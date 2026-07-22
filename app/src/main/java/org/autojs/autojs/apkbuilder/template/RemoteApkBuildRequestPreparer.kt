@@ -14,6 +14,7 @@ import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
+import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.pio.PFiles
@@ -26,6 +27,7 @@ import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequestExtraKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import java.io.Closeable
 import java.io.File
 import java.io.FileInputStream
@@ -52,7 +54,7 @@ object RemoteApkBuildRequestPreparer {
     private const val BUFFER_SIZE = 256 * 1024
     private const val PLUGIN_INFO_QUERY_TIMEOUT_SECONDS = 60L
     private val NATIVE_LIBRARY_ENTRY_ROOTS = listOf("lib", "libs")
-    private val PLUGIN_HOST_FALLBACK_NATIVE_LIB_NAMES = setOf("libc++_shared.so")
+    private val PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES = setOf("libc++_shared.so")
     private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
 
     private data class SelectedPluginArtifact(
@@ -422,30 +424,43 @@ object RemoteApkBuildRequestPreparer {
             artifact.variant.libsToInclude.forEach { soName ->
                 ensureNotCancelled(cancelSignal)
                 val entryName = "lib/$abi/$soName"
-                val copied = copyFirstMatchedSoToZip(
-                    zip = zip,
-                    writtenEntries = writtenEntries,
-                    entryName = entryName,
-                    apkPaths = pluginApkPaths,
-                    nativeLibraryDir = pluginNativeLibraryDir,
-                    abiCandidates = abiCandidates,
-                    soName = soName,
-                    cancelSignal = cancelSignal,
-                    progressListener = progressListener,
-                ) || (
-                    soName in PLUGIN_HOST_FALLBACK_NATIVE_LIB_NAMES &&
-                        copyFirstMatchedSoToZip(
-                            zip = zip,
-                            writtenEntries = writtenEntries,
-                            entryName = entryName,
-                            apkPaths = hostApkPaths,
-                            nativeLibraryDir = hostNativeLibraryDir,
-                            abiCandidates = abiCandidates,
-                            soName = soName,
-                            cancelSignal = cancelSignal,
-                            progressListener = progressListener,
-                        )
+                // Keep local and remote builds on the template's single libc++ runtime. Use a
+                // plugin copy only if the template does not provide the requested ABI.
+                val copied = if (soName in PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES) {
+                    copyFirstMatchedSoToZip(
+                        zip = zip,
+                        writtenEntries = writtenEntries,
+                        entryName = entryName,
+                        apkPaths = hostApkPaths,
+                        nativeLibraryDir = hostNativeLibraryDir,
+                        abiCandidates = abiCandidates,
+                        soName = soName,
+                        cancelSignal = cancelSignal,
+                        progressListener = progressListener,
+                    ) || copyFirstMatchedSoToZip(
+                        zip = zip,
+                        writtenEntries = writtenEntries,
+                        entryName = entryName,
+                        apkPaths = pluginApkPaths,
+                        nativeLibraryDir = pluginNativeLibraryDir,
+                        abiCandidates = abiCandidates,
+                        soName = soName,
+                        cancelSignal = cancelSignal,
+                        progressListener = progressListener,
                     )
+                } else {
+                    copyFirstMatchedSoToZip(
+                        zip = zip,
+                        writtenEntries = writtenEntries,
+                        entryName = entryName,
+                        apkPaths = pluginApkPaths,
+                        nativeLibraryDir = pluginNativeLibraryDir,
+                        abiCandidates = abiCandidates,
+                        soName = soName,
+                        cancelSignal = cancelSignal,
+                        progressListener = progressListener,
+                    )
+                }
                 if (copied) {
                     wroteAny = true
                 } else {
@@ -547,7 +562,20 @@ object RemoteApkBuildRequestPreparer {
             notifyProgress(progressListener, "Resolving plugin artifacts", lib.label)
             val (serviceInfo, variant) = selectPluginServiceOrThrow(context, lib, lib.toPluginPair().second, cancelSignal, progressListener)
             notifyProgress(progressListener, "Selected plugin", "${lib.label}: ${serviceInfo.packageName} (${variant.variant.orEmpty()})")
-            SelectedPluginArtifact(serviceInfo, variant)
+            val packagedVariant = if (
+                lib != ApkBuilder.Lib.OPENCV &&
+                ApkBuilder.Lib.OPENCV.label in selectedLabels
+            ) {
+                // The dedicated OpenCV plugin is the single owner of this JNI runtime.
+                variant.copy(
+                    libsToInclude = variant.libsToInclude.filterNot {
+                        it == OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME
+                    },
+                )
+            } else {
+                variant
+            }
+            SelectedPluginArtifact(serviceInfo, packagedVariant)
         }
     }
 
@@ -559,7 +587,11 @@ object RemoteApkBuildRequestPreparer {
         progressListener: ((ApkBuildProgress) -> Unit)?,
     ): Pair<ServiceInfo, ApkBuilder.PluginLibVariant> {
         ensureNotCancelled(cancelSignal)
-        val enabledServices = queryServices(context, plugin.action)
+        val enabledServices = filterPackagingServices(
+            context,
+            lib,
+            queryServices(context, plugin.action),
+        )
             .filter { service -> PluginEnableStore.isEnabled(context, service.packageName, defaultEnabled = true) }
 
         if (enabledServices.isEmpty()) {
@@ -573,7 +605,11 @@ object RemoteApkBuildRequestPreparer {
                 ensureNotCancelled(cancelSignal)
                 Thread.sleep(delayMs)
                 ensureNotCancelled(cancelSignal)
-                val retryServices = queryServices(context, plugin.action)
+                val retryServices = filterPackagingServices(
+                    context,
+                    lib,
+                    queryServices(context, plugin.action),
+                )
                     .filter { service -> PluginEnableStore.isEnabled(context, service.packageName, defaultEnabled = true) }
                 selectPluginVariant(context, retryServices, plugin, cancelSignal, progressListener)?.let { return it }
             }
@@ -581,6 +617,16 @@ object RemoteApkBuildRequestPreparer {
 
         val variantList = plugin.variants.joinToString("/") { it.variant.orEmpty() }
         throw IOException(context.getString(R.string.error_no_available_enabled_plugin_variants_found, lib.label, variantList))
+    }
+
+    private fun filterPackagingServices(
+        context: Context,
+        lib: ApkBuilder.Lib,
+        services: List<ServiceInfo>,
+    ): List<ServiceInfo> = if (lib == ApkBuilder.Lib.OPENCV) {
+        OpenCvPluginHost.filterEligiblePackagingServices(context, services)
+    } else {
+        services
     }
 
     private fun selectPluginVariant(

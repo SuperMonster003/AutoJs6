@@ -107,4 +107,10 @@
         <url>https://github.com/paddlepaddle/paddle</url>
         <license>Apache Software License 2.0</license>
     </notice>
+    <notice>
+        <name>OpenCV 4.8.0</name>
+        <copyright>Copyright OpenCV contributors</copyright>
+        <url>https://github.com/opencv/opencv/tree/4.8.0</url>
+        <license>Apache Software License 2.0</license>
+    </notice>
 </notices>

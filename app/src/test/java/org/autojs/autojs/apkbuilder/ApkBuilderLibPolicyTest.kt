@@ -1,11 +1,29 @@
 package org.autojs.autojs.apkbuilder
 
+import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ApkBuilderLibPolicyTest {
+
+    @Test
+    fun openCvUsesVersionLockedPluginRuntimeForPackaging() {
+        val openCv = ApkBuilder.Lib.OPENCV
+        assertTrue(openCv.isPlugin)
+        assertTrue(openCv.libsToInclude.isEmpty())
+        assertTrue(openCv.assetDirsToInclude.isEmpty())
+
+        val plugin = openCv.toPluginPair().second
+        assertEquals(OpenCvPluginContract.ACTION_RUNTIME, plugin.action)
+        assertEquals(OpenCvPluginContract.ENGINE, plugin.engine)
+        assertEquals(listOf(OpenCvPluginContract.VARIANT_4_8_0), plugin.variants.map { it.variant })
+        assertEquals(
+            listOf("libc++_shared.so", OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
+            plugin.variants.single().libsToInclude,
+        )
+    }
 
     @Test
     fun installedNativeLibraryDirectoryMustMatchRequestedAbi() {

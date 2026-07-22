@@ -25,6 +25,7 @@ import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
@@ -48,6 +49,7 @@ import org.autojs.plugin.mediainfo.api.MediainfoPluginIds
 import org.autojs.plugin.mlkit.barcode.api.IBarcodePlugin
 import org.autojs.plugin.nodejs.api.NodeJsPluginActions
 import org.autojs.plugin.nodejs.api.NodeJsPluginIds
+import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import org.autojs.plugin.opencc.api.IOpenccPlugin
 import org.autojs.plugin.opencc.api.OpenccPluginIds
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
@@ -1124,7 +1126,11 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             extractLibrariesFromPluginApkOrThrow(
                 context = context,
                 config = config,
-                requiredLibNames = selectedVariant.libsToInclude,
+                requiredLibNames = selectedVariant.libsToInclude.filterNot { soName ->
+                    lib != Lib.OPENCV &&
+                            config.libs.contains(Lib.OPENCV.label) &&
+                            soName == OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME
+                },
                 serviceInfo = serviceInfo,
                 potentialAbiAliasList = potentialAbiAliasList,
             )
@@ -1158,7 +1164,10 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         val moduleLabel = lib.label
         val pluginPair = lib.toPluginPair()
         val plugin = pluginPair.second
-        val services = findServicesByAction(pm, action)
+        val services = filterPackagingServices(
+            lib,
+            findServicesByAction(pm, action),
+        )
         if (services.isEmpty()) {
             throw IllegalStateException(
                 globalContext.getString(R.string.error_missing_required_plugin_for_module_label, moduleLabel)
@@ -1187,7 +1196,10 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         if (tryWakePluginServices(enabledServices)) {
             PLUGIN_WAKE_RETRY_DELAYS_MS.forEach { delayMs ->
                 sleepBeforePluginRetry(delayMs)
-                val retryEnabledServices = findServicesByAction(pm, action).filter { si ->
+                val retryEnabledServices = filterPackagingServices(
+                    lib,
+                    findServicesByAction(pm, action),
+                ).filter { si ->
                     PluginEnableStore.isEnabled(globalContext, si.packageName, defaultEnabled = true)
                 }
                 selectPluginVariant(retryEnabledServices, pluginPair).also { attempt ->
@@ -1207,6 +1219,13 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             globalContext.getString(R.string.error_no_available_enabled_plugin_variants_found, moduleLabel, variantList) + detail
         )
     }
+
+    private fun filterPackagingServices(lib: Lib, services: List<ServiceInfo>): List<ServiceInfo> =
+        if (lib == Lib.OPENCV) {
+            OpenCvPluginHost.filterEligiblePackagingServices(globalContext, services)
+        } else {
+            services
+        }
 
     private fun selectPluginVariant(
         services: List<ServiceInfo>,
@@ -1507,22 +1526,32 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
             requiredLibNames.forEach { soName ->
                 ensureNotCancelled()
-                val ok = extractFirstMatchedSoFromApks(
-                    context = context,
-                    apkPaths = apkPaths,
-                    nativeLibraryDir = nativeLibraryDir,
-                    abiCandidates = abiCandidates,
-                    soName = soName,
-                    abiDestName = abiCanonicalName,
-                ) || (
-                    soName in PLUGIN_HOST_FALLBACK_NATIVE_LIB_NAMES &&
-                            extractFirstMatchedSoFromHostNativeSources(
-                                context = context,
-                                abiCandidates = abiCandidates,
-                                soName = soName,
-                                abiDestName = abiCanonicalName,
-                            )
+                // One process must use one deterministic C++ runtime. Prefer the template's
+                // libc++ for every plugin and use the plugin copy only when an ABI is absent.
+                val ok = if (soName in PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES) {
+                    extractFirstMatchedSoFromHostNativeSources(
+                        context = context,
+                        abiCandidates = abiCandidates,
+                        soName = soName,
+                        abiDestName = abiCanonicalName,
+                    ) || extractFirstMatchedSoFromApks(
+                        context = context,
+                        apkPaths = apkPaths,
+                        nativeLibraryDir = nativeLibraryDir,
+                        abiCandidates = abiCandidates,
+                        soName = soName,
+                        abiDestName = abiCanonicalName,
                     )
+                } else {
+                    extractFirstMatchedSoFromApks(
+                        context = context,
+                        apkPaths = apkPaths,
+                        nativeLibraryDir = nativeLibraryDir,
+                        abiCandidates = abiCandidates,
+                        soName = soName,
+                        abiDestName = abiCanonicalName,
+                    )
+                }
                 if (!ok) missingPairs += abiCanonicalName to soName
             }
         }
@@ -1861,9 +1890,22 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         OPENCV(
             label = "OpenCV",
             aliases = listOf("cv"),
-            libsToInclude = listOf(
-                "libc++_shared.so",
-                "libopencv_java4.so",
+            libsToInclude = emptyList(),
+            plugin = PluginLib(
+                action = OpenCvPluginContract.ACTION_RUNTIME,
+                engine = OpenCvPluginContract.ENGINE,
+                onServiceConnected = { binder: IBinder ->
+                    IPluginInfoProvider.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = OpenCvPluginContract.VARIANT_4_8_0,
+                        libsToInclude = listOf(
+                            "libc++_shared.so",
+                            OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME,
+                        ),
+                    ),
+                ),
             ),
         ),
 
@@ -2186,7 +2228,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         const val INRT_APP_ID = "org.autojs.autojs6.inrt"
 
         private val NATIVE_LIBRARY_ENTRY_ROOTS = listOf("lib", "libs")
-        private val PLUGIN_HOST_FALLBACK_NATIVE_LIB_NAMES = setOf("libc++_shared.so")
+        private val PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES = setOf("libc++_shared.so")
         private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
         private const val PLUGIN_INFO_QUERY_TIMEOUT_SECONDS = 60L
 

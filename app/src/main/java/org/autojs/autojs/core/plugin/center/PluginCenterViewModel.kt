@@ -23,6 +23,7 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
+import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import java.util.Locale
 
 /**
@@ -859,6 +860,7 @@ class PluginCenterViewModel : ViewModel() {
             "pinyin" to PinyinPluginHost.ACTION_PINYIN,
             "pinyin4j" to Pinyin4jPluginHost.ACTION_PINYIN4J,
             "mediainfo" to MediainfoPluginHost.ACTION_MEDIAINFO,
+            OpenCvPluginContract.ENGINE to OpenCvPluginContract.ACTION_RUNTIME,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
         )
 

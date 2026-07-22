@@ -61,6 +61,7 @@ open class ImageWrapper : Shootable<ImageWrapper> {
             if (mBitmap == null) {
                 val mat = mMat
                 if (mat != null) {
+                    Images.initOpenCvIfNeeded()
                     val bitmap = createBitmap(mat.width(), mat.height()).also { mBitmap = it }
                     Utils.matToBitmap(mat, bitmap)
                 } else {
@@ -73,6 +74,7 @@ open class ImageWrapper : Shootable<ImageWrapper> {
     val mat: Mat
         get() {
             ensureNotRecycled()
+            Images.initOpenCvIfNeeded()
             val mat = mMat
             if (mat != null) {
                 return mat
@@ -94,6 +96,7 @@ open class ImageWrapper : Shootable<ImageWrapper> {
     val bgrMat: Mat
         get() {
             ensureNotRecycled()
+            Images.initOpenCvIfNeeded()
             mBgrMat?.let { return it }
             return Mat().also {
                 Imgproc.cvtColor(mat, it, Imgproc.COLOR_BGRA2BGR)
@@ -161,10 +164,6 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         mPlane = null
     }
 
-    init {
-        Images.initOpenCvIfNeeded()
-    }
-
     private fun addToList(image: Any) {
         imageList.add(WeakReference(image))
     }
@@ -181,6 +180,7 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         }
         if (mBitmap == null) {
             if (mMat != null) {
+                Images.initOpenCvIfNeeded()
                 return Imgcodecs.imwrite(fullPath, mMat)
             }
             bitmap /* Getter, for initializing `mBitmap`. */

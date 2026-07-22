@@ -4,12 +4,7 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
-import android.os.Looper;
-
-import org.opencv.android.OpenCVLoader;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost;
 
 /**
  * Created by Stardust on Apr 2, 2018.
@@ -20,9 +15,7 @@ public class OpenCVHelper {
         void onInitFinish();
     }
 
-    private static final String TAG = "OpenCVHelper";
-    private static final Executor executor = Executors.newSingleThreadExecutor();
-    private static boolean sInitialized = false;
+    private static volatile boolean sInitialized = false;
 
     public static MatOfPoint newMatOfPoint(Mat mat) {
         return new MatOfPoint(mat);
@@ -44,21 +37,19 @@ public class OpenCVHelper {
         return sInitialized;
     }
 
-    public synchronized static void initIfNeeded(Context context, InitializeCallback callback) {
-        if (!sInitialized) {
-            sInitialized = true;
-            if (Looper.getMainLooper() == Looper.myLooper()) {
-                executor.execute(() -> init(callback));
-            } else {
-                init(callback);
-            }
-        } else {
+    public static void initIfNeeded(Context context, InitializeCallback callback) {
+        if (sInitialized) {
             callback.onInitFinish();
+            return;
         }
+        init(context, callback);
     }
 
-    private static void init(InitializeCallback callback) {
-        OpenCVLoader.initDebug();
+    private synchronized static void init(Context context, InitializeCallback callback) {
+        if (!sInitialized) {
+            OpenCvPluginHost.ensureLoaded(context.getApplicationContext());
+            sInitialized = true;
+        }
         callback.onInitFinish();
     }
 }

@@ -86,17 +86,18 @@ public class ColorFinder {
 
     @Nullable
     private MatOfPoint findColorInner(ImageWrapper image, int color, int threshold, Rect rect) {
+        Mat source = image.getMat();
         Mat bi = new Mat();
         Scalar lowerBound = new Scalar(Color.red(color) - threshold, Color.green(color) - threshold,
                 Color.blue(color) - threshold, 255);
         Scalar upperBound = new Scalar(Color.red(color) + threshold, Color.green(color) + threshold,
                 Color.blue(color) + threshold, 255);
         if (rect != null) {
-            Mat m = new Mat(image.getMat(), rect);
+            Mat m = new Mat(source, rect);
             Core.inRange(m, lowerBound, upperBound, bi);
             OpenCVHelper.release(m);
         } else {
-            Core.inRange(image.getMat(), lowerBound, upperBound, bi);
+            Core.inRange(source, lowerBound, upperBound, bi);
         }
         Mat nonZeroPos = new Mat();
         Core.findNonZero(bi, nonZeroPos);

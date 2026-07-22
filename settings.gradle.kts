@@ -23,7 +23,7 @@ private val libs = listOf(
     "android-job-simplified-1_4_3",
     "androidx-appcompat-1_0_2",
     "apk-parser-1_0_2",
-    "org-opencv-4_8_0",
+    "org-opencv-java-4_8_0",
     "imagequant",
 
     "jackpal-androidterm-1_0_70",
@@ -49,6 +49,7 @@ private val pluginApi = listOf(
     "pinyin-api",
     "pinyin4j-api",
     "mediainfo-api",
+    "opencv-api",
     "mlkit-barcode-api",
     "paddle-ocr-api",
     "paddle-ocr-engine",

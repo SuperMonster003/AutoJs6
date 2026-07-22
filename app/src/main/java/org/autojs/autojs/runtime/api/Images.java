@@ -939,10 +939,12 @@ public class Images {
     }
 
     public Mat newMat() {
+        initOpenCvIfNeeded();
         return new Mat();
     }
 
     public Mat newMat(Mat mat, Rect rect) {
+        initOpenCvIfNeeded();
         return new Mat(mat, rect);
     }
 

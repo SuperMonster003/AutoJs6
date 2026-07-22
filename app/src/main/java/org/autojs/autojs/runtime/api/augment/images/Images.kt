@@ -424,6 +424,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun isGrayscale(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+            ApiImages.initOpenCvIfNeeded()
             val mat = when (image) {
                 is OpencvMat -> image
                 is ImageWrapper -> image.mat
@@ -649,9 +650,10 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val region = options.prop("region")
             var mat: AutoJsMat? = null
             var grayImage: ImageWrapper? = null
-            val circles = AutoJsMat()
+            var circles: AutoJsMat? = null
             try {
                 ApiImages.initOpenCvIfNeeded()
+                val output = AutoJsMat().also { circles = it }
                 grayImage = if (isGrayscale(scriptRuntime, arrayOf(image))) image else grayscale(scriptRuntime, arrayOf(image)).oneShot()
                 mat = when {
                     region.isJsNullish() -> grayImage.mat
@@ -661,7 +663,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
                 Imgproc.HoughCircles(
                     mat,
-                    circles,
+                    output,
                     Imgproc.CV_HOUGH_GRADIENT,
                     parseNumber(options.prop("dp"), 1),
                     parseNumber(options.prop("minDst")) { grayImage.height / 8 },
@@ -670,9 +672,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     parseIntNumber(options.prop("minRadius"), 0),
                     parseIntNumber(options.prop("maxRadius"), 0),
                 )
-                for (i in 0 until circles.rows()) {
-                    for (j in 0 until circles.cols()) {
-                        val (x, y, radius) = circles[i, j]
+                for (i in 0 until output.rows()) {
+                    for (j in 0 until output.cols()) {
+                        val (x, y, radius) = output[i, j]
                         results += HoughCirclesResult(x, y, radius)
                     }
                 }
@@ -681,7 +683,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 image.shoot()
                 grayImage?.shoot()
                 mat.takeIf { !region.isJsNullish() }?.release()
-                circles.release()
+                circles?.release()
             }
         }
 

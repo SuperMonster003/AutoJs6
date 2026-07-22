@@ -1,0 +1,1 @@
+-keep,allowoptimization class org.opencv.** { *; }

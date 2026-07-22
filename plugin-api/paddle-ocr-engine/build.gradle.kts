@@ -32,7 +32,7 @@ dependencies {
 
     // OpenCV is required at compile time because OCRPredictorNative references OpenCVLoader.
     // zh-CN: OCRPredictorNative 引用了 OpenCVLoader, 因此需要 OpenCV 编译期依赖.
-    compileOnly(projects.libs.orgOpencv480)
+    compileOnly(projects.libs.orgOpencvJava480)
 
     implementation(libs.core.ktx)
     implementation(libs.preference.ktx)

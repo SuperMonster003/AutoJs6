@@ -5,6 +5,7 @@ import android.content.res.AssetManager
 import android.graphics.Bitmap
 import com.baidu.paddle.lite.ocr.PaddleOcrEngine
 import com.baidu.paddle.lite.ocr.VariantSpec
+import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs6.R
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
@@ -23,6 +24,7 @@ internal object PaddleOcrEmbeddedEngine {
     }
 
     private fun getEngine(context: Context): PaddleOcrEngine {
+        OpenCvPluginHost.ensureLoaded(context.applicationContext)
         // Lazily initialize embedded engine.
         // zh-CN: 懒初始化内置引擎.
         val cached = engine

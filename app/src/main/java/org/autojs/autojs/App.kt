@@ -16,11 +16,13 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.transition.Transition
+import com.baidu.paddle.lite.ocr.OCRPredictorNative
 import com.hjq.toast.Toaster
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.engine.NativeNodeProcessService
@@ -97,6 +99,9 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 setUpDebugEnvironment()
             }
             else /* Main process. */ -> {
+                OCRPredictorNative.installOpenCvRuntimeLoader {
+                    OpenCvPluginHost.ensureLoaded(applicationContext)
+                }
                 if (AbstractAutoJs.isInrt) {
                     InrtNodeRuntimeOverride.apply(this)
                     InrtPref.syncLaunchConfigWithBuild()
@@ -113,6 +118,9 @@ class App : Application(), WorkManagerConfiguration.Provider {
                     EditorEnginePreferences.initialize(this)
                     NodeEmbeddedProcessSessionManager.reopenForUse()
                     scheduleNativeNodePrewarmIfNeeded()
+                    if (!AbstractAutoJs.isInrt) {
+                        OpenCvPluginHost.preload(this)
+                    }
                 }
 
                 AutoJs.initInstance(this)

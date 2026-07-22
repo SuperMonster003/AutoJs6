@@ -6,7 +6,7 @@ import android.util.Log;
 import org.opencv.android.OpenCVLoader;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -16,19 +16,50 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class OCRPredictorNative {
 
-    private static final AtomicBoolean isSOLoaded = new AtomicBoolean();
+    @FunctionalInterface
+    public interface OpenCvRuntimeLoader {
+        void ensureLoaded();
+    }
+
+    private static final NativeLibraryLoadGuard libraryLoadGuard = new NativeLibraryLoadGuard();
     private static final ReentrantLock lock = new ReentrantLock();
+    private static volatile OpenCvRuntimeLoader openCvRuntimeLoader;
+
+    /**
+     * Installs the host's OpenCV runtime loader before OCR can initialize.
+     * Standalone Paddle OCR plugins may omit this and keep using their bundled OpenCV runtime.
+     */
+    public static synchronized void installOpenCvRuntimeLoader(OpenCvRuntimeLoader loader) {
+        Objects.requireNonNull(loader, "loader");
+        if (openCvRuntimeLoader != null) {
+            throw new IllegalStateException("The OpenCV runtime loader has already been installed");
+        }
+        openCvRuntimeLoader = loader;
+    }
 
     public static void loadLibrary() throws RuntimeException {
-        if (!isSOLoaded.get() && isSOLoaded.compareAndSet(false, true)) {
-            try {
-                // 可能和 AJ 中的 OpenCV 冲突, 直接初始化一遍
-                OpenCVLoader.initDebug();
-                System.loadLibrary("Native");
-            } catch (Throwable e) {
-                throw new RuntimeException(
-                        "Load libNative.so failed, please check it exists in apk file.", e);
-            }
+        try {
+            libraryLoadGuard.load(
+                    OCRPredictorNative::ensureOpenCvRuntimeLoaded,
+                    () -> System.loadLibrary("Native")
+            );
+        } catch (RuntimeException e) {
+            // Preserve actionable host errors, such as a missing or incompatible OpenCV plugin.
+            throw e;
+        } catch (Throwable e) {
+            throw new RuntimeException(
+                    "Load OCR native runtime failed, please check OpenCV and libNative.so.", e);
+        }
+    }
+
+    private static void ensureOpenCvRuntimeLoaded() {
+        OpenCvRuntimeLoader loader = openCvRuntimeLoader;
+        if (loader != null) {
+            loader.ensureLoaded();
+            return;
+        }
+        if (!OpenCVLoader.initDebug()) {
+            throw new UnsatisfiedLinkError("OpenCVLoader.initDebug() returned false");
         }
     }
 

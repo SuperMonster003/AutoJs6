@@ -44,6 +44,10 @@
             <action android:name="org.autojs.plugin.EDITOR" />
             <category android:name="ace-editor" />
         </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.OPENCV" />
+            <category android:name="opencv-runtime" />
+        </intent>
     </queries>
 
     <uses-permission

@@ -31,6 +31,8 @@ val releaseFlavorNames = listOf(flavorNameApp, flavorNameInrt)
 val apkFileExtension = utils.FILE_EXTENSION_APK
 val apkBuilderBuiltInTemplateAsset = "template.apk"
 val apkBuilderTemplateDistributionTaskName = "assembleApkBuilderTemplateDistribution"
+val openCvNativeLibraryFileName = "libopencv_java4.so"
+val openCvJavaApiAar = rootDir.resolve("libs/org-opencv-java-4_8_0/opencv-java-4.8.0.aar")
 val apkBuilderIncludeBuiltInTemplateProperty = "autojs.apkBuilder.includeBuiltInTemplate"
 val apkBuilderTemplateDistributionRequested = providers.provider {
     gradle.startParameter.taskNames.any { taskName ->
@@ -52,6 +54,50 @@ val apkBuilderIncludeBuiltInTemplate = providers.provider {
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+
+fun verifyOpenCvPluginSeparation(
+    apkDirectory: File,
+    javaApiAar: File,
+    nativeLibraryFileName: String,
+) {
+    if (!javaApiAar.isFile) {
+        throw GradleException("OpenCV Java API AAR is missing: ${javaApiAar.path}")
+    }
+    ZipFile(javaApiAar).use { aar ->
+        val nativeEntries = aar.entries().asSequence()
+            .filterNot { it.isDirectory }
+            .map { it.name }
+            .filter { it.startsWith("jni/") || it.endsWith("/$nativeLibraryFileName") }
+            .toList()
+        if (nativeEntries.isNotEmpty()) {
+            throw GradleException("OpenCV Java API AAR unexpectedly contains native payloads: $nativeEntries")
+        }
+    }
+
+    val apkFiles = apkDirectory.walkTopDown()
+        .filter { it.isFile && it.extension.equals("apk", ignoreCase = true) }
+        .toList()
+    if (apkFiles.isEmpty()) {
+        throw GradleException("No host APKs were found below ${apkDirectory.path}")
+    }
+    val violations = linkedMapOf<String, List<String>>()
+    apkFiles.forEach { apk ->
+        ZipFile(apk).use { zip ->
+            val entries = zip.entries().asSequence()
+                .filterNot { it.isDirectory }
+                .map { it.name }
+                .filter { it.substringAfterLast('/') == nativeLibraryFileName }
+                .toList()
+            if (entries.isNotEmpty()) {
+                violations[apk.name] = entries
+            }
+        }
+    }
+    if (violations.isNotEmpty()) {
+        throw GradleException("AutoJs6 host APKs still package OpenCV JNI: $violations")
+    }
+    println("Verified ${apkFiles.size} AutoJs6 host APK(s) without $nativeLibraryFileName")
+}
 
 val resourcePickFirstPatterns = listOf(
     "META-INF/DEPENDENCIES",
@@ -424,8 +470,8 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/com-android-dx-1_14.jar"))
     implementation(files("$rootDir/libs/com-legacy-android-dx-1_7_0.jar"))
 
-    // OpenCV
-    implementation(project(":libs:org-opencv-4_8_0"))
+    // OpenCV Java API. The native runtime is supplied by the official OpenCV plugin.
+    implementation(project(":libs:org-opencv-java-4_8_0"))
 
     // Image Quantization
     implementation(project(":libs:imagequant"))
@@ -528,6 +574,7 @@ dependencies /* Unclassified */ {
 
     // Plugin API: MediaInfo API
     implementation(project(":plugin-api:mediainfo-api"))
+    implementation(project(":plugin-api:opencv-api"))
 
     // Plugin API: ML Kit Barcode API
     implementation(project(":plugin-api:mlkit-barcode-api"))
@@ -1195,6 +1242,32 @@ tasks {
         )
     }.configureEach {
         onlyIf { !apkBuilderTemplateDistributionRequested.get() }
+    }
+
+    val openCvSeparationTasks = listOf(
+        "AppDebug" to "app/debug",
+        "AppRelease" to "app/release",
+    ).map { (variantTitle, outputPath) ->
+        register("verifyOpenCvPluginSeparation$variantTitle") {
+            group = "verification"
+            description = "Verifies that $variantTitle host APKs use the external OpenCV runtime"
+            dependsOn("assemble$variantTitle")
+            inputs.file(openCvJavaApiAar)
+
+            doLast {
+                verifyOpenCvPluginSeparation(
+                    apkDirectory = layout.buildDirectory.dir("outputs/apk/$outputPath").get().asFile,
+                    javaApiAar = openCvJavaApiAar,
+                    nativeLibraryFileName = openCvNativeLibraryFileName,
+                )
+            }
+        }
+    }
+
+    register("verifyOpenCvPluginSeparation") {
+        group = "verification"
+        description = "Verifies that debug and release host APKs do not package OpenCV JNI"
+        dependsOn(openCvSeparationTasks)
     }
 
     register<Copy>("appendDigestToReleasedFiles") {
