@@ -2,11 +2,10 @@ package org.autojs.autojs.runtime.api;
 
 import android.graphics.Bitmap;
 
-public class PngQuantBridge {
+import org.autojs.autojs.app.GlobalAppContext;
+import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost;
 
-    static {
-        System.loadLibrary("pngquant_bridge");
-    }
+public class PngQuantBridge {
 
     /**
      * Quantizes a 32-bit RGBA image to an 8-bit indexed PNG and returns the encoded bytes.<br>
@@ -39,6 +38,19 @@ public class PngQuantBridge {
      *
      * @return palette-based PNG bytes (may contain transparency)
      */
-    public static native byte[] quantize(Bitmap bitmap, int quality);
+    public static byte[] quantize(Bitmap bitmap, int quality) {
+        var context = GlobalAppContext.get();
+        ImageQuantPluginHost.ensureLoaded(context);
+        return nativeQuantize(bitmap, quality);
+    }
+
+    /** Called only after the host has loaded a policy-approved native runtime. */
+    public static String probeLoadedRuntime() {
+        return nativeProbe();
+    }
+
+    private static native byte[] nativeQuantize(Bitmap bitmap, int quality);
+
+    private static native String nativeProbe();
 
 }

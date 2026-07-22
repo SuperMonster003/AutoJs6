@@ -1,5 +1,6 @@
 package org.autojs.autojs.apkbuilder
 
+import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -103,11 +104,25 @@ class ApkBuilderLibPolicyTest {
     }
 
     @Test
-    fun imageQuantIncludesOnlyRuntimeBridgeLibrary() {
+    fun imageQuantUsesVersionLockedPluginRuntimeForPackaging() {
+        val imageQuant = ApkBuilder.Lib.IMAGE_QUANT
+        assertTrue(imageQuant.isPlugin)
+        assertTrue(imageQuant.libsToInclude.isEmpty())
+        assertTrue(imageQuant.assetDirsToInclude.isEmpty())
+
+        val plugin = imageQuant.toPluginPair().second
+        assertEquals(ImageQuantPluginContract.ACTION_RUNTIME, plugin.action)
+        assertEquals(ImageQuantPluginContract.ENGINE, plugin.engine)
+        assertEquals(listOf(ImageQuantPluginContract.VARIANT_2_17_0), plugin.variants.map { it.variant })
         assertEquals(
-            listOf("libpngquant_bridge.so"),
-            ApkBuilder.Lib.IMAGE_QUANT.libsToInclude,
+            listOf(ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME),
+            plugin.variants.single().libsToInclude,
         )
+        assertEquals(
+            listOf("assets/licenses/imagequant/"),
+            plugin.variants.single().assetsToInclude.first,
+        )
+        assertTrue(plugin.variants.single().assetsToInclude.second.isEmpty())
     }
 
     @Test

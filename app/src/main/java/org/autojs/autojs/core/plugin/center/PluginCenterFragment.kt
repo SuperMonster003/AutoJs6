@@ -34,6 +34,7 @@ import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNav
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentPluginCenterBinding
+import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -907,6 +908,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             PinyinPluginHost.ACTION_PINYIN -> PinyinPluginHost.probe(contextRef, item.packageName)
             Pinyin4jPluginHost.ACTION_PINYIN4J -> Pinyin4jPluginHost.probe(contextRef, item.packageName)
             MediainfoPluginHost.ACTION_MEDIAINFO -> MediainfoPluginHost.probe(contextRef, item.packageName)
+            ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             OpenCvPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             else -> {
                 when {

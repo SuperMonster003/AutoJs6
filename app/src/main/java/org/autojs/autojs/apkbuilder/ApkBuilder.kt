@@ -23,6 +23,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
@@ -44,6 +45,7 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.mediainfo.api.IMediainfoPlugin
 import org.autojs.plugin.mediainfo.api.MediainfoPluginIds
 import org.autojs.plugin.mlkit.barcode.api.IBarcodePlugin
@@ -1220,12 +1222,11 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         )
     }
 
-    private fun filterPackagingServices(lib: Lib, services: List<ServiceInfo>): List<ServiceInfo> =
-        if (lib == Lib.OPENCV) {
-            OpenCvPluginHost.filterEligiblePackagingServices(globalContext, services)
-        } else {
-            services
-        }
+    private fun filterPackagingServices(lib: Lib, services: List<ServiceInfo>): List<ServiceInfo> = when (lib) {
+        Lib.IMAGE_QUANT -> ImageQuantPluginHost.filterEligiblePackagingServices(globalContext, services)
+        Lib.OPENCV -> OpenCvPluginHost.filterEligiblePackagingServices(globalContext, services)
+        else -> services
+    }
 
     private fun selectPluginVariant(
         services: List<ServiceInfo>,
@@ -2152,8 +2153,22 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         IMAGE_QUANT(
             label = "Image Quantization",
             aliases = listOf("imagequant", "image-quant", "image-quantization", "image_quant", "image_quantization"),
-            libsToInclude = listOf(
-                "libpngquant_bridge.so",
+            libsToInclude = emptyList(),
+            plugin = PluginLib(
+                action = ImageQuantPluginContract.ACTION_RUNTIME,
+                engine = ImageQuantPluginContract.ENGINE,
+                onServiceConnected = { binder: IBinder ->
+                    IPluginInfoProvider.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = ImageQuantPluginContract.VARIANT_2_17_0,
+                        assetsToInclude = listOf(
+                            "assets/licenses/imagequant/",
+                        ) to emptyList(),
+                        libsToInclude = listOf(ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME),
+                    ),
+                ),
             ),
         ),
 

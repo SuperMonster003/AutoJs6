@@ -14,6 +14,7 @@ import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
+import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
@@ -623,10 +624,10 @@ object RemoteApkBuildRequestPreparer {
         context: Context,
         lib: ApkBuilder.Lib,
         services: List<ServiceInfo>,
-    ): List<ServiceInfo> = if (lib == ApkBuilder.Lib.OPENCV) {
-        OpenCvPluginHost.filterEligiblePackagingServices(context, services)
-    } else {
-        services
+    ): List<ServiceInfo> = when (lib) {
+        ApkBuilder.Lib.IMAGE_QUANT -> ImageQuantPluginHost.filterEligiblePackagingServices(context, services)
+        ApkBuilder.Lib.OPENCV -> OpenCvPluginHost.filterEligiblePackagingServices(context, services)
+        else -> services
     }
 
     private fun selectPluginVariant(

@@ -24,7 +24,6 @@ private val libs = listOf(
     "androidx-appcompat-1_0_2",
     "apk-parser-1_0_2",
     "org-opencv-java-4_8_0",
-    "imagequant",
 
     "jackpal-androidterm-1_0_70",
     "jackpal-androidterm-emulatorview-1_0_42",
@@ -49,6 +48,7 @@ private val pluginApi = listOf(
     "pinyin-api",
     "pinyin4j-api",
     "mediainfo-api",
+    "imagequant-api",
     "opencv-api",
     "mlkit-barcode-api",
     "paddle-ocr-api",

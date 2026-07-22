@@ -48,6 +48,10 @@
             <action android:name="org.autojs.plugin.OPENCV" />
             <category android:name="opencv-runtime" />
         </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.IMAGE_QUANT" />
+            <category android:name="imagequant-runtime" />
+        </intent>
     </queries>
 
     <uses-permission
