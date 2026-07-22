@@ -1,11 +1,12 @@
 # ACE Editor Integration
 
-This document tracks the current AutoJs6 ACE editor deployment state. ACE is the default logical editor choice and is loaded from the separately installed `AutoJs6-Plugin-Ace-Editor` APK. Native remains selectable and is the fallback when no compatible trusted plugin is available or the plugin runtime fails.
+This document tracks the current AutoJs6 ACE editor deployment state. The default editor selection policy is automatic: an enabled, eligible `AutoJs6-Plugin-Ace-Editor` APK activates ACE, while a missing, disabled, or ineligible plugin leaves Native (`JsDroidEditor`) active. Native remains explicitly selectable and is also the fallback when the plugin runtime fails.
 
 ## Stable Path
 
-- ACE is the default value for `Editor engine`.
-- Native remains available from settings and from the editor engine menu.
+- The host stores editor selection intent separately from the effective engine. The default `AUTO_ACE` intent resolves to ACE only while the plugin is available and otherwise resolves to Native.
+- Native remains available from settings and from the editor engine menu. An explicit Native selection made while ACE is available enters `NATIVE_EXPLICIT` mode and suppresses later automatic ACE selection.
+- Explicitly selecting an available ACE engine restores `AUTO_ACE` mode. Selecting ACE while the plugin is unavailable does not change either the selection mode or effective engine.
 - ACE opens when the host discovers an enabled plugin with an accepted signer or trust state and compatible Editor API, host-version, and binary ABI metadata. Any discovery or load failure falls back to Native.
 - The host APK contains the typed Editor API, secure loader, engine adapter, preferences, and diagnostics integration. The Ace WebView runtime, JavaScript bridge, language services, IME implementation, and static assets live in the plugin APK.
 - Ordinary large files stay on ACE. The old progressive large-file path remains Native-only.
@@ -29,6 +30,67 @@ This document tracks the current AutoJs6 ACE editor deployment state. ACE is the
 - ACE hover tooltips are optional at the bridge boundary. The tooltip layer
   creates DOM lazily, uses the local safe markdown subset renderer, escapes raw
   HTML, and does not fetch external markdown resources.
+
+## Plugin Hot-Plug Lifecycle
+
+### Selection Intent And Effective Engine
+
+- `AUTO_ACE` is the default and migration mode for a missing legacy preference
+  or a legacy explicit ACE value. It selects ACE whenever the plugin is
+  available and Native whenever it is not.
+- A legacy explicit Native value migrates to `NATIVE_EXPLICIT`. A user selection
+  of Native changes the mode to `NATIVE_EXPLICIT` only when ACE is available,
+  so an already unavailable plugin cannot accidentally turn an automatic
+  fallback into a permanent opt-out.
+- A user selection of ACE while it is available changes the mode back to
+  `AUTO_ACE`. Later disable, uninstall, reinstall, or re-enable transitions then
+  continue to reconcile the effective engine automatically.
+- A user selection of ACE while it is unavailable is rejected before the
+  preference is written. The host shows an install-or-enable dialog whose
+  positive button opens the official Plugin Center scope filtered by the exact
+  ACE plugin package name.
+- Automatic fallback, a large-file Native route, or a plugin runtime failure
+  must never rewrite the stored selection intent. Effective-engine changes and
+  explicit user selections use separate APIs.
+
+### Availability Observation
+
+- The application-scoped plugin state monitor observes both Plugin Center
+  enable/authorization changes and Android package add, remove, replace,
+  change, and data-clear broadcasts for the ACE package.
+- Discovery distinguishes available, not installed, disabled, and ineligible
+  states. Disabled application and service components remain discoverable for
+  accurate user guidance.
+- Package update removal events carrying `Intent.EXTRA_REPLACING=true` are
+  ignored to avoid a transient Native fallback. Once replacement completes, an
+  active ACE editor reloads the plugin session if package identity changed.
+- State changes are delivered on the main thread and de-duplicated by change
+  identity so multiple visible host surfaces do not emit duplicate notices.
+- Installing, enabling, disabling, replacing, or uninstalling the plugin must
+  take effect while the host remains running; none of these transitions may
+  require an application restart.
+
+### Foreground Editor And UI Safety
+
+- If an active ACE editor loses the plugin, `EditorView` immediately switches
+  to Native using the latest host-side shadow snapshot. Text, dirty state,
+  cursor, selection, breakpoints, debug line, read-only state, theme, font size,
+  search state, and visible position are preserved as far as Native supports
+  them.
+- The fallback path must not depend on a successful call into the removed or
+  disabled plugin. The ACE adapter keeps host-side text and state caches and
+  treats session destruction as idempotent.
+- A package-state fallback cancels or rolls back any in-progress editor
+  transfer before changing engines, invalidates stale asynchronous switch
+  callbacks, and leaves unsaved content saveable in Native.
+- A reason-specific long Toast reports disabled, unavailable, or uninstalled
+  state. It is separate from the one-time runtime-failure diagnostics notice
+  and is shown at most once for one plugin-state change.
+- An ACE-scoped settings activity, editor settings dialog, ACE font dialog, or
+  ACE plugin settings page that was entered while ACE was available closes
+  when the plugin becomes unavailable. General settings entered while Native
+  is already effective remains usable so the install-or-enable prompt can still
+  be reached.
 
 ## Diagnostics
 
@@ -62,9 +124,12 @@ When ACE falls back to Native, `EditorView` keeps the last ACE diagnostics snaps
 ## UX Rules
 
 - First manual Native/ACE switch shows that undo/redo history is not preserved across engines.
-- ACE fallback shows a one-time Toast and points users to diagnostics.
+- Runtime ACE fallback shows a one-time Toast and points users to diagnostics.
+- Plugin disable or uninstall while ACE is visible shows a reason-specific long
+  Toast after Native has taken over.
 - Debug-forced Native routing shows a one-time Toast.
-- Settings details state that ACE is the default editor and Native remains available as a fallback.
+- Settings details show the effective engine while preserving the independent
+  automatic or explicit-Native selection intent.
 
 ## Clean Host Layout Decision
 
@@ -105,6 +170,20 @@ Before an ACE release candidate is published:
   `AceEditorPluginHostDeviceTest`; a skipped test is not a release pass.
 - Verify missing, disabled, untrusted, contract-incompatible, host-version
   incompatible, and linkage-failing plugins all keep the Native editor usable.
+- Run `EditorEngineSelectionPolicyTest` and
+  `AceEditorPluginPackageEventPolicyTest`. Confirm a fresh automatic mode tracks
+  plugin availability, explicit Native suppresses automatic selection,
+  explicit ACE restores it, and replacement removal is ignored.
+- Run `ACE-HOTPLUG-001` through `ACE-HOTPLUG-006` from
+  `docs/dev/ace-editor-test-plan.md` without restarting the host. Cover Plugin
+  Center disable/enable, Android package disable/enable, install, replacement,
+  and uninstall.
+- Confirm active-editor disable and uninstall preserve unsaved text and dirty
+  state in Native, show one reason-specific long Toast, and do not invoke stale
+  plugin callbacks after destruction.
+- Confirm unavailable ACE selection leaves preferences unchanged and opens
+  Plugin Center filtered to the ACE package. Confirm ACE-scoped activities and
+  dialogs close when availability is lost.
 - Run the manual cases and IME checklist in
   `docs/dev/ace-editor-test-plan.md`, plus the dedicated matrix in
   `docs/dev/ace-keyboard-viewport-test-plan.md`.

@@ -31,6 +31,7 @@
 * `Nuevo` Las tareas programadas admiten tareas mensuales/anuales/con cuenta atrás y condiciones para finalizar la repetición _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Nuevo` El administrador de archivos admite selección múltiple y operaciones por lotes de copia/movimiento/eliminación
 * `Nuevo` El editor de código admite cargar Ace desde un plugin externo, con validación del firmante y la confianza, comprobaciones del contrato Editor API/la versión del anfitrión/la compatibilidad ABI binaria y retorno automático al editor nativo cuando el plugin no está disponible
+* `Nuevo` El editor de código admite el intercambio en caliente en tiempo de ejecución del plugin Ace externo y cambia automáticamente de motor según el estado de instalación o activación del plugin
 * `Nuevo` El editor Ace activa por defecto como función estable el completado inteligente local de TypeScript integrado, con completado de la API AutoJs6, ayuda de firmas, información al pasar el cursor y diagnósticos; se puede desactivar en los ajustes
 * `Nuevo` El editor Ace admite un panel de accesos directos/historial de acciones/acciones favoritas/selección de texto en dispositivos móviles/zoom con pellizco y más
 * `Nuevo` El editor de código permite recargar o convertir archivos con una codificación seleccionada, BOM opcional, indicadores de riesgo de codificación y deshacer/rehacer
@@ -71,6 +72,7 @@
 * `Corrección` Tasker no podía invocar y ejecutar scripts correctamente _[`issue #501`](http://issues.autojs6.com/501)_
 * `Corrección` Diversos problemas de interacción del editor Ace relacionados con IME/selección de texto/plegado de código/zoom con pellizco/navegación de pila y otros escenarios
 * `Corrección` El editor Ace podía dejar de responder durante mucho tiempo y volver al editor nativo cuando al recargar un archivo grande con una codificación incompatible se generaba una línea de texto extremadamente larga
+* `Corrección` Desactivar o desinstalar el plugin Ace externo mientras el editor o su interfaz de ajustes estaba en uso podía provocar la pérdida de cambios sin guardar o dejar la interfaz en un estado no válido
 * `Corrección` La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos
 * `Corrección` Los iconos de los plugins instalados en la pestaña Plugins de la página de inicio no cambiaban dinámicamente al alternar el modo nocturno
 * `Corrección` El Centro de plugins podía instalar el APK de una variante incorrecta cuando una versión del plugin contenía varias variantes
@@ -95,6 +97,7 @@
 * `Mejora` Las puertas de integración final y lanzamiento de Node.js aplican fail-closed cuando faltan o están obsoletos los informes requeridos, las evidencias de las fuentes actuales o los artefactos de aceptación de producción
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` Modularizados como plugin instalable por separado el runtime WebView de Ace/el bridge JavaScript/los servicios de lenguaje integrados/los recursos estáticos, reduciendo el acoplamiento con el APK anfitrión y permitiendo actualizaciones independientes
+* `Mejora` La selección del motor del editor respeta las elecciones explícitas del usuario y ofrece acceso al Centro de plugins cuando Ace no está disponible
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
 * `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más
 * `Mejora` Mejoradas la detección de codificación y la seguridad de guardado del editor de código; las conversiones de codificación solo se escriben en disco cuando el usuario guarda el archivo

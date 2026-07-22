@@ -191,6 +191,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Les tâches planifiées prennent en charge les tâches mensuelles/annuelles/avec compte à rebours et les conditions de fin de répétition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge la sélection multiple et les opérations groupées de copie/déplacement/suppression
 * `Fonctionnalité` L'éditeur de code prend en charge le chargement d'Ace depuis un plugin externe, avec validation du signataire et de la confiance, vérification du contrat Editor API/de la version hôte/de la compatibilité ABI binaire, et repli automatique vers l'éditeur natif lorsque le plugin est indisponible
+* `Fonctionnalité` L'éditeur de code prend en charge le branchement à chaud du plugin Ace externe à l'exécution et change automatiquement de moteur selon l'état d'installation ou d'activation du plugin
 * `Fonctionnalité` L'éditeur Ace active désormais par défaut sa complétion intelligente TypeScript locale intégrée, avec complétion de l'API AutoJs6, aide aux signatures, informations au survol et diagnostics ; elle peut être désactivée dans les paramètres
 * `Fonctionnalité` L'éditeur Ace prend en charge un panneau de raccourcis/l'historique des actions/les actions favorites/la sélection de texte sur mobile/le zoom par pincement et plus encore
 * `Fonctionnalité` L'éditeur de code prend en charge le rechargement ou la conversion des fichiers avec un encodage sélectionné, un BOM facultatif, des indicateurs de risque d'encodage et l'annulation/rétablissement
@@ -231,6 +232,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Tasker ne pouvait pas invoquer et exécuter correctement les scripts _[`issue #501`](http://issues.autojs6.com/501)_
 * `Correction` Plusieurs problèmes d'interaction de l'éditeur Ace concernant l'IME/la sélection de texte/le pliage du code/le zoom par pincement/la navigation dans la pile et d'autres scénarios
 * `Correction` L'éditeur Ace pouvait rester longtemps sans répondre et revenir à l'éditeur natif lorsqu'un fichier volumineux rechargé avec un encodage incompatible produisait une ligne de texte extrêmement longue
+* `Correction` La désactivation ou la désinstallation du plugin Ace externe pendant l'utilisation de l'éditeur ou de son interface de paramètres pouvait entraîner la perte de modifications non enregistrées ou laisser l'interface dans un état invalide
 * `Correction` Le cache des icônes et l'état d'actualisation par glissement du Centre des plugins pouvaient devenir incohérents dans certains cas
 * `Correction` Les icônes des plugins installés dans l'onglet Plugins de la page d'accueil ne changeaient pas dynamiquement lors du basculement du mode nuit
 * `Correction` Le Centre des plugins pouvait installer l'APK d'une mauvaise variante lorsqu'une version de plugin en contenait plusieurs
@@ -255,6 +257,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Les portes d'intégration finale et de livraison Node.js appliquent une stratégie fail-closed lorsque des rapports requis, des preuves correspondant aux sources actuelles ou des artefacts d'acceptation en production sont absents ou périmés
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Modularisation du runtime WebView Ace/du bridge JavaScript/des services de langage intégrés/des ressources statiques sous forme de plugin installable séparément, afin de réduire le couplage avec l'APK hôte et de permettre des mises à jour indépendantes
+* `Amélioration` La sélection du moteur de l'éditeur respecte les choix explicites de l'utilisateur et propose un accès au Centre de plugins lorsqu'Ace est indisponible
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
 * `Amélioration` Amélioration des interactions de l'éditeur de code pour les thèmes/polices/barres d'outils/mode lecture seule/pliage/menus de sélection et plus encore
 * `Amélioration` Amélioration de la détection de l'encodage et de la sécurité d'enregistrement dans l'éditeur de code; les conversions d'encodage ne sont écrites sur le disque que lorsque l'utilisateur enregistre le fichier

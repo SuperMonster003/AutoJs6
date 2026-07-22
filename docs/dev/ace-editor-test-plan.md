@@ -119,6 +119,124 @@ smoke test names:
 - `aceImeCompletionAndSelection`
 - `aceMobileSelectionCopyPaste`
 
+## Plugin Hot-Plug Manual Checklist
+
+Run these cases without restarting or force-stopping the host. Use a disposable
+copy of the test script and record the host and plugin APK versions. Replace
+`<serial>` and `<ace-plugin.apk>` in ADB commands with the selected test device
+and compatible plugin artifact.
+
+### ACE-HOTPLUG-001: Install and automatic selection
+
+Preconditions:
+- The ACE plugin is not installed.
+- The editor selection mode has not been explicitly changed to Native while ACE
+  was available.
+
+Steps:
+1. Start the host and confirm the effective editor engine is Native.
+2. Install the compatible plugin with
+   `adb -s <serial> install <ace-plugin.apk>`.
+3. Open `ace-basic.js` without restarting the host.
+
+Expected:
+- Missing ACE falls back to Native without changing the automatic selection
+  intent.
+- Installing the enabled and eligible plugin automatically changes the
+  effective engine to ACE.
+- The file content and dirty state remain unchanged.
+
+### ACE-HOTPLUG-002: Plugin Center disable and enable
+
+Preconditions:
+- ACE is active with an eligible plugin.
+- `ace-basic.js` contains an unsaved marker.
+
+Steps:
+1. Disable the ACE plugin from Plugin Center while the editor remains open.
+2. Return to the editor and verify its state.
+3. Enable the plugin again from Plugin Center.
+
+Expected:
+- Disable switches the active editor to Native and shows one long
+  disabled-plugin notice.
+- The unsaved marker, dirty state, cursor, selection, and breakpoints survive.
+- Re-enable restores ACE automatically and preserves the same document state.
+
+### ACE-HOTPLUG-003: Android package disable and enable
+
+Preconditions:
+- ACE is active with an unsaved marker.
+
+Steps:
+1. Run
+   `adb -s <serial> shell pm disable-user --user 0 io.github.supermonster003.autojs6.plugin.ace.editor`.
+2. Verify the foreground editor without restarting the host.
+3. Run
+   `adb -s <serial> shell pm enable io.github.supermonster003.autojs6.plugin.ace.editor`.
+
+Expected:
+- Package disable switches to Native without losing unsaved content.
+- The host reports the disabled state with one long notice.
+- Package enable restores ACE automatically in automatic mode.
+
+### ACE-HOTPLUG-004: In-place package replacement
+
+Preconditions:
+- ACE is active and the replacement APK is signer-compatible and contract-compatible.
+
+Steps:
+1. Add an unsaved marker and record the cursor and selection.
+2. Run `adb -s <serial> install -r <ace-plugin.apk>`.
+3. Continue editing without restarting the host.
+
+Expected:
+- Transient replacement remove/add broadcasts do not flicker to Native.
+- The completed replacement reloads the ACE plugin session even when the
+  package version identity is unchanged.
+- Text, dirty state, cursor, and selection survive the session reload.
+
+### ACE-HOTPLUG-005: Uninstall and reinstall with an active editor
+
+Preconditions:
+- ACE is active with an unsaved marker.
+
+Steps:
+1. Run
+   `adb -s <serial> uninstall io.github.supermonster003.autojs6.plugin.ace.editor`.
+2. Save the marker from the Native editor and confirm the file on disk.
+3. Reinstall the plugin with `adb -s <serial> install <ace-plugin.apk>`.
+
+Expected:
+- Uninstall switches to Native, keeps the unsaved marker saveable, and shows
+  one long uninstalled-plugin notice.
+- No stale plugin callback crashes the host after package removal.
+- Reinstall restores ACE automatically and the saved marker remains present.
+
+### ACE-HOTPLUG-006: Explicit selection and ACE-scoped surfaces
+
+Preconditions:
+- Begin with ACE available, then repeat the unavailable steps with the plugin
+  disabled or uninstalled.
+
+Steps:
+1. Select Native explicitly while ACE is available, then disable and re-enable
+   the plugin.
+2. Confirm the editor stays Native, then explicitly select ACE again.
+3. Make ACE unavailable and select ACE from the engine preference.
+4. While ACE is available, open each ACE-scoped settings page, the editor
+   settings dialog, ACE font dialog or preview, and ACE plugin settings page;
+   make the plugin unavailable while each surface is visible.
+
+Expected:
+- Explicit Native suppresses automatic ACE selection until available ACE is
+  explicitly selected again.
+- Selecting unavailable ACE leaves the preference unchanged and offers a
+  button that opens the official Plugin Center filtered to the ACE package.
+- ACE-scoped pages and dialogs close when availability is lost, while general
+  settings entered after Native fallback remain usable.
+- At most one long state-change notice is shown for one plugin-state change.
+
 ## IME Show/Hide Manual Checklist
 
 The dedicated keyboard and viewport release matrix lives in
