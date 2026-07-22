@@ -147,7 +147,6 @@ val inrtMergedAssetPruneIncludes = listOf(
     "project/**/*",
     "sample/**/*",
     "stored-locales/**/*",
-    "android-devices.db",
     "autojs.keystore",
 )
 
@@ -392,13 +391,10 @@ dependencies /* Unclassified */ {
 
     // Retrofit
     implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit.adapter.rxjava2)
-    implementation(libs.retrofit2.kotlin.coroutines.adapter)
 
     // Glide
     implementation(libs.glide)
-    ksp(libs.glide.ksp)
 
     // Joda Time
     implementation(libs.joda.time)
@@ -454,9 +450,6 @@ dependencies /* Unclassified */ {
     // Rx
     implementation(libs.rxjava)
     implementation(libs.rxandroid)
-
-    // Device Names
-    implementation(libs.android.device.names)
 
     // Version Compare
     implementation(libs.versioncompare)
@@ -522,7 +515,6 @@ dependencies /* Unclassified */ {
 
     // Room
     implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     implementation(libs.room.rxjava2)
     ksp(libs.room.compiler)
 
@@ -604,17 +596,10 @@ dependencies /* MIME */ {
 dependencies /* Test */ {
     testImplementation(libs.junit)
     androidTestImplementation(libs.test.runner)
-    androidTestImplementation(libs.junit.jupiter)
 }
 
 dependencies /* Annotations */ {
-    // Android Annotations
-    implementation(libs.android.annotations.api)
     implementation(libs.annotation)
-    ksp(libs.android.annotations)
-
-    // JCIP Annotations
-    implementation(libs.jcip.annotations)
 
     // EventBus
     implementation(libs.eventbus)
