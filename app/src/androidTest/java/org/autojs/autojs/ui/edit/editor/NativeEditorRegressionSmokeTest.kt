@@ -3,10 +3,12 @@ package org.autojs.autojs.ui.edit.editor
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.os.SystemClock
 import android.view.inputmethod.InputMethodManager
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.ui.edit.EditorView
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
@@ -28,13 +30,16 @@ import java.util.concurrent.atomic.AtomicReference
 class NativeEditorRegressionSmokeTest {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val originalEnginePreference = captureStringPreference(EditorEnginePreferences.KEY_EDITOR_ENGINE)
+    private val originalSelectionModePreference =
+        captureStringPreference(EditorEnginePreferences.KEY_EDITOR_ENGINE_SELECTION_MODE)
     private var activity: Activity? = null
     private val launchedEditActivities = CopyOnWriteArrayList<Activity>()
 
     @After
     fun tearDown() {
-        EditorEnginePreferences.set(EditorEngineType.NATIVE)
         finishLaunchedActivity()
+        restoreEnginePreferences()
     }
 
     @Test
@@ -334,6 +339,30 @@ class NativeEditorRegressionSmokeTest {
         }
         error.get()?.let { throw it }
         return value.get()
+    }
+
+    private fun captureStringPreference(key: String): StoredStringPreference {
+        val preferences = Pref.get()
+        return StoredStringPreference(
+            present = preferences.contains(key),
+            value = preferences.getString(key, null),
+        )
+    }
+
+    private fun restoreEnginePreferences() {
+        val editor = Pref.get().edit()
+        originalEnginePreference.restore(editor, EditorEnginePreferences.KEY_EDITOR_ENGINE)
+        originalSelectionModePreference.restore(editor, EditorEnginePreferences.KEY_EDITOR_ENGINE_SELECTION_MODE)
+        editor.commit()
+    }
+
+    private data class StoredStringPreference(
+        val present: Boolean,
+        val value: String?,
+    ) {
+        fun restore(editor: SharedPreferences.Editor, key: String) {
+            if (present) editor.putString(key, value) else editor.remove(key)
+        }
     }
 
     companion object {
