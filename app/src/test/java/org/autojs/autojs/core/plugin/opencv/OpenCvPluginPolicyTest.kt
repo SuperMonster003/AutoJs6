@@ -83,6 +83,18 @@ class OpenCvPluginPolicyTest {
     }
 
     @Test
+    fun `native runtime must be rebuilt with the host NDK`() {
+        assertNull(rejection(nativeNdkVersion = OpenCvPluginContract.EXPECTED_NATIVE_NDK_VERSION))
+        listOf("", "18.1.5063045", "27.0.12077973").forEach { version ->
+            assertEquals(
+                version,
+                OpenCvPluginLoadError.NATIVE_NDK_VERSION_MISMATCH,
+                rejection(nativeNdkVersion = version),
+            )
+        }
+    }
+
+    @Test
     fun `Java API fingerprint must exactly match the host classes`() {
         assertNull(rejection(javaApiSha256 = OpenCvPluginContract.JAVA_API_SHA256))
         assertEquals(
@@ -134,6 +146,7 @@ class OpenCvPluginPolicyTest {
         contractVersion: Int = OpenCvPluginContract.VERSION,
         openCvVersion: String = OpenCvPluginContract.EXPECTED_OPENCV_VERSION,
         nativeLibraryName: String = OpenCvPluginContract.NATIVE_LIBRARY_NAME,
+        nativeNdkVersion: String = OpenCvPluginContract.EXPECTED_NATIVE_NDK_VERSION,
         javaApiSha256: String = OpenCvPluginContract.JAVA_API_SHA256,
         hostVersionCode: Long = 100L,
         requiresHostVersion: Long? = null,
@@ -145,6 +158,7 @@ class OpenCvPluginPolicyTest {
         contractVersion = contractVersion,
         openCvVersion = openCvVersion,
         nativeLibraryName = nativeLibraryName,
+        nativeNdkVersion = nativeNdkVersion,
         javaApiSha256 = javaApiSha256,
         hostVersionCode = hostVersionCode,
         requiresHostVersion = requiresHostVersion,

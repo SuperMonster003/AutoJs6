@@ -47,6 +47,7 @@ object OpenCvPluginHost {
         val contractVersion: Int,
         val openCvVersion: String,
         val nativeLibraryName: String,
+        val nativeNdkVersion: String,
         val javaApiSha256: String,
         val requiresHostVersion: Long?,
         val maxHostVersion: Long?,
@@ -77,6 +78,7 @@ object OpenCvPluginHost {
         val packageVersionCode: Long? = null,
         val abi: String? = null,
         val nativeLibraryPath: String? = null,
+        val nativeNdkVersion: String? = null,
     )
 
     private data class PreparedRuntime(
@@ -106,6 +108,7 @@ object OpenCvPluginHost {
                             contractVersion = candidate.contractVersion,
                             openCvVersion = candidate.openCvVersion,
                             nativeLibraryName = candidate.nativeLibraryName,
+                            nativeNdkVersion = candidate.nativeNdkVersion,
                             javaApiSha256 = candidate.javaApiSha256,
                             hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
                             requiresHostVersion = candidate.requiresHostVersion,
@@ -246,9 +249,14 @@ object OpenCvPluginHost {
                 packageVersionCode = candidate.packageVersionCode,
                 abi = staged.abi,
                 nativeLibraryPath = staged.file.absolutePath,
+                nativeNdkVersion = candidate.nativeNdkVersion,
             ).also { runtime ->
                 loadedRuntime = runtime
-                Log.i(TAG, "Loaded OpenCV ${runtime.openCvVersion} from ${runtime.packageName} for ${runtime.abi}")
+                Log.i(
+                    TAG,
+                    "Loaded OpenCV ${runtime.openCvVersion} built with NDK ${runtime.nativeNdkVersion} " +
+                            "from ${runtime.packageName} for ${runtime.abi}",
+                )
             }
         }
     }
@@ -360,6 +368,8 @@ object OpenCvPluginHost {
                 OpenCvPluginLoadError.CONTRACT_METADATA_INVALID,
                 "OpenCV plugin native library metadata is missing",
             )
+        val nativeNdkVersion = metadataValue(serviceInfo, applicationInfo, OpenCvPluginContract.META_DATA_NATIVE_NDK_VERSION)
+            ?.toString()?.trim().orEmpty()
         val javaApiSha256 = metadataValue(serviceInfo, applicationInfo, OpenCvPluginContract.META_DATA_JAVA_API_SHA256)
             ?.toString()?.trim()?.lowercase()?.takeIf(String::isNotBlank)
             ?: throw OpenCvPluginLoadException(
@@ -375,6 +385,7 @@ object OpenCvPluginHost {
             contractVersion = contractVersion,
             openCvVersion = openCvVersion,
             nativeLibraryName = nativeLibraryName,
+            nativeNdkVersion = nativeNdkVersion,
             javaApiSha256 = javaApiSha256,
             requiresHostVersion = PluginCapabilityResolver.coerceLong(
                 metadataValue(serviceInfo, applicationInfo, OpenCvPluginContract.META_DATA_REQUIRES_HOST_VERSION),
@@ -472,6 +483,7 @@ enum class OpenCvPluginLoadError {
     CONTRACT_VERSION_UNSUPPORTED,
     OPENCV_VERSION_UNSUPPORTED,
     NATIVE_LIBRARY_UNSUPPORTED,
+    NATIVE_NDK_VERSION_MISMATCH,
     JAVA_API_MISMATCH,
     HOST_VERSION_TOO_LOW,
     HOST_VERSION_TOO_HIGH,
@@ -498,6 +510,7 @@ internal object OpenCvPluginPolicy {
         contractVersion: Int,
         openCvVersion: String,
         nativeLibraryName: String,
+        nativeNdkVersion: String = OpenCvPluginContract.EXPECTED_NATIVE_NDK_VERSION,
         javaApiSha256: String = OpenCvPluginContract.JAVA_API_SHA256,
         hostVersionCode: Long,
         requiresHostVersion: Long?,
@@ -514,6 +527,8 @@ internal object OpenCvPluginPolicy {
             OpenCvPluginLoadError.OPENCV_VERSION_UNSUPPORTED
         nativeLibraryName != OpenCvPluginContract.NATIVE_LIBRARY_NAME ->
             OpenCvPluginLoadError.NATIVE_LIBRARY_UNSUPPORTED
+        nativeNdkVersion != OpenCvPluginContract.EXPECTED_NATIVE_NDK_VERSION ->
+            OpenCvPluginLoadError.NATIVE_NDK_VERSION_MISMATCH
         javaApiSha256 != OpenCvPluginContract.JAVA_API_SHA256 ->
             OpenCvPluginLoadError.JAVA_API_MISMATCH
         !PluginCapabilityResolver.isHostVersionCompatible(hostVersionCode, requiresHostVersion) ->

@@ -20,7 +20,7 @@ The matching standalone implementation is maintained as the sibling `AutoJs6-Plu
 
 ## Contract and discovery
 
-The shared contract is in `plugin-api/opencv-api`. Both the host and plugin must compile against the same contract constants. The initial contract is locked to OpenCV 4.8.0 and `libopencv_java4.so`.
+The shared contract is in `plugin-api/opencv-api`. Both the host and plugin must compile against the same contract constants. Contract v2 is locked to OpenCV 4.8.0, `libopencv_java4.so`, and NDK 26.1.10909125.
 
 The plugin exposes a service for:
 
@@ -30,7 +30,7 @@ The plugin exposes a service for:
 - Variant `4.8.0`.
 - Default package `io.github.supermonster003.autojs6.plugin.opencv`.
 
-The service or application metadata must provide the contract version, OpenCV version, native library name, Java API SHA-256 fingerprint, and optional minimum and maximum host version. The service also needs to expose the common plugin information Binder used by Plugin Center and APK Builder.
+The service or application metadata must provide the contract version, OpenCV version, native library name, native NDK version, Java API SHA-256 fingerprint, and optional minimum and maximum host version. The service also needs to expose the common plugin information Binder used by Plugin Center and APK Builder.
 
 The host accepts an in-process candidate only when all of the following are true:
 
@@ -39,8 +39,9 @@ The host accepts an in-process candidate only when all of the following are true
 3. The contract version is supported.
 4. The OpenCV version exactly matches the Java ABI retained by the host.
 5. The native library name exactly matches the contract.
-6. The Java API fingerprint exactly matches the classes retained by the host.
-7. The current host version is within the plugin's declared bounds.
+6. The native runtime was built with the NDK version locked by the contract.
+7. The Java API fingerprint exactly matches the classes retained by the host.
+8. The current host version is within the plugin's declared bounds.
 
 A user grant alone is deliberately insufficient. Loading native code into the AutoJs6 process grants it the same privileges and failure domain as the host.
 
@@ -57,7 +58,7 @@ ABI preference takes precedence over APK path order, so a preferred ABI in a spl
 
 The selected payload is staged below the host code cache using the plugin package version and update time as part of its identity. Extraction validates the declared size, extraction limit, ZIP CRC, and ELF magic. An existing staged file is reused only when its size, ELF header, and CRC still match the current APK entry.
 
-The host then loads the staged file by absolute path. `libc++_shared.so` is loaded first on a best-effort basis because it may already be provided by another host dependency. The native runtime version reported through JNI must still equal the version declared in plugin metadata.
+The host then loads the staged file by absolute path. `libc++_shared.so` is loaded first on a best-effort basis because it may already be provided by another host dependency. OpenCV is rebuilt with the host's NDK 26.1.10909125 toolchain so its C++ exception unwinder is compatible with that process-wide runtime; older official OpenCV Android payloads built with NDK r18b are rejected by contract v2. The native runtime version reported through JNI must still equal the version declared in plugin metadata.
 
 Only an INRT packaged application may load a bundled OpenCV runtime. The ordinary AutoJs6 host never probes a bundled copy, even if a future transitive dependency accidentally packages one; it must always pass fixed-package discovery, enablement, signature/trust, metadata, and compatibility checks. The `verifyOpenCvPluginSeparation` Gradle task additionally rejects host APKs that contain `libopencv_java4.so`.
 
@@ -114,11 +115,12 @@ Raw `Mat` and static `Imgproc` exposure must be deprecated, replaced, or confine
 
 At minimum, changes to this integration should run:
 
-- `OpenCvPluginPolicyTest` for enable, trust, contract, OpenCV version, native name, and host version policy.
+- `OpenCvPluginPolicyTest` for enable, trust, contract, OpenCV version, native name, native NDK version, and host version policy.
 - `OpenCvNativeLibraryStagerTest` for ABI ordering, CRC cache reuse and invalidation, missing ABI payloads, and invalid ELF payloads.
 - `ApkBuilderLibPolicyTest` for the OpenCV plugin action, engine, variant, and packaged libraries.
-- `OpenCvPluginHostDeviceTest` for cross-APK discovery, staging, JNI loading, version verification, and a real `Mat` operation (skipped when the plugin is not installed).
-- The plugin project's `verifyOpenCvApks` task for split/universal ABI inventory, ELF architecture, byte-identical native payloads, absence of duplicate OpenCV Java classes, and complete packaged license assets.
+- `OpenCvPluginHostDeviceTest` for cross-APK discovery, staging, JNI loading, version verification, a real `Mat` operation, and intentional native OpenCV errors reaching Java as `CvException` without terminating the process (skipped when the plugin is not installed).
+- `ImagesResizeRhinoInstrumentationTest` for the documented `images.resize(image, [width, height])` contract and catchable rejection of the common incorrect scalar width/height call.
+- The plugin project's `verifyOpenCvApks` task for split/universal ABI inventory, ELF architecture and NDK identity, byte-identical native payloads, absence of duplicate OpenCV Java classes, and complete packaged license assets.
 - `verifyOpenCvPluginSeparation` for the host Java-only AAR and debug/release APK native inventory.
 
 Device release testing should additionally cover plugin disable and uninstall before initialization, restart after plugin upgrade, all published ABI splits, corrupted APK payload rejection, repeated image allocation and recycling, and APK Builder output on a device that does not have the plugin.
