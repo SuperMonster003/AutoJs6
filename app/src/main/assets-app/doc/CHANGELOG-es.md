@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/22
+###### 2026/07/23
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -113,6 +113,14 @@
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` OpenCV modularizado version 4.8.0
 * `Dependencia` Se agrega Apache Commons Codec version 1.15
+* `Dependencia` Se elimina Android Annotations version 4.8.0
+* `Dependencia` Se elimina Glide KSP version 5.0.5
+* `Dependencia` Se elimina Jaredrummler Android Device Names version 2.1.1
+* `Dependencia` Se elimina JCIP Annotations version 1.0
+* `Dependencia` Se elimina Junit Jupiter version 5.13.4
+* `Dependencia` Se elimina Retrofit2 Converter Gson version 3.0.0
+* `Dependencia` Se elimina Retrofit2 Kotlin Coroutines Adapter version 0.9.2
+* `Dependencia` Se elimina la declaración redundante de AndroidX Room KTX version 2.8.1 del módulo app
 * `Dependencia` Se elimina AndroidX MultiDex version 2.0.1
 * `Dependencia` Se elimina MLKit Barcode Scanning version 17.3.0
 * `Dependencia` Se elimina MLKit Text Recognition Chinese version 16.0.1

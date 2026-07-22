@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/22
+###### 2026/07/23
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -113,6 +113,14 @@
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized OpenCV version 4.8.0
 * `Dependency` Added Apache Commons Codec version 1.15
+* `Dependency` Removed Android Annotations version 4.8.0
+* `Dependency` Removed Glide KSP version 5.0.5
+* `Dependency` Removed Jaredrummler Android Device Names version 2.1.1
+* `Dependency` Removed JCIP Annotations version 1.0
+* `Dependency` Removed Junit Jupiter version 5.13.4
+* `Dependency` Removed Retrofit2 Converter Gson version 3.0.0
+* `Dependency` Removed Retrofit2 Kotlin Coroutines Adapter version 0.9.2
+* `Dependency` Removed redundant app-module declaration of AndroidX Room KTX version 2.8.1
 * `Dependency` Removed AndroidX MultiDex version 2.0.1
 * `Dependency` Removed MLKit Barcode Scanning version 17.3.0
 * `Dependency` Removed MLKit Text Recognition Chinese version 16.0.1

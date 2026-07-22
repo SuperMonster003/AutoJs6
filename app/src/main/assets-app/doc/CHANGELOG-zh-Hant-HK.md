@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/22
+###### 2026/07/23
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -113,6 +113,14 @@
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 OpenCV 版本 4.8.0
 * `依賴` 附加 Apache Commons Codec 版本 1.15
+* `依賴` 移除 Android Annotations 版本 4.8.0
+* `依賴` 移除 Glide KSP 版本 5.0.5
+* `依賴` 移除 Jaredrummler Android Device Names 版本 2.1.1
+* `依賴` 移除 JCIP Annotations 版本 1.0
+* `依賴` 移除 Junit Jupiter 版本 5.13.4
+* `依賴` 移除 Retrofit2 Converter Gson 版本 3.0.0
+* `依賴` 移除 Retrofit2 Kotlin Coroutines Adapter 版本 0.9.2
+* `依賴` 移除 app 模塊重複聲明的 AndroidX Room KTX 版本 2.8.1
 * `依賴` 移除 AndroidX MultiDex 版本 2.0.1
 * `依賴` 移除 MLKit Barcode Scanning 版本 17.3.0
 * `依賴` 移除 MLKit Text Recognition Chinese 版本 16.0.1

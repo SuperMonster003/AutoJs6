@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/22
+###### 2026/07/23
 
 * `Новое` Среда выполнения скриптов Node.js 24.5.0 с поддержкой запуска с помощью директивы "nodejs" или таких расширений, как .node.js/.cjs/.mjs
 * `Новое` Среда выполнения Node.js поддерживает CommonJS/частичный ESM/локальный динамический import()/облегченный исходный код TypeScript (.ts/.mts/.cts)
@@ -113,6 +113,14 @@
 * `Зависимость` Модульный Android ARSC Editor
 * `Зависимость` Модульный OpenCV версии 4.8.0
 * `Зависимость` Добавлен Apache Commons Codec версии 1.15
+* `Зависимость` Удален Android Annotations версии 4.8.0
+* `Зависимость` Удален Glide KSP версии 5.0.5
+* `Зависимость` Удален Jaredrummler Android Device Names версии 2.1.1
+* `Зависимость` Удален JCIP Annotations версии 1.0
+* `Зависимость` Удален Junit Jupiter версии 5.13.4
+* `Зависимость` Удален Retrofit2 Converter Gson версии 3.0.0
+* `Зависимость` Удален Retrofit2 Kotlin Coroutines Adapter версии 0.9.2
+* `Зависимость` Удалена дублирующая декларация AndroidX Room KTX версии 2.8.1 в модуле app
 * `Зависимость` Удален AndroidX MultiDex версии 2.0.1
 * `Зависимость` Удален MLKit Barcode Scanning версии 17.3.0
 * `Зависимость` Удален MLKit Text Recognition Chinese версии 16.0.1

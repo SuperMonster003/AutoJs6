@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/22
+###### 2026/07/23
 
 * `إضافة جديدة` بيئة تشغيل نصوص Node.js 24.5.0, تدعم التشغيل عبر توجيه "nodejs" او امتدادات مثل .node.js/.cjs/.mjs
 * `إضافة جديدة` بيئة تشغيل Node.js تدعم CommonJS و ESM جزئيا و import() الديناميكي المحلي فقط ومصادر TypeScript الخفيفة (.ts/.mts/.cts)
@@ -113,6 +113,14 @@
 * `التبعيات` Android ARSC Editor بعد تحويله الى وحدات
 * `التبعيات` OpenCV بعد تحويله الى وحدات, الاصدار 4.8.0
 * `التبعيات` اضافة Apache Commons Codec الاصدار 1.15
+* `التبعيات` ازالة Android Annotations الاصدار 4.8.0
+* `التبعيات` ازالة Glide KSP الاصدار 5.0.5
+* `التبعيات` ازالة Jaredrummler Android Device Names الاصدار 2.1.1
+* `التبعيات` ازالة تعليقات JCIP الاصدار 1.0
+* `التبعيات` ازالة Junit Jupiter الاصدار 5.13.4
+* `التبعيات` ازالة Retrofit2 Converter Gson الاصدار 3.0.0
+* `التبعيات` ازالة Retrofit2 Kotlin Coroutines Adapter الاصدار 0.9.2
+* `التبعيات` ازالة التصريح المكرر لـ AndroidX Room KTX الاصدار 2.8.1 من وحدة app
 * `التبعيات` ازالة AndroidX MultiDex الاصدار 2.0.1
 * `التبعيات` ازالة MLKit Barcode Scanning الاصدار 17.3.0
 * `التبعيات` ازالة MLKit Text Recognition Chinese الاصدار 16.0.1

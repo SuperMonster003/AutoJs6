@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/22",
+      "released_date": "2026/07/23",
       "feature": [
         "Node.js 24.5.0 스크립트 런타임, \"nodejs\" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원",
         "Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원",
@@ -114,6 +114,14 @@
         "모듈화 Android ARSC Editor",
         "모듈화 OpenCV 버전 4.8.0",
         "Apache Commons Codec 버전 1.15 추가",
+        "Android Annotations 버전 4.8.0 제거",
+        "Glide KSP 버전 5.0.5 제거",
+        "Jaredrummler Android Device Names 버전 2.1.1 제거",
+        "JCIP Annotations 버전 1.0 제거",
+        "Junit Jupiter 버전 5.13.4 제거",
+        "Retrofit2 Converter Gson 버전 3.0.0 제거",
+        "Retrofit2 Kotlin Coroutines Adapter 버전 0.9.2 제거",
+        "app 모듈에서 중복 선언된 AndroidX Room KTX 버전 2.8.1 제거",
         "AndroidX MultiDex 버전 2.0.1 제거",
         "MLKit Barcode Scanning 버전 17.3.0 제거",
         "MLKit Text Recognition Chinese 버전 16.0.1 제거",

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/22",
+      "released_date": "2026/07/23",
       "feature": [
         "بيئة تشغيل نصوص Node.js 24.5.0, تدعم التشغيل عبر توجيه \"nodejs\" او امتدادات مثل .node.js/.cjs/.mjs",
         "بيئة تشغيل Node.js تدعم CommonJS و ESM جزئيا و import() الديناميكي المحلي فقط ومصادر TypeScript الخفيفة (.ts/.mts/.cts)",
@@ -114,6 +114,14 @@
         "Android ARSC Editor بعد تحويله الى وحدات",
         "OpenCV بعد تحويله الى وحدات, الاصدار 4.8.0",
         "اضافة Apache Commons Codec الاصدار 1.15",
+        "ازالة Android Annotations الاصدار 4.8.0",
+        "ازالة Glide KSP الاصدار 5.0.5",
+        "ازالة Jaredrummler Android Device Names الاصدار 2.1.1",
+        "ازالة تعليقات JCIP الاصدار 1.0",
+        "ازالة Junit Jupiter الاصدار 5.13.4",
+        "ازالة Retrofit2 Converter Gson الاصدار 3.0.0",
+        "ازالة Retrofit2 Kotlin Coroutines Adapter الاصدار 0.9.2",
+        "ازالة التصريح المكرر لـ AndroidX Room KTX الاصدار 2.8.1 من وحدة app",
         "ازالة AndroidX MultiDex الاصدار 2.0.1",
         "ازالة MLKit Barcode Scanning الاصدار 17.3.0",
         "ازالة MLKit Text Recognition Chinese الاصدار 16.0.1",

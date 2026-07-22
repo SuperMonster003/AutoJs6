@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/22
+###### 2026/07/23
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -113,6 +113,14 @@
 * `依存関係` モジュール化 Android ARSC Editor
 * `依存関係` モジュール化 OpenCV バージョン 4.8.0
 * `依存関係` Apache Commons Codec バージョン 1.15 を追加
+* `依存関係` Android Annotations バージョン 4.8.0 を削除
+* `依存関係` Glide KSP バージョン 5.0.5 を削除
+* `依存関係` Jaredrummler Android Device Names バージョン 2.1.1 を削除
+* `依存関係` JCIP Annotations バージョン 1.0 を削除
+* `依存関係` Junit Jupiter バージョン 5.13.4 を削除
+* `依存関係` Retrofit2 Converter Gson バージョン 3.0.0 を削除
+* `依存関係` Retrofit2 Kotlin Coroutines Adapter バージョン 0.9.2 を削除
+* `依存関係` app モジュールで重複宣言された AndroidX Room KTX バージョン 2.8.1 を削除
 * `依存関係` AndroidX MultiDex バージョン 2.0.1 を削除
 * `依存関係` MLKit Barcode Scanning バージョン 17.3.0 を削除
 * `依存関係` MLKit Text Recognition Chinese バージョン 16.0.1 を削除
