@@ -63,6 +63,7 @@
         "複数スレッドまたは複数ファイルから OCR を繰り返し呼び出すと画面キャプチャ権限を何度も要求する可能性がある問題 _[`issue #551`](http://issues.autojs6.com/551)_",
         "Paddle OCR プラグインサービスが長時間の実行後に切断され自動復旧できない可能性がある問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_",
         "Paddle OCR プラグインが実行中でないと自動起動できず機能呼び出しやプロジェクトのパッケージ化に失敗する問題 _[`issue #517`](http://issues.autojs6.com/517)_",
+        "誤った `images.resize(ImageWrapper, width, height)` 呼び出しで高さが OpenCV の補間値として渡され, 互換性のないネイティブ例外展開によりスクリプト例外の報告ではなくアプリがクラッシュする可能性がある問題",
         "アクセシビリティサービスが back などの操作を連続実行すると予期せず中断する可能性がある問題 _[`issue #527`](http://issues.autojs6.com/527)_",
         "スクリプトを繰り返し実行するとメモリ使用量が増え続ける可能性がある問題 (修正試行) _[`issue #548`](http://issues.autojs6.com/548)_",
         "外部 URI またはバックグラウンドからスクリプトを実行すると元のパスが保持されず相対パスの解決に失敗する可能性がある問題 _[`issue #545`](http://issues.autojs6.com/545)_",

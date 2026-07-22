@@ -226,6 +226,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 多线程或跨文件重复调用 OCR 时可能反复申请屏幕捕获权限的问题 _[`issue #551`](http://issues.autojs6.com/551)_
 * `修复` Paddle OCR 插件服务长时间运行后可能断开且无法自动恢复的问题 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `修复` Paddle OCR 插件未处于运行状态时无法被自动唤醒, 导致功能调用或项目打包失败的问题 _[`issue #517`](http://issues.autojs6.com/517)_
+* `修复` `images.resize(ImageWrapper, width, height)` 错误用法会将高度作为 OpenCV 插值参数传入, 且不兼容的原生异常展开可能导致应用崩溃而非报告脚本异常的问题
 * `修复` 无障碍服务在连续执行 back 等操作时可能意外中断的问题 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修复` 脚本反复运行后内存占用可能持续增长的问题 (试修) _[`issue #548`](http://issues.autojs6.com/548)_
 * `修复` 通过外部 URI 或后台运行脚本时可能无法保留原始路径, 导致相对路径解析异常的问题 _[`issue #545`](http://issues.autojs6.com/545)_

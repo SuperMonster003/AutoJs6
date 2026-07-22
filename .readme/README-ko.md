@@ -226,6 +226,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 여러 스레드 또는 여러 파일에서 OCR을 반복 호출할 때 화면 캡처 권한을 반복해서 요청할 수 있는 문제 _[`issue #551`](http://issues.autojs6.com/551)_
 * `수정` Paddle OCR 플러그인 서비스가 장시간 실행 후 연결이 끊어지고 자동 복구되지 않을 수 있는 문제 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `수정` Paddle OCR 플러그인이 실행 중이 아닐 때 자동으로 시작되지 않아 기능 호출이나 프로젝트 패키징에 실패하는 문제 _[`issue #517`](http://issues.autojs6.com/517)_
+* `수정` 잘못된 `images.resize(ImageWrapper, width, height)` 호출에서 높이가 OpenCV 보간 값으로 전달되고 호환되지 않는 네이티브 예외 전개로 인해 스크립트 예외 보고 대신 앱이 충돌할 수 있는 문제
 * `수정` 접근성 서비스에서 back 등의 작업을 연속 실행할 때 예기치 않게 중단될 수 있는 문제 _[`issue #527`](http://issues.autojs6.com/527)_
 * `수정` 스크립트를 반복 실행한 후 메모리 사용량이 계속 증가할 수 있는 문제 (수정 시도) _[`issue #548`](http://issues.autojs6.com/548)_
 * `수정` 외부 URI 또는 백그라운드에서 스크립트를 실행할 때 원래 경로가 유지되지 않아 상대 경로 해석에 오류가 발생할 수 있는 문제 _[`issue #545`](http://issues.autojs6.com/545)_

@@ -63,6 +63,7 @@
         "Les appels OCR répétés depuis plusieurs threads ou fichiers pouvaient demander plusieurs fois l'autorisation de capture d'écran _[`issue #551`](http://issues.autojs6.com/551)_",
         "Le service du plugin Paddle OCR pouvait se déconnecter après une longue exécution sans pouvoir se rétablir automatiquement _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_",
         "Le plugin Paddle OCR ne pouvait pas être réveillé automatiquement lorsqu'il n'était pas en cours d'exécution, entraînant l'échec des appels de fonctions ou de l'empaquetage de projets _[`issue #517`](http://issues.autojs6.com/517)_",
+        "Les appels incorrects à `images.resize(ImageWrapper, width, height)` pouvaient transmettre la hauteur à OpenCV comme valeur d'interpolation, tandis qu'un déroulement incompatible des exceptions natives pouvait faire planter l'application au lieu de signaler une exception de script",
         "Le service d'accessibilité pouvait s'interrompre de manière inattendue lors d'opérations consécutives telles que back _[`issue #527`](http://issues.autojs6.com/527)_",
         "L'utilisation de la mémoire pouvait continuer à augmenter après l'exécution répétée de scripts (tentative de correction) _[`issue #548`](http://issues.autojs6.com/548)_",
         "Le chemin d'origine pouvait ne pas être conservé lors de l'exécution de scripts via des URI externes ou en arrière-plan, entraînant une résolution incorrecte des chemins relatifs _[`issue #545`](http://issues.autojs6.com/545)_",

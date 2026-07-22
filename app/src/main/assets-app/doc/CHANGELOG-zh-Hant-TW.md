@@ -66,6 +66,7 @@
 * `修復` 多執行緒或跨檔案重複呼叫 OCR 時可能反覆申請螢幕擷取權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_
 * `修復` Paddle OCR 外掛服務長時間執行後可能中斷連線且無法自動復原的問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `修復` Paddle OCR 外掛未處於執行狀態時無法被自動喚醒, 導致功能呼叫或專案打包失敗的問題 _[`issue #517`](http://issues.autojs6.com/517)_
+* `修復` `images.resize(ImageWrapper, width, height)` 錯誤用法會將高度作為 OpenCV 插值參數傳入, 且不相容的原生例外展開可能導致應用程式當機而非回報腳本例外的問題
 * `修復` 無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修復` 腳本反覆執行後記憶體占用可能持續增加的問題 (試修) _[`issue #548`](http://issues.autojs6.com/548)_
 * `修復` 透過外部 URI 或背景執行腳本時可能無法保留原始路徑, 導致相對路徑解析異常的問題 _[`issue #545`](http://issues.autojs6.com/545)_
