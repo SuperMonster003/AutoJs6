@@ -101,7 +101,7 @@
     <string name="description_editor_encoding_reload_or_convert">Cambiar la codificación de \"%2$s\" a %1$s?\n\nRecargar vuelve a leer el archivo desde el disco con la nueva codificación y reemplaza el contenido del editor. Convertir conserva el texto del editor y establece la nueva codificación para el próximo guardado; no escribe el archivo inmediatamente.</string>
     <string name="description_editor_encoding_reload_replaces_invalid_bytes">Al recargar, las secuencias de bytes no válidas se sustituyen por caracteres de reemplazo.</string>
     <string name="description_editor_encoding_reload_save_prompt">"%1$s" tiene cambios sin guardar. Guardarlos con la codificación actual antes de recargar?</string>
-    <string name="description_editor_engine_preference">Ace es el motor de editor predeterminado. JsDroidEditor sigue disponible como alternativa y se puede seleccionar de forma explícita.</string>
+    <string name="description_editor_engine_preference">Ace se selecciona automáticamente cuando el plugin del editor Ace está instalado y activado. Seleccionar JsDroidEditor de forma explícita desactiva la selección automática de Ace hasta que se vuelva a seleccionar Ace.</string>
     <string name="description_editor_fold_markers_enabled_preference">Muestra u oculta los marcadores de plegado de código en el margen lateral del editor. JsDroidEditor no dispone de una superficie para estos marcadores.</string>
     <string name="description_editor_gutter_width_mode_preference">El ancho dinámico sigue la cantidad de dígitos de los números de línea visibles. El ancho fijo reserva un mínimo estable y solo aumenta cuando lo exigen números de línea visibles más grandes.</string>
     <string name="description_editor_large_file_mode_threshold">Determina si se usa el modo de archivo grande para cargar archivos según el tamano del archivo.\nEl modo de archivo grande puede mejorar en cierta medida la eficiencia y la estabilidad de carga, pero las funciones \"Deshacer\" y \"Rehacer\" se desactivaran en este modo.</string>
@@ -507,6 +507,7 @@
     <string name="plugin_item_info_package_size">Tamaño paquete</string>
     <string name="plugin_item_info_supported_abis">ABI compatibles</string>
     <string name="plugin_item_info_updatable_version">Vers. actualiz.</string>
+    <string name="prompt_ace_editor_plugin_required">Instala o activa el plugin del editor Ace en el Centro de plugins para usar el motor Ace.</string>
     <string name="prompt_add_ignored_app_version">¿Está seguro de ignorar la versión actual de la actualización?\nPuedes gestionar todas las versiones ignoradas en los ajustes de la aplicación.</string>
     <string name="prompt_add_ignored_plugin_version">¿Está seguro de ignorar la versión actual de la actualización?\nPuedes gestionar todas las versiones ignoradas en los ajustes del plugin.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">El archivo actual puede no ser un paquete de complemento válido. ¿Deseas continuar con la instalación?\n\nURI: \"%1$s\"</string>
@@ -620,6 +621,10 @@
     <string name="text_ace_editor_font_integrity_failed">La fuente descargada no superó la verificación de integridad</string>
     <string name="text_ace_editor_font_license">Licencia</string>
     <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_ace_editor_plugin_disabled_fallback_native">El plugin del editor Ace se desactivó; se cambió a JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_required">Se requiere el plugin del editor Ace</string>
+    <string name="text_ace_editor_plugin_unavailable_fallback_native">El plugin del editor Ace no está disponible; se cambió a JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_uninstalled_fallback_native">El plugin del editor Ace se desinstaló; se cambió a JsDroidEditor.</string>
     <string name="text_ace_font_ligatures_enabled">Ligaduras de fuente</string>
     <string name="text_ace_font_styles_enabled">Estilos de fuente</string>
     <string name="text_ace_get_text">Obtener texto</string>

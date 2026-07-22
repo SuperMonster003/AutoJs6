@@ -103,7 +103,7 @@
     <string name="description_editor_encoding_reload_or_convert">هل تريد تغيير ترميز \"%2$s\" إلى %1$s?\n\nتعيد إعادة التحميل قراءة الملف من القرص باستخدام الترميز الجديد وتستبدل محتوى المحرر. يحتفظ التحويل بنص المحرر ويضبط الترميز الجديد للحفظ التالي, ولا يكتب الملف على الفور.</string>
     <string name="description_editor_encoding_reload_replaces_invalid_bytes">تستبدل إعادة التحميل تسلسلات البايت غير الصالحة بأحرف بديلة.</string>
     <string name="description_editor_encoding_reload_save_prompt">يحتوي "%1$s" على تغييرات غير محفوظة. هل تريد حفظها باستخدام الترميز الحالي قبل إعادة التحميل?</string>
-    <string name="description_editor_engine_preference">Ace هو محرك المحرر الافتراضي. يظل JsDroidEditor متاحا كخيار احتياطي ويمكن تحديده صراحة.</string>
+    <string name="description_editor_engine_preference">يتم تحديد Ace تلقائيا عندما تكون اضافة محرر Ace مثبتة ومفعلة. يؤدي تحديد JsDroidEditor صراحة إلى تعطيل التحديد التلقائي لـ Ace حتى يتم تحديد Ace مرة أخرى.</string>
     <string name="description_editor_fold_markers_enabled_preference">أظهر علامات طي الشفرة في هامش المحرر أو أخفها. لا يوفر JsDroidEditor واجهة لعلامات الطي.</string>
     <string name="description_editor_gutter_width_mode_preference">يتبع العرض الديناميكي عدد خانات أرقام الأسطر المرئية حاليا. يحجز العرض الثابت حدا أدنى مستقرا ولا يتسع إلا عندما تتطلب أرقام الأسطر المرئية الأكبر ذلك.</string>
     <string name="description_editor_large_file_mode_threshold">يحدد ما اذا كان سيتم استخدام وضع الملفات الكبيرة لتحميل الملفات بناء على حجم الملف.\nيمكن لوضع الملفات الكبيرة ان يحسن كفاءة التحميل والاستقرار الى حد ما, لكن ميزتي \"تراجع\" و \"اعادة\" سيتم تعطيلهما في هذا الوضع.</string>
@@ -509,6 +509,7 @@
     <string name="plugin_item_info_package_size">حجم الحزمة</string>
     <string name="plugin_item_info_supported_abis">وحدات ABI المدعومة</string>
     <string name="plugin_item_info_updatable_version">إصدار متاح</string>
+    <string name="prompt_ace_editor_plugin_required">ثبّت اضافة محرر Ace أو فعّلها في مركز الاضافات لاستخدام محرك Ace.</string>
     <string name="prompt_add_ignored_app_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات التطبيق.</string>
     <string name="prompt_add_ignored_plugin_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات الإضافة.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">قد لا يكون الملف الحالي حزمة ملحق صالحة. هل تريد المتابعة بالتثبيت؟\n\nURI: \"%1$s\"</string>
@@ -622,6 +623,10 @@
     <string name="text_ace_editor_font_integrity_failed">فشل الخط الذي تم تنزيله في التحقق من السلامة</string>
     <string name="text_ace_editor_font_license">الترخيص</string>
     <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_ace_editor_plugin_disabled_fallback_native">تم تعطيل اضافة محرر Ace; تم التبديل إلى JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_required">اضافة محرر Ace مطلوبة</string>
+    <string name="text_ace_editor_plugin_unavailable_fallback_native">اضافة محرر Ace غير متاحة; تم التبديل إلى JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_uninstalled_fallback_native">تم الغاء تثبيت اضافة محرر Ace; تم التبديل إلى JsDroidEditor.</string>
     <string name="text_ace_font_ligatures_enabled">أربطة الخط</string>
     <string name="text_ace_font_styles_enabled">أنماط الخط</string>
     <string name="text_ace_get_text">الحصول على النص</string>

@@ -98,7 +98,7 @@
     <string name="description_editor_encoding_reload_or_convert">Change the encoding of \"%2$s\" to %1$s?\n\nReload reads the file again from disk using the new encoding and replaces the editor content. Convert keeps the editor text and sets the new encoding for the next save; it does not write the file immediately.</string>
     <string name="description_editor_encoding_reload_replaces_invalid_bytes">Reload replaces invalid byte sequences with replacement characters.</string>
     <string name="description_editor_encoding_reload_save_prompt">"%1$s" has unsaved changes. Save them using the current encoding before reloading?</string>
-    <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
+    <string name="description_editor_engine_preference">Ace is selected automatically while its plugin is installed and enabled. Selecting JsDroidEditor explicitly disables automatic Ace selection until Ace is selected again.</string>
     <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>
     <string name="description_editor_gutter_width_mode_preference">Dynamic width follows currently visible line-number digits. Fixed width preallocates a stable minimum and grows only when larger visible line numbers require it.</string>
     <string name="description_editor_large_file_mode_threshold">Determines whether large file mode is used to load files based on file size.\nLarge file mode can improve file loading efficiency and stability to some extent, but the \"Undo\" and \"Redo\" features will be disabled in large file mode.</string>
@@ -504,6 +504,7 @@
     <string name="plugin_item_info_package_size">Package size</string>
     <string name="plugin_item_info_supported_abis">Supported ABIs</string>
     <string name="plugin_item_info_updatable_version">Updatable ver.</string>
+    <string name="prompt_ace_editor_plugin_required">Install or enable the Ace editor plugin in Plugin Center to use the Ace engine.</string>
     <string name="prompt_add_ignored_app_version">Are you sure to ignore current update version?\nYou can manage all ignored versions by app settings.</string>
     <string name="prompt_add_ignored_plugin_version">Are you sure to ignore current update version?\nYou can manage all ignored versions by plugin settings.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">The current file may not be a valid plugin package, do you want to continue with installation?\n\nURI: \"%1$s\"</string>
@@ -617,6 +618,10 @@
     <string name="text_ace_editor_font_integrity_failed">The downloaded font failed integrity verification</string>
     <string name="text_ace_editor_font_license">License</string>
     <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_ace_editor_plugin_disabled_fallback_native">Ace editor plugin was disabled; switched to JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_required">Ace editor plugin required</string>
+    <string name="text_ace_editor_plugin_unavailable_fallback_native">Ace editor plugin is unavailable; switched to JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_uninstalled_fallback_native">Ace editor plugin was uninstalled; switched to JsDroidEditor.</string>
     <string name="text_ace_font_ligatures_enabled">Font ligatures</string>
     <string name="text_ace_font_styles_enabled">Font styles</string>
     <string name="text_ace_get_text">Get text</string>

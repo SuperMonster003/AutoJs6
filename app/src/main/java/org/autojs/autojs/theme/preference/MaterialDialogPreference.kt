@@ -82,6 +82,12 @@ open class MaterialDialogPreference : MaterialPreference {
 
     protected fun getDialog() = mDialog
 
+    fun dismissDialogIfShowing() {
+        if (::mDialog.isInitialized && mDialog.isShowing) {
+            mDialog.dismiss()
+        }
+    }
+
     protected open fun getBuilder(): MaterialDialog.Builder = mBuilder!!
         .neutralColorRes(R.color.dialog_button_hint)
         .dismissListener { mDialog.recyclerView?.layoutManager = null }

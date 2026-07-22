@@ -21,7 +21,7 @@
     <string name="default_key_ace_editor_font" translatable="false">@string/key_ace_editor_font_iosevka</string>
     <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
     <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
-    <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_ace</string>
+    <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_native</string>
     <string name="default_key_editor_gutter_width_mode" translatable="false">@string/key_editor_gutter_width_mode_dynamic</string>
     <string name="default_key_editor_log_button_behavior" translatable="false">@string/key_editor_log_button_behavior_bottom_sheet</string>
     <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>

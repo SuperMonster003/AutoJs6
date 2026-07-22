@@ -7,9 +7,11 @@ import android.widget.EdgeEffect
 import androidx.annotation.StringRes
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceGroup
 import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.preference.MaterialDialogPreference
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
@@ -34,6 +36,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         EditorPinchToZoomPreferences.migrateLegacyPreferenceIfNeeded()
+        EditorEnginePreferences.initialize(requireContext())
         setPreferencesFromResource(R.xml.fragment_code_editor_settings, rootKey)
         preferencesCreated = true
         syncEditorEnginePreferenceAvailability()
@@ -61,6 +64,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
 
     override fun onResume() {
         super.onResume()
+        EditorEnginePreferences.reconcile(requireContext())
         preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
         syncEditorEnginePreferenceAvailability()
     }
@@ -118,6 +122,17 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
     fun setFontPreviewHandler(handler: ((String) -> Unit)?) {
         fontPreviewHandler = handler
         syncFontPreviewPreference()
+    }
+
+    fun dismissOpenPreferenceDialogs() {
+        fun dismissRecursively(group: PreferenceGroup) {
+            for (index in 0 until group.preferenceCount) {
+                val preference = group.getPreference(index)
+                (preference as? MaterialDialogPreference)?.dismissDialogIfShowing()
+                (preference as? PreferenceGroup)?.let(::dismissRecursively)
+            }
+        }
+        preferenceScreen?.let(::dismissRecursively)
     }
 
     private fun openInitialPreferenceIfNeeded() {

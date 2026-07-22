@@ -4,11 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
+import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
+import org.autojs.autojs.ui.settings.AceEditorPluginUi
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils.setToolbarAsBack
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityPluginSettingsBinding
+import org.autojs.plugin.editor.api.EditorPluginContract
 
 /**
  * Created by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) on Mar 22, 2026.
@@ -16,6 +19,22 @@ import org.autojs.autojs6.databinding.ActivityPluginSettingsBinding
 class PluginSettingsActivity : BaseActivity() {
 
     private lateinit var binding: ActivityPluginSettingsBinding
+    private var lastAcePluginState: AceEditorPluginStateMonitor.State? = null
+    private val acePluginStateListener: (AceEditorPluginStateMonitor.Change) -> Unit = { change ->
+        val wasAvailable = lastAcePluginState?.available == true || change.previous?.available == true
+        val wasRemoved = change.cause == AceEditorPluginStateMonitor.Cause.PACKAGE_REMOVED
+        lastAcePluginState = change.current
+        if (
+            isAcePluginSettings && !change.current.available && (wasAvailable || wasRemoved) &&
+            !isFinishing && !isDestroyed
+        ) {
+            AceEditorPluginUi.showUnavailableToastOnce(this, change)
+            finish()
+        }
+    }
+
+    private val isAcePluginSettings: Boolean
+        get() = intent.getStringExtra(EXTRA_PACKAGE_NAME) == EditorPluginContract.DEFAULT_PACKAGE_NAME
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +64,29 @@ class PluginSettingsActivity : BaseActivity() {
     override fun onSupportNavigateUp(): Boolean {
         requestClose()
         return true
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (!isAcePluginSettings) return
+        val current = AceEditorPluginStateMonitor.current(this)
+        lastAcePluginState = current
+        if (!current.available) {
+            AceEditorPluginUi.showUnavailableToastOnce(
+                this,
+                AceEditorPluginStateMonitor.latestChange(this),
+            )
+            finish()
+        } else {
+            AceEditorPluginStateMonitor.addListener(this, acePluginStateListener)
+        }
+    }
+
+    override fun onStop() {
+        if (isAcePluginSettings) {
+            AceEditorPluginStateMonitor.removeListener(acePluginStateListener)
+        }
+        super.onStop()
     }
 
     private fun requestClose() {

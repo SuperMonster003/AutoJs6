@@ -103,7 +103,7 @@
     <string name="description_editor_encoding_reload_or_convert">\"%2$s\"의 인코딩을 %1$s 방식으로 변경하시겠습니까?\n\n다시 로드는 새 인코딩을 사용하여 디스크에서 파일을 다시 읽고 편집기 내용을 바꿉니다. 변환은 편집기 텍스트를 유지하고 다음 저장에 사용할 새 인코딩을 설정합니다. 파일을 즉시 쓰지는 않습니다.</string>
     <string name="description_editor_encoding_reload_replaces_invalid_bytes">다시 로드는 유효하지 않은 바이트 시퀀스를 대체 문자로 바꿉니다.</string>
     <string name="description_editor_encoding_reload_save_prompt">"%1$s"에 저장되지 않은 변경 사항이 있습니다. 현재 인코딩으로 저장한 후 다시 로드할까요?</string>
-    <string name="description_editor_engine_preference">Ace는 기본 편집기 엔진입니다. JsDroidEditor는 대체 수단으로 계속 사용할 수 있으며 명시적으로 선택할 수도 있습니다.</string>
+    <string name="description_editor_engine_preference">Ace 편집기 플러그인이 설치되어 있고 활성화된 동안에는 Ace가 자동으로 선택됩니다. JsDroidEditor를 명시적으로 선택하면 Ace를 다시 선택할 때까지 Ace 자동 선택이 비활성화됩니다.</string>
     <string name="description_editor_fold_markers_enabled_preference">편집기 거터에서 코드 접기 마커를 표시하거나 숨깁니다. JsDroidEditor에는 접기 마커 영역이 없습니다.</string>
     <string name="description_editor_gutter_width_mode_preference">동적 너비는 현재 보이는 줄 번호의 자릿수를 따릅니다. 고정 너비는 안정적인 최소 너비를 미리 확보하고 더 큰 줄 번호를 표시할 때만 확장됩니다.</string>
     <string name="description_editor_large_file_mode_threshold">파일 크기에 따라 대용량 파일 모드로 파일을 로드할지 결정합니다.\n대용량 파일 모드는 파일 로딩 효율과 안정성을 어느 정도 높일 수 있지만, 이 모드에서는 \"실행 취소\" 및 \"다시 실행\" 기능이 비활성화됩니다.</string>
@@ -509,6 +509,7 @@
     <string name="plugin_item_info_package_size">패키지 크기</string>
     <string name="plugin_item_info_supported_abis">지원 ABI</string>
     <string name="plugin_item_info_updatable_version">업데이트 가능</string>
+    <string name="prompt_ace_editor_plugin_required">Ace 편집기 엔진을 사용하려면 플러그인 센터에서 Ace 편집기 플러그인을 설치하거나 활성화하세요.</string>
     <string name="prompt_add_ignored_app_version">현재 업데이트 버전을 무시해야합니까?\n앱 설정으로 무시 된 버전을 모두 관리 할 수 있습니다.</string>
     <string name="prompt_add_ignored_plugin_version">현재 업데이트 버전을 무시해야합니까?\n플러그인 설정으로 무시 된 버전을 모두 관리 할 수 있습니다.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">현재 파일이 유효한 플러그인 패키지가 아닐 수 있습니다. 설치를 계속하시겠습니까?\n\nURI: \"%1$s\"</string>
@@ -622,6 +623,10 @@
     <string name="text_ace_editor_font_integrity_failed">다운로드한 글꼴이 무결성 검증을 통과하지 못했습니다</string>
     <string name="text_ace_editor_font_license">라이선스</string>
     <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_ace_editor_plugin_disabled_fallback_native">Ace 편집기 플러그인이 비활성화되었습니다; JsDroidEditor로 전환했습니다.</string>
+    <string name="text_ace_editor_plugin_required">Ace 편집기 플러그인이 필요합니다</string>
+    <string name="text_ace_editor_plugin_unavailable_fallback_native">Ace 편집기 플러그인을 사용할 수 없습니다; JsDroidEditor로 전환했습니다.</string>
+    <string name="text_ace_editor_plugin_uninstalled_fallback_native">Ace 편집기 플러그인이 삭제되었습니다; JsDroidEditor로 전환했습니다.</string>
     <string name="text_ace_font_ligatures_enabled">글꼴 합자</string>
     <string name="text_ace_font_styles_enabled">글꼴 스타일</string>
     <string name="text_ace_get_text">텍스트 가져오기</string>

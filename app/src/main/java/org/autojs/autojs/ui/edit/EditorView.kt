@@ -47,6 +47,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
@@ -103,6 +104,7 @@ import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs.ui.edit.editor.engine.EditorSelection
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
+import org.autojs.autojs.ui.edit.editor.engine.EditorStateSnapshot
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingCandidate
 import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingCodec
@@ -143,6 +145,7 @@ import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.settings.EditorSettingActionRegistry
+import org.autojs.autojs.ui.settings.AceEditorPluginUi
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
@@ -469,7 +472,35 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @Volatile
     private var mSwitchingEditorEngine: Boolean = false
 
+    private var mEditorEngineSwitchGeneration: Long = 0L
+    private var mActiveEditorEngineSwitch: EditorEngineSwitchRequest? = null
+    private var mPendingEditorEngineSwitch: EditorEngineSwitchRequest? = null
+
     private val mAceFallbackInProgress = AtomicBoolean(false)
+    private var mAceSessionInvalidated = false
+
+    private var mLastAcePluginState: AceEditorPluginStateMonitor.State? = null
+    private var mLastAcePluginChangeId: Long = 0L
+    private val mAcePluginStateListener: (AceEditorPluginStateMonitor.Change) -> Unit = { change ->
+        post { handleAcePluginStateChange(change) }
+    }
+
+    private enum class EditorEngineSwitchReason(val priority: Int) {
+        PLUGIN_RELOAD(0),
+        PREFERENCE(1),
+        ACE_FAILURE(2),
+        PLUGIN_UNAVAILABLE(3),
+    }
+
+    private data class EditorEngineSwitchRequest(
+        val targetType: EditorEngineType,
+        val reason: EditorEngineSwitchReason,
+        val recreateSameType: Boolean = false,
+        val showSwitchToast: Boolean = false,
+        val allowFactoryFallback: Boolean = false,
+        val pluginChange: AceEditorPluginStateMonitor.Change? = null,
+        val aceFailure: AceFailure? = null,
+    )
 
     @Volatile
     private var mLastAceDiagnosticsSnapshot: AceDiagnosticsSnapshot? = null
@@ -793,6 +824,28 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         registerFunctionsKeyboardBackHandler()
         Pref.get().registerOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
+        val previousAceState = mLastAcePluginState
+        val latestAceChange = AceEditorPluginStateMonitor.latestChange(context)
+        val desiredEngineType = EditorEnginePreferences.reconcile(context)
+        mLastAcePluginState = latestAceChange.current
+        AceEditorPluginStateMonitor.addListener(context, mAcePluginStateListener)
+        when {
+            editor.engineType == EditorEngineType.ACE && !latestAceChange.current.available -> post {
+                mAceSessionInvalidated = true
+                fallbackToNativeFromPluginState(latestAceChange)
+            }
+            editor.engineType != desiredEngineType -> post {
+                applyCurrentEditorEnginePreference()
+            }
+            editor.engineType == EditorEngineType.ACE &&
+                (mAceSessionInvalidated ||
+                    (latestAceChange.id > mLastAcePluginChangeId && latestAceChange.requiresSessionReload) ||
+                    (previousAceState != null &&
+                        previousAceState.packageIdentity != latestAceChange.current.packageIdentity)) -> post {
+                reloadAcePluginSession(latestAceChange)
+            }
+        }
+        mLastAcePluginChangeId = latestAceChange.id
     }
 
     fun handleIntent(intent: Intent): Observable<String> {
@@ -1247,6 +1300,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         loadGeneration: Long,
         sizeOrNull: Long?,
     ): Observable<String> {
+        if (mSwitchingEditorEngine) {
+            return Observable.timer(
+                EDITOR_ENGINE_SWITCH_LOAD_RETRY_DELAY_MS,
+                TimeUnit.MILLISECONDS,
+                AndroidSchedulers.mainThread(),
+            )
+                .filter { isCurrentFileLoad(loadGeneration) }
+                .flatMap {
+                    loadUriWithKnownSize(
+                        uri = uri,
+                        charsetOverride = charsetOverride,
+                        reloadToken = reloadToken,
+                        loadGeneration = loadGeneration,
+                        sizeOrNull = sizeOrNull,
+                    )
+                }
+        }
         val shouldStreamAsLargeFile = EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)
         if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldStreamAsLargeFile, shouldForceLargeFileNativeRoute())) {
             if (!ensureNativeEditorForLargeFile()) {
@@ -1304,7 +1374,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             targetType = EditorEngineType.NATIVE,
             oldEditor = editor,
             latestText = editor.textSnapshot,
-            persistPreference = false,
             showSwitchToast = false,
         )
         if (switched) {
@@ -1317,6 +1386,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return editor.engineType == EditorEngineType.ACE && AceEditorTestHooks.shouldForceLargeFileNativeRoute()
     }
 
+    private fun shouldRetainNativeEditorForLargeFile(): Boolean =
+        mLargeFileMode || AceEditorTestHooks.shouldForceLargeFileNativeRoute()
+
     override fun onDetachedFromWindow() {
         // Cancel loading before unregistering receivers to avoid ANR on exit.
         // zh-CN: 退出前先取消加载, 避免返回退出时 ANR.
@@ -1326,6 +1398,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         context.unregisterReceiver(mOnRunFinishedReceiver)
         unregisterFunctionsKeyboardBackHandler()
         Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
+        AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =
@@ -1886,6 +1959,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
         }
         updateRunButtonVisualState()
+        drainPendingEditorEngineSwitchIfIdle()
     }
 
     private fun finishInitialTextLoad(endLoadingUi: Boolean) {
@@ -3059,38 +3133,226 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun switchEditorEngine(targetType: EditorEngineType) {
-        if (editor.engineType == targetType || mSwitchingEditorEngine) {
+        val request = EditorEngineSwitchRequest(
+            targetType = targetType,
+            reason = EditorEngineSwitchReason.PREFERENCE,
+            showSwitchToast = true,
+        )
+        if (mSwitchingEditorEngine) {
+            enqueueEditorEngineSwitch(request)
             return
         }
-        if (targetType == EditorEngineType.ACE && AceEditorTestHooks.shouldForceLargeFileNativeRoute()) {
+        if (editor.engineType == targetType) {
+            return
+        }
+        if (targetType == EditorEngineType.ACE && shouldRetainNativeEditorForLargeFile()) {
             showAceLargeFileNativeToastOnce()
             return
         }
-        if (mEditorLoading || mEncodingOperationInProgress || mFileSaveInProgress ||
-            mSaveThenReloadInProgress || mSaveAsInProgress || mDraftRestoreInProgress
-        ) {
+        if (isEditorEngineSwitchBlocked()) {
+            queuePendingEditorEngineSwitch(request)
             showToast(context, R.string.text_loading_with_dots)
             return
         }
+        enqueueEditorEngineSwitch(request)
+    }
+
+    private fun enqueueEditorEngineSwitch(request: EditorEngineSwitchRequest) {
+        if (mDestroyed) return
+        if (mSwitchingEditorEngine) {
+            queuePendingEditorEngineSwitch(request)
+            return
+        }
+        if (
+            request.targetType == EditorEngineType.ACE &&
+            editor.engineType == EditorEngineType.NATIVE &&
+            shouldRetainNativeEditorForLargeFile()
+        ) {
+            if (request.reason == EditorEngineSwitchReason.PREFERENCE) {
+                showAceLargeFileNativeToastOnce()
+            }
+            return
+        }
+        if (!request.recreateSameType && editor.engineType == request.targetType) {
+            if (request.reason == EditorEngineSwitchReason.PLUGIN_UNAVAILABLE ||
+                request.reason == EditorEngineSwitchReason.ACE_FAILURE
+            ) {
+                mAceFallbackInProgress.set(false)
+            }
+            return
+        }
+
         val oldEditor = editor
+        val generation = ++mEditorEngineSwitchGeneration
         mSwitchingEditorEngine = true
+        mActiveEditorEngineSwitch = request
+        val oldInputEnabled = runCatching { oldEditor.inputView.isEnabled }.getOrDefault(true)
+        runCatching { oldEditor.inputView.isEnabled = false }
+        runCatching { oldEditor.setReadOnly(true) }
+        setEnhanceBarInteractive(false)
+        syncPrimaryMenuState()
+
+        val delivered = AtomicBoolean(false)
+        fun deliverLatestText(text: String) {
+            if (!delivered.compareAndSet(false, true)) return
+            post {
+                completeEditorEngineSwitch(
+                    generation = generation,
+                    request = request,
+                    oldEditor = oldEditor,
+                    oldInputEnabled = oldInputEnabled,
+                    latestText = text,
+                )
+            }
+        }
         runCatching {
-            oldEditor.getTextForSaving { latestText ->
-                post {
-                    try {
-                        switchEditorEngine(targetType, oldEditor, latestText)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        showToast(context, e.message, true)
-                    } finally {
-                        mSwitchingEditorEngine = false
-                    }
+            oldEditor.getTextForSaving(::deliverLatestText)
+        }.onFailure { error ->
+            error.printStackTrace()
+            deliverLatestText(runCatching { oldEditor.textSnapshot }.getOrDefault(""))
+        }
+    }
+
+    private fun queuePendingEditorEngineSwitch(request: EditorEngineSwitchRequest) {
+        val pending = mPendingEditorEngineSwitch
+        if (
+            pending == null ||
+            !isEditorEngineSwitchRequestValid(pending) ||
+            request.reason.priority >= pending.reason.priority
+        ) {
+            mPendingEditorEngineSwitch = request
+        }
+    }
+
+    private fun isEditorEngineSwitchBlocked(): Boolean =
+        mEditorLoading || editor.isLoadingText || mLargeFileFrameCallback != null ||
+            mEncodingOperationInProgress || mFileSaveInProgress || mSaveThenReloadInProgress ||
+            mSaveAsInProgress || mDraftRestoreInProgress
+
+    private fun drainPendingEditorEngineSwitchIfIdle() {
+        if (mDestroyed || mSwitchingEditorEngine || isEditorEngineSwitchBlocked()) return
+        val pending = mPendingEditorEngineSwitch ?: return
+        mPendingEditorEngineSwitch = null
+        if (!isEditorEngineSwitchRequestValid(pending)) return
+        if (!pending.recreateSameType && editor.engineType == pending.targetType) {
+            completeEditorEngineSwitchEffects(pending)
+            return
+        }
+        post { enqueueEditorEngineSwitch(pending) }
+    }
+
+    private fun completeEditorEngineSwitch(
+        generation: Long,
+        request: EditorEngineSwitchRequest,
+        oldEditor: ScriptEditorEngine,
+        oldInputEnabled: Boolean,
+        latestText: String,
+    ) {
+        if (mDestroyed || generation != mEditorEngineSwitchGeneration || oldEditor !== editor) {
+            return
+        }
+        if (!isEditorEngineSwitchRequestValid(request)) {
+            thawEditorAfterCancelledSwitch(oldEditor, oldInputEnabled)
+            finishEditorEngineSwitch(generation, reconcileDesired = true)
+            return
+        }
+
+        val result = try {
+            Result.success(
+                switchEditorEngine(
+                    targetType = request.targetType,
+                    oldEditor = oldEditor,
+                    latestText = latestText,
+                    showSwitchToast = request.showSwitchToast,
+                    allowFactoryFallback = request.allowFactoryFallback,
+                ),
+            )
+        } catch (error: Exception) {
+            Result.failure(error)
+        } catch (error: LinkageError) {
+            Result.failure(error)
+        }
+
+        result.onSuccess { switched ->
+            if (!switched) {
+                thawEditorAfterCancelledSwitch(oldEditor, oldInputEnabled)
+                finishEditorEngineSwitch(generation, reconcileDesired = false)
+                return@onSuccess
+            }
+            completeEditorEngineSwitchEffects(request)
+            val reachedRequestedEngine = editor.engineType == request.targetType
+            finishEditorEngineSwitch(
+                generation,
+                reconcileDesired = reachedRequestedEngine &&
+                    request.reason != EditorEngineSwitchReason.ACE_FAILURE,
+            )
+        }.onFailure { error ->
+            error.printStackTrace()
+            if (oldEditor === editor) {
+                thawEditorAfterCancelledSwitch(oldEditor, oldInputEnabled)
+            }
+            val rescuedToNative = oldEditor !== editor && editor.engineType == EditorEngineType.NATIVE
+            when {
+                rescuedToNative && request.reason == EditorEngineSwitchReason.PLUGIN_UNAVAILABLE -> {
+                    completeEditorEngineSwitchEffects(request)
+                }
+                rescuedToNative && request.reason == EditorEngineSwitchReason.ACE_FAILURE -> {
+                    completeEditorEngineSwitchEffects(request)
+                }
+                else -> showToast(context, error.message ?: error.toString(), true)
+            }
+            finishEditorEngineSwitch(generation, reconcileDesired = false)
+        }
+    }
+
+    private fun completeEditorEngineSwitchEffects(request: EditorEngineSwitchRequest) {
+        when (request.reason) {
+            EditorEngineSwitchReason.PLUGIN_UNAVAILABLE -> {
+                mAceSessionInvalidated = false
+                mAceFallbackInProgress.set(false)
+                request.pluginChange?.let { AceEditorPluginUi.showUnavailableToastOnce(context, it) }
+            }
+            EditorEngineSwitchReason.ACE_FAILURE -> {
+                mAceSessionInvalidated = false
+                mAceFallbackInProgress.set(false)
+                request.aceFailure?.let(::showAceFallbackToastOnce)
+            }
+            EditorEngineSwitchReason.PLUGIN_RELOAD -> {
+                mAceSessionInvalidated = false
+                if (editor.engineType != EditorEngineType.ACE) {
+                    showToast(context, R.string.error_ace_editor_unavailable, true)
                 }
             }
-        }.onFailure { error ->
-            mSwitchingEditorEngine = false
-            error.printStackTrace()
-            showToast(context, error.message, true)
+            EditorEngineSwitchReason.PREFERENCE -> Unit
+        }
+    }
+
+    private fun thawEditorAfterCancelledSwitch(
+        oldEditor: ScriptEditorEngine,
+        oldInputEnabled: Boolean,
+    ) {
+        if (mDestroyed || oldEditor !== editor) return
+        runCatching { oldEditor.inputView.isEnabled = oldInputEnabled }
+        runCatching { oldEditor.setReadOnly(shouldKeepEditorReadOnlyAfterSwitch()) }
+        setEnhanceBarInteractive(!shouldKeepEditorReadOnlyAfterSwitch())
+        syncPrimaryMenuState()
+    }
+
+    private fun isEditorEngineSwitchRequestValid(request: EditorEngineSwitchRequest): Boolean {
+        val pluginAvailable = AceEditorPluginStateMonitor.current(context).available
+        val desiredType = EditorEnginePreferences.get()
+        return when (request.reason) {
+            EditorEngineSwitchReason.PREFERENCE ->
+                desiredType == request.targetType &&
+                    (request.targetType != EditorEngineType.ACE ||
+                        (pluginAvailable && !shouldRetainNativeEditorForLargeFile()))
+            EditorEngineSwitchReason.PLUGIN_UNAVAILABLE ->
+                request.targetType == EditorEngineType.NATIVE &&
+                    (!pluginAvailable || desiredType == EditorEngineType.NATIVE)
+            EditorEngineSwitchReason.PLUGIN_RELOAD ->
+                pluginAvailable && desiredType == EditorEngineType.ACE &&
+                    editor.engineType == EditorEngineType.ACE
+            EditorEngineSwitchReason.ACE_FAILURE -> editor.engineType == EditorEngineType.ACE
         }
     }
 
@@ -3098,16 +3360,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         targetType: EditorEngineType,
         oldEditor: ScriptEditorEngine,
         latestText: String,
-        persistPreference: Boolean = true,
         showSwitchToast: Boolean = true,
+        allowFactoryFallback: Boolean = false,
     ): Boolean {
         if (oldEditor !== editor) {
             return false
         }
 
-        val newEditor = EditorEngineFactory.create(context, targetType)
-        if (newEditor.engineType != targetType) {
-            newEditor.destroy()
+        var newEditor = EditorEngineFactory.create(context, targetType)
+        if (newEditor.engineType != targetType && !allowFactoryFallback) {
+            runCatching { newEditor.destroy() }
             if (targetType == EditorEngineType.ACE) {
                 recordAcePluginUnavailableFallbackIfNeeded(requireAcePreference = false)
             }
@@ -3120,60 +3382,88 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val oldHadDirectEditSinceSave = mHadDirectEditSinceSave
         val oldEditorLoading = mEditorLoading
         val oldLargeFileMode = mLargeFileMode
-        val snapshot = oldEditor.createStateSnapshot().copy(
-            text = latestText,
-            dirty = oldSaveStickyDirty || oldEditor.isTextChanged,
-            readOnly = mReadOnly,
-            themeKey = themeFontService.currentTheme?.name,
+        val snapshot = captureEditorTransferSnapshot(
+            oldEditor = oldEditor,
+            latestText = latestText,
+            stickyDirty = oldSaveStickyDirty,
         )
-
-        mEditorLoading = true
-        syncPrimaryMenuState()
-
-        if (wasAttached) {
-            unregisterFunctionsKeyboardBackHandler()
+        var preparation = runCatching { prepareEditorForAdoption(newEditor, snapshot) }
+        if (preparation.isFailure && targetType == EditorEngineType.ACE && allowFactoryFallback) {
+            runCatching { newEditor.destroy() }
+            newEditor = EditorEngineFactory.create(context, EditorEngineType.NATIVE)
+            preparation = runCatching { prepareEditorForAdoption(newEditor, snapshot) }
         }
-        mFunctionsKeyboardHelper?.hideFunctionsLayout(false)
-        mFunctionsKeyboardHelper = null
-        mAutoCompletion?.shutdown()
-        mAutoCompletion = null
-        recordLastAceDiagnostics(oldEditor)
-        (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
-        (oldEditor as? AceScriptEditorEngine)?.onAceStateChanged = null
-        (oldEditor as? AceScriptEditorEngine)?.onSelectionAction = null
-        oldEditor.setHistoryOperationListener(null)
-        oldEditor.onUserTouchInTextArea = null
-        binding.editorContainer.removeView(oldEditor.view)
-
-        editor = newEditor
-        mEncodingHistoryEntries.clear()
-        breakpointModelStore.onEditorChanged()
-        mViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
-        attachEditorEngineView()
-        setUpEditor(resetInitialState = false)
-        setUpInputMethodEnhancedBar()
-        setUpFunctionsKeyboard()
-        mLastImeBottomInset = -1
-        requestApplyInsetsSoon()
-        if (wasAttached) {
-            registerFunctionsKeyboardBackHandler()
+        preparation.exceptionOrNull()?.let { error ->
+            runCatching { newEditor.destroy() }
+            throw error
         }
 
-        applyCurrentEditorThemePreference()
-        editor.restoreStateSnapshot(snapshot)
-        editor.setReadOnly(mReadOnly)
-        syncEditorDocumentPath()
+        try {
+            mEditorLoading = true
+            syncPrimaryMenuState()
 
-        oldEditor.destroy()
-        if (persistPreference) {
-            EditorEnginePreferences.set(targetType)
+            if (wasAttached) {
+                unregisterFunctionsKeyboardBackHandler()
+            }
+            mFunctionsKeyboardHelper?.hideFunctionsLayout(false)
+            mFunctionsKeyboardHelper = null
+            mAutoCompletion?.shutdown()
+            mAutoCompletion = null
+            recordLastAceDiagnostics(oldEditor)
+            (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
+            (oldEditor as? AceScriptEditorEngine)?.onAceStateChanged = null
+            (oldEditor as? AceScriptEditorEngine)?.onSelectionAction = null
+            oldEditor.setHistoryOperationListener(null)
+            oldEditor.onUserTouchInTextArea = null
+            binding.editorContainer.removeView(oldEditor.view)
+
+            editor = newEditor
+            mEncodingHistoryEntries.clear()
+            breakpointModelStore.onEditorChanged()
+            mViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
+            attachEditorEngineView()
+            setUpEditor(resetInitialState = false)
+            setUpInputMethodEnhancedBar()
+            setUpFunctionsKeyboard()
+            mLastImeBottomInset = -1
+            requestApplyInsetsSoon()
+            if (wasAttached) {
+                registerFunctionsKeyboardBackHandler()
+            }
+
+            applyCurrentEditorThemePreference()
+            mEditorLoading = oldEditorLoading
+            mLargeFileMode = oldLargeFileMode && editor.engineType == EditorEngineType.NATIVE
+            saveStickyDirty = oldSaveStickyDirty || snapshot.dirty
+            mHadDirectEditSinceSave = oldHadDirectEditSinceSave || snapshot.dirty
+            editor.setReadOnly(shouldKeepEditorReadOnlyAfterSwitch())
+            setEnhanceBarInteractive(!shouldKeepEditorReadOnlyAfterSwitch())
+            runCatching { oldEditor.destroy() }
+        } catch (error: Exception) {
+            recoverNativeEditorAfterFailedSwitch(
+                oldEditor = oldEditor,
+                failedEditor = newEditor,
+                snapshot = snapshot,
+                wasAttached = wasAttached,
+                oldEditorLoading = oldEditorLoading,
+                oldLargeFileMode = oldLargeFileMode,
+                oldSaveStickyDirty = oldSaveStickyDirty,
+                oldHadDirectEditSinceSave = oldHadDirectEditSinceSave,
+            )
+            throw error
+        } catch (error: LinkageError) {
+            recoverNativeEditorAfterFailedSwitch(
+                oldEditor = oldEditor,
+                failedEditor = newEditor,
+                snapshot = snapshot,
+                wasAttached = wasAttached,
+                oldEditorLoading = oldEditorLoading,
+                oldLargeFileMode = oldLargeFileMode,
+                oldSaveStickyDirty = oldSaveStickyDirty,
+                oldHadDirectEditSinceSave = oldHadDirectEditSinceSave,
+            )
+            throw error
         }
-
-        mEditorLoading = oldEditorLoading
-        mLargeFileMode = oldLargeFileMode && editor.engineType == EditorEngineType.NATIVE
-        saveStickyDirty = oldSaveStickyDirty || snapshot.dirty
-        mHadDirectEditSinceSave = oldHadDirectEditSinceSave || snapshot.dirty
-        setEnhanceBarInteractive(!mReadOnly && !mEditorLoading)
 
         syncPrimaryMenuState()
         activity.invalidateOptionsMenu()
@@ -3181,7 +3471,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             editor.requestEditorFocus()
         }
 
-        val engineName = when (targetType) {
+        val engineName = when (editor.engineType) {
             EditorEngineType.NATIVE -> context.getString(R.string.entry_editor_engine_native)
             EditorEngineType.ACE -> context.getString(R.string.entry_editor_engine_ace)
         }
@@ -3213,8 +3503,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
 
-        val oldEditor = editor
-        if (oldEditor.engineType != EditorEngineType.ACE) {
+        if (editor.engineType != EditorEngineType.ACE) {
             mAceFallbackInProgress.set(false)
             return
         }
@@ -3226,26 +3515,76 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             )
             mEncodingOperationInProgress -> finishEncodingOperation()
         }
-
-        mSwitchingEditorEngine = true
-        runCatching {
-            (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
-            val switched = switchEditorEngine(
+        (editor as? AceScriptEditorEngine)?.onFatalFailure = null
+        enqueueEditorEngineSwitch(
+            EditorEngineSwitchRequest(
                 targetType = EditorEngineType.NATIVE,
-                oldEditor = oldEditor,
-                latestText = oldEditor.textSnapshot,
-                persistPreference = false,
-                showSwitchToast = false,
-            )
-            if (switched) {
-                showAceFallbackToastOnce(failure)
+                reason = EditorEngineSwitchReason.ACE_FAILURE,
+                aceFailure = failure,
+            ),
+        )
+    }
+
+    private fun handleAcePluginStateChange(change: AceEditorPluginStateMonitor.Change) {
+        if (mDestroyed) return
+        mLastAcePluginState = change.current
+        mLastAcePluginChangeId = change.id
+        when {
+            !change.current.available && editor.engineType == EditorEngineType.ACE -> {
+                mAceSessionInvalidated = true
+                fallbackToNativeFromPluginState(change)
             }
-        }.onFailure { error ->
-            error.printStackTrace()
-            showToast(context, error.message ?: failure.message, true)
+            change.current.available && editor.engineType == EditorEngineType.ACE &&
+                (change.requiresSessionReload || mAceSessionInvalidated) ->
+                reloadAcePluginSession(change)
         }
-        mSwitchingEditorEngine = false
-        mAceFallbackInProgress.set(false)
+    }
+
+    private fun fallbackToNativeFromPluginState(change: AceEditorPluginStateMonitor.Change) {
+        mAceFallbackInProgress.compareAndSet(false, true)
+        if (editor.engineType != EditorEngineType.ACE) {
+            mAceFallbackInProgress.set(false)
+            return
+        }
+        closeAceFontPreviewForPluginFallback()
+        when {
+            mEncodingReloadRollback != null -> rollbackEncodingReload(
+                IllegalStateException(change.current.errorCode?.name ?: change.current.status.name),
+                showError = false,
+            )
+            mEncodingOperationInProgress -> finishEncodingOperation()
+        }
+        (editor as? AceScriptEditorEngine)?.onFatalFailure = null
+        enqueueEditorEngineSwitch(
+            EditorEngineSwitchRequest(
+                targetType = EditorEngineType.NATIVE,
+                reason = EditorEngineSwitchReason.PLUGIN_UNAVAILABLE,
+                pluginChange = change,
+            ),
+        )
+    }
+
+    private fun closeAceFontPreviewForPluginFallback() {
+        if (!mFontPreviewActive) return
+        mFontPreviewReturnToFontDialog = false
+        runCatching { finishFontPreview(useFont = false) }
+    }
+
+    private fun reloadAcePluginSession(change: AceEditorPluginStateMonitor.Change) {
+        if (editor.engineType != EditorEngineType.ACE) return
+        val request = EditorEngineSwitchRequest(
+            targetType = EditorEngineType.ACE,
+            reason = EditorEngineSwitchReason.PLUGIN_RELOAD,
+            recreateSameType = true,
+            allowFactoryFallback = true,
+            pluginChange = change,
+        )
+        if (isEditorEngineSwitchBlocked()) {
+            queuePendingEditorEngineSwitch(request)
+        } else {
+            enqueueEditorEngineSwitch(request)
+        }
+        mLastAcePluginState = change.current
     }
 
     private fun failureReasonForToast(failure: AceFailure): String {
@@ -3313,9 +3652,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun recordLastAceDiagnostics(editor: ScriptEditorEngine) {
-        mLastAceDiagnosticsSnapshot = (editor as? AceScriptEditorEngine)
-            ?.createHostAceDiagnosticsSnapshot(currentFileSizeOrNull(), currentLargeFilePolicyLabel())
-            ?: mLastAceDiagnosticsSnapshot
+        val aceEditor = editor as? AceScriptEditorEngine ?: return
+        runCatching {
+            aceEditor.createHostAceDiagnosticsSnapshot(
+                currentFileSizeOrNull(),
+                currentLargeFilePolicyLabel(),
+            )
+        }.getOrNull()?.let { snapshot ->
+            mLastAceDiagnosticsSnapshot = snapshot
+        }
     }
 
     private fun AceScriptEditorEngine.createHostAceDiagnosticsSnapshot(
@@ -3466,7 +3811,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun applyCurrentEditorEnginePreference() {
-        switchEditorEngine(EditorEnginePreferences.get())
+        val targetType = EditorEnginePreferences.get()
+        if (
+            targetType == EditorEngineType.NATIVE &&
+            editor.engineType == EditorEngineType.ACE &&
+            !AceEditorPluginStateMonitor.current(context).available
+        ) {
+            fallbackToNativeFromPluginState(AceEditorPluginStateMonitor.latestChange(context))
+            return
+        }
+        switchEditorEngine(targetType)
     }
 
     fun onBackPressed(): Boolean {
@@ -4266,6 +4620,153 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             showEncodingOperationError(error.message ?: error.toString())
         }
         return true
+    }
+
+    private fun prepareEditorForAdoption(
+        candidate: ScriptEditorEngine,
+        snapshot: EditorStateSnapshot,
+    ) {
+        candidate.restoreStateSnapshot(snapshot)
+        candidate.setReadOnly(snapshot.readOnly)
+        candidate.setDocumentPath(currentDocumentPathOrName())
+    }
+
+    private fun recoverNativeEditorAfterFailedSwitch(
+        oldEditor: ScriptEditorEngine,
+        failedEditor: ScriptEditorEngine,
+        snapshot: EditorStateSnapshot,
+        wasAttached: Boolean,
+        oldEditorLoading: Boolean,
+        oldLargeFileMode: Boolean,
+        oldSaveStickyDirty: Boolean,
+        oldHadDirectEditSinceSave: Boolean,
+    ) {
+        if (wasAttached) {
+            runCatching { unregisterFunctionsKeyboardBackHandler() }
+        }
+        mFunctionsKeyboardHelper?.hideFunctionsLayout(false)
+        mFunctionsKeyboardHelper = null
+        mAutoCompletion?.shutdown()
+        mAutoCompletion = null
+        runCatching { binding.editorContainer.removeView(failedEditor.view) }
+        runCatching { binding.editorContainer.removeView(oldEditor.view) }
+        if (failedEditor !== oldEditor) {
+            runCatching { failedEditor.destroy() }
+        }
+
+        val rescueEditor = EditorEngineFactory.create(context, EditorEngineType.NATIVE)
+        prepareEditorForAdoption(rescueEditor, snapshot)
+        editor = rescueEditor
+        mEncodingHistoryEntries.clear()
+        breakpointModelStore.onEditorChanged()
+        mViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
+        attachEditorEngineView()
+        setUpEditor(resetInitialState = false)
+        setUpInputMethodEnhancedBar()
+        setUpFunctionsKeyboard()
+        mLastImeBottomInset = -1
+        requestApplyInsetsSoon()
+        if (wasAttached) {
+            registerFunctionsKeyboardBackHandler()
+        }
+        applyCurrentEditorThemePreference()
+        mEditorLoading = oldEditorLoading
+        mLargeFileMode = oldLargeFileMode
+        saveStickyDirty = oldSaveStickyDirty || snapshot.dirty
+        mHadDirectEditSinceSave = oldHadDirectEditSinceSave || snapshot.dirty
+        editor.setReadOnly(shouldKeepEditorReadOnlyAfterSwitch())
+        setEnhanceBarInteractive(!shouldKeepEditorReadOnlyAfterSwitch())
+        runCatching { oldEditor.destroy() }
+        syncPrimaryMenuState()
+        activity.invalidateOptionsMenu()
+    }
+
+    private fun shouldKeepEditorReadOnlyAfterSwitch(): Boolean =
+        mReadOnly || mEditorLoading || mEncodingOperationInProgress || mFileSaveInProgress ||
+            mSaveThenReloadInProgress || mSaveAsInProgress || mDraftRestoreInProgress
+
+    private fun captureEditorTransferSnapshot(
+        oldEditor: ScriptEditorEngine,
+        latestText: String,
+        stickyDirty: Boolean,
+    ): EditorStateSnapshot {
+        val snapshot = runCatching { oldEditor.createStateSnapshot() }.getOrElse {
+            val selection = runCatching { oldEditor.selection }.getOrNull()
+            EditorStateSnapshot(
+                text = latestText,
+                dirty = stickyDirty || runCatching { oldEditor.isTextChanged }.getOrDefault(true),
+                cursorLine = selection?.endLine ?: 0,
+                cursorColumn = selection?.endColumn ?: 0,
+                selection = selection,
+                firstVisibleLine = null,
+                firstVisibleColumn = null,
+                breakpoints = runCatching { oldEditor.breakpointsSnapshot }.getOrDefault(emptyList()),
+                debuggingLine = -1,
+                readOnly = shouldKeepEditorReadOnlyAfterSwitch(),
+                fontSizeSp = runCatching { oldEditor.getTextSizeSp() }.getOrDefault(14f),
+                themeKey = themeFontService.currentTheme?.name,
+                searchQuery = null,
+                searchOptions = null,
+            )
+        }
+        return snapshot.copy(
+            text = latestText,
+            dirty = stickyDirty || snapshot.dirty || runCatching { oldEditor.isTextChanged }.getOrDefault(true),
+            readOnly = shouldKeepEditorReadOnlyAfterSwitch(),
+            themeKey = themeFontService.currentTheme?.name ?: snapshot.themeKey,
+        )
+    }
+
+    private fun finishEditorEngineSwitch(
+        generation: Long,
+        reconcileDesired: Boolean,
+    ) {
+        if (generation != mEditorEngineSwitchGeneration) return
+        val active = mActiveEditorEngineSwitch
+        mActiveEditorEngineSwitch = null
+        mSwitchingEditorEngine = false
+        if (active?.reason == EditorEngineSwitchReason.PLUGIN_UNAVAILABLE ||
+            active?.reason == EditorEngineSwitchReason.ACE_FAILURE
+        ) {
+            mAceFallbackInProgress.set(false)
+        }
+        var pending = mPendingEditorEngineSwitch.also { mPendingEditorEngineSwitch = null }
+        if (mDestroyed) return
+
+        val pluginState = AceEditorPluginStateMonitor.current(context)
+        if (pending != null && isEditorEngineSwitchRequestValid(pending) &&
+            !pending.recreateSameType && pending.targetType == editor.engineType
+        ) {
+            completeEditorEngineSwitchEffects(pending)
+            pending = null
+        }
+        val nextRequest = when {
+            editor.engineType == EditorEngineType.ACE && !pluginState.available ->
+                EditorEngineSwitchRequest(
+                    targetType = EditorEngineType.NATIVE,
+                    reason = EditorEngineSwitchReason.PLUGIN_UNAVAILABLE,
+                    pluginChange = AceEditorPluginStateMonitor.latestChange(context),
+                )
+            pending != null && isEditorEngineSwitchRequestValid(pending) &&
+                (pending.recreateSameType || pending.targetType != editor.engineType) -> pending
+            reconcileDesired && EditorEnginePreferences.get() != editor.engineType ->
+                EditorEngineSwitchRequest(
+                    targetType = EditorEnginePreferences.get(),
+                    reason = EditorEngineSwitchReason.PREFERENCE,
+                    showSwitchToast = true,
+                )
+            editor.engineType == EditorEngineType.ACE && pluginState.available &&
+                mAceSessionInvalidated && EditorEnginePreferences.get() == EditorEngineType.ACE ->
+                EditorEngineSwitchRequest(
+                    targetType = EditorEngineType.ACE,
+                    reason = EditorEngineSwitchReason.PLUGIN_RELOAD,
+                    recreateSameType = true,
+                    allowFactoryFallback = true,
+                    pluginChange = AceEditorPluginStateMonitor.latestChange(context),
+                )
+            else -> null
+        }
+        nextRequest?.let { request -> post { enqueueEditorEngineSwitch(request) } }
     }
 
     private fun convertToEncoding(charset: Charset, addBom: Boolean) {
@@ -5743,6 +6244,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun destroy() {
         mDestroyed = true
+        mEditorEngineSwitchGeneration++
+        mActiveEditorEngineSwitch = null
+        mPendingEditorEngineSwitch = null
+        mSwitchingEditorEngine = false
+        mAceFallbackInProgress.set(false)
+        AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
         // Cancel loading before destroying editor resources.
         // zh-CN: 销毁前先取消加载, 再销毁编辑器相关资源.
         cancelLargeFileLoading()
@@ -5950,6 +6457,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         private const val ACE_SHORTCUT_ITEM_WIDTH_DP = 40f
         private const val ACE_HISTORY_STATE_SETTLE_DELAY_MS = 160L
+        private const val EDITOR_ENGINE_SWITCH_LOAD_RETRY_DELAY_MS = 50L
         private const val HISTORY_NAVIGATION_TIMEOUT_MS = 10_000L
         private const val ENCODING_RISK_PROBE_LIMIT_BYTES = 64 * 1024
         private const val ENCODING_TEXT_PROBE_LIMIT_CHARS = 64 * 1024

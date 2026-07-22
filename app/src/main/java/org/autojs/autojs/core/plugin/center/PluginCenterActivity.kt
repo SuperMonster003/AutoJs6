@@ -44,6 +44,7 @@ class PluginCenterActivity : BaseActivity() {
     private lateinit var binding: ActivityPluginCenterBinding
 
     private var searchViewItem: SearchViewItem? = null
+    private var initialQuery: String? = null
     private var sourceScope: PluginIndexSource? = null
     private var variantDisplayMode: PluginVariantDisplayMode = PluginVariantDisplayMode.STANDARD
 
@@ -61,6 +62,7 @@ class PluginCenterActivity : BaseActivity() {
             ?.runCatching { PluginVariantDisplayMode.valueOf(this) }
             ?.getOrNull()
             ?: PluginVariantDisplayMode.STANDARD
+        initialQuery = intent.getStringExtra(EXTRA_INITIAL_QUERY)?.takeIf { it.isNotBlank() }
         sourceScope = intent.getStringExtra(EXTRA_SOURCE_SCOPE)
             ?.runCatching { PluginIndexSource.valueOf(this) }
             ?.getOrNull()
@@ -76,7 +78,7 @@ class PluginCenterActivity : BaseActivity() {
             .beginTransaction()
             .replace(
                 R.id.fragment_plugin_center,
-                PluginCenterFragment.newInstance(sourceScope, variantDisplayMode),
+                PluginCenterFragment.newInstance(sourceScope, variantDisplayMode, initialQuery),
             )
             .commit()
 
@@ -815,11 +817,20 @@ class PluginCenterActivity : BaseActivity() {
     companion object {
         private const val EXTRA_SOURCE_SCOPE = "extra_source_scope"
         private const val EXTRA_VARIANT_DISPLAY_MODE = "extra_variant_display_mode"
+        private const val EXTRA_INITIAL_QUERY = "extra_initial_query"
 
-        fun launch(context: Context, sourceScope: PluginIndexSource? = null) {
+        @JvmOverloads
+        fun launch(
+            context: Context,
+            sourceScope: PluginIndexSource? = null,
+            initialQuery: String? = null,
+        ) {
             Intent(context, PluginCenterActivity::class.java).apply {
                 if (sourceScope != null) {
                     putExtra(EXTRA_SOURCE_SCOPE, sourceScope.name)
+                }
+                initialQuery?.takeIf { it.isNotBlank() }?.let {
+                    putExtra(EXTRA_INITIAL_QUERY, it)
                 }
             }.startSafely(context)
         }

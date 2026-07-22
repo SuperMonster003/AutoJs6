@@ -3,11 +3,14 @@ package org.autojs.autojs.ui.edit.editor.engine
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.view.View
 import org.autojs.autojs.core.plugin.editor.AceEditorPluginHost
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.model.autocomplete.AutoCompletion
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
@@ -34,6 +37,9 @@ import org.autojs.plugin.editor.api.EditorPluginTextCallback
 import org.autojs.plugin.editor.api.EditorPluginTheme
 import java.io.File
 import java.util.ArrayDeque
+import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.roundToInt
 
 /** Host-side adapter for the separately installed Ace editor plugin. */
@@ -44,13 +50,55 @@ class AceScriptEditorEngine private constructor(
     private val persistTextSize: (Int) -> Unit = ::setEditorTextSize,
 ) : ScriptEditorEngine {
 
+    // Keep the already-created views on the host side. Once the package disappears, even a
+    // seemingly harmless interface property access must not be required to detach the editor.
+    private val editorView = session.view
+    private val editorInputView = session.inputView
     private val cursorCallbacks = LinkedHashSet<EditorCursorChangeListener>()
     private val textChangeCallbacks = LinkedHashSet<EditorTextChangeListener>()
     private var breakpointChangeListener: EditorBreakpointChangeListener? = null
     private var historyOperationListener: EditorHistoryOperationListener? = null
     private var suppressProgrammaticTextChange = false
+    @Volatile
     private var destroyed = false
     private var pendingFatalFailure: AceFailure? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val textCacheLock = Any()
+    private val cachedTextRevision = AtomicLong(0L)
+    private val pendingTextSnapshotTimeouts = CopyOnWriteArraySet<Runnable>()
+
+    @Volatile
+    private var cachedTextSnapshot = ""
+
+    @Volatile
+    private var cachedPluginState: EditorPluginState? = null
+
+    @Volatile
+    private var cachedHostSnapshot: EditorStateSnapshot? = null
+
+    @Volatile
+    private var cachedDirty = false
+
+    @Volatile
+    private var cachedReadOnly = false
+
+    @Volatile
+    private var cachedTextSizeSp = 14f
+
+    @Volatile
+    private var cachedDebuggingLine = -1
+
+    @Volatile
+    private var cachedThemeKey: String? = null
+
+    @Volatile
+    private var cachedSearchQuery: String? = null
+
+    @Volatile
+    private var cachedSearchOptions: EditorSearchOptions? = null
+
+    @Volatile
+    private var cachedDiagnosticsSnapshot: AceDiagnosticsSnapshot? = null
 
     var onFatalFailure: ((AceFailure) -> Unit)? = null
         set(value) {
@@ -68,73 +116,98 @@ class AceScriptEditorEngine private constructor(
     override var onUserTouchInTextArea: (() -> Unit)? = null
 
     override val view: View
-        get() = session.view
+        get() = editorView
 
     override val inputView: View
-        get() = session.inputView
+        get() = editorInputView
 
     override val engineType: EditorEngineType
         get() = EditorEngineType.ACE
 
     override val isReady: Boolean
-        get() = session.isReady
+        get() = runCatching { session.isReady }.getOrDefault(false)
 
     override var text: String
-        get() = session.text
+        get() {
+            val requestedRevision = cachedTextRevision.get()
+            return runCatching { session.text }
+                .map { text -> updateCachedTextIfRevisionUnchanged(requestedRevision, text) }
+                .getOrElse { cachedTextSnapshot }
+        }
         set(value) {
+            updateCachedText(value)
             suppressProgrammaticTextChange = true
             session.text = value
         }
 
     override val textSnapshot: String
-        get() = session.textSnapshot
+        get() {
+            val requestedRevision = cachedTextRevision.get()
+            return runCatching { session.textSnapshot }
+                .map { text -> updateCachedTextIfRevisionUnchanged(requestedRevision, text) }
+                .getOrElse { cachedTextSnapshot }
+        }
 
     override val isTextChanged: Boolean
-        get() = session.isTextChanged
+        get() = runCatching { session.isTextChanged }.getOrElse { cachedDirty }
 
     override val canUndo: Boolean
-        get() = session.canUndo
+        get() = runCatching { session.canUndo }.getOrElse { cachedPluginState?.canUndo == true }
 
     override val canRedo: Boolean
-        get() = session.canRedo
+        get() = runCatching { session.canRedo }.getOrElse { cachedPluginState?.canRedo == true }
 
     override val lineCountSnapshot: Int
-        get() = session.lineCountSnapshot
+        get() = runCatching { session.lineCountSnapshot }
+            .getOrElse { cachedPluginState?.lineCount ?: cachedTextSnapshot.lineSequence().count() }
 
     override val selection: EditorSelection
-        get() = AceEditorPluginMappings.toHost(session.selection)
+        get() = runCatching { AceEditorPluginMappings.toHost(session.selection) }
+            .getOrElse {
+                cachedPluginState?.selection?.let(AceEditorPluginMappings::toHost) ?: EditorSelection.EMPTY
+            }
 
     override val selectedTextSnapshot: String
-        get() = session.selectedTextSnapshot
+        get() = runCatching { session.selectedTextSnapshot }
+            .getOrElse { cachedPluginState?.selectedText.orEmpty() }
 
     override val breakpoints: Map<Int, EditorBreakpoint>
         get() = breakpointsSnapshot.associateBy(EditorBreakpoint::line)
 
     override val breakpointsSnapshot: List<EditorBreakpoint>
-        get() = session.breakpointsSnapshot.map(AceEditorPluginMappings::toHost)
+        get() = runCatching { session.breakpointsSnapshot.map(AceEditorPluginMappings::toHost) }
+            .getOrElse {
+                cachedPluginState?.breakpoints.orEmpty().map { EditorBreakpoint(line = it) }
+            }
 
     override val foundIndexSnapshot: Int
-        get() = session.foundIndexSnapshot
+        get() = runCatching { session.foundIndexSnapshot }.getOrDefault(-1)
 
     override val isUserTouching: Boolean
-        get() = session.isUserTouching
+        get() = runCatching { session.isUserTouching }.getOrDefault(false)
 
     override val isLoadingText: Boolean
-        get() = session.isLoadingText
+        get() = runCatching { session.isLoadingText }.getOrDefault(false)
 
     override val isReadOnly: Boolean
-        get() = session.isReadOnly
+        get() = runCatching { session.isReadOnly }.getOrElse { cachedReadOnly }
 
     private val pluginCallback = object : EditorPluginCallback {
         override fun onReady(state: EditorPluginState) {
+            cacheState(state)
             onAceStateChanged?.invoke()
         }
 
         override fun onStateChanged(state: EditorPluginState) {
+            cacheState(state)
             onAceStateChanged?.invoke()
         }
 
         override fun onTextChanged(text: String, state: EditorPluginState) {
+            cacheState(state)
+            // The dedicated text argument is the authoritative value for this callback. Some
+            // plugin state payloads intentionally omit text or may describe the preceding frame.
+            updateCachedText(text)
             if (suppressProgrammaticTextChange) {
                 suppressProgrammaticTextChange = false
             } else {
@@ -143,10 +216,12 @@ class AceScriptEditorEngine private constructor(
         }
 
         override fun onCursorChanged(lineText: String, line: Int, column: Int, state: EditorPluginState) {
+            cacheState(state)
             cursorCallbacks.toList().forEach { it.onCursorChange(lineText, column) }
         }
 
         override fun onBreakpointChanged(line: Int, enabled: Boolean, state: EditorPluginState) {
+            cacheState(state)
             breakpointChangeListener?.onBreakpointChange(line, enabled)
         }
 
@@ -191,8 +266,15 @@ class AceScriptEditorEngine private constructor(
         fileSizeBytes: Long? = null,
         largeFilePolicy: String = "auto",
     ): AceDiagnosticsSnapshot {
-        return session.createDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
-            .toAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
+        return runCatching {
+            session.createDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
+                .toAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
+        }.onSuccess { snapshot ->
+            cachedDiagnosticsSnapshot = snapshot
+        }.getOrElse {
+            cachedDiagnosticsSnapshot
+                ?: AceDiagnostics.createNativeSnapshot(EditorEngineType.ACE, fileSizeBytes, largeFilePolicy)
+        }
     }
 
     fun setAceEditorFont(fontId: String) {
@@ -234,17 +316,65 @@ class AceScriptEditorEngine private constructor(
     }
 
     override fun setInitialText(text: String?) {
+        updateCachedText(text.orEmpty())
+        cachedDirty = false
         suppressProgrammaticTextChange = true
         session.setInitialText(text)
     }
 
     override fun getTextForSaving(callback: (String) -> Unit) {
-        session.getTextForSaving(EditorPluginTextCallback(callback))
+        if (destroyed) {
+            callback(cachedTextSnapshot)
+            return
+        }
+        val delivered = AtomicBoolean(false)
+        val requestedRevision = cachedTextRevision.get()
+        lateinit var timeout: Runnable
+        timeout = Runnable {
+            if (destroyed) {
+                delivered.set(true)
+                pendingTextSnapshotTimeouts -= timeout
+                return@Runnable
+            }
+            if (delivered.compareAndSet(false, true)) {
+                pendingTextSnapshotTimeouts -= timeout
+                callback(cachedTextSnapshot)
+            }
+        }
+        pendingTextSnapshotTimeouts += timeout
+        mainHandler.postDelayed(timeout, TEXT_SNAPSHOT_TIMEOUT_MS)
+        runCatching {
+            session.getTextForSaving(EditorPluginTextCallback { text ->
+                if (destroyed) {
+                    delivered.set(true)
+                    pendingTextSnapshotTimeouts -= timeout
+                    mainHandler.removeCallbacks(timeout)
+                    return@EditorPluginTextCallback
+                }
+                if (delivered.compareAndSet(false, true)) {
+                    pendingTextSnapshotTimeouts -= timeout
+                    mainHandler.removeCallbacks(timeout)
+                    callback(updateCachedTextIfRevisionUnchanged(requestedRevision, text))
+                }
+            })
+        }.onFailure {
+            pendingTextSnapshotTimeouts -= timeout
+            mainHandler.removeCallbacks(timeout)
+            if (delivered.compareAndSet(false, true)) {
+                callback(cachedTextSnapshot)
+            }
+        }
     }
 
-    override fun markTextAsSaved() = session.markTextAsSaved()
+    override fun markTextAsSaved() {
+        cachedDirty = false
+        session.markTextAsSaved()
+    }
 
-    override fun markTextAsChanged() = session.markTextAsChanged()
+    override fun markTextAsChanged() {
+        cachedDirty = true
+        session.markTextAsChanged()
+    }
 
     override fun replaceAllTextUndoably(text: String, token: String, onComplete: ((Boolean) -> Unit)?) {
         session.replaceAllTextUndoably(text, token, onComplete?.let { EditorPluginBooleanCallback(it) })
@@ -322,9 +452,15 @@ class AceScriptEditorEngine private constructor(
 
     override fun resetFoundIndexForFindPrevFromCursor() = session.resetFoundIndexForFindPrevFromCursor()
 
-    override fun setReadOnly(readOnly: Boolean) = session.setReadOnly(readOnly)
+    override fun setReadOnly(readOnly: Boolean) {
+        cachedReadOnly = readOnly
+        session.setReadOnly(readOnly)
+    }
 
-    override fun setDebuggingLine(line: Int) = session.setDebuggingLine(line)
+    override fun setDebuggingLine(line: Int) {
+        cachedDebuggingLine = line
+        session.setDebuggingLine(line)
+    }
 
     override fun addOrRemoveBreakpointAtCurrentLine() = session.addOrRemoveBreakpointAtCurrentLine()
 
@@ -334,11 +470,19 @@ class AceScriptEditorEngine private constructor(
         breakpointChangeListener = listener
     }
 
-    override fun setTheme(theme: Theme) = session.setTheme(AceEditorPluginMappings.toPlugin(theme))
+    override fun setTheme(theme: Theme) {
+        cachedThemeKey = theme.name
+        session.setTheme(AceEditorPluginMappings.toPlugin(theme))
+    }
 
-    override fun setTextSizeSp(size: Float) = session.setTextSizeSp(size)
+    override fun setTextSizeSp(size: Float) {
+        cachedTextSizeSp = size
+        session.setTextSizeSp(size)
+    }
 
-    override fun getTextSizeSp(): Float = session.getTextSizeSp()
+    override fun getTextSizeSp(): Float = runCatching { session.getTextSizeSp() }
+        .onSuccess { cachedTextSizeSp = it }
+        .getOrElse { cachedTextSizeSp }
 
     override fun notifyPinchToZoomStrategyChanged(newKey: String?) =
         session.notifyPinchToZoomStrategyChanged(newKey)
@@ -386,10 +530,16 @@ class AceScriptEditorEngine private constructor(
 
     override fun setLoadingText(loading: Boolean) = session.setLoadingText(loading)
 
-    override fun createStateSnapshot(): EditorStateSnapshot =
+    override fun createStateSnapshot(): EditorStateSnapshot = runCatching {
         AceEditorPluginMappings.toHost(session.createStateSnapshot())
+    }.onSuccess { snapshot ->
+        cacheSnapshot(snapshot)
+    }.getOrElse {
+        createEmergencyStateSnapshot()
+    }
 
     override fun restoreStateSnapshot(snapshot: EditorStateSnapshot) {
+        cacheSnapshot(snapshot)
         suppressProgrammaticTextChange = true
         session.restoreStateSnapshot(AceEditorPluginMappings.toPlugin(snapshot))
     }
@@ -399,6 +549,8 @@ class AceScriptEditorEngine private constructor(
             return
         }
         destroyed = true
+        pendingTextSnapshotTimeouts.forEach(mainHandler::removeCallbacks)
+        pendingTextSnapshotTimeouts.clear()
         callbackRelay.detach()
         cursorCallbacks.clear()
         textChangeCallbacks.clear()
@@ -419,6 +571,69 @@ class AceScriptEditorEngine private constructor(
         }
     }
 
+    private fun cacheState(state: EditorPluginState) {
+        cachedPluginState = state
+        if (state.textIncluded) {
+            updateCachedText(state.text)
+        }
+        cachedDirty = state.dirty
+    }
+
+    private fun cacheSnapshot(snapshot: EditorStateSnapshot) {
+        cachedHostSnapshot = snapshot
+        updateCachedText(snapshot.text)
+        cachedDirty = snapshot.dirty
+        cachedReadOnly = snapshot.readOnly
+        cachedTextSizeSp = snapshot.fontSizeSp
+        cachedDebuggingLine = snapshot.debuggingLine
+        cachedThemeKey = snapshot.themeKey
+        cachedSearchQuery = snapshot.searchQuery
+        cachedSearchOptions = snapshot.searchOptions
+    }
+
+    private fun updateCachedText(text: String): String = synchronized(textCacheLock) {
+        cachedTextSnapshot = text
+        cachedTextRevision.incrementAndGet()
+        text
+    }
+
+    private fun updateCachedTextIfRevisionUnchanged(
+        expectedRevision: Long,
+        text: String,
+    ): String = synchronized(textCacheLock) {
+        if (cachedTextRevision.get() != expectedRevision) {
+            cachedTextSnapshot
+        } else {
+            cachedTextSnapshot = text
+            cachedTextRevision.incrementAndGet()
+            text
+        }
+    }
+
+    private fun createEmergencyStateSnapshot(): EditorStateSnapshot {
+        val state = cachedPluginState
+        val prior = cachedHostSnapshot
+        val selection = state?.selection?.let(AceEditorPluginMappings::toHost) ?: prior?.selection
+        return EditorStateSnapshot(
+            text = cachedTextSnapshot,
+            dirty = cachedDirty || state?.dirty == true || prior?.dirty == true,
+            cursorLine = state?.cursor?.line ?: prior?.cursorLine ?: selection?.endLine ?: 0,
+            cursorColumn = state?.cursor?.column ?: prior?.cursorColumn ?: selection?.endColumn ?: 0,
+            selection = selection,
+            firstVisibleLine = state?.firstVisibleLine ?: prior?.firstVisibleLine,
+            firstVisibleColumn = state?.firstVisibleColumn ?: prior?.firstVisibleColumn,
+            breakpoints = state?.breakpoints
+                ?.map { EditorBreakpoint(line = it) }
+                ?: prior?.breakpoints.orEmpty(),
+            debuggingLine = prior?.debuggingLine ?: cachedDebuggingLine,
+            readOnly = prior?.readOnly ?: cachedReadOnly,
+            fontSizeSp = prior?.fontSizeSp ?: cachedTextSizeSp,
+            themeKey = prior?.themeKey ?: cachedThemeKey,
+            searchQuery = prior?.searchQuery ?: cachedSearchQuery,
+            searchOptions = prior?.searchOptions ?: cachedSearchOptions,
+        )
+    }
+
     enum class SelectionAction {
         Copy,
         Paste,
@@ -428,6 +643,8 @@ class AceScriptEditorEngine private constructor(
     }
 
     companion object {
+        private const val TEXT_SNAPSHOT_TIMEOUT_MS = 750L
+
         @JvmStatic
         fun create(context: Context): AceScriptEditorEngine {
             val applicationContext = context.applicationContext

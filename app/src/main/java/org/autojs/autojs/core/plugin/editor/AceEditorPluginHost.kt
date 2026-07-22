@@ -35,6 +35,7 @@ object AceEditorPluginHost {
         val serviceInfo: ServiceInfo,
         val applicationInfo: ApplicationInfo,
         val packageVersionCode: Long,
+        val packageLastUpdateTime: Long,
         val entrypointClassName: String,
         val contractVersion: Int,
         val requiresHostVersion: Long?,
@@ -249,6 +250,7 @@ object AceEditorPluginHost {
             serviceInfo = serviceInfo,
             applicationInfo = applicationInfo,
             packageVersionCode = PackageInfoCompat.getLongVersionCode(packageInfo),
+            packageLastUpdateTime = packageInfo.lastUpdateTime,
             entrypointClassName = normalizeClassName(packageName, rawEntrypoint),
             contractVersion = contractVersion,
             requiresHostVersion = requiresHostVersion,
@@ -393,7 +395,7 @@ object AceEditorPluginHost {
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             setPackage(packageName)
         }
-        val flags = PackageManager.GET_META_DATA.toLong()
+        val flags = (PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS).toLong()
         val resolved = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             packageManager.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(flags))
         } else {
@@ -407,11 +409,16 @@ object AceEditorPluginHost {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             packageManager.getApplicationInfo(
                 packageName,
-                PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong()),
+                PackageManager.ApplicationInfoFlags.of(
+                    (PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS).toLong(),
+                ),
             )
         } else {
             @Suppress("DEPRECATION")
-            packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            packageManager.getApplicationInfo(
+                packageName,
+                PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS,
+            )
         }
     }
 

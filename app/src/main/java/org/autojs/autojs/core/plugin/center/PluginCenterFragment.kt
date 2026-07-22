@@ -118,6 +118,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         sourceScope = arguments?.getString(ARG_SOURCE_SCOPE)
             ?.runCatching { PluginIndexSource.valueOf(this) }
             ?.getOrNull()
+        currentQuery = arguments?.getString(ARG_INITIAL_QUERY)?.takeIf { it.isNotBlank() }
         variantDisplayMode = arguments?.getString(ARG_VARIANT_DISPLAY_MODE)
             ?.runCatching { PluginVariantDisplayMode.valueOf(this) }
             ?.getOrNull()
@@ -1141,6 +1142,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     companion object {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
         private const val ARG_VARIANT_DISPLAY_MODE = "arg_variant_display_mode"
+        private const val ARG_INITIAL_QUERY = "arg_initial_query"
         private const val NIGHT_MODE_ICON_REFRESH_DELAY_MS = 120L
         private const val SWIPE_REFRESH_MAX_VISIBLE_MS = 8_000L
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
@@ -1176,6 +1178,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         fun newInstance(
             sourceScope: PluginIndexSource?,
             variantDisplayMode: PluginVariantDisplayMode = PluginVariantDisplayMode.STANDARD,
+            initialQuery: String? = null,
         ): PluginCenterFragment {
             return PluginCenterFragment().apply {
                 arguments = Bundle().apply {
@@ -1183,6 +1186,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                         putString(ARG_SOURCE_SCOPE, sourceScope.name)
                     }
                     putString(ARG_VARIANT_DISPLAY_MODE, variantDisplayMode.name)
+                    initialQuery?.takeIf { it.isNotBlank() }?.let {
+                        putString(ARG_INITIAL_QUERY, it)
+                    }
                 }
             }
         }

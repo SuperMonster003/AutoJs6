@@ -102,7 +102,7 @@
     <string name="description_editor_encoding_reload_or_convert">\"%2$s\" のエンコーディングを %1$s に変更しますか?\n\n再読み込みでは, 新しいエンコーディングを使用してディスクからファイルを再度読み込み, エディターの内容を置き換えます. 変換では, エディターのテキストを保持し, 次回の保存に使用する新しいエンコーディングを設定します. ファイルはすぐには書き込まれません.</string>
     <string name="description_editor_encoding_reload_replaces_invalid_bytes">再読み込みでは, 無効なバイト列を置換文字に置き換えます.</string>
     <string name="description_editor_encoding_reload_save_prompt">"%1$s" には未保存の変更があります. 現在のエンコーディングで保存してから再読み込みしますか?</string>
-    <string name="description_editor_engine_preference">Ace はデフォルトのエディターエンジンです. JsDroidEditor はフォールバックとして引き続き利用でき, 明示的に選択することもできます.</string>
+    <string name="description_editor_engine_preference">Ace エディタープラグインがインストールされ有効な間は, Ace が自動的に選択されます. JsDroidEditor を明示的に選択すると, Ace を再度選択するまで Ace の自動選択が無効になります.</string>
     <string name="description_editor_fold_markers_enabled_preference">エディターガターのコード折りたたみマーカーを表示または非表示にします. JsDroidEditor には折りたたみマーカーの表示領域がありません.</string>
     <string name="description_editor_gutter_width_mode_preference">動的幅は現在表示されている行番号の桁数に従います. 固定幅は安定した最小幅を事前に確保し, より大きな行番号の表示に必要な場合だけ拡張します.</string>
     <string name="description_editor_large_file_mode_threshold">ファイルサイズに応じて大容量ファイルモードで読み込むかどうかを決定します.\n大容量ファイルモードは読み込み効率と安定性をある程度向上できますが, このモードでは \"元に戻す\" と \"やり直し\" 機能が無効になります.</string>
@@ -508,6 +508,7 @@
     <string name="plugin_item_info_package_size">パッケージサイズ</string>
     <string name="plugin_item_info_supported_abis">対応 ABI</string>
     <string name="plugin_item_info_updatable_version">更新可 Ver.</string>
+    <string name="prompt_ace_editor_plugin_required">Ace エディタープラグインをプラグインセンターでインストールまたは有効化してから, Ace エンジンを使用してください.</string>
     <string name="prompt_add_ignored_app_version">現在のアップデートバージョンを無視して大丈夫ですか?\n無視したバージョンは, アプリの設定で管理することができます</string>
     <string name="prompt_add_ignored_plugin_version">現在のアップデートバージョンを無視して大丈夫ですか?\n無視したバージョンは, プラグインの設定で管理することができます</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">このファイルは有効なプラグインパッケージではない可能性があります. インストールを続行しますか?\n\nURI: \"%1$s\"</string>
@@ -621,6 +622,10 @@
     <string name="text_ace_editor_font_integrity_failed">ダウンロードしたフォントの整合性検証に失敗しました</string>
     <string name="text_ace_editor_font_license">ライセンス</string>
     <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_ace_editor_plugin_disabled_fallback_native">Ace エディタープラグインが無効化されたため, JsDroidEditor に切り替えました.</string>
+    <string name="text_ace_editor_plugin_required">Ace エディタープラグインが必要です</string>
+    <string name="text_ace_editor_plugin_unavailable_fallback_native">Ace エディタープラグインを利用できないため, JsDroidEditor に切り替えました.</string>
+    <string name="text_ace_editor_plugin_uninstalled_fallback_native">Ace エディタープラグインがアンインストールされたため, JsDroidEditor に切り替えました.</string>
     <string name="text_ace_font_ligatures_enabled">フォントリガチャ</string>
     <string name="text_ace_font_styles_enabled">フォントスタイル</string>
     <string name="text_ace_get_text">テキストを取得</string>

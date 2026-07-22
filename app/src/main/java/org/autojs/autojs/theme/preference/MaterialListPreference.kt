@@ -97,6 +97,10 @@ open class MaterialListPreference : MaterialDialogPreference {
         }
     }
 
+    /** Called before a list item is persisted. Returning false rejects the generic write. */
+    protected open fun onItemSelectionRequested(dialog: MaterialDialog, itemKey: String): Boolean =
+        callChangeListener(itemKey)
+
     override fun getBuilder(): MaterialDialog.Builder = super.getBuilder().also { builder ->
         mItemValues.takeIf { it.isNotEmpty() }?.let {
             builder.autoDismiss(false)
@@ -106,6 +110,11 @@ open class MaterialListPreference : MaterialDialogPreference {
             builder.takeIf { mItemDisables.isNotEmpty() }?.itemsDisabledIndices(*mItemDisables)
             builder.itemsCallbackSingleChoice(itemPrefIndex ?: itemDefaultIndex) { d, _, which, _ ->
                 if (itemPrefIndex != which) {
+                    val itemKey = mItemKeys.toList()[which].toString()
+                    if (!onItemSelectionRequested(d, itemKey)) {
+                        d.dismiss()
+                        return@itemsCallbackSingleChoice true
+                    }
                     itemPrefIndex = which
                     showPrompt() ?: onChangeConfirmed(getDialog())
                 } else {

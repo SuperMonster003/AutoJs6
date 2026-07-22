@@ -101,7 +101,7 @@
     <string name="description_editor_encoding_reload_or_convert">Modifier l\'encodage de \"%2$s\" en %1$s?\n\nRecharger relit le fichier depuis le disque avec le nouvel encodage et remplace le contenu de l\'éditeur. Convertir conserve le texte de l\'éditeur et définit le nouvel encodage pour le prochain enregistrement; le fichier n\'est pas écrit immédiatement.</string>
     <string name="description_editor_encoding_reload_replaces_invalid_bytes">Le rechargement remplace les séquences d\'octets non valides par des caractères de remplacement.</string>
     <string name="description_editor_encoding_reload_save_prompt">"%1$s" contient des modifications non enregistrées. Les enregistrer avec l\'encodage actuel avant de recharger?</string>
-    <string name="description_editor_engine_preference">Ace est le moteur d\'éditeur par défaut. JsDroidEditor reste disponible comme solution de secours et peut être sélectionné explicitement.</string>
+    <string name="description_editor_engine_preference">Ace est sélectionné automatiquement lorsque le plugin de l\'éditeur Ace est installé et activé. La sélection explicite de JsDroidEditor désactive la sélection automatique d\'Ace jusqu\'à ce qu\'Ace soit sélectionné à nouveau.</string>
     <string name="description_editor_fold_markers_enabled_preference">Affichez ou masquez les repères de pliage du code dans la gouttière de l\'éditeur. JsDroidEditor ne dispose pas de surface pour ces repères.</string>
     <string name="description_editor_gutter_width_mode_preference">La largeur dynamique suit le nombre de chiffres des numéros de ligne visibles. La largeur fixe réserve un minimum stable et augmente uniquement lorsque des numéros de ligne visibles plus grands l\'exigent.</string>
     <string name="description_editor_large_file_mode_threshold">Determine si le mode gros fichier est utilise pour charger les fichiers selon leur taille.\nLe mode gros fichier peut ameliorer dans une certaine mesure l\'efficacite et la stabilite du chargement, mais les fonctions \"Annuler\" et \"Retablir\" seront desactivees dans ce mode.</string>
@@ -507,6 +507,7 @@
     <string name="plugin_item_info_package_size">Taille du paquet</string>
     <string name="plugin_item_info_supported_abis">ABI prises en charge</string>
     <string name="plugin_item_info_updatable_version">Ver. maj disp.</string>
+    <string name="prompt_ace_editor_plugin_required">Installez ou activez le plugin de l\'éditeur Ace dans le Centre des plugins pour utiliser le moteur Ace.</string>
     <string name="prompt_add_ignored_app_version">Êtes-vous sûr d\'ignorer la version de mise à jour actuelle?\nVous pouvez gérer toutes les versions ignorées dans les paramètres de l\'application.</string>
     <string name="prompt_add_ignored_plugin_version">Êtes-vous sûr d\'ignorer la version de mise à jour actuelle?\nVous pouvez gérer toutes les versions ignorées dans les paramètres du plugin.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">Le fichier actuel n\'est peut-être pas un paquet de plugin valide. Voulez-vous continuer l\'installation ?\n\nURI : \"%1$s\"</string>
@@ -620,6 +621,10 @@
     <string name="text_ace_editor_font_integrity_failed">La police téléchargée n\'a pas passé la vérification d\'intégrité</string>
     <string name="text_ace_editor_font_license">Licence</string>
     <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_ace_editor_plugin_disabled_fallback_native">Le plugin de l\'éditeur Ace a été désactivé; passage à JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_required">Plugin de l\'éditeur Ace requis</string>
+    <string name="text_ace_editor_plugin_unavailable_fallback_native">Le plugin de l\'éditeur Ace est indisponible; passage à JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_uninstalled_fallback_native">Le plugin de l\'éditeur Ace a été désinstallé; passage à JsDroidEditor.</string>
     <string name="text_ace_font_ligatures_enabled">Ligatures de police</string>
     <string name="text_ace_font_styles_enabled">Styles de police</string>
     <string name="text_ace_get_text">Obtenir le texte</string>

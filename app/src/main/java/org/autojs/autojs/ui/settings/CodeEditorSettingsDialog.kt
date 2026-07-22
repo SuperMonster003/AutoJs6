@@ -11,6 +11,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
+import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ContextUtils.findActivity
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
@@ -22,6 +23,16 @@ class CodeEditorSettingsDialog : DialogFragment() {
 
     private var themePreviewHandler: ((Theme) -> Unit)? = null
     private var fontPreviewHandler: ((String) -> Unit)? = null
+    private var lastAcePluginState: AceEditorPluginStateMonitor.State? = null
+    private val acePluginStateListener: (AceEditorPluginStateMonitor.Change) -> Unit = { change ->
+        val wasAvailable = lastAcePluginState?.available == true || change.previous?.available == true
+        lastAcePluginState = change.current
+        if (wasAvailable && !change.current.available && isAdded) {
+            AceEditorPluginUi.showUnavailableToastOnce(requireContext(), change)
+            dismissOpenPreferenceDialogs()
+            dismissAllowingStateLoss()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,8 +77,26 @@ class CodeEditorSettingsDialog : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
+        val current = AceEditorPluginStateMonitor.current(requireContext())
+        val previous = lastAcePluginState
+        lastAcePluginState = current
+        if (previous?.available == true && !current.available) {
+            AceEditorPluginUi.showUnavailableToastOnce(
+                requireContext(),
+                AceEditorPluginStateMonitor.latestChange(requireContext()),
+            )
+            dismissOpenPreferenceDialogs()
+            dismissAllowingStateLoss()
+            return
+        }
+        AceEditorPluginStateMonitor.addListener(requireContext(), acePluginStateListener)
         val width = min((resources.displayMetrics.widthPixels * 0.94f).roundToInt(), requireContext().dp(720))
         dialog?.window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+    }
+
+    override fun onStop() {
+        AceEditorPluginStateMonitor.removeListener(acePluginStateListener)
+        super.onStop()
     }
 
     private fun createSettingsContainer(context: Context): FrameLayout {
@@ -81,6 +110,11 @@ class CodeEditorSettingsDialog : DialogFragment() {
                 setPadding(context.dp(8), 0, context.dp(8), 0)
             }
         }
+    }
+
+    private fun dismissOpenPreferenceDialogs() {
+        (childFragmentManager.findFragmentById(R.id.code_editor_settings_dialog_container) as? CodeEditorSettingsFragment)
+            ?.dismissOpenPreferenceDialogs()
     }
 
     private fun Context.dp(value: Int): Int {

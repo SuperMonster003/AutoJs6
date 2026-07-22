@@ -98,7 +98,7 @@
     <string name="description_editor_encoding_reload_or_convert">要將 \"%2$s\" 的編碼更改為 %1$s 嗎?\n\n重新加載會使用新編碼從磁碟重新讀取文件並替換編輯器內容. 轉換會保留編輯器文本, 並為下次保存設置新編碼, 不會立即寫入文件.</string>
     <string name="description_editor_encoding_reload_replaces_invalid_bytes">重新加載會用替換字符替換無效的字節序列.</string>
     <string name="description_editor_encoding_reload_save_prompt">"%1$s" 中有未保存的更改. 是否先使用當前編碼保存再重新加載?</string>
-    <string name="description_editor_engine_preference">Ace 是默認編輯器引擎. JsDroidEditor 仍可作為後備編輯器使用, 也可以手動選擇.</string>
+    <string name="description_editor_engine_preference">安裝並啓用 Ace 編輯器插件時會自動選擇 Ace. 明確選擇 JsDroidEditor 後將停止自動選擇 Ace, 直至再次選擇 Ace.</string>
     <string name="description_editor_fold_markers_enabled_preference">顯示或隱藏編輯器邊欄中的代碼折疊標記. JsDroidEditor 沒有折疊標記顯示區域.</string>
     <string name="description_editor_gutter_width_mode_preference">動態寬度會隨目前可見行號的位數變化. 固定寬度會預留穩定的最小寬度, 並且只在出現位數更多的行號時增大.</string>
     <string name="description_editor_large_file_mode_threshold">根據文件大小決定是否使用大文件模式加載文件.\n大文件模式可一定程度提升文件加載效率及穩定性, 但 \"撤銷\" 及 \"重做\" 功能在大文件模式下將被禁用.</string>
@@ -504,6 +504,7 @@
     <string name="plugin_item_info_package_size">安裝包大小</string>
     <string name="plugin_item_info_supported_abis">支持 ABI</string>
     <string name="plugin_item_info_updatable_version">可更新版本</string>
+    <string name="prompt_ace_editor_plugin_required">請在插件中心安裝或啓用 Ace 編輯器插件, 然後再使用 Ace 引擎.</string>
     <string name="prompt_add_ignored_app_version">確定忽略當前更新版本嗎?\n在應用設置中可管理已忽略的所有版本.</string>
     <string name="prompt_add_ignored_plugin_version">確定忽略當前更新版本嗎?\n在插件設置中可管理已忽略的所有版本.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">當前文件可能不是有效的插件包, 是否繼續安裝?\n\nURI: \"%1$s\"</string>
@@ -617,6 +618,10 @@
     <string name="text_ace_editor_font_integrity_failed">下載的字體未通過完整性驗證</string>
     <string name="text_ace_editor_font_license">許可證</string>
     <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_ace_editor_plugin_disabled_fallback_native">Ace 編輯器插件已停用; 已切換到 JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_required">需要 Ace 編輯器插件</string>
+    <string name="text_ace_editor_plugin_unavailable_fallback_native">Ace 編輯器插件無法使用; 已切換到 JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_uninstalled_fallback_native">Ace 編輯器插件已卸載; 已切換到 JsDroidEditor.</string>
     <string name="text_ace_font_ligatures_enabled">字體連字</string>
     <string name="text_ace_font_styles_enabled">特殊字體樣式</string>
     <string name="text_ace_get_text">取得文字</string>

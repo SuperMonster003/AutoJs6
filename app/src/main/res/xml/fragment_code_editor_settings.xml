@@ -6,7 +6,7 @@
         app:layout="@layout/preference_category_custom"
         app:title="@string/text_general">
 
-        <org.autojs.autojs.theme.preference.MaterialListPreference
+        <org.autojs.autojs.ui.settings.EditorEnginePreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_editor_engine"
             app:title="@string/text_editor_engine"

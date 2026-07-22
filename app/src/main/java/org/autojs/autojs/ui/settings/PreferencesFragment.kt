@@ -10,17 +10,20 @@ import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 
 class PreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        EditorEnginePreferences.initialize(requireContext())
         setPreferencesFromResource(R.xml.fragment_preferences, rootKey)
     }
 
     override fun onResume() {
         super.onResume()
+        EditorEnginePreferences.reconcile(requireContext())
         preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
         refreshSharedCodeEditorPreferences()
     }

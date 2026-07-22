@@ -42,6 +42,7 @@ import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
 import org.autojs.autojs.tool.CrashHandler
 import org.autojs.autojs.ui.error.CrashReportActivity
+import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -109,6 +110,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 // Node service bindings; otherwise independent managers can keep the
                 // same slot alive and make retirement appear to time out.
                 if (getProcessNameCompat() == applicationInfo.processName) {
+                    EditorEnginePreferences.initialize(this)
                     NodeEmbeddedProcessSessionManager.reopenForUse()
                     scheduleNativeNodePrewarmIfNeeded()
                 }

@@ -17,6 +17,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager
@@ -34,6 +35,7 @@ import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.ui.settings.AceEditorPluginUi
 import org.autojs.autojs6.R
 import kotlin.math.roundToInt
 
@@ -57,15 +59,19 @@ object AceEditorFontDialog {
         onPreviewRequested: ((String) -> Unit)?,
     ): MaterialDialog {
         val manager = AceEditorFontManager.get(context)
+        val childDialogs = mutableSetOf<MaterialDialog>()
         val adapter = Adapter(
             context = context,
             manager = manager,
             fonts = manager.options(context, currentFontId),
             currentFontId = currentFontId,
             onPersistedFontDeleted = onSelected,
+            onChildDialogShown = { childDialog -> childDialogs += childDialog },
         )
         var refreshSubscription: AceFontCatalogRefreshSubscription? = null
         var swipeActionsAttached = false
+        var lastAcePluginState = AceEditorPluginStateMonitor.current(context)
+        var acePluginStateListener: ((AceEditorPluginStateMonitor.Change) -> Unit)? = null
         val builder = MaterialDialog.Builder(context)
             .title(R.string.text_ace_editor_font)
             .options(
@@ -80,7 +86,7 @@ object AceEditorFontDialog {
                         adapter.confirmDownloadAll()
                     },
                     MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_details)) {
-                        showFontHelp(context)
+                        childDialogs += showFontHelp(context)
                     },
                 ),
             )
@@ -113,6 +119,26 @@ object AceEditorFontDialog {
             parent.touchDelegate = TouchDelegate(bounds, options)
         }
         dialog.setOnShowListener {
+            val currentPluginState = AceEditorPluginStateMonitor.current(context)
+            lastAcePluginState = currentPluginState
+            if (!currentPluginState.available) {
+                AceEditorPluginUi.showUnavailableToastOnce(
+                    context,
+                    AceEditorPluginStateMonitor.latestChange(context),
+                )
+                dialog.dismiss()
+                return@setOnShowListener
+            }
+            acePluginStateListener = { change: AceEditorPluginStateMonitor.Change ->
+                val wasAvailable = lastAcePluginState.available || change.previous?.available == true
+                lastAcePluginState = change.current
+                if (wasAvailable && !change.current.available && dialog.isShowing) {
+                    AceEditorPluginUi.showUnavailableToastOnce(context, change)
+                    dialog.dismiss()
+                }
+            }.also { listener ->
+                AceEditorPluginStateMonitor.addListener(context, listener)
+            }
             if (!swipeActionsAttached) {
                 dialog.recyclerView?.let { recyclerView ->
                     attachTouchHelper(context, recyclerView, adapter)
@@ -128,13 +154,19 @@ object AceEditorFontDialog {
             }
         }
         dialog.setOnDismissListener {
+            acePluginStateListener?.let(AceEditorPluginStateMonitor::removeListener)
+            acePluginStateListener = null
             refreshSubscription?.cancel()
+            childDialogs.toList().forEach { childDialog ->
+                if (childDialog.isShowing) childDialog.dismiss()
+            }
+            childDialogs.clear()
             adapter.dispose()
         }
         return dialog
     }
 
-    private fun showFontHelp(context: Context) {
+    private fun showFontHelp(context: Context): MaterialDialog =
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_ace_editor_font)
@@ -143,7 +175,6 @@ object AceEditorFontDialog {
                 .positiveColorRes(R.color.dialog_button_default)
                 .build()
         }
-    }
 
     private fun attachTouchHelper(
         context: Context,
@@ -278,6 +309,7 @@ object AceEditorFontDialog {
         fonts: List<AceEditorFontOption>,
         currentFontId: String,
         private val onPersistedFontDeleted: (String) -> Unit,
+        private val onChildDialogShown: (MaterialDialog) -> Unit,
     ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
 
         private val choiceTint = ThemeColorHelper.getThemeColorStateList(context)
@@ -327,6 +359,11 @@ object AceEditorFontDialog {
             downloads.values.mapNotNull { it.subscription }.forEach { it.cancel() }
             downloads.clear()
             bulkDownload = null
+        }
+
+        private fun showChildDialog(factory: () -> MaterialDialog) {
+            if (disposed) return
+            onChildDialogShown(DialogUtils.buildAndShowAdaptive { factory() })
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -398,7 +435,7 @@ object AceEditorFontDialog {
                 syncingTypeLock = false
             }
 
-            DialogUtils.buildAndShowAdaptive {
+            showChildDialog {
                 MaterialDialog.Builder(context)
                     .title(R.string.text_sort)
                     .items(modes.map { context.getString(it.labelRes) })
@@ -489,7 +526,7 @@ object AceEditorFontDialog {
                 return
             }
             val totalBytes = candidates.sumOf { it.remoteFont?.artifact?.sizeBytes ?: 0L }
-            DialogUtils.buildAndShowAdaptive {
+            showChildDialog {
                 MaterialDialog.Builder(context)
                     .title(R.string.text_download_all)
                     .content(
@@ -582,7 +619,7 @@ object AceEditorFontDialog {
             val remote = font.remoteFont ?: return
             if (isGroupDownloading(font)) return
             val displayName = font.variantDisplayName()
-            DialogUtils.buildAndShowAdaptive {
+            showChildDialog {
                 MaterialDialog.Builder(context)
                     .title(displayName)
                     .content(
@@ -720,7 +757,7 @@ object AceEditorFontDialog {
         }
 
         private fun confirmDelete(font: AceEditorFontOption) {
-            DialogUtils.buildAndShowAdaptive {
+            showChildDialog {
                 MaterialDialog.Builder(context)
                     .title(font.displayName)
                     .content(context.getString(R.string.text_ace_editor_font_delete_confirmation, font.displayName))
@@ -750,7 +787,7 @@ object AceEditorFontDialog {
                 font.remoteFont?.source?.repository?.let(::add)
             }.joinToString("\n\n")
             if (content.isBlank()) return
-            DialogUtils.buildAndShowAdaptive {
+            showChildDialog {
                 MaterialDialog.Builder(context)
                     .title(font.displayName)
                     .content(content)
@@ -797,7 +834,7 @@ object AceEditorFontDialog {
                     PFiles.formatSizeWithUnit(variant.artifact.sizeBytes),
                 ).joinToString(" · ")
             }
-            DialogUtils.buildAndShowAdaptive {
+            showChildDialog {
                 MaterialDialog.Builder(context)
                     .title(font.displayName)
                     .items(items)

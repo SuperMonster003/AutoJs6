@@ -101,7 +101,7 @@
     <string name="description_editor_encoding_reload_or_convert">Изменить кодировку файла \"%2$s\" на %1$s?\n\nПерезагрузка повторно считывает файл с диска в новой кодировке и заменяет содержимое редактора. Преобразование сохраняет текст в редакторе и задает новую кодировку для следующего сохранения; файл не записывается немедленно.</string>
     <string name="description_editor_encoding_reload_replaces_invalid_bytes">При перезагрузке недопустимые последовательности байтов заменяются символами замены.</string>
     <string name="description_editor_encoding_reload_save_prompt">В файле "%1$s" есть несохраненные изменения. Сохранить их в текущей кодировке перед перезагрузкой?</string>
-    <string name="description_editor_engine_preference">Ace является движком редактора по умолчанию. JsDroidEditor остаётся доступным как резервный вариант и может быть выбран вручную.</string>
+    <string name="description_editor_engine_preference">Ace выбирается автоматически, пока плагин редактора Ace установлен и включён. Явный выбор JsDroidEditor отключает автоматический выбор Ace, пока Ace не будет выбран снова.</string>
     <string name="description_editor_fold_markers_enabled_preference">Показывает или скрывает маркеры сворачивания кода в поле редактора. В JsDroidEditor маркеры сворачивания не отображаются.</string>
     <string name="description_editor_gutter_width_mode_preference">Динамическая ширина соответствует количеству цифр в видимых номерах строк. Фиксированная ширина резервирует стабильное минимальное пространство и увеличивается только при появлении более длинных видимых номеров.</string>
     <string name="description_editor_large_file_mode_threshold">Определяет, использовать ли режим больших файлов для загрузки файлов в зависимости от размера файла.\nРежим больших файлов может в некоторой степени повысить эффективность и стабильность загрузки, но функции \"Отменить\" и \"Повторить\" будут отключены в этом режиме.</string>
@@ -507,6 +507,7 @@
     <string name="plugin_item_info_package_size">Размер пакета</string>
     <string name="plugin_item_info_supported_abis">Поддерживаемые ABI</string>
     <string name="plugin_item_info_updatable_version">Обновл. вер.</string>
+    <string name="prompt_ace_editor_plugin_required">Установите или включите плагин редактора Ace в Центре плагинов, чтобы использовать движок Ace.</string>
     <string name="prompt_add_ignored_app_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках приложения.</string>
     <string name="prompt_add_ignored_plugin_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках плагина.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">Текущий файл может быть недействительным пакетом плагина. Продолжить установку?\n\nURI: \"%1$s\"</string>
@@ -620,6 +621,10 @@
     <string name="text_ace_editor_font_integrity_failed">Загруженный шрифт не прошёл проверку целостности</string>
     <string name="text_ace_editor_font_license">Лицензия</string>
     <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_ace_editor_plugin_disabled_fallback_native">Плагин редактора Ace отключён; выполнено переключение на JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_required">Требуется плагин редактора Ace</string>
+    <string name="text_ace_editor_plugin_unavailable_fallback_native">Плагин редактора Ace недоступен; выполнено переключение на JsDroidEditor.</string>
+    <string name="text_ace_editor_plugin_uninstalled_fallback_native">Плагин редактора Ace удалён; выполнено переключение на JsDroidEditor.</string>
     <string name="text_ace_font_ligatures_enabled">Лигатуры шрифта</string>
     <string name="text_ace_font_styles_enabled">Начертания шрифта</string>
     <string name="text_ace_get_text">Получить текст</string>
