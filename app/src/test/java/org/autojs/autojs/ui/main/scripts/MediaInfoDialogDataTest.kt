@@ -49,6 +49,7 @@ class MediaInfoDialogDataTest {
         assertEquals("29.970 FPS", data.frameRate)
         assertTrue(data.hasVideo)
         assertTrue(data.hasAudio)
+        assertEquals(MediaInfoDialogKind.VIDEO, data.resolveDialogKind(isMediaMenu = false))
     }
 
     @Test
@@ -67,6 +68,83 @@ class MediaInfoDialogDataTest {
         assertEquals("AVC", data.videoFormat)
         assertTrue(data.hasVideo)
         assertFalse(data.hasAudio)
+    }
+
+    @Test
+    fun videoWithEmbeddedAudioKeepsVideoDialogKind() {
+        val data = MediaInfoDialogData(
+            videoFormat = "AVC",
+            audioFormat = "AAC",
+            audioBitRate = "128 kb/s",
+            trackName = "Sample",
+            performer = "Artist",
+            album = "Album",
+            hasVideo = true,
+            hasAudio = true,
+        )
+
+        val dialogKind = data.resolveDialogKind(isMediaMenu = false)
+
+        assertEquals(MediaInfoDialogKind.VIDEO, dialogKind)
+        assertTrue(dialogKind.showsVideoDetails)
+        assertFalse(dialogKind.showsAudioDetails)
+        assertTrue(dialogKind.showsSplitLine)
+    }
+
+    @Test
+    fun audioOnlyMediaUsesAudioDialogKind() {
+        val data = MediaInfoDialogData(
+            audioFormat = "FLAC",
+            hasAudio = true,
+        )
+
+        val dialogKind = data.resolveDialogKind(isMediaMenu = false)
+
+        assertEquals(MediaInfoDialogKind.AUDIO, dialogKind)
+        assertFalse(dialogKind.showsVideoDetails)
+        assertTrue(dialogKind.showsAudioDetails)
+        assertTrue(dialogKind.showsSplitLine)
+    }
+
+    @Test
+    fun streamFlagsAndFormatFallbacksRetainVideoPriority() {
+        assertEquals(
+            MediaInfoDialogKind.VIDEO,
+            MediaInfoDialogData(hasVideo = true, hasAudio = true)
+                .resolveDialogKind(isMediaMenu = true),
+        )
+        assertEquals(
+            MediaInfoDialogKind.VIDEO,
+            MediaInfoDialogData(videoFormat = "AVC", audioFormat = "AAC")
+                .resolveDialogKind(isMediaMenu = false),
+        )
+        assertEquals(
+            MediaInfoDialogKind.AUDIO,
+            MediaInfoDialogData(hasAudio = true)
+                .resolveDialogKind(isMediaMenu = false),
+        )
+        assertEquals(
+            MediaInfoDialogKind.AUDIO,
+            MediaInfoDialogData(audioFormat = "AAC")
+                .resolveDialogKind(isMediaMenu = false),
+        )
+    }
+
+    @Test
+    fun filesWithoutStreamsRetainMediaMenuAndOtherKinds() {
+        val data = MediaInfoDialogData()
+
+        val mediaMenuKind = data.resolveDialogKind(isMediaMenu = true)
+        val otherKind = data.resolveDialogKind(isMediaMenu = false)
+
+        assertEquals(MediaInfoDialogKind.MEDIA_MENU, mediaMenuKind)
+        assertFalse(mediaMenuKind.showsVideoDetails)
+        assertFalse(mediaMenuKind.showsAudioDetails)
+        assertFalse(mediaMenuKind.showsSplitLine)
+        assertEquals(MediaInfoDialogKind.OTHER, otherKind)
+        assertFalse(otherKind.showsVideoDetails)
+        assertFalse(otherKind.showsAudioDetails)
+        assertFalse(otherKind.showsSplitLine)
     }
 
     @Test

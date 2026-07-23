@@ -58,6 +58,32 @@ internal data class MediaInfoDialogData(
     }
 }
 
+internal enum class MediaInfoDialogKind(
+    val showsVideoDetails: Boolean = false,
+    val showsAudioDetails: Boolean = false,
+    val showsSplitLine: Boolean = false,
+) {
+    VIDEO(
+        showsVideoDetails = true,
+        showsSplitLine = true,
+    ),
+    AUDIO(
+        showsAudioDetails = true,
+        showsSplitLine = true,
+    ),
+    MEDIA_MENU,
+    OTHER,
+}
+
+internal fun MediaInfoDialogData.resolveDialogKind(isMediaMenu: Boolean): MediaInfoDialogKind {
+    return when {
+        hasVideo || videoFormat.isNotBlank() -> MediaInfoDialogKind.VIDEO
+        hasAudio || audioFormat.isNotBlank() -> MediaInfoDialogKind.AUDIO
+        isMediaMenu -> MediaInfoDialogKind.MEDIA_MENU
+        else -> MediaInfoDialogKind.OTHER
+    }
+}
+
 internal object MediaInfoInformParser {
 
     fun parse(inform: String): MediaInfoDialogData {

@@ -162,27 +162,22 @@ object MediaInfoDialogManager {
         result: MediaInfoLoadResult,
     ) {
         val data = result.data
-        when {
-            data.hasVideo || data.videoFormat.isNotBlank() -> {
-                setViewsAsVideoPlaceholder(binding)
-                if (data.hasAudio || data.audioFormat.isNotBlank()) {
-                    setViewsAsMediaPlaceholder(binding)
-                }
+        val dialogKind = data.resolveDialogKind(explorerItem.isMediaMenu)
+        applyDialogKindVisibility(binding, dialogKind)
+        when (dialogKind) {
+            MediaInfoDialogKind.VIDEO -> {
                 dialog.setIcon(R.drawable.ic_movie)
                 setDialogPlayable(dialog, context, explorerItem)
             }
-            data.hasAudio || data.audioFormat.isNotBlank() -> {
-                setViewsAsMediaPlaceholder(binding)
+            MediaInfoDialogKind.AUDIO -> {
                 dialog.setIcon(R.drawable.ic_voice_note)
                 setDialogPlayable(dialog, context, explorerItem)
             }
-            explorerItem.isMediaMenu -> {
-                setViewsAsMediaMenuPlaceholder(binding)
+            MediaInfoDialogKind.MEDIA_MENU -> {
                 dialog.setIcon(R.drawable.ic_media_menu)
                 setDialogOpenable(dialog, context, explorerItem)
             }
-            else -> {
-                setViewsAsLeastPlaceholder(binding)
+            MediaInfoDialogKind.OTHER -> {
                 dialog.setIcon(R.drawable.ic_question_mark)
                 setDialogOpenable(dialog, context, explorerItem)
             }
@@ -209,7 +204,6 @@ object MediaInfoDialogManager {
         binding.frameRateValue.bindWith(dialog, data.frameRate, unavailable)
 
         updateGuidelines(binding)
-        updateSplitLineVisibility(binding)
         result.failureMessage?.let { dialog.setContent("MediaInfo: $it") }
         updateDialogNeutralButton(dialog, context, result.detailedInfo)
     }
@@ -437,30 +431,23 @@ object MediaInfoDialogManager {
         }
     }
 
-    private fun setViewsAsVideoPlaceholder(binding: MediaFileInfoDialogItemsBinding) {
-        binding.videoFormatParent.isVisible = true
-        binding.bitRateForVideoParent.isVisible = true
-        binding.resolutionParent.isVisible = true
-        binding.aspectRatioParent.isVisible = true
-        binding.frameRateParent.isVisible = true
-    }
+    private fun applyDialogKindVisibility(
+        binding: MediaFileInfoDialogItemsBinding,
+        dialogKind: MediaInfoDialogKind,
+    ) {
+        binding.videoFormatParent.isVisible = dialogKind.showsVideoDetails
+        binding.bitRateForVideoParent.isVisible = dialogKind.showsVideoDetails
+        binding.resolutionParent.isVisible = dialogKind.showsVideoDetails
+        binding.aspectRatioParent.isVisible = dialogKind.showsVideoDetails
+        binding.frameRateParent.isVisible = dialogKind.showsVideoDetails
 
-    private fun setViewsAsMediaPlaceholder(binding: MediaFileInfoDialogItemsBinding) {
-        binding.audioFormatParent.isVisible = true
-        binding.bitRateForAudioParent.isVisible = true
-        binding.albumParent.isVisible = true
-        binding.trackNameParent.isVisible = true
-        binding.performerParent.isVisible = true
-    }
+        binding.audioFormatParent.isVisible = dialogKind.showsAudioDetails
+        binding.bitRateForAudioParent.isVisible = dialogKind.showsAudioDetails
+        binding.albumParent.isVisible = dialogKind.showsAudioDetails
+        binding.trackNameParent.isVisible = dialogKind.showsAudioDetails
+        binding.performerParent.isVisible = dialogKind.showsAudioDetails
 
-    @Suppress("UNUSED_PARAMETER", "unused")
-    private fun setViewsAsMediaMenuPlaceholder(binding: MediaFileInfoDialogItemsBinding) {
-        /* Nothing to do yet. */
-    }
-
-    @Suppress("UNUSED_PARAMETER", "unused")
-    private fun setViewsAsLeastPlaceholder(binding: MediaFileInfoDialogItemsBinding) {
-        /* Nothing to do yet. */
+        binding.splitLine.isVisible = dialogKind.showsSplitLine
     }
 
     private fun restoreEssentialViews(binding: MediaFileInfoDialogItemsBinding, context: Context) {
@@ -516,18 +503,6 @@ object MediaInfoDialogManager {
                 it.guideBegin = maxWidth
             }
         }
-    }
-
-    private fun updateSplitLineVisibility(binding: MediaFileInfoDialogItemsBinding) {
-        binding.splitLine.isVisible = listOf(
-            binding.bitRateForVideoParent,
-            binding.resolutionParent,
-            binding.aspectRatioParent,
-            binding.frameRateParent,
-            binding.albumParent,
-            binding.trackNameParent,
-            binding.performerParent,
-        ).any { it.isVisible }
     }
 
     private fun TextView.bindWith(dialog: MaterialDialog, text: String, unavailable: String) {
