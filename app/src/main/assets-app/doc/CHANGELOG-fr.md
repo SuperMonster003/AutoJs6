@@ -69,6 +69,7 @@
 * `Correction` Le plugin Paddle OCR ne pouvait pas être réveillé automatiquement lorsqu'il n'était pas en cours d'exécution, entraînant l'échec des appels de fonctions ou de l'empaquetage de projets _[`issue #517`](http://issues.autojs6.com/517)_
 * `Correction` Les appels incorrects à `images.resize(ImageWrapper, width, height)` pouvaient transmettre la hauteur à OpenCV comme valeur d'interpolation, tandis qu'un déroulement incompatible des exceptions natives pouvait faire planter l'application au lieu de signaler une exception de script
 * `Correction` Les détails multimédias du gestionnaire de fichiers pouvaient rester sur "..." ou faire planter l'application lorsque la bibliothèque MediaInfo du plugin était indisponible ou qu'un appel Binder échouait, sans repli sur les métadonnées Android
+* `Correction` Les boîtes de dialogue des détails vidéo du gestionnaire de fichiers affichaient à tort les champs de format et de métadonnées de l'audio intégré
 * `Correction` Le service d'accessibilité pouvait s'interrompre de manière inattendue lors d'opérations consécutives telles que back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Correction` L'utilisation de la mémoire pouvait continuer à augmenter après l'exécution répétée de scripts (tentative de correction) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Correction` Le chemin d'origine pouvait ne pas être conservé lors de l'exécution de scripts via des URI externes ou en arrière-plan, entraînant une résolution incorrecte des chemins relatifs _[`issue #545`](http://issues.autojs6.com/545)_
