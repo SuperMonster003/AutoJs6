@@ -63,11 +63,20 @@
             android:layout_height="1.2px"
             android:background="#cccccc" />
 
-        <org.autojs.autojs.ui.widget.EWebView
-            android:id="@+id/eweb_view"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:saveEnabled="false" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <org.autojs.autojs.ui.widget.EWebView
+                android:id="@+id/eweb_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:saveEnabled="false" />
+
+            <include layout="@layout/view_offline_docs_unavailable" />
+
+        </FrameLayout>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

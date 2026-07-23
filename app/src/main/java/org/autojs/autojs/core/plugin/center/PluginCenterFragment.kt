@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
@@ -35,6 +36,7 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentPluginCenterBinding
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
+import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -909,6 +911,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             Pinyin4jPluginHost.ACTION_PINYIN4J -> Pinyin4jPluginHost.probe(contextRef, item.packageName)
             MediainfoPluginHost.ACTION_MEDIAINFO -> MediainfoPluginHost.probe(contextRef, item.packageName)
             ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
+            OfflineDocsPluginContract.ACTION -> OfflineDocsPluginHost.probe(contextRef, item.packageName)
             OpenCvPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             else -> {
                 when {

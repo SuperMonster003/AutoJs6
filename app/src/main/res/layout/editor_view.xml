@@ -404,12 +404,20 @@
 
         </LinearLayout>
 
-        <org.autojs.autojs.ui.widget.EWebView
-            android:id="@+id/docs"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:saveEnabled="false" />
+            android:layout_gravity="start">
+
+            <org.autojs.autojs.ui.widget.EWebView
+                android:id="@+id/docs"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:saveEnabled="false" />
+
+            <include layout="@layout/view_offline_docs_unavailable" />
+
+        </FrameLayout>
 
     </androidx.drawerlayout.widget.DrawerLayout>
 

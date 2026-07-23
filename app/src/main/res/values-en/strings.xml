@@ -87,7 +87,7 @@
     <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.</string>
     <string name="description_client_mode">Client mode allows AutoJs6 to actively connect to a remote server for [ script transfer / log printing / remote control ].\n\nTypically, the device and the server need to be on the same LAN or on a network where they can reach each other.</string>
     <string name="description_display_over_other_app">The \"display over other apps\" permission allows AutoJs6 to show floating windows or a floating button above other apps, enabling quick actions or information viewing on any screen.\n\nNote: without this permission, floating windows and the floating button may not be shown or may not work properly.</string>
-    <string name="description_documentation_source_preference">Local docs: Using AutoJs6 build-in files as documentation sources, no network connection required. The content changes as AutoJs6 is updated.\nOnline docs: Using GitHub pages as documentation sources, requiring network connection. The content is always up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
+    <string name="description_documentation_source_preference">Offline docs: Provided by the separately installed official Offline Docs plugin. No network connection is required, and the documentation can be updated independently of AutoJs6.\nOnline docs: Uses the online documentation site and requires a network connection. The content is kept up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
     <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
     <string name="description_editor_code_highlight_threshold">Determines whether syntax highlighting is enabled based on file size.\nFor large files, disabling syntax highlighting can improve file loading efficiency to some extent.</string>
@@ -1255,6 +1255,8 @@
     <string name="text_null">Null</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">Number of log entries %d exceeds the limit for sending</string>
     <string name="text_number_format_error">Invalid number format</string>
+    <string name="text_offline_docs_unavailable">Offline documentation is unavailable</string>
+    <string name="text_offline_docs_unavailable_prompt">Install or enable the official Offline Docs plugin, or switch to online documentation.</string>
     <string name="text_ok">OK</string>
     <string name="text_old_path">Old path</string>
     <string name="text_only_latest_few_items_will_be_sent">Only latest %d items will be sent</string>
@@ -1624,6 +1626,8 @@
     <string name="text_supported_permissions_short">Permissions</string>
     <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
     <string name="text_switch_to_new_layout">Switch to new layout</string>
+    <string name="text_switch_to_online_documentation">Switch to online documentation</string>
+    <string name="text_switch_to_online_documentation_confirmation">Switch the documentation source to online documentation? A network connection will be required.</string>
     <string name="text_switch_window">Switch window</string>
     <string name="text_symbol_invalid_no_whitespace">Symbols cannot contain whitespace characters</string>
     <string name="text_symbol_name_conflict_with_value">Symbol \"%1$s\" already exists</string>

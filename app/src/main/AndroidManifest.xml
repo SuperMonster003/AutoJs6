@@ -45,6 +45,10 @@
             <category android:name="ace-editor" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.OFFLINE_DOCS" />
+            <category android:name="offline-docs" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.OPENCV" />
             <category android:name="opencv-runtime" />
         </intent>

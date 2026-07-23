@@ -71,6 +71,7 @@ import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.tool.Callback
+import org.autojs.autojs.ui.doc.DocumentationPageController
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
@@ -153,7 +154,6 @@ import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.DocsUtils.INDEX_URL_SUFFIX
 import org.autojs.autojs.util.DocsUtils.getUrl
-import org.autojs.autojs.util.DocsUtils.getUrlByCurrentSource
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs.util.Observers
@@ -540,6 +540,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mAceSymbolsBar: CodeCompletionBar = binding.aceSymbolsBar
     private val mFunctionsKeyboard: FunctionsKeyboardView = binding.functionsKeyboard
     private val mDocsWebView: EWebView = binding.docs
+    private val mDocsPageController by lazy {
+        DocumentationPageController(context, binding.root, mDocsWebView)
+    }
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
     private val mThemePreviewBar: View = binding.themePreviewBar
     private val mThemePreviewTitle: TextView = binding.themePreviewTitle
@@ -763,7 +766,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_ace_lsp_enabled),
             key(R.string.key_ace_lsp_file_types),
                 -> post { (editor as? AceScriptEditorEngine)?.refreshLsp() }
-            key(R.string.key_documentation_source) -> post { reloadDocsWebViewByCurrentDocumentationSource() }
         }
     }
 
@@ -786,8 +788,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
             webView.settings.displayZoomControls = true
-            webView.loadUrl(getUrl(INDEX_URL_SUFFIX))
         }
+        mDocsPageController.start(getUrl(INDEX_URL_SUFFIX))
         themeFontService.loadCurrentTheme()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { theme: Theme? -> setTheme(theme) }
@@ -1399,6 +1401,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         unregisterFunctionsKeyboardBackHandler()
         Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
         AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
+        mDocsPageController.dispose()
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =
@@ -3825,8 +3828,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun onBackPressed(): Boolean {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            if (mDocsWebView.webView.canGoBack()) {
-                mDocsWebView.webView.goBack()
+            if (mDocsPageController.canGoBack()) {
+                mDocsPageController.goBack()
             } else {
                 mDrawerLayout.closeDrawer(GravityCompat.START)
             }
@@ -6152,18 +6155,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .title(title)
             .url(absUrl)
             .pinToLeft {
-                mDocsWebView.webView.loadUrl(absUrl)
+                mDocsPageController.loadUrl(absUrl)
                 mDrawerLayout.openDrawer(GravityCompat.START)
             }
             .show()
-    }
-
-    private fun reloadDocsWebViewByCurrentDocumentationSource() {
-        mDocsWebView.webView.also { webView ->
-            webView.stopLoading()
-            webView.clearHistory()
-            webView.loadUrl(getUrlByCurrentSource(webView.url))
-        }
     }
 
     override fun onModuleLongClick(module: Module) {
@@ -6250,6 +6245,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mSwitchingEditorEngine = false
         mAceFallbackInProgress.set(false)
         AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
+        mDocsPageController.dispose()
         // Cancel loading before destroying editor resources.
         // zh-CN: 销毁前先取消加载, 再销毁编辑器相关资源.
         cancelLargeFileLoading()

@@ -92,7 +92,7 @@
     <string name="description_check_for_updates_preference">AutoJs6 은 GitHub 에서 업데이트를 가져오고 다운로드합니다.</string>
     <string name="description_client_mode">클라이언트 모드는 AutoJs6 가 원격 서버에 능동적으로 연결하여 [ 스크립트 전송 / 로그 출력 / 원격 제어 ] 등을 수행할 수 있도록 합니다.\n\n일반적으로 기기와 서버는 동일한 LAN 또는 서로 접근 가능한 네트워크 환경에 있어야 합니다.</string>
     <string name="description_display_over_other_app">\"다른 앱 위에 표시\" 권한은 AutoJs6 가 다른 앱 화면 위에 플로팅 창 또는 플로팅 버튼을 표시할 수 있게 하여, 어떤 화면에서도 빠르게 작업을 실행하거나 정보를 확인할 수 있도록 합니다.\n\n참고: 이 권한이 부여되지 않으면 플로팅 창 및 플로팅 버튼이 표시되지 않거나 정상적으로 사용할 수 없을 수 있습니다.</string>
-    <string name="description_documentation_source_preference">로컬 문서: AutoJs6 내장 파일을 문서 소스로 사용, 네트워크 연결이 필요하지 않습니다. 내용은 AutoJs6 이 업데이트됨에 따라 변경됩니다.\n온라인 문서: GitHub 페이지를 문서 소스로 사용, 네트워크 연결 필요. 콘텐츠는 항상 최신 상태입니다.\n\n참고: 온라인 문서의 읽기 환경을 최대화하려면 데스크탑 모니터와 같은 와이드 스크린 디스플레이 장치를 사용하는 것이 좋습니다.\n참고: 버전 6.2.0 현재 문서는 아직 개발 초기 단계이며 대부분의 콘텐츠가 아직 작성되거나 업데이트되지 않았습니다.</string>
+    <string name="description_documentation_source_preference">오프라인 문서: 별도로 설치하는 공식 Offline Docs 플러그인에서 제공됩니다. 네트워크 연결이 필요하지 않으며 AutoJs6 와 독립적으로 업데이트할 수 있습니다.\n온라인 문서: 온라인 문서 사이트를 사용하므로 네트워크 연결이 필요합니다. 콘텐츠는 항상 최신 상태로 유지됩니다.\n\n참고: 온라인 문서의 읽기 환경을 최대화하려면 데스크탑 모니터와 같은 와이드 스크린 디스플레이 장치를 사용하는 것이 좋습니다.\n참고: 버전 6.2.0 현재 문서는 아직 개발 초기 단계이며 대부분의 콘텐츠가 아직 작성되거나 업데이트되지 않았습니다.</string>
     <string name="description_documentation_source_preference_more">문서 페이지에서 어두운 테마를 지원하려면 다음 조건이 충족되어야 합니다.\n1. AutoJs6 에는 야간 모드가 활성화되어 있습니다.\n2. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P] 이하: 버전 >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">편집기 거터에서 중단점 마커를 표시하거나 숨깁니다. 중단점 데이터와 디버그 메뉴 작업은 계속 사용할 수 있습니다.</string>
     <string name="description_editor_code_highlight_threshold">파일 크기에 따라 구문 하이라이트 기능을 활성화할지 결정합니다.\n대용량 파일에서는 구문 하이라이트를 비활성화하면 파일 로딩 효율을 어느 정도 높일 수 있습니다.</string>
@@ -1260,6 +1260,8 @@
     <string name="text_null">없는</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">로그 항목 수 %d 개가 전송 제한을 초과했습니다</string>
     <string name="text_number_format_error">잘못된 번호 형식</string>
+    <string name="text_offline_docs_unavailable">오프라인 문서를 사용할 수 없습니다</string>
+    <string name="text_offline_docs_unavailable_prompt">공식 Offline Docs 플러그인을 설치 또는 활성화하거나 온라인 문서로 전환하세요.</string>
     <string name="text_ok">확인</string>
     <string name="text_old_path">오래된 길</string>
     <string name="text_only_latest_few_items_will_be_sent">최신 %d 항목만 전송됩니다</string>
@@ -1629,6 +1631,8 @@
     <string name="text_supported_permissions_short">필요한 권한</string>
     <string name="text_switch_to_legacy_layout">기존 레이아웃으로 전환</string>
     <string name="text_switch_to_new_layout">새 레이아웃으로 전환</string>
+    <string name="text_switch_to_online_documentation">온라인 문서로 전환</string>
+    <string name="text_switch_to_online_documentation_confirmation">문서 소스를 온라인 문서로 전환하시겠습니까? 네트워크 연결이 필요합니다.</string>
     <string name="text_switch_window">창 전환</string>
     <string name="text_symbol_invalid_no_whitespace">기호에는 공백 문자를 포함할 수 없습니다</string>
     <string name="text_symbol_name_conflict_with_value">기호 \"%1$s\" 이 (가) 이미 존재합니다</string>

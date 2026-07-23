@@ -49,6 +49,7 @@ private val pluginApi = listOf(
     "pinyin4j-api",
     "mediainfo-api",
     "imagequant-api",
+    "offline-docs-api",
     "opencv-api",
     "mlkit-barcode-api",
     "paddle-ocr-api",

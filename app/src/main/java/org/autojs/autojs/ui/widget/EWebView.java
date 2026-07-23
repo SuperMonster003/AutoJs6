@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -26,6 +27,7 @@ import org.autojs.autojs6.R;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,6 +40,16 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
     private NestedWebView mWebView;
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private volatile RequestInterceptor mRequestInterceptor;
+    private final List<OnPageFinishedListener> mOnPageFinishedListeners = new CopyOnWriteArrayList<>();
+
+    public interface RequestInterceptor {
+        WebResourceResponse intercept(WebResourceRequest request);
+    }
+
+    public interface OnPageFinishedListener {
+        void onPageFinished(WebView view, String url);
+    }
 
     public EWebView(Context context) {
         super(context);
@@ -80,6 +92,24 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
 
     public NestedWebView getWebView() {
         return mWebView;
+    }
+
+    /**
+     * Installs a request interceptor without replacing the WebViewClient owned by this widget.
+     * Returning {@code null} delegates the request to WebView's normal loading path.
+     */
+    public void setRequestInterceptor(RequestInterceptor interceptor) {
+        mRequestInterceptor = interceptor;
+    }
+
+    public void addOnPageFinishedListener(OnPageFinishedListener listener) {
+        if (listener != null) {
+            mOnPageFinishedListeners.add(listener);
+        }
+    }
+
+    public void removeOnPageFinishedListener(OnPageFinishedListener listener) {
+        mOnPageFinishedListeners.remove(listener);
     }
 
     public void evalJavaScript(String script) {
@@ -181,6 +211,21 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
             super.onPageFinished(view, url);
             mProgressBar.setVisibility(GONE);
             mSwipeRefreshLayout.setRefreshing(false);
+            for (OnPageFinishedListener listener : mOnPageFinishedListeners) {
+                listener.onPageFinished(view, url);
+            }
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            RequestInterceptor interceptor = mRequestInterceptor;
+            if (interceptor != null) {
+                WebResourceResponse response = interceptor.intercept(request);
+                if (response != null) {
+                    return response;
+                }
+            }
+            return super.shouldInterceptRequest(view, request);
         }
 
         @Override

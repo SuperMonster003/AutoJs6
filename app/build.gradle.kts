@@ -133,6 +133,32 @@ fun verifyImageQuantPluginSeparation(
     println("Verified ${apkFiles.size} AutoJs6 host APK(s) without Image Quantization native payloads")
 }
 
+fun verifyOfflineDocsPluginSeparation(apkDirectory: File) {
+    val apkFiles = apkDirectory.walkTopDown()
+        .filter { it.isFile && it.extension.equals("apk", ignoreCase = true) }
+        .toList()
+    if (apkFiles.isEmpty()) {
+        throw GradleException("No host APKs were found below ${apkDirectory.path}")
+    }
+    val violations = linkedMapOf<String, List<String>>()
+    apkFiles.forEach { apk ->
+        ZipFile(apk).use { zip ->
+            val entries = zip.entries().asSequence()
+                .filterNot { it.isDirectory }
+                .map { it.name }
+                .filter { it == "assets/docs" || it.startsWith("assets/docs/") }
+                .toList()
+            if (entries.isNotEmpty()) {
+                violations[apk.name] = entries
+            }
+        }
+    }
+    if (violations.isNotEmpty()) {
+        throw GradleException("AutoJs6 host APKs still package Offline Docs assets: $violations")
+    }
+    println("Verified ${apkFiles.size} AutoJs6 host APK(s) without assets/docs")
+}
+
 val resourcePickFirstPatterns = listOf(
     "META-INF/DEPENDENCIES",
     "META-INF/LICENSE",
@@ -162,6 +188,7 @@ val resourceExcludePatterns = listOf(
 
 val appMergedAssetPruneIncludes = listOf(
     "declarations/**/*",
+    "docs/**/*",
     "sample/declarations/**/*",
     "modules/obsolete/**/*",
 )
@@ -598,6 +625,7 @@ dependencies /* Unclassified */ {
     // Plugin API: MediaInfo API
     implementation(project(":plugin-api:mediainfo-api"))
     implementation(project(":plugin-api:imagequant-api"))
+    implementation(project(":plugin-api:offline-docs-api"))
     implementation(project(":plugin-api:opencv-api"))
 
     // Plugin API: ML Kit Barcode API
@@ -1309,6 +1337,29 @@ tasks {
         group = "verification"
         description = "Verifies that debug and release host APKs do not package Image Quantization JNI or libpng"
         dependsOn(imageQuantSeparationTasks)
+    }
+
+    val offlineDocsSeparationTasks = listOf(
+        "AppDebug" to "app/debug",
+        "AppRelease" to "app/release",
+    ).map { (variantTitle, outputPath) ->
+        register("verifyOfflineDocsPluginSeparation$variantTitle") {
+            group = "verification"
+            description = "Verifies that $variantTitle host APKs use the external Offline Docs plugin"
+            dependsOn("assemble$variantTitle")
+
+            doLast {
+                verifyOfflineDocsPluginSeparation(
+                    apkDirectory = layout.buildDirectory.dir("outputs/apk/$outputPath").get().asFile,
+                )
+            }
+        }
+    }
+
+    register("verifyOfflineDocsPluginSeparation") {
+        group = "verification"
+        description = "Verifies that debug and release host APKs do not package Offline Docs assets"
+        dependsOn(offlineDocsSeparationTasks)
     }
 
     register<Copy>("appendDigestToReleasedFiles") {

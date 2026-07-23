@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/offline_docs_unavailable"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:visibility="gone">
+
+    <ImageView
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:alpha="0.72"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_docs_app" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/text_offline_docs_unavailable"
+        android:textAppearance="?attr/textAppearanceHeadline6" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="@string/text_offline_docs_unavailable_prompt"
+        android:textAppearance="?attr/textAppearanceBody1" />
+
+    <Button
+        android:id="@+id/offline_docs_plugin_center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/text_plugin_center" />
+
+    <Button
+        android:id="@+id/offline_docs_switch_online"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/text_switch_to_online_documentation" />
+
+</LinearLayout>

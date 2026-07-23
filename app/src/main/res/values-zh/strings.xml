@@ -86,7 +86,7 @@
     <string name="description_check_for_updates_preference">AutoJs6 从 GitHub 获取并下载更新.</string>
     <string name="description_client_mode">客户端模式用于让 AutoJs6 主动连接到远端服务端, 以便进行 [ 脚本传输 / 打印日志 / 远程控制 ] 等.\n\n通常需要设备与服务端处于同一局域网或可互相访问的网络环境.</string>
     <string name="description_display_over_other_app">\"显示在其他应用上层\" 权限允许 AutoJs6 在其他应用界面之上展示悬浮窗或浮动按钮, 以便在任意界面快速执行操作或查看信息.\n\n注: 未授予该权限时, 悬浮窗及浮动按钮可能会无法显示或正常使用.</string>
-    <string name="description_documentation_source_preference">本地文档: AutoJs6 内置文件作为文档来源, 无需网络连接, 随 AutoJs6 应用更新而发生内容变动.\n在线文档: 使用 GitHub 网页作为文档来源, 需网络连接, 可随时保持文档内容为最新.\n\n注: 为最大化在线文档的阅读体验, 建议使用桌面显示器等宽屏显示设备阅读.\n注: 截至 6.2.0 版本, 文档尚处于初步编写阶段, 大部分内容尚未完成编写或更新.</string>
+    <string name="description_documentation_source_preference">离线文档: 由独立安装的官方 Offline Docs 插件提供, 无需网络连接, 并可独立于 AutoJs6 更新.\n在线文档: 使用在线文档网站作为来源, 需要网络连接, 文档内容可保持最新.\n\n注: 为最大化在线文档的阅读体验, 建议使用桌面显示器等宽屏显示设备阅读.\n注: 截至 6.2.0 版本, 文档尚处于初步编写阶段, 大部分内容尚未完成编写或更新.</string>
     <string name="description_documentation_source_preference_more">文档页面的深色主题支持需要满足以下条件:\n1. AutoJs6 开启夜间模式\n2. WebView (或 Google Chrome 等浏览器) 版本要求:\n- API 级别 29 (安卓 10) [Q] 及以上: 版本不低于 76\n- API 级别 28 (安卓 9) [P] 及以下: 版本不低于 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">显示或隐藏编辑器边栏中的断点标记. 断点数据和调试菜单操作仍然可用.</string>
     <string name="description_editor_code_highlight_threshold">根据文件大小决定是否启用语法高亮功能.\n对于大文件, 禁用语法高亮功能可一定程度提升文件加载效率.</string>
@@ -1254,6 +1254,8 @@
     <string name="text_null">无</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
     <string name="text_number_format_error">数字格式无效</string>
+    <string name="text_offline_docs_unavailable">离线文档不可用</string>
+    <string name="text_offline_docs_unavailable_prompt">请安装或启用官方 Offline Docs 插件, 或切换至在线文档.</string>
     <string name="text_ok">确定</string>
     <string name="text_old_path">旧路径</string>
     <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
@@ -1623,6 +1625,8 @@
     <string name="text_supported_permissions_short">需要的权限</string>
     <string name="text_switch_to_legacy_layout">切换至传统布局</string>
     <string name="text_switch_to_new_layout">切换至新布局</string>
+    <string name="text_switch_to_online_documentation">切换至在线文档</string>
+    <string name="text_switch_to_online_documentation_confirmation">是否将文档来源切换至在线文档? 此操作需要网络连接.</string>
     <string name="text_switch_window">切换窗口</string>
     <string name="text_symbol_invalid_no_whitespace">符号不可包含空白字符</string>
     <string name="text_symbol_name_conflict_with_value">符号 \"%1$s\" 已存在</string>

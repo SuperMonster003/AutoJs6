@@ -91,7 +91,7 @@
     <string name="description_check_for_updates_preference">AutoJs6 は, GitHub からアップデートを取得し, ダウンロードします.</string>
     <string name="description_client_mode">クライアントモードは, AutoJs6 がリモートのサーバーへ能動的に接続し, [ スクリプト転送 / ログ出力 / リモート制御 ] などを行うための機能です.\n\n通常は, 端末とサーバーが同一 LAN か, 相互に到達可能なネットワーク環境にある必要があります.</string>
     <string name="description_display_over_other_app">\"他のアプリの上に表示\" 権限により, AutoJs6 は他のアプリ画面の上にフローティングウィンドウやフローティングボタンを表示でき, どの画面からでも素早く操作や情報確認ができます.\n\n注: この権限が付与されていない場合, フローティングウィンドウやフローティングボタンが表示されない, または正常に利用できない可能性があります.</string>
-    <string name="description_documentation_source_preference">ローカルドキュメント: AutoJs6 に組み込まれたファイルをドキュメントソースとして使用するため, ネットワーク接続は必要ありません. AutoJs6 が更新されると内容も変わります.\nオンラインドキュメント: GitHub のページをドキュメントソースとして使用し, ネットワーク接続が必要です. コンテンツは常に最新の状態に保たれます.\n\n注: オンラインドキュメントを最大限に活用するために, デスクトップモニターなどのワイドスクリーンディスプレイを使用することをお勧めします.\n注: バージョン 6.2.0 時点では, ドキュメントはまだ開発の初期段階にあり, ほとんどのコンテンツはまだ執筆および更新されていません.</string>
+    <string name="description_documentation_source_preference">オフラインドキュメント: 個別にインストールする公式 Offline Docs プラグインによって提供されます. ネットワーク接続は不要で, AutoJs6 とは独立して更新できます.\nオンラインドキュメント: オンラインドキュメントサイトを使用するため, ネットワーク接続が必要です. コンテンツは常に最新の状態に保たれます.\n\n注: オンラインドキュメントを最大限に活用するために, デスクトップモニターなどのワイドスクリーンディスプレイを使用することをお勧めします.\n注: バージョン 6.2.0 時点では, ドキュメントはまだ開発の初期段階にあり, ほとんどのコンテンツはまだ執筆および更新されていません.</string>
     <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには, 以下の条件を満たす必要があります.\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P] 以下: バージョン >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">エディターガターのブレークポイントマーカーを表示または非表示にします. ブレークポイントデータとデバッグメニュー操作は引き続き利用できます.</string>
     <string name="description_editor_code_highlight_threshold">ファイルサイズに応じて構文ハイライト機能を有効にするかどうかを決定します.\n大きなファイルでは, 構文ハイライトを無効にすることで読み込み効率をある程度向上できます.</string>
@@ -1259,6 +1259,8 @@
     <string name="text_null">無効</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">ログエントリ数 %d が送信制限を超えました</string>
     <string name="text_number_format_error">無効な番号形式</string>
+    <string name="text_offline_docs_unavailable">オフラインドキュメントを利用できません</string>
+    <string name="text_offline_docs_unavailable_prompt">公式 Offline Docs プラグインをインストールまたは有効化するか, オンラインドキュメントに切り替えてください.</string>
     <string name="text_ok">OK</string>
     <string name="text_old_path">旧パス</string>
     <string name="text_only_latest_few_items_will_be_sent">最新の %d 個の項目のみが送信されます</string>
@@ -1628,6 +1630,8 @@
     <string name="text_supported_permissions_short">必要な権限</string>
     <string name="text_switch_to_legacy_layout">従来のレイアウトに切り替え</string>
     <string name="text_switch_to_new_layout">新しいレイアウトに切り替え</string>
+    <string name="text_switch_to_online_documentation">オンラインドキュメントに切り替え</string>
+    <string name="text_switch_to_online_documentation_confirmation">ドキュメントのソースをオンラインドキュメントに切り替えますか? ネットワーク接続が必要です.</string>
     <string name="text_switch_window">ウィンドウの切り替え</string>
     <string name="text_symbol_invalid_no_whitespace">記号に空白文字は含められません</string>
     <string name="text_symbol_name_conflict_with_value">記号 \"%1$s\" は既に存在します</string>

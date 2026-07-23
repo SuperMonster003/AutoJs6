@@ -4,36 +4,70 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
+/** URL and route conversion shared by online documentation and the Offline Docs plugin. */
 object DocsUtils {
 
     const val INDEX_URL_SUFFIX = "index.html"
+    const val OFFLINE_DOCS_ORIGIN = "https://offline-docs.autojs6.local"
+    const val ONLINE_DOCS_ORIGIN = "https://docs.autojs6.com"
 
-    private const val LOCAL_DOCS_URL_BODY = "file:///android_asset/docs/"
-    private const val ONLINE_DOCS_URL_BODY = "https://docs.autojs6.com"
+    private const val LEGACY_LOCAL_DOCS_URL_BODY = "file:///android_asset/docs/"
 
-    private val docsUrlBody
-        get() = Pref.getStringOrNull(R.string.key_documentation_source).let {
-            when (it == null || isLocal(it)) {
-                true -> LOCAL_DOCS_URL_BODY
-                else -> ONLINE_DOCS_URL_BODY
+    enum class Source {
+        OFFLINE,
+        ONLINE,
+    }
+
+    @JvmStatic
+    val currentSource: Source
+        get() = Pref.getStringOrNull(R.string.key_documentation_source).let { preference ->
+            if (preference == null || preference == key(R.string.key_documentation_source_local)) {
+                Source.OFFLINE
+            } else {
+                Source.ONLINE
             }
         }
 
     @JvmStatic
-    fun getUrl(suffix: String) = "${docsUrlBody.replace(Regex("/$"), "")}/${suffix.replace(Regex("^/"), "")}"
+    fun isOfflineSourceSelected() = currentSource == Source.OFFLINE
+
+    @JvmStatic
+    fun getUrl(suffix: String) = getUrl(currentSource, suffix)
+
+    @JvmStatic
+    fun getUrl(source: Source, suffix: String): String {
+        val origin = when (source) {
+            Source.OFFLINE -> OFFLINE_DOCS_ORIGIN
+            Source.ONLINE -> ONLINE_DOCS_ORIGIN
+        }
+        return "${origin.trimEnd('/')}/${suffix.trimStart('/').ifBlank { INDEX_URL_SUFFIX }}"
+    }
+
+    @JvmStatic
+    fun getOfflineUrl(suffix: String) = getUrl(Source.OFFLINE, suffix)
+
+    @JvmStatic
+    fun getOnlineUrl(suffix: String) = getUrl(Source.ONLINE, suffix)
 
     @JvmStatic
     fun getUrlByCurrentSource(url: String?) = getUrl(extractUrlSuffix(url) ?: INDEX_URL_SUFFIX)
 
     @JvmStatic
-    fun isDocumentationSourcePreferenceKey(changedKey: String?) = changedKey == key(R.string.key_documentation_source)
+    fun isDocumentationSourcePreferenceKey(changedKey: String?) =
+        changedKey == key(R.string.key_documentation_source)
 
-    private fun isLocal(source: String) = source == key(R.string.key_documentation_source_local)
+    @JvmStatic
+    fun extractUrlSuffix(url: String?): String? {
+        val normalizedUrl = url?.trim()?.takeIf(String::isNotEmpty) ?: return null
+        return extractUrlSuffixByBase(normalizedUrl, OFFLINE_DOCS_ORIGIN)
+            ?: extractUrlSuffixByBase(normalizedUrl, LEGACY_LOCAL_DOCS_URL_BODY)
+            ?: extractUrlSuffixByBase(normalizedUrl, ONLINE_DOCS_ORIGIN)
+    }
 
-    private fun extractUrlSuffix(url: String?): String? {
-        val normalizedUrl = url?.trim()?.takeIf { it.isNotEmpty() } ?: return null
-        return extractUrlSuffixByBase(normalizedUrl, LOCAL_DOCS_URL_BODY)
-            ?: extractUrlSuffixByBase(normalizedUrl, ONLINE_DOCS_URL_BODY)
+    @JvmStatic
+    fun isOfflineDocsUrl(url: String?): Boolean {
+        val normalizedUrl = url?.trim() ?: return false
+        return normalizedUrl == OFFLINE_DOCS_ORIGIN || normalizedUrl.startsWith("$OFFLINE_DOCS_ORIGIN/")
     }
 
     private fun extractUrlSuffixByBase(url: String, baseUrl: String): String? {
@@ -61,8 +95,10 @@ object DocsUtils {
             return INDEX_URL_SUFFIX
         }
 
-        val pageEnd = normalizedRoute.indexOfAny(charArrayOf('?', '#')).takeIf { it >= 0 } ?: normalizedRoute.length
-        val page = normalizedRoute.take(pageEnd).takeIf { it.isNotBlank() && it != "index" } ?: INDEX_URL_SUFFIX
+        val pageEnd = normalizedRoute.indexOfAny(charArrayOf('?', '#')).takeIf { it >= 0 }
+            ?: normalizedRoute.length
+        val page = normalizedRoute.take(pageEnd).takeIf { it.isNotBlank() && it != "index" }
+            ?: INDEX_URL_SUFFIX
         val tail = normalizedRoute.substring(pageEnd)
         val pageWithExtension = when {
             page.endsWith(".html", ignoreCase = true) -> page
@@ -70,5 +106,4 @@ object DocsUtils {
         }
         return pageWithExtension + tail
     }
-
 }

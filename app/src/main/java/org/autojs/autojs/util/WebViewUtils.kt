@@ -11,6 +11,7 @@ import androidx.webkit.WebViewFeature.ALGORITHMIC_DARKENING
 import androidx.webkit.WebViewFeature.FORCE_DARK
 import androidx.webkit.WebViewFeature.isFeatureSupported
 import org.intellij.lang.annotations.Language
+import org.autojs.autojs.ui.widget.EWebView
 
 /**
  * Created by SuperMonster003 on Aug 26, 2022.
@@ -97,13 +98,20 @@ class WebViewUtils {
                 webView.setPadding(0, 0, 0, systemBarInsets.bottom)
                 insets
             }
-            webView.webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    val systemBarInsets = mSystemBarInsets ?: return
-                    val webView = view ?: return
-                    val injectCode = excludeNavigationBarInjectCode(systemBarInsets.bottom)
-                    adjustBodyPaddingToAvoidNavOverlay(webView, injectCode)
+            val onPageFinished: (WebView?, String?) -> Unit = onPageFinished@{ view, _ ->
+                val systemBarInsets = mSystemBarInsets ?: return@onPageFinished
+                val webView = view ?: return@onPageFinished
+                val injectCode = excludeNavigationBarInjectCode(systemBarInsets.bottom)
+                adjustBodyPaddingToAvoidNavOverlay(webView, injectCode)
+            }
+            if (webViewWrapper is EWebView) {
+                webViewWrapper.addOnPageFinishedListener { view, url -> onPageFinished(view, url) }
+            } else {
+                webView.webViewClient = object : WebViewClient() {
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        super.onPageFinished(view, url)
+                        onPageFinished(view, url)
+                    }
                 }
             }
         }
@@ -123,18 +131,25 @@ class WebViewUtils {
                 insets
             }
             if (excludeNavigationBar) {
-                webView.webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        super.onPageFinished(view, url)
-                        val systemBarInsets = mSystemBarInsets ?: return
-                        val webView = view ?: return
-                        // @Hint by SuperMonster003 on Mar 12, 2025.
-                        //  ! Inject JavaScript code for document body with adding a bottom padding
-                        //  ! to ensure that content won't be covered by nav bar when scrolling to the end.
-                        //  ! zh-CN: 注入 JavaScript, 为 body 添加底部 padding, 确保滚动到底部时导航栏不遮挡内容.
-                        @Language("JavaScript")
-                        val defaultInjectCode = "document.body.style.paddingBottom = '${systemBarInsets.bottom}px'"
-                        adjustBodyPaddingToAvoidNavOverlay(webView, defaultInjectCode)
+                val onPageFinished: (WebView?, String?) -> Unit = onPageFinished@{ view, _ ->
+                    val systemBarInsets = mSystemBarInsets ?: return@onPageFinished
+                    val webView = view ?: return@onPageFinished
+                    // @Hint by SuperMonster003 on Mar 12, 2025.
+                    //  ! Inject JavaScript code for document body with adding a bottom padding
+                    //  ! to ensure that content won't be covered by nav bar when scrolling to the end.
+                    //  ! zh-CN: 注入 JavaScript, 为 body 添加底部 padding, 确保滚动到底部时导航栏不遮挡内容.
+                    @Language("JavaScript")
+                    val defaultInjectCode = "document.body.style.paddingBottom = '${systemBarInsets.bottom}px'"
+                    adjustBodyPaddingToAvoidNavOverlay(webView, defaultInjectCode)
+                }
+                if (webViewWrapper is EWebView) {
+                    webViewWrapper.addOnPageFinishedListener { view, url -> onPageFinished(view, url) }
+                } else {
+                    webView.webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            super.onPageFinished(view, url)
+                            onPageFinished(view, url)
+                        }
                     }
                 }
             }

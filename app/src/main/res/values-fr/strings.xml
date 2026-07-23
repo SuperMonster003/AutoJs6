@@ -90,7 +90,7 @@
     <string name="description_check_for_updates_preference">AutoJs6 obtient et télécharge les mises à jour depuis GitHub.</string>
     <string name="description_client_mode">Le mode client permet à AutoJs6 de se connecter activement à un serveur distant afin d\'effectuer [ transfert de scripts / impression des journaux / contrôle à distance ].\n\nEn général, l\'appareil et le serveur doivent être sur le même réseau local (LAN) ou dans un environnement réseau où ils peuvent s\'atteindre mutuellement.</string>
     <string name="description_display_over_other_app">L\'autorisation \"afficher par-dessus les autres applications\" permet à AutoJs6 d\'afficher des fenêtres flottantes ou un bouton flottant au-dessus des autres applications, afin d\'exécuter rapidement des actions ou de consulter des informations sur n\'importe quel écran.\n\nNote : si cette autorisation n\'est pas accordée, les fenêtres flottantes et le bouton flottant peuvent ne pas s\'afficher ou ne pas fonctionner correctement.</string>
-    <string name="description_documentation_source_preference">Documentation locale : Utilisation des fichiers intégrés d\'AutoJs6 comme sources de documentation, aucune connexion réseau n\'est nécessaire. Le contenu change au fur et à mesure que AutoJs6 est mis à jour.\nDocumentation en ligne : Utilisation des pages GitHub comme sources de documentation, nécessitant une connexion réseau. Le contenu est toujours à jour.\n\nRemarque : pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque : à partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
+    <string name="description_documentation_source_preference">Documentation hors ligne: Elle est fournie par le plugin officiel Offline Docs installé séparément. Aucune connexion réseau n\'est requise et elle peut être mise à jour indépendamment d\'AutoJs6.\nDocumentation en ligne: Elle utilise le site de documentation en ligne et nécessite une connexion réseau. Son contenu reste à jour.\n\nRemarque: Pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque: A partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
     <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur : version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur : version >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Affichez ou masquez les repères de points d\'arrêt dans la gouttière de l\'éditeur. Les données des points d\'arrêt et les actions du menu de débogage restent disponibles.</string>
     <string name="description_editor_code_highlight_threshold">Determine si la coloration syntaxique est activee selon la taille du fichier.\nPour les gros fichiers, la desactivation de la coloration syntaxique peut ameliorer dans une certaine mesure l\'efficacite du chargement.</string>
@@ -1258,6 +1258,8 @@
     <string name="text_null">Null</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">Le nombre d\'entrées de journal %d dépasse la limite d\'envoi</string>
     <string name="text_number_format_error">Format de numéro invalide</string>
+    <string name="text_offline_docs_unavailable">La documentation hors ligne est indisponible</string>
+    <string name="text_offline_docs_unavailable_prompt">Installez ou activez le plugin officiel Offline Docs, ou passez à la documentation en ligne.</string>
     <string name="text_ok">OK</string>
     <string name="text_old_path">Ancien chemin</string>
     <string name="text_only_latest_few_items_will_be_sent">Seuls les derniers %d éléments seront envoyés</string>
@@ -1627,6 +1629,8 @@
     <string name="text_supported_permissions_short">Autorisations nécessaires</string>
     <string name="text_switch_to_legacy_layout">Passer à l\'ancienne disposition</string>
     <string name="text_switch_to_new_layout">Passer à la nouvelle disposition</string>
+    <string name="text_switch_to_online_documentation">Passer à la documentation en ligne</string>
+    <string name="text_switch_to_online_documentation_confirmation">Passer à la documentation en ligne comme source? Une connexion réseau sera nécessaire.</string>
     <string name="text_switch_window">Changer de fenêtre</string>
     <string name="text_symbol_invalid_no_whitespace">Les symboles ne peuvent pas contenir d\'espaces</string>
     <string name="text_symbol_name_conflict_with_value">Le symbole \"%1$s\" existe deja</string>

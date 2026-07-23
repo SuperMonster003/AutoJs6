@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui.doc
 
 import android.app.Activity
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +8,6 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.event.BackPressedHandler
 import org.autojs.autojs.ui.doc.DocumentationActivity.Companion.generateInjectCodeForBottomInsets
 import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
@@ -19,8 +17,6 @@ import org.autojs.autojs.ui.main.ViewPagerFragment
 import org.autojs.autojs.ui.main.ViewStatesManageable
 import org.autojs.autojs.util.DocsUtils.INDEX_URL_SUFFIX
 import org.autojs.autojs.util.DocsUtils.getUrl
-import org.autojs.autojs.util.DocsUtils.getUrlByCurrentSource
-import org.autojs.autojs.util.DocsUtils.isDocumentationSourcePreferenceKey
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WebViewUtils
 import org.autojs.autojs6.R
@@ -42,12 +38,7 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
     private var mIsCurrentPageDocs = false
 
     private lateinit var mWebView: WebView
-
-    private val mDocumentationSourceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
-        if (isDocumentationSourcePreferenceKey(changedKey) && ::mWebView.isInitialized) {
-            mWebView.post { reloadByCurrentDocumentationSource() }
-        }
-    }
+    private lateinit var mPageController: DocumentationPageController
 
     init {
         arguments = Bundle()
@@ -77,6 +68,7 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
                 }
                 webView.post { webView.invalidate() }
             }
+            mPageController = DocumentationPageController(requireContext(), binding.root, ewebView)
         }
         restoreViewStates()
         (activity as? MainActivity)?.apply {
@@ -84,22 +76,13 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
             val docsTab = tabLayout.getTabAt(docsItemIndex)
             docsTab?.view?.let { setTabViewClickListeners(it) }
         }
-        Pref.get().registerOnSharedPreferenceChangeListener(mDocumentationSourceChangeListener)
     }
 
     private fun loadMainPage() {
         arguments?.let { mIndexUrl = it.getString(ARGUMENT_URL, getUrl(INDEX_URL_SUFFIX)) }
-        mIndexUrl?.let { mWebView.loadUrl(it) }
-    }
-
-    private fun reloadByCurrentDocumentationSource() {
-        mIndexUrl = getUrlByCurrentSource(mWebView.url)
+        mIndexUrl?.let { mPageController.loadUrl(it) }
         mPreviousQuery = null
-        arguments?.remove(KEY_SAVED_WEB_VIEW_STATE)
         mWebView.clearMatches()
-        mWebView.stopLoading()
-        mWebView.clearHistory()
-        mWebView.loadUrl(mIndexUrl!!)
     }
 
     override fun onPause() {
@@ -108,11 +91,9 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
     }
 
     override fun onBackPressed(activity: Activity): Boolean {
-        mWebView.let {
-            if (it.canGoBack()) {
-                it.goBack()
-                return true
-            }
+        if (::mPageController.isInitialized && mPageController.canGoBack()) {
+            mPageController.goBack()
+            return true
         }
         return false
     }
@@ -141,13 +122,14 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
     }
 
     override fun onDestroyView() {
-        Pref.get().unregisterOnSharedPreferenceChangeListener(mDocumentationSourceChangeListener)
+        if (::mPageController.isInitialized) mPageController.dispose()
         super.onDestroyView()
     }
 
     override fun onPageShow() {
         super.onPageShow()
         mIsCurrentPageDocs = true
+        if (::mPageController.isInitialized) mPageController.refreshPluginState()
     }
 
     override fun onPageHide() {
@@ -156,14 +138,16 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
     }
 
     override fun saveViewStates() {
-        Bundle().let {
-            mWebView.saveState(it)
-            arguments?.putBundle(KEY_SAVED_WEB_VIEW_STATE, it)
+        if (::mPageController.isInitialized) {
+            arguments?.putString(KEY_SAVED_URL, mPageController.currentUrl)
         }
     }
 
     override fun restoreViewStates() {
-        arguments?.getBundle(KEY_SAVED_WEB_VIEW_STATE)?.let { mWebView.restoreState(it) } ?: loadMainPage()
+        val savedUrl = arguments?.getString(KEY_SAVED_URL)
+        val initialUrl = savedUrl ?: arguments?.getString(ARGUMENT_URL, getUrl(INDEX_URL_SUFFIX))
+        mIndexUrl = initialUrl
+        mPageController.start(initialUrl)
     }
 
     private fun setTabViewClickListeners(tabView: TabLayout.TabView) {
@@ -174,7 +158,7 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
     companion object {
 
         const val ARGUMENT_URL = "url"
-        private const val KEY_SAVED_WEB_VIEW_STATE = "savedWebViewState"
+        private const val KEY_SAVED_URL = "savedUrl"
 
     }
 

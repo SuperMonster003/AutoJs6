@@ -24,6 +24,7 @@ class ManualDialog(private val mContext: Context) {
     private var mEWebView: EWebView
     private var mPinToLeft: View
     private var mDialog: Dialog
+    private var mPageController: DocumentationPageController
 
     init {
         val binding = FloatingManualDialogBinding.inflate(LayoutInflater.from(mContext))
@@ -32,6 +33,7 @@ class ManualDialog(private val mContext: Context) {
         mTitle = binding.title
         mEWebView = binding.ewebView
         mPinToLeft = binding.pinToLeft
+        mPageController = DocumentationPageController(mContext, binding.root, mEWebView)
 
         binding.fullscreen.setOnClickListener { viewInNewActivity() }
         binding.close.setOnClickListener { close() }
@@ -41,12 +43,13 @@ class ManualDialog(private val mContext: Context) {
             .build()
             .apply {
                 window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                setOnDismissListener { mPageController.dispose() }
             }
     }
 
     fun title(title: String?) = also { mTitle.text = title }
 
-    fun url(url: String?) = also { mEWebView.webView.loadUrl(url!!) }
+    fun url(url: String?) = also { mPageController.start(url) }
 
     fun pinToLeft(listener: View.OnClickListener) = also {
         mPinToLeft.setOnClickListener { v: View? ->
@@ -62,7 +65,7 @@ class ManualDialog(private val mContext: Context) {
     fun viewInNewActivity() {
         mDialog.dismiss()
         Intent(mContext, DocumentationActivity::class.java)
-            .putExtra(DocumentationActivity.EXTRA_URL, mEWebView.webView.url)
+            .putExtra(DocumentationActivity.EXTRA_URL, mPageController.currentUrl)
             .startSafely(mContext)
     }
 
