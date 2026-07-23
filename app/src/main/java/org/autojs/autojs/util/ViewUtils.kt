@@ -1690,6 +1690,15 @@ object ViewUtils {
         }
     }
 
+    /**
+     * Scales large text with a GPU transform while fingers are moving, then performs one TextView
+     * layout at gesture end. This avoids repeatedly laying out a multi-megabyte document.
+     */
+    class DeferredTextSizeScaleDetector(
+        context: Context,
+        textView: TextView,
+    ) : ScaleGestureDetector(context, DeferredTextSizeScaleListener(textView))
+
     class DelayedLongPressTouchListener(context: Context, longPressDelayMs: Long) : View.OnTouchListener {
 
         private val longPressDelayMs: Long
@@ -1800,5 +1809,41 @@ object ViewUtils {
         }
 
         fun getTextSize(): Float = DisplayUtils.pxToSp(textView.textSize)
+    }
+
+    private class DeferredTextSizeScaleListener(
+        private val textView: TextView,
+    ) : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+        private val minTextSize = 4.0f
+        private val maxTextSize = 72.0f
+
+        private var initialTextSize = 0.0f
+        private var targetTextSize = 0.0f
+
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+            initialTextSize = DisplayUtils.pxToSp(textView.textSize)
+                .coerceIn(minTextSize, maxTextSize)
+            targetTextSize = initialTextSize
+            textView.pivotX = detector.focusX
+            textView.pivotY = detector.focusY
+            return true
+        }
+
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            targetTextSize = (targetTextSize * detector.scaleFactor)
+                .coerceIn(minTextSize, maxTextSize)
+            val visualScale = targetTextSize / initialTextSize
+            textView.scaleX = visualScale
+            textView.scaleY = visualScale
+            return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
+            textView.scaleX = 1.0f
+            textView.scaleY = 1.0f
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, targetTextSize)
+            super.onScaleEnd(detector)
+        }
     }
 }

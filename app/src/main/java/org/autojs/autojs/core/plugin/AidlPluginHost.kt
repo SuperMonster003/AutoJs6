@@ -26,6 +26,9 @@ import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
+import java.io.Closeable
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -52,6 +55,11 @@ class AidlPluginHost<I : IInterface>(
         val serviceInfo: ServiceInfo,
         val pluginInfo: PluginInfo?,
         val error: Throwable?,
+    )
+
+    data class LeasedCall<T>(
+        val value: T,
+        val bindingLease: Closeable,
     )
 
     suspend fun discover(context: Context): List<Discovered> {
@@ -100,15 +108,46 @@ class AidlPluginHost<I : IInterface>(
         context: Context,
         target: Discovered,
         enforceHostVersionCompatibility: Boolean = true,
+        enforceAuthorization: Boolean = true,
+        retryOnRemoteException: Boolean = true,
         block: (I) -> T,
     ): T {
-        if (!PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
+        if (enforceAuthorization && !PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
             error("Plugin not authorized: ${target.serviceInfo.packageName}")
         }
         if (enforceHostVersionCompatibility) {
             ensureHostVersionCompatible(context, target)
         }
-        return withService(context, target.serviceInfo, defaultBindTimeoutMs, block = block)
+        return withService(
+            context = context,
+            serviceInfo = target.serviceInfo,
+            bindTimeoutMs = defaultBindTimeoutMs,
+            retryOnRemoteException = retryOnRemoteException,
+            block = block,
+        )
+    }
+
+    suspend fun <T> callWithDedicatedBindingLease(
+        context: Context,
+        target: Discovered,
+        enforceHostVersionCompatibility: Boolean = true,
+        enforceAuthorization: Boolean = true,
+        retryOnRemoteException: Boolean = true,
+        block: (I) -> T,
+    ): LeasedCall<T> {
+        if (enforceAuthorization && !PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
+            error("Plugin not authorized: ${target.serviceInfo.packageName}")
+        }
+        if (enforceHostVersionCompatibility) {
+            ensureHostVersionCompatible(context, target)
+        }
+        return withDedicatedServiceBinding(
+            context = context,
+            serviceInfo = target.serviceInfo,
+            bindTimeoutMs = defaultBindTimeoutMs,
+            retryOnRemoteException = retryOnRemoteException,
+            block = block,
+        )
     }
 
     private suspend fun queryFirstServiceWithRetry(context: Context, packageName: String): ServiceInfo? {
@@ -392,6 +431,159 @@ class AidlPluginHost<I : IInterface>(
         } finally {
             touch(entry)
         }
+    }
+
+    private suspend fun <T> withDedicatedServiceBinding(
+        context: Context,
+        serviceInfo: ServiceInfo,
+        bindTimeoutMs: Long,
+        retryOnRemoteException: Boolean,
+        block: (I) -> T,
+    ): LeasedCall<T> {
+        var retriesRemaining = if (retryOnRemoteException) 1 else 0
+        while (true) {
+            val binding = awaitDedicatedServiceBinding(context.applicationContext, serviceInfo, bindTimeoutMs)
+            try {
+                return LeasedCall(
+                    value = block(binding.proxy),
+                    bindingLease = binding.lease,
+                )
+            } catch (error: RemoteException) {
+                binding.lease.close()
+                if (retriesRemaining <= 0) {
+                    throw error
+                }
+                retriesRemaining--
+            } catch (error: Throwable) {
+                binding.lease.close()
+                throw error
+            }
+        }
+    }
+
+    private suspend fun awaitDedicatedServiceBinding(
+        appContext: Context,
+        serviceInfo: ServiceInfo,
+        bindTimeoutMs: Long,
+    ): DedicatedBinding<I> = suspendCancellableCoroutine { continuation ->
+        val component = ComponentName(serviceInfo.packageName, serviceInfo.name)
+        val completionClaimed = AtomicBoolean(false)
+        val timeoutRef = AtomicReference<Runnable?>()
+        val binderRef = AtomicReference<IBinder?>()
+        val deathRecipientRef = AtomicReference<IBinder.DeathRecipient?>()
+        lateinit var connection: ServiceConnection
+
+        val lease = AidlDedicatedBindingLease {
+            timeoutRef.getAndSet(null)?.let(poolHandler::removeCallbacks)
+            val binder = binderRef.getAndSet(null)
+            val deathRecipient = deathRecipientRef.getAndSet(null)
+            if (binder != null && deathRecipient != null) {
+                runCatching { binder.unlinkToDeath(deathRecipient, 0) }
+            }
+            runCatching { appContext.unbindService(connection) }
+                .onFailure { Log.w(tag, "Failed to release dedicated plugin binding: $component", it) }
+        }
+
+        fun fail(error: Throwable) {
+            if (completionClaimed.compareAndSet(false, true)) {
+                if (!continuation.isCompleted) {
+                    continuation.resumeWithException(error)
+                }
+            }
+            lease.close()
+        }
+
+        connection = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName, service: IBinder) {
+                val proxy = proxyFactory(service)
+                val deathRecipient = IBinder.DeathRecipient {
+                    fail(IllegalStateException("Dedicated plugin binder died: $name"))
+                }
+                binderRef.set(service)
+                deathRecipientRef.set(deathRecipient)
+                try {
+                    service.linkToDeath(deathRecipient, 0)
+                } catch (error: RemoteException) {
+                    fail(IllegalStateException("Dedicated plugin binder is already dead: $name", error))
+                    return
+                }
+                if (lease.isClosed || !service.isBinderAlive) {
+                    runCatching { service.unlinkToDeath(deathRecipient, 0) }
+                    fail(IllegalStateException("Dedicated plugin binder disconnected before use: $name"))
+                    return
+                }
+                if (completionClaimed.compareAndSet(false, true)) {
+                    timeoutRef.getAndSet(null)?.let(poolHandler::removeCallbacks)
+                    if (!continuation.isCompleted) {
+                        continuation.resume(DedicatedBinding(proxy, lease))
+                    } else {
+                        lease.close()
+                    }
+                } else {
+                    lease.close()
+                }
+            }
+
+            override fun onServiceDisconnected(name: ComponentName) {
+                fail(IllegalStateException("Dedicated plugin service disconnected: $name"))
+            }
+
+            override fun onBindingDied(name: ComponentName) {
+                fail(IllegalStateException("Dedicated plugin binding died: $name"))
+            }
+
+            override fun onNullBinding(name: ComponentName) {
+                fail(IllegalStateException("Dedicated plugin returned a null binding: $name"))
+            }
+        }
+
+        continuation.invokeOnCancellation {
+            completionClaimed.set(true)
+            lease.close()
+        }
+
+        val timeout = Runnable {
+            fail(TimeoutException("Dedicated bindService timeout: $component"))
+        }
+        timeoutRef.set(timeout)
+        poolHandler.postDelayed(timeout, bindTimeoutMs)
+
+        val intent = Intent().setComponent(component)
+        val bindFlags = buildBindFlags(serviceInfo)
+        var bound = try {
+            Log.i(tag, "dedicated bindService: $component")
+            appContext.bindService(intent, connection, bindFlags)
+        } catch (error: SecurityException) {
+            fail(
+                IllegalStateException(
+                    "Dedicated bindService SecurityException: $component. " +
+                            "Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> " +
+                            "and the Service uses this permission.",
+                    error,
+                )
+            )
+            return@suspendCancellableCoroutine
+        }
+        if (!bound && bindFlags != Context.BIND_AUTO_CREATE) {
+            bound = try {
+                appContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+            } catch (error: SecurityException) {
+                fail(
+                    IllegalStateException(
+                        "Dedicated bindService SecurityException: $component. " +
+                                "Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> " +
+                                "and the Service uses this permission.",
+                        error,
+                    )
+                )
+                return@suspendCancellableCoroutine
+            }
+        }
+        if (!bound) {
+            fail(IllegalStateException(buildBindFailureMessage(appContext, serviceInfo, component)))
+            return@suspendCancellableCoroutine
+        }
+        lease.markRegistered()
     }
 
     private fun invalidateService(serviceInfo: ServiceInfo, error: Throwable) {
@@ -698,6 +890,11 @@ class AidlPluginHost<I : IInterface>(
     private data class SelectionResult(
         val selected: Discovered?,
         val discovered: List<Discovered>,
+    )
+
+    private data class DedicatedBinding<T : IInterface>(
+        val proxy: T,
+        val lease: Closeable,
     )
 
     private class TimeoutException(message: String) : RuntimeException(message)

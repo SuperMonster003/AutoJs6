@@ -2,7 +2,9 @@ package org.autojs.plugin.apkbuilder.template.impl
 
 import android.content.Context
 import android.os.Bundle
+import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import android.os.RemoteException
 import android.util.Log
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
@@ -25,6 +27,22 @@ class RemoteApkBuildSession(
     private val started = AtomicBoolean(false)
     private val cancelled = AtomicBoolean(false)
     private val closed = AtomicBoolean(false)
+    private val requestInputCloser = RemoteBuildRequestInputCloser(
+        closeables = listOf(
+            request.projectArchiveFd,
+            request.nativeLibrariesArchiveFd,
+            request.keyStoreFd,
+        ),
+        onCloseFailure = { error ->
+            Log.w(TAG, "Failed to close a remote build request input fd.", error)
+        },
+    )
+    private val callbackBinder = callback?.asBinder()
+    private val callbackDeathLinked = AtomicBoolean(false)
+    private val callbackDeathRecipient = IBinder.DeathRecipient {
+        Log.w(TAG, "Remote build callback binder died; closing session.")
+        close()
+    }
 
     @Volatile
     private var workspace: RemoteApkBuildWorkspace? = null
@@ -32,20 +50,50 @@ class RemoteApkBuildSession(
     @Volatile
     private var progress = ApkBuildProgress()
 
+    init {
+        linkCallbackDeathRecipient()
+    }
+
     override fun start() {
+        if (closed.get() || cancelled.get()) {
+            closeRequestInputs()
+            if (started.compareAndSet(false, true)) {
+                if (!closed.get()) {
+                    notifyCancelled(
+                        ApkBuildResult(
+                            status = ApkBuildResult.STATUS_CANCELLED,
+                            compatibilityLevel = ApkBuilderTemplateResult.LEVEL_BLOCK,
+                        )
+                    )
+                }
+                unlinkCallbackDeathRecipient()
+            }
+            return
+        }
         if (!started.compareAndSet(false, true)) {
             return
         }
-        executor.execute { runSession() }
+        try {
+            executor.execute { runSession() }
+        } catch (error: Throwable) {
+            closeRequestInputs()
+            unlinkCallbackDeathRecipient()
+            throw error
+        }
     }
 
     override fun cancel() {
         cancelled.set(true)
+        closeRequestInputs()
     }
 
     override fun close() {
-        closed.set(true)
+        if (!closed.compareAndSet(false, true)) {
+            return
+        }
         cancelled.set(true)
+        closeRequestInputs()
+        unlinkCallbackDeathRecipient()
         workspace?.close()
         workspace = null
     }
@@ -129,15 +177,59 @@ class RemoteApkBuildSession(
                 notifyFailed(result)
             }
         }.also {
+            closeRequestInputs()
             if (!keepWorkspaceForResult) {
                 notifyProgress(updateProgress(ApkBuildProgress.STEP_CLEAN, "Cleaning remote build workspace", null))
                 workspace?.close()
                 workspace = null
             }
+            if (
+                !RemoteBuildSessionRetentionPolicy.shouldKeepCallbackDeathRecipientLinked(
+                    workspaceRetainedForResult = keepWorkspaceForResult,
+                    sessionClosed = closed.get(),
+                )
+            ) {
+                unlinkCallbackDeathRecipient()
+            }
             if (!closed.get()) {
                 progress = updateProgress(ApkBuildProgress.STEP_FINISH, "Remote build session finished", null)
             }
         }
+    }
+
+    private fun linkCallbackDeathRecipient() {
+        val binder = callbackBinder ?: return
+        if (!callbackDeathLinked.compareAndSet(false, true)) {
+            return
+        }
+        try {
+            binder.linkToDeath(callbackDeathRecipient, 0)
+        } catch (error: RemoteException) {
+            callbackDeathLinked.set(false)
+            Log.w(TAG, "Remote build callback binder is already dead.", error)
+            close()
+            return
+        }
+        if (!binder.isBinderAlive || closed.get()) {
+            close()
+            unlinkCallbackDeathRecipient()
+        }
+    }
+
+    private fun unlinkCallbackDeathRecipient() {
+        val binder = callbackBinder ?: return
+        if (!callbackDeathLinked.compareAndSet(true, false)) {
+            return
+        }
+        runCatching {
+            binder.unlinkToDeath(callbackDeathRecipient, 0)
+        }.onFailure { error ->
+            Log.w(TAG, "Failed to unlink remote build callback death recipient.", error)
+        }
+    }
+
+    private fun closeRequestInputs() {
+        requestInputCloser.close()
     }
 
     private fun notifyStarted(progress: ApkBuildProgress) {

@@ -18,7 +18,7 @@ val enableRemoteBuild = providers.gradleProperty(enableRemoteBuildProperty)
     .map { value ->
         value.trim().lowercase().let { it in setOf("true", "1", "yes", "on") }
     }
-    .orElse(false)
+    .orElse(true)
 
 private fun Any.reflectedNoArgMethod(name: String): Any? =
     javaClass.methods.firstOrNull { it.name == name && it.parameterTypes.isEmpty() }?.invoke(this)
@@ -116,6 +116,9 @@ dependencies {
     implementation(project(":modules:android-arsc-editor"))
     implementation(project(":modules:apk-signer"))
     implementation(libs.arsclib)
+    implementation(libs.prov)
+
+    testImplementation(libs.junit)
 }
 
 fun File.sha256String(): String {

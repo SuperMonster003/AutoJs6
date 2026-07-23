@@ -28,6 +28,18 @@ val buildActionAssemble = "assemble"
 val buildConfigFieldNameIsInrt = "is${flavorNameInrt.uppercaseFirstChar()}"
 val buildTypeNames = listOf(buildTypeDebug, buildTypeRelease)
 val releaseFlavorNames = listOf(flavorNameApp, flavorNameInrt)
+val supportedResourceLocales = setOf(
+    "ar",
+    "en",
+    "es",
+    "fr",
+    "ja",
+    "ko",
+    "ru",
+    "zh",
+    "zh-rHK",
+    "zh-rTW",
+)
 val apkFileExtension = utils.FILE_EXTENSION_APK
 val apkBuilderBuiltInTemplateAsset = "template.apk"
 val apkBuilderTemplateDistributionTaskName = "assembleApkBuilderTemplateDistribution"
@@ -188,12 +200,14 @@ val resourceExcludePatterns = listOf(
 
 val appMergedAssetPruneIncludes = listOf(
     "declarations/**/*",
+    "default_key_store.bks",
     "docs/**/*",
     "sample/declarations/**/*",
     "modules/obsolete/**/*",
 )
 
 val inrtMergedAssetPruneIncludes = listOf(
+    "default_key_store.bks",
     "doc/**/*",
     "docs/**/*",
     "editor/**/*",
@@ -533,11 +547,6 @@ dependencies /* Unclassified */ {
     // AndroidX Work Runtime
     implementation(libs.work.runtime)
 
-    // APK Parser
-    // implementation("com.jaredrummler:apk-parser:1.0.2")
-    // implementation("com.github.AndroidDeveloperLB:apk-parser:6")
-    implementation(project(":modules:apk-parser"))
-
     // Prism4j
     implementation(files("$rootDir/libs/prism4j-2_0_0.jar"))
     implementation(files("$rootDir/libs/prism4j-bundler-2_0_0.jar"))
@@ -561,29 +570,14 @@ dependencies /* Unclassified */ {
     implementation(libs.shizuku.api)
     implementation(libs.shizuku.provider)
 
-    // ARSCLib
-    implementation(libs.arsclib)
-
     // Toaster
     implementation(libs.toaster)
     implementation(libs.easywindow)
-
-    // Tiny Sign
-    implementation(files("$rootDir/libs/tiny-sign-0_9.jar"))
 
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.rxjava2)
     ksp(libs.room.compiler)
-
-    // ApkSig
-    // implementation("com.android.tools.build:apksig:8.7.3")
-
-    // ApkSigner
-    implementation(project(":modules:apk-signer"))
-
-    // Prov
-    implementation(libs.prov)
 
     // MQTT
     implementation(libs.paho.client.mqttv3)
@@ -592,11 +586,11 @@ dependencies /* Unclassified */ {
     // Jsoup
     implementation(libs.jsoup)
 
+    // Universal Charset Detector
+    implementation(libs.juniversalchardet)
+
     // Material Date Time Picker
     implementation(project(":modules:material-date-time-picker"))
-
-    // ICU4J
-    implementation(libs.icu4j)
 
     // R8
     implementation(libs.r8)
@@ -958,6 +952,10 @@ android {
         //  # }
     }
 
+    androidResources {
+        localeFilters.addAll(supportedResourceLocales)
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
     }
@@ -1080,22 +1078,45 @@ tasks.register("generateRuntimeKit") {
     description = "Builds the AutoJs6 Runtime Kit consumed by the standalone APK Builder template plugin."
     dependsOn("assembleInrtRelease")
 
+    val runtimeKitVersionName = versions.appVersionName
+    val runtimeKitVersionCode = versions.appVersionCode
+    val normalizedRuntimeKitVersion = normalizeRuntimeKitVersion(runtimeKitVersionName)
+    val runtimeKitGitSha = providers.gradleProperty("autojs.git.sha")
+        .orElse(providers.environmentVariable("GITHUB_SHA"))
+        .orElse("local")
+    val runtimeKitSourceRepository = providers.environmentVariable("GITHUB_REPOSITORY")
+        .orElse("local")
+    val runtimeKitGithubRunId = providers.environmentVariable("GITHUB_RUN_ID")
+        .orElse("")
+    val runtimeKitTemplateApk = layout.buildDirectory.file(
+        "outputs/apk/inrt/release/inrt-v$normalizedRuntimeKitVersion-universal.apk"
+    )
+    val runtimeApiSourceRoots = listOf(
+        rootDir.resolve("app/src/main/assets/declarations"),
+        rootDir.resolve("app/src/main/assets/modules"),
+        rootDir.resolve("app/src/main/java/org/autojs/autojs/runtime/api"),
+        rootDir.resolve("app/src/main/java/org/autojs/autojs/runtime/api/augment"),
+        rootDir.resolve("plugin-api/apk-builder-template/src/main"),
+        rootDir.resolve("plugin-api/common-plugin-api/src/main"),
+    )
     val runtimeKitOutputDir = layout.buildDirectory.dir("runtime-kit")
     outputs.dir(runtimeKitOutputDir)
+    inputs.property("runtimeKitVersionName", runtimeKitVersionName)
+    inputs.property("runtimeKitVersionCode", runtimeKitVersionCode)
+    inputs.property("runtimeKitGitSha", runtimeKitGitSha)
+    inputs.property("runtimeKitSourceRepository", runtimeKitSourceRepository)
+    inputs.property("runtimeKitGithubRunId", runtimeKitGithubRunId)
+    inputs.file(runtimeKitTemplateApk)
+    inputs.files(runtimeApiSourceRoots)
     inputs.file(projectDir.resolve("src/main/assets/default_key_store.bks"))
 
     doLast {
-        val versionName = versions.appVersionName
-        val versionCode = versions.appVersionCode
-        val normalizedVersion = normalizeRuntimeKitVersion(versionName)
-        val gitSha = providers.gradleProperty("autojs.git.sha").orNull
-            ?: System.getenv("GITHUB_SHA")
-            ?: "local"
+        val versionName = runtimeKitVersionName
+        val versionCode = runtimeKitVersionCode
+        val normalizedVersion = normalizedRuntimeKitVersion
+        val gitSha = runtimeKitGitSha.get()
 
-        val templateApk = layout.buildDirectory
-            .file("outputs/apk/inrt/release/inrt-v$normalizedVersion-universal.apk")
-            .get()
-            .asFile
+        val templateApk = runtimeKitTemplateApk.get().asFile
         require(templateApk.isFile) {
             "Missing INRT universal APK: $templateApk"
         }
@@ -1226,9 +1247,9 @@ tasks.register("generateRuntimeKit") {
             buildString {
                 appendLine("{")
                 appendLine("  \"schemaVersion\": 1,")
-                appendLine("  \"sourceRepository\": ${(System.getenv("GITHUB_REPOSITORY") ?: "local").toJsonLiteral()},")
+                appendLine("  \"sourceRepository\": ${runtimeKitSourceRepository.get().toJsonLiteral()},")
                 appendLine("  \"gitSha\": ${gitSha.toJsonLiteral()},")
-                appendLine("  \"githubRunId\": ${(System.getenv("GITHUB_RUN_ID") ?: "").toJsonLiteral()},")
+                appendLine("  \"githubRunId\": ${runtimeKitGithubRunId.get().toJsonLiteral()},")
                 appendLine("  \"templateApkSource\": ${templateApk.relativeTo(projectDir).invariantSeparatorsPath.toJsonLiteral()}")
                 appendLine("}")
             },

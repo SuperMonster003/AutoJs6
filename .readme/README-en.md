@@ -228,6 +228,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Paddle OCR plugin service could disconnect after running for a long time and fail to recover automatically _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `Fix` Paddle OCR plugin could not be woken automatically when not running, causing feature calls or project packaging to fail _[`issue #517`](http://issues.autojs6.com/517)_
 * `Fix` Incorrect `images.resize(ImageWrapper, width, height)` calls could pass the height to OpenCV as an interpolation value, while incompatible native exception unwinding could crash the app instead of reporting a script exception
+* `Fix` File manager media details could remain as "..." or crash the app when the MediaInfo plugin library was unavailable or a Binder call failed, without falling back to Android platform metadata
 * `Fix` Accessibility service could stop unexpectedly while performing consecutive operations such as back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Fix` Memory usage could continue to increase after repeatedly running scripts (attempted fix) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Fix` The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_
@@ -239,6 +240,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Installed plugin icons on the Home Plugins tab did not switch dynamically when night mode changed
 * `Fix` Plugin Center could install an APK from the wrong distribution variant when a plugin release contained multiple variants
 * `Fix` APK Builder Template plugins could appear twice or incorrectly report updates
+* `Fix` Offline project documentation integrity verification could reuse stale cached content while the plugin was being updated
+* `Fix` The Manifest button and complete multiline content were missing from APK details in the file manager
 * `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin
 * `Fix` Switch views in home drawer settings had an excessively small effective touch area
 * `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
@@ -258,18 +261,23 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Updated Node.js native verification to resolve and validate the external runtime plugin source and build roots
 * `Improvement` Made Node.js final integration and release gates fail closed when required reports, current-source evidence, or production acceptance artifacts are missing or stale
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
+* `Improvement` Consolidated file manager media detail queries into a single MediaInfo snapshot to reduce Binder calls and wait time
 * `Improvement` Modularized the Ace WebView runtime/JavaScript bridge/built-in language services/static assets as a separately installable plugin, reducing host APK coupling and allowing independent updates
 * `Improvement` Modularized offline project documentation as a plugin, reducing the host APK size and supporting independent installation and updates
+* `Improvement` Moved offline project documentation inventory parsing and full SHA-256 verification on first load to a background thread to avoid blocking the UI
+* `Improvement` Moved the complete AXML/ARSC/parsing/signing/keystore/cryptography toolchain required for APK builds into the APK Builder Template plugin, with lightweight APK inspection in the host
 * `Improvement` Code editor engine selection respects explicit user choices and provides access to Plugin Center when Ace is unavailable
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more
 * `Improvement` Improved code editor file-encoding detection and save safety; encoding conversions are written to disk only when the user saves the file
 * `Improvement` Bottom log panel supports jumping to source code by clicking stack frames on the standalone log page
 * `Improvement` Switching the project documentation source takes effect immediately
+* `Improvement` File manager decodes and formats the complete binary AndroidManifest.xml in the background only after the Manifest button is tapped, with optimized large-text scrolling and pinch zoom performance
 * `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs
 * `Improvement` Plugin Center lists common distribution variants by default and provides a separate page for other variants
 * `Improvement` Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features
 * `Improvement` Standardized multilingual translation coverage/file organization/name ordering/ASCII punctuation for project string resources
+* `Improvement` Limited APK language resources to the 10 locale configurations supported by the project to reduce package size
 * `Improvement` Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 

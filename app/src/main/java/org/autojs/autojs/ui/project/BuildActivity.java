@@ -40,11 +40,10 @@ import com.google.android.material.textfield.TextInputLayout;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import net.dongliu.apk.parser.ApkFile;
-import net.dongliu.apk.parser.bean.ApkMeta;
-import org.autojs.autojs.apkbuilder.ApkBuilder;
+import org.autojs.autojs.apkbuilder.ApkBuildLibrary;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.apkbuilder.template.RemoteApkBuildClient;
+import org.autojs.autojs.apkbuilder.template.RemoteProjectConfigUpdater;
 import org.autojs.autojs.apkbuilder.template.TemplateApkResolver;
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity;
 import org.autojs.autojs.core.pref.Language;
@@ -114,7 +113,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.autojs.autojs.apkbuilder.ApkBuilder.TEMPLATE_APK_NAME;
 import static org.autojs.autojs.util.StringUtils.key;
 
 /**
@@ -124,7 +122,7 @@ import static org.autojs.autojs.util.StringUtils.key;
  *
  * @noinspection ResultOfMethodCallIgnored, unused
  */
-public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCallback {
+public class BuildActivity extends BaseActivity {
 
     private static final int REQUEST_CODE = 44401;
     private static final int REQ_EXPORT_JSON = 44402;
@@ -292,6 +290,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     // Track cancellation state for cooperative build abort.
     // zh-CN: 跟踪取消状态, 用于协作式中止构建.
     private final AtomicBoolean mBuildCancelled = new AtomicBoolean(false);
+    private final Object mBuildCompletionLock = new Object();
+    private boolean mBuildSuccessCommitted;
     @Nullable
     private File mBuildWorkspace;
     @Nullable
@@ -299,7 +299,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @Nullable
     private File mBuildOutputApkBackup;
     @Nullable
-    private Thread mBuildThread;
+    private volatile Thread mBuildThread;
     private String mSource;
     private boolean mIsDefaultIcon = true;
     private boolean mIsProjectLevelBuilding;
@@ -352,7 +352,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private KeyStoreViewModel mKeyStoreViewModel;
 
     static {
-        for (ApkBuilder.Lib entry : ApkBuilder.Lib.getEntries()) {
+        for (ApkBuildLibrary entry : ApkBuildLibrary.getEntries()) {
             if (entry.enumerable) {
                 SUPPORTED_LIBS.add(entry.label);
                 LIB_ALIASES.put(entry.label, entry.aliases);
@@ -2050,47 +2050,37 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void updatePermissionsCheckboxes(String packageName) {
-        ApkFile apkFile;
+        String[] requestedPermissions;
         try {
-            apkFile = new ApkFile(new File(getPackageManager().getApplicationInfo(packageName, 0).sourceDir));
-        } catch (PackageManager.NameNotFoundException | IOException e) {
+            requestedPermissions = getPackageManager()
+                    .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+                    .requestedPermissions;
+        } catch (PackageManager.NameNotFoundException e) {
             return;
         }
-
-        try {
-            ApkMeta meta = apkFile.getApkMeta();
-            if (meta == null) {
-                return;
-            }
-            var initialPermissions = meta.usesPermissions;
-            IntStream.range(0, mFlexboxPermissionsView.getChildCount())
-                    .mapToObj(i -> mFlexboxPermissionsView.getChildAt(i))
-                    .forEach(child -> {
-                        CharSequence viewCharSequence = child instanceof RoundCheckboxWithText
-                                ? ((RoundCheckboxWithText) child).getText()
-                                : child instanceof CheckBox ? ((CheckBox) child).getText() : null;
-                        if (viewCharSequence == null) {
-                            return;
-                        }
-                        String viewText = viewCharSequence.toString().split("\n")[0].trim();
-                        if (!initialPermissions.contains(viewText)) {
-                            return;
-                        }
-                        if (child instanceof RoundCheckboxWithText) {
-                            ((RoundCheckboxWithText) child).setChecked(true);
-                        } else {
-                            ((CheckBox) child).setChecked(true);
-                        }
-                    });
-        } catch (Exception ignored) {
-            /* Ignored. */
-        } finally {
-            try {
-                apkFile.close();
-            } catch (IOException e) {
-                /* Ignored. */
-            }
+        if (requestedPermissions == null) {
+            return;
         }
+        var initialPermissions = List.of(requestedPermissions);
+        IntStream.range(0, mFlexboxPermissionsView.getChildCount())
+                .mapToObj(i -> mFlexboxPermissionsView.getChildAt(i))
+                .forEach(child -> {
+                    CharSequence viewCharSequence = child instanceof RoundCheckboxWithText
+                            ? ((RoundCheckboxWithText) child).getText()
+                            : child instanceof CheckBox ? ((CheckBox) child).getText() : null;
+                    if (viewCharSequence == null) {
+                        return;
+                    }
+                    String viewText = viewCharSequence.toString().split("\n")[0].trim();
+                    if (!initialPermissions.contains(viewText)) {
+                        return;
+                    }
+                    if (child instanceof RoundCheckboxWithText) {
+                        ((RoundCheckboxWithText) child).setChecked(true);
+                    } else {
+                        ((CheckBox) child).setChecked(true);
+                    }
+                });
     }
 
     private static String generatePackageNameSuffix(ScriptFile file) {
@@ -2208,6 +2198,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     void buildApk() {
+        if (isBuildOperationActive()) {
+            return;
+        }
         if (!checkInputs()) {
             ViewUtils.showToast(this, getString(R.string.error_input_fields_check_failed));
             return;
@@ -2423,6 +2416,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @SuppressLint("CheckResult")
     private void doBuildingApk() {
+        if (isBuildOperationActive()) {
+            return;
+        }
         ProjectConfig projectConfig = determineProjectConfig();
         File buildPath = new File(getCacheDir(), "build/");
         File outApk = new File(mOutputPathView.getText().toString(),
@@ -2435,10 +2431,13 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             ErrorDialogActivity.showErrorDialog(this, R.string.text_failed_to_build, e.getMessage());
             return;
         }
-        mBuildCancelled.set(false);
-        mBuildWorkspace = buildPath;
-        mBuildOutputApk = outApk;
-        mBuildOutputApkBackup = outApkBackup;
+        synchronized (mBuildCompletionLock) {
+            mBuildCancelled.set(false);
+            mBuildSuccessCommitted = false;
+            mBuildWorkspace = buildPath;
+            mBuildOutputApk = outApk;
+            mBuildOutputApkBackup = outApkBackup;
+        }
         showProgressDialog();
         Observable.fromCallable(() -> {
                     mBuildThread = Thread.currentThread();
@@ -2458,7 +2457,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     if (buildSucceeded) {
                         onBuildSuccessful(outApk);
                     } else {
-                        onBuildFailed(new FileNotFoundException(TEMPLATE_APK_NAME));
+                        onBuildFailed(new IOException("APK build did not produce an output file"));
                     }
                 }, this::onBuildFailed);
     }
@@ -2611,9 +2610,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private boolean callApkBuild(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
-        if (!shouldAttemptRemoteApkBuild()) {
-            callApkBuilder(buildPath, outApk, projectConfig);
-            return true;
+        TemplateApkResolver.Source source = mTemplateApkSource;
+        if (source == null) {
+            throw new FileNotFoundException("APK Builder plugin is unavailable");
         }
 
         RemoteApkBuildClient.BuildOutcome remoteOutcome;
@@ -2623,7 +2622,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     projectConfig,
                     outApk,
                     mBuildCancelled,
-                    this::onRemoteBuildProgress
+                    this::onRemoteBuildProgress,
+                    source.getPluginPackageName()
             );
         } catch (CancellationException e) {
             mBuildCancelled.set(true);
@@ -2637,52 +2637,35 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 mBuildCancelled.set(true);
                 return false;
             }
-            Log.w(LOG_TAG, "Remote APK build threw before completion; falling back to local build", e);
-            return fallbackToLocalApkBuild(buildPath, outApk, projectConfig, e.getMessage());
+            throw e;
         }
         if (remoteOutcome.getStatus() == RemoteApkBuildClient.STATUS_NOT_AVAILABLE
                 || remoteOutcome.getStatus() == ApkBuildResult.STATUS_UNSUPPORTED) {
-            return fallbackToLocalApkBuild(buildPath, outApk, projectConfig, formatRemoteBuildFailure(remoteOutcome));
+            throw new IOException(formatRemoteBuildFailure(remoteOutcome));
         }
         if (remoteOutcome.getStatus() == ApkBuildResult.STATUS_CANCELLED) {
             mBuildCancelled.set(true);
             return false;
         }
         if (remoteOutcome.isSuccess()) {
-            commitRemoteProjectConfigIfNeeded(projectConfig, remoteOutcome.getUpdatedProjectConfigJson());
+            synchronized (mBuildCompletionLock) {
+                if (mBuildCancelled.get() || Thread.currentThread().isInterrupted()) {
+                    mBuildCancelled.set(true);
+                    return false;
+                }
+                commitRemoteProjectConfigIfNeeded(projectConfig, remoteOutcome.getUpdatedProjectConfigJson());
+                mBuildSuccessCommitted = true;
+            }
             runOnUiThread(() -> updateProgressDialog(BuildStep.FINISHED));
             return true;
         }
-        Log.w(LOG_TAG, "Remote APK build failed; falling back to local build: " + formatRemoteBuildFailure(remoteOutcome));
-        return fallbackToLocalApkBuild(buildPath, outApk, projectConfig, formatRemoteBuildFailure(remoteOutcome));
+        throw new IOException(formatRemoteBuildFailure(remoteOutcome));
     }
 
-    private boolean shouldAttemptRemoteApkBuild() {
-        return mTemplateApkSource instanceof TemplateApkResolver.Source.Plugin;
-    }
-
-    private boolean fallbackToLocalApkBuild(
-            File buildPath,
-            File outApk,
-            ProjectConfig projectConfig,
-            @Nullable String reason
-    ) throws Exception {
-        if (mBuildCancelled.get() || Thread.currentThread().isInterrupted()) {
-            mBuildCancelled.set(true);
-            return false;
-        }
-        if (outApk.exists() && !outApk.delete()) {
-            Log.w(LOG_TAG, "Failed to delete remote build output before local fallback: " + outApk.getPath());
-        }
-        if (!TextUtils.isEmpty(reason)) {
-            Log.w(LOG_TAG, "Remote APK build fallback reason: " + reason);
-        }
-        runOnUiThread(() -> restartProgressDialogForLocalBuild(getString(R.string.text_falling_back_to_local_build)));
-        callApkBuilder(buildPath, outApk, projectConfig);
-        return true;
-    }
-
-    private void commitRemoteProjectConfigIfNeeded(@NonNull ProjectConfig projectConfig, @Nullable String updatedProjectConfigJson) {
+    private void commitRemoteProjectConfigIfNeeded(
+            @NonNull ProjectConfig projectConfig,
+            @Nullable String updatedProjectConfigJson
+    ) throws IOException {
         if (TextUtils.isEmpty(updatedProjectConfigJson)) {
             return;
         }
@@ -2690,7 +2673,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (TextUtils.isEmpty(sourcePath) || !PFiles.isDir(sourcePath)) {
             return;
         }
-        PFiles.write(ProjectConfig.configFileOfDir(sourcePath), updatedProjectConfigJson);
+        String mergedProjectConfigJson = RemoteProjectConfigUpdater.mergeBuildInfoJson(
+                projectConfig,
+                updatedProjectConfigJson
+        );
+        PFiles.write(ProjectConfig.configFileOfDir(sourcePath), mergedProjectConfigJson);
     }
 
     private String formatRemoteBuildFailure(@NonNull RemoteApkBuildClient.BuildOutcome outcome) {
@@ -2704,42 +2691,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return message;
         }
         return "Remote APK build failed with status: " + outcome.getStatus();
-    }
-
-    private ApkBuilder callApkBuilder(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
-        TemplateApkResolver.Source source = mTemplateApkSource;
-        if (source == null) {
-            throw new FileNotFoundException("APK Builder template plugin is unavailable");
-        }
-        InputStream templateApk = source.open(this);
-        return new ApkBuilder(templateApk, outApk, buildPath.getPath())
-                .setProgressCallback(BuildActivity.this)
-                .setCancelSignal(mBuildCancelled)
-                .prepare(BuildActivity.this)
-                .withConfig(BuildActivity.this, projectConfig)
-                .build(BuildActivity.this)
-                .sign(BuildActivity.this)
-                .commitProjectConfigIfNeeded(BuildActivity.this)
-                .cleanWorkspace(BuildActivity.this)
-                .finish();
-    }
-
-    private void restartProgressDialogForLocalBuild() {
-        restartProgressDialogForLocalBuild(null);
-    }
-
-    private void restartProgressDialogForLocalBuild(@Nullable String content) {
-        if (mProgressDialog == null) {
-            return;
-        }
-        resetStepDurations();
-        updateProgressDialog(BuildStep.PREPARE);
-        if (mStateTitleText != null) {
-            mStateTitleText.setText(getString(R.string.text_property_colon, getString(R.string.text_processing)));
-        }
-        if (mStateContentText != null) {
-            mStateContentText.setText(TextUtils.isEmpty(content) ? "" : content);
-        }
     }
 
     private void onRemoteBuildProgress(@NonNull ApkBuildProgress progress) {
@@ -3010,11 +2961,16 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         return tmp;
     }
 
-    // Abort build cooperatively and trigger cleanup as early as possible.
-    // zh-CN: Abort build cooperatively and trigger cleanup as early as possible.
+    // Abort cooperatively. Output and backup cleanup is performed exactly once after the build
+    // thread terminates, so an early cleanup task cannot race with backup restoration.
+    // zh-CN: 协作式中止. 输出与备份仅在构建线程结束后清理一次, 避免提前清理与备份恢复竞争.
     private void requestBuildAbort() {
-        if (!mBuildCancelled.compareAndSet(false, true)) {
-            return;
+        Thread buildThread;
+        synchronized (mBuildCompletionLock) {
+            if (mBuildSuccessCommitted || !mBuildCancelled.compareAndSet(false, true)) {
+                return;
+            }
+            buildThread = mBuildThread;
         }
         if (mProgressDialog != null) {
             mProgressDialog.setTitle(R.string.text_aborting);
@@ -3023,33 +2979,43 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 button.setEnabled(false);
             }
         }
-        Thread buildThread = mBuildThread;
         if (buildThread != null) {
             buildThread.interrupt();
         }
-        cleanupBuildArtifactsAsync(false);
     }
 
-    private void cleanupBuildArtifactsAsync(boolean restoreOutputApk) {
+    private void cleanupBuildArtifactsAsync(@NonNull Runnable onComplete) {
         File workspace = mBuildWorkspace;
         File outApk = mBuildOutputApk;
         File outApkBackup = mBuildOutputApkBackup;
         if (workspace == null && outApk == null && outApkBackup == null) {
+            onComplete.run();
             return;
         }
-        Schedulers.io().scheduleDirect(() -> cleanupBuildArtifacts(workspace, outApk, outApkBackup, restoreOutputApk));
+        Schedulers.io().scheduleDirect(() -> {
+            try {
+                cleanupBuildArtifacts(workspace, outApk, outApkBackup);
+            } finally {
+                runOnUiThread(onComplete);
+            }
+        });
     }
 
     // Best-effort cleanup for workspace and output artifacts.
     // zh-CN: Best-effort cleanup for workspace and output artifacts.
-    private void cleanupBuildArtifacts(@Nullable File workspace, @Nullable File outApk, @Nullable File outApkBackup, boolean restoreOutputApk) {
-        if (workspace != null && workspace.exists()) {
-            PFiles.deleteRecursively(workspace);
+    private void cleanupBuildArtifacts(@Nullable File workspace, @Nullable File outApk, @Nullable File outApkBackup) {
+        try {
+            if (workspace != null && workspace.exists()) {
+                PFiles.deleteRecursively(workspace);
+            }
+        } catch (Exception e) {
+            Log.w(LOG_TAG, "Failed to clean build workspace: " + workspace, e);
         }
-        if (outApk != null && outApk.exists()) {
-            outApk.delete();
-        }
-        if (restoreOutputApk) {
+        try {
+            if (outApk != null && outApk.exists() && !outApk.delete()) {
+                Log.w(LOG_TAG, "Failed to delete aborted build output: " + outApk.getPath());
+            }
+        } finally {
             restoreOutputApkIfNeeded(outApk, outApkBackup);
         }
     }
@@ -3080,18 +3046,28 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void handleBuildAborted() {
-        dismissProgressDialog();
-        cleanupBuildArtifactsAsync(true);
-        ViewUtils.showToast(this, getString(R.string.text_operation_aborted));
-        finishBuildState();
+        cleanupBuildArtifactsAsync(() -> {
+            dismissProgressDialog();
+            ViewUtils.showToast(this, getString(R.string.text_operation_aborted));
+            finishBuildState();
+        });
     }
 
     private void finishBuildState() {
-        mBuildWorkspace = null;
-        mBuildOutputApk = null;
-        mBuildOutputApkBackup = null;
-        mBuildThread = null;
-        mBuildCancelled.set(false);
+        synchronized (mBuildCompletionLock) {
+            mBuildWorkspace = null;
+            mBuildOutputApk = null;
+            mBuildOutputApkBackup = null;
+            mBuildThread = null;
+            mBuildCancelled.set(false);
+            mBuildSuccessCommitted = false;
+        }
+    }
+
+    private boolean isBuildOperationActive() {
+        synchronized (mBuildCompletionLock) {
+            return mBuildWorkspace != null || mBuildThread != null || mBuildCancelled.get();
+        }
     }
 
     private void dismissProgressDialog() {
@@ -3171,44 +3147,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             });
         }
         finishBuildState();
-    }
-
-    @Override
-    public void onPrepare(@NonNull ApkBuilder builder) {
-        updateProgressDialog(BuildStep.PREPARE);
-    }
-
-    @Override
-    public void onBuild(@NonNull ApkBuilder builder) {
-        updateProgressDialog(BuildStep.BUILD);
-    }
-
-    @Override
-    public void onSign(@NonNull ApkBuilder builder) {
-        updateProgressDialog(BuildStep.SIGN);
-    }
-
-    @Override
-    public void onClean(@NonNull ApkBuilder builder) {
-        updateProgressDialog(BuildStep.CLEAN);
-    }
-
-    @Override
-    public void onStepProgress(@NonNull ApkBuilder builder, @NonNull String title, @Nullable String detail) {
-        if (mLatestProgressStep == BuildStep.FINISHED) {
-            return;
-        }
-        if (mStateTitleText != null) {
-            mStateTitleText.setText(getString(R.string.text_property_colon, title));
-        }
-        if (!TextUtils.isEmpty(detail) && mStateContentText != null) {
-            mStateContentText.setText(detail);
-        }
-    }
-
-    @Override
-    public void onFinished(@NotNull ApkBuilder builder) {
-        updateProgressDialog(BuildStep.FINISHED);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

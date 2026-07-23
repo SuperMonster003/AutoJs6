@@ -209,57 +209,29 @@ class RemoteApkLightweightBuilder(
     }
 
     private fun unzipBuildInputsArchive(zipFile: File, buildDir: File) {
-        val canonicalRoot = buildDir.canonicalFile
-        ZipInputStream(FileInputStream(zipFile).buffered(BUFFER_SIZE)).use { zip ->
-            while (true) {
-                val entry = zip.nextEntry ?: break
-                extractBuildInputEntry(zip, entry, canonicalRoot)
-                zip.closeEntry()
-            }
-        }
+        RemoteZipExtractor.extract(
+            archiveFile = zipFile,
+            targetDir = buildDir,
+            budget = RemoteBuildBudgets.NATIVE_LIBRARIES_ARCHIVE_ZIP,
+            isCancelled = cancelSignal::get,
+            cleanupTargetOnFailure = false,
+            entryValidator = ::validateBuildInputEntry,
+        )
     }
 
-    private fun extractBuildInputEntry(zip: ZipInputStream, entry: ZipEntry, root: File) {
-        ensureActive()
-        val name = entry.name.replace('\\', '/')
-        if (name.isBlank() || name.startsWith('/') || name.split('/').any { it == ".." }) {
-            throw IOException("Unsafe remote build input archive entry: ${entry.name}")
-        }
-        validateBuildInputEntry(name, entry)
-        val out = File(root, name).canonicalFile
-        if (!out.path.startsWith(root.path + File.separator) && out.path != root.path) {
-            throw IOException("Remote build input archive entry escapes build directory: ${entry.name}")
-        }
-        if (entry.isDirectory) {
-            if (!out.exists() && !out.mkdirs()) {
-                throw IOException("Failed to create remote build input directory: ${out.path}")
-            }
-            return
-        }
-        out.parentFile?.let { parent ->
-            if (!parent.exists() && !parent.mkdirs()) {
-                throw IOException("Failed to create remote build input parent directory: ${parent.path}")
-            }
-        }
-        FileOutputStream(out, false).use { output ->
-            zip.copyTo(output, BUFFER_SIZE)
-            output.flush()
-        }
-    }
-
-    private fun validateBuildInputEntry(name: String, entry: ZipEntry) {
+    private fun validateBuildInputEntry(name: String, isDirectory: Boolean) {
         val segments = name.split('/')
         when (segments.firstOrNull()) {
             "lib" -> {
-                if (entry.isDirectory) {
+                if (isDirectory) {
                     return
                 }
                 if (segments.size != 3 || !segments[2].endsWith(".so")) {
-                    throw IOException("Unexpected native library archive entry: ${entry.name}")
+                    throw IOException("Unexpected native library archive entry: $name")
                 }
             }
             "assets" -> Unit
-            else -> throw IOException("Unexpected remote build input archive entry: ${entry.name}")
+            else -> throw IOException("Unexpected remote build input archive entry: $name")
         }
     }
 
@@ -335,8 +307,11 @@ class RemoteApkLightweightBuilder(
         val build = projectConfig.json.optJSONObject(KEY_BUILD) ?: JSONObject().also {
             projectConfig.json.put(KEY_BUILD, it)
         }
-        val nextNumber = (build.optLong(KEY_BUILD_NUMBER, 0L).takeIf { it > 0L }
-            ?: projectConfig.versionCode.toLong()) + 1L
+        val nextNumber = RemoteBuildInfoPolicy.nextBuildNumber(
+            sourceKind = workspace.sourceKind,
+            currentBuildNumber = build.optLong(KEY_BUILD_NUMBER, 0L),
+            versionCode = projectConfig.versionCode,
+        )
         val buildTime = System.currentTimeMillis()
         build.put(KEY_BUILD_ID, generateBuildId(nextNumber, buildTime))
         build.put(KEY_BUILD_NUMBER, nextNumber)

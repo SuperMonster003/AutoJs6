@@ -4,10 +4,11 @@ import android.content.Context
 import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
-import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
+import org.autojs.plugin.apkbuilder.template.ApkKeyStoreRequest
+import org.autojs.plugin.apkbuilder.template.ApkKeyStoreResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginActions
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
@@ -18,6 +19,7 @@ import org.autojs.plugin.apkbuilder.template.IApkBuildCallback
 import org.autojs.plugin.apkbuilder.template.IApkBuildSession
 import org.autojs.plugin.apkbuilder.template.IApkBuilderTemplatePlugin
 import org.autojs.plugin.common.api.PluginInfo
+import java.io.Closeable
 
 object ApkBuilderTemplatePluginHost {
 
@@ -41,6 +43,12 @@ object ApkBuilderTemplatePluginHost {
         val target: AidlPluginHost.Discovered,
         val session: IApkBuildSession,
         val hostCompatibilityWarnings: List<String>,
+        val bindingLease: Closeable,
+    )
+
+    data class ResolvedRemoteBuilder(
+        val target: AidlPluginHost.Discovered,
+        val hostCompatibilityWarnings: List<String>,
     )
 
     suspend fun discover(context: Context) = host.discover(context)
@@ -49,10 +57,9 @@ object ApkBuilderTemplatePluginHost {
         val appContext = context.applicationContext
         val candidates = discover(appContext)
             .asSequence()
-            .filter { it.pluginInfo != null }
-            .filter { matchesTemplatePlugin(it.pluginInfo) }
-            .filter { PluginEnableStore.isEnabled(appContext, it.serviceInfo.packageName, true) }
-            .filter { PluginTrustManager.isAuthorized(appContext, it.serviceInfo.packageName) }
+            .filter { isOfficialTemplatePlugin(appContext, it) }
+            .filter { isRequiredHostVersionCompatible(it.pluginInfo) }
+            .filter { supportsTemplateProtocol(it.pluginInfo, request.requiredProtocolVersion) }
             .sortedWith(
                 compareByDescending<AidlPluginHost.Discovered> { isExactHostVersionMatch(it.pluginInfo) }
                     .thenByDescending { it.pluginInfo?.versionCode ?: 0L }
@@ -62,7 +69,13 @@ object ApkBuilderTemplatePluginHost {
 
         val target = candidates.firstOrNull() ?: return null
         val warnings = hostCompatibilityWarnings(appContext, target.pluginInfo)
-        val result = host.call(appContext, target, enforceHostVersionCompatibility = false) { proxy ->
+        ensureStrictTarget(appContext, target)
+        val result = host.call(
+            context = appContext,
+            target = target,
+            enforceHostVersionCompatibility = true,
+            enforceAuthorization = false,
+        ) { proxy ->
             proxy.openTemplate(request)
         }
         return OpenedTemplate(target, result, warnings)
@@ -71,32 +84,92 @@ object ApkBuilderTemplatePluginHost {
     suspend fun hasRemoteBuildPlugin(
         context: Context,
         requiredProtocolVersion: Int = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+        preferredPackageName: String? = null,
     ): Boolean {
+        return resolveRemoteBuilder(context, requiredProtocolVersion, preferredPackageName) != null
+    }
+
+    suspend fun resolveRemoteBuilder(
+        context: Context,
+        requiredProtocolVersion: Int = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+        preferredPackageName: String? = null,
+    ): ResolvedRemoteBuilder? {
         val appContext = context.applicationContext
-        return discover(appContext)
-            .any { item ->
-                item.pluginInfo != null &&
-                        matchesTemplatePlugin(item.pluginInfo) &&
-                        PluginEnableStore.isEnabled(appContext, item.serviceInfo.packageName, true) &&
-                        PluginTrustManager.isAuthorized(appContext, item.serviceInfo.packageName) &&
-                        supportsRemoteBuild(item.pluginInfo, requiredProtocolVersion)
-            }
+        val target = remoteBuildCandidates(appContext, requiredProtocolVersion)
+            .firstOrNull { preferredPackageName == null || it.serviceInfo.packageName == preferredPackageName }
+            ?: return null
+        return ResolvedRemoteBuilder(
+            target = target,
+            hostCompatibilityWarnings = hostCompatibilityWarnings(appContext, target.pluginInfo),
+        )
     }
 
     suspend fun openBuildSession(
         context: Context,
         request: ApkBuildRequest,
         callback: IApkBuildCallback?,
+        preferredPackageName: String? = null,
     ): OpenedBuildSession? {
         val appContext = context.applicationContext
         val requiredProtocolVersion = request.requiredProtocolVersion.takeIf { it > 0 }
             ?: ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION
-        val candidates = discover(appContext)
+        val candidates = remoteBuildCandidates(appContext, requiredProtocolVersion)
             .asSequence()
-            .filter { it.pluginInfo != null }
-            .filter { matchesTemplatePlugin(it.pluginInfo) }
-            .filter { PluginEnableStore.isEnabled(appContext, it.serviceInfo.packageName, true) }
-            .filter { PluginTrustManager.isAuthorized(appContext, it.serviceInfo.packageName) }
+            .filter { preferredPackageName == null || it.serviceInfo.packageName == preferredPackageName }
+            .toList()
+
+        val target = candidates.firstOrNull() ?: return null
+        val warnings = hostCompatibilityWarnings(appContext, target.pluginInfo)
+        ensureStrictTarget(appContext, target)
+        val leasedSession = host.callWithDedicatedBindingLease(
+            context = appContext,
+            target = target,
+            enforceHostVersionCompatibility = true,
+            enforceAuthorization = false,
+            retryOnRemoteException = false,
+        ) { proxy ->
+            proxy.openBuildSession(request, callback)
+        }
+        val session = leasedSession.value
+        if (session == null) {
+            leasedSession.bindingLease.close()
+            return null
+        }
+        return OpenedBuildSession(target, session, warnings, leasedSession.bindingLease)
+    }
+
+    suspend fun manageKeyStore(
+        context: Context,
+        request: ApkKeyStoreRequest,
+        preferredPackageName: String? = null,
+    ): ApkKeyStoreResult? {
+        val appContext = context.applicationContext
+        val target = remoteBuildCandidates(appContext, ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION)
+            .firstOrNull { candidate ->
+                (preferredPackageName == null || candidate.serviceInfo.packageName == preferredPackageName) &&
+                        supportsKeyStoreOperations(candidate.pluginInfo)
+            }
+            ?: return null
+        ensureStrictTarget(appContext, target)
+        return host.call(
+            context = appContext,
+            target = target,
+            enforceHostVersionCompatibility = true,
+            enforceAuthorization = false,
+            retryOnRemoteException = false,
+        ) { proxy ->
+            proxy.manageKeyStore(request)
+        }
+    }
+
+    private suspend fun remoteBuildCandidates(
+        context: Context,
+        requiredProtocolVersion: Int,
+    ): List<AidlPluginHost.Discovered> {
+        return discover(context)
+            .asSequence()
+            .filter { isOfficialTemplatePlugin(context, it) }
+            .filter { isRequiredHostVersionCompatible(it.pluginInfo) }
             .filter { supportsRemoteBuild(it.pluginInfo, requiredProtocolVersion) }
             .sortedWith(
                 compareByDescending<AidlPluginHost.Discovered> { isExactHostVersionMatch(it.pluginInfo) }
@@ -105,19 +178,12 @@ object ApkBuilderTemplatePluginHost {
                     .thenBy { it.serviceInfo.packageName }
             )
             .toList()
-
-        val target = candidates.firstOrNull() ?: return null
-        val warnings = hostCompatibilityWarnings(appContext, target.pluginInfo)
-        val session = host.call(appContext, target, enforceHostVersionCompatibility = false) { proxy ->
-            proxy.openBuildSession(request, callback)
-        } ?: return null
-        return OpenedBuildSession(target, session, warnings)
     }
 
     suspend fun unavailableWarnings(context: Context): List<String> {
         val appContext = context.applicationContext
         val discovered = discover(appContext)
-            .filter { it.pluginInfo == null || matchesTemplatePlugin(it.pluginInfo) }
+            .filter { it.serviceInfo.packageName == ApkBuilderTemplatePluginIds.PACKAGE_NAME }
         if (discovered.isEmpty()) {
             return emptyList()
         }
@@ -128,8 +194,23 @@ object ApkBuilderTemplatePluginHost {
                     "${item.serviceInfo.packageName}/${item.serviceInfo.name}: ${error.message ?: error}"
                 }
             }
-        val infoItems = discovered.filter { it.pluginInfo != null }
-        val unauthorizedItems = infoItems.filterNot { PluginTrustManager.isAuthorized(appContext, it.serviceInfo.packageName) }
+        val infoItems = discovered.filter {
+            it.pluginInfo != null && matchesTemplatePlugin(it.pluginInfo)
+        }
+        val invalidMetadataItems = discovered.filter {
+            it.pluginInfo != null && !matchesTemplatePlugin(it.pluginInfo)
+        }
+        if (invalidMetadataItems.isNotEmpty()) {
+            return (
+                    infoErrors +
+                            "Official APK Builder plugin metadata is invalid: both id=${ApkBuilderTemplatePluginIds.ID} " +
+                            "and engine=${ApkBuilderTemplatePluginIds.ENGINE} are required."
+                    ).filter { it.isNotBlank() }.distinct()
+        }
+
+        val unauthorizedItems = infoItems.filterNot {
+            ApkBuilderPluginTrustPolicy.isAccepted(appContext, it.serviceInfo.packageName)
+        }
         if (unauthorizedItems.isNotEmpty()) {
             return (
                     infoErrors +
@@ -156,8 +237,49 @@ object ApkBuilderTemplatePluginHost {
 
     private fun matchesTemplatePlugin(pluginInfo: PluginInfo?): Boolean {
         pluginInfo ?: return false
-        return pluginInfo.id == ApkBuilderTemplatePluginIds.ID ||
+        return pluginInfo.id == ApkBuilderTemplatePluginIds.ID &&
                 pluginInfo.engine == ApkBuilderTemplatePluginIds.ENGINE
+    }
+
+    private fun isOfficialTemplatePlugin(
+        context: Context,
+        candidate: AidlPluginHost.Discovered,
+    ): Boolean {
+        val packageName = candidate.serviceInfo.packageName
+        return packageName == ApkBuilderTemplatePluginIds.PACKAGE_NAME &&
+                matchesTemplatePlugin(candidate.pluginInfo) &&
+                PluginEnableStore.isEnabled(context, packageName, true) &&
+                ApkBuilderPluginTrustPolicy.isAccepted(context, packageName)
+    }
+
+    private fun ensureStrictTarget(
+        context: Context,
+        candidate: AidlPluginHost.Discovered,
+    ) {
+        check(isOfficialTemplatePlugin(context, candidate)) {
+            "APK Builder plugin identity or signature changed before invocation."
+        }
+        check(isRequiredHostVersionCompatible(candidate.pluginInfo)) {
+            "APK Builder plugin requires a newer AutoJs6 host version."
+        }
+    }
+
+    private fun isRequiredHostVersionCompatible(pluginInfo: PluginInfo?): Boolean {
+        val requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities)
+        return PluginCapabilityResolver.isHostVersionCompatible(
+            BuildConfig.VERSION_CODE.toLong(),
+            requiresHostVersion,
+        )
+    }
+
+    private fun supportsTemplateProtocol(pluginInfo: PluginInfo?, requiredProtocolVersion: Int): Boolean {
+        if (requiredProtocolVersion <= 0) return true
+        val capabilities = pluginInfo?.capabilities ?: return false
+        @Suppress("DEPRECATION")
+        val protocolVersion = PluginCapabilityResolver.coerceLong(
+            capabilities.get(ApkBuilderTemplateCapabilityKeys.PROTOCOL_VERSION)
+        )?.toInt() ?: 0
+        return protocolVersion >= requiredProtocolVersion
     }
 
     private fun supportsRemoteBuild(pluginInfo: PluginInfo?, requiredProtocolVersion: Int): Boolean {
@@ -169,12 +291,24 @@ object ApkBuilderTemplatePluginHost {
         return remoteBuildProtocolVersion(pluginInfo) >= requiredProtocolVersion
     }
 
+    private fun supportsKeyStoreOperations(pluginInfo: PluginInfo?): Boolean {
+        val capabilities = pluginInfo?.capabilities ?: return false
+        @Suppress("DEPRECATION")
+        if (!coerceBoolean(capabilities.get(ApkBuilderTemplateCapabilityKeys.SUPPORTS_KEYSTORE_OPERATIONS))) {
+            return false
+        }
+        @Suppress("DEPRECATION")
+        val apiVersion = PluginCapabilityResolver.coerceLong(
+            capabilities.get(ApkBuilderTemplateCapabilityKeys.KEYSTORE_API_VERSION)
+        )?.toInt() ?: return false
+        return apiVersion == ApkBuilderTemplateProtocol.KEYSTORE_VERSION
+    }
+
     private fun remoteBuildProtocolVersion(pluginInfo: PluginInfo?): Int {
         val capabilities = pluginInfo?.capabilities ?: return 0
         @Suppress("DEPRECATION")
         return PluginCapabilityResolver.coerceLong(
             capabilities.get(ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_PROTOCOL_VERSION)
-                ?: capabilities.get(ApkBuilderTemplateCapabilityKeys.PROTOCOL_VERSION)
         )?.toInt() ?: 0
     }
 

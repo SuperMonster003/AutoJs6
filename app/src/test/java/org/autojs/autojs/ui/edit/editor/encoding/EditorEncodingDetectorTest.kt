@@ -69,7 +69,7 @@ class EditorEncodingDetectorTest {
         )
 
         assertEquals(text, EditorEncodingCodec.decodeStrictOrNull(bytes, detection.charset))
-        assertEquals(EditorEncodingDetectionSource.ICU, detection.source)
+        assertEquals(EditorEncodingDetectionSource.LEGACY, detection.source)
     }
 
     @Test
@@ -86,11 +86,65 @@ class EditorEncodingDetectorTest {
         )
 
         assertEquals(text, EditorEncodingCodec.decodeStrictOrNull(bytes, detection.charset))
-        assertEquals(EditorEncodingDetectionSource.ICU, detection.source)
+        assertEquals(EditorEncodingDetectionSource.LEGACY, detection.source)
     }
 
     @Test
-    fun strongIcuEvidenceIsNotOverriddenByAConflictingLocaleHint() {
+    fun statisticalDetectorRecognizesWesternEuropeanWindows1252() {
+        assumeTrue("Host JVM does not support windows-1252", Charset.isSupported("windows-1252"))
+        val charset = Charset.forName("windows-1252")
+        val text = "L'été à Noël coûte 20 € — déjà vu."
+        val bytes = text.toByteArray(charset)
+
+        val detection = EditorEncodingDetector.detect(
+            bytes = bytes,
+            preferredCharsetNames = listOf("windows-1252", "ISO-8859-1", "ISO-8859-15"),
+            localeTag = "fr",
+        )
+
+        assertEquals(charset, detection.charset)
+        assertEquals(text, EditorEncodingCodec.decodeStrictOrNull(bytes, detection.charset))
+    }
+
+    @Test
+    fun statisticalDetectorDistinguishesCommonRussianLegacyEncodings() {
+        val text = "Съешь ещё этих мягких французских булок, да выпей чаю. Проверка кодировки русского текста."
+        val charsetNames = listOf("windows-1251", "KOI8-R", "ISO-8859-5")
+        charsetNames.forEach { charsetName ->
+            assumeTrue("Host JVM does not support $charsetName", Charset.isSupported(charsetName))
+            val charset = Charset.forName(charsetName)
+            val bytes = text.toByteArray(charset)
+
+            val detection = EditorEncodingDetector.detect(
+                bytes = bytes,
+                preferredCharsetNames = charsetNames,
+                localeTag = "ru",
+            )
+
+            assertEquals(charsetName, charset, detection.charset)
+            assertEquals(charsetName, text, EditorEncodingCodec.decodeStrictOrNull(bytes, detection.charset))
+        }
+    }
+
+    @Test
+    fun arabicLocaleEvidenceRejectsCrossScriptStatisticalGuess() {
+        assumeTrue("Host JVM does not support windows-1256", Charset.isSupported("windows-1256"))
+        val charset = Charset.forName("windows-1256")
+        val text = "هذا اختبار لترميز النص العربي في المحرر"
+        val bytes = text.toByteArray(charset)
+
+        val detection = EditorEncodingDetector.detect(
+            bytes = bytes,
+            preferredCharsetNames = listOf("windows-1256", "ISO-8859-6"),
+            localeTag = "ar",
+        )
+
+        assertEquals(charset, detection.charset)
+        assertEquals(text, EditorEncodingCodec.decodeStrictOrNull(bytes, detection.charset))
+    }
+
+    @Test
+    fun strongIso2022EvidenceIsNotOverriddenByAConflictingLocaleHint() {
         assumeTrue("Host JVM does not support ISO-2022-JP", Charset.isSupported("ISO-2022-JP"))
         val charset = Charset.forName("ISO-2022-JP")
         val text = "日本語の文字コード判定テストです"
@@ -103,7 +157,7 @@ class EditorEncodingDetectorTest {
         )
 
         assertEquals(charset, detection.charset)
-        assertEquals(EditorEncodingDetectionSource.ICU, detection.source)
+        assertEquals(EditorEncodingDetectionSource.LEGACY, detection.source)
         assertTrue(detection.confidence >= 50)
         assertEquals(text, EditorEncodingCodec.decodeStrictOrNull(bytes, detection.charset))
     }
@@ -184,6 +238,19 @@ class EditorEncodingDetectorTest {
         assertEquals(utf16Le, detection.charset)
         assertTrue(detection.hadBom)
         assertEquals(text, EditorEncodingCodec.decodeStrictOrNull(payload, detection.charset))
+    }
+
+    @Test
+    fun bomlessUtf16WithSupplementaryCodePointRemainsText() {
+        val text = "hello🙂world"
+        listOf(StandardCharsets.UTF_16LE, StandardCharsets.UTF_16BE).forEach { charset ->
+            val bytes = EditorEncodingCodec.encodeStrict(text, charset)
+
+            val detection = EditorEncodingDetector.detect(bytes)
+
+            assertEquals(charset.name(), charset, detection.charset)
+            assertEquals(charset.name(), text, EditorEncodingCodec.decodeStrictOrNull(bytes, detection.charset))
+        }
     }
 
     @Test

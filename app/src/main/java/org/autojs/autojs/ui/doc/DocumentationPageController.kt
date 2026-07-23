@@ -10,7 +10,6 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.plugin.center.PluginIndexSource
 import org.autojs.autojs.core.plugin.docs.OfflineDocsAssetPathHandler
-import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
 import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginStateMonitor
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.widget.EWebView
@@ -38,6 +37,7 @@ class DocumentationPageController(
     private var assetLoader: WebViewAssetLoader? = null
     private var clearHistoryAfterNextDocumentationPage = false
     private var started = false
+    private var restartRequiresReload = false
     private var disposed = false
 
     private val pageFinishedListener = EWebView.OnPageFinishedListener { _, url ->
@@ -64,10 +64,15 @@ class DocumentationPageController(
         }
     }
 
-    private val pluginStateListener: (OfflineDocsPluginStateMonitor.Change) -> Unit = {
+    private val pluginStateListener: (OfflineDocsPluginStateMonitor.Change) -> Unit = { change ->
         webView.post {
             if (!disposed && DocsUtils.isOfflineSourceSelected()) {
                 desiredSuffix = currentSuffix()
+                if (change.requiresContentRelease || change.requiresContentReload) {
+                    // A package can be replaced in place without changing its logical identity.
+                    // Drop the old AssetManager before rebuilding the WebView interceptor.
+                    releaseOfflineContent()
+                }
                 renderCurrentSource(forceReload = true)
             }
         }
@@ -94,7 +99,24 @@ class DocumentationPageController(
             Pref.get().registerOnSharedPreferenceChangeListener(preferenceChangeListener)
             OfflineDocsPluginStateMonitor.addListener(context, pluginStateListener)
         }
-        loadUrl(initialUrl)
+        routeSuffix(initialUrl)?.let { desiredSuffix = it }
+        val forceReload = restartRequiresReload
+        restartRequiresReload = false
+        renderCurrentSource(forceReload)
+    }
+
+    /**
+     * Temporarily suspends external listeners while the owning view is detached. Unlike
+     * [dispose], this controller can be started again when the same view is reattached.
+     */
+    fun stop() {
+        if (!started || disposed) return
+        started = false
+        Pref.get().unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
+        OfflineDocsPluginStateMonitor.removeListener(pluginStateListener)
+        webView.stopLoading()
+        releaseOfflineContent()
+        restartRequiresReload = true
     }
 
     fun loadUrl(url: String?) {
@@ -127,11 +149,8 @@ class DocumentationPageController(
 
     fun dispose() {
         if (disposed) return
+        stop()
         disposed = true
-        if (started) {
-            Pref.get().unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
-            OfflineDocsPluginStateMonitor.removeListener(pluginStateListener)
-        }
         eWebView.removeOnPageFinishedListener(pageFinishedListener)
         clearHistoryAfterNextDocumentationPage = false
         releaseOfflineContent()
@@ -152,9 +171,22 @@ class DocumentationPageController(
     }
 
     private fun showOfflineDocumentation(forceReload: Boolean) {
-        val plugin = runCatching { OfflineDocsPluginHost.load(context) }.getOrElse {
-            showUnavailable()
-            return
+        val state = OfflineDocsPluginStateMonitor.current(context)
+        val plugin = OfflineDocsPluginStateMonitor.loadedPlugin(context)
+        when {
+            state.status == OfflineDocsPluginStateMonitor.Status.LOADING -> {
+                showPendingOfflineDocumentation()
+                return
+            }
+            !state.available -> {
+                showUnavailable()
+                return
+            }
+            plugin == null -> {
+                showPendingOfflineDocumentation()
+                OfflineDocsPluginStateMonitor.refresh()
+                return
+            }
         }
         if (assetLoader == null || loadedPluginIdentity != plugin.candidate.packageIdentity) {
             val nextAssetLoader = WebViewAssetLoader.Builder()
@@ -177,6 +209,16 @@ class DocumentationPageController(
         }
         showWebView()
         loadIntoWebView(DocsUtils.getOfflineUrl(desiredSuffix), forceReload)
+    }
+
+    private fun showPendingOfflineDocumentation() {
+        if (assetLoader != null) return
+        releaseOfflineContent()
+        webView.stopLoading()
+        clearHistoryAfterNextDocumentationPage = true
+        if (webView.url != "about:blank") webView.loadUrl("about:blank")
+        unavailableView.isVisible = false
+        eWebView.isVisible = true
     }
 
     private fun showWebView() {

@@ -11,14 +11,10 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 import java.io.SyncFailedException
 import java.security.MessageDigest
 import java.util.concurrent.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 
 class RemoteApkBuildWorkspace private constructor(
     val root: File,
@@ -67,17 +63,41 @@ class RemoteApkBuildWorkspace private constructor(
             try {
                 ensureActive(cancelSignal)
                 val archiveFile = File(root, "project.zip")
-                copyFdToFile(request.projectArchiveFd ?: throw IOException("Project archive fd is missing."), archiveFile, cancelSignal)
+                copyFdToFile(
+                    fd = request.projectArchiveFd ?: throw IOException("Project archive fd is missing."),
+                    file = archiveFile,
+                    expectedSize = request.projectArchiveSizeBytes,
+                    budget = RemoteBuildBudgets.PROJECT_ARCHIVE_TRANSFER,
+                    cancelSignal = cancelSignal,
+                )
                 verifyFile(archiveFile, request.projectArchiveSizeBytes, request.projectArchiveSha256, "project archive", cancelSignal)
                 ensureActive(cancelSignal)
 
                 val projectRoot = File(root, "unpacked")
-                unzipSafely(archiveFile, projectRoot, cancelSignal)
+                RemoteZipExtractor.extract(
+                    archiveFile = archiveFile,
+                    targetDir = projectRoot,
+                    budget = RemoteBuildBudgets.PROJECT_ARCHIVE_ZIP,
+                    isCancelled = { cancelSignal?.get() == true },
+                    cleanupTargetOnFailure = true,
+                )
                 ensureActive(cancelSignal)
 
+                validateOptionalInput(
+                    present = request.nativeLibrariesArchiveFd != null,
+                    declaredSize = request.nativeLibrariesArchiveSizeBytes,
+                    declaredSha256 = request.nativeLibrariesArchiveSha256,
+                    label = "native libraries archive",
+                )
                 val nativeLibrariesArchiveFile = request.nativeLibrariesArchiveFd?.let { fd ->
                     File(root, "native-libraries.zip").also { file ->
-                        copyFdToFile(fd, file, cancelSignal)
+                        copyFdToFile(
+                            fd = fd,
+                            file = file,
+                            expectedSize = request.nativeLibrariesArchiveSizeBytes,
+                            budget = RemoteBuildBudgets.NATIVE_LIBRARIES_ARCHIVE_TRANSFER,
+                            cancelSignal = cancelSignal,
+                        )
                         verifyFile(
                             file = file,
                             expectedSize = request.nativeLibrariesArchiveSizeBytes,
@@ -121,9 +141,21 @@ class RemoteApkBuildWorkspace private constructor(
                     }
                 }
 
+                validateOptionalInput(
+                    present = request.keyStoreFd != null,
+                    declaredSize = request.keyStoreSizeBytes,
+                    declaredSha256 = request.keyStoreSha256,
+                    label = "keystore",
+                )
                 val keyStoreFile = request.keyStoreFd?.let { fd ->
                     File(root, "keystore.bin").also { file ->
-                        copyFdToFile(fd, file, cancelSignal)
+                        copyFdToFile(
+                            fd = fd,
+                            file = file,
+                            expectedSize = request.keyStoreSizeBytes,
+                            budget = RemoteBuildBudgets.KEY_STORE_TRANSFER,
+                            cancelSignal = cancelSignal,
+                        )
                         verifyFile(file, request.keyStoreSizeBytes, request.keyStoreSha256, "keystore", cancelSignal)
                     }
                 }
@@ -146,14 +178,40 @@ class RemoteApkBuildWorkspace private constructor(
         private fun copyFdToFile(
             fd: ParcelFileDescriptor,
             file: File,
+            expectedSize: Long,
+            budget: RemoteTransferBudget,
             cancelSignal: AtomicBoolean?,
         ) {
-            ParcelFileDescriptor.AutoCloseInputStream(fd).use { input ->
-                FileOutputStream(file, false).use { output ->
-                    copyStreamWithCancel(input, output, cancelSignal)
-                    output.flush()
-                    syncBestEffort(output)
+            try {
+                ParcelFileDescriptor.AutoCloseInputStream(fd).use { input ->
+                    budget.validateDeclaredSize(expectedSize)
+                    FileOutputStream(file, false).use { output ->
+                        RemoteBoundedStreamCopier.copy(
+                            input = input,
+                            output = output,
+                            budget = budget,
+                            isCancelled = { cancelSignal?.get() == true },
+                        )
+                        output.flush()
+                        syncBestEffort(output)
+                    }
                 }
+            } catch (error: Throwable) {
+                if (file.exists() && !file.delete()) {
+                    Log.w(TAG, "Failed to delete partial remote build input: ${file.path}")
+                }
+                throw error
+            }
+        }
+
+        private fun validateOptionalInput(
+            present: Boolean,
+            declaredSize: Long,
+            declaredSha256: String?,
+            label: String,
+        ) {
+            if (!present && (declaredSize != 0L || !declaredSha256.isNullOrBlank())) {
+                throw IOException("Remote build $label metadata is present without a file descriptor.")
             }
         }
 
@@ -207,57 +265,6 @@ class RemoteApkBuildWorkspace private constructor(
             }
         }
 
-        private fun unzipSafely(
-            zipFile: File,
-            targetDir: File,
-            cancelSignal: AtomicBoolean?,
-        ) {
-            if (!targetDir.mkdirs()) {
-                throw IOException("Failed to create project archive target dir: ${targetDir.path}")
-            }
-            val canonicalRoot = targetDir.canonicalFile
-            ZipInputStream(FileInputStream(zipFile).buffered(BUFFER_SIZE)).use { zip ->
-                while (true) {
-                    ensureActive(cancelSignal)
-                    val entry = zip.nextEntry ?: break
-                    extractEntry(zip, entry, canonicalRoot, cancelSignal)
-                    zip.closeEntry()
-                }
-            }
-        }
-
-        private fun extractEntry(
-            zip: ZipInputStream,
-            entry: ZipEntry,
-            root: File,
-            cancelSignal: AtomicBoolean?,
-        ) {
-            ensureActive(cancelSignal)
-            val name = entry.name.replace('\\', '/')
-            if (name.isBlank() || name.startsWith('/') || name.split('/').any { it == ".." }) {
-                throw IOException("Unsafe project archive entry: ${entry.name}")
-            }
-            val out = File(root, name).canonicalFile
-            if (!out.path.startsWith(root.path + File.separator) && out.path != root.path) {
-                throw IOException("Project archive entry escapes target dir: ${entry.name}")
-            }
-            if (entry.isDirectory) {
-                if (!out.exists() && !out.mkdirs()) {
-                    throw IOException("Failed to create archive directory: ${out.path}")
-                }
-                return
-            }
-            out.parentFile?.let { parent ->
-                if (!parent.exists() && !parent.mkdirs()) {
-                    throw IOException("Failed to create archive parent directory: ${parent.path}")
-                }
-            }
-            FileOutputStream(out, false).use { output ->
-                copyStreamWithCancel(zip, output, cancelSignal)
-                output.flush()
-            }
-        }
-
         private fun resolveInside(root: File, relativePath: String): File {
             val normalized = relativePath.replace('\\', '/')
             if (normalized.isBlank() || normalized.startsWith('/') || normalized.split('/').any { it == ".." }) {
@@ -286,22 +293,6 @@ class RemoteApkBuildWorkspace private constructor(
                 }
             }
             return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
-        }
-
-        private fun copyStreamWithCancel(
-            input: InputStream,
-            output: OutputStream,
-            cancelSignal: AtomicBoolean?,
-        ) {
-            val buffer = ByteArray(BUFFER_SIZE)
-            while (true) {
-                ensureActive(cancelSignal)
-                val read = input.read(buffer)
-                if (read < 0) {
-                    break
-                }
-                output.write(buffer, 0, read)
-            }
         }
 
         private fun ensureActive(cancelSignal: AtomicBoolean?) {

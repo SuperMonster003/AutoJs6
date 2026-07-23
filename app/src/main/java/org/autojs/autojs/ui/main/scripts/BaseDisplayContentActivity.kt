@@ -7,16 +7,16 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.noties.markwon.syntax.Prism4jThemeBase
 import io.noties.markwon.syntax.Prism4jThemeDarkula
 import io.noties.markwon.syntax.Prism4jThemeDefault
 import io.noties.prism4j.GrammarLocator
 import io.noties.prism4j.Prism4j
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -38,6 +38,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
 
     open var internalMenuResource: Int = 0
     open var themeColorDayNight = R.color.md_blue_gray_50 to R.color.md_blue_gray_900
+    protected open val deferTextRelayoutDuringScale = false
 
     private lateinit var internalTextView: TextView
     private lateinit var internalFabView: FloatingActionButton
@@ -65,11 +66,56 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
             }
         }
 
-        val scaleGestureDetector = ViewUtils.TextSizeScaleDetector(this, internalTextView)
-
         val innerScrollView = binding.innerScrollView.also {
             it.excludePaddingClippableViewFromBottomNavigationBar()
-            it.setOnTouchListener { view, event ->
+        }
+
+        val outerScrollView = binding.outerScrollView.also {
+            it.innerHorizontalScrollView = innerScrollView
+        }
+
+        if (deferTextRelayoutDuringScale) {
+            val scaleGestureDetector = ViewUtils.DeferredTextSizeScaleDetector(this, internalTextView)
+            var handlingScaleGesture = false
+            var lastEventTime = Long.MIN_VALUE
+            var lastEventAction = Int.MIN_VALUE
+            var lastEventPointerCount = Int.MIN_VALUE
+            val scaleTouchListener = View.OnTouchListener { view, event ->
+                // The same MotionEvent can travel through the outer scroll view, the horizontal
+                // scroll view and the TextView. Feed it to ScaleGestureDetector exactly once.
+                if (
+                    event.eventTime != lastEventTime ||
+                    event.action != lastEventAction ||
+                    event.pointerCount != lastEventPointerCount
+                ) {
+                    scaleGestureDetector.onTouchEvent(event)
+                    lastEventTime = event.eventTime
+                    lastEventAction = event.action
+                    lastEventPointerCount = event.pointerCount
+                }
+                if (
+                    event.actionMasked == MotionEvent.ACTION_POINTER_DOWN &&
+                    event.pointerCount >= 2
+                ) {
+                    handlingScaleGesture = true
+                    view.parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                val consume = handlingScaleGesture
+                if (
+                    event.actionMasked == MotionEvent.ACTION_UP ||
+                    event.actionMasked == MotionEvent.ACTION_CANCEL
+                ) {
+                    handlingScaleGesture = false
+                    view.parent?.requestDisallowInterceptTouchEvent(false)
+                }
+                consume
+            }
+            outerScrollView.setOnTouchListener(scaleTouchListener)
+            innerScrollView.setOnTouchListener(scaleTouchListener)
+            internalTextView.setOnTouchListener(scaleTouchListener)
+        } else {
+            val scaleGestureDetector = ViewUtils.TextSizeScaleDetector(this, internalTextView)
+            innerScrollView.setOnTouchListener { view, event ->
                 when (event.pointerCount) {
                     2 -> {
                         scaleGestureDetector.onTouchEvent(event)
@@ -98,11 +144,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
                     else -> super.onTouchEvent(event)
                 }
             }
-        }
-
-        binding.outerScrollView.also {
-            it.innerHorizontalScrollView = innerScrollView
-            it.setOnTouchListener { _, event ->
+            outerScrollView.setOnTouchListener { _, event ->
                 when (event.pointerCount) {
                     2 -> {
                         scaleGestureDetector.onTouchEvent(event)
@@ -114,7 +156,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         }
 
         // 使用协程加载内容
-        CoroutineScope(Dispatchers.Main).launch {
+        lifecycleScope.launch {
             launch {
                 delay(1200L)
                 mTextUpdateMutex.withLock {
@@ -167,6 +209,16 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
 
     protected fun setText(text: CharSequence) {
         internalTextView.text = text
+    }
+
+    protected fun setTextSelectionEnabled(enabled: Boolean) {
+        internalTextView.setTextIsSelectable(enabled)
+        internalTextView.isLongClickable = enabled
+    }
+
+    protected fun setContentActionsEnabled(enabled: Boolean) {
+        internalFabView.isEnabled = enabled
+        internalFabView.alpha = if (enabled) 1.0f else 0.5f
     }
 
     protected fun highlightTextOrSelf(text: CharSequence): CharSequence {

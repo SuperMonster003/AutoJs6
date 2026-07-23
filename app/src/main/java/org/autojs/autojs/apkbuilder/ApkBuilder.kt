@@ -1,220 +1,272 @@
+@file:Suppress("DEPRECATION")
+
 package org.autojs.autojs.apkbuilder
 
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
-import android.content.pm.PackageManager.ApplicationInfoFlags
-import android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES
-import android.content.pm.ServiceInfo
-import android.content.res.AssetManager
-import android.graphics.Bitmap
-import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.mcal.apksigner.ApkSigner
-import com.reandroid.arsc.chunk.TableBlock
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
-import org.autojs.autojs.apkbuilder.keystore.AESUtils
+import org.autojs.autojs.apkbuilder.template.RemoteApkBuildClient
+import org.autojs.autojs.apkbuilder.template.RemoteProjectConfigUpdater
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.core.plugin.center.PluginEnableStore
-import org.autojs.autojs.core.plugin.center.PluginWakeManager
-import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
-import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost
-import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
-import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
-import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
-import org.autojs.autojs.core.plugin.text.OpenccPluginHost
-import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
-import org.autojs.autojs.core.plugin.text.PinyinPluginHost
-import org.autojs.autojs.engine.NodeBridgePermissionManifest
-import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
-import org.autojs.autojs.pio.PFiles
-import org.autojs.autojs.project.BuildInfo
-import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
-import org.autojs.autojs.project.ProjectConfig.CONFIG_FILE_NAME
-import org.autojs.autojs.script.EncryptedScriptFileHeader.writeHeader
-import org.autojs.autojs.script.JavaScriptFileSource
-import org.autojs.autojs.script.JavaScriptSource
-import org.autojs.autojs.util.MD5Utils
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
-import org.autojs.plugin.common.api.IPluginInfoProvider
+import org.autojs.plugin.apkbuilder.template.ApkBuildResult
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.autojs.plugin.common.api.PluginInfo
-import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
-import org.autojs.plugin.mediainfo.api.IMediainfoPlugin
-import org.autojs.plugin.mediainfo.api.MediainfoPluginIds
-import org.autojs.plugin.mlkit.barcode.api.IBarcodePlugin
-import org.autojs.plugin.nodejs.api.NodeJsPluginActions
-import org.autojs.plugin.nodejs.api.NodeJsPluginIds
-import org.autojs.plugin.opencv.api.OpenCvPluginContract
-import org.autojs.plugin.opencc.api.IOpenccPlugin
-import org.autojs.plugin.opencc.api.OpenccPluginIds
-import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
-import org.autojs.plugin.pinyin.api.IPinyinPlugin
-import org.autojs.plugin.pinyin.api.PinyinPluginIds
-import org.autojs.plugin.pinyin4j.api.IPinyin4jPlugin
-import org.autojs.plugin.pinyin4j.api.Pinyin4jPluginIds
-import pxb.android.StringItem
-import pxb.android.axml.AxmlWriter
-import zhao.arsceditor.ResDecoder.ARSCDecoder
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.io.SyncFailedException
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.CancellationException
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
 
 /**
- * Created by Stardust on Oct 24, 2017.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 17, 2026.
- * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
- * Modified by SuperMonster003 as of Mar 13, 2026.
+ * Compatibility adapter for the historic in-process APK builder.
+ *
+ * The standard prepare/configure/build/sign/commit/clean/finish chain is forwarded to the
+ * official APK Builder plugin. Low-level template mutation APIs remain only as migration guards
+ * because their incremental workspace semantics cannot be represented by the remote protocol.
  */
-open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File, private val buildPath: String) {
+@Deprecated(
+    message = "In-process APK building has moved to the APK Builder plugin",
+)
+open class ApkBuilder(
+    apkInputStream: InputStream?,
+    private val outApkFile: File,
+    @Suppress("UNUSED_PARAMETER") buildPath: String,
+) {
 
-    private var mProgressCallback: ProgressCallback? = null
-    private var mArscPackageName: String? = null
-    private var mManifestEditor: ManifestEditor? = null
-    private var mInitVector: String? = null
-    private var mKey: String? = null
-    private var mCancelSignal: AtomicBoolean? = null
-    private var mPendingProjectConfigFile: File? = null
-    private var mPendingProjectConfigJson: String? = null
-    private var mBundledProjectConfigJson: String? = null
-    private var mLastPluginQueryDiagnostics: List<String> = emptyList()
+    internal fun interface RemoteBuildExecutor {
+        fun build(
+            context: Context,
+            projectConfig: ProjectConfig,
+            outApkFile: File,
+            cancelSignal: AtomicBoolean?,
+            progressListener: RemoteApkBuildClient.ProgressListener,
+        ): RemoteApkBuildClient.BuildOutcome
+    }
 
-    private lateinit var mProjectConfig: ProjectConfig
-
-    private val mApkPackager = ApkPackager(apkInputStream, buildPath)
-
-    private val mAssetManager: AssetManager by lazy { globalContext.assets }
-
-    private var mLibsIncludes = Lib.defaultLibsToInclude.toMutableList()
-    private var mAssetsFileIncludes = Lib.defaultAssetFilesToInclude.map(::normalizeAssetPath).toMutableList()
-    private var mAssetsDirExcludes = Lib.defaultAssetDirsToExclude.map(::normalizeAssetPath).toMutableList()
-
-    private var mSplashThemeId: Int = 0
-    private var mNoSplashThemeId: Int = 0
-
-    private val mManifestFile
-        get() = File(buildPath, "AndroidManifest.xml")
-
-    private val mResourcesArscFile
-        get() = File(buildPath, "resources.arsc")
+    private var remoteBuildExecutor = DEFAULT_REMOTE_BUILD_EXECUTOR
+    private var progressCallback: ProgressCallback? = null
+    private var cancelSignal: AtomicBoolean? = null
+    private var projectConfig: ProjectConfig? = null
+    private var buildOutcome: RemoteApkBuildClient.BuildOutcome? = null
+    private var prepared = false
+    private var committed = false
+    private var legacyTemplateInput: InputStream? = apkInputStream
 
     init {
-        PFiles.ensureDir(outApkFile.path)
+        closeLegacyTemplateInput()
     }
 
-    fun setProgressCallback(callback: ProgressCallback?) = also {
-        mProgressCallback = callback
+    @VisibleForTesting
+    internal constructor(
+        apkInputStream: InputStream?,
+        outApkFile: File,
+        buildPath: String,
+        remoteBuildExecutor: RemoteBuildExecutor,
+    ) : this(apkInputStream, outApkFile, buildPath) {
+        this.remoteBuildExecutor = remoteBuildExecutor
     }
 
-    fun setCancelSignal(cancelSignal: AtomicBoolean?) = also {
-        mCancelSignal = cancelSignal
-        mApkPackager.setCancelSignal(cancelSignal)
+    fun setProgressCallback(callback: ProgressCallback?): ApkBuilder = also {
+        progressCallback = callback
     }
 
-    private fun getAssetsRoot(): File =
-        File(buildPath, "assets")
+    fun setCancelSignal(cancelSignal: AtomicBoolean?): ApkBuilder = also {
+        this.cancelSignal = cancelSignal
+    }
 
-    // Throw early when cancellation is requested to avoid partial outputs.
-    // zh-CN: 当收到取消请求时尽早抛出, 以避免产生部分输出.
+    @Throws(IOException::class)
+    fun prepare(context: Context): ApkBuilder = also {
+        try {
+            ensureNotCancelled()
+            prepared = true
+            notifyStepChanged(ProgressStep.PREPARE)
+            notifyStepProgress(
+                context.getString(R.string.text_preparing_workspace),
+                ApkBuilderTemplatePluginIds.PACKAGE_NAME,
+            )
+        } finally {
+            closeLegacyTemplateInput()
+        }
+    }
+
+    @Throws(IOException::class)
+    fun withConfig(context: Context, config: ProjectConfig): ApkBuilder = also {
+        ensureNotCancelled()
+        check(prepared) {
+            "ApkBuilder.prepare(context) must be called before withConfig(context, config)."
+        }
+        projectConfig = config
+        buildOutcome = null
+        committed = false
+        notifyStepChanged(ProgressStep.BUILD)
+        notifyStepProgress(
+            context.getString(R.string.text_preparing_build_config),
+            config.packageName,
+        )
+    }
+
+    @Throws(Exception::class)
+    fun build(context: Context): ApkBuilder = also {
+        ensureNotCancelled()
+        val config = checkNotNull(projectConfig) {
+            "ApkBuilder.withConfig(context, config) must be called before build(context)."
+        }
+        buildOutcome = null
+        committed = false
+        val outcome = remoteBuildExecutor.build(
+            context = context.applicationContext,
+            projectConfig = config,
+            outApkFile = outApkFile,
+            cancelSignal = cancelSignal,
+            progressListener = RemoteApkBuildClient.ProgressListener { progress ->
+                notifyStepProgress(
+                    progress.title?.takeIf(String::isNotBlank)
+                        ?: context.getString(R.string.text_processing),
+                    progress.detail,
+                )
+            },
+        )
+        when {
+            outcome.status == ApkBuildResult.STATUS_CANCELLED -> {
+                cancelSignal?.set(true)
+                throw CancellationException("Remote APK build was cancelled.")
+            }
+
+            !outcome.isSuccess -> throw IOException(formatRemoteBuildFailure(outcome))
+
+            !outApkFile.isFile -> throw IOException(
+                "Remote APK build reported success but did not create ${outApkFile.path}."
+            )
+        }
+        buildOutcome = outcome
+    }
+
+    /**
+     * Signing is completed by the remote build transaction. This method is retained so the
+     * historic fluent chain remains source- and binary-compatible.
+     */
+    @Throws(Exception::class)
+    fun sign(context: Context): ApkBuilder = also {
+        ensureNotCancelled()
+        requireSuccessfulBuild("sign")
+        notifyStepChanged(ProgressStep.SIGN)
+        notifyStepProgress(
+            context.getString(R.string.text_sign_completed),
+            outApkFile.path,
+        )
+    }
+
+    fun commitProjectConfigIfNeeded(context: Context): ApkBuilder = also {
+        ensureNotCancelled()
+        if (committed) {
+            return@also
+        }
+        val outcome = requireSuccessfulBuild("commitProjectConfigIfNeeded")
+        val config = checkNotNull(projectConfig)
+        val sourcePath = config.sourcePath
+        val updatedJson = outcome.updatedProjectConfigJson
+        if (!sourcePath.isNullOrBlank() && File(sourcePath).isDirectory && !updatedJson.isNullOrBlank()) {
+            val configFile = File(ProjectConfig.configFileOfDir(sourcePath))
+            notifyStepProgress(
+                context.getString(R.string.text_writing_project_config),
+                configFile.path,
+            )
+            configFile.writeText(
+                RemoteProjectConfigUpdater.mergeBuildInfoJson(config, updatedJson),
+                StandardCharsets.UTF_8,
+            )
+        }
+        committed = true
+    }
+
+    /**
+     * The remote plugin owns and cleans its workspace. The legacy caller-supplied build path is
+     * deliberately not deleted because this adapter never creates or owns it.
+     */
+    fun cleanWorkspace(context: Context): ApkBuilder = also {
+        ensureNotCancelled()
+        notifyStepChanged(ProgressStep.CLEAN)
+        notifyStepProgress(
+            context.getString(R.string.text_cleaning_workspace),
+            ApkBuilderTemplatePluginIds.PACKAGE_NAME,
+        )
+    }
+
+    fun finish(): ApkBuilder = also {
+        progressCallback?.let { callback ->
+            GlobalAppContext.post { callback.onFinished(this) }
+        }
+    }
+
+    @Throws(IOException::class)
+    fun setScriptFile(
+        @Suppress("UNUSED_PARAMETER") context: Context,
+        @Suppress("UNUSED_PARAMETER") path: String?,
+    ): ApkBuilder = unsupportedLegacyMutation("setScriptFile")
+
+    @Throws(IOException::class)
+    fun copyDir(
+        @Suppress("UNUSED_PARAMETER") context: Context,
+        @Suppress("UNUSED_PARAMETER") srcFile: File,
+        @Suppress("UNUSED_PARAMETER") relativeDestPath: String,
+    ): Unit = unsupportedLegacyMutation("copyDir")
+
+    @Throws(IOException::class)
+    fun replaceFile(
+        @Suppress("UNUSED_PARAMETER") context: Context,
+        @Suppress("UNUSED_PARAMETER") srcPath: String,
+        @Suppress("UNUSED_PARAMETER") relativeDestPath: String,
+    ): ApkBuilder = unsupportedLegacyMutation("replaceFile")
+
+    @Throws(IOException::class)
+    fun replaceFile(
+        @Suppress("UNUSED_PARAMETER") context: Context,
+        @Suppress("UNUSED_PARAMETER") srcFile: File,
+        @Suppress("UNUSED_PARAMETER") relativeDestPath: String,
+    ): ApkBuilder = unsupportedLegacyMutation("replaceFile")
+
+    @Throws(FileNotFoundException::class)
+    fun editManifest(): ManifestEditor = unsupportedLegacyMutation("editManifest")
+
+    @Throws(IOException::class)
+    fun setArscPackageName(
+        @Suppress("UNUSED_PARAMETER") packageName: String?,
+    ): ApkBuilder = unsupportedLegacyMutation("setArscPackageName")
+
     private fun ensureNotCancelled() {
-        if (mCancelSignal?.get() == true) {
-            throw CancellationException("Build aborted")
-        }
-        if (Thread.currentThread().isInterrupted) {
-            throw CancellationException("Build aborted")
+        if (cancelSignal?.get() == true || Thread.currentThread().isInterrupted) {
+            throw CancellationException("Remote APK build was cancelled.")
         }
     }
 
-    // Copy streams with cancellation checks to keep abort responsive during large IO.
-    // zh-CN: 在大 IO 过程中加入取消检查, 保持中止响应.
-    private fun copyStreamWithCancel(input: InputStream, output: OutputStream, bufferSize: Int = 16 * 1024) {
-        val buffer = ByteArray(bufferSize)
-        var len: Int
-        while (input.read(buffer).also { len = it } > 0) {
-            ensureNotCancelled()
-            output.write(buffer, 0, len)
-        }
+    /**
+     * The official plugin owns its template, so the historic constructor stream is never read.
+     * Detach it before closing so repeated lifecycle calls and exceptional close implementations
+     * cannot retain or close it twice.
+     */
+    private fun closeLegacyTemplateInput() {
+        val input = legacyTemplateInput ?: return
+        legacyTemplateInput = null
+        runCatching { input.close() }
     }
 
-    private fun toAssetZipPrefix(path: String): String {
-        val normalized = normalizeAssetPath(path)
-        return if (normalized.isEmpty()) "assets/" else "assets/$normalized"
-    }
-
-    private fun isAssetDirExcluded(assetPath: String): Boolean {
-        val normalized = normalizeAssetPath(assetPath)
-        return mAssetsDirExcludes.any { excluded ->
-            normalized == excluded || normalized.startsWith("$excluded/")
+    private fun requireSuccessfulBuild(operation: String): RemoteApkBuildClient.BuildOutcome {
+        val outcome = buildOutcome
+            ?: throw IllegalStateException("ApkBuilder.build(context) must succeed before $operation().")
+        check(outcome.isSuccess) {
+            "ApkBuilder.build(context) must succeed before $operation()."
         }
-    }
-
-    private fun includeLibraryContributions(lib: Lib) {
-        mLibsIncludes += lib.libsToInclude.toSet()
-        mAssetsFileIncludes += lib.assetFilesToInclude.map(::normalizeAssetPath).toSet()
-        mAssetsDirExcludes -= lib.assetDirsToInclude.map(::normalizeAssetPath).toSet()
-    }
-
-    private fun pruneTemplateAssetsByPolicy(context: Context) {
-        val assetsRoot = getAssetsRoot()
-        if (!assetsRoot.exists() || !assetsRoot.isDirectory) {
-            return
-        }
-
-        val optionalAssetFiles = Lib.entries
-            .flatMap { it.assetFilesToInclude }
-            .map(::normalizeAssetPath)
-            .toSet()
-
-        assetsRoot.listFiles()?.forEach { child ->
-            ensureNotCancelled()
-            val normalizedName = normalizeAssetPath(child.name)
-            if (normalizedName.isEmpty()) {
-                return@forEach
-            }
-            if (child.isDirectory) {
-                if (!isAssetDirExcluded(normalizedName)) {
-                    return@forEach
-                }
-                notifyStepProgress(
-                    ProgressStep.BUILD,
-                    context.getString(R.string.text_pruning),
-                    child.path,
-                )
-                PFiles.deleteRecursively(child)
-                return@forEach
-            }
-            if (optionalAssetFiles.contains(normalizedName) && !mAssetsFileIncludes.contains(normalizedName)) {
-                notifyStepProgress(
-                    ProgressStep.BUILD,
-                    context.getString(R.string.text_pruning),
-                    child.path,
-                )
-                child.delete()
-            }
-        }
+        return outcome
     }
 
     private fun notifyStepChanged(step: ProgressStep) {
-        mProgressCallback?.let { callback ->
+        progressCallback?.let { callback ->
             GlobalAppContext.post {
                 when (step) {
                     ProgressStep.PREPARE -> callback.onPrepare(this)
@@ -226,733 +278,120 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
     }
 
-    private fun notifyStepProgress(step: ProgressStep, title: String, detail: String?) {
-        mProgressCallback?.let { callback ->
+    private fun notifyStepProgress(title: String, detail: String?) {
+        progressCallback?.let { callback ->
             GlobalAppContext.post {
                 callback.onStepProgress(
                     builder = this,
                     title = title,
-                    detail = detail?.takeIf { it.isNotBlank() },
+                    detail = detail?.takeIf(String::isNotBlank),
                 )
             }
         }
     }
 
-    @Throws(IOException::class)
-    fun prepare(context: Context) = also {
-        ensureNotCancelled()
-        notifyStepChanged(ProgressStep.PREPARE)
-        notifyStepProgress(
-            ProgressStep.PREPARE,
-            context.getString(R.string.text_preparing_workspace),
-            buildPath,
-        )
-        File(buildPath).mkdirs()
-        notifyStepProgress(
-            ProgressStep.PREPARE,
-            context.getString(R.string.text_extracting_template_apk),
-            buildPath,
-        )
-        mApkPackager.unzip()
-        ensureNotCancelled()
-        notifyStepProgress(
-            ProgressStep.PREPARE,
-            context.getString(R.string.text_prepare_completed),
-            buildPath,
-        )
-    }
-
-    @Throws(IOException::class)
-    fun setScriptFile(context: Context, path: String?) = also {
-        ensureNotCancelled()
-        path?.let {
-            when {
-                PFiles.isDir(it) -> {
-                    notifyStepProgress(
-                        ProgressStep.BUILD,
-                        context.getString(R.string.text_copying_project_directory),
-                        it,
-                    )
-                    copyDir(context, it, "assets/project/")
-                    writeBundledProjectConfigIfNeeded(context)
-                }
-                else -> {
-                    notifyStepProgress(
-                        ProgressStep.BUILD,
-                        context.getString(R.string.text_copying_script_file),
-                        it,
-                    )
-                    replaceFile(context, it, "assets/project/main.js")
-                    writeBundledProjectConfigIfNeeded(context)
-                }
-            }
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_source_processing_completed),
-                it,
-            )
+    private fun formatRemoteBuildFailure(outcome: RemoteApkBuildClient.BuildOutcome): String {
+        val details = (outcome.errors + outcome.warnings)
+            .filter(String::isNotBlank)
+            .distinct()
+            .joinToString("\n")
+        return details.ifBlank {
+            "Remote APK build failed with status ${outcome.status}. " +
+                    "Install and enable a compatible official APK Builder plugin."
         }
     }
 
-    @Throws(IOException::class)
-    @Suppress("SameParameterValue")
-    private fun copyDir(context: Context, srcPath: String, relativeDestPath: String) {
-        copyDir(context, File(srcPath), relativeDestPath)
-    }
+    @Suppress("SpellCheckingInspection")
+    enum class Lib(private val delegate: ApkBuildLibrary) {
+        TERMINAL_EMULATOR(ApkBuildLibrary.TERMINAL_EMULATOR),
+        EMBEDDED_NODE_JS(ApkBuildLibrary.EMBEDDED_NODE_JS),
+        OPENCV(ApkBuildLibrary.OPENCV),
+        MLKIT_OCR(ApkBuildLibrary.MLKIT_OCR),
+        PADDLE_OCR(ApkBuildLibrary.PADDLE_OCR),
+        RAPID_OCR(ApkBuildLibrary.RAPID_OCR),
+        OPENCC(ApkBuildLibrary.OPENCC),
+        PINYIN(ApkBuildLibrary.PINYIN),
+        PINYIN4J(ApkBuildLibrary.PINYIN4J),
+        MLKIT_BARCODE(ApkBuildLibrary.MLKIT_BARCODE),
+        MEDIA_INFO(ApkBuildLibrary.MEDIA_INFO),
+        IMAGE_QUANT(ApkBuildLibrary.IMAGE_QUANT),
+        ;
 
-    @Throws(IOException::class)
-    fun copyDir(context: Context, srcFile: File, relativeDestPath: String) {
-        ensureNotCancelled()
-        val destDirFile = File(buildPath, relativeDestPath).apply { mkdir() }
-        notifyStepProgress(
-            ProgressStep.BUILD,
-            context.getString(R.string.text_copying_directory),
-            "${srcFile.path} -> ${destDirFile.path}",
-        )
-        srcFile.listFiles()?.forEach { srcChildFile ->
-            ensureNotCancelled()
-            if (srcChildFile.isFile) {
-                if (JavaScriptSource.isJavaScriptFileName(srcChildFile.name)) {
-                    encryptToDir(context, srcChildFile, destDirFile)
-                } else {
-                    val destFile = File(destDirFile, srcChildFile.name)
-                    notifyStepProgress(
-                        ProgressStep.BUILD,
-                        context.getString(R.string.text_copying_file),
-                        "${srcChildFile.path} -> ${destFile.path}",
-                    )
-                    srcChildFile.copyTo(destFile, true)
-                }
-            } else {
-                if (!mProjectConfig.excludedDirs.contains(srcChildFile)) {
-                    copyDir(context, srcChildFile, PFiles.join(relativeDestPath, srcChildFile.name + File.separator))
-                }
-            }
-        }
-    }
+        @JvmField
+        val label: String = delegate.label
 
-    @Throws(IOException::class)
-    private fun encrypt(context: Context, srcFile: File, destFile: File) {
-        ensureNotCancelled()
-        notifyStepProgress(
-            ProgressStep.BUILD,
-            context.getString(R.string.text_encrypting_script),
-            "${srcFile.path} -> ${destFile.path}",
-        )
-        destFile.outputStream().use { os ->
-            writeHeader(os, JavaScriptFileSource(srcFile).executionMode.toShort())
-            AdvancedEncryptionStandard(mKey!!.toByteArray(), mInitVector!!)
-                .encrypt(PFiles.readBytes(srcFile.path))
-                .let { bytes -> os.write(bytes) }
-        }
-    }
+        @JvmField
+        val aliases: List<String> = delegate.aliases
 
-    private fun encryptToDir(context: Context, srcFile: File, destDirFile: File) {
-        val destFile = File(destDirFile, srcFile.name)
-        encrypt(context, srcFile, destFile)
-    }
+        @JvmField
+        val enumerable: Boolean = delegate.enumerable
 
-    @Throws(IOException::class)
-    fun replaceFile(context: Context, srcPath: String, relativeDestPath: String) = replaceFile(context, File(srcPath), relativeDestPath)
+        internal val libsToInclude: List<String>
+            get() = delegate.libsToInclude
 
-    @Throws(IOException::class)
-    fun replaceFile(context: Context, srcFile: File, relativeDestPath: String) = also {
-        ensureNotCancelled()
-        val destFile = File(buildPath, relativeDestPath)
-        if (JavaScriptSource.isJavaScriptFileName(destFile.name)) {
-            encrypt(context, srcFile, destFile)
-        } else {
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_replacing_file),
-                "${srcFile.path} -> ${destFile.path}",
-            )
-            srcFile.copyTo(destFile, true)
-        }
-    }
+        internal val assetFilesToInclude: List<String> = emptyList()
 
-    @Throws(IOException::class)
-    fun withConfig(context: Context, config: ProjectConfig) = also {
-        notifyStepChanged(ProgressStep.BUILD)
-        notifyStepProgress(
-            ProgressStep.BUILD,
-            context.getString(R.string.text_processing),
-            context.getString(R.string.text_preparing_build_config),
-        )
-        config.also { mProjectConfig = it }.run {
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_reading_splash_resources),
-                mResourcesArscFile.path,
-            )
-            retrieveSplashThemeResources(launchConfig)
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_configuring_manifest),
-                mManifestFile.path,
-            )
-            applyNodeBridgeAndroidManifestPermissions(this)
-            prepareManifestConfiguration(this)
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_configuring_package_name),
-                packageName,
-            )
-            setArscPackageName(packageName)
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_processing),
-                context.getString(R.string.text_updating_project_config),
-            )
-            updateProjectConfig(this)
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_processing),
-                getAssetsRoot().path,
-            )
-            pruneTemplateAssetsByPolicy(context)
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_copying_assets_to),
-                getAssetsRoot().path,
-            )
-            copyAssetsRecursively(context, "", getAssetsRoot())
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_processing),
-                context.getString(R.string.text_copying_native_libraries),
-            )
-            pruneNativeLibrariesByAbiPolicy(context, this)
-            copyLibrariesByConfig(context, this)
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_processing_source),
-                sourcePath,
-            )
-            setScriptFile(context, sourcePath)
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_processing),
-                context.getString(R.string.text_applying_binary_resources),
-            )
-        }
-    }
+        internal val assetDirsToInclude: List<String> = emptyList()
 
-    private fun pruneNativeLibrariesByAbiPolicy(context: Context, config: ProjectConfig) {
-        ensureNotCancelled()
-        val libRoot = File(buildPath, "lib")
-        if (!libRoot.isDirectory || config.abis.isEmpty()) {
-            return
-        }
+        internal val plugin: PluginLib?
+            get() = delegate.plugin?.toCompatibilityPlugin()
 
-        val allowedAbis = config.abis.toSet()
-        libRoot.listFiles()?.forEach { abiDir ->
-            ensureNotCancelled()
-            if (!abiDir.isDirectory || abiDir.name in allowedAbis) {
-                return@forEach
-            }
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_pruning),
-                abiDir.path,
-            )
-            PFiles.deleteRecursively(abiDir)
-        }
-    }
+        val isPlugin: Boolean
+            get() = delegate.isPlugin
 
-    private fun prepareManifestConfiguration(config: ProjectConfig) {
-        val manifestEditor = editManifest()
-            .setAppName(config.name)
-            .setVersionName(config.versionName)
-            .setVersionCode(config.versionCode)
-            .setPackageName(config.packageName)
-        if (config.libs.contains(Lib.EMBEDDED_NODE_JS.label)) {
-            manifestEditor
-                .addEmbeddedNodeScriptServiceIfMissing()
-                .addEmbeddedNodeForegroundServicePermissionsIfMissing()
-        }
-        mManifestEditor = manifestEditor
-    }
+        fun toPluginPair(): Pair<Lib, PluginLib> = this to checkNotNull(plugin)
 
-    private fun applyNodeBridgeAndroidManifestPermissions(config: ProjectConfig) {
-        if (!config.libs.contains(Lib.EMBEDDED_NODE_JS.label) || !PFiles.isDir(config.sourcePath)) {
-            return
-        }
-        val requiredPermissions = NodeBridgePermissionManifest.androidPermissionsForWorkingDirectory(config.sourcePath)
-        if (requiredPermissions.isEmpty()) {
-            return
-        }
-        val mergedPermissions = LinkedHashSet(config.permissions)
-        mergedPermissions.addAll(requiredPermissions)
-        config.setPermissions(ArrayList(mergedPermissions))
-    }
-
-    private fun retrieveSplashThemeResources(launchConfig: LaunchConfig) {
-        if (launchConfig.isSplashVisible) {
-            // @Hint by SuperMonster003 on Jan 23, 2024.
-            //   ! Members `mSplashThemeId` and `mNoSplashThemeId` will keep their default values.
-            //   ! zh-CN: 成员变量 `mSplashThemeId` 及 `mNoSplashThemeId` 将保持其默认值.
-            return
-        }
-        try {
-            val tableBlock = TableBlock.load(mResourcesArscFile)
-            val packageName = "${GlobalAppContext.get().packageName}.inrt"
-            val packageBlock = tableBlock.getOrCreatePackage(0x7f, packageName).also {
-                tableBlock.currentPackage = it
-            }
-            packageBlock.getEntry("", "style", "AppTheme.Splash")?.let {
-                mSplashThemeId = it.resourceId
-            }
-            packageBlock.getEntry("", "style", "AppTheme.SevereTransparent")?.let {
-                mNoSplashThemeId = it.resourceId
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    @Throws(FileNotFoundException::class)
-    fun editManifest(): ManifestEditor = ManifestEditorWithAuthorities(FileInputStream(mManifestFile)).also { mManifestEditor = it }
-
-    private fun writeBundledProjectConfigIfNeeded(context: Context) {
-        val json = mBundledProjectConfigJson ?: return
-        val configFile = File(buildPath, "assets/project/$CONFIG_FILE_NAME")
-        configFile.parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-        notifyStepProgress(
-            ProgressStep.BUILD,
-            context.getString(R.string.text_writing_project_config),
-            configFile.path,
-        )
-        configFile.writeText(json)
-    }
-
-    private fun updateProjectConfig(config: ProjectConfig) {
-        ensureNotCancelled()
-
-        val projectConfig = run {
-            if (PFiles.isDir(config.sourcePath)) {
-                // @Hint by SuperMonster003 on Jan 23, 2025.
-                //  ! Project directory packaging.
-                //  ! zh-CN: 打包项目目录.
-                ProjectConfig.fromProjectDir(config.sourcePath)?.let { sourceProjectConfig ->
-                    sourceProjectConfig
-                        .setName(config.name)
-                        .setPackageName(config.packageName)
-                        .setVersionName(config.versionName)
-                        .setVersionCode(config.versionCode)
-                        .setAbis(ArrayList(config.abis))
-                        .setLibs(ArrayList(config.libs))
-                        .setPermissions(ArrayList(config.permissions))
-                        .setSignatureScheme(config.signatureScheme)
-                    sourceProjectConfig.launchConfig = config.launchConfig
-                    val nextBuildInfo = BuildInfo.generate(sourceProjectConfig.buildInfo.buildNumber + 1)
-                    sourceProjectConfig.buildInfo.apply {
-                        buildId = nextBuildInfo.buildId
-                        buildNumber = nextBuildInfo.buildNumber
-                        buildTime = nextBuildInfo.buildTime
-                    }
-                    mPendingProjectConfigFile = File(ProjectConfig.configFileOfDir(config.sourcePath))
-                    mPendingProjectConfigJson = sourceProjectConfig.toJson(true)
-                    return@run sourceProjectConfig
-                }
-            }
-            // @Hint by SuperMonster003 on Jan 23, 2025.
-            //  ! Single file packaging.
-            //  ! zh-CN: 打包单独文件.
-            return@run ProjectConfig().also { newProjectConfig ->
-                newProjectConfig
-                    .setName(config.name)
-                    .setPackageName(config.packageName)
-                    .setVersionName(config.versionName)
-                    .setVersionCode(config.versionCode)
-                    .setAbis(ArrayList(config.abis))
-                    .setLibs(ArrayList(config.libs))
-                    .setPermissions(ArrayList(config.permissions))
-                    .setSignatureScheme(config.signatureScheme)
-                newProjectConfig.launchConfig = config.launchConfig
-                newProjectConfig.setBuildInfo(BuildInfo.generate(newProjectConfig.versionCode.toLong()))
-                File(buildPath, "assets/project/$CONFIG_FILE_NAME").also { file ->
-                    file.parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-                }.writeText(newProjectConfig.toJson(true))
-            }
-
-        }
-
-        mKey = MD5Utils.md5(projectConfig.run { packageName + versionName + mainScriptFileName })
-        mInitVector = MD5Utils.md5(projectConfig.run { buildInfo.buildId + name }).take(16)
-        mBundledProjectConfigJson = projectConfig.toJson(true)
-        Lib.entries.forEach { entry ->
-            if (config.libs.contains(entry.label)) {
-                includeLibraryContributions(entry)
-            }
-        }
-    }
-
-    // Commit project config changes only after a successful build.
-    // zh-CN: 仅在构建成功后提交项目配置变更.
-    fun commitProjectConfigIfNeeded(context: Context) = also {
-        val pendingFile = mPendingProjectConfigFile
-        val pendingJson = mPendingProjectConfigJson
-        if (pendingFile == null || pendingJson == null) {
-            notifyStepProgress(
-                ProgressStep.SIGN,
-                context.getString(R.string.text_processing),
-                context.getString(R.string.text_sign_stage_completed),
-            )
-            return@also
-        }
-        ensureNotCancelled()
-        notifyStepProgress(
-            ProgressStep.SIGN,
-            context.getString(R.string.text_writing_project_config),
-            pendingFile.path,
-        )
-        pendingFile.writeText(pendingJson)
-        mPendingProjectConfigFile = null
-        mPendingProjectConfigJson = null
-        notifyStepProgress(
-            ProgressStep.SIGN,
-            context.getString(R.string.text_processing),
-            context.getString(R.string.text_sign_stage_completed),
-        )
-    }
-
-    @Throws(Exception::class)
-    fun build(context: Context) = also {
-        ensureNotCancelled()
-        notifyStepProgress(
-            ProgressStep.BUILD,
-            context.getString(R.string.text_processing),
-            context.getString(R.string.text_building_resources),
-        )
-        mProjectConfig.iconBitmapGetter?.let { callable ->
-            runCatching {
-                ensureNotCancelled()
-                val tableBlock = TableBlock.load(mResourcesArscFile)
-                val packageName = "${GlobalAppContext.get().packageName}.inrt"
-                val packageBlock = tableBlock.getOrCreatePackage(0x7f, packageName).also {
-                    tableBlock.currentPackage = it
-                }
-                val appIcon = packageBlock.getOrCreate("", ICON_RES_DIR, ICON_NAME)
-                val appIconPath = appIcon.resValue.decodeValue()
-                Log.d(TAG, "Icon path: $appIconPath")
-                val file = File(buildPath, appIconPath).also {
-                    if (!it.exists()) {
-                        File(it.parent!!).mkdirs()
-                        it.createNewFile()
-                    }
-                }
-                notifyStepProgress(
-                    ProgressStep.BUILD,
-                    context.getString(R.string.text_writing_app_icon),
-                    file.path,
-                )
-                callable.call()?.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(file))
-            }.onFailure { throw RuntimeException(it) }
-        }
-        mManifestEditor?.let {
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_writing_manifest),
-                mManifestFile.path,
-            )
-            it.commit()
-            it.writeTo(FileOutputStream(mManifestFile))
-        }
-        mArscPackageName?.let {
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_writing_resources_arsc),
-                mResourcesArscFile.path,
-            )
-            buildArsc()
-        }
-        notifyStepProgress(
-            ProgressStep.BUILD,
-            context.getString(R.string.text_processing),
-            context.getString(R.string.text_build_completed),
-        )
-    }
-
-    private fun copyAssetsRecursively(context: Context, assetPath: String, targetFile: File) {
-        ensureNotCancelled()
-        if (targetFile.isFile && targetFile.exists()) return
-        val list = mAssetManager.list(assetPath) ?: return
-        if (list.isEmpty()) /* asset is a file */ {
-            if (!assetPath.contains('/')) /* assets root dir */ {
-                if (!mAssetsFileIncludes.contains(normalizeAssetPath(assetPath))) {
-                    return
-                }
-            }
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_copying_asset),
-                "assets/$assetPath -> ${targetFile.path}",
-            )
-            mAssetManager.open(assetPath).use { input ->
-                FileOutputStream(targetFile.absolutePath).use { output ->
-                    copyStreamWithCancel(input, output)
-                    output.flush()
-                }
-            }
-        } else /* asset is folder */ {
-            if (isAssetDirExcluded(assetPath)) {
+        fun ensureLibFiles(moduleName: String = label) {
+            if (!isInrt || libsToInclude.isEmpty()) {
                 return
             }
-            val displayPath = if (assetPath.isEmpty()) "/" else "/$assetPath"
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_preparing_assets_dir),
-                displayPath,
+            val nativeLibraries = File(GlobalAppContext.get().applicationInfo.nativeLibraryDir)
+                .list()
+                ?.toSet()
+                .orEmpty()
+            if (!nativeLibraries.containsAll(libsToInclude)) {
+                throw IllegalStateException(
+                    GlobalAppContext.get().getString(
+                        R.string.error_module_does_not_work_due_to_the_lack_of_necessary_library_files,
+                        moduleName,
+                    )
+                )
+            }
+        }
+
+        companion object {
+            val defaultLibsToInclude = TERMINAL_EMULATOR.libsToInclude
+
+            val defaultAssetFilesToInclude = listOf(
+                "init.js",
+                "roboto_medium.ttf",
             )
-            targetFile.delete()
-            targetFile.mkdir()
-            list.forEach {
-                ensureNotCancelled()
-                val sourcePath = if (assetPath.isEmpty()) it else "$assetPath/$it"
-                copyAssetsRecursively(context, sourcePath, File(targetFile, it))
-            }
-        }
-    }
 
-    @Throws(Exception::class)
-    fun sign(context: Context) = also {
-        ensureNotCancelled()
-        notifyStepChanged(ProgressStep.SIGN)
-        val workspaceDir = File(buildPath)
-        outApkFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
-        val unsignedApkFile = outApkFile
-        val tmpOutputApk = File(outApkFile.parentFile ?: workspaceDir, "${outApkFile.name}.signed.tmp")
-        if (tmpOutputApk.exists()) {
-            tmpOutputApk.delete()
-        }
-        notifyStepProgress(
-            ProgressStep.SIGN,
-            context.getString(R.string.text_creating_unsigned_apk),
-            unsignedApkFile.path,
-        )
-        try {
-            BufferedOutputStream(FileOutputStream(unsignedApkFile, false), 256 * 1024).use { fos ->
-                TinySign.sign(workspaceDir, fos)
-                fos.flush()
-            }
-        } catch (e: Exception) {
-            if (tmpOutputApk.exists() && !tmpOutputApk.delete()) {
-                Log.w(TAG, "Failed to delete temporary signed apk after unsigned apk creation failure: ${tmpOutputApk.path}")
-            }
-            if (e.hasNoSpaceLeft()) {
-                throw IOException("No space left on device while creating unsigned APK: ${unsignedApkFile.path}", e)
-            }
-            throw e
-        }
-        notifyStepProgress(
-            ProgressStep.SIGN,
-            context.getString(R.string.text_unsigned_apk_created),
-            unsignedApkFile.path,
-        )
-
-        val defaultKeyStoreFile = File(buildPath, "default_key_store.bks")
-        if (mProjectConfig.keyStore == null) {
-
-            // Replace FileUtils.copyInputStreamToFile(...).
-            // zh-CN: 替换 FileUtils.copyInputStreamToFile(...).
-            ensureNotCancelled()
-            defaultKeyStoreFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
-            notifyStepProgress(
-                ProgressStep.SIGN,
-                context.getString(R.string.text_preparing_keystore),
-                defaultKeyStoreFile.path,
+            val defaultAssetDirsToExclude = listOf(
+                "doc",
+                "docs",
+                "editor",
+                "indices",
+                "js-beautify",
+                "sample",
+                "stored-locales",
+                "models",
             )
-            GlobalAppContext.get().assets.open("default_key_store.bks").use { input ->
-                FileOutputStream(defaultKeyStoreFile, false).use { output ->
-                    copyStreamWithCancel(input, output)
-                    syncBestEffort(output)
-                }
-            }
-        }
-
-        ensureNotCancelled()
-        val signer = ApkSigner(unsignedApkFile, tmpOutputApk).apply {
-            useDefaultSignatureVersion = false
-            v1SigningEnabled = "V1" in mProjectConfig.signatureScheme
-            v2SigningEnabled = "V2" in mProjectConfig.signatureScheme
-            v3SigningEnabled = "V3" in mProjectConfig.signatureScheme
-            v4SigningEnabled = "V4" in mProjectConfig.signatureScheme
-        }
-
-        var keyStoreFile = defaultKeyStoreFile
-        var password = "AutoJs6"
-        var alias = "AutoJs6"
-        var aliasPassword = "AutoJs6"
-
-        mProjectConfig.keyStore?.let {
-            keyStoreFile = File(it.absolutePath)
-            password = AESUtils.decrypt(it.password)
-            alias = it.alias
-            aliasPassword = AESUtils.decrypt(it.aliasPassword)
-        }
-        notifyStepProgress(
-            ProgressStep.SIGN,
-            context.getString(R.string.text_using_keystore),
-            keyStoreFile.path,
-        )
-
-        // Re-sign using ApkSigner.
-        // zh-CN: 使用 ApkSigner 重新签名.
-        ensureNotCancelled()
-        notifyStepProgress(
-            ProgressStep.SIGN,
-            context.getString(R.string.text_processing),
-            context.getString(R.string.text_re_signing_apk),
-        )
-        try {
-            if (!signer.signRelease(keyStoreFile, password, alias, aliasPassword)) {
-                throw RuntimeException("Failed to re-sign using ApkSigner")
-            }
-        } catch (e: Exception) {
-            if (tmpOutputApk.exists() && !tmpOutputApk.delete()) {
-                Log.w(TAG, "Failed to delete temporary signed apk after re-sign failure: ${tmpOutputApk.path}")
-            }
-            if (e.hasNoSpaceLeft()) {
-                throw IOException("No space left on device while re-signing APK: ${tmpOutputApk.path}", e)
-            }
-            throw e
-        }
-
-        try {
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.SIGN,
-                context.getString(R.string.text_writing_signed_apk),
-                outApkFile.path,
-            )
-            if (outApkFile.exists() && !outApkFile.delete()) {
-                throw IOException("Failed to delete unsigned apk before replace: ${outApkFile.path}")
-            }
-            if (!tmpOutputApk.renameTo(outApkFile)) {
-                copyFileWithLargeBuffer(tmpOutputApk, outApkFile)
-            }
-        } catch (e: Exception) {
-            if (e.hasNoSpaceLeft()) {
-                throw IOException("No space left on device while writing signed APK: ${outApkFile.path}", e)
-            }
-            throw RuntimeException(e)
-        } finally {
-            if (tmpOutputApk.exists() && !tmpOutputApk.delete()) {
-                Log.w(TAG, "Failed to delete temporary signed apk: ${tmpOutputApk.path}")
-            }
-        }
-        notifyStepProgress(
-            ProgressStep.SIGN,
-            context.getString(R.string.text_sign_completed),
-            outApkFile.path,
-        )
-    }
-
-    fun cleanWorkspace(context: Context) = also {
-        notifyStepChanged(ProgressStep.CLEAN)
-        val workspace = File(buildPath)
-        val totalTargets = countDeleteTargets(workspace).coerceAtLeast(1)
-        val deletedTargets = intArrayOf(0)
-        notifyStepProgress(
-            ProgressStep.CLEAN,
-            context.getString(R.string.text_cleaning_workspace),
-            workspace.path,
-        )
-        deleteWithProgress(context, workspace, totalTargets, deletedTargets)
-        notifyStepProgress(
-            ProgressStep.CLEAN,
-            context.getString(R.string.text_clean_completed),
-            workspace.path,
-        )
-    }
-
-    fun finish() = also {
-        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onFinished(this) } }
-    }
-
-    @Throws(IOException::class)
-    fun setArscPackageName(packageName: String?) = also { mArscPackageName = packageName }
-
-    @Throws(IOException::class)
-    private fun buildArsc() {
-        val oldArsc = File(buildPath, "resources.arsc")
-        val newArsc = File(buildPath, "resources.arsc.new")
-        BufferedInputStream(FileInputStream(oldArsc), 256 * 1024).use { input ->
-            BufferedOutputStream(FileOutputStream(newArsc, false), 256 * 1024).use { output ->
-                val decoder = ARSCDecoder(input, null, false)
-                decoder.CloneArsc(output, mArscPackageName, true)
-                output.flush()
-            }
-        }
-        oldArsc.delete()
-        if (!newArsc.renameTo(oldArsc)) {
-            copyFileWithLargeBuffer(newArsc, oldArsc)
-            newArsc.delete()
         }
     }
 
-    private fun copyFileWithLargeBuffer(source: File, target: File, bufferSize: Int = 256 * 1024) {
-        FileInputStream(source).use { input ->
-            FileOutputStream(target, false).use { output ->
-                val buffer = ByteArray(bufferSize)
-                var len: Int
-                while (input.read(buffer).also { len = it } > 0) {
-                    ensureNotCancelled()
-                    output.write(buffer, 0, len)
-                }
-            }
-        }
-    }
+    data class PluginLib(
+        val action: String,
+        val engine: String? = null,
+        val onServiceConnected: (IBinder) -> PluginInfo?,
+        val variants: List<PluginLibVariant>,
+    )
 
-    private fun Throwable.hasNoSpaceLeft(): Boolean {
-        var current: Throwable? = this
-        while (current != null) {
-            val message = current.message.orEmpty()
-            if (message.contains("ENOSPC", ignoreCase = true) || message.contains("No space left on device", ignoreCase = true)) {
-                return true
-            }
-            current = current.cause
-        }
-        return false
-    }
-
-    private fun countDeleteTargets(file: File): Int {
-        if (!file.exists()) {
-            return 0
-        }
-        return if (file.isDirectory) {
-            1 + (file.listFiles()?.sumOf(::countDeleteTargets) ?: 0)
-        } else {
-            1
-        }
-    }
-
-    private fun deleteWithProgress(context: Context, file: File, totalTargets: Int, deletedTargets: IntArray) {
-        ensureNotCancelled()
-        if (file.isDirectory) {
-            file.listFiles()?.forEach { child ->
-                deleteWithProgress(context, child, totalTargets, deletedTargets)
-            }
-        }
-        notifyStepProgress(
-            ProgressStep.CLEAN,
-            context.getString(R.string.text_deleting),
-            file.path,
-        )
-        file.delete()
-        deletedTargets[0] += 1
-    }
+    data class PluginLibVariant(
+        val variant: String? = null,
+        val assetsToInclude: Pair<List<String>, List<String>> = emptyList<String>() to emptyList(),
+        val libsToInclude: List<String> = emptyList(),
+    )
 
     enum class ProgressStep {
         PREPARE,
@@ -970,1286 +409,29 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         fun onFinished(builder: ApkBuilder)
     }
 
-    private inner class ManifestEditorWithAuthorities(manifestInputStream: InputStream?) : ManifestEditor(manifestInputStream) {
-
-        override fun shouldIgnoreComponentNode(nodeName: String?, componentClassName: String?): Boolean =
-            when (componentClassName) {
-                // Disable static shortcuts in packaged apps.
-                // Will publish dynamic explicit shortcuts at runtime.
-                // zh-CN:
-                // 在打包应用中禁用静态快捷方式.
-                // 将在运行时发布动态显式快捷方式.
-                "android.app.shortcuts" -> nodeName == "meta-data"
-
-                "org.autojs.autojs.external.open.EditIntentActivity",
-                "org.autojs.autojs.external.open.RunIntentActivity",
-                "org.autojs.autojs.external.open.ImportIntentActivity",
-                "org.autojs.autojs.external.tile.LayoutBoundsTile",
-                "org.autojs.autojs.external.tile.LayoutHierarchyTile",
-                    -> true
-
-                else -> false
-            }
-
-        override fun onAttr(attr: AxmlWriter.Attr) {
-            attr.apply {
-
-                // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Jan 18, 2025.
-                //  ! https://github.com/aiselp/AutoX/blob/5b3303926082d591a166b1845702357406811aaf/app/src/main/java/org/autojs/autojs/build/ApkBuilder.kt#L175-L188
-                if (!mProjectConfig.launchConfig.isSplashVisible && mSplashThemeId != 0 && value == mSplashThemeId) {
-                    value = mNoSplashThemeId
-                }
-
-                when {
-                    name.data == "authorities" -> (value as? StringItem)?.apply {
-                        // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Apr 12, 2025.
-                        //  ! https://github.com/aiselp/AutoX/commit/d085ccd41aafcf74d503bdf5ac08d021567945b2#diff-97c191813b60e8f000917ca5fe93dced97e688bdd48b25d212d03152d5f1678cR432
-                        data = data.replace(INRT_APP_ID, mProjectConfig.packageName)
-                    }
-                    else -> super.onAttr(this)
-                }
-            }
-        }
-
-        override fun isPermissionRequired(permissionName: String): Boolean {
-            if (
-                mProjectConfig.libs.contains(Lib.EMBEDDED_NODE_JS.label) &&
-                isEmbeddedNodeForegroundServicePermission(permissionName)
-            ) {
-                return true
-            }
-            return mProjectConfig.permissions.contains(permissionName)
-        }
-    }
-
-    private fun copyLibrariesByConfig(context: Context, config: ProjectConfig) {
-        ensureNotCancelled()
-
-        // @Hint by SuperMonster003 on Dec 11, 2023.
-        //  ! The list contains only abi names not matching the canonical name itself.
-        //  ! zh-CN: 这个列表仅含有不匹配规范名称本身的 abi 名称.
-        val potentialAbiAliasList = mapOf(
-            "arm64-v8a" to "arm64",
-            "armeabi-v7a" to "arm",
-        )
-
-        // Try extracting native libraries from installed plugin APKs if needed.
-        // zh-CN: 如有需要, 尝试从已安装插件 APK 中解压 native 库文件.
-        notifyStepProgress(
-            ProgressStep.BUILD,
-            context.getString(R.string.text_processing),
-            context.getString(R.string.text_resolving_plugin_native_libraries),
-        )
-        ensureAndExtractPluginLibrariesIfNeeded(context, config, potentialAbiAliasList)
-        ensureEmbeddedNodeLibrariesAvailableOrThrow(config, potentialAbiAliasList)
-
-        config.abis.forEach { abiCanonicalName ->
-            ensureNotCancelled()
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_copying_libraries_for_abi),
-                abiCanonicalName,
-            )
-            copyLibrariesByAbi(context, abiCanonicalName, abiCanonicalName)
-            potentialAbiAliasList[abiCanonicalName]?.let { abiAliasName ->
-                copyLibrariesByAbi(context, abiAliasName, abiCanonicalName)
-            }
-        }
-    }
-
-    private fun ensureEmbeddedNodeLibrariesAvailableOrThrow(
-        config: ProjectConfig,
-        potentialAbiAliasList: Map<String, String>,
-    ) {
-        if (!config.libs.contains(Lib.EMBEDDED_NODE_JS.label)) {
-            return
-        }
-        if (!BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED) {
-            throw IllegalStateException(
-                "Embedded Node.js packaged apps require embedded script execution build support. " +
-                        "Rebuild AutoJs6 with -Pautojs.nodejs.embedded.script.enabled=true before selecting Embedded Node.js."
-            )
-        }
-        if (Lib.EMBEDDED_NODE_JS.isPlugin) {
-            return
-        }
-
-        val missingPairs = mutableListOf<Pair<String, String>>() // (abi, soName)
-        config.abis.forEach { abiCanonicalName ->
-            ensureNotCancelled()
-            val abiCandidates = buildList {
-                add(abiCanonicalName)
-                potentialAbiAliasList[abiCanonicalName]?.let { add(it) }
-            }.distinct()
-
-            Lib.EMBEDDED_NODE_JS.libsToInclude.forEach { soName ->
-                ensureNotCancelled()
-                if (!hasHostNativeLibrary(abiCandidates, soName)) {
-                    missingPairs += abiCanonicalName to soName
-                }
-            }
-        }
-
-        if (missingPairs.isNotEmpty()) {
-            val detail = missingPairs.joinToString(", ") { (abi, so) -> "$abi/$so" }
-            throw IllegalStateException(
-                "Embedded Node.js native libraries are unavailable for selected ABI(s): $detail. " +
-                        "Supported Embedded Node.js ABIs are arm64-v8a, armeabi-v7a, and x86_64."
-            )
-        }
-    }
-
-    private fun ensureAndExtractPluginLibrariesIfNeeded(
-        context: Context,
-        config: ProjectConfig,
-        potentialAbiAliasList: Map<String, String>,
-    ) {
-        ensureNotCancelled()
-        Lib.entries.mapNotNull {
-            if (it.isPlugin && config.libs.contains(it.label)) it.toPluginPair() else null
-        }.forEach { (lib, plugin) ->
-            ensureNotCancelled()
-            // Select plugin service by variant.
-            // zh-CN: 通过 variant 选择插件服务.
-            val (serviceInfo, selectedVariant) = selectPluginServiceOrThrow(
-                lib = lib,
-                action = plugin.action,
-            )
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_selected_plugin),
-                "${lib.label} (${selectedVariant.variant}) from ${serviceInfo.packageName}",
-            )
-
-            Log.i(TAG, "Selected ${lib.label} plugin: variant=${selectedVariant.variant}, pkg=${serviceInfo.packageName}")
-
-            // Extract libraries from installed plugin APK (variant-aware).
-            // zh-CN: 从已安装插件 APK 中解压 so 文件, 并按变体裁剪.
-            extractLibrariesFromPluginApkOrThrow(
-                context = context,
-                config = config,
-                requiredLibNames = selectedVariant.libsToInclude.filterNot { soName ->
-                    lib != Lib.OPENCV &&
-                            config.libs.contains(Lib.OPENCV.label) &&
-                            soName == OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME
-                },
-                serviceInfo = serviceInfo,
-                potentialAbiAliasList = potentialAbiAliasList,
-            )
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_extracted_plugin_libraries),
-                lib.label,
-            )
-
-            // Extract assets (models/labels) from installed plugin APK (variant-aware).
-            // zh-CN: 从已安装插件 APK 中解压 assets 资源 (models/labels), 并按变体裁剪.
-            extractAssetsFromPluginApkOrThrow(
-                context = context,
-                serviceInfo = serviceInfo,
-                pluginLibVariant = selectedVariant,
-            )
-            notifyStepProgress(
-                ProgressStep.BUILD,
-                context.getString(R.string.text_extracted_plugin_assets),
-                lib.label,
-            )
-        }
-    }
-
-    private fun selectPluginServiceOrThrow(
-        lib: Lib,
-        action: String,
-    ): Pair<ServiceInfo, PluginLibVariant> {
-        ensureNotCancelled()
-        val pm = globalContext.packageManager
-        val moduleLabel = lib.label
-        val pluginPair = lib.toPluginPair()
-        val plugin = pluginPair.second
-        val services = filterPackagingServices(
-            lib,
-            findServicesByAction(pm, action),
-        )
-        if (services.isEmpty()) {
-            throw IllegalStateException(
-                globalContext.getString(R.string.error_missing_required_plugin_for_module_label, moduleLabel)
-            )
-        }
-
-        // Only consider enabled plugins in packaging phase.
-        // zh-CN: 打包阶段仅考虑已启用的插件.
-        val enabledServices = services.filter { si ->
-            PluginEnableStore.isEnabled(globalContext, si.packageName, defaultEnabled = true)
-        }
-
-        if (enabledServices.isEmpty()) {
-            throw IllegalStateException(
-                globalContext.getString(R.string.error_no_enabled_plugin_for_module_label, moduleLabel)
-            )
-        }
-
-        mLastPluginQueryDiagnostics = emptyList()
-
-        selectPluginVariant(enabledServices, pluginPair).also { attempt ->
-            mLastPluginQueryDiagnostics = attempt.diagnostics
-            attempt.selected?.let { return it }
-        }
-
-        if (tryWakePluginServices(enabledServices)) {
-            PLUGIN_WAKE_RETRY_DELAYS_MS.forEach { delayMs ->
-                sleepBeforePluginRetry(delayMs)
-                val retryEnabledServices = filterPackagingServices(
-                    lib,
-                    findServicesByAction(pm, action),
-                ).filter { si ->
-                    PluginEnableStore.isEnabled(globalContext, si.packageName, defaultEnabled = true)
-                }
-                selectPluginVariant(retryEnabledServices, pluginPair).also { attempt ->
-                    mLastPluginQueryDiagnostics = attempt.diagnostics
-                    attempt.selected?.let { return it }
-                }
-            }
-        }
-
-        val variantList = plugin.variants.joinToString("/") { it.variant.orEmpty() }
-        val detail = mLastPluginQueryDiagnostics
-            .takeIf { it.isNotEmpty() }
-            ?.joinToString(separator = "\n", prefix = "\n")
-            .orEmpty()
-
-        throw IllegalStateException(
-            globalContext.getString(R.string.error_no_available_enabled_plugin_variants_found, moduleLabel, variantList) + detail
-        )
-    }
-
-    private fun filterPackagingServices(lib: Lib, services: List<ServiceInfo>): List<ServiceInfo> = when (lib) {
-        Lib.IMAGE_QUANT -> ImageQuantPluginHost.filterEligiblePackagingServices(globalContext, services)
-        Lib.OPENCV -> OpenCvPluginHost.filterEligiblePackagingServices(globalContext, services)
-        else -> services
-    }
-
-    private fun selectPluginVariant(
-        services: List<ServiceInfo>,
-        pluginPair: Pair<Lib, PluginLib>,
-    ): PluginSelectionAttempt {
-        ensureNotCancelled()
-        val plugin = pluginPair.second
-        val results = services.map { si ->
-            runCatching {
-                val info = queryPluginInfoBlocking(globalContext, si, pluginPair)
-                PluginQueryResult(
-                    serviceInfo = si,
-                    pluginInfo = info,
-                    selectedVariant = resolvePluginVariant(plugin, info, si),
-                    error = null,
-                )
-            }.getOrElse { error ->
-                PluginQueryResult(
-                    serviceInfo = si,
-                    pluginInfo = null,
-                    selectedVariant = null,
-                    error = error,
-                )
-            }
-        }
-
-        val diagnostics = results.map(::formatPluginQueryDiagnostic)
-        val candidates = results.mapNotNull { result ->
-            result.selectedVariant?.let { variant -> result.serviceInfo to variant }
-        }
-
-        selectBestPluginVariantCandidate(candidates, plugin.variants)?.let {
-            return PluginSelectionAttempt(it, diagnostics)
-        }
-
-        return PluginSelectionAttempt(null, diagnostics)
-    }
-
-    private fun resolvePluginVariant(plugin: PluginLib, info: PluginInfo, serviceInfo: ServiceInfo): PluginLibVariant? {
-        if (!isPluginFamilyMatch(plugin, info, serviceInfo)) {
-            return null
-        }
-        val hints = listOfNotNull(
-            info.variant,
-            info.id,
-            info.name,
-            serviceInfo.packageName,
-            serviceInfo.name,
-        ).filter { it.isNotBlank() }
-
-        return plugin.variants.firstOrNull { variant ->
-            val expected = variant.variant ?: return@firstOrNull false
-            hints.any { hint -> isPluginVariantMatch(hint, expected) }
-        }
-    }
-
-    private fun isPluginFamilyMatch(plugin: PluginLib, info: PluginInfo, serviceInfo: ServiceInfo): Boolean {
-        val expectedEngine = plugin.engine ?: return true
-        if (info.engine == expectedEngine) {
-            return true
-        }
-        val expected = normalizePluginVariantHint(expectedEngine)
-        return listOfNotNull(
-            info.id,
-            info.name,
-            serviceInfo.packageName,
-            serviceInfo.name,
-        ).any { hint ->
-            normalizePluginVariantHint(hint).contains(expected)
-        }
-    }
-
-    private fun isPluginVariantMatch(hint: String, expected: String): Boolean {
-        val normalizedHint = normalizePluginVariantHint(hint)
-        val normalizedExpected = normalizePluginVariantHint(expected)
-        return normalizedHint == normalizedExpected || normalizedHint.endsWith(normalizedExpected)
-    }
-
-    private fun normalizePluginVariantHint(text: String): String {
-        return text.lowercase().replace(Regex("[^a-z0-9]"), "")
-    }
-
-    private fun formatPluginQueryDiagnostic(result: PluginQueryResult): String {
-        val service = "${result.serviceInfo.packageName}/${result.serviceInfo.name}"
-        result.error?.let { error ->
-            return "$service: ${error.javaClass.simpleName}: ${error.message}"
-        }
-        val info = result.pluginInfo
-        val infoText = when (info) {
-            null -> "info=null"
-            else -> "info={id=${info.id}, engine=${info.engine}, variant=${info.variant}, name=${info.name}}"
-        }
-        val variantText = result.selectedVariant?.variant ?: "unmatched"
-        return "$service: selectedVariant=$variantText, $infoText"
-    }
-
-    private fun tryWakePluginServices(services: List<ServiceInfo>): Boolean {
-        ensureNotCancelled()
-        var didWake = false
-        services.map { it.packageName }.distinct().forEach { packageName ->
-            didWake = PluginWakeManager.tryAutoWakeIfNeeded(globalContext, packageName) || didWake
-        }
-        return didWake
-    }
-
-    private fun sleepBeforePluginRetry(delayMs: Long) {
-        ensureNotCancelled()
-        try {
-            Thread.sleep(delayMs)
-        } catch (e: InterruptedException) {
-            Thread.currentThread().interrupt()
-            throw CancellationException("Build aborted").apply { initCause(e) }
-        }
-        ensureNotCancelled()
-    }
-
-    private fun queryPluginInfoBlocking(context: Context, serviceInfo: ServiceInfo, pluginPair: Pair<Lib, PluginLib>): PluginInfo {
-        ensureNotCancelled()
-        // Bind service and call getInfo() synchronously (packaging-time only).
-        // zh-CN: 同步绑定服务并调用 getInfo() (仅打包阶段使用).
-        val latch = CountDownLatch(1)
-        var pluginInfo: PluginInfo? = null
-        var error: Throwable? = null
-
-        val (lib, plugin) = pluginPair
-
-        val intent = Intent(plugin.action).apply {
-            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-            component = ComponentName(serviceInfo.packageName, serviceInfo.name)
-        }
-
-        val conn = object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-                try {
-                    pluginInfo = plugin.onServiceConnected(binder)
-                } catch (t: Throwable) {
-                    error = t
-                } finally {
-                    latch.countDown()
-                }
-            }
-
-            override fun onServiceDisconnected(name: ComponentName) {
-                // Ignored.
-            }
-        }
-
-        val bound = runCatching {
-            context.bindService(intent, conn, Context.BIND_AUTO_CREATE)
-        }.getOrDefault(false)
-
-        if (!bound) {
-            throw IllegalStateException(
-                globalContext.getString(R.string.error_failed_to_bind_plugin_service, lib.label)
-            )
-        }
-
-        try {
-            val ok = latch.await(PLUGIN_INFO_QUERY_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            if (!ok) {
-                throw IllegalStateException(
-                    globalContext.getString(R.string.error_timeout_while_querying_plugin_info, lib.label)
-                )
-            }
-            error?.let { throw it }
-            return pluginInfo ?: throw IllegalStateException(
-                globalContext.getString(R.string.error_plugin_returned_empty_info, lib.label)
-            )
-        } finally {
-            runCatching { context.unbindService(conn) }
-        }
-    }
-
-    private fun extractAssetsFromPluginApkOrThrow(
-        context: Context,
-        serviceInfo: ServiceInfo,
-        pluginLibVariant: PluginLibVariant,
-    ) {
-        ensureNotCancelled()
-        val pm = globalContext.packageManager
-
-        val appInfo = getApplicationInfoCompat(pm, serviceInfo.packageName)
-        val apkPaths = buildList {
-            add(appInfo.sourceDir)
-            appInfo.splitSourceDirs?.forEach { add(it) }
-        }.distinct()
-
-        val (requiredPrefixes, optionalPrefixes) = pluginLibVariant.assetsToInclude
-
-        // Extract required prefixes.
-        // zh-CN: 解压必需前缀.
-        val missingRequired = mutableListOf<String>()
-        requiredPrefixes.forEach { prefix ->
-            ensureNotCancelled()
-            val ok = extractAssetsByPrefixFromApks(
-                context = context,
-                apkPaths = apkPaths,
-                assetPrefix = prefix,
-            )
-            if (!ok) missingRequired += prefix
-        }
-
-        if (missingRequired.isNotEmpty()) {
-            val detail = missingRequired.joinToString(", ")
-            throw IllegalStateException(
-                globalContext.getString(R.string.error_plugin_apk_does_not_contain_required_assets_for_variant, pluginLibVariant.variant, detail)
-            )
-        }
-
-        // Extract optional prefixes (best-effort).
-        // zh-CN: 解压可选前缀 (尽力而为).
-        optionalPrefixes.forEach { prefix ->
-            ensureNotCancelled()
-            extractAssetsByPrefixFromApks(
-                context = context,
-                apkPaths = apkPaths,
-                assetPrefix = prefix,
-            )
-        }
-    }
-
-    private fun extractAssetsByPrefixFromApks(
-        context: Context,
-        apkPaths: List<String>,
-        assetPrefix: String,
-    ): Boolean {
-        ensureNotCancelled()
-        var extractedAny = false
-        val zipPrefix = toAssetZipPrefix(assetPrefix)
-        apkPaths.forEach { apkPath ->
-            ensureNotCancelled()
-            runCatching {
-                ZipFile(apkPath).use { zip ->
-                    val entries = zip.entries()
-                    while (entries.hasMoreElements()) {
-                        ensureNotCancelled()
-                        val entry: ZipEntry = entries.nextElement()
-                        val name = entry.name
-                        if (name != zipPrefix && !name.startsWith("$zipPrefix/")) continue
-                        if (entry.isDirectory) continue
-
-                        val relative = name.removePrefix("assets/")
-                        val outFile = File(buildPath, "assets/$relative").apply {
-                            parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-                        }
-                        notifyStepProgress(
-                            ProgressStep.BUILD,
-                            context.getString(R.string.text_extracting_plugin_asset),
-                            "$apkPath!/$name -> ${outFile.path}",
-                        )
-
-                        zip.getInputStream(entry).use { input ->
-                            FileOutputStream(outFile, false).use { output ->
-                                copyStreamWithCancel(input, output)
-                                syncBestEffort(output)
-                            }
-                        }
-
-                        extractedAny = true
-                    }
-                }
-            }.onFailure {
-                // Ignore and try next apk path.
-                // zh-CN: 忽略异常并尝试下一个 apk 路径.
-                it.printStackTrace()
-            }
-        }
-        return extractedAny
-    }
-
-    private fun extractLibrariesFromPluginApkOrThrow(
-        context: Context,
-        config: ProjectConfig,
-        requiredLibNames: List<String>,
-        serviceInfo: ServiceInfo,
-        potentialAbiAliasList: Map<String, String>,
-    ) {
-        ensureNotCancelled()
-        val pm = globalContext.packageManager
-
-        val appInfo = getApplicationInfoCompat(pm, serviceInfo.packageName)
-        val apkPaths = buildList {
-            add(appInfo.sourceDir)
-            appInfo.splitSourceDirs?.forEach { add(it) }
-        }.distinct()
-        val nativeLibraryDir = appInfo.nativeLibraryDir
-            ?.let(::File)
-            ?.takeIf { it.isDirectory }
-
-        val missingPairs = mutableListOf<Pair<String, String>>() // (abi, soName)
-
-        config.abis.forEach { abiCanonicalName ->
-            ensureNotCancelled()
-            val abiCandidates = buildList {
-                add(abiCanonicalName)
-                potentialAbiAliasList[abiCanonicalName]?.let { add(it) }
-            }.distinct()
-
-            requiredLibNames.forEach { soName ->
-                ensureNotCancelled()
-                // One process must use one deterministic C++ runtime. Prefer the template's
-                // libc++ for every plugin and use the plugin copy only when an ABI is absent.
-                val ok = if (soName in PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES) {
-                    extractFirstMatchedSoFromHostNativeSources(
-                        context = context,
-                        abiCandidates = abiCandidates,
-                        soName = soName,
-                        abiDestName = abiCanonicalName,
-                    ) || extractFirstMatchedSoFromApks(
-                        context = context,
-                        apkPaths = apkPaths,
-                        nativeLibraryDir = nativeLibraryDir,
-                        abiCandidates = abiCandidates,
-                        soName = soName,
-                        abiDestName = abiCanonicalName,
-                    )
-                } else {
-                    extractFirstMatchedSoFromApks(
-                        context = context,
-                        apkPaths = apkPaths,
-                        nativeLibraryDir = nativeLibraryDir,
-                        abiCandidates = abiCandidates,
-                        soName = soName,
-                        abiDestName = abiCanonicalName,
-                    )
-                }
-                if (!ok) missingPairs += abiCanonicalName to soName
-            }
-        }
-
-        if (missingPairs.isNotEmpty()) {
-            val detail = missingPairs.joinToString(", ") { (abi, so) -> "$abi/$so" }
-            throw IllegalStateException(
-                globalContext.getString(R.string.error_plugin_apk_does_not_contain_required_native_libraries, detail)
-            )
-        }
-    }
-
-    private fun findServicesByAction(pm: PackageManager, action: String): List<ServiceInfo> {
-        val intent = Intent(action).addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-        val resolveList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0))
-        } else {
-            @Suppress("DEPRECATION")
-            pm.queryIntentServices(intent, 0)
-        }
-        return resolveList.mapNotNull { it.serviceInfo }
-    }
-
-    private fun extractFirstMatchedSoFromApks(
-        context: Context,
-        apkPaths: List<String>,
-        nativeLibraryDir: File? = null,
-        abiCandidates: List<String>,
-        soName: String,
-        abiDestName: String,
-    ): Boolean {
-        ensureNotCancelled()
-        apkPaths.forEach { apkPath ->
-            ensureNotCancelled()
-            runCatching {
-                ZipFile(apkPath).use { zip ->
-                    abiCandidates.forEach { abiInApk ->
-                        ensureNotCancelled()
-                        val (entryName, entry) = findNativeLibraryEntry(zip, abiInApk, soName) ?: return@forEach
-                        val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
-                            parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-                        }
-                        notifyStepProgress(
-                            ProgressStep.BUILD,
-                            context.getString(R.string.text_extracting_plugin_so),
-                            "$apkPath!/$entryName -> ${outFile.path}",
-                        )
-                        zip.getInputStream(entry).use { input ->
-                            FileOutputStream(outFile, false).use { output ->
-                                copyStreamWithCancel(input, output)
-                                syncBestEffort(output)
-                            }
-                        }
-                        Log.i(TAG, "Extracted so from plugin apk: $apkPath!/$entryName -> ${outFile.path}")
-                        return true
-                    }
-                }
-            }.onFailure {
-                // Ignore and try next apk path.
-                // zh-CN: 忽略异常并尝试下一个 apk 路径.
-                it.printStackTrace()
-            }
-        }
-        return extractFirstMatchedSoFromNativeLibraryDir(
-            context = context,
-            nativeLibraryDir = nativeLibraryDir,
-            abiCandidates = abiCandidates,
-            soName = soName,
-            abiDestName = abiDestName,
-            progressText = context.getString(R.string.text_extracting_plugin_so),
-        )
-    }
-
-    private fun extractFirstMatchedSoFromNativeLibraryDir(
-        context: Context,
-        nativeLibraryDir: File?,
-        abiCandidates: List<String>,
-        soName: String,
-        abiDestName: String,
-        progressText: String,
-    ): Boolean {
-        val sourceFile = findFirstNativeLibraryFile(nativeLibraryDir, abiCandidates, soName) ?: return false
-        val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
-            parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-        }
-        notifyStepProgress(
-            ProgressStep.BUILD,
-            progressText,
-            "${sourceFile.path} -> ${outFile.path}",
-        )
-        FileInputStream(sourceFile).use { input ->
-            FileOutputStream(outFile, false).use { output ->
-                copyStreamWithCancel(input, output)
-                syncBestEffort(output)
-            }
-        }
-        Log.i(TAG, "Extracted so from native library dir: ${sourceFile.path} -> ${outFile.path}")
-        return true
-    }
-
-    private fun findFirstNativeLibraryFile(
-        nativeLibraryDir: File?,
-        abiCandidates: List<String>,
-        soName: String,
-    ): File? {
-        if (nativeLibraryDir == null || !nativeLibraryDir.exists()) {
-            return null
-        }
-        return buildList {
-            if (nativeLibraryDirectoryMatchesAbi(nativeLibraryDir.name, abiCandidates)) {
-                add(nativeLibraryDir.resolve(soName))
-            }
-            abiCandidates.forEach { abi ->
-                add(nativeLibraryDir.resolve("$abi/$soName"))
-            }
-            nativeLibraryDir.parentFile?.let { parent ->
-                abiCandidates.forEach { abi ->
-                    add(parent.resolve("$abi/$soName"))
-                }
-            }
-        }.distinctBy { it.absolutePath }
-            .firstOrNull { it.isFile }
-    }
-
-    private fun hasHostNativeLibrary(abiCandidates: List<String>, soName: String): Boolean {
-        val appInfo = getApplicationInfoCompat(globalContext.packageManager, globalContext.packageName)
-        val nativeLibraryDir = appInfo.nativeLibraryDir
-            ?.let(::File)
-            ?.takeIf { it.exists() }
-        if (findFirstNativeLibraryFile(nativeLibraryDir, abiCandidates, soName) != null) {
-            return true
-        }
-        val srcLibDir = File(appApkFile.parent, LIBRARY_DIR)
-        if (findFirstNativeLibraryFile(srcLibDir, abiCandidates, soName) != null) {
-            return true
-        }
-        return getAppApkPaths().any { apkPath ->
-            abiCandidates.any { abi -> apkContainsSo(apkPath, abi, soName) }
-        }
-    }
-
-    private fun apkContainsSo(apkPath: String, abi: String, soName: String): Boolean =
-        runCatching {
-            ZipFile(apkPath).use { zip -> zip.getEntry("lib/$abi/$soName") != null }
-        }.getOrDefault(false)
-
-    private fun getAppApkPaths(): List<String> {
-        val appInfo = getApplicationInfoCompat(globalContext.packageManager, globalContext.packageName)
-        return buildList {
-            add(appInfo.sourceDir)
-            appInfo.splitSourceDirs?.forEach { add(it) }
-        }.distinct()
-    }
-
-    private fun getApplicationInfoCompat(pm: PackageManager, packageName: String): ApplicationInfo {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.getApplicationInfo(packageName, ApplicationInfoFlags.of(0))
-        } else {
-            @Suppress("DEPRECATION")
-            pm.getApplicationInfo(packageName, 0)
-        }
-    }
-
-    private fun copyLibrariesByAbi(context: Context, abiSrcName: String, abiDestName: String) {
-        ensureNotCancelled()
-
-        // @Reference to LZX284 (https://github.com/LZX284) by SuperMonster003 on Dec 11, 2023.
-        //  ! http://pr.autojs6.com/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61
-        val srcLibDir = File(appApkFile.parent, LIBRARY_DIR).path
-
-        mLibsIncludes.distinct().forEach { libName ->
-            ensureNotCancelled()
-            runCatching {
-                val srcFile = File(srcLibDir, "$abiSrcName/$libName")
-                val destFile = File(buildPath, "lib/$abiDestName/$libName")
-                srcFile.takeIf { it.exists() }?.let {
-                    notifyStepProgress(
-                        ProgressStep.BUILD,
-                        context.getString(R.string.text_copying_library),
-                        "${srcFile.path} -> ${destFile.path}",
-                    )
-                    it.copyTo(destFile, overwrite = true)
-                    return@forEach
-                }
-                extractFirstMatchedSoFromHostNativeSources(
-                    context = context,
-                    abiCandidates = listOf(abiSrcName),
-                    soName = libName,
-                    abiDestName = abiDestName,
-                )
-            }.onFailure { it.printStackTrace() }
-        }
-    }
-
-    private fun extractFirstMatchedSoFromHostNativeSources(
-        context: Context,
-        abiCandidates: List<String>,
-        soName: String,
-        abiDestName: String,
-    ): Boolean {
-        val appInfo = getApplicationInfoCompat(globalContext.packageManager, globalContext.packageName)
-        val nativeLibraryDir = appInfo.nativeLibraryDir
-            ?.let(::File)
-            ?.takeIf { it.exists() }
-        if (extractFirstMatchedSoFromNativeLibraryDir(
-                context = context,
-                nativeLibraryDir = nativeLibraryDir,
-                abiCandidates = abiCandidates,
-                soName = soName,
-                abiDestName = abiDestName,
-                progressText = context.getString(R.string.text_copying_library),
-            )
-        ) {
-            return true
-        }
-
-        val srcLibDir = File(appApkFile.parent, LIBRARY_DIR)
-            .takeIf { it.exists() }
-        if (extractFirstMatchedSoFromNativeLibraryDir(
-                context = context,
-                nativeLibraryDir = srcLibDir,
-                abiCandidates = abiCandidates,
-                soName = soName,
-                abiDestName = abiDestName,
-                progressText = context.getString(R.string.text_copying_library),
-            )
-        ) {
-            return true
-        }
-
-        return extractFirstMatchedSoFromHostApks(
-            context = context,
-            abiCandidates = abiCandidates,
-            soName = soName,
-            abiDestName = abiDestName,
-        )
-    }
-
-    private fun extractFirstMatchedSoFromHostApks(
-        context: Context,
-        abiCandidates: List<String>,
-        soName: String,
-        abiDestName: String,
-    ): Boolean {
-        getAppApkPaths().forEach { apkPath ->
-            ensureNotCancelled()
-            runCatching {
-                ZipFile(apkPath).use { zip ->
-                    abiCandidates.forEach { abiInApk ->
-                        ensureNotCancelled()
-                        val (entryName, entry) = findNativeLibraryEntry(zip, abiInApk, soName) ?: return@forEach
-                        val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
-                            parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-                        }
-                        notifyStepProgress(
-                            ProgressStep.BUILD,
-                            context.getString(R.string.text_copying_library),
-                            "$apkPath!/$entryName -> ${outFile.path}",
-                        )
-                        zip.getInputStream(entry).use { input ->
-                            FileOutputStream(outFile, false).use { output ->
-                                copyStreamWithCancel(input, output)
-                                syncBestEffort(output)
-                            }
-                        }
-                        Log.i(TAG, "Extracted so from host apk: $apkPath!/$entryName -> ${outFile.path}")
-                        return true
-                    }
-                }
-            }.onFailure {
-                it.printStackTrace()
-            }
-        }
-        return false
-    }
-
-    private fun findNativeLibraryEntry(zip: ZipFile, abi: String, soName: String): Pair<String, ZipEntry>? {
-        NATIVE_LIBRARY_ENTRY_ROOTS.forEach { root ->
-            val entryName = "$root/$abi/$soName"
-            zip.getEntry(entryName)?.let { return entryName to it }
-        }
-        return null
-    }
-
-    private fun syncBestEffort(output: FileOutputStream) {
-        try {
-            output.fd.sync()
-        } catch (e: SyncFailedException) {
-            Log.w(TAG, "File descriptor sync failed after writing APK build artifact; continuing.", e)
-        }
-    }
-
-    @Suppress("SpellCheckingInspection")
-    enum class Lib(
-        @JvmField val label: String,
-        @JvmField val aliases: List<String> = emptyList(),
-        @JvmField val enumerable: Boolean = true,
-        internal val plugin: PluginLib? = null,
-        internal val libsToInclude: List<String> = emptyList(),
-        internal val assetFilesToInclude: List<String> = emptyList(),
-        // Select, then include into packaging APK. (选择后, 会被打包进 APK 中.)
-        internal val assetDirsToInclude: List<String> = emptyList(),
-    ) {
-
-        TERMINAL_EMULATOR(
-            label = "Terminal Emulator",
-            enumerable = false,
-            libsToInclude = listOf(
-                "libjackpal-androidterm5.so",
-                "libjackpal-termexec2.so",
-            ),
-        ),
-
-        EMBEDDED_NODE_JS(
-            label = "Embedded Node.js",
-            aliases = listOf("node", "nodejs", "node.js", "embedded-node", "embedded-nodejs", "embedded_nodejs"),
-            libsToInclude = emptyList(),
-            plugin = PluginLib(
-                action = NodeJsPluginActions.INFO,
-                onServiceConnected = { binder: IBinder ->
-                    IPluginInfoProvider.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = NodeJsPluginIds.VARIANT_NODE_24_5,
-                        libsToInclude = listOf(
-                            "libnode.so",
-                            "libautojs6-node.so",
-                            "libc++_shared.so",
-                        ),
-                    ),
-                ),
-            ),
-        ),
-
-        OPENCV(
-            label = "OpenCV",
-            aliases = listOf("cv"),
-            libsToInclude = emptyList(),
-            plugin = PluginLib(
-                action = OpenCvPluginContract.ACTION_RUNTIME,
-                engine = OpenCvPluginContract.ENGINE,
-                onServiceConnected = { binder: IBinder ->
-                    IPluginInfoProvider.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = OpenCvPluginContract.VARIANT_4_8_0,
-                        libsToInclude = listOf(
-                            "libc++_shared.so",
-                            OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME,
-                        ),
-                    ),
-                ),
-            ),
-        ),
-
-        MLKIT_OCR(
-            label = "MLKit OCR",
-            aliases = listOf("mlkit", "mlkitocr", "mlkit-ocr", "mlkit_ocr"),
-            libsToInclude = emptyList(),
-            assetDirsToInclude = emptyList(),
-            plugin = PluginLib(
-                // Shared OCR AIDL action. ML Kit OCR plugins are selected by PluginInfo.engine/variant.
-                action = OcrPluginHost.ACTION_OCR,
-                onServiceConnected = { binder: IBinder ->
-                    IOcrPlugin.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = "chinese",
-                        assetsToInclude = listOf(
-                            "assets/mlkit-google-ocr-models/",
-                        ) to emptyList(),
-                        libsToInclude = listOf(
-                            "libmlkit_google_ocr_pipeline.so",
-                        ),
-                    ),
-                ),
-            ),
-        ),
-
-        PADDLE_OCR(
-            label = "Paddle OCR",
-            aliases = listOf("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"),
-            libsToInclude = emptyList(),
-            assetDirsToInclude = emptyList(),
-            plugin = PluginLib(
-                // Legacy shared OCR AIDL action. Keep stable for existing Paddle OCR plugins.
-                action = OcrPluginHost.ACTION_OCR,
-                engine = "paddle-ocr",
-                onServiceConnected = { binder: IBinder ->
-                    IOcrPlugin.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = "v3",
-                        assetsToInclude = listOf(
-                            "assets/labels/ppocr_keys_v1.txt",
-                            "assets/models/ocr_v3_for_cpu/",
-                        ) to listOf(
-                            "assets/models/ocr_v3_for_cpu(slim)/",
-                        ),
-                        libsToInclude = listOf(
-                            "libc++_shared.so",
-                            "libpaddle_light_api_shared.so",
-                            "libNative.so",
-                            "libopencv_java4.so",
-                        ),
-                    ),
-                    PluginLibVariant(
-                        variant = "v4",
-                        assetsToInclude = listOf(
-                            "assets/models/",
-                        ) to emptyList(),
-                        libsToInclude = listOf(
-                            "libc++_shared.so",
-                            "libonnxruntime.so",
-                            "libonnxruntime4j_jni.so",
-                            "libopencv_java4.so",
-                        ),
-                    ),
-                    PluginLibVariant(
-                        variant = "v5",
-                        assetsToInclude = listOf(
-                            "assets/models/",
-                        ) to emptyList(),
-                        libsToInclude = listOf(
-                            "libc++_shared.so",
-                            "libonnxruntime.so",
-                            "libonnxruntime4j_jni.so",
-                            "libopencv_java4.so",
-                        ),
-                    ),
-                    PluginLibVariant(
-                        variant = "v6",
-                        assetsToInclude = listOf(
-                            "assets/models/",
-                        ) to emptyList(),
-                        libsToInclude = listOf(
-                            "libc++_shared.so",
-                            "libonnxruntime.so",
-                            "libonnxruntime4j_jni.so",
-                            "libopencv_java4.so",
-                        ),
-                    ),
-                ),
-            ),
-        ),
-
-        RAPID_OCR(
-            label = "Rapid OCR",
-            aliases = listOf("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"),
-            libsToInclude = emptyList(),
-            assetDirsToInclude = emptyList(),
-            plugin = PluginLib(
-                // Shared OCR AIDL action. Rapid OCR plugins are selected by PluginInfo.engine/variant.
-                action = OcrPluginHost.ACTION_OCR,
-                engine = "rapid-ocr",
-                onServiceConnected = { binder: IBinder ->
-                    IOcrPlugin.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = "pp-ocrv3",
-                        assetsToInclude = listOf(
-                            "assets/models/ch_PP-OCRv3_det_infer.onnx",
-                            "assets/models/ch_ppocr_mobile_v2.0_cls_infer.onnx",
-                            "assets/models/ch_PP-OCRv3_rec_infer.onnx",
-                            "assets/models/ppocr_keys_v1.txt",
-                        ) to emptyList(),
-                        libsToInclude = listOf(
-                            "libRapidOcr.so",
-                            "libonnxruntime.so",
-                        ),
-                    ),
-                    PluginLibVariant(
-                        variant = "pp-ocrv6",
-                        assetsToInclude = listOf(
-                            "assets/models/PP-OCRv6_det_small.onnx",
-                            "assets/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
-                            "assets/models/PP-OCRv6_rec_small.onnx",
-                            "assets/models/ppocrv6_dict.txt",
-                        ) to emptyList(),
-                        libsToInclude = listOf(
-                            "libRapidOcr.so",
-                            "libonnxruntime.so",
-                        ),
-                    ),
-                ),
-            ),
-        ),
-
-        OPENCC(
-            label = "OpenCC",
-            aliases = listOf("cc"),
-            plugin = PluginLib(
-                action = OpenccPluginHost.ACTION_OPENCC,
-                onServiceConnected = { binder: IBinder ->
-                    IOpenccPlugin.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = OpenccPluginIds.VARIANT_DEFAULT,
-                        assetsToInclude = listOf(
-                            "assets/openccdata/",
-                        ) to emptyList(),
-                        libsToInclude = listOf(
-                            "libChineseConverter.so",
-                        ),
-                    ),
-                ),
-            ),
-        ),
-
-        PINYIN(
-            label = "Pinyin",
-            aliases = listOf("pin"),
-            plugin = PluginLib(
-                action = PinyinPluginHost.ACTION_PINYIN,
-                onServiceConnected = { binder: IBinder ->
-                    IPinyinPlugin.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = PinyinPluginIds.VARIANT_DEFAULT,
-                        assetsToInclude = listOf(
-                            "assets/dict-chinese-words.db.gzip",
-                            "assets/dict-chinese-phrases.db.gzip",
-                            "assets/dict-chinese-chars.db.gzip",
-                            "assets/prob_emit.txt",
-                        ) to emptyList(),
-                    ),
-                ),
-            ),
-        ),
-
-        PINYIN4J(
-            label = "Pinyin4j",
-            aliases = listOf("pinyin4j", "pinyin-4j", "pinyin_4j"),
-            plugin = PluginLib(
-                action = Pinyin4jPluginHost.ACTION_PINYIN4J,
-                onServiceConnected = { binder: IBinder ->
-                    IPinyin4jPlugin.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = Pinyin4jPluginIds.VARIANT_DEFAULT,
-                    ),
-                ),
-            ),
-        ),
-
-        MLKIT_BARCODE(
-            label = "MLKit Barcode",
-            aliases = listOf("barcode", "mlkit-barcode", "mlkit_barcode"),
-            libsToInclude = emptyList(),
-            assetDirsToInclude = emptyList(),
-            plugin = PluginLib(
-                action = BarcodePluginHost.ACTION_BARCODE,
-                onServiceConnected = { binder: IBinder ->
-                    IBarcodePlugin.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = "default",
-                        assetsToInclude = listOf(
-                            "assets/mlkit_barcode_models",
-                        ) to emptyList(),
-                        libsToInclude = listOf(
-                            "libbarhopper_v3.so",
-                        ),
-                    ),
-                ),
-            ),
-        ),
-
-        MEDIA_INFO(
-            label = "MediaInfo",
-            aliases = listOf("mediainfo", "media-info", "media_info"),
-            plugin = PluginLib(
-                action = MediainfoPluginHost.ACTION_MEDIAINFO,
-                onServiceConnected = { binder: IBinder ->
-                    IMediainfoPlugin.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = MediainfoPluginIds.VARIANT_DEFAULT,
-                        libsToInclude = listOf(
-                            "libc++_shared.so",
-                            "libmediainfo.so",
-                        ),
-                    ),
-                ),
-            ),
-        ),
-
-        IMAGE_QUANT(
-            label = "Image Quantization",
-            aliases = listOf("imagequant", "image-quant", "image-quantization", "image_quant", "image_quantization"),
-            libsToInclude = emptyList(),
-            plugin = PluginLib(
-                action = ImageQuantPluginContract.ACTION_RUNTIME,
-                engine = ImageQuantPluginContract.ENGINE,
-                onServiceConnected = { binder: IBinder ->
-                    IPluginInfoProvider.Stub.asInterface(binder).info
-                },
-                variants = listOf(
-                    PluginLibVariant(
-                        variant = ImageQuantPluginContract.VARIANT_2_17_0,
-                        assetsToInclude = listOf(
-                            "assets/licenses/imagequant/",
-                        ) to emptyList(),
-                        libsToInclude = listOf(ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME),
-                    ),
-                ),
-            ),
-        ),
-
-        ;
-
-        val isPlugin: Boolean
-            get() = plugin != null
-
-        fun toPluginPair(): Pair<Lib, PluginLib> = this to plugin!!
-
-        fun ensureLibFiles(moduleName: String = label) {
-            if (!isInrt) return
-            val nativeLibraryDir = File(globalContext.applicationInfo.nativeLibraryDir)
-            val primaryNativeLibraries = nativeLibraryDir.list()?.toList() ?: emptyList()
-            Log.d(TAG, "Native libraries: [ ${primaryNativeLibraries.joinToString(", ")} ]")
-            if (!primaryNativeLibraries.containsAll(libsToInclude)) {
-                throw Exception(globalContext.getString(R.string.error_module_does_not_work_due_to_the_lack_of_necessary_library_files, moduleName))
-            }
-        }
-
-        companion object {
-
-            val defaultLibsToInclude = listOf(
-                TERMINAL_EMULATOR,
-            ).flatMap { it.libsToInclude }
-
-            val defaultAssetFilesToInclude = listOf(
-                "init.js", "roboto_medium.ttf",
-            ).map(::normalizeAssetPath)
-
-            val defaultAssetDirsToExclude = listOf(
-                "doc", "docs", "editor", "indices", "js-beautify", "sample", "stored-locales", "models",
-            ).plus(entries.flatMap { it.assetDirsToInclude })
-                .map(::normalizeAssetPath)
-                .distinct()
-        }
-    }
-
-    private data class PluginSelectionAttempt(
-        val selected: Pair<ServiceInfo, PluginLibVariant>?,
-        val diagnostics: List<String>,
-    )
-
-    private data class PluginQueryResult(
-        val serviceInfo: ServiceInfo,
-        val pluginInfo: PluginInfo?,
-        val selectedVariant: PluginLibVariant?,
-        val error: Throwable?,
-    )
-
-    data class PluginLib(
-        val action: String,
-        val engine: String? = null,
-        val onServiceConnected: (IBinder) -> PluginInfo?,
-        val variants: List<PluginLibVariant>,
-    )
-
-    data class PluginLibVariant(
-        val variant: String? = null,
-        /** <Required List> to <Optional List>. */
-        val assetsToInclude: Pair<List<String>, List<String>> = emptyList<String>() to emptyList(),
-        val libsToInclude: List<String> = emptyList(),
-    )
-
     companion object {
-
         const val ICON_NAME = "ic_launcher"
         const val ICON_RES_DIR = "mipmap"
         const val LIBRARY_DIR = "lib"
-
         const val TEMPLATE_APK_NAME = "template.apk"
         const val INRT_APP_ID = "org.autojs.autojs6.inrt"
 
-        private val NATIVE_LIBRARY_ENTRY_ROOTS = listOf("lib", "libs")
-        private val PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES = setOf("libc++_shared.so")
-        private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
-        private const val PLUGIN_INFO_QUERY_TIMEOUT_SECONDS = 60L
-
-        private val TAG = ApkBuilder::class.java.simpleName
-
-        private val globalContext: Context by lazy { GlobalAppContext.get() }
+        private val DEFAULT_REMOTE_BUILD_EXECUTOR = RemoteBuildExecutor {
+                context,
+                projectConfig,
+                outApkFile,
+                cancelSignal,
+                progressListener,
+            ->
+            RemoteApkBuildClient.buildBlocking(
+                context = context,
+                projectConfig = projectConfig,
+                outApk = outApkFile,
+                cancelSignal = cancelSignal,
+                progressListener = progressListener,
+                preferredPluginPackageName = ApkBuilderTemplatePluginIds.PACKAGE_NAME,
+            )
+        }
 
         @JvmStatic
         @VisibleForTesting
@@ -2261,8 +443,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 .map { it.variant.normalizedPluginVariantKey() }
                 .toSet()
             return infos
-                .filter { (_, pi) -> pi.variant.normalizedPluginVariantKey() in supportedVariantKeys }
-                .maxByOrNull { (_, pi) -> pi.variant.pluginVariantNumber() }
+                .filter { (_, info) -> info.variant.normalizedPluginVariantKey() in supportedVariantKeys }
+                .maxByOrNull { (_, info) -> info.variant.pluginVariantNumber() }
                 ?: infos.firstOrNull()
         }
 
@@ -2278,32 +460,14 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             }
         }
 
+        val appApkFile: File by lazy {
+            File(GlobalAppContext.get().applicationInfo.sourceDir)
+        }
+
         private fun String.canonicalNativeLibraryAbiName(): String = when (trim().lowercase()) {
             "arm64" -> "arm64-v8a"
             "arm" -> "armeabi-v7a"
             else -> trim().lowercase()
-        }
-
-        val appApkFile by lazy {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                File(globalContext.packageManager.getApplicationInfo(globalContext.packageName, ApplicationInfoFlags.of(GET_SHARED_LIBRARY_FILES.toLong())).sourceDir)
-            } else {
-                File(globalContext.packageManager.getApplicationInfo(globalContext.packageName, 0).sourceDir)
-            }
-        }
-
-        private fun normalizeAssetPath(path: String): String {
-            var out = path.trim().replace('\\', '/')
-            while (out.startsWith("/")) {
-                out = out.removePrefix("/")
-            }
-            if (out.startsWith("assets/")) {
-                out = out.removePrefix("assets/")
-            }
-            while (out.endsWith("/")) {
-                out = out.removeSuffix("/")
-            }
-            return out
         }
 
         private fun String?.normalizedPluginVariantKey(): String? {
@@ -2317,4 +481,78 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 ?: 0
         }
     }
+}
+
+/**
+ * Lightweight source/binary compatibility shell for code whose type signatures reference the old
+ * in-process manifest editor. Binary AXML mutation now belongs to the APK Builder plugin and cannot
+ * be performed incrementally through this object.
+ */
+@Deprecated(
+    message = "Binary manifest editing has moved to the APK Builder plugin",
+)
+open class ManifestEditor(
+    @Suppress("UNUSED_PARAMETER") manifestInputStream: InputStream?,
+) {
+
+    open fun setVersionCode(@Suppress("UNUSED_PARAMETER") versionCode: Int): ManifestEditor =
+        unsupportedLegacyMutation("ManifestEditor.setVersionCode")
+
+    open fun setVersionName(@Suppress("UNUSED_PARAMETER") versionName: String?): ManifestEditor =
+        unsupportedLegacyMutation("ManifestEditor.setVersionName")
+
+    open fun setAppName(@Suppress("UNUSED_PARAMETER") appName: CharSequence?): ManifestEditor =
+        unsupportedLegacyMutation("ManifestEditor.setAppName")
+
+    open fun setPackageName(@Suppress("UNUSED_PARAMETER") packageName: String?): ManifestEditor =
+        unsupportedLegacyMutation("ManifestEditor.setPackageName")
+
+    open fun addEmbeddedNodeScriptServiceIfMissing(): ManifestEditor =
+        unsupportedLegacyMutation("ManifestEditor.addEmbeddedNodeScriptServiceIfMissing")
+
+    open fun addEmbeddedNodeForegroundServicePermissionsIfMissing(): ManifestEditor =
+        unsupportedLegacyMutation("ManifestEditor.addEmbeddedNodeForegroundServicePermissionsIfMissing")
+
+    @Throws(IOException::class)
+    open fun commit(): ManifestEditor = unsupportedLegacyMutation("ManifestEditor.commit")
+
+    @Throws(IOException::class)
+    open fun writeTo(@Suppress("UNUSED_PARAMETER") manifestOutputStream: OutputStream): Unit =
+        unsupportedLegacyMutation("ManifestEditor.writeTo")
+
+    open fun isPermissionRequired(@Suppress("UNUSED_PARAMETER") permissionName: String?): Boolean =
+        unsupportedLegacyMutation("ManifestEditor.isPermissionRequired")
+
+    protected open fun isEmbeddedNodeForegroundServicePermission(
+        @Suppress("UNUSED_PARAMETER") permissionName: String?,
+    ): Boolean = unsupportedLegacyMutation("ManifestEditor.isEmbeddedNodeForegroundServicePermission")
+
+    open fun shouldIgnoreComponentNode(
+        @Suppress("UNUSED_PARAMETER") nodeName: String?,
+        @Suppress("UNUSED_PARAMETER") componentClassName: String?,
+    ): Boolean = unsupportedLegacyMutation("ManifestEditor.shouldIgnoreComponentNode")
+}
+
+private fun unsupportedLegacyMutation(operation: String): Nothing {
+    throw UnsupportedOperationException(
+        "$operation is an incremental in-process APK template mutation API and cannot be " +
+                "represented by the remote APK Builder protocol. Configure ProjectConfig and use " +
+                "ApkBuilder.prepare(...).withConfig(...).build(...) with the enabled official APK " +
+                "Builder plugin."
+    )
+}
+
+private fun ApkPluginLibrary.toCompatibilityPlugin(): ApkBuilder.PluginLib {
+    return ApkBuilder.PluginLib(
+        action = action,
+        engine = engine,
+        onServiceConnected = onServiceConnected,
+        variants = variants.map { variant ->
+            ApkBuilder.PluginLibVariant(
+                variant = variant.variant,
+                assetsToInclude = variant.assetsToInclude,
+                libsToInclude = variant.libsToInclude,
+            )
+        },
+    )
 }

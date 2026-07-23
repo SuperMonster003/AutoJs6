@@ -4,6 +4,8 @@ import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateInfo;
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateRequest;
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateResult;
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest;
+import org.autojs.plugin.apkbuilder.template.ApkKeyStoreRequest;
+import org.autojs.plugin.apkbuilder.template.ApkKeyStoreResult;
 import org.autojs.plugin.apkbuilder.template.IApkBuildCallback;
 import org.autojs.plugin.apkbuilder.template.IApkBuildSession;
 
@@ -18,4 +20,6 @@ interface IApkBuilderTemplatePlugin {
     ApkBuilderTemplateResult openTemplate(in ApkBuilderTemplateRequest request);
 
     IApkBuildSession openBuildSession(in ApkBuildRequest request, IApkBuildCallback callback);
+
+    ApkKeyStoreResult manageKeyStore(in ApkKeyStoreRequest request);
 }

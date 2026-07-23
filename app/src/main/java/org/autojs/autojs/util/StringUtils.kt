@@ -33,7 +33,12 @@ object StringUtils {
         Language.ZH_HANT_HK.languageTag to listOf("Big5", "GB18030"),
         Language.ZH_HANT_TW.languageTag to listOf("Big5", "GB18030"),
         Language.JA.languageTag to listOf("Shift_JIS", "EUC-JP", "ISO-2022-JP"),
-        Language.KO.languageTag to listOf("EUC-KR")
+        Language.KO.languageTag to listOf("EUC-KR"),
+        Language.RU.languageTag to listOf("windows-1251", "KOI8-R", "ISO-8859-5"),
+        Language.AR.languageTag to listOf("windows-1256", "ISO-8859-6"),
+        Language.EN.languageTag to listOf("windows-1252", "ISO-8859-1", "ISO-8859-15"),
+        Language.ES.languageTag to listOf("windows-1252", "ISO-8859-1", "ISO-8859-15"),
+        Language.FR.languageTag to listOf("windows-1252", "ISO-8859-1", "ISO-8859-15"),
     )
 
     @JvmStatic

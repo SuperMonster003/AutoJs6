@@ -7,24 +7,19 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_META_DATA
 import android.os.Build
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import com.android.apksig.ApkVerifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
-import net.dongliu.apk.parser.ApkFile
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
@@ -39,8 +34,6 @@ import org.autojs.autojs6.databinding.ApkFileInfoDialogItemsBinding
 import java.io.File
 
 object ApkInfoDialogManager {
-
-    private const val TAG = "ApkInfoDialogManager"
 
     @JvmStatic
     @JvmOverloads
@@ -67,6 +60,7 @@ object ApkInfoDialogManager {
 
         val apkFilePath = apkFile.absolutePath
         val packageManager = context.packageManager
+        var requestedPermissions = emptyList<String>()
 
         val dialog = MaterialDialog.Builder(context)
             .title(apkFile.name)
@@ -87,7 +81,11 @@ object ApkInfoDialogManager {
             }
             .negativeText(R.string.text_cancel)
             .negativeColorRes(R.color.dialog_button_default)
+            .neutralText(R.string.text_manifest)
             .neutralColorRes(R.color.dialog_button_hint)
+            .onNeutral { _, _ ->
+                DisplayManifestActivity.launch(context, apkFile, requestedPermissions)
+            }
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
             .also { builder -> builderApplier?.invoke(builder) }
             .build()
@@ -102,18 +100,12 @@ object ApkInfoDialogManager {
 
 
         scope.launch {
-            val apkInfoDeferred = async(Dispatchers.IO) { getApkInfo(apkFile) }
             val packageInfoDeferred = async(Dispatchers.IO) { getPackageInfo(packageManager, apkFilePath) }
-            val sysBasicDeferred = async(Dispatchers.IO) { getBasicInfoFromPackageArchive(context, apkFilePath) }
-
-            val firstPackageName: String? = select {
-                apkInfoDeferred.onAwait { it?.packageName }
-                packageInfoDeferred.onAwait { it?.packageName }
+            val packageInfo = packageInfoDeferred.await()
+            val archiveInfoDeferred = async(Dispatchers.IO) {
+                packageInfo?.let { buildArchiveInfo(packageManager, apkFilePath, it) }
             }
-            val packageName: String? = firstPackageName ?: when {
-                apkInfoDeferred.isCompleted -> packageInfoDeferred.await()?.packageName
-                else -> apkInfoDeferred.await()?.packageName
-            }
+            val packageName = packageInfo?.packageName
 
             // @Hint by SuperMonster003 on Nov 27, 2024.
             //  ! Prioritize handling "installed version" to determine whether to display its content view.
@@ -139,33 +131,19 @@ object ApkInfoDialogManager {
             dialog.setCopyableTextIfAbsent(binding.packageNameValue, packageName)
             dialog.setCopyableTextIfAbsent(binding.deviceSdkValue, "${Build.VERSION.SDK_INT}")
             dialog.setCopyableTextIfAbsent(binding.fileSizeValue, this) { PFiles.formatSizeWithUnit(apkFile.length()) }
-            dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue, this) { getApkSignatureInfo(apkFile) }
+            dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue, this) {
+                getApkSignatureInfo(apkFile)
+            }
 
             withContext(Dispatchers.Main) {
-                val sys = sysBasicDeferred.await()
-                dialog.setCopyableTextIfAbsent(binding.labelNameValue, sys?.label)
-                dialog.setCopyableTextIfAbsent(binding.minSdkValue, sys?.minSdk?.toString())
-                dialog.setCopyableTextIfAbsent(binding.targetSdkValue, sys?.targetSdk?.toString())
+                val info = archiveInfoDeferred.await()
+                dialog.setCopyableTextIfAbsent(binding.labelNameValue, info?.label)
+                dialog.setCopyableTextIfAbsent(binding.minSdkValue, info?.minSdk?.toString())
+                dialog.setCopyableTextIfAbsent(binding.targetSdkValue, info?.targetSdk?.toString())
+                requestedPermissions = info?.requestedPermissions.orEmpty()
             }
 
             launch(Dispatchers.IO) {
-                val apkInfo = apkInfoDeferred.await()
-
-                withContext(Dispatchers.Main) {
-                    dialog.setCopyableTextIfAbsent(binding.labelNameValue, apkInfo?.label)
-                    dialog.setCopyableTextIfAbsent(binding.minSdkValue, apkInfo?.minSdkVersion?.toString())
-                    dialog.setCopyableTextIfAbsent(binding.targetSdkValue, apkInfo?.targetSdkVersion?.toString())
-
-                    if (apkInfo != null) dialog.getActionButton(DialogAction.NEUTRAL).let { neutralButton ->
-                        neutralButton.isVisible = true
-                        neutralButton.text = "Manifest"
-                        neutralButton.setOnClickListener { DisplayManifestActivity.launch(context, apkInfo.manifestXml, apkInfo.usesPermissions) }
-                    }
-                }
-            }
-
-            launch(Dispatchers.IO) {
-                val packageInfo = packageInfoDeferred.await()
                 val applicationInfo = packageInfo?.applicationInfo
                 val versionName = packageInfo?.versionName
                 val versionCode = packageInfo?.let {
@@ -200,25 +178,11 @@ object ApkInfoDialogManager {
         }
     }
 
-    private fun getApkInfo(apkFile: File): ApkInfo? = runCatching {
-        ApkFile(apkFile).use { parser ->
-            val meta = runCatching { parser.apkMeta }
-                .onFailure {
-                    Log.d(TAG, "Failed to parse apk meta: ${apkFile.absolutePath}", it)
-                }
-                .getOrNull()
-            val label = meta?.label
-            val packageName = meta?.packageName
-            val minSdkVersion = meta?.minSdkVersion?.toIntOrNull()
-            val targetSdkVersion = meta?.targetSdkVersion?.toIntOrNull()
-            val usesPermissions = meta?.usesPermissions ?: emptyList()
-            val manifestXml = parser.manifestXml
-            ApkInfo(label, packageName, minSdkVersion, targetSdkVersion, usesPermissions, manifestXml)
-        }
-    }.getOrNull()
-
     private fun getPackageInfo(packageManager: PackageManager, apkFilePath: String): PackageInfo? = runCatching {
-        packageManager.getPackageArchiveInfo(apkFilePath, GET_META_DATA)
+        packageManager.getPackageArchiveInfo(
+            apkFilePath,
+            GET_META_DATA or PackageManager.GET_PERMISSIONS,
+        )
     }.getOrNull()
 
     private fun restoreEssentialViews(binding: ApkFileInfoDialogItemsBinding, context: Context) {
@@ -263,62 +227,39 @@ object ApkInfoDialogManager {
         }
     }
 
-    private fun getApkSignatureInfo(apkFile: File): String? = runCatching {
-        // @Hint by JetBrains AI Assistant on May 21, 2025.
-        //  ! APK (Zip) has an "APK Signing Block" at the end,
-        //  ! storing <ID/Data> pairs for V2/V3/V4 sequentially.
-        //  ! Only need to locate and check for corresponding ID to determine signature data existence.
-        //  ! zh-CN:
-        //  ! APK (Zip) 末尾有一段 "APK Signing Block", 依次存放 V2/V3/V4 的 <ID/数据> 对.
-        //  ! 只需定位并查看其中是否存在对应 ID, 即可判断是否存在签名数据.
-        ApkSignatureDetector.detectSchemes(apkFile)
-    }.getOrNull() ?: getApkSignatureInfoLegacy(apkFile)
+    private fun getApkSignatureInfo(apkFile: File): String? =
+        runCatching { ApkSignatureDetector.detectSchemes(apkFile) }.getOrNull()
 
-    private fun getApkSignatureInfoLegacy(apkFile: File): String? = runCatching {
-        // @Hint by JetBrains AI Assistant on May 21, 2025.
-        //  ! `ApkVerifier.verify()` parses ZIP structure to find V2/V3/V4 Signing Block,
-        //  ! calculates hash values (SHA-256/512) for each signature scheme segment,
-        //  ! requiring re-traversal of files for each signature.
-        //  ! zh-CN:
-        //  ! `ApkVerifier.verify()` 解析 ZIP 结构找到 V2/V3/V4 Signing Block,
-        //  ! 对每一种签名方案逐段计算哈希值 (SHA-256/512), 每种签名都需要重新遍历文件.
-        ApkVerifier.Builder(apkFile).build().verify().run {
-            listOfNotNull(
-                "V1".takeIf { isVerifiedUsingV1Scheme || ApkSignatureDetector.hasV1Signature(apkFile) },
-                "V2".takeIf { isVerifiedUsingV2Scheme },
-                "V3".takeIf { isVerifiedUsingV3Scheme },
-                "V4".takeIf { isVerifiedUsingV4Scheme },
-            ).takeUnless { it.isEmpty() }?.joinToString(" + ")
-        }
-    }.getOrNull()
-
-    private fun getBasicInfoFromPackageArchive(context: Context, apkPath: String): SysBasicInfo? = runCatching {
-        val pm = context.packageManager
-        val pi = pm.getPackageArchiveInfo(apkPath, GET_META_DATA) ?: return@runCatching null
-        val ai = pi.applicationInfo?.apply {
+    private fun buildArchiveInfo(
+        packageManager: PackageManager,
+        apkPath: String,
+        packageInfo: PackageInfo,
+    ): ArchiveInfo {
+        val applicationInfo = packageInfo.applicationInfo?.apply {
             sourceDir = apkPath
             publicSourceDir = apkPath
         }
-        SysBasicInfo(
-            label = ai?.loadLabel(pm)?.toString(),
-            minSdk = this.runCatching { ai?.minSdkVersion }.getOrNull()?.takeIf { it != 0 },
-            targetSdk = ai?.targetSdkVersion?.takeIf { it != 0 },
+        val minSdk = runCatching { applicationInfo?.minSdkVersion }.getOrNull()?.takeIf { it != 0 }
+        val targetSdk = applicationInfo?.targetSdkVersion?.takeIf { it != 0 }
+        val label = runCatching { applicationInfo?.loadLabel(packageManager)?.toString() }.getOrNull()
+        val requestedPermissions = packageInfo.requestedPermissions
+            ?.filter { it.isNotBlank() }
+            ?.distinct()
+            ?.sorted()
+            .orEmpty()
+        return ArchiveInfo(
+            label = label,
+            minSdk = minSdk,
+            targetSdk = targetSdk,
+            requestedPermissions = requestedPermissions,
         )
-    }.getOrNull()
+    }
 
-    private data class SysBasicInfo(
+    private data class ArchiveInfo(
         val label: String?,
         val minSdk: Int?,
         val targetSdk: Int?,
-    )
-
-    private data class ApkInfo(
-        val label: String?,
-        val packageName: String?,
-        val minSdkVersion: Int?,
-        val targetSdkVersion: Int?,
-        val usesPermissions: List<String>,
-        val manifestXml: String,
+        val requestedPermissions: List<String>,
     )
 
 }

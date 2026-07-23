@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.main.scripts
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import io.noties.prism4j.GrammarLocator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,13 +14,16 @@ import java.util.regex.Pattern
 class DisplayManifestActivity : BaseDisplayContentActivity() {
 
     override var internalMenuResource = R.menu.menu_display_manifest_fab
+    override val deferTextRelayoutDuringScale = true
 
     override var highlightGrammarLocator: GrammarLocator = MarkupGrammarLocator()
     override var highlightGrammarName = MarkupGrammarLocator.GRAMMAR_NAME
     override var highlightThemeLanguage = "markup"
 
-    private lateinit var mPermissionsContent: CharSequence
-    private lateinit var mOriginalText: CharSequence
+    private var mPermissionsContent: CharSequence = ""
+    private var mOriginalText: CharSequence = ""
+    private var mOriginalTextSelectionEnabled = true
+    private var mContentReady = false
 
     init {
         popMenuActionMap += listOf(
@@ -29,60 +33,62 @@ class DisplayManifestActivity : BaseDisplayContentActivity() {
     }
 
     override suspend fun loadAndDisplayContent() {
-        val manifestPath = intent.getStringExtra(PATH_IDENTIFIER_MANIFEST)
+        setContentActionsEnabled(false)
+        val apkPath = intent.getStringExtra(PATH_IDENTIFIER_APK)
         val permissions = intent.getStringArrayExtra(INTENT_IDENTIFIER_PERMISSIONS)
 
         val manifestContentRaw = withContext(Dispatchers.IO) {
-            manifestPath?.let { File(it).readText() }
+            apkPath?.let { path ->
+                runCatching { ApkManifestDisplayDecoder.decode(File(path)) }
+                    .onFailure { error -> Log.w(TAG, "Failed to decode APK manifest: $path", error) }
+                    .getOrNull()
+            }
         }
         val manifestContent = manifestContentRaw ?: getString(R.string.text_no_content)
-        mPermissionsContent = permissions?.let {
-            withContext(Dispatchers.Default) {
-                highlightTextOrNull(handlePermissionsText(it))
-            }
-        } ?: manifestContentRaw?.let {
-            withContext(Dispatchers.Default) {
-                highlightTextOrNull(handlePermissionsText(parsePermissionsFromManifest(it)))
-            }
-        } ?: getString(R.string.text_no_content)
+        mPermissionsContent = withContext(Dispatchers.Default) {
+            permissions
+                ?.let(::handlePermissionsText)
+                ?: manifestContentRaw
+                    ?.let(::parsePermissionsFromManifest)
+                    ?.let(::handlePermissionsText)
+                ?: getString(R.string.text_no_content)
+        }
 
-        setTextWithLock(withContext(Dispatchers.Default) {
-            highlightTextOrSelf(manifestContent).also { mOriginalText = it }
-        })
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        deleteCacheFiles()
+        // Syntax highlighting turns the whole document into spans and delays first paint. The
+        // formatted plain XML remains readable and keeps scrolling and pinch-to-zoom responsive.
+        mOriginalText = manifestContent
+        mOriginalTextSelectionEnabled = manifestContent.length <= SELECTABLE_TEXT_LIMIT
+        setTextSelectionEnabled(mOriginalTextSelectionEnabled)
+        setTextWithLock(manifestContent)
+        mContentReady = true
+        setContentActionsEnabled(true)
     }
 
     private fun showPermissionList() {
+        if (!mContentReady) return
         internalMenuResource = R.menu.menu_display_permissions_fab
+        setTextSelectionEnabled(true)
         setText(mPermissionsContent)
     }
 
     private fun restoreOriginalContent() {
+        if (!mContentReady) return
         internalMenuResource = R.menu.menu_display_manifest_fab
+        setTextSelectionEnabled(mOriginalTextSelectionEnabled)
         setText(mOriginalText)
-    }
-
-    private fun deleteCacheFiles() {
-        File(cacheDir, FILE_NAME_TMP_MANIFEST).takeIf { it.exists() }?.delete()
     }
 
     companion object {
 
-        private const val PATH_IDENTIFIER_MANIFEST = "MANIFEST_PATH"
-        private const val FILE_NAME_TMP_MANIFEST = "tmp-manifest-for-display-manifest-activity.xml"
+        private const val TAG = "DisplayManifest"
+        private const val PATH_IDENTIFIER_APK = "APK_PATH"
         private const val INTENT_IDENTIFIER_PERMISSIONS = "permissions"
+        private const val SELECTABLE_TEXT_LIMIT = 256 * 1024
 
         @JvmStatic
-        fun launch(context: Context, manifest: String, usesPermissions: List<String>) {
-            val manifestFile = File(context.cacheDir, FILE_NAME_TMP_MANIFEST).apply {
-                writeText(manifest)
-            }
+        fun launch(context: Context, apkFile: File, usesPermissions: List<String>) {
             Intent(context, DisplayManifestActivity::class.java).apply {
-                putExtra(PATH_IDENTIFIER_MANIFEST, manifestFile.path)
+                putExtra(PATH_IDENTIFIER_APK, apkFile.absolutePath)
                 putExtra(INTENT_IDENTIFIER_PERMISSIONS, usesPermissions.toTypedArray())
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.startSafely(context)
@@ -90,7 +96,7 @@ class DisplayManifestActivity : BaseDisplayContentActivity() {
 
         private fun parsePermissionsFromManifest(manifestContent: CharSequence): Array<String> {
             val permissionList = mutableListOf<String>()
-            val pattern = Pattern.compile("""<uses-permission[\s\S]*?android:name="([^"]+)"[\s\S]*?/>""")
+            val pattern = Pattern.compile("""<uses-permission\b[^>]*\bandroid:name="([^"]+)"[^>]*?/?>""")
             val matcher = pattern.matcher(manifestContent)
 
             while (matcher.find()) {

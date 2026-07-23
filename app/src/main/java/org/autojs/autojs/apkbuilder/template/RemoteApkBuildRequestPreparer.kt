@@ -12,11 +12,15 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import com.google.gson.GsonBuilder
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
-import org.autojs.autojs.apkbuilder.ApkBuilder
+import org.autojs.autojs.apkbuilder.ApkBuildLibrary
+import org.autojs.autojs.apkbuilder.ApkBuildLibraryCatalog
+import org.autojs.autojs.apkbuilder.ApkPluginLibrary
+import org.autojs.autojs.apkbuilder.ApkPluginLibraryVariant
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
@@ -54,13 +58,16 @@ object RemoteApkBuildRequestPreparer {
     private const val REMOTE_ICON_ENTRY = "__autojs6_remote__/icon.png"
     private const val BUFFER_SIZE = 256 * 1024
     private const val PLUGIN_INFO_QUERY_TIMEOUT_SECONDS = 60L
+    private val remoteConfigGson = GsonBuilder()
+        .setPrettyPrinting()
+        .create()
     private val NATIVE_LIBRARY_ENTRY_ROOTS = listOf("lib", "libs")
     private val PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES = setOf("libc++_shared.so")
     private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
 
     private data class SelectedPluginArtifact(
         val serviceInfo: ServiceInfo,
-        val variant: ApkBuilder.PluginLibVariant,
+        val variant: ApkPluginLibraryVariant,
     )
 
     data class Prepared(
@@ -76,10 +83,8 @@ object RemoteApkBuildRequestPreparer {
 
         fun cleanup() {
             close()
-            if (archiveFile.exists()) {
-                archiveFile.delete()
-            }
-            nativeLibrariesArchiveFile?.takeIf { it.exists() }?.delete()
+            deletePreparedFile(archiveFile)
+            nativeLibrariesArchiveFile?.let(::deletePreparedFile)
         }
     }
 
@@ -105,83 +110,119 @@ object RemoteApkBuildRequestPreparer {
             listFiles()?.forEach { PFiles.deleteRecursively(it) }
         }
         ensureNotCancelled(cancelSignal)
-        notifyProgress(progressListener, "Preparing remote build config", projectConfig.packageName)
         val archiveFile = File(cacheDir, "project-${System.nanoTime()}.zip")
-        val remoteConfig = cloneForRemoteRequest(projectConfig)
-        applyHostSideConfigAdjustments(source, projectConfig, remoteConfig)
-        notifyProgress(progressListener, "Archiving project files", source.path)
-        val sourcePathInArchive = writeProjectArchive(archiveFile, source, projectConfig, remoteConfig, cancelSignal)
-        ensureNotCancelled(cancelSignal)
-        notifyProgress(progressListener, "Preparing remote build inputs", projectConfig.libs.joinToString(", "))
-        val nativeLibrariesArchiveFile = writeBuildInputsArchive(
-            context = appContext,
-            cacheDir = cacheDir,
-            projectConfig = projectConfig,
-            cancelSignal = cancelSignal,
-            progressListener = progressListener,
-        )
-        ensureNotCancelled(cancelSignal)
+        var nativeLibrariesArchiveFile: File? = null
+        var projectArchiveFd: ParcelFileDescriptor? = null
+        var nativeLibrariesArchiveFd: ParcelFileDescriptor? = null
+        var keyStoreFd: ParcelFileDescriptor? = null
+        try {
+            notifyProgress(progressListener, "Preparing remote build config", projectConfig.packageName)
+            val remoteConfig = cloneForRemoteRequest(projectConfig)
+            applyHostSideConfigAdjustments(source, projectConfig, remoteConfig)
+            validateEmbeddedNodeBuildRequirements(projectConfig)
+            notifyProgress(progressListener, "Archiving project files", source.path)
+            val sourcePathInArchive = writeProjectArchive(
+                archiveFile,
+                source,
+                projectConfig,
+                remoteConfig,
+                cancelSignal,
+            )
+            ensureNotCancelled(cancelSignal)
+            notifyProgress(progressListener, "Preparing remote build inputs", projectConfig.libs.joinToString(", "))
+            nativeLibrariesArchiveFile = writeBuildInputsArchive(
+                context = appContext,
+                cacheDir = cacheDir,
+                projectConfig = projectConfig,
+                cancelSignal = cancelSignal,
+                progressListener = progressListener,
+            )
+            ensureNotCancelled(cancelSignal)
 
-        val keyStore = projectConfig.keyStore
-        val keyStoreFile = keyStore?.absolutePath
-            ?.takeIf { it.isNotBlank() }
-            ?.let(::File)
-        if (keyStoreFile != null && !keyStoreFile.isFile) {
-            throw IOException("KeyStore file does not exist: ${keyStoreFile.path}")
-        }
+            val keyStore = projectConfig.keyStore
+            val keyStoreFile = keyStore?.absolutePath
+                ?.takeIf { it.isNotBlank() }
+                ?.let(::File)
+            if (keyStoreFile != null && !keyStoreFile.isFile) {
+                throw IOException("KeyStore file does not exist: ${keyStoreFile.path}")
+            }
 
-        notifyProgress(progressListener, "Verifying project archive", archiveFile.name)
-        val projectArchiveSha256 = sha256(archiveFile)
-        notifyProgress(progressListener, "Verifying remote build inputs", nativeLibrariesArchiveFile?.name)
-        val nativeLibrariesArchiveSha256 = nativeLibrariesArchiveFile?.let(::sha256)
-        val keyStoreSha256 = keyStoreFile?.let { file ->
-            notifyProgress(progressListener, "Preparing keystore", file.path)
-            sha256(file)
-        }
-        notifyProgress(progressListener, "Opening remote build request", outputFileName)
+            notifyProgress(progressListener, "Verifying project archive", archiveFile.name)
+            val projectArchiveSha256 = sha256(archiveFile, cancelSignal)
+            notifyProgress(progressListener, "Verifying remote build inputs", nativeLibrariesArchiveFile?.name)
+            val nativeLibrariesArchiveSha256 = nativeLibrariesArchiveFile?.let {
+                sha256(it, cancelSignal)
+            }
+            val keyStoreSha256 = keyStoreFile?.let { file ->
+                notifyProgress(progressListener, "Preparing keystore", file.path)
+                sha256(file, cancelSignal)
+            }
+            val keyStorePassword = keyStore?.password
+                ?.takeIf { it.isNotBlank() }
+                ?.let(AESUtils::decrypt)
+            val keyAliasPassword = keyStore?.aliasPassword
+                ?.takeIf { it.isNotBlank() }
+                ?.let(AESUtils::decrypt)
+            ensureNotCancelled(cancelSignal)
+            notifyProgress(progressListener, "Opening remote build request", outputFileName)
 
-        val request = ApkBuildRequest(
-            hostPackageName = appContext.packageName,
-            hostVersionName = BuildConfig.VERSION_NAME,
-            hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
-            requiredProtocolVersion = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
-            projectArchiveFd = ParcelFileDescriptor.open(archiveFile, ParcelFileDescriptor.MODE_READ_ONLY),
-            projectArchiveSizeBytes = archiveFile.length(),
-            projectArchiveSha256 = projectArchiveSha256,
+            projectArchiveFd = ParcelFileDescriptor.open(
+                archiveFile,
+                ParcelFileDescriptor.MODE_READ_ONLY,
+            )
             nativeLibrariesArchiveFd = nativeLibrariesArchiveFile?.let {
                 ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY)
-            },
-            nativeLibrariesArchiveSizeBytes = nativeLibrariesArchiveFile?.length() ?: 0L,
-            nativeLibrariesArchiveSha256 = nativeLibrariesArchiveSha256,
-            projectConfigJson = remoteConfig.toJson(false),
-            keyStoreFd = keyStoreFile?.let { ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY) },
-            keyStoreSizeBytes = keyStoreFile?.length() ?: 0L,
-            keyStoreSha256 = keyStoreSha256,
-            keyStorePassword = keyStore?.password?.takeIf { it.isNotBlank() }?.let(AESUtils::decrypt),
-            keyAlias = keyStore?.alias,
-            keyAliasPassword = keyStore?.aliasPassword?.takeIf { it.isNotBlank() }?.let(AESUtils::decrypt),
-            outputFileName = outputFileName,
-            allowRiskyBuild = true,
-            extras = Bundle().apply {
-                putInt(ApkBuildRequestExtraKeys.ARCHIVE_FORMAT_VERSION, ARCHIVE_FORMAT_VERSION)
-                putString(
-                    ApkBuildRequestExtraKeys.SOURCE_KIND,
-                    if (source.isDirectory) {
-                        ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY
-                    } else {
-                        ApkBuildRequestExtraKeys.SOURCE_KIND_FILE
-                    },
-                )
-                putString(ApkBuildRequestExtraKeys.SOURCE_ROOT_PATH, SOURCE_ROOT_ENTRY)
-                putString(ApkBuildRequestExtraKeys.SOURCE_PATH, sourcePathInArchive)
-                if (remoteConfig.iconPath == REMOTE_ICON_ENTRY) {
-                    putString(ApkBuildRequestExtraKeys.ICON_PATH, REMOTE_ICON_ENTRY)
-                }
-                putString(ApkBuildRequestExtraKeys.HOST_OUTPUT_FILE_NAME, outputFileName)
-            },
-        )
-
-        return Prepared(request, archiveFile, nativeLibrariesArchiveFile)
+            }
+            keyStoreFd = keyStoreFile?.let {
+                ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY)
+            }
+            val request = ApkBuildRequest(
+                hostPackageName = appContext.packageName,
+                hostVersionName = BuildConfig.VERSION_NAME,
+                hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+                requiredProtocolVersion = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+                projectArchiveFd = projectArchiveFd,
+                projectArchiveSizeBytes = archiveFile.length(),
+                projectArchiveSha256 = projectArchiveSha256,
+                nativeLibrariesArchiveFd = nativeLibrariesArchiveFd,
+                nativeLibrariesArchiveSizeBytes = nativeLibrariesArchiveFile?.length() ?: 0L,
+                nativeLibrariesArchiveSha256 = nativeLibrariesArchiveSha256,
+                projectConfigJson = serializeProjectConfigForRemoteRequest(remoteConfig),
+                keyStoreFd = keyStoreFd,
+                keyStoreSizeBytes = keyStoreFile?.length() ?: 0L,
+                keyStoreSha256 = keyStoreSha256,
+                keyStorePassword = keyStorePassword,
+                keyAlias = keyStore?.alias,
+                keyAliasPassword = keyAliasPassword,
+                outputFileName = outputFileName,
+                allowRiskyBuild = true,
+                extras = Bundle().apply {
+                    putInt(ApkBuildRequestExtraKeys.ARCHIVE_FORMAT_VERSION, ARCHIVE_FORMAT_VERSION)
+                    putString(
+                        ApkBuildRequestExtraKeys.SOURCE_KIND,
+                        if (source.isDirectory) {
+                            ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY
+                        } else {
+                            ApkBuildRequestExtraKeys.SOURCE_KIND_FILE
+                        },
+                    )
+                    putString(ApkBuildRequestExtraKeys.SOURCE_ROOT_PATH, SOURCE_ROOT_ENTRY)
+                    putString(ApkBuildRequestExtraKeys.SOURCE_PATH, sourcePathInArchive)
+                    if (remoteConfig.iconPath == REMOTE_ICON_ENTRY) {
+                        putString(ApkBuildRequestExtraKeys.ICON_PATH, REMOTE_ICON_ENTRY)
+                    }
+                    putString(ApkBuildRequestExtraKeys.HOST_OUTPUT_FILE_NAME, outputFileName)
+                },
+            )
+            return Prepared(request, archiveFile, nativeLibrariesArchiveFile)
+        } catch (error: Throwable) {
+            runCatching { projectArchiveFd?.close() }
+            runCatching { nativeLibrariesArchiveFd?.close() }
+            runCatching { keyStoreFd?.close() }
+            deletePreparedFile(archiveFile)
+            nativeLibrariesArchiveFile?.let(::deletePreparedFile)
+            throw error
+        }
     }
 
     private fun cloneForRemoteRequest(projectConfig: ProjectConfig): ProjectConfig {
@@ -189,6 +230,15 @@ object RemoteApkBuildRequestPreparer {
         return ProjectConfig.fromJson(json)
             ?.setIconPath(null)
             ?: throw IOException("Failed to clone project config for remote build request.")
+    }
+
+    /**
+     * A fresh Gson instance intentionally bypasses ProjectConfig.toJson(), whose job is to retain
+     * legacy source keys. The plugin protocol always receives canonical keys; the source file is
+     * updated separately by merging only build metadata back into the original ProjectConfig.
+     */
+    internal fun serializeProjectConfigForRemoteRequest(projectConfig: ProjectConfig): String {
+        return remoteConfigGson.toJson(projectConfig)
     }
 
     private fun applyHostSideConfigAdjustments(
@@ -204,7 +254,7 @@ object RemoteApkBuildRequestPreparer {
         projectConfig: ProjectConfig,
         remoteConfig: ProjectConfig,
     ) {
-        if (!source.isDirectory || !projectConfig.libs.contains(ApkBuilder.Lib.EMBEDDED_NODE_JS.label)) {
+        if (!source.isDirectory || !projectConfig.libs.contains(ApkBuildLibrary.EMBEDDED_NODE_JS.label)) {
             return
         }
         val requiredPermissions = NodeBridgePermissionManifest.androidPermissionsForWorkingDirectory(source.path)
@@ -214,6 +264,18 @@ object RemoteApkBuildRequestPreparer {
         val mergedPermissions = LinkedHashSet(remoteConfig.permissions)
         mergedPermissions.addAll(requiredPermissions)
         remoteConfig.setPermissions(ArrayList(mergedPermissions))
+    }
+
+    private fun validateEmbeddedNodeBuildRequirements(projectConfig: ProjectConfig) {
+        if (!projectConfig.libs.contains(ApkBuildLibrary.EMBEDDED_NODE_JS.label)) {
+            return
+        }
+        if (!BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED) {
+            throw IOException(
+                "Embedded Node.js packaged apps require embedded script execution build support. " +
+                        "Rebuild AutoJs6 with -Pautojs.nodejs.embedded.script.enabled=true before packaging."
+            )
+        }
     }
 
     private fun writeProjectArchive(
@@ -311,36 +373,41 @@ object RemoteApkBuildRequestPreparer {
         var wroteAny = false
         val writtenEntries = linkedSetOf<String>()
 
-        writeZipFile(archiveFile, Deflater.BEST_SPEED) { zip ->
-            targetAbis.forEach { abi ->
-                ensureNotCancelled(cancelSignal)
-                val abiCandidates = abiCandidates(abi)
-                requiredLibs.forEach { soName ->
+        try {
+            writeZipFile(archiveFile, Deflater.BEST_SPEED) { zip ->
+                targetAbis.forEach { abi ->
                     ensureNotCancelled(cancelSignal)
-                    val entryName = "lib/$abi/$soName"
-                    if (copyFirstMatchedSoToZip(zip, writtenEntries, entryName, apkPaths, nativeLibraryDir, abiCandidates, soName, cancelSignal, progressListener)) {
+                    val abiCandidates = abiCandidates(abi)
+                    requiredLibs.forEach { soName ->
+                        ensureNotCancelled(cancelSignal)
+                        val entryName = "lib/$abi/$soName"
+                        if (copyFirstMatchedSoToZip(zip, writtenEntries, entryName, apkPaths, nativeLibraryDir, abiCandidates, soName, cancelSignal, progressListener)) {
+                            wroteAny = true
+                        }
+                    }
+                }
+                pluginArtifacts.forEach { artifact ->
+                    ensureNotCancelled(cancelSignal)
+                    if (copyPluginArtifactToZip(zip, writtenEntries, context, targetAbis, apkPaths, nativeLibraryDir, artifact, cancelSignal, progressListener)) {
                         wroteAny = true
                     }
                 }
             }
-            pluginArtifacts.forEach { artifact ->
-                ensureNotCancelled(cancelSignal)
-                if (copyPluginArtifactToZip(zip, writtenEntries, context, targetAbis, apkPaths, nativeLibraryDir, artifact, cancelSignal, progressListener)) {
-                    wroteAny = true
-                }
-            }
+        } catch (error: Throwable) {
+            deletePreparedFile(archiveFile)
+            throw error
         }
 
         return archiveFile.takeIf { wroteAny && it.length() > 0L } ?: run {
-            archiveFile.delete()
+            deletePreparedFile(archiveFile)
             null
         }
     }
 
     private fun resolveHostNativeLibraries(projectConfig: ProjectConfig): List<String> {
         val selectedLibs = projectConfig.libs.toSet()
-        return ApkBuilder.Lib.entries
-            .filter { lib -> lib == ApkBuilder.Lib.TERMINAL_EMULATOR || (!lib.isPlugin && lib.label in selectedLibs) }
+        return ApkBuildLibrary.entries
+            .filter { lib -> lib == ApkBuildLibrary.TERMINAL_EMULATOR || (!lib.isPlugin && lib.label in selectedLibs) }
             .flatMap { it.libsToInclude }
             .distinct()
     }
@@ -555,17 +622,17 @@ object RemoteApkBuildRequestPreparer {
         progressListener: ((ApkBuildProgress) -> Unit)?,
     ): List<SelectedPluginArtifact> {
         val selectedLabels = projectConfig.libs.toSet()
-        return ApkBuilder.Lib.entries.mapNotNull { lib ->
+        return ApkBuildLibrary.entries.mapNotNull { lib ->
             ensureNotCancelled(cancelSignal)
             if (!lib.isPlugin || lib.label !in selectedLabels) {
                 return@mapNotNull null
             }
             notifyProgress(progressListener, "Resolving plugin artifacts", lib.label)
-            val (serviceInfo, variant) = selectPluginServiceOrThrow(context, lib, lib.toPluginPair().second, cancelSignal, progressListener)
+            val (serviceInfo, variant) = selectPluginServiceOrThrow(context, lib, lib.requirePlugin(), cancelSignal, progressListener)
             notifyProgress(progressListener, "Selected plugin", "${lib.label}: ${serviceInfo.packageName} (${variant.variant.orEmpty()})")
             val packagedVariant = if (
-                lib != ApkBuilder.Lib.OPENCV &&
-                ApkBuilder.Lib.OPENCV.label in selectedLabels
+                lib != ApkBuildLibrary.OPENCV &&
+                ApkBuildLibrary.OPENCV.label in selectedLabels
             ) {
                 // The dedicated OpenCV plugin is the single owner of this JNI runtime.
                 variant.copy(
@@ -582,11 +649,11 @@ object RemoteApkBuildRequestPreparer {
 
     private fun selectPluginServiceOrThrow(
         context: Context,
-        lib: ApkBuilder.Lib,
-        plugin: ApkBuilder.PluginLib,
+        lib: ApkBuildLibrary,
+        plugin: ApkPluginLibrary,
         cancelSignal: AtomicBoolean?,
         progressListener: ((ApkBuildProgress) -> Unit)?,
-    ): Pair<ServiceInfo, ApkBuilder.PluginLibVariant> {
+    ): Pair<ServiceInfo, ApkPluginLibraryVariant> {
         ensureNotCancelled(cancelSignal)
         val enabledServices = filterPackagingServices(
             context,
@@ -622,21 +689,21 @@ object RemoteApkBuildRequestPreparer {
 
     private fun filterPackagingServices(
         context: Context,
-        lib: ApkBuilder.Lib,
+        lib: ApkBuildLibrary,
         services: List<ServiceInfo>,
     ): List<ServiceInfo> = when (lib) {
-        ApkBuilder.Lib.IMAGE_QUANT -> ImageQuantPluginHost.filterEligiblePackagingServices(context, services)
-        ApkBuilder.Lib.OPENCV -> OpenCvPluginHost.filterEligiblePackagingServices(context, services)
+        ApkBuildLibrary.IMAGE_QUANT -> ImageQuantPluginHost.filterEligiblePackagingServices(context, services)
+        ApkBuildLibrary.OPENCV -> OpenCvPluginHost.filterEligiblePackagingServices(context, services)
         else -> services
     }
 
     private fun selectPluginVariant(
         context: Context,
         services: List<ServiceInfo>,
-        plugin: ApkBuilder.PluginLib,
+        plugin: ApkPluginLibrary,
         cancelSignal: AtomicBoolean?,
         progressListener: ((ApkBuildProgress) -> Unit)?,
-    ): Pair<ServiceInfo, ApkBuilder.PluginLibVariant>? {
+    ): Pair<ServiceInfo, ApkPluginLibraryVariant>? {
         val candidates = services.mapNotNull { service ->
             ensureNotCancelled(cancelSignal)
             notifyProgress(progressListener, "Querying plugin info", service.packageName)
@@ -650,14 +717,14 @@ object RemoteApkBuildRequestPreparer {
                 ?: return@mapNotNull null
             resolvePluginVariant(plugin, info, service)?.let { variant -> service to variant }
         }
-        return ApkBuilder.selectBestPluginVariantCandidate(candidates, plugin.variants)
+        return ApkBuildLibraryCatalog.selectBestPluginVariantCandidate(candidates, plugin.variants)
     }
 
     private fun resolvePluginVariant(
-        plugin: ApkBuilder.PluginLib,
+        plugin: ApkPluginLibrary,
         info: PluginInfo,
         serviceInfo: ServiceInfo,
-    ): ApkBuilder.PluginLibVariant? {
+    ): ApkPluginLibraryVariant? {
         if (!isPluginFamilyMatch(plugin, info, serviceInfo)) {
             return null
         }
@@ -675,7 +742,7 @@ object RemoteApkBuildRequestPreparer {
         }
     }
 
-    private fun isPluginFamilyMatch(plugin: ApkBuilder.PluginLib, info: PluginInfo, serviceInfo: ServiceInfo): Boolean {
+    private fun isPluginFamilyMatch(plugin: ApkPluginLibrary, info: PluginInfo, serviceInfo: ServiceInfo): Boolean {
         val expectedEngine = plugin.engine ?: return true
         if (info.engine == expectedEngine) {
             return true
@@ -704,7 +771,7 @@ object RemoteApkBuildRequestPreparer {
     private fun queryPluginInfoBlocking(
         context: Context,
         serviceInfo: ServiceInfo,
-        plugin: ApkBuilder.PluginLib,
+        plugin: ApkPluginLibrary,
         cancelSignal: AtomicBoolean?,
     ): PluginInfo {
         ensureNotCancelled(cancelSignal)
@@ -938,11 +1005,15 @@ object RemoteApkBuildRequestPreparer {
         return out
     }
 
-    private fun sha256(file: File): String {
+    private fun sha256(
+        file: File,
+        cancelSignal: AtomicBoolean?,
+    ): String {
         val digest = MessageDigest.getInstance("SHA-256")
         FileInputStream(file).use { input ->
             val buffer = ByteArray(BUFFER_SIZE)
             while (true) {
+                ensureNotCancelled(cancelSignal)
                 val read = input.read(buffer)
                 if (read < 0) {
                     break
@@ -951,6 +1022,14 @@ object RemoteApkBuildRequestPreparer {
             }
         }
         return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+    }
+
+    private fun deletePreparedFile(file: File) {
+        runCatching {
+            if (file.exists()) {
+                PFiles.deleteRecursively(file)
+            }
+        }
     }
 
     private val ABI_ALIASES = mapOf(

@@ -68,6 +68,7 @@
 * `Correction` Le service du plugin Paddle OCR pouvait se déconnecter après une longue exécution sans pouvoir se rétablir automatiquement _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `Correction` Le plugin Paddle OCR ne pouvait pas être réveillé automatiquement lorsqu'il n'était pas en cours d'exécution, entraînant l'échec des appels de fonctions ou de l'empaquetage de projets _[`issue #517`](http://issues.autojs6.com/517)_
 * `Correction` Les appels incorrects à `images.resize(ImageWrapper, width, height)` pouvaient transmettre la hauteur à OpenCV comme valeur d'interpolation, tandis qu'un déroulement incompatible des exceptions natives pouvait faire planter l'application au lieu de signaler une exception de script
+* `Correction` Les détails multimédias du gestionnaire de fichiers pouvaient rester sur "..." ou faire planter l'application lorsque la bibliothèque MediaInfo du plugin était indisponible ou qu'un appel Binder échouait, sans repli sur les métadonnées Android
 * `Correction` Le service d'accessibilité pouvait s'interrompre de manière inattendue lors d'opérations consécutives telles que back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Correction` L'utilisation de la mémoire pouvait continuer à augmenter après l'exécution répétée de scripts (tentative de correction) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Correction` Le chemin d'origine pouvait ne pas être conservé lors de l'exécution de scripts via des URI externes ou en arrière-plan, entraînant une résolution incorrecte des chemins relatifs _[`issue #545`](http://issues.autojs6.com/545)_
@@ -79,6 +80,8 @@
 * `Correction` Les icônes des plugins installés dans l'onglet Plugins de la page d'accueil ne changeaient pas dynamiquement lors du basculement du mode nuit
 * `Correction` Le Centre des plugins pouvait installer l'APK d'une mauvaise variante lorsqu'une version de plugin en contenait plusieurs
 * `Correction` Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement
+* `Correction` La vérification de l'intégrité de la documentation de projet hors ligne pouvait réutiliser un contenu obsolète en cache pendant la mise à jour du plugin
+* `Correction` Le bouton Manifest et le contenu multiligne complet manquaient dans les détails des APK du gestionnaire de fichiers
 * `Correction` La position de défilement de la liste du gestionnaire de fichiers était réinitialisée après la suppression de fichiers de la Corbeille
 * `Correction` La zone tactile effective des interrupteurs du tiroir d'accueil était trop petite
 * `Correction` Les noms de paquet et les informations d'Activity des applications récentes affichés dans le menu du bouton flottant étaient incorrects _[`issue #529`](http://issues.autojs6.com/529)_
@@ -98,31 +101,43 @@
 * `Amélioration` La vérification native de Node.js résout et valide désormais les racines des sources et de la compilation du plugin d'exécution externe
 * `Amélioration` Les portes d'intégration finale et de livraison Node.js appliquent une stratégie fail-closed lorsque des rapports requis, des preuves correspondant aux sources actuelles ou des artefacts d'acceptation en production sont absents ou périmés
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
+* `Amélioration` Regroupement des requêtes de détails multimédias du gestionnaire de fichiers en un seul instantané MediaInfo afin de réduire les appels Binder et le temps d'attente
 * `Amélioration` Modularisation du runtime WebView Ace/du bridge JavaScript/des services de langage intégrés/des ressources statiques sous forme de plugin installable séparément, afin de réduire le couplage avec l'APK hôte et de permettre des mises à jour indépendantes
 * `Amélioration` Modularisation de la documentation hors ligne du projet sous forme de plugin, afin de réduire la taille de l'APK hôte et de permettre une installation et des mises à jour indépendantes
+* `Amélioration` Déplacement de l'analyse de l'inventaire et de la vérification SHA-256 complète de la documentation de projet hors ligne au premier chargement vers un thread d'arrière-plan afin de ne pas bloquer l'interface
+* `Amélioration` Migration de toute la chaîne d'outils AXML/ARSC/analyse/signature/stockage de clés/cryptographie nécessaire aux compilations APK vers le plugin APK Builder Template, avec une inspection APK légère dans l'hôte
 * `Amélioration` La sélection du moteur de l'éditeur respecte les choix explicites de l'utilisateur et propose un accès au Centre de plugins lorsqu'Ace est indisponible
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
 * `Amélioration` Amélioration des interactions de l'éditeur de code pour les thèmes/polices/barres d'outils/mode lecture seule/pliage/menus de sélection et plus encore
 * `Amélioration` Amélioration de la détection de l'encodage et de la sécurité d'enregistrement dans l'éditeur de code; les conversions d'encodage ne sont écrites sur le disque que lorsque l'utilisateur enregistre le fichier
 * `Amélioration` Le panneau de journal inférieur permet d'accéder au code source en cliquant sur les cadres de pile de la page de journal indépendante
 * `Amélioration` Les changements de source de la documentation du projet prennent effet immédiatement
+* `Amélioration` Le gestionnaire de fichiers décode et formate le fichier AndroidManifest.xml binaire complet en arrière-plan uniquement après un appui sur le bouton Manifest, avec de meilleures performances de défilement des grands textes et de zoom par pincement
 * `Amélioration` Amélioration du style et des fonctions des boîtes de dialogue "Trier" et "Filtrer" du Centre des plugins
 * `Amélioration` Le Centre des plugins affiche les variantes courantes par défaut et fournit une page distincte pour les autres variantes
 * `Amélioration` Amélioration des journaux des modifications multilingues/du cache des langues/de la vérification officielle/du chargement des index et d'autres fonctions du Centre des plugins
 * `Amélioration` Normalisation des ressources de chaînes du projet: traductions multilingues complètes/classement par fichier/tri par nom/ponctuation ASCII
+* `Amélioration` Limitation des ressources linguistiques de l'APK aux 10 configurations régionales prises en charge par le projet afin de réduire la taille du paquet
 * `Amélioration` Le système de compilation sélectionne dynamiquement les versions compatibles de Kotlin/KSP/AGP/R8 et réduit la pression mémoire au démarrage de Gradle
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
+* `Dépendance` APK Signer modularise
+* `Dépendance` ARSCLib modularise version 1.3.8
+* `Dépendance` Spongy Castle Prov modularise version 1.58.0.0
 * `Dépendance` Image Quantization modularise version 2.17.0
 * `Dépendance` OpenCV modularise version 4.8.0
 * `Dépendance` Ajout de Apache Commons Codec version 1.15
+* `Dépendance` Ajout de juniversalchardet version 2.0.4
 * `Dépendance` Suppression de Android Annotations version 4.8.0
+* `Dépendance` Suppression du module local APK Parser
 * `Dépendance` Suppression de Glide KSP version 5.0.5
+* `Dépendance` Suppression de ICU4J version 77.1
 * `Dépendance` Suppression de Jaredrummler Android Device Names version 2.1.1
 * `Dépendance` Suppression de JCIP Annotations version 1.0
 * `Dépendance` Suppression de Junit Jupiter version 5.13.4
 * `Dépendance` Suppression de Retrofit2 Converter Gson version 3.0.0
 * `Dépendance` Suppression de Retrofit2 Kotlin Coroutines Adapter version 0.9.2
+* `Dépendance` Suppression de Tiny Sign version 0.9
 * `Dépendance` Suppression de la déclaration redondante de AndroidX Room KTX version 2.8.1 dans le module app
 * `Dépendance` Suppression de AndroidX MultiDex version 2.0.1
 * `Dépendance` Suppression de MLKit Barcode Scanning version 17.3.0

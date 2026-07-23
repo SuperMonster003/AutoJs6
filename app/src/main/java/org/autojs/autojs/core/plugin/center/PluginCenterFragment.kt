@@ -16,10 +16,12 @@ import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
@@ -911,7 +913,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             Pinyin4jPluginHost.ACTION_PINYIN4J -> Pinyin4jPluginHost.probe(contextRef, item.packageName)
             MediainfoPluginHost.ACTION_MEDIAINFO -> MediainfoPluginHost.probe(contextRef, item.packageName)
             ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
-            OfflineDocsPluginContract.ACTION -> OfflineDocsPluginHost.probe(contextRef, item.packageName)
+            OfflineDocsPluginContract.ACTION -> withContext(Dispatchers.IO) {
+                OfflineDocsPluginHost.probe(contextRef, item.packageName)
+            }
             OpenCvPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             else -> {
                 when {

@@ -819,6 +819,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        mDocsPageController.start(null)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED), Context.RECEIVER_NOT_EXPORTED)
         } else {
@@ -1401,7 +1402,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         unregisterFunctionsKeyboardBackHandler()
         Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
         AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
-        mDocsPageController.dispose()
+        mDocsPageController.stop()
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =

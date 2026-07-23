@@ -22,9 +22,8 @@ import java.io.InputStream
 object OfflineDocsPluginHost {
 
     private val verificationLock = Any()
-
-    @Volatile
-    private var verifiedContentCache: VerifiedContentCache? = null
+    private val verifiedContentCache =
+        OfflineDocsVerificationCache<OfflineDocsVerifiedInventory>()
 
     data class Candidate(
         val serviceInfo: ServiceInfo,
@@ -82,11 +81,6 @@ object OfflineDocsPluginHost {
             get() = verifiedInventory.assetPaths
     }
 
-    private data class VerifiedContentCache(
-        val packageIdentity: String,
-        val inventory: OfflineDocsVerifiedInventory,
-    )
-
     fun discover(
         context: Context,
         packageName: String = OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME,
@@ -130,6 +124,7 @@ object OfflineDocsPluginHost {
         packageName: String = OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME,
     ): LoadedPlugin {
         requireSupportedPackage(packageName)
+        val verificationGeneration = verifiedContentCache.snapshotGeneration()
         val candidate = selectCandidate(context)
         // Resolve mutable package state once more before exposing its executable web content.
         val currentCandidate = revalidateCandidate(context, candidate)
@@ -149,9 +144,14 @@ object OfflineDocsPluginHost {
                 error,
             )
         }
-        val verifiedInventory = verifyContent(currentCandidate, packageContext.assets)
-        revalidateCandidate(context, currentCandidate)
-        return LoadedPlugin(currentCandidate, packageContext, verifiedInventory)
+        val verifiedInventory = verifyContent(
+            currentCandidate,
+            packageContext.assets,
+            verificationGeneration,
+        )
+        val revalidatedCandidate = revalidateCandidate(context, currentCandidate)
+        ensureVerificationGenerationCurrent(verificationGeneration, currentCandidate)
+        return LoadedPlugin(revalidatedCandidate, packageContext, verifiedInventory)
     }
 
     @Throws(OfflineDocsPluginLoadException::class)
@@ -161,7 +161,7 @@ object OfflineDocsPluginHost {
     ): String = load(context, packageName).candidate.contentVersion
 
     internal fun invalidateVerificationCache() {
-        verifiedContentCache = null
+        verifiedContentCache.invalidate()
     }
 
     private fun revalidateCandidate(context: Context, candidate: Candidate): Candidate {
@@ -192,14 +192,17 @@ object OfflineDocsPluginHost {
     private fun verifyContent(
         candidate: Candidate,
         assetManager: AssetManager,
+        verificationGeneration: Long,
     ): OfflineDocsVerifiedInventory {
+        ensureVerificationGenerationCurrent(verificationGeneration, candidate)
         verifiedContentCache
-            ?.takeIf { it.packageIdentity == candidate.packageIdentity }
-            ?.let { return it.inventory }
+            .get(verificationGeneration, candidate.packageIdentity)
+            ?.let { return it }
         synchronized(verificationLock) {
             verifiedContentCache
-                ?.takeIf { it.packageIdentity == candidate.packageIdentity }
-                ?.let { return it.inventory }
+                .get(verificationGeneration, candidate.packageIdentity)
+                ?.let { return it }
+            ensureVerificationGenerationCurrent(verificationGeneration, candidate)
             val inventoryBytes = try {
                 assetManager.open(
                     OfflineDocsPluginContract.INVENTORY_FILE,
@@ -236,11 +239,32 @@ object OfflineDocsPluginHost {
                     cause = error,
                 )
             }
-            return inventory.also { verified ->
-                verifiedContentCache = VerifiedContentCache(candidate.packageIdentity, verified)
+            if (!verifiedContentCache.putIfCurrent(
+                    verificationGeneration,
+                    candidate.packageIdentity,
+                    inventory,
+                )
+            ) {
+                throw verificationInvalidatedException(candidate)
             }
+            return inventory
         }
     }
+
+    private fun ensureVerificationGenerationCurrent(
+        verificationGeneration: Long,
+        candidate: Candidate,
+    ) {
+        if (!verifiedContentCache.isCurrent(verificationGeneration)) {
+            throw verificationInvalidatedException(candidate)
+        }
+    }
+
+    private fun verificationInvalidatedException(candidate: Candidate) = loadException(
+        OfflineDocsPluginLoadError.PLUGIN_CHANGED_DURING_LOAD,
+        "The Offline Documentation plugin changed during content verification.",
+        packageName = candidate.serviceInfo.packageName,
+    )
 
     private fun readInventoryBytes(stream: InputStream): ByteArray {
         val output = ByteArrayOutputStream()

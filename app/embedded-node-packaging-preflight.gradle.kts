@@ -2559,8 +2559,18 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
         val templateApk = projectDir.resolve("src/main/assets-app/template.apk")
         val manifest = projectDir.resolve("src/main/AndroidManifest.xml")
         val manifestText = manifest.takeIf(File::isFile)?.readText().orEmpty()
-        val apkBuilder = projectDir.resolve("src/main/java/org/autojs/autojs/apkbuilder/ApkBuilder.kt")
-        val manifestEditor = projectDir.resolve("src/main/java/org/autojs/autojs/apkbuilder/ManifestEditor.java")
+        val apkBuilder = rootProject.projectDir.resolve(
+            "plugins/apk-builder-template/src/main/java/org/autojs/plugin/apkbuilder/template/impl/RemoteApkLightweightBuilder.kt"
+        )
+        val manifestEditor = rootProject.projectDir.resolve(
+            "plugins/apk-builder-template/src/main/java/org/autojs/plugin/apkbuilder/template/impl/RemoteApkManifestEditor.java"
+        )
+        val remoteBuildInputPreparer = projectDir.resolve(
+            "src/main/java/org/autojs/autojs/apkbuilder/template/RemoteApkBuildRequestPreparer.kt"
+        )
+        val apkBuildLibraryCatalog = projectDir.resolve(
+            "src/main/java/org/autojs/autojs/apkbuilder/ApkBuildLibraryCatalog.kt"
+        )
         val buildScript = projectDir.resolve("build.gradle.kts")
         val buildUtils = rootProject.projectDir.resolve("build-logic/convention/src/main/kotlin/org/autojs/build/Utils.kt")
         val tools = findEmbeddedNodePackagingTools(rootProject.projectDir)
@@ -2614,9 +2624,14 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
         ) && embeddedNodePackagingSourceContains(buildScript, "registerTemplateApkCopy(project)")
         val packagingCopiesNativeLibsByProjectConfig = embeddedNodePackagingSourceContains(
             apkBuilder,
-            "copyLibrariesByConfig",
-            "config.abis.forEach",
-            "mLibsIncludes.distinct()",
+            "copyRemoteBuildInputs",
+            "resolveRequiredHostNativeLibraries",
+            "pruneNativeLibrariesByAbiPolicy",
+        ) && embeddedNodePackagingSourceContains(
+            remoteBuildInputPreparer,
+            "writeBuildInputsArchive",
+            "projectConfig.abis",
+            "resolveSelectedPluginArtifacts",
         )
         val projectConfigSupportsLibSelection = embeddedNodePackagingSourceContains(
             rootProject.projectDir.resolve("app/src/main/java/org/autojs/autojs/project/ProjectConfig.java"),
@@ -2624,7 +2639,7 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
             "setLibs",
         )
         val apkBuilderNodeLibEntryPresent = embeddedNodePackagingSourceContains(
-            apkBuilder,
+            apkBuildLibraryCatalog,
             "libnode.so",
             "libautojs6-node.so",
         )
@@ -2644,17 +2659,18 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
             embeddedNodePackagingForegroundServiceSpecialUsePermission,
         )
         val apkBuilderCanExtractHostNativeLibsFromApk = embeddedNodePackagingSourceContains(
-            apkBuilder,
-            "extractFirstMatchedSoFromHostApks",
-            "getAppApkPaths",
+            remoteBuildInputPreparer,
+            "copyFirstMatchedSoToZip",
+            "appInfo.sourceDir",
         )
         val apkBuilderValidatesEmbeddedNodeAbiLibs = embeddedNodePackagingSourceContains(
-            apkBuilder,
-            "ensureEmbeddedNodeLibrariesAvailableOrThrow",
-            "Supported Embedded Node.js ABIs",
+            remoteBuildInputPreparer,
+            "missingNativeLibraries",
+            "error_plugin_apk_does_not_contain_required_native_libraries",
         )
         val apkBuilderValidatesEmbeddedNodeScriptExecutionEnabled = embeddedNodePackagingSourceContains(
-            apkBuilder,
+            remoteBuildInputPreparer,
+            "validateEmbeddedNodeBuildRequirements",
             "NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED",
             "autojs.nodejs.embedded.script.enabled=true",
         )
@@ -2697,7 +2713,7 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
                 scriptExecutionEnabled
         val blockingItems = buildList {
             if (!requiredAbiSetReady) add("required Node native ABI set is incomplete in the host native-lib provider")
-            if (!packagingCopiesNativeLibsByProjectConfig) add("ApkBuilder native-lib copy-by-config path was not detected")
+            if (!packagingCopiesNativeLibsByProjectConfig) add("Remote APK builder native-lib copy-by-config path was not detected")
             if (!projectConfigSupportsLibSelection) add("ProjectConfig libs selection was not detected")
             if (!mainManifestDeclaresScriptService) add("main manifest embedded script service declaration was not detected")
             if (!mainManifestDeclaresEmbeddedNodeFgsPermissions) add("main manifest embedded Node FGS permissions were not detected")
@@ -2713,7 +2729,7 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
                 !packagedRuntimeIntegrationReady
         val nextImplementationItems = buildList {
             if (!apkBuilderNodeLibEntryPresent) {
-                add("Add an ApkBuilder.Lib entry, for example \"Embedded Node.js\", with libnode.so, libautojs6-node.so, and libc++_shared.so.")
+                add("Add an ApkBuildLibrary catalog entry, for example \"Embedded Node.js\", with libnode.so, libautojs6-node.so, and libc++_shared.so.")
             }
             if (!templateManifest.declaresEmbeddedScriptService && !manifestEditorCanSynthesizeServiceNodes) {
                 add("Regenerate template.apk from the current manifest or add a safe binary-manifest insertion path for NativeNodeEmbeddedScriptService.")
@@ -2819,14 +2835,14 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
 
             appendLine("Runtime packaging code readiness:")
             appendLine("  ProjectConfig libs selection detected: $projectConfigSupportsLibSelection")
-            appendLine("  ApkBuilder native lib copy-by-config path detected: $packagingCopiesNativeLibsByProjectConfig")
-            appendLine("  ApkBuilder Embedded Node lib entry present: $apkBuilderNodeLibEntryPresent")
-            appendLine("  ApkBuilder host APK native lib fallback detected: $apkBuilderCanExtractHostNativeLibsFromApk")
-            appendLine("  ApkBuilder Embedded Node ABI/lib validation detected: $apkBuilderValidatesEmbeddedNodeAbiLibs")
-            appendLine("  ApkBuilder Embedded Node script execution build flag validation detected: $apkBuilderValidatesEmbeddedNodeScriptExecutionEnabled")
-            appendLine("  ManifestEditor can filter existing permissions: $manifestEditorCanFilterExistingPermissions")
-            appendLine("  ManifestEditor can synthesize embedded script service nodes: $manifestEditorCanSynthesizeServiceNodes")
-            appendLine("  ManifestEditor can synthesize embedded Node FGS permissions: $manifestEditorCanSynthesizeEmbeddedFgsPermissions")
+            appendLine("  Remote APK builder native lib copy-by-config path detected: $packagingCopiesNativeLibsByProjectConfig")
+            appendLine("  Remote APK builder Embedded Node lib entry present: $apkBuilderNodeLibEntryPresent")
+            appendLine("  Remote build input host APK native lib fallback detected: $apkBuilderCanExtractHostNativeLibsFromApk")
+            appendLine("  Remote build input Embedded Node ABI/lib validation detected: $apkBuilderValidatesEmbeddedNodeAbiLibs")
+            appendLine("  Remote build input Embedded Node script execution build flag validation detected: $apkBuilderValidatesEmbeddedNodeScriptExecutionEnabled")
+            appendLine("  RemoteApkManifestEditor can filter existing permissions: $manifestEditorCanFilterExistingPermissions")
+            appendLine("  RemoteApkManifestEditor can synthesize embedded script service nodes: $manifestEditorCanSynthesizeServiceNodes")
+            appendLine("  RemoteApkManifestEditor can synthesize embedded Node FGS permissions: $manifestEditorCanSynthesizeEmbeddedFgsPermissions")
             appendLine("  runtime manifest service ready via template or synthesis: $runtimeManifestServiceReady")
             appendLine("  runtime FGS permissions ready via template or synthesis: $runtimeFgsPermissionReady")
             appendLine("  runtime dex class ready from current template: $runtimeDexReady")
@@ -2839,7 +2855,7 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
             appendLine("  1. Keep template service/dex readiness separate from Node native lib inclusion.")
             appendLine("  2. Keep template.apk regenerated from current inrt sources so NativeNodeEmbeddedScriptService stays present in manifest and dex.")
             appendLine("  3. Add an explicit packaged-app library option for Embedded Node native libs instead of bloating every packaged app by default.")
-            appendLine("  4. Reuse ApkBuilder's ProjectConfig.libs + abis copy path for libnode.so, libautojs6-node.so, and libc++_shared.so.")
+            appendLine("  4. Reuse the remote builder ProjectConfig.libs + abis input path for libnode.so, libautojs6-node.so, and libc++_shared.so.")
             appendLine("  5. Reject or warn on x86 for Embedded Node until libnode.so exists for x86.")
             appendLine("  6. Keep embedded script execution enabled by default; use -Pautojs.nodejs.embedded.script.enabled=false only for explicit diagnostics fallback.")
             appendLine()
@@ -2875,7 +2891,7 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
             appendLine()
 
             appendLine("Notes:")
-            appendLine("  This dry-run does not modify template.apk, ProjectConfig, ApkBuilder, or ManifestEditor.")
+            appendLine("  This dry-run does not modify template.apk, ProjectConfig, RemoteApkLightweightBuilder, or RemoteApkManifestEditor.")
             appendLine("  It does not enable require/npm/node_modules/fs/import/worker/child_process.")
             appendLine("  It should be used before real packaged-app output verification and after template/runtime integration changes.")
         }

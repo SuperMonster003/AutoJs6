@@ -110,6 +110,36 @@ class OfflineDocsContentVerifierTest {
         }
     }
 
+    @Test
+    fun `current scale corpus is fully verified and reports elapsed time`() {
+        val expectedFileCount = 161
+        val expectedTotalBytes = 6_996_000
+        val bytesPerFile = expectedTotalBytes / expectedFileCount
+        val remainder = expectedTotalBytes % expectedFileCount
+        val files = (0 until expectedFileCount).associate { index ->
+            val path = if (index == 0) {
+                "index.html"
+            } else {
+                "assets/fixture-${index.toString().padStart(3, '0')}.js"
+            }
+            val size = bytesPerFile + if (index < remainder) 1 else 0
+            path to ByteArray(size) { offset -> (index * 31 + offset).toByte() }
+        }
+        val signedInventory = inventory(files)
+
+        val startedAt = System.nanoTime()
+        val verified = verify(signedInventory, files)
+        val elapsedMillis = (System.nanoTime() - startedAt) / 1_000_000.0
+
+        println(
+            "Verified ${verified.fileCount} Offline Documentation files " +
+                    "(${verified.totalBytes} bytes) in %.3f ms.".format(elapsedMillis),
+        )
+        assertEquals(expectedFileCount.toLong(), verified.fileCount)
+        assertEquals(expectedTotalBytes.toLong(), verified.totalBytes)
+        assertEquals(files.keys.toSortedSet(), verified.assetPaths)
+    }
+
     private fun verify(
         inventory: ByteArray,
         actualFiles: Map<String, ByteArray>,

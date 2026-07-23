@@ -68,6 +68,7 @@
 * `修复` Paddle OCR 插件服务长时间运行后可能断开且无法自动恢复的问题 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `修复` Paddle OCR 插件未处于运行状态时无法被自动唤醒, 导致功能调用或项目打包失败的问题 _[`issue #517`](http://issues.autojs6.com/517)_
 * `修复` `images.resize(ImageWrapper, width, height)` 错误用法会将高度作为 OpenCV 插值参数传入, 且不兼容的原生异常展开可能导致应用崩溃而非报告脚本异常的问题
+* `修复` MediaInfo 插件媒体库不可用或 Binder 调用异常时, 文件管理器媒体详情可能仅显示 "..." 或导致应用崩溃, 且无法降级显示 Android 平台元数据的问题
 * `修复` 无障碍服务在连续执行 back 等操作时可能意外中断的问题 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修复` 脚本反复运行后内存占用可能持续增长的问题 (试修) _[`issue #548`](http://issues.autojs6.com/548)_
 * `修复` 通过外部 URI 或后台运行脚本时可能无法保留原始路径, 导致相对路径解析异常的问题 _[`issue #545`](http://issues.autojs6.com/545)_
@@ -79,6 +80,8 @@
 * `修复` 主页插件标签页中已安装插件的图标无法随夜间模式动态切换的问题
 * `修复` 插件项目发布多个变体时插件中心可能安装错误变体 APK 的问题
 * `修复` APK Builder Template 插件可能重复显示或错误提示更新的问题
+* `修复` 离线项目文档插件更新期间完整性校验缓存可能复用旧内容的问题
+* `修复` 文件管理器 APK 详情中缺少 Manifest 按钮及完整多行内容的问题
 * `修复` 文件管理器在回收站删除文件后列表滚动位置被重置的问题
 * `修复` 主页抽屉开关项的开关视图有效点击区域过小的问题
 * `修复` 浮动按钮菜单显示的最近应用包名及 Activity 信息异常的问题 _[`issue #529`](http://issues.autojs6.com/529)_
@@ -98,31 +101,43 @@
 * `优化` Node.js 原生校验支持解析并验证外部运行时插件的源码及构建根目录
 * `优化` Node.js 最终集成及发布门禁在所需报告/当前源码证据/生产验收产物缺失或过期时采用 fail-closed 策略
 * `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
+* `优化` 文件管理器将媒体详情查询整合为单次 MediaInfo 快照, 减少 Binder 调用及等待时间
 * `优化` Ace WebView 运行时/JavaScript bridge/内置语言服务/静态资源完成插件化, 降低宿主 APK 耦合并支持独立安装及更新
 * `优化` 项目离线文档完成插件化, 降低宿主 APK 体积并支持独立安装及更新
+* `优化` 离线项目文档首次加载的文件清单解析及完整 SHA-256 校验移至后台线程, 避免阻塞界面
+* `优化` APK 构建所需的 AXML/ARSC/解析/签名/密钥库及密码学工具链全部迁入 APK Builder Template 插件, 宿主改用轻量 APK 信息检查
 * `优化` 代码编辑器引擎选择尊重用户显式设置, Ace 不可用时提供插件中心跳转入口
 * `优化` 代码编辑器 "运行" 按钮点击后变换为 "停止" 按钮, 可便捷停止脚本
 * `优化` 代码编辑器完善主题/字体/工具栏/只读模式/折叠/选择菜单等交互体验
 * `优化` 代码编辑器完善文件编码检测及保存安全性, 编码转换仅在用户保存文件时写入磁盘
 * `优化` 底部日志面板支持在独立日志页面点击堆栈帧跳转至源码
 * `优化` 项目文档来源切换支持即时生效
+* `优化` 文件管理器仅在点击 Manifest 按钮后后台解码及格式化完整的二进制 AndroidManifest.xml, 并优化大文本滑动及双指缩放性能
 * `优化` 插件中心完善 "排序" 及 "筛选" 对话框的样式及功能
 * `优化` 插件中心默认展示常用插件变体并提供独立页面查看其他变体
 * `优化` 插件中心完善多语言更新日志/语言缓存/官方认证/索引加载等功能
 * `优化` 项目字符串资源完成多语言翻译同步/文件分类/名称排序及 ASCII 标点规范化
+* `优化` 限制 APK 语言资源仅保留项目支持的 10 种配置, 降低安装包体积
 * `优化` 构建系统支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本并降低 Gradle 启动内存压力
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
+* `依赖` 模块化 APK Signer
+* `依赖` 模块化 ARSCLib 版本 1.3.8
+* `依赖` 模块化 Spongy Castle Prov 版本 1.58.0.0
 * `依赖` 模块化 Image Quantization 版本 2.17.0
 * `依赖` 模块化 OpenCV 版本 4.8.0
 * `依赖` 附加 Apache Commons Codec 版本 1.15
+* `依赖` 附加 juniversalchardet 版本 2.0.4
 * `依赖` 移除 Android Annotations 版本 4.8.0
+* `依赖` 移除 APK Parser 本地模块
 * `依赖` 移除 Glide KSP 版本 5.0.5
+* `依赖` 移除 ICU4J 版本 77.1
 * `依赖` 移除 Jaredrummler Android Device Names 版本 2.1.1
 * `依赖` 移除 JCIP Annotations 版本 1.0
 * `依赖` 移除 Junit Jupiter 版本 5.13.4
 * `依赖` 移除 Retrofit2 Converter Gson 版本 3.0.0
 * `依赖` 移除 Retrofit2 Kotlin Coroutines Adapter 版本 0.9.2
+* `依赖` 移除 Tiny Sign 版本 0.9
 * `依赖` 移除 app 模块重复声明的 AndroidX Room KTX 版本 2.8.1
 * `依赖` 移除 AndroidX MultiDex 版本 2.0.1
 * `依赖` 移除 MLKit Barcode Scanning 版本 17.3.0

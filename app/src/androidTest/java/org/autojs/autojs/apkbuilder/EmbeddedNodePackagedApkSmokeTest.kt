@@ -19,12 +19,18 @@ import org.autojs.autojs.engine.NodeEmbeddedProcessPoolPolicy
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.engine.NodeWorkerThreadsTestSupport
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
+import org.autojs.autojs.apkbuilder.template.RemoteApkBuildClient
+import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
+import org.autojs.autojs.apkbuilder.template.RemoteProjectConfigUpdater
 import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor
 import org.autojs.autojs.script.NodeProjectLaunchKind
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -41,6 +47,7 @@ import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.Base64
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.GZIPOutputStream
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
@@ -8143,16 +8150,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             isRunOnBoot = false
         }
 
-        openPackagedSmokeTemplate().use { templateApk ->
-            ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
-                .prepare(context)
-                .withConfig(context, config)
-                .build(context)
-                .sign(context)
-                .commitProjectConfigIfNeeded(context)
-                .cleanWorkspace(context)
-                .finish()
-        }
+        buildPackagedSmokeApkRemotely(config, outputApk)
 
         outputPathFile.writeText(outputApk.absolutePath, StandardCharsets.UTF_8)
         assertTrue("Packaged APK was not created: ${outputApk.absolutePath}", outputApk.isFile)
@@ -8602,18 +8600,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             isRunOnBoot = false
         }
 
-        openPackagedSmokeTemplate(
-            requiredDexMarkers = listOf(PACKAGE_SCRIPT_NODE_MODULES_BIN_TEMPLATE_MARKER),
-        ).use { templateApk ->
-            ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
-                .prepare(context)
-                .withConfig(context, config)
-                .build(context)
-                .sign(context)
-                .commitProjectConfigIfNeeded(context)
-                .cleanWorkspace(context)
-                .finish()
-        }
+        buildPackagedSmokeApkRemotely(config, outputApk)
 
         outputPathFile.writeText(outputApk.absolutePath, StandardCharsets.UTF_8)
         assertTrue("Package script launch APK was not created: ${outputApk.absolutePath}", outputApk.isFile)
@@ -8793,16 +8780,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             isRunOnBoot = false
         }
 
-        openPackagedSmokeTemplate().use { templateApk ->
-            ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
-                .prepare(context)
-                .withConfig(context, config)
-                .build(context)
-                .sign(context)
-                .commitProjectConfigIfNeeded(context)
-                .cleanWorkspace(context)
-                .finish()
-        }
+        buildPackagedSmokeApkRemotely(config, outputApk)
 
         outputPathFile.writeText(outputApk.absolutePath, StandardCharsets.UTF_8)
         assertTrue("Package bin launch APK was not created: ${outputApk.absolutePath}", outputApk.isFile)
@@ -8958,16 +8936,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             isRunOnBoot = false
         }
 
-        openPackagedSmokeTemplate().use { templateApk ->
-            ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
-                .prepare(context)
-                .withConfig(context, config)
-                .build(context)
-                .sign(context)
-                .commitProjectConfigIfNeeded(context)
-                .cleanWorkspace(context)
-                .finish()
-        }
+        buildPackagedSmokeApkRemotely(config, outputApk)
 
         outputPathFile.writeText(outputApk.absolutePath, StandardCharsets.UTF_8)
         assertTrue("Package bin string script APK was not created: ${outputApk.absolutePath}", outputApk.isFile)
@@ -9179,16 +9148,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             isRunOnBoot = false
         }
 
-        openPackagedSmokeTemplate().use { templateApk ->
-            ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
-                .prepare(context)
-                .withConfig(context, config)
-                .build(context)
-                .sign(context)
-                .commitProjectConfigIfNeeded(context)
-                .cleanWorkspace(context)
-                .finish()
-        }
+        buildPackagedSmokeApkRemotely(config, outputApk)
 
         outputPathFile.writeText(outputApk.absolutePath, StandardCharsets.UTF_8)
         assertTrue("Diagnostics packaged APK was not created: ${outputApk.absolutePath}", outputApk.isFile)
@@ -11370,16 +11330,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             return cachedApk
         }
 
-        openPackagedSmokeTemplate(requiredDexMarkers = failureCase.requiredTemplateDexMarkers).use { templateApk ->
-            ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
-                .prepare(context)
-                .withConfig(context, config)
-                .build(context)
-                .sign(context)
-                .commitProjectConfigIfNeeded(context)
-                .cleanWorkspace(context)
-                .finish()
-        }
+        buildPackagedSmokeApkRemotely(config, outputApk)
 
         outputPathFile.writeText(outputApk.absolutePath, StandardCharsets.UTF_8)
         assertTrue("Packaged launch failure APK was not created: ${outputApk.absolutePath}", outputApk.isFile)
@@ -13557,16 +13508,7 @@ $nodeConfigJson
             return cachedApk
         }
 
-        openPackagedSmokeTemplate(requiredDexMarkers = requiredTemplateDexMarkers).use { templateApk ->
-            ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
-                .prepare(context)
-                .withConfig(context, config)
-                .build(context)
-                .sign(context)
-                .commitProjectConfigIfNeeded(context)
-                .cleanWorkspace(context)
-                .finish()
-        }
+        buildPackagedSmokeApkRemotely(config, outputApk)
 
         outputPathFile.writeText(outputApk.absolutePath, StandardCharsets.UTF_8)
         assertTrue("Packaged gate diagnostics APK was not created: ${outputApk.absolutePath}", outputApk.isFile)
@@ -15722,12 +15664,54 @@ $nodeConfigJson
     )
 
     private fun assumePackagedSmokeTemplateAvailable(label: String) {
-        val source = packagedSmokeTemplateSource()
-        source?.let { println("$label template source: ${it.summary}") }
+        val pluginAvailable = runCatching {
+            runBlocking(Dispatchers.IO) {
+                ApkBuilderTemplatePluginHost.hasRemoteBuildPlugin(
+                    context = context,
+                    preferredPackageName = ApkBuilderTemplatePluginIds.PACKAGE_NAME,
+                )
+            }
+        }.getOrDefault(false)
         assumeTrue(
-            "$label requires a packaged smoke template.\n" + packagedSmokeTemplateDiagnostics(),
-            source != null,
+            "$label requires the enabled, compatible official APK Builder plugin.",
+            pluginAvailable,
         )
+    }
+
+    private fun buildPackagedSmokeApkRemotely(
+        projectConfig: ProjectConfig,
+        outputApk: File,
+    ) {
+        val outcome = RemoteApkBuildClient.buildBlocking(
+            context = context,
+            projectConfig = projectConfig,
+            outApk = outputApk,
+            cancelSignal = AtomicBoolean(false),
+            preferredPluginPackageName = ApkBuilderTemplatePluginIds.PACKAGE_NAME,
+        )
+        assumeTrue(
+            "Packaged smoke requires the enabled, compatible official APK Builder plugin. " +
+                    outcome.warnings.joinToString(" "),
+            outcome.status != RemoteApkBuildClient.STATUS_NOT_AVAILABLE,
+        )
+        val details = (outcome.errors + outcome.warnings)
+            .filter(String::isNotBlank)
+            .distinct()
+            .joinToString("\n")
+        assertTrue(
+            "Remote APK build failed with status ${outcome.status}." +
+                    details.takeIf { it.isNotBlank() }?.let { "\n$it" }.orEmpty(),
+            outcome.isSuccess,
+        )
+
+        val sourcePath = projectConfig.sourcePath
+        val updatedJson = outcome.updatedProjectConfigJson
+        if (!sourcePath.isNullOrBlank() && File(sourcePath).isDirectory && !updatedJson.isNullOrBlank()) {
+            File(ProjectConfig.configFileOfDir(sourcePath)).writeText(
+                RemoteProjectConfigUpdater.mergeBuildInfoJson(projectConfig, updatedJson),
+                StandardCharsets.UTF_8,
+            )
+        }
     }
 
     private fun packagedSmokeTargetAbi(): String {

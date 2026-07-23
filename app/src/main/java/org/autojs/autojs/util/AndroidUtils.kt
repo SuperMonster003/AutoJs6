@@ -1,7 +1,7 @@
 package org.autojs.autojs.util
 
 import android.os.Build
-import org.autojs.autojs.apkbuilder.ApkBuilder
+import org.autojs.autojs.app.GlobalAppContext
 import java.util.zip.ZipFile
 
 /**
@@ -35,9 +35,12 @@ object AndroidUtils {
     @JvmStatic
     val appSupportedAbiList: List<String>
         get() = try {
-            ZipFile(ApkBuilder.appApkFile.path).entries().asSequence().mapNotNull { entry ->
-                Regex(".*lib/(.+?)/.+").find(entry.name)?.groupValues?.get(1)
-            }.toSet().toList()
+            val appApkPath = GlobalAppContext.get().applicationInfo.sourceDir
+            ZipFile(appApkPath).use { zipFile ->
+                zipFile.entries().asSequence().mapNotNull { entry ->
+                    Regex(".*lib/(.+?)/.+").find(entry.name)?.groupValues?.get(1)
+                }.toSet().toList()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()

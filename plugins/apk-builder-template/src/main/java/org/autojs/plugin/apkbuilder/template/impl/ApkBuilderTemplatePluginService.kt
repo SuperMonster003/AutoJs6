@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
+import org.autojs.plugin.apkbuilder.template.ApkKeyStoreRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateResult
 import org.autojs.plugin.apkbuilder.template.IApkBuildCallback
@@ -112,5 +113,8 @@ class ApkBuilderTemplatePluginService : Service() {
             callback = callback,
             executor = io,
         )
+
+        override fun manageKeyStore(request: ApkKeyStoreRequest) =
+            RemoteKeyStoreManager.execute(this@ApkBuilderTemplatePluginService, request)
     }
 }

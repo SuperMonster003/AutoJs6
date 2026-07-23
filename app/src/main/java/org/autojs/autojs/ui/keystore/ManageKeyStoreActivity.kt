@@ -7,16 +7,18 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import com.mcal.apksigner.CertCreator
-import com.mcal.apksigner.utils.DistinguishedNameValues
-import com.mcal.apksigner.utils.KeyStoreHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.apkbuilder.keystore.KeyStore
+import org.autojs.autojs.apkbuilder.template.ApkBuilderKeyStoreClient
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.keystore.NewKeyStoreDialog.NewKeyStoreConfigs
@@ -27,8 +29,8 @@ import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNav
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityManageKeyStoreBinding
+import org.autojs.plugin.apkbuilder.template.ApkKeyStoreRequest
 import java.io.File
-import java.io.IOException
 
 
 class ManageKeyStoreActivity : BaseActivity() {
@@ -160,42 +162,42 @@ class ManageKeyStoreActivity : BaseActivity() {
         keyStorePath.mkdirs()
         val file = File(keyStorePath, configs.filename)
 
-        val distinguishedNameValues = DistinguishedNameValues().apply {
-            setCommonName(configs.firstAndLastName)
-            setOrganization(configs.organization)
-            setOrganizationalUnit(configs.organizationalUnit)
-            setCountry(configs.countryCode)
-            setState(configs.stateOrProvince)
-            setLocality(configs.cityOrLocality)
-            setStreet(configs.street)
-        }
-
-        try {
-            CertCreator.createKeystoreAndKey(
-                file,
-                configs.password.toCharArray(),
-                "RSA",
-                2048,
-                configs.alias,
-                configs.aliasPassword.toCharArray(),
-                configs.signatureAlgorithm,
-                configs.validityYears,
-                distinguishedNameValues
-            )
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                ApkBuilderKeyStoreClient.createBlocking(
+                    this@ManageKeyStoreActivity,
+                    file,
+                    ApkKeyStoreRequest(
+                        keyStoreType = keyStoreType(configs.filename),
+                        keyStorePassword = configs.password,
+                        keyAlias = configs.alias,
+                        keyAliasPassword = configs.aliasPassword,
+                        certificateSignatureAlgorithm = configs.signatureAlgorithm,
+                        certificateValidityYears = configs.validityYears,
+                        commonName = configs.firstAndLastName,
+                        organization = configs.organization,
+                        organizationalUnit = configs.organizationalUnit,
+                        country = configs.countryCode,
+                        state = configs.stateOrProvince,
+                        locality = configs.cityOrLocality,
+                        street = configs.street,
+                    ),
+                )
+            }
+            if (!result.isSuccess) {
+                showToast(getString(R.string.text_failed_to_create_key_store) + " " + result.message.orEmpty())
+                return@launch
+            }
             val newKeyStore = KeyStore(
                 absolutePath = file.absolutePath,
                 filename = file.name,
                 password = AESUtils.encrypt(configs.password),
                 alias = configs.alias,
                 aliasPassword = AESUtils.encrypt(configs.aliasPassword),
-                verified = true
+                verified = true,
             )
             keyStoreViewModel.upsertKeyStore(newKeyStore)
             showToast(R.string.text_successfully_created_key_store)
-        } catch (e: IOException) {
-            showToast(getString(R.string.text_failed_to_create_key_store) + " " + e.message)
-        } catch (e: Exception) {
-            showToast(getString(R.string.text_failed_to_create_key_store) + " " + e.message)
         }
     }
 
@@ -231,32 +233,42 @@ class ManageKeyStoreActivity : BaseActivity() {
     fun verifyKeyStore(
         configs: VerifyKeyStoreDialog.VerifyKeyStoreConfigs, keyStore: KeyStore,
     ) {
-        // 验证密钥库密码
-        val tmpKeyStore = runCatching {
-            KeyStoreHelper.loadKeyStore(File(keyStore.absolutePath), configs.password.toCharArray())
-        }.getOrElse {
-            showToast(R.string.text_verify_failed)
-            return
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                ApkBuilderKeyStoreClient.verifyBlocking(
+                    this@ManageKeyStoreActivity,
+                    File(keyStore.absolutePath),
+                    ApkKeyStoreRequest(
+                        keyStoreType = keyStoreType(keyStore.filename),
+                        keyStorePassword = configs.password,
+                        keyAlias = configs.alias,
+                        keyAliasPassword = configs.aliasPassword,
+                    ),
+                )
+            }
+            if (!result.isSuccess) {
+                showToast(R.string.text_verify_failed)
+                return@launch
+            }
+            val verifiedKeyStore = KeyStore(
+                absolutePath = keyStore.absolutePath,
+                filename = keyStore.filename,
+                password = AESUtils.encrypt(configs.password),
+                alias = configs.alias,
+                aliasPassword = AESUtils.encrypt(configs.aliasPassword),
+                verified = true,
+            )
+            keyStoreViewModel.upsertKeyStore(verifiedKeyStore)
+            showToast(R.string.text_verify_success)
         }
+    }
 
-        // 验证别名和别名密码
-        runCatching {
-            tmpKeyStore.getKey(configs.alias, configs.aliasPassword.toCharArray())
-        }.getOrElse {
-            showToast(R.string.text_verify_failed)
-            return
+    private fun keyStoreType(filename: String): String {
+        return if (filename.endsWith(".bks", ignoreCase = true)) {
+            ApkKeyStoreRequest.TYPE_BKS
+        } else {
+            ApkKeyStoreRequest.TYPE_JKS
         }
-
-        val verifiedKeyStore = KeyStore(
-            absolutePath = keyStore.absolutePath,
-            filename = keyStore.filename,
-            password = AESUtils.encrypt(configs.password),
-            alias = configs.alias,
-            aliasPassword = AESUtils.encrypt(configs.aliasPassword),
-            verified = true
-        )
-        keyStoreViewModel.upsertKeyStore(verifiedKeyStore)
-        showToast(R.string.text_verify_success)
     }
 
     private fun showToast(@StringRes messageResId: Int) {

@@ -26,9 +26,12 @@
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:breakStrategy="simple"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:scrollbars="vertical"
-                android:fontFamily="monospace" />
+                android:fontFamily="monospace"
+                android:hyphenationFrequency="none"
+                android:saveEnabled="false" />
 
         </HorizontalScrollView>
 

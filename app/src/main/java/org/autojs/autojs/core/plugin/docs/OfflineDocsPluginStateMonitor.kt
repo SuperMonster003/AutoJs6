@@ -9,11 +9,13 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 
 /** Application-scoped source of truth for Offline Documentation plugin availability. */
@@ -22,6 +24,7 @@ object OfflineDocsPluginStateMonitor {
     private const val TAG = "OfflineDocsStateMonitor"
 
     enum class Status {
+        LOADING,
         AVAILABLE,
         NOT_INSTALLED,
         DISABLED,
@@ -71,12 +74,24 @@ object OfflineDocsPluginStateMonitor {
                             cause == Cause.PACKAGE_DATA_CLEARED ||
                             previous.packageIdentity != current.packageIdentity
                     )
+
+        val requiresContentRelease: Boolean
+            get() = previous?.available == true && (
+                    !current.available ||
+                            cause == Cause.PACKAGE_REPLACED ||
+                            cause == Cause.PACKAGE_DATA_CLEARED ||
+                            previous.packageIdentity != current.packageIdentity
+                    )
     }
 
     private val lock = Any()
     private val mainHandler = Handler(Looper.getMainLooper())
     private val listeners = CopyOnWriteArraySet<(Change) -> Unit>()
     private val nextChangeId = AtomicLong(0L)
+    private val inspectionRequestGate = OfflineDocsInspectionRequestGate()
+    private val inspectionExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "AutoJs6-OfflineDocs-Verification")
+    }
 
     @Volatile
     private var appContext: Context? = null
@@ -86,6 +101,9 @@ object OfflineDocsPluginStateMonitor {
 
     @Volatile
     private var change: Change? = null
+
+    @Volatile
+    private var loadedPluginSnapshot: LoadedPluginSnapshot? = null
 
     private val pluginStateChangedListener: (String) -> Unit = { packageName ->
         if (packageName == OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME) {
@@ -141,7 +159,7 @@ object OfflineDocsPluginStateMonitor {
             }.onFailure { error ->
                 Log.e(TAG, "Unable to register the Offline Documentation plugin monitor.", error)
             }
-            return inspectSafely(applicationContext).also { initial ->
+            return State(status = Status.LOADING).also { initial ->
                 state = initial
                 change = Change(
                     id = nextChangeId.incrementAndGet(),
@@ -149,11 +167,23 @@ object OfflineDocsPluginStateMonitor {
                     current = initial,
                     cause = Cause.INITIALIZED,
                 )
+                scheduleInspection(applicationContext, Cause.INITIALIZED)
             }
         }
     }
 
     fun current(context: Context): State = state ?: initialize(context)
+
+    /**
+     * Returns only a plugin that has already completed discovery, trust checks, inventory parsing,
+     * and full content verification on the background inspection thread.
+     */
+    fun loadedPlugin(context: Context): OfflineDocsPluginHost.LoadedPlugin? {
+        val currentState = current(context)
+        return loadedPluginSnapshot
+            ?.takeIf { snapshot -> snapshot.state == currentState && currentState.available }
+            ?.plugin
+    }
 
     fun latestChange(context: Context): Change {
         initialize(context)
@@ -171,19 +201,72 @@ object OfflineDocsPluginStateMonitor {
 
     fun refresh(cause: Cause = Cause.REFRESHED) {
         val context = appContext ?: return
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            refreshOnMain(context, cause)
-        } else {
-            mainHandler.post { refreshOnMain(context, cause) }
+        if (cause != Cause.REFRESHED && cause != Cause.INITIALIZED) {
+            loadedPluginSnapshot = null
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                publishInvalidation(cause)
+            } else {
+                mainHandler.post { publishInvalidation(cause) }
+            }
+        }
+        scheduleInspection(context, cause)
+    }
+
+    private fun publishInvalidation(cause: Cause) {
+        val previous = state ?: return
+        if (previous.status == Status.LOADING) return
+        val loading = previous.copy(
+            status = Status.LOADING,
+            errorCode = null,
+        )
+        state = loading
+        val event = Change(
+            id = nextChangeId.incrementAndGet(),
+            previous = previous,
+            current = loading,
+            cause = cause,
+        )
+        change = event
+        listeners.forEach { listener -> listener(event) }
+    }
+
+    private fun scheduleInspection(context: Context, cause: Cause) {
+        val request = inspectionRequestGate.newRequest(cause)
+        inspectionExecutor.execute {
+            if (!inspectionRequestGate.isLatest(request)) return@execute
+            val startedAt = SystemClock.elapsedRealtime()
+            val inspection = inspectSafely(context)
+            val elapsedMillis = SystemClock.elapsedRealtime() - startedAt
+            Log.i(
+                TAG,
+                "Offline Documentation plugin inspection and content verification completed " +
+                        "in $elapsedMillis ms on ${Thread.currentThread().name}.",
+            )
+            if (!inspectionRequestGate.isLatest(request)) return@execute
+            mainHandler.post {
+                publishInspection(request, inspection)
+            }
         }
     }
 
-    private fun refreshOnMain(context: Context, cause: Cause) {
+    private fun publishInspection(
+        request: OfflineDocsInspectionRequestGate.Request,
+        inspection: Inspection,
+    ) {
+        val cause = inspectionRequestGate.resolveCauseForPublication(request) ?: return
         val previous = state
-        val current = inspectSafely(context)
-        val forcePublish = cause == Cause.PACKAGE_REPLACED || cause == Cause.PACKAGE_DATA_CLEARED
-        if (!forcePublish && previous == current) return
+        val current = inspection.state
+        val previousLoadedPlugin = loadedPluginSnapshot?.plugin
+        val forcePublish = cause == Cause.PACKAGE_REPLACED ||
+                cause == Cause.PACKAGE_DATA_CLEARED ||
+                (previous?.available == true &&
+                        previousLoadedPlugin == null &&
+                        inspection.loadedPlugin != null)
         state = current
+        loadedPluginSnapshot = inspection.loadedPlugin?.let { plugin ->
+            LoadedPluginSnapshot(current, plugin)
+        }
+        if (!forcePublish && previous == current) return
         val event = Change(
             id = nextChangeId.incrementAndGet(),
             previous = previous,
@@ -194,19 +277,21 @@ object OfflineDocsPluginStateMonitor {
         listeners.forEach { listener -> listener(event) }
     }
 
-    private fun inspectSafely(context: Context): State = runCatching {
+    private fun inspectSafely(context: Context): Inspection = runCatching {
         inspect(context)
     }.getOrElse { error ->
         Log.e(TAG, "Unable to inspect the Offline Documentation plugin.", error)
-        State(
-            status = Status.INELIGIBLE,
-            errorCode = (error as? OfflineDocsPluginLoadException)?.code
-                ?: OfflineDocsPluginLoadError.DISCOVERY_FAILED,
-            eligibilityIdentity = "inspection=${error.javaClass.name}:${error.message.orEmpty()}",
+        Inspection(
+            state = State(
+                status = Status.INELIGIBLE,
+                errorCode = (error as? OfflineDocsPluginLoadException)?.code
+                    ?: OfflineDocsPluginLoadError.DISCOVERY_FAILED,
+                eligibilityIdentity = "inspection=${error.javaClass.name}:${error.message.orEmpty()}",
+            ),
         )
     }
 
-    private fun inspect(context: Context): State {
+    private fun inspect(context: Context): Inspection {
         val discovered = OfflineDocsPluginHost.discover(context)
         val available = discovered
             .asSequence()
@@ -218,9 +303,13 @@ object OfflineDocsPluginStateMonitor {
             )
         if (available != null) {
             return try {
-                OfflineDocsPluginHost.load(context).candidate.toState(Status.AVAILABLE, errorCode = null)
+                val loadedPlugin = OfflineDocsPluginHost.load(context)
+                Inspection(
+                    state = loadedPlugin.candidate.toState(Status.AVAILABLE, errorCode = null),
+                    loadedPlugin = loadedPlugin,
+                )
             } catch (error: OfflineDocsPluginLoadException) {
-                available.toState(Status.INELIGIBLE, error.code)
+                Inspection(available.toState(Status.INELIGIBLE, error.code))
             }
         }
 
@@ -233,17 +322,21 @@ object OfflineDocsPluginStateMonitor {
             } else {
                 Status.INELIGIBLE
             }
-            return rejectedCandidate?.toState(status, rejectedError?.code)
-                ?: State(status = status, errorCode = rejectedError?.code)
+            return Inspection(
+                rejectedCandidate?.toState(status, rejectedError?.code)
+                    ?: State(status = status, errorCode = rejectedError?.code),
+            )
         }
 
         val packageName = OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME
         val applicationInfo = getApplicationInfoOrNull(context.packageManager, packageName)
-            ?: return State(status = Status.NOT_INSTALLED)
+            ?: return Inspection(State(status = Status.NOT_INSTALLED))
         val enabled = applicationInfo.enabled && PluginEnableStore.isEnabled(context, packageName, true)
-        return State(
-            status = if (enabled) Status.INELIGIBLE else Status.DISABLED,
-            eligibilityIdentity = "appEnabled=${applicationInfo.enabled};hostEnabled=$enabled",
+        return Inspection(
+            State(
+                status = if (enabled) Status.INELIGIBLE else Status.DISABLED,
+                eligibilityIdentity = "appEnabled=${applicationInfo.enabled};hostEnabled=$enabled",
+            ),
         )
     }
 
@@ -284,10 +377,66 @@ object OfflineDocsPluginStateMonitor {
             packageManager.getApplicationInfo(packageName, PackageManager.MATCH_DISABLED_COMPONENTS)
         }
     }.getOrNull()
+
+    private data class Inspection(
+        val state: State,
+        val loadedPlugin: OfflineDocsPluginHost.LoadedPlugin? = null,
+    )
+
+    private data class LoadedPluginSnapshot(
+        val state: State,
+        val plugin: OfflineDocsPluginHost.LoadedPlugin,
+    )
 }
 
 internal object OfflineDocsPluginPackageEventPolicy {
 
     fun shouldIgnore(action: String?, replacing: Boolean): Boolean =
         replacing && (action == Intent.ACTION_PACKAGE_REMOVED || action == Intent.ACTION_PACKAGE_ADDED)
+}
+
+/**
+ * Coordinates asynchronous inspections without allowing a superseded package snapshot to be
+ * published after a newer request. A replacement/data-clear cause survives a following manual
+ * refresh so that an identity-stable package replacement still rebuilds the WebView asset loader.
+ */
+internal class OfflineDocsInspectionRequestGate {
+
+    data class Request(
+        val id: Long,
+        val cause: OfflineDocsPluginStateMonitor.Cause,
+    )
+
+    private val lock = Any()
+    private var latestRequestId = 0L
+    private var lastPublishedRequestId = 0L
+    private var pendingForcedRequest: Request? = null
+
+    fun newRequest(cause: OfflineDocsPluginStateMonitor.Cause): Request = synchronized(lock) {
+        Request(++latestRequestId, cause).also { request ->
+            if (cause.requiresForcedPublication) {
+                pendingForcedRequest = request
+            }
+        }
+    }
+
+    fun isLatest(request: Request): Boolean = synchronized(lock) {
+        request.id == latestRequestId
+    }
+
+    fun resolveCauseForPublication(
+        request: Request,
+    ): OfflineDocsPluginStateMonitor.Cause? = synchronized(lock) {
+        if (request.id != latestRequestId) return@synchronized null
+        val forcedRequest = pendingForcedRequest?.takeIf { forced ->
+            forced.id > lastPublishedRequestId && forced.id <= request.id
+        }
+        lastPublishedRequestId = request.id
+        if (forcedRequest != null) pendingForcedRequest = null
+        forcedRequest?.cause ?: request.cause
+    }
+
+    private val OfflineDocsPluginStateMonitor.Cause.requiresForcedPublication: Boolean
+        get() = this == OfflineDocsPluginStateMonitor.Cause.PACKAGE_REPLACED ||
+                this == OfflineDocsPluginStateMonitor.Cause.PACKAGE_DATA_CLEARED
 }

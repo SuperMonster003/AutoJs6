@@ -16,4 +16,6 @@ object ApkBuilderTemplateCapabilityKeys {
     const val SUPPORTS_TEMPLATE_APK = "supportsTemplateApk"
     const val SUPPORTS_REMOTE_BUILD = "supportsRemoteBuild"
     const val REMOTE_BUILD_PROTOCOL_VERSION = "apkBuilderRemoteBuildProtocolVersion"
+    const val SUPPORTS_KEYSTORE_OPERATIONS = "supportsKeyStoreOperations"
+    const val KEYSTORE_API_VERSION = "apkBuilderKeyStoreApiVersion"
 }

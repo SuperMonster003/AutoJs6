@@ -36,6 +36,12 @@
         <license>BSD 2-Clause License</license>
     </notice>
     <notice>
+        <name>juniversalchardet</name>
+        <url>https://github.com/albfernandez/juniversalchardet</url>
+        <copyright/>
+        <license>Mozilla Public License 1.1</license>
+    </notice>
+    <notice>
         <name>Alipay ZeroSdk</name>
         <copyright>Copyright 2016 Fung Go (fython)</copyright>
         <url>https://github.com/fython/AlipayZeroSdk</url>

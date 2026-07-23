@@ -68,6 +68,7 @@
 * `修復` Paddle OCR 外掛服務長時間執行後可能中斷連線且無法自動復原的問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `修復` Paddle OCR 外掛未處於執行狀態時無法被自動喚醒, 導致功能呼叫或專案打包失敗的問題 _[`issue #517`](http://issues.autojs6.com/517)_
 * `修復` `images.resize(ImageWrapper, width, height)` 錯誤用法會將高度作為 OpenCV 插值參數傳入, 且不相容的原生例外展開可能導致應用程式當機而非回報腳本例外的問題
+* `修復` MediaInfo 外掛媒體庫無法使用或 Binder 呼叫異常時, 檔案管理器媒體詳細資訊可能只顯示 "..." 或導致應用程式當機, 且無法改用 Android 平台中繼資料顯示的問題
 * `修復` 無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修復` 腳本反覆執行後記憶體占用可能持續增加的問題 (試修) _[`issue #548`](http://issues.autojs6.com/548)_
 * `修復` 透過外部 URI 或背景執行腳本時可能無法保留原始路徑, 導致相對路徑解析異常的問題 _[`issue #545`](http://issues.autojs6.com/545)_
@@ -79,6 +80,8 @@
 * `修復` 主頁外掛標籤頁中已安裝外掛的圖示無法隨夜間模式動態切換的問題
 * `修復` 外掛專案發布多個變體時外掛中心可能安裝錯誤變體 APK 的問題
 * `修復` APK Builder Template 外掛可能重複顯示或錯誤提示更新的問題
+* `修復` 離線專案文件外掛更新期間完整性驗證快取可能重複使用舊內容的問題
+* `修復` 檔案管理器 APK 詳細資訊中缺少 Manifest 按鈕及完整多行內容的問題
 * `修復` 檔案管理器在資源回收筒刪除檔案後清單捲動位置被重設的問題
 * `修復` 主頁抽屜開關項的開關檢視有效點選區域過小的問題
 * `修復` 浮動按鈕選單顯示的最近應用程式套件名稱及 Activity 資訊異常的問題 _[`issue #529`](http://issues.autojs6.com/529)_
@@ -98,31 +101,43 @@
 * `最佳化` Node.js 原生驗證支援解析並驗證外部執行階段外掛的原始碼及建置根目錄
 * `最佳化` Node.js 最終整合及發佈閘門在必要報告/目前原始碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
 * `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
+* `最佳化` 檔案管理器將媒體詳細資訊查詢整合為單次 MediaInfo 快照, 減少 Binder 呼叫及等待時間
 * `最佳化` Ace WebView 執行階段/JavaScript bridge/內建語言服務/靜態資源完成外掛化, 降低宿主 APK 耦合並支援獨立安裝及更新
 * `最佳化` 專案離線文件完成外掛化, 降低宿主 APK 體積並支援獨立安裝及更新
+* `最佳化` 離線專案文件首次載入的檔案清單解析及完整 SHA-256 驗證移至背景執行緒, 避免阻塞介面
+* `最佳化` APK 建置所需的 AXML/ARSC/解析/簽章/金鑰儲存區及密碼學工具鏈全部遷入 APK Builder Template 外掛, 宿主改用輕量 APK 資訊檢查
 * `最佳化` 程式碼編輯器引擎選擇尊重使用者明確設定, Ace 無法使用時提供前往外掛中心的入口
 * `最佳化` 程式碼編輯器 "執行" 按鈕點選後變換為 "停止" 按鈕, 可便捷停止腳本
 * `最佳化` 程式碼編輯器完善主題/字型/工具列/唯讀模式/折疊/選取選單等互動體驗
 * `最佳化` 程式碼編輯器完善檔案編碼偵測及儲存安全性, 編碼轉換僅在使用者儲存檔案時寫入磁碟
 * `最佳化` 底部日誌面板支援在獨立日誌頁面點選堆疊幀跳轉至原始碼
 * `最佳化` 專案文件來源切換支援即時生效
+* `最佳化` 檔案管理器僅在點選 Manifest 按鈕後於背景解碼及格式化完整的二進位 AndroidManifest.xml, 並最佳化大文字捲動及雙指縮放效能
 * `最佳化` 外掛中心完善 "排序" 及 "篩選" 對話框的樣式及功能
 * `最佳化` 外掛中心預設顯示常用外掛變體並提供獨立頁面檢視其他變體
 * `最佳化` 外掛中心完善多語言更新日誌/語言快取/官方認證/索引載入等功能
 * `最佳化` 專案字串資源完成多語言翻譯同步/檔案分類/名稱排序及 ASCII 標點規範化
+* `最佳化` 限制 APK 語言資源僅保留專案支援的 10 種設定, 降低安裝套件體積
 * `最佳化` 建置系統支援動態匹配 Kotlin/KSP/AGP/R8 相容版本並降低 Gradle 啟動記憶體壓力
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
+* `依賴` 模組化 APK Signer
+* `依賴` 模組化 ARSCLib 版本 1.3.8
+* `依賴` 模組化 Spongy Castle Prov 版本 1.58.0.0
 * `依賴` 模組化 Image Quantization 版本 2.17.0
 * `依賴` 模組化 OpenCV 版本 4.8.0
 * `依賴` 附加 Apache Commons Codec 版本 1.15
+* `依賴` 附加 juniversalchardet 版本 2.0.4
 * `依賴` 移除 Android Annotations 版本 4.8.0
+* `依賴` 移除 APK Parser 本機模組
 * `依賴` 移除 Glide KSP 版本 5.0.5
+* `依賴` 移除 ICU4J 版本 77.1
 * `依賴` 移除 Jaredrummler Android Device Names 版本 2.1.1
 * `依賴` 移除 JCIP Annotations 版本 1.0
 * `依賴` 移除 Junit Jupiter 版本 5.13.4
 * `依賴` 移除 Retrofit2 Converter Gson 版本 3.0.0
 * `依賴` 移除 Retrofit2 Kotlin Coroutines Adapter 版本 0.9.2
+* `依賴` 移除 Tiny Sign 版本 0.9
 * `依賴` 移除 app 模組重複宣告的 AndroidX Room KTX 版本 2.8.1
 * `依賴` 移除 AndroidX MultiDex 版本 2.0.1
 * `依賴` 移除 MLKit Barcode Scanning 版本 17.3.0

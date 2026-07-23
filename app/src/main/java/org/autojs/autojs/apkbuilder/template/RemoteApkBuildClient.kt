@@ -1,7 +1,10 @@
 package org.autojs.autojs.apkbuilder.template
 
 import android.content.Context
+import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import android.os.RemoteException
+import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -10,18 +13,17 @@ import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
 import org.autojs.plugin.apkbuilder.template.IApkBuildCallback
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.security.MessageDigest
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 object RemoteApkBuildClient {
 
     private const val TAG = "RemoteApkBuildClient"
     private const val WAIT_SLICE_MILLIS = 250L
-    private const val BUFFER_SIZE = 256 * 1024
+    private val SHA_256_HEX = Regex("^[0-9a-fA-F]{64}$")
     const val STATUS_NOT_AVAILABLE = 100
 
     fun interface ProgressListener {
@@ -46,10 +48,15 @@ object RemoteApkBuildClient {
         outApk: File,
         cancelSignal: AtomicBoolean?,
         progressListener: ProgressListener? = null,
+        preferredPluginPackageName: String? = null,
     ): BuildOutcome {
+        val buildStartedAtElapsedMillis = SystemClock.elapsedRealtime()
         val appContext = context.applicationContext
         val hasRemoteBuildPlugin = runBlocking(Dispatchers.IO) {
-            ApkBuilderTemplatePluginHost.hasRemoteBuildPlugin(appContext)
+            ApkBuilderTemplatePluginHost.hasRemoteBuildPlugin(
+                appContext,
+                preferredPackageName = preferredPluginPackageName,
+            )
         }
         if (!hasRemoteBuildPlugin) {
             return BuildOutcome(
@@ -75,55 +82,182 @@ object RemoteApkBuildClient {
             },
         )
         try {
-            val callback = Callback(progressListener)
+            val callback = Callback(progressListener, SystemClock::elapsedRealtime)
             val opened = runBlocking(Dispatchers.IO) {
-                ApkBuilderTemplatePluginHost.openBuildSession(appContext, prepared.request, callback)
+                ApkBuilderTemplatePluginHost.openBuildSession(
+                    appContext,
+                    prepared.request,
+                    callback,
+                    preferredPluginPackageName,
+                )
             } ?: return BuildOutcome(
                 status = STATUS_NOT_AVAILABLE,
                 warnings = unavailableWarningsBlocking(appContext),
             )
 
             val session = opened.session
+            val sessionBinder = session.asBinder()
+            val binderLost = AtomicBoolean(!sessionBinder.isBinderAlive)
+            val deathRecipient = IBinder.DeathRecipient {
+                binderLost.set(true)
+                callback.wakeWaiter()
+            }
+            var deathRecipientLinked = false
             try {
-                session.start()
-                while (!callback.await(WAIT_SLICE_MILLIS)) {
+                if (!binderLost.get()) {
+                    try {
+                        sessionBinder.linkToDeath(deathRecipient, 0)
+                        deathRecipientLinked = true
+                        if (!sessionBinder.isBinderAlive) {
+                            binderLost.set(true)
+                        }
+                    } catch (error: RemoteException) {
+                        Log.w(TAG, "Remote build session binder is already dead.", error)
+                        binderLost.set(true)
+                    }
+                }
+                if (binderLost.get()) {
+                    return failedSessionOutcome(
+                        "Remote APK build session was lost before it could start.",
+                        opened.hostCompatibilityWarnings,
+                    )
+                }
+                runCatching { session.start() }.onFailure { error ->
+                    Log.w(TAG, "Failed to start remote APK build session.", error)
+                    if (error is RemoteException || !sessionBinder.isBinderAlive) {
+                        binderLost.set(true)
+                    }
+                }.exceptionOrNull()?.let { error ->
+                    return failedSessionOutcome(
+                        if (binderLost.get()) {
+                            "Remote APK build session was lost while starting."
+                        } else {
+                            "Failed to start remote APK build session: ${error.message ?: error}"
+                        },
+                        opened.hostCompatibilityWarnings,
+                    )
+                }
+
+                while (true) {
+                    val terminalCallbackReceived = try {
+                        callback.await(WAIT_SLICE_MILLIS)
+                    } catch (_: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        runCatching { session.cancel() }
+                            .onFailure { Log.w(TAG, "Failed to cancel interrupted remote build session", it) }
+                        return BuildOutcome(status = ApkBuildResult.STATUS_CANCELLED)
+                    }
+                    if (terminalCallbackReceived) {
+                        break
+                    }
                     if (cancelSignal?.get() == true || Thread.currentThread().isInterrupted) {
                         runCatching { session.cancel() }
                             .onFailure { Log.w(TAG, "Failed to cancel remote build session", it) }
                         return BuildOutcome(status = ApkBuildResult.STATUS_CANCELLED)
                     }
-                }
-                val result = callback.result ?: return BuildOutcome(
-                    status = ApkBuildResult.STATUS_FAILED,
-                    errors = listOf("Remote APK build finished without a result."),
-                )
-                return handleResult(context, result, outApk, progressListener, opened.hostCompatibilityWarnings)
-            } finally {
-                callback.result?.takeIf { it.status == ApkBuildResult.STATUS_OK }?.let {
-                    progressListener?.onProgress(
-                        ApkBuildProgress(
-                            step = ApkBuildProgress.STEP_CLEAN,
-                            title = context.getString(org.autojs.autojs6.R.string.text_cleaning_workspace),
-                            detail = null,
+                    when (
+                        RemoteBuildWaitPolicy.evaluate(
+                            nowElapsedMillis = SystemClock.elapsedRealtime(),
+                            startedAtElapsedMillis = buildStartedAtElapsedMillis,
+                            lastActivityElapsedMillis = callback.lastActivityElapsedMillis(),
+                            binderAlive = !binderLost.get() && sessionBinder.isBinderAlive,
                         )
+                    ) {
+                        RemoteBuildWaitPolicy.Decision.CONTINUE -> Unit
+                        RemoteBuildWaitPolicy.Decision.BINDER_LOST -> {
+                            return failedSessionOutcome(
+                                "Remote APK build session was lost before completion.",
+                                opened.hostCompatibilityWarnings,
+                            )
+                        }
+                        RemoteBuildWaitPolicy.Decision.NO_PROGRESS_TIMEOUT -> {
+                            runCatching { session.cancel() }
+                                .onFailure { Log.w(TAG, "Failed to cancel stalled remote build session", it) }
+                            return failedSessionOutcome(
+                                "Remote APK build made no progress for 12 minutes and was cancelled.",
+                                opened.hostCompatibilityWarnings,
+                            )
+                        }
+                        RemoteBuildWaitPolicy.Decision.TOTAL_TIMEOUT -> {
+                            runCatching { session.cancel() }
+                                .onFailure { Log.w(TAG, "Failed to cancel timed-out remote build session", it) }
+                            return failedSessionOutcome(
+                                "Remote APK build exceeded the 30-minute total time limit and was cancelled.",
+                                opened.hostCompatibilityWarnings,
+                            )
+                        }
+                    }
+                }
+                val result = callback.result ?: return if (binderLost.get() || !sessionBinder.isBinderAlive) {
+                    failedSessionOutcome(
+                        "Remote APK build session was lost before returning a result.",
+                        opened.hostCompatibilityWarnings,
+                    )
+                } else {
+                    failedSessionOutcome(
+                        "Remote APK build finished without a result.",
+                        opened.hostCompatibilityWarnings,
                     )
                 }
+                return handleResult(
+                    context = context,
+                    result = result,
+                    outApk = outApk,
+                    cancelSignal = cancelSignal,
+                    progressListener = progressListener,
+                    hostCompatibilityWarnings = opened.hostCompatibilityWarnings,
+                )
+            } finally {
+                if (deathRecipientLinked) {
+                    runCatching {
+                        sessionBinder.unlinkToDeath(deathRecipient, 0)
+                    }.onFailure {
+                        Log.d(TAG, "Remote build death recipient was already unlinked.", it)
+                    }
+                }
+                runCatching {
+                    callback.result?.takeIf { it.status == ApkBuildResult.STATUS_OK }?.let {
+                        progressListener?.onProgress(
+                            ApkBuildProgress(
+                                step = ApkBuildProgress.STEP_CLEAN,
+                                title = context.getString(org.autojs.autojs6.R.string.text_cleaning_workspace),
+                                detail = null,
+                            )
+                        )
+                    }
+                }.onFailure { Log.w(TAG, "Failed to report remote build cleanup progress.", it) }
                 runCatching { session.close() }
+                    .onFailure { Log.w(TAG, "Failed to close remote build session.", it) }
+                runCatching { opened.bindingLease.close() }
+                    .onFailure { Log.w(TAG, "Failed to release remote build plugin binding lease.", it) }
             }
         } finally {
             prepared.cleanup()
         }
     }
 
+    private fun failedSessionOutcome(message: String, warnings: List<String>): BuildOutcome {
+        return BuildOutcome(
+            status = ApkBuildResult.STATUS_FAILED,
+            warnings = warnings,
+            errors = listOf(message),
+        )
+    }
+
     private fun handleResult(
         context: Context,
         result: ApkBuildResult,
         outApk: File,
+        cancelSignal: AtomicBoolean?,
         progressListener: ProgressListener?,
         hostCompatibilityWarnings: List<String>,
     ): BuildOutcome {
         val warnings = (hostCompatibilityWarnings + result.warnings).filter { it.isNotBlank() }.distinct()
         if (result.status != ApkBuildResult.STATUS_OK) {
+            result.outputApkFd?.let { outputFd ->
+                runCatching(outputFd::close)
+                    .onFailure { Log.w(TAG, "Failed to close unexpected remote build output fd.", it) }
+            }
             return BuildOutcome(
                 status = result.status,
                 warnings = warnings,
@@ -138,34 +272,57 @@ object RemoteApkBuildClient {
             errors = result.errors + "Remote APK build completed without an output APK.",
             updatedProjectConfigJson = result.updatedProjectConfigJson,
         )
-
-        outApk.parentFile?.let { parent ->
-            if (!parent.exists()) {
-                parent.mkdirs()
-            }
-        }
-        progressListener?.onProgress(
-            ApkBuildProgress(
-                step = ApkBuildProgress.STEP_SIGN,
-                title = context.getString(org.autojs.autojs6.R.string.text_writing_signed_apk),
-                detail = outApk.path,
-            )
-        )
-        copyOutput(outputFd, outApk)
-
         val expectedSha256 = result.outputSha256
-        if (!expectedSha256.isNullOrBlank()) {
-            val actualSha256 = sha256(outApk)
-            if (!expectedSha256.equals(actualSha256, ignoreCase = true)) {
-                outApk.delete()
-                return BuildOutcome(
-                    status = ApkBuildResult.STATUS_FAILED,
-                    warnings = warnings,
-                    errors = result.errors + "Remote output APK SHA-256 mismatch: expected=$expectedSha256 actual=$actualSha256",
-                    updatedProjectConfigJson = result.updatedProjectConfigJson,
-                )
-            }
+        if (expectedSha256 == null || !SHA_256_HEX.matches(expectedSha256)) {
+            runCatching(outputFd::close)
+                .onFailure { Log.w(TAG, "Failed to close remote output with an invalid SHA-256.", it) }
+            return BuildOutcome(
+                status = ApkBuildResult.STATUS_FAILED,
+                warnings = warnings,
+                errors = result.errors + "Remote APK build returned a missing or invalid output SHA-256.",
+                updatedProjectConfigJson = result.updatedProjectConfigJson,
+            )
         }
+
+        val transferError = try {
+            progressListener?.onProgress(
+                ApkBuildProgress(
+                    step = ApkBuildProgress.STEP_SIGN,
+                    title = context.getString(org.autojs.autojs6.R.string.text_writing_signed_apk),
+                    detail = outApk.path,
+                )
+            )
+            copyOutput(
+                outputFd = outputFd,
+                outApk = outApk,
+                declaredSizeBytes = result.outputSizeBytes,
+                expectedSha256 = expectedSha256,
+                cancelSignal = cancelSignal,
+            )
+            null
+        } catch (error: Throwable) {
+            error
+        } finally {
+            runCatching(outputFd::close)
+                .onFailure { Log.w(TAG, "Failed to close remote build output fd.", it) }
+        }
+        if (transferError is CancellationException) {
+            return BuildOutcome(
+                status = ApkBuildResult.STATUS_CANCELLED,
+                warnings = warnings,
+                errors = result.errors,
+                updatedProjectConfigJson = result.updatedProjectConfigJson,
+            )
+        }
+        transferError?.let { error ->
+            return BuildOutcome(
+                status = ApkBuildResult.STATUS_FAILED,
+                warnings = warnings,
+                errors = result.errors + "Failed to receive remote output APK: ${error.message ?: error}",
+                updatedProjectConfigJson = result.updatedProjectConfigJson,
+            )
+        }
+
         progressListener?.onProgress(
             ApkBuildProgress(
                 step = ApkBuildProgress.STEP_SIGN,
@@ -182,43 +339,44 @@ object RemoteApkBuildClient {
         )
     }
 
-    private fun copyOutput(outputFd: ParcelFileDescriptor, outApk: File) {
+    private fun copyOutput(
+        outputFd: ParcelFileDescriptor,
+        outApk: File,
+        declaredSizeBytes: Long,
+        expectedSha256: String?,
+        cancelSignal: AtomicBoolean?,
+    ) {
         ParcelFileDescriptor.AutoCloseInputStream(outputFd).use { input ->
-            FileOutputStream(outApk, false).use { output ->
-                input.copyTo(output, BUFFER_SIZE)
-                output.flush()
-                output.fd.sync()
-            }
+            RemoteBuildOutputTransport.copyToFile(
+                input = input,
+                outputFile = outApk,
+                declaredSizeBytes = declaredSizeBytes,
+                expectedSha256 = expectedSha256,
+                isCancelled = { cancelSignal?.get() == true },
+            )
         }
-    }
-
-    private fun sha256(file: File): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        FileInputStream(file).use { input ->
-            val buffer = ByteArray(BUFFER_SIZE)
-            while (true) {
-                val read = input.read(buffer)
-                if (read < 0) {
-                    break
-                }
-                digest.update(buffer, 0, read)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
 
     private class Callback(
         private val progressListener: ProgressListener?,
+        private val elapsedRealtime: () -> Long,
     ) : IApkBuildCallback.Stub() {
 
         private val latch = CountDownLatch(1)
         private val completed = AtomicBoolean(false)
+        private val lastActivityElapsedMillis = AtomicLong(elapsedRealtime())
 
         @Volatile
         var result: ApkBuildResult? = null
             private set
 
         fun await(timeoutMillis: Long): Boolean = latch.await(timeoutMillis, TimeUnit.MILLISECONDS)
+
+        fun lastActivityElapsedMillis(): Long = lastActivityElapsedMillis.get()
+
+        fun wakeWaiter() {
+            latch.countDown()
+        }
 
         override fun onStarted(progress: ApkBuildProgress) {
             notifyProgress(progress)
@@ -250,12 +408,14 @@ object RemoteApkBuildClient {
 
         private fun notifyProgress(progress: ApkBuildProgress) {
             if (!completed.get()) {
+                lastActivityElapsedMillis.set(elapsedRealtime())
                 progressListener?.onProgress(progress)
             }
         }
 
         private fun complete(result: ApkBuildResult) {
             if (completed.compareAndSet(false, true)) {
+                lastActivityElapsedMillis.set(elapsedRealtime())
                 this.result = result
                 latch.countDown()
             }

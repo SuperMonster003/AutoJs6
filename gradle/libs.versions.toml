@@ -62,7 +62,6 @@ flexmark-html2md = "0.64.8"
 foojay-resolver-convention = "1.0.0"
 glide = "5.0.5"
 gson = "2.13.2"
-icu4j = "77.1"
 interpolator = "1.0.0"
 jdeferred = "1.2.6"
 joda-time = "2.14.0"
@@ -70,6 +69,7 @@ jsoup = "1.21.2"
 junit = "4.13.2"
 junit-quickcheck-core = "1.0"
 junit-quickcheck-generators = "1.0"
+juniversalchardet = "2.0.4"
 kotlin-csv-jvm = "1.10.0"
 leakcanary = "2.14"
 licensesdialog = "2.2.0"
@@ -128,7 +128,6 @@ flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbo
 flexmark-html2md = { module = "com.vladsch.flexmark:flexmark-html2md-converter", version.ref = "flexmark-html2md" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-icu4j = { module = "com.ibm.icu:icu4j", version.ref = "icu4j" }
 interpolator = { group = "androidx.interpolator", name = "interpolator", version.ref = "interpolator" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 jdeferred = { module = "org.jdeferred:jdeferred-android-aar", version.ref = "jdeferred" }
@@ -137,6 +136,7 @@ jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 junit = { module = "junit:junit", version.ref = "junit" }
 junit-quickcheck-core = { module = "com.pholser:junit-quickcheck-core", version.ref = "junit-quickcheck-core" }
 junit-quickcheck-generators = { module = "com.pholser:junit-quickcheck-generators", version.ref = "junit-quickcheck-generators" }
+juniversalchardet = { module = "com.github.albfernandez:juniversalchardet", version.ref = "juniversalchardet" }
 kotlin-csv-jvm = { module = "com.github.doyaaaaaken:kotlin-csv-jvm", version.ref = "kotlin-csv-jvm" }
 ksp-version-codes-processor = { module = "logic:ksp-version-codes-processor" }
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
