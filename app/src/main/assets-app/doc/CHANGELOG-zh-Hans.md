@@ -18,6 +18,7 @@
 * `新增` Node.js 外部运行时插件后端支持请求级工作区归档传输 v2, 包含显式输入映射/输出回写/删除 tombstone 清单, 且不扫描宿主沙盒
 * `新增` 打包功能支持 Node.js 脚本项目, 并自动包含所需运行库
 * `新增` 插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本转换/媒体信息等扩展接口
+* `新增` 插件系统支持离线项目文档扩展接口
 * `新增` 插件中心支持全局设置页面及使用说明页面
 * `新增` 插件中心支持 SDK 插件自动挂载功能
 * `新增` 插件中心支持多变体优先级排序功能
@@ -98,6 +99,7 @@
 * `优化` Node.js 最终集成及发布门禁在所需报告/当前源码证据/生产验收产物缺失或过期时采用 fail-closed 策略
 * `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
 * `优化` Ace WebView 运行时/JavaScript bridge/内置语言服务/静态资源完成插件化, 降低宿主 APK 耦合并支持独立安装及更新
+* `优化` 项目离线文档完成插件化, 降低宿主 APK 体积并支持独立安装及更新
 * `优化` 代码编辑器引擎选择尊重用户显式设置, Ace 不可用时提供插件中心跳转入口
 * `优化` 代码编辑器 "运行" 按钮点击后变换为 "停止" 按钮, 可便捷停止脚本
 * `优化` 代码编辑器完善主题/字体/工具栏/只读模式/折叠/选择菜单等交互体验

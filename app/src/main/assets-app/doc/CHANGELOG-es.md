@@ -18,6 +18,7 @@
 * `Nuevo` El backend del plugin de runtime Node.js externo admite el transporte de archivo de espacio de trabajo v2 por solicitud, con mapeo explícito de entradas, escritura de resultados y manifiesto tombstone de eliminación, sin escanear el sandbox del host
 * `Nuevo` La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias
 * `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversión de texto/información multimedia y más
+* `Nuevo` El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión
 * `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
 * `Nuevo` El Centro de plugins admite el montaje automático de plugins SDK
 * `Nuevo` El Centro de plugins admite la ordenación por prioridad de múltiples variantes
@@ -98,6 +99,7 @@
 * `Mejora` Las puertas de integración final y lanzamiento de Node.js aplican fail-closed cuando faltan o están obsoletos los informes requeridos, las evidencias de las fuentes actuales o los artefactos de aceptación de producción
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` Modularizados como plugin instalable por separado el runtime WebView de Ace/el bridge JavaScript/los servicios de lenguaje integrados/los recursos estáticos, reduciendo el acoplamiento con el APK anfitrión y permitiendo actualizaciones independientes
+* `Mejora` Modularizada la documentación del proyecto sin conexión como plugin, reduciendo el tamaño del APK anfitrión y permitiendo su instalación y actualización independientes
 * `Mejora` La selección del motor del editor respeta las elecciones explícitas del usuario y ofrece acceso al Centro de plugins cuando Ace no está disponible
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
 * `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más

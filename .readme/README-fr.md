@@ -178,6 +178,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Le backend du plugin d'exécution Node.js externe prend en charge le transport d'archive d'espace de travail v2 limité à la requête, avec mappage explicite des entrées, réécriture des sorties et manifeste tombstone de suppression, sans analyser le sandbox hôte
 * `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
 * `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversion de texte/informations multimédias et plus encore
+* `Fonctionnalité` Le système de plugins prend en charge une interface d'extension pour la documentation hors ligne du projet
 * `Fonctionnalité` Le Centre des plugins propose une page de paramètres globaux et une page d'instructions
 * `Fonctionnalité` Le Centre des plugins prend en charge le montage automatique des plugins SDK
 * `Fonctionnalité` Le Centre des plugins prend en charge le tri par priorité de plusieurs variantes
@@ -258,6 +259,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Les portes d'intégration finale et de livraison Node.js appliquent une stratégie fail-closed lorsque des rapports requis, des preuves correspondant aux sources actuelles ou des artefacts d'acceptation en production sont absents ou périmés
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Modularisation du runtime WebView Ace/du bridge JavaScript/des services de langage intégrés/des ressources statiques sous forme de plugin installable séparément, afin de réduire le couplage avec l'APK hôte et de permettre des mises à jour indépendantes
+* `Amélioration` Modularisation de la documentation hors ligne du projet sous forme de plugin, afin de réduire la taille de l'APK hôte et de permettre une installation et des mises à jour indépendantes
 * `Amélioration` La sélection du moteur de l'éditeur respecte les choix explicites de l'utilisateur et propose un accès au Centre de plugins lorsqu'Ace est indisponible
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
 * `Amélioration` Amélioration des interactions de l'éditeur de code pour les thèmes/polices/barres d'outils/mode lecture seule/pliage/menus de sélection et plus encore
