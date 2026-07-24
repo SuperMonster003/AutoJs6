@@ -189,6 +189,22 @@ function main() {
     assert.strictEqual(underDurationResult.ready, false);
     assert(underDurationResult.blockers.some((message) => message.includes("below 24h")));
 
+    const malformedSoakNumberTypes = validSoakReport(SOAK_REQUIREMENTS[0]);
+    malformedSoakNumberTypes.durationHours = String(malformedSoakNumberTypes.durationHours);
+    malformedSoakNumberTypes.durationMs = [malformedSoakNumberTypes.durationMs];
+    malformedSoakNumberTypes.startedAtEpochMs = String(malformedSoakNumberTypes.startedAtEpochMs);
+    malformedSoakNumberTypes.endedAtEpochMs = [malformedSoakNumberTypes.endedAtEpochMs];
+    writeJson(root, SOAK_REQUIREMENTS[0].relative, malformedSoakNumberTypes);
+    const malformedSoakNumberTypesResult =
+      evaluateSoakReport(root, SOAK_REQUIREMENTS[0], identity, root);
+    assert.strictEqual(malformedSoakNumberTypesResult.ready, false);
+    assert(malformedSoakNumberTypesResult.blockers.some((message) =>
+      message.includes("durationHours must be a finite number")));
+    assert(malformedSoakNumberTypesResult.blockers.some((message) =>
+      message.includes("durationMs must be a finite number")));
+    assert(malformedSoakNumberTypesResult.blockers.some((message) =>
+      message.includes("wall-clock interval")));
+
     const missingTimelineRequirement = SOAK_REQUIREMENTS[0];
     const missingTimeline = validSoakReport(missingTimelineRequirement);
     delete missingTimeline.startedAtEpochMs;
@@ -281,6 +297,101 @@ function main() {
     const missingCleanupResult = evaluateSoakReport(root, missingCleanupRequirement, identity, root);
     assert.strictEqual(missingCleanupResult.ready, false);
     assert(missingCleanupResult.blockers.some((message) => message.includes("cleanup.complete must be true")));
+
+    const invalidWakeLockRequirement = SOAK_REQUIREMENTS[0];
+    const invalidWakeLock = validSoakReport(invalidWakeLockRequirement);
+    invalidWakeLock.configuration.wakeLockPolicy = "none";
+    invalidWakeLock.configuration.wakeLockTimeoutMs = invalidWakeLock.durationMs - 1;
+    invalidWakeLock.configuration.cycleTimeoutMs = 60_000;
+    invalidWakeLock.cleanup.wakeLockAcquired = false;
+    invalidWakeLock.cleanup.wakeLockHeldUntilCompletion = false;
+    invalidWakeLock.cleanup.wakeLockReleased = false;
+    invalidWakeLock.powerManagement.suspendDurationMs = 5_000;
+    writeJson(root, invalidWakeLockRequirement.relative, invalidWakeLock);
+    const invalidWakeLockResult = evaluateSoakReport(root, invalidWakeLockRequirement, identity, root);
+    assert.strictEqual(invalidWakeLockResult.ready, false);
+    assert(invalidWakeLockResult.blockers.some((message) => message.includes("wakeLockPolicy must be bounded_partial")));
+    assert(invalidWakeLockResult.blockers.some((message) => message.includes("wakeLockTimeoutMs must equal")));
+    assert(invalidWakeLockResult.blockers.some((message) => message.includes("cycleTimeoutMs must be 15000")));
+    assert(invalidWakeLockResult.blockers.some((message) => message.includes("wakeLockAcquired must be true")));
+    assert(invalidWakeLockResult.blockers.some((message) => message.includes("wakeLockHeldUntilCompletion must be true")));
+    assert(invalidWakeLockResult.blockers.some((message) => message.includes("wakeLockReleased must be true")));
+    assert(invalidWakeLockResult.blockers.some((message) => message.includes("suspendDurationMs must be an exact value")));
+
+    const malformedWakeLockEnums = validSoakReport(invalidWakeLockRequirement);
+    malformedWakeLockEnums.configuration.wakeLockPolicy = ["bounded_partial"];
+    malformedWakeLockEnums.powerManagement.wakeLockType = ["partial"];
+    writeJson(root, invalidWakeLockRequirement.relative, malformedWakeLockEnums);
+    const malformedWakeLockEnumsResult =
+      evaluateSoakReport(root, invalidWakeLockRequirement, identity, root);
+    assert.strictEqual(malformedWakeLockEnumsResult.ready, false);
+    assert(malformedWakeLockEnumsResult.blockers.some((message) =>
+      message.includes("wakeLockPolicy must be bounded_partial")));
+    assert(malformedWakeLockEnumsResult.blockers.some((message) =>
+      message.includes("wakeLockType must be partial")));
+
+    const optionalProcRequirement = SOAK_REQUIREMENTS[0];
+    const optionalProc = validSoakReport(optionalProcRequirement);
+    const optionalProcSample = optionalProc.samples[1];
+    optionalProcSample.remoteProcCaptureStatus = "unavailable_but_plugin_alive";
+    optionalProcSample.procMetricsAvailable = false;
+    optionalProcSample.procRssKb = null;
+    optionalProcSample.procThreadCount = null;
+    optionalProcSample.remoteProcCaptureAttempts = 5;
+    optionalProcSample.remoteProcCaptureFailure = "transient cross-UID proc visibility failure";
+    optionalProcSample.remoteProcFallbackLiveness = {
+      cycle: optionalProcSample.cycle,
+      checkedAtEpochMs: optionalProcSample.capturedAtEpochMs,
+      mode: "non_destructive_binder_session_health_and_recoverability",
+      passed: true,
+      runtimeReady: true,
+      persistentProcessRuntime: true,
+      trigger: "remote_proc_probe_unavailable",
+      probeFailure: optionalProcSample.remoteProcCaptureFailure,
+      servicePid: optionalProcSample.servicePid,
+      hostSessionGeneration: optionalProcSample.pluginSessionGeneration,
+    };
+    writeJson(root, optionalProcRequirement.relative, optionalProc);
+    const optionalProcResult = evaluateSoakReport(root, optionalProcRequirement, identity, root);
+    assert.strictEqual(optionalProcResult.ready, true, optionalProcResult.blockers.join("; "));
+
+    const invalidProcFallback = JSON.parse(JSON.stringify(optionalProc));
+    invalidProcFallback.samples[1].remoteProcFallbackLiveness.servicePid += 1;
+    writeJson(root, optionalProcRequirement.relative, invalidProcFallback);
+    const invalidProcFallbackResult = evaluateSoakReport(root, optionalProcRequirement, identity, root);
+    assert.strictEqual(invalidProcFallbackResult.ready, false);
+    assert(invalidProcFallbackResult.blockers.some((message) => message.includes("matching live Binder identity")));
+
+    const malformedProcEnums = JSON.parse(JSON.stringify(optionalProc));
+    malformedProcEnums.samples[0].remoteProcCaptureStatus = ["captured"];
+    malformedProcEnums.samples[1].remoteProcFallbackLiveness.mode = [
+      "non_destructive_binder_session_health_and_recoverability",
+    ];
+    malformedProcEnums.samples[1].remoteProcFallbackLiveness.trigger = [
+      "remote_proc_probe_unavailable",
+    ];
+    writeJson(root, optionalProcRequirement.relative, malformedProcEnums);
+    const malformedProcEnumsResult =
+      evaluateSoakReport(root, optionalProcRequirement, identity, root);
+    assert.strictEqual(malformedProcEnumsResult.ready, false);
+    assert(malformedProcEnumsResult.blockers.some((message) =>
+      message.includes("remoteProcCaptureStatus is invalid")));
+    assert(malformedProcEnumsResult.blockers.some((message) =>
+      message.includes("matching live Binder identity")));
+
+    const invalidCapturedProc = validSoakReport(optionalProcRequirement);
+    invalidCapturedProc.samples[1].procRssKb = null;
+    writeJson(root, optionalProcRequirement.relative, invalidCapturedProc);
+    const invalidCapturedProcResult = evaluateSoakReport(root, optionalProcRequirement, identity, root);
+    assert.strictEqual(invalidCapturedProcResult.ready, false);
+    assert(invalidCapturedProcResult.blockers.some((message) => message.includes("procRssKb must be a non-negative")));
+
+    const nullSuspend = validSoakReport(optionalProcRequirement);
+    nullSuspend.powerManagement.suspendDurationMs = null;
+    writeJson(root, optionalProcRequirement.relative, nullSuspend);
+    const nullSuspendResult = evaluateSoakReport(root, optionalProcRequirement, identity, root);
+    assert.strictEqual(nullSuspendResult.ready, false);
+    assert(nullSuspendResult.blockers.some((message) => message.includes("suspendDurationMs must be an exact value")));
 
     const fakeLivenessRequirement = SOAK_REQUIREMENTS[0];
     const fakeLiveness = validSoakReport(fakeLivenessRequirement);
@@ -518,9 +629,14 @@ function validSoakReport(requirement) {
     endedAtEpochMs: startedAtEpochMs + durationMs,
     runToken: "B".repeat(64),
     configuration: {
+      durationMs,
       sampleIntervalMs: 300_000,
       minimumRequiredSamples: sampleCount,
       livenessRecoverabilityEveryCycles: sampleCount,
+      cycleTimeoutMs: 15_000,
+      wakeLockPolicy: "bounded_partial",
+      wakeLockTimeoutMs: durationMs + 15 * 60_000,
+      wakeLockGraceMs: 15 * 60_000,
     },
     plugin: {
       packageName: "io.github.supermonster003.autojs6.plugin.nodejs",
@@ -539,6 +655,15 @@ function validSoakReport(requirement) {
       propertiesRestored: true,
       pluginHostInvalidated: true,
       workDirectoryDeleted: true,
+      wakeLockAcquired: true,
+      wakeLockHeldUntilCompletion: true,
+      wakeLockReleased: true,
+    },
+    powerManagement: {
+      wakeLockType: "partial",
+      wakeLockHeldElapsedMs: durationMs,
+      wakeLockHeldUptimeMs: durationMs,
+      suspendDurationMs: 0,
     },
     analysis: {
       monotonicLeak: false,
@@ -987,6 +1112,11 @@ function assertSoakFreshBuildContracts(root) {
     cycleDelayMs: 30_000,
     livenessRecoverabilityEveryCycles: 20,
   });
+  assert(args.includes("--no-daemon"), "production soak must use a dedicated single-use Gradle daemon");
+  assert(
+    args.includes("-Pkotlin.compiler.execution.strategy=in-process"),
+    "production soak must avoid a second long-lived Kotlin compiler daemon",
+  );
   assert(args.includes("--rerun-tasks"), "production soak connected builds must force task reruns");
   const artifact = path.join(root, "stale-connected-build.apk");
   fs.writeFileSync(artifact, "stale");
@@ -1035,6 +1165,13 @@ function soakSample(sequence, capturedAtEpochMs, elapsedMs) {
     libuvHandleCount: 2,
     activeBridgeResourceCount: 0,
     freshExecutionState: true,
+    remoteProcCaptureStatus: "captured",
+    procMetricsAvailable: true,
+    procRssKb: 64_000,
+    procThreadCount: 12,
+    remoteProcCaptureAttempts: 1,
+    remoteProcCaptureFailure: null,
+    remoteProcFallbackLiveness: null,
     capturedAtEpochMs,
     elapsedMs,
   };

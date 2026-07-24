@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.os.Build
 import android.os.Environment
+import android.os.PowerManager
 import android.os.Process
 import android.os.SystemClock
 import android.provider.MediaStore
@@ -70,9 +71,10 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             if (kind == KIND_SMOKE) SMOKE_LIVENESS_RECOVERABILITY_EVERY_CYCLES else DEFAULT_LIVENESS_RECOVERABILITY_EVERY_CYCLES,
         ).coerceAtLeast(1)
         val minimumRequiredSamples = minimumRequiredSamples(kind, durationMs, sampleIntervalMs)
-        val startWallMs = System.currentTimeMillis()
-        val startElapsedMs = SystemClock.elapsedRealtime()
-        val deadlineMs = startElapsedMs + durationMs
+        var startWallMs = 0L
+        var startElapsedMs = 0L
+        var startUptimeMs = 0L
+        var deadlineMs = 0L
         val samples = JSONArray()
         val runs = JSONArray()
         val failures = JSONArray()
@@ -84,7 +86,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             .put("status", "running")
             .put("packageName", context.packageName)
             .put("generatedAt", JSONObject.NULL)
-            .put("startedAtEpochMs", startWallMs)
+            .put("startedAtEpochMs", JSONObject.NULL)
             .put("device", deviceJson())
             .put("identity", JSONObject())
             .put("artifacts", JSONObject())
@@ -96,7 +98,11 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                     .put("maximumSampleIntervalMs", MAX_SAMPLE_INTERVAL_MS)
                     .put("minimumRequiredSamples", minimumRequiredSamples)
                     .put("cycleDelayMs", cycleDelayMs)
+                    .put("cycleTimeoutMs", CYCLE_TIMEOUT_MS)
                     .put("livenessRecoverabilityEveryCycles", livenessRecoverabilityEveryCycles)
+                    .put("wakeLockPolicy", WAKE_LOCK_POLICY)
+                    .put("wakeLockTimeoutMs", durationMs + WAKE_LOCK_GRACE_MS)
+                    .put("wakeLockGraceMs", WAKE_LOCK_GRACE_MS)
                     .put("releaseFlavor", BuildConfig.NODEJS_RELEASE_FLAVOR)
                     .put("backend", BuildConfig.NODEJS_RUNTIME_BACKEND)
                     .put("pluginRequired", true)
@@ -129,7 +135,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             File(this, "state.cjs").writeText("module.exports = { count: 0 };\n")
         }
         var cycles = 0
-        var nextSampleAt = startElapsedMs
+        var nextSampleAt = 0L
         var previousResult: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null
         var firstIdentity: RuntimeIdentity? = null
         var lastCycle: CycleResult? = null
@@ -140,6 +146,8 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         var runtimeFailure = false
         var slotFailure = false
         var orphanProcess = true
+        var wakeLock: PowerManager.WakeLock? = null
+        var wakeLockAcquired = false
         var thrown: Throwable? = null
 
         fun recordCleanupFailure(metric: String, error: Throwable) {
@@ -156,6 +164,26 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         }
 
         try {
+            val acquiredWakeLock = (context.getSystemService(Context.POWER_SERVICE) as PowerManager)
+                .newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK,
+                    "${context.packageName}:node-r6-persistent-plugin-soak",
+                )
+                .apply {
+                    setReferenceCounted(false)
+                }
+            wakeLock = acquiredWakeLock
+            acquiredWakeLock.acquire(durationMs + WAKE_LOCK_GRACE_MS)
+            check(acquiredWakeLock.isHeld) {
+                "Failed to acquire the bounded R6 soak partial wake lock."
+            }
+            wakeLockAcquired = true
+            startWallMs = System.currentTimeMillis()
+            startElapsedMs = SystemClock.elapsedRealtime()
+            startUptimeMs = SystemClock.uptimeMillis()
+            deadlineMs = startElapsedMs + durationMs
+            nextSampleAt = startElapsedMs
+            report.put("startedAtEpochMs", startWallMs)
             System.setProperty(NODE_BACKEND_PROPERTY, "plugin")
             System.setProperty(PLUGIN_RUNTIME_ENABLED_PROPERTY, "true")
             System.setProperty(PLUGIN_RUNTIME_REQUIRED_PROPERTY, "true")
@@ -191,7 +219,14 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
 
                 val now = SystemClock.elapsedRealtime()
                 if (cycles == 1 || now >= nextSampleAt || now + cycleDelayMs >= deadlineMs) {
-                    samples.put(captureRemoteSample(cycle, startElapsedMs))
+                    samples.put(
+                        captureRemoteSample(
+                            cycle = cycle,
+                            startElapsedMs = startElapsedMs,
+                            preflight = preflight,
+                            identity = checkNotNull(firstIdentity),
+                        ),
+                    )
                     lastSampledCycle = cycles
                     do {
                         nextSampleAt += sampleIntervalMs
@@ -210,7 +245,14 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
 
             val finalCycle = checkNotNull(lastCycle)
             if (lastSampledCycle != cycles) {
-                samples.put(captureRemoteSample(finalCycle, startElapsedMs))
+                samples.put(
+                    captureRemoteSample(
+                        cycle = finalCycle,
+                        startElapsedMs = startElapsedMs,
+                        preflight = preflight,
+                        identity = checkNotNull(firstIdentity),
+                    ),
+                )
             }
             if (livenessRecoverabilityDetails.length() == 0 || cycles % livenessRecoverabilityEveryCycles != 0) {
                 livenessRecoverabilityDetails.put(
@@ -243,6 +285,28 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                     .put("message", error.message.orEmpty()),
             )
         } finally {
+            val endWallMs = if (wakeLockAcquired) System.currentTimeMillis() else 0L
+            val endElapsedMs = if (wakeLockAcquired) SystemClock.elapsedRealtime() else 0L
+            val endUptimeMs = if (wakeLockAcquired) SystemClock.uptimeMillis() else 0L
+            val wakeLockHeldUntilCompletion = wakeLockAcquired && wakeLock?.isHeld == true
+            val wakeLockHeldElapsedMs = if (wakeLockAcquired) {
+                (endElapsedMs - startElapsedMs).coerceAtLeast(0L)
+            } else {
+                0L
+            }
+            val wakeLockHeldUptimeMs = if (wakeLockAcquired) {
+                (endUptimeMs - startUptimeMs).coerceAtLeast(0L)
+            } else {
+                0L
+            }
+            val suspendDurationMs =
+                (wakeLockHeldElapsedMs - wakeLockHeldUptimeMs).coerceAtLeast(0L)
+            if (!wakeLockHeldUntilCompletion) {
+                recordCleanupFailure(
+                    "wakeLockHeldUntilCompletion",
+                    IllegalStateException("The bounded R6 soak partial wake lock was not held until completion."),
+                )
+            }
             var propertiesRestored = true
             originalProperties.forEach { (name, value) ->
                 runCatching {
@@ -273,14 +337,44 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                     false
                 },
             )
+            val wakeLockReleased = runCatching {
+                val lock = checkNotNull(wakeLock) {
+                    "The bounded R6 soak partial wake lock was not created."
+                }
+                if (lock.isHeld) {
+                    lock.release()
+                }
+                check(!lock.isHeld) {
+                    "Failed to release the R6 soak partial wake lock."
+                }
+            }.fold(
+                onSuccess = { true },
+                onFailure = { error ->
+                    recordCleanupFailure("releaseWakeLock", error)
+                    false
+                },
+            )
             val cleanup = JSONObject()
                 .put("propertiesRestored", propertiesRestored)
                 .put("pluginHostInvalidated", pluginHostInvalidated)
                 .put("workDirectoryDeleted", workDirectoryDeleted)
+                .put("wakeLockAcquired", wakeLockAcquired)
+                .put("wakeLockHeldUntilCompletion", wakeLockHeldUntilCompletion)
+                .put("wakeLockReleased", wakeLockReleased)
                 .put(
                     "complete",
-                    propertiesRestored && pluginHostInvalidated && workDirectoryDeleted,
+                    propertiesRestored &&
+                            pluginHostInvalidated &&
+                            workDirectoryDeleted &&
+                            wakeLockAcquired &&
+                            wakeLockHeldUntilCompletion &&
+                            wakeLockReleased,
                 )
+            val powerManagement = JSONObject()
+                .put("wakeLockType", "partial")
+                .put("wakeLockHeldElapsedMs", wakeLockHeldElapsedMs)
+                .put("wakeLockHeldUptimeMs", wakeLockHeldUptimeMs)
+                .put("suspendDurationMs", suspendDurationMs)
             val growth = analyzeMonotonicGrowth(samples)
             val monotonicLeak = growth.getBoolean("monotonicLeak")
             if (monotonicLeak) {
@@ -292,7 +386,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                         .put("analysis", growth),
                 )
             }
-            val durationActualMs = (SystemClock.elapsedRealtime() - startElapsedMs).coerceAtLeast(0L)
+            val durationActualMs = wakeLockHeldElapsedMs
             val analysis = JSONObject()
                 .put("monotonicLeak", monotonicLeak)
                 .put("orphanProcess", orphanProcess)
@@ -309,12 +403,13 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                 .put("growth", growth)
             report
                 .put("status", if (failures.length() == 0) "passed" else "failed")
-                .put("generatedAt", isoTimestamp(System.currentTimeMillis()))
-                .put("endedAtEpochMs", System.currentTimeMillis())
+                .put("generatedAt", if (endWallMs > 0L) isoTimestamp(endWallMs) else JSONObject.NULL)
+                .put("endedAtEpochMs", if (endWallMs > 0L) endWallMs else JSONObject.NULL)
                 .put("durationMs", durationActualMs)
                 .put("durationHours", durationActualMs.toDouble() / MILLIS_PER_HOUR.toDouble())
                 .put("cycles", cycles)
                 .put("cleanup", cleanup)
+                .put("powerManagement", powerManagement)
                 .put("analysis", analysis)
 
             val reportFile = writeReport(kind, runToken, report)
@@ -462,6 +557,33 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         assertEquals("cycle $cycle runtime teardown is not clean", "true", result.nativeValues[PROCESS_RUNTIME_TEARDOWN_KEY])
         assertEquals("cycle $cycle execution teardown is not clean", "true", result.nativeValues[EXECUTION_TEARDOWN_KEY])
         assertEquals("cycle $cycle plugin process metrics are incomplete", "ready", result.nativeValues[RUNTIME_PROCESS_METRICS_STATUS_KEY])
+        assertEquals(
+            "cycle $cycle plugin process metrics did not originate from plugin procfs",
+            "plugin_process_procfs",
+            result.nativeValues[RUNTIME_PROCESS_METRICS_SOURCE_KEY],
+        )
+        assertEquals(
+            "cycle $cycle plugin process metrics PID differs from result PID",
+            result.pid.toString(),
+            result.nativeValues[RUNTIME_PROCESS_PID_KEY],
+        )
+        assertEquals(
+            "cycle $cycle plugin process status is unreadable",
+            "true",
+            result.nativeValues[RUNTIME_PROCESS_PROC_STATUS_READABLE_KEY],
+        )
+        assertTrue(
+            "cycle $cycle plugin process RSS is unavailable",
+            requireNativeLong(result, RUNTIME_PROCESS_RSS_KB_KEY) > 0L,
+        )
+        assertTrue(
+            "cycle $cycle plugin process thread count is unavailable",
+            requireNativeLong(result, RUNTIME_PROCESS_THREAD_COUNT_KEY) > 0L,
+        )
+        assertTrue(
+            "cycle $cycle plugin process fd count is unavailable",
+            requireNativeLong(result, RUNTIME_PROCESS_FD_COUNT_KEY) > 0L,
+        )
         assertEquals("cycle $cycle retained bridge resources", "0", result.nativeValues[BRIDGE_ACTIVE_COUNT_KEY])
         assertEquals("cycle $cycle retained bridge requests", "0", result.nativeValues[BRIDGE_PENDING_COUNT_KEY])
         assertEquals("cycle $cycle payload PID differs from result PID", result.pid, payload.getInt("pid"))
@@ -503,18 +625,38 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         assertEquals("cycle $cycle execution sequence did not advance exactly once", previousSequence + 1L, currentIdentity.executionSequence)
     }
 
-    private fun captureRemoteSample(cycle: CycleResult, startElapsedMs: Long): JSONObject {
+    private fun captureRemoteSample(
+        cycle: CycleResult,
+        startElapsedMs: Long,
+        preflight: PluginPreflight,
+        identity: RuntimeIdentity,
+    ): JSONObject {
         val result = cycle.result
         val payload = cycle.payload
-        val memory = remoteProcessMemory(result.pid)
-        val proc = remoteProcMetrics(result.pid)
+        val memory = retryRemoteMetric("process memory", result.pid) {
+            remoteProcessMemory(result.pid)
+        }
+        val proc = retryOptionalRemoteMetric {
+            remoteProcMetrics(result.pid)
+        }
+        val procFallbackLiveness = if (proc.value == null) {
+            performLivenessRecoverabilityCheck(
+                preflight = preflight,
+                identity = identity,
+                cycle = payload.getInt("cycle"),
+            )
+                .put("trigger", "remote_proc_probe_unavailable")
+                .put("probeFailure", proc.failure.orEmpty())
+        } else {
+            null
+        }
         val runtimeRssKb = requireNativeLong(result, RUNTIME_PROCESS_RSS_KB_KEY)
         val runtimeThreadCount = requireNativeLong(result, RUNTIME_PROCESS_THREAD_COUNT_KEY)
         val runtimeFdCount = requireNativeLong(result, RUNTIME_PROCESS_FD_COUNT_KEY)
         val runtimeJavaHeapKb = requireNativeLong(result, RUNTIME_PROCESS_JAVA_HEAP_USED_KB_KEY)
         val runtimeNativeHeapKb = requireNativeLong(result, RUNTIME_PROCESS_NATIVE_HEAP_ALLOCATED_KB_KEY)
         val bridgeDiagnostics = result.nativeValues
-            .filterKeys { key -> key.startsWith("embedded_script.bridge_") }
+            .filterKeys(BRIDGE_DIAGNOSTIC_KEYS::contains)
         val runtimeProcessDiagnostics = result.nativeValues
             .filterKeys { key -> key.startsWith("runtime_process.") }
         return JSONObject()
@@ -531,17 +673,22 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             .put("runtimeReused", result.nativeValues[PROCESS_RUNTIME_REUSED_KEY] == "true")
             .put("rssKb", runtimeRssKb)
             .put("nodeRssKb", payload.getLong("rssKb"))
-            .put("procRssKb", proc.rssKb)
-            .put("totalPssKb", memory.totalPssKb)
-            .put("javaPssKb", memory.javaPssKb)
-            .put("nativePssKb", memory.nativePssKb)
+            .put(
+                "remoteProcCaptureStatus",
+                if (proc.value != null) "captured" else "unavailable_but_plugin_alive",
+            )
+            .put("procMetricsAvailable", proc.value != null)
+            .put("procRssKb", proc.value?.rssKb ?: JSONObject.NULL)
+            .put("totalPssKb", memory.value.totalPssKb)
+            .put("javaPssKb", memory.value.javaPssKb)
+            .put("nativePssKb", memory.value.nativePssKb)
             .put("javaHeapKb", runtimeJavaHeapKb)
             .put("javaHeapCommittedKb", requireNativeLong(result, RUNTIME_PROCESS_JAVA_HEAP_COMMITTED_KB_KEY))
             .put("javaHeapMaxKb", requireNativeLong(result, RUNTIME_PROCESS_JAVA_HEAP_MAX_KB_KEY))
             .put("nativeHeapKb", runtimeNativeHeapKb)
             .put("nativeHeapCommittedKb", requireNativeLong(result, RUNTIME_PROCESS_NATIVE_HEAP_COMMITTED_KB_KEY))
             .put("threadCount", runtimeThreadCount)
-            .put("procThreadCount", proc.threadCount)
+            .put("procThreadCount", proc.value?.threadCount ?: JSONObject.NULL)
             .put("fdCount", runtimeFdCount)
             .put("fdCountSource", "plugin_uid_proc_self_fd")
             .put("nodeHeapTotalKb", payload.getLong("nodeHeapTotalKb"))
@@ -552,6 +699,10 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             .put("activeBridgeResourceCount", requireNativeLong(result, BRIDGE_ACTIVE_COUNT_KEY))
             .put("pendingBridgeRequestCount", requireNativeLong(result, BRIDGE_PENDING_COUNT_KEY))
             .put("freshExecutionState", payload.getBoolean("freshExecutionState"))
+            .put("remoteMemoryCaptureAttempts", memory.attempts)
+            .put("remoteProcCaptureAttempts", proc.attempts)
+            .put("remoteProcCaptureFailure", proc.failure ?: JSONObject.NULL)
+            .put("remoteProcFallbackLiveness", procFallbackLiveness ?: JSONObject.NULL)
             .put("bridgeDiagnostics", JSONObject(bridgeDiagnostics))
             .put("runtimeProcessDiagnostics", JSONObject(runtimeProcessDiagnostics))
     }
@@ -560,7 +711,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         val result = cycle.result
         val payload = cycle.payload
         val bridgeDiagnostics = result.nativeValues
-            .filterKeys { key -> key.startsWith("embedded_script.bridge_") }
+            .filterKeys(BRIDGE_DIAGNOSTIC_KEYS::contains)
         val runtimeProcessDiagnostics = result.nativeValues
             .filterKeys { key -> key.startsWith("runtime_process.") }
         return JSONObject()
@@ -586,6 +737,60 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             .put("runtimeProcessDiagnostics", JSONObject(runtimeProcessDiagnostics))
     }
 
+    private fun <T> retryRemoteMetric(
+        label: String,
+        pid: Int,
+        block: () -> T,
+    ): RetriedMetric<T> {
+        var lastFailure: Exception? = null
+        repeat(REMOTE_METRIC_MAX_ATTEMPTS) { attempt ->
+            try {
+                return RetriedMetric(
+                    value = block(),
+                    attempts = attempt + 1,
+                )
+            } catch (error: Exception) {
+                lastFailure = error
+                if (attempt + 1 < REMOTE_METRIC_MAX_ATTEMPTS) {
+                    SystemClock.sleep(REMOTE_METRIC_RETRY_DELAY_MS)
+                }
+            }
+        }
+        throw AssertionError(
+            "Remote $label remained unavailable for plugin PID $pid after " +
+                    "$REMOTE_METRIC_MAX_ATTEMPTS attempts: ${lastFailure?.message.orEmpty()}",
+            lastFailure,
+        )
+    }
+
+    private fun <T> retryOptionalRemoteMetric(
+        block: () -> T,
+    ): OptionalRetriedMetric<T> {
+        var lastFailure: Exception? = null
+        repeat(REMOTE_METRIC_MAX_ATTEMPTS) { attempt ->
+            try {
+                return OptionalRetriedMetric(
+                    value = block(),
+                    attempts = attempt + 1,
+                    failure = null,
+                )
+            } catch (error: Exception) {
+                lastFailure = error
+                if (attempt + 1 < REMOTE_METRIC_MAX_ATTEMPTS) {
+                    SystemClock.sleep(REMOTE_METRIC_RETRY_DELAY_MS)
+                }
+            }
+        }
+        return OptionalRetriedMetric(
+            value = null,
+            attempts = REMOTE_METRIC_MAX_ATTEMPTS,
+            failure = lastFailure
+                ?.message
+                .orEmpty()
+                .take(REMOTE_OUTPUT_DIAGNOSTIC_CHARS),
+        )
+    }
+
     @Suppress("DEPRECATION")
     private fun remoteProcessMemory(pid: Int): RemoteProcessMemory {
         val dumpsys = executeShellCommand("dumpsys meminfo $pid")
@@ -602,9 +807,15 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         val nativeHeapKb = parseMemorySummary(dumpsys, "Native Heap")
             ?: parseMemoryTablePss(dumpsys, "Native Heap")
             ?: activityMemory?.nativePss?.toLong()
-        assertTrue("Remote total PSS is unavailable for plugin PID $pid", totalPssKb != null && totalPssKb >= 0L)
-        assertTrue("Remote Java heap is unavailable for plugin PID $pid", javaHeapKb != null && javaHeapKb >= 0L)
-        assertTrue("Remote native heap is unavailable for plugin PID $pid", nativeHeapKb != null && nativeHeapKb >= 0L)
+        check(totalPssKb != null && totalPssKb >= 0L) {
+            "Remote total PSS is unavailable for plugin PID $pid."
+        }
+        check(javaHeapKb != null && javaHeapKb >= 0L) {
+            "Remote Java heap is unavailable for plugin PID $pid."
+        }
+        check(nativeHeapKb != null && nativeHeapKb >= 0L) {
+            "Remote native heap is unavailable for plugin PID $pid."
+        }
         return RemoteProcessMemory(
             totalPssKb = checkNotNull(totalPssKb),
             javaPssKb = checkNotNull(javaHeapKb),
@@ -616,8 +827,12 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         val status = executeShellCommand("cat /proc/$pid/status")
         val rssKb = parseProcStatusNumber(status, "VmRSS")
         val threadCount = parseProcStatusNumber(status, "Threads")
-        assertTrue("Remote RSS is unavailable for plugin PID $pid", rssKb != null && rssKb >= 0L)
-        assertTrue("Remote thread count is unavailable for plugin PID $pid", threadCount != null && threadCount > 0L)
+        check(rssKb != null && rssKb >= 0L) {
+            "Remote RSS is unavailable for plugin PID $pid: ${status.take(REMOTE_OUTPUT_DIAGNOSTIC_CHARS)}"
+        }
+        check(threadCount != null && threadCount > 0L) {
+            "Remote thread count is unavailable for plugin PID $pid: ${status.take(REMOTE_OUTPUT_DIAGNOSTIC_CHARS)}"
+        }
         return RemoteProcMetrics(
             rssKb = checkNotNull(rssKb),
             threadCount = checkNotNull(threadCount),
@@ -905,6 +1120,17 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         val threadCount: Long,
     )
 
+    private data class RetriedMetric<T>(
+        val value: T,
+        val attempts: Int,
+    )
+
+    private data class OptionalRetriedMetric<T>(
+        val value: T?,
+        val attempts: Int,
+        val failure: String?,
+    )
+
     private data class PluginPreflight(
         val packageName: String,
         val serviceName: String,
@@ -959,6 +1185,11 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         private const val MIN_GROWTH_SAMPLES = 4
         private const val RECENT_SAMPLE_WINDOW = 4
         private const val CYCLE_TIMEOUT_MS = 15_000L
+        private const val WAKE_LOCK_POLICY = "bounded_partial"
+        private const val WAKE_LOCK_GRACE_MS = 15L * 60L * 1_000L
+        private const val REMOTE_METRIC_MAX_ATTEMPTS = 5
+        private const val REMOTE_METRIC_RETRY_DELAY_MS = 250L
+        private const val REMOTE_OUTPUT_DIAGNOSTIC_CHARS = 256
         private const val KIND_QUICK = "quick"
         private const val KIND_FINAL = "final"
         private const val KIND_SMOKE = "smoke"
@@ -1004,6 +1235,9 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         private const val BRIDGE_PENDING_COUNT_KEY = "embedded_script.bridge_live_dispatch_pending_count"
         private const val RUNTIME_PROCESS_RSS_KB_KEY = "runtime_process.rss_kb"
         private const val RUNTIME_PROCESS_METRICS_STATUS_KEY = "runtime_process.metrics.status"
+        private const val RUNTIME_PROCESS_METRICS_SOURCE_KEY = "runtime_process.metrics.source"
+        private const val RUNTIME_PROCESS_PID_KEY = "runtime_process.pid"
+        private const val RUNTIME_PROCESS_PROC_STATUS_READABLE_KEY = "runtime_process.proc_status_readable"
         private const val RUNTIME_PROCESS_THREAD_COUNT_KEY = "runtime_process.thread_count"
         private const val RUNTIME_PROCESS_FD_COUNT_KEY = "runtime_process.fd_count"
         private const val RUNTIME_PROCESS_JAVA_HEAP_USED_KB_KEY = "runtime_process.java_heap_used_kb"
@@ -1021,6 +1255,10 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             NODE_BACKEND_PROPERTY,
             PLUGIN_RUNTIME_ENABLED_PROPERTY,
             PLUGIN_RUNTIME_REQUIRED_PROPERTY,
+        )
+        private val BRIDGE_DIAGNOSTIC_KEYS = setOf(
+            BRIDGE_ACTIVE_COUNT_KEY,
+            BRIDGE_PENDING_COUNT_KEY,
         )
         private val REQUIRED_PAYLOAD_NUMBERS = listOf(
             "rssKb",

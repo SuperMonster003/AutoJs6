@@ -31,6 +31,10 @@ const SHA256_PATTERN = /^[0-9a-f]{64}$/i;
 const RUN_TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
 const MILLIS_PER_HOUR = 3_600_000;
 const MAX_PRODUCTION_SAMPLE_INTERVAL_MS = 300_000;
+const MAX_SOAK_WAKE_LOCK_GRACE_MS = 15 * 60_000;
+const MAX_SOAK_SUSPEND_MS = 1_000;
+const REMOTE_PROC_FALLBACK_CLOCK_TOLERANCE_MS = 30_000;
+const REQUIRED_SOAK_CYCLE_TIMEOUT_MS = 15_000;
 const SOAK_CLOCK_TOLERANCE_MS = 120_000;
 const MIN_GROWTH_SAMPLES = 4;
 const GROWTH_METRICS = [
@@ -440,20 +444,30 @@ function evaluateSoakReport(evidenceRoot, requirement, identity, repoRoot = null
   });
   validateSoakJUnitArtifact(artifactFiles.junitXmlPath, blockers);
   const minimumDurationMs = requirement.minDurationHours * MILLIS_PER_HOUR;
-  const durationHours = numberValue(json.durationHours);
-  const durationMs = numberValue(json.durationMs);
-  if (durationHours < requirement.minDurationHours) {
+  const durationHours = json.durationHours;
+  const durationMs = json.durationMs;
+  if (!Number.isFinite(durationHours)) {
+    blockers.push("durationHours must be a finite number");
+  } else if (durationHours < requirement.minDurationHours) {
     blockers.push(`duration ${durationHours}h is below ${requirement.minDurationHours}h`);
   }
-  if (durationMs < minimumDurationMs) {
+  if (!Number.isFinite(durationMs)) {
+    blockers.push("durationMs must be a finite number");
+  } else if (durationMs < minimumDurationMs) {
     blockers.push(`durationMs ${durationMs} is below ${minimumDurationMs}`);
   }
-  if (Math.abs(durationHours - durationMs / MILLIS_PER_HOUR) > 1 / MILLIS_PER_HOUR) {
+  if (Number.isFinite(durationHours) &&
+      Number.isFinite(durationMs) &&
+      Math.abs(durationHours - durationMs / MILLIS_PER_HOUR) > 1 / MILLIS_PER_HOUR) {
     blockers.push("durationHours does not match durationMs");
   }
-  const startedAtEpochMs = numberValue(json.startedAtEpochMs);
-  const endedAtEpochMs = numberValue(json.endedAtEpochMs);
-  if (startedAtEpochMs <= 0 || endedAtEpochMs <= 0 || endedAtEpochMs < startedAtEpochMs) {
+  const startedAtEpochMs = json.startedAtEpochMs;
+  const endedAtEpochMs = json.endedAtEpochMs;
+  if (!Number.isFinite(startedAtEpochMs) ||
+      !Number.isFinite(endedAtEpochMs) ||
+      startedAtEpochMs <= 0 ||
+      endedAtEpochMs <= 0 ||
+      endedAtEpochMs < startedAtEpochMs) {
     blockers.push("startedAtEpochMs and endedAtEpochMs must define a valid wall-clock interval");
   } else if (endedAtEpochMs - startedAtEpochMs < minimumDurationMs) {
     blockers.push(`wall-clock interval ${endedAtEpochMs - startedAtEpochMs}ms is below ${minimumDurationMs}ms`);
@@ -483,6 +497,24 @@ function evaluateSoakReport(evidenceRoot, requirement, identity, repoRoot = null
   const sampleIntervalMs = Number(configuration.sampleIntervalMs);
   if (!Number.isInteger(sampleIntervalMs) || sampleIntervalMs < 1_000 || sampleIntervalMs > MAX_PRODUCTION_SAMPLE_INTERVAL_MS) {
     blockers.push(`configuration.sampleIntervalMs must be within 1000..${MAX_PRODUCTION_SAMPLE_INTERVAL_MS}`);
+  }
+  if (configuration.durationMs !== minimumDurationMs) {
+    blockers.push(`configuration.durationMs must be ${minimumDurationMs}`);
+  }
+  if (configuration.cycleTimeoutMs !== REQUIRED_SOAK_CYCLE_TIMEOUT_MS) {
+    blockers.push(`configuration.cycleTimeoutMs must be ${REQUIRED_SOAK_CYCLE_TIMEOUT_MS}`);
+  }
+  if (configuration.wakeLockPolicy !== "bounded_partial") {
+    blockers.push("configuration.wakeLockPolicy must be bounded_partial");
+  }
+  const wakeLockGraceMs = configuration.wakeLockGraceMs;
+  if (!Number.isInteger(wakeLockGraceMs) || wakeLockGraceMs <= 0 || wakeLockGraceMs > MAX_SOAK_WAKE_LOCK_GRACE_MS) {
+    blockers.push(`configuration.wakeLockGraceMs must be within 1..${MAX_SOAK_WAKE_LOCK_GRACE_MS}`);
+  }
+  const wakeLockTimeoutMs = configuration.wakeLockTimeoutMs;
+  if (!Number.isInteger(wakeLockTimeoutMs) ||
+      wakeLockTimeoutMs !== configuration.durationMs + wakeLockGraceMs) {
+    blockers.push("configuration.wakeLockTimeoutMs must equal configuration.durationMs plus wakeLockGraceMs");
   }
   const cycles = numberValue(json.cycles);
   if (!Number.isInteger(cycles) || cycles <= 0) blockers.push("cycles must be a positive integer");
@@ -566,6 +598,7 @@ function evaluateSoakReport(evidenceRoot, requirement, identity, repoRoot = null
     for (const metric of ["nativeHeapKb", "libuvHandleCount", "activeBridgeResourceCount"]) {
       requireNonNegativeNumber(sample, metric, `sample ${index}`, blockers);
     }
+    validateSoakSampleProcEvidence(sample, index, blockers);
     if (stringValue(sample && sample.fdCountSource) !== "plugin_uid_proc_self_fd") {
       blockers.push(`sample ${index} fdCountSource must be plugin_uid_proc_self_fd`);
     }
@@ -653,8 +686,37 @@ function evaluateSoakReport(evidenceRoot, requirement, identity, repoRoot = null
   const failures = Array.isArray(json.failures) ? json.failures : null;
   if (!failures || failures.length !== 0) blockers.push("failures must be an empty array");
   const cleanup = json.cleanup || {};
-  for (const flag of ["complete", "propertiesRestored", "pluginHostInvalidated", "workDirectoryDeleted"]) {
+  for (const flag of [
+    "complete",
+    "propertiesRestored",
+    "pluginHostInvalidated",
+    "workDirectoryDeleted",
+    "wakeLockAcquired",
+    "wakeLockHeldUntilCompletion",
+    "wakeLockReleased",
+  ]) {
     if (cleanup[flag] !== true) blockers.push(`cleanup.${flag} must be true`);
+  }
+  const powerManagement = json.powerManagement || {};
+  if (powerManagement.wakeLockType !== "partial") {
+    blockers.push("powerManagement.wakeLockType must be partial");
+  }
+  const wakeLockHeldElapsedMs = powerManagement.wakeLockHeldElapsedMs;
+  const wakeLockHeldUptimeMs = powerManagement.wakeLockHeldUptimeMs;
+  const suspendDurationMs = powerManagement.suspendDurationMs;
+  if (!Number.isFinite(wakeLockHeldElapsedMs) ||
+      Math.abs(wakeLockHeldElapsedMs - durationMs) > SOAK_CLOCK_TOLERANCE_MS) {
+    blockers.push("powerManagement.wakeLockHeldElapsedMs must cover the reported soak duration");
+  }
+  if (!Number.isFinite(wakeLockHeldUptimeMs) ||
+      Math.abs(wakeLockHeldUptimeMs - durationMs) > SOAK_CLOCK_TOLERANCE_MS) {
+    blockers.push("powerManagement.wakeLockHeldUptimeMs must cover the reported soak duration");
+  }
+  if (!Number.isFinite(suspendDurationMs) ||
+      suspendDurationMs < 0 ||
+      suspendDurationMs > MAX_SOAK_SUSPEND_MS ||
+      suspendDurationMs !== Math.max(wakeLockHeldElapsedMs - wakeLockHeldUptimeMs, 0)) {
+    blockers.push(`powerManagement.suspendDurationMs must be an exact value within 0..${MAX_SOAK_SUSPEND_MS}`);
   }
   const analysis = json.analysis || {};
   for (const flag of ["monotonicLeak", "orphanProcess", "unrecoverableRuntime", "unrecoverableSlot"]) {
@@ -1580,6 +1642,68 @@ function assertJUnitAggregate(attributes, actual) {
   return declared;
 }
 
+function validateSoakSampleProcEvidence(sample, index, blockers) {
+  const prefix = `sample ${index}`;
+  const attempts = sample && sample.remoteProcCaptureAttempts;
+  if (!Number.isInteger(attempts) || attempts < 1 || attempts > 5) {
+    blockers.push(`${prefix} remoteProcCaptureAttempts must be within 1..5`);
+  }
+  const status = sample && sample.remoteProcCaptureStatus;
+  if (status === "captured") {
+    if (!sample || sample.procMetricsAvailable !== true) {
+      blockers.push(`${prefix} captured proc metrics must be marked available`);
+    }
+    if (!sample || !Number.isFinite(sample.procRssKb) || sample.procRssKb < 0) {
+      blockers.push(`${prefix} procRssKb must be a non-negative number`);
+    }
+    if (!sample || !Number.isFinite(sample.procThreadCount) || sample.procThreadCount <= 0) {
+      blockers.push(`${prefix} procThreadCount must be positive`);
+    }
+    if (sample && sample.remoteProcCaptureFailure !== null) {
+      blockers.push(`${prefix} captured proc metrics must not report a failure`);
+    }
+    if (sample && sample.remoteProcFallbackLiveness !== null) {
+      blockers.push(`${prefix} captured proc metrics must not report fallback liveness`);
+    }
+    return;
+  }
+  if (status !== "unavailable_but_plugin_alive") {
+    blockers.push(`${prefix} remoteProcCaptureStatus is invalid`);
+    return;
+  }
+  if (!sample || sample.procMetricsAvailable !== false) {
+    blockers.push(`${prefix} unavailable proc metrics must be marked unavailable`);
+  }
+  if (!sample || sample.procRssKb !== null || sample.procThreadCount !== null) {
+    blockers.push(`${prefix} unavailable proc metrics must remain null`);
+  }
+  if (attempts !== 5) {
+    blockers.push(`${prefix} unavailable proc metrics must exhaust all 5 capture attempts`);
+  }
+  const failure = sample && sample.remoteProcCaptureFailure;
+  if (typeof failure !== "string" || !failure || failure.length > 256) {
+    blockers.push(`${prefix} unavailable proc metrics require a bounded failure diagnostic`);
+  }
+  const fallback = sample && sample.remoteProcFallbackLiveness;
+  const fallbackCheckedAtEpochMs = fallback && fallback.checkedAtEpochMs;
+  const sampleCapturedAtEpochMs = sample && sample.capturedAtEpochMs;
+  if (!fallback || fallback.passed !== true ||
+      fallback.runtimeReady !== true ||
+      fallback.persistentProcessRuntime !== true ||
+      fallback.cycle !== (sample && sample.cycle) ||
+      fallback.mode !== "non_destructive_binder_session_health_and_recoverability" ||
+      fallback.trigger !== "remote_proc_probe_unavailable" ||
+      fallback.probeFailure !== failure ||
+      fallback.servicePid !== (sample && sample.servicePid) ||
+      fallback.hostSessionGeneration !== (sample && sample.pluginSessionGeneration) ||
+      !Number.isFinite(fallbackCheckedAtEpochMs) ||
+      !Number.isFinite(sampleCapturedAtEpochMs) ||
+      Math.abs(fallbackCheckedAtEpochMs - sampleCapturedAtEpochMs) >
+        REMOTE_PROC_FALLBACK_CLOCK_TOLERANCE_MS) {
+    blockers.push(`${prefix} unavailable proc metrics require matching live Binder identity evidence`);
+  }
+}
+
 function evaluateMatrix(deviceReports) {
   const blockers = [];
   const primary = deviceReports.find((entry) => entry.id === "sony-arm64");
@@ -1605,6 +1729,12 @@ function validateContractAnchors(repoRoot) {
   const instrumentationGate = read(path.join(repoRoot, "app/node-instrumentation-gates.gradle.kts"));
   const releaseGate = read(path.join(repoRoot, "app/embedded-node-packaging-preflight.gradle.kts"));
   const deviceCollector = read(path.join(repoRoot, "tools/nodejs/r6/run-device-evidence.js"));
+  const soakInstrumentation = read(
+    path.join(
+      repoRoot,
+      "app/src/androidTest/java/org/autojs/autojs/engine/NodeR6PersistentPluginSoakInstrumentationTest.kt",
+    ),
+  );
   const violations = [];
   if (!contract || contract.blocksCoreCompletion !== true) {
     violations.push("FINAL_BLOCKER_REGISTRY must declare blocking R6 evidence revalidation");
@@ -1637,6 +1767,20 @@ function validateContractAnchors(repoRoot) {
   if (!deviceCollector.includes("packaged-template-device-sha256-after-test") ||
       !deviceCollector.includes("packaged-template-device-cleanup")) {
     violations.push("R6 production device collector must rehash and clean its run-owned packaged smoke template");
+  }
+  if (!soakInstrumentation.includes("PowerManager.PARTIAL_WAKE_LOCK") ||
+      !soakInstrumentation.includes("acquire(durationMs + WAKE_LOCK_GRACE_MS)") ||
+      !soakInstrumentation.includes('.put("wakeLockHeldUntilCompletion", wakeLockHeldUntilCompletion)')) {
+    violations.push("R6 production soak must prove a bounded partial wake lock remained held until completion");
+  }
+  if (!soakInstrumentation.includes("private const val CYCLE_TIMEOUT_MS = 15_000L") ||
+      !soakInstrumentation.includes('.put("cycleTimeoutMs", CYCLE_TIMEOUT_MS)')) {
+    violations.push("R6 production soak must retain and report the 15-second per-cycle timeout");
+  }
+  if (!soakInstrumentation.includes("retryOptionalRemoteMetric") ||
+      !soakInstrumentation.includes('.put("procMetricsAvailable", proc.value != null)') ||
+      !soakInstrumentation.includes('"remote_proc_probe_unavailable"')) {
+    violations.push("R6 production soak must treat cross-UID proc sampling as optional with live Binder revalidation");
   }
   return violations;
 }
@@ -1876,10 +2020,12 @@ module.exports = {
   REQUIRED_DEVICE_SELECTORS,
   REQUIRED_REGRESSIONS,
   REQUIRED_SOAK_METRICS,
+  SOAK_CLOCK_TOLERANCE_MS,
   SOAK_REQUIREMENTS,
   SOAK_SCHEMA,
   apkSignerCertificateSha256Digests,
   currentIdentity,
   evaluateDeviceReport,
   evaluateSoakReport,
+  validateSoakSampleProcEvidence,
 };

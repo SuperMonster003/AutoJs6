@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Completion Roadmap
 
-Last updated: 2026-07-20
+Last updated: 2026-07-24
 
 This checklist separates two completion targets:
 
@@ -433,6 +433,31 @@ zero currently allocated native-heap value as a missing metric. The evidence
 contract now accepts non-negative allocated native heap only when committed
 native heap and native PSS remain positive; both production soaks still require
 fresh execution against that corrected source commit.
+
+Subsequent long-run attempts exposed two harness defects rather than a runtime
+leak: a redundant cross-UID `/proc/<pid>/status` observation could fail even
+while the plugin's canonical `/proc/self` metrics and Binder identity remained
+healthy, and the device could enter deep sleep during the intended continuous
+runtime experiment. The latter consumed the request's 15-second wall-clock
+module-source budget before native execution resumed. Historical failing runs
+retained a stable PID, Binder session, runtime generation, and bounded resource
+profile up to those observation/suspend failures.
+
+The 2026-07-24 repair keeps the 15-second per-cycle timeout, holds one bounded
+partial wake lock over the exact reported soak interval, proves acquisition,
+end-of-soak ownership, zero suspend time, and final release, and revalidates
+plugin PID/session liveness before tolerating an unavailable external proc
+cross-check. Canonical plugin-self metrics and PSS remain fail-closed. The
+runner also uses a dedicated single-use Gradle process with in-process Kotlin
+compilation, and compact cycle records no longer retain the large bridge-health
+JSON on every iteration.
+
+An explicitly non-archivable, screen-off Sony XQ-AT72 smoke then passed for
+120.743 seconds on 2026-07-24: 100 continuous cycles, 25 resource samples, clean
+JUnit and cleanup, `wakeLockHeldElapsedMs=120743`,
+`wakeLockHeldUptimeMs=120744`, derived suspend time `0 ms`, and no retained wake
+lock after completion. This validates the repaired collection path only; the
+clean-source 8-hour and 24-hour production reports remain required.
 
 Core completion command:
 

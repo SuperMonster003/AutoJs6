@@ -7,9 +7,11 @@ const fs = require("fs");
 const path = require("path");
 
 const {
+  SOAK_CLOCK_TOLERANCE_MS,
   SOAK_REQUIREMENTS,
   currentIdentity,
   evaluateSoakReport,
+  validateSoakSampleProcEvidence,
 } = require("./verify-production-evidence.js");
 
 const REPORT_SCHEMA = "autojs6-node-r6-persistent-plugin-soak-v1";
@@ -21,7 +23,6 @@ const TEST_SELECTOR = "org.autojs.autojs.engine.NodeR6PersistentPluginSoakInstru
 const MILLIS_PER_HOUR = 3_600_000;
 const MAX_SAMPLE_INTERVAL_MS = 300_000;
 const MIN_REQUIRED_SAMPLES = 4;
-const CLOCK_BOUND_TOLERANCE_MS = 10_000;
 const FRESHNESS_TOLERANCE_MS = 10_000;
 const PRODUCTION_DURATION_MS = { quick: 8 * MILLIS_PER_HOUR, final: 24 * MILLIS_PER_HOUR };
 const CANONICAL_REPORTS = {
@@ -379,6 +380,7 @@ async function main() {
 function buildGradleArgs(config) {
   const args = [
     "--console=plain",
+    "--no-daemon",
     "--rerun-tasks",
     ":app:connectedAppDebugAndroidTest",
     "-Pautojs.nodejs.releaseFlavor=nodePlugin",
@@ -387,6 +389,7 @@ function buildGradleArgs(config) {
     "-Pautojs.nodejs.embedded.persistentRuntime=true",
     "-Pautojs.gradle.build.number.auto.increment.enabled=false",
     "-Pautojs.gradle.build.time.update.enabled=false",
+    "-Pkotlin.compiler.execution.strategy=in-process",
     "-Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true",
     `-Pautojs.nodejs.pluginProjectDir=${config.pluginRoot}`,
     `-Pautojs.nodejs.test.deviceProfile=${config.deviceProfile}`,
@@ -416,24 +419,38 @@ async function enrichReport(config) {
   if (report.schema !== REPORT_SCHEMA) failures.push(`Device report schema must be ${REPORT_SCHEMA}.`);
   if (report.kind !== config.expectedKind) failures.push(`Device report kind must be ${config.expectedKind}.`);
   if (report.runToken !== config.expectedRunToken) failures.push("Device report runToken does not match this runner invocation.");
-  const reportStartedAtEpochMs = Number(report.startedAtEpochMs);
-  const reportEndedAtEpochMs = Number(report.endedAtEpochMs);
+  const reportStartedAtEpochMs = report.startedAtEpochMs;
+  const reportEndedAtEpochMs = report.endedAtEpochMs;
   if (
     !Number.isFinite(reportStartedAtEpochMs) ||
-    reportStartedAtEpochMs < config.deviceStartedAtEpochMs - CLOCK_BOUND_TOLERANCE_MS ||
-    reportStartedAtEpochMs > config.deviceFinishedAtEpochMs + CLOCK_BOUND_TOLERANCE_MS
+    reportStartedAtEpochMs < config.deviceStartedAtEpochMs - SOAK_CLOCK_TOLERANCE_MS ||
+    reportStartedAtEpochMs > config.deviceFinishedAtEpochMs + SOAK_CLOCK_TOLERANCE_MS
   ) {
     failures.push("Device report startedAtEpochMs falls outside this runner invocation's device-clock bounds.");
   }
   if (
     !Number.isFinite(reportEndedAtEpochMs) ||
     reportEndedAtEpochMs < reportStartedAtEpochMs + config.expectedDurationMs ||
-    reportEndedAtEpochMs > config.deviceFinishedAtEpochMs + CLOCK_BOUND_TOLERANCE_MS
+    reportEndedAtEpochMs > config.deviceFinishedAtEpochMs + SOAK_CLOCK_TOLERANCE_MS
   ) {
     failures.push("Device report endedAtEpochMs does not prove the requested wall-clock duration within this run.");
   }
-  if (Number(report.durationMs) < config.expectedDurationMs) {
+  const reportDurationMs = report.durationMs;
+  const reportDurationHours = report.durationHours;
+  if (!Number.isFinite(reportDurationMs) || reportDurationMs < config.expectedDurationMs) {
     failures.push(`Device report durationMs is below the requested ${config.expectedDurationMs}ms.`);
+  }
+  if (!Number.isFinite(reportDurationHours) ||
+      !Number.isFinite(reportDurationMs) ||
+      Math.abs(reportDurationHours - reportDurationMs / MILLIS_PER_HOUR) > 1 / MILLIS_PER_HOUR) {
+    failures.push("Device report durationHours does not match durationMs.");
+  }
+  if (Number.isFinite(reportStartedAtEpochMs) &&
+      Number.isFinite(reportEndedAtEpochMs) &&
+      Number.isFinite(reportDurationMs) &&
+      Math.abs((reportEndedAtEpochMs - reportStartedAtEpochMs) - reportDurationMs) >
+        SOAK_CLOCK_TOLERANCE_MS) {
+    failures.push("Device report wall-clock interval does not match durationMs.");
   }
   if (report.status !== "passed") failures.push(`Device report status must be passed, got ${report.status || "missing"}.`);
   if (!Array.isArray(report.failures) || report.failures.length !== 0) failures.push("Device report failures must be an empty array.");
@@ -451,10 +468,29 @@ async function enrichReport(config) {
   if (Number(report.configuration && report.configuration.minimumRequiredSamples) !== config.minimumRequiredSamples) {
     failures.push("Device report minimumRequiredSamples does not match the runner requirement.");
   }
+  const reportConfiguration = report.configuration || {};
+  if (reportConfiguration.durationMs !== config.expectedDurationMs) {
+    failures.push("Device report configuration.durationMs does not match the requested duration.");
+  }
+  if (reportConfiguration.cycleTimeoutMs !== 15_000) {
+    failures.push("Device report cycleTimeoutMs must remain 15000.");
+  }
+  if (
+    reportConfiguration.wakeLockPolicy !== "bounded_partial" ||
+    !Number.isInteger(reportConfiguration.wakeLockGraceMs) ||
+    reportConfiguration.wakeLockGraceMs <= 0 ||
+    reportConfiguration.wakeLockGraceMs > 15 * 60_000 ||
+    !Number.isInteger(reportConfiguration.wakeLockTimeoutMs) ||
+    reportConfiguration.wakeLockTimeoutMs !==
+      reportConfiguration.durationMs + reportConfiguration.wakeLockGraceMs
+  ) {
+    failures.push("Device report does not prove a bounded partial wake-lock configuration.");
+  }
   (report.samples || []).forEach((sample, index) => {
     REQUIRED_SAMPLE_METRICS.forEach((metric) => {
       if (!sample || !Number.isFinite(sample[metric])) failures.push(`Sample ${index} lacks numeric ${metric}.`);
     });
+    validateSoakSampleProcEvidence(sample, index, failures);
   });
   const analysis = report.analysis || {};
   ["monotonicLeak", "orphanProcess", "unrecoverableRuntime", "unrecoverableSlot"].forEach((flag) => {
@@ -475,9 +511,29 @@ async function enrichReport(config) {
     cleanup.complete !== true ||
     cleanup.propertiesRestored !== true ||
     cleanup.pluginHostInvalidated !== true ||
-    cleanup.workDirectoryDeleted !== true
+    cleanup.workDirectoryDeleted !== true ||
+    cleanup.wakeLockAcquired !== true ||
+    cleanup.wakeLockHeldUntilCompletion !== true ||
+    cleanup.wakeLockReleased !== true
   ) {
     failures.push("Device report did not prove complete post-soak cleanup.");
+  }
+  const powerManagement = report.powerManagement || {};
+  const wakeLockHeldElapsedMs = powerManagement.wakeLockHeldElapsedMs;
+  const wakeLockHeldUptimeMs = powerManagement.wakeLockHeldUptimeMs;
+  const suspendDurationMs = powerManagement.suspendDurationMs;
+  if (
+    powerManagement.wakeLockType !== "partial" ||
+    !Number.isFinite(wakeLockHeldElapsedMs) ||
+    !Number.isFinite(wakeLockHeldUptimeMs) ||
+    Math.abs(wakeLockHeldElapsedMs - reportDurationMs) > 120_000 ||
+    Math.abs(wakeLockHeldUptimeMs - reportDurationMs) > 120_000 ||
+    !Number.isFinite(suspendDurationMs) ||
+    suspendDurationMs < 0 ||
+    suspendDurationMs > 1_000 ||
+    suspendDurationMs !== Math.max(wakeLockHeldElapsedMs - wakeLockHeldUptimeMs, 0)
+  ) {
+    failures.push("Device report does not prove continuous wake-lock coverage without suspend.");
   }
 
   const version = readVersion(path.join(config.repoRoot, "version.properties"));
@@ -940,8 +996,8 @@ function findCandidateReport(root, kind, runToken, startedAtEpochMs, finishedAtE
       entry.json.runToken === runToken
     )
     .filter((entry) =>
-      entry.startedAtEpochMs >= startedAtEpochMs - CLOCK_BOUND_TOLERANCE_MS &&
-      entry.startedAtEpochMs <= finishedAtEpochMs + CLOCK_BOUND_TOLERANCE_MS
+      entry.startedAtEpochMs >= startedAtEpochMs - SOAK_CLOCK_TOLERANCE_MS &&
+      entry.startedAtEpochMs <= finishedAtEpochMs + SOAK_CLOCK_TOLERANCE_MS
     )
     .sort((left, right) => right.startedAtEpochMs - left.startedAtEpochMs)[0] || null;
 }

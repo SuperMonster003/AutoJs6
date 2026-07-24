@@ -16,7 +16,14 @@ The fresh R6 host/test/plugin installation repeated those selectors at `2/2`
 and the permanent required-plugin Safe Node denial selector at `1/1` on
 2026-07-19. An explicitly non-archivable 5-second persistent-plugin smoke also
 passed with 6 cycles, 6 resource samples, and 3 liveness/recoverability checks.
-These focused results validate the implementation and collector path only.
+
+After diagnosing later long-run harness failures, the repaired 2026-07-24
+collector passed a screen-off 120.743-second Sony XQ-AT72 smoke with 100
+continuous executions, 25 resource samples, zero failures, and clean JUnit.
+The bounded partial wake lock remained held across the exact report interval
+and was released during cleanup; elapsed/uptime evidence derived `0 ms` of
+suspend. These focused results validate the implementation and collector path
+only.
 
 R6 and Core completion remain pending. The four current device reports, the
 8-hour quick soak, the 24-hour final soak, and a clean-source final/release
@@ -135,6 +142,23 @@ descriptors, libuv handles, and active bridge resources. Sampling may be no
 slower than five minutes and must provide at least 97 samples for quick and 289
 for final evidence.
 
+The harness retains the 15-second per-cycle timeout and acquires one
+non-reference-counted `PARTIAL_WAKE_LOCK` with a fixed 15-minute cleanup grace.
+The report must prove the lock was acquired, remained held at the common
+soak-end timestamp, covered matching elapsed/uptime durations with at most one
+second of derived suspend, and was released in `finally`. Production builds use
+a single-use Gradle process and in-process Kotlin compilation so unrelated
+long-lived build/compiler daemons cannot own the instrumentation run.
+
+Canonical RSS, thread, fd, and heap metrics come from the plugin process
+itself. The additional cross-UID `/proc/<pid>/status` observation is only a
+cross-check: it is retried five times, and an unavailable result is accepted
+only with null external proc values, a bounded diagnostic, and same-cycle live
+Binder proof matching the sample PID and host session. Plugin-self metrics and
+PSS remain mandatory. Compact cycle records retain only the bridge counters
+needed by the verifier so 24-hour evidence does not duplicate a large
+bridge-health JSON payload on every iteration.
+
 Android may legitimately report zero currently allocated native-heap bytes
 after the allocator releases all tracked blocks. Therefore `nativeHeapKb` is a
 required non-negative metric, while `nativeHeapCommittedKb` and `nativePssKb`
@@ -150,6 +174,15 @@ For a development-only smoke:
 
 A smoke always reports `kind=smoke` and is non-archivable. Passing it validates
 the harness, not the 8-hour or 24-hour production requirement.
+
+The production runner can exercise the same non-archivable path with explicit
+duration and sampling controls:
+
+```powershell
+node tools/nodejs/r6/run-production-soak.js --smoke `
+  --smoke-duration-ms 120000 --sample-interval-ms 5000 `
+  --cycle-delay-ms 500 --serial QV710AF65F
+```
 
 ## Status And Strict Gates
 
