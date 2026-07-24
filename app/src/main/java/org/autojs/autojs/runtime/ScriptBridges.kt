@@ -7,7 +7,6 @@ import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.getOrCreateStandardObjects
 import org.autojs.autojs.util.RhinoUtils.newNativeJavaMethod
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
@@ -41,9 +40,6 @@ class ScriptBridges : IScriptBridges {
     fun isJavaPrimitiveWrap(): Boolean = useJsContext { cx ->
         cx.wrapFactory.isJavaPrimitiveWrap
     }
-
-    override fun call(func: BaseFunction, target: Any?, args: Array<*>) =
-        call(func as Callable, target, args)
 
     override fun call(func: Callable, target: Any?, args: Array<*>) = useJsContext { cx ->
         val scope = when (func) {

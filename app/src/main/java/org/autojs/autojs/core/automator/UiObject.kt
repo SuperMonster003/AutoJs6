@@ -23,7 +23,6 @@ import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Undefined
@@ -628,12 +627,7 @@ open class UiObject(
         }
 
         @JvmStatic
-        fun detect(scriptRuntime: ScriptRuntime, w: UiObject?, compass: CharSequence?, resultType: Any?, callback: BaseFunction? = null): Any? {
-            return detect(scriptRuntime, w, compass, resultType, callback as Callable?)
-        }
-
-        @JvmStatic
-        fun detect(scriptRuntime: ScriptRuntime, w: UiObject?, compass: CharSequence?, resultType: Any?, callback: Callable?): Any? {
+        fun detect(scriptRuntime: ScriptRuntime, w: UiObject?, compass: CharSequence?, resultType: Any?, callback: Callable? = null): Any? {
             return Detector(compass, object : Detector.Result(resultType) {
 
                 override fun byOne() = w
@@ -719,28 +713,9 @@ open class UiObject(
         internal class Detector(
             private val compass: CharSequence? = COMPASS_PASS_ON,
             private val result: Result,
-            val callback: BaseFunction? = null,
+            val callback: Callable? = null,
             private val selector: UiSelector? = UiSelector(),
         ) {
-
-            private var invocationCallback: Callable? = callback
-
-            constructor(
-                compass: CharSequence?,
-                result: Result,
-                callback: Callable?,
-            ) : this(compass, result, callback as? BaseFunction, UiSelector()) {
-                invocationCallback = callback
-            }
-
-            constructor(
-                compass: CharSequence?,
-                result: Result,
-                callback: Callable?,
-                selector: UiSelector?,
-            ) : this(compass, result, callback as? BaseFunction, selector) {
-                invocationCallback = callback
-            }
 
             fun detect(scriptRuntime: ScriptRuntime): Any? {
                 val resultType = result.type.takeUnless { it == "" } ?: return null
@@ -772,8 +747,8 @@ open class UiObject(
 
                     else -> invoke(resultType)
                 }.let { result ->
-                    if (invocationCallback.isJsNullish()) result else {
-                        detectWithCallback(scriptRuntime, invocationCallback, result).let {
+                    if (callback.isJsNullish()) result else {
+                        detectWithCallback(scriptRuntime, callback, result).let {
                             if (it.isJsUndefined()) result else it
                         }
                     }

@@ -678,7 +678,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 if (isDisabled || isFunction) {
                     dialog.setOnBackPressedFromJs {
                         if (onBackKey is Callable) {
-                            val result = callFunction(scriptRuntime, onBackKey, null, null, arrayOf(dialog))
+                            val result = callFunction(scriptRuntime, onBackKey, null as Scriptable?, null, arrayOf(dialog))
                             return@setOnBackPressedFromJs coerceBoolean(result, false)
                         }
                         return@setOnBackPressedFromJs false

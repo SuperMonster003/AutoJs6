@@ -50,7 +50,6 @@ import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeJavaMethod
@@ -846,17 +845,7 @@ open class UiSelector : UiObjectActions, StringReadable {
             selector: Any?,
             compass: CharSequence?,
             resultType: Any?,
-            callback: BaseFunction? = null,
-        ): Any? = pickup(scriptRuntime, root, selector, compass, resultType, callback as Callable?)
-
-        @JvmStatic
-        fun pickup(
-            scriptRuntime: ScriptRuntime,
-            root: UiObject?,
-            selector: Any?,
-            compass: CharSequence?,
-            resultType: Any?,
-            callback: Callable?,
+            callback: Callable? = null,
         ): Any? = Picker.Builder()
             .setRoot(root)
             .setCompass(compass)
@@ -871,21 +860,8 @@ open class UiSelector : UiObjectActions, StringReadable {
             val selector: UiSelector?,
             val compass: CharSequence?,
             val resultType: Any?,
-            val callback: BaseFunction? = null,
+            val callback: Callable? = null,
         ) {
-
-            private var invocationCallback: Callable? = callback
-
-            private constructor(
-                root: UiObject?,
-                selector: UiSelector?,
-                compass: CharSequence?,
-                resultType: Any?,
-                callback: Callable?,
-                @Suppress("UNUSED_PARAMETER") callableMarker: Boolean,
-            ) : this(root, selector, compass, resultType, callback as? BaseFunction) {
-                invocationCallback = callback
-            }
 
             internal fun pick(scriptRuntime: ScriptRuntime) = Detector(compass, object : Result(resultType) {
 
@@ -901,7 +877,7 @@ open class UiSelector : UiObjectActions, StringReadable {
                     } ?: EMPTY
                 }
 
-            }, invocationCallback, selector).detect(scriptRuntime)
+            }, callback, selector).detect(scriptRuntime)
 
             internal class Builder {
 
@@ -1212,11 +1188,9 @@ open class UiSelector : UiObjectActions, StringReadable {
 
                 fun setResultType(resultType: Any?) = also { resultType?.let { mResultType = it } }
 
-                fun setCallback(callback: BaseFunction?) = setCallback(callback as Callable?)
-
                 fun setCallback(callback: Callable?) = also { callback?.let { mCallback = it } }
 
-                fun build() = Picker(mRoot, mSelector, mCompass, mResultType, mCallback, true)
+                fun build() = Picker(mRoot, mSelector, mCompass, mResultType, mCallback)
 
             }
 

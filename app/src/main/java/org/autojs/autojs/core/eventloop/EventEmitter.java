@@ -29,10 +29,6 @@ public class EventEmitter {
             this.isOnce = isOnce;
         }
 
-        public ListenerWrapper(BaseFunction listener, boolean isOnce) {
-            this((Callable) listener, isOnce);
-        }
-
         private Callable getCallable() {
             if (callable instanceof BaseFunction) {
                 return listener;
@@ -63,10 +59,6 @@ public class EventEmitter {
             }
             ensureListenersNotAtLimit();
             listeners.add(new ListenerWrapper(listener, isOnce));
-        }
-
-        public void add(BaseFunction listener, boolean isOnce, Object[] stickyArgs) {
-            add((Callable) listener, isOnce, stickyArgs);
         }
 
         public int count() {
@@ -104,10 +96,6 @@ public class EventEmitter {
             listeners.add(0, new ListenerWrapper(listener, isOnce));
         }
 
-        public void prepend(BaseFunction listener, boolean isOnce) {
-            prepend((Callable) listener, isOnce);
-        }
-
         public boolean remove(Callable listener) {
             for (ListenerWrapper wrapper : listeners) {
                 if (wrapper.getCallable() == listener) {
@@ -116,10 +104,6 @@ public class EventEmitter {
                 }
             }
             return false;
-        }
-
-        public boolean remove(BaseFunction listener) {
-            return remove((Callable) listener);
         }
 
         public Object[] toArray() {
@@ -158,10 +142,6 @@ public class EventEmitter {
 
     public EventEmitter addListener(String eventName, Callable listener) {
         return on(eventName, listener);
-    }
-
-    public EventEmitter addListener(String eventName, BaseFunction listener) {
-        return addListener(eventName, (Callable) listener);
     }
 
     public boolean emit(String eventName, Object... args) {
@@ -206,18 +186,10 @@ public class EventEmitter {
         return this;
     }
 
-    public EventEmitter on(String eventName, BaseFunction listener) {
-        return on(eventName, (Callable) listener);
-    }
-
     public EventEmitter once(String eventName, Callable listener) {
         getListeners(eventName).add(listener, true, mStickyEvents.get(eventName));
         emit("newListener", eventName, listener);
         return this;
-    }
-
-    public EventEmitter once(String eventName, BaseFunction listener) {
-        return once(eventName, (Callable) listener);
     }
 
     public EventEmitter prependListener(String eventName, Callable listener) {
@@ -226,18 +198,10 @@ public class EventEmitter {
         return this;
     }
 
-    public EventEmitter prependListener(String eventName, BaseFunction listener) {
-        return prependListener(eventName, (Callable) listener);
-    }
-
     public EventEmitter prependOnceListener(String eventName, Callable listener) {
         getListeners(eventName).prepend(listener, true);
         emit("newListener", eventName, listener);
         return this;
-    }
-
-    public EventEmitter prependOnceListener(String eventName, BaseFunction listener) {
-        return prependOnceListener(eventName, (Callable) listener);
     }
 
     public EventEmitter removeAllListeners() {
@@ -268,10 +232,6 @@ public class EventEmitter {
             emit("removeListener", eventName, listener);
         }
         return this;
-    }
-
-    public EventEmitter removeListener(String eventName, BaseFunction listener) {
-        return removeListener(eventName, (Callable) listener);
     }
 
     public EventEmitter setMaxListeners(int maxListeners) {

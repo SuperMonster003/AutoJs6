@@ -9,7 +9,6 @@ import okio.ByteString
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import java.lang.ref.WeakReference
 
@@ -74,9 +73,7 @@ class WebSocket @JvmOverloads constructor(
 
     override fun send(bytes: ByteString) = webSocket.send(bytes)
 
-    override fun on(eventName: String, listener: BaseFunction) = this.also { super.on(eventName, listener) }
     override fun on(eventName: String, listener: Callable) = this.also { super.on(eventName, listener) }
-    override fun once(eventName: String, listener: BaseFunction) = this.also { super.once(eventName, listener) }
     override fun once(eventName: String, listener: Callable) = this.also { super.once(eventName, listener) }
 
     @JvmOverloads

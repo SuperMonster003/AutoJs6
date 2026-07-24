@@ -146,18 +146,13 @@ class CallableModuleCompatibilityTest {
     }
 
     @Test
-    fun selectorLegacyBaseFunctionJvmDescriptorsRemainAvailable() {
+    fun selectorSurfacesExposeOnlyCallableJvmDescriptorsAndAcceptBaseFunctionInstances() {
         val pickupParameterTypes = arrayOf(
             ScriptRuntime::class.java,
             UiObject::class.java,
             Any::class.java,
             CharSequence::class.java,
             Any::class.java,
-        )
-        UiSelector::class.java.getMethod(
-            "pickup",
-            *pickupParameterTypes,
-            BaseFunction::class.java,
         )
         UiSelector::class.java.getMethod(
             "pickup",
@@ -173,38 +168,42 @@ class CallableModuleCompatibilityTest {
         UiObject::class.java.getMethod(
             "detect",
             *detectParameterTypes,
-            BaseFunction::class.java,
-        )
-        UiObject::class.java.getMethod(
-            "detect",
-            *detectParameterTypes,
             Callable::class.java,
         )
 
+        assertFalse(
+            UiSelector::class.java.methods.any { method ->
+                method.name == "pickup" && BaseFunction::class.java in method.parameterTypes
+            },
+        )
+        assertFalse(
+            UiObject::class.java.methods.any { method ->
+                method.name == "detect" && BaseFunction::class.java in method.parameterTypes
+            },
+        )
         assertTrue(
             UiSelector.Companion::class.java.declaredMethods.any { method ->
-                method.name == "pickup\$default" && BaseFunction::class.java in method.parameterTypes
+                method.name == "pickup\$default" && Callable::class.java in method.parameterTypes
             },
         )
         assertTrue(
             UiObject.Companion::class.java.declaredMethods.any { method ->
-                method.name == "detect\$default" && BaseFunction::class.java in method.parameterTypes
+                method.name == "detect\$default" && Callable::class.java in method.parameterTypes
             },
         )
         val pickerClass = Class.forName("${UiSelector::class.java.name}\$Companion\$Picker")
         val pickerBuilderClass = Class.forName("${pickerClass.name}\$Builder")
         val detectorClass = Class.forName("${UiObject::class.java.name}\$Companion\$Detector")
-        pickerBuilderClass.getMethod("setCallback", BaseFunction::class.java)
         pickerBuilderClass.getMethod("setCallback", Callable::class.java)
         assertEquals(
-            BaseFunction::class.java,
+            Callable::class.java,
             pickerClass.getMethod("getCallback").returnType,
         )
         assertEquals(
-            BaseFunction::class.java,
+            Callable::class.java,
             detectorClass.getMethod("getCallback").returnType,
         )
-        assertTrue(
+        assertFalse(
             detectorClass.constructors.any { constructor ->
                 BaseFunction::class.java in constructor.parameterTypes
             },

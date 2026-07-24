@@ -16,7 +16,6 @@ import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.tool.UiHandler;
 import org.autojs.autojs.util.ArrayUtils;
-import org.mozilla.javascript.BaseFunction;
 import org.mozilla.javascript.Callable;
 
 import static org.autojs.autojs.util.RhinoUtils.isUiThread;
@@ -73,10 +72,6 @@ public class BlockedMaterialDialog extends MaterialDialog {
             if (Looper.getMainLooper() != Looper.myLooper()) {
                 mResultBox = new VolatileDispose<>();
             }
-        }
-
-        public Builder(Context context, ScriptRuntime runtime, BaseFunction callback) {
-            this(context, runtime, (Callable) callback);
         }
 
         public MaterialDialog.Builder input(@Nullable CharSequence hint, @Nullable CharSequence prefill, boolean allowEmptyInput) {

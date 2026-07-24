@@ -9,7 +9,6 @@ import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Console
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import java.lang.ref.WeakReference
@@ -90,12 +89,6 @@ open class TimerThread(
         mRunningLatch.await()
     }
 
-    fun setTimeout(callback: BaseFunction): Double =
-        setTimeout(callback as Callable)
-
-    fun setTimeout(callback: BaseFunction, delay: Long, vararg args: Any): Double =
-        setTimeout(callback as Callable, delay, *args)
-
     fun setTimeout(callback: Callable): Double =
         setTimeout(callback, 1)
 
@@ -107,12 +100,6 @@ open class TimerThread(
         clearTimeout(id)
     }
 
-    fun setInterval(callback: BaseFunction): Double =
-        setInterval(callback as Callable)
-
-    fun setInterval(callback: BaseFunction, interval: Long, vararg args: Any): Double =
-        setInterval(callback as Callable, interval, *args)
-
     fun setInterval(callback: Callable): Double =
         setInterval(callback, 1L)
 
@@ -123,9 +110,6 @@ open class TimerThread(
     fun clearInterval(id: Double): Boolean = withTimer {
         clearInterval(id)
     }
-
-    fun setImmediate(callback: BaseFunction, vararg args: Any): Double =
-        setImmediate(callback as Callable, *args)
 
     fun setImmediate(callback: Callable, vararg args: Any): Double = withTimer {
         setImmediate(callback, *args.copyOf())

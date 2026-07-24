@@ -66,6 +66,7 @@
 * `Corrección` Una regresión de compatibilidad de la API de ámbitos tras actualizar el motor Rhino provocaba fallos en algunas funciones auxiliares del entorno de ejecución
 * `Corrección` El puente de módulos Rhino procesaba incorrectamente null/undefined, Callable, constructores, prototipos, realms y valores de retorno de Kotlin, lo que podía causar objetos entre realms, pérdida de callbacks o excepciones en tiempo de ejecución
 * `Corrección` Las funciones envueltas en Proxy no podían usarse como callbacks en módulos heredados como dialogs, events, timers, UI, selector y automator, y los argumentos de callback de TimerThread podían pasarse como un array anidado
+* `Corrección` Las sobrecargas de compatibilidad Callable y BaseFunction hacían ambiguos los tipos de parámetros cuando funciones JavaScript normales llamaban a métodos Java como EventEmitter.on
 * `Corrección` La distribución de argumentos, los valores de retorno, los límites numéricos, las coordenadas de imagen y el ciclo de vida de recursos temporales de la migración inicial de módulos JavaScript no coincidían con la implementación original
 * `Corrección` La aplicación podía cerrarse inesperadamente al solicitar permiso de captura de pantalla en Android 14+ debido a un inicio anómalo del servicio en primer plano de proyección multimedia _[`issue #516`](http://issues.autojs6.com/516)_
 * `Corrección` Las llamadas repetidas a OCR desde varios hilos o archivos podían solicitar repetidamente permiso de captura de pantalla _[`issue #551`](http://issues.autojs6.com/551)_

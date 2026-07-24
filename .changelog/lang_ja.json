@@ -63,6 +63,7 @@
         "Rhino エンジン更新後のスコープ API 互換性リグレッションにより一部のランタイム補助機能が正常に動作しない問題",
         "Rhino モジュールブリッジで null/undefined, Callable, コンストラクター, プロトタイプ, realm, Kotlin 戻り値が正しく処理されず, realm をまたぐオブジェクト, コールバック欠落, または実行時例外が発生する問題",
         "Proxy でラップされた関数を dialogs, events, timers, UI, selector, automator などの旧モジュールでコールバックとして使用できず, TimerThread のコールバック引数がネストされた配列として渡されることがある問題",
+        "Callable と BaseFunction の互換オーバーロードにより通常の JavaScript 関数から EventEmitter.on などの Java メソッドを呼び出す際に引数型が曖昧になる問題",
         "初期 JavaScript モジュール移行の引数ディスパッチ, 戻り値, 数値境界, 画像座標, 一時リソースのライフサイクルが元の実装と一致しない問題",
         "Android 14+ で画面キャプチャ権限を要求するとメディアプロジェクションのフォアグラウンドサービス起動異常によりアプリがクラッシュする可能性がある問題 _[`issue #516`](http://issues.autojs6.com/516)_",
         "複数スレッドまたは複数ファイルから OCR を繰り返し呼び出すと画面キャプチャ権限を何度も要求する可能性がある問題 _[`issue #551`](http://issues.autojs6.com/551)_",

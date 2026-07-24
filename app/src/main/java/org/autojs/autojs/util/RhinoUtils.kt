@@ -220,43 +220,33 @@ object RhinoUtils {
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
-    fun callFunction(func: BaseFunction, paramsToFunction: Array<Any?>): Any? =
+    fun callFunction(func: Callable, paramsToFunction: Array<Any?>): Any? =
         callFunction(func, null as VarScope?, paramsToFunction)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
-    fun callFunction(scriptRuntime: ScriptRuntime, func: BaseFunction, paramsToFunction: Array<Any?>): Any? =
+    fun callFunction(scriptRuntime: ScriptRuntime, func: Callable, paramsToFunction: Array<Any?>): Any? =
         callFunction(scriptRuntime, func, null as VarScope?, paramsToFunction)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
-    fun callFunction(func: BaseFunction, scope: Scriptable?, args: Array<Any?>): Any? =
+    fun callFunction(func: Callable, scope: Scriptable?, args: Array<Any?>): Any? =
         callFunction(func, scope?.let { getDeclarationScope(it) }, scope, args)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
-    fun callFunction(scriptRuntime: ScriptRuntime, func: BaseFunction, scope: Scriptable?, args: Array<Any?>): Any? =
+    fun callFunction(scriptRuntime: ScriptRuntime, func: Callable, scope: Scriptable?, args: Array<Any?>): Any? =
         callFunction(scriptRuntime, func, scope?.let { getDeclarationScope(it) }, scope, args)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
-    fun callFunction(func: BaseFunction, scope: VarScope?, args: Array<Any?>): Any? =
+    fun callFunction(func: Callable, scope: VarScope?, args: Array<Any?>): Any? =
         callFunction(func, scope, Undefined.SCRIPTABLE_UNDEFINED, args)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
-    fun callFunction(scriptRuntime: ScriptRuntime, func: BaseFunction, scope: VarScope?, args: Array<Any?>): Any? =
+    fun callFunction(scriptRuntime: ScriptRuntime, func: Callable, scope: VarScope?, args: Array<Any?>): Any? =
         callFunction(scriptRuntime, func, scope, Undefined.SCRIPTABLE_UNDEFINED, args)
-
-    @JvmStatic
-    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
-    fun callFunction(func: BaseFunction, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? =
-        callFunction(null, func, scope?.let { getDeclarationScope(it) }, thisObj, args)
-
-    @JvmStatic
-    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
-    fun callFunction(func: BaseFunction, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? =
-        callFunction(null, func, scope, thisObj, args)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
@@ -269,12 +259,8 @@ object RhinoUtils {
         callFunction(null, func, scope, thisObj, args)
 
     @JvmStatic
-    fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? =
+    fun callFunction(scriptRuntime: ScriptRuntime?, func: Callable, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? =
         callFunction(scriptRuntime, func, scope?.let { getDeclarationScope(it) }, thisObj, args)
-
-    @JvmStatic
-    fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? =
-        callFunction(scriptRuntime, func as Callable, scope, thisObj, args)
 
     @JvmStatic
     fun callFunction(scriptRuntime: ScriptRuntime?, func: Callable, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? = withRhinoContext(scriptRuntime) { cx ->
@@ -313,10 +299,6 @@ object RhinoUtils {
             }
         }
     }
-
-    @JvmStatic
-    fun constructFunction(ctor: BaseFunction, scope: TopLevelScope, args: Array<Any?>): Scriptable =
-        constructFunction(ctor as RhinoFunction, scope, args)
 
     @JvmStatic
     fun constructFunction(ctor: RhinoFunction, scope: TopLevelScope, args: Array<Any?>): Scriptable = withRhinoContext { cx ->

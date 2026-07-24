@@ -440,14 +440,14 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 "Argument \"action\" ${action.jsBrief()} for ui.run must be a JavaScript Function"
             }
             return when {
-                RhinoUtils.isUiThread() -> callFunction(scriptRuntime, action, null, null, arrayOf())
+                RhinoUtils.isUiThread() -> callFunction(scriptRuntime, action, null as VarScope?, null, arrayOf())
                 else -> {
                     var error: Throwable? = null
                     var result: Any? = null
                     val disposable = scriptRuntime.threads.disposable()
                     scriptRuntime.uiHandler.post {
                         try {
-                            result = callFunction(scriptRuntime, action, null, null, arrayOf())
+                            result = callFunction(scriptRuntime, action, null as VarScope?, null, arrayOf())
                         } catch (t: Throwable) {
                             error = t
                         } finally {
@@ -908,13 +908,13 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 val isAutoJsUiMode = !getActivity(scriptRuntime).isJsNullish()
                 when {
                     isAutoJsUiMode -> {
-                        callFunction(scriptRuntime, action, null, null, arrayOf())
+                        callFunction(scriptRuntime, action, null as VarScope?, null, arrayOf())
                     }
                     else -> {
                         val scope = scriptRuntime.topLevelScope
                         val exitIfErrorFunc = scope.prop("__exitIfError__") as Callable
                         callFunction(scriptRuntime, exitIfErrorFunc, scope, scope.globalThis, arrayOf(newBaseFunction(scope, "action", {
-                            callFunction(scriptRuntime, action, null, null, arrayOf())
+                            callFunction(scriptRuntime, action, null as VarScope?, null, arrayOf())
                         }, NOT_CONSTRUCTABLE)))
                     }
                 }

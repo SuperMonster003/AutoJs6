@@ -6,7 +6,6 @@ import android.os.SystemClock
 import android.util.SparseArray
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Scriptable
 import java.lang.ref.WeakReference
@@ -38,9 +37,6 @@ class Timer {
         mHandler = Handler(looper)
     }
 
-    fun setTimeout(callback: BaseFunction, delay: Long, vararg args: Any?): Double =
-        setTimeout(callback as Callable, delay, *args)
-
     fun setTimeout(callback: Callable, delay: Long, vararg args: Any?): Double {
         synchronized(this) {
             val id = (mCallbackMaxId + 1).also { mCallbackMaxId = it }
@@ -57,9 +53,6 @@ class Timer {
     fun clearTimeout(n: Double): Boolean {
         synchronized(this) { return clearCallback(unwrapId(n)) }
     }
-
-    fun setInterval(callback: BaseFunction, interval: Long, vararg args: Any?): Double =
-        setInterval(callback as Callable, interval, *args)
 
     fun setInterval(callback: Callable, interval: Long, vararg args: Any?): Double {
         synchronized(this) {
@@ -80,9 +73,6 @@ class Timer {
     fun clearInterval(n: Double): Boolean {
         synchronized(this) { return clearCallback(unwrapId(n)) }
     }
-
-    fun setImmediate(callback: BaseFunction, vararg args: Any?): Double =
-        setImmediate(callback as Callable, *args)
 
     fun setImmediate(callback: Callable, vararg args: Any?): Double {
         synchronized(this) {

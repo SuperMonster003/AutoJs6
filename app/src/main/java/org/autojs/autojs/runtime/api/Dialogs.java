@@ -15,7 +15,6 @@ import org.autojs.autojs.core.ui.dialog.JsDialogBuilder;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.util.ArrayUtils;
 import org.autojs.autojs6.R;
-import org.mozilla.javascript.BaseFunction;
 import org.mozilla.javascript.Callable;
 
 /**
@@ -42,11 +41,6 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object rawInput(String title, String prefill, BaseFunction callback) {
-        return rawInput(title, prefill, (Callable) callback);
-    }
-
-    @ScriptInterface
     public Object alert(String title, String content, Callable callback) {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .alert()
@@ -56,11 +50,6 @@ public class Dialogs {
             builder.content(content);
         }
         return ((BlockedMaterialDialog.Builder) builder).showAndGet();
-    }
-
-    @ScriptInterface
-    public Object alert(String title, String content, BaseFunction callback) {
-        return alert(title, content, (Callable) callback);
     }
 
     @ScriptInterface
@@ -74,11 +63,6 @@ public class Dialogs {
             builder.content(content);
         }
         return ((BlockedMaterialDialog.Builder) builder).showAndGet();
-    }
-
-    @ScriptInterface
-    public Object confirm(String title, String content, BaseFunction callback) {
-        return confirm(title, content, (Callable) callback);
     }
 
     private Context getContext() {
@@ -98,11 +82,6 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object select(String title, String[] items, BaseFunction callback) {
-        return select(title, items, (Callable) callback);
-    }
-
-    @ScriptInterface
     public Object singleChoice(String title, int selectedIndex, String[] items, Callable callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackSingleChoice(selectedIndex)
@@ -110,11 +89,6 @@ public class Dialogs {
                 .positiveText(R.string.dialog_button_confirm)
                 .items(items))
                 .showAndGet();
-    }
-
-    @ScriptInterface
-    public Object singleChoice(String title, int selectedIndex, String[] items, BaseFunction callback) {
-        return singleChoice(title, selectedIndex, items, (Callable) callback);
     }
 
     @ScriptInterface
@@ -128,21 +102,11 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object multiChoice(String title, int[] indices, String[] items, BaseFunction callback) {
-        return multiChoice(title, indices, items, (Callable) callback);
-    }
-
-    @ScriptInterface
     public Object selectFile(String title, String prefill, Callable callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .input(null, prefill, true)
                 .title(title))
                 .showAndGet();
-    }
-
-    @ScriptInterface
-    public Object selectFile(String title, String prefill, BaseFunction callback) {
-        return selectFile(title, prefill, (Callable) callback);
     }
 
     private BlockedMaterialDialog.Builder dialogBuilder(Callable callback) {
@@ -170,18 +134,9 @@ public class Dialogs {
             return (String) Dialogs.this.rawInput(title, prefill, callback);
         }
 
-        public String rawInput(String title, String prefill, BaseFunction callback) {
-            return rawInput(title, prefill, (Callable) callback);
-        }
-
         @ScriptInterface
         public boolean confirm(String title, String content, Callable callback) {
             return (boolean) Dialogs.this.confirm(title, content, callback);
-        }
-
-        @ScriptInterface
-        public boolean confirm(String title, String content, BaseFunction callback) {
-            return confirm(title, content, (Callable) callback);
         }
 
         @ScriptInterface
@@ -190,18 +145,8 @@ public class Dialogs {
         }
 
         @ScriptInterface
-        public int select(String title, String[] items, BaseFunction callback) {
-            return select(title, items, (Callable) callback);
-        }
-
-        @ScriptInterface
         public int singleChoice(String title, int selectedIndex, String[] items, Callable callback) {
             return (int) Dialogs.this.singleChoice(title, selectedIndex, items, callback);
-        }
-
-        @ScriptInterface
-        public int singleChoice(String title, int selectedIndex, String[] items, BaseFunction callback) {
-            return singleChoice(title, selectedIndex, items, (Callable) callback);
         }
 
         @ScriptInterface
@@ -210,18 +155,8 @@ public class Dialogs {
         }
 
         @ScriptInterface
-        public int[] multiChoice(String title, int[] indices, String[] items, BaseFunction callback) {
-            return multiChoice(title, indices, items, (Callable) callback);
-        }
-
-        @ScriptInterface
         public Object alert(String title, String content, Callable callback) {
             return Dialogs.this.alert(title, content, callback);
-        }
-
-        @ScriptInterface
-        public Object alert(String title, String content, BaseFunction callback) {
-            return alert(title, content, (Callable) callback);
         }
 
     }
