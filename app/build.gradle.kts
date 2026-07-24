@@ -248,6 +248,18 @@ private data class RuntimeKitDigestEntry(
     val sha256: String,
 )
 
+private val runtimeKitBaselineNativeAbis = listOf(
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64",
+    "x86",
+)
+private val runtimeKitBaselineNativeLibraries = listOf(
+    "libjackpal-androidterm5.so",
+    "libjackpal-termexec2.so",
+)
+private val runtimeKitZipTimestampMs = 315532800000L
+
 private fun normalizeRuntimeKitVersion(value: String): String =
     value.replace("\\s+".toRegex(), "-").lowercase()
 
@@ -335,6 +347,83 @@ private fun collectZipDigestEntries(apkFile: File, accept: (String) -> Boolean):
             }
             .sortedBy { it.path }
             .toList()
+    }
+}
+
+private fun writeRuntimeKitTemplateWithBaselineNativeLibraries(
+    sourceTemplateApk: File,
+    baselineNativeLibraryAar: File,
+    outputTemplateApk: File,
+) {
+    require(sourceTemplateApk.isFile) {
+        "Missing Runtime Kit source template APK: $sourceTemplateApk"
+    }
+    require(baselineNativeLibraryAar.isFile) {
+        "Missing Runtime Kit baseline native-library AAR: $baselineNativeLibraryAar"
+    }
+    require(sourceTemplateApk.absoluteFile.normalize() != outputTemplateApk.absoluteFile.normalize()) {
+        "Runtime Kit source and output template APKs must be different files"
+    }
+
+    val targetEntries = runtimeKitBaselineNativeAbis.flatMap { abi ->
+        runtimeKitBaselineNativeLibraries.map { libraryName ->
+            "lib/$abi/$libraryName" to "jni/$abi/$libraryName"
+        }
+    }.toMap()
+    val writtenEntries = linkedSetOf<String>()
+    outputTemplateApk.parentFile?.mkdirs()
+
+    ZipFile(baselineNativeLibraryAar).use { nativeLibraryZip ->
+        targetEntries.forEach { (targetEntry, sourceEntry) ->
+            require(nativeLibraryZip.getEntry(sourceEntry)?.isDirectory == false) {
+                "Runtime Kit baseline native-library AAR is missing $sourceEntry for $targetEntry"
+            }
+        }
+
+        ZipFile(sourceTemplateApk).use { templateZip ->
+            val prepackagedNodeRuntimeEntries = templateZip.entries().asSequence()
+                .filterNot { it.isDirectory }
+                .map { it.name }
+                .filter { it.matches(Regex("""lib/[^/]+/(?:libnode|libautojs6-node)\.so""")) }
+                .toList()
+            require(prepackagedNodeRuntimeEntries.isEmpty()) {
+                "Runtime Kit source template must not prepackage Node runtime JNI libraries: " +
+                        prepackagedNodeRuntimeEntries.joinToString()
+            }
+
+            ZipOutputStream(outputTemplateApk.outputStream().buffered(256 * 1024)).use { outputZip ->
+                templateZip.entries().asSequence()
+                    .filterNot { it.name in targetEntries }
+                    .sortedBy { it.name }
+                    .forEach { sourceEntry ->
+                        require(writtenEntries.add(sourceEntry.name)) {
+                            "Runtime Kit source template contains duplicate ZIP entry: ${sourceEntry.name}"
+                        }
+                        outputZip.putNextEntry(ZipEntry(sourceEntry.name).apply {
+                            time = runtimeKitZipTimestampMs
+                        })
+                        if (!sourceEntry.isDirectory) {
+                            templateZip.getInputStream(sourceEntry).use { input ->
+                                input.copyTo(outputZip, 256 * 1024)
+                            }
+                        }
+                        outputZip.closeEntry()
+                    }
+
+                targetEntries.toSortedMap().forEach { (targetEntry, sourceEntry) ->
+                    require(writtenEntries.add(targetEntry)) {
+                        "Runtime Kit baseline native ZIP entry was written twice: $targetEntry"
+                    }
+                    outputZip.putNextEntry(ZipEntry(targetEntry).apply {
+                        time = runtimeKitZipTimestampMs
+                    })
+                    nativeLibraryZip.getInputStream(nativeLibraryZip.getEntry(sourceEntry)).use { input ->
+                        input.copyTo(outputZip, 256 * 1024)
+                    }
+                    outputZip.closeEntry()
+                }
+            }
+        }
     }
 }
 
@@ -1091,6 +1180,8 @@ tasks.register("generateRuntimeKit") {
     val runtimeKitTemplateApk = layout.buildDirectory.file(
         "outputs/apk/inrt/release/inrt-v$normalizedRuntimeKitVersion-universal.apk"
     )
+    val runtimeKitBaselineNativeLibraryAar =
+        rootDir.resolve("libs/jackpal-androidterm-libtermexec-1_0/libtermexec-release.aar")
     val runtimeApiSourceRoots = listOf(
         rootDir.resolve("app/src/main/assets/declarations"),
         rootDir.resolve("app/src/main/assets/modules"),
@@ -1107,6 +1198,7 @@ tasks.register("generateRuntimeKit") {
     inputs.property("runtimeKitSourceRepository", runtimeKitSourceRepository)
     inputs.property("runtimeKitGithubRunId", runtimeKitGithubRunId)
     inputs.file(runtimeKitTemplateApk)
+    inputs.file(runtimeKitBaselineNativeLibraryAar)
     inputs.files(runtimeApiSourceRoots)
     inputs.file(projectDir.resolve("src/main/assets/default_key_store.bks"))
 
@@ -1132,7 +1224,11 @@ tasks.register("generateRuntimeKit") {
         kitDir.mkdirs()
 
         val templateOut = kitDir.resolve("template.apk")
-        templateApk.copyTo(templateOut, overwrite = true)
+        writeRuntimeKitTemplateWithBaselineNativeLibraries(
+            sourceTemplateApk = templateApk,
+            baselineNativeLibraryAar = runtimeKitBaselineNativeLibraryAar,
+            outputTemplateApk = templateOut,
+        )
         val templateSha256 = templateOut.sha256String()
         kitDir.resolve("template.apk.sha256").writeText("$templateSha256\n", Charsets.UTF_8)
 
@@ -1217,7 +1313,16 @@ tasks.register("generateRuntimeKit") {
                 appendLine("    \"fileName\": \"template.apk\",")
                 appendLine("    \"packageName\": ${("$globalApplicationId.$flavorNameInrt").toJsonLiteral()},")
                 appendLine("    \"sha256\": ${templateSha256.toJsonLiteral()},")
-                appendLine("    \"sizeBytes\": ${templateOut.length()}")
+                appendLine("    \"sizeBytes\": ${templateOut.length()},")
+                appendLine(
+                    "    \"baselineNativeAbis\": " +
+                            runtimeKitBaselineNativeAbis.joinToString(prefix = "[", postfix = "]") { it.toJsonLiteral() } +
+                            ","
+                )
+                appendLine(
+                    "    \"baselineNativeLibraries\": " +
+                            runtimeKitBaselineNativeLibraries.joinToString(prefix = "[", postfix = "]") { it.toJsonLiteral() }
+                )
                 appendLine("  },")
                 appendLine("  \"defaultKeyStore\": {")
                 appendLine("    \"fileName\": \"default_key_store.bks\",")
@@ -1250,7 +1355,11 @@ tasks.register("generateRuntimeKit") {
                 appendLine("  \"sourceRepository\": ${runtimeKitSourceRepository.get().toJsonLiteral()},")
                 appendLine("  \"gitSha\": ${gitSha.toJsonLiteral()},")
                 appendLine("  \"githubRunId\": ${runtimeKitGithubRunId.get().toJsonLiteral()},")
-                appendLine("  \"templateApkSource\": ${templateApk.relativeTo(projectDir).invariantSeparatorsPath.toJsonLiteral()}")
+                appendLine("  \"templateApkSource\": ${templateApk.relativeTo(projectDir).invariantSeparatorsPath.toJsonLiteral()},")
+                appendLine(
+                    "  \"baselineNativeLibrarySource\": " +
+                            runtimeKitBaselineNativeLibraryAar.relativeTo(rootDir).invariantSeparatorsPath.toJsonLiteral()
+                )
                 appendLine("}")
             },
             Charsets.UTF_8,

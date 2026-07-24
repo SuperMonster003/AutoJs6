@@ -1938,6 +1938,16 @@ function validateContractAnchors(repoRoot) {
       "app/src/main/java/org/autojs/autojs/engine/NodeInteractiveLongRunningStatusStore.kt",
     ),
   );
+  const runtimeKitBuild = read(path.join(repoRoot, "app/build.gradle.kts"));
+  const apkBuilderPluginBuild = read(
+    path.join(repoRoot, "plugins/apk-builder-template/build.gradle.kts"),
+  );
+  const remoteApkBuilder = read(
+    path.join(
+      repoRoot,
+      "plugins/apk-builder-template/src/main/java/org/autojs/plugin/apkbuilder/template/impl/RemoteApkLightweightBuilder.kt",
+    ),
+  );
   const violations = [];
   if (!contract || contract.blocksCoreCompletion !== true) {
     violations.push("FINAL_BLOCKER_REGISTRY must declare blocking R6 evidence revalidation");
@@ -2026,6 +2036,24 @@ function validateContractAnchors(repoRoot) {
       packagedSmokeInstrumentation.includes("run-as $packageName")) {
     violations.push(
       "R6 packaged production lifecycle evidence must use the DUMP-protected shell receiver without run-as",
+    );
+  }
+  const runtimeKitBaselineAbis = ["arm64-v8a", "armeabi-v7a", "x86_64", "x86"];
+  const runtimeKitBaselineLibraries = ["libjackpal-androidterm5.so", "libjackpal-termexec2.so"];
+  if (!runtimeKitBuild.includes("writeRuntimeKitTemplateWithBaselineNativeLibraries(") ||
+      !runtimeKitBuild.includes("libs/jackpal-androidterm-libtermexec-1_0/libtermexec-release.aar") ||
+      runtimeKitBaselineAbis.some((abi) =>
+        !runtimeKitBuild.includes(`"${abi}"`) || !apkBuilderPluginBuild.includes(`"${abi}"`)) ||
+      runtimeKitBaselineLibraries.some((library) =>
+        !runtimeKitBuild.includes(`"${library}"`) || !apkBuilderPluginBuild.includes(`"${library}"`)) ||
+      !runtimeKitBuild.includes('"jni/$abi/$libraryName"') ||
+      !runtimeKitBuild.includes('"lib/$abi/$libraryName"') ||
+      !apkBuilderPluginBuild.includes("Runtime Kit template APK is missing baseline native library") ||
+      !remoteApkBuilder.includes("required native libraries in the Runtime Kit template") ||
+      !remoteApkBuilder.includes("or host build inputs") ||
+      remoteApkBuilder.includes("requires native libraries, but the host did not provide a build input archive")) {
+    violations.push(
+      "R6 remote APK Builder Runtime Kit must carry the cross-ABI terminal baseline and accept template-provided libraries",
     );
   }
   if (!deviceCollector.includes("org.gradle.daemon.registry.base") ||

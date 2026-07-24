@@ -27,6 +27,15 @@ native-libs.json
 provenance.json
 ```
 
+The Runtime Kit `template.apk` is slim with respect to Node-owned JNI, but it
+must contain the APK Builder terminal baseline for every declared Builder ABI.
+The main repository injects `libjackpal-androidterm5.so` and
+`libjackpal-termexec2.so` for `arm64-v8a`, `armeabi-v7a`, `x86_64`, and `x86`
+from the version-controlled `libtermexec-release.aar`. `runtime-kit.json`
+declares that policy and `native-libs.json` binds the actual entry hashes. The
+plugin build rejects missing baseline entries and any prepackaged
+`libnode.so`/`libautojs6-node.so`.
+
 ## Main Repository Tasks
 
 Generate a kit locally:

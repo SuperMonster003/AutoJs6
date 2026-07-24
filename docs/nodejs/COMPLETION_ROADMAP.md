@@ -492,6 +492,31 @@ terminal markers, forced-process loss, and next-launch crash collection. This
 focused dirty-source run validates the repair but is not archivable production
 evidence, so a clean complete 13/13 collection is still required.
 
+The following clean Sony arm64 collection on commit `287fe58c` then passed and
+archived all 13 selectors with zero failures, errors, or skips. The canonical
+report SHA-256 was
+`699bd49a722b1ed7e9b24e60091de298b72dbef66c25b99b87bcfce92120993c`.
+The clean Sony v7a collection passed all ten main-app selectors but failed all
+three packaged selectors before APK installation: the Runtime-Kit-backed
+Builder could not find v7a `libjackpal-androidterm5.so` and
+`libjackpal-termexec2.so`. The arm64 host APK was correct under the evidence
+contract, and the selected v7a Node plugin already supplied its own Node JNI
+triplet; the generated Runtime Kit had incorrectly copied a zero-native
+universal INRT template and therefore could not provide the target-independent
+terminal baseline.
+
+The Runtime Kit generator now injects the four supported Builder ABI copies of
+those two terminal libraries directly from the version-controlled
+`libtermexec-release.aar`, records their ABI/library policy and hashes, and
+continues to reject prepackaged Node JNI. Builder packaging verifies every
+entry, and the remote builder accepts required libraries supplied by either the
+template or host build inputs. A focused Sony v7a rerun on 2026-07-25 passed
+all three packaged selectors with zero failures, errors, or skips in 127.477
+seconds; the individual test times were 25.345, 30.358, and 68.943 seconds.
+This focused dirty-source run is not archivable. Because the Runtime Kit repair
+changes the host commit, both Sony arm64 and v7a still require complete clean
+13/13 recollection before their reports can close the current R6 evidence set.
+
 Core completion command:
 
 ```powershell

@@ -14,6 +14,11 @@ val buildTypeRelease = "release"
 val apkFileExtension = "apk"
 val enableRemoteBuildProperty = "autojs.apkBuilder.templatePlugin.enableRemoteBuild"
 val runtimeKitDirProperty = "autojs.apkBuilder.templatePlugin.runtimeKitDir"
+val runtimeKitBaselineNativeAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+val runtimeKitBaselineNativeLibraries = listOf(
+    "libjackpal-androidterm5.so",
+    "libjackpal-termexec2.so",
+)
 val enableRemoteBuild = providers.gradleProperty(enableRemoteBuildProperty)
     .map { value ->
         value.trim().lowercase().let { it in setOf("true", "1", "yes", "on") }
@@ -175,6 +180,12 @@ fun verifyRuntimeKit(runtimeKitDir: File) {
     val meta = JsonSlurper().parse(kitJson) as Map<String, Any?>
     val template = meta["template"] as? Map<String, Any?> ?: emptyMap()
     val defaultKeyStoreMeta = meta["defaultKeyStore"] as? Map<String, Any?> ?: emptyMap()
+    val declaredBaselineNativeAbis = (template["baselineNativeAbis"] as? List<*>)
+        ?.mapNotNull { it?.toString() }
+        .orEmpty()
+    val declaredBaselineNativeLibraries = (template["baselineNativeLibraries"] as? List<*>)
+        ?.mapNotNull { it?.toString() }
+        .orEmpty()
 
     val expectedTemplateSha = template["sha256"]?.toString()?.trim()?.lowercase().orEmpty()
     val actualTemplateSha = templateApk.sha256String().lowercase()
@@ -186,11 +197,36 @@ fun verifyRuntimeKit(runtimeKitDir: File) {
     require(fileTemplateSha == actualTemplateSha) {
         "Runtime Kit template.apk.sha256 mismatch: file=$fileTemplateSha actual=$actualTemplateSha"
     }
+    require(declaredBaselineNativeAbis == runtimeKitBaselineNativeAbis) {
+        "Runtime Kit template baselineNativeAbis mismatch: " +
+                "expected=$runtimeKitBaselineNativeAbis actual=$declaredBaselineNativeAbis"
+    }
+    require(declaredBaselineNativeLibraries == runtimeKitBaselineNativeLibraries) {
+        "Runtime Kit template baselineNativeLibraries mismatch: " +
+                "expected=$runtimeKitBaselineNativeLibraries actual=$declaredBaselineNativeLibraries"
+    }
     ZipFile(templateApk).use { zip ->
         listOf("AndroidManifest.xml", "resources.arsc", "classes.dex", "assets/init.js").forEach { entryName ->
             require(zip.getEntry(entryName) != null) {
                 "Runtime Kit template APK is missing required entry: $entryName"
             }
+        }
+        runtimeKitBaselineNativeAbis.forEach { abi ->
+            runtimeKitBaselineNativeLibraries.forEach { libraryName ->
+                val entryName = "lib/$abi/$libraryName"
+                require(zip.getEntry(entryName)?.isDirectory == false) {
+                    "Runtime Kit template APK is missing baseline native library: $entryName"
+                }
+            }
+        }
+        val prepackagedNodeRuntimeEntries = zip.entries().asSequence()
+            .filterNot { it.isDirectory }
+            .map { it.name }
+            .filter { it.matches(Regex("""lib/[^/]+/(?:libnode|libautojs6-node)\.so""")) }
+            .toList()
+        require(prepackagedNodeRuntimeEntries.isEmpty()) {
+            "Runtime Kit template APK must not prepackage Node runtime JNI libraries: " +
+                    prepackagedNodeRuntimeEntries.joinToString()
         }
     }
 

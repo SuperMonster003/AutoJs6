@@ -80,6 +80,7 @@ function main() {
     assertPackagedTemplateAbiSelectionContract(root);
     assertPackagedTemplateSourceContract();
     assertPackagedInteractiveShellContract();
+    assertRuntimeKitNativeBaselineContract();
     for (const requirement of DEVICE_REQUIREMENTS) {
       writeJson(root, requirement.relative, validDeviceReport(requirement));
       const result = evaluateDeviceReport(root, requirement, identity, root);
@@ -1377,6 +1378,40 @@ function assertPackagedInteractiveShellContract() {
   assert(source.includes("NodeInteractiveLongRunningStatusStore.SHELL_STOP_ACTION_NAME"));
   assert(source.includes("NodeInteractiveLongRunningStatusStore.SHELL_STATUS_RESULT_PREFIX"));
   assert(!source.includes("run-as $packageName"));
+}
+
+function assertRuntimeKitNativeBaselineContract() {
+  const runtimeKitBuild = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/build.gradle.kts"),
+    "utf8",
+  );
+  const apkBuilderPluginBuild = fs.readFileSync(
+    path.resolve(__dirname, "../../../plugins/apk-builder-template/build.gradle.kts"),
+    "utf8",
+  );
+  const remoteBuilder = fs.readFileSync(
+    path.resolve(
+      __dirname,
+      "../../../plugins/apk-builder-template/src/main/java/org/autojs/plugin/apkbuilder/template/impl/RemoteApkLightweightBuilder.kt",
+    ),
+    "utf8",
+  );
+  assert(runtimeKitBuild.includes("writeRuntimeKitTemplateWithBaselineNativeLibraries("));
+  assert(runtimeKitBuild.includes("libs/jackpal-androidterm-libtermexec-1_0/libtermexec-release.aar"));
+  for (const abi of ["arm64-v8a", "armeabi-v7a", "x86_64", "x86"]) {
+    assert(runtimeKitBuild.includes(`"${abi}"`));
+    assert(apkBuilderPluginBuild.includes(`"${abi}"`));
+  }
+  for (const library of ["libjackpal-androidterm5.so", "libjackpal-termexec2.so"]) {
+    assert(runtimeKitBuild.includes(`"${library}"`));
+    assert(apkBuilderPluginBuild.includes(`"${library}"`));
+  }
+  assert(runtimeKitBuild.includes('"jni/$abi/$libraryName"'));
+  assert(runtimeKitBuild.includes('"lib/$abi/$libraryName"'));
+  assert(apkBuilderPluginBuild.includes("Runtime Kit template APK is missing baseline native library"));
+  assert(remoteBuilder.includes("required native libraries in the Runtime Kit template"));
+  assert(remoteBuilder.includes("or host build inputs"));
+  assert(!remoteBuilder.includes("requires native libraries, but the host did not provide a build input archive"));
 }
 
 function readSdkDir(repoRoot) {

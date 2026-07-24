@@ -180,12 +180,6 @@ class RemoteApkLightweightBuilder(
             return
         }
 
-        if (archiveFile == null) {
-            throw RemoteApkBuildUnsupportedException(
-                "Remote APK build requires native libraries, but the host did not provide a build input archive."
-            )
-        }
-
         val missing = buildList {
             abis.forEach { abi ->
                 requiredLibs.forEach { soName ->
@@ -197,7 +191,8 @@ class RemoteApkLightweightBuilder(
         }
         if (missing.isNotEmpty()) {
             throw RemoteApkBuildUnsupportedException(
-                "Remote APK build cannot find required host native libraries: ${missing.joinToString(", ")}"
+                "Remote APK build cannot find required native libraries in the Runtime Kit template " +
+                        "or host build inputs: ${missing.joinToString(", ")}"
             )
         }
     }

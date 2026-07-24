@@ -89,6 +89,19 @@ Builder APK must share the host signer, expose the exact
 installation, and remain byte-for-byte and signer-identical before and after
 instrumentation.
 
+“Slim” excludes prepackaged Node-owned JNI; it does not permit the Builder
+Runtime Kit to omit its target-independent terminal baseline. Runtime Kit
+generation copies `libjackpal-androidterm5.so` and
+`libjackpal-termexec2.so` for `arm64-v8a`, `armeabi-v7a`, `x86_64`, and `x86`
+from the version-controlled `libtermexec-release.aar`. It records those entries
+in `native-libs.json` and declares the ABI/library policy in
+`runtime-kit.json`. Builder packaging fails closed if any declared entry is
+missing or if the template contains `libnode.so` or `libautojs6-node.so`.
+Remote packaging may then satisfy required libraries from this verified
+template or from authenticated host/plugin build inputs. This is required for
+the Sony v7a target, whose evidence contract intentionally keeps the host
+process arm64 while running the external Node service as v7a.
+
 Generated Release packages remain non-debuggable. Packaged lifecycle
 observation therefore cannot rely on `run-as`. The template exposes only an
 explicit ordered status/Stop receiver guarded by the platform
