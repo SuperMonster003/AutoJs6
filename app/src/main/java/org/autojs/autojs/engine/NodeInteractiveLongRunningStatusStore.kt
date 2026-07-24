@@ -132,5 +132,16 @@ object NodeInteractiveLongRunningStatusStore {
 
     private fun JSONObject.copy(): JSONObject = JSONObject(toString())
 
+    const val EXECUTION_ID_EXTRA_NAME = "execution_id"
     const val STOP_ACTION_NAME = "org.autojs.autojs.engine.action.STOP_NATIVE_NODE_INTERACTIVE"
+    const val SHELL_QUERY_ACTION_NAME =
+        "org.autojs.autojs.engine.action.QUERY_NATIVE_NODE_INTERACTIVE_STATUS"
+    const val SHELL_STOP_ACTION_NAME =
+        "org.autojs.autojs.engine.action.STOP_NATIVE_NODE_INTERACTIVE_SHELL"
+    const val SHELL_STATUS_RESULT_PREFIX = "autojs6-node-interactive-status-v1:"
+    const val SHELL_STOP_RESULT_PREFIX = "autojs6-node-interactive-stop-v1:"
+    const val SHELL_STATUS_MISSING = "missing"
+    const val SHELL_RESULT_INVALID_REQUEST = "invalid_request"
+    const val SHELL_STOP_ACCEPTED = "accepted"
+    const val SHELL_STOP_REJECTED = "rejected"
 }

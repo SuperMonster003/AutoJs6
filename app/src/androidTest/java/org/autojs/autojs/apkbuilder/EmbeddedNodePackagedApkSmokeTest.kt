@@ -14991,11 +14991,15 @@ $nodeConfigJson
                 foregroundRecordContainsStopCommand(foregroundRecord),
             )
 
-            val stopCommandOutput = stopPackagedLongRunningViaRunAs(CRASH_EVIDENCE_PACKAGE_NAME, firstExecutionId)
+            val stopCommandOutput = stopPackagedLongRunningViaShell(CRASH_EVIDENCE_PACKAGE_NAME, firstExecutionId)
             logPackagedCrashEvidenceStep("first_stop_command")
             assertTrue(
-                "Packaged foreground notification Stop command should accept the active execution.\n$stopCommandOutput",
+                "DUMP-protected packaged shell Stop command should accept the active execution.\n$stopCommandOutput",
                 stopCommandOutput.contains("Broadcast completed", ignoreCase = true) &&
+                        stopCommandOutput.contains(
+                            NodeInteractiveLongRunningStatusStore.SHELL_STOP_RESULT_PREFIX +
+                                    NodeInteractiveLongRunningStatusStore.SHELL_STOP_ACCEPTED,
+                        ) &&
                         !stopCommandOutput.contains("Exception", ignoreCase = true) &&
                         !stopCommandOutput.contains("Error:", ignoreCase = true) &&
                         !stopCommandOutput.contains("Permission Denial", ignoreCase = true),
@@ -15338,11 +15342,8 @@ $nodeConfigJson
         var lastRaw = ""
         var lastStatus: JSONObject? = null
         while (SystemClock.elapsedRealtime() < deadline) {
-            lastRaw = shellWithTimeout(
-                "run-as $packageName cat files/nodejs/interactive-long-running/$executionId.json 2>/dev/null",
-                PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS,
-            )
-            lastStatus = parseJsonObject(lastRaw)
+            lastRaw = queryPackagedInteractiveStatusViaShell(packageName, executionId)
+            lastStatus = parsePackagedInteractiveShellStatus(lastRaw)
             if (lastStatus?.let(predicate) == true) {
                 return lastStatus
             }
@@ -15448,15 +15449,81 @@ $nodeConfigJson
         return sections[0]
     }
 
-    private fun stopPackagedLongRunningViaRunAs(
+    private fun queryPackagedInteractiveStatusViaShell(
         packageName: String,
         executionId: String,
     ): String {
         return shellWithTimeout(
-            "run-as $packageName am broadcast --user 0 --receiver-foreground " +
-                    "-n $packageName/org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveStopReceiver " +
-                    "-a ${NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME} " +
-                    "--es execution_id $executionId 2>&1",
+            "am broadcast --user 0 --receiver-foreground " +
+                    "-n $packageName/org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveShellReceiver " +
+                    "-a ${NodeInteractiveLongRunningStatusStore.SHELL_QUERY_ACTION_NAME} " +
+                    "--es ${NodeInteractiveLongRunningStatusStore.EXECUTION_ID_EXTRA_NAME} $executionId 2>&1",
+            PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS,
+        )
+    }
+
+    private fun parsePackagedInteractiveShellStatus(output: String): JSONObject? {
+        val payload = packagedInteractiveShellResultPayload(
+            output,
+            NodeInteractiveLongRunningStatusStore.SHELL_STATUS_RESULT_PREFIX,
+        )
+        if (payload == NodeInteractiveLongRunningStatusStore.SHELL_STATUS_MISSING) {
+            return null
+        }
+        if (payload == NodeInteractiveLongRunningStatusStore.SHELL_RESULT_INVALID_REQUEST) {
+            throw AssertionError("Packaged shell status query rejected its request.\n${tail(output)}")
+        }
+        val decoded = runCatching {
+            String(Base64.getDecoder().decode(payload), StandardCharsets.UTF_8)
+        }.getOrElse { error ->
+            throw AssertionError("Packaged shell status query returned invalid Base64.\n${tail(output)}", error)
+        }
+        return parseJsonObject(decoded)
+            ?: throw AssertionError("Packaged shell status query returned invalid JSON.\n${tail(decoded)}")
+    }
+
+    private fun packagedInteractiveShellResultPayload(
+        output: String,
+        prefix: String,
+    ): String {
+        if (
+            output.contains("Permission Denial", ignoreCase = true) ||
+            output.contains("SecurityException", ignoreCase = true) ||
+            output.contains("Error:", ignoreCase = true) ||
+            output.contains("Exception occurred", ignoreCase = true)
+        ) {
+            throw AssertionError("Packaged shell broadcast failed.\n${tail(output)}")
+        }
+        if (!output.contains("Broadcast completed", ignoreCase = true)) {
+            throw AssertionError("Packaged shell broadcast did not complete.\n${tail(output)}")
+        }
+        val start = output.indexOf(prefix)
+        if (start < 0) {
+            throw AssertionError("Packaged shell broadcast omitted result prefix $prefix.\n${tail(output)}")
+        }
+        return output
+            .substring(start + prefix.length)
+            .takeWhile { character ->
+                character.isLetterOrDigit() ||
+                        character == '+' ||
+                        character == '/' ||
+                        character == '=' ||
+                        character == '_' ||
+                        character == '-'
+            }
+            .takeIf { it.isNotBlank() }
+            ?: throw AssertionError("Packaged shell broadcast returned an empty result.\n${tail(output)}")
+    }
+
+    private fun stopPackagedLongRunningViaShell(
+        packageName: String,
+        executionId: String,
+    ): String {
+        return shellWithTimeout(
+            "am broadcast --user 0 --receiver-foreground " +
+                    "-n $packageName/org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveShellReceiver " +
+                    "-a ${NodeInteractiveLongRunningStatusStore.SHELL_STOP_ACTION_NAME} " +
+                    "--es ${NodeInteractiveLongRunningStatusStore.EXECUTION_ID_EXTRA_NAME} $executionId 2>&1",
             PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS,
         )
     }

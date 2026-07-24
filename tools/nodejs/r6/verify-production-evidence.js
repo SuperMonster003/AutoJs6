@@ -1919,6 +1919,25 @@ function validateContractAnchors(repoRoot) {
       "app/src/androidTest/java/org/autojs/autojs/engine/NodeR6PersistentPluginSoakInstrumentationTest.kt",
     ),
   );
+  const packagedSmokeInstrumentation = read(
+    path.join(
+      repoRoot,
+      "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
+    ),
+  );
+  const manifest = read(path.join(repoRoot, "app/src/main/AndroidManifest.xml"));
+  const embeddedService = read(
+    path.join(
+      repoRoot,
+      "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt",
+    ),
+  );
+  const interactiveStatusStore = read(
+    path.join(
+      repoRoot,
+      "app/src/main/java/org/autojs/autojs/engine/NodeInteractiveLongRunningStatusStore.kt",
+    ),
+  );
   const violations = [];
   if (!contract || contract.blocksCoreCompletion !== true) {
     violations.push("FINAL_BLOCKER_REGISTRY must declare blocking R6 evidence revalidation");
@@ -1985,6 +2004,29 @@ function validateContractAnchors(repoRoot) {
   if (!deviceCollector.includes('"--no-daemon"') ||
       !deviceCollector.includes('"-Pkotlin.compiler.execution.strategy=in-process"')) {
     violations.push("R6 production device collector must isolate all Gradle and Kotlin compiler invocations");
+  }
+  const shellReceiverName = "org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveShellReceiver";
+  const shellReceiverStart = manifest.indexOf(`android:name="${shellReceiverName}"`);
+  const shellReceiverEnd = shellReceiverStart < 0 ? -1 : manifest.indexOf("/>", shellReceiverStart);
+  const shellReceiver = shellReceiverStart >= 0 && shellReceiverEnd > shellReceiverStart
+    ? manifest.slice(shellReceiverStart, shellReceiverEnd)
+    : "";
+  if (!shellReceiver.includes('android:exported="true"') ||
+      !shellReceiver.includes('android:permission="android.permission.DUMP"') ||
+      !shellReceiver.includes('android:process=":nodejs_embedded"') ||
+      !embeddedService.includes("class NativeNodeEmbeddedInteractiveShellReceiver : BroadcastReceiver()") ||
+      !embeddedService.includes("if (!isOrderedBroadcast)") ||
+      !embeddedService.includes("Base64.encodeToString(it, Base64.NO_WRAP)") ||
+      !interactiveStatusStore.includes("const val SHELL_QUERY_ACTION_NAME") ||
+      !interactiveStatusStore.includes("const val SHELL_STOP_ACTION_NAME") ||
+      !packagedSmokeInstrumentation.includes(`-n $packageName/${shellReceiverName}`) ||
+      !packagedSmokeInstrumentation.includes(
+        "NodeInteractiveLongRunningStatusStore.SHELL_STATUS_RESULT_PREFIX",
+      ) ||
+      packagedSmokeInstrumentation.includes("run-as $packageName")) {
+    violations.push(
+      "R6 packaged production lifecycle evidence must use the DUMP-protected shell receiver without run-as",
+    );
   }
   if (!deviceCollector.includes("org.gradle.daemon.registry.base") ||
       !deviceCollector.includes("gradle-daemon-registry") ||

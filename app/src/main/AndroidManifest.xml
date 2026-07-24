@@ -507,6 +507,12 @@
             android:exported="false"
             android:process=":nodejs_embedded" />
 
+        <receiver
+            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveShellReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP"
+            android:process=":nodejs_embedded" />
+
         <service
             android:name="org.autojs.autojs.engine.NativeNodeEmbeddedScriptServiceSlot1"
             android:exported="false"

@@ -33,6 +33,20 @@ packaging migration. The collector now treats that plugin as same-run
 evidence rather than an external prerequisite. A fresh production matrix run
 against the corrected collector is still required.
 
+The next clean Sony arm64 attempt executed all 13 selectors with zero skips and
+reached 12/13. The remaining packaged crash-evidence test launched its Node
+service and logcat recorded `RUNNING`, but its legacy `run-as` read could not
+observe the private status file because the generated Release APK was
+correctly non-debuggable. The product was not weakened to make the test pass.
+The packaged lifecycle test now queries status and requests Stop through an
+explicit ordered receiver protected by `android.permission.DUMP`, which is
+available to `adb shell` but not ordinary applications; the notification Stop
+receiver remains non-exported. A focused Sony rerun of that selector passed
+1/1 with zero skips (`76.611` test seconds, `78.388` JUnit-suite seconds) and
+proved clean Stop, task removal, forced-process loss, and next-launch crash
+collection. That direct dirty-source diagnostic is non-archivable; a complete
+clean 13/13 collector run remains required.
+
 R6 and Core completion remain pending. The four current device reports, the
 8-hour quick soak, the 24-hour final soak, and a clean-source final/release
 decision still need to pass. A short smoke run, an old Phase 11/13 archive, or a
@@ -74,6 +88,16 @@ Builder APK must share the host signer, expose the exact
 `org.autojs.plugin.APK_BUILDER` service, match the fresh build after
 installation, and remain byte-for-byte and signer-identical before and after
 instrumentation.
+
+Generated Release packages remain non-debuggable. Packaged lifecycle
+observation therefore cannot rely on `run-as`. The template exposes only an
+explicit ordered status/Stop receiver guarded by the platform
+`android.permission.DUMP` permission and returns status as Base64-encoded JSON;
+ordinary applications cannot call it, while the R6 instrumentation's
+`adb shell` identity can. The existing notification Stop receiver remains
+`exported=false`. The source-contract gate checks the manifest permission,
+receiver process, ordered-result encoding, test actions, and absence of
+packaged `run-as` commands.
 
 The collector verifies the slim template's package/signature, exact native ABI,
 and absence of prepackaged Node JNI, archives its SHA-256, and pushes the exact

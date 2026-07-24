@@ -79,6 +79,7 @@ function main() {
     assertDeviceRunnerGradleContracts();
     assertPackagedTemplateAbiSelectionContract(root);
     assertPackagedTemplateSourceContract();
+    assertPackagedInteractiveShellContract();
     for (const requirement of DEVICE_REQUIREMENTS) {
       writeJson(root, requirement.relative, validDeviceReport(requirement));
       const result = evaluateDeviceReport(root, requirement, identity, root);
@@ -1338,6 +1339,44 @@ function assertPackagedTemplateSourceContract() {
   assert(!source.includes("\"abis\": [\"arm64-v8a\"]"));
   assert(!source.includes("assertEquals(listOf(\"arm64-v8a\"), bundledConfig.abis)"));
   assert(source.includes("\"lib/$targetAbi/$libName\" in entries"));
+}
+
+function assertPackagedInteractiveShellContract() {
+  const source = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"),
+    "utf8",
+  );
+  const manifest = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/src/main/AndroidManifest.xml"),
+    "utf8",
+  );
+  const service = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt"),
+    "utf8",
+  );
+  const statusStore = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/src/main/java/org/autojs/autojs/engine/NodeInteractiveLongRunningStatusStore.kt"),
+    "utf8",
+  );
+  const receiverName = "org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveShellReceiver";
+  const receiverStart = manifest.indexOf(`android:name="${receiverName}"`);
+  const receiverEnd = receiverStart < 0 ? -1 : manifest.indexOf("/>", receiverStart);
+  assert(receiverStart >= 0 && receiverEnd > receiverStart);
+  const receiver = manifest.slice(receiverStart, receiverEnd);
+  assert(receiver.includes('android:exported="true"'));
+  assert(receiver.includes('android:permission="android.permission.DUMP"'));
+  assert(receiver.includes('android:process=":nodejs_embedded"'));
+  assert(service.includes("class NativeNodeEmbeddedInteractiveShellReceiver : BroadcastReceiver()"));
+  assert(service.includes("if (!isOrderedBroadcast)"));
+  assert(service.includes("Base64.encodeToString(it, Base64.NO_WRAP)"));
+  assert(statusStore.includes("const val SHELL_QUERY_ACTION_NAME"));
+  assert(statusStore.includes("const val SHELL_STOP_ACTION_NAME"));
+  assert(statusStore.includes('const val SHELL_STATUS_RESULT_PREFIX = "autojs6-node-interactive-status-v1:"'));
+  assert(source.includes(`-n $packageName/${receiverName}`));
+  assert(source.includes("NodeInteractiveLongRunningStatusStore.SHELL_QUERY_ACTION_NAME"));
+  assert(source.includes("NodeInteractiveLongRunningStatusStore.SHELL_STOP_ACTION_NAME"));
+  assert(source.includes("NodeInteractiveLongRunningStatusStore.SHELL_STATUS_RESULT_PREFIX"));
+  assert(!source.includes("run-as $packageName"));
 }
 
 function readSdkDir(repoRoot) {

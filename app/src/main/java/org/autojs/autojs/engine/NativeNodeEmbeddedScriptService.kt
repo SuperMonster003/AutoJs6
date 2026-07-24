@@ -1,5 +1,6 @@
 ﻿package org.autojs.autojs.engine
 
+import android.app.Activity
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
@@ -16,6 +17,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Process
 import android.os.ResultReceiver
+import android.util.Base64
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import org.autojs.autojs.App
@@ -2415,7 +2417,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RUNTIME_ADAPTER = "runtime_adapter"
         private const val EXTRA_PROCESS_POOL_SLOT = "process_pool_slot"
         private const val EXTRA_PROCESS_POOL_SLOT_SOURCE = "process_pool_slot_source"
-        private const val EXTRA_EXECUTION_ID = "execution_id"
+        private const val EXTRA_EXECUTION_ID = NodeInteractiveLongRunningStatusStore.EXECUTION_ID_EXTRA_NAME
         private const val EXTRA_STOP_SERVICE_CLASS = "stop_service_class"
         private const val EXTRA_FOREGROUND_SERVICE_TYPE = "foreground_service_type"
         private const val EXTRA_PREWARM_TTL_MS = "prewarm_ttl_ms"
@@ -5789,6 +5791,78 @@ class NativeNodeEmbeddedInteractiveStopReceiver : BroadcastReceiver() {
 
     private companion object {
         private const val TAG = "NativeNodeEmbeddedInteractiveStopReceiver"
+    }
+}
+
+class NativeNodeEmbeddedInteractiveShellReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        val executionId = intent.getStringExtra(NodeInteractiveLongRunningStatusStore.EXECUTION_ID_EXTRA_NAME)
+            ?.takeIf { it.isNotBlank() }
+        when (intent.action) {
+            NodeInteractiveLongRunningStatusStore.SHELL_QUERY_ACTION_NAME -> {
+                if (executionId == null) {
+                    respond(
+                        Activity.RESULT_CANCELED,
+                        NodeInteractiveLongRunningStatusStore.SHELL_STATUS_RESULT_PREFIX +
+                                NodeInteractiveLongRunningStatusStore.SHELL_RESULT_INVALID_REQUEST,
+                    )
+                    return
+                }
+                val status = NativeNodeEmbeddedScriptService.interactiveLongRunningStatus(context, executionId)
+                val payload = status?.toString()
+                    ?.toByteArray(Charsets.UTF_8)
+                    ?.let { Base64.encodeToString(it, Base64.NO_WRAP) }
+                    ?: NodeInteractiveLongRunningStatusStore.SHELL_STATUS_MISSING
+                respond(
+                    Activity.RESULT_OK,
+                    NodeInteractiveLongRunningStatusStore.SHELL_STATUS_RESULT_PREFIX + payload,
+                )
+            }
+
+            NodeInteractiveLongRunningStatusStore.SHELL_STOP_ACTION_NAME -> {
+                if (executionId == null) {
+                    respond(
+                        Activity.RESULT_CANCELED,
+                        NodeInteractiveLongRunningStatusStore.SHELL_STOP_RESULT_PREFIX +
+                                NodeInteractiveLongRunningStatusStore.SHELL_RESULT_INVALID_REQUEST,
+                    )
+                    return
+                }
+                val accepted = NativeNodeEmbeddedScriptService.stopInteractiveLongRunning(context, executionId)
+                respond(
+                    if (accepted) Activity.RESULT_OK else Activity.RESULT_CANCELED,
+                    NodeInteractiveLongRunningStatusStore.SHELL_STOP_RESULT_PREFIX +
+                            if (accepted) {
+                                NodeInteractiveLongRunningStatusStore.SHELL_STOP_ACCEPTED
+                            } else {
+                                NodeInteractiveLongRunningStatusStore.SHELL_STOP_REJECTED
+                            },
+                )
+            }
+
+            else -> {
+                Log.w(TAG, "interactive.shell.broadcast_ignored action=${intent.action.orEmpty()}")
+                respond(
+                    Activity.RESULT_CANCELED,
+                    NodeInteractiveLongRunningStatusStore.SHELL_STATUS_RESULT_PREFIX +
+                            NodeInteractiveLongRunningStatusStore.SHELL_RESULT_INVALID_REQUEST,
+                )
+            }
+        }
+    }
+
+    private fun respond(code: Int, data: String) {
+        if (!isOrderedBroadcast) {
+            Log.w(TAG, "interactive.shell.unordered_broadcast_ignored")
+            return
+        }
+        resultCode = code
+        resultData = data
+    }
+
+    private companion object {
+        private const val TAG = "NativeNodeEmbeddedInteractiveShellReceiver"
     }
 }
 

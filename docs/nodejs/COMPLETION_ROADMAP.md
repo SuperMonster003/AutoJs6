@@ -477,6 +477,21 @@ compiled in separate sequential processes: their former combined 4 GB process
 failed with `GC overhead limit exceeded`, while both isolated rebuilds passed
 from the same clean commit. The four current device reports remain required.
 
+A subsequent clean Sony arm64 collection exercised all 13 selectors with zero
+skips and reached 12/13. Its only failure was the packaged crash-evidence
+status poll: runtime logcat proved the production package had entered
+`RUNNING`, while the test's `run-as` read returned no data because the generated
+Release APK was correctly non-debuggable. The production package remains
+non-debuggable. Packaged lifecycle evidence now uses an explicit ordered
+broadcast receiver protected by the platform `android.permission.DUMP`
+permission to query Base64-encoded status and request Stop from `adb shell`;
+the notification receiver remains non-exported. The R6 source contract rejects
+a return to `run-as`. A direct Sony rerun of the formerly failing selector then
+passed 1/1 with zero skips in 76.611 seconds, covering Stop, task removal, clean
+terminal markers, forced-process loss, and next-launch crash collection. This
+focused dirty-source run validates the repair but is not archivable production
+evidence, so a clean complete 13/13 collection is still required.
+
 Core completion command:
 
 ```powershell
