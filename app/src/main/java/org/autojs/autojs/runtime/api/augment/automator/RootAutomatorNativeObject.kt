@@ -4,8 +4,8 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
@@ -46,11 +46,19 @@ class RootAutomatorNativeObject(private val scriptRuntime: ScriptRuntime, waitFo
         //  #     'touchDown', 'touchUp', 'touchMove', 'getDefaultId', 'setDefaultId', 'exit',
         //  # ]
         return when (val o = mRootAutomatorObject.prop(name)) {
-            is BaseFunction -> withRhinoContext(scriptRuntime) { cx ->
-                BoundFunction(cx, mRootAutomatorObject, o, mRootAutomatorObject, arrayOf())
+            is Callable -> withRhinoContext(scriptRuntime) { cx ->
+                bindCallable(cx, mRootAutomatorObject, o)
             }
             else -> super.get(name, start)
         }
+    }
+
+    companion object {
+
+        internal fun bindCallable(cx: Context, owner: Scriptable, callable: Callable): BoundFunction {
+            return BoundFunction(cx, owner, callable, owner, emptyArray())
+        }
+
     }
 
 }

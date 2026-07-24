@@ -225,6 +225,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Selector module could choose the wrong method signature when invoking overloaded methods through reflection
 * `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
+* `Fix` Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array
 * `Fix` Argument dispatch, return values, numeric boundaries, image coordinates, and temporary resource lifecycles in the early JavaScript module migration did not match the original implementation
 * `Fix` The app could crash when requesting screen capture permission on Android 14+ due to abnormal media projection foreground service startup _[`issue #516`](http://issues.autojs6.com/516)_
 * `Fix` Repeated OCR calls across multiple threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_

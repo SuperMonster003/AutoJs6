@@ -225,6 +225,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` selector 模塊反射調用重載方法時可能選擇錯誤方法簽名的問題
 * `修復` Rhino 引擎更新後作用域 API 兼容性回歸導致部分運行時輔助功能異常的問題
 * `修復` Rhino 模塊橋接對 null/undefined, Callable, 構造器, 原型, realm 及 Kotlin 返回值的處理不正確, 可能導致跨 realm 對象, 回調丟失或運行時異常的問題
+* `修復` Proxy 包裝函數無法作為 dialogs, events, timers, UI, selector 及 automator 等舊模塊的回調, 且 TimerThread 回調參數可能被嵌套傳遞的問題
 * `修復` 早期 JavaScript 模塊遷移中的參數分派, 返回值, 數值邊界, 圖像坐標及臨時資源生命週期與原實現不一致的問題
 * `修復` Android 14+ 申請屏幕捕獲權限時可能因媒體投影前台服務啟動異常導致應用崩潰的問題 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修復` 多線程或跨文件重複調用 OCR 時可能反覆申請屏幕捕獲權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_

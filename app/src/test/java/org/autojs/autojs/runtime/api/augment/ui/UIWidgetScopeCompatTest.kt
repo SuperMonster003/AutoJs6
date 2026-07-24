@@ -5,11 +5,13 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.TopLevel
@@ -117,4 +119,54 @@ class UIWidgetScopeCompatTest {
         assertEquals("value", widget.prop("text"))
         assertTrue(called)
     }
+
+    @Test
+    fun renderInternalAcceptsProxyWrappedFunction() {
+        val widget = RhinoUtils.newNativeObject(realm)
+        widget.defineProp("tag", "proxy-render")
+        val renderFunction = evaluate(
+            "new Proxy(function() { return '<' + this.tag + ' />'; }, {})",
+        )
+        assertTrue(renderFunction is Callable)
+        assertFalse(renderFunction is BaseFunction)
+        widget.defineProp("render", renderFunction)
+
+        assertEquals("<proxy-render />", Context.toString(UIWidget.renderInternal(cx, widget, emptyArray(), noopFunction)))
+    }
+
+    @Test
+    fun defineAttrAcceptsProxyWrappedGetterAndSetter() {
+        val widget = RhinoUtils.newNativeObject(realm)
+        val attrsObject = RhinoUtils.newNativeObject(realm)
+        val getter = evaluate(
+            "new Proxy(function(view, name) { return name + ':' + this.seen; }, {})",
+        )
+        val setter = evaluate(
+            "new Proxy(function(view, name, value) { this.seen = value; }, {})",
+        )
+        widget.defineProp("__attrs__", attrsObject)
+
+        UIWidget.defineAttr(cx, widget, arrayOf("text", getter, setter), noopFunction)
+        UIWidget.setAttr(cx, widget, arrayOf(null, "text", "value", null), noopFunction)
+
+        assertEquals("text:value", Context.toString(UIWidget.getAttr(cx, widget, arrayOf(null, "text", null), noopFunction)))
+    }
+
+    @Test
+    fun defineAttrAcceptsProxyWrappedApplier() {
+        val widget = RhinoUtils.newNativeObject(realm)
+        val attrsObject = RhinoUtils.newNativeObject(realm)
+        val applier = evaluate(
+            "new Proxy(function(view, name, value) { this.applied = name + ':' + value; }, {})",
+        )
+        widget.defineProp("__attrs__", attrsObject)
+
+        UIWidget.defineAttr(cx, widget, arrayOf("text", applier), noopFunction)
+        UIWidget.setAttr(cx, widget, arrayOf(null, "text", "value", null), noopFunction)
+
+        assertEquals("text:value", Context.toString(widget.prop("applied")))
+    }
+
+    private fun evaluate(source: String): Any? =
+        cx.evaluateString(realm, source, "UIWidgetScopeCompatTest", 1, null)
 }

@@ -16,6 +16,7 @@ import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.util.ArrayUtils;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.BaseFunction;
+import org.mozilla.javascript.Callable;
 
 /**
  * Created by Stardust on May 8, 2017.
@@ -33,7 +34,7 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object rawInput(String title, String prefill, BaseFunction callback) {
+    public Object rawInput(String title, String prefill, Callable callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .input(null, prefill, true)
                 .title(title))
@@ -41,7 +42,12 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object alert(String title, String content, BaseFunction callback) {
+    public Object rawInput(String title, String prefill, BaseFunction callback) {
+        return rawInput(title, prefill, (Callable) callback);
+    }
+
+    @ScriptInterface
+    public Object alert(String title, String content, Callable callback) {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .alert()
                 .title(title)
@@ -53,7 +59,12 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object confirm(String title, String content, BaseFunction callback) {
+    public Object alert(String title, String content, BaseFunction callback) {
+        return alert(title, content, (Callable) callback);
+    }
+
+    @ScriptInterface
+    public Object confirm(String title, String content, Callable callback) {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .confirm()
                 .title(title)
@@ -65,6 +76,11 @@ public class Dialogs {
         return ((BlockedMaterialDialog.Builder) builder).showAndGet();
     }
 
+    @ScriptInterface
+    public Object confirm(String title, String content, BaseFunction callback) {
+        return confirm(title, content, (Callable) callback);
+    }
+
     private Context getContext() {
         if (mThemeWrapper != null)
             return mThemeWrapper;
@@ -73,7 +89,7 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object select(String title, String[] items, BaseFunction callback) {
+    public Object select(String title, String[] items, Callable callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallback()
                 .title(title)
@@ -82,7 +98,12 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object singleChoice(String title, int selectedIndex, String[] items, BaseFunction callback) {
+    public Object select(String title, String[] items, BaseFunction callback) {
+        return select(title, items, (Callable) callback);
+    }
+
+    @ScriptInterface
+    public Object singleChoice(String title, int selectedIndex, String[] items, Callable callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackSingleChoice(selectedIndex)
                 .title(title)
@@ -92,7 +113,12 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object multiChoice(String title, int[] indices, String[] items, BaseFunction callback) {
+    public Object singleChoice(String title, int selectedIndex, String[] items, BaseFunction callback) {
+        return singleChoice(title, selectedIndex, items, (Callable) callback);
+    }
+
+    @ScriptInterface
+    public Object multiChoice(String title, int[] indices, String[] items, Callable callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackMultiChoice(ArrayUtils.box(indices))
                 .title(title)
@@ -102,14 +128,24 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object selectFile(String title, String prefill, BaseFunction callback) {
+    public Object multiChoice(String title, int[] indices, String[] items, BaseFunction callback) {
+        return multiChoice(title, indices, items, (Callable) callback);
+    }
+
+    @ScriptInterface
+    public Object selectFile(String title, String prefill, Callable callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .input(null, prefill, true)
                 .title(title))
                 .showAndGet();
     }
 
-    private BlockedMaterialDialog.Builder dialogBuilder(BaseFunction callback) {
+    @ScriptInterface
+    public Object selectFile(String title, String prefill, BaseFunction callback) {
+        return selectFile(title, prefill, (Callable) callback);
+    }
+
+    private BlockedMaterialDialog.Builder dialogBuilder(Callable callback) {
         Context context = mRuntime.app.getCurrentActivity();
         if (context == null || ((Activity) context).isFinishing()) {
             context = getContext();
@@ -130,33 +166,62 @@ public class Dialogs {
 
     public class NonUiDialogs {
 
-        public String rawInput(String title, String prefill, BaseFunction callback) {
+        public String rawInput(String title, String prefill, Callable callback) {
             return (String) Dialogs.this.rawInput(title, prefill, callback);
         }
 
+        public String rawInput(String title, String prefill, BaseFunction callback) {
+            return rawInput(title, prefill, (Callable) callback);
+        }
+
         @ScriptInterface
-        public boolean confirm(String title, String content, BaseFunction callback) {
+        public boolean confirm(String title, String content, Callable callback) {
             return (boolean) Dialogs.this.confirm(title, content, callback);
         }
 
         @ScriptInterface
-        public int select(String title, String[] items, BaseFunction callback) {
+        public boolean confirm(String title, String content, BaseFunction callback) {
+            return confirm(title, content, (Callable) callback);
+        }
+
+        @ScriptInterface
+        public int select(String title, String[] items, Callable callback) {
             return (Integer) Dialogs.this.select(title, items, callback);
         }
 
         @ScriptInterface
-        public int singleChoice(String title, int selectedIndex, String[] items, BaseFunction callback) {
+        public int select(String title, String[] items, BaseFunction callback) {
+            return select(title, items, (Callable) callback);
+        }
+
+        @ScriptInterface
+        public int singleChoice(String title, int selectedIndex, String[] items, Callable callback) {
             return (int) Dialogs.this.singleChoice(title, selectedIndex, items, callback);
         }
 
         @ScriptInterface
-        public int[] multiChoice(String title, int[] indices, String[] items, BaseFunction callback) {
+        public int singleChoice(String title, int selectedIndex, String[] items, BaseFunction callback) {
+            return singleChoice(title, selectedIndex, items, (Callable) callback);
+        }
+
+        @ScriptInterface
+        public int[] multiChoice(String title, int[] indices, String[] items, Callable callback) {
             return (int[]) Dialogs.this.multiChoice(title, indices, items, callback);
         }
 
         @ScriptInterface
-        public Object alert(String title, String content, BaseFunction callback) {
+        public int[] multiChoice(String title, int[] indices, String[] items, BaseFunction callback) {
+            return multiChoice(title, indices, items, (Callable) callback);
+        }
+
+        @ScriptInterface
+        public Object alert(String title, String content, Callable callback) {
             return Dialogs.this.alert(title, content, callback);
+        }
+
+        @ScriptInterface
+        public Object alert(String title, String content, BaseFunction callback) {
+            return alert(title, content, (Callable) callback);
         }
 
     }

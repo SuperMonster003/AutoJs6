@@ -13,12 +13,10 @@ import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceCallable
-import org.autojs.autojs.util.RhinoUtils.coerceFunction
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs6.R
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Undefined
 
@@ -57,7 +55,7 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun setTimeout(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtLeast(args, 1) {
             val (callbackArg, intervalArg) = it
-            val callback = coerceFunction(callbackArg)
+            val callback = coerceCallable(callbackArg)
             val interval = coerceLongNumber(intervalArg, 1L)
             when (it.size) {
                 1 -> scriptRuntime.timers.setTimeout(callback)
@@ -76,7 +74,7 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun setInterval(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtLeast(args, 1) {
             val (callbackArg, intervalArg) = it
-            val callback = coerceFunction(callbackArg)
+            val callback = coerceCallable(callbackArg)
             val interval = coerceLongNumber(intervalArg, 1L)
             when (it.size) {
                 1 -> scriptRuntime.timers.setInterval(callback)
@@ -95,7 +93,7 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun setImmediate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtLeast(args, 1) {
             val (callbackArg) = it
-            val callback = coerceFunction(callbackArg)
+            val callback = coerceCallable(callbackArg)
             when (it.size) {
                 1 -> scriptRuntime.timers.setImmediate(callback)
                 else -> scriptRuntime.timers.setImmediate(callback, *it.sliceArray(1 until it.size))

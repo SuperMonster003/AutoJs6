@@ -11,6 +11,7 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
@@ -44,8 +45,12 @@ class ScriptBridges : IScriptBridges {
     override fun call(func: BaseFunction, target: Any?, args: Array<*>) =
         call(func as Callable, target, args)
 
-    fun call(func: Callable, target: Any?, args: Array<*>) = useJsContext { cx ->
-        val scope = (func as? Scriptable)?.parentScope
+    override fun call(func: Callable, target: Any?, args: Array<*>) = useJsContext { cx ->
+        val scope = when (func) {
+            is Function -> func.declarationScope
+            is Scriptable -> func.parentScope
+            else -> null
+        }
         val niceScope = scope ?: engine?.runtime?.topLevelScope ?: cx.getOrCreateStandardObjects()
         val niceArgs = args.map { Context.javaToJS(it, niceScope) }.toTypedArray()
         val thisObj = Context.javaToJS(target, niceScope) as? Scriptable ?: Undefined.SCRIPTABLE_UNDEFINED

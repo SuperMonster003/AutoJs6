@@ -13,11 +13,12 @@ import org.autojs.autojs.runtime.api.augment.util.Util.ensureArrayTypeRhino
 import org.autojs.autojs.util.ArrayUtils.unshiftWith
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.callPrototypeFunction
+import org.autojs.autojs.util.RhinoUtils.coerceCallable
 import org.autojs.autojs.util.RhinoUtils.coerceArray
-import org.autojs.autojs.util.RhinoUtils.coerceFunction
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
@@ -169,7 +170,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 arr.filter { ele ->
                     val selected = callFunction(
                         scriptRuntime,
-                        coerceFunction(selector),
+                        coerceCallable(selector),
                         scriptRuntime.topLevelScope,
                         null,
                         arrayOf(ele),
@@ -248,7 +249,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             val (arr, selector) = argList
             withRhinoContext(scriptRuntime) {
                 require(arr is NativeArray) { "Argument \"arr\" ${arr.jsBrief()} for Arrayx.sortBy must be a JavaScript Array" }
-                require(selector is BaseFunction) { "Argument \"selector\" ${selector.jsBrief()} for Arrayx.sortBy must be a JavaScript Function" }
+                require(selector is Callable) { "Argument \"selector\" ${selector.jsBrief()} for Arrayx.sortBy must be a JavaScript Function" }
                 when {
                     arr.length < 2 -> arr
                     else -> {
@@ -266,7 +267,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             val (arr, selector) = argList
             withRhinoContext(scriptRuntime) {
                 require(arr is NativeArray) { "Argument \"arr\" ${arr.jsBrief()} for Arrayx.sortByDescending must be a JavaScript Array" }
-                require(selector is BaseFunction) { "Argument \"selector\" ${selector.jsBrief()} for Arrayx.sortByDescending must be a JavaScript Function" }
+                require(selector is Callable) { "Argument \"selector\" ${selector.jsBrief()} for Arrayx.sortByDescending must be a JavaScript Function" }
                 when {
                     arr.length < 2 -> arr
                     else -> {
@@ -316,7 +317,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             val (arr, selector) = argList
             withRhinoContext(scriptRuntime) {
                 require(arr is NativeArray) { "Argument \"arr\" ${arr.jsBrief()} for Arrayx.sortedBy must be a JavaScript Array" }
-                require(selector is BaseFunction) { "Argument \"selector\" ${selector.jsBrief()} for Arrayx.sortedBy must be a JavaScript Function" }
+                require(selector is Callable) { "Argument \"selector\" ${selector.jsBrief()} for Arrayx.sortedBy must be a JavaScript Function" }
                 val copied = arr.slice(arr.indices).toNativeArray()
                 when {
                     arr.length < 2 -> copied
@@ -334,7 +335,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             val (arr, selector) = argList
             withRhinoContext(scriptRuntime) {
                 require(arr is NativeArray) { "Argument \"arr\" ${arr.jsBrief()} for Arrayx.sortedByDescending must be a JavaScript Array" }
-                require(selector is BaseFunction) { "Argument \"selector\" ${selector.jsBrief()} for Arrayx.sortedByDescending must be a JavaScript Function" }
+                require(selector is Callable) { "Argument \"selector\" ${selector.jsBrief()} for Arrayx.sortedByDescending must be a JavaScript Function" }
                 val copied = arr.slice(arr.indices).toNativeArray()
                 when {
                     arr.length < 2 -> copied
@@ -361,7 +362,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             return target
         }
 
-        private fun toCompareFunctionAsc(selector: BaseFunction) = object : BaseFunction() {
+        private fun toCompareFunctionAsc(selector: Callable) = object : BaseFunction() {
             override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any>): Int {
                 val (a, b) = args
                 val sA = selector.call(cx, scope, thisObj, arrayOf(a))
@@ -377,7 +378,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             }
         }
 
-        private fun toCompareFunctionDesc(selector: BaseFunction) = object : BaseFunction() {
+        private fun toCompareFunctionDesc(selector: Callable) = object : BaseFunction() {
             override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any>): Int {
                 val (a, b) = args
                 val sA = selector.call(cx, scope, thisObj, arrayOf(a))

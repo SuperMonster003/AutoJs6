@@ -51,8 +51,11 @@ import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeJavaMethod
+import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.regexp.NativeRegExp
 import java.math.BigInteger
 
@@ -844,6 +847,16 @@ open class UiSelector : UiObjectActions, StringReadable {
             compass: CharSequence?,
             resultType: Any?,
             callback: BaseFunction? = null,
+        ): Any? = pickup(scriptRuntime, root, selector, compass, resultType, callback as Callable?)
+
+        @JvmStatic
+        fun pickup(
+            scriptRuntime: ScriptRuntime,
+            root: UiObject?,
+            selector: Any?,
+            compass: CharSequence?,
+            resultType: Any?,
+            callback: Callable?,
         ): Any? = Picker.Builder()
             .setRoot(root)
             .setCompass(compass)
@@ -861,6 +874,19 @@ open class UiSelector : UiObjectActions, StringReadable {
             val callback: BaseFunction? = null,
         ) {
 
+            private var invocationCallback: Callable? = callback
+
+            private constructor(
+                root: UiObject?,
+                selector: UiSelector?,
+                compass: CharSequence?,
+                resultType: Any?,
+                callback: Callable?,
+                @Suppress("UNUSED_PARAMETER") callableMarker: Boolean,
+            ) : this(root, selector, compass, resultType, callback as? BaseFunction) {
+                invocationCallback = callback
+            }
+
             internal fun pick(scriptRuntime: ScriptRuntime) = Detector(compass, object : Result(resultType) {
 
                 override fun byOne(): UiObject? {
@@ -875,7 +901,7 @@ open class UiSelector : UiObjectActions, StringReadable {
                     } ?: EMPTY
                 }
 
-            }, callback, selector).detect(scriptRuntime)
+            }, invocationCallback, selector).detect(scriptRuntime)
 
             internal class Builder {
 
@@ -883,7 +909,7 @@ open class UiSelector : UiObjectActions, StringReadable {
                 private var mSelector = UiSelector()
                 private var mCompass: CharSequence? = COMPASS_PASS_ON
                 private var mResultType: Any = RESULT_TYPE_WIDGET
-                private var mCallback: BaseFunction? = null
+                private var mCallback: Callable? = null
 
                 private val cString = String::class.java
                 private val cBoolean = Boolean::class.java
@@ -1048,8 +1074,14 @@ open class UiSelector : UiObjectActions, StringReadable {
                                 }
                                 "filter" -> tmp.filter(object : BooleanFilter.BooleanSupplier {
                                     override fun get(node: UiObject): Boolean {
-                                        val func = (if (value is NativeArray) value[0] else value) as BaseFunction
-                                        return RhinoUtils.callFunction(scriptRuntime, func, arrayOf(node)) as Boolean
+                                        val func = (if (value is NativeArray) value[0] else value) as Callable
+                                        return RhinoUtils.callFunction(
+                                            scriptRuntime,
+                                            func,
+                                            null as VarScope?,
+                                            Undefined.SCRIPTABLE_UNDEFINED,
+                                            arrayOf(node),
+                                        ) as Boolean
                                     }
                                 })
                                 else -> when (value) {
@@ -1076,10 +1108,16 @@ open class UiSelector : UiObjectActions, StringReadable {
                                     is BigInteger -> tmp::class.java
                                         .getMethod(key, cInt)
                                         .invoke(tmp, value.toInt())
-                                    is BaseFunction -> tmp::class.java
+                                    is Callable -> tmp::class.java
                                         .getMethod(key, cBooleanSupplier)
                                         .invoke(tmp, object : BooleanFilter.BooleanSupplier {
-                                            override fun get(node: UiObject) = RhinoUtils.callFunction(scriptRuntime, value, arrayOf(node)) as Boolean
+                                            override fun get(node: UiObject) = RhinoUtils.callFunction(
+                                                scriptRuntime,
+                                                value,
+                                                null as VarScope?,
+                                                Undefined.SCRIPTABLE_UNDEFINED,
+                                                arrayOf(node),
+                                            ) as Boolean
                                         })
                                     is List<*> -> when {
                                         doubleTypes.containsKey(key) -> when (val types = doubleTypes.getValue(key)) {
@@ -1174,9 +1212,11 @@ open class UiSelector : UiObjectActions, StringReadable {
 
                 fun setResultType(resultType: Any?) = also { resultType?.let { mResultType = it } }
 
-                fun setCallback(callback: BaseFunction?) = also { callback?.let { mCallback = it } }
+                fun setCallback(callback: BaseFunction?) = setCallback(callback as Callable?)
 
-                fun build() = Picker(mRoot, mSelector, mCompass, mResultType, mCallback)
+                fun setCallback(callback: Callable?) = also { callback?.let { mCallback = it } }
+
+                fun build() = Picker(mRoot, mSelector, mCompass, mResultType, mCallback, true)
 
             }
 

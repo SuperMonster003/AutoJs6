@@ -14,6 +14,7 @@ import org.autojs.autojs.core.graphics.ScriptCanvas
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -180,17 +181,23 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
         super.onWindowVisibilityChanged(visibility)
     }
 
-    fun once(eventName: String, listener: BaseFunction): EventEmitter {
+    fun once(eventName: String, listener: Callable): EventEmitter {
         return mEventEmitter.once(eventName, listener)
     }
 
-    fun on(eventName: String, listener: BaseFunction): EventEmitter {
+    fun once(eventName: String, listener: BaseFunction): EventEmitter = once(eventName, listener as Callable)
+
+    fun on(eventName: String, listener: Callable): EventEmitter {
         return mEventEmitter.on(eventName, listener)
     }
 
-    fun addListener(eventName: String, listener: BaseFunction): EventEmitter {
+    fun on(eventName: String, listener: BaseFunction): EventEmitter = on(eventName, listener as Callable)
+
+    fun addListener(eventName: String, listener: Callable): EventEmitter {
         return mEventEmitter.addListener(eventName, listener)
     }
+
+    fun addListener(eventName: String, listener: BaseFunction): EventEmitter = addListener(eventName, listener as Callable)
 
     fun emit(eventName: String, vararg args: Any): Boolean {
         return mEventEmitter.emit(eventName, *args)
@@ -208,13 +215,17 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
         return mEventEmitter.listeners(eventName)
     }
 
-    fun prependListener(eventName: String, listener: BaseFunction): EventEmitter {
+    fun prependListener(eventName: String, listener: Callable): EventEmitter {
         return mEventEmitter.prependListener(eventName, listener)
     }
 
-    fun prependOnceListener(eventName: String, listener: BaseFunction): EventEmitter {
+    fun prependListener(eventName: String, listener: BaseFunction): EventEmitter = prependListener(eventName, listener as Callable)
+
+    fun prependOnceListener(eventName: String, listener: Callable): EventEmitter {
         return mEventEmitter.prependOnceListener(eventName, listener)
     }
+
+    fun prependOnceListener(eventName: String, listener: BaseFunction): EventEmitter = prependOnceListener(eventName, listener as Callable)
 
     fun removeAllListeners(): EventEmitter {
         return mEventEmitter.removeAllListeners()
@@ -224,9 +235,11 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
         return mEventEmitter.removeAllListeners(eventName)
     }
 
-    fun removeListener(eventName: String, listener: BaseFunction): EventEmitter {
+    fun removeListener(eventName: String, listener: Callable): EventEmitter {
         return mEventEmitter.removeListener(eventName, listener)
     }
+
+    fun removeListener(eventName: String, listener: BaseFunction): EventEmitter = removeListener(eventName, listener as Callable)
 
     fun setMaxListeners(n: Int): EventEmitter {
         return mEventEmitter.setMaxListeners(n)

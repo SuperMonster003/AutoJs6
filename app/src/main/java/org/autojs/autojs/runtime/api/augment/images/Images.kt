@@ -50,13 +50,14 @@ import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.coerceStringLowercase
 import org.autojs.autojs.util.RhinoUtils.handleAsyncOperation
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.undefined
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
@@ -1620,7 +1621,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         private fun requestScreenCaptureInternal(scriptRuntime: ScriptRuntime, vararg args: Any?): ScriptPromiseAdapter {
             val rtImages = scriptRuntime.images
             val images = scriptRuntime.topLevelScope.prop("images") as ScriptableObject
-            val emitFunc = images.prop("emit") as BaseFunction
+            val emitFunc = images.prop("emit") as Callable
 
             var orientation = ScreenCapturer.ORIENTATION_AUTO
             var width = -1
@@ -1666,11 +1667,11 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             if (isAsync) {
                 rtImages.setImageCaptureCallback { image ->
                     /* @Reference to `org.autojs.autojs.runtime.api.Images.OnScreenCaptureAvailableListener` */
-                    callFunction(scriptRuntime, emitFunc, arrayOf("screen_capture_available", image))
+                    callFunction(scriptRuntime, emitFunc, getDeclarationScope(images), images, arrayOf("screen_capture_available", image))
                     /* @Reference to `org.autojs.autojs.runtime.api.Images.OnScreenCaptureAvailableListener#onCaptureAvailable` */
-                    callFunction(scriptRuntime, emitFunc, arrayOf("capture_available", image))
+                    callFunction(scriptRuntime, emitFunc, getDeclarationScope(images), images, arrayOf("capture_available", image))
                     /* @Compatible with Auto.js Pro. */
-                    callFunction(scriptRuntime, emitFunc, arrayOf("screen_capture", image))
+                    callFunction(scriptRuntime, emitFunc, getDeclarationScope(images), images, arrayOf("screen_capture", image))
                 }
             }
 

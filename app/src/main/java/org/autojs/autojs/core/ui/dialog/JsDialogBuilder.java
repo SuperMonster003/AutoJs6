@@ -14,6 +14,7 @@ import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.tool.UiHandler;
 import org.jetbrains.annotations.NotNull;
 import org.mozilla.javascript.BaseFunction;
+import org.mozilla.javascript.Callable;
 
 /**
  * Created by Stardust on Apr 17, 2018.
@@ -89,19 +90,31 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
         return mDialog = new JsDialog(this, mEmitter, mUiHandler);
     }
 
-    public JsDialogBuilder once(String eventName, BaseFunction listener) {
+    public JsDialogBuilder once(String eventName, Callable listener) {
         mEmitter.once(eventName, listener);
         return this;
     }
 
-    public JsDialogBuilder on(String eventName, BaseFunction listener) {
+    public JsDialogBuilder once(String eventName, BaseFunction listener) {
+        return once(eventName, (Callable) listener);
+    }
+
+    public JsDialogBuilder on(String eventName, Callable listener) {
         mEmitter.on(eventName, listener);
         return this;
     }
 
-    public JsDialogBuilder addListener(String eventName, BaseFunction listener) {
+    public JsDialogBuilder on(String eventName, BaseFunction listener) {
+        return on(eventName, (Callable) listener);
+    }
+
+    public JsDialogBuilder addListener(String eventName, Callable listener) {
         mEmitter.addListener(eventName, listener);
         return this;
+    }
+
+    public JsDialogBuilder addListener(String eventName, BaseFunction listener) {
+        return addListener(eventName, (Callable) listener);
     }
 
     public boolean emit(String eventName, Object... args) {
@@ -120,14 +133,22 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
         return mEmitter.listeners(eventName);
     }
 
-    public JsDialogBuilder prependListener(String eventName, BaseFunction listener) {
+    public JsDialogBuilder prependListener(String eventName, Callable listener) {
         mEmitter.prependListener(eventName, listener);
         return this;
     }
 
-    public JsDialogBuilder prependOnceListener(String eventName, BaseFunction listener) {
+    public JsDialogBuilder prependListener(String eventName, BaseFunction listener) {
+        return prependListener(eventName, (Callable) listener);
+    }
+
+    public JsDialogBuilder prependOnceListener(String eventName, Callable listener) {
         mEmitter.prependOnceListener(eventName, listener);
         return this;
+    }
+
+    public JsDialogBuilder prependOnceListener(String eventName, BaseFunction listener) {
+        return prependOnceListener(eventName, (Callable) listener);
     }
 
     public JsDialogBuilder removeAllListeners() {
@@ -140,9 +161,13 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
         return this;
     }
 
-    public JsDialogBuilder removeListener(String eventName, BaseFunction listener) {
+    public JsDialogBuilder removeListener(String eventName, Callable listener) {
         mEmitter.removeListener(eventName, listener);
         return this;
+    }
+
+    public JsDialogBuilder removeListener(String eventName, BaseFunction listener) {
+        return removeListener(eventName, (Callable) listener);
     }
 
     public JsDialogBuilder setMaxListeners(int n) {

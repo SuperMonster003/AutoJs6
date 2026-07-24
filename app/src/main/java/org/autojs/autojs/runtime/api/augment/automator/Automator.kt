@@ -28,13 +28,15 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.SdkVersionUtils
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs6.R
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.Scriptable
 import android.graphics.Point as AndroidPoint
 import org.opencv.core.Point as OpencvPoint
 
@@ -684,29 +686,41 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun toGestureResultCallback(scriptRuntime: ScriptRuntime, callback: Any?): AccessibilityService.GestureResultCallback? {
+            if (callback is AccessibilityService.GestureResultCallback) return callback
             if (!isGestureResultCallbackLike(callback)) return null
             return object : AccessibilityService.GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription) {
                     when (callback) {
-                        is BaseFunction -> RhinoUtils.callFunction(scriptRuntime, callback, callback, callback, arrayOf(true))
+                        is Callable -> callGestureCallback(scriptRuntime, callback, true)
                         is NativeObject -> callback.prop("onCompleted")?.let {
-                            if (it is BaseFunction) RhinoUtils.callFunction(scriptRuntime, it, callback, callback, arrayOf(gestureDescription))
+                            if (it is Callable) {
+                                RhinoUtils.callFunction(scriptRuntime, it, getDeclarationScope(callback), callback, arrayOf(gestureDescription))
+                            }
                         }
                     }
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription) {
                     when (callback) {
-                        is BaseFunction -> RhinoUtils.callFunction(scriptRuntime, callback, callback, callback, arrayOf(false))
+                        is Callable -> callGestureCallback(scriptRuntime, callback, false)
                         is NativeObject -> callback.prop("onCancelled")?.let {
-                            if (it is BaseFunction) RhinoUtils.callFunction(scriptRuntime, it, callback, callback, arrayOf(gestureDescription))
+                            if (it is Callable) {
+                                RhinoUtils.callFunction(scriptRuntime, it, getDeclarationScope(callback), callback, arrayOf(gestureDescription))
+                            }
                         }
                     }
                 }
             }
         }
 
-        private fun isGestureResultCallbackLike(o: Any?): Boolean {
+        private fun callGestureCallback(scriptRuntime: ScriptRuntime, callback: Callable, result: Boolean) {
+            val callbackObject = callback as? Scriptable
+            val scope = callbackObject?.let(::getDeclarationScope) ?: scriptRuntime.topLevelScope
+            val thisObj = callbackObject ?: scriptRuntime.topLevelScope.globalThis
+            RhinoUtils.callFunction(scriptRuntime, callback, scope, thisObj, arrayOf(result))
+        }
+
+        internal fun isGestureResultCallbackLike(o: Any?): Boolean {
             return o.isJsFunction() ||
                     o is NativeObject && (o.prop("onCompleted").isJsFunction() || o.prop("onCancelled").isJsFunction()) ||
                     o is AccessibilityService.GestureResultCallback

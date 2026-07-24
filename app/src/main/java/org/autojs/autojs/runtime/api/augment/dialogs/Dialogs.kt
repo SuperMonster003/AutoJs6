@@ -46,7 +46,7 @@ import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.StringUtils.looseMatches
 import org.autojs.autojs6.R
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Wrapper
@@ -190,16 +190,16 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun rawInput(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..3) { argList ->
             val (titleArg, prefillArg, callback) = argList
             when {
-                prefillArg is BaseFunction -> {
+                prefillArg is Callable -> {
                     rawInput(scriptRuntime, arrayOf(titleArg, /* prefill = */ null, /* callback = */ prefillArg))
                 }
-                isUiThread() && callback !is BaseFunction -> {
+                isUiThread() && callback !is Callable -> {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
                     val scope = scriptRuntime.topLevelScope
                     val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
-                        require(resolve is BaseFunction) {
+                        require(resolve is Callable) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.rawInput"
                         }
                         scriptRuntime.dialogs.rawInput(title, prefill, newBaseFunction(scope, "callback", { callbackArgs ->
@@ -216,7 +216,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 else -> {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
-                    require(callback is BaseFunction) {
+                    require(callback is Callable) {
                         "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.rawInput"
                     }
                     scriptRuntime.dialogs.rawInput(title, prefill, callback)
@@ -229,16 +229,16 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun input(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..3) { argList ->
             val (titleArg, prefillArg, callback) = argList
             when {
-                prefillArg is BaseFunction -> {
+                prefillArg is Callable -> {
                     input(scriptRuntime, arrayOf(titleArg, /* prefill = */ null, /* callback = */ prefillArg))
                 }
-                isUiThread() && callback !is BaseFunction -> {
+                isUiThread() && callback !is Callable -> {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
                     val scope = scriptRuntime.topLevelScope
                     val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
-                        require(resolve is BaseFunction) {
+                        require(resolve is Callable) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.input"
                         }
                         scriptRuntime.dialogs.rawInput(title, prefill, newBaseFunction(scope, "callback", { callbackArgs ->
@@ -259,7 +259,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 else -> {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
-                    require(callback is BaseFunction) {
+                    require(callback is Callable) {
                         "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.input"
                     }
                     val newCallback = newBaseFunction(scriptRuntime.topLevelScope, "newCallback", { newCallbackArgs ->
@@ -277,7 +277,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun prompt(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..3) { argList ->
             val (title, prefill, callback) = argList
             when (prefill) {
-                is BaseFunction -> prompt(scriptRuntime, arrayOf(title, /* prefill = */ null, /* callback = */ prefill))
+                is Callable -> prompt(scriptRuntime, arrayOf(title, /* prefill = */ null, /* callback = */ prefill))
                 else -> rawInput(scriptRuntime, arrayOf(title, prefill, callback))
             }
         }
@@ -287,16 +287,16 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun alert(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..3) { argList ->
             val (titleArg, prefillArg, callback) = argList
             when {
-                prefillArg is BaseFunction -> {
+                prefillArg is Callable -> {
                     alert(scriptRuntime, arrayOf(titleArg, /* prefill = */ null, /* callback = */ prefillArg))
                 }
-                isUiThread() && callback !is BaseFunction -> {
+                isUiThread() && callback !is Callable -> {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
                     val scope = scriptRuntime.topLevelScope
                     val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
-                        require(resolve is BaseFunction) {
+                        require(resolve is Callable) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.alert"
                         }
                         scriptRuntime.dialogs.alert(title, prefill, newBaseFunction(scope, "callback", { callbackArgs ->
@@ -313,7 +313,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 else -> {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
-                    require(callback is BaseFunction) {
+                    require(callback is Callable) {
                         "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.alert"
                     }
                     scriptRuntime.dialogs.alert(title, prefill, callback)
@@ -326,16 +326,16 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun confirm(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..3) { argList ->
             val (titleArg, prefillArg, callback) = argList
             when {
-                prefillArg is BaseFunction -> {
+                prefillArg is Callable -> {
                     confirm(scriptRuntime, arrayOf(titleArg, /* prefill = */ null, /* callback = */ prefillArg))
                 }
-                isUiThread() && callback !is BaseFunction -> {
+                isUiThread() && callback !is Callable -> {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
                     val scope = scriptRuntime.topLevelScope
                     val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
-                        require(resolve is BaseFunction) {
+                        require(resolve is Callable) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.confirm"
                         }
                         scriptRuntime.dialogs.confirm(title, prefill, newBaseFunction(scope, "callback", { callbackArgs ->
@@ -352,7 +352,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 else -> {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
-                    require(callback is BaseFunction) {
+                    require(callback is Callable) {
                         "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.confirm"
                     }
                     scriptRuntime.dialogs.confirm(title, prefill, callback)
@@ -367,11 +367,11 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val title = coerceString(titleArg, "")
             when (items) {
                 is NativeArray -> when {
-                    isUiThread() && callback !is BaseFunction -> {
+                    isUiThread() && callback !is Callable -> {
                         val scope = scriptRuntime.topLevelScope
                         val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                             val (resolve) = executorArgs
-                            require(resolve is BaseFunction) {
+                            require(resolve is Callable) {
                                 "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.select"
                             }
                             val itemsToSelect = items.map(::coerceString).toTypedArray()
@@ -386,7 +386,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         scriptRuntime.dialogs.select(title, itemsToSelect, null)
                     }
                     else -> {
-                        require(callback is BaseFunction) {
+                        require(callback is Callable) {
                             "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.select"
                         }
                         val itemsToSelect = items.map(::coerceString).toTypedArray()
@@ -412,11 +412,11 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val items = itemsArg.map(::coerceString).toTypedArray()
             val selectedIndex = coerceIntNumber(defaultIndex, 0)
             when {
-                isUiThread() && callback !is BaseFunction -> {
+                isUiThread() && callback !is Callable -> {
                     val scope = scriptRuntime.topLevelScope
                     val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
-                        require(resolve is BaseFunction) {
+                        require(resolve is Callable) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.singleChoice"
                         }
                         scriptRuntime.dialogs.singleChoice(title, selectedIndex, items, newBaseFunction(scope, "callback", { callbackArgs ->
@@ -429,7 +429,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     scriptRuntime.dialogs.singleChoice(title, selectedIndex, items, null)
                 }
                 else -> {
-                    require(callback is BaseFunction) {
+                    require(callback is Callable) {
                         "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.singleChoice"
                     }
                     scriptRuntime.dialogs.singleChoice(title, selectedIndex, items, callback)
@@ -453,10 +453,10 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
             val scope = scriptRuntime.topLevelScope
             when {
-                isUiThread() && callback !is BaseFunction -> {
+                isUiThread() && callback !is Callable -> {
                     val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
-                        require(resolve is BaseFunction) {
+                        require(resolve is Callable) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.multiChoice"
                         }
                         scriptRuntime.dialogs.multiChoice(title, selectedIndices, items, newBaseFunction(scope, "callback", { callbackArgs ->
@@ -470,7 +470,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     toJsArrayIfNeeded(scriptRuntime.dialogs.multiChoice(title, selectedIndices, items, null))
                 }
                 else -> {
-                    require(callback is BaseFunction) {
+                    require(callback is Callable) {
                         "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.multiChoice"
                     }
                     val transformedCallback = newBaseFunction(scope, "transformedCallback", { callbackArgs ->
@@ -673,12 +673,12 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
 
             properties.inquire(listOf("onBackKey", "onBackPressed"))?.let { onBackKey ->
-                val isFunction = onBackKey is BaseFunction
+                val isFunction = onBackKey is Callable
                 val isDisabled = onBackKey == false || (onBackKey is String && onBackKey.matches(Regex("^disabled?$", RegexOption.IGNORE_CASE)))
                 if (isDisabled || isFunction) {
                     dialog.setOnBackPressedFromJs {
-                        if (onBackKey is BaseFunction) {
-                            val result = callFunction(scriptRuntime, onBackKey, arrayOf(dialog))
+                        if (onBackKey is Callable) {
+                            val result = callFunction(scriptRuntime, onBackKey, null, null, arrayOf(dialog))
                             return@setOnBackPressedFromJs coerceBoolean(result, false)
                         }
                         return@setOnBackPressedFromJs false

@@ -311,6 +311,86 @@ class RhinoUtilsSemanticsTest {
     }
 
     @Test
+    fun scriptableHashHelpersAcceptProxyWrappedMethods() {
+        val receiver = RhinoUtils.newObject(scope)
+        receiver.defineProperty(
+            "expectedClass",
+            Context.javaToJS(UiObjectCollection::class.java, scope),
+            ScriptableObject.EMPTY,
+        )
+        receiver.defineProperty(
+            "getClass",
+            cx.evaluateString(
+                scope,
+                "new Proxy(function() { return this.expectedClass; }, {})",
+                "proxy-get-class",
+                1,
+                null,
+            ),
+            ScriptableObject.EMPTY,
+        )
+        receiver.defineProperty(
+            "hashCode",
+            cx.evaluateString(
+                scope,
+                "new Proxy(function() { return 91; }, {})",
+                "proxy-hash-code",
+                1,
+                null,
+            ),
+            ScriptableObject.EMPTY,
+        )
+
+        assertEquals(91, RhinoUtils.hashCodeOfScriptable(receiver))
+    }
+
+    @Test
+    fun constructAndPrototypeHelpersAcceptProxyWrappedFunctions() {
+        val constructorScope = TopLevelScope().apply {
+            initStandardObjects(cx, false)
+        }
+        val constructor = cx.evaluateString(
+            constructorScope,
+            "new Proxy(function(value) { this.value = value; }, {})",
+            "proxy-constructor",
+            1,
+            null,
+        ) as org.mozilla.javascript.Function
+        val instance = RhinoUtils.constructFunction(
+            constructor,
+            constructorScope,
+            arrayOf<Any?>("constructed"),
+        )
+        assertEquals("constructed", instance.get("value", instance))
+
+        val prototype = ScriptableObject.getObjectPrototype(scope)
+        val hook = cx.evaluateString(
+            scope,
+            "new Proxy(function() { return this.marker; }, {})",
+            "proxy-prototype-hook",
+            1,
+            null,
+        ) as Callable
+        prototype.put("__proxyHook__", prototype, hook)
+        val receiver = RhinoUtils.newObject(scope).apply {
+            put("marker", this, "prototype-called")
+        }
+
+        assertSame(
+            hook,
+            RhinoUtils.getPrototypeCallable(scope, TopLevel.Builtins.Object, "__proxyHook__"),
+        )
+        assertEquals(
+            "prototype-called",
+            RhinoUtils.callPrototypeFunction(
+                TopLevel.Builtins.Object,
+                "__proxyHook__",
+                receiver,
+            ),
+        )
+    }
+
+    @Test
     fun integerCoercionTruncatesTowardZeroAndChecksBounds() {
         assertEquals(12, RhinoUtils.coerceIntNumber(12.9))
         assertEquals(-12, RhinoUtils.coerceIntNumber(-12.9))

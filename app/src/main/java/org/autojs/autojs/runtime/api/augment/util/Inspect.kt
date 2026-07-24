@@ -39,6 +39,7 @@ import org.autojs.autojs.util.RhinoUtils.js_object_hasOwnProperty
 import org.autojs.autojs.util.RhinoUtils.js_object_keys
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
@@ -285,8 +286,8 @@ object Inspect : Augmentable(), Invokable {
         if (value is StringReadable) return value.toStringReadable()
 
         if (value is Scriptable && value !is NativeJavaPackage) runCatching {
-            (value.prop(StringReadable.KEY) as? BaseFunction)?.let { f ->
-                val value = Context.toString(callFunction(f, null as VarScope?, value, arrayOf()))
+            (value.prop(StringReadable.KEY) as? Callable)?.let { f ->
+                val value = Context.toString(callFunction(f, getDeclarationScope(value), value, arrayOf()))
                 return formatValue(ctx, value, recurseTimes)
             }
         }
@@ -300,8 +301,8 @@ object Inspect : Augmentable(), Invokable {
         // noinspection JSIncompatibleTypesComparison
         if (ctx.customInspect && value is Scriptable && value.isJsNonNullObject()) {
             val inspectFunc = value.prop("inspect")
-            if (inspectFunc is BaseFunction) {
-                val ret = callFunction(inspectFunc, null as VarScope?, value, arrayOf(recurseTimes, ctx))
+            if (inspectFunc is Callable) {
+                val ret = callFunction(inspectFunc, getDeclarationScope(value), value, arrayOf(recurseTimes, ctx))
                 return when {
                     isStringRhino(ret) -> formatValue(ctx, Context.toString(ret), recurseTimes)
                     else -> formatValue(ctx, ret, recurseTimes)
@@ -388,7 +389,12 @@ object Inspect : Augmentable(), Invokable {
                         // zh-CN: Augmentable 原型链终端的 toString, 不参与自定义判定.
                         return@run false
                     }
-                    return@run fn is BaseFunction && fn.arity == 0
+                    return@run when {
+                        fn !is Callable -> false
+                        fn is BaseFunction -> fn.arity == 0
+                        fn is Scriptable -> Context.toNumber(fn.prop("length")) == 0.0
+                        else -> false
+                    }
                 }
                 if (isCustom) {
                     return callToStringFunction(value)
@@ -417,7 +423,7 @@ object Inspect : Augmentable(), Invokable {
         // zh-CN: 某些没有属性的对象类型可以简化处理.
         if (keys.isEmpty) {
             when (value) {
-                is BaseFunction -> return formatBaseFunction(ctx, value)
+                is Callable -> return formatFunction(ctx, value)
                 is NativeRegExp -> return formatRegExp(ctx, value)
                 is NativeDate -> return formatDate(ctx, value)
                 is NativeError -> return formatError(value)
@@ -437,8 +443,8 @@ object Inspect : Augmentable(), Invokable {
 
         // Make functions say that they are functions.
         // zh-CN: 让函数表明它们是函数.
-        if (value is BaseFunction) {
-            base = " ${getBaseFunctionFormattedName(value)}"
+        if (value is Callable) {
+            base = " ${getFunctionFormattedName(value)}"
         }
 
         // Make RegExps say that they are RegExps.
@@ -712,9 +718,9 @@ object Inspect : Augmentable(), Invokable {
 
     private fun getRegExpFormattedName(value: Scriptable): String = Context.toString(callPrototypeFunction(Builtins.RegExp, "toString", value))
 
-    private fun formatBaseFunction(ctx: Ctx, value: ScriptableObject) = ctx.stylize(getBaseFunctionFormattedName(value), "special")
+    private fun formatFunction(ctx: Ctx, value: ScriptableObject) = ctx.stylize(getFunctionFormattedName(value), "special")
 
-    private fun getBaseFunctionFormattedName(value: ScriptableObject): String {
+    private fun getFunctionFormattedName(value: ScriptableObject): String {
         val suffix = value.prop("name").takeUnless { it.isJsNullish() }?.let { " $it()" } ?: ""
         return "[Function$suffix]"
     }

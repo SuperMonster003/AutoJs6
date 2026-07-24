@@ -17,11 +17,12 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.util.RhinoUtils.callFunction
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
@@ -63,8 +64,8 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         @JvmStatic
         fun emit(scriptRuntime: ScriptRuntime, eventName: String, vararg args: Any?) {
             val engines = scriptRuntime.topLevelScope.prop("engines") as? ScriptableObject ?: return
-            val emitFunc = engines.prop("emit") as BaseFunction
-            callFunction(scriptRuntime, emitFunc, arrayOf(eventName, *args))
+            val emitFunc = engines.prop("emit") as Callable
+            callFunction(scriptRuntime, emitFunc, getDeclarationScope(engines), engines, arrayOf(eventName, *args))
         }
 
         @JvmStatic

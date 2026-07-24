@@ -33,6 +33,7 @@ import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.BaseFunction;
+import org.mozilla.javascript.Callable;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -190,14 +191,22 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         return service;
     }
 
-    public Events onKeyDown(String keyName, BaseFunction listener) {
+    public Events onKeyDown(String keyName, Callable listener) {
         on(PREFIX_KEY_DOWN + keyName, listener);
         return this;
     }
 
-    public Events onceKeyDown(String keyName, BaseFunction listener) {
+    public Events onKeyDown(String keyName, BaseFunction listener) {
+        return onKeyDown(keyName, (Callable) listener);
+    }
+
+    public Events onceKeyDown(String keyName, Callable listener) {
         once(PREFIX_KEY_DOWN + keyName, listener);
         return this;
+    }
+
+    public Events onceKeyDown(String keyName, BaseFunction listener) {
+        return onceKeyDown(keyName, (Callable) listener);
     }
 
     public Events removeAllKeyDownListeners(String keyName) {
@@ -205,14 +214,22 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         return this;
     }
 
-    public Events onKeyUp(String keyName, BaseFunction listener) {
+    public Events onKeyUp(String keyName, Callable listener) {
         on(PREFIX_KEY_UP + keyName, listener);
         return this;
     }
 
-    public Events onceKeyUp(String keyName, BaseFunction listener) {
+    public Events onKeyUp(String keyName, BaseFunction listener) {
+        return onKeyUp(keyName, (Callable) listener);
+    }
+
+    public Events onceKeyUp(String keyName, Callable listener) {
         once(PREFIX_KEY_UP + keyName, listener);
         return this;
+    }
+
+    public Events onceKeyUp(String keyName, BaseFunction listener) {
+        return onceKeyUp(keyName, (Callable) listener);
     }
 
     public Events removeAllKeyUpListeners(String keyName) {
@@ -220,9 +237,13 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         return this;
     }
 
-    public Events onTouch(BaseFunction listener) {
+    public Events onTouch(Callable listener) {
         on("touch", listener);
         return this;
+    }
+
+    public Events onTouch(BaseFunction listener) {
+        return onTouch((Callable) listener);
     }
 
     public Events removeAllTouchListeners() {
@@ -316,14 +337,22 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         }
     }
 
-    public Events onNotification(BaseFunction listener) {
+    public Events onNotification(Callable listener) {
         on("notification", listener);
         return this;
     }
 
-    public Events onToast(BaseFunction listener) {
+    public Events onNotification(BaseFunction listener) {
+        return onNotification((Callable) listener);
+    }
+
+    public Events onToast(Callable listener) {
         on("toast", listener);
         return this;
+    }
+
+    public Events onToast(BaseFunction listener) {
+        return onToast((Callable) listener);
     }
 
     public void recycle() {

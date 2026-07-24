@@ -315,7 +315,11 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    fun constructFunction(ctor: BaseFunction, scope: TopLevelScope, args: Array<Any?>): Scriptable = withRhinoContext { cx ->
+    fun constructFunction(ctor: BaseFunction, scope: TopLevelScope, args: Array<Any?>): Scriptable =
+        constructFunction(ctor as RhinoFunction, scope, args)
+
+    @JvmStatic
+    fun constructFunction(ctor: RhinoFunction, scope: TopLevelScope, args: Array<Any?>): Scriptable = withRhinoContext { cx ->
         ctor.construct(cx, scope, args)
     }
 
@@ -887,16 +891,26 @@ object RhinoUtils {
     @JvmStatic
     @JvmOverloads
     fun callPrototypeFunction(builtins: TopLevel.Builtins, funcName: String, thisObj: Scriptable, scope: VarScope, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
-        val prototypeFunction = getPrototypeFunction(scope, builtins, funcName)
+        val prototypeFunction = getPrototypeCallable(scope, builtins, funcName)
         prototypeFunction.call(cx, scope, thisObj, args)
     }
 
     @JvmStatic
     @JvmOverloads
     fun callPrototypeFunction(className: String, funcName: String, thisObj: Scriptable, scope: VarScope, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
-        val prototypeFunction = getPrototypeFunction(scope, className, funcName)
+        val prototypeFunction = getPrototypeCallable(scope, className, funcName)
         prototypeFunction.call(cx, scope, thisObj, args)
     }
+
+    @JvmStatic
+    fun getPrototypeCallable(scope: VarScope, builtins: TopLevel.Builtins, funcName: String) = TopLevel.getBuiltinPrototype(
+        ScriptableObject.getTopLevelScope(scope), builtins
+    ).prop(funcName) as Callable
+
+    @JvmStatic
+    fun getPrototypeCallable(scope: VarScope, className: String, funcName: String) = ScriptableObject.getClassPrototype(
+        scope, className
+    ).prop(funcName) as Callable
 
     @JvmStatic
     fun getPrototypeFunction(scope: VarScope, builtins: TopLevel.Builtins, funcName: String) = TopLevel.getBuiltinPrototype(
@@ -1272,12 +1286,12 @@ object RhinoUtils {
     fun hashCodeOfScriptable(other: Any?): Int? {
         if (other !is Scriptable) return null
         val getClassFunc = other["getClass"]
-        if (getClassFunc is BaseFunction) {
+        if (getClassFunc is Callable) {
             val clazz = callFunction(getClassFunc, other, other, emptyArray()).jsUnwrapped()
             if (clazz != UiObjectCollection::class.java) return null
         }
         val hashCodeFunc = other["hashCode"]
-        if (hashCodeFunc is BaseFunction) {
+        if (hashCodeFunc is Callable) {
             val hashCode = callFunction(hashCodeFunc, other, other, emptyArray()).jsUnwrapped()
             if (hashCode is Number) return hashCode.toInt()
         }

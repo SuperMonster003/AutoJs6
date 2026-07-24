@@ -9,6 +9,7 @@ import org.autojs.autojs.core.looper.TimerThread
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -61,10 +62,18 @@ class Timers(scriptRuntime: ScriptRuntime) {
     }
 
     fun setTimeout(callback: BaseFunction, delay: Long, vararg args: Any?): Double {
+        return setTimeout(callback as Callable, delay, *args)
+    }
+
+    fun setTimeout(callback: Callable, delay: Long, vararg args: Any?): Double {
         return mTimerForCurrentOrMainThread.setTimeout(callback, delay, *args)
     }
 
     fun setTimeout(callback: BaseFunction): Double {
+        return setTimeout(callback as Callable)
+    }
+
+    fun setTimeout(callback: Callable): Double {
         return setTimeout(callback, 1)
     }
 
@@ -73,10 +82,18 @@ class Timers(scriptRuntime: ScriptRuntime) {
     }
 
     fun setInterval(callback: BaseFunction, interval: Long, vararg args: Any?): Double {
+        return setInterval(callback as Callable, interval, *args)
+    }
+
+    fun setInterval(callback: Callable, interval: Long, vararg args: Any?): Double {
         return mTimerForCurrentOrMainThread.setInterval(callback, interval, *args)
     }
 
     fun setInterval(callback: BaseFunction): Double {
+        return setInterval(callback as Callable)
+    }
+
+    fun setInterval(callback: Callable): Double {
         return setInterval(callback, 1)
     }
 
@@ -85,6 +102,10 @@ class Timers(scriptRuntime: ScriptRuntime) {
     }
 
     fun setImmediate(callback: BaseFunction, vararg args: Any?): Double {
+        return setImmediate(callback as Callable, *args)
+    }
+
+    fun setImmediate(callback: Callable, vararg args: Any?): Double {
         return mTimerForCurrentOrMainThread.setImmediate(callback, *args)
     }
 

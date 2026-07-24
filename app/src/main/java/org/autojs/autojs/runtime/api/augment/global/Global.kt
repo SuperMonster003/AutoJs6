@@ -47,7 +47,7 @@ import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
@@ -439,7 +439,13 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
             while (true) {
                 checked = when (conditionArg) {
-                    is BaseFunction -> callFunction(scriptRuntime, conditionArg, scriptRuntime.topLevelScope, emptyArray<Any?>())
+                    is Callable -> callFunction(
+                        scriptRuntime,
+                        conditionArg,
+                        scriptRuntime.topLevelScope,
+                        Undefined.SCRIPTABLE_UNDEFINED,
+                        emptyArray<Any?>(),
+                    )
                     else -> Selector.pickup(scriptRuntime, arrayOf(conditionArg))
                 }
 
@@ -461,8 +467,14 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             }
 
             if (!fn.isJsNullish()) {
-                require(fn is BaseFunction) { "Property \"$fnPropertyName\" of callback ${fn.jsBrief()} must be a Function for wait" }
-                callFunction(scriptRuntime, fn, scriptRuntime.topLevelScope, arrayOf(checked)).takeUnless { Undefined.isUndefined(it) }?.let { result = it }
+                require(fn is Callable) { "Property \"$fnPropertyName\" of callback ${fn.jsBrief()} must be a Function for wait" }
+                callFunction(
+                    scriptRuntime,
+                    fn,
+                    scriptRuntime.topLevelScope,
+                    Undefined.SCRIPTABLE_UNDEFINED,
+                    arrayOf(checked),
+                ).takeUnless { Undefined.isUndefined(it) }?.let { result = it }
             }
 
             result

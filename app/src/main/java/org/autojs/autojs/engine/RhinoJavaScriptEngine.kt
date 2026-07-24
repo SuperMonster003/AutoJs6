@@ -24,12 +24,13 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.proxy.PaintProxyObject
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.js_object_assign
 import org.autojs.autojs.util.RhinoUtils.js_require
 import org.autojs.autojs.util.RhinoUtils.registerStandardObjects
 import org.autojs.autojs.util.RhinoUtils.withTimeConsuming
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
@@ -142,7 +143,13 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
                 } else throw e
             }.let { export ->
                 when (export) {
-                    is BaseFunction -> export.call(context, scriptable, scriptable.globalThis, arrayOf(runtime, scriptable))
+                    is Callable -> callFunction(
+                        runtime,
+                        export,
+                        scriptable,
+                        scriptable.globalThis,
+                        arrayOf<Any?>(runtime, scriptable),
+                    )
                     is NativeArray -> export.map { coerceString(it) }.distinct().forEach { bindModule(it) }
                     is NativeObject -> export.entries.forEach { entry -> bindModule(coerceString(entry.key), coerceString(entry.value)) }
                     is String -> when {
@@ -169,7 +176,13 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
             js_require(runtime, "__${niceFileName}__")
         }.getOrElse { js_require(runtime, niceFileName) }
         val exported: Any? = when (exportedRaw) {
-            is BaseFunction -> exportedRaw.call(context, scriptable, scriptable.globalThis, arrayOf(runtime, scriptable))
+            is Callable -> callFunction(
+                runtime,
+                exportedRaw,
+                scriptable,
+                scriptable.globalThis,
+                arrayOf<Any?>(runtime, scriptable),
+            )
             else -> exportedRaw
         }
         if (exported.isJsNullish()) {

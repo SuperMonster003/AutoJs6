@@ -24,7 +24,10 @@ import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import org.opencv.core.Point
 import org.opencv.core.Size
 import kotlin.math.abs
@@ -626,6 +629,11 @@ open class UiObject(
 
         @JvmStatic
         fun detect(scriptRuntime: ScriptRuntime, w: UiObject?, compass: CharSequence?, resultType: Any?, callback: BaseFunction? = null): Any? {
+            return detect(scriptRuntime, w, compass, resultType, callback as Callable?)
+        }
+
+        @JvmStatic
+        fun detect(scriptRuntime: ScriptRuntime, w: UiObject?, compass: CharSequence?, resultType: Any?, callback: Callable?): Any? {
             return Detector(compass, object : Detector.Result(resultType) {
 
                 override fun byOne() = w
@@ -715,6 +723,25 @@ open class UiObject(
             private val selector: UiSelector? = UiSelector(),
         ) {
 
+            private var invocationCallback: Callable? = callback
+
+            constructor(
+                compass: CharSequence?,
+                result: Result,
+                callback: Callable?,
+            ) : this(compass, result, callback as? BaseFunction, UiSelector()) {
+                invocationCallback = callback
+            }
+
+            constructor(
+                compass: CharSequence?,
+                result: Result,
+                callback: Callable?,
+                selector: UiSelector?,
+            ) : this(compass, result, callback as? BaseFunction, selector) {
+                invocationCallback = callback
+            }
+
             fun detect(scriptRuntime: ScriptRuntime): Any? {
                 val resultType = result.type.takeUnless { it == "" } ?: return null
                 return when (resultType) {
@@ -745,8 +772,8 @@ open class UiObject(
 
                     else -> invoke(resultType)
                 }.let { result ->
-                    if (callback.isJsNullish()) result else {
-                        detectWithCallback(scriptRuntime, callback, result).let {
+                    if (invocationCallback.isJsNullish()) result else {
+                        detectWithCallback(scriptRuntime, invocationCallback, result).let {
                             if (it.isJsUndefined()) result else it
                         }
                     }
@@ -791,11 +818,17 @@ open class UiObject(
                 .mapNotNull(result.byAll(), transformer)
                 .toNativeArray()
 
-            private fun detectWithCallback(scriptRuntime: ScriptRuntime, callback: BaseFunction?, args: Array<Any?>) = callback?.let {
-                RhinoUtils.callFunction(scriptRuntime, it, args)
+            private fun detectWithCallback(scriptRuntime: ScriptRuntime, callback: Callable?, args: Array<Any?>) = callback?.let {
+                RhinoUtils.callFunction(
+                    scriptRuntime,
+                    it,
+                    null as VarScope?,
+                    Undefined.SCRIPTABLE_UNDEFINED,
+                    args,
+                )
             }
 
-            private fun detectWithCallback(scriptRuntime: ScriptRuntime, callback: BaseFunction?, arg: Any?) = callback?.let {
+            private fun detectWithCallback(scriptRuntime: ScriptRuntime, callback: Callable?, arg: Any?) = callback?.let {
                 detectWithCallback(scriptRuntime, it, arrayOf(arg))
             }
 

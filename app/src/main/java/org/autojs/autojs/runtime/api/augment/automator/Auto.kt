@@ -28,7 +28,7 @@ import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeJavaObject
@@ -312,7 +312,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                 filter.isJsNullish() -> accessibilityBridge.setWindowFilter { true }
                 filter is Boolean -> accessibilityBridge.setWindowFilter { filter }
                 filter is WindowFilter -> accessibilityBridge.setWindowFilter(filter)
-                filter is BaseFunction -> accessibilityBridge.setWindowFilter { info ->
+                filter is Callable -> accessibilityBridge.setWindowFilter { info ->
                     Context.toBoolean(callFunction(scriptRuntime, filter, null as VarScope?, scriptRuntime.topLevelScope.globalThis, arrayOf(info)))
                 }
                 else -> throw WrappedIllegalArgumentException("Argument filter ($filter) is invalid for auto.setWindowFilter")

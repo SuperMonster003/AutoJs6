@@ -53,6 +53,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceObject
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.initNewBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
@@ -61,7 +62,9 @@ import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.NativeWith
@@ -233,15 +236,15 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         override fun beforeCreateView(inflateContext: InflateContext, node: Node?, viewName: String, parent: ViewGroup?): View? {
             val widgets = scriptRuntime.ui.widgets
             if (widgets.contains(viewName)) {
-                val ctor = widgets.prop(viewName) as BaseFunction
+                val ctor = widgets.prop(viewName) as Function
                 val widget = withRhinoContext(scriptRuntime) { cx ->
                     ctor.construct(cx, scriptRuntime.topLevelScope, arrayOf())
                 } as ScriptableObject
-                val f = widget.prop("renderInternal") as BaseFunction
+                val f = widget.prop("renderInternal") as Callable
                 return __inflateRhinoRuntime__(scriptRuntime, scriptRuntime.ui.layoutInflater.newInflateContext().also { ctx ->
                     ctx.put("root", widget)
                     ctx.put("widget", widget)
-                }, callFunction(scriptRuntime, f, widget, widget, arrayOf()), parent, false)
+                }, callFunction(scriptRuntime, f, getDeclarationScope(widget), widget, arrayOf()), parent, false)
             }
             return null
         }
@@ -279,18 +282,18 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 ViewExtras.getViewAttributes(scriptRuntime, view, scriptRuntime.ui.layoutInflater.resourceParser)
                     .setViewAttributeDelegate(object : ViewAttributeDelegate {
                         override fun has(name: String): Boolean {
-                            return callFunction(scriptRuntime, widget.prop("hasAttr") as BaseFunction, widget, widget, arrayOf(name)) as Boolean
+                            return callFunction(scriptRuntime, widget.prop("hasAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(name)) as Boolean
                         }
 
                         override fun get(view: View?, name: String, defaultGetter: ViewAttributeDelegate.ViewAttributeGetter?): String {
-                            return coerceString(callFunction(scriptRuntime, widget.prop("getAttr") as BaseFunction, widget, widget, arrayOf(view, name, defaultGetter)))
+                            return coerceString(callFunction(scriptRuntime, widget.prop("getAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(view, name, defaultGetter)))
                         }
 
                         override fun set(view: View?, name: String, value: String?, defaultSetter: ViewAttributeDelegate.ViewAttributeSetter?) {
-                            callFunction(scriptRuntime, widget.prop("setAttr") as BaseFunction, widget, widget, arrayOf(view, name, value, defaultSetter))
+                            callFunction(scriptRuntime, widget.prop("setAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(view, name, value, defaultSetter))
                         }
                     })
-                callFunction(scriptRuntime, widget.prop("notifyViewCreated") as BaseFunction, widget, widget, arrayOf(view))
+                callFunction(scriptRuntime, widget.prop("notifyViewCreated") as Callable, getDeclarationScope(widget), widget, arrayOf(view))
             }
             return view
         }
@@ -308,8 +311,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 else -> {
                     val boundValue = bindValueForApplyingAttribute(scriptRuntime, value)
                     val widget = inflateContext.get("widget")
-                    if (widget is NativeObject && callFunction(scriptRuntime, widget.prop("hasAttr") as BaseFunction, widget, widget, arrayOf(attrName)) as Boolean) {
-                        callFunction(scriptRuntime, widget.prop("setAttr") as BaseFunction, widget, widget, arrayOf(view, attrName, boundValue, newBaseFunction(scriptRuntime.topLevelScope, "setter", {
+                    if (widget is NativeObject && callFunction(scriptRuntime, widget.prop("hasAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(attrName)) as Boolean) {
+                        callFunction(scriptRuntime, widget.prop("setAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(view, attrName, boundValue, newBaseFunction(scriptRuntime.topLevelScope, "setter", {
                             val (viewArg, attrNameArg, valueArg, parentArg) = it
                             inflater.setAttr(viewArg as View, ns, coerceString(attrNameArg), coerceString(valueArg, ""), parentArg as ViewGroup?)
                         }, NOT_CONSTRUCTABLE)))
@@ -355,7 +358,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     require(widget is NativeObject) {
                         "Field widget of view prototype must be a JavaScript Object instead of ${widget.jsBrief()}"
                     }
-                    callFunction(scriptRuntime, widget.prop("notifyAfterInflation") as BaseFunction, widget, widget, arrayOf(view))
+                    callFunction(scriptRuntime, widget.prop("notifyAfterInflation") as Callable, getDeclarationScope(widget), widget, arrayOf(view))
                 }
             }
             return view
@@ -433,18 +436,18 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoFunctionBody
         fun runRhinoRuntime(scriptRuntime: ScriptRuntime, action: Any?): Any? {
-            require(action is BaseFunction) {
+            require(action is Callable) {
                 "Argument \"action\" ${action.jsBrief()} for ui.run must be a JavaScript Function"
             }
             return when {
-                RhinoUtils.isUiThread() -> callFunction(scriptRuntime, action, arrayOf())
+                RhinoUtils.isUiThread() -> callFunction(scriptRuntime, action, null, null, arrayOf())
                 else -> {
                     var error: Throwable? = null
                     var result: Any? = null
                     val disposable = scriptRuntime.threads.disposable()
                     scriptRuntime.uiHandler.post {
                         try {
-                            result = callFunction(scriptRuntime, action, arrayOf())
+                            result = callFunction(scriptRuntime, action, null, null, arrayOf())
                         } catch (t: Throwable) {
                             error = t
                         } finally {
@@ -475,7 +478,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoFunctionBody
         fun postRhinoRuntime(scriptRuntime: ScriptRuntime, action: Any?, delay: Any? = null): Boolean {
-            require(action is BaseFunction) {
+            require(action is Callable) {
                 "Argument \"action\" ${action.jsBrief()} for ui.post must be a JavaScript Function"
             }
             val loopers = scriptRuntime.loopers
@@ -525,7 +528,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             require(niceName.isNotEmpty()) {
                 "Argument \"name\" ${name.jsBrief()} for ui.registerWidget must be a valid non-empty string"
             }
-            require(widget is BaseFunction) {
+            require(widget is Function) {
                 "Argument \"widget\" ${widget.jsBrief()} for ui.registerWidget must be a JavaScript Function"
             }
             scriptRuntime.ui.widgets.defineProp(niceName, widget)
@@ -857,7 +860,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     val adapter = list.adapter ?: return
                     val global = scriptRuntime.topLevelScope
                     val globalArray = global.prop("Array") as ScriptableObject
-                    val arrayObserveFunc = globalArray.prop("observe") as BaseFunction
+                    val arrayObserveFunc = globalArray.prop("observe") as Callable
                     val handlerFunc = newBaseFunction(global, "handler", { args ->
                         val (changes) = args
                         require(changes is NativeArray) {
@@ -891,9 +894,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                             }
                         }
                     }, NOT_CONSTRUCTABLE)
-                    withRhinoContext(scriptRuntime) { cx ->
-                        arrayObserveFunc.call(cx, global, globalArray, arrayOf(dataSource, handlerFunc))
-                    }
+                    callFunction(scriptRuntime, arrayObserveFunc, global, globalArray, arrayOf(dataSource, handlerFunc))
                 }
             })
         }
@@ -902,18 +903,18 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             callFunction(scriptRuntime.js_UiExt, scriptRuntime.topLevelScope, null, arrayOf(webView))
         }
 
-        private fun wrapUiActionForPost(scriptRuntime: ScriptRuntime, action: BaseFunction, loopers: Loopers, timer: Timer?, waitId: Int) = Runnable {
+        private fun wrapUiActionForPost(scriptRuntime: ScriptRuntime, action: Callable, loopers: Loopers, timer: Timer?, waitId: Int) = Runnable {
             try {
                 val isAutoJsUiMode = !getActivity(scriptRuntime).isJsNullish()
                 when {
                     isAutoJsUiMode -> {
-                        callFunction(scriptRuntime, action, scriptRuntime.topLevelScope, arrayOf())
+                        callFunction(scriptRuntime, action, null, null, arrayOf())
                     }
-                    else -> withRhinoContext(scriptRuntime) { cx ->
+                    else -> {
                         val scope = scriptRuntime.topLevelScope
-                        val exitIfErrorFunc = scope.prop("__exitIfError__") as BaseFunction
-                        exitIfErrorFunc.call(cx, scope, scope.globalThis, arrayOf(newBaseFunction(scope, "action", {
-                            callFunction(scriptRuntime, action, arrayOf())
+                        val exitIfErrorFunc = scope.prop("__exitIfError__") as Callable
+                        callFunction(scriptRuntime, exitIfErrorFunc, scope, scope.globalThis, arrayOf(newBaseFunction(scope, "action", {
+                            callFunction(scriptRuntime, action, null, null, arrayOf())
                         }, NOT_CONSTRUCTABLE)))
                     }
                 }

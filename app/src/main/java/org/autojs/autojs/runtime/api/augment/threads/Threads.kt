@@ -13,13 +13,19 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceObject
 import org.autojs.autojs.util.RhinoUtils.coerceRunnable
+import org.autojs.autojs.util.RhinoUtils.initNewBaseFunction
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
+import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Synchronizer
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import java.util.concurrent.ThreadPoolExecutor
+import org.mozilla.javascript.Function as RhinoFunction
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -76,8 +82,19 @@ class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun sync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Synchronizer = ensureArgumentsLengthInRange(args, 1..2) {
             val (func, lock) = it
-            require(func is BaseFunction) { "Argument \"func\" ${func.jsBrief()} for global.sync must be a JavaScript Function" }
-            Synchronizer(func, lock)
+            require(func is Callable) { "Argument \"func\" ${func.jsBrief()} for global.sync must be a JavaScript Function" }
+            val target = when (func) {
+                is RhinoFunction -> func
+                else -> object : BaseFunction() {
+                    override fun call(
+                        cx: Context,
+                        scope: VarScope,
+                        thisObj: Scriptable,
+                        args: Array<out Any?>,
+                    ): Any? = func.call(cx, scope, thisObj, args)
+                }.also { initNewBaseFunction(scriptRuntime.topLevelScope, it) }
+            }
+            Synchronizer(target, lock)
         }
 
         @JvmStatic

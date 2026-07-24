@@ -38,7 +38,7 @@ import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.StringUtils.toFile
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeArray
@@ -162,9 +162,7 @@ class ZipNativeObject(
         opts.inquire("excludeFileFilter") { o ->
             when {
                 o.isJsNullish() -> null
-                o is BaseFunction -> ExcludeFileFilter { file ->
-                    coerceBoolean(callFunction(o, opts, opts, arrayOf(file)), false)
-                }
+                o is Callable -> toExcludeFileFilter(o, opts)
                 o is ExcludeFileFilter -> o
                 else -> listOf(
                     "Options property excludeFileFilter ${o.jsBrief()}",
@@ -333,6 +331,12 @@ class ZipNativeObject(
     }
 
     companion object : ArgumentGuards() {
+
+        internal fun toExcludeFileFilter(filter: Callable, owner: ScriptableObject): ExcludeFileFilter {
+            return ExcludeFileFilter { file ->
+                coerceBoolean(callFunction(filter, owner, owner, arrayOf(file)), false)
+            }
+        }
 
         @JvmStatic
         @RhinoStandardFunctionInterface

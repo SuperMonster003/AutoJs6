@@ -13,8 +13,8 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.getRhinoStandardFunctionMethods
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeObject
@@ -56,8 +56,8 @@ class ResponseBodyNativeObject(
             return super.get(name, start)
         }
         return when (val o = mResBodyObject.prop(name)) {
-            is BaseFunction -> withRhinoContext(scriptRuntime) { cx ->
-                BoundFunction(cx, mResBodyObject, o, mResBodyObject, arrayOf())
+            is Callable -> withRhinoContext(scriptRuntime) { cx ->
+                bindCallable(cx, mResBodyObject, o)
             }
             else -> super.get(name, start)
         }
@@ -84,6 +84,10 @@ class ResponseBodyNativeObject(
     }
 
     companion object : ArgumentGuards() {
+
+        internal fun bindCallable(cx: Context, owner: Scriptable, callable: Callable): BoundFunction {
+            return BoundFunction(cx, owner, callable, owner, emptyArray())
+        }
 
         @JvmStatic
         @RhinoStandardFunctionInterface

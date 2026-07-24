@@ -10,6 +10,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Console
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import java.lang.ref.WeakReference
 import java.util.WeakHashMap
@@ -90,10 +91,16 @@ open class TimerThread(
     }
 
     fun setTimeout(callback: BaseFunction): Double =
+        setTimeout(callback as Callable)
+
+    fun setTimeout(callback: BaseFunction, delay: Long, vararg args: Any): Double =
+        setTimeout(callback as Callable, delay, *args)
+
+    fun setTimeout(callback: Callable): Double =
         setTimeout(callback, 1)
 
-    fun setTimeout(callback: BaseFunction, delay: Long, vararg args: Any): Double = withTimer {
-        setTimeout(callback, delay, args.copyOf())
+    fun setTimeout(callback: Callable, delay: Long, vararg args: Any): Double = withTimer {
+        setTimeout(callback, delay, *args.copyOf())
     }
 
     fun clearTimeout(id: Double): Boolean = withTimer {
@@ -101,18 +108,27 @@ open class TimerThread(
     }
 
     fun setInterval(callback: BaseFunction): Double =
+        setInterval(callback as Callable)
+
+    fun setInterval(callback: BaseFunction, interval: Long, vararg args: Any): Double =
+        setInterval(callback as Callable, interval, *args)
+
+    fun setInterval(callback: Callable): Double =
         setInterval(callback, 1L)
 
-    fun setInterval(callback: BaseFunction, interval: Long, vararg args: Any): Double = withTimer {
-        setInterval(callback, interval, args.copyOf())
+    fun setInterval(callback: Callable, interval: Long, vararg args: Any): Double = withTimer {
+        setInterval(callback, interval, *args.copyOf())
     }
 
     fun clearInterval(id: Double): Boolean = withTimer {
         clearInterval(id)
     }
 
-    fun setImmediate(callback: BaseFunction, vararg args: Any): Double = withTimer {
-        setImmediate(callback, args.copyOf())
+    fun setImmediate(callback: BaseFunction, vararg args: Any): Double =
+        setImmediate(callback as Callable, *args)
+
+    fun setImmediate(callback: Callable, vararg args: Any): Double = withTimer {
+        setImmediate(callback, *args.copyOf())
     }
 
     fun clearImmediate(id: Double): Boolean = withTimer {

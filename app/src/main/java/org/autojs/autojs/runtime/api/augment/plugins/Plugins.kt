@@ -15,9 +15,10 @@ import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.flatten
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.js_require
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -167,9 +168,10 @@ class Plugins(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
             when {
                 asPackageName -> {
                     val plugin = scriptRuntime.plugins.load(name)
-                    val moduleExportedFunc = js_require(scriptRuntime, plugin.mainScriptPath) as BaseFunction
+                    val moduleExportedFunc = js_require(scriptRuntime, plugin.mainScriptPath) as Callable
                     val global = scriptRuntime.topLevelScope.globalThis
-                    val scope = moduleExportedFunc.parentScope ?: global.parentScope
+                    val scope = (moduleExportedFunc as? Scriptable)?.let(::getDeclarationScope)
+                        ?: getDeclarationScope(global)
                     callFunction(scriptRuntime, moduleExportedFunc, scope, global, arrayOf(plugin.unwrap()))
                 }
                 scriptRuntime.files.isDir("./plugins") -> {

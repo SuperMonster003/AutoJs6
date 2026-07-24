@@ -44,6 +44,7 @@ import org.autojs.autojs.util.RhinoUtils.js_object_setPrototypeOf
 import org.autojs.autojs.util.RhinoUtils.js_typeof
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeArray
@@ -328,7 +329,7 @@ object Util : Augmentable() {
             if (func.isJsNullish()) {
                 throw WrappedIllegalArgumentException("Function \"$name\" doesn't exist on source object $src")
             }
-            if (func !is BaseFunction) {
+            if (func !is Callable) {
                 throw WrappedIllegalArgumentException("Name \"$name\" is not a function type on source object $src")
             }
             target.put(name, target, js_function_bind(null, func, src))
@@ -754,10 +755,12 @@ object Util : Augmentable() {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun toRegularRhino(f: Any?): BaseFunction {
-        val func = f.also { ensureFunctionTypeRhino(it) } as BaseFunction
+    fun toRegularRhino(f: Any?): Callable {
+        ensureFunctionTypeRhino(f)
+        val func = f as? Callable
+            ?: throw WrappedIllegalArgumentException("Argument ${f.jsBrief()} for util.toRegular must be a JavaScript Function")
         return when {
-            func.prop("prototype").isJsObject() -> {
+            func is Scriptable && func.prop("prototype").isJsObject() -> {
                 func
             }
             else -> RegularFunction(func).also {
@@ -807,7 +810,7 @@ object Util : Augmentable() {
         coerceNumber(DisplayUtils.pxToSp(coerceFloatNumber(it)))
     }
 
-    internal class RegularFunction(private val func: BaseFunction) : BaseFunction() {
+    internal class RegularFunction(private val func: Callable) : BaseFunction() {
 
         override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>): Any {
             return func.call(cx, scope, null, args)
@@ -818,7 +821,10 @@ object Util : Augmentable() {
             @RhinoStandardFunctionInterface
             fun toString(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): String = ensureArgumentsIsEmpty(args) {
                 when (thisObj) {
-                    is RegularFunction -> callToStringFunction(thisObj.func)
+                    is RegularFunction -> when (val func = thisObj.func) {
+                        is Scriptable -> callToStringFunction(func)
+                        else -> Context.toString(func)
+                    }
                     else -> callToStringFunction(thisObj)
                 }
             }

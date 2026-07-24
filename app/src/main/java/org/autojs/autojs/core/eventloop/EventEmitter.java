@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.ScriptBridges;
 import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.BaseFunction;
+import org.mozilla.javascript.Callable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,10 +21,23 @@ public class EventEmitter {
     public static class ListenerWrapper {
         public boolean isOnce;
         public BaseFunction listener;
+        public Callable callable;
+
+        public ListenerWrapper(Callable listener, boolean isOnce) {
+            this.listener = listener instanceof BaseFunction ? (BaseFunction) listener : null;
+            this.callable = listener;
+            this.isOnce = isOnce;
+        }
 
         public ListenerWrapper(BaseFunction listener, boolean isOnce) {
-            this.listener = listener;
-            this.isOnce = isOnce;
+            this((Callable) listener, isOnce);
+        }
+
+        private Callable getCallable() {
+            if (callable instanceof BaseFunction) {
+                return listener;
+            }
+            return listener != null ? listener : callable;
         }
     }
 
@@ -36,7 +50,7 @@ public class EventEmitter {
             }
         }
 
-        public void add(BaseFunction listener, boolean isOnce, Object[] stickyArgs) {
+        public void add(Callable listener, boolean isOnce, Object[] stickyArgs) {
             if (stickyArgs != null) {
                 if (mTimer != null) {
                     mTimer.setImmediate(listener, stickyArgs);
@@ -51,6 +65,10 @@ public class EventEmitter {
             listeners.add(new ListenerWrapper(listener, isOnce));
         }
 
+        public void add(BaseFunction listener, boolean isOnce, Object[] stickyArgs) {
+            add((Callable) listener, isOnce, stickyArgs);
+        }
+
         public int count() {
             return listeners.size();
         }
@@ -60,14 +78,14 @@ public class EventEmitter {
             int index = 0;
             while (iterator.hasNext()) {
                 ListenerWrapper listenerWrapper = iterator.next();
-                BaseFunction listener = listenerWrapper.listener;
+                Callable listener = listenerWrapper.getCallable();
                 if (listener instanceof IListener) {
                     ((IListener) listener).onEvent(args);
                 } else {
                     if (mTimer != null) {
-                        mTimer.setImmediate(listenerWrapper.listener, args);
+                        mTimer.setImmediate(listener, args);
                     } else {
-                        mBridges.call(listenerWrapper.listener, EventEmitter.this, args);
+                        mBridges.call(listener, EventEmitter.this, args);
                     }
                 }
                 if (listenerWrapper.isOnce) {
@@ -81,14 +99,18 @@ public class EventEmitter {
             return listeners.isEmpty();
         }
 
-        public void prepend(BaseFunction listener, boolean isOnce) {
+        public void prepend(Callable listener, boolean isOnce) {
             ensureListenersNotAtLimit();
             listeners.add(0, new ListenerWrapper(listener, isOnce));
         }
 
-        public boolean remove(BaseFunction listener) {
+        public void prepend(BaseFunction listener, boolean isOnce) {
+            prepend((Callable) listener, isOnce);
+        }
+
+        public boolean remove(Callable listener) {
             for (ListenerWrapper wrapper : listeners) {
-                if (wrapper.listener == listener) {
+                if (wrapper.getCallable() == listener) {
                     listeners.remove(wrapper);
                     return true;
                 }
@@ -96,10 +118,14 @@ public class EventEmitter {
             return false;
         }
 
+        public boolean remove(BaseFunction listener) {
+            return remove((Callable) listener);
+        }
+
         public Object[] toArray() {
             ArrayList<Object> listenerList = new ArrayList<>(listeners.size());
             for (ListenerWrapper wrapper : listeners) {
-                listenerList.add(wrapper.listener);
+                listenerList.add(wrapper.getCallable());
             }
             return listenerList.toArray(new Object[0]);
         }
@@ -130,8 +156,12 @@ public class EventEmitter {
         return listeners;
     }
 
-    public EventEmitter addListener(String eventName, BaseFunction listener) {
+    public EventEmitter addListener(String eventName, Callable listener) {
         return on(eventName, listener);
+    }
+
+    public EventEmitter addListener(String eventName, BaseFunction listener) {
+        return addListener(eventName, (Callable) listener);
     }
 
     public boolean emit(String eventName, Object... args) {
@@ -170,28 +200,44 @@ public class EventEmitter {
         return getListeners(eventName).toArray();
     }
 
-    public EventEmitter on(String eventName, BaseFunction listener) {
+    public EventEmitter on(String eventName, Callable listener) {
         getListeners(eventName).add(listener, false, mStickyEvents.get(eventName));
         emit("newListener", eventName, listener);
         return this;
     }
 
-    public EventEmitter once(String eventName, BaseFunction listener) {
+    public EventEmitter on(String eventName, BaseFunction listener) {
+        return on(eventName, (Callable) listener);
+    }
+
+    public EventEmitter once(String eventName, Callable listener) {
         getListeners(eventName).add(listener, true, mStickyEvents.get(eventName));
         emit("newListener", eventName, listener);
         return this;
     }
 
-    public EventEmitter prependListener(String eventName, BaseFunction listener) {
+    public EventEmitter once(String eventName, BaseFunction listener) {
+        return once(eventName, (Callable) listener);
+    }
+
+    public EventEmitter prependListener(String eventName, Callable listener) {
         getListeners(eventName).prepend(listener, false);
         emit("newListener", eventName, listener);
         return this;
     }
 
-    public EventEmitter prependOnceListener(String eventName, BaseFunction listener) {
+    public EventEmitter prependListener(String eventName, BaseFunction listener) {
+        return prependListener(eventName, (Callable) listener);
+    }
+
+    public EventEmitter prependOnceListener(String eventName, Callable listener) {
         getListeners(eventName).prepend(listener, true);
         emit("newListener", eventName, listener);
         return this;
+    }
+
+    public EventEmitter prependOnceListener(String eventName, BaseFunction listener) {
+        return prependOnceListener(eventName, (Callable) listener);
     }
 
     public EventEmitter removeAllListeners() {
@@ -199,7 +245,7 @@ public class EventEmitter {
             String eventName = entry.getKey();
             Listeners listeners = entry.getValue();
             for (ListenerWrapper wrapper : listeners.listeners) {
-                emit("removeListener", eventName, wrapper.listener);
+                emit("removeListener", eventName, wrapper.getCallable());
             }
         }
         mListenersMap.clear();
@@ -210,18 +256,22 @@ public class EventEmitter {
         Listeners listeners = mListenersMap.remove(eventName);
         if (listeners != null) {
             for (ListenerWrapper wrapper : listeners.listeners) {
-                emit("removeListener", eventName, wrapper.listener);
+                emit("removeListener", eventName, wrapper.getCallable());
             }
         }
         return this;
     }
 
-    public EventEmitter removeListener(String eventName, BaseFunction listener) {
+    public EventEmitter removeListener(String eventName, Callable listener) {
         Listeners listeners = mListenersMap.get(eventName);
         if (listeners != null && listeners.remove(listener)) {
             emit("removeListener", eventName, listener);
         }
         return this;
+    }
+
+    public EventEmitter removeListener(String eventName, BaseFunction listener) {
+        return removeListener(eventName, (Callable) listener);
     }
 
     public EventEmitter setMaxListeners(int maxListeners) {

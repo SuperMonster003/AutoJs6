@@ -34,6 +34,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs.util.RhinoUtils.coerceObject
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.coerceStringUppercase
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.undefined
@@ -42,10 +43,12 @@ import org.autojs.autojs.util.StringUtils.lowercaseFirstChar
 import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeError
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 
@@ -209,13 +212,23 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
         fun assert(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsLengthInRange(args, 1..2) {
             val (value, messageArg) = it
             val message = coerceString(messageArg, AssertionError::class.java.name)
-            val result = when (value) {
-                is BaseFunction -> Context.toBoolean(callFunction(scriptRuntime, value, scriptRuntime.topLevelScope, arrayOf()))
-                else -> Context.toBoolean(value)
-            }
+            val result = evaluateAssertionValue(scriptRuntime, value)
             scriptRuntime.console.assertTrue(result, message)
             scriptRuntime.consoleProxyObject
         }
+
+        internal fun evaluateAssertionValue(scriptRuntime: ScriptRuntime, value: Any?): Boolean = Context.toBoolean(
+            when (value) {
+                is Callable -> callFunction(
+                    scriptRuntime,
+                    value,
+                    scriptRuntime.topLevelScope,
+                    Undefined.SCRIPTABLE_UNDEFINED,
+                    emptyArray(),
+                )
+                else -> value
+            },
+        )
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -322,18 +335,24 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
                 } ?: throw WrappedIllegalArgumentException("\$Unknown key \"$key\" of options for builder.build")
 
                 val console = scriptRuntime.consoleProxyObject
-                val func = console.prop(fName)
-                require(func is BaseFunction) {
-                    "console.$fName must be a JavaScript Function instead of a ${func.jsBrief()}"
-                }
-                if (value is NativeArray) {
-                    callFunction(scriptRuntime, func, console, console, value.toTypedArray())
-                } else {
-                    callFunction(scriptRuntime, func, console, console, arrayOf(value))
-                }
+                invokeConfiguratorFunction(scriptRuntime, console, fName, value)
             }
 
             configurator
+        }
+
+        internal fun invokeConfiguratorFunction(
+            scriptRuntime: ScriptRuntime,
+            console: Scriptable,
+            fName: String,
+            value: Any?,
+        ) {
+            val func = console.prop(fName)
+            require(func is Callable) {
+                "console.$fName must be a JavaScript Function instead of a ${func.jsBrief()}"
+            }
+            val args = if (value is NativeArray) value.toTypedArray() else arrayOf(value)
+            callFunction(scriptRuntime, func, getDeclarationScope(console), console, args)
         }
 
         @JvmStatic

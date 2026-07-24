@@ -21,10 +21,13 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import java.net.URI
 
 class RequestBuilderHelper(private val options: NativeObject) {
@@ -70,16 +73,14 @@ class RequestBuilderHelper(private val options: NativeObject) {
             val mediaType = options.prop(Http.KEY_CONTENT_TYPE).takeUnless { it.isJsNullish() }
             body.toRequestBody(Context.toString(mediaType).toMediaTypeOrNull())
         }
-        is BaseFunction -> object : RequestBody() {
+        is Callable -> object : RequestBody() {
             override fun contentType(): MediaType? {
                 val mediaType = options.prop(Http.KEY_CONTENT_TYPE).takeUnless { it.isJsNullish() }
                 return Context.toString(mediaType).toMediaTypeOrNull()
             }
 
             override fun writeTo(sink: BufferedSink) {
-                RhinoUtils.withRhinoContext(scriptRuntime) { cx ->
-                    body.call(cx, body, body, arrayOf(sink))
-                }
+                callBodyWriter(scriptRuntime, scriptRuntime.topLevelScope, body, sink)
             }
         }
         else -> throw WrappedIllegalArgumentException("Unknown type of body for header options")
@@ -151,6 +152,22 @@ class RequestBuilderHelper(private val options: NativeObject) {
 
     private fun processFile(builder: MultipartBody.Builder, key: Any?, fileName: Any?, requestBody: RequestBody) {
         builder.addFormDataPart(RhinoUtils.coerceString(key), fileName as? String, requestBody)
+    }
+
+    companion object {
+
+        internal fun callBodyWriter(
+            scriptRuntime: ScriptRuntime?,
+            defaultScope: VarScope,
+            body: Callable,
+            sink: BufferedSink,
+        ) {
+            val functionObject = body as? Scriptable
+            val scope = functionObject?.let(RhinoUtils::getDeclarationScope) ?: defaultScope
+            val thisObj = functionObject ?: Undefined.SCRIPTABLE_UNDEFINED
+            RhinoUtils.callFunction(scriptRuntime, body, scope, thisObj, arrayOf<Any?>(sink))
+        }
+
     }
 
 }

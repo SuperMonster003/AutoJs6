@@ -19,7 +19,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import java.lang.reflect.Array as JavaArray
@@ -139,7 +139,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                 }
                 4 -> {
                     if (it[0] is UiObject) {
-                        if (it[3] is BaseFunction) {
+                        if (it[3] is Callable) {
                             if (UiObject.isCompass(it[2])) {
                                 // @Overload pickup<R>(root: UiObject, selector: Pickup.Selector, compass: Selector.Compass, callback: (o: any) => R): R;
                                 return@ensureArgumentsAtMost UiSelector.pickup(
@@ -183,7 +183,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                 }
                 3 -> {
                     if (it[0] is UiObject) {
-                        if (it[2] is BaseFunction) {
+                        if (it[2] is Callable) {
                             // @Overload pickup<R>(root: UiObject, selector: Pickup.Selector, callback: (o: any) => R): R;
                             return@ensureArgumentsAtMost UiSelector.pickup(
                                 scriptRuntime,
@@ -215,7 +215,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                             callback = null,
                         )
                     }
-                    if (it[2] is BaseFunction) {
+                    if (it[2] is Callable) {
                         if (UiObject.isCompass(it[1])) {
                             // @Overload pickup<R>(selector: Pickup.Selector, compass: Selector.Compass, callback: (o: any) => R): R;
                             return@ensureArgumentsAtMost UiSelector.pickup(
@@ -260,7 +260,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                             callback = null,
                         )
                     }
-                    if (it[1] is BaseFunction) {
+                    if (it[1] is Callable) {
                         // @Overload pickup<R>(selector: Pickup.Selector, callback: (o: any) => R): R;
                         return@ensureArgumentsAtMost UiSelector.pickup(
                             scriptRuntime,
@@ -333,7 +333,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                     )
                 }
                 3 -> {
-                    if (it[2] is BaseFunction) {
+                    if (it[2] is Callable) {
                         if (UiObject.isCompass(it[1])) {
                             // @Overload detect<R>(w: UiObject, compass: Detect.Compass, callback: ((w: UiObject) => R)): R;
                             return@ensureArgumentsAtMost UiObject.detect(
@@ -363,7 +363,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                     )
                 }
                 2 -> {
-                    if (it[1] is BaseFunction) {
+                    if (it[1] is Callable) {
                         // @Overload detect<T extends UiObject, R>(w: T, callback: ((w: T) => R)): R;
                         return@ensureArgumentsAtMost UiObject.detect(
                             scriptRuntime,
@@ -428,10 +428,10 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
 
         private fun asPickupResultType(args: Array<Any?>, idx: Int): Any? = args[idx]
 
-        private fun asPickupCallback(args: Array<Any?>, idx: Int): BaseFunction? {
+        private fun asPickupCallback(args: Array<Any?>, idx: Int): Callable? {
             val callback = args[idx]
             if (callback.isJsNullish()) return null
-            require(callback is BaseFunction?) { "Argument[$idx] for pickup cannot be taken as a callback" }
+            require(callback is Callable) { "Argument[$idx] for pickup cannot be taken as a callback" }
             return callback
         }
 
@@ -451,10 +451,10 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
 
         private fun asDetectResultType(args: Array<Any?>, idx: Int): Any? = args[idx]
 
-        private fun asDetectCallback(args: Array<Any?>, idx: Int): BaseFunction? {
+        private fun asDetectCallback(args: Array<Any?>, idx: Int): Callable? {
             val callback = args[idx]
             if (callback.isJsNullish()) return null
-            require(callback is BaseFunction?) { "Argument[$idx] for detect cannot be taken as a callback" }
+            require(callback is Callable) { "Argument[$idx] for detect cannot be taken as a callback" }
             return callback
         }
 

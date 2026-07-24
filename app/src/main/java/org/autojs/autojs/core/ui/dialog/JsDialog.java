@@ -41,6 +41,7 @@ import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.tool.UiHandler;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.BaseFunction;
+import org.mozilla.javascript.Callable;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -772,19 +773,31 @@ public class JsDialog {
         mDialog.onProvideKeyboardShortcuts(data, menu, deviceId);
     }
 
-    public JsDialog once(String eventName, BaseFunction listener) {
+    public JsDialog once(String eventName, Callable listener) {
         mEmitter.once(eventName, listener);
         return this;
     }
 
-    public JsDialog on(String eventName, BaseFunction listener) {
+    public JsDialog once(String eventName, BaseFunction listener) {
+        return once(eventName, (Callable) listener);
+    }
+
+    public JsDialog on(String eventName, Callable listener) {
         mEmitter.on(eventName, listener);
         return this;
     }
 
-    public JsDialog addListener(String eventName, BaseFunction listener) {
+    public JsDialog on(String eventName, BaseFunction listener) {
+        return on(eventName, (Callable) listener);
+    }
+
+    public JsDialog addListener(String eventName, Callable listener) {
         mEmitter.addListener(eventName, listener);
         return this;
+    }
+
+    public JsDialog addListener(String eventName, BaseFunction listener) {
+        return addListener(eventName, (Callable) listener);
     }
 
     public boolean emit(String eventName, Object... args) {
@@ -803,14 +816,22 @@ public class JsDialog {
         return mEmitter.listeners(eventName);
     }
 
-    public JsDialog prependListener(String eventName, BaseFunction listener) {
+    public JsDialog prependListener(String eventName, Callable listener) {
         mEmitter.prependListener(eventName, listener);
         return this;
     }
 
-    public JsDialog prependOnceListener(String eventName, BaseFunction listener) {
+    public JsDialog prependListener(String eventName, BaseFunction listener) {
+        return prependListener(eventName, (Callable) listener);
+    }
+
+    public JsDialog prependOnceListener(String eventName, Callable listener) {
         mEmitter.prependOnceListener(eventName, listener);
         return this;
+    }
+
+    public JsDialog prependOnceListener(String eventName, BaseFunction listener) {
+        return prependOnceListener(eventName, (Callable) listener);
     }
 
     public JsDialog removeAllListeners() {
@@ -823,9 +844,13 @@ public class JsDialog {
         return this;
     }
 
-    public JsDialog removeListener(String eventName, BaseFunction listener) {
+    public JsDialog removeListener(String eventName, Callable listener) {
         mEmitter.removeListener(eventName, listener);
         return this;
+    }
+
+    public JsDialog removeListener(String eventName, BaseFunction listener) {
+        return removeListener(eventName, (Callable) listener);
     }
 
     public JsDialog setMaxListeners(int n) {

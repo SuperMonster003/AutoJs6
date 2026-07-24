@@ -18,7 +18,7 @@ import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeObject
@@ -33,7 +33,7 @@ object UIWidget : ArgumentGuards() {
     @RhinoStandardFunctionInterface
     fun renderInternal(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Any = ensureArgumentsIsEmpty(args) {
         when (val renderFunc = thisObj.prop("render")) {
-            is BaseFunction -> callFunction(renderFunc, thisObj, thisObj, arrayOf(*args))
+            is Callable -> callFunction(renderFunc, thisObj, thisObj, arrayOf(*args))
                 ?: throw WrappedIllegalArgumentException("Function render must return a non-null value")
             else -> "< />"
         }
@@ -54,11 +54,11 @@ object UIWidget : ArgumentGuards() {
             if (argList.size >= 3) {
                 applier = arg2
             }
-        } else if (arg1 is BaseFunction && arg2 !is BaseFunction) {
+        } else if (arg1 is Callable && arg2 !is Callable) {
             applier = arg1
         }
         val (getter, setter) = when {
-            arg1 is BaseFunction && arg2 is BaseFunction -> arg1 to arg2
+            arg1 is Callable && arg2 is Callable -> arg1 to arg2
             else -> newBaseFunction(
                 getDeclarationScope(thisObj),
                 "getter", {
@@ -69,7 +69,7 @@ object UIWidget : ArgumentGuards() {
                 "setter", { setterArgList ->
                     val (_, _, value, _) = setterArgList
                     thisObj.defineProp(attrAlias, value)
-                    if (applier is BaseFunction) callFunction(applier, thisObj, thisObj, arrayOf(*setterArgList))
+                    if (applier is Callable) callFunction(applier, thisObj, thisObj, arrayOf(*setterArgList))
                 }, NOT_CONSTRUCTABLE,
             )
         }
@@ -99,7 +99,7 @@ object UIWidget : ArgumentGuards() {
             "Property ui.Widget#__attrs__[\"${attrName}\"] must be a ScriptableObject instead of ${attrValue.jsBrief()}"
         }
         val setterFunc = attrValue.prop("setter")
-        require(setterFunc is BaseFunction) {
+        require(setterFunc is Callable) {
             "Property ui.Widget#__attrs__[\"${attrName}\"][\"setter\"] must be a JavaScript Function instead of ${setterFunc.jsBrief()}"
         }
         callFunction(setterFunc, attrsObject, attrValue, arrayOf(view, attrName, value, setter))
@@ -117,7 +117,7 @@ object UIWidget : ArgumentGuards() {
             "Property ui.Widget#__attrs__[\"${attrName}\"] must be a ScriptableObject instead of ${attrValue.jsBrief()}"
         }
         val getterFunc = attrValue.prop("getter")
-        require(getterFunc is BaseFunction) {
+        require(getterFunc is Callable) {
             "Property ui.Widget#__attrs__[\"${attrName}\"][\"getter\"] must be a JavaScript Function instead of ${getterFunc.jsBrief()}"
         }
         callFunction(getterFunc, attrsObject, attrValue, arrayOf(view, attrName, getter))
@@ -130,7 +130,7 @@ object UIWidget : ArgumentGuards() {
             "Argument \"view\" ${view.jsBrief()} for ui.Widget#notifyViewCreated must be a View"
         }
         val onViewCreatedFunc = thisObj.prop("onViewCreated")
-        if (onViewCreatedFunc is BaseFunction) {
+        if (onViewCreatedFunc is Callable) {
             callFunction(onViewCreatedFunc, thisObj, thisObj, arrayOf(view))
         }
         UNDEFINED
@@ -143,7 +143,7 @@ object UIWidget : ArgumentGuards() {
             "Argument \"view\" ${view.jsBrief()} for ui.Widget#notifyAfterInflation must be a View"
         }
         val onFinishInflationFunc = thisObj.prop("onFinishInflation")
-        if (onFinishInflationFunc is BaseFunction) {
+        if (onFinishInflationFunc is Callable) {
             callFunction(onFinishInflationFunc, thisObj, thisObj, arrayOf(view))
         }
         UNDEFINED
