@@ -67,6 +67,7 @@
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
 * `Fix` Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array
 * `Fix` Callable and BaseFunction compatibility overloads caused ambiguous parameter types when ordinary JavaScript functions called Java methods such as EventEmitter.on
+* `Fix` Global actions such as automator.home could throw a null pointer exception when servant Looper initialization was interrupted on first use, and gesture Y coordinates could incorrectly use the horizontal scaling ratio
 * `Fix` Argument dispatch, return values, numeric boundaries, image coordinates, and temporary resource lifecycles in the early JavaScript module migration did not match the original implementation
 * `Fix` The app could crash when requesting screen capture permission on Android 14+ due to abnormal media projection foreground service startup _[`issue #516`](http://issues.autojs6.com/516)_
 * `Fix` Repeated OCR calls across multiple threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_

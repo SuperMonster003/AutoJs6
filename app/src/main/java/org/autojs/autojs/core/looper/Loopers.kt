@@ -9,18 +9,13 @@ import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.mozilla.javascript.Context
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.concurrent.Volatile
 
 /**
  * Created by Stardust on Jul 29, 2017.
  * Modified by SuperMonster003 as of Aug 28, 2023.
  */
 class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
-
-    @Volatile
-    private var mServantLooper: Looper? = null
 
     private var mMainLooper: Looper?
     private var mMainHandler: Handler?
@@ -29,7 +24,22 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
     private var mLooperQuitHandlers = ThreadLocal<CopyOnWriteArrayList<LooperQuitHandler>>()
     private var mTimers = scriptRuntime.timers
     private var mThreads = scriptRuntime.threads
-    private val mServantLooperReady = CountDownLatch(1)
+    private val mServantLooper = ServantLooperHolder<Looper>(
+        starter = { publish, fail ->
+            ThreadCompat {
+                val looper = try {
+                    Looper.prepare()
+                    checkNotNull(Looper.myLooper())
+                } catch (t: Throwable) {
+                    fail(t)
+                    throw t
+                }
+                publish(looper)
+                Looper.loop()
+            }.start()
+        },
+        disposer = Looper::quit,
+    )
 
     private var mMaxWaitId: ThreadLocal<Int> = object : ThreadLocal<Int>() {
         override fun initialValue() = 0
@@ -42,17 +52,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
     }
 
     val servantLooper: Looper
-        get() {
-            if (mServantLooper == null) {
-                initServantThread()
-                try {
-                    mServantLooperReady.await()
-                } catch (_: InterruptedException) {
-                    /* Ignored. */
-                }
-            }
-            return mServantLooper!!
-        }
+        get() = mServantLooper.get()
 
     init {
         prepare()
@@ -151,17 +151,8 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
         }
     }
 
-    private fun initServantThread() {
-        ThreadCompat {
-            Looper.prepare()
-            mServantLooper = Looper.myLooper()
-            mServantLooperReady.countDown()
-            Looper.loop()
-        }.start()
-    }
-
     private fun quitServantLooper() {
-        mServantLooper?.quit()
+        mServantLooper.close()
     }
 
     interface LooperQuitHandler {

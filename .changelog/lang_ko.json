@@ -64,6 +64,7 @@
         "Rhino 모듈 브리지가 null/undefined, Callable, 생성자, 프로토타입, realm 및 Kotlin 반환값을 잘못 처리하여 교차 realm 객체, 콜백 누락 또는 런타임 예외가 발생할 수 있는 문제",
         "Proxy로 래핑된 함수를 dialogs, events, timers, UI, selector 및 automator 등의 기존 모듈에서 콜백으로 사용할 수 없고, TimerThread 콜백 인수가 중첩 배열로 전달될 수 있는 문제",
         "Callable 및 BaseFunction 호환 오버로드로 인해 일반 JavaScript 함수가 EventEmitter.on 등의 Java 메서드를 호출할 때 인수 타입이 모호해지는 문제",
+        "automator.home 등의 전역 동작을 처음 호출할 때 보조 Looper 초기화가 중단되면 NullPointerException이 발생할 수 있고, 제스처 Y 좌표에 가로 배율이 잘못 사용되는 문제",
         "초기 JavaScript 모듈 마이그레이션의 인수 디스패치, 반환값, 숫자 경계, 이미지 좌표 및 임시 리소스 수명 주기가 원래 구현과 일치하지 않는 문제",
         "Android 14+에서 화면 캡처 권한을 요청할 때 미디어 프로젝션 포그라운드 서비스 시작 오류로 앱이 충돌할 수 있는 문제 _[`issue #516`](http://issues.autojs6.com/516)_",
         "여러 스레드 또는 여러 파일에서 OCR을 반복 호출할 때 화면 캡처 권한을 반복해서 요청할 수 있는 문제 _[`issue #551`](http://issues.autojs6.com/551)_",

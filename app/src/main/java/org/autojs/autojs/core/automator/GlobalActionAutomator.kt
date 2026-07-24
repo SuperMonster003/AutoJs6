@@ -220,7 +220,7 @@ class GlobalActionAutomator(private val context: Context, private val handler: H
 
     private fun scaleX(x: Int) = mScreenMetrics?.scaleX(x) ?: x
 
-    private fun scaleY(y: Int) = mScreenMetrics?.scaleX(y) ?: y
+    private fun scaleY(y: Int) = mScreenMetrics?.scaleY(y) ?: y
 
     fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, duration: Long) = gesture(0, duration, "swipe", intArrayOf(x1, y1), intArrayOf(x2, y2))
 

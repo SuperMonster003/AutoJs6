@@ -42,20 +42,16 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
 
     private val mA11yEventOwnerId: String = scriptRuntime.ownerId
 
-    private val mGlobalActionAutomatorRaw by lazy {
-        GlobalActionAutomator(scriptRuntime.uiHandler.applicationContext, Handler(scriptRuntime.loopers.servantLooper)) {
-            ensureService()
-            accessibilityBridge.service
-        }
-    }
-
     private val mGlobalActionAutomator by lazy {
-        mGlobalActionAutomatorRaw
+        createGlobalActionAutomator(handler = null)
     }
 
-    private val mGlobalActionAutomatorForGesture by lazy {
-        mGlobalActionAutomatorRaw.apply { setScreenMetrics(mScreenMetrics) }
+    private val mGlobalActionAutomatorForGestureRaw by lazy {
+        createGlobalActionAutomator(Handler(scriptRuntime.loopers.servantLooper))
     }
+
+    private val mGlobalActionAutomatorForGesture
+        get() = mGlobalActionAutomatorForGestureRaw.apply { setScreenMetrics(mScreenMetrics) }
 
     private val isRunningPackageSelf
         get() = DeveloperUtils.isSelfPackage(Global.currentPackage(scriptRuntime, emptyArray()))
@@ -64,6 +60,12 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     private val mScriptRuntime = WeakReference(scriptRuntime)
 
     private var mPromiseAdapter: ScriptPromiseAdapter? = null
+
+    private fun createGlobalActionAutomator(handler: Handler?) =
+        GlobalActionAutomator(scriptRuntime.uiHandler.applicationContext, handler) {
+            ensureService()
+            accessibilityBridge.service
+        }
 
     @ScriptInterface
     fun text(text: String, i: Int) = ActionTarget.TextActionTarget(text, i)

@@ -67,6 +67,7 @@
 * `修復` Rhino 模組橋接對 null/undefined, Callable, 建構函式, 原型, realm 及 Kotlin 傳回值的處理不正確, 可能造成跨 realm 物件, 回呼遺失或執行階段例外的問題
 * `修復` Proxy 包裝函式無法作為 dialogs, events, timers, UI, selector 及 automator 等舊模組的回呼, 且 TimerThread 回呼參數可能以巢狀陣列傳遞的問題
 * `修復` Callable 與 BaseFunction 相容多載導致一般 JavaScript 函式呼叫 EventEmitter.on 等 Java 方法時出現參數型別歧義的問題
+* `修復` automator.home 等全域操作首次呼叫時可能因輔助 Looper 初始化遭中斷而擲回空指標例外, 且手勢 Y 座標可能誤用橫向縮放比例的問題
 * `修復` 早期 JavaScript 模組遷移中的引數分派, 傳回值, 數值邊界, 影像座標及暫存資源生命週期與原始實作不一致的問題
 * `修復` Android 14+ 申請螢幕擷取權限時可能因媒體投影前景服務啟動異常導致應用程式當機的問題 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修復` 多執行緒或跨檔案重複呼叫 OCR 時可能反覆申請螢幕擷取權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_
