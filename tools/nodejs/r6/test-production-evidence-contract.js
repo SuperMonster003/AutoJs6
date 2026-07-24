@@ -25,6 +25,8 @@ const {
 const {
   buildEvidenceGradleArgs,
   buildPackagedTemplateGradleArgs,
+  buildPluginGradleArgs,
+  normalizeAndroidComponentName,
   packagedTemplatePathForRunToken,
   parseApkSignerOutput,
   selectAbiApk,
@@ -46,9 +48,16 @@ const identity = {
 let contractRoot = null;
 let contractAndroidTools = null;
 let contractKeystore = null;
+let contractAlternateKeystore = null;
 const contractApkCache = new Map();
 const RUNTIME_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.nodejs";
 const RUNTIME_PLUGIN_SERVICE = `${RUNTIME_PLUGIN_PACKAGE}.NodeJsRuntimePluginService`;
+const APK_BUILDER_PLUGIN_PACKAGE = "org.autojs.plugin.apkbuilder.template";
+const APK_BUILDER_PLUGIN_ACTION = "org.autojs.plugin.APK_BUILDER";
+const APK_BUILDER_PLUGIN_SERVICE =
+  "org.autojs.plugin.apkbuilder.template.impl.ApkBuilderTemplatePluginService";
+const APK_BUILDER_PLUGIN_COMPONENT =
+  `${APK_BUILDER_PLUGIN_PACKAGE}/${APK_BUILDER_PLUGIN_SERVICE}`;
 const R5_PLUGIN_PREFLIGHT_SELECTOR =
   "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_01_livePluginPreflightNegotiatesContractAndReportsTrustIdentity";
 const R6_PLUGIN_SOAK_SELECTOR =
@@ -60,6 +69,7 @@ function main() {
   try {
     prepareContractApkTools();
     assertApkSignerOutputContracts();
+    assertAndroidComponentNameContracts();
     assertDeviceRunnerGradleContracts();
     assertPackagedTemplateAbiSelectionContract(root);
     assertPackagedTemplateSourceContract();
@@ -234,6 +244,159 @@ function main() {
     const fakeHashResult = evaluateDeviceReport(root, fakeHashRequirement, identity, root);
     assert.strictEqual(fakeHashResult.ready, false);
     assert(fakeHashResult.blockers.some((message) => message.includes("hostApkSha256 does not match")));
+
+    const missingApkBuilderRequirement = DEVICE_REQUIREMENTS[0];
+    const missingApkBuilder = validDeviceReport(missingApkBuilderRequirement);
+    delete missingApkBuilder.artifacts.apkBuilderPluginApkPath;
+    writeJson(root, missingApkBuilderRequirement.relative, missingApkBuilder);
+    const missingApkBuilderResult =
+      evaluateDeviceReport(root, missingApkBuilderRequirement, identity, root);
+    assert.strictEqual(missingApkBuilderResult.ready, false);
+    assert(missingApkBuilderResult.blockers.some((message) =>
+      message.includes("artifact apkBuilderPluginApkPath is missing")));
+
+    const fakeApkBuilderHashRequirement = DEVICE_REQUIREMENTS[0];
+    const fakeApkBuilderHash = validDeviceReport(fakeApkBuilderHashRequirement);
+    fakeApkBuilderHash.artifacts.apkBuilderPluginBuildApkSha256 = "f".repeat(64);
+    writeJson(root, fakeApkBuilderHashRequirement.relative, fakeApkBuilderHash);
+    const fakeApkBuilderHashResult =
+      evaluateDeviceReport(root, fakeApkBuilderHashRequirement, identity, root);
+    assert.strictEqual(fakeApkBuilderHashResult.ready, false);
+    assert(fakeApkBuilderHashResult.blockers.some((message) =>
+      message.includes("apkBuilderPluginBuildApkSha256 does not match")));
+    assert(fakeApkBuilderHashResult.blockers.some((message) =>
+      message.includes("installed APK Builder plugin APK must match")));
+
+    const changedApkBuilderDuringTestRequirement = DEVICE_REQUIREMENTS[0];
+    const changedApkBuilderDuringTest =
+      validDeviceReport(changedApkBuilderDuringTestRequirement);
+    bindFixtureApk(
+      changedApkBuilderDuringTest,
+      "apkBuilderPluginApkBeforeTest",
+      contractApk("apk-builder-plugin-alt", ""),
+      "apk-builder-changed-during-test",
+    );
+    writeJson(
+      root,
+      changedApkBuilderDuringTestRequirement.relative,
+      changedApkBuilderDuringTest,
+    );
+    const changedApkBuilderDuringTestResult = evaluateDeviceReport(
+      root,
+      changedApkBuilderDuringTestRequirement,
+      identity,
+      root,
+    );
+    assert.strictEqual(changedApkBuilderDuringTestResult.ready, false);
+    assert(changedApkBuilderDuringTestResult.blockers.some((message) =>
+      message.includes("must remain identical to the fresh build before and after testing")));
+
+    const mismatchedApkBuilderBuildRequirement = DEVICE_REQUIREMENTS[0];
+    const mismatchedApkBuilderBuild = validDeviceReport(mismatchedApkBuilderBuildRequirement);
+    bindFixtureApk(
+      mismatchedApkBuilderBuild,
+      "apkBuilderPluginBuildApk",
+      contractApk("apk-builder-plugin-alt", ""),
+      "apk-builder-alternate-current-source-build",
+    );
+    writeJson(root, mismatchedApkBuilderBuildRequirement.relative, mismatchedApkBuilderBuild);
+    const mismatchedApkBuilderBuildResult =
+      evaluateDeviceReport(root, mismatchedApkBuilderBuildRequirement, identity, root);
+    assert.strictEqual(mismatchedApkBuilderBuildResult.ready, false);
+    assert(mismatchedApkBuilderBuildResult.blockers.some((message) =>
+      message.includes("installed APK Builder plugin APK must match")));
+
+    const wrongApkBuilderPackageRequirement = DEVICE_REQUIREMENTS[0];
+    const wrongApkBuilderPackage = validDeviceReport(wrongApkBuilderPackageRequirement);
+    bindFixtureApk(
+      wrongApkBuilderPackage,
+      "apkBuilderPluginApk",
+      contractApk("test", ""),
+      "apk-builder-wrong-installed-package",
+    );
+    bindFixtureApk(
+      wrongApkBuilderPackage,
+      "apkBuilderPluginBuildApk",
+      contractApk("test", ""),
+      "apk-builder-wrong-build-package",
+    );
+    writeJson(root, wrongApkBuilderPackageRequirement.relative, wrongApkBuilderPackage);
+    const wrongApkBuilderPackageResult =
+      evaluateDeviceReport(root, wrongApkBuilderPackageRequirement, identity, root);
+    assert.strictEqual(wrongApkBuilderPackageResult.ready, false);
+    assert(wrongApkBuilderPackageResult.blockers.some((message) =>
+      message.includes("APK Builder plugin APK package must be org.autojs.plugin.apkbuilder.template")));
+
+    const fakeApkBuilderSignerRequirement = DEVICE_REQUIREMENTS[0];
+    const fakeApkBuilderSigner = validDeviceReport(fakeApkBuilderSignerRequirement);
+    fakeApkBuilderSigner.apkBuilderPlugin.signerSha256 =
+      fakeApkBuilderSigner.apkBuilderPlugin.signerSha256 === "f".repeat(64)
+        ? "e".repeat(64)
+        : "f".repeat(64);
+    writeJson(root, fakeApkBuilderSignerRequirement.relative, fakeApkBuilderSigner);
+    const fakeApkBuilderSignerResult =
+      evaluateDeviceReport(root, fakeApkBuilderSignerRequirement, identity, root);
+    assert.strictEqual(fakeApkBuilderSignerResult.ready, false);
+    assert(fakeApkBuilderSignerResult.blockers.some((message) =>
+      message.includes("APK Builder plugin signerSha256 does not match")));
+
+    const hostBuilderSignerMismatchRequirement = DEVICE_REQUIREMENTS[0];
+    const hostBuilderSignerMismatch = validDeviceReport(hostBuilderSignerMismatchRequirement);
+    const alternateSignerBuilderApk = contractApk("apk-builder-plugin-other-signer", "");
+    for (const prefix of [
+      "apkBuilderPluginApk",
+      "apkBuilderPluginApkBeforeTest",
+      "apkBuilderPluginBuildApk",
+    ]) {
+      bindFixtureApk(
+        hostBuilderSignerMismatch,
+        prefix,
+        alternateSignerBuilderApk,
+        `apk-builder-other-signer-${prefix}`,
+      );
+    }
+    hostBuilderSignerMismatch.apkBuilderPlugin.signerSha256 =
+      apkSignerSha256(alternateSignerBuilderApk);
+    writeJson(
+      root,
+      hostBuilderSignerMismatchRequirement.relative,
+      hostBuilderSignerMismatch,
+    );
+    const hostBuilderSignerMismatchResult = evaluateDeviceReport(
+      root,
+      hostBuilderSignerMismatchRequirement,
+      identity,
+      root,
+    );
+    assert.strictEqual(hostBuilderSignerMismatchResult.ready, false);
+    assert(hostBuilderSignerMismatchResult.blockers.some((message) =>
+      message.includes("host APK and installed APK Builder plugin APK must have the same signer")));
+
+    const invalidApkBuilderProvenanceRequirement = DEVICE_REQUIREMENTS[0];
+    const invalidApkBuilderProvenance = validDeviceReport(invalidApkBuilderProvenanceRequirement);
+    invalidApkBuilderProvenance.apkBuilderPlugin.buildTask =
+      ":plugins:apk-builder-template:packageDebug";
+    invalidApkBuilderProvenance.apkBuilderPlugin.remoteBuildEnabled = false;
+    invalidApkBuilderProvenance.apkBuilderPlugin.hostCommit = "3".repeat(40);
+    invalidApkBuilderProvenance.apkBuilderPlugin.installedMatchesFreshBuild = false;
+    invalidApkBuilderProvenance.apkBuilderPlugin.installedUnchangedDuringTest = false;
+    invalidApkBuilderProvenance.apkBuilderPlugin.servicePreflight.matched = false;
+    writeJson(root, invalidApkBuilderProvenanceRequirement.relative, invalidApkBuilderProvenance);
+    const invalidApkBuilderProvenanceResult =
+      evaluateDeviceReport(root, invalidApkBuilderProvenanceRequirement, identity, root);
+    assert.strictEqual(invalidApkBuilderProvenanceResult.ready, false);
+    assert(invalidApkBuilderProvenanceResult.blockers.some((message) =>
+      message.includes("buildTask must be :plugins:apk-builder-template:packageRelease")));
+    assert(invalidApkBuilderProvenanceResult.blockers.some((message) =>
+      message.includes("remoteBuildEnabled must be true")));
+    assert(invalidApkBuilderProvenanceResult.blockers.some((message) =>
+      message.includes("hostCommit must match")));
+    assert(invalidApkBuilderProvenanceResult.blockers.some((message) =>
+      message.includes("installedMatchesFreshBuild must be true")));
+    assert(invalidApkBuilderProvenanceResult.blockers.some((message) =>
+      message.includes("installedUnchangedDuringTest must be true")));
+    assert(invalidApkBuilderProvenanceResult.blockers.some((message) =>
+      message.includes("servicePreflight must prove")));
 
     const fakeTemplateRequirement = DEVICE_REQUIREMENTS[0];
     const fakeTemplate = validDeviceReport(fakeTemplateRequirement);
@@ -519,6 +682,8 @@ function validDeviceReport(requirement) {
     hostProcessAbi,
   );
   const signerSha256 = apkSignerSha256(path.join(contractRoot, artifacts.pluginApkPath));
+  const apkBuilderPluginSignerSha256 =
+    apkSignerSha256(path.join(contractRoot, artifacts.apkBuilderPluginApkPath));
   const preflightArtifact = writeFixtureArtifact(
     `artifacts/device-${requirement.id}-plugin-preflight.json`,
     {
@@ -554,6 +719,21 @@ function validDeviceReport(requirement) {
       supportedAbis: [...new Set([hostProcessAbi, requirement.runtimeProcessAbi])],
     },
     artifacts,
+    apkBuilderPlugin: {
+      packageName: APK_BUILDER_PLUGIN_PACKAGE,
+      buildTask: ":plugins:apk-builder-template:packageRelease",
+      remoteBuildEnabled: true,
+      hostCommit: identity.host.commit,
+      signerSha256: apkBuilderPluginSignerSha256,
+      installedMatchesFreshBuild: true,
+      installedUnchangedDuringTest: true,
+      servicePreflight: {
+        action: APK_BUILDER_PLUGIN_ACTION,
+        expectedComponent: APK_BUILDER_PLUGIN_COMPONENT,
+        components: [APK_BUILDER_PLUGIN_COMPONENT],
+        matched: true,
+      },
+    },
     plugin: {
       packageName: RUNTIME_PLUGIN_PACKAGE,
       serviceClass: RUNTIME_PLUGIN_SERVICE,
@@ -727,6 +907,23 @@ function artifactHashes(prefix, runtimeProcessAbi, junitKind, runToken = "", hos
     ["requestedPluginApkSha256", "requestedPluginApkPath", "requestedPluginApkBytes"],
   ];
   if (junitKind === "device") {
+    bindings.push(
+      [
+        "apkBuilderPluginApkSha256",
+        "apkBuilderPluginApkPath",
+        "apkBuilderPluginApkBytes",
+      ],
+      [
+        "apkBuilderPluginApkBeforeTestSha256",
+        "apkBuilderPluginApkBeforeTestPath",
+        "apkBuilderPluginApkBeforeTestBytes",
+      ],
+      [
+        "apkBuilderPluginBuildApkSha256",
+        "apkBuilderPluginBuildApkPath",
+        "apkBuilderPluginBuildApkBytes",
+      ],
+    );
     bindings.push([
       "packagedTemplateApkSha256",
       "packagedTemplateApkPath",
@@ -736,8 +933,11 @@ function artifactHashes(prefix, runtimeProcessAbi, junitKind, runToken = "", hos
   const result = {};
   bindings.forEach(([hashKey, pathKey, bytesKey]) => {
     const extension = hashKey === "junitXmlSha256" ? "xml" : "bin";
-    const apkRole = hashKey.includes("Plugin") || hashKey.includes("plugin")
-      ? "plugin"
+    const normalizedHashKey = hashKey.toLowerCase();
+    const apkRole = normalizedHashKey.includes("apkbuilderplugin")
+      ? "apk-builder-plugin"
+      : normalizedHashKey.includes("plugin")
+        ? "plugin"
       : hashKey.toLowerCase().includes("androidtest")
         ? "test"
         : hashKey.toLowerCase().includes("packagedtemplate") ? "template" : "host";
@@ -761,6 +961,10 @@ function artifactHashes(prefix, runtimeProcessAbi, junitKind, runToken = "", hos
   result.installedAndroidTestMatchesFreshBuild = true;
   result.installedPluginMatchesRequested = true;
   if (junitKind === "device") {
+    result.installedApkBuilderPluginMatchesFreshBuild = true;
+    result.installedApkBuilderPluginUnchangedDuringTest = true;
+  }
+  if (junitKind === "device") {
     const devicePath = packagedTemplatePathForRunToken(runToken);
     result.packagedTemplateSourceTask = ":app:packageInrtDebug";
     result.packagedTemplateDevicePath = devicePath;
@@ -778,26 +982,48 @@ function artifactHashes(prefix, runtimeProcessAbi, junitKind, runToken = "", hos
   assert.strictEqual(result.hostApkSha256, result.hostBuildApkSha256);
   assert.strictEqual(result.androidTestApkSha256, result.androidTestBuildApkSha256);
   assert.strictEqual(result.pluginApkSha256, result.requestedPluginApkSha256);
+  if (junitKind === "device") {
+    assert.strictEqual(
+      result.apkBuilderPluginApkSha256,
+      result.apkBuilderPluginBuildApkSha256,
+    );
+    assert.strictEqual(
+      result.apkBuilderPluginApkBeforeTestSha256,
+      result.apkBuilderPluginBuildApkSha256,
+    );
+  }
   return result;
 }
 
 function contractApk(role, runtimeProcessAbi) {
-  const cacheKey = role === "test" ? role : `${role}-${runtimeProcessAbi}`;
+  const cacheKey = role === "test" || role.startsWith("apk-builder-plugin")
+    ? role
+    : `${role}-${runtimeProcessAbi}`;
   if (contractApkCache.has(cacheKey)) return contractApkCache.get(cacheKey);
-  assert(contractRoot && contractAndroidTools && contractKeystore, "contract APK tools are unavailable");
+  assert(
+    contractRoot && contractAndroidTools && contractKeystore && contractAlternateKeystore,
+    "contract APK tools are unavailable",
+  );
   const directory = path.join(contractRoot, "generated-apks", cacheKey);
   fs.mkdirSync(directory, { recursive: true });
   const packageName = role === "plugin"
     ? "io.github.supermonster003.autojs6.plugin.nodejs"
     : role === "test"
       ? "org.autojs.autojs6.test"
-      : role === "template" ? "org.autojs.autojs6.inrt" : "org.autojs.autojs6";
+      : role === "template"
+        ? "org.autojs.autojs6.inrt"
+        : role.startsWith("apk-builder-plugin")
+          ? "org.autojs.plugin.apkbuilder.template"
+          : "org.autojs.autojs6";
+  const applicationAttributes = role === "apk-builder-plugin-alt"
+    ? ' android:hasCode="false" android:label="alternate"'
+    : ' android:hasCode="false"';
   const manifest = path.join(directory, "AndroidManifest.xml");
   fs.writeFileSync(
     manifest,
     `<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="${packageName}">` +
       `<uses-sdk android:minSdkVersion="24" android:targetSdkVersion="36"/>` +
-      `<application android:hasCode="false"/></manifest>\n`,
+      `<application${applicationAttributes}/></manifest>\n`,
   );
   const unsigned = path.join(directory, "unsigned.apk");
   runContractTool(contractAndroidTools.aapt, [
@@ -820,10 +1046,11 @@ function contractApk(role, runtimeProcessAbi) {
     runContractTool(contractAndroidTools.aapt, ["add", unsigned, ...relativeLibraries], directory);
   }
   const signed = path.join(directory, "signed.apk");
+  const useAlternateSigner = role === "apk-builder-plugin-other-signer";
   runContractTool(contractAndroidTools.apksigner, [
     "sign",
-    "--ks", contractKeystore,
-    "--ks-key-alias", "contract",
+    "--ks", useAlternateSigner ? contractAlternateKeystore : contractKeystore,
+    "--ks-key-alias", useAlternateSigner ? "alternate" : "contract",
     "--ks-pass", "pass:changeit",
     "--key-pass", "pass:changeit",
     "--out", signed,
@@ -857,6 +1084,18 @@ function prepareContractApkTools() {
     "-keypass", "changeit",
     "-alias", "contract",
     "-dname", "CN=AutoJs6 R6 Contract",
+    "-keyalg", "RSA",
+    "-keysize", "2048",
+    "-validity", "3650",
+  ], contractRoot);
+  contractAlternateKeystore = path.join(contractRoot, "contract-alternate-signing.jks");
+  runContractTool("keytool", [
+    "-genkeypair", "-noprompt",
+    "-keystore", contractAlternateKeystore,
+    "-storepass", "changeit",
+    "-keypass", "changeit",
+    "-alias", "alternate",
+    "-dname", "CN=AutoJs6 R6 Alternate Contract",
     "-keyalg", "RSA",
     "-keysize", "2048",
     "-validity", "3650",
@@ -940,6 +1179,22 @@ function assertApkSignerOutputContracts() {
 }
 
 function assertDeviceRunnerGradleContracts() {
+  const assertIsolatedGradleArgs = (args, label) => {
+    assert.strictEqual(
+      args.filter((value) => value === "--no-daemon").length,
+      1,
+      `${label} must use exactly one single-use Gradle daemon argument`,
+    );
+    assert(!args.includes("--daemon"), `${label} must not enable the reusable Gradle daemon`);
+    assert.deepStrictEqual(
+      args.filter((value) => value.startsWith("-Pkotlin.compiler.execution.strategy=")),
+      ["-Pkotlin.compiler.execution.strategy=in-process"],
+      `${label} must use only in-process Kotlin compilation`,
+    );
+  };
+  const pluginArgs = buildPluginGradleArgs();
+  assertIsolatedGradleArgs(pluginArgs, "runtime plugin build");
+  assert.strictEqual(pluginArgs.filter((value) => value === ":app:packageDebug").length, 1);
   const devicePaths = new Set();
   DEVICE_REQUIREMENTS.forEach((requirement, index) => {
     const runToken = (index + 1).toString(16).repeat(64);
@@ -950,6 +1205,9 @@ function assertDeviceRunnerGradleContracts() {
       runToken,
       requirement.runtimeProcessAbi,
     );
+    assertIsolatedGradleArgs(evidenceArgs, `${requirement.id} evidence gate`);
+    assert.strictEqual(evidenceArgs.filter((value) => value ===
+      ":app:verifyNodeR6DeviceEvidenceGate").length, 1);
     assert(evidenceArgs.includes(
       "-Pandroid.testInstrumentationRunnerArguments.autojs.embeddedNode.packagedSmokeTemplateOverride=true",
     ));
@@ -962,12 +1220,34 @@ function assertDeviceRunnerGradleContracts() {
     devicePaths.add(devicePath);
   });
   assert.strictEqual(devicePaths.size, DEVICE_REQUIREMENTS.length);
-  const templateArgs = buildPackagedTemplateGradleArgs();
-  assert(templateArgs.includes(":app:packageInrtDebug"));
+  const templateArgs = buildPackagedTemplateGradleArgs(identity.host.commit);
+  assertIsolatedGradleArgs(templateArgs, "packaged template and APK Builder plugin build");
+  assert.strictEqual(templateArgs.filter((value) => value === ":app:packageInrtDebug").length, 1);
+  assert.strictEqual(
+    templateArgs.filter((value) =>
+      value === ":plugins:apk-builder-template:packageRelease").length,
+    1,
+  );
+  assert(!templateArgs.includes(":plugins:apk-builder-template:packageDebug"));
+  assert.deepStrictEqual(
+    templateArgs.filter((value) =>
+      value.startsWith("-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=")),
+    ["-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true"],
+  );
+  assert.deepStrictEqual(
+    templateArgs.filter((value) => value.startsWith("-Pautojs.git.sha=")),
+    [`-Pautojs.git.sha=${identity.host.commit}`],
+  );
   assert(templateArgs.includes("-Pautojs.nodejs.embedded.script.enabled=true"));
   assert(!templateArgs.some((value) => value.startsWith("-Pautojs.nodejs.releaseFlavor=")));
   assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("packagedTemplateApkSha256"));
+  assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("apkBuilderPluginApkSha256"));
+  assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("apkBuilderPluginApkBeforeTestSha256"));
+  assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("apkBuilderPluginBuildApkSha256"));
   assert(!REQUIRED_ARTIFACT_HASHES.includes("packagedTemplateApkSha256"));
+  assert(!REQUIRED_ARTIFACT_HASHES.includes("apkBuilderPluginApkSha256"));
+  assert(!REQUIRED_ARTIFACT_HASHES.includes("apkBuilderPluginApkBeforeTestSha256"));
+  assert(!REQUIRED_ARTIFACT_HASHES.includes("apkBuilderPluginBuildApkSha256"));
 }
 
 function assertPackagedTemplateAbiSelectionContract(root) {
@@ -1055,6 +1335,33 @@ function bindFixtureArtifact(report, prefix, content, suffix) {
   report.artifacts[`${prefix}Bytes`] = bytes.length;
 }
 
+function assertAndroidComponentNameContracts() {
+  assert.strictEqual(
+    normalizeAndroidComponentName(
+      "org.autojs.plugin.apkbuilder.template/.impl.ApkBuilderTemplatePluginService",
+    ),
+    APK_BUILDER_PLUGIN_COMPONENT,
+  );
+  assert.strictEqual(
+    normalizeAndroidComponentName(APK_BUILDER_PLUGIN_COMPONENT),
+    APK_BUILDER_PLUGIN_COMPONENT,
+  );
+  assert.strictEqual(normalizeAndroidComponentName("unexpected output"), "unexpected output");
+}
+
+function bindFixtureApk(report, prefix, source, suffix) {
+  assert(contractRoot, "contract fixture root is unavailable");
+  const relative = `artifacts/negative-${suffix}.apk`;
+  const file = path.join(contractRoot, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.copyFileSync(source, file);
+  const bytes = fs.readFileSync(file);
+  report.artifacts[`${prefix}Path`] = relative;
+  report.artifacts[`${prefix}Sha256`] =
+    crypto.createHash("sha256").update(bytes).digest("hex");
+  report.artifacts[`${prefix}Bytes`] = bytes.length;
+}
+
 function assertJUnitFreshnessContracts(root) {
   const deviceRoot = path.join(root, "freshness-device");
   fs.mkdirSync(deviceRoot, { recursive: true });
@@ -1076,6 +1383,26 @@ function assertJUnitFreshnessContracts(root) {
     REQUIRED_DEVICE_SELECTORS,
   );
   assert.strictEqual(path.resolve(freshDevice.file), path.resolve(deviceFile));
+
+  const skippedRoot = path.join(root, "freshness-device-skipped");
+  fs.mkdirSync(skippedRoot, { recursive: true });
+  const skippedFile = path.join(skippedRoot, "TEST-skipped.xml");
+  fs.writeFileSync(skippedFile, contractJUnit("device"));
+  const skippedBefore = snapshotDeviceJUnitFiles(skippedRoot);
+  fs.writeFileSync(
+    skippedFile,
+    contractJUnit("device").replace(/skipped="0"/g, 'skipped="1"'),
+  );
+  assert.throws(
+    () => selectFreshJUnit(
+      skippedRoot,
+      skippedBefore,
+      Date.now() - 1_000,
+      REQUIRED_DEVICE_SELECTORS,
+    ),
+    /skipped must be explicitly zero, got 1/,
+    "a changed R6 JUnit report with skipped tests must surface its exact contract failure",
+  );
 
   const ambiguousRoot = path.join(root, "freshness-device-ambiguous");
   fs.mkdirSync(ambiguousRoot, { recursive: true });

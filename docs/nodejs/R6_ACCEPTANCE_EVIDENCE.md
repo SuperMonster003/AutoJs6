@@ -25,6 +25,14 @@ and was released during cleanup; elapsed/uptime evidence derived `0 ms` of
 suspend. These focused results validate the implementation and collector path
 only.
 
+The first current-source Sony arm64 production attempt later on 2026-07-24
+was correctly left unarchived: all ten main-app selectors passed, but the
+three packaged-APK selectors were skipped because the collector had not
+installed the new remote APK Builder plugin introduced by the 2026-07-23
+packaging migration. The collector now treats that plugin as same-run
+evidence rather than an external prerequisite. A fresh production matrix run
+against the corrected collector is still required.
+
 R6 and Core completion remain pending. The four current device reports, the
 8-hour quick soak, the 24-hour final soak, and a clean-source final/release
 decision still need to pass. A short smoke run, an old Phase 11/13 archive, or a
@@ -57,10 +65,19 @@ and refuses selector, profile, duration, status, force, and run-token overrides.
 Each production run must start and end with clean, unchanged host and plugin
 source commits. The collector builds a fresh signed ABI-specific plugin APK,
 installs it, and pulls the installed APK back to prove byte-for-byte identity.
-It also builds a fresh slim `packageInrtDebug` APK for the target ABI from the
-same host commit, verifies its package/signature, exact native ABI, and absence
-of prepackaged Node JNI, archives its SHA-256, and pushes the exact bytes to a
-unique packaged-smoke override path derived from the run token. The collector
+It also builds both a fresh slim `packageInrtDebug` APK for the target ABI and
+`:plugins:apk-builder-template:packageRelease` from that same host commit. The
+Builder build explicitly enables remote packaging and consumes the monorepo
+Runtime Kit generated from the current host; a sibling Builder repository or a
+preinstalled legacy package cannot satisfy the contract. The release-signed
+Builder APK must share the host signer, expose the exact
+`org.autojs.plugin.APK_BUILDER` service, match the fresh build after
+installation, and remain byte-for-byte and signer-identical before and after
+instrumentation.
+
+The collector verifies the slim template's package/signature, exact native ABI,
+and absence of prepackaged Node JNI, archives its SHA-256, and pushes the exact
+bytes to a unique packaged-smoke override path derived from the run token. It
 binds that exact path and the target runtime ABI to instrumentation, verifies
 the device SHA-256 both before and after testing, and removes the run-owned
 device file before staging.
@@ -84,6 +101,10 @@ package and service class, its actual authorization state, and the fixed R5
 trust plus R6 required-plugin selectors. The canonical verifier rejects missing
 or forged `required`, `authenticated`, or `trusted` provenance even when the APK
 hash fields are otherwise well formed.
+
+All collector Gradle invocations use `--no-daemon` and in-process Kotlin
+compilation. This isolates the runtime-plugin build, template/Builder build, and
+connected evidence gate from reusable Gradle or Kotlin compiler daemons.
 
 The target constraints are fail-closed: the two Sony entries must use the
 required 64-bit and 32-bit runtime ABIs, the second-OEM entry must be a

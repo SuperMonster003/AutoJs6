@@ -17,6 +17,13 @@ const DEFAULT_RUNTIME_SLOT = "node24_5";
 const DEFAULT_NODE_VERSION = "24.5.0";
 const RUNTIME_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.nodejs";
 const RUNTIME_PLUGIN_SERVICE = `${RUNTIME_PLUGIN_PACKAGE}.NodeJsRuntimePluginService`;
+const APK_BUILDER_PLUGIN_PACKAGE = "org.autojs.plugin.apkbuilder.template";
+const APK_BUILDER_PLUGIN_TASK = ":plugins:apk-builder-template:packageRelease";
+const APK_BUILDER_PLUGIN_ACTION = "org.autojs.plugin.APK_BUILDER";
+const APK_BUILDER_PLUGIN_SERVICE =
+  "org.autojs.plugin.apkbuilder.template.impl.ApkBuilderTemplatePluginService";
+const APK_BUILDER_PLUGIN_COMPONENT =
+  `${APK_BUILDER_PLUGIN_PACKAGE}/${APK_BUILDER_PLUGIN_SERVICE}`;
 const PACKAGED_TEMPLATE_PACKAGE = "org.autojs.autojs6.inrt";
 const PACKAGED_TEMPLATE_TASK = ":app:packageInrtDebug";
 const PACKAGED_TEMPLATE_DEVICE_PATH_PREFIX = "/data/local/tmp/autojs6-r6-packaged-template-";
@@ -142,6 +149,9 @@ const REQUIRED_ARTIFACT_HASHES = [
 ];
 const REQUIRED_DEVICE_ARTIFACT_HASHES = [
   ...REQUIRED_ARTIFACT_HASHES,
+  "apkBuilderPluginApkSha256",
+  "apkBuilderPluginApkBeforeTestSha256",
+  "apkBuilderPluginBuildApkSha256",
   "packagedTemplateApkSha256",
 ];
 
@@ -262,17 +272,25 @@ function evaluateDeviceReport(evidenceRoot, requirement, identity, repoRoot = nu
   const device = json.device || {};
   validateDevice(device, requirement, blockers);
   const plugin = json.plugin || {};
+  const apkBuilderPlugin = json.apkBuilderPlugin || {};
   const artifactFiles = validateArtifacts(json.artifacts, repoRoot, blockers, {
     reportType: "device",
     runToken: stringValue(json.runToken),
     hostProcessAbi: stringValue(device.hostProcessAbi),
     runtimeProcessAbi: requirement.runtimeProcessAbi,
     reportedPluginSignerSha256: stringValue(plugin.signerSha256),
+    reportedApkBuilderPluginSignerSha256: stringValue(apkBuilderPlugin.signerSha256),
   });
   const tests = normalizeTests(json.tests);
   validateTestCounts(json.tests, tests, blockers);
   validateDeviceJUnitArtifact(artifactFiles.junitXmlPath, tests, blockers);
   validateDevicePluginProvenance(plugin, requirement, tests, json.runToken, repoRoot, blockers);
+  validateApkBuilderPluginProvenance(
+    apkBuilderPlugin,
+    json.artifacts,
+    json.identity,
+    blockers,
+  );
   if (tests.total !== REQUIRED_DEVICE_SELECTORS.length) {
     blockers.push(`test total must equal the fixed R6 selector count ${REQUIRED_DEVICE_SELECTORS.length}`);
   }
@@ -982,6 +1000,16 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
   ];
   if (options.reportType === "device") {
     fileBindings.push([
+      "apkBuilderPluginApkSha256",
+      "apkBuilderPluginApkPath",
+      "apkBuilderPluginApkBytes",
+    ]);
+    fileBindings.push([
+      "apkBuilderPluginApkBeforeTestSha256",
+      "apkBuilderPluginApkBeforeTestPath",
+      "apkBuilderPluginApkBeforeTestBytes",
+    ]);
+    fileBindings.push([
       "packagedTemplateApkSha256",
       "packagedTemplateApkPath",
       "packagedTemplateApkBytes",
@@ -1018,6 +1046,13 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
     ["androidTestBuildApkSha256", "androidTestBuildApkPath", "androidTestBuildApkBytes"],
     ["requestedPluginApkSha256", "requestedPluginApkPath", "requestedPluginApkBytes"],
   ];
+  if (options.reportType === "device") {
+    attestationBindings.push([
+      "apkBuilderPluginBuildApkSha256",
+      "apkBuilderPluginBuildApkPath",
+      "apkBuilderPluginBuildApkBytes",
+    ]);
+  }
   attestationBindings.forEach(([hashKey, pathKey, bytesKey]) => {
     if (!SHA256_PATTERN.test(stringValue(artifacts[hashKey]))) {
       blockers.push(`artifact ${hashKey} must be a SHA-256 digest`);
@@ -1058,6 +1093,23 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
     blockers.push("installed Android test APK must match the fresh Android test build APK");
   }
   if (options.reportType === "device") {
+    const installedApkBuilderPluginSha256 =
+      stringValue(artifacts.apkBuilderPluginApkSha256).toLowerCase();
+    const preTestApkBuilderPluginSha256 =
+      stringValue(artifacts.apkBuilderPluginApkBeforeTestSha256).toLowerCase();
+    const freshApkBuilderPluginSha256 =
+      stringValue(artifacts.apkBuilderPluginBuildApkSha256).toLowerCase();
+    if (artifacts.installedApkBuilderPluginMatchesFreshBuild !== true ||
+        installedApkBuilderPluginSha256 !== freshApkBuilderPluginSha256) {
+      blockers.push("installed APK Builder plugin APK must match the fresh current-source build APK");
+    }
+    if (artifacts.installedApkBuilderPluginUnchangedDuringTest !== true ||
+        preTestApkBuilderPluginSha256 !== installedApkBuilderPluginSha256 ||
+        preTestApkBuilderPluginSha256 !== freshApkBuilderPluginSha256) {
+      blockers.push(
+        "installed APK Builder plugin APK must remain identical to the fresh build before and after testing",
+      );
+    }
     if (stringValue(artifacts.packagedTemplateSourceTask) !== PACKAGED_TEMPLATE_TASK) {
       blockers.push(`packaged template source task must be ${PACKAGED_TEMPLATE_TASK}`);
     }
@@ -1143,7 +1195,31 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
     "plugin",
     blockers,
   );
+  let apkBuilderPluginApk = null;
+  let apkBuilderPluginApkBeforeTest = null;
+  let apkBuilderPluginBuildApk = null;
   if (options.reportType === "device") {
+    apkBuilderPluginApk = validateApkArtifact(
+      resolvedFiles.apkBuilderPluginApkPath,
+      "installed APK Builder plugin APK",
+      "",
+      "apk-builder-plugin",
+      blockers,
+    );
+    apkBuilderPluginApkBeforeTest = validateApkArtifact(
+      resolvedFiles.apkBuilderPluginApkBeforeTestPath,
+      "pre-test installed APK Builder plugin APK",
+      "",
+      "apk-builder-plugin",
+      blockers,
+    );
+    apkBuilderPluginBuildApk = validateApkArtifact(
+      resolvedFiles.apkBuilderPluginBuildApkPath,
+      "fresh APK Builder plugin build APK",
+      "",
+      "apk-builder-plugin",
+      blockers,
+    );
     validateApkArtifact(
       resolvedFiles.packagedTemplateApkPath,
       "packaged smoke template APK",
@@ -1166,6 +1242,51 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
     blockers,
   );
   validateApkSignerPair(hostApk, androidTestApk, "host APK and Android test APK", blockers);
+  if (options.reportType === "device") {
+    validateApkSignerPair(
+      apkBuilderPluginApk,
+      apkBuilderPluginBuildApk,
+      "installed APK Builder plugin APK and fresh build APK",
+      blockers,
+    );
+    validateApkSignerPair(
+      apkBuilderPluginApkBeforeTest,
+      apkBuilderPluginBuildApk,
+      "pre-test installed APK Builder plugin APK and fresh build APK",
+      blockers,
+    );
+    validateApkSignerPair(
+      hostApk,
+      apkBuilderPluginApk,
+      "host APK and installed APK Builder plugin APK",
+      blockers,
+    );
+    if (SHA256_PATTERN.test(stringValue(options.reportedApkBuilderPluginSignerSha256))) {
+      const reportedBuilderSigner =
+        stringValue(options.reportedApkBuilderPluginSignerSha256).toLowerCase();
+      validateReportedApkSigner(
+        reportedBuilderSigner,
+        apkBuilderPluginApk,
+        "installed APK Builder plugin APK",
+        blockers,
+        "APK Builder plugin",
+      );
+      validateReportedApkSigner(
+        reportedBuilderSigner,
+        apkBuilderPluginApkBeforeTest,
+        "pre-test installed APK Builder plugin APK",
+        blockers,
+        "APK Builder plugin",
+      );
+      validateReportedApkSigner(
+        reportedBuilderSigner,
+        apkBuilderPluginBuildApk,
+        "fresh APK Builder plugin build APK",
+        blockers,
+        "APK Builder plugin",
+      );
+    }
+  }
   if (SHA256_PATTERN.test(stringValue(options.reportedPluginSignerSha256))) {
     const reportedSigner = stringValue(options.reportedPluginSignerSha256).toLowerCase();
     validateReportedApkSigner(reportedSigner, pluginApk, "runtime plugin APK", blockers);
@@ -1190,7 +1311,11 @@ function validateApkArtifact(file, label, runtimeProcessAbi, kind, blockers) {
     ? RUNTIME_PLUGIN_PACKAGE
     : kind === "test"
       ? "org.autojs.autojs6.test"
-      : kind === "template" ? PACKAGED_TEMPLATE_PACKAGE : "org.autojs.autojs6";
+      : kind === "template"
+        ? PACKAGED_TEMPLATE_PACKAGE
+        : kind === "apk-builder-plugin"
+          ? APK_BUILDER_PLUGIN_PACKAGE
+          : "org.autojs.autojs6";
   if (!inspection.ready) {
     blockers.push(`${label} failed Android package/signature inspection: ${inspection.blockers.join("; ")}`);
   } else if (inspection.packageName !== expectedPackage) {
@@ -1257,10 +1382,16 @@ function validateApkSignerPair(left, right, label, blockers) {
   }
 }
 
-function validateReportedApkSigner(reportedSigner, inspection, label, blockers) {
+function validateReportedApkSigner(
+  reportedSigner,
+  inspection,
+  label,
+  blockers,
+  provenanceLabel = "plugin",
+) {
   const artifactSigner = apkInspectionSigner(inspection);
   if (artifactSigner && reportedSigner !== artifactSigner) {
-    blockers.push(`plugin signerSha256 does not match the ${label} signer`);
+    blockers.push(`${provenanceLabel} signerSha256 does not match the ${label} signer`);
   }
 }
 
@@ -1704,6 +1835,58 @@ function validateSoakSampleProcEvidence(sample, index, blockers) {
   }
 }
 
+function validateApkBuilderPluginProvenance(
+  apkBuilderPlugin,
+  artifactsValue,
+  capturedIdentityValue,
+  blockers,
+) {
+  const artifacts = artifactsValue || {};
+  const capturedIdentity = capturedIdentityValue || {};
+  const signerSha256 = stringValue(apkBuilderPlugin.signerSha256).toLowerCase();
+  if (stringValue(apkBuilderPlugin.packageName) !== APK_BUILDER_PLUGIN_PACKAGE) {
+    blockers.push(`APK Builder plugin packageName must be ${APK_BUILDER_PLUGIN_PACKAGE}`);
+  }
+  if (stringValue(apkBuilderPlugin.buildTask) !== APK_BUILDER_PLUGIN_TASK) {
+    blockers.push(`APK Builder plugin buildTask must be ${APK_BUILDER_PLUGIN_TASK}`);
+  }
+  if (apkBuilderPlugin.remoteBuildEnabled !== true) {
+    blockers.push("APK Builder plugin remoteBuildEnabled must be true");
+  }
+  if (!/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i.test(stringValue(apkBuilderPlugin.hostCommit)) ||
+      stringValue(apkBuilderPlugin.hostCommit) !== stringValue(capturedIdentity.hostCommit)) {
+    blockers.push("APK Builder plugin hostCommit must match the captured clean host source identity");
+  }
+  if (!SHA256_PATTERN.test(signerSha256)) {
+    blockers.push("APK Builder plugin signerSha256 is invalid");
+  }
+  if (apkBuilderPlugin.installedMatchesFreshBuild !== true) {
+    blockers.push("APK Builder plugin installedMatchesFreshBuild must be true");
+  }
+  if (apkBuilderPlugin.installedMatchesFreshBuild !== artifacts.installedApkBuilderPluginMatchesFreshBuild) {
+    blockers.push("APK Builder plugin provenance does not match the artifact installation attestation");
+  }
+  if (apkBuilderPlugin.installedUnchangedDuringTest !== true) {
+    blockers.push("APK Builder plugin installedUnchangedDuringTest must be true");
+  }
+  if (apkBuilderPlugin.installedUnchangedDuringTest !==
+      artifacts.installedApkBuilderPluginUnchangedDuringTest) {
+    blockers.push("APK Builder plugin provenance does not match the artifact unchanged-during-test attestation");
+  }
+  const servicePreflight = apkBuilderPlugin.servicePreflight || {};
+  const components = Array.isArray(servicePreflight.components)
+    ? servicePreflight.components.map(stringValue)
+    : [];
+  if (stringValue(servicePreflight.action) !== APK_BUILDER_PLUGIN_ACTION ||
+      stringValue(servicePreflight.expectedComponent) !== APK_BUILDER_PLUGIN_COMPONENT ||
+      servicePreflight.matched !== true ||
+      !components.includes(APK_BUILDER_PLUGIN_COMPONENT)) {
+    blockers.push(
+      `APK Builder plugin servicePreflight must prove ${APK_BUILDER_PLUGIN_COMPONENT} for ${APK_BUILDER_PLUGIN_ACTION}`,
+    );
+  }
+}
+
 function evaluateMatrix(deviceReports) {
   const blockers = [];
   const primary = deviceReports.find((entry) => entry.id === "sony-arm64");
@@ -1767,6 +1950,26 @@ function validateContractAnchors(repoRoot) {
   if (!deviceCollector.includes("packaged-template-device-sha256-after-test") ||
       !deviceCollector.includes("packaged-template-device-cleanup")) {
     violations.push("R6 production device collector must rehash and clean its run-owned packaged smoke template");
+  }
+  if (!deviceCollector.includes(APK_BUILDER_PLUGIN_TASK) ||
+      !deviceCollector.includes(APK_BUILDER_PLUGIN_PACKAGE) ||
+      !deviceCollector.includes("autojs.apkBuilder.templatePlugin.enableRemoteBuild") ||
+      !deviceCollector.includes("apkBuilderPluginApkSha256") ||
+      !deviceCollector.includes("apkBuilderPluginApkBeforeTestSha256") ||
+      !deviceCollector.includes("apkBuilderPluginBuildApkSha256") ||
+      !deviceCollector.includes("installedApkBuilderPluginMatchesFreshBuild") ||
+      !deviceCollector.includes("installedApkBuilderPluginUnchangedDuringTest") ||
+      !deviceCollector.includes("apk-builder-plugin-service-preflight") ||
+      !deviceCollector.includes('"query-services"') ||
+      !deviceCollector.includes(APK_BUILDER_PLUGIN_ACTION) ||
+      !deviceCollector.includes(APK_BUILDER_PLUGIN_SERVICE)) {
+    violations.push(
+      "R6 production device collector must build, install, and attest the current-source release APK Builder plugin",
+    );
+  }
+  if (!deviceCollector.includes('"--no-daemon"') ||
+      !deviceCollector.includes('"-Pkotlin.compiler.execution.strategy=in-process"')) {
+    violations.push("R6 production device collector must isolate all Gradle and Kotlin compiler invocations");
   }
   if (!soakInstrumentation.includes("PowerManager.PARTIAL_WAKE_LOCK") ||
       !soakInstrumentation.includes("acquire(durationMs + WAKE_LOCK_GRACE_MS)") ||

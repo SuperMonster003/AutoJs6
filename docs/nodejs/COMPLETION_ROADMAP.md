@@ -459,6 +459,18 @@ JUnit and cleanup, `wakeLockHeldElapsedMs=120743`,
 lock after completion. This validates the repaired collection path only; the
 clean-source 8-hour and 24-hour production reports remain required.
 
+The first current-source Sony arm64 device-collection attempt on 2026-07-24
+then passed all ten main-app selectors but skipped the three packaged-APK
+selectors, so the verifier archived nothing. This exposed collector drift after
+the 2026-07-23 migration to the remote APK Builder plugin, not a passing device
+report. The collector now builds
+`:plugins:apk-builder-template:packageRelease` from the same clean host commit
+and generated Runtime Kit, enables remote build explicitly, requires the host
+release signer and exact Builder service, and proves the installed Builder APK
+matches the fresh build and remains unchanged before and after testing. All
+three collector Gradle invocations are single-use with in-process Kotlin
+compilation. The four current device reports remain required.
+
 Core completion command:
 
 ```powershell

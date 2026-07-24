@@ -42,6 +42,13 @@ const PACKAGED_TEMPLATE_DEVICE_PATH_PREFIX = "/data/local/tmp/autojs6-r6-package
 const PACKAGED_TEMPLATE_OVERRIDE_ARGUMENT = "autojs.embeddedNode.packagedSmokeTemplateOverride";
 const PACKAGED_TEMPLATE_EXACT_PATH_ARGUMENT = "autojs.embeddedNode.packagedSmokeTemplateExactPath";
 const PACKAGED_TEMPLATE_TARGET_ABI_ARGUMENT = "autojs.embeddedNode.packagedSmokeTargetAbi";
+const APK_BUILDER_PLUGIN_TASK = ":plugins:apk-builder-template:packageRelease";
+const APK_BUILDER_PLUGIN_PACKAGE = "org.autojs.plugin.apkbuilder.template";
+const APK_BUILDER_PLUGIN_ACTION = "org.autojs.plugin.APK_BUILDER";
+const APK_BUILDER_PLUGIN_SERVICE =
+  "org.autojs.plugin.apkbuilder.template.impl.ApkBuilderTemplatePluginService";
+const APK_BUILDER_PLUGIN_REMOTE_BUILD_PROPERTY =
+  "autojs.apkBuilder.templatePlugin.enableRemoteBuild";
 const R5_PLUGIN_PREFLIGHT_SELECTOR =
   "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_01_livePluginPreflightNegotiatesContractAndReportsTrustIdentity";
 const R6_PLUGIN_SOAK_SELECTOR =
@@ -203,6 +210,7 @@ async function main() {
     sourceIdentity: { before: null, after: null },
     device: null,
     plugin: null,
+    apkBuilderPlugin: null,
     packagedTemplate: null,
     host: null,
     commands: [],
@@ -244,7 +252,7 @@ async function main() {
       root: pluginRoot,
       // The sibling version plugin mutates version.properties only when assembleDebug is in
       // the graph. packageDebug produces the signed split APKs without that post-assemble hook.
-      args: ["--console=plain", "--rerun-tasks", ":app:packageDebug"],
+      args: buildPluginGradleArgs(),
       timeoutMs: boundedNumber(options.pluginBuildTimeoutMs, 7_200_000, 300_000, 14_400_000, "plugin-build-timeout-ms"),
       context,
       label: "plugin-build",
@@ -298,7 +306,7 @@ async function main() {
 
     const packagedTemplateBuild = await runGradle({
       root: repoRoot,
-      args: buildPackagedTemplateGradleArgs(),
+      args: buildPackagedTemplateGradleArgs(identityBefore.host.commit),
       timeoutMs: boundedNumber(options.gradleTimeoutMs, 14_400_000, 900_000, 43_200_000, "gradle-timeout-ms"),
       context,
       label: "packaged-template-build",
@@ -333,6 +341,68 @@ async function main() {
       "packaged-smoke-template.apk",
     );
     const packagedTemplateArtifact = artifactRecord(packagedTemplateCopy, repoRoot);
+
+    const apkBuilderPluginBuildApk = selectFreshUniversalApk(
+      path.join(repoRoot, "plugins/apk-builder-template/build/outputs/apk/release"),
+      packagedTemplateBuild.startedAt,
+      "APK Builder plugin release",
+    );
+    const apkBuilderPluginBuildMetadata = inspectApk(apkBuilderPluginBuildApk, repoRoot, context);
+    validateApkBuilderPluginApk(apkBuilderPluginBuildMetadata, apkBuilderPluginBuildApk, true);
+    const apkBuilderPluginBuildSignature = inspectApkSigner(
+      apkBuilderPluginBuildApk,
+      repoRoot,
+      context,
+      "apk-builder-plugin-build-signature",
+    );
+    const apkBuilderPluginBuildCopy = copyArtifact(
+      apkBuilderPluginBuildApk,
+      artifactDir,
+      "apk-builder-plugin-build.apk",
+    );
+    const apkBuilderPluginBuildArtifact = artifactRecord(apkBuilderPluginBuildCopy, repoRoot);
+    const apkBuilderPluginInstall = await runCommand(
+      "adb",
+      ["-s", serial, "install", "-r", apkBuilderPluginBuildApk],
+      {
+        cwd: repoRoot,
+        env: { ...process.env, ANDROID_SERIAL: serial },
+        timeoutMs: 600_000,
+        context,
+        label: "apk-builder-plugin-install",
+      },
+    );
+    requireSuccessfulCommand(apkBuilderPluginInstall, "APK Builder plugin installation");
+    const apkBuilderPluginInstalledBefore = await captureInstalledApkBuilderPlugin({
+      serial,
+      phase: "before-test",
+      artifactDir,
+      freshBuildArtifact: apkBuilderPluginBuildArtifact,
+      freshBuildSignature: apkBuilderPluginBuildSignature,
+      context,
+    });
+    const apkBuilderPluginServicePreflight = await verifyInstalledApkBuilderPluginService(
+      serial,
+      context,
+    );
+    summary.apkBuilderPlugin = {
+      packageName: APK_BUILDER_PLUGIN_PACKAGE,
+      buildTask: APK_BUILDER_PLUGIN_TASK,
+      remoteBuildEnabled: true,
+      hostCommit: identityBefore.host.commit,
+      signerSha256: apkBuilderPluginBuildSignature.signerSha256,
+      buildSource: relativePath(repoRoot, apkBuilderPluginBuildApk),
+      buildApk: apkBuilderPluginBuildArtifact,
+      buildMetadata: apkBuilderPluginBuildMetadata,
+      buildSignature: apkBuilderPluginBuildSignature,
+      servicePreflight: apkBuilderPluginServicePreflight,
+      installedBefore: apkBuilderPluginInstalledBefore,
+      installedAfter: null,
+      installedMatchesFreshBuild: true,
+      installedUnchangedDuringTest: null,
+    };
+    writeSummary(runRoot, summary);
+
     if (await deviceFileExists(
       serial,
       packagedTemplateDevicePath,
@@ -441,6 +511,23 @@ async function main() {
     if (evidenceGateFailure) throw evidenceGateFailure;
     if (packagedTemplateCleanupFailure) throw packagedTemplateCleanupFailure;
 
+    const apkBuilderPluginInstalledAfter = await captureInstalledApkBuilderPlugin({
+      serial,
+      phase: "after-test",
+      artifactDir,
+      freshBuildArtifact: apkBuilderPluginBuildArtifact,
+      freshBuildSignature: apkBuilderPluginBuildSignature,
+      context,
+    });
+    assertInstalledApkBuilderPluginUnchanged(
+      apkBuilderPluginInstalledBefore,
+      apkBuilderPluginInstalledAfter,
+    );
+    summary.apkBuilderPlugin.installedAfter = apkBuilderPluginInstalledAfter;
+    summary.apkBuilderPlugin.installedMatchesFreshBuild = true;
+    summary.apkBuilderPlugin.installedUnchangedDuringTest = true;
+    writeSummary(runRoot, summary);
+
     const freshJUnit = selectFreshJUnit(
       resultRoot,
       junitBefore,
@@ -543,6 +630,9 @@ async function main() {
       androidTestApk: artifactRecord(installedAndroidTestCopy, repoRoot),
       androidTestBuildApk: artifactRecord(androidTestBuildApk, repoRoot),
       pluginApk: artifactRecord(installedPluginCopy, repoRoot),
+      apkBuilderPluginApk: apkBuilderPluginInstalledAfter.apk,
+      apkBuilderPluginApkBeforeTest: apkBuilderPluginInstalledBefore.apk,
+      apkBuilderPluginBuildApk: apkBuilderPluginBuildArtifact,
       junitXml: artifactRecord(junitCopy, repoRoot),
       requestedPluginApk: pluginSourceArtifact,
       packagedTemplateApk: packagedTemplateArtifact,
@@ -623,6 +713,21 @@ async function main() {
         requestedPluginApkSha256: artifacts.requestedPluginApk.sha256,
         requestedPluginApkBytes: artifacts.requestedPluginApk.sizeBytes,
         installedPluginMatchesRequested: true,
+        apkBuilderPluginApkPath: artifacts.apkBuilderPluginApk.path,
+        apkBuilderPluginApkSha256: artifacts.apkBuilderPluginApk.sha256,
+        apkBuilderPluginApkBytes: artifacts.apkBuilderPluginApk.sizeBytes,
+        apkBuilderPluginApkBeforeTestPath: artifacts.apkBuilderPluginApkBeforeTest.path,
+        apkBuilderPluginApkBeforeTestSha256: artifacts.apkBuilderPluginApkBeforeTest.sha256,
+        apkBuilderPluginApkBeforeTestBytes: artifacts.apkBuilderPluginApkBeforeTest.sizeBytes,
+        apkBuilderPluginBuildApkPath: artifacts.apkBuilderPluginBuildApk.path,
+        apkBuilderPluginBuildApkSha256: artifacts.apkBuilderPluginBuildApk.sha256,
+        apkBuilderPluginBuildApkBytes: artifacts.apkBuilderPluginBuildApk.sizeBytes,
+        apkBuilderPluginApkSignerSha256:
+          apkBuilderPluginInstalledAfter.signature.signerSha256,
+        apkBuilderPluginBuildApkSignerSha256:
+          apkBuilderPluginBuildSignature.signerSha256,
+        installedApkBuilderPluginMatchesFreshBuild: true,
+        installedApkBuilderPluginUnchangedDuringTest: true,
         packagedTemplateApkPath: artifacts.packagedTemplateApk.path,
         packagedTemplateApkSha256: artifacts.packagedTemplateApk.sha256,
         packagedTemplateApkBytes: artifacts.packagedTemplateApk.sizeBytes,
@@ -640,6 +745,19 @@ async function main() {
           `${PACKAGED_TEMPLATE_TARGET_ABI_ARGUMENT}=${requirement.runtimeProcessAbi}`,
       },
       plugin: pluginProvenance,
+      apkBuilderPlugin: {
+        packageName: APK_BUILDER_PLUGIN_PACKAGE,
+        buildTask: APK_BUILDER_PLUGIN_TASK,
+        remoteBuildEnabled: true,
+        hostCommit: identityAfter.host.commit,
+        signerSha256: apkBuilderPluginBuildSignature.signerSha256,
+        installedMatchesFreshBuild: true,
+        installedUnchangedDuringTest: true,
+        servicePreflight: apkBuilderPluginServicePreflight,
+        buildApk: artifacts.apkBuilderPluginBuildApk,
+        installedBefore: apkBuilderPluginInstalledBefore,
+        installedAfter: apkBuilderPluginInstalledAfter,
+      },
       surfaces: derived.surfaces,
       regressions: derived.regressions,
       lifecycle: derived.lifecycle,
@@ -727,11 +845,30 @@ async function main() {
   }
 }
 
-function buildPackagedTemplateGradleArgs() {
+function buildPluginGradleArgs() {
   return [
     "--console=plain",
+    "--no-daemon",
     "--rerun-tasks",
+    "-Pkotlin.compiler.execution.strategy=in-process",
+    ":app:packageDebug",
+  ];
+}
+
+function buildPackagedTemplateGradleArgs(hostCommit) {
+  const commit = String(hostCommit || "").trim();
+  if (!/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i.test(commit)) {
+    throw new Error(`A full 40- or 64-character hexadecimal host commit is required, got ${hostCommit || "missing"}.`);
+  }
+  return [
+    "--console=plain",
+    "--no-daemon",
+    "--rerun-tasks",
+    "-Pkotlin.compiler.execution.strategy=in-process",
     PACKAGED_TEMPLATE_TASK,
+    APK_BUILDER_PLUGIN_TASK,
+    `-P${APK_BUILDER_PLUGIN_REMOTE_BUILD_PROPERTY}=true`,
+    `-Pautojs.git.sha=${commit}`,
     `-Pautojs.nodejs.runtimeSlot=${RUNTIME_SLOT}`,
     "-Pautojs.nodejs.embedded.script.enabled=true",
     "-Pautojs.gradle.build.number.auto.increment.enabled=false",
@@ -743,7 +880,9 @@ function buildEvidenceGradleArgs(pluginRoot, profile, runToken, runtimeProcessAb
   const packagedTemplateDevicePath = packagedTemplatePathForRunToken(runToken);
   return [
     "--console=plain",
+    "--no-daemon",
     "--rerun-tasks",
+    "-Pkotlin.compiler.execution.strategy=in-process",
     GRADLE_TASK,
     `-Pautojs.nodejs.releaseFlavor=${RELEASE_FLAVOR}`,
     `-Pautojs.nodejs.backend=${BACKEND}`,
@@ -870,6 +1009,118 @@ async function readAndValidateDevice(serial, requirement, context) {
 
 async function inspectInstalledPlugin(serial, packageName, context) {
   return inspectInstalledPackage(serial, packageName, context, "plugin");
+}
+
+async function captureInstalledApkBuilderPlugin(config) {
+  const label = `apk-builder-plugin-${config.phase}`;
+  const packageMetadata = await inspectInstalledPackage(
+    config.serial,
+    APK_BUILDER_PLUGIN_PACKAGE,
+    config.context,
+    label,
+    false,
+  );
+  const localApk = path.join(
+    config.artifactDir,
+    `installed-apk-builder-plugin-${config.phase}.apk`,
+  );
+  await pullInstalledApk(
+    config.serial,
+    packageMetadata.baseApkPath,
+    localApk,
+    config.context,
+    `${label}-apk-pull`,
+  );
+  const apkMetadata = inspectApk(localApk, config.context.repoRoot, config.context);
+  validateApkBuilderPluginApk(apkMetadata, localApk);
+  const signature = inspectApkSigner(
+    localApk,
+    config.context.repoRoot,
+    config.context,
+    `${label}-signature`,
+  );
+  const apk = artifactRecord(localApk, config.context.repoRoot);
+  const matchesFreshBuild =
+    apk.sizeBytes === config.freshBuildArtifact.sizeBytes &&
+    apk.sha256 === config.freshBuildArtifact.sha256 &&
+    signature.signerSha256 === config.freshBuildSignature.signerSha256;
+  if (!matchesFreshBuild) {
+    throw new Error(
+      `Installed APK Builder plugin ${config.phase} does not match the fresh release build ` +
+        `(bytes ${apk.sizeBytes}/${config.freshBuildArtifact.sizeBytes}, ` +
+        `sha256 ${apk.sha256}/${config.freshBuildArtifact.sha256}, ` +
+        `signer ${signature.signerSha256}/${config.freshBuildSignature.signerSha256}).`,
+    );
+  }
+  return {
+    packageMetadata,
+    apkMetadata,
+    apk,
+    signature,
+    matchesFreshBuild: true,
+  };
+}
+
+function assertInstalledApkBuilderPluginUnchanged(before, after) {
+  const unchanged =
+    before.apk.sizeBytes === after.apk.sizeBytes &&
+    before.apk.sha256 === after.apk.sha256 &&
+    before.signature.signerSha256 === after.signature.signerSha256 &&
+    JSON.stringify(before.packageMetadata) === JSON.stringify(after.packageMetadata) &&
+    JSON.stringify(before.apkMetadata) === JSON.stringify(after.apkMetadata);
+  if (!unchanged) {
+    throw new Error(
+      "Installed APK Builder plugin package metadata, bytes, hash, or signer changed during the evidence test.",
+    );
+  }
+}
+
+async function verifyInstalledApkBuilderPluginService(serial, context) {
+  const expectedComponent = `${APK_BUILDER_PLUGIN_PACKAGE}/${APK_BUILDER_PLUGIN_SERVICE}`;
+  const output = await adbText(
+    serial,
+    [
+      "shell",
+      "cmd",
+      "package",
+      "query-services",
+      "--brief",
+      "--components",
+      "-a",
+      APK_BUILDER_PLUGIN_ACTION,
+    ],
+    context,
+    "apk-builder-plugin-service-preflight",
+  );
+  const rawComponents = output.split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean);
+  const components = rawComponents.map(normalizeAndroidComponentName);
+  if (!components.includes(expectedComponent)) {
+    throw new Error(
+      `Installed APK Builder plugin does not expose ${expectedComponent} for action ` +
+        `${APK_BUILDER_PLUGIN_ACTION}; query returned ${rawComponents.join(", ") || "<empty>"}.`,
+    );
+  }
+  return {
+    action: APK_BUILDER_PLUGIN_ACTION,
+    expectedComponent,
+    rawComponents,
+    components,
+    matched: true,
+  };
+}
+
+function normalizeAndroidComponentName(value) {
+  const text = String(value || "").trim();
+  const match = /^([^/\s]+)\/([^/\s]+)$/.exec(text);
+  if (!match) return text;
+  const packageName = match[1];
+  const rawClassName = match[2];
+  const className = rawClassName.startsWith(".")
+    ? `${packageName}${rawClassName}`
+    : rawClassName.includes(".")
+      ? rawClassName
+      : `${packageName}.${rawClassName}`;
+  return `${packageName}/${className}`;
 }
 
 async function inspectInstalledPackage(serial, packageName, context, label, requirePrimaryCpuAbi = true) {
@@ -1140,6 +1391,32 @@ function validatePackagedTemplateApk(metadata, apk, expectedAbi) {
   }
 }
 
+function validateApkBuilderPluginApk(metadata, apk, requireUniversalOutput = false) {
+  if (metadata.packageName !== APK_BUILDER_PLUGIN_PACKAGE) {
+    throw new Error(
+      `APK Builder plugin package must be ${APK_BUILDER_PLUGIN_PACKAGE}, ` +
+        `got ${metadata.packageName || "missing"}: ${apk}`,
+    );
+  }
+  if (requireUniversalOutput && !path.basename(apk).toLowerCase().endsWith("-universal.apk")) {
+    throw new Error(`APK Builder plugin must be the universal APK output: ${apk}`);
+  }
+}
+
+function selectFreshUniversalApk(root, startedAtEpochMs, label) {
+  const matches = listFiles(root)
+    .filter((file) => path.basename(file).toLowerCase().endsWith("-universal.apk"))
+    .filter((file) => fs.statSync(file).mtimeMs >= startedAtEpochMs - FRESHNESS_TOLERANCE_MS)
+    .sort((left, right) => fs.statSync(right).mtimeMs - fs.statSync(left).mtimeMs);
+  if (matches.length === 0) {
+    throw new Error(`No fresh universal ${label} APK was found under ${root}.`);
+  }
+  if (matches.length > 1) {
+    throw new Error(`Multiple fresh universal ${label} APKs are ambiguous: ${matches.join(", ")}`);
+  }
+  return matches[0];
+}
+
 function selectAbiApk(root, abi, label) {
   const suffix = `-${abi}.apk`.toLowerCase();
   const matches = listFiles(root)
@@ -1174,6 +1451,7 @@ function snapshotJUnitFiles(root) {
 
 function selectFreshJUnit(root, before, startedAtEpochMs, requiredSelectors) {
   const candidates = [];
+  const rejections = [];
   for (const file of listFiles(root).filter((entry) => path.basename(entry).startsWith("TEST-") && entry.endsWith(".xml"))) {
     const stat = fs.statSync(file);
     const digest = sha256(file);
@@ -1194,12 +1472,21 @@ function selectFreshJUnit(root, before, startedAtEpochMs, requiredSelectors) {
           sha256: digest,
         },
       });
-    } catch (_) {
+    } catch (error) {
       // Changed XML from unrelated Gradle work is not accepted as this run's evidence.
+      rejections.push({ file, error });
     }
   }
   candidates.sort((left, right) => right.mtimeMs - left.mtimeMs);
   if (candidates.length === 0) {
+    if (rejections.length === 1) throw rejections[0].error;
+    if (rejections.length > 1) {
+      throw new Error(
+        "No fresh JUnit XML passed the exact R6 device selector contract. Rejected fresh changed XML: " +
+          rejections.map(({ file, error }) =>
+            `${file}: ${error && error.message ? error.message : String(error)}`).join("; "),
+      );
+    }
     throw new Error("No fresh JUnit XML contains exactly the required R6 device selectors with explicit zero failures/errors/skips.");
   }
   if (candidates.length > 1) {
@@ -1762,6 +2049,16 @@ function renderSummary(summary) {
     `- Plugin required/authenticated/trusted: \`${summary.plugin
       ? [summary.plugin.required, summary.plugin.authenticated, summary.plugin.trusted].join("/")
       : "pending"}\``,
+    `- APK Builder plugin package: \`${summary.apkBuilderPlugin &&
+      summary.apkBuilderPlugin.packageName || "pending"}\``,
+    `- APK Builder plugin signer SHA-256: \`${summary.apkBuilderPlugin &&
+      summary.apkBuilderPlugin.signerSha256 || "pending"}\``,
+    `- APK Builder plugin installed/fresh/unchanged: \`${summary.apkBuilderPlugin
+      ? [
+        summary.apkBuilderPlugin.installedMatchesFreshBuild,
+        summary.apkBuilderPlugin.installedUnchangedDuringTest,
+      ].join("/")
+      : "pending"}\``,
     "",
     "## Failures",
     "",
@@ -1852,8 +2149,9 @@ Operational timeouts:
   --plugin-build-timeout-ms MS   Plugin build timeout (5 minutes..4 hours).
 
 The runner fixes nodePlugin/plugin/node24_5, the target profile and packaged-smoke ABI,
-builds and pushes a fresh target-ABI slim Inrt template to a run-token-derived exact path, verifies
-its device hash before and after testing, cleans it up, runs 30 R5 warm samples and a
+builds and installs a current-source, release-signed remote-build APK Builder plugin, builds and
+pushes a fresh target-ABI slim Inrt template to a run-token-derived exact path, verifies their
+device identities before and after testing, cleans up the template, runs 30 R5 warm samples and a
 30-second smoke lifecycle with 2-second samples, and fixes the exact verifier selectors
 plus a generated 64-character hexadecimal run token.
 It accepts no status, force, selector, profile, duration, or run-token override.
@@ -1864,6 +2162,7 @@ module.exports = {
   SELECTOR_DERIVATION,
   buildEvidenceGradleArgs,
   buildPackagedTemplateGradleArgs,
+  buildPluginGradleArgs,
   derivePluginProvenance,
   deriveEvidence,
   parseArgs,
@@ -1871,6 +2170,7 @@ module.exports = {
   parseRequiredJUnit,
   parseRequiredJUnitXml,
   packagedTemplatePathForRunToken,
+  normalizeAndroidComponentName,
   selectAbiApk,
   selectFreshJUnit,
   snapshotJUnitFiles,
