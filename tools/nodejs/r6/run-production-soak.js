@@ -25,6 +25,8 @@ const MAX_SAMPLE_INTERVAL_MS = 300_000;
 const MIN_REQUIRED_SAMPLES = 4;
 const FRESHNESS_TOLERANCE_MS = 10_000;
 const PRODUCTION_DURATION_MS = { quick: 8 * MILLIS_PER_HOUR, final: 24 * MILLIS_PER_HOUR };
+const GRADLE_DAEMON_REGISTRY_PROPERTY = "org.gradle.daemon.registry.base";
+const GRADLE_DAEMON_REGISTRY_DIRECTORY = "gradle-daemon-registry";
 const CANONICAL_REPORTS = {
   quick: "soak/quick-soak-8h.json",
   final: "soak/final-soak-24h.json",
@@ -160,6 +162,11 @@ async function main() {
       pluginRequired: true,
       persistentRuntime: true,
       archive: !smoke && !options.noArchive,
+      gradleDaemonRegistryIsolation: "per_run",
+      gradleDaemonRegistryBase: relativePath(
+        repoRoot,
+        gradleDaemonRegistryBaseForRun(runRoot),
+      ),
     },
     sourceIdentity: { host: hostGit, plugin: pluginGit },
     pluginBuild: null,
@@ -180,11 +187,11 @@ async function main() {
   console.log(`- run dir: ${runRoot}`);
 
   const env = { ...process.env, ANDROID_SERIAL: serial };
-  const pluginBuildInvocation = commandInvocation(gradleCommand(pluginRoot), [
-    "--console=plain",
-    "--rerun-tasks",
-    ":app:packageDebug",
-  ]);
+  fs.mkdirSync(gradleDaemonRegistryBaseForRun(runRoot), { recursive: true });
+  const pluginBuildInvocation = commandInvocation(
+    gradleCommand(pluginRoot),
+    buildIsolatedGradleArgs(runRoot, buildPluginGradleArgs()),
+  );
   const pluginBuild = await runCommand(pluginBuildInvocation.command, pluginBuildInvocation.args, {
     cwd: pluginRoot,
     env,
@@ -245,7 +252,10 @@ async function main() {
     cycleDelayMs,
     livenessRecoverabilityEveryCycles,
   });
-  const gradleInvocation = commandInvocation(gradleCommand(repoRoot), gradleArgs);
+  const gradleInvocation = commandInvocation(
+    gradleCommand(repoRoot),
+    buildIsolatedGradleArgs(runRoot, gradleArgs),
+  );
   const junitResultRoot = path.join(repoRoot, "app/build/outputs/androidTest-results");
   const junitBefore = snapshotJUnitFiles(junitResultRoot);
   const gradle = await runCommand(gradleInvocation.command, gradleInvocation.args, {
@@ -411,6 +421,36 @@ function buildGradleArgs(config) {
     }
   });
   return args;
+}
+
+function buildPluginGradleArgs() {
+  return [
+    "--console=plain",
+    "--no-daemon",
+    "--rerun-tasks",
+    "-Pkotlin.compiler.execution.strategy=in-process",
+    ":app:packageDebug",
+  ];
+}
+
+function gradleDaemonRegistryBaseForRun(runRoot) {
+  const resolvedRunRoot = path.resolve(String(runRoot || ""));
+  if (!runRoot || path.parse(resolvedRunRoot).root === resolvedRunRoot) {
+    throw new Error("An explicit non-root run directory is required for Gradle daemon isolation.");
+  }
+  return path.join(resolvedRunRoot, GRADLE_DAEMON_REGISTRY_DIRECTORY);
+}
+
+function buildIsolatedGradleArgs(runRoot, args) {
+  if (!Array.isArray(args)) throw new Error("Gradle arguments must be an array.");
+  if (args.some((value) =>
+    String(value).startsWith(`-D${GRADLE_DAEMON_REGISTRY_PROPERTY}=`))) {
+    throw new Error("Gradle daemon registry isolation must be injected exactly once by the runner.");
+  }
+  return [
+    `-D${GRADLE_DAEMON_REGISTRY_PROPERTY}=${gradleDaemonRegistryBaseForRun(runRoot)}`,
+    ...args,
+  ];
 }
 
 async function enrichReport(config) {
@@ -1430,6 +1470,9 @@ There is intentionally no production duration override and no force-archive opti
 module.exports = {
   assertFreshArtifact,
   buildGradleArgs,
+  buildIsolatedGradleArgs,
+  buildPluginGradleArgs,
+  gradleDaemonRegistryBaseForRun,
   selectFreshSoakJUnit,
   snapshotJUnitFiles,
 };

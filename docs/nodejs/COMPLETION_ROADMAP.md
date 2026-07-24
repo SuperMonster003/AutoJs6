@@ -449,8 +449,9 @@ end-of-soak ownership, zero suspend time, and final release, and revalidates
 plugin PID/session liveness before tolerating an unavailable external proc
 cross-check. Canonical plugin-self metrics and PSS remain fail-closed. The
 runner also uses a dedicated single-use Gradle process with in-process Kotlin
-compilation, and compact cycle records no longer retain the large bridge-health
-JSON on every iteration.
+compilation and a per-run daemon registry for both the plugin and connected
+builds, and compact cycle records no longer retain the large bridge-health JSON
+on every iteration.
 
 An explicitly non-archivable, screen-off Sony XQ-AT72 smoke then passed for
 120.743 seconds on 2026-07-24: 100 continuous cycles, 25 resource samples, clean
@@ -469,7 +470,9 @@ and generated Runtime Kit, enables remote build explicitly, requires the host
 release signer and exact Builder service, and proves the installed Builder APK
 matches the fresh build and remains unchanged before and after testing. All
 three collector Gradle invocations are single-use with in-process Kotlin
-compilation. The four current device reports remain required.
+compilation and a per-run daemon registry, so another checkout's global
+`gradle --stop` cannot terminate the evidence build. The four current device
+reports remain required.
 
 Core completion command:
 

@@ -104,7 +104,10 @@ hash fields are otherwise well formed.
 
 All collector Gradle invocations use `--no-daemon` and in-process Kotlin
 compilation. This isolates the runtime-plugin build, template/Builder build, and
-connected evidence gate from reusable Gradle or Kotlin compiler daemons.
+connected evidence gate from reusable Gradle or Kotlin compiler daemons. They
+also use a daemon registry inside the unique run directory while retaining the
+shared Gradle dependency cache, so an unrelated checkout's global
+`gradle --stop` cannot terminate an in-flight evidence build.
 
 The target constraints are fail-closed: the two Sony entries must use the
 required 64-bit and 32-bit runtime ABIs, the second-OEM entry must be a
@@ -169,7 +172,10 @@ The report must prove the lock was acquired, remained held at the common
 soak-end timestamp, covered matching elapsed/uptime durations with at most one
 second of derived suspend, and was released in `finally`. Production builds use
 a single-use Gradle process and in-process Kotlin compilation so unrelated
-long-lived build/compiler daemons cannot own the instrumentation run.
+long-lived build/compiler daemons cannot own the instrumentation run. Both the
+fresh plugin build and the connected 8/24-hour task use the soak run's private
+daemon registry, preventing another checkout's global `gradle --stop` from
+terminating the experiment while the shared dependency cache remains available.
 
 Canonical RSS, thread, fd, and heap metrics come from the plugin process
 itself. The additional cross-UID `/proc/<pid>/status` observation is only a

@@ -24,8 +24,10 @@ const {
 } = require("./verify-production-evidence");
 const {
   buildEvidenceGradleArgs,
+  buildIsolatedGradleArgs,
   buildPackagedTemplateGradleArgs,
   buildPluginGradleArgs,
+  gradleDaemonRegistryBaseForRun,
   normalizeAndroidComponentName,
   packagedTemplatePathForRunToken,
   parseApkSignerOutput,
@@ -36,6 +38,9 @@ const {
 const {
   assertFreshArtifact,
   buildGradleArgs: buildSoakGradleArgs,
+  buildIsolatedGradleArgs: buildSoakIsolatedGradleArgs,
+  buildPluginGradleArgs: buildSoakPluginGradleArgs,
+  gradleDaemonRegistryBaseForRun: soakGradleDaemonRegistryBaseForRun,
   selectFreshSoakJUnit,
   snapshotJUnitFiles: snapshotSoakJUnitFiles,
 } = require("./run-production-soak");
@@ -1179,6 +1184,13 @@ function assertApkSignerOutputContracts() {
 }
 
 function assertDeviceRunnerGradleContracts() {
+  const collectorSource = fs.readFileSync(
+    path.resolve(__dirname, "run-device-evidence.js"),
+    "utf8",
+  );
+  assert(collectorSource.includes(
+    "buildIsolatedGradleArgs(config.context.runRoot, config.args)",
+  ));
   const assertIsolatedGradleArgs = (args, label) => {
     assert.strictEqual(
       args.filter((value) => value === "--no-daemon").length,
@@ -1195,6 +1207,7 @@ function assertDeviceRunnerGradleContracts() {
   const pluginArgs = buildPluginGradleArgs();
   assertIsolatedGradleArgs(pluginArgs, "runtime plugin build");
   assert.strictEqual(pluginArgs.filter((value) => value === ":app:packageDebug").length, 1);
+  assertPerRunDaemonRegistryArgs(pluginArgs, "runtime plugin build");
   const devicePaths = new Set();
   DEVICE_REQUIREMENTS.forEach((requirement, index) => {
     const runToken = (index + 1).toString(16).repeat(64);
@@ -1206,6 +1219,7 @@ function assertDeviceRunnerGradleContracts() {
       requirement.runtimeProcessAbi,
     );
     assertIsolatedGradleArgs(evidenceArgs, `${requirement.id} evidence gate`);
+    assertPerRunDaemonRegistryArgs(evidenceArgs, `${requirement.id} evidence gate`);
     assert.strictEqual(evidenceArgs.filter((value) => value ===
       ":app:verifyNodeR6DeviceEvidenceGate").length, 1);
     assert(evidenceArgs.includes(
@@ -1222,6 +1236,10 @@ function assertDeviceRunnerGradleContracts() {
   assert.strictEqual(devicePaths.size, DEVICE_REQUIREMENTS.length);
   const templateArgs = buildPackagedTemplateGradleArgs(identity.host.commit);
   assertIsolatedGradleArgs(templateArgs, "packaged template and APK Builder plugin build");
+  assertPerRunDaemonRegistryArgs(
+    templateArgs,
+    "packaged template and APK Builder plugin build",
+  );
   assert.strictEqual(templateArgs.filter((value) => value === ":app:packageInrtDebug").length, 1);
   assert.strictEqual(
     templateArgs.filter((value) =>
@@ -1248,6 +1266,23 @@ function assertDeviceRunnerGradleContracts() {
   assert(!REQUIRED_ARTIFACT_HASHES.includes("apkBuilderPluginApkSha256"));
   assert(!REQUIRED_ARTIFACT_HASHES.includes("apkBuilderPluginApkBeforeTestSha256"));
   assert(!REQUIRED_ARTIFACT_HASHES.includes("apkBuilderPluginBuildApkSha256"));
+}
+
+function assertPerRunDaemonRegistryArgs(baseArgs, label) {
+  const runRoot = path.join(contractRoot, "runner path with spaces", label);
+  const expectedRegistry = path.join(path.resolve(runRoot), "gradle-daemon-registry");
+  assert.strictEqual(gradleDaemonRegistryBaseForRun(runRoot), expectedRegistry);
+  const isolatedArgs = buildIsolatedGradleArgs(runRoot, baseArgs);
+  assert.deepStrictEqual(
+    isolatedArgs.filter((value) =>
+      value.startsWith("-Dorg.gradle.daemon.registry.base=")),
+    [`-Dorg.gradle.daemon.registry.base=${expectedRegistry}`],
+    `${label} must use one per-run daemon registry while retaining the shared Gradle cache`,
+  );
+  assert.throws(
+    () => buildIsolatedGradleArgs(runRoot, isolatedArgs),
+    /must be injected exactly once/,
+  );
 }
 
 function assertPackagedTemplateAbiSelectionContract(root) {
@@ -1428,6 +1463,43 @@ function assertJUnitFreshnessContracts(root) {
 }
 
 function assertSoakFreshBuildContracts(root) {
+  const collectorSource = fs.readFileSync(
+    path.resolve(__dirname, "run-production-soak.js"),
+    "utf8",
+  );
+  assert(collectorSource.includes(
+    "buildIsolatedGradleArgs(runRoot, buildPluginGradleArgs())",
+  ));
+  assert(collectorSource.includes("buildIsolatedGradleArgs(runRoot, gradleArgs)"));
+  const assertIsolatedSoakGradleArgs = (args, label) => {
+    assert.strictEqual(
+      args.filter((value) => value === "--no-daemon").length,
+      1,
+      `${label} must use exactly one single-use Gradle daemon argument`,
+    );
+    assert(!args.includes("--daemon"), `${label} must not enable a reusable Gradle daemon`);
+    assert.deepStrictEqual(
+      args.filter((value) => value.startsWith("-Pkotlin.compiler.execution.strategy=")),
+      ["-Pkotlin.compiler.execution.strategy=in-process"],
+      `${label} must use only in-process Kotlin compilation`,
+    );
+    const runRoot = path.join(root, "soak runner path with spaces");
+    const registryBase = soakGradleDaemonRegistryBaseForRun(runRoot);
+    const isolatedArgs = buildSoakIsolatedGradleArgs(runRoot, args);
+    assert.deepStrictEqual(
+      isolatedArgs.filter((value) =>
+        value.startsWith("-Dorg.gradle.daemon.registry.base=")),
+      [`-Dorg.gradle.daemon.registry.base=${registryBase}`],
+      `${label} must use one per-run Gradle daemon registry`,
+    );
+    assert.throws(
+      () => buildSoakIsolatedGradleArgs(runRoot, isolatedArgs),
+      /must be injected exactly once/,
+    );
+  };
+  const pluginArgs = buildSoakPluginGradleArgs();
+  assertIsolatedSoakGradleArgs(pluginArgs, "production soak runtime plugin build");
+  assert.strictEqual(pluginArgs.filter((value) => value === ":app:packageDebug").length, 1);
   const args = buildSoakGradleArgs({
     kind: "quick",
     durationMs: 8 * 3_600_000,
@@ -1439,11 +1511,7 @@ function assertSoakFreshBuildContracts(root) {
     cycleDelayMs: 30_000,
     livenessRecoverabilityEveryCycles: 20,
   });
-  assert(args.includes("--no-daemon"), "production soak must use a dedicated single-use Gradle daemon");
-  assert(
-    args.includes("-Pkotlin.compiler.execution.strategy=in-process"),
-    "production soak must avoid a second long-lived Kotlin compiler daemon",
-  );
+  assertIsolatedSoakGradleArgs(args, "production soak connected build");
   assert(args.includes("--rerun-tasks"), "production soak connected builds must force task reruns");
   const artifact = path.join(root, "stale-connected-build.apk");
   fs.writeFileSync(artifact, "stale");

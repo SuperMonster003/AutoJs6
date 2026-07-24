@@ -49,6 +49,8 @@ const APK_BUILDER_PLUGIN_SERVICE =
   "org.autojs.plugin.apkbuilder.template.impl.ApkBuilderTemplatePluginService";
 const APK_BUILDER_PLUGIN_REMOTE_BUILD_PROPERTY =
   "autojs.apkBuilder.templatePlugin.enableRemoteBuild";
+const GRADLE_DAEMON_REGISTRY_PROPERTY = "org.gradle.daemon.registry.base";
+const GRADLE_DAEMON_REGISTRY_DIRECTORY = "gradle-daemon-registry";
 const R5_PLUGIN_PREFLIGHT_SELECTOR =
   "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_01_livePluginPreflightNegotiatesContractAndReportsTrustIdentity";
 const R6_PLUGIN_SOAK_SELECTOR =
@@ -206,6 +208,11 @@ async function main() {
       soakSmokeRecoveryEveryCycles: SOAK_SMOKE_RECOVERY_EVERY_CYCLES,
       selectors: REQUIRED_DEVICE_SELECTORS,
       archiveRequested: !options.noArchive,
+      gradleDaemonRegistryIsolation: "per_run",
+      gradleDaemonRegistryBase: relativePath(
+        repoRoot,
+        gradleDaemonRegistryBaseForRun(runRoot),
+      ),
     },
     sourceIdentity: { before: null, after: null },
     device: null,
@@ -905,6 +912,27 @@ function buildEvidenceGradleArgs(pluginRoot, profile, runToken, runtimeProcessAb
     `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.r6.soak.livenessRecoverabilityEveryCycles=${SOAK_SMOKE_RECOVERY_EVERY_CYCLES}`,
     `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.r6.runToken=${runToken}`,
     `-Pautojs.nodejs.r6.runToken=${runToken}`,
+  ];
+}
+
+function gradleDaemonRegistryBaseForRun(runRoot) {
+  const resolvedRunRoot = path.resolve(String(runRoot || ""));
+  if (!runRoot || path.parse(resolvedRunRoot).root === resolvedRunRoot) {
+    throw new Error("An explicit non-root run directory is required for Gradle daemon isolation.");
+  }
+  return path.join(resolvedRunRoot, GRADLE_DAEMON_REGISTRY_DIRECTORY);
+}
+
+function buildIsolatedGradleArgs(runRoot, args) {
+  if (!Array.isArray(args)) throw new Error("Gradle arguments must be an array.");
+  if (args.some((value) =>
+    String(value).startsWith(`-D${GRADLE_DAEMON_REGISTRY_PROPERTY}=`))) {
+    throw new Error("Gradle daemon registry isolation must be injected exactly once by the runner.");
+  }
+  const registryBase = gradleDaemonRegistryBaseForRun(runRoot);
+  return [
+    `-D${GRADLE_DAEMON_REGISTRY_PROPERTY}=${registryBase}`,
+    ...args,
   ];
 }
 
@@ -1709,7 +1737,12 @@ function packagedTemplatePathForRunToken(runToken) {
 
 async function runGradle(config) {
   const command = gradleCommand(config.root);
-  const invocation = commandInvocation(command, config.args);
+  const daemonRegistryBase = gradleDaemonRegistryBaseForRun(config.context.runRoot);
+  fs.mkdirSync(daemonRegistryBase, { recursive: true });
+  const invocation = commandInvocation(
+    command,
+    buildIsolatedGradleArgs(config.context.runRoot, config.args),
+  );
   return runCommand(invocation.command, invocation.args, {
     cwd: config.root,
     env: config.env || process.env,
@@ -2161,10 +2194,12 @@ It accepts no status, force, selector, profile, duration, or run-token override.
 module.exports = {
   SELECTOR_DERIVATION,
   buildEvidenceGradleArgs,
+  buildIsolatedGradleArgs,
   buildPackagedTemplateGradleArgs,
   buildPluginGradleArgs,
   derivePluginProvenance,
   deriveEvidence,
+  gradleDaemonRegistryBaseForRun,
   parseArgs,
   parseApkSignerOutput,
   parseRequiredJUnit,

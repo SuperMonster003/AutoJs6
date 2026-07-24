@@ -1912,6 +1912,7 @@ function validateContractAnchors(repoRoot) {
   const instrumentationGate = read(path.join(repoRoot, "app/node-instrumentation-gates.gradle.kts"));
   const releaseGate = read(path.join(repoRoot, "app/embedded-node-packaging-preflight.gradle.kts"));
   const deviceCollector = read(path.join(repoRoot, "tools/nodejs/r6/run-device-evidence.js"));
+  const soakCollector = read(path.join(repoRoot, "tools/nodejs/r6/run-production-soak.js"));
   const soakInstrumentation = read(
     path.join(
       repoRoot,
@@ -1970,6 +1971,26 @@ function validateContractAnchors(repoRoot) {
   if (!deviceCollector.includes('"--no-daemon"') ||
       !deviceCollector.includes('"-Pkotlin.compiler.execution.strategy=in-process"')) {
     violations.push("R6 production device collector must isolate all Gradle and Kotlin compiler invocations");
+  }
+  if (!deviceCollector.includes("org.gradle.daemon.registry.base") ||
+      !deviceCollector.includes("gradle-daemon-registry") ||
+      !deviceCollector.includes(
+        "buildIsolatedGradleArgs(config.context.runRoot, config.args)",
+      )) {
+    violations.push("R6 production device collector must use a per-run Gradle daemon registry");
+  }
+  if (!soakCollector.includes("autojs6-node-r6-persistent-plugin-soak-runner-v1") ||
+      !soakCollector.includes('"--no-daemon"') ||
+      !soakCollector.includes('"-Pkotlin.compiler.execution.strategy=in-process"') ||
+      !soakCollector.includes("org.gradle.daemon.registry.base") ||
+      !soakCollector.includes("gradle-daemon-registry") ||
+      !soakCollector.includes(
+        "buildIsolatedGradleArgs(runRoot, buildPluginGradleArgs())",
+      ) ||
+      !soakCollector.includes("buildIsolatedGradleArgs(runRoot, gradleArgs)")) {
+    violations.push(
+      "R6 production soak collector must isolate plugin and connected builds with a per-run Gradle daemon registry",
+    );
   }
   if (!soakInstrumentation.includes("PowerManager.PARTIAL_WAKE_LOCK") ||
       !soakInstrumentation.includes("acquire(durationMs + WAKE_LOCK_GRACE_MS)") ||
