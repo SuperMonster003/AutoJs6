@@ -159,6 +159,30 @@ class AiAsyncDispatcherTest {
     }
 
     @Test
+    fun promiseSchedulingFailureStillInvokesLifecycleCleanup() {
+        val cleanupCount = AtomicInteger()
+        val expected = IllegalStateException("scheduler unavailable")
+        val dispatcher = AiAsyncDispatcher(
+            valueMapper = { it },
+            scheduler = { throw expected },
+            releaseWait = {},
+        )
+
+        try {
+            dispatcher.resolve(
+                ScriptPromiseAdapter(),
+                "answer",
+                { cleanupCount.incrementAndGet() },
+            )
+            fail("Expected scheduler failure")
+        } catch (actual: Throwable) {
+            assertSame(expected, actual)
+        }
+
+        assertEquals(1, cleanupCount.get())
+    }
+
+    @Test
     fun terminalQueuedDuringNonTerminalSchedulingFailureStillReleasesWait() {
         val releaseCount = AtomicInteger()
         val expected = IllegalStateException("scheduler unavailable")
@@ -217,6 +241,42 @@ class AiAsyncDispatcherTest {
         scheduled.removeFirst().invoke()
 
         assertTrue(delivered.isEmpty())
+        assertEquals(1, releaseCount.get())
+    }
+
+    @Test
+    fun silentCancellationCannotSuppressTerminalCleanupAlreadyClaimedByDrain() {
+        val mappingStarted = CountDownLatch(1)
+        val finishMapping = CountDownLatch(1)
+        val released = CountDownLatch(1)
+        val terminalDelivered = AtomicInteger()
+        val releaseCount = AtomicInteger()
+        val dispatcher = AiAsyncDispatcher(
+            valueMapper = {
+                mappingStarted.countDown()
+                assertTrue(finishMapping.await(5L, TimeUnit.SECONDS))
+                it
+            },
+            scheduler = { drain ->
+                Thread(drain, "captured-js-thread").start()
+            },
+            releaseWait = {
+                releaseCount.incrementAndGet()
+                released.countDown()
+            },
+        )
+
+        assertTrue(
+            dispatcher.terminalValues(arrayOf("done")) {
+                terminalDelivered.incrementAndGet()
+            },
+        )
+        assertTrue(mappingStarted.await(5L, TimeUnit.SECONDS))
+        assertFalse(dispatcher.cancelSilently())
+        finishMapping.countDown()
+
+        assertTrue(released.await(5L, TimeUnit.SECONDS))
+        assertEquals(1, terminalDelivered.get())
         assertEquals(1, releaseCount.get())
     }
 

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/24",
+      "released_date": "2026/07/25",
       "feature": [
         "Node.js 24.5.0 스크립트 런타임, \"nodejs\" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원",
         "Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원",
@@ -25,6 +25,7 @@
         "runtime.loadAar 메서드, AAR 파일 동적 로드용",
         "JavaScript (Rhino) 모듈에서 power/settings/work_manager 호환 인터페이스와 AppInfo 래퍼를 지원하고 Auto.js Pro 9.3.11의 일부 Base64/Crypto/WebSocket/ByteString/automator/images/timers API를 보완",
         "전역 JavaScript (Rhino) ai 모듈에서 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 공급자, ask/chat/stream 호출 및 도구 호출의 다중 라운드 연속 실행 지원; 개발자 옵션에서 암호화된 다중 프로필과 자격 증명을 관리할 수 있으며 로컬 루프백 주소의 호환 엔드포인트는 API 키 없이 실행 가능",
+        "전역 JavaScript (Rhino) tts 모듈에서 시스템 음성 합성, 긴 텍스트 지능형 분할, 논리 큐, 오프라인 음성 필터링을 포함한 음성 및 언어 검색, 관찰 가능한 작업과 오디오 이벤트, 무음 삽입, 원자적 게시를 사용하는 파일 합성 지원; 시간 제한, 백프레셔, 런타임 정리 및 지정 엔진에서 다른 엔진으로의 폴백 방지 기능도 제공",
         "device.getMarketName 메서드, 기기의 \"제품명\" 확인용 _[`issue #513`](http://issues.autojs6.com/513)_",
         "예약 작업에서 월간/연간/카운트다운 작업 및 반복 종료 조건 지원 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "파일 관리자에서 다중 선택 및 일괄 복사/이동/삭제 작업 지원",

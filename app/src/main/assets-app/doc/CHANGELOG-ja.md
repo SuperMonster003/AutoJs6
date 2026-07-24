@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/24
+###### 2026/07/25
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -30,6 +30,7 @@
 * `新機能` runtime.loadAar メソッド, AAR ファイルの動的ロード用
 * `新機能` JavaScript (Rhino) モジュールで power/settings/work_manager 互換 API と AppInfo ラッパーをサポートし, Auto.js Pro 9.3.11 の一部の Base64/Crypto/WebSocket/ByteString/automator/images/timers API を拡充
 * `新機能` グローバル JavaScript (Rhino) ai モジュールが OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible プロバイダー, ask/chat/stream 呼び出し, ツール呼び出しの複数ラウンド継続に対応; 開発者向けオプションで暗号化された複数プロファイルと認証情報を管理でき, ローカルループバックアドレス上の互換エンドポイントは API キーなしで実行可能
+* `新機能` グローバル JavaScript (Rhino) tts モジュールがシステム音声合成, 長文のインテリジェント分割, 論理キュー, オフライン音声の絞り込みを含む音声と言語の検索, 監視可能なタスクと音声イベント, 無音挿入, アトミックな公開を用いたファイルへの音声合成に対応; タイムアウト, バックプレッシャー, ランタイムクリーンアップ, 指定エンジンからのフォールバック防止も提供
 * `新機能` device.getMarketName メソッド, デバイスの "市場名" 取得用 _[`issue #513`](http://issues.autojs6.com/513)_
 * `新機能` タイマータスクが月次/年次/カウントダウンタスクと繰り返し終了条件に対応 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新機能` ファイルマネージャーが複数選択と一括コピー/移動/削除操作に対応

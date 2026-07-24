@@ -97,6 +97,7 @@ import org.autojs.autojs.runtime.api.augment.tasks.WorkManager
 import org.autojs.autojs.runtime.api.augment.threads.Threads
 import org.autojs.autojs.runtime.api.augment.timers.Timers
 import org.autojs.autojs.runtime.api.augment.toast.Toast
+import org.autojs.autojs.runtime.api.augment.tts.Tts
 import org.autojs.autojs.runtime.api.augment.ui.UI
 import org.autojs.autojs.runtime.api.augment.util.Util
 import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo
@@ -104,6 +105,7 @@ import org.autojs.autojs.runtime.api.augment.web.Web
 import org.autojs.autojs.runtime.api.augment.web.WebSocket
 import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
 import org.autojs.autojs.runtime.api.augment.zip.Zip
+import org.autojs.autojs.runtime.api.tts.TtsService
 import org.autojs.autojs.runtime.exception.ScriptEnvironmentException
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -283,6 +285,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     val http: ApiHttp
 
     private val ai: AiService
+    private val tts: TtsService
 
     @JvmField
     @ScriptVariable
@@ -475,6 +478,7 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         http = ApiHttp()
         ai = AiService(mUiHandlerAppContext, this, http.okhttp.client())
+        tts = TtsService(mUiHandlerAppContext, this)
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()
 
@@ -639,6 +643,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         }
 
         ignoresException { ai.close() }
+        ignoresException { tts.close() }
         if (::threads.isInitialized) ignoresException { threads.shutDownAll() }
         if (::events.isInitialized) ignoresException { events.recycle() }
         ignoresException { media.recycle() }
@@ -810,6 +815,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Dialogs(this).augment(target, true)
         Continuation(this).augment(target, js_mod_continuation, true, READONLY)
         Ai(this, ai).augment(target, true)
+        Tts(this, tts).augment(target, true)
         Http(this).augment(target, http, true)
         Web(this).augment(target, true)
         WebSocket(this).augment(target, WebSocketFields, false)

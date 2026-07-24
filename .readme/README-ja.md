@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 7 月 24 日 に更新されました.
+データは 2026 年 7 月 25 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/07/24
+###### 2026/07/25
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -190,6 +190,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` runtime.loadAar メソッド, AAR ファイルの動的ロード用
 * `新機能` JavaScript (Rhino) モジュールで power/settings/work_manager 互換 API と AppInfo ラッパーをサポートし, Auto.js Pro 9.3.11 の一部の Base64/Crypto/WebSocket/ByteString/automator/images/timers API を拡充
 * `新機能` グローバル JavaScript (Rhino) ai モジュールが OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible プロバイダー, ask/chat/stream 呼び出し, ツール呼び出しの複数ラウンド継続に対応; 開発者向けオプションで暗号化された複数プロファイルと認証情報を管理でき, ローカルループバックアドレス上の互換エンドポイントは API キーなしで実行可能
+* `新機能` グローバル JavaScript (Rhino) tts モジュールがシステム音声合成, 長文のインテリジェント分割, 論理キュー, オフライン音声の絞り込みを含む音声と言語の検索, 監視可能なタスクと音声イベント, 無音挿入, アトミックな公開を用いたファイルへの音声合成に対応; タイムアウト, バックプレッシャー, ランタイムクリーンアップ, 指定エンジンからのフォールバック防止も提供
 * `新機能` device.getMarketName メソッド, デバイスの "市場名" 取得用 _[`issue #513`](http://issues.autojs6.com/513)_
 * `新機能` タイマータスクが月次/年次/カウントダウンタスクと繰り返し終了条件に対応 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新機能` ファイルマネージャーが複数選択と一括コピー/移動/削除操作に対応
@@ -570,7 +571,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 7 月 24 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 7 月 25 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

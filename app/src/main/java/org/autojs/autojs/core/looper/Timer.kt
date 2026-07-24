@@ -41,11 +41,21 @@ class Timer {
         synchronized(this) {
             val id = (mCallbackMaxId + 1).also { mCallbackMaxId = it }
             val r = Runnable {
-                callFunction(callback, null, args)
-                mHandlerCallbacks.remove(id)
+                try {
+                    callFunction(callback, null, args)
+                } finally {
+                    synchronized(this@Timer) {
+                        mHandlerCallbacks.remove(id)
+                    }
+                }
             }
             mHandlerCallbacks.put(id, r)
-            postDelayed(r, delay)
+            try {
+                postDelayed(r, delay)
+            } catch (error: Throwable) {
+                mHandlerCallbacks.remove(id)
+                throw error
+            }
             return wrapId(id)
         }
     }
@@ -60,12 +70,24 @@ class Timer {
             val r = object : Runnable {
                 override fun run() {
                     if (mHandlerCallbacks[id] == null) return
-                    callFunction(callback, null, args)
-                    postDelayed(this, interval)
+                    try {
+                        callFunction(callback, null, args)
+                        postDelayed(this, interval)
+                    } catch (error: Throwable) {
+                        synchronized(this@Timer) {
+                            mHandlerCallbacks.remove(id)
+                        }
+                        throw error
+                    }
                 }
             }
             mHandlerCallbacks.put(id, r)
-            postDelayed(r, interval)
+            try {
+                postDelayed(r, interval)
+            } catch (error: Throwable) {
+                mHandlerCallbacks.remove(id)
+                throw error
+            }
             return wrapId(id)
         }
     }
@@ -78,11 +100,21 @@ class Timer {
         synchronized(this) {
             val id = (mCallbackMaxId + 1).also { mCallbackMaxId = it }
             val r = Runnable {
-                callFunction(callback, null, args)
-                mHandlerCallbacks.remove(id)
+                try {
+                    callFunction(callback, null, args)
+                } finally {
+                    synchronized(this@Timer) {
+                        mHandlerCallbacks.remove(id)
+                    }
+                }
             }
             mHandlerCallbacks.put(id, r)
-            postDelayed(r, 0L)
+            try {
+                postDelayed(r, 0L)
+            } catch (error: Throwable) {
+                mHandlerCallbacks.remove(id)
+                throw error
+            }
             return wrapId(id)
         }
     }
@@ -94,7 +126,9 @@ class Timer {
     fun postDelayed(r: Runnable, interval: Long) {
         synchronized(this) {
             val uptime = interval + SystemClock.uptimeMillis()
-            mHandler.postAtTime(r, uptime)
+            check(mHandler.postAtTime(r, uptime)) {
+                "Unable to schedule a timer callback because its looper is exiting"
+            }
             mMaxCallbackUptimeMillis = mMaxCallbackUptimeMillis.coerceAtLeast(uptime)
             synchronized(mMaxCallbackMillisForAllThread) {
                 mMaxCallbackMillisForAllThread.set(max(mMaxCallbackMillisForAllThread.get(), uptime))

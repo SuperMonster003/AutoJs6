@@ -56,6 +56,15 @@
             <action android:name="org.autojs.plugin.IMAGE_QUANT" />
             <category android:name="imagequant-runtime" />
         </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+        <intent>
+            <action android:name="com.android.settings.TTS_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.speech.tts.engine.INSTALL_TTS_DATA" />
+        </intent>
     </queries>
 
     <uses-permission

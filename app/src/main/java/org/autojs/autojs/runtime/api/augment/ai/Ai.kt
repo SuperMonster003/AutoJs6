@@ -7,13 +7,12 @@ import com.google.gson.JsonParser
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.ai.AiRequestInput
 import org.autojs.autojs.runtime.api.ai.AiService
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
+import org.autojs.autojs.runtime.api.augment.toJsPromise
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
-import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Undefined
@@ -41,14 +40,14 @@ class Ai(
     fun ask(runtime: ScriptRuntime, args: Array<out Any?>): Any {
         check(runtime === scriptRuntime) { "AI module belongs to a different script runtime" }
         val input = parseRequestArguments(args)
-        return aiService.ask(input).toPromise(runtime)
+        return aiService.ask(input).toJsPromise(runtime)
     }
 
     @RhinoRuntimeFunctionInterface
     fun chat(runtime: ScriptRuntime, args: Array<out Any?>): Any {
         check(runtime === scriptRuntime) { "AI module belongs to a different script runtime" }
         val input = parseRequestArguments(args)
-        return aiService.chat(input).toPromise(runtime)
+        return aiService.chat(input).toJsPromise(runtime)
     }
 
     @RhinoRuntimeFunctionInterface
@@ -156,17 +155,6 @@ class Ai(
                     "AI $label must be JSON-compatible: ${error.message.orEmpty()}",
                 )
             }
-        }
-
-        private fun ScriptPromiseAdapter.toPromise(scriptRuntime: ScriptRuntime): Any {
-            return requireNotNull(
-                callFunction(
-                    scriptRuntime,
-                    scriptRuntime.js_ResultAdapter,
-                    "promise",
-                    arrayOf(this),
-                ),
-            )
         }
     }
 }

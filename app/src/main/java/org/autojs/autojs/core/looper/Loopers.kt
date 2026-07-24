@@ -9,7 +9,9 @@ import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.mozilla.javascript.Context
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Created by Stardust on Jul 29, 2017.
@@ -44,8 +46,8 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
     private var mMaxWaitId: ThreadLocal<Int> = object : ThreadLocal<Int>() {
         override fun initialValue() = 0
     }
-    private var mWaitIds: ThreadLocal<HashSet<Int>> = object : ThreadLocal<HashSet<Int>>() {
-        override fun initialValue() = HashSet<Int>()
+    private var mWaitIds: ThreadLocal<MutableSet<Int>> = object : ThreadLocal<MutableSet<Int>>() {
+        override fun initialValue(): MutableSet<Int> = ConcurrentHashMap.newKeySet()
     }
     private var mWaitWhenIdle: ThreadLocal<Boolean> = object : ThreadLocal<Boolean>() {
         override fun initialValue() = isMainThread()
@@ -70,10 +72,19 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
     }
 
     fun waitWhenIdle(): Int {
-        val intValue = mMaxWaitId.get() ?: return -1
+        return createWaitToken().id
+    }
+
+    internal fun waitWhenIdleToken(): WaitToken {
+        return createWaitToken()
+    }
+
+    private fun createWaitToken(): WaitToken {
+        val intValue = requireNotNull(mMaxWaitId.get())
         mMaxWaitId.set(intValue + 1)
-        mWaitIds.get()?.add(intValue)
-        return intValue
+        val waitIds = requireNotNull(mWaitIds.get())
+        waitIds.add(intValue)
+        return WaitToken(intValue, waitIds)
     }
 
     fun waitWhenIdle(b: Boolean) {
@@ -157,6 +168,20 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
 
     interface LooperQuitHandler {
         fun shouldQuit(): Boolean
+    }
+
+    internal class WaitToken internal constructor(
+        internal val id: Int,
+        private val waitIds: MutableSet<Int>,
+    ) {
+
+        private val released = AtomicBoolean(false)
+
+        fun release() {
+            if (released.compareAndSet(false, true)) {
+                waitIds.remove(id)
+            }
+        }
     }
 
     companion object {

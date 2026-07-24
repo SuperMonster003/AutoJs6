@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/24
+###### 2026/07/25
 
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
 * `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
@@ -30,6 +30,7 @@
 * `新增` runtime.loadAar 方法, 用於動態載入 AAR 檔案
 * `新增` JavaScript (Rhino) 模組支援 power/settings/work_manager 相容介面及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全域 JavaScript (Rhino) ai 模組支援 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 呼叫及工具呼叫多輪續接; 開發者選項支援加密的多設定檔及憑證管理, 本機迴路位址上的相容端點可免 API 金鑰執行
+* `新增` 全域 JavaScript (Rhino) tts 模組提供系統文字轉語音/長文字智慧分段/邏輯佇列/語音及語言探索/離線語音篩選/可觀察任務及音訊事件/靜音插入/採用原子發布的檔案合成, 並具備逾時/背壓/執行階段清理及指定引擎防回退保護
 * `新增` device.getMarketName 方法, 用於獲取裝置的 "市場名稱" _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` 定時任務支援按月/按年/倒數任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 檔案管理器支援多選檔案及批次複製/移動/刪除操作

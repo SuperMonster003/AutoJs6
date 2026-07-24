@@ -14,6 +14,7 @@ import org.autojs.autojs.core.ui.widget.JsCanvasView
 import org.autojs.autojs.core.web.WebSocket
 import org.autojs.autojs.runtime.IScriptBridges
 import org.autojs.autojs.runtime.ScriptBridges
+import org.autojs.autojs.runtime.api.augment.tts.TtsUtterance
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.Assert.assertFalse
 import org.junit.Assert.fail
@@ -46,6 +47,8 @@ class CallableSurfaceCompatibilityTest {
         assertCallableOnly(ViewPrototype::class.java, "click")
         assertCallableOnly(JsCanvasView::class.java, "on", String::class.java)
         assertCallableOnly(WebSocket::class.java, "on", String::class.java)
+        assertCallableOnly(TtsUtterance::class.java, "on", String::class.java)
+        assertCallableOnly(TtsUtterance::class.java, "once", String::class.java)
         assertCallableOnly(IScriptBridges::class.java, "call", trailingTypes = arrayOf(Any::class.java, Array<Any>::class.java))
     }
 
@@ -56,6 +59,7 @@ class CallableSurfaceCompatibilityTest {
             EventEmitter.Listeners::class.java,
             EventEmitter.ListenerWrapper::class.java,
             WebSocket::class.java,
+            TtsUtterance::class.java,
             ViewPrototype::class.java,
             JsCanvasView::class.java,
             JsDialog::class.java,

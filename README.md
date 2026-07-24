@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 7 月 24 日.
+数据更新于 2026 年 7 月 25 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/07/24
+###### 2026/07/25
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
@@ -190,6 +190,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` runtime.loadAar 方法, 用于动态加载 AAR 文件
 * `新增` JavaScript (Rhino) 模块支持 power/settings/work_manager 兼容接口及 AppInfo 包装, 并完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全局 JavaScript (Rhino) ai 模块支持 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服务商, 提供 ask/chat/stream 调用及工具调用多轮续接; 开发者选项支持加密的多配置及凭据管理, 本机回环地址上的兼容端点可免 API 密钥运行
+* `新增` 全局 JavaScript (Rhino) tts 模块提供系统文字转语音/长文本智能分段/逻辑队列/语音及语言发现/离线语音筛选/可观察任务及音频事件/静音插入/采用原子发布的文件合成, 并具备超时/背压/运行时清理及指定引擎防回退保护
 * `新增` device.getMarketName 方法, 用于获取设备的 "市场名称" _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` 定时任务支持按月/按年/倒计时任务及重复结束条件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 文件管理器支持多选文件及批量复制/移动/删除操作
@@ -570,7 +571,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 7 月 24 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 7 月 25 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
