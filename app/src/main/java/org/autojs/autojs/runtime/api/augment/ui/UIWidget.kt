@@ -13,6 +13,7 @@ import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.StringUtils.str
@@ -59,10 +60,12 @@ object UIWidget : ArgumentGuards() {
         val (getter, setter) = when {
             arg1 is BaseFunction && arg2 is BaseFunction -> arg1 to arg2
             else -> newBaseFunction(
+                getDeclarationScope(thisObj),
                 "getter", {
                     thisObj.prop(attrAlias)
                 }, NOT_CONSTRUCTABLE,
             ) to newBaseFunction(
+                getDeclarationScope(thisObj),
                 "setter", { setterArgList ->
                     val (_, _, value, _) = setterArgList
                     thisObj.defineProp(attrAlias, value)
@@ -71,7 +74,7 @@ object UIWidget : ArgumentGuards() {
             )
         }
         val attrsObj = thisObj.prop("__attrs__") as NativeObject
-        val attrValue = newNativeObject().also {
+        val attrValue = newNativeObject(getDeclarationScope(thisObj)).also {
             it.defineProp("getter", getter)
             it.defineProp("setter", setter)
         }

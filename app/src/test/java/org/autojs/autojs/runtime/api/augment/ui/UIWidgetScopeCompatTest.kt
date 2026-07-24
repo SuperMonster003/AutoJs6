@@ -12,16 +12,19 @@ import org.junit.Test
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.TopLevel
 import org.mozilla.javascript.VarScope
 
 class UIWidgetScopeCompatTest {
 
     private lateinit var cx: Context
+    private lateinit var realm: TopLevel
     private val noopFunction = object : BaseFunction() {}
 
     @Before
     fun enterContext() {
         cx = Context.enter()
+        realm = with(RhinoUtils) { cx.getOrCreateStandardObjects() }
     }
 
     @After
@@ -34,7 +37,7 @@ class UIWidgetScopeCompatTest {
         val widget = RhinoUtils.newNativeObject()
         val renderFunction = object : BaseFunction() {
             override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any {
-                assertSame(RhinoUtils.standardObjects, scope)
+                assertSame(realm, scope)
                 assertSame(widget, thisObj)
                 return "<text />"
             }
@@ -52,7 +55,7 @@ class UIWidgetScopeCompatTest {
         var called = false
         val setterFunction = object : BaseFunction() {
             override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
-                assertSame(RhinoUtils.standardObjects, scope)
+                assertSame(realm, scope)
                 assertSame(attrValue, thisObj)
                 assertEquals("text", args[1])
                 assertEquals("value", args[2])
@@ -77,7 +80,7 @@ class UIWidgetScopeCompatTest {
         val attrValue = RhinoUtils.newNativeObject()
         val getterFunction = object : BaseFunction() {
             override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any {
-                assertSame(RhinoUtils.standardObjects, scope)
+                assertSame(realm, scope)
                 assertSame(attrValue, thisObj)
                 assertEquals("text", args[1])
                 return "value"
@@ -98,7 +101,7 @@ class UIWidgetScopeCompatTest {
         var called = false
         val applierFunction = object : BaseFunction() {
             override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
-                assertSame(RhinoUtils.standardObjects, scope)
+                assertSame(realm, scope)
                 assertSame(widget, thisObj)
                 assertEquals("text", args[1])
                 assertEquals("value", args[2])

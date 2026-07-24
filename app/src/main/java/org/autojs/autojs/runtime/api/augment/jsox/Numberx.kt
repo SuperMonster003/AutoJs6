@@ -24,10 +24,11 @@ import org.autojs.autojs.util.StringUtils.toDoubleOrNaN
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
-import java.math.RoundingMode
+import org.mozilla.javascript.dtoa.DecimalFormatter
 import kotlin.math.ceil
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 
 /**
  * JavaScript build-in object extension for the native Number object.
@@ -256,11 +257,14 @@ class Numberx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         @RhinoFunctionBody
         fun toFixedNumRhino(num: Any?, fraction: Any?): Double {
             val x = parseAnyRhino(num)
-            val frac = parseAnyRhino(fraction)
+            val fractionDigits = RhinoScriptRuntime.toInteger(fraction)
+            if (fractionDigits < 0.0 || fractionDigits > 100.0) {
+                val message = RhinoScriptRuntime.getMessageById("msg.bad.precision", RhinoScriptRuntime.toString(fraction))
+                throw RhinoScriptRuntime.rangeError(message)
+            }
             return when {
-                x.isNaN() || frac.isNaN() -> Double.NaN
-                x.isInfinite() -> x
-                else -> x.toBigDecimal().setScale(frac.roundToInt(), RoundingMode.HALF_UP).toDouble()
+                !x.isFinite() -> x
+                else -> DecimalFormatter.toFixed(x, RhinoScriptRuntime.toInt32(fractionDigits)).toDouble()
             }
         }
 
@@ -373,7 +377,9 @@ class Numberx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         @RhinoFunctionBody
         fun parseRatioRhino(ratio: Any?): Double {
             if (ratio.isJsNullish()) return Double.NaN
-            val (x, y) = Context.toString(ratio).trim().split(':').map(String::trim)
+            val parts = Context.toString(ratio).trim().split(':').map(String::trim)
+            val x = parts.getOrNull(0) ?: return Double.NaN
+            val y = parts.getOrNull(1) ?: return Double.NaN
             return x.toDoubleOrNaN() / y.toDoubleOrNaN()
         }
 

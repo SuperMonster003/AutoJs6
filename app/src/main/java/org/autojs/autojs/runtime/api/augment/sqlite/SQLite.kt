@@ -42,7 +42,7 @@ class SQLite(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             val filePath = coerceString(databaseFilePath, "")
             require(filePath.isNotEmpty()) { "Argument databaseFilePath of sqlite.open() must not be empty" }
 
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for sqlite.open() must be a JavaScript Object" }
 
             val niceCallback = callback.jsSanitize()?.jsTryToJava<DatabaseCallback>()

@@ -26,6 +26,7 @@ object Species : Augmentable(), Invokable {
         ::isFloat32Array.name,
         ::isFloat64Array.name,
         ::isFunction.name,
+        ::isHTMLDocument.name,
         ::isInt16Array.name,
         ::isInt32Array.name,
         ::isInt8Array.name,
@@ -48,6 +49,7 @@ object Species : Augmentable(), Invokable {
         ::isUndefined.name,
         ::isWeakMap.name,
         ::isWeakSet.name,
+        ::isWindow.name,
         ::isXML.name,
         ::isXMLList.name,
     )
@@ -182,6 +184,16 @@ object Species : Augmentable(), Invokable {
     @JvmStatic
     @RhinoFunctionBody
     fun isFunctionRhino(o: Any?) = speciesRhino(o) == "Function"
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun isHTMLDocument(args: Array<out Any?>) = ensureArgumentsOnlyOne(args, true) {
+        isHTMLDocumentRhino(it)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun isHTMLDocumentRhino(o: Any?) = speciesRhino(o) == "HTMLDocument"
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -402,6 +414,16 @@ object Species : Augmentable(), Invokable {
     @JvmStatic
     @RhinoFunctionBody
     fun isWeakSetRhino(o: Any?) = speciesRhino(o) == "WeakSet"
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun isWindow(args: Array<out Any?>) = ensureArgumentsOnlyOne(args, true) {
+        isWindowRhino(it)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun isWindowRhino(o: Any?) = speciesRhino(o) == "Window"
 
     @JvmStatic
     @RhinoSingletonFunctionInterface

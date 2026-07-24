@@ -70,7 +70,7 @@ class ZipNativeObject(
 
     @JvmField
     val options: ScriptableObject = when {
-        rawOptions.isJsNullish() -> newNativeObject()
+        rawOptions.isJsNullish() -> newNativeObject(scriptRuntime.topLevelScope)
         else -> {
             val niceOptions = rawOptions
             require(niceOptions is ScriptableObject) {
@@ -120,7 +120,7 @@ class ZipNativeObject(
     init {
         RhinoUtils.initNativeObjectPrototype(this)
         RhinoUtils.defineFunctionProperties(scriptRuntime.topLevelScope, this, mFunctionNames, javaClass, PERMANENT)
-        defineProperty(StringReadable.KEY, newBaseFunction(StringReadable.KEY, { toStringReadable() }, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
+        defineProperty(StringReadable.KEY, newBaseFunction(scriptRuntime.topLevelScope, StringReadable.KEY, { toStringReadable() }, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
         mPropertyNames.forEach { pair ->
             val (propertyName, value) = pair
             defineProperty(propertyName, value, READONLY or PERMANENT)

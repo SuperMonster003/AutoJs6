@@ -3,9 +3,11 @@ package org.autojs.autojs.rhino
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.callFunction
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
+import org.autojs.autojs.util.RhinoUtils.initNativeObjectPrototype
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -18,16 +20,21 @@ import org.mozilla.javascript.VarScope
  */
 open class ProxyObject() : NativeObject() {
 
-    private var mGetter: BaseFunction? = null
-    private var mSetter: BaseFunction? = null
+    private var mGetter: Callable? = null
+    private var mSetter: Callable? = null
+
+    init {
+        initNativeObjectPrototype(this)
+    }
 
     constructor(scope: Scriptable, proxyObject: NativeObject) : this() {
+        initNativeObjectPrototype(getDeclarationScope(scope), this)
         val getter = proxyObject[PROXY_GETTER_KEY, scope]
-        if (getter is BaseFunction) {
+        if (getter is Callable) {
             mGetter = getter
         }
         val setter = proxyObject[PROXY_SETTER_KEY, scope]
-        if (setter is BaseFunction) {
+        if (setter is Callable) {
             mSetter = setter
         }
     }
@@ -38,23 +45,20 @@ open class ProxyObject() : NativeObject() {
         scope: Scriptable,
         getter: ((Array<out Any?>) -> Any?)? = null,
         setter: ((Array<out Any?>) -> Undefined)? = null,
-    ) : this(scope, newNativeObject().also { o ->
-        o.defineProp(PROXY_GETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, getter, NOT_CONSTRUCTABLE))
-        o.defineProp(PROXY_SETTER_KEY, newBaseFunction(PROXY_SETTER_KEY, setter, NOT_CONSTRUCTABLE))
-    })
+    ) : this(scope, createProxyObject(getDeclarationScope(scope), getter, setter))
 
     constructor(
         scope: VarScope,
         getter: ((Array<out Any?>) -> Any?)? = null,
         setter: ((Array<out Any?>) -> Undefined)? = null,
-    ) : this(ScriptableObject.getTopLevelScope(scope).globalThis, getter, setter)
+    ) : this(scope, createProxyObject(scope, getter, setter))
 
     override fun put(key: String, start: Scriptable, value: Any?) {
         when {
             key == PROXY_OBJECT_KEY -> {
                 val proxy = value as NativeObject
-                proxy[PROXY_GETTER_KEY, start].let { if (it is BaseFunction) mGetter = it }
-                proxy[PROXY_SETTER_KEY, start].let { if (it is BaseFunction) mSetter = it }
+                proxy[PROXY_GETTER_KEY, start].let { if (it is Callable) mGetter = it }
+                proxy[PROXY_SETTER_KEY, start].let { if (it is Callable) mSetter = it }
             }
             else -> when (val setter = mSetter) {
                 null -> super.put(key, start, value)
@@ -73,9 +77,7 @@ open class ProxyObject() : NativeObject() {
         }
     }
 
-    override fun getDefaultValue(typeHint: Class<*>?) = toString()
-
-    fun getWithoutProxy(name: String?, start: Scriptable?): Any = super.get(name, start)
+    fun getWithoutProxy(name: String?, start: Scriptable?): Any? = super.get(name, start)
 
     @Suppress("MayBeConstant")
     companion object {
@@ -94,6 +96,15 @@ open class ProxyObject() : NativeObject() {
 
         @JvmField
         val PROXY_GETTER_KEY = "get"
+
+        private fun createProxyObject(
+            scope: VarScope,
+            getter: ((Array<out Any?>) -> Any?)?,
+            setter: ((Array<out Any?>) -> Undefined)?,
+        ) = newNativeObject(scope).also { o ->
+            o.defineProp(PROXY_GETTER_KEY, newBaseFunction(scope, PROXY_GETTER_KEY, getter, NOT_CONSTRUCTABLE))
+            o.defineProp(PROXY_SETTER_KEY, newBaseFunction(scope, PROXY_SETTER_KEY, setter, NOT_CONSTRUCTABLE))
+        }
 
     }
 

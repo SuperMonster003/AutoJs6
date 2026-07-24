@@ -60,9 +60,9 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             //  ! For scope binding.
             //  ! zh-CN: 用于绑定作用域.
             withRhinoContext(scriptRuntime) { cx ->
-                global.defineProp(methodName, newBaseFunction(null, { argList ->
+                global.defineProp(methodName, newBaseFunction(global, null, { argList ->
                     val methodKey = coerceString(argList[0])
-                    newBaseFunction(methodKey, { arguments ->
+                    newBaseFunction(global, methodKey, { arguments ->
                         runCatching {
                             val availableMethods = selectorObj.javaClass.methods.filter { method -> method.name == methodName }
                             require(availableMethods.isNotEmpty()) { "Method $methodKey doesn't exist on global selector" }

@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.automator
 
+import android.view.accessibility.AccessibilityWindowInfo
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.accessibility.AccessibilityBridge
@@ -10,6 +11,8 @@ import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.Acce
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
@@ -55,6 +58,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::waitFor.name,
         ::setMode.name,
         ::setFlags.name,
+        ::getWindowRoot.name,
         ::setWindowFilter.name,
         ::launchSettings.name,
         ::clearCache.name,
@@ -71,7 +75,8 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             accessibilityTool.getServices().toNativeArray()
         },
         "windows" to Supplier {
-            scriptRuntime.accessibilityBridge.service?.run { Java.toJsArrayRhino(windows, true) } ?: newNativeArray()
+            scriptRuntime.accessibilityBridge.service?.run { Java.toJsArrayRhino(windows, true) }
+                ?: newNativeArray(scriptRuntime.topLevelScope)
         },
         "root" to Supplier {
             scriptRuntime.accessibilityBridge.getRootInCurrentWindow()?.let { UiObject.createRoot(it) }
@@ -83,7 +88,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             scriptRuntime.accessibilityBridge.windowRoots().map { UiObject.createRoot(it) }.toNativeArray()
         },
         "state" to Supplier {
-            newNativeObject().also { o ->
+            newNativeObject(scriptRuntime.topLevelScope).also { o ->
                 o.defineProp("hasInstance", accessibilityTool.hasInstance())
                 o.defineProp("hasService", accessibilityTool.hasService())
                 o.defineProp("isRunning", accessibilityTool.isRunning())
@@ -286,6 +291,16 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                 flagsInt = flagsInt or flag
             }
             scriptRuntime.accessibilityBridge.setFlags(flagsInt)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getWindowRoot(scriptRuntime: ScriptRuntime, args: Array<out Any?>): UiObject? = ensureArgumentsOnlyOne(args) { window ->
+            val windowInfo = window.jsUnwrapped()
+            require(windowInfo is AccessibilityWindowInfo) {
+                "Argument \"window\" ${window.jsBrief()} for auto.getWindowRoot must be an AccessibilityWindowInfo"
+            }
+            windowInfo.root?.let { UiObject.createRoot(it) }
         }
 
         @JvmStatic

@@ -21,7 +21,6 @@ import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.roundToLong
 import kotlin.math.sqrt
-import kotlin.random.Random
 import android.graphics.Point as AndroidPoint
 import android.graphics.Rect as AndroidRect
 
@@ -70,46 +69,33 @@ class Mathx(private val scriptRuntime: ScriptRuntime) : Augmentable(), JsBuildIn
         @Deprecated("Deprecated in Java", ReplaceWith("randomInt"))
         @JvmStatic
         @RhinoSingletonFunctionInterface
-        fun randInt(args: Array<out Any?>): Int = randomInt(args)
+        fun randInt(args: Array<out Any?>): Double = randomInt(args)
 
         @JvmStatic
         @RhinoSingletonFunctionInterface
-        fun randomInt(args: Array<out Any?>): Int = unwrapArguments(args) {
+        fun randomInt(args: Array<out Any?>): Double = unwrapArguments(args) {
             randomIntRhino(*it)
         }
 
         @JvmStatic
         @RhinoFunctionBody
-        fun randomIntRhino(vararg args: Any?): Int {
+        fun randomIntRhino(vararg args: Any?): Double {
             val argList = flatten(args)
             return when {
-                // 如果无参数, 返回 0 或 1
-                argList.isEmpty() -> {
-                    randomIntRhino(0, 1)
-                }
-                // 如果只有一个参数, 根据其正负分别处理
+                argList.isEmpty() -> randomIntRhino(MIN_SAFE_INTEGER, MAX_SAFE_INTEGER)
                 argList.size == 1 -> coerceNumber(argList[0]).let { num ->
-                    when {
-                        num == num.toInt().toDouble() -> num.toInt()
-                        else -> when (Random.nextBoolean()) {
-                            true -> floor(num).toInt()
-                            else -> ceil(num).toInt()
-                        }
-                    }
+                    if (num > 0) randomIntRhino(0, num) else randomIntRhino(num, 0)
                 }
-                // 如果有多个参数, 计算它们的最小值和最大值
                 else -> {
-                    val ranges = argList.map { coerceNumber(it) }
-                    val min = ranges.minOrNull()?.let { ceil(it).toInt() } ?: throw WrappedIllegalArgumentException("Invalid range: no minimum value")
-                    val max = ranges.maxOrNull()?.let { floor(it).toInt() } ?: throw WrappedIllegalArgumentException("Invalid range: no maximum value")
+                    val ranges = argList.map { coerceNumber(it) }.filterNot { it.isNaN() }
+                    val min = ranges.minOrNull()?.let(::ceil) ?: throw WrappedIllegalArgumentException("Invalid range: no minimum value")
+                    val max = ranges.maxOrNull()?.let(::floor) ?: throw WrappedIllegalArgumentException("Invalid range: no maximum value")
 
-                    // 检查 min 和 max 是否有有效的整数范围
                     if (min > max) {
                         throw WrappedIllegalArgumentException("Invalid range: no integers within [${ranges.min()}, ${ranges.max()}]")
                     }
 
-                    // 在 [min, max] 区间内生成随机整数
-                    floor(Math.random() * (max - min + 1)).toInt() + min
+                    floor(Math.random() * (max - min + 1)) + min
                 }
             }
         }
@@ -134,24 +120,15 @@ class Mathx(private val scriptRuntime: ScriptRuntime) : Augmentable(), JsBuildIn
         fun randomFloatRhino(vararg args: Any?): Double {
             val argList = flatten(args)
             return when {
-                // 如果无参数, 返回 Math.random()
-                argList.isEmpty() -> {
-                    Math.random()
-                }
-                // 如果只有一个参数, 根据其正负分别处理
+                argList.isEmpty() -> Math.random()
                 argList.size == 1 -> coerceNumber(argList[0]).let { num ->
-                    val min = floor(num)
-                    var max = ceil(num)
-                    if (min == max) max += 1
-                    randomFloatRhino(num, max)
+                    if (num > 0) randomFloatRhino(0, num) else randomFloatRhino(num, 0)
                 }
-                // 如果有多个参数, 计算它们的最小值和最大值
                 else -> {
-                    val ranges = argList.map { coerceNumber(it) }
+                    val ranges = argList.map { coerceNumber(it) }.filterNot { it.isNaN() }
                     val min = ranges.minOrNull() ?: throw WrappedIllegalArgumentException("Invalid range: $argList has no minimum value")
                     val max = ranges.maxOrNull() ?: throw WrappedIllegalArgumentException("Invalid range: $argList has no maximum value")
 
-                    // 在 [min, max] 区间内生成随机浮点数
                     Math.random() * (max - min) + min
                 }
             }
@@ -278,8 +255,8 @@ class Mathx(private val scriptRuntime: ScriptRuntime) : Augmentable(), JsBuildIn
             }
             2 -> {
                 val (a, b) = args
-                when (a) {
-                    is AndroidRect -> distRhino(AndroidPoint(a.left, a.top), AndroidPoint(a.right, a.bottom), b)
+                when {
+                    a is AndroidRect && b is Number -> distRhino(AndroidPoint(a.left, a.top), AndroidPoint(a.right, a.bottom), b)
                     else -> {
                         val ptA = toPoint(a) ?: throw WrappedIllegalArgumentException("Argument[0] ${a.jsBrief()} cannot be taken as a valid Point")
                         val ptB = toPoint(b) ?: throw WrappedIllegalArgumentException("Argument[1] ${b.jsBrief()} cannot be taken as a valid Point")
@@ -425,7 +402,12 @@ class Mathx(private val scriptRuntime: ScriptRuntime) : Augmentable(), JsBuildIn
         }
 
         private fun cvArgumentsByFlatten(args: Array<out Any?>): Double {
-            return stdArgumentsByFlatten(args) / meanArgumentsByFlatten(args)
+            val nums = flatten(args).map { coerceNumber(it, Double.NaN) }
+            if (nums.size < 2 || nums.any { it.isNaN() }) return Double.NaN
+
+            val mean = nums.sum() / nums.size
+            val sampleVariance = nums.sumOf { (it - mean).pow(2) } / (nums.size - 1)
+            return sqrt(sampleVariance) / mean
         }
 
         private fun modeArgumentsByFlatten(args: Array<out Any?>): Double {
@@ -474,6 +456,9 @@ class Mathx(private val scriptRuntime: ScriptRuntime) : Augmentable(), JsBuildIn
                 else -> o as? Point
             }
         }
+
+        private const val MIN_SAFE_INTEGER = -9_007_199_254_740_991.0
+        private const val MAX_SAFE_INTEGER = 9_007_199_254_740_991.0
 
     }
 

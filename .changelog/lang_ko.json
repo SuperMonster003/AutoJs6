@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/23",
+      "released_date": "2026/07/24",
       "feature": [
         "Node.js 24.5.0 스크립트 런타임, \"nodejs\" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원",
         "Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원",
@@ -23,6 +23,7 @@
         "플러그인 센터에서 APK Builder Template 플러그인 지원, 앱 패키징에 필요한 템플릿을 필요할 때 설치/업데이트 가능",
         "홈의 플러그인 탭에 있는 플로팅 버튼을 길게 눌러 플러그인 센터를 여는 기능 지원",
         "runtime.loadAar 메서드, AAR 파일 동적 로드용",
+        "JavaScript (Rhino) 모듈에서 power/settings/work_manager 호환 인터페이스와 AppInfo 래퍼를 지원하고 Auto.js Pro 9.3.11의 일부 Base64/Crypto/WebSocket/ByteString/automator/images/timers API를 보완",
         "device.getMarketName 메서드, 기기의 \"제품명\" 확인용 _[`issue #513`](http://issues.autojs6.com/513)_",
         "예약 작업에서 월간/연간/카운트다운 작업 및 반복 종료 조건 지원 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "파일 관리자에서 다중 선택 및 일괄 복사/이동/삭제 작업 지원",
@@ -60,6 +61,8 @@
         "dialogs.multiChoice 메서드가 반환한 다중 선택 결과가 잘못 문자열로 변환되는 문제 _[`issue #518`](http://issues.autojs6.com/518)_",
         "selector 모듈이 리플렉션으로 오버로드 메서드를 호출할 때 잘못된 메서드 시그니처를 선택할 수 있는 문제",
         "Rhino 엔진 업데이트 후 스코프 API 호환성 회귀로 일부 런타임 보조 기능이 오작동하는 문제",
+        "Rhino 모듈 브리지가 null/undefined, Callable, 생성자, 프로토타입, realm 및 Kotlin 반환값을 잘못 처리하여 교차 realm 객체, 콜백 누락 또는 런타임 예외가 발생할 수 있는 문제",
+        "초기 JavaScript 모듈 마이그레이션의 인수 디스패치, 반환값, 숫자 경계, 이미지 좌표 및 임시 리소스 수명 주기가 원래 구현과 일치하지 않는 문제",
         "Android 14+에서 화면 캡처 권한을 요청할 때 미디어 프로젝션 포그라운드 서비스 시작 오류로 앱이 충돌할 수 있는 문제 _[`issue #516`](http://issues.autojs6.com/516)_",
         "여러 스레드 또는 여러 파일에서 OCR을 반복 호출할 때 화면 캡처 권한을 반복해서 요청할 수 있는 문제 _[`issue #551`](http://issues.autojs6.com/551)_",
         "Paddle OCR 플러그인 서비스가 장시간 실행 후 연결이 끊어지고 자동 복구되지 않을 수 있는 문제 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_",
@@ -91,6 +94,7 @@
         "KeyCode 메서드에서 Shizuku 권한으로 키 코드 명령 전송 지원",
         "중요하지 않은 구성 요소의 초기화를 지연하여 앱 시작 성능 향상",
         "Rhino 내장 리소스 컴파일 결과 및 런타임 확장 함수 메타데이터를 캐시하여 스크립트 초기화 성능 향상",
+        "Kotlin 모듈 확장 아키텍처를 리팩터링하여 Rhino realm을 명시적으로 바인딩하고 tasks와 work_manager 의미를 분리했으며 모듈 호환성 및 의미 회귀 테스트를 보강",
         "Node.js 상주 프로세스 및 프로세스 범위 런타임을 재사용하여 스크립트 웜 스타트 성능 향상",
         "Node.js 시작 단계별 측정 및 신뢰할 수 있는 콜드/런타임 웜 성능 보고 지원",
         "Node.js 내장 네이티브 라이브러리 확인 결과를 캐시하여 반복적인 플러그인 검색 감소",

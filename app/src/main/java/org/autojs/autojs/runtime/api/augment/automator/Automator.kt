@@ -27,6 +27,7 @@ import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
+import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.SdkVersionUtils
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs6.R
@@ -59,7 +60,9 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::captureScreen.name,
         ::lockScreen.name,
         ::takeScreenshot.name,
-        ::headsethook.name,
+        ::headsethook.name to listOf("headsethook", "headsetHook"),
+        ::switchToInputMethodWithId.name,
+        ::switchToInputMethod.name,
         ::accessibilityButton.name,
         ::accessibilityButtonChooser.name,
         ::accessibilityShortcut.name,
@@ -528,6 +531,18 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun headsethook(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             scriptRuntime.automator.headsethook()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun switchToInputMethodWithId(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
+            scriptRuntime.automator.switchToInputMethodWithId(coerceString(it))
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun switchToInputMethod(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
+            scriptRuntime.automator.switchToInputMethod(coerceString(it))
         }
 
         @JvmStatic

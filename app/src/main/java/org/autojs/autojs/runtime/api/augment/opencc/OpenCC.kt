@@ -9,6 +9,7 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.mozilla.javascript.Wrapper
 
 @Suppress("unused")
 object OpenCC : Augmentable(), Invokable {
@@ -62,9 +63,18 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun convertRhino(s: Any?, type: Any?): String = when (type) {
-        is String -> cvt(s, type)
-        else -> throw WrappedIllegalArgumentException("Argument \"type\" ${type.jsBrief()} for opencc.convert is invalid")
+    fun convertRhino(s: Any?, type: Any?): String {
+        val rawType = (type as? Wrapper)?.unwrap() ?: type
+        val name = when (rawType) {
+            is String -> rawType
+            is Enum<*> -> rawType.name
+            else -> throw WrappedIllegalArgumentException("Argument \"type\" ${type.jsBrief()} for opencc.convert is invalid")
+        }.lowercase()
+        return when (name.uppercase()) {
+            in coreConversionTypes -> cvt(s, name)
+            else -> compositeConversions[name]?.invoke(s)
+                ?: throw WrappedIllegalArgumentException("Unknown OpenCC conversion type \"$type\"")
+        }
     }
 
     /* OpenCC internal conversion. */
@@ -328,6 +338,32 @@ object OpenCC : Augmentable(), Invokable {
     fun jp2twiRhino(s: Any?) = s2twiRhino(t2sRhino(jp2tRhino(s)))
 
     /* Private methods. */
+
+    private val coreConversionTypes = setOf(
+        "HK2S", "HK2T", "JP2T", "S2HK", "S2T", "S2TW", "S2TWP",
+        "T2HK", "T2S", "T2TW", "T2JP", "TW2S", "TW2T", "TW2SP",
+    )
+
+    private val compositeConversions: Map<String, (Any?) -> String> = mapOf(
+        "s2twi" to ::s2twiRhino,
+        "twi2s" to ::twi2sRhino,
+        "s2jp" to ::s2jpRhino,
+        "t2twi" to ::t2twiRhino,
+        "hk2tw" to ::hk2twRhino,
+        "hk2twi" to ::hk2twiRhino,
+        "hk2jp" to ::hk2jpRhino,
+        "tw2hk" to ::tw2hkRhino,
+        "tw2twi" to ::tw2twiRhino,
+        "tw2jp" to ::tw2jpRhino,
+        "twi2t" to ::twi2tRhino,
+        "twi2hk" to ::twi2hkRhino,
+        "twi2tw" to ::twi2twRhino,
+        "twi2jp" to ::twi2jpRhino,
+        "jp2s" to ::jp2sRhino,
+        "jp2hk" to ::jp2hkRhino,
+        "jp2tw" to ::jp2twRhino,
+        "jp2twi" to ::jp2twiRhino,
+    )
 
     private fun cvt(s: Any?, type: String): String = runBlocking {
         OpenccPluginHost.convert(globalContext, coerceString(s), type.uppercase())

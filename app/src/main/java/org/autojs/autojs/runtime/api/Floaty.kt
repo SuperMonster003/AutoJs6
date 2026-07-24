@@ -138,7 +138,7 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         val timeoutForAttachedToWindowManager = 1000L
         val view = FrameLayout(mContext)
         val win = rawWindow(view)
-        UI.runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+        UI.runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
             while (System.currentTimeMillis() - start < timeoutForAttachedToWindowManager) {
                 if (runCatching { win.requestFocus() }.isSuccess) break
             }

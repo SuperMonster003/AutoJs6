@@ -156,7 +156,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun distinct(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsOnlyOne(args) {
-            coerceArray(it).distinct().toNativeArray()
+            distinctValues(coerceArray(it)).toNativeArray()
         }
 
         @JvmStatic
@@ -165,8 +165,18 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             withRhinoContext(scriptRuntime) {
                 val (arrRaw, selector) = argList
                 val arr = coerceArray(arrRaw)
-                arr.distinctBy { ele ->
-                    callFunction(scriptRuntime, coerceFunction(selector), arr, arr, arrayOf(ele))
+                val selectedValues = mutableListOf<Any?>()
+                arr.filter { ele ->
+                    val selected = callFunction(
+                        scriptRuntime,
+                        coerceFunction(selector),
+                        scriptRuntime.topLevelScope,
+                        null,
+                        arrayOf(ele),
+                    )
+                    selectedValues.none { RhinoScriptRuntime.sameZero(it, selected) }.also { isNew ->
+                        if (isNew) selectedValues += selected
+                    }
                 }.toNativeArray()
             }
         }
@@ -174,13 +184,46 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun union(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtLeast(args, 1) {
-            it.fold(coerceArray(it[0])) { acc, arg -> acc.union(coerceArray(arg)).toNativeArray() }
+            unionValues(it).toNativeArray()
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun intersect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtLeast(args, 1) {
-            it.fold(coerceArray(it[0])) { acc, arg -> acc.intersect(coerceArray(arg)).toNativeArray() }
+            intersectValues(it).toNativeArray()
+        }
+
+        internal fun distinctValues(values: Iterable<Any?>): List<Any?> =
+            values.fold(mutableListOf()) { result, value ->
+                if (result.none { RhinoScriptRuntime.sameZero(it, value) }) result += value
+                result
+            }
+
+        internal fun unionValues(args: Array<out Any?>): List<Any?> {
+            val first = coerceArray(args.first())
+            val values = buildList {
+                addAll(first)
+                args.drop(1).forEach { value ->
+                    when (value) {
+                        is NativeArray -> addAll(value)
+                        else -> add(value)
+                    }
+                }
+            }
+            return distinctValues(values)
+        }
+
+        internal fun intersectValues(args: Array<out Any?>): List<Any?> {
+            val first = coerceArray(args.first())
+            if (first.isEmpty() || args.size == 1) return emptyList()
+            return distinctValues(first).filter { candidate ->
+                args.drop(1).all { value ->
+                    when (value) {
+                        is NativeArray -> value.any { RhinoScriptRuntime.sameZero(candidate, it) }
+                        else -> RhinoScriptRuntime.shallowEq(candidate, value)
+                    }
+                }
+            }
         }
 
         @JvmStatic

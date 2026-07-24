@@ -25,8 +25,8 @@ import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
-import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RootUtils
@@ -49,12 +49,12 @@ class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
     private val mResourceGetter = Supplier<Any?> {
         val scope = scriptRuntime.topLevelScope.globalThis
-        val getter = newBaseFunction(PROXY_GETTER_KEY, { argList ->
+        val getter = newBaseFunction(scriptRuntime.topLevelScope, PROXY_GETTER_KEY, { argList ->
             ensureArgumentsOnlyOne(argList) { type ->
                 val niceType = coerceString(type).replace("strings", "string", true)
                 when {
                     mCachedR.contains(niceType) -> mCachedR[niceType]
-                    else -> getProxyObjectInstance(scope, newBaseFunction(PROXY_GETTER_KEY, { argList ->
+                    else -> getProxyObjectInstance(scope, newBaseFunction(scriptRuntime.topLevelScope, PROXY_GETTER_KEY, { argList ->
                         val name = coerceString(argList[0])
                         val ctx: AndroidContext = scope.prop("activity") as? AndroidContext ?: globalContext
                         ctx.resources.getIdentifier(name, niceType, ctx.packageName)
@@ -100,7 +100,7 @@ class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
     )
 
     private fun getProxyObjectInstance(scope: Scriptable, getter: BaseFunction): ProxyObject {
-        return ProxyObject(scope, newNativeObject().also { o ->
+        return ProxyObject(scope, newNativeObject(getDeclarationScope(scope)).also { o ->
             o.defineProp(PROXY_GETTER_KEY, getter)
         })
     }
@@ -143,38 +143,40 @@ class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 else -> false
             }
 
-            fun setForceRoot() = RootUtils.setRootMode(RootMode.FORCE_ROOT, isWriteIntoPref)
-            fun setForceNonRoot() = RootUtils.setRootMode(RootMode.FORCE_NON_ROOT, isWriteIntoPref)
-            fun setAutoDetect() = RootUtils.setRootMode(RootMode.AUTO_DETECT, isWriteIntoPref)
+            RootUtils.setRootMode(resolveRootMode(modeArg), isWriteIntoPref)
+            UNDEFINED
+        }
 
-            when (modeArg) {
-                is Number -> when (coerceIntNumber(modeArg)) {
-                    1 -> setForceRoot()
-                    0 -> setForceNonRoot()
-                    -1 -> setAutoDetect()
+        internal fun resolveRootMode(modeArg: Any?): RootMode {
+            return when (modeArg) {
+                is Number -> when (modeArg.toDouble()) {
+                    1.0 -> RootMode.FORCE_ROOT
+                    0.0 -> RootMode.FORCE_NON_ROOT
+                    -1.0 -> RootMode.AUTO_DETECT
+                    else -> unknownRootMode(modeArg)
                 }
                 is Boolean -> when (modeArg) {
-                    true -> setForceRoot()
-                    false -> setForceNonRoot()
+                    true -> RootMode.FORCE_ROOT
+                    false -> RootMode.FORCE_NON_ROOT
                 }
                 is String -> when {
-                    checkStringArgument(arrayOf(modeArg, "root")) -> setForceRoot()
-                    checkStringArgument(arrayOf(modeArg, "non-root")) -> setForceNonRoot()
-                    checkStringArgument(arrayOf(modeArg, "auto")) -> setAutoDetect()
-                    else -> throw WrappedIllegalArgumentException(
-                        "Unknown mode (${modeArg}) for setRootMode()"
-                    )
+                    checkStringArgument(arrayOf(modeArg, "root")) -> RootMode.FORCE_ROOT
+                    checkStringArgument(arrayOf(modeArg, "non-root")) -> RootMode.FORCE_NON_ROOT
+                    checkStringArgument(arrayOf(modeArg, "auto")) -> RootMode.AUTO_DETECT
+                    else -> unknownRootMode(modeArg)
                 }
-                else -> when (Context.toBoolean(modeArg)) {
-                    true -> throw WrappedIllegalArgumentException(
-                        "Unknown mode (${modeArg}) for setRootMode(). Did you mean to use true or 1 or 'root' to forcibly set root mode?"
-                    )
-                    else -> throw WrappedIllegalArgumentException(
-                        "Unknown mode (${modeArg}) for setRootMode(). Did you mean to use false or 0 or 'non-root' to forcibly set non-root mode?`"
-                    )
-                }
+                else -> unknownRootMode(modeArg)
             }
-            UNDEFINED
+        }
+
+        private fun unknownRootMode(modeArg: Any?): Nothing {
+            val suggestion = when (Context.toBoolean(modeArg)) {
+                true -> "true or 1 or 'root' to forcibly set root mode"
+                else -> "false or 0 or 'non-root' to forcibly set non-root mode"
+            }
+            throw WrappedIllegalArgumentException(
+                "Unknown mode ($modeArg) for setRootMode(). Did you mean to use $suggestion?"
+            )
         }
 
         @JvmStatic

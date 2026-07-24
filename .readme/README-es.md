@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 23 de July de 2026.
+Datos actualizados el 24 de July de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/07/23
+###### 2026/07/24
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -188,6 +188,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` El Centro de plugins admite plugins APK Builder Template, permitiendo instalar y actualizar bajo demanda las plantillas necesarias para empaquetar aplicaciones
 * `Nuevo` Una pulsación prolongada del botón flotante de la pestaña Plugins de la página de inicio abre el Centro de plugins
 * `Nuevo` Método runtime.loadAar, para cargar archivos AAR dinámicamente
+* `Nuevo` Los módulos JavaScript (Rhino) admiten interfaces compatibles con power/settings/work_manager y el contenedor AppInfo, y completan determinadas API de Base64/Crypto/WebSocket/ByteString/automator/images/timers de Auto.js Pro 9.3.11
 * `Nuevo` Método device.getMarketName, para obtener el "nombre comercial" del dispositivo _[`issue #513`](http://issues.autojs6.com/513)_
 * `Nuevo` Las tareas programadas admiten tareas mensuales/anuales/con cuenta atrás y condiciones para finalizar la repetición _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Nuevo` El administrador de archivos admite selección múltiple y operaciones por lotes de copia/movimiento/eliminación
@@ -223,6 +224,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Los resultados de selección múltiple devueltos por dialogs.multiChoice se convertían incorrectamente en cadenas _[`issue #518`](http://issues.autojs6.com/518)_
 * `Corrección` El módulo selector podía elegir una firma de método incorrecta al invocar métodos sobrecargados mediante reflexión
 * `Corrección` Una regresión de compatibilidad de la API de ámbitos tras actualizar el motor Rhino provocaba fallos en algunas funciones auxiliares del entorno de ejecución
+* `Corrección` El puente de módulos Rhino procesaba incorrectamente null/undefined, Callable, constructores, prototipos, realms y valores de retorno de Kotlin, lo que podía causar objetos entre realms, pérdida de callbacks o excepciones en tiempo de ejecución
+* `Corrección` La distribución de argumentos, los valores de retorno, los límites numéricos, las coordenadas de imagen y el ciclo de vida de recursos temporales de la migración inicial de módulos JavaScript no coincidían con la implementación original
 * `Corrección` La aplicación podía cerrarse inesperadamente al solicitar permiso de captura de pantalla en Android 14+ debido a un inicio anómalo del servicio en primer plano de proyección multimedia _[`issue #516`](http://issues.autojs6.com/516)_
 * `Corrección` Las llamadas repetidas a OCR desde varios hilos o archivos podían solicitar repetidamente permiso de captura de pantalla _[`issue #551`](http://issues.autojs6.com/551)_
 * `Corrección` El servicio del plugin Paddle OCR podía desconectarse tras ejecutarse durante mucho tiempo y no recuperarse automáticamente _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
@@ -252,6 +255,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku
 * `Mejora` Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación
 * `Mejora` Almacenados en caché los resultados de compilación de los recursos Rhino integrados y los metadatos de las funciones de extensión del entorno de ejecución para mejorar el rendimiento de inicialización de scripts
+* `Mejora` Refactorizada la arquitectura de extensión de módulos Kotlin con vinculación explícita de realms de Rhino, separación semántica de tasks y work_manager, y más pruebas de regresión semántica y compatibilidad
 * `Mejora` Reutilizados el proceso persistente de Node.js y el entorno de ejecución en el ámbito del proceso para mejorar el rendimiento del arranque en caliente de scripts
 * `Mejora` Incorporados tiempos por fase para el inicio de Node.js e informes fiables de rendimiento en frío y con el runtime caliente
 * `Mejora` Almacenada en caché la resolución de bibliotecas nativas integradas de Node.js para evitar el descubrimiento repetido de plugins
@@ -561,7 +565,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 23 de July de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 24 de July de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

@@ -55,7 +55,7 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
     private val mRtConsole = scriptRuntime.console
     private val mTopLevelScope = scriptRuntime.topLevelScope
 
-    private val mCaptureStack: BaseFunction = newBaseFunction(FUNC_NAME_TRACE, { argList ->
+    private val mCaptureStack: BaseFunction = newBaseFunction(mTopLevelScope, FUNC_NAME_TRACE, { argList ->
         val (messageArg, level) = argList
         val message = "${Util.formatRhino(messageArg)}\n${getStackTrace()}"
         when (level) {
@@ -138,7 +138,7 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
     )
 
     private fun getStackTrace() = withRhinoContext(scriptRuntime) { cx ->
-        newNativeObject().also { o ->
+        newNativeObject(scriptRuntime.topLevelScope).also { o ->
             val globalErrorObject = mTopLevelScope.prop(NativeError.ERROR_TAG) as ScriptableObject
             NativeError.js_captureStackTrace(
                 cx,
@@ -302,7 +302,7 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
         fun build(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ConsoleImpl.Configurator = ensureArgumentsAtMost(args, 1) {
             val (options) = it
             val configurator = scriptRuntime.console.configurator
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             opt.entries.forEach { entry ->
                 val (keyArg, value) = entry

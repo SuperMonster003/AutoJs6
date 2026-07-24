@@ -15,7 +15,10 @@ import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.Context
 import android.content.Context as AndroidContext
+import okio.ByteString
 import org.autojs.autojs.core.web.WebSocket as CoreWebSocket
+import org.mozilla.javascript.NativeObject
+import kotlin.reflect.KClass
 
 class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
@@ -23,6 +26,10 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::newInjectableWebView.name to AS_GLOBAL,
         ::newInjectableWebClient.name to AS_GLOBAL,
         ::newWebSocket.name to AS_GLOBAL,
+    )
+
+    override val selfAssignmentJavaClasses = listOf<Pair<String, KClass<*>>>(
+        "ByteString" to ByteString::class,
     )
 
     companion object : ArgumentGuards() {
@@ -65,8 +72,24 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun newWebSocket(scriptRuntime: ScriptRuntime, args: Array<out Any?>): CoreWebSocket = ensureArgumentsOnlyOne(args) {
-            CoreWebSocket(scriptRuntime, scriptRuntime.http.okhttp, coerceString(it))
+        fun newWebSocket(scriptRuntime: ScriptRuntime, args: Array<out Any?>): CoreWebSocket = ensureArgumentsLengthInRange(args, 1..2) {
+            val (url, options) = it
+            CoreWebSocket(
+                scriptRuntime,
+                scriptRuntime.http.okhttp,
+                coerceString(url),
+                isInCurrentThread = parseEventThread(options),
+            )
+        }
+
+        internal fun parseEventThread(options: Any?): Boolean {
+            if (options.isJsNullish()) return false
+            require(options is NativeObject) {
+                "Argument options for web.newWebSocket must be a JavaScript Object"
+            }
+            return options.prop("eventThread").takeUnless { it.isJsNullish() }?.let {
+                coerceString(it) == "this"
+            } ?: false
         }
 
     }

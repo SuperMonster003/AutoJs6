@@ -43,7 +43,7 @@ public class NativeView extends NativeJavaObjectWithPrototype {
         mView = view;
         mViewPrototype = new ViewPrototype(mView, mViewAttributes, scope, runtime);
         prototype = new NativeJavaObjectWithPrototype(scope, mViewPrototype, mViewPrototype.getClass());
-        prototype.setPrototype(RhinoUtils.newNativeObject());
+        prototype.setPrototype(RhinoUtils.newNativeObject(RhinoUtils.getDeclarationScope(scope)));
     }
 
     @Override

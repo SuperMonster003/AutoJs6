@@ -39,6 +39,7 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::window.name,
         ::rawWindow.name,
         ::hasPermission.name,
+        ::checkPermission.name,
         ::requestPermission.name,
         ::ensurePermission.name,
         ::closeAll.name,
@@ -63,6 +64,12 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun hasPermission(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             scriptRuntime.floaty.hasPermission()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun checkPermission(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean {
+            return hasPermission(scriptRuntime, args)
         }
 
         @JvmStatic
@@ -103,6 +110,7 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     return layoutInflater.inflate(toXMLString(xml!!), parent, true)
                 }
             })
+            lateinit var proxyWindow: ProxyJavaObject
             val getter = fun(args: Array<out Any?>): Any? {
                 val (keyArg) = args
                 val id = coerceString(keyArg)
@@ -122,16 +130,18 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val setter = fun(args: Array<out Any?>): Undefined {
                 val (keyArg, value) = args
                 val id = coerceString(keyArg)
+                proxyWindow.putWithoutProxy(id, proxyWindow, value)
                 storage[id] = value
                 return UNDEFINED
             }
-            val proxyObject = newNativeObject().also {
-                it.defineProp(PROXY_GETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, getter, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
-                it.defineProp(PROXY_SETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, setter, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
+            val proxyObject = newNativeObject(scriptRuntime.topLevelScope).also {
+                it.defineProp(PROXY_GETTER_KEY, newBaseFunction(scriptRuntime.topLevelScope, PROXY_GETTER_KEY, getter, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
+                it.defineProp(PROXY_SETTER_KEY, newBaseFunction(scriptRuntime.topLevelScope, PROXY_SETTER_KEY, setter, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
             }
-            return ProxyJavaObject(scriptRuntime.topLevelScope, window, window::class.java).also {
+            proxyWindow = ProxyJavaObject(scriptRuntime.topLevelScope, window, window::class.java).also {
                 it.defineProp(PROXY_OBJECT_KEY, proxyObject, READONLY or DONTENUM or PERMANENT)
             }
+            return proxyWindow
         }
 
         fun toXMLString(xml: Any): String = when (xml) {

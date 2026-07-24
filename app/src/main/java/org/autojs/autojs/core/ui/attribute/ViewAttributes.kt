@@ -398,6 +398,8 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
         val setGravity = view.javaClass.getMethod("setGravity", Int::class.javaPrimitiveType)
         setGravity.invoke(view, g)
         true
+    } catch (_: NoSuchMethodException) {
+        false
     } catch (e: Exception) {
         false.also { e.printStackTrace() }
     }

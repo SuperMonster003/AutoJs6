@@ -1,7 +1,11 @@
 package org.autojs.autojs.runtime.api.augment.app
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ApplicationInfoFlags
+import android.content.pm.PackageManager.PackageInfoFlags
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -19,6 +23,7 @@ import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.deleteProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
@@ -36,11 +41,14 @@ import org.autojs.autojs.runtime.api.augment.shell.Shell
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.timing.TimedTaskManager
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.getCurrentTopCallScopeOrFallback
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.js_object_assign
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
@@ -48,9 +56,10 @@ import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs6.BuildConfig
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Undefined
-import java.io.File
+import org.mozilla.javascript.VarScope
 import java.net.URI
 import org.autojs.autojs.util.App as PresetApp
 
@@ -85,6 +94,9 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::launchDualApp.name to AS_GLOBAL,
         ::getPackageName.name to AS_GLOBAL,
         ::getAppName.name to AS_GLOBAL,
+        ::getInstalledApps.name,
+        ::getInstalledPackages.name,
+        ::getApkInfo.name,
 
         ::launchAppDetailsSettings.name to listOf(
             "launchAppDetailsSettings", "launchSettings", "openAppSetting", "openAppSettings",
@@ -156,37 +168,37 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                             checkDualProperty(options) -> startDualActivity(scriptRuntime, args)
                             checkShizukuProperty(options) -> {
                                 val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                WrappedShizuku.execCommand("am start ${intentToShellRhino(tmpIntent)}").throwIfError()
+                                WrappedShizuku.execCommand("am start ${intentToShellRhino(scriptRuntime.topLevelScope, tmpIntent)}").throwIfError()
                             }
                             checkRootProperty(options) -> {
                                 val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
+                                Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(scriptRuntime.topLevelScope, tmpIntent)}", /* withRoot = */ true)).throwIfError()
                             }
                             else -> startActivityWithGlobalContext(configuredIntent)
                         }
                     }
                     else -> throw IllegalArgumentException("Argument[1] for app.startActivity must be a JavaScript Object when argument[0] is Intent")
                 }
-                is URI -> when {
+                is Uri, is URI -> when {
                     !options.isJsNullish() -> throw IllegalArgumentException("Method app.startActivity can only have one argument when argument[0] is URI")
-                    else -> openUrlRhino(obj)
+                    else -> openUrlRhino(obj.toString())
                 }
                 is NativeObject -> {
                     val opt = when {
                         options.isJsNullish() -> obj
-                        options is NativeObject -> js_object_assign(js_object_assign(newNativeObject(), obj), options) as NativeObject
+                        options is NativeObject -> js_object_assign(js_object_assign(newNativeObject(scriptRuntime.topLevelScope), obj), options) as NativeObject
                         else -> throw IllegalArgumentException("Argument[1] for app.startActivity must be a JavaScript Object when argument[0] is JavaScript Object")
                     }
                     when {
                         checkDualProperty(opt) -> startDualActivity(scriptRuntime, args)
                         checkShizukuProperty(opt) -> {
                             val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-                            val intentCommand = intentToShellRhino(tmpIntent)
+                            val intentCommand = intentToShellRhino(scriptRuntime.topLevelScope, tmpIntent)
                             WrappedShizuku.execCommand("am start $intentCommand").throwIfError()
                         }
                         checkRootProperty(opt) -> {
                             val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-                            Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
+                            Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(scriptRuntime.topLevelScope, tmpIntent)}", /* withRoot = */ true)).throwIfError()
                         }
                         else -> startActivityWithGlobalContext(scriptRuntime, opt)
                     }
@@ -220,14 +232,14 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     options is NativeObject -> startActivityForDualUser(scriptRuntime, obj.configure(scriptRuntime, options))
                     else -> throw IllegalArgumentException("Argument[1] for app.startDualActivity must be a JavaScript Object when argument[0] is Intent")
                 }
-                is URI -> when {
+                is Uri, is URI -> when {
                     !options.isJsNullish() -> throw IllegalArgumentException("Method app.startDualActivity can only have one argument when argument[0] is URI")
-                    else -> openUrlRhino(obj)
+                    else -> openDualUrlRhino(scriptRuntime, obj.toString())
                 }
                 is NativeObject -> {
                     val opt = when {
                         options.isJsNullish() -> obj
-                        options is NativeObject -> js_object_assign(js_object_assign(newNativeObject(), obj), options) as NativeObject
+                        options is NativeObject -> js_object_assign(js_object_assign(newNativeObject(scriptRuntime.topLevelScope), obj), options) as NativeObject
                         else -> throw IllegalArgumentException("Argument[1] for app.startDualActivity must be a JavaScript Object when argument[0] is JavaScript Object")
                     }
                     startActivityForDualUser(scriptRuntime, opt)
@@ -240,18 +252,27 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun intentToShell(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsOnlyOne(args) {
-            intentToShellRhino(it)
+            intentToShellRhino(scriptRuntime.topLevelScope, it)
         }
 
         @JvmStatic
         @RhinoFunctionBody
         fun intentToShellRhino(i: Any?): String {
-            if (i is Intent) return intentToShellRhino(newNativeObject().apply {
+            val scope = when (i) {
+                is NativeObject -> getDeclarationScope(i)
+                else -> RhinoUtils.withRhinoContext { cx -> cx.getCurrentTopCallScopeOrFallback() }
+            }
+            return intentToShellRhino(scope, i)
+        }
+
+        @JvmStatic
+        fun intentToShellRhino(scope: VarScope, i: Any?): String {
+            if (i is Intent) return intentToShellRhino(scope, newNativeObject(scope).apply {
                 defineProp("packageName", i.component?.packageName ?: i.`package`)
                 defineProp("className", i.component?.className)
                 defineProp("extras", i.extras?.let { extras ->
                     @Suppress("DEPRECATION")
-                    newNativeObject().also { tmp ->
+                    newNativeObject(scope).also { tmp ->
                         extras.keySet().forEach { key ->
                             tmp.put(key, tmp, extras[key])
                         }
@@ -399,7 +420,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             when {
                 o is NativeObject && checkRootProperty(o) -> {
                     @Suppress("SpellCheckingInspection")
-                    Shell.execCommand(scriptRuntime, arrayOf<Any>(/* cmd = */ "am startservice ${intentToShellRhino(o)}", /* withRoot = */ true))
+                    Shell.execCommand(scriptRuntime, arrayOf<Any>(/* cmd = */ "am startservice ${intentToShellRhino(scriptRuntime.topLevelScope, o)}", /* withRoot = */ true))
                 }
                 else -> globalContext.startService(intentRhinoWithRuntime(scriptRuntime, o))
             }
@@ -409,7 +430,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun sendEmail(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { options ->
-            val optionsMap = options as? NativeObject ?: newNativeObject()
+            val optionsMap = options as? NativeObject ?: newNativeObject(scriptRuntime.topLevelScope)
 
             val emailIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "message/rfc822"
@@ -457,7 +478,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
                 else -> when {
                     o is NativeObject && checkRootProperty(o) -> {
-                        Shell.execCommand(scriptRuntime, arrayOf<Any>("am broadcast ${intentToShellRhino(o)}", /* withRoot = */ true))
+                        Shell.execCommand(scriptRuntime, arrayOf<Any>("am broadcast ${intentToShellRhino(scriptRuntime.topLevelScope, o)}", /* withRoot = */ true))
                     }
                     else -> globalContext.sendBroadcast(intentRhinoWithRuntime(scriptRuntime, o))
                 }
@@ -523,7 +544,8 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 uri.startsWith(PROTOCOL_FILE) -> getUriForFileRhinoWithRuntime(scriptRuntime, uri)
                 else -> uri.toUri()
             }
-            is Uri -> parseUriRhinoWithRuntime(scriptRuntime, uri.host)
+            is Uri -> uri
+            is URI -> parseUriRhinoWithRuntime(scriptRuntime, uri.toString())
             else -> null
         }
 
@@ -579,7 +601,62 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     else -> uri
                 }
             ) ?: return null
-            return Uri.fromFile(File(path))
+            return IntentUtils.getUriOfFile(globalContext, path, scriptRuntime.app.fileProviderAuthority)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getInstalledApps(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 1) {
+            val flags = parsePackageManagerFlags(it.getOrNull(0), PackageManager.GET_META_DATA)
+            val packageManager = globalContext.packageManager
+            val applications = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                    packageManager.getInstalledApplications(ApplicationInfoFlags.of(flags.toLong()))
+                }
+                else -> {
+                    @Suppress("DEPRECATION")
+                    packageManager.getInstalledApplications(flags)
+                }
+            }
+            applications.map { info -> AppInfo(globalContext, info) }.toNativeArray()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getInstalledPackages(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 1) {
+            val flags = parsePackageManagerFlags(it.getOrNull(0), PackageManager.GET_META_DATA)
+            val packageManager = globalContext.packageManager
+            val packages = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                    packageManager.getInstalledPackages(PackageInfoFlags.of(flags.toLong()))
+                }
+                else -> {
+                    @Suppress("DEPRECATION")
+                    packageManager.getInstalledPackages(flags)
+                }
+            }
+            packages.onEach { info ->
+                info.applicationInfo = info.applicationInfo?.let { applicationInfo ->
+                    AppInfo(globalContext, applicationInfo)
+                }
+            }.toNativeArray()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getApkInfo(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsLengthInRange(args, 1..2) {
+            val path = scriptRuntime.files.path(coerceString(it[0])) ?: return@ensureArgumentsLengthInRange null
+            val flags = parsePackageManagerFlags(it.getOrNull(1), PackageManager.GET_META_DATA)
+            val packageManager = globalContext.packageManager
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                    packageManager.getPackageArchiveInfo(path, PackageInfoFlags.of(flags.toLong()))
+                }
+                else -> {
+                    @Suppress("DEPRECATION")
+                    packageManager.getPackageArchiveInfo(path, flags)
+                }
+            }
         }
 
         @JvmStatic
@@ -891,7 +968,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun parse(scriptRuntime: ScriptRuntime, query: NativeObject, exclude: String?): String {
-            return parse(scriptRuntime, query, newNativeArray(arrayOf(exclude)))
+            return parse(scriptRuntime, query, newNativeArray(scriptRuntime.topLevelScope, arrayOf(exclude)))
         }
 
         private fun parse(scriptRuntime: ScriptRuntime, query: NativeObject, exclude: Iterable<*>): String {
@@ -924,7 +1001,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         private fun startActivityForDualUser(scriptRuntime: ScriptRuntime, o: Any?) {
             val intent = intentRhinoWithRuntime(scriptRuntime, o).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-            val command = "am start ${intentToShellRhino(intent)}"
+            val command = "am start ${intentToShellRhino(scriptRuntime.topLevelScope, intent)}"
             when (o) {
                 is NativeObject -> execCommandForDualUser(scriptRuntime, command, o)
                 else -> execCommandForDualUser(scriptRuntime, command)
@@ -993,6 +1070,32 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             return o?.let { PresetApp.getAppByAlias(Context.toString(it)) }
         }
 
+        private fun parsePackageManagerFlags(options: Any?, defaultFlags: Int): Int {
+            if (options.isJsNullish()) return defaultFlags
+            require(options is NativeObject) {
+                "Package manager options ${options.jsBrief()} must be a JavaScript Object"
+            }
+            return listOf("get", "match").fold(defaultFlags) { flags, type ->
+                val names = options.prop(type)
+                if (names.isJsNullish()) {
+                    flags
+                } else {
+                    require(names is NativeArray) {
+                        "Package manager option \"$type\" ${names.jsBrief()} must be a JavaScript Array"
+                    }
+                    names.fold(flags) { result, name ->
+                        val fieldName = "${type}_${coerceString(name)}".uppercase()
+                        val value = runCatching {
+                            PackageManager::class.java.getField(fieldName).getInt(null)
+                        }.getOrElse {
+                            throw WrappedIllegalArgumentException("Unknown PackageManager flag \"$fieldName\"")
+                        }
+                        result or value
+                    }
+                }
+            }
+        }
+
         private fun launchDualPackageInternal(scriptRuntime: ScriptRuntime, o: String): Boolean {
             val nicePackageName = getAppByAlias(scriptRuntime, arrayOf(o))?.packageName ?: (/* packageName = */ o)
             val intent = globalContext.packageManager.getLaunchIntentForPackage(nicePackageName) ?: return false
@@ -1034,11 +1137,11 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val actionRaw = o.prop("action")
             val flagsRaw = o.prop("flags")
             val typeRaw = o.prop("type")
-            val dataRaw = o.prop("data")
 
             if (!urlRaw.isJsNullish()) {
                 o.defineProp("data", parseIntentUrl(scriptRuntime, o))
             }
+            val dataRaw = o.prop("data")
 
             if (!packageRaw.isJsNullish()) {
                 if (packageNameRaw.isJsNullish()) {
@@ -1111,7 +1214,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
             } else {
                 if (!dataRaw.isJsNullish()) {
-                    intent.setData(Context.toString(dataRaw).toUri())
+                    intent.setData(parseUriRhinoWithRuntime(scriptRuntime, dataRaw))
                 }
             }
 

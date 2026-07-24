@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/23",
+      "released_date": "2026/07/24",
       "feature": [
         "Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva \"nodejs\" o extensiones como .node.js/.cjs/.mjs",
         "El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)",
@@ -23,6 +23,7 @@
         "El Centro de plugins admite plugins APK Builder Template, permitiendo instalar y actualizar bajo demanda las plantillas necesarias para empaquetar aplicaciones",
         "Una pulsación prolongada del botón flotante de la pestaña Plugins de la página de inicio abre el Centro de plugins",
         "Método runtime.loadAar, para cargar archivos AAR dinámicamente",
+        "Los módulos JavaScript (Rhino) admiten interfaces compatibles con power/settings/work_manager y el contenedor AppInfo, y completan determinadas API de Base64/Crypto/WebSocket/ByteString/automator/images/timers de Auto.js Pro 9.3.11",
         "Método device.getMarketName, para obtener el \"nombre comercial\" del dispositivo _[`issue #513`](http://issues.autojs6.com/513)_",
         "Las tareas programadas admiten tareas mensuales/anuales/con cuenta atrás y condiciones para finalizar la repetición _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "El administrador de archivos admite selección múltiple y operaciones por lotes de copia/movimiento/eliminación",
@@ -60,6 +61,8 @@
         "Los resultados de selección múltiple devueltos por dialogs.multiChoice se convertían incorrectamente en cadenas _[`issue #518`](http://issues.autojs6.com/518)_",
         "El módulo selector podía elegir una firma de método incorrecta al invocar métodos sobrecargados mediante reflexión",
         "Una regresión de compatibilidad de la API de ámbitos tras actualizar el motor Rhino provocaba fallos en algunas funciones auxiliares del entorno de ejecución",
+        "El puente de módulos Rhino procesaba incorrectamente null/undefined, Callable, constructores, prototipos, realms y valores de retorno de Kotlin, lo que podía causar objetos entre realms, pérdida de callbacks o excepciones en tiempo de ejecución",
+        "La distribución de argumentos, los valores de retorno, los límites numéricos, las coordenadas de imagen y el ciclo de vida de recursos temporales de la migración inicial de módulos JavaScript no coincidían con la implementación original",
         "La aplicación podía cerrarse inesperadamente al solicitar permiso de captura de pantalla en Android 14+ debido a un inicio anómalo del servicio en primer plano de proyección multimedia _[`issue #516`](http://issues.autojs6.com/516)_",
         "Las llamadas repetidas a OCR desde varios hilos o archivos podían solicitar repetidamente permiso de captura de pantalla _[`issue #551`](http://issues.autojs6.com/551)_",
         "El servicio del plugin Paddle OCR podía desconectarse tras ejecutarse durante mucho tiempo y no recuperarse automáticamente _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_",
@@ -91,6 +94,7 @@
         "Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku",
         "Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación",
         "Almacenados en caché los resultados de compilación de los recursos Rhino integrados y los metadatos de las funciones de extensión del entorno de ejecución para mejorar el rendimiento de inicialización de scripts",
+        "Refactorizada la arquitectura de extensión de módulos Kotlin con vinculación explícita de realms de Rhino, separación semántica de tasks y work_manager, y más pruebas de regresión semántica y compatibilidad",
         "Reutilizados el proceso persistente de Node.js y el entorno de ejecución en el ámbito del proceso para mejorar el rendimiento del arranque en caliente de scripts",
         "Incorporados tiempos por fase para el inicio de Node.js e informes fiables de rendimiento en frío y con el runtime caliente",
         "Almacenada en caché la resolución de bibliotecas nativas integradas de Node.js para evitar el descubrimiento repetido de plugins",

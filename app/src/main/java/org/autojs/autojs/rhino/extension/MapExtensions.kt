@@ -24,8 +24,8 @@ object MapExtensions {
                 is List<*> -> o.put(key, o, value.toNativeArray())
                 is Array<*> -> o.put(key, o, value.toNativeArray())
                 is Map<*, *> -> o.put(key, o, value.toNativeObject())
-                is Pair<*, *> -> o.put(key, o, newNativeObject().also { newObj ->
-                    newObj.put(Context.toString(value.first), o, value.second)
+                is Pair<*, *> -> o.put(key, o, newNativeObject(RhinoUtils.getDeclarationScope(o)).also { newObj ->
+                    newObj.put(Context.toString(value.first), newObj, value.second)
                 })
                 else -> o.put(key, o, Context.javaToJS(value, scope))
             }

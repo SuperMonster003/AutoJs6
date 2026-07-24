@@ -4,6 +4,7 @@ import android.graphics.Paint
 import android.os.Build
 import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
@@ -41,7 +42,7 @@ class PaintProxyObject(
         return value == asInt.toLong()
     }
 
-    private val setColorFn: BaseFunction = newBaseFunction("setColor", { args ->
+    private val setColorFn: BaseFunction = newBaseFunction(getDeclarationScope(scope), "setColor", { args ->
 
         // Intercept Paint#setColor overload ambiguity on Android Q+.
         // zh-CN: 在 Android Q+ 上拦截 Paint#setColor 的重载歧义问题.

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/23",
+      "released_date": "2026/07/24",
       "feature": [
         "Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive \"nodejs\" ou des extensions comme .node.js/.cjs/.mjs",
         "L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)",
@@ -23,6 +23,7 @@
         "Le Centre des plugins prend en charge les plugins APK Builder Template, permettant d'installer et de mettre à jour à la demande les modèles nécessaires à l'empaquetage",
         "Un appui long sur le bouton flottant de l'onglet Plugins de la page d'accueil ouvre le Centre des plugins",
         "Méthode runtime.loadAar, pour charger dynamiquement des fichiers AAR",
+        "Les modules JavaScript (Rhino) prennent en charge les interfaces compatibles power/settings/work_manager et l'enveloppe AppInfo, et complètent certaines API Base64/Crypto/WebSocket/ByteString/automator/images/timers d'Auto.js Pro 9.3.11",
         "Méthode device.getMarketName, pour obtenir le \"nom commercial\" de l'appareil _[`issue #513`](http://issues.autojs6.com/513)_",
         "Les tâches planifiées prennent en charge les tâches mensuelles/annuelles/avec compte à rebours et les conditions de fin de répétition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "Le gestionnaire de fichiers prend en charge la sélection multiple et les opérations groupées de copie/déplacement/suppression",
@@ -60,6 +61,8 @@
         "Les résultats de sélection multiple renvoyés par dialogs.multiChoice étaient convertis à tort en chaînes _[`issue #518`](http://issues.autojs6.com/518)_",
         "Le module selector pouvait choisir une mauvaise signature lors de l'invocation de méthodes surchargées par réflexion",
         "Une régression de compatibilité de l'API de portée après la mise à jour du moteur Rhino provoquait le dysfonctionnement de certaines fonctions auxiliaires d'exécution",
+        "Le pont des modules Rhino traitait incorrectement null/undefined, Callable, les constructeurs, les prototypes, les realms et les valeurs de retour Kotlin, ce qui pouvait produire des objets inter-realm, perdre des callbacks ou provoquer des exceptions d'exécution",
+        "La distribution des arguments, les valeurs de retour, les limites numériques, les coordonnées d'image et le cycle de vie des ressources temporaires de la migration initiale des modules JavaScript ne correspondaient pas à l'implémentation d'origine",
         "L'application pouvait planter lors de la demande d'autorisation de capture d'écran sur Android 14+ en raison d'un démarrage anormal du service de premier plan de projection multimédia _[`issue #516`](http://issues.autojs6.com/516)_",
         "Les appels OCR répétés depuis plusieurs threads ou fichiers pouvaient demander plusieurs fois l'autorisation de capture d'écran _[`issue #551`](http://issues.autojs6.com/551)_",
         "Le service du plugin Paddle OCR pouvait se déconnecter après une longue exécution sans pouvoir se rétablir automatiquement _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_",
@@ -91,6 +94,7 @@
         "Les méthodes KeyCode permettent d'envoyer des commandes de touche avec l'autorisation Shizuku",
         "Initialisation différée des composants non critiques pour améliorer les performances de démarrage de l'application",
         "Mise en cache des résultats de compilation des ressources Rhino intégrées et des métadonnées des fonctions d'extension de l'environnement d'exécution pour améliorer les performances d'initialisation des scripts",
+        "Refonte de l'architecture d'extension des modules Kotlin avec liaison explicite des realms Rhino, séparation sémantique de tasks et work_manager, et davantage de tests de compatibilité et de régression sémantique",
         "Réutilisation du processus Node.js persistant et de l'environnement d'exécution à l'échelle du processus pour améliorer les performances de démarrage à chaud des scripts",
         "Mesure par phase du démarrage de Node.js et rapports fiables sur les performances à froid et avec le runtime chaud",
         "Mise en cache de la résolution des bibliothèques natives intégrées de Node.js afin d'éviter la découverte répétée des plugins",

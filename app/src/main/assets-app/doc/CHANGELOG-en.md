@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/23
+###### 2026/07/24
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -28,6 +28,7 @@
 * `Feature` Plugin Center supports APK Builder Template plugins, allowing on-demand installation and updates of templates required for app packaging
 * `Feature` Long-pressing the floating button on the Home Plugins tab opens the Plugin Center
 * `Feature` runtime.loadAar method, for dynamically loading AAR files
+* `Feature` JavaScript (Rhino) modules support compatible power/settings/work_manager interfaces and an AppInfo wrapper, and complete selected Base64/Crypto/WebSocket/ByteString/automator/images/timers APIs from Auto.js Pro 9.3.11
 * `Feature` device.getMarketName method, for obtaining the device's "market name" _[`issue #513`](http://issues.autojs6.com/513)_
 * `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Feature` File manager supports multi-selection and batch copy/move/delete operations
@@ -63,6 +64,8 @@
 * `Fix` Multiple-choice results returned by dialogs.multiChoice were incorrectly converted to strings _[`issue #518`](http://issues.autojs6.com/518)_
 * `Fix` Selector module could choose the wrong method signature when invoking overloaded methods through reflection
 * `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
+* `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
+* `Fix` Argument dispatch, return values, numeric boundaries, image coordinates, and temporary resource lifecycles in the early JavaScript module migration did not match the original implementation
 * `Fix` The app could crash when requesting screen capture permission on Android 14+ due to abnormal media projection foreground service startup _[`issue #516`](http://issues.autojs6.com/516)_
 * `Fix` Repeated OCR calls across multiple threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_
 * `Fix` Paddle OCR plugin service could disconnect after running for a long time and fail to recover automatically _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
@@ -92,6 +95,7 @@
 * `Improvement` KeyCode methods support sending key code commands with Shizuku permission
 * `Improvement` Deferred initialization of non-critical components to improve app startup performance
 * `Improvement` Cached compilation results for bundled Rhino resources and metadata for runtime enhancement functions to improve script initialization performance
+* `Improvement` Refactored the Kotlin module augmentation architecture with explicit Rhino realm binding, separated tasks and work_manager semantics, and expanded module compatibility and semantic regression tests
 * `Improvement` Reused the persistent Node.js process and process-scoped runtime to improve warm script startup performance
 * `Improvement` Added phase-by-phase Node.js startup timing and trustworthy cold/runtime-warm performance reporting
 * `Improvement` Cached built-in Node.js native library resolution to avoid repeated plugin discovery

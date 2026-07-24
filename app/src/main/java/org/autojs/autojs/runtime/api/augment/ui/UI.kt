@@ -101,7 +101,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             }
             assignWidgetProperties(scope, it)
         }
-    }.apply { initNewBaseFunction(this) }
+    }.apply { initNewBaseFunction(scriptRuntime.topLevelScope, this) }
 
     override val selfAssignmentProperties = listOf<Pair<Any, Any?>>(
         WIDGET_KEY to mWidgetConstructor,
@@ -189,8 +189,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ui.bindingContext = scope
         ui.layoutInflater.layoutInflaterDelegate = UIProxyLayoutInflaterDelegate()
 
-        ui.defineProperty(PROXY_OBJECT_KEY, newNativeObject().also { o ->
-            o.defineProp(PROXY_GETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, { getterArgList ->
+        ui.defineProperty(PROXY_OBJECT_KEY, newNativeObject(scriptRuntime.topLevelScope).also { o ->
+            o.defineProp(PROXY_GETTER_KEY, newBaseFunction(scriptRuntime.topLevelScope, PROXY_GETTER_KEY, { getterArgList ->
                 val (keyArg) = getterArgList
                 val key = coerceString(keyArg)
                 val rawValue = mProperties[key]
@@ -204,7 +204,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     else -> rawValue
                 }
             }, NOT_CONSTRUCTABLE))
-            o.defineProp(PROXY_SETTER_KEY, newBaseFunction(PROXY_SETTER_KEY, { setterArgList ->
+            o.defineProp(PROXY_SETTER_KEY, newBaseFunction(scriptRuntime.topLevelScope, PROXY_SETTER_KEY, { setterArgList ->
                 val (keyArg, value) = setterArgList
                 val key = coerceString(keyArg)
                 value?.let { mProperties[key] = it } ?: mProperties.remove(key)
@@ -309,7 +309,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     val boundValue = bindValueForApplyingAttribute(scriptRuntime, value)
                     val widget = inflateContext.get("widget")
                     if (widget is NativeObject && callFunction(scriptRuntime, widget.prop("hasAttr") as BaseFunction, widget, widget, arrayOf(attrName)) as Boolean) {
-                        callFunction(scriptRuntime, widget.prop("setAttr") as BaseFunction, widget, widget, arrayOf(view, attrName, boundValue, newBaseFunction("setter", {
+                        callFunction(scriptRuntime, widget.prop("setAttr") as BaseFunction, widget, widget, arrayOf(view, attrName, boundValue, newBaseFunction(scriptRuntime.topLevelScope, "setter", {
                             val (viewArg, attrNameArg, valueArg, parentArg) = it
                             inflater.setAttr(viewArg as View, ns, coerceString(attrNameArg), coerceString(valueArg, ""), parentArg as ViewGroup?)
                         }, NOT_CONSTRUCTABLE)))
@@ -546,7 +546,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             }
             ensureActivity(scriptRuntime) { activity ->
                 scriptRuntime.ui.view = view
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     activity.setContentView(view)
                 }, NOT_CONSTRUCTABLE))
             }
@@ -557,7 +557,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun statusBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
             ensureActivity(scriptRuntime) { activity ->
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(color).also { ViewUtils.setStatusBarBackgroundColor(activity, it) }
                 }, NOT_CONSTRUCTABLE))
             }
@@ -569,7 +569,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun statusBarIconLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
             val (isLight) = argList
             ensureActivity(scriptRuntime) { activity ->
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     ViewUtils.setStatusBarIconLight(activity, coerceBoolean(isLight, true))
                 }, NOT_CONSTRUCTABLE))
             }
@@ -580,7 +580,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun statusBarIconLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
             ensureActivity(scriptRuntime) { activity ->
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(refColor).also { ViewUtils.setStatusBarIconLight(activity, ViewUtils.isLuminanceDark(it)) }
                 }, NOT_CONSTRUCTABLE))
             }
@@ -591,7 +591,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun backgroundColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
             ensureActivity(scriptRuntime) { activity ->
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(Colors.setAlphaRhino(color, 1.0)).also {
                         activity.window.setBackgroundDrawable(it.toDrawable())
                     }
@@ -604,7 +604,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun navigationBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
             ensureActivity(scriptRuntime) { activity ->
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(color).also { ViewUtils.setNavigationBarBackgroundColor(activity, it) }
                 }, NOT_CONSTRUCTABLE))
             }
@@ -616,7 +616,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun navigationBarIconLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
             val (isLight) = argList
             ensureActivity(scriptRuntime) { activity ->
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                         ScriptRuntime.requiresApi(Build.VERSION_CODES.O)
                     } else {
@@ -631,7 +631,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun navigationBarIconLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
             ensureActivity(scriptRuntime) { activity ->
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(refColor).also {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                             ScriptRuntime.requiresApi(Build.VERSION_CODES.O)
@@ -696,7 +696,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 return@ensureArgumentsIsEmpty UNDEFINED
             }
             if (!activity.isFinishing && !activity.isDestroyed) {
-                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     activity.finish()
                 }, NOT_CONSTRUCTABLE))
             }
@@ -716,7 +716,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun getStatusBarHeight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
             val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
             val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
             val ignoreVisibility = opt.inquire("ignoreVisibility", ::coerceBoolean, true)
@@ -727,7 +727,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun getVisibleStatusBarHeight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
             val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
             val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
             ViewUtils.getStatusBarHeight(globalContext, withComputed, withDimen, ignoreVisibility = false)
@@ -737,7 +737,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun getNavigationBarHeight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
             val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
             val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
             val ignoreVisibility = opt.inquire("ignoreVisibility", ::coerceBoolean, true)
@@ -748,20 +748,20 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun getVisibleNavigationBarHeight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
             val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
             val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
             ViewUtils.getNavigationBarHeight(globalContext, withComputed, withDimen, ignoreVisibility = false)
         }
 
         private fun initWidgetConstructor(scope: VarScope, ctor: BaseFunction) {
-            val prototype = ctor.prop("prototype") as? ScriptableObject ?: newNativeObject()
+            val prototype = ctor.prop("prototype") as? ScriptableObject ?: newNativeObject(scope)
             assignWidgetProperties(scope, prototype)
             ctor.defineProp("prototype", prototype, DONTENUM or PERMANENT)
         }
 
         private fun assignWidgetProperties(scope: VarScope, o: ScriptableObject) {
-            o.defineProperty("__attrs__", newNativeObject(), DONTENUM or PERMANENT)
+            o.defineProperty("__attrs__", newNativeObject(scope), DONTENUM or PERMANENT)
             o.defineFunctionProperties(
                 scope,
                 arrayOf(
@@ -858,7 +858,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     val global = scriptRuntime.topLevelScope
                     val globalArray = global.prop("Array") as ScriptableObject
                     val arrayObserveFunc = globalArray.prop("observe") as BaseFunction
-                    val handlerFunc = newBaseFunction("handler", { args ->
+                    val handlerFunc = newBaseFunction(global, "handler", { args ->
                         val (changes) = args
                         require(changes is NativeArray) {
                             "A JavaScript array is required"
@@ -912,7 +912,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     else -> withRhinoContext(scriptRuntime) { cx ->
                         val scope = scriptRuntime.topLevelScope
                         val exitIfErrorFunc = scope.prop("__exitIfError__") as BaseFunction
-                        exitIfErrorFunc.call(cx, scope, scope.globalThis, arrayOf(newBaseFunction("action", {
+                        exitIfErrorFunc.call(cx, scope, scope.globalThis, arrayOf(newBaseFunction(scope, "action", {
                             callFunction(scriptRuntime, action, arrayOf())
                         }, NOT_CONSTRUCTABLE)))
                     }

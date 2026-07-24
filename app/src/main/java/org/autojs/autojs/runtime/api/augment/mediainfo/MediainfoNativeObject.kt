@@ -46,7 +46,7 @@ class MediainfoNativeObject(
 
     init {
         RhinoUtils.initNativeObjectPrototype(this)
-        defineProperty(StringReadable.KEY, newBaseFunction(StringReadable.KEY, { toStringReadable() }, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
+        defineProperty(StringReadable.KEY, newBaseFunction(scriptRuntime.topLevelScope, StringReadable.KEY, { toStringReadable() }, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
         defineProperty("path", path, READONLY or PERMANENT)
         initProperties()
     }
@@ -59,7 +59,7 @@ class MediainfoNativeObject(
         defineProperty("inform", inform, READONLY or PERMANENT)
         STREAM_KINDS.forEach { streamKind ->
             val funcName = streamKind.lowercase()
-            defineProperty(funcName, newBaseFunction(funcName, { argList ->
+            defineProperty(funcName, newBaseFunction(scriptRuntime.topLevelScope, funcName, { argList ->
                 val parameter = argList.takeUnless { it.isEmpty() }?.get(0)?.let { coerceString(it) } ?: ""
                 runBlocking {
                     MediainfoPluginHost.get(ScriptRuntime.applicationContext, file, streamKind, 0, parameter)
@@ -80,7 +80,7 @@ class MediainfoNativeObject(
                 !line.contains(':') -> {
                     currentSectionName = line.lowercase()
                     currentObj = this.getProp(currentSectionName) as? Scriptable
-                        ?: newNativeObject().also { defineProperty(currentSectionName, it, READONLY or PERMANENT) }
+                        ?: newNativeObject(scriptRuntime.topLevelScope).also { defineProperty(currentSectionName, it, READONLY or PERMANENT) }
                     if (informToPrint.isNotBlank()) informToPrint += "  },\n"
                     informToPrint += "  $currentSectionName: {\n"
                 }

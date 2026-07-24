@@ -51,14 +51,15 @@ class RhinoUtilsScopeCompatTest {
     }
 
     @Test
-    fun declarationScopeFallsBackForFullyDetachedNativeObject() {
-        val detached = RhinoUtils.newNativeObject()
+    fun unscopedNativeObjectUsesCurrentContextRealm() {
+        val currentRealm = with(RhinoUtils) { cx.getOrCreateStandardObjects() }
+        val value = RhinoUtils.newNativeObject()
 
-        assertSame(RhinoUtils.standardObjects, RhinoUtils.getDeclarationScope(detached))
-        assertSame(RhinoUtils.standardObjects, RhinoUtils.getTopLevelScope(detached))
-        assertSame(RhinoUtils.objectPrototype, RhinoUtils.getObjectPrototype(detached))
-        assertSame(RhinoUtils.arrayPrototype, RhinoUtils.getArrayPrototype(detached))
-        assertSame(RhinoUtils.functionPrototype, RhinoUtils.getFunctionPrototype(detached))
+        assertSame(currentRealm, RhinoUtils.getDeclarationScope(value))
+        assertSame(currentRealm, RhinoUtils.getTopLevelScope(value))
+        assertSame(ScriptableObject.getObjectPrototype(currentRealm), RhinoUtils.getObjectPrototype(value))
+        assertSame(ScriptableObject.getArrayPrototype(currentRealm), RhinoUtils.getArrayPrototype(value))
+        assertSame(ScriptableObject.getFunctionPrototype(currentRealm), RhinoUtils.getFunctionPrototype(value))
     }
 
     @Test
@@ -71,16 +72,17 @@ class RhinoUtilsScopeCompatTest {
 
     @Test
     fun newObjectCanUseDetachedScope() {
-        val detached = RhinoUtils.newNativeObject()
-        val created = RhinoUtils.newObject(detached)
+        val fallback = RhinoUtils.standardObjects
+        val source = NativeObject()
+        val created = RhinoUtils.newObject(source)
 
-        assertSame(RhinoUtils.standardObjects, created.parentScope)
-        assertSame(RhinoUtils.objectPrototype, created.prototype)
+        assertSame(fallback, created.parentScope)
+        assertSame(ScriptableObject.getObjectPrototype(fallback), created.prototype)
     }
 
     @Test
     fun defineFunctionPropertiesCanUseDetachedTarget() {
-        val detached = RhinoUtils.newNativeObject()
+        val detached = NativeObject()
 
         RhinoUtils.defineFunctionProperties(
             detached,
@@ -94,13 +96,14 @@ class RhinoUtilsScopeCompatTest {
 
     @Test
     fun getOwnPropertyDescriptorCanUseDetachedObject() {
-        val detached = RhinoUtils.newNativeObject()
-        detached.defineProperty("lines", 91, ScriptableObject.EMPTY)
+        val fallback = RhinoUtils.standardObjects
+        val value = NativeObject()
+        value.defineProperty("lines", 91, ScriptableObject.EMPTY)
 
-        val descriptor = RhinoUtils.js_object_getOwnPropertyDescriptor(detached, "lines")
+        val descriptor = RhinoUtils.js_object_getOwnPropertyDescriptor(value, "lines") as ScriptableObject
 
         assertEquals(91, descriptor.get("value", descriptor))
-        assertSame(RhinoUtils.standardObjects, descriptor.parentScope)
+        assertSame(fallback, descriptor.parentScope)
     }
 
     @Test
@@ -129,14 +132,15 @@ class RhinoUtilsScopeCompatTest {
 
     @Test
     fun callFunctionCanUseDetachedScope() {
-        val detached = RhinoUtils.newNativeObject()
+        val fallback = RhinoUtils.standardObjects
+        val value = NativeObject()
         val fn = object : BaseFunction() {
             override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any {
-                return scope === RhinoUtils.standardObjects && thisObj === detached
+                return scope === fallback && thisObj === value
             }
         }
 
-        assertSame(true, RhinoUtils.callFunction(fn, detached, detached, emptyArray()))
+        assertSame(true, RhinoUtils.callFunction(fn, value, value, emptyArray()))
     }
 
     @Suppress("unused")

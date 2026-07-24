@@ -4,17 +4,19 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
 
 internal class SetIntervalExt(
     private val scriptRuntime: ScriptRuntime,
-    private val listener: BaseFunction,
+    private val listener: Callable,
     interval: Double = DEFAULT_INTERVAL,
     timeout: Double = DEFAULT_TIMEOUT,
-    private val timeoutCondition: BaseFunction? = null,
-    private val callback: BaseFunction? = null,
+    private val timeoutCondition: Callable? = null,
+    private val callback: Callable? = null,
 ) {
     private var mTimeoutResult: Any? = null
 
@@ -26,10 +28,10 @@ internal class SetIntervalExt(
     fun execute(): Double = scriptRuntime.timers.setTimeout(object : BaseFunction() {
         override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>): Any {
             val that = Context.javaToJS(this@SetIntervalExt, scope) as Scriptable
-            listener.call(cx, scope, that, arrayOf())
+            callListener(listener, cx, scope)
             when {
                 !isTimedOut(scope) -> execute()
-                callback is BaseFunction -> callback.call(cx, scope, that, arrayOf(mTimeoutResult))
+                callback != null -> RhinoUtils.callFunction(scriptRuntime, callback, scope, that, arrayOf(mTimeoutResult))
             }
             return RhinoUtils.UNDEFINED
         }
@@ -51,6 +53,10 @@ internal class SetIntervalExt(
 
         private const val DEFAULT_INTERVAL = 200.0
         private const val DEFAULT_TIMEOUT = Double.MAX_VALUE
+
+        internal fun callListener(listener: Callable, @Suppress("UNUSED_PARAMETER") cx: Context, scope: VarScope): Any? {
+            return RhinoUtils.callFunction(listener, scope, Undefined.SCRIPTABLE_UNDEFINED, emptyArray())
+        }
 
     }
 

@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 23 July 2026.
+تم تحديث البيانات في 24 July 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/07/23
+###### 2026/07/24
 
 * `إضافة جديدة` بيئة تشغيل نصوص Node.js 24.5.0, تدعم التشغيل عبر توجيه "nodejs" او امتدادات مثل .node.js/.cjs/.mjs
 * `إضافة جديدة` بيئة تشغيل Node.js تدعم CommonJS و ESM جزئيا و import() الديناميكي المحلي فقط ومصادر TypeScript الخفيفة (.ts/.mts/.cts)
@@ -188,6 +188,7 @@
 * `إضافة جديدة` مركز الاضافات يدعم اضافات APK Builder Template, مع تثبيت القوالب اللازمة لتحزيم التطبيقات وتحديثها عند الطلب
 * `إضافة جديدة` الزر العائم في تبويب الاضافات بالصفحة الرئيسية يدعم الضغط المطول لفتح مركز الاضافات
 * `إضافة جديدة` الطريقة runtime.loadAar, لتحميل ملفات AAR ديناميكيا
+* `إضافة جديدة` تدعم وحدات JavaScript (Rhino) واجهات power/settings/work_manager المتوافقة وغلاف AppInfo, وتستكمل بعض واجهات Base64/Crypto/WebSocket/ByteString/automator/images/timers من Auto.js Pro 9.3.11
 * `إضافة جديدة` الطريقة device.getMarketName, للحصول على "الاسم التجاري" للجهاز _[`issue #513`](http://issues.autojs6.com/513)_
 * `إضافة جديدة` المهام المجدولة تدعم المهام الشهرية والسنوية ومهام العد التنازلي وشروط نهاية التكرار _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `إضافة جديدة` مدير الملفات يدعم التحديد المتعدد وعمليات النسخ والنقل والحذف المجمعة
@@ -223,6 +224,8 @@
 * `تصليح` تحويل نتيجة التحديد المتعدد التي تعيدها dialogs.multiChoice الى سلسلة نصية بشكل خاطئ _[`issue #518`](http://issues.autojs6.com/518)_
 * `تصليح` احتمال اختيار وحدة selector توقيع طريقة غير صحيح عند استدعاء طرق محملة بشكل زائد عبر الانعكاس
 * `تصليح` تسبب تراجع توافق API النطاق بعد تحديث محرك Rhino في تعطل بعض ادوات بيئة التشغيل المساعدة
+* `تصليح` كان جسر وحدات Rhino يعالج null/undefined و Callable والمنشئات والنماذج الاولية و realm وقيم ارجاع Kotlin بشكل غير صحيح, مما قد يسبب كائنات عبر realm او فقدان الاستدعاءات الراجعة او استثناءات وقت التشغيل
+* `تصليح` لم تتطابق معالجة المعاملات وقيم الارجاع والحدود الرقمية واحداثيات الصور ودورة حياة الموارد المؤقتة في الترحيل المبكر لوحدات JavaScript مع التنفيذ الاصلي
 * `تصليح` احتمال انهيار التطبيق عند طلب صلاحية التقاط الشاشة على Android 14+ بسبب فشل بدء خدمة اسقاط الوسائط الامامية _[`issue #516`](http://issues.autojs6.com/516)_
 * `تصليح` احتمال تكرار طلب صلاحية التقاط الشاشة عند استدعاء OCR مرارا من خيوط متعددة او ملفات مختلفة _[`issue #551`](http://issues.autojs6.com/551)_
 * `تصليح` احتمال انقطاع خدمة اضافة Paddle OCR بعد تشغيلها مدة طويلة وتعذر استعادتها تلقائيا _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
@@ -252,6 +255,7 @@
 * `تحسين` طرق KeyCode تدعم ارسال اوامر رموز المفاتيح بصلاحية Shizuku
 * `تحسين` تأجيل تهيئة المكونات غير الحرجة لتحسين اداء بدء التطبيق
 * `تحسين` تخزين نتائج ترجمة موارد Rhino المدمجة والبيانات الوصفية لوظائف تحسين بيئة التشغيل مؤقتا لتحسين اداء تهيئة النصوص البرمجية
+* `تحسين` اعادة هيكلة بنية توسيع وحدات Kotlin مع ربط realm الخاص بـ Rhino بشكل صريح, وفصل دلالات tasks و work_manager, وتوسيع اختبارات التوافق والانحدار الدلالي
 * `تحسين` اعادة استخدام عملية Node.js الدائمة وبيئة التشغيل على مستوى العملية لتحسين اداء بدء النصوص البرمجية اللاحقة
 * `تحسين` توفير توقيت مرحلي لبدء Node.js وتقارير اداء موثوقة للتشغيل البارد والتشغيل الدافئ لبيئة التشغيل
 * `تحسين` تخزين نتائج حل مكتبات Node.js الاصلية المدمجة مؤقتا لتجنب اكتشاف الاضافات المتكرر
@@ -561,7 +565,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 23 July 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 24 July 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api.augment.global
 
-import org.autojs.autojs.annotation.AugmentableSimpleGetterProxyInterface
 import org.autojs.autojs.runtime.api.augment.SimpleGetterProxy
 import org.mozilla.javascript.NativeJavaClass
 import org.mozilla.javascript.Scriptable
@@ -14,9 +13,7 @@ object GlobalClasses : SimpleGetterProxy {
     private val mClasses by lazy { Classes() }
     private val mClassesMembers by lazy { Classes::class.declaredMemberProperties }
 
-    @JvmStatic
-    @AugmentableSimpleGetterProxyInterface
-    fun get(scope: Scriptable, key: String): Any? {
+    override fun get(scope: Scriptable, key: String): Any? {
 
         // @Alter by SuperMonster003 on May 29, 2024.
         //  # mClassesMembers.find { it.name == name }?.let {

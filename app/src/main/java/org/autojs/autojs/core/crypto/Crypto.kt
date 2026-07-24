@@ -84,7 +84,7 @@ object Crypto {
 
     @JvmStatic
     @JvmOverloads
-    fun digest(message: String, algorithm: String = DEFAULT_DIGEST_ALGORITHM, options: NativeObject = newNativeObject()): Serializable {
+    fun digest(message: Any, algorithm: String = DEFAULT_DIGEST_ALGORITHM, options: NativeObject = newNativeObject()): Serializable {
         val messageDigest = MessageDigest.getInstance(algorithm)
         input(message, options) { bytes: ByteArray, start: Int, length: Int ->
             messageDigest.update(/* input = */ bytes, /* offset = */ start, /* len = */ length)
@@ -93,7 +93,7 @@ object Crypto {
     }
 
     @JvmStatic
-    fun digest(message: String, options: NativeObject) = digest(message, DEFAULT_DIGEST_ALGORITHM, options)
+    fun digest(message: Any, options: NativeObject) = digest(message, DEFAULT_DIGEST_ALGORITHM, options)
 
     @JvmStatic
     @JvmOverloads
@@ -125,28 +125,39 @@ object Crypto {
             val dest = options.prop("dest") as? String ?: throw IllegalArgumentException(
                 "Property \"dest\" is required when writing output to a file",
             )
-            val fos = FileOutputStream(dest)
-            writeInputData(fos, cipher, data, options)
+            FileOutputStream(dest).use { fos ->
+                writeInputData(fos, cipher, data, options)
+            }
+            return Undefined.instance as Serializable
         }
-        val bos = ByteArrayOutputStream()
-        writeInputData(bos, cipher, data, options)
-        return output(bos.toByteArray(), options, "bytes").also { bos.close() }
+        return ByteArrayOutputStream().use { bos ->
+            writeInputData(bos, cipher, data, options)
+            output(bos.toByteArray(), options, "bytes")
+        }
     }
 
     private fun writeInputData(os: OutputStream, cipher: Cipher, data: Any, options: NativeObject) {
-        val cos = CipherOutputStream(os, cipher)
-        input(data, options) { bytes, start, length ->
-            cos.write(bytes, start, length)
+        CipherOutputStream(os, cipher).use { cos ->
+            input(data, options) { bytes, start, length ->
+                cos.write(bytes, start, length)
+            }
         }
-        cos.close()
     }
 
     @JvmStatic
-    @JvmOverloads
-    fun generateKeyPair(algorithm: String, length: Int = 256): KeyPair {
-        return KeyPairGenerator.getInstance(algorithm).apply {
+    fun generateKeyPair(algorithm: String): KeyPair {
+        return generateKeyPair(KeyPairGenerator.getInstance(algorithm), algorithm)
+    }
+
+    @JvmStatic
+    fun generateKeyPair(algorithm: String, length: Int): KeyPair {
+        return generateKeyPair(KeyPairGenerator.getInstance(algorithm).apply {
             initialize(length)
-        }.generateKeyPair().let {
+        }, algorithm)
+    }
+
+    private fun generateKeyPair(generator: KeyPairGenerator, algorithm: String): KeyPair {
+        return generator.generateKeyPair().let {
             KeyPair(it.public.encoded, it.private.encoded).apply {
                 keyPairGeneratorAlgorithm = algorithm
             }
@@ -162,11 +173,12 @@ object Crypto {
             is NativeArray -> callback(input.jsBytesToByteArray(), 0, input.size)
             is String -> when (options.prop("input")) {
                 "file" -> {
-                    val fis = FileInputStream(input)
-                    val buffer = ByteArray(4096)
-                    var read: Int
-                    while (fis.read(buffer).also { read = it } != -1) {
-                        callback(buffer, 0, read)
+                    FileInputStream(input).use { fis ->
+                        val buffer = ByteArray(4096)
+                        var read: Int
+                        while (fis.read(buffer).also { read = it } != -1) {
+                            callback(buffer, 0, read)
+                        }
                     }
                 }
                 "base64" -> Base64.decode(input, Base64.NO_WRAP).also {

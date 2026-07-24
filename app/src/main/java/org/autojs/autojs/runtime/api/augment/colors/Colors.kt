@@ -18,7 +18,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsSpecies
 import org.autojs.autojs.rhino.extension.ArrayExtensions.jsArrayBrief
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
-import org.autojs.autojs.rhino.extension.MapExtensions.toNativeObject
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -34,6 +33,7 @@ import org.autojs.autojs.util.ColorUtils.roundToSaturationString
 import org.autojs.autojs.util.ColorUtils.roundToValueString
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.ensureNativeArrayLength
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
@@ -80,8 +80,6 @@ object Colors : Augmentable() {
         }
         colorMap
     }
-
-    private val allForNativeObject by lazy { all.toNativeObject() }
 
     override val selfAssignmentFunctions = listOf(
         "toString" to AS_FUNCTIONAL_TO_STRING,
@@ -151,7 +149,7 @@ object Colors : Augmentable() {
     }
 
     override val selfAssignmentGetters = listOf(
-        "all" to Supplier { allForNativeObject } to DONTENUM,
+        "all" to Supplier { all } to DONTENUM,
         "themeColor" to Supplier { ThemeColorManager.currentThemeColor },
     )
 
@@ -938,7 +936,7 @@ object Colors : Augmentable() {
     @RhinoFunctionBody
     fun toRgbaRhino(color: Any?, options: Any? = null): List<Double> {
         val niceOptions = options as? NativeObject ?: newNativeObject()
-        val newOptions = newNativeObject().apply { put("max", this, niceOptions.prop("maxAlpha")) }
+        val newOptions = newNativeObject(getDeclarationScope(niceOptions)).apply { put("max", this, niceOptions.prop("maxAlpha")) }
         return listOf(redRhino(color), greenRhino(color), blueRhino(color), alphaRhino(color, newOptions))
     }
 
@@ -953,7 +951,7 @@ object Colors : Augmentable() {
     @RhinoFunctionBody
     fun toArgbRhino(color: Any?, options: Any? = null): List<Double> {
         val niceOptions = options as? NativeObject ?: newNativeObject()
-        val newOptions = newNativeObject().apply { put("max", this, niceOptions.prop("maxAlpha")) }
+        val newOptions = newNativeObject(getDeclarationScope(niceOptions)).apply { put("max", this, niceOptions.prop("maxAlpha")) }
         return listOf(alphaRhino(color, newOptions), redRhino(color), greenRhino(color), blueRhino(color))
     }
 
@@ -1261,8 +1259,8 @@ object Colors : Augmentable() {
     @RhinoSingletonFunctionInterface
     fun isEqual(args: Array<out Any?>) = ensureArgumentsLengthInRange(args, 2..3) {
         when (it.size) {
-            2 -> isSimilarRhino(it[0], it[1])
-            3 -> isSimilarRhino(it[0], it[1], it[2])
+            2 -> isEqualRhino(it[0], it[1])
+            3 -> isEqualRhino(it[0], it[1], it[2])
             else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.isEqual")
         }
     }

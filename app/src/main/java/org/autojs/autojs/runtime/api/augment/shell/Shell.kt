@@ -89,7 +89,7 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun fromIntent(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsOnlyOne(args) {
-            App.intentToShellRhino(it)
+            App.intentToShellRhino(scriptRuntime.topLevelScope, it)
         }
 
         @JvmStatic

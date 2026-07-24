@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 7 月 23 日.
+資料更新於 2026 年 7 月 24 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/07/23
+###### 2026/07/24
 
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
 * `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
@@ -188,6 +188,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 外掛中心支援 APK Builder Template 外掛, 可按需安裝及更新打包應用所需範本
 * `新增` 主頁外掛標籤頁浮動按鈕支援長按進入外掛中心
 * `新增` runtime.loadAar 方法, 用於動態載入 AAR 檔案
+* `新增` JavaScript (Rhino) 模組支援 power/settings/work_manager 相容介面及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` device.getMarketName 方法, 用於獲取裝置的 "市場名稱" _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` 定時任務支援按月/按年/倒數任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 檔案管理器支援多選檔案及批次複製/移動/刪除操作
@@ -223,6 +224,8 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` dialogs.multiChoice 方法傳回的多選結果被錯誤轉換為字串的問題 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修復` selector 模組反射呼叫多載方法時可能選擇錯誤方法簽名的問題
 * `修復` Rhino 引擎更新後作用域 API 相容性回歸導致部分執行環境輔助功能異常的問題
+* `修復` Rhino 模組橋接對 null/undefined, Callable, 建構函式, 原型, realm 及 Kotlin 傳回值的處理不正確, 可能造成跨 realm 物件, 回呼遺失或執行階段例外的問題
+* `修復` 早期 JavaScript 模組遷移中的引數分派, 傳回值, 數值邊界, 影像座標及暫存資源生命週期與原始實作不一致的問題
 * `修復` Android 14+ 申請螢幕擷取權限時可能因媒體投影前景服務啟動異常導致應用程式當機的問題 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修復` 多執行緒或跨檔案重複呼叫 OCR 時可能反覆申請螢幕擷取權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_
 * `修復` Paddle OCR 外掛服務長時間執行後可能中斷連線且無法自動復原的問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
@@ -252,6 +255,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` KeyCode 方法支援使用 Shizuku 權限傳送鍵碼指令
 * `最佳化` 延遲初始化非關鍵元件, 提升應用程式啟動效能
 * `最佳化` 快取 Rhino 內建資源編譯結果及執行環境增強函式中繼資料, 提升腳本初始化效能
+* `最佳化` 重構 Kotlin 模組增強架構, 明確繫結 Rhino realm, 分離 tasks 與 work_manager 語意, 並補充模組相容性及語意迴歸測試
 * `最佳化` 重複使用 Node.js 常駐處理程序及處理程序層級執行環境, 提升腳本連續執行時的啟動效能
 * `最佳化` Node.js 啟動支援分階段計時及可信的冷啟動/執行階段暖啟動效能報告
 * `最佳化` 快取 Node.js 內建原生程式庫解析結果, 避免重複探索外掛
@@ -561,7 +565,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 7 月 23 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 7 月 24 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

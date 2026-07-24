@@ -69,7 +69,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
                 val options = when {
                     arg1 is NativeObject -> js_object_create(arg1)
-                    else -> newNativeObject()
+                    else -> newNativeObject(scriptRuntime.topLevelScope)
                 }
                 val channelId = parseChannelId(scriptRuntime, options.prop("channelId"))
 
@@ -100,7 +100,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
                 notificationId
             }
-            arg0 is String? && arg1 !is String? -> {
+            shouldUseContentOverload(argList) -> {
 
                 // @Signature notice(content: string, options?: Notice.Options): void;
 
@@ -113,7 +113,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
                 val options = when {
                     arg1 is NativeObject -> js_object_create(arg1)
-                    else -> newNativeObject()
+                    else -> newNativeObject(scriptRuntime.topLevelScope)
                 }
                 if (options.prop("content").isJsNullish()) {
                     options.defineProp("content", arg0)
@@ -135,7 +135,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 val content = arg1
                 val options = when {
                     arg2 is NativeObject -> js_object_create(arg2)
-                    else -> newNativeObject()
+                    else -> newNativeObject(scriptRuntime.topLevelScope)
                 }
                 if (options.prop("title").isJsNullish() && !title.isJsNullish()) {
                     options.defineProp("title", title)
@@ -151,7 +151,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
                 val options = when {
                     arg0 is NativeObject -> js_object_create(arg0)
-                    else -> newNativeObject()
+                    else -> newNativeObject(scriptRuntime.topLevelScope)
                 }
 
                 if (options.prop("title").isJsNullish()
@@ -212,6 +212,11 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
     }
 
     companion object : ArgumentGuards() {
+
+        internal fun shouldUseContentOverload(args: Array<out Any?>): Boolean {
+            if (args.isEmpty() || args[0] !is String?) return false
+            return args.size == 1 || args[1] !is String?
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -278,7 +283,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @RhinoRuntimeFunctionInterface
         fun getBuilder(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Builder = ensureArgumentsIsEmpty(args) {
             val builder = NotificationUtils.getSimpleBuilder()
-            val options = newNativeObject().also { o ->
+            val options = newNativeObject(scriptRuntime.topLevelScope).also { o ->
                 o.defineProp("priority", scriptRuntime.notice.config.defaultPriority)
             }
             parsePriority(options)?.let { builder.setPriority(it) }
@@ -324,7 +329,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                             rexWebSiteWithoutProtocol.matches(intent) -> "http://$intent"
                             else -> intent
                         }
-                        val optIntent = newNativeObject().also { o ->
+                        val optIntent = newNativeObject(scriptRuntime.topLevelScope).also { o ->
                             o.defineProp("data", url)
                         }
                         App.intent(scriptRuntime, arrayOf(optIntent))

@@ -27,7 +27,7 @@ class Shizuku(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
         "state" to Supplier {
-            newNativeObject().also { o ->
+            newNativeObject(scriptRuntime.topLevelScope).also { o ->
                 o.defineProp("isInstalled", WrappedShizuku.isInstalled(globalContext))
                 o.defineProp("hasService", WrappedShizuku.hasService())
                 o.defineProp("isRunning", WrappedShizuku.isRunning())

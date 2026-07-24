@@ -3,10 +3,18 @@ package org.autojs.autojs.runtime.api.augment.mime
 import eu.medsea.mimeutil.MimeType
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.api.augment.util.Util
+import org.autojs.autojs.util.RhinoUtils
+import org.autojs.autojs.util.RhinoUtils.getCurrentTopCallScopeOrFallback
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.VarScope
 
-class JsMime(mimeStr: String) : StringReadable {
+class JsMime(scope: VarScope, mimeStr: String) : StringReadable {
+
+    constructor(mimeStr: String) : this(
+        RhinoUtils.withRhinoContext { cx -> cx.getCurrentTopCallScopeOrFallback() },
+        mimeStr,
+    )
 
     @JvmField
     val raw: String = mimeStr
@@ -30,7 +38,7 @@ class JsMime(mimeStr: String) : StringReadable {
         val mime = MimeType(mimeStr)
         type = mime.type
         subtype = mime.subtype
-        val parsed = parseMimeExtra(type, subtype, mimeStr)
+        val parsed = parseMimeExtra(scope, type, subtype, mimeStr)
         mimeType = parsed.mimeType
         mimeTypeRefined = parsed.mimeTypeRefined
         parameters = parsed.parameters
@@ -49,8 +57,8 @@ class JsMime(mimeStr: String) : StringReadable {
         "}",
     ).joinToString("\n")
 
-    private fun parseMimeExtra(type: String, subtype: String, mimeType: String): MimeExtra {
-        val paramObj = newNativeObject()
+    private fun parseMimeExtra(scope: VarScope, type: String, subtype: String, mimeType: String): MimeExtra {
+        val paramObj = newNativeObject(scope)
         val mimeRefined = "$type/$subtype"
         var mimeFull = mimeRefined
         mimeType.split("\\s*;\\s*".toRegex()).drop(1)

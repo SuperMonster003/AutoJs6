@@ -7,8 +7,9 @@ import org.mozilla.javascript.Undefined
 
 object IsNullish : Augmentable(), Invokable {
 
-    override fun invoke(vararg args: Any?): Boolean = args.all {
-        Undefined.isUndefined(it) || it == null || it == NOT_FOUND
+    override fun invoke(vararg args: Any?): Boolean {
+        val value = args.getOrNull(0)
+        return Undefined.isUndefined(value) || value == null || value == NOT_FOUND
     }
 
 }

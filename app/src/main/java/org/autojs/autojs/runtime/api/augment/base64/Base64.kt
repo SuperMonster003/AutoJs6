@@ -43,20 +43,32 @@ object Base64 : Augmentable() {
     @RhinoFunctionBody
     fun decodeRhino(o: Any?, encoding: Any?): String {
         val niceEncoding = parseEncoding(encoding)
-        val decoded = AndroidBase64.decode(toBytes(o, niceEncoding), AndroidBase64.NO_WRAP)
+        val decoded = AndroidBase64.decode(toBase64InputBytes(o), AndroidBase64.NO_WRAP)
         return String(decoded, niceEncoding)
     }
 
     /**
      * Ignored (but not fuzzy) regex matching for non-word characters.
      */
-    private fun parseEncoding(encoding: Any?): Charset {
+    internal fun parseEncoding(encoding: Any?): Charset {
         if (encoding.isJsNullish()) return Charset.defaultCharset()
         val niceEncoding = Context.toString(encoding)
-        val charsetEncoding = niceEncoding.trim().lowercase().replace("\\W+".toRegex(), "")
+        val charsetEncoding = normalizeEncodingName(niceEncoding)
         return Charset.availableCharsets().values.find {
-            it.name().lowercase().replace("\\W+".toRegex(), "") == charsetEncoding
-        } ?: Charset.defaultCharset()
+            sequenceOf(it.name(), *it.aliases().toTypedArray()).any { name ->
+                normalizeEncodingName(name) == charsetEncoding
+            }
+        } ?: throw WrappedIllegalArgumentException("Unknown charset: $niceEncoding")
+    }
+
+    private fun normalizeEncodingName(name: String) = name.lowercase().replace("[^a-z0-9]+".toRegex(), "")
+
+    internal fun toBase64InputBytes(o: Any?): ByteArray = when {
+        o.isJsNullish() -> throw WrappedIllegalArgumentException("Cannot convert o ($o) to byte[]")
+        o is String -> o.toByteArray(Charsets.US_ASCII)
+        o is ByteArray -> o
+        o is NativeArray -> o.jsBytesToByteArray()
+        else -> toBase64InputBytes(o.toString())
     }
 
     private fun toBytes(o: Any?, encoding: Charset = Charset.defaultCharset()): ByteArray = when {

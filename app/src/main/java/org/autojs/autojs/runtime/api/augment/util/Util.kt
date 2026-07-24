@@ -53,6 +53,7 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.VarScope
+import org.mozilla.javascript.Wrapper
 import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter.ofPattern
 import java.util.*
@@ -92,6 +93,7 @@ object Util : Augmentable() {
         ::deprecate.name,
         ::debuglog.name,
         ::log.name,
+        ::checkStringParam.name,
         ::checkStringArgument.name,
         ::assureStringStartsWith.name,
         ::assureStringEndsWith.name,
@@ -102,7 +104,7 @@ object Util : Augmentable() {
         ::ensureUndefinedType.name,
         ::ensureBooleanType.name,
         ::ensureSymbolType.name,
-        ::ensureBigIntType.name,
+        ::ensureBigIntType.name to listOf(::ensureBigIntType.name, "ensureBigintType"),
         ::ensureObjectType.name,
         ::ensureFunctionType.name,
         ::ensureNonNullObjectType.name,
@@ -214,7 +216,8 @@ object Util : Augmentable() {
     @JvmStatic
     @RhinoSingletonFunctionInterface
     fun isJavaArray(args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
-        it is Scriptable && it.className == "JavaObject" && it.javaClass.isArray
+        val value = (it as? Wrapper)?.unwrap() ?: it
+        value?.javaClass?.isArray == true
     }
 
     @JvmStatic

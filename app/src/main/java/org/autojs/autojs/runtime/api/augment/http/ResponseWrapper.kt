@@ -1,10 +1,10 @@
 package org.autojs.autojs.runtime.api.augment.http
 
 import okhttp3.Response
-import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils
+import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
@@ -22,7 +22,7 @@ class ResponseWrapper(
     var resBodyString: String? = null
     var resBodyBytes: ByteArray? = null
 
-    fun wrap() = newNativeObject().apply {
+    fun wrap() = newNativeObject(scriptRuntime.topLevelScope).apply {
         put("request", this, mRequest)
         put("statusMessage", this, res.message)
         put("statusCode", this, res.code)
@@ -46,7 +46,8 @@ class ResponseWrapper(
     }
 
     private fun getHeaders(): NativeObject {
-        val result = newNativeObject()
+        val scope = scriptRuntime.topLevelScope
+        val result = newNativeObject(scope)
         val headers = res.headers
         for (i in 0 until headers.size) {
             val name = headers.name(i).lowercase()
@@ -63,7 +64,7 @@ class ResponseWrapper(
                 list.addAll(origin)
             }
             list += value
-            result.put(name, result, list.toNativeArray())
+            result.put(name, result, newNativeArray(scope, list.toTypedArray()))
         }
         return result
     }

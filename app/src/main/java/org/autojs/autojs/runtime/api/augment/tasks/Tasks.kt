@@ -26,14 +26,14 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceObject
 import org.autojs.autojs.util.RhinoUtils.coerceString
-import org.autojs.autojs.util.RhinoUtils.isUiThread
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.now
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeObject
@@ -53,6 +53,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::addDisposableTask.name,
         ::addCountdownTask.name,
         ::addIntentTask.name,
+        ::addBroadcastIntentTask.name,
         ::getTimedTask.name,
         ::getIntentTask.name,
         ::removeTask.name,
@@ -82,16 +83,17 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun addTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = ensureArgumentsOnlyOne(args) {
+        fun addTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsOnlyOne(args) {
             addTaskRhino(it)
         }
 
         @JvmStatic
         @RhinoFunctionBody
-        fun addTaskRhino(task: Any?): Any {
-            when (task) {
-                is TimedTask -> TimedTaskManager.addTaskSync(task)
-                is IntentTask -> TimedTaskManager.addTaskSync(task)
+        fun addTaskRhino(task: Any?): Any? {
+            when {
+                task.isJsNullish() -> return null
+                task is TimedTask -> TimedTaskManager.addTaskSync(task)
+                task is IntentTask -> TimedTaskManager.addTaskSync(task)
                 else -> listOf(
                     "Argument \"task\" ${task.jsBrief()} for tasks.addTask",
                     "must be either TimedTask or IntentTask",
@@ -104,7 +106,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun addTimedTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             createTimedTask(scriptRuntime, opt, parseRepeatMode(opt))
                 .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
@@ -114,7 +116,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun addDailyTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_DAILY)
                 .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
@@ -124,7 +126,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun addWeeklyTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_WEEKLY)
                 .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
@@ -134,7 +136,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun addMonthlyTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_MONTHLY)
                 .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
@@ -144,7 +146,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun addYearlyTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_YEARLY)
                 .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
@@ -154,7 +156,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun addDisposableTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_DISPOSABLE)
                 .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
@@ -164,7 +166,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun addCountdownTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_COUNTDOWN)
                 .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
@@ -174,7 +176,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun addIntentTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             IntentTask().apply {
                 opt.acquire("path") { it.toRuntimePath(scriptRuntime) }.let {
@@ -187,6 +189,9 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         isLocal = true
                     }
                 }
+                opt.inquire("category") { coerceString(it) }?.let {
+                    category = it
+                }
                 opt.inquire("dataType") { coerceString(it) }?.let {
                     dataType = it
                 }
@@ -195,6 +200,12 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     isLocal = it
                 }
             }.let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun addBroadcastIntentTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? {
+            return addIntentTask(scriptRuntime, args)
         }
 
         @JvmStatic
@@ -219,13 +230,20 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun removeTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
+        fun removeTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsOnlyOne(args) {
             removeTaskRhino(it)
         }
 
         @JvmStatic
         @RhinoFunctionBody
-        fun removeTaskRhino(it: Any?): Boolean = when {
+        fun removeTaskRhino(it: Any?): Any? {
+            removeTaskSyncResult(it)
+            return it
+        }
+
+        @JvmStatic
+        @RhinoFunctionBody
+        internal fun removeTaskSyncResult(it: Any?): Boolean = when {
             it.isJsNullish() -> false
             it is TimedTask -> TimedTaskManager.removeTaskSync(it)
             it is IntentTask -> TimedTaskManager.removeTaskSync(it)
@@ -234,38 +252,48 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun removeTimedTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
-            val id = coerceIntNumber(it)
-            removeTaskRhino(getTimedTaskRhino(id))
+        fun removeTimedTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..2) {
+            val (idArg, options) = it
+            val task = getTimedTaskRhino(idArg)
+            removeTaskRhino(task)
+            taskFulfilled(scriptRuntime, task, coerceObject(options, newNativeObject(scriptRuntime.topLevelScope)))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun removeIntentTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
-            val id = coerceIntNumber(it)
-            removeTaskRhino(getIntentTaskRhino(id))
+        fun removeIntentTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..2) {
+            val (idArg, options) = it
+            val task = getIntentTaskRhino(idArg)
+            removeTaskRhino(task)
+            taskFulfilled(scriptRuntime, task, coerceObject(options, newNativeObject(scriptRuntime.topLevelScope)))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun updateTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
+        fun updateTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsOnlyOne(args) {
             updateTaskRhino(it)
         }
 
         @JvmStatic
         @RhinoFunctionBody
-        fun updateTaskRhino(task: Any?): Boolean = when {
-            task.isJsNullish() -> false
-            task is TimedTask -> TimedTaskManager.updateTaskSync(task)
-            task is IntentTask -> TimedTaskManager.updateTaskSync(task)
-            else -> throw WrappedIllegalArgumentException("Argument task ${task.jsBrief()} is unacceptable for tasks.updateTask")
+        fun updateTaskRhino(task: Any?): Any? {
+            when {
+                task.isJsNullish() -> return null
+                task is TimedTask -> {
+                    task.isScheduled = false
+                    TimedTaskManager.updateTaskSync(task)
+                }
+                task is IntentTask -> TimedTaskManager.updateTaskSync(task)
+                else -> throw WrappedIllegalArgumentException("Argument task ${task.jsBrief()} is unacceptable for tasks.updateTask")
+            }
+            return task
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun queryTimedTasks(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             val path = opt.inquire("path") { it.toRuntimePath(scriptRuntime) }
             val taskList = TimedTaskManager.allTasksAsList
@@ -278,7 +306,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun queryIntentTasks(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             val tasks = TimedTaskManager.allIntentTasksAsList
 
@@ -313,7 +341,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun daysToTimeFlag(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsOnlyOne(args) {
-            val days = coerceArray(it, newNativeArray()).map { ele -> coerceIntNumber(ele) }
+            val days = coerceArray(it, newNativeArray(scriptRuntime.topLevelScope)).map { ele -> coerceIntNumber(ele) }
             Array(7) { 0 }.foldIndexed(0) { index, acc, _ ->
                 acc + if (days.contains(index)) 2.0.pow(index.toDouble()).toInt() else 0
             }
@@ -439,14 +467,14 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             if (duration.isJsNullish()) {
                 return null
             }
-            return createCountdownDateTime(parseDurationMillis(duration))
+            return createCountdownDateTime(parseDurationMillis(duration, options))
         }
 
         private fun parseCountdownDurationMillis(opt: NativeObject): Long {
             val duration = opt.inquire(listOf("after", "countdown", "timeOffset", "duration", "runAfter"))
             val durationMillis = when {
                 duration.isJsNullish() -> parseDurationFieldsMillis(opt)
-                else -> parseDurationMillis(duration)
+                else -> parseDurationMillis(duration, opt)
             }
             return requirePositiveCountdownDuration(durationMillis)
         }
@@ -464,11 +492,11 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             return durationMillis
         }
 
-        private fun parseDurationMillis(duration: Any?): Long = when {
+        private fun parseDurationMillis(duration: Any?, owner: ScriptableObject): Long = when {
             duration.isJsNullish() -> 0L
             duration is Number -> coerceLongNumber(duration)
             duration is NativeObject -> parseDurationFieldsMillis(duration)
-            else -> parseDurationFieldsMillis(coerceObject(duration, newNativeObject()))
+            else -> parseDurationFieldsMillis(coerceObject(duration, newNativeObject(getDeclarationScope(owner))))
         }
 
         private fun parseDurationFieldsMillis(opt: NativeObject): Long {
@@ -549,8 +577,8 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             return timeFlag
         }
 
-        private fun taskFulfilled(scriptRuntime: ScriptRuntime, task: Any, options: NativeObject? = null): Any? {
-            val opt = coerceObject(options, newNativeObject())
+        private fun taskFulfilled(scriptRuntime: ScriptRuntime, task: Any?, options: NativeObject? = null): Any? {
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             var runnableResult: Any? = null
 
@@ -559,16 +587,16 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 runnableResult = when {
                     callback.isJsNullish() -> task
                     else -> {
-                        require(callback is BaseFunction) {
+                        require(callback is Callable) {
                             "Property \"callback\" for options must be a JavaScript Function instead of ${callback.jsBrief()}"
                         }
-                        callFunction(callback, opt, opt, arrayOf(task))
+                        callFunction(scriptRuntime, callback, scriptRuntime.topLevelScope, opt, arrayOf(task))
                     }
                 }
             }
 
             return when {
-                opt.inquire(listOf("isAsync", "async"), ::coerceBoolean, false) || isUiThread() -> {
+                shouldRunTaskCallbackAsync(opt) -> {
                     Threads.start(scriptRuntime, arrayOf(r))
                 }
                 else -> {
@@ -576,6 +604,10 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     runnableResult
                 }
             }
+        }
+
+        internal fun shouldRunTaskCallbackAsync(options: NativeObject): Boolean {
+            return options.inquire(listOf("isAsync", "async"), ::coerceBoolean, false)
         }
 
     }

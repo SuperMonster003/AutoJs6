@@ -29,6 +29,8 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
+import org.mozilla.javascript.LambdaConstructor
+import org.mozilla.javascript.LambdaFunction
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeJSON
@@ -46,6 +48,8 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.NOT_FOUND
 import org.mozilla.javascript.ScriptableObject.ensureScriptable
 import org.mozilla.javascript.ScriptableObject.ensureScriptableObject
+import org.mozilla.javascript.SerializableCallable
+import org.mozilla.javascript.SerializableConstructable
 import org.mozilla.javascript.Symbol
 import org.mozilla.javascript.TopLevel
 import org.mozilla.javascript.Undefined
@@ -56,11 +60,11 @@ import java.io.Serializable
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.math.BigInteger
+import java.util.IdentityHashMap
 import kotlin.math.floor
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import org.mozilla.javascript.Function as RhinoFunction
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 
 @Suppress("unused")
@@ -106,12 +110,32 @@ object RhinoUtils {
     fun Context.getOrCreateStandardObjects(): TopLevel {
         // Cache standard objects per Context to avoid repeated initStandardObjects().
         // zh-CN: 按 Context 缓存标准对象, 避免重复调用 initStandardObjects().
-        val cached = this.getThreadLocal(STANDARD_OBJECTS_KEY) as? TopLevel
+        val cached = getRegisteredStandardObjects()
         if (cached != null) return cached
         return TopLevelScope().also { created ->
             created.initStandardObjects(this, false)
-            this.putThreadLocal(STANDARD_OBJECTS_KEY, created)
+            registerStandardObjects(created)
         }
+    }
+
+    @JvmStatic
+    fun Context.registerStandardObjects(scope: TopLevel) {
+        putThreadLocal(STANDARD_OBJECTS_KEY, scope)
+    }
+
+    private fun Context.getRegisteredStandardObjects(): TopLevel? =
+        getThreadLocal(STANDARD_OBJECTS_KEY) as? TopLevel
+
+    @JvmStatic
+    fun Context.getCurrentTopCallScopeOrDefault(): VarScope = when {
+        RhinoScriptRuntime.hasTopCall(this) -> RhinoScriptRuntime.getTopCallScope(this)
+        else -> getRegisteredStandardObjects() ?: standardObjects
+    }
+
+    @JvmStatic
+    fun Context.getCurrentTopCallScopeOrFallback(): VarScope = when {
+        RhinoScriptRuntime.hasTopCall(this) -> RhinoScriptRuntime.getTopCallScope(this)
+        else -> getRegisteredStandardObjects() ?: standardObjects
     }
 
     @JvmStatic
@@ -119,7 +143,10 @@ object RhinoUtils {
         // Create a global singleton standard objects as a low-fidelity fallback.
         // zh-CN: 创建全局单例标准对象, 用作低保真兜底.
         try {
-            Context.enter().getOrCreateStandardObjects()
+            val cx = Context.enter()
+            TopLevelScope().apply {
+                initStandardObjects(cx, false)
+            }
         } finally {
             Context.exit()
         }
@@ -171,8 +198,8 @@ object RhinoUtils {
     fun callFunction(obj: Scriptable, name: String, paramsToFunction: Array<Any?>): Any? {
         val property = obj.prop(name)
         if (property == NOT_FOUND) throw IllegalArgumentException("Property $name not found on $obj")
-        if (property !is BaseFunction) throw IllegalArgumentException("Property $name on $obj must be a BaseFunction instead of ${property.jsBrief()}")
-        return callFunction(property, obj, obj, paramsToFunction)
+        if (property !is Callable) throw IllegalArgumentException("Property $name on $obj must be callable instead of ${property.jsBrief()}")
+        return callFunction(null, property, getDeclarationScope(obj), obj, paramsToFunction)
     }
 
     @JvmStatic
@@ -180,8 +207,8 @@ object RhinoUtils {
     fun callFunction(scriptRuntime: ScriptRuntime, obj: Scriptable, name: String, paramsToFunction: Array<Any?>): Any? {
         val property = obj.prop(name)
         if (property == NOT_FOUND) throw IllegalArgumentException("Property $name not found on $obj")
-        if (property !is BaseFunction) throw IllegalArgumentException("Property $name on $obj must be a BaseFunction instead of ${property.jsBrief()}")
-        return callFunction(scriptRuntime, property, obj, obj, paramsToFunction)
+        if (property !is Callable) throw IllegalArgumentException("Property $name on $obj must be callable instead of ${property.jsBrief()}")
+        return callFunction(scriptRuntime, property, getDeclarationScope(obj), obj, paramsToFunction)
     }
 
     @JvmStatic
@@ -232,17 +259,32 @@ object RhinoUtils {
         callFunction(null, func, scope, thisObj, args)
 
     @JvmStatic
+    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
+    fun callFunction(func: Callable, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? =
+        callFunction(null, func, scope?.let { getDeclarationScope(it) }, thisObj, args)
+
+    @JvmStatic
+    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
+    fun callFunction(func: Callable, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? =
+        callFunction(null, func, scope, thisObj, args)
+
+    @JvmStatic
     fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? =
         callFunction(scriptRuntime, func, scope?.let { getDeclarationScope(it) }, thisObj, args)
 
     @JvmStatic
-    fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? = withRhinoContext(scriptRuntime) { cx ->
+    fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? =
+        callFunction(scriptRuntime, func as Callable, scope, thisObj, args)
+
+    @JvmStatic
+    fun callFunction(scriptRuntime: ScriptRuntime?, func: Callable, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? = withRhinoContext(scriptRuntime) { cx ->
         try {
             // Prefer an existing scope to avoid repeatedly creating standard objects.
             // zh-CN: 优先使用已有的作用域, 避免反复创建标准对象.
+            val declarationScope = (func as? RhinoFunction)?.declarationScope
             val niceScope = when {
                 scope != null -> scope
-                func.parentScope != null -> func.parentScope
+                declarationScope != null -> declarationScope
                 scriptRuntime != null -> scriptRuntime.topLevelScope
                 else -> cx.getOrCreateStandardObjects()
             }
@@ -282,77 +324,180 @@ object RhinoUtils {
         funcName: String?,
         callFunc: Int,
         constructFunc: Int,
-    ) = object : InternalBaseFunction(funcName) {
+    ): BaseFunction = withFunctionCreationScope {
+        newBaseFunction(it, funcName, callFunc, constructFunc)
+    }
 
-        init {
-            checkFlagsConflict(callFunc, constructFunc)
+    @JvmStatic
+    fun newBaseFunction(
+        scope: VarScope,
+        funcName: String?,
+        callFunc: Int,
+        constructFunc: Int,
+    ): BaseFunction {
+        validateCallFlag(callFunc)
+        validateConstructFlag(constructFunc)
+        require(callFunc != NOT_CALLABLE || constructFunc != DEFAULT_CONSTRUCTOR) {
+            "BaseFunction ${funcName ?: "anonymous"} cannot have the flag \"NOT_CALLABLE\" simultaneously with the flag \"DEFAULT_CONSTRUCTOR\""
         }
-
-        override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
-            return super.callFlag(callFunc, cx, scope, thisObj, args)
+        val target = callableFromFlag(callFunc, funcName)
+        return when (constructFunc) {
+            NOT_CONSTRUCTABLE -> newLambdaFunction(scope, funcName, target)
+            DEFAULT_CONSTRUCTOR -> newLambdaConstructor(scope, funcName, target, defaultConstructorTarget(target))
+            else -> error("Unreachable construct flag: $constructFunc")
         }
-
-        override fun construct(cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
-            return super.constructFlag(constructFunc, cx, scope, args)
-        }
-
-    }.apply { init() }
+    }
 
     @JvmStatic
     fun newBaseFunction(
         funcName: String?,
         callFunc: Int,
         constructFunc: ((args: Array<out Any?>) -> Any?)?,
-    ) = object : InternalBaseFunction(funcName) {
+    ): BaseFunction = withFunctionCreationScope {
+        newBaseFunction(it, funcName, callFunc, constructFunc)
+    }
 
-        override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
-            return super.callFlag(callFunc, cx, scope, thisObj, args)
+    @JvmStatic
+    fun newBaseFunction(
+        scope: VarScope,
+        funcName: String?,
+        callFunc: Int,
+        constructFunc: ((args: Array<out Any?>) -> Any?)?,
+    ): BaseFunction {
+        validateCallFlag(callFunc)
+        val target = callableFromFlag(callFunc, funcName)
+        val targetConstructor = constructorTarget(funcName, constructFunc, target)
+        return when (callFunc) {
+            NOT_CALLABLE -> newLambdaConstructor(scope, funcName, targetConstructor)
+            DEFAULT_CALLER -> newLambdaConstructor(scope, funcName, target, targetConstructor)
+            else -> error("Unreachable call flag: $callFunc")
         }
-
-        override fun construct(cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
-            return super.constructFunc(constructFunc, cx, scope, args)
-        }
-
-    }.apply { init() }
+    }
 
     @JvmStatic
     fun newBaseFunction(
         funcName: String?,
         callFunc: ((args: Array<out Any?>) -> Any?)?,
         constructFunc: Int,
-    ) = object : InternalBaseFunction(funcName) {
+    ): BaseFunction = withFunctionCreationScope {
+        newBaseFunction(it, funcName, callFunc, constructFunc)
+    }
 
-        override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
-            return super.callFunc(callFunc, cx, scope, thisObj, args)
+    @JvmStatic
+    fun newBaseFunction(
+        scope: VarScope,
+        funcName: String?,
+        callFunc: ((args: Array<out Any?>) -> Any?)?,
+        constructFunc: Int,
+    ): BaseFunction {
+        validateConstructFlag(constructFunc)
+        val target = callable(callFunc)
+        return when (constructFunc) {
+            NOT_CONSTRUCTABLE -> newLambdaFunction(scope, funcName, target)
+            DEFAULT_CONSTRUCTOR -> newLambdaConstructor(scope, funcName, target, defaultConstructorTarget(target))
+            else -> error("Unreachable construct flag: $constructFunc")
         }
-
-        override fun construct(cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
-            return super.constructFlag(constructFunc, cx, scope, args)
-        }
-
-    }.apply { init() }
+    }
 
     @JvmStatic
     fun newBaseFunction(
         funcName: String?,
         callFunc: ((args: Array<out Any?>) -> Any?)?,
         constructFunc: ((args: Array<out Any?>) -> Any?)?,
-    ) = object : InternalBaseFunction(funcName) {
-
-        override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
-            return super.callFunc(callFunc, cx, scope, thisObj, args)
-        }
-
-        override fun construct(cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
-            return super.constructFunc(constructFunc, cx, scope, args)
-        }
-
-    }.apply { init() }
+    ): BaseFunction = withFunctionCreationScope {
+        newBaseFunction(it, funcName, callFunc, constructFunc)
+    }
 
     @JvmStatic
-    fun newObject(scope: VarScope) = newNativeObject().also {
-        setBuiltinProtoAndParent(it, scope, TopLevel.Builtins.Object)
+    fun newBaseFunction(
+        scope: VarScope,
+        funcName: String?,
+        callFunc: ((args: Array<out Any?>) -> Any?)?,
+        constructFunc: ((args: Array<out Any?>) -> Any?)?,
+    ): BaseFunction {
+        val target = callable(callFunc)
+        return newLambdaConstructor(scope, funcName, target, constructorTarget(funcName, constructFunc, target))
     }
+
+    private fun <R> withFunctionCreationScope(block: (VarScope) -> R): R =
+        withRhinoContext { cx -> block(cx.getCurrentTopCallScopeOrDefault()) }
+
+    private fun newLambdaFunction(scope: VarScope, funcName: String?, target: SerializableCallable): BaseFunction =
+        withRhinoContext {
+            LambdaFunction(scope, funcName ?: "anonymous", 0, target, false)
+        }
+
+    private fun newLambdaConstructor(
+        scope: VarScope,
+        funcName: String?,
+        target: SerializableCallable,
+        targetConstructor: SerializableConstructable,
+    ): BaseFunction = withRhinoContext {
+        LambdaConstructor(scope, funcName ?: "anonymous", 0, target, targetConstructor)
+    }
+
+    private fun newLambdaConstructor(
+        scope: VarScope,
+        funcName: String?,
+        targetConstructor: SerializableConstructable,
+    ): BaseFunction = withRhinoContext {
+        LambdaConstructor(scope, funcName ?: "anonymous", 0, LambdaConstructor.CONSTRUCTOR_NEW, targetConstructor)
+    }
+
+    private fun callable(callFunc: ((args: Array<out Any?>) -> Any?)?): SerializableCallable {
+        if (callFunc == null) return undefinedCallable()
+        return SerializableCallable { _, _, _, args -> callFunc.invoke(args) }
+    }
+
+    private fun callableFromFlag(callFunc: Int, funcName: String?): SerializableCallable = when (callFunc) {
+        NOT_CALLABLE -> SerializableCallable { _, _, _, _ ->
+            throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked as a function")
+        }
+        DEFAULT_CALLER -> undefinedCallable()
+        else -> throw IllegalArgumentException("Unknown flag $callFunc for argument callFunc of RhinoUtils.newBaseFunction")
+    }
+
+    private fun undefinedCallable(): SerializableCallable =
+        SerializableCallable { _, _, _, _ -> UNDEFINED }
+
+    private fun defaultConstructorTarget(target: SerializableCallable): SerializableConstructable =
+        SerializableConstructable { cx, scope, args ->
+            when (val result = target.call(cx, scope, Undefined.SCRIPTABLE_UNDEFINED, args)) {
+                is Scriptable -> result
+                else -> NativeObject()
+            }
+        }
+
+    private fun constructorTarget(
+        funcName: String?,
+        constructFunc: ((args: Array<out Any?>) -> Any?)?,
+        fallbackTarget: SerializableCallable,
+    ): SerializableConstructable = SerializableConstructable { cx, scope, args ->
+        val result = if (constructFunc == null) DEFAULT_CONSTRUCTOR else constructFunc.invoke(args)
+        when (result) {
+            DEFAULT_CONSTRUCTOR -> defaultConstructorTarget(fallbackTarget).construct(cx, scope, args)
+            is Int -> throw IllegalArgumentException("Unknown flag $result for constructor function ${funcName ?: "anonymous"}")
+            is Scriptable -> result
+            else -> throw IllegalArgumentException(
+                "Result of constructor for ${funcName ?: "anonymous"} must be a Rhino Scriptable instead of ${result.jsBrief()}",
+            )
+        }
+    }
+
+    private fun validateCallFlag(callFunc: Int) {
+        require(callFunc == NOT_CALLABLE || callFunc == DEFAULT_CALLER) {
+            "Unknown flag $callFunc for argument callFunc of RhinoUtils.newBaseFunction"
+        }
+    }
+
+    private fun validateConstructFlag(constructFunc: Int) {
+        require(constructFunc == NOT_CONSTRUCTABLE || constructFunc == DEFAULT_CONSTRUCTOR) {
+            "Unknown flag $constructFunc for argument constructFunc of RhinoUtils.newBaseFunction"
+        }
+    }
+
+    @JvmStatic
+    fun newObject(scope: VarScope) = newNativeObject(scope)
 
     @JvmStatic
     fun newObject(scope: Scriptable): NativeObject {
@@ -429,6 +574,46 @@ object RhinoUtils {
         is Wrapper -> unwrap(o.unwrap())
         is Unit -> UNDEFINED
         else -> o
+    }
+
+    @JvmStatic
+    fun toJsValue(scope: VarScope, value: Any?): Any? = withRhinoContext { cx ->
+        toJsValue(cx, scope, value, IdentityHashMap())
+    }
+
+    private fun toJsValue(
+        cx: Context,
+        scope: VarScope,
+        value: Any?,
+        seen: IdentityHashMap<Any, Scriptable>,
+    ): Any? = when (value) {
+        null -> null
+        is Scriptable, is String, is Number, is Boolean, is BigInteger, is Symbol, is Undefined -> value
+        is ConsString -> Context.toString(value)
+        is Unit -> UNDEFINED
+        NOT_FOUND -> UNDEFINED
+        is Array<*> -> seen[value] ?: (cx.newArray(scope, value.size) as NativeArray).also { result ->
+            seen[value] = result
+            value.forEachIndexed { index, item ->
+                result.put(index, result, toJsValue(cx, scope, item, seen))
+            }
+        }
+        is List<*> -> seen[value] ?: (cx.newArray(scope, value.size) as NativeArray).also { result ->
+            seen[value] = result
+            value.forEachIndexed { index, item ->
+                result.put(index, result, toJsValue(cx, scope, item, seen))
+            }
+        }
+        is Map<*, *> -> when {
+            value.keys.any { it !is String } -> Context.javaToJS(value, scope)
+            else -> seen[value] ?: newObject(scope).also { result ->
+                seen[value] = result
+                value.forEach { (key, item) ->
+                    result.put(key as String, result, toJsValue(cx, scope, item, seen))
+                }
+            }
+        }
+        else -> Context.javaToJS(value, scope)
     }
 
     @JvmStatic
@@ -515,8 +700,8 @@ object RhinoUtils {
 
     @JvmStatic
     fun flatten(input: Any?): List<Any?> = when (input) {
-        is Collection<*> -> input.flatMap { flatten(it ?: return@flatMap emptyList()) }
-        is Array<*> -> input.flatMap { flatten(it ?: return@flatMap emptyList()) }
+        is Collection<*> -> input.flatMap { flatten(it) }
+        is Array<*> -> input.flatMap { flatten(it) }
         else -> listOf(input)
     }
 
@@ -578,9 +763,24 @@ object RhinoUtils {
 
     @JvmStatic
     @JvmOverloads
+    fun coerceCallable(o: Any?, def: Callable? = null): Callable = when {
+        !o.isJsNullish() -> {
+            require(o is Callable) { "Failed to coerce ${o.jsBrief()} into a JavaScript function" }
+            o
+        }
+        else -> {
+            require(!def.isJsNullish()) { "Failed to coerce nullish into a JavaScript function" }
+            def!!
+        }
+    }
+
+    @JvmStatic
+    @JvmOverloads
     fun coerceRunnable(scriptRuntime: ScriptRuntime, o: Any?, def: Runnable? = null): Runnable = when {
         !o.isJsNullish() -> when (o) {
-            is BaseFunction -> Runnable { callFunction(scriptRuntime, o, arrayOf()) }
+            is Callable -> Runnable {
+                callFunction(scriptRuntime, o, scriptRuntime.topLevelScope, Undefined.SCRIPTABLE_UNDEFINED, emptyArray())
+            }
             is Runnable -> o
             else -> throw IllegalArgumentException("Failed to coerce ${o.jsBrief()} into a Runnable")
         }
@@ -628,11 +828,41 @@ object RhinoUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun coerceIntNumber(o: Any?, def: Number? = null) = coerceNumber(o, def).roundToInt()
+    fun coerceIntNumber(o: Any?, def: Number? = null): Int {
+        numberInput(o, def).let { if (it is Int) return it }
+        return coerceIntegralNumber(o, def, Int.MIN_VALUE.toDouble(), Int.MAX_VALUE.toDouble(), "Int").toInt()
+    }
 
     @JvmStatic
     @JvmOverloads
-    fun coerceLongNumber(o: Any?, def: Number? = null) = coerceNumber(o, def).roundToLong()
+    fun coerceLongNumber(o: Any?, def: Number? = null): Long {
+        numberInput(o, def).let { if (it is Long) return it }
+        return coerceIntegralNumber(o, def, MIN_LONG_VALUE_AS_DOUBLE, MAX_LONG_VALUE_AS_DOUBLE, "Long").toLong()
+    }
+
+    private fun numberInput(o: Any?, def: Number?): Any? = when {
+        !o.isJsNullish() -> o
+        !def.isJsNullish() -> def
+        else -> null
+    }
+
+    private fun coerceIntegralNumber(o: Any?, def: Number?, min: Double, max: Double, target: String): Double {
+        val number = coerceNumber(o, def)
+        require(!number.isNaN() && !number.isInfinite()) {
+            "Failed to coerce ${numberInput(o, def).jsBrief()} into a finite $target number"
+        }
+        val truncated = when {
+            number > 0.0 -> floor(number)
+            else -> kotlin.math.ceil(number)
+        }
+        require(truncated in min..max) {
+            "Failed to coerce ${numberInput(o, def).jsBrief()} into a $target number without overflow"
+        }
+        return truncated
+    }
+
+    private val MAX_LONG_VALUE_AS_DOUBLE = Double.fromBits(0x43dfffffffffffffL)
+    private val MIN_LONG_VALUE_AS_DOUBLE = Double.fromBits(-4332462841530417152L)
 
     @JvmStatic
     @JvmOverloads
@@ -771,8 +1001,7 @@ object RhinoUtils {
     @JvmOverloads
     fun js_object_create(o: Scriptable? = null, properties: ScriptableObject? = null): NativeObject = withRhinoContext { cx ->
         val topLevel = cx.getDeclarationScopeOrDefault(o, properties)
-        newNativeObject().also {
-            it.parentScope = topLevel
+        newNativeObject(topLevel).also {
             it.prototype = when (o) {
                 null -> null
                 else -> ensureScriptable(o)
@@ -798,6 +1027,7 @@ object RhinoUtils {
         return when {
             protoObj is Symbol -> throw typeErrorById("msg.arg.not.object", js_typeof(protoObj))
             o !is ScriptableObject -> o
+            o.prototype === protoObj -> o
             !o.isExtensible -> throw typeErrorById("msg.not.extensible")
             // cycle detection
             else -> {
@@ -823,28 +1053,25 @@ object RhinoUtils {
     fun js_object_getOwnPropertyNames(o: Scriptable): NativeArray = withRhinoContext { cx ->
         val topLevel = getDeclarationScope(o)
         val obj = ensureScriptableObject(toObject(cx, topLevel, o))
-        // val ids = obj.getIds(true, false)
-        // ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
-        // cx.newArray(topLevel, ids) as NativeArray
-        try {
-            val map = obj.startCompoundOp(false)
-            val ids = obj.getIds(map, true, false)
-            ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
-            cx.newArray(topLevel, ids) as NativeArray
-        } catch (_: Exception) {
-            cx.newArray(topLevel, emptyArray()) as NativeArray
+        val map = obj.startCompoundOp(false)
+        val ids = try {
+            obj.getIds(map, true, false)
+        } finally {
+            map.close()
         }
+        ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
+        cx.newArray(topLevel, ids) as NativeArray
     }
 
     @JvmStatic
-    fun js_object_getOwnPropertyDescriptor(value: ScriptableObject, key: Any): ScriptableObject = withRhinoContext { cx ->
+    fun js_object_getOwnPropertyDescriptor(value: ScriptableObject, key: Any): Any = withRhinoContext { cx ->
         val scope = getDeclarationScope(value)
         val obj = ensureScriptableObject(toObject(cx, scope, value))
-        obj.getOwnPropertyDescriptor(cx, key).toScriptableObject(scope)
+        obj.getOwnPropertyDescriptor(cx, key)?.toScriptableObject(scope) ?: UNDEFINED
     }
 
     @JvmStatic
-    fun js_function_bind(scope: Scriptable? = null, targetFunction: Callable, vararg args: Scriptable): BoundFunction = withRhinoContext { cx ->
+    fun js_function_bind(scope: Scriptable? = null, targetFunction: Callable, vararg args: Any?): BoundFunction = withRhinoContext { cx ->
         val topLevel = cx.getDeclarationScopeOrDefault(scope)
         val argc: Int = args.size
         val boundThis: Scriptable?
@@ -860,7 +1087,20 @@ object RhinoUtils {
                 boundArgs = emptyArgs
             }
         }
-        BoundFunction(cx, topLevel, targetFunction, boundThis, boundArgs)
+        when {
+            RhinoScriptRuntime.hasTopCall(cx) -> BoundFunction(cx, topLevel, targetFunction, boundThis, boundArgs)
+            else -> {
+                val global = ScriptableObject.getTopLevelScope(topLevel)
+                RhinoScriptRuntime.doTopCall(
+                    Callable { _, _, _, _ -> BoundFunction(cx, topLevel, targetFunction, boundThis, boundArgs) },
+                    cx,
+                    global,
+                    global.globalThis,
+                    emptyArgs,
+                    false,
+                ) as BoundFunction
+            }
+        }
     }
 
     @JvmStatic
@@ -955,18 +1195,6 @@ object RhinoUtils {
 
     fun now() = System.currentTimeMillis()
 
-    private fun parseConstructFunc(constructFunc: Int, funcName: String?): ((Array<out Any?>) -> Nothing)? = when (constructFunc) {
-        NOT_CONSTRUCTABLE -> { _: Array<out Any?> -> throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked with \"new\" operator") }
-        DEFAULT_CONSTRUCTOR -> null
-        else -> throw IllegalArgumentException("Unknown flag $constructFunc for argument constructFunc of RhinoUtils.newBaseFunction")
-    }
-
-    private fun parseCallFunc(callFunc: Int, funcName: String?): ((Array<out Any?>) -> Nothing)? = when (callFunc) {
-        NOT_CALLABLE -> { _: Array<out Any?> -> throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked as a function") }
-        DEFAULT_CALLER -> null
-        else -> throw IllegalArgumentException("Unknown flag $callFunc for argument callFunc of RhinoUtils.newBaseFunction")
-    }
-
     private fun isEnumerable(key: String, obj: Any): Boolean {
         return obj !is ScriptableObject || obj.getAttributes(key) and DONTENUM == 0
     }
@@ -975,18 +1203,22 @@ object RhinoUtils {
         return obj !is ScriptableObject || obj.getAttributes(index) and DONTENUM == 0
     }
 
-    internal fun initNewBaseFunction(baseFunction: BaseFunction) {
+    internal fun initNewBaseFunction(baseFunction: BaseFunction) = withFunctionCreationScope { scope ->
+        initNewBaseFunction(scope, baseFunction)
+    }
+
+    internal fun initNewBaseFunction(scope: VarScope, baseFunction: BaseFunction) = withRhinoContext { cx ->
         // @Caution by SuperMonster003 on Nov 9, 2024.
         //  ! This will cause severely memory leak.
         //  ! zh-CN: 这将导致严重的内存泄漏.
         //  # baseFunction.exportAsJSClass(BaseFunction.MAX_PROTOTYPE_ID, ImporterTopLevel(Context.getCurrentContext()), false)
 
-        baseFunction.prototype = functionPrototype
+        RhinoScriptRuntime.setFunctionProtoAndParent(baseFunction, cx, scope)
 
         val prototypeObject = baseFunction["prototype"]
         when {
             prototypeObject.isJsNullish() -> {
-                baseFunction.defineProp("prototype", newNativeObject().also { o ->
+                baseFunction.defineProp("prototype", newObject(scope).also { o ->
                     o.defineProp("constructor", baseFunction, DONTENUM)
                 }, DONTENUM)
             }
@@ -997,36 +1229,56 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    fun initNativeObjectPrototype(o: NativeObject): NativeObject {
-        return o.apply { prototype = objectPrototype }
+    fun initNativeObjectPrototype(o: NativeObject): NativeObject = withRhinoContext { cx ->
+        initNativeObjectPrototype(cx.getCurrentTopCallScopeOrFallback(), o)
     }
 
     @JvmStatic
-    fun initNativeArrayPrototype(a: NativeArray): NativeArray {
-        return a.apply { prototype = arrayPrototype }
+    fun initNativeObjectPrototype(scope: VarScope, o: NativeObject): NativeObject =
+        o.apply { setBuiltinProtoAndParent(this, scope, TopLevel.Builtins.Object) }
+
+    @JvmStatic
+    fun initNativeArrayPrototype(a: NativeArray): NativeArray = withRhinoContext { cx ->
+        initNativeArrayPrototype(cx.getCurrentTopCallScopeOrFallback(), a)
     }
+
+    @JvmStatic
+    fun initNativeArrayPrototype(scope: VarScope, a: NativeArray): NativeArray =
+        a.apply { setBuiltinProtoAndParent(this, scope, TopLevel.Builtins.Array) }
 
     @JvmStatic
     fun newNativeObject() = initNativeObjectPrototype(NativeObject())
+
+    @JvmStatic
+    fun newNativeObject(scope: VarScope) = initNativeObjectPrototype(scope, NativeObject())
 
     @JvmStatic
     @JvmOverloads
     fun newNativeArray(lengthArg: Long = 0) = initNativeArrayPrototype(NativeArray(lengthArg))
 
     @JvmStatic
+    @JvmOverloads
+    fun newNativeArray(scope: VarScope, lengthArg: Long = 0) =
+        initNativeArrayPrototype(scope, NativeArray(lengthArg))
+
+    @JvmStatic
     fun newNativeArray(array: Array<Any?>) = initNativeArrayPrototype(NativeArray(array))
+
+    @JvmStatic
+    fun newNativeArray(scope: VarScope, array: Array<Any?>) =
+        initNativeArrayPrototype(scope, NativeArray(array))
 
     @JvmStatic
     fun hashCodeOfScriptable(other: Any?): Int? {
         if (other !is Scriptable) return null
         val getClassFunc = other["getClass"]
         if (getClassFunc is BaseFunction) {
-            val clazz = callFunction(getClassFunc, emptyArray()).jsUnwrapped()
+            val clazz = callFunction(getClassFunc, other, other, emptyArray()).jsUnwrapped()
             if (clazz != UiObjectCollection::class.java) return null
         }
         val hashCodeFunc = other["hashCode"]
         if (hashCodeFunc is BaseFunction) {
-            val hashCode = callFunction(hashCodeFunc, emptyArray()).jsUnwrapped()
+            val hashCode = callFunction(hashCodeFunc, other, other, emptyArray()).jsUnwrapped()
             if (hashCode is Number) return hashCode.toInt()
         }
         return null
@@ -1100,15 +1352,19 @@ object RhinoUtils {
         }
 
         internal fun constructFunc(constructFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
+            val niceScope = scope ?: parentScope ?: cx?.getOrCreateStandardObjects() ?: standardObjects
             return when (constructFunc) {
-                null -> super.construct(cx, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, args)
+                null -> super.construct(cx, niceScope, args)
                 else -> when (val result = constructFunc.invoke(args)) {
                     is Int -> constructFlag(result, cx, scope, args)
                     else -> result.also {
                         require(it is Scriptable) { "Result of constructor for ${getFunctionName()} must be a Rhino Scriptable instead of ${it.jsBrief()}" }
                     } as Scriptable
                 }
-            }.also { it.prototype = prototype }
+            }.also {
+                it.prototype = getClassPrototype()
+                it.parentScope = niceScope
+            }
         }
 
         internal fun callFlag(flag: Int, cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? = when (flag) {
@@ -1134,11 +1390,6 @@ object RhinoUtils {
         override fun getFunctionName() = funcName ?: "anonymous"
 
         override fun toString(): String = "function ${funcName ?: ""}() { ... }"
-
-        override fun getDefaultValue(typeHint: Class<*>?) = when (typeHint) {
-            RhinoScriptRuntime.StringClass -> toString()
-            else -> this
-        }
 
     }
 

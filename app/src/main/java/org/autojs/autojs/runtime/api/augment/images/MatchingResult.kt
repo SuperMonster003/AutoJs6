@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.augment.images
 
 import org.autojs.autojs.core.image.TemplateMatching
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
-import kotlin.math.roundToInt
 
 class MatchingResult(private val matchedList: List<TemplateMatching.Match>) {
 
@@ -22,7 +21,7 @@ class MatchingResult(private val matchedList: List<TemplateMatching.Match>) {
     fun worst() = findMax(comparators["worst"])
 
     fun findMax(comparator: Comparator<TemplateMatching.Match>?): TemplateMatching.Match? {
-        return comparator?.let { matchedList.maxWithOrNull(it) }
+        return comparator?.let { matchedList.minWithOrNull(it) }
     }
 
     fun sortBy(compareFn: (TemplateMatching.Match, TemplateMatching.Match) -> Int): MatchingResult {
@@ -36,9 +35,13 @@ class MatchingResult(private val matchedList: List<TemplateMatching.Match>) {
             val tmpComparator = comparators[s] ?: throw Exception("Unknown direction '$s' in '$direction'")
             comparator = when (comparator) {
                 null -> tmpComparator
-                else -> { l, r ->
-                    val cmpValue = comparator?.invoke(l, r) ?: 0
-                    if (cmpValue == 0) tmpComparator(l, r) else cmpValue
+                else -> {
+                    val previousComparator = requireNotNull(comparator)
+                    val combinedComparator: (TemplateMatching.Match, TemplateMatching.Match) -> Int = { l, r ->
+                        val cmpValue = previousComparator(l, r)
+                        if (cmpValue == 0) tmpComparator(l, r) else cmpValue
+                    }
+                    combinedComparator
                 }
             }
         }
@@ -49,12 +52,12 @@ class MatchingResult(private val matchedList: List<TemplateMatching.Match>) {
     companion object {
 
         private val comparators = mapOf<String, (TemplateMatching.Match, TemplateMatching.Match) -> Int>(
-            "left" to { l, r -> (l.point.x - r.point.x).roundToInt() },
-            "right" to { l, r -> (r.point.x - l.point.x).roundToInt() },
-            "top" to { t, b -> (t.point.y - b.point.y).roundToInt() },
-            "bottom" to { t, b -> (b.point.y - t.point.y).roundToInt() },
-            "best" to { a, b -> (a.similarity - b.similarity).roundToInt() },
-            "worst" to { a, b -> (b.similarity - a.similarity).roundToInt() },
+            "left" to { l, r -> l.point.x.compareTo(r.point.x) },
+            "right" to { l, r -> r.point.x.compareTo(l.point.x) },
+            "top" to { t, b -> t.point.y.compareTo(b.point.y) },
+            "bottom" to { t, b -> b.point.y.compareTo(t.point.y) },
+            "best" to { a, b -> b.similarity.compareTo(a.similarity) },
+            "worst" to { a, b -> a.similarity.compareTo(b.similarity) },
         )
 
     }

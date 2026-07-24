@@ -5,6 +5,7 @@ package org.autojs.autojs.runtime.api.augment.http
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.autojs.autojs.annotation.RhinoFunctionBody
@@ -32,12 +33,13 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceObject
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.handleAsyncOperation
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
-import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject.DONTENUM
@@ -53,6 +55,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
     )
 
     override val selfAssignmentFunctions = listOf(
+        ::client.name,
         ::buildRequest.name,
         ::request.name,
         ::requestAsync.name,
@@ -110,6 +113,12 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun client(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OkHttpClient = ensureArgumentsIsEmpty(args) {
+            scriptRuntime.http.okhttp.client()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun buildRequest(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Request = ensureArgumentsLengthInRange(args, 1..2) {
             val (url, options) = it
             buildRequestRhinoWithRuntime(scriptRuntime, url, options)
@@ -137,7 +146,9 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun requestRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): Any {
 
             val cont: Creator? = when {
-                callback.isJsFunction() && isUiThread() && Continuation.isEnabled(scriptRuntime) -> Continuation.createRhinoWithRuntime(scriptRuntime)
+                shouldUseContinuation(callback.isJsFunction(), isUiThread(), Continuation.isEnabled(scriptRuntime)) -> {
+                    Continuation.createRhinoWithRuntime(scriptRuntime)
+                }
                 else -> null
             }
 
@@ -150,25 +161,46 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             scriptRuntime.loopers.waitWhenIdle(true)
             prepared.call.enqueue(object : Callback {
                 override fun onResponse(call: Call, response: Response) {
-                    val wrappedResponse = wrapResponse(scriptRuntime, response, prepared.cacheBody, prepared.cacheThreshold)
-                    cont?.resume(wrappedResponse)
-                    if (callback is BaseFunction) {
-                        scriptRuntime.bridges.call(callback, callback, arrayOf(wrappedResponse, null))
+                    try {
+                        val wrappedResponse = try {
+                            wrapResponse(scriptRuntime, response, prepared.cacheBody, prepared.cacheThreshold)
+                        } catch (e: Throwable) {
+                            response.close()
+                            cont?.resumeError(e)
+                            if (callback is Callable) {
+                                scriptRuntime.bridges.call(callback, callback, arrayOf(null, e))
+                            }
+                            return
+                        }
+                        cont?.resume(wrappedResponse)
+                        if (callback is Callable) {
+                            scriptRuntime.bridges.call(callback, callback, arrayOf(wrappedResponse, null))
+                        }
+                    } finally {
+                        scriptRuntime.loopers.waitWhenIdle(false)
                     }
-                    scriptRuntime.loopers.waitWhenIdle(false)
                 }
 
                 override fun onFailure(call: Call, e: IOException) {
-                    cont?.resumeError(e)
-                    if (callback is BaseFunction) {
-                        scriptRuntime.bridges.call(callback, callback, arrayOf(null, e))
+                    try {
+                        cont?.resumeError(e)
+                        if (callback is Callable) {
+                            scriptRuntime.bridges.call(callback, callback, arrayOf(null, e))
+                        }
+                    } finally {
+                        scriptRuntime.loopers.waitWhenIdle(false)
                     }
-                    scriptRuntime.loopers.waitWhenIdle(false)
                 }
             })
 
-            cont?.await()
+            if (cont != null) {
+                return requireNotNull(cont.await()) { "HTTP continuation resumed without a response" }
+            }
             return UNDEFINED
+        }
+
+        internal fun shouldUseContinuation(hasCallback: Boolean, isUiThread: Boolean, isContinuationEnabled: Boolean): Boolean {
+            return !hasCallback && isUiThread && isContinuationEnabled
         }
 
         @JvmStatic
@@ -200,7 +232,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
                         // Optional: if user provided callback, call it on UI thread.
                         // zh-CN: 可选: 如果用户提供了 callback, 则在 UI 线程调用.
-                        if (callback is BaseFunction) {
+                        if (callback is Callable) {
                             scriptRuntime.bridges.call(callback, callback, arrayOf(wrapped, null))
                         }
                         wrapped
@@ -234,7 +266,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun headRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): Any {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.head must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_HEAD)
             return requestRhinoWithRuntime(scriptRuntime, url, niceOptions, callback)
@@ -244,7 +276,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun headAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): NativeObject {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.headAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_HEAD)
             return requestAsyncRhinoWithRuntime(scriptRuntime, url, niceOptions, callback)
@@ -261,7 +293,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun getAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): NativeObject {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.getAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_GET)
             return requestAsyncRhinoWithRuntime(scriptRuntime, url, niceOptions, callback)
@@ -271,7 +303,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun getRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): Any {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.get must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_GET)
             return requestRhinoWithRuntime(scriptRuntime, url, niceOptions, callback)
@@ -295,7 +327,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun putRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): Any {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.put must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_PUT)
             putIfAbsent(niceOptions, KEY_CONTENT_TYPE to DEFAULT_CONTENT_TYPE)
@@ -307,7 +339,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun putAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): NativeObject {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.putAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_PUT)
             putIfAbsent(niceOptions, KEY_CONTENT_TYPE to DEFAULT_CONTENT_TYPE)
@@ -347,7 +379,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun deleteRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): Any {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.delete must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_DELETE)
             putIfAbsent(niceOptions, KEY_CONTENT_TYPE to DEFAULT_CONTENT_TYPE)
@@ -359,7 +391,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun deleteAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): NativeObject {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.deleteAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_DELETE)
             putIfAbsent(niceOptions, KEY_CONTENT_TYPE to DEFAULT_CONTENT_TYPE)
@@ -385,7 +417,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun postAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): NativeObject {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_POST)
             putIfAbsent(niceOptions, KEY_CONTENT_TYPE to DEFAULT_CONTENT_TYPE)
@@ -397,7 +429,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun postRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): Any {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.post must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_POST)
             putIfAbsent(niceOptions, KEY_CONTENT_TYPE to DEFAULT_CONTENT_TYPE)
@@ -423,7 +455,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun postJsonAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any?, options: Any? = null, callback: Any? = null): NativeObject {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postJsonAsync must be a JavaScript Object" }
             put(niceOptions, KEY_CONTENT_TYPE to Mime.APPLICATION_JSON)
             return postAsyncRhinoWithRuntime(scriptRuntime, url, data, niceOptions, callback)
@@ -433,7 +465,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun postJsonRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any?, options: Any? = null, callback: Any? = null): Any {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postJson] must be a JavaScript Object" }
             put(niceOptions, KEY_CONTENT_TYPE to Mime.APPLICATION_JSON)
             return postRhinoWithRuntime(scriptRuntime, url, data, niceOptions, callback)
@@ -457,7 +489,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun postMultipartAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, files: Any?, options: Any? = null, callback: Any? = null): NativeObject {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postMultipartAsync must be a JavaScript Object" }
             listOf(
                 KEY_METHOD to METHOD_POST,
@@ -471,7 +503,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmOverloads
         @RhinoFunctionBody
         fun postMultipartRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, files: Any?, options: Any? = null, callback: Any? = null): Any {
-            val niceOptions = if (options.isJsNullish()) newNativeObject() else options
+            val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postMultipart] must be a JavaScript Object" }
             listOf(
                 KEY_METHOD to METHOD_POST,
@@ -485,7 +517,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             when (options.prop(KEY_CONTENT_TYPE)) {
                 DEFAULT_CONTENT_TYPE -> {
                     val builder = FormBody.Builder()
-                    coerceObject(data, newNativeObject()).forEach { (key, value) ->
+                    coerceObject(data, newNativeObject(getDeclarationScope(options))).forEach { (key, value) ->
                         builder.add(coerceString(key), Context.toString(value))
                     }
                     options.put(KEY_BODY, options, builder.build())
@@ -509,7 +541,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
             // Normalize options as a NativeObject.
             // zh-CN: 将 options 规范化为 NativeObject.
-            val opt = coerceObject(options, newNativeObject())
+            val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
 
             // Apply OkHttp runtime configs (retries/client builder).
             // zh-CN: 应用 OkHttp 运行时配置 (重试/Client Builder).

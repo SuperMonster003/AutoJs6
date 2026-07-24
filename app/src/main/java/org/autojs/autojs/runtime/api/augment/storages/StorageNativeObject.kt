@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.augment.storages
 
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
 import org.autojs.autojs.core.storage.LocalStorage
-import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.api.StringReadable
@@ -68,7 +67,11 @@ class StorageNativeObject(@JvmField val name: String) : NativeObject(), StringRe
         fun get(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Any? = ensureArgumentsLengthInRange(args, 1..2) { argList ->
             var (key, def) = argList
             if (argList.size == 1) def = UNDEFINED
-            requireInstanceForBlock(thisObj, ::get.name) { sto -> sto.getString(coerceString(key), null)?.let { js_json_parse(it).takeUnless { o -> o.isJsNullish() } } ?: def }
+            requireInstanceForBlock(thisObj, ::get.name) { sto -> parseStoredValue(sto.getString(coerceString(key), null), def) }
+        }
+
+        internal fun parseStoredValue(serialized: String?, defaultValue: Any?): Any? {
+            return if (serialized == null) defaultValue else js_json_parse(serialized)
         }
 
         @JvmStatic
@@ -101,32 +104,38 @@ class StorageNativeObject(@JvmField val name: String) : NativeObject(), StringRe
 
         @JvmStatic
         @RhinoStandardFunctionInterface
-        fun contains(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): StorageNativeObject = ensureArgumentsOnlyOne(args) { key ->
-            requireInstanceForSelf(thisObj, ::contains.name) { sto -> sto.contains(coerceString(key)) }
+        fun contains(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Boolean = ensureArgumentsOnlyOne(args) { key ->
+            requireInstanceForBlock(thisObj, ::contains.name) { sto -> sto.contains(coerceString(key)) }
         }
 
         @JvmStatic
         @RhinoStandardFunctionInterface
-        fun clear(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): StorageNativeObject = ensureArgumentsIsEmpty(args) {
-            requireInstanceForSelf(thisObj, ::clear.name) { sto -> sto.clear() }
+        fun clear(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Undefined = ensureArgumentsIsEmpty(args) {
+            requireInstanceForBlock(thisObj, ::clear.name) { sto -> sto.clear() }
+            UNDEFINED
         }
 
         @JvmStatic
         @RhinoStandardFunctionInterface
-        fun clearSync(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): StorageNativeObject = ensureArgumentsIsEmpty(args) {
-            requireInstanceForSelf(thisObj, ::clearSync.name) { sto -> sto.clearSync() }
+        fun clearSync(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Undefined = ensureArgumentsIsEmpty(args) {
+            requireInstanceForBlock(thisObj, ::clearSync.name) { sto -> sto.clearSync() }
+            UNDEFINED
         }
 
         @JvmStatic
         @RhinoStandardFunctionInterface
-        fun selfRemove(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): StorageNativeObject = ensureArgumentsOnlyOne(args) { name ->
-            requireInstanceForSelf(thisObj, ::selfRemove.name) { Storages.removeRhino(name) }
+        fun selfRemove(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): StorageNativeObject = ensureArgumentsIsEmpty(args) {
+            requireInstanceForSelf(thisObj, ::selfRemove.name) {
+                Storages.removeRhino((thisObj as StorageNativeObject).name)
+            }
         }
 
         @JvmStatic
         @RhinoStandardFunctionInterface
-        fun selfRemoveSync(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): StorageNativeObject = ensureArgumentsOnlyOne(args) { name ->
-            requireInstanceForSelf(thisObj, ::selfRemoveSync.name) { Storages.removeSyncRhino(name) }
+        fun selfRemoveSync(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): StorageNativeObject = ensureArgumentsIsEmpty(args) {
+            requireInstanceForSelf(thisObj, ::selfRemoveSync.name) {
+                Storages.removeSyncRhino((thisObj as StorageNativeObject).name)
+            }
         }
 
     }

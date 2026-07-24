@@ -2,8 +2,7 @@ package org.autojs.autojs.runtime.api
 
 import org.autojs.autojs.runtime.ScriptRuntime
 
-@Suppress("UNUSED_PARAMETER")
-class Scale(scriptRuntime: ScriptRuntime) {
+class Scale @JvmOverloads constructor(@Suppress("UNUSED_PARAMETER") scriptRuntime: ScriptRuntime? = null) {
 
     private var privateBaseX = 720
     private var privateBaseY = 1280
@@ -15,8 +14,8 @@ class Scale(scriptRuntime: ScriptRuntime) {
         get() = privateBaseX
         set(value) {
             ensureBase(value)
-            privateBaseX = value
             ensureBaseXSetOnlyOnce()
+            privateBaseX = value
             baseXState = true
         }
 
@@ -24,14 +23,10 @@ class Scale(scriptRuntime: ScriptRuntime) {
         get() = privateBaseY
         set(value) {
             ensureBase(value)
-            privateBaseY = value
             ensureBaseYSetOnlyOnce()
+            privateBaseY = value
             baseYState = true
         }
-
-    private fun ensureBase(o: Int) {
-        require(o > 0) { "Scale base \"$o\" must be a positive integer" }
-    }
 
     private fun ensureBaseXSetOnlyOnce() {
         require(!baseXState) { "Scale base X could be set only once, $baseX has been set as the base" }
@@ -43,6 +38,16 @@ class Scale(scriptRuntime: ScriptRuntime) {
 
     fun ensureBasesConsistent() {
         require(baseXState == baseYState) { "Scale bases must be consistent, { x: ${baseXState}, y: $baseYState }" }
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun ensureBase(base: Int): Int {
+            require(base > 0) { "Scale base \"$base\" must be a positive integer" }
+            return base
+        }
+
     }
 
 }

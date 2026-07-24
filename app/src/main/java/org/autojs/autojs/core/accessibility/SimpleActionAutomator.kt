@@ -4,6 +4,7 @@ package org.autojs.autojs.core.accessibility
 
 import android.accessibilityservice.AccessibilityService.GestureResultCallback
 import android.accessibilityservice.GestureDescription
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Build
@@ -12,6 +13,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import org.autojs.autojs.annotation.ScriptInterface
@@ -140,6 +142,29 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
 
     @ScriptInterface
     fun headsethook() = mGlobalActionAutomator.headsethook()
+
+    @ScriptInterface
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun switchToInputMethod(packageName: String): Boolean {
+        ScriptRuntime.requiresApi(Build.VERSION_CODES.R)
+        val inputMethodManager = ScriptRuntime.applicationContext
+            .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethod = inputMethodManager.enabledInputMethodList
+            .firstOrNull { it.packageName == packageName }
+            ?: return false
+        return switchToInputMethodWithId(inputMethod.id)
+    }
+
+    @ScriptInterface
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun switchToInputMethodWithId(inputMethodId: String): Boolean {
+        ScriptRuntime.requiresApi(Build.VERSION_CODES.R)
+        ensureService()
+        return accessibilityBridge.service
+            ?.softKeyboardController
+            ?.switchToInputMethod(inputMethodId)
+            ?: false
+    }
 
     @ScriptInterface
     fun accessibilityButton() = mGlobalActionAutomator.accessibilityButton()

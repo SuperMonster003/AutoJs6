@@ -79,16 +79,19 @@ import org.autojs.autojs.runtime.api.augment.opencc.OpenCC
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin
 import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4j
 import org.autojs.autojs.runtime.api.augment.plugins.Plugins
+import org.autojs.autojs.runtime.api.augment.power.PowerManager
 import org.autojs.autojs.runtime.api.augment.recorder.Recorder
 import org.autojs.autojs.runtime.api.augment.s13n.S13n
 import org.autojs.autojs.runtime.api.augment.selector.Selector
 import org.autojs.autojs.runtime.api.augment.sensors.Sensors
+import org.autojs.autojs.runtime.api.augment.settings.Settings
 import org.autojs.autojs.runtime.api.augment.shell.Shell
 import org.autojs.autojs.runtime.api.augment.shizuku.Shizuku
 import org.autojs.autojs.runtime.api.augment.sqlite.SQLite
 import org.autojs.autojs.runtime.api.augment.storages.Storages
 import org.autojs.autojs.runtime.api.augment.sysprops.SysProps
 import org.autojs.autojs.runtime.api.augment.tasks.Tasks
+import org.autojs.autojs.runtime.api.augment.tasks.WorkManager
 import org.autojs.autojs.runtime.api.augment.threads.Threads
 import org.autojs.autojs.runtime.api.augment.timers.Timers
 import org.autojs.autojs.runtime.api.augment.toast.Toast
@@ -797,6 +800,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Colors.augmentWithRuntime(target, this, Colors.colorTables + colors, true)
         Color.augmentWithRuntime(target, this,Colors.colorTables, false)
         Tasks(this).augment(target, true)
+        WorkManager(this).augment(target, true)
         Dialogs(this).augment(target, true)
         Continuation(this).augment(target, js_mod_continuation, true, READONLY)
         Http(this).augment(target, http, true)
@@ -822,6 +826,8 @@ class ScriptRuntime private constructor(builder: Builder) {
         Floaty(this).augment(target, true)
         Storages.augmentWithRuntime(target, this, true)
         Device(this).augment(target, device, true)
+        PowerManager(this).augment(target, true)
+        Settings(this).augment(target, true)
         Recorder(this).augment(target, recorder, true)
         Toast(this).augment(target, true)
         Media.augmentWithRuntime(target, this, media, true)

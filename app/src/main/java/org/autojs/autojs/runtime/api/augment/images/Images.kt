@@ -153,6 +153,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         ::getWidth.name,
         ::getHeight.name,
         ::buildRegion.name,
+        ::__buildRegion.name,
         ::psnr.name,
         ::ssim.name,
         ::mssim.name,
@@ -161,6 +162,10 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         ::ncc.name,
         ::isEqual.name,
         ::getSimilarity.name,
+    )
+
+    override val selfAssignmentJavaClasses = listOf(
+        "ObjectFrame" to ObjectFrame::class,
     )
 
     @Suppress("MayBeConstant")
@@ -642,7 +647,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findCircles(scriptRuntime: ScriptRuntime, args: Array<out Any?>): List<HoughCirclesResult> = ensureArgumentsLengthInRange(args, 1..2) {
+        fun findCircles(scriptRuntime: ScriptRuntime, args: Array<out Any?>): List<Map<String, Double>> = ensureArgumentsLengthInRange(args, 1..2) {
             val (o, optionsArg) = it
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"grayImage\" ${image.jsBrief()} for images.findCircles must be a ImageWrapper" }
@@ -655,11 +660,11 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 ApiImages.initOpenCvIfNeeded()
                 val output = AutoJsMat().also { circles = it }
                 grayImage = if (isGrayscale(scriptRuntime, arrayOf(image))) image else grayscale(scriptRuntime, arrayOf(image)).oneShot()
-                mat = when {
-                    region.isJsNullish() -> grayImage.mat
-                    else -> AutoJsMat(grayImage.mat, buildRegionInternal(grayImage, region))
+                val regionRect = region.takeUnless { it.isJsNullish() }?.let {
+                    buildRegionInternal(grayImage, it)
                 }
-                val results = mutableListOf<HoughCirclesResult>()
+                mat = regionRect?.let { AutoJsMat(grayImage.mat, it) } ?: grayImage.mat
+                val results = mutableListOf<Map<String, Double>>()
 
                 Imgproc.HoughCircles(
                     mat,
@@ -675,7 +680,13 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 for (i in 0 until output.rows()) {
                     for (j in 0 until output.cols()) {
                         val (x, y, radius) = output[i, j]
-                        results += HoughCirclesResult(x, y, radius)
+                        results += buildCircleResult(
+                            x,
+                            y,
+                            radius,
+                            regionRect?.x ?: 0,
+                            regionRect?.y ?: 0,
+                        )
                     }
                 }
                 results
@@ -1520,8 +1531,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val (oA, oB, options) = argList
             extractMatPair(scriptRuntime, arrayOf(oA, oB), ::getSimilarity.name) { matPair ->
                 val (matA, matB) = matPair
-                val opt = options as? NativeObject ?: newNativeObject()
-                val metric = opt.inquire("metric", ::coerceStringLowercase, DEFAULT_IMAGE_SIMILARITY_METRIC)
+                val metric = parseSimilarityMetric(options)
                 val similarityMethod = runCatching {
                     ImageSimilarity::class.java.getDeclaredMethod(metric, OpencvMat::class.java, OpencvMat::class.java)
                 }.getOrElse { throw WrappedIllegalArgumentException("Unknown similarity metric: $metric") }
@@ -1532,7 +1542,55 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
         }
 
-        private fun buildRegionInternal(image: ImageWrapper, region: Any?) = buildRegionInternal(region, image.width, image.height)
+        @Suppress("FunctionName")
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun __buildRegion(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvRect? = ensureArgumentsAtMost(args, 3) {
+            val (region, imageWidth, imageHeight) = it
+            if (imageWidth.isJsNullish() || imageHeight.isJsNullish()) {
+                null
+            } else {
+                buildRegionForDimensions(region, coerceIntNumber(imageWidth), coerceIntNumber(imageHeight))
+            }
+        }
+
+        internal fun parseSimilarityMetric(options: Any?): String {
+            val opt = options as? NativeObject ?: return DEFAULT_IMAGE_SIMILARITY_METRIC
+            return when {
+                opt.hasProp("metric") -> coerceStringLowercase(opt.prop("metric"))
+                opt.hasProp("type") -> coerceStringLowercase(opt.prop("type"))
+                else -> DEFAULT_IMAGE_SIMILARITY_METRIC
+            }.let { if (it == "pnsr") "psnr" else it }
+        }
+
+        internal fun buildRegionInternal(image: ImageWrapper, region: Any?) = buildRegionInternal(region, image.width, image.height)
+
+        internal fun buildRegionForDimensions(region: Any?, imageWidth: Int, imageHeight: Int): OpencvRect {
+            require(imageWidth >= 0 && imageHeight >= 0) {
+                "Image dimensions must be non-negative: [$imageWidth, $imageHeight]"
+            }
+            val values = when {
+                region is OpencvRect -> listOf(region.x, region.y, region.width, region.height)
+                region is AndroidRect -> listOf(region.left, region.top, region.width(), region.height())
+                region is List<*> -> region.map { value ->
+                    value.takeUnless { it.isJsNullish() }?.let(::coerceIntNumber)
+                }
+                region.isJsNullish() -> emptyList()
+                else -> throw WrappedIllegalArgumentException("Invalid region ${region.jsBrief()} for images.__buildRegion")
+            }
+            val x = values.getOrNull(0) ?: 0
+            val y = values.getOrNull(1) ?: 0
+            val width = values.getOrNull(2) ?: imageWidth - x
+            val height = values.getOrNull(3) ?: imageHeight - y
+            require(
+                x >= 0 && y >= 0 && width >= 0 && height >= 0
+                    && x.toLong() + width <= imageWidth
+                    && y.toLong() + height <= imageHeight
+            ) {
+                "Out of region: region = [$x, $y, $width, $height], image.size = [$imageWidth, $imageHeight]"
+            }
+            return OpencvRect(x, y, width, height)
+        }
 
         private fun buildRegionInternal(region: Any?, imageWidth: Int, imageHeight: Int): OpencvRect {
             var (x, y, w, h) = when {
@@ -1549,10 +1607,12 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 require(it >= 0) { "Y of region must be non-negative rather than $it" }
             }
             w = parseScreenMetric(parseNumber(w) { imageWidth - x }, ScreenMetrics.deviceScreenWidth).also {
-                require(x + it <= imageWidth) { "Excessive width: region [$x + $it] > image [$imageWidth]" }
+                require(it >= 0) { "Width of region must be non-negative rather than $it" }
+                require(x.toLong() + it <= imageWidth) { "Excessive width: region [$x + $it] > image [$imageWidth]" }
             }
             h = parseScreenMetric(parseNumber(h) { imageHeight - y }, ScreenMetrics.deviceScreenHeight).also {
-                require(y + it <= imageHeight) { "Excessive height: region [$y + $it] > image [$imageHeight]" }
+                require(it >= 0) { "Height of region must be non-negative rather than $it" }
+                require(y.toLong() + it <= imageHeight) { "Excessive height: region [$y + $it] > image [$imageHeight]" }
             }
             return OpencvRect(x, y, w, h)
         }
@@ -1830,7 +1890,17 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
         }
 
-        class HoughCirclesResult(val x: Double, val y: Double, val radius: Double)
+        internal fun buildCircleResult(
+            x: Double,
+            y: Double,
+            radius: Double,
+            regionX: Int = 0,
+            regionY: Int = 0,
+        ): Map<String, Double> = linkedMapOf(
+            "x" to x + regionX,
+            "y" to y + regionY,
+            "radius" to radius,
+        )
 
         private class DetectAndComputeFeaturesOptions(val scale: Float, val cvtColor: Int, val method: Int, val region: OpencvRect)
 

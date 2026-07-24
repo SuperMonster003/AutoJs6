@@ -103,7 +103,7 @@ internal fun extendBuildInObjectInternal(scriptRuntime: ScriptRuntime, augmentab
             override fun construct(cx: Context?, scope: VarScope, args: Array<out Any?>): Scriptable {
                 throw RuntimeException("Function $funcName is unable to be invoked with \"new\" operator")
             }
-        }.apply { RhinoUtils.initNewBaseFunction(this) }
+        }.apply { RhinoUtils.initNewBaseFunction(scriptRuntime.topLevelScope, this) }
 
         prototypeObject.defineProperty(funcName, f, attributes)
     }

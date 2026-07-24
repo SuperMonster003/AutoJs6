@@ -154,9 +154,10 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
     }
 
     fun augment(target: Scriptable, proto: Any, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0, specifiedRuntime: ScriptRuntime? = null): ScriptableObject {
+        val creationScope = (specifiedRuntime ?: scriptRuntime)?.topLevelScope ?: RhinoUtils.getDeclarationScope(target)
         val callFunc: (args: Array<out Any?>) -> Any? = { args ->
             try {
-                (this as Invokable).invoke(*args)
+                RhinoUtils.toJsValue(creationScope, (this as Invokable).invoke(*args))
             } catch (e: Exception) {
                 if (ScriptInterruptedException.causedByInterrupt(e)) {
                     throw e
@@ -183,6 +184,9 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
             try {
                 (this as Constructable).construct(*args)
             } catch (e: Exception) {
+                if (ScriptInterruptedException.causedByInterrupt(e)) {
+                    throw e
+                }
                 val message = e.message?.let {
                     globalContext.getString(R.string.error_failed_to_instantiate_with_cause, key, it)
                 } ?: globalContext.getString(R.string.error_failed_to_instantiate, key)
@@ -191,9 +195,9 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         }
 
         val newObj = when (this) {
-            is Versatile -> newBaseFunction(key, callFunc, constructFunc)
-            is Invokable -> newBaseFunction(key, callFunc, NOT_CONSTRUCTABLE)
-            is Constructable -> newBaseFunction(key, DEFAULT_CALLER, constructFunc)
+            is Versatile -> newBaseFunction(creationScope, key, callFunc, constructFunc)
+            is Invokable -> newBaseFunction(creationScope, key, callFunc, NOT_CONSTRUCTABLE)
+            is Constructable -> newBaseFunction(creationScope, key, DEFAULT_CALLER, constructFunc)
             else -> RhinoUtils.newObject(target)
         }
 
@@ -230,7 +234,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
 
         augmentPrototypes(target, globalScope, global, protos)
         augmentProperties(target, global)
-        augmentFunctions(target, global)
+        augmentFunctions(target, global, globalScope)
         augmentGettersAndSetters(target, global)
         augmentJavaClasses(target, globalScope, global)
     }
@@ -257,13 +261,10 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
 
         protos.forEach { protoObj ->
             objProtoList += when (protoObj) {
-                is SimpleGetterProxy -> ProxyObject(globalScope, runCatching {
-                    fun(args: Array<out Any?>): Any? {
-                        val (keyArg) = args
-                        return protoObj::class.java.getDeclaredMethod(PROXY_GETTER_KEY, Scriptable::class.java, String::class.java)
-                            .invoke(this, global, coerceString(keyArg))
-                    }
-                }.getOrNull(), null)
+                is SimpleGetterProxy -> ProxyObject(globalScope, fun(args: Array<out Any?>): Any? {
+                    val (keyArg) = args
+                    return protoObj.get(global, coerceString(keyArg))
+                }, null)
                 is Scriptable -> protoObj
                 else -> RhinoScriptRuntime.toObject(globalScope, protoObj)
             }
@@ -344,10 +345,10 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         }
     }
 
-    private fun augmentFunctions(target: ScriptableObject, global: ScriptableObject) {
+    private fun augmentFunctions(target: ScriptableObject, global: ScriptableObject, scope: VarScope) {
         val assignments = getFunctionAssignments()
-        installFunctions(target, assignments.target)
-        installFunctions(global, assignments.global)
+        installFunctions(target, assignments.target, scope)
+        installFunctions(global, assignments.global, scope)
     }
 
     private fun getFunctionAssignments(): FunctionAssignments {
@@ -476,15 +477,15 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         installFunctions(destination, functions.map { (funcNamePair, attributes) ->
             val (funcName, funcNameAlias) = funcNamePair
             FunctionAssignment(funcName, funcNameAlias, attributes, getCachedFunctionMethod(javaClass, funcName))
-        })
+        }, RhinoUtils.getDeclarationScope(destination))
     }
 
-    private fun installFunctions(destination: ScriptableObject, functions: Collection<FunctionAssignment>) {
+    private fun installFunctions(destination: ScriptableObject, functions: Collection<FunctionAssignment>, scope: VarScope) {
         functions.forEach { assignment ->
             val (funcName, funcNameAlias, attributes, method) = assignment
-            val f = newBaseFunction(funcName, { args ->
+            val f = newBaseFunction(scope, funcName, { args ->
                 try {
-                    method.invoke(this, scriptRuntime, args)
+                    RhinoUtils.toJsValue(scope, method.invoke(this, scriptRuntime, args))
                 } catch (t: Throwable) {
 
                     // @Hint by SuperMonster003 on Sep 27, 2024.
@@ -648,10 +649,12 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
             private var methodWithRuntime: Method? = null
 
             fun invoke(receiver: Augmentable, runtime: ScriptRuntime?, args: Array<out Any?>): Any? {
-                return when (runtime) {
-                    null -> resolve(withRuntime = false).invoke(receiver, args)
-                    else -> resolve(withRuntime = true).invoke(receiver, runtime, args)
+                val method = resolve(withRuntime = runtime != null)
+                val result = when (runtime) {
+                    null -> method.invoke(receiver, args)
+                    else -> method.invoke(receiver, runtime, args)
                 }
+                return if (method.returnType == Void.TYPE) RhinoUtils.UNDEFINED else result
             }
 
             private fun resolve(withRuntime: Boolean): Method {
@@ -742,16 +745,20 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         private fun isInternalName(value: String) = value.startsWith("__") && value.endsWith("__")
 
         private fun ScriptableObject.defineWith(name: String, getter: Supplier<Any?>, setter: Consumer<Any?>?, attributes: Int) {
+            val normalizedGetter = Supplier {
+                RhinoUtils.toJsValue(RhinoUtils.getDeclarationScope(this), getter.get())
+            }
             when (isInternalName(name)) {
-                true -> this.defineProperty(name, getter, setter, DONTENUM or attributes)
-                else -> this.defineProperty(name, getter, setter, attributes)
+                true -> this.defineProperty(name, normalizedGetter, setter, DONTENUM or attributes)
+                else -> this.defineProperty(name, normalizedGetter, setter, attributes)
             }
         }
 
         private fun ScriptableObject.defineWith(name: String, value: Any?, attributes: Int) {
+            val normalizedValue = RhinoUtils.toJsValue(RhinoUtils.getDeclarationScope(this), value)
             when (isInternalName(name)) {
-                true -> this.defineProperty(name, value, DONTENUM or attributes)
-                else -> this.defineProperty(name, value, attributes)
+                true -> this.defineProperty(name, normalizedValue, DONTENUM or attributes)
+                else -> this.defineProperty(name, normalizedValue, attributes)
             }
         }
 

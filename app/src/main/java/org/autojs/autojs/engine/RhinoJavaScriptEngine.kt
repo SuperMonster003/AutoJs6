@@ -27,6 +27,7 @@ import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.js_object_assign
 import org.autojs.autojs.util.RhinoUtils.js_require
+import org.autojs.autojs.util.RhinoUtils.registerStandardObjects
 import org.autojs.autojs.util.RhinoUtils.withTimeConsuming
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
@@ -207,6 +208,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     protected fun createScope(context: Context) = TopLevelScope().apply {
         initStandardObjects(context, false)
+        context.registerStandardObjects(this)
     }
 
     @SuppressLint("VisibleForTests")

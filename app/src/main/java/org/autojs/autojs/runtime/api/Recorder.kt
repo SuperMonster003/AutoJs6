@@ -1,7 +1,6 @@
 package org.autojs.autojs.runtime.api
 
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
@@ -10,6 +9,7 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.VarScope
 import java.lang.System.currentTimeMillis
 
@@ -57,17 +57,19 @@ class Recorder(private val scriptRuntime: ScriptRuntime) {
             mAnonymity.isNotEmpty() -> load()
             else -> save()
         }
-        key is BaseFunction -> {
-            val tmpKeyPrefix = key.functionName.takeUnless { it.isEmpty() } ?: "(anonymous)"
+        key is Callable -> {
+            val tmpKeyPrefix = when (key) {
+                is BaseFunction -> key.functionName
+                is Scriptable -> ScriptableObject.getProperty(key, "name")
+                    .takeUnless { it === Scriptable.NOT_FOUND || it.isJsNullish() }
+                    ?.let(Context::toString)
+                else -> null
+            }.takeUnless { it.isNullOrEmpty() } ?: "(anonymous)"
             val tmpKey = "$tmpKeyPrefix@${currentTimeMillis()}".also { save(it) }
             val thisObj = when {
                 ts is Scriptable && ts !is Callable -> ts
                 ts.isJsNullish() -> null
-                else -> listOf(
-                    "Argument[1] for recorder.shortcut",
-                    "must be a JavaScript Object",
-                    "instead of ${ts.jsBrief()} if provided"
-                ).joinToString(" ").let { throw IllegalArgumentException(it) }
+                else -> null
             }
             callFunction(scriptRuntime, key, null as VarScope?, thisObj, arrayOf())
             load(tmpKey).also { remove(tmpKey) }
@@ -88,10 +90,11 @@ class Recorder(private val scriptRuntime: ScriptRuntime) {
         }
     }
 
-    private fun getValue(key: String?): Double = when {
-        key.isJsNullish() -> mAnonymity.removeLastOrNull()
-        else -> mKeys[Context.toString(key)]
-    } ?: Double.NaN
+    private fun getValue(key: String?): Double {
+        if (key.isJsNullish()) return mAnonymity.removeLastOrNull() ?: Double.NaN
+        val name = Context.toString(key)
+        return mKeys[name] ?: throw NoSuchElementException("Recorder key \"$name\" does not exist")
+    }
 
     private fun toTimestamp(ts: Any? = null): Double = when {
         ts.isJsNullish() -> currentTimeMillis().toDouble()

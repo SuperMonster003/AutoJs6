@@ -136,14 +136,15 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                     // funcName(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
 
                     val capt = AugmentableImages.captureScreen(scriptRuntime, emptyArray())
-                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(capt, arg0, arg1), overrideMode, resultsHandler)
+                    require(capt is ImageWrapper) { "Failed to capture a valid image for ocr.$funcName" }
+                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(capt.oneShot(), arg0, arg1), overrideMode, resultsHandler)
                 }
                 shouldTakenAsRegion(arg1) -> {
 
                     // @Signature funcName(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
 
                     val region = arg1
-                    val options = newNativeObject().also { o ->
+                    val options = newNativeObject(scriptRuntime.topLevelScope).also { o ->
                         o.defineProp("region", region)
                     }
 
@@ -155,32 +156,34 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                     // @Signature funcName(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
 
                     val img = arg0
-                    val opt = arg1 as? NativeObject ?: newNativeObject()
-                    val region = opt.prop("region") ?: return emptyList()
-
-                    var shouldShoot = false
-                    val (image, options) = when {
-                        region.isJsNullish() -> img to opt
-                        else -> {
-                            val clip = AugmentableImages.clip(scriptRuntime, arrayOf(img, region))
-                            shouldShoot = true
-                            clip.oneShot() to opt
+                    val opt = arg1 as? NativeObject ?: newNativeObject(scriptRuntime.topLevelScope)
+                    var clippedImage: ImageWrapper? = null
+                    try {
+                        val region = opt.prop("region")
+                        val rect = region.takeUnless { it.isJsNullish() }?.let {
+                            AugmentableImages.buildRegionInternal(img, it)
                         }
+                        val image = rect?.let {
+                            scriptRuntime.images.clip(img, it.x, it.y, it.width, it.height)
+                                .oneShot()
+                                .also { clip -> clippedImage = clip }
+                        } ?: img
+                        val optMode = overrideMode ?: opt.inquire("mode", scriptRuntime.ocr.mode)
+                        val ocrMode = optMode.toOcrModeOrNull(scriptRuntime)
+                            ?: throw WrappedIllegalArgumentException("Cannot call ocr.$funcName with an unknown mode: ${optMode.jsBrief()}")
+                        val prop = OcrMode::class.declaredMemberProperties.firstOrNull { it.name.contentEquals(funcName, true) }
+                            ?: throw WrappedIllegalArgumentException("Cannot find ocr dispatcher property for $funcName")
+                        val fn = prop.get(ocrMode) as? (ScriptRuntime, ImageWrapper, NativeObject) -> List<T>
+                            ?: throw WrappedIllegalArgumentException("Dispatcher type mismatch for $funcName")
+                        var results = fn.invoke(scriptRuntime, image, opt)
+                        if (rect != null) {
+                            resultsHandler?.let { results = it(results, rect) }
+                        }
+                        results
+                    } finally {
+                        clippedImage?.shoot()
+                        img.shoot()
                     }
-                    val optMode = overrideMode ?: opt.inquire("mode", scriptRuntime.ocr.mode)
-                    val ocrMode = optMode.toOcrModeOrNull(scriptRuntime)
-                        ?: throw WrappedIllegalArgumentException("Cannot call ocr.$funcName with an unknown mode: ${optMode.jsBrief()}")
-                    val prop = OcrMode::class.declaredMemberProperties.firstOrNull { it.name.contentEquals(funcName, true) }
-                        ?: throw WrappedIllegalArgumentException("Cannot find ocr dispatcher property for $funcName")
-                    val fn = prop.get(ocrMode) as? (ScriptRuntime, ImageWrapper, NativeObject) -> List<T>
-                        ?: throw WrappedIllegalArgumentException("Dispatcher type mismatch for $funcName")
-                    var results = fn.invoke(scriptRuntime, image, options)
-                    resultsHandler?.let {
-                        val rect = AugmentableImages.buildRegion(scriptRuntime, arrayOf(img, region))
-                        results = resultsHandler(results, rect)
-                    }
-                    if (shouldShoot) img.shoot()
-                    results
                 }
             }
         }

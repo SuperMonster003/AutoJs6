@@ -12,7 +12,6 @@ import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_SETTER_KEY
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNonNullObject
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.rhino.extension.MapExtensions.toNativeObject
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.StringReadable
@@ -30,6 +29,7 @@ import org.autojs.autojs.util.RhinoUtils.callPrototypeFunction
 import org.autojs.autojs.util.RhinoUtils.callToStringFunction
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.javaArrayToString
 import org.autojs.autojs.util.RhinoUtils.js_array_isArray
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
@@ -65,13 +65,9 @@ import java.util.function.Supplier
 @Suppress("unused")
 object Inspect : Augmentable(), Invokable {
 
-    private val mColorsNativeObject by lazy { colors.toNativeObject() }
-
-    private val mStylesNativeObject by lazy { styles.toNativeObject() }
-
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
-        "colors" to Supplier { mColorsNativeObject },
-        "styles" to Supplier { mStylesNativeObject },
+        "colors" to Supplier { colors },
+        "styles" to Supplier { styles },
     )
 
     override fun invoke(vararg args: Any?): String = ensureArgumentsLengthInRange(args, 1..2) {
@@ -403,7 +399,7 @@ object Inspect : Augmentable(), Invokable {
         // Look up the keys of the object.
         // zh-CN: 查找对象的键.
         var keys: NativeArray = js_object_keys(value)
-        val visibleKeys = newNativeObject().also { o ->
+        val visibleKeys = newNativeObject(getDeclarationScope(value)).also { o ->
             keys.forEach { o.put(Context.toString(it), o, true) }
         }
         if (ctx.showHidden) {
@@ -487,7 +483,7 @@ object Inspect : Augmentable(), Invokable {
                 val limit = if (ctx.maxObjectKeys > 0) ctx.maxObjectKeys else Int.MAX_VALUE
                 keys.asSequence()
                     .take(limit)
-                    .map { key -> formatProperty(ctx, value, recurseTimes, visibleKeys, Context.toString(key), false) }
+                    .mapNotNull { key -> formatProperty(ctx, value, recurseTimes, visibleKeys, Context.toString(key), false) }
                     .toList()
             } catch (err: Exception) {
                 if (isJavaObjectRhino(value)) {
@@ -552,7 +548,7 @@ object Inspect : Augmentable(), Invokable {
         for (i in 0 until head) {
             val key = Context.toString(i)
             output += when (js_object_hasOwnProperty(value, key)) {
-                true -> formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
+                true -> formatProperty(ctx, value, recurseTimes, visibleKeys, key, true).orEmpty()
                 else -> ""
             }
         }
@@ -570,7 +566,7 @@ object Inspect : Augmentable(), Invokable {
             if (i < head) continue
             val key = Context.toString(i)
             output += when (js_object_hasOwnProperty(value, key)) {
-                true -> formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
+                true -> formatProperty(ctx, value, recurseTimes, visibleKeys, key, true).orEmpty()
                 else -> ""
             }
         }
@@ -580,15 +576,15 @@ object Inspect : Augmentable(), Invokable {
         keys.forEach { key ->
             val niceKey = Context.toString(key)
             if (!DIGITS_REGEX.matches(niceKey)) {
-                output.add(formatProperty(ctx, value, recurseTimes, visibleKeys, niceKey, true))
+                formatProperty(ctx, value, recurseTimes, visibleKeys, niceKey, true)?.let(output::add)
             }
         }
         return output
     }
 
-    private fun formatProperty(ctx: Ctx, value: ScriptableObject, recurseTimes: Int?, visibleKeys: NativeObject, key: String, array: Boolean): String {
+    private fun formatProperty(ctx: Ctx, value: ScriptableObject, recurseTimes: Int?, visibleKeys: NativeObject, key: String, array: Boolean): String? {
         var name: String? = null
-        val desc = js_object_getOwnPropertyDescriptor(value, key)
+        val desc = js_object_getOwnPropertyDescriptor(value, key) as? ScriptableObject ?: return null
         val getter = desc.prop(PROXY_GETTER_KEY)
         val setter = desc.prop(PROXY_SETTER_KEY)
 

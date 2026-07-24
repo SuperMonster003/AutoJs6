@@ -160,9 +160,9 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
             val properties = when {
                 propertiesRaw.isJsNullish() -> {
-                    newNativeObject().also { o -> o.defineProp("preset", true) }
+                    newNativeObject(scriptRuntime.topLevelScope).also { o -> o.defineProp("preset", true) }
                 }
-                else -> RhinoUtils.js_object_assign(newNativeObject(), propertiesRaw as Scriptable) as NativeObject
+                else -> RhinoUtils.js_object_assign(newNativeObject(scriptRuntime.topLevelScope), propertiesRaw as Scriptable) as NativeObject
             }
             if (properties.inquire("preset", ::coerceBoolean, false)) {
                 checkPreset(properties, "title", R.string.text_preset_dialog_title)
@@ -180,7 +180,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 applyDialogProperty(builder, name, properties.prop(name))
             }
             applyOtherDialogProperties(scriptRuntime, builder, properties)
-            val dialog = UI.runRhinoRuntime(scriptRuntime, newBaseFunction("action", { builder.buildDialog() }, NOT_CONSTRUCTABLE)) as JsDialog
+            val dialog = UI.runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", { builder.buildDialog() }, NOT_CONSTRUCTABLE)) as JsDialog
             applyBuiltDialogProperties(scriptRuntime, dialog, properties)
             dialog
         }
@@ -197,12 +197,12 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
                     val scope = scriptRuntime.topLevelScope
-                    val promiseExecutor = newBaseFunction("executor", { executorArgs ->
+                    val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
                         require(resolve is BaseFunction) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.rawInput"
                         }
-                        scriptRuntime.dialogs.rawInput(title, prefill, newBaseFunction("callback", { callbackArgs ->
+                        scriptRuntime.dialogs.rawInput(title, prefill, newBaseFunction(scope, "callback", { callbackArgs ->
                             callFunction(resolve, scope, null, arrayOf(*callbackArgs))
                         }, NOT_CONSTRUCTABLE))
                     }, NOT_CONSTRUCTABLE)
@@ -236,12 +236,12 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
                     val scope = scriptRuntime.topLevelScope
-                    val promiseExecutor = newBaseFunction("executor", { executorArgs ->
+                    val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
                         require(resolve is BaseFunction) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.input"
                         }
-                        scriptRuntime.dialogs.rawInput(title, prefill, newBaseFunction("callback", { callbackArgs ->
+                        scriptRuntime.dialogs.rawInput(title, prefill, newBaseFunction(scope, "callback", { callbackArgs ->
                             val (inputStringArg) = callbackArgs
                             val inputString = coerceString(inputStringArg, "")
                             val evaluated = js_eval(scope, inputString)
@@ -262,7 +262,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     require(callback is BaseFunction) {
                         "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.input"
                     }
-                    val newCallback = newBaseFunction("newCallback", { newCallbackArgs ->
+                    val newCallback = newBaseFunction(scriptRuntime.topLevelScope, "newCallback", { newCallbackArgs ->
                         val (str) = newCallbackArgs
                         val newStr = js_eval(scriptRuntime.topLevelScope, Context.toString(str))
                         callFunction(callback, scriptRuntime.topLevelScope, null, arrayOf(newStr))
@@ -294,12 +294,12 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
                     val scope = scriptRuntime.topLevelScope
-                    val promiseExecutor = newBaseFunction("executor", { executorArgs ->
+                    val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
                         require(resolve is BaseFunction) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.alert"
                         }
-                        scriptRuntime.dialogs.alert(title, prefill, newBaseFunction("callback", { callbackArgs ->
+                        scriptRuntime.dialogs.alert(title, prefill, newBaseFunction(scope, "callback", { callbackArgs ->
                             callFunction(scriptRuntime, resolve, scope, null, arrayOf(*callbackArgs))
                         }, NOT_CONSTRUCTABLE))
                     }, NOT_CONSTRUCTABLE)
@@ -333,12 +333,12 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     val title = coerceString(titleArg, "")
                     val prefill = coerceString(prefillArg, "")
                     val scope = scriptRuntime.topLevelScope
-                    val promiseExecutor = newBaseFunction("executor", { executorArgs ->
+                    val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
                         require(resolve is BaseFunction) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.confirm"
                         }
-                        scriptRuntime.dialogs.confirm(title, prefill, newBaseFunction("callback", { callbackArgs ->
+                        scriptRuntime.dialogs.confirm(title, prefill, newBaseFunction(scope, "callback", { callbackArgs ->
                             callFunction(scriptRuntime, resolve, scope, null, arrayOf(*callbackArgs))
                         }, NOT_CONSTRUCTABLE))
                     }, NOT_CONSTRUCTABLE)
@@ -369,13 +369,13 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 is NativeArray -> when {
                     isUiThread() && callback !is BaseFunction -> {
                         val scope = scriptRuntime.topLevelScope
-                        val promiseExecutor = newBaseFunction("executor", { executorArgs ->
+                        val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                             val (resolve) = executorArgs
                             require(resolve is BaseFunction) {
                                 "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.select"
                             }
                             val itemsToSelect = items.map(::coerceString).toTypedArray()
-                            scriptRuntime.dialogs.select(title, itemsToSelect, newBaseFunction("callback", { callbackArgs ->
+                            scriptRuntime.dialogs.select(title, itemsToSelect, newBaseFunction(scope, "callback", { callbackArgs ->
                                 callFunction(scriptRuntime, resolve, scope, null, arrayOf(*callbackArgs))
                             }, NOT_CONSTRUCTABLE))
                         }, NOT_CONSTRUCTABLE)
@@ -414,12 +414,12 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             when {
                 isUiThread() && callback !is BaseFunction -> {
                     val scope = scriptRuntime.topLevelScope
-                    val promiseExecutor = newBaseFunction("executor", { executorArgs ->
+                    val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
                         require(resolve is BaseFunction) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.singleChoice"
                         }
-                        scriptRuntime.dialogs.singleChoice(title, selectedIndex, items, newBaseFunction("callback", { callbackArgs ->
+                        scriptRuntime.dialogs.singleChoice(title, selectedIndex, items, newBaseFunction(scope, "callback", { callbackArgs ->
                             callFunction(scriptRuntime, resolve, scope, null, arrayOf(*callbackArgs))
                         }, NOT_CONSTRUCTABLE))
                     }, NOT_CONSTRUCTABLE)
@@ -454,12 +454,12 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val scope = scriptRuntime.topLevelScope
             when {
                 isUiThread() && callback !is BaseFunction -> {
-                    val promiseExecutor = newBaseFunction("executor", { executorArgs ->
+                    val promiseExecutor = newBaseFunction(scope, "executor", { executorArgs ->
                         val (resolve) = executorArgs
                         require(resolve is BaseFunction) {
                             "Argument resolve ${resolve.jsBrief()} must be a JavaScript Function for promise executor of dialogs.multiChoice"
                         }
-                        scriptRuntime.dialogs.multiChoice(title, selectedIndices, items, newBaseFunction("callback", { callbackArgs ->
+                        scriptRuntime.dialogs.multiChoice(title, selectedIndices, items, newBaseFunction(scope, "callback", { callbackArgs ->
                             val (results) = callbackArgs
                             callFunction(scriptRuntime, resolve, scope, null, arrayOf(toJsArrayIfNeeded(results)))
                         }, NOT_CONSTRUCTABLE))
@@ -473,7 +473,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     require(callback is BaseFunction) {
                         "Argument callback ${callback.jsBrief()} must be a JavaScript Function for dialogs.multiChoice"
                     }
-                    val transformedCallback = newBaseFunction("transformedCallback", { callbackArgs ->
+                    val transformedCallback = newBaseFunction(scope, "transformedCallback", { callbackArgs ->
                         val (results) = callbackArgs
                         val jsResults = toJsArrayIfNeeded(results)
                         callFunction(scriptRuntime, callback, scope, null, arrayOf(jsResults))
@@ -608,7 +608,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             if (!properties.prop("customView").isJsNullish()) {
                 var customView = properties.prop("customView")
                 if (customView.isJsXml() || customView.isJsString()) {
-                    customView = UI.runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    customView = UI.runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                         UI.inflateRhinoRuntime(scriptRuntime, customView)
                     }, NOT_CONSTRUCTABLE))
                 }
@@ -661,7 +661,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
                 dialog.contentView?.let { view ->
                     val text = view.text
-                    UI.runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    UI.runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                         view.autoLinkMask = autoLinkMask
                         // @Hint by SuperMonster003 on Nov 9, 2024.
                         //  ! To trigger linkification.
@@ -751,7 +751,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     var dim = Context.toNumber(properties.prop("dimAmount"))
                     while (dim > 1) dim /= 100
                     if (!dim.isNaN()) {
-                        UI.postRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                        UI.postRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                             win.setDimAmount(dim.toFloat())
                         }, NOT_CONSTRUCTABLE))
                     }
@@ -792,7 +792,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     "Unknown property animation ${animationRaw.jsBrief()} of argument properties for dialogs.build",
                 )
                 dialog.window?.let { win ->
-                    UI.postRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    UI.postRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                         win.setWindowAnimations(animationStyle)
                     }, NOT_CONSTRUCTABLE))
                 }
@@ -800,7 +800,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
             if (properties.inquire("keepScreenOn", ::coerceBoolean, false)) {
                 dialog.window?.let { win ->
-                    UI.postRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    UI.postRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                         win.addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }, NOT_CONSTRUCTABLE))
                 }

@@ -17,6 +17,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.automator.Auto
@@ -52,11 +53,14 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import java.util.function.Supplier
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToLong
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
+
+    internal data class SleepRange(val min: Double, val max: Double)
 
     override val selfAssignmentProperties = listOf(
         "isAutoJs6" to true,
@@ -233,23 +237,41 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
             require(!RhinoUtils.isUiThread()) { str(R.string.error_function_called_in_ui_thread, ::sleep.name) }
 
-            var min = coerceLongNumber(millisMin, 0L).coerceAtLeast(0L)
-
-            val max = when {
-                millisMax.isJsNullish() -> min
-                millisMax is Number -> coerceLongNumber(millisMax).coerceAtMost(Long.MAX_VALUE)
-                millisMax is String -> Regex("[+-]?(\\d+(\\.\\d+)?(e\\d+)?)").find(millisMax)?.let { matched ->
-                    val delta = matched.value.toLong()
-                    val newMax = min + delta
-                    min -= delta
-                    newMax
-                } ?: throw WrappedIllegalArgumentException("String argument millisMax must have a number contained for sleep")
-                else -> throw WrappedIllegalArgumentException("Argument millisMax ${millisMax.jsBrief()} must be a number or a string for sleep")
-            }
-
-            val randBound = coerceLongNumber(Math.random() * (max - min))
-            scriptRuntime.sleep(min + randBound)
+            val range = resolveSleepRange(coerceLongNumber(millisMin, 0L), millisMax)
+            scriptRuntime.sleep(selectSleepMillis(range, Math.random()))
             UNDEFINED
+        }
+
+        internal fun resolveSleepRange(millisMin: Long, millisMax: Any?): SleepRange {
+            val base = millisMin.coerceAtLeast(0L).toDouble()
+            val rawBounds = when {
+                millisMax.isJsNullish() -> base to base
+                millisMax is Number -> base to coerceNumber(millisMax)
+                millisMax is String -> {
+                    val matched = Regex("[+-]?(\\d+(\\.\\d+)?(e\\d+)?)").find(millisMax)
+                        ?: throw WrappedIllegalArgumentException("String argument millisMax must have a number contained for sleep")
+                    val delta = matched.value.toDouble()
+                    (base - delta) to (base + delta)
+                }
+                else -> throw WrappedIllegalArgumentException(
+                    "Argument millisMax ${millisMax.jsBrief()} must be a number or a string for sleep"
+                )
+            }
+            val min = minOf(rawBounds.first, rawBounds.second).coerceAtLeast(0.0)
+            val max = maxOf(rawBounds.first, rawBounds.second)
+                .coerceAtLeast(0.0)
+                .coerceAtMost(Long.MAX_VALUE.toDouble())
+            return SleepRange(min, max)
+        }
+
+        internal fun selectSleepMillis(range: SleepRange, random: Double): Long {
+            require(random >= 0.0 && random < 1.0) { "Random value for sleep must be in [0, 1)" }
+            val millis = range.min + ceil(random * (range.max - range.min))
+            return when {
+                millis <= 0.0 -> 0L
+                millis >= Long.MAX_VALUE.toDouble() -> Long.MAX_VALUE
+                else -> millis.toLong()
+            }
         }
 
         @JvmStatic
@@ -388,7 +410,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
             var result: Any?
             val start = System.currentTimeMillis()
-            val callback = callbackArg.takeUnless { it.isJsNullish() } ?: newNativeObject()
+            val callback = callbackArg.takeUnless { it.isJsNullish() } ?: newNativeObject(scriptRuntime.topLevelScope)
 
             require(callback is ScriptableObject) {
                 "Argument callback ${callbackArg.jsBrief()} must be a ScriptableObject for wait"
@@ -453,7 +475,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 globalContext.getString(R.string.blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution)
             }
             val (activityNameArg, limitArg, intervalArg, callbackArg) = argList
-            val condition = newBaseFunction("condition", {
+            val condition = newBaseFunction(scriptRuntime.topLevelScope, "condition", {
                 currentActivity(scriptRuntime, emptyArray()) == coerceString(activityNameArg)
             }, NOT_CONSTRUCTABLE)
             wait(scriptRuntime, arrayOf(condition, limitArg, intervalArg, callbackArg))
@@ -466,7 +488,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 globalContext.getString(R.string.blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution)
             }
             val (packageNameArg, limitArg, intervalArg, callbackArg) = argList
-            val condition = newBaseFunction("condition", {
+            val condition = newBaseFunction(scriptRuntime.topLevelScope, "condition", {
                 currentPackage(scriptRuntime, emptyArray()) == coerceString(packageNameArg)
             }, NOT_CONSTRUCTABLE)
             wait(scriptRuntime, arrayOf(condition, limitArg, intervalArg, callbackArg))
@@ -532,7 +554,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getScaleBases(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsIsEmpty(args) {
-            newNativeObject().also { o ->
+            newNativeObject(scriptRuntime.topLevelScope).also { o ->
                 o.defineProp("x", scriptRuntime.scale.baseX)
                 o.defineProp("y", scriptRuntime.scale.baseY)
             }
@@ -592,7 +614,10 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             }
             when {
                 base.isJsNullish() -> base = scriptRuntime.scale.baseX
-                base is Number -> require(RhinoUtils.isInteger(base)) { "Scale base ${base.jsBrief()} must be a positive integer for cX" }
+                base is Number -> {
+                    require(RhinoUtils.isInteger(base)) { "Scale base ${base.jsBrief()} must be a positive integer for cX" }
+                    base = Scale.ensureBase(coerceIntNumber(base))
+                }
                 else -> throw WrappedIllegalArgumentException("Argument \"base\" ${base.jsBrief()} for cX must be a number if provided")
             }
             return@ensureArgumentsAtMost (deviceWidth * num / coerceIntNumber(base)).roundToLong().toDouble()
@@ -616,7 +641,10 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             }
             when {
                 base.isJsNullish() -> base = scriptRuntime.scale.baseY
-                base is Number -> require(RhinoUtils.isInteger(base)) { "Scale base ${base.jsBrief()} must be a positive integer for cY" }
+                base is Number -> {
+                    require(RhinoUtils.isInteger(base)) { "Scale base ${base.jsBrief()} must be a positive integer for cY" }
+                    base = Scale.ensureBase(coerceIntNumber(base))
+                }
                 else -> throw WrappedIllegalArgumentException("Argument \"base\" ${base.jsBrief()} for cY must be a number if provided")
             }
             return@ensureArgumentsAtMost (deviceHeight * num / coerceIntNumber(base)).roundToLong().toDouble()

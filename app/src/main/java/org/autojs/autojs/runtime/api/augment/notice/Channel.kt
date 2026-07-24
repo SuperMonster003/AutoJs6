@@ -31,6 +31,15 @@ import org.autojs.autojs.runtime.api.augment.notice.Notice as AugmentableNotice
 
 class Channel(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
+    override val selfAssignmentFunctions = listOf(
+        ::create.name,
+        ::createIfNeeded.name,
+        ::remove.name,
+        ::contains.name,
+        ::get.name,
+        ::getAll.name,
+    )
+
     companion object : ArgumentGuards() {
 
         @JvmStatic
@@ -44,7 +53,7 @@ class Channel(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
 
             val id = AugmentableNotice.parseChannelId(scriptRuntime, arg0)
-            val options = arg1 as? NativeObject ?: newNativeObject()
+            val options = arg1 as? NativeObject ?: newNativeObject(scriptRuntime.topLevelScope)
 
             val name: String? = run {
                 val optName = options.prop("name")

@@ -33,9 +33,7 @@ class QrCode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
     override fun invoke(vararg args: Any?): Any? = ensureArgumentsAtMost(args, 3) { argList ->
         when {
-            argList.firstOrNull() as? Boolean == true -> {
-                recognizeTexts(scriptRuntime, argList)
-            }
+            Barcode.shouldTakeAsAll(argList) -> recognizeTexts(scriptRuntime, argList)
             else -> recognizeText(scriptRuntime, argList)
         }
     }
@@ -84,21 +82,22 @@ class QrCode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                     // @Overload
                     // detectAll(img: ImageWrapper): QrCode.Result[];
                     // detectAll(img: ImageWrapper, options: DetectOptions): QrCode.Result[];
-                    parse(scriptRuntime, arrayOf(img.oneShot(), arg1, arg2))
+                    parseOwnedImage(scriptRuntime, img, arg1, arg2)
                 }
                 !is ImageWrapper -> {
                     // @Signature detectAll(options?: DetectOptions): QrCode.Result[];
 
                     // @Overload detectAll(img: ImageWrapper, options?: DetectOptions): QrCode.Result[];
                     val capt = AugmentableImages.captureScreen(scriptRuntime, emptyArray())
-                    parse(scriptRuntime, arrayOf(capt, arg0, arg1))
+                    require(capt is ImageWrapper) { "Failed to capture a valid image for qrcode" }
+                    parseOwnedImage(scriptRuntime, capt, arg0, arg1)
                 }
                 else -> {
 
                     // @Signature detectAll(img: ImageWrapper, options?: DetectOptions): QrCode.Result[];
 
                     val img = arg0
-                    val opt = arg1 as? NativeObject ?: newNativeObject()
+                    val opt = arg1 as? NativeObject ?: newNativeObject(scriptRuntime.topLevelScope)
 
                     val formats = listOf(BarcodeFormats.FORMAT_QR_CODE).toIntArray()
                     val enableAllPotentialBarcodes = opt.inquire("enableAllPotentialQrCodes") { coerceBoolean(it, false) }
@@ -106,6 +105,21 @@ class QrCode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
                     BarcodeDetectData(img, formats, enableAllPotentialBarcodes, opt)
                 }
+            }
+        }
+
+        private fun parseOwnedImage(
+            scriptRuntime: ScriptRuntime,
+            image: ImageWrapper,
+            options: Any?,
+            isAll: Any?,
+        ): BarcodeDetectData {
+            val ownedImage = image.oneShot()
+            return try {
+                parse(scriptRuntime, arrayOf(ownedImage, options, isAll))
+            } catch (throwable: Throwable) {
+                ownedImage.shoot()
+                throw throwable
             }
         }
 

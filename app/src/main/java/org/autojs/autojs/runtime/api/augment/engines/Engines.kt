@@ -47,7 +47,7 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
     private fun setEngineExecArgv() {
         when (val tag = scriptRuntime.engines.myEngine().getTag(ExecutionConfig.tag)) {
             is ExecutionConfig -> {
-                val execArgv = newNativeObject()
+                val execArgv = newNativeObject(scriptRuntime.topLevelScope)
                 val iterator = tag.arguments.entries.iterator()
                 while (iterator.hasNext()) {
                     val entry = iterator.next()
@@ -120,7 +120,7 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
 
         private fun fillConfig(scriptRuntime: ScriptRuntime, o: Any?): ExecutionConfig {
             val result = ExecutionConfig()
-            when (val config = if (o.isJsNullish()) newNativeObject() else o) {
+            when (val config = if (o.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else o) {
                 is ExecutionConfig -> {
                     result.workingDirectory = config.workingDirectory.takeUnless { it.isBlank() } ?: scriptRuntime.files.cwd() ?: ""
                     result.delay = config.delay.takeUnless { it < 0 } ?: 0L

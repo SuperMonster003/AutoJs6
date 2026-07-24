@@ -24,7 +24,7 @@ import org.mozilla.javascript.Wrapper
 object Java : Augmentable() {
 
     override val selfAssignmentFunctions = listOf(
-        ::instanceof.name,
+        ::instanceof.name to listOf(::instanceof.name, "instanceOf"),
         ::array.name,
         ::toJsArray.name,
         ::objectToMap.name,
@@ -33,7 +33,7 @@ object Java : Augmentable() {
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
-    fun instanceof(args: Array<out Any?>): Any = ensureArgumentsLength(args, 2) {
+    fun instanceof(args: Array<out Any?>): Boolean = ensureArgumentsLength(args, 2) {
         val (obj, clazz) = it
         obj ?: throw WrappedIllegalArgumentException("Argument \"obj\" for util.java.instanceof must not be null")
 
@@ -48,7 +48,9 @@ object Java : Augmentable() {
             }
             else -> clazz.resolveClass()
         }
-        resolvedClass.isAssignableFrom(obj.javaClass)
+        val unwrappedObject = if (obj is Wrapper) obj.unwrap() else obj
+        unwrappedObject ?: return@ensureArgumentsLength false
+        resolvedClass.isAssignableFrom(unwrappedObject.javaClass)
     }
 
     @JvmStatic

@@ -23,7 +23,7 @@ class UI(context: Context, private val scriptRuntime: ScriptRuntime) : ProxyObje
     var isAndroidLayout: Boolean? = null
         internal set
 
-    val widgets by lazy { newNativeObject() }
+    val widgets by lazy { newNativeObject(scriptRuntime.topLevelScope) }
 
     var view: View? = null
 

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/23
+###### 2026/07/24
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -28,6 +28,7 @@
 * `新增` 插件中心支持 APK Builder Template 插件, 可按需安裝及更新打包應用所需模板
 * `新增` 主頁插件標籤頁浮動按鈕支持長按進入插件中心
 * `新增` runtime.loadAar 方法, 用於動態加載 AAR 文件
+* `新增` JavaScript (Rhino) 模塊支持 power/settings/work_manager 兼容接口及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` device.getMarketName 方法, 用於獲取設備的 "市場名稱" _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` 定時任務支持按月/按年/倒計時任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 文件管理器支持多選文件及批量複製/移動/刪除操作
@@ -63,6 +64,8 @@
 * `修復` dialogs.multiChoice 方法返回的多選結果被錯誤轉換為字符串的問題 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修復` selector 模塊反射調用重載方法時可能選擇錯誤方法簽名的問題
 * `修復` Rhino 引擎更新後作用域 API 兼容性回歸導致部分運行時輔助功能異常的問題
+* `修復` Rhino 模塊橋接對 null/undefined, Callable, 構造器, 原型, realm 及 Kotlin 返回值的處理不正確, 可能導致跨 realm 對象, 回調丟失或運行時異常的問題
+* `修復` 早期 JavaScript 模塊遷移中的參數分派, 返回值, 數值邊界, 圖像坐標及臨時資源生命週期與原實現不一致的問題
 * `修復` Android 14+ 申請屏幕捕獲權限時可能因媒體投影前台服務啟動異常導致應用崩潰的問題 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修復` 多線程或跨文件重複調用 OCR 時可能反覆申請屏幕捕獲權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_
 * `修復` Paddle OCR 插件服務長時間運行後可能斷開且無法自動恢復的問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
@@ -92,6 +95,7 @@
 * `優化` KeyCode 方法支持使用 Shizuku 權限發送鍵碼指令
 * `優化` 延遲初始化非關鍵組件, 提升應用啟動性能
 * `優化` 緩存 Rhino 內置資源編譯結果及運行時增強函數元數據, 提升腳本初始化性能
+* `優化` 重構 Kotlin 模塊增強架構, 顯式綁定 Rhino realm, 分離 tasks 與 work_manager 語義, 並補充模塊兼容性及語義回歸測試
 * `優化` 復用 Node.js 常駐進程及進程級運行時, 提升腳本連續運行時的啟動性能
 * `優化` Node.js 啟動支持分階段計時及可信的冷啟動/運行時熱啟動性能報告
 * `優化` 緩存 Node.js 內置原生庫解析結果, 避免重複發現插件

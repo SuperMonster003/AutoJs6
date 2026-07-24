@@ -38,7 +38,7 @@ class ResponseBodyNativeObject(
     }
 
     init {
-        RhinoUtils.initNativeObjectPrototype(this)
+        RhinoUtils.initNativeObjectPrototype(scriptRuntime.topLevelScope, this)
     }
 
     // Record whether it has been explicitly closed.

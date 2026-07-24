@@ -61,10 +61,10 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
     }
 
     override fun get(name: String, start: Scriptable): Any? = when (name) {
-        "equals" -> newBaseFunction("equals", {
+        "equals" -> newBaseFunction(RhinoUtils.getDeclarationScope(this), "equals", {
             ensureArgumentsOnlyOne(it) { other -> equals(other) }
         }, NOT_CONSTRUCTABLE)
-        StringReadable.KEY -> newBaseFunction(StringReadable.KEY, {
+        StringReadable.KEY -> newBaseFunction(RhinoUtils.getDeclarationScope(this), StringReadable.KEY, {
             ensureArgumentsIsEmpty(it) { toStringReadable() }
         }, NOT_CONSTRUCTABLE)
 
@@ -85,7 +85,7 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
             }
             try {
                 val method = Colors::class.java.getMethod(protoName, Array<Any>::class.java)
-                newBaseFunction(protoName, { args -> method.invoke(null, args.unshiftWith(color)) }, NOT_CONSTRUCTABLE)
+                newBaseFunction(RhinoUtils.getDeclarationScope(this), protoName, { args -> method.invoke(null, args.unshiftWith(color)) }, NOT_CONSTRUCTABLE)
             } catch (_: Exception) {
                 super.get(protoName, start)
             }
@@ -203,11 +203,12 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
         @RhinoStandardFunctionInterface
         fun setRgb(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): ColorNativeObject = ensureArgumentsLengthInRange(args, 1..3) {
             val c = thisObj as ColorNativeObject
-            c.color = when (it.size) {
+            val rgb = when (it.size) {
                 1 -> Colors.rgbRhino(it[0])
                 3 -> Colors.rgbRhino(it[0], it[1], it[2])
                 else -> throw WrappedIllegalArgumentException("Invalid arguments length ${it.size} for Color#setRgb")
             }
+            c.color = Colors.setAlphaRhino(rgb, Colors.alphaRhino(c.color))
             return@ensureArgumentsLengthInRange c
         }
 
@@ -239,11 +240,12 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
         @RhinoStandardFunctionInterface
         fun setHsv(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): ColorNativeObject = ensureArgumentsLengthInRange(args, 1..3) {
             val c = thisObj as ColorNativeObject
-            c.color = when (it.size) {
+            val hsv = when (it.size) {
                 1 -> Colors.hsvRhino(it[0])
                 3 -> Colors.hsvRhino(it[0], it[1], it[2])
                 else -> throw WrappedIllegalArgumentException("Invalid arguments length ${it.size} for Color#setHsv")
             }
+            c.color = Colors.setAlphaRhino(hsv, Colors.alphaRhino(c.color))
             return@ensureArgumentsLengthInRange c
         }
 
@@ -259,11 +261,12 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
         @RhinoStandardFunctionInterface
         fun setHsl(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): ColorNativeObject = ensureArgumentsLengthInRange(args, 1..3) {
             val c = thisObj as ColorNativeObject
-            c.color = when (it.size) {
+            val hsl = when (it.size) {
                 1 -> Colors.hslRhino(it[0])
                 3 -> Colors.hslRhino(it[0], it[1], it[2])
                 else -> throw WrappedIllegalArgumentException("Invalid arguments length ${it.size} for Color#setHsl")
             }
+            c.color = Colors.setAlphaRhino(hsl, Colors.alphaRhino(c.color))
             return@ensureArgumentsLengthInRange c
         }
 

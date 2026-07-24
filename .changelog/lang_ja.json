@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/23",
+      "released_date": "2026/07/24",
       "feature": [
         "Node.js 24.5.0 スクリプトランタイム, \"nodejs\" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応",
         "Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応",
@@ -23,6 +23,7 @@
         "プラグインセンターが APK Builder Template プラグインに対応, アプリのパッケージ化に必要なテンプレートを必要に応じてインストール/更新可能",
         "ホームのプラグインタブにあるフローティングボタンの長押しでプラグインセンターを開く機能に対応",
         "runtime.loadAar メソッド, AAR ファイルの動的ロード用",
+        "JavaScript (Rhino) モジュールで power/settings/work_manager 互換 API と AppInfo ラッパーをサポートし, Auto.js Pro 9.3.11 の一部の Base64/Crypto/WebSocket/ByteString/automator/images/timers API を拡充",
         "device.getMarketName メソッド, デバイスの \"市場名\" 取得用 _[`issue #513`](http://issues.autojs6.com/513)_",
         "タイマータスクが月次/年次/カウントダウンタスクと繰り返し終了条件に対応 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "ファイルマネージャーが複数選択と一括コピー/移動/削除操作に対応",
@@ -60,6 +61,8 @@
         "dialogs.multiChoice メソッドが返す複数選択結果が誤って文字列に変換される問題 _[`issue #518`](http://issues.autojs6.com/518)_",
         "selector モジュールがリフレクションでオーバーロードメソッドを呼び出す際に誤ったメソッドシグネチャを選択する可能性がある問題",
         "Rhino エンジン更新後のスコープ API 互換性リグレッションにより一部のランタイム補助機能が正常に動作しない問題",
+        "Rhino モジュールブリッジで null/undefined, Callable, コンストラクター, プロトタイプ, realm, Kotlin 戻り値が正しく処理されず, realm をまたぐオブジェクト, コールバック欠落, または実行時例外が発生する問題",
+        "初期 JavaScript モジュール移行の引数ディスパッチ, 戻り値, 数値境界, 画像座標, 一時リソースのライフサイクルが元の実装と一致しない問題",
         "Android 14+ で画面キャプチャ権限を要求するとメディアプロジェクションのフォアグラウンドサービス起動異常によりアプリがクラッシュする可能性がある問題 _[`issue #516`](http://issues.autojs6.com/516)_",
         "複数スレッドまたは複数ファイルから OCR を繰り返し呼び出すと画面キャプチャ権限を何度も要求する可能性がある問題 _[`issue #551`](http://issues.autojs6.com/551)_",
         "Paddle OCR プラグインサービスが長時間の実行後に切断され自動復旧できない可能性がある問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_",
@@ -91,6 +94,7 @@
         "KeyCode メソッドが Shizuku 権限によるキーコードコマンド送信に対応",
         "重要でないコンポーネントの初期化を遅延しアプリの起動性能を向上",
         "Rhino 内蔵リソースのコンパイル結果とランタイム拡張関数のメタデータをキャッシュしスクリプトの初期化性能を向上",
+        "Kotlin モジュール拡張アーキテクチャをリファクタリングし, Rhino realm の明示的なバインド, tasks と work_manager のセマンティクス分離, モジュール互換性とセマンティクスの回帰テスト拡充を実施",
         "Node.js 常駐プロセスとプロセス単位のランタイムを再利用しスクリプトのウォーム起動性能を向上",
         "Node.js 起動のフェーズ別計測と信頼できるコールド/ランタイムウォーム性能レポートを追加",
         "Node.js 内蔵ネイティブライブラリの解決結果をキャッシュしプラグインの反復検出を削減",

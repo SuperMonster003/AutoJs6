@@ -8,6 +8,7 @@ import org.junit.Test
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.Undefined
 
 class AugmentableFunctionCacheTest {
 
@@ -48,6 +49,14 @@ class AugmentableFunctionCacheTest {
         assertEquals("beta", call(betaTarget, "beta"))
     }
 
+    @Test
+    fun voidReturningMethodsProduceJavaScriptUndefined() {
+        val target = RhinoUtils.newNativeObject()
+        VoidAugmentable().assign(target)
+
+        assertEquals(Undefined.instance, call(target, "perform"))
+    }
+
     private fun call(target: ScriptableObject, name: String, vararg args: Any?): Any? {
         val function = target.get(name, target) as BaseFunction
         val callArgs = Array<Any?>(args.size) { index -> args[index] }
@@ -73,5 +82,15 @@ class AugmentableFunctionCacheTest {
 
         @Suppress("unused", "UNUSED_PARAMETER")
         fun beta(args: Array<out Any?>): String = "beta"
+    }
+
+    class VoidAugmentable : Augmentable() {
+
+        override val selfAssignmentFunctions = listOf("perform")
+
+        @Suppress("unused", "UNUSED_PARAMETER")
+        fun perform(args: Array<out Any?>) {
+            // Intentionally empty. Reflection exposes this Kotlin Unit method as JVM void.
+        }
     }
 }

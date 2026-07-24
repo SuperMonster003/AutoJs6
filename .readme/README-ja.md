@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 7 月 23 日 に更新されました.
+データは 2026 年 7 月 24 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/07/23
+###### 2026/07/24
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -188,6 +188,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` プラグインセンターが APK Builder Template プラグインに対応, アプリのパッケージ化に必要なテンプレートを必要に応じてインストール/更新可能
 * `新機能` ホームのプラグインタブにあるフローティングボタンの長押しでプラグインセンターを開く機能に対応
 * `新機能` runtime.loadAar メソッド, AAR ファイルの動的ロード用
+* `新機能` JavaScript (Rhino) モジュールで power/settings/work_manager 互換 API と AppInfo ラッパーをサポートし, Auto.js Pro 9.3.11 の一部の Base64/Crypto/WebSocket/ByteString/automator/images/timers API を拡充
 * `新機能` device.getMarketName メソッド, デバイスの "市場名" 取得用 _[`issue #513`](http://issues.autojs6.com/513)_
 * `新機能` タイマータスクが月次/年次/カウントダウンタスクと繰り返し終了条件に対応 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新機能` ファイルマネージャーが複数選択と一括コピー/移動/削除操作に対応
@@ -223,6 +224,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` dialogs.multiChoice メソッドが返す複数選択結果が誤って文字列に変換される問題 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修正` selector モジュールがリフレクションでオーバーロードメソッドを呼び出す際に誤ったメソッドシグネチャを選択する可能性がある問題
 * `修正` Rhino エンジン更新後のスコープ API 互換性リグレッションにより一部のランタイム補助機能が正常に動作しない問題
+* `修正` Rhino モジュールブリッジで null/undefined, Callable, コンストラクター, プロトタイプ, realm, Kotlin 戻り値が正しく処理されず, realm をまたぐオブジェクト, コールバック欠落, または実行時例外が発生する問題
+* `修正` 初期 JavaScript モジュール移行の引数ディスパッチ, 戻り値, 数値境界, 画像座標, 一時リソースのライフサイクルが元の実装と一致しない問題
 * `修正` Android 14+ で画面キャプチャ権限を要求するとメディアプロジェクションのフォアグラウンドサービス起動異常によりアプリがクラッシュする可能性がある問題 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修正` 複数スレッドまたは複数ファイルから OCR を繰り返し呼び出すと画面キャプチャ権限を何度も要求する可能性がある問題 _[`issue #551`](http://issues.autojs6.com/551)_
 * `修正` Paddle OCR プラグインサービスが長時間の実行後に切断され自動復旧できない可能性がある問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
@@ -252,6 +255,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` KeyCode メソッドが Shizuku 権限によるキーコードコマンド送信に対応
 * `改善` 重要でないコンポーネントの初期化を遅延しアプリの起動性能を向上
 * `改善` Rhino 内蔵リソースのコンパイル結果とランタイム拡張関数のメタデータをキャッシュしスクリプトの初期化性能を向上
+* `改善` Kotlin モジュール拡張アーキテクチャをリファクタリングし, Rhino realm の明示的なバインド, tasks と work_manager のセマンティクス分離, モジュール互換性とセマンティクスの回帰テスト拡充を実施
 * `改善` Node.js 常駐プロセスとプロセス単位のランタイムを再利用しスクリプトのウォーム起動性能を向上
 * `改善` Node.js 起動のフェーズ別計測と信頼できるコールド/ランタイムウォーム性能レポートを追加
 * `改善` Node.js 内蔵ネイティブライブラリの解決結果をキャッシュしプラグインの反復検出を削減
@@ -561,7 +565,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 7 月 23 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 7 月 24 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

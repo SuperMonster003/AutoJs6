@@ -31,7 +31,7 @@ import javax.net.ssl.X509TrustManager
 class RequestBuilder(
     private val scriptRuntime: ScriptRuntime,
     private val url: Any?,
-    options: NativeObject = RhinoUtils.newNativeObject(),
+    options: NativeObject = RhinoUtils.newNativeObject(scriptRuntime.topLevelScope),
 ) {
 
     private val mRequest = Request.Builder()

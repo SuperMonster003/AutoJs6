@@ -39,7 +39,7 @@ class Events(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun __asEmitter__(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ScriptableObject = ensureArgumentsAtMost(args, 2) { arguments ->
             var (obj, thread) = arguments
             if (obj.isJsNullish()) {
-                obj = newNativeObject()
+                obj = newNativeObject(scriptRuntime.topLevelScope)
             }
             require(obj is ScriptableObject) { "Argument \"obj\" ${obj.jsBrief()} for events.__asEmitter__ must be a ScriptableObject" }
             val emitter: EventEmitter = when {
@@ -52,7 +52,7 @@ class Events(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             emitter.javaClass.declaredMethods.filter {
                 !obj.hasProp(it.name) && it.name.matches(Regex("\\w+")) && Modifier.isPublic(it.modifiers)
             }.forEach { method ->
-                obj.defineProp(method.name, newBaseFunction(method.name, { argList ->
+                obj.defineProp(method.name, newBaseFunction(scope, method.name, { argList ->
                     val thisObj = Context.javaToJS(emitter, scope) as Scriptable
                     callFunction(scriptRuntime, newNativeJavaMethod(scope, method, method.name), scope, thisObj, arrayOf(*argList))
                 }, NOT_CONSTRUCTABLE))

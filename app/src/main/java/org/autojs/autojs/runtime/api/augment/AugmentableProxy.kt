@@ -14,8 +14,8 @@ import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
-import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Scriptable.NOT_FOUND
@@ -27,18 +27,12 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
     open fun set(augmented: ScriptableObject, key: String, value: Any?): Undefined {
         if (key == "constructor") return UNDEFINED
 
-        val setterResult = listOf(
-            when {
-                Regex("^set[A-Z].*").containsMatchIn(key) -> key
-                else -> "set${key.uppercaseFirstChar()}"
-            },
-            when {
-                Regex("^is[A-Z].*").containsMatchIn(key) -> key
-                else -> "is${key.uppercaseFirstChar()}"
-            },
-        ).any { setCore(augmented, it, value) }
+        val setterKey = when {
+            Regex("^set[A-Z].*").matches(key) -> key
+            else -> "set${key.uppercaseFirstChar()}"
+        }
 
-        require(setterResult) {
+        require(setCore(augmented, setterKey, value)) {
             throw WrappedIllegalArgumentException("Unknown key \"$key\" for augmentable proxy setter")
         }
 
@@ -46,17 +40,14 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
     }
 
     open fun setCore(augmented: ScriptableObject, key: String, value: Any?): Boolean {
-        return when (val o = augmented.prop(key)) {
-            is BaseFunction -> when (value) {
-                is NativeArray -> {
-                    callFunction(scriptRuntime, o, augmented, augmented, value.toTypedArray())
-                }
-                else -> {
-                    callFunction(scriptRuntime, o, augmented, augmented, arrayOf(value))
-                }
-            }
-            else -> null
-        }.let { it != null }
+        val setter = augmented.prop(key)
+        if (setter !is Callable) return false
+        val args = when (value) {
+            is NativeArray -> value.toTypedArray()
+            else -> arrayOf(value)
+        }
+        callFunction(scriptRuntime, setter, RhinoUtils.getDeclarationScope(augmented), augmented, args)
+        return true
     }
 
     open fun get(augmented: ScriptableObject, key: String): Any? {
@@ -76,7 +67,7 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
     open fun getCore(augmented: ScriptableObject, key: String): Any? = when (key) {
         AUGMENTED_OBJECT_KEY -> augmented
         else -> when (val value = augmented.prop(key)) {
-            is BaseFunction -> when {
+            is Callable -> when {
                 // @Hint by SuperMonster003 on Nov 6, 2024.
                 //  ! Indicated that `key` is not defined in `augmented`
                 //  ! but defined in a certain object in its prototype chain.

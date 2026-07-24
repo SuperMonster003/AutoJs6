@@ -32,9 +32,7 @@ class Barcode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
 
     override fun invoke(vararg args: Any?): Any? = ensureArgumentsAtMost(args, 3) { argList ->
         when {
-            argList.firstOrNull() as? Boolean == true -> {
-                recognizeTexts(scriptRuntime, argList)
-            }
+            shouldTakeAsAll(argList) -> recognizeTexts(scriptRuntime, argList)
             else -> recognizeText(scriptRuntime, argList)
         }
     }
@@ -93,21 +91,22 @@ class Barcode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
                     // @Overload
                     // detectAll(img: ImageWrapper): Barcode.Result[];
                     // detectAll(img: ImageWrapper, options: DetectOptions): Barcode.Result[];
-                    parse(scriptRuntime, arrayOf(img.oneShot(), arg1, arg2))
+                    parseOwnedImage(scriptRuntime, img, arg1, arg2)
                 }
                 !is ImageWrapper -> {
                     // @Signature detectAll(options?: DetectOptions): Barcode.Result[];
 
                     // @Overload detectAll(img: ImageWrapper, options?: DetectOptions): Barcode.Result[];
                     val capt = AugmentableImages.captureScreen(scriptRuntime, emptyArray())
-                    parse(scriptRuntime, arrayOf(capt, arg0, arg1))
+                    require(capt is ImageWrapper) { "Failed to capture a valid image for barcode" }
+                    parseOwnedImage(scriptRuntime, capt, arg0, arg1)
                 }
                 else -> {
 
                     // @Signature detectAll(img: ImageWrapper, options?: DetectOptions): Barcode.Result[];
 
                     val img = arg0
-                    val opt = arg1 as? NativeObject ?: newNativeObject()
+                    val opt = arg1 as? NativeObject ?: newNativeObject(scriptRuntime.topLevelScope)
 
                     val transformer = mapOf(
                         "FORMAT_QRCODE" to "FORMAT_QR_CODE"
@@ -141,31 +140,68 @@ class Barcode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
             }
         }
 
+        private fun parseOwnedImage(
+            scriptRuntime: ScriptRuntime,
+            image: ImageWrapper,
+            options: Any?,
+            isAll: Any?,
+        ): BarcodeDetectData {
+            val ownedImage = image.oneShot()
+            return try {
+                parse(scriptRuntime, arrayOf(ownedImage, options, isAll))
+            } catch (throwable: Throwable) {
+                ownedImage.shoot()
+                throw throwable
+            }
+        }
+
         fun recognizeTextInternal(scriptRuntime: ScriptRuntime, argList: Array<Any?>, parser: (ScriptRuntime, Array<out Any?>) -> BarcodeDetectData): Any? {
-            val (img, formats, enableAllPotentialBarcodes, options) = parser.invoke(scriptRuntime, argList)
-            val isAll = options.inquire("isAll") { coerceBoolean(it, false) } ?: false
-            return when {
-                isAll -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, false).mapNotNull { it.getRawValue() }
-                else -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, true).firstOrNull()?.getRawValue()
+            return withBarcodeDetectData(scriptRuntime, argList, parser) { (img, formats, enableAllPotentialBarcodes) ->
+                val isAll = shouldTakeAsAll(argList)
+                when {
+                    isAll -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, false).mapNotNull { it.getRawValue() }
+                    else -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, true).firstOrNull()?.getRawValue()
+                }
             }
         }
 
         fun recognizeTextsInternal(scriptRuntime: ScriptRuntime, argList: Array<Any?>, parser: (ScriptRuntime, Array<out Any?>) -> BarcodeDetectData): List<String> {
-            return detectAll(scriptRuntime, argList).mapNotNull { it.getRawValue() }
+            return detectAllInternal(scriptRuntime, argList, parser).mapNotNull { it.getRawValue() }
         }
 
         fun detectInternal(scriptRuntime: ScriptRuntime, argList: Array<Any?>, parser: (ScriptRuntime, Array<out Any?>) -> BarcodeDetectData): Any? {
-            val (img, formats, enableAllPotentialBarcodes, options) = parser.invoke(scriptRuntime, argList)
-            val isAll = options.inquire("isAll") { coerceBoolean(it, false) } ?: false
-            return when {
-                isAll -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, false)
-                else -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, true).firstOrNull()
+            return withBarcodeDetectData(scriptRuntime, argList, parser) { (img, formats, enableAllPotentialBarcodes) ->
+                val isAll = shouldTakeAsAll(argList)
+                when {
+                    isAll -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, false)
+                    else -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, true).firstOrNull()
+                }
             }
         }
 
         fun detectAllInternal(scriptRuntime: ScriptRuntime, argList: Array<Any?>, parser: (ScriptRuntime, Array<out Any?>) -> BarcodeDetectData): List<WrappedBarcode> {
-            val (img, formats, enableAllPotentialBarcodes) = parser.invoke(scriptRuntime, argList)
-            return scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, false)
+            return withBarcodeDetectData(scriptRuntime, argList, parser) { (img, formats, enableAllPotentialBarcodes) ->
+                scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, false)
+            }
+        }
+
+        private inline fun <T> withBarcodeDetectData(
+            scriptRuntime: ScriptRuntime,
+            argList: Array<Any?>,
+            parser: (ScriptRuntime, Array<out Any?>) -> BarcodeDetectData,
+            block: (BarcodeDetectData) -> T,
+        ): T {
+            val data = parser.invoke(scriptRuntime, argList)
+            return try {
+                block(data)
+            } finally {
+                data.img.shoot()
+            }
+        }
+
+        internal fun shouldTakeAsAll(args: Array<out Any?>): Boolean {
+            val last = args.lastOrNull() ?: return false
+            return last == true || (last is NativeObject && (last.inquire("isAll") { coerceBoolean(it, false) } ?: false))
         }
 
     }
