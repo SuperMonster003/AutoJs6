@@ -102,12 +102,15 @@ trust plus R6 required-plugin selectors. The canonical verifier rejects missing
 or forged `required`, `authenticated`, or `trusted` provenance even when the APK
 hash fields are otherwise well formed.
 
-All collector Gradle invocations use `--no-daemon` and in-process Kotlin
-compilation. This isolates the runtime-plugin build, template/Builder build, and
-connected evidence gate from reusable Gradle or Kotlin compiler daemons. They
-also use a daemon registry inside the unique run directory while retaining the
-shared Gradle dependency cache, so an unrelated checkout's global
-`gradle --stop` cannot terminate an in-flight evidence build.
+All four collector Gradle invocations use `--no-daemon` and in-process Kotlin
+compilation. This isolates the runtime-plugin build, target-ABI template build,
+Runtime-Kit-backed APK Builder release build, and connected evidence gate from
+reusable Gradle or Kotlin compiler daemons. The Debug template and Release
+Builder graphs run sequentially in separate processes because their combined
+4 GB compiler process exceeded its heap; each isolated full rebuild passes.
+All four invocations use a daemon registry inside the unique run directory
+while retaining the shared Gradle dependency cache, so an unrelated checkout's
+global `gradle --stop` cannot terminate an in-flight evidence build.
 
 The target constraints are fail-closed: the two Sony entries must use the
 required 64-bit and 32-bit runtime ABIs, the second-OEM entry must be a

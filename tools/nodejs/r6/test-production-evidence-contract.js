@@ -23,6 +23,7 @@ const {
   evaluateSoakReport,
 } = require("./verify-production-evidence");
 const {
+  buildApkBuilderPluginGradleArgs,
   buildEvidenceGradleArgs,
   buildIsolatedGradleArgs,
   buildPackagedTemplateGradleArgs,
@@ -1235,29 +1236,45 @@ function assertDeviceRunnerGradleContracts() {
   });
   assert.strictEqual(devicePaths.size, DEVICE_REQUIREMENTS.length);
   const templateArgs = buildPackagedTemplateGradleArgs(identity.host.commit);
-  assertIsolatedGradleArgs(templateArgs, "packaged template and APK Builder plugin build");
-  assertPerRunDaemonRegistryArgs(
-    templateArgs,
-    "packaged template and APK Builder plugin build",
-  );
+  assertIsolatedGradleArgs(templateArgs, "packaged template build");
+  assertPerRunDaemonRegistryArgs(templateArgs, "packaged template build");
   assert.strictEqual(templateArgs.filter((value) => value === ":app:packageInrtDebug").length, 1);
+  assert(!templateArgs.includes(":plugins:apk-builder-template:packageRelease"));
+  assert(!templateArgs.some((value) =>
+    value.startsWith("-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=")));
+  const apkBuilderArgs = buildApkBuilderPluginGradleArgs(identity.host.commit);
+  assertIsolatedGradleArgs(apkBuilderArgs, "APK Builder plugin build");
+  assertPerRunDaemonRegistryArgs(apkBuilderArgs, "APK Builder plugin build");
+  assert(!apkBuilderArgs.includes(":app:packageInrtDebug"));
   assert.strictEqual(
-    templateArgs.filter((value) =>
+    apkBuilderArgs.filter((value) =>
       value === ":plugins:apk-builder-template:packageRelease").length,
     1,
   );
-  assert(!templateArgs.includes(":plugins:apk-builder-template:packageDebug"));
+  assert(!apkBuilderArgs.includes(":plugins:apk-builder-template:packageDebug"));
   assert.deepStrictEqual(
-    templateArgs.filter((value) =>
+    apkBuilderArgs.filter((value) =>
       value.startsWith("-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=")),
     ["-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true"],
   );
-  assert.deepStrictEqual(
-    templateArgs.filter((value) => value.startsWith("-Pautojs.git.sha=")),
-    [`-Pautojs.git.sha=${identity.host.commit}`],
+  [templateArgs, apkBuilderArgs].forEach((args) => {
+    assert.deepStrictEqual(
+      args.filter((value) => value.startsWith("-Pautojs.git.sha=")),
+      [`-Pautojs.git.sha=${identity.host.commit}`],
+    );
+    assert(args.includes("-Pautojs.nodejs.embedded.script.enabled=true"));
+    assert(!args.some((value) => value.startsWith("-Pautojs.nodejs.releaseFlavor=")));
+  });
+  const packagedTemplateInvocation = collectorSource.indexOf(
+    "args: buildPackagedTemplateGradleArgs(identityBefore.host.commit)",
   );
-  assert(templateArgs.includes("-Pautojs.nodejs.embedded.script.enabled=true"));
-  assert(!templateArgs.some((value) => value.startsWith("-Pautojs.nodejs.releaseFlavor=")));
+  const apkBuilderInvocation = collectorSource.indexOf(
+    "args: buildApkBuilderPluginGradleArgs(identityBefore.host.commit)",
+  );
+  assert(packagedTemplateInvocation >= 0);
+  assert(apkBuilderInvocation > packagedTemplateInvocation);
+  assert(collectorSource.includes('label: "packaged-template-build"'));
+  assert(collectorSource.includes('label: "apk-builder-plugin-build"'));
   assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("packagedTemplateApkSha256"));
   assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("apkBuilderPluginApkSha256"));
   assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("apkBuilderPluginApkBeforeTestSha256"));

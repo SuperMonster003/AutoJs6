@@ -469,10 +469,13 @@ report. The collector now builds
 and generated Runtime Kit, enables remote build explicitly, requires the host
 release signer and exact Builder service, and proves the installed Builder APK
 matches the fresh build and remains unchanged before and after testing. All
-three collector Gradle invocations are single-use with in-process Kotlin
+four collector Gradle invocations are single-use with in-process Kotlin
 compilation and a per-run daemon registry, so another checkout's global
-`gradle --stop` cannot terminate the evidence build. The four current device
-reports remain required.
+`gradle --stop` cannot terminate the evidence build. The target-ABI
+`packageInrtDebug` template and Runtime-Kit-backed Builder release are also
+compiled in separate sequential processes: their former combined 4 GB process
+failed with `GC overhead limit exceeded`, while both isolated rebuilds passed
+from the same clean commit. The four current device reports remain required.
 
 Core completion command:
 

@@ -1968,6 +1968,20 @@ function validateContractAnchors(repoRoot) {
       "R6 production device collector must build, install, and attest the current-source release APK Builder plugin",
     );
   }
+  const packagedTemplateBuildIndex = deviceCollector.indexOf(
+    "args: buildPackagedTemplateGradleArgs(identityBefore.host.commit)",
+  );
+  const apkBuilderPluginBuildIndex = deviceCollector.indexOf(
+    "args: buildApkBuilderPluginGradleArgs(identityBefore.host.commit)",
+  );
+  if (packagedTemplateBuildIndex < 0 ||
+      apkBuilderPluginBuildIndex <= packagedTemplateBuildIndex ||
+      !deviceCollector.includes('label: "packaged-template-build"') ||
+      !deviceCollector.includes('label: "apk-builder-plugin-build"')) {
+    violations.push(
+      "R6 production device collector must build the packaged template and APK Builder plugin in separate ordered Gradle invocations",
+    );
+  }
   if (!deviceCollector.includes('"--no-daemon"') ||
       !deviceCollector.includes('"-Pkotlin.compiler.execution.strategy=in-process"')) {
     violations.push("R6 production device collector must isolate all Gradle and Kotlin compiler invocations");

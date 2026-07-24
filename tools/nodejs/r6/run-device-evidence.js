@@ -349,9 +349,22 @@ async function main() {
     );
     const packagedTemplateArtifact = artifactRecord(packagedTemplateCopy, repoRoot);
 
+    const apkBuilderPluginBuild = await runGradle({
+      root: repoRoot,
+      args: buildApkBuilderPluginGradleArgs(identityBefore.host.commit),
+      timeoutMs: boundedNumber(options.gradleTimeoutMs, 14_400_000, 900_000, 43_200_000, "gradle-timeout-ms"),
+      context,
+      label: "apk-builder-plugin-build",
+    });
+    requireSuccessfulCommand(apkBuilderPluginBuild, "APK Builder plugin build");
+    assertSameCleanIdentity(
+      identityBefore,
+      currentIdentity(repoRoot, pluginRoot),
+      "after the APK Builder plugin build",
+    );
     const apkBuilderPluginBuildApk = selectFreshUniversalApk(
       path.join(repoRoot, "plugins/apk-builder-template/build/outputs/apk/release"),
-      packagedTemplateBuild.startedAt,
+      apkBuilderPluginBuild.startedAt,
       "APK Builder plugin release",
     );
     const apkBuilderPluginBuildMetadata = inspectApk(apkBuilderPluginBuildApk, repoRoot, context);
@@ -863,6 +876,17 @@ function buildPluginGradleArgs() {
 }
 
 function buildPackagedTemplateGradleArgs(hostCommit) {
+  return buildCurrentSourceHostGradleArgs(hostCommit, PACKAGED_TEMPLATE_TASK);
+}
+
+function buildApkBuilderPluginGradleArgs(hostCommit) {
+  return [
+    ...buildCurrentSourceHostGradleArgs(hostCommit, APK_BUILDER_PLUGIN_TASK),
+    `-P${APK_BUILDER_PLUGIN_REMOTE_BUILD_PROPERTY}=true`,
+  ];
+}
+
+function buildCurrentSourceHostGradleArgs(hostCommit, task) {
   const commit = String(hostCommit || "").trim();
   if (!/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i.test(commit)) {
     throw new Error(`A full 40- or 64-character hexadecimal host commit is required, got ${hostCommit || "missing"}.`);
@@ -872,9 +896,7 @@ function buildPackagedTemplateGradleArgs(hostCommit) {
     "--no-daemon",
     "--rerun-tasks",
     "-Pkotlin.compiler.execution.strategy=in-process",
-    PACKAGED_TEMPLATE_TASK,
-    APK_BUILDER_PLUGIN_TASK,
-    `-P${APK_BUILDER_PLUGIN_REMOTE_BUILD_PROPERTY}=true`,
+    task,
     `-Pautojs.git.sha=${commit}`,
     `-Pautojs.nodejs.runtimeSlot=${RUNTIME_SLOT}`,
     "-Pautojs.nodejs.embedded.script.enabled=true",
@@ -2178,7 +2200,7 @@ Artifact/source options:
   --no-archive                  Validate the staged report without replacing device/<target>.json.
 
 Operational timeouts:
-  --gradle-timeout-ms MS         Main connected gate timeout (15 minutes..12 hours).
+  --gradle-timeout-ms MS         Each host Gradle invocation timeout (15 minutes..12 hours).
   --plugin-build-timeout-ms MS   Plugin build timeout (5 minutes..4 hours).
 
 The runner fixes nodePlugin/plugin/node24_5, the target profile and packaged-smoke ABI,
@@ -2193,6 +2215,7 @@ It accepts no status, force, selector, profile, duration, or run-token override.
 
 module.exports = {
   SELECTOR_DERIVATION,
+  buildApkBuilderPluginGradleArgs,
   buildEvidenceGradleArgs,
   buildIsolatedGradleArgs,
   buildPackagedTemplateGradleArgs,
