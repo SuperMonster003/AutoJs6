@@ -189,6 +189,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 홈의 플러그인 탭에 있는 플로팅 버튼을 길게 눌러 플러그인 센터를 여는 기능 지원
 * `추가` runtime.loadAar 메서드, AAR 파일 동적 로드용
 * `추가` JavaScript (Rhino) 모듈에서 power/settings/work_manager 호환 인터페이스와 AppInfo 래퍼를 지원하고 Auto.js Pro 9.3.11의 일부 Base64/Crypto/WebSocket/ByteString/automator/images/timers API를 보완
+* `추가` 전역 JavaScript (Rhino) ai 모듈에서 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 공급자, ask/chat/stream 호출 및 도구 호출의 다중 라운드 연속 실행 지원; 개발자 옵션에서 암호화된 다중 프로필과 자격 증명을 관리할 수 있으며 로컬 루프백 주소의 호환 엔드포인트는 API 키 없이 실행 가능
 * `추가` device.getMarketName 메서드, 기기의 "제품명" 확인용 _[`issue #513`](http://issues.autojs6.com/513)_
 * `추가` 예약 작업에서 월간/연간/카운트다운 작업 및 반복 종료 조건 지원 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `추가` 파일 관리자에서 다중 선택 및 일괄 복사/이동/삭제 작업 지원
@@ -227,6 +228,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` Rhino 모듈 브리지가 null/undefined, Callable, 생성자, 프로토타입, realm 및 Kotlin 반환값을 잘못 처리하여 교차 realm 객체, 콜백 누락 또는 런타임 예외가 발생할 수 있는 문제
 * `수정` Proxy로 래핑된 함수를 dialogs, events, timers, UI, selector 및 automator 등의 기존 모듈에서 콜백으로 사용할 수 없고, TimerThread 콜백 인수가 중첩 배열로 전달될 수 있는 문제
 * `수정` Callable 및 BaseFunction 호환 오버로드로 인해 일반 JavaScript 함수가 EventEmitter.on 등의 Java 메서드를 호출할 때 인수 타입이 모호해지는 문제
+* `수정` 이벤트 재귀 디스패치 중 또는 리스너가 예외를 던질 때 EventEmitter.once 리스너가 두 번 이상 호출될 수 있는 문제
 * `수정` automator.home 등의 전역 동작을 처음 호출할 때 보조 Looper 초기화가 중단되면 NullPointerException이 발생할 수 있고, 제스처 Y 좌표에 가로 배율이 잘못 사용되는 문제
 * `수정` 초기 JavaScript 모듈 마이그레이션의 인수 디스패치, 반환값, 숫자 경계, 이미지 좌표 및 임시 리소스 수명 주기가 원래 구현과 일치하지 않는 문제
 * `수정` Android 14+에서 화면 캡처 권한을 요청할 때 미디어 프로젝션 포그라운드 서비스 시작 오류로 앱이 충돌할 수 있는 문제 _[`issue #516`](http://issues.autojs6.com/516)_

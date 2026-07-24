@@ -94,6 +94,9 @@
     <string name="key_ace_lsp_file_types" translatable="false">key_$_ace_lsp_file_types</string>
     <string name="key_ace_print_margin_enabled" translatable="false">key_$_ace_print_margin_enabled</string>
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
+    <string name="key_ai_default_profile" translatable="false">key_$_ai_default_profile</string>
+    <string name="key_ai_profiles" translatable="false">key_$_ai_profiles</string>
+    <string name="key_ai_settings" translatable="false">key_$_ai_settings</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
     <string name="key_app_language" translatable="false">key_$_app_language</string>
     <string name="key_app_language_ar" translatable="false">key_$_app_language_ar</string>

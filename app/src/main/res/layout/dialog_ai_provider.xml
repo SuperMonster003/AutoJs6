@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/day_night_full"
+            android:textSize="24sp"
+            tools:text="AI provider profile" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                    android:id="@+id/name_text_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/text_name"
+                    app:expandedHintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences"
+                        android:textColor="@color/text_color_primary" />
+
+                </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="8dp"
+                    android:labelFor="@id/provider"
+                    android:text="@string/text_ai_provider"
+                    android:textSize="11sp" />
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/provider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-4dp"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/text_color_primary"
+                    android:textSize="16sp" />
+
+                <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                    android:id="@+id/base_url_text_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/text_ai_base_url"
+                    app:expandedHintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/base_url"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textUri"
+                        android:textColor="@color/text_color_primary" />
+
+                </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                    android:id="@+id/model_text_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/text_ai_model"
+                    app:expandedHintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/model"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textNoSuggestions"
+                        android:textColor="@color/text_color_primary" />
+
+                </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                    android:id="@+id/api_key_text_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/text_ai_api_key"
+                    app:endIconMode="password_toggle"
+                    app:expandedHintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/api_key"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:importantForAutofill="noExcludeDescendants"
+                        android:inputType="textPassword|textNoSuggestions"
+                        android:saveEnabled="false"
+                        android:textColor="@color/text_color_primary" />
+
+                </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                <TextView
+                    android:id="@+id/api_key_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="@string/summary_ai_api_key_new"
+                    android:textColor="@color/text_color_secondary"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/clear_api_key"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_vertical|start"
+                    android:text="@string/text_ai_clear_api_key"
+                    android:textAlignment="viewStart"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/set_as_default"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_vertical|start"
+                    android:text="@string/text_ai_set_as_default"
+                    android:textAlignment="viewStart" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/delete"
+                style="@style/MD_ActionButton.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                android:gravity="start|center_vertical"
+                android:text="@string/text_delete"
+                android:textColor="@color/dialog_button_hint"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <Button
+                android:id="@+id/cancel"
+                style="@style/MD_ActionButton.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:text="@string/dialog_button_cancel"
+                android:textColor="@color/dialog_button_default" />
+
+            <Button
+                android:id="@+id/save"
+                style="@style/MD_ActionButton.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:text="@string/dialog_button_save"
+                android:textColor="@color/dialog_button_attraction" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

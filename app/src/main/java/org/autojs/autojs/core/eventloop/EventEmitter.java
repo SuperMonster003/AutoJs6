@@ -9,7 +9,6 @@ import org.mozilla.javascript.Callable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TooManyListenersException;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -66,10 +65,12 @@ public class EventEmitter {
         }
 
         public void emit(Object[] args) {
-            Iterator<ListenerWrapper> iterator = listeners.iterator();
-            int index = 0;
-            while (iterator.hasNext()) {
-                ListenerWrapper listenerWrapper = iterator.next();
+            for (ListenerWrapper listenerWrapper : listeners) {
+                if (listenerWrapper.isOnce && !listeners.remove(listenerWrapper)) {
+                    // Remove by identity before invocation. This keeps multiple once listeners,
+                    // recursive emits, and throwing listeners from observing stale registrations.
+                    continue;
+                }
                 Callable listener = listenerWrapper.getCallable();
                 if (listener instanceof IListener) {
                     ((IListener) listener).onEvent(args);
@@ -80,10 +81,6 @@ public class EventEmitter {
                         mBridges.call(listener, EventEmitter.this, args);
                     }
                 }
-                if (listenerWrapper.isOnce) {
-                    listeners.remove(index);
-                }
-                ++index;
             }
         }
 

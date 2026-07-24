@@ -29,6 +29,7 @@
 * `新增` 主頁外掛標籤頁浮動按鈕支援長按進入外掛中心
 * `新增` runtime.loadAar 方法, 用於動態載入 AAR 檔案
 * `新增` JavaScript (Rhino) 模組支援 power/settings/work_manager 相容介面及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
+* `新增` 全域 JavaScript (Rhino) ai 模組支援 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 呼叫及工具呼叫多輪續接; 開發者選項支援加密的多設定檔及憑證管理, 本機迴路位址上的相容端點可免 API 金鑰執行
 * `新增` device.getMarketName 方法, 用於獲取裝置的 "市場名稱" _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` 定時任務支援按月/按年/倒數任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 檔案管理器支援多選檔案及批次複製/移動/刪除操作
@@ -67,6 +68,7 @@
 * `修復` Rhino 模組橋接對 null/undefined, Callable, 建構函式, 原型, realm 及 Kotlin 傳回值的處理不正確, 可能造成跨 realm 物件, 回呼遺失或執行階段例外的問題
 * `修復` Proxy 包裝函式無法作為 dialogs, events, timers, UI, selector 及 automator 等舊模組的回呼, 且 TimerThread 回呼參數可能以巢狀陣列傳遞的問題
 * `修復` Callable 與 BaseFunction 相容多載導致一般 JavaScript 函式呼叫 EventEmitter.on 等 Java 方法時出現參數型別歧義的問題
+* `修復` EventEmitter.once 監聽器在事件遞迴分派或監聽器擲回例外時可能重複呼叫的問題
 * `修復` automator.home 等全域操作首次呼叫時可能因輔助 Looper 初始化遭中斷而擲回空指標例外, 且手勢 Y 座標可能誤用橫向縮放比例的問題
 * `修復` 早期 JavaScript 模組遷移中的引數分派, 傳回值, 數值邊界, 影像座標及暫存資源生命週期與原始實作不一致的問題
 * `修復` Android 14+ 申請螢幕擷取權限時可能因媒體投影前景服務啟動異常導致應用程式當機的問題 _[`issue #516`](http://issues.autojs6.com/516)_

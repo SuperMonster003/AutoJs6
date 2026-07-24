@@ -33,6 +33,8 @@ import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.WrappedShizuku
+import org.autojs.autojs.runtime.api.ai.AiService
+import org.autojs.autojs.runtime.api.augment.ai.Ai
 import org.autojs.autojs.runtime.api.augment.app.App
 import org.autojs.autojs.runtime.api.augment.autojs.Autojs
 import org.autojs.autojs.runtime.api.augment.automator.Auto
@@ -280,6 +282,8 @@ class ScriptRuntime private constructor(builder: Builder) {
     @ScriptVariable
     val http: ApiHttp
 
+    private val ai: AiService
+
     @JvmField
     @ScriptVariable
     val device: ApiDevice
@@ -470,6 +474,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         sqlite = ApiSQLite(mUiHandlerAppContext, this)
 
         http = ApiHttp()
+        ai = AiService(mUiHandlerAppContext, this, http.okhttp.client())
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()
 
@@ -633,6 +638,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             events.emit("exit")
         }
 
+        ignoresException { ai.close() }
         if (::threads.isInitialized) ignoresException { threads.shutDownAll() }
         if (::events.isInitialized) ignoresException { events.recycle() }
         ignoresException { media.recycle() }
@@ -803,6 +809,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         WorkManager(this).augment(target, true)
         Dialogs(this).augment(target, true)
         Continuation(this).augment(target, js_mod_continuation, true, READONLY)
+        Ai(this, ai).augment(target, true)
         Http(this).augment(target, http, true)
         Web(this).augment(target, true)
         WebSocket(this).augment(target, WebSocketFields, false)

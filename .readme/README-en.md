@@ -189,6 +189,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Long-pressing the floating button on the Home Plugins tab opens the Plugin Center
 * `Feature` runtime.loadAar method, for dynamically loading AAR files
 * `Feature` JavaScript (Rhino) modules support compatible power/settings/work_manager interfaces and an AppInfo wrapper, and complete selected Base64/Crypto/WebSocket/ByteString/automator/images/timers APIs from Auto.js Pro 9.3.11
+* `Feature` Global JavaScript (Rhino) ai module supports OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible providers, ask/chat/stream calls, and multi-round tool-call continuation; Developer options provide encrypted multi-profile configuration and credential management, while compatible endpoints on local loopback addresses can run without an API key
 * `Feature` device.getMarketName method, for obtaining the device's "market name" _[`issue #513`](http://issues.autojs6.com/513)_
 * `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Feature` File manager supports multi-selection and batch copy/move/delete operations
@@ -227,6 +228,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
 * `Fix` Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array
 * `Fix` Callable and BaseFunction compatibility overloads caused ambiguous parameter types when ordinary JavaScript functions called Java methods such as EventEmitter.on
+* `Fix` EventEmitter.once listeners could be invoked more than once during recursive event dispatch or when a listener threw an exception
 * `Fix` Global actions such as automator.home could throw a null pointer exception when servant Looper initialization was interrupted on first use, and gesture Y coordinates could incorrectly use the horizontal scaling ratio
 * `Fix` Argument dispatch, return values, numeric boundaries, image coordinates, and temporary resource lifecycles in the early JavaScript module migration did not match the original implementation
 * `Fix` The app could crash when requesting screen capture permission on Android 14+ due to abnormal media projection foreground service startup _[`issue #516`](http://issues.autojs6.com/516)_

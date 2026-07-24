@@ -35,6 +35,19 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_ai">
+
+        <org.autojs.autojs.ui.settings.AiSettingsPreference
+            app:key="@string/key_ai_settings"
+            app:layout="@layout/preference_custom"
+            app:summary="@string/description_ai_settings_preference"
+            app:title="@string/text_ai_settings"
+            app:longClickPrompt="@string/description_ai_settings_preference" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_nodejs">
 
         <org.autojs.autojs.ui.settings.NodeDoctorReportPreference
