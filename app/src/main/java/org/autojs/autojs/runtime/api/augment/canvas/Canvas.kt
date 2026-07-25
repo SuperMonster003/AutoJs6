@@ -8,6 +8,7 @@ import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Constructable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
@@ -17,9 +18,7 @@ import org.mozilla.javascript.Scriptable
 @Suppress("unused")
 class Canvas(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Constructable {
 
-    init {
-        originateKeyName()
-    }
+    override val keys = listOf(AugmentableKey("Canvas", withDollarPrefix = false))
 
     override fun construct(vararg args: Any?): Scriptable = ensureArgumentsAtMost(args, 2) { argList ->
         when (argList.size) {

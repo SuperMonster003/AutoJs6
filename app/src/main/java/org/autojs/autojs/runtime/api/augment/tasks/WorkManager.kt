@@ -4,6 +4,7 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.util.RhinoUtils.js_object_assign
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeObject
@@ -19,7 +20,10 @@ import org.mozilla.javascript.VarScope
  */
 class WorkManager(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
-    override val key = "work_manager"
+    override val keys = listOf(
+        AugmentableKey("workManager"),
+        AugmentableKey("work_manager"),
+    )
 
     override val selfAssignmentFunctions = listOf(
         ::addDailyTask.name,

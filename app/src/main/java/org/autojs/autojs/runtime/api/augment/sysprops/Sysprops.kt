@@ -9,6 +9,7 @@ import org.autojs.autojs.rhino.extension.MapExtensions.toNativeObject
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.util.RhinoUtils.callFunction
@@ -21,7 +22,7 @@ import org.mozilla.javascript.regexp.NativeRegExp
 @Suppress("UNUSED_PARAMETER")
 class SysProps(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
-    override val key = super.key.lowercase()
+    override val keys = listOf(AugmentableKey("sysprops"))
 
     override val selfAssignmentFunctions = listOf(
         ::get.name,

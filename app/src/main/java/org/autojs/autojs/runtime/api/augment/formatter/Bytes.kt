@@ -11,6 +11,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsString
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.AUTO
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.DEFAULT_BYTES_STRICT
@@ -26,6 +27,8 @@ import org.mozilla.javascript.ScriptableObject
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes as CoreBytes
 
 object Bytes : Augmentable(), Invokable {
+
+    override val keys = listOf(AugmentableKey("bytes", withDollarPrefix = false))
 
     override val selfAssignmentProperties = listOf(
         "UNITS" to UNITS,

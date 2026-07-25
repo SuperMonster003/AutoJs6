@@ -13,6 +13,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.SQLite.Companion.DEFAULT_READ_ONLY
 import org.autojs.autojs.runtime.api.SQLite.Companion.DEFAULT_VERSION
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
@@ -22,7 +23,7 @@ import org.mozilla.javascript.NativeObject
 
 class SQLite(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
-    override val key = super.key.lowercase()
+    override val keys = listOf(AugmentableKey("sqlite"))
 
     override val selfAssignmentFunctions = listOf(
         ::open.name,

@@ -16,6 +16,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.global.Species.isErrorRhino
 import org.autojs.autojs.runtime.api.augment.global.Species.isJavaObjectRhino
@@ -65,6 +66,8 @@ import java.util.function.Supplier
  */
 @Suppress("unused")
 object Inspect : Augmentable(), Invokable {
+
+    override val keys = listOf(AugmentableKey("inspect", withDollarPrefix = false))
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
         "colors" to Supplier { colors },

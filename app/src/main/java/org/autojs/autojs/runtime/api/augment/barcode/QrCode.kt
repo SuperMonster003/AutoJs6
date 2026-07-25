@@ -6,6 +6,7 @@ import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.WrappedBarcode
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.barcode.Barcode.BarcodeDetectData
 import org.autojs.autojs.runtime.api.augment.barcode.Barcode.Parseable
@@ -22,7 +23,7 @@ import org.autojs.autojs.runtime.api.augment.images.Images as AugmentableImages
 
 class QrCode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
-    override val key = super.key.lowercase()
+    override val keys = listOf(AugmentableKey("qrcode"))
 
     override val selfAssignmentFunctions = listOf(
         ::recognizeText.name,

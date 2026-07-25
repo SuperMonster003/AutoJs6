@@ -21,8 +21,6 @@ import org.autojs.autojs.runtime.api.augment.images.Images as AugmentableImages
 
 class Barcode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
-    override val key = super.key.lowercase()
-
     override val selfAssignmentFunctions = listOf(
         ::recognizeText.name,
         ::recognizeTexts.name,

@@ -38,6 +38,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.AugmentableProxy
 import org.autojs.autojs.runtime.api.augment.colors.ColorNativeObject
 import org.autojs.autojs.runtime.api.augment.colors.Colors
@@ -90,7 +91,7 @@ import org.autojs.autojs.runtime.api.UI as ApiUI
 @Suppress("unused", "UNUSED_PARAMETER")
 class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
 
-    override val key = super.key.lowercase()
+    override val keys = listOf(AugmentableKey("ui"))
 
     private val mProperties = ConcurrentHashMap<String, Any>()
 

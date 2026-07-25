@@ -9,6 +9,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.util.Util.ensureArrayTypeRhino
 import org.autojs.autojs.util.ArrayUtils.unshiftWith
 import org.autojs.autojs.util.RhinoUtils.callFunction
@@ -34,7 +35,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 @Suppress("unused", "UNUSED_PARAMETER")
 class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), JsBuildInObjectExtensible {
 
-    override val key: String = javaClass.simpleName
+    override val keys = listOf(AugmentableKey("Arrayx", withDollarPrefix = false))
 
     override val selfAssignmentFunctions = listOf(
         ::ensureArray.name to AS_JSOX_STATIC,

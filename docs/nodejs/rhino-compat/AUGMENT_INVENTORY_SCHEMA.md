@@ -3,7 +3,11 @@
 本文件定义 Phase 11A 使用的 Rhino `augment` inventory v1 schema。它描述
 `org/autojs/autojs/runtime/api/augment` 中每个 Rhino 内置 JavaScript 模块
 如何注册到 `ScriptRuntime.augment(...)`，以及每个导出的 API 在 Node.js
-兼容层中的迁移状态。
+兼容层中的迁移状态。schema id 和版本保持 v1，并以可选字段表达声明式
+多名称挂载。这里的兼容性是后向读取兼容：更新后的 schema 仍接受未包含
+新字段的既有 v1 inventory。由于旧版 schema 使用
+`additionalProperties: false`，持有旧版 schema 的 validator 必须先更新
+schema，才能读取新 generator 输出的 `keys` 和 `mountNames`。
 
 机器可读 schema 位于：
 
@@ -42,8 +46,11 @@ surface。稳定 id 使用 lower snake case，例如 `toast`、`images`、
 关键字段：
 
 - `id`: inventory 内稳定模块 id。
-- `key`: Rhino 中由 `Augmentable.key` 计算或 `originateKeyName()` 指定的
-  key，例如 `toast`、`Canvas`。
+- `key`: primary name。它镜像 `Augmentable.keys.first().name`，并继续
+  作为 v1 兼容字段，例如 `toast`、`Canvas`。
+- `keys`: 可选的有序声明式名称 descriptor 数组。每项分别声明 `name`
+  和该名称的 `withDollarPrefix` 策略，对应源码中的 `AugmentableKey`。
+- `mountNames`: 可选的最终挂载名称数组。它是 `keys` 的稳定展开结果。
 - `className`: Kotlin/Java 类全名。
 - `packageName`: 源码包名。
 - `source`: 模块源码位置。
@@ -51,6 +58,43 @@ surface。稳定 id 使用 lower snake case，例如 `toast`、`images`、
 - `augmentable`: 基类、trait 和对象创建形态。
 - `exports`: 当前模块导出的 API entries。
 - `migration`: 模块级 Node 迁移状态。
+
+### 多名称挂载
+
+新 generator 应同时输出 `keys` 和 `mountNames`；schema 不允许只出现
+其中一个字段。`keys` 必须非空，并遵循以下约束：
+
+- `keys[0].name` 等于 `key`，作为 primary name。
+- 每个 `name` 必须包含非空白字符，并在 `keys` 中唯一，数组顺序等于
+  源码中的声明顺序。
+- 源码中的 `keys` 必须使用稳定的 `val` 声明；可变 `var` 或 scanner
+  无法静态解析的初始化表达式会被计入 unresolved。
+- 每个 descriptor 先产生其原始 `name`；当 `withDollarPrefix` 为
+  `true` 时，再产生 `"$" + name`。
+- `mountNames` 按上述顺序展开且不得碰撞，并必须与
+  `exports.moduleKeys` 完全一致。
+- `registration.withDollarPrefix` 保留为必填 v1 字段，并镜像 primary
+  descriptor 的 `withDollarPrefix`，供旧 consumer 继续读取；它不再
+  表示 `ScriptRuntime` 调用点存在同名布尔参数。
+
+只包含 v1 字段的 inventory 等价于单个 descriptor：
+
+```json
+{
+  "name": "toast",
+  "withDollarPrefix": true
+}
+```
+
+其中两个值分别取自 `module.key` 和
+`module.registration.withDollarPrefix`。
+
+`assignWithRuntime` 不挂载模块对象，因此 scanner 对该注册方式继续使用
+v1 的有效视图：只保留 primary name，并将其 `withDollarPrefix` 记为
+`false`。这避免 inventory 虚构源码运行时不会产生的 dollar alias。
+
+由于 JSON Schema 无法跨字段表达数组首项相等和数组展开关系，generator
+和 consumer 的语义校验需要负责上述不变量。
 
 ## Augmentable model
 
@@ -94,7 +138,9 @@ API surface，而不要求 scanner 立即理解完整函数签名。
 - `assignment`: 来自哪个 `Augmentable` assignment list 或注册机制。
 - `source`: 源码位置。
 - `attributes`: Rhino flag 和是否 dollar alias。
-- `aliases`: 可选别名。
+- `aliases`: 可选的有序别名数组。对于代表模块本身的 generator entry，
+  `exposedName` 使用 primary name，其余 `mountNames` 应依序写入
+  `aliases`，因此同一 entry 可以拥有多个别名。
 - `signature`: 可选人读签名。
 - `migration`: 单个 API 的 Node 迁移状态。
 - `risks`: 资源、权限、安全或语义风险。
@@ -178,11 +224,13 @@ API surface，而不要求 scanner 立即理解完整函数签名。
 
 `fixtures/rhino-augment-inventory.sample.json` 覆盖以下形态：
 
-- `Toast`: `Augmentable + Invokable`
+- `Toast`: `Augmentable + Invokable`，并覆盖多个声明名称、逐名称
+  dollar prefix 策略和多值 `exports.entries[].aliases`
 - `UI`: `AugmentableProxy`
 - `Canvas`: `Augmentable + Constructable`
 - `Images`: `Augmentable + AsEmitter`
-- `WebSocketFields`: `SimpleGetterProxy`
+- `WebSocketFields`: `SimpleGetterProxy`，并保留省略 `keys`/`mountNames`
+  的既有 v1 文档形态
 
 该 fixture 不是完整 inventory，也不是后续 scanner 的黄金输出。它用于
 锁定 v1 schema 的表达能力，确保 S11-02/S11-03 的 scanner 输出有明确

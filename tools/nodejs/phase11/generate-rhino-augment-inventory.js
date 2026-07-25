@@ -52,8 +52,9 @@ function main() {
   console.log(`Rhino augment inventory modules: ${inventory.modules.length}`);
   console.log(`Rhino augment inventory API entries: ${inventory.totals.apiEntryCount}`);
   console.log(`Rhino augment source scan unresolved receivers: ${scanReport.totals.unresolvedReceiverCount}`);
+  console.log(`Rhino augment source scan unresolved keys: ${scanReport.totals.unresolvedKeyCount || 0}`);
 
-  if (options.failOnUnresolved && scanReport.totals.unresolvedReceiverCount > 0) {
+  if (options.failOnUnresolved && unresolvedSourceCount(scanReport) > 0) {
     process.exitCode = 1;
   }
 }
@@ -85,15 +86,19 @@ function buildInventory(scanReport) {
 }
 
 function toInventoryModule(scanModule) {
-  const withDollarPrefix = scanModule.registration.withDollarPrefix === true;
-  const moduleKeys = moduleKeysFor(scanModule.key || scanModule.receiver, withDollarPrefix);
+  const key = scanModule.key || scanModule.receiver;
+  const keys = keyDescriptorsFor(scanModule, key);
+  const withDollarPrefix = keys[0].withDollarPrefix;
+  const moduleKeys = moduleKeysFor(scanModule, keys);
   const entries = [
-    moduleObjectEntry(scanModule, withDollarPrefix),
+    moduleObjectEntry(scanModule, moduleKeys, withDollarPrefix),
     ...assignmentEntries(scanModule),
   ];
   return withoutUndefined({
     id: scanModule.id,
-    key: scanModule.key || scanModule.receiver,
+    key,
+    keys,
+    mountNames: moduleKeys,
     displayName: scanModule.receiver,
     className: scanModule.className || scanModule.receiver,
     packageName: scanModule.packageName || "unknown",
@@ -128,7 +133,7 @@ function toInventoryModule(scanModule) {
   });
 }
 
-function moduleObjectEntry(scanModule, withDollarPrefix) {
+function moduleObjectEntry(scanModule, moduleKeys, withDollarPrefix) {
   const key = scanModule.key || scanModule.receiver;
   const kind = moduleObjectKind(scanModule);
   return {
@@ -142,7 +147,7 @@ function moduleObjectEntry(scanModule, withDollarPrefix) {
       rhinoFlags: ["PERMANENT"],
       dollarAlias: withDollarPrefix,
     },
-    aliases: withDollarPrefix ? [`$${key}`] : [],
+    aliases: moduleKeys.filter((mountName) => mountName !== key),
     migration: seedMigration(scanModule, "api"),
     risks: risksFor(scanModule),
     notes: [
@@ -237,12 +242,34 @@ function risksFor(scanModule) {
   return Array.from(risks).sort();
 }
 
-function moduleKeysFor(key, withDollarPrefix) {
-  const keys = [key];
-  if (withDollarPrefix) {
-    keys.push(`$${key}`);
+function keyDescriptorsFor(scanModule, fallbackKey) {
+  if (Array.isArray(scanModule.keys) && scanModule.keys.length > 0) {
+    return scanModule.keys.map((key) => ({
+      name: key.name,
+      withDollarPrefix: key.withDollarPrefix === true,
+    }));
   }
-  return keys;
+  return [{
+    name: fallbackKey,
+    withDollarPrefix: scanModule.registration.withDollarPrefix === true,
+  }];
+}
+
+function moduleKeysFor(scanModule, keys) {
+  if (Array.isArray(scanModule.mountNames) && scanModule.mountNames.length > 0) {
+    return scanModule.mountNames.slice();
+  }
+  return keys.flatMap((key) => key.withDollarPrefix
+    ? [key.name, `$${key.name}`]
+    : [key.name]);
+}
+
+function unresolvedSourceCount(scanReport) {
+  if (Number.isInteger(scanReport.totals.unresolvedCount)) {
+    return scanReport.totals.unresolvedCount;
+  }
+  return (scanReport.totals.unresolvedReceiverCount || 0) +
+    (scanReport.totals.unresolvedKeyCount || 0);
 }
 
 function entrySegment(name) {

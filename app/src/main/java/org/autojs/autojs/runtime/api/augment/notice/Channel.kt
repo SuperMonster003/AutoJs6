@@ -14,6 +14,7 @@ import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.console.Console
 import org.autojs.autojs.runtime.api.augment.s13n.S13n
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -30,6 +31,8 @@ import org.mozilla.javascript.Undefined
 import org.autojs.autojs.runtime.api.augment.notice.Notice as AugmentableNotice
 
 class Channel(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
+
+    override val keys = listOf(AugmentableKey("channel", withDollarPrefix = false))
 
     override val selfAssignmentFunctions = listOf(
         ::create.name,

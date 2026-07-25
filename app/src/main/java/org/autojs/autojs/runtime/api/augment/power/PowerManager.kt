@@ -10,6 +10,7 @@ import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -19,7 +20,10 @@ import android.os.PowerManager as AndroidPowerManager
 @Suppress("unused", "UNUSED_PARAMETER")
 class PowerManager(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
-    override val key = "power_manager"
+    override val keys = listOf(
+        AugmentableKey("powerManager"),
+        AugmentableKey("power_manager"),
+    )
 
     override val selfAssignmentFunctions = listOf(
         ::isIgnoringBatteryOptimizations.name,

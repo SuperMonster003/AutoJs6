@@ -2,13 +2,14 @@ package org.autojs.autojs.runtime.api.augment.nanoid
 
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import java.security.SecureRandom
 
 object NanoID : Augmentable(), Invokable {
 
-    override val key = super.key.lowercase()
+    override val keys = listOf(AugmentableKey("nanoid"))
 
     @RhinoSingletonFunctionInterface
     override fun invoke(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 1) { argList ->

@@ -5,6 +5,7 @@ import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
@@ -12,6 +13,8 @@ import org.mozilla.javascript.NativeObject
 
 @Suppress("unused")
 object MorseCode : Augmentable(), Invokable {
+
+    override val keys = listOf(AugmentableKey("morseCode", withDollarPrefix = false))
 
     override val selfAssignmentFunctions = listOf(
         ::getPattern.name,

@@ -9,6 +9,7 @@ import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
@@ -27,6 +28,8 @@ import java.util.*
 
 @Suppress("unused", "UNUSED_PARAMETER")
 object VersionCodes : Augmentable() {
+
+    override val keys = listOf(AugmentableKey("versionCodes", withDollarPrefix = false))
 
     override val selfAssignmentFunctions = listOf(
         "toString" to AS_LITERAL_TO_STRING,

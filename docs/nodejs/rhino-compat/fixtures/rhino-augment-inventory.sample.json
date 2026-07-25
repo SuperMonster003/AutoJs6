@@ -7,7 +7,8 @@
     "scriptRuntime": "app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt",
     "scannerVersion": "fixture-s11-01",
     "notes": [
-      "Coverage fixture for schema expression only; not a complete inventory."
+      "Coverage fixture for schema expression only; not a complete inventory.",
+      "toastMessage is a synthetic secondary mount name used to cover per-name dollar-prefix policies."
     ]
   },
   "statusVocabulary": [
@@ -22,6 +23,21 @@
     {
       "id": "toast",
       "key": "toast",
+      "keys": [
+        {
+          "name": "toast",
+          "withDollarPrefix": true
+        },
+        {
+          "name": "toastMessage",
+          "withDollarPrefix": false
+        }
+      ],
+      "mountNames": [
+        "toast",
+        "$toast",
+        "toastMessage"
+      ],
       "displayName": "Toast",
       "className": "org.autojs.autojs.runtime.api.augment.toast.Toast",
       "packageName": "org.autojs.autojs.runtime.api.augment.toast",
@@ -55,7 +71,8 @@
       "exports": {
         "moduleKeys": [
           "toast",
-          "$toast"
+          "$toast",
+          "toastMessage"
         ],
         "entries": [
           {
@@ -75,7 +92,8 @@
               "dollarAlias": true
             },
             "aliases": [
-              "$toast"
+              "$toast",
+              "toastMessage"
             ],
             "signature": "toast(message?, isLong?, isForcible?)",
             "migration": {
@@ -131,6 +149,16 @@
     {
       "id": "ui",
       "key": "ui",
+      "keys": [
+        {
+          "name": "ui",
+          "withDollarPrefix": true
+        }
+      ],
+      "mountNames": [
+        "ui",
+        "$ui"
+      ],
       "displayName": "UI",
       "className": "org.autojs.autojs.runtime.api.augment.ui.UI",
       "packageName": "org.autojs.autojs.runtime.api.augment.ui",
@@ -210,6 +238,15 @@
     {
       "id": "canvas",
       "key": "Canvas",
+      "keys": [
+        {
+          "name": "Canvas",
+          "withDollarPrefix": false
+        }
+      ],
+      "mountNames": [
+        "Canvas"
+      ],
       "displayName": "Canvas",
       "className": "org.autojs.autojs.runtime.api.augment.canvas.Canvas",
       "packageName": "org.autojs.autojs.runtime.api.augment.canvas",
@@ -283,6 +320,16 @@
     {
       "id": "images",
       "key": "images",
+      "keys": [
+        {
+          "name": "images",
+          "withDollarPrefix": true
+        }
+      ],
+      "mountNames": [
+        "images",
+        "$images"
+      ],
       "displayName": "Images",
       "className": "org.autojs.autojs.runtime.api.augment.images.Images",
       "packageName": "org.autojs.autojs.runtime.api.augment.images",

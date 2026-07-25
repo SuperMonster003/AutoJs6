@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.augment.autojs
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs6.BuildConfig
@@ -10,6 +11,8 @@ import io.github.g00fy2.versioncompare.Version as InternalVersion
 
 @Suppress("unused")
 object Version : Augmentable() {
+
+    override val keys = listOf(AugmentableKey("version", withDollarPrefix = false))
 
     private const val NAME = BuildConfig.VERSION_NAME
 

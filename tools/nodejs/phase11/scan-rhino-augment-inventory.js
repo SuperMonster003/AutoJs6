@@ -28,7 +28,7 @@ function main() {
   } else {
     process.stdout.write(text);
   }
-  if (options.failOnUnresolved && report.totals.unresolvedReceiverCount > 0) {
+  if (options.failOnUnresolved && report.totals.unresolvedCount > 0) {
     process.exitCode = 1;
   }
 }
@@ -43,6 +43,8 @@ function scan(repoRoot) {
   const registrations = extractRegistrations(repoRoot, augmentBlock, imports, sourceIndex);
   const protoReferences = collectProtoReferences(registrations, imports, sourceIndex);
   const unresolvedReceivers = registrations.filter((entry) => !entry.className);
+  const unresolvedKeys = registrations.flatMap((entry) => entry.unresolvedKeys || []);
+  const unresolvedCount = unresolvedReceivers.length + unresolvedKeys.length;
 
   return {
     schema: SCAN_SCHEMA,
@@ -59,6 +61,9 @@ function scan(repoRoot) {
       protoReferenceCount: protoReferences.length,
       unresolvedReceiverCount: unresolvedReceivers.length,
       unresolvedReceivers: unresolvedReceivers.map((entry) => entry.receiver),
+      unresolvedKeyCount: unresolvedKeys.length,
+      unresolvedKeys,
+      unresolvedCount,
     },
   };
 }
@@ -77,6 +82,7 @@ function indexAugmentSources(repoRoot, augmentRoot) {
       const simpleName = match[2];
       const line = lineNumberAt(text, match.index);
       const header = declarationHeader(text, match.index);
+      const declarationText = declarationSource(text, match.index);
       const fqcn = packageName ? `${packageName}.${simpleName}` : simpleName;
       const metadata = {
         kind,
@@ -90,11 +96,12 @@ function indexAugmentSources(repoRoot, augmentRoot) {
         baseClass: header.includes("AugmentableProxy") ? "AugmentableProxy" : header.includes("Augmentable") ? "Augmentable" : "unknown",
         traits: detectTraits(text, header),
         construction: "unknown",
-        requiresScriptRuntime: /scriptRuntime\s*:\s*ScriptRuntime/.test(header) || /scriptRuntime\s*:\s*ScriptRuntime/.test(text),
-        originatesKeyName: text.includes("originateKeyName()"),
-        keyOverride: detectKeyOverride(text, simpleName),
+        requiresScriptRuntime: /scriptRuntime\s*:\s*ScriptRuntime/.test(header) || /scriptRuntime\s*:\s*ScriptRuntime/.test(declarationText),
+        originatesKeyName: declarationText.includes("originateKeyName()"),
+        keyOverride: detectKeyOverride(declarationText, simpleName),
+        keysOverride: detectKeysOverride(declarationText, simpleName),
         simpleGetterProxyInterface: text.includes("@AugmentableSimpleGetterProxyInterface"),
-        assignmentSummary: extractAssignmentSummary(text),
+        assignmentSummary: extractAssignmentSummary(declarationText),
       };
       metadata.construction = constructionFor(metadata);
       byFqcn.set(fqcn, metadata);
@@ -157,18 +164,33 @@ function enrichRegistration(repoRoot, entry, imports, sourceIndex, order) {
   const metadata = resolveMetadata(entry.receiver, fqcn, sourceIndex);
   const simpleName = metadata ? metadata.simpleName : simpleNameFromFqcn(fqcn) || entry.receiver;
   const protoExpressions = protoArgsFor(entry.method, entry.args);
-  const withDollarPrefix = withDollarPrefixFor(entry.method, entry.args);
-  const targetExpression = entry.args[0] || null;
-  const additionalAttributes = entry.args.filter((arg) => arg === "READONLY" || arg === "DONTENUM");
+  const legacyWithDollarPrefix = withDollarPrefixFor(entry.method, entry.args);
+  const keys = keysFor(entry.method, simpleName, metadata, legacyWithDollarPrefix);
+  const mountNames = mountNamesFor(keys);
+  const withDollarPrefix = keys[0].withDollarPrefix;
+  const targetExpression = argumentValue(entry.args, "target", 0);
+  const additionalAttributes = additionalAttributesFor(entry.args);
   const registrationTarget = targetFor(entry.method, targetExpression);
   const className = metadata ? metadata.className : fqcn;
+  const unresolvedKeys = metadata && metadata.keysOverride
+    ? metadata.keysOverride.unresolved.map((unresolved) => ({
+      receiver: entry.receiver,
+      className: className || null,
+      source: metadata.source,
+      expression: unresolved.expression,
+      reason: unresolved.reason,
+    }))
+    : [];
 
   return {
     order,
     id: moduleIdFor(className, entry.receiver, simpleName),
     receiver: entry.receiver,
     receiverKind: entry.receiverKind,
-    key: keyFor(simpleName, metadata),
+    key: keys[0].name,
+    keys,
+    mountNames,
+    unresolvedKeys,
     className: className || null,
     packageName: metadata ? metadata.packageName : packageNameFromFqcn(fqcn),
     source: metadata ? metadata.source : null,
@@ -385,6 +407,174 @@ function detectKeyOverride(text, simpleName) {
   return null;
 }
 
+function detectKeysOverride(text, simpleName) {
+  const overridePattern = /override\s+(val|var)\s+keys\b/g;
+  let overrideMatch;
+  while ((overrideMatch = overridePattern.exec(text)) !== null) {
+    if (!isTopLevelClassMember(text, overrideMatch.index)) {
+      continue;
+    }
+    if (overrideMatch[1] === "var") {
+      return {
+        keys: [],
+        unresolved: [{
+          expression: firstSourceLine(text.slice(overrideMatch.index)),
+          reason: "keys property must be declared as val",
+        }],
+      };
+    }
+    const propertyText = text.slice(overrideMatch.index);
+    const declarationMatch = propertyText.match(
+      /^override\s+val\s+keys(?:\s*:[^=\r\n]+)?\s*(?:=\s*|get\s*\(\s*\)\s*=\s*)listOf(?:\s*<\s*AugmentableKey\s*>)?\s*\(/,
+    );
+    if (!declarationMatch) {
+      return {
+        keys: [],
+        unresolved: [{
+          expression: firstSourceLine(propertyText),
+          reason: "unsupported keys property initializer",
+        }],
+      };
+    }
+    const open = overrideMatch.index + declarationMatch[0].lastIndexOf("(");
+    const close = findMatchingDelimiter(text, open, "(", ")");
+    if (close < 0) {
+      return {
+        keys: [],
+        unresolved: [{
+          expression: declarationMatch[0].trim(),
+          reason: "unterminated keys list",
+        }],
+      };
+    }
+    const declarations = parseTopLevelArgs(text.slice(open + 1, close));
+    const keys = [];
+    const unresolved = [];
+    declarations.forEach((declaration) => {
+      const parsed = parseAugmentableKey(declaration, simpleName);
+      if (parsed.key) {
+        keys.push(parsed.key);
+      } else {
+        unresolved.push({
+          expression: declaration.trim(),
+          reason: parsed.reason,
+        });
+      }
+    });
+    if (declarations.length === 0) {
+      unresolved.push({
+        expression: "listOf()",
+        reason: "keys list is empty",
+      });
+    }
+    validateDeclaredKeys(keys).forEach((entry) => unresolved.push(entry));
+    return { keys, unresolved };
+  }
+  return null;
+}
+
+function validateDeclaredKeys(keys) {
+  const unresolved = [];
+  const duplicateKeyNames = duplicateValues(keys.map((key) => key.name));
+  if (duplicateKeyNames.length > 0) {
+    unresolved.push({
+      expression: duplicateKeyNames.join(", "),
+      reason: "duplicate AugmentableKey names",
+    });
+  }
+  const duplicateMountNames = duplicateValues(mountNamesFor(keys));
+  if (duplicateMountNames.length > 0) {
+    unresolved.push({
+      expression: duplicateMountNames.join(", "),
+      reason: "AugmentableKey declarations resolve to duplicate mount names",
+    });
+  }
+  return unresolved;
+}
+
+function parseAugmentableKey(declaration, simpleName) {
+  const constructorMatch = String(declaration).trim().match(
+    /^(?:[A-Za-z_][A-Za-z0-9_.]*\.)?AugmentableKey\s*\(([\s\S]*)\)$/,
+  );
+  if (!constructorMatch) {
+    return {
+      key: null,
+      reason: "expected an AugmentableKey(...) declaration",
+    };
+  }
+  const args = parseTopLevelArgs(constructorMatch[1]);
+  const nameExpression = argumentValue(args, "name", 0);
+  if (!nameExpression) {
+    return {
+      key: null,
+      reason: "AugmentableKey name is missing",
+    };
+  }
+  const name = resolveKeyNameExpression(nameExpression, simpleName);
+  if (!name) {
+    return {
+      key: null,
+      reason: `unsupported key name expression: ${nameExpression}`,
+    };
+  }
+  if (!/\S/.test(name)) {
+    return {
+      key: null,
+      reason: "AugmentableKey name must not be blank",
+    };
+  }
+  const prefixExpression = argumentValue(args, "withDollarPrefix", 1);
+  if (prefixExpression !== null && !isBooleanLiteral(prefixExpression)) {
+    return {
+      key: null,
+      reason: `unsupported withDollarPrefix expression: ${prefixExpression}`,
+    };
+  }
+  return {
+    key: {
+      name,
+      withDollarPrefix: prefixExpression === null ? true : prefixExpression === "true",
+    },
+    reason: null,
+  };
+}
+
+function resolveKeyNameExpression(expression, simpleName) {
+  const value = String(expression).trim();
+  const rawString = value.match(/^"""([\s\S]*)"""$/);
+  if (rawString) {
+    return rawString[1];
+  }
+  const quotedString = value.match(/^"((?:\\.|[^"\\])*)"$/);
+  if (quotedString) {
+    if (/(^|[^\\])\$(?:\{|[A-Za-z_])/.test(quotedString[1])) {
+      return null;
+    }
+    try {
+      const jsonCompatible = quotedString[1]
+        .replace(/\\\$/g, "$")
+        .replace(/\\'/g, "'");
+      return JSON.parse(`"${jsonCompatible}"`);
+    } catch (_) {
+      return null;
+    }
+  }
+  const ocrMode = value.match(/(?:^|\.)OcrMode\.([A-Z0-9_]+)\.value$/);
+  if (ocrMode) {
+    return ocrMode[1].toLowerCase();
+  }
+  if (/^(?:this\.)?javaClass\.simpleName\.lowercaseFirstChar\(\)$/.test(value)) {
+    return lowercaseFirstChar(simpleName);
+  }
+  if (/^(?:this\.)?javaClass\.simpleName(?:\.toString\(\))?$/.test(value)) {
+    return simpleName;
+  }
+  if (/^super\.key\.lowercase\(\)$/.test(value)) {
+    return lowercaseFirstChar(simpleName).toLowerCase();
+  }
+  return null;
+}
+
 function constructionFor(metadata) {
   if (metadata.baseClass === "AugmentableProxy") {
     return "proxy_object";
@@ -417,17 +607,25 @@ function resolveMetadata(receiver, fqcn, sourceIndex) {
 }
 
 function protoArgsFor(method, args) {
+  const namedProto = argumentValue(args, "proto", null);
+  if (namedProto !== null) {
+    return [namedProto];
+  }
   if (method === "augment") {
-    return args.length > 1 && !isBooleanLiteral(args[1]) ? [args[1]] : [];
+    const proto = argumentValue(args, null, 1);
+    return proto !== null && !isBooleanLiteral(proto) ? [proto] : [];
   }
   if (method === "augmentWithRuntime") {
-    return args.length > 2 && !isBooleanLiteral(args[2]) ? [args[2]] : [];
+    const proto = argumentValue(args, null, 2);
+    return proto !== null && !isBooleanLiteral(proto) ? [proto] : [];
   }
   if (method === "assignWithRuntime") {
-    return args.length > 2 ? [args[2]] : [];
+    const proto = argumentValue(args, null, 2);
+    return proto !== null ? [proto] : [];
   }
   if (method === "proxying") {
-    return args.length > 1 ? [args[1]] : [];
+    const proto = argumentValue(args, null, 1);
+    return proto !== null && !isBooleanLiteral(proto) ? [proto] : [];
   }
   return [];
 }
@@ -436,12 +634,89 @@ function withDollarPrefixFor(method, args) {
   if (method === "assignWithRuntime") {
     return null;
   }
+  const namedValue = argumentValue(args, "withDollarPrefix", null);
+  if (namedValue !== null) {
+    return isBooleanLiteral(namedValue) ? namedValue === "true" : null;
+  }
   for (let index = args.length - 1; index >= 0; index -= 1) {
-    if (isBooleanLiteral(args[index])) {
+    const named = parseNamedArgument(args[index]);
+    if (!named && isBooleanLiteral(args[index])) {
       return args[index] === "true";
     }
   }
   return null;
+}
+
+function keysFor(method, simpleName, metadata, legacyWithDollarPrefix) {
+  if (method === "assignWithRuntime") {
+    const primary = metadata && metadata.keysOverride && metadata.keysOverride.keys.length > 0
+      ? metadata.keysOverride.keys[0].name
+      : keyFor(simpleName, metadata);
+    return [{
+      name: primary,
+      withDollarPrefix: false,
+    }];
+  }
+  if (metadata && metadata.keysOverride && metadata.keysOverride.keys.length > 0) {
+    return metadata.keysOverride.keys;
+  }
+  return [{
+    name: keyFor(simpleName, metadata),
+    withDollarPrefix: legacyWithDollarPrefix === null ? true : legacyWithDollarPrefix,
+  }];
+}
+
+function mountNamesFor(keys) {
+  return keys.flatMap((key) => key.withDollarPrefix
+    ? [key.name, `$${key.name}`]
+    : [key.name]);
+}
+
+function duplicateValues(values) {
+  const counts = new Map();
+  values.forEach((value) => counts.set(value, (counts.get(value) || 0) + 1));
+  return Array.from(counts)
+    .filter(([, count]) => count > 1)
+    .map(([value]) => value);
+}
+
+function firstSourceLine(value) {
+  return String(value).split(/\r?\n/, 1)[0].trim();
+}
+
+function additionalAttributesFor(args) {
+  const attributes = new Set();
+  args.forEach((arg) => {
+    const named = parseNamedArgument(arg);
+    const expression = named && named.name === "additionalAttributes"
+      ? named.value
+      : named ? "" : arg;
+    for (const match of expression.matchAll(/\b(READONLY|DONTENUM)\b/g)) {
+      attributes.add(match[1]);
+    }
+  });
+  return Array.from(attributes);
+}
+
+function argumentValue(args, namedKey, positionalIndex) {
+  if (namedKey) {
+    for (const arg of args) {
+      const named = parseNamedArgument(arg);
+      if (named && named.name === namedKey) {
+        return named.value;
+      }
+    }
+  }
+  if (positionalIndex === null || positionalIndex === undefined) {
+    return null;
+  }
+  const positional = args.filter((arg) => !parseNamedArgument(arg));
+  return positional[positionalIndex] === undefined ? null : positional[positionalIndex];
+}
+
+function parseNamedArgument(value) {
+  const match = String(value).trim().match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([\s\S]+)$/);
+  return match ? { name: match[1], value: match[2].trim() } : null;
 }
 
 function targetFor(method, targetExpression) {
@@ -501,6 +776,118 @@ function parseTopLevelArgs(rawArgs) {
     args.push(current.trim());
   }
   return args;
+}
+
+function declarationSource(text, index) {
+  const open = text.indexOf("{", index);
+  const nextDeclarationOffset = text.slice(index + 1).search(/\b(?:class|object)\s+[A-Za-z_][A-Za-z0-9_]*/);
+  const nextDeclaration = nextDeclarationOffset < 0 ? -1 : index + 1 + nextDeclarationOffset;
+  if (nextDeclaration >= 0 && (open < 0 || nextDeclaration < open)) {
+    return text.slice(index, nextDeclaration);
+  }
+  if (open < 0) {
+    return text.slice(index);
+  }
+  const close = findMatchingDelimiter(text, open, "{", "}");
+  return text.slice(index, close < 0 ? text.length : close + 1);
+}
+
+function findMatchingDelimiter(text, openIndex, openCharacter, closeCharacter) {
+  let depth = 0;
+  let result = -1;
+  scanKotlinCode(text, openIndex, text.length, (ch, index) => {
+    if (ch === openCharacter) {
+      depth += 1;
+    } else if (ch === closeCharacter) {
+      depth -= 1;
+      if (depth === 0) {
+        result = index;
+        return false;
+      }
+    }
+    return true;
+  });
+  return result;
+}
+
+function isTopLevelClassMember(text, index) {
+  let depth = 0;
+  let isCode = false;
+  scanKotlinCode(text, 0, index + 1, (ch, cursor) => {
+    if (cursor === index) {
+      isCode = true;
+      return false;
+    }
+    if (ch === "{") {
+      depth += 1;
+    } else if (ch === "}") {
+      depth -= 1;
+    }
+    return true;
+  });
+  return isCode && depth === 1;
+}
+
+function scanKotlinCode(text, start, end, visitor) {
+  let quote = null;
+  let tripleQuoted = false;
+  let lineComment = false;
+  let blockCommentDepth = 0;
+  for (let cursor = start; cursor < end; cursor += 1) {
+    const ch = text[cursor];
+    const next = text[cursor + 1];
+    if (lineComment) {
+      if (ch === "\n") {
+        lineComment = false;
+      }
+      continue;
+    }
+    if (blockCommentDepth > 0) {
+      if (ch === "/" && next === "*") {
+        blockCommentDepth += 1;
+        cursor += 1;
+      } else if (ch === "*" && next === "/") {
+        blockCommentDepth -= 1;
+        cursor += 1;
+      }
+      continue;
+    }
+    if (tripleQuoted) {
+      if (text.slice(cursor, cursor + 3) === "\"\"\"") {
+        tripleQuoted = false;
+        cursor += 2;
+      }
+      continue;
+    }
+    if (quote) {
+      if (ch === quote && text[cursor - 1] !== "\\") {
+        quote = null;
+      }
+      continue;
+    }
+    if (ch === "/" && next === "/") {
+      lineComment = true;
+      cursor += 1;
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      blockCommentDepth = 1;
+      cursor += 1;
+      continue;
+    }
+    if (text.slice(cursor, cursor + 3) === "\"\"\"") {
+      tripleQuoted = true;
+      cursor += 2;
+      continue;
+    }
+    if (ch === "\"" || ch === "'") {
+      quote = ch;
+      continue;
+    }
+    if (visitor(ch, cursor) === false) {
+      return;
+    }
+  }
 }
 
 function declarationHeader(text, index) {

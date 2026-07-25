@@ -101,7 +101,7 @@
 * `Mejora` Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku
 * `Mejora` Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación
 * `Mejora` Almacenados en caché los resultados de compilación de los recursos Rhino integrados y los metadatos de las funciones de extensión del entorno de ejecución para mejorar el rendimiento de inicialización de scripts
-* `Mejora` Refactorizada la arquitectura de extensión de módulos Kotlin con vinculación explícita de realms de Rhino, separación semántica de tasks y work_manager, y más pruebas de regresión semántica y compatibilidad
+* `Mejora` Refactorizada la arquitectura de extensión de módulos Kotlin con especificaciones de montaje declarativas que admiten varios alias y un control independiente del prefijo `$` para cada nombre, vinculación explícita de realms de Rhino, separación semántica de tasks y work_manager, y más pruebas de regresión semántica y compatibilidad
 * `Mejora` Reutilizados el proceso persistente de Node.js y el entorno de ejecución en el ámbito del proceso para mejorar el rendimiento del arranque en caliente de scripts
 * `Mejora` Incorporados tiempos por fase para el inicio de Node.js e informes fiables de rendimiento en frío y con el runtime caliente
 * `Mejora` Almacenada en caché la resolución de bibliotecas nativas integradas de Node.js para evitar el descubrimiento repetido de plugins

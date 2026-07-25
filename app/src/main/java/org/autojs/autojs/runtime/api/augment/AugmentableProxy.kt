@@ -81,8 +81,13 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
         }
     }
 
-    fun proxying(target: Scriptable, proto: Any, withDollarPrefix: Boolean): ProxyObject {
-        val augmented = augment(RhinoUtils.newObject(scriptRuntime.topLevelScope), proto, false)
+    fun proxying(target: Scriptable, proto: Any): ProxyObject {
+        val resolvedKeys = resolveKeys()
+        val augmented = createAugmentedObject(
+            RhinoUtils.newObject(scriptRuntime.topLevelScope),
+            proto,
+            resolvedKeys = resolvedKeys,
+        )
 
         val proxyObject = ProxyObject(
             scriptRuntime.topLevelScope,
@@ -96,9 +101,7 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
             },
         )
 
-        val keys = mutableListOf(key)
-        if (withDollarPrefix) keys += "\$$key"
-        keys.forEach { target.defineProp(it, proxyObject) }
+        mount(target, proxyObject, resolvedKeys = resolvedKeys)
 
         return proxyObject
     }

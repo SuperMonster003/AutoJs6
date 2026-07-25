@@ -23,7 +23,6 @@ import org.autojs.autojs.util.RhinoUtils.DEFAULT_CALLER
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
-import org.autojs.autojs.util.StringUtils.lowercaseFirstChar
 import org.autojs.autojs6.R
 import org.mozilla.javascript.NativeJavaClass
 import org.mozilla.javascript.Scriptable
@@ -40,6 +39,29 @@ import java.util.function.Consumer
 import java.util.function.Supplier
 import kotlin.reflect.KClass
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
+
+/**
+ * Describes a name used to expose an [Augmentable] object on its target.
+ *
+ * When [withDollarPrefix] is enabled, both [name] and its dollar-prefixed alias
+ * are bound to the same augmented object.
+ *
+ * zh-CN:
+ *
+ * 描述 [Augmentable] 对象在目标上的挂载名称.
+ *
+ * 当 [withDollarPrefix] 启用时, [name] 及其带美元前缀的别名将绑定到同一个扩充对象.
+ */
+data class AugmentableKey(
+    val name: String,
+    val withDollarPrefix: Boolean = true,
+) {
+
+    init {
+        require(name.isNotBlank()) { "Augmentable key name must not be blank" }
+    }
+
+}
 
 /**
  * Augmentable is an extensible base class (also an abstract class).
@@ -64,13 +86,30 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  */
 abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : ArgumentGuards() {
 
-    private var mIsOriginalKeyName = false
+    /**
+     * Names used to expose the augmented object. The first item is the primary
+     * key used as the function name and in error messages. The declaration is
+     * resolved once on first use and must remain stable for the lifetime of the
+     * augmentable instance.
+     *
+     * zh-CN:
+     *
+     * 扩充对象的挂载名称. 首项为主键, 同时用于函数名称及错误消息.
+     *
+     * ```
+     * override val keys = listOf(
+     *     AugmentableKey("primary"),
+     *     AugmentableKey("legacy", withDollarPrefix = false),
+     * )
+     * ```
+     */
+    open val keys: List<AugmentableKey>
+        get() = listOf(AugmentableKey(javaClass.simpleName.replaceFirstChar { it.lowercaseChar() }))
 
-    open val key: String
-        get() = when {
-            mIsOriginalKeyName -> javaClass.simpleName
-            else -> javaClass.simpleName.lowercaseFirstChar()
-        }
+    private val resolvedKeysSnapshot by lazy(::createResolvedKeys)
+
+    val key: String
+        get() = resolveKeys().primary
 
     /**
      * List element cases: <br>
@@ -139,21 +178,71 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
      */
     open val globalAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>()
 
-    fun originateKeyName() = also { mIsOriginalKeyName = true }
-
-    fun augmentWithRuntime(target: Scriptable, specifiedRuntime: ScriptRuntime, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0): ScriptableObject {
-        return augment(target, withDollarPrefix, additionalAttributes, specifiedRuntime)
+    fun augmentWithRuntime(target: Scriptable, specifiedRuntime: ScriptRuntime, additionalAttributes: Int = 0): ScriptableObject {
+        return augment(target, additionalAttributes, specifiedRuntime)
     }
 
-    fun augmentWithRuntime(target: Scriptable, specifiedRuntime: ScriptRuntime, proto: Any, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0): ScriptableObject {
-        return augment(target, proto, withDollarPrefix, additionalAttributes, specifiedRuntime)
+    fun augmentWithRuntime(target: Scriptable, specifiedRuntime: ScriptRuntime, proto: Any, additionalAttributes: Int = 0): ScriptableObject {
+        return augment(target, proto, additionalAttributes, specifiedRuntime)
     }
 
-    fun augment(target: Scriptable, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0, specifiedRuntime: ScriptRuntime? = null): ScriptableObject {
-        return augment(target, emptyList<Any>(), withDollarPrefix, additionalAttributes, specifiedRuntime)
+    @Deprecated(LEGACY_PREFIX_ARGUMENT_MESSAGE, level = DeprecationLevel.ERROR)
+    fun augmentWithRuntime(
+        target: Scriptable,
+        specifiedRuntime: ScriptRuntime,
+        withDollarPrefix: Boolean,
+        additionalAttributes: Int = 0,
+    ): ScriptableObject = legacyPrefixArgument()
+
+    @Deprecated(LEGACY_PREFIX_ARGUMENT_MESSAGE, level = DeprecationLevel.ERROR)
+    fun augmentWithRuntime(
+        target: Scriptable,
+        specifiedRuntime: ScriptRuntime,
+        proto: Any,
+        withDollarPrefix: Boolean,
+        additionalAttributes: Int = 0,
+    ): ScriptableObject = legacyPrefixArgument()
+
+    fun augment(target: Scriptable, additionalAttributes: Int = 0, specifiedRuntime: ScriptRuntime? = null): ScriptableObject {
+        return augment(target, emptyList<Any>(), additionalAttributes, specifiedRuntime)
     }
 
-    fun augment(target: Scriptable, proto: Any, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0, specifiedRuntime: ScriptRuntime? = null): ScriptableObject {
+    fun augment(target: Scriptable, proto: Any, additionalAttributes: Int = 0, specifiedRuntime: ScriptRuntime? = null): ScriptableObject {
+        val resolvedKeys = resolveKeys()
+        val newObj = createAugmentedObject(target, proto, specifiedRuntime, resolvedKeys)
+        mount(
+            target,
+            newObj,
+            PERMANENT or refineAttributes(additionalAttributes),
+            resolvedKeys,
+        )
+        return newObj
+    }
+
+    @Deprecated(LEGACY_PREFIX_ARGUMENT_MESSAGE, level = DeprecationLevel.ERROR)
+    fun augment(
+        target: Scriptable,
+        withDollarPrefix: Boolean,
+        additionalAttributes: Int = 0,
+        specifiedRuntime: ScriptRuntime? = null,
+    ): ScriptableObject = legacyPrefixArgument()
+
+    @Deprecated(LEGACY_PREFIX_ARGUMENT_MESSAGE, level = DeprecationLevel.ERROR)
+    fun augment(
+        target: Scriptable,
+        proto: Any,
+        withDollarPrefix: Boolean,
+        additionalAttributes: Int = 0,
+        specifiedRuntime: ScriptRuntime? = null,
+    ): ScriptableObject = legacyPrefixArgument()
+
+    protected fun createAugmentedObject(
+        target: Scriptable,
+        proto: Any,
+        specifiedRuntime: ScriptRuntime? = null,
+        resolvedKeys: ResolvedKeys = resolveKeys(),
+    ): ScriptableObject {
+        val primaryKey = resolvedKeys.primary
         val creationScope = (specifiedRuntime ?: scriptRuntime)?.topLevelScope ?: RhinoUtils.getDeclarationScope(target)
         val callFunc: (args: Array<out Any?>) -> Any? = { args ->
             try {
@@ -166,16 +255,16 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
                     when {
                         msg.contains("\n") -> {
                             msg.split("\n").let { split ->
-                                globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, split.first()).let { result ->
+                                globalContext.getString(R.string.error_failed_to_call_method_with_cause, primaryKey, split.first()).let { result ->
                                     split.slice(1..split.lastIndex).joinToString("\n").takeUnless { it.isBlank() }?.let {
                                         "$result\n$it"
                                     } ?: result
                                 }
                             }
                         }
-                        else -> globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, msg)
+                        else -> globalContext.getString(R.string.error_failed_to_call_method_with_cause, primaryKey, msg)
                     }
-                } ?: globalContext.getString(R.string.error_failed_to_call_method, key)
+                } ?: globalContext.getString(R.string.error_failed_to_call_method, primaryKey)
                 throw WrappedRuntimeException(message, e)
             }
         }
@@ -188,30 +277,59 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
                     throw e
                 }
                 val message = e.message?.let {
-                    globalContext.getString(R.string.error_failed_to_instantiate_with_cause, key, it)
-                } ?: globalContext.getString(R.string.error_failed_to_instantiate, key)
+                    globalContext.getString(R.string.error_failed_to_instantiate_with_cause, primaryKey, it)
+                } ?: globalContext.getString(R.string.error_failed_to_instantiate, primaryKey)
                 throw WrappedRuntimeException(message, e)
             }
         }
 
         val newObj = when (this) {
-            is Versatile -> newBaseFunction(creationScope, key, callFunc, constructFunc)
-            is Invokable -> newBaseFunction(creationScope, key, callFunc, NOT_CONSTRUCTABLE)
-            is Constructable -> newBaseFunction(creationScope, key, DEFAULT_CALLER, constructFunc)
+            is Versatile -> newBaseFunction(creationScope, primaryKey, callFunc, constructFunc)
+            is Invokable -> newBaseFunction(creationScope, primaryKey, callFunc, NOT_CONSTRUCTABLE)
+            is Constructable -> newBaseFunction(creationScope, primaryKey, DEFAULT_CALLER, constructFunc)
             else -> RhinoUtils.newObject(target)
         }
 
         assign(newObj, proto, specifiedRuntime)
 
-        val keys = mutableListOf(key)
-        if (withDollarPrefix) keys += "\$$key"
-
-        keys.forEach {
-            target.defineProp(it, newObj, PERMANENT or refineAttributes(additionalAttributes))
-        }
-
         return newObj
     }
+
+    protected fun mount(
+        target: Scriptable,
+        value: Any?,
+        attributes: Int = ScriptableObject.EMPTY,
+        resolvedKeys: ResolvedKeys = resolveKeys(),
+    ) {
+        resolvedKeys.names.forEach { target.defineProp(it, value, attributes) }
+    }
+
+    protected fun resolveKeys(): ResolvedKeys = resolvedKeysSnapshot
+
+    private fun createResolvedKeys(): ResolvedKeys {
+        val configuredKeys = keys
+        require(configuredKeys.isNotEmpty()) { "Augmentable keys must not be empty" }
+
+        val resolvedNames = configuredKeys.flatMap { configuredKey ->
+            buildList {
+                add(configuredKey.name)
+                if (configuredKey.withDollarPrefix) add("\$${configuredKey.name}")
+            }
+        }
+        val duplicateNames = resolvedNames.groupingBy { it }.eachCount()
+            .filterValues { it > 1 }
+            .keys
+        require(duplicateNames.isEmpty()) {
+            "Augmentable keys resolve to duplicate names: ${duplicateNames.joinToString()}"
+        }
+
+        return ResolvedKeys(configuredKeys.first().name, resolvedNames)
+    }
+
+    protected data class ResolvedKeys(
+        val primary: String,
+        val names: List<String>,
+    )
 
     fun assignWithRuntime(target: ScriptableObject, specifiedRuntime: ScriptRuntime, proto: Any? = null) {
         assign(target, proto, specifiedRuntime)
@@ -589,6 +707,11 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
     }.getOrNull()
 
     companion object : ArgumentGuards() {
+
+        private const val LEGACY_PREFIX_ARGUMENT_MESSAGE =
+            "Declare dollar-prefix policies with Augmentable.keys and remove the withDollarPrefix argument"
+
+        private fun legacyPrefixArgument(): Nothing = error(LEGACY_PREFIX_ARGUMENT_MESSAGE)
 
         private data class FunctionAssignment(
             val funcName: String,

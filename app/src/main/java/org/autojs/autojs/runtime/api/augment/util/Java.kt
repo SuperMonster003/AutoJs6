@@ -9,6 +9,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
@@ -22,6 +23,8 @@ import org.mozilla.javascript.Wrapper
 
 @Suppress("unused")
 object Java : Augmentable() {
+
+    override val keys = listOf(AugmentableKey("java", withDollarPrefix = false))
 
     override val selfAssignmentFunctions = listOf(
         ::instanceof.name to listOf(::instanceof.name, "instanceOf"),

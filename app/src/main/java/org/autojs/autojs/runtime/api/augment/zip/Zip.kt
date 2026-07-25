@@ -21,8 +21,6 @@ import java.util.UUID.randomUUID
 
 class Zip(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
-    override val key = super.key.lowercase()
-
     override val selfAssignmentFunctions = listOf(
         ::open.name,
         ::zipFile.name,

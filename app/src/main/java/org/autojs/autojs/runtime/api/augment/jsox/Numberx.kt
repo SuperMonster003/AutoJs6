@@ -13,6 +13,7 @@ import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.ArrayUtils.unshiftWith
@@ -36,7 +37,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 @Suppress("unused", "MemberVisibilityCanBePrivate", "UNUSED_PARAMETER")
 class Numberx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), JsBuildInObjectExtensible {
 
-    override val key: String = javaClass.simpleName
+    override val keys = listOf(AugmentableKey("Numberx", withDollarPrefix = false))
 
     override val selfAssignmentProperties = listOf(
         // @Hint by SuperMonster003 on Jun 20, 2024.

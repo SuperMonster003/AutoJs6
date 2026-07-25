@@ -63,6 +63,7 @@ function main() {
       registeredModuleCount: scanReport.totals.registeredModuleCount,
       protoReferenceCount: scanReport.totals.protoReferenceCount,
       unresolvedReceiverCount: scanReport.totals.unresolvedReceiverCount,
+      unresolvedKeyCount: scanReport.totals.unresolvedKeyCount || 0,
       inventoryModuleCount: inventory.totals.moduleCount,
       inventoryApiEntryCount: inventory.totals.apiEntryCount,
       manifestModuleCount: manifestInfo && manifestInfo.manifest.totals ? manifestInfo.manifest.totals.moduleCount : 0,
@@ -106,6 +107,13 @@ function policyViolationsFor(scanReport, inventory, manifestInfo, manifestValida
   if (scanReport.totals.unresolvedReceiverCount > 0) {
     violations.push("source scan has unresolved receivers: " + scanReport.totals.unresolvedReceivers.join(", "));
   }
+  if ((scanReport.totals.unresolvedKeyCount || 0) > 0) {
+    const expressions = (scanReport.totals.unresolvedKeys || [])
+      .map((entry) => `${entry.receiver}: ${entry.expression}`)
+      .join(", ");
+    violations.push("source scan has unresolved augmentable keys: " + expressions);
+  }
+  violations.push(...inventoryKeyViolations(inventory));
   if (inventory.totals.moduleCount <= 0 || inventory.totals.apiEntryCount <= 0) {
     violations.push("inventory is empty");
   }
@@ -119,6 +127,62 @@ function policyViolationsFor(scanReport, inventory, manifestInfo, manifestValida
     violations.push("inventory status vocabulary does not match Phase 11A vocabulary");
   }
   return violations;
+}
+
+function inventoryKeyViolations(inventory) {
+  const violations = [];
+  (inventory.modules || []).forEach((module) => {
+    const hasKeys = Array.isArray(module.keys);
+    const hasMountNames = Array.isArray(module.mountNames);
+    if (!hasKeys && !hasMountNames) {
+      return;
+    }
+    if (!hasKeys || !hasMountNames || module.keys.length === 0) {
+      violations.push(`module ${module.id} must provide non-empty keys and mountNames together`);
+      return;
+    }
+    const keyNames = module.keys.map((key) => key && key.name);
+    if (keyNames.some((name) => typeof name !== "string" || !/\S/.test(name))) {
+      violations.push(`module ${module.id} has a blank or invalid key descriptor name`);
+      return;
+    }
+    if (new Set(keyNames).size !== keyNames.length) {
+      violations.push(`module ${module.id} has duplicate key descriptor names`);
+    }
+    if (module.key !== keyNames[0]) {
+      violations.push(`module ${module.id} primary key does not match keys[0].name`);
+    }
+    if (module.registration.withDollarPrefix !== module.keys[0].withDollarPrefix) {
+      violations.push(`module ${module.id} registration.withDollarPrefix does not mirror the primary key`);
+    }
+    const expanded = module.keys.flatMap((key) => key.withDollarPrefix
+      ? [key.name, `$${key.name}`]
+      : [key.name]);
+    if (new Set(expanded).size !== expanded.length) {
+      violations.push(`module ${module.id} key descriptors resolve to duplicate mount names`);
+    }
+    if (!sameArray(module.mountNames, expanded)) {
+      violations.push(`module ${module.id} mountNames does not match expanded keys`);
+    }
+    if (!sameArray(module.exports && module.exports.moduleKeys, module.mountNames)) {
+      violations.push(`module ${module.id} exports.moduleKeys does not match mountNames`);
+    }
+    const moduleEntry = module.exports && Array.isArray(module.exports.entries)
+      ? module.exports.entries.find((entry) => entry.id === `${module.id}.__module`)
+      : null;
+    const expectedAliases = module.mountNames.filter((name) => name !== module.key);
+    if (!moduleEntry || moduleEntry.exposedName !== module.key ||
+        !sameArray(moduleEntry.aliases || [], expectedAliases)) {
+      violations.push(`module ${module.id} module entry aliases do not match non-primary mountNames`);
+    }
+  });
+  return violations;
+}
+
+function sameArray(left, right) {
+  return Array.isArray(left) && Array.isArray(right) &&
+    left.length === right.length &&
+    left.every((value, index) => value === right[index]);
 }
 
 function missingManifestValidation() {
@@ -143,6 +207,7 @@ function renderMarkdown(report) {
     `- Manifest API entries: ${report.summary.manifestApiEntryCount}`,
     `- Bridge modules: ${report.summary.bridgeModuleCount}`,
     `- Type modules: ${report.summary.typeModuleCount}`,
+    `- Unresolved augmentable keys: ${report.summary.unresolvedKeyCount}`,
     `- Policy violations: ${report.policyViolations.length}`,
     "",
     "## Status Counts",
@@ -193,4 +258,10 @@ function parseArgs(argv) {
   return options;
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  inventoryKeyViolations,
+};

@@ -11,13 +11,10 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.flatten
-import org.autojs.autojs.util.StringUtils.lowercaseFirstChar
 import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
 import org.mozilla.javascript.Undefined
 
 class Jsox(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
-
-    override val key = javaClass.simpleName.lowercaseFirstChar()
 
     override val selfAssignmentFunctions = listOf(
         ::extend.name,

@@ -101,7 +101,7 @@
 * `Improvement` KeyCode methods support sending key code commands with Shizuku permission
 * `Improvement` Deferred initialization of non-critical components to improve app startup performance
 * `Improvement` Cached compilation results for bundled Rhino resources and metadata for runtime enhancement functions to improve script initialization performance
-* `Improvement` Refactored the Kotlin module augmentation architecture with explicit Rhino realm binding, separated tasks and work_manager semantics, and expanded module compatibility and semantic regression tests
+* `Improvement` Refactored the Kotlin module augmentation architecture with declarative mount specifications supporting multiple aliases and independent `$` prefix control per name, explicit Rhino realm binding, separated tasks and work_manager semantics, and expanded module compatibility and semantic regression tests
 * `Improvement` Reused the persistent Node.js process and process-scoped runtime to improve warm script startup performance
 * `Improvement` Added phase-by-phase Node.js startup timing and trustworthy cold/runtime-warm performance reporting
 * `Improvement` Cached built-in Node.js native library resolution to avoid repeated plugin discovery

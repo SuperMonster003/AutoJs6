@@ -91,13 +91,41 @@
         "exports",
         "migration"
       ],
+      "dependentRequired": {
+        "keys": [
+          "mountNames"
+        ],
+        "mountNames": [
+          "keys"
+        ]
+      },
       "properties": {
         "id": {
           "$ref": "#/$defs/stableId"
         },
         "key": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Primary module name. This v1 field remains the stable compatibility view of keys[0].name."
+        },
+        "keys": {
+          "type": "array",
+          "description": "Ordered declarative module-name descriptors. Optional so existing v1 inventory documents remain valid.",
+          "items": {
+            "$ref": "#/$defs/moduleKey"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "mountNames": {
+          "type": "array",
+          "description": "Ordered, collision-free final names produced by expanding keys. It must equal exports.moduleKeys when present.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
         },
         "displayName": {
           "type": "string"
@@ -173,7 +201,8 @@
           "description": "Registration method such as augment, augmentWithRuntime, assignWithRuntime, proxying."
         },
         "withDollarPrefix": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Legacy v1 compatibility mirror of the primary key descriptor's withDollarPrefix policy."
         },
         "additionalAttributes": {
           "type": "array",
@@ -306,6 +335,7 @@
         },
         "aliases": {
           "type": "array",
+          "description": "Ordered alternate exposed names. Module-level generated entries may contain every mount name except exposedName.",
           "items": {
             "type": "string"
           },
@@ -436,6 +466,25 @@
         "endLine": {
           "type": "integer",
           "minimum": 1
+        }
+      }
+    },
+    "moduleKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "withDollarPrefix"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "withDollarPrefix": {
+          "type": "boolean",
+          "description": "Whether this name also produces a dollar-prefixed mount name after the plain name."
         }
       }
     },

@@ -12,6 +12,7 @@ import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
@@ -24,7 +25,7 @@ import org.mozilla.javascript.NativeObject
 
 class OcrMLKit(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
-    override val key = OcrMode.MLKIT.value
+    override val keys = listOf(AugmentableKey(OcrMode.MLKIT.value, withDollarPrefix = false))
 
     override val selfAssignmentFunctions = listOf(
         ::recognizeText.name,

@@ -6,6 +6,7 @@ import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -14,7 +15,7 @@ import org.mozilla.javascript.Wrapper
 @Suppress("unused")
 object OpenCC : Augmentable(), Invokable {
 
-    override val key = super.key.lowercase()
+    override val keys = listOf(AugmentableKey("opencc"))
 
     override val selfAssignmentFunctions = listOf(
         ::convert.name,

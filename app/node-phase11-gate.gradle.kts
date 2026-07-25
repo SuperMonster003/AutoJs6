@@ -89,9 +89,27 @@ tasks.register<Exec>("generateNodeRhinoNodeCompatGap") {
     )
 }
 
+val verifyNodeRhinoAugmentInventoryKeys = tasks.register<Exec>("verifyNodeRhinoAugmentInventoryKeys") {
+    group = "verification"
+    description = "Verifies declarative Rhino augment keys, aliases, and legacy inventory compatibility."
+
+    val testFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/test-rhino-augment-inventory.js")
+    inputs.files(
+        testFile,
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/scan-rhino-augment-inventory.js"),
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-augment-inventory.js"),
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-node-compat-gap.js"),
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-inventory.js"),
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine("node", testFile.asFile.absolutePath)
+}
+
 tasks.register<Exec>("verifyNodeRhinoCompatInventory") {
     group = "verification"
     description = "Verifies Phase 11A Rhino augment inventory, status manifest coverage, and Node bridge/types/docs evidence."
+    dependsOn(verifyNodeRhinoAugmentInventoryKeys)
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-inventory.js")
     val statusManifestFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/rhino-compat-status-manifest.js")

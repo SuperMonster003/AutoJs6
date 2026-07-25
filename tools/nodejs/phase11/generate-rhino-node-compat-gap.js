@@ -198,6 +198,8 @@ function candidateModuleNames(module) {
   const candidates = new Set();
   [
     module.key,
+    ...(module.keys || []).map((key) => key.name),
+    ...(module.mountNames || []),
     module.id,
     module.id.split(".").pop(),
     module.displayName,
@@ -465,4 +467,5 @@ module.exports = {
   parseTypeDeclarations,
   parseRuntimeEvidence,
   parseDocsEvidence,
+  candidateModuleNames,
 };
