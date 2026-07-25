@@ -51,6 +51,7 @@ import org.mozilla.javascript.NativeJavaPackage
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.Symbol
 import org.mozilla.javascript.TopLevel
 import org.mozilla.javascript.TopLevel.Builtins
 import org.mozilla.javascript.Undefined.isUndefined
@@ -405,14 +406,29 @@ object Inspect : Augmentable(), Invokable {
             }
         }
 
+        val array = js_array_isArray(value)
+
         // Look up the keys of the object.
         // zh-CN: 查找对象的键.
-        var keys: NativeArray = js_object_keys(value)
-        val visibleKeys = newNativeObject(getDeclarationScope(value)).also { o ->
-            keys.forEach { o.put(Context.toString(it), o, true) }
-        }
-        if (ctx.showHidden) {
-            keys = js_object_getOwnPropertyNames(value)
+        val visibleKeys: NativeObject?
+        val keys: Iterable<Any?>
+        if (value is NativeArray) {
+            // Keep raw array IDs so large arrays do not stringify every numeric index.
+            // zh-CN: 保留原始数组属性 ID, 避免大型数组将每个数字索引转换为字符串.
+            visibleKeys = null
+            keys = when {
+                ctx.showHidden -> value.allIds.asIterable()
+                else -> value.ids.asIterable()
+            }
+        } else {
+            val enumerableKeys = js_object_keys(value)
+            visibleKeys = newNativeObject(getDeclarationScope(value)).also { o ->
+                enumerableKeys.forEach { o.put(Context.toString(it), o, true) }
+            }
+            keys = when {
+                ctx.showHidden -> js_object_getOwnPropertyNames(value)
+                else -> enumerableKeys
+            }
         }
 
         // IE doesn't make error fields non-enumerable.
@@ -424,7 +440,7 @@ object Inspect : Augmentable(), Invokable {
 
         // Some type of object without properties can be shortcut.
         // zh-CN: 某些没有属性的对象类型可以简化处理.
-        if (keys.isEmpty) {
+        if (keys.none()) {
             when (value) {
                 is Callable -> return formatFunction(ctx, value)
                 is NativeRegExp -> return formatRegExp(ctx, value)
@@ -434,13 +450,11 @@ object Inspect : Augmentable(), Invokable {
         }
 
         var base = ""
-        var array = false
         var braces = listOf("{", "}")
 
         // Make Array say that they are Array.
         // zh-CN: 让数组表明它们是数组.
-        if (js_array_isArray(value)) {
-            array = true
+        if (array) {
             braces = listOf("[", "]")
         }
 
@@ -468,7 +482,7 @@ object Inspect : Augmentable(), Invokable {
             base = " ${getErrorFormattedName(value)}"
         }
 
-        if (keys.isEmpty && (!array || (value as NativeArray).isEmpty)) {
+        if (keys.none() && (!array || (value as NativeArray).isEmpty)) {
             return "${braces[0]}$base${braces[1]}"
         }
 
@@ -484,7 +498,7 @@ object Inspect : Augmentable(), Invokable {
         ctx.seen.add(value)
 
         val output: List<String> = if (array) {
-            formatArray(ctx, value as NativeArray, recurseTimes, visibleKeys, keys)
+            formatArray(ctx, value as NativeArray, recurseTimes, keys)
         } else {
             try {
                 // Object properties limit.
@@ -535,7 +549,7 @@ object Inspect : Augmentable(), Invokable {
 
     private fun toJavaObjectString(className: Any?, value: Any?) = "[JavaObject: $className@${Integer.toHexString(value.hashCode())}]"
 
-    private fun formatArray(ctx: Ctx, value: NativeArray, recurseTimes: Int?, visibleKeys: NativeObject, keys: NativeArray): List<String> {
+    private fun formatArray(ctx: Ctx, value: NativeArray, recurseTimes: Int?, keys: Iterable<Any?>): List<String> {
         val output = mutableListOf<String>()
 
         // Array elements upper limit display (head/tail summary).
@@ -557,7 +571,7 @@ object Inspect : Augmentable(), Invokable {
         for (i in 0 until head) {
             val key = Context.toString(i)
             output += when (js_object_hasOwnProperty(value, key)) {
-                true -> formatProperty(ctx, value, recurseTimes, visibleKeys, key, true).orEmpty()
+                true -> formatProperty(ctx, value, recurseTimes, null, key, true).orEmpty()
                 else -> ""
             }
         }
@@ -575,7 +589,7 @@ object Inspect : Augmentable(), Invokable {
             if (i < head) continue
             val key = Context.toString(i)
             output += when (js_object_hasOwnProperty(value, key)) {
-                true -> formatProperty(ctx, value, recurseTimes, visibleKeys, key, true).orEmpty()
+                true -> formatProperty(ctx, value, recurseTimes, null, key, true).orEmpty()
                 else -> ""
             }
         }
@@ -583,15 +597,16 @@ object Inspect : Augmentable(), Invokable {
         // Append non-numeric keys.
         // zh-CN: 补充非数字键.
         keys.forEach { key ->
+            if (key is Symbol || (key is Int && key >= 0)) return@forEach
             val niceKey = Context.toString(key)
             if (!DIGITS_REGEX.matches(niceKey)) {
-                formatProperty(ctx, value, recurseTimes, visibleKeys, niceKey, true)?.let(output::add)
+                formatProperty(ctx, value, recurseTimes, null, niceKey, true)?.let(output::add)
             }
         }
         return output
     }
 
-    private fun formatProperty(ctx: Ctx, value: ScriptableObject, recurseTimes: Int?, visibleKeys: NativeObject, key: String, array: Boolean): String? {
+    private fun formatProperty(ctx: Ctx, value: ScriptableObject, recurseTimes: Int?, visibleKeys: NativeObject?, key: String, array: Boolean): String? {
         var name: String? = null
         val desc = js_object_getOwnPropertyDescriptor(value, key) as? ScriptableObject ?: return null
         val getter = desc.prop(PROXY_GETTER_KEY)
@@ -608,7 +623,11 @@ object Inspect : Augmentable(), Invokable {
             else -> ""
         }
 
-        if (!js_object_keys(visibleKeys).contains(key)) {
+        val enumerable = when (visibleKeys) {
+            null -> Context.toBoolean(desc.prop("enumerable"))
+            else -> js_object_keys(visibleKeys).contains(key)
+        }
+        if (!enumerable) {
             name = "[$key]"
         }
 

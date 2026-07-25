@@ -261,6 +261,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Les méthodes KeyCode permettent d'envoyer des commandes de touche avec l'autorisation Shizuku
 * `Amélioration` Initialisation différée des composants non critiques pour améliorer les performances de démarrage de l'application
 * `Amélioration` Mise en cache des résultats de compilation des ressources Rhino intégrées et des métadonnées des fonctions d'extension de l'environnement d'exécution pour améliorer les performances d'initialisation des scripts
+* `Amélioration` Amélioration des performances de formatage des grands tableaux dans la console Rhino
 * `Amélioration` Refonte de l'architecture d'extension des modules Kotlin avec des spécifications de montage déclaratives prenant en charge plusieurs alias et le contrôle indépendant du préfixe `$` pour chaque nom, liaison explicite des realms Rhino, séparation sémantique de tasks et work_manager, et davantage de tests de compatibilité et de régression sémantique
 * `Amélioration` Réutilisation du processus Node.js persistant et de l'environnement d'exécution à l'échelle du processus pour améliorer les performances de démarrage à chaud des scripts
 * `Amélioration` Mesure par phase du démarrage de Node.js et rapports fiables sur les performances à froid et avec le runtime chaud
