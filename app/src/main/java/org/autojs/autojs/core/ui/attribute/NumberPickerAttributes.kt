@@ -7,7 +7,6 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class NumberPickerAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : LinearLayoutAttributes(scriptRuntime, resourceParser, view) {
 
@@ -24,7 +23,7 @@ open class NumberPickerAttributes(scriptRuntime: ScriptRuntime, resourceParser: 
 
         registerAttrs(arrayOf("textColor", "color")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.textColor = ColorUtils.parse(view, it)
+                view.textColor = parseColor(it)
             }
         }
 

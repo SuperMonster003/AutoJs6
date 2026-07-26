@@ -8,7 +8,6 @@ import androidx.core.widget.ImageViewCompat
 import org.autojs.autojs.core.ui.BiMaps
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class ImageViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewAttributes(scriptRuntime, resourceParser, view) {
 
@@ -32,7 +31,7 @@ open class ImageViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Res
             //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
             //  ! 方法 setImageTintList 无效果.
             val mode = ImageViewCompat.getImageTintMode(view)
-            view.setColorFilter(ColorUtils.parse(view, it), mode ?: PorterDuff.Mode.SRC_ATOP)
+            view.setColorFilter(parseColor(it), mode ?: PorterDuff.Mode.SRC_ATOP)
         }
         registerAttr("tintMode") { ImageViewCompat.setImageTintMode(view, TINT_MODES[it]) }
         registerAttr("url") { drawables.setupWithImage(view, wrapAsUrl(it)) }

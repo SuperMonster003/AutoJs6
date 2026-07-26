@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#FFF8F3</color>
+    <color name="background_accent">#FCE7DC</color>
+    <color name="button_text">#FFFFFFFF</color>
+    <color name="logo_end">#FFFFF8F3</color>
+    <color name="logo_start">#FFFFD9C8</color>
+    <color name="outline">#1FD85B32</color>
+    <color name="primary">#FFD85B32</color>
+    <color name="primary_pressed">#FFB94724</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="surface_muted">#FFFFF0E8</color>
+    <color name="text_primary">#FF2B211D</color>
+    <color name="text_secondary">#FF75645C</color>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="header_glow_height">240dp</dimen>
+    <dimen name="logo_size">52dp</dimen>
+    <dimen name="progress_height">8dp</dimen>
+    <dimen name="radius_large">28dp</dimen>
+    <dimen name="radius_medium">16dp</dimen>
+    <dimen name="space_card">24dp</dimen>
+    <dimen name="space_large">24dp</dimen>
+    <dimen name="space_medium">16dp</dimen>
+    <dimen name="space_screen">24dp</dimen>
+    <dimen name="space_section">20dp</dimen>
+    <dimen name="space_small">12dp</dimen>
+    <dimen name="space_tiny">6dp</dimen>
+    <dimen name="stroke_thin">1dp</dimen>
+    <dimen name="text_body">16sp</dimen>
+    <dimen name="text_caption">14sp</dimen>
+    <dimen name="text_eyebrow">13sp</dimen>
+    <dimen name="text_logo">15sp</dimen>
+    <dimen name="text_summary">22sp</dimen>
+    <dimen name="text_timer">64sp</dimen>
+    <dimen name="text_title">24sp</dimen>
+</resources>

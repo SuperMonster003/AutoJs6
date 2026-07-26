@@ -4,7 +4,6 @@ import android.view.View
 import org.autojs.autojs.core.console.ConsoleView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class ConsoleViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(scriptRuntime, resourceParser, view) {
 
@@ -14,13 +13,13 @@ open class ConsoleViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: R
         super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("textSize") { view.textSize = it.toFloat() }
-        registerAttr("textColors") { value -> view.setTextColors(parseAttrValue(value).map { ColorUtils.parse(view, it) }.toTypedArray()) }
-        registerAttrs(arrayOf("verboseTextColor", "verboseColor")) { view.setVerboseTextColor(ColorUtils.parse(view, it)) }
-        registerAttrs(arrayOf("debugTextColor", "debugColor")) { view.setDebugTextColor(ColorUtils.parse(view, it)) }
-        registerAttrs(arrayOf("infoTextColor", "infoColor")) { view.setInfoTextColor(ColorUtils.parse(view, it)) }
-        registerAttrs(arrayOf("warnTextColor", "warnColor")) { view.setWarnTextColor(ColorUtils.parse(view, it)) }
-        registerAttrs(arrayOf("errorTextColor", "errorColor")) { view.setErrorTextColor(ColorUtils.parse(view, it)) }
-        registerAttrs(arrayOf("assertTextColor", "assertColor")) { view.setAssertTextColor(ColorUtils.parse(view, it)) }
+        registerAttr("textColors") { value -> view.setTextColors(parseAttrValue(value).map(::parseColor).toTypedArray()) }
+        registerAttrs(arrayOf("verboseTextColor", "verboseColor")) { view.setVerboseTextColor(parseColor(it)) }
+        registerAttrs(arrayOf("debugTextColor", "debugColor")) { view.setDebugTextColor(parseColor(it)) }
+        registerAttrs(arrayOf("infoTextColor", "infoColor")) { view.setInfoTextColor(parseColor(it)) }
+        registerAttrs(arrayOf("warnTextColor", "warnColor")) { view.setWarnTextColor(parseColor(it)) }
+        registerAttrs(arrayOf("errorTextColor", "errorColor")) { view.setErrorTextColor(parseColor(it)) }
+        registerAttrs(arrayOf("assertTextColor", "assertColor")) { view.setAssertTextColor(parseColor(it)) }
         registerAttrs(arrayOf("isPinchToZoomEnabled", "pinchToZoomEnabled", "enablePinchToZoom")) { view.setPinchToZoomEnabled(it.toBoolean()) }
     }
 

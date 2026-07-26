@@ -28,7 +28,6 @@ import org.autojs.autojs.core.ui.inflater.util.Ids
 import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -38,6 +37,7 @@ import java.util.Locale
 open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, open val view: View) {
 
     val drawables: Drawables = resourceParser.drawables
+    protected val androidResources = resourceParser.androidResources
 
     private val mAttributes: MutableMap<String, Attribute> = HashMap()
     private var mViewAttributeDelegate: ViewAttributeDelegate? = null
@@ -126,12 +126,12 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
         registerAttrs(arrayOf("width", "w", "layout_width", "layoutWidth"), { parseDimension(it, true) }, ::setWidth)
         registerAttrs(arrayOf("height", "h", "layout_height", "layoutHeight"), { parseDimension(it, false) }, ::setHeight)
         registerAttrs(arrayOf("background", "bg")) { drawables.setupWithViewBackground(view, it) }
-        registerAttrs(arrayOf("backgroundColor", "bgColor")) { view.setBackgroundColor(ColorUtils.parse(view, it)) }
-        registerAttrs(arrayOf("backgroundTint", "bgTint")) { setBackgroundTint(ColorUtils.parse(view, it)) }
+        registerAttrs(arrayOf("backgroundColor", "bgColor")) { view.setBackgroundColor(parseColor(it)) }
+        registerAttrs(arrayOf("backgroundTint", "bgTint")) { setBackgroundTint(parseColorStateList(it)) }
         registerAttrs(arrayOf("backgroundTintMode", "bgTintMode")) { ViewCompat.setBackgroundTintMode(view, TINT_MODES[it]) }
         registerAttrs(arrayOf("foreground", "fg")) { setForeground(drawables.parse(view, it)) }
         registerAttrs(arrayOf("foregroundGravity", "fgGravity"), Gravities::parse, ::setForegroundGravity)
-        registerAttrs(arrayOf("foregroundTint", "fgTint")) { view.foregroundTintList = ColorUtils.toColorStateList(view, it) }
+        registerAttrs(arrayOf("foregroundTint", "fgTint")) { view.foregroundTintList = parseColorStateList(it) }
         registerAttrs(arrayOf("foregroundTintMode", "fgTintMode"), { TINT_MODES[it] }, ::setForegroundTintMode)
         registerAttrs(arrayOf("layout_gravity", "layoutGravity"), Gravities::parse, ::setLayoutGravity)
         registerAttrs(arrayOf("layout_weight", "layoutWeight"), String::toFloat, ::setLayoutWeight)
@@ -394,6 +394,11 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
 
     protected fun parseDrawable(value: String): Drawable? = drawables.parse(view, value)
 
+    protected fun parseColor(value: String) = androidResources.parseColor(view.context, value)
+
+    protected fun parseColorStateList(value: String) =
+        androidResources.parseColorStateList(view.context, value)
+
     protected fun setGravity(g: Int) = try {
         val setGravity = view.javaClass.getMethod("setGravity", Int::class.javaPrimitiveType)
         setGravity.invoke(view, g)
@@ -500,8 +505,8 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
         view.setPaddingRelative(padding, view.paddingTop, padding, view.paddingBottom)
     }
 
-    protected fun setBackgroundTint(color: Int) {
-        ViewCompat.setBackgroundTintList(view, ColorStateList.valueOf(color))
+    protected fun setBackgroundTint(colors: ColorStateList) {
+        ViewCompat.setBackgroundTintList(view, colors)
     }
 
     protected fun setContextClickable(clickable: Boolean) {

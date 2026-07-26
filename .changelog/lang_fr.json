@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/25",
+      "released_date": "2026/07/26",
       "feature": [
         "Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive \"nodejs\" ou des extensions comme .node.js/.cjs/.mjs",
         "L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)",
@@ -23,6 +23,7 @@
         "Le Centre des plugins prend en charge les plugins APK Builder Template, permettant d'installer et de mettre à jour à la demande les modèles nécessaires à l'empaquetage",
         "Un appui long sur le bouton flottant de l'onglet Plugins de la page d'accueil ouvre le Centre des plugins",
         "Méthode runtime.loadAar, pour charger dynamiquement des fichiers AAR",
+        "ui.useAndroidLayout prend en charge les widgets de mise en page Android natifs, include/merge, les références res des projets de scripts et les fichiers Drawable XML comme shape/selector/layer-list",
         "Les modules JavaScript (Rhino) prennent en charge les interfaces compatibles power/settings/work_manager et l'enveloppe AppInfo, et complètent certaines API Base64/Crypto/WebSocket/ByteString/automator/images/timers d'Auto.js Pro 9.3.11",
         "Le module global ai JavaScript (Rhino) prend en charge les fournisseurs OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible, les appels ask/chat/stream et la poursuite multi-tour des appels d'outils; les options pour les développeurs proposent une gestion chiffrée de plusieurs profils et identifiants, et les points de terminaison compatibles sur l'adresse de bouclage locale peuvent fonctionner sans clé API",
         "Le module global tts JavaScript (Rhino) propose la synthèse vocale du système, le découpage intelligent des textes longs, des files logiques, la découverte des voix et des langues avec filtrage des voix hors ligne, des tâches observables et des événements audio, l'insertion de silences et la synthèse vers des fichiers avec publication atomique; il intègre aussi les délais d'expiration, la contre-pression, le nettoyage à l'exécution et la protection contre l'emploi d'un moteur de repli lorsqu'un moteur précis est demandé",

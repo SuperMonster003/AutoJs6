@@ -17,7 +17,6 @@ import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.core.ui.inflater.util.Res
 import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils.parse
 
 /**
  * Created by SuperMonster003 on Apr 12, 2023.
@@ -90,7 +89,7 @@ open class TextViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Reso
         registerAttr("privateImeOptions") { view.privateImeOptions = Strings.parse(view, it) }
         registerAttr("scrollHorizontally") { view.setHorizontallyScrolling(it.toBoolean()) }
         registerAttr("selectAllOnFocus") { view.setSelectAllOnFocus(it.toBoolean()) }
-        registerAttr("shadowColor") { view.setShadowLayer(view.shadowRadius, view.shadowDx, view.shadowDy, parse(view, it)) }
+        registerAttr("shadowColor") { view.setShadowLayer(view.shadowRadius, view.shadowDx, view.shadowDy, parseColor(it)) }
         registerAttr("shadowDx") { view.setShadowLayer(view.shadowRadius, Dimensions.parseToPixel(it, view), view.shadowDy, view.shadowColor) }
         registerAttr("shadowDy") { view.setShadowLayer(view.shadowRadius, view.shadowDx, Dimensions.parseToPixel(it, view), view.shadowColor) }
         registerAttr("shadowRadius") { view.setShadowLayer(Dimensions.parseToPixel(it, view), view.shadowDx, view.shadowDy, view.shadowColor) }
@@ -100,14 +99,14 @@ open class TextViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Reso
         registerAttr("textScaleX") { view.textScaleX = Dimensions.parseToPixel(it, view) }
         registerAttr("textStyle") { mTextStyle = TextViewInflater.TEXT_STYLES.split(it); setTypeface() }
         registerAttr("typeface") { mTypeface = it; setTypeface() }
-        registerAttrs(arrayOf("highlightTextColor", "textColorHighlight")) { view.highlightColor = parse(view, it) }
-        registerAttrs(arrayOf("hintTextColor", "textColorHint")) { view.setHintTextColor(parse(view, it)) }
+        registerAttrs(arrayOf("highlightTextColor", "textColorHighlight")) { view.highlightColor = parseColor(it) }
+        registerAttrs(arrayOf("hintTextColor", "textColorHint")) { view.setHintTextColor(parseColorStateList(it)) }
         registerAttrs(arrayOf("isAllCaps", "allCaps", "textAllCaps")) { view.isAllCaps = it.toBoolean() }
         registerAttrs(arrayOf("isCursorVisible", "cursorVisible")) { view.isCursorVisible = it.toBoolean() }
         registerAttrs(arrayOf("isElegantTextHeight", "elegantTextHeight")) { view.isElegantTextHeight = it.toBoolean() }
         registerAttrs(arrayOf("isSingleLine", "singleLine")) { view.isSingleLine = it.toBoolean() }
-        registerAttrs(arrayOf("linkTextColor", "textColorLink")) { view.setLinkTextColor(parse(view, it)) }
-        registerAttrs(arrayOf("textColor", "color")) { view.setTextColor(parse(view.context, it)) }
+        registerAttrs(arrayOf("linkTextColor", "textColorLink")) { view.setLinkTextColor(parseColorStateList(it)) }
+        registerAttrs(arrayOf("textColor", "color")) { view.setTextColor(parseColorStateList(it)) }
         registerAttrs(arrayOf("textSize", "size")) { view.setTextSize(TypedValue.COMPLEX_UNIT_PX, Dimensions.parseToPixel(it, view)) }
 
         registerAttrUnsupported(

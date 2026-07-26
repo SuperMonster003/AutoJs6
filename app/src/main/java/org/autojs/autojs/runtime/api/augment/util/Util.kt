@@ -4,6 +4,7 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsBigInt
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsBoolean
@@ -19,10 +20,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsString
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsSymbol
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsUndefined
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.rhino.ArgumentGuards
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
 import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
@@ -42,7 +39,6 @@ import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.autojs.autojs.util.RhinoUtils.js_object_create
 import org.autojs.autojs.util.RhinoUtils.js_object_setPrototypeOf
 import org.autojs.autojs.util.RhinoUtils.js_typeof
-import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
@@ -57,7 +53,7 @@ import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
 import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter.ofPattern
-import java.util.*
+import java.util.Locale
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 
 /**
@@ -66,6 +62,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 @Suppress("unused", "FunctionName", "UNUSED_PARAMETER")
 object Util : Augmentable() {
 
+    @Suppress("DEPRECATION")
     override val selfAssignmentFunctions = listOf(
         ::__assignFunctions__.name to (READONLY or DONTENUM or PERMANENT),
         ::isArray.name,

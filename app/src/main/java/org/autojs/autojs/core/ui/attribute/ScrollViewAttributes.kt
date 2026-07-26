@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.ScrollView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class ScrollViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(scriptRuntime, resourceParser, view) {
 
@@ -14,22 +13,22 @@ open class ScrollViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Re
     override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
         super.onRegisterAttrs(scriptRuntime)
 
-        registerAttr("isFillViewport") { view.isFillViewport = it.toBoolean() }
+        registerAttrs(arrayOf("fillViewport", "isFillViewport")) { view.isFillViewport = it.toBoolean() }
         registerAttrs(arrayOf("isSmoothScrollingEnabled", "isSmoothScrolling", "smoothScrollingEnabled", "enableSmoothScrolling")) { view.isSmoothScrollingEnabled = it.toBoolean() }
 
         registerAttr("topEdgeEffectColor") {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.topEdgeEffectColor = ColorUtils.parse(view, it)
+                view.topEdgeEffectColor = parseColor(it)
             }
         }
         registerAttr("edgeEffectColor") {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.setEdgeEffectColor(ColorUtils.parse(view, it))
+                view.setEdgeEffectColor(parseColor(it))
             }
         }
         registerAttr("bottomEdgeEffectColor") {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.bottomEdgeEffectColor = ColorUtils.parse(view, it)
+                view.bottomEdgeEffectColor = parseColor(it)
             }
         }
     }

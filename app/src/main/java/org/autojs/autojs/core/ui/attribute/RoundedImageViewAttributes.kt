@@ -9,7 +9,6 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class RoundedImageViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ImageViewAttributes(scriptRuntime, resourceParser, view) {
 
@@ -27,7 +26,7 @@ open class RoundedImageViewAttributes(scriptRuntime: ScriptRuntime, resourcePars
         registerAttrs(arrayOf("tileX", "tileModeX")) { view.tileModeX = TILE_MODES[it] }
         registerAttrs(arrayOf("tileY", "tileModeY")) { view.tileModeY = TILE_MODES[it] }
         registerAttr("borderWidth") { view.borderWidth = Dimensions.parseToPixel(it, view) }
-        registerAttr("borderColor") { view.borderColor = ColorUtils.parse(view, it) }
+        registerAttr("borderColor") { view.borderColor = parseColor(it) }
         registerAttr("scaleType") { view.scaleType = SCALE_TYPES[it] }
     }
 

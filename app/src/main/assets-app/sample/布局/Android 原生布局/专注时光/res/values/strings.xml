@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_reset">重置</string>
+    <string name="action_skip">跳过</string>
+    <string name="action_start">开始</string>
+    <string name="app_name">专注时光</string>
+    <string name="app_subtitle">把注意力留给当下</string>
+    <string name="focus_hint">保持专注, 一次只做一件事.</string>
+    <string name="logo_text">25</string>
+    <string name="mode_focus">专注阶段</string>
+    <string name="session_initial">0 / 4</string>
+    <string name="session_label">今日进度</string>
+    <string name="session_target">目标 4 个专注时段</string>
+    <string name="timer_initial">25:00</string>
+</resources>

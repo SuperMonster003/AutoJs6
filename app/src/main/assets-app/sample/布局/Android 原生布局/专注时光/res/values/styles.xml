@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="FocusButtonPrimary">
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/button_text</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FocusButtonSecondary">
+        <item name="android:background">@drawable/button_secondary</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/button_secondary_text</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FocusCaption">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/text_caption</item>
+    </style>
+
+    <style name="FocusEyebrow">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">@dimen/text_eyebrow</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FocusTimer">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_timer</item>
+    </style>
+
+    <style name="FocusThemeOverlay">
+        <item name="android:colorAccent">@color/primary</item>
+    </style>
+
+    <style name="FocusTitle">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

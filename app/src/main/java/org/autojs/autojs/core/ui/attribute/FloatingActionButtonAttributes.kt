@@ -5,7 +5,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
 
 /**
@@ -23,8 +22,8 @@ open class FloatingActionButtonAttributes(scriptRuntime: ScriptRuntime, resource
         registerAttrs(arrayOf("size", "fabSize")) { view.size = Dimensions.parseToIntPixel(it, view) }
         registerPixelAttr("elevation") { view.compatElevation = it }
         registerAttr("useCompatPadding") { view.useCompatPadding = it.toBoolean() }
-        registerAttr("rippleColor") { view.rippleColor = ColorUtils.parse(view, it) }
-        registerAttrs(arrayOf("backgroundTint", "bgTint")) { view.backgroundTintList = ColorUtils.toColorStateList(view, it) }
+        registerAttr("rippleColor") { view.rippleColor = parseColor(it) }
+        registerAttrs(arrayOf("backgroundTint", "bgTint")) { view.backgroundTintList = parseColorStateList(it) }
         registerAttr("ensureMinTouchTargetSize") { view.setEnsureMinTouchTargetSize(it.toBoolean()) }
         registerAttr("maxImageSize") { view.setMaxImageSize(it.toInt()) }
         registerAttr("excludeFromNavigationBar") { view.excludeFloatingActionButtonFromBottomNavigationBar() }

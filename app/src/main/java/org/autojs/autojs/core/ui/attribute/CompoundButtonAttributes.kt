@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.CompoundButton
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class CompoundButtonAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ButtonAttributes(scriptRuntime, resourceParser, view) {
 
@@ -16,28 +15,26 @@ open class CompoundButtonAttributes(scriptRuntime: ScriptRuntime, resourceParser
 
         registerAttrs(arrayOf("checked", "check", "isChecked")) { setChecked(it.toBoolean()) }
         registerAttr("buttonDrawable") { view.buttonDrawable = drawables.parse(view, it) }
-        registerAttrs(arrayOf("buttonTint", "tint")) { view.buttonTintList = parseTintList(view, it) }
+        registerAttrs(arrayOf("buttonTint", "tint")) { view.buttonTintList = parseTintList(it) }
     }
 
     private fun setChecked(checked: Boolean) {
         view.isChecked = checked
     }
 
-    companion object {
+    protected fun parseTintList(value: String): ColorStateList {
+        val colors = parseAttrValue(value)
+        return when (colors.size) {
+            2 -> ColorStateList(switchStates, colors.map(::parseColor).toIntArray())
+            else -> parseColorStateList(colors[0])
+        }
+    }
 
+    companion object {
         private val switchStates = arrayOf(
             intArrayOf(-android.R.attr.state_checked),
             intArrayOf(android.R.attr.state_checked),
         )
-
-        fun parseTintList(view: View, value: String): ColorStateList {
-            val colors = parseAttrValue(value)
-            return when (colors.size) {
-                2 -> ColorStateList(switchStates, colors.map { ColorUtils.parse(view, it) }.toIntArray())
-                else -> ColorUtils.parse(view, colors[0]).let { ColorStateList(switchStates, intArrayOf(it, it)) }
-            }
-        }
-
     }
 
 }

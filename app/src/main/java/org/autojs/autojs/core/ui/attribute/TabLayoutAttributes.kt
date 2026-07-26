@@ -8,7 +8,6 @@ import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class TabLayoutAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : HorizontalScrollViewAttributes(scriptRuntime, resourceParser, view) {
 
@@ -18,15 +17,15 @@ open class TabLayoutAttributes(scriptRuntime: ScriptRuntime, resourceParser: Res
         super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("tabGravity") { view.tabGravity = Gravities.parse(it) }
-        registerAttrs(arrayOf("selectedTabIndicatorColor", "tabIndicatorColor")) { view.setSelectedTabIndicatorColor(ColorUtils.parse(view, it)) }
+        registerAttrs(arrayOf("selectedTabIndicatorColor", "tabIndicatorColor")) { view.setSelectedTabIndicatorColor(parseColor(it)) }
         registerAttr("tabMode") { view.tabMode = TAB_MODES[it] }
-        registerAttr("tabRippleColor") { view.tabRippleColor = ColorUtils.toColorStateList(view, it) }
-        registerAttr("tabIconTint") { view.tabIconTint = ColorUtils.toColorStateList(view, it) }
+        registerAttr("tabRippleColor") { view.tabRippleColor = parseColorStateList(it) }
+        registerAttr("tabIconTint") { view.tabIconTint = parseColorStateList(it) }
         registerAttr("tabGravity") { view.tabGravity = Gravities.parse(it) }
         registerAttrs(arrayOf("selectedTabIndicatorGravity", "tabIndicatorGravity")) { view.setSelectedTabIndicatorGravity(Gravities.parse(it)) }
         registerAttr("selectedTabIndicator") { view.setSelectedTabIndicator(drawables.parse(view, it)) }
-        registerAttr("tabSelectedTextColor") { view.setTabTextColors(view.tabTextColors?.defaultColor ?: Color.WHITE, ColorUtils.parse(view, it)) }
-        registerAttr("tabTextColor") { view.setTabTextColors(ColorUtils.parse(view, it), view.tabTextColors?.defaultColor ?: Color.WHITE) }
+        registerAttr("tabSelectedTextColor") { view.setTabTextColors(view.tabTextColors?.defaultColor ?: Color.WHITE, parseColor(it)) }
+        registerAttr("tabTextColor") { view.setTabTextColors(parseColor(it), view.tabTextColors?.defaultColor ?: Color.WHITE) }
         registerAttrs(arrayOf("isTabIndicatorFullWidth", "tabIndicatorFullWidth")) { view.isTabIndicatorFullWidth = it.toBoolean() }
         registerAttrs(arrayOf("isInlineLabel", "inlineLabel")) { view.isInlineLabel = it.toBoolean() }
 

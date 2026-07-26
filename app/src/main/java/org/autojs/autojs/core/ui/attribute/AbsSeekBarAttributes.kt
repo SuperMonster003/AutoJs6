@@ -4,7 +4,6 @@ import android.view.View
 import android.widget.AbsSeekBar
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class AbsSeekBarAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ProgressBarAttributes(scriptRuntime, resourceParser, view) {
 
@@ -17,8 +16,8 @@ open class AbsSeekBarAttributes(scriptRuntime: ScriptRuntime, resourceParser: Re
         registerAttr("splitTrack") { view.splitTrack = it.toBoolean() }
         registerAttr("thumb") { view.thumb = drawables.parse(view, it) }
         registerAttr("thumbOffset") { view.thumbOffset = it.toInt() }
-        registerAttr("thumbTintList") { view.thumbTintList = ColorUtils.toColorStateList(view, it) }
+        registerAttr("thumbTintList") { view.thumbTintList = parseColorStateList(it) }
         registerAttr("tickMark") { view.tickMark = drawables.parse(view, it) }
-        registerAttr("tickMarkTintList") { view.tickMarkTintList = ColorUtils.toColorStateList(view, it) }
+        registerAttr("tickMarkTintList") { view.tickMarkTintList = parseColorStateList(it) }
     }
 }

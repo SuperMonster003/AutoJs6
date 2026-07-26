@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/25
+###### 2026/07/26
 
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
 * `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
@@ -28,6 +28,7 @@
 * `新增` 外掛中心支援 APK Builder Template 外掛, 可按需安裝及更新打包應用所需範本
 * `新增` 主頁外掛標籤頁浮動按鈕支援長按進入外掛中心
 * `新增` runtime.loadAar 方法, 用於動態載入 AAR 檔案
+* `新增` ui.useAndroidLayout 支援 Android 原生版面配置元件, include/merge, 指令碼專案 res 資源引用及 shape/selector/layer-list 等 Drawable XML
 * `新增` JavaScript (Rhino) 模組支援 power/settings/work_manager 相容介面及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全域 JavaScript (Rhino) ai 模組支援 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 呼叫及工具呼叫多輪續接; 開發者選項支援加密的多設定檔及憑證管理, 本機迴路位址上的相容端點可免 API 金鑰執行
 * `新增` 全域 JavaScript (Rhino) tts 模組提供系統文字轉語音/長文字智慧分段/邏輯佇列/語音及語言探索/離線語音篩選/可觀察任務及音訊事件/靜音插入/採用原子發布的檔案合成, 並具備逾時/背壓/執行階段清理及指定引擎防回退保護

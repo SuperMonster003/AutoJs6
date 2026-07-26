@@ -15,6 +15,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.ImageLoader.BitmapCallback
 import org.autojs.autojs.core.ui.inflater.ImageLoader.DrawableCallback
+import org.autojs.autojs.core.ui.inflater.AndroidResourceResolver
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ColorUtils.toInt
@@ -33,7 +34,21 @@ open class Drawables {
 
     private var imageLoader = sDefaultImageLoader
 
+    var androidResourceResolver: AndroidResourceResolver? = null
+
     fun parse(context: Context, value: String): Drawable? {
+        androidResourceResolver?.let { resolver ->
+            if (resolver.canResolveDrawable(value)) {
+                resolver.resolveDrawable(context, value)?.let { return it }
+                if (value == "@null") {
+                    return null
+                }
+                resolver.resolveScalar(context, value)
+                    .takeIf { it != value }
+                    ?.let { return parse(context, it) }
+                return null
+            }
+        }
         if (Regex("^(#|@(android:)?color/)").containsMatchIn(value)) {
             return ColorDrawable(ColorUtils.parse(context, value))
         }

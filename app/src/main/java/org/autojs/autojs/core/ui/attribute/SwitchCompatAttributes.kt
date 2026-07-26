@@ -20,9 +20,9 @@ open class SwitchCompatAttributes(scriptRuntime: ScriptRuntime, resourceParser: 
         registerAttr("textOn") { view.textOn = Strings.parse(view, it) }
         registerAttr("thumbDrawable") { view.thumbDrawable = drawables.parse(view, it) }
         registerAttr("thumbTextPadding") { view.thumbTextPadding = Dimensions.parseToIntPixel(it, view) }
-        registerAttr("thumbTint") { view.thumbTintList = parseTintList(view, it) }
+        registerAttr("thumbTint") { view.thumbTintList = parseTintList(it) }
         registerAttr("trackDrawable") { view.trackDrawable = drawables.parse(view, it) }
-        registerAttr("trackTint") { view.trackTintList = parseTintList(view, it) }
+        registerAttr("trackTint") { view.trackTintList = parseTintList(it) }
         registerAttr("splitTrack") { view.splitTrack = it.toBoolean() }
         registerAttr("switchMinWidth") { view.switchMinWidth = Dimensions.parseToIntPixel(it, view) }
         registerAttr("switchPadding") { view.switchPadding = Dimensions.parseToIntPixel(it, view) }

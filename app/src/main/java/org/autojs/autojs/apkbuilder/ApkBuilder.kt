@@ -30,10 +30,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  * official APK Builder plugin. Low-level template mutation APIs remain only as migration guards
  * because their incremental workspace semantics cannot be represented by the remote protocol.
  */
+open class ApkBuilder
 @Deprecated(
     message = "In-process APK building has moved to the APK Builder plugin",
 )
-open class ApkBuilder(
+constructor(
     apkInputStream: InputStream?,
     private val outApkFile: File,
     @Suppress("UNUSED_PARAMETER") buildPath: String,
@@ -124,7 +125,7 @@ open class ApkBuilder(
             projectConfig = config,
             outApkFile = outApkFile,
             cancelSignal = cancelSignal,
-            progressListener = RemoteApkBuildClient.ProgressListener { progress ->
+            progressListener = { progress ->
                 notifyStepProgress(
                     progress.title?.takeIf(String::isNotBlank)
                         ?: context.getString(R.string.text_processing),

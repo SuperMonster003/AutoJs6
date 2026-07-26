@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/reset"
+            style="@style/FocusButtonSecondary"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginEnd="@dimen/space_tiny"
+            android:layout_weight="1"
+            android:text="@string/action_reset" />
+
+        <Button
+            android:id="@+id/skip"
+            style="@style/FocusButtonSecondary"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginStart="@dimen/space_tiny"
+            android:layout_weight="1"
+            android:text="@string/action_skip" />
+    </LinearLayout>
+</merge>

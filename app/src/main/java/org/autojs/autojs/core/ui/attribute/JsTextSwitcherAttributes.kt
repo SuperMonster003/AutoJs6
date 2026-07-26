@@ -18,7 +18,6 @@ import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.core.ui.widget.JsTextSwitcher
 import org.autojs.autojs.core.ui.widget.JsTextView
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 import kotlin.text.RegexOption.IGNORE_CASE
 
@@ -93,7 +92,7 @@ class JsTextSwitcherAttributes(scriptRuntime: ScriptRuntime, resourceParser: Res
         registerAttr("privateImeOptions") { value -> textViews.forEach { it.privateImeOptions = Strings.parse(view, value) } }
         registerAttr("scrollHorizontally") { value -> textViews.forEach { it.setHorizontallyScrolling(value.toBoolean()) } }
         registerAttr("selectAllOnFocus") { value -> textViews.forEach { it.setSelectAllOnFocus(value.toBoolean()) } }
-        registerAttr("shadowColor") { value -> textViews.forEach { it.setShadowLayer(it.shadowRadius, it.shadowDx, it.shadowDy, ColorUtils.parse(it, value)) } }
+        registerAttr("shadowColor") { value -> textViews.forEach { it.setShadowLayer(it.shadowRadius, it.shadowDx, it.shadowDy, parseColor(value)) } }
         registerAttr("shadowDx") { value -> textViews.forEach { it.setShadowLayer(it.shadowRadius, Dimensions.parseToPixel(value, it), it.shadowDy, it.shadowColor) } }
         registerAttr("shadowDy") { value -> textViews.forEach { it.setShadowLayer(it.shadowRadius, it.shadowDx, Dimensions.parseToPixel(value, it), it.shadowColor) } }
         registerAttr("shadowRadius") { value -> textViews.forEach { it.setShadowLayer(Dimensions.parseToPixel(value, it), it.shadowDx, it.shadowDy, it.shadowColor) } }
@@ -103,14 +102,14 @@ class JsTextSwitcherAttributes(scriptRuntime: ScriptRuntime, resourceParser: Res
         registerAttr("textScaleX") { value -> textViews.forEach { it.textScaleX = Dimensions.parseToPixel(value, it) } }
         registerAttr("textStyle") { value -> mTextStyle = TextViewInflater.TEXT_STYLES.split(value); textViews.forEach { setTypeface(it) } }
         registerAttr("typeface") { value -> mTypeface = value; textViews.forEach { setTypeface(it) } }
-        registerAttrs(arrayOf("highlightTextColor", "textColorHighlight")) { value -> textViews.forEach { it.highlightColor = ColorUtils.parse(view, value) } }
-        registerAttrs(arrayOf("hintTextColor", "textColorHint")) { value -> textViews.forEach { it.setHintTextColor(ColorUtils.parse(view, value)) } }
+        registerAttrs(arrayOf("highlightTextColor", "textColorHighlight")) { value -> textViews.forEach { it.highlightColor = parseColor(value) } }
+        registerAttrs(arrayOf("hintTextColor", "textColorHint")) { value -> textViews.forEach { it.setHintTextColor(parseColorStateList(value)) } }
         registerAttrs(arrayOf("isAllCaps", "allCaps", "textAllCaps")) { value -> textViews.forEach { it.isAllCaps = value.toBoolean() } }
         registerAttrs(arrayOf("isCursorVisible", "cursorVisible")) { value -> textViews.forEach { it.isCursorVisible = value.toBoolean() } }
         registerAttrs(arrayOf("isElegantTextHeight", "elegantTextHeight")) { value -> textViews.forEach { it.isElegantTextHeight = value.toBoolean() } }
         registerAttrs(arrayOf("isSingleLine", "singleLine")) { value -> textViews.forEach { it.isSingleLine = value.toBoolean() } }
-        registerAttrs(arrayOf("linkTextColor", "textColorLink")) { value -> textViews.forEach { it.setLinkTextColor(ColorUtils.parse(view, value)) } }
-        registerAttrs(arrayOf("textColor", "color")) { value -> textViews.forEach { it.setTextColor(ColorUtils.parse(it.context, value)) } }
+        registerAttrs(arrayOf("linkTextColor", "textColorLink")) { value -> textViews.forEach { it.setLinkTextColor(parseColorStateList(value)) } }
+        registerAttrs(arrayOf("textColor", "color")) { value -> textViews.forEach { it.setTextColor(parseColorStateList(value)) } }
         registerAttrs(arrayOf("textSize", "size")) { value -> textViews.forEach { it.setTextSize(TypedValue.COMPLEX_UNIT_PX, Dimensions.parseToPixel(value, it)) } }
 
         registerAttrs(arrayOf("anim", "animation")) { setAnimations(it) }

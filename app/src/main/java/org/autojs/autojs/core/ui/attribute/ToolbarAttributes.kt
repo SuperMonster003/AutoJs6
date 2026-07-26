@@ -7,7 +7,6 @@ import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class ToolbarAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewGroupAttributes(scriptRuntime, resourceParser, view) {
 
@@ -25,14 +24,14 @@ open class ToolbarAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resou
         registerAttr("overflowIcon") { view.overflowIcon = drawables.parse(view, it) }
         registerAttr("popupTheme") { view.popupTheme = POP_UP_THEMES[it] }
         registerAttr("subtitle") { view.subtitle = Strings.parse(view, it) }
-        registerAttr("subtitleTextColor") { view.setSubtitleTextColor(ColorUtils.parse(view, it)) }
+        registerAttr("subtitleTextColor") { view.setSubtitleTextColor(parseColor(it)) }
         registerAttr("title") { view.title = Strings.parse(view, it) }
         registerAttr("titleMargin") { value -> Dimensions.parseToIntPixel(value, view).let { view.setTitleMargin(it, it, it, it) } }
         registerAttr("titleMarginBottom") { view.titleMarginBottom = Dimensions.parseToIntPixel(it, view) }
         registerAttr("titleMarginTop") { view.titleMarginTop = Dimensions.parseToIntPixel(it, view) }
         registerAttr("titleMarginStart") { view.titleMarginStart = Dimensions.parseToIntPixel(it, view) }
         registerAttr("titleMarginEnd") { view.titleMarginEnd = Dimensions.parseToIntPixel(it, view) }
-        registerAttr("titleTextColor") { view.setTitleTextColor(ColorUtils.parse(view, it)) }
+        registerAttr("titleTextColor") { view.setTitleTextColor(parseColor(it)) }
     }
 
     companion object {

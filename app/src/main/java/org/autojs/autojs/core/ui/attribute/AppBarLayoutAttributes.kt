@@ -5,7 +5,6 @@ import com.google.android.material.appbar.AppBarLayout
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class AppBarLayoutAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : LinearLayoutAttributes(scriptRuntime, resourceParser, view) {
 
@@ -16,7 +15,7 @@ open class AppBarLayoutAttributes(scriptRuntime: ScriptRuntime, resourceParser: 
 
         registerAttr("expanded") { view.setExpanded(it.toBoolean()) }
         registerAttrs(arrayOf("isLifted", "lifted")) { view.isLifted = it.toBoolean() }
-        registerAttrs(arrayOf("statusBarForegroundColor", "statusBarFgColor")) { view.setStatusBarForegroundColor(ColorUtils.parse(view, it)) }
+        registerAttrs(arrayOf("statusBarForegroundColor", "statusBarFgColor")) { view.setStatusBarForegroundColor(parseColor(it)) }
         @Suppress("DEPRECATION")
         registerAttr("elevation") { view.targetElevation = Dimensions.parseToPixel(it, view) }
     }

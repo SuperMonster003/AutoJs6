@@ -242,7 +242,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     ctor.construct(cx, scriptRuntime.topLevelScope, arrayOf())
                 } as ScriptableObject
                 val f = widget.prop("renderInternal") as Callable
-                return __inflateRhinoRuntime__(scriptRuntime, scriptRuntime.ui.layoutInflater.newInflateContext().also { ctx ->
+                return __inflateRhinoRuntime__(scriptRuntime, scriptRuntime.ui.layoutInflater.newInflateContext(inflateContext).also { ctx ->
                     ctx.put("root", widget)
                     ctx.put("widget", widget)
                 }, callFunction(scriptRuntime, f, getDeclarationScope(widget), widget, arrayOf()), parent, false)
@@ -310,7 +310,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 isDynamic && inflaterFlags == DynamicLayoutInflater.FLAG_IGNORES_DYNAMIC_ATTRS -> true
                 !isDynamic && inflaterFlags == DynamicLayoutInflater.FLAG_JUST_DYNAMIC_ATTRS -> true
                 else -> {
-                    val boundValue = bindValueForApplyingAttribute(scriptRuntime, value)
+                    val boundValue = scriptRuntime.ui.layoutInflater.resourceParser.androidResources.resolveScalar(
+                        view.context,
+                        bindValueForApplyingAttribute(scriptRuntime, value),
+                    )
                     val widget = inflateContext.get("widget")
                     if (widget is NativeObject && callFunction(scriptRuntime, widget.prop("hasAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(attrName)) as Boolean) {
                         callFunction(scriptRuntime, widget.prop("setAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(view, attrName, boundValue, newBaseFunction(scriptRuntime.topLevelScope, "setter", {
@@ -511,7 +514,16 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun layoutFile(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { path ->
-            layout(scriptRuntime, arrayOf(scriptRuntime.files.read(coerceString(path))))
+            ensureActivity(scriptRuntime) { activity ->
+                scriptRuntime.ui.layoutInflater.context = activity
+                val resolvedPath = scriptRuntime.files.path(coerceString(path))
+                    ?: throw WrappedIllegalArgumentException("Android layout file path cannot be resolved")
+                scriptRuntime.ui.layoutInflater.inflateFile(
+                    resolvedPath,
+                    activity.window.decorView as ViewGroup,
+                    false,
+                ).let { setContentViewRhinoRuntime(scriptRuntime, it) }
+            }
             UNDEFINED
         }
 

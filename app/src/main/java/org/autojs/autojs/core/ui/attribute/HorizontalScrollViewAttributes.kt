@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.HorizontalScrollView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ColorUtils
 
 open class HorizontalScrollViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(scriptRuntime, resourceParser, view) {
 
@@ -19,17 +18,17 @@ open class HorizontalScrollViewAttributes(scriptRuntime: ScriptRuntime, resource
 
         registerAttr("leftEdgeEffectColor") {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.leftEdgeEffectColor = ColorUtils.parse(view, it)
+                view.leftEdgeEffectColor = parseColor(it)
             }
         }
         registerAttr("rightEdgeEffectColor") {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.rightEdgeEffectColor = ColorUtils.parse(view, it)
+                view.rightEdgeEffectColor = parseColor(it)
             }
         }
         registerAttr("setEdgeEffectColor") {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.setEdgeEffectColor(ColorUtils.parse(view, it))
+                view.setEdgeEffectColor(parseColor(it))
             }
         }
     }

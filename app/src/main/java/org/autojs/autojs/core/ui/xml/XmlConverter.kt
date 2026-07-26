@@ -23,8 +23,7 @@ import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import java.io.IOException
-import java.io.StringReader
-import javax.xml.parsers.DocumentBuilderFactory
+import java.nio.charset.Charset
 import javax.xml.parsers.ParserConfigurationException
 
 /**
@@ -131,15 +130,22 @@ object XmlConverter {
 
     @Throws(IOException::class, SAXException::class, ParserConfigurationException::class)
     fun convertToAndroidLayout(xml: String?): String {
-        return convertToAndroidLayout(InputSource(StringReader(xml)))
+        return convertDocument(SecureXml.parse(requireNotNull(xml)))
     }
 
     @Throws(ParserConfigurationException::class, IOException::class, SAXException::class)
     fun convertToAndroidLayout(source: InputSource?): String {
+        val input = requireNotNull(source)
+        val xml = input.characterStream?.readText()
+            ?: input.byteStream?.let { stream ->
+                stream.reader(input.encoding?.let(Charset::forName) ?: Charsets.UTF_8).readText()
+            }
+            ?: throw SAXException("InputSource must provide a character stream or byte stream")
+        return convertDocument(SecureXml.parse(xml))
+    }
+
+    private fun convertDocument(document: org.w3c.dom.Document): String {
         val layoutXml = StringBuilder()
-        val factory = DocumentBuilderFactory.newInstance()
-        val builder = factory.newDocumentBuilder()
-        val document = builder.parse(source)
         handleNode(document.firstChild, "xmlns:android=\"http://schemas.android.com/apk/res/android\"", layoutXml)
         return layoutXml.toString()
     }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_card"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="@dimen/space_card"
+    android:theme="@style/FocusThemeOverlay">
+
+    <TextView
+        android:id="@+id/mode_label"
+        style="@style/FocusEyebrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/mode_focus" />
+
+    <TextView
+        android:id="@+id/timer_text"
+        style="@style/FocusTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small"
+        android:text="@string/timer_initial" />
+
+    <ProgressBar
+        android:id="@+id/timer_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/progress_height"
+        android:layout_marginTop="@dimen/space_medium"
+        android:indeterminate="false"
+        android:max="1500"
+        android:progress="0"
+        android:progressTint="?android:attr/colorAccent" />
+
+    <TextView
+        android:id="@+id/mode_hint"
+        style="@style/FocusCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_medium"
+        android:gravity="center"
+        android:text="@string/focus_hint" />
+
+    <Button
+        android:id="@+id/start_pause"
+        style="@style/FocusButtonPrimary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginTop="@dimen/space_large"
+        android:text="@string/action_start" />
+
+    <include layout="@layout/view_actions" />
+</LinearLayout>

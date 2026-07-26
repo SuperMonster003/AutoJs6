@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/25",
+      "released_date": "2026/07/26",
       "feature": [
         "Node.js 24.5.0 script runtime, supporting scripts launched with the \"nodejs\" directive or extensions such as .node.js/.cjs/.mjs",
         "Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code",
@@ -23,6 +23,7 @@
         "Plugin Center supports APK Builder Template plugins, allowing on-demand installation and updates of templates required for app packaging",
         "Long-pressing the floating button on the Home Plugins tab opens the Plugin Center",
         "runtime.loadAar method, for dynamically loading AAR files",
+        "ui.useAndroidLayout supports native Android layout widgets, include/merge, script project res references, and Drawable XML such as shape/selector/layer-list",
         "JavaScript (Rhino) modules support compatible power/settings/work_manager interfaces and an AppInfo wrapper, and complete selected Base64/Crypto/WebSocket/ByteString/automator/images/timers APIs from Auto.js Pro 9.3.11",
         "Global JavaScript (Rhino) ai module supports OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible providers, ask/chat/stream calls, and multi-round tool-call continuation; Developer options provide encrypted multi-profile configuration and credential management, while compatible endpoints on local loopback addresses can run without an API key",
         "Global JavaScript (Rhino) tts module provides system text-to-speech, intelligent long-text chunking, logical queues, voice and language discovery with offline voice filtering, observable tasks and audio events, silence insertion, and file synthesis with atomic publication; it also includes timeouts, backpressure, runtime cleanup, and protection against fallback from a requested engine",
