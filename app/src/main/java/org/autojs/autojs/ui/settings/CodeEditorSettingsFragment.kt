@@ -14,6 +14,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.MaterialDialogPreference
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.theme.preference.MaterialPreference
+import org.autojs.autojs.theme.preference.PreferenceTitleColorMutable
 import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.EditorPinchToZoomPreferences
@@ -21,6 +22,7 @@ import org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
+import org.autojs.autojs.ui.edit.theme.EditorChromePalette
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
@@ -38,6 +40,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         EditorPinchToZoomPreferences.migrateLegacyPreferenceIfNeeded()
         EditorEnginePreferences.initialize(requireContext())
         setPreferencesFromResource(R.xml.fragment_code_editor_settings, rootKey)
+        applyEmbeddedDialogPreferenceTitleColors()
         preferencesCreated = true
         syncEditorEnginePreferenceAvailability()
         syncThemePreviewPreference()
@@ -137,6 +140,27 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
 
     private fun openInitialPreferenceIfNeeded() {
         initialPreferenceKey?.let { openPreference(it, suppressInitialActionRecord) }
+    }
+
+    /**
+     * PreferenceViewHolder resets its TextViews from the host Activity theme every time a row is
+     * rebound. Persist the editor foreground on each Preference so its own bind step reapplies the
+     * correct title color after RecyclerView recycling.
+     */
+    internal fun applyEmbeddedDialogPreferenceTitleColors(
+        foreground: Int = EditorChromePalette.current().foreground,
+    ) {
+        if (!embeddedInDialog) {
+            return
+        }
+        fun applyToGroup(group: PreferenceGroup) {
+            for (index in 0 until group.preferenceCount) {
+                val preference = group.getPreference(index)
+                (preference as? PreferenceTitleColorMutable)?.titleColor = foreground
+                (preference as? PreferenceGroup)?.let(::applyToGroup)
+            }
+        }
+        preferenceScreen?.let(::applyToGroup)
     }
 
     private fun recordAceSettingAction(preference: Preference) {

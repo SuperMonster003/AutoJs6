@@ -43,6 +43,7 @@ import org.autojs.autojs.ui.edit.theme.EditorMaterialDialogThemeDelegate
 import org.autojs.autojs.ui.log.LogBottomSheet
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.settings.CodeEditorSettingsDialog
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
@@ -352,6 +353,9 @@ open class EditActivity :
 
     private fun onEditorUiPaletteChanged(colors: EditorChromePalette.Colors) {
         mEditorDialogThemeDelegate.updatePalette(colors.background, colors.foreground)
+        supportFragmentManager.fragments
+            .filterIsInstance<CodeEditorSettingsDialog>()
+            .forEach { dialog -> dialog.updatePreferenceTitleColors(colors.foreground) }
         val bottomSheet = mLogBottomSheet
             ?: supportFragmentManager.findFragmentByTag(LOG_BOTTOM_SHEET_TAG) as? LogBottomSheet
         bottomSheet?.applyEditorPalette(colors.background, colors.foreground)

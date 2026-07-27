@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
@@ -28,6 +29,7 @@ import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -745,6 +747,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mLastImeVisible = false
     private var mLastImeEventAtUptimeMillis = 0L
     private var mLastWindowInsets: WindowInsetsCompat? = null
+    private var mStableDecorBottomOnScreen = 0
+    private var mStableDecorWidth = 0
+    private var mLegacyImeLayoutObserver: ViewTreeObserver? = null
+    private val mLegacyImeGlobalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && isAttachedToWindow) {
+            (ViewCompat.getRootWindowInsets(this) ?: mLastWindowInsets)
+                ?.let(::applyImeInsetsState)
+        }
+    }
     private val mBaseWindowInsetPadding = intArrayOf(
         paddingLeft,
         paddingTop,
@@ -755,6 +766,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // Reusable rect for window visible area.
     // zh-CN: 复用的窗口可见区域 Rect.
     private val mTmpWindowVisibleRect = Rect()
+    private val mTmpStableWindowBounds = Rect()
     private val mTmpLocationOnScreen = IntArray(2)
     private val mTmpDecorLocationOnScreen = IntArray(2)
     private val mMinImeOverlapPx =
@@ -888,6 +900,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        registerLegacyImeGlobalLayoutListener()
         mDocsPaneController.start(null)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED), Context.RECEIVER_NOT_EXPORTED)
@@ -1129,6 +1142,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        resetStableDecorBaseline()
+        super.onConfigurationChanged(newConfig)
+    }
+
+    override fun onSizeChanged(
+        width: Int,
+        height: Int,
+        oldWidth: Int,
+        oldHeight: Int,
+    ) {
+        if (oldWidth > 0 && width > 0 && width != oldWidth) {
+            resetStableDecorBaseline()
+        }
+        super.onSizeChanged(width, height, oldWidth, oldHeight)
+    }
+
     fun currentEditorUiPalette(): EditorChromePalette.Colors =
         themeFontService.currentEditorChromeColors() ?: EditorChromePalette.current()
 
@@ -1186,7 +1216,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             val imeVisible = isImeEffectivelyVisible(insets, rootBottomOverlap)
             applyEditorSystemBarInsets(
                 insets,
-                fullscreenImeBottomInset = if (enabled && imeVisible) {
+                imeBottomOverlap = if (imeVisible) {
                     rootBottomOverlap
                 } else {
                     0
@@ -1443,69 +1473,82 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Handle IME insets to avoid keyboard covering the editor.
         // zh-CN: 处理 IME inset, 避免软键盘遮挡编辑器内容.
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-            mLastWindowInsets = insets
-            val rootBottomOverlap = calculateImeBottomOverlap(this, insets)
-            val imeVisible = isImeEffectivelyVisible(insets, rootBottomOverlap)
-            val fullscreenImeBottomInset = if (mFullscreenMode && imeVisible) {
-                rootBottomOverlap
-            } else {
-                0
-            }
-            applyEditorSystemBarInsets(insets, fullscreenImeBottomInset)
-
-            // Compute the real overlap between editor and the visible window area.
-            // zh-CN: 计算 editor 与窗口可见区域之间的真实重叠量.
-            val targetBottom = calculateImeBottomOverlap(editor.view, insets)
-            val editorBottomOverlap = when {
-                !imeVisible -> 0
-                fullscreenImeBottomInset > 0 ->
-                    (targetBottom - fullscreenImeBottomInset).coerceAtLeast(0)
-                else -> targetBottom
-            }
-            val imeBottomInset = if (imeVisible) {
-                maxOf(
-                    insets.getInsets(WindowInsetsCompat.Type.ime()).bottom,
-                    fullscreenImeBottomInset,
-                    targetBottom,
-                )
-            } else {
-                0
-            }
-
-            val imeStateChanged = imeBottomInset != mLastImeBottomInset ||
-                editorBottomOverlap != mLastEditorBottomOverlap ||
-                imeVisible != mLastImeVisible
-
-            if (imeStateChanged) {
-                val imeJustHidden = mLastImeVisible && !imeVisible
-                mLastImeBottomInset = imeBottomInset
-                mLastEditorBottomOverlap = editorBottomOverlap
-                mLastImeVisible = imeVisible
-                mLastImeEventAtUptimeMillis = SystemClock.uptimeMillis()
-
-                mViewportPolicy.onImeInsetsChanged(
-                    visible = imeVisible,
-                    bottomInset = imeBottomInset,
-                    editorBottomOverlap = editorBottomOverlap,
-                )
-                if (imeJustHidden && mFullscreenMode) {
-                    postOnAnimation {
-                        if (mFullscreenMode && !mLastImeVisible && isAttachedToWindow) {
-                            applyFullscreenSystemBars()
-                        }
-                    }
-                }
-            }
-
+            applyImeInsetsState(insets)
             // Do not consume insets.
             // zh-CN: 不消费 insets.
             insets
         }
     }
 
+    private fun applyImeInsetsState(insets: WindowInsetsCompat) {
+        mLastWindowInsets = insets
+        val decorResizeOverlap = calculateDecorResizeBottomOverlap()
+        val rootBottomOverlap = calculateImeBottomOverlap(this, insets)
+        val imeVisible = isImeEffectivelyVisible(
+            insets,
+            rootBottomOverlap,
+            decorResizeOverlap,
+        )
+        val rootImeBottomOverlap = if (imeVisible) {
+            rootBottomOverlap
+        } else {
+            0
+        }
+        applyEditorSystemBarInsets(insets, rootImeBottomOverlap)
+
+        // Compute the real overlap between editor and the visible window area.
+        // zh-CN: 计算 editor 与窗口可见区域之间的真实重叠量.
+        val targetBottom = calculateImeBottomOverlap(editor.view, insets)
+        val editorBottomOverlap = when {
+            !imeVisible -> 0
+            rootImeBottomOverlap > 0 ->
+                (targetBottom - rootImeBottomOverlap).coerceAtLeast(0)
+            else -> targetBottom
+        }
+        val imeBottomInset = if (imeVisible) {
+            maxOf(
+                insets.getInsets(WindowInsetsCompat.Type.ime()).bottom,
+                decorResizeOverlap,
+                rootImeBottomOverlap,
+                targetBottom,
+            )
+        } else {
+            0
+        }
+
+        val imeStateChanged = imeBottomInset != mLastImeBottomInset ||
+            editorBottomOverlap != mLastEditorBottomOverlap ||
+            imeVisible != mLastImeVisible
+
+        if (imeStateChanged) {
+            val imeJustHidden = mLastImeVisible && !imeVisible
+            mLastImeBottomInset = imeBottomInset
+            mLastEditorBottomOverlap = editorBottomOverlap
+            mLastImeVisible = imeVisible
+            mLastImeEventAtUptimeMillis = SystemClock.uptimeMillis()
+
+            mViewportPolicy.onImeInsetsChanged(
+                visible = imeVisible,
+                bottomInset = imeBottomInset,
+                editorBottomOverlap = editorBottomOverlap,
+            )
+            if (imeJustHidden && mFullscreenMode) {
+                postOnAnimation {
+                    if (mFullscreenMode && !mLastImeVisible && isAttachedToWindow) {
+                        applyFullscreenSystemBars()
+                    }
+                }
+            }
+        }
+        if (!imeVisible) {
+            updateStableDecorBottomOnScreen()
+        }
+    }
+
     private fun isImeEffectivelyVisible(
         insets: WindowInsetsCompat,
         rootBottomOverlap: Int,
+        decorResizeOverlap: Int = calculateDecorResizeBottomOverlap(),
     ): Boolean {
         if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
             return true
@@ -1513,8 +1556,32 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val hiddenNavigationBottom = insets
             .getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())
             .bottom
-        return mFullscreenMode &&
-            rootBottomOverlap - hiddenNavigationBottom >= mMinImeOverlapPx
+        return maxOf(
+            rootBottomOverlap - hiddenNavigationBottom,
+            decorResizeOverlap,
+        ) >= mMinImeOverlapPx
+    }
+
+    private fun registerLegacyImeGlobalLayoutListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return
+        }
+        val observer = viewTreeObserver
+        if (mLegacyImeLayoutObserver === observer && observer.isAlive) {
+            return
+        }
+        unregisterLegacyImeGlobalLayoutListener()
+        if (observer.isAlive) {
+            observer.addOnGlobalLayoutListener(mLegacyImeGlobalLayoutListener)
+            mLegacyImeLayoutObserver = observer
+        }
+    }
+
+    private fun unregisterLegacyImeGlobalLayoutListener() {
+        mLegacyImeLayoutObserver
+            ?.takeIf { it.isAlive }
+            ?.removeOnGlobalLayoutListener(mLegacyImeGlobalLayoutListener)
+        mLegacyImeLayoutObserver = null
     }
 
     private fun calculateVisibleWindowBottomOverlap(view: View): Int {
@@ -1523,6 +1590,61 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         view.getLocationOnScreen(mTmpLocationOnScreen)
         val viewBottomOnScreen = mTmpLocationOnScreen[1] + view.height
         return (viewBottomOnScreen - mTmpWindowVisibleRect.bottom).coerceAtLeast(0)
+    }
+
+    private fun calculateDecorBottomOnScreen(): Int {
+        val decor = findHostActivityOrNull()?.window?.decorView ?: return 0
+        val decorWidth = decor.width
+        if (
+            decorWidth > 0 &&
+            mStableDecorWidth > 0 &&
+            decorWidth != mStableDecorWidth
+        ) {
+            resetStableDecorBaseline()
+        }
+        if (decorWidth > 0) {
+            mStableDecorWidth = decorWidth
+        }
+        decor.getLocationOnScreen(mTmpDecorLocationOnScreen)
+        return mTmpDecorLocationOnScreen[1] + decor.height
+    }
+
+    private fun calculateDecorResizeBottomOverlap(): Int {
+        val currentDecorBottomOnScreen = calculateDecorBottomOnScreen()
+        val stableDecorBottomOnScreen = mStableDecorBottomOnScreen
+        if (
+            stableDecorBottomOnScreen <= 0 ||
+            currentDecorBottomOnScreen <= 0
+        ) {
+            return 0
+        }
+        return (stableDecorBottomOnScreen - currentDecorBottomOnScreen)
+            .coerceAtLeast(0)
+    }
+
+    private fun updateStableDecorBottomOnScreen() {
+        calculateDecorBottomOnScreen()
+            .takeIf { it > 0 }
+            ?.let { mStableDecorBottomOnScreen = it }
+    }
+
+    private fun resetStableDecorBaseline() {
+        mStableDecorBottomOnScreen = calculateUnresizedWindowBottomOnScreen()
+        mStableDecorWidth = 0
+    }
+
+    @Suppress("DEPRECATION")
+    private fun calculateUnresizedWindowBottomOnScreen(): Int {
+        val hostActivity = findHostActivityOrNull() ?: return 0
+        return when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
+                hostActivity.windowManager.currentWindowMetrics.bounds.bottom
+            else -> {
+                hostActivity.windowManager.defaultDisplay
+                    .getRectSize(mTmpStableWindowBounds)
+                mTmpStableWindowBounds.bottom
+            }
+        }
     }
 
     /**
@@ -1542,12 +1664,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (rawImeBottom <= 0) {
             return legacyOverlap
         }
-        val hostActivity = findHostActivityOrNull() ?: return legacyOverlap
-        val decor = hostActivity.window.decorView
-        decor.getLocationOnScreen(mTmpDecorLocationOnScreen)
         view.getLocationOnScreen(mTmpLocationOnScreen)
-        val decorBottomOnScreen = mTmpDecorLocationOnScreen[1] + decor.height
-        val imeTopOnScreen = decorBottomOnScreen - rawImeBottom
+        val decorBottomOnScreen = calculateDecorBottomOnScreen()
+        val stableWindowBottomOnScreen = mStableDecorBottomOnScreen
+            .takeIf { it > 0 }
+            ?: decorBottomOnScreen
+        val imeTopOnScreen = stableWindowBottomOnScreen - rawImeBottom
         val viewBottomOnScreen = mTmpLocationOnScreen[1] + view.height
         val geometryOverlap = (viewBottomOnScreen - imeTopOnScreen)
             .coerceIn(0, rawImeBottom)
@@ -1556,7 +1678,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun applyEditorSystemBarInsets(
         insets: WindowInsetsCompat,
-        fullscreenImeBottomInset: Int,
+        imeBottomOverlap: Int,
     ) {
         val insetTypes = when {
             mFullscreenMode -> WindowInsetsCompat.Type.displayCutout()
@@ -1568,7 +1690,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val top = mBaseWindowInsetPadding[1] + systemBarInsets.top
         val right = mBaseWindowInsetPadding[2] + systemBarInsets.right
         val bottom = mBaseWindowInsetPadding[3] +
-            maxOf(systemBarInsets.bottom, fullscreenImeBottomInset)
+            maxOf(systemBarInsets.bottom, imeBottomOverlap)
         if (
             paddingLeft != left ||
             paddingTop != top ||
@@ -1859,6 +1981,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Cancel loading before unregistering receivers to avoid ANR on exit.
         // zh-CN: 退出前先取消加载, 避免返回退出时 ANR.
         cancelLargeFileLoading()
+        unregisterLegacyImeGlobalLayoutListener()
 
         super.onDetachedFromWindow()
         context.unregisterReceiver(mOnRunFinishedReceiver)

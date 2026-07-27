@@ -108,7 +108,11 @@ internal class EditorDocumentationPaneController(
         val restoreUrl = pageController?.currentUrl ?: pendingUrl
         val previousWebView = eWebView.webView
         val webViewState = Bundle()
-        val hasWebViewState = previousWebView.saveState(webViewState) != null
+        val hasWebViewState =
+            pageController != null &&
+                !previousWebView.url.isNullOrBlank() &&
+                previousWebView.url != "about:blank" &&
+                previousWebView.saveState(webViewState) != null
         pendingScrollX = previousWebView.scrollX
         pendingScrollY = previousWebView.scrollY
         pendingUrl = restoreUrl

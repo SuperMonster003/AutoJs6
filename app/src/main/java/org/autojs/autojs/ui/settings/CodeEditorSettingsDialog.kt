@@ -23,6 +23,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
 
     private var themePreviewHandler: ((Theme) -> Unit)? = null
     private var fontPreviewHandler: ((String) -> Unit)? = null
+    private var latestPreferenceForeground: Int? = null
     private var lastAcePluginState: AceEditorPluginStateMonitor.State? = null
     private val acePluginStateListener: (AceEditorPluginStateMonitor.Change) -> Unit = { change ->
         val wasAvailable = lastAcePluginState?.available == true || change.previous?.available == true
@@ -61,6 +62,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
                 )
                 .commit()
         }
+        view.post(::applyLatestPreferenceTitleColors)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -115,6 +117,17 @@ class CodeEditorSettingsDialog : DialogFragment() {
     private fun dismissOpenPreferenceDialogs() {
         (childFragmentManager.findFragmentById(R.id.code_editor_settings_dialog_container) as? CodeEditorSettingsFragment)
             ?.dismissOpenPreferenceDialogs()
+    }
+
+    internal fun updatePreferenceTitleColors(foreground: Int) {
+        latestPreferenceForeground = foreground
+        applyLatestPreferenceTitleColors()
+    }
+
+    private fun applyLatestPreferenceTitleColors() {
+        val foreground = latestPreferenceForeground ?: return
+        (childFragmentManager.findFragmentById(R.id.code_editor_settings_dialog_container) as? CodeEditorSettingsFragment)
+            ?.applyEmbeddedDialogPreferenceTitleColors(foreground)
     }
 
     private fun Context.dp(value: Int): Int {
