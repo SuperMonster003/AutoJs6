@@ -558,6 +558,7 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Ouvrir automatiquement le panneau de logs inferieur apres que le bouton Executer de l\'editeur lance un script</string>
     <string name="summary_editor_breakpoint_markers_enabled">Afficher les repères de points d\'arrêt dans la gouttière de l\'éditeur</string>
     <string name="summary_editor_fold_markers_enabled">Afficher les repères de pliage du code dans la gouttière de l\'éditeur</string>
+    <string name="summary_editor_fullscreen_mode">Masquer la barre d\'actions, la barre d\'informations et les barres système afin de maximiser la zone d\'édition du code</string>
     <string name="summary_editor_gutter_width_mode">Choisir si la gouttière suit les chiffres de ligne visibles ou conserve une largeur stable pendant la session</string>
     <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">Modifier la taille du texte de l\'éditeur avec des gestes de pincement</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">Indisponible pour le moteur d\'éditeur actuel</string>
@@ -992,6 +993,8 @@
     <string name="text_editor_engine_switched" formatted="true">Moteur d\'éditeur remplacé par %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Moteur d\'éditeur remplacé par %s. L\'historique d\'annulation et de rétablissement n\'est pas conservé entre les moteurs d\'éditeur</string>
     <string name="text_editor_fold_markers_enabled">Repères de pliage du code</string>
+    <string name="text_editor_fullscreen_mode">Mode plein écran</string>
+    <string name="text_editor_fullscreen_mode_hint">Mode plein écran activé; appuyez sur Retour pour quitter</string>
     <string name="text_editor_gestures">Gestes</string>
     <string name="text_editor_gutter_markers">Repères de gouttière</string>
     <string name="text_editor_gutter_width_mode">Largeur de la gouttière</string>
@@ -1036,6 +1039,7 @@
     <string name="text_execution_finished" formatted="false">[%s] terminé en %s secondes.\n</string>
     <string name="text_exit">Sortir</string>
     <string name="text_exit_directly">Quitter</string>
+    <string name="text_exit_fullscreen_mode">Quitter le plein écran</string>
     <string name="text_expand_all">Tout développer</string>
     <string name="text_export">Export</string>
     <string name="text_export_all">Tout exporter</string>

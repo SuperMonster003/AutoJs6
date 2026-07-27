@@ -61,6 +61,11 @@ public class EditorMenu {
         if (encodingItem != null) {
             encodingItem.setEnabled(mEditorView.canChangeFileEncoding());
         }
+        MenuItem fullscreenItem = menu.findItem(R.id.action_fullscreen_mode);
+        if (fullscreenItem != null) {
+            fullscreenItem.setCheckable(true);
+            fullscreenItem.setChecked(mEditorView.isFullscreenMode());
+        }
     }
 
     private void setReadOnlySensitiveMenuItemsVisible(Menu menu, boolean mutable) {
@@ -112,6 +117,9 @@ public class EditorMenu {
             handled = tryDoing(mEditorView::forceStop);
         } else if (itemId == R.id.action_editor_settings) {
             mEditorView.showEditorSettingsDialog();
+            handled = true;
+        } else if (itemId == R.id.action_fullscreen_mode) {
+            mEditorView.toggleFullscreenMode();
             handled = true;
         } else if (itemId == R.id.action_file_encoding) {
             handled = tryDoing(mEditorView::showEncodingDialog);

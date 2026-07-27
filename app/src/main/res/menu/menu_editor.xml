@@ -125,6 +125,12 @@
         android:title="@string/text_settings"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_fullscreen_mode"
+        android:checkable="true"
+        android:title="@string/text_editor_fullscreen_mode"
+        app:showAsAction="never" />
+
     <item android:title="@string/text_more">
         <menu>
             <item

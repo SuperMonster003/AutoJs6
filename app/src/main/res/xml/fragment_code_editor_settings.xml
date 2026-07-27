@@ -48,6 +48,13 @@
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_fullscreen_mode"
+            app:defaultValue="@bool/pref_editor_fullscreen_mode"
+            app:title="@string/text_editor_fullscreen_mode"
+            app:summary="@string/summary_editor_fullscreen_mode" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
             app:key="@string/key_ace_font_ligatures_enabled"
             app:defaultValue="@bool/pref_ace_font_ligatures_enabled"
             app:title="@string/text_ace_font_ligatures_enabled"

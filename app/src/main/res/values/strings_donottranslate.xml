@@ -139,6 +139,7 @@
     <string name="key_editor_engine_ace" translatable="false">ace</string>
     <string name="key_editor_engine_native" translatable="false">native</string>
     <string name="key_editor_fold_markers_enabled" translatable="false">key_$_editor_fold_markers_enabled</string>
+    <string name="key_editor_fullscreen_mode" translatable="false">key_$_editor_fullscreen_mode</string>
     <string name="key_editor_gutter_width_mode" translatable="false">key_$_editor_gutter_width_mode</string>
     <string name="key_editor_gutter_width_mode_dynamic" translatable="false">dynamic</string>
     <string name="key_editor_gutter_width_mode_fixed" translatable="false">fixed</string>

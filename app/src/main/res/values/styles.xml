@@ -233,6 +233,8 @@
 
     <style name="Material3DarkTheme" parent="@style/Theme.Material3.Dark" />
 
+    <style name="Material3LightTheme" parent="@style/Theme.Material3.Light" />
+
     <style name="TextAppearanceEditorTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">@dimen/editor_title_text_size</item>
         <item name="maxLines">2</item>

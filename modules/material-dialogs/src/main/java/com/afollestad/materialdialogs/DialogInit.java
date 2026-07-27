@@ -46,8 +46,9 @@ class DialogInit {
 
     @StyleRes
     static int getTheme(@NonNull MaterialDialog.Builder builder) {
-        boolean darkTheme =
-                DialogUtils.resolveBoolean(
+        boolean darkTheme = builder.themeSet
+                ? builder.theme == Theme.DARK
+                : DialogUtils.resolveBoolean(
                         builder.context, R.attr.md_dark_theme, builder.theme == Theme.DARK);
         builder.theme = darkTheme ? Theme.DARK : Theme.LIGHT;
         return darkTheme ? R.style.MD_Dark : R.style.MD_Light;
@@ -233,7 +234,10 @@ class DialogInit {
             if (builder.options != null) {
                 dialog.optionsView.setVisibility(View.VISIBLE);
                 dialog.optionsView.setOnClickListener(v -> {
-                    var popupMenu = new PopupMenu(builder.context, v, Gravity.END);
+                    var popupMenu = dialog.themeDelegate == null
+                            ? new PopupMenu(builder.context, v, Gravity.END)
+                            : dialog.themeDelegate.createOptionsPopupMenu(
+                                    builder.context, v, Gravity.END);
                     popupMenu.getMenuInflater().inflate(R.menu.md_more_options, popupMenu.getMenu());
                     List<MaterialDialog.OptionMenuItemSpec> options = builder.options;
                     for (int i = 0; i < options.size(); i++) {
@@ -252,6 +256,9 @@ class DialogInit {
                         }
                         return false;
                     });
+                    if (dialog.themeDelegate != null) {
+                        dialog.themeDelegate.onPrepareOptionsPopupMenu(popupMenu);
+                    }
                     popupMenu.show();
                 });
             }

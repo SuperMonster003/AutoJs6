@@ -7,6 +7,9 @@
     android:scrollHorizontally="true"
     android:imeOptions="flagNoExtractUi"
     android:textColor="@android:color/transparent"
-    android:textCursorDrawable="@drawable/code_edit_text_cursor"
+    android:textCursorDrawable="@drawable/native_editor_cursor"
+    android:textSelectHandle="@drawable/native_editor_insertion_handle"
+    android:textSelectHandleLeft="@drawable/native_editor_selection_handle_left"
+    android:textSelectHandleRight="@drawable/native_editor_selection_handle_right"
     android:textSize="15sp"/>
 

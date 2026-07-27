@@ -42,7 +42,8 @@
 * `Feature` Ace editor supports a shortcut panel/action history/action favorites/mobile text selection/pinch zoom and more
 * `Feature` Code editor supports reloading or converting files with a selected encoding, optional BOM, encoding risk indicators, and undo/redo
 * `Feature` Code editor information bar below the toolbar shows the file name, the cursor's line and column in real time, and the file encoding; the three items can be tapped to view file details, jump to a line, or change the encoding, respectively
-* `Feature` Code editor system status bar, ActionBar, button icons and text, and overflow and nested menus dynamically follow the current editor theme; status-bar icons automatically maintain light/dark contrast for a visually unified surface from the top of the screen through the code area
+* `Feature` Code editor system status bar, ActionBar, button icons and text, overflow and nested menus, in-editor dialogs, and native-editor cursor, handles, and selection controls dynamically follow the current editor theme; status-bar icons automatically maintain light/dark contrast for a visually unified surface from the top of the screen through the code area
+* `Feature` Code editor supports an immersive fullscreen mode, with the preference persisted and available from both the menu and settings; swipe from an edge to reveal system bars temporarily, while Back exits fullscreen before leaving the editor
 * `Feature` Code editor supports a bottom log panel (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Feature` Code editor bottom log panel supports jumping from stack frames to source code (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Feature` Code editor bottom log panel provides a "Run/Stop" button for quickly starting and stopping scripts

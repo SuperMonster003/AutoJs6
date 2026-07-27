@@ -37,15 +37,20 @@ class WebViewUtils {
         //  !   - 安卓系统 WebView (或类似 Google Chrome 浏览器) 版本 >= 105
         //  ! 参阅: https://stackoverflow.com/questions/57449900/letting-webview-on-android-work-with-prefers-color-scheme-dark
         @JvmStatic
-        fun adaptDarkMode(webView: WebView) {
+        @JvmOverloads
+        fun adaptDarkMode(webView: WebView, darkMode: Boolean = true) {
             val settings = webView.settings
             when {
                 isFeatureSupported(ALGORITHMIC_DARKENING) -> {
-                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, darkMode)
                 }
                 isFeatureSupported(FORCE_DARK) -> {
                     @Suppress("DEPRECATION")
-                    WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON)
+                    WebSettingsCompat.setForceDark(
+                        settings,
+                        if (darkMode) WebSettingsCompat.FORCE_DARK_ON
+                        else WebSettingsCompat.FORCE_DARK_OFF,
+                    )
                 }
                 // FIXME by SuperMonster003 on Mar 14, 2025.
                 //  ! Not working.

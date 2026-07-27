@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -11,13 +12,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.util.ColorUtils
-import org.autojs.autojs.util.ContextUtils.getColorForMode
 import org.autojs.autojs.util.ContextUtils.getColorsForMode
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -38,6 +39,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
     private lateinit var mScriptName: String
     private lateinit var mScriptPath: String
     private var mEditorBackgroundColor by Delegates.notNull<Int>()
+    private var mEditorForegroundColor by Delegates.notNull<Int>()
 
     private var mStackFrameClickListener: OnStackFrameClickListener? = null
     private var mScriptControlListener: ScriptControlListener? = null
@@ -75,17 +77,24 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         private const val ARG_SCRIPT_NAME = "script_name"
         private const val ARG_SCRIPT_PATH = "script_path"
         private const val ARG_EDITOR_BACKGROUND_COLOR = "editor_background_color"
+        private const val ARG_EDITOR_FOREGROUND_COLOR = "editor_foreground_color"
 
         /**
          * Create a new instance with script info
          */
         @JvmStatic
-        fun newInstance(scriptName: String?, scriptPath: String?, editorBackgroundColor: Int?): LogBottomSheet {
+        fun newInstance(
+            scriptName: String?,
+            scriptPath: String?,
+            editorBackgroundColor: Int?,
+            editorForegroundColor: Int?,
+        ): LogBottomSheet {
             val fragment = LogBottomSheet()
             val args = Bundle()
             args.putString(ARG_SCRIPT_NAME, scriptName)
             args.putString(ARG_SCRIPT_PATH, scriptPath)
             args.putInt(ARG_EDITOR_BACKGROUND_COLOR, editorBackgroundColor ?: Color.TRANSPARENT)
+            args.putInt(ARG_EDITOR_FOREGROUND_COLOR, editorForegroundColor ?: Color.TRANSPARENT)
             fragment.arguments = args
             return fragment
         }
@@ -100,6 +109,18 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         if (_binding != null) {
             updateScriptRunningState(listener.isScriptRunning())
         }
+    }
+
+    fun applyEditorPalette(
+        editorBackgroundColor: Int,
+        editorForegroundColor: Int,
+    ) {
+        mEditorBackgroundColor = editorBackgroundColor
+        mEditorForegroundColor = editorForegroundColor
+        if (_binding != null) {
+            applyEditorPaletteToViews()
+        }
+        applyEditorPaletteToDialogWindow()
     }
 
     fun updateScriptRunningState(isRunning: Boolean) {
@@ -119,14 +140,17 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         var argScriptName = ""
         var argScriptPath = ""
         var argEditorBackgroundColor = requireContext().getColor(R.color.window_background)
+        var argEditorForegroundColor = requireContext().getColor(R.color.day_night)
         arguments?.let {
             argScriptName = it.getString(ARG_SCRIPT_NAME, argScriptName)
             argScriptPath = it.getString(ARG_SCRIPT_PATH, argScriptPath)
             argEditorBackgroundColor = it.getInt(ARG_EDITOR_BACKGROUND_COLOR, argEditorBackgroundColor)
+            argEditorForegroundColor = it.getInt(ARG_EDITOR_FOREGROUND_COLOR, argEditorForegroundColor)
         }
         mScriptName = argScriptName
         mScriptPath = argScriptPath
         mEditorBackgroundColor = argEditorBackgroundColor
+        mEditorForegroundColor = argEditorForegroundColor
     }
 
     override fun onCreateView(
@@ -148,36 +172,15 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         mDidLaunchFullLogActivity = false
         setupResizableBottomSheet()
         updateScriptRunningState(mScriptControlListener?.isScriptRunning() == true)
+        applyEditorPaletteToDialogWindow()
     }
 
     private fun setupViews() {
-        val context = requireContext()
-
-        val asDarkMode = ColorUtils.isLuminanceDark(mEditorBackgroundColor)
-
-        val titleBarBackgroundColor = when {
-            asDarkMode -> ColorUtils.adjustContrast(mEditorBackgroundColor, 1.05f)
-            else -> ColorUtils.adjustContrast(mEditorBackgroundColor, 0.95f)
-        }.let { ColorUtils.adjustColorForContrast(mEditorBackgroundColor, it, 1.15) }
-
-        val dayNightColor = context.getColorForMode(R.color.day_night, asDarkMode)
-
-        binding.root.setBackgroundColor(mEditorBackgroundColor)
-
         binding.dragHandleTouchArea.setOnTouchListener { _, event -> handleDrag(event) }
-        binding.dragHandleTouchArea.setBackgroundColor(titleBarBackgroundColor)
-
-        binding.dragHandle.background = (binding.dragHandle.background as? GradientDrawable)?.apply {
-            mutate()
-            setColor(context.getColorForMode(R.color.day_night_alpha_20, asDarkMode))
-        }
-
-        binding.header.setBackgroundColor(titleBarBackgroundColor)
 
         if (mScriptName.isNotBlank()) {
             binding.tvTitle.text = mScriptName
         }
-        binding.tvTitle.setTextColor(dayNightColor)
 
         binding.console.setConsole(AutoJs.instance.globalConsole)
         binding.console.findViewById<View>(R.id.input_container)?.visibility = View.GONE
@@ -189,19 +192,6 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 StackFrameClickResult.FAILED, null -> ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
             }
         }
-        binding.console.setTextColors(
-            context.getColorsForMode(
-                darkMode = asDarkMode,
-                colorResArray = arrayOf(
-                    R.color.console_view_verbose,
-                    R.color.console_view_debug,
-                    R.color.console_view_info,
-                    R.color.console_view_warn,
-                    R.color.console_view_error,
-                    R.color.console_view_assert,
-                ),
-            )
-        )
         setupConsoleLogList()
 
         binding.btnRunStop.setOnClickListener {
@@ -217,17 +207,80 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         binding.btnClear.setOnClickListener {
             AutoJs.instance.globalConsole.clear()
         }
-        binding.btnClear.imageTintList = ColorStateList.valueOf(dayNightColor)
 
         binding.btnMaximize.setOnClickListener {
             openFullLogActivity()
         }
-        binding.btnMaximize.imageTintList = ColorStateList.valueOf(dayNightColor)
 
         binding.btnClose.setOnClickListener {
             dismissAllowingStateLoss()
         }
-        binding.btnClose.imageTintList = ColorStateList.valueOf(dayNightColor)
+
+        applyEditorPaletteToViews()
+    }
+
+    private fun applyEditorPaletteToViews() {
+        val context = requireContext()
+        val asDarkMode = ColorUtils.isLuminanceDark(mEditorBackgroundColor)
+        val titleBarBackgroundColor = when {
+            asDarkMode -> ColorUtils.adjustContrast(mEditorBackgroundColor, 1.05f)
+            else -> ColorUtils.adjustContrast(mEditorBackgroundColor, 0.95f)
+        }.let { ColorUtils.adjustColorForContrast(mEditorBackgroundColor, it, 1.15) }
+        val foregroundColor = ColorUtils.adjustColorForContrast(
+            titleBarBackgroundColor,
+            mEditorForegroundColor,
+            3.0,
+        )
+
+        binding.root.setBackgroundColor(mEditorBackgroundColor)
+        mBottomSheetView?.setBackgroundColor(mEditorBackgroundColor)
+        binding.dragHandleTouchArea.setBackgroundColor(titleBarBackgroundColor)
+        binding.dragHandle.background = (binding.dragHandle.background as? GradientDrawable)?.apply {
+            mutate()
+            setColor(ColorUtils.applyAlpha(foregroundColor, 0.20))
+        }
+        binding.header.setBackgroundColor(titleBarBackgroundColor)
+        binding.tvTitle.setTextColor(foregroundColor)
+        binding.btnClear.imageTintList = ColorStateList.valueOf(foregroundColor)
+        binding.btnMaximize.imageTintList = ColorStateList.valueOf(foregroundColor)
+        binding.btnClose.imageTintList = ColorStateList.valueOf(foregroundColor)
+        binding.console.setTextColors(
+            context.getColorsForMode(
+                darkMode = asDarkMode,
+                colorResArray = arrayOf(
+                    R.color.console_view_verbose,
+                    R.color.console_view_debug,
+                    R.color.console_view_info,
+                    R.color.console_view_warn,
+                    R.color.console_view_error,
+                    R.color.console_view_assert,
+                ),
+            ),
+        )
+    }
+
+    private fun applyEditorPaletteToDialogWindow() {
+        val window = dialog?.window ?: return
+        val navigationBarBackground = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ||
+                ColorUtils.isLuminanceDark(mEditorBackgroundColor) -> mEditorBackgroundColor
+            else -> ColorUtils.adjustColorForContrast(
+                Color.WHITE,
+                mEditorBackgroundColor,
+                3.0,
+            )
+        }
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = navigationBarBackground
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightNavigationBars =
+                !ColorUtils.isLuminanceDark(navigationBarBackground)
+            isAppearanceLightStatusBars =
+                !ColorUtils.isLuminanceDark(mEditorBackgroundColor)
+        }
     }
 
     private fun setupConsoleLogList() {
@@ -242,6 +295,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         val bottomSheet = bottomSheetDialog.findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet) ?: return
 
         mBottomSheetView = bottomSheet
+        bottomSheet.setBackgroundColor(mEditorBackgroundColor)
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet).apply {
             isFitToContents = false
             expandedOffset = 0

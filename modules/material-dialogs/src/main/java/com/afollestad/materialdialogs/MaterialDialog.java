@@ -62,6 +62,9 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
 
     protected final Builder builder;
     private final Handler handler;
+    @Nullable
+    final MaterialDialogThemeDelegate themeDelegate;
+    private boolean themeDelegateDismissed;
     protected ImageView icon;
     protected TextView title;
     protected TextView content;
@@ -84,16 +87,53 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
 
     @SuppressLint("InflateParams")
     protected MaterialDialog(Builder builder) {
-        super(builder.context, DialogInit.getTheme(builder));
+        super(prepareBuilder(builder), DialogInit.getTheme(builder));
         handler = new Handler();
         this.builder = builder;
+        themeDelegate = builder.themeDelegate;
         final LayoutInflater inflater = LayoutInflater.from(builder.context);
         view = (MDRootLayout) inflater.inflate(DialogInit.getInflateLayout(builder), null);
         DialogInit.init(this);
+        if (themeDelegate != null) {
+            themeDelegate.onDialogCreated(this);
+        }
+    }
+
+    @NonNull
+    private static Context prepareBuilder(@NonNull Builder builder) {
+        MaterialDialogThemeDelegate delegate =
+                MaterialDialogThemeResolver.resolve(builder.context);
+        builder.themeDelegate = delegate;
+        if (delegate != null) {
+            builder.applyingThemeDelegate = true;
+            try {
+                delegate.onPrepareBuilder(builder);
+            } finally {
+                builder.applyingThemeDelegate = false;
+            }
+        }
+        return builder.context;
     }
 
     public final Builder getBuilder() {
         return builder;
+    }
+
+    /**
+     * Re-runs this dialog's scoped builder hook. This updates colors consumed by adapters which may
+     * create or rebind children after the dialog was initially built.
+     */
+    @UiThread
+    public final void refreshThemeFromDelegate() {
+        if (themeDelegate == null) {
+            return;
+        }
+        builder.applyingThemeDelegate = true;
+        try {
+            themeDelegate.onPrepareBuilder(builder);
+        } finally {
+            builder.applyingThemeDelegate = false;
+        }
     }
 
     public final void setTypeface(TextView target, Typeface t) {
@@ -911,11 +951,15 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
 
     @Override
     public final void onShow(DialogInterface dialog) {
+        themeDelegateDismissed = false;
         if (input != null) {
             DialogUtils.showKeyboard(this, builder);
             if (input.getText().length() > 0) {
                 input.setSelection(input.getText().length());
             }
+        }
+        if (themeDelegate != null) {
+            themeDelegate.onDialogShown(this);
         }
         super.onShow(dialog);
     }
@@ -981,6 +1025,10 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
             DialogUtils.hideKeyboard(this, builder);
         }
         super.dismiss();
+        if (themeDelegate != null && !themeDelegateDismissed) {
+            themeDelegateDismissed = true;
+            themeDelegate.onDialogDismissed(this);
+        }
     }
 
     enum ListType {
@@ -1109,6 +1157,7 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         protected boolean alwaysCallMultiChoiceCallback = false;
         protected boolean alwaysCallSingleChoiceCallback = false;
         protected Theme theme = Theme.LIGHT;
+        protected boolean themeSet = false;
         protected boolean cancelable = true;
         protected boolean canceledOnTouchOutside = true;
         protected float contentLineSpacingMultiplier = 1.2f;
@@ -1162,6 +1211,16 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         protected boolean negativeColorSet = false;
         protected boolean widgetColorSet = false;
         protected boolean dividerColorSet = false;
+
+        private boolean applyingThemeDelegate;
+        @Nullable
+        private MaterialDialogThemeDelegate themeDelegate;
+        @Nullable
+        private ColorStateList explicitPositiveColor;
+        @Nullable
+        private ColorStateList explicitNegativeColor;
+        @Nullable
+        private ColorStateList explicitNeutralColor;
 
         @DrawableRes
         protected int listSelector;
@@ -1662,6 +1721,9 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         public Builder positiveColor(@NonNull ColorStateList colorStateList) {
             this.positiveColor = colorStateList;
             this.positiveColorSet = true;
+            if (!applyingThemeDelegate) {
+                this.explicitPositiveColor = colorStateList;
+            }
             return this;
         }
 
@@ -1703,6 +1765,9 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         public Builder negativeColor(@NonNull ColorStateList colorStateList) {
             this.negativeColor = colorStateList;
             this.negativeColorSet = true;
+            if (!applyingThemeDelegate) {
+                this.explicitNegativeColor = colorStateList;
+            }
             return this;
         }
 
@@ -1744,6 +1809,9 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         public Builder neutralColor(@NonNull ColorStateList colorStateList) {
             this.neutralColor = colorStateList;
             this.neutralColorSet = true;
+            if (!applyingThemeDelegate) {
+                this.explicitNeutralColor = colorStateList;
+            }
             return this;
         }
 
@@ -2001,7 +2069,23 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
 
         public Builder theme(@NonNull Theme theme) {
             this.theme = theme;
+            this.themeSet = true;
             return this;
+        }
+
+        @Nullable
+        public ColorStateList getExplicitPositiveColor() {
+            return explicitPositiveColor;
+        }
+
+        @Nullable
+        public ColorStateList getExplicitNegativeColor() {
+            return explicitNegativeColor;
+        }
+
+        @Nullable
+        public ColorStateList getExplicitNeutralColor() {
+            return explicitNeutralColor;
         }
 
         public Builder cancelable(boolean cancelable) {

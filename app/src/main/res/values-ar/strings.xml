@@ -560,6 +560,7 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">فتح لوحة السجلات السفلية تلقائيا بعد ان يقوم زر التشغيل في المحرر بتشغيل سكربت</string>
     <string name="summary_editor_breakpoint_markers_enabled">إظهار علامات نقاط التوقف في هامش المحرر</string>
     <string name="summary_editor_fold_markers_enabled">إظهار علامات طي الشفرة في هامش المحرر</string>
+    <string name="summary_editor_fullscreen_mode">إخفاء شريط الإجراءات وشريط المعلومات وأشرطة النظام لزيادة مساحة تحرير الكود</string>
     <string name="summary_editor_gutter_width_mode">اختيار ما إذا كان الهامش يتبع خانات الأسطر المرئية أو يحتفظ بعرض ثابت للجلسة</string>
     <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">تغيير حجم نص المحرر بإيماءات القرص</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">غير متاح لمحرك المحرر الحالي</string>
@@ -994,6 +995,8 @@
     <string name="text_editor_engine_switched" formatted="true">تم تبديل محرك المحرر إلى %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">تم تبديل محرك المحرر إلى %s. لا يحتفظ بسجل التراجع/الإعادة بين محركات المحرر</string>
     <string name="text_editor_fold_markers_enabled">علامات طي الشفرة</string>
+    <string name="text_editor_fullscreen_mode">وضع ملء الشاشة</string>
+    <string name="text_editor_fullscreen_mode_hint">تم تمكين وضع ملء الشاشة; اضغط على زر الرجوع للخروج</string>
     <string name="text_editor_gestures">الإيماءات</string>
     <string name="text_editor_gutter_markers">علامات هامش المحرر</string>
     <string name="text_editor_gutter_width_mode">عرض هامش المحرر</string>
@@ -1038,6 +1041,7 @@
     <string name="text_execution_finished" formatted="false">[%s] انتهى في %s.\n</string>
     <string name="text_exit">مخرج</string>
     <string name="text_exit_directly">مخرج</string>
+    <string name="text_exit_fullscreen_mode">الخروج من وضع ملء الشاشة</string>
     <string name="text_expand_all">توسيع الكل</string>
     <string name="text_export">يصدّر</string>
     <string name="text_export_all">تصدير الكل</string>

@@ -26,6 +26,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -163,6 +164,8 @@ class CodeEditText : AppCompatEditText {
         // Update accessibility importance at init.
         // zh-CN: 初始化时更新无障碍重要性配置.
         updateAccessibilityImportanceIfNeeded()
+
+        applyInteractionColors(mTheme)
     }
 
     // Toggle loading state.
@@ -401,7 +404,30 @@ class CodeEditText : AppCompatEditText {
 
     fun setTheme(theme: Theme) {
         mTheme = theme
+        applyInteractionColors(theme)
         invalidate()
+    }
+
+    private fun applyInteractionColors(theme: Theme) {
+        val colors = NativeEditorInteractionPalette.update(
+            background = theme.backgroundColor,
+            foreground = theme.foregroundColor,
+        )
+        highlightColor = colors.selectionColor
+    }
+
+    override fun onFocusChanged(
+        focused: Boolean,
+        direction: Int,
+        previouslyFocusedRect: Rect?,
+    ) {
+        super.onFocusChanged(focused, direction, previouslyFocusedRect)
+        if (focused) {
+            // Framework cursor/handle drawables are resource-inflated and process-local. Reassert
+            // this editor's palette whenever it becomes active so another editor or preview
+            // cannot leave the visible controls with a stale color.
+            applyInteractionColors(mTheme)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {

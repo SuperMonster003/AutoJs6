@@ -560,6 +560,7 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">편집기의 실행 버튼으로 스크립트를 시작한 뒤 하단 로그 패널을 자동으로 엽니다</string>
     <string name="summary_editor_breakpoint_markers_enabled">편집기 거터에 중단점 표시</string>
     <string name="summary_editor_fold_markers_enabled">편집기 거터에 코드 접기 표시</string>
+    <string name="summary_editor_fullscreen_mode">ActionBar, 정보 표시줄 및 시스템 표시줄을 숨겨 코드 편집 영역을 최대화</string>
     <string name="summary_editor_gutter_width_mode">거터가 표시된 줄 번호의 자릿수를 따를지 세션 동안 안정적인 너비를 유지할지 선택</string>
     <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">손가락 모으기/벌리기 동작으로 편집기 글자 크기 변경</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">현재 편집기 엔진에서는 사용할 수 없음</string>
@@ -994,6 +995,8 @@
     <string name="text_editor_engine_switched" formatted="true">편집기 엔진을 %s(으)로 전환했습니다</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">편집기 엔진을 %s(으)로 전환했습니다. 실행 취소/다시 실행 기록은 편집기 엔진 간에 유지되지 않습니다</string>
     <string name="text_editor_fold_markers_enabled">코드 접기 표시</string>
+    <string name="text_editor_fullscreen_mode">전체 화면 모드</string>
+    <string name="text_editor_fullscreen_mode_hint">전체 화면 모드가 활성화되었습니다; 뒤로가기를 눌러 종료</string>
     <string name="text_editor_gestures">제스처</string>
     <string name="text_editor_gutter_markers">거터 표시</string>
     <string name="text_editor_gutter_width_mode">거터 너비</string>
@@ -1038,6 +1041,7 @@
     <string name="text_execution_finished" formatted="false">[%s] 는 %s 초 만에 완료되었습니다.\n</string>
     <string name="text_exit">출구</string>
     <string name="text_exit_directly">출구</string>
+    <string name="text_exit_fullscreen_mode">전체 화면 종료</string>
     <string name="text_expand_all">모두 펼치기</string>
     <string name="text_export">내보내다</string>
     <string name="text_export_all">모두 내보내기</string>

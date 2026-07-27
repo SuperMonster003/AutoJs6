@@ -558,6 +558,7 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Автоматически открывать нижнюю панель логов после запуска скрипта кнопкой Запуск в редакторе</string>
     <string name="summary_editor_breakpoint_markers_enabled">Показывать маркеры точек останова в поле редактора</string>
     <string name="summary_editor_fold_markers_enabled">Показывать маркеры сворачивания кода в поле редактора</string>
+    <string name="summary_editor_fullscreen_mode">Скрывать ActionBar, информационную и системные панели, чтобы увеличить область редактирования кода</string>
     <string name="summary_editor_gutter_width_mode">Выбрать динамическую ширину по видимым номерам строк или стабильную ширину в течение сеанса</string>
     <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">Изменять размер текста редактора жестом масштабирования</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">Недоступно для текущего движка редактора</string>
@@ -992,6 +993,8 @@
     <string name="text_editor_engine_switched" formatted="true">Движок редактора переключён на %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Движок редактора переключён на %s. История отмены и повтора не сохраняется между движками редактора</string>
     <string name="text_editor_fold_markers_enabled">Маркеры сворачивания кода</string>
+    <string name="text_editor_fullscreen_mode">Полноэкранный режим</string>
+    <string name="text_editor_fullscreen_mode_hint">Полноэкранный режим включен; нажмите кнопку Назад, чтобы выйти</string>
     <string name="text_editor_gestures">Жесты</string>
     <string name="text_editor_gutter_markers">Маркеры поля</string>
     <string name="text_editor_gutter_width_mode">Ширина поля</string>
@@ -1036,6 +1039,7 @@
     <string name="text_execution_finished" formatted="false">[%s] завершилось через %s секунд.\n</string>
     <string name="text_exit">Выход</string>
     <string name="text_exit_directly">Выйти</string>
+    <string name="text_exit_fullscreen_mode">Выход из полноэкранного режима</string>
     <string name="text_expand_all">Развернуть всё</string>
     <string name="text_export">Экспорт</string>
     <string name="text_export_all">Экспортировать все</string>

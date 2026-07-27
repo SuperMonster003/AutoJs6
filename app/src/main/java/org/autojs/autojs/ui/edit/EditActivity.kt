@@ -22,6 +22,8 @@ import androidx.core.view.get
 import androidx.core.view.size
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.MaterialDialogThemeDelegate
+import com.afollestad.materialdialogs.MaterialDialogThemeOwner
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
@@ -36,13 +38,17 @@ import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsObservation
 import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsRecord
 import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsRegistration
 import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsStore
-import org.autojs.autojs.ui.error.ErrorDialogActivity
+import org.autojs.autojs.ui.edit.theme.EditorChromePalette
+import org.autojs.autojs.ui.edit.theme.EditorMaterialDialogThemeDelegate
 import org.autojs.autojs.ui.log.LogBottomSheet
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs6.R
@@ -55,7 +61,13 @@ import java.util.UUID
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 15, 2026.
  * Modified by SuperMonster003 as of Feb 15, 2026.
  */
-open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
+open class EditActivity :
+    BaseActivity(),
+    DelegateHost,
+    PermissionRequestProxyActivity,
+    MaterialDialogThemeOwner {
+
+    private val mEditorDialogThemeDelegate = EditorMaterialDialogThemeDelegate()
 
     private var mReadOnly: Boolean = false
 
@@ -119,6 +131,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         val editorView = binding.editorView.also {
             mEditorView = it
             it.setEditorSessionId(mEditorSessionId)
+            it.setEditorUiPaletteChangedListener(::onEditorUiPaletteChanged)
             it.setCompletedSaveAsAdoptedListener { record, exactSavedSnapshot ->
                 if (exactSavedSnapshot) {
                     draftService.deleteDraft()
@@ -262,6 +275,9 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 val existing = supportFragmentManager.findFragmentByTag(LOG_BOTTOM_SHEET_TAG) as? LogBottomSheet
                 if (existing?.isAdded == true) {
                     mLogBottomSheet = existing
+                    mEditorView.currentEditorUiPalette().let { colors ->
+                        existing.applyEditorPalette(colors.background, colors.foreground)
+                    }
                     existing.updateScriptRunningState(mEditorView.isScriptRunning())
                     return
                 }
@@ -269,7 +285,13 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 val scriptName = mEditorView.name
                 val scriptPath = mEditorView.uri?.path
 
-                val bottomSheet = LogBottomSheet.newInstance(scriptName, scriptPath, mEditorView.getEditorTheme()?.backgroundColor)
+                val colors = mEditorView.currentEditorUiPalette()
+                val bottomSheet = LogBottomSheet.newInstance(
+                    scriptName,
+                    scriptPath,
+                    colors.background,
+                    colors.foreground,
+                )
                 bottomSheet.setOnStackFrameClickListener(object : LogBottomSheet.OnStackFrameClickListener {
                     override fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int): LogBottomSheet.StackFrameClickResult {
                         return try {
@@ -327,6 +349,16 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             }
         })
     }
+
+    private fun onEditorUiPaletteChanged(colors: EditorChromePalette.Colors) {
+        mEditorDialogThemeDelegate.updatePalette(colors.background, colors.foreground)
+        val bottomSheet = mLogBottomSheet
+            ?: supportFragmentManager.findFragmentByTag(LOG_BOTTOM_SHEET_TAG) as? LogBottomSheet
+        bottomSheet?.applyEditorPalette(colors.background, colors.foreground)
+    }
+
+    override fun getMaterialDialogThemeDelegate(): MaterialDialogThemeDelegate =
+        mEditorDialogThemeDelegate
 
     private fun onLoadFileError(message: String?) {
         MaterialDialog.Builder(this)
@@ -571,7 +603,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                             // zh-CN: 保存失败, 保持编辑器不退出.
                             e.printStackTrace()
                             runCatching { d.dismiss() }
-                            ErrorDialogActivity.showErrorDialog(this@EditActivity, R.string.error_failed_to_save, e.message)
+                            showSaveErrorDialog(e.message)
                         })
                 }
                 .autoDismiss(false)
@@ -584,6 +616,31 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                         gravity = Gravity.CENTER_VERTICAL
                     }
                 }
+        }
+    }
+
+    private fun showSaveErrorDialog(message: String?) {
+        val content = message.orEmpty()
+        val builder = MaterialDialog.Builder(this)
+            .title(R.string.error_failed_to_save)
+            .content(content)
+            .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
+        if (content.isNotBlank()) {
+            builder
+                .neutralText(R.string.text_copy_all)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral { dialog, _ ->
+                    ClipboardUtils.setClip(dialog.context, content)
+                    ViewUtils.showSnack(
+                        dialog.view,
+                        R.string.text_already_copied_to_clip,
+                        false,
+                    )
+                }
+        }
+        builder.show().also { dialog ->
+            dialog.makeTextCopyable(dialog.contentView)
         }
     }
 
@@ -626,6 +683,14 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         super.onResume()
         mEditorView.syncPrimaryMenuState()
         runCatching { mEditorView.refreshSymbolsBar() }
+        mEditorView.reapplyFullscreenModeIfNeeded()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && ::mEditorView.isInitialized) {
+            mEditorView.reapplyFullscreenModeIfNeeded()
+        }
     }
 
     override fun addRequestPermissionsCallback(callback: OnRequestPermissionsResultCallback) {

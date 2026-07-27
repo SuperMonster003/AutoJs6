@@ -21,6 +21,7 @@ object EditorSettingActionRegistry {
         Spec(R.string.key_editor_theme, R.string.text_editor_theme),
         Spec(R.string.key_ace_editor_font, R.string.text_ace_editor_font),
         Spec(R.string.key_editor_text_size, R.string.text_text_size),
+        Spec(R.string.key_editor_fullscreen_mode, R.string.text_editor_fullscreen_mode),
         Spec(R.string.key_ace_font_ligatures_enabled, R.string.text_ace_font_ligatures_enabled),
         Spec(R.string.key_ace_font_styles_enabled, R.string.text_ace_font_styles_enabled),
         Spec(R.string.key_ace_print_margin_enabled, R.string.text_ace_print_margin_enabled),

@@ -558,6 +558,7 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Abrir automaticamente el panel inferior de registros después de que el boton Ejecutar del editor inicie un script</string>
     <string name="summary_editor_breakpoint_markers_enabled">Mostrar marcadores de puntos de interrupción en el margen lateral del editor</string>
     <string name="summary_editor_fold_markers_enabled">Mostrar marcadores de plegado de código en el margen lateral del editor</string>
+    <string name="summary_editor_fullscreen_mode">Ocultar la barra de acciones, la barra de información y las barras del sistema para maximizar el área de edición de código</string>
     <string name="summary_editor_gutter_width_mode">Elegir si el margen sigue los dígitos de línea visibles o conserva un ancho estable durante la sesión</string>
     <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">Cambiar el tamaño del texto del editor con gestos de pellizco</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">No disponible para el motor de editor actual</string>
@@ -992,6 +993,8 @@
     <string name="text_editor_engine_switched" formatted="true">El motor de editor cambió a %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">El motor de editor cambió a %s. El historial de deshacer y rehacer no se conserva entre motores de editor</string>
     <string name="text_editor_fold_markers_enabled">Marcadores de plegado de código</string>
+    <string name="text_editor_fullscreen_mode">Modo de pantalla completa</string>
+    <string name="text_editor_fullscreen_mode_hint">Modo de pantalla completa activado; pulsa Atrás para salir</string>
     <string name="text_editor_gestures">Gestos</string>
     <string name="text_editor_gutter_markers">Marcadores del margen lateral</string>
     <string name="text_editor_gutter_width_mode">Ancho del margen lateral</string>
@@ -1036,6 +1039,7 @@
     <string name="text_execution_finished" formatted="false">[%s] terminó en %s segundos.\n</string>
     <string name="text_exit">Salir</string>
     <string name="text_exit_directly">Salir de</string>
+    <string name="text_exit_fullscreen_mode">Salir de pantalla completa</string>
     <string name="text_expand_all">Expandir todo</string>
     <string name="text_export">Exportar</string>
     <string name="text_export_all">Exportar todo</string>

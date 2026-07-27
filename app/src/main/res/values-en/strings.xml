@@ -555,6 +555,7 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
     <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter</string>
     <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter</string>
+    <string name="summary_editor_fullscreen_mode">Hide the ActionBar, information bar, and system bars to maximize the code editing area</string>
     <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width</string>
     <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">Change editor text size with pinch gestures</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine</string>
@@ -989,6 +990,8 @@
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
     <string name="text_editor_fold_markers_enabled">Code folding markers</string>
+    <string name="text_editor_fullscreen_mode">Fullscreen mode</string>
+    <string name="text_editor_fullscreen_mode_hint">Fullscreen mode enabled; press Back to exit</string>
     <string name="text_editor_gestures">Gestures</string>
     <string name="text_editor_gutter_markers">Gutter markers</string>
     <string name="text_editor_gutter_width_mode">Gutter width</string>
@@ -1033,6 +1036,7 @@
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
     <string name="text_exit">Exit</string>
     <string name="text_exit_directly">Exit</string>
+    <string name="text_exit_fullscreen_mode">Exit fullscreen</string>
     <string name="text_expand_all">Expand all</string>
     <string name="text_export">Export</string>
     <string name="text_export_all">Export all</string>

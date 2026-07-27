@@ -555,6 +555,7 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">編輯器運行按鈕啓動腳本後自動打開底部日誌面板</string>
     <string name="summary_editor_breakpoint_markers_enabled">在編輯器邊欄中顯示斷點標記</string>
     <string name="summary_editor_fold_markers_enabled">在編輯器邊欄中顯示代碼折疊標記</string>
+    <string name="summary_editor_fullscreen_mode">隱藏 ActionBar, 資訊列和系統列, 將代碼編輯區域最大化</string>
     <string name="summary_editor_gutter_width_mode">選擇邊欄隨可見行號位數變化, 或在目前工作階段中保持穩定寬度</string>
     <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">使用手勢縮放調整編輯器字體大小</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">不適用於目前的編輯器引擎</string>
@@ -989,6 +990,8 @@
     <string name="text_editor_engine_switched" formatted="true">編輯器引擎已切換為 %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">編輯器引擎已切換為 %s. 不同編輯器引擎之間不會保留撤銷/重做記錄.</string>
     <string name="text_editor_fold_markers_enabled">代碼折疊標記</string>
+    <string name="text_editor_fullscreen_mode">全屏模式</string>
+    <string name="text_editor_fullscreen_mode_hint">已進入全屏模式; 按返回鍵退出</string>
     <string name="text_editor_gestures">操作手勢</string>
     <string name="text_editor_gutter_markers">邊欄標記</string>
     <string name="text_editor_gutter_width_mode">邊欄寬度</string>
@@ -1033,6 +1036,7 @@
     <string name="text_execution_finished" formatted="false">[%s] 運行結束 (用時 %s 秒)\n</string>
     <string name="text_exit">退出</string>
     <string name="text_exit_directly">直接退出</string>
+    <string name="text_exit_fullscreen_mode">退出全屏</string>
     <string name="text_expand_all">展開全部</string>
     <string name="text_export">導出</string>
     <string name="text_export_all">導出全部</string>

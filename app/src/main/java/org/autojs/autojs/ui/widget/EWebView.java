@@ -22,11 +22,13 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import org.autojs.autojs.app.OnActivityResultDelegate;
 import org.autojs.autojs.tool.ImageSelector;
+import org.autojs.autojs.util.ContextUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -150,9 +152,10 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
 
         public boolean openFileChooser(ValueCallback<Uri> valueCallback,
                                        String[] acceptType) {
-            if (getContext() instanceof OnActivityResultDelegate.DelegateHost &&
-                getContext() instanceof Activity && isImageType(acceptType)) {
-                chooseImage(valueCallback);
+            Activity activity = ContextUtils.findActivity(getContext());
+            if (activity instanceof OnActivityResultDelegate.DelegateHost &&
+                isImageType(acceptType)) {
+                chooseImage(activity, valueCallback);
                 return true;
             }
             return false;
@@ -162,22 +165,20 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
         public boolean onShowFileChooser(WebView webView,
                                          ValueCallback<Uri[]> filePathCallback,
                                          WebChromeClient.FileChooserParams fileChooserParams) {
-            openFileChooser(value -> {
+            return openFileChooser(value -> {
                 if (value == null) {
                     filePathCallback.onReceiveValue(null);
                 } else {
                     filePathCallback.onReceiveValue(new Uri[]{value});
                 }
             }, fileChooserParams.getAcceptTypes());
-            return true;
         }
 
     }
 
-    private void chooseImage(ValueCallback<Uri> valueCallback) {
-        DelegateHost delegateHost = ((OnActivityResultDelegate.DelegateHost) getContext());
+    private void chooseImage(Activity activity, ValueCallback<Uri> valueCallback) {
+        DelegateHost delegateHost = ((OnActivityResultDelegate.DelegateHost) activity);
         Mediator mediator = delegateHost.getOnActivityResultDelegateMediator();
-        Activity activity = (Activity) getContext();
         new ImageSelector(activity, mediator, (selector, uri) -> valueCallback.onReceiveValue(uri))
                 .disposable()
                 .select();
@@ -188,8 +189,15 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
             return false;
         }
         for (String acceptType : acceptTypes) {
+            if (acceptType == null) {
+                continue;
+            }
+            String normalizedType = acceptType.toLowerCase(Locale.ROOT);
+            if (normalizedType.startsWith("image/")) {
+                return true;
+            }
             for (String imageType : IMAGE_TYPES) {
-                if (acceptType.contains(imageType)) {
+                if (normalizedType.contains(imageType)) {
                     return true;
                 }
             }

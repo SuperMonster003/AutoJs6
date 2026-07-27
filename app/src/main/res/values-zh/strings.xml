@@ -554,6 +554,7 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">编辑器运行按钮启动脚本后自动打开底部日志面板</string>
     <string name="summary_editor_breakpoint_markers_enabled">在编辑器边栏中显示断点标记</string>
     <string name="summary_editor_fold_markers_enabled">在编辑器边栏中显示代码折叠标记</string>
+    <string name="summary_editor_fullscreen_mode">隐藏 ActionBar, 信息栏和系统栏, 最大化代码编辑区域</string>
     <string name="summary_editor_gutter_width_mode">选择边栏跟随可见行号位数变化, 或在当前会话中保持稳定宽度</string>
     <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">使用手势缩放调整编辑器字体大小</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">不适用于当前编辑器引擎</string>
@@ -988,6 +989,8 @@
     <string name="text_editor_engine_switched" formatted="true">编辑器引擎已切换为 %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">编辑器引擎已切换为 %s. 不同编辑器引擎之间不会保留撤销/重做历史.</string>
     <string name="text_editor_fold_markers_enabled">代码折叠标记</string>
+    <string name="text_editor_fullscreen_mode">全屏模式</string>
+    <string name="text_editor_fullscreen_mode_hint">已进入全屏模式; 按返回键退出</string>
     <string name="text_editor_gestures">操作手势</string>
     <string name="text_editor_gutter_markers">边栏标记</string>
     <string name="text_editor_gutter_width_mode">边栏宽度</string>
@@ -1032,6 +1035,7 @@
     <string name="text_execution_finished" formatted="false">[%s] 运行结束 (用时 %s 秒)\n</string>
     <string name="text_exit">退出</string>
     <string name="text_exit_directly">直接退出</string>
+    <string name="text_exit_fullscreen_mode">退出全屏</string>
     <string name="text_expand_all">展开全部</string>
     <string name="text_export">导出</string>
     <string name="text_export_all">导出全部</string>

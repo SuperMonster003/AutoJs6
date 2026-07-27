@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -41,7 +40,7 @@ public class ClassSearchDialogBuilder extends MaterialDialog.Builder {
     private MaterialDialog mDialog;
 
     public ClassSearchDialogBuilder(@NonNull Context context) {
-        super(new ContextThemeWrapper(context, R.style.AppTheme));
+        super(context);
         mHandler = new Handler(Looper.getMainLooper());
         initViews(getContext());
         AndroidClassIndices.getInstance(getContext());

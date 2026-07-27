@@ -40,6 +40,7 @@ class EditorThemeFontService(
     private val completionBars: List<CodeCompletionBar>,
     private val showFunctionsButtons: List<ImageView>,
     private val invalidateHost: () -> Unit,
+    private val onPaletteChanged: (background: Int, foreground: Int) -> Unit,
 ) {
 
     data class PreviewProgressColors(
@@ -127,6 +128,13 @@ class EditorThemeFontService(
         }
     }
 
+    fun currentEditorChromeColors(): EditorChromePalette.Colors? = currentTheme?.let { theme ->
+        EditorChromePalette.Colors(
+            background = theme.backgroundColor,
+            foreground = resolveImeBarForegroundColor(theme),
+        )
+    }
+
     fun applyMenuColors(menu: Menu) {
         currentTheme?.let { theme ->
             val foreground = resolveImeBarForegroundColor(theme)
@@ -169,6 +177,7 @@ class EditorThemeFontService(
 
     private fun applyEditorChrome(theme: Theme, @androidx.annotation.ColorInt foreground: Int) {
         EditorChromePalette.update(theme.backgroundColor, foreground)
+        onPaletteChanged(theme.backgroundColor, foreground)
         editorToolbar.setEditorThemeColors(theme.backgroundColor, foreground)
         applyToolbarMenuItemColors(toolbarMenuContainer, foreground)
 

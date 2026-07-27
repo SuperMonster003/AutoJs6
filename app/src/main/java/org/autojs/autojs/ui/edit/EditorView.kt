@@ -36,6 +36,7 @@ import androidx.annotation.StringRes
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
@@ -137,6 +138,7 @@ import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
 import org.autojs.autojs.ui.edit.keyboard.SymbolsConfigStore
+import org.autojs.autojs.ui.edit.theme.EditorChromePalette
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.edit.theme.Themes
 import org.autojs.autojs.ui.edit.toolbar.DebugToolbarFragment
@@ -533,6 +535,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mProgressiveTextLoadActive = false
 
     private val mCodeCompletionBar: CodeCompletionBar = binding.codeCompletionBar
+    private val mEditorAppBar: View = binding.editorAppBar
     private val mEditorStatusBar: View = binding.editorStatusBar
     private val mEditorFileNameStatus: TextView = binding.editorFileNameStatus
     private val mEditorCursorStatus: TextView = binding.editorCursorStatus
@@ -636,6 +639,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mAceShortcutReturnJumpInProgress = false
     private var mDrawerGestureGuardDepth = 0
     private var mAceShortcutBottomBarDrawerGuardInstalled = false
+    private var mEditorUiPaletteChangedListener: ((EditorChromePalette.Colors) -> Unit)? = null
+    private val mFullscreenModeSupported = activity is EditActivity
+    private var mFullscreenMode = mFullscreenModeSupported &&
+        Pref.getBoolean(
+            R.string.key_editor_fullscreen_mode,
+            R.bool.pref_editor_fullscreen_mode,
+        )
+    private var mFullscreenHintPending = mFullscreenMode
+    private var mFullscreenHintSnackbar: Snackbar? = null
     private var mThemePreviewActive = false
     private var mThemePreviewReturnToThemeDialog = false
     private var mThemePreviewThemes: List<Theme> = emptyList()
@@ -697,6 +709,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mAceShowFunctionsButton,
         ),
         invalidateHost = { invalidate() },
+        onPaletteChanged = { background, foreground ->
+            mEditorUiPaletteChangedListener?.invoke(
+                EditorChromePalette.Colors(background, foreground),
+            )
+        },
     )
 
     private var mLoadingBarRequested = false
@@ -717,6 +734,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mLastImeBottomInset = 0
     private var mLastImeVisible = false
     private var mLastImeEventAtUptimeMillis = 0L
+    private var mLastWindowInsets: WindowInsetsCompat? = null
+    private val mBaseWindowInsetPadding = intArrayOf(
+        paddingLeft,
+        paddingTop,
+        paddingRight,
+        paddingBottom,
+    )
 
     // Reusable rect for window visible area.
     // zh-CN: 复用的窗口可见区域 Rect.
@@ -776,6 +800,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_editor_theme_mode),
                 -> post { applyCurrentEditorThemePreference() }
             key(R.string.key_editor_engine) -> post { applyCurrentEditorEnginePreference() }
+            key(R.string.key_editor_fullscreen_mode) -> post {
+                if (mFullscreenModeSupported) {
+                    val enabled = Pref.getBoolean(
+                        R.string.key_editor_fullscreen_mode,
+                        R.bool.pref_editor_fullscreen_mode,
+                    )
+                    setFullscreenMode(enabled, persist = false, showHint = enabled)
+                }
+            }
             key(R.string.key_editor_pinch_to_zoom_change_text_size_enabled) -> post { editor.notifyPinchToZoomStrategyChanged(null) }
             key(R.string.key_ace_lsp_enabled),
             key(R.string.key_ace_lsp_declaration_groups),
@@ -791,6 +824,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
+        mEditorAppBar.isVisible = !mFullscreenMode
         recordAcePluginUnavailableFallbackIfNeeded()
         attachEditorEngineView()
         setUpEditor()
@@ -870,6 +904,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
         }
         mLastAcePluginChangeId = latestAceChange.id
+        applyFullscreenSystemBars()
     }
 
     fun handleIntent(intent: Intent): Observable<String> {
@@ -1071,6 +1106,154 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun applyToolbarTheme(root: View) = themeFontService.applyToolbarMenuItemColors(root)
 
+    fun setEditorUiPaletteChangedListener(
+        listener: ((EditorChromePalette.Colors) -> Unit)?,
+    ) {
+        mEditorUiPaletteChangedListener = listener
+        if (listener != null) {
+            themeFontService.currentEditorChromeColors()?.let(listener)
+        }
+    }
+
+    fun currentEditorUiPalette(): EditorChromePalette.Colors =
+        themeFontService.currentEditorChromeColors() ?: EditorChromePalette.current()
+
+    fun isFullscreenMode(): Boolean = mFullscreenMode
+
+    fun toggleFullscreenMode() {
+        if (!mFullscreenModeSupported) {
+            return
+        }
+        setFullscreenMode(
+            enabled = !mFullscreenMode,
+            persist = true,
+            showHint = true,
+        )
+    }
+
+    fun reapplyFullscreenModeIfNeeded() {
+        if (!mFullscreenModeSupported || !mFullscreenMode || !isAttachedToWindow) {
+            return
+        }
+        post {
+            if (mFullscreenMode && isAttachedToWindow) {
+                applyFullscreenSystemBars()
+                showPendingFullscreenHint()
+            }
+        }
+    }
+
+    private fun setFullscreenMode(
+        enabled: Boolean,
+        persist: Boolean,
+        showHint: Boolean,
+    ) {
+        if (!mFullscreenModeSupported) {
+            return
+        }
+        val changed = mFullscreenMode != enabled
+        mFullscreenMode = enabled
+
+        if (
+            persist &&
+            Pref.getBoolean(
+                R.string.key_editor_fullscreen_mode,
+                R.bool.pref_editor_fullscreen_mode,
+            ) != enabled
+        ) {
+            Pref.putBoolean(R.string.key_editor_fullscreen_mode, enabled)
+        }
+
+        mEditorAppBar.isVisible = !enabled
+        mLastWindowInsets?.let(::applyEditorSystemBarInsets)
+        applyFullscreenSystemBars()
+        editor.view.requestLayout()
+        ViewCompat.requestApplyInsets(this)
+
+        if (!changed) {
+            return
+        }
+
+        activity.invalidateOptionsMenu()
+        if (enabled && showHint) {
+            mFullscreenHintPending = true
+            post(::showPendingFullscreenHint)
+        } else if (!enabled) {
+            mFullscreenHintPending = false
+            mFullscreenHintSnackbar?.dismiss()
+            mFullscreenHintSnackbar = null
+        }
+    }
+
+    private fun exitFullscreenModeIfNeeded(): Boolean {
+        if (!mFullscreenMode) {
+            return false
+        }
+        setFullscreenMode(
+            enabled = false,
+            persist = true,
+            showHint = false,
+        )
+        return true
+    }
+
+    private fun applyFullscreenSystemBars() {
+        if (!mFullscreenModeSupported || !isAttachedToWindow) {
+            return
+        }
+        val controller = WindowInsetsControllerCompat(
+            activity.window,
+            activity.window.decorView,
+        )
+        when {
+            mFullscreenMode -> {
+                controller.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.hide(WindowInsetsCompat.Type.systemBars())
+            }
+            else -> {
+                controller.show(WindowInsetsCompat.Type.systemBars())
+                themeFontService.applyCurrentEditorChrome()
+            }
+        }
+    }
+
+    private fun showPendingFullscreenHint() {
+        if (themeFontService.currentEditorChromeColors() == null) {
+            return
+        }
+        if (
+            !mFullscreenHintPending ||
+            !mFullscreenMode ||
+            !isAttachedToWindow ||
+            !activity.hasWindowFocus()
+        ) {
+            return
+        }
+        mFullscreenHintPending = false
+        mFullscreenHintSnackbar?.dismiss()
+        mFullscreenHintSnackbar = Snackbar
+            .make(this, R.string.text_editor_fullscreen_mode_hint, Snackbar.LENGTH_LONG)
+            .setAction(R.string.text_exit_fullscreen_mode) {
+                setFullscreenMode(
+                    enabled = false,
+                    persist = true,
+                    showHint = false,
+                )
+            }
+            .also {
+                applyFullscreenHintPalette(it)
+                it.show()
+            }
+    }
+
+    private fun applyFullscreenHintPalette(snackbar: Snackbar) {
+        val colors = themeFontService.currentEditorChromeColors() ?: return
+        snackbar.setBackgroundTint(colors.background)
+        snackbar.setTextColor(colors.foreground)
+        snackbar.setActionTextColor(colors.foreground)
+    }
+
     private fun handleText(intent: Intent): Observable<String> {
         val content = intent.getStringExtra(EXTRA_CONTENT)
         if (content != null) {
@@ -1109,6 +1292,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Handle IME insets to avoid keyboard covering the editor.
         // zh-CN: 处理 IME inset, 避免软键盘遮挡编辑器内容.
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+            mLastWindowInsets = insets
+            applyEditorSystemBarInsets(insets)
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
 
             // Compute the real overlap between editor and the visible window area.
@@ -1140,6 +1325,27 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             // Do not consume insets.
             // zh-CN: 不消费 insets.
             insets
+        }
+    }
+
+    private fun applyEditorSystemBarInsets(insets: WindowInsetsCompat) {
+        val insetTypes = when {
+            mFullscreenMode -> WindowInsetsCompat.Type.displayCutout()
+            else -> WindowInsetsCompat.Type.systemBars() or
+                WindowInsetsCompat.Type.displayCutout()
+        }
+        val systemBarInsets = insets.getInsets(insetTypes)
+        val left = mBaseWindowInsetPadding[0] + systemBarInsets.left
+        val top = mBaseWindowInsetPadding[1] + systemBarInsets.top
+        val right = mBaseWindowInsetPadding[2] + systemBarInsets.right
+        val bottom = mBaseWindowInsetPadding[3] + systemBarInsets.bottom
+        if (
+            paddingLeft != left ||
+            paddingTop != top ||
+            paddingRight != right ||
+            paddingBottom != bottom
+        ) {
+            setPadding(left, top, right, bottom)
         }
     }
 
@@ -1429,6 +1635,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
         AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
         mDocsPageController.stop()
+        mFullscreenHintSnackbar?.dismiss()
+        mFullscreenHintSnackbar = null
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =
@@ -3849,7 +4057,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun setTheme(theme: Theme?) {
-        themeFontService.applyTheme(theme)?.let(::syncThemePreviewWithAppliedTheme)
+        themeFontService.applyTheme(theme)?.let {
+            syncThemePreviewWithAppliedTheme(it)
+            mFullscreenHintSnackbar?.let(::applyFullscreenHintPalette)
+            showPendingFullscreenHint()
+        }
     }
 
     @SuppressLint("CheckResult")
@@ -3882,6 +4094,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             } else {
                 mDrawerLayout.closeDrawer(GravityCompat.START)
             }
+            return true
+        }
+        if (exitFullscreenModeIfNeeded()) {
             return true
         }
         if (mDraftRestoreInProgress || mFileSaveInProgress || mSaveThenReloadInProgress ||
@@ -5798,6 +6013,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_BUILD_APK -> true.also { startBuildApkActivity(action.payloadString(PAYLOAD_PATH)) }
             ACTION_LOG -> true.also { openEditorLogByPreference() }
             ACTION_SETTINGS -> true.also { showEditorSettingsDialog() }
+            ACTION_TOGGLE_FULLSCREEN -> true.also { toggleFullscreenMode() }
             ACTION_CONSOLE -> true.also { showConsole() }
             ACTION_IMPORT_JAVA_CLASS -> true.also {
                 showJavaClassSearchDialog(
@@ -5948,6 +6164,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         R.id.action_build_apk -> buildApkHistoryAction()
         R.id.action_log -> historyAction(ACTION_LOG, R.string.text_log, mutatesText = false)
         R.id.action_editor_settings -> historyAction(ACTION_SETTINGS, R.string.text_settings, mutatesText = false)
+        R.id.action_fullscreen_mode -> historyAction(ACTION_TOGGLE_FULLSCREEN, R.string.text_editor_fullscreen_mode, mutatesText = false)
         R.id.action_console -> historyAction(ACTION_CONSOLE, R.string.text_console, mutatesText = false)
         R.id.action_import_java_class -> historyAction(ACTION_IMPORT_JAVA_CLASS, R.string.text_find_java_classes, mutatesText = true)
         R.id.action_file_details -> historyAction(ACTION_FILE_DETAILS, R.string.text_file_details, mutatesText = false)
@@ -6200,7 +6417,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun showManual(urlSuffix: String, title: String) {
         val absUrl = getUrl(urlSuffix)
-        ManualDialog(context)
+        val colors = currentEditorUiPalette()
+        ManualDialog(context, colors.background, colors.foreground)
             .title(title)
             .url(absUrl)
             .pinToLeft {
@@ -6489,6 +6707,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_BUILD_APK = "editor:build_apk"
         private const val ACTION_LOG = "editor:log"
         private const val ACTION_SETTINGS = "editor:settings"
+        private const val ACTION_TOGGLE_FULLSCREEN = "editor:toggle_fullscreen"
         private const val ACTION_CONSOLE = "editor:console"
         private const val ACTION_IMPORT_JAVA_CLASS = "editor:import_java_class"
         private const val ACTION_FILE_DETAILS = "editor:file_details"

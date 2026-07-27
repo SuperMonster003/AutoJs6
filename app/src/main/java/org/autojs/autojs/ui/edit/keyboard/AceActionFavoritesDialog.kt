@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.ui.edit.theme.EditorChromePalette
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.ViewUtils
@@ -204,7 +205,9 @@ object AceActionFavoritesDialog {
             holder.icon.setImageResource(
                 if (entry.pinned) R.drawable.ic_thumbtacks else R.drawable.ic_asterisk_small,
             )
-            holder.icon.imageTintList = ColorStateList.valueOf(context.getColor(R.color.day_night))
+            holder.icon.imageTintList = ColorStateList.valueOf(
+                EditorChromePalette.current().foreground,
+            )
             holder.itemView.setOnClickListener {
                 onActionSelected(
                     AceActionHistoryStore.Action(
