@@ -78,6 +78,7 @@
     <string name="description_ace_font_styles_enabled_preference">Permite que los temas de Ace y el resaltado de sintaxis usen negrita, cursiva y otros estilos de fuente. Al desactivarlo, el texto del código usa el estilo normal sin cambiar los colores ni el contenido.</string>
     <string name="description_ace_indent_guides_enabled_preference">Muestra u oculta las guías verticales de sangría en el área de código. Esto solo cambia la presentación del código.</string>
     <string name="description_ace_line_numbers_enabled_preference">Muestra u oculta los números de línea del margen lateral del editor. El plegado, los puntos de interrupción y la disposición del margen siguen disponibles.</string>
+    <string name="description_ace_lsp_declaration_groups_preference">Elija los grupos de declaraciones opcionales que se cargarán en el servicio de lenguaje TypeScript de Ace. Las casillas y el resumen solo muestran sus selecciones explícitas. Todos los grupos están desactivados de forma predeterminada para reducir el tiempo de inicio y el uso de memoria. libraries también carga android; main-app carga automáticamente android, libraries y resources.</string>
     <string name="description_ace_lsp_enabled_preference">El autocompletado inteligente LSP está activado de forma predeterminada. El editor usa el servicio de lenguaje TypeScript incluido para autocompletado, información al pasar el puntero, ayuda de firmas y diagnósticos; conserva el autocompletado estático como alternativa. Puede desactivarse en cualquier momento.</string>
     <string name="description_ace_lsp_file_types_preference">LSP solo se inicia para archivos cuyos nombres terminan con uno de los sufijos seleccionados. Usar valores predeterminados restaura el conjunto de sufijos de JavaScript, TypeScript, JSON, Auto.js y Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Muestra u oculta la guía del margen de impresión del editor Ace. Es la línea de límite de columna del lado derecho y solo cambia la presentación del código.</string>
@@ -536,6 +537,8 @@
     <string name="summary_ace_font_styles_enabled">Permitir negrita, cursiva y otros estilos de la fuente de código</string>
     <string name="summary_ace_indent_guides_enabled">Mostrar guías verticales para la sangría del código</string>
     <string name="summary_ace_line_numbers_enabled">Mostrar números de línea en el margen lateral del editor</string>
+    <string name="summary_ace_lsp_declaration_groups">Elegir grupos de declaraciones opcionales de AutoJs6</string>
+    <string name="summary_ace_lsp_declaration_groups_disabled">Desactivado</string>
     <string name="summary_ace_lsp_enabled">Activar la asistencia del editor mediante LSP</string>
     <string name="summary_ace_lsp_file_types">Elegir los tipos de archivo que pueden usar funciones de LSP</string>
     <string name="summary_ace_print_margin_enabled">Mostrar la guía de límite de columna del lado derecho</string>
@@ -652,6 +655,7 @@
     <string name="text_ace_insert">Insertar</string>
     <string name="text_ace_large_file_uses_native_editor">La política de alternativa activa dirige el editor Ace a JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">Números de línea</string>
+    <string name="text_ace_lsp_declaration_groups">Grupos de declaraciones LSP</string>
     <string name="text_ace_lsp_enabled">Autocompletado inteligente LSP</string>
     <string name="text_ace_lsp_file_types">Tipos de archivo LSP</string>
     <string name="text_ace_no_last_action">No hay una última acción del editor</string>

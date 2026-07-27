@@ -31,6 +31,7 @@ object EditorSettingActionRegistry {
         Spec(R.string.key_editor_auto_show_log_bottom_sheet_on_run, R.string.text_editor_auto_show_log_bottom_sheet_on_run),
         Spec(R.string.key_editor_shortcut_input_bar, R.string.text_editor_shortcut_input_bar),
         Spec(R.string.key_ace_lsp_enabled, R.string.text_ace_lsp_enabled),
+        Spec(R.string.key_ace_lsp_declaration_groups, R.string.text_ace_lsp_declaration_groups),
         Spec(R.string.key_ace_lsp_file_types, R.string.text_ace_lsp_file_types),
         Spec(R.string.key_editor_pinch_to_zoom_change_text_size_enabled, R.string.text_editor_pinch_to_zoom_change_text_size_enabled),
         Spec(R.string.key_editor_gutter_width_mode, R.string.text_editor_gutter_width_mode),

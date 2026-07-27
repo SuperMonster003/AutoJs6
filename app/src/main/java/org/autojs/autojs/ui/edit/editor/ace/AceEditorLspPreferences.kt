@@ -5,7 +5,12 @@ import org.autojs.autojs.core.pref.Pref
 object AceEditorLspPreferences {
     const val KEY_ACE_LSP_ENABLED = "key_\$_ace_lsp_enabled"
     const val KEY_ACE_LSP_FILE_TYPES = "key_\$_ace_lsp_file_types"
+    const val KEY_ACE_LSP_DECLARATION_GROUPS = "key_\$_ace_lsp_declaration_groups"
     const val DEFAULT_ENABLED = true
+    const val DECLARATION_GROUP_ANDROID = "android"
+    const val DECLARATION_GROUP_LIBRARIES = "libraries"
+    const val DECLARATION_GROUP_RESOURCES = "resources"
+    const val DECLARATION_GROUP_MAIN_APP = "main-app"
     private val TYPE_SCRIPT_DECLARATION_EXTENSIONS = listOf(".d.ts", ".d.mts", ".d.cts")
 
     val DEFAULT_FILE_TYPES = listOf(
@@ -20,6 +25,15 @@ object AceEditorLspPreferences {
         ".auto.js",
         ".node.js",
     )
+
+    val SUPPORTED_DECLARATION_GROUPS = listOf(
+        DECLARATION_GROUP_ANDROID,
+        DECLARATION_GROUP_LIBRARIES,
+        DECLARATION_GROUP_RESOURCES,
+        DECLARATION_GROUP_MAIN_APP,
+    )
+
+    val DEFAULT_DECLARATION_GROUPS = emptyList<String>()
 
     @JvmStatic
     fun isEnabled(): Boolean {
@@ -52,6 +66,27 @@ object AceEditorLspPreferences {
     @JvmStatic
     fun resetFileTypes() {
         Pref.remove(KEY_ACE_LSP_FILE_TYPES)
+    }
+
+    @JvmStatic
+    fun getDeclarationGroups(): List<String> {
+        if (!Pref.containsKey(KEY_ACE_LSP_DECLARATION_GROUPS)) {
+            return DEFAULT_DECLARATION_GROUPS
+        }
+        return normalizeDeclarationGroups(Pref.getString(KEY_ACE_LSP_DECLARATION_GROUPS, ""))
+    }
+
+    @JvmStatic
+    fun setDeclarationGroups(groups: Collection<String>) {
+        Pref.putString(
+            KEY_ACE_LSP_DECLARATION_GROUPS,
+            normalizeDeclarationGroups(groups).joinToString(","),
+        )
+    }
+
+    @JvmStatic
+    fun resetDeclarationGroups() {
+        Pref.remove(KEY_ACE_LSP_DECLARATION_GROUPS)
     }
 
     @JvmStatic
@@ -101,5 +136,22 @@ object AceEditorLspPreferences {
             .map { if (it.startsWith(".")) it else ".$it" }
             .distinct()
             .toList()
+    }
+
+    fun normalizeDeclarationGroups(raw: String?): List<String> {
+        return normalizeDeclarationGroups(
+            raw.orEmpty()
+                .split(',', ';', '\n', '\r', '\t', ' ')
+                .filter { it.isNotBlank() },
+        )
+    }
+
+    fun normalizeDeclarationGroups(values: Collection<String>): List<String> {
+        val selected = values
+            .asSequence()
+            .map { it.trim().lowercase() }
+            .filter { it in SUPPORTED_DECLARATION_GROUPS }
+            .toSet()
+        return SUPPORTED_DECLARATION_GROUPS.filter { it in selected }
     }
 }

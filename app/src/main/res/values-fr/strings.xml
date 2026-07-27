@@ -78,6 +78,7 @@
     <string name="description_ace_font_styles_enabled_preference">Autorisez les thèmes Ace et la coloration syntaxique à utiliser le gras, l\'italique et d\'autres styles de police. Lorsque cette option est désactivée, le texte du code utilise le style normal sans modifier les couleurs ni le contenu.</string>
     <string name="description_ace_indent_guides_enabled_preference">Affichez ou masquez les guides verticaux d\'indentation dans la zone de code. Seul l\'affichage du code est modifié.</string>
     <string name="description_ace_line_numbers_enabled_preference">Affichez ou masquez les numéros de ligne dans la gouttière de l\'éditeur. Le pliage, les points d\'arrêt et la disposition de la gouttière restent disponibles.</string>
+    <string name="description_ace_lsp_declaration_groups_preference">Choisissez les groupes de déclarations facultatifs à charger dans le service de langage TypeScript d\'Ace. Les cases à cocher et le résumé affichent uniquement vos sélections explicites. Tous les groupes sont désactivés par défaut afin de réduire le temps de démarrage et l\'utilisation de la mémoire. libraries charge également android; main-app charge automatiquement android, libraries et resources.</string>
     <string name="description_ace_lsp_enabled_preference">La saisie semi-automatique intelligente LSP est activée par défaut. L\'éditeur utilise le service de langage TypeScript intégré pour la saisie semi-automatique, les informations au survol, l\'aide sur les signatures et les diagnostics; la saisie semi-automatique statique reste disponible comme solution de secours. Cette fonction peut être désactivée à tout moment.</string>
     <string name="description_ace_lsp_file_types_preference">LSP démarre uniquement pour les fichiers dont le nom se termine par un des suffixes sélectionnés. Utiliser les valeurs par défaut restaure les suffixes JavaScript, TypeScript, JSON, Auto.js et Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Affichez ou masquez le repère de marge d\'impression de l\'éditeur Ace. Cette ligne indique la limite de colonne à droite et modifie uniquement l\'affichage du code.</string>
@@ -536,6 +537,8 @@
     <string name="summary_ace_font_styles_enabled">Autoriser le gras, l\'italique et d\'autres styles de police de code</string>
     <string name="summary_ace_indent_guides_enabled">Afficher les guides verticaux d\'indentation du code</string>
     <string name="summary_ace_line_numbers_enabled">Afficher les numéros de ligne dans la gouttière de l\'éditeur</string>
+    <string name="summary_ace_lsp_declaration_groups">Choisir les groupes de déclarations AutoJs6 facultatifs</string>
+    <string name="summary_ace_lsp_declaration_groups_disabled">Désactivé</string>
     <string name="summary_ace_lsp_enabled">Activer l\'assistance de l\'éditeur fournie par LSP</string>
     <string name="summary_ace_lsp_file_types">Choisir les types de fichiers qui peuvent utiliser les fonctions LSP</string>
     <string name="summary_ace_print_margin_enabled">Afficher le repère de limite de colonne à droite</string>
@@ -652,6 +655,7 @@
     <string name="text_ace_insert">Insérer</string>
     <string name="text_ace_large_file_uses_native_editor">La politique de secours active redirige l\'éditeur Ace vers JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">Numéros de ligne</string>
+    <string name="text_ace_lsp_declaration_groups">Groupes de déclarations LSP</string>
     <string name="text_ace_lsp_enabled">Saisie semi-automatique intelligente LSP</string>
     <string name="text_ace_lsp_file_types">Types de fichiers LSP</string>
     <string name="text_ace_no_last_action">Aucune dernière action de l\'éditeur</string>

@@ -80,6 +80,7 @@
     <string name="description_ace_font_styles_enabled_preference">Ace 테마와 구문 강조에서 굵게, 기울임꼴 및 다른 글꼴 스타일을 사용할 수 있도록 합니다. 사용하지 않으면 색상이나 내용을 변경하지 않고 코드 텍스트를 일반 스타일로 고정합니다.</string>
     <string name="description_ace_indent_guides_enabled_preference">코드 영역에서 세로 들여쓰기 안내선을 표시하거나 숨깁니다. 코드 표시 방식만 변경됩니다.</string>
     <string name="description_ace_line_numbers_enabled_preference">편집기 거터의 줄 번호를 표시하거나 숨깁니다. 코드 접기, 중단점 및 거터 레이아웃은 계속 사용할 수 있습니다.</string>
+    <string name="description_ace_lsp_declaration_groups_preference">Ace TypeScript 언어 서비스에 불러올 선택적 선언 그룹을 선택합니다. 체크박스와 요약에는 명시적으로 선택한 그룹만 표시됩니다. 시작 시간과 메모리 사용량을 줄이기 위해 모든 그룹은 기본적으로 비활성화되어 있습니다. libraries를 선택하면 android도 불러오며, main-app을 선택하면 android, libraries 및 resources를 자동으로 불러옵니다.</string>
     <string name="description_ace_lsp_enabled_preference">LSP 스마트 자동 완성은 기본적으로 켜져 있습니다. 편집기는 내장 TypeScript 언어 서비스를 통해 자동 완성, 마우스 오버 정보, 시그니처 도움말 및 진단을 제공하며, 정적 자동 완성을 대체 수단으로 유지합니다. 이 기능은 언제든지 끌 수 있습니다.</string>
     <string name="description_ace_lsp_file_types_preference">LSP는 파일 이름이 선택한 접미사 중 하나로 끝날 때만 시작됩니다. \"기본값 사용\"을 선택하면 JavaScript, TypeScript, JSON, Auto.js 및 Node.js 접미사 모음으로 복원됩니다.</string>
     <string name="description_ace_print_margin_enabled_preference">Ace 편집기의 인쇄 여백 안내선을 표시하거나 숨깁니다. 오른쪽 열 제한선이며 코드 표시 방식만 변경됩니다.</string>
@@ -538,6 +539,8 @@
     <string name="summary_ace_font_styles_enabled">굵게, 기울임꼴 및 다른 코드 글꼴 스타일 허용</string>
     <string name="summary_ace_indent_guides_enabled">코드 들여쓰기를 위한 세로 안내선 표시</string>
     <string name="summary_ace_line_numbers_enabled">편집기 거터에 줄 번호 표시</string>
+    <string name="summary_ace_lsp_declaration_groups">선택적 AutoJs6 선언 그룹 선택</string>
+    <string name="summary_ace_lsp_declaration_groups_disabled">끔</string>
     <string name="summary_ace_lsp_enabled">LSP 기반 편집기 지원 사용</string>
     <string name="summary_ace_lsp_file_types">LSP 기능을 사용할 수 있는 파일 형식 선택</string>
     <string name="summary_ace_print_margin_enabled">오른쪽 열 제한 안내선 표시</string>
@@ -654,6 +657,7 @@
     <string name="text_ace_insert">삽입</string>
     <string name="text_ace_large_file_uses_native_editor">활성 대체 정책에 따라 Ace 편집기에서 JsDroidEditor를 사용합니다</string>
     <string name="text_ace_line_numbers_enabled">줄 번호</string>
+    <string name="text_ace_lsp_declaration_groups">LSP 선언 그룹</string>
     <string name="text_ace_lsp_enabled">LSP 스마트 자동 완성</string>
     <string name="text_ace_lsp_file_types">LSP 파일 형식</string>
     <string name="text_ace_no_last_action">마지막 편집기 작업 없음</string>

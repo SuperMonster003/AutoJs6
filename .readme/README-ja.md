@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 7 月 26 日 に更新されました.
+データは 2026 年 7 月 27 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/07/26
+###### 2026/07/27
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -198,6 +198,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` コードエディタは外部プラグインからの Ace 読み込みに対応し, 署名者/信頼性/Editor API コントラクト/ホストバージョン/バイナリ ABI 互換性を検証して, プラグインが利用できない場合はネイティブエディタへ自動フォールバック
 * `新機能` コードエディタが Ace 外部プラグインの実行時ホットプラグに対応し, プラグインのインストールまたは有効状態の変化に応じてエディタエンジンを自動切り替え
 * `新機能` Ace エディタの組み込みローカル TypeScript スマート補完を正式機能として既定で有効化し、AutoJs6 API 補完/シグネチャヘルプ/ホバー情報/診断に対応（設定で無効化可能）
+* `新機能` Ace エディタ設定で android/libraries/resources/main-app の AutoJs6 TypeScript 宣言グループを選択的に読み込み可能, 依存グループは自動的に補完され, 言語サービスの起動時間とメモリ使用量を抑えるためすべてのオプショングループはデフォルトで無効
 * `新機能` Ace エディタがショートカットパネル/操作履歴/操作のお気に入り/モバイルテキスト選択/ピンチズームなどに対応
 * `新機能` コードエディタが指定したエンコーディングでのファイルの再読み込みまたは変換, BOM の設定, エンコーディングリスクの表示, 元に戻す/やり直しに対応
 * `新機能` コードエディタが下部ログパネルの表示に対応 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
@@ -573,7 +574,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 7 月 26 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 7 月 27 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

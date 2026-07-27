@@ -764,6 +764,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_editor_engine) -> post { applyCurrentEditorEnginePreference() }
             key(R.string.key_editor_pinch_to_zoom_change_text_size_enabled) -> post { editor.notifyPinchToZoomStrategyChanged(null) }
             key(R.string.key_ace_lsp_enabled),
+            key(R.string.key_ace_lsp_declaration_groups),
             key(R.string.key_ace_lsp_file_types),
                 -> post { (editor as? AceScriptEditorEngine)?.refreshLsp() }
         }

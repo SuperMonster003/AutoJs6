@@ -40,4 +40,23 @@ class AceEditorLspPreferencesTest {
             AceEditorLspPreferences.normalizeFileTypes(AceEditorLspPreferences.DEFAULT_FILE_TYPES),
         )
     }
+
+    @Test
+    fun declarationGroupsAreDisabledByDefaultAndUseSupportedOrder() {
+        assertTrue(AceEditorLspPreferences.DEFAULT_DECLARATION_GROUPS.isEmpty())
+        assertEquals(
+            listOf("android", "libraries", "resources", "main-app"),
+            AceEditorLspPreferences.SUPPORTED_DECLARATION_GROUPS,
+        )
+        assertEquals(
+            listOf("android", "libraries", "resources", "main-app"),
+            AceEditorLspPreferences.normalizeDeclarationGroups(
+                listOf(" MAIN-APP ", "resources", "unknown", "libraries", "android", "android"),
+            ),
+        )
+        assertEquals(
+            listOf("android", "main-app"),
+            AceEditorLspPreferences.normalizeDeclarationGroups("main-app;ANDROID,unknown"),
+        )
+    }
 }

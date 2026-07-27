@@ -144,6 +144,13 @@
             app:summary="@string/summary_ace_lsp_file_types"
             app:longClickPrompt="@string/description_ace_lsp_file_types_preference" />
 
+        <org.autojs.autojs.ui.settings.AceLspDeclarationGroupsPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_lsp_declaration_groups"
+            app:title="@string/text_ace_lsp_declaration_groups"
+            app:summary="@string/summary_ace_lsp_declaration_groups"
+            app:longClickPrompt="@string/description_ace_lsp_declaration_groups_preference" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory

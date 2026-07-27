@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 7 월 26 일.
+데이터 갱신일: 2026 년 7 월 27 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/07/26
+###### 2026/07/27
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
@@ -198,6 +198,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 코드 편집기에서 외부 플러그인의 Ace 로딩을 지원하고 서명자/신뢰/Editor API 계약/호스트 버전/바이너리 ABI 호환성을 검증하며, 플러그인을 사용할 수 없을 때 네이티브 편집기로 자동 폴백
 * `추가` 코드 편집기에서 Ace 외부 플러그인의 런타임 핫 플러그를 지원하고 플러그인 설치 또는 활성화 상태 변경에 따라 편집기 엔진 자동 전환
 * `추가` Ace 편집기의 내장 로컬 TypeScript 스마트 완성을 정식 기능으로 기본 활성화하고 AutoJs6 API 완성/시그니처 도움말/호버 정보/진단을 지원 (설정에서 비활성화 가능)
+* `추가` Ace 편집기 설정에서 android/libraries/resources/main-app AutoJs6 TypeScript 선언 그룹의 선택적 로드를 지원하고 의존 그룹을 자동으로 추가하며, 언어 서비스 시작 시간과 메모리 사용량을 줄이기 위해 모든 선택적 그룹을 기본적으로 비활성화
 * `추가` Ace 편집기에서 바로 가기 패널/작업 기록/즐겨찾기/모바일 텍스트 선택/핀치 확대 및 축소 등의 기능 지원
 * `추가` 코드 편집기에서 선택한 인코딩으로 파일 다시 로드 또는 변환, 선택적 BOM, 인코딩 위험 표시 및 실행 취소/다시 실행 지원
 * `추가` 코드 편집기에서 하단 로그 패널 표시 지원 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
@@ -573,7 +574,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 7 월 26 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 7 월 27 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

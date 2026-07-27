@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/26
+###### 2026/07/27
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -38,6 +38,7 @@
 * `Feature` Code editor supports loading Ace from an external plugin, with signer and trust validation, Editor API contract/host-version/binary ABI compatibility checks, and automatic fallback to the native editor when unavailable
 * `Feature` Code editor supports runtime hot plugging of the external Ace plugin and automatically switches engines as plugin installation and enabled states change
 * `Feature` Ace editor now enables its bundled local TypeScript smart completion by default, with AutoJs6 API completion, signature help, hover information, and diagnostics; it can be disabled in settings
+* `Feature` Ace editor settings support selectively loading the android/libraries/resources/main-app AutoJs6 TypeScript declaration groups; dependencies are loaded automatically, while all optional groups are disabled by default to reduce language-service startup time and memory use
 * `Feature` Ace editor supports a shortcut panel/action history/action favorites/mobile text selection/pinch zoom and more
 * `Feature` Code editor supports reloading or converting files with a selected encoding, optional BOM, encoding risk indicators, and undo/redo
 * `Feature` Code editor supports a bottom log panel (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_

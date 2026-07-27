@@ -90,6 +90,7 @@
     <string name="key_ace_font_styles_enabled" translatable="false">key_$_ace_font_styles_enabled</string>
     <string name="key_ace_indent_guides_enabled" translatable="false">key_$_ace_indent_guides_enabled</string>
     <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
+    <string name="key_ace_lsp_declaration_groups" translatable="false">key_$_ace_lsp_declaration_groups</string>
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
     <string name="key_ace_lsp_file_types" translatable="false">key_$_ace_lsp_file_types</string>
     <string name="key_ace_print_margin_enabled" translatable="false">key_$_ace_print_margin_enabled</string>

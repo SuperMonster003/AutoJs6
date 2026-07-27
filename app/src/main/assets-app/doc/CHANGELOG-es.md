@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/26
+###### 2026/07/27
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -38,6 +38,7 @@
 * `Nuevo` El editor de código admite cargar Ace desde un plugin externo, con validación del firmante y la confianza, comprobaciones del contrato Editor API/la versión del anfitrión/la compatibilidad ABI binaria y retorno automático al editor nativo cuando el plugin no está disponible
 * `Nuevo` El editor de código admite el intercambio en caliente en tiempo de ejecución del plugin Ace externo y cambia automáticamente de motor según el estado de instalación o activación del plugin
 * `Nuevo` El editor Ace activa por defecto como función estable el completado inteligente local de TypeScript integrado, con completado de la API AutoJs6, ayuda de firmas, información al pasar el cursor y diagnósticos; se puede desactivar en los ajustes
+* `Nuevo` Los ajustes del editor Ace permiten cargar de forma selectiva los grupos de declaraciones TypeScript de AutoJs6 android/libraries/resources/main-app; las dependencias se cargan automáticamente y todos los grupos opcionales están desactivados de forma predeterminada para reducir el tiempo de inicio del servicio de lenguaje y el uso de memoria
 * `Nuevo` El editor Ace admite un panel de accesos directos/historial de acciones/acciones favoritas/selección de texto en dispositivos móviles/zoom con pellizco y más
 * `Nuevo` El editor de código permite recargar o convertir archivos con una codificación seleccionada, BOM opcional, indicadores de riesgo de codificación y deshacer/rehacer
 * `Nuevo` El editor de código admite un panel de registro inferior (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_

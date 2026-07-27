@@ -174,7 +174,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         setPreferenceAvailable(R.string.key_ace_print_margin_enabled, aceSelected, R.string.summary_ace_print_margin_enabled)
         setPreferenceAvailable(R.string.key_ace_indent_guides_enabled, aceSelected, R.string.summary_ace_indent_guides_enabled)
         setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected, R.string.summary_ace_lsp_enabled)
-        syncAceLspFileTypesPreferenceVisibility(aceSelected)
+        syncAceLspPreferencesVisibility(aceSelected)
         setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected, R.string.summary_ace_word_wrap_enabled)
         syncWordWrapIndentPreferenceVisibility(aceSelected)
         setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected, R.string.summary_editor_gutter_width_mode)
@@ -201,9 +201,15 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
             ?.setFontPreviewHandler(handler)
     }
 
-    private fun syncAceLspFileTypesPreferenceVisibility(aceSelected: Boolean) {
-        findPreference<Preference>(getString(R.string.key_ace_lsp_file_types))?.apply {
-            isVisible = aceSelected && AceEditorLspPreferences.isEnabled()
+    private fun syncAceLspPreferencesVisibility(aceSelected: Boolean) {
+        val visible = aceSelected && AceEditorLspPreferences.isEnabled()
+        listOf(
+            R.string.key_ace_lsp_declaration_groups,
+            R.string.key_ace_lsp_file_types,
+        ).forEach { keyRes ->
+            findPreference<Preference>(getString(keyRes))?.apply {
+                isVisible = visible
+            }
         }
     }
 

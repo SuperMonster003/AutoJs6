@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/26
+###### 2026/07/27
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -38,6 +38,7 @@
 * `Fonctionnalité` L'éditeur de code prend en charge le chargement d'Ace depuis un plugin externe, avec validation du signataire et de la confiance, vérification du contrat Editor API/de la version hôte/de la compatibilité ABI binaire, et repli automatique vers l'éditeur natif lorsque le plugin est indisponible
 * `Fonctionnalité` L'éditeur de code prend en charge le branchement à chaud du plugin Ace externe à l'exécution et change automatiquement de moteur selon l'état d'installation ou d'activation du plugin
 * `Fonctionnalité` L'éditeur Ace active désormais par défaut sa complétion intelligente TypeScript locale intégrée, avec complétion de l'API AutoJs6, aide aux signatures, informations au survol et diagnostics ; elle peut être désactivée dans les paramètres
+* `Fonctionnalité` Les paramètres de l'éditeur Ace permettent de charger sélectivement les groupes de déclarations TypeScript AutoJs6 android/libraries/resources/main-app; les dépendances sont chargées automatiquement et tous les groupes facultatifs sont désactivés par défaut afin de réduire le temps de démarrage du service de langage et l'utilisation de la mémoire
 * `Fonctionnalité` L'éditeur Ace prend en charge un panneau de raccourcis/l'historique des actions/les actions favorites/la sélection de texte sur mobile/le zoom par pincement et plus encore
 * `Fonctionnalité` L'éditeur de code prend en charge le rechargement ou la conversion des fichiers avec un encodage sélectionné, un BOM facultatif, des indicateurs de risque d'encodage et l'annulation/rétablissement
 * `Fonctionnalité` L'éditeur de code prend en charge un panneau de journal inférieur (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
