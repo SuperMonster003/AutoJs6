@@ -10,8 +10,10 @@ import androidx.annotation.StringRes
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.ui.edit.theme.EditorChromePalette
 import org.autojs.autojs.util.DrawableUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ToolbarMenuItemBinding
@@ -26,18 +28,20 @@ class ToolbarMenuItem : LinearLayout {
 
     private var mEnabledDrawable: Drawable? = null
     private var mDisabledDrawable: Drawable? = null
+    private var mEditorForegroundColor: Int? = null
 
     private val colorEnabled: Int
-        get() = when (ThemeColorManager.isLuminanceLight()) {
-            true -> ContextCompat.getColor(context, R.color.toolbar_menu_item_enabled_dark)
-            else -> ContextCompat.getColor(context, R.color.toolbar_menu_item_enabled_light)
-        }
+        get() = mEditorForegroundColor ?: when (ThemeColorManager.isLuminanceLight()) {
+                true -> ContextCompat.getColor(context, R.color.toolbar_menu_item_enabled_dark)
+                else -> ContextCompat.getColor(context, R.color.toolbar_menu_item_enabled_light)
+            }
 
     private val colorDisabled: Int
-        get() = when (ThemeColorManager.isLuminanceLight()) {
-            true -> ContextCompat.getColor(context, R.color.toolbar_menu_item_disabled_dark)
-            else -> ContextCompat.getColor(context, R.color.toolbar_menu_item_disabled_light)
-        }
+        get() = mEditorForegroundColor?.let { EditorChromePalette.withAlpha(it, 0.43f) }
+            ?: when (ThemeColorManager.isLuminanceLight()) {
+                true -> ContextCompat.getColor(context, R.color.toolbar_menu_item_disabled_dark)
+                else -> ContextCompat.getColor(context, R.color.toolbar_menu_item_disabled_light)
+            }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         val binding = ToolbarMenuItemBinding.inflate(LayoutInflater.from(context), this, true)
@@ -69,6 +73,12 @@ class ToolbarMenuItem : LinearLayout {
 
     fun setTextResource(@StringRes textRes: Int) {
         mTextView.setText(textRes)
+    }
+
+    fun setEditorForegroundColor(@ColorInt color: Int) {
+        mEditorForegroundColor = color
+        mDisabledDrawable = null
+        applyStyleByCurrentState()
     }
 
     override fun setEnabled(enabled: Boolean) {

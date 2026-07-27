@@ -23,6 +23,7 @@ import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.Choreographer
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
@@ -673,6 +674,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         context = context,
         activity = activity,
         currentEditor = { editor },
+        editorToolbar = binding.toolbar,
+        toolbarMenuContainer = binding.toolbarMenu,
         editorStatusBar = mEditorStatusBar,
         editorStatusTextViews = listOf(
             mEditorFileNameStatus,
@@ -1061,6 +1064,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun getEditorTheme() = themeFontService.currentTheme
+
+    fun applyCurrentEditorChrome() = themeFontService.applyCurrentEditorChrome()
+
+    fun applyEditorMenuTheme(menu: Menu) = themeFontService.applyMenuColors(menu)
+
+    fun applyToolbarTheme(root: View) = themeFontService.applyToolbarMenuItemColors(root)
 
     private fun handleText(intent: Intent): Observable<String> {
         val content = intent.getStringExtra(EXTRA_CONTENT)

@@ -39,6 +39,7 @@ public abstract class ToolbarFragment<T extends ViewBinding> extends BaseViewBin
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         updateMenuItemStatus(view);
+        findEditorView(view).applyToolbarTheme(view);
     }
 
     protected EditorView findEditorView(View view) {

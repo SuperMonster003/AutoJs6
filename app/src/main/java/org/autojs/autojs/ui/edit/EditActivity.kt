@@ -44,7 +44,6 @@ import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
-import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
@@ -81,6 +80,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     }
 
     override val handleContentViewFromHorizontalNavigationBarAutomatically = false
+    override val handleStatusBarThemeColorAutomatically = false
+    override val handleNavigationBarContrastEnforcedAutomatically = false
 
     private var mToolbar: ThemeColorToolbar? = null
     private val mMediator = OnActivityResultDelegate.Mediator()
@@ -175,6 +176,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         toolbar.setTitleTextAppearance(this, R.style.TextAppearanceEditorTitle)
         setToolbarAsBack("")
+        editorView.applyCurrentEditorChrome()
         handleEditorIntentWhenSaveAsSettles()
         onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
 
@@ -339,8 +341,9 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_editor, menu)
+        mEditorView.applyCurrentEditorChrome()
+        mEditorView.applyEditorMenuTheme(menu)
         mToolbar?.let { toolbar ->
-            toolbar.setMenuIconsColorByThemeColorLuminance(this)
             toolbar.onceGlobalLayout { toolbar.titleView?.adjustTitleTextView() }
         }
         return true
@@ -348,7 +351,10 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         mEditorMenu.prepareOptionsMenu(menu)
-        return super.onPrepareOptionsMenu(menu)
+        val prepared = super.onPrepareOptionsMenu(menu)
+        mEditorView.applyCurrentEditorChrome()
+        mEditorView.applyEditorMenuTheme(menu)
+        return prepared
     }
 
     private fun TextView.adjustTitleTextView() = this.post {

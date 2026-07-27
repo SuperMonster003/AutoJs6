@@ -20,7 +20,7 @@
             android:theme="@style/ToolBarStyle"
             app:contentInsetEndWithActions="2dp"
             app:contentInsetStartWithNavigation="0dp"
-            app:popupTheme="@style/PopupMenuTheme"
+            app:popupTheme="@style/EditorPopupMenuTheme"
             app:titleTextAppearance="@style/TextAppearanceEditorTitle"
             tools:title="@string/app_name">
 

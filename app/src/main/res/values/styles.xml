@@ -185,6 +185,40 @@
         <item name="android:tint">@color/night_full</item>
     </style>
 
+    <style name="EditorPopupMenuTheme" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:textColorSecondary">@android:color/black</item>
+        <item name="colorControlNormal">@android:color/black</item>
+        <item name="actionOverflowMenuStyle">@style/EditorOverflowMenu</item>
+        <item name="listMenuViewStyle">@style/EditorListMenuView</item>
+        <item name="android:checkboxStyle">@style/EditorPopupCheckbox</item>
+        <item name="android:radioButtonStyle">@style/EditorPopupRadioButton</item>
+    </style>
+
+    <style name="EditorOverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/editor_popup_background</item>
+        <item name="android:itemBackground">@drawable/editor_popup_item_background</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="overlapAnchor">false</item>
+        <item name="android:dropDownVerticalOffset">5dp</item>
+    </style>
+
+    <style name="EditorListMenuView" parent="Widget.AppCompat.ListMenuView">
+        <item name="android:itemBackground">@drawable/editor_popup_item_background</item>
+        <item name="subMenuArrow">@drawable/editor_popup_submenu_arrow</item>
+    </style>
+
+    <style name="EditorPopupCheckbox" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/editor_popup_checkbox</item>
+        <item name="android:buttonTint">@null</item>
+    </style>
+
+    <style name="EditorPopupRadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:button">@drawable/editor_popup_radio</item>
+        <item name="android:buttonTint">@null</item>
+    </style>
+
     <style name="PopupMenu.HideIndicator" parent="@style/ThemeOverlay.AppCompat.DayNight">
         <item name="android:radioButtonStyle">@style/PopupMenu.Radio.Null</item>
         <item name="android:checkboxStyle">@style/PopupMenu.Radio.Null</item>

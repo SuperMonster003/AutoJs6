@@ -30,7 +30,7 @@ public final class AceEditorThemes {
             new Spec("GitHub Dark", "ace/theme/github_dark", true, "#24292E", "#FFFFFF"),
             new Spec("GitHub Light Default", "ace/theme/github_light_default", false, "#FFFFFF", "#24292E"),
             new Spec("Gob", "ace/theme/gob", true, "#0B0B0B", "#00FF00"),
-            new Spec("Gruvbox", "ace/theme/gruvbox", true, "#1D2021", "#EBDAB4"),
+            new Spec("Gruvbox", "ace/theme/gruvbox", true, "#1E1E1E", "#EBDAB4"),
             new Spec("Gruvbox Dark Hard", "ace/theme/gruvbox_dark_hard", true, "#1D2021", "#EBDBB2"),
             new Spec("Gruvbox Light Hard", "ace/theme/gruvbox_light_hard", false, "#F9F5D7", "#3C3836"),
             new Spec("Idle Fingers", "ace/theme/idle_fingers", true, "#323232", "#FFFFFF"),
