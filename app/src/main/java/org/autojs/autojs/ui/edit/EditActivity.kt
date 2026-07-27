@@ -504,13 +504,14 @@ open class EditActivity :
         Log.d(LOG_TAG, "onActionModeStarted: $mode")
 
         val menu = mode.menu
-        val item = menu[menu.size - 1]
-
-        if (!mReadOnly && !mEditorView.isReadOnly() && menu.findItem(R.id.action_delete_line) == null) {
-            addMenuItem(menu, item.groupId, R.id.action_delete_line, 10000, R.string.text_delete_line) { mEditorMenu.deleteLine() }
-        }
-        if (menu.findItem(R.id.action_copy_line) == null) {
-            addMenuItem(menu, item.groupId, R.id.action_copy_line, 20000, R.string.text_copy_line) { mEditorMenu.copyLine() }
+        if (!mEditorView.isAceEditorEngine() && menu.size > 0) {
+            val item = menu[menu.size - 1]
+            if (!mReadOnly && !mEditorView.isReadOnly() && menu.findItem(R.id.action_delete_line) == null) {
+                addMenuItem(menu, item.groupId, R.id.action_delete_line, 10000, R.string.text_delete_line) { mEditorMenu.deleteLine() }
+            }
+            if (menu.findItem(R.id.action_copy_line) == null) {
+                addMenuItem(menu, item.groupId, R.id.action_copy_line, 20000, R.string.text_copy_line) { mEditorMenu.copyLine() }
+            }
         }
 
         super.onActionModeStarted(mode)

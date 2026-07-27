@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 7 月 27 日.
+数据更新于 2026 年 7 月 28 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/07/27
+###### 2026/07/28
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
@@ -249,6 +249,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 通过外部 URI 或后台运行脚本时可能无法保留原始路径, 导致相对路径解析异常的问题 _[`issue #545`](http://issues.autojs6.com/545)_
 * `修复` Tasker 无法正常调用并运行脚本的问题 _[`issue #501`](http://issues.autojs6.com/501)_
 * `修复` Ace 编辑器在输入法交互/文本选择/代码折叠/双指缩放/堆栈跳转等场景下的多项交互问题
+* `修复` 编辑器设置主标题, fx 函数面板, 固定在左侧的文档抽屉及 Ace 文本选择工具栏可能沿用 AutoJs6 应用配色而非当前编辑器主题, 且 Ace 行操作可能重复出现的问题
+* `修复` 全屏编辑模式下软键盘可能覆盖多功能按键栏, 且全屏提示 Snackbar 下方导航栏区域可能透明的问题
 * `修复` 大型文件使用不兼容编码重新加载后产生超长文本行时, Ace 编辑器可能长时间无响应并回退至原生编辑器的问题
 * `修复` Ace 外部插件在编辑器或设置界面使用期间被禁用或卸载时可能丢失未保存编辑状态或导致界面异常的问题
 * `修复` 插件中心图标缓存及下拉刷新状态在部分场景下可能异常的问题
@@ -578,7 +580,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 7 月 27 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 7 月 28 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

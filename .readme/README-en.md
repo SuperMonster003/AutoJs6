@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Jul 27, 2026.
+Data updated on Jul 28, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,7 +166,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/07/27
+###### 2026/07/28
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -249,6 +249,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_
 * `Fix` Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
 * `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
+* `Fix` Code editor settings primary titles, the fx function panel, the left-pinned documentation drawer, and the Ace text-selection toolbar could still use AutoJs6 app colors instead of the current editor theme, while Ace line actions could appear more than once
+* `Fix` Fullscreen editing could let the soft keyboard cover the multifunction key bar, and the navigation-bar area below the fullscreen hint Snackbar could remain transparent
 * `Fix` Ace editor could become unresponsive and fall back to the native editor after an incompatible-encoding reload of a large file produced an extremely long text line
 * `Fix` Disabling or uninstalling the external Ace plugin while its editor or settings interface was active could cause unsaved editing state to be lost or leave the interface in an invalid state
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
@@ -578,7 +580,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Jul 27, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Jul 28, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

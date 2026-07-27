@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/27",
+      "released_date": "2026/07/28",
       "feature": [
         "Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive \"nodejs\" ou des extensions comme .node.js/.cjs/.mjs",
         "L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)",
@@ -86,6 +86,8 @@
         "Le chemin d'origine pouvait ne pas être conservé lors de l'exécution de scripts via des URI externes ou en arrière-plan, entraînant une résolution incorrecte des chemins relatifs _[`issue #545`](http://issues.autojs6.com/545)_",
         "Tasker ne pouvait pas invoquer et exécuter correctement les scripts _[`issue #501`](http://issues.autojs6.com/501)_",
         "Plusieurs problèmes d'interaction de l'éditeur Ace concernant l'IME/la sélection de texte/le pliage du code/le zoom par pincement/la navigation dans la pile et d'autres scénarios",
+        "Les titres principaux des paramètres de l'éditeur de code, le panneau de fonctions fx, le tiroir de documentation épinglé à gauche et la barre d'outils de sélection de texte Ace pouvaient encore utiliser les couleurs de l'application AutoJs6 au lieu du thème actuel de l'éditeur, et les actions de ligne Ace pouvaient apparaître en double",
+        "En mode d'édition plein écran, le clavier virtuel pouvait recouvrir la barre de touches multifonctions et la zone de la barre de navigation sous le Snackbar d'indication du plein écran pouvait rester transparente",
         "L'éditeur Ace pouvait rester longtemps sans répondre et revenir à l'éditeur natif lorsqu'un fichier volumineux rechargé avec un encodage incompatible produisait une ligne de texte extrêmement longue",
         "La désactivation ou la désinstallation du plugin Ace externe pendant l'utilisation de l'éditeur ou de son interface de paramètres pouvait entraîner la perte de modifications non enregistrées ou laisser l'interface dans un état invalide",
         "Le cache des icônes et l'état d'actualisation par glissement du Centre des plugins pouvaient devenir incohérents dans certains cas",

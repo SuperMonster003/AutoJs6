@@ -22,10 +22,12 @@ import android.text.InputType
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.Choreographer
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -73,7 +75,6 @@ import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.tool.Callback
-import org.autojs.autojs.ui.doc.DocumentationPageController
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
@@ -510,6 +511,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val aceFailure: AceFailure? = null,
     )
 
+    private data class SystemBarProtectionLayout(
+        val width: Int,
+        val height: Int,
+        val gravity: Int,
+        val visibleSize: Int,
+    )
+
     @Volatile
     private var mLastAceDiagnosticsSnapshot: AceDiagnosticsSnapshot? = null
 
@@ -551,9 +559,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mAceSymbolsBar: CodeCompletionBar = binding.aceSymbolsBar
     private val mFunctionsKeyboard: FunctionsKeyboardView = binding.functionsKeyboard
     private val mDocsWebView: EWebView = binding.docs
-    private val mDocsPageController by lazy {
-        DocumentationPageController(context, binding.root, mDocsWebView)
-    }
+    private val mDocsPaneController =
+        EditorDocumentationPaneController(context, binding.root, mDocsWebView)
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
     private val mThemePreviewBar: View = binding.themePreviewBar
     private val mThemePreviewTitle: TextView = binding.themePreviewTitle
@@ -648,6 +655,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         )
     private var mFullscreenHintPending = mFullscreenMode
     private var mFullscreenHintSnackbar: Snackbar? = null
+    private var mFullscreenSnackbarBottomProtection: View? = null
+    private var mFullscreenSnackbarBottomProtectionOwner: Snackbar? = null
     private var mThemePreviewActive = false
     private var mThemePreviewReturnToThemeDialog = false
     private var mThemePreviewThemes: List<Theme> = emptyList()
@@ -732,6 +741,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // IME bottom inset last applied to editor padding.
     // zh-CN: 最近一次应用到编辑器 padding 的 IME 底部值.
     private var mLastImeBottomInset = 0
+    private var mLastEditorBottomOverlap = 0
     private var mLastImeVisible = false
     private var mLastImeEventAtUptimeMillis = 0L
     private var mLastWindowInsets: WindowInsetsCompat? = null
@@ -745,6 +755,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // Reusable rect for window visible area.
     // zh-CN: 复用的窗口可见区域 Rect.
     private val mTmpWindowVisibleRect = Rect()
+    private val mTmpLocationOnScreen = IntArray(2)
+    private val mTmpDecorLocationOnScreen = IntArray(2)
+    private val mMinImeOverlapPx =
+        (MIN_IME_OVERLAP_DP * resources.displayMetrics.density + 0.5F).toInt()
 
     // Search mode UI state.
     // zh-CN: 搜索模式 UI 状态.
@@ -844,7 +858,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mDocsWebView.apply {
             webView.settings.displayZoomControls = true
         }
-        mDocsPageController.start(getUrl(INDEX_URL_SUFFIX))
+        mDocsPaneController.start(getUrl(INDEX_URL_SUFFIX))
         themeFontService.loadCurrentTheme()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { theme: Theme? -> setTheme(theme) }
@@ -874,7 +888,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        mDocsPageController.start(null)
+        mDocsPaneController.start(null)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED), Context.RECEIVER_NOT_EXPORTED)
         } else {
@@ -1120,6 +1134,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun isFullscreenMode(): Boolean = mFullscreenMode
 
+    fun isAceEditorEngine(): Boolean = editor.engineType == EditorEngineType.ACE
+
     fun toggleFullscreenMode() {
         if (!mFullscreenModeSupported) {
             return
@@ -1165,7 +1181,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         mEditorAppBar.isVisible = !enabled
-        mLastWindowInsets?.let(::applyEditorSystemBarInsets)
+        mLastWindowInsets?.let { insets ->
+            val rootBottomOverlap = calculateImeBottomOverlap(this, insets)
+            val imeVisible = isImeEffectivelyVisible(insets, rootBottomOverlap)
+            applyEditorSystemBarInsets(
+                insets,
+                fullscreenImeBottomInset = if (enabled && imeVisible) {
+                    rootBottomOverlap
+                } else {
+                    0
+                },
+            )
+        }
         applyFullscreenSystemBars()
         editor.view.requestLayout()
         ViewCompat.requestApplyInsets(this)
@@ -1180,8 +1207,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             post(::showPendingFullscreenHint)
         } else if (!enabled) {
             mFullscreenHintPending = false
-            mFullscreenHintSnackbar?.dismiss()
+            val snackbar = mFullscreenHintSnackbar
             mFullscreenHintSnackbar = null
+            snackbar?.dismiss()
+            removeFullscreenSnackbarBottomProtection()
         }
     }
 
@@ -1232,7 +1261,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         mFullscreenHintPending = false
         mFullscreenHintSnackbar?.dismiss()
-        mFullscreenHintSnackbar = Snackbar
+        val snackbar = Snackbar
             .make(this, R.string.text_editor_fullscreen_mode_hint, Snackbar.LENGTH_LONG)
             .setAction(R.string.text_exit_fullscreen_mode) {
                 setFullscreenMode(
@@ -1241,10 +1270,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     showHint = false,
                 )
             }
-            .also {
-                applyFullscreenHintPalette(it)
-                it.show()
+        snackbar.addCallback(object : Snackbar.Callback() {
+            override fun onDismissed(transientBottomBar: Snackbar, event: Int) {
+                if (mFullscreenHintSnackbar === transientBottomBar) {
+                    mFullscreenHintSnackbar = null
+                }
+                removeFullscreenSnackbarBottomProtection(transientBottomBar)
             }
+        })
+        mFullscreenHintSnackbar = snackbar
+        applyFullscreenHintPalette(snackbar)
+        showFullscreenSnackbarBottomProtection(snackbar)
+        snackbar.show()
     }
 
     private fun applyFullscreenHintPalette(snackbar: Snackbar) {
@@ -1252,6 +1289,120 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         snackbar.setBackgroundTint(colors.background)
         snackbar.setTextColor(colors.foreground)
         snackbar.setActionTextColor(colors.foreground)
+        if (mFullscreenSnackbarBottomProtectionOwner === snackbar) {
+            mFullscreenSnackbarBottomProtection?.setBackgroundColor(colors.background)
+        }
+    }
+
+    private fun showFullscreenSnackbarBottomProtection(snackbar: Snackbar) {
+        if (!mFullscreenMode || !isAttachedToWindow) {
+            return
+        }
+        val content = activity.findViewById<FrameLayout>(android.R.id.content) ?: return
+        val protection = mFullscreenSnackbarBottomProtection ?: View(context).apply {
+            isClickable = false
+            isFocusable = false
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                Gravity.BOTTOM,
+            )
+            content.addView(this)
+            mFullscreenSnackbarBottomProtection = this
+        }
+        mFullscreenSnackbarBottomProtectionOwner = snackbar
+        themeFontService.currentEditorChromeColors()?.let { colors ->
+            protection.setBackgroundColor(colors.background)
+        }
+        updateFullscreenSnackbarBottomProtection(
+            mLastWindowInsets ?: ViewCompat.getRootWindowInsets(this),
+        )
+    }
+
+    private fun updateFullscreenSnackbarBottomProtection(insets: WindowInsetsCompat?) {
+        val protection = mFullscreenSnackbarBottomProtection ?: return
+        if (
+            !mFullscreenMode ||
+            mFullscreenSnackbarBottomProtectionOwner == null ||
+            insets == null
+        ) {
+            protection.visibility = GONE
+            return
+        }
+        val navigationBars = insets
+            .getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())
+        val tappableElements = insets
+            .getInsetsIgnoringVisibility(WindowInsetsCompat.Type.tappableElement())
+        val mandatoryGestures = insets
+            .getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
+        val left = maxOf(navigationBars.left, tappableElements.left, mandatoryGestures.left)
+        val top = maxOf(navigationBars.top, tappableElements.top, mandatoryGestures.top)
+        val right = maxOf(navigationBars.right, tappableElements.right, mandatoryGestures.right)
+        val bottom = maxOf(navigationBars.bottom, tappableElements.bottom, mandatoryGestures.bottom)
+        val layoutParams = protection.layoutParams as FrameLayout.LayoutParams
+        val (width, height, gravity, size) = when {
+            bottom > 0 && bottom >= left && bottom >= right && bottom >= top ->
+                SystemBarProtectionLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    bottom,
+                    Gravity.BOTTOM,
+                    bottom,
+                )
+            right > 0 && right >= left && right >= top ->
+                SystemBarProtectionLayout(
+                    right,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    Gravity.END,
+                    right,
+                )
+            left > 0 && left >= top ->
+                SystemBarProtectionLayout(
+                    left,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    Gravity.START,
+                    left,
+                )
+            top > 0 ->
+                SystemBarProtectionLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    top,
+                    Gravity.TOP,
+                    top,
+                )
+            else ->
+                SystemBarProtectionLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    0,
+                    Gravity.BOTTOM,
+                    0,
+                )
+        }
+        if (
+            layoutParams.width != width ||
+            layoutParams.height != height ||
+            layoutParams.gravity != gravity
+        ) {
+            layoutParams.width = width
+            layoutParams.height = height
+            layoutParams.gravity = gravity
+            protection.layoutParams = layoutParams
+        }
+        protection.visibility = if (size > 0) VISIBLE else GONE
+    }
+
+    private fun removeFullscreenSnackbarBottomProtection(owner: Snackbar? = null) {
+        if (
+            owner != null &&
+            mFullscreenSnackbarBottomProtectionOwner !== owner
+        ) {
+            return
+        }
+        mFullscreenSnackbarBottomProtectionOwner = null
+        mFullscreenSnackbarBottomProtection?.let { protection ->
+            (protection.parent as? ViewGroup)?.removeView(protection)
+        }
+        mFullscreenSnackbarBottomProtection = null
     }
 
     private fun handleText(intent: Intent): Observable<String> {
@@ -1293,33 +1444,57 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 处理 IME inset, 避免软键盘遮挡编辑器内容.
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
             mLastWindowInsets = insets
-            applyEditorSystemBarInsets(insets)
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val rootBottomOverlap = calculateImeBottomOverlap(this, insets)
+            val imeVisible = isImeEffectivelyVisible(insets, rootBottomOverlap)
+            val fullscreenImeBottomInset = if (mFullscreenMode && imeVisible) {
+                rootBottomOverlap
+            } else {
+                0
+            }
+            applyEditorSystemBarInsets(insets, fullscreenImeBottomInset)
 
             // Compute the real overlap between editor and the visible window area.
             // zh-CN: 计算 editor 与窗口可见区域之间的真实重叠量.
-            val activity = findHostActivityOrNull()
-            val targetBottom = if (activity != null) {
-                activity.window.decorView.getWindowVisibleDisplayFrame(mTmpWindowVisibleRect)
-
-                val loc = IntArray(2)
-                editor.view.getLocationOnScreen(loc)
-                val editorBottomOnScreen = loc[1] + editor.view.height
-
-                (editorBottomOnScreen - mTmpWindowVisibleRect.bottom).coerceAtLeast(0)
+            val targetBottom = calculateImeBottomOverlap(editor.view, insets)
+            val editorBottomOverlap = when {
+                !imeVisible -> 0
+                fullscreenImeBottomInset > 0 ->
+                    (targetBottom - fullscreenImeBottomInset).coerceAtLeast(0)
+                else -> targetBottom
+            }
+            val imeBottomInset = if (imeVisible) {
+                maxOf(
+                    insets.getInsets(WindowInsetsCompat.Type.ime()).bottom,
+                    fullscreenImeBottomInset,
+                    targetBottom,
+                )
             } else {
                 0
             }
 
-            val imeStateChanged = targetBottom != mLastImeBottomInset ||
+            val imeStateChanged = imeBottomInset != mLastImeBottomInset ||
+                editorBottomOverlap != mLastEditorBottomOverlap ||
                 imeVisible != mLastImeVisible
 
             if (imeStateChanged) {
-                mLastImeBottomInset = targetBottom
+                val imeJustHidden = mLastImeVisible && !imeVisible
+                mLastImeBottomInset = imeBottomInset
+                mLastEditorBottomOverlap = editorBottomOverlap
                 mLastImeVisible = imeVisible
                 mLastImeEventAtUptimeMillis = SystemClock.uptimeMillis()
 
-                mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)
+                mViewportPolicy.onImeInsetsChanged(
+                    visible = imeVisible,
+                    bottomInset = imeBottomInset,
+                    editorBottomOverlap = editorBottomOverlap,
+                )
+                if (imeJustHidden && mFullscreenMode) {
+                    postOnAnimation {
+                        if (mFullscreenMode && !mLastImeVisible && isAttachedToWindow) {
+                            applyFullscreenSystemBars()
+                        }
+                    }
+                }
             }
 
             // Do not consume insets.
@@ -1328,7 +1503,61 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    private fun applyEditorSystemBarInsets(insets: WindowInsetsCompat) {
+    private fun isImeEffectivelyVisible(
+        insets: WindowInsetsCompat,
+        rootBottomOverlap: Int,
+    ): Boolean {
+        if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
+            return true
+        }
+        val hiddenNavigationBottom = insets
+            .getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())
+            .bottom
+        return mFullscreenMode &&
+            rootBottomOverlap - hiddenNavigationBottom >= mMinImeOverlapPx
+    }
+
+    private fun calculateVisibleWindowBottomOverlap(view: View): Int {
+        val hostActivity = findHostActivityOrNull() ?: return 0
+        hostActivity.window.decorView.getWindowVisibleDisplayFrame(mTmpWindowVisibleRect)
+        view.getLocationOnScreen(mTmpLocationOnScreen)
+        val viewBottomOnScreen = mTmpLocationOnScreen[1] + view.height
+        return (viewBottomOnScreen - mTmpWindowVisibleRect.bottom).coerceAtLeast(0)
+    }
+
+    /**
+     * Computes the portion of [view] that is geometrically covered by the IME.
+     *
+     * Some edge-to-edge WebView/OEM combinations keep the visible display frame at full height
+     * while still publishing a correct IME inset. Older releases do the opposite. Combining the
+     * raw-inset geometry with the legacy visible frame covers both without double-padding a view
+     * that has already been resized above the keyboard.
+     */
+    private fun calculateImeBottomOverlap(
+        view: View,
+        insets: WindowInsetsCompat,
+    ): Int {
+        val legacyOverlap = calculateVisibleWindowBottomOverlap(view)
+        val rawImeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+        if (rawImeBottom <= 0) {
+            return legacyOverlap
+        }
+        val hostActivity = findHostActivityOrNull() ?: return legacyOverlap
+        val decor = hostActivity.window.decorView
+        decor.getLocationOnScreen(mTmpDecorLocationOnScreen)
+        view.getLocationOnScreen(mTmpLocationOnScreen)
+        val decorBottomOnScreen = mTmpDecorLocationOnScreen[1] + decor.height
+        val imeTopOnScreen = decorBottomOnScreen - rawImeBottom
+        val viewBottomOnScreen = mTmpLocationOnScreen[1] + view.height
+        val geometryOverlap = (viewBottomOnScreen - imeTopOnScreen)
+            .coerceIn(0, rawImeBottom)
+        return maxOf(legacyOverlap, geometryOverlap)
+    }
+
+    private fun applyEditorSystemBarInsets(
+        insets: WindowInsetsCompat,
+        fullscreenImeBottomInset: Int,
+    ) {
         val insetTypes = when {
             mFullscreenMode -> WindowInsetsCompat.Type.displayCutout()
             else -> WindowInsetsCompat.Type.systemBars() or
@@ -1338,7 +1567,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val left = mBaseWindowInsetPadding[0] + systemBarInsets.left
         val top = mBaseWindowInsetPadding[1] + systemBarInsets.top
         val right = mBaseWindowInsetPadding[2] + systemBarInsets.right
-        val bottom = mBaseWindowInsetPadding[3] + systemBarInsets.bottom
+        val bottom = mBaseWindowInsetPadding[3] +
+            maxOf(systemBarInsets.bottom, fullscreenImeBottomInset)
         if (
             paddingLeft != left ||
             paddingTop != top ||
@@ -1347,6 +1577,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         ) {
             setPadding(left, top, right, bottom)
         }
+        updateFullscreenSnackbarBottomProtection(insets)
     }
 
     private fun requestApplyInsetsSoon() {
@@ -1634,9 +1865,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         unregisterFunctionsKeyboardBackHandler()
         Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
         AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
-        mDocsPageController.stop()
+        mDocsPaneController.stop()
         mFullscreenHintSnackbar?.dismiss()
         mFullscreenHintSnackbar = null
+        removeFullscreenSnackbarBottomProtection()
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =
@@ -2693,7 +2925,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun previewTheme(theme: Theme) {
         mThemePreviewCurrentTheme = mThemePreviewThemes.firstOrNull { it == theme } ?: theme
-        themeFontService.applyTheme(mThemePreviewCurrentTheme)
+        applyEditorTheme(mThemePreviewCurrentTheme)
         refreshThemePreviewBar(mThemePreviewCurrentTheme)
     }
 
@@ -2832,9 +3064,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mThemePreviewBar.isVisible = false
 
         if (useTheme && selectedTheme != null) {
-            themeFontService.persistAndApplyTheme(selectedTheme)
+            persistAndApplyEditorTheme(selectedTheme)
         } else if (originalTheme != null) {
-            themeFontService.applyTheme(originalTheme)
+            applyEditorTheme(originalTheme)
         } else {
             applyCurrentEditorThemePreference()
         }
@@ -4057,11 +4289,25 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun setTheme(theme: Theme?) {
-        themeFontService.applyTheme(theme)?.let {
-            syncThemePreviewWithAppliedTheme(it)
-            mFullscreenHintSnackbar?.let(::applyFullscreenHintPalette)
-            showPendingFullscreenHint()
-        }
+        applyEditorTheme(theme)
+    }
+
+    private fun applyEditorTheme(theme: Theme?): Theme? =
+        themeFontService.applyTheme(theme)?.also(::onEditorThemeApplied)
+
+    private fun persistAndApplyEditorTheme(theme: Theme): Theme =
+        themeFontService.persistAndApplyTheme(theme).also(::onEditorThemeApplied)
+
+    private fun onEditorThemeApplied(appliedTheme: Theme) {
+        val colors = currentEditorUiPalette()
+        mFunctionsKeyboard.setEditorPalette(
+            appliedTheme.imeBarBackgroundColor,
+            themeFontService.inputMethodBarForegroundColor(appliedTheme),
+        )
+        mDocsPaneController.applyPalette(colors.background, colors.foreground)
+        syncThemePreviewWithAppliedTheme(appliedTheme)
+        mFullscreenHintSnackbar?.let(::applyFullscreenHintPalette)
+        showPendingFullscreenHint()
     }
 
     @SuppressLint("CheckResult")
@@ -4089,11 +4335,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun onBackPressed(): Boolean {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            if (mDocsPageController.canGoBack()) {
-                mDocsPageController.goBack()
+            if (mDocsPaneController.canGoBack()) {
+                mDocsPaneController.goBack()
             } else {
                 mDrawerLayout.closeDrawer(GravityCompat.START)
             }
+            return true
+        }
+        if ((editor as? AceScriptEditorEngine)?.handleSelectionBackIfNeeded() == true) {
             return true
         }
         if (exitFullscreenModeIfNeeded()) {
@@ -5396,7 +5645,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 )
                 .itemsCallbackSingleChoice(i) { _, _, which, _ ->
                     themes[which].let {
-                        themeFontService.persistAndApplyTheme(it)
+                        persistAndApplyEditorTheme(it)
                     }
                     true
                 }
@@ -6422,7 +6671,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .title(title)
             .url(absUrl)
             .pinToLeft {
-                mDocsPageController.loadUrl(absUrl)
+                mDocsPaneController.loadUrl(absUrl)
                 mDrawerLayout.openDrawer(GravityCompat.START)
             }
             .show()
@@ -6506,13 +6755,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun destroy() {
         mDestroyed = true
+        mFullscreenHintSnackbar?.dismiss()
+        mFullscreenHintSnackbar = null
+        removeFullscreenSnackbarBottomProtection()
         mEditorEngineSwitchGeneration++
         mActiveEditorEngineSwitch = null
         mPendingEditorEngineSwitch = null
         mSwitchingEditorEngine = false
         mAceFallbackInProgress.set(false)
         AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
-        mDocsPageController.dispose()
+        mDocsPaneController.dispose()
         // Cancel loading before destroying editor resources.
         // zh-CN: 销毁前先取消加载, 再销毁编辑器相关资源.
         cancelLargeFileLoading()
@@ -6720,6 +6972,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_JUMP_TO_PREVIOUS_CURSOR = "editor:jump_to_previous_cursor"
 
         private const val ACE_SHORTCUT_ITEM_WIDTH_DP = 40f
+        private const val MIN_IME_OVERLAP_DP = 80F
         private const val ACE_HISTORY_STATE_SETTLE_DELAY_MS = 160L
         private const val EDITOR_ENGINE_SWITCH_LOAD_RETRY_DELAY_MS = 50L
         private const val HISTORY_NAVIGATION_TIMEOUT_MS = 10_000L

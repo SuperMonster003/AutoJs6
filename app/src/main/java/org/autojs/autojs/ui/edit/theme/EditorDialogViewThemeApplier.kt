@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.edit.theme
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
@@ -74,11 +75,15 @@ object EditorDialogViewThemeApplier {
         clearAppliedPaletteTree(root)
     }
 
-    private fun applyTree(view: View, palette: Palette) {
+    private fun applyTree(
+        view: View,
+        palette: Palette,
+        reconcileCurrentState: Boolean = false,
+    ) {
         val paletteChanged = synchronized(appliedPalettes) {
             appliedPalettes.put(view, palette) != palette
         }
-        if (paletteChanged) {
+        if (paletteChanged || reconcileCurrentState) {
             when (view) {
                 is MDButton -> Unit
                 is TextInputLayout -> applyTextInputLayout(view, palette)
@@ -93,12 +98,14 @@ object EditorDialogViewThemeApplier {
             }
 
             if (view is AbsListView || view is androidx.recyclerview.widget.RecyclerView) {
-                view.setBackgroundColor(Color.TRANSPARENT)
+                if ((view.background as? ColorDrawable)?.color != Color.TRANSPARENT) {
+                    view.setBackgroundColor(Color.TRANSPARENT)
+                }
             }
         }
         if (view is ViewGroup) {
             for (index in 0 until view.childCount) {
-                applyTree(view.getChildAt(index), palette)
+                applyTree(view.getChildAt(index), palette, reconcileCurrentState)
             }
         }
     }
@@ -115,9 +122,20 @@ object EditorDialogViewThemeApplier {
     }
 
     private fun applyTextView(view: TextView, palette: Palette) {
-        view.setTextColor(enabledStateList(palette.foreground))
-        view.setHintTextColor(withAlpha(palette.foreground, SECONDARY_ALPHA))
-        view.setLinkTextColor(palette.foreground)
+        val disabledColor = withAlpha(palette.foreground, DISABLED_ALPHA)
+        if (
+            view.textColors.defaultColor != palette.foreground ||
+            view.textColors.getColorForState(DISABLED_STATE, palette.foreground) != disabledColor
+        ) {
+            view.setTextColor(enabledStateList(palette.foreground))
+        }
+        val hintColor = withAlpha(palette.foreground, SECONDARY_ALPHA)
+        if (view.hintTextColors?.defaultColor != hintColor) {
+            view.setHintTextColor(hintColor)
+        }
+        if (view.linkTextColors?.defaultColor != palette.foreground) {
+            view.setLinkTextColor(palette.foreground)
+        }
     }
 
     private fun applyEditText(view: EditText, palette: Palette) {
@@ -272,7 +290,11 @@ object EditorDialogViewThemeApplier {
         override fun onGlobalLayout() {
             val root = rootReference.get() ?: return
             if (::palette.isInitialized) {
-                applyTree(root, palette)
+                // PreferenceViewHolder.resetState() and other adapter bind paths can restore the
+                // original XML colors on an already-known View. Reconcile the actual state after
+                // each layout instead of treating an unchanged palette as proof that the View is
+                // still themed.
+                applyTree(root, palette, reconcileCurrentState = true)
             }
         }
 
@@ -314,4 +336,5 @@ object EditorDialogViewThemeApplier {
     private const val BUTTON_FOCUSED_ALPHA = 0.18f
     private const val BUTTON_PRESSED_ALPHA = 0.24f
     private const val BUTTON_DISABLED_ALPHA = 0.06f
+    private val DISABLED_STATE = intArrayOf(-android.R.attr.state_enabled)
 }

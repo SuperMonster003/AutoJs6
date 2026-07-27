@@ -307,6 +307,14 @@ class AceScriptEditorEngine private constructor(
         session.handleEscapeKey()
     }
 
+    fun handleSelectionBackIfNeeded(): Boolean {
+        if (selectedTextSnapshot.isEmpty()) {
+            return false
+        }
+        session.handleEscapeKey()
+        return true
+    }
+
     fun refreshLsp() {
         session.refreshLsp()
     }

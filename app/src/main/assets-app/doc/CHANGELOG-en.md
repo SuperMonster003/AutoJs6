@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/27
+###### 2026/07/28
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -89,6 +89,8 @@
 * `Fix` The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_
 * `Fix` Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
 * `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
+* `Fix` Code editor settings primary titles, the fx function panel, the left-pinned documentation drawer, and the Ace text-selection toolbar could still use AutoJs6 app colors instead of the current editor theme, while Ace line actions could appear more than once
+* `Fix` Fullscreen editing could let the soft keyboard cover the multifunction key bar, and the navigation-bar area below the fullscreen hint Snackbar could remain transparent
 * `Fix` Ace editor could become unresponsive and fall back to the native editor after an incompatible-encoding reload of a large file produced an extremely long text line
 * `Fix` Disabling or uninstalling the external Ace plugin while its editor or settings interface was active could cause unsaved editing state to be lost or leave the interface in an invalid state
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios

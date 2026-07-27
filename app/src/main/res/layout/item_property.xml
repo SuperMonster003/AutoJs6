@@ -4,7 +4,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="45dp"
-        android:background="@drawable/bg_item_property"
+        android:background="@android:color/transparent"
         android:gravity="center"
-        android:textColor="@color/text_color_primary"
         android:textSize="@dimen/textSize_item_property" />

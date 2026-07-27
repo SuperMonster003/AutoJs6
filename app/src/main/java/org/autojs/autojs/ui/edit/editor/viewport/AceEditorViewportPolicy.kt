@@ -6,7 +6,11 @@ class AceEditorViewportPolicy(
     private val editor: ScriptEditorEngine,
 ) : EditorViewportPolicy {
 
-    override fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) {
+    override fun onImeInsetsChanged(
+        visible: Boolean,
+        bottomInset: Int,
+        editorBottomOverlap: Int,
+    ) {
         val view = editor.view
         if (view.paddingBottom != 0) {
             view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, 0)

@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 27 de July de 2026.
+Datos actualizados el 28 de July de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/07/27
+###### 2026/07/28
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -249,6 +249,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` La ruta original podía no conservarse al ejecutar scripts mediante URI externos o en segundo plano, lo que provocaba una resolución incorrecta de rutas relativas _[`issue #545`](http://issues.autojs6.com/545)_
 * `Corrección` Tasker no podía invocar y ejecutar scripts correctamente _[`issue #501`](http://issues.autojs6.com/501)_
 * `Corrección` Diversos problemas de interacción del editor Ace relacionados con IME/selección de texto/plegado de código/zoom con pellizco/navegación de pila y otros escenarios
+* `Corrección` Los títulos principales de los ajustes del editor de código, el panel de funciones fx, el cajón de documentación fijado a la izquierda y la barra de herramientas de selección de texto de Ace podían seguir usando los colores de la aplicación AutoJs6 en lugar del tema actual del editor, y las acciones de línea de Ace podían aparecer duplicadas
+* `Corrección` En el modo de edición a pantalla completa, el teclado virtual podía cubrir la barra de teclas multifunción y el área de la barra de navegación situada bajo el Snackbar de aviso podía quedar transparente
 * `Corrección` El editor Ace podía dejar de responder durante mucho tiempo y volver al editor nativo cuando al recargar un archivo grande con una codificación incompatible se generaba una línea de texto extremadamente larga
 * `Corrección` Desactivar o desinstalar el plugin Ace externo mientras el editor o su interfaz de ajustes estaba en uso podía provocar la pérdida de cambios sin guardar o dejar la interfaz en un estado no válido
 * `Corrección` La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos
@@ -578,7 +580,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 27 de July de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 28 de July de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

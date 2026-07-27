@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -17,6 +19,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -70,17 +74,17 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
     private void init() {
         inflate(getContext(), R.layout.ewebview, this);
 
-        mWebView = findViewById(R.id.web_view);
-        setUpWebView();
-
         mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         mProgressBar = findViewById(R.id.progress_bar);
+
+        mWebView = findViewById(R.id.web_view);
+        setUpWebView(mWebView);
     }
 
-    private void setUpWebView() {
-        WebSettings settings = mWebView.getSettings();
+    private void setUpWebView(NestedWebView webView) {
+        WebSettings settings = webView.getSettings();
         settings.setUseWideViewPort(true);
         settings.setBuiltInZoomControls(true);
         settings.setLoadWithOverviewMode(true);
@@ -88,12 +92,79 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setDomStorageEnabled(true);
         settings.setDisplayZoomControls(false);
-        mWebView.setWebViewClient(new MyWebViewClient());
-        mWebView.setWebChromeClient(new MyWebChromeClient());
+        webView.setWebViewClient(new MyWebViewClient());
+        webView.setWebChromeClient(new MyWebChromeClient());
     }
 
     public NestedWebView getWebView() {
         return mWebView;
+    }
+
+    /**
+     * Recreates the owned WebView with a context carrying the requested theme.
+     *
+     * WebView resolves {@code prefers-color-scheme} from the context theme at construction time,
+     * so changing only its background or settings cannot switch that value reliably. The outer
+     * EWebView, refresh container, listeners, and request interceptor are retained; the replacement
+     * receives the same layout slot and this widget's WebView settings/clients.
+     */
+    @MainThread
+    @NonNull
+    public NestedWebView recreateWebView(@NonNull Context themedContext) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalStateException("WebView recreation must run on the main thread");
+        }
+
+        NestedWebView previous = mWebView;
+        int childIndex = mSwipeRefreshLayout.indexOfChild(previous);
+        if (childIndex < 0) {
+            throw new IllegalStateException("The current WebView is not attached to its refresh container");
+        }
+
+        ViewGroup.LayoutParams layoutParams = previous.getLayoutParams();
+        if (layoutParams == null) {
+            layoutParams = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+            );
+        }
+        boolean displayZoomControls = previous.getSettings().getDisplayZoomControls();
+
+        NestedWebView replacement = new NestedWebView(themedContext);
+        replacement.setId(previous.getId());
+        replacement.setVisibility(previous.getVisibility());
+        replacement.setContentDescription(previous.getContentDescription());
+        replacement.setImportantForAccessibility(previous.getImportantForAccessibility());
+        replacement.setSaveEnabled(previous.isSaveEnabled());
+        setUpWebView(replacement);
+        replacement.getSettings().setDisplayZoomControls(displayZoomControls);
+
+        mSwipeRefreshLayout.removeViewAt(childIndex);
+        try {
+            mSwipeRefreshLayout.addView(replacement, childIndex, layoutParams);
+        } catch (RuntimeException error) {
+            if (replacement.getParent() == mSwipeRefreshLayout) {
+                mSwipeRefreshLayout.removeView(replacement);
+            }
+            mSwipeRefreshLayout.addView(previous, childIndex, layoutParams);
+            destroyWebView(replacement);
+            throw error;
+        }
+
+        mWebView = replacement;
+        mProgressBar.setVisibility(GONE);
+        mSwipeRefreshLayout.setRefreshing(false);
+        destroyWebView(previous);
+        return replacement;
+    }
+
+    private void destroyWebView(NestedWebView webView) {
+        webView.stopLoading();
+        webView.setWebChromeClient(null);
+        webView.setWebViewClient(null);
+        webView.clearHistory();
+        webView.removeAllViews();
+        webView.destroy();
     }
 
     /**

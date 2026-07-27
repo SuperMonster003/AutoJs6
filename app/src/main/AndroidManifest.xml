@@ -348,6 +348,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="standard"
             android:multiprocess="true"
+            android:windowSoftInputMode="stateHidden|adjustResize"
             android:taskAffinity="org.autojs.autojs.edit"
             android:theme="@style/EditorTheme" />
 

@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 7 月 27 日 に更新されました.
+データは 2026 年 7 月 28 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/07/27
+###### 2026/07/28
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -249,6 +249,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` 外部 URI またはバックグラウンドからスクリプトを実行すると元のパスが保持されず相対パスの解決に失敗する可能性がある問題 _[`issue #545`](http://issues.autojs6.com/545)_
 * `修正` Tasker がスクリプトを正常に呼び出して実行できない問題 _[`issue #501`](http://issues.autojs6.com/501)_
 * `修正` Ace エディタの IME 入力/テキスト選択/コード折りたたみ/ピンチズーム/スタック移動などに関する複数の操作問題
+* `修正` コードエディタ設定の主タイトル, fx 関数パネル, 左側に固定されたドキュメントドロワー, Ace テキスト選択ツールバーが現在のエディタテーマではなく AutoJs6 アプリの配色を使用する場合があり, Ace の行操作が重複表示される問題
+* `修正` フルスクリーン編集モードでソフトウェアキーボードが多機能キーバーを覆い, フルスクリーンヒント Snackbar の下にあるナビゲーションバー領域が透明になる問題
 * `修正` 大容量ファイルを互換性のないエンコーディングで再読み込みして極端に長いテキスト行が生成された場合, Ace エディタが長時間応答せずネイティブエディタにフォールバックする問題
 * `修正` Ace 外部プラグインのエディタまたは設定画面の使用中にプラグインを無効化またはアンインストールすると, 未保存の編集状態が失われるか画面が不正な状態になる問題
 * `修正` 一部の状況でプラグインセンターのアイコンキャッシュとスワイプ更新状態が不整合になる可能性がある問題
@@ -578,7 +580,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 7 月 27 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 7 月 28 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

@@ -8,9 +8,13 @@ class NativeEditorViewportPolicy(
     private val hostView: View,
 ) : EditorViewportPolicy {
 
-    override fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) {
+    override fun onImeInsetsChanged(
+        visible: Boolean,
+        bottomInset: Int,
+        editorBottomOverlap: Int,
+    ) {
         val view = editor.view
-        view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomInset)
+        view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, editorBottomOverlap)
         editor.onImeInsetsChanged(visible, bottomInset)
         if (visible) {
             hostView.post { editor.ensureCursorVisibleIfPossible() }

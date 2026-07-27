@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/27
+###### 2026/07/28
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -89,6 +89,8 @@
 * `Corrección` La ruta original podía no conservarse al ejecutar scripts mediante URI externos o en segundo plano, lo que provocaba una resolución incorrecta de rutas relativas _[`issue #545`](http://issues.autojs6.com/545)_
 * `Corrección` Tasker no podía invocar y ejecutar scripts correctamente _[`issue #501`](http://issues.autojs6.com/501)_
 * `Corrección` Diversos problemas de interacción del editor Ace relacionados con IME/selección de texto/plegado de código/zoom con pellizco/navegación de pila y otros escenarios
+* `Corrección` Los títulos principales de los ajustes del editor de código, el panel de funciones fx, el cajón de documentación fijado a la izquierda y la barra de herramientas de selección de texto de Ace podían seguir usando los colores de la aplicación AutoJs6 en lugar del tema actual del editor, y las acciones de línea de Ace podían aparecer duplicadas
+* `Corrección` En el modo de edición a pantalla completa, el teclado virtual podía cubrir la barra de teclas multifunción y el área de la barra de navegación situada bajo el Snackbar de aviso podía quedar transparente
 * `Corrección` El editor Ace podía dejar de responder durante mucho tiempo y volver al editor nativo cuando al recargar un archivo grande con una codificación incompatible se generaba una línea de texto extremadamente larga
 * `Corrección` Desactivar o desinstalar el plugin Ace externo mientras el editor o su interfaz de ajustes estaba en uso podía provocar la pérdida de cambios sin guardar o dejar la interfaz en un estado no válido
 * `Corrección` La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos

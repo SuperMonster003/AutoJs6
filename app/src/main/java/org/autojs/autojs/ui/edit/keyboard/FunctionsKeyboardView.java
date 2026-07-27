@@ -2,20 +2,28 @@ package org.autojs.autojs.ui.edit.keyboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.StateSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EdgeEffect;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.autojs.autojs.model.indices.Module;
 import org.autojs.autojs.model.indices.Modules;
 import org.autojs.autojs.model.indices.Property;
+import org.autojs.autojs.ui.edit.theme.EditorChromePalette;
 import org.autojs.autojs.ui.widget.GridDividerDecoration;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.FunctionsKeyboardViewBinding;
@@ -41,10 +50,21 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 public class FunctionsKeyboardView extends FrameLayout {
 
     private static final int SPAN_COUNT = 4;
+    private static final float DIVIDER_ALPHA = 0.18f;
+    private static final float DISABLED_TEXT_ALPHA = 0.43f;
+    private static final float SELECTED_ALPHA = 0.14f;
+    private static final float PRESSED_ALPHA = 0.18f;
 
+    private View mRootView;
+    private View[] mHorizontalDividers;
     private RecyclerView mModulesView;
     private RecyclerView mPropertiesView;
     private Drawable mGridDividerView;
+    @ColorInt
+    private int mEditorBackgroundColor;
+    @ColorInt
+    private int mEditorForegroundColor;
+    private boolean mEditorPaletteInitialized;
 
     private List<Module> mModules;
     private final Map<Module, List<Integer>> mSpanSizes = new HashMap<>();
@@ -87,9 +107,17 @@ public class FunctionsKeyboardView extends FrameLayout {
 
     private void init() {
         FunctionsKeyboardViewBinding binding = FunctionsKeyboardViewBinding.inflate(LayoutInflater.from(getContext()), this, true);
+        mRootView = binding.getRoot();
+        mHorizontalDividers = new View[]{
+                binding.functionsKeyboardTopDivider,
+                binding.functionsKeyboardModuleDivider,
+        };
 
         initModulesView(binding);
         initPropertiesView(binding);
+
+        EditorChromePalette.Colors colors = EditorChromePalette.current();
+        setEditorPalette(colors.getBackground(), colors.getForeground());
     }
 
     private void initPropertiesView(FunctionsKeyboardViewBinding binding) {
@@ -103,9 +131,115 @@ public class FunctionsKeyboardView extends FrameLayout {
                 return mSpanSizes.get(mSelectedModule).get(position);
             }
         });
-        mGridDividerView = ContextCompat.getDrawable(getContext(), R.drawable.divider_functions_view);
-        GridDividerDecoration dividerItemDecoration = new GridDividerDecoration(getContext(), mGridDividerView);
-        mPropertiesView.addItemDecoration(dividerItemDecoration);
+        Drawable divider = ContextCompat.getDrawable(getContext(), R.drawable.divider_functions_view);
+        if (divider != null) {
+            mGridDividerView = DrawableCompat.wrap(divider.mutate());
+            GridDividerDecoration dividerItemDecoration = new GridDividerDecoration(getContext(), mGridDividerView);
+            mPropertiesView.addItemDecoration(dividerItemDecoration);
+        }
+    }
+
+    /**
+     * Applies the editor-owned palette to the complete functions panel.
+     *
+     * The panel deliberately does not resolve app day/night resources: the editor theme can have
+     * the opposite luminance from the host Activity theme.
+     */
+    public void setEditorPalette(
+            @ColorInt int backgroundColor,
+            @ColorInt int foregroundColor
+    ) {
+        if (mEditorPaletteInitialized
+                && mEditorBackgroundColor == backgroundColor
+                && mEditorForegroundColor == foregroundColor) {
+            return;
+        }
+        mEditorPaletteInitialized = true;
+        mEditorBackgroundColor = backgroundColor;
+        mEditorForegroundColor = foregroundColor;
+
+        setBackgroundColor(backgroundColor);
+        mRootView.setBackgroundColor(backgroundColor);
+        mModulesView.setBackgroundColor(backgroundColor);
+        mPropertiesView.setBackgroundColor(backgroundColor);
+
+        int dividerColor = withAlpha(foregroundColor, DIVIDER_ALPHA);
+        for (View divider : mHorizontalDividers) {
+            divider.setBackgroundColor(dividerColor);
+        }
+        if (mGridDividerView != null) {
+            DrawableCompat.setTint(mGridDividerView, dividerColor);
+            mPropertiesView.invalidateItemDecorations();
+        }
+
+        applyEdgeEffectPalette(mModulesView);
+        applyEdgeEffectPalette(mPropertiesView);
+
+        RecyclerView.Adapter<?> modulesAdapter = mModulesView.getAdapter();
+        if (modulesAdapter != null) {
+            modulesAdapter.notifyDataSetChanged();
+        }
+        RecyclerView.Adapter<?> propertiesAdapter = mPropertiesView.getAdapter();
+        if (propertiesAdapter != null) {
+            propertiesAdapter.notifyDataSetChanged();
+        }
+        invalidate();
+    }
+
+    private void applyEdgeEffectPalette(RecyclerView recyclerView) {
+        recyclerView.setEdgeEffectFactory(new RecyclerView.EdgeEffectFactory() {
+            @NonNull
+            @Override
+            protected EdgeEffect createEdgeEffect(@NonNull RecyclerView view, int direction) {
+                EdgeEffect edgeEffect = new EdgeEffect(view.getContext());
+                edgeEffect.setColor(mEditorForegroundColor);
+                return edgeEffect;
+            }
+        });
+    }
+
+    private ColorStateList editorTextColors() {
+        return new ColorStateList(
+                new int[][]{
+                        new int[]{-android.R.attr.state_enabled},
+                        StateSet.WILD_CARD,
+                },
+                new int[]{
+                        withAlpha(mEditorForegroundColor, DISABLED_TEXT_ALPHA),
+                        mEditorForegroundColor,
+                }
+        );
+    }
+
+    private Drawable moduleBackground() {
+        StateListDrawable background = new StateListDrawable();
+        background.addState(
+                new int[]{android.R.attr.state_pressed},
+                new ColorDrawable(withAlpha(mEditorForegroundColor, PRESSED_ALPHA))
+        );
+        background.addState(
+                new int[]{android.R.attr.state_selected},
+                new ColorDrawable(withAlpha(mEditorForegroundColor, SELECTED_ALPHA))
+        );
+        background.addState(StateSet.WILD_CARD, new ColorDrawable(Color.TRANSPARENT));
+        return background;
+    }
+
+    private Drawable propertyBackground() {
+        StateListDrawable background = new StateListDrawable();
+        background.addState(
+                new int[]{android.R.attr.state_pressed},
+                new ColorDrawable(withAlpha(mEditorForegroundColor, PRESSED_ALPHA))
+        );
+        background.addState(StateSet.WILD_CARD, new ColorDrawable(Color.TRANSPARENT));
+        return background;
+    }
+
+    @ColorInt
+    private static int withAlpha(@ColorInt int color, float alpha) {
+        int sourceAlpha = Color.alpha(color);
+        int adjustedAlpha = Math.max(0, Math.min(0xFF, (int) (sourceAlpha * alpha)));
+        return color & 0x00FFFFFF | (adjustedAlpha << 24);
     }
 
     private void initSpanSizes(Module module) {
@@ -244,6 +378,8 @@ public class FunctionsKeyboardView extends FrameLayout {
         void bind(Module module) {
             mModule = module;
             mTextView.setText(module.getSummary());
+            mTextView.setTextColor(editorTextColors());
+            mTextView.setBackground(moduleBackground());
             mTextView.setSelected(module == mSelectedModule);
             if (module == mSelectedModule) {
                 mSelectedModuleView = mTextView;
@@ -276,6 +412,8 @@ public class FunctionsKeyboardView extends FrameLayout {
         void bind(Property property) {
             mProperty = property;
             mTextView.setText(getDisplayText(property));
+            mTextView.setTextColor(editorTextColors());
+            mTextView.setBackground(propertyBackground());
         }
     }
 
