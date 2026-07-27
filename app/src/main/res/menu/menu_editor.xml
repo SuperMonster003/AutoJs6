@@ -111,18 +111,14 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_log"
-        android:title="@string/text_log"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_file_encoding"
-        android:title="@string/text_file_encoding"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/action_editor_settings"
         android:title="@string/text_settings"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_ace_read_only_mode"
+        android:checkable="true"
+        android:title="@string/text_ace_read_only_mode"
         app:showAsAction="never" />
 
     <item
@@ -154,9 +150,8 @@
                 app:showAsAction="never" />
 
             <item
-                android:id="@+id/action_ace_read_only_mode"
-                android:checkable="true"
-                android:title="@string/text_ace_read_only_mode"
+                android:id="@+id/action_file_encoding"
+                android:title="@string/text_file_encoding"
                 app:showAsAction="never" />
 
             <item

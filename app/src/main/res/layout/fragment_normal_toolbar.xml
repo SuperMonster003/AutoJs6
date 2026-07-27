@@ -8,6 +8,13 @@
     android:orientation="horizontal">
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
+        android:id="@+id/action_log"
+        android:layout_width="@dimen/toolbar_menu_item_width"
+        android:layout_height="match_parent"
+        app:icon="@drawable/ic_ali_log"
+        app:text="@string/text_log" />
+
+    <org.autojs.autojs.ui.widget.ToolbarMenuItem
         android:id="@+id/run"
         android:layout_width="@dimen/toolbar_menu_item_width"
         android:layout_height="match_parent"

@@ -127,6 +127,7 @@
 * `Amélioration` Migration de toute la chaîne d'outils AXML/ARSC/analyse/signature/stockage de clés/cryptographie nécessaire aux compilations APK vers le plugin APK Builder Template, avec une inspection APK légère dans l'hôte
 * `Amélioration` La sélection du moteur de l'éditeur respecte les choix explicites de l'utilisateur et propose un accès au Centre de plugins lorsqu'Ace est indisponible
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
+* `Amélioration` Réorganisation de la barre d'actions et de la hiérarchie des menus de l'éditeur de code, avec Journal comme action permanente et un meilleur emplacement pour Encodage du fichier et Mode lecture seule
 * `Amélioration` Amélioration des interactions de l'éditeur de code pour les thèmes/polices/barres d'outils/mode lecture seule/pliage/menus de sélection et plus encore
 * `Amélioration` Amélioration de la détection de l'encodage et de la sécurité d'enregistrement dans l'éditeur de code; les conversions d'encodage ne sont écrites sur le disque que lorsque l'utilisateur enregistre le fichier
 * `Amélioration` Réduction supplémentaire de la hauteur et de l'espacement horizontal de la barre d'informations de l'éditeur de code afin de libérer davantage d'espace pour la zone de code

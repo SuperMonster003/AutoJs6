@@ -287,6 +287,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Trasladada al plugin APK Builder Template toda la cadena de herramientas AXML/ARSC/análisis/firma/almacén de claves/criptografía necesaria para compilar APK, con una inspección ligera de APK en el host
 * `Mejora` La selección del motor del editor respeta las elecciones explícitas del usuario y ofrece acceso al Centro de plugins cuando Ace no está disponible
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
+* `Mejora` Reorganizadas la barra de acciones y la jerarquía de menús del editor de código, con Registro como acción permanente y una ubicación más clara para Codificación de archivo y Modo de solo lectura
 * `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más
 * `Mejora` Mejoradas la detección de codificación y la seguridad de guardado del editor de código; las conversiones de codificación solo se escriben en disco cuando el usuario guarda el archivo
 * `Mejora` Reducidas aún más la altura y el espaciado horizontal de la barra de información del editor de código para liberar más espacio para el área de código

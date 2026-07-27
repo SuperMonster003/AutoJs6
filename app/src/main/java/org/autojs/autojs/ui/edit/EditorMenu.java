@@ -9,14 +9,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher;
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
-import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.util.ClipboardUtils;
@@ -27,10 +25,6 @@ import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 import java.io.File;
-import java.util.Objects;
-
-import static org.autojs.autojs.util.StringUtils.key;
-
 /**
  * Created by Stardust on Sep 28, 2017.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
@@ -112,7 +106,7 @@ public class EditorMenu {
         int itemId = item.getItemId();
         boolean handled;
         if (itemId == R.id.action_log) {
-            handled = tryDoing(this::openEditorLogByPreference);
+            handled = tryDoing(mEditorView::openEditorLogByPreference);
         } else if (itemId == R.id.action_force_stop) {
             handled = tryDoing(mEditorView::forceStop);
         } else if (itemId == R.id.action_editor_settings) {
@@ -188,7 +182,7 @@ public class EditorMenu {
             return tryDoing(mEditorView::showConsole);
         }
         if (itemId == R.id.action_log) {
-            openEditorLogByPreference();
+            mEditorView.openEditorLogByPreference();
             return true;
         }
         if (itemId == R.id.action_import_java_class) {
@@ -352,23 +346,6 @@ public class EditorMenu {
         builder.negativeColorRes(R.color.dialog_button_default);
         DialogUtils.widgetThemeColor(builder);
         builder.show();
-    }
-
-    private void showLogPanel() {
-        mEditorView.showLogPanel();
-    }
-
-    private void openEditorLogByPreference() {
-        String mode = Pref.getString(
-                R.string.key_editor_log_button_behavior,
-                key(R.string.default_key_editor_log_button_behavior)
-        );
-        if (Objects.equals(mode, key(R.string.key_editor_log_button_behavior_fullscreen_page))) {
-            Uri uri = mEditorView.getUri();
-            LogActivity.launch(mContext, mEditorView.getName(), uri == null ? null : uri.getPath());
-            return;
-        }
-        showLogPanel();
     }
 
     private void showFileDetails() {

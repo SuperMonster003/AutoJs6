@@ -4361,6 +4361,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     override fun onToolbarMenuItemClick(id: Int) {
         val action = actionForToolbarItem(id)
         when (id) {
+            R.id.action_log -> openEditorLogByPreference()
             R.id.run -> when {
                 isScriptRunning() -> forceStop()
                 else -> runAndSaveFileIfNeeded()
@@ -6370,6 +6371,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun actionForToolbarItem(id: Int): AceActionHistoryStore.Action? = when (id) {
+        R.id.action_log -> historyAction(ACTION_LOG, R.string.text_log, mutatesText = false)
         R.id.run -> historyAction(
             if (isScriptRunning()) ACTION_FORCE_STOP else ACTION_RUN,
             if (isScriptRunning()) R.string.text_force_stop else R.string.text_run,

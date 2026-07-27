@@ -287,6 +287,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Moved the complete AXML/ARSC/parsing/signing/keystore/cryptography toolchain required for APK builds into the APK Builder Template plugin, with lightweight APK inspection in the host
 * `Improvement` Code editor engine selection respects explicit user choices and provides access to Plugin Center when Ace is unavailable
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
+* `Improvement` Reorganized the code editor action bar and menu hierarchy, making Log a persistent action while improving the placement of File encoding and Read-only mode
 * `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more
 * `Improvement` Improved code editor file-encoding detection and save safety; encoding conversions are written to disk only when the user saves the file
 * `Improvement` Further reduced the code editor information bar height and horizontal spacing to free more space for the code area

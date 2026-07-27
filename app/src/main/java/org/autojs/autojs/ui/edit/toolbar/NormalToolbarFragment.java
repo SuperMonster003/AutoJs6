@@ -24,7 +24,7 @@ public class NormalToolbarFragment extends ToolbarFragment<FragmentNormalToolbar
 
     @Override
     public List<Integer> getMenuItemIds() {
-        return Arrays.asList(R.id.run, R.id.undo, R.id.redo, R.id.save);
+        return Arrays.asList(R.id.action_log, R.id.run, R.id.undo, R.id.redo, R.id.save);
     }
 
     @Override
