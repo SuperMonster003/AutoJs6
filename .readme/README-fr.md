@@ -285,6 +285,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
 * `Amélioration` Amélioration des interactions de l'éditeur de code pour les thèmes/polices/barres d'outils/mode lecture seule/pliage/menus de sélection et plus encore
 * `Amélioration` Amélioration de la détection de l'encodage et de la sécurité d'enregistrement dans l'éditeur de code; les conversions d'encodage ne sont écrites sur le disque que lorsque l'utilisateur enregistre le fichier
+* `Amélioration` Réduction supplémentaire de la hauteur et de l'espacement horizontal de la barre d'informations de l'éditeur de code afin de libérer davantage d'espace pour la zone de code
 * `Amélioration` Le panneau de journal inférieur permet d'accéder au code source en cliquant sur les cadres de pile de la page de journal indépendante
 * `Amélioration` Les changements de source de la documentation du projet prennent effet immédiatement
 * `Amélioration` Le gestionnaire de fichiers décode et formate le fichier AndroidManifest.xml binaire complet en arrière-plan uniquement après un appui sur le bouton Manifest, avec de meilleures performances de défilement des grands textes et de zoom par pincement

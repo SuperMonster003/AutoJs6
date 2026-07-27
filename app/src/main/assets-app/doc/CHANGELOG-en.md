@@ -125,6 +125,7 @@
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more
 * `Improvement` Improved code editor file-encoding detection and save safety; encoding conversions are written to disk only when the user saves the file
+* `Improvement` Further reduced the code editor information bar height and horizontal spacing to free more space for the code area
 * `Improvement` Bottom log panel supports jumping to source code by clicking stack frames on the standalone log page
 * `Improvement` Switching the project documentation source takes effect immediately
 * `Improvement` File manager decodes and formats the complete binary AndroidManifest.xml in the background only after the Manifest button is tapped, with optimized large-text scrolling and pinch zoom performance

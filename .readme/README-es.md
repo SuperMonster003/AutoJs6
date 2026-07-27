@@ -285,6 +285,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
 * `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más
 * `Mejora` Mejoradas la detección de codificación y la seguridad de guardado del editor de código; las conversiones de codificación solo se escriben en disco cuando el usuario guarda el archivo
+* `Mejora` Reducidas aún más la altura y el espaciado horizontal de la barra de información del editor de código para liberar más espacio para el área de código
 * `Mejora` El panel de registro inferior permite saltar al código fuente pulsando marcos de pila en la página de registro independiente
 * `Mejora` El cambio de la fuente de documentación del proyecto surte efecto inmediatamente
 * `Mejora` El administrador de archivos decodifica y formatea el AndroidManifest.xml binario completo en segundo plano solo después de pulsar el botón Manifest, con mejor rendimiento al desplazar textos grandes y usar zoom con dos dedos
