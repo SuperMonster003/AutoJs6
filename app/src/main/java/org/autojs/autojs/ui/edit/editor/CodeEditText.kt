@@ -759,9 +759,10 @@ class CodeEditText : AppCompatEditText {
         }
 
         mCursorChangeCallbacks?.let { it.takeUnless { it.isEmpty() } } ?: return
-        if (selStart != selEnd) return
-        callCursorChangeCallback(text, selStart)
-        matchesBracket(text, selStart)
+        callCursorChangeCallback(text, selEnd)
+        if (selStart == selEnd) {
+            matchesBracket(text, selStart)
+        }
     }
 
     override fun sendAccessibilityEventUnchecked(event: AccessibilityEvent) {
@@ -814,23 +815,32 @@ class CodeEditText : AppCompatEditText {
     }
 
     private fun callCursorChangeCallback(text: CharSequence?, sel: Int) {
-        if (text!!.isEmpty()) {
-            return
-        }
+        val value = text ?: return
         if (mCursorChangeCallbacks!!.isEmpty()) {
             return
         }
-        val lineStart = (lastIndexOf(text, '\n', sel - 1) + 1).coerceIn(0, text.length - 1)
-        var lineEnd = indexOf(text, '\n', sel)
-        if (lineEnd < 0) {
-            lineEnd = text.length
-        }
-        if (lineEnd < lineStart || lineStart < 0 || lineEnd > text.length) {
+        if (value.isEmpty()) {
+            mCursorChangeCallbacks!!.forEach { it.onCursorChange("", 0, 0) }
             return
         }
-        val line = text.subSequence(lineStart, lineEnd).toString()
-        val cursor = sel - lineStart
-        mCursorChangeCallbacks!!.forEach { it.onCursorChange(line, cursor) }
+        val safeOffset = sel.coerceIn(0, value.length)
+        val lineStart = (lastIndexOf(value, '\n', safeOffset - 1) + 1).coerceIn(0, value.length)
+        var lineEnd = indexOf(value, '\n', safeOffset)
+        if (lineEnd < 0) {
+            lineEnd = value.length
+        }
+        if (lineEnd < lineStart || lineEnd > value.length) {
+            return
+        }
+        val lineText = value.subSequence(lineStart, lineEnd).toString()
+        val line = if (!isWordWrapEnabled) {
+            layout?.let { LayoutHelper.getLineOfChar(it, safeOffset) }
+                ?: getLogicalLineForOffset(safeOffset)
+        } else {
+            getLogicalLineForOffset(safeOffset)
+        }
+        val column = safeOffset - lineStart
+        mCursorChangeCallbacks!!.forEach { it.onCursorChange(lineText, line, column) }
     }
 
     fun addCursorChangeCallback(callback: CursorChangeCallback) {

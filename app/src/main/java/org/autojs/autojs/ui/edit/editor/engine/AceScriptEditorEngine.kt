@@ -217,7 +217,7 @@ class AceScriptEditorEngine private constructor(
 
         override fun onCursorChanged(lineText: String, line: Int, column: Int, state: EditorPluginState) {
             cacheState(state)
-            cursorCallbacks.toList().forEach { it.onCursorChange(lineText, column) }
+            cursorCallbacks.toList().forEach { it.onCursorChange(lineText, line, column) }
         }
 
         override fun onBreakpointChanged(line: Int, enabled: Boolean, state: EditorPluginState) {

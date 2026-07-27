@@ -32,6 +32,67 @@
 
         </org.autojs.autojs.theme.widget.ThemeColorToolbarEditor>
 
+        <LinearLayout
+            android:id="@+id/editor_status_bar"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:background="@color/window_background"
+            android:gravity="center_vertical"
+            android:layoutDirection="ltr"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/editor_file_name_status"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:ellipsize="end"
+                android:focusable="true"
+                android:gravity="start|center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:singleLine="true"
+                android:textColor="@color/day_night_full"
+                android:textSize="12sp"
+                tools:text="test-basic-typescript" />
+
+            <TextView
+                android:id="@+id/editor_cursor_status"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:minWidth="52dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textColor="@color/day_night_full"
+                android:textDirection="ltr"
+                android:textSize="12sp"
+                tools:text="10:2" />
+
+            <TextView
+                android:id="@+id/editor_encoding_status"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/text_file_encoding"
+                android:focusable="true"
+                android:gravity="center"
+                android:minWidth="64dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/day_night_full"
+                android:textDirection="ltr"
+                android:textSize="12sp"
+                tools:text="UTF-8" />
+
+        </LinearLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.drawerlayout.widget.DrawerLayout
@@ -49,33 +110,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
-
-            <FrameLayout
-                android:id="@+id/editor_status_bar"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="#77f2f3f7"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <TextView
-                    android:id="@+id/editor_encoding_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="end"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:contentDescription="@string/text_file_encoding"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:minWidth="72dp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textColor="@color/day_night_full"
-                    android:textSize="12sp"
-                    tools:text="UTF-8" />
-
-            </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/input_method_enhance_bar"

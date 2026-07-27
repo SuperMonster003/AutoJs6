@@ -425,9 +425,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         get() = _name ?: "[ ${this.context.getString(text_unknown)} ]"
         set(value) {
             _name = value
+            updateEditorStatusMetadata()
         }
 
     var uri: Uri? = null
+        set(value) {
+            field = value
+            updateEditorStatusMetadata()
+        }
 
     private fun currentDocumentPathOrName(): String? {
         return uri?.path?.takeIf { it.isNotBlank() }
@@ -528,6 +533,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val mCodeCompletionBar: CodeCompletionBar = binding.codeCompletionBar
     private val mEditorStatusBar: View = binding.editorStatusBar
+    private val mEditorFileNameStatus: TextView = binding.editorFileNameStatus
+    private val mEditorCursorStatus: TextView = binding.editorCursorStatus
     private val mEditorEncodingStatus: TextView = binding.editorEncodingStatus
     private val mInputMethodEnhanceBar: View = binding.inputMethodEnhanceBar
     private val mNativeInputMethodEnhanceContent: View = binding.nativeInputMethodEnhanceContent
@@ -667,7 +674,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         activity = activity,
         currentEditor = { editor },
         editorStatusBar = mEditorStatusBar,
-        editorEncodingStatus = mEditorEncodingStatus,
+        editorStatusTextViews = listOf(
+            mEditorFileNameStatus,
+            mEditorCursorStatus,
+            mEditorEncodingStatus,
+        ),
         inputMethodEnhanceBar = mInputMethodEnhanceBar,
         loadingBarContainer = mLoadingBarContainer,
         loadingBarText = mLoadingBarText,
@@ -784,7 +795,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setUpFunctionsKeyboard()
         setUpEditorPreviewer()
         setUpImeInsetsHandling()
+        mEditorFileNameStatus.setOnClickListener {
+            if (!uri?.path.isNullOrEmpty()) showFileDetailsDialog()
+        }
+        mEditorCursorStatus.setOnClickListener { showJumpToLineDialog() }
         mEditorEncodingStatus.setOnClickListener { showEncodingDialog() }
+        updateEditorStatusMetadata()
+        updateCursorStatus(line = 0, column = 0)
         updateEncodingStatus()
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
@@ -1056,7 +1073,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             Uri.fromFile(File(it))
         } ?: intent.data
         this.uri = uri
-        mEditorStatusBar.visibility = if (uri == null) GONE else VISIBLE
 
         if (_name == null && uri != null) {
             uri.path?.let {
@@ -3776,10 +3792,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
             themeFontService.applyEditorPreferences()
 
-            editor.addCursorChangeCallback(EditorCursorChangeListener { line, cursor ->
-                autoComplete(line, cursor)
+            editor.addCursorChangeCallback(EditorCursorChangeListener { lineText, line, column ->
+                autoComplete(lineText, column)
+                updateCursorStatus(line, column)
                 recordAceShortcutCursorHistory()
             })
+            editor.selection.let { selection ->
+                updateCursorStatus(selection.endLine, selection.endColumn)
+            }
             editor.view.layoutDirection = LAYOUT_DIRECTION_LTR
 
             // Initialize to "new file" expected state: only Run enabled.
@@ -3799,6 +3819,24 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun autoComplete(line: String, cursor: Int) {
         mAutoCompletion?.onCursorChange(line, cursor)
+    }
+
+    private fun updateEditorStatusMetadata() {
+        val displayName = name
+        mEditorFileNameStatus.text = displayName
+        mEditorFileNameStatus.contentDescription =
+            "${context.getString(R.string.text_file_details)}: $displayName"
+        val fileDetailsAvailable = !uri?.path.isNullOrEmpty()
+        mEditorFileNameStatus.isClickable = fileDetailsAvailable
+        mEditorFileNameStatus.isFocusable = fileDetailsAvailable
+        mEditorEncodingStatus.visibility = if (uri == null) GONE else VISIBLE
+    }
+
+    private fun updateCursorStatus(line: Int, column: Int) {
+        val position = "${line.coerceAtLeast(0) + 1}:${column.coerceAtLeast(0) + 1}"
+        mEditorCursorStatus.text = position
+        mEditorCursorStatus.contentDescription =
+            "$position, ${context.getString(R.string.text_jump_to_line)}"
     }
 
     private fun setTheme(theme: Theme?) {

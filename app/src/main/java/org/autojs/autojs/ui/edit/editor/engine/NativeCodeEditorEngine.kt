@@ -393,8 +393,8 @@ class NativeCodeEditorEngine(
     override fun addCursorChangeCallback(listener: EditorCursorChangeListener) {
         if (cursorCallbacks.containsKey(listener)) return
         val nativeCallback = object : CodeEditor.CursorChangeCallback {
-            override fun onCursorChange(line: String, cursor: Int) {
-                listener.onCursorChange(line, cursor)
+            override fun onCursorChange(lineText: String, line: Int, column: Int) {
+                listener.onCursorChange(lineText, line, column)
             }
         }
         cursorCallbacks[listener] = nativeCallback

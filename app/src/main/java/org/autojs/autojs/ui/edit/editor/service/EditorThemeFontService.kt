@@ -26,7 +26,7 @@ class EditorThemeFontService(
     private val activity: Activity,
     private val currentEditor: () -> ScriptEditorEngine,
     private val editorStatusBar: View,
-    private val editorEncodingStatus: TextView,
+    private val editorStatusTextViews: List<TextView>,
     private val inputMethodEnhanceBar: View,
     private val loadingBarContainer: View,
     private val loadingBarText: TextView,
@@ -66,7 +66,7 @@ class EditorThemeFontService(
             val imeBarBackgroundColor = it.imeBarBackgroundColor
             currentEditor().setTheme(it)
 
-            editorStatusBar.setBackgroundColor(imeBarBackgroundColor)
+            editorStatusBar.setBackgroundColor(it.backgroundColor)
             inputMethodEnhanceBar.setBackgroundColor(imeBarBackgroundColor)
             loadingBarContainer.setBackgroundColor(imeBarBackgroundColor)
 
@@ -74,7 +74,7 @@ class EditorThemeFontService(
             loadingBarText.setTextColor(loadingTextColor)
 
             val textColor = resolveImeBarForegroundColor(it)
-            editorEncodingStatus.setTextColor(textColor)
+            editorStatusTextViews.forEach { textView -> textView.setTextColor(textColor) }
             completionBars.forEach { bar -> bar.setTextColor(textColor) }
             showFunctionsButtons.forEach { button -> button.setColorFilter(textColor) }
 

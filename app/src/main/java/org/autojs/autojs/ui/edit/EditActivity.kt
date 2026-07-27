@@ -40,13 +40,11 @@ import org.autojs.autojs.ui.error.ErrorDialogActivity
 import org.autojs.autojs.ui.log.LogBottomSheet
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
 import org.autojs.autojs.ui.main.MainActivity
-import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
-import org.autojs.autojs.util.ViewUtils.setOnTitleViewClickListener
 import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
@@ -159,7 +157,6 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 }
                 putExtra(EditorView.EXTRA_NAME, documentName)
             }
-            mToolbar?.title = documentName
         }
 
         // Restore draft as early as possible to avoid being overwritten by async file loading.
@@ -177,15 +174,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         }
 
         toolbar.setTitleTextAppearance(this, R.style.TextAppearanceEditorTitle)
-        toolbar.setOnTitleViewClickListener {
-            val path = mEditorView.uri?.path
-            if (path != null) {
-                EditableFileInfoDialogManager.showEditableFileInfoDialog(this, File(path)) {
-                    mEditorView.editor.text
-                }
-            }
-        }
-        setToolbarAsBack(intent.getStringExtra(EditorView.EXTRA_NAME) ?: editorView.name)
+        setToolbarAsBack("")
         handleEditorIntentWhenSaveAsSettles()
         onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
 
@@ -213,7 +202,6 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         if (::draftService.isInitialized) {
             draftService.rebindDraftKeyPath(destinationUri.editorDocumentIdentity())
         }
-        mToolbar?.title = record.destination.nameWithoutExtension
     }
 
     private fun handleEditorIntentWhenSaveAsSettles() {

@@ -789,7 +789,7 @@ class CodeEditor : HVScrollView {
     }
 
     interface CursorChangeCallback {
-        fun onCursorChange(line: String, cursor: Int)
+        fun onCursorChange(lineText: String, line: Int, column: Int)
     }
 
     inner class CommentHelper {

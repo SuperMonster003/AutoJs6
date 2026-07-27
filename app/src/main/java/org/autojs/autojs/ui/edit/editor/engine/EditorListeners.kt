@@ -9,7 +9,7 @@ fun interface EditorBreakpointChangeListener {
 }
 
 fun interface EditorCursorChangeListener {
-    fun onCursorChange(line: String, cursor: Int)
+    fun onCursorChange(lineText: String, line: Int, column: Int)
 }
 
 fun interface EditorTextChangeListener {

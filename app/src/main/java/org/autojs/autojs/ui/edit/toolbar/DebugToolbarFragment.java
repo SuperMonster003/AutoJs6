@@ -259,7 +259,7 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
     }
 
     @Override
-    public void onCursorChange(@NotNull String line, int ch) {
+    public void onCursorChange(@NotNull String line, int row, int ch) {
         if (ch == 0 && !mCursorChangeFromUser) {
             mCursorChangeFromUser = true;
             return;
