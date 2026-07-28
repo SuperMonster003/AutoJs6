@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
+import android.graphics.drawable.ColorDrawable
 import android.os.SystemClock
+import android.widget.TextView
 import android.view.inputmethod.InputMethodManager
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.core.pref.Pref
@@ -147,6 +149,7 @@ class NativeEditorRegressionSmokeTest {
             assertTrue(runOnMainSync { editorView.editor.lineCountSnapshot } > 2000)
             assertEquals(largeText.take(128), runOnMainSync { editorView.editor.textSnapshot.take(128) })
             assertEquals(largeText.takeLast(128), runOnMainSync { editorView.editor.textSnapshot.takeLast(128) })
+            assertEditorChromeSettled(editorView, file)
         } finally {
             finishLaunchedActivity()
             file.delete()
@@ -167,7 +170,29 @@ class NativeEditorRegressionSmokeTest {
             expectedDirty = false,
             message = "Native EditActivity should load the test file cleanly",
         )
+        assertEditorChromeSettled(editorView, file)
         return editorView
+    }
+
+    private fun assertEditorChromeSettled(editorView: EditorView, file: File) {
+        waitUntil("Editor info bar and themed transition background should settle") {
+            runOnMainSync {
+                val fileName = editorView
+                    .findViewById<TextView>(R.id.editor_file_name_status)
+                    .text
+                    .toString()
+                val cursorPosition = editorView
+                    .findViewById<TextView>(R.id.editor_cursor_status)
+                    .text
+                    .toString()
+                val editorBackground = editorView.background as? ColorDrawable
+                val themeBackground = editorView.getEditorTheme()?.backgroundColor
+                fileName == file.name &&
+                    cursorPosition == "1:1" &&
+                    themeBackground != null &&
+                    editorBackground?.color == themeBackground
+            }
+        }
     }
 
     private fun startEditActivity(file: File): EditorView {

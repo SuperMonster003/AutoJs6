@@ -427,6 +427,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @Volatile
     private var mUserMovedCursorDuringLoading: Boolean = false
 
+    private var mDocumentDisplayName: String? = null
+
+    @Volatile
+    private var mCursorStatusReady: Boolean = false
+
     var name: String
         get() = _name ?: "[ ${this.context.getString(text_unknown)} ]"
         set(value) {
@@ -437,6 +442,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     var uri: Uri? = null
         set(value) {
             field = value
+            mDocumentDisplayName = value
+                ?.takeIf { it.scheme.equals("file", ignoreCase = true) }
+                ?.path
+                ?.let(::File)
+                ?.name
+                ?.takeIf(String::isNotBlank)
             updateEditorStatusMetadata()
         }
 
@@ -864,7 +875,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mEditorCursorStatus.setOnClickListener { showJumpToLineDialog() }
         mEditorEncodingStatus.setOnClickListener { showEncodingDialog() }
         updateEditorStatusMetadata()
-        updateCursorStatus(line = 0, column = 0)
+        showCursorStatusPlaceholder()
         updateEncodingStatus()
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
@@ -938,6 +949,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Initialize menu state early to avoid "first render" flicker.
         // zh-CN: 尽早初始化菜单状态, 避免首次渲染闪烁.
         mEditorLoading = true
+        showCursorStatusPlaceholder()
 
         // Do NOT reset dirty flags if we already restored a draft in this session.
         // Otherwise, the editor will keep the draft text but lose "needs save" state,
@@ -992,6 +1004,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .doOnError {
                 mEditorLoading = false
                 syncPrimaryMenuState()
+                scheduleCursorStatusAfterInitialLoad()
             }
     }
 
@@ -1002,7 +1015,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         val columnNumber = intent.getIntExtra(EXTRA_INITIAL_COLUMN, 0).coerceAtLeast(0)
         mPendingInitialPosition = InitialPositionRequest(lineNumber, columnNumber)
-        post { applyPendingInitialPositionIfPossible(clearOutOfRange = false) }
+        scheduleCursorStatusAfterInitialLoad()
     }
 
     fun setRestoredText(text: String) {
@@ -1042,6 +1055,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         applyPendingRestoredDraftEncodingStateIfReady()
         updateEncodingStatus()
         markRestoredDraftAsDirty()
+        scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor = true)
     }
 
     private fun applyPendingRestoredDraftEncodingStateIfReady() {
@@ -1714,21 +1728,58 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         editor.ensureCursorVisibleIfPossible()
     }
 
-    private fun ensureEditorHasCursorAfterLoadIfNeeded() {
-        // Ensure there is a visible caret after loading, so jump operations can work.
-        // zh-CN: 加载完成后确保存在可见光标, 以使跳转操作可用.
-        if (editor.textSnapshot.isEmpty() && mPendingInitialPosition == null) return
-        val appliedInitialPosition = applyPendingInitialPositionIfPossible(clearOutOfRange = true)
+    private fun scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor: Boolean = false) {
+        post {
+            publishCursorStatusAfterInitialLoadIfReady(preserveCurrentCursor)
+        }
+    }
 
-        // Request focus without forcing soft keyboard.
-        // zh-CN: 请求焦点但不强制弹出软键盘.
+    private fun publishCursorStatusAfterInitialLoadIfReady(preserveCurrentCursor: Boolean) {
+        if (
+            mDestroyed ||
+            mEditorLoading ||
+            editor.isLoadingText ||
+            mLargeFileFrameCallback != null ||
+            (mCursorStatusReady && mPendingInitialPosition == null)
+        ) {
+            return
+        }
+
+        val requestedPosition = mPendingInitialPosition
+        val appliedInitialPosition = applyPendingInitialPositionIfPossible(clearOutOfRange = true)
+        val finalPosition = when {
+            appliedInitialPosition && requestedPosition != null ->
+                initialPositionForStatus(requestedPosition)
+            preserveCurrentCursor -> editor.selection.let { it.endLine to it.endColumn }
+            else -> {
+                runCatching { editor.jumpToStart() }
+                0 to 0
+            }
+        }
+
+        // Request focus without forcing the soft keyboard, then publish one stable position.
+        // zh-CN: 请求焦点但不强制弹出软键盘, 随后只发布一次稳定的坐标.
         if (!appliedInitialPosition) {
             editor.requestEditorFocus()
         }
-
-        // Optionally ensure visible once.
-        // zh-CN: 可选地确保一次可见.
+        mCursorStatusReady = true
+        updateCursorStatus(finalPosition.first, finalPosition.second)
         ensureCursorVisibleIfPossible()
+    }
+
+    private fun initialPositionForStatus(request: InitialPositionRequest): Pair<Int, Int> {
+        val selection = editor.selection
+        val lineLength = editor.textSnapshot
+            .lineSequence()
+            .drop(request.lineNumber)
+            .firstOrNull()
+            ?.length
+        val reportedColumn = if (selection.endLine == request.lineNumber) {
+            selection.endColumn
+        } else {
+            request.columnNumber
+        }
+        return request.lineNumber to reportedColumn.coerceAtMost(lineLength ?: reportedColumn)
     }
 
     private fun applyPendingInitialPositionIfPossible(clearOutOfRange: Boolean): Boolean {
@@ -1742,12 +1793,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
             return false
         }
-        runCatching {
+        return runCatching {
             editor.jumpTo(request.lineNumber, request.columnNumber)
             editor.requestEditorFocus()
             mPendingInitialPosition = null
-        }
-        return mPendingInitialPosition == null
+            true
+        }.getOrDefault(false)
     }
 
     private fun effectiveInitialPositionLineCount(): Int {
@@ -1840,7 +1891,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mFileEncodingValidationComplete = false
         mDraftEncodingValidationPending = charsetOverride == null && mDraftRestoredInThisSession
         return Observable.fromCallable {
-            ContentLengthResult(runCatching { fileService.queryContentLengthOrNull(uri) }.getOrNull())
+            ContentLengthResult(
+                sizeOrNull = runCatching { fileService.queryContentLengthOrNull(uri) }.getOrNull(),
+                displayName = runCatching { fileService.queryDisplayNameOrNull(uri) }.getOrNull(),
+            )
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -1849,6 +1903,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     Observable.empty()
                 } else {
                     mCurrentFileSizeBytes = result.sizeOrNull
+                    result.displayName?.let { displayName ->
+                        if (this.uri == uri) {
+                            mDocumentDisplayName = displayName
+                            updateEditorStatusMetadata()
+                        }
+                    }
                     loadUriWithKnownSize(
                         uri = uri,
                         charsetOverride = charsetOverride,
@@ -1878,6 +1938,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mEditorLoading = false
                 updateEncodingStatus()
                 syncPrimaryMenuState()
+                scheduleCursorStatusAfterInitialLoad()
             }
     }
 
@@ -1941,6 +2002,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                         endEditorLoadingUi()
                         mEditorLoading = false
                         syncPrimaryMenuState()
+                        scheduleCursorStatusAfterInitialLoad()
                         if (!rollbackEncodingReload(it)) {
                             showEncodingOperationError(it.message ?: it.toString())
                         }
@@ -2336,6 +2398,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     syncPrimaryMenuState()
                     endEditorLoadingUi()
                     mLargeFileFrameCallback = null
+                    scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor = true)
                     return
                 }
 
@@ -2355,6 +2418,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                             showEncodingOperationError(error.message ?: error.toString())
                         }
                         mLargeFileFrameCallback = null
+                        scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor = true)
                         return
                     }
                     // Drain the final metadata update (for example, a malformed sequence found at
@@ -2389,10 +2453,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     val textLength = editor.textSnapshot.length
                     post {
                         if (!isCurrentFileLoad(loadGeneration)) return@post
-                        if (!mUserMovedCursorDuringLoading) {
-                            runCatching { editor.jumpToStart() }
-                        }
-                        ensureEditorHasCursorAfterLoadIfNeeded()
+                        publishCursorStatusAfterInitialLoadIfReady(
+                            preserveCurrentCursor = preserveExistingText || mUserMovedCursorDuringLoading,
+                        )
                         if (Pref.isCodeHighlightEnabledForLength(textLength)) {
                             editor.refreshHighlightTokensIfAllowed()
                         }
@@ -2466,7 +2529,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mDraftEncodingValidationPending = false
             applyPendingRestoredDraftEncodingStateIfReady()
             updateEncodingStatus()
-            finishInitialTextLoad(endLoadingUiWhenFinished)
+            finishInitialTextLoad(
+                endLoadingUi = endLoadingUiWhenFinished,
+                preserveCurrentCursor = true,
+            )
             return
         }
 
@@ -2479,7 +2545,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             saveStickyDirty = false
             mHadDirectEditSinceSave = false
 
-            finishInitialTextLoad(endLoadingUiWhenFinished)
+            finishInitialTextLoad(
+                endLoadingUi = endLoadingUiWhenFinished,
+                preserveCurrentCursor = true,
+            )
 
             // Refresh highlight for restored text if size allows.
             // zh-CN: 若大小允许, 则对恢复文本刷新一次高亮.
@@ -2509,10 +2578,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         saveStickyDirty = false
         mHadDirectEditSinceSave = false
         finishInitialTextLoad(endLoadingUiWhenFinished)
-
-        // Ensure caret/focus after fast load.
-        // zh-CN: 快速加载完成后确保光标/焦点.
-        post { ensureEditorHasCursorAfterLoadIfNeeded() }
 
         // Re-highlight once after fast load, but only when size is within highlighter limit.
         // zh-CN: 快速加载完成后主动触发一次高亮, 但仅在文本大小不超过高亮上限时执行.
@@ -2555,13 +2620,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         drainPendingEditorEngineSwitchIfIdle()
     }
 
-    private fun finishInitialTextLoad(endLoadingUi: Boolean) {
+    private fun finishInitialTextLoad(
+        endLoadingUi: Boolean,
+        preserveCurrentCursor: Boolean = false,
+    ) {
         mEditorLoading = false
         if (endLoadingUi) {
             endEditorLoadingUi()
         }
         syncPrimaryMenuState()
         tryFinalizeCompletedSaveAsAdoption()
+        scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor)
     }
 
     private fun tryFinalizeCompletedSaveAsAdoption() {
@@ -4366,11 +4435,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
             editor.addCursorChangeCallback(EditorCursorChangeListener { lineText, line, column ->
                 autoComplete(lineText, column)
-                updateCursorStatus(line, column)
+                if (mCursorStatusReady) {
+                    updateCursorStatus(line, column)
+                }
                 recordAceShortcutCursorHistory()
             })
-            editor.selection.let { selection ->
-                updateCursorStatus(selection.endLine, selection.endColumn)
+            if (mCursorStatusReady) {
+                editor.selection.let { selection ->
+                    updateCursorStatus(selection.endLine, selection.endColumn)
+                }
             }
             editor.view.layoutDirection = LAYOUT_DIRECTION_LTR
 
@@ -4394,7 +4467,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun updateEditorStatusMetadata() {
-        val displayName = name
+        val displayName = mDocumentDisplayName ?: name
         mEditorFileNameStatus.text = displayName
         mEditorFileNameStatus.contentDescription =
             "${context.getString(R.string.text_file_details)}: $displayName"
@@ -4411,6 +4484,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             "$position, ${context.getString(R.string.text_jump_to_line)}"
     }
 
+    private fun showCursorStatusPlaceholder() {
+        mCursorStatusReady = false
+        mEditorCursorStatus.text = CURSOR_STATUS_PLACEHOLDER
+        mEditorCursorStatus.contentDescription =
+            "${context.getString(R.string.text_loading_with_dots)}, " +
+                context.getString(R.string.text_jump_to_line)
+    }
+
     private fun setTheme(theme: Theme?) {
         applyEditorTheme(theme)
     }
@@ -4422,6 +4503,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         themeFontService.persistAndApplyTheme(theme).also(::onEditorThemeApplied)
 
     private fun onEditorThemeApplied(appliedTheme: Theme) {
+        setBackgroundColor(appliedTheme.backgroundColor)
         val colors = currentEditorUiPalette()
         mFunctionsKeyboard.setEditorPalette(
             appliedTheme.imeBarBackgroundColor,
@@ -6959,6 +7041,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private data class ContentLengthResult(
         val sizeOrNull: Long?,
+        val displayName: String?,
     )
 
     private data class EncodingReloadReadResult(
@@ -7101,6 +7184,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACE_HISTORY_STATE_SETTLE_DELAY_MS = 160L
         private const val EDITOR_ENGINE_SWITCH_LOAD_RETRY_DELAY_MS = 50L
         private const val HISTORY_NAVIGATION_TIMEOUT_MS = 10_000L
+        private const val CURSOR_STATUS_PLACEHOLDER = "-:-"
         private const val ENCODING_RISK_PROBE_LIMIT_BYTES = 64 * 1024
         private const val ENCODING_TEXT_PROBE_LIMIT_CHARS = 64 * 1024
         private const val STREAM_UI_QUEUE_CAPACITY = 32

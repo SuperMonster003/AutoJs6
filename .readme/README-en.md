@@ -253,6 +253,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Fullscreen editing could let the soft keyboard cover the multifunction key bar, and the navigation-bar area below the fullscreen hint Snackbar could remain transparent
 * `Fix` The code editor documentation sidebar could show only its themed background with no content, while editor settings lacked stable hierarchical role colors derived from the editor background, causing title, subtitle, category, and control colors to disappear after list scrolling and item recycling
 * `Fix` The soft keyboard could cover the multifunction key bar outside fullscreen mode
+* `Fix` The code editor information bar could omit file extensions or briefly display a temporary end-of-file cursor position while opening a document, and a light-colored gap could flash between the multifunction key bar and the soft keyboard when app and editor themes used different brightness
 * `Fix` Ace editor could become unresponsive and fall back to the native editor after an incompatible-encoding reload of a large file produced an extremely long text line
 * `Fix` Disabling or uninstalling the external Ace plugin while its editor or settings interface was active could cause unsaved editing state to be lost or leave the interface in an invalid state
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios

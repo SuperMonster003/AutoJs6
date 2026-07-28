@@ -34,6 +34,16 @@ class EditorFileReadPipeline(
         }
     }
 
+    fun queryDisplayNameOrNull(uri: Uri): String? {
+        return EditorFileIoCoordinator.withReadAccess(uri) {
+            when (uri.scheme?.lowercase()) {
+                "file" -> uri.path?.let(::File)?.name
+                "content" -> queryContentDisplayNameOrNull(uri)
+                else -> uri.lastPathSegment
+            }?.takeIf(String::isNotBlank)
+        }
+    }
+
     fun readText(uri: Uri, charsetOverride: Charset? = null): EditorFileReadResult {
         return EditorFileIoCoordinator.withReadAccess(uri) {
             val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() }
@@ -105,6 +115,27 @@ class EditorFileReadPipeline(
                 val idx = cursor.getColumnIndex(OpenableColumns.SIZE)
                 if (idx >= 0 && !cursor.isNull(idx)) {
                     cursor.getLong(idx).coerceAtLeast(0L)
+                } else null
+            } else null
+        } finally {
+            runCatching { cursor?.close() }
+        }
+    }
+
+    private fun queryContentDisplayNameOrNull(uri: Uri): String? {
+        var cursor: Cursor? = null
+        return try {
+            cursor = resolver.query(
+                uri,
+                arrayOf(OpenableColumns.DISPLAY_NAME),
+                null,
+                null,
+                null,
+            )
+            if (cursor != null && cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index >= 0 && !cursor.isNull(index)) {
+                    cursor.getString(index)
                 } else null
             } else null
         } finally {

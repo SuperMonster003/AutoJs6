@@ -98,6 +98,10 @@ class EditorFileService(
         return fileReadPipeline.queryContentLengthOrNull(uri)
     }
 
+    fun queryDisplayNameOrNull(uri: Uri): String? {
+        return fileReadPipeline.queryDisplayNameOrNull(uri)
+    }
+
     fun readText(uri: Uri, charsetOverride: Charset? = null): EditorFileReadResult {
         return fileReadPipeline.readText(uri, charsetOverride)
     }
