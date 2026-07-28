@@ -355,7 +355,9 @@ open class EditActivity :
         mEditorDialogThemeDelegate.updatePalette(colors.background, colors.foreground)
         supportFragmentManager.fragments
             .filterIsInstance<CodeEditorSettingsDialog>()
-            .forEach { dialog -> dialog.updatePreferenceTitleColors(colors.foreground) }
+            .forEach { dialog ->
+                dialog.updatePreferenceColors(colors.background, colors.foreground)
+            }
         val bottomSheet = mLogBottomSheet
             ?: supportFragmentManager.findFragmentByTag(LOG_BOTTOM_SHEET_TAG) as? LogBottomSheet
         bottomSheet?.applyEditorPalette(colors.background, colors.foreground)

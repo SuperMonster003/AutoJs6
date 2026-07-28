@@ -25,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import org.autojs.autojs.app.OnActivityResultDelegate;
+import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout;
 import org.autojs.autojs.tool.ImageSelector;
 import org.autojs.autojs.util.ContextUtils;
 import org.autojs.autojs.util.IntentUtils;
@@ -104,9 +105,10 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
      * Recreates the owned WebView with a context carrying the requested theme.
      *
      * WebView resolves {@code prefers-color-scheme} from the context theme at construction time,
-     * so changing only its background or settings cannot switch that value reliably. The outer
-     * EWebView, refresh container, listeners, and request interceptor are retained; the replacement
-     * receives the same layout slot and this widget's WebView settings/clients.
+     * so changing only its background or settings cannot switch that value reliably. The refresh
+     * container is recreated together with the WebView because SwipeRefreshLayout 1.1.0 caches its
+     * first content child privately; replacing only that child leaves the new WebView unmeasured.
+     * The outer EWebView, listeners, and request interceptor are retained.
      */
     @MainThread
     @NonNull
@@ -116,14 +118,26 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
         }
 
         NestedWebView previous = mWebView;
-        int childIndex = mSwipeRefreshLayout.indexOfChild(previous);
-        if (childIndex < 0) {
+        SwipeRefreshLayout previousRefreshLayout = mSwipeRefreshLayout;
+        int webViewIndex = previousRefreshLayout.indexOfChild(previous);
+        if (webViewIndex < 0) {
             throw new IllegalStateException("The current WebView is not attached to its refresh container");
         }
+        int refreshLayoutIndex = indexOfChild(previousRefreshLayout);
+        if (refreshLayoutIndex < 0) {
+            throw new IllegalStateException("The refresh container is not attached to EWebView");
+        }
 
-        ViewGroup.LayoutParams layoutParams = previous.getLayoutParams();
-        if (layoutParams == null) {
-            layoutParams = new ViewGroup.LayoutParams(
+        ViewGroup.LayoutParams webViewLayoutParams = previous.getLayoutParams();
+        if (webViewLayoutParams == null) {
+            webViewLayoutParams = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+            );
+        }
+        ViewGroup.LayoutParams refreshLayoutParams = previousRefreshLayout.getLayoutParams();
+        if (refreshLayoutParams == null) {
+            refreshLayoutParams = new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
             );
@@ -139,18 +153,48 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
         setUpWebView(replacement);
         replacement.getSettings().setDisplayZoomControls(displayZoomControls);
 
-        mSwipeRefreshLayout.removeViewAt(childIndex);
+        ThemeColorSwipeRefreshLayout replacementRefreshLayout =
+                new ThemeColorSwipeRefreshLayout(getContext());
+        replacementRefreshLayout.setId(previousRefreshLayout.getId());
+        replacementRefreshLayout.setVisibility(previousRefreshLayout.getVisibility());
+        replacementRefreshLayout.setContentDescription(previousRefreshLayout.getContentDescription());
+        replacementRefreshLayout.setImportantForAccessibility(
+                previousRefreshLayout.getImportantForAccessibility()
+        );
+        replacementRefreshLayout.setSaveEnabled(previousRefreshLayout.isSaveEnabled());
+        replacementRefreshLayout.setEnabled(previousRefreshLayout.isEnabled());
+        replacementRefreshLayout.setAlpha(previousRefreshLayout.getAlpha());
+        replacementRefreshLayout.setClipChildren(previousRefreshLayout.getClipChildren());
+        replacementRefreshLayout.setClipToPadding(previousRefreshLayout.getClipToPadding());
+        replacementRefreshLayout.setPadding(
+                previousRefreshLayout.getPaddingLeft(),
+                previousRefreshLayout.getPaddingTop(),
+                previousRefreshLayout.getPaddingRight(),
+                previousRefreshLayout.getPaddingBottom()
+        );
+        replacementRefreshLayout.setNestedScrollingEnabled(
+                previousRefreshLayout.isNestedScrollingEnabled()
+        );
+        replacementRefreshLayout.setBackground(previousRefreshLayout.getBackground());
+        replacementRefreshLayout.setOnRefreshListener(this);
+        replacementRefreshLayout.addView(replacement, webViewIndex, webViewLayoutParams);
+
+        removeViewAt(refreshLayoutIndex);
         try {
-            mSwipeRefreshLayout.addView(replacement, childIndex, layoutParams);
+            addView(replacementRefreshLayout, refreshLayoutIndex, refreshLayoutParams);
         } catch (RuntimeException error) {
-            if (replacement.getParent() == mSwipeRefreshLayout) {
-                mSwipeRefreshLayout.removeView(replacement);
+            if (replacementRefreshLayout.getParent() == this) {
+                removeView(replacementRefreshLayout);
             }
-            mSwipeRefreshLayout.addView(previous, childIndex, layoutParams);
+            addView(previousRefreshLayout, refreshLayoutIndex, refreshLayoutParams);
+            replacementRefreshLayout.removeView(replacement);
             destroyWebView(replacement);
             throw error;
         }
 
+        previousRefreshLayout.setOnRefreshListener(null);
+        previousRefreshLayout.removeView(previous);
+        mSwipeRefreshLayout = replacementRefreshLayout;
         mWebView = replacement;
         mProgressBar.setVisibility(GONE);
         mSwipeRefreshLayout.setRefreshing(false);

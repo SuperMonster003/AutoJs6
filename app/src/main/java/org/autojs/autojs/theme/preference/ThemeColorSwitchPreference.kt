@@ -41,6 +41,7 @@ open class ThemeColorSwitchPreference :
     private var _titleColor: Int? = null
     private var _summaryColor: Int? = null
     private var _buttonColor = Color.TRANSPARENT
+    private var buttonColorContrastMatters = true
     private var availableForCurrentContext = true
     private var unavailableChecked = false
     private var unavailableClickHandler: (() -> Unit)? = null
@@ -48,6 +49,7 @@ open class ThemeColorSwitchPreference :
     override var titleColor: Int?
         get() = _titleColor
         set(value) {
+            if (_titleColor == value) return
             _titleColor = value
             notifyChanged()
         }
@@ -55,6 +57,7 @@ open class ThemeColorSwitchPreference :
     override var summaryColor: Int?
         get() = _summaryColor
         set(value) {
+            if (_summaryColor == value) return
             _summaryColor = value
             notifyChanged()
         }
@@ -62,8 +65,7 @@ open class ThemeColorSwitchPreference :
     override var buttonColor: Int
         get() = _buttonColor
         set(value) {
-            _buttonColor = value
-            applyColor()
+            setButtonColor(value, contrastMatters = true)
         }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
@@ -102,9 +104,7 @@ open class ThemeColorSwitchPreference :
         if (!availableForCurrentContext) {
             setCheckableViewCheckedWithoutPreferenceCallback(unavailableChecked)
         }
-        if (buttonColor != Color.TRANSPARENT) {
-            applyColor()
-        }
+        applyColor()
         DialogUtils.applyLongClickability(this, holder)
         titleColor?.let { color ->
             holder.itemView.findViewById<TextView>(android.R.id.title)?.setTextColor(color)
@@ -138,12 +138,28 @@ open class ThemeColorSwitchPreference :
         applyColor()
     }
 
+    fun setButtonColor(color: Int, contrastMatters: Boolean) {
+        if (_buttonColor == color && buttonColorContrastMatters == contrastMatters) return
+        _buttonColor = color
+        buttonColorContrastMatters = contrastMatters
+        applyColor()
+        notifyChanged()
+    }
+
     private fun applyColor() {
-        if (mCheckableView is Switch) {
-            ThemeColorHelper.setColorPrimary(mCheckableView as Switch, buttonColor, true)
+        if (mCheckableView is Switch && buttonColor != Color.TRANSPARENT) {
+            ThemeColorHelper.setColorPrimary(
+                mCheckableView as Switch,
+                buttonColor,
+                buttonColorContrastMatters,
+            )
         }
-        if (mCheckableView is SwitchCompat) {
-            ThemeColorHelper.setColorPrimary(mCheckableView as SwitchCompat, buttonColor, true)
+        if (mCheckableView is SwitchCompat && buttonColor != Color.TRANSPARENT) {
+            ThemeColorHelper.setColorPrimary(
+                mCheckableView as SwitchCompat,
+                buttonColor,
+                buttonColorContrastMatters,
+            )
         }
     }
 

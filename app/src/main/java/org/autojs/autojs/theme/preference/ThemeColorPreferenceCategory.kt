@@ -17,10 +17,23 @@ import org.autojs.autojs6.R
  * Created by Stardust on Aug 8, 2016.
  * Transformed by SuperMonster003 on Sep 25, 2022.
  */
-class ThemeColorPreferenceCategory : PreferenceCategory, ThemeColorMutable {
+class ThemeColorPreferenceCategory :
+    PreferenceCategory,
+    ThemeColorMutable,
+    PreferenceTitleColorMutable {
 
     private var mTitleTextView: TextView? = null
     private var mColor = Color.TRANSPARENT
+    private var mExplicitTitleColor: Int? = null
+
+    override var titleColor: Int?
+        get() = mExplicitTitleColor
+        set(value) {
+            if (mExplicitTitleColor == value) return
+            mExplicitTitleColor = value
+            value?.let { mTitleTextView?.setTextColor(it) }
+            notifyChanged()
+        }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
@@ -34,19 +47,24 @@ class ThemeColorPreferenceCategory : PreferenceCategory, ThemeColorMutable {
         ThemeColorManager.add(this)
     }
 
-    fun setTitleTextColor(titleTextColor: Int) = setThemeColor(ThemeColor(titleTextColor))
+    fun setTitleTextColor(titleTextColor: Int) {
+        titleColor = titleTextColor
+    }
 
     override fun setThemeColor(color: ThemeColor) {
         ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), color.colorPrimary, 3.2).let { contrastColor ->
             mColor = contrastColor
-            mTitleTextView?.setTextColor(contrastColor)
+            if (titleColor == null) {
+                mTitleTextView?.setTextColor(contrastColor)
+            }
         }
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         (holder.findViewById(android.R.id.title) as TextView).let {
-            it.takeIf { mColor != Color.TRANSPARENT }?.setTextColor(mColor)
+            (titleColor ?: mColor.takeUnless { color -> color == Color.TRANSPARENT })
+                ?.let(it::setTextColor)
             it.setTypeface(null, Typeface.BOLD)
             mTitleTextView = it
         }

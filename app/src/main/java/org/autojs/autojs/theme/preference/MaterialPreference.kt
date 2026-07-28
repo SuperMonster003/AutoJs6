@@ -27,6 +27,7 @@ open class MaterialPreference :
     override var titleColor: Int?
         get() = _titleColor
         set(value) {
+            if (_titleColor == value) return
             _titleColor = value
             notifyChanged()
         }
@@ -34,6 +35,7 @@ open class MaterialPreference :
     override var summaryColor: Int?
         get() = _summaryColor
         set(value) {
+            if (_summaryColor == value) return
             _summaryColor = value
             notifyChanged()
         }

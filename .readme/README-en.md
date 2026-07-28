@@ -251,7 +251,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
 * `Fix` Code editor settings primary titles, the fx function panel, the left-pinned documentation drawer, and the Ace text-selection toolbar could still use AutoJs6 app colors instead of the current editor theme, while Ace line actions could appear more than once
 * `Fix` Fullscreen editing could let the soft keyboard cover the multifunction key bar, and the navigation-bar area below the fullscreen hint Snackbar could remain transparent
-* `Fix` Code editor settings primary titles could lose their editor-theme colors after list item recycling, the dark documentation drawer could initially load blank, and the soft keyboard could cover the multifunction key bar outside fullscreen mode
+* `Fix` The code editor documentation sidebar could show only its themed background with no content, while editor settings lacked stable hierarchical role colors derived from the editor background, causing title, subtitle, category, and control colors to disappear after list scrolling and item recycling
+* `Fix` The soft keyboard could cover the multifunction key bar outside fullscreen mode
 * `Fix` Ace editor could become unresponsive and fall back to the native editor after an incompatible-encoding reload of a large file produced an extremely long text line
 * `Fix` Disabling or uninstalling the external Ace plugin while its editor or settings interface was active could cause unsaved editing state to be lost or leave the interface in an invalid state
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios

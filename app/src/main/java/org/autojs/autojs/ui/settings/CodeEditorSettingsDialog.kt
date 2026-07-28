@@ -11,7 +11,11 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
+import com.afollestad.materialdialogs.DialogAction
+import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
+import org.autojs.autojs.ui.edit.theme.EditorChromePalette
+import org.autojs.autojs.ui.edit.theme.EditorDialogViewThemeApplier
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ContextUtils.findActivity
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
@@ -23,7 +27,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
 
     private var themePreviewHandler: ((Theme) -> Unit)? = null
     private var fontPreviewHandler: ((String) -> Unit)? = null
-    private var latestPreferenceForeground: Int? = null
+    private var latestPreferencePalette: EditorSettingsPreferencePalette? = null
     private var lastAcePluginState: AceEditorPluginStateMonitor.State? = null
     private val acePluginStateListener: (AceEditorPluginStateMonitor.Change) -> Unit = { change ->
         val wasAvailable = lastAcePluginState?.available == true || change.previous?.available == true
@@ -62,14 +66,21 @@ class CodeEditorSettingsDialog : DialogFragment() {
                 )
                 .commit()
         }
-        view.post(::applyLatestPreferenceTitleColors)
+        view.post(::applyLatestPreferenceColors)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val preferencePalette = EditorChromePalette.current().let { colors ->
+            EditorSettingsPreferencePalette.generate(
+                background = colors.background,
+                primary = colors.foreground,
+            )
+        }
+        latestPreferencePalette = preferencePalette
         return FragmentHostMaterialDialog.Builder(requireContext())
             .title(R.string.text_code_editor_settings)
             .positiveText(R.string.dialog_button_dismiss)
-            .positiveColorRes(R.color.dialog_button_default)
+            .positiveColor(preferencePalette.categoryAndButton)
             .widgetThemeColor()
             .build()
             .apply {
@@ -94,6 +105,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
         AceEditorPluginStateMonitor.addListener(requireContext(), acePluginStateListener)
         val width = min((resources.displayMetrics.widthPixels * 0.94f).roundToInt(), requireContext().dp(720))
         dialog?.window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+        applyLatestPreferenceColors()
     }
 
     override fun onStop() {
@@ -119,15 +131,23 @@ class CodeEditorSettingsDialog : DialogFragment() {
             ?.dismissOpenPreferenceDialogs()
     }
 
-    internal fun updatePreferenceTitleColors(foreground: Int) {
-        latestPreferenceForeground = foreground
-        applyLatestPreferenceTitleColors()
+    internal fun updatePreferenceColors(background: Int, primary: Int) {
+        latestPreferencePalette = EditorSettingsPreferencePalette.generate(background, primary)
+        applyLatestPreferenceColors()
     }
 
-    private fun applyLatestPreferenceTitleColors() {
-        val foreground = latestPreferenceForeground ?: return
+    private fun applyLatestPreferenceColors() {
+        val palette = latestPreferencePalette ?: return
+        (dialog as? MaterialDialog)?.let { materialDialog ->
+            materialDialog.titleView?.let { titleView ->
+                EditorDialogViewThemeApplier.setSubtreeExcluded(titleView, true)
+                titleView.setTextColor(palette.title)
+            }
+            materialDialog.getActionButton(DialogAction.POSITIVE)
+                .setTextColor(palette.categoryAndButton)
+        }
         (childFragmentManager.findFragmentById(R.id.code_editor_settings_dialog_container) as? CodeEditorSettingsFragment)
-            ?.applyEmbeddedDialogPreferenceTitleColors(foreground)
+            ?.applyEmbeddedDialogPreferenceColors(palette)
     }
 
     private fun Context.dp(value: Int): Int {

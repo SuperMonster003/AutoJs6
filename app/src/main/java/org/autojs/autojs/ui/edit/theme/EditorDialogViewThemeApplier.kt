@@ -22,6 +22,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.widget.CompoundButtonCompat
 import com.afollestad.materialdialogs.internal.MDButton
 import com.google.android.material.textfield.TextInputLayout
+import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
 import java.util.WeakHashMap
 
@@ -75,11 +76,26 @@ object EditorDialogViewThemeApplier {
         clearAppliedPaletteTree(root)
     }
 
+    @JvmStatic
+    @MainThread
+    fun setSubtreeExcluded(root: View, excluded: Boolean) {
+        root.setTag(
+            R.id.editor_dialog_theme_applier_excluded_subtree,
+            true.takeIf { excluded },
+        )
+        if (excluded) {
+            clearAppliedPaletteTree(root)
+        }
+    }
+
     private fun applyTree(
         view: View,
         palette: Palette,
         reconcileCurrentState: Boolean = false,
     ) {
+        if (view.getTag(R.id.editor_dialog_theme_applier_excluded_subtree) == true) {
+            return
+        }
         val paletteChanged = synchronized(appliedPalettes) {
             appliedPalettes.put(view, palette) != palette
         }

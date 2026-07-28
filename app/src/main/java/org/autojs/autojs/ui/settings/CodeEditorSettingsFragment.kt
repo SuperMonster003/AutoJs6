@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.EdgeEffect
 import androidx.annotation.StringRes
 import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import androidx.preference.SwitchPreference
@@ -14,6 +15,8 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.MaterialDialogPreference
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.theme.preference.MaterialPreference
+import org.autojs.autojs.theme.preference.PreferenceButtonColorMutable
+import org.autojs.autojs.theme.preference.PreferenceSummaryColorMutable
 import org.autojs.autojs.theme.preference.PreferenceTitleColorMutable
 import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
@@ -23,6 +26,7 @@ import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
 import org.autojs.autojs.ui.edit.theme.EditorChromePalette
+import org.autojs.autojs.ui.edit.theme.EditorDialogViewThemeApplier
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
@@ -40,7 +44,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         EditorPinchToZoomPreferences.migrateLegacyPreferenceIfNeeded()
         EditorEnginePreferences.initialize(requireContext())
         setPreferencesFromResource(R.xml.fragment_code_editor_settings, rootKey)
-        applyEmbeddedDialogPreferenceTitleColors()
+        applyEmbeddedDialogPreferenceColors()
         preferencesCreated = true
         syncEditorEnginePreferenceAvailability()
         syncThemePreviewPreference()
@@ -59,7 +63,12 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         }
         listView.isHorizontalScrollBarEnabled = false
         listView.isVerticalScrollBarEnabled = false
-        if (!embeddedInDialog) {
+        if (embeddedInDialog) {
+            EditorDialogViewThemeApplier.setSubtreeExcluded(listView, true)
+            // The dialog applier may have visited rows between child inflation and this callback.
+            // Rebind once after exclusion so even the first rendered frame comes from A/B/C state.
+            listView.adapter?.notifyDataSetChanged()
+        } else {
             listView.excludePaddingClippableViewFromBottomNavigationBar()
         }
         openInitialPreferenceIfNeeded()
@@ -143,12 +152,16 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
     }
 
     /**
-     * PreferenceViewHolder resets its TextViews from the host Activity theme every time a row is
-     * rebound. Persist the editor foreground on each Preference so its own bind step reapplies the
-     * correct title color after RecyclerView recycling.
+     * PreferenceViewHolder reapplies the host Activity theme whenever a row is rebound. Persist all
+     * editor-owned role colors on the Preference objects so each bind wins after row recycling.
      */
-    internal fun applyEmbeddedDialogPreferenceTitleColors(
-        foreground: Int = EditorChromePalette.current().foreground,
+    internal fun applyEmbeddedDialogPreferenceColors(
+        palette: EditorSettingsPreferencePalette = EditorChromePalette.current().let { colors ->
+            EditorSettingsPreferencePalette.generate(
+                background = colors.background,
+                primary = colors.foreground,
+            )
+        },
     ) {
         if (!embeddedInDialog) {
             return
@@ -156,7 +169,22 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         fun applyToGroup(group: PreferenceGroup) {
             for (index in 0 until group.preferenceCount) {
                 val preference = group.getPreference(index)
-                (preference as? PreferenceTitleColorMutable)?.titleColor = foreground
+                (preference as? PreferenceTitleColorMutable)?.titleColor =
+                    if (preference is PreferenceCategory) {
+                        palette.categoryAndButton
+                    } else {
+                        palette.title
+                    }
+                (preference as? PreferenceSummaryColorMutable)?.summaryColor = palette.subtitle
+                if (preference is ThemeColorSwitchPreference) {
+                    preference.setButtonColor(
+                        palette.categoryAndButton,
+                        contrastMatters = false,
+                    )
+                } else {
+                    (preference as? PreferenceButtonColorMutable)?.buttonColor =
+                        palette.categoryAndButton
+                }
                 (preference as? PreferenceGroup)?.let(::applyToGroup)
             }
         }
