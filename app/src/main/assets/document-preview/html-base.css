@@ -1,0 +1,33 @@
+:root {
+    color-scheme: light dark;
+}
+
+html,
+body {
+    min-width: 0;
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 16px;
+    overflow-wrap: anywhere;
+    background: Canvas;
+    color: CanvasText;
+}
+
+img,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+pre {
+    max-width: 100%;
+    overflow: auto;
+}
+
+table {
+    max-width: 100%;
+}

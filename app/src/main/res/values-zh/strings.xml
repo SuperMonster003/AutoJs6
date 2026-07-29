@@ -294,6 +294,8 @@
     <string name="error_continuation_resume_called_without_suspend">方法 resume() 调用前需先调用 suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">方法 suspend() 只能调用一次</string>
     <string name="error_corresponding_github_release_may_not_published">对应的 GitHub 发行版可能还未发布</string>
+    <string name="error_custom_css_file_too_large">CSS 文件超出导入限制 (%1$s)</string>
+    <string name="error_document_preview_file_too_large">文件超出预览限制 (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">点分十进制数超过 255</string>
     <string name="error_download_interrupted">下载中断</string>
     <string name="error_editor_encoding_validation_incomplete">文件编码验证尚未完成. 保存前请打开文件编码并使用重新加载或转换.</string>
@@ -822,6 +824,7 @@
     <string name="text_clean_completed">清理完成</string>
     <string name="text_cleaning_workspace">正在清理工作区</string>
     <string name="text_clear">清空</string>
+    <string name="text_clear_custom_css">清除自定义 CSS</string>
     <string name="text_clear_file_selection">清空文件选择</string>
     <string name="text_clear_pre_execute_script">清空预执行脚本</string>
     <string name="text_clear_trash">清空回收站</string>
@@ -908,6 +911,8 @@
     <string name="text_current">当前</string>
     <string name="text_current_page_configuration">当前页面配置</string>
     <string name="text_current_version">当前版本</string>
+    <string name="text_custom_css_cleared">自定义 CSS 已清除</string>
+    <string name="text_custom_css_imported">自定义 CSS 已导入</string>
     <string name="text_daily_task">每日任务</string>
     <string name="text_date">日期</string>
     <string name="text_day1">一</string>
@@ -1141,6 +1146,7 @@
     <string name="text_ignored_versions">已忽略版本</string>
     <string name="text_import">导入</string>
     <string name="text_import_color_library">导入颜色库</string>
+    <string name="text_import_custom_css">导入自定义 CSS</string>
     <string name="text_import_name_conflict">已存在同名配置 \"%1$s\", 请选择导入方式:</string>
     <string name="text_import_script">导入脚本文件</string>
     <string name="text_import_strategy_auto_rename">自动重命名</string>
@@ -1475,6 +1481,13 @@
     <string name="text_press_again_to_exit">再按一次退出</string>
     <string name="text_press_back_or_vol_down_to_close_window">如需关闭窗口, 可按 \"返回键\" 或 \"音量减键\"</string>
     <string name="text_preview">预览</string>
+    <string name="text_preview_theme">预览主题</string>
+    <string name="text_preview_theme_custom">自定义 CSS</string>
+    <string name="text_preview_theme_github_auto">GitHub 自动</string>
+    <string name="text_preview_theme_github_dark">GitHub 深色</string>
+    <string name="text_preview_theme_github_light">GitHub 浅色</string>
+    <string name="text_preview_theme_paper">纸张</string>
+    <string name="text_preview_theme_sepia">棕褐色</string>
     <string name="text_process_log">流程日志</string>
     <string name="text_processing">正在处理</string>
     <string name="text_processing_source">正在处理源代码</string>

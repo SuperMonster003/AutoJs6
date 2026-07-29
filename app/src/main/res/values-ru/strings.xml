@@ -298,6 +298,8 @@
     <string name="error_continuation_resume_called_without_suspend">Метод resume() должен вызываться после suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Метод suspend() должен быть вызван только один раз</string>
     <string name="error_corresponding_github_release_may_not_published">Соответствующий релиз на GitHub может быть еще не опубликован</string>
+    <string name="error_custom_css_file_too_large">Файл CSS превышает ограничение импорта (%1$s)</string>
+    <string name="error_document_preview_file_too_large">Файл превышает ограничение предпросмотра (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">Точечно-десятичное число больше 255</string>
     <string name="error_download_interrupted">Загрузка прервана</string>
     <string name="error_editor_encoding_validation_incomplete">Проверка кодировки файла не завершена. Перед сохранением откройте кодировку файла и выполните перезагрузку или преобразование.</string>
@@ -826,6 +828,7 @@
     <string name="text_clean_completed">Очистка завершена</string>
     <string name="text_cleaning_workspace">Очистка рабочей области</string>
     <string name="text_clear">Очистить</string>
+    <string name="text_clear_custom_css">Очистить пользовательский CSS</string>
     <string name="text_clear_file_selection">Очистить выбор файла</string>
     <string name="text_clear_pre_execute_script">Очистить сценарий предварительного выполнения</string>
     <string name="text_clear_trash">Очистить корзину</string>
@@ -912,6 +915,8 @@
     <string name="text_current">Текущая</string>
     <string name="text_current_page_configuration">Конфигурация страницы</string>
     <string name="text_current_version">Текущая версия</string>
+    <string name="text_custom_css_cleared">Пользовательский CSS очищен</string>
+    <string name="text_custom_css_imported">Пользовательский CSS импортирован</string>
     <string name="text_daily_task">Ежедневная задача</string>
     <string name="text_date">Дата</string>
     <string name="text_day1">Пн</string>
@@ -1145,6 +1150,7 @@
     <string name="text_ignored_versions">Игнорируемые версии</string>
     <string name="text_import">Импорт</string>
     <string name="text_import_color_library">Импортировать цветовую библиотеку</string>
+    <string name="text_import_custom_css">Импортировать пользовательский CSS</string>
     <string name="text_import_name_conflict">Профиль с именем \"%1$s\" уже существует. Выберите способ импорта:</string>
     <string name="text_import_script">Импорт скрипта(ов)</string>
     <string name="text_import_strategy_auto_rename">Автопереименовать</string>
@@ -1479,6 +1485,13 @@
     <string name="text_press_again_to_exit">Нажмите еще раз, чтобы выйти</string>
     <string name="text_press_back_or_vol_down_to_close_window">Чтобы закрыть, нажмите \"Назад\" или \"Уменьшение громкости\"</string>
     <string name="text_preview">Предварительный просмотр</string>
+    <string name="text_preview_theme">Тема предпросмотра</string>
+    <string name="text_preview_theme_custom">Пользовательский CSS</string>
+    <string name="text_preview_theme_github_auto">GitHub Авто</string>
+    <string name="text_preview_theme_github_dark">GitHub Темная</string>
+    <string name="text_preview_theme_github_light">GitHub Светлая</string>
+    <string name="text_preview_theme_paper">Бумага</string>
+    <string name="text_preview_theme_sepia">Сепия</string>
     <string name="text_process_log">Журнал процесса</string>
     <string name="text_processing">Обработка</string>
     <string name="text_processing_source">Обработка исходников</string>

@@ -300,6 +300,8 @@
     <string name="error_continuation_resume_called_without_suspend">يجب استدعاء الطريقة السيرة الذاتية() بعد تعليق()</string>
     <string name="error_continuation_suspend_called_more_than_once">يجب استدعاء طريقة تعليق() مرة واحدة فقط</string>
     <string name="error_corresponding_github_release_may_not_published">قد لم يتم نشر إصدار GitHub المقابل بعد</string>
+    <string name="error_custom_css_file_too_large">يتجاوز ملف CSS حد الاستيراد (%1$s)</string>
+    <string name="error_document_preview_file_too_large">يتجاوز الملف حد المعاينة (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">رقم عشري أكثر من 255</string>
     <string name="error_download_interrupted">تنزيل المقاطعة</string>
     <string name="error_editor_encoding_validation_incomplete">لم يكتمل التحقق من ترميز الملف. افتح ترميز الملف واستخدم إعادة التحميل أو التحويل قبل الحفظ.</string>
@@ -828,6 +830,7 @@
     <string name="text_clean_completed">اكتمل التنظيف</string>
     <string name="text_cleaning_workspace">جارٍ تنظيف مساحة العمل</string>
     <string name="text_clear">صافي</string>
+    <string name="text_clear_custom_css">مسح CSS المخصص</string>
     <string name="text_clear_file_selection">مسح اختيار الملف</string>
     <string name="text_clear_pre_execute_script">مسح السيناريو قبل التنفيذ</string>
     <string name="text_clear_trash">تفريغ سلة المحذوفات</string>
@@ -914,6 +917,8 @@
     <string name="text_current">الحالي</string>
     <string name="text_current_page_configuration">اعدادات الصفحة الحالية</string>
     <string name="text_current_version">النسخة الحالية</string>
+    <string name="text_custom_css_cleared">تم مسح CSS المخصص</string>
+    <string name="text_custom_css_imported">تم استيراد CSS المخصص</string>
     <string name="text_daily_task">مهام يومية</string>
     <string name="text_date">تاريخ</string>
     <string name="text_day1">الاثنين</string>
@@ -1147,6 +1152,7 @@
     <string name="text_ignored_versions">الاصدارات المتجاهلة</string>
     <string name="text_import">يستورد</string>
     <string name="text_import_color_library">استيراد مكتبة ألوان</string>
+    <string name="text_import_custom_css">استيراد CSS مخصص</string>
     <string name="text_import_name_conflict">يوجد ملف تعريف بالاسم \"%1$s\" بالفعل، اختر طريقة الاستيراد:</string>
     <string name="text_import_script">استيراد السيناريو</string>
     <string name="text_import_strategy_auto_rename">اعادة تسمية تلقائيا</string>
@@ -1481,6 +1487,13 @@
     <string name="text_press_again_to_exit">اضغط مرة أخرى للخروج</string>
     <string name="text_press_back_or_vol_down_to_close_window">لإغلاق، اضغط على \"رجوع\" أو \"خفض الصوت\"</string>
     <string name="text_preview">معاينة</string>
+    <string name="text_preview_theme">سمة المعاينة</string>
+    <string name="text_preview_theme_custom">CSS مخصص</string>
+    <string name="text_preview_theme_github_auto">GitHub تلقائي</string>
+    <string name="text_preview_theme_github_dark">GitHub داكن</string>
+    <string name="text_preview_theme_github_light">GitHub فاتح</string>
+    <string name="text_preview_theme_paper">ورق</string>
+    <string name="text_preview_theme_sepia">بني داكن</string>
     <string name="text_process_log">سجل العملية</string>
     <string name="text_processing">جارٍ المعالجة</string>
     <string name="text_processing_source">جارٍ معالجة المصدر</string>

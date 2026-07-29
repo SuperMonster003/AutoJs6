@@ -1,0 +1,11 @@
+:root {
+    color-scheme: light;
+    --preview-bg: #ffffff;
+    --preview-fg: #1f2328;
+    --preview-muted: #656d76;
+    --preview-border: #d0d7de;
+    --preview-link: #0969da;
+    --preview-code-bg: #818b981f;
+    --preview-block-bg: #f6f8fa;
+    --preview-mark-bg: #fff8c5;
+}

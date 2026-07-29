@@ -18,6 +18,9 @@
         android:id="@+id/action_version_history"
         android:title="@string/text_version_history" />
     <item
+        android:id="@+id/action_preview"
+        android:title="@string/text_preview" />
+    <item
         android:id="@+id/action_timed_task"
         android:title="@string/text_timed_task" />
     <item

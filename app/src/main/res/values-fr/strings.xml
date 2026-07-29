@@ -298,6 +298,8 @@
     <string name="error_continuation_resume_called_without_suspend">La méthode resume() doit être appelée après suspend().</string>
     <string name="error_continuation_suspend_called_more_than_once">La méthode suspend() ne devrait être appelée qu\'une seule fois.</string>
     <string name="error_corresponding_github_release_may_not_published">La version GitHub correspondante n\'a peut-être pas encore été publiée.</string>
+    <string name="error_custom_css_file_too_large">Le fichier CSS dépasse la limite d\'importation (%1$s)</string>
+    <string name="error_document_preview_file_too_large">Le fichier dépasse la limite d\'aperçu (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">Nombre de points décimaux supérieur à 255</string>
     <string name="error_download_interrupted">Téléchargement interrompu</string>
     <string name="error_editor_encoding_validation_incomplete">La vérification de l\'encodage du fichier est incomplète. Ouvrez l\'encodage du fichier et utilisez Recharger ou Convertir avant d\'enregistrer.</string>
@@ -826,6 +828,7 @@
     <string name="text_clean_completed">Nettoyage termine</string>
     <string name="text_cleaning_workspace">Nettoyage de l\'espace de travail</string>
     <string name="text_clear">Effacer</string>
+    <string name="text_clear_custom_css">Effacer le CSS personnalisé</string>
     <string name="text_clear_file_selection">Effacer la sélection de fichiers</string>
     <string name="text_clear_pre_execute_script">Effacer le script de pré-exécution</string>
     <string name="text_clear_trash">Vider la corbeille</string>
@@ -912,6 +915,8 @@
     <string name="text_current">Actuel</string>
     <string name="text_current_page_configuration">Config de la page</string>
     <string name="text_current_version">Version actuelle</string>
+    <string name="text_custom_css_cleared">Le CSS personnalisé a été effacé</string>
+    <string name="text_custom_css_imported">Le CSS personnalisé a été importé</string>
     <string name="text_daily_task">Tâche quotidienne</string>
     <string name="text_date">Date</string>
     <string name="text_day1">Lun</string>
@@ -1145,6 +1150,7 @@
     <string name="text_ignored_versions">Versions ignorees</string>
     <string name="text_import">Importer</string>
     <string name="text_import_color_library">Importer une bibliothèque de couleurs</string>
+    <string name="text_import_custom_css">Importer un CSS personnalisé</string>
     <string name="text_import_name_conflict">Un profil nomme \"%1$s\" existe deja, choisissez une methode d\'import:</string>
     <string name="text_import_script">Importer un ou des scripts</string>
     <string name="text_import_strategy_auto_rename">Renommage auto</string>
@@ -1479,6 +1485,13 @@
     <string name="text_press_again_to_exit">Appuyez à nouveau pour quitter</string>
     <string name="text_press_back_or_vol_down_to_close_window">Pour fermer, appuyez sur \"Retour\" ou \"Volume bas\"</string>
     <string name="text_preview">Préview</string>
+    <string name="text_preview_theme">Thème de l\'aperçu</string>
+    <string name="text_preview_theme_custom">CSS personnalisé</string>
+    <string name="text_preview_theme_github_auto">GitHub Auto</string>
+    <string name="text_preview_theme_github_dark">GitHub Sombre</string>
+    <string name="text_preview_theme_github_light">GitHub Clair</string>
+    <string name="text_preview_theme_paper">Papier</string>
+    <string name="text_preview_theme_sepia">Sépia</string>
     <string name="text_process_log">Journal de processus</string>
     <string name="text_processing">Traitement</string>
     <string name="text_processing_source">Traitement du code source</string>

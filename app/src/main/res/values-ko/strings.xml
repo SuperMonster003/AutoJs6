@@ -300,6 +300,8 @@
     <string name="error_continuation_resume_called_without_suspend">메소드 resume() 가 suspend() 후 호출해야합니다.</string>
     <string name="error_continuation_suspend_called_more_than_once">메소드 suspend() 는 한 번만 호출해야합니다</string>
     <string name="error_corresponding_github_release_may_not_published">해당 GitHub 릴리스는 아직 게시되지 않았을 수 있습니다</string>
+    <string name="error_custom_css_file_too_large">CSS 파일이 가져오기 제한(%1$s)을 초과합니다</string>
+    <string name="error_document_preview_file_too_large">파일이 미리보기 제한(%1$s)을 초과합니다</string>
     <string name="error_dot_decimal_notation_num_over_255">255 를 초과하는 점 십진수</string>
     <string name="error_download_interrupted">다운로드가 중단되었습니다</string>
     <string name="error_editor_encoding_validation_incomplete">파일 인코딩 검증이 완료되지 않았습니다. 저장하기 전에 파일 인코딩을 열고 다시 로드 또는 변환을 사용하세요.</string>
@@ -828,6 +830,7 @@
     <string name="text_clean_completed">정리 완료</string>
     <string name="text_cleaning_workspace">작업 공간 정리 중</string>
     <string name="text_clear">분명한</string>
+    <string name="text_clear_custom_css">사용자 지정 CSS 지우기</string>
     <string name="text_clear_file_selection">파일 선택을 지우십시오</string>
     <string name="text_clear_pre_execute_script">사전 에코 슈트 스크립트를 지우십시오</string>
     <string name="text_clear_trash">휴지통 비우기</string>
@@ -914,6 +917,8 @@
     <string name="text_current">현재</string>
     <string name="text_current_page_configuration">현재 페이지 설정</string>
     <string name="text_current_version">현재 버전</string>
+    <string name="text_custom_css_cleared">사용자 지정 CSS가 지워졌습니다</string>
+    <string name="text_custom_css_imported">사용자 지정 CSS를 가져왔습니다</string>
     <string name="text_daily_task">일상적인 작업</string>
     <string name="text_date">날짜</string>
     <string name="text_day1">월</string>
@@ -1147,6 +1152,7 @@
     <string name="text_ignored_versions">무시된 버전</string>
     <string name="text_import">수입</string>
     <string name="text_import_color_library">색상 라이브러리 가져오기</string>
+    <string name="text_import_custom_css">사용자 지정 CSS 가져오기</string>
     <string name="text_import_name_conflict">이름이 \"%1$s\" 인 프로필이 이미 있습니다. 가져오기 방식을 선택하세요:</string>
     <string name="text_import_script">스크립트 가져 오기</string>
     <string name="text_import_strategy_auto_rename">자동 이름 변경</string>
@@ -1481,6 +1487,13 @@
     <string name="text_press_again_to_exit">종료하려면 다시 누릅니다</string>
     <string name="text_press_back_or_vol_down_to_close_window">창을 닫으려면 \"뒤로\" 또는 \"볼륨 감소\" 버튼을 누르세요</string>
     <string name="text_preview">시사</string>
+    <string name="text_preview_theme">미리보기 테마</string>
+    <string name="text_preview_theme_custom">사용자 지정 CSS</string>
+    <string name="text_preview_theme_github_auto">GitHub 자동</string>
+    <string name="text_preview_theme_github_dark">GitHub 다크</string>
+    <string name="text_preview_theme_github_light">GitHub 라이트</string>
+    <string name="text_preview_theme_paper">종이</string>
+    <string name="text_preview_theme_sepia">세피아</string>
     <string name="text_process_log">프로세스 로그</string>
     <string name="text_processing">처리 중</string>
     <string name="text_processing_source">소스 처리 중</string>

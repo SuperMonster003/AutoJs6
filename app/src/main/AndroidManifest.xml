@@ -353,6 +353,11 @@
             android:theme="@style/EditorTheme" />
 
         <activity
+            android:name="org.autojs.autojs.ui.preview.DocumentPreviewActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
             android:name="org.autojs.autojs.ui.edit.keyboard.SymbolsSettingsActivity"
             android:theme="@style/AppTheme.Settings" />
 

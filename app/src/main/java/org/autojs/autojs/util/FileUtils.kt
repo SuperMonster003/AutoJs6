@@ -195,6 +195,8 @@ object FileUtils {
         val PROJECT = TypeData(IconData("✲", size = 22, toTop = 1.5), TYPE.IDENTITY_TEXT_EDITABLE)
         val TEXT = TypeData(IconData("✐", toTop = 1, toEnd = 0.5, degree = 121), TYPE.IDENTITY_TEXT_EDITABLE)
         val CREATION = TypeData(IconData("✎", toTop = 4, toEnd = 2, degree = 105), TYPE.IDENTITY_TEXT_EDITABLE)
+        val HTML_PREVIEW = TypeData(CREATION.iconData, CREATION.identity or TYPE.IDENTITY_PREVIEWABLE, PreviewType.HTML)
+        val MARKDOWN_PREVIEW = TypeData(CREATION.iconData, CREATION.identity or TYPE.IDENTITY_PREVIEWABLE, PreviewType.MARKDOWN)
         val CONFIG = TypeData(IconData("⚙", toStart = 0.5, toTop = 1), TYPE.IDENTITY_TEXT_EDITABLE)
         val DOCUMENT = TypeData(IconData("⌸", size = 24, toTop = 0.5, toEnd = 0.5), TYPE.IDENTITY_EXTERNAL_EDITABLE)
         val DISK_IMAGE = TypeData(IconData("⊚", size = 25, toTop = 1))
@@ -651,13 +653,16 @@ object FileUtils {
         SVG("svg", TypeDataHolder.CREATION),
 
         /** HTML file, standard markup language for web pages. */
-        HTML("html", TypeDataHolder.CREATION),
+        HTML("html", TypeDataHolder.HTML_PREVIEW),
 
         /** Alternative HTML file extension. */
-        HTM("htm", TypeDataHolder.CREATION),
+        HTM("htm", TypeDataHolder.HTML_PREVIEW),
+
+        /** Alternative server-side include HTML file extension. */
+        SHTM("shtm", TypeDataHolder.HTML_PREVIEW),
 
         /** Server-side include HTML file, used for dynamic webpages. */
-        SHTML("shtml", TypeDataHolder.CREATION),
+        SHTML("shtml", TypeDataHolder.HTML_PREVIEW),
 
         /** MIME Encapsulation of Aggregate HTML documents. */
         HMTML("mhtml", TypeDataHolder.CREATION),
@@ -669,7 +674,10 @@ object FileUtils {
         HTA("hta", TypeDataHolder.CREATION),
 
         /** XHTML file, a more strict and XML-compatible HTML version. */
-        XHT("xht", TypeDataHolder.CREATION),
+        XHT("xht", TypeDataHolder.HTML_PREVIEW),
+
+        /** XHTML file with the canonical long extension. */
+        XHTML("xhtml", TypeDataHolder.HTML_PREVIEW),
 
         /** LaTeX file, used for high-quality typesetting. */
         LTX("ltx", TypeDataHolder.CREATION),
@@ -682,10 +690,37 @@ object FileUtils {
 
         /** Markdown file, used for simple document formatting. */
         MARKDOWN(
-            "md", TypeDataHolder.CREATION,
+            "md", TypeDataHolder.MARKDOWN_PREVIEW,
             CandidateCriterion({ it.isMarkdownMDLike() }, 10),
             priority = 8,
         ),
+
+        /** Markdown file with the canonical long extension. */
+        MARKDOWN_LONG("markdown", TypeDataHolder.MARKDOWN_PREVIEW),
+
+        /** Markdown file using a common alternative extension. */
+        MDOWN("mdown", TypeDataHolder.MARKDOWN_PREVIEW),
+
+        /** Markdown file using a short alternative extension. */
+        MKD("mkd", TypeDataHolder.MARKDOWN_PREVIEW),
+
+        /** Markdown file using an alternative extension. */
+        MKDN("mkdn", TypeDataHolder.MARKDOWN_PREVIEW),
+
+        /** Markdown file using an alternative extension. */
+        MDWN("mdwn", TypeDataHolder.MARKDOWN_PREVIEW),
+
+        /** Markdown text file using a long extension. */
+        MDTEXT("mdtext", TypeDataHolder.MARKDOWN_PREVIEW),
+
+        /** Markdown text file using a compact extension. */
+        MDTXT("mdtxt", TypeDataHolder.MARKDOWN_PREVIEW),
+
+        /** R Markdown document. */
+        R_MARKDOWN("rmd", TypeDataHolder.MARKDOWN_PREVIEW),
+
+        /** Quarto Markdown document. */
+        QUARTO_MARKDOWN("qmd", TypeDataHolder.MARKDOWN_PREVIEW),
 
         /** Browser configuration file. */
         BROWSER("browser", TypeDataHolder.CREATION),
@@ -2924,6 +2959,9 @@ object FileUtils {
         @JvmField
         val identity: Int = typeData.identity
 
+        @JvmField
+        val previewType: PreviewType? = typeData.previewType
+
         fun isExecutable() = identity and IDENTITY_EXECUTABLE != 0
 
         fun isInstallable() = identity and IDENTITY_INSTALLABLE != 0
@@ -2935,6 +2973,8 @@ object FileUtils {
         fun isMediaMenu() = identity and IDENTITY_MEDIA_MENU != 0
 
         fun isMediaPlayable() = identity and IDENTITY_MEDIA_PLAYABLE != 0
+
+        fun isPreviewable() = identity and IDENTITY_PREVIEWABLE != 0 && previewType != null
 
         @Suppress("ArrayInDataClass")
         data class Icon(
@@ -2955,6 +2995,7 @@ object FileUtils {
             const val IDENTITY_EXTERNAL_EDITABLE = 0x08
             const val IDENTITY_MEDIA_MENU = 0x10
             const val IDENTITY_MEDIA_PLAYABLE = 0x20
+            const val IDENTITY_PREVIEWABLE = 0x40
 
             @JvmStatic
             fun determineBy(file: File): TYPE {
@@ -3382,7 +3423,16 @@ object FileUtils {
         val excludeFontPadding: Boolean = false,
     )
 
-    data class TypeData(val iconData: IconData, @JvmField val identity: Int = 0x0)
+    enum class PreviewType {
+        MARKDOWN,
+        HTML,
+    }
+
+    data class TypeData(
+        val iconData: IconData,
+        @JvmField val identity: Int = 0x0,
+        @JvmField val previewType: PreviewType? = null,
+    )
 
     /**
      * Represents a criterion used to evaluate files with a specific weight.

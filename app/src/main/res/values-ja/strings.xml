@@ -299,6 +299,8 @@
     <string name="error_continuation_resume_called_without_suspend">resume() メソッドは suspend() の後に呼び出す必要があります</string>
     <string name="error_continuation_suspend_called_more_than_once">suspend() メソッドは一度だけコールされるべきです</string>
     <string name="error_corresponding_github_release_may_not_published">対応する GitHub のリリースがまだ公開されていない可能性があります</string>
+    <string name="error_custom_css_file_too_large">CSS ファイルがインポート上限 (%1$s) を超えています</string>
+    <string name="error_document_preview_file_too_large">ファイルがプレビュー上限 (%1$s) を超えています</string>
     <string name="error_dot_decimal_notation_num_over_255">255 を超えるドット 10 進数</string>
     <string name="error_download_interrupted">ダウンロードが中断される</string>
     <string name="error_editor_encoding_validation_incomplete">ファイルのエンコーディング検証が完了していません. 保存する前にファイルエンコーディングを開き, 再読み込みまたは変換を実行してください.</string>
@@ -827,6 +829,7 @@
     <string name="text_clean_completed">クリーン完了</string>
     <string name="text_cleaning_workspace">ワークスペースをクリーン中</string>
     <string name="text_clear">クリア</string>
+    <string name="text_clear_custom_css">カスタム CSS をクリア</string>
     <string name="text_clear_file_selection">ファイル選択の解除</string>
     <string name="text_clear_pre_execute_script">実行前スクリプトのクリア</string>
     <string name="text_clear_trash">ゴミ箱を空にする</string>
@@ -913,6 +916,8 @@
     <string name="text_current">現在</string>
     <string name="text_current_page_configuration">現在のページ設定</string>
     <string name="text_current_version">現在のバージョン</string>
+    <string name="text_custom_css_cleared">カスタム CSS をクリアしました</string>
+    <string name="text_custom_css_imported">カスタム CSS をインポートしました</string>
     <string name="text_daily_task">デイリータスク</string>
     <string name="text_date">日付</string>
     <string name="text_day1">月</string>
@@ -1146,6 +1151,7 @@
     <string name="text_ignored_versions">無視したバージョン</string>
     <string name="text_import">インポート</string>
     <string name="text_import_color_library">カラーライブラリをインポート</string>
+    <string name="text_import_custom_css">カスタム CSS をインポート</string>
     <string name="text_import_name_conflict">同名のプロファイル \"%1$s\" が存在します. インポート方法を選択してください:</string>
     <string name="text_import_script">インポートスクリプト</string>
     <string name="text_import_strategy_auto_rename">自動リネーム</string>
@@ -1480,6 +1486,13 @@
     <string name="text_press_again_to_exit">もう一度押すと終了します</string>
     <string name="text_press_back_or_vol_down_to_close_window">閉じるには \"戻る\" または \"音量を下げる\" を押してください</string>
     <string name="text_preview">プレビュー</string>
+    <string name="text_preview_theme">プレビューテーマ</string>
+    <string name="text_preview_theme_custom">カスタム CSS</string>
+    <string name="text_preview_theme_github_auto">GitHub 自動</string>
+    <string name="text_preview_theme_github_dark">GitHub ダーク</string>
+    <string name="text_preview_theme_github_light">GitHub ライト</string>
+    <string name="text_preview_theme_paper">ペーパー</string>
+    <string name="text_preview_theme_sepia">セピア</string>
     <string name="text_process_log">プロセスログ</string>
     <string name="text_processing">処理中</string>
     <string name="text_processing_source">ソースを処理中</string>

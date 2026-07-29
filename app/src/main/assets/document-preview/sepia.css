@@ -1,0 +1,20 @@
+:root {
+    color-scheme: light;
+    --preview-bg: #f4ecd8;
+    --preview-fg: #4b3b2a;
+    --preview-muted: #77634d;
+    --preview-border: #cbb994;
+    --preview-link: #7a4d22;
+    --preview-code-bg: #775c3824;
+    --preview-block-bg: #eadfc5;
+    --preview-mark-bg: #e8cf78;
+}
+
+body {
+    font-family: Georgia, "Noto Serif", serif;
+    line-height: 1.75;
+}
+
+.markdown-body {
+    max-width: 860px;
+}

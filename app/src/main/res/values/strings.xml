@@ -293,6 +293,8 @@
     <string name="error_continuation_resume_called_without_suspend">Method resume() should be called after suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Method suspend() should be only called once</string>
     <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
+    <string name="error_custom_css_file_too_large">The CSS file exceeds the import limit (%1$s)</string>
+    <string name="error_document_preview_file_too_large">The file exceeds the preview limit (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
     <string name="error_download_interrupted">Download interrupted</string>
     <string name="error_editor_encoding_validation_incomplete">File encoding validation is incomplete. Choose File encoding and use Reload or Convert before saving.</string>
@@ -821,6 +823,7 @@
     <string name="text_clean_completed">Clean completed</string>
     <string name="text_cleaning_workspace">Cleaning workspace</string>
     <string name="text_clear">Clear</string>
+    <string name="text_clear_custom_css">Clear custom CSS</string>
     <string name="text_clear_file_selection">Clear file selection</string>
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
     <string name="text_clear_trash">Clear trash</string>
@@ -907,6 +910,8 @@
     <string name="text_current">Current</string>
     <string name="text_current_page_configuration">Current page configuration</string>
     <string name="text_current_version">Current version</string>
+    <string name="text_custom_css_cleared">Custom CSS has been cleared</string>
+    <string name="text_custom_css_imported">Custom CSS has been imported</string>
     <string name="text_daily_task">Daily task</string>
     <string name="text_date">Date</string>
     <string name="text_day1">Mon</string>
@@ -1140,6 +1145,7 @@
     <string name="text_ignored_versions">Ignored versions</string>
     <string name="text_import">Import</string>
     <string name="text_import_color_library">Import a color library</string>
+    <string name="text_import_custom_css">Import custom CSS</string>
     <string name="text_import_name_conflict">A profile named \"%1$s\" already exists, please choose an import strategy:</string>
     <string name="text_import_script">Import script(s)</string>
     <string name="text_import_strategy_auto_rename">Auto rename</string>
@@ -1474,6 +1480,13 @@
     <string name="text_press_again_to_exit">Press again to exit</string>
     <string name="text_press_back_or_vol_down_to_close_window">To close, press \"Back\" or \"Volume Down\"</string>
     <string name="text_preview">Preview</string>
+    <string name="text_preview_theme">Preview theme</string>
+    <string name="text_preview_theme_custom">Custom CSS</string>
+    <string name="text_preview_theme_github_auto">GitHub Auto</string>
+    <string name="text_preview_theme_github_dark">GitHub Dark</string>
+    <string name="text_preview_theme_github_light">GitHub Light</string>
+    <string name="text_preview_theme_paper">Paper</string>
+    <string name="text_preview_theme_sepia">Sepia</string>
     <string name="text_process_log">Process log</string>
     <string name="text_processing">Processing</string>
     <string name="text_processing_source">Processing source</string>

@@ -68,6 +68,7 @@ import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.explorer.ExplorerProjectToolbar.OnOperateListener
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
+import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_DATE
@@ -529,6 +530,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
                 notifyItemOperated()
                 mRequestHostDialogHide?.run()
+            }
+            R.id.action_preview -> {
+                val selected = selectedItem ?: return false
+                mRequestHostDialogHide?.run()
+                DocumentPreviewActivity.launch(context, selected.path)
+                notifyItemOperated()
             }
             R.id.action_run_repeatedly -> {
                 ScriptLoopDialog(context, selectedItem!!.toScriptFile())
@@ -1392,6 +1399,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             }
             if (!mExplorerItem.isTextEditable) {
                 menu.removeItem(R.id.action_version_history)
+            }
+            if (!mExplorerItem.isPreviewable) {
+                menu.removeItem(R.id.action_preview)
             }
             if (!mExplorerItem.canBuildApk()) {
                 menu.removeItem(R.id.action_build_apk)

@@ -195,6 +195,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Método device.getMarketName, para obtener el "nombre comercial" del dispositivo _[`issue #513`](http://issues.autojs6.com/513)_
 * `Nuevo` Las tareas programadas admiten tareas mensuales/anuales/con cuenta atrás y condiciones para finalizar la repetición _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Nuevo` El administrador de archivos admite selección múltiple y operaciones por lotes de copia/movimiento/eliminación
+* `Nuevo` El administrador de archivos admite la vista previa segura de archivos Markdown y HTML, con renderizado GFM, varios temas, CSS personalizado y carga controlada de recursos del mismo directorio
 * `Nuevo` El editor de código admite cargar Ace desde un plugin externo, con validación del firmante y la confianza, comprobaciones del contrato Editor API/la versión del anfitrión/la compatibilidad ABI binaria y retorno automático al editor nativo cuando el plugin no está disponible
 * `Nuevo` El editor de código admite el intercambio en caliente en tiempo de ejecución del plugin Ace externo y cambia automáticamente de motor según el estado de instalación o activación del plugin
 * `Nuevo` El editor Ace activa por defecto como función estable el completado inteligente local de TypeScript integrado, con completado de la API AutoJs6, ayuda de firmas, información al pasar el cursor y diagnósticos; se puede desactivar en los ajustes

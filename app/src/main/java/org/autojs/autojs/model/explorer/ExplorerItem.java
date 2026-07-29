@@ -74,6 +74,10 @@ public interface ExplorerItem {
         return getType().isMediaMenu();
     }
 
+    default boolean isPreviewable() {
+        return getType().isPreviewable();
+    }
+
     default boolean install(@NotNull View view) {
         return IntentUtils.installApk(view.getContext(), getPath(), AppFileProvider.AUTHORITY, new SnackExceptionHolder(view));
     }
