@@ -56,6 +56,8 @@ class DocumentPreviewWebController(
             allowFileAccessFromFileURLs = false
             allowUniversalAccessFromFileURLs = false
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            blockNetworkImage = false
+            blockNetworkLoads = false
 
             setSupportMultipleWindows(false)
             setSupportZoom(true)
@@ -88,10 +90,18 @@ class DocumentPreviewWebController(
                 ) {
                     return null
                 }
-                if (uri.scheme != "https" || uri.host != DocumentPreviewWebOrigin.DOMAIN) {
-                    return forbidden()
+                if (uri.scheme.equals("https", ignoreCase = true) && DocumentPreviewWebOrigin.isDomain(uri.host)) {
+                    return assetLoader.shouldInterceptRequest(uri) ?: forbidden()
                 }
-                return assetLoader.shouldInterceptRequest(uri) ?: forbidden()
+                if (
+                    DocumentPreviewRequestPolicy.shouldLetWebViewLoadHttpsSubresource(
+                        uri.toString(),
+                        request.isForMainFrame,
+                    )
+                ) {
+                    return null
+                }
+                return forbidden()
             }
 
             override fun shouldOverrideUrlLoading(
@@ -101,7 +111,7 @@ class DocumentPreviewWebController(
                 if (!request.isForMainFrame) return true
                 val uri = request.url
                 if (isLocalAnchor(uri)) return false
-                if (uri.host == DocumentPreviewWebOrigin.DOMAIN) return true
+                if (DocumentPreviewWebOrigin.isDomain(uri.host)) return true
                 if (request.hasGesture() && uri.scheme in EXTERNAL_LINK_SCHEMES) {
                     onExternalLink(uri)
                 }
@@ -134,7 +144,11 @@ class DocumentPreviewWebController(
     }
 
     private fun isLocalAnchor(uri: Uri): Boolean {
-        if (uri.scheme != "https" || uri.host != DocumentPreviewWebOrigin.DOMAIN || uri.fragment == null) {
+        if (
+            !uri.scheme.equals("https", ignoreCase = true) ||
+            !DocumentPreviewWebOrigin.isDomain(uri.host) ||
+            uri.fragment == null
+        ) {
             return false
         }
         return uri.path == DocumentPreviewWebOrigin.DOCUMENT_PATH_PREFIX ||
@@ -169,4 +183,13 @@ internal object DocumentPreviewRequestPolicy {
         !isForMainFrame &&
             url.startsWith("data:", ignoreCase = true) &&
             DocumentPreviewUrlPolicy.isSafeResource(url)
+
+    fun shouldLetWebViewLoadHttpsSubresource(
+        url: String,
+        isForMainFrame: Boolean,
+    ): Boolean {
+        if (isForMainFrame) return false
+        val host = DocumentPreviewUrlPolicy.safeRemoteHttpsHost(url) ?: return false
+        return !DocumentPreviewWebOrigin.isDomain(host)
+    }
 }

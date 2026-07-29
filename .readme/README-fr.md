@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/07/29
+###### 2026/07/30
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -301,6 +301,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Le panneau de journal inférieur permet d'accéder au code source en cliquant sur les cadres de pile de la page de journal indépendante
 * `Amélioration` Les changements de source de la documentation du projet prennent effet immédiatement
 * `Amélioration` Le gestionnaire de fichiers décode et formate le fichier AndroidManifest.xml binaire complet en arrière-plan uniquement après un appui sur le bouton Manifest, avec de meilleures performances de défilement des grands textes et de zoom par pincement
+* `Amélioration` Amélioration des aperçus Markdown du gestionnaire de fichiers avec le HTML brut couramment utilisé sur GitHub et nettoyé de manière sécurisée, les images distantes HTTPS, le défilement des tableaux sur écran étroit et la compatibilité avec les anciens commentaires masqués
 * `Amélioration` Amélioration du style et des fonctions des boîtes de dialogue "Trier" et "Filtrer" du Centre des plugins
 * `Amélioration` Le Centre des plugins affiche les variantes courantes par défaut et fournit une page distincte pour les autres variantes
 * `Amélioration` Amélioration des journaux des modifications multilingues/du cache des langues/de la vérification officielle/du chargement des index et d'autres fonctions du Centre des plugins

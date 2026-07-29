@@ -91,7 +91,7 @@ body {
 .markdown-body ul,
 .markdown-body ol,
 .markdown-body dl,
-.markdown-body table,
+.markdown-body .markdown-table-wrapper,
 .markdown-body pre,
 .markdown-body details {
     margin-top: 0;
@@ -169,11 +169,20 @@ body {
     white-space: pre;
 }
 
-.markdown-body table {
+.markdown-body .markdown-table-wrapper {
     display: block;
-    width: max-content;
+    width: 100%;
     max-width: 100%;
-    overflow: auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.markdown-body .markdown-table-wrapper table {
+    display: table;
+    width: max-content;
+    max-width: none;
+    margin: 0;
+    overflow: visible;
     border-spacing: 0;
     border-collapse: collapse;
 }
@@ -182,6 +191,8 @@ body {
 .markdown-body td {
     padding: 6px 13px;
     border: 1px solid var(--preview-border);
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 .markdown-body th {
@@ -205,7 +216,11 @@ body {
     background: var(--preview-border);
 }
 
-.markdown-body img,
+.markdown-body img {
+    max-width: 100%;
+    box-sizing: content-box;
+}
+
 .markdown-body video,
 .markdown-body svg,
 .markdown-body canvas {
@@ -215,6 +230,18 @@ body {
 
 .markdown-body mark {
     background: var(--preview-mark-bg);
+}
+
+.markdown-body [align="center"] {
+    text-align: center;
+}
+
+.markdown-body summary {
+    cursor: pointer;
+}
+
+.markdown-body details[open] > summary {
+    margin-bottom: 16px;
 }
 
 @media (max-width: 767px) {

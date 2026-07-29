@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/29
+###### 2026/07/30
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -141,6 +141,7 @@
 * `Mejora` El panel de registro inferior permite saltar al código fuente pulsando marcos de pila en la página de registro independiente
 * `Mejora` El cambio de la fuente de documentación del proyecto surte efecto inmediatamente
 * `Mejora` El administrador de archivos decodifica y formatea el AndroidManifest.xml binario completo en segundo plano solo después de pulsar el botón Manifest, con mejor rendimiento al desplazar textos grandes y usar zoom con dos dedos
+* `Mejora` Mejoradas las vistas previas de Markdown del administrador de archivos con HTML sin procesar utilizado habitualmente en GitHub y sanitizado de forma segura, imágenes remotas HTTPS, desplazamiento de tablas en pantallas estrechas y compatibilidad con comentarios ocultos de formato antiguo
 * `Mejora` Mejorados el estilo y las funciones de los diálogos "Ordenar" y "Filtrar" del Centro de plugins
 * `Mejora` El Centro de plugins muestra las variantes comunes de forma predeterminada y ofrece una página independiente para las demás variantes
 * `Mejora` Mejorados los registros de cambios multilingües/caché de idiomas/verificación oficial/carga de índices y otras funciones del Centro de plugins

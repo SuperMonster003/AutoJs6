@@ -52,21 +52,26 @@ class DocumentPreviewWebControllerInstrumentationTest {
                             pageFinished.countDown()
                         },
                     ).also {
-                        it.show(
-                            """
-                                <!doctype html>
-                                <html>
-                                <head>
-                                    <meta charset="UTF-8">
-                                    <title>$EXPECTED_DOCUMENT_TITLE</title>
-                                    <link
-                                        rel="stylesheet"
-                                        href="${DocumentPreviewWebOrigin.PREVIEW_ASSET_BASE_URL}base.css"
-                                    >
-                                </head>
-                                <body>Document preview loaded</body>
-                                </html>
+                        val renderedPreview = DocumentPreviewRenderer().renderMarkdown(
+                            markdown = """
+                                # Document preview loaded
+
+                                <div align="center">
+                                  <details><summary>Preview details</summary>Safe content</details>
+                                </div>
+
+                                | Name | Value |
+                                | --- | --- |
+                                | One | Two |
                             """.trimIndent(),
+                            stylesheetName = "github-light.css",
+                            customCss = null,
+                        ).replace(
+                            "<head>",
+                            "<head><title>$EXPECTED_DOCUMENT_TITLE</title>",
+                        )
+                        it.show(
+                            renderedPreview,
                         )
                     },
                 )
@@ -117,6 +122,8 @@ class DocumentPreviewWebControllerInstrumentationTest {
                         assertFalse(allowContentAccess)
                         assertFalse(allowFileAccessFromFileURLs)
                         assertFalse(allowUniversalAccessFromFileURLs)
+                        assertFalse(blockNetworkImage)
+                        assertFalse(blockNetworkLoads)
                         assertEquals(WebSettings.MIXED_CONTENT_NEVER_ALLOW, mixedContentMode)
                     }
                 } finally {

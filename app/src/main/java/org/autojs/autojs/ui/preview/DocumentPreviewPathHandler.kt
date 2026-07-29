@@ -163,6 +163,7 @@ private val RESPONSE_HEADERS = mapOf(
 
 private val DOCUMENT_RESPONSE_HEADERS = RESPONSE_HEADERS + mapOf(
     "Content-Security-Policy" to DocumentPreviewSecurityPolicy.CONTENT_SECURITY_POLICY,
+    "Referrer-Policy" to DocumentPreviewSecurityPolicy.REFERRER_POLICY,
 )
 
 private fun notFound(): WebResourceResponse = WebResourceResponse(
