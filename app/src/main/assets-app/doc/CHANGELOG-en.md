@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/28
+###### 2026/07/29
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -69,6 +69,7 @@
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
 * `Fix` Shell-related methods could become unresponsive on devices without Root access
 * `Fix` Multiple-choice results returned by dialogs.multiChoice were incorrectly converted to strings _[`issue #518`](http://issues.autojs6.com/518)_
+* `Fix` The app could crash when a script dialog was dismissed while its thread Looper was exiting because a timer callback could no longer be scheduled
 * `Fix` Selector module could choose the wrong method signature when invoking overloaded methods through reflection
 * `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
@@ -88,6 +89,7 @@
 * `Fix` Memory usage could continue to increase after repeatedly running scripts (attempted fix) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Fix` The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_
 * `Fix` Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
+* `Fix` The Home > Docs tab could crash the app when ViewPager received an anomalous multi-pointer sequence containing an invalid pointer index
 * `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
 * `Fix` Code editor settings primary titles, the fx function panel, the left-pinned documentation drawer, and the Ace text-selection toolbar could still use AutoJs6 app colors instead of the current editor theme, while Ace line actions could appear more than once
 * `Fix` Fullscreen editing could let the soft keyboard cover the multifunction key bar, and the navigation-bar area below the fullscreen hint Snackbar could remain transparent

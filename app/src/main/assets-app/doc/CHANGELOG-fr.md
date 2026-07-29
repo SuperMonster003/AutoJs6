@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/28
+###### 2026/07/29
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -69,6 +69,7 @@
 * `Correction` app.isInstalled/kill et les méthodes associées ne pouvaient pas utiliser correctement les arguments de nom de paquet _[`issue #495`](http://issues.autojs6.com/495)_
 * `Correction` Les méthodes liées au shell pouvaient ne plus répondre sur les appareils sans accès Root
 * `Correction` Les résultats de sélection multiple renvoyés par dialogs.multiChoice étaient convertis à tort en chaînes _[`issue #518`](http://issues.autojs6.com/518)_
+* `Correction` L'application pouvait planter lorsqu'une boîte de dialogue de script était fermée pendant l'arrêt du Looper de son thread, car un callback de timer ne pouvait plus être planifié
 * `Correction` Le module selector pouvait choisir une mauvaise signature lors de l'invocation de méthodes surchargées par réflexion
 * `Correction` Une régression de compatibilité de l'API de portée après la mise à jour du moteur Rhino provoquait le dysfonctionnement de certaines fonctions auxiliaires d'exécution
 * `Correction` Le pont des modules Rhino traitait incorrectement null/undefined, Callable, les constructeurs, les prototypes, les realms et les valeurs de retour Kotlin, ce qui pouvait produire des objets inter-realm, perdre des callbacks ou provoquer des exceptions d'exécution
@@ -88,6 +89,7 @@
 * `Correction` L'utilisation de la mémoire pouvait continuer à augmenter après l'exécution répétée de scripts (tentative de correction) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Correction` Le chemin d'origine pouvait ne pas être conservé lors de l'exécution de scripts via des URI externes ou en arrière-plan, entraînant une résolution incorrecte des chemins relatifs _[`issue #545`](http://issues.autojs6.com/545)_
 * `Correction` Tasker ne pouvait pas invoquer et exécuter correctement les scripts _[`issue #501`](http://issues.autojs6.com/501)_
+* `Correction` L'onglet Docs de la page d'accueil pouvait faire planter l'application lorsque ViewPager recevait une séquence multitactile anormale avec un index de pointeur invalide
 * `Correction` Plusieurs problèmes d'interaction de l'éditeur Ace concernant l'IME/la sélection de texte/le pliage du code/le zoom par pincement/la navigation dans la pile et d'autres scénarios
 * `Correction` Les titres principaux des paramètres de l'éditeur de code, le panneau de fonctions fx, le tiroir de documentation épinglé à gauche et la barre d'outils de sélection de texte Ace pouvaient encore utiliser les couleurs de l'application AutoJs6 au lieu du thème actuel de l'éditeur, et les actions de ligne Ace pouvaient apparaître en double
 * `Correction` En mode d'édition plein écran, le clavier virtuel pouvait recouvrir la barre de touches multifonctions et la zone de la barre de navigation sous le Snackbar d'indication du plein écran pouvait rester transparente

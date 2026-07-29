@@ -9,7 +9,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.looper.Loopers;
-import org.autojs.autojs.core.looper.Timer;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.tool.UiHandler;
 import org.jetbrains.annotations.NotNull;
@@ -23,18 +22,15 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
 
     private final EventEmitter mEmitter;
     private final UiHandler mUiHandler;
-    private volatile Timer mTimer;
     private final Loopers mLoopers;
-    private final ScriptRuntime mRuntime;
+    private final DialogWaitTokenStore mWaitTokenStore = new DialogWaitTokenStore();
     private JsDialog mDialog;
-    private volatile int mWaitId = -1;
 
     @Nullable
     public Object thread;
 
     public JsDialogBuilder(Context context, ScriptRuntime scriptRuntime) {
         super(context);
-        mRuntime = scriptRuntime;
         mLoopers = scriptRuntime.loopers;
         mEmitter = new EventEmitter(scriptRuntime.bridges);
         mUiHandler = scriptRuntime.getUiHandler();
@@ -63,16 +59,40 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
                 }
             }
         });
-        dismissListener(dialog -> {
-            mTimer.postDelayed(() -> mLoopers.doNotWaitWhenIdle(mWaitId), 0);
-            emit("dismiss", dialog);
-        });
+        dismissListener(dialog -> onDismiss(mWaitTokenStore.detach(), dialog, null));
         cancelListener(dialog -> emit("cancel", dialog));
     }
 
+    @Deprecated
     public void onShowCalled() {
-        mTimer = mRuntime.timers.getTimerForCurrentThread();
-        mWaitId = mLoopers.waitWhenIdle();
+        onShowStarting(onShowRequested());
+    }
+
+    Loopers.WaitToken onShowRequested() {
+        return mLoopers.waitWhenIdleToken$app();
+    }
+
+    void onShowStarting(Loopers.WaitToken waitToken) {
+        mWaitTokenStore.replace(waitToken);
+    }
+
+    void onShowFailed(Loopers.WaitToken waitToken) {
+        mWaitTokenStore.release(waitToken);
+    }
+
+    void onDismiss(@Nullable Loopers.WaitToken waitToken, Object dialog, @Nullable Runnable userCallback) {
+        if (waitToken != null) {
+            mWaitTokenStore.detach(waitToken);
+        }
+        DialogDismissDispatcher.dispatch(
+            () -> emit("dismiss", dialog),
+            userCallback,
+            () -> {
+                if (waitToken != null) {
+                    waitToken.release();
+                }
+            }
+        );
     }
 
     public JsDialog getDialog() {

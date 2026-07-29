@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 7 月 28 日.
+数据更新于 2026 年 7 月 29 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/07/28
+###### 2026/07/29
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
@@ -229,6 +229,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_
 * `修复` 无 Root 权限设备调用 shell 相关方法时可能出现假死的问题
 * `修复` dialogs.multiChoice 方法返回的多选结果被错误转换为字符串的问题 _[`issue #518`](http://issues.autojs6.com/518)_
+* `修复` 脚本对话框在线程 Looper 退出时关闭, 因无法调度 timer 回调而导致应用崩溃的问题
 * `修复` selector 模块反射调用重载方法时可能选择错误方法签名的问题
 * `修复` Rhino 引擎更新后作用域 API 兼容性回归导致部分运行时辅助功能异常的问题
 * `修复` Rhino 模块桥接对 null/undefined, Callable, 构造器, 原型, realm 及 Kotlin 返回值的处理不正确, 可能导致跨 realm 对象, 回调丢失或运行时异常的问题
@@ -248,6 +249,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 脚本反复运行后内存占用可能持续增长的问题 (试修) _[`issue #548`](http://issues.autojs6.com/548)_
 * `修复` 通过外部 URI 或后台运行脚本时可能无法保留原始路径, 导致相对路径解析异常的问题 _[`issue #545`](http://issues.autojs6.com/545)_
 * `修复` Tasker 无法正常调用并运行脚本的问题 _[`issue #501`](http://issues.autojs6.com/501)_
+* `修复` 主页文档标签页操作时, ViewPager 可能因异常多指触摸序列产生无效指针索引并导致应用崩溃的问题
 * `修复` Ace 编辑器在输入法交互/文本选择/代码折叠/双指缩放/堆栈跳转等场景下的多项交互问题
 * `修复` 编辑器设置主标题, fx 函数面板, 固定在左侧的文档抽屉及 Ace 文本选择工具栏可能沿用 AutoJs6 应用配色而非当前编辑器主题, 且 Ace 行操作可能重复出现的问题
 * `修复` 全屏编辑模式下软键盘可能覆盖多功能按键栏, 且全屏提示 Snackbar 下方导航栏区域可能透明的问题
@@ -584,7 +586,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 7 月 28 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 7 月 29 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

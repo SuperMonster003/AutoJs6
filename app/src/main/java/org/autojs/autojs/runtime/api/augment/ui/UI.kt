@@ -9,7 +9,6 @@ import androidx.core.graphics.drawable.toDrawable
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.looper.Loopers
-import org.autojs.autojs.core.looper.Timer
 import org.autojs.autojs.core.ui.JsViewHelper
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.core.ui.attribute.ViewAttributeDelegate
@@ -486,14 +485,24 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 "Argument \"action\" ${action.jsBrief()} for ui.post must be a JavaScript Function"
             }
             val loopers = scriptRuntime.loopers
-            val timer = scriptRuntime.timers.timerForCurrentThread
-            val waitId = timer?.let { loopers.waitWhenIdle() } ?: -1
+            val waitToken = scriptRuntime.timers.timerForCurrentThread?.let {
+                loopers.waitWhenIdleToken()
+            }
 
-            val uiAction = wrapUiActionForPost(scriptRuntime, action, loopers, timer, waitId)
+            val uiAction = wrapUiActionForPost(scriptRuntime, action, waitToken)
 
-            return when {
-                delay.isJsNullish() -> scriptRuntime.uiHandler.post(uiAction)
-                else -> scriptRuntime.uiHandler.postDelayed(uiAction, coerceLongNumber(delay, 0L))
+            return try {
+                when {
+                    delay.isJsNullish() -> scriptRuntime.uiHandler.post(uiAction)
+                    else -> scriptRuntime.uiHandler.postDelayed(uiAction, coerceLongNumber(delay, 0L))
+                }.also { posted ->
+                    if (!posted) {
+                        waitToken?.release()
+                    }
+                }
+            } catch (t: Throwable) {
+                waitToken?.release()
+                throw t
             }
         }
 
@@ -916,7 +925,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             callFunction(scriptRuntime.js_UiExt, scriptRuntime.topLevelScope, null, arrayOf(webView))
         }
 
-        private fun wrapUiActionForPost(scriptRuntime: ScriptRuntime, action: Callable, loopers: Loopers, timer: Timer?, waitId: Int) = Runnable {
+        private fun wrapUiActionForPost(scriptRuntime: ScriptRuntime, action: Callable, waitToken: Loopers.WaitToken?) = Runnable {
             try {
                 val isAutoJsUiMode = !getActivity(scriptRuntime).isJsNullish()
                 when {
@@ -932,7 +941,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     }
                 }
             } finally {
-                timer?.postDelayed({ loopers.doNotWaitWhenIdle(waitId) }, 0)
+                waitToken?.release()
             }
         }
 

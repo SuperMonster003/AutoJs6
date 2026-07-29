@@ -72,7 +72,10 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
     }
 
     fun waitWhenIdle(): Int {
-        return createWaitToken().id
+        val intValue = requireNotNull(mMaxWaitId.get())
+        mMaxWaitId.set(intValue + 1)
+        requireNotNull(mWaitIds.get()).add(intValue)
+        return intValue
     }
 
     internal fun waitWhenIdleToken(): WaitToken {
@@ -80,11 +83,14 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
     }
 
     private fun createWaitToken(): WaitToken {
-        val intValue = requireNotNull(mMaxWaitId.get())
-        mMaxWaitId.set(intValue + 1)
+        val wakeHandler = Handler(requireNotNull(Looper.myLooper()) {
+            "Cannot wait for an idle callback on a thread without a looper"
+        })
+        val intValue = waitWhenIdle()
         val waitIds = requireNotNull(mWaitIds.get())
-        waitIds.add(intValue)
-        return WaitToken(intValue, waitIds)
+        return WaitToken(intValue, WakeUpOnRemoveSet(waitIds) {
+            wakeHandler.post(EMPTY_RUNNABLE)
+        })
     }
 
     fun waitWhenIdle(b: Boolean) {

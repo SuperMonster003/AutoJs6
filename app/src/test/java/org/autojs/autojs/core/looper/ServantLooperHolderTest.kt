@@ -16,25 +16,64 @@ import java.util.concurrent.atomic.AtomicReference
 class ServantLooperHolderTest {
 
     @Test
-    fun interruptedFirstGetThrowsScriptInterruptedException() {
+    fun interruptedFirstGetThrowsScriptInterruptedExceptionAndAnotherCallerReceivesValue() {
+        val sentinel = Any()
         val starts = AtomicInteger()
+        val releasePublisher = CountDownLatch(1)
+        val publisher = AtomicReference<Thread>()
         val holder = ServantLooperHolder<Any>(
-            starter = { _, _ -> starts.incrementAndGet() },
+            starter = { publish, fail ->
+                starts.incrementAndGet()
+                publisher.set(Thread {
+                    try {
+                        releasePublisher.await()
+                        publish(sentinel)
+                    } catch (t: Throwable) {
+                        fail(t)
+                    }
+                }.apply { start() })
+            },
             disposer = {},
         )
+        val followerResult = AtomicReference<Any>()
+        val followerFailure = AtomicReference<Throwable>()
+        var follower: Thread? = null
 
-        Thread.currentThread().interrupt()
         try {
-            holder.get()
-            fail("Expected ScriptInterruptedException")
-        } catch (e: ScriptInterruptedException) {
-            assertTrue(e.cause is InterruptedException)
+            Thread.currentThread().interrupt()
+            try {
+                holder.get()
+                fail("Expected ScriptInterruptedException")
+            } catch (e: ScriptInterruptedException) {
+                assertTrue(e.cause is InterruptedException)
+            } finally {
+                Thread.interrupted()
+            }
+
+            val followerThread = Thread {
+                try {
+                    followerResult.set(holder.get())
+                } catch (t: Throwable) {
+                    followerFailure.set(t)
+                }
+            }.apply { start() }
+            follower = followerThread
+            releasePublisher.countDown()
+            followerThread.join(5_000)
+
+            assertFalse(followerThread.isAlive)
+            assertTrue(followerFailure.get()?.toString(), followerFailure.get() == null)
+            assertSame(sentinel, followerResult.get())
+            assertEquals(1, starts.get())
         } finally {
             Thread.interrupted()
+            releasePublisher.countDown()
             holder.close()
+            follower?.interrupt()
+            publisher.get()?.interrupt()
+            follower?.join(5_000)
+            publisher.get()?.join(5_000)
         }
-
-        assertEquals(1, starts.get())
     }
 
     @Test

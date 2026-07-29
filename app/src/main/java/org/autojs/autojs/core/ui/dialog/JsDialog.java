@@ -38,6 +38,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
 import com.google.android.material.snackbar.Snackbar;
 import org.autojs.autojs.core.eventloop.EventEmitter;
+import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.tool.UiHandler;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.Callable;
@@ -57,8 +58,13 @@ public class JsDialog {
     private final UiHandler mUiHandler;
     private final MaterialDialog mDialog;
     private final JsDialogBuilder mBuilder;
+    private final Object mDismissCallbackLock = new Object();
 
     private OnBackPressedFromJs mOnBackPressedFromJs;
+    @Nullable
+    private UserDismissCallback mUserDismissCallback;
+    @Nullable
+    private Loopers.WaitToken mActiveDismissWaitToken;
 
     public JsDialog(JsDialogBuilder builder, EventEmitter emitter, UiHandler uiHandler) {
         mBuilder = builder;
@@ -69,13 +75,59 @@ public class JsDialog {
 
     public JsDialog show() {
         checkWindowType();
+        Loopers.WaitToken waitToken = mBuilder.onShowRequested();
         if (isUiThread()) {
-            mDialog.show();
+            showDialog(waitToken);
         } else {
-            mUiHandler.post(mDialog::show);
+            try {
+                if (!mUiHandler.post(() -> showDialog(waitToken))) {
+                    mBuilder.onShowFailed(waitToken);
+                }
+            } catch (RuntimeException | Error throwable) {
+                mBuilder.onShowFailed(waitToken);
+                throw throwable;
+            }
         }
-        mBuilder.onShowCalled();
         return this;
+    }
+
+    private void showDialog(Loopers.WaitToken waitToken) {
+        try {
+            installDismissCallback(waitToken);
+            mBuilder.onShowStarting(waitToken);
+            mDialog.show();
+        } catch (RuntimeException | Error throwable) {
+            clearActiveDismissWaitToken(waitToken);
+            mBuilder.onShowFailed(waitToken);
+            throw throwable;
+        }
+    }
+
+    private void installDismissCallback(Loopers.WaitToken waitToken) {
+        synchronized (mDismissCallbackLock) {
+            mActiveDismissWaitToken = waitToken;
+            installDismissCallbackLocked(waitToken);
+        }
+    }
+
+    private void installDismissCallbackLocked(Loopers.WaitToken waitToken) {
+        UserDismissCallback userDismissCallback = mUserDismissCallback;
+        mDialog.setOnDismissListener(dialog -> {
+            clearActiveDismissWaitToken(waitToken);
+            mBuilder.onDismiss(
+                waitToken,
+                dialog,
+                userDismissCallback == null ? null : () -> userDismissCallback.notifyDismiss(dialog)
+            );
+        });
+    }
+
+    private void clearActiveDismissWaitToken(Loopers.WaitToken waitToken) {
+        synchronized (mDismissCallbackLock) {
+            if (mActiveDismissWaitToken == waitToken) {
+                mActiveDismissWaitToken = null;
+            }
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -749,11 +801,21 @@ public class JsDialog {
     }
 
     public void setOnDismissListener(@Nullable DialogInterface.OnDismissListener listener) {
-        mDialog.setOnDismissListener(listener);
+        synchronized (mDismissCallbackLock) {
+            mUserDismissCallback = listener == null ? null : new UserDismissCallback(listener);
+            if (mActiveDismissWaitToken != null) {
+                installDismissCallbackLocked(mActiveDismissWaitToken);
+            }
+        }
     }
 
     public void setDismissMessage(@Nullable Message msg) {
-        mDialog.setDismissMessage(msg);
+        synchronized (mDismissCallbackLock) {
+            mUserDismissCallback = msg == null ? null : new UserDismissCallback(msg);
+            if (mActiveDismissWaitToken != null) {
+                installDismissCallbackLocked(mActiveDismissWaitToken);
+            }
+        }
     }
 
     public void setVolumeControlStream(int streamType) {
@@ -839,6 +901,33 @@ public class JsDialog {
 
     public static int defaultMaxListeners() {
         return EventEmitter.defaultMaxListeners();
+    }
+
+    private static final class UserDismissCallback {
+
+        @Nullable
+        private final DialogInterface.OnDismissListener mListener;
+        @Nullable
+        private final Message mMessage;
+
+        private UserDismissCallback(DialogInterface.OnDismissListener listener) {
+            mListener = listener;
+            mMessage = null;
+        }
+
+        private UserDismissCallback(Message message) {
+            mListener = null;
+            mMessage = message;
+        }
+
+        private void notifyDismiss(DialogInterface dialog) {
+            if (mListener != null) {
+                mListener.onDismiss(dialog);
+            } else if (mMessage != null) {
+                Message.obtain(mMessage).sendToTarget();
+            }
+        }
+
     }
 
 }

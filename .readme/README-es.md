@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 28 de July de 2026.
+Datos actualizados el 29 de July de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/07/28
+###### 2026/07/29
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -229,6 +229,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_
 * `Corrección` Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root
 * `Corrección` Los resultados de selección múltiple devueltos por dialogs.multiChoice se convertían incorrectamente en cadenas _[`issue #518`](http://issues.autojs6.com/518)_
+* `Corrección` La aplicación podía cerrarse inesperadamente al cerrar un diálogo de script mientras el Looper de su hilo estaba terminando porque no se podía programar un callback de timer
 * `Corrección` El módulo selector podía elegir una firma de método incorrecta al invocar métodos sobrecargados mediante reflexión
 * `Corrección` Una regresión de compatibilidad de la API de ámbitos tras actualizar el motor Rhino provocaba fallos en algunas funciones auxiliares del entorno de ejecución
 * `Corrección` El puente de módulos Rhino procesaba incorrectamente null/undefined, Callable, constructores, prototipos, realms y valores de retorno de Kotlin, lo que podía causar objetos entre realms, pérdida de callbacks o excepciones en tiempo de ejecución
@@ -248,6 +249,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` El uso de memoria podía seguir aumentando tras ejecutar scripts repetidamente (intento de corrección) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Corrección` La ruta original podía no conservarse al ejecutar scripts mediante URI externos o en segundo plano, lo que provocaba una resolución incorrecta de rutas relativas _[`issue #545`](http://issues.autojs6.com/545)_
 * `Corrección` Tasker no podía invocar y ejecutar scripts correctamente _[`issue #501`](http://issues.autojs6.com/501)_
+* `Corrección` La pestaña Documentos de la página principal podía provocar el cierre inesperado de la aplicación cuando ViewPager recibía una secuencia multitáctil anómala con un índice de puntero no válido
 * `Corrección` Diversos problemas de interacción del editor Ace relacionados con IME/selección de texto/plegado de código/zoom con pellizco/navegación de pila y otros escenarios
 * `Corrección` Los títulos principales de los ajustes del editor de código, el panel de funciones fx, el cajón de documentación fijado a la izquierda y la barra de herramientas de selección de texto de Ace podían seguir usando los colores de la aplicación AutoJs6 en lugar del tema actual del editor, y las acciones de línea de Ace podían aparecer duplicadas
 * `Corrección` En el modo de edición a pantalla completa, el teclado virtual podía cubrir la barra de teclas multifunción y el área de la barra de navegación situada bajo el Snackbar de aviso podía quedar transparente
@@ -584,7 +586,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 28 de July de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 29 de July de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/28",
+      "released_date": "2026/07/29",
       "feature": [
         "Node.js 24.5.0 脚本运行时, 支持通过 \"nodejs\" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本",
         "Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码",
@@ -66,6 +66,7 @@
         "app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_",
         "无 Root 权限设备调用 shell 相关方法时可能出现假死的问题",
         "dialogs.multiChoice 方法返回的多选结果被错误转换为字符串的问题 _[`issue #518`](http://issues.autojs6.com/518)_",
+        "脚本对话框在线程 Looper 退出时关闭, 因无法调度 timer 回调而导致应用崩溃的问题",
         "selector 模块反射调用重载方法时可能选择错误方法签名的问题",
         "Rhino 引擎更新后作用域 API 兼容性回归导致部分运行时辅助功能异常的问题",
         "Rhino 模块桥接对 null/undefined, Callable, 构造器, 原型, realm 及 Kotlin 返回值的处理不正确, 可能导致跨 realm 对象, 回调丢失或运行时异常的问题",
@@ -85,6 +86,7 @@
         "脚本反复运行后内存占用可能持续增长的问题 (试修) _[`issue #548`](http://issues.autojs6.com/548)_",
         "通过外部 URI 或后台运行脚本时可能无法保留原始路径, 导致相对路径解析异常的问题 _[`issue #545`](http://issues.autojs6.com/545)_",
         "Tasker 无法正常调用并运行脚本的问题 _[`issue #501`](http://issues.autojs6.com/501)_",
+        "主页文档标签页操作时, ViewPager 可能因异常多指触摸序列产生无效指针索引并导致应用崩溃的问题",
         "Ace 编辑器在输入法交互/文本选择/代码折叠/双指缩放/堆栈跳转等场景下的多项交互问题",
         "编辑器设置主标题, fx 函数面板, 固定在左侧的文档抽屉及 Ace 文本选择工具栏可能沿用 AutoJs6 应用配色而非当前编辑器主题, 且 Ace 行操作可能重复出现的问题",
         "全屏编辑模式下软键盘可能覆盖多功能按键栏, 且全屏提示 Snackbar 下方导航栏区域可能透明的问题",
