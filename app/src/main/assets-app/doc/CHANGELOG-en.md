@@ -86,6 +86,7 @@
 * `Fix` Incorrect `images.resize(ImageWrapper, width, height)` calls could pass the height to OpenCV as an interpolation value, while incompatible native exception unwinding could crash the app instead of reporting a script exception
 * `Fix` File manager media details could remain as "..." or crash the app when the MediaInfo plugin library was unavailable or a Binder call failed, without falling back to Android platform metadata
 * `Fix` File manager video detail dialogs incorrectly displayed embedded audio format and metadata fields
+* `Fix` The Markdown and HTML preview main document could be incorrectly rejected by the request interceptor on some WebView versions and physical devices
 * `Fix` Accessibility service could stop unexpectedly while performing consecutive operations such as back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Fix` Memory usage could continue to increase after repeatedly running scripts (attempted fix) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Fix` The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_

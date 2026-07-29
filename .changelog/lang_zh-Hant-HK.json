@@ -83,6 +83,7 @@
         "`images.resize(ImageWrapper, width, height)` 錯誤用法會將高度作為 OpenCV 插值參數傳入, 且不兼容的原生異常展開可能導致應用崩潰而非報告腳本異常的問題",
         "MediaInfo 插件媒體庫不可用或 Binder 調用異常時, 文件管理器媒體詳情可能只顯示 \"...\" 或導致應用崩潰, 且無法回退顯示 Android 平台元數據的問題",
         "文件管理器視頻詳情對話框錯誤顯示內嵌音頻格式及元數據字段的問題",
+        "部分 WebView 版本及實體設備上的 Markdown 與 HTML 預覽主文檔被請求攔截器錯誤拒絕的問題",
         "無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_",
         "腳本反覆運行後內存佔用可能持續增長的問題 (試修) _[`issue #548`](http://issues.autojs6.com/548)_",
         "通過外部 URI 或後台運行腳本時可能無法保留原始路徑, 導致相對路徑解析異常的問題 _[`issue #545`](http://issues.autojs6.com/545)_",

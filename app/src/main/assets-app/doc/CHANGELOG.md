@@ -86,6 +86,7 @@
 * `修复` `images.resize(ImageWrapper, width, height)` 错误用法会将高度作为 OpenCV 插值参数传入, 且不兼容的原生异常展开可能导致应用崩溃而非报告脚本异常的问题
 * `修复` MediaInfo 插件媒体库不可用或 Binder 调用异常时, 文件管理器媒体详情可能仅显示 "..." 或导致应用崩溃, 且无法降级显示 Android 平台元数据的问题
 * `修复` 文件管理器视频详情对话框错误显示内嵌音频格式及元数据字段的问题
+* `修复` 部分 WebView 版本及实体设备上的 Markdown 与 HTML 预览主文档被请求拦截器误拒绝的问题
 * `修复` 无障碍服务在连续执行 back 等操作时可能意外中断的问题 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修复` 脚本反复运行后内存占用可能持续增长的问题 (试修) _[`issue #548`](http://issues.autojs6.com/548)_
 * `修复` 通过外部 URI 或后台运行脚本时可能无法保留原始路径, 导致相对路径解析异常的问题 _[`issue #545`](http://issues.autojs6.com/545)_

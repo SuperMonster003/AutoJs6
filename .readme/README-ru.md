@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 29 July 2026 года.
+Данные обновлены на 30 July 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -246,6 +246,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Исправление` Некорректные вызовы `images.resize(ImageWrapper, width, height)` могли передавать высоту в OpenCV как значение интерполяции, а несовместимая раскрутка нативных исключений могла аварийно завершить приложение вместо сообщения об исключении скрипта
 * `Исправление` Сведения о медиафайле в файловом менеджере могли оставаться в состоянии "..." или приводить к сбою приложения, если библиотека MediaInfo плагина была недоступна или вызов Binder завершался ошибкой, без перехода на метаданные Android
 * `Исправление` В диалоге сведений о видео в файловом менеджере ошибочно отображались поля формата и метаданных встроенного аудио
+* `Исправление` Перехватчик запросов ошибочно отклонял основной документ предварительного просмотра Markdown и HTML в некоторых версиях WebView и на физических устройствах
 * `Исправление` Служба специальных возможностей могла неожиданно прерываться при последовательном выполнении таких операций, как back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Исправление` Использование памяти могло продолжать расти после многократного запуска скриптов (пробное исправление) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Исправление` Исходный путь мог не сохраняться при запуске скриптов через внешние URI или в фоновом режиме, что приводило к неверному разрешению относительных путей _[`issue #545`](http://issues.autojs6.com/545)_
@@ -587,7 +588,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 29 July 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 30 July 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

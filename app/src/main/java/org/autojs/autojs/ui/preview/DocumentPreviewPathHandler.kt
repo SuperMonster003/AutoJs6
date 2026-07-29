@@ -7,18 +7,40 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicReference
 
-class DocumentPreviewFilePathHandler(
+class DocumentPreviewDocumentPathHandler(
     rootDirectory: File,
 ) : WebViewAssetLoader.PathHandler {
 
     private val canonicalRoot = rootDirectory.canonicalFile
+    private val documentBytes = AtomicReference<ByteArray?>(null)
 
     init {
         require(canonicalRoot.isDirectory) { "Preview resource root must be a directory" }
     }
 
+    fun updateDocument(html: String) {
+        documentBytes.set(html.toByteArray(Charsets.UTF_8))
+    }
+
+    fun clearDocument() {
+        documentBytes.set(null)
+    }
+
     override fun handle(path: String): WebResourceResponse {
+        if (path == DocumentPreviewWebOrigin.DOCUMENT_FILE_NAME) {
+            val bytes = documentBytes.get() ?: return notFound()
+            return WebResourceResponse(
+                "text/html",
+                Charsets.UTF_8.name(),
+                200,
+                "OK",
+                DOCUMENT_RESPONSE_HEADERS,
+                ByteArrayInputStream(bytes),
+            )
+        }
+
         val resource = DocumentPreviewPathPolicy.resolve(canonicalRoot, path) ?: return notFound()
         val input = try {
             resource.file.inputStream()
@@ -137,6 +159,10 @@ internal object DocumentPreviewPathPolicy {
 private val RESPONSE_HEADERS = mapOf(
     "Cache-Control" to "no-store, max-age=0",
     "X-Content-Type-Options" to "nosniff",
+)
+
+private val DOCUMENT_RESPONSE_HEADERS = RESPONSE_HEADERS + mapOf(
+    "Content-Security-Policy" to DocumentPreviewSecurityPolicy.CONTENT_SECURITY_POLICY,
 )
 
 private fun notFound(): WebResourceResponse = WebResourceResponse(

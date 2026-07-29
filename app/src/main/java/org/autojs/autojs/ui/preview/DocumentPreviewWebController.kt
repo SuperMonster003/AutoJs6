@@ -24,6 +24,8 @@ class DocumentPreviewWebController(
     private val onPageFinished: () -> Unit = {},
 ) {
 
+    private val documentPathHandler = DocumentPreviewDocumentPathHandler(resourceRoot)
+
     private val assetLoader = WebViewAssetLoader.Builder()
         .setDomain(DocumentPreviewWebOrigin.DOMAIN)
         .addPathHandler(
@@ -32,7 +34,7 @@ class DocumentPreviewWebController(
         )
         .addPathHandler(
             DocumentPreviewWebOrigin.DOCUMENT_PATH_PREFIX,
-            DocumentPreviewFilePathHandler(resourceRoot),
+            documentPathHandler,
         )
         .build()
 
@@ -76,8 +78,16 @@ class DocumentPreviewWebController(
             override fun shouldInterceptRequest(
                 view: WebView,
                 request: WebResourceRequest,
-            ): WebResourceResponse {
+            ): WebResourceResponse? {
                 val uri = request.url
+                if (
+                    DocumentPreviewRequestPolicy.shouldLetWebViewLoadDataResource(
+                        uri.toString(),
+                        request.isForMainFrame,
+                    )
+                ) {
+                    return null
+                }
                 if (uri.scheme != "https" || uri.host != DocumentPreviewWebOrigin.DOMAIN) {
                     return forbidden()
                 }
@@ -107,16 +117,12 @@ class DocumentPreviewWebController(
     }
 
     fun show(html: String) {
-        webView.loadDataWithBaseURL(
-            DocumentPreviewWebOrigin.DOCUMENT_BASE_URL,
-            html,
-            "text/html",
-            Charsets.UTF_8.name(),
-            DocumentPreviewWebOrigin.DOCUMENT_URL,
-        )
+        documentPathHandler.updateDocument(html)
+        webView.loadUrl(DocumentPreviewWebOrigin.DOCUMENT_URL)
     }
 
     fun destroy() {
+        documentPathHandler.clearDocument()
         webView.stopLoading()
         webView.webViewClient = WebViewClient()
         webView.webChromeClient = null
@@ -152,4 +158,15 @@ class DocumentPreviewWebController(
             ByteArrayInputStream(ByteArray(0)),
         )
     }
+}
+
+internal object DocumentPreviewRequestPolicy {
+
+    fun shouldLetWebViewLoadDataResource(
+        url: String,
+        isForMainFrame: Boolean,
+    ): Boolean =
+        !isForMainFrame &&
+            url.startsWith("data:", ignoreCase = true) &&
+            DocumentPreviewUrlPolicy.isSafeResource(url)
 }

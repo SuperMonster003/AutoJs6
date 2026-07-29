@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 7 月 29 日 に更新されました.
+データは 2026 年 7 月 30 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -246,6 +246,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` 誤った `images.resize(ImageWrapper, width, height)` 呼び出しで高さが OpenCV の補間値として渡され, 互換性のないネイティブ例外展開によりスクリプト例外の報告ではなくアプリがクラッシュする可能性がある問題
 * `修正` MediaInfo プラグインライブラリが利用できない場合や Binder 呼び出しが失敗した場合に, ファイルマネージャーのメディア詳細が "..." のままになるかアプリがクラッシュし, Android メタデータへフォールバックできない問題
 * `修正` ファイルマネージャーの動画詳細ダイアログに埋め込み音声の形式とメタデータ項目が誤って表示される問題
+* `修正` 一部の WebView バージョンおよび実機で Markdown と HTML プレビューのメインドキュメントがリクエストインターセプターに誤って拒否される問題
 * `修正` アクセシビリティサービスが back などの操作を連続実行すると予期せず中断する可能性がある問題 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修正` スクリプトを繰り返し実行するとメモリ使用量が増え続ける可能性がある問題 (修正試行) _[`issue #548`](http://issues.autojs6.com/548)_
 * `修正` 外部 URI またはバックグラウンドからスクリプトを実行すると元のパスが保持されず相対パスの解決に失敗する可能性がある問題 _[`issue #545`](http://issues.autojs6.com/545)_
@@ -587,7 +588,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 7 月 29 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 7 月 30 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

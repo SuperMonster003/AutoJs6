@@ -86,6 +86,7 @@
 * `Corrección` Las llamadas incorrectas a `images.resize(ImageWrapper, width, height)` podían pasar la altura a OpenCV como valor de interpolación, mientras que un desenrollado incompatible de excepciones nativas podía bloquear la aplicación en vez de informar una excepción del script
 * `Corrección` Los detalles multimedia del administrador de archivos podían permanecer en "..." o provocar el cierre inesperado de la aplicación cuando la biblioteca MediaInfo del plugin no estaba disponible o fallaba una llamada Binder, sin recurrir a los metadatos de Android
 * `Corrección` Los diálogos de detalles de vídeo del administrador de archivos mostraban incorrectamente campos de formato y metadatos del audio integrado
+* `Corrección` El interceptor de solicitudes rechazaba incorrectamente el documento principal de las vistas previas de Markdown y HTML en algunas versiones de WebView y dispositivos físicos
 * `Corrección` El servicio de accesibilidad podía interrumpirse inesperadamente al ejecutar operaciones consecutivas como back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Corrección` El uso de memoria podía seguir aumentando tras ejecutar scripts repetidamente (intento de corrección) _[`issue #548`](http://issues.autojs6.com/548)_
 * `Corrección` La ruta original podía no conservarse al ejecutar scripts mediante URI externos o en segundo plano, lo que provocaba una resolución incorrecta de rutas relativas _[`issue #545`](http://issues.autojs6.com/545)_

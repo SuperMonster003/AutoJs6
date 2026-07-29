@@ -216,7 +216,8 @@ internal object DocumentPreviewWebOrigin {
     const val DOMAIN = "appassets.androidplatform.net"
     const val DOCUMENT_PATH_PREFIX = "/document/"
     const val DOCUMENT_BASE_URL = "https://$DOMAIN$DOCUMENT_PATH_PREFIX"
-    const val DOCUMENT_URL = "${DOCUMENT_BASE_URL}__preview__.html"
+    const val DOCUMENT_FILE_NAME = "__preview__.html"
+    const val DOCUMENT_URL = "$DOCUMENT_BASE_URL$DOCUMENT_FILE_NAME"
     const val PREVIEW_ASSET_PATH_PREFIX = "/preview-assets/"
     const val PREVIEW_ASSET_BASE_URL = "https://$DOMAIN$PREVIEW_ASSET_PATH_PREFIX"
 }
