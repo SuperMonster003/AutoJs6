@@ -3093,6 +3093,22 @@ object FileUtils {
         @JvmField
         val previewType: PreviewType? = typeData.previewType
 
+        val viewerType: ViewerType?
+            get() = when (this) {
+                JPG, JPEG, PNG, GIF, BMP, WEBP, JFIF, JPE -> ViewerType.IMAGE
+
+                MP3, AAC, WAV, OGG, FLAC, OPUS, M4A, AMR, MKA, AC3,
+                M4B, M4R, MP1, MP2, MPGA, OGA, WAVE, AWB,
+                -> ViewerType.AUDIO
+
+                MP4, MPEG4, MPG4, AVI, MKV, MOV, FLV, WEBM, M4V,
+                THREE_GP, MPEG, THREE_G_TWO, THREE_GP_TWO, THREE_GPP,
+                F4V, M2T, M2TS, MTS, MPEG2_TS, MPG, MPE, VOB, QT,
+                -> ViewerType.VIDEO
+
+                else -> null
+            }
+
         fun isExecutable() = identity and IDENTITY_EXECUTABLE != 0
 
         fun isInstallable() = identity and IDENTITY_INSTALLABLE != 0
@@ -3102,6 +3118,14 @@ object FileUtils {
         fun isExternalEditable() = identity and IDENTITY_EXTERNAL_EDITABLE != 0
 
         fun isMediaMenu() = identity and IDENTITY_MEDIA_MENU != 0
+
+        fun isImageFile() = typeData === TypeDataHolder.PICTURE
+
+        fun isImageViewable() = viewerType == ViewerType.IMAGE
+
+        fun isAudioPlayable() = viewerType == ViewerType.AUDIO
+
+        fun isVideoPlayable() = viewerType == ViewerType.VIDEO
 
         fun isMediaPlayable() = identity and IDENTITY_MEDIA_PLAYABLE != 0
 
@@ -3557,6 +3581,12 @@ object FileUtils {
     enum class PreviewType {
         MARKDOWN,
         HTML,
+    }
+
+    enum class ViewerType {
+        IMAGE,
+        AUDIO,
+        VIDEO,
     }
 
     data class TypeData(

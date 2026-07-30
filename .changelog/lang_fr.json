@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/30",
+      "released_date": "2026/07/31",
       "feature": [
         "Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive \"nodejs\" ou des extensions comme .node.js/.cjs/.mjs",
         "L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)",
@@ -31,6 +31,7 @@
         "Les tâches planifiées prennent en charge les tâches mensuelles/annuelles/avec compte à rebours et les conditions de fin de répétition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "Le gestionnaire de fichiers prend en charge la sélection multiple et les opérations groupées de copie/déplacement/suppression",
         "Le gestionnaire de fichiers prend en charge la prévisualisation sécurisée des fichiers Markdown et HTML, avec rendu GFM, plusieurs thèmes, CSS personnalisé et chargement contrôlé des ressources du même répertoire",
+        "Le gestionnaire de fichiers propose des actions par icône tout à gauche pour l'aperçu Markdown/HTML, l'affichage des images et la lecture audio/vidéo; l'application peut servir de visionneuse multimédia système, avec lecture audio en arrière-plan et commandes de notification",
         "Le gestionnaire de fichiers prend en charge les détails du package et l'affichage du manifeste pour les fichiers APK/APKS/XAPK/APKM/APKZ/AAB",
         "Le programme d'installation prend en charge les APK et les ensembles d'APK fractionnés compatibles des conteneurs APKS/XAPK/APKM/APKZ, avec sélection des fractions pour l'appareil et vérification de la cohérence des certificats de signature",
         "L'éditeur de code prend en charge le chargement d'Ace depuis un plugin externe, avec validation du signataire et de la confiance, vérification du contrat Editor API/de la version hôte/de la compatibilité ABI binaire, et repli automatique vers l'éditeur natif lorsque le plugin est indisponible",
@@ -159,6 +160,7 @@
         "Spongy Castle Prov modularise version 1.58.0.0",
         "Image Quantization modularise version 2.17.0",
         "OpenCV modularise version 4.8.0",
+        "Ajout de AndroidX Media3 version 1.10.1",
         "Ajout de Apache Commons Codec version 1.15",
         "Ajout de juniversalchardet version 2.0.4",
         "Suppression de Android Annotations version 4.8.0",

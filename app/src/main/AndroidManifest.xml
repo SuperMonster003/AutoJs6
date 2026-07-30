@@ -132,6 +132,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
@@ -379,6 +380,43 @@
         </activity>
 
         <activity
+            android:name="org.autojs.autojs.ui.media.MediaViewerEntryActivity"
+            android:enabled="${mediaViewerEnabled}"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:icon="${icon}"
+            android:label="${appName}"
+            android:noHistory="true"
+            android:requireContentUriPermissionFromCaller="read"
+            android:taskAffinity=""
+            android:theme="@style/AppTheme.Transparent"
+            tools:targetApi="35">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="content" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="org.autojs.autojs.ui.media.ImageViewerActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="org.autojs.autojs.ui.media.VideoPlayerActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="org.autojs.autojs.ui.media.AudioPlayerActivity"
+            android:exported="false" />
+
+        <activity
             android:name="org.autojs.autojs.ui.main.scripts.DisplayMediaInfoActivity"
             android:theme="@style/AppTheme.Settings" />
 
@@ -525,6 +563,17 @@
         </activity>
 
         <service android:name="org.autojs.autojs.ui.enhancedfloaty.FloatyService" />
+
+        <service
+            android:name="org.autojs.autojs.ui.media.AudioPlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="false">
+
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
 
         <service
             android:name="org.autojs.autojs.external.foreground.AppForegroundService"

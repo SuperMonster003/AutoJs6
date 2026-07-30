@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/30
+###### 2026/07/31
 
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
 * `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
@@ -36,6 +36,7 @@
 * `新增` 定時任務支援按月/按年/倒數任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 檔案管理器支援多選檔案及批次複製/移動/刪除操作
 * `新增` 檔案管理器支援安全預覽 Markdown 與 HTML 檔案, 提供 GFM 渲染/多套主題/自訂 CSS 及受控的同目錄資源載入
+* `新增` 檔案管理器支援透過最左側圖示按鈕預覽 Markdown/HTML 及檢視圖片/播放音訊/影片; 應用程式可註冊為系統媒體檢視器, 音訊支援背景播放及通知列連動控制
 * `新增` 檔案管理器支援檢視 APK/APKS/XAPK/APKM/APKZ/AAB 檔案的安裝包詳細資訊及資訊清單
 * `新增` 安裝器支援 APK 及 APKS/XAPK/APKM/APKZ 容器中的相容分割 APK 組合, 包含裝置分割選擇及簽章憑證一致性驗證
 * `新增` 程式碼編輯器支援透過外部外掛載入 Ace 編輯器, 包含簽章/信任/Editor API 合約/宿主版本/二進位 ABI 相容性驗證, 外掛無法使用時自動切回原生編輯器
@@ -158,6 +159,7 @@
 * `依賴` 模組化 Spongy Castle Prov 版本 1.58.0.0
 * `依賴` 模組化 Image Quantization 版本 2.17.0
 * `依賴` 模組化 OpenCV 版本 4.8.0
+* `依賴` 附加 AndroidX Media3 版本 1.10.1
 * `依賴` 附加 Apache Commons Codec 版本 1.15
 * `依賴` 附加 juniversalchardet 版本 2.0.4
 * `依賴` 移除 Android Annotations 版本 4.8.0

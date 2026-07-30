@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.autojs.ui.media.MediaViewerLauncher
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.DialogUtils.setCopyableText
 import org.autojs.autojs.util.DialogUtils.showAdaptive
@@ -415,7 +416,9 @@ object MediaInfoDialogManager {
             it.setTextColor(context.getColor(R.color.dialog_button_attraction))
             it.setOnClickListener {
                 dialog.dismiss()
-                explorerItem.play(context)
+                if (!MediaViewerLauncher.open(context, explorerItem)) {
+                    explorerItem.play(context)
+                }
             }
         }
     }

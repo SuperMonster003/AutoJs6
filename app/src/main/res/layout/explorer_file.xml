@@ -99,6 +99,19 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/primary_viewer"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/text_view"
+                android:focusable="true"
+                android:src="@drawable/ic_play_media"
+                android:visibility="gone"
+                app:tint="@color/explorer_file_operation_button"
+                tools:visibility="visible" />
+
+            <ImageView
                 android:id="@+id/install"
                 android:layout_width="36dp"
                 android:layout_height="match_parent"

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/30
+###### 2026/07/31
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -36,6 +36,7 @@
 * `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Feature` File manager supports multi-selection and batch copy/move/delete operations
 * `Feature` File manager supports secure Markdown and HTML previews with GFM rendering, multiple themes, custom CSS, and controlled same-directory resource loading
+* `Feature` File manager supports leftmost icon actions for Markdown/HTML preview and image viewing/audio/video playback; the app can act as a system media viewer, with background audio playback and notification controls
 * `Feature` File manager supports package details and manifest viewing for APK/APKS/XAPK/APKM/APKZ/AAB files
 * `Feature` Package installer supports APK and compatible split APK sets from APKS/XAPK/APKM/APKZ containers, with device split selection and signing-certificate consistency checks
 * `Feature` Code editor supports loading Ace from an external plugin, with signer and trust validation, Editor API contract/host-version/binary ABI compatibility checks, and automatic fallback to the native editor when unavailable
@@ -158,6 +159,7 @@
 * `Dependency` Modularized Spongy Castle Prov version 1.58.0.0
 * `Dependency` Modularized Image Quantization version 2.17.0
 * `Dependency` Modularized OpenCV version 4.8.0
+* `Dependency` Added AndroidX Media3 version 1.10.1
 * `Dependency` Added Apache Commons Codec version 1.15
 * `Dependency` Added juniversalchardet version 2.0.4
 * `Dependency` Removed Android Annotations version 4.8.0

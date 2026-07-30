@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/30",
+      "released_date": "2026/07/31",
       "feature": [
         "Node.js 24.5.0 스크립트 런타임, \"nodejs\" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원",
         "Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원",
@@ -31,6 +31,7 @@
         "예약 작업에서 월간/연간/카운트다운 작업 및 반복 종료 조건 지원 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "파일 관리자에서 다중 선택 및 일괄 복사/이동/삭제 작업 지원",
         "파일 관리자에서 Markdown 및 HTML 파일의 안전한 미리 보기를 지원하고 GFM 렌더링/다중 테마/사용자 지정 CSS/제어된 동일 디렉터리 리소스 로딩 제공",
+        "파일 관리자에서 Markdown/HTML 미리보기 및 이미지 보기/오디오/비디오 재생을 맨 왼쪽 아이콘으로 실행 지원; 앱을 시스템 미디어 뷰어로 등록할 수 있으며 오디오는 백그라운드 재생 및 알림 제어 지원",
         "파일 관리자에서 APK/APKS/XAPK/APKM/APKZ/AAB 파일의 패키지 세부 정보 및 매니페스트 보기 지원",
         "패키지 설치 관리자에서 APK 및 APKS/XAPK/APKM/APKZ 컨테이너의 호환 가능한 분할 APK 세트를 지원하고 디바이스 분할 선택 및 서명 인증서 일관성 검사 제공",
         "코드 편집기에서 외부 플러그인의 Ace 로딩을 지원하고 서명자/신뢰/Editor API 계약/호스트 버전/바이너리 ABI 호환성을 검증하며, 플러그인을 사용할 수 없을 때 네이티브 편집기로 자동 폴백",
@@ -159,6 +160,7 @@
         "모듈화 Spongy Castle Prov 버전 1.58.0.0",
         "모듈화 Image Quantization 버전 2.17.0",
         "모듈화 OpenCV 버전 4.8.0",
+        "AndroidX Media3 버전 1.10.1 추가",
         "Apache Commons Codec 버전 1.15 추가",
         "juniversalchardet 버전 2.0.4 추가",
         "Android Annotations 버전 4.8.0 제거",

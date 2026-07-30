@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/30
+###### 2026/07/31
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
@@ -36,6 +36,7 @@
 * `新增` 定时任务支持按月/按年/倒计时任务及重复结束条件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 文件管理器支持多选文件及批量复制/移动/删除操作
 * `新增` 文件管理器支持安全预览 Markdown 与 HTML 文件, 提供 GFM 渲染/多套主题/自定义 CSS 及受控的同目录资源加载
+* `新增` 文件管理器支持通过最左侧图标按钮预览 Markdown/HTML 及查看图片/播放音频/视频; 应用可注册为系统媒体查看器, 音频支持后台播放及通知栏联动控制
 * `新增` 文件管理器支持查看 APK/APKS/XAPK/APKM/APKZ/AAB 文件的安装包详情及清单
 * `新增` 安装器支持 APK 及 APKS/XAPK/APKM/APKZ 容器中的兼容拆分 APK 组合, 包含设备拆分选择及签名证书一致性校验
 * `新增` 代码编辑器支持通过外部插件加载 Ace 编辑器, 包含签名/信任/Editor API 合约/宿主版本/二进制 ABI 兼容性校验, 插件不可用时自动回退至原生编辑器
@@ -158,6 +159,7 @@
 * `依赖` 模块化 Spongy Castle Prov 版本 1.58.0.0
 * `依赖` 模块化 Image Quantization 版本 2.17.0
 * `依赖` 模块化 OpenCV 版本 4.8.0
+* `依赖` 附加 AndroidX Media3 版本 1.10.1
 * `依赖` 附加 Apache Commons Codec 版本 1.15
 * `依赖` 附加 juniversalchardet 版本 2.0.4
 * `依赖` 移除 Android Annotations 版本 4.8.0

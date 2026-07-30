@@ -68,6 +68,7 @@ import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.explorer.ExplorerProjectToolbar.OnOperateListener
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
+import org.autojs.autojs.ui.media.MediaViewerLauncher
 import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager
@@ -100,6 +101,15 @@ import java.util.Objects
 import java.util.Stack
 import java.util.concurrent.Callable
 import kotlin.math.roundToInt
+
+private data class ExplorerItemActionState(
+    val primaryAction: ExplorerPrimaryAction?,
+    val editVisible: Boolean,
+    val runVisible: Boolean,
+    val runAsMedia: Boolean,
+    val installVisible: Boolean,
+    val infoVisible: Boolean,
+)
 
 /**
  * Created by Stardust on Aug 21, 2017.
@@ -530,12 +540,6 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
                 notifyItemOperated()
                 mRequestHostDialogHide?.run()
-            }
-            R.id.action_preview -> {
-                val selected = selectedItem ?: return false
-                mRequestHostDialogHide?.run()
-                DocumentPreviewActivity.launch(context, selected.path)
-                notifyItemOperated()
             }
             R.id.action_run_repeatedly -> {
                 ScriptLoopDialog(context, selectedItem!!.toScriptFile())
@@ -1116,8 +1120,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private val mFileSize: TextView
 
         private val mActionIconContainer: View
+        private val mPrimaryViewer: ImageView
         private val mInstall: View
-        private val mRun: View
+        private val mRun: ImageView
         private val mEdit: View
         private val mInfo: View
 
@@ -1125,6 +1130,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private val mOptions: View
 
         private lateinit var mExplorerItem: ExplorerItem
+        private var mBindGeneration = 0
 
         init {
             val explorerFileBinding = ExplorerFileBinding.bind(itemView)
@@ -1139,6 +1145,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mActionIconContainer = explorerFileBinding.actionIconContainer
 
             mItem = explorerFileBinding.item
+            mPrimaryViewer = explorerFileBinding.primaryViewer.apply {
+                setOnClickListener { withItemSelected { openPrimaryViewer() } }
+            }
             mRun = explorerFileBinding.run.apply { setOnClickListener { withItemSelected { run() } } }
             mEdit = explorerFileBinding.edit.apply { setOnClickListener { withItemSelected { edit() } } }
             mInfo = explorerFileBinding.info.apply { setOnClickListener { withItemSelected { showInfo() } } }
@@ -1146,7 +1155,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
             mOptions = explorerFileBinding.more.apply { setOnClickListener { withItemSelected { showOptionsMenu() } } }
 
-            listOf(mRun, mEdit, mInfo, mInstall, mOptions).forEach { view ->
+            listOf(mPrimaryViewer, mRun, mEdit, mInfo, mInstall, mOptions).forEach { view ->
                 ImageViewCompat.setImageTintList(view, mActionIconTint)
             }
 
@@ -1163,6 +1172,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         override fun bind(item: Any, position: Int) {
             if (item !is ExplorerItem) return
             mExplorerItem = item
+            val bindGeneration = ++mBindGeneration
 
             setFirstChar(item)
 
@@ -1170,32 +1180,56 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             setTextWith(mFileDate) { PFile.getFullDateString(item.lastModified()) }
             setTextWith(mFileSize) { PFiles.formatSizeWithUnit(item.size) }
             bindSelectionState(item)
+            setVisibilityIf(mActionIconContainer, false)
 
             Observable.fromCallable {
+                val primaryAction = ExplorerPrimaryActionResolver.resolve(item.type)
                 val shouldEditShow = item.isTextEditable || item.isExternalEditable
-                val shouldRunShow = item.isExecutable || item.isMediaPlayable
+                val shouldRunAsMedia =
+                    !item.isExecutable && item.isMediaPlayable && primaryAction == null
+                val shouldRunShow = item.isExecutable || shouldRunAsMedia
                 val shouldInstallShow = item.isInstallable
 
-                val alreadyHasTwoImportantIcons = shouldEditShow && (shouldRunShow || shouldInstallShow)
+                val alreadyHasTwoImportantIcons = listOf(
+                    primaryAction != null,
+                    shouldEditShow,
+                    shouldRunShow,
+                    shouldInstallShow,
+                ).count { it } >= 2
                 val shouldInfoShow = !alreadyHasTwoImportantIcons && (item.isInstallable || item.isMediaMenu || item.isMediaPlayable)
 
-                listOf(shouldEditShow, shouldRunShow, shouldInstallShow, shouldInfoShow)
+                ExplorerItemActionState(
+                    primaryAction = primaryAction,
+                    editVisible = shouldEditShow,
+                    runVisible = shouldRunShow,
+                    runAsMedia = shouldRunAsMedia,
+                    installVisible = shouldInstallShow,
+                    infoVisible = shouldInfoShow,
+                )
             }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { list ->
-                    val (shouldEditShow, shouldRunShow, shouldInstallShow, shouldInfoShow) = list
-                    val hasActionIcons = shouldEditShow || shouldRunShow || shouldInstallShow || shouldInfoShow
+                .subscribe { state ->
+                    if (bindGeneration != mBindGeneration) return@subscribe
+
+                    val hasActionIcons = state.primaryAction != null ||
+                        state.editVisible ||
+                        state.runVisible ||
+                        state.installVisible ||
+                        state.infoVisible
                     if (isInSelectionMode) {
                         setVisibilityIf(mActionIconContainer, if (hasActionIcons) INVISIBLE else GONE)
                         setVisibilityIf(mOptions, INVISIBLE)
                         return@subscribe
                     }
                     if (hasActionIcons) {
-                        setVisibilityIf(mEdit, shouldEditShow)
-                        setVisibilityIf(mRun, shouldRunShow)
-                        setVisibilityIf(mInstall, shouldInstallShow)
-                        setVisibilityIf(mInfo, shouldInfoShow)
+                        state.primaryAction?.let(::bindPrimaryViewer)
+                        setVisibilityIf(mPrimaryViewer, state.primaryAction != null)
+                        setVisibilityIf(mEdit, state.editVisible)
+                        bindRunAction(state.runAsMedia)
+                        setVisibilityIf(mRun, state.runVisible)
+                        setVisibilityIf(mInstall, state.installVisible)
+                        setVisibilityIf(mInfo, state.infoVisible)
                         setVisibilityIf(mActionIconContainer, true)
                     } else {
                         setVisibilityIf(mActionIconContainer, false)
@@ -1277,6 +1311,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
         override fun onViewRecycled() {
             super.onViewRecycled()
+            mBindGeneration++
             mName.text = null
             mFileDate.text = null
             mFileSize.text = null
@@ -1305,6 +1340,53 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     setVisibilityIf(mActionIconContainer, INVISIBLE)
                 }
             }
+        }
+
+        private fun bindPrimaryViewer(action: ExplorerPrimaryAction) {
+            val (iconRes, contentDescriptionRes) = when (action) {
+                ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
+                    R.drawable.ic_preview_web_page to R.string.text_preview
+                }
+                ExplorerPrimaryAction.IMAGE_VIEW -> {
+                    R.drawable.ic_play_media to R.string.text_view
+                }
+                ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL -> {
+                    R.drawable.ic_play_media to R.string.text_view
+                }
+                ExplorerPrimaryAction.MEDIA_PLAY -> {
+                    R.drawable.ic_play_media to R.string.text_play
+                }
+            }
+            mPrimaryViewer.setImageResource(iconRes)
+            mPrimaryViewer.contentDescription = context.getString(contentDescriptionRes)
+        }
+
+        private fun bindRunAction(asMedia: Boolean) {
+            mRun.setImageResource(
+                if (asMedia) R.drawable.ic_play_media else R.drawable.ic_run_explorer_btn,
+            )
+            mRun.contentDescription = context.getString(
+                if (asMedia) R.string.text_play else R.string.text_run,
+            )
+        }
+
+        private fun openPrimaryViewer() {
+            val action = ExplorerPrimaryActionResolver.resolve(mExplorerItem.type) ?: return
+            mRequestHostDialogHide?.run()
+            when (action) {
+                ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
+                    DocumentPreviewActivity.launch(context, mExplorerItem.path)
+                }
+                ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL -> {
+                    mExplorerItem.view(context)
+                }
+                ExplorerPrimaryAction.IMAGE_VIEW,
+                ExplorerPrimaryAction.MEDIA_PLAY,
+                -> if (!MediaViewerLauncher.open(context, mExplorerItem)) {
+                    ViewUtils.showToast(context, R.string.text_cannot_read_file)
+                }
+            }
+            notifyItemOperated()
         }
 
         private fun run() {
@@ -1399,9 +1481,6 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             }
             if (!mExplorerItem.isTextEditable) {
                 menu.removeItem(R.id.action_version_history)
-            }
-            if (!mExplorerItem.isPreviewable) {
-                menu.removeItem(R.id.action_preview)
             }
             if (!mExplorerItem.canBuildApk()) {
                 menu.removeItem(R.id.action_build_apk)

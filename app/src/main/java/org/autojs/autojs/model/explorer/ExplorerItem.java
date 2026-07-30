@@ -69,6 +69,18 @@ public interface ExplorerItem {
         return getType().isExternalEditable();
     }
 
+    default boolean isImageViewable() {
+        return getType().isImageViewable();
+    }
+
+    default boolean isAudioPlayable() {
+        return getType().isAudioPlayable();
+    }
+
+    default boolean isVideoPlayable() {
+        return getType().isVideoPlayable();
+    }
+
     default boolean isMediaPlayable() {
         return getType().isMediaPlayable();
     }
