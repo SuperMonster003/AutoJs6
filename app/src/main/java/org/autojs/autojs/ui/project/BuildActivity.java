@@ -47,7 +47,6 @@ import org.autojs.autojs.apkbuilder.template.RemoteProjectConfigUpdater;
 import org.autojs.autojs.apkbuilder.template.TemplateApkResolver;
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity;
 import org.autojs.autojs.core.pref.Language;
-import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.pio.PFiles;
@@ -63,6 +62,7 @@ import org.autojs.autojs.ui.error.ErrorDialogActivity;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.keystore.ManageKeyStoreActivity;
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager;
+import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
 import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
 import org.autojs.autojs.ui.widget.RoundCheckboxWithText;
@@ -74,7 +74,6 @@ import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.util.EnvironmentUtils;
 import org.autojs.autojs.util.IntentUtils;
-import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.StringUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
@@ -3123,12 +3122,7 @@ public class BuildActivity extends BaseActivity {
             positiveButton.setText(getString(R.string.text_install));
             positiveButton.setTextColor(getColor(R.color.dialog_button_attraction));
             positiveButton.setOnClickListener(v -> {
-                IntentUtils.installApk(
-                        BuildActivity.this,
-                        outApk.getPath(),
-                        AppFileProvider.AUTHORITY,
-                        new ToastExceptionHolder(BuildActivity.this)
-                );
+                PackageInstallerActivity.install(BuildActivity.this, outApk);
                 dismissProgressDialog();
             });
             var negativeButton = mProgressDialog.getActionButton(DialogAction.NEGATIVE);

@@ -13,8 +13,18 @@
     <string name="apk_builder_package">パッケージング</string>
     <string name="apk_builder_plugin_version_incompatible">apk builder の非互換バージョン.\n今すぐダウンロードしますか?</string>
     <string name="apk_builder_prepare">準備中</string>
+    <string name="apk_info_components">コンポーネント</string>
+    <string name="apk_info_components_aab">モジュール: %1$d</string>
+    <string name="apk_info_components_apk">APK: %1$d, 選択済み: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">デバイス SDK</string>
     <string name="apk_info_file_size">ファイルサイズ</string>
+    <string name="apk_info_format">形式</string>
+    <string name="apk_info_installation">インストール</string>
+    <string name="apk_info_installation_aab">AAB は公開形式です. インストールする前に APK に変換し, 元の鍵で署名してください.</string>
+    <string name="apk_info_installation_incompatible">このデバイスに対応する APK セットがありません</string>
+    <string name="apk_info_installation_invalid">パッケージデータが不完全または無効です</string>
+    <string name="apk_info_installation_ready">準備完了</string>
+    <string name="apk_info_installation_ready_without_obb">APK セットは準備完了です; OBB: %1$d (自動配置されません)</string>
     <string name="apk_info_installed_version">インストール済み</string>
     <string name="apk_info_max_sdk">最大 SDK</string>
     <string name="apk_info_min_sdk">最小 SDK</string>
@@ -272,6 +282,10 @@
     <string name="error_ai_profile_name_required">プロファイル名を空にすることはできません</string>
     <string name="error_an_error_occurred">エラーが発生しました</string>
     <string name="error_an_operation_is_not_implemented">操作が実装されていません</string>
+    <string name="error_android_package_archive_invalid">無効な Android パッケージ: %1$s</string>
+    <string name="error_android_package_file_unavailable">Android パッケージファイルを利用できません</string>
+    <string name="error_android_package_installation_failed">パッケージのインストールに失敗しました: %1$s</string>
+    <string name="error_android_package_operation_in_progress">別の Android パッケージ操作がすでに進行中です</string>
     <string name="error_app_not_installed">アプリがインストールされていません</string>
     <string name="error_app_not_installed_with_name">\"%s\" アプリがインストールされていません</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">%2$s#%3$s の引数 %1$s を null 値にはできません</string>
@@ -396,6 +410,8 @@
     <string name="error_no_write_settings_permission">\"設定の書き込み\" 権限なし</string>
     <string name="error_official_plugin_missing">依存プラグインが不足しています: %1$s. AutoJs6 の \"プラグインセンター\" で関連する公式プラグインを検索してオンラインでインストールしてください</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView は 1 つの直接の子だけをホストできます</string>
+    <string name="error_package_installation_confirmation_missing">システムのインストール確認を利用できません</string>
+    <string name="error_package_installation_status">パッケージのインストールに失敗しました. ステータス: %1$d</string>
     <string name="error_parse_github_release_assets">GitHub リリースアセットの解析に失敗しました</string>
     <string name="error_parse_version_info">バージョン情報の解析に失敗しました</string>
     <string name="error_pattern_syntax">無効なパターン構文</string>
@@ -415,6 +431,7 @@
     <string name="error_regex_find_prev">正規表現で前を見つけることができません</string>
     <string name="error_repeated_colon_symbol">繰り返されるコロン記号</string>
     <string name="error_repeated_dot_symbol">ドット記号の繰り返し</string>
+    <string name="error_request_install_packages_permission_denied">続行する前に AutoJs6 に不明なアプリのインストールを許可してください</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">必要なプロパティ \"%1$s\" が null か存在しません</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" の解決済みパスは null にできません</string>
     <string name="error_save_failed">保存に失敗しました</string>
@@ -1329,6 +1346,7 @@
     <string name="text_others">その他</string>
     <string name="text_output_apk_path">APK 出力パス</string>
     <string name="text_overwrite">上書き</string>
+    <string name="text_package_installation_succeeded">パッケージをインストールしました</string>
     <string name="text_package_name">パッケージ名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">パッケージ名 (計算中...)</string>
     <string name="text_password">パスワード</string>
@@ -1509,6 +1527,7 @@
     <string name="text_querying_plugin_info">プラグイン情報を照会しています</string>
     <string name="text_quit">終了</string>
     <string name="text_re_signing_apk">APK を再署名中</string>
+    <string name="text_reading_android_package">Android パッケージを読み込み中</string>
     <string name="text_reading_splash_resources">スプラッシュ資源を読み込み中</string>
     <string name="text_recommended">推奨</string>
     <string name="text_record_finished">記録終了</string>

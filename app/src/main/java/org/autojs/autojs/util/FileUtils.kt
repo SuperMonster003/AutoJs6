@@ -2,12 +2,18 @@ package org.autojs.autojs.util
 
 import android.content.Context
 import android.net.Uri
+import android.os.CancellationSignal
 import android.provider.OpenableColumns
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.util.FileUtils.TYPE.Companion.TYPE_NAME_PREFIX_REGEX
 import java.io.File
+import java.io.IOException
+import java.util.UUID
 import java.util.function.Predicate
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
@@ -20,6 +26,11 @@ import kotlin.text.RegexOption.IGNORE_CASE
  */
 @Suppress("SpellCheckingInspection")
 object FileUtils {
+
+    private const val MAX_URI_CACHE_BYTES = 4L * 1024L * 1024L * 1024L
+    private const val MINIMUM_URI_CACHE_RESERVE_BYTES = 128L * 1024L * 1024L
+    private const val URI_CACHE_SPACE_RECHECK_BYTES = 8L * 1024L * 1024L
+    private const val URI_CACHE_SESSION_MAX_AGE_MILLIS = 24L * 60L * 60L * 1000L
 
     @JvmStatic
     fun getExtension(file: File): String = getExtension(file.name)
@@ -126,33 +137,147 @@ object FileUtils {
         preferName: String? = null,
     ): File = withContext(Dispatchers.IO) {
         val uri = this@toCacheFile
-        val dir = File(context.cacheDir, subDir).apply { if (!exists()) mkdirs() }
-
-        val finalName = preferName
-            ?: run getNameFromMeta@{
-                context.contentResolver.query(
-                    /* uri = */ uri,
-                    /* projection = */ arrayOf(OpenableColumns.DISPLAY_NAME),
-                    /* selection = */ null,
-                    /* selectionArgs = */ null,
-                    /* sortOrder = */ null,
-                )?.use { cursor ->
-                    val idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    if (idx >= 0 && cursor.moveToFirst()) cursor.getString(idx) else null
+        val resolver = context.contentResolver
+        val cacheRoot = context.cacheDir.canonicalFile
+        val root = File(cacheRoot, subDir).canonicalFile
+        if (root != cacheRoot &&
+            !root.path.startsWith(cacheRoot.path + File.separator)
+        ) {
+            throw IOException("Unsafe URI cache directory")
+        }
+        root.apply {
+            if (!exists() && !mkdirs()) throw IOException("Unable to create the URI cache")
+        }
+        val staleCutoff = System.currentTimeMillis() - URI_CACHE_SESSION_MAX_AGE_MILLIS
+        root.listFiles()
+            ?.asSequence()
+            ?.filter(File::isDirectory)
+            ?.filter { it.name.startsWith("import-") && it.lastModified() in 1 until staleCutoff }
+            ?.forEach { directory ->
+                runCatching {
+                    val target = directory.canonicalFile
+                    if (target.parentFile == root) target.deleteRecursively()
                 }
             }
-            ?: uri.lastPathSegment?.substringAfterLast('/')
-            ?: "temp_${System.currentTimeMillis()}"
+        val sessionDirectory = File(root, "import-${UUID.randomUUID()}").apply {
+            if (!mkdirs()) throw IOException("Unable to create the URI cache session")
+        }.canonicalFile
+        if (sessionDirectory.parentFile != root) {
+            throw IOException("Unsafe URI cache session path")
+        }
 
-        val outFile = File(dir, finalName)
+        val cancellationSignal = CancellationSignal()
+        val cancellationHandle = currentCoroutineContext().job.invokeOnCompletion {
+            cancellationSignal.cancel()
+        }
+        try {
+            val metadata = runCatching {
+                resolver.query(
+                    uri,
+                    arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
+                    null,
+                    null,
+                    null,
+                    cancellationSignal,
+                )?.use { cursor ->
+                    if (!cursor.moveToFirst()) return@use null
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    val name = nameIndex.takeIf { it >= 0 }?.let(cursor::getString)
+                    val size = sizeIndex
+                        .takeIf { it >= 0 && !cursor.isNull(it) }
+                        ?.let(cursor::getLong)
+                        ?.takeIf { it >= 0L }
+                    name to size
+                }
+            }.getOrNull()
+            currentCoroutineContext().ensureActive()
 
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            outFile.outputStream().use { output ->
-                input.copyTo(output)
+            val rawName = preferName
+                ?: metadata?.first
+                ?: uri.lastPathSegment
+                ?: "package.bin"
+            val safeName = sanitizeUriCacheFileName(rawName)
+            val outputFile = File(sessionDirectory, safeName).canonicalFile
+            if (outputFile.parentFile != sessionDirectory) {
+                throw IOException("Unsafe URI cache output path")
             }
-        } ?: error("Unable to open input stream for uri: $uri")
 
-        outFile
+            val declaredSize = metadata?.second
+            if (declaredSize != null && declaredSize > MAX_URI_CACHE_BYTES) {
+                throw IOException("URI content exceeds the cache size limit")
+            }
+            val available = (sessionDirectory.usableSpace - MINIMUM_URI_CACHE_RESERVE_BYTES)
+                .coerceAtLeast(0L)
+            val copyLimit = minOf(MAX_URI_CACHE_BYTES, available)
+            if (copyLimit <= 0L || declaredSize?.let { it > copyLimit } == true) {
+                throw IOException("Insufficient cache space for URI content")
+            }
+
+            val descriptor = resolver.openAssetFileDescriptor(uri, "r", cancellationSignal)
+                ?: throw IOException("Unable to open URI content")
+            descriptor.use {
+                val input = it.createInputStream().buffered()
+                val closeHandle = currentCoroutineContext().job.invokeOnCompletion {
+                    runCatching { input.close() }
+                }
+                try {
+                    input.use { source ->
+                        outputFile.outputStream().buffered().use { output ->
+                            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                            var total = 0L
+                            var nextSpaceCheck = 0L
+                            while (true) {
+                                currentCoroutineContext().ensureActive()
+                                val read = source.read(buffer)
+                                currentCoroutineContext().ensureActive()
+                                if (read < 0) break
+                                if (read == 0) continue
+                                if (read.toLong() > copyLimit - total) {
+                                    throw IOException("URI content exceeds the cache size limit")
+                                }
+                                total += read
+                                if (total >= nextSpaceCheck) {
+                                    if (sessionDirectory.usableSpace <= MINIMUM_URI_CACHE_RESERVE_BYTES) {
+                                        throw IOException("Insufficient cache space for URI content")
+                                    }
+                                    nextSpaceCheck = total + URI_CACHE_SPACE_RECHECK_BYTES
+                                }
+                                output.write(buffer, 0, read)
+                            }
+                        }
+                    }
+                } finally {
+                    closeHandle.dispose()
+                }
+            }
+            outputFile
+        } catch (error: Throwable) {
+            if (sessionDirectory.parentFile == root) {
+                runCatching { sessionDirectory.deleteRecursively() }
+            }
+            throw error
+        } finally {
+            cancellationHandle.dispose()
+        }
+    }
+
+    internal fun sanitizeUriCacheFileName(rawName: String?): String {
+        val basename = rawName
+            .orEmpty()
+            .replace('\\', '/')
+            .substringAfterLast('/')
+            .trim()
+            .filter { character -> character >= ' ' && character != '\u007F' }
+            .takeIf { it.isNotBlank() && it != "." && it != ".." }
+            ?: return "package.bin"
+        if (basename.length <= 180) return basename
+        val suffix = basename
+            .substringAfterLast('.', "")
+            .takeIf { it.length in 1..16 }
+            ?.let { extension -> ".$extension" }
+            .orEmpty()
+        return basename.take(180 - suffix.length) + suffix
     }
 
     private fun withRegexPrefix(regexGetter: () -> String) = TYPE_NAME_PREFIX_REGEX + regexGetter.invoke()
@@ -191,7 +316,7 @@ object FileUtils {
         val NODE_JAVASCRIPT = TypeData(IconData("N"), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
         val AUTO = TypeData(IconData("R", toTop = 1), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
         val APK = TypeData(IconData("❖", size = 23, toTop = 1, toEnd = 0.5), TYPE.IDENTITY_INSTALLABLE)
-        val APK_EXT = TypeData(APK.iconData)
+        val APK_EXT = TypeData(APK.iconData, TYPE.IDENTITY_INSTALLABLE)
         val PROJECT = TypeData(IconData("✲", size = 22, toTop = 1.5), TYPE.IDENTITY_TEXT_EDITABLE)
         val TEXT = TypeData(IconData("✐", toTop = 1, toEnd = 0.5, degree = 121), TYPE.IDENTITY_TEXT_EDITABLE)
         val CREATION = TypeData(IconData("✎", toTop = 4, toEnd = 2, degree = 105), TYPE.IDENTITY_TEXT_EDITABLE)
@@ -2401,6 +2526,12 @@ object FileUtils {
 
         /** Android Split APKs, used for app bundles. */
         APKS("apks", TypeDataHolder.APK_EXT),
+
+        /** APKMirror split APK package. */
+        APKM("apkm", TypeDataHolder.APK_EXT),
+
+        /** Compressed Android package container. */
+        APKZ("apkz", TypeDataHolder.APK_EXT),
 
         /** Extended APK Package, includes additional resources. */
         XAPK("xapk", TypeDataHolder.APK_EXT),

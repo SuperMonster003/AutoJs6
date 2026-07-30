@@ -12,8 +12,18 @@
     <string name="apk_builder_package">Упаковка</string>
     <string name="apk_builder_plugin_version_incompatible">Несовместимая версия \"apk builder\".\nЗагрузить ее сейчас?</string>
     <string name="apk_builder_prepare">Подготовка</string>
+    <string name="apk_info_components">Компоненты</string>
+    <string name="apk_info_components_aab">Модули: %1$d</string>
+    <string name="apk_info_components_apk">APK: %1$d, выбрано: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">SDK устройства</string>
     <string name="apk_info_file_size">Размер файла</string>
+    <string name="apk_info_format">Формат</string>
+    <string name="apk_info_installation">Установка</string>
+    <string name="apk_info_installation_aab">AAB является форматом публикации. Перед установкой преобразуйте его в APK и подпишите исходным ключом.</string>
+    <string name="apk_info_installation_incompatible">Для этого устройства нет совместимого набора APK</string>
+    <string name="apk_info_installation_invalid">Данные пакета неполны или недействительны</string>
+    <string name="apk_info_installation_ready">Готово</string>
+    <string name="apk_info_installation_ready_without_obb">Набор APK готов; OBB: %1$d (не развертывается автоматически)</string>
     <string name="apk_info_installed_version">Установлено</string>
     <string name="apk_info_max_sdk">Макс. SDK</string>
     <string name="apk_info_min_sdk">Мин. SDK</string>
@@ -271,6 +281,10 @@
     <string name="error_ai_profile_name_required">Имя профиля не может быть пустым</string>
     <string name="error_an_error_occurred">Произошла ошибка</string>
     <string name="error_an_operation_is_not_implemented">Операция не выполняется</string>
+    <string name="error_android_package_archive_invalid">Недопустимый пакет Android: %1$s</string>
+    <string name="error_android_package_file_unavailable">Файл пакета Android недоступен</string>
+    <string name="error_android_package_installation_failed">Не удалось установить пакет: %1$s</string>
+    <string name="error_android_package_operation_in_progress">Другая операция с пакетом Android уже выполняется</string>
     <string name="error_app_not_installed">Приложение не установлено</string>
     <string name="error_app_not_installed_with_name">Приложение не установлено: \"%s\"</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Аргумент %1$s для %2$s#%3$s не может быть пустым</string>
@@ -395,6 +409,8 @@
     <string name="error_no_write_settings_permission">Нет разрешения \"запись настроек\"</string>
     <string name="error_official_plugin_missing">Отсутствует зависимый плагин: %1$s. Найдите и установите связанный официальный плагин онлайн в \"Центре плагинов\" AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView может содержать только одного прямого дочернего элемента</string>
+    <string name="error_package_installation_confirmation_missing">Системное подтверждение установки недоступно</string>
+    <string name="error_package_installation_status">Установка пакета завершилась со статусом %1$d</string>
     <string name="error_parse_github_release_assets">Не удалось разобрать активы релиза GitHub</string>
     <string name="error_parse_version_info">Не удалось разобрать информацию о версии</string>
     <string name="error_pattern_syntax">Неверный синтаксис шаблона</string>
@@ -414,6 +430,7 @@
     <string name="error_regex_find_prev">Невозможно найти предыдущее значение с помощью regex</string>
     <string name="error_repeated_colon_symbol">Повторяющийся символ двоеточия</string>
     <string name="error_repeated_dot_symbol">Повторяющийся символ точки</string>
+    <string name="error_request_install_packages_permission_denied">Разрешите AutoJs6 устанавливать неизвестные приложения перед продолжением</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">Требуемое свойство \"%1$s\" пусто или не существует</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
     <string name="error_save_failed">Не удалось сохранить</string>
@@ -1328,6 +1345,7 @@
     <string name="text_others">Другие</string>
     <string name="text_output_apk_path">Путь вывода APK</string>
     <string name="text_overwrite">Перезаписать</string>
+    <string name="text_package_installation_succeeded">Пакет успешно установлен</string>
     <string name="text_package_name">Имя пакета</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Имя пакета (Вычисление...)</string>
     <string name="text_password">Пароль</string>
@@ -1508,6 +1526,7 @@
     <string name="text_querying_plugin_info">Запрос сведений о плагине</string>
     <string name="text_quit">Выйти</string>
     <string name="text_re_signing_apk">Повторная подпись APK</string>
+    <string name="text_reading_android_package">Чтение пакета Android</string>
     <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>
     <string name="text_recommended">Рекомендуемый</string>
     <string name="text_record_finished">Запись завершена</string>

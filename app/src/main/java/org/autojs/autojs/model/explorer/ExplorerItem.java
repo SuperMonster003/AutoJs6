@@ -7,12 +7,15 @@ import androidx.annotation.Nullable;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.runtime.api.Mime;
+import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity;
 import org.autojs.autojs.util.FileUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder;
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs6.R;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
 
 public interface ExplorerItem {
 
@@ -79,11 +82,11 @@ public interface ExplorerItem {
     }
 
     default boolean install(@NotNull View view) {
-        return IntentUtils.installApk(view.getContext(), getPath(), AppFileProvider.AUTHORITY, new SnackExceptionHolder(view));
+        return PackageInstallerActivity.install(view.getContext(), new File(getPath()));
     }
 
     default boolean install(Context context) {
-        return IntentUtils.installApk(context, getPath(), AppFileProvider.AUTHORITY, new ToastExceptionHolder(context));
+        return PackageInstallerActivity.install(context, new File(getPath()));
     }
 
     default boolean play(@NotNull View view) {

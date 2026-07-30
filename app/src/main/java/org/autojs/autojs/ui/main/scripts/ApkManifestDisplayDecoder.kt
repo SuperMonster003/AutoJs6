@@ -1,13 +1,16 @@
 package org.autojs.autojs.ui.main.scripts
 
+import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.EOFException
 import java.io.File
+import java.io.FilterInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.Locale
 import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
 /**
  * A deliberately small, read-only AndroidManifest.xml decoder for the APK details screen.
@@ -47,6 +50,63 @@ internal object ApkManifestDisplayDecoder {
             }
             zipFile.getInputStream(entry).use { input ->
                 decodeManifest(input.readBounded(displayLimits.maxInputBytes), displayLimits)
+            }
+        }
+    }
+
+    /**
+     * Decodes an APK streamed from an outer package archive without materializing the nested APK.
+     */
+    fun decodeApk(input: InputStream): String {
+        ZipInputStream(BufferedInputStream(BoundedInputStream(input, MAX_APK_SCAN_BYTES))).use { apk ->
+            var entryCount = 0
+            while (true) {
+                val entry = apk.nextEntry ?: break
+                entryCount++
+                if (entryCount > MAX_APK_ENTRY_COUNT) {
+                    throw IOException("APK entry count exceeds the display limit")
+                }
+                if (!entry.isDirectory && entry.name == MANIFEST_ENTRY) {
+                    if (entry.size > displayLimits.maxInputBytes) {
+                        throw IOException("$MANIFEST_ENTRY exceeds the display size limit")
+                    }
+                    return decodeManifest(apk.readBounded(displayLimits.maxInputBytes), displayLimits)
+                }
+                apk.closeEntry()
+            }
+        }
+        throw IOException("$MANIFEST_ENTRY is missing")
+    }
+
+    private class BoundedInputStream(
+        input: InputStream,
+        private val maxBytes: Long,
+    ) : FilterInputStream(input) {
+
+        private var total = 0L
+
+        override fun read(): Int {
+            val value = super.read()
+            if (value >= 0) count(1)
+            return value
+        }
+
+        override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+            val read = super.read(buffer, offset, length)
+            if (read > 0) count(read.toLong())
+            return read
+        }
+
+        override fun skip(byteCount: Long): Long {
+            val skipped = super.skip(byteCount)
+            if (skipped > 0L) count(skipped)
+            return skipped
+        }
+
+        private fun count(bytes: Long) {
+            total += bytes
+            if (total > maxBytes) {
+                throw IOException("APK manifest scan exceeds the display size limit")
             }
         }
     }
@@ -904,6 +964,8 @@ internal object ApkManifestDisplayDecoder {
     private fun hex8(value: Int): String = "0x%08x".format(Locale.ROOT, value)
 
     private const val MANIFEST_ENTRY = "AndroidManifest.xml"
+    private const val MAX_APK_ENTRY_COUNT = 16_384
+    private const val MAX_APK_SCAN_BYTES = 64L * 1024L * 1024L
     private const val ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android"
     private const val INDENT = "  "
     private const val MAX_UTF8_BYTES_PER_CHAR = 4

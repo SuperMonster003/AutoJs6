@@ -14,8 +14,18 @@
     <string name="apk_builder_package">التغليف </string>
     <string name="apk_builder_plugin_version_incompatible">نسخة غير متوافقة من \"APK Builder\".\nتحميله الآن؟</string>
     <string name="apk_builder_prepare">خطة</string>
+    <string name="apk_info_components">المكونات</string>
+    <string name="apk_info_components_aab">الوحدات: %1$d</string>
+    <string name="apk_info_components_apk">APK: %1$d, المحدد: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">SDK الجهاز</string>
     <string name="apk_info_file_size">حجم الملف</string>
+    <string name="apk_info_format">التنسيق</string>
+    <string name="apk_info_installation">التثبيت</string>
+    <string name="apk_info_installation_aab">AAB هو تنسيق نشر. حوّله إلى ملفات APK ووقّعها بالمفتاح الأصلي قبل التثبيت.</string>
+    <string name="apk_info_installation_incompatible">لا تتوفر مجموعة APK متوافقة لهذا الجهاز</string>
+    <string name="apk_info_installation_invalid">بيانات الحزمة غير مكتملة أو غير صالحة</string>
+    <string name="apk_info_installation_ready">جاهز</string>
+    <string name="apk_info_installation_ready_without_obb">مجموعة APK جاهزة; OBB: %1$d (لا يتم نشرها تلقائيا)</string>
     <string name="apk_info_installed_version">مثبت</string>
     <string name="apk_info_max_sdk">SDK الأقصى</string>
     <string name="apk_info_min_sdk">SDK الأدنى</string>
@@ -273,6 +283,10 @@
     <string name="error_ai_profile_name_required">لا يمكن أن يكون اسم ملف التعريف فارغًا</string>
     <string name="error_an_error_occurred">حدث خطأ</string>
     <string name="error_an_operation_is_not_implemented">لم يتم تنفيذ العملية</string>
+    <string name="error_android_package_archive_invalid">حزمة Android غير صالحة: %1$s</string>
+    <string name="error_android_package_file_unavailable">ملف حزمة Android غير متاح</string>
+    <string name="error_android_package_installation_failed">فشل تثبيت الحزمة: %1$s</string>
+    <string name="error_android_package_operation_in_progress">هناك عملية أخرى لحزمة Android قيد التنفيذ بالفعل</string>
     <string name="error_app_not_installed">التطبيق غير مثبت</string>
     <string name="error_app_not_installed_with_name">التطبيق غير مثبت: \"%s\"</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">لا يمكن أن تكون الوسائط %1$s بالنسبة لـ %2$s#%3$s فارغة</string>
@@ -397,6 +411,8 @@
     <string name="error_no_write_settings_permission">لا يوجد إذن \"إعدادات الكتابة\"</string>
     <string name="error_official_plugin_missing">المكون الإضافي التابع مفقود: %1$s. ابحث عن المكون الإضافي الرسمي ذي الصلة وثبّته عبر الإنترنت من \"مركز الإضافات\" في AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">يمكن أن تستضيف Scrollview طفلًا مباشرًا واحد فقط</string>
+    <string name="error_package_installation_confirmation_missing">تأكيد تثبيت النظام غير متاح</string>
+    <string name="error_package_installation_status">فشل تثبيت الحزمة بالحالة %1$d</string>
     <string name="error_parse_github_release_assets">فشل في تحليل أصول الإفراج عن جيثب</string>
     <string name="error_parse_version_info">فشل في تحليل معلومات الإصدار</string>
     <string name="error_pattern_syntax">بناء جملة نمط غير صالح</string>
@@ -416,6 +432,7 @@
     <string name="error_regex_find_prev">لا يمكن العثور على السابق مع Regex</string>
     <string name="error_repeated_colon_symbol">رمز القولون المتكرر</string>
     <string name="error_repeated_dot_symbol">تكرار رمز النقطة</string>
+    <string name="error_request_install_packages_permission_denied">اسمح لـ AutoJs6 بتثبيت تطبيقات غير معروفة قبل المتابعة</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">الخاصية المطلوبة \"%1$s\" خالية أو غير موجودة</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">المسار المُحلّ لـ \"%1$s\" لا يمكن أن يكون null</string>
     <string name="error_save_failed">فشل الحفظ</string>
@@ -1330,6 +1347,7 @@
     <string name="text_others">آحرون</string>
     <string name="text_output_apk_path">مسار الإخراج APK</string>
     <string name="text_overwrite">استبدال</string>
+    <string name="text_package_installation_succeeded">تم تثبيت الحزمة بنجاح</string>
     <string name="text_package_name">اسم الحزمة</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">اسم الحزمة (جارٍ الحساب...)</string>
     <string name="text_password">كلمة المرور</string>
@@ -1510,6 +1528,7 @@
     <string name="text_querying_plugin_info">جار الاستعلام عن معلومات المكون الإضافي</string>
     <string name="text_quit">يترك</string>
     <string name="text_re_signing_apk">جارٍ اعادة توقيع APK</string>
+    <string name="text_reading_android_package">جارٍ قراءة حزمة Android</string>
     <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
     <string name="text_recommended">مُستَحسَن</string>
     <string name="text_record_finished">انتهى التسجيل</string>

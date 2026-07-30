@@ -36,6 +36,8 @@
 * `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Feature` File manager supports multi-selection and batch copy/move/delete operations
 * `Feature` File manager supports secure Markdown and HTML previews with GFM rendering, multiple themes, custom CSS, and controlled same-directory resource loading
+* `Feature` File manager supports package details and manifest viewing for APK/APKS/XAPK/APKM/APKZ/AAB files
+* `Feature` Package installer supports APK and compatible split APK sets from APKS/XAPK/APKM/APKZ containers, with device split selection and signing-certificate consistency checks
 * `Feature` Code editor supports loading Ace from an external plugin, with signer and trust validation, Editor API contract/host-version/binary ABI compatibility checks, and automatic fallback to the native editor when unavailable
 * `Feature` Code editor supports runtime hot plugging of the external Ace plugin and automatically switches engines as plugin installation and enabled states change
 * `Feature` Ace editor now enables its bundled local TypeScript smart completion by default, with AutoJs6 API completion, signature help, hover information, and diagnostics; it can be disabled in settings
@@ -106,6 +108,7 @@
 * `Fix` APK Builder Template plugins could appear twice or incorrectly report updates
 * `Fix` Offline project documentation integrity verification could reuse stale cached content while the plugin was being updated
 * `Fix` The Manifest button and complete multiline content were missing from APK details in the file manager
+* `Fix` External URI cache imports trusted content-provider filenames, potentially allowing path traversal or same-name overwrites
 * `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin
 * `Fix` Switch views in home drawer settings had an excessively small effective touch area
 * `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_

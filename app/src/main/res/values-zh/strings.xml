@@ -8,8 +8,18 @@
     <string name="apk_builder_package">打包中</string>
     <string name="apk_builder_plugin_version_incompatible">打包插件需更新\n是否下载</string>
     <string name="apk_builder_prepare">准备文件</string>
+    <string name="apk_info_components">组件</string>
+    <string name="apk_info_components_aab">模块: %1$d</string>
+    <string name="apk_info_components_apk">APK: %1$d, 已选择: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">设备 SDK</string>
     <string name="apk_info_file_size">文件大小</string>
+    <string name="apk_info_format">格式</string>
+    <string name="apk_info_installation">安装</string>
+    <string name="apk_info_installation_aab">AAB 是发布格式. 请先将其转换为 APK 集并使用原签名密钥签名</string>
+    <string name="apk_info_installation_incompatible">当前设备没有兼容的 APK 组合</string>
+    <string name="apk_info_installation_invalid">安装包数据不完整或无效</string>
+    <string name="apk_info_installation_ready">可以安装</string>
+    <string name="apk_info_installation_ready_without_obb">APK 组合可以安装; OBB: %1$d (无法自动部署)</string>
     <string name="apk_info_installed_version">已安装</string>
     <string name="apk_info_max_sdk">最高 SDK</string>
     <string name="apk_info_min_sdk">最低 SDK</string>
@@ -267,6 +277,10 @@
     <string name="error_ai_profile_name_required">配置名称不能为空</string>
     <string name="error_an_error_occurred">发生错误</string>
     <string name="error_an_operation_is_not_implemented">操作尚未实现</string>
+    <string name="error_android_package_archive_invalid">Android 安装包无效: %1$s</string>
+    <string name="error_android_package_file_unavailable">Android 安装包文件不可用</string>
+    <string name="error_android_package_installation_failed">安装包安装失败: %1$s</string>
+    <string name="error_android_package_operation_in_progress">已有另一个 Android 安装包操作正在进行</string>
     <string name="error_app_not_installed">应用未安装</string>
     <string name="error_app_not_installed_with_name">应用未安装: \"%s\"</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">参数 %1$s 对于 %2$s#%3$s 不可为 nullish</string>
@@ -391,6 +405,8 @@
     <string name="error_no_write_settings_permission">缺少 \"修改系统设置\" 权限</string>
     <string name="error_official_plugin_missing">缺少依赖插件: %1$s, 可在 AutoJs6 \"插件中心\" 搜索并在线安装相关的官方插件</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView 只能拥有至多一个直接子控件</string>
+    <string name="error_package_installation_confirmation_missing">系统安装确认界面不可用</string>
+    <string name="error_package_installation_status">安装包安装失败, 状态码: %1$d</string>
     <string name="error_parse_github_release_assets">解析 GitHub 发行版资源信息失败</string>
     <string name="error_parse_version_info">无法解析版本信息</string>
     <string name="error_pattern_syntax">正则表达式句法错误</string>
@@ -410,6 +426,7 @@
     <string name="error_regex_find_prev">正则表达式不支持向前查找</string>
     <string name="error_repeated_colon_symbol">重复的分号符号</string>
     <string name="error_repeated_dot_symbol">重复的句点符号</string>
+    <string name="error_request_install_packages_permission_denied">请先允许 AutoJs6 安装未知应用</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">必需属性 \"%1$s\" 为空或不存在</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析后的路径 \"%1$s\" 不可为 null</string>
     <string name="error_save_failed">保存失败</string>
@@ -1324,6 +1341,7 @@
     <string name="text_others">其他</string>
     <string name="text_output_apk_path">打包应用保存路径</string>
     <string name="text_overwrite">覆盖</string>
+    <string name="text_package_installation_succeeded">安装包已成功安装</string>
     <string name="text_package_name">包名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (计算中...)</string>
     <string name="text_password">密码</string>
@@ -1504,6 +1522,7 @@
     <string name="text_querying_plugin_info">正在查询插件信息</string>
     <string name="text_quit">放弃</string>
     <string name="text_re_signing_apk">正在重新签名 APK</string>
+    <string name="text_reading_android_package">正在读取 Android 安装包</string>
     <string name="text_reading_splash_resources">正在读取启动页资源</string>
     <string name="text_recommended">推荐</string>
     <string name="text_record_finished">录制完成</string>

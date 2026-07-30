@@ -7,8 +7,18 @@
     <string name="apk_builder_package">Packaging</string>
     <string name="apk_builder_plugin_version_incompatible">Incompatible version of \"apk builder\".\nDownload it now?</string>
     <string name="apk_builder_prepare">Preparing</string>
+    <string name="apk_info_components">Components</string>
+    <string name="apk_info_components_aab">Modules: %1$d</string>
+    <string name="apk_info_components_apk">APK: %1$d, selected: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">Device SDK</string>
     <string name="apk_info_file_size">File size</string>
+    <string name="apk_info_format">Format</string>
+    <string name="apk_info_installation">Installation</string>
+    <string name="apk_info_installation_aab">AAB is a publishing format. Convert it to APKs and sign them with the original key before installation.</string>
+    <string name="apk_info_installation_incompatible">No compatible APK set is available for this device</string>
+    <string name="apk_info_installation_invalid">Package data is incomplete or invalid</string>
+    <string name="apk_info_installation_ready">Ready</string>
+    <string name="apk_info_installation_ready_without_obb">APK set is ready; OBB: %1$d (not deployed automatically)</string>
     <string name="apk_info_installed_version">Installed</string>
     <string name="apk_info_max_sdk">Max SDK</string>
     <string name="apk_info_min_sdk">Min SDK</string>
@@ -266,6 +276,10 @@
     <string name="error_ai_profile_name_required">Profile name cannot be empty</string>
     <string name="error_an_error_occurred">An error occurred</string>
     <string name="error_an_operation_is_not_implemented">An operation is not implemented</string>
+    <string name="error_android_package_archive_invalid">Invalid Android package: %1$s</string>
+    <string name="error_android_package_file_unavailable">Android package file is unavailable</string>
+    <string name="error_android_package_installation_failed">Package installation failed: %1$s</string>
+    <string name="error_android_package_operation_in_progress">Another Android package operation is already in progress</string>
     <string name="error_app_not_installed">App is not installed</string>
     <string name="error_app_not_installed_with_name">App is not installed: \"%s\"</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Argument %1$s for %2$s#%3$s cannot be nullish</string>
@@ -390,6 +404,8 @@
     <string name="error_no_write_settings_permission">No \"write settings\" permission</string>
     <string name="error_official_plugin_missing">Missing dependency plugin: %1$s, search and install the related official plugin online in AutoJs6 \"Plugin Center\"</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView can host only one direct child</string>
+    <string name="error_package_installation_confirmation_missing">The system installation confirmation is unavailable</string>
+    <string name="error_package_installation_status">Package installation failed with status %1$d</string>
     <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
     <string name="error_parse_version_info">Failed to parse version information</string>
     <string name="error_pattern_syntax">Invalid pattern syntax</string>
@@ -409,6 +425,7 @@
     <string name="error_regex_find_prev">Cannot find previous with regex</string>
     <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
     <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
+    <string name="error_request_install_packages_permission_denied">Allow AutoJs6 to install unknown apps before continuing</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">Required property \"%1$s\" is nullish or does not exist</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
     <string name="error_save_failed">Save failed</string>
@@ -1323,6 +1340,7 @@
     <string name="text_others">Others</string>
     <string name="text_output_apk_path">APK output path</string>
     <string name="text_overwrite">Overwrite</string>
+    <string name="text_package_installation_succeeded">Package installed successfully</string>
     <string name="text_package_name">Package name</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
     <string name="text_password">Password</string>
@@ -1503,6 +1521,7 @@
     <string name="text_querying_plugin_info">Querying plugin info</string>
     <string name="text_quit">Quit</string>
     <string name="text_re_signing_apk">Re-signing APK</string>
+    <string name="text_reading_android_package">Reading Android package</string>
     <string name="text_reading_splash_resources">Reading splash resources</string>
     <string name="text_recommended">Recommended</string>
     <string name="text_record_finished">Recording finished</string>

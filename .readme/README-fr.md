@@ -196,6 +196,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Les tâches planifiées prennent en charge les tâches mensuelles/annuelles/avec compte à rebours et les conditions de fin de répétition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge la sélection multiple et les opérations groupées de copie/déplacement/suppression
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge la prévisualisation sécurisée des fichiers Markdown et HTML, avec rendu GFM, plusieurs thèmes, CSS personnalisé et chargement contrôlé des ressources du même répertoire
+* `Fonctionnalité` Le gestionnaire de fichiers prend en charge les détails du package et l'affichage du manifeste pour les fichiers APK/APKS/XAPK/APKM/APKZ/AAB
+* `Fonctionnalité` Le programme d'installation prend en charge les APK et les ensembles d'APK fractionnés compatibles des conteneurs APKS/XAPK/APKM/APKZ, avec sélection des fractions pour l'appareil et vérification de la cohérence des certificats de signature
 * `Fonctionnalité` L'éditeur de code prend en charge le chargement d'Ace depuis un plugin externe, avec validation du signataire et de la confiance, vérification du contrat Editor API/de la version hôte/de la compatibilité ABI binaire, et repli automatique vers l'éditeur natif lorsque le plugin est indisponible
 * `Fonctionnalité` L'éditeur de code prend en charge le branchement à chaud du plugin Ace externe à l'exécution et change automatiquement de moteur selon l'état d'installation ou d'activation du plugin
 * `Fonctionnalité` L'éditeur Ace active désormais par défaut sa complétion intelligente TypeScript locale intégrée, avec complétion de l'API AutoJs6, aide aux signatures, informations au survol et diagnostics ; elle peut être désactivée dans les paramètres
@@ -266,6 +268,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement
 * `Correction` La vérification de l'intégrité de la documentation de projet hors ligne pouvait réutiliser un contenu obsolète en cache pendant la mise à jour du plugin
 * `Correction` Le bouton Manifest et le contenu multiligne complet manquaient dans les détails des APK du gestionnaire de fichiers
+* `Correction` Les importations en cache depuis des URI externes faisaient confiance aux noms de fichiers fournis par le fournisseur de contenu, ce qui pouvait permettre une traversée de chemin ou l'écrasement de fichiers portant le même nom
 * `Correction` La position de défilement de la liste du gestionnaire de fichiers était réinitialisée après la suppression de fichiers de la Corbeille
 * `Correction` La zone tactile effective des interrupteurs du tiroir d'accueil était trop petite
 * `Correction` Les noms de paquet et les informations d'Activity des applications récentes affichés dans le menu du bouton flottant étaient incorrects _[`issue #529`](http://issues.autojs6.com/529)_

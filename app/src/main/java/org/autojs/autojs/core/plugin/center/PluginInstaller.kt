@@ -1,7 +1,6 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
 import com.afollestad.materialdialogs.DialogAction
@@ -10,8 +9,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
+import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils.applyProgressThemeColorTintLists
 import org.autojs.autojs.util.DialogUtils.setProgressNumberFormatByBytes
@@ -19,7 +18,6 @@ import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.FileUtils.toCacheFile
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder
-import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.EOFException
@@ -46,11 +44,12 @@ import kotlin.math.roundToInt
 object PluginInstaller {
 
     suspend fun installFromFileUriWithPrompt(context: Context, uri: Uri) = runCatching {
-        ApkInfoDialogManager.showApkInfoDialog(context, uri.toCacheFile(context)) {
+        val packageFile = uri.toCacheFile(context)
+        ApkInfoDialogManager.showApkInfoDialog(context, packageFile) {
             onPositive { dialog, _ ->
                 dialog.dismiss()
-                if (FileUtils.isLikelyApk(context, uri)) {
-                    installFromFileUri(context, uri)
+                if (FileUtils.isLikelyApk(packageFile)) {
+                    PackageInstallerActivity.install(context, packageFile)
                     return@onPositive
                 }
                 MaterialDialog.Builder(context)
@@ -63,7 +62,7 @@ object PluginInstaller {
                     .positiveColorRes(R.color.dialog_button_not_recommended)
                     .onPositive { d, _ ->
                         d.dismiss()
-                        installFromFileUri(context, uri)
+                        PackageInstallerActivity.install(context, packageFile)
                     }
                     .autoDismiss(false)
                     .cancelable(false)
@@ -79,10 +78,7 @@ object PluginInstaller {
     }
 
     fun installFromFileUri(context: Context, uri: Uri) {
-        Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, Mime.APPLICATION_VND_ANDROID_PACKAGE_ARCHIVE)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }.startSafely(context)
+        PackageInstallerActivity.install(context, uri)
     }
 
     suspend fun installFromUrlWithPrompt(context: Context, url: String, expectedSha256: String? = null) {

@@ -34,13 +34,17 @@ class DisplayManifestActivity : BaseDisplayContentActivity() {
 
     override suspend fun loadAndDisplayContent() {
         setContentActionsEnabled(false)
-        val apkPath = intent.getStringExtra(PATH_IDENTIFIER_APK)
+        val packagePath = intent.getStringExtra(PATH_IDENTIFIER_PACKAGE)
         val permissions = intent.getStringArrayExtra(INTENT_IDENTIFIER_PERMISSIONS)
+        val deviceSpec = PackageDeviceSpec.from(this)
 
         val manifestContentRaw = withContext(Dispatchers.IO) {
-            apkPath?.let { path ->
-                runCatching { ApkManifestDisplayDecoder.decode(File(path)) }
-                    .onFailure { error -> Log.w(TAG, "Failed to decode APK manifest: $path", error) }
+            packagePath?.let { path ->
+                runCatching {
+                    AndroidPackageArchiveInspector.inspect(File(path), deviceSpec).decodeDisplayManifest()
+                }.onFailure { error ->
+                    Log.w(TAG, "Failed to decode Android package manifest: $path", error)
+                }
                     .getOrNull()
             }
         }
@@ -81,15 +85,18 @@ class DisplayManifestActivity : BaseDisplayContentActivity() {
     companion object {
 
         private const val TAG = "DisplayManifest"
-        private const val PATH_IDENTIFIER_APK = "APK_PATH"
+        private const val PATH_IDENTIFIER_PACKAGE = "PACKAGE_PATH"
         private const val INTENT_IDENTIFIER_PERMISSIONS = "permissions"
         private const val SELECTABLE_TEXT_LIMIT = 256 * 1024
 
         @JvmStatic
-        fun launch(context: Context, apkFile: File, usesPermissions: List<String>) {
+        @JvmOverloads
+        fun launch(context: Context, packageFile: File, usesPermissions: List<String>? = null) {
             Intent(context, DisplayManifestActivity::class.java).apply {
-                putExtra(PATH_IDENTIFIER_APK, apkFile.absolutePath)
-                putExtra(INTENT_IDENTIFIER_PERMISSIONS, usesPermissions.toTypedArray())
+                putExtra(PATH_IDENTIFIER_PACKAGE, packageFile.absolutePath)
+                usesPermissions?.let {
+                    putExtra(INTENT_IDENTIFIER_PERMISSIONS, it.toTypedArray())
+                }
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.startSafely(context)
         }

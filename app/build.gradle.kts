@@ -855,6 +855,7 @@ android {
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
                     "authorities" to "org.autojs.autojs6.fileprovider",
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
+                    "installerEnabled" to "true",
                 )
             )
         }
@@ -879,6 +880,7 @@ android {
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
                     "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
                     "icon" to "@mipmap/ic_launcher",
+                    "installerEnabled" to "false",
                 )
             )
 
