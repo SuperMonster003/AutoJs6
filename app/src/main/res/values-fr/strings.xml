@@ -16,14 +16,13 @@
     <string name="apk_info_components_aab">Modules: %1$d</string>
     <string name="apk_info_components_apk">APK: %1$d, sélectionnés: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">SDK de l\'appareil</string>
+    <string name="apk_info_exception">Exception</string>
+    <string name="apk_info_exception_obb_not_deployed">OBB: %1$d (non déployé automatiquement)</string>
     <string name="apk_info_file_size">Taille du fichier</string>
     <string name="apk_info_format">Format</string>
-    <string name="apk_info_installation">Installation</string>
     <string name="apk_info_installation_aab">AAB est un format de publication. Convertissez-le en APK et signez-les avec la clé d\'origine avant l\'installation.</string>
     <string name="apk_info_installation_incompatible">Aucun ensemble d\'APK compatible n\'est disponible pour cet appareil</string>
     <string name="apk_info_installation_invalid">Les données du package sont incomplètes ou non valides</string>
-    <string name="apk_info_installation_ready">Prêt</string>
-    <string name="apk_info_installation_ready_without_obb">L\'ensemble d\'APK est prêt; OBB: %1$d (non déployé automatiquement)</string>
     <string name="apk_info_installed_version">Installé</string>
     <string name="apk_info_max_sdk">SDK maximum</string>
     <string name="apk_info_min_sdk">SDK minimum</string>
@@ -487,6 +486,12 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Le plugin actuel nécessite une version plus élevée de l\'environnement hôte AutoJs6 (versionCode requis: %1$d, versionCode actuel: %2$d). Une mise à niveau d\'AutoJs6 est nécessaire.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Le protocole du plugin n\'est pas compatible avec la version actuelle d\'AutoJs6. Une mise à niveau du plugin est requise.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Essayez d\'appuyer sur le bouton \"Activer\" pour activer le plugin une fois.\nSi l\'activation reussit, le bouton s\'activera automatiquement dans un certain delai.</string>
+    <string name="image_editor_flip_horizontal">Retourner horizontalement</string>
+    <string name="image_editor_flip_vertical">Retourner verticalement</string>
+    <string name="image_editor_rotate_left">Tourner à gauche</string>
+    <string name="image_editor_rotate_right">Tourner à droite</string>
+    <string name="image_info_modified_label">Modifié</string>
+    <string name="image_info_orientation_label">Orientation</string>
     <string name="instruction_install_plugin_from_url">Saisissez une URL pointant vers l\'adresse d\'un plugin distant.\nPar exemple \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">Supprimer definitivement</string>
     <string name="item_move_to_trash">Deplacer vers la corbeille</string>
@@ -787,6 +792,7 @@
     <string name="text_auto_rename">Renommer automatiquement</string>
     <string name="text_available_windows">Fenêtres disponibles</string>
     <string name="text_back">Retour</string>
+    <string name="text_background_color">Couleur d\'arrière-plan</string>
     <string name="text_broadcast_action">Action</string>
     <string name="text_broadcast_task">Tâche de diffusion</string>
     <string name="text_build">Compiler</string>
@@ -1002,6 +1008,7 @@
     <string name="text_drawer_close">Fermer le tiroir</string>
     <string name="text_drawer_open">Ouvrir le tiroir</string>
     <string name="text_edit">Editer</string>
+    <string name="text_edit_by_other_apps">Modifier avec d\'autres applications</string>
     <string name="text_edit_prepare_script">Editer le script de pré-exécution</string>
     <string name="text_edit_script">Editer le script</string>
     <string name="text_editor_assistance">Assistance</string>
@@ -1691,6 +1698,7 @@
     <string name="text_special_permissions">Autorisations spéciales</string>
     <string name="text_stable_mode">Mode stable</string>
     <string name="text_star">Étoile</string>
+    <string name="text_start_in_fullscreen_mode">Démarrer en mode plein écran</string>
     <string name="text_start_record">Démarrer l\'enregistrement</string>
     <string name="text_start_running">En cours d\'exécution</string>
     <string name="text_state_or_province">État ou province</string>

@@ -409,6 +409,10 @@
             android:exported="false" />
 
         <activity
+            android:name="org.autojs.autojs.ui.media.ImageEditorActivity"
+            android:exported="false" />
+
+        <activity
             android:name="org.autojs.autojs.ui.media.VideoPlayerActivity"
             android:exported="false" />
 
@@ -418,6 +422,10 @@
 
         <activity
             android:name="org.autojs.autojs.ui.main.scripts.DisplayMediaInfoActivity"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
+            android:name="org.autojs.autojs.ui.main.scripts.DisplayExifInfoActivity"
             android:theme="@style/AppTheme.Settings" />
 
         <activity

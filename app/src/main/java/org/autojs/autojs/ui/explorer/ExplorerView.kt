@@ -67,7 +67,10 @@ import org.autojs.autojs.ui.common.ScriptLoopDialog
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.explorer.ExplorerProjectToolbar.OnOperateListener
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
+import org.autojs.autojs.ui.main.scripts.ImageInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
+import org.autojs.autojs.ui.media.ImageConverter
+import org.autojs.autojs.ui.media.ImageEditorActivity
 import org.autojs.autojs.ui.media.MediaViewerLauncher
 import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.ui.project.BuildActivity
@@ -549,6 +552,28 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             R.id.action_create_shortcut -> {
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .createShortcut(selectedItem!!.toScriptFile())
+                mRequestHostDialogHide?.run()
+            }
+            R.id.action_image_edit -> {
+                selectedItem?.let { ImageEditorActivity.launch(context, File(it.path)) }
+                notifyItemOperated()
+                mRequestHostDialogHide?.run()
+            }
+            R.id.action_convert -> {
+                selectedItem?.let {
+                    mRequestHostDialogHide?.run()
+                    ImageConverter.show(
+                        context = context,
+                        source = File(it.path),
+                        onCompleted = null,
+                        onDismissed = { mRequestHostDialogShow?.run() },
+                    )
+                }
+                notifyItemOperated()
+            }
+            R.id.action_edit_by_other_apps -> {
+                selectedItem?.edit(this@ExplorerView)
+                notifyItemOperated()
                 mRequestHostDialogHide?.run()
             }
             R.id.action_open_by_other_apps -> {
@@ -1184,7 +1209,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
             Observable.fromCallable {
                 val primaryAction = ExplorerPrimaryActionResolver.resolve(item.type)
-                val shouldEditShow = item.isTextEditable || item.isExternalEditable
+                val shouldEditShow = item.isTextEditable || (item.isExternalEditable && !item.type.isImageFile())
                 val shouldRunAsMedia =
                     !item.isExecutable && item.isMediaPlayable && primaryAction == null
                 val shouldRunShow = item.isExecutable || shouldRunAsMedia
@@ -1196,7 +1221,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     shouldRunShow,
                     shouldInstallShow,
                 ).count { it } >= 2
-                val shouldInfoShow = !alreadyHasTwoImportantIcons && (item.isInstallable || item.isMediaMenu || item.isMediaPlayable)
+                val shouldInfoShow = item.type.isImageFile() ||
+                    (!alreadyHasTwoImportantIcons && (item.isInstallable || item.isMediaMenu || item.isMediaPlayable))
 
                 ExplorerItemActionState(
                     primaryAction = primaryAction,
@@ -1345,13 +1371,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private fun bindPrimaryViewer(action: ExplorerPrimaryAction) {
             val (iconRes, contentDescriptionRes) = when (action) {
                 ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
-                    R.drawable.ic_preview_web_page to R.string.text_preview
+                    R.drawable.ic_window to R.string.text_preview
                 }
                 ExplorerPrimaryAction.IMAGE_VIEW -> {
-                    R.drawable.ic_play_media to R.string.text_view
+                    R.drawable.ic_eye to R.string.text_view
                 }
                 ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL -> {
-                    R.drawable.ic_play_media to R.string.text_view
+                    R.drawable.ic_eye to R.string.text_view
                 }
                 ExplorerPrimaryAction.MEDIA_PLAY -> {
                     R.drawable.ic_play_media to R.string.text_play
@@ -1424,6 +1450,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mRequestHostDialogHide?.run()
 
             when {
+                mExplorerItem.type.isImageFile() -> {
+                    ImageInfoDialogManager.showImageInfoDialog(context, File(mExplorerItem.path)) {
+                        mRequestHostDialogShow?.run()
+                    }
+                    notifyItemOperated()
+                }
                 mExplorerItem.isInstallable -> {
                     ApkInfoDialogManager.showApkInfoDialog(context, mExplorerItem.toScriptFile(), null) {
                         // Restore host dialog after the info dialog is dismissed.
@@ -1462,6 +1494,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             val popupMenu = PopupMenu(context, mOptions)
             popupMenu.inflate(R.menu.menu_script_options)
             val menu = popupMenu.menu
+            if (!mExplorerItem.type.isImageFile()) {
+                menu.removeItem(R.id.action_image_edit)
+                menu.removeItem(R.id.action_convert)
+                menu.removeItem(R.id.action_edit_by_other_apps)
+            }
             if (!mExplorerItem.isExecutable) {
                 menu.removeItem(R.id.action_create_shortcut)
                 menu.removeItem(R.id.action_timed_task)

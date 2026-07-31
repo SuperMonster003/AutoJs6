@@ -17,14 +17,13 @@
     <string name="apk_info_components_aab">モジュール: %1$d</string>
     <string name="apk_info_components_apk">APK: %1$d, 選択済み: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">デバイス SDK</string>
+    <string name="apk_info_exception">異常</string>
+    <string name="apk_info_exception_obb_not_deployed">OBB: %1$d (自動配置されません)</string>
     <string name="apk_info_file_size">ファイルサイズ</string>
     <string name="apk_info_format">形式</string>
-    <string name="apk_info_installation">インストール</string>
     <string name="apk_info_installation_aab">AAB は公開形式です. インストールする前に APK に変換し, 元の鍵で署名してください.</string>
     <string name="apk_info_installation_incompatible">このデバイスに対応する APK セットがありません</string>
     <string name="apk_info_installation_invalid">パッケージデータが不完全または無効です</string>
-    <string name="apk_info_installation_ready">準備完了</string>
-    <string name="apk_info_installation_ready_without_obb">APK セットは準備完了です; OBB: %1$d (自動配置されません)</string>
     <string name="apk_info_installed_version">インストール済み</string>
     <string name="apk_info_max_sdk">最大 SDK</string>
     <string name="apk_info_min_sdk">最小 SDK</string>
@@ -488,6 +487,12 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">現在のプラグインには, より新しいバージョンの AutoJs6 ホスト環境が必要です (必要な versionCode: %1$d, 現在の versionCode: %2$d). AutoJs6 をアップグレードしてください.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">プラグインプロトコルは現在の AutoJs6 と互換性がありません. プラグインをアップグレードしてください.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"有効化\" ボタンをタップして, プラグインを一度有効化してみてください.\n有効化に成功すると, 一定時間内にボタンが自動的にオンになります.</string>
+    <string name="image_editor_flip_horizontal">左右反転</string>
+    <string name="image_editor_flip_vertical">上下反転</string>
+    <string name="image_editor_rotate_left">左に回転</string>
+    <string name="image_editor_rotate_right">右に回転</string>
+    <string name="image_info_modified_label">更新日時</string>
+    <string name="image_info_orientation_label">向き</string>
     <string name="instruction_install_plugin_from_url">リモートプラグインの URL を入力してください. \n例: \"https://example.com/plugin.apk\"</string>
     <string name="item_delete_permanently">完全に削除</string>
     <string name="item_move_to_trash">ゴミ箱に移動</string>
@@ -788,6 +793,7 @@
     <string name="text_auto_rename">自動リネーム</string>
     <string name="text_available_windows">使用可能なウィンドウ</string>
     <string name="text_back">戻る</string>
+    <string name="text_background_color">背景色</string>
     <string name="text_broadcast_action">動作</string>
     <string name="text_broadcast_task">タスクの実行</string>
     <string name="text_build">ビルド</string>
@@ -1003,6 +1009,7 @@
     <string name="text_drawer_close">ドロワーを閉じる</string>
     <string name="text_drawer_open">ドロワーを開く</string>
     <string name="text_edit">編集する</string>
+    <string name="text_edit_by_other_apps">他のアプリで編集</string>
     <string name="text_edit_prepare_script">実行前スクリプトの編集</string>
     <string name="text_edit_script">スクリプトの編集</string>
     <string name="text_editor_assistance">支援機能</string>
@@ -1692,6 +1699,7 @@
     <string name="text_special_permissions">特殊な権限</string>
     <string name="text_stable_mode">安定モード</string>
     <string name="text_star">スター</string>
+    <string name="text_start_in_fullscreen_mode">全画面モードで起動</string>
     <string name="text_start_record">記録開始</string>
     <string name="text_start_running">実行中</string>
     <string name="text_state_or_province">州または省</string>

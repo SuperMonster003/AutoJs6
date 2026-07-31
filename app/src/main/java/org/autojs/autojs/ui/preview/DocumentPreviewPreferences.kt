@@ -59,6 +59,10 @@ class DocumentPreviewPreferences(context: Context) {
             preferences.edit { putString(KEY_THEME, normalized.id) }
         }
 
+    var startInFullscreenMode: Boolean
+        get() = preferences.getBoolean(KEY_START_IN_FULLSCREEN_MODE, false)
+        set(value) = preferences.edit { putBoolean(KEY_START_IN_FULLSCREEN_MODE, value) }
+
     val hasCustomCss: Boolean
         get() = customCssFile.baseFile.isFile
 
@@ -125,6 +129,7 @@ class DocumentPreviewPreferences(context: Context) {
         const val MAX_CUSTOM_CSS_BYTES = 256 * 1024
 
         private const val PREFERENCES_NAME = "document_preview"
+        private const val KEY_START_IN_FULLSCREEN_MODE = "start_in_fullscreen_mode"
         private const val KEY_THEME = "theme"
         private const val CUSTOM_CSS_RELATIVE_PATH = "document-preview/custom.css"
         private const val DEFAULT_BUFFER_SIZE = 8 * 1024

@@ -16,14 +16,13 @@
     <string name="apk_info_components_aab">Модули: %1$d</string>
     <string name="apk_info_components_apk">APK: %1$d, выбрано: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">SDK устройства</string>
+    <string name="apk_info_exception">Исключение</string>
+    <string name="apk_info_exception_obb_not_deployed">OBB: %1$d (не развертывается автоматически)</string>
     <string name="apk_info_file_size">Размер файла</string>
     <string name="apk_info_format">Формат</string>
-    <string name="apk_info_installation">Установка</string>
     <string name="apk_info_installation_aab">AAB является форматом публикации. Перед установкой преобразуйте его в APK и подпишите исходным ключом.</string>
     <string name="apk_info_installation_incompatible">Для этого устройства нет совместимого набора APK</string>
     <string name="apk_info_installation_invalid">Данные пакета неполны или недействительны</string>
-    <string name="apk_info_installation_ready">Готово</string>
-    <string name="apk_info_installation_ready_without_obb">Набор APK готов; OBB: %1$d (не развертывается автоматически)</string>
     <string name="apk_info_installed_version">Установлено</string>
     <string name="apk_info_max_sdk">Макс. SDK</string>
     <string name="apk_info_min_sdk">Мин. SDK</string>
@@ -487,6 +486,12 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Текущий плагин требует более новой версии хост-среды AutoJs6 (требуемый versionCode: %1$d, текущий versionCode: %2$d). Необходимо обновить AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Протокол плагина несовместим с текущей версией AutoJs6. Требуется обновить плагин.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>
+    <string name="image_editor_flip_horizontal">Отразить по горизонтали</string>
+    <string name="image_editor_flip_vertical">Отразить по вертикали</string>
+    <string name="image_editor_rotate_left">Повернуть влево</string>
+    <string name="image_editor_rotate_right">Повернуть вправо</string>
+    <string name="image_info_modified_label">Изменено</string>
+    <string name="image_info_orientation_label">Ориентация</string>
     <string name="instruction_install_plugin_from_url">Введите URL, указывающий на удалённый плагин.\nНапример: \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">Удалить навсегда</string>
     <string name="item_move_to_trash">Переместить в корзину</string>
@@ -787,6 +792,7 @@
     <string name="text_auto_rename">Автопереименование</string>
     <string name="text_available_windows">Доступные окна</string>
     <string name="text_back">Назад</string>
+    <string name="text_background_color">Цвет фона</string>
     <string name="text_broadcast_action">Действие</string>
     <string name="text_broadcast_task">Трансляция задачи</string>
     <string name="text_build">Собрать</string>
@@ -1002,6 +1008,7 @@
     <string name="text_drawer_close">Закрыть ящик</string>
     <string name="text_drawer_open">Открыть ящик</string>
     <string name="text_edit">Редактировать</string>
+    <string name="text_edit_by_other_apps">Редактировать в других приложениях</string>
     <string name="text_edit_prepare_script">Редактирование сценария перед выполнением</string>
     <string name="text_edit_script">Редактирование скрипта</string>
     <string name="text_editor_assistance">Помощь</string>
@@ -1691,6 +1698,7 @@
     <string name="text_special_permissions">Специальные разрешения</string>
     <string name="text_stable_mode">Стабильный режим</string>
     <string name="text_star">Звезда</string>
+    <string name="text_start_in_fullscreen_mode">Запускать в полноэкранном режиме</string>
     <string name="text_start_record">Начало записи</string>
     <string name="text_start_running">Выполнение</string>
     <string name="text_state_or_province">Штат или провинция</string>

@@ -16,14 +16,13 @@
     <string name="apk_info_components_aab">Módulos: %1$d</string>
     <string name="apk_info_components_apk">APK: %1$d, seleccionados: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">SDK del dispositivo</string>
+    <string name="apk_info_exception">Excepción</string>
+    <string name="apk_info_exception_obb_not_deployed">OBB: %1$d (no se implementa automáticamente)</string>
     <string name="apk_info_file_size">Tamaño de archivo</string>
     <string name="apk_info_format">Formato</string>
-    <string name="apk_info_installation">Instalación</string>
     <string name="apk_info_installation_aab">AAB es un formato de publicación. Conviértalo en APK y fírmelo con la clave original antes de instalarlo.</string>
     <string name="apk_info_installation_incompatible">No hay un conjunto de APK compatible con este dispositivo</string>
     <string name="apk_info_installation_invalid">Los datos del paquete están incompletos o no son válidos</string>
-    <string name="apk_info_installation_ready">Listo</string>
-    <string name="apk_info_installation_ready_without_obb">El conjunto de APK está listo; OBB: %1$d (no se implementa automáticamente)</string>
     <string name="apk_info_installed_version">Instalado</string>
     <string name="apk_info_max_sdk">SDK máximo</string>
     <string name="apk_info_min_sdk">SDK mínimo</string>
@@ -487,6 +486,12 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">El plugin actual requiere una versión más alta del entorno host de AutoJs6 (versionCode requerido: %1$d, versionCode actual: %2$d). Es necesario actualizar AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">El protocolo del plugin no es compatible con la versión actual de AutoJs6. Debes actualizar el plugin.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Prueba a pulsar el boton \"Activar\" para activar el plugin una vez.\nSi la activacion se realiza correctamente, el boton se activara automaticamente en un periodo de tiempo.</string>
+    <string name="image_editor_flip_horizontal">Voltear horizontalmente</string>
+    <string name="image_editor_flip_vertical">Voltear verticalmente</string>
+    <string name="image_editor_rotate_left">Girar a la izquierda</string>
+    <string name="image_editor_rotate_right">Girar a la derecha</string>
+    <string name="image_info_modified_label">Modificado</string>
+    <string name="image_info_orientation_label">Orientación</string>
     <string name="instruction_install_plugin_from_url">Introduce una URL que apunte a la dirección de un complemento remoto.\nPor ejemplo, \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">Eliminar definitivamente</string>
     <string name="item_move_to_trash">Mover a la papelera</string>
@@ -787,6 +792,7 @@
     <string name="text_auto_rename">Renombrar automaticamente</string>
     <string name="text_available_windows">Ventanas disponibles</string>
     <string name="text_back">Volver</string>
+    <string name="text_background_color">Color de fondo</string>
     <string name="text_broadcast_action">Acción</string>
     <string name="text_broadcast_task">Tarea de difusión</string>
     <string name="text_build">Compilar</string>
@@ -1002,6 +1008,7 @@
     <string name="text_drawer_close">Cerrar cajón</string>
     <string name="text_drawer_open">Abrir el cajón</string>
     <string name="text_edit">Editar</string>
+    <string name="text_edit_by_other_apps">Editar con otras aplicaciones</string>
     <string name="text_edit_prepare_script">Editar script de preejecución</string>
     <string name="text_edit_script">Editar script</string>
     <string name="text_editor_assistance">Asistencia</string>
@@ -1691,6 +1698,7 @@
     <string name="text_special_permissions">Permisos especiales</string>
     <string name="text_stable_mode">Modo estable</string>
     <string name="text_star">Estrella</string>
+    <string name="text_start_in_fullscreen_mode">Iniciar en modo de pantalla completa</string>
     <string name="text_start_record">Comenzar a grabar</string>
     <string name="text_start_running">Ejecutando</string>
     <string name="text_state_or_province">Estado o provincia</string>

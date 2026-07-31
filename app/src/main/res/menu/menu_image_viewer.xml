@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_edit"
+        android:icon="@drawable/ic_edit_white_24dp"
+        android:title="@string/text_edit"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_delete_toolbar"
+        android:icon="@drawable/ic_delete_black_24dp"
+        android:title="@string/text_delete"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_move_to"
+        android:title="@string/text_move_to"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_copy_to"
+        android:title="@string/text_copy_to"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_rename"
+        android:title="@string/text_rename"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete"
+        android:title="@string/text_delete"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_convert"
+        android:title="@string/dialog_button_convert"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_fullscreen_mode"
+        android:checkable="true"
+        android:title="@string/text_editor_fullscreen_mode"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_send"
+        android:title="@string/text_send"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_open_by_other_apps"
+        android:title="@string/text_open_by_other_apps"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/text_settings"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/action_start_in_fullscreen_mode"
+                android:checkable="true"
+                android:title="@string/text_start_in_fullscreen_mode" />
+            <item
+                android:id="@+id/action_background_color"
+                android:title="@string/text_background_color" />
+        </menu>
+    </item>
+
+</menu>

@@ -1,0 +1,33 @@
+package org.autojs.autojs.ui.main.scripts
+
+import android.content.Context
+import android.content.Intent
+import io.noties.prism4j.GrammarLocator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.autojs.autojs.util.IntentUtils.startSafely
+import org.autojs.autojs6.R
+
+class DisplayExifInfoActivity : BaseDisplayContentActivity() {
+
+    override var internalMenuResource = R.menu.menu_display_media_info_fab
+    override var highlightGrammarLocator: GrammarLocator = MediaInfoGrammarLocator()
+    override var highlightGrammarName = MediaInfoGrammarLocator.GRAMMAR_NAME
+    override var highlightThemeLanguage = "json"
+
+    override suspend fun loadAndDisplayContent() {
+        setTextWithLock(withContext(Dispatchers.Default) {
+            highlightTextOrSelf(intent.getStringExtra(EXTRA_EXIF_INFO) ?: getString(R.string.text_no_content))
+        })
+    }
+
+    companion object {
+        private const val EXTRA_EXIF_INFO = "org.autojs.autojs.extra.EXIF_INFO"
+
+        fun launch(context: Context, info: String) {
+            Intent(context, DisplayExifInfoActivity::class.java)
+                .putExtra(EXTRA_EXIF_INFO, info)
+                .startSafely(context)
+        }
+    }
+}

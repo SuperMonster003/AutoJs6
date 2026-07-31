@@ -72,6 +72,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
                     when {
                         item.isTextEditable -> Scripts.edit(requireActivity(), item.toScriptFile())
                         item.isInstallable -> ApkInfoDialogManager.showApkInfoDialog(requireActivity(), item.toScriptFile())
+                        item.type.isImageFile() -> ImageInfoDialogManager.showImageInfoDialog(requireActivity(), item.toScriptFile())
                         item.isMediaMenu || item.isMediaPlayable -> MediaInfoDialogManager.showMediaInfoDialog(requireActivity(), item)
                         else -> viewFile(item)
                     }

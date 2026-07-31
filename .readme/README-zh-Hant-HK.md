@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-數據更新於 2026 年 7 月 31 日.
+數據更新於 2026 年 8 月 1 日.
 
 數據條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/07/31
+###### 2026/08/01
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -196,7 +196,10 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 定時任務支持按月/按年/倒計時任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 文件管理器支持多選文件及批量複製/移動/刪除操作
 * `新增` 文件管理器支持安全預覽 Markdown 與 HTML 文件, 提供 GFM 渲染/多套主題/自定義 CSS 及受控的同目錄資源加載
+* `新增` Markdown 與 HTML 預覽支持全屏模式及預設關閉的 "以全屏模式啓動" 設置
 * `新增` 文件管理器支持通過最左側圖標按鈕預覽 Markdown/HTML 及查看圖片/播放音頻/視頻; 應用可註冊為系統媒體查看器, 音頻支持後台播放及通知欄聯動控制
+* `新增` 文件管理器支持查看圖片文件信息及 EXIF 詳情, 並提供內置基礎編輯與格式轉換功能
+* `新增` 圖片查看器支持自動遍歷同目錄圖片, 在副標題顯示當前位置及總數, 並支持左右滑動切換/雙指縮放/全屏模式/以全屏模式啓動/帶歷史記錄的背景色設置
 * `新增` 文件管理器支持查看 APK/APKS/XAPK/APKM/APKZ/AAB 文件的安裝包詳情及清單
 * `新增` 安裝器支持 APK 及 APKS/XAPK/APKM/APKZ 容器中的兼容拆分 APK 組合, 包含設備拆分選擇及簽名證書一致性校驗
 * `新增` 代碼編輯器支持透過外部插件加載 Ace 編輯器, 包含簽名/信任/Editor API 合約/宿主版本/二進制 ABI 兼容性校驗, 插件不可用時自動回退至原生編輯器
@@ -250,6 +253,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` MediaInfo 插件媒體庫不可用或 Binder 調用異常時, 文件管理器媒體詳情可能只顯示 "..." 或導致應用崩潰, 且無法回退顯示 Android 平台元數據的問題
 * `修復` 文件管理器視頻詳情對話框錯誤顯示內嵌音頻格式及元數據字段的問題
 * `修復` 部分 WebView 版本及實體設備上的 Markdown 與 HTML 預覽主文檔被請求攔截器錯誤拒絕的問題
+* `修復` 圖片查看器退出時 Glide 仍嘗試使用已銷毀的 Activity 發起圖片加載, 導致應用崩潰的問題
 * `修復` 無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修復` 腳本反覆運行後內存佔用可能持續增長的問題 (試修) _[`issue #548`](http://issues.autojs6.com/548)_
 * `修復` 通過外部 URI 或後台運行腳本時可能無法保留原始路徑, 導致相對路徑解析異常的問題 _[`issue #545`](http://issues.autojs6.com/545)_
@@ -305,7 +309,9 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 底部日誌面板支持在獨立日誌頁面點擊堆棧幀跳轉至源碼
 * `優化` 項目文檔來源切換支持即時生效
 * `優化` 文件管理器僅在點擊 Manifest 按鈕後於後台解碼及格式化完整的二進制 AndroidManifest.xml, 並優化大文本滾動及雙指縮放性能
+* `優化` 文件管理器 APK 詳情僅在 Manifest 明確指定時顯示最高 SDK, 並將安裝條目改為異常且僅在存在異常時顯示
 * `優化` 文件管理器 Markdown 預覽支持經安全清理的 GitHub 常用原始 HTML 及 HTTPS 遠程圖片, 並改善窄屏表格滾動與舊式隱藏註釋兼容性
+* `優化` 調整文件管理器預覽/播放圖標的語義及顯示尺寸: Markdown/HTML 使用 `ic_window`, 圖片使用 `ic_eye`, 音頻/視頻使用 `ic_play_media`
 * `優化` 插件中心完善 "排序" 及 "篩選" 對話框的樣式及功能
 * `優化` 插件中心默認展示常用插件變體並提供獨立頁面查看其他變體
 * `優化` 插件中心完善多語言更新日誌/語言緩存/官方認證/索引加載等功能
@@ -593,7 +599,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 7 月 31 日, AutoJs6 可支持 JDK 最高版本為 `26`.
+截至 2026 年 8 月 1 日, AutoJs6 可支持 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

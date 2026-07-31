@@ -3,6 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/action_image_edit"
+        android:title="@string/text_edit" />
+    <item
+        android:id="@+id/action_convert"
+        android:title="@string/dialog_button_convert" />
+    <item
         android:id="@+id/action_move_to"
         android:title="@string/text_move_to" />
     <item
@@ -35,6 +41,9 @@
     <item
         android:id="@+id/action_open_by_other_apps"
         android:title="@string/text_open_by_other_apps" />
+    <item
+        android:id="@+id/action_edit_by_other_apps"
+        android:title="@string/text_edit_by_other_apps" />
     <item
         android:id="@+id/action_run_repeatedly"
         android:title="@string/text_run_repeatedly" />

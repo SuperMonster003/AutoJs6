@@ -6,7 +6,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.MaterialDialog
@@ -26,6 +30,7 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.isNightModeYes
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityDocumentPreviewBinding
+import org.autojs.autojs6.databinding.DialogDocumentPreviewSettingsBinding
 import java.io.File
 import java.io.IOException
 
@@ -40,6 +45,19 @@ class DocumentPreviewActivity : BaseActivity() {
     private val renderer = DocumentPreviewRenderer()
     private var loadJob: Job? = null
     private var loadGeneration = 0
+    private var fullscreenMode = false
+
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            if (fullscreenMode) {
+                setFullscreenMode(false)
+                return
+            }
+            isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
+            isEnabled = true
+        }
+    }
 
     private val customCssPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let(::importCustomCss)
@@ -56,12 +74,16 @@ class DocumentPreviewActivity : BaseActivity() {
         previewFile = resolved.first
         previewType = resolved.second
         preferences = DocumentPreviewPreferences(this)
+        fullscreenMode = savedInstanceState?.getBoolean(STATE_FULLSCREEN_MODE)
+            ?: preferences.startInFullscreenMode
 
         binding = ActivityDocumentPreviewBinding.inflate(layoutInflater).also {
             setContentView(it.root)
             it.previewWebView.setBackgroundColor(getColor(R.color.window_background))
         }
         setToolbarAsBack(previewFile.name)
+        setFullscreenMode(fullscreenMode, invalidateMenu = false)
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         webController = DocumentPreviewWebController(
             context = this,
@@ -87,6 +109,7 @@ class DocumentPreviewActivity : BaseActivity() {
         menu.findItem(R.id.action_preview_theme)?.isVisible = markdown
         menu.findItem(R.id.action_import_custom_css)?.isVisible = markdown
         menu.findItem(R.id.action_clear_custom_css)?.isVisible = markdown && preferences.hasCustomCss
+        menu.findItem(R.id.action_fullscreen_mode)?.isChecked = fullscreenMode
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -95,7 +118,21 @@ class DocumentPreviewActivity : BaseActivity() {
         R.id.action_preview_theme -> true.also { showThemeDialog() }
         R.id.action_import_custom_css -> true.also { openCustomCssPicker() }
         R.id.action_clear_custom_css -> true.also { clearCustomCss() }
+        R.id.action_fullscreen_mode -> true.also { setFullscreenMode(!fullscreenMode) }
+        R.id.action_document_preview_settings -> true.also { showSettingsDialog() }
         else -> super.onOptionsItemSelected(item)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(STATE_FULLSCREEN_MODE, fullscreenMode)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && fullscreenMode && ::binding.isInitialized) {
+            applyFullscreenMode()
+        }
     }
 
     override fun onDestroy() {
@@ -200,6 +237,47 @@ class DocumentPreviewActivity : BaseActivity() {
             .showAdaptive()
     }
 
+    private fun showSettingsDialog() {
+        val settingsBinding = DialogDocumentPreviewSettingsBinding.inflate(layoutInflater).apply {
+            startInFullscreenMode.isChecked = preferences.startInFullscreenMode
+        }
+        MaterialDialog.Builder(this)
+            .title(R.string.text_settings)
+            .customView(settingsBinding.root, false)
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .onPositive { _, _ ->
+                preferences.startInFullscreenMode = settingsBinding.startInFullscreenMode.isChecked
+            }
+            .showAdaptive()
+    }
+
+    private fun setFullscreenMode(enabled: Boolean, invalidateMenu: Boolean = true) {
+        val changed = fullscreenMode != enabled
+        fullscreenMode = enabled
+        binding.appBar.isVisible = !enabled
+        applyFullscreenMode()
+        if (changed && invalidateMenu) {
+            invalidateOptionsMenu()
+        }
+    }
+
+    private fun applyFullscreenMode() {
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            when {
+                fullscreenMode -> {
+                    systemBarsBehavior =
+                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    hide(WindowInsetsCompat.Type.systemBars())
+                }
+                else -> show(WindowInsetsCompat.Type.systemBars())
+            }
+        }
+        ViewCompat.requestApplyInsets(binding.root)
+    }
+
     private fun openCustomCssPicker() {
         customCssPicker.launch(arrayOf("text/css", "text/plain"))
     }
@@ -251,6 +329,7 @@ class DocumentPreviewActivity : BaseActivity() {
         const val MAX_DOCUMENT_BYTES = 8 * 1024 * 1024
 
         private const val EXTRA_PATH = "path"
+        private const val STATE_FULLSCREEN_MODE = "fullscreen_mode"
 
         fun launch(context: Context, path: String) {
             Intent(context, DocumentPreviewActivity::class.java)

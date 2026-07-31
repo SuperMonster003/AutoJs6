@@ -18,14 +18,13 @@
     <string name="apk_info_components_aab">모듈: %1$d</string>
     <string name="apk_info_components_apk">APK: %1$d, 선택됨: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">디바이스 SDK</string>
+    <string name="apk_info_exception">이상</string>
+    <string name="apk_info_exception_obb_not_deployed">OBB: %1$d (자동으로 배포되지 않음)</string>
     <string name="apk_info_file_size">파일 크기</string>
     <string name="apk_info_format">형식</string>
-    <string name="apk_info_installation">설치</string>
     <string name="apk_info_installation_aab">AAB는 배포 형식입니다. 설치하기 전에 APK로 변환하고 원래 키로 서명하세요.</string>
     <string name="apk_info_installation_incompatible">이 디바이스와 호환되는 APK 세트가 없습니다</string>
     <string name="apk_info_installation_invalid">패키지 데이터가 불완전하거나 유효하지 않습니다</string>
-    <string name="apk_info_installation_ready">준비됨</string>
-    <string name="apk_info_installation_ready_without_obb">APK 세트가 준비되었습니다; OBB: %1$d (자동으로 배포되지 않음)</string>
     <string name="apk_info_installed_version">설치됨</string>
     <string name="apk_info_max_sdk">최대 SDK</string>
     <string name="apk_info_min_sdk">최소 SDK</string>
@@ -489,6 +488,12 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">현재 플러그인은 더 높은 버전의 AutoJs6 호스트 환경이 필요합니다 (필요한 versionCode: %1$d, 현재 versionCode: %2$d). AutoJs6를 업그레이드해야 합니다.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">플러그인 프로토콜이 현재 AutoJs6와 호환되지 않습니다. 플러그인 버전을 업그레이드해야 합니다.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"활성화\" 버튼을 눌러 플러그인을 한 번 활성화해 보세요.\n활성화에 성공하면 일정 시간 내에 버튼이 자동으로 켜집니다.</string>
+    <string name="image_editor_flip_horizontal">좌우 뒤집기</string>
+    <string name="image_editor_flip_vertical">상하 뒤집기</string>
+    <string name="image_editor_rotate_left">왼쪽으로 회전</string>
+    <string name="image_editor_rotate_right">오른쪽으로 회전</string>
+    <string name="image_info_modified_label">수정 시간</string>
+    <string name="image_info_orientation_label">방향</string>
     <string name="instruction_install_plugin_from_url">원격 플러그인 주소를 가리키는 URL을 입력하세요.\n예: \"https://example.com/plugin.apk\"</string>
     <string name="item_delete_permanently">영구 삭제</string>
     <string name="item_move_to_trash">휴지통으로 이동</string>
@@ -789,6 +794,7 @@
     <string name="text_auto_rename">자동 이름 변경</string>
     <string name="text_available_windows">사용 가능한 창</string>
     <string name="text_back">뒤</string>
+    <string name="text_background_color">배경색</string>
     <string name="text_broadcast_action">동작</string>
     <string name="text_broadcast_task">방송 작업</string>
     <string name="text_build">빌드</string>
@@ -1004,6 +1010,7 @@
     <string name="text_drawer_close">가까운 서랍</string>
     <string name="text_drawer_open">열린 서랍</string>
     <string name="text_edit">편집하다</string>
+    <string name="text_edit_by_other_apps">다른 앱으로 편집</string>
     <string name="text_edit_prepare_script">사전 사전 자연 스크립트를 편집하십시오</string>
     <string name="text_edit_script">스크립트 편집</string>
     <string name="text_editor_assistance">지원 기능</string>
@@ -1693,6 +1700,7 @@
     <string name="text_special_permissions">특수 권한</string>
     <string name="text_stable_mode">안정적인 모드</string>
     <string name="text_star">별</string>
+    <string name="text_start_in_fullscreen_mode">전체 화면 모드로 시작</string>
     <string name="text_start_record">녹음을 시작하십시오</string>
     <string name="text_start_running">달리기</string>
     <string name="text_state_or_province">주 또는 도</string>

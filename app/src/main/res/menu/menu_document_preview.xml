@@ -23,4 +23,15 @@
         android:title="@string/text_clear_custom_css"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_fullscreen_mode"
+        android:checkable="true"
+        android:title="@string/text_editor_fullscreen_mode"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_document_preview_settings"
+        android:title="@string/text_settings"
+        app:showAsAction="never" />
+
 </menu>

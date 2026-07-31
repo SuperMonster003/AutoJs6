@@ -432,7 +432,9 @@
             android:id="@+id/max_sdk_parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="4dp">
+            android:paddingTop="4dp"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <TextView
                 android:id="@+id/max_sdk_label"
@@ -517,7 +519,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
-            android:paddingBottom="4dp">
+            android:paddingBottom="4dp"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <TextView
                 android:id="@+id/installation_label"
@@ -527,7 +531,7 @@
                 android:lineSpacingExtra="2dp"
                 android:text="@string/ellipsis_six"
                 android:textSize="@dimen/ref_md_listitem_textsize"
-                tools:text="@string/apk_info_installation" />
+                tools:text="@string/apk_info_exception" />
 
             <TextView
                 android:id="@+id/installation_colon"

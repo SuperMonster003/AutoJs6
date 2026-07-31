@@ -13,14 +13,13 @@
     <string name="apk_info_components_aab">模組: %1$d</string>
     <string name="apk_info_components_apk">APK: %1$d, 已選擇: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">裝置 SDK</string>
+    <string name="apk_info_exception">異常</string>
+    <string name="apk_info_exception_obb_not_deployed">OBB: %1$d (無法自動部署)</string>
     <string name="apk_info_file_size">檔案大小</string>
     <string name="apk_info_format">格式</string>
-    <string name="apk_info_installation">安裝</string>
     <string name="apk_info_installation_aab">AAB 是發佈格式. 請先將其轉換為 APK 集並使用原簽章金鑰簽章</string>
     <string name="apk_info_installation_incompatible">目前裝置沒有相容的 APK 組合</string>
     <string name="apk_info_installation_invalid">安裝包資料不完整或無效</string>
-    <string name="apk_info_installation_ready">可以安裝</string>
-    <string name="apk_info_installation_ready_without_obb">APK 組合可以安裝; OBB: %1$d (無法自動部署)</string>
     <string name="apk_info_installed_version">已安裝</string>
     <string name="apk_info_max_sdk">最高 SDK</string>
     <string name="apk_info_min_sdk">最低 SDK</string>
@@ -484,6 +483,12 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">當前外掛需要更高版本的 AutoJs6 宿主環境 (要求 versionCode: %1$d, 當前 versionCode: %2$d), 需要升級 AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">外掛協議與當前 AutoJs6 不相容, 需升級外掛版本.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可嘗試點選 \"啟用\" 按鈕啟用一次外掛.\n如啟用成功, 按鈕將在一定時間內自動開啟.</string>
+    <string name="image_editor_flip_horizontal">水平翻轉</string>
+    <string name="image_editor_flip_vertical">垂直翻轉</string>
+    <string name="image_editor_rotate_left">向左旋轉</string>
+    <string name="image_editor_rotate_right">向右旋轉</string>
+    <string name="image_info_modified_label">修改時間</string>
+    <string name="image_info_orientation_label">方向</string>
     <string name="instruction_install_plugin_from_url">輸入一個指向遠端外掛地址的 URL.\n例如 \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">永久刪除</string>
     <string name="item_move_to_trash">移入回收站</string>
@@ -784,6 +789,7 @@
     <string name="text_auto_rename">自動重新命名</string>
     <string name="text_available_windows">可用視窗</string>
     <string name="text_back">返回</string>
+    <string name="text_background_color">背景色</string>
     <string name="text_broadcast_action">動作 (Action)</string>
     <string name="text_broadcast_task">廣播觸發任務</string>
     <string name="text_build">構建</string>
@@ -999,6 +1005,7 @@
     <string name="text_drawer_close">關閉側拉抽屜</string>
     <string name="text_drawer_open">開啟側拉抽屜</string>
     <string name="text_edit">編輯</string>
+    <string name="text_edit_by_other_apps">使用其他應用程式編輯</string>
     <string name="text_edit_prepare_script">編輯預執行指令碼</string>
     <string name="text_edit_script">編輯指令碼</string>
     <string name="text_editor_assistance">輔助</string>
@@ -1688,6 +1695,7 @@
     <string name="text_special_permissions">特殊許可權</string>
     <string name="text_stable_mode">穩定模式</string>
     <string name="text_star">收藏</string>
+    <string name="text_start_in_fullscreen_mode">以全屏模式啟動</string>
     <string name="text_start_record">開始錄製</string>
     <string name="text_start_running">開始執行</string>
     <string name="text_state_or_province">州或省份</string>

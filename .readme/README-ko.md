@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 7 월 31 일.
+데이터 갱신일: 2026 년 8 월 1 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/07/31
+###### 2026/08/01
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
@@ -196,7 +196,10 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 예약 작업에서 월간/연간/카운트다운 작업 및 반복 종료 조건 지원 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `추가` 파일 관리자에서 다중 선택 및 일괄 복사/이동/삭제 작업 지원
 * `추가` 파일 관리자에서 Markdown 및 HTML 파일의 안전한 미리 보기를 지원하고 GFM 렌더링/다중 테마/사용자 지정 CSS/제어된 동일 디렉터리 리소스 로딩 제공
+* `추가` Markdown 및 HTML 미리 보기에서 전체 화면 모드를 지원하고 기본적으로 비활성화된 "전체 화면 모드로 시작" 설정 제공
 * `추가` 파일 관리자에서 Markdown/HTML 미리보기 및 이미지 보기/오디오/비디오 재생을 맨 왼쪽 아이콘으로 실행 지원; 앱을 시스템 미디어 뷰어로 등록할 수 있으며 오디오는 백그라운드 재생 및 알림 제어 지원
+* `추가` 파일 관리자에서 이미지 정보 및 상세 EXIF 보기, 내장 기본 이미지 편집, 이미지 형식 변환 지원
+* `추가` 이미지 뷰어에서 동일 디렉터리의 모든 이미지를 자동 탐색하고 부제목에 현재 위치와 총 개수를 표시하며 스와이프 탐색/핀치 줌/전체 화면 모드/전체 화면 시작 설정/기록이 있는 구성 가능한 배경색 지원
 * `추가` 파일 관리자에서 APK/APKS/XAPK/APKM/APKZ/AAB 파일의 패키지 세부 정보 및 매니페스트 보기 지원
 * `추가` 패키지 설치 관리자에서 APK 및 APKS/XAPK/APKM/APKZ 컨테이너의 호환 가능한 분할 APK 세트를 지원하고 디바이스 분할 선택 및 서명 인증서 일관성 검사 제공
 * `추가` 코드 편집기에서 외부 플러그인의 Ace 로딩을 지원하고 서명자/신뢰/Editor API 계약/호스트 버전/바이너리 ABI 호환성을 검증하며, 플러그인을 사용할 수 없을 때 네이티브 편집기로 자동 폴백
@@ -250,6 +253,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` MediaInfo 플러그인 라이브러리를 사용할 수 없거나 Binder 호출에 실패할 때 파일 관리자의 미디어 상세 정보가 "..." 상태로 남거나 앱이 비정상 종료되고 Android 메타데이터로 대체하지 못하는 문제
 * `수정` 파일 관리자의 동영상 상세 정보 대화 상자에 내장 오디오 형식 및 메타데이터 필드가 잘못 표시되는 문제
 * `수정` 일부 WebView 버전 및 실제 기기에서 Markdown 및 HTML 미리 보기의 기본 문서가 요청 인터셉터에 의해 잘못 거부되는 문제
+* `수정` ImageViewer가 소멸될 때 Glide가 이미 소멸된 Activity에서 이미지 로드를 시작하려 하여 앱이 충돌하는 문제
 * `수정` 접근성 서비스에서 back 등의 작업을 연속 실행할 때 예기치 않게 중단될 수 있는 문제 _[`issue #527`](http://issues.autojs6.com/527)_
 * `수정` 스크립트를 반복 실행한 후 메모리 사용량이 계속 증가할 수 있는 문제 (수정 시도) _[`issue #548`](http://issues.autojs6.com/548)_
 * `수정` 외부 URI 또는 백그라운드에서 스크립트를 실행할 때 원래 경로가 유지되지 않아 상대 경로 해석에 오류가 발생할 수 있는 문제 _[`issue #545`](http://issues.autojs6.com/545)_
@@ -305,7 +309,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 하단 로그 패널에서 독립 로그 페이지의 스택 프레임을 눌러 소스 코드로 이동 가능
 * `개선` 프로젝트 문서 소스 전환을 즉시 적용
 * `개선` 파일 관리자는 Manifest 버튼을 누른 후에만 전체 바이너리 AndroidManifest.xml을 백그라운드에서 디코딩/서식화하며 대용량 텍스트 스크롤 및 핀치 줌 성능 개선
+* `개선` 파일 관리자의 APK 상세 정보에서 최대 SDK는 매니페스트에 명시된 경우에만 표시하고 설치 항목을 이상으로 변경하여 이상이 있을 때만 표시
 * `개선` 파일 관리자의 Markdown 미리보기에서 안전하게 정제된 GitHub에서 일반적으로 사용되는 원시 HTML 및 HTTPS 원격 이미지를 지원하고 좁은 화면의 표 스크롤과 기존 형식 숨김 주석 호환성 개선
+* `개선` 파일 관리자 미리보기/재생 아이콘의 의미와 표시 크기 조정: Markdown/HTML은 `ic_window`, 이미지는 `ic_eye`, 오디오/비디오는 `ic_play_media` 사용
 * `개선` 플러그인 센터 "정렬" 및 "필터" 대화상자의 스타일과 기능 개선
 * `개선` 플러그인 센터에서 일반적인 배포 변형을 기본으로 표시하고 기타 변형 전용 페이지 제공
 * `개선` 플러그인 센터의 다국어 변경 기록/언어 캐시/공식 인증/인덱스 로딩 등의 기능 개선
@@ -593,7 +599,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 7 월 31 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 8 월 1 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

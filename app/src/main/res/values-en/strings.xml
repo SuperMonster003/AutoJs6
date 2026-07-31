@@ -13,14 +13,13 @@
     <string name="apk_info_components_aab">Modules: %1$d</string>
     <string name="apk_info_components_apk">APK: %1$d, selected: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">Device SDK</string>
+    <string name="apk_info_exception">Exception</string>
+    <string name="apk_info_exception_obb_not_deployed">OBB: %1$d (not deployed automatically)</string>
     <string name="apk_info_file_size">File size</string>
     <string name="apk_info_format">Format</string>
-    <string name="apk_info_installation">Installation</string>
     <string name="apk_info_installation_aab">AAB is a publishing format. Convert it to APKs and sign them with the original key before installation.</string>
     <string name="apk_info_installation_incompatible">No compatible APK set is available for this device</string>
     <string name="apk_info_installation_invalid">Package data is incomplete or invalid</string>
-    <string name="apk_info_installation_ready">Ready</string>
-    <string name="apk_info_installation_ready_without_obb">APK set is ready; OBB: %1$d (not deployed automatically)</string>
     <string name="apk_info_installed_version">Installed</string>
     <string name="apk_info_max_sdk">Max SDK</string>
     <string name="apk_info_min_sdk">Min SDK</string>
@@ -484,6 +483,12 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Current plugin requires a higher version of the AutoJs6 host environment (required versionCode: %1$d, current versionCode: %2$d), AutoJs6 upgrade needed.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Plugin protocol is incompatible with current AutoJs6, plugin version upgrade required.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Try clicking the \"Activate\" button to activate the plugin once.\nIf activation is successful, the button will automatically turn on within a certain period of time.</string>
+    <string name="image_editor_flip_horizontal">Flip horizontally</string>
+    <string name="image_editor_flip_vertical">Flip vertically</string>
+    <string name="image_editor_rotate_left">Rotate left</string>
+    <string name="image_editor_rotate_right">Rotate right</string>
+    <string name="image_info_modified_label">Modified</string>
+    <string name="image_info_orientation_label">Orientation</string>
     <string name="instruction_install_plugin_from_url">Enter a URL pointing to a remote plugin address.\nFor example \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">Delete permanently</string>
     <string name="item_move_to_trash">Move to trash</string>
@@ -784,6 +789,7 @@
     <string name="text_auto_rename">Auto rename</string>
     <string name="text_available_windows">Available windows</string>
     <string name="text_back">Back</string>
+    <string name="text_background_color">Background color</string>
     <string name="text_broadcast_action">Action</string>
     <string name="text_broadcast_task">Broadcast task</string>
     <string name="text_build">Build</string>
@@ -999,6 +1005,7 @@
     <string name="text_drawer_close">Close drawer</string>
     <string name="text_drawer_open">Open drawer</string>
     <string name="text_edit">Edit</string>
+    <string name="text_edit_by_other_apps">Edit with other apps</string>
     <string name="text_edit_prepare_script">Edit pre-execute script</string>
     <string name="text_edit_script">Edit script</string>
     <string name="text_editor_assistance">Assistance</string>
@@ -1688,6 +1695,7 @@
     <string name="text_special_permissions">Special permissions</string>
     <string name="text_stable_mode">Stable mode</string>
     <string name="text_star">Star</string>
+    <string name="text_start_in_fullscreen_mode">Start in fullscreen mode</string>
     <string name="text_start_record">Start recording</string>
     <string name="text_start_running">Running</string>
     <string name="text_state_or_province">State or Province</string>

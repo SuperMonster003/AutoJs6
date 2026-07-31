@@ -165,8 +165,14 @@ object ApkInfoDialogManager {
                 dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue, info.signatureSchemes)
                 dialog.setCopyableTextIfAbsent(binding.minSdkValue, (info.minSdk ?: summary?.minSdk)?.toString())
                 dialog.setCopyableTextIfAbsent(binding.targetSdkValue, (info.targetSdk ?: summary?.targetSdk)?.toString())
-                dialog.setCopyableTextIfAbsent(binding.maxSdkValue, summary?.maxSdk?.toString())
-                dialog.setCopyableTextIfAbsent(binding.installationValue, installationText(context, archive))
+                summary?.maxSdk?.let { maxSdk ->
+                    binding.maxSdkParent.isVisible = true
+                    dialog.setCopyableTextIfAbsent(binding.maxSdkValue, maxSdk.toString())
+                }
+                installationExceptionText(context, archive)?.let { exceptionText ->
+                    binding.installationParent.isVisible = true
+                    dialog.setCopyableTextIfAbsent(binding.installationValue, exceptionText)
+                }
                 dialog.setIcon(
                     info.icon ?: AppCompatResources.getDrawable(context, R.drawable.ic_packaging),
                 )
@@ -196,6 +202,7 @@ object ApkInfoDialogManager {
                 dialog.setCopyableTextIfAbsent(binding.minSdkValue, null)
                 dialog.setCopyableTextIfAbsent(binding.targetSdkValue, null)
                 dialog.setCopyableTextIfAbsent(binding.maxSdkValue, null)
+                binding.installationParent.isVisible = true
                 dialog.setCopyableTextIfAbsent(
                     binding.installationValue,
                     context.getString(
@@ -364,11 +371,11 @@ object ApkInfoDialogManager {
             )
         }
 
-    private fun installationText(context: Context, archive: AndroidPackageArchive): String =
+    private fun installationExceptionText(context: Context, archive: AndroidPackageArchive): String? =
         when (archive.installationState) {
-            ArchiveInstallationState.READY -> context.getString(R.string.apk_info_installation_ready)
+            ArchiveInstallationState.READY -> null
             ArchiveInstallationState.READY_WITH_UNDEPLOYED_OBB -> context.getString(
-                R.string.apk_info_installation_ready_without_obb,
+                R.string.apk_info_exception_obb_not_deployed,
                 archive.obbEntries.size,
             )
             ArchiveInstallationState.AAB_REQUIRES_CONVERSION ->
@@ -395,7 +402,7 @@ object ApkInfoDialogManager {
             Triple(binding.targetSdkLabel, binding.targetSdkColon, binding.targetSdkValue) to R.string.apk_info_target_sdk,
             Triple(binding.maxSdkLabel, binding.maxSdkColon, binding.maxSdkValue) to R.string.apk_info_max_sdk,
             Triple(binding.deviceSdkLabel, binding.deviceSdkColon, binding.deviceSdkValue) to R.string.apk_info_device_sdk,
-            Triple(binding.installationLabel, binding.installationColon, binding.installationValue) to R.string.apk_info_installation,
+            Triple(binding.installationLabel, binding.installationColon, binding.installationValue) to R.string.apk_info_exception,
         ).forEach { (views, labelTextRes) ->
             val (labelView, colonView, valueView) = views
             labelView.text = context.getString(labelTextRes)

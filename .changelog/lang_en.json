@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/31",
+      "released_date": "2026/08/01",
       "feature": [
         "Node.js 24.5.0 script runtime, supporting scripts launched with the \"nodejs\" directive or extensions such as .node.js/.cjs/.mjs",
         "Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code",
@@ -31,7 +31,10 @@
         "Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "File manager supports multi-selection and batch copy/move/delete operations",
         "File manager supports secure Markdown and HTML previews with GFM rendering, multiple themes, custom CSS, and controlled same-directory resource loading",
+        "Markdown and HTML previews support fullscreen mode, with a \"Start in fullscreen mode\" setting that is disabled by default",
         "File manager supports leftmost icon actions for Markdown/HTML preview and image viewing/audio/video playback; the app can act as a system media viewer, with background audio playback and notification controls",
+        "File manager supports image information and detailed EXIF viewing, built-in basic image editing, and image format conversion",
+        "Image viewer automatically discovers all images in the same directory, shows the current position and total in the subtitle, and supports swipe navigation/pinch zoom/fullscreen mode/a start-in-fullscreen setting/a configurable background color with history",
         "File manager supports package details and manifest viewing for APK/APKS/XAPK/APKM/APKZ/AAB files",
         "Package installer supports APK and compatible split APK sets from APKS/XAPK/APKM/APKZ containers, with device split selection and signing-certificate consistency checks",
         "Code editor supports loading Ace from an external plugin, with signer and trust validation, Editor API contract/host-version/binary ABI compatibility checks, and automatic fallback to the native editor when unavailable",
@@ -87,6 +90,7 @@
         "File manager media details could remain as \"...\" or crash the app when the MediaInfo plugin library was unavailable or a Binder call failed, without falling back to Android platform metadata",
         "File manager video detail dialogs incorrectly displayed embedded audio format and metadata fields",
         "The Markdown and HTML preview main document could be incorrectly rejected by the request interceptor on some WebView versions and physical devices",
+        "ImageViewer could crash during destruction because Glide attempted to start an image load for an already destroyed Activity",
         "Accessibility service could stop unexpectedly while performing consecutive operations such as back _[`issue #527`](http://issues.autojs6.com/527)_",
         "Memory usage could continue to increase after repeatedly running scripts (attempted fix) _[`issue #548`](http://issues.autojs6.com/548)_",
         "The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_",
@@ -144,7 +148,9 @@
         "Bottom log panel supports jumping to source code by clicking stack frames on the standalone log page",
         "Switching the project documentation source takes effect immediately",
         "File manager decodes and formats the complete binary AndroidManifest.xml in the background only after the Manifest button is tapped, with optimized large-text scrolling and pinch zoom performance",
+        "File manager APK details show the maximum SDK only when explicitly declared in the manifest, and rename Install to Exception while showing it only when an exception exists",
         "Improved file manager Markdown previews with securely sanitized raw HTML commonly used on GitHub, HTTPS remote images, narrow-screen table scrolling, and compatibility with legacy hidden comments",
+        "Adjusted the semantics and visual sizes of file manager preview/play icons: `ic_window` for Markdown/HTML, `ic_eye` for images, and `ic_play_media` for audio/video",
         "Improved the style and functionality of the Plugin Center \"Sort\" and \"Filter\" dialogs",
         "Plugin Center lists common distribution variants by default and provides a separate page for other variants",
         "Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features",

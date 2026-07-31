@@ -18,14 +18,13 @@
     <string name="apk_info_components_aab">الوحدات: %1$d</string>
     <string name="apk_info_components_apk">APK: %1$d, المحدد: %2$d, OBB: %3$d</string>
     <string name="apk_info_device_sdk">SDK الجهاز</string>
+    <string name="apk_info_exception">استثناء</string>
+    <string name="apk_info_exception_obb_not_deployed">OBB: %1$d (لا يتم نشرها تلقائيا)</string>
     <string name="apk_info_file_size">حجم الملف</string>
     <string name="apk_info_format">التنسيق</string>
-    <string name="apk_info_installation">التثبيت</string>
     <string name="apk_info_installation_aab">AAB هو تنسيق نشر. حوّله إلى ملفات APK ووقّعها بالمفتاح الأصلي قبل التثبيت.</string>
     <string name="apk_info_installation_incompatible">لا تتوفر مجموعة APK متوافقة لهذا الجهاز</string>
     <string name="apk_info_installation_invalid">بيانات الحزمة غير مكتملة أو غير صالحة</string>
-    <string name="apk_info_installation_ready">جاهز</string>
-    <string name="apk_info_installation_ready_without_obb">مجموعة APK جاهزة; OBB: %1$d (لا يتم نشرها تلقائيا)</string>
     <string name="apk_info_installed_version">مثبت</string>
     <string name="apk_info_max_sdk">SDK الأقصى</string>
     <string name="apk_info_min_sdk">SDK الأدنى</string>
@@ -489,6 +488,12 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">يتطلب المكون الإضافي الحالي إصدارا أعلى من بيئة المضيف AutoJs6 (versionCode المطلوب: %1$d, versionCode الحالي: %2$d). يجب ترقية AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">بروتوكول المكون الإضافي غير متوافق مع إصدار AutoJs6 الحالي. يجب ترقية إصدار المكون الإضافي.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">جرّب الضغط على زر \"تفعيل\" لتفعيل الاضافة مرة واحدة.\nاذا نجح التفعيل، فسيتم تشغيل الزر تلقائيا خلال فترة زمنية معينة.</string>
+    <string name="image_editor_flip_horizontal">قلب أفقي</string>
+    <string name="image_editor_flip_vertical">قلب رأسي</string>
+    <string name="image_editor_rotate_left">تدوير لليسار</string>
+    <string name="image_editor_rotate_right">تدوير لليمين</string>
+    <string name="image_info_modified_label">تاريخ التعديل</string>
+    <string name="image_info_orientation_label">الاتجاه</string>
     <string name="instruction_install_plugin_from_url">أدخل عنوان URL يشير إلى ملحق (Plugin) بعيد.\nمثال: \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">حذف نهائيا</string>
     <string name="item_move_to_trash">نقل الى سلة المحذوفات</string>
@@ -789,6 +794,7 @@
     <string name="text_auto_rename">اعادة تسمية تلقائيا</string>
     <string name="text_available_windows">النوافذ المتاحة</string>
     <string name="text_back">خلف</string>
+    <string name="text_background_color">لون الخلفية</string>
     <string name="text_broadcast_action">عمل</string>
     <string name="text_broadcast_task">مهمة البث</string>
     <string name="text_build">بناء</string>
@@ -1004,6 +1010,7 @@
     <string name="text_drawer_close">وثيق درج</string>
     <string name="text_drawer_open">درج مفتوح</string>
     <string name="text_edit">يحرر</string>
+    <string name="text_edit_by_other_apps">تحرير باستخدام تطبيقات أخرى</string>
     <string name="text_edit_prepare_script">تحرير البرنامج النصي قبل التنفيذ</string>
     <string name="text_edit_script">تحرير البرنامج النصي</string>
     <string name="text_editor_assistance">المساعدة</string>
@@ -1693,6 +1700,7 @@
     <string name="text_special_permissions">أذونات خاصة</string>
     <string name="text_stable_mode">وضع مستقر</string>
     <string name="text_star">نجمة</string>
+    <string name="text_start_in_fullscreen_mode">بدء التشغيل في وضع ملء الشاشة</string>
     <string name="text_start_record">ابدأ التسجيل</string>
     <string name="text_start_running">ادارة</string>
     <string name="text_state_or_province">الولاية أو المقاطعة</string>

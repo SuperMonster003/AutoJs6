@@ -24,6 +24,7 @@ internal data class MediaViewerRequest(
     val mimeType: String,
     val displayName: String,
     val kind: MediaViewerKind,
+    val localPath: String? = null,
 )
 
 /**
@@ -155,7 +156,12 @@ object MediaViewerLauncher {
                 ?.let(::sanitizeDisplayName)
                 ?.takeIf(String::isNotBlank)
             ?: ""
-        return MediaViewerRequest(uri, mimeType, displayName, expectedKind)
+        val localPath = intent.getStringExtra(EXTRA_LOCAL_PATH)
+            ?.let(::File)
+            ?.let { runCatching { it.canonicalFile }.getOrNull() }
+            ?.takeIf { it.isFile && it.canRead() }
+            ?.path
+        return MediaViewerRequest(uri, mimeType, displayName, expectedKind, localPath)
     }
 
     private fun openLocalFile(
@@ -171,13 +177,7 @@ object MediaViewerLauncher {
             ?.let(MediaViewerPolicy::normalizeMimeType)
             ?.takeIf { MediaViewerPolicy.kindForMimeType(it) == kind }
             ?: MediaViewerPolicy.wildcardMimeType(kind)
-        val uri = runCatching {
-            FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                canonicalFile,
-            )
-        }.getOrNull() ?: return false
+        val uri = uriForLocalFile(context, canonicalFile) ?: return false
         return launch(
             context = context,
             request = MediaViewerRequest(
@@ -185,6 +185,7 @@ object MediaViewerLauncher {
                 mimeType = mimeType,
                 displayName = canonicalFile.name,
                 kind = kind,
+                localPath = canonicalFile.path,
             ),
             grantReadPermission = true,
         )
@@ -204,6 +205,7 @@ object MediaViewerLauncher {
             action = Intent.ACTION_VIEW
             setDataAndType(request.uri, request.mimeType)
             putExtra(EXTRA_DISPLAY_NAME, sanitizeDisplayName(request.displayName))
+            request.localPath?.let { putExtra(EXTRA_LOCAL_PATH, it) }
             if (request.kind == MediaViewerKind.AUDIO) {
                 putExtra(AudioPlayerActivity.EXTRA_START_PLAYBACK, true)
             }
@@ -260,6 +262,15 @@ object MediaViewerLauncher {
         .trim()
         .take(MAX_DISPLAY_NAME_LENGTH)
 
+    internal fun uriForLocalFile(context: Context, file: File): Uri? = runCatching {
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file,
+        )
+    }.getOrNull()
+
     internal const val EXTRA_DISPLAY_NAME = "org.autojs.autojs.extra.MEDIA_DISPLAY_NAME"
+    internal const val EXTRA_LOCAL_PATH = "org.autojs.autojs.extra.MEDIA_LOCAL_PATH"
     private const val MAX_DISPLAY_NAME_LENGTH = 256
 }

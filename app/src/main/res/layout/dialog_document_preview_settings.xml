@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp">
+
+    <org.autojs.autojs.theme.widget.ThemeColorSwitch
+        android:id="@+id/start_in_fullscreen_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/md_listitem_height"
+        android:paddingHorizontal="8dp"
+        android:text="@string/text_start_in_fullscreen_mode"
+        android:textColor="@color/day_night"
+        android:textSize="16sp" />
+
+</LinearLayout>
