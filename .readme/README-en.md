@@ -198,8 +198,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` File manager supports secure Markdown and HTML previews with GFM rendering, multiple themes, custom CSS, and controlled same-directory resource loading
 * `Feature` Markdown and HTML previews support fullscreen mode, with a "Start in fullscreen mode" setting that is disabled by default
 * `Feature` File manager supports leftmost icon actions for Markdown/HTML preview and image viewing/audio/video playback; the app can act as a system media viewer, with background audio playback and notification controls
-* `Feature` File manager supports image information and detailed EXIF viewing, built-in basic image editing, and image format conversion
-* `Feature` Image viewer automatically discovers all images in the same directory, shows the current position and total in the subtitle, and supports swipe navigation/pinch zoom/fullscreen mode/a start-in-fullscreen setting/a configurable background color with history
+* `Feature` File manager supports image information and detailed EXIF viewing, built-in editing with crop/flip/rotation/brightness/contrast/saturation/color temperature/brush/text tools, and conversion with configurable output format/quality/dimensions/aspect-ratio handling/JPEG background color
+* `Feature` Image viewer automatically discovers all images in the same directory and supports synchronized focal-point pinch zoom, swipe and toolbar previous/next navigation, a compact three-row information bar for position/resolution/size/format/modification time/EXIF, fullscreen mode, a start-in-fullscreen setting, and a configurable background color with history, while the ActionBar, system bars, and icons adapt their colors and contrast to the background
 * `Feature` File manager supports package details and manifest viewing for APK/APKS/XAPK/APKM/APKZ/AAB files
 * `Feature` Package installer supports APK and compatible split APK sets from APKS/XAPK/APKM/APKZ containers, with device split selection and signing-certificate consistency checks
 * `Feature` Code editor supports loading Ace from an external plugin, with signer and trust validation, Editor API contract/host-version/binary ABI compatibility checks, and automatic fallback to the native editor when unavailable
@@ -253,6 +253,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` File manager media details could remain as "..." or crash the app when the MediaInfo plugin library was unavailable or a Binder call failed, without falling back to Android platform metadata
 * `Fix` File manager video detail dialogs incorrectly displayed embedded audio format and metadata fields
 * `Fix` The Markdown and HTML preview main document could be incorrectly rejected by the request interceptor on some WebView versions and physical devices
+* `Fix` Image viewer pinch zoom did not track finger movement closely, was difficult to return to the original size when pinching inward, and could briefly or continuously retain the theme color on the ActionBar when first opened
 * `Fix` ImageViewer could crash during destruction because Glide attempted to start an image load for an already destroyed Activity
 * `Fix` Accessibility service could stop unexpectedly while performing consecutive operations such as back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Fix` Memory usage could continue to increase after repeatedly running scripts (attempted fix) _[`issue #548`](http://issues.autojs6.com/548)_
@@ -312,7 +313,6 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` File manager decodes and formats the complete binary AndroidManifest.xml in the background only after the Manifest button is tapped, with optimized large-text scrolling and pinch zoom performance
 * `Improvement` File manager APK details show the maximum SDK only when explicitly declared in the manifest, and rename Install to Exception while showing it only when an exception exists
 * `Improvement` Improved file manager Markdown previews with securely sanitized raw HTML commonly used on GitHub, HTTPS remote images, narrow-screen table scrolling, and compatibility with legacy hidden comments
-* `Improvement` Adjusted the semantics and visual sizes of file manager preview/play icons: `ic_window` for Markdown/HTML, `ic_eye` for images, and `ic_play_media` for audio/video
 * `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs
 * `Improvement` Plugin Center lists common distribution variants by default and provides a separate page for other variants
 * `Improvement` Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features

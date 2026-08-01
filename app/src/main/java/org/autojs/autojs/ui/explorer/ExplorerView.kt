@@ -1371,7 +1371,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private fun bindPrimaryViewer(action: ExplorerPrimaryAction) {
             val (iconRes, contentDescriptionRes) = when (action) {
                 ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
-                    R.drawable.ic_window to R.string.text_preview
+                    R.drawable.ic_preview_web_page to R.string.text_preview
                 }
                 ExplorerPrimaryAction.IMAGE_VIEW -> {
                     R.drawable.ic_eye to R.string.text_view

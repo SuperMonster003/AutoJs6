@@ -363,6 +363,13 @@
     <string name="error_illegal_ui_object_result_type" formatted="false">結果タイプ \"%s\" は UiObject ではサポートされません</string>
     <string name="error_illegal_url_argument" formatted="false">URL は \"https://\" などのようにプロトコルで開始する必要があります</string>
     <string name="error_illegal_widget_command" formatted="false">パラメータ %s (%s) は, %s 型にキャストする必要があるか, キャストできます</string>
+    <string name="error_image_conversion_dimension_too_large">幅と高さは %1$d px 以下にしてください</string>
+    <string name="error_image_conversion_invalid_height">有効な高さを入力してください</string>
+    <string name="error_image_conversion_invalid_percentage">パーセントは %1$d から %2$d の範囲で指定してください</string>
+    <string name="error_image_conversion_invalid_source">画像情報を読み取れません</string>
+    <string name="error_image_conversion_invalid_width">有効な幅を入力してください</string>
+    <string name="error_image_conversion_memory_budget_exceeded">この出力サイズを処理するためのメモリが不足しています</string>
+    <string name="error_image_conversion_pixel_count_too_large">出力画像の総ピクセル数は %1$d 以下にしてください</string>
     <string name="error_image_has_been_recycled">画像はリサイクルされました</string>
     <string name="error_images_must_have_the_same_size">画像は同じサイズでなければなりません</string>
     <string name="error_images_must_have_the_same_size_and_type">画像は同じサイズとタイプでなければなりません</string>
@@ -487,10 +494,22 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">現在のプラグインには, より新しいバージョンの AutoJs6 ホスト環境が必要です (必要な versionCode: %1$d, 現在の versionCode: %2$d). AutoJs6 をアップグレードしてください.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">プラグインプロトコルは現在の AutoJs6 と互換性がありません. プラグインをアップグレードしてください.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"有効化\" ボタンをタップして, プラグインを一度有効化してみてください.\n有効化に成功すると, 一定時間内にボタンが自動的にオンになります.</string>
+    <string name="image_editor_brightness">明るさ</string>
+    <string name="image_editor_brush">ブラシ</string>
+    <string name="image_editor_brush_width">ブラシの太さ</string>
+    <string name="image_editor_contrast">コントラスト</string>
+    <string name="image_editor_crop">切り抜き</string>
+    <string name="image_editor_crop_help">角または辺をドラッグして切り抜き範囲を選択してください</string>
     <string name="image_editor_flip_horizontal">左右反転</string>
     <string name="image_editor_flip_vertical">上下反転</string>
     <string name="image_editor_rotate_left">左に回転</string>
     <string name="image_editor_rotate_right">右に回転</string>
+    <string name="image_editor_saturation">彩度</string>
+    <string name="image_editor_temperature">色温度</string>
+    <string name="image_editor_text">テキスト</string>
+    <string name="image_editor_text_hint">テキストを入力</string>
+    <string name="image_editor_text_position_help">テキストをドラッグして位置を指定してください</string>
+    <string name="image_editor_text_size_percent">テキストサイズ: %1$d%%</string>
     <string name="image_info_modified_label">更新日時</string>
     <string name="image_info_orientation_label">向き</string>
     <string name="instruction_install_plugin_from_url">リモートプラグインの URL を入力してください. \n例: \"https://example.com/plugin.apk\"</string>
@@ -1173,6 +1192,24 @@
     <string name="text_ignore_battery_optimizations">バッテリーの最適化を無視する</string>
     <string name="text_ignored_updates">アップデートを無視する</string>
     <string name="text_ignored_versions">無視したバージョン</string>
+    <string name="text_image_conversion_background_black">黒</string>
+    <string name="text_image_conversion_background_white">白</string>
+    <string name="text_image_conversion_custom_size">カスタム</string>
+    <string name="text_image_conversion_estimated_size">推定ファイルサイズ: ~%1$s</string>
+    <string name="text_image_conversion_estimated_size_unavailable">推定ファイルサイズ: -</string>
+    <string name="text_image_conversion_filename_strategy" tools:ignore="TypographyEllipsis">同名ファイルがある場合は -1, -2... の連番サフィックスを追加します</string>
+    <string name="text_image_conversion_height">高さ</string>
+    <string name="text_image_conversion_jpeg_background">JPEG の透明部分の背景</string>
+    <string name="text_image_conversion_lock_aspect_ratio">縦横比を固定</string>
+    <string name="text_image_conversion_original_size">元のサイズ</string>
+    <string name="text_image_conversion_output_filename">出力ファイル: %1$s</string>
+    <string name="text_image_conversion_output_resolution">出力解像度: %1$d x %2$d</string>
+    <string name="text_image_conversion_output_resolution_unavailable">出力解像度: -</string>
+    <string name="text_image_conversion_percentage">パーセント</string>
+    <string name="text_image_conversion_percentage_hint">パーセント</string>
+    <string name="text_image_conversion_quality">画質</string>
+    <string name="text_image_conversion_resize">サイズ変更</string>
+    <string name="text_image_conversion_width">幅</string>
     <string name="text_import">インポート</string>
     <string name="text_import_color_library">カラーライブラリをインポート</string>
     <string name="text_import_custom_css">カスタム CSS をインポート</string>
@@ -1301,6 +1338,7 @@
     <string name="text_no_content">内容なし</string>
     <string name="text_no_content_description">コンテンツの説明がありません</string>
     <string name="text_no_data">データなし</string>
+    <string name="text_no_exif_information">EXIF 情報がありません</string>
     <string name="text_no_hidden_plugins">非表示のプラグインはありません</string>
     <string name="text_no_history">履歴なし</string>
     <string name="text_no_ignored_updates">無視された更新がない</string>

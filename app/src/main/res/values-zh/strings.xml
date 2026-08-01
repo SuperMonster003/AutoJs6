@@ -358,6 +358,13 @@
     <string name="error_illegal_ui_object_result_type" formatted="false">结果类型 \"%s\" 不适用于 UiObject</string>
     <string name="error_illegal_url_argument" formatted="false">URL 需以协议标识开头 (如 \"https://\" 等)</string>
     <string name="error_illegal_widget_command" formatted="false">参数 %s (%s) 需要属于或可转换为 %s 类型</string>
+    <string name="error_image_conversion_dimension_too_large">宽度和高度不能超过 %1$d px</string>
+    <string name="error_image_conversion_invalid_height">请输入有效的高度</string>
+    <string name="error_image_conversion_invalid_percentage">百分比必须在 %1$d 到 %2$d 之间</string>
+    <string name="error_image_conversion_invalid_source">无法读取图片信息</string>
+    <string name="error_image_conversion_invalid_width">请输入有效的宽度</string>
+    <string name="error_image_conversion_memory_budget_exceeded">可用内存不足以处理此输出尺寸</string>
+    <string name="error_image_conversion_pixel_count_too_large">输出图片的总像素数不能超过 %1$d</string>
     <string name="error_image_has_been_recycled">图像资源已被回收</string>
     <string name="error_images_must_have_the_same_size">图像大小需保持一致</string>
     <string name="error_images_must_have_the_same_size_and_type">图像大小及类型均需保持一致</string>
@@ -482,10 +489,22 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">当前插件需要更高版本的 AutoJs6 宿主环境 (要求 versionCode: %1$d, 当前 versionCode: %2$d), 需要升级 AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">插件协议与当前 AutoJs6 不兼容, 需升级插件版本.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可尝试点击 \"激活\" 按钮激活一次插件.\n如激活成功, 按钮将在一定时间内自动开启.</string>
+    <string name="image_editor_brightness">亮度</string>
+    <string name="image_editor_brush">画笔</string>
+    <string name="image_editor_brush_width">画笔宽度</string>
+    <string name="image_editor_contrast">对比度</string>
+    <string name="image_editor_crop">裁剪</string>
+    <string name="image_editor_crop_help">拖动边角或边缘选择裁剪区域</string>
     <string name="image_editor_flip_horizontal">水平翻转</string>
     <string name="image_editor_flip_vertical">垂直翻转</string>
     <string name="image_editor_rotate_left">向左旋转</string>
     <string name="image_editor_rotate_right">向右旋转</string>
+    <string name="image_editor_saturation">饱和度</string>
+    <string name="image_editor_temperature">色温</string>
+    <string name="image_editor_text">文字</string>
+    <string name="image_editor_text_hint">输入文字</string>
+    <string name="image_editor_text_position_help">拖动文字选择位置</string>
+    <string name="image_editor_text_size_percent">文字大小: %1$d%%</string>
     <string name="image_info_modified_label">修改时间</string>
     <string name="image_info_orientation_label">方向</string>
     <string name="instruction_install_plugin_from_url">输入一个指向远程插件地址的 URL.\n例如 \"https://example.com/plugin.apk\".</string>
@@ -1168,6 +1187,24 @@
     <string name="text_ignore_battery_optimizations">忽略电池优化</string>
     <string name="text_ignored_updates">已忽略更新</string>
     <string name="text_ignored_versions">已忽略版本</string>
+    <string name="text_image_conversion_background_black">黑色</string>
+    <string name="text_image_conversion_background_white">白色</string>
+    <string name="text_image_conversion_custom_size">自定义</string>
+    <string name="text_image_conversion_estimated_size">预计文件大小: ~%1$s</string>
+    <string name="text_image_conversion_estimated_size_unavailable">预计文件大小: -</string>
+    <string name="text_image_conversion_filename_strategy" tools:ignore="TypographyEllipsis">名称已存在时, 自动追加递增的 -1, -2... 后缀</string>
+    <string name="text_image_conversion_height">高度</string>
+    <string name="text_image_conversion_jpeg_background">JPEG 透明区域背景</string>
+    <string name="text_image_conversion_lock_aspect_ratio">锁定宽高比</string>
+    <string name="text_image_conversion_original_size">原始</string>
+    <string name="text_image_conversion_output_filename">输出文件: %1$s</string>
+    <string name="text_image_conversion_output_resolution">输出分辨率: %1$d x %2$d</string>
+    <string name="text_image_conversion_output_resolution_unavailable">输出分辨率: -</string>
+    <string name="text_image_conversion_percentage">百分比</string>
+    <string name="text_image_conversion_percentage_hint">百分比</string>
+    <string name="text_image_conversion_quality">质量</string>
+    <string name="text_image_conversion_resize">调整尺寸</string>
+    <string name="text_image_conversion_width">宽度</string>
     <string name="text_import">导入</string>
     <string name="text_import_color_library">导入颜色库</string>
     <string name="text_import_custom_css">导入自定义 CSS</string>
@@ -1296,6 +1333,7 @@
     <string name="text_no_content">无内容</string>
     <string name="text_no_content_description">无内容描述</string>
     <string name="text_no_data">无数据</string>
+    <string name="text_no_exif_information">无 EXIF 信息</string>
     <string name="text_no_hidden_plugins">暂无隐藏插件</string>
     <string name="text_no_history">无历史记录</string>
     <string name="text_no_ignored_updates">暂无已忽略更新</string>

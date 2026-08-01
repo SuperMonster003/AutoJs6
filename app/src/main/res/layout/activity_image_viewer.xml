@@ -20,8 +20,136 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:theme="@style/ToolBarStyle"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            tools:title="@string/text_view" />
+            app:contentInsetEndWithActions="2dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+        <LinearLayout
+            android:id="@+id/image_info_bar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/window_background"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/image_name_info"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:ellipsize="middle"
+                    android:gravity="start|center_vertical"
+                    android:includeFontPadding="false"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true"
+                    android:textColor="@color/day_night_full"
+                    android:textSize="12sp"
+                    tools:text="IMG_20260801_123456.jpg" />
+
+                <TextView
+                    android:id="@+id/image_position_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="end|center_vertical"
+                    android:includeFontPadding="false"
+                    android:minWidth="52dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="8dp"
+                    android:singleLine="true"
+                    android:textColor="@color/day_night_full"
+                    android:textDirection="ltr"
+                    android:textSize="12sp"
+                    tools:text="3/50" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/image_properties_info"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:gravity="start|center_vertical"
+                    android:includeFontPadding="false"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true"
+                    android:textColor="@color/day_night_full"
+                    android:textSize="12sp"
+                    tools:text="1920 x 1080  |  3.45 MiB" />
+
+                <TextView
+                    android:id="@+id/image_format_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:ellipsize="end"
+                    android:gravity="end|center_vertical"
+                    android:includeFontPadding="false"
+                    android:maxWidth="96dp"
+                    android:minWidth="52dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="8dp"
+                    android:singleLine="true"
+                    android:textColor="@color/day_night_full"
+                    android:textSize="12sp"
+                    tools:text="JPEG" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/image_modified_info"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:gravity="start|center_vertical"
+                    android:includeFontPadding="false"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true"
+                    android:textColor="@color/day_night_full"
+                    android:textDirection="ltr"
+                    android:textSize="12sp"
+                    tools:text="2022-09-07 14:37" />
+
+                <TextView
+                    android:id="@+id/image_exif_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="end|center_vertical"
+                    android:includeFontPadding="false"
+                    android:minWidth="64dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="8dp"
+                    android:singleLine="true"
+                    android:textColor="@color/day_night_full"
+                    android:textSize="12sp"
+                    tools:text="EXIF" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 

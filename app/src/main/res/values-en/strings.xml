@@ -359,6 +359,13 @@
     <string name="error_illegal_ui_object_result_type" formatted="false">Result type \"%s\" is not supported for UiObject</string>
     <string name="error_illegal_url_argument" formatted="false">URL must starts with a protocol like \"https://\" and so forth</string>
     <string name="error_illegal_widget_command" formatted="false">Parameter %s (%s) must be or can be cast to %s type</string>
+    <string name="error_image_conversion_dimension_too_large">Width and height must not exceed %1$d px</string>
+    <string name="error_image_conversion_invalid_height">Enter a valid height</string>
+    <string name="error_image_conversion_invalid_percentage">Percentage must be between %1$d and %2$d</string>
+    <string name="error_image_conversion_invalid_source">Unable to read image information</string>
+    <string name="error_image_conversion_invalid_width">Enter a valid width</string>
+    <string name="error_image_conversion_memory_budget_exceeded">Not enough memory is available for this output size</string>
+    <string name="error_image_conversion_pixel_count_too_large">The output image must not exceed %1$d pixels</string>
     <string name="error_image_has_been_recycled">Image has been recycled</string>
     <string name="error_images_must_have_the_same_size">Images must have the same size</string>
     <string name="error_images_must_have_the_same_size_and_type">Images must have the same size and type</string>
@@ -483,10 +490,22 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Current plugin requires a higher version of the AutoJs6 host environment (required versionCode: %1$d, current versionCode: %2$d), AutoJs6 upgrade needed.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Plugin protocol is incompatible with current AutoJs6, plugin version upgrade required.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Try clicking the \"Activate\" button to activate the plugin once.\nIf activation is successful, the button will automatically turn on within a certain period of time.</string>
+    <string name="image_editor_brightness">Brightness</string>
+    <string name="image_editor_brush">Brush</string>
+    <string name="image_editor_brush_width">Brush width</string>
+    <string name="image_editor_contrast">Contrast</string>
+    <string name="image_editor_crop">Crop</string>
+    <string name="image_editor_crop_help">Drag corners or edges to select the crop area</string>
     <string name="image_editor_flip_horizontal">Flip horizontally</string>
     <string name="image_editor_flip_vertical">Flip vertically</string>
     <string name="image_editor_rotate_left">Rotate left</string>
     <string name="image_editor_rotate_right">Rotate right</string>
+    <string name="image_editor_saturation">Saturation</string>
+    <string name="image_editor_temperature">Color temperature</string>
+    <string name="image_editor_text">Text</string>
+    <string name="image_editor_text_hint">Enter text</string>
+    <string name="image_editor_text_position_help">Drag the text to choose its position</string>
+    <string name="image_editor_text_size_percent">Text size: %1$d%%</string>
     <string name="image_info_modified_label">Modified</string>
     <string name="image_info_orientation_label">Orientation</string>
     <string name="instruction_install_plugin_from_url">Enter a URL pointing to a remote plugin address.\nFor example \"https://example.com/plugin.apk\".</string>
@@ -1169,6 +1188,24 @@
     <string name="text_ignore_battery_optimizations">Ignore battery optimizations</string>
     <string name="text_ignored_updates">Ignored updates</string>
     <string name="text_ignored_versions">Ignored versions</string>
+    <string name="text_image_conversion_background_black">Black</string>
+    <string name="text_image_conversion_background_white">White</string>
+    <string name="text_image_conversion_custom_size">Custom</string>
+    <string name="text_image_conversion_estimated_size">Estimated file size: ~%1$s</string>
+    <string name="text_image_conversion_estimated_size_unavailable">Estimated file size: -</string>
+    <string name="text_image_conversion_filename_strategy" tools:ignore="TypographyEllipsis">Existing names use an incrementing -1, -2... suffix</string>
+    <string name="text_image_conversion_height">Height</string>
+    <string name="text_image_conversion_jpeg_background">JPEG transparent background</string>
+    <string name="text_image_conversion_lock_aspect_ratio">Lock aspect ratio</string>
+    <string name="text_image_conversion_original_size">Original</string>
+    <string name="text_image_conversion_output_filename">Output file: %1$s</string>
+    <string name="text_image_conversion_output_resolution">Output resolution: %1$d x %2$d</string>
+    <string name="text_image_conversion_output_resolution_unavailable">Output resolution: -</string>
+    <string name="text_image_conversion_percentage">Percentage</string>
+    <string name="text_image_conversion_percentage_hint">Percentage</string>
+    <string name="text_image_conversion_quality">Quality</string>
+    <string name="text_image_conversion_resize">Resize</string>
+    <string name="text_image_conversion_width">Width</string>
     <string name="text_import">Import</string>
     <string name="text_import_color_library">Import a color library</string>
     <string name="text_import_custom_css">Import custom CSS</string>
@@ -1297,6 +1334,7 @@
     <string name="text_no_content">No content</string>
     <string name="text_no_content_description">No content description</string>
     <string name="text_no_data">No data</string>
+    <string name="text_no_exif_information">No EXIF information</string>
     <string name="text_no_hidden_plugins">No hidden plugins</string>
     <string name="text_no_history">No history</string>
     <string name="text_no_ignored_updates">No ignored updates</string>

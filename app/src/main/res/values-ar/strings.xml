@@ -364,6 +364,13 @@
     <string name="error_illegal_ui_object_result_type" formatted="false">نوع النتيجة \"%s\" غير مدعوم لـ UiObject</string>
     <string name="error_illegal_url_argument" formatted="false">يجب أن يبدأ عنوان URL ببروتوكول مثل \"https://\" وهكذا دواليك</string>
     <string name="error_illegal_widget_command" formatted="false">المعلمة %s (%s) يجب أن تكون أو يمكن إلقاؤها على %s نوع</string>
+    <string name="error_image_conversion_dimension_too_large">يجب ألا يتجاوز العرض والارتفاع %1$d px</string>
+    <string name="error_image_conversion_invalid_height">أدخل ارتفاعًا صالحًا</string>
+    <string name="error_image_conversion_invalid_percentage">يجب أن تكون النسبة المئوية بين %1$d و%2$d</string>
+    <string name="error_image_conversion_invalid_source">تعذر قراءة معلومات الصورة</string>
+    <string name="error_image_conversion_invalid_width">أدخل عرضًا صالحًا</string>
+    <string name="error_image_conversion_memory_budget_exceeded">الذاكرة المتاحة غير كافية لحجم الإخراج هذا</string>
+    <string name="error_image_conversion_pixel_count_too_large">يجب ألا يتجاوز عدد بكسلات الصورة الناتجة %1$d بكسل</string>
     <string name="error_image_has_been_recycled">تم إعادة تدوير الصورة</string>
     <string name="error_images_must_have_the_same_size">يجب أن يكون للصور نفس الحجم</string>
     <string name="error_images_must_have_the_same_size_and_type">يجب أن تكون الصور بنفس الحجم والنوع</string>
@@ -488,10 +495,22 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">يتطلب المكون الإضافي الحالي إصدارا أعلى من بيئة المضيف AutoJs6 (versionCode المطلوب: %1$d, versionCode الحالي: %2$d). يجب ترقية AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">بروتوكول المكون الإضافي غير متوافق مع إصدار AutoJs6 الحالي. يجب ترقية إصدار المكون الإضافي.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">جرّب الضغط على زر \"تفعيل\" لتفعيل الاضافة مرة واحدة.\nاذا نجح التفعيل، فسيتم تشغيل الزر تلقائيا خلال فترة زمنية معينة.</string>
+    <string name="image_editor_brightness">السطوع</string>
+    <string name="image_editor_brush">فرشاة</string>
+    <string name="image_editor_brush_width">عرض الفرشاة</string>
+    <string name="image_editor_contrast">التباين</string>
+    <string name="image_editor_crop">اقتصاص</string>
+    <string name="image_editor_crop_help">اسحب الزوايا أو الحواف لتحديد منطقة الاقتصاص</string>
     <string name="image_editor_flip_horizontal">قلب أفقي</string>
     <string name="image_editor_flip_vertical">قلب رأسي</string>
     <string name="image_editor_rotate_left">تدوير لليسار</string>
     <string name="image_editor_rotate_right">تدوير لليمين</string>
+    <string name="image_editor_saturation">التشبع</string>
+    <string name="image_editor_temperature">حرارة اللون</string>
+    <string name="image_editor_text">نص</string>
+    <string name="image_editor_text_hint">أدخل النص</string>
+    <string name="image_editor_text_position_help">اسحب النص لاختيار موضعه</string>
+    <string name="image_editor_text_size_percent">حجم النص: %1$d%%</string>
     <string name="image_info_modified_label">تاريخ التعديل</string>
     <string name="image_info_orientation_label">الاتجاه</string>
     <string name="instruction_install_plugin_from_url">أدخل عنوان URL يشير إلى ملحق (Plugin) بعيد.\nمثال: \"https://example.com/plugin.apk\".</string>
@@ -1174,6 +1193,24 @@
     <string name="text_ignore_battery_optimizations">تجاهل تحسينات البطارية</string>
     <string name="text_ignored_updates">تحديثات تجاهل</string>
     <string name="text_ignored_versions">الاصدارات المتجاهلة</string>
+    <string name="text_image_conversion_background_black">أسود</string>
+    <string name="text_image_conversion_background_white">أبيض</string>
+    <string name="text_image_conversion_custom_size">مخصص</string>
+    <string name="text_image_conversion_estimated_size">حجم الملف المقدر: ~%1$s</string>
+    <string name="text_image_conversion_estimated_size_unavailable">حجم الملف المقدر: -</string>
+    <string name="text_image_conversion_filename_strategy" tools:ignore="TypographyEllipsis">عند وجود الاسم, تضاف لاحقة متزايدة مثل -1, -2...</string>
+    <string name="text_image_conversion_height">الارتفاع</string>
+    <string name="text_image_conversion_jpeg_background">خلفية المناطق الشفافة في JPEG</string>
+    <string name="text_image_conversion_lock_aspect_ratio">قفل نسبة العرض إلى الارتفاع</string>
+    <string name="text_image_conversion_original_size">الأصلي</string>
+    <string name="text_image_conversion_output_filename">ملف الإخراج: %1$s</string>
+    <string name="text_image_conversion_output_resolution">دقة الإخراج: %1$d x %2$d</string>
+    <string name="text_image_conversion_output_resolution_unavailable">دقة الإخراج: -</string>
+    <string name="text_image_conversion_percentage">النسبة المئوية</string>
+    <string name="text_image_conversion_percentage_hint">النسبة المئوية</string>
+    <string name="text_image_conversion_quality">الجودة</string>
+    <string name="text_image_conversion_resize">تغيير الحجم</string>
+    <string name="text_image_conversion_width">العرض</string>
     <string name="text_import">يستورد</string>
     <string name="text_import_color_library">استيراد مكتبة ألوان</string>
     <string name="text_import_custom_css">استيراد CSS مخصص</string>
@@ -1302,6 +1339,7 @@
     <string name="text_no_content">لا يوجد محتوى</string>
     <string name="text_no_content_description">لا يوجد وصف للمحتوى</string>
     <string name="text_no_data">لا توجد بيانات</string>
+    <string name="text_no_exif_information">لا توجد معلومات EXIF</string>
     <string name="text_no_hidden_plugins">لا توجد مكونات إضافية مخفية</string>
     <string name="text_no_history">لا يوجد سجل</string>
     <string name="text_no_ignored_updates">لا تحديثات تم تجاهلها</string>

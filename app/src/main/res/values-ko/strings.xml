@@ -364,6 +364,13 @@
     <string name="error_illegal_ui_object_result_type" formatted="false">결과 유형 \"%s\" 는 UiObject 에 지원되지 않습니다.</string>
     <string name="error_illegal_url_argument" formatted="false">URL 은 \"https://\" 등의 프로토콜로 시작해야합니다.</string>
     <string name="error_illegal_widget_command" formatted="false">매개 변수 %s (%s) 는 %s 유형으로 캐스트 될 수 있어야합니다.</string>
+    <string name="error_image_conversion_dimension_too_large">너비와 높이는 %1$d px 이하여야 합니다</string>
+    <string name="error_image_conversion_invalid_height">올바른 높이를 입력하세요</string>
+    <string name="error_image_conversion_invalid_percentage">백분율은 %1$d에서 %2$d 사이여야 합니다</string>
+    <string name="error_image_conversion_invalid_source">이미지 정보를 읽을 수 없습니다</string>
+    <string name="error_image_conversion_invalid_width">올바른 너비를 입력하세요</string>
+    <string name="error_image_conversion_memory_budget_exceeded">이 출력 크기를 처리할 메모리가 부족합니다</string>
+    <string name="error_image_conversion_pixel_count_too_large">출력 이미지의 총 픽셀 수는 %1$d 이하여야 합니다</string>
     <string name="error_image_has_been_recycled">이미지가 재활용되었습니다</string>
     <string name="error_images_must_have_the_same_size">이미지의 크기가 같아야 합니다</string>
     <string name="error_images_must_have_the_same_size_and_type">이미지는 같은 크기와 유형이어야 합니다</string>
@@ -488,10 +495,22 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">현재 플러그인은 더 높은 버전의 AutoJs6 호스트 환경이 필요합니다 (필요한 versionCode: %1$d, 현재 versionCode: %2$d). AutoJs6를 업그레이드해야 합니다.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">플러그인 프로토콜이 현재 AutoJs6와 호환되지 않습니다. 플러그인 버전을 업그레이드해야 합니다.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"활성화\" 버튼을 눌러 플러그인을 한 번 활성화해 보세요.\n활성화에 성공하면 일정 시간 내에 버튼이 자동으로 켜집니다.</string>
+    <string name="image_editor_brightness">밝기</string>
+    <string name="image_editor_brush">브러시</string>
+    <string name="image_editor_brush_width">브러시 너비</string>
+    <string name="image_editor_contrast">대비</string>
+    <string name="image_editor_crop">자르기</string>
+    <string name="image_editor_crop_help">모서리나 가장자리를 드래그하여 자를 영역을 선택하세요</string>
     <string name="image_editor_flip_horizontal">좌우 뒤집기</string>
     <string name="image_editor_flip_vertical">상하 뒤집기</string>
     <string name="image_editor_rotate_left">왼쪽으로 회전</string>
     <string name="image_editor_rotate_right">오른쪽으로 회전</string>
+    <string name="image_editor_saturation">채도</string>
+    <string name="image_editor_temperature">색온도</string>
+    <string name="image_editor_text">텍스트</string>
+    <string name="image_editor_text_hint">텍스트 입력</string>
+    <string name="image_editor_text_position_help">텍스트를 드래그하여 위치를 지정하세요</string>
+    <string name="image_editor_text_size_percent">텍스트 크기: %1$d%%</string>
     <string name="image_info_modified_label">수정 시간</string>
     <string name="image_info_orientation_label">방향</string>
     <string name="instruction_install_plugin_from_url">원격 플러그인 주소를 가리키는 URL을 입력하세요.\n예: \"https://example.com/plugin.apk\"</string>
@@ -1174,6 +1193,24 @@
     <string name="text_ignore_battery_optimizations">배터리 최적화를 무시합니다</string>
     <string name="text_ignored_updates">업데이트를 무시했습니다</string>
     <string name="text_ignored_versions">무시된 버전</string>
+    <string name="text_image_conversion_background_black">검정</string>
+    <string name="text_image_conversion_background_white">흰색</string>
+    <string name="text_image_conversion_custom_size">사용자 지정</string>
+    <string name="text_image_conversion_estimated_size">예상 파일 크기: ~%1$s</string>
+    <string name="text_image_conversion_estimated_size_unavailable">예상 파일 크기: -</string>
+    <string name="text_image_conversion_filename_strategy" tools:ignore="TypographyEllipsis">같은 이름이 있으면 -1, -2... 형식의 증가하는 접미사를 추가합니다</string>
+    <string name="text_image_conversion_height">높이</string>
+    <string name="text_image_conversion_jpeg_background">JPEG 투명 영역 배경</string>
+    <string name="text_image_conversion_lock_aspect_ratio">가로세로 비율 고정</string>
+    <string name="text_image_conversion_original_size">원본</string>
+    <string name="text_image_conversion_output_filename">출력 파일: %1$s</string>
+    <string name="text_image_conversion_output_resolution">출력 해상도: %1$d x %2$d</string>
+    <string name="text_image_conversion_output_resolution_unavailable">출력 해상도: -</string>
+    <string name="text_image_conversion_percentage">백분율</string>
+    <string name="text_image_conversion_percentage_hint">백분율</string>
+    <string name="text_image_conversion_quality">품질</string>
+    <string name="text_image_conversion_resize">크기 조정</string>
+    <string name="text_image_conversion_width">너비</string>
     <string name="text_import">수입</string>
     <string name="text_import_color_library">색상 라이브러리 가져오기</string>
     <string name="text_import_custom_css">사용자 지정 CSS 가져오기</string>
@@ -1302,6 +1339,7 @@
     <string name="text_no_content">내용 없음</string>
     <string name="text_no_content_description">콘텐츠 설명 없음</string>
     <string name="text_no_data">데이터 없음</string>
+    <string name="text_no_exif_information">EXIF 정보가 없습니다</string>
     <string name="text_no_hidden_plugins">숨겨진 플러그인이 없습니다</string>
     <string name="text_no_history">기록 없음</string>
     <string name="text_no_ignored_updates">무시되지 않았습니다</string>

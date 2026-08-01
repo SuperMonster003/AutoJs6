@@ -362,6 +362,13 @@
     <string name="error_illegal_ui_object_result_type" formatted="false">Тип результата \"%s\" не поддерживается для UiObject</string>
     <string name="error_illegal_url_argument" formatted="false">URL должен начинаться с протокола, например, \"https://\" и т.д.</string>
     <string name="error_illegal_widget_command" formatted="false">Параметр %s (%s) должен быть или может быть приведен к типу %s</string>
+    <string name="error_image_conversion_dimension_too_large">Ширина и высота не должны превышать %1$d px</string>
+    <string name="error_image_conversion_invalid_height">Введите допустимую высоту</string>
+    <string name="error_image_conversion_invalid_percentage">Процент должен быть от %1$d до %2$d</string>
+    <string name="error_image_conversion_invalid_source">Не удалось прочитать информацию об изображении</string>
+    <string name="error_image_conversion_invalid_width">Введите допустимую ширину</string>
+    <string name="error_image_conversion_memory_budget_exceeded">Недостаточно доступной памяти для этого размера вывода</string>
+    <string name="error_image_conversion_pixel_count_too_large">Общее число пикселей выходного изображения не должно превышать %1$d</string>
     <string name="error_image_has_been_recycled">Изображение было переработано</string>
     <string name="error_images_must_have_the_same_size">Изображения должны иметь одинаковый размер</string>
     <string name="error_images_must_have_the_same_size_and_type">Изображения должны иметь одинаковый размер и тип</string>
@@ -486,10 +493,22 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Текущий плагин требует более новой версии хост-среды AutoJs6 (требуемый versionCode: %1$d, текущий versionCode: %2$d). Необходимо обновить AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Протокол плагина несовместим с текущей версией AutoJs6. Требуется обновить плагин.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>
+    <string name="image_editor_brightness">Яркость</string>
+    <string name="image_editor_brush">Кисть</string>
+    <string name="image_editor_brush_width">Толщина кисти</string>
+    <string name="image_editor_contrast">Контрастность</string>
+    <string name="image_editor_crop">Обрезка</string>
+    <string name="image_editor_crop_help">Перетащите углы или края, чтобы выбрать область обрезки</string>
     <string name="image_editor_flip_horizontal">Отразить по горизонтали</string>
     <string name="image_editor_flip_vertical">Отразить по вертикали</string>
     <string name="image_editor_rotate_left">Повернуть влево</string>
     <string name="image_editor_rotate_right">Повернуть вправо</string>
+    <string name="image_editor_saturation">Насыщенность</string>
+    <string name="image_editor_temperature">Цветовая температура</string>
+    <string name="image_editor_text">Текст</string>
+    <string name="image_editor_text_hint">Введите текст</string>
+    <string name="image_editor_text_position_help">Перетащите текст, чтобы выбрать его положение</string>
+    <string name="image_editor_text_size_percent">Размер текста: %1$d%%</string>
     <string name="image_info_modified_label">Изменено</string>
     <string name="image_info_orientation_label">Ориентация</string>
     <string name="instruction_install_plugin_from_url">Введите URL, указывающий на удалённый плагин.\nНапример: \"https://example.com/plugin.apk\".</string>
@@ -1172,6 +1191,24 @@
     <string name="text_ignore_battery_optimizations">Игнорировать оптимизацию батареи</string>
     <string name="text_ignored_updates">Игнорировать обновления</string>
     <string name="text_ignored_versions">Игнорируемые версии</string>
+    <string name="text_image_conversion_background_black">Черный</string>
+    <string name="text_image_conversion_background_white">Белый</string>
+    <string name="text_image_conversion_custom_size">Пользовательский</string>
+    <string name="text_image_conversion_estimated_size">Ожидаемый размер файла: ~%1$s</string>
+    <string name="text_image_conversion_estimated_size_unavailable">Ожидаемый размер файла: -</string>
+    <string name="text_image_conversion_filename_strategy" tools:ignore="TypographyEllipsis">Если имя уже существует, добавляется суффикс -1, -2... с увеличивающимся номером</string>
+    <string name="text_image_conversion_height">Высота</string>
+    <string name="text_image_conversion_jpeg_background">Фон прозрачных областей JPEG</string>
+    <string name="text_image_conversion_lock_aspect_ratio">Сохранять соотношение сторон</string>
+    <string name="text_image_conversion_original_size">Исходный</string>
+    <string name="text_image_conversion_output_filename">Выходной файл: %1$s</string>
+    <string name="text_image_conversion_output_resolution">Выходное разрешение: %1$d x %2$d</string>
+    <string name="text_image_conversion_output_resolution_unavailable">Выходное разрешение: -</string>
+    <string name="text_image_conversion_percentage">Процент</string>
+    <string name="text_image_conversion_percentage_hint">Процент</string>
+    <string name="text_image_conversion_quality">Качество</string>
+    <string name="text_image_conversion_resize">Изменить размер</string>
+    <string name="text_image_conversion_width">Ширина</string>
     <string name="text_import">Импорт</string>
     <string name="text_import_color_library">Импортировать цветовую библиотеку</string>
     <string name="text_import_custom_css">Импортировать пользовательский CSS</string>
@@ -1300,6 +1337,7 @@
     <string name="text_no_content">Нет содержимого</string>
     <string name="text_no_content_description">Нет описания содержимого</string>
     <string name="text_no_data">Нет данных</string>
+    <string name="text_no_exif_information">Нет информации EXIF</string>
     <string name="text_no_hidden_plugins">Нет скрытых плагинов</string>
     <string name="text_no_history">Истории нет</string>
     <string name="text_no_ignored_updates">Нет проигнорированных обновлений</string>

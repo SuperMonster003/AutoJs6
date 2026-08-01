@@ -10,27 +10,9 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_rotate_left"
-        android:icon="@drawable/ic_rotate_left_black_48dp"
-        android:title="@string/image_editor_rotate_left"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_rotate_right"
-        android:icon="@drawable/ic_rotate_right_black_48dp"
-        android:title="@string/image_editor_rotate_right"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_flip_horizontal"
-        android:icon="@drawable/ic_flip_black_48dp"
-        android:title="@string/image_editor_flip_horizontal"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_flip_vertical"
-        android:icon="@drawable/ic_flip_black_48dp"
-        android:title="@string/image_editor_flip_vertical"
-        app:showAsAction="never" />
+        android:id="@+id/action_undo"
+        android:icon="@drawable/ic_undo_white_48dp"
+        android:title="@string/text_undo"
+        app:showAsAction="always" />
 
 </menu>

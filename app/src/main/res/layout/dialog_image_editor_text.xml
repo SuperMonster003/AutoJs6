@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="8dp">
+
+    <EditText
+        android:id="@+id/text_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start|top"
+        android:hint="@string/image_editor_text_hint"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxLines="4"
+        android:minLines="2"
+        tools:text="AutoJs6" />
+
+    <TextView
+        android:id="@+id/text_size_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/text_color_primary"
+        tools:text="Size: 6%" />
+
+    <SeekBar
+        android:id="@+id/text_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="14"
+        android:progress="4" />
+
+    <Button
+        android:id="@+id/text_color"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_gravity="end"
+        android:text="@string/text_color_palette"
+        android:textAllCaps="false" />
+
+</LinearLayout>

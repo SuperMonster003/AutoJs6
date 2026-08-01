@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/window_background"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        app:theme="@style/AppTheme.AppBarOverlay">
+
+        <org.autojs.autojs.theme.widget.ThemeColorToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/ToolBarStyle"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            tools:title="@string/text_edit" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#212121">
+
+        <org.autojs.autojs.ui.media.ImageEditingView
+            android:id="@+id/editor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/text_edit" />
+
+        <ProgressBar
+            android:id="@+id/loading_indicator"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/error_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="@string/text_cannot_read_file"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </FrameLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="false"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="4dp">
+
+            <Button
+                android:id="@+id/tool_crop"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_crop"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_rotate_left"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_rotate_left"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_rotate_right"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_rotate_right"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_flip_horizontal"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_flip_horizontal"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_flip_vertical"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_flip_vertical"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_brightness"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_brightness"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_contrast"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_contrast"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_saturation"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_saturation"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_temperature"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_temperature"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_brush"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_brush"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/tool_text"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="72dp"
+                android:text="@string/image_editor_text"
+                android:textAllCaps="false" />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/adjustment_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="6dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/adjustment_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/text_color_primary"
+                android:textSize="14sp"
+                tools:text="@string/image_editor_brightness" />
+
+            <TextView
+                android:id="@+id/adjustment_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:gravity="end"
+                android:textColor="@color/text_color_primary"
+                android:textSize="14sp"
+                tools:text="+20" />
+
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/adjustment_seek_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="100" />
+
+        <include
+            android:id="@+id/adjustment_buttons"
+            layout="@layout/image_editor_confirm_buttons" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/interaction_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="6dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/interaction_help"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/text_color_primary"
+            android:textSize="14sp"
+            tools:text="@string/image_editor_crop_help" />
+
+        <include
+            android:id="@+id/interaction_buttons"
+            layout="@layout/image_editor_confirm_buttons" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/brush_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="4dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/brush_color"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:text="@string/text_color_palette"
+                android:textAllCaps="false" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/image_editor_brush_width"
+                android:textColor="@color/text_color_primary" />
+
+            <SeekBar
+                android:id="@+id/brush_width"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="46"
+                android:progress="6" />
+
+        </LinearLayout>
+
+        <include
+            android:id="@+id/brush_buttons"
+            layout="@layout/image_editor_confirm_buttons" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -362,6 +362,13 @@
     <string name="error_illegal_ui_object_result_type" formatted="false">Le type de résultat \"%s\" n\'est pas pris en charge pour UiObject</string>
     <string name="error_illegal_url_argument" formatted="false">L\'URL doit commencer par un protocole comme \"https://\" et ainsi de suite</string>
     <string name="error_illegal_widget_command" formatted="false">Paramètre %s (%s) doit être ou peut être coulé en %s type</string>
+    <string name="error_image_conversion_dimension_too_large">La largeur et la hauteur ne doivent pas dépasser %1$d px</string>
+    <string name="error_image_conversion_invalid_height">Saisissez une hauteur valide</string>
+    <string name="error_image_conversion_invalid_percentage">Le pourcentage doit être compris entre %1$d et %2$d</string>
+    <string name="error_image_conversion_invalid_source">Impossible de lire les informations de l\'image</string>
+    <string name="error_image_conversion_invalid_width">Saisissez une largeur valide</string>
+    <string name="error_image_conversion_memory_budget_exceeded">La mémoire disponible est insuffisante pour cette taille de sortie</string>
+    <string name="error_image_conversion_pixel_count_too_large">L\'image de sortie ne doit pas dépasser %1$d pixels</string>
     <string name="error_image_has_been_recycled">L\'image a été recyclée</string>
     <string name="error_images_must_have_the_same_size">Les images doivent avoir la même taille</string>
     <string name="error_images_must_have_the_same_size_and_type">Les images doivent avoir la même taille et le même type</string>
@@ -486,10 +493,22 @@
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Le plugin actuel nécessite une version plus élevée de l\'environnement hôte AutoJs6 (versionCode requis: %1$d, versionCode actuel: %2$d). Une mise à niveau d\'AutoJs6 est nécessaire.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Le protocole du plugin n\'est pas compatible avec la version actuelle d\'AutoJs6. Une mise à niveau du plugin est requise.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Essayez d\'appuyer sur le bouton \"Activer\" pour activer le plugin une fois.\nSi l\'activation reussit, le bouton s\'activera automatiquement dans un certain delai.</string>
+    <string name="image_editor_brightness">Luminosité</string>
+    <string name="image_editor_brush">Pinceau</string>
+    <string name="image_editor_brush_width">Épaisseur du pinceau</string>
+    <string name="image_editor_contrast">Contraste</string>
+    <string name="image_editor_crop">Recadrer</string>
+    <string name="image_editor_crop_help">Faites glisser les coins ou les bords pour sélectionner la zone de recadrage</string>
     <string name="image_editor_flip_horizontal">Retourner horizontalement</string>
     <string name="image_editor_flip_vertical">Retourner verticalement</string>
     <string name="image_editor_rotate_left">Tourner à gauche</string>
     <string name="image_editor_rotate_right">Tourner à droite</string>
+    <string name="image_editor_saturation">Saturation</string>
+    <string name="image_editor_temperature">Température de couleur</string>
+    <string name="image_editor_text">Texte</string>
+    <string name="image_editor_text_hint">Saisissez le texte</string>
+    <string name="image_editor_text_position_help">Faites glisser le texte pour choisir sa position</string>
+    <string name="image_editor_text_size_percent">Taille du texte: %1$d%%</string>
     <string name="image_info_modified_label">Modifié</string>
     <string name="image_info_orientation_label">Orientation</string>
     <string name="instruction_install_plugin_from_url">Saisissez une URL pointant vers l\'adresse d\'un plugin distant.\nPar exemple \"https://example.com/plugin.apk\".</string>
@@ -1172,6 +1191,24 @@
     <string name="text_ignore_battery_optimizations">Ignorer les optimisations de la batterie.</string>
     <string name="text_ignored_updates">Ignorer les mises à jour</string>
     <string name="text_ignored_versions">Versions ignorees</string>
+    <string name="text_image_conversion_background_black">Noir</string>
+    <string name="text_image_conversion_background_white">Blanc</string>
+    <string name="text_image_conversion_custom_size">Personnalisé</string>
+    <string name="text_image_conversion_estimated_size">Taille de fichier estimée: ~%1$s</string>
+    <string name="text_image_conversion_estimated_size_unavailable">Taille de fichier estimée: -</string>
+    <string name="text_image_conversion_filename_strategy" tools:ignore="TypographyEllipsis">Si le nom existe déjà, un suffixe incrémental -1, -2... est ajouté</string>
+    <string name="text_image_conversion_height">Hauteur</string>
+    <string name="text_image_conversion_jpeg_background">Arrière-plan des zones transparentes JPEG</string>
+    <string name="text_image_conversion_lock_aspect_ratio">Verrouiller les proportions</string>
+    <string name="text_image_conversion_original_size">Original</string>
+    <string name="text_image_conversion_output_filename">Fichier de sortie: %1$s</string>
+    <string name="text_image_conversion_output_resolution">Résolution de sortie: %1$d x %2$d</string>
+    <string name="text_image_conversion_output_resolution_unavailable">Résolution de sortie: -</string>
+    <string name="text_image_conversion_percentage">Pourcentage</string>
+    <string name="text_image_conversion_percentage_hint">Pourcentage</string>
+    <string name="text_image_conversion_quality">Qualité</string>
+    <string name="text_image_conversion_resize">Redimensionner</string>
+    <string name="text_image_conversion_width">Largeur</string>
     <string name="text_import">Importer</string>
     <string name="text_import_color_library">Importer une bibliothèque de couleurs</string>
     <string name="text_import_custom_css">Importer un CSS personnalisé</string>
@@ -1300,6 +1337,7 @@
     <string name="text_no_content">Pas de contenu</string>
     <string name="text_no_content_description">Aucune description de contenu</string>
     <string name="text_no_data">Aucune donnee</string>
+    <string name="text_no_exif_information">Aucune information EXIF</string>
     <string name="text_no_hidden_plugins">Aucun plugin masqué</string>
     <string name="text_no_history">Aucun historique</string>
     <string name="text_no_ignored_updates">Aucune mise à jour ignorée</string>
