@@ -113,6 +113,7 @@
 * `Fix` APK Builder Template plugins could appear twice or incorrectly report updates
 * `Fix` Offline project documentation integrity verification could reuse stale cached content while the plugin was being updated
 * `Fix` The Manifest button and complete multiline content were missing from APK details in the file manager
+* `Fix` The file manager incorrectly ignored case in ZIP entry names when inspecting APKs, causing some valid packages with case-distinct entries to be reported as containing duplicates and preventing them from being viewed or installed
 * `Fix` External URI cache imports trusted content-provider filenames, potentially allowing path traversal or same-name overwrites
 * `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin
 * `Fix` Switch views in home drawer settings had an excessively small effective touch area

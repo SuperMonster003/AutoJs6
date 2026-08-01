@@ -273,6 +273,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement
 * `Correction` La vérification de l'intégrité de la documentation de projet hors ligne pouvait réutiliser un contenu obsolète en cache pendant la mise à jour du plugin
 * `Correction` Le bouton Manifest et le contenu multiligne complet manquaient dans les détails des APK du gestionnaire de fichiers
+* `Correction` Le gestionnaire de fichiers ignorait à tort la casse des noms d'entrées ZIP lors de l'analyse des APK, de sorte que des entrées ne différant que par la casse étaient considérées comme des doublons dans certains paquets valides, empêchant leur consultation ou leur installation
 * `Correction` Les importations en cache depuis des URI externes faisaient confiance aux noms de fichiers fournis par le fournisseur de contenu, ce qui pouvait permettre une traversée de chemin ou l'écrasement de fichiers portant le même nom
 * `Correction` La position de défilement de la liste du gestionnaire de fichiers était réinitialisée après la suppression de fichiers de la Corbeille
 * `Correction` La zone tactile effective des interrupteurs du tiroir d'accueil était trop petite

@@ -113,6 +113,7 @@
 * `Corrección` Los plugins APK Builder Template podían aparecer duplicados o notificar actualizaciones incorrectamente
 * `Corrección` La verificación de integridad de la documentación del proyecto sin conexión podía reutilizar contenido obsoleto almacenado en caché mientras se actualizaba el plugin
 * `Corrección` Faltaban el botón Manifest y el contenido completo en varias líneas en los detalles de APK del administrador de archivos
+* `Corrección` El administrador de archivos ignoraba por error las diferencias entre mayúsculas y minúsculas en los nombres de las entradas ZIP al analizar APK, por lo que entradas que solo diferían en el uso de mayúsculas y minúsculas se consideraban duplicadas en algunos paquetes válidos e impedían verlos o instalarlos
 * `Corrección` Las importaciones en caché desde URI externos confiaban en los nombres de archivo proporcionados por el proveedor de contenido, lo que podía permitir el cruce de rutas o la sobrescritura de archivos con el mismo nombre
 * `Corrección` La posición de desplazamiento de la lista del administrador de archivos se restablecía tras eliminar archivos de la Papelera
 * `Corrección` El área táctil efectiva de los interruptores del cajón de inicio era demasiado pequeña

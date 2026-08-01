@@ -144,6 +144,22 @@ class AndroidPackageArchiveInspectorTest {
     }
 
     @Test
+    fun caseDistinctApkEntriesAreAccepted() {
+        val apk = temporaryFolder.newFile("case-distinct.apk")
+        writeZip(
+            apk,
+            "AndroidManifest.xml" to manifest(),
+            "assets/Example.txt" to byteArrayOf(1),
+            "assets/example.txt" to byteArrayOf(2),
+        )
+
+        val archive = AndroidPackageArchiveInspector.inspect(apk, arm64Device)
+
+        assertEquals(AndroidPackageFormat.APK, archive.format)
+        assertTrue(archive.canInstall)
+    }
+
+    @Test
     fun manifestSummaryParsesSplitMetadataAndPermissions() {
         val summary = ManifestSummaryParser.parse(
             manifest(

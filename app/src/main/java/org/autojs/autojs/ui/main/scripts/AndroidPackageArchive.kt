@@ -507,7 +507,7 @@ internal object AndroidPackageArchiveInspector {
 
     private fun validateAndCollectEntries(zip: ZipFile): List<ZipEntry> {
         val result = ArrayList<ZipEntry>()
-        val normalizedNames = HashSet<String>()
+        val entryNames = HashSet<String>()
         var declaredTotal = 0L
         val enumeration = zip.entries()
         while (enumeration.hasMoreElements()) {
@@ -516,7 +516,7 @@ internal object AndroidPackageArchiveInspector {
                 throw IOException("Archive entry count exceeds the inspection limit")
             }
             validateEntryName(entry.name)
-            if (!normalizedNames.add(entry.name.lowercase(Locale.ROOT))) {
+            if (!entryNames.add(entry.name)) {
                 throw IOException("Archive contains duplicate entry names")
             }
             if (entry.size > MAX_DECLARED_ENTRY_BYTES) {

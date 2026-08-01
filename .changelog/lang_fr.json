@@ -110,6 +110,7 @@
         "Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement",
         "La vérification de l'intégrité de la documentation de projet hors ligne pouvait réutiliser un contenu obsolète en cache pendant la mise à jour du plugin",
         "Le bouton Manifest et le contenu multiligne complet manquaient dans les détails des APK du gestionnaire de fichiers",
+        "Le gestionnaire de fichiers ignorait à tort la casse des noms d'entrées ZIP lors de l'analyse des APK, de sorte que des entrées ne différant que par la casse étaient considérées comme des doublons dans certains paquets valides, empêchant leur consultation ou leur installation",
         "Les importations en cache depuis des URI externes faisaient confiance aux noms de fichiers fournis par le fournisseur de contenu, ce qui pouvait permettre une traversée de chemin ou l'écrasement de fichiers portant le même nom",
         "La position de défilement de la liste du gestionnaire de fichiers était réinitialisée après la suppression de fichiers de la Corbeille",
         "La zone tactile effective des interrupteurs du tiroir d'accueil était trop petite",
