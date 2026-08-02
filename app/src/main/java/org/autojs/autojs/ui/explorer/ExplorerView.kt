@@ -74,8 +74,6 @@ import org.autojs.autojs.ui.explorer.ExplorerProjectToolbar.OnOperateListener
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.ImageInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
-import org.autojs.autojs.ui.media.ImageConverter
-import org.autojs.autojs.ui.media.ImageEditorActivity
 import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager
@@ -560,23 +558,6 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .createShortcut(selectedItem!!.toScriptFile())
                 mRequestHostDialogHide?.run()
-            }
-            R.id.action_image_edit -> {
-                selectedItem?.let { ImageEditorActivity.launch(context, File(it.path)) }
-                notifyItemOperated()
-                mRequestHostDialogHide?.run()
-            }
-            R.id.action_convert -> {
-                selectedItem?.let {
-                    mRequestHostDialogHide?.run()
-                    ImageConverter.show(
-                        context = context,
-                        source = File(it.path),
-                        onCompleted = null,
-                        onDismissed = { mRequestHostDialogShow?.run() },
-                    )
-                }
-                notifyItemOperated()
             }
             R.id.action_edit_by_other_apps -> {
                 selectedItem?.edit(this@ExplorerView)
@@ -1608,8 +1589,6 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             popupMenu.inflate(R.menu.menu_script_options)
             val menu = popupMenu.menu
             if (!mExplorerItem.type.isImageFile()) {
-                menu.removeItem(R.id.action_image_edit)
-                menu.removeItem(R.id.action_convert)
                 menu.removeItem(R.id.action_edit_by_other_apps)
             }
             if (!mExplorerItem.isExecutable) {

@@ -41,7 +41,8 @@
 * `Feature` File manager supports secure Markdown and HTML previews with GFM rendering, multiple themes, custom CSS, and controlled same-directory resource loading
 * `Feature` Markdown and HTML previews support fullscreen mode, with a "Start in fullscreen mode" setting that is disabled by default
 * `Feature` File manager supports leftmost icon actions for Markdown/HTML preview and image viewing/audio/video playback; the app can act as a system media viewer, with background audio playback and notification controls
-* `Feature` File manager supports image information and detailed EXIF viewing, built-in editing with crop/flip/rotation/brightness/contrast/saturation/color temperature/brush/text tools, and conversion with configurable output format/quality/dimensions/aspect-ratio handling/JPEG background color
+* `Feature` File manager supports image information and detailed EXIF viewing
+* `Feature` Image editing and format conversion are provided by the independent Image Tools plugin; when the plugin is unavailable, only the corresponding actions are hidden, while image viewing, image information, and EXIF viewing remain available
 * `Feature` Image viewer automatically discovers all images in the same directory and supports synchronized focal-point pinch zoom, swipe and toolbar previous/next navigation, a compact three-row information bar for position/resolution/size/format/modification time/EXIF, fullscreen mode, a start-in-fullscreen setting, and a configurable background color with history, while the ActionBar, system bars, and icons adapt their colors and contrast to the background
 * `Feature` File manager supports package details and manifest viewing for APK/APKS/XAPK/APKM/APKZ/AAB files
 * `Feature` Package installer supports APK and compatible split APK sets from APKS/XAPK/APKM/APKZ containers, with device split selection and signing-certificate consistency checks

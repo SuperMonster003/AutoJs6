@@ -17,7 +17,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.pio.PFiles
-import org.autojs.autojs.ui.media.ImageEditorActivity
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
 import org.autojs.autojs.util.DialogUtils.showAdaptive
@@ -53,12 +52,6 @@ object ImageInfoDialogManager {
             .negativeText(R.string.text_cancel)
             .negativeColorRes(R.color.dialog_button_default)
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
-            .positiveText(R.string.text_edit)
-            .positiveColorRes(R.color.dialog_button_attraction)
-            .onPositive { materialDialog, _ ->
-                materialDialog.dismiss()
-                ImageEditorActivity.launch(context, imageFile)
-            }
             .build()
             .apply {
                 makeTextCopyable { titleView }
