@@ -1630,6 +1630,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private val startedAtEpochMs = System.currentTimeMillis()
         private val seen = mutableSetOf<String>()
         private val responsesLock = Any()
+        private val responseLifecycleLock = Any()
         private val responses = mutableListOf<NodeBridgeResponse>()
         private val destroyed = AtomicBoolean(false)
         private val thread = Thread {
@@ -1667,7 +1668,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     thread.join(BRIDGE_LIVE_STOP_JOIN_MS)
                 }
             }
-            if (destroyed.compareAndSet(false, true)) {
+            val shouldDestroy = synchronized(responseLifecycleLock) {
+                destroyed.compareAndSet(false, true)
+            }
+            if (shouldDestroy) {
                 provider.destroy()
             }
             requestDir.parentFile?.deleteRecursivelyIfExists()
@@ -1769,7 +1773,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 if (!responded.compareAndSet(false, true)) {
                     return
                 }
-                recordResponse(response)
+                synchronized(responseLifecycleLock) {
+                    if (!destroyed.get()) {
+                        recordResponse(response)
+                    }
+                }
                 pending.decrementAndGet()
                 file.delete()
             }

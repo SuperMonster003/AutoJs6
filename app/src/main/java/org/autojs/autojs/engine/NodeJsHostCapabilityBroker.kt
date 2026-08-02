@@ -7,7 +7,13 @@ import android.os.RemoteException
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityBroker
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityCallback
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.Semaphore
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 internal class NodeJsHostCapabilityBroker(
     context: Context,
@@ -24,6 +30,23 @@ internal class NodeJsHostCapabilityBroker(
     private val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
         request.runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
         request.workingDirectory,
+    )
+    private val callbackCapacity = bridgeLimits.maxPendingBridgeCalls.coerceAtLeast(1)
+    private val callbackSlots = Semaphore(callbackCapacity, true)
+    private val pendingCallbackCount = AtomicInteger(0)
+    private val rejectedCallbackCount = AtomicInteger(0)
+    private val callbackExecutor = ThreadPoolExecutor(
+        1,
+        1,
+        0L,
+        TimeUnit.MILLISECONDS,
+        ArrayBlockingQueue(callbackCapacity),
+        { runnable ->
+            Thread(runnable, "AutoJs6NodeHostCapabilityCallback-$id").apply {
+                isDaemon = true
+            }
+        },
+        ThreadPoolExecutor.AbortPolicy(),
     )
     private val engineInfo = NodeBridgeEngineInfo
         .fromContext(
@@ -65,14 +88,24 @@ internal class NodeJsHostCapabilityBroker(
             return
         }
         if (destroyed.get()) {
-            sendResponse(
-                callback,
-                NodeBridgeResponse.failure(
-                    requestId(request),
-                    NodeBridgeError.processDead("AutoJs6 host capability broker is already destroyed."),
-                ),
-            )
             return
+        }
+        if (!callbackSlots.tryAcquire()) {
+            rejectedCallbackCount.incrementAndGet()
+            throw IllegalStateException(
+                "AutoJs6 host capability broker exceeded its $callbackCapacity pending callback limit.",
+            )
+        }
+        pendingCallbackCount.incrementAndGet()
+        if (destroyed.get()) {
+            releaseCallbackSlot()
+            return
+        }
+        val responseScheduled = AtomicBoolean(false)
+        val respond: (NodeBridgeResponse) -> Unit = { response ->
+            if (responseScheduled.compareAndSet(false, true)) {
+                sendResponse(callback, response)
+            }
         }
         val requestJson = request
             ?.getString(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_JSON)
@@ -80,8 +113,7 @@ internal class NodeJsHostCapabilityBroker(
         val bridgeRequest = runCatching {
             NodeBridgeRequest.fromJson(requestJson)
         }.getOrElse { error ->
-            sendResponse(
-                callback,
+            respond(
                 NodeBridgeResponse.failure(
                     requestId(requestJson),
                     NodeBridgeError.invalidRequest(
@@ -93,11 +125,10 @@ internal class NodeJsHostCapabilityBroker(
         }
         runCatching {
             provider.dispatch(bridgeRequest) { response ->
-                sendResponse(callback, response)
+                respond(response)
             }
         }.onFailure { error ->
-            sendResponse(
-                callback,
+            respond(
                 NodeBridgeResponse.failure(
                     bridgeRequest.id,
                     NodeBridgeError.providerFailed(
@@ -119,6 +150,7 @@ internal class NodeJsHostCapabilityBroker(
 
     override fun destroy(reason: Bundle?) {
         if (destroyed.compareAndSet(false, true)) {
+            callbackExecutor.shutdownNow().forEach { _ -> releaseCallbackSlot() }
             provider.destroy(
                 NodeBridgeError.processDead(
                     reason
@@ -131,10 +163,48 @@ internal class NodeJsHostCapabilityBroker(
     }
 
     private fun nativeDiagnostics(): Map<String, String> {
-        return provider.nativeDiagnostics()
+        return linkedMapOf<String, String>().apply {
+            putAll(provider.nativeDiagnostics())
+            put("embedded_script.host_broker_callback_pending_count", pendingCallbackCount.get().toString())
+            put("embedded_script.host_broker_callback_pending_limit", callbackCapacity.toString())
+            put("embedded_script.host_broker_callback_rejected_count", rejectedCallbackCount.get().toString())
+            put("embedded_script.host_broker_destroyed", destroyed.get().toString())
+        }
     }
 
     private fun sendResponse(
+        callback: INodeJsHostCapabilityCallback,
+        response: NodeBridgeResponse,
+    ) {
+        if (destroyed.get()) {
+            releaseCallbackSlot()
+            return
+        }
+        try {
+            callbackExecutor.execute {
+                try {
+                    if (!destroyed.get()) {
+                        deliverResponse(callback, response)
+                    }
+                } finally {
+                    releaseCallbackSlot()
+                }
+            }
+        } catch (_: RejectedExecutionException) {
+            // destroy() seals the callback boundary before tearing down provider resources.
+            if (!destroyed.get()) {
+                rejectedCallbackCount.incrementAndGet()
+            }
+            releaseCallbackSlot()
+        }
+    }
+
+    private fun releaseCallbackSlot() {
+        pendingCallbackCount.updateAndGet { pending -> (pending - 1).coerceAtLeast(0) }
+        callbackSlots.release()
+    }
+
+    private fun deliverResponse(
         callback: INodeJsHostCapabilityCallback,
         response: NodeBridgeResponse,
     ) {

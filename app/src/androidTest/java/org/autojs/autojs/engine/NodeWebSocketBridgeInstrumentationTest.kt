@@ -1,6 +1,9 @@
 package org.autojs.autojs.engine
 
+import android.os.Bundle
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityCallback
+import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
@@ -522,17 +525,63 @@ class NodeWebSocketBridgeInstrumentationTest {
 
         ControlledWebSocketLoopbackServer().use { server ->
             val provider = AndroidNodeBridgeCapabilityProvider(context)
-            val callbackLatch = CountDownLatch(1)
-            var response: NodeBridgeResponse? = null
+            fun connect(path: String): NodeBridgeResponse {
+                val callbackLatch = CountDownLatch(1)
+                var response: NodeBridgeResponse? = null
+                provider.dispatch(
+                    NodeBridgeRequest(
+                        id = "websocket-live-destroy-${path.removePrefix("/")}-${System.nanoTime()}",
+                        module = "websocket",
+                        method = "connect",
+                        argsJson = JSONArray().put(
+                            JSONObject().apply {
+                                put("url", "${server.baseUrl}$path")
+                                put("timeoutMs", 2_000)
+                                put("maxMessageBytes", 1024)
+                                put("maxQueueSize", 8)
+                            },
+                        ).toString(),
+                        timeoutMs = 2_000L,
+                        permissions = listOf("network"),
+                    ),
+                ) { bridgeResponse ->
+                    response = bridgeResponse
+                    callbackLatch.countDown()
+                }
+                assertTrue("live WebSocket connect did not complete for $path", callbackLatch.await(5, TimeUnit.SECONDS))
+                return response ?: error("Missing WebSocket destroy response for $path")
+            }
 
+            connect("/hold").also { response -> assertTrue(response.error?.toString().orEmpty(), response.ok) }
+            connect("/hold-no-close-ack").also { response -> assertTrue(response.error?.toString().orEmpty(), response.ok) }
+            assertTrue("hold WebSocket did not open on loopback server", server.awaitHoldOpen())
+            assertTrue("non-ACK WebSocket did not open on loopback server", server.awaitNoCloseAckOpen())
+
+            val destroyStartedAt = System.nanoTime()
+            provider.destroy(NodeBridgeError.processDead("websocket live destroy test"))
+            val destroyElapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - destroyStartedAt)
+            assertTrue("provider destroy blocked for ${destroyElapsedMs}ms", destroyElapsedMs < 1_000L)
+            assertTrue("provider destroy did not close the loopback WebSocket", server.awaitHoldClose())
+            assertTrue("provider destroy did not send Close to the non-ACK peer", server.awaitNoCloseAckFrame())
+            assertTrue("provider destroy did not cancel the non-ACK transport", server.awaitNoCloseAckDisconnect())
+            provider.nativeDiagnostics().also { diagnostics ->
+                assertEquals("0", diagnostics["embedded_script.websocket_active_connection_count"])
+                assertEquals("2", diagnostics["embedded_script.websocket_service_destroy_close_count"])
+            }
+        }
+
+        ControlledWebSocketLoopbackServer().use { server ->
+            val provider = AndroidNodeBridgeCapabilityProvider(context)
+            val connectLatch = CountDownLatch(1)
+            var connectResponse: NodeBridgeResponse? = null
             provider.dispatch(
                 NodeBridgeRequest(
-                    id = "websocket-live-destroy-${System.nanoTime()}",
+                    id = "websocket-live-explicit-close-connect-${System.nanoTime()}",
                     module = "websocket",
                     method = "connect",
                     argsJson = JSONArray().put(
                         JSONObject().apply {
-                            put("url", "${server.baseUrl}/hold")
+                            put("url", "${server.baseUrl}/hold-no-close-ack")
                             put("timeoutMs", 2_000)
                             put("maxMessageBytes", 1024)
                             put("maxQueueSize", 8)
@@ -541,23 +590,212 @@ class NodeWebSocketBridgeInstrumentationTest {
                     timeoutMs = 2_000L,
                     permissions = listOf("network"),
                 ),
-            ) { bridgeResponse ->
-                response = bridgeResponse
-                callbackLatch.countDown()
+            ) { response ->
+                connectResponse = response
+                connectLatch.countDown()
+            }
+            assertTrue("explicit-close WebSocket connect did not complete", connectLatch.await(5, TimeUnit.SECONDS))
+            val connected = connectResponse ?: error("Missing explicit-close WebSocket connect response")
+            assertTrue(connected.error?.toString().orEmpty(), connected.ok)
+            val sessionId = JSONObject(connected.resultJson.orEmpty()).getString("id")
+            assertTrue("explicit-close non-ACK WebSocket did not open", server.awaitNoCloseAckOpen())
+
+            fun closeAttempt(code: Int, reason: String, label: String): NodeBridgeResponse {
+                val closeLatch = CountDownLatch(1)
+                var closeResponse: NodeBridgeResponse? = null
+                provider.dispatch(
+                    NodeBridgeRequest(
+                        id = "websocket-live-$label-${System.nanoTime()}",
+                        module = "websocket",
+                        method = "close",
+                        argsJson = JSONArray().put(
+                            JSONObject()
+                                .put("id", sessionId)
+                                .put("code", code)
+                                .put("reason", reason),
+                        ).toString(),
+                        timeoutMs = 2_000L,
+                        permissions = listOf("network"),
+                    ),
+                ) { response ->
+                    closeResponse = response
+                    closeLatch.countDown()
+                }
+                assertTrue("$label WebSocket close did not complete", closeLatch.await(5, TimeUnit.SECONDS))
+                return closeResponse ?: error("Missing $label WebSocket close response")
             }
 
-            assertTrue("live WebSocket connect did not complete", callbackLatch.await(5, TimeUnit.SECONDS))
-            val success = response ?: error("Missing WebSocket destroy response")
-            assertTrue(success.error?.toString().orEmpty(), success.ok)
-            assertTrue("hold WebSocket did not open on loopback server", server.awaitHoldOpen())
+            closeAttempt(1006, "reserved code", "reserved-code").also { response ->
+                assertFalse(response.ok)
+                assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, response.error?.code)
+            }
+            closeAttempt(1000, "界".repeat(42), "oversize-reason").also { response ->
+                assertFalse(response.ok)
+                assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, response.error?.code)
+            }
+            assertEquals("1", provider.nativeDiagnostics()["embedded_script.websocket_active_connection_count"])
 
-            provider.destroy(NodeBridgeError.processDead("websocket live destroy test"))
-            assertTrue("provider destroy did not close the loopback WebSocket", server.awaitHoldClose())
+            val closeResponse = closeAttempt(1000, "explicit close before destroy", "explicit-close")
+            assertTrue(closeResponse.error?.toString().orEmpty(), closeResponse.ok)
+            assertTrue("explicit close did not send Close to the non-ACK peer", server.awaitNoCloseAckFrame())
+            assertEquals(
+                "1",
+                provider.nativeDiagnostics()["embedded_script.websocket_active_connection_count"],
+            )
+
+            provider.destroy(NodeBridgeError.processDead("websocket explicit close then destroy test"))
+            assertTrue("destroy did not cancel the explicitly closed non-ACK transport", server.awaitNoCloseAckDisconnect())
             provider.nativeDiagnostics().also { diagnostics ->
                 assertEquals("0", diagnostics["embedded_script.websocket_active_connection_count"])
-                assertEquals("1", diagnostics["embedded_script.websocket_service_destroy_close_count"])
+                assertEquals("0", diagnostics["embedded_script.websocket_service_destroy_close_count"])
             }
         }
+
+        ControlledWebSocketLoopbackServer().use { server ->
+            val provider = AndroidNodeBridgeCapabilityProvider(context)
+            val invalidLatch = CountDownLatch(1)
+            var invalidResponse: NodeBridgeResponse? = null
+            provider.dispatch(
+                NodeBridgeRequest(
+                    id = "websocket-live-invalid-header-${System.nanoTime()}",
+                    module = "websocket",
+                    method = "connect",
+                    argsJson = JSONArray().put(
+                        JSONObject()
+                            .put("url", "${server.baseUrl}/hold-no-close-ack")
+                            .put("headers", JSONObject().put("x-invalid", "line-one\r\nline-two")),
+                    ).toString(),
+                    timeoutMs = 2_000L,
+                    permissions = listOf("network"),
+                ),
+            ) { response ->
+                invalidResponse = response
+                invalidLatch.countDown()
+            }
+            assertTrue("invalid-header WebSocket request did not complete", invalidLatch.await(2, TimeUnit.SECONDS))
+            assertFalse(invalidResponse?.ok ?: true)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, invalidResponse?.error?.code)
+            assertEquals("0", provider.nativeDiagnostics()["embedded_script.websocket_active_connection_count"])
+
+            val connectLatch = CountDownLatch(1)
+            var connectResponse: NodeBridgeResponse? = null
+            provider.dispatch(
+                NodeBridgeRequest(
+                    id = "websocket-live-oversize-non-ack-${System.nanoTime()}",
+                    module = "websocket",
+                    method = "connect",
+                    argsJson = JSONArray().put(
+                        JSONObject()
+                            .put("url", "${server.baseUrl}/hold-no-close-ack")
+                            .put("timeoutMs", 2_000)
+                            .put("maxMessageBytes", 3)
+                            .put("maxQueueSize", 8),
+                    ).toString(),
+                    timeoutMs = 2_000L,
+                    permissions = listOf("network"),
+                ),
+            ) { response ->
+                connectResponse = response
+                connectLatch.countDown()
+            }
+            assertTrue("oversize non-ACK WebSocket connect did not complete", connectLatch.await(5, TimeUnit.SECONDS))
+            assertTrue(connectResponse?.error?.toString().orEmpty(), connectResponse?.ok == true)
+            assertTrue("oversize non-ACK WebSocket did not open", server.awaitNoCloseAckOpen())
+            assertTrue("oversize policy close did not send a Close frame", server.awaitNoCloseAckFrame())
+            assertTrue("oversize policy close did not cancel the non-ACK transport", server.awaitNoCloseAckDisconnect())
+            val transportDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2)
+            while (
+                provider.nativeDiagnostics()["embedded_script.websocket_active_connection_count"] != "0" &&
+                System.nanoTime() < transportDeadline
+            ) {
+                Thread.sleep(25L)
+            }
+            assertEquals("0", provider.nativeDiagnostics()["embedded_script.websocket_active_connection_count"])
+            provider.destroy(NodeBridgeError.processDead("websocket oversize non-ACK test complete"))
+        }
+
+        ControlledWebSocketLoopbackServer().use { server ->
+            val broker = NodeJsHostCapabilityBroker(
+                context = context,
+                request = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                    source = "",
+                    sourceName = "<websocket-host-broker-destroy-test>",
+                    workingDirectory = context.cacheDir.absolutePath,
+                    sandboxRoot = context.cacheDir.absolutePath,
+                    executionId = "websocket-host-broker-destroy-${System.nanoTime()}",
+                    runtimeModuleSources = mapOf(
+                        NodeBridgeLimits.RUNTIME_MODULE_NAME to
+                                NodeBridgeLimits.defaults.copy(maxPendingBridgeCalls = 1).toJson(),
+                    ),
+                ),
+                launchSurface = "instrumentation",
+            )
+            val callbackAfterDestroy = CountDownLatch(1)
+            val callback = object : INodeJsHostCapabilityCallback.Stub() {
+                override fun onResponse(response: Bundle) {
+                    callbackAfterDestroy.countDown()
+                }
+            }
+            val request = NodeBridgeRequest(
+                id = "websocket-host-broker-pending-${System.nanoTime()}",
+                module = "websocket",
+                method = "connect",
+                argsJson = JSONArray().put(
+                    JSONObject()
+                        .put("url", "${server.baseUrl}/slow")
+                        .put("timeoutMs", 5_000)
+                        .put("maxMessageBytes", 1024),
+                ).toString(),
+                timeoutMs = 5_000L,
+                permissions = listOf("network"),
+            )
+            val requestBundle = Bundle().apply {
+                putString(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_JSON, request.toJson())
+            }
+            broker.dispatch(requestBundle, callback)
+            assertTrue("pending host-broker WebSocket did not reach the loopback server", server.awaitSlowRequest())
+            val saturationError = runCatching {
+                broker.dispatch(requestBundle, callback)
+            }.exceptionOrNull()
+            assertTrue("host-broker callback saturation did not reject", saturationError is IllegalStateException)
+            val saturatedDiagnostics = broker.getNativeDiagnostics()
+                .getStringArray(NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD)
+                .orEmpty()
+                .mapNotNull { entry ->
+                    val separator = entry.indexOf('=')
+                    if (separator > 0) entry.substring(0, separator) to entry.substring(separator + 1) else null
+                }
+                .toMap()
+            assertEquals("1", saturatedDiagnostics["embedded_script.host_broker_callback_pending_count"])
+            assertEquals("1", saturatedDiagnostics["embedded_script.host_broker_callback_pending_limit"])
+            assertEquals("1", saturatedDiagnostics["embedded_script.host_broker_callback_rejected_count"])
+            broker.destroy(null)
+            assertFalse(
+                "pending WebSocket callback re-entered the destroyed Node host boundary",
+                callbackAfterDestroy.await(3, TimeUnit.SECONDS),
+            )
+            broker.dispatch(requestBundle, callback)
+            assertFalse(
+                "destroyed Node host broker accepted a new callback",
+                callbackAfterDestroy.await(250, TimeUnit.MILLISECONDS),
+            )
+            val releaseDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(4)
+            var pendingCallbacks: String?
+            do {
+                pendingCallbacks = broker.getNativeDiagnostics()
+                    .getStringArray(NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD)
+                    .orEmpty()
+                    .firstOrNull { entry ->
+                        entry.startsWith("embedded_script.host_broker_callback_pending_count=")
+                    }
+                    ?.substringAfter('=')
+                if (pendingCallbacks != "0") {
+                    Thread.sleep(25L)
+                }
+            } while (pendingCallbacks != "0" && System.nanoTime() < releaseDeadline)
+            assertEquals("0", pendingCallbacks)
+        }
+
     }
 
     @Test
@@ -593,6 +831,10 @@ class NodeWebSocketBridgeInstrumentationTest {
         private val serverSocket = ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))
         private val holdOpen = CountDownLatch(1)
         private val holdClose = CountDownLatch(1)
+        private val noCloseAckOpen = CountDownLatch(1)
+        private val noCloseAckFrame = CountDownLatch(1)
+        private val noCloseAckDisconnect = CountDownLatch(1)
+        private val slowRequest = CountDownLatch(1)
 
         @Volatile
         private var running = true
@@ -622,6 +864,14 @@ class NodeWebSocketBridgeInstrumentationTest {
         fun awaitHoldOpen(): Boolean = holdOpen.await(5, TimeUnit.SECONDS)
 
         fun awaitHoldClose(): Boolean = holdClose.await(5, TimeUnit.SECONDS)
+
+        fun awaitNoCloseAckOpen(): Boolean = noCloseAckOpen.await(5, TimeUnit.SECONDS)
+
+        fun awaitNoCloseAckFrame(): Boolean = noCloseAckFrame.await(5, TimeUnit.SECONDS)
+
+        fun awaitNoCloseAckDisconnect(): Boolean = noCloseAckDisconnect.await(4, TimeUnit.SECONDS)
+
+        fun awaitSlowRequest(): Boolean = slowRequest.await(5, TimeUnit.SECONDS)
 
         override fun close() {
             running = false
@@ -653,6 +903,7 @@ class NodeWebSocketBridgeInstrumentationTest {
 
             val uri = URI(parts[1])
             if (uri.path == "/slow") {
+                slowRequest.countDown()
                 Thread.sleep(2_000)
                 return
             }
@@ -662,6 +913,7 @@ class NodeWebSocketBridgeInstrumentationTest {
                 "/socket" -> runEchoSession(input, output, headers, uri.rawQuery.orEmpty())
                 "/large" -> runLargeMessageSession(input, output)
                 "/hold" -> runHoldSession(input, output)
+                "/hold-no-close-ack" -> runNoCloseAckSession(input, output)
                 else -> writeCloseFrame(output, 1008, "unsupported")
             }
         }
@@ -715,6 +967,28 @@ class NodeWebSocketBridgeInstrumentationTest {
                     WebSocketFrame.Ping -> writePongFrame(output)
                     else -> Unit
                 }
+            }
+        }
+
+        private fun runNoCloseAckSession(input: InputStream, output: OutputStream) {
+            noCloseAckOpen.countDown()
+            writeTextFrame(output, "server-ready")
+            try {
+                while (true) {
+                    when (val frame = readFrame(input) ?: return) {
+                        is WebSocketFrame.Close -> {
+                            noCloseAckFrame.countDown()
+                            while (input.read() >= 0) {
+                                // Deliberately withhold the protocol Close ACK until the client cancels.
+                            }
+                            return
+                        }
+                        WebSocketFrame.Ping -> writePongFrame(output)
+                        else -> Unit
+                    }
+                }
+            } finally {
+                noCloseAckDisconnect.countDown()
             }
         }
 

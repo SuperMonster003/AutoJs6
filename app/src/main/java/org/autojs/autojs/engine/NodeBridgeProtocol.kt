@@ -766,7 +766,13 @@ class AndroidNodeBridgeCapabilityProvider(
         .build()
     private val networkCalls = ConcurrentHashMap<String, Call>()
     private val networkDiagnostics = ControlledFetchDiagnostics()
+    private val websocketLifecycleLock = Any()
+    private val websocketDestroyed = AtomicBoolean(false)
     private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
+    private val websocketTransports = ConcurrentHashMap<String, ControlledWebSocketSession>()
+    private val websocketCloseScheduler = Executors.newSingleThreadScheduledExecutor { runnable ->
+        Thread(runnable, "AutoJs6NodeWebSocketClose").apply { isDaemon = true }
+    }
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
     private val imageHandles = ConcurrentHashMap<String, ControlledImageHandle>()
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
@@ -894,7 +900,7 @@ class AndroidNodeBridgeCapabilityProvider(
             appContext,
             activeResourceCounts = mapOf(
                 "fetch" to networkCalls.size,
-                "websocket" to websocketSessions.size,
+                "websocket" to websocketTransports.size,
                 "ocr" to ocrOperations.size,
                 "barcode" to barcodeOperations.size,
                 "image" to imageHandles.size,
@@ -913,8 +919,12 @@ class AndroidNodeBridgeCapabilityProvider(
 
     override fun destroy(reason: NodeBridgeError) {
         val destroyReason = reason.code.ifBlank { reason.message }
+        val (websocketSessionsToClose, websocketTransportsToClose) = synchronized(websocketLifecycleLock) {
+            websocketDestroyed.set(true)
+            websocketSessions.values.toList() to websocketTransports.values.toList()
+        }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
-        websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
+        websocketDiagnostics.recordServiceDestroyClose(websocketSessionsToClose.size)
         ocrDiagnostics.recordServiceDestroyCancellation(ocrOperations.size)
         barcodeDiagnostics.recordServiceDestroyCancellation(barcodeOperations.size)
         ocrOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
@@ -925,8 +935,11 @@ class AndroidNodeBridgeCapabilityProvider(
         databaseExecutor.shutdownNow()
         resourceRegistry.closeAll(destroyReason)
         networkCalls.values.forEach { call -> runCatching { call.cancel() } }
-        networkClient.dispatcher.cancelAll()
-        networkClient.dispatcher.executorService.shutdownNow()
+        // WebSocket.close() queues its close frame asynchronously. Give each owned
+        // session a bounded grace period, then cancel only peers that did not ACK.
+        scheduleWebSocketCancellation(websocketTransportsToClose)
+        websocketCloseScheduler.shutdown()
+        networkClient.dispatcher.executorService.shutdown()
         networkClient.connectionPool.evictAll()
         runCatching { networkClient.cache?.close() }
         runCatching { databaseExecutor.awaitTermination(250L, TimeUnit.MILLISECONDS) }
@@ -942,6 +955,38 @@ class AndroidNodeBridgeCapabilityProvider(
         closeOverlaySessions("destroy:$destroyReason")
         overlaySessionIds.clear()
         inputObserverSubscriptions.clear()
+    }
+
+    private fun scheduleWebSocketCancellation(sessions: Collection<ControlledWebSocketSession>) {
+        val pendingSessions = sessions
+            .distinctBy { session -> session.id }
+            .filter { session -> session.tryScheduleCancellation() }
+        if (pendingSessions.isEmpty()) {
+            return
+        }
+        val cancelPendingSessions = {
+            pendingSessions.forEach { session ->
+                if (session.forceCancelIfPending()) {
+                    finishWebSocketTransport(session)
+                }
+            }
+            networkClient.connectionPool.evictAll()
+        }
+        try {
+            websocketCloseScheduler.schedule(
+                cancelPendingSessions,
+                WEBSOCKET_DESTROY_GRACE_MS,
+                TimeUnit.MILLISECONDS,
+            )
+        } catch (_: RejectedExecutionException) {
+            cancelPendingSessions()
+        }
+    }
+
+    private fun finishWebSocketTransport(session: ControlledWebSocketSession) {
+        if (websocketTransports.remove(session.id, session)) {
+            websocketDiagnostics.finishConnection()
+        }
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -4195,6 +4240,15 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchWebSocketConnect(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (websocketDestroyed.get()) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.processDead("AutoJs6 controlled WebSocket provider is destroyed."),
+                ),
+            )
+            return
+        }
         val payload = request.firstObjectArg()
         if (payload == null) {
             callback(
@@ -4215,6 +4269,21 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.failure(request.id, connectRequest.error ?: NodeBridgeError.processDead()))
             return
         }
+        val controlled = connectRequest.value
+        val okHttpRequest = runCatching { controlled.toOkHttpRequest() }.getOrElse { error ->
+            websocketDiagnostics.recordPolicyRejection()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "websocket.connect contains invalid headers or protocols: ${error.message ?: error.javaClass.simpleName}",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
         if (!websocketDiagnostics.tryStartConnection(bridgeLimits.maxWebSocketConnections)) {
             bridgeResourceLimitRejections.incrementAndGet()
             callback(
@@ -4231,7 +4300,6 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
 
-        val controlled = connectRequest.value
         val sessionId = "websocket-${UUID.randomUUID()}"
         val responded = AtomicBoolean(false)
         val session = ControlledWebSocketSession(
@@ -4240,18 +4308,35 @@ class AndroidNodeBridgeCapabilityProvider(
             maxMessageBytes = controlled.maxMessageBytes,
             maxQueueSize = controlled.maxQueueSize,
         )
-        websocketSessions[sessionId] = session
-        val websocketResource = resourceRegistry.register(
-            type = NodeBridgeResourceType.WEBSOCKET_CONNECTION,
-            id = sessionId,
-            metadata = mapOf(
-                "url" to controlled.url,
-                "maxMessageBytes" to controlled.maxMessageBytes.toString(),
-            ),
-        ) { closeReason ->
-            websocketSessions.remove(sessionId)
-            session.close(1001, closeReason.take(123))
+        val websocketResource = synchronized(websocketLifecycleLock) {
+            if (websocketDestroyed.get()) {
+                null
+            } else {
+                websocketSessions[sessionId] = session
+                websocketTransports[sessionId] = session
+                resourceRegistry.register(
+                    type = NodeBridgeResourceType.WEBSOCKET_CONNECTION,
+                    id = sessionId,
+                    metadata = mapOf(
+                        "url" to controlled.url,
+                        "maxMessageBytes" to controlled.maxMessageBytes.toString(),
+                    ),
+                ) { closeReason ->
+                    websocketSessions.remove(sessionId)
+                    session.close(1001, controlledWebSocketTruncateCloseReason(closeReason))
+                    scheduleWebSocketCancellation(listOf(session))
+                }
+            }
+        }
+        if (websocketResource == null) {
             websocketDiagnostics.finishConnection()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.processDead("AutoJs6 controlled WebSocket provider was destroyed during connect."),
+                ),
+            )
+            return
         }
 
         val timeoutRunnable = Runnable {
@@ -4275,7 +4360,19 @@ class AndroidNodeBridgeCapabilityProvider(
 
         val listener = object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
-                session.attach(webSocket)
+                if (!session.attach(webSocket) || websocketDestroyed.get()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    websocketResource.close("websocket.destroyed-during-connect")
+                    if (responded.compareAndSet(false, true)) {
+                        callback(
+                            NodeBridgeResponse.failure(
+                                request.id,
+                                NodeBridgeError.processDead("AutoJs6 controlled WebSocket provider was destroyed during connect."),
+                            ),
+                        )
+                    }
+                    return
+                }
                 session.queueOpen()
                 if (responded.compareAndSet(false, true)) {
                     mainHandler.removeCallbacks(timeoutRunnable)
@@ -4288,7 +4385,8 @@ class AndroidNodeBridgeCapabilityProvider(
                 if (text.toByteArray(Charsets.UTF_8).size > session.maxMessageBytes) {
                     websocketDiagnostics.recordPolicyRejection()
                     session.queueError(NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE, "AutoJs6 controlled WebSocket message exceeded ${session.maxMessageBytes} bytes.")
-                    webSocket.close(1009, "message too large")
+                    session.close(1009, "message too large")
+                    scheduleWebSocketCancellation(listOf(session))
                     return
                 }
                 session.queueMessageText(text)
@@ -4298,7 +4396,8 @@ class AndroidNodeBridgeCapabilityProvider(
                 if (bytes.size > session.maxMessageBytes) {
                     websocketDiagnostics.recordPolicyRejection()
                     session.queueError(NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE, "AutoJs6 controlled WebSocket message exceeded ${session.maxMessageBytes} bytes.")
-                    webSocket.close(1009, "message too large")
+                    session.close(1009, "message too large")
+                    scheduleWebSocketCancellation(listOf(session))
                     return
                 }
                 session.queueMessageBinary(bytes.base64())
@@ -4306,12 +4405,11 @@ class AndroidNodeBridgeCapabilityProvider(
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
                 mainHandler.removeCallbacks(timeoutRunnable)
-                if (websocketResource.release("websocket.failure")) {
-                    websocketDiagnostics.finishConnection()
-                }
+                websocketResource.release("websocket.failure")
                 session.queueError(NodeRuntimeErrorCodes.NETWORK_TIMEOUT, t.message ?: t.javaClass.name)
                 session.queueClose(1006, t.message ?: t.javaClass.name)
                 session.markTerminal()
+                finishWebSocketTransport(session)
                 if (responded.compareAndSet(false, true)) {
                     websocketSessions.remove(sessionId)
                     websocketDiagnostics.recordTimeout()
@@ -4332,15 +4430,37 @@ class AndroidNodeBridgeCapabilityProvider(
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 session.queueClose(code, reason)
                 session.markTerminal()
-                if (websocketResource.release("websocket.closed")) {
-                    websocketDiagnostics.finishConnection()
-                }
+                websocketResource.release("websocket.closed")
+                finishWebSocketTransport(session)
             }
         }
-        val webSocket = networkClient.newBuilder()
-            .callTimeout(controlled.timeoutMs, TimeUnit.MILLISECONDS)
-            .build()
-            .newWebSocket(controlled.toOkHttpRequest(), listener)
+        val webSocket = runCatching {
+            networkClient.newBuilder()
+                .callTimeout(controlled.timeoutMs, TimeUnit.MILLISECONDS)
+                .build()
+                .newWebSocket(okHttpRequest, listener)
+        }.getOrElse { error ->
+            mainHandler.removeCallbacks(timeoutRunnable)
+            websocketResource.release("websocket.connect-dispatch-failed")
+            session.queueError(NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD, error.message ?: error.javaClass.name)
+            session.markTerminal()
+            websocketSessions.remove(sessionId, session)
+            finishWebSocketTransport(session)
+            if (responded.compareAndSet(false, true)) {
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.network(
+                            message = "AutoJs6 controlled WebSocket could not start: ${error.message ?: error.javaClass.name}",
+                            code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+            }
+            return
+        }
         session.attach(webSocket)
     }
 
@@ -4379,17 +4499,35 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchWebSocketClose(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val payload = request.firstObjectArg()
         val sessionId = payload?.optString("id").orEmpty()
-        val session = websocketSessions.remove(sessionId)
+        val session = websocketSessions[sessionId]
         if (payload == null || session == null) {
             callback(websocketMissingSessionResponse(request))
             return
         }
-        val code = payload.optInt("code", 1000).coerceIn(1000, 4999)
+        val code = payload.optInt("code", 1000)
         val reason = payload.optString("reason", "")
-        session.close(code, reason)
-        if (resourceRegistry.release(sessionId, "websocket.close")) {
-            websocketDiagnostics.finishConnection()
+        val closeValidationError = controlledWebSocketCloseValidationError(code, reason)
+        if (closeValidationError != null) {
+            websocketDiagnostics.recordPolicyRejection()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = closeValidationError,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
         }
+        if (!websocketSessions.remove(sessionId, session)) {
+            callback(websocketMissingSessionResponse(request))
+            return
+        }
+        session.close(code, reason)
+        resourceRegistry.release(sessionId, "websocket.close")
+        scheduleWebSocketCancellation(listOf(session))
         callback(NodeBridgeResponse.success(request.id, "null"))
     }
 
@@ -5114,6 +5252,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private companion object {
         const val TAG = "AndroidNodeBridge"
         const val SHELL_STREAM_JOIN_MS = 500L
+        const val WEBSOCKET_DESTROY_GRACE_MS = 2_000L
         const val MAX_ACTIVE_UI_SESSIONS = 4
         const val MAX_ACTIVE_OVERLAY_SESSIONS = 4
         const val MLKIT_OCR_ENGINE = "mlkit-ocr"
@@ -7910,13 +8049,33 @@ private class ControlledWebSocketSession(
     val maxQueueSize: Int,
 ) {
     private val events = ConcurrentLinkedQueue<JSONObject>()
-    @Volatile
+    private val lifecycleLock = Any()
     private var webSocket: WebSocket? = null
-    @Volatile
     private var terminal = false
+    private var forceCancelled = false
+    private var pendingClose: Pair<Int, String>? = null
+    private var closeEnqueued = false
+    private var cancellationScheduled = false
 
-    fun attach(value: WebSocket) {
-        webSocket = value
+    fun attach(value: WebSocket): Boolean {
+        var shouldCancel = false
+        var closeRequest: Pair<Int, String>? = null
+        val accepted = synchronized(lifecycleLock) {
+            webSocket = value
+            when {
+                terminal || forceCancelled -> shouldCancel = true
+                pendingClose != null && !closeEnqueued -> {
+                    closeEnqueued = true
+                    closeRequest = pendingClose
+                }
+            }
+            !shouldCancel && pendingClose == null
+        }
+        when {
+            shouldCancel -> value.cancel()
+            closeRequest != null -> value.close(closeRequest.first, closeRequest.second)
+        }
+        return accepted
     }
 
     fun queueOpen() {
@@ -7952,7 +8111,9 @@ private class ControlledWebSocketSession(
     }
 
     fun markTerminal() {
-        terminal = true
+        synchronized(lifecycleLock) {
+            terminal = true
+        }
     }
 
     fun drainEvents(): JSONArray {
@@ -7964,17 +8125,65 @@ private class ControlledWebSocketSession(
         return result
     }
 
-    fun removeAfterDrain(): Boolean = terminal && events.isEmpty()
+    fun removeAfterDrain(): Boolean = synchronized(lifecycleLock) { terminal } && events.isEmpty()
 
-    fun sendText(text: String): Boolean = webSocket?.send(text) == true
+    fun sendText(text: String): Boolean = synchronized(lifecycleLock) {
+        if (terminal || forceCancelled) null else webSocket
+    }?.send(text) == true
 
     fun sendBinary(base64: String): Boolean {
         val bytes = base64.decodeBase64() ?: return false
-        return webSocket?.send(bytes) == true
+        return synchronized(lifecycleLock) {
+            if (terminal || forceCancelled) null else webSocket
+        }?.send(bytes) == true
     }
 
-    fun close(code: Int, reason: String) {
-        webSocket?.close(code, reason)
+    fun close(code: Int, reason: String): Boolean {
+        var closeRequest: Pair<Int, String>? = null
+        val target = synchronized(lifecycleLock) {
+            if (terminal || forceCancelled) {
+                null
+            } else {
+                if (pendingClose == null) {
+                    pendingClose = code to reason
+                }
+                webSocket?.takeIf { !closeEnqueued }?.also {
+                    closeEnqueued = true
+                    closeRequest = pendingClose
+                }
+            }
+        }
+        if (target == null) {
+            return true
+        }
+        return runCatching {
+            target.close(closeRequest?.first ?: code, closeRequest?.second ?: reason)
+        }.getOrDefault(false)
+    }
+
+    fun tryScheduleCancellation(): Boolean = synchronized(lifecycleLock) {
+        if (terminal || forceCancelled || cancellationScheduled) {
+            false
+        } else {
+            cancellationScheduled = true
+            true
+        }
+    }
+
+    fun forceCancelIfPending(): Boolean {
+        var cancelled = false
+        val target = synchronized(lifecycleLock) {
+            if (terminal || forceCancelled) {
+                null
+            } else {
+                forceCancelled = true
+                terminal = true
+                cancelled = true
+                webSocket
+            }
+        }
+        target?.cancel()
+        return cancelled
     }
 
     fun toJson(): JSONObject = JSONObject()
@@ -8063,6 +8272,36 @@ private fun parseProtocols(value: Any?): List<String> {
         is String -> value.split(",").mapNotNull { it.trim().takeIf(String::isNotBlank) }
         else -> emptyList()
     }
+}
+
+private fun controlledWebSocketCloseValidationError(code: Int, reason: String): String? {
+    return when {
+        code !in 1000..4999 -> "WebSocket close code must be in range [1000, 5000): $code"
+        code in 1004..1006 || code in 1015..2999 -> "WebSocket close code is reserved and may not be used: $code"
+        reason.toByteArray(Charsets.UTF_8).size > 123 -> "WebSocket close reason must not exceed 123 UTF-8 bytes."
+        else -> null
+    }
+}
+
+private fun controlledWebSocketTruncateCloseReason(reason: String): String {
+    if (reason.toByteArray(Charsets.UTF_8).size <= 123) {
+        return reason
+    }
+    val result = StringBuilder()
+    var index = 0
+    var byteCount = 0
+    while (index < reason.length) {
+        val codePoint = reason.codePointAt(index)
+        val value = String(Character.toChars(codePoint))
+        val valueBytes = value.toByteArray(Charsets.UTF_8).size
+        if (byteCount + valueBytes > 123) {
+            break
+        }
+        result.append(value)
+        byteCount += valueBytes
+        index += Character.charCount(codePoint)
+    }
+    return result.toString()
 }
 
 private fun parsePositiveLong(value: Any?, fallback: Long): Long {
