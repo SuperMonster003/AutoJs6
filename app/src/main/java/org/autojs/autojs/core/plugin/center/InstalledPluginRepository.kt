@@ -10,6 +10,7 @@ import androidx.core.os.BundleCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
@@ -80,6 +81,8 @@ class InstalledPluginRepository {
                     Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = Pinyin4jPluginHost.ACTION_PINYIN4J)
                 } + MediainfoPluginHost.discover(context).map {
                     Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = MediainfoPluginHost.ACTION_MEDIAINFO)
+                } + ExplorerActionPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = ExplorerActionPluginHost.ACTION_EXPLORER_ACTION)
                 }
                 ).mergeByPackage()
 

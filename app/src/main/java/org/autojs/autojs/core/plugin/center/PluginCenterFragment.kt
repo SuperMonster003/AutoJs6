@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
@@ -912,6 +913,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             PinyinPluginHost.ACTION_PINYIN -> PinyinPluginHost.probe(contextRef, item.packageName)
             Pinyin4jPluginHost.ACTION_PINYIN4J -> Pinyin4jPluginHost.probe(contextRef, item.packageName)
             MediainfoPluginHost.ACTION_MEDIAINFO -> MediainfoPluginHost.probe(contextRef, item.packageName)
+            ExplorerActionPluginHost.ACTION_EXPLORER_ACTION -> ExplorerActionPluginHost.probe(contextRef, item.packageName)
             ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             OfflineDocsPluginContract.ACTION -> withContext(Dispatchers.IO) {
                 OfflineDocsPluginHost.probe(contextRef, item.packageName)

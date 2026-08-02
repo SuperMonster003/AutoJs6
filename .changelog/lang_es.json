@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/01",
+      "released_date": "2026/08/02",
       "feature": [
         "Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva \"nodejs\" o extensiones como .node.js/.cjs/.mjs",
         "El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)",
@@ -14,6 +14,7 @@
         "La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias",
         "El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversión de texto/información multimedia y más",
         "El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión",
+        "El explorador de archivos admite extensiones de plugin Explorer Action de solo lectura para un archivo y carga dinámicamente sus acciones en el menú adicional de la página principal de archivos",
         "El Centro de plugins ofrece una página de configuración global y una página de instrucciones",
         "El Centro de plugins admite el montaje automático de plugins SDK",
         "El Centro de plugins admite la ordenación por prioridad de múltiples variantes",

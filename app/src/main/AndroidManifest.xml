@@ -38,6 +38,12 @@
             <action android:name="org.autojs.plugin.INFO" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.EXPLORER_ACTION" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.EXPLORER_ACTION_EXECUTE" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.APK_BUILDER" />
         </intent>
         <intent>

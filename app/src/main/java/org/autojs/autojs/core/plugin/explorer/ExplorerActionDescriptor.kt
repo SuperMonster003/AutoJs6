@@ -1,0 +1,19 @@
+package org.autojs.autojs.core.plugin.explorer
+
+internal data class ExplorerActionDescriptor(
+    val id: String,
+    val labelResourceName: String?,
+    val labelFallback: String?,
+    val activityClassName: String,
+    val priority: Int,
+    val targetKind: Int,
+    val accessMode: Int,
+    val placement: Int,
+    val mimeTypes: Set<String>,
+    val extensions: Set<String>,
+)
+
+internal data class ExplorerActionTarget(
+    val mimeType: String,
+    val extension: String,
+)

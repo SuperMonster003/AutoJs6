@@ -10,10 +10,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.marginBottom
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.launch
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionRegistry
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.script.Scripts
@@ -67,6 +72,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mExplorerView = binding.itemList.also { explorerView ->
+            explorerView.setPluginActionProvider(ExplorerActionRegistry)
             explorerView.setOnItemClickListener(object : ExplorerView.OnItemClickListener {
                 override fun onItemClick(view: View?, item: ExplorerItem) {
                     when {
@@ -84,6 +90,11 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
                     handleSelectionToolbarStateChanged(shown)
                 }
             })
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ExplorerActionRegistry.refresh(requireContext())
+            }
         }
         (activity as? MainActivity)?.apply {
             val tabLayout: TabLayout = findViewById(R.id.tab)
@@ -285,6 +296,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     override fun onDestroyView() {
         super.onDestroyView()
         mExplorerView?.setOnSelectionToolbarStateChangeListener(null)
+        mExplorerView?.setPluginActionProvider(null)
         restoreFabAfterSelectionToolbar()
         mExplorerView = null
         mFloatingActionMenu = null

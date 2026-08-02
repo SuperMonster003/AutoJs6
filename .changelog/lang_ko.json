@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/01",
+      "released_date": "2026/08/02",
       "feature": [
         "Node.js 24.5.0 스크립트 런타임, \"nodejs\" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원",
         "Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원",
@@ -14,6 +14,7 @@
         "앱 패키징 기능은 Node.js 스크립트 프로젝트를 지원하고 필요한 런타임 라이브러리를 자동 포함",
         "플러그인 시스템에서 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/텍스트 변환/미디어 정보 등의 확장 API 지원",
         "플러그인 시스템에서 오프라인 프로젝트 문서 확장 인터페이스 지원",
+        "파일 관리자가 단일 파일 읽기 전용 Explorer Action 플러그인 확장을 지원하고 기본 파일 페이지의 더보기 메뉴에 플러그인 작업을 동적으로 로드",
         "플러그인 센터에서 전역 설정 페이지 및 사용 설명 페이지 지원",
         "플러그인 센터에서 SDK 플러그인 자동 마운트 기능 지원",
         "플러그인 센터에서 다중 변형의 우선순위 정렬 기능 지원",

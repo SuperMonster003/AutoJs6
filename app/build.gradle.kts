@@ -606,6 +606,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Editor API
     implementation(project(":plugin-api:editor-api"))
 
+    // Plugin API: Explorer Action API
+    implementation(project(":plugin-api:explorer-action-api"))
+
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
 

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/01
+###### 2026/08/02
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -19,6 +19,7 @@
 * `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
 * `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversion de texte/informations multimédias et plus encore
 * `Fonctionnalité` Le système de plugins prend en charge une interface d'extension pour la documentation hors ligne du projet
+* `Fonctionnalité` Le gestionnaire de fichiers prend en charge les extensions de plugin Explorer Action en lecture seule pour un seul fichier et charge dynamiquement leurs actions dans le menu supplémentaire de la page principale des fichiers
 * `Fonctionnalité` Le Centre des plugins propose une page de paramètres globaux et une page d'instructions
 * `Fonctionnalité` Le Centre des plugins prend en charge le montage automatique des plugins SDK
 * `Fonctionnalité` Le Centre des plugins prend en charge le tri par priorité de plusieurs variantes

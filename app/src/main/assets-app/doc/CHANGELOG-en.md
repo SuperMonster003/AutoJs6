@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/01
+###### 2026/08/02
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -19,6 +19,7 @@
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/text conversion/media information and more
 * `Feature` Plugin system supports an extension interface for offline project documentation
+* `Feature` File manager supports single-file read-only Explorer Action plugin extensions and dynamically loads their actions in the overflow menu of the main file page
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting

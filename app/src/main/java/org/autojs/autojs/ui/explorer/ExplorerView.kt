@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -171,6 +172,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private var mOnItemOperateListener: OnItemOperateListener? = null
     private var mOnSelectionToolbarStateChangeListener: OnSelectionToolbarStateChangeListener? = null
+    private var mPluginActionProvider: ExplorerPluginActionProvider? = null
 
     private val mPageStateHistory = Stack<ExplorerPageState>()
     private var mDirectorySpanSize = 2
@@ -766,6 +768,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener?) {
         this.onItemClickListener = onItemClickListener
+    }
+
+    internal fun setPluginActionProvider(provider: ExplorerPluginActionProvider?) {
+        mPluginActionProvider = provider
     }
 
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage) {
@@ -1529,7 +1535,35 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             if (!mExplorerItem.path.startsWith(samplePath)) {
                 menu.removeItem(R.id.action_reset)
             }
-            popupMenu.setOnMenuItemClickListener(this@ExplorerView)
+            val pluginMenuItems = mutableMapOf<Int, org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction>()
+            runCatching { mPluginActionProvider?.actionsFor(mExplorerItem).orEmpty() }
+                .getOrElse { error ->
+                    Log.w(LOG_TAG, "Failed to resolve Explorer plugin actions", error)
+                    emptyList()
+                }
+                .forEachIndexed { index, action ->
+                    val menuId = View.generateViewId()
+                    menu.add(
+                        Menu.NONE,
+                        menuId,
+                        PLUGIN_ACTION_MENU_ORDER_START + index,
+                        action.menuTitle,
+                    )
+                    pluginMenuItems[menuId] = action
+                }
+            popupMenu.setOnMenuItemClickListener { menuItem ->
+                val pluginAction = pluginMenuItems[menuItem.itemId]
+                if (pluginAction == null) {
+                    return@setOnMenuItemClickListener this@ExplorerView.onMenuItemClick(menuItem)
+                }
+                val provider = mPluginActionProvider ?: return@setOnMenuItemClickListener false
+                provider.launch(context, mExplorerItem, pluginAction)
+                    .onSuccess { notifyItemOperated() }
+                    .onFailure { error ->
+                        ViewUtils.showToast(context, error.message ?: error.toString(), true)
+                    }
+                true
+            }
             popupMenu.show()
         }
 
@@ -1808,6 +1842,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     companion object {
         private const val LOG_TAG = "ExplorerView"
+        private const val PLUGIN_ACTION_MENU_ORDER_START = 1_000
         private const val SELECTION_TOOLBAR_CONTENT_HEIGHT_DP = 81F
         private const val SELECTION_TOOLBAR_SHOW_DURATION = 120L
         private const val SELECTION_TOOLBAR_HIDE_DURATION = 90L

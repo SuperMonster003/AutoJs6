@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/01
+###### 2026/08/02
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -19,6 +19,7 @@
 * `Nuevo` La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias
 * `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversión de texto/información multimedia y más
 * `Nuevo` El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión
+* `Nuevo` El explorador de archivos admite extensiones de plugin Explorer Action de solo lectura para un archivo y carga dinámicamente sus acciones en el menú adicional de la página principal de archivos
 * `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
 * `Nuevo` El Centro de plugins admite el montaje automático de plugins SDK
 * `Nuevo` El Centro de plugins admite la ordenación por prioridad de múltiples variantes

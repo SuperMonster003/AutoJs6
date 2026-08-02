@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/01
+###### 2026/08/02
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -19,6 +19,7 @@
 * `新增` 打包功能支持 Node.js 腳本項目, 並自動包含所需運行庫
 * `新增` 插件系統支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本轉換/媒體信息等擴展接口
 * `新增` 插件系統支持離線項目文檔擴展接口
+* `新增` 文件管理器支持單文件只讀 Explorer Action 插件擴展接口, 並在主文件頁面的更多菜單中動態加載插件動作
 * `新增` 插件中心支持全局設置頁面及使用說明頁面
 * `新增` 插件中心支持 SDK 插件自動掛載功能
 * `新增` 插件中心支持多變體優先級排序功能

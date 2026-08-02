@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
@@ -23,6 +24,7 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
+import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
@@ -862,6 +864,7 @@ class PluginCenterViewModel : ViewModel() {
             "pinyin" to PinyinPluginHost.ACTION_PINYIN,
             "pinyin4j" to Pinyin4jPluginHost.ACTION_PINYIN4J,
             "mediainfo" to MediainfoPluginHost.ACTION_MEDIAINFO,
+            ExplorerActionPluginIds.ENGINE to ExplorerActionPluginHost.ACTION_EXPLORER_ACTION,
             ImageQuantPluginContract.ENGINE to ImageQuantPluginContract.ACTION_RUNTIME,
             OfflineDocsPluginContract.ENGINE to OfflineDocsPluginContract.ACTION,
             OpenCvPluginContract.ENGINE to OpenCvPluginContract.ACTION_RUNTIME,
