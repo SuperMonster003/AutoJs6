@@ -140,6 +140,7 @@
         "插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能",
         "文件管理器将媒体详情查询整合为单次 MediaInfo 快照, 减少 Binder 调用及等待时间",
         "文件外部查看与媒体播放降级仅授予 URI 读取权限",
+        "统一文件管理器默认点击, 主要按钮, 媒体详情播放和 overflow 菜单插件动作, 通过显式主文件页界面策略提供确定性的单次降级",
         "Ace WebView 运行时/JavaScript bridge/内置语言服务/静态资源完成插件化, 降低宿主 APK 耦合并支持独立安装及更新",
         "项目离线文档完成插件化, 降低宿主 APK 体积并支持独立安装及更新",
         "离线项目文档首次加载的文件清单解析及完整 SHA-256 校验移至后台线程, 避免阻塞界面",

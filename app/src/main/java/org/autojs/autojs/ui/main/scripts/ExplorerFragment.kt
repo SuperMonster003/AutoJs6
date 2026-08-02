@@ -19,6 +19,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.launch
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionRegistry
+import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.script.Scripts
@@ -72,7 +73,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mExplorerView = binding.itemList.also { explorerView ->
-            explorerView.setPluginActionProvider(ExplorerActionRegistry)
+            explorerView.setPluginActionProvider(ExplorerSurface.MAIN_FILES, ExplorerActionRegistry)
             explorerView.setOnItemClickListener(object : ExplorerView.OnItemClickListener {
                 override fun onItemClick(view: View?, item: ExplorerItem) {
                     when {
@@ -297,7 +298,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     override fun onDestroyView() {
         super.onDestroyView()
         mExplorerView?.setOnSelectionToolbarStateChangeListener(null)
-        mExplorerView?.setPluginActionProvider(null)
+        mExplorerView?.setPluginActionProvider(ExplorerSurface.UNSPECIFIED, null)
         restoreFabAfterSelectionToolbar()
         mExplorerView = null
         mFloatingActionMenu = null

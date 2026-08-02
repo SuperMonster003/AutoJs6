@@ -13,7 +13,6 @@ import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.explorer.api.ExplorerActionIntentExtras
-import org.autojs.plugin.explorer.api.ExplorerActionIntentValues
 import org.autojs.plugin.explorer.api.ExplorerActionPluginActions
 import org.autojs.plugin.explorer.api.ExplorerActionPluginPermissions
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
@@ -39,9 +38,12 @@ internal object ExplorerActionLauncher {
 
     fun launch(
         context: Context,
+        surface: ExplorerSurface,
         item: ExplorerItem,
         action: ResolvedExplorerAction,
     ): Result<Unit> = runCatching {
+        val sourceSurface = ExplorerActionPolicy.sourceSurfaceValue(surface)
+            ?: error("Explorer Action surface is not allowed: $surface")
         val component = resolveAndValidateActivity(
             context = context,
             packageName = action.packageName,
@@ -72,7 +74,7 @@ internal object ExplorerActionLauncher {
             putExtra(ExplorerActionIntentExtras.HOST_PACKAGE_NAME, context.packageName)
             putExtra(ExplorerActionIntentExtras.HOST_VERSION_NAME, BuildConfig.VERSION_NAME)
             putExtra(ExplorerActionIntentExtras.HOST_VERSION_CODE, BuildConfig.VERSION_CODE.toLong())
-            putExtra(ExplorerActionIntentExtras.SOURCE_SURFACE, ExplorerActionIntentValues.SOURCE_SURFACE_MAIN)
+            putExtra(ExplorerActionIntentExtras.SOURCE_SURFACE, sourceSurface)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
             if (context !is Activity) {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

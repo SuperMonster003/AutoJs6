@@ -17,7 +17,6 @@ import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.explorer.api.ExplorerActionCapabilityKeys
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
-import org.autojs.plugin.explorer.api.ExplorerActionValues
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicReference
@@ -81,15 +80,13 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         )
     }
 
-    override fun actionsFor(item: ExplorerItem): List<ResolvedExplorerAction> {
+    override fun actionsFor(
+        surface: ExplorerSurface,
+        entryPoint: ExplorerActionEntryPoint,
+        item: ExplorerItem,
+    ): List<ResolvedExplorerAction> {
         return matchingActionsFor(item).filter { action ->
-            action.descriptor.placement == ExplorerActionValues.PLACEMENT_OVERFLOW
-        }
-    }
-
-    override fun primaryActionFor(item: ExplorerItem): ResolvedExplorerAction? {
-        return matchingActionsFor(item).firstOrNull { action ->
-            action.descriptor.placement == ExplorerActionValues.PLACEMENT_PRIMARY
+            ExplorerActionPolicy.allows(surface, entryPoint, action.descriptor)
         }
     }
 
@@ -107,16 +104,24 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
 
     override fun launch(
         context: Context,
+        surface: ExplorerSurface,
+        entryPoint: ExplorerActionEntryPoint,
         item: ExplorerItem,
         action: ResolvedExplorerAction,
     ): Result<Unit> {
+        if (!ExplorerActionPolicy.allows(surface, entryPoint, action.descriptor)) {
+            return Result.failure(IllegalArgumentException("Explorer Action is not allowed on $surface from $entryPoint"))
+        }
+        if (action !in matchingActionsFor(item)) {
+            return Result.failure(IllegalStateException("Explorer Action no longer matches the target: ${action.descriptor.id}"))
+        }
         if (!PluginEnableStore.isEnabled(context, action.packageName, true)) {
             return Result.failure(IllegalStateException("Explorer Action plugin is disabled: ${action.packageName}"))
         }
         if (!PluginTrustManager.isAuthorized(context, action.packageName)) {
             return Result.failure(IllegalStateException("Explorer Action plugin is not authorized: ${action.packageName}"))
         }
-        return ExplorerActionLauncher.launch(context, item, action)
+        return ExplorerActionLauncher.launch(context, surface, item, action)
     }
 
     private fun isAvailablePlugin(

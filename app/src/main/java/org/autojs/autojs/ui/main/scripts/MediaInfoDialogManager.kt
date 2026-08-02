@@ -22,7 +22,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.core.plugin.explorer.ExplorerActionRegistry
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
@@ -46,7 +45,7 @@ object MediaInfoDialogManager {
         context: Context,
         explorerItem: ExplorerItem,
         builderApplier: (MaterialDialog.Builder.() -> Unit)? = null,
-    ) = showMediaInfoDialog(context, explorerItem, builderApplier, null)
+    ) = showMediaInfoDialog(context, explorerItem, builderApplier, null, null)
 
     @JvmStatic
     @SuppressLint("SetTextI18n")
@@ -55,6 +54,7 @@ object MediaInfoDialogManager {
         explorerItem: ExplorerItem,
         builderApplier: (MaterialDialog.Builder.() -> Unit)?,
         onDismissListener: DialogInterface.OnDismissListener?,
+        onPlayRequested: (() -> Boolean)? = null,
     ) {
         val binding = MediaFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
 
@@ -97,7 +97,7 @@ object MediaInfoDialogManager {
                 val result = withContext(Dispatchers.IO) {
                     loadMediaInfo(context, File(explorerItem.path))
                 }
-                renderMediaInfo(dialog, binding, context, explorerItem, result)
+                renderMediaInfo(dialog, binding, context, explorerItem, result, onPlayRequested)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
@@ -108,6 +108,7 @@ object MediaInfoDialogManager {
                     context = context,
                     explorerItem = explorerItem,
                     failureMessage = MediaInfoFailureMessage.from(error),
+                    onPlayRequested = onPlayRequested,
                 )
             }
         }
@@ -161,6 +162,7 @@ object MediaInfoDialogManager {
         context: Context,
         explorerItem: ExplorerItem,
         result: MediaInfoLoadResult,
+        onPlayRequested: (() -> Boolean)?,
     ) {
         val data = result.data
         val dialogKind = data.resolveDialogKind(explorerItem.isMediaMenu)
@@ -168,11 +170,11 @@ object MediaInfoDialogManager {
         when (dialogKind) {
             MediaInfoDialogKind.VIDEO -> {
                 dialog.setIcon(R.drawable.ic_movie)
-                setDialogPlayable(dialog, context, explorerItem)
+                setDialogPlayable(dialog, context, explorerItem, onPlayRequested)
             }
             MediaInfoDialogKind.AUDIO -> {
                 dialog.setIcon(R.drawable.ic_voice_note)
-                setDialogPlayable(dialog, context, explorerItem)
+                setDialogPlayable(dialog, context, explorerItem, onPlayRequested)
             }
             MediaInfoDialogKind.MEDIA_MENU -> {
                 dialog.setIcon(R.drawable.ic_media_menu)
@@ -215,6 +217,7 @@ object MediaInfoDialogManager {
         context: Context,
         explorerItem: ExplorerItem,
         failureMessage: String,
+        onPlayRequested: (() -> Boolean)?,
     ) {
         val data = MediaInfoDialogData()
         val result = MediaInfoLoadResult(
@@ -223,7 +226,7 @@ object MediaInfoDialogManager {
             failureMessage = failureMessage,
         )
         try {
-            renderMediaInfo(dialog, binding, context, explorerItem, result)
+            renderMediaInfo(dialog, binding, context, explorerItem, result, onPlayRequested)
         } catch (renderError: Exception) {
             Log.e(TAG, "Unable to render MediaInfo failure state", renderError)
             runCatching {
@@ -410,20 +413,22 @@ object MediaInfoDialogManager {
         return if (b == 0) a else greatestCommonDivisor(b, a % b)
     }
 
-    private fun setDialogPlayable(dialog: MaterialDialog, context: Context, explorerItem: ExplorerItem) {
+    private fun setDialogPlayable(
+        dialog: MaterialDialog,
+        context: Context,
+        explorerItem: ExplorerItem,
+        onPlayRequested: (() -> Boolean)?,
+    ) {
         dialog.getActionButton(DialogAction.POSITIVE).let {
             it.text = context.getString(R.string.text_play)
             it.setTextColor(context.getColor(R.color.dialog_button_attraction))
             it.setOnClickListener {
                 dialog.dismiss()
-                val launched = runCatching {
-                    ExplorerActionRegistry.primaryActionFor(explorerItem)?.let { action ->
-                        ExplorerActionRegistry.launch(context, explorerItem, action).getOrThrow()
-                        true
-                    } ?: false
-                }.onFailure { error ->
-                    Log.w(TAG, "Primary media plugin failed; using external player fallback", error)
-                }.getOrDefault(false)
+                val launched = runCatching { onPlayRequested?.invoke() == true }
+                    .onFailure { error ->
+                        Log.w(TAG, "Primary media action failed; using external player fallback", error)
+                    }
+                    .getOrDefault(false)
                 if (!launched) {
                     explorerItem.play(context)
                 }

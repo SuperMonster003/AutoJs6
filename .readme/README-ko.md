@@ -301,6 +301,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 관련 기능 플러그인화
 * `개선` 파일 관리자의 미디어 상세 정보 조회를 단일 MediaInfo 스냅샷으로 통합하여 Binder 호출 및 대기 시간 감소
 * `개선` 외부 파일 보기 및 미디어 재생 대체 경로를 읽기 전용 URI 접근으로 제한
+* `개선` 파일 관리자의 기본 클릭/주요 버튼/미디어 상세 재생/overflow 메뉴 플러그인 작업을 명시적인 기본 파일 페이지 정책으로 통합하고 결정적인 단일 폴백 적용
 * `개선` Ace WebView 런타임/JavaScript bridge/내장 언어 서비스/정적 리소스를 별도로 설치 가능한 플러그인으로 모듈화하여 호스트 APK 결합도를 낮추고 독립 업데이트 지원
 * `개선` 프로젝트 오프라인 문서를 플러그인화하여 호스트 APK 크기를 줄이고 독립 설치 및 업데이트 지원
 * `개선` 오프라인 프로젝트 문서의 최초 로드 시 파일 목록 분석 및 전체 SHA-256 검증을 백그라운드 스레드로 이동하여 UI 차단 방지

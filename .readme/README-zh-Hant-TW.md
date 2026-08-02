@@ -301,6 +301,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `最佳化` 檔案管理器將媒體詳細資訊查詢整合為單次 MediaInfo 快照, 減少 Binder 呼叫及等待時間
 * `最佳化` 檔案外部檢視及媒體播放降級僅授予 URI 讀取權限
+* `最佳化` 統一檔案管理器預設點擊, 主要按鈕, 媒體詳細資訊播放和 overflow 選單外掛動作, 透過明確主檔案頁介面策略提供確定性的單次降級
 * `最佳化` Ace WebView 執行階段/JavaScript bridge/內建語言服務/靜態資源完成外掛化, 降低宿主 APK 耦合並支援獨立安裝及更新
 * `最佳化` 專案離線文件完成外掛化, 降低宿主 APK 體積並支援獨立安裝及更新
 * `最佳化` 離線專案文件首次載入的檔案清單解析及完整 SHA-256 驗證移至背景執行緒, 避免阻塞介面

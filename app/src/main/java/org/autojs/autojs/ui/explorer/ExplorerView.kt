@@ -36,6 +36,9 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionEntryPoint
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionExecution
+import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getInt
@@ -174,6 +177,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private var mOnItemOperateListener: OnItemOperateListener? = null
     private var mOnSelectionToolbarStateChangeListener: OnSelectionToolbarStateChangeListener? = null
     private var mPluginActionProvider: ExplorerPluginActionProvider? = null
+    private var mPluginActionSurface = ExplorerSurface.UNSPECIFIED
 
     private val mPageStateHistory = Stack<ExplorerPageState>()
     private var mDirectorySpanSize = 2
@@ -771,7 +775,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         this.onItemClickListener = onItemClickListener
     }
 
-    internal fun setPluginActionProvider(provider: ExplorerPluginActionProvider?) {
+    internal fun setPluginActionProvider(
+        surface: ExplorerSurface,
+        provider: ExplorerPluginActionProvider?,
+    ) {
+        mPluginActionSurface = if (provider == null) ExplorerSurface.UNSPECIFIED else surface
         mPluginActionProvider = provider
     }
 
@@ -1219,7 +1227,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             Observable.fromCallable {
                 val primaryAction = ExplorerPrimaryActionResolver.resolve(item.type)
                 val pluginPrimaryAction = runCatching {
-                    mPluginActionProvider?.primaryActionFor(item)
+                    mPluginActionProvider?.actionsFor(
+                        mPluginActionSurface,
+                        ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                        item,
+                    )?.firstOrNull()
                 }.onFailure { error ->
                     Log.w(LOG_TAG, "Failed to resolve primary Explorer plugin action", error)
                 }.getOrNull()
@@ -1374,8 +1386,23 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 toggleItemSelection(mExplorerItem)
                 return
             }
-            onItemClickListener?.let {
-                it.onItemClick(itemView, mExplorerItem)
+            val pluginAction = resolvePluginAction(ExplorerActionEntryPoint.DEFAULT_CLICK)
+            if (pluginAction == null) {
+                dispatchHostItemClick()
+                return
+            }
+            if (ExplorerActionExecution.withFallback(
+                    attempt = { launchPluginAction(ExplorerActionEntryPoint.DEFAULT_CLICK, pluginAction) },
+                    fallback = ::dispatchHostItemClick,
+                )
+            ) {
+                notifyItemOperated()
+            }
+        }
+
+        private fun dispatchHostItemClick() {
+            onItemClickListener?.let { listener ->
+                listener.onItemClick(itemView, mExplorerItem)
                 notifyItemOperated()
             }
         }
@@ -1430,7 +1457,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mRequestHostDialogHide?.run()
             val fallback = { openHostPrimaryViewer(action) }
             if (pluginAction != null) {
-                openPrimaryPluginOrFallback(pluginAction, fallback)
+                ExplorerActionExecution.withFallback(
+                    attempt = { launchPluginAction(ExplorerActionEntryPoint.PRIMARY_BUTTON, pluginAction) },
+                    fallback = fallback,
+                )
             } else {
                 fallback()
             }
@@ -1454,21 +1484,36 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             }
         }
 
-        private fun openPrimaryPluginOrFallback(
-            pluginAction: ResolvedExplorerAction,
-            fallback: () -> Unit,
-        ) {
+        private fun resolvePluginAction(
+            entryPoint: ExplorerActionEntryPoint,
+            item: ExplorerItem = mExplorerItem,
+        ): ResolvedExplorerAction? {
             val provider = mPluginActionProvider
-            if (provider == null) {
-                fallback()
-                return
-            }
-            val launched = runCatching {
-                provider.launch(context, mExplorerItem, pluginAction).getOrThrow()
-            }
-                .onFailure { error -> Log.w(LOG_TAG, "Failed to launch primary Explorer plugin action", error) }
-                .isSuccess
-            if (!launched) fallback()
+                ?: return null
+            return runCatching {
+                provider.actionsFor(mPluginActionSurface, entryPoint, item).firstOrNull()
+            }.onFailure { error ->
+                Log.w(LOG_TAG, "Failed to resolve Explorer plugin action from $entryPoint", error)
+            }.getOrNull()
+        }
+
+        private fun launchPluginAction(
+            entryPoint: ExplorerActionEntryPoint,
+            pluginAction: ResolvedExplorerAction,
+            item: ExplorerItem = mExplorerItem,
+        ): Boolean {
+            val provider = mPluginActionProvider ?: return false
+            return runCatching {
+                provider.launch(
+                    context,
+                    mPluginActionSurface,
+                    entryPoint,
+                    item,
+                    pluginAction,
+                ).getOrThrow()
+            }.onFailure { error ->
+                Log.w(LOG_TAG, "Failed to launch Explorer plugin action from $entryPoint", error)
+            }.isSuccess
         }
 
         private fun run() {
@@ -1521,11 +1566,22 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     notifyItemOperated()
                 }
                 mExplorerItem.isMediaMenu || mExplorerItem.isMediaPlayable -> {
-                    MediaInfoDialogManager.showMediaInfoDialog(context, mExplorerItem, null) {
-                        // Restore host dialog after the info dialog is dismissed.
-                        // zh-CN: 信息对话框关闭后恢复宿主对话框.
-                        mRequestHostDialogShow?.run()
-                    }
+                    val mediaItem = mExplorerItem
+                    MediaInfoDialogManager.showMediaInfoDialog(
+                        context = context,
+                        explorerItem = mediaItem,
+                        builderApplier = null,
+                        onDismissListener = {
+                            // Restore host dialog after the info dialog is dismissed.
+                            // zh-CN: 信息对话框关闭后恢复宿主对话框.
+                            mRequestHostDialogShow?.run()
+                        },
+                        onPlayRequested = {
+                            resolvePluginAction(ExplorerActionEntryPoint.MEDIA_INFO_DIALOG, mediaItem)?.let { action ->
+                                launchPluginAction(ExplorerActionEntryPoint.MEDIA_INFO_DIALOG, action, mediaItem)
+                            } == true
+                        },
+                    )
                     notifyItemOperated()
                 }
             }
@@ -1547,6 +1603,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
         @SuppressLint("CheckResult")
         private fun showOptionsMenu() {
+            val actionItem = mExplorerItem
             val popupMenu = PopupMenu(context, mOptions)
             popupMenu.inflate(R.menu.menu_script_options)
             val menu = popupMenu.menu
@@ -1586,7 +1643,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 menu.removeItem(R.id.action_reset)
             }
             val pluginMenuItems = mutableMapOf<Int, org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction>()
-            runCatching { mPluginActionProvider?.actionsFor(mExplorerItem).orEmpty() }
+            runCatching {
+                mPluginActionProvider?.actionsFor(
+                    mPluginActionSurface,
+                    ExplorerActionEntryPoint.OVERFLOW_MENU,
+                    actionItem,
+                ).orEmpty()
+            }
                 .getOrElse { error ->
                     Log.w(LOG_TAG, "Failed to resolve Explorer plugin actions", error)
                     emptyList()
@@ -1607,7 +1670,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     return@setOnMenuItemClickListener this@ExplorerView.onMenuItemClick(menuItem)
                 }
                 val provider = mPluginActionProvider ?: return@setOnMenuItemClickListener false
-                provider.launch(context, mExplorerItem, pluginAction)
+                provider.launch(
+                    context,
+                    mPluginActionSurface,
+                    ExplorerActionEntryPoint.OVERFLOW_MENU,
+                    actionItem,
+                    pluginAction,
+                )
                     .onSuccess { notifyItemOperated() }
                     .onFailure { error ->
                         ViewUtils.showToast(context, error.message ?: error.toString(), true)
