@@ -256,6 +256,7 @@ tasks.register<Exec>("verifyNodePhase13PackagedLongRunningService") {
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInteractiveLongRunningInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeExecutionModePolicyInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/AndroidManifest.xml"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     outputs.files(
         nodePhase13ReportDir.map { it.file("phase13-packaged-long-running-service.json") },

@@ -9,6 +9,9 @@ val nodePhase11NativeCppRoot =
         ?: project.layout.projectDirectory.dir("src/main/cpp").asFile).canonicalFile
 val nodePhase11RuntimeJniLibsRoot =
     nodePhase11RuntimeConfig<java.io.File>("nodeJsRuntimeSlotJniLibsSourceDir").canonicalFile
+val nodePhase11R6PluginProjectRoot =
+    (nodePhase11RuntimeConfig<java.io.File?>("nodeJsPluginProjectDir")
+        ?: rootProject.projectDir.parentFile.resolve("AutoJs6-Plugin-NodeJs-Runtime")).canonicalFile
 val nodePhase11UsesPluginNativeBuild =
     nodePhase11RuntimeConfig<String>("effectiveNodeJsRuntimeBackend") == "plugin" &&
             !nodePhase11RuntimeConfig<Boolean>("isNodeJsHostBridgeBuildRequested")
@@ -1364,9 +1367,13 @@ tasks.register<Exec>("verifyNodeFinalCrashGate") {
 
 tasks.register<Exec>("generateNodeFinalPackageManagerStatus") {
     group = "verification"
-    description = "Writes the current Phase 11 package-manager status without failing on Android install blockers."
+    description = "Writes the current Phase 11 package-manager evidence status without failing on blockers."
 
-    dependsOn("generateNodeFinalCapabilityTruth")
+    dependsOn(
+        "verifyNodePackageManagerGate",
+        "verifyNodePhase13AndroidPackageInstallManager",
+        "generateNodeFinalCapabilityTruth",
+    )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-package-manager-gate.js")
     inputs.file(scriptFile)
@@ -1399,7 +1406,7 @@ tasks.register<Exec>("generateNodeFinalPackageManagerStatus") {
 
 tasks.register<Exec>("verifyNodeFinalPackageManagerGate") {
     group = "verification"
-    description = "Strict final package-manager gate; blocked until Android-side package installation is implemented."
+    description = "Strictly verifies the closed Android package-manager boundary and current evidence."
 
     dependsOn(
         "verifyNodePackageManagerGate",
@@ -1437,15 +1444,19 @@ tasks.register<Exec>("verifyNodeFinalPackageManagerGate") {
 
 tasks.register<Exec>("generateNodeFinalLongRunningStatus") {
     group = "verification"
-    description = "Writes the current Phase 11 long-running status without failing on packaged/stress blockers."
+    description = "Writes the current Phase 11 long-running evidence status without failing on blockers."
 
-    dependsOn("generateNodeFinalCapabilityTruth")
-    mustRunAfter("verifyNodePhase10LongRunningActivation")
+    dependsOn(
+        "verifyNodePhase10LongRunningActivation",
+        "verifyNodePhase13PackagedLongRunningService",
+        "generateNodeFinalCapabilityTruth",
+    )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-long-running-gate.js")
     inputs.file(scriptFile)
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-packaged-long-running-service.js"))
     inputs.file(project.layout.projectDirectory.file("node-instrumentation-gates.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("embedded-node-packaging-preflight.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
@@ -1460,7 +1471,10 @@ tasks.register<Exec>("generateNodeFinalLongRunningStatus") {
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedLifecycleStressInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/LONG_RUNNING_SERVICE.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/LONG_RUNNING_ACTIVATION.md"))
-    inputs.files(nodePhase11ReportDir.map { it.file("phase10-long-running-activation.json") })
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("phase10-long-running-activation.json") },
+        nodePhase11ReportDir.map { it.file("phase13-packaged-long-running-service.json") },
+    )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
         nodePhase11ReportDir.map { it.file("final-long-running-gate.md") },
@@ -1479,14 +1493,19 @@ tasks.register<Exec>("generateNodeFinalLongRunningStatus") {
 
 tasks.register<Exec>("verifyNodeFinalLongRunningGate") {
     group = "verification"
-    description = "Strict final long-running gate; blocked until packaged long-running and full stress are implemented."
+    description = "Strictly verifies the closed packaged long-running and full-stress boundaries."
 
-    dependsOn("verifyNodePhase10LongRunningActivation", "generateNodeFinalCapabilityTruth")
+    dependsOn(
+        "verifyNodePhase10LongRunningActivation",
+        "verifyNodePhase13PackagedLongRunningService",
+        "generateNodeFinalCapabilityTruth",
+    )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-long-running-gate.js")
     inputs.file(scriptFile)
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-packaged-long-running-service.js"))
     inputs.file(project.layout.projectDirectory.file("node-instrumentation-gates.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("embedded-node-packaging-preflight.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
@@ -1501,7 +1520,10 @@ tasks.register<Exec>("verifyNodeFinalLongRunningGate") {
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedLifecycleStressInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/LONG_RUNNING_SERVICE.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/LONG_RUNNING_ACTIVATION.md"))
-    inputs.file(nodePhase11ReportDir.map { it.file("phase10-long-running-activation.json") })
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("phase10-long-running-activation.json") },
+        nodePhase11ReportDir.map { it.file("phase13-packaged-long-running-service.json") },
+    )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
         nodePhase11ReportDir.map { it.file("final-long-running-gate.md") },
@@ -1553,7 +1575,7 @@ tasks.register<Exec>("generateNodeFinalMultiInstanceStatus") {
 
 tasks.register<Exec>("verifyNodeFinalMultiInstanceGate") {
     group = "verification"
-    description = "Strict final multi-instance gate; blocked until a second execution slot is promoted."
+    description = "Strictly verifies the closed second execution-slot and multi-instance boundary."
 
     dependsOn("verifyNodeMultiInstanceGate", "generateNodeFinalCapabilityTruth")
 
@@ -1586,10 +1608,9 @@ tasks.register<Exec>("verifyNodeFinalMultiInstanceGate") {
 
 tasks.register<Exec>("generateNodeFinalWorkerDecisionStatus") {
     group = "verification"
-    description = "Writes the current Phase 11 Worker/WASI decision status without failing on unresolved conditional decisions."
+    description = "Writes the current Phase 11 Worker/WASI decision status without failing on blockers."
 
-    dependsOn("generateNodeFinalCapabilityTruth")
-    mustRunAfter("verifyNodePhase10WorkerWasiBoundary")
+    dependsOn("verifyNodePhase10WorkerWasiBoundary", "generateNodeFinalCapabilityTruth")
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-worker-decision-gate.js")
     inputs.file(scriptFile)
@@ -1627,7 +1648,7 @@ tasks.register<Exec>("generateNodeFinalWorkerDecisionStatus") {
 
 tasks.register<Exec>("verifyNodeFinalWorkerDecisionGate") {
     group = "verification"
-    description = "Strict final Worker/WASI decision gate; blocked until conditional decisions are resolved."
+    description = "Strictly verifies the resolved Safe-profile Worker/WASI decisions."
 
     dependsOn("verifyNodePhase10WorkerWasiBoundary", "generateNodeFinalCapabilityTruth")
 
@@ -1670,12 +1691,12 @@ tasks.register<Exec>("generateNodeFinalProviderStatus") {
     group = "verification"
     description = "Writes the current Phase 11 provider status without failing on missing live-provider evidence."
 
-    dependsOn("generateNodeFinalCapabilityTruth")
+    dependsOn("verifyNodePhase10ProviderRegistryV2", "generateNodeFinalCapabilityTruth")
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-provider-gate.js")
     inputs.file(scriptFile)
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-provider-registry-v2.js"))
-    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-instrumentation-gates.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("embedded-node-packaging-preflight.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
@@ -1715,7 +1736,7 @@ tasks.register<Exec>("verifyNodeFinalProviderGate") {
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-provider-gate.js")
     inputs.file(scriptFile)
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-provider-registry-v2.js"))
-    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-instrumentation-gates.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("embedded-node-packaging-preflight.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
@@ -1846,7 +1867,7 @@ tasks.register<Exec>("generateNodeFinalSecurityStatus") {
     group = "verification"
     description = "Writes the current Phase 11 security/fuzz status without failing on policy-blocked final surfaces."
 
-    dependsOn("generateNodeFinalCapabilityTruth")
+    dependsOn("verifyNodePhase10SecurityCorpus", "generateNodeFinalCapabilityTruth")
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-security-gate.js")
     inputs.file(scriptFile)
@@ -1915,12 +1936,13 @@ tasks.register<Exec>("verifyNodeFinalSecurityGate") {
 
 tasks.register<Exec>("generateNodeFinalSoakStatus") {
     group = "verification"
-    description = "Writes the current Phase 11 soak status without failing on missing long-duration soak evidence."
+    description = "Writes the current Phase 11 R6 production-soak evidence status without failing on blockers."
 
-    dependsOn("generateNodeFinalCapabilityTruth")
+    dependsOn("verifyNodeR6ProductionEvidenceContract", "generateNodeFinalCapabilityTruth")
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-soak-gate.js")
     inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/r6/verify-production-evidence.js"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
     inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
@@ -1933,8 +1955,8 @@ tasks.register<Exec>("generateNodeFinalSoakStatus") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/PERFORMANCE.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
     inputs.files(
-        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/quick-soak-8h.json"),
-        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/final-soak-24h.json"),
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/r6-evidence/soak/quick-soak-8h.json"),
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/r6-evidence/soak/final-soak-24h.json"),
     ).optional()
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
@@ -1947,6 +1969,8 @@ tasks.register<Exec>("generateNodeFinalSoakStatus") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--plugin-root",
+        nodePhase11R6PluginProjectRoot.absolutePath,
         "--report-dir",
         nodePhase11ReportDir.get().asFile.absolutePath,
     )
@@ -1954,12 +1978,13 @@ tasks.register<Exec>("generateNodeFinalSoakStatus") {
 
 tasks.register<Exec>("verifyNodeFinalSoakGate") {
     group = "verification"
-    description = "Strict final soak gate; blocked until 24-hour soak evidence exists."
+    description = "Strictly verifies the current R6 8-hour and 24-hour production soak evidence."
 
-    dependsOn("generateNodeFinalCapabilityTruth")
+    dependsOn("verifyNodeR6ProductionEvidenceContract", "generateNodeFinalCapabilityTruth")
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-soak-gate.js")
     inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/r6/verify-production-evidence.js"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
     inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
@@ -1972,8 +1997,8 @@ tasks.register<Exec>("verifyNodeFinalSoakGate") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/PERFORMANCE.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
     inputs.files(
-        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/quick-soak-8h.json"),
-        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/final-soak-24h.json"),
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/r6-evidence/soak/quick-soak-8h.json"),
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/r6-evidence/soak/final-soak-24h.json"),
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
@@ -1986,6 +2011,8 @@ tasks.register<Exec>("verifyNodeFinalSoakGate") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--plugin-root",
+        nodePhase11R6PluginProjectRoot.absolutePath,
         "--report-dir",
         nodePhase11ReportDir.get().asFile.absolutePath,
         "--fail-on-blocked",

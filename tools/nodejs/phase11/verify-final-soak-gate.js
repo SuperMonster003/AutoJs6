@@ -3,6 +3,11 @@
 
 const fs = require("fs");
 const path = require("path");
+const {
+  SOAK_REQUIREMENTS,
+  currentIdentity,
+  evaluateSoakReport,
+} = require("../r6/verify-production-evidence.js");
 
 const FILES = {
   finalGate: "app/node-phase11-gate.gradle.kts",
@@ -16,6 +21,7 @@ const FILES = {
   performanceDoc: "docs/nodejs/PERFORMANCE.md",
   finalDefinition: "docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md",
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
+  r6Verifier: "tools/nodejs/r6/verify-production-evidence.js",
 };
 
 const STRESS_ANCHOR_CHECKS = [
@@ -33,13 +39,11 @@ const STRESS_ANCHOR_CHECKS = [
 const REQUIRED_SOAK_REPORTS = [
   {
     id: "quick_soak_8h",
-    relative: "build/reports/nodejs/final-soak/quick-soak-8h.json",
-    minDurationHours: 8,
+    canonicalId: "quick-soak-8h",
   },
   {
     id: "final_soak_24h",
-    relative: "build/reports/nodejs/final-soak/final-soak-24h.json",
-    minDurationHours: 24,
+    canonicalId: "final-soak-24h",
   },
 ];
 
@@ -51,27 +55,30 @@ function main() {
     Object.entries(FILES).map(([id, relative]) => [id, read(path.join(repoRoot, relative))]),
   );
   const registry = readJsonIfExists(path.join(repoRoot, FILES.blockerRegistry)) || { blockers: [] };
+  const pluginRoot = resolvePluginRoot(repoRoot, options.pluginRoot);
+  const evidenceRoot = path.join(repoRoot, "build/reports/nodejs/r6-evidence");
+  const identity = currentIdentity(repoRoot, pluginRoot);
   const anchorChecks = STRESS_ANCHOR_CHECKS.map(([id, fileId, token]) => ({
     id,
     file: FILES[fileId],
     token,
     present: files[fileId].includes(token),
   }));
-  const soakReports = REQUIRED_SOAK_REPORTS.map((entry) => readSoakReport(repoRoot, entry));
+  const soakReports = REQUIRED_SOAK_REPORTS.map((entry) => readSoakReport(
+    repoRoot,
+    evidenceRoot,
+    identity,
+    entry,
+  ));
   const registryBlocker = registryBlockerEntry(registry, "full_heavy_resource_stress");
   const blockers = [];
   anchorChecks
     .filter((entry) => !entry.present)
     .forEach((entry) => blockers.push("missing soak/stress anchor: " + entry.id));
-  soakReports
-    .filter((entry) => !entry.available)
-    .forEach((entry) => blockers.push("missing required soak evidence: " + entry.id));
-  soakReports
-    .filter((entry) => entry.available && !entry.durationReady)
-    .forEach((entry) => blockers.push(`soak evidence duration is below ${entry.minDurationHours}h: ${entry.id}`));
-  soakReports
-    .filter((entry) => entry.available && !entry.metricsClean)
-    .forEach((entry) => blockers.push("soak evidence reports leaks, orphan process, or unrecoverable runtime: " + entry.id));
+  identity.blockers.forEach((blocker) => blockers.push("R6 source identity: " + blocker));
+  soakReports.forEach((entry) => {
+    entry.blockers.forEach((blocker) => blockers.push(`${entry.id}: ${blocker}`));
+  });
   if (registryBlocker.open) {
     blockers.push(`${registryBlocker.id}: ${registryBlocker.currentEvidence}`);
   }
@@ -86,6 +93,13 @@ function main() {
     anchors: {
       status: anchorChecks.every((entry) => entry.present) ? "ready" : "missing_evidence",
       checks: anchorChecks,
+    },
+    canonicalContract: {
+      verifier: FILES.r6Verifier,
+      evidenceRoot: relativePath(repoRoot, evidenceRoot),
+      pluginRoot: relativePath(repoRoot, pluginRoot),
+      identity,
+      identityReady: identity.blockers.length === 0,
     },
     soakReports,
     registryBlockers: [registryBlocker],
@@ -106,49 +120,48 @@ function main() {
   }
 }
 
-function readSoakReport(repoRoot, requirement) {
-  const file = path.join(repoRoot, requirement.relative);
-  const json = readJsonIfExists(file);
-  const durationHours = durationHoursFrom(json);
-  const metricsClean = json ? metricsAreClean(json) : false;
+function readSoakReport(repoRoot, evidenceRoot, identity, requirement) {
+  const canonicalRequirement = SOAK_REQUIREMENTS.find((entry) => entry.id === requirement.canonicalId);
+  if (!canonicalRequirement) {
+    return {
+      id: requirement.id,
+      canonicalId: requirement.canonicalId,
+      path: "missing",
+      minDurationHours: 0,
+      available: false,
+      durationHours: 0,
+      durationReady: false,
+      metricsClean: false,
+      blockers: [`canonical R6 soak requirement is missing: ${requirement.canonicalId}`],
+      ready: false,
+    };
+  }
+  const canonical = evaluateSoakReport(evidenceRoot, canonicalRequirement, identity, repoRoot);
   return {
     id: requirement.id,
-    path: requirement.relative,
-    minDurationHours: requirement.minDurationHours,
-    available: Boolean(json),
-    durationHours,
-    durationReady: durationHours >= requirement.minDurationHours,
-    metricsClean,
-    ready: Boolean(json) && durationHours >= requirement.minDurationHours && metricsClean,
+    canonicalId: canonicalRequirement.id,
+    kind: canonicalRequirement.kind,
+    path: canonical.path,
+    minDurationHours: canonicalRequirement.minDurationHours,
+    available: canonical.available,
+    durationHours: canonical.durationHours,
+    durationReady: canonical.durationHours >= canonicalRequirement.minDurationHours,
+    samples: canonical.samples,
+    metricsClean: canonical.ready,
+    sha256: canonical.sha256 || null,
+    blockers: canonical.blockers,
+    ready: identity.blockers.length === 0 && canonical.ready,
   };
 }
 
-function durationHoursFrom(json) {
-  if (!json) return 0;
-  if (typeof json.durationHours === "number") return json.durationHours;
-  if (typeof json.durationMs === "number") return json.durationMs / 3600000;
-  const start = Date.parse(json.startedAt || json.startTime || "");
-  const end = Date.parse(json.completedAt || json.endTime || "");
-  if (Number.isFinite(start) && Number.isFinite(end) && end >= start) {
-    return (end - start) / 3600000;
-  }
-  return 0;
-}
-
-function metricsAreClean(json) {
-  if (json.decision && json.decision.status && !["ready", "passed", "completed"].includes(json.decision.status)) {
-    return false;
-  }
-  if (json.status && !["ready", "passed", "completed"].includes(json.status)) {
-    return false;
-  }
-  const flags = [
-    json.monotonicLeaks,
-    json.orphanProcess,
-    json.unrecoverableRuntime,
-    json.leakDetected,
+function resolvePluginRoot(repoRoot, explicit) {
+  if (explicit) return path.resolve(explicit);
+  const workspace = path.dirname(repoRoot);
+  const candidates = [
+    path.join(workspace, "AutoJs6-Plugin-NodeJs-Runtime"),
+    path.join(workspace, "autojs6-plugin-nodejs"),
   ];
-  return flags.every((value) => value !== true);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
 }
 
 function registryBlockerEntry(registry, id) {
@@ -233,7 +246,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-final-soak-gate.js [--repo-root dir] [--report-dir dir] [--fail-on-blocked]");
+      console.log("Usage: node verify-final-soak-gate.js [--repo-root dir] [--plugin-root dir] [--report-dir dir] [--fail-on-blocked]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

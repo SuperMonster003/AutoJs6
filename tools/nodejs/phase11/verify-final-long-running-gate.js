@@ -6,6 +6,7 @@ const path = require("path");
 
 const FILES = {
   phase10Report: "build/reports/nodejs/phase10-long-running-activation.json",
+  phase13Report: "build/reports/nodejs/phase13-packaged-long-running-service.json",
   phase10Tool: "tools/nodejs/phase10/verify-long-running-activation.js",
   instrumentationGates: "app/node-instrumentation-gates.gradle.kts",
   packagingPreflight: "app/embedded-node-packaging-preflight.gradle.kts",
@@ -21,7 +22,6 @@ const FILES = {
   lifecycleStressTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedLifecycleStressInstrumentationTest.kt",
   designDoc: "docs/nodejs/design/LONG_RUNNING_SERVICE.md",
   phase10Doc: "docs/nodejs/reports/phase10/LONG_RUNNING_ACTIVATION.md",
-  phase13PackagedReport: "docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md",
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
 };
 
@@ -45,8 +45,6 @@ const EVIDENCE_CHECKS = [
   ["lifecycle_queue_stress", "lifecycleStressTest", "queuedExecutionRunsAfterActiveExecution"],
   ["packaged_doc_boundary", "designDoc", "packaged long-running launch surface"],
   ["phase10_doc_boundary", "phase10Doc", "Packaged long-running service mode"],
-  ["phase13_packaged_partial", "phase13PackagedReport", "Status: partial packaged dispatch, metadata/disclosure policy, and Stop/crash"],
-  ["phase13_packaged_stop_task_removal", "phase13PackagedReport", "The same focused smoke removes the packaged Activity task"],
 ];
 
 const REQUIRED_PHASE10_ITEMS = [
@@ -72,6 +70,7 @@ function main() {
     Object.entries(FILES).map(([id, relative]) => [id, read(path.join(repoRoot, relative))]),
   );
   const phase10Report = readJsonIfExists(path.join(repoRoot, FILES.phase10Report));
+  const phase13Report = readJsonIfExists(path.join(repoRoot, FILES.phase13Report));
   const registry = readJsonIfExists(path.join(repoRoot, FILES.blockerRegistry)) || { blockers: [] };
   const evidenceChecks = EVIDENCE_CHECKS.map(([id, fileId, token]) => ({
     id,
@@ -94,7 +93,41 @@ function main() {
   const packagedLongRunningRegistryOpen = registryBlockers.some((entry) => (
     entry.id === "packaged_long_running" && entry.open
   ));
+  const phase13Decision = phase13Report && phase13Report.decision ? phase13Report.decision : {};
+  const phase13Status = decisionStatus(phase13Report);
+  const phase13PolicyViolationsPresent = Array.isArray(phase13Report && phase13Report.policyViolations);
+  const phase13BlockersPresent = Array.isArray(phase13Report && phase13Report.blockers);
+  const phase13PolicyViolations = phase13PolicyViolationsPresent
+    ? phase13Report.policyViolations
+    : [];
+  const phase13Blockers = phase13BlockersPresent
+    ? phase13Report.blockers
+    : [];
+  const phase13ContractValid = Boolean(phase13Report &&
+    phase13Report.schema === "autojs6-node-phase13-packaged-long-running-service-v1" &&
+    phase13Report.gate === "verifyNodePhase13PackagedLongRunningService" &&
+    phase13Report.task === "P13-07" &&
+    phase13PolicyViolationsPresent &&
+    phase13BlockersPresent &&
+    phase13Report.blockerRegistry &&
+    phase13Report.blockerRegistry.id === "packaged_long_running" &&
+    phase13Report.blockerRegistry.status === "closed");
+  const phase13PackagedLongRunningReady = !packagedLongRunningRegistryOpen &&
+    phase13ContractValid &&
+    phase13Status === "ready" &&
+    phase13PolicyViolations.length === 0 &&
+    phase13Blockers.length === 0 &&
+    phase13Decision.phase13TaskComplete === true &&
+    phase13Decision.finalBlockerClosable === true &&
+    phase13Decision.packagedDispatchReady === true &&
+    phase13Decision.packagedLifecycleSmokeReady === true &&
+    phase13Decision.packagedStopSmokeReady === true &&
+    phase13Decision.packagedTaskRemovalSmokeReady === true &&
+    phase13Decision.deviceEvidenceReady === true &&
+    phase13Decision.safeNodeProfilePreserved === true;
   const decision = phase10Report && phase10Report.decision ? phase10Report.decision : {};
+  const packagedLongRunningPromoted = decision.packagedLongRunningPromoted === true ||
+    phase13PackagedLongRunningReady;
   const phase10Status = decisionStatus(phase10Report);
   const blockers = [];
   evidenceChecks
@@ -117,8 +150,24 @@ function main() {
   if (decision.automaticRestartEnabled !== false) {
     blockers.push("automatic restart must remain disabled");
   }
-  if (decision.packagedLongRunningPromoted !== true && !packagedLongRunningRegistryOpen) {
+  if (!packagedLongRunningPromoted) {
     blockers.push("packaged long-running service mode is not promoted");
+  }
+  if (!phase13Report) {
+    blockers.push("Phase 13 packaged long-running service report is missing");
+  } else if (!phase13ContractValid) {
+    blockers.push("Phase 13 packaged long-running service report contract is invalid");
+  } else if (phase13Status !== "ready") {
+    blockers.push("Phase 13 packaged long-running service report is not ready: " + phase13Status);
+  }
+  phase13PolicyViolations.forEach((violation) => {
+    blockers.push("Phase 13 packaged long-running policy violation: " + violation);
+  });
+  phase13Blockers.forEach((blocker) => {
+    blockers.push("Phase 13 packaged long-running blocker: " + blocker);
+  });
+  if (phase13Report && !phase13PackagedLongRunningReady) {
+    blockers.push("Phase 13 packaged long-running decision is incomplete");
   }
   registryBlockers
     .filter((entry) => entry.open)
@@ -137,18 +186,28 @@ function main() {
       interactiveLongRunningPromoted: decision.interactiveLongRunningPromoted === true,
       scheduledRunnerPromoted: decision.scheduledRunnerPromoted === true,
       packagedLongRunningPromoted: decision.packagedLongRunningPromoted === true,
+      phase13PackagedLongRunningReady,
       automaticRestartEnabled: decision.automaticRestartEnabled === true,
       policyViolations: Array.isArray(phase10Report && phase10Report.policyViolations)
         ? phase10Report.policyViolations
         : [],
       items: phase10Items,
     },
+    phase13: {
+      reportAvailable: Boolean(phase13Report),
+      reportStatus: phase13Status,
+      contractValid: phase13ContractValid,
+      packagedLongRunningReady: phase13PackagedLongRunningReady,
+      policyViolations: phase13PolicyViolations,
+      blockers: phase13Blockers,
+      decision: phase13Decision,
+    },
     evidence: {
       status: evidenceChecks.every((entry) => entry.present) ? "ready" : "missing_evidence",
       checks: evidenceChecks,
     },
     finalPromotion: {
-      packagedServiceMode: decision.packagedLongRunningPromoted === true ? "promoted" : "blocked",
+      packagedServiceMode: packagedLongRunningPromoted ? "promoted" : "blocked",
       fullHeavyStress: registryBlockers.some((entry) => entry.id === "full_heavy_resource_stress" && entry.open)
         ? "blocked"
         : "ready",
@@ -160,7 +219,7 @@ function main() {
     decision: {
       status: blockers.length === 0 ? "ready" : "blocked",
       interactiveLongRunningReady: decision.interactiveLongRunningPromoted === true,
-      packagedLongRunningAllowed: decision.packagedLongRunningPromoted === true &&
+      packagedLongRunningAllowed: packagedLongRunningPromoted &&
         !registryBlockers.some((entry) => entry.open && entry.id === "packaged_long_running"),
       fullHeavyStressReady: !registryBlockers.some((entry) => entry.open && entry.id === "full_heavy_resource_stress"),
       safeNodeProfilePreserved: true,
@@ -197,6 +256,7 @@ function renderMarkdown(report) {
     "",
     `- Decision: ${report.decision.status}`,
     `- Phase 10 status: ${report.phase10.reportStatus}`,
+    `- Phase 13 packaged long-running status: ${report.phase13.reportStatus}`,
     `- Interactive long-running ready: ${report.decision.interactiveLongRunningReady}`,
     `- Packaged long-running allowed: ${report.decision.packagedLongRunningAllowed}`,
     `- Full heavy stress ready: ${report.decision.fullHeavyStressReady}`,
