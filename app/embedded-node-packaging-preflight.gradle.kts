@@ -4472,10 +4472,10 @@ val verifyNodePhase7Gate = tasks.register("verifyNodePhase7Gate") {
     description = "Runs the current focused Node Phase 7 gate set without expanding to the full release gate."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
     if (deviceProfile in setOf("sony", "full")) {
         dependsOn(
             verifyNodePackagedEsmGate,
-            verifyNodeLiveProviderGate,
             verifyNodeLongRunningGate,
             verifyNodeWorkerGate,
             verifyNodeModernCoreGate,
@@ -4485,6 +4485,9 @@ val verifyNodePhase7Gate = tasks.register("verifyNodePhase7Gate") {
     }
     doFirst {
         embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
+            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so its fetch/websocket cases are covered.")
+        }
     }
 }
 

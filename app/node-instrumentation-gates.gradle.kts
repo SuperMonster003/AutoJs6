@@ -1,6 +1,79 @@
 ﻿import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.io.File
+import java.security.MessageDigest
 import java.time.Instant
+import java.util.UUID
 import javax.xml.parsers.DocumentBuilderFactory
+
+private data class NodeJsLiveProviderApkInspection(
+    val device: String,
+    val kind: String,
+    val logFile: File,
+    val apkFile: File,
+)
+
+abstract class NodeJsInstrumentationOutputLockService :
+    org.gradle.api.services.BuildService<NodeJsInstrumentationOutputLockService.Parameters>,
+    AutoCloseable {
+
+    interface Parameters : org.gradle.api.services.BuildServiceParameters {
+        val lockFile: org.gradle.api.file.RegularFileProperty
+    }
+
+    private var channel: java.nio.channels.FileChannel? = null
+    private var lock: java.nio.channels.FileLock? = null
+
+    @Synchronized
+    fun acquire() {
+        if (lock?.isValid == true) {
+            return
+        }
+        val file = parameters.lockFile.get().asFile
+        file.parentFile.mkdirs()
+        val openedChannel = java.nio.channels.FileChannel.open(
+            file.toPath(),
+            java.nio.file.StandardOpenOption.CREATE,
+            java.nio.file.StandardOpenOption.WRITE,
+        )
+        val acquired = try {
+            openedChannel.tryLock()
+        } catch (_: java.nio.channels.OverlappingFileLockException) {
+            null
+        }
+        if (acquired == null) {
+            openedChannel.close()
+            throw GradleException(
+                "Another Gradle invocation owns the shared app-debug/live-provider evidence outputs. " +
+                        "Wait for it to finish, then retry."
+            )
+        }
+        channel = openedChannel
+        lock = acquired
+    }
+
+    @Synchronized
+    override fun close() {
+        runCatching { lock?.release() }
+        runCatching { channel?.close() }
+        lock = null
+        channel = null
+    }
+}
+
+private fun nodeJsInstrumentationInspectedApk(logFile: File): File {
+    val marker = " dump badging "
+    val command = logFile.useLines { lines ->
+        lines.firstOrNull { line -> line.startsWith("EXECUTING:") && marker in line }
+    } ?: throw IllegalArgumentException("UTP aapt log has no APK inspection command: ${logFile.absolutePath}")
+    val rawPath = command.substringAfter(marker).trim()
+    val unquotedPath = when {
+        rawPath.length >= 2 && rawPath.first() == '"' && rawPath.last() == '"' -> rawPath.substring(1, rawPath.length - 1)
+        rawPath.length >= 2 && rawPath.first() == '\'' && rawPath.last() == '\'' -> rawPath.substring(1, rawPath.length - 1)
+        else -> rawPath
+    }
+    return File(unquotedPath).canonicalFile
+}
 
 private fun nodeJsInstrumentationExtraName(name: String): String = "nodeJsInstrumentation.$name"
 
@@ -12,6 +85,23 @@ private val taskNames = nodeJsInstrumentationInput<List<String>>("taskNames")
 private val nodeJsNetworkExperimentalEnabled = nodeJsInstrumentationInput<Boolean>("nodeJsNetworkExperimentalEnabled")
 private val nodeJsWorkerThreadsExperimentalEnabled = nodeJsInstrumentationInput<Boolean>("nodeJsWorkerThreadsExperimentalEnabled")
 private val nodeJsTestDeviceProfile = nodeJsInstrumentationInput<String?>("nodeJsTestDeviceProfile")
+
+private fun nodeJsInstrumentationSha256(file: File): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().buffered().use { input ->
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val count = input.read(buffer)
+            if (count < 0) {
+                break
+            }
+            digest.update(buffer, 0, count)
+        }
+    }
+    return digest.digest().joinToString("") { byte ->
+        (byte.toInt() and 0xff).toString(16).padStart(2, '0')
+    }
+}
 
 val nodeJsV11AlphaInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
@@ -681,12 +771,104 @@ val nodeJsRequestedFocusedGate = taskNames
 val nodeJsFocusedGateInstrumentationClassArgument = nodeJsRequestedFocusedGate?.let { taskName ->
     nodeJsFocusedGateInstrumentationClasses.getValue(taskName).joinToString(",")
 }
+val nodeJsLiveProviderInvocationId = "${Instant.now().toEpochMilli()}-${UUID.randomUUID()}"
+val nodeJsLiveProviderSourceIdentityFile = layout.buildDirectory.file(
+    "reports/nodejs/live-provider-runs/$nodeJsLiveProviderInvocationId/source-identity.json"
+)
+private val nodeJsInstrumentationOutputLockService = gradle.sharedServices.registerIfAbsent(
+    "nodeJsInstrumentationOutputLock",
+    NodeJsInstrumentationOutputLockService::class,
+) {
+    parameters.lockFile.set(rootProject.layout.projectDirectory.file(".gradle/nodejs/live-provider-output.lock"))
+}
+val acquireNodeJsInstrumentationOutputLock = tasks.register("acquireNodeJsInstrumentationOutputLock") {
+    group = "verification"
+    description = "Exclusively locks shared app-debug and connected-test outputs for this Gradle invocation."
+    outputs.upToDateWhen { false }
+    usesService(nodeJsInstrumentationOutputLockService)
+    doLast {
+        nodeJsInstrumentationOutputLockService.get().acquire()
+    }
+}
+val nodeJsCollectingLiveProviderEvidence = taskNames.any { rawTaskName ->
+    rawTaskName.substringAfterLast(':') in setOf(
+        "generateNodeLiveProviderSummary",
+        "verifyNodeLiveProviderGate",
+    )
+}
+val nodeJsLiveProviderGitOutput: (List<String>) -> String = { arguments ->
+    providers.exec {
+        workingDir(rootProject.projectDir)
+        commandLine(listOf("git") + arguments)
+    }.standardOutput.asText.get().trim()
+}
+val nodeJsCaptureLiveProviderSourceIdentity: () -> Map<String, Any?> = {
+    val commit = nodeJsLiveProviderGitOutput(listOf("rev-parse", "HEAD"))
+    val worktreeStatus = nodeJsLiveProviderGitOutput(listOf("status", "--porcelain=v1", "--untracked-files=all"))
+    linkedMapOf(
+        "hostCommit" to commit,
+        "hostTreeClean" to worktreeStatus.isBlank(),
+    )
+}
+val captureNodeLiveProviderSourceIdentity = tasks.register("captureNodeLiveProviderSourceIdentity") {
+    group = "verification"
+    description = "Captures the host source identity before connected live-provider instrumentation starts."
+
+    dependsOn(acquireNodeJsInstrumentationOutputLock)
+    usesService(nodeJsInstrumentationOutputLockService)
+    outputs.file(nodeJsLiveProviderSourceIdentityFile)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val identityFile = nodeJsLiveProviderSourceIdentityFile.get().asFile
+        identityFile.parentFile.mkdirs()
+        identityFile.writeText(
+            JsonOutput.prettyPrint(
+                JsonOutput.toJson(
+                    linkedMapOf(
+                        "schemaVersion" to 1,
+                        "invocationId" to nodeJsLiveProviderInvocationId,
+                        "capturedAt" to Instant.now().toString(),
+                        "identity" to nodeJsCaptureLiveProviderSourceIdentity(),
+                    ),
+                ),
+            ) + System.lineSeparator(),
+        )
+    }
+}
+tasks.matching { task -> task.name == "connectedAppDebugAndroidTest" }.configureEach {
+    dependsOn(acquireNodeJsInstrumentationOutputLock)
+    usesService(nodeJsInstrumentationOutputLockService)
+    mustRunAfter(captureNodeLiveProviderSourceIdentity)
+}
+tasks.matching { task -> task.name == "clean" }.configureEach {
+    dependsOn(acquireNodeJsInstrumentationOutputLock)
+    usesService(nodeJsInstrumentationOutputLockService)
+}
+tasks.matching { task ->
+    task.name in setOf(
+        "preAppDebugBuild",
+        "preAppDebugAndroidTestBuild",
+        "packageAppDebug",
+        "packageAppDebugAndroidTest",
+    )
+}.configureEach {
+    dependsOn(acquireNodeJsInstrumentationOutputLock)
+    usesService(nodeJsInstrumentationOutputLockService)
+    mustRunAfter(captureNodeLiveProviderSourceIdentity)
+    if (nodeJsCollectingLiveProviderEvidence && name in setOf("packageAppDebug", "packageAppDebugAndroidTest")) {
+        outputs.upToDateWhen { false }
+    }
+}
+
 val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTaskName) {
     group = "verification"
     description = "Writes build/reports/nodejs/live-provider-summary.json from the focused live-provider gate results."
 
-    dependsOn("connectedAppDebugAndroidTest")
+    dependsOn(captureNodeLiveProviderSourceIdentity, "connectedAppDebugAndroidTest")
+    usesService(nodeJsInstrumentationOutputLockService)
     outputs.file(layout.buildDirectory.file("reports/nodejs/live-provider-summary.json"))
+    outputs.dir(layout.buildDirectory.dir("reports/nodejs/live-provider-evidence"))
     outputs.upToDateWhen { false }
 
     doFirst {
@@ -708,7 +890,27 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
         if (xmlFiles.isEmpty()) {
             throw GradleException("No connected Android test XML results found under ${resultDir.absolutePath}.")
         }
+        if (xmlFiles.size != 1) {
+            throw GradleException(
+                "Live-provider evidence requires exactly one connected-device JUnit XML; found ${xmlFiles.size}. " +
+                        "Use -Pandroid.injected.device.serial=SERIAL when more than one device is attached."
+            )
+        }
+        val xmlSourceHashesBefore = xmlFiles.associate { file -> file.canonicalPath to nodeJsInstrumentationSha256(file) }
 
+        val capturedIdentityFile = nodeJsLiveProviderSourceIdentityFile.get().asFile
+        val capturedIdentity = JsonSlurper().parse(capturedIdentityFile) as? Map<*, *>
+            ?: throw GradleException("Invalid live-provider source identity capture: ${capturedIdentityFile.absolutePath}")
+        if (capturedIdentity["invocationId"]?.toString() != nodeJsLiveProviderInvocationId) {
+            throw GradleException("Live-provider source identity does not belong to this Gradle invocation.")
+        }
+        val sourceIdentityBeforeRaw = capturedIdentity["identity"] as? Map<*, *>
+            ?: throw GradleException("Live-provider source identity capture is missing its identity object.")
+        val sourceIdentityBefore = linkedMapOf<String, Any?>(
+            "capturedAt" to capturedIdentity["capturedAt"]?.toString(),
+            "hostCommit" to sourceIdentityBeforeRaw["hostCommit"]?.toString(),
+            "hostTreeClean" to sourceIdentityBeforeRaw["hostTreeClean"],
+        )
         val parserFactory = DocumentBuilderFactory.newInstance().apply {
             setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
             setFeature("http://xml.org/sax/features/external-general-entities", false)
@@ -716,6 +918,7 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
             isExpandEntityReferences = false
         }
         val results = linkedMapOf<String, Map<String, Any?>>()
+        val observedCaseIds = mutableListOf<String>()
         val devices = linkedSetOf<String>()
         var totalTests = 0
         var totalFailures = 0
@@ -753,7 +956,12 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
             for (index in 0 until properties.length) {
                 val property = properties.item(index) as? org.w3c.dom.Element ?: continue
                 if (property.getAttribute("name") == "device") {
-                    property.getAttribute("value").takeIf { it.isNotBlank() }?.let(devices::add)
+                    property.getAttribute("value").takeIf { it.isNotBlank() }?.let { device ->
+                        if (device in setOf(".", "..") || '/' in device || '\\' in device || File(device).isAbsolute) {
+                            throw GradleException("Live-provider JUnit contains an unsafe device identity: $device")
+                        }
+                        devices += device
+                    }
                 }
             }
 
@@ -777,12 +985,43 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
                     skipped != null -> childMessage(skipped)
                     else -> ""
                 }
-                results["$className#$methodName"] = linkedMapOf(
+                val caseId = "$className#$methodName"
+                observedCaseIds += caseId
+                results[caseId] = linkedMapOf(
                     "status" to status,
                     "message" to message,
                     "timeSeconds" to testCase.getAttribute("time").toDoubleOrNull(),
                 )
             }
+        }
+
+        if (devices.size != 1) {
+            throw GradleException(
+                "Live-provider evidence requires exactly one connected device identity; found ${devices.toList()}. " +
+                        "Use -Pandroid.injected.device.serial=SERIAL to bind the run."
+            )
+        }
+
+        val expectedCaseIds = nodeJsLiveProviderGateInstrumentationClasses.toSet()
+        val observedCaseIdSet = observedCaseIds.toSet()
+        val duplicateCaseIds = observedCaseIds.groupingBy { caseId -> caseId }.eachCount()
+            .filterValues { count -> count != 1 }
+            .keys
+        val missingCaseIds = expectedCaseIds - observedCaseIdSet
+        val unexpectedCaseIds = observedCaseIdSet - expectedCaseIds
+        if (
+            totalTests != expectedCaseIds.size ||
+            observedCaseIds.size != expectedCaseIds.size ||
+            duplicateCaseIds.isNotEmpty() ||
+            missingCaseIds.isNotEmpty() ||
+            unexpectedCaseIds.isNotEmpty()
+        ) {
+            throw GradleException(
+                "Live-provider evidence requires the exact ${expectedCaseIds.size}-case universe; " +
+                        "tests=$totalTests, parsed=${observedCaseIds.size}, duplicates=$duplicateCaseIds, " +
+                        "missing=$missingCaseIds, unexpected=$unexpectedCaseIds. " +
+                        "Run verifyNodeLiveProviderGate directly instead of an aggregate connected-test task."
+            )
         }
 
         val policyViolations = mutableListOf<String>()
@@ -829,23 +1068,223 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
             .map { testCase -> testCase.getValue("provider").toString() }
             .toSortedSet()
 
+        val appApkFiles = layout.buildDirectory
+            .dir("outputs/apk/app/debug")
+            .get()
+            .asFile
+            .walkTopDown()
+            .filter { file -> file.isFile && file.extension == "apk" }
+            .sortedBy { file -> file.absolutePath }
+            .toList()
+        val androidTestApkFiles = layout.buildDirectory
+            .dir("outputs/apk/androidTest/app/debug")
+            .get()
+            .asFile
+            .walkTopDown()
+            .filter { file -> file.isFile && file.extension == "apk" }
+            .sortedBy { file -> file.absolutePath }
+            .toList()
+        if (appApkFiles.isEmpty() || androidTestApkFiles.isEmpty()) {
+            throw GradleException("Live-provider evidence requires both app and androidTest debug APK artifacts.")
+        }
+        val appApkByCanonicalPath = appApkFiles.associateBy { file -> file.canonicalPath }
+        val androidTestApkByCanonicalPath = androidTestApkFiles.associateBy { file -> file.canonicalPath }
+        val apkInspections = devices.flatMap { device ->
+            val deviceResultDir = resultDir.resolve(device).canonicalFile
+            if (deviceResultDir.parentFile != resultDir.canonicalFile) {
+                throw GradleException("Live-provider UTP device directory escapes the connected result root: $device")
+            }
+            if (!deviceResultDir.isDirectory) {
+                throw GradleException("Live-provider UTP result directory is missing for device $device.")
+            }
+            val inspections = deviceResultDir
+                .walkTopDown()
+                .filter { file ->
+                    file.isFile && file.name.startsWith("aapt") && file.name.endsWith(".ok.txt")
+                }
+                .mapNotNull { logFile ->
+                    val inspectedApk = nodeJsInstrumentationInspectedApk(logFile)
+                    val kind = when (inspectedApk.canonicalPath) {
+                        in appApkByCanonicalPath -> "app"
+                        in androidTestApkByCanonicalPath -> "androidTest"
+                        else -> null
+                    }
+                    kind?.let {
+                        NodeJsLiveProviderApkInspection(
+                            device = device,
+                            kind = it,
+                            logFile = logFile,
+                            apkFile = inspectedApk,
+                        )
+                    }
+                }
+                .toList()
+            listOf("app", "androidTest").forEach { kind ->
+                val matching = inspections.filter { inspection -> inspection.kind == kind }
+                if (matching.size != 1) {
+                    throw GradleException(
+                        "Live-provider UTP evidence for $device requires exactly one $kind APK inspection; " +
+                                "found ${matching.size}."
+                    )
+                }
+            }
+            inspections
+        }
+        val inspectedSourceHashesBefore = apkInspections
+            .flatMap { inspection -> listOf(inspection.apkFile, inspection.logFile) }
+            .distinctBy { file -> file.canonicalPath }
+            .associate { file -> file.canonicalPath to nodeJsInstrumentationSha256(file) }
+
+        val summaryGeneratedAt = Instant.now()
+        val snapshotCommit = sourceIdentityBefore["hostCommit"]?.toString().orEmpty()
+        val snapshotRunKey = "${snapshotCommit.take(12)}-${summaryGeneratedAt.toEpochMilli()}"
+        val snapshotRoot = layout.buildDirectory
+            .dir("reports/nodejs/live-provider-evidence/$snapshotRunKey")
+            .get()
+            .asFile
+        if (snapshotRoot.exists()) {
+            throw GradleException("Live-provider evidence snapshot already exists: ${snapshotRoot.absolutePath}")
+        }
+
+        fun snapshotArtifact(source: File, relativePath: String, expectedSha256: String): File {
+            val destination = snapshotRoot.resolve(relativePath)
+            destination.parentFile.mkdirs()
+            if (!destination.canonicalFile.toPath().startsWith(snapshotRoot.canonicalFile.toPath())) {
+                throw GradleException("Live-provider snapshot destination escaped its run root: ${destination.absolutePath}")
+            }
+            if (nodeJsInstrumentationSha256(source) != expectedSha256) {
+                throw GradleException("Live-provider producer artifact changed before snapshot: ${source.absolutePath}")
+            }
+            source.copyTo(destination, overwrite = false)
+            val snapshotSha256 = nodeJsInstrumentationSha256(destination)
+            val sourceSha256After = nodeJsInstrumentationSha256(source)
+            if (snapshotSha256 != expectedSha256 || sourceSha256After != expectedSha256) {
+                throw GradleException("Live-provider producer artifact changed while it was snapshotted: ${source.absolutePath}")
+            }
+            return destination
+        }
+
+        fun repositoryRelativePath(file: File): String =
+            file.relativeTo(rootProject.projectDir).invariantSeparatorsPath
+
+        val xmlFilesAtSnapshot = resultDir
+            .walkTopDown()
+            .filter { file -> file.isFile && file.name.startsWith("TEST-") && file.extension == "xml" }
+            .sortedBy { file -> file.absolutePath }
+            .toList()
+        if (xmlFilesAtSnapshot.map { file -> file.canonicalPath } != xmlFiles.map { file -> file.canonicalPath }) {
+            throw GradleException("Live-provider JUnit XML set changed before evidence snapshot.")
+        }
+        val resultXmlArtifacts = xmlFiles.map { source ->
+            val snapshot = snapshotArtifact(
+                source,
+                "result-xml/${source.relativeTo(resultDir).invariantSeparatorsPath}",
+                xmlSourceHashesBefore.getValue(source.canonicalPath),
+            )
+            linkedMapOf(
+                "path" to repositoryRelativePath(snapshot),
+                "sourcePath" to repositoryRelativePath(source),
+                "sourceLastModifiedAt" to Instant.ofEpochMilli(source.lastModified()).toString(),
+                "sha256" to nodeJsInstrumentationSha256(snapshot),
+            )
+        }
+        val apkArtifacts = apkInspections
+            .distinctBy { inspection -> "${inspection.kind}:${inspection.apkFile.canonicalPath}" }
+            .map { inspection ->
+                val source = inspection.apkFile
+                val snapshot = snapshotArtifact(
+                    source,
+                    "apk/${inspection.kind}/${source.name}",
+                    inspectedSourceHashesBefore.getValue(source.canonicalPath),
+                )
+                linkedMapOf(
+                    "kind" to inspection.kind,
+                    "path" to repositoryRelativePath(snapshot),
+                    "sourcePath" to repositoryRelativePath(source),
+                    "sourceLastModifiedAt" to Instant.ofEpochMilli(source.lastModified()).toString(),
+                    "sha256" to nodeJsInstrumentationSha256(snapshot),
+                )
+            }
+        val apkArtifactPathBySource = apkArtifacts.associate { artifact ->
+            "${artifact.getValue("kind")}:${artifact.getValue("sourcePath")}" to artifact.getValue("path").toString()
+        }
+        val utpApkSelectionArtifacts = apkInspections.map { inspection ->
+            val snapshot = snapshotArtifact(
+                inspection.logFile,
+                "utp-apk-selection/${inspection.logFile.relativeTo(resultDir).invariantSeparatorsPath}",
+                inspectedSourceHashesBefore.getValue(inspection.logFile.canonicalPath),
+            )
+            val apkSourcePath = repositoryRelativePath(inspection.apkFile)
+            linkedMapOf(
+                "device" to inspection.device,
+                "kind" to inspection.kind,
+                "path" to repositoryRelativePath(snapshot),
+                "sourcePath" to repositoryRelativePath(inspection.logFile),
+                "sourceLastModifiedAt" to Instant.ofEpochMilli(inspection.logFile.lastModified()).toString(),
+                "sha256" to nodeJsInstrumentationSha256(snapshot),
+                "inspectedApkSourcePath" to apkSourcePath,
+                "apkArtifactPath" to apkArtifactPathBySource.getValue("${inspection.kind}:$apkSourcePath"),
+            )
+        }
+        val deviceApkBindings = devices.map { device ->
+            val selections = utpApkSelectionArtifacts.filter { selection -> selection.getValue("device") == device }
+            val appSelection = selections.single { selection -> selection.getValue("kind") == "app" }
+            val androidTestSelection = selections.single { selection -> selection.getValue("kind") == "androidTest" }
+            linkedMapOf(
+                "device" to device,
+                "appArtifactPath" to appSelection.getValue("apkArtifactPath"),
+                "appInspectionArtifactPath" to appSelection.getValue("path"),
+                "androidTestArtifactPath" to androidTestSelection.getValue("apkArtifactPath"),
+                "androidTestInspectionArtifactPath" to androidTestSelection.getValue("path"),
+            )
+        }
+
+        val sourceIdentityAfterRaw = nodeJsCaptureLiveProviderSourceIdentity()
+        val sourceIdentityAfter = linkedMapOf<String, Any?>(
+            "capturedAt" to Instant.now().toString(),
+            "hostCommit" to sourceIdentityAfterRaw["hostCommit"],
+            "hostTreeClean" to sourceIdentityAfterRaw["hostTreeClean"],
+        )
+        val sourceIdentityStable =
+            sourceIdentityBefore["hostCommit"] == sourceIdentityAfter["hostCommit"] &&
+                    sourceIdentityBefore["hostTreeClean"] == sourceIdentityAfter["hostTreeClean"]
+
         val reportFile = layout.buildDirectory
             .file("reports/nodejs/live-provider-summary.json")
             .get()
             .asFile
         reportFile.parentFile.mkdirs()
         val summary = linkedMapOf(
-            "schemaVersion" to 1,
-            "generatedAt" to Instant.now().toString(),
+            "schemaVersion" to 3,
+            "generatedAt" to summaryGeneratedAt.toString(),
             "task" to "S7-16 Live Provider Gate",
             "gate" to "verifyNodeLiveProviderGate",
+            "evidenceSnapshot" to linkedMapOf(
+                "runKey" to snapshotRunKey,
+                "invocationId" to nodeJsLiveProviderInvocationId,
+                "path" to repositoryRelativePath(snapshotRoot),
+                "manifestPath" to repositoryRelativePath(snapshotRoot.resolve("manifest.json")),
+                "summaryPath" to repositoryRelativePath(snapshotRoot.resolve("summary.json")),
+                "immutable" to true,
+            ),
+            "sourceIdentity" to linkedMapOf(
+                "invocationId" to nodeJsLiveProviderInvocationId,
+                "before" to sourceIdentityBefore,
+                "after" to sourceIdentityAfter,
+                "stable" to sourceIdentityStable,
+            ),
             "deviceProfile" to nodeJsTestDeviceProfile,
             "devices" to devices.toList(),
             "networkExperimentalRequired" to true,
             "networkExperimentalEnabled" to nodeJsNetworkExperimentalEnabled,
             "fakeProvidersAllowed" to false,
             "skipReasonRequired" to true,
-            "resultXml" to xmlFiles.map { file -> file.relativeTo(projectDir).invariantSeparatorsPath },
+            "sourceResultXml" to xmlFiles.map { file -> repositoryRelativePath(file) },
+            "resultXml" to resultXmlArtifacts.map { artifact -> artifact.getValue("path") },
+            "resultXmlArtifacts" to resultXmlArtifacts,
+            "apkArtifacts" to apkArtifacts,
+            "utpApkSelectionArtifacts" to utpApkSelectionArtifacts,
+            "deviceApkBindings" to deviceApkBindings,
             "totals" to linkedMapOf(
                 "tests" to totalTests,
                 "failures" to totalFailures,
@@ -857,7 +1296,52 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
             "policyViolations" to policyViolations,
             "cases" to caseSummaries,
         )
-        reportFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(summary)) + System.lineSeparator())
+        val manifestFile = snapshotRoot.resolve("manifest.json")
+        val manifestText = JsonOutput.prettyPrint(JsonOutput.toJson(summary)) + System.lineSeparator()
+        manifestFile.writeText(manifestText)
+        val manifestSha256 = nodeJsInstrumentationSha256(manifestFile)
+        @Suppress("UNCHECKED_CAST")
+        val publishedSummary = LinkedHashMap(summary).apply {
+            val publishedSnapshot = LinkedHashMap(this["evidenceSnapshot"] as Map<String, Any?>)
+            publishedSnapshot["manifestSha256"] = manifestSha256
+            this["evidenceSnapshot"] = publishedSnapshot
+        }
+        val publishedText = JsonOutput.prettyPrint(JsonOutput.toJson(publishedSummary)) + System.lineSeparator()
+        snapshotRoot.resolve("summary.json").writeText(publishedText)
+
+        fun publishAtomically(target: File, content: String) {
+            target.parentFile.mkdirs()
+            val temporary = target.parentFile.resolve(".${target.name}.tmp-$nodeJsLiveProviderInvocationId")
+            temporary.writeText(content)
+            try {
+                java.nio.file.Files.move(
+                    temporary.toPath(),
+                    target.toPath(),
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                )
+            } catch (_: java.nio.file.AtomicMoveNotSupportedException) {
+                java.nio.file.Files.move(
+                    temporary.toPath(),
+                    target.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                )
+            }
+        }
+
+        publishAtomically(reportFile, publishedText)
+        publishAtomically(
+            reportFile.parentFile.resolve("live-provider-latest-attempt.json"),
+            publishedText,
+        )
+        val sourceIdentityClean = sourceIdentityBefore["hostTreeClean"] == true &&
+                sourceIdentityAfter["hostTreeClean"] == true
+        if (policyViolations.isEmpty() && sourceIdentityStable && sourceIdentityClean) {
+            publishAtomically(
+                reportFile.parentFile.resolve("live-provider-latest-valid.json"),
+                publishedText,
+            )
+        }
         logger.lifecycle("Node live provider summary written to ${reportFile.absolutePath}")
 
         if (policyViolations.isNotEmpty()) {

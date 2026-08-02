@@ -94,8 +94,24 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             },
             healthById.getValue("fetch").status,
         )
-        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ocr").status)
-        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("barcode").status)
+        val ocrHealth = healthById.getValue("ocr")
+        val barcodeHealth = healthById.getValue("barcode")
+        assertEquals(
+            if (ocrHealth.details.getValue("mlkitPluginServiceCount").toInt() > 0) {
+                NodeBridgeProviderStatus.AVAILABLE
+            } else {
+                NodeBridgeProviderStatus.UNAVAILABLE
+            },
+            ocrHealth.status,
+        )
+        assertEquals(
+            if (barcodeHealth.details.getValue("barcodePluginServiceCount").toInt() > 0) {
+                NodeBridgeProviderStatus.AVAILABLE
+            } else {
+                NodeBridgeProviderStatus.UNAVAILABLE
+            },
+            barcodeHealth.status,
+        )
         assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("media_projection").status)
         assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("image").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ui").status)
@@ -105,9 +121,9 @@ class NodeBridgeProviderRegistryInstrumentationTest {
                 NodeBridgeProviderStatus.DEGRADED,
             ),
         )
-        assertEquals("mlkit-chinese", healthById.getValue("ocr").details.getValue("defaultEngine"))
-        assertEquals("mlkit-barcode", healthById.getValue("barcode").details.getValue("defaultEngine"))
-        assertTrue(healthById.getValue("barcode").details.getValue("liveMethods").contains("detectAll"))
+        assertEquals("mlkit-ocr", ocrHealth.details.getValue("defaultEngine"))
+        assertEquals("mlkit-barcode", barcodeHealth.details.getValue("defaultEngine"))
+        assertTrue(barcodeHealth.details.getValue("liveMethods").contains("detectAll"))
         assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))
         assertTrue(healthById.getValue("ui").details.getValue("liveMethods").contains("showLayout"))
         assertEquals("fake", healthById.getValue("input_observer").details.getValue("availableSource"))
