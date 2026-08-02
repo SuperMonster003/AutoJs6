@@ -98,7 +98,32 @@ class ExplorerActionCatalogPolicyTest {
     fun descriptorRejectsUnsupportedV1ExecutionModes() {
         assertNull(descriptor(targetKind = ExplorerActionValues.TARGET_FILE + 1))
         assertNull(descriptor(accessMode = ExplorerActionValues.ACCESS_READ_ONLY + 1))
-        assertNull(descriptor(placement = ExplorerActionValues.PLACEMENT_OVERFLOW + 1))
+        assertNull(descriptor(placement = ExplorerActionValues.PLACEMENT_PRIMARY))
+        assertNull(descriptor(placement = ExplorerActionValues.PLACEMENT_PRIMARY + 1))
+    }
+
+    @Test
+    fun protocolV2AcceptsPrimaryPlacementWithoutChangingMatchingSemantics() {
+        val descriptor = descriptor(
+            protocolVersion = 2,
+            placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+            mimeTypes = listOf("video/*"),
+        ) ?: error("Expected a valid primary descriptor")
+
+        assertEquals(2, descriptor.protocolVersion)
+        assertEquals(ExplorerActionValues.PLACEMENT_PRIMARY, descriptor.placement)
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                descriptor,
+                ExplorerActionTarget("video/mp4", "mp4"),
+            ),
+        )
+        assertFalse(
+            ExplorerActionCatalogPolicy.matches(
+                descriptor,
+                ExplorerActionTarget("audio/mpeg", "mp3"),
+            ),
+        )
     }
 
     @Test
@@ -126,9 +151,10 @@ class ExplorerActionCatalogPolicyTest {
     @Test
     fun protocolAndHostVersionCompatibilityAreStrict() {
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(1L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(2L))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(2L))
+        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(3L))
 
         assertTrue(ExplorerActionAvailabilityPolicy.isHostVersionCompatible(5_268L, 5_268L))
         assertTrue(ExplorerActionAvailabilityPolicy.isHostVersionCompatible(5_268L, null))
@@ -175,6 +201,7 @@ class ExplorerActionCatalogPolicyTest {
 
     @Suppress("LongParameterList")
     private fun descriptor(
+        protocolVersion: Int = 1,
         id: String = "document-preview",
         labelResourceName: String? = null,
         labelFallback: String? = "Preview",
@@ -187,6 +214,7 @@ class ExplorerActionCatalogPolicyTest {
         extensions: Collection<String>? = emptyList(),
     ): ExplorerActionDescriptor? {
         return ExplorerActionCatalogPolicy.normalizeDescriptor(
+            protocolVersion = protocolVersion,
             packageName = "com.example.preview",
             id = id,
             labelResourceName = labelResourceName,

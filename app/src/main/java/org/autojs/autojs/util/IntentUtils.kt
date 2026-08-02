@@ -215,7 +215,6 @@ object IntentUtils {
     ) = Intent(Intent.ACTION_VIEW)
         .setDataAndType(uri, mimeType)
         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         .startSafely(context, true) {
             exceptionHolder?.show(R.string.error_no_applications_available_for_viewing_this_file)
         }

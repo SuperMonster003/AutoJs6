@@ -180,6 +180,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文字轉換/媒體資訊等擴充介面
 * `新增` 外掛系統支援離線專案文件擴充介面
 * `新增` 檔案管理器支援單一檔案唯讀 Explorer Action 外掛擴充介面, 並在主檔案頁面的更多選單中動態載入外掛動作
+* `新增` 檔案管理器支援 Explorer Action 協定 v2 主要操作, 透過三個獨立外掛提供圖片檢視, 音訊播放及影片播放
 * `新增` 外掛中心支援全域設定頁面及使用說明頁面
 * `新增` 外掛中心支援 SDK 外掛自動掛載功能
 * `新增` 外掛中心支援多變體優先順序排序功能
@@ -299,6 +300,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` Node.js 最終整合及發佈閘門在必要報告/目前原始碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
 * `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `最佳化` 檔案管理器將媒體詳細資訊查詢整合為單次 MediaInfo 快照, 減少 Binder 呼叫及等待時間
+* `最佳化` 檔案外部檢視及媒體播放降級僅授予 URI 讀取權限
 * `最佳化` Ace WebView 執行階段/JavaScript bridge/內建語言服務/靜態資源完成外掛化, 降低宿主 APK 耦合並支援獨立安裝及更新
 * `最佳化` 專案離線文件完成外掛化, 降低宿主 APK 體積並支援獨立安裝及更新
 * `最佳化` 離線專案文件首次載入的檔案清單解析及完整 SHA-256 驗證移至背景執行緒, 避免阻塞介面

@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.explorer
 
 internal data class ExplorerActionDescriptor(
+    val protocolVersion: Int,
     val id: String,
     val labelResourceName: String?,
     val labelFallback: String?,

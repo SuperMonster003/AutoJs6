@@ -94,6 +94,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ExplorerActionRegistry.refresh(requireContext())
+                mExplorerView?.notifyDataSetChanged()
             }
         }
         (activity as? MainActivity)?.apply {

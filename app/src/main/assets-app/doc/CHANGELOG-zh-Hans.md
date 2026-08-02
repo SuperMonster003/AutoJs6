@@ -20,6 +20,7 @@
 * `新增` 插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本转换/媒体信息等扩展接口
 * `新增` 插件系统支持离线项目文档扩展接口
 * `新增` 文件管理器支持单文件只读 Explorer Action 插件扩展接口, 并在主文件页面的更多菜单中动态加载插件动作
+* `新增` 文件管理器支持 Explorer Action 协议 v2 主操作, 通过三个独立插件提供图像查看, 音频播放和视频播放
 * `新增` 插件中心支持全局设置页面及使用说明页面
 * `新增` 插件中心支持 SDK 插件自动挂载功能
 * `新增` 插件中心支持多变体优先级排序功能
@@ -139,6 +140,7 @@
 * `优化` Node.js 最终集成及发布门禁在所需报告/当前源码证据/生产验收产物缺失或过期时采用 fail-closed 策略
 * `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
 * `优化` 文件管理器将媒体详情查询整合为单次 MediaInfo 快照, 减少 Binder 调用及等待时间
+* `优化` 文件外部查看与媒体播放降级仅授予 URI 读取权限
 * `优化` Ace WebView 运行时/JavaScript bridge/内置语言服务/静态资源完成插件化, 降低宿主 APK 耦合并支持独立安装及更新
 * `优化` 项目离线文档完成插件化, 降低宿主 APK 体积并支持独立安装及更新
 * `优化` 离线项目文档首次加载的文件清单解析及完整 SHA-256 校验移至后台线程, 避免阻塞界面
@@ -167,7 +169,7 @@
 * `依赖` 模块化 Spongy Castle Prov 版本 1.58.0.0
 * `依赖` 模块化 Image Quantization 版本 2.17.0
 * `依赖` 模块化 OpenCV 版本 4.8.0
-* `依赖` 附加 AndroidX Media3 版本 1.10.1
+* `依赖` 模块化 AndroidX Media3 版本 1.10.1
 * `依赖` 附加 Apache Commons Codec 版本 1.15
 * `依赖` 附加 juniversalchardet 版本 2.0.4
 * `依赖` 移除 Android Annotations 版本 4.8.0

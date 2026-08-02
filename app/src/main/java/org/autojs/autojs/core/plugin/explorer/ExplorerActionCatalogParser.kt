@@ -24,6 +24,7 @@ internal object ExplorerActionCatalogParser {
         val actionIds = HashSet<String>()
         return actionBundles.mapNotNull { action ->
             val descriptor = ExplorerActionCatalogPolicy.normalizeDescriptor(
+                protocolVersion = protocolVersion,
                 packageName = packageName,
                 id = action.getString(ExplorerActionCatalogKeys.ID),
                 labelResourceName = action.getString(ExplorerActionCatalogKeys.LABEL_RESOURCE_NAME),

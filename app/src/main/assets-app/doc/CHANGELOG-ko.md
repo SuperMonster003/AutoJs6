@@ -20,6 +20,7 @@
 * `추가` 플러그인 시스템에서 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/텍스트 변환/미디어 정보 등의 확장 API 지원
 * `추가` 플러그인 시스템에서 오프라인 프로젝트 문서 확장 인터페이스 지원
 * `추가` 파일 관리자가 단일 파일 읽기 전용 Explorer Action 플러그인 확장을 지원하고 기본 파일 페이지의 더보기 메뉴에 플러그인 작업을 동적으로 로드
+* `추가` 파일 관리자가 Explorer Action 프로토콜 v2의 기본 작업을 지원하여 이미지 보기, 오디오 재생, 비디오 재생을 3개의 독립 플러그인으로 제공
 * `추가` 플러그인 센터에서 전역 설정 페이지 및 사용 설명 페이지 지원
 * `추가` 플러그인 센터에서 SDK 플러그인 자동 마운트 기능 지원
 * `추가` 플러그인 센터에서 다중 변형의 우선순위 정렬 기능 지원
@@ -139,6 +140,7 @@
 * `개선` 필수 보고서/현재 소스 증거/프로덕션 승인 산출물이 누락되거나 만료된 경우 Node.js 최종 통합 및 릴리스 게이트가 fail-closed로 판정되도록 개선
 * `개선` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 관련 기능 플러그인화
 * `개선` 파일 관리자의 미디어 상세 정보 조회를 단일 MediaInfo 스냅샷으로 통합하여 Binder 호출 및 대기 시간 감소
+* `개선` 외부 파일 보기 및 미디어 재생 대체 경로를 읽기 전용 URI 접근으로 제한
 * `개선` Ace WebView 런타임/JavaScript bridge/내장 언어 서비스/정적 리소스를 별도로 설치 가능한 플러그인으로 모듈화하여 호스트 APK 결합도를 낮추고 독립 업데이트 지원
 * `개선` 프로젝트 오프라인 문서를 플러그인화하여 호스트 APK 크기를 줄이고 독립 설치 및 업데이트 지원
 * `개선` 오프라인 프로젝트 문서의 최초 로드 시 파일 목록 분석 및 전체 SHA-256 검증을 백그라운드 스레드로 이동하여 UI 차단 방지
@@ -167,7 +169,7 @@
 * `의존성` 모듈화 Spongy Castle Prov 버전 1.58.0.0
 * `의존성` 모듈화 Image Quantization 버전 2.17.0
 * `의존성` 모듈화 OpenCV 버전 4.8.0
-* `의존성` AndroidX Media3 버전 1.10.1 추가
+* `의존성` 모듈화 AndroidX Media3 버전 1.10.1
 * `의존성` Apache Commons Codec 버전 1.15 추가
 * `의존성` juniversalchardet 버전 2.0.4 추가
 * `의존성` Android Annotations 버전 4.8.0 제거

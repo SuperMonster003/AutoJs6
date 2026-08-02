@@ -14,6 +14,7 @@ internal object ExplorerActionCatalogPolicy {
 
     @Suppress("LongParameterList")
     fun normalizeDescriptor(
+        protocolVersion: Int,
         packageName: String,
         id: String?,
         labelResourceName: String?,
@@ -26,6 +27,12 @@ internal object ExplorerActionCatalogPolicy {
         mimeTypes: Collection<String>?,
         extensions: Collection<String>?,
     ): ExplorerActionDescriptor? {
+        if (
+            protocolVersion !in
+            ExplorerActionProtocol.MIN_SUPPORTED_VERSION..ExplorerActionProtocol.MAX_SUPPORTED_VERSION
+        ) {
+            return null
+        }
         val normalizedId = id?.trim()?.takeIf {
             it.length <= ExplorerActionProtocol.MAX_ACTION_ID_LENGTH && actionIdPattern.matches(it)
         } ?: return null
@@ -37,7 +44,12 @@ internal object ExplorerActionCatalogPolicy {
         val normalizedActivityClassName = normalizeActivityClassName(packageName, activityClassName) ?: return null
         if (targetKind != ExplorerActionValues.TARGET_FILE) return null
         if (accessMode != ExplorerActionValues.ACCESS_READ_ONLY) return null
-        if (placement != ExplorerActionValues.PLACEMENT_OVERFLOW) return null
+        val placementSupported = when (placement) {
+            ExplorerActionValues.PLACEMENT_OVERFLOW -> true
+            ExplorerActionValues.PLACEMENT_PRIMARY -> protocolVersion >= PRIMARY_PLACEMENT_PROTOCOL_VERSION
+            else -> false
+        }
+        if (!placementSupported) return null
 
         val normalizedMimeTypes = normalizeMatchers(mimeTypes, ::normalizeMimeType)
         val normalizedExtensions = normalizeMatchers(extensions, ::normalizeExtension)
@@ -45,6 +57,7 @@ internal object ExplorerActionCatalogPolicy {
         if (normalizedMimeTypes.isEmpty() && normalizedExtensions.isEmpty()) return null
 
         return ExplorerActionDescriptor(
+            protocolVersion = protocolVersion,
             id = normalizedId,
             labelResourceName = normalizedLabelResourceName,
             labelFallback = normalizedLabelFallback,
@@ -61,7 +74,12 @@ internal object ExplorerActionCatalogPolicy {
     fun matches(descriptor: ExplorerActionDescriptor, target: ExplorerActionTarget): Boolean {
         if (descriptor.targetKind != ExplorerActionValues.TARGET_FILE) return false
         if (descriptor.accessMode != ExplorerActionValues.ACCESS_READ_ONLY) return false
-        if (descriptor.placement != ExplorerActionValues.PLACEMENT_OVERFLOW) return false
+        if (
+            descriptor.placement != ExplorerActionValues.PLACEMENT_OVERFLOW &&
+            descriptor.placement != ExplorerActionValues.PLACEMENT_PRIMARY
+        ) {
+            return false
+        }
 
         val normalizedTargetMimeType = normalizeMimeType(target.mimeType)
         val normalizedTargetExtension = normalizeExtension(target.extension)
@@ -138,4 +156,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val MIN_PRIORITY = -10_000
     private const val MAX_PRIORITY = 10_000
     private const val MAX_EXTENSION_LENGTH = 64
+    private const val PRIMARY_PLACEMENT_PROTOCOL_VERSION = 2
 }

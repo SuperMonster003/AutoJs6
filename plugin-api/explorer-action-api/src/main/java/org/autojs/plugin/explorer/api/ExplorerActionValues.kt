@@ -6,4 +6,5 @@ object ExplorerActionValues {
     const val ACCESS_READ_ONLY = 1
 
     const val PLACEMENT_OVERFLOW = 1
+    const val PLACEMENT_PRIMARY = 2
 }

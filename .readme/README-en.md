@@ -180,6 +180,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/text conversion/media information and more
 * `Feature` Plugin system supports an extension interface for offline project documentation
 * `Feature` File manager supports single-file read-only Explorer Action plugin extensions and dynamically loads their actions in the overflow menu of the main file page
+* `Feature` File manager supports Explorer Action protocol v2 primary actions to provide image viewing, audio playback, and video playback through three independent plugins
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting
@@ -299,6 +300,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Made Node.js final integration and release gates fail closed when required reports, current-source evidence, or production acceptance artifacts are missing or stale
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Consolidated file manager media detail queries into a single MediaInfo snapshot to reduce Binder calls and wait time
+* `Improvement` Limited external file viewing and media playback fallbacks to read-only URI access
 * `Improvement` Modularized the Ace WebView runtime/JavaScript bridge/built-in language services/static assets as a separately installable plugin, reducing host APK coupling and allowing independent updates
 * `Improvement` Modularized offline project documentation as a plugin, reducing the host APK size and supporting independent installation and updates
 * `Improvement` Moved offline project documentation inventory parsing and full SHA-256 verification on first load to a background thread to avoid blocking the UI

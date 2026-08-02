@@ -65,7 +65,7 @@ internal object ExplorerActionLauncher {
             setDataAndType(targetUri, mimeType)
             this.clipData = clipData
             putExtra(ExplorerActionIntentExtras.ACTION_ID, action.descriptor.id)
-            putExtra(ExplorerActionIntentExtras.PROTOCOL_VERSION, ExplorerActionProtocol.VERSION)
+            putExtra(ExplorerActionIntentExtras.PROTOCOL_VERSION, action.descriptor.protocolVersion)
             putExtra(ExplorerActionIntentExtras.DISPLAY_NAME, item.name)
             putExtra(ExplorerActionIntentExtras.SIZE, item.size)
             putExtra(ExplorerActionIntentExtras.PARENT_URI, parentUri)

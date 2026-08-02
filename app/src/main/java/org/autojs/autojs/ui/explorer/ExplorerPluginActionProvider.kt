@@ -8,6 +8,8 @@ internal interface ExplorerPluginActionProvider {
 
     fun actionsFor(item: ExplorerItem): List<ResolvedExplorerAction>
 
+    fun primaryActionFor(item: ExplorerItem): ResolvedExplorerAction?
+
     fun launch(
         context: Context,
         item: ExplorerItem,

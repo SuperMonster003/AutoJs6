@@ -17,6 +17,7 @@ import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.explorer.api.ExplorerActionCapabilityKeys
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
+import org.autojs.plugin.explorer.api.ExplorerActionValues
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicReference
@@ -81,6 +82,18 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
     }
 
     override fun actionsFor(item: ExplorerItem): List<ResolvedExplorerAction> {
+        return matchingActionsFor(item).filter { action ->
+            action.descriptor.placement == ExplorerActionValues.PLACEMENT_OVERFLOW
+        }
+    }
+
+    override fun primaryActionFor(item: ExplorerItem): ResolvedExplorerAction? {
+        return matchingActionsFor(item).firstOrNull { action ->
+            action.descriptor.placement == ExplorerActionValues.PLACEMENT_PRIMARY
+        }
+    }
+
+    private fun matchingActionsFor(item: ExplorerItem): List<ResolvedExplorerAction> {
         val file = File(item.path)
         if (!file.isFile || !file.canRead()) return emptyList()
         val target = ExplorerActionTarget(

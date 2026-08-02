@@ -36,6 +36,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getInt
 import org.autojs.autojs.core.pref.Pref.getLinkedList
@@ -72,7 +73,6 @@ import org.autojs.autojs.ui.main.scripts.ImageInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
 import org.autojs.autojs.ui.media.ImageConverter
 import org.autojs.autojs.ui.media.ImageEditorActivity
-import org.autojs.autojs.ui.media.MediaViewerLauncher
 import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager
@@ -108,6 +108,7 @@ import kotlin.math.roundToInt
 
 private data class ExplorerItemActionState(
     val primaryAction: ExplorerPrimaryAction?,
+    val pluginPrimaryAction: ResolvedExplorerAction?,
     val editVisible: Boolean,
     val runVisible: Boolean,
     val runAsMedia: Boolean,
@@ -1162,6 +1163,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
         private lateinit var mExplorerItem: ExplorerItem
         private var mBindGeneration = 0
+        private var mPrimaryPluginAction: ResolvedExplorerAction? = null
 
         init {
             val explorerFileBinding = ExplorerFileBinding.bind(itemView)
@@ -1203,6 +1205,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         override fun bind(item: Any, position: Int) {
             if (item !is ExplorerItem) return
             mExplorerItem = item
+            mPrimaryPluginAction = null
             val bindGeneration = ++mBindGeneration
 
             setFirstChar(item)
@@ -1215,6 +1218,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
             Observable.fromCallable {
                 val primaryAction = ExplorerPrimaryActionResolver.resolve(item.type)
+                val pluginPrimaryAction = runCatching {
+                    mPluginActionProvider?.primaryActionFor(item)
+                }.onFailure { error ->
+                    Log.w(LOG_TAG, "Failed to resolve primary Explorer plugin action", error)
+                }.getOrNull()
+                val hasPrimaryAction = primaryAction != null || pluginPrimaryAction != null
                 val shouldEditShow = item.isTextEditable || (item.isExternalEditable && !item.type.isImageFile())
                 val shouldRunAsMedia =
                     !item.isExecutable && item.isMediaPlayable && primaryAction == null
@@ -1222,7 +1231,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 val shouldInstallShow = item.isInstallable
 
                 val alreadyHasTwoImportantIcons = listOf(
-                    primaryAction != null,
+                    hasPrimaryAction,
                     shouldEditShow,
                     shouldRunShow,
                     shouldInstallShow,
@@ -1232,6 +1241,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
                 ExplorerItemActionState(
                     primaryAction = primaryAction,
+                    pluginPrimaryAction = pluginPrimaryAction,
                     editVisible = shouldEditShow,
                     runVisible = shouldRunShow,
                     runAsMedia = shouldRunAsMedia,
@@ -1244,7 +1254,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 .subscribe { state ->
                     if (bindGeneration != mBindGeneration) return@subscribe
 
-                    val hasActionIcons = state.primaryAction != null ||
+                    mPrimaryPluginAction = state.pluginPrimaryAction
+                    val hasPrimaryAction = state.primaryAction != null || state.pluginPrimaryAction != null
+                    val hasActionIcons = hasPrimaryAction ||
                         state.editVisible ||
                         state.runVisible ||
                         state.installVisible ||
@@ -1256,7 +1268,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     }
                     if (hasActionIcons) {
                         state.primaryAction?.let(::bindPrimaryViewer)
-                        setVisibilityIf(mPrimaryViewer, state.primaryAction != null)
+                            ?: state.pluginPrimaryAction?.let(::bindPrimaryPluginAction)
+                        state.pluginPrimaryAction?.let { action ->
+                            mPrimaryViewer.contentDescription = action.menuTitle
+                        }
+                        setVisibilityIf(mPrimaryViewer, hasPrimaryAction)
                         setVisibilityIf(mEdit, state.editVisible)
                         bindRunAction(state.runAsMedia)
                         setVisibilityIf(mRun, state.runVisible)
@@ -1393,6 +1409,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mPrimaryViewer.contentDescription = context.getString(contentDescriptionRes)
         }
 
+        private fun bindPrimaryPluginAction(action: ResolvedExplorerAction) {
+            mPrimaryViewer.setImageResource(R.drawable.ic_extension_black_48dp)
+            mPrimaryViewer.contentDescription = action.menuTitle
+        }
+
         private fun bindRunAction(asMedia: Boolean) {
             mRun.setImageResource(
                 if (asMedia) R.drawable.ic_play_media else R.drawable.ic_run_explorer_btn,
@@ -1403,22 +1424,51 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private fun openPrimaryViewer() {
-            val action = ExplorerPrimaryActionResolver.resolve(mExplorerItem.type) ?: return
+            val action = ExplorerPrimaryActionResolver.resolve(mExplorerItem.type)
+            val pluginAction = mPrimaryPluginAction
+            if (action == null && pluginAction == null) return
             mRequestHostDialogHide?.run()
+            val fallback = { openHostPrimaryViewer(action) }
+            if (pluginAction != null) {
+                openPrimaryPluginOrFallback(pluginAction, fallback)
+            } else {
+                fallback()
+            }
+            notifyItemOperated()
+        }
+
+        private fun openHostPrimaryViewer(action: ExplorerPrimaryAction?) {
             when (action) {
                 ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
                     DocumentPreviewActivity.launch(context, mExplorerItem.path)
                 }
-                ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL -> {
+                ExplorerPrimaryAction.IMAGE_VIEW,
+                ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,
+                null,
+                -> {
                     mExplorerItem.view(context)
                 }
-                ExplorerPrimaryAction.IMAGE_VIEW,
-                ExplorerPrimaryAction.MEDIA_PLAY,
-                -> if (!MediaViewerLauncher.open(context, mExplorerItem)) {
-                    ViewUtils.showToast(context, R.string.text_cannot_read_file)
+                ExplorerPrimaryAction.MEDIA_PLAY -> {
+                    mExplorerItem.play(context)
                 }
             }
-            notifyItemOperated()
+        }
+
+        private fun openPrimaryPluginOrFallback(
+            pluginAction: ResolvedExplorerAction,
+            fallback: () -> Unit,
+        ) {
+            val provider = mPluginActionProvider
+            if (provider == null) {
+                fallback()
+                return
+            }
+            val launched = runCatching {
+                provider.launch(context, mExplorerItem, pluginAction).getOrThrow()
+            }
+                .onFailure { error -> Log.w(LOG_TAG, "Failed to launch primary Explorer plugin action", error) }
+                .isSuccess
+            if (!launched) fallback()
         }
 
         private fun run() {

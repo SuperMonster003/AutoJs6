@@ -471,11 +471,6 @@ dependencies /* Unclassified */ {
     // Glide
     implementation(libs.glide)
 
-    // Media3
-    implementation(libs.media3.exoplayer)
-    implementation(libs.media3.session)
-    implementation(libs.media3.ui)
-
     // Joda Time
     implementation(libs.joda.time)
 
@@ -864,7 +859,6 @@ android {
                     "authorities" to "org.autojs.autojs6.fileprovider",
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
                     "installerEnabled" to "true",
-                    "mediaViewerEnabled" to "true",
                 )
             )
         }
@@ -890,7 +884,6 @@ android {
                     "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
                     "icon" to "@mipmap/ic_launcher",
                     "installerEnabled" to "false",
-                    "mediaViewerEnabled" to "false",
                 )
             )
 

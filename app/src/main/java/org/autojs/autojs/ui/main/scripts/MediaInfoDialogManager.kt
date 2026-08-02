@@ -22,9 +22,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionRegistry
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.model.explorer.ExplorerItem
-import org.autojs.autojs.ui.media.MediaViewerLauncher
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.DialogUtils.setCopyableText
 import org.autojs.autojs.util.DialogUtils.showAdaptive
@@ -416,7 +416,15 @@ object MediaInfoDialogManager {
             it.setTextColor(context.getColor(R.color.dialog_button_attraction))
             it.setOnClickListener {
                 dialog.dismiss()
-                if (!MediaViewerLauncher.open(context, explorerItem)) {
+                val launched = runCatching {
+                    ExplorerActionRegistry.primaryActionFor(explorerItem)?.let { action ->
+                        ExplorerActionRegistry.launch(context, explorerItem, action).getOrThrow()
+                        true
+                    } ?: false
+                }.onFailure { error ->
+                    Log.w(TAG, "Primary media plugin failed; using external player fallback", error)
+                }.getOrDefault(false)
+                if (!launched) {
                     explorerItem.play(context)
                 }
             }

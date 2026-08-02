@@ -20,6 +20,7 @@
 * `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversión de texto/información multimedia y más
 * `Nuevo` El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión
 * `Nuevo` El explorador de archivos admite extensiones de plugin Explorer Action de solo lectura para un archivo y carga dinámicamente sus acciones en el menú adicional de la página principal de archivos
+* `Nuevo` El explorador de archivos admite acciones principales de Explorer Action con el protocolo v2 para ofrecer visualización de imágenes, reproducción de audio y reproducción de video mediante tres plugins independientes
 * `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
 * `Nuevo` El Centro de plugins admite el montaje automático de plugins SDK
 * `Nuevo` El Centro de plugins admite la ordenación por prioridad de múltiples variantes
@@ -139,6 +140,7 @@
 * `Mejora` Las puertas de integración final y lanzamiento de Node.js aplican fail-closed cuando faltan o están obsoletos los informes requeridos, las evidencias de las fuentes actuales o los artefactos de aceptación de producción
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` Consolidadas las consultas de detalles multimedia del administrador de archivos en una única instantánea de MediaInfo para reducir las llamadas Binder y el tiempo de espera
+* `Mejora` Limitadas las alternativas de visualización y reproducción externas a permisos URI de solo lectura
 * `Mejora` Modularizados como plugin instalable por separado el runtime WebView de Ace/el bridge JavaScript/los servicios de lenguaje integrados/los recursos estáticos, reduciendo el acoplamiento con el APK anfitrión y permitiendo actualizaciones independientes
 * `Mejora` Modularizada la documentación del proyecto sin conexión como plugin, reduciendo el tamaño del APK anfitrión y permitiendo su instalación y actualización independientes
 * `Mejora` Trasladados el análisis del inventario y la verificación SHA-256 completa de la documentación del proyecto sin conexión durante la primera carga a un hilo en segundo plano para evitar bloquear la interfaz
@@ -167,7 +169,7 @@
 * `Dependencia` Spongy Castle Prov modularizado version 1.58.0.0
 * `Dependencia` Image Quantization modularizado version 2.17.0
 * `Dependencia` OpenCV modularizado version 4.8.0
-* `Dependencia` Se agrega AndroidX Media3 version 1.10.1
+* `Dependencia` AndroidX Media3 version 1.10.1 modularizado
 * `Dependencia` Se agrega Apache Commons Codec version 1.15
 * `Dependencia` Se agrega juniversalchardet version 2.0.4
 * `Dependencia` Se elimina Android Annotations version 4.8.0
