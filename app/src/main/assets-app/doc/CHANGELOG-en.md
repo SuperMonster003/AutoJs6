@@ -21,6 +21,7 @@
 * `Feature` Plugin system supports an extension interface for offline project documentation
 * `Feature` File manager supports single-file read-only Explorer Action plugin extensions and dynamically loads their actions in the overflow menu of the main file page
 * `Feature` File manager supports Explorer Action protocol v2 primary actions to provide image viewing, audio playback, and video playback through three independent plugins
+* `Feature` File manager supports Explorer Action protocol v3 output transactions with bounded write-only content URIs, output validation, crash recovery, and atomic publication of sibling files
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting

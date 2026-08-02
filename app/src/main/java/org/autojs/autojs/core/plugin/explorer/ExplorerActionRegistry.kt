@@ -40,12 +40,19 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
             .forEach candidateLoop@{ candidate ->
                 val packageName = candidate.serviceInfo.packageName
                 val pluginInfo = candidate.pluginInfo ?: return@candidateLoop
-                if (!isAvailablePlugin(appContext, packageName, pluginInfo)) return@candidateLoop
+                val advertisedProtocolVersion = resolveProtocolVersion(pluginInfo)
+                if (!isAvailablePlugin(appContext, packageName, pluginInfo, advertisedProtocolVersion)) {
+                    return@candidateLoop
+                }
 
                 runCatching {
                     val catalog = ExplorerActionPluginHost.getActionCatalog(appContext, candidate)
                     val pluginTitle = resolvePluginTitle(appContext, packageName, pluginInfo)
-                    ExplorerActionCatalogParser.parse(packageName, catalog).forEach actionLoop@{ descriptor ->
+                    ExplorerActionCatalogParser.parse(
+                        packageName,
+                        catalog,
+                        requireNotNull(advertisedProtocolVersion),
+                    ).forEach actionLoop@{ descriptor ->
                         val component = ExplorerActionLauncher.resolveAndValidateActivity(
                             context = appContext,
                             packageName = packageName,
@@ -128,6 +135,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         context: Context,
         packageName: String,
         pluginInfo: PluginInfo,
+        advertisedProtocolVersion: Long?,
     ): Boolean {
         if (pluginInfo.engine != ExplorerActionPluginIds.ENGINE) return false
         if (!PluginEnableStore.isEnabled(context, packageName, true)) return false
@@ -140,11 +148,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         ) {
             return false
         }
-        @Suppress("DEPRECATION")
-        val protocolVersion = pluginInfo.capabilities
-            ?.get(ExplorerActionCapabilityKeys.PROTOCOL_VERSION)
-            ?.let(PluginCapabilityResolver::coerceLong)
-        if (!ExplorerActionAvailabilityPolicy.isProtocolSupported(protocolVersion)) {
+        if (!ExplorerActionAvailabilityPolicy.isProtocolSupported(advertisedProtocolVersion)) {
             return false
         }
         return ExplorerActionAvailabilityPolicy.isAbiCompatible(
@@ -152,6 +156,11 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
             Build.SUPPORTED_ABIS.asList(),
         )
     }
+
+    @Suppress("DEPRECATION")
+    private fun resolveProtocolVersion(pluginInfo: PluginInfo): Long? = pluginInfo.capabilities
+        ?.get(ExplorerActionCapabilityKeys.PROTOCOL_VERSION)
+        ?.let(PluginCapabilityResolver::coerceLong)
 
     private fun resolvePluginTitle(context: Context, packageName: String, pluginInfo: PluginInfo): String {
         return PluginResourceResolver.resolve(

@@ -16,6 +16,7 @@
         "Le système de plugins prend en charge une interface d'extension pour la documentation hors ligne du projet",
         "Le gestionnaire de fichiers prend en charge les extensions de plugin Explorer Action en lecture seule pour un seul fichier et charge dynamiquement leurs actions dans le menu supplémentaire de la page principale des fichiers",
         "Le gestionnaire de fichiers prend en charge les actions principales Explorer Action du protocole v2 pour fournir l'affichage d'images, la lecture audio et la lecture vidéo via trois plugins indépendants",
+        "Le gestionnaire de fichiers prend en charge les transactions de sortie du protocole Explorer Action v3 avec des URI de contenu en écriture seule et soumises à des limites, la validation des sorties, la récupération après plantage et la publication atomique de fichiers dans le même répertoire",
         "Le Centre des plugins propose une page de paramètres globaux et une page d'instructions",
         "Le Centre des plugins prend en charge le montage automatique des plugins SDK",
         "Le Centre des plugins prend en charge le tri par priorité de plusieurs variantes",

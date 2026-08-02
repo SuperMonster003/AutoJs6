@@ -14,4 +14,8 @@ object ExplorerActionCatalogKeys {
     const val PLACEMENT = "placement"
     const val MIME_TYPES = "mimeTypes"
     const val EXTENSIONS = "extensions"
+    const val OUTPUT_MODE = "outputMode"
+    const val OUTPUT_MIME_TYPES = "outputMimeTypes"
+    const val OUTPUT_NAME_SUFFIX = "outputNameSuffix"
+    const val MAX_OUTPUT_BYTES = "maxOutputBytes"
 }

@@ -12,6 +12,10 @@ internal data class ExplorerActionDescriptor(
     val placement: Int,
     val mimeTypes: Set<String>,
     val extensions: Set<String>,
+    val outputMode: Int,
+    val outputMimeTypes: Set<String>,
+    val outputNameSuffix: String?,
+    val maxOutputBytes: Long?,
 )
 
 internal data class ExplorerActionTarget(

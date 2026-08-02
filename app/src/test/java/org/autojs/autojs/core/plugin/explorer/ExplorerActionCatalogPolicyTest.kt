@@ -23,6 +23,10 @@ class ExplorerActionCatalogPolicyTest {
         assertEquals(10_000, descriptor.priority)
         assertEquals(setOf("text/markdown"), descriptor.mimeTypes)
         assertEquals(setOf("md", "markdown"), descriptor.extensions)
+        assertEquals(ExplorerActionValues.OUTPUT_NONE, descriptor.outputMode)
+        assertTrue(descriptor.outputMimeTypes.isEmpty())
+        assertNull(descriptor.outputNameSuffix)
+        assertNull(descriptor.maxOutputBytes)
     }
 
     @Test
@@ -152,9 +156,13 @@ class ExplorerActionCatalogPolicyTest {
     fun protocolAndHostVersionCompatibilityAreStrict() {
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(1L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(2L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(3L))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(3L))
+        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(4L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 3))
+        assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(2L, 3))
+        assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 3))
 
         assertTrue(ExplorerActionAvailabilityPolicy.isHostVersionCompatible(5_268L, 5_268L))
         assertTrue(ExplorerActionAvailabilityPolicy.isHostVersionCompatible(5_268L, null))

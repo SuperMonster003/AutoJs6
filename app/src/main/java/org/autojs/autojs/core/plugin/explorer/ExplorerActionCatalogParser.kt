@@ -7,10 +7,20 @@ import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 
 internal object ExplorerActionCatalogParser {
 
-    fun parse(packageName: String, catalog: Bundle): List<ExplorerActionDescriptor> {
+    fun parse(
+        packageName: String,
+        catalog: Bundle,
+        advertisedProtocolVersion: Long,
+    ): List<ExplorerActionDescriptor> {
         val protocolVersion = catalog.getInt(ExplorerActionCatalogKeys.PROTOCOL_VERSION, 0)
-        require(protocolVersion in ExplorerActionProtocol.MIN_SUPPORTED_VERSION..ExplorerActionProtocol.MAX_SUPPORTED_VERSION) {
-            "Unsupported Explorer Action catalog protocol version: $protocolVersion"
+        require(
+            ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(
+                advertisedProtocolVersion,
+                protocolVersion,
+            ),
+        ) {
+            "Explorer Action catalog protocol version $protocolVersion does not match advertised version " +
+                advertisedProtocolVersion
         }
         val actionBundles = BundleCompat.getParcelableArrayList(
             catalog,
@@ -36,8 +46,24 @@ internal object ExplorerActionCatalogParser {
                 placement = action.getInt(ExplorerActionCatalogKeys.PLACEMENT, 0),
                 mimeTypes = action.getStringArrayList(ExplorerActionCatalogKeys.MIME_TYPES),
                 extensions = action.getStringArrayList(ExplorerActionCatalogKeys.EXTENSIONS),
+                outputMode = action.getIntOrNull(ExplorerActionCatalogKeys.OUTPUT_MODE),
+                outputMimeTypes = action.getStringArrayList(ExplorerActionCatalogKeys.OUTPUT_MIME_TYPES),
+                outputNameSuffix = action.getStringOrNull(ExplorerActionCatalogKeys.OUTPUT_NAME_SUFFIX),
+                maxOutputBytes = action.getLongOrNull(ExplorerActionCatalogKeys.MAX_OUTPUT_BYTES),
             ) ?: return@mapNotNull null
             descriptor.takeIf { actionIds.add(it.id) }
         }
+    }
+
+    private fun Bundle.getIntOrNull(key: String): Int? {
+        return if (containsKey(key)) getInt(key) else null
+    }
+
+    private fun Bundle.getLongOrNull(key: String): Long? {
+        return if (containsKey(key)) getLong(key) else null
+    }
+
+    private fun Bundle.getStringOrNull(key: String): String? {
+        return if (containsKey(key)) getString(key) ?: "" else null
     }
 }

@@ -26,6 +26,10 @@ internal object ExplorerActionCatalogPolicy {
         placement: Int,
         mimeTypes: Collection<String>?,
         extensions: Collection<String>?,
+        outputMode: Int? = null,
+        outputMimeTypes: Collection<String>? = null,
+        outputNameSuffix: String? = null,
+        maxOutputBytes: Long? = null,
     ): ExplorerActionDescriptor? {
         if (
             protocolVersion !in
@@ -55,6 +59,19 @@ internal object ExplorerActionCatalogPolicy {
         val normalizedExtensions = normalizeMatchers(extensions, ::normalizeExtension)
         if (normalizedMimeTypes == null || normalizedExtensions == null) return null
         if (normalizedMimeTypes.isEmpty() && normalizedExtensions.isEmpty()) return null
+        val normalizedOutput = ExplorerActionOutputPolicy.normalize(
+            protocolVersion = protocolVersion,
+            outputMode = outputMode,
+            outputMimeTypes = outputMimeTypes,
+            outputNameSuffix = outputNameSuffix,
+            maxOutputBytes = maxOutputBytes,
+        ) ?: return null
+        if (
+            normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE &&
+            placement != ExplorerActionValues.PLACEMENT_OVERFLOW
+        ) {
+            return null
+        }
 
         return ExplorerActionDescriptor(
             protocolVersion = protocolVersion,
@@ -68,6 +85,10 @@ internal object ExplorerActionCatalogPolicy {
             placement = placement,
             mimeTypes = normalizedMimeTypes,
             extensions = normalizedExtensions,
+            outputMode = normalizedOutput.mode,
+            outputMimeTypes = normalizedOutput.mimeTypes,
+            outputNameSuffix = normalizedOutput.nameSuffix,
+            maxOutputBytes = normalizedOutput.maxBytes,
         )
     }
 
@@ -133,7 +154,7 @@ internal object ExplorerActionCatalogPolicy {
         return normalized.takeIf { it.length <= MAX_EXTENSION_LENGTH && extensionPattern.matches(it) }
     }
 
-    private fun normalizeMimeType(value: String): String? {
+    internal fun normalizeMimeType(value: String): String? {
         val normalized = value.substringBefore(';').trim().lowercase(Locale.ROOT)
         val parts = normalized.split('/')
         if (parts.size != 2) return null

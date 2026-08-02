@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputCoordinator
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.runtime.api.Mime
@@ -37,6 +38,18 @@ internal object ExplorerActionLauncher {
     }
 
     fun launch(
+        context: Context,
+        surface: ExplorerSurface,
+        item: ExplorerItem,
+        action: ResolvedExplorerAction,
+    ): Result<Unit> {
+        if (ExplorerActionOutputCoordinator.supports(action)) {
+            return ExplorerActionOutputCoordinator.launch(context, surface, item, action)
+        }
+        return launchReadOnly(context, surface, item, action)
+    }
+
+    private fun launchReadOnly(
         context: Context,
         surface: ExplorerSurface,
         item: ExplorerItem,

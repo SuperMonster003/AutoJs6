@@ -12,6 +12,11 @@ internal object ExplorerActionAvailabilityPolicy {
                 ExplorerActionProtocol.MAX_SUPPORTED_VERSION.toLong()
     }
 
+    fun isCatalogProtocolCompatible(advertisedProtocolVersion: Long?, catalogProtocolVersion: Int): Boolean {
+        return isProtocolSupported(advertisedProtocolVersion) &&
+                advertisedProtocolVersion == catalogProtocolVersion.toLong()
+    }
+
     fun isHostVersionCompatible(hostVersionCode: Long, requiresHostVersion: Long?): Boolean {
         return PluginCapabilityResolver.isHostVersionCompatible(hostVersionCode, requiresHostVersion)
     }

@@ -424,6 +424,18 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
+        <provider
+            android:name="org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputProvider"
+            android:authorities="${applicationId}.explorer_action_output"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
+        <activity
+            android:name="org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputProxyActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@style/AppTheme.Transparent" />
+
         <activity
             android:name="org.autojs.autojs.ui.edit.EditActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"

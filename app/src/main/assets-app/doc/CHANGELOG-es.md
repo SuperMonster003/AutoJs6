@@ -21,6 +21,7 @@
 * `Nuevo` El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión
 * `Nuevo` El explorador de archivos admite extensiones de plugin Explorer Action de solo lectura para un archivo y carga dinámicamente sus acciones en el menú adicional de la página principal de archivos
 * `Nuevo` El explorador de archivos admite acciones principales de Explorer Action con el protocolo v2 para ofrecer visualización de imágenes, reproducción de audio y reproducción de video mediante tres plugins independientes
+* `Nuevo` El administrador de archivos admite transacciones de salida del protocolo Explorer Action v3 con URI de contenido de solo escritura y límites definidos, validación de salida, recuperación tras fallos y publicación atómica de archivos en el mismo directorio
 * `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
 * `Nuevo` El Centro de plugins admite el montaje automático de plugins SDK
 * `Nuevo` El Centro de plugins admite la ordenación por prioridad de múltiples variantes
