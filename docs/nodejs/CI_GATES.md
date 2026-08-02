@@ -606,6 +606,31 @@ evidence is missing, blocked, stale, or failed:
 .\gradlew.bat --console=plain :app:verifyNodeFinalIntegrationGate
 ```
 
+The Phase 11 final status tasks rebuild their host-only Phase 10/13 inputs from
+current sources. `generateNodeFinalProviderStatus` still consumes the separately
+collected debug live-provider summary, because that evidence requires
+`autojs.nodejs.network.experimental=true` while release tasks must reject the
+same flag. The summary captures clean host identity before and after the device
+run, requires exactly one device and one 27-case JUnit XML, and copies that XML
+plus the exact app/androidTest APKs selected by UTP's `aapt` trace, the selection
+logs, and device bindings into a unique commit-and-run-keyed evidence snapshot.
+The snapshot keeps a hashed manifest and archived summary; the outer canonical
+and latest-attempt summaries are published atomically, while latest-valid is
+updated only by a clean policy-valid run. The final provider gate reparses the
+hashed XML and rejects missing, dirty, changed, mismatched, mutable-output,
+symlink/junction escape, or stale provenance. An archived `summary.json` can be
+replayed with `verify-final-provider-gate.js --live-summary PATH`.
+App-debug build, connected-test, snapshot, and `clean` tasks share a cross-
+process lock under the repository `.gradle/` directory. The collector still
+requires an exclusive source workspace: do not edit, checkout, or externally
+rewrite tracked inputs between the before/after identity captures.
+`generateNodeFinalSoakStatus` and `verifyNodeFinalSoakGate` consume the current
+R6 production reports under
+`build/reports/nodejs/r6-evidence/soak/`; the historical Phase 13 heavy-resource
+gate continues to own its original `build/reports/nodejs/final-soak/` contract.
+Final-soak delegates to the canonical R6 soak and source-identity contract
+rather than maintaining a weaker duplicate validator.
+
 Historical Phase 11/13 capability closure is necessary but is not sufficient
 for R6. Persistent process-global runtime reuse and the required external
 `plugin` lifecycle independently require current lifecycle, crash, memory, ABI,
@@ -691,13 +716,31 @@ accessibility/image, UI, and `work_manager`; fake-provider tests are excluded.
 It requires `autojs.nodejs.network.experimental=true` so fetch and WebSocket are
 real Android I/O instead of skipped, and writes
 `app/build/reports/nodejs/live-provider-summary.json` with per-test interaction,
-skip, and status metadata.
+skip, and status metadata, test-before/test-after host identity, and a unique
+commit-and-run-keyed snapshot containing one hashed JUnit XML, the UTP/aapt-
+selected app/androidTest APKs, selection logs, device bindings, and a frozen
+manifest/summary pair. Only the direct S7-16 gate publishes this canonical
+evidence; the broader Phase 7 aggregate cannot overwrite it. Final-provider
+requires every artifact real path to remain inside that immutable snapshot,
+reparses the XML, and requires the exact 27-case set, zero
+failures/errors, allowed skips with reasons, a Sony/full device, stable clean
+source identity matching current HEAD, and intact artifact hashes. OCR and
+Barcode health follows discoverable external plugin services,
+so an absent plugin is reported as `unavailable` rather than being promoted by
+a test constant. When several devices are attached, set `ANDROID_SERIAL` to the
+intended device before invoking Gradle; evidence generation fails if UTP emits
+more than one device identity or JUnit XML.
 `verifyNodeLiveFetchGate` is an explicit experimental subgate: it fails unless
 `autojs.nodejs.network.experimental=true` is set, then runs loopback
 controlled-fetch/axios Android I/O plus provider destroy cancellation coverage.
 `verifyNodeLiveWebSocketGate` follows the same opt-in rule for controlled
 WebSocket Android I/O, including loopback text/binary roundtrip, close,
-timeout/size-limit rejection, raw socket denial, and destroy cleanup.
+timeout/size-limit rejection, raw socket denial, and provider-destroy cleanup.
+Every owned close path queues a protocol Close without blocking, retains its
+transport connection quota until terminal acknowledgement, permits a
+two-second ACK window, then selectively cancels only a peer that withheld its
+Close ACK. The regression also covers explicit close followed by provider
+destroy, so a non-ACK transport cannot escape cleanup or bypass the limit.
 `verifyNodeLiveOcrGate` validates the live MLKit OCR provider over
 provider-owned image handles created by the scoped `image.readImage()` path,
 including region recognition, `image.recycle()`, unknown-handle denial, and

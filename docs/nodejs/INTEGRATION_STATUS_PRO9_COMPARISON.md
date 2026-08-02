@@ -10,7 +10,7 @@ JavaScript API，尤其是 `org/autojs/autojs/runtime/api/augment` 中主要 API
 当前版本基线来自根目录 `version.properties`：
 
 - `VERSION_NAME=6.8.0 Alpha7`
-- `VERSION_BUILD=5223`
+- `VERSION_BUILD=5244`
 - `MIN_SDK_VERSION=24`
 - `TARGET_SDK_VERSION=36`
 - `COMPILE_SDK_VERSION=36`
@@ -817,14 +817,27 @@ package-store blocker。
 R6 的 production-evidence freshness 是独立的 Core completion gate。当前默认
 交付已改为 required external `plugin`，embedded 路径也改为 persistent
 process-global runtime reuse，因此旧的 lifecycle、crash、memory、ABI、
-packaged、multi-device 和 soak closure 不能单独证明当前版本可发布。R6 仍需：
+packaged、multi-device 和 soak closure 不能单独证明当前版本可发布。
 
-- 从当前源码重新生成全部 Phase 11 final reports。
-- 用 production collector 取得 Sony `arm64-v8a`、Sony `armeabi-v7a`、
-  第二 OEM 物理 `arm64-v8a` 设备和 x86_64 emulator 的四份 current report。
-- 用当前 lifecycle 重新取得干净的 8 小时 quick soak 和 24 小时 final soak。
-- 让 final integration 和 release gate 在无 release-blocking report 的前提下
-  通过。
+截至 2026-08-02，host `ee97b790` / plugin `a904ee20` 候选已经取得四份
+13/13、零 failure/error/skip 的 device report，以及 8.000056 小时和
+24.000057 小时的 production soak；该 clean identity 的严格 R6 verifier
+曾以 `completed`、零 blocker、零 policy violation 通过。随后 final-gate
+审计修正了 host report producer，使 long-running 读取真实 Phase 13 JSON，令
+final-soak 复用 canonical R6 contract，并补齐 live-provider summary 的路径与
+source/artifact provenance，并将 XML/APK 固化到 commit+run 唯一的 immutable
+snapshot；同时修复 WebSocket destroy Close-frame 竞态、所有 close 路径的
+transport quota 保留、两秒 non-ACK 定向取消和外置 OCR/Barcode 插件状态测试。完整 Sony
+live-provider gate 当前为 27 个 expected case、零 failure/error、2 个
+policy-approved skip、零 policy violation。
+
+这些修正改变了 host 源码，所以不能把 `ee97b790` 的归档证据冒充为当前工作树
+证据。当前非严格 final summary 接受 10/13：final-soak 与 R6 aggregate 都
+传播 canonical dirty-host blocker；final-provider 还会拒绝本次虽通过 27 个
+case、但在 dirty worktree 上采集的报告。严格 final 因这三个 fail-closed
+视图而 blocked，release gate 因依赖它而不能通过。下一 clean successor
+commit 仍需重新采集 live-provider、四份 device report、8h/24h soak，并通过
+严格 final/release gate。
 
 Rhino/Node alternating 与 backend-switch focused regression 已于 2026-07-18
 在 Sony XQ-AT72 上以 2/2、零失败、零 error、零 skip 通过。这个结果只关闭
@@ -838,8 +851,9 @@ R6 collector 要求 host/plugin 两个 worktree 在运行前后保持 clean 且 
 final gate。完整命令和证据字段见
 [R6_ACCEPTANCE_EVIDENCE.md](R6_ACCEPTANCE_EVIDENCE.md)。
 
-在这些证据完成前，不应宣称 R6 或 Core completion 已通过；同时也不应把上述
-历史 capability blocker 重新描述为功能尚未实现。
+在 successor identity 的证据完成前，不应宣称 R6 或 Core completion 已通过；
+同时也不应抹去完整的 `ee97b790` candidate archive，或把上述历史 capability
+blocker 重新描述为功能尚未实现。
 
 ### Conditional decisions
 

@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Completion Roadmap
 
-Last updated: 2026-07-24
+Last updated: 2026-08-02
 
 This checklist separates two completion targets:
 
@@ -50,8 +50,9 @@ production Inspector are intentional boundaries rather than unfinished work.
   live gate on `arm64-v8a`, `armeabi-v7a`, and `x86_64` with no skipped tests.
 - [x] Resolve the narrative status drift between the closed historical blocker
   registry and the current R6 production-evidence requirement.
-- [ ] Complete the current R6 device, packaged, ABI, crash, memory, and soak
-  evidence before declaring Core completion.
+- [ ] Land the current R6 final-gate and live-provider corrections, recollect
+  production evidence for that clean successor source identity, and pass the
+  strict final/release gates before declaring Core completion.
 
 The focused performance reports on XQ-DQ72 recorded:
 
@@ -377,16 +378,61 @@ and the semantic evidence matrix are maintained in
 - [x] Reopen lifecycle, crash, memory, ABI, packaged, and soak evidence made
   stale by persistent runtime reuse through a separate fail-closed R6 evidence
   contract without rewriting the historical capability closures.
-- [ ] Close the reopened evidence requirement with current clean-source device
-  and soak reports.
+- [ ] Close the reopened evidence requirement with device and soak reports that
+  match the next clean source identity.
 - [x] Pass Rhino/Node alternating execution and backend-switch regression.
 - [x] Pass the fixed main app and packaged APK matrix: Sony `arm64-v8a`, Sony
   `armeabi-v7a`, a second-OEM physical `arm64-v8a` device, and an x86_64
   emulator.
-- [ ] Pass 8-hour quick soak and 24-hour final soak without monotonic leaks,
-  orphan processes, or unrecoverable slots.
+- [ ] Pass 8-hour quick soak and 24-hour final soak for that same clean source
+  identity without monotonic leaks, orphan processes, or unrecoverable slots.
 - [ ] Make `verifyNodeFinalIntegrationGate` and `verifyNodeReleaseGate` pass
   from a clean checkout with zero release-blocking reports.
+
+The archived candidate at host commit
+`ee97b7909eaf64daf1521e6f840c65c94569d2b5` and runtime-plugin commit
+`a904ee2011e93031db1178a0b2ff624b970e460f` reached a complete R6 evidence
+payload before the current corrections began. All four canonical device
+reports passed 13/13 selectors with zero failures, errors, or skips. The quick
+soak ran for 8.000056 hours with 979 cycles, 126 samples, and 49
+liveness/recoverability checks; the final soak ran for 24.000057 hours with
+2890 cycles, 329 samples, and 145 checks. Both soaks reported clean cleanup,
+continuous runtime reuse with fresh execution state, zero derived suspend,
+and no monotonic leak, orphan process, or unrecoverable runtime/slot. Against
+that clean identity the strict R6 verifier reported `completed`, zero blockers,
+and zero policy violations.
+
+The 2026-08-02 final-gate audit then corrected stale Phase 10/13 producer
+dependencies, made long-running consume the real Phase 13 JSON decision,
+reused the canonical R6 contract for final-soak validation, and corrected
+live-provider report discovery. A Sony live-provider run also exposed and
+fixed two stale external-plugin availability assertions plus a real WebSocket
+destroy race: provider shutdown had cancelled the OkHttp dispatcher before its
+queued Close frame could be sent. Every close path now sends the protocol
+Close, retains transport quota until a terminal callback or directed cancel,
+and selectively cancels a non-ACK peer after a two-second grace period without
+blocking provider destroy. The regression includes explicit
+close -> non-ACK -> destroy. The focused reruns and the complete 27-case
+live-provider gate pass; the complete summary records zero failures/errors,
+two policy-approved skips, and zero policy violations.
+
+Those corrections change the host source after the archived `ee97b790`
+identity. Live-provider evidence now records clean test-before/test-after host
+identity, requires one device/one exact 27-case XML, and snapshots that XML plus
+the UTP/aapt-selected app/androidTest APKs, selection logs, and device bindings.
+Each unique snapshot retains a hashed manifest and archived summary; canonical
+publication is atomic, and the final verifier reparses JUnit and validates real
+paths and hashes. Old summaries can no longer cross a commit boundary or be
+invalidated by a later connected test overwriting producer outputs. That overwrite/reverification regression
+passes with only the expected dirty-identity blockers. The regenerated
+non-strict final summary
+accepts 10 of 13 subreports. Final-soak, final-provider, and the R6 aggregate
+all fail closed on the same underlying condition: the current source is dirty
+and therefore cannot authorize archived or newly collected production
+evidence. The release gate remains transitively unavailable. Therefore the
+checkboxes above remain open until these changes are committed and the live
+provider summary, four device reports, both production soaks, and strict
+final/release decision are recollected from one clean successor identity.
 
 The R6 implementation checkpoint now includes a real multi-round engine-switch
 instrumentation gate, a persistent required-plugin soak harness, an evidence
@@ -397,11 +443,13 @@ worktrees, short soaks, and missing resource metrics remain explicit blockers;
 contract fixtures and short smoke runs cannot satisfy production evidence.
 
 The complete non-strict Phase 11 report set was regenerated from the current
-sources on 2026-07-19 with zero required-internal blockers and zero policy
-violations. Package-manager, Worker/WASI, security, adapter, crash,
-multi-instance, and focused-topology reports are ready. Long-running, provider,
-legacy soak, and the R6 aggregate reports remain honestly blocked by their
-recorded long-duration evidence requirements.
+sources on 2026-08-02 with zero required-internal blockers and zero policy
+violations. Capability truth, focused topology, adapter, crash, package
+manager, long-running, multi-instance, Worker/WASI, ABI, and security are
+accepted. Final-soak and the R6 aggregate propagate the dirty host identity;
+final-provider additionally rejects the live run because its before/after
+identity correctly records that these changes were uncommitted during
+collection.
 
 The focused `verifyNodeR6EngineSwitchGate` run on Sony XQ-AT72 passed both
 selectors with zero failures, errors, or skips on 2026-07-18. This closes only
@@ -431,8 +479,8 @@ stable runtime identity, and no detected leak or cleanup failure. It was
 correctly left unarchived because the final verifier treated Android's valid
 zero currently allocated native-heap value as a missing metric. The evidence
 contract now accepts non-negative allocated native heap only when committed
-native heap and native PSS remain positive; both production soaks still require
-fresh execution against that corrected source commit.
+native heap and native PSS remain positive. At that checkpoint both production
+soaks still required fresh execution against the corrected source commit.
 
 Subsequent long-run attempts exposed two harness defects rather than a runtime
 leak: a redundant cross-UID `/proc/<pid>/status` observation could fail even
@@ -475,7 +523,8 @@ compilation and a per-run daemon registry, so another checkout's global
 `packageInrtDebug` template and Runtime-Kit-backed Builder release are also
 compiled in separate sequential processes: their former combined 4 GB process
 failed with `GC overhead limit exceeded`, while both isolated rebuilds passed
-from the same clean commit. The four current device reports remain required.
+from the same clean commit. At that checkpoint all four device reports still
+required recollection.
 
 A subsequent clean Sony arm64 collection exercised all 13 selectors with zero
 skips and reached 12/13. Its only failure was the packaged crash-evidence
@@ -513,9 +562,13 @@ entry, and the remote builder accepts required libraries supplied by either the
 template or host build inputs. A focused Sony v7a rerun on 2026-07-25 passed
 all three packaged selectors with zero failures, errors, or skips in 127.477
 seconds; the individual test times were 25.345, 30.358, and 68.943 seconds.
-This focused dirty-source run is not archivable. Because the Runtime Kit repair
-changes the host commit, both Sony arm64 and v7a still require complete clean
-13/13 recollection before their reports can close the current R6 evidence set.
+This focused dirty-source run was not archivable. After the Runtime Kit repair
+landed, the clean `ee97b790` host / `a904ee20` plugin candidate recollected all
+four device targets at 13/13 with zero failures, errors, or skips. It then
+completed the 8-hour and 24-hour production soaks described above, making that
+candidate's R6 payload complete. The current successor corrections reopen only
+the immutable source-identity requirement; they do not erase the archived
+candidate result or authorize reusing it for different source bytes.
 
 Core completion command:
 

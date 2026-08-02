@@ -10,8 +10,11 @@ internal blockers. Those historical Phase 11/13 capability closures remain
 `closed`. They do not, by themselves, complete R6: persistent process-global
 runtime reuse and the required external `plugin` lifecycle make lifecycle,
 crash, memory, ABI, packaged, and soak evidence freshness an independent Core
-completion gate. R6 remains pending until the final reports are regenerated
-from the current build and the required device evidence passes.
+completion gate. The archived `ee97b790` host / `a904ee20` plugin candidate has
+a complete four-device and 8h/24h R6 payload, but current successor corrections
+change the host source identity. R6 therefore remains pending until matching
+evidence is recollected and strict final/release verification passes from that
+clean successor build.
 
 Current entry points:
 
@@ -50,8 +53,25 @@ Strict final gates such as `verifyNodeFinalCapabilityTruth`,
 `verifyNodeFinalAbiGate`, `verifyNodeFinalSecurityGate`, and
 `verifyNodeFinalIntegrationGate` must fail closed on missing, stale, blocked, or
 failed required evidence. The registry no longer blocks them through an open
-required capability item; R6 production-evidence freshness still blocks Core
-completion until the current lifecycle and device matrix are revalidated.
+required capability item. On 2026-08-02 the regenerated aggregate accepted 10
+of 13 subreports. Final-soak and the R6 aggregate both propagate the canonical
+dirty-host identity blocker; final-provider also rejects its otherwise passing
+Sony run because the new before/after provenance records that collection took
+place while these corrections were uncommitted.
+
+The final status graph regenerates host-only Phase 10/13 prerequisite reports.
+The live-provider summary remains a separate debug-device prerequisite because
+its required network experiment is forbidden in release tasks. Its schema binds
+the result to a clean, stable host commit and snapshots exactly one 27-case
+JUnit XML plus the UTP/aapt-selected app/androidTest APKs, selection logs, and
+device bindings under a unique commit-and-run key. A hashed manifest and archived
+summary make each attempt replayable, while canonical publication is atomic.
+Final-provider reparses JUnit, validates manifest/summary agreement and artifact
+real paths, and compares hashes plus source identity with the current checkout.
+The final soak status consumes the current
+R6 8-hour/24-hour reports through the same canonical R6 contract, including
+source identity; the older Phase 13 final-soak paths remain historical Phase 13
+gate inputs.
 
 R6 uses four canonical device reports: Sony `arm64-v8a`, Sony
 `armeabi-v7a`, a non-Sony physical OEM device on `arm64-v8a`, and an x86_64

@@ -27,12 +27,14 @@ Phase 13 required blocker.
   so Android 15 background-service-start policy does not block the packaged
   Stop path.
 - Focused packaged smoke grants packaged runtime permissions including
-  `POST_NOTIFICATIONS`, verifies the foreground notification Stop action,
-  triggers Stop as the packaged APK UID with
-  `run-as ... am broadcast --user 0 --receiver-foreground`, observes stopped
-  status with `stopRequested=true`, records `NodeCrashEvidenceStore` clean-exit
-  evidence, and verifies the clean Stop is not collected as next-launch crash
-  evidence.
+  `POST_NOTIFICATIONS`, verifies the foreground notification Stop action, and
+  uses an ordered shell broadcast to the exported
+  `NativeNodeEmbeddedInteractiveShellReceiver`. That receiver is protected by
+  `android.permission.DUMP`, accepts query/Stop requests from `adb shell`, and
+  leaves the notification Stop receiver non-exported. The smoke observes
+  stopped status with `stopRequested=true`, records `NodeCrashEvidenceStore`
+  clean-exit evidence, and verifies the clean Stop is not collected as
+  next-launch crash evidence.
 - The same focused smoke removes the packaged Activity task with
   `am stack remove <taskId>`, verifies `NativeNodeEmbeddedScriptService`
   receives `onTaskRemoved`, writes stopped status with `stopRequested=true`,

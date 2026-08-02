@@ -149,7 +149,19 @@ On script stop, timeout, service destroy, or process shutdown:
 - release provider handles
 - prevent callbacks from re-entering a destroyed Node environment
 
+Provider close requests retain the underlying transport/quota until OkHttp
+reports a terminal callback. A peer that withholds its Close ACK is selectively
+cancelled after a two-second grace period; provider destroy queues Close frames
+and returns without waiting for that grace period. Close codes, header values,
+and the 123-byte UTF-8 close reason limit are validated before registration or
+quota mutation, and an oversized inbound message uses the same bounded-close
+path.
+
 Callbacks into JavaScript must be marshalled onto the Node event loop thread.
+The plugin host Broker serializes them through a queue bounded by the bridge's
+pending-call limit. Destroy seals admission and drops callbacks that have not
+started before provider resources are torn down; Binder callbacks never execute
+while holding the provider WebSocket lifecycle lock.
 
 ## Bridge Protocol
 
@@ -232,6 +244,9 @@ Covered paths:
 - unsupported scheme rejection
 - connect timeout
 - service destroy rejects pending connection
+- invalid headers, close codes, and UTF-8 close reasons do not leak quota
+- non-ACK and oversized-message close paths receive a directed two-second cancel
+- host Broker destroy suppresses queued and late provider callbacks
 - raw `net.connect()` remains denied
 - raw `tls.connect()` remains denied
 - normal Android provider rejects with `ERR_AUTOJS6_NETWORK_DISABLED`
@@ -248,8 +263,10 @@ This explicit experimental subgate uses an on-device loopback WebSocket server
 and the Android OkHttp provider. It covers connect, headers, protocol
 negotiation, text and binary messages, close, inbound message-size rejection,
 connect timeout, raw `net`/`tls` denial, diagnostics, and provider destroy
-cleanup. It does not make controlled WebSocket default-on and does not expose
-raw socket modules.
+cleanup. Cooperating and non-ACK peers prove protocol Close plus directed cancel,
+and the host Broker proves bounded callback admission and post-destroy
+suppression. It does not make controlled WebSocket default-on and does not
+expose raw socket modules.
 
 ## Non-Goals
 
