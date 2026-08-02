@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/02
+###### 2026/08/03
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -18,6 +18,7 @@
 * `Nuevo` El backend del plugin de runtime Node.js externo admite el transporte de archivo de espacio de trabajo v2 por solicitud, con mapeo explícito de entradas, escritura de resultados y manifiesto tombstone de eliminación, sin escanear el sandbox del host
 * `Nuevo` La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias
 * `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversión de texto/información multimedia y más
+* `Nuevo` El sistema de plugins ofrece transporte TaggedWire versionado y paquetes de protocolo de desarrollo v1 para compilación DEX y generación de texto AI neutral respecto al proveedor, con proveedores de conformidad aislados y escenarios hostiles
 * `Nuevo` El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión
 * `Nuevo` El explorador de archivos admite extensiones de plugin Explorer Action de solo lectura para un archivo y carga dinámicamente sus acciones en el menú adicional de la página principal de archivos
 * `Nuevo` El explorador de archivos admite acciones principales de Explorer Action con el protocolo v2 para ofrecer visualización de imágenes, reproducción de audio y reproducción de video mediante tres plugins independientes
@@ -144,6 +145,7 @@
 * `Mejora` Consolidadas las consultas de detalles multimedia del administrador de archivos en una única instantánea de MediaInfo para reducir las llamadas Binder y el tiempo de espera
 * `Mejora` Limitadas las alternativas de visualización y reproducción externas a permisos URI de solo lectura
 * `Mejora` Unificadas las acciones de plugins del administrador de archivos para clic predeterminado, botón principal, reproducción desde detalles multimedia y menú overflow bajo una política explícita de la página principal de archivos con un único fallback determinista
+* `Mejora` La ruta experimental del host para el compilador DEX aplica la fijación del UID del componente exacto y del conjunto completo de firmantes, fallback de despacho único, procedencia semántica de caché, entrada de callbacks acotada, plazos Binder aislados y publicación de una copia verificada tras la validación estructural del ZIP DEX
 * `Mejora` Modularizados como plugin instalable por separado el runtime WebView de Ace/el bridge JavaScript/los servicios de lenguaje integrados/los recursos estáticos, reduciendo el acoplamiento con el APK anfitrión y permitiendo actualizaciones independientes
 * `Mejora` Modularizada la documentación del proyecto sin conexión como plugin, reduciendo el tamaño del APK anfitrión y permitiendo su instalación y actualización independientes
 * `Mejora` Trasladados el análisis del inventario y la verificación SHA-256 completa de la documentación del proyecto sin conexión durante la primera carga a un hilo en segundo plano para evitar bloquear la interfaz

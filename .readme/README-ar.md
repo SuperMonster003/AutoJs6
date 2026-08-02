@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 2 August 2026.
+تم تحديث البيانات في 3 August 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/08/02
+###### 2026/08/03
 
 * `إضافة جديدة` بيئة تشغيل نصوص Node.js 24.5.0, تدعم التشغيل عبر توجيه "nodejs" او امتدادات مثل .node.js/.cjs/.mjs
 * `إضافة جديدة` بيئة تشغيل Node.js تدعم CommonJS و ESM جزئيا و import() الديناميكي المحلي فقط ومصادر TypeScript الخفيفة (.ts/.mts/.cts)
@@ -178,6 +178,7 @@
 * `إضافة جديدة` الواجهة الخلفية لملحق بيئة تشغيل Node.js الخارجية تدعم نقل ارشيف مساحة العمل v2 لكل طلب, مع تعيين صريح للمدخلات واعادة كتابة المخرجات وبيان tombstone للحذف من دون فحص sandbox المضيف
 * `إضافة جديدة` ميزة تحزيم التطبيقات تدعم مشاريع نصوص Node.js وتتضمن مكتبات التشغيل المطلوبة تلقائيا
 * `إضافة جديدة` نظام الاضافات يدعم واجهات توسعة ل Node.js و ML Kit OCR و ML Kit Barcode و Rapid OCR و OpenCV و Image Quantization وتحويل النص ومعلومات الوسائط وغيرها
+* `إضافة جديدة` يوفر نظام الاضافات نقل TaggedWire باصدارات وحزم بروتوكول تطوير v1 لتجميع DEX وتوليد نصوص AI المحايد للموفر, مع موفري توافق معزولين وحالات اختبار عدائية
 * `إضافة جديدة` يدعم نظام الاضافات واجهة توسعة لوثائق المشروع بلا اتصال
 * `إضافة جديدة` يدعم مدير الملفات امتدادات مكونات Explorer Action الاضافية للقراءة فقط لملف واحد, ويحمل اجراءاتها ديناميكيا في القائمة الاضافية لصفحة الملفات الرئيسية
 * `إضافة جديدة` يدعم مدير الملفات اجراءات Explorer Action الاساسية بالبروتوكول v2 لتوفير عرض الصور وتشغيل الصوت وتشغيل الفيديو عبر ثلاثة مكونات اضافية مستقلة
@@ -304,6 +305,7 @@
 * `تحسين` دمج استعلامات تفاصيل الوسائط في مدير الملفات في لقطة MediaInfo واحدة لتقليل استدعاءات Binder ووقت الانتظار
 * `تحسين` تقييد مسارات الرجوع لعرض الملفات وتشغيل الوسائط الخارجية بمنح الوصول للقراءة فقط عبر URI
 * `تحسين` توحيد النقر الافتراضي وزر الاجراء الرئيسي وتشغيل تفاصيل الوسائط وقائمة overflow لاضافات مدير الملفات ضمن سياسة صريحة لصفحة الملفات الرئيسية مع مسار رجوع واحد حتمي
+* `تحسين` يفرض مسار المضيف التجريبي لمترجم DEX تثبيت UID للمكون الدقيق ومجموعة الموقعين الكاملة, والرجوع بعد ارسال واحد, وتتبع مصدر ذاكرة التخزين المؤقت الدلالي, ومدخلا محدودا لردود الاتصال, ومهلات Binder معزولة, ونشر نسخة متحقق منها بعد التحقق البنيوي من ملف DEX ZIP
 * `تحسين` تم تحويل بيئة تشغيل WebView الخاصة بمحرر Ace وجسر JavaScript وخدمات اللغة المضمنة والموارد الثابتة الى مكون اضافي قابل للتثبيت بشكل مستقل, مما يقلل الارتباط ب APK المضيف ويدعم التحديث المستقل
 * `تحسين` تم تحويل وثائق المشروع بلا اتصال الى اضافة, مما يقلل حجم APK المضيف ويدعم التثبيت والتحديث المستقلين
 * `تحسين` نقل تحليل قائمة ملفات وثائق المشروع بلا اتصال والتحقق الكامل SHA-256 عند التحميل الأول إلى خيط في الخلفية لتجنب حجب واجهة المستخدم
@@ -606,7 +608,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 2 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 3 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/02
+###### 2026/08/03
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -18,6 +18,7 @@
 * `Feature` External Node.js runtime plugin backend supports request-scoped workspace archive transport v2 with explicit input mapping, output writeback, and deletion tombstone manifests without scanning the host sandbox
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/text conversion/media information and more
+* `Feature` Plugin system provides versioned TaggedWire transport and v1 developer protocol packs for DEX compilation and provider-neutral AI text generation, with isolated conformance providers and hostile fixtures
 * `Feature` Plugin system supports an extension interface for offline project documentation
 * `Feature` File manager supports single-file read-only Explorer Action plugin extensions and dynamically loads their actions in the overflow menu of the main file page
 * `Feature` File manager supports Explorer Action protocol v2 primary actions to provide image viewing, audio playback, and video playback through three independent plugins
@@ -144,6 +145,7 @@
 * `Improvement` Consolidated file manager media detail queries into a single MediaInfo snapshot to reduce Binder calls and wait time
 * `Improvement` Limited external file viewing and media playback fallbacks to read-only URI access
 * `Improvement` Unified file manager plugin actions for default clicks, primary buttons, media detail playback, and the overflow menu under an explicit main-file-page policy with one deterministic fallback
+* `Improvement` DEX compiler experimental host path enforces exact-component UID and complete signer-set pinning, single-dispatch fallback, semantic cache provenance, bounded callback ingress, isolated Binder deadlines, and verified-copy publication after structural DEX ZIP validation
 * `Improvement` Modularized the Ace WebView runtime/JavaScript bridge/built-in language services/static assets as a separately installable plugin, reducing host APK coupling and allowing independent updates
 * `Improvement` Modularized offline project documentation as a plugin, reducing the host APK size and supporting independent installation and updates
 * `Improvement` Moved offline project documentation inventory parsing and full SHA-256 verification on first load to a background thread to avoid blocking the UI

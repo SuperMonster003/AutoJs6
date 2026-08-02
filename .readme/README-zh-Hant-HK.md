@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-數據更新於 2026 年 8 月 2 日.
+數據更新於 2026 年 8 月 3 日.
 
 數據條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/08/02
+###### 2026/08/03
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -178,6 +178,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Node.js 外部運行時插件後端支援請求級工作區歸檔傳輸 v2, 包含顯式輸入映射/輸出回寫/刪除 tombstone 清單, 且不掃描宿主沙盒
 * `新增` 打包功能支持 Node.js 腳本項目, 並自動包含所需運行庫
 * `新增` 插件系統支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本轉換/媒體信息等擴展接口
+* `新增` 插件系統提供版本化 TaggedWire 傳輸及 DEX 編譯與供應商中立 AI 文本生成 v1 開發協議包, 並配備隔離的一致性測試插件及惡意場景夾具
 * `新增` 插件系統支持離線項目文檔擴展接口
 * `新增` 文件管理器支持單文件只讀 Explorer Action 插件擴展接口, 並在主文件頁面的更多菜單中動態加載插件動作
 * `新增` 文件管理器支持 Explorer Action 協議 v2 主操作, 通過三個獨立插件提供圖像查看, 音頻播放和視頻播放
@@ -304,6 +305,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 文件管理器將媒體詳情查詢整合為單次 MediaInfo 快照, 減少 Binder 調用及等待時間
 * `優化` 文件外部查看與媒體播放回退只授予 URI 讀取權限
 * `優化` 統一文件管理器默認點擊, 主要按鈕, 媒體詳情播放和 overflow 菜單插件動作, 通過顯式主文件頁介面策略提供確定性的單次回退
+* `優化` DEX 編譯器實驗性宿主路徑實施精確組件 UID 與完整簽名者集合鎖定, 單次分派回退, 語義緩存來源追蹤, 有界回調入口, 隔離 Binder 超時及結構化 DEX ZIP 校驗後的已驗證副本發佈
 * `優化` Ace WebView 運行時/JavaScript bridge/內置語言服務/靜態資源完成插件化, 降低宿主 APK 耦合並支持獨立安裝及更新
 * `優化` 項目離線文檔完成插件化, 降低宿主 APK 體積並支持獨立安裝及更新
 * `優化` 離線項目文檔首次加載的文件清單解析及完整 SHA-256 校驗移至後台線程, 避免阻塞界面
@@ -606,7 +608,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 2 日, AutoJs6 可支持 JDK 最高版本為 `26`.
+截至 2026 年 8 月 3 日, AutoJs6 可支持 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

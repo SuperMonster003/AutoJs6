@@ -10,6 +10,14 @@ authorize a mixed-modality AI plugin.
 Proceed with a limited GO for a build-time AI protocol pack and a fake
 conformance provider.
 
+Implementation status on 2026-08-03: Phase 1 is implemented as a
+provider-neutral text protocol pack and isolated fake provider. Phase 2 host
+selection remains open, so installing the fixture has no user-facing effect.
+Repository and Android runtime gates are tracked in
+[the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
+contract is documented in
+[AI Text Plugin Protocol V1](ai-text-plugin-protocol-v1.md).
+
 V1 supports provider-neutral text generation only: one-shot chat, chat over a
 supplied message history, streaming text, reasoning metadata, tool-call
 descriptions, tool results, usage, cancellation, and capability discovery. One

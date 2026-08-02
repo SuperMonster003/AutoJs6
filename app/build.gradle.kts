@@ -598,6 +598,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Common API
     implementation(project(":plugin-api:common-plugin-api"))
 
+    // Plugin API: DEX Compiler API
+    implementation(project(":plugin-api:dex-compiler-api"))
+
     // Plugin API: Editor API
     implementation(project(":plugin-api:editor-api"))
 

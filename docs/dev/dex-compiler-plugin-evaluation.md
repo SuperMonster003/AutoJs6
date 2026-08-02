@@ -9,6 +9,13 @@ runtime loading path.
 
 Proceed with a phased GO for a standalone D8 compiler plugin.
 
+Implementation status on 2026-08-03: the V1 protocol pack, isolated fake
+provider, and experimental host harness are implemented. The harness remains
+disconnected from the default class-loading path while the Android runtime
+gates in [the conformance matrix](compiler-ai-protocol-conformance.md) are
+pending. The frozen implementation contract is documented in
+[DEX Compiler Protocol V1](dex-compiler-protocol-v1.md).
+
 The v1 protocol is limited to bounded bytecode-to-DEX conversion. It does not
 assume byte-for-byte deterministic D8 output and does not expose R8 shrinking,
 optimization, obfuscation, resource shrinking, mapping generation, retracing,

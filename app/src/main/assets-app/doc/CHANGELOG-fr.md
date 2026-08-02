@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/02
+###### 2026/08/03
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -18,6 +18,7 @@
 * `Fonctionnalité` Le backend du plugin d'exécution Node.js externe prend en charge le transport d'archive d'espace de travail v2 limité à la requête, avec mappage explicite des entrées, réécriture des sorties et manifeste tombstone de suppression, sans analyser le sandbox hôte
 * `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
 * `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversion de texte/informations multimédias et plus encore
+* `Fonctionnalité` Le système de plugins fournit un transport TaggedWire versionné et des packs de protocole de développement v1 pour la compilation DEX et la génération de texte AI indépendante du fournisseur, avec des fournisseurs de conformité isolés et des scénarios hostiles
 * `Fonctionnalité` Le système de plugins prend en charge une interface d'extension pour la documentation hors ligne du projet
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge les extensions de plugin Explorer Action en lecture seule pour un seul fichier et charge dynamiquement leurs actions dans le menu supplémentaire de la page principale des fichiers
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge les actions principales Explorer Action du protocole v2 pour fournir l'affichage d'images, la lecture audio et la lecture vidéo via trois plugins indépendants
@@ -144,6 +145,7 @@
 * `Amélioration` Regroupement des requêtes de détails multimédias du gestionnaire de fichiers en un seul instantané MediaInfo afin de réduire les appels Binder et le temps d'attente
 * `Amélioration` Limitation des replis d'affichage et de lecture externes aux accès URI en lecture seule
 * `Amélioration` Unification des actions de plugins du gestionnaire de fichiers pour le clic par défaut, le bouton principal, la lecture depuis les détails multimédias et le menu overflow sous une politique explicite de la page principale des fichiers avec un repli unique et déterministe
+* `Amélioration` Le chemin hôte expérimental du compilateur DEX impose l'épinglage de l'UID du composant exact et de l'ensemble complet des signataires, un repli à répartition unique, la provenance sémantique du cache, une entrée de callbacks bornée, des délais Binder isolés et la publication d'une copie vérifiée après validation structurelle du ZIP DEX
 * `Amélioration` Modularisation du runtime WebView Ace/du bridge JavaScript/des services de langage intégrés/des ressources statiques sous forme de plugin installable séparément, afin de réduire le couplage avec l'APK hôte et de permettre des mises à jour indépendantes
 * `Amélioration` Modularisation de la documentation hors ligne du projet sous forme de plugin, afin de réduire la taille de l'APK hôte et de permettre une installation et des mises à jour indépendantes
 * `Amélioration` Déplacement de l'analyse de l'inventaire et de la vérification SHA-256 complète de la documentation de projet hors ligne au premier chargement vers un thread d'arrière-plan afin de ne pas bloquer l'interface

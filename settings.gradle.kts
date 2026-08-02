@@ -41,6 +41,10 @@ private val libs = listOf(
 
 private val pluginApi = listOf(
     "common-plugin-api",
+    "protocol-wire-api",
+    "ai-common-api",
+    "ai-text-generation-api",
+    "dex-compiler-api",
     "editor-api",
     "explorer-action-api",
     "nodejs-api",
@@ -59,7 +63,9 @@ private val pluginApi = listOf(
 )
 
 private val plugins = listOf(
+    "ai-text-provider-fake",
     "apk-builder-template",
+    "dex-compiler-fake",
 )
 
 include(

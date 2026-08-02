@@ -47,6 +47,9 @@
             <action android:name="org.autojs.plugin.APK_BUILDER" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.DEX_COMPILER" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.EDITOR" />
             <category android:name="ace-editor" />
         </intent>
