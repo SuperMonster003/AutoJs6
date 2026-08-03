@@ -703,6 +703,10 @@ Desktop Node differential harness:
 node tools/nodejs/differential/run-differential-tests.js
 ```
 
+The HTTP client and FormData/fetch policy probes use manifest-selected API-shape desktop companions that perform no
+live I/O. Android continues to execute the original fixture entry points and must observe the exact default-denial
+markers; the runner rejects missing, unknown, malformed, or conflicting AutoJs6 records before comparing results.
+
 This host-side script runs the fixed real npm fixtures under desktop Node 24 and writes:
 
 ```text

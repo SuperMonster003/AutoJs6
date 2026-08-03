@@ -32,6 +32,9 @@ $env:ANDROID_SERIAL='QV710AF65F'
 - ESM package metadata remains allowed only below fixture `node_modules`
 - raw network authority remains denied by default; HTTP/fetch fixtures verify
   denial or controlled facade behavior instead of performing live I/O
+- the desktop differential runner uses API-shape-only companion entry points for
+  the HTTP/fetch policy fixtures, so stock Node proves its normal surface without
+  live I/O while the embedded fixture continues to prove AutoJs6 default denial
 - watcher coverage is compatibility-oriented; Android file-event delivery can be
   coalesced, so the real npm fixture requires creation and cleanup while the
   focused watcher gate owns event semantics

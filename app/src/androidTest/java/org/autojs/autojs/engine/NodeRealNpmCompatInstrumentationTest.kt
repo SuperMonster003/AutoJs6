@@ -28,6 +28,7 @@ class NodeRealNpmCompatInstrumentationTest {
         val workDir = copyCorpusToTemp("node-real-npm-metadata")
         try {
             val corpusRoot = File(workDir, CORPUS_ASSET_DIR)
+            val manifest = JSONObject(File(corpusRoot, "manifest.json").readText())
             val fixtures = readFixtures(corpusRoot)
             assertEquals("unexpected real npm fixture count", EXPECTED_FIXTURE_COUNT, fixtures.size)
             assertTrue("real npm corpus should grow beyond the Phase 8 baseline", fixtures.size > PHASE8_FIXTURE_COUNT)
@@ -36,9 +37,10 @@ class NodeRealNpmCompatInstrumentationTest {
             assertEquals(EXPECTED_FIXTURE_COUNT - PHASE9_FIXTURE_COUNT, fixtures.size - PHASE9_FIXTURE_COUNT)
             assertRequiredPatternsPresent(fixtures)
             assertPhase13CompatibilityMetadata(
-                manifest = JSONObject(File(corpusRoot, "manifest.json").readText()),
+                manifest = manifest,
                 fixtureNames = fixtures.map { it.name }.toSet(),
             )
+            assertDifferentialFixtureMetadata(manifest, corpusRoot)
 
             fixtures.forEach { fixture ->
                 val fixtureDir = File(corpusRoot, fixture.name)
@@ -187,11 +189,16 @@ class NodeRealNpmCompatInstrumentationTest {
                   throw new Error("real npm fixture " + name + " does not export a runner");
                 }
                 const captured = [];
+                const capturedError = [];
                 const originalLog = console.log;
                 const originalError = console.error;
                 console.log = function captureFixtureLog() {
                   const line = Array.prototype.map.call(arguments, String).join(" ");
                   captured.push(line);
+                };
+                console.error = function captureFixtureError() {
+                  const line = Array.prototype.map.call(arguments, String).join(" ");
+                  capturedError.push(line);
                 };
                 try {
                   const result = await run();
@@ -199,32 +206,53 @@ class NodeRealNpmCompatInstrumentationTest {
                     throw new Error("real npm fixture " + name + " returned " + result);
                   }
                   console.log = originalLog;
+                  console.error = originalError;
                   const stdout = captured.join("\n");
+                  const stderr = capturedError.join("\n");
                   const expectedOutput = expected[name] || "";
                   const expectedOutputFound = stdout.indexOf(expectedOutput) >= 0;
                   if (stdout.length > 0) {
                     originalLog(stdout);
+                  }
+                  if (stderr.length > 0) {
+                    originalError(stderr);
                   }
                   originalLog("realnpm.fixture." + name + "=PASS");
                   originalError("realnpm.differential.result=" + JSON.stringify({
                     runtime: "autojs6",
                     fixture: name,
                     exitCode: 0,
+                    stdout,
+                    stderr,
+                    errorCode: "",
+                    errorMessage: "",
+                    errorMessagePattern: "",
+                    expectedOutput,
                     expectedOutputFound,
                   }));
                 } catch (error) {
                   console.log = originalLog;
+                  console.error = originalError;
                   const stdout = captured.join("\n");
+                  const stderr = capturedError.join("\n");
+                  const expectedOutput = expected[name] || "";
                   if (stdout.length > 0) {
                     originalLog(stdout);
+                  }
+                  if (stderr.length > 0) {
+                    originalError(stderr);
                   }
                   originalError("realnpm.differential.result=" + JSON.stringify({
                     runtime: "autojs6",
                     fixture: name,
                     exitCode: 1,
-                    errorCode: String(error && error.code || ""),
+                    stdout,
+                    stderr,
+                    errorCode: String(error && (error.autojs6Code || error.code) || ""),
                     errorMessage: String(error && error.message || error),
                     errorMessagePattern: String(error && error.message || error).replace(/\d+/g, "<n>"),
+                    expectedOutput,
+                    expectedOutputFound: stdout.indexOf(expectedOutput) >= 0,
                   }));
                   throw error;
                 }
@@ -264,6 +292,67 @@ class NodeRealNpmCompatInstrumentationTest {
         REQUIRED_REAL_NPM_PATTERNS.forEach { pattern ->
             assertTrue("missing real npm pattern: $pattern in $patterns", pattern in patterns)
         }
+    }
+
+    private fun assertDifferentialFixtureMetadata(manifest: JSONObject, corpusRoot: File) {
+        val fixtures = manifest.getJSONArray("fixtures")
+        val classified = mutableMapOf<String, String>()
+        for (index in 0 until fixtures.length()) {
+            val fixture = fixtures.getJSONObject(index)
+            val name = fixture.getString("name")
+            val classification = fixture.optString("expectedClassification")
+            if (classification.isBlank()) {
+                assertFalse("desktop fixture requires an expected classification: $name", fixture.has("desktop"))
+                continue
+            }
+            assertTrue(
+                "unsupported differential classification for $name: $classification",
+                classification in DIFFERENTIAL_CLASSIFICATIONS,
+            )
+            assertTrue("differential reason missing for $name", fixture.optString("reason").isNotBlank())
+            classified[name] = classification
+
+            when (classification) {
+                "expected AutoJs6 restriction" -> {
+                    assertTrue(
+                        "AutoJs6 restriction marker missing for $name",
+                        fixture.optString("autoJsRestrictionPattern").isNotBlank(),
+                    )
+                    val desktop = fixture.getJSONObject("desktop")
+                    val fixtureDir = File(corpusRoot, name)
+                    val desktopTest = resolveFixtureMetadataFile(fixtureDir, desktop.getString("test"), "$name desktop test")
+                    val desktopExpected = resolveFixtureMetadataFile(
+                        fixtureDir,
+                        desktop.getString("expected"),
+                        "$name desktop expected output",
+                    )
+                    assertTrue("desktop test must stay CommonJS: $name", desktopTest.name.endsWith(".cjs"))
+                    assertTrue("desktop expected output must be text: $name", desktopExpected.name.endsWith(".txt"))
+                    assertTrue("desktop expected output must not be blank: $name", desktopExpected.readText().trim().isNotBlank())
+                }
+
+                "flaky" -> {
+                    val pattern = fixture.optString("allowedOutputPattern")
+                    assertTrue("flaky output allowlist missing for $name", pattern.isNotBlank())
+                    Regex(pattern)
+                    assertFalse("flaky fixture must use its shared test entry: $name", fixture.has("desktop"))
+                }
+            }
+        }
+        assertEquals(DIFFERENTIAL_FIXTURE_CLASSIFICATIONS, classified)
+    }
+
+    private fun resolveFixtureMetadataFile(fixtureDir: File, relativePath: String, label: String): File {
+        assertTrue("$label path must not be blank", relativePath.isNotBlank())
+        assertFalse("$label path must be relative: $relativePath", File(relativePath).isAbsolute)
+        val canonicalRoot = fixtureDir.canonicalFile
+        val candidate = File(canonicalRoot, relativePath).canonicalFile
+        assertTrue(
+            "$label escapes fixture root: $relativePath",
+            candidate != canonicalRoot && candidate.toPath().startsWith(canonicalRoot.toPath()),
+        )
+        assertTrue("$label file is missing: ${candidate.absolutePath}", candidate.isFile)
+        return candidate
     }
 
     private fun assertPhase13CompatibilityMetadata(manifest: JSONObject, fixtureNames: Set<String>) {
@@ -377,6 +466,12 @@ class NodeRealNpmCompatInstrumentationTest {
             "network",
             "fs",
             "package_manager",
+        )
+        private val DIFFERENTIAL_CLASSIFICATIONS = setOf("expected AutoJs6 restriction", "flaky")
+        private val DIFFERENTIAL_FIXTURE_CLASSIFICATIONS = mapOf(
+            "http-client-package" to "expected AutoJs6 restriction",
+            "formdata-fetch-package" to "expected AutoJs6 restriction",
+            "fs-watch-package" to "flaky",
         )
         private val REQUIRED_REAL_NPM_PATTERNS = setOf(
             "ESM-only small package",

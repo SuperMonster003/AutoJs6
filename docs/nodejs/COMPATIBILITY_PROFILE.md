@@ -475,7 +475,8 @@ per-request proxy configuration denial. The corpus runs with a fake controlled
 fetch bridge transport and an enforced `network` manifest; it does not install
 packages, use live network I/O, load native addons, or expose raw sockets.
 
-`tools/nodejs/differential/run-differential-tests.js` runs the same fixed fixtures under desktop Node 24 and writes a
+`tools/nodejs/differential/run-differential-tests.js` runs the fixed corpus under desktop Node 24, using
+manifest-selected API-shape desktop companions for the two AutoJs6 network-denial probes, and writes a
 JSON/Markdown report under `build/reports/nodejs/differential/`, the v1.1 npm summary report
 `build/reports/nodejs/npm-compat-v1.1.md`, and the Task 188 measurement report
 `build/reports/nodejs/v1.1-differential.md`. When supplied with `realnpm.differential.result=...` lines emitted by

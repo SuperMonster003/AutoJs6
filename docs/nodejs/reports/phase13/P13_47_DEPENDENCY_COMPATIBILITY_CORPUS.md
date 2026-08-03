@@ -28,9 +28,9 @@ with category pass-rate rows, and adds a host verifier plus Gradle gate.
 - `tools/nodejs/differential/run-differential-tests.js` now emits
   `phase13Compatibility` JSON and a "Phase 13 Dependency Compatibility
   Categories" Markdown section with desktop and AutoJs6 pass-rate columns when
-  differential artifacts are collected. Desktop-baseline-only runs can still
-  return non-zero for fixtures that intentionally assert AutoJs6 policy
-  denials.
+  differential artifacts are collected. The two AutoJs6 network-denial probes
+  use manifest-selected API-shape desktop companions, so desktop-baseline-only
+  runs remain offline and must complete with zero fixture failures.
 - `PHASE13_SUMMARY.md` records the 60 fixed offline fixtures, stdlib
   `targetedFixtureDeltas` +5 pass delta, ESM/network/fs/package-manager
   targeted deltas, and differential pass-rate rows.
@@ -73,6 +73,9 @@ denials, docs, surface manifest, and Gradle gate are synchronized.
   `NodeRealNpmCompatInstrumentationTest.fixtureMetadataIsCompleteAndSafe`
 - Differential report:
   `tools/nodejs/differential/run-differential-tests.js`
+- Runtime-specific desktop companions:
+  `http-client-package/desktop.cjs` and
+  `formdata-fetch-package/desktop.cjs`
 - Host verifier:
   `tools/nodejs/phase13/verify-dependency-compatibility-corpus.js`
 - Gradle gate:

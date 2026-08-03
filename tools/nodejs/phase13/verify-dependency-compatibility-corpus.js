@@ -10,10 +10,15 @@ const REQUIRED_REASON_KINDS = ["missing_builtin", "native_addon", "postinstall",
 const FILES = {
   phase13Tasks: "docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md",
   p13Report: "docs/nodejs/reports/phase13/P13_47_DEPENDENCY_COMPATIBILITY_CORPUS.md",
+  phase8CorpusReport: "docs/nodejs/reports/phase8/REAL_NPM_CORPUS_PHASE8.md",
   surfaceManifest: "docs/nodejs/phase13/phase13-surface-manifest.json",
   surfaceManifestDoc: "docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md",
   realNpmManifest: "app/src/androidTest/assets/npm_compat_real/manifest.json",
   realNpmTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeRealNpmCompatInstrumentationTest.kt",
+  httpDesktopTest: "app/src/androidTest/assets/npm_compat_real/http-client-package/desktop.cjs",
+  httpDesktopExpected: "app/src/androidTest/assets/npm_compat_real/http-client-package/desktop-expected.txt",
+  fetchDesktopTest: "app/src/androidTest/assets/npm_compat_real/formdata-fetch-package/desktop.cjs",
+  fetchDesktopExpected: "app/src/androidTest/assets/npm_compat_real/formdata-fetch-package/desktop-expected.txt",
   differentialRunner: "tools/nodejs/differential/run-differential-tests.js",
   phase13GradleGate: "app/node-phase13-gate.gradle.kts",
   compatibilityProfile: "docs/nodejs/COMPATIBILITY_PROFILE.md",
@@ -58,6 +63,7 @@ function buildReport(files) {
   const fixtureNames = new Set((manifest && manifest.fixtures || []).map((fixture) => fixture.name));
   const categories = Array.isArray(compatibility.categories) ? compatibility.categories : [];
   const targetedDeltas = Array.isArray(compatibility.targetedFixtureDeltas) ? compatibility.targetedFixtureDeltas : [];
+  const differentialProblems = validateDifferentialContract(manifest, files);
   const reasonKinds = new Set(categories.map((category) => category.reasonKind));
   const surfaceEntry = surface(files.surfaceManifest.text, "packaging.plugins_distribution");
   const targetedDeltaRows = targetedDeltas.map((delta) => ({
@@ -110,8 +116,20 @@ function buildReport(files) {
       token(files.differentialRunner, "summarizePhase13CompatibilityCategories"),
       token(files.differentialRunner, "readAutoJsConnectedResults"),
       token(files.differentialRunner, "--autojs-connected-results <dir|file>"),
+      token(files.differentialRunner, "resolveDesktopFixture"),
+      token(files.differentialRunner, "runtimePassed"),
+      token(files.differentialRunner, "validateAutoJsRecord"),
+      token(files.differentialRunner, "validateAutoJsFixtureSet"),
+      token(files.differentialRunner, "Conflicting AutoJs6 differential records"),
       token(files.differentialRunner, "Phase 13 Dependency Compatibility Categories"),
       token(files.differentialRunner, "renderPassRate"),
+      token(files.realNpmTest, "assertDifferentialFixtureMetadata"),
+      token(files.realNpmTest, "captureFixtureError"),
+      token(files.realNpmManifest, '"expectedClassification": "expected AutoJs6 restriction"'),
+      token(files.realNpmManifest, '"autoJsRestrictionPattern": "ERR_AUTOJS6_"'),
+      token(files.realNpmManifest, '"allowedOutputPattern"'),
+      token(files.httpDesktopTest, "http:client/desktop-api/agent"),
+      token(files.fetchDesktopTest, "formdata:fetch/alpha=1,beta=two/desktop-api"),
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-47", [
       token(files.phase13Tasks, "P13-47 partial landing"),
@@ -129,6 +147,10 @@ function buildReport(files) {
       token(files.phase13Summary, "P13-47 records dependency compatibility corpus as partial with 60 fixed offline fixtures"),
       token(files.phase13Summary, "stdlib targetedFixtureDeltas +5"),
       token(files.phase13Summary, "differential pass-rate rows"),
+      token(files.p13Report, "manifest-selected API-shape desktop companions"),
+      token(files.testingDoc, "manifest-selected API-shape desktop companions"),
+      token(files.compatibilityProfile, "manifest-selected API-shape desktop companions"),
+      token(files.phase8CorpusReport, "API-shape-only companion entry points"),
     ]),
   ];
 
@@ -198,6 +220,11 @@ function buildReport(files) {
     check("fixture-count", fixtureNames.size === 60 && compatibility.fixtureCount === 60, "real npm corpus must keep the 60-fixture baseline."),
     check("required-reason-kinds", categoryProblems.length === 0, "phase13Compatibility must cover required package reason categories."),
     check("targeted-deltas", deltaProblems.length === 0, "phase13Compatibility must record targeted fixture deltas."),
+    check(
+      "differential-contract",
+      differentialProblems.length === 0,
+      "runtime-specific differential fixtures must keep their fail-closed manifest and companion contract.",
+    ),
     check("surface-present", Boolean(surfaceEntry), "`packaging.plugins_distribution` surface must exist."),
     check(
       "surface-evidence",
@@ -214,7 +241,10 @@ function buildReport(files) {
     ),
   ];
 
-  const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message).concat(categoryProblems).concat(deltaProblems);
+  const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message)
+    .concat(categoryProblems)
+    .concat(deltaProblems)
+    .concat(differentialProblems);
   const blockers = scenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`));
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
   return {
@@ -249,6 +279,85 @@ function buildReport(files) {
       registryDriftTestingPromoted: false,
     },
   };
+}
+
+function validateDifferentialContract(manifest, files) {
+  if (!manifest || !Array.isArray(manifest.fixtures)) {
+    return ["real npm manifest fixtures are unavailable for differential validation"];
+  }
+  const problems = [];
+  const fixtures = new Map(manifest.fixtures.map((fixture) => [String(fixture && fixture.name || ""), fixture]));
+  const expected = [
+    {
+      name: "http-client-package",
+      classification: "expected AutoJs6 restriction",
+      marker: "ERR_AUTOJS6_",
+      desktopTest: "desktop.cjs",
+      desktopExpected: "desktop-expected.txt",
+      testFile: files.httpDesktopTest,
+      expectedFile: files.httpDesktopExpected,
+      expectedOutput: "realnpm.http-client-package=http:client/desktop-api/agent",
+      forbiddenInvocation: "http.get(",
+    },
+    {
+      name: "formdata-fetch-package",
+      classification: "expected AutoJs6 restriction",
+      marker: "ERR_AUTOJS6_",
+      desktopTest: "desktop.cjs",
+      desktopExpected: "desktop-expected.txt",
+      testFile: files.fetchDesktopTest,
+      expectedFile: files.fetchDesktopExpected,
+      expectedOutput: "realnpm.formdata-fetch-package=formdata:fetch/alpha=1,beta=two/desktop-api",
+      forbiddenInvocation: "fetch(",
+    },
+  ];
+  for (const contract of expected) {
+    const fixture = fixtures.get(contract.name);
+    if (!fixture) {
+      problems.push(`missing differential fixture: ${contract.name}`);
+      continue;
+    }
+    if (fixture.expectedClassification !== contract.classification) {
+      problems.push(`${contract.name} must declare ${contract.classification}`);
+    }
+    if (fixture.autoJsRestrictionPattern !== contract.marker) {
+      problems.push(`${contract.name} must declare AutoJs6 restriction marker ${contract.marker}`);
+    }
+    if (!fixture.reason) {
+      problems.push(`${contract.name} must explain its runtime-specific classification`);
+    }
+    if (!fixture.desktop || fixture.desktop.test !== contract.desktopTest ||
+        fixture.desktop.expected !== contract.desktopExpected) {
+      problems.push(`${contract.name} must reference its checked-in desktop companion files`);
+    }
+    if (!contract.testFile.exists || !contract.expectedFile.exists) {
+      problems.push(`${contract.name} desktop companion files are missing`);
+    } else {
+      if (!contract.testFile.text.includes(contract.expectedOutput) ||
+          contract.expectedFile.text.trim() !== contract.expectedOutput) {
+        problems.push(`${contract.name} desktop companion output marker is inconsistent`);
+      }
+      if (contract.testFile.text.includes(contract.forbiddenInvocation)) {
+        problems.push(`${contract.name} desktop companion must remain API-shape-only without live network I/O`);
+      }
+    }
+  }
+
+  const watch = fixtures.get("fs-watch-package");
+  const watchPattern = "^realnpm\\.fs-watch-package=fswatch:(change|rename|event|timeout-fallback)/closed$";
+  if (!watch || watch.expectedClassification !== "flaky" || watch.allowedOutputPattern !== watchPattern || !watch.reason) {
+    problems.push("fs-watch-package must keep its bounded flaky output allowlist and reason");
+  }
+
+  const classified = manifest.fixtures
+    .filter((fixture) => fixture && fixture.expectedClassification)
+    .map((fixture) => String(fixture.name))
+    .sort();
+  const expectedClassified = ["formdata-fetch-package", "fs-watch-package", "http-client-package"].sort();
+  if (JSON.stringify(classified) !== JSON.stringify(expectedClassified)) {
+    problems.push("differential classification declarations drifted from the reviewed fixture set");
+  }
+  return problems;
 }
 
 function scenario(id, title, checks, plannedRemaining = []) {

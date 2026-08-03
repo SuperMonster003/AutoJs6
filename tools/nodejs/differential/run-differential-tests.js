@@ -7,6 +7,10 @@ const path = require("path");
 
 const ERROR_MARKER = "__AUTOJS6_DIFFERENTIAL_ERROR__=";
 const AUTOJS_RESULT_PREFIX = "realnpm.differential.result=";
+const EXPECTED_CLASSIFICATIONS = new Set([
+  "expected AutoJs6 restriction",
+  "flaky",
+]);
 
 function main() {
   const options = parseArgs(process.argv.slice(2));
@@ -22,19 +26,31 @@ function main() {
   }
 
   const autoJsImport = readAutoJsResults(options);
+  validateAutoJsFixtureSet(fixtures, autoJsImport);
   const autoJsResults = autoJsImport.results;
   const rows = fixtures.map((fixture) => {
+    validateFixture(fixture);
     const fixtureDir = path.join(fixtureRoot, fixture.name);
     const expectedOutput = readText(path.join(fixtureDir, "expected.txt")).trim();
-    const desktop = runDesktopFixture(nodeBinary, fixtureDir, fixture.name, expectedOutput);
+    const desktopFixture = resolveDesktopFixture(fixture, fixtureDir, expectedOutput);
+    const desktop = runDesktopFixture(
+      nodeBinary,
+      fixtureDir,
+      fixture.name,
+      desktopFixture.testPath,
+      desktopFixture.expectedOutput,
+    );
     const autojs = autoJsResults.get(fixture.name) || null;
     return {
       fixture: fixture.name,
       patterns: fixture.patterns || [],
+      expectedClassification: fixture.expectedClassification || "",
+      reason: fixture.reason || "",
       expectedOutput,
+      desktopExpectedOutput: desktopFixture.expectedOutput,
       desktop,
       autojs,
-      comparison: compareResults(desktop, autojs),
+      comparison: compareResults(fixture, expectedOutput, desktop, autojs),
     };
   });
 
@@ -48,6 +64,7 @@ function main() {
     autoJsSource: autoJsImport.sources.length > 0 ? autoJsImport.sources.join("; ") : null,
     autoJsSources: autoJsImport.sources,
     autoJsImportedRecords: autoJsImport.recordCount,
+    autoJsImportedFixtures: autoJsImport.fixtureCount,
     rows,
     summary: summarize(rows),
     phase13Compatibility: summarizePhase13CompatibilityCategories(rows, manifest.phase13Compatibility),
@@ -119,8 +136,74 @@ function printHelp() {
   ].join("\n"));
 }
 
-function runDesktopFixture(nodeBinary, fixtureDir, fixtureName, expectedOutput) {
-  const testPath = path.join(fixtureDir, "test.cjs");
+function validateFixture(fixture) {
+  if (!fixture || typeof fixture.name !== "string" || !fixture.name) {
+    throw new Error("Differential fixture is missing name");
+  }
+  if (fixture.expectedClassification && !EXPECTED_CLASSIFICATIONS.has(fixture.expectedClassification)) {
+    throw new Error(
+      "Unsupported expected classification for " + fixture.name + ": " + fixture.expectedClassification,
+    );
+  }
+  if (fixture.desktop != null) {
+    if (!fixture.desktop || typeof fixture.desktop !== "object" || Array.isArray(fixture.desktop)) {
+      throw new Error("Desktop fixture configuration must be an object: " + fixture.name);
+    }
+    if (!fixture.desktop.test || !fixture.desktop.expected) {
+      throw new Error("Desktop fixture configuration must provide test and expected files: " + fixture.name);
+    }
+  }
+  if (fixture.expectedClassification === "expected AutoJs6 restriction" && !fixture.desktop) {
+    throw new Error("Expected AutoJs6 restriction requires a desktop baseline fixture: " + fixture.name);
+  }
+  if (fixture.expectedClassification === "expected AutoJs6 restriction" && !fixture.autoJsRestrictionPattern) {
+    throw new Error("Expected AutoJs6 restriction requires an AutoJs6 marker: " + fixture.name);
+  }
+  if (fixture.expectedClassification === "flaky") {
+    if (!fixture.allowedOutputPattern) {
+      throw new Error("Flaky fixture requires an allowed output pattern: " + fixture.name);
+    }
+    try {
+      new RegExp(fixture.allowedOutputPattern);
+    } catch (error) {
+      throw new Error("Invalid allowed output pattern for " + fixture.name + ": " + error.message);
+    }
+  }
+}
+
+function resolveDesktopFixture(fixture, fixtureDir, defaultExpectedOutput) {
+  if (!fixture.desktop) {
+    return {
+      testPath: path.join(fixtureDir, "test.cjs"),
+      expectedOutput: defaultExpectedOutput,
+    };
+  }
+  const testPath = resolveFixtureFile(fixtureDir, fixture.desktop.test, fixture.name + " desktop test");
+  const expectedPath = resolveFixtureFile(
+    fixtureDir,
+    fixture.desktop.expected,
+    fixture.name + " desktop expected output",
+  );
+  return {
+    testPath,
+    expectedOutput: readText(expectedPath).trim(),
+  };
+}
+
+function resolveFixtureFile(fixtureDir, relativePath, label) {
+  const root = path.resolve(fixtureDir);
+  const resolved = path.resolve(root, String(relativePath || ""));
+  const relative = path.relative(root, resolved);
+  if (!relative || relative === ".." || relative.startsWith(".." + path.sep) || path.isAbsolute(relative)) {
+    throw new Error("Invalid " + label + " path: " + relativePath);
+  }
+  if (!fs.statSync(resolved).isFile()) {
+    throw new Error("Missing " + label + " file: " + resolved);
+  }
+  return resolved;
+}
+
+function runDesktopFixture(nodeBinary, fixtureDir, fixtureName, testPath, expectedOutput) {
   const script = `
     "use strict";
     const testPath = process.argv[1];
@@ -179,14 +262,19 @@ function readAutoJsResults(options) {
   const sources = [];
   let recordCount = 0;
   function addRecords(source, records) {
-    if (records.length > 0) {
+    if (!sources.includes(source)) {
       sources.push(source);
-      recordCount += records.length;
     }
+    recordCount += records.length;
     records.forEach((record) => {
-      if (record && record.fixture) {
-        results.set(record.fixture, normalizeRuntimeRecord(record));
+      validateAutoJsRecord(record, source);
+      const fixture = record.fixture;
+      const normalized = normalizeRuntimeRecord(record);
+      const existing = results.get(fixture);
+      if (existing && JSON.stringify(existing) !== JSON.stringify(normalized)) {
+        throw new Error("Conflicting AutoJs6 differential records for fixture " + fixture + " in " + source);
       }
+      results.set(fixture, normalized);
     });
   }
   [options.autojsJson, options.autojsLog].filter(Boolean).forEach((file) => {
@@ -196,7 +284,11 @@ function readAutoJsResults(options) {
     addRecords(resolved, records);
   });
   if (options.autojsConnectedResults) {
-    const connected = readAutoJsConnectedResults(path.resolve(options.autojsConnectedResults));
+    const connectedRoot = path.resolve(options.autojsConnectedResults);
+    const connected = readAutoJsConnectedResults(connectedRoot);
+    if (connected.files.length === 0) {
+      sources.push(connectedRoot);
+    }
     connected.files.forEach((file) => {
       addRecords(file, connected.recordsByFile.get(file) || []);
     });
@@ -205,7 +297,61 @@ function readAutoJsResults(options) {
     results,
     sources,
     recordCount,
+    fixtureCount: results.size,
+    comparisonRequested: Boolean(options.autojsJson || options.autojsLog || options.autojsConnectedResults),
   };
+}
+
+function validateAutoJsRecord(record, source) {
+  if (!record || typeof record !== "object" || Array.isArray(record)) {
+    throw new Error("Invalid AutoJs6 differential record in " + source);
+  }
+  const requiredStrings = [
+    "runtime",
+    "fixture",
+    "stdout",
+    "stderr",
+    "errorCode",
+    "errorMessage",
+    "errorMessagePattern",
+    "expectedOutput",
+  ];
+  requiredStrings.forEach((field) => {
+    if (typeof record[field] !== "string") {
+      throw new Error("AutoJs6 differential record field " + field + " must be a string in " + source);
+    }
+  });
+  if (record.runtime !== "autojs6") {
+    throw new Error("Unexpected differential runtime for " + record.fixture + " in " + source + ": " + record.runtime);
+  }
+  if (!record.fixture) {
+    throw new Error("AutoJs6 differential record fixture must not be blank in " + source);
+  }
+  if (!Number.isInteger(record.exitCode) || ![0, 1].includes(record.exitCode)) {
+    throw new Error("AutoJs6 differential record exitCode must be 0 or 1 for " + record.fixture + " in " + source);
+  }
+  if (typeof record.expectedOutputFound !== "boolean") {
+    throw new Error(
+      "AutoJs6 differential record expectedOutputFound must be boolean for " + record.fixture + " in " + source,
+    );
+  }
+}
+
+function validateAutoJsFixtureSet(fixtures, autoJsImport) {
+  if (!autoJsImport.comparisonRequested) {
+    return;
+  }
+  const expected = new Set(fixtures.map((fixture) => String(fixture.name)));
+  const actual = new Set(autoJsImport.results.keys());
+  const missing = Array.from(expected).filter((fixture) => !actual.has(fixture));
+  const unknown = Array.from(actual).filter((fixture) => !expected.has(fixture));
+  if (missing.length > 0 || unknown.length > 0) {
+    throw new Error([
+      "AutoJs6 differential fixture set is incomplete or unexpected.",
+      "Missing: " + (missing.join(", ") || "none"),
+      "Unknown: " + (unknown.join(", ") || "none"),
+    ].join(" "));
+  }
 }
 
 function parseAutoJsJson(text) {
@@ -352,23 +498,22 @@ function unescapeXml(value) {
 }
 
 function normalizeRuntimeRecord(record) {
-  const errorMessage = String(record.errorMessage || "");
   return {
-    runtime: record.runtime || "autojs6",
-    fixture: String(record.fixture || ""),
-    exitCode: Number(record.exitCode || 0),
-    stdout: normalizeOutput(record.stdout || ""),
-    stderr: normalizeOutput(record.stderr || ""),
-    errorCode: String(record.errorCode || ""),
-    errorMessage,
-    errorMessagePattern: String(record.errorMessagePattern || errorMessagePattern(errorMessage)),
-    expectedOutput: String(record.expectedOutput || ""),
-    expectedOutputFound: !!record.expectedOutputFound,
+    runtime: record.runtime,
+    fixture: record.fixture,
+    exitCode: record.exitCode,
+    stdout: normalizeOutput(record.stdout),
+    stderr: normalizeOutput(record.stderr),
+    errorCode: record.errorCode,
+    errorMessage: record.errorMessage,
+    errorMessagePattern: record.errorMessagePattern,
+    expectedOutput: record.expectedOutput,
+    expectedOutputFound: record.expectedOutputFound,
   };
 }
 
-function compareResults(desktop, autojs) {
-  if (!desktop.expectedOutputFound) {
+function compareResults(fixture, expectedOutput, desktop, autojs) {
+  if (!runtimePassed(desktop, desktop.expectedOutput, { allowStderr: true })) {
     return {
       status: "desktop-failed",
       classification: "bug",
@@ -379,7 +524,58 @@ function compareResults(desktop, autojs) {
     return {
       status: "desktop-only",
       classification: "unsupported",
+      comparisonAvailable: false,
       reason: "No AutoJs6 differential result was supplied; generated desktop baseline only.",
+    };
+  }
+
+  if (!runtimePassed(autojs, expectedOutput)) {
+    return {
+      status: "autojs-failed",
+      classification: "bug",
+      comparisonAvailable: true,
+      reason: "AutoJs6 did not pass the fixture or emit the expected marker.",
+    };
+  }
+
+  if (fixture.expectedClassification === "expected AutoJs6 restriction") {
+    const restrictionPattern = String(fixture.autoJsRestrictionPattern || "");
+    const restrictionMarker = normalizeOutput(autojs.stdout) + "\n" + String(autojs.errorCode || "");
+    if (!restrictionMarker.includes(restrictionPattern)) {
+      return {
+        status: "restriction-missing",
+        classification: "bug",
+        comparisonAvailable: true,
+        reason: "AutoJs6 did not emit the expected policy result for the runtime-specific fixture.",
+      };
+    }
+    return {
+      status: "restricted",
+      classification: "expected AutoJs6 restriction",
+      comparisonAvailable: true,
+      reason: fixture.reason || "AutoJs6 intentionally restricts this desktop Node capability.",
+    };
+  }
+
+  if (fixture.expectedClassification === "flaky") {
+    const allowedOutput = new RegExp(fixture.allowedOutputPattern);
+    if (!allowedOutput.test(normalizeOutput(desktop.stdout)) || !allowedOutput.test(normalizeOutput(autojs.stdout))) {
+      return {
+        status: "unexpected-output",
+        classification: "bug",
+        comparisonAvailable: true,
+        reason: "A flaky fixture emitted output outside its manifest allowlist.",
+      };
+    }
+    const recordsMatch = Number(desktop.exitCode) === Number(autojs.exitCode) &&
+      normalizeOutput(desktop.stdout) === normalizeOutput(autojs.stdout) &&
+      String(desktop.errorCode || "") === String(autojs.errorCode || "") &&
+      String(desktop.errorMessagePattern || "") === String(autojs.errorMessagePattern || "");
+    return {
+      status: recordsMatch ? "matched" : "different-allowed",
+      classification: recordsMatch ? "matched" : "flaky",
+      comparisonAvailable: true,
+      reason: fixture.reason || "The fixture permits a documented nondeterministic runtime result.",
     };
   }
 
@@ -394,25 +590,21 @@ function compareResults(desktop, autojs) {
       reason: "Desktop Node and AutoJs6 normalized outputs agree.",
     };
   }
-  if (String(autojs.errorCode || "").startsWith("ERR_AUTOJS6_")) {
-    return {
-      status: "different",
-      classification: "expected AutoJs6 restriction",
-      reason: "AutoJs6 failed with a policy error while desktop Node did not.",
-    };
-  }
-  if (desktop.exitCode !== 0 && autojs.exitCode !== 0) {
-    return {
-      status: "different",
-      classification: "unsupported",
-      reason: "Both runtimes failed; inspect normalized error patterns.",
-    };
-  }
   return {
     status: "different",
     classification: "bug",
     reason: "Runtime results differ without a known AutoJs6 policy error.",
   };
+}
+
+function runtimePassed(record, expectedOutput, options = {}) {
+  const marker = String(expectedOutput || "");
+  return !!record && marker.length > 0 && Number(record.exitCode) === 0 &&
+    record.expectedOutputFound === true && normalizeOutput(record.stdout).includes(marker) &&
+    String(record.expectedOutput || "") === marker &&
+    String(record.errorCode || "") === "" && String(record.errorMessage || "") === "" &&
+    String(record.errorMessagePattern || "") === "" &&
+    (options.allowStderr === true || normalizeOutput(record.stderr) === "");
 }
 
 function summarize(rows) {
@@ -426,7 +618,7 @@ function summarize(rows) {
     bugs: 0,
   };
   rows.forEach((row) => {
-    if (!row.desktop.expectedOutputFound || row.desktop.exitCode !== 0) {
+    if (!runtimePassed(row.desktop, row.desktopExpectedOutput, { allowStderr: true })) {
       summary.desktopFailures += 1;
     }
     switch (row.comparison.classification) {
@@ -466,8 +658,8 @@ function renderMarkdown(report) {
   report.rows.forEach((row) => {
     lines.push([
       row.fixture,
-      row.desktop.expectedOutputFound && row.desktop.exitCode === 0 ? "pass" : "fail",
-      row.autojs ? (row.autojs.exitCode === 0 ? "pass" : "fail") : "not supplied",
+      runtimePassed(row.desktop, row.desktopExpectedOutput, { allowStderr: true }) ? "pass" : "fail",
+      row.autojs ? (runtimePassed(row.autojs, row.expectedOutput) ? "pass" : "fail") : "not supplied",
       row.comparison.classification,
       row.comparison.reason,
     ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
@@ -507,8 +699,8 @@ function renderV11CompatMarkdown(report) {
     lines.push([
       row.fixture,
       (row.patterns || []).join(", "),
-      row.desktop.expectedOutputFound && row.desktop.exitCode === 0 ? "pass" : "fail",
-      row.autojs ? (row.autojs.exitCode === 0 ? "pass" : "fail") : "not supplied",
+      runtimePassed(row.desktop, row.desktopExpectedOutput, { allowStderr: true }) ? "pass" : "fail",
+      row.autojs ? (runtimePassed(row.autojs, row.expectedOutput) ? "pass" : "fail") : "not supplied",
     ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
   });
   lines.push("");
@@ -586,8 +778,8 @@ function renderV11DifferentialMarkdown(report) {
     lines.push([
       row.fixture,
       (row.patterns || []).join(", "),
-      row.desktop.expectedOutputFound && row.desktop.exitCode === 0 ? "pass" : "fail",
-      row.autojs ? (row.autojs.exitCode === 0 ? "pass" : "fail") : "not supplied",
+      runtimePassed(row.desktop, row.desktopExpectedOutput, { allowStderr: true }) ? "pass" : "fail",
+      row.autojs ? (runtimePassed(row.autojs, row.expectedOutput) ? "pass" : "fail") : "not supplied",
       row.comparison.classification,
       row.comparison.reason,
     ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
@@ -625,10 +817,13 @@ function summarizePhase13CompatibilityCategories(rows, metadata) {
           : [],
         counts: countClassifications(matchedRows),
         passRate: {
-          desktop: passRate(matchedRows, (row) => row.desktop && row.desktop.expectedOutputFound && row.desktop.exitCode === 0),
+          desktop: passRate(
+            matchedRows,
+            (row) => runtimePassed(row.desktop, row.desktopExpectedOutput, { allowStderr: true }),
+          ),
           autojs: passRate(
             matchedRows.filter((row) => row.autojs),
-            (row) => row.autojs && row.autojs.exitCode === 0,
+            (row) => runtimePassed(row.autojs, row.expectedOutput),
           ),
         },
       };

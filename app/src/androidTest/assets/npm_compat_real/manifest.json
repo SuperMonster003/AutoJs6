@@ -124,7 +124,14 @@
         "package using node:http client",
         "default raw network denial",
         "HTTP Agent compatibility shape"
-      ]
+      ],
+      "expectedClassification": "expected AutoJs6 restriction",
+      "autoJsRestrictionPattern": "ERR_AUTOJS6_",
+      "reason": "Desktop Node exposes the native HTTP and Agent surface while AutoJs6 intentionally denies raw network access by default.",
+      "desktop": {
+        "test": "desktop.cjs",
+        "expected": "desktop-expected.txt"
+      }
     },
     {
       "name": "formdata-fetch-package",
@@ -132,7 +139,14 @@
         "package using FormData/fetch",
         "Web Platform FormData",
         "default fetch denial"
-      ]
+      ],
+      "expectedClassification": "expected AutoJs6 restriction",
+      "autoJsRestrictionPattern": "ERR_AUTOJS6_",
+      "reason": "Desktop Node exposes the FormData and fetch surface while AutoJs6 intentionally denies raw fetch access by default.",
+      "desktop": {
+        "test": "desktop.cjs",
+        "expected": "desktop-expected.txt"
+      }
     },
     {
       "name": "filehandle-package",
@@ -148,7 +162,10 @@
         "package using fs.watch",
         "scoped watcher lifecycle",
         "watcher cleanup"
-      ]
+      ],
+      "expectedClassification": "flaky",
+      "allowedOutputPattern": "^realnpm\\.fs-watch-package=fswatch:(change|rename|event|timeout-fallback)/closed$",
+      "reason": "Desktop and Android may report different watcher event kinds or the bounded timeout fallback; both must close the watcher and clean up."
     },
     {
       "name": "compile-cache-package",
