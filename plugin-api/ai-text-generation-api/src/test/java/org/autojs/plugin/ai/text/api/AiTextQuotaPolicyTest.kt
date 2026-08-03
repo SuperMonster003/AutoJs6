@@ -2,10 +2,13 @@ package org.autojs.plugin.ai.text.api
 
 import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ai.common.api.AiProtocolRange
+import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.common.api.AiUsage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import java.security.MessageDigest
+import java.util.concurrent.atomic.AtomicInteger
 
 class AiTextQuotaPolicyTest {
     @Test
@@ -170,6 +173,116 @@ class AiTextQuotaPolicyTest {
         assertThrows(IllegalArgumentException::class.java) {
             AiTextQuotaPolicy.validateToolResults(results, 2, 1)
         }
+    }
+
+    @Test
+    fun requestAwareToolValidationRejectsUndeclaredNamesBeforeReadingDescriptors() {
+        val request = request(
+            message = textPayload("Hello"),
+            tools = listOf(AiToolDefinition("lookup", "Lookup", jsonPayload("{}"))),
+        )
+        val reads = AtomicInteger(0)
+        val batch = AiToolCallBatch(
+            listOf(
+                AiToolCall(
+                    callId = "call-undeclared",
+                    name = "delete-all",
+                    arguments = descriptorPayload(AiTextMimeType.JSON, 2, 0),
+                ),
+            ),
+        )
+
+        assertThrows(IllegalArgumentException::class.java) {
+            AiTextQuotaPolicy.validateToolCalls(
+                request = request,
+                batch = batch,
+                descriptorCount = 1,
+                maximumDescriptors = 1,
+                readDescriptor = { _, _ ->
+                    reads.incrementAndGet()
+                    "{}".toByteArray()
+                },
+            )
+        }
+        assertEquals(0, reads.get())
+    }
+
+    @Test
+    fun requestAwareToolValidationReturnsVerifiedDescriptorJsonSnapshot() {
+        val request = request(
+            message = textPayload("Hello"),
+            tools = listOf(AiToolDefinition("lookup", "Lookup", jsonPayload("{}"))),
+        )
+        val bytes = "{\"query\":\"safe\"}".toByteArray()
+        val batch = toolCallsWithDescriptor(
+            AiPayloadReference(
+                mimeType = AiTextMimeType.JSON,
+                declaredLengthBytes = bytes.size.toLong(),
+                sha256 = sha256(bytes),
+                descriptorIndex = 0,
+            ),
+        )
+
+        val snapshot = AiTextQuotaPolicy.validateToolCalls(
+            request = request,
+            batch = batch,
+            descriptorCount = 1,
+            maximumDescriptors = 1,
+            readDescriptor = { _, _ -> bytes },
+        )
+
+        assertEquals(bytes.size.toLong(), snapshot.totalBytes)
+        assertEquals(1, snapshot.descriptorCount)
+        assertEquals("{\"query\":\"safe\"}", snapshot.argumentsJsonByCallId["call-1"])
+        assertThrows(UnsupportedOperationException::class.java) {
+            @Suppress("UNCHECKED_CAST")
+            (snapshot.argumentsJsonByCallId as MutableMap<String, String>)["call-2"] = "{}"
+        }
+    }
+
+    @Test
+    fun requestAwareToolValidationRejectsMalformedLengthDigestUtf8AndOversizePayloads() {
+        val request = request(
+            message = textPayload("Hello"),
+            tools = listOf(AiToolDefinition("lookup", "Lookup", jsonPayload("{}"))),
+        )
+
+        fun reject(payload: AiPayloadReference, bytes: ByteArray) {
+            assertThrows(IllegalArgumentException::class.java) {
+                AiTextQuotaPolicy.validateToolCalls(
+                    request = request,
+                    batch = toolCallsWithDescriptor(payload),
+                    descriptorCount = 1,
+                    maximumDescriptors = 1,
+                    readDescriptor = { _, _ -> bytes },
+                )
+            }
+        }
+
+        val malformed = "{]".toByteArray()
+        reject(descriptorPayload(AiTextMimeType.JSON, malformed.size.toLong(), 0), malformed)
+
+        reject(descriptorPayload(AiTextMimeType.JSON, 3, 0), "{}".toByteArray())
+
+        val valid = "{}".toByteArray()
+        reject(
+            AiPayloadReference(
+                mimeType = AiTextMimeType.JSON,
+                declaredLengthBytes = valid.size.toLong(),
+                sha256 = "0".repeat(64),
+                descriptorIndex = 0,
+            ),
+            valid,
+        )
+
+        val invalidUtf8 = byteArrayOf(0xC3.toByte(), 0x28)
+        reject(descriptorPayload(AiTextMimeType.JSON, invalidUtf8.size.toLong(), 0), invalidUtf8)
+
+        val maximum = AiTextLimits.MAX_TOOL_ARGUMENT_OR_RESULT_BYTES.toInt()
+        reject(
+            descriptorPayload(AiTextMimeType.JSON, AiTextLimits.MAX_TOOL_ARGUMENT_OR_RESULT_BYTES, 0),
+            ByteArray(maximum + 1),
+        )
     }
 
     @Test
@@ -344,4 +457,12 @@ class AiTextQuotaPolicyTest {
         ),
         tools = tools,
     )
+
+    private fun toolCallsWithDescriptor(payload: AiPayloadReference) = AiToolCallBatch(
+        listOf(AiToolCall("call-1", "lookup", payload)),
+    )
+
+    private fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256")
+        .digest(bytes)
+        .joinToString(separator = "") { byte -> "%02x".format(byte.toInt() and 0xFF) }
 }

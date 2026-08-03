@@ -12,6 +12,8 @@ internal interface DexCompilerInputSnapshot : Closeable {
 }
 
 internal interface DexCompilerOutputTransaction : Closeable {
+    /** Starts the single bounded host-side drain before the remote writer can be dispatched. */
+    fun beginDrain(maxBytes: Long, onTerminal: (DexCompilerOutputDrainTerminal) -> Unit)
     fun claimWriteDescriptor(): DexCompilerOwnedDescriptor
     fun readBytes(maxBytes: Long): ByteArray
 
@@ -21,6 +23,11 @@ internal interface DexCompilerOutputTransaction : Closeable {
      */
     fun publishVerified(cacheKeySha256: String, bytes: ByteArray)
     fun rollback()
+}
+
+internal sealed class DexCompilerOutputDrainTerminal {
+    data class Success(val summary: DexCompilerStreamSummary) : DexCompilerOutputDrainTerminal()
+    data class Failure(val cause: Throwable?) : DexCompilerOutputDrainTerminal()
 }
 
 internal interface DexCompilerRemoteSession : Closeable {

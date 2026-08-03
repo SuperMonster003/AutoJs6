@@ -216,6 +216,45 @@ class TaggedWireTest {
     }
 
     @Test
+    fun rejectsNonPositiveWireTypeEvenWhenTheFieldIsOptionalAndUnknown() {
+        listOf(0, -1, Int.MIN_VALUE).forEach { invalidType ->
+            val encoded = TaggedWireWriter(SCHEMA, 1, 1)
+                .bytes(99, byteArrayOf(1))
+                .encode()
+                .also { bytes ->
+                    ByteBuffer.wrap(bytes)
+                        .order(ByteOrder.BIG_ENDIAN)
+                        .putInt(TaggedWireProtocol.HEADER_SIZE_BYTES + Int.SIZE_BYTES, invalidType)
+                }
+
+            val error = assertThrows(TaggedWireException::class.java) {
+                TaggedWireDocument.decode(encoded)
+            }
+            assertEquals(TaggedWireError.INVALID_FIELD, error.error)
+        }
+    }
+
+    @Test
+    fun skipsPositiveUnknownWireTypeOnlyWhenItsFieldIsOptionalAndUnknown() {
+        val encoded = TaggedWireWriter(SCHEMA, 1, 1)
+            .int32(1, 7)
+            .bytes(99, byteArrayOf(1, 2, 3))
+            .encode()
+            .also { bytes ->
+                val secondFieldTypeOffset = TaggedWireProtocol.HEADER_SIZE_BYTES +
+                    TaggedWireProtocol.FIELD_HEADER_SIZE_BYTES + Int.SIZE_BYTES +
+                    Int.SIZE_BYTES
+                ByteBuffer.wrap(bytes)
+                    .order(ByteOrder.BIG_ENDIAN)
+                    .putInt(secondFieldTypeOffset, 99)
+            }
+
+        val document = TaggedWireDocument.decode(encoded)
+            .rejectUnknownRequiredFields(setOf(1))
+        assertEquals(7, document.requireInt32(1))
+    }
+
+    @Test
     fun impossibleFieldCountIsRejectedBeforeAllocatingTheFieldList() {
         val encoded = TaggedWireWriter(SCHEMA, 1, 0).encode().also { bytes ->
             ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).putInt(24, Int.MAX_VALUE)

@@ -32,6 +32,7 @@ internal data class DexCompilerExperimentalInvocation(
 )
 
 internal enum class DexCompilerExperimentalFailure {
+    EXPERIMENT_DISABLED,
     MAIN_THREAD_SYNC_FAIL_OPEN,
     INPUT_REJECTED,
     PLUGIN_UNAVAILABLE,
@@ -122,6 +123,10 @@ internal class DexCompilerExperimentalHarness(
         attempt.enqueue {
             if (gate == DexCompilerEntryDecision.FAIL_OPEN_TO_LOCAL) {
                 attempt.useLocal(DexCompilerExperimentalFailure.MAIN_THREAD_SYNC_FAIL_OPEN)
+            } else if (invocation.preferredComponent == null) {
+                // V1 has no automatic provider selection. A caller must carry an explicit,
+                // already persisted component choice into this disconnected experiment.
+                attempt.useLocal(DexCompilerExperimentalFailure.EXPERIMENT_DISABLED)
             } else {
                 attempt.begin()
             }
@@ -135,6 +140,8 @@ internal class DexCompilerExperimentalHarness(
     ) {
         private val lifecycle = DexCompilerSessionLifecycle()
         private val fallback = DexCompilerFallbackController()
+        private val publicationGate = DexCompilerPipePublicationGate()
+        private val terminalCommitLock = Any()
         private val bindingSlot = CloseOnceSlot<DexCompilerBinding>()
         private val deadlineSlot = CloseOnceSlot<Closeable>()
         private val sessionSlot = RemoteSessionSlot()
@@ -156,6 +163,7 @@ internal class DexCompilerExperimentalHarness(
         private var pinnedIdentity: DexCompilerPinnedIdentity? = null
         private var compilerInfo: DexCompilerInfo? = null
         private var capabilities: DexCompilerCapabilities? = null
+        private var completedResult: DexCompileResult? = null
         private var lastWireSequence: Long? = null
         private var bindClaimed = false
 
@@ -169,7 +177,7 @@ internal class DexCompilerExperimentalHarness(
             try {
                 deadlineSlot.install(
                     deadlineScheduler.schedule(invocation.request.timeoutMillis) {
-                        if (timeoutIngressClaimed.compareAndSet(false, true)) enqueueUrgent(::timeout)
+                        if (claimAbortIngress(timeoutIngressClaimed)) enqueueUrgent(::timeout)
                     },
                 )
                 val candidates = transport.discoverExactAction(DexCompilerContract.SERVICE_ACTION)
@@ -191,13 +199,13 @@ internal class DexCompilerExperimentalHarness(
                     }
 
                     override fun onBindingFailure(cause: Throwable?) {
-                        if (bindingFailureIngressClaimed.compareAndSet(false, true)) {
+                        if (claimAbortIngress(bindingFailureIngressClaimed)) {
                             enqueueUrgent { useLocal(DexCompilerExperimentalFailure.BIND_FAILED) }
                         }
                     }
 
                     override fun onBinderDeath() {
-                        if (binderDeathIngressClaimed.compareAndSet(false, true)) enqueueUrgent(::binderDied)
+                        if (claimAbortIngress(binderDeathIngressClaimed)) enqueueUrgent(::binderDied)
                     }
                 })
                 bindingSlot.install(binding)
@@ -284,10 +292,12 @@ internal class DexCompilerExperimentalHarness(
         ) {
             val negotiated = DexCompilerNegotiation.requireNegotiated(info)
             require(info.providerVersionCode == identity.versionCode) { "Provider version identity drift" }
-            require(info.minHostVersionCode == null || hostVersionCode >= info.minHostVersionCode) {
+            val minHostVersionCode = info.minHostVersionCode
+            val maxHostVersionCode = info.maxHostVersionCode
+            require(minHostVersionCode == null || hostVersionCode >= minHostVersionCode) {
                 "Host version is below provider minimum"
             }
-            require(info.maxHostVersionCode == null || hostVersionCode <= info.maxHostVersionCode) {
+            require(maxHostVersionCode == null || hostVersionCode <= maxHostVersionCode) {
                 "Host version exceeds provider maximum"
             }
             DexCompilerValidation.validateRequestAgainst(invocation.request, capabilities, negotiated)
@@ -296,6 +306,12 @@ internal class DexCompilerExperimentalHarness(
         private fun beginDispatch(connection: DexCompilerRemoteConnection) {
             if (!blockingJobInFlight.compareAndSet(false, true)) return callbackViolation()
             try {
+                invocation.outputTransaction.beginDrain(maximumOutputBytes()) { terminal ->
+                    when (terminal) {
+                        is DexCompilerOutputDrainTerminal.Success -> enqueue { acceptOutputDrain(terminal) }
+                        is DexCompilerOutputDrainTerminal.Failure -> enqueueUrgent { acceptOutputDrain(terminal) }
+                    }
+                }
                 val programDescriptor = invocation.inputSnapshot.claimReadDescriptor()
                 programDescriptorSlot.install(programDescriptor)
                 val outputDescriptor = invocation.outputTransaction.claimWriteDescriptor()
@@ -380,7 +396,7 @@ internal class DexCompilerExperimentalHarness(
             }
 
             override fun onTransportViolation(cause: Throwable?) {
-                if (transportViolationIngressClaimed.compareAndSet(false, true)) {
+                if (claimAbortIngress(transportViolationIngressClaimed)) {
                     enqueueUrgent(::transportViolation)
                 }
             }
@@ -428,7 +444,37 @@ internal class DexCompilerExperimentalHarness(
             if (finished.get()) return
             val result = decodeOrReject(DexCompilerCodec::decodeResult, encoded) ?: return
             if (!matchesResult(result) || !lifecycle.acceptCompleted()) return callbackViolation()
-            verifyAndPublish(result)
+            completedResult = result
+            applyPublicationDecision(
+                publicationGate.acceptProviderCompletion(
+                    DexCompilerStreamSummary(
+                        sizeBytes = result.outputSizeBytes,
+                        sha256 = result.outputSha256.toHexString(),
+                    ),
+                ),
+            )
+        }
+
+        private fun acceptOutputDrain(terminal: DexCompilerOutputDrainTerminal) {
+            if (finished.get()) return
+            val decision = when (terminal) {
+                is DexCompilerOutputDrainTerminal.Success -> publicationGate.acceptDrainSuccess(terminal.summary)
+                is DexCompilerOutputDrainTerminal.Failure -> publicationGate.acceptDrainFailure()
+            }
+            applyPublicationDecision(decision)
+        }
+
+        private fun applyPublicationDecision(decision: DexCompilerPipePublicationGate.Decision) {
+            when (decision) {
+                DexCompilerPipePublicationGate.Decision.Waiting,
+                DexCompilerPipePublicationGate.Decision.Ignored -> Unit
+                is DexCompilerPipePublicationGate.Decision.Publish -> {
+                    val result = completedResult ?: return callbackViolation()
+                    verifyAndPublish(result, decision.summary)
+                }
+                is DexCompilerPipePublicationGate.Decision.Rollback ->
+                    useLocal(DexCompilerExperimentalFailure.OUTPUT_REJECTED, cancelRemote = true)
+            }
         }
 
         private fun acceptFailed(encoded: ByteArray) {
@@ -478,16 +524,17 @@ internal class DexCompilerExperimentalHarness(
         private fun matchesCancellation(cancellation: DexCompileCancellation): Boolean =
             cancellation.requestId == invocation.request.requestId
 
-        private fun verifyAndPublish(result: DexCompileResult) {
+        private fun verifyAndPublish(
+            result: DexCompileResult,
+            drainedSummary: DexCompilerStreamSummary,
+        ) {
             var ownsTerminal = false
             try {
                 val expected = capabilities ?: return callbackViolation()
-                val maximum = minOf(
-                    invocation.request.maxOutputBytes,
-                    expected.limits.maxOutputBytes,
-                    maximumInMemoryOutputBytes,
-                )
+                val maximum = maximumOutputBytes()
                 val bytes = invocation.outputTransaction.readBytes(maximum)
+                require(bytes.size.toLong() == drainedSummary.sizeBytes) { "Drained output size changed" }
+                require(sha256(bytes) == drainedSummary.sha256) { "Drained output SHA-256 changed" }
                 require(bytes.size.toLong() == result.outputSizeBytes) { "Output size metadata mismatch" }
                 require(sha256(bytes) == result.outputSha256.toHexString()) { "Output SHA-256 metadata mismatch" }
                 val validation = outputVerifier.verify(
@@ -502,11 +549,15 @@ internal class DexCompilerExperimentalHarness(
                 require(validation.dexEntryCount == result.dexEntryCount) { "DEX entry metadata mismatch" }
                 // Queue rejection can fail closed from outside the lane. Claim terminal ownership
                 // before publication so no fallback can race between the cache commit and outcome.
-                if (!terminalClaimed.compareAndSet(false, true)) return
+                if (!tryClaimPublicationTerminal()) {
+                    publicationGate.publicationFailed()
+                    return
+                }
                 ownsTerminal = true
                 val cacheKeySha256 = semanticCacheKey()
                 invocation.outputTransaction.publishVerified(cacheKeySha256, bytes)
                 check(fallback.finish()) { "Compilation attempt was already terminal" }
+                publicationGate.publicationSucceeded()
                 finish(
                     DexCompilerExperimentalOutcome.Published(
                         result = result,
@@ -517,12 +568,22 @@ internal class DexCompilerExperimentalHarness(
                     rollback = false,
                 )
             } catch (_: Throwable) {
+                publicationGate.publicationFailed()
                 if (ownsTerminal) {
                     useLocalClaimed(DexCompilerExperimentalFailure.OUTPUT_REJECTED, cancelRemote = true)
                 } else {
                     useLocal(DexCompilerExperimentalFailure.OUTPUT_REJECTED, cancelRemote = true)
                 }
             }
+        }
+
+        private fun maximumOutputBytes(): Long {
+            val expected = capabilities ?: error("Compiler capabilities are missing")
+            return minOf(
+                invocation.request.maxOutputBytes,
+                expected.limits.maxOutputBytes,
+                maximumInMemoryOutputBytes,
+            )
         }
 
         private fun verifyInputSnapshot() {
@@ -595,7 +656,7 @@ internal class DexCompilerExperimentalHarness(
         }
 
         fun requestHostCancellation() {
-            if (hostCancellationIngressClaimed.compareAndSet(false, true)) enqueueUrgent(::cancelByHost)
+            if (claimAbortIngress(hostCancellationIngressClaimed)) enqueueUrgent(::cancelByHost)
         }
 
         private fun callbackViolation() {
@@ -641,7 +702,11 @@ internal class DexCompilerExperimentalHarness(
             sessionSlot.close()
             programDescriptorSlot.close()
             outputDescriptorSlot.close()
-            if (rollback) runCatching { invocation.outputTransaction.rollback() }
+            if (rollback) {
+                publicationGate.abort()
+                runCatching { invocation.outputTransaction.rollback() }
+                publicationGate.rollbackFinished()
+            }
             closeQuietly(invocation.outputTransaction)
             closeQuietly(invocation.inputSnapshot)
             bindingSlot.close()
@@ -664,8 +729,29 @@ internal class DexCompilerExperimentalHarness(
         }
 
         private fun signalCallbackViolation() {
-            if (callbackViolationIngressClaimed.compareAndSet(false, true)) enqueueUrgent(::callbackViolation)
+            if (claimAbortIngress(callbackViolationIngressClaimed)) enqueueUrgent(::callbackViolation)
         }
+
+        /**
+         * Linearizes asynchronous abort ingress against the publication commit point. A signal
+         * registered before publication claims the lock must win rollback even while verification
+         * is occupying the serial lane. Signals registered after the terminal CAS are late.
+         */
+        private fun claimAbortIngress(claim: AtomicBoolean): Boolean = synchronized(terminalCommitLock) {
+            claim.compareAndSet(false, true)
+        }
+
+        private fun tryClaimPublicationTerminal(): Boolean = synchronized(terminalCommitLock) {
+            if (hasPendingAbortIngress()) false else terminalClaimed.compareAndSet(false, true)
+        }
+
+        private fun hasPendingAbortIngress(): Boolean =
+            hostCancellationIngressClaimed.get() ||
+                timeoutIngressClaimed.get() ||
+                bindingFailureIngressClaimed.get() ||
+                binderDeathIngressClaimed.get() ||
+                callbackViolationIngressClaimed.get() ||
+                transportViolationIngressClaimed.get()
 
         private fun diagnosticsFitRequest(diagnostics: Collection<DexCompilerDiagnostic>): Boolean {
             var retainedBytes = 0L

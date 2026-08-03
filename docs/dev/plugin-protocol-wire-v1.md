@@ -46,7 +46,7 @@ Each field has a fixed 16-byte header followed by its payload:
 | Offset | Size | Value |
 | ---: | ---: | --- |
 | 0 | 4 | Positive field tag |
-| 4 | 4 | Wire type |
+| 4 | 4 | Positive wire type |
 | 8 | 4 | Flags |
 | 12 | 4 | Non-negative payload size |
 | 16 | N | Payload |

@@ -405,7 +405,12 @@ class TaggedWireDocument private constructor(
                 val type = buffer.int
                 val flags = buffer.int
                 val length = buffer.int
-                if (tag <= 0 || flags and TaggedWireProtocol.FLAG_REQUIRED_FOR_READER.inv() != 0 || length < 0) {
+                if (
+                    tag <= 0 ||
+                    type <= 0 ||
+                    flags and TaggedWireProtocol.FLAG_REQUIRED_FOR_READER.inv() != 0 ||
+                    length < 0
+                ) {
                     throw TaggedWireException(TaggedWireError.INVALID_FIELD, "Field $index has invalid metadata")
                 }
                 if (tag < previousTag) {

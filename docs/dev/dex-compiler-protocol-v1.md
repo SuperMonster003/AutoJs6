@@ -80,16 +80,32 @@ The output points at a host-owned staging transaction. A successful callback
 does not publish it. The provider must close its producer before the callback;
 the host reads the staging artifact, verifies reported size and SHA-256,
 validates the DEX indexed ZIP, and only then allows cache publication. Failure,
-timeout, cancellation, Binder death, identity drift, or a late callback rolls
-the transaction back.
+timeout, cancellation, Binder death, identity drift, or a late callback
+observed before the publication commit point rolls the transaction back.
 
-The experimental Android shell never renames the remote-writable staging inode
-into the cache. It copies the already validated bytes into a second host-only
-file, verifies that copy, fsyncs it, and atomically renames only that file. This
-prevents a provider that retained its staging FD from modifying a published
-artifact. The current direct-file staging transport cannot impose a hard write
-quota after a remote process retains the FD; a bounded reliable-pipe drain is
-therefore still a promotion gate before default or third-party selection.
+The disconnected Android artifact store creates a reliable pipe and starts a
+dedicated bounded drain before dispatch. The drain consumes at most the
+negotiated byte ceiling, reports peer errors after EOF, and writes only into a
+host-private staging inode. Provider completion metadata and the independently
+drained size and SHA-256 must match before publication can be claimed. Drain
+failure, timeout, cancellation, or a summary mismatch claims rollback instead.
+
+Asynchronous abort ingress and the publication terminal claim share one commit
+lock. Cancellation, timeout, Binder death, binding failure, or a transport or
+callback violation registered before that commit point prevents publication,
+even when validation is occupying the serialized worker lane. A signal that is
+registered after the publication terminal CAS is late and cannot create a
+published-artifact/local-fallback split brain.
+
+The host never renames the drained staging inode into the cache. It copies the
+already validated bytes into a second host-only file, verifies that copy,
+fsyncs it, and atomically renames only that file. The bounded transfer and
+dual-terminal publication state machine have pure JVM coverage, but the pipe
+adapter still requires API 24-36 Binder, peer-error, cancellation, storage
+exhaustion, and process-death evidence before default or third-party selection.
+The current structural validator also materializes output under a conservative
+16 MiB host limit; removing that heap ceiling requires a separately tested
+random-access or streaming validator.
 
 ## Negotiation And Cache Identity
 
@@ -154,9 +170,11 @@ separate implementation and corpus.
 ## Failure And Degradation
 
 The experimental adapter performs at most one plugin dispatch and never
-retries Binder work after dispatch. Before the local compiler is removed, an
-eligible failure may claim one local fallback after rolling back plugin output.
-Cancellation never changes engines and never triggers fallback.
+retries Binder work after dispatch. It also rejects invocation unless the
+caller supplies an explicit selected component; V1 performs no automatic
+provider selection. Before the local compiler is removed, an eligible failure
+may claim one local fallback after rolling back plugin output. Cancellation
+never changes engines and never triggers fallback.
 
 The adapter is not connected to `AndroidClassLoader` in this phase. Therefore:
 

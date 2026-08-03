@@ -48,7 +48,8 @@ class AiJsonValidationTest {
     @Test
     fun enforcesNodeLimitWithValuesAndObjectKeysAsNodes() {
         fun array(elementCount: Int) = List(elementCount) { "0" }.joinToString(",", "[", "]")
-        fun objectValue(memberCount: Int) = List(memberCount) { "\"k\":0" }.joinToString(",", "{", "}")
+        fun objectValue(memberCount: Int) =
+            List(memberCount) { index -> "\"k$index\":0" }.joinToString(",", "{", "}")
 
         AiJsonSyntaxValidator.requireValid(array(AiTextLimits.MAX_JSON_NODES - 1))
         assertThrows(IllegalArgumentException::class.java) {
@@ -58,6 +59,21 @@ class AiJsonValidationTest {
         assertThrows(IllegalArgumentException::class.java) {
             AiJsonSyntaxValidator.requireValid(objectValue((AiTextLimits.MAX_JSON_NODES + 1) / 2))
         }
+    }
+
+    @Test
+    fun rejectsDuplicateDecodedObjectKeysIncludingEscapeEquivalentSpellings() {
+        listOf(
+            "{\"same\":1,\"same\":2}",
+            "{\"a\":1,\"\\u0061\":2}",
+            "{\"/\":1,\"\\/\":2}",
+        ).forEach { duplicate ->
+            assertThrows(IllegalArgumentException::class.java) {
+                AiJsonSyntaxValidator.requireValid(duplicate)
+            }
+        }
+
+        AiJsonSyntaxValidator.requireValid("{\"outer\":{\"same\":1},\"same\":2}")
     }
 
     @Test

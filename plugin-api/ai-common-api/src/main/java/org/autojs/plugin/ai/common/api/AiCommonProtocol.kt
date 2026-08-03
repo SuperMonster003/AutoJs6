@@ -1,5 +1,7 @@
 package org.autojs.plugin.ai.common.api
 
+import java.util.Collections
+
 object AiCommonProtocol {
     const val MAJOR_VERSION = 1
     const val MINOR_VERSION = 0
@@ -26,21 +28,21 @@ object AiDataLocality {
     const val REMOTE = 2
     const val HYBRID = 3
 
-    val VALUES = setOf(ON_DEVICE, REMOTE, HYBRID)
+    val VALUES: Set<Int> = immutableSetOf(ON_DEVICE, REMOTE, HYBRID)
 }
 
 object AiCredentialMode {
     const val NONE = 1
     const val PLUGIN_MANAGED = 2
 
-    val VALUES = setOf(NONE, PLUGIN_MANAGED)
+    val VALUES: Set<Int> = immutableSetOf(NONE, PLUGIN_MANAGED)
 }
 
 object AiRetryDisposition {
     const val NEVER = 1
     const val EXPLICIT_NEW_REQUEST_ONLY = 2
 
-    val VALUES = setOf(NEVER, EXPLICIT_NEW_REQUEST_ONLY)
+    val VALUES: Set<Int> = immutableSetOf(NEVER, EXPLICIT_NEW_REQUEST_ONLY)
 }
 
 object AiErrorCode {
@@ -58,7 +60,7 @@ object AiErrorCode {
     const val PROVIDER_FAILED = 12
     const val DESCRIPTOR_FAILED = 13
 
-    val VALUES = setOf(
+    val VALUES: Set<Int> = immutableSetOf(
         INVALID_REQUEST,
         UNSUPPORTED_PROTOCOL,
         UNSUPPORTED_CAPABILITY,
@@ -74,6 +76,9 @@ object AiErrorCode {
         DESCRIPTOR_FAILED,
     )
 }
+
+private fun <T> immutableSetOf(vararg values: T): Set<T> =
+    Collections.unmodifiableSet(linkedSetOf(*values))
 
 object AiCommonLimits {
     const val MAX_BINDER_ENVELOPE_BYTES = 256 * 1024

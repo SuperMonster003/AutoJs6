@@ -47,6 +47,31 @@ import java.util.concurrent.TimeUnit
 class DexCompilerExperimentalHarnessTest {
 
     @Test
+    fun experimentIsDisabledWithoutAnExplicitComponentSelection() {
+        val fixture = Fixture()
+
+        fixture.harness.start(
+            DexCompilerExperimentalInvocation(
+                request = fixture.request,
+                inputSnapshot = fixture.snapshot,
+                outputTransaction = fixture.output,
+                releaseBuild = true,
+            ),
+            fixture.outcomes::add,
+        )
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.EXPERIMENT_DISABLED, outcome.failure)
+        assertFalse(outcome.pluginWasDispatched)
+        assertEquals(0, fixture.transport.discoveryCount)
+        assertEquals(0, fixture.transport.bindCount)
+        assertEquals(1, fixture.output.rollbackCount)
+        assertEquals(1, fixture.output.closeCount)
+        assertEquals(1, fixture.snapshot.closeCount)
+        assertEquals(0, fixture.binding.closeCount)
+    }
+
+    @Test
     fun mainThreadSynchronousCallFailsOpenWithoutDiscoveryOrBinding() {
         val fixture = Fixture(mainThread = true)
 
@@ -161,6 +186,80 @@ class DexCompilerExperimentalHarnessTest {
         assertEquals(1, fixture.snapshot.descriptorCloseCount)
         assertEquals(1, fixture.output.descriptorCloseCount)
         assertEquals(1, fixture.outcomes.size)
+    }
+
+    @Test
+    fun providerCompletionWaitsForTheIndependentOutputDrain() {
+        val fixture = Fixture()
+        fixture.output.autoCompleteDrain = false
+        fixture.start()
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        assertTrue(fixture.outcomes.isEmpty())
+        assertEquals(0, fixture.output.readCount)
+        assertEquals(0, fixture.output.publishCount)
+
+        fixture.output.completeDrain()
+
+        assertTrue(fixture.singleOutcome() is DexCompilerExperimentalOutcome.Published)
+        assertEquals(1, fixture.output.readCount)
+        assertEquals(1, fixture.output.publishCount)
+    }
+
+    @Test
+    fun timeoutWhileWaitingForDrainRollsBackAndIgnoresLateEof() {
+        val fixture = Fixture()
+        fixture.output.autoCompleteDrain = false
+        fixture.start()
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        fixture.scheduler.fire()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.TIMEOUT, outcome.failure)
+        assertEquals(1, fixture.session.cancelCount)
+        assertEquals(0, fixture.output.publishCount)
+
+        fixture.output.completeDrain()
+
+        assertEquals(1, fixture.outcomes.size)
+        assertEquals(0, fixture.output.publishCount)
+    }
+
+    @Test
+    fun drainFailureRollsBackAndCancelsTheRemoteSession() {
+        val fixture = Fixture()
+        fixture.output.autoCompleteDrain = false
+        fixture.start()
+
+        fixture.output.failDrain()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.OUTPUT_REJECTED, outcome.failure)
+        assertTrue(outcome.pluginWasDispatched)
+        assertEquals(1, fixture.session.cancelCount)
+        assertEquals(0, fixture.output.publishCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun mismatchedDrainSummaryRejectsBeforeReadingOrVerifyingStaging() {
+        val fixture = Fixture()
+        fixture.output.autoCompleteDrain = false
+        fixture.start()
+        fixture.output.completeDrain(byteArrayOf(9, 9, 9))
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.OUTPUT_REJECTED, outcome.failure)
+        assertEquals(0, fixture.output.readCount)
+        assertEquals(0, fixture.verifierCount)
+        assertEquals(0, fixture.output.publishCount)
     }
 
     @Test
@@ -305,7 +404,7 @@ class DexCompilerExperimentalHarnessTest {
         val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
         assertEquals(DexCompilerExperimentalFailure.OUTPUT_REJECTED, outcome.failure)
         assertEquals(0, fixture.output.publishCount)
-        assertEquals(1, fixture.output.readCount)
+        assertEquals(0, fixture.output.readCount)
         fixture.assertRolledBackAndUnboundExactlyOnce()
     }
 
@@ -322,6 +421,35 @@ class DexCompilerExperimentalHarnessTest {
         assertEquals(1, fixture.output.publishCount)
         assertEquals(0, fixture.output.rollbackCount)
         assertEquals(1, fixture.outcomes.size)
+    }
+
+    @Test
+    fun cancellationObservedDuringValidationRollsBackBeforePublicationCommit() {
+        val fixture = Fixture()
+        val handle = fixture.start()
+        fixture.output.onAfterRead = handle::close
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        assertTrue(fixture.singleOutcome() === DexCompilerExperimentalOutcome.Cancelled)
+        assertEquals(0, fixture.output.publishCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun binderDeathObservedDuringValidationRollsBackBeforePublicationCommit() {
+        val fixture = Fixture()
+        fixture.start()
+        fixture.output.onAfterRead = fixture.transport.bindingCallback!!::onBinderDeath
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.BINDER_DIED, outcome.failure)
+        assertEquals(0, fixture.output.publishCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
     }
 
     @Test
@@ -679,6 +807,7 @@ class DexCompilerExperimentalHarnessTest {
                     inputSnapshot = snapshot,
                     outputTransaction = output,
                     releaseBuild = true,
+                    preferredComponent = candidate.component,
                     invocationKind = invocationKind,
                 ),
                 outcomes::add,
@@ -864,6 +993,11 @@ class DexCompilerExperimentalHarnessTest {
 
     private class FakeOutputTransaction(bytes: ByteArray) : DexCompilerOutputTransaction {
         private var stagingBytes = bytes.copyOf()
+        private var drainedBytes: ByteArray? = null
+        private var drainCallback: ((DexCompilerOutputDrainTerminal) -> Unit)? = null
+        private var drainFinished = false
+        var autoCompleteDrain = true
+        var drainStartCount = 0
         var claimCount = 0
         var descriptorCloseCount = 0
         var readCount = 0
@@ -876,6 +1010,17 @@ class DexCompilerExperimentalHarnessTest {
         var publishedBytes: ByteArray? = null
         var publishedCacheKey: String? = null
 
+        override fun beginDrain(
+            maxBytes: Long,
+            onTerminal: (DexCompilerOutputDrainTerminal) -> Unit,
+        ) {
+            check(drainCallback == null)
+            require(maxBytes > 0L)
+            drainStartCount++
+            drainCallback = onTerminal
+            if (autoCompleteDrain) completeDrain()
+        }
+
         override fun claimWriteDescriptor(): DexCompilerOwnedDescriptor {
             claimCount++
             return object : DexCompilerOwnedDescriptor {
@@ -887,8 +1032,9 @@ class DexCompilerExperimentalHarnessTest {
 
         override fun readBytes(maxBytes: Long): ByteArray {
             readCount++
-            require(stagingBytes.size <= maxBytes)
-            return stagingBytes.copyOf().also { onAfterRead?.invoke() }
+            val bytes = checkNotNull(drainedBytes)
+            require(bytes.size <= maxBytes)
+            return bytes.copyOf().also { onAfterRead?.invoke() }
         }
 
         override fun publishVerified(cacheKeySha256: String, bytes: ByteArray) {
@@ -900,6 +1046,26 @@ class DexCompilerExperimentalHarnessTest {
 
         fun replaceRemoteWritableBytes(bytes: ByteArray) {
             stagingBytes = bytes.copyOf()
+        }
+
+        fun completeDrain(bytes: ByteArray = stagingBytes) {
+            check(!drainFinished)
+            drainFinished = true
+            drainedBytes = bytes.copyOf()
+            checkNotNull(drainCallback).invoke(
+                DexCompilerOutputDrainTerminal.Success(
+                    DexCompilerStreamSummary(
+                        sizeBytes = bytes.size.toLong(),
+                        sha256 = DexSha256.digest(bytes).toHexString(),
+                    ),
+                ),
+            )
+        }
+
+        fun failDrain() {
+            check(!drainFinished)
+            drainFinished = true
+            checkNotNull(drainCallback).invoke(DexCompilerOutputDrainTerminal.Failure(null))
         }
 
         fun remoteWritableBytes(): ByteArray = stagingBytes.copyOf()

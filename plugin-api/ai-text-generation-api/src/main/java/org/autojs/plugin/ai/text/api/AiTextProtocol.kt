@@ -4,6 +4,7 @@ import org.autojs.plugin.ai.common.api.AiCommonProtocol
 import org.autojs.plugin.ai.common.api.AiProtocolRange
 import org.autojs.plugin.ai.common.api.AiProtocolNegotiator
 import org.autojs.plugin.ai.common.api.AiProtocolVersion
+import java.util.Collections
 
 object AiTextProtocol {
     const val ACTION_TEXT_PROVIDER = "org.autojs.plugin.AI_TEXT_GENERATION"
@@ -40,7 +41,7 @@ object AiTextCapabilityId {
     const val STRUCTURED_JSON = "structured-json"
     const val USAGE = "usage"
 
-    val VALUES = setOf(STREAMING, REASONING, TOOLS, STRUCTURED_JSON, USAGE)
+    val VALUES: Set<String> = immutableSetOf(STREAMING, REASONING, TOOLS, STRUCTURED_JSON, USAGE)
 }
 
 object AiMessageRole {
@@ -49,7 +50,7 @@ object AiMessageRole {
     const val ASSISTANT = 3
     const val TOOL = 4
 
-    val VALUES = setOf(SYSTEM, USER, ASSISTANT, TOOL)
+    val VALUES: Set<Int> = immutableSetOf(SYSTEM, USER, ASSISTANT, TOOL)
 }
 
 object AiFinishReason {
@@ -60,16 +61,19 @@ object AiFinishReason {
     const val ERROR = 5
     const val OTHER = 6
 
-    val VALUES = setOf(STOP, LENGTH, TOOL_CALLS, CONTENT_FILTER, ERROR, OTHER)
+    val VALUES: Set<Int> = immutableSetOf(STOP, LENGTH, TOOL_CALLS, CONTENT_FILTER, ERROR, OTHER)
 }
 
 object AiTextMimeType {
     const val PLAIN = "text/plain"
     const val JSON = "application/json"
 
-    val INPUT_VALUES = setOf(PLAIN, JSON)
-    val SCHEMA_VALUES = setOf(JSON)
+    val INPUT_VALUES: Set<String> = immutableSetOf(PLAIN, JSON)
+    val SCHEMA_VALUES: Set<String> = immutableSetOf(JSON)
 }
+
+private fun <T> immutableSetOf(vararg values: T): Set<T> =
+    Collections.unmodifiableSet(linkedSetOf(*values))
 
 object AiTextLimits {
     const val MAX_MESSAGES = 256

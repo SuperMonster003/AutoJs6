@@ -11,9 +11,15 @@ Proceed with a limited GO for a build-time AI protocol pack and a fake
 conformance provider.
 
 Implementation status on 2026-08-03: Phase 1 is implemented as a
-provider-neutral text protocol pack and isolated fake provider. Phase 2 host
-selection remains open, so installing the fixture has no user-facing effect.
-Repository and Android runtime gates are tracked in
+provider-neutral text protocol pack and isolated fake provider. A non-invasive
+slice of Phase 2 now exists as a default-off, pure Kotlin host policy for
+selection, trust pinning, capability matching, safe session planning, and race
+ownership. The protocol layer now also binds tool calls to the original request,
+verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
+quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
+summaries. Android discovery, Binder binding, UI, and script-runtime selection
+remain open, so installing the fixture has no user-facing effect. Repository
+and Android runtime gates are tracked in
 [the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
 contract is documented in
 [AI Text Plugin Protocol V1](ai-text-plugin-protocol-v1.md).
@@ -54,6 +60,10 @@ would not become simpler merely by moving it across Binder:
   provider-neutral usage, reasoning fields, and tool-call round trips.
 - `app/src/main/java/org/autojs/autojs/runtime/api/augment/ai/Ai.kt` exposes the
   existing `ai.ask`, `ai.chat`, and `ai.stream` script facade.
+- `app/src/main/java/org/autojs/autojs/core/plugin/ai/` contains the default-off
+  transport-independent selection and session policies. It does not query
+  `PackageManager`, bind a service, read a credential, send a request, or
+  connect to the script facade.
 - Current `ai.chat` results include provider-native `message` and `raw` fields;
   transport tests prove that opaque reasoning/thinking signatures survive a
   later same-provider tool round trip. A provider-neutral protocol cannot claim
@@ -187,6 +197,15 @@ treated as stable:
 - At most one tool turn is outstanding. Tool calls pause ordinary completion
   until every accepted call receives one result or the session is cancelled.
 - Usage counters are non-negative and monotonic when reported incrementally.
+- A provider tool name must occur in the original request tool whitelist.
+  Stable-name syntax alone does not authorize a tool call.
+- Descriptor-backed JSON is materialized within its declared bound and checked
+  for exact length, optional digest, strict UTF-8, one complete JSON entity,
+  complexity quotas, and duplicate decoded object keys.
+- A non-streaming request rejects chunks, and a request that did not ask for
+  reasoning rejects reasoning deltas or terminal reasoning metadata.
+- Streamed visible/reasoning bytes and terminal visible/reasoning payloads use
+  one cumulative negotiated output budget rather than independent allowances.
 - A terminal callback and a bounded error are never blocked by stream credits.
 - Provider-specific deltas are merged inside the plugin. Provider-native
   continuation state remains plugin-private for the live session and is erased
@@ -218,14 +237,29 @@ opening a session. An unknown required field or capability rejects the plugin.
 An unknown optional field is ignored. Breaking parcel, lifecycle, flow-control,
 credential, or privacy semantics require a new protocol major version.
 
-The host resolves an explicit service component, applies the existing
-signature-level `org.autojs.permission.PLUGIN` binding permission, and checks
-enablement, signer authorization, package version, and protocol compatibility
-before binding. It pins package UID, signer digest, version code, and last-update
-time for the session and rejects changes before dispatch or continuation. The
-provider also checks `Binder.getCallingUid()` and the packages/signers associated
-with that UID against its expected authorized host identity; an action string
-or package name supplied inside a Parcel is not caller proof.
+The current pure host policy accepts candidates from a future discovery
+adapter. With its entry option explicitly enabled, it checks the action,
+export/enable state, signature-level `org.autojs.permission.PLUGIN` binding
+permission, trust authorization, host version, ABI, and protocol/capability
+intersection. It rejects multiple eligible providers unless one exact
+component was selected; duplicate eligible rows for that same component remain
+ambiguous and are rejected. It pins the exact component, package UID, complete
+normalized signer set, package version, last-update time, provider metadata,
+negotiated protocol, and capabilities, then requires an exact revalidation
+immediately before dispatch. A callback UID must equal the pinned package UID.
+
+No Android adapter currently supplies those candidates or performs the bind.
+That adapter must independently obtain every package fact from
+`PackageManager`; an action string or package name supplied inside a Parcel is
+not caller proof. The provider must separately check `Binder.getCallingUid()`
+and the packages/signers associated with that UID against its expected
+authorized host identity.
+
+A separate pure session gate serializes dispatch start, remote-handle
+attachment, cancellation, close, data admission, and terminal ownership.
+Cancellation or close requested before attachment is claimed at most once when
+the handle arrives, and cancellation/completion races cannot both win. This is
+policy coverage only; it is not currently connected to an AIDL session.
 
 A pure Java or Kotlin provider reports `supportedAbis = emptyArray()`. A local
 native model plugin declares its actual ABIs and should ship ABI splits plus a
@@ -272,6 +306,15 @@ Prompts, tool schemas, tool results, reasoning content, provider-native state,
 and attached text are sensitive. They are excluded from normal logs, crash
 messages, analytics, model-list cache keys, and plugin-discovery diagnostics.
 
+The implemented host session plan is credential-free by construction and can
+represent only `NONE` or `PROVIDER_PROCESS_ONLY`. Its SHA-256 binding-decision
+key covers the pinned identity, negotiated protocol/capabilities,
+`listingGeneration`, model ID, model capability snapshot, and effective
+context/output limits. It is not a response cache and has no prompt, tool data,
+page token, header, or credential input. The diagnostic formatter accepts only
+stable IDs and a bounded event enum; it cannot accept request content, provider
+error text, exception messages, or credentials.
+
 ## Tool Boundary
 
 The plugin may describe a requested tool call with a stable call ID, tool name,
@@ -301,6 +344,12 @@ operation is executed. The current JSON-only `ai.chat` input does not yet carry
 callable implementations, so automatic tool execution is a Phase 2 API and
 compatibility decision rather than an assumed v1 host behavior.
 
+The protocol additionally binds every provider-emitted tool name to the tool
+definitions in the original request. Descriptor-backed arguments are read and
+validated as bounded JSON entities before a script tool can be considered.
+Unknown names and malformed, trailing, over-quota, or duplicate-key JSON are
+rejected before execution.
+
 Tool names, call IDs, JSON depth, object members, array elements, string bytes,
 and argument/result bytes have independent limits. The host rejects duplicate
 names, duplicate or unknown call IDs, non-finite numbers, malformed UTF-8,
@@ -320,8 +369,11 @@ an inactive script callback:
   cancellation, usage, tool calls, or a terminal callback.
 - Sequence values begin at a negotiated origin, increase by one, and never
   repeat.
-- The host rejects out-of-order chunks, duplicate terminal events, or total
-  output beyond the session quota.
+- The host rejects out-of-order chunks, duplicate terminal events, chunks for
+  non-streaming requests, or unrequested reasoning. Terminal aggregate text
+  must match the streamed text length and SHA-256 and is charged once; streamed
+  reasoning and the terminal reasoning summary are each charged to the same
+  session quota.
 
 Callback methods are one-way or otherwise return immediately, and the provider
 uses one serialized callback lane. Credits bound ordinary data callbacks; they
@@ -360,6 +412,10 @@ V1 applies these rules:
 - Only `text/plain` with an explicit charset and `application/json` are
   accepted by the text protocol unless a later compatible extension adds
   another text MIME type.
+- Descriptor metadata is not accepted as proof of JSON validity. The receiver
+  reads exactly the bounded declared entity, verifies length and optional
+  SHA-256, decodes strict UTF-8, rejects trailing JSON and duplicate decoded
+  object keys, and applies the same depth/node/string quotas as inline JSON.
 - Large plugin-produced text uses a bounded reliable pipe or host-created
   write-only descriptor. The host verifies the byte count and encoding before
   exposing the result to the script and checks reliable-pipe errors after EOF.
@@ -420,7 +476,10 @@ failure and terminates the session without retry.
 ## Fallback And Degradation
 
 The existing built-in providers remain the compatibility baseline. Plugin
-selection is explicit and does not silently replace a built-in profile.
+selection is designed to be explicit and does not silently replace a built-in
+profile. The current policy entry is disabled by default and has no Android or
+runtime adapter. Installing, removing, disabling, or omitting the fake provider
+therefore creates no user-visible feature or degradation today.
 
 - Missing, disabled, incompatible, updating, or crashed selected plugins fail
   with `PROVIDER_UNAVAILABLE`.
@@ -510,6 +569,8 @@ is directional evidence only, not an APK-size or performance measurement.
 
 ### Phase 2: Optional Host Selector
 
+- Keep the completed pure policy core default-off while Android discovery,
+  Binder transport, UI, and runtime adapters are absent.
 - Add an experimental provider selector without changing `ai.ask`, `ai.chat`,
   or `ai.stream` script signatures.
 - Keep built-in providers as the default and explicit fallback baseline.

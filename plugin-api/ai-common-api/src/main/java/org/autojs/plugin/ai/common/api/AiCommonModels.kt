@@ -179,6 +179,10 @@ data class AiError(
             }
         }
     }
+
+    override fun toString(): String =
+        "AiError(code=$code, retryDisposition=$retryDisposition, " +
+            "messagePresent=${message != null}, providerCodePresent=${providerCode != null})"
 }
 
 /**
@@ -266,7 +270,8 @@ class AiPayloadReference(
 
     override fun toString(): String =
         "AiPayloadReference(mimeType=$mimeType, declaredLengthBytes=$declaredLengthBytes, " +
-            "sha256=$sha256, inline=${inlineStorage != null}, descriptorIndex=$descriptorIndex, charset=$charset)"
+            "sha256Present=${sha256 != null}, inline=${inlineStorage != null}, " +
+            "descriptorIndex=$descriptorIndex, charset=$charset)"
 }
 
 object AiProtocolNegotiator {

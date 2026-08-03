@@ -10,10 +10,26 @@ runtime loading path.
 Proceed with a phased GO for a standalone D8 compiler plugin.
 
 Implementation status on 2026-08-03: the V1 protocol pack, isolated fake
-provider, and experimental host harness are implemented. The harness remains
-disconnected from the default class-loading path while the Android runtime
-gates in [the conformance matrix](compiler-ai-protocol-conformance.md) are
-pending. The frozen implementation contract is documented in
+provider, and experimental host harness are implemented. The host artifact
+store now starts a bounded reliable-pipe drain before dispatch, enforces the
+negotiated write ceiling, and checks the pipe peer error after EOF. Publication
+requires the provider-reported size and SHA-256 to match the independently
+drained size and SHA-256; the dual-summary gate permits only one publication or
+rollback claim. The experiment also requires an explicit selected component,
+so an invocation without that selection fails open before plugin discovery and
+automatic provider selection remains disabled.
+
+Publication has an explicit atomic commit boundary. Cancellation, timeout,
+Binder death, binding failure, and callback or transport violations registered
+while output validation is occupying the serialized lane are observed before
+the publication claim and force rollback. Signals registered after that claim
+are late and cannot race a second fallback outcome against a published cache
+entry.
+
+The harness remains disconnected from the default class-loading path. No
+production provider invokes real D8 yet, and the Android runtime gates in
+[the conformance matrix](compiler-ai-protocol-conformance.md) remain pending.
+The frozen implementation contract is documented in
 [DEX Compiler Protocol V1](dex-compiler-protocol-v1.md).
 
 The v1 protocol is limited to bounded bytecode-to-DEX conversion. It does not

@@ -149,7 +149,7 @@ internal object DexIndexedZipValidator {
         }
 
         val header = DexHeader.parse(bytes, entryName)
-        if (header.fileSize != bytes.size.toLong() || header.headerSize != DEX_HEADER_SIZE.toLong()) {
+        if (header.fileSize != bytes.size.toLong() || header.headerSize != DEX_HEADER_SIZE) {
             fail(DexOutputValidationFailure.INVALID_DEX_HEADER, "$entryName has inconsistent file or header size")
         }
         if (header.endianTag != DEX_ENDIAN_CONSTANT) {
@@ -180,7 +180,7 @@ internal object DexIndexedZipValidator {
     }
 
     private fun validateFixedSectionOrder(sections: List<DexSection>, dataOffset: Long, entryName: String) {
-        var previousEnd = DEX_HEADER_SIZE.toLong()
+        var previousEnd = DEX_HEADER_SIZE
         sections.forEach { section ->
             if (section.size == 0L) {
                 if (section.offset != 0L) {
@@ -271,7 +271,7 @@ internal object DexIndexedZipValidator {
         items.forEachIndexed { index, item ->
             val upperBound = if (index + 1 < items.size) items[index + 1].offset else bytes.size.toLong()
             val minimumBytes = when (item.type) {
-                TYPE_HEADER_ITEM -> DEX_HEADER_SIZE.toLong()
+                TYPE_HEADER_ITEM -> DEX_HEADER_SIZE
                 TYPE_STRING_ID_ITEM -> checkedMultiply(item.size, 4L, "string IDs")
                 TYPE_TYPE_ID_ITEM -> checkedMultiply(item.size, 4L, "type IDs")
                 TYPE_PROTO_ID_ITEM -> checkedMultiply(item.size, 12L, "proto IDs")

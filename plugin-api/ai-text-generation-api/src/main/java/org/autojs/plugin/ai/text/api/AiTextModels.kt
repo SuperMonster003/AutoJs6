@@ -179,6 +179,10 @@ data class AiModelListRequest(
             AiValidation.requireUtf8(it, 1, AiTextLimits.MAX_MODEL_PAGE_TOKEN_BYTES, "Model page token")
         }
     }
+
+    override fun toString(): String =
+        "AiModelListRequest(protocolVersion=$protocolVersion, pageSize=$pageSize, " +
+            "pageTokenPresent=${pageToken != null})"
 }
 
 class AiModelInfo(
@@ -264,7 +268,7 @@ class AiModelPage(
     override fun hashCode(): Int = dataClassHashCode(listingGeneration, models, nextPageToken)
 
     override fun toString(): String =
-        "AiModelPage(listingGeneration=$listingGeneration, models=$models, nextPageToken=$nextPageToken)"
+        "AiModelPage(modelCount=${models.size}, nextPageTokenPresent=${nextPageToken != null})"
 }
 
 data class AiContentPart(
@@ -472,7 +476,9 @@ class AiTextRequest(
 
     override fun toString(): String =
         "AiTextRequest(requestId=$requestId, protocolVersion=$protocolVersion, providerId=$providerId, " +
-            "modelId=$modelId, messages=$messages, options=$options, tools=$tools)"
+            "modelId=$modelId, messageCount=${messages.size}, " +
+            "contentPartCount=${messages.sumOf { it.parts.size }}, toolCount=${tools.size}, " +
+            "stream=${options.stream}, responseMimeType=${options.responseMimeType})"
 }
 
 data class AiSessionStarted(
@@ -506,6 +512,10 @@ data class AiTextChunk(
         require(total <= AiTextLimits.MAX_CHUNK_TEXT_BYTES) { "Chunk text exceeds the protocol limit" }
         require(textDelta.isNotEmpty() || reasoningDelta.isNotEmpty()) { "An empty chunk is not allowed" }
     }
+
+    override fun toString(): String =
+        "AiTextChunk(sequence=$sequence, textDeltaBytes=${AiValidation.utf8Size(textDelta)}, " +
+            "reasoningDeltaBytes=${AiValidation.utf8Size(reasoningDelta)})"
 }
 
 data class AiReasoningMetadata(

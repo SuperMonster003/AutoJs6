@@ -9,7 +9,6 @@ import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.os.ParcelFileDescriptor
 import androidx.core.content.pm.PackageInfoCompat
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginSignatureUtils
@@ -249,16 +248,6 @@ internal class AndroidDexCompilerExperimentalTransport(
             }
             action()
         }
-    }
-}
-
-internal class AndroidDexCompilerDescriptor(
-    internal val descriptor: ParcelFileDescriptor,
-) : DexCompilerOwnedDescriptor {
-    private val closed = AtomicBoolean(false)
-
-    override fun close() {
-        if (closed.compareAndSet(false, true)) descriptor.close()
     }
 }
 

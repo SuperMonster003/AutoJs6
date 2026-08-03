@@ -1,5 +1,6 @@
 package org.autojs.plugin.ai.text.api
 
+import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.common.api.AiValidation
 import java.security.MessageDigest
@@ -47,10 +48,14 @@ object AiJsonSyntaxValidator {
             index += 1
             skipWhitespace()
             if (consume('}')) return
+            val decodedKeys = hashSetOf<String>()
             while (true) {
                 require(peek() == '"') { "JSON object key must be a string" }
                 consumeNode()
-                parseString()
+                val decodedKey = parseString(captureDecodedValue = true)
+                require(decodedKeys.add(requireNotNull(decodedKey))) {
+                    "JSON object contains a duplicate decoded key"
+                }
                 skipWhitespace()
                 require(consume(':')) { "JSON object key is missing a colon" }
                 skipWhitespace()
@@ -76,38 +81,57 @@ object AiJsonSyntaxValidator {
             }
         }
 
-        private fun parseString() {
+        private data class ParsedEscape(
+            val first: Char,
+            val second: Char? = null,
+            val utf8Bytes: Int,
+        )
+
+        private fun parseString(captureDecodedValue: Boolean = false): String? {
             require(consume('"')) { "JSON string is missing its opening quote" }
             var decodedUtf8Bytes = 0
+            val decoded = if (captureDecodedValue) StringBuilder() else null
             while (index < source.length) {
                 val character = source[index++]
                 when {
-                    character == '"' -> return
+                    character == '"' -> return decoded?.toString()
                     character == '\\' -> {
-                        decodedUtf8Bytes = addDecodedStringBytes(decodedUtf8Bytes, parseEscape())
+                        val escape = parseEscape()
+                        decodedUtf8Bytes = addDecodedStringBytes(decodedUtf8Bytes, escape.utf8Bytes)
+                        decoded?.append(escape.first)
+                        escape.second?.let { decoded?.append(it) }
                     }
                     character.code < 0x20 -> throw IllegalArgumentException("JSON string contains a control character")
                     Character.isHighSurrogate(character) -> {
                         require(index < source.length && Character.isLowSurrogate(source[index])) {
                             "JSON string contains an unpaired surrogate"
                         }
-                        index += 1
+                        val lowSurrogate = source[index++]
                         decodedUtf8Bytes = addDecodedStringBytes(decodedUtf8Bytes, 4)
+                        decoded?.append(character)?.append(lowSurrogate)
                     }
                     Character.isLowSurrogate(character) ->
                         throw IllegalArgumentException("JSON string contains an unpaired surrogate")
                     else -> {
                         decodedUtf8Bytes = addDecodedStringBytes(decodedUtf8Bytes, utf8Bytes(character))
+                        decoded?.append(character)
                     }
                 }
             }
             throw IllegalArgumentException("JSON string is unterminated")
         }
 
-        private fun parseEscape(): Int {
+        private fun parseEscape(): ParsedEscape {
             require(index < source.length) { "JSON escape is truncated" }
             return when (source[index++]) {
-                '"', '\\', '/', 'b', 'f', 'n', 'r', 't' -> 1
+                '"' -> ParsedEscape('"', utf8Bytes = 1)
+                '\\' -> ParsedEscape('\\', utf8Bytes = 1)
+                '/' -> ParsedEscape('/', utf8Bytes = 1)
+                'b' -> ParsedEscape('\b', utf8Bytes = 1)
+                'f' -> ParsedEscape('\u000C', utf8Bytes = 1)
+                'n' -> ParsedEscape('\n', utf8Bytes = 1)
+                'r' -> ParsedEscape('\r', utf8Bytes = 1)
+                't' -> ParsedEscape('\t', utf8Bytes = 1)
                 'u' -> {
                     val first = parseHexCodeUnit().toChar()
                     when {
@@ -118,11 +142,11 @@ object AiJsonSyntaxValidator {
                             index += 2
                             val second = parseHexCodeUnit().toChar()
                             require(Character.isLowSurrogate(second)) { "JSON escape contains an unpaired surrogate" }
-                            4
+                            ParsedEscape(first, second, utf8Bytes = 4)
                         }
                         Character.isLowSurrogate(first) ->
                             throw IllegalArgumentException("JSON escape contains an unpaired surrogate")
-                        else -> utf8Bytes(first)
+                        else -> ParsedEscape(first, utf8Bytes = utf8Bytes(first))
                     }
                 }
                 else -> throw IllegalArgumentException("JSON string contains an invalid escape")
@@ -216,10 +240,29 @@ object AiTextPayloadPolicy {
     fun materializeAndValidate(
         payload: AiPayloadReference,
         readDescriptor: ((index: Int, declaredLengthBytes: Long) -> ByteArray)? = null,
+    ): String = materializeAndValidateBounded(
+        payload = payload,
+        maximumBytes = AiCommonLimits.MAX_PAYLOAD_BYTES,
+        readDescriptor = readDescriptor,
+    )
+
+    /**
+     * Materializes one text payload only after its declaration fits [maximumBytes]. Descriptor
+     * readers must honor the supplied declared length and avoid unbounded reads; the returned
+     * bytes are checked again before UTF-8, digest, and JSON validation.
+     */
+    fun materializeAndValidateBounded(
+        payload: AiPayloadReference,
+        maximumBytes: Long,
+        readDescriptor: ((index: Int, declaredLengthBytes: Long) -> ByteArray)? = null,
     ): String {
-        val bytes = payload.inlineBytes ?: requireNotNull(readDescriptor) {
+        require(maximumBytes in 0L..AiCommonLimits.MAX_PAYLOAD_BYTES) { "Invalid text payload byte limit" }
+        require(payload.declaredLengthBytes <= maximumBytes) { "Text payload declaration exceeds its byte limit" }
+        val materializedBytes = payload.inlineBytes ?: requireNotNull(readDescriptor) {
             "A descriptor reader is required for an out-of-line text payload"
         }.invoke(requireNotNull(payload.descriptorIndex), payload.declaredLengthBytes)
+        require(materializedBytes.size.toLong() <= maximumBytes) { "Materialized text payload exceeds its byte limit" }
+        val bytes = materializedBytes.copyOf()
         return validateMaterialized(payload, bytes)
     }
 

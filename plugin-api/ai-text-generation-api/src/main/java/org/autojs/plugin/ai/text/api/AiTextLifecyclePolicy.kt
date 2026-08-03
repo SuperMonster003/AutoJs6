@@ -2,10 +2,12 @@ package org.autojs.plugin.ai.text.api
 
 import org.autojs.plugin.ai.common.api.AiUsage
 import org.autojs.plugin.ai.common.api.AiUsagePolicy
+import java.security.MessageDigest
 
 class AiCreditWindow(
     private val maximumCredits: Int = AiTextLimits.MAX_OUTSTANDING_CHUNK_CREDITS,
 ) {
+    @get:Synchronized
     var outstandingCredits: Int = 0
         private set
 
@@ -60,6 +62,7 @@ class AiTerminalGate {
         CANCELLED,
     }
 
+    @get:Synchronized
     var terminal: Terminal? = null
         private set
 
@@ -77,9 +80,11 @@ class AiToolTurnPolicy(
     private val seenCallIds = linkedSetOf<String>()
     private var outstandingCallIds: Set<String> = emptySet()
 
+    @get:Synchronized
     var completedRounds: Int = 0
         private set
 
+    @get:Synchronized
     var totalToolDataBytes: Long = 0L
         private set
 
@@ -143,11 +148,16 @@ class AiTextSessionPolicy(
     private val sequences = AiChunkSequencePolicy()
     private val terminals = AiTerminalGate()
     private val tools = AiToolTurnPolicy(maximumToolRounds, maximumOutstandingToolCalls)
+    private val streamedTextDigest = MessageDigest.getInstance("SHA-256")
     private var usage: AiUsage? = null
     private var cancelRequested = false
-    private var emittedOutputBytes = 0L
+    private var emittedTextBytes = 0L
+    private var emittedReasoningBytes = 0L
+    private var emittedChunkCount = 0L
     private var effectiveMaximumOutputBytes: Long? = null
     private var effectiveMaximumToolRounds: Int? = null
+    private var completionValidationInProgress = false
+    private var completionValidationAttempted = false
 
     init {
         require(maximumOutputBytes in 1L..AiTextLimits.MAX_STREAMING_OUTPUT_BYTES)
@@ -156,17 +166,18 @@ class AiTextSessionPolicy(
         )
     }
 
+    @get:Synchronized
     var state: State = State.CREATED
         private set
 
     val outstandingCredits: Int
-        get() = credits.outstandingCredits
+        @Synchronized get() = credits.outstandingCredits
 
     val completedToolRounds: Int
-        get() = tools.completedRounds
+        @Synchronized get() = tools.completedRounds
 
     val terminal: AiTerminalGate.Terminal?
-        get() = terminals.terminal
+        @Synchronized get() = terminals.terminal
 
     @Synchronized
     fun grantCredits(count: Int) {
@@ -207,23 +218,36 @@ class AiTextSessionPolicy(
     @Synchronized
     fun onChunk(chunk: AiTextChunk) {
         requireStarted()
+        expectedRequest?.options?.let { options ->
+            require(options.stream) { "Provider emitted a chunk for a non-streaming request" }
+            require(options.includeReasoning || chunk.reasoningDelta.isEmpty()) {
+                "Provider emitted reasoning that was not requested"
+            }
+        }
         check(!tools.hasOutstandingTurn) { "Chunks are paused while a tool turn is outstanding" }
         credits.requireAvailable()
         sequences.requireNext(chunk.sequence)
-        val chunkBytes = org.autojs.plugin.ai.common.api.AiValidation.utf8Size(chunk.textDelta).toLong() +
-            org.autojs.plugin.ai.common.api.AiValidation.utf8Size(chunk.reasoningDelta).toLong()
+        val textBytes = chunk.textDelta.toByteArray(Charsets.UTF_8)
+        val textByteCount = textBytes.size.toLong()
+        val reasoningByteCount = org.autojs.plugin.ai.common.api.AiValidation.utf8Size(chunk.reasoningDelta).toLong()
+        val chunkBytes = textByteCount + reasoningByteCount
+        val emittedBytes = emittedTextBytes + emittedReasoningBytes
         val outputLimit = checkNotNull(effectiveMaximumOutputBytes) { "Session output limit is unavailable" }
-        check(chunkBytes <= outputLimit && emittedOutputBytes <= outputLimit - chunkBytes) {
+        check(chunkBytes <= outputLimit && emittedBytes <= outputLimit - chunkBytes) {
             "Streaming output exceeds the session quota"
         }
         sequences.accept(chunk.sequence)
         credits.consume()
-        emittedOutputBytes += chunkBytes
+        streamedTextDigest.update(textBytes)
+        emittedTextBytes += textByteCount
+        emittedReasoningBytes += reasoningByteCount
+        emittedChunkCount += 1L
     }
 
     @Synchronized
     fun onToolCalls(batch: AiToolCallBatch) {
         requireStarted()
+        expectedRequest?.let { request -> AiTextQuotaPolicy.requireDeclaredToolCalls(request, batch) }
         val toolRoundLimit = checkNotNull(effectiveMaximumToolRounds) { "Session tool-round limit is unavailable" }
         check(tools.completedRounds < toolRoundLimit) { "Tool round limit is exhausted" }
         tools.open(batch)
@@ -242,36 +266,72 @@ class AiTextSessionPolicy(
         usage = AiUsagePolicy.mergeMonotonic(usage, next)
     }
 
+    /** Structural compatibility path for sessions that were created without an expected request. */
+    @Deprecated(
+        message = "Use request-aware onCompleted to verify the terminal payload and aggregate stream",
+    )
     @Synchronized
     fun onCompleted() {
         requireStarted()
+        check(expectedRequest == null) {
+            "Request-aware completion must verify the terminal payload"
+        }
         check(!tools.hasOutstandingTurn) { "Completion cannot bypass an outstanding tool turn" }
         acceptTerminal(AiTerminalGate.Terminal.COMPLETED)
     }
 
-    @Synchronized
     fun onCompleted(
         result: AiCompletionResult,
         descriptorCount: Int,
         readDescriptor: ((index: Int, declaredLengthBytes: Long) -> ByteArray)? = null,
     ): AiTextCompletionQuotaSnapshot {
-        requireStarted()
-        check(!tools.hasOutstandingTurn) { "Completion cannot bypass an outstanding tool turn" }
-        val request = checkNotNull(expectedRequest) { "A request-aware session policy is required" }
-        val snapshot = AiTextQuotaPolicy.validateCompletion(
-            request = request,
-            result = result,
-            descriptorCount = descriptorCount,
-            maximumDescriptors = maximumSessionDescriptors,
-            observedUsage = usage,
-            readDescriptor = readDescriptor,
-            effectiveMaximumOutputBytes = checkNotNull(effectiveMaximumOutputBytes) {
-                "Session output limit is unavailable"
-            },
-        )
-        usage = snapshot.finalUsage
-        acceptTerminal(AiTerminalGate.Terminal.COMPLETED)
-        return snapshot
+        val validation = synchronized(this) {
+            requireStarted()
+            check(!tools.hasOutstandingTurn) { "Completion cannot bypass an outstanding tool turn" }
+            check(!completionValidationInProgress) { "Completion validation is already in progress" }
+            check(!completionValidationAttempted) { "Completion validation was already attempted" }
+            val context = CompletionValidationContext(
+                request = checkNotNull(expectedRequest) { "A request-aware session policy is required" },
+                observedUsage = usage,
+                streamedChunkCount = emittedChunkCount,
+                streamedTextBytes = emittedTextBytes,
+                streamedReasoningBytes = emittedReasoningBytes,
+                streamedTextSha256 = if (emittedChunkCount > 0L) streamedTextDigest.digest().toHex() else null,
+                effectiveMaximumOutputBytes = checkNotNull(effectiveMaximumOutputBytes) {
+                    "Session output limit is unavailable"
+                },
+            )
+            completionValidationAttempted = true
+            completionValidationInProgress = true
+            context
+        }
+        try {
+            val snapshot = AiTextQuotaPolicy.validateCompletionAggregate(
+                request = validation.request,
+                result = result,
+                streamedChunkCount = validation.streamedChunkCount,
+                streamedTextBytes = validation.streamedTextBytes,
+                streamedReasoningBytes = validation.streamedReasoningBytes,
+                streamedTextSha256 = validation.streamedTextSha256,
+                descriptorCount = descriptorCount,
+                maximumDescriptors = maximumSessionDescriptors,
+                observedUsage = validation.observedUsage,
+                readDescriptor = readDescriptor,
+                effectiveMaximumOutputBytes = validation.effectiveMaximumOutputBytes,
+            )
+            synchronized(this) {
+                completionValidationInProgress = false
+                requireCompletionCommitAllowed()
+                check(!tools.hasOutstandingTurn) { "Completion cannot bypass an outstanding tool turn" }
+                usage = snapshot.finalUsage
+                acceptTerminal(AiTerminalGate.Terminal.COMPLETED)
+            }
+            return snapshot
+        } finally {
+            synchronized(this) {
+                completionValidationInProgress = false
+            }
+        }
     }
 
     @Synchronized
@@ -319,5 +379,26 @@ class AiTextSessionPolicy(
 
     private fun requireDataAllowed() {
         check(!cancelRequested) { "Session cancellation was requested" }
+        check(!completionValidationAttempted) { "Terminal completion validation was already attempted" }
+        check(!completionValidationInProgress) { "Completion validation is in progress" }
     }
+
+    private fun requireCompletionCommitAllowed() {
+        requireOpen()
+        check(!cancelRequested) { "Session cancellation was requested" }
+        check(state == State.STARTED) { "Session has not started" }
+    }
+
+    private data class CompletionValidationContext(
+        val request: AiTextRequest,
+        val observedUsage: AiUsage?,
+        val streamedChunkCount: Long,
+        val streamedTextBytes: Long,
+        val streamedReasoningBytes: Long,
+        val streamedTextSha256: String?,
+        val effectiveMaximumOutputBytes: Long,
+    )
+
+    private fun ByteArray.toHex(): String =
+        joinToString(separator = "") { byte -> "%02x".format(byte.toInt() and 0xFF) }
 }

@@ -17,6 +17,11 @@ data class AiToolDefinition(
         requireInlineTextPayload(inputSchema)
         require(inputSchema.declaredLengthBytes <= AiTextLimits.MAX_ONE_SCHEMA_BYTES)
     }
+
+    override fun toString(): String =
+        "AiToolDefinition(name=$name, descriptionBytes=${AiValidation.utf8Size(description)}, " +
+            "inputSchemaMimeType=${inputSchema.mimeType}, " +
+            "inputSchemaBytes=${inputSchema.declaredLengthBytes})"
 }
 
 data class AiToolCall(
@@ -33,6 +38,10 @@ data class AiToolCall(
         requireInlineTextPayload(arguments)
         require(arguments.declaredLengthBytes <= AiTextLimits.MAX_TOOL_ARGUMENT_OR_RESULT_BYTES)
     }
+
+    override fun toString(): String =
+        "AiToolCall(name=$name, argumentsBytes=${arguments.declaredLengthBytes}, " +
+            "argumentsDescriptorBacked=${!arguments.isInline})"
 }
 
 class AiToolCallBatch(
@@ -55,7 +64,7 @@ class AiToolCallBatch(
 
     override fun hashCode(): Int = calls.hashCode()
 
-    override fun toString(): String = "AiToolCallBatch(calls=$calls)"
+    override fun toString(): String = "AiToolCallBatch(callCount=${calls.size})"
 }
 
 data class AiToolResult(
@@ -70,6 +79,10 @@ data class AiToolResult(
         requireInlineTextPayload(output)
         require(output.declaredLengthBytes <= AiTextLimits.MAX_TOOL_ARGUMENT_OR_RESULT_BYTES)
     }
+
+    override fun toString(): String =
+        "AiToolResult(outputMimeType=${output.mimeType}, outputBytes=${output.declaredLengthBytes}, " +
+            "outputDescriptorBacked=${!output.isInline}, isError=$isError)"
 }
 
 class AiToolResultBatch(
@@ -92,7 +105,7 @@ class AiToolResultBatch(
 
     override fun hashCode(): Int = results.hashCode()
 
-    override fun toString(): String = "AiToolResultBatch(results=$results)"
+    override fun toString(): String = "AiToolResultBatch(resultCount=${results.size})"
 }
 
 private fun <T> immutableListSnapshot(values: List<T>): List<T> =

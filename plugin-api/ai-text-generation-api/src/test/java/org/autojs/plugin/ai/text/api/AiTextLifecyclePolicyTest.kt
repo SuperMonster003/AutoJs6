@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.autojs.plugin.ai.text.api
 
 import org.autojs.plugin.ai.common.api.AiProtocolVersion
@@ -8,6 +10,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 class AiTextLifecyclePolicyTest {
@@ -307,6 +312,196 @@ class AiTextLifecyclePolicyTest {
         assertEquals(AiTerminalGate.Terminal.COMPLETED, policy.terminal)
     }
 
+    @Test
+    fun requestAwareSessionRejectsUndeclaredToolCalls() {
+        val request = requestAwareRequest(
+            stream = false,
+            tools = listOf(AiToolDefinition("lookup", "Lookup", jsonPayload("{}"))),
+        )
+        val policy = AiTextSessionPolicy(
+            maximumToolRounds = 1,
+            expectedRequest = request,
+        ).apply {
+            onStarted(startedMetadata(maximumToolRounds = 1))
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            policy.onToolCalls(
+                AiToolCallBatch(
+                    listOf(AiToolCall("call-1", "delete-all", jsonPayload("{}"))),
+                ),
+            )
+        }
+        policy.onToolCalls(calls("call-1"))
+    }
+
+    @Test
+    fun requestAwareSessionCannotBypassTerminalPayloadValidation() {
+        val request = requestAwareRequest(stream = false)
+        val policy = AiTextSessionPolicy(
+            maximumToolRounds = 0,
+            expectedRequest = request,
+        ).apply {
+            onStarted(startedMetadata())
+        }
+
+        assertThrows(IllegalStateException::class.java) {
+            @Suppress("DEPRECATION")
+            policy.onCompleted()
+        }
+        assertEquals(AiTextSessionPolicy.State.STARTED, policy.state)
+        assertEquals(null, policy.terminal)
+    }
+
+    @Test
+    fun requestOptionsRejectUnexpectedStreamingAndReasoningBeforeSpendingCredit() {
+        val nonStreamingRequest = requestAwareRequest(stream = false)
+        val nonStreaming = AiTextSessionPolicy(
+            maximumToolRounds = 0,
+            expectedRequest = nonStreamingRequest,
+        ).apply {
+            onStarted(startedMetadata())
+            grantCredits(1)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            nonStreaming.onChunk(AiTextChunk(0, textDelta = "unexpected"))
+        }
+        assertEquals(1, nonStreaming.outstandingCredits)
+
+        val noReasoningRequest = requestAwareRequest(stream = true, includeReasoning = false)
+        val noReasoning = AiTextSessionPolicy(
+            maximumToolRounds = 0,
+            expectedRequest = noReasoningRequest,
+        ).apply {
+            onStarted(startedMetadata())
+            grantCredits(1)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            noReasoning.onChunk(AiTextChunk(0, reasoningDelta = "private reasoning"))
+        }
+        assertEquals(1, noReasoning.outstandingCredits)
+        noReasoning.onChunk(AiTextChunk(0, textDelta = "safe"))
+    }
+
+    @Test
+    fun streamingTerminalOutputIsOneAggregateBoundToTheStreamContent() {
+        val request = requestAwareRequest(stream = true, maximumOutputBytes = 4)
+        val policy = AiTextSessionPolicy(
+            maximumToolRounds = 0,
+            maximumOutputBytes = 4,
+            expectedRequest = request,
+        ).apply {
+            onStarted(startedMetadata(effectiveMaximumOutputBytes = 4))
+            grantCredits(1)
+            onChunk(AiTextChunk(0, textDelta = "four"))
+        }
+
+        val snapshot = policy.onCompleted(
+            AiCompletionResult(textPayload("four"), AiFinishReason.STOP),
+            descriptorCount = 0,
+        )
+        assertEquals(4L, snapshot.totalGeneratedBytes)
+        assertEquals(AiTerminalGate.Terminal.COMPLETED, policy.terminal)
+
+        val mismatch = AiTextSessionPolicy(
+            maximumToolRounds = 0,
+            maximumOutputBytes = 4,
+            expectedRequest = request,
+        ).apply {
+            onStarted(startedMetadata(effectiveMaximumOutputBytes = 4))
+            grantCredits(1)
+            onChunk(AiTextChunk(0, textDelta = "four"))
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            mismatch.onCompleted(
+                AiCompletionResult(textPayload("xxxx"), AiFinishReason.STOP),
+                descriptorCount = 0,
+            )
+        }
+        assertThrows(IllegalStateException::class.java) {
+            mismatch.onCompleted(
+                AiCompletionResult(textPayload("four"), AiFinishReason.STOP),
+                descriptorCount = 0,
+            )
+        }
+        mismatch.onFailed()
+    }
+
+    @Test
+    fun streamedReasoningAndTerminalSummaryAreBothChargedBesideAggregateOutput() {
+        val request = requestAwareRequest(
+            stream = true,
+            includeReasoning = true,
+            maximumOutputBytes = 5,
+        )
+        val policy = AiTextSessionPolicy(
+            maximumToolRounds = 0,
+            maximumOutputBytes = 5,
+            expectedRequest = request,
+        ).apply {
+            onStarted(startedMetadata(effectiveMaximumOutputBytes = 5))
+            grantCredits(1)
+            onChunk(AiTextChunk(0, textDelta = "a", reasoningDelta = "rr"))
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            policy.onCompleted(
+                AiCompletionResult(
+                    output = textPayload("a"),
+                    finishReason = AiFinishReason.STOP,
+                    reasoning = AiReasoningMetadata(summary = textPayload("sss")),
+                ),
+                descriptorCount = 0,
+            )
+        }
+        policy.onFailed()
+    }
+
+    @Test
+    fun descriptorReaderRunsOutsideSessionLockAndCancellationWinsTheRace() {
+        val request = requestAwareRequest(stream = false, maximumOutputBytes = 16)
+        val policy = AiTextSessionPolicy(
+            maximumToolRounds = 0,
+            maximumOutputBytes = 16,
+            expectedRequest = request,
+            maximumSessionDescriptors = 1,
+        ).apply {
+            onStarted(startedMetadata(effectiveMaximumOutputBytes = 16))
+        }
+        val readerEntered = java.util.concurrent.CountDownLatch(1)
+        val releaseReader = java.util.concurrent.CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+        try {
+            val completion = executor.submit<AiTextCompletionQuotaSnapshot> {
+                policy.onCompleted(
+                    result = AiCompletionResult(
+                        descriptorPayload(AiTextMimeType.PLAIN, 2, 0, charset = "utf-8"),
+                        AiFinishReason.STOP,
+                    ),
+                    descriptorCount = 1,
+                    readDescriptor = { _, _ ->
+                        readerEntered.countDown()
+                        check(releaseReader.await(2, TimeUnit.SECONDS))
+                        "ok".toByteArray()
+                    },
+                )
+            }
+            assertTrue(readerEntered.await(2, TimeUnit.SECONDS))
+            val cancellation = executor.submit<Boolean> { policy.requestCancel() }
+            assertTrue(cancellation.get(1, TimeUnit.SECONDS))
+            releaseReader.countDown()
+            val failure = assertThrows(ExecutionException::class.java) {
+                completion.get(2, TimeUnit.SECONDS)
+            }
+            assertTrue(failure.cause is IllegalStateException)
+            policy.onCancelled()
+            assertEquals(AiTerminalGate.Terminal.CANCELLED, policy.terminal)
+        } finally {
+            releaseReader.countDown()
+            executor.shutdownNow()
+        }
+    }
+
     private fun startedPolicy(
         firstSequence: Long = 0,
         maximumToolRounds: Int = 0,
@@ -335,5 +530,28 @@ class AiTextLifecyclePolicyTest {
 
     private fun results(vararg ids: String) = AiToolResultBatch(
         ids.map { id -> AiToolResult(id, jsonPayload("{}")) },
+    )
+
+    private fun requestAwareRequest(
+        stream: Boolean,
+        includeReasoning: Boolean = false,
+        maximumOutputBytes: Long = 4096,
+        tools: List<AiToolDefinition> = emptyList(),
+    ) = AiTextRequest(
+        requestId = "request-life",
+        protocolVersion = AiProtocolVersion(1, 0),
+        providerId = "fake.local",
+        modelId = "fake.echo",
+        messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(textPayload("hello"))))),
+        options = AiGenerationOptions(
+            stream = stream,
+            includeReasoning = includeReasoning,
+            structuredJson = false,
+            reportUsage = false,
+            maximumOutputBytes = maximumOutputBytes,
+            maximumToolRounds = if (tools.isEmpty()) 0 else 1,
+            timeoutMillis = 30_000,
+        ),
+        tools = tools,
     )
 }
