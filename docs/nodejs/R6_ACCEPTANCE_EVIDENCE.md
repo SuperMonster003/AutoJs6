@@ -74,6 +74,67 @@ node tools/nodejs/r6/run-device-evidence.js --target second-oem-arm64 --serial S
 node tools/nodejs/r6/run-device-evidence.js --target emulator-x86_64 --serial EMULATOR_SERIAL
 ```
 
+The canonical x86_64 target is pinned to the local AVD named `AVD_API_37`,
+Android API 37, primary ABI `x86_64`, and a 16384-byte runtime page size. Start
+that AVD, select the serial assigned to it, and prove the complete identity
+before invoking the collector:
+
+```powershell
+$emulator = Join-Path $env:ANDROID_HOME 'emulator\emulator.exe'
+$adb = Join-Path $env:ANDROID_HOME 'platform-tools\adb.exe'
+
+Start-Process -FilePath $emulator -ArgumentList @('-avd', 'AVD_API_37') `
+    -WindowStyle Hidden
+& $adb devices -l
+
+# Replace this value if adb assigned AVD_API_37 a different emulator port.
+$serial = 'emulator-5554'
+$deadline = [DateTimeOffset]::UtcNow.AddMinutes(5)
+do {
+    $stateLines = @(& $adb -s $serial get-state 2>$null)
+    $bootLines = @(& $adb -s $serial shell getprop sys.boot_completed 2>$null)
+    $state = if ($stateLines.Count -gt 0) { $stateLines[0].Trim() } else { '' }
+    $bootCompleted = if ($bootLines.Count -gt 0) { $bootLines[0].Trim() } else { '' }
+    if ($state -eq 'device' -and $bootCompleted -eq '1') {
+        break
+    }
+    if ([DateTimeOffset]::UtcNow -ge $deadline) {
+        throw "AVD_API_37 did not finish booting on $serial within five minutes."
+    }
+    Start-Sleep -Seconds 2
+} while ($true)
+
+$avdNameLines = @(& $adb -s $serial emu avd name)
+$observed = [ordered]@{
+    State = (& $adb -s $serial get-state).Trim()
+    AvdName = $avdNameLines[0].Trim()
+    ApiLevel = (& $adb -s $serial shell getprop ro.build.version.sdk).Trim()
+    PrimaryAbi = (& $adb -s $serial shell getprop ro.product.cpu.abi).Trim()
+    PageSizeBytes = (& $adb -s $serial shell getconf PAGE_SIZE).Trim()
+    Qemu = (& $adb -s $serial shell getprop ro.kernel.qemu).Trim()
+}
+[pscustomobject]$observed
+
+if ($observed.State -ne 'device' -or
+    $observed.AvdName -ne 'AVD_API_37' -or
+    $observed.ApiLevel -ne '37' -or
+    $observed.PrimaryAbi -ne 'x86_64' -or
+    $observed.PageSizeBytes -ne '16384' -or
+    $observed.Qemu -ne '1') {
+    throw 'The connected emulator does not satisfy the canonical R6 x86_64 contract.'
+}
+
+node tools/nodejs/r6/run-device-evidence.js `
+    --target emulator-x86_64 --serial $serial
+```
+
+An emulator with a different AVD name or API level, including an x86_64 AVD
+booted with a 4096-byte page size, is diagnostic-only and cannot be archived as
+`emulator-x86_64` production evidence. The collector performs these device
+identity checks immediately after adb preflight and fails closed before the
+runtime-plugin, packaged-template, APK Builder, or connected-test Gradle builds
+begin, so a wrong emulator does not consume the expensive build phase.
+
 The four canonical reports are:
 
 - `build/reports/nodejs/r6-evidence/device/sony-arm64.json`
@@ -161,7 +222,8 @@ global `gradle --stop` cannot terminate an in-flight evidence build.
 
 The target constraints are fail-closed: the two Sony entries must use the
 required 64-bit and 32-bit runtime ABIs, the second-OEM entry must be a
-non-Sony physical arm64 device, and the x86_64 entry must be an emulator.
+non-Sony physical arm64 device, and the x86_64 entry must be the
+`AVD_API_37` API 37 emulator with a 16384-byte runtime page size.
 The packaged APK selectors use that same target ABI; an arm64-only packaged
 fixture cannot satisfy the v7a or x86_64 matrix entries.
 

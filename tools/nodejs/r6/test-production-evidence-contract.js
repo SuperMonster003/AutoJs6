@@ -32,6 +32,8 @@ const {
   normalizeAndroidComponentName,
   packagedTemplatePathForRunToken,
   parseApkSignerOutput,
+  parseEmulatorAvdName,
+  parsePageSizeBytes,
   selectAbiApk,
   selectFreshJUnit,
   snapshotJUnitFiles: snapshotDeviceJUnitFiles,
@@ -76,6 +78,7 @@ function main() {
     prepareContractApkTools();
     assertApkSignerOutputContracts();
     assertAndroidComponentNameContracts();
+    assertEmulatorDeviceContractParsers();
     assertDeviceRunnerGradleContracts();
     assertPackagedTemplateAbiSelectionContract(root);
     assertPackagedTemplateSourceContract();
@@ -86,6 +89,27 @@ function main() {
       const result = evaluateDeviceReport(root, requirement, identity, root);
       assert.strictEqual(result.ready, true, `${requirement.id}: ${result.blockers.join("; ")}`);
     }
+
+    const emulatorRequirement = DEVICE_REQUIREMENTS.find((entry) => entry.id === "emulator-x86_64");
+    assert(emulatorRequirement, "emulator-x86_64 requirement is missing");
+    const emulatorMutations = [
+      ["wrong AVD", (report) => { report.device.avdName = "AVD_API_36.1"; }, "emulator AVD name"],
+      ["missing AVD", (report) => { delete report.device.avdName; }, "emulator AVD name"],
+      ["wrong API", (report) => { report.device.apiLevel = 36; }, "device API level must be exactly"],
+      ["4 KB page size", (report) => { report.device.pageSizeBytes = 4096; }, "device page size must be exactly"],
+      ["missing page size", (report) => { delete report.device.pageSizeBytes; }, "device page size must be exactly"],
+    ];
+    emulatorMutations.forEach(([label, mutate, blockerText]) => {
+      const report = validDeviceReport(emulatorRequirement);
+      mutate(report);
+      writeJson(root, emulatorRequirement.relative, report);
+      const result = evaluateDeviceReport(root, emulatorRequirement, identity, root);
+      assert.strictEqual(result.ready, false, `${label} must fail closed`);
+      assert(
+        result.blockers.some((message) => message.includes(blockerText)),
+        `${label}: ${result.blockers.join("; ")}`,
+      );
+    });
 
     const skippedRequirement = DEVICE_REQUIREMENTS[0];
     const skipped = validDeviceReport(skippedRequirement);
@@ -720,7 +744,11 @@ function validDeviceReport(requirement) {
       serial: `contract-${requirement.id}`,
       manufacturer,
       model: `contract-${requirement.id}`,
-      apiLevel: 36,
+      apiLevel: requirement.apiLevel || 36,
+      ...(requirement.avdName ? { avdName: requirement.avdName } : {}),
+      ...(Number.isInteger(requirement.pageSizeBytes)
+        ? { pageSizeBytes: requirement.pageSizeBytes }
+        : {}),
       isEmulator: requirement.emulator,
       hostProcessAbi,
       runtimeProcessAbi: requirement.runtimeProcessAbi,
@@ -1186,6 +1214,26 @@ function assertApkSignerOutputContracts() {
   );
 }
 
+function assertEmulatorDeviceContractParsers() {
+  const requirement = DEVICE_REQUIREMENTS.find((entry) => entry.id === "emulator-x86_64");
+  assert(requirement, "emulator-x86_64 requirement is missing");
+  assert.strictEqual(DEVICE_SCHEMA, "autojs6-node-r6-device-evidence-v2");
+  assert.deepStrictEqual(
+    {
+      avdName: requirement.avdName,
+      apiLevel: requirement.apiLevel,
+      pageSizeBytes: requirement.pageSizeBytes,
+    },
+    { avdName: "AVD_API_37", apiLevel: 37, pageSizeBytes: 16_384 },
+  );
+  assert.strictEqual(parseEmulatorAvdName("AVD_API_37\r\nOK\r\n"), "AVD_API_37");
+  assert.throws(() => parseEmulatorAvdName("OK\n"), /exactly one AVD name/);
+  assert.throws(() => parseEmulatorAvdName("AVD_API_37\nOTHER_AVD\nOK\n"), /exactly one AVD name/);
+  assert.strictEqual(parsePageSizeBytes("16384\n"), 16_384);
+  assert.throws(() => parsePageSizeBytes(""), /positive decimal integer/);
+  assert.throws(() => parsePageSizeBytes("16 KiB"), /positive decimal integer/);
+}
+
 function assertDeviceRunnerGradleContracts() {
   const collectorSource = fs.readFileSync(
     path.resolve(__dirname, "run-device-evidence.js"),
@@ -1194,6 +1242,8 @@ function assertDeviceRunnerGradleContracts() {
   assert(collectorSource.includes(
     "buildIsolatedGradleArgs(config.context.runRoot, config.args)",
   ));
+  assert(collectorSource.includes('["emu", "avd", "name"]'));
+  assert(collectorSource.includes('["shell", "getconf", "PAGE_SIZE"]'));
   const assertIsolatedGradleArgs = (args, label) => {
     assert.strictEqual(
       args.filter((value) => value === "--no-daemon").length,

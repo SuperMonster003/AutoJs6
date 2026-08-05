@@ -7,7 +7,7 @@ const fs = require("fs");
 const path = require("path");
 
 const SCHEMA = "autojs6-node-r6-production-evidence-gate-v1";
-const DEVICE_SCHEMA = "autojs6-node-r6-device-evidence-v1";
+const DEVICE_SCHEMA = "autojs6-node-r6-device-evidence-v2";
 const SOAK_SCHEMA = "autojs6-node-r6-persistent-plugin-soak-v1";
 const REPORT_BASENAME = "r6-production-evidence-gate";
 const LIFECYCLE_MODEL = "persistent_process_global_runtime";
@@ -96,6 +96,9 @@ const DEVICE_REQUIREMENTS = [
     relative: "device/emulator-x86_64.json",
     runtimeProcessAbi: "x86_64",
     emulator: true,
+    avdName: "AVD_API_37",
+    apiLevel: 37,
+    pageSizeBytes: 16_384,
   },
 ];
 
@@ -925,6 +928,15 @@ function validateDevice(deviceValue, requirement, blockers) {
   if (!stringValue(device.model)) blockers.push("device model is missing");
   if (!stringValue(device.manufacturer)) blockers.push("device manufacturer is missing");
   if (numberValue(device.apiLevel) < 24) blockers.push("device API level must be at least 24");
+  if (Number.isInteger(requirement.apiLevel) && device.apiLevel !== requirement.apiLevel) {
+    blockers.push(`device API level must be exactly ${requirement.apiLevel}`);
+  }
+  if (requirement.avdName && stringValue(device.avdName) !== requirement.avdName) {
+    blockers.push(`emulator AVD name must be ${requirement.avdName}`);
+  }
+  if (Number.isInteger(requirement.pageSizeBytes) && device.pageSizeBytes !== requirement.pageSizeBytes) {
+    blockers.push(`device page size must be exactly ${requirement.pageSizeBytes} bytes`);
+  }
   if (stringValue(device.runtimeProcessAbi) !== requirement.runtimeProcessAbi) {
     blockers.push(`runtime process ABI must be ${requirement.runtimeProcessAbi}`);
   }

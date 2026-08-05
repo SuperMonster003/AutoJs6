@@ -434,6 +434,21 @@ checkboxes above remain open until these changes are committed and the live
 provider summary, four device reports, both production soaks, and strict
 final/release decision are recollected from one clean successor identity.
 
+The clean `98db4a6ce557eb6206e38c7f347046a649603652` successor subsequently
+recollected the four device reports at 13/13 with zero failures, errors, or
+skips, the 27-case live-provider report, and the complete 8-hour and 24-hour
+soaks. A recovery audit on 2026-08-06 then found that the v1
+`emulator-x86_64` contract proved only emulator status and runtime ABI: the
+report happened to come from the API 37 16 KB-page AVD, but did not attest the
+AVD name, exact API level, or runtime page size. The device contract is now v2
+and fixes that target to `AVD_API_37`, API 37, and 16384 bytes. The collector
+checks all three values before any production build, and its Gradle entry point
+runs the fail-closed contract fixtures first. Consequently the otherwise
+healthy `98db4a6c` payload remains historical evidence; all four device
+reports, live-provider evidence, and both production soaks must be recollected
+from the clean commit containing this correction before the open R6 items can
+close.
+
 The R6 implementation checkpoint now includes a real multi-round engine-switch
 instrumentation gate, a persistent required-plugin soak harness, an evidence
 schema/contract-fixture gate, external-plugin native source/artifact

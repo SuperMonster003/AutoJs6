@@ -692,6 +692,8 @@ async function main() {
         manufacturer: device.manufacturer,
         model: device.model,
         apiLevel: device.apiLevel,
+        avdName: device.avdName,
+        pageSizeBytes: device.pageSizeBytes,
         supportedAbis: device.supportedAbis,
         hostProcessAbi: installedHost.primaryCpuAbi,
         runtimeProcessAbi: installedAfter.primaryCpuAbi,
@@ -1041,11 +1043,40 @@ async function readAndValidateDevice(serial, requirement, context) {
     throw new Error("Device manufacturer, model, or API level is unavailable.");
   }
   if (apiLevel < 24) throw new Error(`Device API level ${apiLevel} is below 24.`);
+  if (Number.isInteger(requirement.apiLevel) && apiLevel !== requirement.apiLevel) {
+    throw new Error(`Target ${requirement.id} requires API level ${requirement.apiLevel}, detected ${apiLevel}.`);
+  }
   if (!supportedAbis.includes(requirement.runtimeProcessAbi)) {
     throw new Error(`Device ABI list does not contain required ${requirement.runtimeProcessAbi}: ${supportedAbis.join(", ")}`);
   }
   if (isEmulator !== requirement.emulator) {
     throw new Error(`Target ${requirement.id} requires isEmulator=${requirement.emulator}, detected ${isEmulator}.`);
+  }
+  let avdName = null;
+  let pageSizeBytes = null;
+  if (requirement.avdName) {
+    avdName = parseEmulatorAvdName(await adbText(
+      serial,
+      ["emu", "avd", "name"],
+      context,
+      "emulator-avd-name",
+    ));
+    if (avdName !== requirement.avdName) {
+      throw new Error(`Target ${requirement.id} requires AVD ${requirement.avdName}, detected ${avdName}.`);
+    }
+  }
+  if (Number.isInteger(requirement.pageSizeBytes)) {
+    pageSizeBytes = parsePageSizeBytes(await adbText(
+      serial,
+      ["shell", "getconf", "PAGE_SIZE"],
+      context,
+      "device-page-size",
+    ));
+    if (pageSizeBytes !== requirement.pageSizeBytes) {
+      throw new Error(
+        `Target ${requirement.id} requires page size ${requirement.pageSizeBytes} bytes, detected ${pageSizeBytes}.`,
+      );
+    }
   }
   const normalizedManufacturer = manufacturer.toLowerCase();
   if (requirement.manufacturer && normalizedManufacturer !== requirement.manufacturer) {
@@ -1054,7 +1085,41 @@ async function readAndValidateDevice(serial, requirement, context) {
   if (requirement.manufacturerNot && normalizedManufacturer === requirement.manufacturerNot) {
     throw new Error(`Target ${requirement.id} requires an OEM other than ${requirement.manufacturerNot}, detected ${manufacturer}.`);
   }
-  return { serial, manufacturer, model, apiLevel, supportedAbis, isEmulator, properties };
+  return {
+    serial,
+    manufacturer,
+    model,
+    apiLevel,
+    avdName,
+    pageSizeBytes,
+    supportedAbis,
+    isEmulator,
+    properties,
+  };
+}
+
+function parseEmulatorAvdName(output) {
+  const lines = String(output || "")
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((value) => value.trim())
+    .filter((value) => value && value !== "OK");
+  if (lines.length !== 1) {
+    throw new Error("Emulator console did not report exactly one AVD name.");
+  }
+  return lines[0];
+}
+
+function parsePageSizeBytes(output) {
+  const value = String(output || "").trim();
+  if (!/^[1-9][0-9]*$/.test(value)) {
+    throw new Error(`Device PAGE_SIZE must be a positive decimal integer, got ${value || "missing"}.`);
+  }
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed)) {
+    throw new Error(`Device PAGE_SIZE is outside the safe integer range: ${value}.`);
+  }
+  return parsed;
 }
 
 async function inspectInstalledPlugin(serial, packageName, context) {
@@ -2209,6 +2274,8 @@ pushes a fresh target-ABI slim Inrt template to a run-token-derived exact path, 
 device identities before and after testing, cleans up the template, runs 30 R5 warm samples and a
 30-second smoke lifecycle with 2-second samples, and fixes the exact verifier selectors
 plus a generated 64-character hexadecimal run token.
+The emulator-x86_64 target additionally requires AVD_API_37, API level 37, and a runtime
+PAGE_SIZE of exactly 16384 bytes before any production build starts.
 It accepts no status, force, selector, profile, duration, or run-token override.
 `);
 }
@@ -2225,6 +2292,8 @@ module.exports = {
   gradleDaemonRegistryBaseForRun,
   parseArgs,
   parseApkSignerOutput,
+  parseEmulatorAvdName,
+  parsePageSizeBytes,
   parseRequiredJUnit,
   parseRequiredJUnitXml,
   packagedTemplatePathForRunToken,

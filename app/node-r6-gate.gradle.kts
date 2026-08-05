@@ -98,7 +98,8 @@ tasks.register<Exec>("verifyNodeR6ProductionEvidenceContract") {
     description = "Verifies accepted and fail-closed R6 device/soak evidence contract fixtures without producing release evidence."
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/r6/test-production-evidence-contract.js")
     val verifierFile = rootProject.layout.projectDirectory.file("tools/nodejs/r6/verify-production-evidence.js")
-    inputs.files(scriptFile, verifierFile)
+    val deviceRunnerFile = rootProject.layout.projectDirectory.file("tools/nodejs/r6/run-device-evidence.js")
+    inputs.files(scriptFile, verifierFile, deviceRunnerFile)
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
     commandLine("node", scriptFile.asFile.absolutePath)
@@ -121,6 +122,7 @@ tasks.register<Exec>("verifyNodeR6ProductionEvidenceGate") {
 tasks.register<Exec>("collectNodeR6DeviceEvidence") {
     group = "verification"
     description = "Collects and archives one fixed-contract R6 production device target from explicit target and serial properties."
+    dependsOn("verifyNodeR6ProductionEvidenceContract")
     val runnerFile = rootProject.layout.projectDirectory.file("tools/nodejs/r6/run-device-evidence.js")
     val verifierFile = rootProject.layout.projectDirectory.file("tools/nodejs/r6/verify-production-evidence.js")
     val pluginRoot = nodeR6PluginProjectRoot()
