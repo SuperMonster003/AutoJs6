@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.ZonedDateTime
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -40,8 +41,8 @@ private val embeddedNodePackagingPackageJsonEntry = "assets/project/package.json
 private val embeddedNodePackagingRuntimeMatrixEntry = "assets/project/runtime-matrix.expected.txt"
 private val embeddedNodePackagingPreloadBudgetEntry = "assets/project/preload-budget.expected.txt"
 private val embeddedNodePackagingModuleSourcesLimit = 64
-private val embeddedNodePackagingModuleSourceMaxBytes = 262_144
-private val embeddedNodePackagingModuleSourcesMaxBytes = 524_288
+private val embeddedNodePackagingModuleSourceMaxBytes = 16_777_216
+private val embeddedNodePackagingModuleSourcesMaxBytes = 67_108_864
 private val embeddedNodePackagingModuleSourceBudgetExceededCode = "ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED"
 private val embeddedNodePackagingInrtNodeProjectLaunchSourceMarker =
     "autojs6.inrt.node_project_launch_source.v2"
@@ -57,6 +58,7 @@ private val embeddedNodePackagingInrtNodeProjectStableFailureMarkers = listOf(
     "autojs6.node_project_launch.failure.v1",
     "autojs6.node_project_runner.request_failure.v1",
 )
+private val embeddedNodePackagingFullSmokeTailMarker = "packaged.tail=true"
 private val embeddedNodePackagingFullSmokeMarkers = listOf(
     "packaged.node.version=v24.5.0",
     "packaged.text=packaged",
@@ -108,7 +110,8 @@ private val embeddedNodePackagingFullSmokeMarkers = listOf(
     "packaged.dirent.opendir=true",
     "packaged.dirent.async_iterator=true",
     "packaged.readlink.surface=true",
-    "packaged.readlink.symlink_disabled=true",
+    "packaged.readlink.symlink=true",
+    "packaged.readlink.rejects=true",
     "packaged.config.ready=true",
     "packaged.config.plugin=true",
     "packaged.config.scoped=true",
@@ -135,23 +138,11 @@ private val embeddedNodePackagingFullSmokeMarkers = listOf(
     "packaged.chdir.ready=true",
     "packaged.chdir.fs=true",
     "packaged.chdir.require=true",
-    "packaged.node_modules_scope.ready=true",
-    "packaged.node_modules_scope.nearest=true",
-    "packaged.node_modules_scope.imports=true",
+    embeddedNodePackagingFullSmokeTailMarker,
 )
-private val embeddedNodePackagingRealNpmCorpusReadyMarker = "packaged.real_npm_corpus.ready=true"
+private val embeddedNodePackagingRealNpmCorpusReadyMarker = embeddedNodePackagingFullSmokeTailMarker
 private val embeddedNodePackagingRealNpmCorpusMarkers = listOf(
     embeddedNodePackagingRealNpmCorpusReadyMarker,
-    "packaged.real.npm.ok=true",
-    "packaged.real.npm.debug=pkg:test ready +2ms optional=true",
-    "packaged.real.npm.buffer=ok",
-    "packaged.real.npm.cache=true",
-    "packaged.real.npm.batch2.ready=true",
-    "packaged.real.npm.batch2.ok=true",
-    "packaged.real.npm.string_width=true",
-    "packaged.real.npm.strip_ansi=true",
-    "packaged.real.npm.camelcase=true",
-    "packaged.real.npm.brace_expansion=true",
 )
 private val embeddedNodePackagingRealNpmPackageJsonEntries = listOf(
     "assets/project/node_modules/is-number/package.json",
@@ -209,17 +200,9 @@ private val embeddedNodePackagingRealNpmJavaScriptEntries = listOf(
     "assets/project/node_modules/concat-map/index.js",
     "assets/project/node_modules/brace-expansion-lite/index.js",
 )
-private val embeddedNodePackagingCjsResolverReadyMarker = "packaged.cjs.resolver.ready=true"
+private val embeddedNodePackagingCjsResolverReadyMarker = embeddedNodePackagingFullSmokeTailMarker
 private val embeddedNodePackagingCjsResolverMarkers = listOf(
     embeddedNodePackagingCjsResolverReadyMarker,
-    "packaged.cjs.resolver.ok=true",
-    "packaged.cjs.exports=true",
-    "packaged.cjs.imports=true",
-    "packaged.cjs.self_reference=true",
-    "packaged.cjs.scoped_self_reference=true",
-    "packaged.cjs.require_resolve=true",
-    "packaged.cjs.blocked=true",
-    "packaged.cjs.esm_rejected=true",
 )
 private val embeddedNodePackagingCjsResolverPackageJsonEntries = listOf(
     "assets/project/node_modules/resolver-edge-pkg/package.json",
@@ -247,17 +230,9 @@ private val embeddedNodePackagingCjsResolverJavaScriptEntries = listOf(
     "assets/project/node_modules/@scope/resolver-self-pkg/feature.js",
     "assets/project/node_modules/fallback-main-pkg/index.js",
 )
-private val embeddedNodePackagingDependencyResolutionReadyMarker = "packaged.cjs.dependency_resolution.ready=true"
+private val embeddedNodePackagingDependencyResolutionReadyMarker = embeddedNodePackagingFullSmokeTailMarker
 private val embeddedNodePackagingDependencyResolutionMarkers = listOf(
     embeddedNodePackagingDependencyResolutionReadyMarker,
-    "packaged.cjs.dependency_resolution.ok=true",
-    "packaged.cjs.builtin_precedence=true",
-    "packaged.cjs.nested_dependency=true",
-    "packaged.cjs.subpath_resolution=true",
-    "packaged.cjs.cache_identity=true",
-    "packaged.node_modules_scope.ready=true",
-    "packaged.node_modules_scope.nearest=true",
-    "packaged.node_modules_scope.imports=true",
 )
 private val embeddedNodePackagingDependencyResolutionPackageJsonEntries = listOf(
     "assets/project/node_modules/path/package.json",
@@ -286,10 +261,15 @@ private val embeddedNodePackagingDiagnosticsMarkers = listOf(
     "packaged.diagnostics.fs_absolute.message=true",
     "packaged.diagnostics.cjs_stack.message=true",
     "packaged.diagnostics.cjs_stack.source=true",
-    "packaged.diagnostics.esm.type_module.message=true",
+    "packaged.diagnostics.esm.type_module.value=true",
     "packaged.diagnostics.esm.exports_context=true",
+    "packaged.diagnostics.esm.async_code=ERR_REQUIRE_ASYNC_MODULE",
+    "packaged.diagnostics.esm.async_message=true",
     "packaged.diagnostics.after_failure.ok=true",
-    "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
+    "packaged.diagnostics.esm.code=ok",
+    "packaged.dynamic_import.ready=true",
+    "packaged.dynamic_import.mjs=true",
+    "packaged.dynamic_import.cjs=true",
     "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",
     "packaged.diagnostics.timeout.timedOut=true",
     "packaged.diagnostics.timeout.pendingTimers=true",
@@ -298,6 +278,7 @@ private val embeddedNodePackagingDiagnosticsPackageJsonEntries = listOf(
     "assets/project/node_modules/diagnostic-boom/package.json",
     "assets/project/node_modules/diagnostic-type-module/package.json",
     "assets/project/node_modules/diagnostic-esm-export-context/package.json",
+    "assets/project/node_modules/diagnostic-async-esm/package.json",
 )
 private val embeddedNodePackagingDiagnosticsJavaScriptEntries = listOf(
     "assets/project/main.js",
@@ -309,6 +290,7 @@ private val embeddedNodePackagingDiagnosticsJavaScriptEntries = listOf(
     "assets/project/node_modules/diagnostic-boom/index.js",
     "assets/project/node_modules/diagnostic-type-module/index.mjs",
     "assets/project/node_modules/diagnostic-esm-export-context/esm.mjs",
+    "assets/project/node_modules/diagnostic-async-esm/index.mjs",
 )
 private val embeddedNodePackagingForegroundServicePermission = "android.permission.FOREGROUND_SERVICE"
 private val embeddedNodePackagingForegroundServiceMediaProjectionPermission =
@@ -355,21 +337,21 @@ private val embeddedNodePackagingAndroidPermissionsByBridgeCapability = mapOf(
 private val embeddedNodePackagingSpecialUseFgsSubtypeProperty = "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
 private val embeddedNodePackagingRefreshTaskName = "embeddedNodeRefreshInrtTemplateApk"
 private val embeddedNodePackagingFullRefreshTaskName = "embeddedNodeRefreshFullInrtTemplateApk"
+private val embeddedNodePackagedSmokePrecleanTaskName = "embeddedNodePrecleanPackagedSmokeInstrumentation"
+private val embeddedNodePackagedSmokeResultVerifyTaskName = "embeddedNodeVerifyPackagedSmokeInstrumentationResults"
 private val embeddedNodePackagedSmokePullTaskName = "embeddedNodePullPackagedSmokeApks"
 private val embeddedNodePackagedSmokeHostVerifyTaskName = "embeddedNodePackagedSmokeHostVerify"
 private val embeddedNodePackagingSmokePublicExportDir = "/sdcard/Download/AutoJs6/embedded-node-packaged-smoke"
-private val embeddedNodePackagingSmokeApkNames = listOf(
-    "PackagedNodeSmoke_v1.0.0.apk",
-    "PackagedNodeScriptLaunchSmoke_v1.0.0.apk",
-    "PackagedNodeBinLaunchSmoke_v1.0.0.apk",
-    "PackagedNodeBinStringScriptSmoke_v1.0.0.apk",
-    "PackagedNodeDiagnosticsSmoke_v1.0.0.apk",
-    "PackagedNodeEsmDiagnosticsSmoke_v1.0.0.apk",
-    "PackagedNodeDynamicImportDiagnosticsSmoke_v1.0.0.apk",
-    "PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk",
-    "PackagedNodeV11BridgeSmoke_v1.0.0.apk",
-)
-private val embeddedNodePackagingSmokeVerifierReadyApkNames = setOf(
+private val embeddedNodePackagingApkBuilderPluginPackage = "org.autojs.plugin.apkbuilder.template"
+private val embeddedNodePackagingApkBuilderPluginOutputDir =
+    "plugins/apk-builder-template/build/outputs/apk/release"
+private val embeddedNodePackagingApkBuilderProvenanceSchema =
+    "autojs6-apk-builder-template-current-source-v1"
+private val embeddedNodePackagingApkBuilderProvenancePath =
+    "plugins/apk-builder-template/build/reports/apk-builder-template/current-source-release.properties"
+private val embeddedNodePackagingApkBuilderSnapshotName =
+    "packaged-smoke-apk-builder-before.properties"
+private val embeddedNodePackagingSmokeVerifierReadyApkNames = listOf(
     "PackagedNodeSmoke_v1.0.0.apk",
     "PackagedNodeDiagnosticsSmoke_v1.0.0.apk",
 )
@@ -390,6 +372,43 @@ private data class EmbeddedNodePackagingTools(
     val sdkDir: File,
     val aapt2: File,
 )
+
+private data class EmbeddedNodePackagingAdbSerialSelection(
+    val serial: String?,
+    val sources: Map<String, String>,
+) {
+    val conflictingValues: List<String> = sources.values.distinct()
+    val connectedTestSources: Map<String, String> = sources.filterKeys { source ->
+        source == "Gradle property android.injected.device.serial" ||
+                source == "environment ANDROID_SERIAL"
+    }
+    val usesConnectedTestUnsupportedAliasOnly: Boolean =
+        serial != null && connectedTestSources.isEmpty()
+    val hasConnectedTestBinding: Boolean =
+        serial != null && connectedTestSources.isNotEmpty()
+}
+
+private data class EmbeddedNodePackagingRepositoryState(
+    val commit: String,
+    val fingerprint: String,
+)
+
+private data class EmbeddedNodePackagingApkBuilderInspection(
+    val localCandidates: List<File>,
+    val localApk: File?,
+    val localSha256: String?,
+    val runtimeKitGitSha: String?,
+    val packagePathExit: Int,
+    val packagePathOutput: String,
+    val installedApkPaths: List<String>,
+    val installedSha256: String?,
+    val provenanceFile: File,
+    val provenance: Properties?,
+    val repositoryState: EmbeddedNodePackagingRepositoryState?,
+    val failures: List<String>,
+) {
+    val ready: Boolean = failures.isEmpty()
+}
 
 private data class EmbeddedNodePackagingManifestInfo(
     val inspected: Boolean,
@@ -454,6 +473,11 @@ private data class EmbeddedNodePackagedOutputVerification(
     val moduleSourcesReady: Boolean,
 )
 
+private enum class EmbeddedNodePackagedSmokeRole {
+    FULL,
+    DIAGNOSTICS,
+}
+
 private data class EmbeddedNodePackagingModuleSourceBudgetEntry(
     val index: Int,
     val sourceName: String,
@@ -489,6 +513,20 @@ private fun String.toEmbeddedNodePackagingBoolean(): Boolean =
 @Suppress("UNCHECKED_CAST")
 private fun <T> embeddedNodePackagingRuntimeConfig(name: String): T =
     extensions.extraProperties.get("nodeJsRuntimeConfig.$name") as T
+
+private val embeddedNodePackagingRequestedFocusedGate =
+    embeddedNodePackagingRuntimeConfig<String?>("nodeJsRequestedFocusedGate")
+private val embeddedNodePackagingFocusedInstrumentationSelectors =
+    embeddedNodePackagingRuntimeConfig<String?>("nodeJsFocusedGateInstrumentationClassArgument")
+        ?.split(',')
+        ?.map(String::trim)
+        ?.filter(String::isNotEmpty)
+        .orEmpty()
+private val embeddedNodePackagingReleaseCandidateInvocation =
+    embeddedNodePackagingRequestedFocusedGate in setOf(
+        "verifyEmbeddedNodeReleaseCandidate",
+        "verifyNodeReleaseGate",
+    )
 
 private val embeddedNodePackagingUsesPluginNativeBuild =
     embeddedNodePackagingRuntimeConfig<String>("effectiveNodeJsRuntimeBackend") == "plugin" &&
@@ -746,16 +784,8 @@ private fun embeddedNodePackagingApkEntryContainsUtf8(apk: File, entryName: Stri
     embeddedNodePackagingApkEntryBytes(apk, entryName)
         ?.embeddedNodePackagingContainsBytes(value.toByteArray(Charsets.UTF_8)) == true
 
-private fun embeddedNodePackagingJsonStringValue(json: String?, key: String): String? {
-    if (json == null) {
-        return null
-    }
-    val escapedKey = Regex.escape(key)
-    return Regex(""""$escapedKey"\s*:\s*"([^"]*)"""")
-        .find(json)
-        ?.groupValues
-        ?.getOrNull(1)
-}
+private fun embeddedNodePackagingJsonStringValue(json: String?, key: String): String? =
+    embeddedNodePackagingJsonMap(json)?.get(key) as? String
 
 private fun embeddedNodePackagingProjectScriptEntry(projectConfigText: String?): String =
     embeddedNodePackagingJsonStringValue(projectConfigText, "main")
@@ -1137,12 +1167,344 @@ private fun embeddedNodePackagingAdbCommand(adb: File, serial: String?, vararg a
         addAll(args)
     }.toTypedArray()
 
-private fun runEmbeddedNodePackagingCommand(vararg command: String): Pair<Int, String> {
+private fun embeddedNodePackagingAdbSerialSelection(): EmbeddedNodePackagingAdbSerialSelection {
+    val sources = linkedMapOf<String, String>()
+    listOf(
+        "autojs.embeddedNode.adbSerial",
+        "embeddedNodeAdbSerial",
+        "adbSerial",
+        "android.injected.device.serial",
+    ).forEach { propertyName ->
+        providers.gradleProperty(propertyName).orNull
+            ?.trim()
+            ?.takeIf(String::isNotEmpty)
+            ?.let { value -> sources["Gradle property $propertyName"] = value }
+    }
+    providers.environmentVariable("ANDROID_SERIAL").orNull
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let { value -> sources["environment ANDROID_SERIAL"] = value }
+    val distinctValues = sources.values.distinct()
+    return EmbeddedNodePackagingAdbSerialSelection(
+        serial = distinctValues.singleOrNull(),
+        sources = sources,
+    )
+}
+
+private fun terminateEmbeddedNodePackagingProcess(process: Process) {
+    if (!process.isAlive) return
+    process.destroy()
+    try {
+        if (!process.waitFor(5L, TimeUnit.SECONDS)) {
+            process.destroyForcibly()
+            process.waitFor(5L, TimeUnit.SECONDS)
+        }
+    } catch (_: InterruptedException) {
+        process.destroyForcibly()
+    }
+}
+
+private fun runEmbeddedNodePackagingCommand(
+    vararg command: String,
+    timeoutSeconds: Long = 120L,
+    mergeError: Boolean = true,
+): Pair<Int, String> {
     val process = ProcessBuilder(command.toList())
-        .redirectErrorStream(true)
+        .redirectErrorStream(mergeError)
         .start()
-    val output = process.inputStream.bufferedReader().readText()
-    return process.waitFor() to output
+    var output = ""
+    var errorOutput = ""
+    val readerThread = Thread(
+        {
+            output = runCatching { process.inputStream.bufferedReader().readText() }
+                .getOrElse { error -> "Failed to read process output: ${error.message}" }
+        },
+        "embedded-node-command-output",
+    ).apply {
+        isDaemon = true
+        start()
+    }
+    val errorReaderThread = if (!mergeError) {
+        Thread(
+            {
+                errorOutput = runCatching { process.errorStream.bufferedReader().readText() }
+                    .getOrElse { error -> "Failed to read process stderr: ${error.message}" }
+            },
+            "embedded-node-command-error-output",
+        ).apply {
+            isDaemon = true
+            start()
+        }
+    } else {
+        null
+    }
+    try {
+        val finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS)
+        if (!finished) {
+            terminateEmbeddedNodePackagingProcess(process)
+        }
+        readerThread.join(5_000L)
+        errorReaderThread?.join(5_000L)
+        val exitCode = if (finished) process.exitValue() else 124
+        val returnedOutput = if (!mergeError && (exitCode != 0 || !finished) && errorOutput.isNotEmpty()) {
+            output +
+                    (if (output.endsWith('\n') || output.isEmpty()) "" else System.lineSeparator()) +
+                    errorOutput
+        } else {
+            output
+        }
+        val timeoutMessage = if (finished) "" else {
+            "${if (returnedOutput.endsWith('\n') || returnedOutput.isEmpty()) "" else System.lineSeparator()}" +
+                    "Command timed out after $timeoutSeconds seconds."
+        }
+        return exitCode to (returnedOutput + timeoutMessage)
+    } catch (error: InterruptedException) {
+        terminateEmbeddedNodePackagingProcess(process)
+        readerThread.interrupt()
+        errorReaderThread?.interrupt()
+        Thread.currentThread().interrupt()
+        throw GradleException(
+            "Interrupted while running bounded command: ${command.joinToString(" ")}",
+            error,
+        )
+    } finally {
+        if (process.isAlive) {
+            process.destroyForcibly()
+        }
+    }
+}
+
+private fun MessageDigest.updateEmbeddedNodePackagingFingerprintPart(label: String, bytes: ByteArray) {
+    update(label.toByteArray(Charsets.UTF_8))
+    update(0)
+    update(bytes.size.toString().toByteArray(Charsets.UTF_8))
+    update(0)
+    update(bytes)
+    update(0)
+}
+
+private fun embeddedNodePackagingRepositoryState(repositoryRoot: File): EmbeddedNodePackagingRepositoryState? =
+    runCatching {
+        fun gitOutput(vararg arguments: String): String {
+            val (exitCode, output) = runEmbeddedNodePackagingCommand(
+                "git",
+                "-C",
+                repositoryRoot.absolutePath,
+                *arguments,
+                mergeError = false,
+            )
+            check(exitCode == 0) {
+                "git ${arguments.joinToString(" ")} failed with exit=$exitCode: ${output.trim()}"
+            }
+            return output
+        }
+
+        val canonicalRoot = repositoryRoot.canonicalFile
+        val commit = gitOutput("rev-parse", "HEAD").trim()
+        check(commit.matches(Regex("(?i)^[0-9a-f]{40}$"))) {
+            "Unable to resolve current host Git commit: '$commit'"
+        }
+        val trackedDiff = gitOutput("diff", "--binary", "HEAD", "--")
+        val untrackedPaths = gitOutput(
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+            "-z",
+        ).split('\u0000')
+            .filter(String::isNotEmpty)
+            .sorted()
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.updateEmbeddedNodePackagingFingerprintPart("commit", commit.toByteArray(Charsets.UTF_8))
+        digest.updateEmbeddedNodePackagingFingerprintPart("tracked-diff", trackedDiff.toByteArray(Charsets.UTF_8))
+        untrackedPaths.forEach { relativePath ->
+            val file = canonicalRoot.resolve(relativePath).canonicalFile
+            check(file.toPath().startsWith(canonicalRoot.toPath()) && file.isFile) {
+                "Invalid untracked source path while checking APK Builder provenance: $relativePath"
+            }
+            digest.updateEmbeddedNodePackagingFingerprintPart(
+                "untracked-path",
+                relativePath.toByteArray(Charsets.UTF_8),
+            )
+            digest.updateEmbeddedNodePackagingFingerprintPart("untracked-content", file.readBytes())
+        }
+        EmbeddedNodePackagingRepositoryState(
+            commit = commit.lowercase(),
+            fingerprint = digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) },
+        )
+    }.getOrNull()
+
+private fun embeddedNodePackagingLoadProperties(file: File): Properties? =
+    runCatching {
+        if (!file.isFile) return@runCatching null
+        Properties().apply {
+            file.reader(Charsets.UTF_8).use(::load)
+        }
+    }.getOrNull()
+
+private fun embeddedNodePackagingApkBuilderRuntimeKitGitSha(apk: File): String? =
+    runCatching {
+        ZipFile(apk).use { zip ->
+            val entry = zip.getEntry("assets/runtime-kit/runtime-kit.json")
+                ?: return@use null
+            val metadata = zip.getInputStream(entry).bufferedReader(Charsets.UTF_8).use { reader ->
+                embeddedNodePackagingJsonMap(reader.readText())
+            }
+            val host = metadata?.get("host") as? Map<*, *>
+            host?.get("gitSha")?.toString()?.trim()?.lowercase()
+        }
+    }.getOrNull()
+
+private fun embeddedNodePackagingInspectApkBuilder(
+    repositoryRoot: File,
+    adb: File,
+    adbSerial: String?,
+): EmbeddedNodePackagingApkBuilderInspection {
+    val failures = mutableListOf<String>()
+    val localCandidates = repositoryRoot
+        .resolve(embeddedNodePackagingApkBuilderPluginOutputDir)
+        .listFiles()
+        ?.filter { file -> file.isFile && file.extension.equals("apk", ignoreCase = true) }
+        ?.sortedBy(File::getAbsolutePath)
+        .orEmpty()
+    val localApk = localCandidates.singleOrNull()
+    val localSha256 = localApk?.let(::embeddedNodePackagingSha256)
+    val runtimeKitGitSha = localApk?.let(::embeddedNodePackagingApkBuilderRuntimeKitGitSha)
+    val provenanceFile = repositoryRoot.resolve(embeddedNodePackagingApkBuilderProvenancePath)
+    val provenance = embeddedNodePackagingLoadProperties(provenanceFile)
+    val repositoryState = embeddedNodePackagingRepositoryState(repositoryRoot)
+
+    val (packagePathExit, packagePathOutput) = runEmbeddedNodePackagingCommand(
+        *embeddedNodePackagingAdbCommand(
+            adb,
+            adbSerial,
+            "shell",
+            "pm",
+            "path",
+            embeddedNodePackagingApkBuilderPluginPackage,
+        )
+    )
+    val installedApkPaths = packagePathOutput.lineSequence()
+        .map(String::trim)
+        .filter { line -> line.startsWith("package:") }
+        .map { line -> line.removePrefix("package:").trim() }
+        .filter(String::isNotEmpty)
+        .toList()
+    val installedApkPath = installedApkPaths.singleOrNull()
+    val installedSha256 = installedApkPath?.let { path ->
+        val (shaExit, shaOutput) = runEmbeddedNodePackagingCommand(
+            *embeddedNodePackagingAdbCommand(adb, adbSerial, "shell", "sha256sum", path)
+        )
+        if (shaExit == 0) {
+            Regex("(?i)\\b[0-9a-f]{64}\\b").find(shaOutput)?.value?.lowercase()
+        } else {
+            null
+        }
+    }
+
+    if (localCandidates.size != 1) {
+        failures += "exactly one local APK Builder release APK is required (found ${localCandidates.size})"
+    }
+    if (localSha256 == null) {
+        failures += "local APK Builder release SHA-256 is unavailable"
+    }
+    if (runtimeKitGitSha == null) {
+        failures += "local APK Builder embedded Runtime Kit gitSha is unavailable"
+    }
+    if (packagePathExit != 0 || installedApkPaths.size != 1 || installedSha256 == null) {
+        failures += "exactly one installed APK Builder base APK with a readable SHA-256 is required"
+    }
+    if (localSha256 == null || localSha256 != installedSha256) {
+        failures += "installed APK Builder plugin does not match the local release APK"
+    }
+    if (provenance == null) {
+        failures += "current-source APK Builder provenance is missing; rebuild with :plugins:apk-builder-template:installRelease --rerun-tasks"
+    }
+    if (repositoryState == null) {
+        failures += "current repository state fingerprint is unavailable"
+    }
+    if (provenance != null && repositoryState != null && localApk != null && localSha256 != null) {
+        val expectedRelativeApkPath = localApk.relativeTo(repositoryRoot).invariantSeparatorsPath
+        val generatedAt = provenance.getProperty("generated_at_epoch_ms")?.toLongOrNull()
+        if (provenance.getProperty("schema") != embeddedNodePackagingApkBuilderProvenanceSchema) {
+            failures += "APK Builder provenance schema is invalid"
+        }
+        if (provenance.getProperty("build.task") != ":plugins:apk-builder-template:packageRelease") {
+            failures += "APK Builder provenance build task is invalid"
+        }
+        if (!provenance.getProperty("build.rerun_tasks").equals("true", ignoreCase = true)) {
+            failures += "APK Builder provenance must prove a --rerun-tasks release build"
+        }
+        if (!provenance.getProperty("remote_build.enabled").equals("true", ignoreCase = true)) {
+            failures += "APK Builder provenance must enable remote build"
+        }
+        if (provenance.getProperty("source.commit") != repositoryState.commit) {
+            failures += "APK Builder provenance host commit does not match the current repository"
+        }
+        if (provenance.getProperty("source.fingerprint") != repositoryState.fingerprint) {
+            failures += "APK Builder provenance source fingerprint is stale"
+        }
+        if (runtimeKitGitSha != repositoryState.commit ||
+            provenance.getProperty("runtime_kit.git_sha") != runtimeKitGitSha
+        ) {
+            failures += "APK Builder embedded Runtime Kit gitSha does not match current source provenance"
+        }
+        if (provenance.getProperty("apk.path") != expectedRelativeApkPath) {
+            failures += "APK Builder provenance APK path does not match the local release APK"
+        }
+        if (provenance.getProperty("apk.sha256") != localSha256) {
+            failures += "APK Builder provenance APK SHA-256 does not match the local release APK"
+        }
+        if (provenance.getProperty("apk.bytes")?.toLongOrNull() != localApk.length()) {
+            failures += "APK Builder provenance APK byte count does not match the local release APK"
+        }
+        if (generatedAt == null || generatedAt <= 0L) {
+            failures += "APK Builder provenance generation timestamp is invalid"
+        }
+    }
+
+    return EmbeddedNodePackagingApkBuilderInspection(
+        localCandidates = localCandidates,
+        localApk = localApk,
+        localSha256 = localSha256,
+        runtimeKitGitSha = runtimeKitGitSha,
+        packagePathExit = packagePathExit,
+        packagePathOutput = packagePathOutput,
+        installedApkPaths = installedApkPaths,
+        installedSha256 = installedSha256,
+        provenanceFile = provenanceFile,
+        provenance = provenance,
+        repositoryState = repositoryState,
+        failures = failures,
+    )
+}
+
+private fun StringBuilder.appendEmbeddedNodePackagingApkBuilderInspection(
+    label: String,
+    inspection: EmbeddedNodePackagingApkBuilderInspection,
+) {
+    appendLine("$label APK Builder plugin provenance:")
+    appendLine("  package: $embeddedNodePackagingApkBuilderPluginPackage")
+    appendLine("  local candidates: ${inspection.localCandidates.size}")
+    appendLine("  local APK: ${inspection.localApk?.absolutePath ?: "unavailable"}")
+    appendLine("  local SHA-256: ${inspection.localSha256 ?: "unavailable"}")
+    appendLine("  embedded Runtime Kit gitSha: ${inspection.runtimeKitGitSha ?: "unavailable"}")
+    appendLine("  provenance file: ${inspection.provenanceFile.absolutePath}")
+    appendLine("  provenance schema: ${inspection.provenance?.getProperty("schema") ?: "unavailable"}")
+    appendLine("  provenance build task: ${inspection.provenance?.getProperty("build.task") ?: "unavailable"}")
+    appendLine("  provenance rerun tasks: ${inspection.provenance?.getProperty("build.rerun_tasks") ?: "unavailable"}")
+    appendLine("  provenance remote build: ${inspection.provenance?.getProperty("remote_build.enabled") ?: "unavailable"}")
+    appendLine("  provenance Runtime Kit gitSha: ${inspection.provenance?.getProperty("runtime_kit.git_sha") ?: "unavailable"}")
+    appendLine("  provenance source commit: ${inspection.provenance?.getProperty("source.commit") ?: "unavailable"}")
+    appendLine("  current source commit: ${inspection.repositoryState?.commit ?: "unavailable"}")
+    appendLine("  provenance source fingerprint: ${inspection.provenance?.getProperty("source.fingerprint") ?: "unavailable"}")
+    appendLine("  current source fingerprint: ${inspection.repositoryState?.fingerprint ?: "unavailable"}")
+    appendLine("  package path exit: ${inspection.packagePathExit}")
+    appendLine("  package path output: ${inspection.packagePathOutput.trim().ifEmpty { "none" }}")
+    appendLine("  installed APK paths: ${if (inspection.installedApkPaths.isEmpty()) "none" else inspection.installedApkPaths.joinToString()}")
+    appendLine("  installed SHA-256: ${inspection.installedSha256 ?: "unavailable"}")
+    appendLine("  failures: ${if (inspection.failures.isEmpty()) "none" else inspection.failures.joinToString()}")
+    appendLine("  ready: ${inspection.ready}")
+    appendLine()
 }
 
 private fun dumpEmbeddedNodePackagingManifestXmlTree(tools: EmbeddedNodePackagingTools?, apk: File): Pair<File?, String?> {
@@ -1858,6 +2220,8 @@ val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReprod
     group = "verification"
     description = "Verifies current slim inrt template freshness, deterministic manifest summary, and on-demand native lib injection policy."
 
+    mustRunAfter(embeddedNodeRefreshInrtTemplateApk)
+
     val templateApk = projectDir.resolve("src/main/assets-app/template.apk")
     val reportFile = layout.buildDirectory
         .file("reports/embedded-node/template-reproducibility.txt")
@@ -1955,9 +2319,425 @@ val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReprod
     }
 }
 
+val embeddedNodePrecleanPackagedSmokeInstrumentation = tasks.register(embeddedNodePackagedSmokePrecleanTaskName) {
+    group = "verification"
+    description = "Deletes prior verifier-ready packaged smoke exports and connected-test XML before an RC/release device run."
+
+    dependsOn("acquireNodeJsInstrumentationOutputLock")
+    val reportFileProvider = layout.buildDirectory
+        .file("reports/embedded-node/packaged-smoke-instrumentation-preclean.txt")
+    val apkBuilderSnapshotFileProvider = layout.buildDirectory
+        .file("reports/embedded-node/$embeddedNodePackagingApkBuilderSnapshotName")
+    outputs.file(reportFileProvider)
+    outputs.file(apkBuilderSnapshotFileProvider)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val reportFile = reportFileProvider.get().asFile
+        val apkBuilderSnapshotFile = apkBuilderSnapshotFileProvider.get().asFile
+        reportFile.parentFile.mkdirs()
+        if (apkBuilderSnapshotFile.exists() && !apkBuilderSnapshotFile.delete()) {
+            throw GradleException(
+                "Unable to delete the prior APK Builder pre-test snapshot: ${apkBuilderSnapshotFile.absolutePath}"
+            )
+        }
+        val resultDir = layout.buildDirectory
+            .dir("outputs/androidTest-results/connected/debug/flavors/app")
+            .get()
+            .asFile
+        val resultDirExisted = resultDir.exists()
+        if (resultDirExisted) {
+            resultDir.deleteRecursively()
+        }
+        val localResultReady = !resultDir.exists()
+
+        val adb = findEmbeddedNodePackagingAdb(rootProject.projectDir)
+        val adbSerialSelection = embeddedNodePackagingAdbSerialSelection()
+        val adbSerialProperty = adbSerialSelection.serial
+
+        val report = StringBuilder()
+        report.appendLine("Embedded Node.js packaged smoke instrumentation pre-clean report")
+        report.appendLine("Generated at: ${ZonedDateTime.now()}")
+        report.appendLine()
+        report.appendLine("Inputs:")
+        report.appendLine("  focused gate: ${embeddedNodePackagingRequestedFocusedGate ?: "not set"}")
+        report.appendLine("  focused selectors: ${embeddedNodePackagingFocusedInstrumentationSelectors.joinToString()}")
+        report.appendLine("  adb: ${adb?.absolutePath ?: "unavailable"}")
+        report.appendLine("  adb serial: ${adbSerialProperty ?: "not set"}")
+        report.appendLine("  adb serial sources: ${if (adbSerialSelection.sources.isEmpty()) "none" else adbSerialSelection.sources.entries.joinToString { (source, value) -> "$source=$value" }}")
+        report.appendLine("  connected-test serial sources: ${if (adbSerialSelection.connectedTestSources.isEmpty()) "none" else adbSerialSelection.connectedTestSources.entries.joinToString { (source, value) -> "$source=$value" }}")
+        report.appendLine("  device export dir: $embeddedNodePackagingSmokePublicExportDir")
+        report.appendLine("  connected result dir: ${resultDir.absolutePath}")
+        report.appendLine("  APK Builder pre-test snapshot: ${apkBuilderSnapshotFile.absolutePath}")
+        report.appendLine()
+        report.appendLine("Local result cleanup:")
+        report.appendLine("  existed before cleanup: $resultDirExisted")
+        report.appendLine("  absent after cleanup: $localResultReady")
+        report.appendLine()
+
+        var deviceReady = false
+        var apkBuilderPluginReady = false
+        var apkBuilderInspection: EmbeddedNodePackagingApkBuilderInspection? = null
+        val remoteCleanupFailures = mutableListOf<String>()
+        if (adb == null) {
+            remoteCleanupFailures += "adb not found in Android SDK platform-tools"
+        } else if (adbSerialSelection.conflictingValues.size > 1) {
+            remoteCleanupFailures +=
+                "conflicting ADB serial selections: ${adbSerialSelection.sources.entries.joinToString { (source, value) -> "$source=$value" }}"
+        } else if (adbSerialSelection.usesConnectedTestUnsupportedAliasOnly) {
+            remoteCleanupFailures +=
+                "the selected serial is not bound to AGP connected testing; use ANDROID_SERIAL or -Pandroid.injected.device.serial"
+        } else if (!adbSerialSelection.hasConnectedTestBinding) {
+            remoteCleanupFailures +=
+                "RC/release connected testing requires ANDROID_SERIAL or -Pandroid.injected.device.serial"
+        } else {
+            val (stateExit, stateOutput) = runEmbeddedNodePackagingCommand(
+                *embeddedNodePackagingAdbCommand(adb, adbSerialProperty, "get-state")
+            )
+            deviceReady = stateExit == 0 && stateOutput.lineSequence().any { line -> line.trim() == "device" }
+            report.appendLine("ADB state:")
+            report.appendLine("  exit=$stateExit")
+            report.appendLine(stateOutput.trim().prependIndent("  "))
+            report.appendLine()
+            if (!deviceReady) {
+                remoteCleanupFailures += "connected device unavailable"
+            } else {
+                val currentInspection = embeddedNodePackagingInspectApkBuilder(
+                    rootProject.projectDir,
+                    adb,
+                    adbSerialProperty,
+                )
+                apkBuilderInspection = currentInspection
+                apkBuilderPluginReady = currentInspection.ready
+                if (!apkBuilderPluginReady) {
+                    remoteCleanupFailures += currentInspection.failures
+                }
+                report.appendEmbeddedNodePackagingApkBuilderInspection("Pre-test", currentInspection)
+
+                report.appendLine("Remote export cleanup:")
+                embeddedNodePackagingSmokeVerifierReadyApkNames.forEach { apkName ->
+                    val remotePath = "$embeddedNodePackagingSmokePublicExportDir/$apkName"
+                    val (removeExit, removeOutput) = runEmbeddedNodePackagingCommand(
+                        *embeddedNodePackagingAdbCommand(adb, adbSerialProperty, "shell", "rm", "-f", remotePath)
+                    )
+                    val (absentExit, absentOutput) = runEmbeddedNodePackagingCommand(
+                        *embeddedNodePackagingAdbCommand(adb, adbSerialProperty, "shell", "test", "!", "-e", remotePath)
+                    )
+                    val removed = removeExit == 0 && absentExit == 0
+                    if (!removed) {
+                        remoteCleanupFailures += "$apkName could not be removed or remained present"
+                    }
+                    report.appendLine("  $apkName:")
+                    report.appendLine("    remove exit: $removeExit")
+                    report.appendLine("    remove output: ${removeOutput.trim().ifEmpty { "none" }}")
+                    report.appendLine("    absent check exit: $absentExit")
+                    report.appendLine("    absent check output: ${absentOutput.trim().ifEmpty { "none" }}")
+                    report.appendLine("    removed: $removed")
+                }
+                report.appendLine()
+            }
+        }
+
+        val preSnapshotReady = embeddedNodePackagingReleaseCandidateInvocation &&
+                embeddedNodePackagingFocusedInstrumentationSelectors.isNotEmpty() &&
+                localResultReady &&
+                deviceReady &&
+                apkBuilderPluginReady &&
+                remoteCleanupFailures.isEmpty()
+        val beforeInspection = apkBuilderInspection
+        val snapshotReady = if (preSnapshotReady && beforeInspection != null) {
+            Properties().apply {
+                setProperty("schema", "autojs6-packaged-smoke-apk-builder-before-v1")
+                setProperty("adb.serial", adbSerialProperty.orEmpty())
+                setProperty("source.commit", beforeInspection.repositoryState?.commit.orEmpty())
+                setProperty("source.fingerprint", beforeInspection.repositoryState?.fingerprint.orEmpty())
+                setProperty("apk.sha256", beforeInspection.localSha256.orEmpty())
+                setProperty("installed.apk.sha256", beforeInspection.installedSha256.orEmpty())
+                setProperty("runtime_kit.git_sha", beforeInspection.runtimeKitGitSha.orEmpty())
+            }.let { properties ->
+                apkBuilderSnapshotFile.parentFile.mkdirs()
+                apkBuilderSnapshotFile.writer(Charsets.UTF_8).use { writer ->
+                    properties.store(writer, "AutoJs6 packaged smoke APK Builder pre-test snapshot")
+                }
+            }
+            embeddedNodePackagingLoadProperties(apkBuilderSnapshotFile)
+                ?.getProperty("apk.sha256") == beforeInspection.localSha256
+        } else {
+            false
+        }
+        val ready = preSnapshotReady && snapshotReady
+        report.appendLine("Summary:")
+        report.appendLine("  embedded.node.packaged.smoke.instrumentation.preclean.gate=${embeddedNodePackagingRequestedFocusedGate ?: "not-set"}")
+        report.appendLine("  embedded.node.packaged.smoke.instrumentation.preclean.expected_selectors=${embeddedNodePackagingFocusedInstrumentationSelectors.size}")
+        report.appendLine("  embedded.node.packaged.smoke.instrumentation.preclean.local_results_absent=$localResultReady")
+        report.appendLine("  embedded.node.packaged.smoke.instrumentation.preclean.device_ready=$deviceReady")
+        report.appendLine("  embedded.node.packaged.smoke.instrumentation.preclean.apk_builder_plugin_ready=$apkBuilderPluginReady")
+        report.appendLine("  embedded.node.packaged.smoke.instrumentation.preclean.apk_builder_snapshot_ready=$snapshotReady")
+        report.appendLine("  embedded.node.packaged.smoke.instrumentation.preclean.remote_failures=${if (remoteCleanupFailures.isEmpty()) "none" else remoteCleanupFailures.joinToString()}")
+        report.appendLine("  embedded.node.packaged.smoke.instrumentation.preclean.ready=$ready")
+        reportFile.writeText(report.toString())
+
+        logger.lifecycle("Embedded Node.js packaged smoke instrumentation pre-clean ready: $ready")
+        if (!ready) {
+            throw GradleException(
+                "Embedded Node.js packaged smoke instrumentation pre-clean failed. " +
+                        "Run it only through verifyEmbeddedNodeReleaseCandidate or verifyNodeReleaseGate. " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
+tasks.matching { task -> task.name == "connectedAppDebugAndroidTest" }.configureEach {
+    mustRunAfter(embeddedNodePrecleanPackagedSmokeInstrumentation)
+    if (embeddedNodePackagingReleaseCandidateInvocation) {
+        timeout.set(java.time.Duration.ofMinutes(60L))
+    }
+}
+
+val embeddedNodeVerifyPackagedSmokeInstrumentationResults = tasks.register(
+    embeddedNodePackagedSmokeResultVerifyTaskName,
+) {
+    group = "verification"
+    description = "Requires the current RC/release selector set to pass exactly and the APK Builder bytes/source identity to remain unchanged."
+
+    dependsOn(
+        embeddedNodePrecleanPackagedSmokeInstrumentation,
+        "connectedAppDebugAndroidTest",
+    )
+    val reportFileProvider = layout.buildDirectory
+        .file("reports/embedded-node/packaged-smoke-instrumentation-results.txt")
+    outputs.file(reportFileProvider)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val reportFile = reportFileProvider.get().asFile
+        reportFile.parentFile.mkdirs()
+        val resultDir = layout.buildDirectory
+            .dir("outputs/androidTest-results/connected/debug/flavors/app")
+            .get()
+            .asFile
+        val xmlFiles = if (resultDir.isDirectory) {
+            resultDir.walkTopDown()
+                .filter { file -> file.isFile && file.name.startsWith("TEST-") && file.extension == "xml" }
+                .sortedBy(File::getAbsolutePath)
+                .toList()
+        } else {
+            emptyList()
+        }
+
+        if (!embeddedNodePackagingReleaseCandidateInvocation ||
+            embeddedNodePackagingFocusedInstrumentationSelectors.isEmpty()
+        ) {
+            reportFile.writeText(
+                "Embedded Node.js packaged smoke instrumentation result verification\n" +
+                        "embedded.node.packaged.smoke.instrumentation.results.ready=false\n" +
+                        "embedded.node.packaged.smoke.instrumentation.results.error=missing RC/release focused selector scope\n"
+            )
+            throw GradleException(
+                "$embeddedNodePackagedSmokeResultVerifyTaskName requires the focused " +
+                        "verifyEmbeddedNodeReleaseCandidate or verifyNodeReleaseGate invocation. " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
+        if (xmlFiles.size != 1) {
+            reportFile.writeText(
+                "Embedded Node.js packaged smoke instrumentation result verification\n" +
+                        "embedded.node.packaged.smoke.instrumentation.results.ready=false\n" +
+                        "embedded.node.packaged.smoke.instrumentation.results.xml_count=${xmlFiles.size}\n" +
+                        "embedded.node.packaged.smoke.instrumentation.results.error=exactly one fresh connected-device JUnit XML is required\n"
+            )
+            throw GradleException(
+                "Expected exactly one fresh connected Android test XML under ${resultDir.absolutePath}; " +
+                        "found ${xmlFiles.size}. See ${reportFile.absolutePath}"
+            )
+        }
+
+        val apkBuilderSnapshotFile = layout.buildDirectory
+            .file("reports/embedded-node/$embeddedNodePackagingApkBuilderSnapshotName")
+            .get()
+            .asFile
+        val apkBuilderSnapshot = embeddedNodePackagingLoadProperties(apkBuilderSnapshotFile)
+        val adb = findEmbeddedNodePackagingAdb(rootProject.projectDir)
+        val adbSerialSelection = embeddedNodePackagingAdbSerialSelection()
+        val apkBuilderPostFailures = mutableListOf<String>()
+        if (apkBuilderSnapshot?.getProperty("schema") != "autojs6-packaged-smoke-apk-builder-before-v1") {
+            apkBuilderPostFailures += "valid APK Builder pre-test snapshot is missing"
+        }
+        if (adb == null) {
+            apkBuilderPostFailures += "adb not found for APK Builder post-test verification"
+        }
+        if (adbSerialSelection.conflictingValues.size > 1) {
+            apkBuilderPostFailures += "conflicting ADB serial selections during APK Builder post-test verification"
+        }
+        if (adbSerialSelection.usesConnectedTestUnsupportedAliasOnly) {
+            apkBuilderPostFailures +=
+                "the selected serial is not bound to AGP connected testing; use ANDROID_SERIAL or -Pandroid.injected.device.serial"
+        }
+        if (!adbSerialSelection.hasConnectedTestBinding) {
+            apkBuilderPostFailures +=
+                "RC/release connected testing requires ANDROID_SERIAL or -Pandroid.injected.device.serial"
+        }
+        val apkBuilderPostInspection = if (adb != null &&
+            adbSerialSelection.conflictingValues.size <= 1 &&
+            !adbSerialSelection.usesConnectedTestUnsupportedAliasOnly &&
+            adbSerialSelection.hasConnectedTestBinding
+        ) {
+            embeddedNodePackagingInspectApkBuilder(
+                rootProject.projectDir,
+                adb,
+                adbSerialSelection.serial,
+            ).also { inspection ->
+                apkBuilderPostFailures += inspection.failures
+            }
+        } else {
+            null
+        }
+        if (apkBuilderSnapshot != null && apkBuilderPostInspection != null) {
+            val snapshotSerial = apkBuilderSnapshot.getProperty("adb.serial").orEmpty()
+            val snapshotCommit = apkBuilderSnapshot.getProperty("source.commit").orEmpty()
+            val snapshotFingerprint = apkBuilderSnapshot.getProperty("source.fingerprint").orEmpty()
+            val snapshotApkSha256 = apkBuilderSnapshot.getProperty("apk.sha256").orEmpty()
+            val snapshotInstalledSha256 = apkBuilderSnapshot.getProperty("installed.apk.sha256").orEmpty()
+            val snapshotRuntimeKitGitSha = apkBuilderSnapshot.getProperty("runtime_kit.git_sha").orEmpty()
+            if (snapshotSerial != adbSerialSelection.serial.orEmpty()) {
+                apkBuilderPostFailures += "ADB serial changed between pre-test and post-test verification"
+            }
+            if (snapshotCommit.isBlank() || snapshotCommit != apkBuilderPostInspection.repositoryState?.commit) {
+                apkBuilderPostFailures += "host commit changed between pre-test and post-test verification"
+            }
+            if (snapshotFingerprint.isBlank() ||
+                snapshotFingerprint != apkBuilderPostInspection.repositoryState?.fingerprint
+            ) {
+                apkBuilderPostFailures += "host source fingerprint changed between pre-test and post-test verification"
+            }
+            if (snapshotApkSha256.isBlank() ||
+                snapshotApkSha256 != apkBuilderPostInspection.localSha256 ||
+                snapshotApkSha256 != apkBuilderPostInspection.installedSha256 ||
+                snapshotApkSha256 != snapshotInstalledSha256
+            ) {
+                apkBuilderPostFailures +=
+                    "APK Builder local/installed bytes changed or stopped matching during connected testing"
+            }
+            if (snapshotRuntimeKitGitSha.isBlank() ||
+                snapshotRuntimeKitGitSha != apkBuilderPostInspection.runtimeKitGitSha ||
+                snapshotRuntimeKitGitSha != apkBuilderPostInspection.repositoryState?.commit
+            ) {
+                apkBuilderPostFailures +=
+                    "APK Builder embedded Runtime Kit gitSha changed or stopped matching during connected testing"
+            }
+        }
+        val apkBuilderUnchanged = apkBuilderPostFailures.isEmpty()
+
+        val parserFactory = javax.xml.parsers.DocumentBuilderFactory.newInstance().apply {
+            setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
+            setFeature("http://xml.org/sax/features/external-general-entities", false)
+            setFeature("http://xml.org/sax/features/external-parameter-entities", false)
+            isExpandEntityReferences = false
+        }
+        val document = parserFactory.newDocumentBuilder().parse(xmlFiles.single())
+        val root = document.documentElement
+        val totalTests = root.getAttribute("tests").toIntOrNull() ?: -1
+        val totalFailures = root.getAttribute("failures").toIntOrNull() ?: -1
+        val totalErrors = root.getAttribute("errors").toIntOrNull() ?: -1
+        val totalSkipped = root.getAttribute("skipped").toIntOrNull() ?: -1
+        val actualSelectors = mutableListOf<String>()
+        val nonPassingSelectors = mutableListOf<String>()
+        val testCases = document.getElementsByTagName("testcase")
+        for (index in 0 until testCases.length) {
+            val testCase = testCases.item(index) as? org.w3c.dom.Element ?: continue
+            val selector = "${testCase.getAttribute("classname")}#${testCase.getAttribute("name")}"
+            actualSelectors += selector
+            val status = when {
+                testCase.getElementsByTagName("failure").length > 0 -> "failed"
+                testCase.getElementsByTagName("error").length > 0 -> "error"
+                testCase.getElementsByTagName("skipped").length > 0 -> "skipped"
+                else -> "passed"
+            }
+            if (status != "passed") {
+                nonPassingSelectors += "$selector=$status"
+            }
+        }
+
+        val expectedSelectors = embeddedNodePackagingFocusedInstrumentationSelectors
+        val missingSelectors = expectedSelectors.filterNot { selector -> selector in actualSelectors }
+        val unexpectedSelectors = actualSelectors.filterNot { selector -> selector in expectedSelectors }
+        val duplicateSelectors = actualSelectors.groupingBy { selector -> selector }
+            .eachCount()
+            .filterValues { count -> count != 1 }
+            .keys
+            .toList()
+        val ready = totalTests == expectedSelectors.size &&
+                testCases.length == expectedSelectors.size &&
+                totalFailures == 0 &&
+                totalErrors == 0 &&
+                totalSkipped == 0 &&
+                missingSelectors.isEmpty() &&
+                unexpectedSelectors.isEmpty() &&
+                duplicateSelectors.isEmpty() &&
+                nonPassingSelectors.isEmpty() &&
+                apkBuilderUnchanged
+
+        val report = buildString {
+            appendLine("Embedded Node.js packaged smoke instrumentation result verification")
+            appendLine("Generated at: ${ZonedDateTime.now()}")
+            appendLine()
+            appendLine("Inputs:")
+            appendLine("  focused gate: $embeddedNodePackagingRequestedFocusedGate")
+            appendLine("  result XML: ${xmlFiles.single().absolutePath}")
+            appendLine("  expected selectors: ${expectedSelectors.size}")
+            expectedSelectors.forEach { selector -> appendLine("    $selector") }
+            appendLine()
+            appendLine("APK Builder pre/post identity:")
+            appendLine("  snapshot: ${apkBuilderSnapshotFile.absolutePath}")
+            appendLine("  adb serial: ${adbSerialSelection.serial ?: "not set"}")
+            appendLine("  adb serial sources: ${if (adbSerialSelection.sources.isEmpty()) "none" else adbSerialSelection.sources.entries.joinToString { (source, value) -> "$source=$value" }}")
+            if (apkBuilderPostInspection != null) {
+                appendEmbeddedNodePackagingApkBuilderInspection("Post-test", apkBuilderPostInspection)
+            } else {
+                appendLine("  post-test inspection: unavailable")
+                appendLine()
+            }
+            appendLine("JUnit:")
+            appendLine("  tests: $totalTests")
+            appendLine("  failures: $totalFailures")
+            appendLine("  errors: $totalErrors")
+            appendLine("  skipped: $totalSkipped")
+            appendLine("  testcase elements: ${testCases.length}")
+            appendLine("  actual selectors: ${actualSelectors.size}")
+            actualSelectors.forEach { selector -> appendLine("    $selector") }
+            appendLine()
+            appendLine("Summary:")
+            appendLine("  embedded.node.packaged.smoke.instrumentation.results.missing=${if (missingSelectors.isEmpty()) "none" else missingSelectors.joinToString()}")
+            appendLine("  embedded.node.packaged.smoke.instrumentation.results.unexpected=${if (unexpectedSelectors.isEmpty()) "none" else unexpectedSelectors.joinToString()}")
+            appendLine("  embedded.node.packaged.smoke.instrumentation.results.duplicates=${if (duplicateSelectors.isEmpty()) "none" else duplicateSelectors.joinToString()}")
+            appendLine("  embedded.node.packaged.smoke.instrumentation.results.non_passing=${if (nonPassingSelectors.isEmpty()) "none" else nonPassingSelectors.joinToString()}")
+            appendLine("  embedded.node.packaged.smoke.instrumentation.results.apk_builder_failures=${if (apkBuilderPostFailures.isEmpty()) "none" else apkBuilderPostFailures.joinToString()}")
+            appendLine("  embedded.node.packaged.smoke.instrumentation.results.apk_builder_unchanged=$apkBuilderUnchanged")
+            appendLine("  embedded.node.packaged.smoke.instrumentation.results.ready=$ready")
+        }
+        reportFile.writeText(report)
+        logger.lifecycle("Embedded Node.js packaged smoke instrumentation results ready: $ready")
+        if (!ready) {
+            throw GradleException(
+                "Embedded Node.js packaged smoke instrumentation did not pass the exact current selector set. " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
 val embeddedNodePullPackagedSmokeApks = tasks.register(embeddedNodePackagedSmokePullTaskName) {
     group = "verification"
-    description = "Pulls Embedded Node packaged smoke APK artifacts from a connected device into app/build."
+    description = "Pulls the two verifier-ready Embedded Node packaged smoke APKs from a connected device into app/build."
+
+    if (embeddedNodePackagingReleaseCandidateInvocation) {
+        dependsOn(embeddedNodeVerifyPackagedSmokeInstrumentationResults)
+    }
+    mustRunAfter(
+        "connectedAppDebugAndroidTest",
+        embeddedNodeVerifyPackagedSmokeInstrumentationResults,
+    )
 
     outputs.dir(layout.buildDirectory.dir(embeddedNodePackagingSmokeHostDirName))
     outputs.file(layout.buildDirectory.file("reports/embedded-node/packaged-smoke-apk-pull.txt"))
@@ -1971,21 +2751,19 @@ val embeddedNodePullPackagedSmokeApks = tasks.register(embeddedNodePackagedSmoke
         reportFile.parentFile.mkdirs()
 
         val adb = findEmbeddedNodePackagingAdb(rootProject.projectDir)
-        var adbSerialProperty: String? = null
-        for (propertyName in listOf("autojs.embeddedNode.adbSerial", "embeddedNodeAdbSerial", "adbSerial")) {
-            val value = providers.gradleProperty(propertyName).orNull?.trim()
-            if (!value.isNullOrEmpty()) {
-                adbSerialProperty = value
-                break
-            }
-        }
+        val adbSerialSelection = embeddedNodePackagingAdbSerialSelection()
+        val adbSerialProperty = adbSerialSelection.serial
 
         val hostDir = layout.buildDirectory
             .dir(embeddedNodePackagingSmokeHostDirName)
             .get()
             .asFile
-        hostDir.deleteRecursively()
-        hostDir.mkdirs()
+        if (hostDir.exists() && !hostDir.deleteRecursively()) {
+            throw GradleException("Unable to clear prior packaged smoke host artifacts: ${hostDir.absolutePath}")
+        }
+        if (!hostDir.mkdirs() && !hostDir.isDirectory) {
+            throw GradleException("Unable to create packaged smoke host artifact directory: ${hostDir.absolutePath}")
+        }
 
         val report = StringBuilder()
         report.appendLine("Embedded Node.js packaged smoke APK pull report")
@@ -1993,11 +2771,19 @@ val embeddedNodePullPackagedSmokeApks = tasks.register(embeddedNodePackagedSmoke
         report.appendLine()
         report.appendLine("Inputs:")
         report.appendLine("  adb: ${adb?.absolutePath ?: "unavailable"}")
-        report.appendLine("  adb serial property: ${adbSerialProperty ?: "not set"}")
+        report.appendLine("  adb serial: ${adbSerialProperty ?: "not set"}")
+        report.appendLine("  adb serial sources: ${if (adbSerialSelection.sources.isEmpty()) "none" else adbSerialSelection.sources.entries.joinToString { (source, value) -> "$source=$value" }}")
         report.appendLine("  device export dir: $embeddedNodePackagingSmokePublicExportDir")
         report.appendLine("  host output dir: ${hostDir.absolutePath}")
         report.appendLine()
 
+        if (adbSerialSelection.conflictingValues.size > 1) {
+            report.appendLine("Status:")
+            report.appendLine("  embedded.node.packaged.smoke.pull.ready=false")
+            report.appendLine("  embedded.node.packaged.smoke.pull.error=conflicting ADB serial selections")
+            reportFile.writeText(report.toString())
+            throw GradleException("Conflicting ADB serial selections. See ${reportFile.absolutePath}")
+        }
         if (adb == null) {
             report.appendLine("Status:")
             report.appendLine("  embedded.node.packaged.smoke.pull.ready=false")
@@ -2024,15 +2810,16 @@ val embeddedNodePullPackagedSmokeApks = tasks.register(embeddedNodePackagedSmoke
             report.appendLine("  embedded.node.packaged.smoke.pull.error=connected device unavailable")
             report.appendLine()
             report.appendLine("Hints:")
-            report.appendLine("  Connect exactly one device, or pass -Pautojs.embeddedNode.adbSerial=<serial>.")
-            report.appendLine("  Run EmbeddedNodePackagedApkSmokeTest before pulling artifacts.")
+            report.appendLine("  Connect exactly one device; for RC/release use ANDROID_SERIAL or -Pandroid.injected.device.serial=<serial>.")
+            report.appendLine("  Direct host-only pulls may also use -Pautojs.embeddedNode.adbSerial=<serial>.")
+            report.appendLine("  RC/release runs generate and verify fresh exports automatically; direct pulls consume existing verified exports.")
             reportFile.writeText(report.toString())
             throw GradleException("Connected Android device unavailable. See ${reportFile.absolutePath}")
         }
 
         val pulledFiles = mutableListOf<File>()
         val missingItems = mutableListOf<String>()
-        embeddedNodePackagingSmokeApkNames.forEach { apkName ->
+        embeddedNodePackagingSmokeVerifierReadyApkNames.forEach { apkName ->
             val remotePath = "$embeddedNodePackagingSmokePublicExportDir/$apkName"
             val targetFile = hostDir.resolve(apkName)
             report.appendLine("Artifact: $apkName")
@@ -2068,10 +2855,10 @@ val embeddedNodePullPackagedSmokeApks = tasks.register(embeddedNodePackagedSmoke
             report.appendLine()
         }
 
-        val ready = missingItems.isEmpty() && pulledFiles.size == embeddedNodePackagingSmokeApkNames.size
+        val ready = missingItems.isEmpty() &&
+                pulledFiles.size == embeddedNodePackagingSmokeVerifierReadyApkNames.size
         report.appendLine("Verifier commands:")
-        val verifierReadyFiles = pulledFiles.filter { it.name in embeddedNodePackagingSmokeVerifierReadyApkNames }
-        verifierReadyFiles.forEach { file ->
+        pulledFiles.forEach { file ->
             val expectedAbis = "arm64-v8a"
             report.appendLine(
                 "  .\\gradlew.bat --console=plain :app:embeddedNodePackagedApkOutputVerify " +
@@ -2079,20 +2866,13 @@ val embeddedNodePullPackagedSmokeApks = tasks.register(embeddedNodePackagedSmoke
                         "\"-Pautojs.embeddedNode.expectedAbis=$expectedAbis\""
             )
         }
-        if (verifierReadyFiles.isEmpty()) {
+        if (pulledFiles.isEmpty()) {
             report.appendLine("  none; no verifier-ready success/diagnostics APKs were pulled")
-        }
-        val installRunOnlyFiles = pulledFiles.filterNot { it.name in embeddedNodePackagingSmokeVerifierReadyApkNames }
-        if (installRunOnlyFiles.isNotEmpty()) {
-            report.appendLine("  install-and-run diagnostics only:")
-            installRunOnlyFiles.forEach { file ->
-                report.appendLine("    ${file.absolutePath}")
-            }
         }
         report.appendLine()
         report.appendLine("Summary:")
         report.appendLine("  embedded.node.packaged.smoke.pull.host_dir=${hostDir.absolutePath}")
-        embeddedNodePackagingSmokeApkNames.forEach { apkName ->
+        embeddedNodePackagingSmokeVerifierReadyApkNames.forEach { apkName ->
             val file = hostDir.resolve(apkName)
             report.appendLine("  embedded.node.packaged.smoke.pull.${apkName.removeSuffix(".apk")}.exists=${file.isFile}")
             report.appendLine("  embedded.node.packaged.smoke.pull.${apkName.removeSuffix(".apk")}.sha256=${embeddedNodePackagingSha256(file) ?: "unavailable"}")
@@ -2101,8 +2881,8 @@ val embeddedNodePullPackagedSmokeApks = tasks.register(embeddedNodePackagedSmoke
         report.appendLine("  embedded.node.packaged.smoke.pull.missing=${if (missingItems.isEmpty()) "none" else missingItems.joinToString()}")
         report.appendLine()
         report.appendLine("Hints:")
-        report.appendLine("  Run this after EmbeddedNodePackagedApkSmokeTest has exported all current smoke APKs.")
-        report.appendLine("  Device export dir must contain exactly the current smoke APK names; this task cleans the host target before pulling.")
+        report.appendLine("  RC/release invocations first require exact current JUnit success and then pull only the two host-verifier inputs.")
+        report.appendLine("  Standalone pull invocations consume existing device exports and clean the host target before pulling.")
 
         reportFile.writeText(report.toString())
         logger.lifecycle("Embedded Node.js packaged smoke APK pull report written to ${reportFile.absolutePath}")
@@ -2908,8 +3688,10 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     releaseFlavorPolicy: EmbeddedNodeReleaseFlavorPolicy,
     runtimeBackend: String,
     scriptExecutionEnabled: Boolean,
+    expectedSmokeRole: EmbeddedNodePackagedSmokeRole? = null,
 ): EmbeddedNodePackagedOutputVerification {
-    val currentBuildRuntimeConfigReady = runtimeBackend in setOf("embedded", "pluginOptional") && scriptExecutionEnabled
+    val currentBuildRuntimeConfigReady =
+        runtimeBackend in setOf("embedded", "plugin", "pluginOptional") && scriptExecutionEnabled
     val packagedApk = embeddedNodePackagingResolveFile(rootDir, packagedApkProperty)
     val packagedApkExists = packagedApk?.isFile == true
     val releaseFlavor = releaseFlavorPolicy.flavor
@@ -2978,8 +3760,10 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     val nodeRuntimeNativeEntriesPresent =
         nativeEntriesByLib.getValue("libnode.so").isNotEmpty() ||
                 nativeEntriesByLib.getValue("libautojs6-node.so").isNotEmpty()
-    val releaseFlavorNativePolicyReady = when (releaseFlavor) {
-        "nodePlugin", "rhinoOnly" -> !nodeRuntimeNativeEntriesPresent && !x86NodeRuntimePresent
+    val releaseFlavorNativePolicyReady = when {
+        releaseFlavor == "rhinoOnly" -> !nodeRuntimeNativeEntriesPresent && !x86NodeRuntimePresent
+        releaseFlavor == "nodePlugin" && expectedAbis.isEmpty() ->
+            !nodeRuntimeNativeEntriesPresent && !x86NodeRuntimePresent
         else -> nativeLibsReady && !x86NodeRuntimePresent
     }
     val manifestServiceReady = manifestInfo.declaresEmbeddedScriptService &&
@@ -3168,6 +3952,11 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     val fullCompatibilitySmokeReady = bundledProjectConfigReady &&
             bundledMainScriptReady &&
             runtimeMatrixMarkersReady
+    val packagedSmokeEvidenceReady = runtimeMatrixPresent && when (expectedSmokeRole) {
+        EmbeddedNodePackagedSmokeRole.FULL -> fullCompatibilitySmokeReady
+        EmbeddedNodePackagedSmokeRole.DIAGNOSTICS -> diagnosticsRequested && diagnosticsReady
+        null -> fullCompatibilitySmokeReady || (diagnosticsRequested && diagnosticsReady)
+    }
     val packagedOutputReady = if (releaseFlavor == "rhinoOnly") {
         packagedApkExists && releaseFlavorNativePolicyReady
     } else {
@@ -3179,6 +3968,8 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
                 dexDefinesScriptService &&
                 bundledProjectConfigReady &&
                 bundledMainScriptReady &&
+                packagedSmokeEvidenceReady &&
+                (!moduleSourcesBudgetRequested || fullCompatibilitySmokeReady) &&
                 moduleSourcesBudgetReady &&
                 realNpmCorpusReady &&
                 cjsResolverReady &&
@@ -3232,6 +4023,8 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  full compatibility smoke marker entry: $embeddedNodePackagingRuntimeMatrixEntry")
         appendLine("  full compatibility smoke marker present: $runtimeMatrixPresent")
         appendLine("  full compatibility smoke markers ready: $runtimeMatrixMarkersReady")
+        appendLine("  expected smoke role: ${expectedSmokeRole?.name?.lowercase() ?: "full-or-diagnostics"}")
+        appendLine("  recognized full/diagnostics smoke evidence ready: $packagedSmokeEvidenceReady")
         embeddedNodePackagingFullSmokeMarkers.forEach { marker ->
             appendLine("    marker '$marker': ${runtimeMatrixText?.contains(marker) == true}")
         }
@@ -3388,6 +4181,7 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  embedded.node.packaged.output.bridge_capabilities.required_only.ready=${bridgeCapabilityReport.requiredOnlyReady}")
         appendLine("  embedded.node.packaged.output.main_script.ready=$bundledMainScriptReady")
         appendLine("  embedded.node.packaged.output.full_compatibility_smoke.ready=$fullCompatibilitySmokeReady")
+        appendLine("  embedded.node.packaged.output.smoke_evidence.ready=$packagedSmokeEvidenceReady")
         appendLine("  embedded.node.packaged.output.module_sources.requested=$moduleSourcesBudgetRequested")
         appendLine("  embedded.node.packaged.output.module_sources.budget.present=$preloadBudgetPresent")
         appendLine("  embedded.node.packaged.output.module_sources.estimated_count=${moduleSourcesEstimatedCount ?: "unknown"}")
@@ -3576,6 +4370,7 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
     description = "Pulls exported Embedded Node packaged smoke APKs and verifies success/diagnostics APKs on the host."
 
     dependsOn(embeddedNodePullPackagedSmokeApks)
+    mustRunAfter(embeddedNodeRefreshInrtTemplateApk)
     outputs.file(layout.buildDirectory.file("reports/embedded-node/packaged-smoke-aggregate.txt"))
     outputs.file(layout.buildDirectory.file("reports/embedded-node/packaged-apk-output-verify-success.txt"))
     outputs.file(layout.buildDirectory.file("reports/embedded-node/packaged-apk-output-verify-diagnostics.txt"))
@@ -3595,7 +4390,7 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
             .dir(embeddedNodePackagingSmokeHostDirName)
             .get()
             .asFile
-        val pulledFiles = embeddedNodePackagingSmokeApkNames.associateWith { apkName ->
+        val pulledFiles = embeddedNodePackagingSmokeVerifierReadyApkNames.associateWith { apkName ->
             hostDir.resolve(apkName)
         }
         val missingPulledFiles = pulledFiles
@@ -3627,6 +4422,7 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
             releaseFlavorPolicy = releaseFlavorPolicy,
             runtimeBackend = runtimeBackend,
             scriptExecutionEnabled = scriptExecutionEnabled,
+            expectedSmokeRole = EmbeddedNodePackagedSmokeRole.FULL,
         )
         val diagnosticsVerification = embeddedNodePackagingVerifyPackagedApkOutput(
             rootDir = rootProject.projectDir,
@@ -3635,6 +4431,7 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
             releaseFlavorPolicy = releaseFlavorPolicy,
             runtimeBackend = runtimeBackend,
             scriptExecutionEnabled = scriptExecutionEnabled,
+            expectedSmokeRole = EmbeddedNodePackagedSmokeRole.DIAGNOSTICS,
         )
         successVerifierReportFile.writeText(successVerification.report)
         diagnosticsVerifierReportFile.writeText(diagnosticsVerification.report)
@@ -4550,7 +5347,6 @@ val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
             generateDesktopNodeDifferentialReport,
             generateNodeModernCoreDifferentialReport,
             "verifyEmbeddedNodeReleaseCandidate",
-            "connectedAppDebugAndroidTest",
         )
     }
     doFirst {
@@ -4560,10 +5356,11 @@ val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
 
 tasks.register("verifyEmbeddedNodeReleaseCandidate") {
     group = "verification"
-    description = "Runs the local Embedded Node release-candidate verification gate."
+    description = "Runs the Embedded Node host and connected-device release-candidate verification gate."
 
     dependsOn(
         verifyEmbeddedNodeDebug,
         verifyEmbeddedNodePackagedDebug,
+        embeddedNodeVerifyPackagedSmokeInstrumentationResults,
     )
 }

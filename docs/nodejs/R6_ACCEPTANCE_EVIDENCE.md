@@ -7,60 +7,76 @@ device, APK, JUnit, or soak evidence for this lifecycle.
 
 ## Current Checkpoint
 
-The archived candidate at host commit
-`ee97b7909eaf64daf1521e6f840c65c94569d2b5` and runtime-plugin commit
-`a904ee2011e93031db1178a0b2ff624b970e460f` has a complete internally
-consistent R6 payload:
+The clean host commit
+`723a66d37b8178dbd2b7bcbf1b8bc17f3ea3d003` and runtime-plugin commit
+`a904ee2011e93031db1178a0b2ff624b970e460f` produced a complete internally
+consistent schema-v2 R6 payload:
 
-- Sony `arm64-v8a`, Sony `armeabi-v7a`, Xiaomi `arm64-v8a`, and the x86_64
-  emulator each passed all 13 fixed selectors with zero failure, error, or
-  skip.
-- The quick soak ran for 8.000056 hours with 979 cycles, 126 samples, and 49
-  liveness/recoverability checks.
-- The final soak ran for 24.000057 hours with 2890 cycles, 329 samples, and 145
-  liveness/recoverability checks.
-- Both soaks completed cleanup and wake-lock release, reused one process
-  runtime with fresh execution state, derived zero suspend time, and reported
-  no monotonic leak, orphan process, or unrecoverable runtime/slot.
-- Before successor source edits, `verifyNodeR6ProductionEvidenceGate` reported
-  `completed` with zero blockers and zero policy violations.
+- Sony `arm64-v8a`, Sony `armeabi-v7a`, second-OEM `arm64-v8a`, and the exact
+  `AVD_API_37` / API 37 / 16384-byte-page x86_64 emulator each passed all 13
+  fixed selectors with zero failure, error, or skip.
+- The exact 27-case live-provider gate passed with zero failures/errors, two
+  policy-approved skips, and zero policy violations.
+- The quick soak ran for 8.000144 hours with 991 cycles and 138 samples; the
+  final soak ran for 24.000052 hours with 2892 cycles and 331 samples.
+- Both soaks completed cleanup and wake-lock release, continuously reused the
+  process runtime with fresh execution state, derived zero suspend time, and
+  reported no monotonic leak, orphan process, or unrecoverable runtime/slot.
+- `verifyNodeR6ProductionEvidenceGate` and
+  `verifyNodeFinalIntegrationGate` both reported `completed` with zero blockers
+  and zero policy violations.
 
-The 2026-08-02 final-integration audit corrected stale final-status producer
-dependencies, bound long-running to the real Phase 13 JSON decision, reused the
-canonical R6 contract for final-soak validation, and fixed live-provider
-summary lookup and provenance. It also fixed a WebSocket provider-destroy race
-and made OCR/Barcode health tests reflect the actual external-plugin
-installation state. Every WebSocket close path now retains transport quota,
-sends Close, and selectively cancels a non-ACK peer after a two-second grace
-period; the regression includes explicit close followed by provider destroy.
-The originally failing Sony
-selectors and the enhanced non-ACK regression pass, followed by the complete
-live-provider summary at 27 expected cases, zero failures/errors, two
-policy-approved skips, and zero policy violations.
+The 2026-08-08 release-command audit then exposed a stale packaged APK host
+oracle. It decoded the JSON-escaped main path `src\/main.js` as
+`src//main.js`, compared the current APK against obsolete module-source budgets
+and diagnostics markers, and applied the main-app `nodePlugin` no-JNI policy to
+generated APKs that intentionally inject one selected Embedded Node ABI. The
+release task graph also allowed the APK pull to run before the connected test
+that exports current smoke artifacts. Fresh Sony full-compatibility and
+diagnostics APKs passed their 2/2 install-and-run tests; after correcting the
+oracle in a dirty worktree, both host output verifiers and the aggregate report
+were ready. This is a gate/tooling correction, not an observed device runtime
+or soak failure.
 
-These corrections modify the host source after the archived candidate. The
-current non-strict R6 status therefore deliberately reports
-`deviceMatrixReady=true`, `soakReady=true`, and `zeroSkippedTests=true`, but
-remains blocked by `current host worktree is not clean`. The strict final-soak
-gate now propagates the same canonical source-identity blocker. Separately,
-the live-provider summary records test-before/test-after commit and clean state,
-then copies and hashes its single 27-case JUnit XML, the app/androidTest APKs
-actually selected by UTP's `aapt` trace, the selection logs, and device bindings
-in a unique snapshot with a frozen manifest and archived summary. A subsequent connected-test run overwrote
-the producer XML without invalidating that snapshot. Final-provider therefore
-correctly rejects the otherwise passing Sony run only because it was collected
-from this dirty worktree. The final
-integration summary therefore accepts 10 of 13 subreports and reports three
-fail-closed views of the same uncommitted-source condition; the release gate
-cannot pass transitively.
+The first full release-candidate rerun after that correction exposed a second
+static contract drift: 10 Android package-manager errors were absent from the
+central registry, 15 real Android package/Rhino errors lacked catalog entries,
+and the still-active Rhino `JavaAdapter` denial appeared stale because its
+runtime implementation lives in the sibling plugin. The registry now owns the
+Android package aliases and the public Rhino denial codes. A follow-up audit
+also found that the catalog gate still scanned the deleted host C++ directory
+and silently omitted the sibling plugin's Java/C++ runtime sources. The gate
+now declares those configured source trees as inputs and fails closed when
+either is missing; the registry and catalog cover 114 codes with no missing,
+unregistered, or stale entries. This was also a host release-gate/catalog
+defect, not a device or soak failure.
 
-R6 and Core completion consequently remain pending for the successor source
-identity. After these changes are committed, recollect all four device reports
-and both production soaks, rerun the separate debug live-provider gate, and
-then run the strict final/release command. The complete `ee97b790` archive is
-valid historical candidate evidence, but it cannot authorize different source
-bytes; a short smoke, old Phase 11/13 archive, or contract fixture cannot be
-substituted either.
+The corrected verifier now JSON-decodes project metadata, uses the canonical
+16 MiB per-source and 64 MiB aggregate budgets, validates current full/diagnostic
+markers and encrypted npm/CJS/resolver assets, honors an explicit generated-APK
+ABI under the `nodePlugin` host flavor, and orders connected instrumentation
+before artifact pull. It also rejects non-Rhino APKs without recognizable full
+or diagnostics smoke evidence. The standalone release candidate now runs only
+the full-compatibility and diagnostics selectors, while the release gate runs
+the 12 non-soak R6 live selectors plus diagnostics. The persistent selector is
+left to the canonical smoke/8-hour/24-hour runners. The RC path deletes old
+exports and JUnit XML, requires a current-source Builder provenance record from
+the `--rerun-tasks` release build, proves the installed APK exactly matches it,
+requires one exact fresh JUnit file with zero skip or failure, and rechecks the
+source fingerprint and Builder bytes after testing before pulling the two
+verifier-ready APKs. The R6 fixture suite pins those anchors. The preceding
+correction checkpoint passed 2/2; the provenance-hardened successor still
+requires its own rerun. RC/release invocations also require an explicit
+`ANDROID_SERIAL` or `android.injected.device.serial` binding so pre-test,
+instrumentation, post-test, and pull phases cannot drift across devices.
+Because the tracked verifier,
+central error registry, and catalog are part of the source identity, the
+complete `723a66d3` payload remains immutable historical evidence and cannot
+authorize the corrected bytes. R6 and Core completion remain pending until one
+clean successor recollects the live-provider report, all four device reports,
+both production soaks, and the strict final/release decisions. A short smoke,
+historical Phase 11/13 archive, or contract fixture cannot substitute for those
+runs.
 
 ## Fixed Device Matrix
 
@@ -344,6 +360,13 @@ or failed required report:
 `verifyNodeFinalIntegrationGate` is strict, and `verifyNodeReleaseGate` depends
 on that strict final gate. Consequently a release cannot pass by generating a
 blocked status report or by relying on historical capability closure.
+From a clean checkout, use the three-invocation Core completion command in
+[COMPLETION_ROADMAP.md](COMPLETION_ROADMAP.md): rebuild/install the current
+Runtime-Kit-backed APK Builder, refresh the slim inrt template, then run the
+strict final/release tasks, failing immediately after either prerequisite and
+keeping version-metadata writes disabled. Separate Gradle invocations preserve
+the template's `rhinoOnly` policy and the release candidate's required
+`nodePlugin` / `plugin` policy.
 
 The Phase 11 final soak status also reads the two canonical R6 soak reports
 above. Its standalone checks cover duration, failures, wake-lock cleanup,

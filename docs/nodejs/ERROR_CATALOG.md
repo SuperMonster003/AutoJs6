@@ -657,6 +657,86 @@ P14-39 does not add a new error code. It records the v1.2 closeout handoff as
   converted into runtime errors.
 - Runtime authority remains unchanged.
 
+## ERR_AUTOJS6_ANDROID_PACKAGE_ALREADY_INSTALLED
+
+- Meaning: The requested package name and version already exist in the Android app-private package store.
+- Common cause: calling `install()` twice for the same `name@version` instead of planning an update.
+- Example: installing `@autojs6/example@1.0.0` after that exact package record has already been committed.
+- How to fix: inspect `list()` or `planInstall()`, then use `update()`, remove the old record, or choose a new version.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md](reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md).
+
+## ERR_AUTOJS6_ANDROID_PACKAGE_BIN_DISABLED
+
+- Meaning: An Android package source declares executable `bin` entries, which the Safe Node Profile does not install.
+- Common cause: vendoring a desktop-oriented package whose `package.json` includes `bin` commands or CLI shims.
+- Example: installing an otherwise pure-JavaScript package that declares `"bin": { "tool": "cli.js" }`.
+- How to fix: call the package's library API directly or remove the executable surface during trusted host-side preparation.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_ANDROID_PACKAGE_CANCELLED
+
+- Meaning: An Android package-store operation was cancelled before its transaction completed.
+- Common cause: cancellation while the manager enumerates or copies a package tree.
+- Example: cancelling an install while files are being staged in the app-private transaction directory.
+- How to fix: inspect `list()` or `verify()` for the committed state, then retry the operation if it is still needed.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md](reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md).
+
+## ERR_AUTOJS6_ANDROID_PACKAGE_INTEGRITY
+
+- Meaning: A requested, recorded, or recalculated package integrity value does not match the package contents.
+- Common cause: stale expected SHA-512 metadata, changed source files, or corruption in an installed package record.
+- Example: `update()` receives an `expectedIntegrity` value from a plan whose source tree has since changed.
+- How to fix: obtain the package again from a trusted source, rerun the plan and integrity calculation, and do not bypass the mismatch.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [reports/phase13/P13_48_PACKAGE_LOCK_INTEGRITY_POLICY.md](reports/phase13/P13_48_PACKAGE_LOCK_INTEGRITY_POLICY.md).
+
+## ERR_AUTOJS6_ANDROID_PACKAGE_INVALID
+
+- Meaning: An Android package request or its local unpacked source is invalid.
+- Common cause: a blank name/version, a missing source directory or `package.json`, or metadata that does not match the request.
+- Example: installing `example@1.0.0` from a directory whose `package.json` names a different package.
+- How to fix: use a project-scoped host-managed unpacked directory and make its name and version metadata match the request.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md](reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md).
+
+## ERR_AUTOJS6_ANDROID_PACKAGE_LIFECYCLE_DISABLED
+
+- Meaning: The package declares a lifecycle script that Android runtime installation is not allowed to execute.
+- Common cause: `package.json` contains `preinstall`, `install`, `postinstall`, or `prepare`.
+- Example: installing a dependency whose `postinstall` script downloads or builds an artifact.
+- How to fix: perform any trusted preparation on the host, then package only reviewed output without lifecycle scripts.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_ANDROID_PACKAGE_NATIVE_DISABLED
+
+- Meaning: The package contains a native-addon payload that is disabled for Android local-store installation.
+- Common cause: a `.node` file, `binding.gyp`, or `build/Release` or `build/Debug` native build output is present.
+- Example: attempting to install a dependency that compiled a desktop Node addon during host preparation.
+- How to fix: use a pure-JavaScript or approved WASM alternative, or a separately reviewed signed native distribution path.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_ANDROID_PACKAGE_NOT_INSTALLED
+
+- Meaning: An Android package update targets a package name and version that is not installed.
+- Common cause: calling `update()` before the matching package record exists or using the wrong version.
+- Example: updating `@autojs6/example@1.0.0` when only version `1.1.0` is installed.
+- How to fix: confirm the exact record with `list()` or `planUpdate()`, then install it first or update the correct version.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md](reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md).
+
+## ERR_AUTOJS6_ANDROID_PACKAGE_PATH_ESCAPE
+
+- Meaning: A package source contains a symbolic link or a canonical path that escapes its source root.
+- Common cause: symlinked workspace content, `..` traversal, or another filesystem alias outside the reviewed package tree.
+- Example: a package file resolves through a symlink to content elsewhere on the device.
+- How to fix: remove symlinks and path escapes, and keep ordinary files entirely under the selected source directory.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED
+
+- Meaning: A package-manager mutation was rejected because the caller did not explicitly confirm it.
+- Common cause: calling `install()`, `update()`, or `remove()` without `allowMutation: true` after reviewing the dry-run plan.
+- Example: invoking `package_manager.install(request)` directly after a dry run without adding explicit mutation confirmation.
+- How to fix: review the plan, declare the required capability, supply the expected integrity, and set `allowMutation: true` deliberately.
+- Related docs: [reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md](reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md), [reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md](reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md).
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.
@@ -720,6 +800,62 @@ P14-39 does not add a new error code. It records the v1.2 closeout handoff as
 - Example: `compat.assertSupported("files.read")` before the scoped files facade is implemented.
 - How to fix: use the current Node bridge module directly, or wait for the matching Phase 11 compat facade task.
 - Related docs: [design/RHINO_COMPAT_LOADER.md](design/RHINO_COMPAT_LOADER.md), [RHINO_AUGMENT_COMPATIBILITY_MATRIX.md](RHINO_AUGMENT_COMPATIBILITY_MATRIX.md).
+
+## ERR_AUTOJS6_RHINO_SHIM_DISABLED
+
+- Meaning: Rhino execution from Node is disabled unless the explicitly gated JSON-only experiment is enabled and available.
+- Common cause: calling `rhino.run()` without `experimental: true`, or using a transport without the live Rhino provider.
+- Example: `require("rhino").run({ source: "1 + 1" })` on the default Safe profile.
+- How to fix: keep the script on the Rhino engine or, for reviewed POC use only, enable the explicit bounded JSON-only path.
+- Related docs: [design/RHINO_SHIM.md](design/RHINO_SHIM.md), [design/RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md).
+
+## ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED
+
+- Meaning: Installing Rhino globals into the Node runtime is unsupported by default.
+- Common cause: calling `rhino.install()` without the separately reviewed experimental Java-proxy configuration.
+- Example: attempting to install legacy Rhino globals into `globalThis` from a Node script.
+- How to fix: use explicit Node bridge modules; use the experimental proxy POC only when its Java interop policy is deliberately enabled.
+- Related docs: [design/RHINO_SHIM.md](design/RHINO_SHIM.md), [design/JAVA_INTEROP.md](design/JAVA_INTEROP.md).
+
+## ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED
+
+- Meaning: Rhino-style `importClass()` and `importPackage()` helpers are not emulated inside Node.
+- Common cause: migrating code that expects Rhino imports to create implicit global names.
+- Example: `require("rhino").importClass(android.graphics.Rect)`.
+- How to fix: use explicit assignment from an allowed Java proxy target, or keep the script on Rhino.
+- Related docs: [design/RHINO_SHIM.md](design/RHINO_SHIM.md), [design/JAVA_INTEROP.md](design/JAVA_INTEROP.md).
+
+## ERR_AUTOJS6_RHINO_INVALID_REQUEST
+
+- Meaning: A `rhino.run()` request cannot be accepted by the JSON-only execution adapter.
+- Common cause: an invalid source/path/args/timeout/cwd shape, or a source explicitly marked for Node execution.
+- Example: submitting both `source` and `path`, or asking Rhino to execute a Node-mode source.
+- How to fix: send exactly one source form and keep the descriptor, arguments, working directory, and timeout within the documented bounds.
+- Related docs: [design/RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_RHINO_EXECUTION_ERROR
+
+- Meaning: The bounded Rhino adapter started the script, but Rhino execution failed with a non-timeout exception.
+- Common cause: a syntax error, runtime exception, or other failure raised by the legacy script.
+- Example: a `rhino.run()` source throws before producing its JSON-safe result.
+- How to fix: inspect the stable error message, source location, stack, and captured console output, then correct the Rhino script.
+- Related docs: [design/RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT
+
+- Meaning: Rhino execution exceeded its bounded `timeoutMs` window.
+- Common cause: an infinite loop, blocking work, or a timeout that is too short for the requested operation.
+- Example: a `rhino.run()` source loops indefinitely until the service requests force-stop and engine destruction.
+- How to fix: make the work finite, split long operations, and choose an appropriate but still bounded timeout.
+- Related docs: [design/RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT
+
+- Meaning: A Rhino result cannot cross into Node as a bounded JSON-safe snapshot.
+- Common cause: returning a function, Java/Android/Rhino wrapper, cyclic value, unrepresentable value, or oversized JSON result.
+- Example: returning an Android `View` or a Rhino function from `rhino.run()`.
+- How to fix: return only finite JSON-compatible data made from null, booleans, numbers, strings, arrays, and plain objects.
+- Related docs: [design/RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED
 
@@ -1046,6 +1182,22 @@ silently falls back to a project-wide directory scan.
 - How to fix: handle timeout, lower workload size, or pass an appropriate timeout where supported.
 - Related docs: [design/NETWORK.md](design/NETWORK.md), [design/WEBSOCKET.md](design/WEBSOCKET.md).
 
+## ERR_AUTOJS6_NPM_CLI_DENIED
+
+- Meaning: The requested npm CLI-style operation is deliberately unavailable in the Android Safe Node Profile.
+- Common cause: calling `npm.cli()`, `npm.exec()`, `npm.runScript()`, or `npm.pack()` instead of the guarded local package-manager facade.
+- Example: `require("npm").cli(["install"])` attempts to launch an npm executable on the device.
+- How to fix: prepare dependencies on the host, or use the reviewed `package_manager` planning and local app-private-store operations.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md](reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md).
+
+## ERR_AUTOJS6_NPM_REGISTRY_DENIED
+
+- Meaning: Direct npm registry installation or publishing is deliberately unavailable in the Android Safe Node Profile.
+- Common cause: calling `npm.installFromRegistry()` or `npm.publish()` where only metadata-only registry planning is allowed.
+- Example: `require("npm").installFromRegistry("example")` tries to grant the script registry download and install authority.
+- How to fix: use `planRegistryInstall()` only for bounded diagnostics, then resolve and validate the dependency on the host before using the guarded local store.
+- Related docs: [design/PACKAGE_MANAGER.md](design/PACKAGE_MANAGER.md), [reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md](reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md).
+
 ## ERR_AUTOJS6_NODE_DISABLED
 
 - Meaning: embedded Node is disabled or unavailable for a Node-marked script.
@@ -1097,6 +1249,102 @@ silently falls back to a project-wide directory scan.
 - Example: four callers start scripts simultaneously; one is admitted and the others receive busy results with queue capacity `0`.
 - How to fix: wait for the active execution to finish and retry explicitly. The host does not place the request in the embedded queue and does not use optional fallback.
 - Related docs: [design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md), [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md).
+
+## ERR_AUTOJS6_NODE_PLUGIN_EMPTY_SOURCE
+
+- Meaning: The runtime plugin received an execution request whose source string is empty.
+- Common cause: the host failed to resolve or transfer the selected entry, or constructed a plugin request without source content.
+- Example: a Binder request reaches `NodeJsRuntimePluginService` with `KEY_SOURCE` set to `""`.
+- How to fix: verify entry resolution and workspace transport, then resend a request containing the intended source; do not treat an empty request as a successful no-op.
+- Related docs: [design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_NODE_PROCESS_RUNTIME_UNAVAILABLE
+
+- Meaning: The persistent process-global Node runtime could not admit a fresh per-execution isolate because it is unavailable or poisoned.
+- Common cause: process-runtime initialization failed, no usable libnode/platform handle exists, or an earlier teardown failure quarantined the runtime.
+- Example: a new execution reaches a slot whose previous isolate cleanup marked the process runtime poisoned.
+- How to fix: inspect `process_runtime.*` diagnostics and the poison reason, retire and restart the affected runtime process, and investigate repeated initialization or teardown failures.
+- Related docs: [COMPLETION_ROADMAP.md](COMPLETION_ROADMAP.md), [design/MULTI_INSTANCE.md](design/MULTI_INSTANCE.md).
+
+## ERR_AUTOJS6_NODE_WORKING_DIRECTORY
+
+- Meaning: Native execution could not enter the requested working directory before starting the script.
+- Common cause: the directory is missing, is not a directory, is inaccessible, or was not materialized correctly from the plugin workspace.
+- Example: native `chdir()` fails after a request names a deleted project directory.
+- How to fix: provide an existing accessible scoped project directory and verify workspace extraction/path mapping before retrying.
+- Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [security/THREAT_MODEL_V1.md](security/THREAT_MODEL_V1.md).
+
+## ERR_AUTOJS6_NODE_ONE_SHOT_REQUIRES_FRESH_PROCESS
+
+- Meaning: The legacy one-shot native lifecycle was asked to execute after the process had already consumed its one-shot initialization boundary.
+- Common cause: persistent process mode is disabled and a second execution is attempted in the same service process.
+- Example: a fallback one-shot run starts after an earlier run already initialized process-global Node/V8 state.
+- How to fix: run the request in a fresh service process or use the persistent process runtime, which creates a fresh isolate per execution.
+- Related docs: [COMPLETION_ROADMAP.md](COMPLETION_ROADMAP.md), [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md).
+
+## ERR_AUTOJS6_NODE_NATIVE_EXECUTION_EXCEPTION
+
+- Meaning: The native embedded execution lifecycle caught an unexpected C++ exception while running Node/V8/libuv work.
+- Common cause: an internal native initialization, execution, or teardown operation threw outside the normal JavaScript result path.
+- Example: `runEmbeddedScriptExecution()` catches a `std::exception` and converts it into a failed execution payload.
+- How to fix: preserve the native detail, runtime/process diagnostics, and crash evidence; restart the affected runtime and report a reproducible failure rather than retrying blindly.
+- Related docs: [NATIVE_CRASH_DIAGNOSTICS.md](NATIVE_CRASH_DIAGNOSTICS.md), [CRASH_INTAKE.md](CRASH_INTAKE.md).
+
+## ERR_AUTOJS6_NODE_ADAPTER_API_UNAVAILABLE
+
+- Meaning: The JNI bridge could not obtain the versioned Node runtime adapter API table.
+- Common cause: `autojs_node_get_runtime_api_v1()` returned null because the native artifact is incomplete, incompatible, or incorrectly linked.
+- Example: adapter diagnostics or execution starts, but no `AutoJsNodeRuntimeApiV1` table is available.
+- How to fix: install matching host/plugin native artifacts and run the adapter ABI/export verification; do not bypass the missing API table.
+- Related docs: [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), [native/NATIVE_INTEGRATION_MAP.md](native/NATIVE_INTEGRATION_MAP.md).
+
+## ERR_AUTOJS6_NODE_ADAPTER_BAD_JSON
+
+- Meaning: The runtime adapter could not parse the JSON metadata supplied for module sources or the execution environment.
+- Common cause: malformed JSON or an invalid module-source, sandbox-root, runtime-module-source, or environment pair shape crossed the C ABI.
+- Example: `environment_json` is truncated, or `module_sources_json` contains an entry that is not a supported string pair.
+- How to fix: use the host serializer for adapter requests, inspect the adapter diagnostic message, and correct the producing boundary rather than hand-editing the JSON.
+- Related docs: [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), [design/ESM.md](design/ESM.md).
+
+## ERR_AUTOJS6_NODE_ADAPTER_CREATE_FAILED
+
+- Meaning: The adapter could not create a runtime handle before execution.
+- Common cause: `create_runtime` is missing, returns a non-success result, fails native allocation/initialization, or returns a null handle.
+- Example: the JNI adapter path records `create_result_code=failed` and `handle_created=false`.
+- How to fix: inspect the create result and native logs, verify ABI-compatible artifacts, and restart or update the runtime instead of continuing with a null handle.
+- Related docs: [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), [NATIVE_CRASH_DIAGNOSTICS.md](NATIVE_CRASH_DIAGNOSTICS.md).
+
+## ERR_AUTOJS6_NODE_ADAPTER_INVALID_ARGUMENT
+
+- Meaning: A runtime adapter ABI call received an invalid pointer, undersized structure, or inconsistent byte view.
+- Common cause: a host/adapter ABI mismatch, a null required request/result structure, or source bytes with a nonzero length and null data.
+- Example: `execute_script` receives an `AutoJsNodeExecutionRequest` whose `struct_size` is older than the required v1 structure.
+- How to fix: use matching host and plugin builds, initialize every ABI structure and `struct_size`, and correct the native caller; this is not an ordinary JavaScript argument error.
+- Related docs: [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), [native/NATIVE_INTEGRATION_MAP.md](native/NATIVE_INTEGRATION_MAP.md).
+
+## ERR_AUTOJS6_NODE_ADAPTER_INVALID_HANDLE
+
+- Meaning: Adapter state or diagnostics were requested with a null, destroyed, or unregistered runtime handle.
+- Common cause: a lifecycle race, use-after-destroy, or retention of a handle after runtime teardown.
+- Example: the host calls `get_diagnostics()` after `destroy_runtime()` completed for the same handle.
+- How to fix: serialize adapter lifecycle calls, stop using a handle after destroy, and create a new runtime handle for later execution.
+- Related docs: [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), [design/MULTI_INSTANCE.md](design/MULTI_INSTANCE.md).
+
+## ERR_AUTOJS6_NODE_ADAPTER_NATIVE_EXCEPTION
+
+- Meaning: The adapter execution wrapper caught an unexpected C++ exception and converted it into a stable result envelope.
+- Common cause: native Node/V8/libuv execution threw while the adapter owned the request.
+- Example: `execute_script` catches a `std::exception` from the embedded lifecycle and records its message in `errorMessage`.
+- How to fix: retain the adapter diagnostics and native detail, restart the affected runtime, and investigate the native failure before explicitly retrying.
+- Related docs: [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), [NATIVE_CRASH_DIAGNOSTICS.md](NATIVE_CRASH_DIAGNOSTICS.md).
+
+## ERR_AUTOJS6_NODE_ADAPTER_RESULT_MISSING
+
+- Meaning: Adapter execution returned without a nonempty embedded-script result envelope.
+- Common cause: an internal execution path failed to publish `embedded_script.result_json`, or the ABI result exposes a null/empty `result_json`.
+- Example: `execute_script` returns a result code but the JNI bridge cannot read any execution result JSON.
+- How to fix: treat the run as failed, inspect adapter/native diagnostics and logs, and update or repair the runtime path; never infer success from the missing envelope.
+- Related docs: [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), [TESTING.md](TESTING.md).
 
 ## ERR_AUTOJS6_NODE_ENGINE_BUSY
 
@@ -1186,6 +1434,14 @@ silently falls back to a project-wide directory scan.
 - How to fix: remove the dependency on dangerous process internals.
 - Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
+## ERR_AUTOJS6_PROCESS_EXIT
+
+- Meaning: A nonzero `process.exit(code)` was converted into an embedded-script lifecycle result without terminating the Android process directly.
+- Common cause: the script explicitly calls `process.exit()` with a nonzero finite code.
+- Example: `process.exit(7)` stops script evaluation and returns exit code `7` with this stable error code.
+- How to fix: if the exit was intentional, handle the returned exit code; otherwise remove the early exit and return or throw through the normal script lifecycle.
+- Related docs: [reports/phase13/P13_44_PROCESS_PARITY.md](reports/phase13/P13_44_PROCESS_PARITY.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
+
 ## ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED
 
 - Meaning: CommonJS attempted to require an ESM module while the partial ESM boundary was disabled or unavailable.
@@ -1225,6 +1481,14 @@ silently falls back to a project-wide directory scan.
 - Example: an uncleared interval keeps the event loop alive.
 - How to fix: clear timers, close handles, or configure a timeout appropriate for the workload.
 - Related docs: [TESTING.md](TESTING.md), [PERFORMANCE.md](PERFORMANCE.md).
+
+## ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED
+
+- Meaning: A script requested Shizuku-backed shell execution, which remains a stable-denied capability in the current Node profile.
+- Common cause: calling `shell.execShizuku()` or passing `{ shizuku: true }` to `shell.exec()`.
+- Example: `require("shell").execShizuku("id")` rejects before any bridge request is dispatched.
+- How to fix: use the controlled non-root shell path, request the separately governed root path when appropriate, or wait for a dedicated Shizuku provider to be promoted.
+- Related docs: [reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md](reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_WORKER_BRIDGE_DENIED
 

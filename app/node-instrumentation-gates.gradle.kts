@@ -556,6 +556,8 @@ val nodeJsR5RuntimePluginGateInstrumentationClasses = listOf(
 val nodeJsR6EngineSwitchGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeR6EngineSwitchInstrumentationTest",
 )
+val nodeJsR6PersistentPluginSoakInstrumentationSelector =
+    "org.autojs.autojs.engine.NodeR6PersistentPluginSoakInstrumentationTest#persistentRequiredPluginSoakProducesR6Evidence"
 val nodeJsR6DeviceEvidenceGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeR6EngineSwitchInstrumentationTest#r6_01_requiredPluginNodeAndRhinoAlternateAcrossMultipleRounds",
     "org.autojs.autojs.engine.NodeR6EngineSwitchInstrumentationTest#r6_02_pluginRhinoCompatibilityPluginSwitchExecutesAndRecovers",
@@ -566,11 +568,37 @@ val nodeJsR6DeviceEvidenceGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_07_binderDeathReconnectsAtomicallyAndPreservesCrashAttribution",
     "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_08_runtimeWarmSamplesMeetR2SloAndSeparateDiscoveryAndBindOverhead",
     "org.autojs.autojs.engine.NodeR6RequiredPluginSecurityInstrumentationTest#requiredPluginPreservesPermanentSafeNodeDenials",
-    "org.autojs.autojs.engine.NodeR6PersistentPluginSoakInstrumentationTest#persistentRequiredPluginSoakProducesR6Evidence",
+    nodeJsR6PersistentPluginSoakInstrumentationSelector,
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunFullCompatibilityEmbeddedNodePackagedApk",
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunCrashEvidenceEmbeddedNodePackagedApk",
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
 )
+val nodeJsPackagedReleaseCandidateInstrumentationClasses = listOf(
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunFullCompatibilityEmbeddedNodePackagedApk",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDiagnosticsEmbeddedNodePackagedApk",
+)
+val nodeJsR6ReleaseGateInstrumentationClasses = (
+        nodeJsR6DeviceEvidenceGateInstrumentationClasses
+            .filterNot { selector -> selector == nodeJsR6PersistentPluginSoakInstrumentationSelector } +
+                "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDiagnosticsEmbeddedNodePackagedApk"
+        ).distinct()
+check(nodeJsR6DeviceEvidenceGateInstrumentationClasses.size == 13) {
+    "The canonical R6 device evidence gate must contain exactly 13 selectors."
+}
+check(nodeJsR6DeviceEvidenceGateInstrumentationClasses.distinct().size == 13) {
+    "The canonical R6 device evidence gate must not contain duplicate selectors."
+}
+check(nodeJsPackagedReleaseCandidateInstrumentationClasses.size == 2 &&
+        nodeJsPackagedReleaseCandidateInstrumentationClasses.distinct().size == 2
+) {
+    "The packaged release-candidate gate must contain exactly two unique selectors."
+}
+check(nodeJsR6ReleaseGateInstrumentationClasses.size == 13) {
+    "The R6 release gate must contain exactly 13 selectors (12 non-soak canonical selectors plus diagnostics)."
+}
+check(nodeJsR6ReleaseGateInstrumentationClasses.distinct().size == 13) {
+    "The R6 release gate must not contain duplicate selectors."
+}
 val nodeJsPluginUiGateInstrumentationClasses = (
         listOf(
             "org.autojs.autojs.engine.NodePluginSystemInstrumentationTest",
@@ -758,6 +786,8 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeR5RuntimePluginGate" to nodeJsR5RuntimePluginGateInstrumentationClasses,
     "verifyNodeR6EngineSwitchGate" to nodeJsR6EngineSwitchGateInstrumentationClasses,
     "verifyNodeR6DeviceEvidenceGate" to nodeJsR6DeviceEvidenceGateInstrumentationClasses,
+    "verifyEmbeddedNodeReleaseCandidate" to nodeJsPackagedReleaseCandidateInstrumentationClasses,
+    "verifyNodeReleaseGate" to nodeJsR6ReleaseGateInstrumentationClasses,
     "verifyNodePhase8SecurityStressGate" to nodeJsPhase8SecurityStressGateInstrumentationClasses,
     "verifyNodePhase8Gate" to nodeJsPhase8GateInstrumentationClasses,
     "verifyNodeWasmWasiGate" to nodeJsPhase9WasmWasiGateInstrumentationClasses,
@@ -765,9 +795,17 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodePhase9Gate" to nodeJsPhase9GateInstrumentationClasses,
     "verifyNodePhase10Gate" to nodeJsPhase10GateInstrumentationClasses,
 )
-val nodeJsRequestedFocusedGate = taskNames
+val nodeJsRequestedFocusedGates = taskNames
     .map { rawTaskName -> rawTaskName.substringAfterLast(':') }
-    .firstOrNull { taskName -> taskName in nodeJsFocusedGateInstrumentationClasses }
+    .filter { taskName -> taskName in nodeJsFocusedGateInstrumentationClasses }
+    .distinct()
+if (nodeJsRequestedFocusedGates.size > 1) {
+    throw GradleException(
+        "Only one focused Node instrumentation gate may be requested per Gradle invocation; " +
+                "received ${nodeJsRequestedFocusedGates.joinToString()}. Run each focused gate separately."
+    )
+}
+val nodeJsRequestedFocusedGate = nodeJsRequestedFocusedGates.singleOrNull()
 val nodeJsFocusedGateInstrumentationClassArgument = nodeJsRequestedFocusedGate?.let { taskName ->
     nodeJsFocusedGateInstrumentationClasses.getValue(taskName).joinToString(",")
 }

@@ -3007,6 +3007,14 @@ The production inrt template is intentionally slim. `assembleInrtRelease` and
 `Embedded Node.js` library inject those native files from the host APK according
 to the selected ABI policy.
 
+The standalone pull task copies only the two host-verifier inputs,
+`PackagedNodeSmoke_v1.0.0.apk` and
+`PackagedNodeDiagnosticsSmoke_v1.0.0.apk`, from existing device exports. When
+it is reached through `verifyEmbeddedNodeReleaseCandidate` or
+`verifyNodeReleaseGate`, the graph first removes those device files and old
+JUnit XML, runs the exact focused selectors, requires zero failures/errors/
+skips, and only then permits the pull.
+
 Full Embedded Node inrt templates for runtime/template testing are generated as
 build outputs only and do not replace `assets-app/template.apk`:
 
@@ -3278,6 +3286,32 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodePackagedDebug
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeReleaseCandidate
 ```
+
+The standalone release-gate line above assumes both a current installed APK
+Builder and a current slim `app/src/main/assets-app/template.apk`. From a clean
+checkout, first rebuild/install
+`:plugins:apk-builder-template:installRelease`, then run
+`:app:embeddedNodeRefreshInrtTemplateApk`, each in its own Gradle invocation;
+disable build-number/time metadata writes throughout and then run the release
+gate. `installRelease` must use `--rerun-tasks`; `packageRelease` then records
+the host commit, full tracked/untracked source fingerprint, remote-build mode,
+and APK hash. The pre-clean task requires that current record and an exact
+installed/local APK match, while the result task proves both remain unchanged
+after testing. The standalone release candidate
+runs the full-compatibility and diagnostics packaged selectors and requires an
+exact 2/2 JUnit result with zero skips before pulling their fresh exports. The
+full release task runs the 12 non-soak R6 required-plugin selectors plus the
+diagnostics exporter (13 total); the strict final gate separately consumes the
+current-commit 8-hour and 24-hour soak evidence. Use the complete fail-fast
+PowerShell command in [CI_GATES.md](CI_GATES.md#release-gate); combining the
+Builder, refresh, and release tasks in one Gradle invocation would apply one
+global runtime flavor to incompatible build roles.
+Request only one focused connected-test gate per Gradle invocation; in
+particular, do not place `verifyEmbeddedNodeReleaseCandidate` and
+`verifyNodeReleaseGate` on the same command line.
+Both gates require an explicit device binding through `ANDROID_SERIAL` or
+`-Pandroid.injected.device.serial`; the host-only
+`autojs.embeddedNode.adbSerial` alias does not bind AGP connected testing.
 
 `verifyNodePrGate` is the fast host-side PR gate. `verifyNodeV11AlphaGate` is the v1.1 functional milestone gate and
 requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/README.md](reports/v1.1-alpha/README.md).

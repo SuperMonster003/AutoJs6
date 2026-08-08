@@ -12,28 +12,59 @@ private fun extractCatalogHeadings(text: String): Set<String> =
         .map { it.groupValues[1] }
         .toSet()
 
+private fun nodeErrorCatalogConfiguredFile(name: String): File? =
+    if (extensions.extraProperties.has("nodeJsRuntimeConfig.$name")) {
+        extensions.extraProperties.get("nodeJsRuntimeConfig.$name") as? File
+    } else {
+        null
+    }
+
+val nodeErrorCatalogRegistryFile =
+    projectDir.resolve("src/main/java/org/autojs/autojs/engine/NodeRuntimeErrorCodes.kt")
+val nodeErrorCatalogCatalogFile = rootProject.projectDir.resolve("docs/nodejs/ERROR_CATALOG.md")
+val nodeErrorCatalogPluginProjectDir = nodeErrorCatalogConfiguredFile("nodeJsPluginProjectDir")
+val nodeErrorCatalogPluginCppDir = nodeErrorCatalogConfiguredFile("nodeJsPluginCppDir")
+    ?: nodeErrorCatalogPluginProjectDir?.resolve("app/src/main/cpp")
+val nodeErrorCatalogConfiguredPluginRoots = listOfNotNull(
+    nodeErrorCatalogPluginProjectDir?.resolve("app/src/main/java"),
+    nodeErrorCatalogPluginCppDir,
+)
+val nodeErrorCatalogRuntimeSourceRoots = buildList {
+    add(projectDir.resolve("src/main/java/org/autojs/autojs/engine"))
+    if (nodeErrorCatalogConfiguredPluginRoots.isNotEmpty()) {
+        addAll(nodeErrorCatalogConfiguredPluginRoots)
+    } else {
+        add(projectDir.resolve("src/main/cpp"))
+    }
+}
+
 val verifyNodeErrorCatalog = tasks.register("verifyNodeErrorCatalog") {
     group = "verification"
     description = "Verifies docs/nodejs/ERROR_CATALOG.md against Embedded Node runtime error codes."
 
     val reportFile = layout.buildDirectory.file("reports/nodejs/error-catalog.json")
 
+    inputs.file(nodeErrorCatalogRegistryFile)
+    inputs.file(nodeErrorCatalogCatalogFile)
+    nodeErrorCatalogRuntimeSourceRoots.filter(File::isDirectory).forEach { inputs.dir(it) }
     outputs.file(reportFile)
 
     doLast {
-        val registryFile = projectDir.resolve("src/main/java/org/autojs/autojs/engine/NodeRuntimeErrorCodes.kt")
-        val runtimeSourceRoots = listOf(
-            projectDir.resolve("src/main/java/org/autojs/autojs/engine"),
-            projectDir.resolve("src/main/cpp"),
-        )
-        val catalogFile = rootProject.projectDir.resolve("docs/nodejs/ERROR_CATALOG.md")
-
-        if (!catalogFile.isFile) {
-            throw GradleException("Missing Node error catalog: ${catalogFile.relativeTo(rootProject.projectDir)}")
+        if (!nodeErrorCatalogCatalogFile.isFile) {
+            throw GradleException(
+                "Missing Node error catalog: ${nodeErrorCatalogCatalogFile.relativeTo(rootProject.projectDir)}"
+            )
+        }
+        val missingConfiguredPluginRoots = nodeErrorCatalogConfiguredPluginRoots.filterNot(File::isDirectory)
+        if (missingConfiguredPluginRoots.isNotEmpty()) {
+            throw GradleException(
+                "Configured Node runtime plugin source directories are missing: " +
+                        missingConfiguredPluginRoots.joinToString { it.absolutePath }
+            )
         }
 
-        val registryCodes = extractNodeErrorCodes(registryFile.readText())
-        val runtimeCodes = runtimeSourceRoots
+        val registryCodes = extractNodeErrorCodes(nodeErrorCatalogRegistryFile.readText())
+        val runtimeCodes = nodeErrorCatalogRuntimeSourceRoots
             .filter(File::isDirectory)
             .flatMap { root ->
                 root.walkTopDown()
@@ -45,15 +76,21 @@ val verifyNodeErrorCatalog = tasks.register("verifyNodeErrorCatalog") {
             .toSet()
 
         val requiredCodes = (registryCodes + runtimeCodes).toSortedSet()
-        val catalogCodes = extractCatalogHeadings(catalogFile.readText()).toSortedSet()
+        val catalogCodes = extractCatalogHeadings(nodeErrorCatalogCatalogFile.readText()).toSortedSet()
         val missing = (requiredCodes - catalogCodes).toSortedSet()
         val undocumentedRuntime = (runtimeCodes - registryCodes).toSortedSet()
         val stale = (catalogCodes - requiredCodes).toSortedSet()
 
         val report = mapOf(
             "schema" to "autojs6-node-error-catalog-v1",
-            "registryFile" to registryFile.relativeTo(projectDir).invariantSeparatorsPath,
-            "catalogFile" to catalogFile.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
+            "registryFile" to nodeErrorCatalogRegistryFile.relativeTo(projectDir).invariantSeparatorsPath,
+            "catalogFile" to nodeErrorCatalogCatalogFile.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
+            "runtimeSourceRoots" to nodeErrorCatalogRuntimeSourceRoots
+                .filter(File::isDirectory)
+                .map { root ->
+                    root.relativeToOrNull(rootProject.projectDir)?.invariantSeparatorsPath
+                        ?: root.invariantSeparatorsPath
+                },
             "registryCodes" to registryCodes.sorted(),
             "runtimeCodes" to runtimeCodes.sorted(),
             "catalogCodes" to catalogCodes.sorted(),

@@ -82,6 +82,9 @@ function main() {
     assertDeviceRunnerGradleContracts();
     assertPackagedTemplateAbiSelectionContract(root);
     assertPackagedTemplateSourceContract();
+    assertPackagedHostVerifierSourceContract();
+    assertReleaseInstrumentationScopeContract();
+    assertNodeErrorCatalogSourceContract();
     assertPackagedInteractiveShellContract();
     assertRuntimeKitNativeBaselineContract();
     for (const requirement of DEVICE_REQUIREMENTS) {
@@ -1390,6 +1393,241 @@ function assertPackagedTemplateSourceContract() {
   assert(!source.includes("\"abis\": [\"arm64-v8a\"]"));
   assert(!source.includes("assertEquals(listOf(\"arm64-v8a\"), bundledConfig.abis)"));
   assert(source.includes("\"lib/$targetAbi/$libName\" in entries"));
+}
+
+function assertPackagedHostVerifierSourceContract() {
+  const source = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/embedded-node-packaging-preflight.gradle.kts"),
+    "utf8",
+  );
+  const apkBuilderBuildSource = fs.readFileSync(
+    path.resolve(__dirname, "../../../plugins/apk-builder-template/build.gradle.kts"),
+    "utf8",
+  );
+  assert(source.includes("embeddedNodePackagingJsonMap(json)?.get(key) as? String"));
+  assert(source.includes("embeddedNodePackagingModuleSourceMaxBytes = 16_777_216"));
+  assert(source.includes("embeddedNodePackagingModuleSourcesMaxBytes = 67_108_864"));
+  assert(source.includes('"packaged.readlink.symlink=true"'));
+  assert(source.includes('"packaged.readlink.rejects=true"'));
+  assert(source.includes('embeddedNodePackagingFullSmokeTailMarker = "packaged.tail=true"'));
+  assert(source.includes(
+    "embeddedNodePackagingRealNpmCorpusReadyMarker = embeddedNodePackagingFullSmokeTailMarker",
+  ));
+  assert(source.includes(
+    "embeddedNodePackagingCjsResolverReadyMarker = embeddedNodePackagingFullSmokeTailMarker",
+  ));
+  assert(source.includes(
+    "embeddedNodePackagingDependencyResolutionReadyMarker = embeddedNodePackagingFullSmokeTailMarker",
+  ));
+  assert(!source.includes('"packaged.readlink.symlink_disabled=true"'));
+  assert(source.includes('"packaged.diagnostics.esm.type_module.value=true"'));
+  assert(source.includes('"packaged.diagnostics.esm.async_code=ERR_REQUIRE_ASYNC_MODULE"'));
+  assert(source.includes('"packaged.diagnostics.esm.code=ok"'));
+  assert(source.includes('"assets/project/node_modules/diagnostic-async-esm/index.mjs"'));
+  assert(!source.includes('"packaged.diagnostics.esm.type_module.message=true"'));
+  assert(!source.includes('"packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"'));
+  assert(source.includes('releaseFlavor == "nodePlugin" && expectedAbis.isEmpty()'));
+  assert(source.includes('runtimeBackend in setOf("embedded", "plugin", "pluginOptional")'));
+  assert(source.includes(
+    "EmbeddedNodePackagedSmokeRole.FULL -> fullCompatibilitySmokeReady",
+  ));
+  assert(source.includes(
+    "EmbeddedNodePackagedSmokeRole.DIAGNOSTICS -> diagnosticsRequested && diagnosticsReady",
+  ));
+  assert(source.includes("packagedSmokeEvidenceReady &&"));
+  assert(source.includes("(!moduleSourcesBudgetRequested || fullCompatibilitySmokeReady)"));
+  assert(source.includes("process.waitFor(timeoutSeconds, TimeUnit.SECONDS)"));
+  assert(source.includes("process.destroyForcibly()"));
+  assert(source.includes("catch (error: InterruptedException)"));
+  assert(source.includes("Thread.currentThread().interrupt()"));
+  assert(source.includes("mergeError = false"));
+  assert(apkBuilderBuildSource.includes(
+    'currentSourceProvenanceSchema = "autojs6-apk-builder-template-current-source-v1"',
+  ));
+  assert(apkBuilderBuildSource.includes("rootProject.apkBuilderTemplateRepositoryState()"));
+  assert(apkBuilderBuildSource.includes("currentSourceStateBeforeReleaseBuild"));
+  assert(apkBuilderBuildSource.includes("repositoryStateBeforeBuild == repositoryState"));
+  assert(apkBuilderBuildSource.includes('providers.gradleProperty("autojs.git.sha")'));
+  assert(apkBuilderBuildSource.includes("configuredHostGitSha == repositoryState.commit"));
+  assert(apkBuilderBuildSource.includes('zip.getEntry("assets/runtime-kit/runtime-kit.json")'));
+  assert(apkBuilderBuildSource.includes("runtimeKitGitSha == repositoryState.commit"));
+  assert(apkBuilderBuildSource.includes('setProperty("build.rerun_tasks", gradle.startParameter.isRerunTasks.toString())'));
+  assert(apkBuilderBuildSource.includes('setProperty("runtime_kit.git_sha", runtimeKitGitSha)'));
+  assert(apkBuilderBuildSource.includes('setProperty("source.fingerprint", repositoryState.fingerprint)'));
+  assert(apkBuilderBuildSource.includes('setProperty("apk.sha256", releaseApk.sha256String())'));
+  assert(apkBuilderBuildSource.includes("outputs.file(currentSourceProvenanceFile)"));
+
+  const pullTaskStart = source.indexOf("val embeddedNodePullPackagedSmokeApks = tasks.register(");
+  const pullTaskEnd = source.indexOf(
+    "\nval embeddedNodePackagingPreflightAppDebug = tasks.register(",
+    pullTaskStart,
+  );
+  assert(pullTaskStart >= 0 && pullTaskEnd > pullTaskStart);
+  const pullTaskSource = source.slice(pullTaskStart, pullTaskEnd);
+  assert.match(
+    pullTaskSource,
+    /mustRunAfter\([\s\S]*?"connectedAppDebugAndroidTest",[\s\S]*?embeddedNodeVerifyPackagedSmokeInstrumentationResults,[\s\S]*?\)/,
+  );
+  assert(pullTaskSource.includes("dependsOn(embeddedNodeVerifyPackagedSmokeInstrumentationResults)"));
+  assert(pullTaskSource.includes("embeddedNodePackagingSmokeVerifierReadyApkNames.forEach"));
+  assert(!source.includes("embeddedNodePackagingSmokeApkNames"));
+
+  const precleanTaskStart = source.indexOf(
+    "val embeddedNodePrecleanPackagedSmokeInstrumentation = tasks.register(",
+  );
+  const resultTaskStart = source.indexOf(
+    "val embeddedNodeVerifyPackagedSmokeInstrumentationResults = tasks.register(",
+  );
+  assert(precleanTaskStart >= 0 && resultTaskStart > precleanTaskStart);
+  const precleanTaskSource = source.slice(precleanTaskStart, resultTaskStart);
+  assert(precleanTaskSource.includes("resultDir.deleteRecursively()"));
+  assert(precleanTaskSource.includes("embeddedNodePackagingSmokeVerifierReadyApkNames.forEach"));
+  assert(precleanTaskSource.includes('"shell", "rm", "-f", remotePath'));
+  assert(precleanTaskSource.includes('"shell", "test", "!", "-e", remotePath'));
+  assert(source.includes("embeddedNodePackagingApkBuilderPluginPackage"));
+  assert(precleanTaskSource.includes("embeddedNodePackagingInspectApkBuilder("));
+  assert(precleanTaskSource.includes("source.fingerprint"));
+  assert(precleanTaskSource.includes("installed.apk.sha256"));
+  assert(precleanTaskSource.includes("runtime_kit.git_sha"));
+  assert(precleanTaskSource.includes("apkBuilderSnapshotFile.exists() && !apkBuilderSnapshotFile.delete()"));
+  assert(precleanTaskSource.includes("usesConnectedTestUnsupportedAliasOnly"));
+  assert(precleanTaskSource.includes("!adbSerialSelection.hasConnectedTestBinding"));
+  assert(precleanTaskSource.includes("RC/release connected testing requires ANDROID_SERIAL"));
+  assert(precleanTaskSource.includes("apk_builder_snapshot_ready=$snapshotReady"));
+  assert(precleanTaskSource.includes("apk_builder_plugin_ready=$apkBuilderPluginReady"));
+
+  const resultTaskSource = source.slice(resultTaskStart, pullTaskStart);
+  assert(resultTaskSource.includes('dependsOn(\n        embeddedNodePrecleanPackagedSmokeInstrumentation,\n        "connectedAppDebugAndroidTest",'));
+  assert(resultTaskSource.includes("xmlFiles.size != 1"));
+  assert(resultTaskSource.includes("totalTests == expectedSelectors.size"));
+  assert(resultTaskSource.includes("totalSkipped == 0"));
+  assert(resultTaskSource.includes("missingSelectors.isEmpty()"));
+  assert(resultTaskSource.includes("unexpectedSelectors.isEmpty()"));
+  assert(resultTaskSource.includes("nonPassingSelectors.isEmpty()"));
+  assert(resultTaskSource.includes("snapshotFingerprint != apkBuilderPostInspection.repositoryState?.fingerprint"));
+  assert(resultTaskSource.includes("snapshotApkSha256 != apkBuilderPostInspection.installedSha256"));
+  assert(resultTaskSource.includes("snapshotApkSha256 != snapshotInstalledSha256"));
+  assert(resultTaskSource.includes("snapshotRuntimeKitGitSha != apkBuilderPostInspection.runtimeKitGitSha"));
+  assert(resultTaskSource.includes("apk_builder_unchanged=$apkBuilderUnchanged"));
+  assert(resultTaskSource.includes("nonPassingSelectors.isEmpty() &&\n                apkBuilderUnchanged"));
+  assert(pullTaskSource.includes("!hostDir.deleteRecursively()"));
+  assert(pullTaskSource.includes("!hostDir.mkdirs() && !hostDir.isDirectory"));
+  assert.match(
+    source,
+    /tasks\.matching \{ task -> task\.name == "connectedAppDebugAndroidTest" \}\.configureEach \{[\s\S]*?mustRunAfter\(embeddedNodePrecleanPackagedSmokeInstrumentation\)/,
+  );
+
+  const hostVerifyTaskStart = source.indexOf(
+    "val embeddedNodePackagedSmokeHostVerify = tasks.register(",
+  );
+  const hostVerifyTaskEnd = source.indexOf(
+    "\nval verifyEmbeddedNodeDebug = tasks.register(",
+    hostVerifyTaskStart,
+  );
+  assert(hostVerifyTaskStart >= 0 && hostVerifyTaskEnd > hostVerifyTaskStart);
+  const hostVerifyTaskSource = source.slice(hostVerifyTaskStart, hostVerifyTaskEnd);
+  assert.match(
+    hostVerifyTaskSource,
+    /packagedApkProperty = successApk\.absolutePath,[\s\S]*?expectedSmokeRole = EmbeddedNodePackagedSmokeRole\.FULL,/,
+  );
+  assert.match(
+    hostVerifyTaskSource,
+    /packagedApkProperty = diagnosticsApk\.absolutePath,[\s\S]*?expectedSmokeRole = EmbeddedNodePackagedSmokeRole\.DIAGNOSTICS,/,
+  );
+
+  const releaseCandidateTaskStart = source.indexOf(
+    'tasks.register("verifyEmbeddedNodeReleaseCandidate")',
+  );
+  assert(releaseCandidateTaskStart >= 0);
+  const releaseCandidateTaskSource = source.slice(releaseCandidateTaskStart);
+  assert(releaseCandidateTaskSource.includes("embeddedNodeVerifyPackagedSmokeInstrumentationResults"));
+  assert(!releaseCandidateTaskSource.includes('"connectedAppDebugAndroidTest"'));
+}
+
+function assertNodeErrorCatalogSourceContract() {
+  const source = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/node-error-catalog.gradle.kts"),
+    "utf8",
+  );
+  assert(source.includes('nodeErrorCatalogConfiguredFile("nodeJsPluginProjectDir")'));
+  assert(source.includes('nodeErrorCatalogConfiguredFile("nodeJsPluginCppDir")'));
+  assert(source.includes('nodeErrorCatalogPluginProjectDir?.resolve("app/src/main/java")'));
+  assert(source.includes("inputs.file(nodeErrorCatalogRegistryFile)"));
+  assert(source.includes("inputs.file(nodeErrorCatalogCatalogFile)"));
+  assert(source.includes(
+    "nodeErrorCatalogRuntimeSourceRoots.filter(File::isDirectory).forEach { inputs.dir(it) }",
+  ));
+  assert(source.includes("missingConfiguredPluginRoots.isNotEmpty()"));
+  assert(source.includes('"runtimeSourceRoots" to nodeErrorCatalogRuntimeSourceRoots'));
+}
+
+function assertReleaseInstrumentationScopeContract() {
+  const source = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/node-instrumentation-gates.gradle.kts"),
+    "utf8",
+  );
+  assert(source.includes("val nodeJsPackagedReleaseCandidateInstrumentationClasses = listOf("));
+  assert(source.includes("val nodeJsR6ReleaseGateInstrumentationClasses = ("));
+  assert(source.includes("val nodeJsR6PersistentPluginSoakInstrumentationSelector ="));
+  assert(source.includes(
+    ".filterNot { selector -> selector == nodeJsR6PersistentPluginSoakInstrumentationSelector }",
+  ));
+  assert(source.includes(
+    '"org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDiagnosticsEmbeddedNodePackagedApk"',
+  ));
+  assert(source.includes(
+    '"verifyEmbeddedNodeReleaseCandidate" to nodeJsPackagedReleaseCandidateInstrumentationClasses',
+  ));
+  assert(source.includes(
+    '"verifyNodeReleaseGate" to nodeJsR6ReleaseGateInstrumentationClasses',
+  ));
+  assert(source.includes("nodeJsRequestedFocusedGates.size > 1"));
+  assert(source.includes("Only one focused Node instrumentation gate may be requested"));
+  assert(source.includes("nodeJsRequestedFocusedGates.singleOrNull()"));
+  assert(source.includes("nodeJsR6DeviceEvidenceGateInstrumentationClasses.size == 13"));
+  assert(source.includes("nodeJsR6ReleaseGateInstrumentationClasses.size == 13"));
+
+  const deviceStart = source.indexOf(
+    "val nodeJsR6DeviceEvidenceGateInstrumentationClasses = listOf(",
+  );
+  const candidateStart = source.indexOf(
+    "val nodeJsPackagedReleaseCandidateInstrumentationClasses = listOf(",
+    deviceStart,
+  );
+  const releaseStart = source.indexOf(
+    "val nodeJsR6ReleaseGateInstrumentationClasses = (",
+    candidateStart,
+  );
+  const releaseEnd = source.indexOf(
+    "val nodeJsPluginUiGateInstrumentationClasses = (",
+    releaseStart,
+  );
+  assert(deviceStart >= 0 && candidateStart > deviceStart);
+  assert(releaseStart > candidateStart && releaseEnd > releaseStart);
+  const deviceBlock = source.slice(deviceStart, candidateStart);
+  const candidateBlock = source.slice(candidateStart, releaseStart);
+  const releaseBlock = source.slice(releaseStart, releaseEnd);
+  const quotedSelectors = (block) =>
+    [...block.matchAll(/"(org\.autojs[^"\r\n]+)"/g)].map((match) => match[1]);
+  const fullSelector =
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunFullCompatibilityEmbeddedNodePackagedApk";
+  const diagnosticsSelector =
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDiagnosticsEmbeddedNodePackagedApk";
+  const deviceSelectors = [...quotedSelectors(deviceBlock), R6_PLUGIN_SOAK_SELECTOR];
+  assert.deepStrictEqual(
+    [...deviceSelectors].sort(),
+    [...REQUIRED_DEVICE_SELECTORS].sort(),
+  );
+  assert(deviceBlock.includes("nodeJsR6PersistentPluginSoakInstrumentationSelector"));
+  assert.deepStrictEqual(quotedSelectors(candidateBlock), [fullSelector, diagnosticsSelector]);
+  assert.deepStrictEqual(quotedSelectors(releaseBlock), [diagnosticsSelector]);
+  assert(releaseBlock.includes(
+    ".filterNot { selector -> selector == nodeJsR6PersistentPluginSoakInstrumentationSelector }",
+  ));
+  assert.deepStrictEqual(
+    [...REQUIRED_DEVICE_SELECTORS.filter((selector) => selector !== R6_PLUGIN_SOAK_SELECTOR), diagnosticsSelector].sort(),
+    [...new Set([...REQUIRED_DEVICE_SELECTORS.filter((selector) => selector !== R6_PLUGIN_SOAK_SELECTOR), diagnosticsSelector])].sort(),
+  );
 }
 
 function assertPackagedInteractiveShellContract() {

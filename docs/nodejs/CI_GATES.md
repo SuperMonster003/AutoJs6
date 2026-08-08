@@ -1696,22 +1696,77 @@ Use `verifyNodeReleaseGate` for release candidates:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
+$commonGradleArgs = @(
+  '-Pautojs.gradle.build.number.auto.increment.enabled=false'
+  '-Pautojs.gradle.build.time.update.enabled=false'
+  '--console=plain'
+  '--no-daemon'
+)
+
+$hostCommit = (& git rev-parse HEAD).Trim()
+& .\gradlew.bat ':plugins:apk-builder-template:installRelease' `
+  '--rerun-tasks' `
+  '-Pkotlin.compiler.execution.strategy=in-process' `
+  "-Pautojs.git.sha=$hostCommit" `
+  '-Pautojs.nodejs.runtimeSlot=node24_5' `
+  '-Pautojs.nodejs.embedded.script.enabled=true' `
+  '-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true' @commonGradleArgs
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+& .\gradlew.bat ':app:embeddedNodeRefreshInrtTemplateApk' @commonGradleArgs
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+& .\gradlew.bat ':app:verifyNodeReleaseGate' `
+  '-Pautojs.nodejs.test.deviceProfile=sony' @commonGradleArgs
+exit $LASTEXITCODE
 ```
+
+Keep the APK Builder install, template refresh, and release gate in three
+separate Gradle invocations. The first produces and installs the current
+Runtime-Kit-backed Builder. The explicit inrt refresh then selects the slim
+`rhinoOnly` template policy, while the release invocation remains on the
+required `nodePlugin` / `plugin` production policy. The disabled
+version-metadata writes preserve the clean source identity consumed by the
+strict R6 verifier.
 
 Scope:
 
 - release manifest generation
 - desktop Node differential harnesses for real npm and modern core probes
 - `verifyEmbeddedNodeReleaseCandidate`
-- connected device instrumentation selected by `sony` or `full`
+- the fixed 12-selector non-soak R6 required-plugin live set, plus the
+  diagnostics packaged-APK exporter required by host verification (13 total)
+
+The explicit `sony` or `full` device profile remains mandatory, but the release
+task itself narrows connected instrumentation to the R6 plugin-safe contract.
+It does not run the legacy embedded-backend `sony` corpus under the external
+plugin backend; that corpus includes host-private runtime filesystem semantics
+which the bounded explicit-input workspace transport intentionally does not
+grant.
+
+The release invocation also does not run the persistent soak selector. The
+strict final gate consumes the current-commit archived 8-hour and 24-hour soak
+reports. The raw selector requires a valid 64-hex run token and its default
+valid mode is the 8-hour quick soak, so only the bounded smoke/production soak
+runners may invoke it. Before connected instrumentation, the RC path deletes
+the two old device exports and prior JUnit XML, requires the `--rerun-tasks`
+current-source Builder provenance record, and proves that the installed APK is
+byte-for-byte identical. It then requires the exact current selector set with
+zero failures, errors, or skips and rechecks the source fingerprint and Builder
+bytes after testing. Only after that result gate may it pull the full and
+diagnostics APKs for host verification. Request only one focused connected-test
+gate per Gradle invocation. RC/release also requires `ANDROID_SERIAL` or
+`-Pandroid.injected.device.serial`; `autojs.embeddedNode.adbSerial` remains a
+host-only pull alias and cannot bind AGP connected testing.
 
 A `nodePlugin` release candidate additionally requires a current green R5
 three-ABI record. `pluginOptional` is not a release fallback for `nodePlugin`;
 it remains restricted to self-contained `nodeFull`/`nodeMini` gate or release
 builds and only before dispatch.
 
-The release gate still relies on packaged smoke APK artifacts being current when packaged host verification is part of the selected path. See [TESTING.md](TESTING.md) for packaged smoke artifact collection.
+The release gate produces and verifies fresh packaged smoke APK artifacts on
+the selected device; it does not accept prior exports. See
+[TESTING.md](TESTING.md) for the standalone artifact workflow.
 
 ## Phase 16 v1.4 Foundation Gates
 

@@ -1,5 +1,6 @@
 import groovy.json.JsonSlurper
 import java.security.MessageDigest
+import java.util.Properties
 import java.util.zip.ZipFile
 import org.gradle.api.provider.Property
 
@@ -24,6 +25,74 @@ val enableRemoteBuild = providers.gradleProperty(enableRemoteBuildProperty)
         value.trim().lowercase().let { it in setOf("true", "1", "yes", "on") }
     }
     .orElse(true)
+val currentSourceProvenanceSchema = "autojs6-apk-builder-template-current-source-v1"
+val currentSourceProvenanceFile = layout.buildDirectory.file(
+    "reports/apk-builder-template/current-source-release.properties"
+)
+var currentSourceStateBeforeReleaseBuild: ApkBuilderTemplateRepositoryState? = null
+
+data class ApkBuilderTemplateRepositoryState(
+    val commit: String,
+    val fingerprint: String,
+)
+
+fun MessageDigest.updateApkBuilderTemplateFingerprintPart(label: String, bytes: ByteArray) {
+    update(label.toByteArray(Charsets.UTF_8))
+    update(0)
+    update(bytes.size.toString().toByteArray(Charsets.UTF_8))
+    update(0)
+    update(bytes)
+    update(0)
+}
+
+fun org.gradle.api.Project.apkBuilderTemplateGitOutput(vararg arguments: String): String =
+    providers.exec {
+        workingDir(rootProject.projectDir)
+        commandLine(listOf("git") + arguments)
+    }.standardOutput.asText.get()
+
+fun org.gradle.api.Project.apkBuilderTemplateRepositoryState(): ApkBuilderTemplateRepositoryState {
+    val repositoryRoot = rootProject.projectDir.canonicalFile
+    val commit = apkBuilderTemplateGitOutput("rev-parse", "HEAD").trim()
+    require(commit.matches(Regex("(?i)^[0-9a-f]{40}$"))) {
+        "Unable to resolve the current host Git commit for APK Builder provenance: '$commit'"
+    }
+    val trackedDiff = apkBuilderTemplateGitOutput("diff", "--binary", "HEAD", "--")
+    val untrackedPaths = apkBuilderTemplateGitOutput(
+        "ls-files",
+        "--others",
+        "--exclude-standard",
+        "-z",
+    ).split('\u0000')
+        .filter(String::isNotEmpty)
+        .sorted()
+    val digest = MessageDigest.getInstance("SHA-256")
+    digest.updateApkBuilderTemplateFingerprintPart("commit", commit.toByteArray(Charsets.UTF_8))
+    digest.updateApkBuilderTemplateFingerprintPart("tracked-diff", trackedDiff.toByteArray(Charsets.UTF_8))
+    untrackedPaths.forEach { relativePath ->
+        val file = repositoryRoot.resolve(relativePath).canonicalFile
+        require(file.toPath().startsWith(repositoryRoot.toPath()) && file.isFile) {
+            "Invalid untracked source path while recording APK Builder provenance: $relativePath"
+        }
+        digest.updateApkBuilderTemplateFingerprintPart(
+            "untracked-path",
+            relativePath.toByteArray(Charsets.UTF_8),
+        )
+        digest.updateApkBuilderTemplateFingerprintPart("untracked-content", file.readBytes())
+    }
+    return ApkBuilderTemplateRepositoryState(
+        commit = commit.lowercase(),
+        fingerprint = digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) },
+    )
+}
+
+gradle.taskGraph.whenReady(
+    org.gradle.api.Action<org.gradle.api.execution.TaskExecutionGraph> {
+        if (hasTask(":plugins:apk-builder-template:packageRelease")) {
+            currentSourceStateBeforeReleaseBuild = rootProject.apkBuilderTemplateRepositoryState()
+        }
+    }
+)
 
 private fun Any.reflectedNoArgMethod(name: String): Any? =
     javaClass.methods.firstOrNull { it.name == name && it.parameterTypes.isEmpty() }?.invoke(this)
@@ -289,4 +358,72 @@ tasks.matching {
     taskName.contains("lint", ignoreCase = true) || (taskName.startsWith("merge") && taskName.endsWith("Assets"))
 }.configureEach {
     dependsOn(prepareApkBuilderTemplateAssets)
+}
+
+tasks.matching { task -> task.name == "packageRelease" }.configureEach {
+    outputs.file(currentSourceProvenanceFile)
+    doLast {
+        val releaseApkCandidates = layout.buildDirectory
+            .dir("outputs/apk/release")
+            .get()
+            .asFile
+            .listFiles()
+            ?.filter { file -> file.isFile && file.extension.equals("apk", ignoreCase = true) }
+            ?.sortedBy(File::getAbsolutePath)
+            .orEmpty()
+        require(releaseApkCandidates.size == 1) {
+            "APK Builder release provenance requires exactly one release APK; found " +
+                    "${releaseApkCandidates.size}: ${releaseApkCandidates.joinToString()}"
+        }
+        val releaseApk = releaseApkCandidates.single()
+        val repositoryState = rootProject.apkBuilderTemplateRepositoryState()
+        val repositoryStateBeforeBuild = requireNotNull(currentSourceStateBeforeReleaseBuild) {
+            "APK Builder release provenance did not capture the repository state before task execution."
+        }
+        require(repositoryStateBeforeBuild == repositoryState) {
+            "Host source identity changed while building the APK Builder release: " +
+                    "before=$repositoryStateBeforeBuild after=$repositoryState"
+        }
+        val configuredHostGitSha = providers.gradleProperty("autojs.git.sha").orNull
+            ?.trim()
+            ?.lowercase()
+        require(configuredHostGitSha == repositoryState.commit) {
+            "APK Builder release requires -Pautojs.git.sha to match the current host commit: " +
+                    "configured=${configuredHostGitSha ?: "missing"} current=${repositoryState.commit}"
+        }
+        val runtimeKitGitSha = ZipFile(releaseApk).use { zip ->
+            val entry = requireNotNull(zip.getEntry("assets/runtime-kit/runtime-kit.json")) {
+                "APK Builder release is missing assets/runtime-kit/runtime-kit.json"
+            }
+            val metadata = zip.getInputStream(entry).bufferedReader(Charsets.UTF_8).use { reader ->
+                JsonSlurper().parse(reader) as? Map<*, *>
+            }
+            val host = metadata?.get("host") as? Map<*, *>
+            host?.get("gitSha")?.toString()?.trim()?.lowercase()
+        }
+        require(runtimeKitGitSha == repositoryState.commit) {
+            "APK Builder embedded Runtime Kit gitSha does not match the current host commit: " +
+                    "embedded=${runtimeKitGitSha ?: "missing"} current=${repositoryState.commit}"
+        }
+        val provenanceFile = currentSourceProvenanceFile.get().asFile
+        provenanceFile.parentFile.mkdirs()
+        Properties().apply {
+            setProperty("schema", currentSourceProvenanceSchema)
+            setProperty("build.task", ":plugins:apk-builder-template:packageRelease")
+            setProperty("build.rerun_tasks", gradle.startParameter.isRerunTasks.toString())
+            setProperty("remote_build.enabled", enableRemoteBuild.get().toString())
+            setProperty("source.commit", repositoryState.commit)
+            setProperty("source.fingerprint", repositoryState.fingerprint)
+            setProperty("runtime_kit.git_sha", runtimeKitGitSha)
+            setProperty("apk.path", releaseApk.relativeTo(rootProject.projectDir).invariantSeparatorsPath)
+            setProperty("apk.sha256", releaseApk.sha256String())
+            setProperty("apk.bytes", releaseApk.length().toString())
+            setProperty("generated_at_epoch_ms", System.currentTimeMillis().toString())
+        }.let { properties ->
+            provenanceFile.writer(Charsets.UTF_8).use { writer ->
+                properties.store(writer, "AutoJs6 APK Builder current-source release provenance")
+            }
+        }
+        logger.lifecycle("APK Builder current-source provenance: ${provenanceFile.absolutePath}")
+    }
 }
