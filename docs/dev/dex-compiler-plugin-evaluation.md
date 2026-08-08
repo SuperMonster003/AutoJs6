@@ -28,7 +28,8 @@ entry.
 
 The harness remains disconnected from the default class-loading path. No
 production provider invokes real D8 yet, and the Android runtime gates in
-[the conformance matrix](compiler-ai-protocol-conformance.md) remain pending.
+[the conformance matrix](compiler-ai-protocol-conformance.md) remain open. The
+current device evidence is limited to the documented API 25 partial run.
 The frozen implementation contract is documented in
 [DEX Compiler Protocol V1](dex-compiler-protocol-v1.md).
 
@@ -459,6 +460,9 @@ new capability family and may require a new protocol major version.
 - [D8](https://developer.android.com/tools/d8) documents program inputs,
   `DEBUG`/`RELEASE` output, minimum API, multi-DEX output, and required library
   and classpath resources for desugaring.
+- [R8 `AndroidApiLevel`](https://r8.googlesource.com/r8/+/c33e8e902c56db7a207c0f28e2403547a76fc5a6/src/main/java/com/android/tools/r8/utils/AndroidApiLevel.java)
+  defines the conservative D8 output-version minimum API profile enforced by
+  the experimental host.
 - [Dalvik executable format](https://source.android.com/docs/core/runtime/dex-format)
   defines the DEX header and section layout.
 - [DEX constraints](https://source.android.com/docs/core/runtime/constraints)

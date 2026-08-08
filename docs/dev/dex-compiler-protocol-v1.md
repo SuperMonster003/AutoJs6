@@ -151,7 +151,9 @@ test binds different components explicitly.
 Before cache publication, the host validates:
 
 - ZIP framing, flags, methods, CRCs, data descriptors, bounds, and compression
-  ratios without trusting `ZipInputStream` alone.
+  ratios without trusting `ZipInputStream` alone. Declared per-entry and
+  aggregate sizes and ratios are checked from the central directory before
+  inflation.
 - Exactly the contiguous `classes*.dex` entries and no other entry.
 - DEX magic and negotiated version, file and header size, endian tag, Adler-32,
   and SHA-1 signature.
@@ -166,6 +168,19 @@ artifact remains a separate trusted-host operation.
 The current validator supports fixed 0x70-byte headers for DEX 035, 037, 038,
 039, and 040. DEX 041 is rejected until its container/header rules receive a
 separate implementation and corpus.
+
+The V1 experimental harness requires `request.minApi` to equal the current host
+runtime API and restricts accepted versions using the D8 output profile:
+
+- API 24-25: DEX 035 and 037.
+- API 26-27: DEX 035, 037, and 038.
+- API 28-29: DEX 035, 037, 038, and 039.
+- API 30 and newer: DEX 035, 037, 038, 039, and 040.
+
+This check happens before cache publication. It prevents a provider from
+returning a version outside the host's conservative D8 compatibility profile;
+on older targets this also avoids deferring an unsupported-version failure
+until `DexClassLoader`.
 
 ## Failure And Degradation
 
