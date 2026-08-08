@@ -189,6 +189,33 @@ class DexCompilerExperimentalHarnessTest {
     }
 
     @Test
+    fun outputVersionProfileIsBoundToTheCurrentHostRuntimeApi() {
+        listOf(
+            25 to setOf("035", "037"),
+            30 to setOf("035", "037", "038", "039", "040"),
+        ).forEach { (runtimeApi, expectedVersions) ->
+            val fixture = Fixture(requestMinApi = runtimeApi)
+            fixture.start()
+            fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+            fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+            assertTrue(fixture.singleOutcome() is DexCompilerExperimentalOutcome.Published)
+            assertEquals(expectedVersions, fixture.verifierLimits!!.allowedDexVersions)
+        }
+    }
+
+    @Test
+    fun requestMinimumApiMustEqualTheCurrentHostRuntimeApi() {
+        val fixture = Fixture(requestMinApi = 25, hostRuntimeApi = 26)
+
+        fixture.start()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.INPUT_REJECTED, outcome.failure)
+        assertEquals(0, fixture.transport.discoveryCount)
+    }
+
+    @Test
     fun providerCompletionWaitsForTheIndependentOutputDrain() {
         val fixture = Fixture()
         fixture.output.autoCompleteDrain = false
@@ -712,6 +739,8 @@ class DexCompilerExperimentalHarnessTest {
         providerId: String = "fixture-d8",
         urgentControlCapacity: Int = 16,
         maximumInMemoryOutputBytes: Long = DexCompilerExperimentalHostLimits.MAX_IN_MEMORY_OUTPUT_BYTES,
+        requestMinApi: Int = 36,
+        hostRuntimeApi: Int = requestMinApi,
     ) {
         val inputBytes = "program-jar".toByteArray()
         val outputBytes = byteArrayOf(1, 3, 3, 7)
@@ -761,7 +790,7 @@ class DexCompilerExperimentalHarnessTest {
             inputFormat = DexCompilerInputFormat.JAR,
             outputFormat = DexCompilerOutputFormat.DEX_ZIP,
             mode = DexCompilerMode.DEBUG,
-            minApi = 36,
+            minApi = requestMinApi,
             programSizeBytes = inputBytes.size.toLong(),
             programSha256 = DexSha256.digest(inputBytes),
             maxOutputBytes = 4096,
@@ -780,6 +809,7 @@ class DexCompilerExperimentalHarnessTest {
         val scheduler = ManualScheduler()
         val outcomes = mutableListOf<DexCompilerExperimentalOutcome>()
         var verifierCount = 0
+        var verifierLimits: DexIndexedZipLimits? = null
         val harness = DexCompilerExperimentalHarness(
             transport = transport,
             workerExecutor = workerExecutor,
@@ -787,10 +817,12 @@ class DexCompilerExperimentalHarnessTest {
             deadlineScheduler = scheduler,
             threadProbe = DexCompilerThreadProbe { mainThread },
             hostVersionCode = 100,
+            hostRuntimeApi = hostRuntimeApi,
             urgentControlCapacity = urgentControlCapacity,
             maximumInMemoryOutputBytes = maximumInMemoryOutputBytes,
-            outputVerifier = DexCompilerOutputVerifier { bytes, _ ->
+            outputVerifier = DexCompilerOutputVerifier { bytes, limits ->
                 verifierCount++
+                verifierLimits = limits
                 if (verifierThrows) throw IllegalArgumentException("hostile DEX")
                 assertEquals(outputBytes.toList(), bytes.toList())
                 DexIndexedZipValidationResult(1, bytes.size.toLong(), 1, setOf("035"))

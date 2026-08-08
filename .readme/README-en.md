@@ -56,7 +56,7 @@ The table below lists some Auto.js-related projects:
 
 | <span style="word-break:keep-all;white-space:nowrap">Project</span> | <span style="word-break:keep-all;white-space:nowrap">App Name</span> | <span style="word-break:keep-all;white-space:nowrap">Main Developers</span> | <span style="word-break:keep-all;white-space:nowrap">Created</span> | <span style="word-break:keep-all;white-space:nowrap">Last Active</span> | <span style="word-break:keep-all;white-space:nowrap">Active Maintenance (Year)</span> |
 |:------:|:------:|:------:|:------:|:------:|:------:|
-| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/07/27`](https://github.com/aiselp/AutoX/commit/ecad6d208efe0ffb9661fb1fe0d5a1b243848c9f)</span> | <span style="word-break:keep-all;white-space:nowrap">2.27</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/08/04`](https://github.com/aiselp/AutoX/commit/b9a8a3ecd7d34c6d0c2670df5b1171dc5ae43f19)</span> | <span style="word-break:keep-all;white-space:nowrap">2.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Autoxjs_v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi)</span> | <span style="white-space:pre">[Autox.js&#160;v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/blob/a651d02246e09cfbbfa87e6eaccf900fab/app/build.gradle.kts#L143)</span> | <span style="word-break:keep-all;white-space:nowrap">[ozobiozobi](https://github.com/ozobiozobi)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/10/01`</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/04/16`](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/commit/e8563000af8068f07f821a4a8b23d4457167c1ab)</span> | <span style="word-break:keep-all;white-space:nowrap">1.54</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/blob/a8ce1b9acb541e9736c33134be3194c3148a15a3/common/src/main/res/values/strings.xml#L27)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2021/12/01`](https://github.com/SuperMonster003/AutoJs6/commit/99a1d8490fac5b6d55f6f183db59ad833a2064ed)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/16`](https://github.com/SuperMonster003/AutoJs6/commit/ed3eb10e88db5a8425fd94bdddefa4176e5e1c94)</span> | <span style="word-break:keep-all;white-space:nowrap">4.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4/blob/a6b952704b8305aed1bb6265f40acb3598ac80df/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2023/04/11`](https://github.com/SuperMonster003/AutoJs4/commit/8de11699b608be1c1f49f0f10e2e2826f8c77978)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/15`](https://github.com/SuperMonster003/AutoJs4/commit/3fb08269198ebd49a880ab3ca2621383eaa10443)</span> | <span style="word-break:keep-all;white-space:nowrap">2.93</span> |
@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Aug 3, 2026.
+Data updated on Aug 8, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,7 +166,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/08/03
+###### 2026/08/08
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -237,6 +237,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Node.js R6 soak evidence could reject a healthy persistent runtime when Android reported zero currently allocated native-heap bytes
 * `Fix` Node.js R6 packaged APK evidence was skipped or bound to arm64 because the collector did not stage a fresh Inrt template or pass the target ABI
 * `Fix` Cross-ABI app packaging could copy native libraries from the installed host process into another ABI directory, causing 32-bit packaged apps to load 64-bit terminal libraries and crash
+* `Fix` Experimental DEX compiler host could accept DEX versions incompatible with the requested minApi, reject the valid 65,536 field/method ID boundary, and recreate a rolled-back partial artifact when a queued pipe drain started late
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
 * `Fix` Shell-related methods could become unresponsive on devices without Root access
@@ -306,6 +307,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Limited external file viewing and media playback fallbacks to read-only URI access
 * `Improvement` Unified file manager plugin actions for default clicks, primary buttons, media detail playback, and the overflow menu under an explicit main-file-page policy with one deterministic fallback
 * `Improvement` DEX compiler experimental host path remains default-off and requires an explicit component while enforcing exact-component UID and complete signer-set pinning, single-dispatch fallback, semantic cache provenance, bounded callback ingress, isolated Binder deadlines, structural DEX ZIP validation, reliable-pipe bounded draining with peer errors checked at EOF, rollback-safe single publication guarded by source and destination digests, and atomic arbitration between asynchronous termination signals and the publication commit point that forces rollback when cancellation, timeout, or Binder death wins before commit
+* `Improvement` Experimental DEX compiler conformance now exercises real Android Binder transport and artifact storage, exact signed components, hostile callback/output/timeout scenarios, target-aware DEX validation, and DexClassLoader execution
 * `Improvement` Default-off pure AI text host policy provides deterministic trust selection, exact identity pinning and revalidation, host/provider capability intersection, ambiguous-candidate rejection, plugin-managed credential isolation, diagnostics without sensitive content, deterministic ownership of cancellation/terminal session races, request-bound tool and descriptor JSON validation, aggregate streaming length/SHA-256/quota enforcement, duplicate decoded JSON key rejection, summary-only `toString` for models containing sensitive data, and a domain-separated cache key for capability collections
 * `Improvement` Modularized the Ace WebView runtime/JavaScript bridge/built-in language services/static assets as a separately installable plugin, reducing host APK coupling and allowing independent updates
 * `Improvement` Modularized offline project documentation as a plugin, reducing the host APK size and supporting independent installation and updates
@@ -609,7 +611,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Aug 3, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Aug 8, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

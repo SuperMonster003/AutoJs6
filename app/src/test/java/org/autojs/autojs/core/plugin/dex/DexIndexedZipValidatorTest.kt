@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.dex
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -11,6 +12,18 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 class DexIndexedZipValidatorTest {
+
+    @Test
+    fun derivesTheD8OutputVersionProfileFromMinimumApi() {
+        assertEquals(setOf("035"), dexVersionsCompatibleWithMinApi(23))
+        assertEquals(setOf("035", "037"), dexVersionsCompatibleWithMinApi(24))
+        assertEquals(setOf("035", "037"), dexVersionsCompatibleWithMinApi(25))
+        assertEquals(setOf("035", "037", "038"), dexVersionsCompatibleWithMinApi(26))
+        assertEquals(setOf("035", "037", "038", "039"), dexVersionsCompatibleWithMinApi(28))
+        assertEquals(setOf("035", "037", "038", "039"), dexVersionsCompatibleWithMinApi(29))
+        assertEquals(setOf("035", "037", "038", "039", "040"), dexVersionsCompatibleWithMinApi(30))
+        assertThrows(IllegalArgumentException::class.java) { dexVersionsCompatibleWithMinApi(0) }
+    }
 
     @Test
     fun acceptsOneOrContiguousMultipleStructurallyValidDexEntries() {
@@ -67,6 +80,16 @@ class DexIndexedZipValidatorTest {
                 ),
                 DexIndexedZipLimits(maxDexEntries = 1),
             )
+        }
+    }
+
+    @Test
+    fun acceptsDeflatedDataDescriptorsAndPreflightsCompressionRatio() {
+        val container = deflatedZipOf("classes.dex" to minimalDex("Lfixture/Compressed;"))
+
+        assertEquals(1, DexIndexedZipValidator.validate(container).dexEntryCount)
+        assertFailure(DexOutputValidationFailure.DEX_QUOTA) {
+            DexIndexedZipValidator.validate(container, DexIndexedZipLimits(maxCompressionRatio = 1))
         }
     }
 
@@ -204,6 +227,18 @@ class DexIndexedZipValidatorTest {
                     compressedSize = bytes.size.toLong()
                     this.crc = crc
                 })
+                zip.write(bytes)
+                zip.closeEntry()
+            }
+        }
+        return output.toByteArray()
+    }
+
+    private fun deflatedZipOf(vararg entries: Pair<String, ByteArray>): ByteArray {
+        val output = ByteArrayOutputStream()
+        ZipOutputStream(output).use { zip ->
+            entries.forEach { (name, bytes) ->
+                zip.putNextEntry(ZipEntry(name).apply { method = ZipEntry.DEFLATED })
                 zip.write(bytes)
                 zip.closeEntry()
             }

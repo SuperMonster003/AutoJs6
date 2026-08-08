@@ -5,6 +5,7 @@ enum class FakeDexCompilerScenario(val metadataValue: String) {
     PROGRESS_BEFORE_START("progress-before-start"),
     DUPLICATE_TERMINAL("duplicate-terminal"),
     INVALID_OUTPUT("invalid-output"),
+    UNNEGOTIATED_DEX_VERSION("unnegotiated-dex-version"),
     STALL("stall"),
     ;
 

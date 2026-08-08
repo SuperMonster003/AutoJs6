@@ -56,7 +56,7 @@
 
 | <span style="word-break:keep-all;white-space:nowrap">المشروع</span> | <span style="word-break:keep-all;white-space:nowrap">اسم التطبيق</span> | <span style="word-break:keep-all;white-space:nowrap">المطورون الرئيسيون</span> | <span style="word-break:keep-all;white-space:nowrap">تاريخ الإنشاء</span> | <span style="word-break:keep-all;white-space:nowrap">آخر نشاط</span> | <span style="word-break:keep-all;white-space:nowrap">فترة الصيانة النشطة (سنة)</span> |
 |:------:|:------:|:------:|:------:|:------:|:------:|
-| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/07/27`](https://github.com/aiselp/AutoX/commit/ecad6d208efe0ffb9661fb1fe0d5a1b243848c9f)</span> | <span style="word-break:keep-all;white-space:nowrap">2.27</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/08/04`](https://github.com/aiselp/AutoX/commit/b9a8a3ecd7d34c6d0c2670df5b1171dc5ae43f19)</span> | <span style="word-break:keep-all;white-space:nowrap">2.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Autoxjs_v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi)</span> | <span style="white-space:pre">[Autox.js&#160;v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/blob/a651d02246e09cfbbfa87e6eaccf900fab/app/build.gradle.kts#L143)</span> | <span style="word-break:keep-all;white-space:nowrap">[ozobiozobi](https://github.com/ozobiozobi)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/10/01`</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/04/16`](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/commit/e8563000af8068f07f821a4a8b23d4457167c1ab)</span> | <span style="word-break:keep-all;white-space:nowrap">1.54</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/blob/a8ce1b9acb541e9736c33134be3194c3148a15a3/common/src/main/res/values/strings.xml#L27)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2021/12/01`](https://github.com/SuperMonster003/AutoJs6/commit/99a1d8490fac5b6d55f6f183db59ad833a2064ed)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/16`](https://github.com/SuperMonster003/AutoJs6/commit/ed3eb10e88db5a8425fd94bdddefa4176e5e1c94)</span> | <span style="word-break:keep-all;white-space:nowrap">4.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4/blob/a6b952704b8305aed1bb6265f40acb3598ac80df/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2023/04/11`](https://github.com/SuperMonster003/AutoJs4/commit/8de11699b608be1c1f49f0f10e2e2826f8c77978)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/15`](https://github.com/SuperMonster003/AutoJs4/commit/3fb08269198ebd49a880ab3ca2621383eaa10443)</span> | <span style="word-break:keep-all;white-space:nowrap">2.93</span> |
@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 3 August 2026.
+تم تحديث البيانات في 8 August 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/08/03
+###### 2026/08/08
 
 * `إضافة جديدة` بيئة تشغيل نصوص Node.js 24.5.0, تدعم التشغيل عبر توجيه "nodejs" او امتدادات مثل .node.js/.cjs/.mjs
 * `إضافة جديدة` بيئة تشغيل Node.js تدعم CommonJS و ESM جزئيا و import() الديناميكي المحلي فقط ومصادر TypeScript الخفيفة (.ts/.mts/.cts)
@@ -237,6 +237,7 @@
 * `تصليح` قد ترفض ادلة soak في Node.js R6 بيئة تشغيل دائمة سليمة عندما يبلغ Android عن صفر بايتات مخصصة حاليا للكومة الاصلية
 * `تصليح` تخطي دليل APK المعبأ في Node.js R6 او ربطه ب arm64 لان المجمع لم يجهز قالب Inrt حديثا ولم يمرر ABI المستهدف
 * `تصليح` نسخ تغليف التطبيقات عبر ABI مكتبات اصلية من عملية المضيف المثبتة الى دليل ABI مختلف, مما تسبب في تحميل التطبيقات المعبأة 32 بت مكتبات طرفية 64 بت وانهيارها
+* `تصليح` كان مسار المضيف التجريبي لمترجم DEX قد يقبل اصدارات DEX غير المتوافقة مع minApi المطلوب, ويرفض خطا الحد الصالح البالغ 65,536 لمعرفات field/method, ويعيد انشاء عنصر جزئي تم التراجع عنه عند بدء drain مؤجل في pipe
 * `تصليح` تعذر على runtime.loadJar تحميل ملفات Java class المترجمة لاستهداف اصدارات Java احدث ديناميكيا
 * `تصليح` تعذر على app.isInstalled/kill والطرق المرتبطة استخدام معاملات اسم الحزمة بشكل صحيح _[`issue #495`](http://issues.autojs6.com/495)_
 * `تصليح` احتمال توقف الطرق المرتبطة ب shell عن الاستجابة على الاجهزة التي لا تملك صلاحية Root
@@ -306,6 +307,7 @@
 * `تحسين` تقييد مسارات الرجوع لعرض الملفات وتشغيل الوسائط الخارجية بمنح الوصول للقراءة فقط عبر URI
 * `تحسين` توحيد النقر الافتراضي وزر الاجراء الرئيسي وتشغيل تفاصيل الوسائط وقائمة overflow لاضافات مدير الملفات ضمن سياسة صريحة لصفحة الملفات الرئيسية مع مسار رجوع واحد حتمي
 * `تحسين` يبقى مسار المضيف التجريبي لمترجم DEX معطلا افتراضيا ويتطلب مكونا صريحا, مع فرض تثبيت UID للمكون الدقيق ومجموعة الموقعين الكاملة, والرجوع بعد ارسال واحد, وتتبع مصدر ذاكرة التخزين المؤقت الدلالي, ومدخل محدود لردود الاتصال, ومهلات Binder معزولة, والتحقق البنيوي من ملف DEX ZIP, والتفريغ المحدود لـ reliable pipe مع فحص اخطاء الطرف المقابل عند EOF, ونشر واحد قابل للتراجع تحميه خلاصتا المصدر والوجهة, والتحكيم الذري بين اشارات الانهاء غير المتزامنة ونقطة commit للنشر مع فرض التراجع اذا سبق الالغاء او انتهاء المهلة او Binder death نقطة commit
+* `تحسين` توسعت اختبارات التوافق التجريبية لمترجم DEX لتشمل نقل Android Binder الحقيقي وتخزين العناصر, والمكونات الدقيقة الموقعة, وحالات callback/الاخراج/timeout العدائية, والتحقق من DEX المدرك لـ API الهدف, والتنفيذ عبر DexClassLoader
 * `تحسين` توفر سياسة مضيف نص AI الخالصة والمعطلة افتراضيا اختيار ثقة حتميا, وتثبيت الهوية واعادة التحقق منها بدقة, وتقاطع قدرات المضيف/المزود, ورفض المرشحين الملتبسين, وعزل بيانات الاعتماد التي تديرها الاضافة, وتشخيصات خالية من المحتوى الحساس, وملكية حتمية لسباقات الغاء الجلسة/حالته النهائية, والتحقق المرتبط بالطلب من الادوات وJSON القائم على descriptor, وفرض الطول/SHA-256/الحصة المجمعة لتدفق streaming, ورفض مفاتيح JSON المكررة بعد فك الترميز, وتلخيص `toString` للنماذج التي تحتوي بيانات حساسة, ومفتاح ذاكرة تخزين مؤقت مفصول المجال لمجموعات القدرات
 * `تحسين` تم تحويل بيئة تشغيل WebView الخاصة بمحرر Ace وجسر JavaScript وخدمات اللغة المضمنة والموارد الثابتة الى مكون اضافي قابل للتثبيت بشكل مستقل, مما يقلل الارتباط ب APK المضيف ويدعم التحديث المستقل
 * `تحسين` تم تحويل وثائق المشروع بلا اتصال الى اضافة, مما يقلل حجم APK المضيف ويدعم التثبيت والتحديث المستقلين
@@ -609,7 +611,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 3 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 8 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

@@ -84,6 +84,7 @@ internal class DexCompilerExperimentalHarness(
     private val deadlineScheduler: DexCompilerDeadlineScheduler,
     private val threadProbe: DexCompilerThreadProbe,
     private val hostVersionCode: Long,
+    private val hostRuntimeApi: Int,
     urgentControlCapacity: Int = 16,
     normalControlCapacity: Int = 64,
     private val maximumInMemoryOutputBytes: Long = DexCompilerExperimentalHostLimits.MAX_IN_MEMORY_OUTPUT_BYTES,
@@ -94,6 +95,7 @@ internal class DexCompilerExperimentalHarness(
 
     init {
         require(maximumInMemoryOutputBytes > 0L)
+        require(hostRuntimeApi > 0)
     }
 
     private val attempts = ConcurrentHashMap.newKeySet<Attempt>()
@@ -544,6 +546,7 @@ internal class DexCompilerExperimentalHarness(
                         maxDexEntries = minOf(expected.limits.maxDexEntries, DexCompilerContract.MAX_DEX_ENTRIES),
                         maxDexEntryBytes = maximum,
                         maxTotalDexBytes = maximum,
+                        allowedDexVersions = dexVersionsCompatibleWithMinApi(invocation.request.minApi),
                     ),
                 )
                 require(validation.dexEntryCount == result.dexEntryCount) { "DEX entry metadata mismatch" }
@@ -588,6 +591,9 @@ internal class DexCompilerExperimentalHarness(
 
         private fun verifyInputSnapshot() {
             DexCompilerValidation.validateRequest(invocation.request)
+            require(invocation.request.minApi == hostRuntimeApi) {
+                "DEX compiler v1 must use the current host runtime API"
+            }
             require(invocation.request.maxOutputBytes <= maximumInMemoryOutputBytes) {
                 "Requested output exceeds the experimental host in-memory limit"
             }

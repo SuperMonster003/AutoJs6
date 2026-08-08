@@ -56,7 +56,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 | <span style="word-break:keep-all;white-space:nowrap">項目</span> | <span style="word-break:keep-all;white-space:nowrap">應用名稱</span> | <span style="word-break:keep-all;white-space:nowrap">主要開發者</span> | <span style="word-break:keep-all;white-space:nowrap">創建日期</span> | <span style="word-break:keep-all;white-space:nowrap">最近活躍</span> | <span style="word-break:keep-all;white-space:nowrap">活躍維護期 (年)</span> |
 |:------:|:------:|:------:|:------:|:------:|:------:|
-| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/07/27`](https://github.com/aiselp/AutoX/commit/ecad6d208efe0ffb9661fb1fe0d5a1b243848c9f)</span> | <span style="word-break:keep-all;white-space:nowrap">2.27</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/08/04`](https://github.com/aiselp/AutoX/commit/b9a8a3ecd7d34c6d0c2670df5b1171dc5ae43f19)</span> | <span style="word-break:keep-all;white-space:nowrap">2.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Autoxjs_v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi)</span> | <span style="white-space:pre">[Autox.js&#160;v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/blob/a651d02246e09cfbbfa87e6eaccf900fab/app/build.gradle.kts#L143)</span> | <span style="word-break:keep-all;white-space:nowrap">[ozobiozobi](https://github.com/ozobiozobi)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/10/01`</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/04/16`](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/commit/e8563000af8068f07f821a4a8b23d4457167c1ab)</span> | <span style="word-break:keep-all;white-space:nowrap">1.54</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/blob/a8ce1b9acb541e9736c33134be3194c3148a15a3/common/src/main/res/values/strings.xml#L27)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2021/12/01`](https://github.com/SuperMonster003/AutoJs6/commit/99a1d8490fac5b6d55f6f183db59ad833a2064ed)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/16`](https://github.com/SuperMonster003/AutoJs6/commit/ed3eb10e88db5a8425fd94bdddefa4176e5e1c94)</span> | <span style="word-break:keep-all;white-space:nowrap">4.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4/blob/a6b952704b8305aed1bb6265f40acb3598ac80df/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2023/04/11`](https://github.com/SuperMonster003/AutoJs4/commit/8de11699b608be1c1f49f0f10e2e2826f8c77978)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/15`](https://github.com/SuperMonster003/AutoJs4/commit/3fb08269198ebd49a880ab3ca2621383eaa10443)</span> | <span style="word-break:keep-all;white-space:nowrap">2.93</span> |
@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-數據更新於 2026 年 8 月 3 日.
+數據更新於 2026 年 8 月 8 日.
 
 數據條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/08/03
+###### 2026/08/08
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -237,6 +237,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` Android 報告目前已分配原生堆位元組數為零時, 健康的 Node.js R6 持久運行時 soak 證據被錯誤拒絕的問題
 * `修復` Node.js R6 打包 APK 證據因收集器未準備當前 Inrt 模板或傳入目標 ABI 而被跳過或錯誤綁定 arm64 的問題
 * `修復` 跨 ABI 打包應用時錯誤將已安裝宿主進程的原生庫複製到其他 ABI 目錄, 導致 32 位打包應用加載 64 位終端庫並崩潰的問題
+* `修復` DEX 編譯器實驗性宿主可能接受與請求 minApi 不兼容的 DEX 版本, 錯誤拒絕合法的 65,536 field/method ID 邊界, 並在排隊的 pipe drain 延遲啟動時重新創建已回退的臨時產物
 * `修復` runtime.loadJar 無法正常動態加載由較高 Java 版本編譯的 class 文件的問題
 * `修復` app.isInstalled/kill 等方法無法正常使用包名參數的問題 _[`issue #495`](http://issues.autojs6.com/495)_
 * `修復` 無 Root 權限設備調用 shell 相關方法時可能出現假死的問題
@@ -306,6 +307,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 文件外部查看與媒體播放回退只授予 URI 讀取權限
 * `優化` 統一文件管理器默認點擊, 主要按鈕, 媒體詳情播放和 overflow 菜單插件動作, 通過顯式主文件頁介面策略提供確定性的單次回退
 * `優化` DEX 編譯器實驗性宿主路徑保持默認關閉並要求顯式組件, 實施精確組件 UID 與完整簽名者集合鎖定, 單次分派回退, 語義緩存來源追蹤, 有界回調入口, 隔離 Binder 超時, 結構化 DEX ZIP 校驗, reliable pipe 有界 drain 與 EOF 對端錯誤檢查, 由來源/目標雙摘要保護的可回退單次發佈, 異步終止信號與發佈提交點原子仲裁, 且取消/超時/Binder death 在提交前勝出時強制回退
+* `優化` DEX 編譯器實驗性一致性測試擴展至真實 Android Binder 傳輸與產物存儲, 覆蓋精確簽名組件, 惡意回調/輸出/超時場景, 目標 API 感知的 DEX 校驗及 DexClassLoader 執行
 * `優化` 默認關閉的純 AI 文本宿主策略支持確定性信任選擇, 精確身份鎖定與重新驗證, 宿主/供應商能力交集, 歧義候選拒絕, 插件管理憑據隔離, 不含敏感內容的安全診斷, 取消/終態會話競態的確定性所有權, 請求綁定的工具及 descriptor JSON 驗證, streaming 聚合長度/SHA-256/配額校驗, 解碼後 JSON 重複鍵拒絕, 含敏感數據的模型 `toString` 摘要化及能力集合的域分離緩存鍵
 * `優化` Ace WebView 運行時/JavaScript bridge/內置語言服務/靜態資源完成插件化, 降低宿主 APK 耦合並支持獨立安裝及更新
 * `優化` 項目離線文檔完成插件化, 降低宿主 APK 體積並支持獨立安裝及更新
@@ -609,7 +611,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 3 日, AutoJs6 可支持 JDK 最高版本為 `26`.
+截至 2026 年 8 月 8 日, AutoJs6 可支持 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

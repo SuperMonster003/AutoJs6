@@ -173,7 +173,10 @@ internal object DexIndexedZipValidator {
         if (header.checksum != adler32) {
             fail(DexOutputValidationFailure.INVALID_DEX_CHECKSUM, "$entryName has an invalid Adler-32 checksum")
         }
-        val signature = MessageDigest.getInstance("SHA-1").digest(bytes.copyOfRange(32, bytes.size))
+        val signature = MessageDigest.getInstance("SHA-1").run {
+            update(bytes, 32, bytes.size - 32)
+            digest()
+        }
         if (!MessageDigest.isEqual(signature, bytes.copyOfRange(12, 32))) {
             fail(DexOutputValidationFailure.INVALID_DEX_SIGNATURE, "$entryName has an invalid SHA-1 signature")
         }
@@ -301,11 +304,13 @@ internal object DexIndexedZipValidator {
         map: DexMap,
         entryName: String,
     ): Set<String> {
-        if (header.typeIdsSize > MAX_16_BIT_INDEX_COUNT || header.protoIdsSize > MAX_16_BIT_INDEX_COUNT ||
-            header.fieldIdsSize > MAX_16_BIT_INDEX_COUNT || header.methodIdsSize > MAX_16_BIT_INDEX_COUNT ||
-            header.classDefsSize > MAX_16_BIT_INDEX_COUNT
+        if (header.typeIdsSize > MAX_TYPE_OR_PROTO_ID_COUNT ||
+            header.protoIdsSize > MAX_TYPE_OR_PROTO_ID_COUNT ||
+            header.fieldIdsSize > MAX_FIELD_OR_METHOD_ID_COUNT ||
+            header.methodIdsSize > MAX_FIELD_OR_METHOD_ID_COUNT ||
+            header.classDefsSize > header.typeIdsSize
         ) {
-            fail(DexOutputValidationFailure.INVALID_DEX_SECTION, "$entryName exceeds a 16-bit DEX index limit")
+            fail(DexOutputValidationFailure.INVALID_DEX_SECTION, "$entryName exceeds a DEX index-section limit")
         }
         val stringCount = header.stringIdsSize
         val typeCount = header.typeIdsSize
@@ -635,19 +640,11 @@ internal object DexIndexedZipValidator {
             }
 
             val centralEntries = readCentralEntries(centralOffset.toInt(), centralSize.toInt(), entryCount)
+            validateExpectedEntryNames(centralEntries)
+            preflightDeclaredEntryQuotas(centralEntries)
             val output = ArrayList<DexZipEntry>(centralEntries.size)
             var totalDexBytes = 0L
-            var totalCompressedBytes = 0L
             centralEntries.forEachIndexed { index, central ->
-                val expectedName = if (index == 0) "classes.dex" else "classes${index + 1}.dex"
-                if (central.name != expectedName) {
-                    val failure = if (dexIndex(central.name) != null) {
-                        DexOutputValidationFailure.NON_CONTIGUOUS_DEX_ENTRIES
-                    } else {
-                        DexOutputValidationFailure.UNEXPECTED_ZIP_ENTRY
-                    }
-                    fail(failure, "Expected $expectedName but found ${central.name}")
-                }
                 val nextOffset = if (index + 1 < centralEntries.size) {
                     centralEntries[index + 1].localHeaderOffset
                 } else {
@@ -655,17 +652,53 @@ internal object DexIndexedZipValidator {
                 }
                 val content = readLocalEntry(central, nextOffset)
                 totalDexBytes = checkedAdd(totalDexBytes, content.size.toLong(), "total DEX bytes")
-                totalCompressedBytes = checkedAdd(totalCompressedBytes, central.compressedSize, "total compressed bytes")
                 if (content.size.toLong() != central.uncompressedSize ||
                     content.size.toLong() > limits.maxDexEntryBytes || totalDexBytes > limits.maxTotalDexBytes
                 ) {
                     fail(DexOutputValidationFailure.DEX_QUOTA, "DEX output exceeds its declared or negotiated quota")
                 }
-                enforceCompressionRatio(content.size.toLong(), central.compressedSize)
                 output += DexZipEntry(central.name, content)
             }
-            enforceCompressionRatio(totalDexBytes, totalCompressedBytes)
             return output
+        }
+
+        private fun validateExpectedEntryNames(entries: List<CentralEntry>) {
+            entries.forEachIndexed { index, entry ->
+                val expectedName = if (index == 0) "classes.dex" else "classes${index + 1}.dex"
+                if (entry.name != expectedName) {
+                    val failure = if (dexIndex(entry.name) != null) {
+                        DexOutputValidationFailure.NON_CONTIGUOUS_DEX_ENTRIES
+                    } else {
+                        DexOutputValidationFailure.UNEXPECTED_ZIP_ENTRY
+                    }
+                    fail(failure, "Expected $expectedName but found ${entry.name}")
+                }
+            }
+        }
+
+        private fun preflightDeclaredEntryQuotas(entries: List<CentralEntry>) {
+            var totalUncompressedBytes = 0L
+            var totalCompressedBytes = 0L
+            entries.forEach { entry ->
+                totalUncompressedBytes = checkedAdd(
+                    totalUncompressedBytes,
+                    entry.uncompressedSize,
+                    "declared total DEX bytes",
+                )
+                totalCompressedBytes = checkedAdd(
+                    totalCompressedBytes,
+                    entry.compressedSize,
+                    "declared total compressed bytes",
+                )
+                if (entry.uncompressedSize < DEX_HEADER_SIZE ||
+                    entry.uncompressedSize > limits.maxDexEntryBytes ||
+                    totalUncompressedBytes > limits.maxTotalDexBytes
+                ) {
+                    fail(DexOutputValidationFailure.DEX_QUOTA, "Declared DEX output exceeds its negotiated quota")
+                }
+                enforceCompressionRatio(entry.uncompressedSize, entry.compressedSize)
+            }
+            enforceCompressionRatio(totalUncompressedBytes, totalCompressedBytes)
         }
 
         private fun readCentralEntries(offset: Int, declaredSize: Int, count: Int): List<CentralEntry> {
@@ -898,7 +931,8 @@ internal object DexIndexedZipValidator {
 private const val DEX_HEADER_SIZE = 0x70L
 private const val DEX_ENDIAN_CONSTANT = 0x12345678L
 private const val NO_INDEX = 0xffffffffL
-private const val MAX_16_BIT_INDEX_COUNT = 65_535L
+private const val MAX_TYPE_OR_PROTO_ID_COUNT = 65_535L
+private const val MAX_FIELD_OR_METHOD_ID_COUNT = 65_536L
 private const val MAX_MAP_ITEMS = 256L
 private const val MAP_ITEM_SIZE = 12
 private const val MAX_DESCRIPTOR_UTF16_UNITS = 65_535
@@ -945,6 +979,24 @@ private const val ZIP64_U16_SENTINEL = 0xffff
 private const val ZIP64_U32_SENTINEL = 0xffffffffL
 
 private fun isCanonicalDexVersion(version: String): Boolean = version.length == 3 && version.all { it in '0'..'9' }
+
+/** D8's v1 output-version compatibility profile for the requested minimum Android API. */
+internal fun dexVersionsCompatibleWithMinApi(minApi: Int): Set<String> {
+    require(minApi > 0) { "Minimum API must be positive" }
+    return when {
+        minApi >= 30 -> DEX_VERSIONS_THROUGH_040
+        minApi >= 28 -> DEX_VERSIONS_THROUGH_039
+        minApi >= 26 -> DEX_VERSIONS_THROUGH_038
+        minApi >= 24 -> DEX_VERSIONS_THROUGH_037
+        else -> DEX_VERSIONS_THROUGH_035
+    }
+}
+
+private val DEX_VERSIONS_THROUGH_035 = setOf("035")
+private val DEX_VERSIONS_THROUGH_037 = DEX_VERSIONS_THROUGH_035 + "037"
+private val DEX_VERSIONS_THROUGH_038 = DEX_VERSIONS_THROUGH_037 + "038"
+private val DEX_VERSIONS_THROUGH_039 = DEX_VERSIONS_THROUGH_038 + "039"
+private val DEX_VERSIONS_THROUGH_040 = DEX_VERSIONS_THROUGH_039 + "040"
 
 private fun dexIndex(name: String): Int? {
     if (name == "classes.dex") return 1

@@ -35,6 +35,10 @@
             android:permission="org.autojs.permission.PLUGIN"
             android:process=":compiler">
 
+            <intent-filter>
+                <action android:name="org.autojs.plugin.DEX_COMPILER" />
+            </intent-filter>
+
             <meta-data
                 android:name="org.autojs.plugin.dexcompiler.fake.SCENARIO"
                 android:value="progress-before-start" />
@@ -46,6 +50,10 @@
             android:exported="true"
             android:permission="org.autojs.permission.PLUGIN"
             android:process=":compiler">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.DEX_COMPILER" />
+            </intent-filter>
 
             <meta-data
                 android:name="org.autojs.plugin.dexcompiler.fake.SCENARIO"
@@ -59,6 +67,10 @@
             android:permission="org.autojs.permission.PLUGIN"
             android:process=":compiler">
 
+            <intent-filter>
+                <action android:name="org.autojs.plugin.DEX_COMPILER" />
+            </intent-filter>
+
             <meta-data
                 android:name="org.autojs.plugin.dexcompiler.fake.SCENARIO"
                 android:value="invalid-output" />
@@ -71,9 +83,29 @@
             android:permission="org.autojs.permission.PLUGIN"
             android:process=":compiler">
 
+            <intent-filter>
+                <action android:name="org.autojs.plugin.DEX_COMPILER" />
+            </intent-filter>
+
             <meta-data
                 android:name="org.autojs.plugin.dexcompiler.fake.SCENARIO"
                 android:value="stall" />
+        </service>
+
+        <service
+            android:name=".service.UnnegotiatedDexVersionCompilerService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":compiler">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.DEX_COMPILER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.dexcompiler.fake.SCENARIO"
+                android:value="unnegotiated-dex-version" />
         </service>
 
     </application>

@@ -6,6 +6,8 @@ import org.autojs.plugin.dexcompiler.api.DexCompilerFailurePhase
 import org.autojs.plugin.dexcompiler.api.DexCompilerValidation
 import org.autojs.plugin.dexcompiler.api.DexSha256
 import java.io.InputStream
+import java.security.MessageDigest
+import java.util.zip.Adler32
 
 class FakeDexArtifact private constructor(
     outputBytes: ByteArray,
@@ -40,10 +42,10 @@ class FakeDexCompilerEngine {
             FakeDexCompilerFixture.protocolVersion,
         )
         BoundedJarValidator.readAndValidate(request, programInput)
-        val classesDex = if (scenario == FakeDexCompilerScenario.INVALID_OUTPUT) {
-            INVALID_DEX.copyOf()
-        } else {
-            EmbeddedDexFixture.bytes()
+        val classesDex = when (scenario) {
+            FakeDexCompilerScenario.INVALID_OUTPUT -> INVALID_DEX.copyOf()
+            FakeDexCompilerScenario.UNNEGOTIATED_DEX_VERSION -> incompatibleVersionDex(request.minApi)
+            else -> EmbeddedDexFixture.bytes()
         }
         val output = DeterministicDexZip.create(classesDex)
         if (output.size.toLong() > request.maxOutputBytes) {
@@ -61,6 +63,21 @@ class FakeDexCompilerEngine {
             )
         }
         return FakeDexArtifact.create(output, dexEntryCount = 1)
+    }
+
+    private fun incompatibleVersionDex(minApi: Int): ByteArray = EmbeddedDexFixture.bytes().apply dex@{
+        val version = when {
+            minApi < 26 -> "038"
+            minApi < 28 -> "039"
+            minApi < 30 -> "040"
+            else -> "041"
+        }.toByteArray(Charsets.US_ASCII)
+        version.copyInto(this, destinationOffset = 4)
+        MessageDigest.getInstance("SHA-1")
+            .digest(copyOfRange(32, size))
+            .copyInto(this, destinationOffset = 12)
+        val checksum = Adler32().apply { update(this@dex, 12, size - 12) }.value
+        repeat(4) { index -> this[8 + index] = (checksum ushr (index * 8)).toByte() }
     }
 
     private companion object {

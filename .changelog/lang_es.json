@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/03",
+      "released_date": "2026/08/08",
       "feature": [
         "Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva \"nodejs\" o extensiones como .node.js/.cjs/.mjs",
         "El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)",
@@ -74,6 +74,7 @@
         "La evidencia soak de Node.js R6 podía rechazar un runtime persistente en buen estado cuando Android informaba cero bytes asignados actualmente al heap nativo",
         "La evidencia de APK empaquetado de Node.js R6 se omitía o quedaba vinculada a arm64 porque el recopilador no preparaba una plantilla Inrt nueva ni pasaba la ABI de destino",
         "El empaquetado de aplicaciones entre ABI podía copiar bibliotecas nativas del proceso host instalado a un directorio de otra ABI, lo que hacía que las aplicaciones empaquetadas de 32 bits cargaran bibliotecas de terminal de 64 bits y se cerraran inesperadamente",
+        "La ruta host experimental del compilador DEX podía aceptar versiones DEX incompatibles con el minApi solicitado, rechazar erróneamente el límite válido de 65 536 identificadores field/method y recrear un artefacto parcial revertido cuando un drain de pipe en cola comenzaba tarde",
         "runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java",
         "app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_",
         "Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root",
@@ -145,6 +146,7 @@
         "Limitadas las alternativas de visualización y reproducción externas a permisos URI de solo lectura",
         "Unificadas las acciones de plugins del administrador de archivos para clic predeterminado, botón principal, reproducción desde detalles multimedia y menú overflow bajo una política explícita de la página principal de archivos con un único fallback determinista",
         "La ruta experimental del host para el compilador DEX permanece desactivada por defecto y exige un componente explícito, con fijación del UID del componente exacto y del conjunto completo de firmantes, fallback de despacho único, procedencia semántica de caché, entrada de callbacks acotada, plazos Binder aislados, validación estructural del ZIP DEX, drenaje acotado de reliable pipe con errores del par comprobados en EOF, publicación única con rollback protegida por digests de origen y destino, y arbitraje atómico entre señales de terminación asíncronas y el punto de commit de publicación que fuerza rollback si la cancelación, el timeout o Binder death prevalecen antes del commit",
+        "Las pruebas experimentales de conformidad del compilador DEX ahora cubren el transporte Binder Android real y el almacenamiento de artefactos, componentes firmados exactos, escenarios hostiles de callback/salida/timeout, validación DEX según la API de destino y ejecución mediante DexClassLoader",
         "La política pura del host de texto IA, desactivada por defecto, proporciona selección de confianza determinista, fijación y revalidación exactas de identidad, intersección de capacidades host/proveedor, rechazo de candidatos ambiguos, aislamiento de credenciales gestionadas por el plugin, diagnósticos sin contenido sensible, control determinista de carreras de cancelación/terminales de sesión, validación de herramientas y JSON por descriptor vinculada a la solicitud, control agregado de longitud/SHA-256/cuota del streaming, rechazo de claves JSON duplicadas tras decodificación, `toString` resumido para modelos con datos sensibles y una clave de caché con separación de dominio para colecciones de capacidades",
         "Modularizados como plugin instalable por separado el runtime WebView de Ace/el bridge JavaScript/los servicios de lenguaje integrados/los recursos estáticos, reduciendo el acoplamiento con el APK anfitrión y permitiendo actualizaciones independientes",
         "Modularizada la documentación del proyecto sin conexión como plugin, reduciendo el tamaño del APK anfitrión y permitiendo su instalación y actualización independientes",

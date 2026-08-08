@@ -64,6 +64,31 @@ class FakeDexCompilerEngineTest {
     }
 
     @Test
+    fun unnegotiatedVersionScenarioReturnsAnOtherwiseIntactIncompatibleDex() {
+        val program = FakeDexTestFixtures.programJar()
+        listOf(
+            24 to "038",
+            26 to "039",
+            28 to "040",
+            30 to "041",
+        ).forEach { (minApi, expectedVersion) ->
+            val artifact = engine.compile(
+                FakeDexTestFixtures.request(program, minApi = minApi),
+                ByteArrayInputStream(program),
+                FakeDexCompilerScenario.UNNEGOTIATED_DEX_VERSION,
+            )
+
+            ZipInputStream(ByteArrayInputStream(artifact.bytes())).use { zip ->
+                assertEquals(DeterministicDexZip.ENTRY_NAME, zip.nextEntry.name)
+                val dex = zip.readBytes()
+                assertTrue(dex.copyOfRange(0, 4).contentEquals("dex\n".toByteArray(Charsets.US_ASCII)))
+                assertEquals(expectedVersion, dex.copyOfRange(4, 7).toString(Charsets.US_ASCII))
+                assertEquals(EmbeddedDexFixture.SIZE_BYTES, dex.size)
+            }
+        }
+    }
+
+    @Test
     fun rejectsProgramSizeMismatch() {
         val program = FakeDexTestFixtures.programJar()
         val failure = assertThrows(FakeDexCompileFailure::class.java) {

@@ -233,37 +233,51 @@ internal class AndroidDexCompilerArtifactStore(
             onTerminal: (DexCompilerOutputDrainTerminal) -> Unit,
         ) {
             val terminal = try {
-                val summary = FileOutputStream(staging, false).use { output ->
-                    val input = ParcelFileDescriptor.AutoCloseInputStream(readSide)
-                    try {
-                        val copied = DexCompilerBoundedStreamTransfer.copy(
-                            input = input,
-                            output = output,
-                            maximumBytes = maxBytes,
-                            isCancelled = { synchronized(this) { state != State.OPEN } },
-                        )
-                        readSide.checkError()
-                        output.fd.sync()
-                        copied
-                    } catch (error: Throwable) {
-                        runCatching { readSide.closeWithError(PIPE_REJECTION_MESSAGE) }
-                        throw error
-                    } finally {
-                        runCatching { input.close() }
-                    }
-                }
-                val accepted = synchronized(this) {
+                // Opening the path and checking transaction ownership must share the same lock as
+                // rollback/close. Otherwise a queued drain can recreate a staging pathname after
+                // the transaction has already deleted it.
+                val output = synchronized(this) {
                     if (state == State.OPEN && drainState == DrainState.RUNNING) {
-                        drainState = DrainState.SUCCEEDED
-                        true
+                        FileOutputStream(staging, false)
                     } else {
-                        false
+                        null
                     }
                 }
-                if (accepted) {
-                    DexCompilerOutputDrainTerminal.Success(summary)
-                } else {
+                if (output == null) {
                     DexCompilerOutputDrainTerminal.Failure(null)
+                } else {
+                    val summary = output.use { outputStream ->
+                        val input = ParcelFileDescriptor.AutoCloseInputStream(readSide)
+                        try {
+                            val copied = DexCompilerBoundedStreamTransfer.copy(
+                                input = input,
+                                output = outputStream,
+                                maximumBytes = maxBytes,
+                                isCancelled = { synchronized(this) { state != State.OPEN } },
+                            )
+                            readSide.checkError()
+                            outputStream.fd.sync()
+                            copied
+                        } catch (error: Throwable) {
+                            runCatching { readSide.closeWithError(PIPE_REJECTION_MESSAGE) }
+                            throw error
+                        } finally {
+                            runCatching { input.close() }
+                        }
+                    }
+                    val accepted = synchronized(this) {
+                        if (state == State.OPEN && drainState == DrainState.RUNNING) {
+                            drainState = DrainState.SUCCEEDED
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    if (accepted) {
+                        DexCompilerOutputDrainTerminal.Success(summary)
+                    } else {
+                        DexCompilerOutputDrainTerminal.Failure(null)
+                    }
                 }
             } catch (error: Throwable) {
                 synchronized(this) {

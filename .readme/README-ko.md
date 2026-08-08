@@ -56,7 +56,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 
 | <span style="word-break:keep-all;white-space:nowrap">프로젝트</span> | <span style="word-break:keep-all;white-space:nowrap">앱 이름</span> | <span style="word-break:keep-all;white-space:nowrap">주요 개발자</span> | <span style="word-break:keep-all;white-space:nowrap">생성 날짜</span> | <span style="word-break:keep-all;white-space:nowrap">최근 활동</span> | <span style="word-break:keep-all;white-space:nowrap">활성 유지보수 기간 (년)</span> |
 |:------:|:------:|:------:|:------:|:------:|:------:|
-| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/07/27`](https://github.com/aiselp/AutoX/commit/ecad6d208efe0ffb9661fb1fe0d5a1b243848c9f)</span> | <span style="word-break:keep-all;white-space:nowrap">2.27</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/08/04`](https://github.com/aiselp/AutoX/commit/b9a8a3ecd7d34c6d0c2670df5b1171dc5ae43f19)</span> | <span style="word-break:keep-all;white-space:nowrap">2.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Autoxjs_v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi)</span> | <span style="white-space:pre">[Autox.js&#160;v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/blob/a651d02246e09cfbbfa87e6eaccf900fab/app/build.gradle.kts#L143)</span> | <span style="word-break:keep-all;white-space:nowrap">[ozobiozobi](https://github.com/ozobiozobi)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/10/01`</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/04/16`](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/commit/e8563000af8068f07f821a4a8b23d4457167c1ab)</span> | <span style="word-break:keep-all;white-space:nowrap">1.54</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/blob/a8ce1b9acb541e9736c33134be3194c3148a15a3/common/src/main/res/values/strings.xml#L27)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2021/12/01`](https://github.com/SuperMonster003/AutoJs6/commit/99a1d8490fac5b6d55f6f183db59ad833a2064ed)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/16`](https://github.com/SuperMonster003/AutoJs6/commit/ed3eb10e88db5a8425fd94bdddefa4176e5e1c94)</span> | <span style="word-break:keep-all;white-space:nowrap">4.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4/blob/a6b952704b8305aed1bb6265f40acb3598ac80df/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2023/04/11`](https://github.com/SuperMonster003/AutoJs4/commit/8de11699b608be1c1f49f0f10e2e2826f8c77978)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/15`](https://github.com/SuperMonster003/AutoJs4/commit/3fb08269198ebd49a880ab3ca2621383eaa10443)</span> | <span style="word-break:keep-all;white-space:nowrap">2.93</span> |
@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 8 월 3 일.
+데이터 갱신일: 2026 년 8 월 8 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/03
+###### 2026/08/08
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
@@ -237,6 +237,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` Android가 현재 할당된 네이티브 힙 바이트를 0으로 보고할 때 정상적인 Node.js R6 상주 런타임 soak 증거가 거부되는 문제
 * `수정` 수집기가 최신 Inrt 템플릿을 준비하거나 대상 ABI를 전달하지 않아 Node.js R6 패키지 APK 증거를 건너뛰거나 arm64에 고정하는 문제
 * `수정` ABI 간 앱 패키징에서 설치된 호스트 프로세스의 네이티브 라이브러리를 다른 ABI 디렉터리로 복사하여, 32비트 패키지 앱이 64비트 터미널 라이브러리를 로드하고 충돌하는 문제
+* `수정` DEX 컴파일러 실험적 호스트 경로에서 요청 minApi와 호환되지 않는 DEX 버전을 허용하고, 유효한 65,536 field/method ID 한계를 잘못 거부하며, 대기 중인 pipe drain이 늦게 시작될 때 rollback된 임시 아티팩트를 다시 생성할 수 있는 문제
 * `수정` runtime.loadJar에서 더 높은 Java 버전을 대상으로 컴파일된 class 파일을 정상적으로 동적 로드하지 못하는 문제
 * `수정` app.isInstalled/kill 등의 메서드에서 패키지 이름 인수를 정상적으로 사용하지 못하는 문제 _[`issue #495`](http://issues.autojs6.com/495)_
 * `수정` Root 권한이 없는 기기에서 shell 관련 메서드를 호출할 때 응답하지 않을 수 있는 문제
@@ -306,6 +307,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 외부 파일 보기 및 미디어 재생 대체 경로를 읽기 전용 URI 접근으로 제한
 * `개선` 파일 관리자의 기본 클릭/주요 버튼/미디어 상세 재생/overflow 메뉴 플러그인 작업을 명시적인 기본 파일 페이지 정책으로 통합하고 결정적인 단일 폴백 적용
 * `개선` DEX 컴파일러 실험적 호스트 경로를 기본 비활성화하고 명시적 컴포넌트를 요구하며, 정확한 컴포넌트 UID와 전체 서명자 집합 고정, 단일 디스패치 폴백, 의미 기반 캐시 출처, 제한된 콜백 입력, 격리된 Binder 시간 제한, 구조적 DEX ZIP 검증, reliable pipe 제한 drain과 EOF 시 peer error 확인, 원본/대상 digest로 보호되는 rollback 가능한 단일 게시, 비동기 종료 신호와 게시 commit 지점 사이의 원자적 중재, 취소/시간 초과/Binder death가 commit 전에 승리할 때 강제 rollback을 적용
+* `개선` DEX 컴파일러 실험적 적합성 테스트를 실제 Android Binder 전송 및 아티팩트 저장소로 확장하여 정확한 서명 컴포넌트, 적대적 callback/출력/timeout 시나리오, 대상 API 인식 DEX 검증 및 DexClassLoader 실행을 포함
 * `개선` 기본 비활성화된 순수 AI 텍스트 호스트 정책에 결정적 신뢰 선택, 정확한 ID 고정 및 재검증, 호스트/프로바이더 기능 교집합, 모호한 후보 거부, 플러그인 관리 자격 증명 격리, 민감한 내용을 포함하지 않는 진단, 취소/종료 세션 경쟁의 결정적 소유권, request-bound 도구/descriptor JSON 검증, streaming 집계 length/SHA-256/quota 검증, 디코딩된 JSON 중복 key 거부, 민감한 데이터를 포함한 모델의 `toString` 요약, capability collection용 domain-separated cache key를 적용
 * `개선` Ace WebView 런타임/JavaScript bridge/내장 언어 서비스/정적 리소스를 별도로 설치 가능한 플러그인으로 모듈화하여 호스트 APK 결합도를 낮추고 독립 업데이트 지원
 * `개선` 프로젝트 오프라인 문서를 플러그인화하여 호스트 APK 크기를 줄이고 독립 설치 및 업데이트 지원
@@ -609,7 +611,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 8 월 3 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 8 월 8 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

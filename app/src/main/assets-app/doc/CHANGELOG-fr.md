@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/03
+###### 2026/08/08
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -77,6 +77,7 @@
 * `Correction` Les preuves soak Node.js R6 pouvaient rejeter un environnement d'exécution persistant sain lorsqu'Android signalait zéro octet actuellement alloué au tas natif
 * `Correction` Les preuves d'APK empaqueté Node.js R6 étaient ignorées ou liées à arm64 car le collecteur ne préparait pas de modèle Inrt récent et ne transmettait pas l'ABI cible
 * `Correction` L'empaquetage d'applications entre ABI pouvait copier les bibliothèques natives du processus hôte installé dans le répertoire d'une autre ABI, amenant les applications empaquetées 32 bits à charger des bibliothèques de terminal 64 bits puis à planter
+* `Correction` Le chemin hôte expérimental du compilateur DEX pouvait accepter des versions DEX incompatibles avec le minApi demandé, rejeter à tort la limite valide de 65 536 identifiants field/method et recréer un artefact partiel annulé lorsqu'un drain de pipe en attente démarrait tardivement
 * `Correction` runtime.loadJar ne pouvait pas charger dynamiquement des fichiers de classe Java compilés pour une version plus récente
 * `Correction` app.isInstalled/kill et les méthodes associées ne pouvaient pas utiliser correctement les arguments de nom de paquet _[`issue #495`](http://issues.autojs6.com/495)_
 * `Correction` Les méthodes liées au shell pouvaient ne plus répondre sur les appareils sans accès Root
@@ -146,6 +147,7 @@
 * `Amélioration` Limitation des replis d'affichage et de lecture externes aux accès URI en lecture seule
 * `Amélioration` Unification des actions de plugins du gestionnaire de fichiers pour le clic par défaut, le bouton principal, la lecture depuis les détails multimédias et le menu overflow sous une politique explicite de la page principale des fichiers avec un repli unique et déterministe
 * `Amélioration` Le chemin hôte expérimental du compilateur DEX reste désactivé par défaut et exige un composant explicite, avec épinglage de l'UID du composant exact et de l'ensemble complet des signataires, repli à répartition unique, provenance sémantique du cache, entrée de callbacks bornée, délais Binder isolés, validation structurelle du ZIP DEX, vidage borné de reliable pipe avec vérification des erreurs du pair à EOF, publication unique avec retour arrière protégée par les condensats source et destination, et arbitrage atomique entre les signaux de terminaison asynchrones et le point de commit de publication qui force le retour arrière si l'annulation, le délai dépassé ou Binder death l'emporte avant le commit
+* `Amélioration` Les tests de conformité expérimentaux du compilateur DEX couvrent désormais le transport Binder Android réel et le stockage d'artefacts, les composants signés exacts, les scénarios hostiles de callback/sortie/délai, la validation DEX adaptée à l'API cible et l'exécution via DexClassLoader
 * `Amélioration` La politique hôte pure de texte IA, désactivée par défaut, fournit une sélection de confiance déterministe, l'épinglage et la revalidation exacte de l'identité, l'intersection des capacités hôte/fournisseur, le rejet des candidats ambigus, l'isolation des identifiants gérés par le plugin, des diagnostics sans contenu sensible, l'arbitrage déterministe des courses annulation/terminal de session, la validation des outils et du JSON par descripteur liée à la requête, le contrôle agrégé longueur/SHA-256/quota du streaming, le rejet des clés JSON dupliquées après décodage, un `toString` résumé pour les modèles contenant des données sensibles et une clé de cache à séparation de domaine pour les collections de capacités
 * `Amélioration` Modularisation du runtime WebView Ace/du bridge JavaScript/des services de langage intégrés/des ressources statiques sous forme de plugin installable séparément, afin de réduire le couplage avec l'APK hôte et de permettre des mises à jour indépendantes
 * `Amélioration` Modularisation de la documentation hors ligne du projet sous forme de plugin, afin de réduire la taille de l'APK hôte et de permettre une installation et des mises à jour indépendantes

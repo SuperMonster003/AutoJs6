@@ -135,6 +135,10 @@ class InvalidOutputDexCompilerService : DexCompilerFakeService() {
     override val scenario = FakeDexCompilerScenario.INVALID_OUTPUT
 }
 
+class UnnegotiatedDexVersionCompilerService : DexCompilerFakeService() {
+    override val scenario = FakeDexCompilerScenario.UNNEGOTIATED_DEX_VERSION
+}
+
 class StallDexCompilerService : DexCompilerFakeService() {
     override val scenario = FakeDexCompilerScenario.STALL
 }
