@@ -117,6 +117,22 @@ internal class AiTextProviderPackageSnapshot private constructor(
         signerSha256.map { value -> value.lowercase() }.sorted(),
     )
 
+    /** Exact local identity comparison used before and after a metadata-only Binder handshake. */
+    fun samePackageIdentityAs(other: AiTextProviderPackageSnapshot): Boolean =
+        component == other.component &&
+            declaredAction == other.declaredAction &&
+            exported == other.exported &&
+            applicationEnabled == other.applicationEnabled &&
+            serviceEnabled == other.serviceEnabled &&
+            requiredPermission == other.requiredPermission &&
+            packageUid == other.packageUid &&
+            versionCode == other.versionCode &&
+            lastUpdateTime == other.lastUpdateTime &&
+            signerSha256 == other.signerSha256 &&
+            officialSignerMatch == other.officialSignerMatch &&
+            sameSignerAsHost == other.sameSignerAsHost &&
+            debuggable == other.debuggable
+
     companion object {
         fun from(input: AiTextProviderDiscoveryInput): AiTextProviderPackageSnapshot? {
             val component = runCatching {
