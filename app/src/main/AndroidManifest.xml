@@ -50,6 +50,9 @@
             <action android:name="org.autojs.plugin.DEX_COMPILER" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.AI_TEXT_GENERATION" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.EDITOR" />
             <category android:name="ace-editor" />
         </intent>

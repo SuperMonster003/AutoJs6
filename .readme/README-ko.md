@@ -310,6 +310,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` DEX 컴파일러 실험적 호스트 경로를 기본 비활성화하고 명시적 컴포넌트를 요구하며, 정확한 컴포넌트 UID와 전체 서명자 집합 고정, 단일 디스패치 폴백, 의미 기반 캐시 출처, 제한된 콜백 입력, 격리된 Binder 시간 제한, 구조적 DEX ZIP 검증, reliable pipe 제한 drain과 EOF 시 peer error 확인, 원본/대상 digest로 보호되는 rollback 가능한 단일 게시, 비동기 종료 신호와 게시 commit 지점 사이의 원자적 중재, 취소/시간 초과/Binder death가 commit 전에 승리할 때 강제 rollback을 적용
 * `개선` DEX 컴파일러 실험적 적합성 테스트를 실제 Android Binder 전송 및 아티팩트 저장소로 확장하여 정확한 서명 컴포넌트, 적대적 callback/출력/timeout 시나리오, 대상 API 인식 DEX 검증 및 DexClassLoader 실행을 포함
 * `개선` 기본 비활성화된 순수 AI 텍스트 호스트 정책에 결정적 신뢰 선택, 정확한 ID 고정 및 재검증, 호스트/프로바이더 기능 교집합, 모호한 후보 거부, 플러그인 관리 자격 증명 격리, 민감한 내용을 포함하지 않는 진단, 취소/종료 세션 경쟁의 결정적 소유권, request-bound 도구/descriptor JSON 검증, streaming 집계 length/SHA-256/quota 검증, 디코딩된 JSON 중복 key 거부, 민감한 데이터를 포함한 모델의 `toString` 요약, capability collection용 domain-separated cache key를 적용
+* `개선` 기본 비활성화 및 미연결 AI 텍스트 호스트 기반에 PackageManager를 통한 읽기 전용 정확한 action 검색과 정확한 컴포넌트 재검사를 추가하고, 원시 패키지/서비스 상태와 서명자 근거 정보를 보존하되 Binder 바인딩, runtime/UI 통합, `ai.*` 라우팅은 연결하지 않음
 * `개선` Ace WebView 런타임/JavaScript bridge/내장 언어 서비스/정적 리소스를 별도로 설치 가능한 플러그인으로 모듈화하여 호스트 APK 결합도를 낮추고 독립 업데이트 지원
 * `개선` 프로젝트 오프라인 문서를 플러그인화하여 호스트 APK 크기를 줄이고 독립 설치 및 업데이트 지원
 * `개선` 오프라인 프로젝트 문서의 최초 로드 시 파일 목록 분석 및 전체 SHA-256 검증을 백그라운드 스레드로 이동하여 UI 차단 방지

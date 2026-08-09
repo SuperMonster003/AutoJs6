@@ -18,7 +18,7 @@ document temporarily lags the current hardening pass.
 | `plugin-api:ai-common-api` | Provider identity, errors, usage, payload and FD references |
 | `plugin-api:ai-text-generation-api` | Text AIDL, models, codecs, limits, and lifecycle policies |
 | `test-apps:ai-text-provider-conformance` | Deterministic provider and hostile conformance scenarios |
-| `app/.../core/plugin/ai` | Default-off, transport-independent host selection and session policies |
+| `app/.../core/plugin/ai` | Default-off, read-only Android package discovery plus transport-independent host selection and session policies |
 
 V1 is text generation only. Image, audio, and video remain separate future
 protocols and separate plugins. The protocol does not create a mixed-media or
@@ -111,12 +111,26 @@ provider-reported total to repair an inconsistent snapshot.
 `supportedAbis` is empty for a pure Java or Kotlin provider. A future local
 model provider with native libraries reports only its actual packaged ABIs.
 
-## Current Host Policy Layer
+## Current Host Discovery And Policy Baseline
 
-The repository now contains a pure Kotlin host policy layer, but its entry
-option defaults to `enabled = false`. It consumes discovery candidates supplied
-by a future Android adapter and performs no `PackageManager` query or Binder
-operation itself.
+The repository now contains a default-off host baseline with two deliberately
+separate layers. `AndroidAiTextProviderDiscovery` is a read-only,
+`PackageManager`-only Android adapter with no production call site. When called
+directly, it can discover services for the exact protocol action and reinspect
+one exact component. Query and package-identity failures are captured as
+discovery outcomes rather than causing a bind. Its local snapshots preserve the
+raw application and service enabled flags, export status, binding permission,
+UID, version code, last-update time, complete current signer set, and same-signer,
+official-signer, and debuggable evidence. Debuggable status is evidence only and
+never grants trust by itself. The added package-visibility intent query is
+scoped to services declaring that action; it neither registers a host
+component nor activates discovery.
+
+The adapter does not read `PluginEnableStore`, bind a service, inspect remote
+provider metadata, construct an `AiTextProviderCandidate`, invoke provider
+selection, or dispatch a request. The separate pure Kotlin discovery-admission
+and host-policy layers also default to `enabled = false`; the policy continues
+to own all trust, protocol, capability, and ambiguity decisions.
 
 When explicitly exercised by tests, the policy:
 
@@ -149,9 +163,11 @@ When explicitly exercised by tests, the policy:
   and terminal ownership so cancellation/completion races have one winner and
   deferred remote controls are claimed at most once.
 
-This policy layer is not an active selector. There is still no Android service
-discovery adapter, Binder binding, FD transport adapter, UI, script-runtime
-entry point, network request, or built-in-provider migration.
+These layers are not an active selector. There is no production discovery call
+site, Binder binding, FD transport adapter, UI, script-runtime entry point,
+network request, or built-in-provider migration. In particular, there is no
+route from `ai.ask`, `ai.chat`, `ai.stream`, or any other `ai.*` API to this
+baseline.
 
 ## Streaming And Backpressure
 
@@ -228,12 +244,13 @@ back to a cloud provider, changes models, or changes credential mode.
 
 ## Failure And Degradation
 
-This phase has a default-off, pure host selection policy but no Android
-discovery, Binder binding, UI, or runtime integration. Installing either the
-independent production provider or the in-repository conformance provider
-therefore does not switch the public AI module or alter its built-in providers.
-The conformance APK is test-only, has no launcher or network permission, and is
-intended only for explicit conformance environments.
+This phase has default-off, read-only Android package discovery and exact
+component reinspection plus a pure host selection policy, but no active
+discovery call site, Binder binding, UI, or runtime integration. Installing
+either the independent production provider or the in-repository conformance
+provider therefore does not switch the public AI module or alter its built-in
+providers. The conformance APK is test-only, has no launcher or network
+permission, and is intended only for explicit conformance environments.
 
 A future Android integration built on the policy must preserve the built-in
 implementation as the baseline, independently obtain and revalidate every
