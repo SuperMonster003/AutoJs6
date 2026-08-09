@@ -18,7 +18,7 @@ document temporarily lags the current hardening pass.
 | `plugin-api:ai-common-api` | Provider identity, errors, usage, payload and FD references |
 | `plugin-api:ai-text-generation-api` | Text AIDL, models, codecs, limits, and lifecycle policies |
 | `test-apps:ai-text-provider-conformance` | Deterministic provider and hostile conformance scenarios |
-| `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, and transport-independent host policies |
+| `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, transport-independent model-list transcript validation, and host policies |
 
 V1 is text generation only. Image, audio, and video remain separate future
 protocols and separate plugins. The protocol does not create a mixed-media or
@@ -111,9 +111,9 @@ provider-reported total to repair an inconsistent snapshot.
 `supportedAbis` is empty for a pure Java or Kotlin provider. A future local
 model provider with native libraries reports only its actual packaged ABIs.
 
-## Current Host Discovery, Handshake, And Policy Baseline
+## Current Host Discovery, Handshake, Model-List, And Policy Baseline
 
-The repository now contains a default-off host baseline with three deliberately
+The repository now contains a default-off host baseline with four deliberately
 separate layers. The first, `AndroidAiTextProviderDiscovery`, is a read-only,
 `PackageManager`-only Android adapter with no production call site. When called
 directly, it can discover services for the exact protocol action and reinspect
@@ -174,9 +174,10 @@ When explicitly exercised by tests, the policy:
   was selected. Duplicate eligible rows for that same component remain
   ambiguous and are rejected.
 - Pins the exact component and package identity together with provider metadata,
-  negotiated protocol, and negotiated capabilities. The same values must pass
-  revalidation immediately before dispatch, and callbacks must come from the
-  pinned package UID.
+  negotiated protocol, and negotiated capabilities. The policy exposes the
+  revalidation decision that a future dispatch path must call immediately before
+  dispatch, but no current call site reaches that boundary. Callbacks must come
+  from the pinned package UID.
 - Builds a credential-free session plan. Its binding-decision key includes the
   pinned identity, `listingGeneration`, model ID, model capability snapshot,
   effective context/output limits, and negotiated capabilities. Collection
@@ -193,12 +194,31 @@ When explicitly exercised by tests, the policy:
   and terminal ownership so cancellation/completion races have one winner and
   deferred remote controls are claimed at most once.
 
-These layers are not an active host route. The explicit metadata-only Binder
-handshake has no production call site, and there is no model listing, session
-dispatch, FD transport adapter, generation callback, UI, script-runtime entry
-point, network request, or built-in-provider migration. In particular, there
-is no route from `ai.ask`, `ai.chat`, `ai.stream`, or any other `ai.*` API to
-this baseline.
+The fourth layer, `AiTextProviderModelListingPolicy`, is default-off,
+transport-independent, and has no production call site. It accepts an already
+pinned provider identity and returns defensively copied encoded model-list
+request envelopes for a caller-owned transport; it neither binds nor registers
+`IAiModelListCallback`. A future transport must supply the calling UID captured
+synchronously at callback entry. The policy checks that UID against the pinned
+provider before decoding, strictly bounds and decodes model pages and provider
+errors, applies `AiModelPaginationPolicy` across one transcript, rejects stale
+or duplicate callbacks, listing-generation drift, token replay or cycles,
+duplicate model IDs, and model capabilities outside the pinned negotiation,
+and gives callback, cancellation, timeout, and binder-death terminal races
+exactly one winner. A completed transcript publishes an immutable
+provider-pinned catalog. `planExact()` selects one exact model ID and returns an
+immutable `AiTextHostSessionPlan` only when that model satisfies the requested
+capability requirements.
+
+The listing policy's internal `Dispatch` decision identifies only the next
+encoded model-list request for a future caller-owned transport; it is not
+session dispatch. These layers are not an active host route. The explicit
+metadata-only Binder handshake and transport-independent listing policy have no
+production call site, and there is no Android `IAiModelListCallback` adapter,
+actual Binder model-list invocation, `openSession` or session dispatch, FD
+transport adapter, `IAiTextCallback`, UI, script-runtime entry point, network
+request, or built-in-provider migration. In particular, there is no route from
+`ai.ask`, `ai.chat`, `ai.stream`, or any other `ai.*` API to this baseline.
 
 ## Streaming And Backpressure
 
@@ -253,6 +273,12 @@ exceed that scoped size. A token is single use. The host
 rejects replay, cycles, identity drift, generation changes, duplicate model
 IDs within a page, and model IDs repeated across pages.
 
+The current default-off transport-independent transcript policy enforces the
+page-size, token, generation, duplicate-model, pinned-UID, envelope, capability,
+and single-terminal portions of this boundary for caller-supplied callback
+events. It does not bind, register an Android callback, invoke `listModels()`, or
+perform Android package reinspection.
+
 The conformance provider exposes deterministic public models for echo, streaming,
 reasoning, and tools. Reserved hidden model IDs select hostile conformance
 behavior without adding a public `testMode` field to the protocol.
@@ -277,13 +303,15 @@ back to a cloud provider, changes models, or changes credential mode.
 
 This phase has default-off, read-only Android package discovery and exact
 component reinspection, an explicit-component metadata-only Binder handshake,
-and a pure host selection policy. It still has no production discovery or
-handshake call site, model listing, session or FD transport, generation
-callback, UI, or runtime integration. Installing either the independent
-production provider or the in-repository conformance provider therefore does
-not switch the public AI module or alter its built-in providers. The
-conformance APK is test-only, has no launcher or network permission, and is
-intended only for explicit conformance environments.
+pure host selection policies, and a transport-independent model-list transcript
+policy. It still has no production discovery, handshake, or model-list call
+site, Android `IAiModelListCallback` adapter, actual Binder model-list
+invocation, session or FD transport, `IAiTextCallback`, UI, or runtime
+integration. Installing either the independent production provider or the
+in-repository conformance provider therefore does not switch the public AI
+module or alter its built-in providers. The conformance APK is test-only, has
+no launcher or network permission, and is intended only for explicit
+conformance environments.
 
 A future Android integration built on the discovery, handshake, and policy
 layers must preserve the built-in implementation as the baseline,
