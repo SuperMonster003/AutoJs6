@@ -52,7 +52,7 @@ jobs:
       - name: Verify preinstalled Ninja
         run: ninja --version
 
-      - name: Test editor plugin host and build distributions
+      - name: Test plugin hosts and build distributions
         run: |
           set -euo pipefail
           chmod +x gradlew
@@ -62,6 +62,22 @@ jobs:
             --tests org.autojs.autojs.core.plugin.editor.AceEditorPluginPolicyTest \
             --tests org.autojs.autojs.ui.edit.editor.engine.AceEditorPluginMappingsTest \
             --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest \
+            --tests org.autojs.autojs.core.plugin.ai.* \
+            --tests org.autojs.autojs.core.plugin.dex.* \
+            --no-daemon \
+            --build-cache \
+            --console=plain \
+            --stacktrace
+          bash .github/scripts/run-gradle-ci.sh \
+            ./gradlew \
+            :plugin-api:protocol-wire-api:testDebugUnitTest \
+            :plugin-api:ai-common-api:testDebugUnitTest \
+            :plugin-api:ai-text-generation-api:testDebugUnitTest \
+            :plugin-api:dex-compiler-api:testDebugUnitTest \
+            :test-apps:ai-text-provider-conformance:testDebugUnitTest \
+            :test-apps:dex-compiler-conformance:testDebugUnitTest \
+            :test-apps:ai-text-provider-conformance:assembleDebug \
+            :test-apps:dex-compiler-conformance:assembleDebug \
             --no-daemon \
             --build-cache \
             --console=plain \

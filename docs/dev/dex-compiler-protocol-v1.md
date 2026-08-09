@@ -1,10 +1,11 @@
 # DEX Compiler Protocol V1
 
 This document records the frozen V1 contract and the first implementation
-boundary. The protocol AAR is a build-time SDK. The fake provider is a
-conformance fixture, not a production D8 distribution. The host still keeps
-its current local compiler and does not route `runtime.loadJar` through the
-plugin by default.
+boundary. The protocol AAR is a build-time SDK. The in-repository conformance
+provider is not a production D8 distribution; the real D8 provider lives in
+the independent sibling project `AutoJs6-Plugin-DEX-Compiler`. The host still
+keeps its current local compiler and does not route `runtime.loadJar` through
+the plugin by default.
 
 ## Modules
 
@@ -12,7 +13,7 @@ plugin by default.
 | --- | --- |
 | `plugin-api:protocol-wire-api` | Versioned field-tagged binary envelope |
 | `plugin-api:dex-compiler-api` | AIDL, models, codecs, negotiation, and quotas |
-| `plugins:dex-compiler-fake` | Deterministic normal and hostile conformance services |
+| `test-apps:dex-compiler-conformance` | Deterministic normal and hostile conformance services |
 | `app/.../core/plugin/dex` | Experimental host policy, lifecycle, cache key, and output validation |
 
 The API AAR contains no D8, R8, dx, archive implementation, network stack, UI,
@@ -140,7 +141,7 @@ larger protocol ceiling is not a safe Android heap target. Streaming validation
 and publication, or device-qualified heap-specific limits, remain a promotion
 gate before this ceiling can be raised.
 
-The fake provider does not make these large values a test allocation target.
+The conformance provider does not make these large values a test allocation target.
 Conformance tests use small fixtures and separately verify rejection at the
 boundaries. All normal and hostile service components share one process-wide
 session gate, matching the advertised single concurrent session even when a
@@ -196,7 +197,7 @@ The adapter is not connected to `AndroidClassLoader` in this phase. Therefore:
 - Missing, disabled, incompatible, or crashing DEX plugins do not change
   current host behavior.
 - Existing local D8 and legacy dx gates remain intact.
-- The fake provider cannot cause production scripts to execute its output.
+- The conformance provider cannot cause production scripts to execute its output.
 
 Default selection requires device/API matrix evidence, real
 `DexClassLoader` execution, Java and Kotlin corpus parity, cancellation and

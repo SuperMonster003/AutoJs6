@@ -7,19 +7,21 @@ authorize a mixed-modality AI plugin.
 
 ## Decision
 
-Proceed with a limited GO for a build-time AI protocol pack and a fake
-conformance provider.
+Proceed with a limited GO for a build-time AI protocol pack and a dedicated
+conformance test app.
 
-Implementation status on 2026-08-03: Phase 1 is implemented as a
-provider-neutral text protocol pack and isolated fake provider. A non-invasive
-slice of Phase 2 now exists as a default-off, pure Kotlin host policy for
-selection, trust pinning, capability matching, safe session planning, and race
-ownership. The protocol layer now also binds tool calls to the original request,
-verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
-quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
+Implementation status on 2026-08-09: Phase 1 is implemented as a
+provider-neutral text protocol pack and an isolated conformance test app under
+`test-apps`. Phase 3 now has a real CPU-only on-device provider in the
+independent sibling project `AutoJs6-Plugin-AI-Text-Generation`. A non-invasive
+slice of Phase 2 exists as a default-off, pure Kotlin host policy for selection,
+trust pinning, capability matching, safe session planning, and race ownership.
+The protocol layer also binds tool calls to the original request, verifies
+descriptor-backed tool JSON, enforces aggregate streaming digests and quotas,
+rejects decoded duplicate JSON keys, and redacts payload-bearing model
 summaries. Android discovery, Binder binding, UI, and script-runtime selection
-remain open, so installing the fixture has no user-facing effect. Repository
-and Android runtime gates are tracked in
+remain open, so installing either app alone has no effect on the public AI
+module. Repository and Android runtime gates are tracked in
 [the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
 contract is documented in
 [AI Text Plugin Protocol V1](ai-text-plugin-protocol-v1.md).
@@ -94,7 +96,7 @@ ai-text-generation-api
   callbacks, cancellation, and flow control
 
 ai-text-generation-conformance
-  fake provider, hostile fixtures, host harness, and compatibility corpus
+  conformance provider, hostile fixtures, host harness, and compatibility corpus
 ```
 
 The API artifacts must not depend on Gson, OkHttp, Retrofit, Bitmap, OpenCV,
@@ -478,7 +480,7 @@ failure and terminates the session without retry.
 The existing built-in providers remain the compatibility baseline. Plugin
 selection is designed to be explicit and does not silently replace a built-in
 profile. The current policy entry is disabled by default and has no Android or
-runtime adapter. Installing, removing, disabling, or omitting the fake provider
+runtime adapter. Installing, removing, disabling, or omitting the conformance provider
 therefore creates no user-visible feature or degradation today.
 
 - Missing, disabled, incompatible, updating, or crashed selected plugins fail
@@ -502,7 +504,7 @@ can prove that no provider work began.
 
 ## Conformance Matrix
 
-The limited GO advances only after a fake provider and hostile fixture pass:
+The limited GO advances only after a conformance provider and hostile fixture pass:
 
 - Android API 24, 26, 27, and the current highest supported API.
 - Current host/current plugin, current host/previous minor plugin, previous host/
@@ -561,10 +563,10 @@ is directional evidence only, not an APK-size or performance measurement.
   fallback semantics.
 - Keep all existing host behavior unchanged.
 
-### Phase 1: Build-Time Pack And Fake Provider
+### Phase 1: Build-Time Pack And Conformance Test App
 
 - Publish `ai-common-api` and `ai-text-generation-api` as lightweight AARs.
-- Add binary API checks, hostile Parcelable fixtures, and a fake provider APK.
+- Add binary API checks, hostile Parcelable fixtures, and a conformance APK.
 - Run the full version, lifecycle, flow-control, PFD, and vault-secrecy matrix.
 
 ### Phase 2: Optional Host Selector

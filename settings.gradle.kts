@@ -63,9 +63,12 @@ private val pluginApi = listOf(
 )
 
 private val plugins = listOf(
-    "ai-text-provider-fake",
     "apk-builder-template",
-    "dex-compiler-fake",
+)
+
+private val pluginConformanceTestApps = listOf(
+    "ai-text-provider-conformance",
+    "dex-compiler-conformance",
 )
 
 include(
@@ -74,6 +77,7 @@ include(
     *libs.map { ":libs:$it" }.toTypedArray(),
     *pluginApi.map { ":plugin-api:$it" }.toTypedArray(),
     *plugins.map { ":plugins:$it" }.toTypedArray(),
+    *pluginConformanceTestApps.map { ":test-apps:$it" }.toTypedArray(),
 )
 
 modules.forEach {
@@ -86,6 +90,10 @@ pluginApi.forEach {
 
 plugins.forEach {
     project(":plugins:$it").projectDir = File("plugins", it)
+}
+
+pluginConformanceTestApps.forEach {
+    project(":test-apps:$it").projectDir = File("test-apps", it)
 }
 
 pluginManagement {

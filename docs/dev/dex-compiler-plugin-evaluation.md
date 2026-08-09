@@ -9,8 +9,11 @@ runtime loading path.
 
 Proceed with a phased GO for a standalone D8 compiler plugin.
 
-Implementation status on 2026-08-03: the V1 protocol pack, isolated fake
-provider, and experimental host harness are implemented. The host artifact
+Implementation status on 2026-08-09: the V1 protocol pack, isolated
+conformance test app, production D8 provider, and experimental host harness are
+implemented. The production provider lives in the independent sibling project
+`AutoJs6-Plugin-DEX-Compiler`; the conformance app remains under `test-apps`
+only for deterministic hostile Binder scenarios. The host artifact
 store now starts a bounded reliable-pipe drain before dispatch, enforces the
 negotiated write ceiling, and checks the pipe peer error after EOF. Publication
 requires the provider-reported size and SHA-256 to match the independently
@@ -26,10 +29,11 @@ the publication claim and force rollback. Signals registered after that claim
 are late and cannot race a second fallback outcome against a published cache
 entry.
 
-The harness remains disconnected from the default class-loading path. No
-production provider invokes real D8 yet, and the Android runtime gates in
+The harness remains disconnected from the default class-loading path. The
+production provider invokes real D8, but `AndroidClassLoader` does not dispatch
+to it yet, and the Android runtime gates in
 [the conformance matrix](compiler-ai-protocol-conformance.md) remain open. The
-current device evidence is limited to the documented API 25 partial run.
+in-repository device evidence is limited to the documented API 25 partial run.
 The frozen implementation contract is documented in
 [DEX Compiler Protocol V1](dex-compiler-protocol-v1.md).
 
@@ -349,7 +353,7 @@ diagnostic.
 
 The following gates are required before making the plugin the default:
 
-- A fake compiler fixture proves version negotiation, descriptor ownership,
+- A conformance compiler fixture proves version negotiation, descriptor ownership,
   caller authentication, cancellation, timeout, late D8 completion, Binder
   death, duplicate terminal suppression, Binder-size failure, and atomic
   rollback.
@@ -373,7 +377,7 @@ The following gates are required before making the plugin the default:
   rolls back, so cancellation latency is not reported as compiler termination
   latency.
 - The host independently rejects every malformed-output corpus item even when
-  the fake plugin reports success.
+  the conformance provider reports success.
 
 The following additional gates are required before removing host compiler
 dependencies:
@@ -425,7 +429,7 @@ potential only; they are not performance, APK, or installed-size measurements.
 - Freeze canonical AAR normalization, duplicate handling, the runtime-library
   model, and cache provenance.
 - Record current D8/dx behavior, output validity, latency, RSS, and APK size.
-- Publish the protocol AAR and a fake conformance plugin only.
+- Publish the protocol AAR and a conformance test app only.
 
 ### Phase 1: Optional D8 Path
 

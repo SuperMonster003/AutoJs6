@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/08
+###### 2026/08/09
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -18,7 +18,7 @@
 * `Feature` External Node.js runtime plugin backend supports request-scoped workspace archive transport v2 with explicit input mapping, output writeback, and deletion tombstone manifests without scanning the host sandbox
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/text conversion/media information and more
-* `Feature` Plugin system provides versioned TaggedWire transport and v1 developer protocol packs for DEX compilation and provider-neutral AI text generation, with isolated conformance providers and hostile fixtures
+* `Feature` Plugin system provides versioned TaggedWire transport and v1 developer protocol packs for DEX compilation and provider-neutral AI text generation, with dedicated conformance test apps and hostile fixtures
 * `Feature` Plugin system supports an extension interface for offline project documentation
 * `Feature` File manager supports single-file read-only Explorer Action plugin extensions and dynamically loads their actions in the overflow menu of the main file page
 * `Feature` File manager supports Explorer Action protocol v2 primary actions to provide image viewing, audio playback, and video playback through three independent plugins
@@ -146,6 +146,7 @@
 * `Improvement` Consolidated file manager media detail queries into a single MediaInfo snapshot to reduce Binder calls and wait time
 * `Improvement` Limited external file viewing and media playback fallbacks to read-only URI access
 * `Improvement` Unified file manager plugin actions for default clicks, primary buttons, media detail playback, and the overflow menu under an explicit main-file-page policy with one deterministic fallback
+* `Improvement` Moved the AI text and DEX compiler conformance providers from the production `plugins` directory into the dedicated `test-apps` build group, preserving hostile Binder regression coverage while keeping independent production plugins as a separate release boundary
 * `Improvement` DEX compiler experimental host path remains default-off and requires an explicit component while enforcing exact-component UID and complete signer-set pinning, single-dispatch fallback, semantic cache provenance, bounded callback ingress, isolated Binder deadlines, structural DEX ZIP validation, reliable-pipe bounded draining with peer errors checked at EOF, rollback-safe single publication guarded by source and destination digests, and atomic arbitration between asynchronous termination signals and the publication commit point that forces rollback when cancellation, timeout, or Binder death wins before commit
 * `Improvement` Experimental DEX compiler conformance now exercises real Android Binder transport and artifact storage, exact signed components, hostile callback/output/timeout scenarios, target-aware DEX validation, and DexClassLoader execution
 * `Improvement` Default-off pure AI text host policy provides deterministic trust selection, exact identity pinning and revalidation, host/provider capability intersection, ambiguous-candidate rejection, plugin-managed credential isolation, diagnostics without sensitive content, deterministic ownership of cancellation/terminal session races, request-bound tool and descriptor JSON validation, aggregate streaming length/SHA-256/quota enforcement, duplicate decoded JSON key rejection, summary-only `toString` for models containing sensitive data, and a domain-separated cache key for capability collections

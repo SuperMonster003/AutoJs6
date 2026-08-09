@@ -7,7 +7,7 @@
     <application
         android:allowBackup="false"
         android:extractNativeLibs="false"
-        android:label="AutoJs6 AI Text Provider Fake"
+        android:label="AutoJs6 AI Text Conformance"
         android:supportsRtl="true"
         android:testOnly="true"
         android:usesCleartextTraffic="false">

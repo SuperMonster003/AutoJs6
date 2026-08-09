@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/08
+###### 2026/08/09
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
@@ -18,7 +18,7 @@
 * `추가` Node.js 외부 런타임 플러그인 백엔드에서 요청 범위 워크스페이스 아카이브 전송 v2, 명시적 입력 매핑, 출력 쓰기 반영, 삭제 tombstone 매니페스트를 지원하며 호스트 샌드박스를 스캔하지 않음
 * `추가` 앱 패키징 기능은 Node.js 스크립트 프로젝트를 지원하고 필요한 런타임 라이브러리를 자동 포함
 * `추가` 플러그인 시스템에서 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/텍스트 변환/미디어 정보 등의 확장 API 지원
-* `추가` 플러그인 시스템에서 버전 지정 TaggedWire 전송과 DEX 컴파일/공급자 중립 AI 텍스트 생성을 위한 v1 개발 프로토콜 팩을 지원하고 격리된 적합성 테스트 제공자 및 적대적 시나리오 제공
+* `추가` 플러그인 시스템에서 버전 지정 TaggedWire 전송과 DEX 컴파일/공급자 중립 AI 텍스트 생성을 위한 v1 개발 프로토콜 팩을 지원하고 전용 적합성 테스트 앱 및 적대적 fixture 제공
 * `추가` 플러그인 시스템에서 오프라인 프로젝트 문서 확장 인터페이스 지원
 * `추가` 파일 관리자가 단일 파일 읽기 전용 Explorer Action 플러그인 확장을 지원하고 기본 파일 페이지의 더보기 메뉴에 플러그인 작업을 동적으로 로드
 * `추가` 파일 관리자가 Explorer Action 프로토콜 v2의 기본 작업을 지원하여 이미지 보기, 오디오 재생, 비디오 재생을 3개의 독립 플러그인으로 제공
@@ -146,6 +146,7 @@
 * `개선` 파일 관리자의 미디어 상세 정보 조회를 단일 MediaInfo 스냅샷으로 통합하여 Binder 호출 및 대기 시간 감소
 * `개선` 외부 파일 보기 및 미디어 재생 대체 경로를 읽기 전용 URI 접근으로 제한
 * `개선` 파일 관리자의 기본 클릭/주요 버튼/미디어 상세 재생/overflow 메뉴 플러그인 작업을 명시적인 기본 파일 페이지 정책으로 통합하고 결정적인 단일 폴백 적용
+* `개선` AI 텍스트 및 DEX 컴파일러 적합성 provider를 프로덕션 `plugins` 디렉터리에서 전용 `test-apps` build group으로 이동하여 적대적 Binder 회귀 테스트 범위를 유지하고 독립 프로덕션 플러그인의 릴리스 경계를 명확화
 * `개선` DEX 컴파일러 실험적 호스트 경로를 기본 비활성화하고 명시적 컴포넌트를 요구하며, 정확한 컴포넌트 UID와 전체 서명자 집합 고정, 단일 디스패치 폴백, 의미 기반 캐시 출처, 제한된 콜백 입력, 격리된 Binder 시간 제한, 구조적 DEX ZIP 검증, reliable pipe 제한 drain과 EOF 시 peer error 확인, 원본/대상 digest로 보호되는 rollback 가능한 단일 게시, 비동기 종료 신호와 게시 commit 지점 사이의 원자적 중재, 취소/시간 초과/Binder death가 commit 전에 승리할 때 강제 rollback을 적용
 * `개선` DEX 컴파일러 실험적 적합성 테스트를 실제 Android Binder 전송 및 아티팩트 저장소로 확장하여 정확한 서명 컴포넌트, 적대적 callback/출력/timeout 시나리오, 대상 API 인식 DEX 검증 및 DexClassLoader 실행을 포함
 * `개선` 기본 비활성화된 순수 AI 텍스트 호스트 정책에 결정적 신뢰 선택, 정확한 ID 고정 및 재검증, 호스트/프로바이더 기능 교집합, 모호한 후보 거부, 플러그인 관리 자격 증명 격리, 민감한 내용을 포함하지 않는 진단, 취소/종료 세션 경쟁의 결정적 소유권, request-bound 도구/descriptor JSON 검증, streaming 집계 length/SHA-256/quota 검증, 디코딩된 JSON 중복 key 거부, 민감한 데이터를 포함한 모델의 `toString` 요약, capability collection용 domain-separated cache key를 적용

@@ -34,6 +34,7 @@ AGENTS.md
 /modules/**/build/
 /plugin-api/**/build/
 /plugins/**/build/
+/test-apps/**/build/
 /captures/
 /release/
 /releases/

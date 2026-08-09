@@ -1,9 +1,11 @@
 # AI Text Plugin Protocol V1
 
 This document records the frozen provider-neutral text-generation protocol.
-The two API AARs and the fake provider are conformance infrastructure. They do
-not replace or modify the existing host `ai.ask`, `ai.chat`, or `ai.stream`
-implementation in this phase.
+The two API AARs and the in-repository conformance test app are contract and
+hostile-test infrastructure. The first production on-device provider lives in
+the independent sibling project `AutoJs6-Plugin-AI-Text-Generation`. Neither
+the SDK nor the test app replaces or modifies the existing host `ai.ask`,
+`ai.chat`, or `ai.stream` implementation in this phase.
 
 The final checked-in API and conformance tests are normative if wording in this
 document temporarily lags the current hardening pass.
@@ -15,7 +17,7 @@ document temporarily lags the current hardening pass.
 | `plugin-api:protocol-wire-api` | Shared versioned binary envelope |
 | `plugin-api:ai-common-api` | Provider identity, errors, usage, payload and FD references |
 | `plugin-api:ai-text-generation-api` | Text AIDL, models, codecs, limits, and lifecycle policies |
-| `plugins:ai-text-provider-fake` | Deterministic provider and hostile conformance scenarios |
+| `test-apps:ai-text-provider-conformance` | Deterministic provider and hostile conformance scenarios |
 | `app/.../core/plugin/ai` | Default-off, transport-independent host selection and session policies |
 
 V1 is text generation only. Image, audio, and video remain separate future
@@ -204,14 +206,14 @@ exceed that scoped size. A token is single use. The host
 rejects replay, cycles, identity drift, generation changes, duplicate model
 IDs within a page, and model IDs repeated across pages.
 
-The fake provider exposes deterministic public models for echo, streaming,
+The conformance provider exposes deterministic public models for echo, streaming,
 reasoning, and tools. Reserved hidden model IDs select hostile conformance
 behavior without adding a public `testMode` field to the protocol.
 
 ## Credentials, Privacy, And Retry
 
 V1 allows `NONE` and `PLUGIN_MANAGED` credential modes. Credentials remain in
-the owning component and never cross the protocol. The fake provider is local,
+the owning component and never cross the protocol. The conformance provider is local,
 uses `NONE`, has no network permission, and never logs prompts, tool arguments,
 tool results, keys, or provider-native payloads.
 
@@ -227,10 +229,11 @@ back to a cloud provider, changes models, or changes credential mode.
 ## Failure And Degradation
 
 This phase has a default-off, pure host selection policy but no Android
-discovery, Binder binding, UI, or runtime integration. Installing or removing
-the fake provider therefore adds no user-facing AI capability and cannot alter
-the existing built-in providers. The fake APK is test-only, has no launcher or
-network permission, and is intended for explicit conformance environments.
+discovery, Binder binding, UI, or runtime integration. Installing either the
+independent production provider or the in-repository conformance provider
+therefore does not switch the public AI module or alter its built-in providers.
+The conformance APK is test-only, has no launcher or network permission, and is
+intended only for explicit conformance environments.
 
 A future Android integration built on the policy must preserve the built-in
 implementation as the baseline, independently obtain and revalidate every

@@ -4,6 +4,11 @@ This matrix separates checks that are complete in the repository from checks
 that require an installed provider, multiple Android API levels, or a real
 production engine. A static pass is not a device-runtime claim.
 
+The production AI and DEX providers are maintained as independent sibling
+projects and are not source dependencies of this repository. The applications
+under `test-apps` deliberately retain fake package identities and hostile
+behavior only for reproducible host conformance testing.
+
 ## Current Repository Gates
 
 | Area | Gate | Evidence | Status |
@@ -16,16 +21,16 @@ production engine. A static pass is not a device-runtime claim.
 | DEX host | ZIP and DEX structural validation, including target-aware DEX versions, pre-inflate declared quotas and ratios, and cross-DEX duplicate classes | `DexIndexedZipValidatorTest`, 12 tests | PASS, JVM |
 | DEX host | Exact component/UID/full-signer policy, identity drift, bounded ingress, reliable-pipe transfer, dual summaries, abort/publication commit arbitration, no retry, rollback, cleanup, and late callback handling | Experimental adapter corpus, 94 tests total across host policies | PASS, JVM |
 | DEX host | Android transport and artifact-store source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
-| DEX fake | Deterministic fixed DEX ZIP, strict bounded JAR framing/hash validation, process-wide single-session gate, explicit hostile services, and single-writer behavior | Fake compiler unit corpus, 25 tests | PASS, JVM |
-| DEX fake | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
+| DEX conformance app | Deterministic fixed DEX ZIP, strict bounded JAR framing/hash validation, process-wide single-session gate, explicit hostile services, and single-writer behavior | Conformance compiler unit corpus, 25 tests | PASS, JVM |
+| DEX conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 | AI common | Provider, error, usage, payload reference, version negotiation, malformed and evolution corpus | `AiCommonCodecTest` | PASS, JVM |
 | AI text | Capabilities, requests, chunks, reasoning, usage, tools, pages, malformed and evolution corpus | `AiTextCodecTest` | PASS, JVM |
 | AI lifecycle | Credits, contiguous sequence, single terminal, cancellation, declared tools, verified JSON, aggregate stream digests, tool exactly-once, and cumulative quotas | Lifecycle and quota unit corpus | PASS, JVM |
 | AI models | Page token replay, scope, cycle, generation drift, and cross-page duplicate model IDs | `AiModelPageTokenPolicyTest` | PASS, JVM |
 | AI protocol | Shared wire, common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and pagination | Combined protocol/API corpus, 103 tests | PASS, JVM |
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
-| AI fake | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models, bounded executors, FD cleanup, and caller authentication | Fake text provider unit corpus, 31 tests | PASS, JVM |
-| AI fake | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
+| AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models, bounded executors, FD cleanup, and caller authentication | Conformance text provider unit corpus, 31 tests | PASS, JVM |
+| AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 
 ## Android Runtime Gates
 
@@ -42,7 +47,7 @@ APK assembly pass.
 | D8 parity for default/static interface methods, missing libraries, and device boot libraries | Current local compiler versus production plugin | PENDING |
 | AAR normalization and resource behavior | Current local path versus production plugin | PENDING |
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
-| AI fake provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PENDING |
+| AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PENDING |
 | AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PENDING |
 | Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
 
@@ -99,7 +104,7 @@ No runtime gate may use a developer device that is reserved for another soak
 or endurance test. An explicit serial and a dedicated conformance run are
 required before any install, uninstall, process kill, or connected Gradle task.
 
-Both fake APK modules disable their release variants and use only Android's
+Both conformance test-app modules disable their release variants and use only Android's
 debug/test signing configuration. Same-signer conformance must build the host
 and fixture together in an isolated checkout with the same default or dedicated
 test key. Production `sign.properties` and production signing keys are outside
@@ -109,7 +114,7 @@ this matrix.
 
 The DEX adapter remains experimental and disconnected from
 `AndroidClassLoader` until every applicable Android gate passes. A production
-compiler must contain the real D8 implementation; the fixed-output fake can
+compiler must contain the real D8 implementation; the fixed-output conformance provider can
 never be selected for production compilation.
 
 The AI protocol remains disconnected from the public `ai` module until an

@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 8 August 2026.
+Données mises à jour le 9 August 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/08/08
+###### 2026/08/09
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -178,7 +178,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Le backend du plugin d'exécution Node.js externe prend en charge le transport d'archive d'espace de travail v2 limité à la requête, avec mappage explicite des entrées, réécriture des sorties et manifeste tombstone de suppression, sans analyser le sandbox hôte
 * `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
 * `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversion de texte/informations multimédias et plus encore
-* `Fonctionnalité` Le système de plugins fournit un transport TaggedWire versionné et des packs de protocole de développement v1 pour la compilation DEX et la génération de texte AI indépendante du fournisseur, avec des fournisseurs de conformité isolés et des scénarios hostiles
+* `Fonctionnalité` Le système de plugins fournit un transport TaggedWire versionné et des packs de protocole de développement v1 pour la compilation DEX et la génération de texte AI indépendante du fournisseur, avec des applications de test de conformité dédiées et des scénarios hostiles
 * `Fonctionnalité` Le système de plugins prend en charge une interface d'extension pour la documentation hors ligne du projet
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge les extensions de plugin Explorer Action en lecture seule pour un seul fichier et charge dynamiquement leurs actions dans le menu supplémentaire de la page principale des fichiers
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge les actions principales Explorer Action du protocole v2 pour fournir l'affichage d'images, la lecture audio et la lecture vidéo via trois plugins indépendants
@@ -306,6 +306,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Regroupement des requêtes de détails multimédias du gestionnaire de fichiers en un seul instantané MediaInfo afin de réduire les appels Binder et le temps d'attente
 * `Amélioration` Limitation des replis d'affichage et de lecture externes aux accès URI en lecture seule
 * `Amélioration` Unification des actions de plugins du gestionnaire de fichiers pour le clic par défaut, le bouton principal, la lecture depuis les détails multimédias et le menu overflow sous une politique explicite de la page principale des fichiers avec un repli unique et déterministe
+* `Amélioration` Migration des fournisseurs de conformité AI text et compilateur DEX du répertoire de production `plugins` vers le groupe de build dédié `test-apps`, en conservant la couverture de régression Binder hostile et en séparant la frontière de publication des plugins de production indépendants
 * `Amélioration` Le chemin hôte expérimental du compilateur DEX reste désactivé par défaut et exige un composant explicite, avec épinglage de l'UID du composant exact et de l'ensemble complet des signataires, repli à répartition unique, provenance sémantique du cache, entrée de callbacks bornée, délais Binder isolés, validation structurelle du ZIP DEX, vidage borné de reliable pipe avec vérification des erreurs du pair à EOF, publication unique avec retour arrière protégée par les condensats source et destination, et arbitrage atomique entre les signaux de terminaison asynchrones et le point de commit de publication qui force le retour arrière si l'annulation, le délai dépassé ou Binder death l'emporte avant le commit
 * `Amélioration` Les tests de conformité expérimentaux du compilateur DEX couvrent désormais le transport Binder Android réel et le stockage d'artefacts, les composants signés exacts, les scénarios hostiles de callback/sortie/délai, la validation DEX adaptée à l'API cible et l'exécution via DexClassLoader
 * `Amélioration` La politique hôte pure de texte IA, désactivée par défaut, fournit une sélection de confiance déterministe, l'épinglage et la revalidation exacte de l'identité, l'intersection des capacités hôte/fournisseur, le rejet des candidats ambigus, l'isolation des identifiants gérés par le plugin, des diagnostics sans contenu sensible, l'arbitrage déterministe des courses annulation/terminal de session, la validation des outils et du JSON par descripteur liée à la requête, le contrôle agrégé longueur/SHA-256/quota du streaming, le rejet des clés JSON dupliquées après décodage, un `toString` résumé pour les modèles contenant des données sensibles et une clé de cache à séparation de domaine pour les collections de capacités
@@ -611,7 +612,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 8 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 9 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
