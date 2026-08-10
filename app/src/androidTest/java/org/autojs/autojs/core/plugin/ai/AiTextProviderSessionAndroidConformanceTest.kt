@@ -174,6 +174,289 @@ class AiTextProviderSessionAndroidConformanceTest {
         assertEquals(operationStarts.get(), operationEnds.get())
     }
 
+    @Test
+    fun completionDescriptorIsMaterializedAcrossProcess() {
+        val result = runHostileScenario(
+            modelId = FAKE_COMPLETION_FD_MODEL,
+            prompt = COMPLETION_FD_TEXT,
+        )
+
+        val completed = result.requireTranscriptTerminal<AiTextProviderSessionEvent.Completed>()
+        assertEquals(COMPLETION_FD_TEXT, completed.result.outputText)
+        assertEquals(1, completed.result.descriptorCount)
+        assertSettledExactlyOnce(result)
+    }
+
+    @Test
+    fun toolDescriptorIsOwnedThenRejectedWithoutExecution() {
+        val result = runHostileScenario(modelId = FAKE_TOOL_FD_MODEL)
+
+        assertTranscriptRejected(result, AiTextProviderSessionFailure.TOOLS_UNSUPPORTED)
+        assertSettledExactlyOnce(result)
+    }
+
+    @Test
+    fun chunkBeforeStartFailsClosedAfterInitialCreditCommit() {
+        val result = runHostileScenario(
+            modelId = FAKE_CHUNK_BEFORE_START_MODEL,
+        )
+
+        assertTranscriptRejected(result, AiTextProviderSessionFailure.CALLBACK_MALFORMED)
+        assertSettledExactlyOnce(result)
+    }
+
+    @Test
+    fun sequenceGapFailsClosedOnce() {
+        val result = runHostileScenario(
+            modelId = FAKE_SEQUENCE_GAP_MODEL,
+        )
+
+        assertTranscriptRejected(result, AiTextProviderSessionFailure.CALLBACK_MALFORMED)
+        assertSettledExactlyOnce(result)
+    }
+
+    @Test
+    fun invalidCompletionDescriptorReferenceFailsClosedOnce() {
+        val result = runHostileScenario(modelId = FAKE_INVALID_FD_REFERENCE_MODEL)
+
+        assertTranscriptRejected(result, AiTextProviderSessionFailure.CALLBACK_MALFORMED)
+        assertSettledExactlyOnce(result)
+    }
+
+    @Test
+    fun duplicateTerminalPublishesOnlyOneSettledOutcome() {
+        val result = runHostileScenario(modelId = FAKE_DUPLICATE_TERMINAL_MODEL)
+
+        when (val terminal = result.terminal) {
+            is AiTextProviderSessionRunEvent.Transcript ->
+                assertTrue(
+                    "Unexpected duplicate-terminal transcript: ${terminal.event}",
+                    terminal.event is AiTextProviderSessionEvent.Completed,
+                )
+            is AiTextProviderSessionRunEvent.Rejected -> {
+                assertEquals(AiTextProviderSessionRunFailure.TRANSCRIPT_REJECTED, terminal.failure)
+                assertEquals(
+                    AiTextProviderSessionFailure.CALLBACK_OUT_OF_ORDER,
+                    terminal.transcriptFailure,
+                )
+            }
+            else -> assertTrue("Unexpected duplicate-terminal outcome: $terminal", false)
+        }
+        assertSettledExactlyOnce(result)
+    }
+
+    @Test
+    fun stalledSessionCanBeCancelledAfterStartAndReleasesOwner() {
+        val result = runHostileScenario(
+            modelId = FAKE_STALL_MODEL,
+            cancelAfterStarted = true,
+        )
+
+        assertTrue("Host cancel was not accepted for the stalled session", result.cancelAccepted)
+        result.requireTranscriptTerminal<AiTextProviderSessionEvent.Cancelled>()
+        assertEquals(1, result.transcript.filterIsInstance<AiTextProviderSessionEvent.Started>().size)
+        assertSettledExactlyOnce(result)
+    }
+
+    private fun runHostileScenario(
+        modelId: String,
+        prompt: String = HOSTILE_PROMPT,
+        cancelAfterStarted: Boolean = false,
+    ): HostileScenarioResult {
+        requireConformanceEnvironment()
+        val component = AiTextProviderComponent(FAKE_PACKAGE, FAKE_SERVICE)
+        val initial = discoverExact(component)
+        val worker = boundedExecutor("ai-text-hostile-control", 64)
+        val blocking = boundedExecutor("ai-text-hostile-binder", 32)
+        val fallback = boundedExecutor("ai-text-hostile-terminal", 32)
+        val scheduler = Executors.newSingleThreadScheduledExecutor(
+            namedThreadFactory("ai-text-hostile-deadline"),
+        )
+        val owner = AiTextProviderSessionProcessOwner()
+        var runHandle: AiTextProviderSessionRunHandle? = null
+        var requestDescriptors: AndroidAiTextProviderSessionRequestDescriptors? = null
+        try {
+            val pinned = runHandshake(initial, worker, blocking, scheduler)
+            requestDescriptors = AndroidAiTextProviderSessionRequestDescriptors(
+                emptyArray<ParcelFileDescriptor>(),
+            )
+            val request = hostileRequest(
+                pinned = pinned,
+                modelId = modelId,
+                prompt = prompt,
+            )
+            val plan = AiTextHostSessionPlan(
+                pinnedProvider = pinned,
+                listingGeneration = FAKE_LISTING_GENERATION,
+                modelId = modelId,
+                modelCapabilityIds = setOf(AiTextCapabilityId.STREAMING),
+                effectiveMaximumContextBytes = pinned.negotiatedCapabilities.maximumContextBytes,
+                effectiveMaximumOutputBytes = pinned.negotiatedCapabilities.maximumOutputBytes,
+                credentialDisposition = AiTextCredentialIsolationPolicy.disposition(pinned),
+            )
+            val events = Collections.synchronizedList(mutableListOf<AiTextProviderSessionRunEvent>())
+            val started = CountDownLatch(1)
+            val terminal = CountDownLatch(1)
+            val terminalCount = AtomicInteger()
+            val callbackOnMain = AtomicBoolean(false)
+            val terminalEvent = AtomicReference<AiTextProviderSessionRunEvent>()
+            val coordinator = AiTextProviderSessionCoordinator(
+                transport = AndroidAiTextProviderSession(context),
+                workerExecutor = worker,
+                blockingExecutor = blocking,
+                terminalFallbackExecutor = fallback,
+                deadlineScheduler = scheduler.asSessionDeadlineScheduler(),
+                clock = AiTextProviderSessionClock { android.os.SystemClock.elapsedRealtime() },
+                owner = owner,
+            )
+            runHandle = coordinator.start(
+                AiTextProviderSessionRunRequest(
+                    snapshot = initial,
+                    plan = plan,
+                    request = request,
+                    requestDescriptors = checkNotNull(requestDescriptors),
+                    environment = environment(),
+                    hostCapabilities = hostCapabilities(),
+                    options = AiTextProviderSessionRunOptions(enabled = true),
+                ),
+            ) { event ->
+                if (Looper.myLooper() == Looper.getMainLooper()) callbackOnMain.set(true)
+                events += event
+                if ((event as? AiTextProviderSessionRunEvent.Transcript)?.event is
+                    AiTextProviderSessionEvent.Started
+                ) {
+                    started.countDown()
+                }
+                if (event.isSessionTerminal()) {
+                    terminalCount.incrementAndGet()
+                    if (terminalEvent.compareAndSet(null, event)) terminal.countDown()
+                }
+            }
+
+            var cancelAccepted = false
+            if (cancelAfterStarted) {
+                assertTrue(
+                    "Hostile AI text session did not start",
+                    started.await(START_WAIT_MILLIS, TimeUnit.MILLISECONDS),
+                )
+                cancelAccepted = checkNotNull(runHandle).cancel()
+            }
+            assertTrue(
+                "Hostile AI text session did not terminate: $modelId",
+                terminal.await(OUTCOME_WAIT_MILLIS, TimeUnit.MILLISECONDS),
+            )
+            Thread.sleep(LATE_CALLBACK_SETTLE_MILLIS)
+            assertFalse(
+                "Hostile AI text callback was delivered on the Android main thread",
+                callbackOnMain.get(),
+            )
+            assertTrue(initial.samePackageIdentityAs(discoverExact(component)))
+            assertFalse(
+                "A settled hostile session accepted another cancel",
+                checkNotNull(runHandle).cancel(),
+            )
+            checkNotNull(runHandle).close()
+            val admission = owner.tryAcquire(component)
+            val ownerReusable = admission == AiTextProviderSessionAdmission.ACQUIRED
+            if (ownerReusable) owner.release()
+            return HostileScenarioResult(
+                events = synchronized(events) { events.toList() },
+                terminal = checkNotNull(terminalEvent.get()),
+                terminalCount = terminalCount.get(),
+                cancelAccepted = cancelAccepted,
+                ownerReusable = ownerReusable,
+            )
+        } finally {
+            runCatching { runHandle?.close() }
+            runCatching { requestDescriptors?.close() }
+            shutdown(worker, blocking, fallback, scheduler)
+        }
+    }
+
+    private fun hostileRequest(
+        pinned: AiTextProviderPinnedIdentity,
+        modelId: String,
+        prompt: String,
+    ): AiTextRequest {
+        val promptBytes = prompt.toByteArray(Charsets.UTF_8)
+        return AiTextRequest(
+            requestId = "android-hostile-${modelId.substringAfterLast('.')}",
+            protocolVersion = AiProtocolVersion(1, 0),
+            providerId = pinned.providerId,
+            modelId = modelId,
+            messages = listOf(
+                AiMessage(
+                    role = AiMessageRole.USER,
+                    parts = listOf(
+                        AiContentPart(
+                            AiPayloadReference(
+                                mimeType = AiTextMimeType.PLAIN,
+                                declaredLengthBytes = promptBytes.size.toLong(),
+                                inlineBytes = promptBytes,
+                                charset = "utf-8",
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            options = AiGenerationOptions(
+                stream = true,
+                includeReasoning = false,
+                structuredJson = false,
+                reportUsage = false,
+                maximumOutputBytes = 4_096,
+                maximumToolRounds = 0,
+                timeoutMillis = SESSION_TIMEOUT_MILLIS,
+                responseMimeType = AiTextMimeType.PLAIN,
+                requiredCapabilityIds = listOf(AiTextCapabilityId.STREAMING),
+            ),
+        )
+    }
+
+    private fun assertTranscriptRejected(
+        result: HostileScenarioResult,
+        expected: AiTextProviderSessionFailure,
+    ) {
+        val rejected = result.terminal as? AiTextProviderSessionRunEvent.Rejected
+        assertNotNull("Expected transcript rejection, got ${result.terminal}", rejected)
+        val terminal = checkNotNull(rejected)
+        assertEquals(
+            AiTextProviderSessionRunFailure.TRANSCRIPT_REJECTED,
+            terminal.failure,
+        )
+        assertEquals(expected, terminal.transcriptFailure)
+    }
+
+    private fun assertSettledExactlyOnce(result: HostileScenarioResult) {
+        assertEquals("Hostile session emitted more than one terminal event", 1, result.terminalCount)
+        assertEquals(
+            "Hostile session retained more than one terminal in its event list",
+            1,
+            result.events.count { it.isSessionTerminal() },
+        )
+        assertTrue("Hostile session did not release the process owner", result.ownerReusable)
+    }
+
+    private inline fun <reified T : AiTextProviderSessionEvent> HostileScenarioResult
+        .requireTranscriptTerminal(): T {
+        val transcript = terminal as? AiTextProviderSessionRunEvent.Transcript
+        assertNotNull("Expected transcript terminal, got $terminal", transcript)
+        val event = checkNotNull(transcript).event
+        assertTrue("Expected ${T::class.java.simpleName}, got $event", event is T)
+        return event as T
+    }
+
+    private data class HostileScenarioResult(
+        val events: List<AiTextProviderSessionRunEvent>,
+        val terminal: AiTextProviderSessionRunEvent,
+        val terminalCount: Int,
+        val cancelAccepted: Boolean,
+        val ownerReusable: Boolean,
+    ) {
+        val transcript: List<AiTextProviderSessionEvent>
+            get() = events.mapNotNull { (it as? AiTextProviderSessionRunEvent.Transcript)?.event }
+    }
+
     private fun descriptorRequest(
         pinned: AiTextProviderPinnedIdentity,
         promptBytes: ByteArray,
@@ -430,8 +713,18 @@ class AiTextProviderSessionAndroidConformanceTest {
             "org.autojs.plugin.ai.text.fake.service.FakeAiTextProviderService"
         const val FAKE_LISTING_GENERATION = "fake-models-v1"
         const val FAKE_STREAM_MODEL = "fake.stream"
+        const val FAKE_COMPLETION_FD_MODEL = "fake.hostile.completion-fd"
+        const val FAKE_TOOL_FD_MODEL = "fake.hostile.tool-fd"
+        const val FAKE_CHUNK_BEFORE_START_MODEL = "fake.hostile.chunk-before-start"
+        const val FAKE_SEQUENCE_GAP_MODEL = "fake.hostile.sequence-gap"
+        const val FAKE_DUPLICATE_TERMINAL_MODEL = "fake.hostile.duplicate-terminal"
+        const val FAKE_INVALID_FD_REFERENCE_MODEL = "fake.hostile.invalid-fd-ref"
+        const val FAKE_STALL_MODEL = "fake.hostile.stall"
+        const val COMPLETION_FD_TEXT = "descriptor completion across Binder"
+        const val HOSTILE_PROMPT = "hostile Android session"
         const val HANDSHAKE_TIMEOUT_MILLIS = 15_000L
         const val SESSION_TIMEOUT_MILLIS = 30_000L
+        const val START_WAIT_MILLIS = 15_000L
         const val OUTCOME_WAIT_MILLIS = 40_000L
         const val LATE_CALLBACK_SETTLE_MILLIS = 250L
         const val EXECUTOR_SHUTDOWN_WAIT_MILLIS = 2_000L
