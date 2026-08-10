@@ -6,6 +6,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.os.SystemClock
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
 import androidx.test.platform.app.InstrumentationRegistry
 import dalvik.system.DexClassLoader
 import org.autojs.autojs6.BuildConfig
@@ -75,7 +78,6 @@ class DexCompilerR1MatrixAndroidTest {
             program.contentEquals(deterministicProgramJar()),
         )
         val inputSha256 = r1Sha256(program)
-        val fdCountBefore = openFileDescriptorCount()
         val transientBefore = transientArtifactNames()
         val threadPrefix = "dex-r1-matrix-${UUID.randomUUID()}"
         val trackingTransport = TrackingTransport(AndroidDexCompilerExperimentalTransport(context))
@@ -111,9 +113,17 @@ class DexCompilerR1MatrixAndroidTest {
         var evidence: MatrixEvidence? = null
         var cleanup: CleanupEvidence? = null
         var primaryFailure: Throwable? = null
+        var transportCleanupAttempted = false
+        var fdCountBefore = -1
+        var fdSnapshotBefore = emptyMap<Int, String>()
         try {
             val identity = requirePinnedRealProvider(trackingTransport)
             val handshake = readAndValidateHandshake(trackingTransport, identity)
+            // Exclude one-time test, PackageManager, Binder, and provider-handshake initialization
+            // from the ownership window. The first exact binding is already closed here; the window
+            // below brackets the production harness session and its host-owned resources only.
+            fdSnapshotBefore = awaitStableHostFileDescriptorSnapshot()
+            fdCountBefore = fdSnapshotBefore.size
             val attempt = runAttempt(
                 harness = harness,
                 store = store,
@@ -176,13 +186,31 @@ class DexCompilerR1MatrixAndroidTest {
 
             val entryManifest = entryManifest(outputBytes)
             assertEquals(secondValidation.dexEntryCount, entryManifest.dexEntryCount)
-            val execution = loadAndExecute(outputBytes)
-            assertEquals(EXPECTED_RESULT, execution.result)
             assertEquals(
                 "Provider identity drifted after the real D8 publication",
                 identity,
                 trackingTransport.inspectExact(REAL_COMPONENT)?.pin(),
             )
+
+            // ART may retain descriptors owned by a successfully adopted DexClassLoader for the
+            // lifetime of its loaded classes (observed on API 28). Fully retire the Binder, pipe,
+            // publication, executor, binding, thread, and workspace boundary first, prove that its
+            // descriptor count returned to the host baseline, and only then adopt the in-memory
+            // output with DexClassLoader.
+            transportCleanupAttempted = true
+            cleanup = completeTransportCleanup(
+                exactArtifact = exactArtifact,
+                exactCacheKey = exactCacheKey,
+                executors = executors,
+                trackingTransport = trackingTransport,
+                threadPrefix = threadPrefix,
+                transientBefore = transientBefore,
+                fdCountBefore = fdCountBefore,
+                fdSnapshotBefore = fdSnapshotBefore,
+            )
+
+            val execution = loadAndExecute(outputBytes)
+            assertEquals(EXPECTED_RESULT, execution.result)
 
             evidence = MatrixEvidence(
                 inputSizeBytes = program.size.toLong(),
@@ -200,102 +228,23 @@ class DexCompilerR1MatrixAndroidTest {
             primaryFailure = error
             throw error
         } finally {
-            val cleanupFailures = mutableListOf<Throwable>()
-            var generationInvalidated = exactArtifact == null
-            var exactGenerationAbsent = exactCacheKey == null
-            runCatching {
-                exactArtifact?.let { artifact ->
-                    assertTrue("Unable to invalidate the exact R1 matrix generation", artifact.invalidate())
-                    generationInvalidated = true
-                    assertTrue(
-                        "The invalidated R1 matrix generation can still be opened",
-                        artifact.openRead() == null,
+            if (!transportCleanupAttempted) {
+                transportCleanupAttempted = true
+                val cleanupFailure = runCatching {
+                    cleanup = completeTransportCleanup(
+                        exactArtifact = exactArtifact,
+                        exactCacheKey = exactCacheKey,
+                        executors = executors,
+                        trackingTransport = trackingTransport,
+                        threadPrefix = threadPrefix,
+                        transientBefore = transientBefore,
+                        fdCountBefore = fdCountBefore,
+                        fdSnapshotBefore = fdSnapshotBefore,
                     )
-                }
-                exactCacheKey?.let { key ->
-                    assertTrue(
-                        "The exact R1 matrix cache generation left files behind",
-                        exactCacheFiles(key).isEmpty(),
-                    )
-                    exactGenerationAbsent = true
-                }
-            }.exceptionOrNull()?.let(cleanupFailures::add)
-
-            executors.forEach(ExecutorService::shutdownNow)
-            var executorsTerminated = true
-            executors.forEach { executor ->
-                runCatching {
-                    assertTrue(
-                        "An R1 matrix executor did not terminate",
-                        executor.awaitTermination(EXECUTOR_SHUTDOWN_WAIT_MILLIS, TimeUnit.MILLISECONDS),
-                    )
-                }.onFailure {
-                    executorsTerminated = false
-                    cleanupFailures += it
-                }
-            }
-
-            var bindingsClosed = false
-            runCatching {
-                assertTrue("The R1 matrix test did not open both expected exact bindings", trackingTransport.opened >= 2)
-                assertEquals(
-                    "An exact DEX compiler binding was not closed",
-                    trackingTransport.opened,
-                    trackingTransport.closed,
-                )
-                bindingsClosed = true
-            }.exceptionOrNull()?.let(cleanupFailures::add)
-
-            var ownedThreadsAlive = -1
-            runCatching {
-                val ownedThreadNames = awaitOwnedLiveThreadNames(threadPrefix)
-                ownedThreadsAlive = ownedThreadNames.size
-                assertTrue(
-                    "An R1 matrix-owned thread remains alive: $ownedThreadNames",
-                    ownedThreadNames.isEmpty(),
-                )
-            }.exceptionOrNull()?.let(cleanupFailures::add)
-
-            var workspaceRestored = false
-            runCatching {
-                val transientAfter = transientArtifactNames()
-                assertTrue(
-                    "The R1 matrix test left a new transient artifact: ${transientAfter - transientBefore}",
-                    transientAfter.subtract(transientBefore).isEmpty(),
-                )
-                workspaceRestored = true
-            }.exceptionOrNull()?.let(cleanupFailures::add)
-
-            var fdCountAfter = -1
-            runCatching {
-                fdCountAfter = awaitFileDescriptorCountAtMost(fdCountBefore)
-                assertTrue(
-                    "The R1 matrix test leaked a host file descriptor: before=$fdCountBefore after=$fdCountAfter",
-                    fdCountAfter <= fdCountBefore,
-                )
-            }.exceptionOrNull()?.let(cleanupFailures::add)
-
-            if (cleanupFailures.isEmpty()) {
-                cleanup = CleanupEvidence(
-                    generationInvalidated = generationInvalidated,
-                    exactGenerationAbsent = exactGenerationAbsent,
-                    executorsTerminated = executorsTerminated,
-                    bindingsOpened = trackingTransport.opened,
-                    bindingsClosed = trackingTransport.closed,
-                    allBindingsClosed = bindingsClosed,
-                    ownedThreadsAlive = ownedThreadsAlive,
-                    workspaceRestored = workspaceRestored,
-                    fdCountBefore = fdCountBefore,
-                    fdCountAfter = fdCountAfter,
-                )
-            } else {
-                val original = primaryFailure
-                if (original != null) {
-                    cleanupFailures.forEach(original::addSuppressed)
-                } else {
-                    val cleanupFailure = cleanupFailures.removeAt(0)
-                    cleanupFailures.forEach(cleanupFailure::addSuppressed)
-                    throw cleanupFailure
+                }.exceptionOrNull()
+                if (cleanupFailure != null) {
+                    val original = primaryFailure
+                    if (original != null) original.addSuppressed(cleanupFailure) else throw cleanupFailure
                 }
             }
         }
@@ -307,6 +256,138 @@ class DexCompilerR1MatrixAndroidTest {
             Bundle().apply {
                 putString(STATUS_KEY, completedEvidence.toJson(completedCleanup).toString())
             },
+        )
+    }
+
+    private fun completeTransportCleanup(
+        exactArtifact: DexCompilerVerifiedArtifact?,
+        exactCacheKey: String?,
+        executors: List<ExecutorService>,
+        trackingTransport: TrackingTransport,
+        threadPrefix: String,
+        transientBefore: Set<String>,
+        fdCountBefore: Int,
+        fdSnapshotBefore: Map<Int, String>,
+    ): CleanupEvidence {
+        val cleanupFailures = mutableListOf<Throwable>()
+        var generationInvalidated = exactArtifact == null
+        var exactGenerationAbsent = exactCacheKey == null
+        exactArtifact?.let { artifact ->
+            runCatching {
+                assertTrue("Unable to invalidate the exact R1 matrix generation", artifact.invalidate())
+                generationInvalidated = true
+                val reopened = artifact.openRead()
+                try {
+                    assertTrue(
+                        "The invalidated R1 matrix generation can still be opened",
+                        reopened == null,
+                    )
+                } finally {
+                    reopened?.close()
+                }
+            }.exceptionOrNull()?.let(cleanupFailures::add)
+        }
+        exactCacheKey?.let { key ->
+            runCatching {
+                assertTrue(
+                    "The exact R1 matrix cache generation left files behind",
+                    exactCacheFiles(key).isEmpty(),
+                )
+                exactGenerationAbsent = true
+            }.exceptionOrNull()?.let(cleanupFailures::add)
+        }
+
+        executors.forEach { executor ->
+            runCatching { executor.shutdownNow() }
+                .exceptionOrNull()
+                ?.let(cleanupFailures::add)
+        }
+        var executorsTerminated = true
+        executors.forEach { executor ->
+            runCatching {
+                assertTrue(
+                    "An R1 matrix executor did not terminate",
+                    executor.awaitTermination(EXECUTOR_SHUTDOWN_WAIT_MILLIS, TimeUnit.MILLISECONDS),
+                )
+            }.onFailure {
+                executorsTerminated = false
+                cleanupFailures += it
+            }
+        }
+
+        var bindingsClosed = false
+        runCatching {
+            assertTrue("The R1 matrix test did not open both expected exact bindings", trackingTransport.opened >= 2)
+            assertEquals(
+                "An exact DEX compiler binding was not closed",
+                trackingTransport.opened,
+                trackingTransport.closed,
+            )
+            bindingsClosed = true
+        }.exceptionOrNull()?.let(cleanupFailures::add)
+
+        var ownedThreadsAlive = -1
+        runCatching {
+            val ownedThreadNames = awaitOwnedLiveThreadNames(threadPrefix)
+            ownedThreadsAlive = ownedThreadNames.size
+            assertTrue(
+                "An R1 matrix-owned thread remains alive: $ownedThreadNames",
+                ownedThreadNames.isEmpty(),
+            )
+        }.exceptionOrNull()?.let(cleanupFailures::add)
+
+        var workspaceRestored = false
+        runCatching {
+            val transientAfter = transientArtifactNames()
+            assertTrue(
+                "The R1 matrix test left a new transient artifact: ${transientAfter - transientBefore}",
+                transientAfter.subtract(transientBefore).isEmpty(),
+            )
+            workspaceRestored = true
+        }.exceptionOrNull()?.let(cleanupFailures::add)
+
+        var fdCountAfter = -1
+        var fdTargetsRestored = false
+        if (fdCountBefore >= 0) {
+            runCatching {
+                val fdSnapshotAfter = awaitFileDescriptorSnapshotAtMost(fdCountBefore)
+                fdCountAfter = fdSnapshotAfter.size
+                val openedTargets = additionalFileDescriptorTargets(
+                    before = fdSnapshotBefore,
+                    after = fdSnapshotAfter,
+                )
+                assertTrue(
+                    "The R1 matrix transport left new host file descriptor targets before " +
+                        "DexClassLoader adoption: $openedTargets",
+                    openedTargets.isEmpty(),
+                )
+                assertTrue(
+                    "The R1 matrix transport leaked a host file descriptor before DexClassLoader adoption: " +
+                        "before=$fdCountBefore after=$fdCountAfter opened=$openedTargets",
+                    fdCountAfter <= fdCountBefore,
+                )
+                fdTargetsRestored = true
+            }.exceptionOrNull()?.let(cleanupFailures::add)
+        }
+
+        if (cleanupFailures.isNotEmpty()) {
+            val cleanupFailure = cleanupFailures.removeAt(0)
+            cleanupFailures.forEach(cleanupFailure::addSuppressed)
+            throw cleanupFailure
+        }
+        return CleanupEvidence(
+            generationInvalidated = generationInvalidated,
+            exactGenerationAbsent = exactGenerationAbsent,
+            executorsTerminated = executorsTerminated,
+            bindingsOpened = trackingTransport.opened,
+            bindingsClosed = trackingTransport.closed,
+            allBindingsClosed = bindingsClosed,
+            ownedThreadsAlive = ownedThreadsAlive,
+            workspaceRestored = workspaceRestored,
+            fdMeasurementBoundary = FD_MEASUREMENT_BOUNDARY,
+            transportFdTargetsRestored = fdTargetsRestored,
+            transportFdCountBefore = fdCountBefore,
+            transportFdCountAfter = fdCountAfter,
         )
     }
 
@@ -779,18 +860,80 @@ class DexCompilerR1MatrixAndroidTest {
 
     private fun artifactRoot(): File = File(context.noBackupFilesDir, ARTIFACT_DIRECTORY_NAME)
 
-    private fun openFileDescriptorCount(): Int = checkNotNull(File("/proc/self/fd").list()) {
-        "Unable to inspect the host process file descriptors"
-    }.size
-
-    private fun awaitFileDescriptorCountAtMost(limit: Int): Int {
-        val deadline = SystemClock.uptimeMillis() + FD_SETTLE_WAIT_MILLIS
-        var count = openFileDescriptorCount()
-        while (count > limit && SystemClock.uptimeMillis() < deadline) {
-            SystemClock.sleep(FD_SETTLE_POLL_MILLIS)
-            count = openFileDescriptorCount()
+    private fun openFileDescriptorSnapshot(): Map<Int, String> {
+        val entries = checkNotNull(File("/proc/self/fd").listFiles()) {
+            "Unable to inspect the host process file descriptors"
         }
-        return count
+        return entries
+            .mapNotNull { entry ->
+                val descriptor = entry.name.toIntOrNull() ?: return@mapNotNull null
+                val target = try {
+                    Os.readlink(entry.absolutePath)
+                } catch (error: ErrnoException) {
+                    if (error.errno == OsConstants.ENOENT) return@mapNotNull null
+                    throw error
+                }
+                descriptor to target
+            }
+            .sortedBy { it.first }
+            .toMap(linkedMapOf())
+    }
+
+    private fun awaitStableHostFileDescriptorSnapshot(): Map<Int, String> {
+        val startedAt = SystemClock.uptimeMillis()
+        val earliestCompletion = startedAt + HOST_STARTUP_SETTLE_MIN_MILLIS
+        val deadline = startedAt + HOST_STARTUP_SETTLE_MAX_MILLIS
+        var snapshot = openFileDescriptorSnapshot()
+        var signature = snapshot.values.sorted()
+        var stableSince = startedAt
+        while (SystemClock.uptimeMillis() < deadline) {
+            SystemClock.sleep(HOST_STARTUP_SETTLE_POLL_MILLIS)
+            val current = openFileDescriptorSnapshot()
+            val currentSignature = current.values.sorted()
+            val now = SystemClock.uptimeMillis()
+            if (currentSignature == signature) {
+                if (
+                    now >= earliestCompletion &&
+                    now - stableSince >= HOST_STARTUP_STABLE_WINDOW_MILLIS
+                ) {
+                    return current
+                }
+            } else {
+                snapshot = current
+                signature = currentSignature
+                stableSince = now
+            }
+        }
+        throw AssertionError(
+            "The host process file descriptors did not stabilize after startup: " +
+                "targets=${snapshot.values.sorted()}",
+        )
+    }
+
+    private fun awaitFileDescriptorSnapshotAtMost(limit: Int): Map<Int, String> {
+        val deadline = SystemClock.uptimeMillis() + FD_SETTLE_WAIT_MILLIS
+        var snapshot = openFileDescriptorSnapshot()
+        while (snapshot.size > limit && SystemClock.uptimeMillis() < deadline) {
+            SystemClock.sleep(FD_SETTLE_POLL_MILLIS)
+            snapshot = openFileDescriptorSnapshot()
+        }
+        return snapshot
+    }
+
+    private fun additionalFileDescriptorTargets(
+        before: Map<Int, String>,
+        after: Map<Int, String>,
+    ): List<String> {
+        val remaining = before.values.groupingBy { it }.eachCount().toMutableMap()
+        return after.entries.mapNotNull { (descriptor, target) ->
+            val count = remaining[target] ?: 0
+            if (count > 0) {
+                remaining[target] = count - 1
+                null
+            } else {
+                "$descriptor=$target"
+            }
+        }
     }
 
     private fun awaitOwnedLiveThreadNames(prefix: String): List<String> {
@@ -872,8 +1015,10 @@ class DexCompilerR1MatrixAndroidTest {
         val allBindingsClosed: Boolean,
         val ownedThreadsAlive: Int,
         val workspaceRestored: Boolean,
-        val fdCountBefore: Int,
-        val fdCountAfter: Int,
+        val fdMeasurementBoundary: String,
+        val transportFdTargetsRestored: Boolean,
+        val transportFdCountBefore: Int,
+        val transportFdCountAfter: Int,
     )
 
     private data class MatrixEvidence(
@@ -950,8 +1095,10 @@ class DexCompilerR1MatrixAndroidTest {
                 .put("allBindingsClosed", cleanup.allBindingsClosed)
                 .put("ownedThreadsAlive", cleanup.ownedThreadsAlive)
                 .put("workspaceRestored", cleanup.workspaceRestored)
-                .put("fdCountBefore", cleanup.fdCountBefore)
-                .put("fdCountAfter", cleanup.fdCountAfter))
+                .put("fdMeasurementBoundary", cleanup.fdMeasurementBoundary)
+                .put("transportFdTargetsRestored", cleanup.transportFdTargetsRestored)
+                .put("transportFdCountBefore", cleanup.transportFdCountBefore)
+                .put("transportFdCountAfter", cleanup.transportFdCountAfter))
 
         companion object {
             private fun compilerPath(): String = if (Build.VERSION.SDK_INT <= 25) {
@@ -1005,7 +1152,7 @@ class DexCompilerR1MatrixAndroidTest {
         const val ARG_ENABLED = "autojs.dexCompiler.r1Matrix.enabled"
         const val STATUS_KEY = "autojs.dex.r1.matrix.evidence"
         const val STATUS_CODE = 0
-        const val STATUS_SCHEMA_VERSION = "autojs6.dex.r1.matrix-instrumentation-evidence/v1"
+        const val STATUS_SCHEMA_VERSION = "autojs6.dex.r1.matrix-instrumentation-evidence/v2"
         const val CORPUS_ID = "r1-real-d8-load-v1"
 
         const val HOST_PACKAGE = "org.autojs.autojs6"
@@ -1031,6 +1178,11 @@ class DexCompilerR1MatrixAndroidTest {
         const val THREAD_SETTLE_POLL_MILLIS = 25L
         const val FD_SETTLE_WAIT_MILLIS = 3_000L
         const val FD_SETTLE_POLL_MILLIS = 25L
+        const val HOST_STARTUP_SETTLE_MIN_MILLIS = 4_000L
+        const val HOST_STARTUP_SETTLE_MAX_MILLIS = 12_000L
+        const val HOST_STARTUP_STABLE_WINDOW_MILLIS = 1_000L
+        const val HOST_STARTUP_SETTLE_POLL_MILLIS = 50L
+        const val FD_MEASUREMENT_BOUNDARY = "HOST_TRANSPORT_PFD_CLEAN_BEFORE_DEX_CLASS_LOADER"
 
         const val ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50L
         const val ZIP_CENTRAL_DIRECTORY_SIGNATURE = 0x02014b50L
