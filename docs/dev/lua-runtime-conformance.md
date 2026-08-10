@@ -13,7 +13,7 @@ exists.
 | Public AIDL compilation | PASS, GRADLE | R0 Gradle API gate, 14+50 JVM tests, `lua-runtime-api` debug AAR assembly | Cross-package calls, caller UID, Binder death |
 | Host proxy and `.lua` routing | PASS, LOCAL R1 + R2 DEVICE | App compilation plus 66/66 focused JVM tests after Explorer executable admission; pinned selection, explicit transport, effective component-state handling, process-wide bounded Binder lane, and API 31 fixture cleanup policies | Production provider/native Lua execution, Android API/ABI matrix |
 | Hostile Android provider | PASS, DEVICE PARTIAL | R2 debug-only/testOnly fixture 2/2 JVM build plus 19/19 isolated methods on `QV710AF65F` API 31/arm64-v8a | Provider death, wrong UID/capability attacks, update/uninstall during a session, oversized source, OS-level FD evidence |
-| PUC Lua JNI provider | PASS, BUILD/ARTIFACT; NOT ANDROID-RUN | Clean independent revision; immutable protocol/Lua intake; Gradle 9.6.1 wrapper; native-enabled/provider-disabled Kotlin/Java/JNI build; 30/30 JVM tests; arm64-v8a/x86_64/universal APKs with exact ABI inventory, 16 KiB ELF/ZIP alignment, and a common debug signer | Android INFO/RUNTIME bind, native Lua execution, PFD ownership, allocator/hooks/OOM/cancel under execution, crash/wedge recovery, release signing, production enablement |
+| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; PROVIDER OFF | Immutable protocol/Lua intake; Gradle 9.6.1 wrapper; 38/38 JVM tests; three aligned APKs; 7/7 separately selected instrumentation methods in the provider-disabled direct-native harness (6 native execution + 1 provider-off) on API 31/arm64 with exact install/restore evidence | Android INFO/RUNTIME bind, real provider PFD/session execution, watchdog kill/rebind/new PID, crash/wedge or Android process-OOM recovery, release signing, production enablement |
 | Device/API/ABI acceptance | PASS, SINGLE DEVICE | API 31, arm64-v8a, 4 KiB, exact serial/artifact/restore evidence | API 24-36, x86_64, 16 KiB environments |
 | Release evidence | PENDING | R6 | Signed independent plugin APK and production soak |
 
@@ -223,10 +223,20 @@ A detached clean checkout of the same revision repeated 50/50 Gradle tasks,
 30/30 JVM tests, and the full artifact gate with a fresh Gradle user home. Its
 three APK digests differ from the first build, so the checkpoint establishes
 clean-checkout input rebuildability, not byte-identical APK reproducibility.
-Actionless cross-process binding, actual native Lua results, dedicated-process
-session behavior, PFD accounting, allocator/OOM, hook cancellation, safe-library
-denial, native crash or wedged-call containment, process kill/rebuild, clean
-release signing, and production enablement all remain unestablished.
+At sibling revision `52076d7a5b97630acdc86652f39703eba058a46a`,
+`VERSION_BUILD=14`, the repository gate passes 21/21 static/hostile Python tests,
+38/38 JVM tests, and Android-test compilation. Seven separately selected
+instrumentation methods in the provider-disabled direct-native harness then
+passed on `QV710AF65F` API 31/arm64-v8a: six native-execution methods and one
+provider-off/discovery check. They cover scalar results, failure classification,
+hook cancellation/deadline, an allocator memory-limit failure, and same-process
+reuse. See
+`docs/dev/lua-runtime-native-device-evidence-2026-08-10.md`.
+
+Actionless cross-process binding, dedicated-process session behavior, PFD
+accounting, watchdog kill/rebind/new-PID recovery, native crash or wedged-call
+containment, Android process OOM, release signing, and production enablement
+remain unestablished.
 
 Recheck the existing artifacts without ADB or rebuilding:
 
@@ -238,7 +248,7 @@ python "$sibling\tools\verify_repository.py" --require-build-ready
     -SdkRoot 'E:\.android\sdk' `
     -BuildToolsVersion '37.0.0' `
     -NdkVersion '28.2.13676358' `
-    -ExpectedTests 30
+    -ExpectedTests 38
 exit $LASTEXITCODE
 ```
 
@@ -255,5 +265,5 @@ digest mismatch, source/output quotas, zero credits, output replay/gap,
 duplicate terminal, cancellation races, bind timeout/null binding, Binder
 death, update/uninstall, wrong UID, ambiguous providers, capability replay,
 and descriptor cleanup. The native provider additionally covers infinite-loop
-stop, allocator OOM, native crash, wedged C call, process rebuild, and repeated
-execution resource growth.
+stop, allocator memory-limit exhaustion, Android process OOM, native crash,
+wedged C call, process rebuild, and repeated execution resource growth.

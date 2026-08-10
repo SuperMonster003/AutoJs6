@@ -106,6 +106,10 @@ $deviceEvidence = Read-RequiredText $root "docs/dev/lua-runtime-device-evidence-
 Require-Pattern $deviceEvidence 'all 19 methods passed' "R2 report records the complete method outcome"
 Require-Pattern $deviceEvidence 'returned to the audited package/process\s+state' "R2 report records audited device restoration"
 
+$nativeDeviceEvidence = Read-RequiredText $root "docs/dev/lua-runtime-native-device-evidence-2026-08-10.md"
+Require-Pattern $nativeDeviceEvidence 'Every method was selected explicitly' "R3 native report records isolated method execution"
+Require-Pattern $nativeDeviceEvidence 'Final state: both packages absent, no target PID, and no active\s+instrumentation' "R3 native report records audited device restoration"
+
 $restartRouting = Read-RequiredText $root "app/src/main/java/org/autojs/autojs/util/IntentUtils.kt"
 Require-Pattern $restartRouting 'resolveRestartScriptFile' "Restart recovery uses one source resolver"
 Require-Pattern $restartRouting 'LuaScriptSource\.isLuaFileName\(script\)' "Restart recovery preserves Lua extensions"
@@ -453,6 +457,7 @@ if (Test-Path -LiteralPath $PluginRoot -PathType Container) {
     $pluginBuild = Read-RequiredText $resolvedPlugin "app/build.gradle.kts"
     Require-Pattern $pluginBuild 'luaProviderEnabled\.get\(\)\s*&&\s*!luaNativeEnabled\.get\(\)' "R3 rejects provider enablement without native enablement"
     Require-Pattern $pluginBuild 'resValue\("bool",\s*"lua_runtime_provider_enabled",\s*luaProviderEnabled\.get\(\)\.toString\(\)\)' "R3 manifest enablement is generated from the provider gate"
+    Require-Pattern $pluginBuild 'testInstrumentationRunner\s*=\s*"androidx\.test\.runner\.AndroidJUnitRunner"' "R3 declares the native Android test runner"
 
     $pluginManifestPath = Join-Path $resolvedPlugin "app/src/main/AndroidManifest.xml"
     $pluginManifest = Require-Xml $pluginManifestPath "R3 plugin manifest"
@@ -518,6 +523,18 @@ if (Test-Path -LiteralPath $PluginRoot -PathType Container) {
     $callbackGate = Read-RequiredText $resolvedPlugin "app/src/main/java/io/github/supermonster003/autojs6/plugin/lua/runtime/execution/LuaCallbackDeliveryGate.kt"
     Require-Pattern $callbackGate 'AtomicReference\(State\.OPEN\)' "R3 callback delivery is atomically claimed"
     Require-Pattern $callbackGate 'State\.CLOSE_PENDING' "R3 callback close waits for the in-flight delivery owner"
+
+    $executionWatchdog = Read-RequiredText $resolvedPlugin "app/src/main/java/io/github/supermonster003/autojs6/plugin/lua/runtime/execution/LuaExecutionWatchdog.kt"
+    Require-Pattern $executionWatchdog 'execution\.token\s*!==\s*token' "R3 watchdog actions are bound to the active execution token"
+    Require-Pattern $executionWatchdog '(?s)immediateTermination\s*=\s*when\s*\{.*?poisonIfOwned\(execution\).*?return@synchronized\s+false' "R3 watchdog rejects dispatch when its deadline or stop grace already expired"
+
+    $processWatchdog = Read-RequiredText $resolvedPlugin "app/src/main/java/io/github/supermonster003/autojs6/plugin/lua/runtime/service/LuaRuntimeProcessWatchdog.kt"
+    Require-Pattern $processWatchdog '(?s)Process\.killProcess\(pid\).*?Runtime\.getRuntime\(\)\.halt' "R3 process watchdog has kill and fail-stop fallback paths"
+
+    $nativeAndroidTest = Read-RequiredText $resolvedPlugin "app/src/androidTest/java/io/github/supermonster003/autojs6/plugin/lua/runtime/NativeLuaRuntimeInstrumentationTest.kt"
+    Require-Pattern $nativeAndroidTest '(?s)\A(?!.*bindService\().*assertTrue\(BuildConfig\.LUA_NATIVE_ENABLED\).*assertFalse\(BuildConfig\.LUA_PROVIDER_ENABLED\)' "R3 native Android gate keeps the provider disabled and never binds it"
+    Require-Pattern $nativeAndroidTest 'fun\s+infiniteLoopIsCancelledByHook\(\)' "R3 native Android gate exercises hook cancellation"
+    Require-Pattern $nativeAndroidTest 'fun\s+allocatorLimitFailsClosedAndTheProcessRemainsReusable\(\)' "R3 native Android gate exercises allocator failure and same-process reuse"
 
     $vendorLock = Read-RequiredText $resolvedPlugin "app/src/main/cpp/vendor/vendor-lock.json"
     Require-Pattern $vendorLock 'https://www\.lua\.org/ftp/lua-5\.4\.8\.tar\.gz' "R3 pins the official Lua 5.4.8 source"

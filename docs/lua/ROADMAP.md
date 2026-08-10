@@ -24,19 +24,19 @@ Android Binder, native-runtime, device, ABI, or release evidence.
 - [x] The protected `QV710AF65F` soak was explicitly released by the user on
   2026-08-10. Every Gradle invocation waited for two idle samples and ran
   serially. ADB was used only after release and the audited packages were
-  restored to their original absent state after R2.
-- [x] The no-Gradle/no-ADB static roadmap guard passes 155 source and
+  restored to their original absent state after both R2 and R3 device gates.
+- [x] The no-Gradle/no-ADB static roadmap guard passes 168 source and
   configuration checks across the host, R2 fixture, and R3 sibling repository.
 - [x] R2 has a compiled opt-in host Android harness, an assembled hostile
   fixture, and a 19/19 API 31 arm64-v8a device checkpoint. R3 now has an
   independently versioned, default-disabled sibling build and artifact gate at
-  revision `3be87d6c7f354649cded9b580fa53eceeb849791`.
+  revision `52076d7a5b97630acdc86652f39703eba058a46a`.
 - [x] The current boundary is explicit: Explorer can dispatch `.lua` to the
   proxy, the fake provider has partial Android Binder/PFD acceptance, and the
   sibling packages the compiled PUC Lua/JNI runtime for arm64-v8a and x86_64.
-  The production provider remains packaged off; no sibling APK installation,
-  Android service binding, native Lua execution, PFD lifecycle, watchdog, or
-  process-recovery claim exists yet.
+  The provider-disabled direct-native harness has six execution passes plus one
+  provider-off/discovery pass. Production Android service binding, provider PFD
+  lifecycle, watchdog process termination, and process recovery remain open.
 
 ## Deferred Verification Queue After The Protected Soak
 
@@ -360,10 +360,14 @@ exit $LASTEXITCODE
   and its policy passes JVM tests, but it has not run cross-process on Android.
 - [x] Vendor and pin PUC Lua 5.4.8 source, license notices, reproducible native
   build inputs, and runtime slot `lua54`.
-- [ ] Validate the bounded `lua_newstate` allocator, `lua_sethook` cancellation
-  and deadline checks, protected calls, and serialized worker under native
-  Android execution. These paths compile, but compile/JVM evidence does not
-  establish allocator, hook, cancellation, or hard-stop behavior.
+- [x] Validate the bounded `lua_newstate` allocator, `lua_sethook` cancellation
+  and deadline checks, protected calls, scalar/result rejection, and
+  post-memory-limit reuse through provider-disabled direct native Android
+  execution.
+- [ ] Validate the serialized worker, source PFDs, and process watchdog through
+  the dedicated `:lua_runtime` process, including a native wedge/crash or
+  Android process OOM, kill, Binder death, rebind, new PID, and a successful
+  post-recovery execution.
 - [x] Compile the exact standard-library allowlist; `debug`, unrestricted `io`,
   `os.execute`, dynamic C modules, Java reflection, and `loadlib` remain absent
   from admitted sources. Runtime denial behavior remains an Android test gate.
@@ -419,13 +423,30 @@ R3 immutable-input/build checkpoint on 2026-08-10:
   and `3ba79648fb7a275f39355c3242749577452998b8dc1e3e2e447da8df7defa0b2`.
   They differ from the first clean build, so this proves pinned inputs can be
   rebuilt from a clean checkout, not byte-for-byte deterministic APK output.
-- INFO/RUNTIME actionless binding, dedicated-process/session behavior,
-  allocator/OOM, hook cancellation, library denial, actual native Lua results,
-  and PFD ownership have compile/static/JVM evidence only. No sibling APK was
-  installed and no ADB transaction was used for this checkpoint. Provider
-  discovery, cross-package Binder/PFD hostile cases, native crash/wedge
-  containment, process kill/rebuild, release signing, API/device matrix, and
-  production enablement remain open.
+- The later `3f9834328976dfcef0ee85fe6c63218bda6763ee` revision adds a
+  token-bound fail-stop watchdog. Its 38/38 JVM gate covers normal finish,
+  stop, scheduler failure, stale-token, and already-expired dispatch races;
+  Android process termination and recovery remain open.
+- Current sibling revision `52076d7a5b97630acdc86652f39703eba058a46a`
+  has `VERSION_BUILD=14`, 21/21 static/hostile Python tests, 38/38 JVM tests,
+  and a compiled Android native harness. The current universal, arm64-v8a, and
+  x86_64 APK SHA-256 values are respectively
+  `2303d4b4b2901080931236c625f4e60307b9bf010c5b9262ca41f600e48b442b`,
+  `f35bef79e9c151a9bfd7edc6ea6afdf496fa1ac26a6d57496e4a33dee0c4bf22`,
+  and `77782d877ae781b48915fafd910ebc5ae61eb335df95f5a9d00973d638f8d2fe`.
+- Seven instrumentation methods in the provider-disabled direct-native harness
+  passed independently on `QV710AF65F` API 31/arm64-v8a: one provider-off
+  discovery check plus six native execution methods covering scalar/runner
+  results, syntax/runtime errors, unsupported values/arguments, infinite-loop
+  cancel/deadline, and an allocator memory-limit failure followed by
+  same-process reuse.
+  Exact artifact, method, and restoration evidence is in
+  `docs/dev/lua-runtime-native-device-evidence-2026-08-10.md`.
+- INFO/RUNTIME actionless binding, dedicated-process/session behavior, real
+  provider PFD ownership, watchdog kill/rebind/new-PID recovery, native crash
+  containment, Android process OOM, release signing, API/device matrix, and
+  production enablement remain open. The tested packages were restored to
+  their original absent state and provider discovery remains disabled.
 
 Check the frozen sibling revision and already-built artifacts without ADB:
 
@@ -437,7 +458,7 @@ python "$sibling\tools\verify_repository.py" --require-build-ready
     -SdkRoot 'E:\.android\sdk' `
     -BuildToolsVersion '37.0.0' `
     -NdkVersion '28.2.13676358' `
-    -ExpectedTests 30
+    -ExpectedTests 38
 exit $LASTEXITCODE
 ```
 
