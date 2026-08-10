@@ -14,16 +14,17 @@ Implementation status on 2026-08-10: Phase 1 is implemented as a
 provider-neutral text protocol pack and an isolated conformance test app under
 `test-apps`. Phase 3 now has a real CPU-only on-device provider in the
 independent sibling project `AutoJs6-Plugin-AI-Text-Generation`. A non-invasive
-slice of Phase 2 now includes default-off pure Kotlin host policies, read-only
-Android package discovery, an exact-component metadata handshake, and an
-exact-component Android model-list coordinator/transport. None has a production
-call site. The protocol layer also binds tool calls to the original request,
+slice of Phase 2 now includes default-off pure Kotlin host selection,
+model-list, and session-transcript policies, read-only Android package discovery,
+an exact-component metadata handshake, and an exact-component Android
+model-list coordinator/transport. None has a production call site. The protocol
+layer also binds tool calls to the original request,
 verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
 quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
-summaries. Session dispatch, request/result PFD transport, `IAiTextCallback`,
-credit flow, UI, and script-runtime selection remain open, so installing either
-app alone has no effect on the public AI module. Repository and Android runtime
-gates are tracked in
+summaries. Android `openSession` dispatch, request/result PFD transport, an
+`IAiTextCallback` adapter, UI, and script-runtime selection remain open, so
+installing either app alone has no effect on the public AI module. Repository
+and Android runtime gates are tracked in
 [the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
 contract is documented in
 [AI Text Plugin Protocol V1](ai-text-plugin-protocol-v1.md).
@@ -68,6 +69,12 @@ would not become simpler merely by moving it across Binder:
   transport-independent selection, transcript, and session policies. They do
   not query `PackageManager`, bind a service, read a credential, send a
   generation request, or connect to the script facade.
+- `AiTextProviderSessionPolicy` now owns a default-off pure Kotlin session
+  transcript: plan/request admission, provisional callbacks around a
+  synchronous open, callback UID and size checks before copy/decode, bounded
+  credits and ingress, descriptor cleanup, and one terminal outcome. Its
+  descriptor, callback, and remote interfaces are transport abstractions, not
+  Android Binder/PFD adapters.
 - The same package now contains read-only Android discovery, a metadata-only
   exact-component handshake, and an exact-component model-list
   coordinator/transport. These adapters have no production call site. The
@@ -283,11 +290,35 @@ action string or package name supplied inside a Parcel is not caller proof. The
 provider must separately check `Binder.getCallingUid()` and the packages/signers
 associated with that UID against its expected authorized host identity.
 
-A separate pure session gate serializes dispatch start, remote-handle
-attachment, cancellation, close, data admission, and terminal ownership.
-Cancellation or close requested before attachment is claimed at most once when
-the handle arrives, and cancellation/completion races cannot both win. This is
-policy coverage only; it is not currently connected to an AIDL session.
+`AiTextProviderSessionPolicy` is a separate default-off pure Kotlin transcript
+owner. It validates an already pinned plan and request before producing a
+dispatch decision. Callbacks arriving before the synchronous open transaction
+returns are provisional and become listener-visible only after
+`commitOpenSucceeded()`; external cancel, timeout, or death can supersede them
+before commit, while `commitOpenFailed()` reports `OPEN_FAILED` when no external
+terminal has won. The policy checks callback UID and envelope size before copy
+or decode, uses a bounded callback queue with a minimum capacity of ten (one
+start, eight initially credited chunks, and one terminal), and does not
+replenish credit after terminal ingress.
+
+Remote teardown and late-handle cleanup are serialized, prompt, and idempotent;
+listener publication waits for open resolution, request and callback descriptor
+cleanup, copy/read reservations, data delivery, credit grants, and remote
+closures to settle. Executor rejection has an independent terminal fallback,
+and a double-rejection contract breach drains claimable resources without
+invoking the listener on the rejecting thread. Tool-bearing requests and
+tool-call callbacks fail closed in this slice without reading tool descriptors.
+Event summaries omit payload-bearing and provider-controlled text.
+
+The policy source and tests landed in commit `325577c82`. Standalone Kotlin
+K2/JVM execution passed 40/40 tests; 30 repeated rounds passed 1200/1200. A
+focused Gradle `:app:testAppDebugUnitTest` run for
+`AiTextProviderSessionTest` recorded 40 tests, 0 skipped, 0 failures, and
+0 errors in its XML. Both are JVM/host-unit evidence. There was no Android
+instrumentation, device, or ADB run for this slice, and there is no generated
+`IAiTextCallback` implementation, `IAiTextProvider.openSession` invocation, or
+`ParcelFileDescriptor` adapter. It therefore provides no Android session/PFD
+acceptance and does not reach UI, runtime, or any `ai.*` API.
 
 A pure Java or Kotlin provider reports `supportedAbis = emptyArray()`. A local
 native model plugin declares its actual ABIs and should ship ABI splits plus a
@@ -598,10 +629,10 @@ is directional evidence only, not an APK-size or performance measurement.
 
 ### Phase 2: Optional Host Selector
 
-- Keep the completed pure policy core and the current Android discovery,
-  metadata-handshake, and model-list transport default-off and without a
-  production call site while session/PFD, `IAiTextCallback`, UI, and runtime
-  adapters are absent.
+- Keep the completed pure selection, model-list, and session-transcript policy
+  core and the current Android discovery, metadata-handshake, and model-list
+  transport default-off and without a production call site while Android
+  `openSession`/PFD, `IAiTextCallback`, UI, and runtime adapters are absent.
 - Add an experimental provider selector without changing `ai.ask`, `ai.chat`,
   or `ai.stream` script signatures.
 - Keep built-in providers as the default and explicit fallback baseline.

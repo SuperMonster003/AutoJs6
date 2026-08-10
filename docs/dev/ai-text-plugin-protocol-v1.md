@@ -18,7 +18,7 @@ document temporarily lags the current hardening pass.
 | `plugin-api:ai-common-api` | Provider identity, errors, usage, payload and FD references |
 | `plugin-api:ai-text-generation-api` | Text AIDL, models, codecs, limits, and lifecycle policies |
 | `test-apps:ai-text-provider-conformance` | Deterministic provider and hostile conformance scenarios |
-| `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, exact-component model-list coordination/transport, transcript validation, and host policies |
+| `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, exact-component model-list coordination/transport, transcript validation, session-transcript ownership, and host policies |
 
 V1 is text generation only. Image, audio, and video remain separate future
 protocols and separate plugins. The protocol does not create a mixed-media or
@@ -111,9 +111,9 @@ provider-reported total to repair an inconsistent snapshot.
 `supportedAbis` is empty for a pure Java or Kotlin provider. A future local
 model provider with native libraries reports only its actual packaged ABIs.
 
-## Current Host Discovery, Handshake, Model-List, And Policy Baseline
+## Current Host Discovery, Handshake, Model-List, Session Transcript, And Policy Baseline
 
-The repository now contains a default-off host baseline with five deliberately
+The repository now contains a default-off host baseline with six deliberately
 separate layers. The first, `AndroidAiTextProviderDiscovery`, is a read-only,
 `PackageManager`-only Android adapter with no production call site. When called
 directly, it can discover services for the exact protocol action and reinspect
@@ -249,13 +249,63 @@ then fuses the exact component for the rest of the process. Binding, death
 recipient, prepared calls, callback sinks, and the process gate close at most
 once.
 
-These five layers are not an active host route. The discovery, metadata
-handshake, model-list coordinator, Android model-list transport, and transcript
-policy all remain default-off or otherwise unreachable from production. There
-is still no `openSession` or session dispatch, request/result FD transport,
-`IAiTextCallback`, credit flow, UI, script-runtime entry point, network request,
-or built-in-provider migration. In particular, there is no route from
-`ai.ask`, `ai.chat`, `ai.stream`, or any other `ai.*` API to this baseline.
+The sixth layer, `AiTextProviderSessionPolicy`, is a transport-independent pure
+Kotlin owner for one session transcript. Its entry option defaults to
+`enabled = false`, and it has no production call site. It accepts an already
+pinned `AiTextHostSessionPlan`, one request, and abstract descriptor, remote,
+callback, and executor interfaces. Before producing a dispatch decision, it
+checks that the request still matches the pinned plan. At callback ingress, it
+validates the exact pinned UID and bounds callback envelopes before any
+defensive copy or decode. Requests containing tools fail closed in this slice;
+tool-call callbacks are rejected without reading their descriptors.
+
+`beginOpen()`, `commitOpenSucceeded()`, and `commitOpenFailed()` explicitly
+model the synchronous open transaction. Provider callbacks that arrive before
+the transaction returns are provisional: they are bounded and buffered but do
+not become listener-visible until a successful commit. An external cancel,
+timeout, or death may supersede provisional callback failure before the open is
+resolved; absent such an external terminal, a failed open reports
+`OPEN_FAILED`. Request descriptors remain policy-owned until either open commit
+settles.
+
+The callback queue is bounded. Its minimum capacity is ten entries: one
+`Started`, the fixed eight-credit initial chunk window, and one terminal event.
+Credits are reserved before chunk ingress, replenished only after successful
+delivery, and rolled back fail-closed when a remote grant fails. Once terminal
+ingress is claimed, no further credit is replenished. Callback descriptors are
+closed exactly once after their bounded copy/read reservation settles, including
+late and rejected callbacks.
+
+Terminal processing has two stages. Remote cancel/close and late-remote cleanup
+run promptly and idempotently on a serialized non-inline terminal lane. Listener
+publication waits until the open transaction, request-descriptor close,
+callback copy/read/cleanup reservations, data delivery, credit grants, and late
+remote closures have all settled. If the primary executor rejects, an
+independent fallback lane owns terminal cleanup. If both lanes reject, the
+fatal owner-contract path exclusively drains claimable local and remote
+resources, does not invoke the listener on the rejecting caller thread, and
+throws. Session events and dispatch decisions expose summary-only `toString()`
+output rather than prompt, generated text, reasoning, provider error text, or
+descriptor content.
+
+This session-transcript slice was committed in `325577c82`. Its standalone
+Kotlin K2/JVM corpus passed 40/40 tests and 30 repeated rounds passed
+1200/1200. A focused Gradle `:app:testAppDebugUnitTest` run for
+`AiTextProviderSessionTest` recorded 40 tests, 0 skipped, 0 failures, and
+0 errors in its XML. These are JVM/host-unit gates only. No Android
+instrumentation, device, or ADB run was performed for this slice, so the
+evidence cannot be promoted to Android Binder or PFD acceptance.
+
+These six layers are not an active host route. The discovery, metadata
+handshake, model-list coordinator, Android model-list transport, listing
+transcript policy, and session-transcript policy all remain default-off or
+otherwise unreachable from production. The pure session policy neither
+implements an Android `IAiTextCallback` stub nor calls
+`IAiTextProvider.openSession`; it has no `ParcelFileDescriptor` adapter. There
+is still no Android session dispatch, request/result PFD transport, UI,
+script-runtime entry point, network request, or built-in-provider migration. In
+particular, there is no route from `ai.ask`, `ai.chat`, `ai.stream`, or any
+other `ai.*` API to this baseline.
 
 ## Streaming And Backpressure
 

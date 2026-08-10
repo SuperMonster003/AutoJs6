@@ -30,8 +30,26 @@ behavior only for reproducible host conformance testing.
 | AI protocol | Shared wire, common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and pagination | Combined protocol/API corpus, 103 tests | PASS, JVM |
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
 | AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
+| AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-copy ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
 | AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models, bounded executors, FD cleanup, and caller authentication | Conformance text provider unit corpus, 31 tests | PASS, JVM |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
+
+### Pure Kotlin AI Session Transcript Evidence
+
+Commit `325577c82` adds `AiTextProviderSessionPolicy` and its 40-test unit
+corpus. The policy is default-off, transport-neutral, and unwired. Its abstract
+descriptor and callback interfaces are not an Android `ParcelFileDescriptor`
+or generated `IAiTextCallback` adapter, and it does not invoke
+`IAiTextProvider.openSession`. The standalone Kotlin K2/JVM gate passed 40/40;
+30 repeated rounds passed 1200/1200. A focused Gradle
+`:app:testAppDebugUnitTest` run for `AiTextProviderSessionTest` recorded
+40 tests, 0 skipped, 0 failures, and 0 errors in its XML.
+
+No Android instrumentation, device, or ADB run was performed for this slice.
+There is no production provider/model session, UI/runtime adapter, or `ai.*`
+entry point in this path. The standalone and Gradle results are therefore
+JVM/host-unit evidence only; they do not advance Generated AIDL transact/PFD,
+AI Binder corpus, streaming death, or public AI integration acceptance.
 
 ## Android Runtime Gates
 
@@ -186,10 +204,10 @@ compiler must contain the real D8 implementation; the fixed-output conformance p
 never be selected for production compilation.
 
 The AI protocol remains disconnected from the public `ai` module. Default-off
-Android discovery, metadata-handshake, and model-list adapters now exist but
-have no production call site. Promotion still requires the installed-provider
-matrix, explicit user selection, session/PFD and `IAiTextCallback` transport,
-and UI/runtime wiring. The pure host policy and credential boundary are
-default-off foundations, not production activation. Image, audio, and video
-require separate protocol reviews and cannot be added to the text plugin to
-satisfy this matrix.
+Android discovery, metadata-handshake, and model-list adapters and a pure Kotlin
+session-transcript policy now exist but have no production call site. Promotion
+still requires the installed-provider matrix, explicit user selection, an
+Android `openSession`/PFD and `IAiTextCallback` adapter, and UI/runtime wiring.
+The pure host policies and credential boundary are default-off foundations, not
+production activation. Image, audio, and video require separate protocol
+reviews and cannot be added to the text plugin to satisfy this matrix.
