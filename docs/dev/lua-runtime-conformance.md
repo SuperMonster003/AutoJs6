@@ -13,7 +13,7 @@ exists.
 | Public AIDL compilation | PASS, GRADLE | R0 Gradle API gate, 14+50 JVM tests, `lua-runtime-api` debug AAR assembly | Cross-package calls, caller UID, Binder death |
 | Host proxy and `.lua` routing | PASS, LOCAL R1 + R2 DEVICE | App compilation plus 66/66 focused JVM tests after Explorer executable admission; pinned selection, explicit transport, effective component-state handling, process-wide bounded Binder lane, and API 31 fixture cleanup policies | Production provider/native Lua execution, Android API/ABI matrix |
 | Hostile Android provider | PASS, DEVICE PARTIAL | R2 debug-only/testOnly fixture 2/2 JVM build plus 19/19 isolated methods on `QV710AF65F` API 31/arm64-v8a | Provider death, wrong UID/capability attacks, update/uninstall during a session, oversized source, OS-level FD evidence |
-| PUC Lua JNI provider | SOURCE SCAFFOLD, NOT RUN | Independent default-off sibling, protocol/vendor locks, exact CMake admission, bounded allocator and safe-library JNI probe | Git/release history, staged AARs, vendored Lua, execution session, wrapper/Gradle/native compile, allocator/hooks under execution, ABI/alignment, APK/device evidence |
+| PUC Lua JNI provider | PASS, BUILD/ARTIFACT; NOT ANDROID-RUN | Clean independent revision; immutable protocol/Lua intake; Gradle 9.6.1 wrapper; native-enabled/provider-disabled Kotlin/Java/JNI build; 30/30 JVM tests; arm64-v8a/x86_64/universal APKs with exact ABI inventory, 16 KiB ELF/ZIP alignment, and a common debug signer | Android INFO/RUNTIME bind, native Lua execution, PFD ownership, allocator/hooks/OOM/cancel under execution, crash/wedge recovery, release signing, production enablement |
 | Device/API/ABI acceptance | PASS, SINGLE DEVICE | API 31, arm64-v8a, 4 KiB, exact serial/artifact/restore evidence | API 24-36, x86_64, 16 KiB environments |
 | Release evidence | PENDING | R6 | Signed independent plugin APK and production soak |
 
@@ -171,28 +171,76 @@ Compile the authored host Android harness separately with
 the host lane, so each such device case requires an isolated instrumentation
 process plus explicit fixture release/cleanup. Skipped cases are not passes.
 
-## R3 Independent Provider Source Checkpoint
+## R3 Independent Provider Build And Artifact Checkpoint
 
-`E:\AutoJs6-Plugin-Lua-Runtime` contains an independent, default-disabled
-Android source scaffold. INFO and RUNTIME sources share `:lua_runtime`, require
-the plugin permission, and accept actionless explicit binding. Three protocol
-AARs and PUC Lua 5.4.8 have immutable intake locks but are deliberately absent;
-the plugin runtime therefore cannot be built or discovered.
+`E:\AutoJs6-Plugin-Lua-Runtime` is clean at independent revision
+`3be87d6c7f354649cded9b580fa53eceeb849791`, with `VERSION_BUILD=12` matching
+its 12-commit history. The repository-owned Gradle 9.6.1 wrapper pins
+distribution SHA-256
+`9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14`
+and wrapper-JAR SHA-256
+`497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7`.
 
-The exact CMake admission list excludes debug, unrestricted I/O, OS/process,
-and dynamic-loader libraries. Its JNI probe opens only the approved baseline
-libraries with a bounded allocator, and the roadmap requires future execution
-to use an explicit text-only loader. `createExecution()` currently closes the
-incoming PFD and throws rather than returning a fake session.
+The staged AARs are pinned to clean AutoJs6 revision
+`ae422391759810ce9dbbf0bc119bb47834c66b85`:
 
-The sibling verifier reports
-`STATIC_SCAFFOLD_OK protocol=not-staged lua=not-vendored build_ready=false`.
-The directory is not yet a Git repository and has no Gradle wrapper, staged
-AARs, vendored source, runtime execution, compile, native ABI/alignment, APK,
-signing, install, or device evidence. This is a source checkpoint, not R3 exit.
-The verifier now also rejects duplicate/default-on build flags, malformed Git
-revisions or AAR/module mappings, and any future vendored tree whose canonical
-file count/path/content digest differs from its lock.
+- `common-plugin-api.aar`:
+  `d745bb24d6a6995e68ebea27d592faec162f0bad4f9bf70cb038a480ad8c6df2`
+- `protocol-wire-api.aar`:
+  `6c597ec095852eac7e6277574191141100dc96b6c5a803725ed540f42aa7d871`
+- `lua-runtime-api.aar`:
+  `a40a0fff299f60520d07a2739a8f0c9ab004d3f307ff016bab35dc902635b851`
+
+The official PUC Lua 5.4.8 archive SHA-256 is
+`4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae`;
+the canonical 63-file vendored tree SHA-256 is
+`abc2321841ec25281797b4b3bb855d6ad1caa8ddea265ef0d47844cf959dcda8`.
+The fail-closed verifier reports
+`STATIC_SCAFFOLD_OK protocol=ready lua=ready build_ready=true`.
+
+A clean native-enabled/provider-disabled build executed all 50 requested tasks.
+Eight JVM suites report 30/30, with no failure, error, or skip. The generated
+and packaged flags are `LUA_NATIVE_ENABLED=true` and
+`LUA_PROVIDER_ENABLED=false`, and both exported services remain resource-gated
+off. INFO/RUNTIME sources compile in `:lua_runtime`, accept actionless explicit
+binding, and select the native runner only in the native-enabled variant. Those
+facts are compile/manifest/JVM evidence, not an Android bind or execution pass.
+
+The artifact gate found exactly three APKs under one debug signer SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`:
+
+- universal:
+  `d5089e7e5c78a87e8c8f6dccdcec499127aec3358f04dc20accfbd05ae9311e2`
+- arm64-v8a:
+  `b5fc7ce3d6633e5f8a13ae92c78828e7ba6ce42e06a4a43c232f42147865251a`
+- x86_64:
+  `09efce09ba7e6b3dccbc408d8f8fca86a4717f58f5972712e3e58c31c2952b79`
+
+The ABI inventories are exact, all ELF LOAD alignments are `0x4000`, and every
+APK passes `zipalign -c -P 16 4`. This is native build and artifact evidence;
+the APKs were not installed and no ADB transaction was used for this checkpoint.
+A detached clean checkout of the same revision repeated 50/50 Gradle tasks,
+30/30 JVM tests, and the full artifact gate with a fresh Gradle user home. Its
+three APK digests differ from the first build, so the checkpoint establishes
+clean-checkout input rebuildability, not byte-identical APK reproducibility.
+Actionless cross-process binding, actual native Lua results, dedicated-process
+session behavior, PFD accounting, allocator/OOM, hook cancellation, safe-library
+denial, native crash or wedged-call containment, process kill/rebuild, clean
+release signing, and production enablement all remain unestablished.
+
+Recheck the existing artifacts without ADB or rebuilding:
+
+```powershell
+$sibling = 'E:\AutoJs6-Plugin-Lua-Runtime'
+git -C $sibling rev-parse HEAD
+python "$sibling\tools\verify_repository.py" --require-build-ready
+& "$sibling\tools\verify_debug_artifacts.ps1" `
+    -SdkRoot 'E:\.android\sdk' `
+    -BuildToolsVersion '37.0.0' `
+    -NdkVersion '28.2.13676358' `
+    -ExpectedTests 30
+exit $LASTEXITCODE
+```
 
 ## Required Android Evidence
 

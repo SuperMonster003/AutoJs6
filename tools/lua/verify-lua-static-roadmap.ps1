@@ -483,12 +483,12 @@ if (Test-Path -LiteralPath $PluginRoot -PathType Container) {
     $runtimeService = Read-RequiredText $resolvedPlugin "app/src/main/java/io/github/supermonster003/autojs6/plugin/lua/runtime/service/LuaRuntimeService.kt"
     Require-Pattern $runtimeService 'override\s+fun\s+onBind\(intent:\s*Intent\?\):\s*IBinder\s*=\s*binder' "R3 runtime accepts actionless explicit binding"
     Require-Pattern $runtimeService 'NativeLuaRuntime\.requireReady\(\)' "R3 runtime rechecks the native/provider gate inside Binder entrypoints"
-    Require-Pattern $runtimeService 'runner\s*=\s*DisabledLuaExecutionRunner' "R3 service keeps the uncompiled native adapter disconnected"
+    Require-Pattern $runtimeService 'runner\s*=\s*selectLuaExecutionRunner\(BuildConfig\.LUA_NATIVE_ENABLED\)' "R3 service selects native execution only through the native build gate"
 
     $executionWorker = Read-RequiredText $resolvedPlugin "app/src/main/java/io/github/supermonster003/autojs6/plugin/lua/runtime/execution/LuaSerialExecutionWorker.kt"
     Require-Pattern $executionWorker 'ThreadPoolExecutor\(\s*1,\s*1,' "R3 execution worker has exactly one thread"
     Require-Pattern $executionWorker 'SynchronousQueue\(\)' "R3 execution worker has no backlog"
-    Require-Pattern $executionWorker 'prestartCoreThread\(\)' "R3 execution worker owns one stable daemon lane"
+    Require-Pattern $executionWorker '(?s)^(?!.*prestartCoreThread).*executor\.execute\(task\)' "R3 first task starts the zero-backlog worker without a prestart race"
 
     $sourceVerifier = Read-RequiredText $resolvedPlugin "app/src/main/java/io/github/supermonster003/autojs6/plugin/lua/runtime/execution/LuaSourceVerifier.kt"
     Require-Pattern $sourceVerifier 'sourceLengthBytes' "R3 source verifier consumes the declared byte length"

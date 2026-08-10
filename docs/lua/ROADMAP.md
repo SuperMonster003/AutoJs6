@@ -26,15 +26,17 @@ Android Binder, native-runtime, device, ABI, or release evidence.
   serially. ADB was used only after release and the audited packages were
   restored to their original absent state after R2.
 - [x] The no-Gradle/no-ADB static roadmap guard passes 155 source and
-  configuration checks across the host, R2 fixture, and R3 sibling scaffold.
+  configuration checks across the host, R2 fixture, and R3 sibling repository.
 - [x] R2 has a compiled opt-in host Android harness, an assembled hostile
-  fixture, and a 19/19 API 31 arm64-v8a device checkpoint. R3 remains a
-  separate, default-disabled source scaffold without Android/native
-  compilation.
+  fixture, and a 19/19 API 31 arm64-v8a device checkpoint. R3 now has an
+  independently versioned, default-disabled sibling build and artifact gate at
+  revision `3be87d6c7f354649cded9b580fa53eceeb849791`.
 - [x] The current boundary is explicit: Explorer can dispatch `.lua` to the
-  proxy and the fake provider has Android Binder/PFD acceptance, but no
-  compiled/runnable production provider, vendored Lua, JNI runtime, or native
-  Lua execution claim exists yet.
+  proxy, the fake provider has partial Android Binder/PFD acceptance, and the
+  sibling packages the compiled PUC Lua/JNI runtime for arm64-v8a and x86_64.
+  The production provider remains packaged off; no sibling APK installation,
+  Android service binding, native Lua execution, PFD lifecycle, watchdog, or
+  process-recovery claim exists yet.
 
 ## Deferred Verification Queue After The Protected Soak
 
@@ -57,11 +59,12 @@ the shared Gradle/ADB resources.
   require `freshProcess=true` must execute alone in a fresh target process.
 - [x] Record Binder/PFD/UID/process evidence per scenario, restore the audited
   pre-test device state, and keep failed evidence instead of relabeling it.
-- [ ] Stage R3 protocol AARs and vendor Lua only from immutable, digest-verified
+- [x] Stage R3 protocol AARs and vendor Lua only from immutable, digest-verified
   inputs; then compile/JNI/ABI/16 KiB gates in the sibling repository.
-- [x] Keep R3 provider/native enablement disabled. Explorer now enters the
-  fail-closed proxy after R1, while successful provider-backed execution stays
-  gated by R2, R3, and R6 evidence.
+- [x] Keep R3 provider discovery disabled while compiling the native path.
+  Explorer enters the fail-closed proxy after R1, while successful
+  provider-backed execution stays gated by the remaining R3/R6 Android,
+  lifecycle, recovery, and release evidence.
 
 ## R0 - Freeze The Protocol And Safety Baseline
 
@@ -347,77 +350,96 @@ exit $LASTEXITCODE
 
 ## R3 - Create The Independent Runtime Plugin
 
-- [ ] Create sibling repository `AutoJs6-Plugin-Lua-Runtime` with its own
-  application ID, icon, version, signing, release history, and CI.
-- [ ] Implement INFO and RUNTIME services; runtime binding must support an
-  explicit component-only Intent whose action is null.
+- [x] Create sibling repository `AutoJs6-Plugin-Lua-Runtime` with its own
+  application ID, icon, version/signing contract, local Git history, and CI.
+- [x] Implement and compile INFO and RUNTIME services whose source and manifest
+  support an explicit component-only Intent whose action is null. Android bind
+  execution remains an unchecked R3-D gate.
 - [ ] Run executions in a dedicated `:lua_runtime` process with one active
-  execution and no hidden queue.
-- [ ] Vendor and pin PUC Lua 5.4 source, license notices, reproducible native
+  execution and no hidden queue. The process/session implementation compiles
+  and its policy passes JVM tests, but it has not run cross-process on Android.
+- [x] Vendor and pin PUC Lua 5.4.8 source, license notices, reproducible native
   build inputs, and runtime slot `lua54`.
-- [ ] Use a bounded `lua_newstate` allocator, `lua_sethook` cancellation and
-  deadline checks, protected calls, and one serialized worker per state.
-- [ ] Open only the approved standard libraries; keep `debug`, unrestricted
-  `io`, `os.execute`, dynamic C modules, Java reflection, and `loadlib` closed.
-- [ ] Build and verify arm64-v8a and x86_64 artifacts, including 16 KiB ELF and
-  APK alignment.
+- [ ] Validate the bounded `lua_newstate` allocator, `lua_sethook` cancellation
+  and deadline checks, protected calls, and serialized worker under native
+  Android execution. These paths compile, but compile/JVM evidence does not
+  establish allocator, hook, cancellation, or hard-stop behavior.
+- [x] Compile the exact standard-library allowlist; `debug`, unrestricted `io`,
+  `os.execute`, dynamic C modules, Java reflection, and `loadlib` remain absent
+  from admitted sources. Runtime denial behavior remains an Android test gate.
+- [x] Build and verify arm64-v8a and x86_64 artifacts, including 16 KiB ELF LOAD
+  alignment and APK ZIP alignment.
 
-R3 source checkpoint on 2026-08-10:
+R3 immutable-input/build checkpoint on 2026-08-10:
 
-- `E:\AutoJs6-Plugin-Lua-Runtime` now contains a 52-file independent Android
-  source scaffold with its own application ID, version/signing contract, icon,
-  CI source, and plugin roadmap. It has deliberately not been initialized as a
-  Git repository, so the first R3 checkbox and release-history claim remain
-  open.
-- INFO and RUNTIME service sources share `:lua_runtime`, require the plugin
-  permission, accept actionless explicit binding, and are controlled by two
-  build flags that default off. The runtime service now owns a source-only
-  session manager, but deliberately injects `DisabledLuaExecutionRunner`; the
-  uncompiled JNI adapter is not connected.
-- The Kotlin skeleton has a process-wide single worker with no queue, one
-  active execution, a two-session retained ceiling, a bounded start lease,
-  exact source length/EOF/SHA-256/UTF-8 verification, remaining-deadline
-  propagation, output-credit accounting, unique terminal delivery, and a
-  callback-close gate that holds no monitor while invoking Binder. A standalone
-  Kotlin 2.3.20/JDK 21 diagnostic compiled these Android-free sources and ran
-  23/23 JUnit tests with zero failures. The first launcher attempt stopped
-  before source compilation because its ad-hoc compiler classpath omitted the
-  cached JetBrains annotations JAR; the corrected invocation supplied that
-  compiler dependency. This is not an AIDL, Android, PFD, or native gate.
-- The JNI source creates one bounded `lua_State`, uses a text-only loader,
-  installs cancellation/deadline hooks, performs protected execution, and
-  admits only bounded scalar results. Its exact library allowlist is base,
-  math, string, table, and UTF-8; coroutine, debug, io, os, package, dynamic
-  loading, Lua protected calls, metatable installation, print/warn, and binary
-  dump entrypoints remain unavailable. Six native-boundary tests are authored
-  but not run.
-- The scaffold freezes three repository-local protocol AAR names and a clean-
-  revision rebuild/hash intake workflow. All AARs are absent and the lock is
-  `not-staged` because the host protocol work has not been committed.
-- The sibling input verifier now rejects duplicate JSON members and nested
-  Git-ignore overrides, validates the frozen lock schema/repository/inventory,
-  and offers a fail-closed `--require-build-ready` mode. Its Python hostile
-  suite passes 15/15; normal verification reports `build_ready=false`, while
-  the build-required mode exits nonzero as intended. This remains a static
-  intake gate: commit existence/AAR provenance, the canonical extracted Lua
-  tree, merged-manifest enablement, and CI execution semantics still require
-  immutable-input and Gradle evidence.
-- PUC Lua 5.4.8 is pinned to its official archive and SHA-256. The source is
-  intentionally `not-vendored`; there is no placeholder. A future vendored
-  state must come through the offline verified-archive intake script and also
-  match a canonical full-source-tree file count and digest.
-  CMake admits an exact core/library list, while the JNI probe demonstrates the
-  bounded allocator and safe-library baseline. Future execution must use an
-  explicit text-only load.
-- The sibling static verifier reports
-  `STATIC_SCAFFOLD_OK protocol=not-staged lua=not-vendored build_ready=false`.
-  The host/R2/R3 static roadmap guard reports 155/155. No wrapper, Gradle/AIDL
-  compile, native build, APK, ABI/alignment, signing, install, Binder/PFD, or
-  device evidence exists, so every main R3 checkbox remains open. A native
-  runner that does not return still requires dedicated-process termination and
-  recovery evidence before enablement. Before wiring the adapter, Android tests
-  must also resolve or explicitly accept the retained-cap third-create failure,
-  tiny-deadline/start-lease race, and blocking non-regular source-FD behavior.
+- The independent sibling is clean at Git revision
+  `3be87d6c7f354649cded9b580fa53eceeb849791`; its positive
+  `VERSION_BUILD=12` equals its 12-commit history. Release signing and a public
+  release remain R6 work. Its repository-owned Gradle 9.6.1 wrapper pins
+  distribution SHA-256
+  `9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14`
+  and wrapper-JAR SHA-256
+  `497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7`.
+- The protocol lock is pinned to clean AutoJs6 revision
+  `ae422391759810ce9dbbf0bc119bb47834c66b85`. The staged artifacts are
+  `common-plugin-api.aar` SHA-256
+  `d745bb24d6a6995e68ebea27d592faec162f0bad4f9bf70cb038a480ad8c6df2`,
+  `protocol-wire-api.aar` SHA-256
+  `6c597ec095852eac7e6277574191141100dc96b6c5a803725ed540f42aa7d871`,
+  and `lua-runtime-api.aar` SHA-256
+  `a40a0fff299f60520d07a2739a8f0c9ab004d3f307ff016bab35dc902635b851`.
+- The official PUC Lua 5.4.8 archive is pinned to SHA-256
+  `4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae`.
+  Its exact 63-file vendored source tree is pinned to SHA-256
+  `abc2321841ec25281797b4b3bb855d6ad1caa8ddea265ef0d47844cf959dcda8`.
+  The build verifier reports
+  `STATIC_SCAFFOLD_OK protocol=ready lua=ready build_ready=true`.
+- A clean canonical native-enabled/provider-disabled build executed all 50
+  requested tasks and passed eight JVM suites with 30/30 tests, zero failures,
+  errors, or skips. Generated and packaged gates are
+  `LUA_NATIVE_ENABLED=true` and `LUA_PROVIDER_ENABLED=false`; both exported
+  services remain resource-disabled. The service selects
+  `NativeLuaExecutionRunner` only for the native-enabled build, without making
+  the provider discoverable.
+- The artifact gate verified one common debug signer SHA-256
+  `2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`
+  and exactly three APKs: universal SHA-256
+  `d5089e7e5c78a87e8c8f6dccdcec499127aec3358f04dc20accfbd05ae9311e2`,
+  arm64-v8a SHA-256
+  `b5fc7ce3d6633e5f8a13ae92c78828e7ba6ce42e06a4a43c232f42147865251a`,
+  and x86_64 SHA-256
+  `09efce09ba7e6b3dccbc408d8f8fca86a4717f58f5972712e3e58c31c2952b79`.
+  Split/universal ABI inventories are exact, every native ELF LOAD segment is
+  aligned to `0x4000`, and every APK passes `zipalign -c -P 16 4`.
+- A detached clean worktree at the same `3be87d6` revision repeated all 50
+  Gradle tasks, 30/30 JVM tests, and the complete artifact gate using a fresh
+  Gradle user home. Its universal/arm64-v8a/x86_64 APK SHA-256 values are
+  `5fca4ec29e11cf37a89d9682973ec4290028ff24b6e9965418f63301025961cf`,
+  `523ca0af9c547dbdf5d3455c3f62ae1aeca4853fcdafc488908c49cc9f738b89`,
+  and `3ba79648fb7a275f39355c3242749577452998b8dc1e3e2e447da8df7defa0b2`.
+  They differ from the first clean build, so this proves pinned inputs can be
+  rebuilt from a clean checkout, not byte-for-byte deterministic APK output.
+- INFO/RUNTIME actionless binding, dedicated-process/session behavior,
+  allocator/OOM, hook cancellation, library denial, actual native Lua results,
+  and PFD ownership have compile/static/JVM evidence only. No sibling APK was
+  installed and no ADB transaction was used for this checkpoint. Provider
+  discovery, cross-package Binder/PFD hostile cases, native crash/wedge
+  containment, process kill/rebuild, release signing, API/device matrix, and
+  production enablement remain open.
+
+Check the frozen sibling revision and already-built artifacts without ADB:
+
+```powershell
+$sibling = 'E:\AutoJs6-Plugin-Lua-Runtime'
+git -C $sibling rev-parse HEAD
+python "$sibling\tools\verify_repository.py" --require-build-ready
+& "$sibling\tools\verify_debug_artifacts.ps1" `
+    -SdkRoot 'E:\.android\sdk' `
+    -BuildToolsVersion '37.0.0' `
+    -NdkVersion '28.2.13676358' `
+    -ExpectedTests 30
+exit $LASTEXITCODE
+```
 
 ## R4 - Add Language-Neutral Host Capabilities
 
