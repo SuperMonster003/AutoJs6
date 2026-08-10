@@ -28,7 +28,11 @@ internal interface AiTextProviderSessionRequestDescriptorLease : Closeable {
     val count: Int
 }
 
-/** Incoming callback descriptors. copyForAsync is the sole receiver-owned duplication boundary. */
+/**
+ * Incoming callback descriptors. [copyForAsync] is the sole receiver-owned asynchronous
+ * ownership-transfer boundary; callers must not assume that platform PFD duplication preserves
+ * reliable-pipe error state.
+ */
 internal interface AiTextProviderSessionIncomingDescriptors : Closeable {
     val count: Int
     fun copyForAsync(): AiTextProviderSessionDescriptorLease
