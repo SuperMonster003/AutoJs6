@@ -30,7 +30,8 @@ behavior only for reproducible host conformance testing.
 | AI protocol | Shared wire, common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and pagination | Combined protocol/API corpus, 103 tests | PASS, JVM |
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
 | AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
-| AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-copy ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
+| AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
+| AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, and no retry after dispatch | Commits `bfa8fd649` and `851acc588`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 positive path |
 | AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models, bounded executors, FD cleanup, and caller authentication | Conformance text provider unit corpus, 31 tests | PASS, JVM |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 
@@ -51,6 +52,45 @@ entry point in this path. The standalone and Gradle results are therefore
 JVM/host-unit evidence only; they do not advance Generated AIDL transact/PFD,
 AI Binder corpus, streaming death, or public AI integration acceptance.
 
+### Default-Off Android AI Session Transport
+
+Commits `bfa8fd649`, `851acc588`, and `836bfb48d` add the default-off session
+coordinator, Android Binder/PFD adapter, and opt-in instrumentation. There is no
+production call site. An explicitly enabled run checks the locally pinned plan
+and package, performs four exact package inspections, binds one actionless exact
+component, verifies `IAiTextProvider`, and reads bounded provider info and
+capabilities from the same Binder later used for one synchronous
+`openSession`. The final exact inspection occurs immediately before dispatch.
+The returned `IAiTextSession` descriptor and death recipient are verified
+before the remote is committed; callback-before-return remains provisional.
+
+The generated callback stub captures the Binder calling UID before forwarding.
+The transcript policy applies pinned-UID, event-specific envelope, descriptor
+count, and strict typed bounds before decode. Request PFDs remain host-owned and
+are borrowed only for synchronous open. Callback PFDs cross the async boundary
+through exactly-once transfer of the complete `ParcelFileDescriptor` objects,
+not a data-FD-only `dup()`, preserving the reliable-pipe communication FD.
+Null elements close all valid peers and become an invalid-count policy failure.
+Exact reads require declared length, EOF, and reliable producer-error checking.
+
+Eight credits are granted after open commit and replenished one at a time only
+after delivery. Cancel, timeout, Binder death, control failure, callback
+terminal, and completion have one terminal owner. Binding, descriptors, remote
+controls, death recipients, policy settlement, and the process gate release
+before publication. A blocking Binder/PFD/control operation that crosses the
+absolute deadline fuses the component and keeps the gate busy until unwind. No
+dispatch or control is automatically retried.
+
+The locally pinned plan includes `listingGeneration`, but provider metadata and
+`openSession` expose no current catalog-generation proof. Same-Binder metadata
+and final package inspection cannot remotely revalidate that value or the model
+record. This remains a promotion blocker.
+
+The focused coordinator Gradle run recorded 18 tests, 0 skipped, 0 failures,
+and 0 errors. The host App Debug, App Debug instrumentation, and fake-provider
+Debug APKs also assembled. This build/JVM evidence remains separate from the
+API 31 device evidence below.
+
 ## Android Runtime Gates
 
 These gates intentionally remain open. They must not be inferred from a JVM or
@@ -58,20 +98,22 @@ APK assembly pass.
 
 | Gate | Required matrix | Current status |
 | --- | --- | --- |
-| Generated AIDL transact behavior and descriptor ownership | API 24, 25, 26, 28, 34, 36 | PARTIAL, API 25 only: cross-process generated AIDL calls, descriptor handoff, reliable-pipe EOF, and rollback exercised |
-| Caller UID, signature permission, same-signer policy, and exact component revalidation | Debug conformance install on isolated devices | PARTIAL, API 25 positive path only: signature permission, same test signer, callback UID pinning, and explicit-component discovery/reinspection |
+| Generated AIDL transact behavior and descriptor ownership | API 24, 25, 26, 28, 34, 36 | PARTIAL: API 25 DEX descriptor handoff/rollback plus API 31 AI cross-process request PFD and process-local reliable callback-PFD ownership; no AI cross-process completion/tool PFD |
+| Caller UID, signature permission, same-signer policy, and exact component revalidation | Debug conformance install on isolated devices | PARTIAL: positive paths on API 25 and API 31; no wrong-callback-UID Android case |
 | Cancellation, timeout, callback death, provider death, host death, update, disable, and uninstall cleanup | API 24, 28, 34, 36 | PENDING; API 25 stall timeout and rollback are supplemental evidence only |
 | DEX normal and hostile services against the real host adapter | API 24, 25, 26, 28, 34, 36 | PARTIAL, API 25 only: normal, progress-before-start, duplicate-terminal, malformed output, unnegotiated DEX version, and stall-timeout services |
 | Validated DEX execution through the real `DexClassLoader` | Java and Kotlin corpus on API 24 through 36 | PARTIAL, API 25 fixed DEX 037 fixture only: class load and `answer() == 42` execution |
 | D8 parity for default/static interface methods, missing libraries, and device boot libraries | Current local compiler versus production plugin | PENDING |
 | AAR normalization and resource behavior | Current local path versus production plugin | PENDING |
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
-| AI exact-component metadata and model-list positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a positive metadata-handshake and paged model-list paths only |
-| AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PENDING |
-| AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PENDING |
+| AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a metadata, paged model list, and one normal `fake.stream` session only |
+| AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PARTIAL, one API 31 normal session; hostile session Binder cases remain pending |
+| AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal stream crossed 8 initial credits; tools and death remain pending |
 | Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
 
 ### API 31 AI Partial Evidence
+
+#### Metadata And Model-List Run
 
 The 2026-08-10 positive-path run used `QV710AF65F` (API 31,
 `arm64-v8a`). Its source was built in an isolated worktree from baseline
@@ -129,13 +171,50 @@ artifact exactly. Before installation, all three packages --
 `org.autojs.plugin.ai.text.fake` -- were absent. The run uninstalled only those
 temporary packages, and all three were confirmed absent again afterward.
 
-This is positive-path PARTIAL evidence only. It covers no API other than 31 and
+This earlier model-list run is positive-path PARTIAL evidence only. It covers
+no API other than 31 and
 does not cover hostile callbacks, negative signer/UID/identity drift, package
 update/disable/uninstall during a transcript, timeout or callback/provider/host
 death, a real production plugin/model, session opening, PFD ownership, credit
 flow, generation, UI/runtime selection, or any `ai.*` integration. The
 standalone K2/JUnit 15/15 result remains separate JVM evidence rather than an
 additional Android matrix cell.
+
+#### Session Transport Run
+
+The later 2026-08-10 run used the same explicit device,
+`QV710AF65F` (API 31, `arm64-v8a`), against the default-off coordinator,
+Android `IAiTextCallback`/PFD transport, and opt-in instrumentation in commits
+`bfa8fd649`, `851acc588`, and `836bfb48d`. A focused Gradle invocation recorded
+18 `AiTextProviderSessionCoordinatorTest` tests with 0 skipped, 0 failures, and
+0 errors and assembled the host App Debug, App Debug instrumentation, and
+fake-provider Debug APKs.
+
+Two separate exact `Class#method` instrumentation invocations each returned
+`OK (1 test)`:
+
+| Method | Asserted positive path |
+| --- | --- |
+| `AiTextProviderSessionAndroidConformanceTest#exactComponentSessionStreamsPastInitialCreditsFromRequestDescriptor` | Re-handshook and pinned the exact fake provider, sent the prompt through request descriptor index 0 with exact length/SHA-256/EOF, opened `fake.stream`, received `Started`, approximately 18 contiguous chunks (more than the fixed initial 8 credits), one usage event, and one matching completion off the main thread; request ownership was closed after settlement |
+| `AiTextProviderSessionAndroidConformanceTest#callbackDescriptorOwnerEnforcesExactLengthProducerErrorsAndIdempotentClose` | In the host instrumentation process, preserved reliable-PFD error state across async ownership transfer, accepted exact bytes, rejected short and trailing data and `closeWithError()` producer failure, balanced four operation leases, and tolerated repeated close |
+
+The invocation shape was:
+
+```text
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiText.session.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiTextProviderSessionAndroidConformanceTest#<method>' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+Before installation, all three packages--`org.autojs.autojs6`,
+`org.autojs.autojs6.test`, and `org.autojs.plugin.ai.text.fake`--were absent.
+Only those temporary packages were installed for the run, and all three were
+confirmed absent again after cleanup.
+
+This result remains **PARTIAL**. The stream's normal completion used an empty
+callback descriptor array, and the exact/error descriptor method was
+process-local. There is no cross-process completion or tool PFD, wrong callback
+UID, hostile provider death, package update/disable/uninstall during a session,
+host death, other Android API/ABI cell, real production plugin/model, remote
+`listingGeneration` proof, UI/runtime selector, or `ai.*` route.
 
 ### API 25 Partial Evidence
 
@@ -204,10 +283,11 @@ compiler must contain the real D8 implementation; the fixed-output conformance p
 never be selected for production compilation.
 
 The AI protocol remains disconnected from the public `ai` module. Default-off
-Android discovery, metadata-handshake, and model-list adapters and a pure Kotlin
-session-transcript policy now exist but have no production call site. Promotion
-still requires the installed-provider matrix, explicit user selection, an
-Android `openSession`/PFD and `IAiTextCallback` adapter, and UI/runtime wiring.
-The pure host policies and credential boundary are default-off foundations, not
+Android discovery, metadata-handshake, model-list, and
+`openSession`/PFD/`IAiTextCallback` adapters plus the pure Kotlin policies now
+exist but have no production call site. Promotion still requires the remaining
+installed-provider/version/hostile matrix, remote catalog-generation handling,
+explicit user selection, real provider/model evidence, and UI/runtime wiring.
+The pure host policies and Android adapters are default-off foundations, not
 production activation. Image, audio, and video require separate protocol
 reviews and cannot be added to the text plugin to satisfy this matrix.

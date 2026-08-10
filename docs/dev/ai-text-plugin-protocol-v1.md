@@ -18,7 +18,7 @@ document temporarily lags the current hardening pass.
 | `plugin-api:ai-common-api` | Provider identity, errors, usage, payload and FD references |
 | `plugin-api:ai-text-generation-api` | Text AIDL, models, codecs, limits, and lifecycle policies |
 | `test-apps:ai-text-provider-conformance` | Deterministic provider and hostile conformance scenarios |
-| `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, exact-component model-list coordination/transport, transcript validation, session-transcript ownership, and host policies |
+| `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, exact-component model-list and session coordination/transports, transcript validation, PFD ownership, and host policies |
 
 V1 is text generation only. Image, audio, and video remain separate future
 protocols and separate plugins. The protocol does not create a mixed-media or
@@ -97,9 +97,13 @@ length and optional SHA-256, decodes strict UTF-8, parses one complete JSON
 value, and applies the depth, node, string, and duplicate-key rules. MIME type,
 descriptor index, and declared length alone do not establish valid JSON.
 Quota and descriptor-reference helpers that are documented as structural do
-not replace this materialization step. A future Android session/FD adapter must
-use the request-aware verified tool-call path and must materialize every request
-and tool-result descriptor before exposing its content to an engine or script.
+not replace this materialization step. The current default-off Android session
+adapter preserves the full callback `ParcelFileDescriptor` object across its
+asynchronous ownership-transfer boundary so reliable-pipe error state is not
+lost through a data-FD-only `dup()`. Tool-bearing requests still fail closed in
+this slice; a future tool-enabled route must use the request-aware verified
+tool-call path and materialize every tool-result descriptor before exposing its
+content to an engine or script.
 
 Usage callbacks are cumulative snapshots. Omitted counters retain their last
 reported values, and reported counters never decrease. When total, input, and
@@ -111,9 +115,9 @@ provider-reported total to repair an inconsistent snapshot.
 `supportedAbis` is empty for a pure Java or Kotlin provider. A future local
 model provider with native libraries reports only its actual packaged ABIs.
 
-## Current Host Discovery, Handshake, Model-List, Session Transcript, And Policy Baseline
+## Current Host Discovery, Handshake, Model-List, Android Session, And Policy Baseline
 
-The repository now contains a default-off host baseline with six deliberately
+The repository now contains a default-off host baseline with seven deliberately
 separate layers. The first, `AndroidAiTextProviderDiscovery`, is a read-only,
 `PackageManager`-only Android adapter with no production call site. When called
 directly, it can discover services for the exact protocol action and reinspect
@@ -175,9 +179,10 @@ When explicitly exercised by tests, the policy:
   ambiguous and are rejected.
 - Pins the exact component and package identity together with provider metadata,
   negotiated protocol, and negotiated capabilities. The model-list coordinator
-  uses this revalidation decision before it lists models; a future session path
-  must repeat the same boundary immediately before session dispatch. Callbacks
-  must come from the pinned package UID.
+  uses this revalidation decision before it lists models; the session
+  coordinator repeats the package and metadata boundary and performs a final
+  exact package inspection immediately before `openSession`. Callbacks must come
+  from the pinned package UID.
 - Builds a credential-free session plan. Its binding-decision key includes the
   pinned identity, `listingGeneration`, model ID, model capability snapshot,
   effective context/output limits, and negotiated capabilities. Collection
@@ -256,7 +261,7 @@ pinned `AiTextHostSessionPlan`, one request, and abstract descriptor, remote,
 callback, and executor interfaces. Before producing a dispatch decision, it
 checks that the request still matches the pinned plan. At callback ingress, it
 validates the exact pinned UID and bounds callback envelopes before any
-defensive copy or decode. Requests containing tools fail closed in this slice;
+asynchronous retention or decode. Requests containing tools fail closed in this slice;
 tool-call callbacks are rejected without reading their descriptors.
 
 `beginOpen()`, `commitOpenSucceeded()`, and `commitOpenFailed()` explicitly
@@ -273,13 +278,14 @@ The callback queue is bounded. Its minimum capacity is ten entries: one
 Credits are reserved before chunk ingress, replenished only after successful
 delivery, and rolled back fail-closed when a remote grant fails. Once terminal
 ingress is claimed, no further credit is replenished. Callback descriptors are
-closed exactly once after their bounded copy/read reservation settles, including
-late and rejected callbacks.
+closed exactly once after their bounded ownership-transfer/read reservation
+settles, including late and rejected callbacks.
 
 Terminal processing has two stages. Remote cancel/close and late-remote cleanup
 run promptly and idempotently on a serialized non-inline terminal lane. Listener
 publication waits until the open transaction, request-descriptor close,
-callback copy/read/cleanup reservations, data delivery, credit grants, and late
+callback ownership-transfer/read/cleanup reservations, data delivery, credit
+grants, and late
 remote closures have all settled. If the primary executor rejects, an
 independent fallback lane owns terminal cleanup. If both lanes reject, the
 fatal owner-contract path exclusively drains claimable local and remote
@@ -288,24 +294,78 @@ throws. Session events and dispatch decisions expose summary-only `toString()`
 output rather than prompt, generated text, reasoning, provider error text, or
 descriptor content.
 
-This session-transcript slice was committed in `325577c82`. Its standalone
-Kotlin K2/JVM corpus passed 40/40 tests and 30 repeated rounds passed
-1200/1200. A focused Gradle `:app:testAppDebugUnitTest` run for
-`AiTextProviderSessionTest` recorded 40 tests, 0 skipped, 0 failures, and
-0 errors in its XML. These are JVM/host-unit gates only. No Android
-instrumentation, device, or ADB run was performed for this slice, so the
-evidence cannot be promoted to Android Binder or PFD acceptance.
+The seventh layer combines `AiTextProviderSessionCoordinator`,
+`AndroidAiTextProviderSession`, the generated `IAiTextCallback` stub, and the
+Android request/callback descriptor owners. It is default-off
+(`enabled = false`), has no production call site, and accepts only an already
+pinned exact component, plan, and request. One process owner permits one active
+run. One absolute deadline covers the four exact package inspections, exact
+actionless bind, provider descriptor check, bounded metadata reads, synchronous
+open, callback admission, PFD reads, credit controls, and terminal cleanup.
 
-These six layers are not an active host route. The discovery, metadata
-handshake, model-list coordinator, Android model-list transport, listing
-transcript policy, and session-transcript policy all remain default-off or
-otherwise unreachable from production. The pure session policy neither
-implements an Android `IAiTextCallback` stub nor calls
-`IAiTextProvider.openSession`; it has no `ParcelFileDescriptor` adapter. There
-is still no Android session dispatch, request/result PFD transport, UI,
-script-runtime entry point, network request, or built-in-provider migration. In
-particular, there is no route from `ai.ask`, `ai.chat`, `ai.stream`, or any
-other `ai.*` API to this baseline.
+After connection, provider info and capabilities are read and revalidated from
+the same descriptor-verified `IAiTextProvider` Binder later used to prepare and
+invoke `openSession`. The fourth inspection occurs immediately before that one
+synchronous open. The returned `IAiTextSession` descriptor is verified and its
+death recipient is linked before the handle is accepted. Callbacks that occur
+synchronously before `openSession` returns remain provisional under the session
+policy and are published only after the open commits successfully.
+
+At callback entry the Android stub captures `Binder.getCallingUid()`. The policy
+checks that UID and the event-specific envelope and descriptor-count bounds
+before strict typed decoding. Request PFDs are borrowed only for the synchronous
+open and remain host-owned until its success/failure commit. Callback PFDs are
+not reduced to data-FD-only duplicates: the receiver transfers each complete
+`ParcelFileDescriptor` object exactly once to the asynchronous lease, preserving
+the reliable-pipe communication FD used by `closeWithError()`/`checkError()`.
+Null array elements close every valid peer and become a no-FD invalid-count
+sentinel, so policy rejects them before transfer or decode. Reads require the
+exact declared byte count, EOF, and reliable producer-error check; partial ownership
+or constructor failure rolls back every transferred PFD.
+
+Eight initial chunk credits are granted only after open commit. One credit is
+replenished only after one accepted chunk is delivered. Cancel, timeout, Binder
+death, control failure, callback failure, and completion have one terminal
+owner; no operation is retried after dispatch. Binding, prepared callback,
+request descriptors, callback leases, remote controls, death recipients, and
+the process gate settle before the terminal event is published. A deadline
+crossed by a blocking Binder/PFD/control operation fuses the exact component and
+keeps the process gate busy until that operation unwinds.
+
+The session coordinator can locally pin the `listingGeneration` carried by the
+prior `AiTextHostSessionPlan`, but V1 provider metadata and `openSession` expose
+no remote model-catalog generation proof. Re-reading provider info and
+capabilities from the same Binder therefore cannot prove that the listed model
+or `listingGeneration` is still current. This remains an explicit promotion
+gap, not an identity guarantee inferred from package or metadata stability.
+
+The pure session-policy slice in commit `325577c82` retains its standalone
+Kotlin K2/JVM 40/40 and focused Gradle 40/0 host-unit evidence. The coordinator,
+Android transport, and instrumentation landed in `bfa8fd649`, `851acc588`, and
+`836bfb48d`. A focused Gradle run recorded all 18
+`AiTextProviderSessionCoordinatorTest` methods with 0 skipped, 0 failures, and
+0 errors and assembled the host, instrumentation, and fake-provider APKs.
+
+On `QV710AF65F` (Android 12/API 31, arm64-v8a), two exact instrumentation method
+runs each returned `OK (1 test)`. The cross-process `fake.stream` run opened the
+exact component with a request PFD, delivered approximately 18 chunks, more
+than the fixed initial credit window of 8, then one usage event and one
+completion off the main thread. The descriptor-owner run accepted an exact
+payload and rejected short, trailing, and reliable-producer-error inputs while
+checking idempotent close. The host, instrumentation, and fake-provider packages
+were absent before installation and absent again after cleanup.
+
+This is **PARTIAL** Android evidence only. The descriptor-owner method is local
+to the instrumentation process, and the normal completion carries no callback
+PFD. There is no cross-process completion/tool PFD case, wrong-callback-UID
+case, hostile provider death or package-update case, real production
+plugin/model session, UI, script-runtime selector, or `ai.*` integration.
+
+These seven layers are not an active host route. Discovery, handshake,
+model-list, session coordination, and their Android transports remain
+default-off or otherwise unreachable from production. There is no route from
+`ai.ask`, `ai.chat`, `ai.stream`, or any other `ai.*` API to this baseline, and
+installing the conformance or independent provider APK does not activate it.
 
 ## Streaming And Backpressure
 
@@ -392,10 +452,10 @@ back to a cloud provider, changes models, or changes credential mode.
 
 This phase has default-off, read-only Android package discovery and exact
 component reinspection, an explicit-component metadata-only Binder handshake,
-pure host selection policies, and an exact-component Android model-list
-coordinator/transport. It still has no production discovery, handshake, or
-model-list call site, session or FD transport, `IAiTextCallback`, UI, or runtime
-integration. Installing either the independent production provider or the
+pure host policies, exact-component Android model-list coordination, and a
+default-off exact-component Android `openSession`/`IAiTextCallback`/PFD
+transport. None has a production call site, UI, runtime selector, or `ai.*`
+wiring. Installing either the independent production provider or the
 in-repository conformance provider therefore does not switch the public AI
 module or alter its built-in providers. The conformance APK is test-only, has
 no launcher or network permission, and is intended only for explicit
