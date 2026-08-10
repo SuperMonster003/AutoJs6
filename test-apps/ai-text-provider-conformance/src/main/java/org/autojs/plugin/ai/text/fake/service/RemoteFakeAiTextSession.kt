@@ -19,6 +19,8 @@ import org.autojs.plugin.ai.text.api.AiTextLimits
 import org.autojs.plugin.ai.text.api.AiTextMimeType
 import org.autojs.plugin.ai.text.api.AiTextQuotaPolicy
 import org.autojs.plugin.ai.text.api.AiTextRequest
+import org.autojs.plugin.ai.text.api.AiToolCall
+import org.autojs.plugin.ai.text.api.AiToolCallBatch
 import org.autojs.plugin.ai.text.api.IAiTextCallback
 import org.autojs.plugin.ai.text.api.IAiTextSession
 import org.autojs.plugin.ai.text.fake.FakeAiGenerationPlan
@@ -31,6 +33,7 @@ import org.autojs.plugin.ai.text.fake.FakeAiTextFixture
 import org.autojs.plugin.ai.text.fake.FakeMaterializedRequest
 import org.autojs.plugin.ai.text.fake.FakeOwnedResourceRegistry
 import org.autojs.plugin.ai.text.fake.FakeTerminalFinalizer
+import java.security.MessageDigest
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
@@ -263,6 +266,11 @@ internal class RemoteFakeAiTextSession(
         materialized: FakeMaterializedRequest,
         scenario: FakeAiHostileScenario,
     ) {
+        require(request.options.stream) { "Fake hostile sessions require streaming credits" }
+        // Initial credits are the fixture's explicit proof that synchronous openSession returned
+        // and the host committed the remote. Hostile callbacks must exercise the active Android
+        // transport, not race the provisional callback-before-return window.
+        awaitInitialCredits()
         val plan = FakeAiTextEngine.plan(request, materialized)
         when (scenario) {
             FakeAiHostileScenario.CHUNK_BEFORE_START -> {
@@ -302,9 +310,118 @@ internal class RemoteFakeAiTextSession(
                     resultOverride = AiCompletionResult(invalidOutput, AiFinishReason.STOP),
                 )
             }
+            FakeAiHostileScenario.COMPLETION_FD -> {
+                emitStarted(request)
+                finishDescriptorCompleted(request, plan)
+            }
+            FakeAiHostileScenario.TOOL_FD -> {
+                emitStarted(request)
+                emitDescriptorToolCalls()
+                awaitStop()
+            }
             FakeAiHostileScenario.STALL -> {
                 emitStarted(request)
                 awaitStop()
+            }
+        }
+    }
+
+    private fun finishDescriptorCompleted(
+        request: AiTextRequest,
+        plan: FakeAiGenerationPlan,
+    ) {
+        val outputBytes = plan.output.toByteArray(Charsets.UTF_8)
+        val output = AiPayloadReference(
+            mimeType = request.options.responseMimeType,
+            declaredLengthBytes = outputBytes.size.toLong(),
+            sha256 = sha256(outputBytes),
+            descriptorIndex = 0,
+            charset = "utf-8".takeIf { request.options.responseMimeType == AiTextMimeType.PLAIN },
+        )
+        val result = AiCompletionResult(
+            output = output,
+            finishReason = AiFinishReason.STOP,
+            usage = plan.usage.takeIf {
+                request.options.reportUsage || request.options.maximumOutputTokens != null
+            },
+            reasoning = plan.reasoningSummary?.let { summary ->
+                AiReasoningMetadata(
+                    summary = summary,
+                    reasoningTokens = plan.usage.reasoningTokens,
+                    redacted = false,
+                )
+            },
+        )
+        val encoded = AiTextCodec.encodeCompletionResult(result)
+        if (!machine.complete()) return
+        FakeTerminalFinalizer.run(cleanup = { cleanup(cancelWorkers = false) }) {
+            dispatchPlainDescriptor(outputBytes) { descriptor ->
+                callback.onCompleted(encoded, arrayOf(descriptor))
+            }
+        }
+    }
+
+    private fun emitDescriptorToolCalls() {
+        val argumentBytes = TOOL_ARGUMENTS.toByteArray(Charsets.UTF_8)
+        val calls = AiToolCallBatch(
+            listOf(
+                AiToolCall(
+                    callId = FakeAiTextEngine.TOOL_CALL_ID,
+                    name = TOOL_NAME,
+                    arguments = AiPayloadReference(
+                        mimeType = AiTextMimeType.JSON,
+                        declaredLengthBytes = argumentBytes.size.toLong(),
+                        sha256 = sha256(argumentBytes),
+                        descriptorIndex = 0,
+                    ),
+                ),
+            ),
+        )
+        val encoded = AiTextCodec.encodeToolCallBatch(calls)
+        dispatchReliableDescriptor(argumentBytes) { descriptor ->
+            callback.onToolCalls(encoded, arrayOf(descriptor))
+        }
+    }
+
+    /**
+     * Publishes one small ordinary-pipe payload for cross-process ownership/materialization tests.
+     * The fixture writes before publishing, so callers must keep this payload well below pipe
+     * capacity. Reliable producer-status transport has a separate, process-local conformance gate.
+     */
+    private fun dispatchPlainDescriptor(
+        bytes: ByteArray,
+        publish: (ParcelFileDescriptor) -> Unit,
+    ) {
+        require(bytes.size <= 4 * 1024) { "Pre-buffered fixture payload is too large" }
+        val safeBytes = bytes.copyOf()
+        dispatchCallback {
+            val pipe = ParcelFileDescriptor.createPipe()
+            try {
+                ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
+                    output.write(safeBytes)
+                }
+                publish(pipe[0])
+            } finally {
+                pipe.forEach { descriptor -> runCatching(descriptor::close) }
+            }
+        }
+    }
+
+    /** Publishes one complete reliable-pipe reader and always closes both sender-side endpoints. */
+    private fun dispatchReliableDescriptor(
+        bytes: ByteArray,
+        publish: (ParcelFileDescriptor) -> Unit,
+    ) {
+        val safeBytes = bytes.copyOf()
+        dispatchCallback {
+            val pipe = ParcelFileDescriptor.createReliablePipe()
+            try {
+                ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
+                    output.write(safeBytes)
+                }
+                publish(pipe[0])
+            } finally {
+                pipe.forEach { descriptor -> runCatching(descriptor::close) }
             }
         }
     }
@@ -393,6 +510,16 @@ internal class RemoteFakeAiTextSession(
                 if (machine.isActive && machine.credits == 0) {
                     signal.wait()
                 }
+            }
+        }
+    }
+
+    private fun awaitInitialCredits() {
+        while (true) {
+            ensureActive()
+            synchronized(signal) {
+                if (machine.credits > 0) return
+                if (machine.isActive) signal.wait()
             }
         }
     }
@@ -507,5 +634,14 @@ internal class RemoteFakeAiTextSession(
         if (!machine.isActive || Thread.currentThread().isInterrupted) throw SessionStopped()
     }
 
+    private fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256")
+        .digest(bytes)
+        .joinToString(separator = "") { byte -> "%02x".format(byte.toInt() and 0xFF) }
+
     private class SessionStopped : RuntimeException()
+
+    private companion object {
+        const val TOOL_NAME = "lookup"
+        const val TOOL_ARGUMENTS = "{\"fixture\":true}"
+    }
 }

@@ -6,6 +6,8 @@ enum class FakeAiHostileScenario(val modelId: String) {
     NO_CREDIT("fake.hostile.no-credit"),
     DUPLICATE_TERMINAL("fake.hostile.duplicate-terminal"),
     INVALID_FD_REFERENCE("fake.hostile.invalid-fd-ref"),
+    COMPLETION_FD("fake.hostile.completion-fd"),
+    TOOL_FD("fake.hostile.tool-fd"),
     STALL("fake.hostile.stall"),
     ;
 
