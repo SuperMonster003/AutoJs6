@@ -29,6 +29,7 @@ behavior only for reproducible host conformance testing.
 | AI models | Page token replay, scope, cycle, generation drift, and cross-page duplicate model IDs | `AiModelPageTokenPolicyTest` | PASS, JVM |
 | AI protocol | Shared wire, common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and pagination | Combined protocol/API corpus, 103 tests | PASS, JVM |
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
+| AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
 | AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models, bounded executors, FD cleanup, and caller authentication | Conformance text provider unit corpus, 31 tests | PASS, JVM |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 
@@ -47,9 +48,76 @@ APK assembly pass.
 | D8 parity for default/static interface methods, missing libraries, and device boot libraries | Current local compiler versus production plugin | PENDING |
 | AAR normalization and resource behavior | Current local path versus production plugin | PENDING |
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
+| AI exact-component metadata and model-list positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a positive metadata-handshake and paged model-list paths only |
 | AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PENDING |
 | AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PENDING |
 | Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
+
+### API 31 AI Partial Evidence
+
+The 2026-08-10 positive-path run used `QV710AF65F` (API 31,
+`arm64-v8a`). Its source was built in an isolated worktree from baseline
+`54ae482cb2654734b850926e7fca5252901eab3e` plus the four-file model-list
+patch. That exact content was subsequently committed without source changes as
+`19a82f22ff071a1d013be63f8f0c9f8c8a6a570d` (`19a82f22f`). The four source
+file SHA-256 values were:
+
+- `b74c59d9f0cefabeda2ad99fbc42117525ba090fa3ead9ed6ae7f1bcc0df05cc` --
+  `AiTextProviderModelListingCoordinator.kt`.
+- `cd014fc96419613cac1b52e8cb5272dff99241eb7e7a6caa055ba62243154f52` --
+  `AndroidAiTextProviderModelListing.kt`.
+- `28204fee38366966442beee3b4b1d6f362c19f5d7785240bd2b33b354e63394f` --
+  `AiTextProviderModelListingCoordinatorTest.kt`.
+- `d344e235e884e66894b2d1a3b1a202d6b3cbf465109de98def62889d9c276750` --
+  `AiTextProviderModelListingAndroidConformanceTest.kt`.
+
+After an exclusive-slot preflight observed 30 continuous seconds with no other
+Gradle client, one isolated `--no-daemon --no-parallel --max-workers=2`
+invocation ran the focused `testAppDebugUnitTest` class and assembled the host
+App Debug, App Debug androidTest, and fake-provider Debug APKs. It exited 0;
+the Gradle XML recorded 15 tests with no skipped tests, failures, or errors,
+and `VERSION_BUILD`/`BUILD_TIME` remained unchanged. An unrelated Gradle client
+started later while this invocation was already running, which produced Kotlin
+daemon connection-retry noise; Gradle recovered, and the XML and three APK
+artifacts below were all published by the successful invocation.
+
+Two separate exact `Class#method` instrumentation invocations returned
+`OK (1 test)`:
+
+| Method | Time | Asserted positive path |
+| --- | ---: | --- |
+| `AiTextProviderAndroidConformanceTest#exactComponentHandshakeDecodesAndPinsFakeProviderMetadata` | 0.575 s | Existing exact-component metadata handshake decoded and pinned the same-signer on-device fake provider; completion was off the main thread, terminal was unique, and exact package identity was unchanged |
+| `AiTextProviderModelListingAndroidConformanceTest#exactComponentModelListingRevalidatesAndCollectsAllFakeModels` | 0.524 s | With `pageSize = 1`, collected generation `fake-models-v1` and model IDs `fake.echo`, `fake.stream`, `fake.reasoning`, and `fake.tools`; the catalog retained the pinned provider, completion was off the main thread, terminal was unique, and exact package identity was unchanged |
+
+The exact commands were:
+
+```text
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiText.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiTextProviderAndroidConformanceTest#exactComponentHandshakeDecodesAndPinsFakeProviderMetadata' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiText.modelListing.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiTextProviderModelListingAndroidConformanceTest#exactComponentModelListingRevalidatesAndCollectsAllFakeModels' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+The host, instrumentation, and fake-provider APKs all verified with APK
+Signature Scheme v2 and the same test certificate SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
+Their artifact SHA-256 values were:
+
+- Host: `f43fbdb8ecb8ce37a38df9ffebbe06733de481bbeaa5bec7de07c2e0184337d2`.
+- Instrumentation: `6cef35988b5f2497654051aeb872a9236a22eeaba2c5cf92c9da8ca5bea52b5f`.
+- Fake provider: `045ba4955b8eaaf68068c62f8740ca236298fa2489b9f37adddb96a4acf06a12`.
+
+The SHA-256 of each installed device `base.apk` matched its corresponding
+artifact exactly. Before installation, all three packages --
+`org.autojs.autojs6`, `org.autojs.autojs6.test`, and
+`org.autojs.plugin.ai.text.fake` -- were absent. The run uninstalled only those
+temporary packages, and all three were confirmed absent again afterward.
+
+This is positive-path PARTIAL evidence only. It covers no API other than 31 and
+does not cover hostile callbacks, negative signer/UID/identity drift, package
+update/disable/uninstall during a transcript, timeout or callback/provider/host
+death, a real production plugin/model, session opening, PFD ownership, credit
+flow, generation, UI/runtime selection, or any `ai.*` integration. The
+standalone K2/JUnit 15/15 result remains separate JVM evidence rather than an
+additional Android matrix cell.
 
 ### API 25 Partial Evidence
 
@@ -117,9 +185,11 @@ The DEX adapter remains experimental and disconnected from
 compiler must contain the real D8 implementation; the fixed-output conformance provider can
 never be selected for production compilation.
 
-The AI protocol remains disconnected from the public `ai` module until an
-Android discovery and Binder adapter, explicit user selection, and the
-installed-provider matrix are implemented. The pure host policy and credential
-boundary are default-off foundations, not production activation. Image, audio,
-and video require separate protocol reviews and cannot be added to the text
-plugin to satisfy this matrix.
+The AI protocol remains disconnected from the public `ai` module. Default-off
+Android discovery, metadata-handshake, and model-list adapters now exist but
+have no production call site. Promotion still requires the installed-provider
+matrix, explicit user selection, session/PFD and `IAiTextCallback` transport,
+and UI/runtime wiring. The pure host policy and credential boundary are
+default-off foundations, not production activation. Image, audio, and video
+require separate protocol reviews and cannot be added to the text plugin to
+satisfy this matrix.

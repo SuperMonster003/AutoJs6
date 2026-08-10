@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/09
+###### 2026/08/10
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -150,7 +150,7 @@
 * `優化` DEX 編譯器實驗性宿主路徑保持默認關閉並要求顯式組件, 實施精確組件 UID 與完整簽名者集合鎖定, 單次分派回退, 語義緩存來源追蹤, 有界回調入口, 隔離 Binder 超時, 結構化 DEX ZIP 校驗, reliable pipe 有界 drain 與 EOF 對端錯誤檢查, 由來源/目標雙摘要保護的可回退單次發佈, 異步終止信號與發佈提交點原子仲裁, 且取消/超時/Binder death 在提交前勝出時強制回退
 * `優化` DEX 編譯器實驗性一致性測試擴展至真實 Android Binder 傳輸與產物存儲, 覆蓋精確簽名組件, 惡意回調/輸出/超時場景, 目標 API 感知的 DEX 校驗及 DexClassLoader 執行
 * `優化` 默認關閉的純 AI 文本宿主策略支持確定性信任選擇, 精確身份鎖定與重新驗證, 宿主/供應商能力交集, 歧義候選拒絕, 插件管理憑據隔離, 不含敏感內容的安全診斷, 取消/終態會話競態的確定性所有權, 請求綁定的工具及 descriptor JSON 驗證, streaming 聚合長度/SHA-256/配額校驗, 解碼後 JSON 重複鍵拒絕, 含敏感數據的模型 `toString` 摘要化及能力集合的域分離緩存鍵
-* `優化` 默認關閉且未接線的 AI 文本宿主基線沒有生產調用點, 將只讀 PackageManager 精確 action 發現/精確組件複查與顯式組件 metadata-only Binder 綁定結合. 每條路徑都會複查其實際到達的身份邊界; 成功路徑最多執行三次複查: 綁定前, 連接後, 以及 descriptor 驗證且 provider info/capabilities 完成有界嚴格解碼後. absolute deadline 會使嘗試失敗並忽略延遲結果; 僅當 deadline 到期時 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 Binder 調用仍在執行, 才在進程內熔斷該組件. getter 返回後的同步嚴格解碼不計入 RPC in-flight, 不會觸發熔斷. worker queue/綁定/最終身份複查階段超時也不會觸發熔斷. 此熔斷不能強制中止已阻塞的 Binder 調用. 獨立的 transport-independent 模型列舉 transcript policy 同樣默認關閉且未接線; 它先按 pinned provider 驗證調用方提供的 callback-entry UID, 再有界嚴格解碼模型頁及 provider error, 拒絕分頁/callback 違規並讓終態競態只有一個勝出, 最終形成不可變 provider-pinned catalog, 且只為精確匹配並能力相容的 model 生成 session plan. 目前沒有 Android `IAiModelListCallback` adapter 或實際 Binder model-list invocation, 仍無 `openSession`, PFD, `IAiTextCallback`, session dispatch, runtime/UI 整合, `ai.*` 路由或 dispatch 前身份複查
+* `優化` 默認關閉且未接線的 AI 文本宿主基線沒有生產調用點. 只讀 PackageManager 精確 action 發現/精確組件複查及顯式組件 metadata-only Binder 握手, 與新增的精確組件 Android 模型列舉 coordinator/transport 保持分離. metadata 握手僅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在執行時於進程內熔斷組件; getter 返回後的嚴格解碼及 worker queue/綁定/最終複查階段超時不會觸發熔斷. 模型列舉 coordinator 使用同一個 descriptor 已驗證 Binder 重新驗證有界 provider metadata 並調用 `listModels()`, 在每次初始或續頁 dispatch 及每次 callback 准入前精確複查包身份. callback 在唯一一次防禦性複製前驗證 pinned UID, 對應 page/error 類型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整穩定的 pinned identity 隔離, 並受不驅逐的單 provider 及進程總預算約束. 進程級 single-flight gate, 唯一終態所有者及冪等清理覆蓋綁定, death recipient, callback 註冊, deadline 與 operation lease. 與 metadata 握手不同, 若模型列舉 deadline 到期時任何已准入 platform/transport operation 尚未退出, 將 fail-closed 地於進程內熔斷該精確組件; 熔斷無法強制中止操作, gate/watchdog 會保持佔用直至延遲退出. 仍無 session dispatch 或 `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 整合, `ai.*` 路由及任何生產調用點
 * `優化` Ace WebView 運行時/JavaScript bridge/內置語言服務/靜態資源完成插件化, 降低宿主 APK 耦合並支持獨立安裝及更新
 * `優化` 項目離線文檔完成插件化, 降低宿主 APK 體積並支持獨立安裝及更新
 * `優化` 離線項目文檔首次加載的文件清單解析及完整 SHA-256 校驗移至後台線程, 避免阻塞界面

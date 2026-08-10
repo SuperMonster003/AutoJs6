@@ -18,7 +18,7 @@ document temporarily lags the current hardening pass.
 | `plugin-api:ai-common-api` | Provider identity, errors, usage, payload and FD references |
 | `plugin-api:ai-text-generation-api` | Text AIDL, models, codecs, limits, and lifecycle policies |
 | `test-apps:ai-text-provider-conformance` | Deterministic provider and hostile conformance scenarios |
-| `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, transport-independent model-list transcript validation, and host policies |
+| `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, exact-component model-list coordination/transport, transcript validation, and host policies |
 
 V1 is text generation only. Image, audio, and video remain separate future
 protocols and separate plugins. The protocol does not create a mixed-media or
@@ -97,9 +97,9 @@ length and optional SHA-256, decodes strict UTF-8, parses one complete JSON
 value, and applies the depth, node, string, and duplicate-key rules. MIME type,
 descriptor index, and declared length alone do not establish valid JSON.
 Quota and descriptor-reference helpers that are documented as structural do
-not replace this materialization step. A future Android adapter must use the
-request-aware verified tool-call path and must materialize every request and
-tool-result descriptor before exposing its content to an engine or script.
+not replace this materialization step. A future Android session/FD adapter must
+use the request-aware verified tool-call path and must materialize every request
+and tool-result descriptor before exposing its content to an engine or script.
 
 Usage callbacks are cumulative snapshots. Omitted counters retain their last
 reported values, and reported counters never decrease. When total, input, and
@@ -113,7 +113,7 @@ model provider with native libraries reports only its actual packaged ABIs.
 
 ## Current Host Discovery, Handshake, Model-List, And Policy Baseline
 
-The repository now contains a default-off host baseline with four deliberately
+The repository now contains a default-off host baseline with five deliberately
 separate layers. The first, `AndroidAiTextProviderDiscovery`, is a read-only,
 `PackageManager`-only Android adapter with no production call site. When called
 directly, it can discover services for the exact protocol action and reinspect
@@ -174,10 +174,10 @@ When explicitly exercised by tests, the policy:
   was selected. Duplicate eligible rows for that same component remain
   ambiguous and are rejected.
 - Pins the exact component and package identity together with provider metadata,
-  negotiated protocol, and negotiated capabilities. The policy exposes the
-  revalidation decision that a future dispatch path must call immediately before
-  dispatch, but no current call site reaches that boundary. Callbacks must come
-  from the pinned package UID.
+  negotiated protocol, and negotiated capabilities. The model-list coordinator
+  uses this revalidation decision before it lists models; a future session path
+  must repeat the same boundary immediately before session dispatch. Callbacks
+  must come from the pinned package UID.
 - Builds a credential-free session plan. Its binding-decision key includes the
   pinned identity, `listingGeneration`, model ID, model capability snapshot,
   effective context/output limits, and negotiated capabilities. Collection
@@ -211,13 +211,50 @@ immutable `AiTextHostSessionPlan` only when that model satisfies the requested
 capability requirements.
 
 The listing policy's internal `Dispatch` decision identifies only the next
-encoded model-list request for a future caller-owned transport; it is not
-session dispatch. These layers are not an active host route. The explicit
-metadata-only Binder handshake and transport-independent listing policy have no
-production call site, and there is no Android `IAiModelListCallback` adapter,
-actual Binder model-list invocation, `openSession` or session dispatch, FD
-transport adapter, `IAiTextCallback`, UI, script-runtime entry point, network
-request, or built-in-provider migration. In particular, there is no route from
+encoded model-list request for a caller-owned transport; it is not session
+dispatch.
+
+The fifth layer combines `AiTextProviderModelListingCoordinator` with
+`AndroidAiTextProviderModelListing`. Its entry option defaults to
+`enabled = false`, and it has no production call site. An explicitly invoked
+run accepts an already pinned provider; it does not select or enable one. The
+Android transport requires a background thread, binds with an actionless intent
+to the exact component, verifies the `IAiTextProvider` descriptor before
+constructing the proxy, links Binder death, and keeps that one binding alive for
+the complete transcript. The coordinator uses the same descriptor-verified
+Binder for bounded provider-info and capability revalidation and for every
+`listModels()` call. It performs exact package-identity reinspection before the
+bind, immediately before each initial or continuation dispatch, and again
+before admitting each callback to the transcript policy.
+
+The `IAiModelListCallback` stub captures `Binder.getCallingUid()` and forwards
+the original envelope synchronously on that Binder callback stack. Before the
+callback returns, the coordinator checks the UID and message-specific envelope
+ceiling, reserves one slot in its bounded callback queue, and only then makes
+the defensive copy retained for later admission. A callback delivered
+synchronously by `listModels()` is not admitted unless that dispatch itself
+returns successfully. Callback registrations detach on close even if the
+provider retains their Binder objects.
+
+One process-owned coordinator gate permits a single active transcript. Its
+continuation-token replay ledgers are isolated by the full pinned transport
+identity and bounded without eviction; exhausting the provider-identity or
+per-provider token budget, or the aggregate process token-entry budget fails
+closed. One absolute deadline covers binding,
+metadata, dispatch, reinspection, and callback admission. Cancellation,
+timeout, Binder death, callback, and provider-error races publish one terminal
+outcome. If a terminal path wins while an operation remains blocked, the gate
+and deadline watchdog stay owned until that operation unwinds; deadline expiry
+then fuses the exact component for the rest of the process. Binding, death
+recipient, prepared calls, callback sinks, and the process gate close at most
+once.
+
+These five layers are not an active host route. The discovery, metadata
+handshake, model-list coordinator, Android model-list transport, and transcript
+policy all remain default-off or otherwise unreachable from production. There
+is still no `openSession` or session dispatch, request/result FD transport,
+`IAiTextCallback`, credit flow, UI, script-runtime entry point, network request,
+or built-in-provider migration. In particular, there is no route from
 `ai.ask`, `ai.chat`, `ai.stream`, or any other `ai.*` API to this baseline.
 
 ## Streaming And Backpressure
@@ -273,11 +310,13 @@ exceed that scoped size. A token is single use. The host
 rejects replay, cycles, identity drift, generation changes, duplicate model
 IDs within a page, and model IDs repeated across pages.
 
-The current default-off transport-independent transcript policy enforces the
-page-size, token, generation, duplicate-model, pinned-UID, envelope, capability,
-and single-terminal portions of this boundary for caller-supplied callback
-events. It does not bind, register an Android callback, invoke `listModels()`, or
-perform Android package reinspection.
+The current default-off transcript policy enforces the page-size, token,
+generation, duplicate-model, pinned-UID, envelope, capability, and
+single-terminal portions of this boundary. When the explicitly invoked
+coordinator is enabled, the Android transport now binds the exact component,
+registers one callback per dispatch, invokes `listModels()`, and brackets each
+dispatch and callback admission with exact package reinspection. No production
+call site enables that path.
 
 The conformance provider exposes deterministic public models for echo, streaming,
 reasoning, and tools. Reserved hidden model IDs select hostile conformance
@@ -303,19 +342,18 @@ back to a cloud provider, changes models, or changes credential mode.
 
 This phase has default-off, read-only Android package discovery and exact
 component reinspection, an explicit-component metadata-only Binder handshake,
-pure host selection policies, and a transport-independent model-list transcript
-policy. It still has no production discovery, handshake, or model-list call
-site, Android `IAiModelListCallback` adapter, actual Binder model-list
-invocation, session or FD transport, `IAiTextCallback`, UI, or runtime
+pure host selection policies, and an exact-component Android model-list
+coordinator/transport. It still has no production discovery, handshake, or
+model-list call site, session or FD transport, `IAiTextCallback`, UI, or runtime
 integration. Installing either the independent production provider or the
 in-repository conformance provider therefore does not switch the public AI
 module or alter its built-in providers. The conformance APK is test-only, has
 no launcher or network permission, and is intended only for explicit
 conformance environments.
 
-A future Android integration built on the discovery, handshake, and policy
-layers must preserve the built-in implementation as the baseline,
-independently obtain and revalidate every package fact, own every FD
-transaction, enforce the lifecycle policies in the host, and expose selection
-explicitly. No current result compatibility claim is made for proprietary
+A future production integration built on these default-off layers must preserve
+the built-in implementation as the baseline, independently obtain and
+revalidate every package fact, own every FD transaction, enforce the lifecycle
+policies in the host, and expose selection explicitly. No current result
+compatibility claim is made for proprietary
 `message` or `raw` fields.

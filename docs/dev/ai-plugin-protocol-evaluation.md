@@ -10,18 +10,20 @@ authorize a mixed-modality AI plugin.
 Proceed with a limited GO for a build-time AI protocol pack and a dedicated
 conformance test app.
 
-Implementation status on 2026-08-09: Phase 1 is implemented as a
+Implementation status on 2026-08-10: Phase 1 is implemented as a
 provider-neutral text protocol pack and an isolated conformance test app under
 `test-apps`. Phase 3 now has a real CPU-only on-device provider in the
 independent sibling project `AutoJs6-Plugin-AI-Text-Generation`. A non-invasive
-slice of Phase 2 exists as a default-off, pure Kotlin host policy for selection,
-trust pinning, capability matching, safe session planning, and race ownership.
-The protocol layer also binds tool calls to the original request, verifies
-descriptor-backed tool JSON, enforces aggregate streaming digests and quotas,
-rejects decoded duplicate JSON keys, and redacts payload-bearing model
-summaries. Android discovery, Binder binding, UI, and script-runtime selection
-remain open, so installing either app alone has no effect on the public AI
-module. Repository and Android runtime gates are tracked in
+slice of Phase 2 now includes default-off pure Kotlin host policies, read-only
+Android package discovery, an exact-component metadata handshake, and an
+exact-component Android model-list coordinator/transport. None has a production
+call site. The protocol layer also binds tool calls to the original request,
+verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
+quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
+summaries. Session dispatch, request/result PFD transport, `IAiTextCallback`,
+credit flow, UI, and script-runtime selection remain open, so installing either
+app alone has no effect on the public AI module. Repository and Android runtime
+gates are tracked in
 [the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
 contract is documented in
 [AI Text Plugin Protocol V1](ai-text-plugin-protocol-v1.md).
@@ -62,10 +64,16 @@ would not become simpler merely by moving it across Binder:
   provider-neutral usage, reasoning fields, and tool-call round trips.
 - `app/src/main/java/org/autojs/autojs/runtime/api/augment/ai/Ai.kt` exposes the
   existing `ai.ask`, `ai.chat`, and `ai.stream` script facade.
-- `app/src/main/java/org/autojs/autojs/core/plugin/ai/` contains the default-off
-  transport-independent selection and session policies. It does not query
-  `PackageManager`, bind a service, read a credential, send a request, or
-  connect to the script facade.
+- `app/src/main/java/org/autojs/autojs/core/plugin/ai/` contains default-off
+  transport-independent selection, transcript, and session policies. They do
+  not query `PackageManager`, bind a service, read a credential, send a
+  generation request, or connect to the script facade.
+- The same package now contains read-only Android discovery, a metadata-only
+  exact-component handshake, and an exact-component model-list
+  coordinator/transport. These adapters have no production call site. The
+  model-list path can call only the provider metadata getters and
+  `listModels()`; it cannot open a session, transfer a PFD, register
+  `IAiTextCallback`, grant credits, or reach any `ai.*` API.
 - Current `ai.chat` results include provider-native `message` and `raw` fields;
   transport tests prove that opaque reasoning/thinking signatures survive a
   later same-provider tool round trip. A provider-neutral protocol cannot claim
@@ -239,8 +247,8 @@ opening a session. An unknown required field or capability rejects the plugin.
 An unknown optional field is ignored. Breaking parcel, lifecycle, flow-control,
 credential, or privacy semantics require a new protocol major version.
 
-The current pure host policy accepts candidates from a future discovery
-adapter. With its entry option explicitly enabled, it checks the action,
+The current pure host policy accepts candidates from the default-off discovery
+layer. With its entry option explicitly enabled, it checks the action,
 export/enable state, signature-level `org.autojs.permission.PLUGIN` binding
 permission, trust authorization, host version, ABI, and protocol/capability
 intersection. It rejects multiple eligible providers unless one exact
@@ -250,12 +258,30 @@ normalized signer set, package version, last-update time, provider metadata,
 negotiated protocol, and capabilities, then requires an exact revalidation
 immediately before dispatch. A callback UID must equal the pinned package UID.
 
-No Android adapter currently supplies those candidates or performs the bind.
-That adapter must independently obtain every package fact from
-`PackageManager`; an action string or package name supplied inside a Parcel is
-not caller proof. The provider must separately check `Binder.getCallingUid()`
-and the packages/signers associated with that UID against its expected
-authorized host identity.
+`AndroidAiTextProviderDiscovery` can supply package snapshots when called
+explicitly, and the metadata handshake and model-list transport can bind an
+actionless intent to one exact component. Both verify the AIDL interface
+descriptor before constructing a proxy. The model-list coordinator uses the
+same descriptor-verified Binder to revalidate bounded provider metadata and to
+invoke every initial or continuation `listModels()` request; it reinspects the
+exact package identity immediately before each dispatch and before each
+callback is admitted.
+
+The Android model-list callback captures `Binder.getCallingUid()` synchronously.
+The coordinator rejects the wrong UID and oversized envelope before its one
+defensive copy, bounds callback-flood admission, and gives cancellation,
+timeout, Binder death, callback, and provider-error races one terminal owner.
+Its process owner serializes transcripts, retains component fuses, and isolates
+bounded continuation-token ledgers by the complete pinned transport identity.
+Bindings, death recipients, prepared callback registrations, the absolute
+deadline, and operation leases are coordinator-owned. These classes remain
+default-off and unwired; their existence does not authorize discovery or bind a
+provider.
+
+Every Android package fact still comes independently from `PackageManager`; an
+action string or package name supplied inside a Parcel is not caller proof. The
+provider must separately check `Binder.getCallingUid()` and the packages/signers
+associated with that UID against its expected authorized host identity.
 
 A separate pure session gate serializes dispatch start, remote-handle
 attachment, cancellation, close, data admission, and terminal ownership.
@@ -479,8 +505,9 @@ failure and terminates the session without retry.
 
 The existing built-in providers remain the compatibility baseline. Plugin
 selection is designed to be explicit and does not silently replace a built-in
-profile. The current policy entry is disabled by default and has no Android or
-runtime adapter. Installing, removing, disabling, or omitting the conformance provider
+profile. The current discovery, handshake, and model-list Android adapters are
+default-off or unreachable from production and there is no session, runtime, or
+UI adapter. Installing, removing, disabling, or omitting the conformance provider
 therefore creates no user-visible feature or degradation today.
 
 - Missing, disabled, incompatible, updating, or crashed selected plugins fail
@@ -571,8 +598,10 @@ is directional evidence only, not an APK-size or performance measurement.
 
 ### Phase 2: Optional Host Selector
 
-- Keep the completed pure policy core default-off while Android discovery,
-  Binder transport, UI, and runtime adapters are absent.
+- Keep the completed pure policy core and the current Android discovery,
+  metadata-handshake, and model-list transport default-off and without a
+  production call site while session/PFD, `IAiTextCallback`, UI, and runtime
+  adapters are absent.
 - Add an experimental provider selector without changing `ai.ask`, `ai.chat`,
   or `ai.stream` script signatures.
 - Keep built-in providers as the default and explicit fallback baseline.

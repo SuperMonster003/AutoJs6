@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 8 월 9 일.
+데이터 갱신일: 2026 년 8 월 10 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/09
+###### 2026/08/10
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
@@ -310,7 +310,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` DEX 컴파일러 실험적 호스트 경로를 기본 비활성화하고 명시적 컴포넌트를 요구하며, 정확한 컴포넌트 UID와 전체 서명자 집합 고정, 단일 디스패치 폴백, 의미 기반 캐시 출처, 제한된 콜백 입력, 격리된 Binder 시간 제한, 구조적 DEX ZIP 검증, reliable pipe 제한 drain과 EOF 시 peer error 확인, 원본/대상 digest로 보호되는 rollback 가능한 단일 게시, 비동기 종료 신호와 게시 commit 지점 사이의 원자적 중재, 취소/시간 초과/Binder death가 commit 전에 승리할 때 강제 rollback을 적용
 * `개선` DEX 컴파일러 실험적 적합성 테스트를 실제 Android Binder 전송 및 아티팩트 저장소로 확장하여 정확한 서명 컴포넌트, 적대적 callback/출력/timeout 시나리오, 대상 API 인식 DEX 검증 및 DexClassLoader 실행을 포함
 * `개선` 기본 비활성화된 순수 AI 텍스트 호스트 정책에 결정적 신뢰 선택, 정확한 ID 고정 및 재검증, 호스트/프로바이더 기능 교집합, 모호한 후보 거부, 플러그인 관리 자격 증명 격리, 민감한 내용을 포함하지 않는 진단, 취소/종료 세션 경쟁의 결정적 소유권, request-bound 도구/descriptor JSON 검증, streaming 집계 length/SHA-256/quota 검증, 디코딩된 JSON 중복 key 거부, 민감한 데이터를 포함한 모델의 `toString` 요약, capability collection용 domain-separated cache key를 적용
-* `개선` 기본 비활성화 및 미연결 AI 텍스트 호스트 기반에는 프로덕션 호출 지점이 없고, 읽기 전용 PackageManager exact-action discovery/exact-component reinspection과 명시적 컴포넌트 전용 metadata-only Binder 바인딩을 결합함. 모든 경로에서 실제로 도달한 ID 경계마다 재검사하며, 성공 경로에서는 최대 3회 바인딩 전/연결 후/descriptor가 검증된 provider info/capabilities의 제한된 엄격 디코딩 후 재검사함. absolute deadline은 시도를 실패 처리하고 늦은 결과를 무시하며, interface descriptor, `getProviderInfo()`, `getCapabilities()` 동기 Binder 호출 중 하나가 실행 중인 상태로 만료될 때만 프로세스 내에서 해당 컴포넌트를 fuse함. getter 반환 뒤의 동기 엄격 디코딩은 RPC in-flight에 포함되지 않으며 fuse하지 않음. worker queue/bind/final reinspection 중 timeout도 fuse하지 않음. 이 fuse는 이미 차단된 Binder 호출을 강제 중단할 수 없음. 별도의 transport-independent model-list transcript policy도 기본 비활성화 및 미연결 상태이며, 호출자가 제공한 callback-entry UID를 고정된 provider와 대조한 뒤 페이지/오류를 제한된 범위 안에서 엄격하게 디코딩하고, pagination/callback 위반을 거부하며, 경쟁하는 terminal event 중 하나만 승리하도록 하고, provider에 고정된 불변 catalog를 구성함. capability가 호환되는 exact model만 이 catalog에서 session plan을 만들 수 있음. Android `IAiModelListCallback` adapter나 실제 Binder model-list invocation은 없고, `openSession`, PFD, `IAiTextCallback`, session dispatch, runtime/UI 통합, `ai.*` 라우팅 및 dispatch 전 identity reinspection도 구현되지 않음
+* `개선` 기본 비활성화 및 미연결 AI 텍스트 호스트 기반에는 프로덕션 호출 지점이 없음. 읽기 전용 PackageManager exact-action discovery/exact-component reinspection과 명시적 컴포넌트 전용 metadata-only Binder handshake는 새 exact-component Android model-list coordinator/transport와 분리되어 있음. metadata handshake는 absolute deadline 만료 시 interface descriptor, `getProviderInfo()`, `getCapabilities()` 동기 RPC 중 하나가 실행 중일 때만 프로세스에서 컴포넌트를 fuse하며, getter 반환 뒤 strict decode와 worker queue/bind/final reinspection 중 timeout은 fuse하지 않음. model-list coordinator는 같은 descriptor 검증 Binder로 제한된 provider metadata를 재검증하고 `listModels()`를 호출하며, 각 initial/continuation dispatch 및 callback admission 전에 package identity를 exact reinspection함. callback은 유일한 defensive copy 전에 pinned UID, 형식별 page/error envelope 상한 및 제한된 flood slot을 검증함. continuation-token ledger는 완전하고 안정적인 pinned identity별로 격리되며 eviction 없는 provider별 및 프로세스 전체 budget의 제한을 받음. process-wide single-flight gate, 단일 terminal owner 및 멱등 cleanup이 binding, death recipient, callback registration, deadline 및 operation lease를 소유함. metadata handshake와 달리 model-list deadline 만료 시 admit된 platform/transport operation 중 하나라도 아직 unwind되지 않았으면 exact component를 fail-closed process fuse함; fuse는 operation을 강제 중단할 수 없고 gate/watchdog는 늦은 unwind까지 유지됨. session dispatch와 `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 통합, `ai.*` 라우팅 및 모든 프로덕션 호출 지점은 여전히 없음
 * `개선` Ace WebView 런타임/JavaScript bridge/내장 언어 서비스/정적 리소스를 별도로 설치 가능한 플러그인으로 모듈화하여 호스트 APK 결합도를 낮추고 독립 업데이트 지원
 * `개선` 프로젝트 오프라인 문서를 플러그인화하여 호스트 APK 크기를 줄이고 독립 설치 및 업데이트 지원
 * `개선` 오프라인 프로젝트 문서의 최초 로드 시 파일 목록 분석 및 전체 SHA-256 검증을 백그라운드 스레드로 이동하여 UI 차단 방지
@@ -613,7 +613,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 8 월 9 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 8 월 10 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
