@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.rhino.TokenStream;
 import org.autojs.autojs.tool.MapBuilder;
+import org.autojs.autojs.util.FileUtils;
 import org.mozilla.javascript.Token;
 
 import java.io.Reader;
@@ -52,7 +53,7 @@ public abstract class JavaScriptSource extends ScriptSource {
     private int mExecutionMode = EXECUTION_MODE_RAW;
 
     public JavaScriptSource(String name) {
-        super(name);
+        super(name, FileUtils.TYPE.JAVASCRIPT.extension);
     }
 
     @NonNull

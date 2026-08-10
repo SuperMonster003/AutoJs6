@@ -1,0 +1,276 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <queries>
+        <package android:name="org.autojs.autojs6" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:extractNativeLibs="false"
+        android:label="Lua Runtime Conformance"
+        android:supportsRtl="true"
+        android:testOnly="true"
+        android:usesCleartextTraffic="false">
+
+        <service
+            android:name=".service.FakeLuaPluginInfoService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.INFO" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.StallLuaPluginInfoService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.INFO" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.FakeLuaConformanceControlService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.runtime.fake.CONTROL" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.NormalLuaRuntimeService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="normal" />
+        </service>
+
+        <service
+            android:name=".service.MalformedRuntimeInfoLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="malformed-runtime-info" />
+        </service>
+
+        <service
+            android:name=".service.NullBindingLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="null-binding" />
+        </service>
+
+        <service
+            android:name=".service.StallRuntimeInfoLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="stall-runtime-info" />
+        </service>
+
+        <service
+            android:name=".service.StallCreateLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="stall-create" />
+        </service>
+
+        <service
+            android:name=".service.CallbackBeforeStartLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="callback-before-start" />
+        </service>
+
+        <service
+            android:name=".service.LateCreateReturnSessionLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="late-create-return-session" />
+        </service>
+
+        <service
+            android:name=".service.DuplicateTerminalLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="duplicate-terminal" />
+        </service>
+
+        <service
+            android:name=".service.IgnoreCancelLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="ignore-cancel" />
+        </service>
+
+        <service
+            android:name=".service.ZeroCreditOutputLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="zero-credit-output" />
+        </service>
+
+        <service
+            android:name=".service.SequenceGapLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="sequence-gap" />
+        </service>
+
+        <service
+            android:name=".service.SequenceReplayLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="sequence-replay" />
+        </service>
+
+        <service
+            android:name=".service.WrongRequestIdLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="wrong-request-id" />
+        </service>
+
+        <service
+            android:name=".service.BusySecondCreateLuaRuntimeService"
+            android:enabled="false"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":lua_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.lua.RUNTIME" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.lua.runtime.fake.SCENARIO"
+                android:value="busy-second-create" />
+        </service>
+
+    </application>
+</manifest>

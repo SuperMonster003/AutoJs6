@@ -11,6 +11,7 @@ import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs.script.LuaScriptSource;
 import org.autojs.autojs.script.NodeProjectLaunchKind;
 import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 import org.autojs.autojs.script.ScriptSource;
@@ -119,6 +120,9 @@ public abstract class Task {
             try {
                 return createLaunch().getEngineName();
             } catch (Exception ignored) {
+                if (LuaScriptSource.isLuaFileName(scriptPath)) {
+                    return LuaScriptSource.ENGINE;
+                }
                 if (!JavaScriptSource.isJavaScriptFileName(scriptPath)) {
                     return AutoFileSource.ENGINE;
                 }

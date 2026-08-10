@@ -47,6 +47,7 @@ private val pluginApi = listOf(
     "dex-compiler-api",
     "editor-api",
     "explorer-action-api",
+    "lua-runtime-api",
     "nodejs-api",
     "apk-builder-template",
     "opencc-api",
@@ -69,6 +70,7 @@ private val plugins = listOf(
 private val pluginConformanceTestApps = listOf(
     "ai-text-provider-conformance",
     "dex-compiler-conformance",
+    "lua-runtime-conformance",
 )
 
 include(

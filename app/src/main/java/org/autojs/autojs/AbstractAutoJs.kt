@@ -15,6 +15,7 @@ import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
+import org.autojs.autojs.engine.LuaPluginScriptEngine
 import org.autojs.autojs.engine.NodeJavaScriptEngineFactory
 import org.autojs.autojs.engine.RootAutomatorEngine
 import org.autojs.autojs.engine.ScriptEngineManager
@@ -29,6 +30,7 @@ import org.autojs.autojs.runtime.api.Shell
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
@@ -64,6 +66,9 @@ abstract class AbstractAutoJs protected constructor(val application: Application
         scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_NODEJS) {
             val rt = createRuntime()
             NodeJavaScriptEngineFactory.create(applicationContext).also { it.runtime = rt }
+        }
+        scriptEngineManager.registerEngine(LuaScriptSource.ENGINE) {
+            LuaPluginScriptEngine(applicationContext)
         }
         initContextFactory()
         scriptEngineManager.registerEngine(AutoFileSource.ENGINE) { RootAutomatorEngine(applicationContext) }

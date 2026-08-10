@@ -133,7 +133,7 @@ object ScriptLaunchSourceFactory {
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
     ): Launch {
-        if (JavaScriptSource.isJavaScriptFileName(file.name)) {
+        if (LuaScriptSource.isLuaFileName(file.name) || JavaScriptSource.isJavaScriptFileName(file.name)) {
             return createPathLaunch(
                 path = file.path,
                 workingDirectory = workingDirectory,
@@ -157,6 +157,18 @@ object ScriptLaunchSourceFactory {
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
     ): Launch {
+        if (LuaScriptSource.isLuaFileName(File(path).name)) {
+            require(preExecuteScript == null) {
+                "Lua launch source does not support JavaScript preExecuteScript"
+            }
+            val fileSource = LuaFileSource(File(path).normalizedFile())
+            return Launch(
+                source = fileSource,
+                workingDirectory = workingDirectory
+                    ?: fileSource.file.parent
+                    ?: defaultWorkingDirectory,
+            )
+        }
         val fileSource = NodeProjectScriptSourceFactory.create(path)
         val source = if (preExecuteScript == null) {
             fileSource
@@ -198,6 +210,7 @@ object ScriptLaunchSourceFactory {
         }
         return when (this) {
             is JavaScriptFileSource -> file.parent ?: defaultWorkingDirectory
+            is LuaFileSource -> file.parent ?: defaultWorkingDirectory
             is AutoFileSource -> file.parent ?: defaultWorkingDirectory
             else -> defaultWorkingDirectory
         }

@@ -38,6 +38,9 @@
             <action android:name="org.autojs.plugin.INFO" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.lua.RUNTIME" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.EXPLORER_ACTION" />
         </intent>
         <intent>

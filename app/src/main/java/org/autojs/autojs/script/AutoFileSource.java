@@ -3,6 +3,7 @@ package org.autojs.autojs.script;
 import androidx.annotation.NonNull;
 
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.util.FileUtils;
 
 import java.io.File;
 
@@ -15,7 +16,7 @@ public class AutoFileSource extends ScriptSource {
     private final File mFile;
 
     public AutoFileSource(File file) {
-        super(PFiles.getNameWithoutExtension(file.getAbsolutePath()));
+        super(PFiles.getNameWithoutExtension(file.getAbsolutePath()), FileUtils.TYPE.AUTO.extension);
         mFile = file;
     }
 

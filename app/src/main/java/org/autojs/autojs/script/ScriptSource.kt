@@ -9,7 +9,10 @@ import java.io.Serializable
  * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of Oct 3, 2022.
  */
-abstract class ScriptSource(private val sourceName: String) : Serializable {
+abstract class ScriptSource @JvmOverloads constructor(
+    private val sourceName: String,
+    val extension: String = FileUtils.TYPE.JAVASCRIPT.extension,
+) : Serializable {
 
     var overriddenFullPath: String? = null
 
@@ -19,8 +22,6 @@ abstract class ScriptSource(private val sourceName: String) : Serializable {
         get() = overriddenFullPath
 
     var prefix: String? = null
-
-    val extension = FileUtils.TYPE.JAVASCRIPT.extension
 
     val name
         get() = overriddenFullPath?.let { PFiles.getNameWithoutExtension(it) } ?: sourceName

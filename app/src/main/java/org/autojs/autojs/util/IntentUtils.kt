@@ -32,6 +32,8 @@ import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.api.WrappedShizuku
+import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.FloatyWindowManger
@@ -529,7 +531,7 @@ object IntentUtils {
                 activity.runOnUiThread {
                     scripts.forEach { script ->
                         try {
-                            val file = script.toScriptFile(workingDir)
+                            val file = resolveRestartScriptFile(script, workingDir)
                             when {
                                 file.exists() -> {
                                     val launch = ScriptLaunchSourceFactory.createFileLaunch(
@@ -542,7 +544,7 @@ object IntentUtils {
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            scriptsFailedToRun[script.toScriptFile(workingDir).absolutePath] = e.stackTraceToString()
+                            scriptsFailedToRun[resolveRestartScriptFile(script, workingDir).absolutePath] = e.stackTraceToString()
                         }
                     }
                 }
@@ -584,10 +586,12 @@ object IntentUtils {
                 .show()
         }
 
-        private fun String.toScriptFile(workingDir: String): File {
-            val file = when (this.endsWith(FileUtils.TYPE.JAVASCRIPT.extensionWithDot)) {
-                true -> this
-                else -> this + FileUtils.TYPE.JAVASCRIPT.extensionWithDot
+        internal fun resolveRestartScriptFile(script: String, workingDir: String): File {
+            val file = when {
+                LuaScriptSource.isLuaFileName(script) -> script
+                JavaScriptSource.isJavaScriptFileName(script) -> script
+                script.endsWith(FileUtils.TYPE.AUTO.extensionWithDot, ignoreCase = true) -> script
+                else -> script + FileUtils.TYPE.JAVASCRIPT.extensionWithDot
             }.let { File(it) }
             return when {
                 file.exists() -> file
