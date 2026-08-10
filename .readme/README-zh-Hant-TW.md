@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 8 月 10 日.
+資料更新於 2026 年 8 月 11 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -309,7 +309,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 將 AI 文字與 DEX 編譯器符合性 provider 從生產 `plugins` 目錄移入專用 `test-apps` 建置群組, 保留惡意 Binder 回歸涵蓋並明確獨立生產外掛的發布邊界
 * `最佳化` DEX 編譯器實驗性宿主路徑維持預設關閉並要求明確元件, 實施精確元件 UID 與完整簽署者集合鎖定, 單次分派降級, 語意快取來源追蹤, 有界回呼入口, 隔離 Binder 逾時, 結構化 DEX ZIP 驗證, reliable pipe 有界 drain 與 EOF 對端錯誤檢查, 由來源/目標雙摘要保護的可回復單次發布, 非同步終止訊號與發布提交點原子仲裁, 且取消/逾時/Binder death 在提交前勝出時強制回復
 * `最佳化` DEX 編譯器 R1.1 維持實驗預設關閉, 允許 runtime.loadJar 的 raw JAR 優先使用一個明確選取且與主程式同簽章的精確元件 provider, 失敗時只降級一次至內建 D8/dx, 取消時不降級, AAR 載入繼續使用內建路徑
-* `最佳化` DEX 編譯器 R1.2 已達 4/4: 修正版主程式門禁通過 DEX 16 suites/149 tests、Android-test Kotlin 及 host/test APK assemble, API 31 arm64 上同簽章 host/test/plugin 181E38E8/70FAE1E8/5B6AC53B 通過 2 個 production concurrency、2 個真實 lifecycle 及 3 個真實 corpus 方法. 並行探針統計 committed remote dispatch 而非 provider openSession 直接呼叫, 獨立重型 multi-dex 門禁產生 65,700 個方法並載入主要、次要 DEX 類別. R1.1 維持 0/7, R1.3 全部未勾. force-stop 也暴露真實舊 workspace; process-once strict-canonical janitor 通過外掛 48/48 與 workspace recovery 6/6, 在首次 Binder 暴露前清除舊 UUID, 正常 D8 載入後仍維持 workspace 為空. 這僅啟動 R2 復原切片, R2 其餘項繼續未勾
+* `最佳化` DEX 編譯器 R1 已閉環, 同時維持預設關閉與精確元件明確 opt-in: R1.1 生產載入鏈路 7/7、R1.2 自動化 4/4、R1.3 真實 provider 矩陣 7/7、退出條件 3/3. API 34 production routing 8/8, 主程式 DEX 16 suites/149 tests、wire 4/24、fake-provider 5/25 及外掛 48 tests 全數通過, lint 0 error. Canonical campaign f3c2b1af-be93-41e7-b541-f167f90e5cc1 在 API 24/25 使用 D8 CLI、API 26/28/34/36 在 x86_64 使用 D8Command、API 31 使用 QV arm64 多使用者實體裝置, 七個真實 provider 單元全數 PASS; 較早失敗或主動終止的 campaign 繼續原樣保留. last-waiter 協同取消與更廣泛復原仍是未勾選的 R2 工作
 * `最佳化` DEX 編譯器實驗性符合性測試擴展至真實 Android Binder 傳輸與成品儲存, 涵蓋精確簽署元件, 惡意回呼/輸出/逾時情境, 目標 API 感知的 DEX 驗證及 DexClassLoader 執行
 * `最佳化` 預設關閉的純 AI 文字宿主策略支援確定性信任選擇, 精確身分鎖定與重新驗證, 宿主/供應商能力交集, 歧義候選拒絕, 外掛管理憑證隔離, 不含敏感內容的安全診斷, 取消/終止工作階段競爭的確定性所有權, 請求繫結的工具及 descriptor JSON 驗證, streaming 彙總長度/SHA-256/配額驗證, 解碼後 JSON 重複鍵拒絕, 含敏感資料的模型 `toString` 摘要化及能力集合的域分離快取鍵
 * `最佳化` 預設關閉且未接線的 AI 文字宿主基準沒有生產呼叫點. 唯讀 PackageManager 精確 action 探索/精確元件複查及明確元件 metadata-only Binder 握手, 與新增的精確元件 Android 模型列舉 coordinator/transport 保持分離. metadata 握手僅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在執行時於 process 內熔斷元件; getter 回傳後的嚴格解碼及 worker queue/繫結/最終複查階段逾時不會觸發熔斷. 模型列舉 coordinator 使用同一個 descriptor 已驗證 Binder 重新驗證有界 provider metadata 並呼叫 `listModels()`, 在每次初始或續頁 dispatch 及每次 callback 准入前精確複查套件身分. callback 在唯一一次防禦性複製前驗證 pinned UID, 對應 page/error 類型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整穩定的 pinned identity 隔離, 並受不驅逐的單 provider 及 process 總預算約束. process 級 single-flight gate, 唯一終態所有者及冪等清理涵蓋繫結, death recipient, callback 註冊, deadline 與 operation lease. 與 metadata 握手不同, 若模型列舉 deadline 到期時任何已准入 platform/transport operation 尚未退出, 將 fail-closed 地於 process 內熔斷該精確元件; 熔斷無法強制中止操作, gate/watchdog 會保持占用直至延遲退出. 仍無 session dispatch 或 `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 整合, `ai.*` 路由及任何生產呼叫點
@@ -615,7 +615,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 10 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 8 月 11 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

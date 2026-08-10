@@ -1,6 +1,6 @@
 # DEX Compiler Protocol V1
 
-This document records the frozen V1 contract and the R1.2 source-deployment
+This document records the frozen V1 contract and the completed R1 deployment
 boundary. The protocol AAR is a build-time SDK. The in-repository conformance
 provider is not a production D8 distribution; the real D8 provider lives in
 the independent sibling project `AutoJs6-Plugin-DEX-Compiler`. The experiment
@@ -112,9 +112,10 @@ allowed built-in fallback. Diagnostic reports need the visible component state,
 host/plugin versions, device API/ABI, input byte count and SHA-256, timestamp,
 full exception, and redacted class-loader/runtime logs.
 
-This control plane is a controlled preview while R1.1 production fault/rollback
-gates and the R1.3 API 24/25/26/28/34/36 plus x86_64/arm64 matrix remain open.
-The current API 31 arm64 real-provider evidence does not promote other rows.
+R1 acceptance is complete: the seven production-route gates and the canonical
+API 24/25/26/28/31/34/36 real-provider matrix passed. This does not alter the
+control plane: installation still does not enable the route, selection remains
+explicit and same-signed, and the plugin is not promoted to the default compiler.
 
 ## Descriptor Ownership
 
@@ -311,21 +312,41 @@ multi-DEX gate that generates 7,300 classes and 65,700 methods. That gate parses
 every emitted DEX header, map, and class_defs table and executes one dynamically
 selected class from each of `classes.dex` and `classes2.dex`.
 
-The corrected current code/APK gate passed 16 host DEX suites/149 tests with no
-failure/error/skipped result; Android-test Kotlin compilation and host/test APK
-assembly also succeeded. The executed APK SHA-256 values were host arm64
-`181E38E8…A0A47`, strict lifecycle test `70FAE1E8…39B0C`, and repaired
-plugin `5B6AC53B…640C4B`, all with v2 signer certificate SHA-256
-`31a681fc…c213`. On `QV710AF65F` API 31 arm64, the two concurrency methods,
-strict BUSY/FD/callback/gate reuse, Java/Kotlin single-DEX and duplicate identity,
-missing-dependency ART resolution, the 65,700-method primary/secondary multi-DEX
-load, and strict Binder-death/EOF/no-provider-terminal/rebind method all passed
-individually. Their respective durations were 1.479 s, 0.583 s, 2.177 s, 0.555 s,
-0.524 s, 21.692 s, and 1.355 s; the workspace was empty after each lifecycle
-gate. Final host/test/plugin uninstall operations all returned `Success`, the
-fake provider remained absent, and the related process count was zero. This
-satisfies R1.2 4/4 only. R1.1 remains 0/7 and R1.3 remains entirely open because
-the result covers only one API/ABI cell.
+The corrected code gate passed 16 host DEX suites/149 tests with no
+failure/error/skipped result; wire 4/24 and fake-provider 5/25 were also green,
+without treating the fake provider as end-to-end evidence. On `QV710AF65F` API
+31 arm64, two production-concurrency, two real-lifecycle, and three real-corpus
+methods passed individually. The separate heavy corpus generated 65,700 methods,
+loaded primary and secondary DEX classes, and left the workspace clean. These
+results close R1.2 4/4 and retain their single-device evidence boundary.
+
+R1.1 then closed 7/7 with eight production-routing instrumentation methods on
+API 34. They cover opt-in raw-JAR routing and exactly one fallback, compatible
+JAR/AAR/DEX/`defineClass()` built-in routing, the pinned decision snapshot,
+verified-adoption failure and exact cache eviction, cancellation without local
+compiler startup, same-key concurrency outside the local conversion monitor,
+and probe-fault/interruption ordering.
+
+The final canonical real-provider campaign is
+`f3c2b1af-be93-41e7-b541-f167f90e5cc1`. Its Gate passed 7/7: API 24/25 use the
+D8 CLI fallback; API 26/28/34/36 use `D8Command` on x86_64 emulators; API 31
+uses the authorized `QV710AF65F` arm64-v8a physical device with its user 0/user
+10 topology preserved. The clean commits are host
+`e39023758e3a66a24f0ce90466b5bc77a503515d` and plugin
+`1f50d5333ab3a58c4c0f00fe06a20a5692aa3448`. Host/test/plugin APK SHA-256 values
+are `505bc077ad3586b802ba41eec5b093a01b3e7be011e0de7bf0b83dbf0aa1b878`,
+`4199d54d2f0fa8bd96d3c67d3c7073bf20a0c6f51f8248d2727e2dd75a75da24`, and
+`65e432a7b4866cfb3db0392b87ac60e3dbab9161acc232b42b57a66abf08bd88`; all use
+signer certificate SHA-256
+`31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213`.
+The journal head is
+`a5abaf62803c6277aa015563cf16f2771eb0ffa9f9a226a20e7ac835ed54581b`, the
+runner SHA-256 is
+`ca89ac1637e5c690ced9e2e2d0b3d35aecf5c32584c6816883a21c363f040057`, and the
+campaign identity is
+`6b859228a4943d74ab67707fa6c9a785f77248768ec1a4807e5e214034383665`.
+Failed and intentionally terminated earlier campaigns remain immutable evidence;
+the final PASS does not rewrite them.
 
 Force-stop exposed a real stale session workspace containing a zero-byte
 `program.jar` and empty `d8-output`. The repaired provider now runs a

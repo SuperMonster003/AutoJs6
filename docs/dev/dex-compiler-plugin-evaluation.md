@@ -2,13 +2,13 @@
 
 This note evaluates moving the runtime JAR-to-DEX compiler out of the AutoJs6
 application and into a standalone plugin. It records the phased decision and
-the current R1.2 source-deployment boundary.
+the completed default-off R1 deployment boundary.
 
 ## Decision
 
 Proceed with a phased GO for a standalone D8 compiler plugin.
 
-Implementation status on 2026-08-09: the V1 protocol pack, isolated
+Implementation status on 2026-08-11: the V1 protocol pack, isolated
 conformance test app, production D8 provider, and experimental host harness are
 implemented. The production provider lives in the independent sibling project
 `AutoJs6-Plugin-DEX-Compiler`; the conformance app remains under `test-apps`
@@ -41,19 +41,14 @@ The R1.1 source path lets raw `runtime.loadJar` JARs prefer the explicitly
 selected same-signed exact component. The route stays default-off, provider
 failure retains one built-in D8/dx fallback, cancellation has no compiler
 fallback, and `loadAar`, `loadDex`, and `GeneratedClassLoader.defineClass()` stay
-on built-in paths. The Android runtime gates in
-[the conformance matrix](compiler-ai-protocol-conformance.md) remain open. The
-canonical in-repository device matrix evidence is still limited to the
-documented API 25 partial run. The corrected current gate passed 16 host DEX
-suites/149 tests with no failure/error/skipped result; Android-test Kotlin
-compilation and host/test APK assembly also succeeded. Earlier wire 4/24 and
-fake-provider JVM 5/25 gates remain green but do not replace a real provider.
-A historical supplemental API 31 arm64 run first passed one real Harness method
-and one production `AndroidClassLoader` method. The corrected current APKs then
-passed two production-concurrency, two real-lifecycle, and three real-corpus
-instrumentation methods individually. This closes the four precisely scoped
-R1.2 automation items, but it is not the complete R1.1 production-path gate or
-the R1.3 API/ABI matrix. The frozen implementation contract is documented in
+on built-in paths. R1 is now closed: R1.1 production loading is 7/7, R1.2
+automation is 4/4, the R1.3 canonical real-provider matrix is 7/7, and all three
+R1 exit conditions are satisfied. The corrected host gate passed 16 DEX
+suites/149 tests; wire 4/24 and fake-provider 5/25 remain supplemental rather
+than end-to-end evidence. API 34 production routing passed 8/8, the earlier API
+31 arm64 lifecycle/concurrency/corpus gates remain real-provider evidence, and
+the canonical matrix covers API 24/25/26/28/31/34/36 across x86_64 emulators and
+an arm64 physical device. The frozen implementation contract is documented in
 [DEX Compiler Protocol V1](dex-compiler-protocol-v1.md).
 
 The v1 protocol is limited to bounded bytecode-to-DEX conversion. It does not
@@ -70,7 +65,7 @@ lifecycle, performance, and output-verification gates below pass.
 
 ## R1 User Opt-In And Rollback Guide
 
-The R1 route is a controlled preview and remains off after plugin installation.
+The completed R1 route remains an explicit, default-off option after plugin installation.
 The user-facing procedure is:
 
 1. Install AutoJs6 build 5270 or later and the paired plugin APK. Their complete
@@ -99,10 +94,11 @@ script success by itself is not evidence that the plugin compiled the input.
 Problem reports should include host/plugin versions, the complete selected
 component summary, device model/API/ABI, input size and SHA-256, event time,
 the full script exception, and redacted `AndroidClassLoader`/`AndroidRuntime`
-logs. Canonical real-provider device evidence currently covers API 31 arm64;
-the advertised minApi 24 through 36 range is not a substitute for the open R1.3
-API/ABI matrix. The localized step-by-step example and diagnostic commands live
-in the sibling plugin README.
+logs. Canonical real-provider evidence covers API 24/25/26/28/31/34/36 on the
+fixed R1 x86_64/arm64 cells. That acceptance does not turn every device into a
+tested cell or alter the per-request identity, handshake, validation, and
+fallback requirements. The localized step-by-step example and diagnostic
+commands live in the sibling plugin README.
 
 ## Current Repository Evidence
 
@@ -375,19 +371,28 @@ The current Android-test source adds seven separately opted-in methods:
   both `classes.dex` and `classes2.dex`.
 
 The corrected host gate passed 16 DEX suites/149 tests with no
-failure/error/skipped result; Android-test Kotlin compilation and host/test APK
-assembly succeeded. The executed APKs were host arm64 `181E38E8…A0A47`, strict
-lifecycle test `70FAE1E8…39B0C`, and repaired plugin `5B6AC53B…640C4B`, all
-with v2 signer certificate SHA-256 `31a681fc…c213`. On `QV710AF65F` API 31
-arm64, the two concurrency methods passed in 1.479 s and 0.583 s; strict
-BUSY/FD/callback/gate reuse in 2.177 s; Java/Kotlin single-DEX and duplicate
-identity in 0.555 s; missing-dependency ART resolution in 0.524 s; the
-65,700-method primary/secondary multi-DEX load in 21.692 s; and strict Binder
-death/EOF/no-provider-terminal/rebind in 1.355 s. Each method ran separately and
-the workspace was empty afterward. Final host/test/plugin uninstall operations
-all returned `Success`, the fake provider remained absent, and the related
-process count was zero. These results satisfy R1.2 4/4 only; R1.1 remains 0/7,
-and R1.3 remains entirely open because no other API/ABI cell ran.
+failure/error/skipped result; wire 4/24 and fake-provider 5/25 were green but are
+not promoted to real-provider acceptance. On `QV710AF65F` API 31 arm64, the two
+concurrency, two lifecycle, and three corpus methods passed individually. The
+65,700-method corpus loaded classes from primary and secondary DEX, and cleanup
+left the workspace empty. These results close the precisely scoped R1.2 4/4.
+
+R1.1 subsequently closed 7/7 when all eight
+`DexCompilerProductionRoutingAndroidTest` methods passed on API 34. They exercise
+public raw-JAR routing, compatibility-path exclusion, retained snapshot use,
+verified-adoption rollback and exact eviction, cancellation, concurrency, and
+probe-fault/interruption ordering through the production boundary.
+
+The final canonical campaign `f3c2b1af-be93-41e7-b541-f167f90e5cc1` passed
+7/7 real-provider cells. API 24/25 use the D8 CLI fallback; API 26/28/34/36 use
+`D8Command` on x86_64 emulators; API 31 uses the authorized `QV710AF65F`
+arm64-v8a physical device with its multi-user topology preserved. Clean host
+commit `e39023758e3a66a24f0ce90466b5bc77a503515d` and plugin commit
+`1f50d5333ab3a58c4c0f00fe06a20a5692aa3448` produced host/test/plugin APKs
+`505bc077…1b878`, `4199d54d…5da24`, and `65e432a7…bd88`, all signed by
+`31a681fc…c213`. The Gate binds journal head `a5abaf62…54581b`, runner
+`ca89ac16…0057`, and campaign identity `6b859228…3665`. Earlier failed and
+intentionally terminated campaigns remain preserved rather than overwritten.
 
 The force-stop run also exposed a real stale session workspace: an old UUID
 containing a zero-byte `program.jar` and empty `d8-output` survived process death.
@@ -493,10 +498,11 @@ process-local circuit, it remains conservatively open for that process lifetime.
 
 The following gates are required before making the plugin the default:
 
-The API 31 arm64 methods described above complete the four precisely scoped R1.2
-automation items: JVM host coverage, real Binder lifecycle, cache and production
-single-flight behavior, and the specified real `DexClassLoader` corpus. They do
-not complete the seven R1.1 production-path gates or any multi-API R1.3 matrix.
+The API 31 arm64 methods described above close the four precisely scoped R1.2
+automation items. Together with API 34 production-routing 8/8 and the canonical
+7-cell real-provider Gate, they close R1.1 7/7 and R1.3 7/7. The remaining list
+also contains promotion and host-dependency-removal gates beyond R1; R1 closure
+does not make the plugin the default or authorize compiler removal.
 
 - A conformance compiler fixture proves version negotiation, descriptor ownership,
   caller authentication, cancellation, timeout, late D8 completion, Binder
@@ -580,7 +586,7 @@ potential only; they are not performance, APK, or installed-size measurements.
 
 - R1.0 complete: add default-off explicit same-signed exact-component selection
   and visible eligibility/off state while retaining the current host path.
-- R1.1 deployment in progress: source wiring lets raw `runtime.loadJar` JARs
+- R1.1 complete: source wiring lets raw `runtime.loadJar` JARs
   prefer the selected provider, with one failure fallback, no cancellation
   fallback, and AAR and generated-class loading kept built-in.
 - R1.2 automation complete: retain bounded persistent semantic-cache
@@ -595,16 +601,17 @@ potential only; they are not performance, APK, or installed-size measurements.
 - Historical supplemental result: the explicit real-provider Harness and
   production class-loader happy paths passed once on API 31 arm64 with cleanup
   verified for earlier host/test APKs.
-- Current R1.2 result: two production-concurrency, two real-lifecycle, and three
-  real-corpus methods passed individually on API 31 arm64. The 65,700-method
-  multi-DEX corpus remained a separate long-running gate. R1.2 is 4/4; R1.1 is
-  0/7 and R1.3 remains open, so the plugin is not promoted to a default path.
+- Final R1 result: R1.1 is 7/7, R1.2 is 4/4, R1.3 is 7/7, and exit conditions
+  are 3/3. API 34 production routing passed 8/8; canonical campaign
+  `f3c2b1af-be93-41e7-b541-f167f90e5cc1` passed API 24/25/26/28/31/34/36
+  with a real provider across x86_64 and arm64. The plugin is still not promoted
+  to a default path.
 - R2 recovery slice started: a real force-stop stale workspace was reproduced,
   then removed by the process-once strict-canonical janitor before first Binder
   exposure. Plugin 48/48, recovery 6/6, lint, both builds, rebind, and a normal
   post-recovery D8 load passed; the broader R2 terminal matrix remains open.
-- Pending: close the code and main gates, then run the explicitly authorized
-  real-provider device matrix before treating this as Android acceptance.
+- Phase 1 acceptance is complete; performance promotion, default enablement,
+  last-waiter cooperative cancellation, and broader recovery remain later work.
 - Use host-owned snapshots, output transactions, validation, and cache keys.
 - Compare semantic load results, not byte-for-byte DEX identity.
 
