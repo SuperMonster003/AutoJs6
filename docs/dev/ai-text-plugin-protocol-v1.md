@@ -341,8 +341,8 @@ gap, not an identity guarantee inferred from package or metadata stability.
 
 The pure session-policy slice in commit `325577c82` retains its standalone
 Kotlin K2/JVM 40/40 and focused Gradle 40/0 host-unit evidence. The coordinator,
-Android transport, and instrumentation landed in `bfa8fd649`, `851acc588`, and
-`836bfb48d`. A focused Gradle run recorded all 18
+Android transport, and instrumentation landed in `4f22dc854`, `038728f03`, and
+`a22ed8b75`. A focused Gradle run recorded all 18
 `AiTextProviderSessionCoordinatorTest` methods with 0 skipped, 0 failures, and
 0 errors and assembled the host, instrumentation, and fake-provider APKs.
 

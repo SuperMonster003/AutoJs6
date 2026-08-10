@@ -357,8 +357,8 @@ Event summaries omit payload-bearing and provider-controlled text.
 The policy source and tests landed in commit `325577c82`. Standalone Kotlin
 K2/JVM execution passed 40/40 tests; 30 repeated rounds passed 1200/1200, and a
 focused Gradle run recorded 40 tests with no skips or failures. The later
-coordinator, Android transport, and instrumentation commits are `bfa8fd649`,
-`851acc588`, and `836bfb48d`. Their focused Gradle coordinator run recorded 18
+coordinator, Android transport, and instrumentation commits are `4f22dc854`,
+`038728f03`, and `a22ed8b75`. Their focused Gradle coordinator run recorded 18
 tests, 0 skipped, 0 failures, and 0 errors and assembled the host,
 instrumentation, and fake-provider APKs.
 
