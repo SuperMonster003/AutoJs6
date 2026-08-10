@@ -1,9 +1,8 @@
 # DEX Compiler Plugin Evaluation
 
 This note evaluates moving the runtime JAR-to-DEX compiler out of the AutoJs6
-application and into a standalone plugin. It records a phased decision and the
-minimum boundary required before implementation. It does not change the current
-runtime loading path.
+application and into a standalone plugin. It records the phased decision and
+the current R1.2 source-deployment boundary.
 
 ## Decision
 
@@ -18,9 +17,18 @@ store now starts a bounded reliable-pipe drain before dispatch, enforces the
 negotiated write ceiling, and checks the pipe peer error after EOF. Publication
 requires the provider-reported size and SHA-256 to match the independently
 drained size and SHA-256; the dual-summary gate permits only one publication or
-rollback claim. The experiment also requires an explicit selected component,
-so an invocation without that selection fails open before plugin discovery and
-automatic provider selection remains disabled.
+rollback claim. R1.0 provides a default-off Developer options control plane that
+retains one explicit eligible same-signed exact component, exposes its selected
+or off state, and can be disabled without uninstalling the provider. R1.1 source
+wiring consumes that identity only after explicit opt-in; automatic provider
+selection remains disabled.
+
+The host finalizes a compile request only after the selected provider completes
+its Binder info/capability handshake. The negotiated protocol version and the
+runtime-library fingerprint from that handshake are fixed before `openSession`,
+while advertised capability limits validate or reject the request rather than
+being written into it. This removes the previous fingerprint-ordering blocker
+for the R1.1 raw-JAR adapter.
 
 Publication has an explicit atomic commit boundary. Cancellation, timeout,
 Binder death, binding failure, and callback or transport violations registered
@@ -29,12 +37,23 @@ the publication claim and force rollback. Signals registered after that claim
 are late and cannot race a second fallback outcome against a published cache
 entry.
 
-The harness remains disconnected from the default class-loading path. The
-production provider invokes real D8, but `AndroidClassLoader` does not dispatch
-to it yet, and the Android runtime gates in
+The R1.1 source path lets raw `runtime.loadJar` JARs prefer the explicitly
+selected same-signed exact component. The route stays default-off, provider
+failure retains one built-in D8/dx fallback, cancellation has no compiler
+fallback, and `loadAar`, `loadDex`, and `GeneratedClassLoader.defineClass()` stay
+on built-in paths. The Android runtime gates in
 [the conformance matrix](compiler-ai-protocol-conformance.md) remain open. The
-in-repository device evidence is limited to the documented API 25 partial run.
-The frozen implementation contract is documented in
+canonical in-repository device matrix evidence is still limited to the
+documented API 25 partial run. The corrected current gate passed 16 host DEX
+suites/149 tests with no failure/error/skipped result; Android-test Kotlin
+compilation and host/test APK assembly also succeeded. Earlier wire 4/24 and
+fake-provider JVM 5/25 gates remain green but do not replace a real provider.
+A historical supplemental API 31 arm64 run first passed one real Harness method
+and one production `AndroidClassLoader` method. The corrected current APKs then
+passed two production-concurrency, two real-lifecycle, and three real-corpus
+instrumentation methods individually. This closes the four precisely scoped
+R1.2 automation items, but it is not the complete R1.1 production-path gate or
+the R1.3 API/ABI matrix. The frozen implementation contract is documented in
 [DEX Compiler Protocol V1](dex-compiler-protocol-v1.md).
 
 The v1 protocol is limited to bounded bytecode-to-DEX conversion. It does not
@@ -44,9 +63,46 @@ ProGuard rule processing, or keep-rule interpretation.
 Shipping the R8 artifact inside the plugin is acceptable because D8 is
 distributed by that artifact, but the public v1 capability is D8 only.
 
-Host dependency removal is not authorized by this decision. The host keeps its
-current compiler path until the plugin passes the compatibility, lifecycle,
-performance, and output-verification gates below.
+Host dependency removal is not authorized by this decision. The host retains
+its compiler as the default-off path, the one bounded failure fallback, and the
+implementation for AAR and generated-class loading until the compatibility,
+lifecycle, performance, and output-verification gates below pass.
+
+## R1 User Opt-In And Rollback Guide
+
+The R1 route is a controlled preview and remains off after plugin installation.
+The user-facing procedure is:
+
+1. Install AutoJs6 build 5270 or later and the paired plugin APK. Their complete
+   current signer sets must match. The fixed provider component is
+   `io.github.supermonster003.autojs6.plugin.dexcompiler/io.github.supermonster003.autojs6.plugin.dexcompiler.DexCompilerService`.
+2. In AutoJs6, open **Settings > About app and developer**, long-press the app
+   icon to enter **Developer options**, then open **DEX compiler > Raw JAR
+   compiler provider**. Select that exact component and confirm. Discovery never
+   selects or enables a provider automatically.
+3. Confirm that the preference summary says raw `runtime.loadJar` JARs prefer
+   the selected exact component. This confirms selection and eligibility only;
+   it does not prove that a particular compilation reached the provider.
+4. Exercise the existing `runtime.loadJar(path)` script API with a trusted raw
+   JVM JAR. The plugin adds no JavaScript global. AAR, precompiled DEX,
+   compatibility helpers, and generated-class loading stay built-in.
+5. For rollback, select **Built-in D8/dx**, confirm, then restart AutoJs6. Disable
+   the route before uninstalling the plugin. Uninstalling the provider deletes
+   its private app data and workspaces but does not require clearing host data.
+
+Plugin absence, incompatibility, timeout, remote failure, invalid output, or
+verified-artifact adoption failure can claim at most one built-in compiler
+attempt. Binder work is never automatically retried after dispatch. Caller
+cancellation or thread interruption propagates without local fallback, so final
+script success by itself is not evidence that the plugin compiled the input.
+
+Problem reports should include host/plugin versions, the complete selected
+component summary, device model/API/ABI, input size and SHA-256, event time,
+the full script exception, and redacted `AndroidClassLoader`/`AndroidRuntime`
+logs. Canonical real-provider device evidence currently covers API 31 arm64;
+the advertised minApi 24 through 36 range is not a substitute for the open R1.3
+API/ABI matrix. The localized step-by-step example and diagnostic commands live
+in the sibling plugin README.
 
 ## Current Repository Evidence
 
@@ -106,12 +162,11 @@ The first protocol supports one normalized program archive per request:
   implementation that adds native components must declare its actual ABIs and
   provide a Universal APK where practical.
 
-AAR parsing is not part of the compiler protocol. Before plugin dispatch, the
-host normalizes an AAR into one canonical JAR by merging `classes.jar` and
-`libs/*.jar` under a frozen nested-JAR order, entry order, timestamp/extra-field
-policy, and duplicate-entry policy. This is a proposed v1 prerequisite, not a
-property established by the current archive-order merge. It keeps archive
-policy and user-facing file handling outside the compiler process.
+AAR parsing is not part of the compiler protocol. R1.1 therefore does not
+normalize or dispatch AAR input to the plugin: `AndroidClassLoader.loadAar()`
+continues to merge and compile through the existing built-in path. Any future
+plugin-backed AAR path would first need a separately frozen nested-JAR order,
+entry order, timestamp/extra-field policy, and duplicate-entry policy.
 
 The following are explicit v1 non-goals:
 
@@ -132,7 +187,8 @@ The host owns:
 - Plugin discovery, signer trust, protocol negotiation, and user selection.
 - Resolving the original file or content URI and opening an exact read-only
   snapshot.
-- AAR normalization and deterministic duplicate-entry handling.
+- Keeping AAR normalization and duplicate-entry handling on the built-in path
+  for R1.1.
 - Input quotas, output transactions, timeout policy, and cancellation routing.
 - The Android runtime compatibility target used by a runtime load request.
 - Freezing the runtime-library model and checking the library fingerprint
@@ -251,7 +307,7 @@ The host applies these rules:
 1. Resolve a source URI once and open the exact read-only object selected by the
    caller.
 2. Copy non-seekable or mutable providers into a bounded host-private snapshot.
-3. Normalize AAR inputs before opening the program descriptor.
+3. Reject non-JAR routing at the R1.1 adapter boundary; AAR stays built-in.
 4. Create a host-private output transaction and expose only its write side.
 5. Commit the output only after a successful terminal callback and independent
    verification. Every other terminal path rolls the transaction back.
@@ -266,9 +322,84 @@ last-update time are also recorded as provenance. Path and modification time
 alone are not a sufficient cache identity. Cache correctness does not depend on
 a claim that separate D8 invocations are byte-identical.
 
-Verified cache entries may be reused without starting the plugin. An entry is
-discarded when its content hash, provenance, protocol, options, or read-only
-state does not match.
+The initial R1.1 source deployment used verified publication only as an
+ephemeral handoff. The current R1.2 source deployment replaces that historical
+boundary with a bounded persistent semantic cache. It stores generation-bound
+artifact and checksummed manifest pairs, fsyncs data and the directory around
+the atomic manifest commit, recovers complete generations, and applies limits
+of 16 MiB per entry, 128 MiB total, and 32 entries with LRU eviction. Lookup
+opens the artifact descriptor first and rechecks size and SHA-256 from that same
+inode. A corrupt generation is evicted without deleting a newer replacement.
+
+Cache lookup occurs only after the authenticated Binder handshake has finalized
+the semantic key, but before input/output descriptor claims or `openSession`.
+Every hit is revalidated with the current `DexIndexedZipValidator`; successful
+class-loader adoption keeps the cached generation, while a non-interruption
+adoption failure invalidates only that exact generation. Production Runtime now
+passes the finalized semantic attempt key through a process-scoped single-flight
+coordinator, so matching callers share one producer and each successful caller
+receives a fresh capability. Interrupting any waiter, including the last one,
+only detaches that caller and returns cancellation without local compiler
+fallback; the producer may finish in the background and populate the persistent
+cache. Cooperative producer cancellation when the last waiter leaves is an R2
+item. The coordinator's unsafe-executor or suspected blocked-Binder circuit is
+deliberately conservative: once opened, it stays open for the current process
+lifetime and does not claim to have forcibly stopped already blocked work.
+
+The production coordination semantics have 14/14 pure JVM evidence. A separate
+explicitly opted-in `DexCompilerRealProviderAndroidTest` entry targets the
+real package, exact service, and same signer, then requests a unique raw JAR,
+expects `Published` followed by `CacheHit`, executes a fixture with the real
+`DexClassLoader`, and performs exact-generation cleanup. On API 31 arm64, its
+real-Harness method and production `AndroidClassLoader` method each passed once
+against the earlier host `17092F2D…A97EB`, test `1FC07F35…63B89`, and plugin
+`E0E5D861…F9C5D` APKs; post-test cache, workspace, opt-in, uninstall, and
+package-absence checks passed. This historical run is retained as provenance;
+the rebuilt current-APK evidence is recorded below.
+
+The current Android-test source adds seven separately opted-in methods:
+
+- Two production-concurrency methods prove same-semantic-key coalescing with
+  fresh caller capabilities, and follower interruption while the shared leader
+  still publishes. Their debug probe counts a committed remote dispatch at the
+  host coordinator boundary; it does not claim to count direct provider
+  `openSession` invocations.
+- Two real-lifecycle methods exercise a blocked raw AIDL session, BUSY/QUEUE,
+  descriptor EOF and exactly-one terminal behavior, plus explicitly consented
+  force-stop, Binder death, and exact authenticated recovery.
+- Three real-corpus methods cover Java/Kotlin single-DEX and defined duplicate
+  loading, the missing-dependency ART resolution boundary, and real D8
+  multi-DEX. The heavy multi-DEX method is a separate long-running gate: it
+  generates 7,300 classes with 65,700 methods, validates each emitted DEX header,
+  map, and class_defs table, and executes one dynamically selected class from
+  both `classes.dex` and `classes2.dex`.
+
+The corrected host gate passed 16 DEX suites/149 tests with no
+failure/error/skipped result; Android-test Kotlin compilation and host/test APK
+assembly succeeded. The executed APKs were host arm64 `181E38E8…A0A47`, strict
+lifecycle test `70FAE1E8…39B0C`, and repaired plugin `5B6AC53B…640C4B`, all
+with v2 signer certificate SHA-256 `31a681fc…c213`. On `QV710AF65F` API 31
+arm64, the two concurrency methods passed in 1.479 s and 0.583 s; strict
+BUSY/FD/callback/gate reuse in 2.177 s; Java/Kotlin single-DEX and duplicate
+identity in 0.555 s; missing-dependency ART resolution in 0.524 s; the
+65,700-method primary/secondary multi-DEX load in 21.692 s; and strict Binder
+death/EOF/no-provider-terminal/rebind in 1.355 s. Each method ran separately and
+the workspace was empty afterward. Final host/test/plugin uninstall operations
+all returned `Success`, the fake provider remained absent, and the related
+process count was zero. These results satisfy R1.2 4/4 only; R1.1 remains 0/7,
+and R1.3 remains entirely open because no other API/ABI cell ran.
+
+The force-stop run also exposed a real stale session workspace: an old UUID
+containing a zero-byte `program.jar` and empty `d8-output` survived process death.
+The plugin now performs a process-once, strict-canonical janitor before exposing
+its first service Binder. It anchors traversal to the private cache root and
+fails closed on boundary or symbolic-link violations. The repaired plugin passed
+10 suites/48 tests, including 6/6 workspace-recovery cases, lint with 0 errors/27
+warnings, and Debug/Release assembly. The old UUID was still present immediately
+before update; after first bind, kill, and recovery only the empty workspace root
+remained. A normal D8/`DexClassLoader` run then passed in 0.832 s and the root
+remained empty. This starts an R2 recovery slice; it does not complete host-death,
+callback-failure, cancellation-stage, timeout, or full R2 terminal coverage.
 
 ## Proposed V1 Quotas
 
@@ -337,8 +468,10 @@ AutoJs6 script and class-loading trust model still applies after compilation.
 The rollout has two distinct fallback states:
 
 - Before host compiler removal, plugin absence, incompatibility, timeout,
-  crash, or verified-output failure falls back once to the current host D8/dx
-  path. The reason is recorded without exposing private paths.
+  crash, remote error, invalid output, or verified-artifact adoption failure
+  falls back once to the current host D8/dx path. Cancellation is interruption,
+  not failure, and never changes compilers. The reason is recorded without
+  exposing private paths.
 - After host compiler removal, an already verified matching cache entry or a
   prebuilt DEX file may still load. A JAR or AAR that requires conversion fails
   explicitly with `DEX_COMPILER_UNAVAILABLE`. There is no network download,
@@ -349,9 +482,21 @@ transaction. The host must never load partial output. Repeated crashes disable
 automatic plugin selection for the current process and surface a bounded
 diagnostic.
 
+Single-flight cancellation follows the same rule: an interrupted caller only
+detaches from its waiter, receives cancellation, and never falls back locally.
+Even when it was the final waiter, the producer may complete and cache the
+result in the background; cooperative last-waiter cancellation remains R2.
+When unsafe executor rejection or a suspected blocked Binder call opens the
+process-local circuit, it remains conservatively open for that process lifetime.
+
 ## Verification Gates
 
 The following gates are required before making the plugin the default:
+
+The API 31 arm64 methods described above complete the four precisely scoped R1.2
+automation items: JVM host coverage, real Binder lifecycle, cache and production
+single-flight behavior, and the specified real `DexClassLoader` corpus. They do
+not complete the seven R1.1 production-path gates or any multi-API R1.3 matrix.
 
 - A conformance compiler fixture proves version negotiation, descriptor ownership,
   caller authentication, cancellation, timeout, late D8 completion, Binder
@@ -367,8 +512,8 @@ The following gates are required before making the plugin the default:
 - D8 output loads and executes the same corpus as the current host D8 path.
 - Verified output is exercised through the real `DexClassLoader`, not only by
   structural DEX parsing or compiler success callbacks.
-- Current AAR normalization produces equivalent loadable classes and resources
-  remain subject to the existing documented behavior.
+- R1.1 regression coverage proves that AAR stays on the existing built-in path
+  and retains its documented loadable-class and resource behavior.
 - Cold and warm compilation record latency, peak host RSS, peak plugin RSS,
   output size, descriptor count, and temporary-storage usage.
 - Cancellation, plugin disable, update, uninstall, process death, host process
@@ -433,7 +578,33 @@ potential only; they are not performance, APK, or installed-size measurements.
 
 ### Phase 1: Optional D8 Path
 
-- Add explicit experimental selection while retaining the current host path.
+- R1.0 complete: add default-off explicit same-signed exact-component selection
+  and visible eligibility/off state while retaining the current host path.
+- R1.1 deployment in progress: source wiring lets raw `runtime.loadJar` JARs
+  prefer the selected provider, with one failure fallback, no cancellation
+  fallback, and AAR and generated-class loading kept built-in.
+- R1.2 automation complete: retain bounded persistent semantic-cache
+  generations, recovery, LRU and exact corruption eviction; perform lookup only
+  after authenticated key finalization and revalidate every hit with the current
+  DEX ZIP validator. Production Runtime request coalescing is connected and its
+  caller/producer semantics have 14/14 pure JVM evidence: waiter interruption,
+  including the last waiter, detaches only that caller without local fallback,
+  while the producer may finish and cache the result. Last-waiter cooperative
+  cancellation remains R2, and an opened safety circuit stays conservative for
+  the current process lifetime.
+- Historical supplemental result: the explicit real-provider Harness and
+  production class-loader happy paths passed once on API 31 arm64 with cleanup
+  verified for earlier host/test APKs.
+- Current R1.2 result: two production-concurrency, two real-lifecycle, and three
+  real-corpus methods passed individually on API 31 arm64. The 65,700-method
+  multi-DEX corpus remained a separate long-running gate. R1.2 is 4/4; R1.1 is
+  0/7 and R1.3 remains open, so the plugin is not promoted to a default path.
+- R2 recovery slice started: a real force-stop stale workspace was reproduced,
+  then removed by the process-once strict-canonical janitor before first Binder
+  exposure. Plugin 48/48, recovery 6/6, lint, both builds, rebind, and a normal
+  post-recovery D8 load passed; the broader R2 terminal matrix remains open.
+- Pending: close the code and main gates, then run the explicitly authorized
+  real-provider device matrix before treating this as Android acceptance.
 - Use host-owned snapshots, output transactions, validation, and cache keys.
 - Compare semantic load results, not byte-for-byte DEX identity.
 

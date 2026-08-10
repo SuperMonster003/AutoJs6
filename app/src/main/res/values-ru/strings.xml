@@ -100,6 +100,7 @@
     <string name="description_change_working_dir_preference">Измените путь к директории, содержащей скрипты</string>
     <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.</string>
     <string name="description_client_mode">Клиентский режим позволяет AutoJs6 активно подключаться к удалённому серверу для выполнения [ передачи скриптов / вывода логов / удалённого управления ].\n\nОбычно устройство и сервер должны находиться в одной локальной сети (LAN) или в сетевой среде, где они могут обращаться друг к другу.</string>
+    <string name="description_dex_compiler_experimental_preference">По умолчанию отключено. После включения runtime.loadJar для необработанных файлов JAR предпочитает явно выбранный provider точного компонента с той же подписью, что и хост. При сбое provider выполняется один переход на встроенный D8/dx; отмена не запускает переход. Загрузка AAR всегда использует встроенный путь.</string>
     <string name="description_display_over_other_app">Разрешение \"показ поверх других приложений\" позволяет AutoJs6 отображать плавающие окна или плавающую кнопку поверх интерфейса других приложений, чтобы быстро выполнять действия или просматривать информацию на любом экране.\n\nПримечание: если разрешение не выдано, плавающие окна и плавающая кнопка могут не отображаться или работать некорректно.</string>
     <string name="description_documentation_source_preference">Офлайн-документация: Предоставляется отдельно устанавливаемым официальным плагином Offline Docs. Подключение к сети не требуется, а документация может обновляться независимо от AutoJs6.\nОнлайн-документация: Использует сайт онлайн-документации и требует подключения к сети. Содержимое поддерживается в актуальном состоянии.\n\nПримечание: Чтобы максимально улучшить качество чтения онлайн-документов, рекомендуется использовать широкоформатное устройство отображения, например настольный монитор.\nПримечание: Начиная с версии 6.2.0, документация находится на предварительной стадии разработки, и большая часть содержимого еще не была написана или обновлена.</string>
     <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
@@ -596,6 +597,9 @@
     <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
     <string name="summary_code_editor_settings">Открыть полную страницу настроек редактора кода</string>
+    <string name="summary_dex_compiler_experimental_disabled">Только встроенный D8/dx; AAR всегда остается на встроенном пути</string>
+    <string name="summary_dex_compiler_experimental_disabled_with_selection">Только встроенный D8/dx; сохраненный provider: %1$s</string>
+    <string name="summary_dex_compiler_experimental_selected">Для необработанных JAR runtime.loadJar предпочитает %1$s; при сбое используется встроенный D8/dx</string>
     <string name="summary_display_over_other_apps">Позволяет AutoJs6 отображать контент поверх других приложений</string>
     <string name="summary_display_over_other_apps_inrt">Разрешить приложению отображать контент поверх других приложений</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Автоматически открывать нижнюю панель логов после запуска скрипта кнопкой Запуск в редакторе</string>
@@ -993,6 +997,11 @@
     <string name="text_details">Детали</string>
     <string name="text_developer_details_under_development">Детали разработчика находятся в стадии разработки</string>
     <string name="text_developer_options">Параметры разработчика</string>
+    <string name="text_dex_compiler">Компилятор DEX</string>
+    <string name="text_dex_compiler_no_eligible_providers">Не установлен подходящий provider компилятора DEX с той же подписью, что и хост. Отмените действие, чтобы сохранить текущий выбор, или подтвердите встроенный компилятор.</string>
+    <string name="text_dex_compiler_provider">Provider компилятора необработанных JAR</string>
+    <string name="text_dex_compiler_provider_discovery_failed">Не удалось обнаружить providers. Отмените действие, чтобы сохранить текущий выбор, или подтвердите встроенный компилятор.</string>
+    <string name="text_dex_compiler_use_builtin">Встроенный D8/dx (эксперимент отключен; AAR всегда встроенный)</string>
     <string name="text_device_brand">Бренд устройства</string>
     <string name="text_device_hardware_name">Название аппаратного обеспечения устройства</string>
     <string name="text_device_hardware_serial_number">Серийный номер устройства</string>

@@ -100,6 +100,7 @@
     <string name="description_change_working_dir_preference">Cambiar la ruta del directorio que contiene los scripts</string>
     <string name="description_check_for_updates_preference">AutoJs6 obtiene y descarga las actualizaciones de GitHub.</string>
     <string name="description_client_mode">El modo cliente permite que AutoJs6 se conecte activamente a un servidor remoto para realizar [ transferencia de scripts / impresión de registros / control remoto ].\n\nPor lo general, el dispositivo y el servidor deben estar en la misma red local (LAN) o en una red accesible entre sí.</string>
+    <string name="description_dex_compiler_experimental_preference">Desactivado de forma predeterminada. Al habilitarlo, runtime.loadJar prefiere el provider de componente exacto seleccionado explícitamente y con la misma firma que el host para archivos JAR sin procesar. Los fallos del provider recurren una vez al D8/dx integrado; la cancelación no recurre al compilador integrado. La carga de AAR siempre usa la ruta integrada.</string>
     <string name="description_display_over_other_app">El permiso \"mostrar sobre otras aplicaciones\" permite que AutoJs6 muestre ventanas flotantes o un botón flotante por encima de otras aplicaciones, para ejecutar acciones rápidamente o ver información en cualquier pantalla.\n\nNota: si este permiso no se concede, las ventanas flotantes y el botón flotante pueden no mostrarse o no funcionar correctamente.</string>
     <string name="description_documentation_source_preference">Documentación sin conexión: La proporciona el plugin oficial Offline Docs, que se instala por separado. No requiere conexión de red y puede actualizarse independientemente de AutoJs6.\nDocumentación en línea: Utiliza el sitio de documentación en línea y requiere conexión de red. El contenido se mantiene actualizado.\n\nNota: Para maximizar la experiencia de lectura de los documentos en línea, se recomienda utilizar un dispositivo de pantalla ancha, como un monitor de escritorio.\nNota: A partir de la versión 6.2.0, la documentación se encuentra todavía en las fases preliminares de desarrollo, y la mayor parte del contenido aún no ha sido escrito o actualizado.</string>
     <string name="description_documentation_source_preference_more">Para que el tema oscuro sea compatible con las páginas de los documentos, deben cumplirse las siguientes condiciones\n1. AutoJs6 tiene activado el modo nocturno\n2. Sistema Android WebView (o navegadores como Google Chrome):\n- Android API Level 29 (Android 10) [Q] y superior: versión >= 76\n- Android API Level 28 (Android 9) [P] e inferiores: versión >= 105</string>
@@ -596,6 +597,9 @@
     <string name="summary_all_files_access">Permite que AutoJs6 acceda a todos los archivos, incluidos los del almacenamiento externo</string>
     <string name="summary_all_files_access_inrt">Permitir que la aplicación acceda a todos los archivos, incluido el almacenamiento externo</string>
     <string name="summary_code_editor_settings">Abrir la página completa de ajustes del editor de código</string>
+    <string name="summary_dex_compiler_experimental_disabled">Solo D8/dx integrado; AAR siempre usa la ruta integrada</string>
+    <string name="summary_dex_compiler_experimental_disabled_with_selection">Solo D8/dx integrado; provider conservado: %1$s</string>
+    <string name="summary_dex_compiler_experimental_selected">Los JAR sin procesar de runtime.loadJar prefieren %1$s; los fallos recurren al D8/dx integrado</string>
     <string name="summary_display_over_other_apps">Permite que AutoJs6 muestre contenido encima de otras aplicaciones</string>
     <string name="summary_display_over_other_apps_inrt">Permitir que la aplicación muestre contenido sobre otras aplicaciones</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Abrir automaticamente el panel inferior de registros después de que el boton Ejecutar del editor inicie un script</string>
@@ -993,6 +997,11 @@
     <string name="text_details">Detalles</string>
     <string name="text_developer_details_under_development">Los detalles del desarrollador están en desarrollo</string>
     <string name="text_developer_options">Opciones del desarrollador</string>
+    <string name="text_dex_compiler">Compilador DEX</string>
+    <string name="text_dex_compiler_no_eligible_providers">No hay instalado ningún provider de compilador DEX elegible con la misma firma que el host. Cancela para conservar la selección actual o confirma el compilador integrado.</string>
+    <string name="text_dex_compiler_provider">Provider del compilador de JAR sin procesar</string>
+    <string name="text_dex_compiler_provider_discovery_failed">Falló el descubrimiento de providers. Cancela para conservar la selección actual o confirma el compilador integrado.</string>
+    <string name="text_dex_compiler_use_builtin">D8/dx integrado (experimento desactivado; AAR siempre integrado)</string>
     <string name="text_device_brand">Marca del dispositivo</string>
     <string name="text_device_hardware_name">Nombre del hardware del dispositivo</string>
     <string name="text_device_hardware_serial_number">Número de serie del dispositivo</string>

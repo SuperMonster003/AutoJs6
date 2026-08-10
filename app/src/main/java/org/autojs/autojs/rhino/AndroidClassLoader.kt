@@ -1,6 +1,7 @@
 package org.autojs.autojs.rhino
 
 import android.os.Build
+import android.system.Os
 import android.util.Log
 import com.android.dx.command.dexer.Main
 import com.android.tools.r8.CompilationMode
@@ -11,7 +12,13 @@ import dalvik.system.DexClassLoader
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.ZipParameters
+import org.autojs.autojs.core.plugin.dex.AndroidDexCompilerRuntime
+import org.autojs.autojs.core.plugin.dex.DexCompilerRetainedInput
+import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeAndroidTestInstrumentation
+import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeDecision
+import org.autojs.autojs.core.plugin.dex.DexCompilerVerifiedArtifact
 import org.autojs.autojs.pio.PFiles.deleteFilesOfDir
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.MD5Utils.md5
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
@@ -19,8 +26,12 @@ import org.mozilla.javascript.GeneratedClassLoader
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.security.MessageDigest
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarInputStream
 import kotlin.random.Random
@@ -100,24 +111,193 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
 
     @Throws(IOException::class, FileNotFoundException::class)
     fun loadJar(jar: File): DexClassLoader {
+        return loadJarInternal(jar, allowExperimentalCompiler = false)
+    }
+
+    /** Production runtime.loadJar entry; AAR, defineClass, and compatibility helpers stay local. */
+    @Throws(IOException::class, FileNotFoundException::class)
+    internal fun loadJarWithExperimentalCompiler(jar: File): DexClassLoader {
+        return loadJarInternal(jar, allowExperimentalCompiler = true)
+    }
+
+    @Throws(IOException::class, FileNotFoundException::class)
+    private fun loadJarInternal(
+        jar: File,
+        allowExperimentalCompiler: Boolean,
+    ): DexClassLoader {
         Log.d(TAG, "loadJar: jar = ${jar.path}")
         if (!jar.exists() || !jar.canRead()) {
             throw FileNotFoundException(str(R.string.file_not_exist_or_readable_with_path, jar.path))
         }
 
+        val testDecision = if (allowExperimentalCompiler) {
+            DexCompilerRuntimeAndroidTestInstrumentation.compileDecisionOverrideOrNull(jar)
+        } else {
+            null
+        }
+        val coordinator = if (allowExperimentalCompiler) {
+            AndroidDexCompilerRuntime.coordinatorOrNull()
+        } else {
+            null
+        }
+        val decision = testDecision ?: coordinator?.compile(jar)
+            ?: return loadJarLocallySynchronized(jar)
+
+        return when (decision) {
+            is DexCompilerRuntimeDecision.Published -> {
+                try {
+                    try {
+                        loadVerifiedDexZip(decision.artifact)
+                    } catch (remoteLoadError: Exception) {
+                        throwIfInterrupted(remoteLoadError)
+                        runCatching { decision.artifact.invalidate() }
+                        Log.e(TAG, "Verified DEX compiler output could not be loaded; using local compiler", remoteLoadError)
+                        loadRetainedSnapshotLocally(decision.fallbackInput)
+                    }
+                } finally {
+                    decision.fallbackInput.close()
+                }
+            }
+            is DexCompilerRuntimeDecision.UseLocal -> {
+                val retained = decision.fallbackInput
+                try {
+                    throwIfInterrupted()
+                    Log.i(
+                        TAG,
+                        "DEX compiler provider fallback: reason=${decision.reason}, " +
+                            "failure=${decision.experimentalFailure}, remote=${decision.remoteFailure}",
+                    )
+                    if (retained == null) {
+                        loadJarLocallySynchronized(jar)
+                    } else {
+                        loadRetainedSnapshotLocally(retained)
+                    }
+                } finally {
+                    retained?.close()
+                }
+            }
+            DexCompilerRuntimeDecision.Cancelled -> throw ScriptInterruptedException()
+        }
+    }
+
+    private fun loadRetainedSnapshotLocally(input: DexCompilerRetainedInput): DexClassLoader {
+        throwIfInterrupted()
+        val snapshot = input.resolve() ?: throw IOException("Pinned DEX compiler input snapshot is unavailable")
+        if (snapshot.length() != input.sizeBytes || sha256Hex(snapshot) != input.sha256) {
+            throw IOException("Pinned DEX compiler input snapshot changed")
+        }
+        throwIfInterrupted()
+        return loadJarLocallySynchronized(snapshot)
+    }
+
+    private fun loadJarLocallySynchronized(jar: File): DexClassLoader {
         val key = generateArtifactsCacheName(jar)
         val lock = conversionLocks.getOrPut(key) { Any() }
+        return synchronized(lock) { loadJarLocally(jar) }
+    }
 
-        return synchronized(lock) {
-            runCatching {
-                jarToDexR8(jar)
-            }.recoverCatching { eR8 ->
-                Log.e(TAG, "Failed: jarToDexR8", eR8)
-                jarToDexDx(jar)
-            }.getOrElse { eDx ->
-                Log.e(TAG, "Failed: jarToDexDx", eDx)
-                throw eDx
+    private fun loadJarLocally(jar: File): DexClassLoader {
+        throwIfInterrupted()
+        DexCompilerRuntimeAndroidTestInstrumentation.localCompilerStarted(jar)
+        throwIfInterrupted()
+        try {
+            return jarToDexR8(jar)
+        } catch (eR8: Throwable) {
+            throwIfInterrupted(eR8)
+            Log.e(TAG, "Failed: jarToDexR8", eR8)
+        }
+        throwIfInterrupted()
+        try {
+            return jarToDexDx(jar)
+        } catch (eDx: Throwable) {
+            throwIfInterrupted(eDx)
+            Log.e(TAG, "Failed: jarToDexDx", eDx)
+            throw eDx
+        }
+    }
+
+    private fun loadVerifiedDexZip(artifact: DexCompilerVerifiedArtifact): DexClassLoader {
+        throwIfInterrupted()
+        val outputSha256 = artifact.outputSha256
+        val sizeBytes = artifact.sizeBytes
+        val source = artifact.openRead() ?: throw IOException("Verified DEX compiler artifact is unavailable")
+        return try {
+            val adoptionKey = "verified_$outputSha256"
+            val lock = conversionLocks.getOrPut(adoptionKey) { Any() }
+            synchronized(lock) {
+                val target = File(cacheDir, "$adoptionKey.dex.zip")
+                val targetMatches = try {
+                    target.isFile && target.length() == sizeBytes &&
+                        sha256Hex(target) == outputSha256
+                } catch (_: Exception) {
+                    false
+                }
+                if (!targetMatches) {
+                    val temporary = File(cacheDir, "$adoptionKey-${UUID.randomUUID()}.partial")
+                    try {
+                        val digest = MessageDigest.getInstance("SHA-256")
+                        var total = 0L
+                        FileOutputStream(temporary).use { output ->
+                            // Android 14 requires dynamically loaded code to be read-only. Mark the
+                            // pathname before writing; this already-open descriptor remains the sole
+                            // writer until the verified copy is synced and closed.
+                            Os.chmod(temporary.absolutePath, READ_ONLY_MODE)
+                            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                            while (true) {
+                                throwIfInterrupted()
+                                val count = source.read(buffer)
+                                if (count < 0) break
+                                if (count == 0) continue
+                                total = Math.addExact(total, count.toLong())
+                                if (total > sizeBytes) {
+                                    throw IOException("Verified DEX compiler artifact grew during adoption")
+                                }
+                                output.write(buffer, 0, count)
+                                digest.update(buffer, 0, count)
+                            }
+                            output.fd.sync()
+                        }
+                        val copiedSha256 = digest.digest().toHex()
+                        if (total != sizeBytes || copiedSha256 != outputSha256) {
+                            throw IOException("Verified DEX compiler artifact changed during adoption")
+                        }
+                        Os.rename(temporary.absolutePath, target.absolutePath)
+                        val finalCopyMatches = try {
+                            target.length() == sizeBytes && sha256Hex(target) == outputSha256
+                        } catch (_: Exception) {
+                            false
+                        }
+                        if (!finalCopyMatches) {
+                            target.delete()
+                            throw IOException("Adopted DEX compiler artifact failed final verification")
+                        }
+                    } finally {
+                        temporary.delete()
+                    }
+                }
+                Os.chmod(target.absolutePath, READ_ONLY_MODE)
+                throwIfInterrupted()
+
+                try {
+                    DexClassLoader(target.path, cacheDir.path, null, parent).also {
+                        mDexClassLoaders[target.path] = it
+                    }
+                } catch (error: Throwable) {
+                    target.delete()
+                    throw error
+                }
             }
+        } finally {
+            runCatching { source.close() }
+        }
+    }
+
+    private fun throwIfInterrupted(cause: Throwable? = null) {
+        if (Thread.currentThread().isInterrupted ||
+            cause != null && ScriptInterruptedException.causedByInterrupt(cause)
+        ) {
+            if (cause is ScriptInterruptedException) throw cause
+            throw if (cause == null) ScriptInterruptedException() else ScriptInterruptedException(cause)
         }
     }
 
@@ -417,6 +597,17 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         .distinctBy { it.path }
         .toList()
 
+    private fun sha256Hex(file: File): String = FileInputStream(file).use { input ->
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val count = input.read(buffer)
+            if (count < 0) break
+            if (count > 0) digest.update(buffer, 0, count)
+        }
+        digest.digest().toHex()
+    }
+
     private fun isAarJarEntry(name: String): Boolean {
         val normalized = name.lowercase()
         return normalized == AAR_CLASSES_JAR || normalized.startsWith(AAR_LIBS_PREFIX) && normalized.endsWith(".jar")
@@ -435,5 +626,8 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         private val TAG = AndroidClassLoader::class.java.simpleName
         private const val AAR_CLASSES_JAR = "classes.jar"
         private const val AAR_LIBS_PREFIX = "libs/"
+        private const val READ_ONLY_MODE = 0x100
     }
 }
+
+private fun ByteArray.toHex(): String = joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }

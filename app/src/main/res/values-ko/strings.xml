@@ -102,6 +102,7 @@
     <string name="description_change_working_dir_preference">스크립트가 포함 된 디렉토리의 경로를 변경하십시오</string>
     <string name="description_check_for_updates_preference">AutoJs6 은 GitHub 에서 업데이트를 가져오고 다운로드합니다.</string>
     <string name="description_client_mode">클라이언트 모드는 AutoJs6 가 원격 서버에 능동적으로 연결하여 [ 스크립트 전송 / 로그 출력 / 원격 제어 ] 등을 수행할 수 있도록 합니다.\n\n일반적으로 기기와 서버는 동일한 LAN 또는 서로 접근 가능한 네트워크 환경에 있어야 합니다.</string>
+    <string name="description_dex_compiler_experimental_preference">기본적으로 비활성화됩니다. 활성화하면 runtime.loadJar는 raw JAR 파일에 대해 명시적으로 선택한 호스트와 동일 서명의 정확한 컴포넌트 provider를 우선 사용합니다. provider 실패 시 내장 D8/dx로 한 번만 폴백합니다; 취소 시에는 폴백하지 않습니다. AAR 로딩은 항상 내장 경로를 사용합니다.</string>
     <string name="description_display_over_other_app">\"다른 앱 위에 표시\" 권한은 AutoJs6 가 다른 앱 화면 위에 플로팅 창 또는 플로팅 버튼을 표시할 수 있게 하여, 어떤 화면에서도 빠르게 작업을 실행하거나 정보를 확인할 수 있도록 합니다.\n\n참고: 이 권한이 부여되지 않으면 플로팅 창 및 플로팅 버튼이 표시되지 않거나 정상적으로 사용할 수 없을 수 있습니다.</string>
     <string name="description_documentation_source_preference">오프라인 문서: 별도로 설치하는 공식 Offline Docs 플러그인에서 제공됩니다. 네트워크 연결이 필요하지 않으며 AutoJs6 와 독립적으로 업데이트할 수 있습니다.\n온라인 문서: 온라인 문서 사이트를 사용하므로 네트워크 연결이 필요합니다. 콘텐츠는 항상 최신 상태로 유지됩니다.\n\n참고: 온라인 문서의 읽기 환경을 최대화하려면 데스크탑 모니터와 같은 와이드 스크린 디스플레이 장치를 사용하는 것이 좋습니다.\n참고: 버전 6.2.0 현재 문서는 아직 개발 초기 단계이며 대부분의 콘텐츠가 아직 작성되거나 업데이트되지 않았습니다.</string>
     <string name="description_documentation_source_preference_more">문서 페이지에서 어두운 테마를 지원하려면 다음 조건이 충족되어야 합니다.\n1. AutoJs6 에는 야간 모드가 활성화되어 있습니다.\n2. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P] 이하: 버전 >= 105</string>
@@ -598,6 +599,9 @@
     <string name="summary_all_files_access">AutoJs6 가 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_all_files_access_inrt">앱이 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_code_editor_settings">전체 코드 편집기 설정 페이지 열기</string>
+    <string name="summary_dex_compiler_experimental_disabled">내장 D8/dx만 사용; AAR는 항상 내장 경로 사용</string>
+    <string name="summary_dex_compiler_experimental_disabled_with_selection">내장 D8/dx만 사용; 유지된 provider: %1$s</string>
+    <string name="summary_dex_compiler_experimental_selected">runtime.loadJar의 raw JAR는 %1$s 우선; 실패 시 내장 D8/dx로 폴백</string>
     <string name="summary_display_over_other_apps">AutoJs6 가 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
     <string name="summary_display_over_other_apps_inrt">앱이 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">편집기의 실행 버튼으로 스크립트를 시작한 뒤 하단 로그 패널을 자동으로 엽니다</string>
@@ -995,6 +999,11 @@
     <string name="text_details">세부</string>
     <string name="text_developer_details_under_development">개발자 세부 사항이 개발 중입니다</string>
     <string name="text_developer_options">개발자 옵션</string>
+    <string name="text_dex_compiler">DEX 컴파일러</string>
+    <string name="text_dex_compiler_no_eligible_providers">호스트와 동일한 서명인 적격 DEX 컴파일러 provider가 설치되어 있지 않습니다. 취소하면 현재 선택을 유지하고 확인하면 내장 컴파일러를 사용합니다.</string>
+    <string name="text_dex_compiler_provider">Raw JAR 컴파일러 provider</string>
+    <string name="text_dex_compiler_provider_discovery_failed">Provider 검색에 실패했습니다. 취소하면 현재 선택을 유지하고 확인하면 내장 컴파일러를 사용합니다.</string>
+    <string name="text_dex_compiler_use_builtin">내장 D8/dx (실험 꺼짐; AAR는 항상 내장)</string>
     <string name="text_device_brand">기기 브랜드</string>
     <string name="text_device_hardware_name">장치 하드웨어 이름</string>
     <string name="text_device_hardware_serial_number">장치 일련 번호</string>

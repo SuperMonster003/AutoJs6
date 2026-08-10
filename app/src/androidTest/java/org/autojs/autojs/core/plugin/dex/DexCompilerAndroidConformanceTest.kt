@@ -27,6 +27,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.File
+import java.io.FileOutputStream
 import java.util.UUID
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CountDownLatch
@@ -66,17 +67,32 @@ class DexCompilerAndroidConformanceTest {
         assertEquals(1, outcome.validation.classDefinitionCount)
         assertEquals(setOf("037"), outcome.validation.dexVersions)
 
-        val published = artifactFile(outcome.cacheKeySha256)
-        assertTrue("Validated DEX was not published in the host-private cache", published.isFile)
-        assertTrue("Normal conformance did not create or replace its cache artifact", published.name in publishedArtifacts())
-        assertTrue("Normal conformance unexpectedly removed another cache artifact", publishedArtifacts().containsAll(before))
-        val existedBefore = published.name in before
+        val afterPublication = publishedArtifacts()
+        val publishedCandidate = publishedArtifactFiles(outcome.cacheKeySha256).singleOrNull()
+        assertNotNull("Validated DEX generation was not published in the host-private cache", publishedCandidate)
+        val published = publishedCandidate!!
+        assertEquals(outcome.artifact.sizeBytes, published.length())
+        assertTrue("Normal conformance did not publish a fresh cache generation", published.name in afterPublication - before)
 
         val optimized = File(context.codeCacheDir, "dex-compiler-conformance-${UUID.randomUUID()}")
+        val loadable = File(context.codeCacheDir, "dex-compiler-conformance-${UUID.randomUUID()}.dex.zip")
         assertTrue("Unable to create the DEX optimization directory", optimized.mkdirs())
         try {
+            val sourceCandidate = outcome.artifact.openRead()
+            assertNotNull("Published artifact capability could not be opened", sourceCandidate)
+            val source = sourceCandidate!!
+            source.use { input ->
+                FileOutputStream(loadable).use { output ->
+                    // Android 14 requires dynamically loaded code to be read-only. The already-open
+                    // descriptor remains the sole writer until the verified copy is synced/closed.
+                    assertTrue("Unable to make adopted DEX read-only", loadable.setReadOnly())
+                    input.copyTo(output)
+                    output.fd.sync()
+                }
+            }
+            assertEquals(outcome.artifact.sizeBytes, loadable.length())
             val loaded = DexClassLoader(
-                published.absolutePath,
+                loadable.absolutePath,
                 optimized.absolutePath,
                 null,
                 javaClass.classLoader,
@@ -85,11 +101,16 @@ class DexCompilerAndroidConformanceTest {
             assertEquals(42, loaded.getDeclaredMethod("answer").invoke(null))
         } finally {
             optimized.deleteRecursively()
-            if (!existedBefore) {
-                assertTrue("Unable to remove the conformance cache artifact", published.delete())
-            }
+            loadable.delete()
+            assertTrue("Unable to invalidate the exact conformance cache generation", outcome.artifact.invalidate())
         }
-        assertEquals("Normal conformance did not restore its initial cache state", before, publishedArtifacts())
+        val afterInvalidation = publishedArtifacts()
+        assertTrue("Invalidated conformance generation remains published", published.name !in afterInvalidation)
+        assertTrue(
+            "Invalidated conformance generation left cache metadata behind",
+            artifactRoot().listFiles().orEmpty().none { it.name.startsWith("${outcome.cacheKeySha256}.") },
+        )
+        assertTrue("Normal conformance left an unexpected publication", before.containsAll(afterInvalidation))
         assertNoTransientArtifacts()
     }
 
@@ -282,7 +303,10 @@ class DexCompilerAndroidConformanceTest {
         assertTrue("DEX compiler transaction artifacts leaked: ${transient.joinToString { it.name }}", transient.isEmpty())
     }
 
-    private fun artifactFile(cacheKeySha256: String): File = File(artifactRoot(), "$cacheKeySha256.dex.zip")
+    private fun publishedArtifactFiles(cacheKeySha256: String): List<File> = artifactRoot().listFiles().orEmpty()
+        .filter { file ->
+            file.isFile && file.name.startsWith("$cacheKeySha256.") && file.name.endsWith(".dex.zip")
+        }
 
     private fun publishedArtifacts(): Set<String> = artifactRoot().listFiles().orEmpty()
         .filter { it.isFile && it.name.endsWith(".dex.zip") }
@@ -305,6 +329,8 @@ class DexCompilerAndroidConformanceTest {
             0x00, 0x00, 0x00, 0x34,
         )
         val crc = CRC32().apply { update(classBytes) }.value
+        val nonce = UUID.randomUUID().toString().toByteArray()
+        val nonceCrc = CRC32().apply { update(nonce) }.value
         return ByteArrayOutputStream().also { output ->
             ZipOutputStream(output).use { zip ->
                 zip.putNextEntry(ZipEntry("fixture/Program.class").apply {
@@ -317,6 +343,17 @@ class DexCompilerAndroidConformanceTest {
                     comment = null
                 })
                 zip.write(classBytes)
+                zip.closeEntry()
+                zip.putNextEntry(ZipEntry("fixture/run-${UUID.randomUUID()}.txt").apply {
+                    method = ZipEntry.STORED
+                    size = nonce.size.toLong()
+                    compressedSize = nonce.size.toLong()
+                    this.crc = nonceCrc
+                    time = ZIP_DOS_EPOCH_MILLIS
+                    extra = byteArrayOf()
+                    comment = null
+                })
+                zip.write(nonce)
                 zip.closeEntry()
             }
         }.toByteArray()

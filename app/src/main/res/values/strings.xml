@@ -95,6 +95,7 @@
     <string name="description_change_working_dir_preference">Change the path of the directory containing scripts</string>
     <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.</string>
     <string name="description_client_mode">Client mode allows AutoJs6 to actively connect to a remote server for [ script transfer / log printing / remote control ].\n\nTypically, the device and the server need to be on the same LAN or on a network where they can reach each other.</string>
+    <string name="description_dex_compiler_experimental_preference">Disabled by default. When enabled, runtime.loadJar prefers the explicitly selected exact-component provider signed like the host for raw JAR files. Provider failures fall back once to built-in D8/dx; cancellation does not fall back. AAR loading always uses the built-in path.</string>
     <string name="description_display_over_other_app">The \"display over other apps\" permission allows AutoJs6 to show floating windows or a floating button above other apps, enabling quick actions or information viewing on any screen.\n\nNote: without this permission, floating windows and the floating button may not be shown or may not work properly.</string>
     <string name="description_documentation_source_preference">Offline docs: Provided by the separately installed official Offline Docs plugin. No network connection is required, and the documentation can be updated independently of AutoJs6.\nOnline docs: Uses the online documentation site and requires a network connection. The content is kept up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
     <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
@@ -591,6 +592,9 @@
     <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
     <string name="summary_code_editor_settings">Open the full code editor settings page</string>
+    <string name="summary_dex_compiler_experimental_disabled">Built-in D8/dx only; AAR always stays built-in</string>
+    <string name="summary_dex_compiler_experimental_disabled_with_selection">Built-in D8/dx only; retained provider: %1$s</string>
+    <string name="summary_dex_compiler_experimental_selected">Raw runtime.loadJar JARs prefer %1$s; failures fall back to built-in D8/dx</string>
     <string name="summary_display_over_other_apps">Allows AutoJs6 to display content over other apps</string>
     <string name="summary_display_over_other_apps_inrt">Allow the application to display content over other apps</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
@@ -988,6 +992,11 @@
     <string name="text_details">Details</string>
     <string name="text_developer_details_under_development">Developer details is under development</string>
     <string name="text_developer_options">Developer options</string>
+    <string name="text_dex_compiler">DEX compiler</string>
+    <string name="text_dex_compiler_no_eligible_providers">No eligible same-signed DEX compiler provider is installed. Cancel to preserve the current selection, or confirm the built-in compiler.</string>
+    <string name="text_dex_compiler_provider">Raw JAR compiler provider</string>
+    <string name="text_dex_compiler_provider_discovery_failed">Provider discovery failed. Cancel to preserve the current selection, or confirm the built-in compiler.</string>
+    <string name="text_dex_compiler_use_builtin">Built-in D8/dx (experiment off; AAR always built-in)</string>
     <string name="text_device_brand">Device brand</string>
     <string name="text_device_hardware_name">Device hardware name</string>
     <string name="text_device_hardware_serial_number">Device hardware serial number</string>

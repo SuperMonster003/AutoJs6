@@ -48,6 +48,18 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_dex_compiler">
+
+        <org.autojs.autojs.ui.settings.DexCompilerPreference
+            app:layout="@layout/preference_custom"
+            app:longClickPrompt="@string/description_dex_compiler_experimental_preference"
+            app:summary="@string/summary_dex_compiler_experimental_disabled"
+            app:title="@string/text_dex_compiler_provider" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_nodejs">
 
         <org.autojs.autojs.ui.settings.NodeDoctorReportPreference

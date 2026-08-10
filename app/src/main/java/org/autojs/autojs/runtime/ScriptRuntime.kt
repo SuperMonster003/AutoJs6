@@ -678,16 +678,25 @@ class ScriptRuntime private constructor(builder: Builder) {
                 val filtered = file.listFiles(filter)
                 if (filtered != null) {
                     for (f in filtered) {
-                        if (isJarFile(f)) loadJar(f.path)
+                        if (isJarFile(f)) loadJarWithoutExperimentalCompiler(f)
                         else if (isDexFile(f)) loadDex(f.path)
                         else if (isAarFile(f)) loadAar(f.path)
                     }
                 }
             } else {
-                if (isJarFile(file)) loadJar(file.path)
+                if (isJarFile(file)) loadJarWithoutExperimentalCompiler(file)
                 else if (isDexFile(file)) loadDex(file.path)
                 else if (isAarFile(file)) loadAar(file.path)
             }
+        }
+    }
+
+    /** The compatibility load() multiplexer stays local; only explicit loadJar() may opt in. */
+    private fun loadJarWithoutExperimentalCompiler(file: File) {
+        try {
+            sClassLoader.loadJar(file)
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
         }
     }
 
@@ -725,7 +734,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                         }
                     }
                 } else {
-                    classLoader.loadJar(file)
+                    classLoader.loadJarWithExperimentalCompiler(file)
                 }
             }
         } catch (e: IOException) {

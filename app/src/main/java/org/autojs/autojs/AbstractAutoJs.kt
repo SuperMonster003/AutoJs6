@@ -12,6 +12,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.LayoutInspector
 import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.plugin.dex.AndroidDexCompilerRuntime
 import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
@@ -86,6 +87,10 @@ abstract class AbstractAutoJs protected constructor(val application: Application
     }
 
     private fun initContextFactory() {
+        AndroidDexCompilerRuntime.initialize(
+            context = applicationContext,
+            eligibleProcess = App.getProcessNameCompat() == applicationContext.applicationInfo.processName,
+        )
         ContextFactory.initGlobal(InterruptibleAndroidContextFactory(File(applicationContext.cacheDir, "classes")))
     }
 

@@ -1,6 +1,8 @@
 package org.autojs.autojs.core.plugin.dex
 
 import java.io.Closeable
+import java.io.File
+import java.io.InputStream
 
 /** A descriptor has one owner and may be transferred to exactly one openSession invocation. */
 internal interface DexCompilerOwnedDescriptor : Closeable
@@ -9,6 +11,33 @@ internal interface DexCompilerInputSnapshot : Closeable {
     val sizeBytes: Long
     val sha256: String
     fun claimReadDescriptor(): DexCompilerOwnedDescriptor
+
+    /** Keeps the exact host snapshot alive for a possible local fallback. */
+    fun retainForLocalFallback(): DexCompilerRetainedInput
+}
+
+internal interface DexCompilerRetainedInput : Closeable {
+    val sizeBytes: Long
+    val sha256: String
+
+    /** Resolves only this still-live host-private snapshot, after size and digest revalidation. */
+    fun resolve(): File?
+}
+
+/**
+ * An in-process capability for one verified publication generation.
+ *
+ * It is deliberately not parcelable or serializable. Callers cannot resolve arbitrary cache keys,
+ * and a stale handle cannot invalidate a newer publication of the same semantic key.
+ */
+internal interface DexCompilerVerifiedArtifact {
+    val cacheKeySha256: String
+    val outputSha256: String
+    val sizeBytes: Long
+
+    /** Opens this exact publication generation before the store releases its generation lock. */
+    fun openRead(): InputStream?
+    fun invalidate(): Boolean
 }
 
 internal interface DexCompilerOutputTransaction : Closeable {
@@ -21,7 +50,7 @@ internal interface DexCompilerOutputTransaction : Closeable {
      * Copies the already verified bytes into a host-only publication inode. The remote-writable
      * staging inode must never be renamed or linked into the cache.
      */
-    fun publishVerified(cacheKeySha256: String, bytes: ByteArray)
+    fun publishVerified(cacheKeySha256: String, bytes: ByteArray): DexCompilerVerifiedArtifact
     fun rollback()
 }
 
@@ -85,4 +114,13 @@ internal fun interface DexCompilerThreadProbe {
 
 internal fun interface DexCompilerOutputVerifier {
     fun verify(bytes: ByteArray, limits: DexIndexedZipLimits): DexIndexedZipValidationResult
+}
+
+/**
+ * Looks up only a fully finalized semantic key after provider authentication and negotiation.
+ * Implementations must return a capability for the exact publication generation, never a path
+ * reconstructed from caller-controlled input.
+ */
+internal fun interface DexCompilerVerifiedCache {
+    fun lookup(cacheKeySha256: String): DexCompilerVerifiedArtifact?
 }

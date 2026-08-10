@@ -102,6 +102,7 @@
     <string name="description_change_working_dir_preference">قم بتغيير مسار الدليل الذي يحتوي على البرامج النصية</string>
     <string name="description_check_for_updates_preference">يحصل AutoJs6 على التحديثات وتنزيلها من GitHub.</string>
     <string name="description_client_mode">يُستخدم وضع العميل لتمكين AutoJs6 من الاتصال بشكل نشط بخادم بعيد لتنفيذ [ نقل السكربتات / طباعة السجلات / التحكم عن بُعد ].\n\nعادةً ما يلزم أن يكون الجهاز والخادم ضمن نفس الشبكة المحلية (LAN) أو ضمن بيئة شبكة يمكنهما الوصول فيها إلى بعضهما البعض.</string>
+    <string name="description_dex_compiler_experimental_preference">التجربة معطلة افتراضيا. عند تمكينها, يفضل runtime.loadJar الـ provider المحدد صراحة والموقع بالتوقيع نفسه للمضيف لملفات JAR الخام. عند فشل provider يجري الرجوع مرة واحدة إلى D8/dx المدمج; ولا يؤدي الإلغاء إلى الرجوع. يظل تحميل AAR على المسار المدمج دائما.</string>
     <string name="description_display_over_other_app">يسمح إذن \"العرض فوق التطبيقات الأخرى\" لـ AutoJs6 بعرض نوافذ عائمة أو زر عائم فوق واجهات التطبيقات الأخرى، وذلك لتنفيذ الإجراءات بسرعة أو عرض المعلومات على أي شاشة.\n\nملاحظة: عند عدم منح هذا الإذن، قد لا تظهر النوافذ العائمة والزر العائم أو قد لا يعملان بشكل صحيح.</string>
     <string name="description_documentation_source_preference">المستندات بلا اتصال: يوفرها مكون Offline Docs الإضافي الرسمي الذي يتم تثبيته بشكل منفصل. لا يلزم اتصال بالشبكة, ويمكن تحديثها بشكل مستقل عن AutoJs6.\nالمستندات عبر الإنترنت: تستخدم موقع المستندات عبر الإنترنت وتتطلب اتصالا بالشبكة. يظل المحتوى محدثا.\n\nملاحظة: للحصول على أفضل تجربة لقراءة المستندات عبر الإنترنت, يوصى باستخدام جهاز عرض بشاشة عريضة مثل شاشة سطح المكتب.\nملاحظة: اعتبارا من الإصدار 6.2.0, لا تزال الوثائق في المراحل الأولية من التطوير, ومعظم المحتوى لم تتم كتابته أو تحديثه بعد.</string>
     <string name="description_documentation_source_preference_more">يجب استيفاء الشروط التالية لدعم النسق الداكن على صفحات المستند:\n1. تم تمكين الوضع الليلي AutoJs6\n2.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P] وما دون: الإصدار> = 105</string>
@@ -598,6 +599,9 @@
     <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
     <string name="summary_code_editor_settings">فتح صفحة إعدادات محرر الشفرة الكاملة</string>
+    <string name="summary_dex_compiler_experimental_disabled">D8/dx المدمج فقط; يظل AAR على المسار المدمج دائما</string>
+    <string name="summary_dex_compiler_experimental_disabled_with_selection">D8/dx المدمج فقط; provider المحتفظ به: %1$s</string>
+    <string name="summary_dex_compiler_experimental_selected">runtime.loadJar لملفات JAR الخام يفضل %1$s; وعند الفشل يجري الرجوع إلى D8/dx المدمج</string>
     <string name="summary_display_over_other_apps">يسمح لـ AutoJs6 بعرض المحتوى فوق التطبيقات الأخرى</string>
     <string name="summary_display_over_other_apps_inrt">السماح للتطبيق بعرض المحتوى فوق التطبيقات الأخرى</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">فتح لوحة السجلات السفلية تلقائيا بعد ان يقوم زر التشغيل في المحرر بتشغيل سكربت</string>
@@ -995,6 +999,11 @@
     <string name="text_details">تفاصيل</string>
     <string name="text_developer_details_under_development">تفاصيل المطور قيد التطوير</string>
     <string name="text_developer_options">خيارات للمطور</string>
+    <string name="text_dex_compiler">مترجم DEX</string>
+    <string name="text_dex_compiler_no_eligible_providers">لا يوجد provider مترجم DEX مؤهل وموقع بالتوقيع نفسه للمضيف مثبت. اختر إلغاء للاحتفاظ بالاختيار الحالي, أو أكد استخدام المترجم المدمج.</string>
+    <string name="text_dex_compiler_provider">provider مترجم JAR الخام</string>
+    <string name="text_dex_compiler_provider_discovery_failed">فشل اكتشاف provider. اختر إلغاء للاحتفاظ بالاختيار الحالي, أو أكد استخدام المترجم المدمج.</string>
+    <string name="text_dex_compiler_use_builtin">D8/dx المدمج (التجربة معطلة; يظل AAR مدمجا دائما)</string>
     <string name="text_device_brand">العلامة التجارية للجهاز</string>
     <string name="text_device_hardware_name">اسم جهاز الجهاز</string>
     <string name="text_device_hardware_serial_number">الرقم التسلسلي للجهاز</string>

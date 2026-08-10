@@ -101,6 +101,7 @@
     <string name="description_change_working_dir_preference">スクリプトを含むディレクトリのパスを変更する</string>
     <string name="description_check_for_updates_preference">AutoJs6 は, GitHub からアップデートを取得し, ダウンロードします.</string>
     <string name="description_client_mode">クライアントモードは, AutoJs6 がリモートのサーバーへ能動的に接続し, [ スクリプト転送 / ログ出力 / リモート制御 ] などを行うための機能です.\n\n通常は, 端末とサーバーが同一 LAN か, 相互に到達可能なネットワーク環境にある必要があります.</string>
+    <string name="description_dex_compiler_experimental_preference">デフォルトでは無効です. 有効にすると, runtime.loadJar は raw JAR ファイルに対して明示的に選択されたホストと同一署名の正確なコンポーネント provider を優先します. provider の失敗時は組み込み D8/dx に一度だけフォールバックします; キャンセル時はフォールバックしません. AAR の読み込みは常に組み込み経路を使用します.</string>
     <string name="description_display_over_other_app">\"他のアプリの上に表示\" 権限により, AutoJs6 は他のアプリ画面の上にフローティングウィンドウやフローティングボタンを表示でき, どの画面からでも素早く操作や情報確認ができます.\n\n注: この権限が付与されていない場合, フローティングウィンドウやフローティングボタンが表示されない, または正常に利用できない可能性があります.</string>
     <string name="description_documentation_source_preference">オフラインドキュメント: 個別にインストールする公式 Offline Docs プラグインによって提供されます. ネットワーク接続は不要で, AutoJs6 とは独立して更新できます.\nオンラインドキュメント: オンラインドキュメントサイトを使用するため, ネットワーク接続が必要です. コンテンツは常に最新の状態に保たれます.\n\n注: オンラインドキュメントを最大限に活用するために, デスクトップモニターなどのワイドスクリーンディスプレイを使用することをお勧めします.\n注: バージョン 6.2.0 時点では, ドキュメントはまだ開発の初期段階にあり, ほとんどのコンテンツはまだ執筆および更新されていません.</string>
     <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには, 以下の条件を満たす必要があります.\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P] 以下: バージョン >= 105</string>
@@ -597,6 +598,9 @@
     <string name="summary_all_files_access">AutoJs6 が外部ストレージを含むすべてのファイルにアクセスすることを許可します</string>
     <string name="summary_all_files_access_inrt">アプリが外部ストレージを含むすべてのファイルにアクセスすることを許可する</string>
     <string name="summary_code_editor_settings">コードエディターの全設定ページを開く</string>
+    <string name="summary_dex_compiler_experimental_disabled">組み込み D8/dx のみ; AAR は常に組み込み経路</string>
+    <string name="summary_dex_compiler_experimental_disabled_with_selection">組み込み D8/dx のみ; 保持中の provider: %1$s</string>
+    <string name="summary_dex_compiler_experimental_selected">runtime.loadJar の raw JAR は %1$s を優先; 失敗時は組み込み D8/dx にフォールバック</string>
     <string name="summary_display_over_other_apps">AutoJs6 が他のアプリの上にコンテンツを表示することを許可します</string>
     <string name="summary_display_over_other_apps_inrt">アプリが他のアプリの上にコンテンツを表示することを許可する</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">エディタの実行ボタンでスクリプトを開始した後, 下部ログパネルを自動で開きます</string>
@@ -994,6 +998,11 @@
     <string name="text_details">詳細</string>
     <string name="text_developer_details_under_development">デベロッパーの詳細については, 現在開発中です</string>
     <string name="text_developer_options">デベロッパーオプション</string>
+    <string name="text_dex_compiler">DEX コンパイラ</string>
+    <string name="text_dex_compiler_no_eligible_providers">ホストと同じ署名を持つ利用可能な DEX コンパイラ provider がインストールされていません. キャンセルすると現在の選択を維持し, 確認すると組み込みコンパイラを使用します.</string>
+    <string name="text_dex_compiler_provider">Raw JAR コンパイラ provider</string>
+    <string name="text_dex_compiler_provider_discovery_failed">Provider の検出に失敗しました. キャンセルすると現在の選択を維持し, 確認すると組み込みコンパイラを使用します.</string>
+    <string name="text_dex_compiler_use_builtin">組み込み D8/dx (実験は無効; AAR は常に組み込み)</string>
     <string name="text_device_brand">デバイスブランド</string>
     <string name="text_device_hardware_name">デバイスのハードウェア名</string>
     <string name="text_device_hardware_serial_number">デバイスのシリアル番号</string>

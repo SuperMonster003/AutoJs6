@@ -36,6 +36,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.Closeable
+import java.io.ByteArrayInputStream
+import java.io.File
 import java.util.ArrayDeque
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -85,6 +87,36 @@ class DexCompilerExperimentalHarnessTest {
         assertEquals(1, fixture.output.rollbackCount)
         assertEquals(1, fixture.output.closeCount)
         assertEquals(1, fixture.snapshot.closeCount)
+    }
+
+    @Test
+    fun capabilityBoundRequestIsFinalizedAfterHandshakeAndDrivesPublication() {
+        val fixture = Fixture()
+        val unknownFingerprint = DexSha256.fromBytes(ByteArray(DexSha256.BYTE_COUNT))
+        val draft = fixture.request.copy(
+            protocolVersion = DexProtocolVersion(1, 99),
+            expectedRuntimeLibraryFingerprint = unknownFingerprint,
+        )
+
+        fixture.start(
+            request = draft,
+            requestFinalization = DexCompilerRequestFinalization.CAPABILITY_BOUND,
+        )
+
+        val dispatched = fixture.connection.openedRequest.also(::assertNotNull)!!
+        assertEquals(DexProtocolVersion(1, 0), dispatched.protocolVersion)
+        assertEquals(fixture.capabilities.runtimeLibraryFingerprint, dispatched.expectedRuntimeLibraryFingerprint)
+        assertEquals(draft.requestId, dispatched.requestId)
+        assertEquals(draft.programSha256, dispatched.programSha256)
+        assertEquals(draft.mode, dispatched.mode)
+        assertEquals(draft.maxOutputBytes, dispatched.maxOutputBytes)
+        assertEquals(draft.timeoutMillis, dispatched.timeoutMillis)
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.Published
+        assertEquals(outcome.cacheKeySha256, fixture.output.publishedCacheKey)
+        assertEquals(1, fixture.output.publishCount)
     }
 
     @Test
@@ -162,6 +194,41 @@ class DexCompilerExperimentalHarnessTest {
     }
 
     @Test
+    fun requiredIdentityRejectsOfficialCandidateWithoutHostSignerBeforeBinding() {
+        val fixture = Fixture()
+
+        fixture.start(requiredIdentity = fixture.candidate.pin())
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.IDENTITY_DRIFT, outcome.failure)
+        assertFalse(outcome.pluginWasDispatched)
+        assertEquals(1, fixture.transport.discoveryCount)
+        assertEquals(0, fixture.transport.inspectCount)
+        assertEquals(0, fixture.transport.bindCount)
+        assertEquals(0, fixture.connection.infoCount)
+        assertEquals(0, fixture.connection.openCount)
+    }
+
+    @Test
+    fun requiredIdentityRejectsDriftDuringConnectedReinspectionBeforeOpenSession() {
+        val fixture = Fixture(sameSignerAsHost = true)
+        val requiredIdentity = fixture.candidate.pin()
+        fixture.transport.inspectedCandidate = fixture.candidate.copy(lastUpdateTime = 999)
+
+        fixture.start(requiredIdentity = requiredIdentity)
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.IDENTITY_DRIFT, outcome.failure)
+        assertFalse(outcome.pluginWasDispatched)
+        assertEquals(1, fixture.transport.discoveryCount)
+        assertEquals(1, fixture.transport.bindCount)
+        assertEquals(1, fixture.transport.inspectCount)
+        assertEquals(0, fixture.connection.infoCount)
+        assertEquals(0, fixture.connection.openCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
     fun matchingResultIsHashedStructurallyVerifiedThenPublished() {
         val fixture = Fixture()
         fixture.start()
@@ -173,8 +240,11 @@ class DexCompilerExperimentalHarnessTest {
 
         val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.Published
         assertEquals(fixture.candidate.pin(), outcome.identity)
+        assertTrue(outcome.artifact === fixture.output.publishedArtifact)
         assertEquals(64, outcome.cacheKeySha256.length)
         assertEquals(outcome.cacheKeySha256, fixture.output.publishedCacheKey)
+        assertEquals(fixture.outputBytes.size.toLong(), outcome.artifact.sizeBytes)
+        assertEquals(DexSha256.digest(fixture.outputBytes).toHexString(), outcome.artifact.outputSha256)
         assertEquals(1, fixture.verifierCount)
         assertEquals(1, fixture.output.readCount)
         assertEquals(1, fixture.output.publishCount)
@@ -301,6 +371,9 @@ class DexCompilerExperimentalHarnessTest {
 
         val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
         assertEquals(DexCompilerExperimentalFailure.REMOTE_FAILED, outcome.failure)
+        assertEquals(DexCompilerErrorCode.COMPILATION_FAILED, outcome.remoteFailure?.code)
+        assertEquals(DexCompilerFailurePhase.COMPILATION, outcome.remoteFailure?.phase)
+        assertEquals(false, outcome.remoteFailure?.retryable)
         assertTrue(outcome.pluginWasDispatched)
         assertTrue(outcome.pluginOutputRollbackRequired)
         assertEquals(1, fixture.outcomes.size)
@@ -382,6 +455,22 @@ class DexCompilerExperimentalHarnessTest {
         assertTrue(fixture.singleOutcome() === DexCompilerExperimentalOutcome.Cancelled)
         assertEquals(1, fixture.outcomes.size)
         assertEquals(1, fixture.session.cancelCount)
+        assertEquals(1, fixture.session.closeCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun providerCancellationFallsBackAsRemoteCancelled() {
+        val fixture = Fixture()
+        fixture.start()
+
+        fixture.callback.onCancelled(DexCompilerCodec.encodeCancellation(fixture.cancellation()))
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.REMOTE_CANCELLED, outcome.failure)
+        assertTrue(outcome.pluginWasDispatched)
+        assertTrue(outcome.pluginOutputRollbackRequired)
+        assertEquals(0, fixture.session.cancelCount)
         assertEquals(1, fixture.session.closeCount)
         fixture.assertRolledBackAndUnboundExactlyOnce()
     }
@@ -567,6 +656,42 @@ class DexCompilerExperimentalHarnessTest {
     }
 
     @Test
+    fun mismatchedPublishedArtifactMetadataInvalidatesAndFallsBack() {
+        val fixture = Fixture()
+        fixture.output.artifactSizeDelta = 1
+        fixture.start()
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.OUTPUT_REJECTED, outcome.failure)
+        assertTrue(outcome.pluginWasDispatched)
+        assertTrue(outcome.pluginOutputRollbackRequired)
+        assertEquals(1, fixture.output.publishCount)
+        assertEquals(1, fixture.output.publishedArtifact?.invalidationCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun exceptionReadingPublishedArtifactMetadataInvalidatesAndFallsBack() {
+        val fixture = Fixture()
+        fixture.output.throwOnArtifactOutputSha256Read = true
+        fixture.start()
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.OUTPUT_REJECTED, outcome.failure)
+        assertTrue(outcome.pluginWasDispatched)
+        assertTrue(outcome.pluginOutputRollbackRequired)
+        assertEquals(1, fixture.output.publishCount)
+        assertEquals(1, fixture.output.publishedArtifact?.invalidationCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
     fun timeoutDuringQueuedHandshakeRollsBackWithoutWaitingForBinderWork() {
         val blocking = ManualExecutor()
         val fixture = Fixture(blockingExecutor = blocking)
@@ -730,6 +855,131 @@ class DexCompilerExperimentalHarnessTest {
         assertEquals(1, fixture.session.cancelCount)
     }
 
+    @Test
+    fun verifiedCacheHitAfterHandshakeSkipsDescriptorsAndRemoteSession() {
+        val fixture = Fixture(cachedBytes = byteArrayOf(1, 3, 3, 7))
+
+        fixture.start()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.CacheHit
+        assertEquals(fixture.candidate.pin(), outcome.identity)
+        assertEquals(fixture.cacheLookupKey, outcome.cacheKeySha256)
+        assertEquals(1, fixture.cacheLookupCount)
+        assertEquals(1, fixture.verifierCount)
+        assertEquals(0, fixture.connection.openCount)
+        assertEquals(0, fixture.snapshot.claimCount)
+        assertEquals(0, fixture.output.drainStartCount)
+        assertEquals(0, fixture.output.claimCount)
+        assertEquals(0, fixture.output.publishCount)
+        assertEquals(0, fixture.cachedArtifact?.invalidationCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun corruptCacheGenerationIsEvictedBeforeOneRemoteDispatch() {
+        val fixture = Fixture(
+            cachedBytes = byteArrayOf(1, 3, 3, 7),
+            cachedSha256 = DexSha256.digest(byteArrayOf(9, 9, 9)).toHexString(),
+        )
+
+        fixture.start()
+
+        assertEquals(1, fixture.cacheLookupCount)
+        assertEquals(1, fixture.cachedArtifact?.invalidationCount)
+        assertEquals(1, fixture.connection.openCount)
+        assertEquals(1, fixture.snapshot.claimCount)
+        assertEquals(1, fixture.output.drainStartCount)
+        assertEquals(1, fixture.output.claimCount)
+        assertTrue(fixture.outcomes.isEmpty())
+    }
+
+    @Test
+    fun cacheHitRerunsCurrentDexZipValidatorBeforeRemoteDispatch() {
+        val fixture = Fixture(
+            cachedBytes = byteArrayOf(1, 3, 3, 7),
+            verifierThrows = true,
+        )
+
+        fixture.start()
+
+        assertEquals(1, fixture.verifierCount)
+        assertEquals(1, fixture.cachedArtifact?.invalidationCount)
+        assertEquals(1, fixture.connection.openCount)
+        assertEquals(1, fixture.snapshot.claimCount)
+        assertTrue(fixture.outcomes.isEmpty())
+    }
+
+    @Test
+    fun timeoutEnteringDuringCacheValidationPreventsRemoteDispatchWithoutEviction() {
+        val fixture = Fixture(
+            cachedBytes = byteArrayOf(1, 3, 3, 7),
+            timeoutDuringVerify = true,
+        )
+
+        fixture.start()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.TIMEOUT, outcome.failure)
+        assertEquals(0, fixture.cachedArtifact?.invalidationCount)
+        assertEquals(0, fixture.connection.openCount)
+        assertEquals(0, fixture.snapshot.claimCount)
+        assertEquals(0, fixture.output.drainStartCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun timeoutEnteringWhileInvalidCacheIsRejectedStillPreventsRemoteDispatch() {
+        val fixture = Fixture(
+            cachedBytes = byteArrayOf(1, 3, 3, 7),
+            timeoutDuringVerify = true,
+            verifierThrows = true,
+        )
+
+        fixture.start()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.TIMEOUT, outcome.failure)
+        assertEquals(1, fixture.cachedArtifact?.invalidationCount)
+        assertEquals(0, fixture.connection.openCount)
+        assertEquals(0, fixture.snapshot.claimCount)
+        assertEquals(0, fixture.output.drainStartCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun cacheLookupFailureIsAMissBeforeOneRemoteDispatch() {
+        val fixture = Fixture(cacheLookupThrows = true)
+
+        fixture.start()
+
+        assertEquals(1, fixture.cacheLookupCount)
+        assertEquals(1, fixture.connection.openCount)
+        assertEquals(1, fixture.snapshot.claimCount)
+        assertEquals(1, fixture.output.drainStartCount)
+        assertEquals(1, fixture.output.claimCount)
+        assertTrue(fixture.outcomes.isEmpty())
+    }
+
+    @Test
+    fun incompatibleCapabilitiesFailBeforeCacheLookupDescriptorsOrDispatch() {
+        val fixture = Fixture(
+            requestMinApi = 37,
+            hostRuntimeApi = 37,
+            cachedBytes = byteArrayOf(1, 3, 3, 7),
+        )
+
+        fixture.start()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.HANDSHAKE_REJECTED, outcome.failure)
+        assertEquals(0, fixture.cacheLookupCount)
+        assertEquals(0, fixture.connection.openCount)
+        assertEquals(0, fixture.snapshot.claimCount)
+        assertEquals(0, fixture.output.drainStartCount)
+        assertEquals(0, fixture.output.claimCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
     private class Fixture(
         mainThread: Boolean = false,
         verifierThrows: Boolean = false,
@@ -741,13 +991,18 @@ class DexCompilerExperimentalHarnessTest {
         maximumInMemoryOutputBytes: Long = DexCompilerExperimentalHostLimits.MAX_IN_MEMORY_OUTPUT_BYTES,
         requestMinApi: Int = 36,
         hostRuntimeApi: Int = requestMinApi,
+        sameSignerAsHost: Boolean = false,
+        private val cachedBytes: ByteArray? = null,
+        private val cachedSha256: String? = null,
+        private val cacheLookupThrows: Boolean = false,
+        private val timeoutDuringVerify: Boolean = false,
     ) {
         val inputBytes = "program-jar".toByteArray()
         val outputBytes = byteArrayOf(1, 3, 3, 7)
         val requestId = DexRequestId.fromUuid(UUID(1, 2))
         private val libraryIdentity = DexRuntimeLibraryIdentity(4, DexSha256.digest(byteArrayOf(1, 2, 3, 4)))
         private val libraryFingerprint = DexRuntimeLibraryFingerprint.compute(listOf(libraryIdentity))
-        val candidate = candidate()
+        val candidate = candidate().copy(sameSignerAsHost = sameSignerAsHost)
         val info = DexCompilerInfo(
             protocolMin = DexProtocolVersion(1, 0),
             protocolMax = DexProtocolVersion(1, 0),
@@ -810,6 +1065,9 @@ class DexCompilerExperimentalHarnessTest {
         val outcomes = mutableListOf<DexCompilerExperimentalOutcome>()
         var verifierCount = 0
         var verifierLimits: DexIndexedZipLimits? = null
+        var cacheLookupCount = 0
+        var cacheLookupKey: String? = null
+        var cachedArtifact: FakeVerifiedArtifact? = null
         val harness = DexCompilerExperimentalHarness(
             transport = transport,
             workerExecutor = workerExecutor,
@@ -823,16 +1081,35 @@ class DexCompilerExperimentalHarnessTest {
             outputVerifier = DexCompilerOutputVerifier { bytes, limits ->
                 verifierCount++
                 verifierLimits = limits
+                if (timeoutDuringVerify) scheduler.fire()
                 if (verifierThrows) throw IllegalArgumentException("hostile DEX")
                 assertEquals(outputBytes.toList(), bytes.toList())
                 DexIndexedZipValidationResult(1, bytes.size.toLong(), 1, setOf("035"))
+            },
+            verifiedCache = DexCompilerVerifiedCache { cacheKeySha256 ->
+                cacheLookupCount++
+                cacheLookupKey = cacheKeySha256
+                if (cacheLookupThrows) throw IllegalStateException("cache unavailable")
+                cachedBytes?.let { bytes ->
+                    FakeVerifiedArtifact(
+                        cacheKeySha256 = cacheKeySha256,
+                        bytes = bytes,
+                        outputSha256Value = cachedSha256 ?: DexSha256.digest(bytes).toHexString(),
+                        sizeBytes = bytes.size.toLong(),
+                    ).also { cachedArtifact = it }
+                }
             },
         )
 
         val callback: DexCompilerRemoteCallback
             get() = connection.callback.also(::assertNotNull)!!
 
-        fun start(invocationKind: DexCompilerInvocationKind = DexCompilerInvocationKind.ASYNCHRONOUS): Closeable =
+        fun start(
+            invocationKind: DexCompilerInvocationKind = DexCompilerInvocationKind.ASYNCHRONOUS,
+            request: DexCompileRequest = this.request,
+            requestFinalization: DexCompilerRequestFinalization = DexCompilerRequestFinalization.NONE,
+            requiredIdentity: DexCompilerPinnedIdentity? = null,
+        ): Closeable =
             harness.start(
                 DexCompilerExperimentalInvocation(
                     request = request,
@@ -841,6 +1118,8 @@ class DexCompilerExperimentalHarnessTest {
                     releaseBuild = true,
                     preferredComponent = candidate.component,
                     invocationKind = invocationKind,
+                    requestFinalization = requestFinalization,
+                    requiredIdentity = requiredIdentity,
                 ),
                 outcomes::add,
             )
@@ -960,6 +1239,7 @@ class DexCompilerExperimentalHarnessTest {
         var openCount = 0
         var throwOnOpen = false
         var callback: DexCompilerRemoteCallback? = null
+        var openedRequest: DexCompileRequest? = null
 
         override fun getCompilerInfo(): ByteArray {
             infoCount++
@@ -975,7 +1255,7 @@ class DexCompilerExperimentalHarnessTest {
             callback: DexCompilerRemoteCallback,
         ): DexCompilerRemoteSession {
             openCount++
-            DexCompilerCodec.decodeRequest(encodedRequest)
+            openedRequest = DexCompilerCodec.decodeRequest(encodedRequest)
             this.callback = callback
             if (throwOnOpen) throw IllegalStateException("ambiguous Binder failure")
             return session
@@ -1018,6 +1298,13 @@ class DexCompilerExperimentalHarnessTest {
             }
         }
 
+        override fun retainForLocalFallback(): DexCompilerRetainedInput = object : DexCompilerRetainedInput {
+            override val sizeBytes: Long = this@FakeInputSnapshot.sizeBytes
+            override val sha256: String = this@FakeInputSnapshot.sha256
+            override fun resolve(): File? = null
+            override fun close() = Unit
+        }
+
         override fun close() {
             closeCount++
         }
@@ -1041,6 +1328,9 @@ class DexCompilerExperimentalHarnessTest {
         var onClose: (() -> Unit)? = null
         var publishedBytes: ByteArray? = null
         var publishedCacheKey: String? = null
+        var publishedArtifact: FakeVerifiedArtifact? = null
+        var artifactSizeDelta = 0L
+        var throwOnArtifactOutputSha256Read = false
 
         override fun beginDrain(
             maxBytes: Long,
@@ -1069,11 +1359,21 @@ class DexCompilerExperimentalHarnessTest {
             return bytes.copyOf().also { onAfterRead?.invoke() }
         }
 
-        override fun publishVerified(cacheKeySha256: String, bytes: ByteArray) {
+        override fun publishVerified(
+            cacheKeySha256: String,
+            bytes: ByteArray,
+        ): DexCompilerVerifiedArtifact {
             publishCount++
             publishedCacheKey = cacheKeySha256
             publishedBytes = bytes.copyOf()
             onPublish?.invoke()
+            return FakeVerifiedArtifact(
+                cacheKeySha256 = cacheKeySha256,
+                bytes = bytes,
+                outputSha256Value = DexSha256.digest(bytes).toHexString(),
+                sizeBytes = bytes.size.toLong() + artifactSizeDelta,
+                throwOnOutputSha256Read = throwOnArtifactOutputSha256Read,
+            ).also { publishedArtifact = it }
         }
 
         fun replaceRemoteWritableBytes(bytes: ByteArray) {
@@ -1109,6 +1409,28 @@ class DexCompilerExperimentalHarnessTest {
         override fun close() {
             closeCount++
             onClose?.invoke()
+        }
+    }
+
+    private class FakeVerifiedArtifact(
+        override val cacheKeySha256: String,
+        bytes: ByteArray,
+        private val outputSha256Value: String,
+        override val sizeBytes: Long,
+        private val throwOnOutputSha256Read: Boolean = false,
+    ) : DexCompilerVerifiedArtifact {
+        private val bytes = bytes.copyOf()
+        var invalidationCount = 0
+        override val outputSha256: String
+            get() {
+                if (throwOnOutputSha256Read) throw IllegalStateException("artifact metadata unavailable")
+                return outputSha256Value
+            }
+
+        override fun openRead() = ByteArrayInputStream(bytes)
+        override fun invalidate(): Boolean {
+            invalidationCount++
+            return invalidationCount == 1
         }
     }
 

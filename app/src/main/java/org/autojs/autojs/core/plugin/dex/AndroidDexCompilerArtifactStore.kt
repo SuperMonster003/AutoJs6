@@ -3,6 +3,7 @@ package org.autojs.autojs.core.plugin.dex
 import android.content.Context
 import android.os.ParcelFileDescriptor
 import android.system.Os
+import android.system.OsConstants
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -11,13 +12,15 @@ import java.security.MessageDigest
 import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Host-private snapshot and verified-copy cache publication used only by the experimental harness.
  *
- * Construct this once during process initialization, before the harness can start its single live
- * session. Startup recovery deletes only transaction-shaped leftovers; published `.dex.zip` cache
- * entries are retained. A remote-writable staging inode is never used as a published cache inode.
+ * Construct this once per process when the explicitly selected runtime backend is first needed,
+ * before the harness can start its single live session. The persistent index recovers committed
+ * generations and removes transaction-shaped or unindexed crash leftovers. A remote-writable
+ * staging inode is never used as a published cache inode.
  * [drainExecutor] must be a dedicated bounded asynchronous executor; inline execution would block
  * before the write descriptor can be dispatched.
  */
@@ -26,27 +29,52 @@ internal class AndroidDexCompilerArtifactStore(
     private val drainExecutor: Executor,
 ) {
 
+    private val ownerToken = Any()
+
     private val root = File(context.noBackupFilesDir, DIRECTORY_NAME).apply {
         if (!exists() && !mkdirs()) throw IllegalStateException("Unable to create DEX compiler transaction directory")
         require(isDirectory)
     }.canonicalFile.also { directory ->
         directory.listFiles().orEmpty()
-            .filter { it.isFile && DexCompilerArtifactRecoveryPolicy.isTransientArtifact(it.name) }
+            .filter {
+                it.isFile && (DexCompilerArtifactRecoveryPolicy.isTransientArtifact(it.name) ||
+                    UNINDEXED_PUBLICATION.matches(it.name))
+            }
             .forEach(File::delete)
     }
+    private val persistentCache = DexCompilerPersistentCache(
+        rootDirectory = root,
+        fileOps = AndroidPersistentCacheFileOps,
+    )
 
-    fun snapshot(input: InputStream, maximumBytes: Long): DexCompilerInputSnapshot {
+    /**
+     * Looks up an exact semantic key derived after the authenticated provider handshake.
+     * Arbitrary keys are rejected and are never interpreted as paths.
+     */
+    fun lookupVerified(cacheKeySha256: String): DexCompilerVerifiedArtifact? =
+        persistentCache.lookup(cacheKeySha256)?.toVerifiedArtifact()
+
+    fun snapshot(
+        input: InputStream,
+        maximumBytes: Long,
+        isCancelled: () -> Boolean = { false },
+    ): DexCompilerInputSnapshot {
         require(maximumBytes > 0L)
         val file = newPrivateFile("input", ".jar")
         try {
             val summary = FileOutputStream(file).use { output ->
-                val copied = DexCompilerBoundedStreamTransfer.copy(input, output, maximumBytes)
+                val copied = DexCompilerBoundedStreamTransfer.copy(
+                    input = input,
+                    output = output,
+                    maximumBytes = maximumBytes,
+                    isCancelled = isCancelled,
+                )
                 output.fd.sync()
                 copied
             }
             if (summary.sizeBytes <= 0L) throw IllegalArgumentException("Program snapshot is empty")
             Os.chmod(file.absolutePath, READ_ONLY_MODE)
-            return InputSnapshot(file, summary.sizeBytes, summary.sha256)
+            return InputSnapshot(SnapshotState(file, summary.sizeBytes, summary.sha256))
         } catch (error: Throwable) {
             file.delete()
             throw error
@@ -65,7 +93,7 @@ internal class AndroidDexCompilerArtifactStore(
             OutputTransaction(
                 staging = staging,
                 verified = verifiedFile,
-                root = root,
+                owner = this,
                 readSide = descriptors[0],
                 writeSide = descriptors[1],
                 drainExecutor = drainExecutor,
@@ -95,31 +123,87 @@ internal class AndroidDexCompilerArtifactStore(
     }
 
     private class InputSnapshot(
-        private val file: File,
-        override val sizeBytes: Long,
-        override val sha256: String,
+        private val state: SnapshotState,
     ) : DexCompilerInputSnapshot {
         private val descriptorClaimed = AtomicBoolean(false)
         private val closed = AtomicBoolean(false)
+
+        override val sizeBytes: Long
+            get() = state.sizeBytes
+
+        override val sha256: String
+            get() = state.sha256
 
         override fun claimReadDescriptor(): DexCompilerOwnedDescriptor {
             check(!closed.get() && descriptorClaimed.compareAndSet(false, true)) {
                 "Program descriptor may be claimed exactly once"
             }
             return AndroidDexCompilerDescriptor(
-                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY),
+                ParcelFileDescriptor.open(state.file, ParcelFileDescriptor.MODE_READ_ONLY),
             )
         }
 
+        override fun retainForLocalFallback(): DexCompilerRetainedInput {
+            check(!closed.get()) { "Program snapshot is already closed" }
+            state.retain()
+            return RetainedInput(state)
+        }
+
         override fun close() {
-            if (closed.compareAndSet(false, true)) file.delete()
+            if (closed.compareAndSet(false, true)) state.release()
+        }
+    }
+
+    private class RetainedInput(
+        private val state: SnapshotState,
+    ) : DexCompilerRetainedInput {
+        private val closed = AtomicBoolean(false)
+
+        override val sizeBytes: Long
+            get() = state.sizeBytes
+
+        override val sha256: String
+            get() = state.sha256
+
+        override fun resolve(): File? = if (closed.get()) null else state.resolve()
+
+        override fun close() {
+            if (closed.compareAndSet(false, true)) state.release()
+        }
+    }
+
+    private class SnapshotState(
+        val file: File,
+        val sizeBytes: Long,
+        val sha256: String,
+    ) {
+        private val references = AtomicInteger(1)
+
+        fun retain() {
+            while (true) {
+                val current = references.get()
+                check(current > 0) { "Program snapshot is already released" }
+                check(current < Int.MAX_VALUE) { "Program snapshot reference count overflow" }
+                if (references.compareAndSet(current, current + 1)) return
+            }
+        }
+
+        fun resolve(): File? {
+            if (references.get() <= 0 || !file.isFile || file.length() != sizeBytes) return null
+            return file.takeIf { sha256File(it) == sha256 }
+        }
+
+        fun release() {
+            val remaining = references.decrementAndGet()
+            check(remaining >= 0) { "Program snapshot was released more than once" }
+            if (remaining == 0) file.delete()
         }
     }
 
     private class OutputTransaction(
         private val staging: File,
         private val verified: File,
-        private val root: File,
+        private val owner: AndroidDexCompilerArtifactStore,
         private val readSide: ParcelFileDescriptor,
         private var writeSide: ParcelFileDescriptor?,
         private val drainExecutor: Executor,
@@ -180,12 +264,13 @@ internal class AndroidDexCompilerArtifactStore(
             bytes
         }
 
-        override fun publishVerified(cacheKeySha256: String, bytes: ByteArray) = synchronized(this) {
+        override fun publishVerified(
+            cacheKeySha256: String,
+            bytes: ByteArray,
+        ): DexCompilerVerifiedArtifact = synchronized(this) {
             check(state == State.OPEN && descriptorClaimed.get())
             require(SHA256.matches(cacheKeySha256)) { "Cache key must be lowercase SHA-256" }
             require(bytes.isNotEmpty())
-            val published = File(root, "$cacheKeySha256.dex.zip").canonicalFile
-            require(published.parentFile == root) { "DEX cache target escaped its private directory" }
             FileOutputStream(verified, false).use { output ->
                 output.write(bytes)
                 output.fd.sync()
@@ -206,10 +291,15 @@ internal class AndroidDexCompilerArtifactStore(
                 "Verified publication copy differs from validated output"
             }
             Os.chmod(verified.absolutePath, READ_ONLY_MODE)
-            Os.rename(verified.absolutePath, published.absolutePath)
+            val artifact = owner.publishVerifiedCopy(
+                cacheKeySha256 = cacheKeySha256,
+                outputSha256 = expectedDigest.toHex(),
+                sizeBytes = bytes.size.toLong(),
+                verified = verified,
+            )
             state = State.PUBLISHED
             staging.delete()
-            Unit
+            artifact
         }
 
         override fun rollback() = synchronized(this) {
@@ -314,11 +404,123 @@ internal class AndroidDexCompilerArtifactStore(
         }
     }
 
+    private fun publishVerifiedCopy(
+        cacheKeySha256: String,
+        outputSha256: String,
+        sizeBytes: Long,
+        verified: File,
+    ): DexCompilerVerifiedArtifact {
+        val entry = persistentCache.publishVerified(
+            cacheKeySha256 = cacheKeySha256,
+            outputSha256 = outputSha256,
+            sizeBytes = sizeBytes,
+            verified = verified,
+        )
+        return entry.toVerifiedArtifact()
+    }
+
+    private fun openRead(
+        token: Any,
+        entry: DexCompilerPersistentCache.Entry,
+    ): InputStream? = if (token === ownerToken) persistentCache.openRead(entry) else null
+
+    private fun invalidate(
+        token: Any,
+        entry: DexCompilerPersistentCache.Entry,
+    ): Boolean = token === ownerToken && persistentCache.invalidate(entry)
+
+    private fun DexCompilerPersistentCache.Entry.toVerifiedArtifact(): DexCompilerVerifiedArtifact =
+        VerifiedArtifact(
+            owner = this@AndroidDexCompilerArtifactStore,
+            ownerToken = ownerToken,
+            entry = this,
+        )
+
+    private class VerifiedArtifact(
+        private val owner: AndroidDexCompilerArtifactStore,
+        private val ownerToken: Any,
+        private val entry: DexCompilerPersistentCache.Entry,
+    ) : DexCompilerVerifiedArtifact {
+        override val cacheKeySha256: String
+            get() = entry.cacheKeySha256
+
+        override val outputSha256: String
+            get() = entry.outputSha256
+
+        override val sizeBytes: Long
+            get() = entry.sizeBytes
+
+        override fun openRead(): InputStream? = owner.openRead(
+            token = ownerToken,
+            entry = entry,
+        )
+
+        override fun invalidate(): Boolean = owner.invalidate(ownerToken, entry)
+
+        override fun toString(): String =
+            "DexCompilerVerifiedArtifact(cacheKeySha256=$cacheKeySha256, outputSha256=$outputSha256, " +
+                "sizeBytes=$sizeBytes)"
+    }
+
     private companion object {
         const val DIRECTORY_NAME = "dex-compiler-experimental"
         const val READ_ONLY_MODE = 0x100
         const val OWNER_READ_WRITE_MODE = 0x180
         const val PIPE_REJECTION_MESSAGE = "Host rejected DEX compiler output"
         val SHA256 = Regex("[0-9a-f]{64}")
+        val UNINDEXED_PUBLICATION = Regex("[0-9a-f]{64}\\.dex\\.zip")
     }
 }
+
+private object AndroidPersistentCacheFileOps : DexCompilerPersistentCache.FileOps {
+    override fun makeOwnerReadWrite(file: File) {
+        Os.chmod(file.absolutePath, 0x180)
+    }
+
+    override fun makeOwnerReadOnly(file: File) {
+        Os.chmod(file.absolutePath, 0x100)
+    }
+
+    override fun isOwnerReadOnlyRegularFile(file: File): Boolean = try {
+        val stat = Os.lstat(file.absolutePath)
+        OsConstants.S_ISREG(stat.st_mode) && (stat.st_mode and PERMISSION_MASK) == OWNER_READ_ONLY
+    } catch (_: Exception) {
+        false
+    }
+
+    override fun isOwnerReadOnlyRegularFile(file: File, opened: FileInputStream): Boolean = try {
+        val stat = Os.fstat(opened.fd)
+        OsConstants.S_ISREG(stat.st_mode) && (stat.st_mode and PERMISSION_MASK) == OWNER_READ_ONLY
+    } catch (_: Exception) {
+        false
+    }
+
+    override fun atomicReplace(source: File, destination: File) {
+        Os.rename(source.absolutePath, destination.absolutePath)
+    }
+
+    override fun syncDirectory(directory: File) {
+        val descriptor = Os.open(directory.absolutePath, OsConstants.O_RDONLY, 0)
+        try {
+            Os.fsync(descriptor)
+        } finally {
+            Os.close(descriptor)
+        }
+    }
+
+    private const val PERMISSION_MASK = 0x1ff
+    private const val OWNER_READ_ONLY = 0x100
+}
+
+private fun sha256File(file: File): String = FileInputStream(file).use { input ->
+    val digest = MessageDigest.getInstance("SHA-256")
+    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+    while (true) {
+        val count = input.read(buffer)
+        if (count < 0) break
+        if (count > 0) digest.update(buffer, 0, count)
+    }
+    digest.digest().toHex()
+}
+
+private fun ByteArray.toHex(): String = joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }

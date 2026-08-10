@@ -2,6 +2,8 @@ package org.autojs.autojs.core.plugin.dex
 
 import org.autojs.plugin.dexcompiler.api.DexCompileCancellation
 import org.autojs.plugin.dexcompiler.api.DexCompileError
+import org.autojs.plugin.dexcompiler.api.DexCompilerErrorCode
+import org.autojs.plugin.dexcompiler.api.DexCompilerFailurePhase
 import org.autojs.plugin.dexcompiler.api.DexCompileProgress
 import org.autojs.plugin.dexcompiler.api.DexCompileRequest
 import org.autojs.plugin.dexcompiler.api.DexCompileResult
@@ -29,7 +31,36 @@ internal data class DexCompilerExperimentalInvocation(
     val releaseBuild: Boolean,
     val invocationKind: DexCompilerInvocationKind = DexCompilerInvocationKind.ASYNCHRONOUS,
     val preferredComponent: DexCompilerComponent? = null,
-)
+    val requestFinalization: DexCompilerRequestFinalization = DexCompilerRequestFinalization.NONE,
+    val requiredIdentity: DexCompilerPinnedIdentity? = null,
+    val dispatchObserver: DexCompilerDispatchObserver = DexCompilerDispatchObserver.NONE,
+) {
+    init {
+        require(requiredIdentity == null || preferredComponent == requiredIdentity.component) {
+            "The required DEX compiler identity must match the preferred component"
+        }
+    }
+}
+
+internal fun interface DexCompilerDispatchObserver {
+    fun onDispatchCommitted()
+
+    companion object {
+        val NONE = DexCompilerDispatchObserver {}
+    }
+}
+
+/**
+ * Controls whether the two provider-owned request fields are finalized after authentication.
+ *
+ * The fixed capability-bound path cannot alter caller-owned resource limits, input identity,
+ * timeout, or compilation semantics. Keeping this as a closed enum also prevents an arbitrary
+ * request callback from blocking the serial control lane between handshake and dispatch.
+ */
+internal enum class DexCompilerRequestFinalization {
+    NONE,
+    CAPABILITY_BOUND,
+}
 
 internal enum class DexCompilerExperimentalFailure {
     EXPERIMENT_DISABLED,
@@ -44,6 +75,7 @@ internal enum class DexCompilerExperimentalFailure {
     TRANSPORT_VIOLATION,
     CALLBACK_VIOLATION,
     REMOTE_FAILED,
+    REMOTE_CANCELLED,
     TIMEOUT,
     OUTPUT_REJECTED,
     WORKER_REJECTED,
@@ -56,20 +88,40 @@ internal sealed class DexCompilerExperimentalOutcome {
         val result: DexCompileResult,
         val validation: DexIndexedZipValidationResult,
         val identity: DexCompilerPinnedIdentity,
-        val cacheKeySha256: String,
-    ) : DexCompilerExperimentalOutcome()
+        val artifact: DexCompilerVerifiedArtifact,
+    ) : DexCompilerExperimentalOutcome() {
+        val cacheKeySha256: String
+            get() = artifact.cacheKeySha256
+    }
+
+    data class CacheHit(
+        val validation: DexIndexedZipValidationResult,
+        val identity: DexCompilerPinnedIdentity,
+        val artifact: DexCompilerVerifiedArtifact,
+    ) : DexCompilerExperimentalOutcome() {
+        val cacheKeySha256: String
+            get() = artifact.cacheKeySha256
+    }
+
+    data class RemoteFailure(
+        val code: DexCompilerErrorCode,
+        val phase: DexCompilerFailurePhase,
+        val retryable: Boolean,
+    )
 
     data class UseLocalCompiler(
         val failure: DexCompilerExperimentalFailure,
         val pluginWasDispatched: Boolean,
         val pluginOutputRollbackRequired: Boolean,
+        val remoteFailure: RemoteFailure? = null,
     ) : DexCompilerExperimentalOutcome()
 
     object Cancelled : DexCompilerExperimentalOutcome()
 }
 
 /**
- * Explicit Phase 1 acceptance harness. Nothing in the runtime calls this class by default.
+ * Default-off experimental harness. The runtime reaches it only after an exact provider has been
+ * explicitly selected and revalidated against the production opt-in policy.
  *
  * Control, callbacks, validation, and cleanup are serialized on [workerExecutor]. Potentially
  * blocking Binder handshakes and dispatch run on [blockingExecutor]. Production must provide a
@@ -91,6 +143,7 @@ internal class DexCompilerExperimentalHarness(
     private val outputVerifier: DexCompilerOutputVerifier = DexCompilerOutputVerifier { bytes, limits ->
         DexIndexedZipValidator.validate(bytes, limits)
     },
+    private val verifiedCache: DexCompilerVerifiedCache = DexCompilerVerifiedCache { null },
 ) {
 
     init {
@@ -165,6 +218,7 @@ internal class DexCompilerExperimentalHarness(
         private var pinnedIdentity: DexCompilerPinnedIdentity? = null
         private var compilerInfo: DexCompilerInfo? = null
         private var capabilities: DexCompilerCapabilities? = null
+        private var effectiveRequest: DexCompileRequest = invocation.request
         private var completedResult: DexCompileResult? = null
         private var lastWireSequence: Long? = null
         private var bindClaimed = false
@@ -183,11 +237,29 @@ internal class DexCompilerExperimentalHarness(
                     },
                 )
                 val candidates = transport.discoverExactAction(DexCompilerContract.SERVICE_ACTION)
-                val identity = DexCompilerExperimentalPolicy.selectAndPin(
-                    candidates = candidates,
-                    releaseBuild = invocation.releaseBuild,
-                    preferredComponent = invocation.preferredComponent,
-                ) ?: return useLocal(DexCompilerExperimentalFailure.PLUGIN_UNAVAILABLE)
+                val requiredIdentity = invocation.requiredIdentity
+                val identity = if (requiredIdentity == null) {
+                    DexCompilerExperimentalPolicy.selectAndPin(
+                        candidates = candidates,
+                        releaseBuild = invocation.releaseBuild,
+                        preferredComponent = invocation.preferredComponent,
+                    ) ?: return useLocal(DexCompilerExperimentalFailure.PLUGIN_UNAVAILABLE)
+                } else {
+                    val decision = DexCompilerOptInPolicy.decide(
+                        options = DexCompilerOptInOptions(
+                            enabled = true,
+                            selectedComponent = requiredIdentity.component,
+                        ),
+                        releaseBuild = invocation.releaseBuild,
+                        discoverCandidates = { candidates },
+                    )
+                    val selected = (decision as? DexCompilerOptInDecision.Selected)?.identity
+                        ?: return useLocal(DexCompilerExperimentalFailure.IDENTITY_DRIFT)
+                    if (selected != requiredIdentity) {
+                        return useLocal(DexCompilerExperimentalFailure.IDENTITY_DRIFT)
+                    }
+                    selected
+                }
                 pinnedIdentity = identity
                 if (bindClaimed) return callbackViolation()
                 bindClaimed = true
@@ -221,7 +293,22 @@ internal class DexCompilerExperimentalHarness(
             val identity = pinnedIdentity ?: return callbackViolation()
             try {
                 val current = transport.inspectExact(identity.component)
-                if (!DexCompilerExperimentalPolicy.revalidate(identity, current, invocation.releaseBuild)) {
+                val requiredIdentity = invocation.requiredIdentity
+                val identityIsValid = if (requiredIdentity == null) {
+                    DexCompilerExperimentalPolicy.revalidate(identity, current, invocation.releaseBuild)
+                } else {
+                    val decision = DexCompilerOptInPolicy.decide(
+                        options = DexCompilerOptInOptions(
+                            enabled = true,
+                            selectedComponent = requiredIdentity.component,
+                        ),
+                        releaseBuild = invocation.releaseBuild,
+                        discoverCandidates = { listOfNotNull(current) },
+                    )
+                    identity == requiredIdentity &&
+                        (decision as? DexCompilerOptInDecision.Selected)?.identity == requiredIdentity
+                }
+                if (!identityIsValid) {
                     return useLocal(DexCompilerExperimentalFailure.IDENTITY_DRIFT, cancelRemote = true)
                 }
             } catch (_: Throwable) {
@@ -278,20 +365,79 @@ internal class DexCompilerExperimentalHarness(
             handshake: Handshake,
         ) {
             try {
-                validateHandshake(identity, handshake.info, handshake.capabilities)
+                effectiveRequest = validateHandshake(identity, handshake.info, handshake.capabilities)
                 compilerInfo = handshake.info
                 capabilities = handshake.capabilities
-                beginDispatch(connection)
+                // A timeout, cancellation, or transport abort may have entered while the Binder
+                // handshake occupied the blocking executor. Its urgent lane action owns the
+                // terminal decision; never dispatch a new remote session in front of it.
+                if (!hasPendingAbortIngress() && !tryFinishFromCache() && !hasPendingAbortIngress()) {
+                    beginDispatch(connection)
+                }
             } catch (_: Throwable) {
                 useLocal(DexCompilerExperimentalFailure.HANDSHAKE_REJECTED, cancelRemote = true)
             }
+        }
+
+        /**
+         * A cache lookup is deliberately after the authenticated handshake because compiler
+         * version, runtime-library fingerprint, and provider provenance are semantic-key fields.
+         * A hit is consumed before either program or output descriptor is claimed.
+         */
+        private fun tryFinishFromCache(): Boolean {
+            val cacheKeySha256 = semanticCacheKey()
+            val artifact = try {
+                verifiedCache.lookup(cacheKeySha256)
+            } catch (_: Exception) {
+                null
+            } ?: return false
+
+            val validation = try {
+                require(artifact.cacheKeySha256 == cacheKeySha256) { "Cached semantic key changed" }
+                val maximum = maximumOutputBytes()
+                require(artifact.sizeBytes in 1L..maximum) { "Cached output size is outside negotiated limits" }
+                require(artifact.sizeBytes <= Int.MAX_VALUE.toLong()) { "Cached output cannot be materialized safely" }
+                val expectedSha256 = artifact.outputSha256
+                require(expectedSha256.matches(LOWERCASE_SHA256)) { "Cached output SHA-256 is malformed" }
+                val bytes = artifact.openRead()?.use { input ->
+                    val result = ByteArray(artifact.sizeBytes.toInt())
+                    var offset = 0
+                    while (offset < result.size) {
+                        val count = input.read(result, offset, result.size - offset)
+                        if (count < 0) error("Cached output ended before its declared size")
+                        if (count == 0) continue
+                        offset += count
+                    }
+                    require(input.read() < 0) { "Cached output exceeds its declared size" }
+                    result
+                } ?: error("Cached output generation is unavailable")
+                require(sha256(bytes) == expectedSha256) { "Cached output SHA-256 changed" }
+                outputVerifier.verify(bytes, outputLimits())
+            } catch (_: Exception) {
+                runCatching { artifact.invalidate() }
+                return false
+            }
+
+            // An abort registered during validation owns the terminal result. The cache remains
+            // valid and the queued urgent action will close this attempt without remote dispatch.
+            if (!tryClaimPublicationTerminal()) return true
+            check(fallback.finish()) { "Compilation attempt was already terminal" }
+            finish(
+                DexCompilerExperimentalOutcome.CacheHit(
+                    validation = validation,
+                    identity = pinnedIdentity ?: error("Pinned identity is missing"),
+                    artifact = artifact,
+                ),
+                rollback = true,
+            )
+            return true
         }
 
         private fun validateHandshake(
             identity: DexCompilerPinnedIdentity,
             info: DexCompilerInfo,
             capabilities: DexCompilerCapabilities,
-        ) {
+        ): DexCompileRequest {
             val negotiated = DexCompilerNegotiation.requireNegotiated(info)
             require(info.providerVersionCode == identity.versionCode) { "Provider version identity drift" }
             val minHostVersionCode = info.minHostVersionCode
@@ -302,10 +448,23 @@ internal class DexCompilerExperimentalHarness(
             require(maxHostVersionCode == null || hostVersionCode <= maxHostVersionCode) {
                 "Host version exceeds provider maximum"
             }
-            DexCompilerValidation.validateRequestAgainst(invocation.request, capabilities, negotiated)
+            val request = when (invocation.requestFinalization) {
+                DexCompilerRequestFinalization.NONE -> invocation.request
+                DexCompilerRequestFinalization.CAPABILITY_BOUND -> invocation.request.copy(
+                    protocolVersion = negotiated,
+                    expectedRuntimeLibraryFingerprint = capabilities.runtimeLibraryFingerprint,
+                )
+            }
+            DexCompilerValidation.validateRequestAgainst(request, capabilities, negotiated)
+            return request
         }
 
         private fun beginDispatch(connection: DexCompilerRemoteConnection) {
+            // Linearize the dispatch boundary against cancellation/timeout/death ingress before
+            // starting the drain or claiming either descriptor. An abort that wins this lock owns
+            // the terminal result; an abort after this commit cancels the already-dispatched work.
+            if (!tryCommitPluginDispatch()) return
+            notifyDispatchCommitted()
             if (!blockingJobInFlight.compareAndSet(false, true)) return callbackViolation()
             try {
                 invocation.outputTransaction.beginDrain(maximumOutputBytes()) { terminal ->
@@ -318,8 +477,7 @@ internal class DexCompilerExperimentalHarness(
                 programDescriptorSlot.install(programDescriptor)
                 val outputDescriptor = invocation.outputTransaction.claimWriteDescriptor()
                 outputDescriptorSlot.install(outputDescriptor)
-                if (!fallback.tryBeginPluginDispatch()) return callbackViolation()
-                val encodedRequest = DexCompilerCodec.encodeRequest(invocation.request)
+                val encodedRequest = DexCompilerCodec.encodeRequest(effectiveRequest)
                 try {
                     blockingExecutor.execute {
                         val result = runCatching {
@@ -351,6 +509,14 @@ internal class DexCompilerExperimentalHarness(
             } catch (_: Throwable) {
                 blockingJobInFlight.set(false)
                 useLocal(DexCompilerExperimentalFailure.DISPATCH_FAILED, cancelRemote = true)
+            }
+        }
+
+        private fun notifyDispatchCommitted() {
+            try {
+                invocation.dispatchObserver.onDispatchCommitted()
+            } catch (_: Throwable) {
+                // Instrumentation must not affect dispatch ownership or the terminal state machine.
             }
         }
 
@@ -434,7 +600,7 @@ internal class DexCompilerExperimentalHarness(
             if (finished.get()) return
             val progress = decodeOrReject(DexCompilerCodec::decodeProgress, encoded) ?: return
             val previous = lastWireSequence
-            if (progress.requestId != invocation.request.requestId || previous == null || progress.sequence <= previous ||
+            if (progress.requestId != effectiveRequest.requestId || previous == null || progress.sequence <= previous ||
                 !lifecycle.acceptProgress(progress.sequence)
             ) {
                 return callbackViolation()
@@ -483,72 +649,77 @@ internal class DexCompilerExperimentalHarness(
             if (finished.get()) return
             val error = decodeOrReject(DexCompilerCodec::decodeError, encoded) ?: return
             if (!matchesError(error) || !lifecycle.acceptFailed()) return callbackViolation()
-            useLocal(DexCompilerExperimentalFailure.REMOTE_FAILED)
+            useLocal(
+                failure = DexCompilerExperimentalFailure.REMOTE_FAILED,
+                remoteFailure = DexCompilerExperimentalOutcome.RemoteFailure(
+                    code = error.code,
+                    phase = error.phase,
+                    retryable = error.retryable,
+                ),
+            )
         }
 
         private fun acceptCancelled(encoded: ByteArray) {
             if (finished.get()) return
             val cancellation = decodeOrReject(DexCompilerCodec::decodeCancellation, encoded) ?: return
             if (!matchesCancellation(cancellation) || !lifecycle.acceptCancelled()) return callbackViolation()
-            if (!terminalClaimed.compareAndSet(false, true)) return
-            check(fallback.cancel()) { "Cancellation terminal state was already claimed" }
-            finish(DexCompilerExperimentalOutcome.Cancelled, rollback = true)
+            when {
+                hostCancellationIngressClaimed.get() -> {
+                    if (!terminalClaimed.compareAndSet(false, true)) return
+                    check(fallback.cancel()) { "Cancellation terminal state was already claimed" }
+                    finish(DexCompilerExperimentalOutcome.Cancelled, rollback = true)
+                }
+                timeoutIngressClaimed.get() -> useLocal(DexCompilerExperimentalFailure.TIMEOUT)
+                else -> useLocal(DexCompilerExperimentalFailure.REMOTE_CANCELLED)
+            }
         }
 
         private fun matchesStarted(started: DexCompileStarted): Boolean {
             val expected = capabilities ?: return false
-            return started.requestId == invocation.request.requestId &&
-                started.protocolVersion == invocation.request.protocolVersion &&
+            return started.requestId == effectiveRequest.requestId &&
+                started.protocolVersion == effectiveRequest.protocolVersion &&
                 started.compilerFamily == expected.compilerFamily &&
                 started.compilerVersion == expected.compilerVersion &&
-                started.runtimeLibraryModel == invocation.request.runtimeLibraryModel &&
-                started.runtimeLibraryFingerprint == invocation.request.expectedRuntimeLibraryFingerprint
+                started.runtimeLibraryModel == effectiveRequest.runtimeLibraryModel &&
+                started.runtimeLibraryFingerprint == effectiveRequest.expectedRuntimeLibraryFingerprint
         }
 
         private fun matchesResult(result: DexCompileResult): Boolean {
             val expected = capabilities ?: return false
-            return result.requestId == invocation.request.requestId &&
+            return result.requestId == effectiveRequest.requestId &&
                 result.compilerFamily == DexCompilerFamily.D8 &&
                 result.compilerFamily == expected.compilerFamily &&
                 result.compilerVersion == expected.compilerVersion &&
-                result.mode == invocation.request.mode && result.minApi == invocation.request.minApi &&
-                result.outputFormat == invocation.request.outputFormat &&
-                result.runtimeLibraryFingerprint == invocation.request.expectedRuntimeLibraryFingerprint &&
-                result.outputSizeBytes <= invocation.request.maxOutputBytes &&
+                result.mode == effectiveRequest.mode && result.minApi == effectiveRequest.minApi &&
+                result.outputFormat == effectiveRequest.outputFormat &&
+                result.runtimeLibraryFingerprint == effectiveRequest.expectedRuntimeLibraryFingerprint &&
+                result.outputSizeBytes <= effectiveRequest.maxOutputBytes &&
                 result.outputSizeBytes <= expected.limits.maxOutputBytes &&
                 result.dexEntryCount <= expected.limits.maxDexEntries &&
                 diagnosticsFitRequest(result.diagnostics)
         }
 
         private fun matchesError(error: DexCompileError): Boolean =
-            error.requestId == invocation.request.requestId && diagnosticsFitRequest(error.diagnostics)
+            error.requestId == effectiveRequest.requestId && diagnosticsFitRequest(error.diagnostics)
 
         private fun matchesCancellation(cancellation: DexCompileCancellation): Boolean =
-            cancellation.requestId == invocation.request.requestId
+            cancellation.requestId == effectiveRequest.requestId
 
         private fun verifyAndPublish(
             result: DexCompileResult,
             drainedSummary: DexCompilerStreamSummary,
         ) {
             var ownsTerminal = false
+            var publishedArtifact: DexCompilerVerifiedArtifact? = null
             try {
-                val expected = capabilities ?: return callbackViolation()
+                if (capabilities == null) return callbackViolation()
                 val maximum = maximumOutputBytes()
                 val bytes = invocation.outputTransaction.readBytes(maximum)
                 require(bytes.size.toLong() == drainedSummary.sizeBytes) { "Drained output size changed" }
                 require(sha256(bytes) == drainedSummary.sha256) { "Drained output SHA-256 changed" }
                 require(bytes.size.toLong() == result.outputSizeBytes) { "Output size metadata mismatch" }
                 require(sha256(bytes) == result.outputSha256.toHexString()) { "Output SHA-256 metadata mismatch" }
-                val validation = outputVerifier.verify(
-                    bytes,
-                    DexIndexedZipLimits(
-                        maxContainerBytes = maximum,
-                        maxDexEntries = minOf(expected.limits.maxDexEntries, DexCompilerContract.MAX_DEX_ENTRIES),
-                        maxDexEntryBytes = maximum,
-                        maxTotalDexBytes = maximum,
-                        allowedDexVersions = dexVersionsCompatibleWithMinApi(invocation.request.minApi),
-                    ),
-                )
+                val validation = outputVerifier.verify(bytes, outputLimits())
                 require(validation.dexEntryCount == result.dexEntryCount) { "DEX entry metadata mismatch" }
                 // Queue rejection can fail closed from outside the lane. Claim terminal ownership
                 // before publication so no fallback can race between the cache commit and outcome.
@@ -558,7 +729,13 @@ internal class DexCompilerExperimentalHarness(
                 }
                 ownsTerminal = true
                 val cacheKeySha256 = semanticCacheKey()
-                invocation.outputTransaction.publishVerified(cacheKeySha256, bytes)
+                val artifact = invocation.outputTransaction.publishVerified(cacheKeySha256, bytes)
+                publishedArtifact = artifact
+                require(artifact.cacheKeySha256 == cacheKeySha256) { "Published cache key changed" }
+                require(artifact.sizeBytes == bytes.size.toLong()) { "Published output size changed" }
+                require(artifact.outputSha256 == result.outputSha256.toHexString()) {
+                    "Published output SHA-256 changed"
+                }
                 check(fallback.finish()) { "Compilation attempt was already terminal" }
                 publicationGate.publicationSucceeded()
                 finish(
@@ -566,11 +743,12 @@ internal class DexCompilerExperimentalHarness(
                         result = result,
                         validation = validation,
                         identity = pinnedIdentity ?: error("Pinned identity is missing"),
-                        cacheKeySha256 = cacheKeySha256,
+                        artifact = artifact,
                     ),
                     rollback = false,
                 )
             } catch (_: Throwable) {
+                publishedArtifact?.let { artifact -> runCatching { artifact.invalidate() } }
                 publicationGate.publicationFailed()
                 if (ownsTerminal) {
                     useLocalClaimed(DexCompilerExperimentalFailure.OUTPUT_REJECTED, cancelRemote = true)
@@ -583,9 +761,21 @@ internal class DexCompilerExperimentalHarness(
         private fun maximumOutputBytes(): Long {
             val expected = capabilities ?: error("Compiler capabilities are missing")
             return minOf(
-                invocation.request.maxOutputBytes,
+                effectiveRequest.maxOutputBytes,
                 expected.limits.maxOutputBytes,
                 maximumInMemoryOutputBytes,
+            )
+        }
+
+        private fun outputLimits(): DexIndexedZipLimits {
+            val expected = capabilities ?: error("Compiler capabilities are missing")
+            val maximum = maximumOutputBytes()
+            return DexIndexedZipLimits(
+                maxContainerBytes = maximum,
+                maxDexEntries = minOf(expected.limits.maxDexEntries, DexCompilerContract.MAX_DEX_ENTRIES),
+                maxDexEntryBytes = maximum,
+                maxTotalDexBytes = maximum,
+                allowedDexVersions = dexVersionsCompatibleWithMinApi(effectiveRequest.minApi),
             )
         }
 
@@ -610,19 +800,19 @@ internal class DexCompilerExperimentalHarness(
             val identity = pinnedIdentity ?: error("Pinned identity is missing")
             val info = compilerInfo ?: error("Compiler info is missing")
             val expected = capabilities ?: error("Compiler capabilities are missing")
-            val mode = when (invocation.request.mode) {
+            val mode = when (effectiveRequest.mode) {
                 org.autojs.plugin.dexcompiler.api.DexCompilerMode.DEBUG -> DexCompilationMode.DEBUG
                 org.autojs.plugin.dexcompiler.api.DexCompilerMode.RELEASE -> DexCompilationMode.RELEASE
             }
             return DexCompilerSemanticCacheKey.sha256(
                 DexCompilerCacheSpec(
-                    inputSha256 = invocation.request.programSha256.toHexString(),
-                    canonicalizationPolicyVersion = invocation.request.canonicalizationPolicyVersion,
-                    protocolMajor = invocation.request.protocolVersion.major,
-                    protocolMinor = invocation.request.protocolVersion.minor,
+                    inputSha256 = effectiveRequest.programSha256.toHexString(),
+                    canonicalizationPolicyVersion = effectiveRequest.canonicalizationPolicyVersion,
+                    protocolMajor = effectiveRequest.protocolVersion.major,
+                    protocolMinor = effectiveRequest.protocolVersion.minor,
                     compilerFamily = expected.compilerFamily.name.lowercase(),
                     compilerVersion = expected.compilerVersion,
-                    minimumApi = invocation.request.minApi,
+                    minimumApi = effectiveRequest.minApi,
                     compilationMode = mode,
                     outputMode = DexOutputMode.DEX_INDEXED_ZIP,
                     runtimeLibraryFingerprint = expected.runtimeLibraryFingerprint.toHexString(),
@@ -678,14 +868,16 @@ internal class DexCompilerExperimentalHarness(
         fun useLocal(
             failure: DexCompilerExperimentalFailure,
             cancelRemote: Boolean = false,
+            remoteFailure: DexCompilerExperimentalOutcome.RemoteFailure? = null,
         ) {
             if (finished.get() || !terminalClaimed.compareAndSet(false, true)) return
-            useLocalClaimed(failure, cancelRemote)
+            useLocalClaimed(failure, cancelRemote, remoteFailure)
         }
 
         private fun useLocalClaimed(
             failure: DexCompilerExperimentalFailure,
             cancelRemote: Boolean,
+            remoteFailure: DexCompilerExperimentalOutcome.RemoteFailure? = null,
         ) {
             if (cancelRemote) sessionSlot.requestCancel()
             val directive = checkNotNull(fallback.tryClaimLocalFallback()) {
@@ -696,6 +888,7 @@ internal class DexCompilerExperimentalHarness(
                     failure = failure,
                     pluginWasDispatched = fallback.snapshot().pluginDispatched,
                     pluginOutputRollbackRequired = directive.requiresPluginOutputRollback,
+                    remoteFailure = remoteFailure,
                 ),
                 rollback = true,
             )
@@ -751,6 +944,10 @@ internal class DexCompilerExperimentalHarness(
             if (hasPendingAbortIngress()) false else terminalClaimed.compareAndSet(false, true)
         }
 
+        private fun tryCommitPluginDispatch(): Boolean = synchronized(terminalCommitLock) {
+            if (hasPendingAbortIngress() || terminalClaimed.get()) false else fallback.tryBeginPluginDispatch()
+        }
+
         private fun hasPendingAbortIngress(): Boolean =
             hostCancellationIngressClaimed.get() ||
                 timeoutIngressClaimed.get() ||
@@ -764,7 +961,7 @@ internal class DexCompilerExperimentalHarness(
             diagnostics.forEach { diagnostic ->
                 retainedBytes += diagnostic.code.toByteArray(StandardCharsets.UTF_8).size
                 retainedBytes += diagnostic.message.toByteArray(StandardCharsets.UTF_8).size
-                if (retainedBytes > invocation.request.diagnosticByteLimit) return false
+                if (retainedBytes > effectiveRequest.diagnosticByteLimit) return false
             }
             return true
         }
@@ -789,6 +986,8 @@ private fun isMetadataSizeAllowed(bytes: ByteArray): Boolean =
 private fun requireMetadataSize(bytes: ByteArray) {
     require(isMetadataSizeAllowed(bytes)) { "Binder metadata exceeds the protocol wire limit" }
 }
+
+private val LOWERCASE_SHA256 = Regex("[0-9a-f]{64}")
 
 private class CloseOnceSlot<T : Closeable> : Closeable {
     private var value: T? = null
