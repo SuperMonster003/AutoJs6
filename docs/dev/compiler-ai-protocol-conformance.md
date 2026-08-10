@@ -31,8 +31,8 @@ behavior only for reproducible host conformance testing.
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
 | AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
-| AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, and no retry after dispatch | Commits `4f22dc854` and `038728f03`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 positive path |
-| AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models, bounded executors, FD cleanup, and caller authentication | Conformance text provider unit corpus, 31 tests | PASS, JVM |
+| AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, and H1 instrumentation `06ebc788c`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal and seven H1 method runs |
+| AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models, bounded executors, FD cleanup, and caller authentication | H1 fixture commit `edd10008f`; conformance text provider unit corpus: 31 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 
 ### Pure Kotlin AI Session Transcript Evidence
@@ -91,6 +91,11 @@ and 0 errors. The host App Debug, App Debug instrumentation, and fake-provider
 Debug APKs also assembled. This build/JVM evidence remains separate from the
 API 31 device evidence below.
 
+H1 commits `edd10008f` and `06ebc788c` add the hostile provider modes and their
+opt-in Android instrumentation. The H1 build evidence independently retained
+the coordinator 18/0 result, recorded fake-provider unit 31/0, and assembled all
+three APKs. The method-level API 31 evidence and its limits are recorded below.
+
 ## Android Runtime Gates
 
 These gates intentionally remain open. They must not be inferred from a JVM or
@@ -98,17 +103,17 @@ APK assembly pass.
 
 | Gate | Required matrix | Current status |
 | --- | --- | --- |
-| Generated AIDL transact behavior and descriptor ownership | API 24, 25, 26, 28, 34, 36 | PARTIAL: API 25 DEX descriptor handoff/rollback plus API 31 AI cross-process request PFD and process-local reliable callback-PFD ownership; no AI cross-process completion/tool PFD |
+| Generated AIDL transact behavior and descriptor ownership | API 24, 25, 26, 28, 34, 36 | PARTIAL: API 25 DEX descriptor handoff/rollback plus API 31 AI cross-process request PFD, ordinary-pipe completion-PFD materialization, and tool-PFD handoff/rejection cleanup; reliable callback-PFD status is process-local only |
 | Caller UID, signature permission, same-signer policy, and exact component revalidation | Debug conformance install on isolated devices | PARTIAL: positive paths on API 25 and API 31; no wrong-callback-UID Android case |
-| Cancellation, timeout, callback death, provider death, host death, update, disable, and uninstall cleanup | API 24, 28, 34, 36 | PENDING; API 25 stall timeout and rollback are supplemental evidence only |
+| Cancellation, timeout, callback death, provider death, host death, update, disable, and uninstall cleanup | API 24, 28, 34, 36 | PARTIAL: API 31 cancel-after-`Started` released the session owner; provider/host death, timeout, update, disable, and uninstall-during-session remain pending; API 25 stall timeout and rollback are supplemental only |
 | DEX normal and hostile services against the real host adapter | API 24, 25, 26, 28, 34, 36 | PARTIAL, API 25 only: normal, progress-before-start, duplicate-terminal, malformed output, unnegotiated DEX version, and stall-timeout services |
 | Validated DEX execution through the real `DexClassLoader` | Java and Kotlin corpus on API 24 through 36 | PARTIAL, API 25 fixed DEX 037 fixture only: class load and `answer() == 42` execution |
 | D8 parity for default/static interface methods, missing libraries, and device boot libraries | Current local compiler versus production plugin | PENDING |
 | AAR normalization and resource behavior | Current local path versus production plugin | PENDING |
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
-| AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a metadata, paged model list, and one normal `fake.stream` session only |
-| AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PARTIAL, one API 31 normal session; hostile session Binder cases remain pending |
-| AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal stream crossed 8 initial credits; tools and death remain pending |
+| AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a metadata, paged model list, one normal `fake.stream` session, and ordinary-pipe completion materialization |
+| AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PARTIAL, API 31 only: seven H1 methods cover completion/tool descriptors, ordering, sequence, descriptor reference, bounded duplicate terminal, and cancel-after-start; wrong UID, no-credit, and death/update lifecycle remain pending |
+| AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal stream crossed 8 initial credits and a tool callback was rejected without execution; real tool turns and death remain pending |
 | Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
 
 ### API 31 AI Partial Evidence
@@ -209,12 +214,65 @@ Before installation, all three packages--`org.autojs.autojs6`,
 Only those temporary packages were installed for the run, and all three were
 confirmed absent again after cleanup.
 
-This result remains **PARTIAL**. The stream's normal completion used an empty
-callback descriptor array, and the exact/error descriptor method was
-process-local. There is no cross-process completion or tool PFD, wrong callback
-UID, hostile provider death, package update/disable/uninstall during a session,
-host death, other Android API/ABI cell, real production plugin/model, remote
-`listingGeneration` proof, UI/runtime selector, or `ai.*` route.
+This baseline result was **PARTIAL**: the stream's normal completion used an
+empty callback descriptor array, and the exact/error descriptor method was
+process-local. H1 closes only the narrow callback-PFD and hostile cases recorded
+next; the other promotion gaps remain open.
+
+#### Hostile Session H1 Run
+
+H1 commits `edd10008f` and `06ebc788c` added hidden fake-provider modes and
+opt-in method-level instrumentation. The focused Gradle run recorded 18
+coordinator tests and 31 fake-provider unit tests, each with 0 skipped, 0
+failures, and 0 errors. It also assembled the host App Debug, App Debug
+instrumentation, and final fake-provider Debug APKs.
+
+All three APKs verified with APK Signature Scheme v2 and the same test
+certificate SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
+Their H1 artifact SHA-256 values were:
+
+- Host: `0ec03495cdd096fa812dd64641c07a484bdd2231df777427f55e8dd9a96e2634`.
+- Instrumentation: `68e9a08522c03e2daa2575a0a087403372adf0e6eefee452fcce66263ecdaa59`.
+- Final fake provider: `8c9c3b3d0eca3e67c41a2c563e975d927e5422018c5a790330c10b164303b521`.
+
+Seven separate exact `Class#method` invocations on `QV710AF65F` (API 31,
+`arm64-v8a`) each returned `OK (1 test)`:
+
+| Method | Asserted H1 boundary |
+| --- | --- |
+| `AiTextProviderSessionAndroidConformanceTest#completionDescriptorIsMaterializedAcrossProcess` | After initial host credit/open commit, materialized one ordinary-pipe completion descriptor across Binder and accepted exact EOF, declared length, SHA-256, UTF-8 text `descriptor completion across Binder`, descriptor count 1, and terminal cleanup |
+| `AiTextProviderSessionAndroidConformanceTest#toolDescriptorIsOwnedThenRejectedWithoutExecution` | After `Started`, owned a descriptor-backed tool batch, rejected it as `TOOLS_UNSUPPORTED` without execution, and cleaned up the callback descriptor |
+| `AiTextProviderSessionAndroidConformanceTest#chunkBeforeStartFailsClosedAfterInitialCreditCommit` | Emitted a chunk before `Started` only after initial host credit and rejected it once as `CALLBACK_MALFORMED` |
+| `AiTextProviderSessionAndroidConformanceTest#sequenceGapFailsClosedOnce` | Rejected a non-contiguous chunk sequence once as `CALLBACK_MALFORMED` |
+| `AiTextProviderSessionAndroidConformanceTest#invalidCompletionDescriptorReferenceFailsClosedOnce` | Rejected a completion referring to an absent descriptor once as `CALLBACK_MALFORMED` |
+| `AiTextProviderSessionAndroidConformanceTest#duplicateTerminalPublishesOnlyOneSettledOutcome` | Published one settled host outcome while observing late callbacks for a bounded 250 ms smoke window |
+| `AiTextProviderSessionAndroidConformanceTest#stalledSessionCanBeCancelledAfterStartAndReleasesOwner` | Accepted host cancel after one `Started`, published `Cancelled`, and released the process owner |
+
+Every exercised H1 fixture waited for initial host credit before its action,
+keeping the callbacks after synchronous open commit rather than in the
+provisional callback-before-return window. Every method asserted one published
+terminal, off-main-thread delivery, stable package identity, rejected cancel
+after settlement, and reusable process ownership. Preflight found
+`org.autojs.autojs6`, `org.autojs.autojs6.test`, and
+`org.autojs.plugin.ai.text.fake` absent; post-cleanup found the same three
+packages absent again.
+
+This H1 result remains **PARTIAL**. The completion fixture deliberately used an
+ordinary pipe. It proves cross-process callback-PFD ownership, exact
+EOF/length/SHA-256/UTF-8 materialization, and cleanup, but it does not prove
+cross-process reliable-pipe producer status. Reliable `closeWithError()` /
+`checkError()` behavior remains covered only by the process-local descriptor
+method. The descriptor-backed tool case proves ownership and fail-closed
+cleanup, not tool execution or reliable-status propagation. The duplicate case
+is only a 250 ms bounded late-callback smoke test, not an exhaustive race proof.
+
+There is no Android wrong-callback-UID or deterministic no-credit result; no
+provider death, update, disable, or uninstall-during-session result; no host
+death or other Android API/ABI cell; and no real production plugin/model/runtime,
+remote `listingGeneration` proof, UI/runtime selector, or `ai.*` route. Package
+absence before and after this run is cleanup evidence, not uninstall-during-
+session evidence.
 
 ### API 25 Partial Evidence
 

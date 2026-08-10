@@ -346,20 +346,56 @@ Android transport, and instrumentation landed in `4f22dc854`, `038728f03`, and
 `AiTextProviderSessionCoordinatorTest` methods with 0 skipped, 0 failures, and
 0 errors and assembled the host, instrumentation, and fake-provider APKs.
 
-On `QV710AF65F` (Android 12/API 31, arm64-v8a), two exact instrumentation method
-runs each returned `OK (1 test)`. The cross-process `fake.stream` run opened the
-exact component with a request PFD, delivered approximately 18 chunks, more
-than the fixed initial credit window of 8, then one usage event and one
-completion off the main thread. The descriptor-owner run accepted an exact
-payload and rejected short, trailing, and reliable-producer-error inputs while
-checking idempotent close. The host, instrumentation, and fake-provider packages
-were absent before installation and absent again after cleanup.
+The earlier API 31 baseline ran two exact methods: a cross-process
+`fake.stream` request-PFD session delivered approximately 18 chunks beyond the
+initial credit window of 8, then usage and one off-main-thread completion; the
+process-local descriptor-owner method accepted exact input and rejected short,
+trailing, and reliable-producer-error inputs while checking idempotent close.
 
-This is **PARTIAL** Android evidence only. The descriptor-owner method is local
-to the instrumentation process, and the normal completion carries no callback
-PFD. There is no cross-process completion/tool PFD case, wrong-callback-UID
-case, hostile provider death or package-update case, real production
-plugin/model session, UI, script-runtime selector, or `ai.*` integration.
+The H1 hostile-provider and instrumentation additions landed in `edd10008f` and
+`06ebc788c`. Their focused Gradle evidence recorded coordinator 18/0 and fake
+provider unit 31/0, then assembled the host, instrumentation, and fake-provider
+APKs. All three APKs verified with Signature Scheme v2 and the same certificate
+SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
+Their artifact SHA-256 values were host
+`0ec03495cdd096fa812dd64641c07a484bdd2231df777427f55e8dd9a96e2634`,
+instrumentation
+`68e9a08522c03e2daa2575a0a087403372adf0e6eefee452fcce66263ecdaa59`,
+and final fake provider
+`8c9c3b3d0eca3e67c41a2c563e975d927e5422018c5a790330c10b164303b521`.
+
+On `QV710AF65F` (Android 12/API 31, arm64-v8a), each of these seven exact
+instrumentation methods returned `OK (1 test)`:
+
+| Method | Narrow evidence |
+| --- | --- |
+| `completionDescriptorIsMaterializedAcrossProcess` | An ordinary-pipe callback PFD was owned and materialized across the process boundary with exact EOF, declared length, SHA-256, UTF-8 output, one descriptor, and terminal cleanup. |
+| `toolDescriptorIsOwnedThenRejectedWithoutExecution` | A descriptor-backed tool callback crossed Binder, was owned, rejected as `TOOLS_UNSUPPORTED` without tool execution, and cleaned up. |
+| `chunkBeforeStartFailsClosedAfterInitialCreditCommit` | A chunk before `Started`, emitted only after initial host credit, failed closed as `CALLBACK_MALFORMED`. |
+| `sequenceGapFailsClosedOnce` | A non-contiguous chunk sequence failed closed as `CALLBACK_MALFORMED`. |
+| `invalidCompletionDescriptorReferenceFailsClosedOnce` | A completion referring to a missing descriptor failed closed as `CALLBACK_MALFORMED`. |
+| `duplicateTerminalPublishesOnlyOneSettledOutcome` | The observed duplicate terminal produced one settled host outcome within a bounded 250 ms late-callback smoke window. |
+| `stalledSessionCanBeCancelledAfterStartAndReleasesOwner` | Host cancel after `Started` was accepted, published `Cancelled`, and released the process owner. |
+
+Every exercised H1 mode waited for initial host credit before acting, so the
+callbacks landed after synchronous open commit rather than in the provisional
+callback-before-return window. Each method also asserted one published
+terminal, off-main-thread delivery, stable package identity, and reusable
+process ownership. The host, instrumentation, and fake-provider packages were
+absent before installation and absent again after cleanup.
+
+This remains **PARTIAL** Android evidence. In particular, the completion case
+used an ordinary pipe: it proves cross-process callback-PFD ownership, exact
+EOF/length/SHA-256/UTF-8 materialization, and cleanup, but not cross-process
+reliable-pipe producer status. `closeWithError()`/`checkError()` remains covered
+only by the process-local descriptor test. The tool case proves ownership and
+fail-closed cleanup, not tool payload execution or reliable-status propagation.
+The duplicate-terminal result is only a 250 ms bounded smoke observation, not
+an exhaustive late-callback proof. There is no wrong-callback-UID or
+deterministic no-credit Android case; no provider death, update, disable, or
+uninstall-during-session case; and no real production plugin/model/runtime,
+UI, other API/ABI, remote `listingGeneration`, or `ai.*` integration evidence.
 
 These seven layers are not an active host route. Discovery, handshake,
 model-list, session coordination, and their Android transports remain
