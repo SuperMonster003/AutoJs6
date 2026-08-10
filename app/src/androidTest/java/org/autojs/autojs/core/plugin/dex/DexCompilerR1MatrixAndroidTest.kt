@@ -248,8 +248,12 @@ class DexCompilerR1MatrixAndroidTest {
 
             var ownedThreadsAlive = -1
             runCatching {
-                ownedThreadsAlive = ownedLiveThreadCount(threadPrefix)
-                assertEquals("An R1 matrix-owned thread remains alive", 0, ownedThreadsAlive)
+                val ownedThreadNames = awaitOwnedLiveThreadNames(threadPrefix)
+                ownedThreadsAlive = ownedThreadNames.size
+                assertTrue(
+                    "An R1 matrix-owned thread remains alive: $ownedThreadNames",
+                    ownedThreadNames.isEmpty(),
+                )
             }.exceptionOrNull()?.let(cleanupFailures::add)
 
             var workspaceRestored = false
@@ -789,9 +793,20 @@ class DexCompilerR1MatrixAndroidTest {
         return count
     }
 
-    private fun ownedLiveThreadCount(prefix: String): Int = Thread.getAllStackTraces().keys.count { thread ->
-        thread.isAlive && thread.name.startsWith(prefix)
+    private fun awaitOwnedLiveThreadNames(prefix: String): List<String> {
+        val deadline = SystemClock.uptimeMillis() + THREAD_SETTLE_WAIT_MILLIS
+        var names = ownedLiveThreadNames(prefix)
+        while (names.isNotEmpty() && SystemClock.uptimeMillis() < deadline) {
+            SystemClock.sleep(THREAD_SETTLE_POLL_MILLIS)
+            names = ownedLiveThreadNames(prefix)
+        }
+        return names
     }
+
+    private fun ownedLiveThreadNames(prefix: String): List<String> = Thread.getAllStackTraces().keys
+        .filter { thread -> thread.isAlive && thread.name.startsWith(prefix) }
+        .map(Thread::getName)
+        .sorted()
 
     private fun boundedExecutor(name: String, queueCapacity: Int): ThreadPoolExecutor = ThreadPoolExecutor(
         1,
@@ -1012,6 +1027,8 @@ class DexCompilerR1MatrixAndroidTest {
         const val OUTCOME_WAIT_ALLOWANCE_MILLIS = 30_000L
         const val TERMINAL_CLEANUP_WAIT_MILLIS = 5_000L
         const val EXECUTOR_SHUTDOWN_WAIT_MILLIS = 3_000L
+        const val THREAD_SETTLE_WAIT_MILLIS = 3_000L
+        const val THREAD_SETTLE_POLL_MILLIS = 25L
         const val FD_SETTLE_WAIT_MILLIS = 3_000L
         const val FD_SETTLE_POLL_MILLIS = 25L
 

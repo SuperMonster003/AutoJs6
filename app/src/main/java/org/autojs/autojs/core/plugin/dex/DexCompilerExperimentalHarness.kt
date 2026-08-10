@@ -107,7 +107,11 @@ internal sealed class DexCompilerExperimentalOutcome {
         val code: DexCompilerErrorCode,
         val phase: DexCompilerFailurePhase,
         val retryable: Boolean,
-    )
+        val message: String? = null,
+    ) {
+        override fun toString(): String =
+            "RemoteFailure(code=$code, phase=$phase, retryable=$retryable, hasMessage=${!message.isNullOrEmpty()})"
+    }
 
     data class UseLocalCompiler(
         val failure: DexCompilerExperimentalFailure,
@@ -655,6 +659,7 @@ internal class DexCompilerExperimentalHarness(
                     code = error.code,
                     phase = error.phase,
                     retryable = error.retryable,
+                    message = error.message,
                 ),
             )
         }
