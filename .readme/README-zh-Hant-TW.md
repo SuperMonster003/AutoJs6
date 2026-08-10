@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 8 月 9 日.
+資料更新於 2026 年 8 月 10 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/08/09
+###### 2026/08/10
 
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
 * `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
@@ -310,7 +310,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` DEX 編譯器實驗性宿主路徑維持預設關閉並要求明確元件, 實施精確元件 UID 與完整簽署者集合鎖定, 單次分派降級, 語意快取來源追蹤, 有界回呼入口, 隔離 Binder 逾時, 結構化 DEX ZIP 驗證, reliable pipe 有界 drain 與 EOF 對端錯誤檢查, 由來源/目標雙摘要保護的可回復單次發布, 非同步終止訊號與發布提交點原子仲裁, 且取消/逾時/Binder death 在提交前勝出時強制回復
 * `最佳化` DEX 編譯器實驗性符合性測試擴展至真實 Android Binder 傳輸與成品儲存, 涵蓋精確簽署元件, 惡意回呼/輸出/逾時情境, 目標 API 感知的 DEX 驗證及 DexClassLoader 執行
 * `最佳化` 預設關閉的純 AI 文字宿主策略支援確定性信任選擇, 精確身分鎖定與重新驗證, 宿主/供應商能力交集, 歧義候選拒絕, 外掛管理憑證隔離, 不含敏感內容的安全診斷, 取消/終止工作階段競爭的確定性所有權, 請求繫結的工具及 descriptor JSON 驗證, streaming 彙總長度/SHA-256/配額驗證, 解碼後 JSON 重複鍵拒絕, 含敏感資料的模型 `toString` 摘要化及能力集合的域分離快取鍵
-* `最佳化` 預設關閉且未接線的 AI 文字宿主基準沒有生產呼叫點, 將唯讀 PackageManager 精確 action 探索/精確元件複查與明確元件 metadata-only Binder 繫結結合. 每條路徑都會複查其實際到達的身分邊界; 成功路徑最多執行三次複查: 繫結前, 連線後, 以及 descriptor 驗證且 provider info/capabilities 完成有界嚴格解碼後. absolute deadline 會使嘗試失敗並忽略延遲結果; 僅當 deadline 到期時 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 Binder 呼叫仍在執行, 才在 process 內熔斷該元件. getter 回傳後的同步嚴格解碼不計入 RPC in-flight, 不會觸發熔斷. worker queue/繫結/最終身分複查階段逾時也不會觸發熔斷. 此熔斷無法強制中止已阻塞的 Binder 呼叫. 獨立的 transport-independent 模型列舉 transcript policy 同樣預設關閉且未接線; 它先依 pinned provider 驗證呼叫端提供的 callback-entry UID, 再有界嚴格解碼模型頁及 provider error, 拒絕分頁/callback 違規並讓終態競爭只有一個勝出, 最終形成不可變 provider-pinned catalog, 且只為精確匹配並能力相容的 model 產生 session plan. 目前沒有 Android `IAiModelListCallback` adapter 或實際 Binder model-list invocation, 仍無 `openSession`, PFD, `IAiTextCallback`, session dispatch, runtime/UI 整合, `ai.*` 路由或 dispatch 前身分複查
+* `最佳化` 預設關閉且未接線的 AI 文字宿主基準沒有生產呼叫點. 唯讀 PackageManager 精確 action 探索/精確元件複查及明確元件 metadata-only Binder 握手, 與新增的精確元件 Android 模型列舉 coordinator/transport 保持分離. metadata 握手僅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在執行時於 process 內熔斷元件; getter 回傳後的嚴格解碼及 worker queue/繫結/最終複查階段逾時不會觸發熔斷. 模型列舉 coordinator 使用同一個 descriptor 已驗證 Binder 重新驗證有界 provider metadata 並呼叫 `listModels()`, 在每次初始或續頁 dispatch 及每次 callback 准入前精確複查套件身分. callback 在唯一一次防禦性複製前驗證 pinned UID, 對應 page/error 類型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整穩定的 pinned identity 隔離, 並受不驅逐的單 provider 及 process 總預算約束. process 級 single-flight gate, 唯一終態所有者及冪等清理涵蓋繫結, death recipient, callback 註冊, deadline 與 operation lease. 與 metadata 握手不同, 若模型列舉 deadline 到期時任何已准入 platform/transport operation 尚未退出, 將 fail-closed 地於 process 內熔斷該精確元件; 熔斷無法強制中止操作, gate/watchdog 會保持占用直至延遲退出. 仍無 session dispatch 或 `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 整合, `ai.*` 路由及任何生產呼叫點
 * `最佳化` Ace WebView 執行階段/JavaScript bridge/內建語言服務/靜態資源完成外掛化, 降低宿主 APK 耦合並支援獨立安裝及更新
 * `最佳化` 專案離線文件完成外掛化, 降低宿主 APK 體積並支援獨立安裝及更新
 * `最佳化` 離線專案文件首次載入的檔案清單解析及完整 SHA-256 驗證移至背景執行緒, 避免阻塞介面
@@ -613,7 +613,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 9 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 8 月 10 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

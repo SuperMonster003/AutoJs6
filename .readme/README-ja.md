@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 8 月 9 日 に更新されました.
+データは 2026 年 8 月 10 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/08/09
+###### 2026/08/10
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -310,7 +310,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` DEX コンパイラの実験的ホスト経路をデフォルト無効かつ明示コンポーネント必須とし, 正確なコンポーネント UID と完全な署名者集合の固定, 単一ディスパッチフォールバック, セマンティックキャッシュ由来情報, 有界コールバック入力, 分離された Binder タイムアウト, 構造的 DEX ZIP 検証, reliable pipe の有界 drain と EOF 時の peer error 確認, コピー前後の digest で保護された rollback 可能な単一公開, 非同期終端信号と公開 commit point の原子的仲裁, キャンセル/タイムアウト/Binder death が commit 前に勝った場合の強制 rollback を適用
 * `改善` DEX コンパイラの実験的適合性テストを実 Android Binder 転送/成果物ストアに拡張し, 正確な署名付きコンポーネント, 敵対的 callback/出力/timeout シナリオ, 対象 API 対応 DEX 検証, DexClassLoader 実行を網羅
 * `改善` デフォルト無効の純粋な AI テキストホストポリシーに, 決定的な信頼選択, 正確な ID 固定と再検証, ホスト/プロバイダ能力交差, 曖昧候補拒否, プラグイン管理資格情報の分離, 機密内容を含まない診断, キャンセル/終端セッション競合の決定的所有権, request-bound のツール/descriptor JSON 検証, streaming の集約 length/SHA-256/quota 検証, デコード後の JSON 重複 key 拒否, 機密データを持つモデルの `toString` 要約化, capability collection 用の domain-separated cache key を適用
-* `改善` デフォルト無効かつ未接続の AI テキストホスト基盤には本番 call site がなく, 読み取り専用 PackageManager の exact-action discovery/exact-component reinspection と明示コンポーネント限定の metadata-only Binder bind を組み合わせる. どの経路でも実際に到達した ID 境界ごとに再検査し, 成功経路では最大 3 回, bind 前/接続後/descriptor 検証済み provider info/capabilities の有界かつ厳格な decode 後に再検査する. absolute deadline は試行を失敗させて遅延結果を無視し, interface descriptor, `getProviderInfo()`, `getCapabilities()` のいずれかの同期 Binder call が実行中のまま期限切れとなった場合のみ process 内で対象コンポーネントを fuse する. getter 返却後の同期 strict decode は RPC in-flight に含まれず fuse しない. worker queue/bind/final reinspection 中の timeout でも fuse しない. この fuse はすでに block した Binder call を強制中断できない. 別個の transport-independent model-list transcript policy もデフォルト無効かつ未接続であり, 呼び出し側が渡す callback-entry UID を固定済み provider と照合してからページ/エラーを有界かつ厳格に decode し, pagination/callback 違反を拒否して競合する terminal event の勝者を 1 つに限定し, provider に固定された immutable catalog を形成する. capability に適合する exact model だけがこの catalog から session plan を生成できる. Android `IAiModelListCallback` adapter や実際の Binder model-list invocation はなく, `openSession`, PFD, `IAiTextCallback`, session dispatch, runtime/UI 統合, `ai.*` routing, dispatch 前の identity reinspection も未実装
+* `改善` デフォルト無効かつ未接続の AI テキストホスト基盤には本番 call site がない. 読み取り専用 PackageManager の exact-action discovery/exact-component reinspection と明示コンポーネント限定の metadata-only Binder handshake は, 新しい exact-component Android model-list coordinator/transport から分離されている. metadata handshake は absolute deadline の到来時に interface descriptor, `getProviderInfo()`, `getCapabilities()` のいずれかの同期 RPC が実行中の場合のみ process 内で対象コンポーネントを fuse し, getter 返却後の strict decode や worker queue/bind/final reinspection 中の timeout では fuse しない. model-list coordinator は同一の descriptor 検証済み Binder で有界な provider metadata を再検証して `listModels()` を呼び出し, initial/continuation dispatch ごと及び callback admission ごとに package identity を exact reinspection する. callback は唯一の defensive copy より前に pinned UID, 型別 page/error envelope 上限, 有界 flood slot を検証する. continuation-token ledger は完全かつ安定した pinned identity ごとに分離され, eviction しない provider 単位と process 全体の budget で制限される. process-wide single-flight gate, 唯一の terminal owner, 冪等 cleanup が binding, death recipient, callback registration, deadline, operation lease を所有する. metadata handshake と異なり, model-list deadline の到来時に admit 済み platform/transport operation が 1 つでも unwind していなければ exact component を fail-closed で process fuse する; fuse は operation を強制中断できず, gate/watchdog は遅延 unwind まで保持される. session dispatch と `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 統合, `ai.*` routing, 全ての本番 call site は未実装のままである
 * `改善` Ace WebView ランタイム/JavaScript bridge/組み込み言語サービス/静的リソースを個別にインストール可能なプラグインとしてモジュール化し, ホスト APK との結合を削減して独立更新に対応
 * `改善` プロジェクトのオフラインドキュメントをプラグイン化し, ホスト APK のサイズを削減するとともに個別のインストールと更新に対応
 * `改善` オフラインプロジェクトドキュメントの初回読み込み時に行うファイル一覧解析と完全な SHA-256 検証をバックグラウンドスレッドへ移動, UI のブロックを回避
@@ -613,7 +613,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 8 月 9 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 8 月 10 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 
