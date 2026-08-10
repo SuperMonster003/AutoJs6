@@ -362,19 +362,52 @@ coordinator, Android transport, and instrumentation commits are `4f22dc854`,
 tests, 0 skipped, 0 failures, and 0 errors and assembled the host,
 instrumentation, and fake-provider APKs.
 
-On `QV710AF65F` (API 31, arm64-v8a), two exact instrumentation method runs each
-returned `OK (1 test)`. One cross-process `fake.stream` session carried the
-prompt through a request PFD and delivered approximately 18 ordered chunks,
-crossing the initial credit window of 8, followed by usage and one completion
-off the main thread. The second, process-local descriptor-owner method covered
-exact, short, trailing, reliable-producer-error, and idempotent-close cases. All
-three temporary packages were absent before installation and absent again after
-cleanup.
+The earlier API 31 baseline ran two exact methods: a cross-process
+`fake.stream` request-PFD session delivered approximately 18 ordered chunks
+beyond the initial eight credits, then usage and one off-main-thread
+completion; the process-local descriptor-owner method covered exact, short,
+trailing, reliable-producer-error, and idempotent-close cases.
 
-This is **PARTIAL** evidence. It does not cover cross-process callback
-completion/tool PFDs, a wrong callback UID, hostile provider death or package
-update during a session, a real production plugin/model, or UI/runtime/`ai.*`
-wiring.
+The H1 hostile-provider and instrumentation commits are `edd10008f` and
+`06ebc788c`. The focused Gradle results were coordinator 18/0 and fake provider
+unit 31/0, followed by successful assembly of the host, instrumentation, and
+fake-provider APKs. All three APKs used Signature Scheme v2 and certificate
+SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
+Their artifact SHA-256 values were host
+`0ec03495cdd096fa812dd64641c07a484bdd2231df777427f55e8dd9a96e2634`,
+instrumentation
+`68e9a08522c03e2daa2575a0a087403372adf0e6eefee452fcce66263ecdaa59`,
+and final fake provider
+`8c9c3b3d0eca3e67c41a2c563e975d927e5422018c5a790330c10b164303b521`.
+
+On `QV710AF65F` (API 31, arm64-v8a), seven exact H1 method invocations each
+returned `OK (1 test)`: `completionDescriptorIsMaterializedAcrossProcess`,
+`toolDescriptorIsOwnedThenRejectedWithoutExecution`,
+`chunkBeforeStartFailsClosedAfterInitialCreditCommit`,
+`sequenceGapFailsClosedOnce`,
+`invalidCompletionDescriptorReferenceFailsClosedOnce`,
+`duplicateTerminalPublishesOnlyOneSettledOutcome`, and
+`stalledSessionCanBeCancelledAfterStartAndReleasesOwner`. Every exercised H1
+mode waited for initial host credit before acting, placing it after open commit.
+The completion method used an ordinary pipe and proved cross-process
+callback-PFD ownership, exact EOF/declared-length/SHA-256/UTF-8 materialization,
+and cleanup.
+The tool callback was owned, rejected as `TOOLS_UNSUPPORTED`, and cleaned up
+without execution; the malformed ordering, sequence, and descriptor-reference
+cases failed closed; host cancellation after `Started` released the owner; and
+each method observed one settled terminal. The duplicate-terminal observation
+used only a bounded 250 ms late-callback smoke window. All three temporary
+packages were absent before installation and absent again after cleanup.
+
+This is **PARTIAL** evidence. The ordinary-pipe completion case does not prove
+cross-process reliable-pipe producer status; `closeWithError()`/`checkError()`
+remains process-local evidence. The tool case does not prove tool execution or
+reliable-status propagation, and the 250 ms duplicate smoke is not an
+exhaustive late-callback guarantee. There is no Android wrong-callback-UID or
+deterministic no-credit case; no provider death, update, disable, or
+uninstall-during-session case; and no other API/ABI, real production
+plugin/model/runtime, UI, remote `listingGeneration`, or `ai.*` wiring evidence.
 
 A pure Java or Kotlin provider reports `supportedAbis = emptyArray()`. A local
 native model plugin declares its actual ABIs and should ship ABI splits plus a
@@ -657,10 +690,14 @@ The first real provider should be an on-device text model with credential mode
 boundaries without introducing remote credential transport at the same time.
 
 The current API 31 Android session result is only a **PARTIAL** cell in this
-matrix: it proves one normal exact-component stream with a request PFD and more
-than eight chunks, plus local exact/error descriptor ownership. It does not
-close the cross-process callback PFD, wrong-UID, hostile death/update, version
-matrix, real-provider/model, or public-integration rows above.
+matrix. In addition to one normal exact-component request-PFD stream beyond the
+initial eight credits, H1 proves ordinary-pipe completion materialization across
+Binder, descriptor-backed tool rejection without execution, three malformed
+callback failures, one bounded duplicate-terminal outcome, and cancel-after-
+start owner release. It does not prove cross-process reliable-pipe status,
+wrong UID, deterministic no-credit behavior, provider death/update/disable/
+uninstall during a session, the version matrix, a real provider/model/runtime,
+UI, or public `ai.*` integration.
 
 ## Estimated Benefit And Cost
 
