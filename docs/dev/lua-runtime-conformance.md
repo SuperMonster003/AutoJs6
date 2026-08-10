@@ -13,7 +13,7 @@ exists.
 | Public AIDL compilation | PASS, GRADLE | R0 Gradle API gate, 14+50 JVM tests, `lua-runtime-api` debug AAR assembly | Cross-package calls, caller UID, Binder death |
 | Host proxy and `.lua` routing | PASS, LOCAL R1 + R2 DEVICE | App compilation plus 66/66 focused JVM tests after Explorer executable admission; pinned selection, explicit transport, effective component-state handling, process-wide bounded Binder lane, and API 31 fixture cleanup policies | Production provider/native Lua execution, Android API/ABI matrix |
 | Hostile Android provider | PASS, DEVICE PARTIAL | R2 debug-only/testOnly fixture 2/2 JVM build plus 19/19 isolated methods on `QV710AF65F` API 31/arm64-v8a | Provider death, wrong UID/capability attacks, update/uninstall during a session, oversized source, OS-level FD evidence |
-| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; PROVIDER OFF | Immutable protocol/Lua intake; Gradle 9.6.1 wrapper; 38/38 JVM tests; three aligned APKs; 7/7 separately selected instrumentation methods in the provider-disabled direct-native harness (6 native execution + 1 provider-off) on API 31/arm64 with exact install/restore evidence | Android INFO/RUNTIME bind, real provider PFD/session execution, watchdog kill/rebind/new PID, crash/wedge or Android process-OOM recovery, release signing, production enablement |
+| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; PROVIDER OFF | Immutable protocol/Lua intake; Gradle 9.6.1 wrapper; 38/38 JVM tests; three aligned APKs; 7/7 separately selected direct-native methods plus 2/2 cross-process fault-recovery methods on API 31/arm64 with exact all-user install/restore evidence | Production INFO/RUNTIME bind, concurrent admission, cancel/peer death, blocking PFD, Android process OOM, API/ABI matrix, signed release, production enablement |
 | Device/API/ABI acceptance | PASS, SINGLE DEVICE | API 31, arm64-v8a, 4 KiB, exact serial/artifact/restore evidence | API 24-36, x86_64, 16 KiB environments |
 | Release evidence | PENDING | R6 | Signed independent plugin APK and production soak |
 
@@ -233,10 +233,21 @@ hook cancellation/deadline, an allocator memory-limit failure, and same-process
 reuse. See
 `docs/dev/lua-runtime-native-device-evidence-2026-08-10.md`.
 
-Actionless cross-process binding, dedicated-process session behavior, PFD
-accounting, watchdog kill/rebind/new-PID recovery, native crash or wedged-call
-containment, Android process OOM, release signing, and production enablement
-remain unestablished.
+At sibling revision `e8ed2bdc4d72d06314354aefb1e1a5f36b8343d5`,
+`VERSION_BUILD=15`, the repository gate passes 23/23 static/hostile Python
+tests, 38/38 JVM tests, a native/fault-enabled debug artifact gate, and an
+unsigned release-variant physical-exclusion gate. Two separately selected
+cross-process methods then passed on `QV710AF65F`: native SIGABRT and a wedged
+native call terminated by the production watchdog. Both sent a read-only PFD,
+callback/broker Binders, and a remote session through the real execution
+manager/session/worker/watchdog implementation in `:lua_runtime`; the fault
+tokens used a debug shim, while recovered `return 7` used the real native
+runner. Both observed Binder death and rebound to a new PID and nonce. See
+`docs/dev/lua-runtime-fault-recovery-device-evidence-2026-08-10.md`.
+
+Production INFO/RUNTIME discovery and bind, Android concurrent admission,
+cancel and callback-peer death, blocking/hostile PFD recovery, Android process
+OOM, release signing, and production enablement remain unestablished.
 
 Recheck the existing artifacts without ADB or rebuilding:
 
@@ -248,7 +259,8 @@ python "$sibling\tools\verify_repository.py" --require-build-ready
     -SdkRoot 'E:\.android\sdk' `
     -BuildToolsVersion '37.0.0' `
     -NdkVersion '28.2.13676358' `
-    -ExpectedTests 38
+    -ExpectedTests 38 `
+    -RequireFaultHarness
 exit $LASTEXITCODE
 ```
 

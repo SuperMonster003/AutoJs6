@@ -110,6 +110,15 @@ $nativeDeviceEvidence = Read-RequiredText $root "docs/dev/lua-runtime-native-dev
 Require-Pattern $nativeDeviceEvidence 'Every method was selected explicitly' "R3 native report records isolated method execution"
 Require-Pattern $nativeDeviceEvidence 'Final state: both packages absent, no target PID, and no active\s+instrumentation' "R3 native report records audited device restoration"
 
+$faultRecoveryEvidence = Read-RequiredText $root "docs/dev/lua-runtime-fault-recovery-device-evidence-2026-08-10.md"
+Require-Pattern $faultRecoveryEvidence 'The two fault methods passed independently' "R3 fault report records both isolated method outcomes"
+Require-Pattern $faultRecoveryEvidence 'returned to the audited package/process state' "R3 fault report records audited all-user restoration"
+Require-Pattern $faultRecoveryEvidence 'per-user package\s+inventory for users `0` and `10`' "R3 fault report names every audited Android user"
+Require-Pattern $faultRecoveryEvidence 'no current or uninstalled record for either package in either Android user' "R3 fault report records all-user package-setting removal"
+Require-Pattern $faultRecoveryEvidence 'LuaRuntimeFaultRecoveryInstrumentationTest#nativeCrashCausesBinderDeathAndRecoversInANewProcess' "R3 fault report pins the crash selector"
+Require-Pattern $faultRecoveryEvidence 'LuaRuntimeFaultRecoveryInstrumentationTest#nativeWedgeIsKilledByWatchdogAndRecoversInANewProcess' "R3 fault report pins the wedge selector"
+Require-Pattern $faultRecoveryEvidence 'e8ed2bdc4d72d06314354aefb1e1a5f36b8343d5' "R3 fault report pins the canonical sibling revision"
+
 $restartRouting = Read-RequiredText $root "app/src/main/java/org/autojs/autojs/util/IntentUtils.kt"
 Require-Pattern $restartRouting 'resolveRestartScriptFile' "Restart recovery uses one source resolver"
 Require-Pattern $restartRouting 'LuaScriptSource\.isLuaFileName\(script\)' "Restart recovery preserves Lua extensions"
@@ -429,6 +438,10 @@ if (Test-Path -LiteralPath $PluginRoot -PathType Container) {
         ".github/workflows/ci.yml",
         "app/build.gradle.kts",
         "app/src/main/AndroidManifest.xml",
+        "app/src/debug/AndroidManifest.xml",
+        "app/src/debug/java/io/github/supermonster003/autojs6/plugin/lua/runtime/debug/LuaRuntimeFaultService.kt",
+        "app/src/debug/java/io/github/supermonster003/autojs6/plugin/lua/runtime/debug/NativeLuaFaults.kt",
+        "app/src/androidTest/java/io/github/supermonster003/autojs6/plugin/lua/runtime/LuaRuntimeFaultRecoveryInstrumentationTest.kt",
         "app/src/main/cpp/vendor/vendor-lock.json",
         "app/src/main/cpp/lua_runtime_jni.cpp",
         "docs/native-execution-core.md",
@@ -446,17 +459,22 @@ if (Test-Path -LiteralPath $PluginRoot -PathType Container) {
         "app/src/test/java/io/github/supermonster003/autojs6/plugin/lua/runtime/execution/LuaCallbackDeliveryGateTest.kt",
         "app/src/test/java/io/github/supermonster003/autojs6/plugin/lua/runtime/execution/LuaExecutionSessionControllerTest.kt",
         "app/src/test/java/io/github/supermonster003/autojs6/plugin/lua/runtime/execution/LuaSourceVerifierTest.kt",
-        "tools/verify_repository.py"
+        "tools/verify_repository.py",
+        "tools/verify_fault_harness_artifacts.ps1"
     )) {
         [void](Require-File $resolvedPlugin $file)
     }
     $pluginProperties = Read-RequiredText $resolvedPlugin "gradle.properties"
     Require-Pattern $pluginProperties '(?m)^autojs\.lua\.native\.enabled=false\s*$' "R3 native build remains default-off"
     Require-Pattern $pluginProperties '(?m)^autojs\.lua\.provider\.enabled=false\s*$' "R3 provider discovery remains default-off"
+    Require-Pattern $pluginProperties '(?m)^autojs\.lua\.faultHarness\.enabled=false\s*$' "R3 fault harness remains default-off"
 
     $pluginBuild = Read-RequiredText $resolvedPlugin "app/build.gradle.kts"
     Require-Pattern $pluginBuild 'luaProviderEnabled\.get\(\)\s*&&\s*!luaNativeEnabled\.get\(\)' "R3 rejects provider enablement without native enablement"
+    Require-Pattern $pluginBuild 'luaFaultHarnessEnabled\.get\(\)\s*&&\s*\(!luaNativeEnabled\.get\(\)\s*\|\|\s*luaProviderEnabled\.get\(\)\)' "R3 admits the fault harness only with native=true and provider=false"
     Require-Pattern $pluginBuild 'resValue\("bool",\s*"lua_runtime_provider_enabled",\s*luaProviderEnabled\.get\(\)\.toString\(\)\)' "R3 manifest enablement is generated from the provider gate"
+    Require-Pattern $pluginBuild 'buildConfigField\("boolean",\s*"LUA_FAULT_HARNESS_ENABLED",\s*"false"\)' "R3 release BuildConfig hard-disables the fault harness"
+    Require-Pattern $pluginBuild 'arguments\s*\+=\s*"-DAUTOJS_LUA_DEBUG_FAULT_HARNESS=OFF"' "R3 release native build hard-excludes fault JNI"
     Require-Pattern $pluginBuild 'testInstrumentationRunner\s*=\s*"androidx\.test\.runner\.AndroidJUnitRunner"' "R3 declares the native Android test runner"
 
     $pluginManifestPath = Join-Path $resolvedPlugin "app/src/main/AndroidManifest.xml"
@@ -482,6 +500,24 @@ if (Test-Path -LiteralPath $PluginRoot -PathType Container) {
         }
         if ($pluginServices.Count -eq 2) {
             Add-Pass "R3 services share the gated process and permission boundary"
+        }
+    }
+
+    $faultManifestPath = Join-Path $resolvedPlugin "app/src/debug/AndroidManifest.xml"
+    $faultManifest = Require-Xml $faultManifestPath "R3 debug fault manifest"
+    if ($null -ne $faultManifest) {
+        $faultServices = @($faultManifest.manifest.application.service)
+        if (
+            $faultServices.Count -eq 1 -and
+            (Android-Attribute $faultServices[0] "name") -eq ".debug.LuaRuntimeFaultService" -and
+            (Android-Attribute $faultServices[0] "enabled") -eq "@bool/lua_runtime_fault_harness_enabled" -and
+            (Android-Attribute $faultServices[0] "exported") -eq "false" -and
+            (Android-Attribute $faultServices[0] "process") -eq ":lua_runtime" -and
+            @($faultServices[0].SelectNodes("intent-filter")).Count -eq 0
+        ) {
+            Add-Pass "R3 debug fault service is resource-gated, non-exported, actionless, and process-isolated"
+        } else {
+            Add-Failure "R3 debug fault service isolation boundary drifted"
         }
     }
 
@@ -535,6 +571,30 @@ if (Test-Path -LiteralPath $PluginRoot -PathType Container) {
     Require-Pattern $nativeAndroidTest '(?s)\A(?!.*bindService\().*assertTrue\(BuildConfig\.LUA_NATIVE_ENABLED\).*assertFalse\(BuildConfig\.LUA_PROVIDER_ENABLED\)' "R3 native Android gate keeps the provider disabled and never binds it"
     Require-Pattern $nativeAndroidTest 'fun\s+infiniteLoopIsCancelledByHook\(\)' "R3 native Android gate exercises hook cancellation"
     Require-Pattern $nativeAndroidTest 'fun\s+allocatorLimitFailsClosedAndTheProcessRemainsReusable\(\)' "R3 native Android gate exercises allocator failure and same-process reuse"
+
+    $faultService = Read-RequiredText $resolvedPlugin "app/src/debug/java/io/github/supermonster003/autojs6/plugin/lua/runtime/debug/LuaRuntimeFaultService.kt"
+    Require-Pattern $faultService 'BuildConfig\.DEBUG\s*&&\s*BuildConfig\.LUA_FAULT_HARNESS_ENABLED' "R3 fault service rechecks its debug opt-in"
+    Require-Pattern $faultService 'BuildConfig\.LUA_NATIVE_ENABLED\s*&&\s*!BuildConfig\.LUA_PROVIDER_ENABLED' "R3 fault service keeps production discovery disabled"
+    Require-Pattern $faultService 'LuaRuntimeExecutionManager\(' "R3 fault service uses the production execution manager"
+    Require-Pattern $faultService 'writeStrongBinder\(runtimeProvider\)' "R3 fault control exposes only a remote provider Binder"
+    Require-Pattern $faultService 'executionManager\.create\(' "R3 fault provider uses the production session creation path"
+    Require-Pattern $faultService 'NativeLuaExecutionRunner\.execute\(request\)' "R3 fault runner recovers through the real native adapter"
+
+    $faultAndroidTest = Read-RequiredText $resolvedPlugin "app/src/androidTest/java/io/github/supermonster003/autojs6/plugin/lua/runtime/LuaRuntimeFaultRecoveryInstrumentationTest.kt"
+    Require-Pattern $faultAndroidTest 'ParcelFileDescriptor\.open\(snapshot,\s*ParcelFileDescriptor\.MODE_READ_ONLY\)' "R3 fault client sends a read-only source PFD"
+    Require-Pattern $faultAndroidTest 'provider\.createExecution\(' "R3 fault client creates a session through remote AIDL"
+    Require-Pattern $faultAndroidTest 'session\.start\(\)' "R3 fault client explicitly starts the remote session"
+    Require-Pattern $faultAndroidTest 'assertStartedWithoutTerminal\(\)' "R3 fault client requires started without a false terminal"
+    Require-Pattern $faultAndroidTest 'assertNotEquals\("The Lua runtime PID was reused without recovery"' "R3 fault client requires a new process PID"
+    Require-Pattern $faultAndroidTest 'assertEquals\(7L,\s*executeReturnSeven' "R3 fault client proves post-recovery execution"
+
+    $faultArtifactGate = Read-RequiredText $resolvedPlugin "tools/verify_fault_harness_artifacts.ps1"
+    Require-Pattern $faultArtifactGate 'InvocationStartedAtUtc' "R3 fault artifact gate binds outputs to one invocation"
+    Require-Pattern $faultArtifactGate 'merged_manifest/release' "R3 fault artifact gate checks the release main manifest"
+    Require-Pattern $faultArtifactGate 'CmakeDirectory\s*=\s*''RelWithDebInfo''' "R3 fault artifact gate maps the release CMake output exactly"
+    Require-Pattern $faultArtifactGate 'LuaRuntimeService\.class' "R3 release exclusion has a fresh known-class positive control"
+    Require-Pattern $faultArtifactGate 'NativeLuaFaults_nativeCrash' "R3 artifact gate checks crash JNI admission and exclusion"
+    Require-Pattern $faultArtifactGate 'RELEASE_VARIANT_FAULT_HARNESS_EXCLUSION_PASS' "R3 fault gate labels unsigned release-variant evidence"
 
     $vendorLock = Read-RequiredText $resolvedPlugin "app/src/main/cpp/vendor/vendor-lock.json"
     Require-Pattern $vendorLock 'https://www\.lua\.org/ftp/lua-5\.4\.8\.tar\.gz' "R3 pins the official Lua 5.4.8 source"
