@@ -32,8 +32,47 @@ behavior only for reproducible host conformance testing.
 | AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
 | AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
+| AI explicit ask route | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process/per-script lifecycle ownership, and stable terminal codes | Standalone K2/JUnit 15/15; focused Gradle 19/19 (8 parser + 3 mapper + 4 runtime + 4 service), 0 skipped/failures/errors; Android main source compiled | PASS, JVM/source only; no production device result |
 | AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models including isolated callback UID and provider process death, bounded executors, FD cleanup, and caller authentication | H1 fixture commit `edd10008f` and H2 fixture commit `10dad3e39`; conformance text provider unit corpus: 31 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM; Android hostile results remain PARTIAL below |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
+
+### Explicit `ai.ask` Plugin Route Source Evidence
+
+The production `AiService` now chooses the plugin path only when the request
+options contain the `plugin` key. A missing key leaves legacy cloud ask/chat/
+stream behavior unchanged. A present key, including a null or malformed value,
+never consults the vault or HTTP path and never falls back. Admission requires
+one exact component package/class, provider ID, model ID, and an optional
+integer timeout from 1,000 through 600,000 milliseconds; the default is
+120,000. Cloud control aliases, explicit streaming, and unknown fields fail
+closed.
+
+The request mapping admits exactly one plain-text user message. It creates one
+non-streaming inline request with zero request descriptors and no reasoning,
+structured output, usage, tools, or tool rounds. The composed Android runner
+reuses the exact-component discovery, handshake, model-list, and session
+coordinators, requires an `ON_DEVICE`/`NONE` provider and the exact planned
+model, and applies one outer absolute deadline from discovery through the active
+session terminal. Lower handles and coordinators retain settled cleanup
+ownership. A process-shared backend owns one ask admission gate, serialized
+orchestration/control/terminal/deadline lanes, a
+bounded three-operation blocking pool, and the existing coordinator process
+owners. Each script runtime owns cancellation and handle close; terminal and
+late-callback races have one visible winner and no post-dispatch retry.
+
+The standalone K2/JUnit gate passed 15/15 tests: 8 option-parser, 3 mapper, and
+4 runtime lifecycle cases. A later focused Gradle run passed the final 19/19
+corpus--those 15 plus 4 `AiService` integration cases--with 0 skipped, 0
+failures, and 0 errors, while also compiling Android main source. That compile
+is an Android source-compatibility gate only, not Binder, APK, native, device,
+or production-model evidence.
+
+No real plugin/model, install, ADB/device execution, UI selector,
+plugin-backed `ai.chat` or `ai.stream`, remote catalog-generation proof, or
+package update, disable, or uninstall during an active routed request was
+exercised. Earlier fake-provider Android cells below remain separate evidence;
+they cannot be promoted to this production route by inference. This narrow
+source gate closes no broad Android or production promotion criterion.
 
 ### Pure Kotlin AI Session Transcript Evidence
 
@@ -421,12 +460,14 @@ The DEX adapter remains experimental and disconnected from
 compiler must contain the real D8 implementation; the fixed-output conformance provider can
 never be selected for production compilation.
 
-The AI protocol remains disconnected from the public `ai` module. Default-off
-Android discovery, metadata-handshake, model-list, and
-`openSession`/PFD/`IAiTextCallback` adapters plus the pure Kotlin policies now
-exist but have no production call site. Promotion still requires the remaining
-installed-provider/version/hostile matrix, remote catalog-generation handling,
-explicit user selection, real provider/model evidence, and UI/runtime wiring.
-The pure host policies and Android adapters are default-off foundations, not
-production activation. Image, audio, and video require separate protocol
-reviews and cannot be added to the text plugin to satisfy this matrix.
+The AI protocol now has one narrow public connection: an exact, explicit,
+prompt-only plugin selector on `ai.ask`. Selector absence preserves the built-in
+cloud path; selector presence fails closed without vault, HTTP, retry, or
+fallback. This source-level integration does not promote the broader protocol.
+Promotion still requires the remaining installed-provider/version/hostile
+matrix, remote catalog-generation handling, real provider/model and device
+evidence, UI selection, plugin-backed chat/stream decisions, and active-request
+update/disable/uninstall results. The pure policies and Android adapters remain
+fail-closed foundations outside that one composition. Image, audio, and video
+require separate protocol reviews and cannot be added to the text plugin to
+satisfy this matrix.

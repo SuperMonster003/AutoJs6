@@ -10,22 +10,24 @@ authorize a mixed-modality AI plugin.
 Proceed with a limited GO for a build-time AI protocol pack and a dedicated
 conformance test app.
 
-Implementation status on 2026-08-10: Phase 1 is implemented as a
+Implementation status on 2026-08-11: Phase 1 is implemented as a
 provider-neutral text protocol pack and an isolated conformance test app under
 `test-apps`. Phase 3 now has a real CPU-only on-device provider in the
 independent sibling project `AutoJs6-Plugin-AI-Text-Generation`. A non-invasive
 slice of Phase 2 now includes default-off pure Kotlin host selection,
 model-list, and session-transcript policies, read-only Android package discovery,
 an exact-component metadata handshake, and exact-component Android model-list
-and session coordinators/transports. None has a production call site. The
+and session coordinators/transports. One strict prompt-only production route now
+connects an explicitly selected `ai.ask` to those layers. The
 protocol layer also binds tool calls to the original request,
 verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
 quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
 summaries. The Android session slice can explicitly exercise `openSession`, a
 generated `IAiTextCallback`, request PFDs, streaming credits, and callback PFD
-ownership, but it remains default-off and unwired. Remote `listingGeneration`
-proof, UI, and script-runtime selection remain open, so installing either app
-alone has no effect on the public AI module. Repository and Android runtime
+ownership. Remote `listingGeneration` proof, UI selection, plugin-backed chat
+and stream, and production device evidence remain open. Installing either app
+alone still has no effect on the public AI module because no component is
+selected automatically. Repository and Android runtime
 gates are tracked in
 [the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
 contract is documented in
@@ -36,8 +38,9 @@ supplied message history, streaming text, reasoning metadata, tool-call
 descriptions, tool results, usage, cancellation, and capability discovery. One
 session represents one generation request plus bounded tool rounds; v1 does not
 publish a reusable conversation handle across separate script calls. The
-current host implementation remains available and continues to back the
-existing `ai.ask`, `ai.chat`, and `ai.stream` surfaces.
+current host implementation remains available and continues to back every
+`ai.ask`, `ai.chat`, and `ai.stream` call whose options do not contain a
+`plugin` selector.
 
 This decision is a NO-GO for immediate extraction of the current host HTTP AI
 stack and a NO-GO for one monolithic AI plugin. Image, audio, and video are
@@ -67,10 +70,11 @@ would not become simpler merely by moving it across Binder:
   provider-neutral usage, reasoning fields, and tool-call round trips.
 - `app/src/main/java/org/autojs/autojs/runtime/api/augment/ai/Ai.kt` exposes the
   existing `ai.ask`, `ai.chat`, and `ai.stream` script facade.
-- `app/src/main/java/org/autojs/autojs/core/plugin/ai/` contains default-off
-  transport-independent selection, transcript, and session policies. They do
-  not query `PackageManager`, bind a service, read a credential, send a
-  generation request, or connect to the script facade.
+- `app/src/main/java/org/autojs/autojs/core/plugin/ai/` contains
+  transport-independent selection, transcript, and session policies plus the
+  process-shared Android runner used only by an explicit plugin `ai.ask`. The
+  pure policies themselves do not query `PackageManager`, bind a service, read
+  a credential, or connect to the script facade.
 - `AiTextProviderSessionPolicy` now owns a default-off pure Kotlin session
   transcript: plan/request admission, provisional callbacks around a
   synchronous open, callback UID and size checks before asynchronous retention
@@ -78,17 +82,17 @@ would not become simpler merely by moving it across Binder:
   descriptor, callback, and remote interfaces remain transport abstractions.
 - The same package now contains read-only Android discovery, a metadata-only
   exact-component handshake, and an exact-component model-list
-  coordinator/transport. These adapters have no production call site. The
-  model-list path can call only the provider metadata getters and
-  `listModels()`; it cannot open a session, transfer a PFD, register
-  `IAiTextCallback`, grant credits, or reach any `ai.*` API.
+  coordinator/transport. The model-list adapter can call only the provider
+  metadata getters and `listModels()`; the explicit ask runner composes it with
+  the separate session adapter rather than expanding that surface.
 - A separate `AiTextProviderSessionCoordinator` and
   `AndroidAiTextProviderSession` now adapt those transcript abstractions to one
   explicitly enabled, exact-component Android session. They revalidate bounded
   provider metadata on the same Binder used for `openSession`, capture callback
   UID before typed admission, preserve reliable callback-PFD state through
   ownership transfer, and serialize credit/death/terminal cleanup. Their entry
-  option still defaults off and no runtime, UI, or `ai.*` path constructs them.
+  option still defaults off; only the explicit production ask runner constructs
+  enabled attempts. There is no automatic or UI construction path.
 - Current `ai.chat` results include provider-native `message` and `raw` fields;
   transport tests prove that opaque reasoning/thinking signatures survive a
   later same-provider tool round trip. A provider-neutral protocol cannot claim
@@ -100,6 +104,60 @@ Extracting that code now offers little dependable host-size benefit and would
 add credential, endpoint, retry, and compatibility risk. The stronger near-term
 benefit is extensibility: third parties can add a provider or a local text model
 without changing the stable script API.
+
+## Narrow Production `ai.ask` Route
+
+Phase 2 now preserves the existing `ai.ask` signature while admitting this
+explicit shape:
+
+```javascript
+ai.ask(prompt, {
+    plugin: {
+        component: {
+            packageName: "org.example.provider",
+            className: "org.example.provider.AiTextService",
+        },
+        providerId: "example.provider",
+        modelId: "example-model",
+    },
+    timeout: 120000,
+});
+```
+
+All four pins are required: component package and class, provider ID, and model
+ID. Timeout must be an integer from 1,000 through 600,000 milliseconds and
+defaults to 120,000. Presence of the `plugin` key chooses the local branch even
+when its value is malformed. That branch strictly rejects unknown fields,
+explicit streaming, and all profile/provider/base-URL/model/API-key cloud
+controls. It never reads the vault, sends HTTP, retries, or falls back to a
+built-in provider. When `plugin` is absent, the established cloud path remains
+unchanged.
+
+The first route accepts one plain-text user message only. It opens a
+non-streaming, inline, zero-request-descriptor session with no reasoning,
+structured JSON, usage, tools, or tool rounds. The exact component must pass
+the existing repeated identity checks, the provider must match the selected ID
+and remain `ON_DEVICE` with credential mode `NONE`, and model listing must plan
+the exact selected model. A plugin selector on `ai.chat` or `ai.stream` is
+rejected as unsupported without entering HTTP; neither method has a plugin
+production route.
+
+One lazily created process backend owns a single routed-ask admission gate,
+single-thread orchestration/control/terminal/deadline lanes, a bounded
+three-operation blocking pool, and the existing model-list/session process
+owners. One outer absolute deadline covers discovery through the active session
+terminal; lower owners retain settled cleanup responsibility. Per-script
+runtime owners cancel and close active handles once on shutdown and ignore late
+terminals; no operation is automatically retried after dispatch.
+
+Evidence remains at source/JVM level. Standalone K2/JUnit passed 15/15 tests
+(8 parser, 3 mapper, 4 runtime). The final focused Gradle run passed 19/19
+(those 15 plus 4 `AiService` integration cases), with 0 skipped, 0 failures,
+and 0 errors, and compiled Android main source. That Android compilation proves
+source compatibility only. This slice did not run a real plugin or model, APK,
+Binder production session, device or ADB command, UI, plugin-backed chat or
+stream, or an update/disable/uninstall during an active routed request. It does
+not close the broader promotion matrix.
 
 ## Meaning Of Protocol Pack
 
@@ -668,15 +726,15 @@ failure and terminates the session without retry.
 ## Fallback And Degradation
 
 The existing built-in providers remain the compatibility baseline. Plugin
-selection is designed to be explicit and does not silently replace a built-in
-profile. The current discovery, handshake, model-list, and Android session
-adapters are default-off or unreachable from production; there is still no
-runtime or UI adapter. Installing, removing, disabling, or omitting the
-conformance provider therefore creates no user-visible feature or degradation
-today.
+selection is explicit and does not silently replace a built-in profile. The
+narrow `ai.ask` runtime route reaches discovery, handshake, model listing, and
+the Android session adapter only when the options contain an exact selector;
+there is still no automatic or UI selector. Installing, removing, disabling,
+or omitting a provider does not change calls without that selector.
 
-- Missing, disabled, incompatible, updating, or crashed selected plugins fail
-  with `PROVIDER_UNAVAILABLE`.
+- Missing, disabled, incompatible, updating, or crashed selected plugins map to
+  bounded route codes such as `PROVIDER_NOT_FOUND`, `PROVIDER_REJECTED`,
+  `BINDER_DIED`, `FUSED`, or `TIMED_OUT`; provider text is not forwarded.
 - A local provider never falls back to a cloud provider automatically.
 - A remote provider never changes model, origin, provider, or credential mode
   automatically.
@@ -776,12 +834,12 @@ is directional evidence only, not an APK-size or performance measurement.
 ### Phase 2: Optional Host Selector
 
 - Keep the completed pure selection, model-list, and session-transcript policy
-  core and the current Android discovery, metadata-handshake, model-list, and
-  `openSession`/PFD/`IAiTextCallback` transports default-off and without a
-  production call site while catalog-generation proof, UI, and runtime adapters
-  are absent.
-- Add an experimental provider selector without changing `ai.ask`, `ai.chat`,
-  or `ai.stream` script signatures.
+  core and the Android discovery, metadata-handshake, model-list, and
+  `openSession`/PFD/`IAiTextCallback` transports fail-closed. Only the narrow
+  explicit `ai.ask` composition enables individual attempts; catalog-generation
+  proof, UI selection, and chat/stream adapters remain absent.
+- Retain the experimental provider selector without changing `ai.ask`,
+  `ai.chat`, or `ai.stream` script signatures.
 - Keep built-in providers as the default and explicit fallback baseline.
 - Surface signer, locality, endpoint, credential mode, and degradation reason.
 - Do not claim response compatibility until provider-native `message`/`raw`
