@@ -226,27 +226,34 @@ class AiTextProviderSessionCoordinatorTest {
         assertEquals(0, mismatchedTransport.inspectionCalls.get())
         assertEquals(0, mismatchedTransport.bindCalls.get())
 
-        val driftLease = SessionRecordingRequestLease()
-        val driftTransport = FakeSessionTransport(fixture)
-        repeat(3) { driftTransport.inspectionResults += discovered(fixture.input) }
-        driftTransport.inspectionResults += discovered(sessionDiscoveryInput(lastUpdateTime = 999L))
-        val driftEvents = CopyOnWriteArrayList<AiTextProviderSessionRunEvent>()
-
-        coordinator(driftTransport).start(fixture.runRequest(driftLease), driftEvents::add)
-
-        assertEquals(
-            listOf(
-                AiTextProviderSessionRunEvent.Rejected(
-                    AiTextProviderSessionRunFailure.IDENTITY_DRIFT,
-                ),
-            ),
-            driftEvents,
+        val finalReinspectionCases = listOf(
+            discovered(sessionDiscoveryInput(lastUpdateTime = 999L)),
+            AiTextProviderDiscoverySourceResult.Completed(emptyList()),
         )
-        assertEquals(4, driftTransport.inspectionCalls.get())
-        assertEquals(1, driftTransport.rpc.prepareCalls.get())
-        assertEquals(0, driftTransport.rpc.prepared.openCalls.get())
-        assertEquals(1, driftTransport.rpc.prepared.closeCount.get())
-        assertEquals(1, driftLease.closeCount.get())
+        finalReinspectionCases.forEach { finalInspection ->
+            val driftLease = SessionRecordingRequestLease()
+            val driftTransport = FakeSessionTransport(fixture)
+            repeat(3) { driftTransport.inspectionResults += discovered(fixture.input) }
+            driftTransport.inspectionResults += finalInspection
+            val driftEvents = CopyOnWriteArrayList<AiTextProviderSessionRunEvent>()
+
+            coordinator(driftTransport).start(fixture.runRequest(driftLease), driftEvents::add)
+
+            assertEquals(
+                listOf(
+                    AiTextProviderSessionRunEvent.Rejected(
+                        AiTextProviderSessionRunFailure.IDENTITY_DRIFT,
+                    ),
+                ),
+                driftEvents,
+            )
+            assertEquals(4, driftTransport.inspectionCalls.get())
+            assertEquals(1, driftTransport.rpc.prepareCalls.get())
+            assertEquals(0, driftTransport.rpc.prepared.openCalls.get())
+            assertEquals(1, driftTransport.rpc.prepared.closeCount.get())
+            assertEquals(1, driftTransport.binding.closeCount.get())
+            assertEquals(1, driftLease.closeCount.get())
+        }
     }
 
     @Test
