@@ -23,9 +23,9 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.external.shortcut.Shortcut;
 import org.autojs.autojs.external.shortcut.ShortcutActivity;
+import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.util.BitmapUtils;
@@ -118,7 +118,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         }
         shortcut.name(mName.getText().toString())
                 .targetClass(ShortcutActivity.class)
-                .extras(new Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptFile.getPath()))
+                .extras(ScriptShortcutIntentFactory.create(mScriptFile.getPath()))
                 .send();
     }
 
@@ -149,8 +149,8 @@ public class ShortcutCreateActivity extends AppCompatActivity {
 
         /* To make each script be able to have its own individual icon. */
         String id = ShortcutActivity.class.getName() + "$" + name + "@" + System.currentTimeMillis();
-        Intent intent = new Intent(this, ShortcutActivity.class)
-                .putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptFile.getPath())
+        Intent intent = ScriptShortcutIntentFactory.create(mScriptFile.getPath())
+                .setClass(this, ShortcutActivity.class)
                 .setAction(Intent.ACTION_MAIN);
         if (mIsDefaultIcon) {
             ShortcutUtils.requestPinShortcut(this, id, intent, name, name, R.drawable.ic_file_type_js_dark_green);

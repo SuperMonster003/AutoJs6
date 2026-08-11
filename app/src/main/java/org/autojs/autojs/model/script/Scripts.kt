@@ -9,10 +9,10 @@ import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
-import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.external.shortcut.Shortcut
 import org.autojs.autojs.external.shortcut.ShortcutActivity
+import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.JavaScriptSource
@@ -104,7 +104,7 @@ object Scripts {
         Shortcut(context).name(scriptFile.simplifiedName)
             .targetClass(ShortcutActivity::class.java)
             .iconRes(R.drawable.ic_node_js_black)
-            .extras(Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.path))
+            .extras(ScriptShortcutIntentFactory.create(scriptFile.path))
             .send()
     }
 
