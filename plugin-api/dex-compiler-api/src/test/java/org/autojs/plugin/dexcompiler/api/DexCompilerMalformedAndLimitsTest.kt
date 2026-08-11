@@ -133,6 +133,78 @@ class DexCompilerMalformedAndLimitsTest {
         }
     }
 
+    @Test
+    fun rejectsProtocol10RequestCarryingProtocol11Metadata() {
+        val v11 = DexCompilerFixtures.v11Request()
+        val invalid = DexCompilerFixtures.request().copy(
+            inputLayout = v11.inputLayout,
+            inputIdentities = v11.inputIdentities,
+            inputSetFingerprint = v11.inputSetFingerprint,
+            inputBundleSizeBytes = v11.inputBundleSizeBytes,
+            inputBundleSha256 = v11.inputBundleSha256,
+        )
+
+        assertEquals(
+            DexCompilerContractViolation.INVALID_VALUE,
+            assertThrows(DexCompilerContractException::class.java) {
+                DexCompilerCodec.encodeRequest(invalid)
+            }.violation,
+        )
+    }
+
+    @Test
+    fun rejectsIncompleteOrNonCanonicalProtocol11InputMetadata() {
+        val missing = DexCompilerFixtures.request(protocolVersion = DexCompilerContract.PROTOCOL_V1_1)
+        assertThrows(DexCompilerContractException::class.java) {
+            DexCompilerCodec.encodeRequest(missing)
+        }
+
+        val identities = DexCompilerFixtures.inputIdentities().toMutableList().also {
+            it[2] = it[2].copy(ordinal = 7)
+        }
+        assertThrows(DexCompilerContractException::class.java) {
+            DexCompilerCodec.encodeRequest(
+                DexCompilerFixtures.v11Request(
+                    identities = identities,
+                    inputSetFingerprint = DexCompilerFixtures.sha256("wrong-order"),
+                    inputBundleSizeBytes = 1L,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun rejectsProtocol11FingerprintAndCanonicalBundleSizeMismatch() {
+        assertThrows(DexCompilerContractException::class.java) {
+            DexCompilerCodec.encodeRequest(
+                DexCompilerFixtures.v11Request(
+                    inputSetFingerprint = DexCompilerFixtures.sha256("wrong-input-set"),
+                )
+            )
+        }
+        assertThrows(DexCompilerContractException::class.java) {
+            DexCompilerCodec.encodeRequest(
+                DexCompilerFixtures.v11Request(
+                    inputBundleSizeBytes = DexCompilerInputBundleCodec.encodedSize(
+                        DexCompilerFixtures.inputIdentities()
+                    ) + 1L,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun rejectsProtocol11RequestWhenProviderHasOnlyLegacyCapabilities() {
+        val error = assertThrows(DexCompilerContractException::class.java) {
+            DexCompilerValidation.validateRequestAgainst(
+                DexCompilerFixtures.v11Request(),
+                DexCompilerFixtures.capabilities(),
+                DexCompilerContract.PROTOCOL_V1_1,
+            )
+        }
+        assertEquals(DexCompilerContractViolation.CAPABILITY_INCOMPATIBLE, error.violation)
+    }
+
     private fun rawRequest(
         mode: String = DexCompilerMode.RELEASE.wireName,
         programSha256: ByteArray = DexCompilerFixtures.programSha256.toByteArray(),

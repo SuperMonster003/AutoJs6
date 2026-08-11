@@ -3,6 +3,7 @@ package org.autojs.plugin.dexcompiler.api
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -38,6 +39,20 @@ class DexCompilerCodecRoundTripTest {
         assertTrue(decoded.supportsMultiDex)
         assertFalse(decoded.acceptsExternalClasspath)
         assertFalse(decoded.supportsDesugaredLibraryConfiguration)
+        assertNull(decoded.classpathBundle)
+    }
+
+    @Test
+    fun roundTripsOptionalProtocol11ClasspathCapability() {
+        val expected = DexCompilerFixtures.classpathBundleCapability()
+        val decoded = DexCompilerCodec.decodeCapabilities(
+            DexCompilerCodec.encodeCapabilities(
+                DexCompilerFixtures.capabilities(classpathBundle = expected)
+            )
+        )
+
+        assertEquals(expected, decoded.classpathBundle)
+        assertFalse(decoded.acceptsExternalClasspath)
     }
 
     @Test
@@ -52,6 +67,21 @@ class DexCompilerCodecRoundTripTest {
         assertEquals(DexCompilerFixtures.programSha256, decoded.programSha256)
         assertEquals(DexCompilerFixtures.runtimeFingerprint, decoded.expectedRuntimeLibraryFingerprint)
         assertEquals(DexCompilerContract.DEFAULT_TIMEOUT_MILLIS, decoded.timeoutMillis)
+        assertTrue(decoded.inputIdentities.isEmpty())
+        assertNull(decoded.inputLayout)
+    }
+
+    @Test
+    fun roundTripsProtocol11OrderedInputMetadata() {
+        val expected = DexCompilerFixtures.v11Request()
+        val decoded = DexCompilerCodec.decodeRequest(DexCompilerCodec.encodeRequest(expected))
+
+        assertEquals(DexCompilerContract.PROTOCOL_V1_1, decoded.protocolVersion)
+        assertEquals(expected.inputLayout, decoded.inputLayout)
+        assertEquals(expected.inputIdentities, decoded.inputIdentities)
+        assertEquals(expected.inputSetFingerprint, decoded.inputSetFingerprint)
+        assertEquals(expected.inputBundleSizeBytes, decoded.inputBundleSizeBytes)
+        assertEquals(expected.inputBundleSha256, decoded.inputBundleSha256)
     }
 
     @Test
@@ -154,5 +184,25 @@ class DexCompilerCodecRoundTripTest {
         val exposed = digest.toByteArray()
         exposed.fill(0)
         assertTrue(digest.toByteArray().any { it.toInt() != 0 })
+    }
+
+    @Test
+    fun requestSnapshotsInputIdentitiesAcrossConstructionAndCopy() {
+        val constructorSource = DexCompilerFixtures.inputIdentities().toMutableList()
+        val request = DexCompilerFixtures.v11Request(identities = constructorSource)
+        val expected = request.inputIdentities.toList()
+        constructorSource.clear()
+        assertEquals(expected, request.inputIdentities)
+        assertEquals(expected, request.component16())
+        assertThrows(UnsupportedOperationException::class.java) {
+            (request.inputIdentities as MutableList).clear()
+        }
+
+        val copySource = DexCompilerFixtures.inputIdentities().toMutableList()
+        val copied = request.copy(inputIdentities = copySource)
+        copySource.removeAt(copySource.lastIndex)
+        assertEquals(expected, copied.inputIdentities)
+        assertEquals(request, request.copy())
+        assertEquals(request.hashCode(), request.copy().hashCode())
     }
 }

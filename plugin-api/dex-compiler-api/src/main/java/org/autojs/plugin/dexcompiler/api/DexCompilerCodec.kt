@@ -53,7 +53,14 @@ object DexCompilerCodec {
 
     fun encodeCapabilities(value: DexCompilerCapabilities): ByteArray {
         DexCompilerValidation.validateCapabilities(value)
-        return writer(DexCompilerContract.SCHEMA_CAPABILITIES)
+        return writer(
+            DexCompilerContract.SCHEMA_CAPABILITIES,
+            schemaMinor = if (value.classpathBundle == null) {
+                DexCompilerContract.SCHEMA_MINOR
+            } else {
+                DexCompilerContract.PROTOCOL_CLASSPATH_BUNDLE_MINOR
+            },
+        )
             .int32(CapabilityTags.COMPILER_FAMILY, value.compilerFamily.wireCode, requiredForReader = true)
             .string(CapabilityTags.COMPILER_VERSION, value.compilerVersion, requiredForReader = true)
             .strings(CapabilityTags.INPUT_FORMATS, value.inputFormats.map { it.wireName }, requiredForReader = true)
@@ -105,6 +112,38 @@ object DexCompilerCodec {
                 value.runtimeLibraryFingerprint.toByteArray(),
                 requiredForReader = true,
             )
+            .apply {
+                value.classpathBundle?.let { capability ->
+                    // These fields must stay optional to readers so a frozen V1 host can retain
+                    // the legacy tags 1..23 view and negotiate protocol 1.0 with this provider.
+                    int32(CapabilityTags.CLASSPATH_INPUT_LAYOUT, capability.inputLayout.wireCode)
+                    int32(
+                        CapabilityTags.MAX_CLASSPATH_JAR_COUNT,
+                        capability.limits.maxClasspathJarCount,
+                    )
+                    int64(
+                        CapabilityTags.MAX_COMPRESSED_CLASSPATH_JAR_BYTES,
+                        capability.limits.maxCompressedClasspathJarBytes,
+                    )
+                    int64(
+                        CapabilityTags.MAX_TOTAL_COMPRESSED_CLASSPATH_BYTES,
+                        capability.limits.maxTotalCompressedClasspathBytes,
+                    )
+                    int64(CapabilityTags.MAX_INPUT_BUNDLE_BYTES, capability.limits.maxInputBundleBytes)
+                    int32(
+                        CapabilityTags.MAX_TOTAL_INPUT_ARCHIVE_ENTRIES,
+                        capability.limits.maxTotalInputArchiveEntries,
+                    )
+                    int64(
+                        CapabilityTags.MAX_TOTAL_UNCOMPRESSED_INPUT_BYTES,
+                        capability.limits.maxTotalUncompressedInputBytes,
+                    )
+                    int64(
+                        CapabilityTags.MAX_TOTAL_INPUT_CLASS_BYTES,
+                        capability.limits.maxTotalInputClassBytes,
+                    )
+                }
+            }
             .encode()
     }
 
@@ -161,12 +200,20 @@ object DexCompilerCodec {
             runtimeLibraryFingerprint = DexSha256.fromBytes(
                 document.requireBytes(CapabilityTags.RUNTIME_LIBRARY_FINGERPRINT)
             ),
+            classpathBundle = decodeClasspathBundle(document),
         ).also(DexCompilerValidation::validateCapabilities)
     }
 
     fun encodeRequest(value: DexCompileRequest): ByteArray {
         DexCompilerValidation.validateRequest(value)
-        return writer(DexCompilerContract.SCHEMA_COMPILE_REQUEST)
+        return writer(
+            DexCompilerContract.SCHEMA_COMPILE_REQUEST,
+            schemaMinor = if (value.protocolVersion == DexCompilerContract.PROTOCOL_V1_1) {
+                DexCompilerContract.PROTOCOL_CLASSPATH_BUNDLE_MINOR
+            } else {
+                DexCompilerContract.SCHEMA_MINOR
+            },
+        )
             .bytes(RequestTags.REQUEST_ID, value.requestId.toByteArray(), requiredForReader = true)
             .int32(RequestTags.PROTOCOL_MAJOR, value.protocolVersion.major, requiredForReader = true)
             .int32(RequestTags.PROTOCOL_MINOR, value.protocolVersion.minor, requiredForReader = true)
@@ -190,11 +237,47 @@ object DexCompilerCodec {
             )
             .int32(RequestTags.DIAGNOSTIC_BYTE_LIMIT, value.diagnosticByteLimit, requiredForReader = true)
             .int64(RequestTags.TIMEOUT_MILLIS, value.timeoutMillis, requiredForReader = true)
+            .apply {
+                if (value.protocolVersion == DexCompilerContract.PROTOCOL_V1_1) {
+                    int32(
+                        RequestTags.INPUT_LAYOUT,
+                        value.inputLayout!!.wireCode,
+                        requiredForReader = true,
+                    )
+                    value.inputIdentities.forEach { identity ->
+                        document(
+                            RequestTags.INPUT_IDENTITIES,
+                            encodeInputIdentity(identity),
+                            requiredForReader = true,
+                        )
+                    }
+                    bytes(
+                        RequestTags.INPUT_SET_FINGERPRINT,
+                        value.inputSetFingerprint!!.toByteArray(),
+                        requiredForReader = true,
+                    )
+                    int64(
+                        RequestTags.INPUT_BUNDLE_SIZE_BYTES,
+                        value.inputBundleSizeBytes!!,
+                        requiredForReader = true,
+                    )
+                    bytes(
+                        RequestTags.INPUT_BUNDLE_SHA256,
+                        value.inputBundleSha256!!.toByteArray(),
+                        requiredForReader = true,
+                    )
+                }
+            }
             .encode()
     }
 
     fun decodeRequest(bytes: ByteArray): DexCompileRequest {
-        val document = document(bytes, DexCompilerContract.SCHEMA_COMPILE_REQUEST, RequestTags.ALL)
+        val document = document(
+            bytes,
+            DexCompilerContract.SCHEMA_COMPILE_REQUEST,
+            RequestTags.ALL,
+            RequestTags.REPEATED,
+        )
         return DexCompileRequest(
             requestId = DexRequestId.fromBytes(document.requireBytes(RequestTags.REQUEST_ID)),
             protocolVersion = DexProtocolVersion(
@@ -226,6 +309,17 @@ object DexCompilerCodec {
             canonicalizationPolicyVersion = document.requireInt32(RequestTags.CANONICALIZATION_POLICY_VERSION),
             diagnosticByteLimit = document.requireInt32(RequestTags.DIAGNOSTIC_BYTE_LIMIT),
             timeoutMillis = document.requireInt64(RequestTags.TIMEOUT_MILLIS),
+            inputLayout = document.optionalInt32(RequestTags.INPUT_LAYOUT)?.let { value ->
+                enumByCode<DexCompilerInputLayout>(value, "input layout") { it.wireCode }
+            },
+            inputIdentities = document.documents(RequestTags.INPUT_IDENTITIES).map(::decodeInputIdentity),
+            inputSetFingerprint = document.optionalBytes(RequestTags.INPUT_SET_FINGERPRINT)?.let {
+                DexSha256.fromBytes(it)
+            },
+            inputBundleSizeBytes = document.optionalInt64(RequestTags.INPUT_BUNDLE_SIZE_BYTES),
+            inputBundleSha256 = document.optionalBytes(RequestTags.INPUT_BUNDLE_SHA256)?.let {
+                DexSha256.fromBytes(it)
+            },
         ).also(DexCompilerValidation::validateRequest)
     }
 
@@ -444,6 +538,70 @@ object DexCompilerCodec {
         )
     }
 
+    private fun encodeInputIdentity(value: DexCompilerInputIdentity): ByteArray =
+        writer(
+            DexCompilerContract.SCHEMA_INPUT_IDENTITY,
+            DexCompilerContract.PROTOCOL_CLASSPATH_BUNDLE_MINOR,
+        )
+            .int32(InputIdentityTags.ROLE, value.role.wireCode, requiredForReader = true)
+            .int32(InputIdentityTags.ORDINAL, value.ordinal, requiredForReader = true)
+            .int64(InputIdentityTags.SIZE_BYTES, value.sizeBytes, requiredForReader = true)
+            .bytes(
+                InputIdentityTags.CONTENT_SHA256,
+                value.contentSha256.toByteArray(),
+                requiredForReader = true,
+            )
+            .encode()
+
+    private fun decodeInputIdentity(bytes: ByteArray): DexCompilerInputIdentity {
+        val document = document(
+            bytes,
+            DexCompilerContract.SCHEMA_INPUT_IDENTITY,
+            InputIdentityTags.ALL,
+        )
+        return DexCompilerInputIdentity(
+            role = enumByCode<DexCompilerInputRole>(
+                document.requireInt32(InputIdentityTags.ROLE),
+                "input role",
+            ) { it.wireCode },
+            ordinal = document.requireInt32(InputIdentityTags.ORDINAL),
+            sizeBytes = document.requireInt64(InputIdentityTags.SIZE_BYTES),
+            contentSha256 = DexSha256.fromBytes(document.requireBytes(InputIdentityTags.CONTENT_SHA256)),
+        )
+    }
+
+    private fun decodeClasspathBundle(
+        document: TaggedWireDocument,
+    ): DexCompilerClasspathBundleCapability? {
+        val present = CapabilityTags.CLASSPATH_EXTENSION.any { it in document.tags }
+        if (!present) return null
+        return DexCompilerClasspathBundleCapability(
+            inputLayout = enumByCode<DexCompilerInputLayout>(
+                document.requireInt32(CapabilityTags.CLASSPATH_INPUT_LAYOUT),
+                "classpath input layout",
+            ) { it.wireCode },
+            limits = DexCompilerClasspathBundleLimits(
+                maxClasspathJarCount = document.requireInt32(CapabilityTags.MAX_CLASSPATH_JAR_COUNT),
+                maxCompressedClasspathJarBytes = document.requireInt64(
+                    CapabilityTags.MAX_COMPRESSED_CLASSPATH_JAR_BYTES
+                ),
+                maxTotalCompressedClasspathBytes = document.requireInt64(
+                    CapabilityTags.MAX_TOTAL_COMPRESSED_CLASSPATH_BYTES
+                ),
+                maxInputBundleBytes = document.requireInt64(CapabilityTags.MAX_INPUT_BUNDLE_BYTES),
+                maxTotalInputArchiveEntries = document.requireInt32(
+                    CapabilityTags.MAX_TOTAL_INPUT_ARCHIVE_ENTRIES
+                ),
+                maxTotalUncompressedInputBytes = document.requireInt64(
+                    CapabilityTags.MAX_TOTAL_UNCOMPRESSED_INPUT_BYTES
+                ),
+                maxTotalInputClassBytes = document.requireInt64(
+                    CapabilityTags.MAX_TOTAL_INPUT_CLASS_BYTES
+                ),
+            ),
+        )
+    }
+
     private fun encodeDiagnostic(value: DexCompilerDiagnostic): ByteArray =
         writer(DexCompilerContract.SCHEMA_DIAGNOSTIC)
             .int32(DiagnosticTags.SEVERITY, value.severity.wireCode, requiredForReader = true)
@@ -463,10 +621,13 @@ object DexCompilerCodec {
         )
     }
 
-    private fun writer(schemaId: Int): TaggedWireWriter = TaggedWireWriter(
+    private fun writer(
+        schemaId: Int,
+        schemaMinor: Int = DexCompilerContract.SCHEMA_MINOR,
+    ): TaggedWireWriter = TaggedWireWriter(
         schemaId = schemaId,
         schemaMajor = DexCompilerContract.SCHEMA_MAJOR,
-        schemaMinor = DexCompilerContract.SCHEMA_MINOR,
+        schemaMinor = schemaMinor,
         limits = WIRE_LIMITS,
     )
 
@@ -538,14 +699,31 @@ object DexCompilerCodec {
         const val MAX_CONCURRENT_SESSIONS = 21
         const val RUNTIME_LIBRARY_IDENTITIES = 22
         const val RUNTIME_LIBRARY_FINGERPRINT = 23
-        val ALL = (1..23).toSet()
+        const val CLASSPATH_INPUT_LAYOUT = 24
+        const val MAX_CLASSPATH_JAR_COUNT = 25
+        const val MAX_COMPRESSED_CLASSPATH_JAR_BYTES = 26
+        const val MAX_TOTAL_COMPRESSED_CLASSPATH_BYTES = 27
+        const val MAX_INPUT_BUNDLE_BYTES = 28
+        const val MAX_TOTAL_INPUT_ARCHIVE_ENTRIES = 29
+        const val MAX_TOTAL_UNCOMPRESSED_INPUT_BYTES = 30
+        const val MAX_TOTAL_INPUT_CLASS_BYTES = 31
+        val ALL = (1..31).toSet()
         val REPEATED = setOf(INPUT_FORMATS, OUTPUT_FORMATS, MODES, RUNTIME_LIBRARY_IDENTITIES)
+        val CLASSPATH_EXTENSION = (24..31).toSet()
     }
 
     private object RuntimeLibraryIdentityTags {
         const val SIZE_BYTES = 1
         const val CONTENT_SHA256 = 2
         val ALL = setOf(SIZE_BYTES, CONTENT_SHA256)
+    }
+
+    private object InputIdentityTags {
+        const val ROLE = 1
+        const val ORDINAL = 2
+        const val SIZE_BYTES = 3
+        const val CONTENT_SHA256 = 4
+        val ALL = (1..4).toSet()
     }
 
     private object RequestTags {
@@ -564,7 +742,13 @@ object DexCompilerCodec {
         const val CANONICALIZATION_POLICY_VERSION = 13
         const val DIAGNOSTIC_BYTE_LIMIT = 14
         const val TIMEOUT_MILLIS = 15
-        val ALL = (1..15).toSet()
+        const val INPUT_LAYOUT = 16
+        const val INPUT_IDENTITIES = 17
+        const val INPUT_SET_FINGERPRINT = 18
+        const val INPUT_BUNDLE_SIZE_BYTES = 19
+        const val INPUT_BUNDLE_SHA256 = 20
+        val ALL = (1..20).toSet()
+        val REPEATED = setOf(INPUT_IDENTITIES)
     }
 
     private object StartedTags {

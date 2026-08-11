@@ -12,7 +12,9 @@ object DexCompilerContract {
     const val ENGINE_ID = "dex-compiler"
 
     const val PROTOCOL_MAJOR = 1
+    /** Legacy raw-program default. Callers opt into 1.1 explicitly for classpath bundles. */
     const val PROTOCOL_MINOR = 0
+    const val PROTOCOL_CLASSPATH_BUNDLE_MINOR = 1
 
     const val SCHEMA_MAJOR = 1
     const val SCHEMA_MINOR = 0
@@ -21,6 +23,7 @@ object DexCompilerContract {
     const val SCHEMA_CAPABILITIES = 0x0202
     const val SCHEMA_RUNTIME_LIBRARY_IDENTITY = 0x0203
     const val SCHEMA_DIAGNOSTIC = 0x0204
+    const val SCHEMA_INPUT_IDENTITY = 0x0205
     const val SCHEMA_COMPILE_REQUEST = 0x0210
     const val SCHEMA_STARTED = 0x0211
     const val SCHEMA_PROGRESS = 0x0212
@@ -32,9 +35,16 @@ object DexCompilerContract {
 
     const val MAX_METADATA_BYTES = 256 * 1024
     const val MAX_COMPRESSED_PROGRAM_BYTES = 128L * 1024L * 1024L
+    const val MAX_CLASSPATH_JARS = 32
+    const val MAX_COMPRESSED_CLASSPATH_JAR_BYTES = 64L * 1024L * 1024L
+    const val MAX_TOTAL_COMPRESSED_CLASSPATH_BYTES = 128L * 1024L * 1024L
+    const val MAX_COMPRESSED_INPUT_BUNDLE_BYTES = 256L * 1024L * 1024L
     const val MAX_ARCHIVE_ENTRIES = 20_000
+    const val MAX_TOTAL_INPUT_ARCHIVE_ENTRIES = 60_000
     const val MAX_UNCOMPRESSED_PROGRAM_BYTES = 256L * 1024L * 1024L
+    const val MAX_TOTAL_UNCOMPRESSED_INPUT_BYTES = 512L * 1024L * 1024L
     const val MAX_TOTAL_CLASS_BYTES = 128L * 1024L * 1024L
+    const val MAX_TOTAL_INPUT_CLASS_BYTES = 256L * 1024L * 1024L
     const val MAX_SINGLE_CLASS_BYTES = 8L * 1024L * 1024L
     const val MAX_OUTPUT_BYTES = 256L * 1024L * 1024L
     const val MAX_DEX_ENTRIES = 64
@@ -48,6 +58,9 @@ object DexCompilerContract {
     const val DEFAULT_TIMEOUT_MILLIS = 120_000L
     const val MAX_TIMEOUT_MILLIS = 300_000L
     const val MAX_CONCURRENT_SESSIONS = 1
+
+    val PROTOCOL_V1_0 = DexProtocolVersion(PROTOCOL_MAJOR, PROTOCOL_MINOR)
+    val PROTOCOL_V1_1 = DexProtocolVersion(PROTOCOL_MAJOR, PROTOCOL_CLASSPATH_BUNDLE_MINOR)
 }
 
 data class DexProtocolVersion(
@@ -68,6 +81,15 @@ enum class DexCompilerFamily(val wireCode: Int) {
 
 enum class DexCompilerInputFormat(val wireName: String) {
     JAR("jar"),
+}
+
+enum class DexCompilerInputLayout(val wireCode: Int) {
+    PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1(1),
+}
+
+enum class DexCompilerInputRole(val wireCode: Int) {
+    PROGRAM(1),
+    CLASSPATH(2),
 }
 
 enum class DexCompilerOutputFormat(val wireName: String) {
@@ -226,6 +248,37 @@ object DexRuntimeLibraryFingerprint {
         digest.update(intBytes(identities.size))
         identities.forEachIndexed { index, identity ->
             digest.update(intBytes(index))
+            digest.update(longBytes(identity.sizeBytes))
+            digest.update(identity.contentSha256.toByteArray())
+        }
+        return DexSha256.fromBytes(digest.digest())
+    }
+
+    private fun intBytes(value: Int): ByteArray = ByteBuffer.allocate(Int.SIZE_BYTES)
+        .order(ByteOrder.BIG_ENDIAN)
+        .putInt(value)
+        .array()
+
+    private fun longBytes(value: Long): ByteArray = ByteBuffer.allocate(Long.SIZE_BYTES)
+        .order(ByteOrder.BIG_ENDIAN)
+        .putLong(value)
+        .array()
+}
+
+/** Domain-separated identity for the exact ordered program/classpath input set. */
+object DexCompilerInputSetFingerprint {
+    private val DOMAIN = "AutoJs6:DexCompilerInputSetFingerprint:v1\u0000"
+        .toByteArray(StandardCharsets.UTF_8)
+
+    fun compute(identities: Collection<DexCompilerInputIdentity>): DexSha256 {
+        val ordered = identities.toList()
+        DexCompilerInputIdentityValidation.requireCanonical(ordered)
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.update(DOMAIN)
+        digest.update(intBytes(ordered.size))
+        ordered.forEach { identity ->
+            digest.update(intBytes(identity.role.wireCode))
+            digest.update(intBytes(identity.ordinal))
             digest.update(longBytes(identity.sizeBytes))
             digest.update(identity.contentSha256.toByteArray())
         }

@@ -29,6 +29,7 @@ internal object DexCompilerFixtures {
     fun capabilities(
         runtimeFingerprintOverride: DexSha256 = runtimeFingerprint,
         modes: Collection<DexCompilerMode> = listOf(DexCompilerMode.DEBUG, DexCompilerMode.RELEASE),
+        classpathBundle: DexCompilerClasspathBundleCapability? = null,
     ) = DexCompilerCapabilities(
         compilerFamily = DexCompilerFamily.D8,
         compilerVersion = "8.13.17",
@@ -55,6 +56,26 @@ internal object DexCompilerFixtures {
         ),
         runtimeLibraryIdentities = runtimeLibraries,
         runtimeLibraryFingerprint = runtimeFingerprintOverride,
+        classpathBundle = classpathBundle,
+    )
+
+    fun classpathBundleCapability() = DexCompilerClasspathBundleCapability(
+        inputLayout = DexCompilerInputLayout.PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1,
+        limits = DexCompilerClasspathBundleLimits(
+            maxClasspathJarCount = 32,
+            maxCompressedClasspathJarBytes = 32L * 1024L * 1024L,
+            maxTotalCompressedClasspathBytes = 96L * 1024L * 1024L,
+            maxInputBundleBytes = 192L * 1024L * 1024L,
+            maxTotalInputArchiveEntries = 40_000,
+            maxTotalUncompressedInputBytes = 384L * 1024L * 1024L,
+            maxTotalInputClassBytes = 256L * 1024L * 1024L,
+        ),
+    )
+
+    fun inputIdentities(): List<DexCompilerInputIdentity> = listOf(
+        DexCompilerInputIdentity(DexCompilerInputRole.PROGRAM, 0, 4_096L, programSha256),
+        DexCompilerInputIdentity(DexCompilerInputRole.CLASSPATH, 0, 2_048L, sha256("classpath-0")),
+        DexCompilerInputIdentity(DexCompilerInputRole.CLASSPATH, 1, 1_024L, sha256("classpath-1")),
     )
 
     fun request(
@@ -77,6 +98,18 @@ internal object DexCompilerFixtures {
         canonicalizationPolicyVersion = DexCompilerContract.CANONICALIZATION_POLICY_VERSION,
         diagnosticByteLimit = DexCompilerContract.MAX_DIAGNOSTIC_BYTES,
         timeoutMillis = DexCompilerContract.DEFAULT_TIMEOUT_MILLIS,
+    )
+
+    fun v11Request(
+        identities: List<DexCompilerInputIdentity> = inputIdentities(),
+        inputSetFingerprint: DexSha256 = DexCompilerInputSetFingerprint.compute(identities),
+        inputBundleSizeBytes: Long = DexCompilerInputBundleCodec.encodedSize(identities),
+    ): DexCompileRequest = request(protocolVersion = DexCompilerContract.PROTOCOL_V1_1).copy(
+        inputLayout = DexCompilerInputLayout.PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1,
+        inputIdentities = identities,
+        inputSetFingerprint = inputSetFingerprint,
+        inputBundleSizeBytes = inputBundleSizeBytes,
+        inputBundleSha256 = sha256("input-bundle"),
     )
 
     fun diagnostics(): List<DexCompilerDiagnostic> = listOf(

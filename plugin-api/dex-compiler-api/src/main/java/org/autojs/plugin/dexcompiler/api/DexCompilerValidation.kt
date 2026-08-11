@@ -104,6 +104,7 @@ object DexCompilerValidation {
             capabilities.runtimeLibraryFingerprint ==
                 DexRuntimeLibraryFingerprint.compute(capabilities.runtimeLibraryIdentities)
         ) { "Runtime-library fingerprint does not match the ordered identities" }
+        capabilities.classpathBundle?.let(::validateClasspathBundleCapability)
     }
 
     fun validateRequest(request: DexCompileRequest) {
@@ -127,6 +128,14 @@ object DexCompilerValidation {
         }
         requireValue(request.timeoutMillis in 1L..DexCompilerContract.MAX_TIMEOUT_MILLIS) {
             "Compile timeout is invalid"
+        }
+        when (request.protocolVersion) {
+            DexCompilerContract.PROTOCOL_V1_0 -> validateV1RequestExtensions(request)
+            DexCompilerContract.PROTOCOL_V1_1 -> validateV11RequestExtensions(request)
+            else -> throw DexCompilerContractException(
+                DexCompilerContractViolation.PROTOCOL_INCOMPATIBLE,
+                "Compile request protocol version is unsupported",
+            )
         }
     }
 
@@ -159,6 +168,30 @@ object DexCompilerValidation {
         }
         requireCapability(request.expectedRuntimeLibraryFingerprint == capabilities.runtimeLibraryFingerprint) {
             "Runtime-library fingerprint is incompatible"
+        }
+        if (request.protocolVersion == DexCompilerContract.PROTOCOL_V1_1) {
+            val classpathBundle = capabilities.classpathBundle
+                ?: throw DexCompilerContractException(
+                    DexCompilerContractViolation.CAPABILITY_INCOMPATIBLE,
+                    "Provider does not advertise ordered classpath bundles",
+                )
+            requireCapability(request.inputLayout == classpathBundle.inputLayout) {
+                "Input bundle layout is unsupported"
+            }
+            val classpath = request.inputIdentities.drop(1)
+            val limits = classpathBundle.limits
+            requireCapability(classpath.size <= limits.maxClasspathJarCount) {
+                "Classpath JAR count exceeds the provider limit"
+            }
+            requireCapability(classpath.all { it.sizeBytes <= limits.maxCompressedClasspathJarBytes }) {
+                "A classpath JAR exceeds the provider limit"
+            }
+            requireCapability(classpath.sumSizes() <= limits.maxTotalCompressedClasspathBytes) {
+                "Classpath JARs exceed the provider aggregate limit"
+            }
+            requireCapability(request.inputBundleSizeBytes!! <= limits.maxInputBundleBytes) {
+                "Input bundle exceeds the provider limit"
+            }
         }
     }
 
@@ -285,6 +318,98 @@ object DexCompilerValidation {
         requireValue(limits.maxConcurrentSessions == DexCompilerContract.MAX_CONCURRENT_SESSIONS) {
             "DEX Compiler protocol v1 permits exactly one concurrent session"
         }
+    }
+
+    private fun validateClasspathBundleCapability(capability: DexCompilerClasspathBundleCapability) {
+        requireValue(
+            capability.inputLayout == DexCompilerInputLayout.PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1
+        ) { "Classpath input layout is unsupported" }
+        val limits = capability.limits
+        requireValue(limits.maxClasspathJarCount in 1..DexCompilerContract.MAX_CLASSPATH_JARS) {
+            "Classpath JAR count limit is invalid"
+        }
+        requireValue(
+            limits.maxCompressedClasspathJarBytes in
+                1L..DexCompilerContract.MAX_COMPRESSED_CLASSPATH_JAR_BYTES
+        ) { "Classpath JAR byte limit is invalid" }
+        requireValue(
+            limits.maxTotalCompressedClasspathBytes in
+                limits.maxCompressedClasspathJarBytes..DexCompilerContract.MAX_TOTAL_COMPRESSED_CLASSPATH_BYTES
+        ) { "Classpath aggregate byte limit is invalid" }
+        requireValue(
+            limits.maxInputBundleBytes in 1L..DexCompilerContract.MAX_COMPRESSED_INPUT_BUNDLE_BYTES
+        ) { "Input bundle byte limit is invalid" }
+        requireValue(
+            limits.maxTotalInputArchiveEntries in 1..DexCompilerContract.MAX_TOTAL_INPUT_ARCHIVE_ENTRIES
+        ) { "Aggregate archive-entry limit is invalid" }
+        requireValue(
+            limits.maxTotalUncompressedInputBytes in 1L..DexCompilerContract.MAX_TOTAL_UNCOMPRESSED_INPUT_BYTES
+        ) { "Aggregate uncompressed-input limit is invalid" }
+        requireValue(
+            limits.maxTotalInputClassBytes in 1L..DexCompilerContract.MAX_TOTAL_INPUT_CLASS_BYTES
+        ) { "Aggregate class-byte limit is invalid" }
+        requireValue(limits.maxTotalInputClassBytes <= limits.maxTotalUncompressedInputBytes) {
+            "Aggregate class-byte limit exceeds the uncompressed-input limit"
+        }
+    }
+
+    private fun validateV1RequestExtensions(request: DexCompileRequest) {
+        requireValue(request.inputLayout == null) { "Protocol 1.0 request must not declare an input layout" }
+        requireValue(request.inputIdentities.isEmpty()) {
+            "Protocol 1.0 request must not declare bundled input identities"
+        }
+        requireValue(request.inputSetFingerprint == null) {
+            "Protocol 1.0 request must not declare an input-set fingerprint"
+        }
+        requireValue(request.inputBundleSizeBytes == null) {
+            "Protocol 1.0 request must not declare an input-bundle size"
+        }
+        requireValue(request.inputBundleSha256 == null) {
+            "Protocol 1.0 request must not declare an input-bundle SHA-256"
+        }
+    }
+
+    private fun validateV11RequestExtensions(request: DexCompileRequest) {
+        requireValue(
+            request.inputLayout == DexCompilerInputLayout.PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1
+        ) { "Protocol 1.1 requires the canonical ordered-classpath bundle layout" }
+        requireValue(request.inputIdentities.size in 2..DexCompilerContract.MAX_CLASSPATH_JARS + 1) {
+            "Protocol 1.1 requires one program and at least one classpath JAR"
+        }
+        DexCompilerInputIdentityValidation.requireCanonical(request.inputIdentities)
+        val program = request.inputIdentities.first()
+        requireValue(program.sizeBytes == request.programSizeBytes) {
+            "Bundled program size differs from the request"
+        }
+        requireValue(program.contentSha256 == request.programSha256) {
+            "Bundled program SHA-256 differs from the request"
+        }
+        requireValue(
+            request.inputSetFingerprint == DexCompilerInputSetFingerprint.compute(request.inputIdentities)
+        ) { "Input-set fingerprint does not match the ordered identities" }
+        val bundleSize = request.inputBundleSizeBytes
+            ?: throw DexCompilerContractException(
+                DexCompilerContractViolation.INVALID_VALUE,
+                "Input bundle size is missing",
+            )
+        requireValue(bundleSize > 0L) { "Input bundle size is invalid" }
+        requireValue(bundleSize <= DexCompilerContract.MAX_COMPRESSED_INPUT_BUNDLE_BYTES) {
+            "Input bundle exceeds the protocol limit"
+        }
+        requireValue(bundleSize == DexCompilerInputBundleCodec.encodedSize(request.inputIdentities)) {
+            "Input bundle size does not match the canonical framing"
+        }
+        requireValue(request.inputBundleSha256 != null) { "Input bundle SHA-256 is missing" }
+    }
+
+    private fun Collection<DexCompilerInputIdentity>.sumSizes(): Long = try {
+        fold(0L) { total, identity -> Math.addExact(total, identity.sizeBytes) }
+    } catch (error: ArithmeticException) {
+        throw DexCompilerContractException(
+            DexCompilerContractViolation.INVALID_VALUE,
+            "Input sizes overflow",
+            error,
+        )
     }
 
     private fun <T> requireDistinctNonEmpty(values: Collection<T>, label: String) {
