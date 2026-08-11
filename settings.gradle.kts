@@ -57,6 +57,7 @@ private val pluginApi = listOf(
     "offline-docs-api",
     "opencv-api",
     "mlkit-barcode-api",
+    "yolo-api",
     "paddle-ocr-api",
     "paddle-ocr-engine",
     "rapid-ocr-engine",
