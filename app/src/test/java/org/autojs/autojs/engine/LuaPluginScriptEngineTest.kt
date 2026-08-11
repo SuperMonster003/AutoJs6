@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.plugin.lua.runtime.api.LuaCancellationReason
@@ -56,11 +57,75 @@ class LuaPluginScriptEngineTest {
         assertEquals(1, backend.lastSession?.closeCount)
         assertEquals(1, backend.connectionCloseCount)
         assertEquals(listOf("from-fake"), backend.outputs)
+        assertEquals(LuaValue.MapValue(emptyMap()), backend.lastRequest?.arguments)
         assertTrue(temporaryFolder.root.resolve("lua-source-snapshots").listFiles().orEmpty().isEmpty())
 
         engine.destroy()
         engine.destroy()
         assertTrue(engine.isDestroyed)
+    }
+
+    @Test
+    fun executionArgumentsAreFrozenBeforeProviderPreparationAndIgnorePutGlobals() {
+        val backend = FakeBackend(Mode.COMPLETE)
+        val engine = LuaPluginScriptEngine(temporaryFolder.root, backend)
+        val payload = byteArrayOf(1, 2, 3)
+        val items = mutableListOf<Any>(7, "second")
+        val metadata = linkedMapOf<String, Any>("name" to "before", "ratio" to 1.5)
+        val config = ExecutionConfig().apply {
+            setArgument("enabled", true)
+            setArgument("items", items)
+            setArgument("meta", metadata)
+            setArgument("payload", payload)
+        }
+        engine.setTag(ExecutionConfig.tag, config)
+        engine.put("context", mapOf("mustNotLeak" to true))
+
+        engine.init()
+        payload[0] = 99
+        items += "late"
+        metadata["name"] = "after"
+        config.setArgument("late", "ignored")
+
+        engine.execute(source())
+
+        assertEquals(
+            LuaValue.MapValue(
+                mapOf(
+                    "enabled" to LuaValue.BooleanValue(true),
+                    "items" to LuaValue.ArrayValue(
+                        listOf(LuaValue.Int64Value(7L), LuaValue.StringValue("second")),
+                    ),
+                    "meta" to LuaValue.MapValue(
+                        mapOf(
+                            "name" to LuaValue.StringValue("before"),
+                            "ratio" to LuaValue.Float64Value(1.5),
+                        ),
+                    ),
+                    "payload" to LuaValue.BytesValue(byteArrayOf(1, 2, 3)),
+                ),
+            ),
+            backend.lastRequest?.arguments,
+        )
+        engine.destroy()
+    }
+
+    @Test
+    fun unsupportedExecutionArgumentFailsBeforeProviderPreparation() {
+        val backend = FakeBackend(Mode.COMPLETE)
+        val engine = LuaPluginScriptEngine(temporaryFolder.root, backend)
+        engine.setTag(
+            ExecutionConfig.tag,
+            ExecutionConfig().apply { setArgument("unsupported", Any()) },
+        )
+
+        val failure = assertThrows(IllegalArgumentException::class.java) { engine.init() }
+
+        assertTrue(failure.message.orEmpty().contains("unsupported type"))
+        assertEquals(0, backend.prepareCount)
+        assertEquals(0, backend.acquireCount)
+        assertEquals(0, backend.createCount)
+        engine.destroy()
     }
 
     @Test
@@ -369,6 +434,7 @@ class LuaPluginScriptEngineTest {
         var acquireCount = 0
         var createCount = 0
         var connectionCloseCount = 0
+        var lastRequest: LuaExecutionRequest? = null
         var lastSession: FakeSession? = null
 
         override fun prepare(): LuaEnginePreparedRuntime {
@@ -403,6 +469,7 @@ class LuaPluginScriptEngineTest {
                     observer: LuaEngineExecutionObserver,
                 ): LuaEngineRemoteSession {
                     createCount++
+                    lastRequest = request
                     assertEquals(source.lengthBytes, request.sourceLengthBytes)
                     if (mode == Mode.BLOCK_CREATE) {
                         createEntered.countDown()

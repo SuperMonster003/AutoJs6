@@ -10,6 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.engine.LuaPluginScriptEngine
 import org.autojs.autojs.engine.ScriptEngineService
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.lua.runtime.api.LuaPluginActions
@@ -54,21 +55,41 @@ class LuaOfficialRuntimeSmokeTest {
             packageManager.checkSignatures(context.packageName, OFFICIAL_PROVIDER_PACKAGE),
         )
 
-        val engine = LuaPluginScriptEngine(context)
+        val marker = UUID.randomUUID().toString()
+        val stdout = "lua-m3-stdout-$marker"
+        val stderr = "lua-m3-stderr-$marker"
+        val config = ExecutionConfig().apply {
+            setArgument("enabled", true)
+            setArgument("items", listOf(4L, "ready"))
+            setArgument(
+                "meta",
+                mapOf(
+                    "stdout" to stdout,
+                    "stderr" to stderr,
+                    "delta" to 5L,
+                ),
+            )
+        }
+        val engine = LuaPluginScriptEngine(context).apply {
+            setTag(ExecutionConfig.tag, config)
+        }
         try {
             engine.init()
             assertEquals(LuaValue.Int64Value(7L), engine.execute(source("return 7", "official-provider-first")))
 
-            val marker = UUID.randomUUID().toString()
-            val stdout = "lua-m3-stdout-$marker"
-            val stderr = "lua-m3-stderr-$marker"
             val script = """
                 local autojs = require("autojs")
-                autojs.console.log("$stdout")
-                autojs.console.error("$stderr")
-                return 8
+                local arguments = autojs.arguments
+                if arguments.enabled ~= true
+                    or arguments.items[1] ~= 4
+                    or arguments.items[2] ~= "ready" then
+                    error("host argument mismatch")
+                end
+                autojs.console.log(arguments.meta.stdout)
+                autojs.console.error(arguments.meta.stderr)
+                return arguments.items[1] + arguments.meta.delta
             """.trimIndent()
-            assertEquals(LuaValue.Int64Value(8L), engine.execute(source(script, "official-provider-console")))
+            assertEquals(LuaValue.Int64Value(9L), engine.execute(source(script, "official-provider-arguments")))
             assertEquals(
                 listOf(Log.INFO to stdout, Log.ERROR to stderr),
                 consoleEntries(stdout, stderr),

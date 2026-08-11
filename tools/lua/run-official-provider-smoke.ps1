@@ -156,7 +156,7 @@ $expectedHashes = @{
     $testPackage = (Get-FileHash -LiteralPath $TestApk -Algorithm SHA256).Hash.ToLowerInvariant()
     $providerPackage = (Get-FileHash -LiteralPath $ProviderApk -Algorithm SHA256).Hash.ToLowerInvariant()
 }
-$installed = @{
+$installAttempted = @{
     $hostPackage = $false
     $testPackage = $false
     $providerPackage = $false
@@ -171,11 +171,13 @@ try {
         [pscustomobject]@{ Package = $testPackage; Apk = $TestApk; Label = "INSTALL_TEST" }
     )
     foreach ($item in $installPlan) {
+        # The device can finish an install after the adb client times out or loses its reply.
+        # Mark the attempt before dispatch so finally always tries to remove any late package.
+        $installAttempted[$item.Package] = $true
         $result = Invoke-AdbBounded -Arguments @(
             "-s", $Serial, "install", "--no-streaming", "-t", $item.Apk
         )
         Require-AdbSuccess -Result $result -Label $item.Label
-        $installed[$item.Package] = $true
     }
 
     foreach ($packageName in $packages) {
@@ -220,7 +222,7 @@ try {
     ) {
         throw "Instrumentation receipt was rejected"
     }
-    Write-Output "M3_OFFICIAL_PROVIDER_CONSOLE_SMOKE=PASS"
+    Write-Output "M3_OFFICIAL_PROVIDER_SMOKE=PASS"
 
     Invoke-DeviceLines -Arguments @("shell", "ps", "-A", "-o", "PID,NAME") |
         Where-Object { $_ -match "\s$([regex]::Escape($providerPackage)):lua_runtime\s*$" } |
@@ -234,13 +236,15 @@ try {
         )
     }
     foreach ($packageName in @($testPackage, $providerPackage, $hostPackage)) {
-        if ($installed[$packageName]) {
+        if ($installAttempted[$packageName]) {
             $result = Invoke-AdbBounded -Arguments @("-s", $Serial, "uninstall", $packageName)
             $successCount = @($result.Lines | Where-Object { $_.Trim() -eq "Success" }).Count
-            if ($result.TimedOut -or $result.ExitCode -ne 0 -or $successCount -ne 1) {
-                $cleanupFailures.Add("uninstall $packageName failed: $($result.Lines -join ' | ')")
-            } else {
+            if (-not $result.TimedOut -and $result.ExitCode -eq 0 -and $successCount -eq 1) {
                 Write-Output "UNINSTALL_$packageName=Success"
+            } else {
+                # A package that never landed is already clean. The authoritative all-user and
+                # pm-path audit below decides whether a failed/unknown-package reply is harmful.
+                Write-Output "UNINSTALL_ATTEMPT_$packageName=$($result.Lines -join ' | ')"
             }
         }
     }

@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.plugin.lua.LuaRuntimePluginHostFactory
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.plugin.lua.runtime.api.LuaExecutionError
@@ -48,6 +49,9 @@ class LuaPluginScriptEngine internal constructor(
     @Volatile
     private var preparedRuntime: LuaEnginePreparedRuntime? = null
 
+    @Volatile
+    private var preparedArguments: LuaValue.MapValue = EMPTY_ARGUMENTS
+
     /** ScriptEngineManager injects `context`; Lua must never retain or serialize it. */
     override fun put(name: String, value: Any?) = Unit
 
@@ -57,7 +61,10 @@ class LuaPluginScriptEngine internal constructor(
         try {
             throwIfStopped()
             if (preparedRuntime == null) {
-                preparedRuntime = backend.prepare()
+                val arguments = executionArguments()
+                val runtime = backend.prepare()
+                preparedArguments = arguments
+                preparedRuntime = runtime
             }
             throwIfStopped()
         } catch (interrupted: InterruptedException) {
@@ -73,6 +80,7 @@ class LuaPluginScriptEngine internal constructor(
     override fun execute(scriptSource: LuaScriptSource): Any {
         check(!destroyed.get()) { "Lua engine is destroyed" }
         val prepared = checkNotNull(preparedRuntime) { "Lua engine was not initialized" }
+        val arguments = preparedArguments
         ownerThread = Thread.currentThread()
         try {
             throwIfStopped()
@@ -84,7 +92,7 @@ class LuaPluginScriptEngine internal constructor(
                 }
                 try {
                     throwIfStopped()
-                    val request = executionRequest(snapshot, connection)
+                    val request = executionRequest(snapshot, connection, arguments)
                     val observer = LuaEngineExecutionObserver(request, connection.runtimeInfo, outputSink)
                     var session: LuaEngineRemoteSession? = null
                     try {
@@ -146,6 +154,7 @@ class LuaPluginScriptEngine internal constructor(
         runCatching { currentSession.getAndSet(null)?.close() }
         runCatching { currentConnection.getAndSet(null)?.close() }
         preparedRuntime = null
+        preparedArguments = EMPTY_ARGUMENTS
         ownerThread = null
         super.destroy()
     }
@@ -157,6 +166,7 @@ class LuaPluginScriptEngine internal constructor(
     private fun executionRequest(
         snapshot: LuaSourceSnapshot,
         connection: LuaEngineRuntimeConnection,
+        arguments: LuaValue.MapValue,
     ): LuaExecutionRequest {
         val limits = connection.runtimeInfo.limits
         return LuaExecutionRequest(
@@ -165,12 +175,19 @@ class LuaPluginScriptEngine internal constructor(
             sourceName = snapshot.logicalName,
             sourceLengthBytes = snapshot.lengthBytes,
             sourceSha256 = snapshot.sha256,
-            // Host execution arguments stay isolated until the R4 language-neutral module is gated.
-            arguments = LuaValue.MapValue(emptyMap()),
+            arguments = arguments,
             requiredCapabilities = emptyList(),
             outputByteLimit = minOf(LuaRuntimeContract.DEFAULT_OUTPUT_BYTES, limits.maxOutputBytes),
             memoryByteLimit = minOf(LuaRuntimeContract.DEFAULT_MEMORY_BYTES, limits.maxMemoryBytes),
             timeoutMillis = minOf(LuaRuntimeContract.DEFAULT_TIMEOUT_MILLIS, limits.maxExecutionMillis),
+        )
+    }
+
+    private fun executionArguments(): LuaValue.MapValue = when (val config = getTag(ExecutionConfig.tag)) {
+        null -> EMPTY_ARGUMENTS
+        is ExecutionConfig -> LuaExecutionArgumentMapper.map(config.arguments)
+        else -> throw IllegalArgumentException(
+            "Lua execution config tag has unsupported type ${config.javaClass.name}",
         )
     }
 
@@ -195,6 +212,7 @@ class LuaPluginScriptEngine internal constructor(
         const val TAG = "LuaPluginScriptEngine"
         const val INITIAL_OUTPUT_CREDITS = LuaRuntimeContract.MAX_OUTSTANDING_OUTPUT_CREDITS
         const val DEFAULT_TERMINAL_GRACE_MILLIS = 5_000L
+        val EMPTY_ARGUMENTS = LuaValue.MapValue(emptyMap())
 
         fun emitOutput(output: LuaOutputChunk) {
             val level = if (output.stream == LuaOutputStream.STDERR) Log.ERROR else Log.INFO
