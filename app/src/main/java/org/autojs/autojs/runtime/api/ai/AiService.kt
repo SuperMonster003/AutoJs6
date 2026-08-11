@@ -28,6 +28,7 @@ import org.autojs.autojs.core.ai.transport.AiToolCall
 import org.autojs.autojs.core.ai.transport.AiUsage
 import org.autojs.autojs.core.ai.transport.SseReader
 import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamRunner
 import org.autojs.autojs.core.plugin.ai.AndroidAiTextPluginAskRunner
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
@@ -56,6 +57,7 @@ class AiService private constructor(
     private val scriptRuntime: ScriptRuntime,
     sourceClient: OkHttpClient,
     pluginAskRuntimeFactory: () -> AiPluginAskRuntime,
+    pluginStreamRuntimeFactory: () -> AiPluginStreamRuntime,
 ) {
 
     constructor(
@@ -74,6 +76,15 @@ class AiService private constructor(
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
             )
         },
+        {
+            AiPluginStreamRuntime(
+                runnerProvider = {
+                    AndroidAiTextPluginAskRunner.createStream(context.applicationContext)
+                },
+                dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
+                bridges = scriptRuntime.bridges,
+            )
+        },
     )
 
     internal constructor(
@@ -82,6 +93,8 @@ class AiService private constructor(
         sourceClient: OkHttpClient,
         pluginAskRunner: AiTextPluginAskRunner,
         pluginDispatcherFactory: () -> AiAsyncDispatcher,
+        pluginStreamRunner: AiTextPluginStreamRunner =
+            AndroidAiTextPluginAskRunner.createStream(context.applicationContext),
     ) : this(
         context,
         scriptRuntime,
@@ -90,6 +103,13 @@ class AiService private constructor(
             AiPluginAskRuntime(
                 runnerProvider = { pluginAskRunner },
                 dispatcherFactory = pluginDispatcherFactory,
+            )
+        },
+        {
+            AiPluginStreamRuntime(
+                runnerProvider = { pluginStreamRunner },
+                dispatcherFactory = pluginDispatcherFactory,
+                bridges = scriptRuntime.bridges,
             )
         },
     )
@@ -102,6 +122,9 @@ class AiService private constructor(
     private val client = AiHttpClientFactory.create(sourceClient)
     private val pluginAskRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         pluginAskRuntimeFactory()
+    }
+    private val pluginStreamRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        pluginStreamRuntimeFactory()
     }
 
     fun ask(input: AiRequestInput): ScriptPromiseAdapter {
@@ -120,7 +143,7 @@ class AiService private constructor(
 
     fun stream(input: AiRequestInput): AiStream {
         if (AiPluginAskInputMapper.hasPluginSelection(input)) {
-            return rejectPluginStream(input)
+            return enqueuePluginStream(input)
         }
         var controllerReference: AiStream.Controller? = null
         val controller = AiStream.Controller(scriptRuntime) {
@@ -231,6 +254,9 @@ class AiService private constructor(
             if (pluginAskRuntimeDelegate.isInitialized()) {
                 pluginAskRuntimeDelegate.value.close()
             }
+            if (pluginStreamRuntimeDelegate.isInitialized()) {
+                pluginStreamRuntimeDelegate.value.close()
+            }
             activeStreams.toList().forEach(AiStream.Controller::cancelSilently)
             activePromises.entries.toList().forEach { (dispatcher, callReference) ->
                 dispatcher.cancelSilently {
@@ -254,6 +280,15 @@ class AiService private constructor(
         return pluginAskRuntime().ask(request)
     }
 
+    private fun enqueuePluginStream(input: AiRequestInput): AiStream {
+        val request = try {
+            AiPluginAskInputMapper.map(input, DEFAULT_CALL_TIMEOUT_MILLIS)
+        } catch (_: Exception) {
+            return pluginStreamRuntime().reject(invalidPluginRequest())
+        }
+        return pluginStreamRuntime().stream(request)
+    }
+
     private fun rejectPluginMethod(
         input: AiRequestInput,
         method: String,
@@ -270,31 +305,13 @@ class AiService private constructor(
         return pluginAskRuntime().reject(error)
     }
 
-    private fun rejectPluginStream(input: AiRequestInput): AiStream {
-        var controllerReference: AiStream.Controller? = null
-        val controller = AiStream.Controller(scriptRuntime) {
-            controllerReference?.let(activeStreams::remove)
-        }.also { controllerReference = it }
-        activeStreams.add(controller)
-        val error = try {
-            AiPluginAskInputMapper.requirePluginControl(input)
-            AiPluginRouteException(
-                code = PLUGIN_METHOD_UNSUPPORTED,
-                message = "ai.stream does not support the AI plugin route",
-            )
-        } catch (_: Exception) {
-            invalidPluginRequest()
-        }
-        if (closed.get()) {
-            controller.cancelSilently()
-        } else {
-            controller.fail(error.toPublicError())
-        }
-        return controller.stream
-    }
-
     private fun pluginAskRuntime(): AiPluginAskRuntime =
         pluginAskRuntimeDelegate.value.also { runtime ->
+            if (closed.get()) runtime.close()
+        }
+
+    private fun pluginStreamRuntime(): AiPluginStreamRuntime =
+        pluginStreamRuntimeDelegate.value.also { runtime ->
             if (closed.get()) runtime.close()
         }
 

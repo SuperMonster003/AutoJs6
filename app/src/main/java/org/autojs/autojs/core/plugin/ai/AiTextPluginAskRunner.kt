@@ -75,3 +75,40 @@ internal fun interface AiTextPluginAskRunner {
         onOutcome: (AiTextPluginAskOutcome) -> Unit,
     ): AiTextPluginAskHandle
 }
+
+/**
+ * Provider-neutral events for the narrow prompt-only plugin stream route.
+ *
+ * Binder/session identities and provider-native payloads deliberately remain below this boundary.
+ */
+internal sealed class AiTextPluginStreamEvent {
+    object Opened : AiTextPluginStreamEvent()
+
+    class Chunk(val text: String) : AiTextPluginStreamEvent() {
+        init {
+            AiValidation.requireUtf8(
+                text,
+                1,
+                AiTextLimits.MAX_CHUNK_TEXT_BYTES,
+                "AI text plugin stream chunk",
+            )
+        }
+
+        override fun toString(): String =
+            "Chunk(textBytes=${AiValidation.utf8Size(text)})"
+    }
+
+    class Completed(val text: String) : AiTextPluginStreamEvent() {
+        override fun toString(): String =
+            "Completed(textBytes=${AiValidation.utf8Size(text)})"
+    }
+
+    data class Failed(val failure: AiTextPluginAskFailure) : AiTextPluginStreamEvent()
+}
+
+internal fun interface AiTextPluginStreamRunner {
+    fun startStream(
+        request: AiTextPluginAskRequest,
+        onEvent: (AiTextPluginStreamEvent) -> Unit,
+    ): AiTextPluginAskHandle
+}
