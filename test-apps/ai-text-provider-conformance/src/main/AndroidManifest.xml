@@ -24,5 +24,12 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".service.IsolatedWrongUidAiCallbackService"
+            android:enabled="true"
+            android:exported="false"
+            android:isolatedProcess="true"
+            android:process=":wrong_uid_relay" />
+
     </application>
 </manifest>

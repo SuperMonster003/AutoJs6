@@ -156,6 +156,7 @@ class FakeAiTextProviderService : Service() {
             val ownedDescriptors = OwnedParcelFileDescriptors.duplicateBeforeAsync(safeDescriptors)
             val session = try {
                 RemoteFakeAiTextSession(
+                    context = applicationContext,
                     ownerUid = ownerUid,
                     requestMetadata = safeRequest.copyOf(),
                     descriptors = ownedDescriptors,

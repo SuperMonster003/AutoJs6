@@ -30,8 +30,7 @@ class FakeAiSessionMachine(
     var terminal: Terminal? = null
         private set
 
-    var credits = 0
-        private set
+    private var credits = 0
 
     var completedToolRounds = 0
         private set
@@ -41,6 +40,9 @@ class FakeAiSessionMachine(
 
     val isActive: Boolean
         @Synchronized get() = state == State.CREATED || state == State.STARTED
+
+    @Synchronized
+    fun creditCount(): Int = credits
 
     init {
         require(maximumCredits > 0)

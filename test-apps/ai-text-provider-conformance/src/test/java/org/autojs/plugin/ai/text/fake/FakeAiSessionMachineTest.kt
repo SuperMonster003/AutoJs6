@@ -9,15 +9,20 @@ import org.junit.Test
 
 class FakeAiSessionMachineTest {
     @Test
-    fun creditsCanBePregrantedAndSequencesAdvanceExactlyOnce() {
+    fun creditsCanBeSnapshottedPregrantedReplenishedAndSequencesAdvanceExactlyOnce() {
         val machine = machine()
         machine.grantCredits(2)
+        val initialWindow = machine.creditCount()
         machine.start(firstChunkSequence = 4L)
 
         assertEquals(4L, machine.reserveNextChunk())
+        assertEquals(initialWindow - 1, machine.creditCount())
+        machine.grantCredits(1)
+        assertEquals(initialWindow, machine.creditCount())
         assertEquals(5L, machine.reserveNextChunk())
+        assertEquals(6L, machine.reserveNextChunk())
         assertNull(machine.reserveNextChunk())
-        assertEquals(0, machine.credits)
+        assertEquals(0, machine.creditCount())
     }
 
     @Test
