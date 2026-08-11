@@ -1,6 +1,6 @@
 # AutoJs6 Python 引擎交付路线图
 
-最后更新：2026-08-11
+最后更新：2026-08-12
 
 本路线图以“尽快形成可用的 Python 引擎”为主线。详细测试过程、历史 APK 哈希和逐次诊断记录保存在证据文档与报告目录中，不再作为日常推进清单重复展开。
 
@@ -17,7 +17,7 @@
 - 每个阶段只设置一个退出门槛，不为每个测试场景创建独立门禁。
 - 当前阶段只验证受本阶段修改影响的层级；纯文档或无关测试变化不自动废弃既有运行时证据。
 - JVM/静态、Android 构建、真机 Binder、真实 CPython 和稳定发布证据继续分层描述。
-- API/ABI 扩展矩阵、hostile 变体、压力和长时 soak 统一放到稳定版发布前，不阻塞 MVP 主线。
+- API/ABI 扩展矩阵、重复 hostile 变体、压力和长时 soak 只按已识别风险追加；不以穷举矩阵或固定时长 soak 作为稳定发布的固定门禁。
 - 诊断证据可以支持工程决策，但不得冒充公开稳定版发布证据。
 - R3-P 完成前 Python 功能默认关闭；开启后也只允许显式选择并固定可信插件。
 - Gradle 任务仍须独占执行；使用真机时必须指定精确 serial，并在结束后恢复和核验设备状态。
@@ -41,7 +41,7 @@
 | R3-P | **已完成（default-off 开发者预览）** | 单文件 Python 引擎纵向路径已通过代表性真机 smoke；公开入口仍关闭 |
 | R4 | **已完成（限定入口范围的开发者预览）** | Python 项目、编辑器及新建快捷方式/定时任务入口一致；content 项目树、Widget 与 Tasker 项目上下文明确延后 |
 | R5 | **已完成（default-off 能力预览）** | 不可变只读能力快照和最小 `autojs6` Python API 已通过构建及 API 31/arm64 代表性项目 smoke |
-| R6 | **进行中（Host `6.8.0` 版本身份已冻结，正式发布待完成）** | 稳定 app adapter、INRT 隔离、三件 AAR 本地分发和聚焦编译/单测已完成；下一步提交精确源码、重建稳定产物并复验 P3 |
+| R6 | **已完成（Plugin `0.1.0` 正式发布）** | Host `6.8.0`/`5275` producer 身份、Plugin GitHub Release、官方索引、代表性 P3 与 production receipt 均已闭环；Host APK 的公开发布不在本路线图内冒充完成 |
 
 ## R0：协议与隔离基线（已完成）
 
@@ -97,7 +97,7 @@
 - [x] 在 API 31/arm64 代表性设备完成真实 CPython、PFD、取消、超时和恢复纵向验证。
 - [x] 完成同签名不同 UID 的 provider 入口拒绝验证。
 - [x] 检查 debug APK 权限、signer、ABI、第三方 wheel 缺失和 ELF 16 KiB page 兼容性。
-- [ ] 补齐许可证、源码提供义务和 CPython 安全维护策略；此项阻断 R6，不阻断 R3-P。
+- [x] 补齐许可证、源码提供义务和 CPython 安全维护策略；对应发行材料已在 R6-P1 固化并随插件 APK 提供。
 
 退出条件：可信插件在代表性设备上可执行、停止、超时并恢复；宿主可以开始默认关闭的 R3-P 集成。
 
@@ -253,7 +253,7 @@ Widget、Tasker 的项目上下文、content 项目树及公开 Python MIME choo
 
 R5 退出条件已满足：预览用户显式开启 Python 后，可通过最小项目使用只读 `autojs6` API；聚焦构建和一个代表性真机项目 smoke 均已通过。当前不新增聚合 gate 或正式 receipt。
 
-## R6：稳定发布闭环（进行中）
+## R6：稳定发布闭环（已完成）
 
 R6 按可独立交付的四个小阶段推进。P1 建立准入与合规基线，P2/P3 保存已经完成的本地 RC 冻结与集中验证，P4 才负责正式 `0.1.0` 发布。前一阶段完成即可进入下一阶段，不等待完整 API × ABI 矩阵、重复 hostile 变体或固定时长 soak；这些只在发现具体风险时追加，不作为日常推进门禁。
 
@@ -289,22 +289,35 @@ P2 的冻结身份为 Host `a03c83807f0e0ad11027daf6c6985787c3e3f793`、Plugin `
 
 P3 诊断 SHA-256 为 `517f8f1729d1fe494d480be915e673cb0e6396bfebdc81eff8bc14f6b420d801`，本地 RC 集成 receipt SHA-256 为 `0a7d33796ddde4f55204553d83e3477288e455b6aaafc776826d53d80fa629e3`。这些文件保持不可改写的历史证据；P4 的源码、文档、版本或产物身份变化后必须生成新证据，不得重标旧 receipt。
 
-### R6-P4：Python Runtime `0.1.0` / Host `6.8.0` 正式热插拔发布（进行中）
+### R6-P4：Python Runtime `0.1.0` / Host `6.8.0` 正式热插拔发布（已完成）
 
 - [x] 固化产品与维护决定：Chaquopy 是可信本地脚本运行时，不是 hostile-code sandbox；SM003 是长期发行 signer；`SuperMonster003` 同时承担 runtime、security 与 release owner；Plugin `0.1.0` 与 Host `6.8.0` 配对。
 - [x] 固化并在当前源码实现热插拔语义：Host 无需重启；安装或重新启用 Plugin 后，下一次新执行重新发现并 pin provider 身份；前台入口对缺失/禁用显示安装/启用提示，后台入口只返回稳定错误，二者都绝不 fallback；卸载、禁用或更新引起在途 Binder death 时终止该执行且不得重放，后续新执行再重新发现。
 - [x] 生成 `1.1.0`/`STABLE` 的本地三件 AAR distribution：`common-plugin-api-release.aar`、`protocol-wire-api-release.aar` 和 `python-runtime-api-release.aar`；sibling Plugin 已按 manifest/SHA-256 锁定三件 AAR 并完成聚焦 Debug/Release 编译与单测消费验证。
-- [x] 冻结 Host `6.8.0` 的版本身份与配对约束：`VERSION_NAME=6.8.0`、`VERSION_BUILD`/`versionCode=5275`，Plugin `0.1.0` 与该 Host 版本配对。该勾选只确认版本身份，不代表源码 commit、AAR、provenance、P3、tag 或发布已经冻结或完成。
-- [ ] 完成官方 GitHub 身份与权限准备：目标仓库、`master` 分支和发布权限必须实际可用；当前授权决定不等于已认证、已推送、已打 tag 或已发布。
-- [ ] 在 AutoJs6 官方插件索引登记 Python Runtime 的包名、仓库、版本、Host 配对和 SM003 signer；索引未落地前不得宣称官方可发现。
-- [ ] 将本次版本与 Roadmap 变更提交为精确 Host source commit 后，重新生成 Host API 分发清单、Plugin `0.1.0` 版本/产物和 provenance，并对这些精确稳定产物重新运行最小 P3 集中复验；当前 dirty-tree 编译/单测和历史 RC/P3 均不能替代该复验。
-- [ ] 推送精确源码，创建 `v0.1.0` tag 与 GitHub Release，独立下载并复核发布资产，再生成唯一 production receipt；receipt 必须记录发布 URL/ID、tag commit、资产哈希、signer、Host 配对以及证据限制。
+- [x] 冻结 Host `6.8.0` 的版本身份与配对约束：`VERSION_NAME=6.8.0`、`VERSION_BUILD`/`versionCode=5275`，Plugin `0.1.0` 仅接受该正式 Host 基线及后续兼容版本。
+- [x] 完成官方 GitHub 身份：公开仓库 `SuperMonster003/AutoJs6-Plugin-Python-Runtime`、默认 `master` 分支、稳定 tag `v0.1.0` 与非 draft/非 prerelease Release 均已落地。
+- [x] 在 AutoJs6 官方插件索引登记 Python Runtime；索引实际承载包名、`0.1.0`/VC11、三件 APK、`supportedAbis`、`engine=python`、`variant=cpython-3.13` 与 `engineId=python-runtime`。Host 配对和 signer 由 provenance/receipt 固定，不虚构为索引字段。
+- [x] 冻结精确 Host/Plugin producer commit，重新生成三件 Host API AAR、Plugin `0.1.0` APK 与 provenance，并对这些精确稳定产物完成最小 P3 集中复验。后续 Roadmap 文档提交只是 docs-only closure，不改变或替代 producer identity。
+- [x] 推送精确插件源码、创建 `v0.1.0` tag 与 GitHub Release，独立下载并逐字节复核三件公开资产，再生成唯一 production receipt。
 
-P4 版本身份冻结前的本地证据：`verifyPythonReleaseApiDistributionGate` 为 PASS，distribution manifest SHA-256 为 `16cad933bb6a13b1eafa6e7a5af581db0736b97c6d2690ff51053005a1a35e96`，三件 AAR 的依赖边为 `python-runtime-api -> protocol-wire-api`，`common-plugin-api` 独立分发。Host 的上述 `9/9` 聚焦单测及 Debug/Release Kotlin 编译通过；sibling Plugin 的 `testDebugUnitTest` 为 `32/32`、零失败/错误/跳过，`compileDebugKotlin` 与 `compileReleaseKotlin` 通过。该 manifest 明确记录 Host `dirty=true`、`published=false`，且不绑定当前 `6.8.0`/`5275` 版本身份；producer gate 中的 `pluginConsumed=false` 不被篡改，独立的 sibling lock 与编译/测试只构成历史本地 consumer 证据，必须按上一项重新生成和复验。
+P4 最终 producer 与供应链证据：
 
-P4 退出条件：正式 Host 身份、官方索引、GitHub tag/Release 与下载复核均可追溯，且新的 production receipt 明确声明 `published=true`、`stableRelease=true` 并回指全部冻结输入。当前尚未达到该条件，也不声称 `0.1.0` 已发布。
+- Host producer commit 为 `2caddcb763b39f0bf450909742fa6ec4caba27a8`，版本为 `6.8.0`/`5275`；稳定三件 AAR distribution manifest SHA-256 为 `9f296ad45c24b7eb3e217e4d0ce6c96ba2593966b2bed1db1f2846d658987818`。
+- Plugin producer/tag commit 为 `4cc4187137e3c1060aa0444b482377afafb6a032`，版本为 `0.1.0`/`11`；prepublication provenance SHA-256 为 `f40cab93c531663b55188d2f27ceaec63c7446877f19f5c9997ccd8137fa73ef`。
+- 最终 P3 SHA-256 为 `dc3b64214bdafe099c01aa1826d9a53ae2bd3a9aaea87fb4a29fa2f92bc3fa4c`：`QV710AF65F`、API 31、`arm64-v8a`、冻结用户 `[0,10]`，15 项 observation 全部通过，结束后所有测试包在全用户与 global 状态均核验为 absent。
 
-`verifyPythonFinalIntegrationGate` 仍是预期的最终独立聚合入口；在受版本控制的实现与 production receipt 实际生成前，该名称本身不构成发布证据，也不阻塞 P4 之前的日常推进。
+公开发布证据：
+
+- [GitHub Release `v0.1.0`](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/releases/tag/v0.1.0) 的 ID 为 `368794229`，发布时间为 `2026-08-11T19:08:41Z`，tag 精确指向 Plugin producer commit。
+- `arm64-v8a` 资产 `autojs6-plugin-python-runtime-v0.1.0-arm64-v8a-afe2ffe6.apk`：22,567,808 bytes，SHA-256 `37e11baffac6076e25c70e1f2cd85a0c5032311fcf12dbf3a43c74264c1bdbcf`。
+- `x86_64` 资产 `autojs6-plugin-python-runtime-v0.1.0-x86_64-644671b6.apk`：22,584,168 bytes，SHA-256 `7e340a31988dcf8a24c824c525a70ba77e8c383b35c4ae1f0b239c05ba8e31a8`。
+- `universal` 资产 `autojs6-plugin-python-runtime-v0.1.0-universal-36cd892e.apk`：33,480,159 bytes，SHA-256 `18f1cb68c42a9f21acd3691bf6d798004b6a69ff5f881b39c2ff1fe670c980b6`。
+- 官方插件索引 commit 为 `3d7a573c4500cf0589e5a3318038f0aeebc06eba`，生成索引 SHA-256 为 `5228a1715fee3af754088c7ae1cce8af51451d340b4825f1e33098185d30a938`，Python 条目唯一且三件资产摘要与 Release 一致。
+- production receipt SHA-256 为 `73138982b4e0d7979a24f67e84c806ca02db74e17bb75b5f78e59d9bfb2b9e98`，明确声明 `PRODUCTION_RELEASE`、`published=true`、`stableRelease=true` 与 `productionReleaseAuthorized=true`。
+
+P4 退出条件已满足。最终聚合入口是插件仓库中受版本控制的 `tools/verify-r6-stable-release.ps1`；它消费精确 provenance、P3、独立下载资产和远端 Release 元数据后原子生成 production receipt。
+
+证据边界保持不变：运行时只面向可信本地 Python 脚本，不是安全沙箱；`x86_64` 只有签名 Release 打包证据，没有真机执行证据；receipt 的 `hostPublicReleaseVerified=false` 表示本路线图只冻结 Host `6.8.0`/`5275` producer 与配对产物，不声称 Host APK 已公开发布。后续 Roadmap 提交不是 producer，无需因此重建 AAR、APK、provenance、P3 或 receipt。
 
 ## 全局不变量
 
