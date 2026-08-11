@@ -136,7 +136,7 @@ class AiService private constructor(
 
     fun chat(input: AiRequestInput): ScriptPromiseAdapter {
         if (AiPluginAskInputMapper.hasPluginSelection(input)) {
-            return rejectPluginMethod(input, "ai.chat")
+            return enqueuePluginChat(input)
         }
         return enqueue(input) { response, metadata -> response.toPublicValue(metadata) }
     }
@@ -280,6 +280,15 @@ class AiService private constructor(
         return pluginAskRuntime().ask(request)
     }
 
+    private fun enqueuePluginChat(input: AiRequestInput): ScriptPromiseAdapter {
+        val request = try {
+            AiPluginAskInputMapper.map(input, DEFAULT_CALL_TIMEOUT_MILLIS)
+        } catch (_: Exception) {
+            return pluginAskRuntime().reject(invalidPluginRequest())
+        }
+        return pluginAskRuntime().chat(request)
+    }
+
     private fun enqueuePluginStream(input: AiRequestInput): AiStream {
         val request = try {
             AiPluginAskInputMapper.map(input, DEFAULT_CALL_TIMEOUT_MILLIS)
@@ -287,22 +296,6 @@ class AiService private constructor(
             return pluginStreamRuntime().reject(invalidPluginRequest())
         }
         return pluginStreamRuntime().stream(request)
-    }
-
-    private fun rejectPluginMethod(
-        input: AiRequestInput,
-        method: String,
-    ): ScriptPromiseAdapter {
-        val error = try {
-            AiPluginAskInputMapper.requirePluginControl(input)
-            AiPluginRouteException(
-                code = PLUGIN_METHOD_UNSUPPORTED,
-                message = "$method does not support the AI plugin route",
-            )
-        } catch (_: Exception) {
-            invalidPluginRequest()
-        }
-        return pluginAskRuntime().reject(error)
     }
 
     private fun pluginAskRuntime(): AiPluginAskRuntime =
@@ -786,7 +779,6 @@ class AiService private constructor(
         private const val DEFAULT_STREAM_CALL_TIMEOUT_MILLIS =
             AiControlOptions.MAX_TIMEOUT_MILLIS
         private const val PLUGIN_INVALID_REQUEST = "INVALID_REQUEST"
-        private const val PLUGIN_METHOD_UNSUPPORTED = "PLUGIN_METHOD_UNSUPPORTED"
         private const val MAX_ERROR_MESSAGE_CHARS = 512
         private val CONTROL_CHARACTERS = Regex("[\\p{Cc}\\p{Cf}]+")
     }
