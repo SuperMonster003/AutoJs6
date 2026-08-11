@@ -176,7 +176,7 @@ class LuaPluginScriptEngine internal constructor(
             sourceLengthBytes = snapshot.lengthBytes,
             sourceSha256 = snapshot.sha256,
             arguments = arguments,
-            requiredCapabilities = emptyList(),
+            requiredCapabilities = connection.grantedCapabilities,
             outputByteLimit = minOf(LuaRuntimeContract.DEFAULT_OUTPUT_BYTES, limits.maxOutputBytes),
             memoryByteLimit = minOf(LuaRuntimeContract.DEFAULT_MEMORY_BYTES, limits.maxMemoryBytes),
             timeoutMillis = minOf(LuaRuntimeContract.DEFAULT_TIMEOUT_MILLIS, limits.maxExecutionMillis),

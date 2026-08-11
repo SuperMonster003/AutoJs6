@@ -33,6 +33,10 @@ internal object LuaRuntimePluginHostFactory {
             releaseBuild = !BuildConfig.DEBUG,
             allowUserApprovedProviders = true,
         ),
+        requirement = LuaRuntimeProviderRequirement(
+            hostCapabilities = LuaRuntimeHostCapabilities.ENABLED,
+            requiredCapabilities = emptyList(),
+        ),
     )
 }
 

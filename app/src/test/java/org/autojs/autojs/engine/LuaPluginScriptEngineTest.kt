@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import org.autojs.autojs.core.plugin.lua.LuaRuntimeHostCapabilities
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.LuaScriptSource
@@ -58,11 +59,24 @@ class LuaPluginScriptEngineTest {
         assertEquals(1, backend.connectionCloseCount)
         assertEquals(listOf("from-fake"), backend.outputs)
         assertEquals(LuaValue.MapValue(emptyMap()), backend.lastRequest?.arguments)
+        assertEquals(LuaRuntimeHostCapabilities.ENABLED, backend.lastRequest?.requiredCapabilities)
         assertTrue(temporaryFolder.root.resolve("lua-source-snapshots").listFiles().orEmpty().isEmpty())
 
         engine.destroy()
         engine.destroy()
         assertTrue(engine.isDestroyed)
+    }
+
+    @Test
+    fun providerWithoutOptionalHostCapabilityStillRunsBasicLua() {
+        val backend = FakeBackend(Mode.COMPLETE, EMPTY_CAPABILITY_INFO)
+        val engine = LuaPluginScriptEngine(temporaryFolder.root, backend)
+
+        engine.init()
+        assertEquals(LuaValue.Int64Value(7L), engine.execute(source()))
+
+        assertEquals(emptyList<String>(), backend.lastRequest?.requiredCapabilities)
+        engine.destroy()
     }
 
     @Test
@@ -424,7 +438,10 @@ class LuaPluginScriptEngineTest {
         PREPARE_FAILURE,
     }
 
-    private class FakeBackend(private val mode: Mode) : LuaEngineRuntimeBackend {
+    private class FakeBackend(
+        private val mode: Mode,
+        private val info: LuaRuntimeInfo = INFO,
+    ) : LuaEngineRuntimeBackend {
         val started = CountDownLatch(1)
         val prepareEntered = CountDownLatch(1)
         val acquireEntered = CountDownLatch(1)
@@ -446,7 +463,7 @@ class LuaPluginScriptEngineTest {
                 CountDownLatch(1).await()
                 error("Blocked prepare unexpectedly resumed")
             }
-            return LuaEnginePreparedRuntime(INFO, VERSION, this)
+            return LuaEnginePreparedRuntime(info, VERSION, this)
         }
 
         override fun acquire(prepared: LuaEnginePreparedRuntime): LuaEngineRuntimeConnection {
@@ -460,8 +477,9 @@ class LuaPluginScriptEngineTest {
             }
             val connectionClosed = AtomicBoolean(false)
             return object : LuaEngineRuntimeConnection {
-                override val runtimeInfo: LuaRuntimeInfo = INFO
+                override val runtimeInfo: LuaRuntimeInfo = info
                 override val protocolVersion: LuaProtocolVersion = VERSION
+                override val grantedCapabilities: List<String> = info.capabilities
 
                 override fun createExecution(
                     request: LuaExecutionRequest,
@@ -570,7 +588,7 @@ class LuaPluginScriptEngineTest {
             languageVersion = "5.4.8",
             processAbi = "x86_64",
             supportedAbis = listOf("x86_64"),
-            capabilities = emptyList(),
+            capabilities = LuaRuntimeHostCapabilities.ENABLED,
             limits = LuaRuntimeLimits(
                 maxSourceBytes = 1024L,
                 maxMemoryBytes = 1024L * 1024L,
@@ -578,6 +596,20 @@ class LuaPluginScriptEngineTest {
                 maxExecutionMillis = 1_000L,
                 maxConcurrentExecutions = 1,
             ),
+        )
+        val EMPTY_CAPABILITY_INFO = LuaRuntimeInfo(
+            protocolMin = VERSION,
+            protocolMax = VERSION,
+            providerId = "org.autojs.lua.compat",
+            providerVersionName = "1.0",
+            providerVersionCode = 1L,
+            runtimeFamily = LuaRuntimeFamily.PUC_LUA,
+            runtimeSlot = "lua54",
+            languageVersion = "5.4.8",
+            processAbi = "x86_64",
+            supportedAbis = listOf("x86_64"),
+            capabilities = emptyList(),
+            limits = INFO.limits,
         )
     }
 }

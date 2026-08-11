@@ -13,8 +13,6 @@ import org.autojs.plugin.lua.runtime.api.ILuaExecutionSession
 import org.autojs.plugin.lua.runtime.api.ILuaHostCapabilityBroker
 import org.autojs.plugin.lua.runtime.api.ILuaHostCapabilityCallback
 import org.autojs.plugin.lua.runtime.api.LuaExecutionRequest
-import org.autojs.plugin.lua.runtime.api.LuaHostCallError
-import org.autojs.plugin.lua.runtime.api.LuaHostErrorCode
 import org.autojs.plugin.lua.runtime.api.LuaProtocolVersion
 import org.autojs.plugin.lua.runtime.api.LuaRuntimeCodec
 import org.autojs.plugin.lua.runtime.api.LuaRuntimeInfo
@@ -37,6 +35,7 @@ internal interface LuaEngineRuntimeBackend {
 internal interface LuaEngineRuntimeConnection : Closeable {
     val runtimeInfo: LuaRuntimeInfo
     val protocolVersion: LuaProtocolVersion
+    val grantedCapabilities: List<String>
 
     fun createExecution(
         request: LuaExecutionRequest,
@@ -93,19 +92,30 @@ internal class BinderLuaEngineRuntimeBackend(
         override val protocolVersion: LuaProtocolVersion
             get() = acquired.pinnedIdentity.protocolVersion
 
+        override val grantedCapabilities: List<String>
+            get() = acquired.pinnedIdentity.grantedCapabilities
+
         override fun createExecution(
             request: LuaExecutionRequest,
             source: LuaSourceSnapshot,
             observer: LuaEngineExecutionObserver,
         ): LuaEngineRemoteSession {
+            require(acquired.pinnedIdentity.grantedCapabilities.containsAll(request.requiredCapabilities)) {
+                "Lua execution requirements exceed the pinned host capability grant"
+            }
             val sessionRef = AtomicReference<ILuaExecutionSession?>()
             val revoked = AtomicBoolean(false)
-            val callback = executionCallback(observer, sessionRef, revoked)
-            val broker = rejectingHostBroker(request, observer, revoked)
+            val broker = hostBroker(request, observer, revoked)
+            val revokeBroker: () -> Unit = {
+                revoked.set(true)
+                broker.close()
+            }
+            val callback = executionCallback(observer, sessionRef, revoked, revokeBroker)
             val provider = acquired.provider
             val providerBinder = provider.asBinder()
                 ?: throw IllegalStateException("Lua runtime provider returned a null Binder")
             val deathRecipient = IBinder.DeathRecipient {
+                revokeBroker()
                 observer.transportViolation(IllegalStateException("Lua runtime provider Binder died"))
             }
             providerBinder.linkToDeath(deathRecipient, 0)
@@ -140,6 +150,7 @@ internal class BinderLuaEngineRuntimeBackend(
                     ?: throw IllegalStateException("Lua runtime provider returned a session without a Binder")
                 if (createdSessionBinder !== providerBinder) {
                     val createdSessionDeathRecipient = IBinder.DeathRecipient {
+                        revokeBroker()
                         observer.transportViolation(IllegalStateException("Lua execution session Binder died"))
                     }
                     createdSessionBinder.linkToDeath(createdSessionDeathRecipient, 0)
@@ -158,9 +169,11 @@ internal class BinderLuaEngineRuntimeBackend(
                     sessionBinder = sessionBinder,
                     sessionDeathRecipient = sessionDeathRecipient,
                     revoked = revoked,
+                    closeHostBroker = broker::close,
                 )
             } catch (error: Throwable) {
                 revoked.set(true)
+                broker.close()
                 session?.let { unownedSession ->
                     sessionRef.compareAndSet(unownedSession, null)
                     if (attached) acquired.releaseSession(unownedSession)
@@ -185,14 +198,15 @@ internal class BinderLuaEngineRuntimeBackend(
             observer: LuaEngineExecutionObserver,
             sessionRef: AtomicReference<ILuaExecutionSession?>,
             revoked: AtomicBoolean,
+            revokeBroker: () -> Unit,
         ) = object : ILuaExecutionCallback.Stub() {
 
-            override fun onStarted(metadata: ByteArray?) = fromPinnedUid(observer) {
+            override fun onStarted(metadata: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
                 if (revoked.get()) return@fromPinnedUid
                 observer.onStarted(requireNotNull(metadata) { "Lua started metadata is null" })
             }
 
-            override fun onOutput(output: ByteArray?) = fromPinnedUid(observer) {
+            override fun onOutput(output: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
                 if (revoked.get()) return@fromPinnedUid
                 if (!observer.onOutput(requireNotNull(output) { "Lua output payload is null" })) return@fromPinnedUid
                 val session = sessionRef.get()
@@ -206,29 +220,51 @@ internal class BinderLuaEngineRuntimeBackend(
 
             override fun onCompleted(result: ByteArray?, descriptors: Array<out ParcelFileDescriptor?>?) {
                 closeDescriptors(descriptors) { count ->
-                    fromPinnedUid(observer) {
+                    fromPinnedUid(observer, revokeBroker) {
                         if (revoked.get()) return@fromPinnedUid
-                        observer.onCompleted(requireNotNull(result) { "Lua result payload is null" }, count)
+                        try {
+                            observer.onCompleted(requireNotNull(result) { "Lua result payload is null" }, count)
+                        } finally {
+                            revokeBroker()
+                        }
                     }
                 }
             }
 
-            override fun onFailed(error: ByteArray?) = fromPinnedUid(observer) {
+            override fun onFailed(error: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
                 if (revoked.get()) return@fromPinnedUid
-                observer.onFailed(requireNotNull(error) { "Lua error payload is null" })
+                try {
+                    observer.onFailed(requireNotNull(error) { "Lua error payload is null" })
+                } finally {
+                    revokeBroker()
+                }
             }
 
-            override fun onCancelled(cancellation: ByteArray?) = fromPinnedUid(observer) {
+            override fun onCancelled(cancellation: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
                 if (revoked.get()) return@fromPinnedUid
-                observer.onCancelled(requireNotNull(cancellation) { "Lua cancellation payload is null" })
+                try {
+                    observer.onCancelled(requireNotNull(cancellation) { "Lua cancellation payload is null" })
+                } finally {
+                    revokeBroker()
+                }
             }
         }
 
-        private fun rejectingHostBroker(
+        private fun hostBroker(
             request: LuaExecutionRequest,
             observer: LuaEngineExecutionObserver,
             revoked: AtomicBoolean,
-        ) = object : ILuaHostCapabilityBroker.Stub() {
+        ) = SessionHostBroker(request, observer, revoked)
+
+        private inner class SessionHostBroker(
+            private val request: LuaExecutionRequest,
+            private val observer: LuaEngineExecutionObserver,
+            private val revoked: AtomicBoolean,
+        ) : ILuaHostCapabilityBroker.Stub() {
+            private val dispatcher = LuaHostCapabilityDispatcher(
+                executionId = request.requestId,
+                grantedCapabilities = request.requiredCapabilities,
+            )
 
             override fun invoke(
                 encodedRequest: ByteArray?,
@@ -236,37 +272,51 @@ internal class BinderLuaEngineRuntimeBackend(
                 callback: ILuaHostCapabilityCallback?,
             ) {
                 closeDescriptors(descriptors) { descriptorCount ->
-                    fromPinnedUid(observer) {
+                    fromPinnedUid(observer, ::closeForViolation) {
                         if (revoked.get()) return@fromPinnedUid
                         try {
                             LuaRuntimeValidation.validateV1DescriptorCount(descriptorCount)
                             val hostRequest = LuaRuntimeCodec.decodeHostRequest(
                                 requireNotNull(encodedRequest) { "Lua host request payload is null" },
                             )
-                            require(hostRequest.executionId == request.requestId) {
-                                "Lua host request execution ID does not match"
+                            val hostCallback = requireNotNull(callback) {
+                                "Lua host capability callback is null"
                             }
-                            requireNotNull(callback) { "Lua host capability callback is null" }.onFailed(
-                                LuaRuntimeCodec.encodeHostError(
-                                    LuaHostCallError(
-                                        executionId = hostRequest.executionId,
-                                        callId = hostRequest.callId,
-                                        code = LuaHostErrorCode.CAPABILITY_DENIED,
-                                        message = "Host capabilities are unavailable in Lua host R1",
-                                    ),
-                                ),
-                            )
+                            when (val outcome = dispatcher.dispatch(hostRequest, descriptorCount)) {
+                                is LuaHostDispatchOutcome.Completed -> hostCallback.onCompleted(
+                                    LuaRuntimeCodec.encodeHostResult(outcome.result),
+                                    emptyArray(),
+                                )
+                                is LuaHostDispatchOutcome.Failed -> hostCallback.onFailed(
+                                    LuaRuntimeCodec.encodeHostError(outcome.error),
+                                )
+                            }
                         } catch (error: Throwable) {
+                            closeForViolation()
                             observer.transportViolation(error)
                         }
                     }
                 }
             }
+
+            fun close() {
+                dispatcher.close()
+            }
+
+            private fun closeForViolation() {
+                revoked.set(true)
+                dispatcher.close()
+            }
         }
 
-        private inline fun fromPinnedUid(observer: LuaEngineExecutionObserver, action: () -> Unit) {
+        private inline fun fromPinnedUid(
+            observer: LuaEngineExecutionObserver,
+            onViolation: () -> Unit = {},
+            action: () -> Unit,
+        ) {
             val callingUid = Binder.getCallingUid()
             if (!LuaRuntimeProviderCallbackCallerPolicy.isExpectedUid(acquired.pinnedIdentity, callingUid)) {
+                onViolation()
                 observer.transportViolation(
                     SecurityException(
                         "Lua runtime callback UID $callingUid differs from pinned UID ${acquired.expectedCallbackUid}",
@@ -278,6 +328,7 @@ internal class BinderLuaEngineRuntimeBackend(
             try {
                 action()
             } catch (error: Throwable) {
+                onViolation()
                 observer.transportViolation(error)
             } finally {
                 Binder.restoreCallingIdentity(identity)
@@ -309,6 +360,7 @@ internal class BinderLuaEngineRuntimeBackend(
         private val sessionBinder: IBinder?,
         private val sessionDeathRecipient: IBinder.DeathRecipient?,
         private val revoked: AtomicBoolean,
+        private val closeHostBroker: () -> Unit,
     ) : LuaEngineRemoteSession {
         private val started = AtomicBoolean(false)
         private val cancelled = AtomicBoolean(false)
@@ -331,6 +383,7 @@ internal class BinderLuaEngineRuntimeBackend(
         override fun close() {
             if (!closed.compareAndSet(false, true)) return
             revoked.set(true)
+            closeHostBroker()
             sessionRef.compareAndSet(session, null)
             runCatching { session.close() }
             acquired.releaseSession(session)
