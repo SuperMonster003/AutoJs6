@@ -31,6 +31,107 @@ import sun.misc.Unsafe
 class AiServicePluginRouteTest {
 
     @Test
+    fun synchronousPluginChatCompletionReusesExactPromptRouteAndReturnsNormalizedShapeWithoutCloudFallback() {
+        val dispatchers = TestDispatchers()
+        val runner = FakePluginAskRunner(
+            synchronousOutcome = AiTextPluginAskOutcome.Completed("exact local chat answer"),
+        )
+        val resolved = AtomicReference<Any?>()
+        val rejected = AtomicReference<Any?>()
+        val resolveCount = AtomicInteger()
+        val rejectCount = AtomicInteger()
+        val httpCallCount = AtomicInteger()
+        TestContext.preferenceCallCount.set(0)
+        val service = service(runner, dispatchers, httpCallCount = httpCallCount)
+
+        service.chat(pluginInput(timeoutMillis = 2_500L))
+            .onResolve(callback { value ->
+                resolveCount.incrementAndGet()
+                resolved.set(value)
+            })
+            .onReject(callback { error ->
+                rejectCount.incrementAndGet()
+                rejected.set(error)
+            })
+        dispatchers.drain()
+
+        assertPluginChatResponse(resolved.get(), "exact local chat answer")
+        assertNull(rejected.get())
+        assertEquals(1, resolveCount.get())
+        assertEquals(0, rejectCount.get())
+        assertEquals(1, runner.startCount.get())
+        assertEquals("org.example.provider", runner.request.get()?.component?.packageName)
+        assertEquals("org.example.provider.AiTextService", runner.request.get()?.component?.className)
+        assertEquals("example.provider", runner.request.get()?.providerId)
+        assertEquals("example-model", runner.request.get()?.modelId)
+        assertEquals("prompt", runner.request.get()?.prompt)
+        assertEquals(2_500L, runner.request.get()?.timeoutMillis)
+        assertEquals(0, runner.handle.cancelCount.get())
+        assertEquals(1, runner.handle.closeCount.get())
+        assertEquals(0, TestContext.preferenceCallCount.get())
+        assertEquals(0, httpCallCount.get())
+
+        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        dispatchers.drain()
+        assertPluginChatResponse(resolved.get(), "exact local chat answer")
+        assertNull(rejected.get())
+        assertEquals(1, resolveCount.get())
+        assertEquals(0, rejectCount.get())
+        assertEquals(1, runner.handle.closeCount.get())
+        assertEquals(0, httpCallCount.get())
+        service.close()
+    }
+
+    @Test
+    fun pluginChatFailureRejectsStableRouteCodeWithoutVaultHttpOrFallback() {
+        val dispatchers = TestDispatchers()
+        val runner = FakePluginAskRunner()
+        val resolved = AtomicReference<Any?>()
+        val rejected = AtomicReference<Any?>()
+        val resolveCount = AtomicInteger()
+        val rejectCount = AtomicInteger()
+        val httpCallCount = AtomicInteger()
+        TestContext.preferenceCallCount.set(0)
+        val service = service(runner, dispatchers, httpCallCount = httpCallCount)
+
+        service.chat(pluginInput())
+            .onResolve(callback { value ->
+                resolveCount.incrementAndGet()
+                resolved.set(value)
+            })
+            .onReject(callback { error ->
+                rejectCount.incrementAndGet()
+                rejected.set(error)
+            })
+        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.BINDER_DIED))
+        dispatchers.drain()
+
+        assertNull(resolved.get())
+        assertEquals(0, resolveCount.get())
+        assertEquals(1, rejectCount.get())
+        val error = rejected.get() as Map<*, *>
+        assertEquals("AiPluginRouteException", error["name"])
+        assertEquals("AI plugin chat failed (BINDER_DIED)", error["message"])
+        assertEquals("plugin", error["route"])
+        assertEquals("BINDER_DIED", error["code"])
+        assertEquals(0, TestContext.preferenceCallCount.get())
+        assertEquals(0, httpCallCount.get())
+        assertEquals(1, runner.startCount.get())
+        assertEquals(0, runner.handle.cancelCount.get())
+        assertEquals(1, runner.handle.closeCount.get())
+
+        runner.emit(AiTextPluginAskOutcome.Completed("late completion must not win"))
+        dispatchers.drain()
+        assertNull(resolved.get())
+        assertEquals(error, rejected.get())
+        assertEquals(0, resolveCount.get())
+        assertEquals(1, rejectCount.get())
+        assertEquals(1, runner.handle.closeCount.get())
+        assertEquals(0, httpCallCount.get())
+        service.close()
+    }
+
+    @Test
     fun synchronousPluginCompletionResolvesExactTextAndClosesHandleOnce() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
@@ -95,9 +196,11 @@ class AiServicePluginRouteTest {
     fun malformedPluginSelectionRejectsWithStableInvalidRequestWithoutCloudFallback() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner()
-        val rejected = AtomicReference<Any?>()
+        val askRejected = AtomicReference<Any?>()
+        val chatRejected = AtomicReference<Any?>()
+        val httpCallCount = AtomicInteger()
         TestContext.preferenceCallCount.set(0)
-        val service = service(runner, dispatchers)
+        val service = service(runner, dispatchers, httpCallCount = httpCallCount)
         val input = AiRequestInput(
             messages = JsonParser.parseString(
                 """[{"role":"user","content":"prompt"}]""",
@@ -105,15 +208,15 @@ class AiServicePluginRouteTest {
             options = JsonParser.parseString("""{"plugin":null}""").asJsonObject,
         )
 
-        service.ask(input).onReject(callback(rejected::set))
+        service.ask(input).onReject(callback(askRejected::set))
+        service.chat(input).onReject(callback(chatRejected::set))
         dispatchers.drain()
 
-        val error = rejected.get() as Map<*, *>
-        assertEquals("plugin", error["route"])
-        assertEquals("INVALID_REQUEST", error["code"])
-        assertEquals("AI plugin request is invalid", error["message"])
+        assertInvalidPluginRequest(askRejected.get())
+        assertInvalidPluginRequest(chatRejected.get())
         assertEquals(0, runner.startCount.get())
         assertEquals(0, TestContext.preferenceCallCount.get())
+        assertEquals(0, httpCallCount.get())
         service.close()
     }
 
@@ -182,6 +285,7 @@ class AiServicePluginRouteTest {
         runner: FakePluginAskRunner,
         dispatchers: TestDispatchers,
         streamRunner: AiTextPluginStreamRunner = FakePluginStreamRunner(),
+        httpCallCount: AtomicInteger = AtomicInteger(),
     ) = AiService(
         context = testContext(),
         scriptRuntime = RhinoTestRuntime.create(TopLevelScope()),
@@ -189,7 +293,63 @@ class AiServicePluginRouteTest {
         pluginAskRunner = runner,
         pluginDispatcherFactory = dispatchers::create,
         pluginStreamRunner = streamRunner,
-    )
+    ).also { service ->
+        // AiHttpClientFactory intentionally strips source-client interceptors. Install this on the
+        // actual per-service client so a cloud fallback cannot turn a zero counter into a false pass.
+        val clientField = AiService::class.java.getDeclaredField("client").apply {
+            isAccessible = true
+        }
+        val client = clientField.get(service) as OkHttpClient
+        clientField.set(
+            service,
+            client.newBuilder()
+                .addInterceptor { chain ->
+                    httpCallCount.incrementAndGet()
+                    throw AssertionError("Unexpected cloud HTTP request: ${chain.request().url}")
+                }
+                .build(),
+        )
+    }
+
+    private fun assertPluginChatResponse(value: Any?, expectedText: String) {
+        val response = value as Map<*, *>
+        assertEquals(
+            setOf(
+                "text",
+                "reasoning",
+                "toolCalls",
+                "usage",
+                "finishReason",
+                "message",
+                "error",
+                "raw",
+                "profile",
+                "route",
+                "provider",
+                "model",
+            ),
+            response.keys.toSet(),
+        )
+        assertEquals(expectedText, response["text"])
+        assertEquals("", response["reasoning"])
+        assertEquals(emptyList<Any?>(), response["toolCalls"])
+        assertNull(response["usage"])
+        assertNull(response["finishReason"])
+        assertNull(response["message"])
+        assertNull(response["error"])
+        assertNull(response["raw"])
+        assertNull(response["profile"])
+        assertEquals("plugin", response["route"])
+        assertEquals("example.provider", response["provider"])
+        assertEquals("example-model", response["model"])
+    }
+
+    private fun assertInvalidPluginRequest(value: Any?) {
+        val error = value as Map<*, *>
+        assertEquals("plugin", error["route"])
+        assertEquals("INVALID_REQUEST", error["code"])
+        assertEquals("AI plugin request is invalid", error["message"])
+    }
 
     private fun testContext(): TestContext {
         val unsafe = Unsafe::class.java.getDeclaredField("theUnsafe").run {

@@ -73,10 +73,10 @@ class AiPluginAskRuntimeTest {
         dispatchers.drain()
         assertEquals("first async answer", first.get())
 
-        runtime.ask(request()).onResolve(callback(second::set))
+        runtime.chat(request()).onResolve(callback(second::set))
         runner.emit(AiTextPluginAskOutcome.Completed("second async answer"))
         dispatchers.drain()
-        assertEquals("second async answer", second.get())
+        assertPluginChatResponse(second.get(), "second async answer")
         assertEquals(1, providerCalls.get())
         assertEquals(2, runner.startCount.get())
         assertEquals(2, runner.handle.closeCount.get())
@@ -110,7 +110,7 @@ class AiPluginAskRuntimeTest {
         val resolveCount = AtomicInteger()
         val rejectCount = AtomicInteger()
 
-        runtime.ask(request())
+        runtime.chat(request())
             .onResolve(callback { resolveCount.incrementAndGet() })
             .onReject(callback { rejectCount.incrementAndGet() })
         runtime.close()
@@ -123,6 +123,39 @@ class AiPluginAskRuntimeTest {
         assertEquals(1, runner.handle.closeCount.get())
         assertEquals(0, resolveCount.get())
         assertEquals(0, rejectCount.get())
+    }
+
+    private fun assertPluginChatResponse(value: Any?, expectedText: String) {
+        val response = value as Map<*, *>
+        assertEquals(
+            setOf(
+                "text",
+                "reasoning",
+                "toolCalls",
+                "usage",
+                "finishReason",
+                "message",
+                "error",
+                "raw",
+                "profile",
+                "route",
+                "provider",
+                "model",
+            ),
+            response.keys.toSet(),
+        )
+        assertEquals(expectedText, response["text"])
+        assertEquals("", response["reasoning"])
+        assertEquals(emptyList<Any?>(), response["toolCalls"])
+        assertNull(response["usage"])
+        assertNull(response["finishReason"])
+        assertNull(response["message"])
+        assertNull(response["error"])
+        assertNull(response["raw"])
+        assertNull(response["profile"])
+        assertEquals("plugin", response["route"])
+        assertEquals("example.provider", response["provider"])
+        assertEquals("example-model", response["model"])
     }
 
     private fun request() = AiTextPluginAskRequest(
