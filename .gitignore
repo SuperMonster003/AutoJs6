@@ -42,6 +42,7 @@ AGENTS.md
 !/tools/lua/
 /tools/lua/*
 !/tools/lua/verify-lua-static-roadmap.ps1
+!/tools/lua/run-official-provider-smoke.ps1
 !/tools/nodejs/
 !/tools/nodejs/**
 

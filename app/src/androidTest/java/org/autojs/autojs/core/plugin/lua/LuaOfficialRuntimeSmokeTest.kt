@@ -7,8 +7,9 @@ import android.os.Build
 import android.os.Looper
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.engine.LuaPluginScriptEngine
+import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.lua.runtime.api.LuaPluginActions
@@ -109,12 +110,21 @@ class LuaOfficialRuntimeSmokeTest {
 
     private fun consoleEntries(vararg markers: String): List<Pair<Int, String>> {
         val expected = markers.toSet()
-        val entries = AutoJs.instance.globalConsole.logEntries
-        return synchronized(entries) {
-            entries.mapNotNull { entry ->
-                entry.content.toString().takeIf(expected::contains)?.let { entry.level to it }
+        val console = ScriptEngineService.getInstance().globalConsole as? ConsoleImpl
+            ?: error("Lua output sink is not backed by the host ConsoleImpl")
+        val deadline = System.nanoTime() + 2_000_000_000L
+        var matched = emptyList<Pair<Int, String>>()
+        do {
+            matched = synchronized(console.logEntries) {
+                console.logEntries.mapNotNull { entry ->
+                    val marker = expected.firstOrNull(entry.content.toString()::endsWith)
+                    marker?.let { entry.level to it }
+                }
             }
-        }
+            if (matched.size == expected.size) return matched
+            Thread.sleep(10L)
+        } while (System.nanoTime() < deadline)
+        return matched
     }
 
     private companion object {
