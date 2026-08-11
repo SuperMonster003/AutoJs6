@@ -236,10 +236,13 @@ function Assert-YoloR2Qv710Available {
     $serialPattern = [regex]::Escape($protectedQv710)
     $soakPattern = '(?i)(soak|endurance|long[-_ ]?run|stress[-_ ]?run|verify[-_a-z0-9]*r7|r7[-_a-z0-9]*verify)'
     $matches = @(Get-CimInstance Win32_Process -ErrorAction Stop | Where-Object {
-        $_.ProcessId -ne $PID -and
-        -not [string]::IsNullOrWhiteSpace($_.CommandLine) -and
-        $_.CommandLine -match $serialPattern -and
-        $_.CommandLine -match $soakPattern
+        if ($_.ProcessId -eq $PID -or [string]::IsNullOrWhiteSpace($_.CommandLine)) {
+            return $false
+        }
+        # The explicit approval switch contains the word "Soak" and is propagated by
+        # some command wrappers. Remove only that token before looking for a real runner.
+        $commandForInspection = $_.CommandLine -replace '(?i)-Qv710SoakConfirmedIdle\b', ''
+        return $commandForInspection -match $serialPattern -and $commandForInspection -match $soakPattern
     })
     Assert-YoloR2Condition ($matches.Count -eq 0) (
         "Refusing to use $protectedQv710 because matching soak runner process IDs are active: " +
