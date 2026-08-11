@@ -4,11 +4,21 @@ import android.content.Context
 import android.os.ParcelFileDescriptor
 import android.system.Os
 import android.system.OsConstants
+import org.autojs.plugin.dexcompiler.api.DexCompilerContract
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputBundleCodec
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputBundleSource
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputIdentity
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputRole
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputSetFingerprint
+import org.autojs.plugin.dexcompiler.api.DexSha256
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.FilterInputStream
 import java.io.InputStream
 import java.security.MessageDigest
+import java.util.ArrayList
+import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
@@ -58,7 +68,113 @@ internal class AndroidDexCompilerArtifactStore(
         input: InputStream,
         maximumBytes: Long,
         isCancelled: () -> Boolean = { false },
+    ): DexCompilerInputSnapshot = InputSnapshot(
+        copySnapshot(input, maximumBytes, "Program", isCancelled),
+    )
+
+    /**
+     * Freezes one program and a non-empty ordered compile-time classpath, then builds the V1.1
+     * descriptor bundle exclusively from those private read-only snapshots.
+     *
+     * Each source factory is opened exactly once and the returned stream is closed here. No live
+     * caller path is retained or reopened after its snapshot identity has been established.
+     */
+    fun snapshotInputSet(
+        programInput: () -> InputStream,
+        classpathInputs: Collection<() -> InputStream>,
+        isCancelled: () -> Boolean = { false },
     ): DexCompilerInputSnapshot {
+        val orderedClasspath = classpathInputs.toList()
+        require(orderedClasspath.size in 1..DexCompilerContract.MAX_CLASSPATH_JARS) {
+            "Ordered classpath count is outside the protocol limit"
+        }
+        val frozen = ArrayList<SnapshotState>(orderedClasspath.size + 1)
+        var bundle: SnapshotState? = null
+        try {
+            if (isCancelled()) throw DexCompilerStreamCancelledException()
+            val program = openAndCopySnapshot(
+                source = programInput,
+                maximumBytes = DexCompilerContract.MAX_COMPRESSED_PROGRAM_BYTES,
+                label = "Program",
+                isCancelled = isCancelled,
+            ).also { frozen += it }
+
+            var classpathBytes = 0L
+            orderedClasspath.forEachIndexed { index, source ->
+                if (isCancelled()) throw DexCompilerStreamCancelledException()
+                val state = openAndCopySnapshot(
+                    source = source,
+                    maximumBytes = DexCompilerContract.MAX_COMPRESSED_CLASSPATH_JAR_BYTES,
+                    label = "Classpath JAR $index",
+                    isCancelled = isCancelled,
+                )
+                frozen += state
+                classpathBytes = Math.addExact(classpathBytes, state.sizeBytes)
+                require(classpathBytes <= DexCompilerContract.MAX_TOTAL_COMPRESSED_CLASSPATH_BYTES) {
+                    "Ordered classpath exceeds the aggregate protocol limit"
+                }
+            }
+
+            val identities = frozen.mapIndexed { index, state ->
+                DexCompilerInputIdentity(
+                    role = if (index == 0) DexCompilerInputRole.PROGRAM else DexCompilerInputRole.CLASSPATH,
+                    ordinal = if (index == 0) 0 else index - 1,
+                    sizeBytes = state.sizeBytes,
+                    contentSha256 = state.sha256.toDexSha256(),
+                )
+            }
+            val bundleFile = newPrivateFile("input", ".bundle")
+            try {
+                val summary = FileOutputStream(bundleFile).use { output ->
+                    if (isCancelled()) throw DexCompilerStreamCancelledException()
+                    val value = DexCompilerInputBundleCodec.write(
+                        output = output,
+                        sources = identities.mapIndexed { index, identity ->
+                            DexCompilerInputBundleSource(identity) {
+                                CancellationCheckingInputStream(
+                                    FileInputStream(frozen[index].file),
+                                    isCancelled,
+                                )
+                            }
+                        },
+                    )
+                    if (isCancelled()) throw DexCompilerStreamCancelledException()
+                    output.fd.sync()
+                    if (isCancelled()) throw DexCompilerStreamCancelledException()
+                    value
+                }
+                check(summary.identities == identities) { "Canonical input bundle identities changed" }
+                check(bundleFile.length() == summary.sizeBytes) { "Canonical input bundle size changed" }
+                Os.chmod(bundleFile.absolutePath, READ_ONLY_MODE)
+                bundle = SnapshotState(
+                    file = bundleFile,
+                    sizeBytes = summary.sizeBytes,
+                    sha256 = summary.contentSha256.toHexString(),
+                )
+            } catch (error: Throwable) {
+                bundleFile.delete()
+                throw error
+            }
+            return InputSetSnapshot(
+                program = program,
+                classpath = frozen.drop(1),
+                bundle = checkNotNull(bundle),
+                identities = identities,
+                inputSetSha256 = DexCompilerInputSetFingerprint.compute(identities).toHexString(),
+            )
+        } catch (error: Throwable) {
+            bundle?.release()
+            frozen.asReversed().forEach(SnapshotState::release)
+            throw error
+        }
+    }
+
+    private fun copySnapshot(
+        input: InputStream,
+        maximumBytes: Long,
+        label: String,
+        isCancelled: () -> Boolean,
+    ): SnapshotState {
         require(maximumBytes > 0L)
         val file = newPrivateFile("input", ".jar")
         try {
@@ -72,11 +188,30 @@ internal class AndroidDexCompilerArtifactStore(
                 output.fd.sync()
                 copied
             }
-            if (summary.sizeBytes <= 0L) throw IllegalArgumentException("Program snapshot is empty")
+            if (summary.sizeBytes <= 0L) throw IllegalArgumentException("$label snapshot is empty")
             Os.chmod(file.absolutePath, READ_ONLY_MODE)
-            return InputSnapshot(SnapshotState(file, summary.sizeBytes, summary.sha256))
+            return SnapshotState(file, summary.sizeBytes, summary.sha256)
         } catch (error: Throwable) {
             file.delete()
+            throw error
+        }
+    }
+
+    private fun openAndCopySnapshot(
+        source: () -> InputStream,
+        maximumBytes: Long,
+        label: String,
+        isCancelled: () -> Boolean,
+    ): SnapshotState {
+        var copied: SnapshotState? = null
+        return try {
+            source().use { input ->
+                copySnapshot(input, maximumBytes, label, isCancelled).also { copied = it }
+            }
+        } catch (error: Throwable) {
+            // `use` may fail while closing the source after copySnapshot has already committed its
+            // private read-only file. Until this helper returns, that state has no outer owner.
+            copied?.release()
             throw error
         }
     }
@@ -154,8 +289,60 @@ internal class AndroidDexCompilerArtifactStore(
         }
     }
 
+    private class InputSetSnapshot(
+        private val program: SnapshotState,
+        private val classpath: List<SnapshotState>,
+        private val bundle: SnapshotState,
+        identities: Collection<DexCompilerInputIdentity>,
+        private val inputSetSha256: String,
+    ) : DexCompilerInputSnapshot {
+        private val descriptorClaimed = AtomicBoolean(false)
+        private val closed = AtomicBoolean(false)
+
+        override val sizeBytes: Long
+            get() = program.sizeBytes
+
+        override val sha256: String
+            get() = program.sha256
+
+        override val wireSizeBytes: Long
+            get() = bundle.sizeBytes
+
+        override val wireSha256: String
+            get() = bundle.sha256
+
+        override val inputIdentities: List<DexCompilerInputIdentity> =
+            Collections.unmodifiableList(ArrayList(identities))
+
+        override fun claimReadDescriptor(): DexCompilerOwnedDescriptor {
+            check(!closed.get() && descriptorClaimed.compareAndSet(false, true)) {
+                "Input bundle descriptor may be claimed exactly once"
+            }
+            return AndroidDexCompilerDescriptor(
+                ParcelFileDescriptor.open(bundle.file, ParcelFileDescriptor.MODE_READ_ONLY),
+            )
+        }
+
+        override fun retainForLocalFallback(): DexCompilerRetainedInput {
+            check(!closed.get()) { "Input-set snapshot is already closed" }
+            val states = listOf(program) + classpath
+            retainAll(states)
+            return RetainedInput(program, classpath, inputSetSha256)
+        }
+
+        override fun close() {
+            if (closed.compareAndSet(false, true)) {
+                bundle.release()
+                classpath.asReversed().forEach(SnapshotState::release)
+                program.release()
+            }
+        }
+    }
+
     private class RetainedInput(
         private val state: SnapshotState,
+        private val classpath: List<SnapshotState> = emptyList(),
+        override val inputSetSha256: String? = null,
     ) : DexCompilerRetainedInput {
         private val closed = AtomicBoolean(false)
 
@@ -167,8 +354,19 @@ internal class AndroidDexCompilerArtifactStore(
 
         override fun resolve(): File? = if (closed.get()) null else state.resolve()
 
+        override fun resolveInputSet(): DexCompilerResolvedInputSet? {
+            if (closed.get()) return null
+            val program = state.resolve() ?: return null
+            val resolvedClasspath = ArrayList<File>(classpath.size)
+            classpath.forEach { item -> resolvedClasspath += item.resolve() ?: return null }
+            return DexCompilerResolvedInputSet(program, resolvedClasspath)
+        }
+
         override fun close() {
-            if (closed.compareAndSet(false, true)) state.release()
+            if (closed.compareAndSet(false, true)) {
+                classpath.asReversed().forEach(SnapshotState::release)
+                state.release()
+            }
         }
     }
 
@@ -197,6 +395,25 @@ internal class AndroidDexCompilerArtifactStore(
             val remaining = references.decrementAndGet()
             check(remaining >= 0) { "Program snapshot was released more than once" }
             if (remaining == 0) file.delete()
+        }
+    }
+
+    private class CancellationCheckingInputStream(
+        input: InputStream,
+        private val isCancelled: () -> Boolean,
+    ) : FilterInputStream(input) {
+        override fun read(): Int {
+            throwIfCancelled()
+            return super.read()
+        }
+
+        override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+            throwIfCancelled()
+            return super.read(buffer, offset, length)
+        }
+
+        private fun throwIfCancelled() {
+            if (isCancelled()) throw DexCompilerStreamCancelledException()
         }
     }
 
@@ -469,6 +686,19 @@ internal class AndroidDexCompilerArtifactStore(
         const val PIPE_REJECTION_MESSAGE = "Host rejected DEX compiler output"
         val SHA256 = Regex("[0-9a-f]{64}")
         val UNINDEXED_PUBLICATION = Regex("[0-9a-f]{64}\\.dex\\.zip")
+
+        fun retainAll(states: List<SnapshotState>) {
+            val retained = ArrayList<SnapshotState>(states.size)
+            try {
+                states.forEach { state ->
+                    state.retain()
+                    retained += state
+                }
+            } catch (error: Throwable) {
+                retained.asReversed().forEach(SnapshotState::release)
+                throw error
+            }
+        }
     }
 }
 
@@ -524,3 +754,12 @@ private fun sha256File(file: File): String = FileInputStream(file).use { input -
 }
 
 private fun ByteArray.toHex(): String = joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
+
+private fun String.toDexSha256(): DexSha256 {
+    require(length == DexSha256.BYTE_COUNT * 2 && all { it in '0'..'9' || it in 'a'..'f' })
+    return DexSha256.fromBytes(
+        ByteArray(DexSha256.BYTE_COUNT) { index ->
+            substring(index * 2, index * 2 + 2).toInt(16).toByte()
+        },
+    )
+}

@@ -18,7 +18,13 @@ import org.autojs.plugin.dexcompiler.api.DexCompilerErrorCode
 import org.autojs.plugin.dexcompiler.api.DexCompilerFailurePhase
 import org.autojs.plugin.dexcompiler.api.DexCompilerFamily
 import org.autojs.plugin.dexcompiler.api.DexCompilerInfo
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputBundleCodec
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputBundleSource
 import org.autojs.plugin.dexcompiler.api.DexCompilerInputFormat
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputIdentity
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputLayout
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputRole
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputSetFingerprint
 import org.autojs.plugin.dexcompiler.api.DexCompilerMode
 import org.autojs.plugin.dexcompiler.api.DexCompilerOutputFormat
 import org.autojs.plugin.dexcompiler.api.DexCompilerProgressStage
@@ -37,6 +43,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.Closeable
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.ArrayDeque
 import java.util.UUID
@@ -94,7 +101,7 @@ class DexCompilerExperimentalHarnessTest {
         val fixture = Fixture()
         val unknownFingerprint = DexSha256.fromBytes(ByteArray(DexSha256.BYTE_COUNT))
         val draft = fixture.request.copy(
-            protocolVersion = DexProtocolVersion(1, 99),
+            protocolVersion = DexCompilerContract.PROTOCOL_V1_0,
             expectedRuntimeLibraryFingerprint = unknownFingerprint,
         )
 
@@ -117,6 +124,65 @@ class DexCompilerExperimentalHarnessTest {
         val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.Published
         assertEquals(outcome.cacheKeySha256, fixture.output.publishedCacheKey)
         assertEquals(1, fixture.output.publishCount)
+    }
+
+    @Test
+    fun exactV11RequestRejectsAV10ProviderBeforeCacheDescriptorOrRemoteDispatch() {
+        val fixture = Fixture()
+        val classpathBytes = "compile-time-classpath".toByteArray()
+        val identities = listOf(
+            DexCompilerInputIdentity(
+                DexCompilerInputRole.PROGRAM,
+                0,
+                fixture.inputBytes.size.toLong(),
+                DexSha256.digest(fixture.inputBytes),
+            ),
+            DexCompilerInputIdentity(
+                DexCompilerInputRole.CLASSPATH,
+                0,
+                classpathBytes.size.toLong(),
+                DexSha256.digest(classpathBytes),
+            ),
+        )
+        val bundle = ByteArrayOutputStream().also { output ->
+            DexCompilerInputBundleCodec.write(
+                output,
+                listOf(fixture.inputBytes, classpathBytes).mapIndexed { index, bytes ->
+                    DexCompilerInputBundleSource(identities[index]) { ByteArrayInputStream(bytes) }
+                },
+            )
+        }.toByteArray()
+        val snapshot = FakeInputSnapshot(fixture.inputBytes, bundle, identities)
+        val request = fixture.request.copy(
+            protocolVersion = DexCompilerContract.PROTOCOL_V1_1,
+            inputLayout = DexCompilerInputLayout.PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1,
+            inputIdentities = identities,
+            inputSetFingerprint = DexCompilerInputSetFingerprint.compute(identities),
+            inputBundleSizeBytes = bundle.size.toLong(),
+            inputBundleSha256 = DexSha256.digest(bundle),
+        )
+
+        fixture.harness.start(
+            DexCompilerExperimentalInvocation(
+                request = request,
+                inputSnapshot = snapshot,
+                outputTransaction = fixture.output,
+                releaseBuild = true,
+                preferredComponent = fixture.candidate.component,
+                requestFinalization = DexCompilerRequestFinalization.CAPABILITY_BOUND_EXACT_PROTOCOL,
+            ),
+            fixture.outcomes::add,
+        )
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.HANDSHAKE_REJECTED, outcome.failure)
+        assertFalse(outcome.pluginWasDispatched)
+        assertEquals(0, fixture.cacheLookupCount)
+        assertEquals(0, fixture.connection.openCount)
+        assertEquals(0, snapshot.claimCount)
+        assertEquals(0, fixture.output.drainStartCount)
+        assertEquals(0, fixture.output.claimCount)
+        assertEquals(1, snapshot.closeCount)
     }
 
     @Test
@@ -1420,9 +1486,15 @@ class DexCompilerExperimentalHarnessTest {
         }
     }
 
-    private class FakeInputSnapshot(bytes: ByteArray) : DexCompilerInputSnapshot {
+    private class FakeInputSnapshot(
+        bytes: ByteArray,
+        wireBytes: ByteArray = bytes,
+        override val inputIdentities: List<DexCompilerInputIdentity> = emptyList(),
+    ) : DexCompilerInputSnapshot {
         override val sizeBytes = bytes.size.toLong()
         override val sha256 = DexSha256.digest(bytes).toHexString()
+        override val wireSizeBytes = wireBytes.size.toLong()
+        override val wireSha256 = DexSha256.digest(wireBytes).toHexString()
         var claimCount = 0
         var descriptorCloseCount = 0
         var closeCount = 0

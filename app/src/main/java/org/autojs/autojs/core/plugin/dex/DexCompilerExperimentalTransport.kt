@@ -1,15 +1,30 @@
 package org.autojs.autojs.core.plugin.dex
 
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputIdentity
 import java.io.Closeable
 import java.io.File
 import java.io.InputStream
+import java.util.ArrayList
+import java.util.Collections
 
 /** A descriptor has one owner and may be transferred to exactly one openSession invocation. */
 internal interface DexCompilerOwnedDescriptor : Closeable
 
 internal interface DexCompilerInputSnapshot : Closeable {
+    /** Program identity retained for the legacy V1 request fields. */
     val sizeBytes: Long
     val sha256: String
+
+    /** Exact bytes transferred through the single program descriptor. */
+    val wireSizeBytes: Long
+        get() = sizeBytes
+    val wireSha256: String
+        get() = sha256
+
+    /** Empty for the raw V1.0 program descriptor; canonical program/classpath order for V1.1. */
+    val inputIdentities: List<DexCompilerInputIdentity>
+        get() = emptyList()
+
     fun claimReadDescriptor(): DexCompilerOwnedDescriptor
 
     /** Keeps the exact host snapshot alive for a possible local fallback. */
@@ -20,8 +35,24 @@ internal interface DexCompilerRetainedInput : Closeable {
     val sizeBytes: Long
     val sha256: String
 
+    /** Present only for an ordered V1.1 input set. */
+    val inputSetSha256: String?
+        get() = null
+
     /** Resolves only this still-live host-private snapshot, after size and digest revalidation. */
     fun resolve(): File?
+
+    /** Resolves the exact frozen program/classpath set used to build the remote request. */
+    fun resolveInputSet(): DexCompilerResolvedInputSet? = resolve()?.let { program ->
+        DexCompilerResolvedInputSet(program, emptyList())
+    }
+}
+
+internal class DexCompilerResolvedInputSet(
+    val program: File,
+    classpath: Collection<File>,
+) {
+    val classpath: List<File> = Collections.unmodifiableList(ArrayList(classpath))
 }
 
 /**

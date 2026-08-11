@@ -197,11 +197,58 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
                 return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.OPT_IN_REJECTED)
             is DexCompilerOptInDecision.Selected -> optIn.identity
         }
-        return compileSelected(jar, identity)
+        return compileSelected(jar, emptyList(), identity)
+    }
+
+    /**
+     * Internal R3 production seam. The ordered classpath is compile-time-only and must be non-empty;
+     * no JavaScript surface routes here until the separate R3.3 API change.
+     */
+    fun compileWithClasspath(
+        jar: File,
+        orderedClasspath: Collection<File>,
+    ): DexCompilerRuntimeDecision {
+        val classpath = orderedClasspath.toList()
+        require(classpath.isNotEmpty()) { "Ordered classpath must not be empty" }
+        require(classpath.size <= DexCompilerContract.MAX_CLASSPATH_JARS) {
+            "Ordered classpath exceeds the protocol JAR-count limit"
+        }
+        if (Thread.currentThread().isInterrupted) return DexCompilerRuntimeDecision.Cancelled
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.MAIN_THREAD)
+        }
+        if (circuitOpen.get()) {
+            return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.CIRCUIT_OPEN)
+        }
+
+        val options = try {
+            DexCompilerOptInStore.read()
+        } catch (_: Exception) {
+            DexCompilerOptInOptions()
+        }
+        val optIn = DexCompilerOptInPolicy.decide(
+            options = options,
+            releaseBuild = releaseBuild,
+            discoverCandidates = {
+                transport.discoverExactAction(DexCompilerContract.SERVICE_ACTION)
+            },
+        )
+        val identity = when (optIn) {
+            DexCompilerOptInDecision.Disabled,
+            DexCompilerOptInDecision.NoSelection ->
+                return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.OPT_IN_DISABLED)
+            is DexCompilerOptInDecision.Unavailable ->
+                return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.OPT_IN_UNAVAILABLE)
+            is DexCompilerOptInDecision.Rejected ->
+                return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.OPT_IN_REJECTED)
+            is DexCompilerOptInDecision.Selected -> optIn.identity
+        }
+        return compileSelected(jar, classpath, identity)
     }
 
     private fun compileSelected(
         jar: File,
+        orderedClasspath: List<File>,
         identity: DexCompilerPinnedIdentity,
     ): DexCompilerRuntimeDecision {
         val backend = try {
@@ -210,10 +257,20 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
             return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.ATTEMPT_SETUP_FAILED)
         }
         val snapshot = try {
-            FileInputStream(jar).use { input ->
-                backend.artifactStore.snapshot(
-                    input = input,
-                    maximumBytes = DexCompilerContract.MAX_COMPRESSED_PROGRAM_BYTES,
+            if (orderedClasspath.isEmpty()) {
+                FileInputStream(jar).use { input ->
+                    backend.artifactStore.snapshot(
+                        input = input,
+                        maximumBytes = DexCompilerContract.MAX_COMPRESSED_PROGRAM_BYTES,
+                        isCancelled = { Thread.currentThread().isInterrupted },
+                    )
+                }
+            } else {
+                backend.artifactStore.snapshotInputSet(
+                    programInput = { FileInputStream(jar) },
+                    classpathInputs = orderedClasspath.map { classpathJar ->
+                        { FileInputStream(classpathJar) }
+                    },
                     isCancelled = { Thread.currentThread().isInterrupted },
                 )
             }
@@ -321,7 +378,11 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
                 releaseBuild = releaseBuild,
                 invocationKind = DexCompilerInvocationKind.SYNCHRONOUS,
                 preferredComponent = identity.component,
-                requestFinalization = DexCompilerRequestFinalization.CAPABILITY_BOUND,
+                requestFinalization = if (request.protocolVersion == DexCompilerContract.PROTOCOL_V1_1) {
+                    DexCompilerRequestFinalization.CAPABILITY_BOUND_EXACT_PROTOCOL
+                } else {
+                    DexCompilerRequestFinalization.CAPABILITY_BOUND
+                },
                 requiredIdentity = identity,
                 dispatchObserver = DexCompilerDispatchObserver(
                     DexCompilerRuntimeAndroidTestInstrumentation::dispatchCommitted,

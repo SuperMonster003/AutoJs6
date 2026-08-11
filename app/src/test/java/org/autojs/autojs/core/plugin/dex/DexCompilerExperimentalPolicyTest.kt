@@ -115,6 +115,7 @@ class DexCompilerExperimentalPolicyTest {
     @Test
     fun recoveryDeletesOnlyKnownTransactionNamesAndNeverPublishedCache() {
         assertTrue(DexCompilerArtifactRecoveryPolicy.isTransientArtifact("input-123e4567-e89b-12d3-a456-426614174000.jar"))
+        assertTrue(DexCompilerArtifactRecoveryPolicy.isTransientArtifact("input-123e4567-e89b-12d3-a456-426614174000.bundle"))
         assertTrue(DexCompilerArtifactRecoveryPolicy.isTransientArtifact("output-123e4567-e89b-12d3-a456-426614174000.partial"))
         assertTrue(DexCompilerArtifactRecoveryPolicy.isTransientArtifact("verified-123e4567-e89b-12d3-a456-426614174000.partial"))
         assertFalse(DexCompilerArtifactRecoveryPolicy.isTransientArtifact("aa.dex.zip"))

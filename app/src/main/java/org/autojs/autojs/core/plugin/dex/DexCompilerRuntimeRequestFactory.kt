@@ -3,6 +3,8 @@ package org.autojs.autojs.core.plugin.dex
 import org.autojs.plugin.dexcompiler.api.DexCompileRequest
 import org.autojs.plugin.dexcompiler.api.DexCompilerContract
 import org.autojs.plugin.dexcompiler.api.DexCompilerInputFormat
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputLayout
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputSetFingerprint
 import org.autojs.plugin.dexcompiler.api.DexCompilerMode
 import org.autojs.plugin.dexcompiler.api.DexCompilerOutputFormat
 import org.autojs.plugin.dexcompiler.api.DexProtocolVersion
@@ -14,7 +16,7 @@ import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicReference
 
-/** Builds the immutable V1 request from the already pinned host snapshot. */
+/** Builds an immutable V1.0 raw-JAR or V1.1 ordered-classpath request from pinned snapshots. */
 internal object DexCompilerRuntimeRequestFactory {
 
     fun create(
@@ -25,12 +27,28 @@ internal object DexCompilerRuntimeRequestFactory {
         require(minApi > 0)
         require(timeoutMillis in 1L..DexCompilerContract.MAX_TIMEOUT_MILLIS)
         require(snapshot.sizeBytes in 1L..DexCompilerContract.MAX_COMPRESSED_PROGRAM_BYTES)
+        val identities = snapshot.inputIdentities
+        val hasClasspathBundle = identities.isNotEmpty()
+        if (hasClasspathBundle) {
+            require(identities.size >= 2) { "Classpath bundle must contain a program and classpath" }
+            require(identities.first().sizeBytes == snapshot.sizeBytes)
+            require(identities.first().contentSha256.toHexString() == snapshot.sha256)
+            require(snapshot.wireSizeBytes in 1L..DexCompilerContract.MAX_COMPRESSED_INPUT_BUNDLE_BYTES)
+        } else {
+            // These equalities preserve the legacy raw-program descriptor contract.
+            require(snapshot.wireSizeBytes == snapshot.sizeBytes)
+            require(snapshot.wireSha256 == snapshot.sha256)
+        }
         return DexCompileRequest(
             requestId = DexRequestId.fromUuid(UUID.randomUUID()),
-            protocolVersion = DexProtocolVersion(
-                DexCompilerContract.PROTOCOL_MAJOR,
-                DexCompilerContract.PROTOCOL_MINOR,
-            ),
+            protocolVersion = if (hasClasspathBundle) {
+                DexCompilerContract.PROTOCOL_V1_1
+            } else {
+                DexProtocolVersion(
+                    DexCompilerContract.PROTOCOL_MAJOR,
+                    DexCompilerContract.PROTOCOL_MINOR,
+                )
+            },
             inputFormat = DexCompilerInputFormat.JAR,
             outputFormat = DexCompilerOutputFormat.DEX_ZIP,
             mode = DexCompilerMode.RELEASE,
@@ -44,6 +62,20 @@ internal object DexCompilerRuntimeRequestFactory {
             canonicalizationPolicyVersion = DexCompilerContract.CANONICALIZATION_POLICY_VERSION,
             diagnosticByteLimit = DexCompilerContract.MAX_DIAGNOSTIC_BYTES,
             timeoutMillis = timeoutMillis,
+            inputLayout = DexCompilerInputLayout.PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1
+                .takeIf { hasClasspathBundle },
+            inputIdentities = identities,
+            inputSetFingerprint = if (hasClasspathBundle) {
+                DexCompilerInputSetFingerprint.compute(identities)
+            } else {
+                null
+            },
+            inputBundleSizeBytes = snapshot.wireSizeBytes.takeIf { hasClasspathBundle },
+            inputBundleSha256 = if (hasClasspathBundle) {
+                DexSha256.fromBytes(snapshot.wireSha256.decodeLowercaseSha256())
+            } else {
+                null
+            },
         )
     }
 }

@@ -68,6 +68,8 @@ private val SYSTEM_DEX_COMPILER_MONOTONIC_CLOCK = DexCompilerMonotonicClock {
 internal enum class DexCompilerRequestFinalization {
     NONE,
     CAPABILITY_BOUND,
+    /** Requires the provider to support the request's already selected protocol version exactly. */
+    CAPABILITY_BOUND_EXACT_PROTOCOL,
 }
 
 internal enum class DexCompilerExperimentalFailure {
@@ -481,7 +483,17 @@ internal class DexCompilerExperimentalHarness(
             info: DexCompilerInfo,
             capabilities: DexCompilerCapabilities,
         ): DexCompileRequest {
-            val negotiated = DexCompilerNegotiation.requireNegotiated(info)
+            val negotiated = when (invocation.requestFinalization) {
+                DexCompilerRequestFinalization.CAPABILITY_BOUND_EXACT_PROTOCOL ->
+                    DexCompilerNegotiation.requireNegotiated(
+                        providerInfo = info,
+                        hostMin = invocation.request.protocolVersion,
+                        hostMax = invocation.request.protocolVersion,
+                    )
+                DexCompilerRequestFinalization.NONE,
+                DexCompilerRequestFinalization.CAPABILITY_BOUND ->
+                    DexCompilerNegotiation.requireNegotiated(info)
+            }
             require(info.providerVersionCode == identity.versionCode) { "Provider version identity drift" }
             val minHostVersionCode = info.minHostVersionCode
             val maxHostVersionCode = info.maxHostVersionCode
@@ -495,6 +507,9 @@ internal class DexCompilerExperimentalHarness(
                 DexCompilerRequestFinalization.NONE -> invocation.request
                 DexCompilerRequestFinalization.CAPABILITY_BOUND -> invocation.request.copy(
                     protocolVersion = negotiated,
+                    expectedRuntimeLibraryFingerprint = capabilities.runtimeLibraryFingerprint,
+                )
+                DexCompilerRequestFinalization.CAPABILITY_BOUND_EXACT_PROTOCOL -> invocation.request.copy(
                     expectedRuntimeLibraryFingerprint = capabilities.runtimeLibraryFingerprint,
                 )
             }
@@ -854,6 +869,25 @@ internal class DexCompilerExperimentalHarness(
                 invocation.request.programSha256.toHexString(),
                 ignoreCase = true,
             )) { "Input snapshot SHA-256 differs from the request" }
+            val bundleSize = invocation.request.inputBundleSizeBytes
+            val bundleSha256 = invocation.request.inputBundleSha256
+            if (bundleSize == null || bundleSha256 == null) {
+                require(invocation.inputSnapshot.inputIdentities.isEmpty()) {
+                    "Raw-program snapshot unexpectedly declares bundled identities"
+                }
+                require(invocation.inputSnapshot.wireSizeBytes == invocation.inputSnapshot.sizeBytes)
+                require(invocation.inputSnapshot.wireSha256 == invocation.inputSnapshot.sha256)
+            } else {
+                require(invocation.inputSnapshot.inputIdentities == invocation.request.inputIdentities) {
+                    "Input snapshot identities differ from the request"
+                }
+                require(invocation.inputSnapshot.wireSizeBytes == bundleSize) {
+                    "Input bundle snapshot size differs from the request"
+                }
+                require(invocation.inputSnapshot.wireSha256 == bundleSha256.toHexString()) {
+                    "Input bundle snapshot SHA-256 differs from the request"
+                }
+            }
         }
 
         private fun semanticCacheKey(): String {
@@ -866,7 +900,8 @@ internal class DexCompilerExperimentalHarness(
             }
             return DexCompilerSemanticCacheKey.sha256(
                 DexCompilerCacheSpec(
-                    inputSha256 = effectiveRequest.programSha256.toHexString(),
+                    inputSha256 = effectiveRequest.inputSetFingerprint?.toHexString()
+                        ?: effectiveRequest.programSha256.toHexString(),
                     canonicalizationPolicyVersion = effectiveRequest.canonicalizationPolicyVersion,
                     protocolMajor = effectiveRequest.protocolVersion.major,
                     protocolMinor = effectiveRequest.protocolVersion.minor,

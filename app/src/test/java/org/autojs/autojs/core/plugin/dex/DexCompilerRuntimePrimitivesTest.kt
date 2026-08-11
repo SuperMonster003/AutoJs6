@@ -5,7 +5,13 @@ import org.autojs.plugin.dexcompiler.api.DexCompilerContract
 import org.autojs.plugin.dexcompiler.api.DexCompilerErrorCode
 import org.autojs.plugin.dexcompiler.api.DexCompilerFailurePhase
 import org.autojs.plugin.dexcompiler.api.DexCompilerFamily
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputBundleCodec
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputBundleSource
 import org.autojs.plugin.dexcompiler.api.DexCompilerInputFormat
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputIdentity
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputLayout
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputRole
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputSetFingerprint
 import org.autojs.plugin.dexcompiler.api.DexCompilerMode
 import org.autojs.plugin.dexcompiler.api.DexCompilerOutputFormat
 import org.autojs.plugin.dexcompiler.api.DexProtocolVersion
@@ -20,6 +26,8 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -55,6 +63,11 @@ class DexCompilerRuntimeRequestFactoryTest {
         assertEquals(DexCompilerContract.CANONICALIZATION_POLICY_VERSION, request.canonicalizationPolicyVersion)
         assertEquals(DexCompilerContract.MAX_DIAGNOSTIC_BYTES, request.diagnosticByteLimit)
         assertEquals(TIMEOUT_MILLIS, request.timeoutMillis)
+        assertNull(request.inputLayout)
+        assertTrue(request.inputIdentities.isEmpty())
+        assertNull(request.inputSetFingerprint)
+        assertNull(request.inputBundleSizeBytes)
+        assertNull(request.inputBundleSha256)
     }
 
     @Test
@@ -117,6 +130,47 @@ class DexCompilerRuntimeRequestFactoryTest {
         assertEquals(draft.diagnosticByteLimit, finalized.diagnosticByteLimit)
         assertEquals(draft.timeoutMillis, finalized.timeoutMillis)
         assertEquals(replacementFingerprint, finalized.expectedRuntimeLibraryFingerprint)
+    }
+
+    @Test
+    fun orderedClasspathSnapshotProducesAnExactV11BundleRequest() {
+        val classpath = listOf("first-classpath".toByteArray(), "second-classpath".toByteArray())
+        val identities = listOf(
+            DexCompilerInputIdentity(
+                DexCompilerInputRole.PROGRAM,
+                0,
+                PROGRAM_BYTES.size.toLong(),
+                DexSha256.digest(PROGRAM_BYTES),
+            ),
+        ) + classpath.mapIndexed { index, bytes ->
+            DexCompilerInputIdentity(
+                DexCompilerInputRole.CLASSPATH,
+                index,
+                bytes.size.toLong(),
+                DexSha256.digest(bytes),
+            )
+        }
+        val bundle = ByteArrayOutputStream().also { output ->
+            DexCompilerInputBundleCodec.write(
+                output,
+                identities.mapIndexed { index, identity ->
+                    val bytes = if (index == 0) PROGRAM_BYTES else classpath[index - 1]
+                    DexCompilerInputBundleSource(identity) { ByteArrayInputStream(bytes) }
+                },
+            )
+        }.toByteArray()
+        val snapshot = TestInputSetSnapshot(PROGRAM_BYTES, identities, bundle)
+
+        val request = DexCompilerRuntimeRequestFactory.create(snapshot, MIN_API, TIMEOUT_MILLIS)
+
+        assertEquals(DexCompilerContract.PROTOCOL_V1_1, request.protocolVersion)
+        assertEquals(DexCompilerInputLayout.PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1, request.inputLayout)
+        assertEquals(identities, request.inputIdentities)
+        assertEquals(DexCompilerInputSetFingerprint.compute(identities), request.inputSetFingerprint)
+        assertEquals(bundle.size.toLong(), request.inputBundleSizeBytes)
+        assertEquals(DexSha256.digest(bundle), request.inputBundleSha256)
+        assertEquals(PROGRAM_BYTES.size.toLong(), request.programSizeBytes)
+        assertEquals(DexSha256.digest(PROGRAM_BYTES), request.programSha256)
     }
 
     private companion object {
@@ -329,6 +383,21 @@ private class TestInputSnapshot(bytes: ByteArray) : DexCompilerInputSnapshot {
 
     override fun retainForLocalFallback(): DexCompilerRetainedInput = error("Not used by these tests")
 
+    override fun close() = Unit
+}
+
+private class TestInputSetSnapshot(
+    program: ByteArray,
+    override val inputIdentities: List<DexCompilerInputIdentity>,
+    bundle: ByteArray,
+) : DexCompilerInputSnapshot {
+    override val sizeBytes: Long = program.size.toLong()
+    override val sha256: String = DexSha256.digest(program).toHexString()
+    override val wireSizeBytes: Long = bundle.size.toLong()
+    override val wireSha256: String = DexSha256.digest(bundle).toHexString()
+
+    override fun claimReadDescriptor(): DexCompilerOwnedDescriptor = error("Not used by these tests")
+    override fun retainForLocalFallback(): DexCompilerRetainedInput = error("Not used by these tests")
     override fun close() = Unit
 }
 

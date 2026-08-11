@@ -48,8 +48,8 @@ internal data class DexCompilerSingleFlightAttemptKey(
             providerIdentity: DexCompilerPinnedIdentity,
             hostRuntimeApi: Int,
         ): DexCompilerSingleFlightAttemptKey = DexCompilerSingleFlightAttemptKey(
-            inputSizeBytes = request.programSizeBytes,
-            inputSha256 = request.programSha256.toHexString(),
+            inputSizeBytes = request.inputBundleSizeBytes ?: request.programSizeBytes,
+            inputSha256 = request.inputSetFingerprint?.toHexString() ?: request.programSha256.toHexString(),
             protocolVersion = request.protocolVersion,
             inputFormat = request.inputFormat,
             outputFormat = request.outputFormat,

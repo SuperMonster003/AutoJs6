@@ -154,7 +154,9 @@ internal object DexCompilerExperimentalEntryGate {
 
 /** Only crash leftovers are recoverable; published cache entries are never startup-cleaned. */
 internal object DexCompilerArtifactRecoveryPolicy {
-    private val TRANSIENT = Regex("(?:input-[0-9a-f-]{36}\\.jar|(?:output|verified)-[0-9a-f-]{36}\\.partial)")
+    private val TRANSIENT = Regex(
+        "(?:input-[0-9a-f-]{36}\\.(?:jar|bundle)|(?:output|verified)-[0-9a-f-]{36}\\.partial)",
+    )
 
     fun isTransientArtifact(fileName: String): Boolean = TRANSIENT.matches(fileName)
 }

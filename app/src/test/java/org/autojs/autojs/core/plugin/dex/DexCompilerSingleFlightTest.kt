@@ -2,7 +2,12 @@ package org.autojs.autojs.core.plugin.dex
 
 import org.autojs.plugin.dexcompiler.api.DexCompileRequest
 import org.autojs.plugin.dexcompiler.api.DexCompilerContract
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputBundleCodec
 import org.autojs.plugin.dexcompiler.api.DexCompilerInputFormat
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputIdentity
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputLayout
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputRole
+import org.autojs.plugin.dexcompiler.api.DexCompilerInputSetFingerprint
 import org.autojs.plugin.dexcompiler.api.DexCompilerMode
 import org.autojs.plugin.dexcompiler.api.DexCompilerOutputFormat
 import org.autojs.plugin.dexcompiler.api.DexProtocolVersion
@@ -41,6 +46,8 @@ class DexCompilerSingleFlightAttemptKeyTest {
 
         assertNotEquals(firstRequest.requestId, secondRequest.requestId)
         assertEquals(first, second)
+        assertEquals(PROGRAM_BYTES.size.toLong(), first.inputSizeBytes)
+        assertEquals(DexSha256.digest(PROGRAM_BYTES).toHexString(), first.inputSha256)
         assertNotEquals(first, DexCompilerSingleFlightAttemptKey.from(secondRequest, identity(8L), HOST_API))
         assertNotEquals(first, DexCompilerSingleFlightAttemptKey.from(secondRequest, identity, HOST_API + 1))
         assertNotEquals(
@@ -51,6 +58,26 @@ class DexCompilerSingleFlightAttemptKeyTest {
                 HOST_API,
             ),
         )
+    }
+
+    @Test
+    fun orderedClasspathFingerprintSeparatesSingleFlightAttempts() {
+        val firstClasspath = "first-classpath".toByteArray()
+        val secondClasspath = "second-classpath".toByteArray()
+        val identity = identity(versionCode = 7L)
+        val first = DexCompilerSingleFlightAttemptKey.from(
+            classpathRequest(listOf(firstClasspath, secondClasspath)),
+            identity,
+            HOST_API,
+        )
+        val reordered = DexCompilerSingleFlightAttemptKey.from(
+            classpathRequest(listOf(secondClasspath, firstClasspath)),
+            identity,
+            HOST_API,
+        )
+
+        assertNotEquals(first, reordered)
+        assertNotEquals(first.inputSha256, reordered.inputSha256)
     }
 
     private fun identity(versionCode: Long) = DexCompilerPinnedIdentity(
@@ -80,6 +107,33 @@ class DexCompilerSingleFlightAttemptKeyTest {
         diagnosticByteLimit = DexCompilerContract.MAX_DIAGNOSTIC_BYTES,
         timeoutMillis = DexCompilerContract.DEFAULT_TIMEOUT_MILLIS,
     )
+
+    private fun classpathRequest(classpath: List<ByteArray>): DexCompileRequest {
+        val identities = listOf(
+            DexCompilerInputIdentity(
+                DexCompilerInputRole.PROGRAM,
+                0,
+                PROGRAM_BYTES.size.toLong(),
+                DexSha256.digest(PROGRAM_BYTES),
+            ),
+        ) + classpath.mapIndexed { index, bytes ->
+            DexCompilerInputIdentity(
+                DexCompilerInputRole.CLASSPATH,
+                index,
+                bytes.size.toLong(),
+                DexSha256.digest(bytes),
+            )
+        }
+        val inputSet = DexCompilerInputSetFingerprint.compute(identities)
+        return request().copy(
+            protocolVersion = DexCompilerContract.PROTOCOL_V1_1,
+            inputLayout = DexCompilerInputLayout.PROGRAM_AND_ORDERED_CLASSPATH_BUNDLE_V1,
+            inputIdentities = identities,
+            inputSetFingerprint = inputSet,
+            inputBundleSizeBytes = DexCompilerInputBundleCodec.encodedSize(identities),
+            inputBundleSha256 = inputSet,
+        )
+    }
 
     private companion object {
         val PROGRAM_BYTES = "single-flight-attempt-key".toByteArray()
