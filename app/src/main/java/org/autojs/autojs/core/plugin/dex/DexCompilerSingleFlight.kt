@@ -130,6 +130,7 @@ internal class DexCompilerSingleFlightCallerCoordinator<K : Any, V : Any, F : Au
         releaseProducerResources: () -> Unit,
         onJoined: (isLeader: Boolean) -> Unit = {},
         requestProducerCancellation: () -> Unit = {},
+        onProducerResourcesTransferred: () -> Unit = {},
         producer: () -> DexCompilerSingleFlightTerminal<V>,
     ): DexCompilerSingleFlightCallerOutcome<V, F> {
         val outcome = try {
@@ -138,6 +139,7 @@ internal class DexCompilerSingleFlightCallerCoordinator<K : Any, V : Any, F : Au
                 releaseProducerResources = releaseProducerResources,
                 onJoined = onJoined,
                 requestProducerCancellation = requestProducerCancellation,
+                onProducerResourcesTransferred = onProducerResourcesTransferred,
                 producer = producer,
             )
         } catch (failure: Throwable) {
@@ -261,8 +263,10 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
         releaseProducerResources: () -> Unit = {},
         onJoined: (isLeader: Boolean) -> Unit = {},
         requestProducerCancellation: () -> Unit = {},
+        onProducerResourcesTransferred: () -> Unit = {},
         producer: () -> DexCompilerSingleFlightTerminal<V>,
     ): DexCompilerSingleFlightOutcome<V> {
+        onProducerResourcesTransferred()
         if (Thread.currentThread().isInterrupted) {
             val interrupted = InterruptedException("DEX compiler single-flight caller was already interrupted")
             releaseProducerResourcesSafely(releaseProducerResources)?.let { releaseFailure ->

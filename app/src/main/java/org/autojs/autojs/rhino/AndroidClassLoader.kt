@@ -13,6 +13,9 @@ import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.ZipParameters
 import org.autojs.autojs.core.plugin.dex.AndroidDexCompilerRuntime
+import org.autojs.autojs.core.plugin.dex.DexCompilerClasspathDecisionRunner
+import org.autojs.autojs.core.plugin.dex.DexCompilerLocalD8Plan
+import org.autojs.autojs.core.plugin.dex.DexCompilerLocalRuntimeLibraryFingerprint
 import org.autojs.autojs.core.plugin.dex.DexCompilerRetainedInput
 import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeAndroidTestInstrumentation
 import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeDecision
@@ -29,7 +32,9 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileNotFoundException
+import java.io.FilterInputStream
 import java.io.IOException
+import java.io.InputStream
 import java.security.MessageDigest
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -120,6 +125,47 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         return loadJarInternal(jar, allowExperimentalCompiler = true)
     }
 
+    /**
+     * Dormant R3 seam for one program plus an ordered compile-time-only classpath.
+     *
+     * Classpath JARs are inputs to D8 only: they are not emitted, loaded, or inserted between the
+     * resulting [DexClassLoader] and this loader's existing [parent]. Program references therefore
+     * remain loadable only when their runtime definitions are already visible from that base parent.
+     */
+    @Throws(IOException::class, FileNotFoundException::class)
+    internal fun loadJarWithExperimentalCompilerClasspath(
+        jar: File,
+        orderedClasspath: Collection<File>,
+    ): DexClassLoader {
+        val classpath = orderedClasspath.toList()
+        require(classpath.isNotEmpty()) { "Ordered classpath must not be empty" }
+        throwIfInterrupted()
+        val coordinator = AndroidDexCompilerRuntime.coordinatorOrNull()
+            ?: throw IOException("DEX compiler input snapshot store is unavailable")
+        val decision = coordinator.compileWithClasspath(jar, classpath)
+        return DexCompilerClasspathDecisionRunner.consume(
+            decision = decision,
+            loadPublished = ::loadVerifiedDexZip,
+            loadLocal = ::loadRetainedInputSetLocallyWithD8,
+            checkInterrupted = ::throwIfInterrupted,
+            onUseLocal = { local ->
+                Log.i(
+                    TAG,
+                    "DEX compiler classpath fallback: reason=${local.reason}, " +
+                        "failure=${local.experimentalFailure}, remote=${local.remoteFailure}",
+                )
+            },
+            onPublishedLoadFailure = { failure ->
+                Log.e(
+                    TAG,
+                    "Verified classpath compilation could not be loaded; using pinned local D8",
+                    failure,
+                )
+            },
+            cancelled = { throw ScriptInterruptedException() },
+        )
+    }
+
     @Throws(IOException::class, FileNotFoundException::class)
     private fun loadJarInternal(
         jar: File,
@@ -190,6 +236,56 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         return loadJarLocallySynchronized(snapshot)
     }
 
+    private fun loadRetainedInputSetLocallyWithD8(input: DexCompilerRetainedInput): DexClassLoader {
+        throwIfInterrupted()
+        val inputSetSha256 = input.inputSetSha256
+            ?: throw IOException("Pinned DEX compiler input-set fingerprint is unavailable")
+        val resolved = try {
+            input.resolveInputSet { Thread.currentThread().isInterrupted }
+        } catch (fatal: VirtualMachineError) {
+            throw fatal
+        } catch (failure: Throwable) {
+            throwIfInterrupted(failure)
+            throw failure
+        } ?: throw IOException("Pinned DEX compiler input set is unavailable")
+        if (resolved.classpath.isEmpty()) {
+            throw IOException("Pinned DEX compiler classpath is empty")
+        }
+        if (resolved.program.length() != input.sizeBytes || sha256HexInterruptible(resolved.program) != input.sha256) {
+            throw IOException("Pinned DEX compiler program snapshot changed")
+        }
+        throwIfInterrupted()
+
+        val runtimeLibraries = collectRuntimeLibrariesForD8()
+        val runtimeLibrarySha256 = DexCompilerLocalRuntimeLibraryFingerprint.sha256(
+            runtimeBuildFingerprint = Build.FINGERPRINT,
+            orderedLibraries = runtimeLibraries,
+            fileSha256 = ::sha256HexInterruptible,
+        )
+        val plan = DexCompilerLocalD8Plan(
+            program = resolved.program,
+            orderedClasspath = resolved.classpath,
+            orderedRuntimeLibraries = runtimeLibraries,
+            minimumApi = Build.VERSION.SDK_INT,
+            inputSetSha256 = inputSetSha256,
+            runtimeLibrarySha256 = runtimeLibrarySha256,
+        )
+        val lock = conversionLocks.getOrPut(plan.cacheKeySha256) { Any() }
+        return synchronized(lock) {
+            throwIfInterrupted()
+            DexCompilerRuntimeAndroidTestInstrumentation.localCompilerStarted(plan.program)
+            throwIfInterrupted()
+            try {
+                jarToDexR8(plan)
+            } catch (fatal: VirtualMachineError) {
+                throw fatal
+            } catch (error: Throwable) {
+                throwIfInterrupted(error)
+                throw error
+            }
+        }
+    }
+
     private fun loadJarLocallySynchronized(jar: File): DexClassLoader {
         val key = generateArtifactsCacheName(jar)
         val lock = conversionLocks.getOrPut(key) { Any() }
@@ -221,14 +317,16 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         val outputSha256 = artifact.outputSha256
         val sizeBytes = artifact.sizeBytes
         val source = artifact.openRead() ?: throw IOException("Verified DEX compiler artifact is unavailable")
-        return try {
+        var primaryFailure: Throwable? = null
+        var adoptedTarget: File? = null
+        val adoption = try {
             val adoptionKey = "verified_$outputSha256"
             val lock = conversionLocks.getOrPut(adoptionKey) { Any() }
             synchronized(lock) {
                 val target = File(cacheDir, "$adoptionKey.dex.zip")
                 val targetMatches = try {
                     target.isFile && target.length() == sizeBytes &&
-                        sha256Hex(target) == outputSha256
+                        sha256HexInterruptible(target) == outputSha256
                 } catch (_: Exception) {
                     false
                 }
@@ -257,13 +355,14 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
                             }
                             output.fd.sync()
                         }
+                        throwIfInterrupted()
                         val copiedSha256 = digest.digest().toHex()
                         if (total != sizeBytes || copiedSha256 != outputSha256) {
                             throw IOException("Verified DEX compiler artifact changed during adoption")
                         }
                         Os.rename(temporary.absolutePath, target.absolutePath)
                         val finalCopyMatches = try {
-                            target.length() == sizeBytes && sha256Hex(target) == outputSha256
+                            target.length() == sizeBytes && sha256HexInterruptible(target) == outputSha256
                         } catch (_: Exception) {
                             false
                         }
@@ -279,23 +378,64 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
                 throwIfInterrupted()
 
                 try {
-                    DexClassLoader(target.path, cacheDir.path, null, parent).also {
-                        mDexClassLoaders[target.path] = it
-                    }
+                    val loader = DexClassLoader(target.path, cacheDir.path, null, parent)
+                    throwIfInterrupted()
+                    adoptedTarget = target
+                    target to loader
                 } catch (error: Throwable) {
                     target.delete()
                     throw error
                 }
             }
+        } catch (failure: Throwable) {
+            primaryFailure = failure
+            throw failure
         } finally {
-            runCatching { source.close() }
+            try {
+                closeInputPreservingPrimary(source, primaryFailure)
+            } catch (closeFailure: Throwable) {
+                adoptedTarget?.delete()
+                throw closeFailure
+            }
+        }
+        val (target, loader) = adoption
+        try {
+            throwIfInterrupted()
+            mDexClassLoaders[target.path] = loader
+            throwIfInterrupted()
+            return loader
+        } catch (failure: Throwable) {
+            mDexClassLoaders.remove(target.path, loader)
+            target.delete()
+            throw failure
+        }
+    }
+
+    private fun closeInputPreservingPrimary(input: InputStream, primary: Throwable?) {
+        try {
+            input.close()
+        } catch (closeFailure: Throwable) {
+            if (closeFailure === primary) return
+            val closeWasInterrupted = closeFailure is InterruptedException ||
+                ScriptInterruptedException.causedByInterrupt(closeFailure)
+            if (closeWasInterrupted) Thread.currentThread().interrupt()
+            if (primary == null) throw closeFailure
+            if (closeFailure is VirtualMachineError && primary !is VirtualMachineError) {
+                closeFailure.addSuppressed(primary)
+                throw closeFailure
+            }
+            if (closeWasInterrupted && primary !is VirtualMachineError) {
+                closeFailure.addSuppressed(primary)
+                throw closeFailure
+            }
+            primary.addSuppressed(closeFailure)
         }
     }
 
     private fun throwIfInterrupted(cause: Throwable? = null) {
-        if (Thread.currentThread().isInterrupted ||
-            cause != null && ScriptInterruptedException.causedByInterrupt(cause)
-        ) {
+        val causedByInterrupt = cause != null && ScriptInterruptedException.causedByInterrupt(cause)
+        if (causedByInterrupt) Thread.currentThread().interrupt()
+        if (Thread.currentThread().isInterrupted) {
             if (cause is ScriptInterruptedException) throw cause
             throw if (cause == null) ScriptInterruptedException() else ScriptInterruptedException(cause)
         }
@@ -532,6 +672,139 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         }
     }
 
+    /** D8-only implementation for the frozen ordered-classpath seam; it intentionally has no dx fallback. */
+    @Throws(IOException::class, FileNotFoundException::class)
+    private fun jarToDexR8(plan: DexCompilerLocalD8Plan): DexClassLoader {
+        val cacheName = "classpath_${plan.cacheKeySha256}"
+        val dexFile = File(cacheDir, "$cacheName.dex")
+        val dexJarFile = File(cacheDir, "$cacheName.jar")
+
+        if (dexJarFile.exists()) {
+            throwIfInterrupted()
+            return loadDexInterruptibly(dexJarFile)
+        }
+        if (dexFile.exists()) {
+            throwIfInterrupted()
+            return loadDexInterruptibly(dexFile)
+        }
+
+        val tmpOut = File(cacheDir, "${cacheName}_tmp_${System.currentTimeMillis()}_${Random.nextInt(1000, 9999)}")
+        if (!tmpOut.mkdirs()) {
+            throw IOException("Failed to create temp output directory: ${tmpOut.path}")
+        }
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val builder = D8Command.builder()
+                    .addProgramFiles(plan.program.toPath())
+                    .setOutput(tmpOut.toPath(), OutputMode.DexIndexed)
+                    .setMode(CompilationMode.RELEASE)
+                    .setMinApiLevel(plan.minimumApi)
+                plan.orderedClasspath.forEach { classpathJar ->
+                    builder.addClasspathFiles(classpathJar.toPath())
+                }
+                plan.orderedRuntimeLibraries.forEach { library ->
+                    builder.addLibraryFiles(library.toPath())
+                }
+                D8.run(builder.build())
+            } else {
+                D8.main(plan.commandLine(tmpOut).toTypedArray())
+            }
+            throwIfInterrupted()
+
+            val dexFiles = tmpOut.listFiles { _, name ->
+                Regex("classes\\d*\\.dex").matches(name)
+            }?.sortedBy { it.name } ?: emptyList()
+            if (dexFiles.isEmpty()) throw IOException("D8 did not produce any classes*.dex")
+            throwIfInterrupted()
+
+            val partial = File(cacheDir, "$cacheName-${UUID.randomUUID()}.partial")
+            val published = try {
+                if (dexFiles.size == 1) {
+                    throwIfInterrupted()
+                    val classesDex = dexFiles.first()
+                    if (!classesDex.renameTo(dexFile)) {
+                        FileOutputStream(partial).use { output ->
+                            interruptibleInput(classesDex).use { input -> input.copyTo(output) }
+                            throwIfInterrupted()
+                            output.fd.sync()
+                        }
+                        throwIfInterrupted()
+                        Os.rename(partial.absolutePath, dexFile.absolutePath)
+                    }
+                    dexFile
+                } else {
+                    val zip = ZipFile(partial)
+                    dexFiles.forEach { dex ->
+                        throwIfInterrupted()
+                        interruptibleInput(dex).use { input ->
+                            zip.addStream(input, ZipParameters().apply {
+                                fileNameInZip = dex.name
+                            })
+                        }
+                    }
+                    throwIfInterrupted()
+                    FileOutputStream(partial, true).use { output -> output.fd.sync() }
+                    throwIfInterrupted()
+                    Os.rename(partial.absolutePath, dexJarFile.absolutePath)
+                    dexJarFile
+                }
+            } finally {
+                partial.delete()
+            }
+            try {
+                throwIfInterrupted()
+                return loadDexInterruptibly(published)
+            } catch (failure: Throwable) {
+                published.delete()
+                throw failure
+            }
+        } finally {
+            tmpOut.deleteRecursively()
+        }
+    }
+
+    /** Classpath-only adoption that cannot register a loader after observing cancellation. */
+    private fun loadDexInterruptibly(file: File): DexClassLoader {
+        throwIfInterrupted()
+        if (!file.exists() || !file.canRead()) {
+            throw FileNotFoundException(str(R.string.file_not_exist_or_readable_with_path, file.path))
+        }
+        val safeDexFile = File(cacheDir, "safe_${file.name}")
+        val safeMatches = safeDexFile.isFile &&
+            sha256HexInterruptible(file) == sha256HexInterruptible(safeDexFile)
+        if (!safeMatches) {
+            if (safeDexFile.exists() && !safeDexFile.delete()) {
+                throw IOException("Failed to replace local D8 adoption file: ${safeDexFile.path}")
+            }
+            try {
+                FileOutputStream(safeDexFile).use { output ->
+                    interruptibleInput(file).use { input -> input.copyTo(output) }
+                    throwIfInterrupted()
+                    output.fd.sync()
+                }
+            } catch (failure: Throwable) {
+                safeDexFile.delete()
+                throw failure
+            }
+        }
+        throwIfInterrupted()
+        if (!safeDexFile.setReadOnly()) {
+            throw IOException("Failed to make local D8 adoption file read-only: ${safeDexFile.path}")
+        }
+        throwIfInterrupted()
+        val loader = DexClassLoader(safeDexFile.path, cacheDir.path, null, parent)
+        throwIfInterrupted()
+        mDexClassLoaders[safeDexFile.path] = loader
+        try {
+            throwIfInterrupted()
+        } catch (failure: Throwable) {
+            mDexClassLoaders.remove(safeDexFile.path, loader)
+            throw failure
+        }
+        return loader
+    }
+
     @Throws(IOException::class)
     private fun mergeAarToJar(aar: File, outputJar: File) {
         if (outputJar.exists() && !outputJar.delete()) {
@@ -606,6 +879,30 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
             if (count > 0) digest.update(buffer, 0, count)
         }
         digest.digest().toHex()
+    }
+
+    private fun sha256HexInterruptible(file: File): String = FileInputStream(file).use { input ->
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            throwIfInterrupted()
+            val count = input.read(buffer)
+            if (count < 0) break
+            if (count > 0) digest.update(buffer, 0, count)
+        }
+        digest.digest().toHex()
+    }
+
+    private fun interruptibleInput(file: File): InputStream = object : FilterInputStream(FileInputStream(file)) {
+        override fun read(): Int {
+            throwIfInterrupted()
+            return super.read()
+        }
+
+        override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+            throwIfInterrupted()
+            return super.read(buffer, offset, length)
+        }
     }
 
     private fun isAarJarEntry(name: String): Boolean {

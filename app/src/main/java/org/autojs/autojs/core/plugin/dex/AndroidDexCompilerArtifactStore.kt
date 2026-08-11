@@ -354,11 +354,15 @@ internal class AndroidDexCompilerArtifactStore(
 
         override fun resolve(): File? = if (closed.get()) null else state.resolve()
 
-        override fun resolveInputSet(): DexCompilerResolvedInputSet? {
+        override fun resolveInputSet(isCancelled: () -> Boolean): DexCompilerResolvedInputSet? {
             if (closed.get()) return null
-            val program = state.resolve() ?: return null
+            if (isCancelled()) throw DexCompilerStreamCancelledException()
+            val program = state.resolve(isCancelled) ?: return null
             val resolvedClasspath = ArrayList<File>(classpath.size)
-            classpath.forEach { item -> resolvedClasspath += item.resolve() ?: return null }
+            classpath.forEach { item ->
+                if (isCancelled()) throw DexCompilerStreamCancelledException()
+                resolvedClasspath += item.resolve(isCancelled) ?: return null
+            }
             return DexCompilerResolvedInputSet(program, resolvedClasspath)
         }
 
@@ -386,9 +390,10 @@ internal class AndroidDexCompilerArtifactStore(
             }
         }
 
-        fun resolve(): File? {
+        fun resolve(isCancelled: () -> Boolean = { false }): File? {
+            if (isCancelled()) throw DexCompilerStreamCancelledException()
             if (references.get() <= 0 || !file.isFile || file.length() != sizeBytes) return null
-            return file.takeIf { sha256File(it) == sha256 }
+            return file.takeIf { sha256File(it, isCancelled) == sha256 }
         }
 
         fun release() {
@@ -742,10 +747,14 @@ private object AndroidPersistentCacheFileOps : DexCompilerPersistentCache.FileOp
     private const val OWNER_READ_ONLY = 0x100
 }
 
-private fun sha256File(file: File): String = FileInputStream(file).use { input ->
+private fun sha256File(
+    file: File,
+    isCancelled: () -> Boolean = { false },
+): String = FileInputStream(file).use { input ->
     val digest = MessageDigest.getInstance("SHA-256")
     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
     while (true) {
+        if (isCancelled()) throw DexCompilerStreamCancelledException()
         val count = input.read(buffer)
         if (count < 0) break
         if (count > 0) digest.update(buffer, 0, count)

@@ -43,8 +43,11 @@ internal interface DexCompilerRetainedInput : Closeable {
     fun resolve(): File?
 
     /** Resolves the exact frozen program/classpath set used to build the remote request. */
-    fun resolveInputSet(): DexCompilerResolvedInputSet? = resolve()?.let { program ->
-        DexCompilerResolvedInputSet(program, emptyList())
+    fun resolveInputSet(isCancelled: () -> Boolean = { false }): DexCompilerResolvedInputSet? {
+        if (isCancelled()) throw DexCompilerStreamCancelledException()
+        return resolve()?.let { program ->
+            DexCompilerResolvedInputSet(program, emptyList())
+        }
     }
 }
 

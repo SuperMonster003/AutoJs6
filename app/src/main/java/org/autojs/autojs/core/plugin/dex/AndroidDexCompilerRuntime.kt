@@ -10,6 +10,7 @@ import org.autojs.plugin.dexcompiler.api.DexCompilerContract
 import java.io.Closeable
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.SynchronousQueue
@@ -202,8 +203,12 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
 
     /**
      * Internal R3 production seam. The ordered classpath is compile-time-only and must be non-empty;
-     * no JavaScript surface routes here until the separate R3.3 API change.
+     * no JavaScript surface routes here until the separate R3.3 API change. Unlike the legacy path,
+     * every local decision returned by this method owns a retained copy of the exact frozen input
+     * set. If that input set cannot be frozen, this seam fails closed instead of reopening live
+     * caller files for a semantically different fallback.
      */
+    @Throws(IOException::class)
     fun compileWithClasspath(
         jar: File,
         orderedClasspath: Collection<File>,
@@ -214,36 +219,88 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
             "Ordered classpath exceeds the protocol JAR-count limit"
         }
         if (Thread.currentThread().isInterrupted) return DexCompilerRuntimeDecision.Cancelled
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.MAIN_THREAD)
+
+        val backend = try {
+            backend()
+        } catch (fatal: VirtualMachineError) {
+            throw fatal
+        } catch (error: Exception) {
+            throw IOException("DEX compiler input snapshot store is unavailable", error)
         }
-        if (circuitOpen.get()) {
-            return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.CIRCUIT_OPEN)
+        val snapshot = try {
+            backend.artifactStore.snapshotInputSet(
+                programInput = { FileInputStream(jar) },
+                classpathInputs = classpath.map { classpathJar ->
+                    { FileInputStream(classpathJar) }
+                },
+                isCancelled = { Thread.currentThread().isInterrupted },
+            )
+        } catch (_: DexCompilerStreamCancelledException) {
+            return DexCompilerRuntimeDecision.Cancelled
+        } catch (fatal: VirtualMachineError) {
+            throw fatal
+        } catch (error: Exception) {
+            throw IOException("DEX compiler input set could not be frozen", error)
+        }
+        val retainedInput = try {
+            snapshot.retainForLocalFallback()
+        } catch (fatal: VirtualMachineError) {
+            rethrowAfterClosing(fatal, snapshot::close)
+        } catch (error: Exception) {
+            rethrowAfterClosing(
+                IOException("DEX compiler input set could not be retained", error),
+                snapshot::close,
+            )
+        } catch (failure: Throwable) {
+            rethrowAfterClosing(failure, snapshot::close)
         }
 
-        val options = try {
-            DexCompilerOptInStore.read()
-        } catch (_: Exception) {
-            DexCompilerOptInOptions()
+        fun useLocal(reason: DexCompilerLocalReason): DexCompilerRuntimeDecision.UseLocal {
+            return localDecision(snapshot, retainedInput, reason)
         }
-        val optIn = DexCompilerOptInPolicy.decide(
-            options = options,
-            releaseBuild = releaseBuild,
-            discoverCandidates = {
-                transport.discoverExactAction(DexCompilerContract.SERVICE_ACTION)
-            },
-        )
+
+        fun cancelled(): DexCompilerRuntimeDecision.Cancelled {
+            return cancelledDecision(snapshot, retainedInput)
+        }
+
+        if (Thread.currentThread().isInterrupted) return cancelled()
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            return useLocal(DexCompilerLocalReason.MAIN_THREAD)
+        }
+        if (circuitOpen.get()) {
+            return useLocal(DexCompilerLocalReason.CIRCUIT_OPEN)
+        }
+
+        val optIn = try {
+            val options = try {
+                DexCompilerOptInStore.read()
+            } catch (_: Exception) {
+                DexCompilerOptInOptions()
+            }
+            DexCompilerOptInPolicy.decide(
+                options = options,
+                releaseBuild = releaseBuild,
+                discoverCandidates = {
+                    transport.discoverExactAction(DexCompilerContract.SERVICE_ACTION)
+                },
+            )
+        } catch (_: Exception) {
+            return useLocal(DexCompilerLocalReason.ATTEMPT_SETUP_FAILED)
+        } catch (failure: Throwable) {
+            rethrowAfterClosing(failure, snapshot::close, retainedInput::close)
+        }
+        if (Thread.currentThread().isInterrupted) return cancelled()
         val identity = when (optIn) {
             DexCompilerOptInDecision.Disabled,
             DexCompilerOptInDecision.NoSelection ->
-                return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.OPT_IN_DISABLED)
+                return useLocal(DexCompilerLocalReason.OPT_IN_DISABLED)
             is DexCompilerOptInDecision.Unavailable ->
-                return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.OPT_IN_UNAVAILABLE)
+                return useLocal(DexCompilerLocalReason.OPT_IN_UNAVAILABLE)
             is DexCompilerOptInDecision.Rejected ->
-                return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.OPT_IN_REJECTED)
+                return useLocal(DexCompilerLocalReason.OPT_IN_REJECTED)
             is DexCompilerOptInDecision.Selected -> optIn.identity
         }
-        return compileSelected(jar, classpath, identity)
+        return compilePrepared(backend, snapshot, retainedInput, identity)
     }
 
     private fun compileSelected(
@@ -286,26 +343,47 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
             snapshot.close()
             return DexCompilerRuntimeDecision.UseLocal(DexCompilerLocalReason.SNAPSHOT_FAILED)
         }
+        return compilePrepared(backend, snapshot, retainedInput, identity)
+    }
+
+    private fun compilePrepared(
+        backend: Backend,
+        snapshot: DexCompilerInputSnapshot,
+        retainedInput: DexCompilerRetainedInput,
+        identity: DexCompilerPinnedIdentity,
+    ): DexCompilerRuntimeDecision {
+        if (Thread.currentThread().isInterrupted) {
+            return cancelledDecision(snapshot, retainedInput)
+        }
         val request = try {
             DexCompilerRuntimeRequestFactory.create(snapshot, runtimeApi)
         } catch (_: Exception) {
-            snapshot.close()
-            return DexCompilerRuntimeDecision.UseLocal(
-                reason = DexCompilerLocalReason.ATTEMPT_SETUP_FAILED,
-                fallbackInput = retainedInput,
+            return localDecision(
+                snapshot,
+                retainedInput,
+                DexCompilerLocalReason.ATTEMPT_SETUP_FAILED,
             )
+        } catch (failure: Throwable) {
+            rethrowAfterClosing(failure, snapshot::close, retainedInput::close)
         }
         val attemptKey = try {
             DexCompilerSingleFlightAttemptKey.from(request, identity, runtimeApi)
         } catch (_: Exception) {
-            snapshot.close()
-            return DexCompilerRuntimeDecision.UseLocal(
-                reason = DexCompilerLocalReason.ATTEMPT_SETUP_FAILED,
-                fallbackInput = retainedInput,
+            return localDecision(
+                snapshot,
+                retainedInput,
+                DexCompilerLocalReason.ATTEMPT_SETUP_FAILED,
             )
+        } catch (failure: Throwable) {
+            rethrowAfterClosing(failure, snapshot::close, retainedInput::close)
         }
-        val producerCancellation = DexCompilerAttemptCancellation()
+        val producerCancellation = try {
+            DexCompilerAttemptCancellation()
+        } catch (failure: Throwable) {
+            rethrowAfterClosing(failure, snapshot::close, retainedInput::close)
+        }
 
+        var producerResourcesTransferred = false
         val sharedOutcome = try {
             backend.singleFlight.execute(
                 key = attemptKey,
@@ -313,6 +391,7 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
                 releaseProducerResources = snapshot::close,
                 onJoined = DexCompilerRuntimeAndroidTestInstrumentation::singleFlightJoined,
                 requestProducerCancellation = producerCancellation::request,
+                onProducerResourcesTransferred = { producerResourcesTransferred = true },
             ) {
                 runSharedAttempt(
                     backend = backend,
@@ -323,11 +402,22 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
                 )
             }
         } catch (fatal: VirtualMachineError) {
+            if (!producerResourcesTransferred) {
+                rethrowAfterClosing(fatal, snapshot::close, retainedInput::close)
+            }
             throw fatal
         } catch (_: InterruptedException) {
+            if (!producerResourcesTransferred) {
+                closeResources(snapshot::close, retainedInput::close)?.let { throw it }
+            }
             DexCompilerRuntimeAndroidTestInstrumentation.callerCancelledAfterFallbackCloseAttempt()
             Thread.currentThread().interrupt()
             return DexCompilerRuntimeDecision.Cancelled
+        } catch (failure: Throwable) {
+            if (!producerResourcesTransferred) {
+                rethrowAfterClosing(failure, snapshot::close, retainedInput::close)
+            }
+            throw failure
         }
 
         return when (sharedOutcome) {
@@ -441,6 +531,67 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
                 cache = DexCompilerVerifiedCache(backend.artifactStore::lookupVerified),
             ),
         )
+
+    private fun localDecision(
+        snapshot: DexCompilerInputSnapshot,
+        retainedInput: DexCompilerRetainedInput,
+        reason: DexCompilerLocalReason,
+    ): DexCompilerRuntimeDecision.UseLocal {
+        closeResources(snapshot::close)?.let { closeFailure ->
+            rethrowAfterClosing(closeFailure, retainedInput::close)
+        }
+        return DexCompilerRuntimeDecision.UseLocal(reason, retainedInput)
+    }
+
+    private fun cancelledDecision(
+        snapshot: DexCompilerInputSnapshot,
+        retainedInput: DexCompilerRetainedInput,
+    ): DexCompilerRuntimeDecision.Cancelled {
+        closeResources(snapshot::close, retainedInput::close)?.let { throw it }
+        return DexCompilerRuntimeDecision.Cancelled
+    }
+
+    private fun rethrowAfterClosing(
+        failure: Throwable,
+        vararg closeActions: () -> Unit,
+    ): Nothing {
+        val closeFailure = closeResources(*closeActions)
+        throw mergeFailures(failure, closeFailure)
+    }
+
+    private fun closeResources(vararg closeActions: () -> Unit): Throwable? {
+        var failure: Throwable? = null
+        closeActions.forEach { close ->
+            try {
+                close()
+            } catch (closeFailure: Throwable) {
+                failure = mergeFailures(failure, closeFailure)
+            }
+        }
+        return failure
+    }
+
+    /** A close-time VME has priority; otherwise the original operation remains primary. */
+    private fun mergeFailures(primary: Throwable?, additional: Throwable?): Throwable {
+        if (primary == null) return checkNotNull(additional)
+        if (additional == null || additional === primary) return primary
+        return if (additional is VirtualMachineError && primary !is VirtualMachineError) {
+            addSuppressedWithoutThrowing(additional, primary)
+            additional
+        } else {
+            addSuppressedWithoutThrowing(primary, additional)
+            primary
+        }
+    }
+
+    private fun addSuppressedWithoutThrowing(primary: Throwable, suppressed: Throwable) {
+        if (primary === suppressed) return
+        try {
+            primary.addSuppressed(suppressed)
+        } catch (_: Throwable) {
+            // Resource ownership and the selected primary failure must still reach a terminal.
+        }
+    }
 
     private fun closeUnusedOutput(output: DexCompilerOutputTransaction) {
         runCatching { output.rollback() }
