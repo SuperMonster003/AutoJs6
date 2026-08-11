@@ -104,6 +104,30 @@ class AiStreamTest {
     }
 
     @Test
+    fun userCancellationInvokesBoundPluginCancellationExactlyOnce() {
+        val cancelledEvents = AtomicInteger()
+        val transportCancellations = AtomicInteger()
+        val releaseCount = AtomicInteger()
+        val controller = AiStream.Controller(
+            dispatcher = immediateDispatcher(releaseCount),
+            bridges = ScriptBridges(),
+            onTerminal = null,
+        )
+        val stream = controller.stream
+        stream.on(AiStream.EVENT_CANCELLED, listener { cancelledEvents.incrementAndGet() })
+        controller.bindCancellation { transportCancellations.incrementAndGet() }
+
+        assertSame(stream, stream.cancel())
+        assertSame(stream, stream.cancel())
+
+        assertEquals("cancelled", stream.state)
+        assertTrue(stream.isDone)
+        assertEquals(1, cancelledEvents.get())
+        assertEquals(1, transportCancellations.get())
+        assertEquals(1, releaseCount.get())
+    }
+
+    @Test
     fun openEventCanOnlyBePublishedOnce() {
         val opens = AtomicInteger()
         val controller = AiStream.Controller(
@@ -119,6 +143,40 @@ class AiStreamTest {
 
         assertEquals("open", stream.state)
         assertEquals(1, opens.get())
+    }
+
+    @Test
+    fun normalizedTextChunkEmitsChunkThenDeltaInOneDispatcherAction() {
+        val scheduled = ArrayDeque<() -> Unit>()
+        val events = mutableListOf<String>()
+        val normalized = mapOf("text" to "piece")
+        val controller = AiStream.Controller(
+            dispatcher = AiAsyncDispatcher(
+                valueMapper = { value -> RhinoUtils.toJsValue(scope, value) },
+                scheduler = scheduled::addLast,
+                releaseWait = {},
+            ),
+            bridges = ScriptBridges(),
+            onTerminal = null,
+        )
+        controller.stream.on(AiStream.EVENT_CHUNK, listener { args ->
+            val chunk = args[0] as Scriptable
+            assertEquals("piece", chunk["text"])
+            events += "chunk"
+        })
+        controller.stream.on(AiStream.EVENT_DELTA, listener { args ->
+            assertEquals("piece", args[0])
+            val chunk = args[1] as Scriptable
+            assertEquals("piece", chunk["text"])
+            events += "delta"
+        })
+
+        assertTrue(controller.textChunk("piece", normalized))
+        assertEquals(1, scheduled.size)
+        scheduled.removeFirst().invoke()
+
+        assertEquals(listOf("chunk", "delta"), events)
+        assertEquals("open", controller.stream.state)
     }
 
     @Test
@@ -219,9 +277,11 @@ class AiStreamTest {
 
         listOf(
             "bindCall",
+            "bindCancellation",
             "open",
             "delta",
             "chunk",
+            "textChunk",
             "toolCall",
             "usage",
             "complete",

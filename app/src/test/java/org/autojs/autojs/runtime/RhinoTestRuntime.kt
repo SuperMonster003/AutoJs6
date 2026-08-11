@@ -18,6 +18,10 @@ internal object RhinoTestRuntime {
                 isAccessible = true
                 set(runtime, scope)
             }
+            ScriptRuntime::class.java.getDeclaredField("bridges").run {
+                isAccessible = true
+                set(runtime, ScriptBridges())
+            }
         }
     }
 

@@ -10,13 +10,18 @@ import org.autojs.autojs.core.plugin.ai.AiTextPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.AiTextPluginAskOutcome
 import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamEvent
+import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamRunner
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.augment.ai.AiStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.mozilla.javascript.Callable
+import org.mozilla.javascript.Wrapper
 import java.lang.reflect.Proxy
 import java.util.ArrayDeque
 import java.util.concurrent.atomic.AtomicInteger
@@ -136,15 +141,54 @@ class AiServicePluginRouteTest {
         assertEquals(0, rejectCount.get())
     }
 
+    @Test
+    fun pluginStreamFailureUsesExactRouteWithoutVaultOrCloudFallback() {
+        val dispatchers = TestDispatchers()
+        val askRunner = FakePluginAskRunner()
+        val streamRunner = FakePluginStreamRunner()
+        val errors = AtomicReference<Any?>()
+        TestContext.preferenceCallCount.set(0)
+        val service = service(askRunner, dispatchers, streamRunner)
+
+        val stream = service.stream(pluginInput(timeoutMillis = 2_500L))
+        stream.once(AiStream.EVENT_ERROR, streamCallback(errors::set))
+        streamRunner.emit(AiTextPluginStreamEvent.Failed(AiTextPluginAskFailure.BINDER_DIED))
+        dispatchers.drain()
+
+        assertEquals("error", stream.state)
+        assertEquals(true, stream.isDone)
+        assertEquals(1, streamRunner.startCount.get())
+        assertEquals("org.example.provider", streamRunner.request.get()?.component?.packageName)
+        assertEquals("org.example.provider.AiTextService", streamRunner.request.get()?.component?.className)
+        assertEquals("example.provider", streamRunner.request.get()?.providerId)
+        assertEquals("example-model", streamRunner.request.get()?.modelId)
+        assertEquals("prompt", streamRunner.request.get()?.prompt)
+        assertEquals(2_500L, streamRunner.request.get()?.timeoutMillis)
+        val error = (errors.get() as Wrapper).unwrap() as Map<*, *>
+        assertEquals("plugin", error["route"])
+        assertEquals("BINDER_DIED", error["code"])
+        assertEquals(0, TestContext.preferenceCallCount.get())
+        assertEquals(0, askRunner.startCount.get())
+        assertEquals(0, streamRunner.handle.cancelCount.get())
+        assertEquals(1, streamRunner.handle.closeCount.get())
+
+        streamRunner.emit(AiTextPluginStreamEvent.Completed("late cloud fallback must not win"))
+        dispatchers.drain()
+        assertEquals(1, streamRunner.handle.closeCount.get())
+        service.close()
+    }
+
     private fun service(
         runner: FakePluginAskRunner,
         dispatchers: TestDispatchers,
+        streamRunner: AiTextPluginStreamRunner = FakePluginStreamRunner(),
     ) = AiService(
         context = testContext(),
         scriptRuntime = RhinoTestRuntime.create(TopLevelScope()),
         sourceClient = OkHttpClient(),
         pluginAskRunner = runner,
         pluginDispatcherFactory = dispatchers::create,
+        pluginStreamRunner = streamRunner,
     )
 
     private fun testContext(): TestContext {
@@ -181,6 +225,11 @@ class AiServicePluginRouteTest {
 
     private fun callback(action: (Any?) -> Unit) = object : ScriptPromiseAdapter.Callback {
         override fun call(arg: Any?) = action(arg)
+    }
+
+    private fun streamCallback(action: (Any?) -> Unit) = Callable { _, _, _, args ->
+        action(args.firstOrNull())
+        null
     }
 
     private class TestContext : ContextWrapper(null) {
@@ -242,6 +291,27 @@ class AiServicePluginRouteTest {
 
         fun emit(outcome: AiTextPluginAskOutcome) {
             checkNotNull(callback.get())(outcome)
+        }
+    }
+
+    private class FakePluginStreamRunner : AiTextPluginStreamRunner {
+        val startCount = AtomicInteger()
+        val request = AtomicReference<AiTextPluginAskRequest?>()
+        private val callback = AtomicReference<((AiTextPluginStreamEvent) -> Unit)?>()
+        val handle = RecordingHandle {}
+
+        override fun startStream(
+            request: AiTextPluginAskRequest,
+            onEvent: (AiTextPluginStreamEvent) -> Unit,
+        ): AiTextPluginAskHandle {
+            startCount.incrementAndGet()
+            this.request.set(request)
+            callback.set(onEvent)
+            return handle
+        }
+
+        fun emit(event: AiTextPluginStreamEvent) {
+            checkNotNull(callback.get())(event)
         }
     }
 
