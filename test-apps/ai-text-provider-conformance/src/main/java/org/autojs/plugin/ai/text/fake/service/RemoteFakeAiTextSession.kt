@@ -1,7 +1,9 @@
 package org.autojs.plugin.ai.text.fake.service
 
+import android.content.Context
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import android.os.Process
 import android.os.RemoteException
 import org.autojs.plugin.ai.common.api.AiCommonCodec
 import org.autojs.plugin.ai.common.api.AiCommonLimits
@@ -44,6 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 internal class RemoteFakeAiTextSession(
+    private val context: Context,
     private val ownerUid: Int,
     requestMetadata: ByteArray,
     private val descriptors: OwnedParcelFileDescriptors,
@@ -67,6 +70,7 @@ internal class RemoteFakeAiTextSession(
     private val timeoutFuture = AtomicReference<Future<*>?>()
     private val futures = ConcurrentLinkedQueue<Future<*>>()
     private val pendingResultDescriptors = FakeOwnedResourceRegistry<OwnedParcelFileDescriptors>()
+    private val wrongUidRelayBinding = AtomicReference<IsolatedWrongUidAiCallbackBinding?>()
     private val signal = java.lang.Object()
 
     @Volatile
@@ -270,7 +274,7 @@ internal class RemoteFakeAiTextSession(
         // Initial credits are the fixture's explicit proof that synchronous openSession returned
         // and the host committed the remote. Hostile callbacks must exercise the active Android
         // transport, not race the provisional callback-before-return window.
-        awaitInitialCredits()
+        val initialCreditWindow = awaitInitialCredits()
         val plan = FakeAiTextEngine.plan(request, materialized)
         when (scenario) {
             FakeAiHostileScenario.CHUNK_BEFORE_START -> {
@@ -318,6 +322,18 @@ internal class RemoteFakeAiTextSession(
                 emitStarted(request)
                 emitDescriptorToolCalls()
                 awaitStop()
+            }
+            FakeAiHostileScenario.WRONG_UID -> {
+                dispatchWrongUidStarted(request)
+                awaitStop()
+            }
+            FakeAiHostileScenario.PROCESS_DEATH -> {
+                emitStarted(request)
+                // One reservation lowers the captured host window. Seeing that exact window again
+                // is the causal acknowledgement that the host delivered this chunk and replenished.
+                dispatchHostileChunk(awaitChunkSequence())
+                awaitCredits(initialCreditWindow)
+                Process.killProcess(Process.myPid())
             }
             FakeAiHostileScenario.STALL -> {
                 emitStarted(request)
@@ -441,6 +457,30 @@ internal class RemoteFakeAiTextSession(
         dispatchCallback { callback.onStarted(AiTextCodec.encodeSessionStarted(metadata)) }
     }
 
+    private fun dispatchWrongUidStarted(request: AiTextRequest) {
+        val metadata = AiSessionStarted(
+            requestId = request.requestId,
+            sessionId = "fake-isolated-session",
+            protocolVersion = request.protocolVersion,
+            providerId = FakeAiTextFixture.PROVIDER_ID,
+            modelId = request.modelId,
+            firstChunkSequence = 0L,
+            effectiveMaximumOutputBytes = request.options.maximumOutputBytes,
+            effectiveMaximumToolRounds = request.options.maximumToolRounds,
+        )
+        val binding = IsolatedWrongUidAiCallbackBinding(
+            context = context,
+            callback = callback,
+            startedEnvelope = AiTextCodec.encodeSessionStarted(metadata),
+        )
+        check(wrongUidRelayBinding.compareAndSet(null, binding)) {
+            "Fake isolated callback relay was already installed"
+        }
+        if (!binding.bindAndAwaitAcknowledgement() && machine.isActive) {
+            finishFailed(AiErrorCode.PROVIDER_FAILED, "Fake isolated callback relay is unavailable")
+        }
+    }
+
     private fun dispatchHostileChunk(sequence: Long) {
         dispatchCallback {
             callback.onChunk(
@@ -507,18 +547,30 @@ internal class RemoteFakeAiTextSession(
             ensureActive()
             machine.reserveNextChunk()?.let { return it }
             synchronized(signal) {
-                if (machine.isActive && machine.credits == 0) {
+                if (machine.isActive && machine.creditCount() == 0) {
                     signal.wait()
                 }
             }
         }
     }
 
-    private fun awaitInitialCredits() {
+    private fun awaitInitialCredits(): Int {
         while (true) {
             ensureActive()
             synchronized(signal) {
-                if (machine.credits > 0) return
+                val available = machine.creditCount()
+                if (available > 0) return available
+                if (machine.isActive) signal.wait()
+            }
+        }
+    }
+
+    private fun awaitCredits(minimum: Int) {
+        require(minimum > 0)
+        while (true) {
+            ensureActive()
+            synchronized(signal) {
+                if (machine.creditCount() >= minimum) return
                 if (machine.isActive) signal.wait()
             }
         }
@@ -598,6 +650,7 @@ internal class RemoteFakeAiTextSession(
         timeoutFuture.getAndSet(null)?.cancel(false)
         descriptors.close()
         pendingResultDescriptors.close()
+        wrongUidRelayBinding.getAndSet(null)?.close()
         unlinkCallbackDeath()
         wakeWaiters()
         if (cancelWorkers) futures.forEach { it.cancel(true) }

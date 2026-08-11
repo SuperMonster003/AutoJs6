@@ -8,6 +8,8 @@ enum class FakeAiHostileScenario(val modelId: String) {
     INVALID_FD_REFERENCE("fake.hostile.invalid-fd-ref"),
     COMPLETION_FD("fake.hostile.completion-fd"),
     TOOL_FD("fake.hostile.tool-fd"),
+    WRONG_UID("fake.hostile.wrong-uid"),
+    PROCESS_DEATH("fake.hostile.process-death"),
     STALL("fake.hostile.stall"),
     ;
 
