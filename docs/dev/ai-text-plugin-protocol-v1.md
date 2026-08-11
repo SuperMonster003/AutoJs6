@@ -444,9 +444,10 @@ the existing JVM policy test
 drift and a missing final exact inspection are covered only by coordinator JVM
 final-reinspection cases before `openSession`; they do not prove an Android
 package update or uninstall during an active session. Provider disable, host
-death, real production plugin/model/runtime, UI, other API/ABI, remote
-`listingGeneration`, and `ai.*` integration evidence remain open. No broad R1
-or protocol exit gate is closed by this slice.
+death, other API/ABI, remote `listingGeneration`, and the broader `ai.*` matrix
+remain open. A separate real public `ai.ask` smoke is recorded below; it does
+not broaden these hostile-provider cells or close a broad R1 or protocol exit
+gate.
 
 ### Explicit Production `ai.ask` Route
 
@@ -505,17 +506,50 @@ a runtime close requests cancellation, closes the handle once, suppresses late
 terminals, and leaves process-owned executors and component fuses alive for the
 host process lifetime.
 
-The source-level evidence for this integration is intentionally narrow. A
-standalone K2/JUnit gate passed 15/15 tests: 8 option-parser, 3 input-mapper,
-and 4 per-script runtime lifecycle cases. The final focused Gradle gate passed
-19/19 tests with 0 skipped, 0 failures, and 0 errors: the same 15 plus 4
-`AiService` integration cases; that invocation also compiled the Android main
-source. The Android compilation is only a source-compatibility gate. No real
-plugin/model, APK install, Binder session, device, ADB, UI, plugin-backed
-`ai.chat`/`ai.stream`, or active-request package update, disable, or uninstall
-was exercised by this route slice. The earlier conformance APK evidence remains
-separate and does not become production-route evidence by inference. All broad
-promotion and Android matrix gates therefore remain open.
+The route retains its source/JVM gate: standalone K2/JUnit passed 15/15 tests
+(8 option-parser, 3 input-mapper, and 4 per-script runtime lifecycle cases),
+and the focused Gradle gate passed 19/19 with 0 skipped, 0 failures, and 0
+errors (the same 15 plus 4 `AiService` integration cases). The host build also
+assembled App Debug and its instrumentation APK. Separately, the production
+plugin build passed `testDebugUnitTest`, `lintDebug`, `assembleDebug`, and
+`assembleRelease`.
+
+On 2026-08-11, the exact opt-in method
+`AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
+ran on `QV710AF65F` (Android 12/API 31, arm64-v8a). It exercised the real
+`ScriptEngineService` and Rhino global `ai.ask`, an explicit selector for
+`io.github.supermonster003.autojs6.plugin.ai.text.provider.AiTextProviderService`
+and provider `autojs6.local.text`, the release plugin, and a real
+2,583,085,056-byte LiteRT-LM model. The model SHA-256 was
+`ab7838cdfc8f77e54d8ca45eadceb20452d9f01e4bfade03e5dce27911b27e42`,
+and its imported model ID was
+`litertlm.ab7838cdfc8f77e54d8ca45eadceb204`. The public Promise settled with a
+nonempty result; the complete instrumentation method took 7.071 seconds and
+reported `OK (1 test)` with `INSTRUMENTATION_CODE: -1`.
+
+The host App Debug APK SHA-256 was
+`b7dab13c33b49f12f45de7a2091fabffa41618c983055fa19083ab1482af9561`,
+the instrumentation APK SHA-256 was
+`09b6277f7da86d1b0a6b7143bb27236c46873c731736640b79fe8e72edcfd5cf`,
+and the release plugin v32 APK SHA-256 was
+`ee16cea749753b4e8d7c03d4cce72066495f8b7fb251ea0a88bf5165a6c0a5bb`.
+All three used APK Signature Scheme v2 with certificate SHA-256
+`31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213`,
+and each installed `base.apk` matched its local candidate byte for byte. Exact
+package checks for users 0 and 10 found the host, instrumentation, and plugin
+packages absent before the transaction and absent again after cleanup; the
+three transaction-reserved external-storage paths were likewise absent at both
+boundaries. The detailed transaction receipt is retained locally only.
+
+This is a deliberately narrow production positive-path smoke, not broad
+acceptance. It covers one physical device, one real model, one non-streaming
+one-shot ask, and an App Debug host. It does not cover a release host, an API or
+ABI matrix, plugin-backed chat or streaming, tools, structured output, usage,
+clipboard behavior, active-request update/uninstall, performance, or soak.
+Opening the model through DocumentsUI may also change its last-location UI
+state; that state has no lossless snapshot/restore contract. The earlier fake
+provider Android evidence remains separate, and all broader promotion gates
+remain open.
 
 ## Streaming And Backpressure
 

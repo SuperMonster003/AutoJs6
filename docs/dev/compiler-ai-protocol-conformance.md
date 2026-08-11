@@ -32,11 +32,11 @@ behavior only for reproducible host conformance testing.
 | AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
 | AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
-| AI explicit ask route | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process/per-script lifecycle ownership, and stable terminal codes | Standalone K2/JUnit 15/15; focused Gradle 19/19 (8 parser + 3 mapper + 4 runtime + 4 service), 0 skipped/failures/errors; Android main source compiled | PASS, JVM/source only; no production device result |
+| AI explicit ask route | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process/per-script lifecycle ownership, and stable terminal codes | Standalone K2/JUnit 15/15; focused Gradle 19/19 (8 parser + 3 mapper + 4 runtime + 4 service), 0 skipped/failures/errors; App Debug/instrumentation assembled; one real release-plugin/model public-route method on API 31 | PARTIAL, JVM/source plus one production positive-path device smoke |
 | AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models including isolated callback UID and provider process death, bounded executors, FD cleanup, and caller authentication | H1 fixture commit `edd10008f` and H2 fixture commit `10dad3e39`; conformance text provider unit corpus: 31 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM; Android hostile results remain PARTIAL below |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 
-### Explicit `ai.ask` Plugin Route Source Evidence
+### Explicit `ai.ask` Plugin Route Evidence
 
 The production `AiService` now chooses the plugin path only when the request
 options contain the `plugin` key. A missing key leaves legacy cloud ask/chat/
@@ -63,16 +63,92 @@ late-callback races have one visible winner and no post-dispatch retry.
 The standalone K2/JUnit gate passed 15/15 tests: 8 option-parser, 3 mapper, and
 4 runtime lifecycle cases. A later focused Gradle run passed the final 19/19
 corpus--those 15 plus 4 `AiService` integration cases--with 0 skipped, 0
-failures, and 0 errors, while also compiling Android main source. That compile
-is an Android source-compatibility gate only, not Binder, APK, native, device,
-or production-model evidence.
+failures, and 0 errors, and assembled the host App Debug and instrumentation
+APKs. The production plugin separately passed `testDebugUnitTest`, `lintDebug`,
+`assembleDebug`, and `assembleRelease`.
 
-No real plugin/model, install, ADB/device execution, UI selector,
-plugin-backed `ai.chat` or `ai.stream`, remote catalog-generation proof, or
-package update, disable, or uninstall during an active routed request was
-exercised. Earlier fake-provider Android cells below remain separate evidence;
-they cannot be promoted to this production route by inference. This narrow
-source gate closes no broad Android or production promotion criterion.
+The 2026-08-11 production positive-path smoke ran the exact method
+`AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
+on `QV710AF65F` (API 31, arm64-v8a). It traversed the real Rhino
+`ScriptEngineService`, public global `ai.ask` with an explicit selector, the
+release plugin service/provider, and a real 2,583,085,056-byte model whose
+SHA-256 was
+`ab7838cdfc8f77e54d8ca45eadceb20452d9f01e4bfade03e5dce27911b27e42`
+and imported ID was
+`litertlm.ab7838cdfc8f77e54d8ca45eadceb204`. The public Promise settled with a
+nonempty result; the complete instrumentation method took 7.071 seconds and
+reported `OK (1 test)` with `INSTRUMENTATION_CODE: -1`.
+
+The host App Debug, instrumentation, and release plugin v32 APK SHA-256 values
+were, respectively,
+`b7dab13c33b49f12f45de7a2091fabffa41618c983055fa19083ab1482af9561`,
+`09b6277f7da86d1b0a6b7143bb27236c46873c731736640b79fe8e72edcfd5cf`,
+and `ee16cea749753b4e8d7c03d4cce72066495f8b7fb251ea0a88bf5165a6c0a5bb`.
+All three used APK Signature Scheme v2 with certificate SHA-256
+`31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213`,
+and their installed `base.apk` files matched the local candidates byte for
+byte. Exact pre/post checks for users 0 and 10 found the host, instrumentation,
+and plugin packages absent, and the three transaction-reserved external paths
+were absent at both boundaries. The detailed receipt remains local only.
+
+This one method is not a release or matrix gate. It covers one physical device,
+one real model, one non-streaming one-shot ask, and an App Debug host. It does
+not cover a release host, other APIs/ABIs, plugin-backed chat or stream, tools,
+structured output, usage, clipboard behavior, active-request update/uninstall,
+performance, or soak. DocumentsUI import can leave last-location UI state whose
+exact prior value cannot be snapshotted and restored losslessly. Earlier fake-
+provider Android cells remain separate evidence, remote catalog-generation and
+automatic UI selection remain open, and no broad promotion criterion is closed.
+
+#### Reproducible Local Public-Route Entry
+
+After the exact host, instrumentation, and plugin artifacts are installed and
+the exact model above has been imported, the durable method-level entry is the
+direct instrumentation command below. It deliberately names the device and all
+four opt-in arguments; a temporary transaction script is not a protocol or
+conformance entry point.
+
+```powershell
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiText.publicAskSmoke.enabled true -e autojs.aiText.publicAskSmoke.serial QV710AF65F -e autojs.aiText.publicAskSmoke.modelId litertlm.ab7838cdfc8f77e54d8ca45eadceb204 -e autojs.aiText.publicAskSmoke.timeoutMillis 600000 -e class 'org.autojs.autojs.core.plugin.ai.AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+Future runs must retain the following fixed record field names so that a result
+can be compared without depending on a local script or prose-only receipt. The
+values below are the 2026-08-11 record; a rerun replaces values, not field names.
+The built and device-tested APKs came from `ceb44b8ba272a958bad37ec4f1aae2fd4b29dcbd`.
+Commit `7ce26ceea3f5458e347cb46078005885d1e8f807` integrates the same test content
+onto the newer parent `9bbf7ffc2`. The app-tree diff between those commits is
+empty, but the integration commit was not itself the artifact build source.
+
+```text
+evidence_schema=ai-public-ask-smoke-v1
+tested_source_commit=ceb44b8ba272a958bad37ec4f1aae2fd4b29dcbd
+integration_commit=7ce26ceea3f5458e347cb46078005885d1e8f807
+tested_and_integration_app_tree_byte_identical=true
+test_class_method=org.autojs.autojs.core.plugin.ai.AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin
+device_serial=QV710AF65F
+device_api=31
+device_abi=arm64-v8a
+host_variant=appDebug
+host_apk_sha256=b7dab13c33b49f12f45de7a2091fabffa41618c983055fa19083ab1482af9561
+android_test_apk_sha256=09b6277f7da86d1b0a6b7143bb27236c46873c731736640b79fe8e72edcfd5cf
+plugin_version_code=32
+plugin_apk_sha256=ee16cea749753b4e8d7c03d4cce72066495f8b7fb251ea0a88bf5165a6c0a5bb
+apk_v2_signer_sha256=31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213
+installed_base_apk_matches_candidates=true
+model_id=litertlm.ab7838cdfc8f77e54d8ca45eadceb204
+model_bytes=2583085056
+model_sha256=ab7838cdfc8f77e54d8ca45eadceb20452d9f01e4bfade03e5dce27911b27e42
+instrumentation_time_seconds=7.071
+instrumentation_summary=OK (1 test)
+instrumentation_code=-1
+users_0_10_packages_pre=all-three-absent
+users_0_10_packages_post=all-three-absent
+reserved_external_paths_pre=all-three-absent
+reserved_external_paths_post=all-three-absent
+documentsui_last_location_restore=not-lossless
+receipt_scope=local-only
+```
 
 ### Pure Kotlin AI Session Transcript Evidence
 
@@ -159,6 +235,7 @@ APK assembly pass.
 | AAR normalization and resource behavior | Current local path versus production plugin | PENDING |
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
 | AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a metadata, paged model list, one normal `fake.stream` session, and ordinary-pipe completion materialization |
+| AI public production `ai.ask` positive path | Real signed provider release, real model, public Rhino entry, exact component/provider/model selector, artifact/device hash match, reversible cleanup | PARTIAL, one API 31/arm64-v8a App Debug non-streaming one-shot method; no release-host or API matrix |
 | AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PARTIAL, API 31 only: seven H1 methods plus two H2 methods cover completion/tool descriptors, ordering, sequence, descriptor reference, bounded duplicate terminal, cancel-after-start, one isolated wrong UID, and one provider death; deterministic Android no-credit and update/disable/uninstall lifecycle remain pending |
 | AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal stream crossed 8 initial credits, a tool callback was rejected without execution, and one provider kill followed a chunk whose credit was causally replenished; real tool turns, host death, and the matrix remain pending |
 | Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
@@ -463,11 +540,13 @@ never be selected for production compilation.
 The AI protocol now has one narrow public connection: an exact, explicit,
 prompt-only plugin selector on `ai.ask`. Selector absence preserves the built-in
 cloud path; selector presence fails closed without vault, HTTP, retry, or
-fallback. This source-level integration does not promote the broader protocol.
-Promotion still requires the remaining installed-provider/version/hostile
-matrix, remote catalog-generation handling, real provider/model and device
-evidence, UI selection, plugin-backed chat/stream decisions, and active-request
-update/disable/uninstall results. The pure policies and Android adapters remain
-fail-closed foundations outside that one composition. Image, audio, and video
+fallback. One real release provider/model completed this route on one API 31
+device with an App Debug host, but that smoke does not promote the broader
+protocol. Promotion still requires the remaining installed-provider/version/
+hostile and API matrices, remote catalog-generation handling, release-host
+evidence, automatic UI-selection decisions, plugin-backed chat/stream
+decisions, and active-request update/disable/uninstall results. The pure
+policies and Android adapters remain fail-closed foundations outside that one
+composition. Image, audio, and video
 require separate protocol reviews and cannot be added to the text plugin to
 satisfy this matrix.

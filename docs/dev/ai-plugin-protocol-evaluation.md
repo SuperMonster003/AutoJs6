@@ -24,10 +24,12 @@ verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
 quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
 summaries. The Android session slice can explicitly exercise `openSession`, a
 generated `IAiTextCallback`, request PFDs, streaming credits, and callback PFD
-ownership. Remote `listingGeneration` proof, UI selection, plugin-backed chat
-and stream, and production device evidence remain open. Installing either app
-alone still has no effect on the public AI module because no component is
-selected automatically. Repository and Android runtime
+ownership. One API 31 production positive-path smoke now covers a real release
+provider, real model, and public Rhino `ai.ask`; remote `listingGeneration`
+proof, automatic UI selection, plugin-backed chat and stream, and the broader
+production matrix remain open. Installing either app alone still has no effect
+on the public AI module because no component is selected automatically.
+Repository and Android runtime
 gates are tracked in
 [the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
 contract is documented in
@@ -150,14 +152,44 @@ terminal; lower owners retain settled cleanup responsibility. Per-script
 runtime owners cancel and close active handles once on shutdown and ignore late
 terminals; no operation is automatically retried after dispatch.
 
-Evidence remains at source/JVM level. Standalone K2/JUnit passed 15/15 tests
-(8 parser, 3 mapper, 4 runtime). The final focused Gradle run passed 19/19
-(those 15 plus 4 `AiService` integration cases), with 0 skipped, 0 failures,
-and 0 errors, and compiled Android main source. That Android compilation proves
-source compatibility only. This slice did not run a real plugin or model, APK,
-Binder production session, device or ADB command, UI, plugin-backed chat or
-stream, or an update/disable/uninstall during an active routed request. It does
-not close the broader promotion matrix.
+The source/JVM gate remains green. Standalone K2/JUnit passed 15/15 tests
+(8 parser, 3 mapper, 4 runtime), and the focused Gradle run passed 19/19 (those
+15 plus 4 `AiService` integration cases), with 0 skipped, 0 failures, and 0
+errors; the same run assembled the host App Debug and instrumentation APKs. The
+production plugin separately passed `testDebugUnitTest`, `lintDebug`,
+`assembleDebug`, and `assembleRelease`.
+
+On 2026-08-11,
+`AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
+completed on `QV710AF65F` (API 31, arm64-v8a). The method traversed the real
+Rhino `ScriptEngineService`, public global `ai.ask` with an explicit plugin
+selector, the release plugin service/provider, and one real 2,583,085,056-byte
+model. The model SHA-256 was
+`ab7838cdfc8f77e54d8ca45eadceb20452d9f01e4bfade03e5dce27911b27e42`
+and its imported ID was
+`litertlm.ab7838cdfc8f77e54d8ca45eadceb204`. The public Promise settled with a
+nonempty result; the complete instrumentation method took 7.071 seconds and
+returned `OK (1 test)` with `INSTRUMENTATION_CODE: -1`.
+
+The host App Debug, instrumentation, and release plugin v32 APK SHA-256 values
+were, respectively,
+`b7dab13c33b49f12f45de7a2091fabffa41618c983055fa19083ab1482af9561`,
+`09b6277f7da86d1b0a6b7143bb27236c46873c731736640b79fe8e72edcfd5cf`,
+and `ee16cea749753b4e8d7c03d4cce72066495f8b7fb251ea0a88bf5165a6c0a5bb`.
+All three used APK Signature Scheme v2 with certificate SHA-256
+`31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213`;
+their installed `base.apk` files matched the local candidates byte for byte.
+Exact checks for users 0 and 10 found all three packages absent before and after
+the reversible transaction, as were its three reserved external-storage paths.
+The detailed receipt is retained locally only.
+
+This proves one production positive path, not the broader promotion matrix. It
+is one physical device, one real model, one non-streaming one-shot ask, and an
+App Debug host. It does not cover a release host, API matrix, plugin-backed
+chat/stream, tools, structured output, usage, clipboard behavior, active-request
+update/uninstall, performance, or soak. DocumentsUI model import can also drift
+its last-location UI state because that state has no lossless snapshot/restore
+contract.
 
 ## Meaning Of Protocol Pack
 
@@ -783,21 +815,24 @@ The limited GO advances only after a conformance provider and hostile fixture pa
 - Existing built-in AI unit tests continue to pass with the plugin protocol
   present and no plugin installed.
 
-The first real provider should be an on-device text model with credential mode
-`NONE`. It exercises process, ABI, cancellation, memory, and streaming
+The first real provider is an on-device text model with credential mode `NONE`.
+That choice exercises process, ABI, cancellation, memory, and streaming
 boundaries without introducing remote credential transport at the same time.
 
-The current API 31 Android session result is only a **PARTIAL** cell in this
-matrix. In addition to one normal exact-component request-PFD stream beyond the
-initial eight credits, H1 proves ordinary-pipe completion materialization across
+The fake-provider API 31 Android session result is only a **PARTIAL** cell in
+this matrix. In addition to one normal exact-component request-PFD stream
+beyond the initial eight credits, H1 proves ordinary-pipe completion
+materialization across
 Binder, descriptor-backed tool rejection without execution, three malformed
 callback failures, one bounded duplicate-terminal outcome, and cancel-after-
 start owner release. H2 adds one isolated-process callback-UID rejection and
 one fake-provider death after an acknowledged chunk/credit cycle. It does not
 prove cross-process reliable-pipe status, deterministic Android no-credit
-behavior, active-session update/disable/uninstall, host death, the version
-matrix, a real provider/model/runtime, UI, or public `ai.*` integration. The
-no-credit and final-reinspection package-drift cases remain JVM evidence only.
+behavior, active-session update/disable/uninstall, host death, or the version
+matrix. The separate public-route smoke above adds one real provider/model and
+one non-streaming public `ai.ask` positive path, but does not promote the fake
+hostile cells or supply the missing matrix. The no-credit and final-reinspection
+package-drift cases remain JVM evidence only.
 
 ## Estimated Benefit And Cost
 
@@ -849,9 +884,10 @@ is directional evidence only, not an APK-size or performance measurement.
 
 ### Phase 3: First Real Text Provider
 
-- Validate one on-device text-generation plugin first.
-- Record ABI, Universal APK, model storage, peak RSS, cancellation latency,
-  throughput, descriptor, and process-death results.
+- Retain the completed one-device public positive-path smoke for the first
+  on-device text-generation plugin.
+- Still record the ABI matrix, Universal APK, model storage, peak RSS,
+  cancellation latency, throughput, descriptor, and process-death results.
 - Revisit remote `PLUGIN_MANAGED` providers only after the local lifecycle is
   stable.
 
