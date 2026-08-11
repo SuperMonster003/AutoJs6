@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-/** Per-script owner for local plugin asks; the injected runner may remain process-shared. */
+/** Per-script owner for prompt-only local plugin unary requests; the runner may be process-shared. */
 internal class AiPluginAskRuntime(
     runnerProvider: () -> AiTextPluginAskRunner,
     private val dispatcherFactory: () -> AiAsyncDispatcher,
@@ -23,8 +23,17 @@ internal class AiPluginAskRuntime(
     private val runnerDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED, runnerProvider)
     private val runner by runnerDelegate
 
-    fun ask(request: AiTextPluginAskRequest): ScriptPromiseAdapter {
-        val attempt = newAttempt()
+    fun ask(request: AiTextPluginAskRequest): ScriptPromiseAdapter =
+        execute(request, Operation.ASK)
+
+    fun chat(request: AiTextPluginAskRequest): ScriptPromiseAdapter =
+        execute(request, Operation.CHAT)
+
+    private fun execute(
+        request: AiTextPluginAskRequest,
+        operation: Operation,
+    ): ScriptPromiseAdapter {
+        val attempt = newAttempt(request, operation)
         if (closed.get()) {
             attempt.cancelSilently()
             return attempt.promiseAdapter
@@ -32,7 +41,7 @@ internal class AiPluginAskRuntime(
         val selectedRunner = try {
             runner
         } catch (_: Exception) {
-            attempt.fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+            attempt.fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE, operation))
             return attempt.promiseAdapter
         }
         attempt.start(selectedRunner, request)
@@ -41,7 +50,7 @@ internal class AiPluginAskRuntime(
     }
 
     fun reject(error: Exception): ScriptPromiseAdapter {
-        val attempt = newAttempt()
+        val attempt = newAttempt(request = null, operation = Operation.ASK)
         if (closed.get()) {
             attempt.cancelSilently()
         } else {
@@ -58,10 +67,15 @@ internal class AiPluginAskRuntime(
         active.clear()
     }
 
-    private fun newAttempt(): ActiveAsk {
+    private fun newAttempt(
+        request: AiTextPluginAskRequest?,
+        operation: Operation,
+    ): ActiveAsk {
         val attempt = ActiveAsk(
             dispatcher = dispatcherFactory(),
             promiseAdapter = ScriptPromiseAdapter(),
+            request = request,
+            operation = operation,
         )
         active.add(attempt)
         return attempt
@@ -70,6 +84,8 @@ internal class AiPluginAskRuntime(
     private inner class ActiveAsk(
         private val dispatcher: AiAsyncDispatcher,
         val promiseAdapter: ScriptPromiseAdapter,
+        private val request: AiTextPluginAskRequest?,
+        private val operation: Operation,
     ) {
         private val handle = AtomicReference<AiTextPluginAskHandle?>()
         private val terminal = AtomicBoolean(false)
@@ -84,12 +100,12 @@ internal class AiPluginAskRuntime(
             val returned = try {
                 selectedRunner.start(request, ::accept)
             } catch (_: Exception) {
-                fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+                fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE, operation))
                 return
             }
             if (!handle.compareAndSet(null, returned)) {
                 runCatching(returned::close)
-                fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+                fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE, operation))
                 return
             }
             cleanupHandleIfTerminal()
@@ -114,11 +130,25 @@ internal class AiPluginAskRuntime(
 
         private fun accept(outcome: AiTextPluginAskOutcome) {
             when (outcome) {
-                is AiTextPluginAskOutcome.Completed -> finish { onDelivered ->
-                    dispatcher.resolve(promiseAdapter, outcome.text, onDelivered)
+                is AiTextPluginAskOutcome.Completed -> {
+                    val value = try {
+                        completionValue(outcome.text)
+                    } catch (_: Exception) {
+                        fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE, operation))
+                        return
+                    }
+                    finish { onDelivered ->
+                        dispatcher.resolve(promiseAdapter, value, onDelivered)
+                    }
                 }
-                is AiTextPluginAskOutcome.Failed -> fail(pluginFailure(outcome.failure))
+                is AiTextPluginAskOutcome.Failed ->
+                    fail(pluginFailure(outcome.failure, operation))
             }
+        }
+
+        private fun completionValue(text: String): Any = when (operation) {
+            Operation.ASK -> text
+            Operation.CHAT -> pluginChatResponse(requireNotNull(request), text)
         }
 
         private fun finish(
@@ -144,12 +174,40 @@ internal class AiPluginAskRuntime(
         }
     }
 
+    private enum class Operation(val publicName: String) {
+        ASK("ask"),
+        CHAT("chat"),
+    }
+
     private companion object {
-        fun pluginFailure(failure: AiTextPluginAskFailure): AiPluginRouteException =
+        const val PLUGIN_ROUTE = "plugin"
+
+        fun pluginFailure(
+            failure: AiTextPluginAskFailure,
+            operation: Operation,
+        ): AiPluginRouteException =
             AiPluginRouteException(
                 code = failure.name,
-                message = "AI plugin ask failed (${failure.name})",
+                message = "AI plugin ${operation.publicName} failed (${failure.name})",
             )
+
+        fun pluginChatResponse(
+            request: AiTextPluginAskRequest,
+            text: String,
+        ): Map<String, Any?> = linkedMapOf(
+            "text" to text,
+            "reasoning" to "",
+            "toolCalls" to emptyList<Any?>(),
+            "usage" to null,
+            "finishReason" to null,
+            "message" to null,
+            "error" to null,
+            "raw" to null,
+            "profile" to null,
+            "route" to PLUGIN_ROUTE,
+            "provider" to request.providerId,
+            "model" to request.modelId,
+        )
     }
 }
 
