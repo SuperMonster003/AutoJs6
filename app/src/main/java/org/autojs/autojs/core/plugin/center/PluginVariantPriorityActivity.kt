@@ -72,7 +72,11 @@ class PluginVariantPriorityActivity : BaseActivity() {
                             packageName = plugin.packageName,
                             title = plugin.title,
                             variant = plugin.pluginInfo?.variant,
-                            enabled = PluginEnableStore.isEnabled(this@PluginVariantPriorityActivity, plugin.packageName, true),
+                            enabled = PluginEnableStore.isEnabled(
+                                this@PluginVariantPriorityActivity,
+                                plugin.packageName,
+                                PluginDefaultEnabledPolicy.isEnabledByDefault(plugin.pluginInfo?.engine),
+                            ),
                         )
                     }
                 applyStoredOrder(source)

@@ -645,6 +645,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: Rapid OCR Engine
     implementation(project(":plugin-api:rapid-ocr-engine"))
+
+    // Plugin API: YOLO API
+    implementation(project(":plugin-api:yolo-api"))
 }
 
 dependencies /* MIME */ {

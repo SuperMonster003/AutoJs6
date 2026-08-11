@@ -53,6 +53,9 @@
             <action android:name="org.autojs.plugin.AI_TEXT_GENERATION" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.YOLO" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.EDITOR" />
             <category android:name="ace-editor" />
         </intent>

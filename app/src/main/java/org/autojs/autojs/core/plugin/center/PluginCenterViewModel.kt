@@ -28,6 +28,7 @@ import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
+import org.autojs.plugin.yolo.api.YoloContract
 import java.util.Locale
 
 /**
@@ -546,7 +547,8 @@ class PluginCenterViewModel : ViewModel() {
             )
         }
 
-        var enabled = enableStore.isEnabled(context, packageName, defaultEnabled = isInstalled)
+        val defaultEnabled = isInstalled && PluginDefaultEnabledPolicy.isEnabledByDefault(engine)
+        var enabled = enableStore.isEnabled(context, packageName, defaultEnabled = defaultEnabled)
         if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED && enabled) {
             enableStore.setEnabled(context, packageName, false)
             enabled = false
@@ -691,7 +693,11 @@ class PluginCenterViewModel : ViewModel() {
             )
         }
 
-        var enabled = enableStore.isEnabled(context, packageName, defaultEnabled = true)
+        var enabled = enableStore.isEnabled(
+            context,
+            packageName,
+            defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(index?.engine),
+        )
         if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED && enabled) {
             enableStore.setEnabled(context, packageName, false)
             enabled = false
@@ -868,6 +874,7 @@ class PluginCenterViewModel : ViewModel() {
             ImageQuantPluginContract.ENGINE to ImageQuantPluginContract.ACTION_RUNTIME,
             OfflineDocsPluginContract.ENGINE to OfflineDocsPluginContract.ACTION,
             OpenCvPluginContract.ENGINE to OpenCvPluginContract.ACTION_RUNTIME,
+            YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
         )
 

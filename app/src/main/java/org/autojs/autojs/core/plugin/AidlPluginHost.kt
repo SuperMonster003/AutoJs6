@@ -38,6 +38,7 @@ class AidlPluginHost<I : IInterface>(
     private val moduleLabel: String,
     private val proxyFactory: (IBinder) -> I,
     private val infoReader: (I) -> PluginInfo,
+    private val defaultEnabled: Boolean = true,
 ) {
 
     private val defaultBindTimeoutMs = 60_000L
@@ -184,7 +185,7 @@ class AidlPluginHost<I : IInterface>(
     ): Discovered? {
         val list = discovered
             .filter { it.pluginInfo != null }
-            .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
+            .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, defaultEnabled) }
             .filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
             .filter { isHostVersionCompatible(it.pluginInfo) }
         if (list.isEmpty()) return null
@@ -306,7 +307,9 @@ class AidlPluginHost<I : IInterface>(
             return IllegalStateException(context.getString(R.string.error_plugin_is_not_authorized_in_plugin_center, scopedInfoItems.first().serviceInfo.packageName))
         }
 
-        val enabledItems = authorizedItems.filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
+        val enabledItems = authorizedItems.filter {
+            PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, defaultEnabled)
+        }
         if (enabledItems.isEmpty()) {
             return IllegalStateException(context.getString(R.string.error_plugin_is_not_enabled_in_plugin_center, authorizedItems.first().serviceInfo.packageName))
         }
