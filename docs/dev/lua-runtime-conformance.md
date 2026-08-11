@@ -13,7 +13,7 @@ exists.
 | Public AIDL compilation | PASS, GRADLE | R0 Gradle API gate, 14+50 JVM tests, `lua-runtime-api` debug AAR assembly | Cross-package calls, caller UID, Binder death |
 | Host proxy and `.lua` routing | PASS, LOCAL + DEVICE HAPPY PATH | App compilation plus focused JVM tests; pinned selection, explicit transport, bounded Binder lane, R2 fixture coverage, and one opt-in official Provider smoke with two sequential native results | Android API/ABI matrix and product capability layer |
 | Hostile Android provider | PASS, DEVICE PARTIAL | R2 debug-only/testOnly fixture 2/2 JVM build plus 19/19 isolated methods on `QV710AF65F` API 31/arm64-v8a | Provider death, wrong UID/capability attacks, update/uninstall during a session, oversized source, OS-level FD evidence |
-| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing `return 7` then `return 8` on API 31/arm64 with exact all-user restoration | Concurrent admission, cancel/peer death, blocking PFD, Android process OOM, API/ABI matrix, signed release and default production enablement |
+| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing controlled `require("autojs")`, stdout/stderr, and scalar results on API 31/arm64 with exact all-user restoration | Arguments, host broker capabilities, concurrent admission, blocking PFD, Android process OOM, API/ABI matrix, signed release and default production enablement |
 | Device/API/ABI acceptance | PASS, SINGLE DEVICE | API 31, arm64-v8a, 4 KiB, exact serial/artifact/restore evidence | API 24-36, x86_64, 16 KiB environments |
 | Release evidence | PENDING | R6 | Signed independent plugin APK and production soak |
 
@@ -251,6 +251,15 @@ One exact instrumentation method executed `return 7` and `return 8` sequentially
 through the host proxy, read-only PFD, remote session, and native runner. The
 repositories still default the Provider off. See
 `docs/dev/lua-runtime-official-provider-smoke-2026-08-11.md`.
+
+At sibling revision `cf79c461a2ff4117e0e733cdaf0fc652985418cf`, M3.1 adds a
+restricted built-in `require("autojs")` whose only functions are
+`console.log(string)` and `console.error(string)`. The existing output sequence,
+credits, chunk, and total-byte limits remain authoritative. The official
+Provider smoke at host revision `d4b6e41e9d8fb7456ef0cb7f5994a4df18672e69`
+passed one exact API 31/arm64 method, observed INFO/ERROR markers in the host
+console, returned `Int64(8)`, and restored all three packages for users 0 and
+10. See `docs/dev/lua-runtime-console-smoke-2026-08-11.md`.
 
 Android concurrent admission, cancel and callback-peer death,
 blocking/hostile PFD recovery, Android process OOM, release signing, API/ABI
