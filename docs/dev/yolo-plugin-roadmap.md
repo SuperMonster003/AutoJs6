@@ -11,9 +11,10 @@
 | R0 本地提交 | `3c170896d8e4b528f1aa85953a4698d1742c8344`，未 push |
 | 通用 Host | 已有 `AidlPluginHost`，包含发现、授权、显式组件绑定、连接池和 dedicated binding lease |
 | OCR Host | 当前是统一的 `OcrPluginHost`；raw SharedMemory/pipe 仍是其私有实现 |
-| YOLO Runtime | R1 sibling 已有 CPU/arm64 NCNN/JNI provider 与 debug APK；主仓库仍不包含 runtime，且尚无 Host/Rhino 生产路由 |
+| YOLO Runtime | R1 sibling 已有 CPU/arm64 NCNN/JNI provider；主仓库已有 R2 default-off Host/Binder/PFD 路由，但仍无 Rhino API |
 | R0 当前声明 | `SOURCE_DEPLOYED / STATIC_PASS / JVM_DIAGNOSTIC_PASS / AIDL_DIAGNOSTIC_PASS / ANDROID_BUILD_PASS`；不能证明 Binder/native/设备可运行 |
-| 生产入口 | 当前 main 工作树没有 Host、Rhino、插件中心、Manifest query 或自动执行入口；因此仍不可调用，不由 R0 marker gate 证明 |
+| R2 当前声明 | `SOURCE / ANDROID_BUILD / BINDER_PFD = PASS`；真实 NCNN 推理也经该链路复验，但不等于 Rhino `DEVICE_E2E` 或生产发布 |
+| 生产入口 | 插件中心可发现但 YOLO 默认关闭；目前只有内部 Host API 和 opt-in instrumentation，无 Rhino/Node/Explorer 自动执行入口 |
 
 ## 固定架构决定
 
@@ -165,18 +166,39 @@ canonical receipt 必须包含命令、commit/source snapshot、输入 artifact 
 
 目标：连接真实 provider，但仍不暴露脚本 API。
 
-- [ ] 新增 `core/plugin/yolo/YoloPluginHost.kt`，组合现有 `AidlPluginHost`。
-- [ ] 增加最窄的 package-visibility query/插件中心发现映射，但不自动启用 provider。
-- [ ] 为通用选择策略增加兼容的 `defaultEnabled` 参数，YOLO 固定传 `false`。
-- [ ] 使用 exact component、授权、签名/UID/version pinning 和 dedicated binding lease。
-- [ ] `openSession`、`detect` 均显式 `retryOnRemoteException=false`。
-- [ ] Host 以只读 PFD 打开模型；provider 不申请共享存储访问权限。
-- [ ] 先实现窄范围 `YoloImageTransport`，不把 OCR 重构设为本阶段门禁。
-- [ ] session 同时持有 remote Binder 与 binding lease，close/death 时幂等释放。
-- [ ] 保持无 Rhino/Node/Explorer 生产调用点。
+- [x] 新增 `core/plugin/yolo/YoloPluginHost.kt`，组合现有 `AidlPluginHost`。
+- [x] 增加最窄的 package-visibility query/插件中心发现映射，但不自动启用 provider。
+- [x] 为通用选择策略增加兼容的 `defaultEnabled` 参数，YOLO 固定传 `false`。
+- [x] 使用 exact component、授权、签名/UID/version pinning 和 dedicated binding lease。
+- [x] `openSession`、`detect` 均显式 `retryOnRemoteException=false`。
+- [x] Host 以只读 PFD 打开模型；provider 不申请共享存储访问权限。
+- [x] 先实现窄范围 `YoloImageTransport`，不把 OCR 重构设为本阶段门禁。
+- [x] session 同时持有 remote Binder 与 binding lease，close/death 时幂等释放。
+- [x] 保持无 Rhino/Node/Explorer 生产调用点。
 
 主 gate：Host 与 provider Android build 通过；一次真实 Binder/PFD smoke 作为独立
 `BINDER_PFD` 证据。没有设备时只允许声明 `ANDROID_BUILD`。
+
+2026-08-11 R2 exit：
+
+- `R2-SOURCE=PASS`：main revision
+  `10e7c85ad285de1ca14db8b18457f3f4992e3ed3` 与 provider revision
+  `01b9093c55c7c1a78f39246c671e928df244483f` 均在 gate 前 clean；无 push。
+- `R2-ANDROID_BUILD=PASS`：Provider arm64 debug APK、Host arm64 debug APK 与 Host
+  instrumentation APK 串行 assemble；三者均为单 signer 且证书 SHA-256 一致，三个
+  APK 都不包含本地模型/测试图。
+- `R2-BINDER_PFD=PASS`：授权设备 `QV710AF65F`（API 31、arm64）在确认无 soak
+  且三个目标包预先不存在后运行唯一 opt-in test；Host 与
+  Provider UID 分离，provider/session 均为 remote Binder，模型 PFD 在同步 open 后关闭，
+  图像 PFD 在 oneway dispatch 后关闭，callback UID/correlation 与唯一终态通过。
+- 真实 YOLO11n 检测得到 1 bus + 4 person，五项与锁定 NCNN fixture 的 IoU 均大于
+  `0.9999994`；重复 close 和重新 open session 均通过。
+- 运行后 Host/Provider/Test 三包均 absent，唯一 staging 目录已删除；未启动 AVD。
+- canonical receipt：`docs/dev/yolo-evidence/r2-summary.json`。
+
+边界保持不变：R2 没有 Rhino/Node/Explorer 调用点，因此不声明 `DEVICE_E2E`、
+`PUBLIC_PREVIEW` 或 `PRODUCTION`；hostile provider、timeout/cancel/death 与持续资源增长
+检查仍按计划留在 R5。
 
 ## R3：Rhino opt-in Preview 端到端
 

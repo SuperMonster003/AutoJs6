@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "roadmapStage": "R2",
+  "status": "PASS",
+  "evidenceLevel": "real-device-production-host-remote-binder-pfd",
+  "generatedAtUtc": "2026-08-11T11:23:23.7692607Z",
+  "mainRevision": "10e7c85ad285de1ca14db8b18457f3f4992e3ed3",
+  "providerRevision": "01b9093c55c7c1a78f39246c671e928df244483f",
+  "sourceRepositoriesClean": true,
+  "invocation": {
+    "script": "tools/yolo/verify-yolo-r2.ps1",
+    "explicitDeviceSerial": "QV710AF65F",
+    "gradleTasks": [
+      ":app:assembleDebug",
+      ":app:assembleAppDebug",
+      ":app:assembleAppDebugAndroidTest"
+    ]
+  },
+  "device": {
+    "serial": "QV710AF65F",
+    "api": 31,
+    "abi": "arm64-v8a",
+    "fingerprint": "Sony/XQ-AT72_CN/XQ-AT72:12/58.2.A.10.44A/058002A0100044A0891821322:user/release-keys",
+    "qv710SoakConfirmedIdle": true
+  },
+  "apks": {
+    "host": {
+      "path": "E:\\AutoJs6-Worktree-Yolo\\app\\build\\outputs\\apk\\app\\debug\\autojs6-v6.8.0-alpha7-arm64-v8a.apk",
+      "sha256": "7e611b22828f0bde95b9f4c4884c51c34d6b31ab137512878d5cd4ccac331301",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true
+    },
+    "provider": {
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Yolo-NCNN\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-yolo-ncnn-v0.1.0-arm64-v8a.apk",
+      "sha256": "a595a0521b7025b67e6fff87cdf99328cdd3b8192ecdfd918ed3627e38aeebf7",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true,
+      "nativeArm64": true
+    },
+    "instrumentation": {
+      "path": "E:\\AutoJs6-Worktree-Yolo\\app\\build\\outputs\\apk\\androidTest\\app\\debug\\app-app-debug-androidTest.apk",
+      "sha256": "e9b298626c6b4ce1e4b46d7f75de73d64758cfe5a0d5bcf49d2408a1c2fa9717",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true
+    }
+  },
+  "fixture": {
+    "model-manifest-v1.json": {
+      "length": 1689,
+      "sha256": "ab729b5f63cccc22fe63d30b71973778e06db2a4a1354882c46bb35cc3c2d39a"
+    },
+    "expected-bus-detections.json": {
+      "length": 1242,
+      "sha256": "b79f7f914fab82cf4a9c80e72e1453e7cf3dd6a986b5e3d45481927410268d5f"
+    },
+    "model.ncnn.param": {
+      "length": 22713,
+      "sha256": "041f788d58e9831f33fdfe00296e4d815e6d2421146ac55b3056cc8813441998"
+    },
+    "model.ncnn.bin": {
+      "length": 10566144,
+      "sha256": "2c75384fc331b576c1de59ae16524578831b1a50b5eed9f63878fa8f16464bbb"
+    },
+    "bus.jpg": {
+      "length": 137419,
+      "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
+    }
+  },
+  "instrumentation": {
+    "runner": "androidx.test.runner.AndroidJUnitRunner",
+    "class": "org.autojs.autojs.core.plugin.yolo.YoloRealProviderR2AndroidTest",
+    "method": "productionHostUsesRemoteBinderOwnsPfdAndReopensAfterIdempotentClose",
+    "singleMethodOnly": true,
+    "passedTests": 1
+  },
+  "test": {
+    "schemaVersion": 1,
+    "status": "PASS",
+    "hostPackage": "org.autojs.autojs6",
+    "providerPackage": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+    "testPackage": "org.autojs.autojs6.test",
+    "component": "io.github.supermonster003.autojs6.plugin.yolo.ncnn/io.github.supermonster003.autojs6.plugin.yolo.ncnn.provider.YoloProviderService",
+    "hostUid": 14587,
+    "providerUid": 14588,
+    "testUid": 14589,
+    "sameSigner": true,
+    "remoteBinder": true,
+    "modelDescriptorsClosedAfterOpen": true,
+    "imageDescriptorClosedAfterDispatch": true,
+    "terminalCount": 1,
+    "callbackUid": 14588,
+    "idempotentClose": true,
+    "reopenSucceeded": true,
+    "detections": [
+      {
+        "classId": 5,
+        "label": "bus",
+        "confidence": 0.9392049312591553,
+        "bounds": [
+          11.918380737304688,
+          228.39425659179688,
+          799.22509765625,
+          735.2150268554688
+        ]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.9019904732704163,
+        "bounds": [
+          48.592716217041016,
+          397.960693359375,
+          243.21273803710938,
+          904.5357055664062
+        ]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.8492761254310608,
+        "bounds": [
+          670.556396484375,
+          392.5901184082031,
+          810,
+          879.6233520507812
+        ]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.8327871561050415,
+        "bounds": [
+          223.11959838867188,
+          405.57794189453125,
+          345.2289733886719,
+          859.7220458984375
+        ]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.3993437588214874,
+        "bounds": [
+          0,
+          550.1927490234375,
+          66.00817108154297,
+          871.7786254882812
+        ]
+      }
+    ],
+    "comparisons": [
+      {
+        "classId": 5,
+        "label": "bus",
+        "iou": 0.9999999069711301,
+        "confidenceDelta": 5.960464477539063E-08
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "iou": 0.9999995445697621,
+        "confidenceDelta": 2.980232238769531E-07
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "iou": 0.9999999997700463,
+        "confidenceDelta": 0
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "iou": 0.9999999997989771,
+        "confidenceDelta": 2.980232238769531E-07
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "iou": 0.9999994629995906,
+        "confidenceDelta": 5.960464477539063E-08
+      }
+    ]
+  },
+  "cleanup": {
+    "reverseUninstall": true,
+    "packagesAbsent": true,
+    "temporaryStagingRemoved": true,
+    "temporaryAvdStarted": false
+  }
+}
