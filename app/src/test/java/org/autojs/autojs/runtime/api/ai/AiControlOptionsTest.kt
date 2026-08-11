@@ -4,6 +4,7 @@ import com.google.gson.JsonParser
 import org.autojs.autojs.core.ai.AiProviderSelector
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -33,11 +34,132 @@ class AiControlOptionsTest {
         assertEquals("https://example.test/v1", control.baseUrl)
         assertEquals("secret", control.apiKey)
         assertEquals(1500L, control.timeoutMillis)
+        assertNull(control.pluginSelection)
         assertFalse(options.has("profileId"))
         assertFalse(options.has("baseURL"))
         assertFalse(options.has("timeoutMs"))
         assertFalse(options.has("stream"))
         assertEquals(0.25, options.get("temperature").asDouble, 0.0)
+    }
+
+    @Test
+    fun exactPluginSelectionIsConsumedWithoutCreatingCloudControls() {
+        val options = pluginOptions(", \"timeout\": 1500")
+
+        val control = AiControlOptions.takeFrom(options)
+
+        assertEquals(
+            AiPluginSelection(
+                packageName = "org.example.provider",
+                className = "org.example.provider.AiTextService",
+                providerId = "example.provider",
+                modelId = "example-model",
+            ),
+            control.pluginSelection,
+        )
+        assertEquals(1500L, control.timeoutMillis)
+        assertNull(control.profile)
+        assertNull(control.providerId)
+        assertNull(control.baseUrl)
+        assertNull(control.model)
+        assertNull(control.apiKey)
+        assertTrue(options.entrySet().isEmpty())
+    }
+
+    @Test
+    fun malformedPluginSelectionIsRejectedWithItsExactBoundary() {
+        data class Case(val pluginJson: String, val expectedMessage: String)
+
+        val cases = listOf(
+            Case("null", "AI plugin selection must be an object"),
+            Case("[]", "AI plugin selection must be an object"),
+            Case(
+                """{"providerId":"example.provider","modelId":"example-model"}""",
+                "AI plugin component is required",
+            ),
+            Case(
+                """{"component":{},"modelId":"example-model"}""",
+                "AI plugin providerId is required",
+            ),
+            Case(
+                """{"component":{},"providerId":"example.provider"}""",
+                "AI plugin modelId is required",
+            ),
+            Case(
+                """{"component":{},"providerId":1,"modelId":"example-model"}""",
+                "AI plugin providerId must be a string",
+            ),
+            Case(
+                """{"component":{},"providerId":"example.provider","modelId":" "}""",
+                "AI plugin modelId must not be blank",
+            ),
+            Case(
+                """{"component":{},"providerId":"bad/id","modelId":"example-model"}""",
+                "AI plugin providerId is invalid",
+            ),
+            Case(
+                """{"component":[],"providerId":"example.provider","modelId":"example-model"}""",
+                "AI plugin component must be an object",
+            ),
+            Case(
+                """{"component":{"packageName":"org.example.provider"},"providerId":"example.provider","modelId":"example-model"}""",
+                "AI plugin component className is required",
+            ),
+            Case(
+                """{"component":{"packageName":"org.example.provider","className":"org.example.\u0001Service"},"providerId":"example.provider","modelId":"example-model"}""",
+                "AI plugin component className contains control characters",
+            ),
+            Case(
+                """{"component":{"packageName":"org.example.provider","className":"Service","extra":true},"providerId":"example.provider","modelId":"example-model"}""",
+                "AI plugin component contains unsupported fields",
+            ),
+            Case(
+                """{"component":{},"providerId":"example.provider","modelId":"example-model","extra":true}""",
+                "AI plugin selection contains unsupported fields",
+            ),
+        )
+
+        cases.forEach { case ->
+            val options = JsonParser.parseString("""{"plugin":${case.pluginJson}}""").asJsonObject
+            val error = assertThrows(IllegalArgumentException::class.java) {
+                AiControlOptions.takeFrom(options)
+            }
+            assertEquals(case.expectedMessage, error.message)
+        }
+    }
+
+    @Test
+    fun pluginSelectionRejectsCloudControlsAndUnsupportedOuterOptions() {
+        val cloudControls = listOf(
+            "\"profile\":\"Work\"",
+            "\"profileId\":\"Work\"",
+            "\"profile_id\":\"Work\"",
+            "\"provider\":\"openai\"",
+            "\"providerId\":\"openai\"",
+            "\"provider_id\":\"openai\"",
+            "\"baseUrl\":\"https://example.test/v1\"",
+            "\"baseURL\":\"https://example.test/v1\"",
+            "\"base_url\":\"https://example.test/v1\"",
+            "\"model\":\"cloud-model\"",
+            "\"apiKey\":\"secret\"",
+            "\"api_key\":\"secret\"",
+        )
+        cloudControls.forEach { cloudControl ->
+            val error = assertThrows(IllegalArgumentException::class.java) {
+                AiControlOptions.takeFrom(pluginOptions(", $cloudControl"))
+            }
+            assertEquals(
+                "AI plugin selection cannot be combined with cloud provider controls",
+                error.message,
+            )
+        }
+
+        listOf("\"stream\":true", "\"temperature\":0.25").forEach { unsupported ->
+            val error = assertThrows(IllegalArgumentException::class.java) {
+                AiControlOptions.takeFrom(pluginOptions(", $unsupported"))
+            }
+            assertEquals("AI plugin selection contains unsupported options", error.message)
+        }
     }
 
     @Test
@@ -108,4 +230,20 @@ class AiControlOptionsTest {
             ).canUseStandaloneConfig(),
         )
     }
+
+    private fun pluginOptions(extra: String = "") = JsonParser.parseString(
+        """
+        {
+          "plugin": {
+            "component": {
+              "packageName": "org.example.provider",
+              "className": "org.example.provider.AiTextService"
+            },
+            "providerId": "example.provider",
+            "modelId": "example-model"
+          }
+          $extra
+        }
+        """,
+    ).asJsonObject
 }

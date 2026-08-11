@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/10
+###### 2026/08/11
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
@@ -195,6 +195,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` ui.useAndroidLayout에서 Android 네이티브 레이아웃 위젯, include/merge, 스크립트 프로젝트의 res 참조 및 shape/selector/layer-list 등의 Drawable XML 지원
 * `추가` JavaScript (Rhino) 모듈에서 power/settings/work_manager 호환 인터페이스와 AppInfo 래퍼를 지원하고 Auto.js Pro 9.3.11의 일부 Base64/Crypto/WebSocket/ByteString/automator/images/timers API를 보완
 * `추가` 전역 JavaScript (Rhino) ai 모듈에서 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 공급자, ask/chat/stream 호출 및 도구 호출의 다중 라운드 연속 실행 지원; 개발자 옵션에서 암호화된 다중 프로필과 자격 증명을 관리할 수 있으며 로컬 루프백 주소의 호환 엔드포인트는 API 키 없이 실행 가능
+* `추가` 실험적 `ai.ask` 로컬 플러그인 경로에서 명시적으로 고정한 AI 텍스트 플러그인 구성 요소/공급자/모델을 통한 프롬프트 전용 요청 지원
 * `추가` 전역 JavaScript (Rhino) tts 모듈에서 시스템 음성 합성, 긴 텍스트 지능형 분할, 논리 큐, 오프라인 음성 필터링을 포함한 음성 및 언어 검색, 관찰 가능한 작업과 오디오 이벤트, 무음 삽입, 원자적 게시를 사용하는 파일 합성 지원; 시간 제한, 백프레셔, 런타임 정리 및 지정 엔진에서 다른 엔진으로의 폴백 방지 기능도 제공
 * `추가` device.getMarketName 메서드, 기기의 "제품명" 확인용 _[`issue #513`](http://issues.autojs6.com/513)_
 * `추가` 예약 작업에서 월간/연간/카운트다운 작업 및 반복 종료 조건 지원 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
