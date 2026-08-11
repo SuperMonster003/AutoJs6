@@ -30,7 +30,7 @@
 | M0 协议与宿主接入 | 已完成 | `.lua` 路由、协议、选择策略和 fail-closed 代理 |
 | M1 独立 Native 运行时 | 已完成 | Lua 5.4.8/JNI、独立进程、ABI/16 KiB 和故障恢复 |
 | M2 真实 Provider 闭环 | 已完成 | 宿主经 production INFO/RUNTIME 连续执行两次真实 Lua |
-| M3 最小 AutoJs 能力 | 进行中 | console 与受限参数已闭环；下一步是首个宿主 broker 能力 |
+| M3 最小 AutoJs 能力 | 已完成 | console、受限参数与首个 `device.info` broker 能力已闭环 |
 | M4 产品预览 | 未开始 | 编辑器、持久入口和安装/错误体验 |
 | M5 发布候选 | 未开始 | 签名、兼容抽样和独立发布 |
 
@@ -65,7 +65,7 @@ Provider 恢复到审计前状态。Provider 仍不作为普通构建的默认�
 本阶段不做：hostile PFD 全矩阵、Android OOM、并发 BUSY、全部 API/ABI、签名发布、
 AutoJs 能力模块。
 
-## M3 — 最小 AutoJs 能力（进行中）
+## M3 — 最小 AutoJs 能力（已完成）
 
 - [x] M3.1 实现受控 `require("autojs")`，仅开放
   `console.log(string)` / `console.error(string)`；输出继续受 sequence、credits、chunk
@@ -73,11 +73,11 @@ AutoJs 能力模块。
 - [x] 用真实 production Provider 运行示例脚本，验证 stdout、stderr 和标量结果返回。
 - [x] M3.2 从 `ExecutionConfig` 冻结宿主参数，并安全映射为受配额约束的标量、稠密数组和
   字符串键 map；Lua 通过 `require("autojs").arguments` 读取该会话快照。
-- [ ] M3.3 接入首个真正的宿主 broker 能力；Provider 声明、宿主授予，未授权明确返回
-  `CAPABILITY_DENIED`。
+- [x] M3.3 接入首个真正的宿主 broker 能力 `device.info`；Provider 声明、宿主按 pinned
+  交集授予，未授权明确返回 `CAPABILITY_DENIED`，真实 production Provider smoke 已通过。
 
 本阶段不做：文件写入、网络、shell、UI、无障碍、通用 Java 反射和任意动态 C 模块。
-timer、只读设备信息和受限模块加载可在上述最小闭环稳定后按需加入。
+timer、更多只读设备信息和受限模块加载在产品预览或后续版本按需加入，不阻塞进入 M4。
 
 ## M4 — 产品预览
 
@@ -113,6 +113,7 @@ timer、只读设备信息和受限模块加载可在上述最小闭环稳定后
 - 官方 Provider smoke：[`docs/dev/lua-runtime-official-provider-smoke-2026-08-11.md`](../dev/lua-runtime-official-provider-smoke-2026-08-11.md)
 - M3 console smoke：[`docs/dev/lua-runtime-console-smoke-2026-08-11.md`](../dev/lua-runtime-console-smoke-2026-08-11.md)
 - M3 参数 smoke：[`docs/dev/lua-runtime-arguments-smoke-2026-08-11.md`](../dev/lua-runtime-arguments-smoke-2026-08-11.md)
+- M3 `device.info` smoke：[`docs/dev/lua-runtime-device-info-smoke-2026-08-11.md`](../dev/lua-runtime-device-info-smoke-2026-08-11.md)
 
 ## 最小检查策略
 

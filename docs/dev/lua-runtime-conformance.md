@@ -11,9 +11,9 @@ exists.
 | TaggedWire and value JVM tests | PASS, JVM | Round trip, canonical map order, golden bytes, malformed fields, limits, defensive copies | Binder framing, PFD I/O |
 | Negotiation and lifecycle JVM tests | PASS, JVM | Capability/limit intersection, credits, sequence, terminal, cancel/close, host-call replay | Android scheduling and races |
 | Public AIDL compilation | PASS, GRADLE | R0 Gradle API gate, 14+50 JVM tests, `lua-runtime-api` debug AAR assembly | Cross-package calls, caller UID, Binder death |
-| Host proxy and `.lua` routing | PASS, LOCAL + DEVICE HAPPY PATH | App compilation plus focused JVM tests; pinned selection, explicit transport, bounded Binder lane, R2 fixture coverage, and one opt-in official Provider smoke with two sequential native results | Android API/ABI matrix and product capability layer |
+| Host proxy and `.lua` routing | PASS, LOCAL + DEVICE HAPPY PATH | App compilation plus focused JVM tests; pinned selection, explicit transport, bounded Binder lane, R2 fixture coverage, and opt-in official Provider smokes including `device.info` | Android API/ABI matrix and broader product capability layer |
 | Hostile Android provider | PASS, DEVICE PARTIAL | R2 debug-only/testOnly fixture 2/2 JVM build plus 19/19 isolated methods on `QV710AF65F` API 31/arm64-v8a | Provider death, wrong UID/capability attacks, update/uninstall during a session, oversized source, OS-level FD evidence |
-| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing controlled `require("autojs")`, stdout/stderr, and scalar results on API 31/arm64 with exact all-user restoration | Arguments, host broker capabilities, concurrent admission, blocking PFD, Android process OOM, API/ABI matrix, signed release and default production enablement |
+| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing controlled console, arguments, `device.info`, and scalar results on API 31/arm64 with exact all-user restoration | More broker capabilities, concurrent admission, blocking PFD, Android process OOM, API/ABI matrix, signed release and default production enablement |
 | Device/API/ABI acceptance | PASS, SINGLE DEVICE | API 31, arm64-v8a, 4 KiB, exact serial/artifact/restore evidence | API 24-36, x86_64, 16 KiB environments |
 | Release evidence | PENDING | R6 | Signed independent plugin APK and production soak |
 
@@ -261,7 +261,18 @@ passed one exact API 31/arm64 method, observed INFO/ERROR markers in the host
 console, returned `Int64(8)`, and restored all three packages for users 0 and
 10. See `docs/dev/lua-runtime-console-smoke-2026-08-11.md`.
 
-Android concurrent admission, cancel and callback-peer death,
+M3.2 then froze supported `ExecutionConfig` values into a quota-bound value tree and mapped them
+to `require("autojs").arguments`; its exact production smoke returned `Int64(9)` and restored the
+same device. See `docs/dev/lua-runtime-arguments-smoke-2026-08-11.md`.
+
+At host revision `9729b5c7c4c5807f1ab494f03df93a59e3e8e3be` and sibling revision
+`74194f54c4f5e9762b17e827821e52f55fb79559`, M3.3 pinned the optional
+`device.info` grant, returned only five strings plus `sdkInt`, and passed 29/29 host JVM tests,
+42/42 Provider JVM tests, and one exact production Binder smoke on `QV710AF65F`. The script
+returned the device API level, the runtime stayed in `:lua_runtime`, and all packages were absent
+again for users 0 and 10. See `docs/dev/lua-runtime-device-info-smoke-2026-08-11.md`.
+
+Android hostile capability denial/replay, concurrent admission, cancel and callback-peer death,
 blocking/hostile PFD recovery, Android process OOM, release signing, API/ABI
 sampling, and default production enablement remain unestablished.
 
