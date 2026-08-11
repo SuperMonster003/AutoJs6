@@ -104,6 +104,7 @@ import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo
 import org.autojs.autojs.runtime.api.augment.web.Web
 import org.autojs.autojs.runtime.api.augment.web.WebSocket
 import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
+import org.autojs.autojs.runtime.api.augment.yolo.Yolo
 import org.autojs.autojs.runtime.api.augment.zip.Zip
 import org.autojs.autojs.runtime.api.tts.TtsService
 import org.autojs.autojs.runtime.exception.ScriptEnvironmentException
@@ -815,6 +816,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         }
         Barcode(this).augment(target)
         QrCode(this).augment(target)
+        Yolo(this).augment(target)
         Threads(this).augment(target, threads)
         UI(this).proxying(target, ui)
         Colors.augmentWithRuntime(target, this, Colors.colorTables + colors)
