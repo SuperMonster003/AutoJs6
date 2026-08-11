@@ -3,10 +3,18 @@ package org.autojs.autojs.core.plugin.dex
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Looper
+import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
 import dalvik.system.DexClassLoader
+import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.engine.RhinoJavaScriptEngine
+import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.autojs.execution.ScriptExecution
+import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.rhino.AndroidClassLoader
+import org.autojs.autojs.script.JavaScriptFileSource
+import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.dexcompiler.api.DexCompilerContract
 import org.autojs.plugin.dexcompiler.api.DexCompilerDiagnosticSeverity
@@ -49,6 +57,8 @@ class DexCompilerRealProviderAndroidTest {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
+    private val service
+        get() = AutoJs.instance.scriptEngineService
 
     @Test
     fun realProviderPublishesThenCacheHitsAndLoadsFixture() {
@@ -231,6 +241,193 @@ class DexCompilerRealProviderAndroidTest {
             cleanupFailures.forEach { cleanupFailure ->
                 val failure = primaryFailure
                 if (failure != null) failure.addSuppressed(cleanupFailure) else throw cleanupFailure
+            }
+        }
+    }
+
+    /**
+     * One API 34 representative for the public Rhino entry. The program extends a Host class that
+     * is present in the ordered compile classpath but deliberately absent from the emitted DEX.
+     * The same script also exercises the independent V1.0 runtime.loadJar entry.
+     */
+    @Test
+    fun api34RhinoClasspathEntryUsesRealProviderAndRetainsLegacyLoadJar() {
+        assumeTrue(
+            "The representative Rhino classpath deployment runs only on API 34",
+            Build.VERSION.SDK_INT == Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+        )
+        val identity = requireRealProvider()
+        val savedOptIn = snapshotOptInStore()
+        val token = UUID.randomUUID()
+        val workDir = File(context.cacheDir, "dex-real-rhino-classpath-$token")
+        assertTrue("Unable to create the Rhino classpath fixture directory", workDir.mkdirs())
+        val program = File(workDir, CLASSPATH_PROGRAM_NAME)
+        val classpath = File(workDir, CLASSPATH_NAME)
+        val legacyProgram = File(workDir, LEGACY_PROGRAM_NAME)
+        val marker = File(workDir, RHINO_MARKER_NAME)
+        val script = File(workDir, RHINO_SCRIPT_NAME)
+        val executor = Executors.newSingleThreadExecutor(
+            namedThreadFactory("dex-real-rhino-classpath"),
+        )
+        var classpathGeneration: DexCompilerVerifiedArtifact? = null
+        var legacyGeneration: DexCompilerVerifiedArtifact? = null
+        var primaryFailure: Throwable? = null
+        try {
+            listOf(
+                program to classpathProgramJar(),
+                classpath to classpathStubJar(),
+                legacyProgram to uniqueProgramJar(),
+            ).forEach { (file, content) ->
+                FileOutputStream(file).use { output ->
+                    output.write(content)
+                    output.fd.sync()
+                }
+            }
+            script.writeText(RHINO_CLASSPATH_SOURCE)
+            assertEquals(
+                DexCompilerOptInOptions(enabled = true, selectedComponent = identity.component),
+                DexCompilerOptInStore.select(identity.component),
+            )
+            AndroidDexCompilerRuntime.initialize(context, eligibleProcess = true)
+            val coordinator = requireNotNull(AndroidDexCompilerRuntime.coordinatorOrNull()) {
+                "The production DEX compiler runtime was not initialized"
+            }
+
+            service.stopAll()
+            awaitNoRegisteredEngines("before real-provider Rhino classpath execution")
+            val completed = CountDownLatch(1)
+            val startedEngineClass = AtomicReference<Class<*>>()
+            val scriptFailure = AtomicReference<Throwable>()
+            val source = JavaScriptFileSource(script)
+            assertEquals(JavaScriptSource.ENGINE, source.engineName)
+            service.execute(
+                source,
+                object : SimpleScriptExecutionListener() {
+                    override fun onStart(execution: ScriptExecution) {
+                        startedEngineClass.set(execution.engine.javaClass)
+                    }
+
+                    override fun onSuccess(execution: ScriptExecution, result: Any?) {
+                        completed.countDown()
+                    }
+
+                    override fun onException(execution: ScriptExecution, error: Throwable) {
+                        scriptFailure.set(error)
+                        completed.countDown()
+                    }
+                },
+                ExecutionConfig(workingDirectory = workDir.absolutePath),
+            )
+            if (!completed.await(RHINO_SCRIPT_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                service.stopAll()
+                throw AssertionError("Timed out waiting for the real-provider Rhino classpath script")
+            }
+            awaitNoRegisteredEngines("after real-provider Rhino classpath execution")
+            scriptFailure.get()?.let { failure ->
+                throw AssertionError("Real-provider Rhino classpath script failed", failure)
+            }
+            val started = requireNotNull(startedEngineClass.get()) {
+                "Script execution did not report its engine"
+            }
+            assertTrue(
+                "The public classpath entry did not execute on a Rhino engine: ${started.name}",
+                RhinoJavaScriptEngine::class.java.isAssignableFrom(started),
+            )
+            assertEquals("42,42", marker.takeIf(File::isFile)?.readText())
+
+            val future = executor.submit {
+                when (val decision = coordinator.compileWithClasspath(program, listOf(classpath))) {
+                    is DexCompilerRuntimeDecision.Published -> {
+                        classpathGeneration = decision.artifact
+                        decision.fallbackInput.use {
+                            assertTrue(
+                                "The Rhino classpath entry did not populate the exact provider cache",
+                                decision.cacheHit,
+                            )
+                            val output = requireNotNull(decision.artifact.openRead()) {
+                                "The exact Rhino classpath generation could not be opened"
+                            }.use { it.readBytes() }
+                            assertEquals(decision.artifact.sizeBytes, output.size.toLong())
+                            assertEquals(
+                                "The compile-only classpath class leaked into provider output",
+                                1,
+                                DexIndexedZipValidator.validate(output).classDefinitionCount,
+                            )
+                        }
+                    }
+                    is DexCompilerRuntimeDecision.UseLocal -> {
+                        decision.fallbackInput?.close()
+                        throw AssertionError("The Rhino classpath repeat unexpectedly used local D8: $decision")
+                    }
+                    DexCompilerRuntimeDecision.Cancelled ->
+                        throw AssertionError("The Rhino classpath repeat was unexpectedly cancelled")
+                }
+
+                when (val decision = coordinator.compile(legacyProgram)) {
+                    is DexCompilerRuntimeDecision.Published -> {
+                        legacyGeneration = decision.artifact
+                        decision.fallbackInput.use {
+                            assertTrue(
+                                "The V1.0 runtime.loadJar call did not populate the exact provider cache",
+                                decision.cacheHit,
+                            )
+                        }
+                    }
+                    is DexCompilerRuntimeDecision.UseLocal -> {
+                        decision.fallbackInput?.close()
+                        throw AssertionError("The V1.0 loadJar repeat unexpectedly used local D8: $decision")
+                    }
+                    DexCompilerRuntimeDecision.Cancelled ->
+                        throw AssertionError("The V1.0 loadJar repeat was unexpectedly cancelled")
+                }
+            }
+            try {
+                future.get(PRODUCTION_WIRING_WAIT_MILLIS, TimeUnit.MILLISECONDS)
+            } catch (timeout: java.util.concurrent.TimeoutException) {
+                future.cancel(true)
+                throw AssertionError("Real-provider Rhino cache verification did not finish in time").also {
+                    it.initCause(timeout)
+                }
+            }
+        } catch (error: Throwable) {
+            primaryFailure = error
+            throw error
+        } finally {
+            val cleanupFailures = mutableListOf<Throwable>()
+            runCatching { service.stopAll() }.exceptionOrNull()?.let(cleanupFailures::add)
+            runCatching { awaitNoRegisteredEngines("after real-provider Rhino classpath cleanup") }
+                .exceptionOrNull()?.let(cleanupFailures::add)
+            executor.shutdownNow()
+            runCatching {
+                assertTrue(
+                    "The Rhino classpath verification executor did not terminate",
+                    executor.awaitTermination(EXECUTOR_SHUTDOWN_WAIT_MILLIS, TimeUnit.MILLISECONDS),
+                )
+            }.exceptionOrNull()?.let(cleanupFailures::add)
+            listOfNotNull(classpathGeneration, legacyGeneration).forEach { artifact ->
+                runCatching {
+                    assertTrue("Unable to invalidate an exact Rhino generation", artifact.invalidate())
+                    assertTrue(
+                        "An invalidated Rhino generation can still be opened",
+                        artifact.openRead() == null,
+                    )
+                }.exceptionOrNull()?.let(cleanupFailures::add)
+            }
+            runCatching { restoreOptInStore(savedOptIn) }
+                .exceptionOrNull()?.let(cleanupFailures::add)
+            runCatching {
+                assertTrue(
+                    "Unable to delete the Rhino classpath fixture directory",
+                    !workDir.exists() || workDir.deleteRecursively(),
+                )
+            }.exceptionOrNull()?.let(cleanupFailures::add)
+            val failure = primaryFailure
+            if (failure != null) {
+                cleanupFailures.forEach(failure::addSuppressed)
+            } else if (cleanupFailures.isNotEmpty()) {
+                val first = cleanupFailures.first()
+                cleanupFailures.drop(1).forEach(first::addSuppressed)
+                throw first
             }
         }
     }
@@ -491,6 +688,17 @@ class DexCompilerRealProviderAndroidTest {
             else -> null
         }
 
+    private fun awaitNoRegisteredEngines(label: String) {
+        val deadline = SystemClock.elapsedRealtime() + ENGINE_REMOVAL_TIMEOUT_MILLIS
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (service.engines.isEmpty() && service.scriptExecutions.isEmpty()) return
+            SystemClock.sleep(ENGINE_REMOVAL_POLL_MILLIS)
+        }
+        throw AssertionError(
+            "$label left engines=${service.engines.map { it.id }} executions=${service.scriptExecutions}",
+        )
+    }
+
     private fun snapshotOptInStore(): OptInStoreSnapshot {
         val preferences = Pref.get()
         val values = preferences.all
@@ -581,6 +789,40 @@ class DexCompilerRealProviderAndroidTest {
         }
     }
 
+    private fun classpathProgramJar(): ByteArray = ByteArrayOutputStream().use { output ->
+        ZipOutputStream(output).use { zip ->
+            zip.writeStoredEntry(
+                CLASSPATH_PROGRAM_CLASS_ENTRY,
+                fixtureClassBytes(
+                    internalName = CLASSPATH_PROGRAM_INTERNAL_NAME,
+                    superInternalName = HOST_PARENT_INTERNAL_NAME,
+                    sourceFileName = "ClasspathProgramFixture.java",
+                ),
+            )
+            zip.writeStoredEntry(
+                "org/autojs/fixture/dexcompiler/classpath-run-${UUID.randomUUID()}.txt",
+                byteArrayOf(1),
+            )
+        }
+        output.toByteArray()
+    }
+
+    private fun classpathStubJar(): ByteArray = ByteArrayOutputStream().use { output ->
+        ZipOutputStream(output).use { zip ->
+            zip.writeStoredEntry(
+                HOST_PARENT_CLASS_ENTRY,
+                fixtureClassBytes(
+                    internalName = HOST_PARENT_INTERNAL_NAME,
+                    superInternalName = "java/lang/Object",
+                    sourceFileName = "Objects.java",
+                    answer = null,
+                    finalClass = false,
+                ),
+            )
+        }
+        output.toByteArray()
+    }
+
     private fun invalidProgramJar(): ByteArray = ByteArrayOutputStream().use { output ->
         ZipOutputStream(output).use { zip ->
             // The provider's bounded archive validator intentionally checks only the class magic;
@@ -611,16 +853,23 @@ class DexCompilerRealProviderAndroidTest {
         closeEntry()
     }
 
-    /** A deterministic Java 8 class: public static int answer() { return 42; }. */
-    private fun fixtureClassBytes(): ByteArray = ByteArrayOutputStream().use { bytes ->
+    /** A deterministic Java 8 class with a public constructor and optional answer() method. */
+    private fun fixtureClassBytes(
+        internalName: String = FIXTURE_INTERNAL_NAME,
+        superInternalName: String = "java/lang/Object",
+        sourceFileName: String = "RealProviderFixture.java",
+        answer: Int? = 42,
+        finalClass: Boolean = true,
+    ): ByteArray = ByteArrayOutputStream().use { bytes ->
+        require(answer == null || answer in Byte.MIN_VALUE..Byte.MAX_VALUE)
         DataOutputStream(bytes).use { output ->
             output.writeInt(0xcafebabe.toInt())
             output.writeShort(0)
             output.writeShort(52)
             output.writeShort(14)
-            output.writeUtf8Constant(FIXTURE_INTERNAL_NAME) // #1
+            output.writeUtf8Constant(internalName) // #1
             output.writeByte(7); output.writeShort(1) // #2 Class
-            output.writeUtf8Constant("java/lang/Object") // #3
+            output.writeUtf8Constant(superInternalName) // #3
             output.writeByte(7); output.writeShort(3) // #4 Class
             output.writeUtf8Constant("<init>") // #5
             output.writeUtf8Constant("()V") // #6
@@ -630,14 +879,14 @@ class DexCompilerRealProviderAndroidTest {
             output.writeUtf8Constant("answer") // #10
             output.writeUtf8Constant("()I") // #11
             output.writeUtf8Constant("SourceFile") // #12
-            output.writeUtf8Constant("RealProviderFixture.java") // #13
+            output.writeUtf8Constant(sourceFileName) // #13
 
-            output.writeShort(0x0031) // public final super
+            output.writeShort(if (finalClass) 0x0031 else 0x0021) // public [final] super
             output.writeShort(2)
             output.writeShort(4)
             output.writeShort(0) // interfaces
             output.writeShort(0) // fields
-            output.writeShort(2) // methods
+            output.writeShort(if (answer == null) 1 else 2) // methods
 
             output.writeShort(0x0001) // public <init>()V
             output.writeShort(5)
@@ -652,18 +901,20 @@ class DexCompilerRealProviderAndroidTest {
             output.writeShort(0)
             output.writeShort(0)
 
-            output.writeShort(0x0009) // public static answer()I
-            output.writeShort(10)
-            output.writeShort(11)
-            output.writeShort(1)
-            output.writeShort(7)
-            output.writeInt(15)
-            output.writeShort(1)
-            output.writeShort(0)
-            output.writeInt(3)
-            output.write(byteArrayOf(0x10, 0x2a, 0xac.toByte()))
-            output.writeShort(0)
-            output.writeShort(0)
+            if (answer != null) {
+                output.writeShort(0x0009) // public static answer()I
+                output.writeShort(10)
+                output.writeShort(11)
+                output.writeShort(1)
+                output.writeShort(7)
+                output.writeInt(15)
+                output.writeShort(1)
+                output.writeShort(0)
+                output.writeInt(3)
+                output.write(byteArrayOf(0x10, answer.toByte(), 0xac.toByte()))
+                output.writeShort(0)
+                output.writeShort(0)
+            }
 
             output.writeShort(1) // class attributes
             output.writeShort(12)
@@ -721,11 +972,36 @@ class DexCompilerRealProviderAndroidTest {
         const val FIXTURE_INTERNAL_NAME = "org/autojs/fixture/dexcompiler/RealProviderFixture"
         const val FIXTURE_CLASS_ENTRY = "$FIXTURE_INTERNAL_NAME.class"
         const val FIXTURE_CLASS_NAME = "org.autojs.fixture.dexcompiler.RealProviderFixture"
+        const val CLASSPATH_PROGRAM_NAME = "program-with-classpath.jar"
+        const val CLASSPATH_NAME = "compile-only-classpath.jar"
+        const val LEGACY_PROGRAM_NAME = "legacy-program.jar"
+        const val RHINO_MARKER_NAME = "classpath-result.marker"
+        const val RHINO_SCRIPT_NAME = "runtime-load-jar-with-classpath.js"
+        const val CLASSPATH_PROGRAM_INTERNAL_NAME =
+            "org/autojs/fixture/dexcompiler/ClasspathProgramFixture"
+        const val CLASSPATH_PROGRAM_CLASS_ENTRY = "$CLASSPATH_PROGRAM_INTERNAL_NAME.class"
+        const val CLASSPATH_PROGRAM_CLASS_NAME =
+            "org.autojs.fixture.dexcompiler.ClasspathProgramFixture"
+        const val HOST_PARENT_INTERNAL_NAME = "com/stardust/util/Objects"
+        const val HOST_PARENT_CLASS_ENTRY = "$HOST_PARENT_INTERNAL_NAME.class"
         const val ZIP_DOS_EPOCH_MILLIS = 315_532_800_000L
         const val OUTCOME_WAIT_ALLOWANCE_MILLIS = 30_000L
         const val TERMINAL_CLEANUP_WAIT_MILLIS = 5_000L
         const val EXECUTOR_SHUTDOWN_WAIT_MILLIS = 2_000L
+        const val RHINO_SCRIPT_TIMEOUT_SECONDS = 90L
+        const val ENGINE_REMOVAL_TIMEOUT_MILLIS = 5_000L
+        const val ENGINE_REMOVAL_POLL_MILLIS = 25L
         const val PRODUCTION_WIRING_WAIT_MILLIS =
             DexCompilerContract.DEFAULT_TIMEOUT_MILLIS * 2L + OUTCOME_WAIT_ALLOWANCE_MILLIS
+
+        val RHINO_CLASSPATH_SOURCE =
+            """
+            "rhino";
+            runtime.loadJarWithClasspath("./$CLASSPATH_PROGRAM_NAME", "./$CLASSPATH_NAME");
+            var classpathAnswer = Packages.$CLASSPATH_PROGRAM_CLASS_NAME.answer();
+            runtime.loadJar("./$LEGACY_PROGRAM_NAME");
+            var legacyAnswer = Packages.$FIXTURE_CLASS_NAME.answer();
+            files.write("./$RHINO_MARKER_NAME", String(classpathAnswer) + "," + String(legacyAnswer));
+            """.trimIndent()
     }
 }

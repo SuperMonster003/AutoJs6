@@ -567,6 +567,20 @@ class ScriptRuntime private constructor(builder: Builder) {
         doLoadJar({ f: File -> isJarFile(f) }, *paths)
     }
 
+    fun loadJarWithClasspath(program: String, vararg orderedClasspath: String) {
+        try {
+            ScriptRuntimeJarClasspathRoute.dispatch(
+                programPath = program,
+                orderedClasspathPaths = orderedClasspath,
+                resolvePath = files::nonNullPath,
+            ) { programJar, classpathJars ->
+                sClassLoader.loadJarWithExperimentalCompilerClasspath(programJar, classpathJars)
+            }
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
+        }
+    }
+
     fun loadJar(dir: String?, isRecursive: Boolean) {
         doLoadJar({ f: File -> isJarFile(f) || isRecursive && f.isDirectory }, dir!!)
     }
