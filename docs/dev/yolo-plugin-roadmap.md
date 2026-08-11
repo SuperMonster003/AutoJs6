@@ -242,6 +242,7 @@ soak、所有 YOLO 家族均不作为首发阻塞项。
 
 ## 设备保护边界
 
-`QV710AF65F` 当前不属于 YOLO 验证窗口。未经明确授权，不对它运行 ADB、Gradle
-connected task、安装、查询或竞争资源。未来设备命令必须使用明确 serial，且 receipt
-必须记录设备、APK/模型 hash、前置状态和恢复结果。
+`QV710AF65F` 仅在确认没有 soak 测试运行时可用于 YOLO 验证，并且所有命令必须使用
+明确 serial；优先备用设备为 Xiaomi `23046RP50C` 或 `QV770340J7`。在线 AVD 也可使用，
+但临时启动的 AVD 必须在验证结束后关闭。receipt 必须记录设备、APK/模型 hash、前置
+状态和恢复结果。
