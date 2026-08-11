@@ -1,6 +1,6 @@
 # DEX Compiler Protocol V1
 
-This document records the frozen V1 contract and the completed R1 deployment
+This document records the frozen V1 contract and the completed R1/R2 deployment
 boundary. The protocol AAR is a build-time SDK. The in-repository conformance
 provider is not a production D8 distribution; the real D8 provider lives in
 the independent sibling project `AutoJs6-Plugin-DEX-Compiler`. The experiment
@@ -166,17 +166,18 @@ has finalized the semantic key and before it claims input/output descriptors or
 calls `openSession`. A hit is never trusted as historical validation evidence:
 the host reruns the current `DexIndexedZipValidator`. Successful class-loader
 adoption retains the generation, while a non-interruption adoption failure
-invalidates that exact generation. Production Runtime now passes the finalized
+invalidates that exact generation. Production Runtime passes the finalized
 semantic attempt key through a process-scoped single-flight coordinator. Matching
 callers share one producer, while each successful caller receives a fresh
-capability. Interrupting any waiter, including the final waiter, only detaches
-that caller and returns cancellation without local compiler fallback; the
-producer may complete in the background and publish to the persistent cache.
-Cooperative producer cancellation after the last waiter leaves remains R2. The
-unsafe-executor or suspected blocked-Binder circuit is deliberately conservative:
-once opened, it stays open for the current host process lifetime and does not
-claim to forcibly stop work that is already blocked. These coordination semantics
-have 14/14 pure JVM evidence.
+capability. Interrupting a waiter detaches only that caller and returns
+cancellation without local compiler fallback. The producer continues while
+another waiter remains; when the final waiter leaves before a terminal result, a
+leader-owned one-shot handle cooperatively requests producer cancellation. That
+request prevents late publication and eventually releases owned resources, but
+an already entered D8 invocation may continue using CPU until it returns. The
+unsafe-executor or suspected blocked-Binder circuit remains deliberately
+conservative: once opened, it stays open for the current host process lifetime
+and does not claim to forcibly stop work that is already blocked.
 The current structural validator also materializes output under a conservative
 16 MiB host limit; removing that heap ceiling requires a separately tested
 random-access or streaming validator.
@@ -276,12 +277,14 @@ verified-artifact adoption failure claims at most one built-in D8/dx attempt.
 Post-dispatch fallback first rolls back plugin output. Cancellation propagates
 as interruption and never changes compilers or triggers fallback.
 
-That cancellation rule also applies inside single-flight. Any interrupted caller,
-including the final waiter, detaches without a local fallback, while the shared
-producer may finish and populate the cache in the background. Last-waiter
-cooperative cancellation is deferred to R2. A safety circuit opened by unsafe
-executor rejection or a suspected blocked Binder call remains open for the
-current process lifetime rather than speculatively recovering.
+That cancellation rule also applies inside single-flight. Any interrupted caller
+detaches without a local fallback. The shared producer continues while another
+waiter remains; the final waiter to leave before a terminal result cooperatively
+requests cancellation through the leader-owned handle. Cancellation wins before
+publication when registered first, closes resources during terminal cleanup, and
+does not claim to stop CPU work already executing inside D8. A safety circuit
+opened by unsafe executor rejection or a suspected blocked Binder call remains
+open for the current process lifetime rather than speculatively recovering.
 
 Production source wiring is intentionally limited to the raw JAR branch used by
 `runtime.loadJar`. `loadAar`, `loadDex`, compatibility helpers, and
@@ -349,13 +352,22 @@ Failed and intentionally terminated earlier campaigns remain immutable evidence;
 the final PASS does not rewrite them.
 
 Force-stop exposed a real stale session workspace containing a zero-byte
-`program.jar` and empty `d8-output`. The repaired provider now runs a
-process-once strict-canonical janitor before exposing its first service Binder,
-anchored to the private cache root and fail-closed on traversal violations. The
-plugin passed 10 suites/48 tests, including 6/6 workspace-recovery cases, lint
-with 0 errors/27 warnings, and Debug/Release assembly. The old UUID existed
-before update; first bind/kill/recovery reduced the workspace to an empty root,
-and a normal D8/`DexClassLoader` run passed in 0.832 s while it remained empty.
-This is the first partial R2 recovery result, not full host-death, callback,
-cancellation, timeout, or terminal-matrix acceptance. Removing host compiler
-dependencies is a later explicit decision.
+`program.jar` and empty `d8-output`. The repaired provider runs a process-once
+strict-canonical janitor before exposing its first service Binder, anchored to
+the private cache root and fail-closed on traversal violations. R2 subsequently
+unified terminal, stop, cleanup, last-waiter cancellation, and monotonic-deadline
+ownership. The current gates are 17 host DEX suites/166 tests and 12 plugin
+suites/65 tests, with no failure/error/skipped result and plugin lint at 0 errors.
+
+The representative R2 closeout package at
+`D:\idea-projects\AutoJs6-DEX-R2-Evidence-20260811\closeout-api34-dab3f857-650d-4107-a3b9-941a1f7e02c2\report.json`
+passed real D8 failure/recovery, caller cancellation, and provider-process
+interruption on one authorized API 34 x86_64 target. Each scenario records its
+terminal observation, publication boundary, descriptor/workspace cleanup, and
+next-session availability. The report SHA-256 is
+`5d1549b9d5207e5dcd1c62a3c2caf863a748f49b8f9f2582f66bb2898be98eba`;
+its 61-file manifest SHA-256 is
+`927ee1abebe83a0901e7f767a56b377a2afd84a137d16b8d5d3784fcd54e639e`.
+This closes R2 without creating a new device matrix and without equating result
+termination with D8 CPU termination. Removing host compiler dependencies remains
+a later explicit decision.

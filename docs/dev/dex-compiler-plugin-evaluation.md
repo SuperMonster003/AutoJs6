@@ -2,7 +2,7 @@
 
 This note evaluates moving the runtime JAR-to-DEX compiler out of the AutoJs6
 application and into a standalone plugin. It records the phased decision and
-the completed default-off R1 deployment boundary.
+the completed default-off R1/R2 deployment boundary.
 
 ## Decision
 
@@ -331,14 +331,16 @@ Cache lookup occurs only after the authenticated Binder handshake has finalized
 the semantic key, but before input/output descriptor claims or `openSession`.
 Every hit is revalidated with the current `DexIndexedZipValidator`; successful
 class-loader adoption keeps the cached generation, while a non-interruption
-adoption failure invalidates only that exact generation. Production Runtime now
+adoption failure invalidates only that exact generation. Production Runtime
 passes the finalized semantic attempt key through a process-scoped single-flight
 coordinator, so matching callers share one producer and each successful caller
-receives a fresh capability. Interrupting any waiter, including the last one,
-only detaches that caller and returns cancellation without local compiler
-fallback; the producer may finish in the background and populate the persistent
-cache. Cooperative producer cancellation when the last waiter leaves is an R2
-item. The coordinator's unsafe-executor or suspected blocked-Binder circuit is
+receives a fresh capability. Interrupting a waiter detaches only that caller and
+returns cancellation without local compiler fallback. The producer continues
+while another waiter remains; when the final waiter leaves before a terminal
+result, a leader-owned one-shot handle cooperatively requests cancellation.
+Cancellation prevents late publication and eventually releases owned resources,
+but cannot promise to stop CPU work already executing inside D8. The
+coordinator's unsafe-executor or suspected blocked-Binder circuit remains
 deliberately conservative: once opened, it stays open for the current process
 lifetime and does not claim to have forcibly stopped already blocked work.
 
@@ -396,15 +398,25 @@ intentionally terminated campaigns remain preserved rather than overwritten.
 
 The force-stop run also exposed a real stale session workspace: an old UUID
 containing a zero-byte `program.jar` and empty `d8-output` survived process death.
-The plugin now performs a process-once, strict-canonical janitor before exposing
-its first service Binder. It anchors traversal to the private cache root and
-fails closed on boundary or symbolic-link violations. The repaired plugin passed
-10 suites/48 tests, including 6/6 workspace-recovery cases, lint with 0 errors/27
-warnings, and Debug/Release assembly. The old UUID was still present immediately
-before update; after first bind, kill, and recovery only the empty workspace root
-remained. A normal D8/`DexClassLoader` run then passed in 0.832 s and the root
-remained empty. This starts an R2 recovery slice; it does not complete host-death,
-callback-failure, cancellation-stage, timeout, or full R2 terminal coverage.
+The plugin performs a process-once, strict-canonical janitor before exposing its
+first service Binder. It anchors traversal to the private cache root and fails
+closed on boundary or symbolic-link violations. R2 then unified terminal, stop,
+cleanup, last-waiter cancellation, and monotonic-deadline ownership. The current
+gates are 17 host DEX suites/166 tests and 12 plugin suites/65 tests, with no
+failure/error/skipped result and plugin lint at 0 errors.
+
+The representative R2 closeout package at
+`D:\idea-projects\AutoJs6-DEX-R2-Evidence-20260811\closeout-api34-dab3f857-650d-4107-a3b9-941a1f7e02c2\report.json`
+passed real D8 failure/recovery, caller cancellation, and provider-process
+interruption on one authorized API 34 x86_64 target. The 52-command run records
+terminal and publication state, descriptor/workspace cleanup, next-session
+availability, clean preflight/postflight state, and 61 hashed files. Its report,
+manifest, and runner SHA-256 values are respectively
+`5d1549b9d5207e5dcd1c62a3c2caf863a748f49b8f9f2582f66bb2898be98eba`,
+`927ee1abebe83a0901e7f767a56b377a2afd84a137d16b8d5d3784fcd54e639e`, and
+`61437b2b2d7a02e35d43176a1c381a9fcd4b7fa540b5876ed9347661962c5f9e`.
+This closes R2 without creating a new device matrix or treating terminal latency
+as proof that D8 CPU work stopped.
 
 ## Proposed V1 Quotas
 
@@ -489,10 +501,12 @@ diagnostic.
 
 Single-flight cancellation follows the same rule: an interrupted caller only
 detaches from its waiter, receives cancellation, and never falls back locally.
-Even when it was the final waiter, the producer may complete and cache the
-result in the background; cooperative last-waiter cancellation remains R2.
-When unsafe executor rejection or a suspected blocked Binder call opens the
-process-local circuit, it remains conservatively open for that process lifetime.
+The producer continues while another waiter remains. When the final waiter leaves
+before a terminal result, the leader-owned handle cooperatively requests
+cancellation; a D8 invocation already in progress may still run, but its late
+result cannot publish. When unsafe executor rejection or a suspected blocked
+Binder call opens the process-local circuit, it remains conservatively open for
+that process lifetime.
 
 ## Verification Gates
 
@@ -592,12 +606,11 @@ potential only; they are not performance, APK, or installed-size measurements.
 - R1.2 automation complete: retain bounded persistent semantic-cache
   generations, recovery, LRU and exact corruption eviction; perform lookup only
   after authenticated key finalization and revalidate every hit with the current
-  DEX ZIP validator. Production Runtime request coalescing is connected and its
-  caller/producer semantics have 14/14 pure JVM evidence: waiter interruption,
-  including the last waiter, detaches only that caller without local fallback,
-  while the producer may finish and cache the result. Last-waiter cooperative
-  cancellation remains R2, and an opened safety circuit stays conservative for
-  the current process lifetime.
+  DEX ZIP validator. Production Runtime request coalescing is connected: waiter
+  interruption detaches only that caller without local fallback, the producer
+  continues while another waiter remains, and final-waiter departure requests
+  cooperative cancellation through the leader-owned handle. An opened safety
+  circuit stays conservative for the current process lifetime.
 - Historical supplemental result: the explicit real-provider Harness and
   production class-loader happy paths passed once on API 31 arm64 with cleanup
   verified for earlier host/test APKs.
@@ -606,12 +619,13 @@ potential only; they are not performance, APK, or installed-size measurements.
   `f3c2b1af-be93-41e7-b541-f167f90e5cc1` passed API 24/25/26/28/31/34/36
   with a real provider across x86_64 and arm64. The plugin is still not promoted
   to a default path.
-- R2 recovery slice started: a real force-stop stale workspace was reproduced,
-  then removed by the process-once strict-canonical janitor before first Binder
-  exposure. Plugin 48/48, recovery 6/6, lint, both builds, rebind, and a normal
-  post-recovery D8 load passed; the broader R2 terminal matrix remains open.
-- Phase 1 acceptance is complete; performance promotion, default enablement,
-  last-waiter cooperative cancellation, and broader recovery remain later work.
+- R2 complete: bounded failure summaries, process-once recovery, unified
+  fail-closed terminal ownership, monotonic deadlines, and last-waiter
+  cooperative cancellation passed 17/166 host and 12/65 plugin JVM gates plus a
+  representative three-scenario API 34 real-provider closeout. This is not a new
+  device matrix and does not equate result termination with D8 CPU termination.
+- Phase 1 acceptance is complete; performance promotion, default enablement, and
+  removal of host compiler dependencies remain later work.
 - Use host-owned snapshots, output transactions, validation, and cache keys.
 - Compare semantic load results, not byte-for-byte DEX identity.
 
