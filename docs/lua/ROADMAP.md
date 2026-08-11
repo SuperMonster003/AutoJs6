@@ -29,8 +29,8 @@
 | --- | --- | --- |
 | M0 协议与宿主接入 | 已完成 | `.lua` 路由、协议、选择策略和 fail-closed 代理 |
 | M1 独立 Native 运行时 | 已完成 | Lua 5.4.8/JNI、独立进程、ABI/16 KiB 和故障恢复 |
-| M2 真实 Provider 闭环 | 进行中 | 当前阶段：宿主调用 production INFO/RUNTIME 执行真实 Lua |
-| M3 最小 AutoJs 能力 | 未开始 | `require("autojs")`、console、参数和结果 |
+| M2 真实 Provider 闭环 | 已完成 | 宿主经 production INFO/RUNTIME 连续执行两次真实 Lua |
+| M3 最小 AutoJs 能力 | 进行中 | 下一阶段：`require("autojs")`、console、参数和结果 |
 | M4 产品预览 | 未开始 | 编辑器、持久入口和安装/错误体验 |
 | M5 发布候选 | 未开始 | 签名、兼容抽样和独立发布 |
 
@@ -48,16 +48,16 @@
 - [x] Debug-only crash/wedge 验证完成 Binder death、进程重建和再次执行。
 - [x] R2 hostile fixture 已覆盖关键 Binder/PFD 拒绝路径；扩展矩阵不再阻塞功能阶段。
 
-## M2 — 真实 Provider 端到端闭环（当前阶段）
+## M2 — 真实 Provider 端到端闭环（已完成）
 
 目标：不经过 fake provider 或 fault service，由 AutoJs6 宿主调用 production
 INFO/RUNTIME 服务完成真正的 Lua 执行。
 
-- [ ] 增加一个显式 opt-in 的官方 Provider smoke；仓库默认开关继续保持关闭。
-- [ ] 在一台 ARM64 设备上跑通
+- [x] 增加一个显式 opt-in 的官方 Provider smoke；仓库默认开关继续保持关闭。
+- [x] 在一台 ARM64 设备上跑通
   `LuaPluginScriptEngine -> production INFO/RUNTIME -> PFD -> session -> return 7`。
-- [ ] 同一安装内再执行一个简单脚本，确认第一会话释放且第二次执行成功。
-- [ ] 记录插件/宿主 revision、APK 摘要、签名、远端进程和设备恢复状态。
+- [x] 同一安装内再执行 `return 8`，确认第一会话释放且第二次执行成功。
+- [x] 记录插件/宿主 revision、APK 摘要、签名、远端进程和设备恢复状态。
 
 最小验收：受影响模块编译通过；一个精确选择的设备方法返回 `OK (1 test)`；测试包和
 Provider 恢复到审计前状态。Provider 仍不作为普通构建的默认可发现组件。
@@ -65,7 +65,7 @@ Provider 恢复到审计前状态。Provider 仍不作为普通构建的默认�
 本阶段不做：hostile PFD 全矩阵、Android OOM、并发 BUSY、全部 API/ABI、签名发布、
 AutoJs 能力模块。
 
-## M3 — 最小 AutoJs 能力
+## M3 — 最小 AutoJs 能力（下一阶段）
 
 - [ ] 实现受控的 `require("autojs")`，第一批只提供 `console.log/error`、参数和返回值。
 - [ ] 能力必须由 Provider 声明、宿主授予；未声明调用明确返回 `CAPABILITY_DENIED`。
@@ -105,6 +105,7 @@ timer、只读设备信息和受限模块加载可在上述最小闭环稳定后
 - R2 Binder/PFD：[`docs/dev/lua-runtime-device-evidence-2026-08-10.md`](../dev/lua-runtime-device-evidence-2026-08-10.md)
 - Native 执行：[`docs/dev/lua-runtime-native-device-evidence-2026-08-10.md`](../dev/lua-runtime-native-device-evidence-2026-08-10.md)
 - 故障恢复：[`docs/dev/lua-runtime-fault-recovery-device-evidence-2026-08-10.md`](../dev/lua-runtime-fault-recovery-device-evidence-2026-08-10.md)
+- 官方 Provider smoke：[`docs/dev/lua-runtime-official-provider-smoke-2026-08-11.md`](../dev/lua-runtime-official-provider-smoke-2026-08-11.md)
 
 ## 最小检查策略
 

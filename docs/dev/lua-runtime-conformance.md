@@ -11,9 +11,9 @@ exists.
 | TaggedWire and value JVM tests | PASS, JVM | Round trip, canonical map order, golden bytes, malformed fields, limits, defensive copies | Binder framing, PFD I/O |
 | Negotiation and lifecycle JVM tests | PASS, JVM | Capability/limit intersection, credits, sequence, terminal, cancel/close, host-call replay | Android scheduling and races |
 | Public AIDL compilation | PASS, GRADLE | R0 Gradle API gate, 14+50 JVM tests, `lua-runtime-api` debug AAR assembly | Cross-package calls, caller UID, Binder death |
-| Host proxy and `.lua` routing | PASS, LOCAL R1 + R2 DEVICE | App compilation plus 66/66 focused JVM tests after Explorer executable admission; pinned selection, explicit transport, effective component-state handling, process-wide bounded Binder lane, and API 31 fixture cleanup policies | Production provider/native Lua execution, Android API/ABI matrix |
+| Host proxy and `.lua` routing | PASS, LOCAL + DEVICE HAPPY PATH | App compilation plus focused JVM tests; pinned selection, explicit transport, bounded Binder lane, R2 fixture coverage, and one opt-in official Provider smoke with two sequential native results | Android API/ABI matrix and product capability layer |
 | Hostile Android provider | PASS, DEVICE PARTIAL | R2 debug-only/testOnly fixture 2/2 JVM build plus 19/19 isolated methods on `QV710AF65F` API 31/arm64-v8a | Provider death, wrong UID/capability attacks, update/uninstall during a session, oversized source, OS-level FD evidence |
-| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; PROVIDER OFF | Immutable protocol/Lua intake; Gradle 9.6.1 wrapper; 38/38 JVM tests; three aligned APKs; 7/7 separately selected direct-native methods plus 2/2 cross-process fault-recovery methods on API 31/arm64 with exact all-user install/restore evidence | Production INFO/RUNTIME bind, concurrent admission, cancel/peer death, blocking PFD, Android process OOM, API/ABI matrix, signed release, production enablement |
+| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing `return 7` then `return 8` on API 31/arm64 with exact all-user restoration | Concurrent admission, cancel/peer death, blocking PFD, Android process OOM, API/ABI matrix, signed release and default production enablement |
 | Device/API/ABI acceptance | PASS, SINGLE DEVICE | API 31, arm64-v8a, 4 KiB, exact serial/artifact/restore evidence | API 24-36, x86_64, 16 KiB environments |
 | Release evidence | PENDING | R6 | Signed independent plugin APK and production soak |
 
@@ -245,9 +245,16 @@ tokens used a debug shim, while recovered `return 7` used the real native
 runner. Both observed Binder death and rebound to a new PID and nonce. See
 `docs/dev/lua-runtime-fault-recovery-device-evidence-2026-08-10.md`.
 
-Production INFO/RUNTIME discovery and bind, Android concurrent admission,
-cancel and callback-peer death, blocking/hostile PFD recovery, Android process
-OOM, release signing, and production enablement remain unestablished.
+On 2026-08-11, the official Provider was built with a one-invocation opt-in and
+its production INFO/RUNTIME services were discovered by the real AutoJs6 host.
+One exact instrumentation method executed `return 7` and `return 8` sequentially
+through the host proxy, read-only PFD, remote session, and native runner. The
+repositories still default the Provider off. See
+`docs/dev/lua-runtime-official-provider-smoke-2026-08-11.md`.
+
+Android concurrent admission, cancel and callback-peer death,
+blocking/hostile PFD recovery, Android process OOM, release signing, API/ABI
+sampling, and default production enablement remain unestablished.
 
 Recheck the existing artifacts without ADB or rebuilding:
 
