@@ -152,13 +152,24 @@ function Resolve-YoloR2AndroidTool {
 function Resolve-YoloR2ApkFromMetadata {
     param(
         [Parameter(Mandatory = $true)][string] $MetadataPath,
-        [Parameter(Mandatory = $true)][string] $Label
+        [Parameter(Mandatory = $true)][string] $Label,
+        [string] $Abi
     )
     $metadataFile = Get-YoloR2RequiredFile -Path $MetadataPath -Label "$Label output metadata"
     $metadata = Get-Content -Raw -LiteralPath $metadataFile | ConvertFrom-Json
     $elements = @($metadata.elements)
-    Assert-YoloR2Condition ($elements.Count -eq 1) "$Label must have exactly one APK output"
-    $outputFile = [string]$elements[0].outputFile
+    $selected = if ([string]::IsNullOrWhiteSpace($Abi)) {
+        $elements
+    } else {
+        @($elements | Where-Object {
+            @($_.filters | Where-Object {
+                $_.filterType -eq "ABI" -and $_.value -eq $Abi
+            }).Count -eq 1
+        })
+    }
+    $expectation = if ([string]::IsNullOrWhiteSpace($Abi)) { "one APK output" } else { "one $Abi APK output" }
+    Assert-YoloR2Condition ($selected.Count -eq 1) "$Label must have exactly $expectation"
+    $outputFile = [string]$selected[0].outputFile
     Assert-YoloR2Condition (-not [string]::IsNullOrWhiteSpace($outputFile)) "$Label output metadata has no outputFile"
     return Get-YoloR2RequiredFile -Path (Join-Path (Split-Path -Parent $metadataFile) $outputFile) -Label "$Label APK"
 }
@@ -290,7 +301,7 @@ Invoke-YoloR2External -FilePath $mainGradle -Arguments @($gradleDeterministicArg
 Invoke-YoloR2External -FilePath $mainGradle -Arguments @($gradleDeterministicArguments + ":app:assembleAppDebugAndroidTest") -WorkingDirectory $repositoryRoot
 
 $providerApk = Resolve-YoloR2ApkFromMetadata -MetadataPath (Join-Path $siblingRoot "app\build\outputs\apk\debug\output-metadata.json") -Label "Provider"
-$hostApk = Resolve-YoloR2ApkFromMetadata -MetadataPath (Join-Path $repositoryRoot "app\build\outputs\apk\app\debug\output-metadata.json") -Label "Host"
+$hostApk = Resolve-YoloR2ApkFromMetadata -MetadataPath (Join-Path $repositoryRoot "app\build\outputs\apk\app\debug\output-metadata.json") -Label "Host" -Abi "arm64-v8a"
 $testApk = Resolve-YoloR2ApkFromMetadata -MetadataPath (Join-Path $repositoryRoot "app\build\outputs\apk\androidTest\app\debug\output-metadata.json") -Label "Instrumentation"
 Assert-YoloR2ApkClean -ApkPath $providerApk -Label "Provider" -RequireNative
 Assert-YoloR2ApkClean -ApkPath $hostApk -Label "Host"
