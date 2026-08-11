@@ -9,6 +9,7 @@ import org.autojs.plugin.ai.common.api.AiCredentialMode
 import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.text.api.AiContentPart
+import org.autojs.plugin.ai.text.api.AiTextCapabilityId
 import org.autojs.plugin.ai.text.api.AiGenerationOptions
 import org.autojs.plugin.ai.text.api.AiMessage
 import org.autojs.plugin.ai.text.api.AiMessageRole
@@ -35,37 +36,45 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 internal class AndroidAiTextPluginAskRunner private constructor(
     private val applicationContext: Context,
-) : AiTextPluginAskRunner {
+) : AiTextPluginAskRunner, AiTextPluginStreamRunner {
 
     override fun start(
         request: AiTextPluginAskRequest,
         onOutcome: (AiTextPluginAskOutcome) -> Unit,
     ): AiTextPluginAskHandle = processBackend(applicationContext).start(request, onOutcome)
 
+    override fun startStream(
+        request: AiTextPluginAskRequest,
+        onEvent: (AiTextPluginStreamEvent) -> Unit,
+    ): AiTextPluginAskHandle = processBackend(applicationContext).startStream(request, onEvent)
+
     companion object {
         fun create(context: Context): AiTextPluginAskRunner =
+            AndroidAiTextPluginAskRunner(context.applicationContext)
+
+        fun createStream(context: Context): AiTextPluginStreamRunner =
             AndroidAiTextPluginAskRunner(context.applicationContext)
 
         private val backendLock = Any()
 
         @Volatile
-        private var sharedBackend: AiTextPluginAskRunner? = null
+        private var sharedBackend: ProcessAiTextPluginAskRunner? = null
 
-        private fun processBackend(context: Context): AiTextPluginAskRunner {
+        private fun processBackend(context: Context): ProcessAiTextPluginAskRunner {
             sharedBackend?.let { return it }
             return synchronized(backendLock) {
                 sharedBackend ?: createProcessBackend(context).also { sharedBackend = it }
             }
         }
 
-        private fun createProcessBackend(context: Context): AiTextPluginAskRunner =
+        private fun createProcessBackend(context: Context): ProcessAiTextPluginAskRunner =
             ProcessAiTextPluginAskRunner(context.applicationContext)
     }
 }
 
 private class ProcessAiTextPluginAskRunner(
     applicationContext: Context,
-) : AiTextPluginAskRunner {
+) : AiTextPluginAskRunner, AiTextPluginStreamRunner {
     private val admission = AtomicBoolean(false)
     private val threadFactory = AiTextPluginAskThreadFactory()
     private val orchestrationExecutor =
@@ -125,27 +134,44 @@ private class ProcessAiTextPluginAskRunner(
         onOutcome: (AiTextPluginAskOutcome) -> Unit,
     ): AiTextPluginAskHandle {
         if (!admission.compareAndSet(false, true)) {
-            deliver(
-                onOutcome,
-                AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.BUSY),
-            )
+            deliver {
+                onOutcome(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.BUSY))
+            }
             return CompletedAiTextPluginAskHandle
         }
-        return Attempt(this, request, onOutcome).also(Attempt::start)
+        return Attempt(
+            backend = this,
+            request = request,
+            streaming = false,
+            onOutcome = onOutcome,
+            onStreamEvent = null,
+        ).also(Attempt::start)
     }
 
-    private fun deliver(
-        onOutcome: (AiTextPluginAskOutcome) -> Unit,
-        outcome: AiTextPluginAskOutcome,
-    ) {
-        if (!execute(orchestrationExecutor) { runCatching { onOutcome(outcome) } }) {
-            runCatching { onOutcome(outcome) }
+    override fun startStream(
+        request: AiTextPluginAskRequest,
+        onEvent: (AiTextPluginStreamEvent) -> Unit,
+    ): AiTextPluginAskHandle {
+        if (!admission.compareAndSet(false, true)) {
+            deliver { onEvent(AiTextPluginStreamEvent.Failed(AiTextPluginAskFailure.BUSY)) }
+            return CompletedAiTextPluginAskHandle
         }
+        return Attempt(
+            backend = this,
+            request = request,
+            streaming = true,
+            onOutcome = null,
+            onStreamEvent = onEvent,
+        ).also(Attempt::start)
+    }
+
+    private fun deliver(action: () -> Unit) {
+        if (!execute(orchestrationExecutor) { runCatching(action) }) runCatching(action)
     }
 
     private fun releaseAdmission() {
         check(admission.compareAndSet(true, false)) {
-            "AI text plugin ask admission was not acquired"
+            "AI text plugin route admission was not acquired"
         }
     }
 
@@ -162,8 +188,16 @@ private class ProcessAiTextPluginAskRunner(
 
     private fun now(): Long = SystemClock.elapsedRealtime()
 
-    private fun requirement(promptBytes: Int): AiTextCapabilityRequirement =
+    private fun requirement(
+        promptBytes: Int,
+        streaming: Boolean,
+    ): AiTextCapabilityRequirement =
         AiTextCapabilityRequirement(
+            requiredCapabilityIds = if (streaming) {
+                setOf(AiTextCapabilityId.STREAMING)
+            } else {
+                emptySet()
+            },
             minimumMessages = 1,
             minimumContentParts = 1,
             minimumContextBytes = promptBytes.toLong(),
@@ -176,13 +210,15 @@ private class ProcessAiTextPluginAskRunner(
     private class Attempt(
         private val backend: ProcessAiTextPluginAskRunner,
         private val request: AiTextPluginAskRequest,
-        private val onOutcome: (AiTextPluginAskOutcome) -> Unit,
+        private val streaming: Boolean,
+        private val onOutcome: ((AiTextPluginAskOutcome) -> Unit)?,
+        private val onStreamEvent: ((AiTextPluginStreamEvent) -> Unit)?,
     ) : AiTextPluginAskHandle {
         private val lock = Any()
         private val startedAtMillis = backend.now()
         private val deadlineAtMillis = saturatingAdd(startedAtMillis, request.timeoutMillis)
         private val promptBytes = request.prompt.toByteArray(Charsets.UTF_8)
-        private val requirement = backend.requirement(promptBytes.size)
+        private val requirement = backend.requirement(promptBytes.size, streaming)
 
         private var terminal = false
         private var stageHandle: Closeable? = null
@@ -426,7 +462,7 @@ private class ProcessAiTextPluginAskRunner(
             val outputLimit = minOf(request.maximumOutputBytes, plan.effectiveMaximumOutputBytes)
             val typedRequest = try {
                 AiTextRequest(
-                    requestId = "ask-${UUID.randomUUID()}",
+                    requestId = "${if (streaming) "stream" else "ask"}-${UUID.randomUUID()}",
                     protocolVersion = plan.pinnedProvider.protocolVersion,
                     providerId = request.providerId,
                     modelId = request.modelId,
@@ -446,7 +482,7 @@ private class ProcessAiTextPluginAskRunner(
                         ),
                     ),
                     options = AiGenerationOptions(
-                        stream = false,
+                        stream = streaming,
                         includeReasoning = false,
                         structuredJson = false,
                         reportUsage = false,
@@ -454,6 +490,11 @@ private class ProcessAiTextPluginAskRunner(
                         maximumToolRounds = 0,
                         timeoutMillis = remaining.coerceAtMost(AiTextLimits.MAX_TIMEOUT_MILLIS),
                         responseMimeType = AiTextMimeType.PLAIN,
+                        requiredCapabilityIds = if (streaming) {
+                            listOf(AiTextCapabilityId.STREAMING)
+                        } else {
+                            emptyList()
+                        },
                     ),
                 )
             } catch (_: Exception) {
@@ -492,10 +533,18 @@ private class ProcessAiTextPluginAskRunner(
                 is AiTextProviderSessionRunEvent.Transcript -> when (val transcript = event.event) {
                     AiTextProviderSessionEvent.Disabled ->
                         terminalSession(AiTextPluginAskFailure.INTERNAL_FAILURE)
-                    is AiTextProviderSessionEvent.Started -> Unit
-                    is AiTextProviderSessionEvent.Chunk,
-                    is AiTextProviderSessionEvent.Usage,
-                    -> terminalSession(AiTextPluginAskFailure.SESSION_REJECTED)
+                    is AiTextProviderSessionEvent.Started -> {
+                        if (streaming) publish(AiTextPluginStreamEvent.Opened)
+                    }
+                    is AiTextProviderSessionEvent.Chunk -> {
+                        if (!streaming || transcript.chunk.textDelta.isEmpty()) {
+                            terminalSession(AiTextPluginAskFailure.SESSION_REJECTED)
+                        } else {
+                            publish(AiTextPluginStreamEvent.Chunk(transcript.chunk.textDelta))
+                        }
+                    }
+                    is AiTextProviderSessionEvent.Usage ->
+                        terminalSession(AiTextPluginAskFailure.SESSION_REJECTED)
                     is AiTextProviderSessionEvent.Completed -> {
                         detachStage()
                         finish(AiTextPluginAskOutcome.Completed(transcript.result.outputText))
@@ -512,6 +561,11 @@ private class ProcessAiTextPluginAskRunner(
                         terminalSession(AiTextPluginAskFailure.SESSION_REJECTED)
                 }
             }
+        }
+
+        private fun publish(event: AiTextPluginStreamEvent) {
+            if (!streaming || !isActive()) return
+            checkNotNull(onStreamEvent).invoke(event)
         }
 
         private fun terminalSession(failure: AiTextPluginAskFailure) {
@@ -542,7 +596,7 @@ private class ProcessAiTextPluginAskRunner(
                 if (terminal) {
                     true
                 } else {
-                    check(stageHandle == null) { "AI text plugin ask stage overlap" }
+                    check(stageHandle == null) { "AI text plugin route stage overlap" }
                     stageHandle = handle
                     false
                 }
@@ -562,7 +616,7 @@ private class ProcessAiTextPluginAskRunner(
                 if (terminal) {
                     true
                 } else {
-                    check(deadlineHandle == null) { "AI text plugin ask deadline overlap" }
+                    check(deadlineHandle == null) { "AI text plugin route deadline overlap" }
                     deadlineHandle = handle
                     false
                 }
@@ -583,7 +637,17 @@ private class ProcessAiTextPluginAskRunner(
             resources.first?.let { runCatching { it.close() } }
             resources.second?.let { runCatching { it.close() } }
             backend.releaseAdmission()
-            runCatching { onOutcome(outcome) }
+            if (streaming) {
+                val event = when (outcome) {
+                    is AiTextPluginAskOutcome.Completed ->
+                        AiTextPluginStreamEvent.Completed(outcome.text)
+                    is AiTextPluginAskOutcome.Failed ->
+                        AiTextPluginStreamEvent.Failed(outcome.failure)
+                }
+                runCatching { checkNotNull(onStreamEvent).invoke(event) }
+            } else {
+                runCatching { checkNotNull(onOutcome).invoke(outcome) }
+            }
             return true
         }
 

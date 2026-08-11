@@ -21,6 +21,7 @@ class AiStream internal constructor(
 ) : EventEmitter(bridges) {
 
     private val call = AtomicReference<Call?>()
+    private val cancellation = AtomicReference<(() -> Unit)?>()
     private val streamState = AtomicReference(State.CREATED)
     private val terminalLock = Any()
 
@@ -63,6 +64,22 @@ class AiStream internal constructor(
         return this
     }
 
+    /** Binds a non-HTTP transport cancellation without exposing it to Rhino. */
+    private fun bindCancellation(action: () -> Unit): AiStream {
+        val cancelNow = synchronized(terminalLock) {
+            if (isDone) {
+                true
+            } else {
+                check(cancellation.compareAndSet(null, action)) {
+                    "AI stream already has a bound cancellation"
+                }
+                false
+            }
+        }
+        if (cancelNow) action()
+        return this
+    }
+
     private fun open(metadata: Any? = null): Boolean {
         if (!markOpen(allowAlreadyOpen = false)) return false
         return dispatcher.dispatchValues(arrayOf(metadata)) { values ->
@@ -81,6 +98,25 @@ class AiStream internal constructor(
         if (!markOpen()) return false
         return dispatcher.dispatchValues(arrayOf(chunk)) { values ->
             emit(EVENT_CHUNK, values[0])
+        }
+    }
+
+    /** Emits the normalized chunk and its text delta in one bounded dispatcher action. */
+    private fun textChunk(text: String, chunk: Any?): Boolean {
+        if (!markOpen()) return false
+        return dispatcher.dispatchValues(arrayOf(text, chunk)) { values ->
+            var firstFailure: Throwable? = null
+            try {
+                emit(EVENT_CHUNK, values[1])
+            } catch (error: Throwable) {
+                firstFailure = error
+            }
+            try {
+                emit(EVENT_DELTA, values[0], values[1])
+            } catch (error: Throwable) {
+                firstFailure?.addSuppressed(error) ?: run { firstFailure = error }
+            }
+            firstFailure?.let { throw it }
         }
     }
 
@@ -111,11 +147,13 @@ class AiStream internal constructor(
     }
 
     /**
-     * User-visible cancellation. The bound OkHttp call is cancelled immediately while the
-     * "cancelled" event and looper-wait release are delivered on the originating JS thread.
+     * User-visible cancellation. Bound HTTP and plugin transports are cancelled immediately
+     * while the "cancelled" event and looper-wait release are delivered on the originating JS
+     * thread.
      */
     fun cancel(): AiStream {
         var boundCall: Call? = null
+        var boundCancellation: (() -> Unit)? = null
         var cancellationFailure: Throwable? = null
         synchronized(terminalLock) {
             if (dispatcher.isTerminal) return this
@@ -137,8 +175,13 @@ class AiStream internal constructor(
                 return this
             }
             boundCall = call.getAndSet(null)
+            boundCancellation = cancellation.getAndSet(null)
         }
-        boundCall?.cancel()
+        cancellationFailure = cancelTransport(
+            boundCall = boundCall,
+            boundCancellation = boundCancellation,
+            previousFailure = cancellationFailure,
+        )
         cancellationFailure?.let { throw it }
         return this
     }
@@ -148,13 +191,34 @@ class AiStream internal constructor(
      */
     private fun cancelSilently(): Boolean {
         val boundCall: Call?
+        val boundCancellation: (() -> Unit)?
         synchronized(terminalLock) {
             if (!dispatcher.cancelSilently(::notifyTerminal)) return false
             streamState.set(State.CANCELLED)
             boundCall = call.getAndSet(null)
+            boundCancellation = cancellation.getAndSet(null)
         }
-        boundCall?.cancel()
+        cancelTransport(boundCall, boundCancellation)?.let { throw it }
         return true
+    }
+
+    private fun cancelTransport(
+        boundCall: Call?,
+        boundCancellation: (() -> Unit)?,
+        previousFailure: Throwable? = null,
+    ): Throwable? {
+        var firstFailure = previousFailure
+        try {
+            boundCall?.cancel()
+        } catch (error: Throwable) {
+            firstFailure?.addSuppressed(error) ?: run { firstFailure = error }
+        }
+        try {
+            boundCancellation?.invoke()
+        } catch (error: Throwable) {
+            firstFailure?.addSuppressed(error) ?: run { firstFailure = error }
+        }
+        return firstFailure
     }
 
     private fun markOpen(allowAlreadyOpen: Boolean = true): Boolean {
@@ -186,11 +250,14 @@ class AiStream internal constructor(
                     }
                 }
             } catch (error: Throwable) {
+                call.set(null)
+                cancellation.set(null)
                 notifyTerminal()
                 throw error
             }
             if (!accepted) return false
             call.set(null)
+            cancellation.set(null)
             return true
         }
     }
@@ -234,11 +301,17 @@ class AiStream internal constructor(
 
         fun bindCall(call: Call): Controller = apply { stream.bindCall(call) }
 
+        fun bindCancellation(action: () -> Unit): Controller = apply {
+            stream.bindCancellation(action)
+        }
+
         fun open(metadata: Any? = null): Boolean = stream.open(metadata)
 
         fun delta(text: String, chunk: Any? = null): Boolean = stream.delta(text, chunk)
 
         fun chunk(chunk: Any?): Boolean = stream.chunk(chunk)
+
+        fun textChunk(text: String, chunk: Any?): Boolean = stream.textChunk(text, chunk)
 
         fun toolCall(toolCall: Any?): Boolean = stream.toolCall(toolCall)
 
