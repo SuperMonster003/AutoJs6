@@ -385,17 +385,60 @@ terminal, off-main-thread delivery, stable package identity, and reusable
 process ownership. The host, instrumentation, and fake-provider packages were
 absent before installation and absent again after cleanup.
 
-This remains **PARTIAL** Android evidence. In particular, the completion case
-used an ordinary pipe: it proves cross-process callback-PFD ownership, exact
+The H2 lifecycle slice landed in production transport commit `e5bd92b16`, fake
+fixture commit `10dad3e39`, and host-test commit `0b9a94742`. Once Android has
+delivered the exact service connection, `onServiceDisconnected` now follows
+the same binder-death path as the death recipient and `onBindingDied`; only a
+disconnect before that connection callback retains the typed `DISCONNECTED`
+binding failure. The fake provider adds an `isolatedProcess` exact-bound relay
+for a real mismatched callback UID and a provider-process-death mode that waits
+for initial host credit, emits `Started` and one sequence-0 `hostile` chunk,
+waits for the host grant to restore the captured credit window, and only then
+kills the provider process.
+
+The focused H2 Gradle XML recorded all 18 coordinator tests and all 31
+fake-provider unit tests with 0 skipped, 0 failures, and 0 errors, and the same
+run assembled the host, instrumentation, and fake-provider APKs. All three
+verified with Signature Scheme v2 and certificate SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
+Their H2 artifact SHA-256 values were host
+`0685ce99c0f9e8f9056be5f3a8eebc2c7ea5ffca2d422e21eac69d0cb3364629`,
+instrumentation
+`7c91a0af651e2098ad124ff8a89ae3ac3018e0f1d0dec068367595e964739178`,
+and fake provider
+`6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
+Each local hash matched the installed device `base.apk` hash.
+
+On `QV710AF65F` (Android 12/API 31, arm64-v8a), these two separate exact H2
+method invocations each returned `OK (1 test)`:
+
+| Method | Time | Narrow evidence |
+| --- | ---: | --- |
+| `callbackFromIsolatedProviderUidIsRejectedAndReleasesOwner` | 0.852 s | A callback issued through the same conformance APK's exact-bound isolated-process relay arrived under a distinct Android UID, failed closed as `CALLBACK_UID_MISMATCH` before publishing transcript data, produced one terminal, and released the process owner. |
+| `providerProcessDeathAfterStartedPublishesOneBinderDiedAndReleasesOwner` | 0.544 s | After `Started`, one sequence-0 `hostile` chunk, and causal host credit replenishment, killing the provider process published one `BinderDied` terminal and released the process owner. |
+
+The host, instrumentation, and fake-provider packages were absent before this
+H2 install and absent again after cleanup. This is cleanup evidence; it is not
+an update/uninstall-during-session test.
+
+H1 and H2 remain **PARTIAL** Android evidence. The H1 completion case used an
+ordinary pipe: it proves cross-process callback-PFD ownership, exact
 EOF/length/SHA-256/UTF-8 materialization, and cleanup, but not cross-process
 reliable-pipe producer status. `closeWithError()`/`checkError()` remains covered
 only by the process-local descriptor test. The tool case proves ownership and
 fail-closed cleanup, not tool payload execution or reliable-status propagation.
 The duplicate-terminal result is only a 250 ms bounded smoke observation, not
-an exhaustive late-callback proof. There is no wrong-callback-UID or
-deterministic no-credit Android case; no provider death, update, disable, or
-uninstall-during-session case; and no real production plugin/model/runtime,
-UI, other API/ABI, remote `listingGeneration`, or `ai.*` integration evidence.
+an exhaustive late-callback proof. H2 proves one isolated-callback-UID rejection
+and one fake-provider process death on one API 31 device; it is not a broader
+identity or lifecycle matrix. Deterministic no-credit behavior remains only in
+the existing JVM policy test
+`ninthChunkBeforeAnyReplenishmentFailsClosedForNoCredit`. Package last-update
+drift and a missing final exact inspection are covered only by coordinator JVM
+final-reinspection cases before `openSession`; they do not prove an Android
+package update or uninstall during an active session. Provider disable, host
+death, real production plugin/model/runtime, UI, other API/ABI, remote
+`listingGeneration`, and `ai.*` integration evidence remain open. No broad R1
+or protocol exit gate is closed by this slice.
 
 These seven layers are not an active host route. Discovery, handshake,
 model-list, session coordination, and their Android transports remain

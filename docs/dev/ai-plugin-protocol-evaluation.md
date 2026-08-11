@@ -400,14 +400,54 @@ each method observed one settled terminal. The duplicate-terminal observation
 used only a bounded 250 ms late-callback smoke window. All three temporary
 packages were absent before installation and absent again after cleanup.
 
-This is **PARTIAL** evidence. The ordinary-pipe completion case does not prove
-cross-process reliable-pipe producer status; `closeWithError()`/`checkError()`
-remains process-local evidence. The tool case does not prove tool execution or
-reliable-status propagation, and the 250 ms duplicate smoke is not an
-exhaustive late-callback guarantee. There is no Android wrong-callback-UID or
-deterministic no-credit case; no provider death, update, disable, or
-uninstall-during-session case; and no other API/ABI, real production
-plugin/model/runtime, UI, remote `listingGeneration`, or `ai.*` wiring evidence.
+H2 is integrated as production transport commit `e5bd92b16`, fake-fixture
+commit `10dad3e39`, and host-test commit `0b9a94742`. The transport now reports
+an already-connected `onServiceDisconnected` through the binder-death path,
+leaving `DISCONNECTED` only for a pre-connection callback. The fixture uses an
+exact-bound `isolatedProcess` relay to issue one callback under a distinct UID.
+Its process-death mode waits for initial host credit, emits `Started` and one
+sequence-0 `hostile` chunk, waits until the host grant restores that captured
+credit window, and then kills the provider process.
+
+The focused H2 Gradle XML recorded all 18 coordinator tests and all 31
+fake-provider unit tests with 0 skipped, 0 failures, and 0 errors, and the same
+run assembled the host, instrumentation, and fake-provider APKs. All three APKs
+verified with Signature Scheme v2 and certificate SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
+Their local artifact SHA-256 values -- each equal to the installed device
+`base.apk` hash -- were host
+`0685ce99c0f9e8f9056be5f3a8eebc2c7ea5ffca2d422e21eac69d0cb3364629`,
+instrumentation
+`7c91a0af651e2098ad124ff8a89ae3ac3018e0f1d0dec068367595e964739178`,
+and fake provider
+`6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
+
+On `QV710AF65F` (API 31, arm64-v8a), the exact method
+`callbackFromIsolatedProviderUidIsRejectedAndReleasesOwner` returned
+`OK (1 test)` in 0.852 s: the distinct-UID callback was rejected as
+`CALLBACK_UID_MISMATCH` before transcript publication, with one terminal and a
+reusable owner. The exact method
+`providerProcessDeathAfterStartedPublishesOneBinderDiedAndReleasesOwner`
+returned `OK (1 test)` in 0.544 s: after `Started`, the one `hostile` chunk, and
+causal credit replenishment, provider kill produced one `BinderDied` terminal
+and released the owner. The host, instrumentation, and fake-provider packages
+were absent before installation and absent again after cleanup.
+
+This is still **PARTIAL** evidence. The ordinary-pipe completion case does not
+prove cross-process reliable-pipe producer status; `closeWithError()` /
+`checkError()` remains process-local evidence. The tool case does not prove tool
+execution or reliable-status propagation, and the 250 ms duplicate smoke is
+not an exhaustive late-callback guarantee. H2 adds one real isolated-callback-
+UID rejection and one fake-provider process death on API 31, not a broader
+identity or lifecycle matrix. Deterministic no-credit behavior remains only in
+the existing JVM policy test
+`ninthChunkBeforeAnyReplenishmentFailsClosedForNoCredit`. Update-time drift and
+a missing provider at final exact reinspection are only coordinator JVM cases
+before `openSession`; package absence before and after device testing is cleanup
+evidence, not an Android update or uninstall during an active session. Provider
+disable, host death, other API/ABI, real production plugin/model/runtime, UI,
+remote `listingGeneration`, and `ai.*` wiring evidence remain open. H2 does not
+close broad R1 or protocol exit criteria.
 
 A pure Java or Kotlin provider reports `supportedAbis = emptyArray()`. A local
 native model plugin declares its actual ABIs and should ship ABI splits plus a
@@ -694,10 +734,12 @@ matrix. In addition to one normal exact-component request-PFD stream beyond the
 initial eight credits, H1 proves ordinary-pipe completion materialization across
 Binder, descriptor-backed tool rejection without execution, three malformed
 callback failures, one bounded duplicate-terminal outcome, and cancel-after-
-start owner release. It does not prove cross-process reliable-pipe status,
-wrong UID, deterministic no-credit behavior, provider death/update/disable/
-uninstall during a session, the version matrix, a real provider/model/runtime,
-UI, or public `ai.*` integration.
+start owner release. H2 adds one isolated-process callback-UID rejection and
+one fake-provider death after an acknowledged chunk/credit cycle. It does not
+prove cross-process reliable-pipe status, deterministic Android no-credit
+behavior, active-session update/disable/uninstall, host death, the version
+matrix, a real provider/model/runtime, UI, or public `ai.*` integration. The
+no-credit and final-reinspection package-drift cases remain JVM evidence only.
 
 ## Estimated Benefit And Cost
 
