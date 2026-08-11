@@ -12,4 +12,6 @@ The model and image are intentionally not included. R3 supports only CPU detecti
 provider component; it does not silently select or fall back to another provider.
 
 Preview failures start with a stable `YOLO_*` code such as `YOLO_COMPONENT_REQUIRED`,
-`YOLO_MODEL_INVALID`, `YOLO_PROVIDER_UNAVAILABLE`, or `YOLO_DETECT_FAILED`.
+`YOLO_MODEL_INVALID`, `YOLO_MODEL_REJECTED`, `YOLO_PROVIDER_UNAVAILABLE`, or
+`YOLO_DETECT_FAILED`. `YOLO_MODEL_REJECTED` means the provider rejected the manifest,
+model graph, weights, or declared decoder profile after the files were transferred.

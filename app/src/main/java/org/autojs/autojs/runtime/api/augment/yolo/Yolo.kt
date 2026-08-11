@@ -4,6 +4,7 @@ import android.content.ComponentName
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.plugin.yolo.YoloPluginHost
+import org.autojs.autojs.core.plugin.yolo.YoloSessionOpenException
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
@@ -16,6 +17,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.plugin.yolo.api.YoloContract
 import org.autojs.plugin.yolo.api.YoloDevice
+import org.autojs.plugin.yolo.api.YoloErrorCode
 import org.mozilla.javascript.NativeObject
 import java.io.File
 
@@ -74,8 +76,16 @@ class Yolo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                     }
                 } catch (error: Exception) {
                     rethrowIfInterrupted(error)
+                    val code = if (
+                        error is YoloSessionOpenException &&
+                        error.code == YoloErrorCode.MODEL_REJECTED
+                    ) {
+                        YoloScriptException.MODEL_REJECTED
+                    } else {
+                        YoloScriptException.SESSION_OPEN_FAILED
+                    }
                     throw YoloScriptException(
-                        YoloScriptException.SESSION_OPEN_FAILED,
+                        code,
                         error.message ?: "the YOLO session could not be opened",
                         error,
                     )
