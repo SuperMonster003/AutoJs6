@@ -5,7 +5,9 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Looper
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.AutoJs
 import org.autojs.autojs.engine.LuaPluginScriptEngine
 import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs6.BuildConfig
@@ -17,6 +19,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import java.io.Reader
+import java.util.UUID
 
 /**
  * Opt-in happy-path smoke for the real, independently installed Lua runtime provider.
@@ -54,7 +57,21 @@ class LuaOfficialRuntimeSmokeTest {
         try {
             engine.init()
             assertEquals(LuaValue.Int64Value(7L), engine.execute(source("return 7", "official-provider-first")))
-            assertEquals(LuaValue.Int64Value(8L), engine.execute(source("return 8", "official-provider-second")))
+
+            val marker = UUID.randomUUID().toString()
+            val stdout = "lua-m3-stdout-$marker"
+            val stderr = "lua-m3-stderr-$marker"
+            val script = """
+                local autojs = require("autojs")
+                autojs.console.log("$stdout")
+                autojs.console.error("$stderr")
+                return 8
+            """.trimIndent()
+            assertEquals(LuaValue.Int64Value(8L), engine.execute(source(script, "official-provider-console")))
+            assertEquals(
+                listOf(Log.INFO to stdout, Log.ERROR to stderr),
+                consoleEntries(stdout, stderr),
+            )
         } finally {
             engine.destroy()
         }
@@ -88,6 +105,16 @@ class LuaOfficialRuntimeSmokeTest {
     private fun source(scriptText: String, name: String) = object : LuaScriptSource(name) {
         override val script: String = scriptText
         override val scriptReader: Reader? = null
+    }
+
+    private fun consoleEntries(vararg markers: String): List<Pair<Int, String>> {
+        val expected = markers.toSet()
+        val entries = AutoJs.instance.globalConsole.logEntries
+        return synchronized(entries) {
+            entries.mapNotNull { entry ->
+                entry.content.toString().takeIf(expected::contains)?.let { entry.level to it }
+            }
+        }
     }
 
     private companion object {
