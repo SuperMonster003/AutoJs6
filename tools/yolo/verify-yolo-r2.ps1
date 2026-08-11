@@ -182,9 +182,20 @@ function Get-YoloR2ApkSignerDigest {
     )
     $output = Invoke-YoloR2External -FilePath $ApkSigner -Arguments @("verify", "--verbose", "--print-certs", $ApkPath) -Quiet
     $text = $output -join "`n"
-    $matches = [regex]::Matches($text, '(?im)^Signer #[0-9]+ certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$')
-    Assert-YoloR2Condition ($matches.Count -eq 1) "$Label must have exactly one signer certificate"
-    return $matches[0].Groups[1].Value.ToLowerInvariant()
+    $signerCountMatches = [regex]::Matches($text, '(?im)^Number of signers:\s*([0-9]+)\s*$')
+    Assert-YoloR2Condition (
+        $signerCountMatches.Count -eq 1 -and [int]$signerCountMatches[0].Groups[1].Value -eq 1
+    ) "$Label must have exactly one APK signer"
+    # build-tools 36 prints "Signer #1", while build-tools 37 prints "V2 Signer".
+    $certificateMatches = [regex]::Matches(
+        $text,
+        '(?im)^(?:Signer #[0-9]+|V[0-9.]+ Signer(?: #[0-9]+)?): certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$'
+    )
+    $certificateDigests = @($certificateMatches | ForEach-Object {
+        $_.Groups[1].Value.ToLowerInvariant()
+    } | Sort-Object -Unique)
+    Assert-YoloR2Condition ($certificateDigests.Count -eq 1) "$Label must expose exactly one signer certificate digest"
+    return $certificateDigests[0]
 }
 
 function Assert-YoloR2ApkClean {
