@@ -19,7 +19,7 @@ import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Debug-only Android adapter used by the Python Runtime conformance instrumentation.
+ * AndroidTest-only adapter used by the Python Runtime conformance instrumentation.
  *
  * Discovery is action based, but the Binder handshake is deliberately component-only. The
  * complete PackageManager identity is captured before binding and compared again after the
