@@ -7,6 +7,20 @@
   "mainRevision": "10e7c85ad285de1ca14db8b18457f3f4992e3ed3",
   "providerRevision": "01b9093c55c7c1a78f39246c671e928df244483f",
   "sourceRepositoriesClean": true,
+  "evidenceStatus": {
+    "source": "PASS",
+    "static": "NOT_RUN_BY_R2_GATE",
+    "jvm": "NOT_RUN_BY_R2_GATE",
+    "androidBuild": "PASS",
+    "binderPfd": "PASS",
+    "nativeRuntime": "PASS_OBSERVED_IN_R2_GATE",
+    "deviceE2e": "NOT_CLAIMED_NO_RHINO",
+    "production": "NOT_CLAIMED"
+  },
+  "generatedReceipt": {
+    "path": "build/reports/yolo/r2-summary.generated.json",
+    "sha256": "c5b865e543047866a18e1fcf703f546509694e3f351c93ad5bf31e7b649e7eeb"
+  },
   "invocation": {
     "script": "tools/yolo/verify-yolo-r2.ps1",
     "explicitDeviceSerial": "QV710AF65F",
