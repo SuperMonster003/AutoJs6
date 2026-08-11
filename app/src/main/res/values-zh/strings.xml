@@ -381,6 +381,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">不合法的选择器集合元素: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP 地址不可为空</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 端口必须使用 \"[ipv6]:port\" 格式.</string>
+    <string name="error_lua_runtime_ambiguous">检测到多个兼容且已启用的 Lua 运行时插件. 请在插件中心禁用多余的 Lua 运行时 Provider, 然后重试.</string>
+    <string name="error_lua_runtime_identity_or_bind">Lua 运行时发生变化或无法启动. 请重试; 如问题持续, 请在插件中心更新或重新启用该插件.</string>
+    <string name="error_lua_runtime_incompatible">已安装的 Lua 运行时与当前 AutoJs6 版本或设备不兼容. 请更新 AutoJs6 或 Lua 运行时插件, 然后重试.</string>
+    <string name="error_lua_runtime_unavailable">Lua 运行时不可用. 请在插件中心安装、启用或授权官方 Lua 运行时插件, 然后重试.</string>
     <string name="error_max_listeners_exceeded">超出最大监听器数量限制: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 权限而无法运行 \"auto\" 文件</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 传入的 %s 参数为空</string>

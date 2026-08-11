@@ -5,6 +5,7 @@ import android.os.Build;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages;
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.execution.LoopedBasedJavaScriptExecution;
 import org.autojs.autojs.execution.RunnableScriptExecution;
@@ -95,7 +96,7 @@ public class ScriptEngineService {
                 onFinish(execution);
                 String message = null;
                 if (!ScriptInterruptedException.causedByInterrupt(e)) {
-                    message = e.getMessage();
+                    message = AndroidLuaRuntimeFailureMessages.resolve(getLanguageContext(), e);
                     if (engine instanceof JavaScriptEngine scriptEngine) {
                         scriptEngine.getRuntime().console.error(e);
                     }

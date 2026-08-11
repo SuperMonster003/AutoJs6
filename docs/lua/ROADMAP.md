@@ -31,7 +31,7 @@
 | M1 独立 Native 运行时 | 已完成 | Lua 5.4.8/JNI、独立进程、ABI/16 KiB 和故障恢复 |
 | M2 真实 Provider 闭环 | 已完成 | 宿主经 production INFO/RUNTIME 连续执行两次真实 Lua |
 | M3 最小 AutoJs 能力 | 已完成 | console、受限参数与首个 `device.info` broker 能力已闭环 |
-| M4 产品预览 | 未开始 | 编辑器、持久入口和安装/错误体验 |
+| M4 产品预览 | 进行中 | 编辑器 Lua 快照运行与运行时错误提示已完成 |
 | M5 发布候选 | 未开始 | 签名、兼容抽样和独立发布 |
 
 ## M0 — 协议与宿主接入（已完成）
@@ -81,7 +81,7 @@ timer、更多只读设备信息和受限模块加载在产品预览或后续版
 
 ## M4 — 产品预览
 
-- [ ] 保存及未保存的编辑器 Lua 脚本都可运行，并给出可理解的安装、授权和错误提示。
+- [x] 保存及未保存的编辑器 Lua 脚本都可运行，并给出可理解的安装、授权和错误提示。
 - [ ] 至少接通一种持久入口：定时任务或快捷方式；保留明确的 Lua engine 元数据。
 - [ ] 增加受控模块快照；语法高亮可以独立交付，不阻塞执行链。
 
@@ -114,6 +114,7 @@ timer、更多只读设备信息和受限模块加载在产品预览或后续版
 - M3 console smoke：[`docs/dev/lua-runtime-console-smoke-2026-08-11.md`](../dev/lua-runtime-console-smoke-2026-08-11.md)
 - M3 参数 smoke：[`docs/dev/lua-runtime-arguments-smoke-2026-08-11.md`](../dev/lua-runtime-arguments-smoke-2026-08-11.md)
 - M3 `device.info` smoke：[`docs/dev/lua-runtime-device-info-smoke-2026-08-11.md`](../dev/lua-runtime-device-info-smoke-2026-08-11.md)
+- M4 编辑器预览：[`docs/dev/lua-runtime-editor-preview-2026-08-11.md`](../dev/lua-runtime-editor-preview-2026-08-11.md)
 
 ## 最小检查策略
 

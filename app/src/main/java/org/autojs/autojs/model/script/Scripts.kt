@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
@@ -70,7 +71,7 @@ object Scripts {
             } else {
                 globalAppContext.sendBroadcast(
                     newExecutionFinishedIntent()
-                        .putExtra(EXTRA_EXCEPTION_MESSAGE, e.message)
+                        .putExtra(EXTRA_EXCEPTION_MESSAGE, AndroidLuaRuntimeFailureMessages.resolve(globalAppContext, e))
                         .putExtra(EXTRA_EXCEPTION_LINE_NUMBER, line)
                         .putExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, col)
                 )
