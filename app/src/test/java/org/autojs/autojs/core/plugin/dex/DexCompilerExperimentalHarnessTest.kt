@@ -500,6 +500,116 @@ class DexCompilerExperimentalHarnessTest {
     }
 
     @Test
+    fun deadlineIsAnchoredAtAttemptCreationAndScheduledOnceForTheRemainingTime() {
+        val worker = ManualExecutor()
+        val fixture = Fixture(workerExecutor = worker)
+
+        fixture.start()
+        fixture.clock.advanceBy(2_500L)
+        worker.runNext()
+
+        assertEquals(1, fixture.scheduler.scheduleCount)
+        assertEquals(7_500L, fixture.scheduler.lastDelayMillis)
+        fixture.scheduler.fire()
+        worker.runAll()
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.TIMEOUT, outcome.failure)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun absoluteDeadlineSaturatesWithoutExtendingTheRequestedTimeout() {
+        val fixture = Fixture()
+        fixture.clock.set(Long.MAX_VALUE - 5L)
+
+        fixture.start()
+
+        assertEquals(1, fixture.scheduler.scheduleCount)
+        assertEquals(5L, fixture.scheduler.lastDelayMillis)
+        fixture.scheduler.fire()
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.TIMEOUT, outcome.failure)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun attemptAlreadyExpiredBeforeBeginTimesOutWithoutSchedulingOrBinding() {
+        val worker = ManualExecutor()
+        val fixture = Fixture(workerExecutor = worker)
+
+        fixture.start()
+        fixture.clock.advanceBy(fixture.request.timeoutMillis)
+        worker.runAll()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.TIMEOUT, outcome.failure)
+        assertEquals(0, fixture.scheduler.scheduleCount)
+        assertEquals(0, fixture.transport.discoveryCount)
+        assertEquals(0, fixture.transport.bindCount)
+        assertEquals(0, fixture.connection.openCount)
+        assertEquals(1, fixture.output.rollbackCount)
+        assertEquals(1, fixture.output.closeCount)
+        assertEquals(1, fixture.snapshot.closeCount)
+        assertEquals(0, fixture.binding.closeCount)
+    }
+
+    @Test
+    fun hostCancellationRegisteredBeforeExpiredBeginKeepsCancellationOwnership() {
+        val worker = ManualExecutor()
+        val fixture = Fixture(workerExecutor = worker)
+        val handle = fixture.start()
+
+        handle.close()
+        fixture.clock.advanceBy(fixture.request.timeoutMillis)
+        worker.runAll()
+
+        assertTrue(fixture.singleOutcome() === DexCompilerExperimentalOutcome.Cancelled)
+        assertEquals(0, fixture.scheduler.scheduleCount)
+        assertEquals(0, fixture.transport.discoveryCount)
+        assertEquals(0, fixture.transport.bindCount)
+        assertEquals(0, fixture.connection.openCount)
+        assertEquals(1, fixture.output.rollbackCount)
+        assertEquals(1, fixture.output.closeCount)
+        assertEquals(1, fixture.snapshot.closeCount)
+        assertEquals(0, fixture.binding.closeCount)
+    }
+
+    @Test
+    fun expiredDeadlineAtDispatchCommitTimesOutWithoutWaitingForScheduler() {
+        val blocking = ManualExecutor()
+        val fixture = Fixture(blockingExecutor = blocking)
+        fixture.start()
+        assertTrue(fixture.outcomes.isEmpty())
+
+        fixture.clock.advanceBy(fixture.request.timeoutMillis)
+        blocking.runAll()
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.TIMEOUT, outcome.failure)
+        assertFalse(outcome.pluginWasDispatched)
+        assertEquals(1, fixture.scheduler.scheduleCount)
+        assertEquals(0, fixture.connection.openCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun expiredDeadlineAtPublicationCommitTimesOutWithoutPublishingOrSchedulerFire() {
+        val fixture = Fixture()
+        fixture.start()
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.clock.advanceBy(fixture.request.timeoutMillis)
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.TIMEOUT, outcome.failure)
+        assertTrue(outcome.pluginWasDispatched)
+        assertEquals(0, fixture.output.publishCount)
+        assertEquals(1, fixture.session.cancelCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
     fun duplicateOrNonIncreasingProgressIsAProtocolViolation() {
         val fixture = Fixture()
         fixture.start()
@@ -572,6 +682,25 @@ class DexCompilerExperimentalHarnessTest {
         val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
         assertEquals(DexCompilerExperimentalFailure.BINDER_DIED, outcome.failure)
         assertEquals(0, fixture.output.publishCount)
+        fixture.assertRolledBackAndUnboundExactlyOnce()
+    }
+
+    @Test
+    fun binderDeathRegisteredBeforeDeadlineExpiryKeepsPublicationTerminalOwnership() {
+        val fixture = Fixture()
+        fixture.start()
+        fixture.output.onAfterRead = {
+            fixture.transport.bindingCallback!!.onBinderDeath()
+            fixture.clock.advanceBy(fixture.request.timeoutMillis)
+        }
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.BINDER_DIED, outcome.failure)
+        assertEquals(0, fixture.output.publishCount)
+        assertEquals(1, fixture.session.cancelCount)
         fixture.assertRolledBackAndUnboundExactlyOnce()
     }
 
@@ -1069,6 +1198,7 @@ class DexCompilerExperimentalHarnessTest {
         val binding = FakeBinding()
         val transport = FakeTransport(candidate, connection, binding)
         val scheduler = ManualScheduler()
+        val clock = ManualMonotonicClock()
         val outcomes = mutableListOf<DexCompilerExperimentalOutcome>()
         var verifierCount = 0
         var verifierLimits: DexIndexedZipLimits? = null
@@ -1080,6 +1210,7 @@ class DexCompilerExperimentalHarnessTest {
             workerExecutor = workerExecutor,
             blockingExecutor = blockingExecutor,
             deadlineScheduler = scheduler,
+            monotonicClock = clock,
             threadProbe = DexCompilerThreadProbe { mainThread },
             hostVersionCode = 100,
             hostRuntimeApi = hostRuntimeApi,
@@ -1444,15 +1575,37 @@ class DexCompilerExperimentalHarnessTest {
     private class ManualScheduler : DexCompilerDeadlineScheduler {
         private var action: (() -> Unit)? = null
         private var closed = false
+        var scheduleCount = 0
+            private set
+        var lastDelayMillis: Long? = null
+            private set
 
         override fun schedule(delayMillis: Long, action: () -> Unit): Closeable {
             assertTrue(delayMillis > 0)
+            scheduleCount++
+            lastDelayMillis = delayMillis
+            closed = false
             this.action = action
             return Closeable { closed = true }
         }
 
         fun fire() {
             if (!closed) action?.invoke()
+        }
+    }
+
+    private class ManualMonotonicClock : DexCompilerMonotonicClock {
+        private var nowMillis = 0L
+
+        override fun elapsedRealtimeMillis(): Long = nowMillis
+
+        fun advanceBy(deltaMillis: Long) {
+            require(deltaMillis >= 0L)
+            nowMillis = Math.addExact(nowMillis, deltaMillis)
+        }
+
+        fun set(valueMillis: Long) {
+            nowMillis = valueMillis
         }
     }
 

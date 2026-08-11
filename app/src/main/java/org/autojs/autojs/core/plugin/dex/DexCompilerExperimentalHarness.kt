@@ -50,6 +50,14 @@ internal fun interface DexCompilerDispatchObserver {
     }
 }
 
+internal fun interface DexCompilerMonotonicClock {
+    fun elapsedRealtimeMillis(): Long
+}
+
+private val SYSTEM_DEX_COMPILER_MONOTONIC_CLOCK = DexCompilerMonotonicClock {
+    System.nanoTime() / 1_000_000L
+}
+
 /**
  * Controls whether the two provider-owned request fields are finalized after authentication.
  *
@@ -146,6 +154,7 @@ internal class DexCompilerExperimentalHarness(
     workerExecutor: Executor,
     private val blockingExecutor: Executor,
     private val deadlineScheduler: DexCompilerDeadlineScheduler,
+    private val monotonicClock: DexCompilerMonotonicClock = SYSTEM_DEX_COMPILER_MONOTONIC_CLOCK,
     private val threadProbe: DexCompilerThreadProbe,
     private val hostVersionCode: Long,
     private val hostRuntimeApi: Int,
@@ -205,6 +214,10 @@ internal class DexCompilerExperimentalHarness(
         private val invocation: DexCompilerExperimentalInvocation,
         private val onOutcome: (DexCompilerExperimentalOutcome) -> Unit,
     ) {
+        private val deadlineAtMillis = saturatingAdd(
+            monotonicClock.elapsedRealtimeMillis(),
+            invocation.request.timeoutMillis,
+        )
         private val lifecycle = DexCompilerSessionLifecycle()
         private val fallback = DexCompilerFallbackController()
         private val publicationGate = DexCompilerPipePublicationGate()
@@ -217,6 +230,7 @@ internal class DexCompilerExperimentalHarness(
         private val finished = AtomicBoolean(false)
         private val terminalClaimed = AtomicBoolean(false)
         private val blockingJobInFlight = AtomicBoolean(false)
+        private val deadlineScheduleClaimed = AtomicBoolean(false)
         private val hostCancellationIngressClaimed = AtomicBoolean(false)
         private val timeoutIngressClaimed = AtomicBoolean(false)
         private val connectionIngressClaimed = AtomicBoolean(false)
@@ -243,11 +257,21 @@ internal class DexCompilerExperimentalHarness(
                 return useLocal(DexCompilerExperimentalFailure.INPUT_REJECTED)
             }
             try {
+                if (!deadlineScheduleClaimed.compareAndSet(false, true)) return callbackViolation()
+                var remainingMillis = remainingDeadlineMillis()
+                if (remainingMillis <= 0L) {
+                    remainingMillis = remainingDeadlineUnlessAbortPending() ?: return
+                    if (remainingMillis <= 0L) return timeout()
+                }
+                // Preserve the deadline as a backstop even when an earlier abort action is queued.
                 deadlineSlot.install(
-                    deadlineScheduler.schedule(invocation.request.timeoutMillis) {
-                        if (claimAbortIngress(timeoutIngressClaimed)) enqueueUrgent(::timeout)
+                    deadlineScheduler.schedule(remainingMillis) {
+                        if (claimAbortIngress(timeoutIngressClaimed)) enqueueTimeout()
                     },
                 )
+                if (finished.get()) return
+                val remainingAfterSchedule = remainingDeadlineUnlessAbortPending() ?: return
+                if (remainingAfterSchedule <= 0L) return timeout()
                 val candidates = transport.discoverExactAction(DexCompilerContract.SERVICE_ACTION)
                 val requiredIdentity = invocation.requiredIdentity
                 val identity = if (requiredIdentity == null) {
@@ -432,7 +456,14 @@ internal class DexCompilerExperimentalHarness(
 
             // An abort registered during validation owns the terminal result. The cache remains
             // valid and the queued urgent action will close this attempt without remote dispatch.
-            if (!tryClaimPublicationTerminal()) return true
+            when (tryClaimPublicationTerminal()) {
+                DexCompilerTerminalCommitDecision.COMMITTED -> Unit
+                DexCompilerTerminalCommitDecision.ABORT_PENDING -> return true
+                DexCompilerTerminalCommitDecision.DEADLINE_EXPIRED -> {
+                    timeout()
+                    return true
+                }
+            }
             check(fallback.finish()) { "Compilation attempt was already terminal" }
             finish(
                 DexCompilerExperimentalOutcome.CacheHit(
@@ -475,7 +506,14 @@ internal class DexCompilerExperimentalHarness(
             // Linearize the dispatch boundary against cancellation/timeout/death ingress before
             // starting the drain or claiming either descriptor. An abort that wins this lock owns
             // the terminal result; an abort after this commit cancels the already-dispatched work.
-            if (!tryCommitPluginDispatch()) return
+            when (tryCommitPluginDispatch()) {
+                DexCompilerTerminalCommitDecision.COMMITTED -> Unit
+                DexCompilerTerminalCommitDecision.ABORT_PENDING -> return
+                DexCompilerTerminalCommitDecision.DEADLINE_EXPIRED -> {
+                    timeout()
+                    return
+                }
+            }
             notifyDispatchCommitted()
             if (!blockingJobInFlight.compareAndSet(false, true)) return callbackViolation()
             try {
@@ -737,9 +775,17 @@ internal class DexCompilerExperimentalHarness(
                 require(validation.dexEntryCount == result.dexEntryCount) { "DEX entry metadata mismatch" }
                 // Queue rejection can fail closed from outside the lane. Claim terminal ownership
                 // before publication so no fallback can race between the cache commit and outcome.
-                if (!tryClaimPublicationTerminal()) {
-                    publicationGate.publicationFailed()
-                    return
+                when (tryClaimPublicationTerminal()) {
+                    DexCompilerTerminalCommitDecision.COMMITTED -> Unit
+                    DexCompilerTerminalCommitDecision.ABORT_PENDING -> {
+                        publicationGate.publicationFailed()
+                        return
+                    }
+                    DexCompilerTerminalCommitDecision.DEADLINE_EXPIRED -> {
+                        publicationGate.publicationFailed()
+                        timeout()
+                        return
+                    }
                 }
                 ownsTerminal = true
                 val cacheKeySha256 = semanticCacheKey()
@@ -941,6 +987,10 @@ internal class DexCompilerExperimentalHarness(
             if (!lane.tryExecuteUrgent(Runnable(action))) workerRejected()
         }
 
+        private fun enqueueTimeout() {
+            if (!lane.tryExecuteUrgent(Runnable(::timeout))) timeout()
+        }
+
         private fun signalCallbackViolation() {
             if (claimAbortIngress(callbackViolationIngressClaimed)) enqueueUrgent(::callbackViolation)
         }
@@ -954,13 +1004,42 @@ internal class DexCompilerExperimentalHarness(
             claim.compareAndSet(false, true)
         }
 
-        private fun tryClaimPublicationTerminal(): Boolean = synchronized(terminalCommitLock) {
-            if (hasPendingAbortIngress()) false else terminalClaimed.compareAndSet(false, true)
+        private fun tryClaimPublicationTerminal(): DexCompilerTerminalCommitDecision =
+            synchronized(terminalCommitLock) {
+                when {
+                    hasPendingAbortIngress() -> DexCompilerTerminalCommitDecision.ABORT_PENDING
+                    claimExpiredDeadlineLocked() -> DexCompilerTerminalCommitDecision.DEADLINE_EXPIRED
+                    terminalClaimed.compareAndSet(false, true) -> DexCompilerTerminalCommitDecision.COMMITTED
+                    else -> DexCompilerTerminalCommitDecision.ABORT_PENDING
+                }
+            }
+
+        private fun tryCommitPluginDispatch(): DexCompilerTerminalCommitDecision =
+            synchronized(terminalCommitLock) {
+                when {
+                    hasPendingAbortIngress() || terminalClaimed.get() ->
+                        DexCompilerTerminalCommitDecision.ABORT_PENDING
+                    claimExpiredDeadlineLocked() -> DexCompilerTerminalCommitDecision.DEADLINE_EXPIRED
+                    fallback.tryBeginPluginDispatch() -> DexCompilerTerminalCommitDecision.COMMITTED
+                    else -> DexCompilerTerminalCommitDecision.ABORT_PENDING
+                }
+            }
+
+        private fun remainingDeadlineUnlessAbortPending(): Long? = synchronized(terminalCommitLock) {
+            if (hasPendingAbortIngress()) return@synchronized null
+            remainingDeadlineMillis().also { remainingMillis ->
+                if (remainingMillis <= 0L) timeoutIngressClaimed.compareAndSet(false, true)
+            }
         }
 
-        private fun tryCommitPluginDispatch(): Boolean = synchronized(terminalCommitLock) {
-            if (hasPendingAbortIngress() || terminalClaimed.get()) false else fallback.tryBeginPluginDispatch()
+        private fun claimExpiredDeadlineLocked(): Boolean {
+            if (remainingDeadlineMillis() > 0L) return false
+            timeoutIngressClaimed.compareAndSet(false, true)
+            return true
         }
+
+        private fun remainingDeadlineMillis(): Long =
+            saturatingRemaining(deadlineAtMillis, monotonicClock.elapsedRealtimeMillis())
 
         private fun hasPendingAbortIngress(): Boolean =
             hostCancellationIngressClaimed.get() ||
@@ -996,6 +1075,27 @@ internal class DexCompilerExperimentalHarness(
 
 private fun isMetadataSizeAllowed(bytes: ByteArray): Boolean =
     bytes.isNotEmpty() && bytes.size <= DexCompilerContract.MAX_METADATA_BYTES
+
+private enum class DexCompilerTerminalCommitDecision {
+    COMMITTED,
+    ABORT_PENDING,
+    DEADLINE_EXPIRED,
+}
+
+private fun saturatingAdd(left: Long, right: Long): Long = try {
+    Math.addExact(left, right)
+} catch (_: ArithmeticException) {
+    if (right >= 0L) Long.MAX_VALUE else Long.MIN_VALUE
+}
+
+private fun saturatingRemaining(deadlineMillis: Long, nowMillis: Long): Long {
+    if (deadlineMillis <= nowMillis) return 0L
+    return try {
+        Math.subtractExact(deadlineMillis, nowMillis)
+    } catch (_: ArithmeticException) {
+        Long.MAX_VALUE
+    }
+}
 
 private fun requireMetadataSize(bytes: ByteArray) {
     require(isMetadataSizeAllowed(bytes)) { "Binder metadata exceeds the protocol wire limit" }

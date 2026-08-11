@@ -15,6 +15,7 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.ByteArrayInputStream
@@ -190,6 +191,37 @@ class DexCompilerSingleFlightTest {
     }
 
     @Test
+    fun producerVirtualMachineErrorCompletesFlightReleasesResourcesAndEscapesExecutor() {
+        val executor = ManualExecutor()
+        val releaseCount = AtomicInteger()
+        val fatal = OutOfMemoryError("synthetic producer failure")
+        val singleFlight = DexCompilerSingleFlight<String, TestLease>(executor)
+        val caller = startCall {
+            singleFlight.execute(
+                key = KEY,
+                releaseProducerResources = { releaseCount.incrementAndGet() },
+            ) {
+                throw fatal
+            }
+        }
+
+        try {
+            assertTrue(executor.awaitTask())
+            assertTrue(waitUntilWaiting(caller.thread))
+
+            val escaped = assertThrows(OutOfMemoryError::class.java) { executor.runNext() }
+            assertSame(fatal, escaped)
+            caller.join()
+
+            assertSame(fatal, caller.failure.get())
+            assertNull(caller.outcome.get())
+            assertEquals(1, releaseCount.get())
+        } finally {
+            caller.stop()
+        }
+    }
+
+    @Test
     fun cancelledTerminalIsNotCached() {
         val producerCalls = AtomicInteger()
         val directExecutor = Executor { command -> command.run() }
@@ -216,10 +248,15 @@ class DexCompilerSingleFlightTest {
         val executor = ManualExecutor()
         val producerCalls = AtomicInteger()
         val producerWasInterrupted = AtomicReference<Boolean>()
+        val leaderCancellationRequests = AtomicInteger()
+        val followerCancellationRequests = AtomicInteger()
         val source = TestValueSource()
         val singleFlight = DexCompilerSingleFlight<String, TestLease>(executor)
         val leaderConsumer = startCall {
-            singleFlight.execute(KEY) {
+            singleFlight.execute(
+                key = KEY,
+                requestProducerCancellation = { leaderCancellationRequests.incrementAndGet() },
+            ) {
                 producerCalls.incrementAndGet()
                 producerWasInterrupted.set(Thread.currentThread().isInterrupted)
                 DexCompilerSingleFlightTerminal.Value(source)
@@ -228,7 +265,10 @@ class DexCompilerSingleFlightTest {
         assertTrue(executor.awaitTask())
         assertTrue(waitUntilWaiting(leaderConsumer.thread))
         val interruptedFollower = startCall {
-            singleFlight.execute(KEY) {
+            singleFlight.execute(
+                key = KEY,
+                requestProducerCancellation = { followerCancellationRequests.incrementAndGet() },
+            ) {
                 DexCompilerSingleFlightTerminal.Failure(AssertionError("Follower became leader"))
             }
         }
@@ -239,12 +279,16 @@ class DexCompilerSingleFlightTest {
             interruptedFollower.join()
             assertTrue(interruptedFollower.failure.get() is InterruptedException)
             assertNull(interruptedFollower.outcome.get())
+            assertEquals(0, leaderCancellationRequests.get())
+            assertEquals(0, followerCancellationRequests.get())
 
             executor.runNext()
             leaderConsumer.join()
             assertTrue(leaderConsumer.outcome.get() is DexCompilerSingleFlightOutcome.Value)
             assertEquals(1, producerCalls.get())
             assertEquals(false, producerWasInterrupted.get())
+            assertEquals(0, leaderCancellationRequests.get())
+            assertEquals(0, followerCancellationRequests.get())
             assertEquals(1, source.acquireCount.get())
             assertEquals(1, source.closeCount.get())
         } finally {
@@ -254,15 +298,82 @@ class DexCompilerSingleFlightTest {
     }
 
     @Test
-    fun lastWaiterInterruptDetachesButR12ProducerStillCompletesAndClosesPublication() {
+    fun lastWaiterInterruptRequestsLeaderCancellationAndMakesLateTerminalUnjoinable() {
         val executor = ManualExecutor()
         val producerCalls = AtomicInteger()
-        val source = TestValueSource()
+        val producerReleaseCount = AtomicInteger()
+        val cancellationRequests = AtomicInteger()
+        val lateSource = TestValueSource()
         val singleFlight = DexCompilerSingleFlight<String, TestLease>(executor)
         val caller = startCall {
-            singleFlight.execute(KEY) {
+            singleFlight.execute(
+                key = KEY,
+                releaseProducerResources = { producerReleaseCount.incrementAndGet() },
+                requestProducerCancellation = { cancellationRequests.incrementAndGet() },
+            ) {
                 producerCalls.incrementAndGet()
-                DexCompilerSingleFlightTerminal.Value(source)
+                DexCompilerSingleFlightTerminal.Value(lateSource)
+            }
+        }
+        var retry: TestCall<DexCompilerSingleFlightOutcome<TestLease>>? = null
+
+        try {
+            assertTrue(executor.awaitTask())
+            assertTrue(waitUntilWaiting(caller.thread))
+            caller.thread.interrupt()
+            caller.join()
+            assertTrue(caller.failure.get() is InterruptedException)
+            assertNull(caller.outcome.get())
+            assertEquals(1, cancellationRequests.get())
+            assertEquals(0, producerReleaseCount.get())
+
+            val retrySource = TestValueSource()
+            val retryCancellationRequests = AtomicInteger()
+            retry = startCall {
+                singleFlight.execute(
+                    key = KEY,
+                    requestProducerCancellation = { retryCancellationRequests.incrementAndGet() },
+                ) {
+                    producerCalls.incrementAndGet()
+                    DexCompilerSingleFlightTerminal.Value(retrySource)
+                }
+            }
+            assertTrue(waitUntilWaiting(checkNotNull(retry).thread))
+
+            // The abandoned producer may still reach a late terminal. It owns no waiter and its
+            // value source must close without consuming or removing the replacement flight.
+            executor.runNext()
+            assertTrue(waitUntil { lateSource.closeCount.get() == 1 })
+            assertEquals(0, lateSource.acquireCount.get())
+            assertEquals(1, producerReleaseCount.get())
+            assertTrue(checkNotNull(retry).thread.isAlive)
+
+            executor.runNext()
+            checkNotNull(retry).join()
+            assertTrue(checkNotNull(retry).outcome.get() is DexCompilerSingleFlightOutcome.Value)
+            assertEquals(2, producerCalls.get())
+            assertEquals(1, retrySource.acquireCount.get())
+            assertEquals(1, retrySource.closeCount.get())
+            assertEquals(0, retryCancellationRequests.get())
+        } finally {
+            caller.stop()
+            retry?.stop()
+        }
+    }
+
+    @Test
+    fun cancellationHookVirtualMachineErrorEscapesWithCallerInterruptRestored() {
+        val executor = ManualExecutor()
+        val releaseCount = AtomicInteger()
+        val fatal = OutOfMemoryError("synthetic cancellation hook failure")
+        val singleFlight = DexCompilerSingleFlight<String, TestLease>(executor)
+        val caller = startCall {
+            singleFlight.execute(
+                key = KEY,
+                releaseProducerResources = { releaseCount.incrementAndGet() },
+                requestProducerCancellation = { throw fatal },
+            ) {
+                DexCompilerSingleFlightTerminal.Cancelled
             }
         }
 
@@ -271,12 +382,14 @@ class DexCompilerSingleFlightTest {
             assertTrue(waitUntilWaiting(caller.thread))
             caller.thread.interrupt()
             caller.join()
-            assertTrue(caller.failure.get() is InterruptedException)
+
+            assertSame(fatal, caller.failure.get())
+            assertNull(caller.outcome.get())
+            assertEquals(true, caller.interruptedOnExit.get())
+            assertTrue(fatal.suppressed.any { it is InterruptedException })
 
             executor.runNext()
-            assertEquals(1, producerCalls.get())
-            assertEquals(0, source.acquireCount.get())
-            assertEquals(1, source.closeCount.get())
+            assertEquals(1, releaseCount.get())
         } finally {
             caller.stop()
         }
@@ -526,6 +639,7 @@ class DexCompilerSingleFlightCallerCoordinatorTest {
         val executor = ManualExecutor()
         val producerCalls = AtomicInteger()
         val producerReleaseCount = AtomicInteger()
+        val producerCancellationRequests = AtomicInteger()
         val source = TestValueSource()
         val coordinator = DexCompilerSingleFlightCallerCoordinator<String, TestLease, TestFallback>(
             DexCompilerSingleFlight<String, TestLease>(executor),
@@ -533,7 +647,12 @@ class DexCompilerSingleFlightCallerCoordinatorTest {
         val leaderFallback = TestFallback("leader")
         val followerFallback = TestFallback("follower")
         val leader = startCall {
-            coordinator.execute(KEY, leaderFallback, { producerReleaseCount.incrementAndGet() }) {
+            coordinator.execute(
+                key = KEY,
+                fallback = leaderFallback,
+                releaseProducerResources = { producerReleaseCount.incrementAndGet() },
+                requestProducerCancellation = { producerCancellationRequests.incrementAndGet() },
+            ) {
                 producerCalls.incrementAndGet()
                 DexCompilerSingleFlightTerminal.Value(source)
             }
@@ -554,6 +673,7 @@ class DexCompilerSingleFlightCallerCoordinatorTest {
             assertEquals(1, leaderFallback.closeCount.get())
             assertEquals(0, followerFallback.closeCount.get())
             assertEquals(0, producerReleaseCount.get())
+            assertEquals(0, producerCancellationRequests.get())
 
             executor.runNext()
             follower.join()
@@ -565,11 +685,112 @@ class DexCompilerSingleFlightCallerCoordinatorTest {
             assertSame(followerFallback, followerValue.fallback)
             assertEquals(1, producerCalls.get())
             assertEquals(1, producerReleaseCount.get())
+            assertEquals(0, producerCancellationRequests.get())
             assertEquals(0, followerFallback.closeCount.get())
         } finally {
             leader.stop()
             follower.stop()
             followerFallback.close()
+        }
+    }
+
+    @Test
+    fun interruptingLastCallerClosesItsFallbackAndCancelsProducerWithoutFallback() {
+        val executor = ManualExecutor()
+        val producerReleaseCount = AtomicInteger()
+        val producerCancellationRequests = AtomicInteger()
+        val source = TestValueSource()
+        val coordinator = DexCompilerSingleFlightCallerCoordinator<String, TestLease, TestFallback>(
+            DexCompilerSingleFlight<String, TestLease>(executor),
+        )
+        val fallback = TestFallback("last-waiter")
+        val caller = startCall {
+            coordinator.execute(
+                key = KEY,
+                fallback = fallback,
+                releaseProducerResources = { producerReleaseCount.incrementAndGet() },
+                requestProducerCancellation = { producerCancellationRequests.incrementAndGet() },
+            ) {
+                DexCompilerSingleFlightTerminal.Value(source)
+            }
+        }
+
+        try {
+            assertTrue(executor.awaitTask())
+            assertTrue(waitUntilWaiting(caller.thread))
+            caller.thread.interrupt()
+            caller.join()
+
+            assertTrue(caller.failure.get() is InterruptedException)
+            assertNull(caller.outcome.get())
+            assertEquals(1, fallback.closeCount.get())
+            assertEquals(1, producerCancellationRequests.get())
+            assertEquals(0, producerReleaseCount.get())
+
+            executor.runNext()
+            assertEquals(1, producerReleaseCount.get())
+            assertEquals(0, source.acquireCount.get())
+            assertEquals(1, source.closeCount.get())
+        } finally {
+            caller.stop()
+        }
+    }
+
+    @Test
+    fun fallbackCloseVirtualMachineErrorEscapesButNonFatalCloseKeepsCancellationSemantics() {
+        val fatalExecutor = ManualExecutor()
+        val fatal = OutOfMemoryError("synthetic fallback close failure")
+        val fatalFallback = TestFallback("fatal-close", fatal)
+        val fatalCoordinator = DexCompilerSingleFlightCallerCoordinator<String, TestLease, TestFallback>(
+            DexCompilerSingleFlight<String, TestLease>(fatalExecutor),
+        )
+        val fatalCaller = startCall {
+            fatalCoordinator.execute(KEY, fatalFallback, {}) {
+                DexCompilerSingleFlightTerminal.Cancelled
+            }
+        }
+
+        try {
+            assertTrue(fatalExecutor.awaitTask())
+            assertTrue(waitUntilWaiting(fatalCaller.thread))
+            fatalCaller.thread.interrupt()
+            fatalCaller.join()
+
+            assertSame(fatal, fatalCaller.failure.get())
+            assertNull(fatalCaller.outcome.get())
+            assertEquals(1, fatalFallback.closeCount.get())
+            assertEquals(true, fatalCaller.interruptedOnExit.get())
+            assertTrue(fatal.suppressed.any { it is InterruptedException })
+            fatalExecutor.runNext()
+        } finally {
+            fatalCaller.stop()
+        }
+
+        val nonFatalExecutor = ManualExecutor()
+        val nonFatal = IllegalStateException("synthetic non-fatal fallback close failure")
+        val nonFatalFallback = TestFallback("non-fatal-close", nonFatal)
+        val nonFatalCoordinator = DexCompilerSingleFlightCallerCoordinator<String, TestLease, TestFallback>(
+            DexCompilerSingleFlight<String, TestLease>(nonFatalExecutor),
+        )
+        val nonFatalCaller = startCall {
+            nonFatalCoordinator.execute(KEY, nonFatalFallback, {}) {
+                DexCompilerSingleFlightTerminal.Cancelled
+            }
+        }
+
+        try {
+            assertTrue(nonFatalExecutor.awaitTask())
+            assertTrue(waitUntilWaiting(nonFatalCaller.thread))
+            nonFatalCaller.thread.interrupt()
+            nonFatalCaller.join()
+
+            val interrupted = nonFatalCaller.failure.get() as InterruptedException
+            assertNull(nonFatalCaller.outcome.get())
+            assertEquals(1, nonFatalFallback.closeCount.get())
+            assertTrue(interrupted.suppressed.contains(nonFatal))
+            nonFatalExecutor.runNext()
+        } finally {
+            nonFatalCaller.stop()
         }
     }
 
@@ -625,11 +846,15 @@ class DexCompilerSingleFlightCallerCoordinatorTest {
 
 private data class TestLease(val leaseId: Int)
 
-private class TestFallback(val name: String) : AutoCloseable {
+private class TestFallback(
+    val name: String,
+    private val closeFailure: Throwable? = null,
+) : AutoCloseable {
     val closeCount = AtomicInteger()
 
     override fun close() {
         check(closeCount.incrementAndGet() == 1) { "Fallback $name closed more than once" }
+        closeFailure?.let { throw it }
     }
 }
 
@@ -690,6 +915,7 @@ private class TestCall<O : Any>(
     val thread: Thread,
     val outcome: AtomicReference<O?>,
     val failure: AtomicReference<Throwable?>,
+    val interruptedOnExit: AtomicReference<Boolean>,
 ) {
     fun join() {
         thread.join(2_000L)
@@ -707,18 +933,21 @@ private fun <O : Any> startCall(
 ): TestCall<O> {
     val outcome = AtomicReference<O?>()
     val failure = AtomicReference<Throwable?>()
+    val interruptedOnExit = AtomicReference<Boolean>()
     val thread = Thread {
         try {
             outcome.set(block())
         } catch (error: Throwable) {
             failure.set(error)
+        } finally {
+            interruptedOnExit.set(Thread.currentThread().isInterrupted)
         }
     }.apply {
         name = "DexCompilerSingleFlightTest-caller"
         isDaemon = true
         start()
     }
-    return TestCall(thread, outcome, failure)
+    return TestCall(thread, outcome, failure, interruptedOnExit)
 }
 
 private fun waitUntilWaiting(thread: Thread): Boolean {

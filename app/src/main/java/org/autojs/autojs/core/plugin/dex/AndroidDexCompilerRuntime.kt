@@ -247,6 +247,7 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
                 fallbackInput = retainedInput,
             )
         }
+        val producerCancellation = DexCompilerAttemptCancellation()
 
         val sharedOutcome = try {
             backend.singleFlight.execute(
@@ -254,14 +255,18 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
                 fallback = retainedInput,
                 releaseProducerResources = snapshot::close,
                 onJoined = DexCompilerRuntimeAndroidTestInstrumentation::singleFlightJoined,
+                requestProducerCancellation = producerCancellation::request,
             ) {
                 runSharedAttempt(
                     backend = backend,
                     snapshot = snapshot,
                     request = request,
                     identity = identity,
+                    producerCancellation = producerCancellation,
                 )
             }
+        } catch (fatal: VirtualMachineError) {
+            throw fatal
         } catch (_: InterruptedException) {
             DexCompilerRuntimeAndroidTestInstrumentation.callerCancelledAfterFallbackCloseAttempt()
             Thread.currentThread().interrupt()
@@ -299,8 +304,10 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
         snapshot: DexCompilerInputSnapshot,
         request: DexCompileRequest,
         identity: DexCompilerPinnedIdentity,
+        producerCancellation: DexCompilerAttemptCancellation,
     ): DexCompilerSingleFlightTerminal<DexCompilerSingleFlightPublishedArtifact> {
         DexCompilerRuntimeAndroidTestInstrumentation.sharedProducerStarted()
+        if (producerCancellation.isRequested()) return DexCompilerSingleFlightTerminal.Cancelled
         val output = try {
             backend.artifactStore.outputTransaction()
         } catch (error: Exception) {
@@ -326,7 +333,7 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
         }
 
         val outcome = try {
-            backend.runner.run(invocation)
+            backend.runner.run(invocation, producerCancellation)
         } catch (_: InterruptedException) {
             Thread.currentThread().interrupt()
             closeUnusedOutput(output)

@@ -129,6 +129,80 @@ class DexCompilerRuntimeRequestFactoryTest {
 class DexCompilerSynchronousAttemptRunnerTest {
 
     @Test
+    fun cancellationRequestedBeforeHandleBindingClosesNewHandleExactlyOnce() {
+        val invocation = invocation()
+        val cancellation = DexCompilerAttemptCancellation()
+        val closeCount = AtomicInteger()
+        cancellation.request()
+        cancellation.request()
+        val runner = DexCompilerSynchronousAttemptRunner { _, onOutcome ->
+            Closeable {
+                closeCount.incrementAndGet()
+                onOutcome(DexCompilerExperimentalOutcome.Cancelled)
+            }
+        }
+
+        assertSame(DexCompilerExperimentalOutcome.Cancelled, runner.run(invocation, cancellation))
+        cancellation.request()
+        assertTrue(cancellation.isRequested())
+        assertEquals(1, closeCount.get())
+    }
+
+    @Test
+    fun cancellationRequestedAfterHandleBindingClosesHandleExactlyOnce() {
+        val invocation = invocation()
+        val cancellation = DexCompilerAttemptCancellation()
+        val launcherReturned = CountDownLatch(1)
+        val closeCount = AtomicInteger()
+        val returned = AtomicReference<DexCompilerExperimentalOutcome?>()
+        val failure = AtomicReference<Throwable?>()
+        val runner = DexCompilerSynchronousAttemptRunner { _, onOutcome ->
+            launcherReturned.countDown()
+            Closeable {
+                closeCount.incrementAndGet()
+                onOutcome(DexCompilerExperimentalOutcome.Cancelled)
+            }
+        }
+        val waitingThread = Thread {
+            try {
+                returned.set(runner.run(invocation, cancellation))
+            } catch (error: Throwable) {
+                failure.set(error)
+            }
+        }.apply { isDaemon = true }
+
+        waitingThread.start()
+        try {
+            assertTrue(launcherReturned.await(2, TimeUnit.SECONDS))
+            assertTrue(waitUntilWaiting(waitingThread))
+            cancellation.request()
+            cancellation.request()
+            waitingThread.join(2_000L)
+
+            assertFalse("Cancelled runner thread is still alive", waitingThread.isAlive)
+            assertNull(failure.get())
+            assertSame(DexCompilerExperimentalOutcome.Cancelled, returned.get())
+            assertEquals(1, closeCount.get())
+        } finally {
+            waitingThread.interrupt()
+            waitingThread.join(2_000L)
+        }
+    }
+
+    @Test
+    fun cancellationDoesNotSwallowVirtualMachineErrorFromHandleClose() {
+        val cancellation = DexCompilerAttemptCancellation()
+        val fatal = OutOfMemoryError("synthetic cancellation failure")
+        cancellation.request()
+
+        val thrown = assertThrows(OutOfMemoryError::class.java) {
+            cancellation.bind(Closeable { throw fatal })
+        }
+
+        assertSame(fatal, thrown)
+    }
+
+    @Test
     fun publishedUseLocalAndCancelledOutcomesAreReturnedByIdentity() {
         val invocation = invocation()
         val outcomes = listOf(

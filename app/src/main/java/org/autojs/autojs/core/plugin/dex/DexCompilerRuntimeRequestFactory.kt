@@ -55,18 +55,79 @@ internal fun interface DexCompilerAttemptLauncher {
     ): Closeable
 }
 
+/**
+ * A one-shot bridge between single-flight abandonment and the asynchronously created attempt.
+ *
+ * A request may win before [bind]. In that case the newly bound handle is cancelled before
+ * [bind] returns. The handle is claimed at most once and is always closed outside this object's
+ * monitor because closing it may enqueue or synchronously execute harness control work.
+ */
+internal class DexCompilerAttemptCancellation {
+    private var requested = false
+    private var handleBound = false
+    private var handleCloseClaimed = false
+    private var handle: Closeable? = null
+
+    fun request() {
+        val handleToClose = synchronized(this) {
+            requested = true
+            claimHandleForCloseLocked()
+        }
+        closeCancellationHandle(handleToClose)
+    }
+
+    fun bind(handle: Closeable) {
+        val handleToClose = synchronized(this) {
+            check(!handleBound) { "DEX compiler attempt cancellation handle was bound more than once" }
+            handleBound = true
+            this.handle = handle
+            claimHandleForCloseLocked()
+        }
+        closeCancellationHandle(handleToClose)
+    }
+
+    fun isRequested(): Boolean = synchronized(this) { requested }
+
+    private fun claimHandleForCloseLocked(): Closeable? {
+        if (!requested || handleCloseClaimed) return null
+        val current = handle ?: return null
+        handleCloseClaimed = true
+        return current
+    }
+
+    private fun closeCancellationHandle(handle: Closeable?) {
+        if (handle == null) return
+        val wasInterrupted = Thread.currentThread().isInterrupted
+        var closeWasInterrupted = false
+        try {
+            handle.close()
+        } catch (fatal: VirtualMachineError) {
+            throw fatal
+        } catch (failure: Throwable) {
+            closeWasInterrupted = failure is InterruptedException
+            // Cancellation is best effort; the attempt deadline remains the terminal backstop.
+        } finally {
+            if (wasInterrupted || closeWasInterrupted) Thread.currentThread().interrupt()
+        }
+    }
+}
+
 /** Interruptible synchronous adapter; class loading itself remains on the calling script thread. */
 internal class DexCompilerSynchronousAttemptRunner(
     private val launcher: DexCompilerAttemptLauncher,
 ) {
     @Throws(InterruptedException::class)
-    fun run(invocation: DexCompilerExperimentalInvocation): DexCompilerExperimentalOutcome {
+    fun run(
+        invocation: DexCompilerExperimentalInvocation,
+        cancellation: DexCompilerAttemptCancellation? = null,
+    ): DexCompilerExperimentalOutcome {
         if (Thread.currentThread().isInterrupted) throw InterruptedException("DEX compilation was interrupted")
         val terminal = CountDownLatch(1)
         val outcome = AtomicReference<DexCompilerExperimentalOutcome?>()
         val handle = launcher.start(invocation) { value ->
             if (outcome.compareAndSet(null, value)) terminal.countDown()
         }
+        cancellation?.bind(handle)
         try {
             terminal.await()
             if (Thread.currentThread().isInterrupted) {
@@ -74,7 +135,17 @@ internal class DexCompilerSynchronousAttemptRunner(
             }
             return checkNotNull(outcome.get()) { "DEX compiler completed without a terminal outcome" }
         } catch (interrupted: InterruptedException) {
-            runCatching { handle.close() }
+            if (cancellation == null) {
+                try {
+                    handle.close()
+                } catch (fatal: VirtualMachineError) {
+                    throw fatal
+                } catch (_: Throwable) {
+                    // The original interruption remains the caller-visible terminal.
+                }
+            } else {
+                cancellation.request()
+            }
             throw interrupted
         }
     }

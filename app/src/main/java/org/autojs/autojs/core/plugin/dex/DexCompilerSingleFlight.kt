@@ -129,12 +129,26 @@ internal class DexCompilerSingleFlightCallerCoordinator<K : Any, V : Any, F : Au
         fallback: F,
         releaseProducerResources: () -> Unit,
         onJoined: (isLeader: Boolean) -> Unit = {},
+        requestProducerCancellation: () -> Unit = {},
         producer: () -> DexCompilerSingleFlightTerminal<V>,
     ): DexCompilerSingleFlightCallerOutcome<V, F> {
         val outcome = try {
-            singleFlight.execute(key, releaseProducerResources, onJoined, producer)
+            singleFlight.execute(
+                key = key,
+                releaseProducerResources = releaseProducerResources,
+                onJoined = onJoined,
+                requestProducerCancellation = requestProducerCancellation,
+                producer = producer,
+            )
         } catch (failure: Throwable) {
-            closeFallback(fallback)?.let { closeFailure -> addSuppressedSafely(failure, closeFailure) }
+            closeFallback(fallback)?.let { closeFailure ->
+                if (closeFailure is VirtualMachineError) {
+                    if (failure is InterruptedException) Thread.currentThread().interrupt()
+                    addSuppressedSafely(closeFailure, failure)
+                    throw closeFailure
+                }
+                addSuppressedSafely(failure, closeFailure)
+            }
             throw failure
         }
         return when (outcome) {
@@ -143,7 +157,9 @@ internal class DexCompilerSingleFlightCallerCoordinator<K : Any, V : Any, F : Au
             is DexCompilerSingleFlightOutcome.Failure ->
                 DexCompilerSingleFlightCallerOutcome.Failure(outcome.cause, fallback)
             DexCompilerSingleFlightOutcome.Cancelled -> {
-                closeFallback(fallback)
+                closeFallback(fallback)?.let { closeFailure ->
+                    if (closeFailure is VirtualMachineError) throw closeFailure
+                }
                 DexCompilerSingleFlightCallerOutcome.Cancelled
             }
         }
@@ -210,14 +226,11 @@ internal class DexCompilerSingleFlightArtifactSource(
  * Process-local, non-caching single-flight coordination.
  *
  * Exactly one producer runs for overlapping calls with the same key. Producer work is dispatched
- * away from caller threads, so interrupting any waiting caller only detaches that caller and never
- * interrupts the leader. Every terminal removes its map entry before waiters are released: failures
- * can be retried immediately and [DexCompilerSingleFlightTerminal.Cancelled] is never cached.
- *
- * R1.2 deliberately lets the producer finish after the last waiter detaches, so an interrupted
- * caller can still be followed by a background persistent-cache publication. Cooperative
- * last-waiter cancellation is deferred to R2 and must preserve the transport's one-terminal and
- * post-dispatch cancellation rules.
+ * away from caller threads, so interrupting one waiting caller only detaches that caller while any
+ * other waiter remains. When the last waiter detaches before a terminal, the flight is removed and
+ * its leader-owned cooperative cancellation hook is requested without interrupting the producer
+ * thread. Every terminal removes its map entry before waiters are released: failures can be retried
+ * immediately and [DexCompilerSingleFlightTerminal.Cancelled] is never cached.
  *
  * Production must provide a dedicated bounded orchestration executor. It must not reuse the
  * harness control, Binder, deadline, or output-drain executors because a producer may synchronously
@@ -233,9 +246,9 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
     /**
      * Joins or starts an attempt and waits for its terminal.
      *
-     * The producer supplied by a follower is ignored. [InterruptedException] detaches only this
-     * caller; the leader remains live even when no callers are currently waiting, allowing a later
-     * overlapping caller to join it until the leader reaches a terminal.
+     * The producer and [requestProducerCancellation] hook supplied by a follower are ignored.
+     * [InterruptedException] detaches only this caller. If it was the final waiter, the abandoned
+     * flight is made unjoinable before its leader-owned cancellation hook is requested.
      *
      * [releaseProducerResources] transfers caller-created producer resources to this coordinator.
      * A follower releases them immediately. A leader releases them only after its producer returns,
@@ -247,6 +260,7 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
         key: K,
         releaseProducerResources: () -> Unit = {},
         onJoined: (isLeader: Boolean) -> Unit = {},
+        requestProducerCancellation: () -> Unit = {},
         producer: () -> DexCompilerSingleFlightTerminal<V>,
     ): DexCompilerSingleFlightOutcome<V> {
         if (Thread.currentThread().isInterrupted) {
@@ -263,7 +277,7 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
                     existing.waiterCount++
                     JoinedFlight(existing, isLeader = false)
                 } else {
-                    val created = Flight(key).apply { waiterCount = 1 }
+                    val created = Flight(key, requestProducerCancellation).apply { waiterCount = 1 }
                     flights[key] = created
                     JoinedFlight(created, isLeader = true)
                 }
@@ -291,10 +305,16 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
         releaseProducerResources: () -> Unit,
         producer: () -> DexCompilerSingleFlightTerminal<V>,
     ) {
+        val taskStarted = AtomicBoolean(false)
         try {
             leaderExecutor.execute {
+                taskStarted.set(true)
+                var fatal: VirtualMachineError? = null
                 var terminal = try {
                     producer()
+                } catch (failure: VirtualMachineError) {
+                    fatal = failure
+                    DexCompilerSingleFlightTerminal.Failure(failure)
                 } catch (failure: Throwable) {
                     DexCompilerSingleFlightTerminal.Failure(failure)
                 }
@@ -302,7 +322,16 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
                     terminal = mergeReleaseFailure(terminal, releaseFailure)
                 }
                 complete(flight, terminal)
+                fatal?.let { throw it }
             }
+        } catch (fatal: VirtualMachineError) {
+            if (!taskStarted.get()) {
+                releaseProducerResourcesSafely(releaseProducerResources)?.let { releaseFailure ->
+                    addSuppressedSafely(fatal, releaseFailure)
+                }
+                complete(flight, DexCompilerSingleFlightTerminal.Failure(fatal))
+            }
+            throw fatal
         } catch (failure: Throwable) {
             releaseProducerResourcesSafely(releaseProducerResources)?.let { releaseFailure ->
                 addSuppressedSafely(failure, releaseFailure)
@@ -352,18 +381,28 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
         try {
             flight.completed.await()
         } catch (interrupted: InterruptedException) {
-            detach(flight)
+            try {
+                detach(flight)
+            } catch (fatal: VirtualMachineError) {
+                Thread.currentThread().interrupt()
+                addSuppressedSafely(fatal, interrupted)
+                throw fatal
+            }
             throw interrupted
         }
         return try {
             when (val terminal = checkNotNull(flight.terminal)) {
                 is DexCompilerSingleFlightTerminal.Value -> try {
                     DexCompilerSingleFlightOutcome.Value(terminal.source.acquireForCaller())
+                } catch (fatal: VirtualMachineError) {
+                    throw fatal
                 } catch (failure: Throwable) {
                     DexCompilerSingleFlightOutcome.Failure(failure)
                 }
-                is DexCompilerSingleFlightTerminal.Failure ->
+                is DexCompilerSingleFlightTerminal.Failure -> {
+                    if (terminal.cause is VirtualMachineError) throw terminal.cause
                     DexCompilerSingleFlightOutcome.Failure(terminal.cause)
+                }
                 DexCompilerSingleFlightTerminal.Cancelled -> DexCompilerSingleFlightOutcome.Cancelled
             }
         } finally {
@@ -394,12 +433,40 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
     }
 
     private fun detach(flight: Flight) {
+        var producerCancellation: (() -> Unit)? = null
         val sourceToClose = synchronized(lock) {
             check(flight.waiterCount > 0) { "DEX compiler single-flight waiter count underflow" }
             flight.waiterCount--
-            if (flight.waiterCount == 0) claimSourceForCloseLocked(flight) else null
+            if (flight.waiterCount == 0) {
+                if (flight.terminal == null && !flight.producerCancellationRequested) {
+                    flight.producerCancellationRequested = true
+                    if (flights[flight.key] === flight) {
+                        flights.remove(flight.key)
+                    }
+                    producerCancellation = flight.requestProducerCancellation
+                }
+                claimSourceForCloseLocked(flight)
+            } else {
+                null
+            }
         }
+        producerCancellation?.let(::requestProducerCancellationSafely)
         sourceToClose?.let(::closeValueSource)
+    }
+
+    private fun requestProducerCancellationSafely(request: () -> Unit) {
+        val wasInterrupted = Thread.currentThread().isInterrupted
+        var requestWasInterrupted = false
+        try {
+            request()
+        } catch (fatal: VirtualMachineError) {
+            throw fatal
+        } catch (failure: Throwable) {
+            requestWasInterrupted = failure is InterruptedException
+            // A caller cancellation must not turn into fallback or depend on producer diagnostics.
+        } finally {
+            if (wasInterrupted || requestWasInterrupted) Thread.currentThread().interrupt()
+        }
     }
 
     private fun claimSourceForCloseLocked(flight: Flight): DexCompilerSingleFlightValueSource<V>? {
@@ -421,9 +488,13 @@ internal class DexCompilerSingleFlight<K : Any, V : Any>(
         }
     }
 
-    private inner class Flight(val key: K) {
+    private inner class Flight(
+        val key: K,
+        val requestProducerCancellation: () -> Unit,
+    ) {
         val completed = CountDownLatch(1)
         var waiterCount: Int = 0
+        var producerCancellationRequested: Boolean = false
         var sourceCloseClaimed: Boolean = false
 
         @Volatile
