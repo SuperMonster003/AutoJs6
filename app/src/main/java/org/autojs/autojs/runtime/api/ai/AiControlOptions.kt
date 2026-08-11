@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.ai
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.autojs.autojs.core.ai.AiProviderSelector
+import org.autojs.plugin.ai.common.api.AiValidation
 import java.util.UUID
 
 /**
@@ -18,6 +19,7 @@ internal data class AiControlOptions(
     val model: String?,
     val apiKey: String?,
     val timeoutMillis: Long?,
+    val pluginSelection: AiPluginSelection? = null,
 ) {
 
     fun canUseStandaloneConfig(): Boolean {
@@ -55,7 +57,8 @@ internal data class AiControlOptions(
         }
         return "AiControlOptions(profile=${profile.redacted()}, " +
             "providerId=${providerId.redacted()}, baseUrl=${baseUrl.redacted()}, " +
-            "model=${model.redacted()}, apiKey=[REDACTED], timeoutMillis=$timeoutMillis)"
+            "model=${model.redacted()}, apiKey=[REDACTED], timeoutMillis=$timeoutMillis, " +
+            "pluginSelection=$pluginSelection)"
     }
 
     companion object {
@@ -64,6 +67,9 @@ internal data class AiControlOptions(
         const val MAX_TIMEOUT_MILLIS = 10L * 60L * 1_000L
 
         fun takeFrom(options: JsonObject): AiControlOptions {
+            val pluginElement = options.remove("plugin")
+            val hasCloudControl = CLOUD_CONTROL_NAMES.any(options::has)
+            val hasExplicitStreamControl = options.has("stream")
             val profile = options.takeString("profile", "profileId", "profile_id")
             val provider = options.takeString("provider", "providerId", "provider_id")
             val baseUrl = options.takeString("baseUrl", "baseURL", "base_url")
@@ -81,6 +87,15 @@ internal data class AiControlOptions(
                 }
             }
             options.remove("stream")
+            val pluginSelection = pluginElement?.let(::parsePluginSelection)
+            if (pluginSelection != null) {
+                require(!hasCloudControl) {
+                    "AI plugin selection cannot be combined with cloud provider controls"
+                }
+                require(!hasExplicitStreamControl && options.entrySet().isEmpty()) {
+                    "AI plugin selection contains unsupported options"
+                }
+            }
             return AiControlOptions(
                 profile = profile,
                 providerId = provider,
@@ -88,7 +103,61 @@ internal data class AiControlOptions(
                 model = model,
                 apiKey = apiKey,
                 timeoutMillis = timeout,
+                pluginSelection = pluginSelection,
             )
+        }
+
+        private fun parsePluginSelection(value: JsonElement): AiPluginSelection {
+            require(value.isJsonObject) { "AI plugin selection must be an object" }
+            val plugin = value.asJsonObject.deepCopy()
+            val componentElement = plugin.remove("component")
+                ?: throw IllegalArgumentException("AI plugin component is required")
+            val providerId = plugin.takeRequiredString("providerId", "AI plugin providerId")
+            val modelId = plugin.takeRequiredString("modelId", "AI plugin modelId")
+            require(plugin.entrySet().isEmpty()) {
+                "AI plugin selection contains unsupported fields"
+            }
+            require(AiValidation.STABLE_ID.matches(providerId)) {
+                "AI plugin providerId is invalid"
+            }
+            require(AiValidation.STABLE_ID.matches(modelId)) {
+                "AI plugin modelId is invalid"
+            }
+            require(componentElement.isJsonObject) {
+                "AI plugin component must be an object"
+            }
+            val component = componentElement.asJsonObject.deepCopy()
+            val packageName = component.takeRequiredString(
+                "packageName",
+                "AI plugin component packageName",
+            )
+            val className = component.takeRequiredString(
+                "className",
+                "AI plugin component className",
+            )
+            require(component.entrySet().isEmpty()) {
+                "AI plugin component contains unsupported fields"
+            }
+            return AiPluginSelection(
+                packageName = packageName,
+                className = className,
+                providerId = providerId,
+                modelId = modelId,
+            )
+        }
+
+        private fun JsonObject.takeRequiredString(name: String, label: String): String {
+            val value = remove(name)
+                ?: throw IllegalArgumentException("$label is required")
+            require(value.isJsonPrimitive && value.asJsonPrimitive.isString) {
+                "$label must be a string"
+            }
+            return value.asString.trim().also {
+                require(it.isNotEmpty()) { "$label must not be blank" }
+                require(it.none(Character::isISOControl)) {
+                    "$label contains control characters"
+                }
+            }
         }
 
         private fun JsonObject.takeString(vararg names: String): String? {
@@ -127,5 +196,27 @@ internal data class AiControlOptions(
                 )
             }
         }
+
+        private val CLOUD_CONTROL_NAMES = setOf(
+            "profile",
+            "profileId",
+            "profile_id",
+            "provider",
+            "providerId",
+            "provider_id",
+            "baseUrl",
+            "baseURL",
+            "base_url",
+            "model",
+            "apiKey",
+            "api_key",
+        )
     }
 }
+
+internal data class AiPluginSelection(
+    val packageName: String,
+    val className: String,
+    val providerId: String,
+    val modelId: String,
+)

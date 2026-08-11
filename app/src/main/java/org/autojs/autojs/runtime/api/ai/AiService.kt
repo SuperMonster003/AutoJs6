@@ -27,6 +27,8 @@ import org.autojs.autojs.core.ai.transport.AiStreamProtocolException
 import org.autojs.autojs.core.ai.transport.AiToolCall
 import org.autojs.autojs.core.ai.transport.AiUsage
 import org.autojs.autojs.core.ai.transport.SseReader
+import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AndroidAiTextPluginAskRunner
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
@@ -49,11 +51,48 @@ data class AiRequestInput(
  * retries are disabled so a credential-bearing POST cannot be replayed or redirected to another
  * origin. Every Rhino conversion is delegated to [AiAsyncDispatcher].
  */
-class AiService(
+class AiService private constructor(
     context: Context,
     private val scriptRuntime: ScriptRuntime,
     sourceClient: OkHttpClient,
+    pluginAskRuntimeFactory: () -> AiPluginAskRuntime,
 ) {
+
+    constructor(
+        context: Context,
+        scriptRuntime: ScriptRuntime,
+        sourceClient: OkHttpClient,
+    ) : this(
+        context,
+        scriptRuntime,
+        sourceClient,
+        {
+            AiPluginAskRuntime(
+                runnerProvider = {
+                    AndroidAiTextPluginAskRunner.create(context.applicationContext)
+                },
+                dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
+            )
+        },
+    )
+
+    internal constructor(
+        context: Context,
+        scriptRuntime: ScriptRuntime,
+        sourceClient: OkHttpClient,
+        pluginAskRunner: AiTextPluginAskRunner,
+        pluginDispatcherFactory: () -> AiAsyncDispatcher,
+    ) : this(
+        context,
+        scriptRuntime,
+        sourceClient,
+        {
+            AiPluginAskRuntime(
+                runnerProvider = { pluginAskRunner },
+                dispatcherFactory = pluginDispatcherFactory,
+            )
+        },
+    )
 
     private val vault = AiProviderVault(context)
     private val closed = AtomicBoolean(false)
@@ -61,16 +100,28 @@ class AiService(
         ConcurrentHashMap<AiAsyncDispatcher, AtomicReference<Call?>>()
     private val activeStreams = ConcurrentHashMap.newKeySet<AiStream.Controller>()
     private val client = AiHttpClientFactory.create(sourceClient)
+    private val pluginAskRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        pluginAskRuntimeFactory()
+    }
 
     fun ask(input: AiRequestInput): ScriptPromiseAdapter {
+        if (AiPluginAskInputMapper.hasPluginSelection(input)) {
+            return enqueuePluginAsk(input)
+        }
         return enqueue(input) { response, _ -> response.text }
     }
 
     fun chat(input: AiRequestInput): ScriptPromiseAdapter {
+        if (AiPluginAskInputMapper.hasPluginSelection(input)) {
+            return rejectPluginMethod(input, "ai.chat")
+        }
         return enqueue(input) { response, metadata -> response.toPublicValue(metadata) }
     }
 
     fun stream(input: AiRequestInput): AiStream {
+        if (AiPluginAskInputMapper.hasPluginSelection(input)) {
+            return rejectPluginStream(input)
+        }
         var controllerReference: AiStream.Controller? = null
         val controller = AiStream.Controller(scriptRuntime) {
             controllerReference?.let(activeStreams::remove)
@@ -177,6 +228,9 @@ class AiService(
             return
         }
         try {
+            if (pluginAskRuntimeDelegate.isInitialized()) {
+                pluginAskRuntimeDelegate.value.close()
+            }
             activeStreams.toList().forEach(AiStream.Controller::cancelSilently)
             activePromises.entries.toList().forEach { (dispatcher, callReference) ->
                 dispatcher.cancelSilently {
@@ -190,6 +244,65 @@ class AiService(
             AiHttpClientFactory.close(client)
         }
     }
+
+    private fun enqueuePluginAsk(input: AiRequestInput): ScriptPromiseAdapter {
+        val request = try {
+            AiPluginAskInputMapper.map(input, DEFAULT_CALL_TIMEOUT_MILLIS)
+        } catch (_: Exception) {
+            return pluginAskRuntime().reject(invalidPluginRequest())
+        }
+        return pluginAskRuntime().ask(request)
+    }
+
+    private fun rejectPluginMethod(
+        input: AiRequestInput,
+        method: String,
+    ): ScriptPromiseAdapter {
+        val error = try {
+            AiPluginAskInputMapper.requirePluginControl(input)
+            AiPluginRouteException(
+                code = PLUGIN_METHOD_UNSUPPORTED,
+                message = "$method does not support the AI plugin route",
+            )
+        } catch (_: Exception) {
+            invalidPluginRequest()
+        }
+        return pluginAskRuntime().reject(error)
+    }
+
+    private fun rejectPluginStream(input: AiRequestInput): AiStream {
+        var controllerReference: AiStream.Controller? = null
+        val controller = AiStream.Controller(scriptRuntime) {
+            controllerReference?.let(activeStreams::remove)
+        }.also { controllerReference = it }
+        activeStreams.add(controller)
+        val error = try {
+            AiPluginAskInputMapper.requirePluginControl(input)
+            AiPluginRouteException(
+                code = PLUGIN_METHOD_UNSUPPORTED,
+                message = "ai.stream does not support the AI plugin route",
+            )
+        } catch (_: Exception) {
+            invalidPluginRequest()
+        }
+        if (closed.get()) {
+            controller.cancelSilently()
+        } else {
+            controller.fail(error.toPublicError())
+        }
+        return controller.stream
+    }
+
+    private fun pluginAskRuntime(): AiPluginAskRuntime =
+        pluginAskRuntimeDelegate.value.also { runtime ->
+            if (closed.get()) runtime.close()
+        }
+
+    private fun invalidPluginRequest(): AiPluginRouteException =
+        AiPluginRouteException(
+            code = PLUGIN_INVALID_REQUEST,
+            message = "AI plugin request is invalid",
+        )
 
     private fun enqueue(
         input: AiRequestInput,
@@ -598,6 +711,10 @@ class AiService(
                 put("type", cause.errorType)
                 put("requestId", cause.requestId)
             }
+            if (cause is AiPluginRouteException) {
+                put("route", "plugin")
+                put("code", cause.code)
+            }
         }
     }
 
@@ -651,6 +768,8 @@ class AiService(
         private const val DEFAULT_CALL_TIMEOUT_MILLIS = 120_000L
         private const val DEFAULT_STREAM_CALL_TIMEOUT_MILLIS =
             AiControlOptions.MAX_TIMEOUT_MILLIS
+        private const val PLUGIN_INVALID_REQUEST = "INVALID_REQUEST"
+        private const val PLUGIN_METHOD_UNSUPPORTED = "PLUGIN_METHOD_UNSUPPORTED"
         private const val MAX_ERROR_MESSAGE_CHARS = 512
         private val CONTROL_CHARACTERS = Regex("[\\p{Cc}\\p{Cf}]+")
     }
