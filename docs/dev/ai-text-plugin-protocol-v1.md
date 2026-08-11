@@ -5,9 +5,9 @@ The two API AARs and the in-repository conformance test app are contract and
 hostile-test infrastructure. The first production on-device provider lives in
 the independent sibling project `AutoJs6-Plugin-AI-Text-Generation`. The SDK
 and test app do not replace a built-in provider. A later narrow integration now
-adds explicit local-plugin branches to `ai.ask` and `ai.stream`; when the
-`plugin` selector is absent, the existing cloud-backed `ai.ask`, `ai.chat`, and
-`ai.stream` behavior is unchanged.
+adds explicit local-plugin branches to `ai.ask`, `ai.chat`, and `ai.stream`;
+when the `plugin` selector is absent, the existing cloud-backed behavior of all
+three calls is unchanged.
 
 The final checked-in API and conformance tests are normative if wording in this
 document temporarily lags the current hardening pass.
@@ -21,7 +21,7 @@ document temporarily lags the current hardening pass.
 | `plugin-api:ai-text-generation-api` | Text AIDL, models, codecs, limits, and lifecycle policies |
 | `test-apps:ai-text-provider-conformance` | Deterministic provider and hostile conformance scenarios |
 | `app/.../core/plugin/ai` | Default-off Android package discovery, metadata-only Binder handshake, exact-component model-list and session coordination/transports, transcript validation, PFD ownership, and host policies |
-| `app/.../runtime/api/ai` | Strict explicit-selector admission and per-script ownership for the narrow production `ai.ask` and `ai.stream` plugin routes |
+| `app/.../runtime/api/ai` | Strict explicit-selector admission and per-script ownership for the narrow production `ai.ask`, `ai.chat`, and `ai.stream` plugin routes |
 
 V1 is text generation only. Image, audio, and video remain separate future
 protocols and separate plugins. The protocol does not create a mixed-media or
@@ -139,7 +139,7 @@ inspect remote provider metadata, construct an `AiTextProviderCandidate`,
 invoke provider selection, or dispatch a request. The second layer combines
 `AiTextProviderHandshakeCoordinator` with
 `AndroidAiTextProviderHandshake`. Its entry option defaults to
-`enabled = false`; the explicit production ask/stream runner is its only
+`enabled = false`; the explicit production ask/chat/stream runner is its only
 production owner and enables one exact attempt. Such an attempt reinspects every
 exact package-identity boundary it reaches.
 The successful path reaches at most three such boundaries: before binding,
@@ -206,12 +206,12 @@ When explicitly exercised by tests, the policy:
 
 The fourth layer, `AiTextProviderModelListingPolicy`, is default-off and
 transport-independent. It has no independent public entry; the explicit
-ask/stream runner reaches it only through the model-list coordinator. It accepts
-an already pinned provider identity and returns defensively copied encoded model-list
-request envelopes for a caller-owned transport; it neither binds nor registers
-`IAiModelListCallback`. A future transport must supply the calling UID captured
-synchronously at callback entry. The policy checks that UID against the pinned
-provider before decoding, strictly bounds and decodes model pages and provider
+ask/chat/stream runner reaches it only through the model-list coordinator. It
+accepts an already pinned provider identity and returns defensively copied
+encoded model-list request envelopes for a caller-owned transport; it neither
+binds nor registers `IAiModelListCallback`. A future transport must supply the
+calling UID captured synchronously at callback entry. The policy checks that
+UID against the pinned provider before decoding, strictly bounds and decodes model pages and provider
 errors, applies `AiModelPaginationPolicy` across one transcript, rejects stale
 or duplicate callbacks, listing-generation drift, token replay or cycles,
 duplicate model IDs, and model capabilities outside the pinned negotiation,
@@ -227,10 +227,10 @@ dispatch.
 
 The fifth layer combines `AiTextProviderModelListingCoordinator` with
 `AndroidAiTextProviderModelListing`. Its entry option defaults to
-`enabled = false`; the explicit ask/stream runner is its only production owner
-and enables one exact run. That run accepts an already pinned provider; it does
-not select or enable one. The Android transport requires a background thread, binds
-with an actionless intent
+`enabled = false`; the explicit ask/chat/stream runner is its only production
+owner and enables one exact run. That run accepts an already pinned provider;
+it does not select or enable one. The Android transport requires a background
+thread, binds with an actionless intent
 to the exact component, verifies the `IAiTextProvider` descriptor before
 constructing the proxy, links Binder death, and keeps that one binding alive for
 the complete transcript. The coordinator uses the same descriptor-verified
@@ -264,10 +264,10 @@ once.
 The sixth layer, `AiTextProviderSessionPolicy`, is a transport-independent pure
 Kotlin owner for one session transcript. Its entry option defaults to
 `enabled = false` and it exposes no independent public entry. The explicit
-ask/stream runner reaches it only through the session coordinator. It accepts an
-already pinned `AiTextHostSessionPlan`, one request, and abstract descriptor, remote,
-callback, and executor interfaces. Before producing a dispatch decision, it
-checks that the request still matches the pinned plan. At callback ingress, it
+ask/chat/stream runner reaches it only through the session coordinator. It
+accepts an already pinned `AiTextHostSessionPlan`, one request, and abstract
+descriptor, remote, callback, and executor interfaces. Before producing a
+dispatch decision, it checks that the request still matches the pinned plan. At callback ingress, it
 validates the exact pinned UID and bounds callback envelopes before any
 asynchronous retention or decode. Requests containing tools fail closed in this slice;
 tool-call callbacks are rejected without reading their descriptors.
@@ -305,10 +305,10 @@ descriptor content.
 The seventh layer combines `AiTextProviderSessionCoordinator`,
 `AndroidAiTextProviderSession`, the generated `IAiTextCallback` stub, and the
 Android request/callback descriptor owners. It is default-off
-(`enabled = false`); the explicit ask/stream runner is its only production owner
-and supplies an already pinned exact component, plan, and request. One process
-owner permits one active run. One absolute deadline covers the four exact package inspections, exact
-actionless bind, provider descriptor check, bounded metadata reads, synchronous
+(`enabled = false`); the explicit ask/chat/stream runner is its only production
+owner and supplies an already pinned exact component, plan, and request. One
+process owner permits one active run. One absolute deadline covers the four
+exact package inspections, exact actionless bind, provider descriptor check, bounded metadata reads, synchronous
 open, callback admission, PFD reads, credit controls, and terminal cleanup.
 
 After connection, provider info and capabilities are read and revalidated from
@@ -446,17 +446,30 @@ final-reinspection cases before `openSession`; they do not prove an Android
 package update or uninstall during an active session. Provider disable, host
 death, other API/ABI, remote `listingGeneration`, and the broader `ai.*` matrix
 remain open. Separate real-provider public `ai.ask` and fake-provider public
-`ai.stream` smokes are recorded below; neither broadens these hostile-provider
-cells or closes a broad R1 or protocol exit gate.
+`ai.stream` and public `ai.chat` smokes with the fake provider are recorded
+below; none broadens these hostile-provider cells or closes a broad R1 or
+protocol exit gate.
 
-### Explicit Production `ai.ask` And `ai.stream` Routes
+### Explicit Production `ai.ask`, `ai.chat`, And `ai.stream` Routes
 
-The seven layers above now have two deliberately narrow production call sites.
-Only an `ai.ask` or `ai.stream` whose options object contains the `plugin` key
-enters them. The stable selector shape is:
+The seven layers above now have three deliberately narrow production call sites.
+Only an `ai.ask`, `ai.chat`, or `ai.stream` whose options object contains the
+`plugin` key enters them. The stable selector shape is:
 
 ```javascript
 ai.ask(prompt, {
+    plugin: {
+        component: {
+            packageName: "org.example.provider",
+            className: "org.example.provider.AiTextService",
+        },
+        providerId: "example.provider",
+        modelId: "example-model",
+    },
+    timeout: 120000,
+});
+
+ai.chat(prompt, {
     plugin: {
         component: {
             packageName: "org.example.provider",
@@ -497,18 +510,20 @@ profile, provider, base URL, model, or API key. It does not read the provider
 vault, construct a cloud request, issue HTTP, retry, or fall back to a built-in
 provider. Absence of `plugin` preserves the legacy cloud path unchanged.
 
-Both routes accept exactly one message object with only `role: "user"` and a
-nonempty string `content`; a prompt string is normalized to that shape by the
+All three routes accept exactly one message object with only `role: "user"` and
+a nonempty string `content`; a prompt string is normalized to that shape by the
 existing facade. They send one inline UTF-8 `text/plain` part and zero request
 descriptors, with no reasoning, structured JSON, usage, tools, or tool rounds.
-`ai.ask` is non-streaming and rejects a chunk or usage callback. `ai.stream`
-requires the planned model's `STREAMING` capability; it maps `Started` to
-`open`, each nonempty text chunk to `chunk` followed by `delta` in one bounded
-dispatcher action, and the aggregate completion to `done`. `ai.chat` still
-rejects a present plugin selector and does not enter the cloud path.
+`ai.ask` and `ai.chat` are non-streaming and reject chunk or usage callbacks.
+Chat completion uses the stable 12-key public result: text, an empty reasoning
+string, an empty toolCalls array, null usage/finishReason/message/error/raw/
+profile, route `plugin`, and the exact provider/model pins. `ai.stream` requires
+the planned model's `STREAMING` capability; it maps `Started` to `open`, each
+nonempty text chunk to `chunk` followed by `delta` in one bounded dispatcher
+action, and the aggregate completion to `done`.
 
 `AndroidAiTextPluginAskRunner` lazily creates one process-shared backend. A
-process admission gate permits one routed ask or stream at a time.
+process admission gate permits one routed ask, chat, or stream at a time.
 Process-lifetime single-thread orchestration, coordinator, terminal-fallback, and deadline
 owners share a bounded blocking pool of at most three Binder/package-manager
 operations with the existing model-list and session process owners. Every stage
@@ -528,7 +543,14 @@ runtime lifecycle cases). After production commit `2ea3360a2` and test commit
 `AiPluginStreamRuntimeTest` (4), `AiServicePluginRouteTest` (5), and
 `AiStreamTest` (9), with 0 skipped, 0 failures, and 0 errors. Separately, the
 production plugin retained its completed `testDebugUnitTest`, `lintDebug`,
-`assembleDebug`, and `assembleRelease` evidence.
+`assembleDebug`, and `assembleRelease` evidence. The chat addition was tested at
+source `b0aa6768484d6046551264f69ecc84b527bbb442`, after exact feature/test
+commits `d480b6918` / `b0aa67684`. Its focused Gradle XML recorded 14/14 tests:
+`AiPluginAskInputMapperTest` (3), `AiPluginAskRuntimeTest` (4), and
+`AiServicePluginRouteTest` (7), with 0 skipped, 0 failures, and 0 errors. Main
+integrates the production and test patches as commits `2d256b99f` and
+`c35f199b8`; those later identifiers provide integration traceability and are
+not the tested APK source.
 
 On 2026-08-11, the exact opt-in method
 `AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
@@ -559,10 +581,10 @@ boundaries. The detailed transaction receipt is retained locally only.
 
 This is a deliberately narrow production positive-path smoke, not broad
 acceptance. It covers one physical device, one real model, one non-streaming
-one-shot ask, and an App Debug host. It does not cover a release host, an API or
-ABI matrix, plugin-backed chat or streaming, tools, structured output, usage,
-clipboard behavior, active-request update/uninstall, performance, or soak.
-Opening the model through DocumentsUI may also change its last-location UI
+one-shot ask, and an App Debug host. That method does not cover a release host,
+an API or ABI matrix, plugin-backed chat or streaming, tools, structured output,
+usage, clipboard behavior, active-request update/uninstall, performance, or
+soak. Opening the model through DocumentsUI may also change its last-location UI
 state; that state has no lossless snapshot/restore contract. The earlier fake
 provider Android evidence remains separate, and all broader promotion gates
 remain open.
@@ -596,6 +618,40 @@ evidence in `AiStreamTest` and `AiPluginStreamRuntimeTest`. A real production
 provider/model stream, public active cancellation, release-host behavior, and
 the API/ABI matrix remain untested. No broad R1 or protocol exit criterion is
 promoted.
+
+The same date also has one deliberately narrow public chat conformance smoke.
+`AiTextPluginPublicChatSmokeTest#publicRhinoAiChatReturnsNormalizedResponseThroughExactFakeProvider`
+reported `OK (1 test)`, `Time: 1.54`, and instrumentation code `-1` on
+`QV710AF65F` (Android 12/API 31, arm64-v8a, user 0). The APK-tested source was
+`b0aa6768484d6046551264f69ecc84b527bbb442`, following feature commit
+`d480b6918`; main later integrated the production/test changes as `2d256b99f` /
+`c35f199b8`, neither of which is the tested APK source. The method used the real
+`ScriptEngineService` and public Rhino `ai.chat`, selecting the test-only
+package `org.autojs.plugin.ai.text.fake`, service class
+`org.autojs.plugin.ai.text.fake.service.FakeAiTextProviderService`, provider
+`fake.local`, and model `fake.echo`.
+
+The naturally completed Promise settled once. The result contained exactly
+`text`, `reasoning`, `toolCalls`, `usage`, `finishReason`, `message`, `error`,
+`raw`, `profile`, `route`, `provider`, and `model`. Text exactly reproduced the
+UTF-8 prompt, reasoning was empty, toolCalls was an empty array, the six optional
+fields were null, and route/provider/model were `plugin`, `fake.local`, and
+`fake.echo`.
+
+The host arm64 App Debug, instrumentation, and test-only fake-provider APK
+SHA-256 values were, respectively,
+`2d3dfb9c16ad91ccb73c6a969db7dcc9b10046df14f716c82d9e61f07faaf1d3`,
+`9caa1cc6936d98c380c9c9ffe81178a0e81e667207da9623fa95c19bf3a11166`,
+and `6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
+Exact checks before installation and after cleanup found the host,
+instrumentation, and fake-provider packages absent for users 0 and 10 and all
+nine reserved external data/media/obb paths absent.
+
+This is **PARTIAL** fake-provider evidence. Natural completion does not prove a
+real provider/model, a release host, another API/ABI, a device-side failure or
+Binder-death path, or forced engine/runtime cancellation. Those lifecycle
+failure and silent-close assertions remain JVM-only where covered. No broad R1
+or protocol exit criterion is promoted.
 
 ## Streaming And Backpressure
 
@@ -656,7 +712,7 @@ single-terminal portions of this boundary. When the explicitly invoked
 coordinator is enabled, the Android transport now binds the exact component,
 registers one callback per dispatch, invokes `listModels()`, and brackets each
 dispatch and callback admission with exact package reinspection. Only the
-explicit ask/stream routes enable that path in production.
+explicit ask/chat/stream routes enable that path in production.
 
 The conformance provider exposes deterministic public models for echo, streaming,
 reasoning, and tools. Reserved hidden model IDs select hostile conformance
@@ -684,8 +740,9 @@ This phase has read-only Android package discovery and exact component
 reinspection, an explicit-component metadata handshake, pure host policies,
 exact-component Android model-list coordination, and an exact-component Android
 `openSession`/`IAiTextCallback`/PFD transport. Their only production entries are
-the strict prompt-only `ai.ask` and `ai.stream` selectors described above;
-there is no automatic discovery, UI selection, or plugin-backed chat path.
+the strict prompt-only `ai.ask`, `ai.chat`, and `ai.stream` selectors described
+above; there is no automatic discovery, UI selection, or multi-message/
+provider-native plugin chat path.
 Installing either the independent production provider or the in-repository conformance provider
 does not switch the public AI module or alter its built-in defaults. The
 conformance APK is test-only, has no launcher or network permission, and is

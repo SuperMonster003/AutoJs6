@@ -32,33 +32,36 @@ behavior only for reproducible host conformance testing.
 | AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
 | AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
-| AI explicit ask/stream routes | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process-shared admission, per-script lifecycle ownership, normalized stream events, and stable terminal codes | Earlier standalone ask K2/JUnit 15/15; focused Gradle 25/25 across mapper, ask/stream runtime, service, and `AiStream`, 0 skipped/failures/errors; one real-provider ask and one fake-provider stream public-route method on API 31 | PARTIAL, JVM/source plus two narrow positive-path device smokes |
+| AI explicit ask/chat/stream routes | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process-shared admission, per-script lifecycle ownership, normalized unary/chat/stream results, and stable terminal codes | Earlier ask/stream focused Gradle 25/25; chat tested-source commits `d480b6918` / `b0aa67684` focused Gradle 14/14 (3 mapper + 4 runtime + 7 service), 0 skipped/failures/errors; one real-provider ask plus fake-provider stream and chat public methods on API 31 | PARTIAL, JVM/source plus three narrow positive-path device smokes |
 | AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models including isolated callback UID and provider process death, bounded executors, FD cleanup, and caller authentication | H1 fixture commit `edd10008f` and H2 fixture commit `10dad3e39`; conformance text provider unit corpus: 31 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM; Android hostile results remain PARTIAL below |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 
-### Explicit `ai.ask` And `ai.stream` Plugin Route Evidence
+### Explicit `ai.ask`, `ai.chat`, And `ai.stream` Plugin Route Evidence
 
-The production `AiService` chooses the plugin path for `ai.ask` and `ai.stream`
-only when the request options contain the `plugin` key. A missing key leaves
-legacy cloud ask/chat/stream behavior unchanged. A present key, including a
-null or malformed value, never consults the vault or HTTP path and never falls
-back. Admission requires one exact component package/class, provider ID, model
-ID, and an optional integer timeout from 1,000 through 600,000 milliseconds;
-the default is 120,000. Cloud control aliases, an explicit `stream` option, and
-unknown fields fail closed.
+The production `AiService` chooses the plugin path for `ai.ask`, `ai.chat`, and
+`ai.stream` only when the request options contain the `plugin` key. A missing
+key leaves legacy cloud ask/chat/stream behavior unchanged. A present key,
+including a null or malformed value, never consults the vault or HTTP path and
+never falls back. Admission requires one exact component package/class,
+provider ID, model ID, and an optional integer timeout from 1,000 through
+600,000 milliseconds; the default is 120,000. Cloud control aliases, an
+explicit `stream` option, and unknown fields fail closed.
 
 The shared request mapping admits exactly one plain-text user message and sends
 one inline request with zero request descriptors and no reasoning, structured
-output, usage, tools, or tool rounds. `ai.ask` is non-streaming. `ai.stream`
-requires the planned model's `STREAMING` capability and maps `Started` to
-`open`, every nonempty text chunk to `chunk` then `delta` in one dispatcher
-action, and the aggregate completion to `done`. The composed Android runner
+output, usage, tools, or tool rounds. `ai.ask` and `ai.chat` are non-streaming;
+chat completion maps to exactly 12 public keys: text, empty reasoning, empty
+toolCalls, null usage/finishReason/message/error/raw/profile, route `plugin`,
+and exact provider/model pins. `ai.stream` requires the planned model's
+`STREAMING` capability and maps `Started` to `open`, every nonempty text chunk
+to `chunk` then `delta` in one dispatcher action, and the aggregate completion
+to `done`. The composed Android runner
 reuses the exact-component discovery, handshake, model-list, and session
 coordinators, requires an `ON_DEVICE`/`NONE` provider and the exact planned
 model, and applies one outer absolute deadline from discovery through the active
 session terminal. Lower handles and coordinators retain settled cleanup
-ownership. One process-shared backend and admission gate serialize ask and
-stream attempts over the same orchestration/control/terminal/deadline lanes,
+ownership. One process-shared backend and admission gate serialize ask, chat,
+and stream attempts over the same orchestration/control/terminal/deadline lanes,
 bounded three-operation blocking pool, and coordinator process owners. Each
 script runtime owns cancellation and handle close; terminal and late-callback
 races have one visible winner and no post-dispatch retry.
@@ -71,6 +74,15 @@ and test commit `50b43d00c`, the focused Gradle XML recorded 25/25 tests across
 `AiStreamTest` (9), with 0 skipped, 0 failures, and 0 errors. The production
 plugin separately retained its completed `testDebugUnitTest`, `lintDebug`,
 `assembleDebug`, and `assembleRelease` evidence.
+
+The chat change's exact feature/test commits were `d480b6918` / `b0aa67684`.
+Focused Gradle XML at tested source
+`b0aa6768484d6046551264f69ecc84b527bbb442` recorded 14/14 tests across
+`AiPluginAskInputMapperTest` (3), `AiPluginAskRuntimeTest` (4), and
+`AiServicePluginRouteTest` (7), with 0 skipped, 0 failures, and 0 errors. Main
+integrates those scoped changes as production commit `2d256b99f` and test commit
+`c35f199b8`; the integration commits are traceability references and were not
+the APK build/test source.
 
 The 2026-08-11 production positive-path smoke ran the exact method
 `AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
@@ -97,11 +109,12 @@ and plugin packages absent, and the three transaction-reserved external paths
 were absent at both boundaries. The detailed receipt remains local only.
 
 This one method is not a release or matrix gate. It covers one physical device,
-one real model, one non-streaming one-shot ask, and an App Debug host. It does
-not cover a release host, other APIs/ABIs, plugin-backed chat or stream, tools,
-structured output, usage, clipboard behavior, active-request update/uninstall,
-performance, or soak. DocumentsUI import can leave last-location UI state whose
-exact prior value cannot be snapshotted and restored losslessly. Earlier fake-
+one real model, one non-streaming one-shot ask, and an App Debug host. That ask
+method does not cover a release host, other APIs/ABIs, plugin-backed chat or
+stream, tools, structured output, usage, clipboard behavior, active-request
+update/uninstall, performance, or soak. DocumentsUI import can leave
+last-location UI state whose exact prior value cannot be snapshotted and
+restored losslessly. Earlier fake-
 provider Android cells remain separate evidence, remote catalog-generation and
 automatic UI selection remain open, and no broad promotion criterion is closed.
 
@@ -197,6 +210,46 @@ late-event suppression remain JVM evidence in `AiStreamTest` and
 propagation on Android, a release host, and the API/ABI matrix remain open. This
 result closes no broad R1 checkbox or protocol exit criterion.
 
+#### Public Fake-Provider Chat Route
+
+On 2026-08-11, the exact opt-in method
+`AiTextPluginPublicChatSmokeTest#publicRhinoAiChatReturnsNormalizedResponseThroughExactFakeProvider`
+reported `OK (1 test)`, `Time: 1.54`, and instrumentation code `-1` on
+`QV710AF65F` (API 31, arm64-v8a, user 0). The APK-tested source commit was
+`b0aa6768484d6046551264f69ecc84b527bbb442`, which contains feature commit
+`d480b6918`. The matching production/test changes were later integrated to main
+as `2d256b99f` / `c35f199b8`; those integration commits were not the artifact
+source.
+
+The method traversed the real `ScriptEngineService` and public Rhino `ai.chat`
+with the exact test-only package `org.autojs.plugin.ai.text.fake`, service class
+`org.autojs.plugin.ai.text.fake.service.FakeAiTextProviderService`, provider
+`fake.local`, and model `fake.echo`. One naturally completed Promise terminal
+returned the exact 12-key set `text`, `reasoning`, `toolCalls`, `usage`,
+`finishReason`, `message`, `error`, `raw`, `profile`, `route`, `provider`, and
+`model`. Text exactly equalled the UTF-8 prompt, reasoning was empty, toolCalls
+was an empty array, usage/finishReason/message/error/raw/profile were null, and
+route/provider/model exactly equalled `plugin`, `fake.local`, and `fake.echo`.
+
+The candidate SHA-256 values were:
+
+- Host arm64 App Debug:
+  `2d3dfb9c16ad91ccb73c6a969db7dcc9b10046df14f716c82d9e61f07faaf1d3`.
+- App Debug instrumentation:
+  `9caa1cc6936d98c380c9c9ffe81178a0e81e667207da9623fa95c19bf3a11166`.
+- Test-only fake provider:
+  `6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
+
+Exact pre/post checks found the host, instrumentation, and fake-provider
+packages absent for users 0 and 10 and all nine reserved external
+data/media/obb paths absent.
+
+This is one **PARTIAL** fake-provider public-route cell. Natural completion does
+not prove a real provider/model, a release host, another API/ABI, any device-side
+failure or Binder-death path, or forced engine/runtime cancellation. Failure
+mapping and silent runtime-close coverage remain JVM-only. This result promotes
+no broad R1 checkbox or protocol exit criterion.
+
 ### Pure Kotlin AI Session Transcript Evidence
 
 Commit `325577c82` adds `AiTextProviderSessionPolicy` and its 40-test unit
@@ -284,6 +337,7 @@ APK assembly pass.
 | AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a metadata, paged model list, one normal `fake.stream` session, and ordinary-pipe completion materialization |
 | AI public production `ai.ask` positive path | Real signed provider release, real model, public Rhino entry, exact component/provider/model selector, artifact/device hash match, reversible cleanup | PARTIAL, one API 31/arm64-v8a App Debug non-streaming one-shot method; no release-host or API matrix |
 | AI public conformance `ai.stream` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, normalized chunk/delta/done aggregation beyond eight initial credits, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; public active cancel/engine stop remain JVM-only and no real provider/model stream ran |
+| AI public conformance `ai.chat` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, exact normalized 12-key response, one terminal, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; no real provider/model, device failure/cancel path, release host, or matrix |
 | AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PARTIAL, API 31 only: seven H1 methods plus two H2 methods cover completion/tool descriptors, ordering, sequence, descriptor reference, bounded duplicate terminal, cancel-after-start, one isolated wrong UID, and one provider death; deterministic Android no-credit and update/disable/uninstall lifecycle remain pending |
 | AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal session and public Rhino fake stream crossed 8 initial credits, a tool callback was rejected without execution, and one provider kill followed a chunk whose credit was causally replenished; real tool turns, host death, and the matrix remain pending |
 | Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
@@ -585,19 +639,20 @@ The DEX adapter remains experimental and disconnected from
 compiler must contain the real D8 implementation; the fixed-output conformance provider can
 never be selected for production compilation.
 
-The AI protocol now has two narrow public connections: exact, explicit,
-prompt-only plugin selectors on `ai.ask` and `ai.stream`. Selector absence
-preserves the built-in cloud path; selector presence fails closed without vault,
-HTTP, retry, or fallback. One real release provider/model completed the ask
-route on one API 31 device with an App Debug host. A separate public stream
-method completed beyond eight credits with the test-only fake provider. Neither
-smoke promotes the broader protocol, and the stream method does not turn its JVM
-public-cancel/runtime-close coverage into Android evidence. Promotion still
-requires the remaining installed-provider/version/hostile and API matrices,
-remote catalog-generation handling, release-host evidence, automatic
-UI-selection decisions, plugin-backed chat and broader stream features, a real
-provider/model public stream, active public cancellation, and active-request
-update/disable/uninstall results. The pure policies and Android adapters remain
-fail-closed foundations outside those two compositions. Image, audio, and video
-require separate protocol reviews and cannot be added to the text plugin to
-satisfy this matrix.
+The AI protocol now has three narrow public connections: exact, explicit,
+prompt-only plugin selectors on `ai.ask`, `ai.chat`, and `ai.stream`. Selector
+absence preserves the built-in cloud path; selector presence fails closed
+without vault, HTTP, retry, or fallback. One real release provider/model
+completed the ask route on one API 31 device with an App Debug host. Separate
+public stream and chat methods naturally completed with the test-only fake
+provider, proving a stream beyond eight credits and the normalized 12-key chat
+shape. None of these smokes promotes the broader protocol. In particular, they
+do not turn JVM failure, public-stream-cancel, or runtime-close coverage into
+Android evidence. Promotion still requires the remaining installed-provider/
+version/hostile and API matrices, remote catalog-generation handling,
+release-host evidence, automatic UI-selection decisions, multi-message and
+provider-native chat compatibility, a real provider/model public chat and
+stream, active public cancellation, and active-request update/disable/uninstall
+results. The pure policies and Android adapters remain fail-closed foundations
+outside those three compositions. Image, audio, and video require separate
+protocol reviews and cannot be added to the text plugin to satisfy this matrix.
