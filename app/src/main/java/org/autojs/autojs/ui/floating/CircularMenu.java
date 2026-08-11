@@ -218,7 +218,10 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                 mScriptListDialogExplorerView.setOnItemClickListener((view, item) -> {
                     if (item.isExecutable()) {
                         scriptListDialog.hide();
-                        Scripts.run(view != null ? view.getContext() : mScriptListDialogExplorerView.getContext(), item.toScriptFile());
+                        Scripts.runInteractive(
+                                view != null ? view.getContext() : mScriptListDialogExplorerView.getContext(),
+                                item.toScriptFile()
+                        );
                     } else {
                         DialogUtils.showAdaptive(new MaterialDialog.Builder(mContext)
                                 .title(mContext.getString(R.string.error_failed_to_run_script))

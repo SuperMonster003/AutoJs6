@@ -1501,7 +1501,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mRequestHostDialogHide?.run()
             when {
                 mExplorerItem.isExecutable -> {
-                    Scripts.run(context, ScriptFile(mExplorerItem.path))
+                    Scripts.runInteractive(context, ScriptFile(mExplorerItem.path))
                     notifyItemOperated()
                 }
                 mExplorerItem.isMediaPlayable -> {

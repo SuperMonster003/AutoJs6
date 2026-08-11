@@ -228,12 +228,16 @@ tasks {
     register("verifyPythonReleaseApiDistributionGate").configure {
         group = "distribution"
         description =
-            "Builds and verifies the current-tree local release Python Runtime API AAR distribution."
+            "Builds and verifies the stable current-tree Python Runtime release API AAR distribution."
         dependsOn(
+            ":plugin-api:common-plugin-api:assembleRelease",
             ":plugin-api:protocol-wire-api:assembleRelease",
             ":plugin-api:python-runtime-api:assembleRelease",
         )
 
+        val commonPluginAar = project(":plugin-api:common-plugin-api").layout.buildDirectory.file(
+            "outputs/aar/common-plugin-api-release.aar",
+        )
         val protocolWireAar = project(":plugin-api:protocol-wire-api").layout.buildDirectory.file(
             "outputs/aar/protocol-wire-api-release.aar",
         )
@@ -243,6 +247,10 @@ tasks {
         val sourceFiles = files(
             file("build.gradle.kts"),
             file("settings.gradle.kts"),
+            file("version.properties"),
+            fileTree("plugin-api/common-plugin-api") {
+                exclude("build/**", ".gradle/**")
+            },
             fileTree("plugin-api/protocol-wire-api") {
                 exclude("build/**", ".gradle/**")
             },
@@ -250,7 +258,7 @@ tasks {
                 exclude("build/**", ".gradle/**")
             },
         )
-        inputs.files(protocolWireAar, pythonRuntimeAar, sourceFiles)
+        inputs.files(commonPluginAar, protocolWireAar, pythonRuntimeAar, sourceFiles)
         outputs.dir(pythonReleaseApiDistributionDirectory)
         outputs.file(pythonReleaseApiDistributionReceipt)
         outputs.upToDateWhen { false }
@@ -264,10 +272,18 @@ tasks {
                 "Unable to create Python release API distribution: $distributionDirectory"
             }
 
-            val sources = listOf(protocolWireAar.get().asFile, pythonRuntimeAar.get().asFile)
-            val expectedNames = setOf("protocol-wire-api-release.aar", "python-runtime-api-release.aar")
+            val sources = listOf(
+                commonPluginAar.get().asFile,
+                protocolWireAar.get().asFile,
+                pythonRuntimeAar.get().asFile,
+            )
+            val expectedNames = setOf(
+                "common-plugin-api-release.aar",
+                "protocol-wire-api-release.aar",
+                "python-runtime-api-release.aar",
+            )
             check(sources.map(File::getName).toSet() == expectedNames) {
-                "Python release API source names differ from the exact release AAR pair"
+                "Python release API source names differ from the exact stable release AAR bundle"
             }
             sources.forEach { source ->
                 check(source.isFile) { "Missing Python release API artifact: $source" }
@@ -286,7 +302,7 @@ tasks {
                 .orEmpty()
                 .filter { it.isFile && it.extension.equals("aar", ignoreCase = true) }
             check(stagedAars.map(File::getName).toSet() == expectedNames && stagedAars.size == expectedNames.size) {
-                "Python release API distribution must contain exactly the two release AARs; " +
+                "Python release API distribution must contain exactly the three release AARs; " +
                     "found=${stagedAars.map(File::getName).sorted()}"
             }
 
@@ -298,6 +314,46 @@ tasks {
                 "--porcelain=v1",
                 "--untracked-files=all",
             ).isNotEmpty()
+            val versionProperties = java.util.Properties().apply {
+                file("version.properties").inputStream().buffered().use { input -> load(input) }
+            }
+            val hostVersionName = versionProperties.getProperty("VERSION_NAME")?.trim().orEmpty()
+            check(hostVersionName.isNotEmpty() && hostVersionName.none(Character::isISOControl)) {
+                "Current host VERSION_NAME is missing or invalid"
+            }
+            val hostVersionCode = versionProperties.getProperty("VERSION_BUILD")
+                ?.trim()
+                ?.toLongOrNull()
+                ?: error("Current host VERSION_BUILD is missing or invalid")
+            check(hostVersionCode > 0L) { "Current host VERSION_BUILD must be positive" }
+            val escapedHostVersionName = hostVersionName
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+
+            fun declaredApiProjectDependencies(module: String): Set<String> {
+                val buildText = file("plugin-api/$module/build.gradle.kts").readText()
+                return Regex("""\bapi\s*\(\s*project\("([^"]+)"\)\s*\)""")
+                    .findAll(buildText)
+                    .map { match -> match.groupValues[1] }
+                    .toSet()
+            }
+            val declaredDependencies = mapOf(
+                "common-plugin-api-release.aar" to declaredApiProjectDependencies("common-plugin-api"),
+                "protocol-wire-api-release.aar" to declaredApiProjectDependencies("protocol-wire-api"),
+                "python-runtime-api-release.aar" to declaredApiProjectDependencies("python-runtime-api"),
+            )
+            check(declaredDependencies["common-plugin-api-release.aar"].orEmpty().isEmpty()) {
+                "common-plugin-api release dependency graph changed; update the stable distribution manifest"
+            }
+            check(declaredDependencies["protocol-wire-api-release.aar"].orEmpty().isEmpty()) {
+                "protocol-wire-api release dependency graph changed; update the stable distribution manifest"
+            }
+            check(
+                declaredDependencies["python-runtime-api-release.aar"] ==
+                    setOf(":plugin-api:protocol-wire-api"),
+            ) {
+                "python-runtime-api release dependency graph changed; update the stable distribution manifest"
+            }
             val (sourceFingerprint, sourceFileCount) = pythonGateSourceFingerprint(
                 rootDir,
                 sourceFiles.files,
@@ -310,11 +366,14 @@ tasks {
                     appendLine("{")
                     appendLine("  \"schema\": \"org.autojs6.python-runtime.release-api-distribution\",")
                     appendLine("  \"schemaVersion\": 1,")
-                    appendLine("  \"distributionVersion\": \"1.1.0-r5-preview\",")
+                    appendLine("  \"distributionVersion\": \"1.1.0\",")
+                    appendLine("  \"releaseChannel\": \"STABLE\",")
                     appendLine("  \"scope\": \"LOCAL_CURRENT_TREE_RELEASE_AAR_DISTRIBUTION\",")
                     appendLine("  \"published\": false,")
                     appendLine("  \"host\": {")
-                    appendLine("    \"gitHead\": \"$head\",")
+                    appendLine("    \"versionName\": \"$escapedHostVersionName\",")
+                    appendLine("    \"versionCode\": $hostVersionCode,")
+                    appendLine("    \"gitCommit\": \"$head\",")
                     appendLine("    \"dirty\": $dirty,")
                     appendLine("    \"sourceFingerprintAlgorithm\": \"SHA-256\",")
                     appendLine("    \"sourceFingerprint\": \"$sourceFingerprint\",")
@@ -327,9 +386,15 @@ tasks {
                     appendLine("    \"minor\": 1,")
                     appendLine("    \"taggedWireFormatVersion\": 1")
                     appendLine("  },")
-                    appendLine("  \"dependency\": {")
-                    appendLine("    \"direction\": \"python-runtime-api -> protocol-wire-api\",")
-                    appendLine("    \"packaging\": \"SEPARATE_AARS\"")
+                    appendLine("  \"dependencies\": {")
+                    appendLine("    \"packaging\": \"SEPARATE_AARS\",")
+                    appendLine("    \"compileEdges\": [")
+                    appendLine(
+                        "      {\"from\": \"python-runtime-api-release.aar\", " +
+                            "\"to\": \"protocol-wire-api-release.aar\"}",
+                    )
+                    appendLine("    ],")
+                    appendLine("    \"independentArtifacts\": [\"common-plugin-api-release.aar\"]")
                     appendLine("  },")
                     appendLine("  \"artifacts\": [")
                     artifacts.forEachIndexed { index, artifact ->
@@ -409,7 +474,7 @@ tasks {
 
     val verifyPythonR1DefaultOffHostBoundary = register("verifyPythonR1DefaultOffHostBoundary") {
         group = "verification"
-        description = "Verifies that Python remains default-off and that CPython stays outside the host process."
+        description = "Verifies the stable app-only Python host channel and process-isolated CPython boundary."
         doLast {
             val violations = mutableListOf<String>()
             val appBuildFile = file("app/build.gradle.kts")
@@ -431,8 +496,13 @@ tasks {
                 )
             }.files.forEach { file ->
                 if ("org.autojs.plugin.python.RUNTIME" in file.readText()) {
-                    violations += "production manifest exposes Python runtime discovery in ${file.relativeTo(rootDir)}"
+                    violations += "production manifest uses broad Python runtime action visibility in ${file.relativeTo(rootDir)}"
                 }
+            }
+            val mainManifest = file("app/src/main/AndroidManifest.xml")
+            val mainManifestText = if (mainManifest.isFile) mainManifest.readText() else ""
+            if ("<package android:name=\"io.github.supermonster003.autojs6.plugin.python.runtime\" />" !in mainManifestText) {
+                violations += "main manifest is missing exact official Python Runtime package visibility"
             }
             fileTree("app/src") {
                 include("main/**/*.so", "release/**/*.so", "app/**/*.so", "inrt/**/*.so")
@@ -440,33 +510,14 @@ tasks {
                 .filter { "python" in it.name.lowercase() }
                 .forEach { file -> violations += "embedded Python native library in ${file.relativeTo(rootDir)}" }
 
-            fun hasDefaultFalseProperty(variableName: String, propertyName: String): Boolean {
-                val declaration = "val $variableName = providers.gradleProperty(\"$propertyName\")"
-                val start = appBuildText.indexOf(declaration)
-                if (start < 0) return false
-                val end = appBuildText.indexOf("\nval ", start + declaration.length)
-                    .let { if (it < 0) appBuildText.length else it }
-                return ".orElse(false)" in appBuildText.substring(start, end)
-            }
-
-            if (
-                !hasDefaultFalseProperty(
-                    "pythonRuntimePreviewEnabled",
-                    "autojs.python.preview.enabled",
-                ) ||
-                !hasDefaultFalseProperty(
-                    "pythonRuntimeReleaseCandidateEnabled",
-                    "autojs.python.release.candidate.enabled",
-                )
-            ) {
-                violations += "Python preview and release-candidate build flags must both be default-off"
-            }
             listOf(
+                "autojs.python.preview.enabled",
+                "autojs.python.release.candidate.enabled",
                 "PYTHON_RUNTIME_PREVIEW_ENABLED",
                 "PYTHON_RUNTIME_RELEASE_CANDIDATE_ENABLED",
-            ).forEach { field ->
-                if (field !in appBuildText) {
-                    violations += "Python host BuildConfig is missing $field"
+            ).forEach { staleFlag ->
+                if (staleFlag in appBuildText) {
+                    violations += "Python host still depends on retired build flag $staleFlag"
                 }
             }
 
@@ -475,10 +526,8 @@ tasks {
             )
             val channelPolicyText = if (channelPolicy.isFile) channelPolicy.readText() else ""
             listOf(
-                "if (debuggable) previewEnabled else releaseCandidateEnabled",
-                "debuggable = BuildConfig.DEBUG",
-                "previewEnabled = BuildConfig.PYTHON_RUNTIME_PREVIEW_ENABLED",
-                "releaseCandidateEnabled = BuildConfig.PYTHON_RUNTIME_RELEASE_CANDIDATE_ENABLED",
+                "fun isEnabled(isInrt: Boolean): Boolean = !isInrt",
+                "isInrt = BuildConfig.isInrt",
             ).forEach { marker ->
                 if (marker !in channelPolicyText) {
                     violations += "Python host channel policy is missing $marker"
@@ -491,7 +540,47 @@ tasks {
                 !previewFeature.isFile ||
                 "PythonRuntimeChannelPolicy.isEnabledForCurrentBuild" !in previewFeature.readText()
             ) {
-                violations += "Python source admission does not use the shared default-off channel policy"
+                violations += "Python source admission does not use the shared stable host-flavor policy"
+            }
+
+            val transport = file(
+                "app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeOfficialTransport.kt",
+            )
+            val transportText = if (transport.isFile) transport.readText() else ""
+            listOf(
+                "PluginEnableStore.isEnabled(",
+                "pluginEnabled = pluginEnabledBeforeInspection && isPluginEnabled()",
+                "requirePluginEnabled()",
+                "Intent().setComponent(OFFICIAL_COMPONENT)",
+            ).forEach { marker ->
+                if (marker !in transportText) {
+                    violations += "Python official transport is missing $marker"
+                }
+            }
+            val bindServiceIndex = transportText.indexOf("applicationContext.bindService(")
+            val enableCheckIndex = transportText.indexOf("requirePluginEnabled()")
+            if (bindServiceIndex < 0 || enableCheckIndex !in 0 until bindServiceIndex) {
+                violations += "Python official transport does not check logical enablement before binding"
+            }
+
+            val client = file(
+                "app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeClient.kt",
+            )
+            val clientText = if (client.isFile) client.readText() else ""
+            listOf(
+                "PluginStateChangeRegistry.addListener(pluginStateChangedListener)",
+                "PluginStateChangeRegistry.removeListener(pluginStateChangedListener)",
+                "failClosedForPluginStateChange",
+                "retireRemoteSession",
+            ).forEach { marker ->
+                if (marker !in clientText) {
+                    violations += "Python runtime lifecycle handling is missing $marker"
+                }
+            }
+            val clientPreconditionIndex = clientText.indexOf("checkProviderPreconditions(installed)")
+            val clientBindIndex = clientText.indexOf("transport.bind(")
+            if (clientBindIndex < 0 || clientPreconditionIndex !in 0 until clientBindIndex) {
+                violations += "Python runtime client may bind before rejecting a logically disabled provider"
             }
 
             val fixtureRoot = file("test-apps/python-runtime-conformance")
@@ -564,7 +653,7 @@ tasks {
                 violations += "distribution consumer is not test-only"
             }
             check(violations.isEmpty()) {
-                violations.joinToString(prefix = "Python R1 default-off boundary violations:\n", separator = "\n")
+                violations.joinToString(prefix = "Python R1 stable host boundary violations:\n", separator = "\n")
             }
         }
     }

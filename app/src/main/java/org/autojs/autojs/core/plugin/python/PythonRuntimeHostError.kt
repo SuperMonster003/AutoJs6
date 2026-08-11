@@ -1,7 +1,8 @@
 package org.autojs.autojs.core.plugin.python
 
-/** Stable host-side failures for the default-off Python developer preview. */
+/** Stable host-side failures for the independent Python Runtime plugin. */
 internal enum class PythonRuntimeHostError(val stableCode: String) {
+    /** Legacy stable code retained for the unsupported packaged-INRT host flavor. */
     PREVIEW_DISABLED("PYTHON_RUNTIME_PREVIEW_DISABLED"),
     SOURCE_INVALID("PYTHON_RUNTIME_SOURCE_INVALID"),
     WORKSPACE_INVALID("PYTHON_RUNTIME_WORKSPACE_INVALID"),

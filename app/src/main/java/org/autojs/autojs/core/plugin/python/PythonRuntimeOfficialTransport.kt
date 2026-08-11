@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.content.pm.PackageInfoCompat
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.plugin.python.runtime.api.IPythonRuntimeProvider
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCapabilities
@@ -36,6 +37,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
     private val packageManager = applicationContext.packageManager
 
     fun inspect(): InstalledProvider? {
+        val pluginEnabledBeforeInspection = isPluginEnabled()
         val serviceInfo = getServiceInfo() ?: return null
         val packageInfo = getPackageInfo() ?: return null
         val applicationInfo = getApplicationInfo() ?: return null
@@ -51,6 +53,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
             exported = serviceInfo.exported,
             applicationEnabled = applicationInfo.enabled,
             serviceEnabled = serviceInfo.enabled,
+            pluginEnabled = pluginEnabledBeforeInspection && isPluginEnabled(),
             requiredPermission = serviceInfo.permission,
             packageUid = applicationInfo.uid,
             versionCode = PackageInfoCompat.getLongVersionCode(packageInfo),
@@ -65,8 +68,11 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
         timeoutMillis: Long,
         cancelled: () -> Boolean,
         onConnectionLost: (Throwable) -> Unit,
+        abortFailure: () -> Throwable? = { null },
     ): Binding {
         require(timeoutMillis > 0L) { "Python Runtime bind timeout must be positive" }
+        requirePluginEnabled()
+        abortFailure()?.let { throw it }
         val binding = Binding(applicationContext, onConnectionLost)
         val didBind = try {
             applicationContext.bindService(
@@ -95,8 +101,12 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
         }
         binding.markBound()
         try {
+            requirePluginEnabled()
+            abortFailure()?.let { throw it }
             val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis)
             while (true) {
+                requirePluginEnabled()
+                abortFailure()?.let { throw it }
                 if (cancelled()) {
                     throw InterruptedException("Python Runtime binding was cancelled")
                 }
@@ -108,6 +118,8 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
                     )
                 }
                 if (binding.await(minOf(TimeUnit.NANOSECONDS.toMillis(remaining).coerceAtLeast(1L), POLL_MILLIS))) {
+                    requirePluginEnabled()
+                    abortFailure()?.let { throw it }
                     return binding.requireConnected()
                 }
             }
@@ -115,6 +127,21 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
             // Ownership transfers to the caller only on the successful return above.
             binding.close()
             throw error
+        }
+    }
+
+    internal fun isPluginEnabled(): Boolean = PluginEnableStore.isEnabled(
+        applicationContext,
+        OFFICIAL_COMPONENT.packageName,
+        defaultEnabled = true,
+    )
+
+    private fun requirePluginEnabled() {
+        if (!isPluginEnabled()) {
+            throw PythonRuntimeHostException(
+                PythonRuntimeHostError.PLUGIN_DISABLED,
+                "Official Python Runtime plugin is disabled in Plugin Center",
+            )
         }
     }
 
@@ -296,6 +323,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
         val exported: Boolean,
         val applicationEnabled: Boolean,
         val serviceEnabled: Boolean,
+        val pluginEnabled: Boolean,
         val requiredPermission: String?,
         val packageUid: Int,
         val versionCode: Long,
@@ -311,7 +339,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
             component = component,
             declaredAction = declaredAction,
             exported = exported,
-            applicationEnabled = applicationEnabled,
+            applicationEnabled = applicationEnabled && pluginEnabled,
             serviceEnabled = serviceEnabled,
             requiredPermission = requiredPermission,
             packageUid = packageUid,

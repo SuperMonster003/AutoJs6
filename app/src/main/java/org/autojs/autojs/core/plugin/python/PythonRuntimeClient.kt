@@ -7,6 +7,7 @@ import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
 import org.autojs.autojs.script.PythonFileSource
 import org.autojs.autojs.script.PythonRuntimeChannelPolicy
 import org.autojs.autojs6.BuildConfig
@@ -37,7 +38,7 @@ import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-/** Minimal production client for the default-off Python Runtime host channel. */
+/** Minimal production client for the stable Python Runtime plugin host channel. */
 internal class PythonRuntimeClient(
     context: Context,
     private val globalConsole: GlobalConsole,
@@ -57,6 +58,7 @@ internal class PythonRuntimeClient(
         private val terminal = CountDownLatch(1)
         private val result = AtomicReference<PythonExecutionResult?>()
         private val failure = AtomicReference<Throwable?>()
+        private val pluginStateFailure = AtomicReference<PythonRuntimeHostException?>()
         private val binding = AtomicReference<PythonRuntimeOfficialTransport.Binding?>()
         private val executionSnapshot = AtomicReference<PythonPrivateExecutionSnapshot?>()
         private val reservation = AtomicReference<PythonRuntimeDispatchRegistry.Reservation?>()
@@ -64,20 +66,48 @@ internal class PythonRuntimeClient(
         private val stdout = ByteArrayOutputStream()
         private val stderr = ByteArrayOutputStream()
         private val outputFlushed = AtomicBoolean(false)
+        private val pluginStateLock = Any()
+
+        private val pluginStateChangedListener: (String) -> Unit = { packageName ->
+            if (packageName == PythonRuntimeOfficialTransport.OFFICIAL_PACKAGE) {
+                synchronized(pluginStateLock) {
+                    val enabled = runCatching { transport.isPluginEnabled() }.getOrDefault(false)
+                    PythonRuntimePluginStateChangePolicy.failureFor(
+                        changedPackageName = packageName,
+                        officialPackageName = PythonRuntimeOfficialTransport.OFFICIAL_PACKAGE,
+                        pluginEnabled = enabled,
+                    )?.let(::failClosedForPluginStateChange)
+                }
+            }
+        }
 
         fun run(): PythonExecutionResult {
+            PluginStateChangeRegistry.addListener(pluginStateChangedListener)
+            return try {
+                runWithPluginStateObserver()
+            } catch (error: InterruptedException) {
+                pluginStateFailure.get()?.let { throw it }
+                throw error
+            } finally {
+                PluginStateChangeRegistry.removeListener(pluginStateChangedListener)
+            }
+        }
+
+        private fun runWithPluginStateObserver(): PythonExecutionResult {
             requireRuntimeChannelEnabled()
-            checkCancelled()
+            checkExecutionActive()
             val installed = inspectInstalledProvider()
             checkProviderPreconditions(installed)
+            checkExecutionActive()
             val requestId = PythonRequestId.fromUuid(UUID.randomUUID())
             val snapshot = PythonPrivateExecutionSnapshot.create(
                 applicationContext,
                 source,
                 requestId,
-                cancelled::get,
+                { cancelled.get() || pluginStateFailure.get() != null },
             ).also(executionSnapshot::set)
             try {
+                checkExecutionActive()
                 val connection = transport.bind(
                     timeoutMillis = BIND_TIMEOUT_MILLIS,
                     cancelled = cancelled::get,
@@ -91,8 +121,11 @@ internal class PythonRuntimeClient(
                                 ),
                         )
                     },
+                    abortFailure = {
+                        pluginStateFailure.get() ?: failure.get()
+                    },
                 ).also(binding::set)
-                checkCancelled()
+                checkExecutionActive()
                 val provider = connection.provider()
                 val initialMetadata = callProviderRpc(
                     operation = "metadata inspection",
@@ -163,6 +196,7 @@ internal class PythonRuntimeClient(
                     provider.runtimeInfo to provider.capabilities
                 }
                 val current = transport.inspect()?.let { refreshed ->
+                    checkProviderPreconditions(refreshed)
                     refreshed.toCandidate(
                         decodeRuntimeInfo(refreshedMetadata.first),
                         decodeCapabilities(refreshedMetadata.second),
@@ -188,16 +222,17 @@ internal class PythonRuntimeClient(
                     )
                     is PythonRuntimeHostRequestPlanningResult.Planned -> planning.plan
                 }
+                checkExecutionActive()
                 val reserved = registry.reserve(plan)
                     ?: throw PythonRuntimeHostException(
                         PythonRuntimeHostError.CONTRACT_VIOLATION,
                         "Python Runtime request ID was already reserved",
                     )
                 reservation.set(reserved)
-                checkCancelled()
+                checkExecutionActive()
                 openSession(provider, pinned, reserved, snapshot)
                 awaitTerminal(request.timeoutMillis)
-                checkCancelled()
+                checkExecutionActive()
                 failure.get()?.let { throw it }
                 return result.get()
                     ?: throw PythonRuntimeHostException(
@@ -205,9 +240,11 @@ internal class PythonRuntimeClient(
                         "Python Runtime ended without a result",
                     )
             } catch (error: InterruptedException) {
+                pluginStateFailure.get()?.let { throw it }
                 cancel()
                 throw error
             } catch (error: Throwable) {
+                pluginStateFailure.get()?.let { throw it }
                 if (cancelled.get()) {
                     throw InterruptedException("Python execution was cancelled").apply {
                         initCause(error)
@@ -232,6 +269,30 @@ internal class PythonRuntimeClient(
             executionSnapshot.getAndSet(null)?.close()
             terminalClaimed.compareAndSet(false, true)
             terminal.countDown()
+        }
+
+        private fun failClosedForPluginStateChange(error: PythonRuntimeHostException) {
+            if (!terminalClaimed.compareAndSet(false, true)) return
+            pluginStateFailure.set(error)
+            failure.set(error)
+            retireRemoteSession()
+            binding.getAndSet(null)?.close()
+            executionSnapshot.getAndSet(null)?.close()
+            terminal.countDown()
+        }
+
+        private fun retireRemoteSession() {
+            val reserved = reservation.getAndSet(null) ?: return
+            when (val cancellation = registry.cancel(reserved.requestId)) {
+                is PythonRuntimeDispatchRegistry.Cancellation.BeforeStart ->
+                    runCatching { cancellation.session.cancel() }
+                is PythonRuntimeDispatchRegistry.Cancellation.AfterStart ->
+                    runCatching { cancellation.session.cancel() }
+                PythonRuntimeDispatchRegistry.Cancellation.BeforeOpened,
+                PythonRuntimeDispatchRegistry.Cancellation.Unknown,
+                -> Unit
+            }
+            registry.release(reserved)?.let { session -> runCatching { session.close() } }
         }
 
         private fun cancelRemoteSession() {
@@ -389,22 +450,28 @@ internal class PythonRuntimeClient(
                                     cancel()
                                     return@fromPinnedProvider
                                 }
-                                when (val start = registry.beginStart(reserved)) {
-                                    PythonRuntimeDispatchRegistry.Start.Rejected -> {
+                                synchronized(pluginStateLock) {
+                                    if (pluginStateFailure.get() != null) {
                                         runCatching { opened.session.close() }
-                                        finishFailure(
-                                            PythonRuntimeHostException(
-                                                PythonRuntimeHostError.CONTRACT_VIOLATION,
-                                                "Python Runtime start ownership was rejected",
-                                            ),
-                                        )
-                                    }
-                                    is PythonRuntimeDispatchRegistry.Start.Dispatch -> {
-                                        val credits = reserved.plan.admissionPlan.maxOutstandingOutputCredits
-                                        start.policy.grantOutputCredits(credits)
-                                        start.session.grantOutputCredits(credits)
-                                        // The registry has now forbidden replay before this one-way dispatch.
-                                        start.session.start()
+                                    } else {
+                                        when (val start = registry.beginStart(reserved)) {
+                                            PythonRuntimeDispatchRegistry.Start.Rejected -> {
+                                                runCatching { opened.session.close() }
+                                                finishFailure(
+                                                    PythonRuntimeHostException(
+                                                        PythonRuntimeHostError.CONTRACT_VIOLATION,
+                                                        "Python Runtime start ownership was rejected",
+                                                    ),
+                                                )
+                                            }
+                                            is PythonRuntimeDispatchRegistry.Start.Dispatch -> {
+                                                val credits = reserved.plan.admissionPlan.maxOutstandingOutputCredits
+                                                start.policy.grantOutputCredits(credits)
+                                                start.session.grantOutputCredits(credits)
+                                                // The registry forbids replay before this one-way dispatch.
+                                                start.session.start()
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -552,7 +619,7 @@ internal class PythonRuntimeClient(
             val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(PROVIDER_RPC_TIMEOUT_MILLIS)
             try {
                 while (true) {
-                    checkCancelled()
+                    checkExecutionActive()
                     failure.get()?.let { throw it }
                     val remaining = deadline - System.nanoTime()
                     if (remaining <= 0L) {
@@ -591,7 +658,7 @@ internal class PythonRuntimeClient(
                     )
                 }
             } catch (error: CancellationException) {
-                checkCancelled()
+                checkExecutionActive()
                 throw PythonRuntimeHostException(
                     failureError,
                     "Python Runtime $operation was cancelled by the transport",
@@ -629,7 +696,8 @@ internal class PythonRuntimeClient(
             }
         }
 
-        private fun checkCancelled() {
+        private fun checkExecutionActive() {
+            pluginStateFailure.get()?.let { throw it }
             if (cancelled.get()) throw InterruptedException("Python execution was cancelled")
         }
     }
@@ -638,7 +706,7 @@ internal class PythonRuntimeClient(
         if (!PythonRuntimeChannelPolicy.isEnabledForCurrentBuild) {
             throw PythonRuntimeHostException(
                 PythonRuntimeHostError.PREVIEW_DISABLED,
-                "Python Runtime host channel is disabled",
+                "Python Runtime is not supported by this host flavor",
             )
         }
     }
@@ -661,7 +729,7 @@ internal class PythonRuntimeClient(
         }
 
     private fun checkProviderPreconditions(installed: PythonRuntimeOfficialTransport.InstalledProvider) {
-        if (!installed.applicationEnabled || !installed.serviceEnabled) {
+        if (!installed.pluginEnabled || !installed.applicationEnabled || !installed.serviceEnabled) {
             throw PythonRuntimeHostException(
                 PythonRuntimeHostError.PLUGIN_DISABLED,
                 "Official Python Runtime plugin is disabled",
@@ -796,6 +864,29 @@ internal class PythonRuntimeClient(
             },
             ThreadPoolExecutor.AbortPolicy(),
         )
+    }
+}
+
+/** Pure mapping for process-local enablement or signer-authorization invalidation events. */
+internal object PythonRuntimePluginStateChangePolicy {
+
+    fun failureFor(
+        changedPackageName: String,
+        officialPackageName: String,
+        pluginEnabled: Boolean,
+    ): PythonRuntimeHostException? {
+        if (changedPackageName != officialPackageName) return null
+        return if (pluginEnabled) {
+            PythonRuntimeHostException(
+                PythonRuntimeHostError.PROVIDER_IDENTITY_CHANGED,
+                "Official Python Runtime authorization changed during execution",
+            )
+        } else {
+            PythonRuntimeHostException(
+                PythonRuntimeHostError.PLUGIN_DISABLED,
+                "Official Python Runtime was disabled during execution",
+            )
+        }
     }
 }
 

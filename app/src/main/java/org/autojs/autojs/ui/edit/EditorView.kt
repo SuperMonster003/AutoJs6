@@ -71,7 +71,7 @@ import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_COLUMN_NUMBER
 import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_LINE_NUMBER
 import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE
 import org.autojs.autojs.model.script.Scripts.openByOtherApps
-import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
+import org.autojs.autojs.model.script.Scripts.runWithBroadcastSenderInteractive
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.script.JavaScriptSource
@@ -4679,7 +4679,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val workingDirectory = originPath
             ?.let { File(it).parent }
             ?: WorkingDirectoryUtils.path
-        val execution = runWithBroadcastSender(
+        val execution = runWithBroadcastSenderInteractive(
+            context = context,
             file = executableFile,
             workingDirectory = workingDirectory,
             overriddenFullPath = originPath,

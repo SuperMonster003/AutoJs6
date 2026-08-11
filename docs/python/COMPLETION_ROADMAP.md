@@ -255,40 +255,56 @@ R5 退出条件已满足：预览用户显式开启 Python 后，可通过最小
 
 ## R6：稳定发布闭环（进行中）
 
-R6 按可独立交付的三个小阶段推进。前一阶段完成即可进入下一阶段，不等待完整 API × ABI 矩阵、重复 hostile 变体或固定时长 soak；这些只在发现具体风险时追加，不作为日常推进门禁。
+R6 按可独立交付的四个小阶段推进。P1 建立准入与合规基线，P2/P3 保存已经完成的本地 RC 冻结与集中验证，P4 才负责正式 `0.1.0` 发布。前一阶段完成即可进入下一阶段，不等待完整 API × ABI 矩阵、重复 hostile 变体或固定时长 soak；这些只在发现具体风险时追加，不作为日常推进门禁。
 
-### R6-P1：默认关闭的 RC 准入与合规源码（已完成）
+### R6-P1：普通 app 稳定 adapter、INRT 隔离与交互准入（当前源码已完成）
 
-- [x] 增加唯一且默认值为 `false` 的 Release Candidate 构建属性；Debug 预览仍由既有开关控制，普通 Release 不会因构建变体而自动启用 Python。
-- [x] 用同一份纯策略统一 source 准入、engine 注册、执行保护和 runtime client，避免只打开部分链路；开关关闭时继续 fail-closed 且绝不回退到 JavaScript。
-- [x] 为 Debug/Release 两个通道的默认关闭、显式启用和交叉开关隔离增加聚焦单元测试源码。
-- [x] 串行运行聚焦单元测试并完成受影响的 Debug/Release 源码编译；本项不要求安装 APK 或运行完整回归。
+- [x] 退休 Python preview/RC 构建开关。普通 AutoJs6 app 的 Debug/Release 均提供稳定 Host adapter；打包生成的 INRT app 继续关闭 Python Runtime，并以既有稳定错误码表示该 host flavor 不支持。
+- [x] 用同一份纯策略统一 source 准入、engine 注册、执行保护和 runtime client；普通 app 可以发现独立插件，但插件缺失、禁用、不兼容或身份变化时继续 fail-closed，绝不回退到 JavaScript。
+- [x] 将安装/启用提示严格限制在用户主动触发的前台入口：Explorer 文件运行、Editor Run、Explorer Python 项目工具栏和悬浮窗脚本列表。提示只处理 missing/disabled/incompatible，并将用户引向官方 Plugin Center。
+- [x] 保持后台和非交互入口零 UI：广播、调度、服务及直接 engine/`executeLaunch` 调用只返回稳定 `PythonRuntimeHostError`，不得显示对话框或启动 Activity。
+- [x] 为普通 app/INRT 选择、插件状态变化和前台提示纯决策增加聚焦单元测试，并完成当前源码的 app Debug/Release Kotlin 编译。
 - [x] 补齐插件随发行所需的许可证/NOTICE、源码来源与提供说明、依赖锁说明及 CPython 安全维护策略源码；NOTICE 与 Chaquopy/CPython 完整上游许可副本均作为 APK asset 落盘。
 
-插件合规源码当前位于独立 sibling 仓库；该仓库仍为 unborn、全树尚未提交，因此“进入可追溯版本控制”仍由 P2 的首个逻辑提交负责，不把未提交文件误当发布来源证明。
+插件合规源码位于独立 sibling Git 仓库，已经形成可追溯提交历史。P1 当时的未提交状态只属于历史过程，不再作为当前事实；后续发布证据必须绑定各自冻结时的精确 Host/Plugin commit，而不能仅引用工作区路径。
 
-P1 聚焦证据：`PythonRuntimeChannelPolicyTest` 为 `4/4`、零失败/错误/跳过；`compileAppDebugKotlin` 与 `compileAppReleaseKotlin` 在普通构建下成功，生成的两个 BuildConfig 开关均为 `false`。Gradle daemon 日志记录 `BUILD SUCCESSFUL in 15m 47s`；Kotlin daemon 连接失败后使用进程内 fallback 完成，不属于源码失败。插件静态门保持 PASS，NOTICE 根文件与 APK asset 副本逐字节一致，Chaquopy 17.0.0 与 CPython 3.13.9 上游完整许可文本已作为独立 assets 落盘。P1 不生成 receipt，也不提升为已签名 Release 产物证据。
+P1 当前工作树的聚焦证据：`PythonRuntimeChannelPolicyTest` 为 `2/2`、`PythonRuntimePluginStateChangePolicyTest` 为 `3/3`、`PythonRuntimePluginUiTest` 为 `4/4`，合计 `9/9`、零失败/错误/跳过；`compileAppDebugKotlin`、`compileAppReleaseKotlin` 与聚焦 `testAppDebugUnitTest` 已实际完成。该证据覆盖普通 app adapter、INRT 关闭、前台提示纯决策和在途状态变化的稳定错误映射；它不证明所有后台入口或设备路径已穷举。NOTICE 根文件与 APK asset 副本逐字节一致，Chaquopy 17.0.0 与 CPython 3.13.9 上游完整许可文本已作为独立 assets 落盘。
 
-P1 退出条件：普通构建保持默认关闭；只有显式 RC 构建能完整打开一致的 Python 路径；合规材料已落盘并准备进入受版本控制的候选源码。此阶段不要求设备矩阵、soak 或正式 receipt。
+P1 退出条件已满足：普通 app 提供稳定且 fail-closed 的 Python Host adapter，INRT 保持关闭，只有明确前台用户手势可以展示安装/启用提示，后台执行保持零 UI。当前证据来自未冻结工作树，不生成 receipt，也不提升为稳定 `0.1.0` 发布证据。
 
-### R6-P2：可追溯 Release Candidate 产物
+### R6-P2：可追溯本地 Release Candidate 产物（已完成，历史证据）
 
-- [ ] 冻结宿主与插件的 commit、版本、包名、协议版本和兼容范围，确认候选源码树可追溯。
-- [ ] 配置并核验候选签名身份，以锁定依赖和 release AAR 构建宿主与插件 release APK。
-- [ ] 生成单份 provenance 记录，包含 commit、版本、signer、APK/AAR 哈希、ABI、依赖锁和构建输入；完成最小 release 打包静态检查。
+- [x] 冻结本地 RC 的宿主与插件 commit、版本、包名、协议版本和声明范围，确认候选源码树可追溯。
+- [x] 使用 SM003 候选签名身份，以锁定依赖和 release AAR 构建宿主与插件 release APK。
+- [x] 生成本地 RC provenance，记录 commit、版本、signer、APK/AAR 哈希、ABI、依赖锁和构建输入，并完成最小 release 打包静态检查。
 
-P2 退出条件：得到可重复识别、可安装且来源可追溯的一组宿主/插件 Release Candidate 产物。P2 只冻结候选产物，不提前生成稳定版 receipt。
+P2 的冻结身份为 Host `a03c83807f0e0ad11027daf6c6985787c3e3f793`、Plugin `31d994aae2f83b7fca99b5a9103f6c8b4c18c741`、Plugin `0.1.0-rc.1`/`versionCode 4`；provenance SHA-256 为 `c2ce2dd0778acdf69b8aebc640ce10e085982b2af9039456392293a64e6544e1`。它证明一组本地 RC 产物曾被冻结，不证明当前源码、GitHub 发布或稳定 `0.1.0` 已冻结。
 
-### R6-P3：集中发布验证与唯一 receipt
+### R6-P3：本地 RC 集中验证（已完成，历史证据）
 
-- [ ] 对 P2 的精确产物运行一次集中 hostile/lifecycle 验证，覆盖异签调用者、跨 UID session relay、provider 更新/禁用/卸载、Binder death，以及取消/超时后的资源释放与 clean rebind。
-- [ ] 在一个代表性真实设备链路上完成一次从既有版本升级到候选版本、禁用/崩溃恢复及回滚的连续流程，并核验结束后的设备恢复。
-- [ ] 对声明发行的 ABI 做打包核验并记录实际设备覆盖；额外 API/ABI 设备、压力或限时 soak 仅由已识别风险触发，不建立穷举矩阵门禁。
-- [ ] 汇总前两阶段的冻结输入和本阶段结果，生成唯一最终发布 receipt；失败后必须重新生成候选产物与 receipt，不沿用旧结论。
+- [x] 对 P2 精确产物运行集中 hostile/lifecycle 验证，覆盖异签调用者、跨 UID session relay、provider 更新/禁用/卸载、Binder death，以及取消/超时后的资源释放与 clean rebind。
+- [x] 在 `QV710AF65F`（API 31、arm64-v8a）完成升级、禁用/重新启用、卸载/重装、崩溃/超时恢复和回滚流程，并核验结束后的包状态恢复。
+- [x] 核验声明 ABI 的打包状态并记录实际设备覆盖；arm64-v8a 有代表性真机执行，x86_64 仅有打包证据，不冒充设备执行。
+- [x] 生成独立的本地 RC 集成 receipt，并明确标记 `LOCAL_RC_INTEGRATION`、`published=false`、`stableRelease=false`、`productionReleaseAuthorized=false`。
 
-R6 总退出条件：精确 Release Candidate 在声明范围内通过上述集中安全、生命周期、升级与回滚流程，且唯一最终 receipt 能回指全部冻结产物和证据。
+P3 诊断 SHA-256 为 `517f8f1729d1fe494d480be915e673cb0e6396bfebdc81eff8bc14f6b420d801`，本地 RC 集成 receipt SHA-256 为 `0a7d33796ddde4f55204553d83e3477288e455b6aaafc776826d53d80fa629e3`。这些文件保持不可改写的历史证据；P4 的源码、文档、版本或产物身份变化后必须生成新证据，不得重标旧 receipt。
 
-最终仅保留一个聚合任务：`verifyPythonFinalIntegrationGate`；它在 P3 才执行，不阻塞 P1/P2 日常推进。
+### R6-P4：Python Runtime `0.1.0` / Host `6.8.0` 正式热插拔发布（进行中）
+
+- [x] 固化产品与维护决定：Chaquopy 是可信本地脚本运行时，不是 hostile-code sandbox；SM003 是长期发行 signer；`SuperMonster003` 同时承担 runtime、security 与 release owner；Plugin `0.1.0` 与 Host `6.8.0` 配对。
+- [x] 固化并在当前源码实现热插拔语义：Host 无需重启；安装或重新启用 Plugin 后，下一次新执行重新发现并 pin provider 身份；前台入口对缺失/禁用显示安装/启用提示，后台入口只返回稳定错误，二者都绝不 fallback；卸载、禁用或更新引起在途 Binder death 时终止该执行且不得重放，后续新执行再重新发现。
+- [x] 生成 `1.1.0`/`STABLE` 的本地三件 AAR distribution：`common-plugin-api-release.aar`、`protocol-wire-api-release.aar` 和 `python-runtime-api-release.aar`；sibling Plugin 已按 manifest/SHA-256 锁定三件 AAR 并完成聚焦 Debug/Release 编译与单测消费验证。
+- [ ] 冻结可发布的 Host `6.8.0` 最终身份及对应兼容约束。当前工作树仍标识为 `6.8.0 Alpha7`/`versionCode 5273`，本地 RC 证据不能代替正式 Host 身份。
+- [ ] 完成官方 GitHub 身份与权限准备：目标仓库、`master` 分支和发布权限必须实际可用；当前授权决定不等于已认证、已推送、已打 tag 或已发布。
+- [ ] 在 AutoJs6 官方插件索引登记 Python Runtime 的包名、仓库、版本、Host 配对和 SM003 signer；索引未落地前不得宣称官方可发现。
+- [ ] 在最终源码冻结后重新生成 Host API 分发清单、Plugin `0.1.0` 版本/产物和 provenance，并对这些精确稳定产物重新运行最小 P3 集中复验；当前 dirty-tree 编译/单测和历史 RC/P3 均不能替代该复验。
+- [ ] 推送精确源码，创建 `v0.1.0` tag 与 GitHub Release，独立下载并复核发布资产，再生成唯一 production receipt；receipt 必须记录发布 URL/ID、tag commit、资产哈希、signer、Host 配对以及证据限制。
+
+P4 当前工作树证据：`verifyPythonReleaseApiDistributionGate` 为 PASS，distribution manifest SHA-256 为 `16cad933bb6a13b1eafa6e7a5af581db0736b97c6d2690ff51053005a1a35e96`，三件 AAR 的依赖边为 `python-runtime-api -> protocol-wire-api`，`common-plugin-api` 独立分发。Host 的上述 `9/9` 聚焦单测及 Debug/Release Kotlin 编译通过；sibling Plugin 的 `testDebugUnitTest` 为 `32/32`、零失败/错误/跳过，`compileDebugKotlin` 与 `compileReleaseKotlin` 通过。该 manifest 明确记录 Host `dirty=true`、`published=false`；producer gate 中的 `pluginConsumed=false` 不被篡改，独立的 sibling lock 与编译/测试只构成本地 consumer 证据。
+
+P4 退出条件：正式 Host 身份、官方索引、GitHub tag/Release 与下载复核均可追溯，且新的 production receipt 明确声明 `published=true`、`stableRelease=true` 并回指全部冻结输入。当前尚未达到该条件，也不声称 `0.1.0` 已发布。
+
+`verifyPythonFinalIntegrationGate` 仍是预期的最终独立聚合入口；在受版本控制的实现与 production receipt 实际生成前，该名称本身不构成发布证据，也不阻塞 P4 之前的日常推进。
 
 ## 全局不变量
 

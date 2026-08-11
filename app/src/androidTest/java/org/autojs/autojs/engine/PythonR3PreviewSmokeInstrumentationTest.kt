@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * R3-P3 representative-device smoke for the default-off single-file Python preview.
+ * R3-P3 representative-device smoke retained for the stable single-file Python host route.
  *
  * This intentionally enters through [Scripts.run], rather than talking to the Python Binder
  * protocol directly. One opt-in method covers only the missing vertical slice: local `.py`
@@ -53,14 +53,14 @@ class PythonR3PreviewSmokeInstrumentationTest {
     private var serviceStateOwned = false
 
     @Before
-    fun requireExplicitPreviewAndRealPlugin() {
+    fun requireExplicitSmokeAndRealPlugin() {
         assumeTrue(
             "R3-P3 real-plugin smoke is opt-in; pass -e $ARG_ENABLED true",
             InstrumentationRegistry.getArguments().getString(ARG_ENABLED).toBoolean(),
         )
         assumeTrue(
-            "R3-P3 requires a Debug host built with -Pautojs.python.preview.enabled=true",
-            BuildConfig.DEBUG && BuildConfig.PYTHON_RUNTIME_PREVIEW_ENABLED,
+            "R3-P3 requires the normal AutoJs6 app host rather than a packaged INRT app",
+            !BuildConfig.isInrt,
         )
         assertTrue("R3-P3 requires API 24 or newer", Build.VERSION.SDK_INT >= 24)
         assertEquals("Real plugin admits only the canonical host package", HOST_PACKAGE, context.packageName)

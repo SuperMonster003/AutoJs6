@@ -45,14 +45,14 @@ class PythonR4ProjectSmokeInstrumentationTest {
     private var serviceStateOwned = false
 
     @Before
-    fun requireExplicitPreviewAndRealPlugin() {
+    fun requireExplicitSmokeAndRealPlugin() {
         assumeTrue(
             "R4 project smoke is opt-in; pass -e $ARG_ENABLED true",
             InstrumentationRegistry.getArguments().getString(ARG_ENABLED).toBoolean(),
         )
         assumeTrue(
-            "R4 project smoke requires a Debug host built with -Pautojs.python.preview.enabled=true",
-            BuildConfig.DEBUG && BuildConfig.PYTHON_RUNTIME_PREVIEW_ENABLED,
+            "R4 project smoke requires the normal AutoJs6 app host rather than a packaged INRT app",
+            !BuildConfig.isInrt,
         )
         assertTrue("R4 project smoke requires API 24 or newer", Build.VERSION.SDK_INT >= 24)
         assertEquals("Real plugin admits only the canonical host package", HOST_PACKAGE, context.packageName)

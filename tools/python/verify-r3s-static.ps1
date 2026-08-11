@@ -111,10 +111,8 @@ Assert-Markers 'app/src/main/java/org/autojs/autojs/external/ScriptIntents.kt' @
 )
 
 Assert-Markers 'app/src/main/java/org/autojs/autojs/script/PythonRuntimeChannelPolicy.kt' @(
-    'Boolean = if (debuggable) previewEnabled else releaseCandidateEnabled',
-    'debuggable = BuildConfig.DEBUG',
-    'previewEnabled = BuildConfig.PYTHON_RUNTIME_PREVIEW_ENABLED',
-    'releaseCandidateEnabled = BuildConfig.PYTHON_RUNTIME_RELEASE_CANDIDATE_ENABLED'
+    'fun isEnabled(isInrt: Boolean): Boolean = !isInrt',
+    'isInrt = BuildConfig.isInrt'
 )
 
 Assert-Markers 'app/src/main/java/org/autojs/autojs/script/PythonScriptSource.kt' @(
@@ -139,13 +137,23 @@ Assert-Markers 'app/src/main/java/org/autojs/autojs/engine/PythonPluginScriptEng
 Assert-Markers 'app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeClient.kt' @(
     'private val transport = PythonRuntimeOfficialTransport(applicationContext)',
     'requireRuntimeChannelEnabled()',
-    'transport.bind('
+    'transport.bind(',
+    'PluginStateChangeRegistry.addListener(pluginStateChangedListener)',
+    'failClosedForPluginStateChange',
+    'retireRemoteSession'
 )
 
 Assert-Markers 'app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeOfficialTransport.kt' @(
     'Intent().setComponent(OFFICIAL_COMPONENT)',
     'applicationContext.bindService(',
-    'PluginTrustManager.resolveTrustInfo('
+    'PluginTrustManager.resolveTrustInfo(',
+    'PluginEnableStore.isEnabled(',
+    'pluginEnabled = pluginEnabledBeforeInspection && isPluginEnabled()',
+    'requirePluginEnabled()'
+)
+
+Assert-Markers 'app/src/main/AndroidManifest.xml' @(
+    '<package android:name="io.github.supermonster003.autojs6.plugin.python.runtime" />'
 )
 
 # The Python engine and source must not redirect to a legacy engine when admission fails.
@@ -166,9 +174,9 @@ Assert-ForbiddenMarkers 'app/src/main/java/org/autojs/autojs/script/PythonScript
 )
 
 $appBuild = Read-RequiredText 'app/build.gradle.kts'
-Assert-Pattern 'app/build.gradle.kts' '(?s)val\s+pythonRuntimePreviewEnabled\s*=\s*providers\.gradleProperty\("autojs\.python\.preview\.enabled"\).*?\.orElse\(false\)' 'preview channel defaults off'
-Assert-Pattern 'app/build.gradle.kts' '(?s)val\s+pythonRuntimeReleaseCandidateEnabled\s*=\s*providers\.gradleProperty\("autojs\.python\.release\.candidate\.enabled"\).*?\.orElse\(false\)' 'release-candidate channel defaults off'
-Assert-Markers 'app/build.gradle.kts' @(
+Assert-ForbiddenMarkers 'app/build.gradle.kts' @(
+    'autojs.python.preview.enabled',
+    'autojs.python.release.candidate.enabled',
     '"PYTHON_RUNTIME_PREVIEW_ENABLED"',
     '"PYTHON_RUNTIME_RELEASE_CANDIDATE_ENABLED"'
 )
@@ -185,9 +193,9 @@ if ($pythonNative.Count -ne 0) {
 Write-Output 'R3S_STATIC_GATE=PASS'
 Write-Output 'SOURCE_MARKERS_PRESENT=YES_UNCOMPILED'
 Write-Output 'ROUTING_EVIDENCE=UNCOMPILED_MARKERS_ONLY'
-Write-Output 'PRODUCTION_PYTHON_EXECUTION_ROUTE=DEFAULT_OFF_BY_SOURCE_SENTINELS'
+Write-Output 'PRODUCTION_PYTHON_EXECUTION_ROUTE=STABLE_APP_HOST_ONLY_BY_SOURCE_SENTINELS'
 Write-Output 'PERSISTED_CONTEXT_ROUTING=PRESENT_BY_SOURCE_SENTINELS'
-Write-Output 'ENGINE_ACTIVATION=SHARED_CHANNEL_POLICY_BY_SOURCE_SENTINELS'
+Write-Output 'ENGINE_ACTIVATION=APP_ENABLED_INRT_UNSUPPORTED_BY_SOURCE_SENTINELS'
 Write-Output 'BINDER_TRANSPORT=EXPLICIT_OFFICIAL_COMPONENT_BY_SOURCE_SENTINELS'
 Write-Output 'LEGACY_ENGINE_FALLBACK=ABSENT_IN_PYTHON_ENGINE_BY_SENTINEL'
 Write-Output 'HOST_EMBEDDED_CPYTHON=ABSENT_BY_SENTINEL'

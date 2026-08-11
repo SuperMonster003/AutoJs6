@@ -73,7 +73,10 @@ class PythonRuntimeR6SessionRelayInstrumentationTest {
         val transportFailure = AtomicReference<Throwable?>()
         val transport = PythonRuntimeOfficialTransport(context)
         val installed = requireNotNull(transport.inspect()) { "Exact Python Runtime provider is missing" }
-        assertTrue("Exact Python Runtime provider is disabled", installed.applicationEnabled && installed.serviceEnabled)
+        assertTrue(
+            "Exact Python Runtime provider is disabled",
+            installed.pluginEnabled && installed.applicationEnabled && installed.serviceEnabled,
+        )
         assertTrue("Exact Python Runtime provider signer differs from host", installed.sameSignerAsHost)
         val binding = transport.bind(
             timeoutMillis = BIND_TIMEOUT_MILLIS,

@@ -11,7 +11,7 @@ import org.autojs.autojs.script.PythonRuntimeChannelPolicy
 import org.autojs.autojs.script.PythonScriptSource
 import java.util.concurrent.atomic.AtomicReference
 
-/** Default-off engine facade; CPython remains entirely in the independent plugin process. */
+/** Stable host facade; CPython remains entirely in the independent plugin process. */
 class PythonPluginScriptEngine(
     context: Context,
     globalConsole: GlobalConsole,
@@ -30,7 +30,7 @@ class PythonPluginScriptEngine(
         if (!PythonRuntimeChannelPolicy.isEnabledForCurrentBuild) {
             throw PythonRuntimeHostException(
                 PythonRuntimeHostError.PREVIEW_DISABLED,
-                "Python Runtime host channel is disabled",
+                "Python Runtime is not supported by this host flavor",
             )
         }
         if (isDestroyed) {

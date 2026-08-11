@@ -1,6 +1,6 @@
 package org.autojs.autojs.script
 
-/** Source marker for the default-off Python Runtime host channel. */
+/** Source marker for the stable Python Runtime plugin host channel. */
 abstract class PythonScriptSource protected constructor(
     sourceName: String,
 ) : ScriptSource(sourceName, EXTENSION) {
@@ -17,7 +17,7 @@ abstract class PythonScriptSource protected constructor(
     }
 }
 
-/** Compatibility facade for existing preview-named source-routing call sites. */
+/** Compatibility facade retained for existing preview-named source-routing call sites. */
 internal object PythonRuntimePreviewFeature {
     val isEnabled: Boolean
         get() = PythonRuntimeChannelPolicy.isEnabledForCurrentBuild

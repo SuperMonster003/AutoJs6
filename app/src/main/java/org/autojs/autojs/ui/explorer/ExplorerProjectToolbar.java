@@ -22,6 +22,7 @@ import org.autojs.autojs.project.ProjectLauncher;
 import org.autojs.autojs.script.PythonProjectLaunchPolicy;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.project.ProjectConfigActivity;
+import org.autojs.autojs.ui.python.PythonRuntimePluginUi;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerProjectToolbarBinding;
@@ -142,6 +143,9 @@ public class ExplorerProjectToolbar extends CardView {
             return;
         }
         notifyOperated();
+        if (mPythonProject && !PythonRuntimePluginUi.ensureAvailableForInteractiveLaunch(getContext())) {
+            return;
+        }
         try {
             new ProjectLauncher(directory.getPath())
                     .launch(AutoJs.getInstance().getScriptEngineService());

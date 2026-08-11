@@ -19,6 +19,7 @@ import org.autojs.autojs.script.PythonScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
+import org.autojs.autojs.ui.python.PythonRuntimePluginUi
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
@@ -138,6 +139,22 @@ object Scripts {
         null
     }
 
+    /** Runs a user-selected file and may show the foreground Python plugin availability prompt. */
+    @JvmStatic
+    fun runInteractive(context: Context, file: ScriptFile): ScriptExecution? = try {
+        val persisted = ScriptLaunchSourceFactory.capturePersistedLaunchContext(file.path)
+        val launch = ScriptLaunchSourceFactory.createPersistedPathLaunch(
+            path = file.path,
+            sourceKind = persisted.sourceKind,
+            projectRoot = persisted.projectRoot,
+        )
+        executeInteractiveLaunch(context, launch)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ViewUtils.showToast(context, e.message, true)
+        null
+    }
+
     @JvmStatic
     fun run(context: Context, source: ScriptSource): ScriptExecution? {
         return run(context, source, null)
@@ -178,6 +195,31 @@ object Scripts {
         null
     }
 
+    /**
+     * Foreground-only execution entry. Background callers must keep using [executeLaunch] so they
+     * never show a dialog or start Plugin Center.
+     */
+    @JvmStatic
+    fun executeInteractiveLaunch(
+        context: Context,
+        launch: ScriptLaunchSourceFactory.Launch,
+    ): ScriptExecution? = executeInteractiveLaunch(context, launch, launch.createExecutionConfig())
+
+    @JvmStatic
+    fun executeInteractiveLaunch(
+        context: Context,
+        launch: ScriptLaunchSourceFactory.Launch,
+        config: ExecutionConfig,
+    ): ScriptExecution? {
+        if (
+            launch.engineName == PythonScriptSource.ENGINE &&
+            !PythonRuntimePluginUi.ensureAvailableForInteractiveLaunch(context)
+        ) {
+            return null
+        }
+        return executeLaunch(context, launch, config)
+    }
+
     @JvmStatic
     @JvmOverloads
     fun runWithBroadcastSender(
@@ -187,6 +229,45 @@ object Scripts {
         originUri: String? = null,
         semanticDisplayName: String? = null,
         originMimeType: String? = null,
+    ): ScriptExecution? = runWithBroadcastSenderInternal(
+        file = file,
+        workingDirectory = workingDirectory,
+        overriddenFullPath = overriddenFullPath,
+        originUri = originUri,
+        semanticDisplayName = semanticDisplayName,
+        originMimeType = originMimeType,
+        interactiveContext = null,
+    )
+
+    /** Editor/user-gesture counterpart which may show the Python plugin availability prompt. */
+    @JvmStatic
+    @JvmOverloads
+    fun runWithBroadcastSenderInteractive(
+        context: Context,
+        file: File,
+        workingDirectory: String?,
+        overriddenFullPath: String?,
+        originUri: String? = null,
+        semanticDisplayName: String? = null,
+        originMimeType: String? = null,
+    ): ScriptExecution? = runWithBroadcastSenderInternal(
+        file = file,
+        workingDirectory = workingDirectory,
+        overriddenFullPath = overriddenFullPath,
+        originUri = originUri,
+        semanticDisplayName = semanticDisplayName,
+        originMimeType = originMimeType,
+        interactiveContext = context,
+    )
+
+    private fun runWithBroadcastSenderInternal(
+        file: File,
+        workingDirectory: String?,
+        overriddenFullPath: String?,
+        originUri: String?,
+        semanticDisplayName: String?,
+        originMimeType: String?,
+        interactiveContext: Context?,
     ): ScriptExecution? {
         val launch = ScriptLaunchSourceFactory.createSemanticFileLaunch(
             sourceFile = file,
@@ -197,6 +278,13 @@ object Scripts {
             workingDirectory = workingDirectory,
             defaultWorkingDirectory = file.parent ?: "",
         )
+        if (
+            interactiveContext != null &&
+            launch.engineName == PythonScriptSource.ENGINE &&
+            !PythonRuntimePluginUi.ensureAvailableForInteractiveLaunch(interactiveContext)
+        ) {
+            return null
+        }
         return AutoJs.instance.scriptEngineService.execute(
             launch.source.apply {
                 this.overriddenFullPath = overriddenFullPath
