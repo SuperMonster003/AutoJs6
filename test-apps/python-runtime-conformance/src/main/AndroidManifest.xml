@@ -1,0 +1,29 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <queries>
+        <package android:name="org.autojs.autojs6" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:label="AutoJs6 Python Runtime Conformance"
+        android:supportsRtl="true"
+        android:testOnly="true"
+        android:usesCleartextTraffic="false"
+        tools:ignore="DataExtractionRules,MissingApplicationIcon">
+
+        <service
+            android:name=".service.FakePythonRuntimeService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":python_runtime">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.python.RUNTIME" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

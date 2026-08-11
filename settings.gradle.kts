@@ -4,6 +4,36 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "AutoJs6"
 
+// Remove stale PASS receipts before project build scripts are compiled. This
+// covers root-script compilation/configuration failures which occur before a
+// task graph and therefore cannot be handled by build.gradle.kts.
+val requestedPythonGateNames = gradle.startParameter.taskNames
+    .map { requested -> requested.substringAfterLast(':') }
+    .toSet()
+val stalePythonReceipts = buildList {
+    if (
+        "verifyPythonR0" in requestedPythonGateNames ||
+        "verifyPythonR1AndroidHarnessCompileGate" in requestedPythonGateNames ||
+        "verifyPythonR1ConformanceGate" in requestedPythonGateNames ||
+        "verifyPythonR1DeviceConformanceGate" in requestedPythonGateNames
+    ) {
+        add(settingsDir.resolve("build/reports/python/r0-gate.json"))
+    }
+    if (
+        "verifyPythonR1AndroidHarnessCompileGate" in requestedPythonGateNames ||
+        "verifyPythonR1ConformanceGate" in requestedPythonGateNames ||
+        "verifyPythonR1DeviceConformanceGate" in requestedPythonGateNames
+    ) {
+        add(settingsDir.resolve("build/reports/python/r1-conformance-gate.json"))
+        add(settingsDir.resolve("build/reports/python/r1-device-conformance-gate.json"))
+    }
+}
+stalePythonReceipts.forEach { staleReceipt ->
+    check(!staleReceipt.exists() || staleReceipt.delete()) {
+        "Unable to remove stale Python gate receipt before project configuration: $staleReceipt"
+    }
+}
+
 includeBuild("build-logic")
 
 private val modules = listOf(
@@ -48,6 +78,7 @@ private val pluginApi = listOf(
     "editor-api",
     "explorer-action-api",
     "nodejs-api",
+    "python-runtime-api",
     "apk-builder-template",
     "opencc-api",
     "pinyin-api",
@@ -69,6 +100,8 @@ private val plugins = listOf(
 private val pluginConformanceTestApps = listOf(
     "ai-text-provider-conformance",
     "dex-compiler-conformance",
+    "python-runtime-conformance",
+    "python-runtime-api-consumer",
 )
 
 include(

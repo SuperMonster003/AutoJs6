@@ -19,6 +19,7 @@ import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.project.ProjectLauncher;
+import org.autojs.autojs.script.PythonProjectLaunchPolicy;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.project.ProjectConfigActivity;
 import org.autojs.autojs.util.IntentUtils;
@@ -26,6 +27,7 @@ import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerProjectToolbarBinding;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.File;
 import java.util.List;
 
 import static org.autojs.autojs.util.ViewUtils.showToast;
@@ -39,6 +41,10 @@ public class ExplorerProjectToolbar extends CardView {
     private ExplorerProjectToolbarBinding binding;
 
     private PFile mDirectory;
+
+    private boolean mPythonProject;
+
+    private boolean mRunnableOnly;
 
     TextView mProjectName;
 
@@ -85,14 +91,42 @@ public class ExplorerProjectToolbar extends CardView {
     }
 
     public void setProject(PFile dir) {
-        ProjectConfig projectConfig = ProjectConfig.fromProjectDir(dir.getPath());
-        if (projectConfig == null) {
-            setVisibility(GONE);
-        } else {
-            setVisibility(VISIBLE);
-            mDirectory = dir;
-            mProjectName.setText(projectConfig.getName());
+        trySetProject(dir);
+    }
+
+    boolean trySetProject(PFile dir) {
+        try {
+            if (PythonProjectLaunchPolicy.inspect(new File(dir.getPath()), null) != null) {
+                activateProject(dir, dir.getName(), true);
+                return true;
+            }
+            ProjectConfig projectConfig = ProjectConfig.fromProjectDir(dir.getPath());
+            if (projectConfig == null) {
+                clearProject();
+                return false;
+            }
+            activateProject(dir, projectConfig.getName(), false);
+            return true;
+        } catch (RuntimeException ignored) {
+            clearProject();
+            return false;
         }
+    }
+
+    private void activateProject(PFile dir, CharSequence projectName, boolean pythonProject) {
+        mDirectory = dir;
+        mPythonProject = pythonProject;
+        mProjectName.setText(projectName);
+        updateCommandVisibility();
+        setVisibility(VISIBLE);
+    }
+
+    void clearProject() {
+        mDirectory = null;
+        mPythonProject = false;
+        mProjectName.setText(null);
+        updateCommandVisibility();
+        setVisibility(GONE);
     }
 
     public void refresh() {
@@ -102,9 +136,14 @@ public class ExplorerProjectToolbar extends CardView {
     }
 
     void run() {
+        PFile directory = mDirectory;
+        if (directory == null) {
+            clearProject();
+            return;
+        }
         notifyOperated();
         try {
-            new ProjectLauncher(mDirectory.getPath())
+            new ProjectLauncher(directory.getPath())
                     .launch(AutoJs.getInstance().getScriptEngineService());
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,7 +158,15 @@ public class ExplorerProjectToolbar extends CardView {
     }
 
     void build() {
-        BuildActivity.launch(getContext(), mDirectory.getPath());
+        PFile directory = mDirectory;
+        if (directory == null) {
+            clearProject();
+            return;
+        }
+        if (mPythonProject) {
+            return;
+        }
+        BuildActivity.launch(getContext(), directory.getPath());
     }
 
     @Override
@@ -148,16 +195,30 @@ public class ExplorerProjectToolbar extends CardView {
     }
 
     void edit() {
+        PFile directory = mDirectory;
+        if (directory == null) {
+            clearProject();
+            return;
+        }
+        if (mPythonProject) {
+            return;
+        }
         Intent intent = new Intent(getContext(), ProjectConfigActivity.class)
-                .putExtra(ProjectConfigActivity.EXTRA_DIRECTORY, mDirectory.getPath());
+                .putExtra(ProjectConfigActivity.EXTRA_DIRECTORY, directory.getPath());
         IntentUtils.startSafely(intent, getContext());
     }
 
     public void setRunnableOnly(boolean b) {
+        mRunnableOnly = b;
+        updateCommandVisibility();
+    }
+
+    private void updateCommandVisibility() {
         ViewGroup viewGroup = binding.commands;
         for (int i = 0; i < viewGroup.getChildCount(); i += 1) {
             ImageView view = (ImageView) viewGroup.getChildAt(i);
-            view.setVisibility(!b || view.getId() == R.id.project_run ? VISIBLE : GONE);
+            boolean runOnly = mRunnableOnly || mPythonProject;
+            view.setVisibility(!runOnly || view.getId() == R.id.project_run ? VISIBLE : GONE);
         }
     }
 

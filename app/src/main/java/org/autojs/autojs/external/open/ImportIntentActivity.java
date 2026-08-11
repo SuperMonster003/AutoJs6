@@ -5,9 +5,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import androidx.annotation.Nullable;
+import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.ScriptOperations;
+import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
@@ -40,18 +43,33 @@ public class ImportIntentActivity extends BaseActivity {
 
     private void handleIntent(Intent intent) throws FileNotFoundException {
         Uri uri = intent.getData();
-        if (uri != null && "content".equals(uri.getScheme())) {
-            String ext = PFiles.getExtension(uri.getScheme());
+        ScriptIntents.enforceExternalUriRequestShape(intent);
+        if (uri != null && "content".equalsIgnoreCase(uri.getScheme())) {
+            String displayName = IntentUtils.getFileName(this, uri);
+            ScriptIntents.enforceSingleFileImportBoundary(displayName, uri.getPath());
+            String providerMimeType = getContentResolver().getType(uri);
+            String ext = ScriptLaunchSourceFactory.resolvePythonImportExtension(
+                    displayName,
+                    uri.getPath(),
+                    intent.getType(),
+                    providerMimeType
+            );
             if (TextUtils.isEmpty(ext)) {
                 ext = JAVASCRIPT.extension;
             }
             InputStream stream = getContentResolver().openInputStream(uri);
+            if (stream == null) {
+                throw new FileNotFoundException(uri.toString());
+            }
             new ScriptOperations(this, null)
                     .importFile("", stream, ext)
                     .subscribe(s -> finish());
         } else {
-            final String path = intent.getData().getPath();
+            final String path = uri == null ? null : uri.getPath();
             if (!TextUtils.isEmpty(path)) {
+                ScriptIntents.enforceSingleFileImportBoundary(PFiles.getName(path), path);
+                ScriptLaunchSourceFactory.resolvePythonImportExtension(
+                        PFiles.getName(path), path, intent.getType(), null);
                 new ScriptOperations(this, null)
                         .importFile(path)
                         .subscribe(s -> finish());

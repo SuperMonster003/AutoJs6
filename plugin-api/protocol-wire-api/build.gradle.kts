@@ -16,7 +16,7 @@ android {
 
     lint {
         targetSdk = versions.sdkVersionTarget
-        abortOnError = false
+        abortOnError = true
     }
 
     buildFeatures {

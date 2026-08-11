@@ -10,7 +10,7 @@ import org.autojs.autojs.timing.TimedTask;
 
 public class TimedTaskDatabase extends Database<TimedTask> {
 
-    private static final int VERSION = 4;
+    private static final int VERSION = 5;
     private static final String NAME = "TimedTaskDatabase";
 
     public TimedTaskDatabase(Context context) {
@@ -27,6 +27,8 @@ public class TimedTaskDatabase extends Database<TimedTask> {
         values.put("loop_times", model.getLoopTimes());
         values.put("millis", model.getMillis());
         values.put("script_path", model.getScriptPath());
+        values.put("source_kind", model.getSourceKind());
+        values.put("project_root", model.getProjectRoot());
         values.put("repeat_mode", model.getRepeatMode());
         values.put("end_mode", model.getEndMode());
         values.put("end_value", model.getEndValue());
@@ -53,6 +55,8 @@ public class TimedTaskDatabase extends Database<TimedTask> {
         task.setFinishedTimes(getInt(cursor, "finished_times", 0));
         task.setDayOfMonth(getInt(cursor, "day_of_month", 0));
         task.setMonthOfYear(getInt(cursor, "month_of_year", 0));
+        task.setSourceKind(getString(cursor, "source_kind"));
+        task.setProjectRoot(getString(cursor, "project_root"));
         return task;
     }
 
@@ -64,6 +68,11 @@ public class TimedTaskDatabase extends Database<TimedTask> {
     private static long getLong(Cursor cursor, String columnName, long defaultValue) {
         int index = cursor.getColumnIndex(columnName);
         return index < 0 ? defaultValue : cursor.getLong(index);
+    }
+
+    private static String getString(Cursor cursor, String columnName) {
+        int index = cursor.getColumnIndex(columnName);
+        return index < 0 || cursor.isNull(index) ? null : cursor.getString(index);
     }
 
     private static class SQLHelper extends SQLiteOpenHelper {
@@ -88,7 +97,9 @@ public class TimedTaskDatabase extends Database<TimedTask> {
                     "`end_value` INTEGER DEFAULT 0, " +
                     "`finished_times` INTEGER DEFAULT 0, " +
                     "`day_of_month` INTEGER DEFAULT 0, " +
-                    "`month_of_year` INTEGER DEFAULT 0);");
+                    "`month_of_year` INTEGER DEFAULT 0, " +
+                    "`source_kind` TEXT, " +
+                    "`project_root` TEXT);");
         }
 
         @Override
@@ -100,6 +111,10 @@ public class TimedTaskDatabase extends Database<TimedTask> {
                 addColumn(db, "finished_times", "INTEGER DEFAULT 0");
                 addColumn(db, "day_of_month", "INTEGER DEFAULT 0");
                 addColumn(db, "month_of_year", "INTEGER DEFAULT 0");
+            }
+            if (oldVersion < 5) {
+                addColumn(db, "source_kind", "TEXT");
+                addColumn(db, "project_root", "TEXT");
             }
         }
 

@@ -3,12 +3,18 @@ package org.autojs.autojs.timing;
 import android.content.IntentFilter;
 
 import org.autojs.autojs.storage.database.BaseModel;
+import org.autojs.autojs.script.PersistedScriptLaunchContext;
+import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 
 public class IntentTask extends BaseModel {
 
     public static final String TABLE = "IntentTask";
 
     private String mScriptPath;
+
+    private String mSourceKind;
+
+    private String mProjectRoot;
 
     private String mAction;
 
@@ -42,6 +48,29 @@ public class IntentTask extends BaseModel {
 
     public void setScriptPath(String scriptPath) {
         mScriptPath = scriptPath;
+    }
+
+    public void setScriptPathAndCaptureContext(String scriptPath) {
+        mScriptPath = scriptPath;
+        PersistedScriptLaunchContext context = ScriptLaunchSourceFactory.capturePersistedLaunchContext(scriptPath);
+        mSourceKind = context.getSourceKind();
+        mProjectRoot = context.getProjectRoot();
+    }
+
+    public String getSourceKind() {
+        return mSourceKind;
+    }
+
+    public void setSourceKind(String sourceKind) {
+        mSourceKind = sourceKind;
+    }
+
+    public String getProjectRoot() {
+        return mProjectRoot;
+    }
+
+    public void setProjectRoot(String projectRoot) {
+        mProjectRoot = projectRoot;
     }
 
     public String getAction() {

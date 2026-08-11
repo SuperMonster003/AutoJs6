@@ -1968,10 +1968,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private fun ExplorerProjectToolbar.updateVisibility() {
         if (!isProjectRecognitionEnabled || !ProjectConfig.isProject(currentPage)) {
-            visibility = GONE
+            clearProject()
             return
         }
-        setProject(currentPage.toScriptFile())
+        if (!trySetProject(currentPage.toScriptFile())) return
         visibility = if (isInSelectionMode) {
             INVISIBLE
         } else {

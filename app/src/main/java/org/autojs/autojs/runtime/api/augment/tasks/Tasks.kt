@@ -180,7 +180,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
             IntentTask().apply {
                 opt.acquire("path") { it.toRuntimePath(scriptRuntime) }.let {
-                    scriptPath = it
+                    setScriptPathAndCaptureContext(it)
                 }
                 opt.inquire("action") { coerceString(it) }?.let {
                     action = it

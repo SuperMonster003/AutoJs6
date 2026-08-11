@@ -15,6 +15,7 @@ import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.PythonScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
@@ -44,7 +45,8 @@ object Scripts {
     val FILE_FILTER = FileFilter { file ->
         file.isDirectory ||
         JavaScriptSource.isJavaScriptFileName(file.name) ||
-        file.name.endsWith(FileUtils.TYPE.AUTO.extension, true)
+        file.name.endsWith(FileUtils.TYPE.AUTO.extension, true) ||
+        (PythonScriptSource.isPreviewEnabled() && file.name.endsWith(".${PythonScriptSource.EXTENSION}", true))
     }
 
     private val BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER = object : SimpleScriptExecutionListener() {
@@ -100,10 +102,14 @@ object Scripts {
     }
 
     fun createShortcut(context: Context, scriptFile: ScriptFile) {
+        val extras = ScriptIntents.putCapturedPythonContext(
+            Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.path),
+            scriptFile.path,
+        )
         Shortcut(context).name(scriptFile.simplifiedName)
             .targetClass(ShortcutActivity::class.java)
             .iconRes(R.drawable.ic_node_js_black)
-            .extras(Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.path))
+            .extras(extras)
             .send()
     }
 
@@ -119,7 +125,12 @@ object Scripts {
 
     @JvmStatic
     fun run(context: Context, file: ScriptFile): ScriptExecution? = try {
-        val launch = ScriptLaunchSourceFactory.createFileLaunch(file)
+        val persisted = ScriptLaunchSourceFactory.capturePersistedLaunchContext(file.path)
+        val launch = ScriptLaunchSourceFactory.createPersistedPathLaunch(
+            path = file.path,
+            sourceKind = persisted.sourceKind,
+            projectRoot = persisted.projectRoot,
+        )
         executeLaunch(context, launch)
     } catch (e: Exception) {
         e.printStackTrace()
@@ -169,9 +180,20 @@ object Scripts {
 
     @JvmStatic
     @JvmOverloads
-    fun runWithBroadcastSender(file: File, workingDirectory: String?, overriddenFullPath: String?, originUri: String? = null): ScriptExecution? {
-        val launch = ScriptLaunchSourceFactory.createFileLaunch(
-            file = file,
+    fun runWithBroadcastSender(
+        file: File,
+        workingDirectory: String?,
+        overriddenFullPath: String?,
+        originUri: String? = null,
+        semanticDisplayName: String? = null,
+        originMimeType: String? = null,
+    ): ScriptExecution? {
+        val launch = ScriptLaunchSourceFactory.createSemanticFileLaunch(
+            sourceFile = file,
+            semanticPath = overriddenFullPath,
+            semanticUri = originUri,
+            semanticDisplayName = semanticDisplayName,
+            semanticMimeType = originMimeType,
             workingDirectory = workingDirectory,
             defaultWorkingDirectory = file.parent ?: "",
         )
@@ -187,7 +209,12 @@ object Scripts {
 
     @JvmStatic
     fun runRepeatedly(scriptFile: ScriptFile, loopTimes: Int, delay: Long, interval: Long) {
-        val launch = ScriptLaunchSourceFactory.createFileLaunch(scriptFile)
+        val persisted = ScriptLaunchSourceFactory.capturePersistedLaunchContext(scriptFile.path)
+        val launch = ScriptLaunchSourceFactory.createPersistedPathLaunch(
+            path = scriptFile.path,
+            sourceKind = persisted.sourceKind,
+            projectRoot = persisted.projectRoot,
+        )
         executeLaunch(
             globalAppContext,
             launch,

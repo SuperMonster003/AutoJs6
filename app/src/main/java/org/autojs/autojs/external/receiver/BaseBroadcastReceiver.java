@@ -37,6 +37,12 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
         Log.d(LOG_TAG, "runTask: action = " + intent.getAction() + ", script = " + task.getScriptPath());
         try {
             Intent launchIntent = new Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, task.getScriptPath());
+            if (task.getSourceKind() != null) {
+                launchIntent.putExtra(ScriptIntents.EXTRA_KEY_SOURCE_KIND, task.getSourceKind());
+            }
+            if (task.getProjectRoot() != null) {
+                launchIntent.putExtra(ScriptIntents.EXTRA_KEY_PROJECT_ROOT, task.getProjectRoot());
+            }
             ScriptIntents.PreparedLaunch preparedLaunch = ScriptIntents.prepareLaunch(
                     context,
                     launchIntent,

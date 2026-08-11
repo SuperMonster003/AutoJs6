@@ -45,8 +45,17 @@ public class RunIntentActivity extends Activity {
             return;
         }
 
+        ScriptIntents.enforceExternalUriRequestShape(intent);
         String originPath = ScriptOriginResolver.resolveFilePath(this, uri);
         String displayName = IntentUtils.getFileName(this, uri);
+        String providerMimeType = getContentResolver().getType(uri);
+        ScriptIntents.enforceContentPythonExecutionBoundary(
+                displayName,
+                uri.getPath(),
+                originPath,
+                intent.getType(),
+                providerMimeType
+        );
         String sourceName = PFiles.getNameWithoutExtension(displayName);
 
         InputStream stream = getContentResolver().openInputStream(uri);

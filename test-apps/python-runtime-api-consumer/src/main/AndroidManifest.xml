@@ -1,0 +1,28 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="org.autojs.permission.PLUGIN" />
+
+    <queries>
+        <package android:name="org.autojs.autojs6" />
+        <package android:name="io.github.supermonster003.autojs6.plugin.python.runtime" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:label="Python Runtime API Distribution Consumer"
+        android:supportsRtl="true"
+        android:testOnly="true"
+        android:usesCleartextTraffic="false"
+        tools:ignore="DataExtractionRules,MissingApplicationIcon">
+
+        <service
+            android:name=".SessionRelayProbeService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":session_relay_probe" />
+
+    </application>
+
+</manifest>

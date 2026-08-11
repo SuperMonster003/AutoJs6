@@ -67,6 +67,12 @@ val apkBuilderIncludeBuiltInTemplate = providers.provider {
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val pythonRuntimePreviewEnabled = providers.gradleProperty("autojs.python.preview.enabled")
+    .map { value -> value.trim().lowercase() in setOf("true", "1", "yes", "on") }
+    .orElse(false)
+val pythonRuntimeReleaseCandidateEnabled = providers.gradleProperty("autojs.python.release.candidate.enabled")
+    .map { value -> value.trim().lowercase() in setOf("true", "1", "yes", "on") }
+    .orElse(false)
 
 fun verifyOpenCvPluginSeparation(
     apkDirectory: File,
@@ -616,6 +622,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
 
+    // Plugin API: Python Runtime API
+    implementation(project(":plugin-api:python-runtime-api"))
+
     // Plugin API: APK Builder Template API
     implementation(project(":plugin-api:apk-builder-template"))
 
@@ -837,6 +846,16 @@ android {
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
         buildConfigField("boolean", "APK_BUILDER_BUILT_IN_TEMPLATE_INCLUDED", apkBuilderIncludeBuiltInTemplate.get().toString())
+        buildConfigField(
+            "boolean",
+            "PYTHON_RUNTIME_PREVIEW_ENABLED",
+            pythonRuntimePreviewEnabled.get().toString(),
+        )
+        buildConfigField(
+            "boolean",
+            "PYTHON_RUNTIME_RELEASE_CANDIDATE_ENABLED",
+            pythonRuntimeReleaseCandidateEnabled.get().toString(),
+        )
         buildConfigField("boolean", buildConfigFieldNameIsInrt, "false")
 
         javaCompileOptions {

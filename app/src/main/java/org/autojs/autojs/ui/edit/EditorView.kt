@@ -428,6 +428,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mUserMovedCursorDuringLoading: Boolean = false
 
     private var mDocumentDisplayName: String? = null
+    private var mDocumentIdentityGeneration: Long = 0L
 
     @Volatile
     private var mCursorStatusReady: Boolean = false
@@ -435,12 +436,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     var name: String
         get() = _name ?: "[ ${this.context.getString(text_unknown)} ]"
         set(value) {
+            if (_name != value) {
+                mDocumentIdentityGeneration++
+            }
             _name = value
             updateEditorStatusMetadata()
         }
 
     var uri: Uri? = null
         set(value) {
+            mDocumentIdentityGeneration++
             field = value
             mDocumentDisplayName = value
                 ?.takeIf { it.scheme.equals("file", ignoreCase = true) }
@@ -1905,6 +1910,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     mCurrentFileSizeBytes = result.sizeOrNull
                     result.displayName?.let { displayName ->
                         if (this.uri == uri) {
+                            if (mDocumentDisplayName != displayName) {
+                                mDocumentIdentityGeneration++
+                            }
                             mDocumentDisplayName = displayName
                             updateEditorStatusMetadata()
                         }
@@ -4618,10 +4626,24 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @SuppressLint("CheckResult")
     fun runAndSaveFileIfNeeded(showLogPanelAfterRun: Boolean = true) {
+        val runOrigin = captureEditorRunOrigin()
         runScriptTextProvider.saveToTmpFile()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ file: File ->
-                val execution = runTmpFile(file)
+                if (!isEditorRunOriginCurrent(runOrigin)) {
+                    discardRunFile(file)
+                    showSnack(this, R.string.text_please_wait)
+                    return@subscribe
+                }
+                val execution = try {
+                    runTmpFile(file, runOrigin)
+                } catch (error: Throwable) {
+                    discardRunFile(file)
+                    throw error
+                }
+                if (execution == null) {
+                    discardRunFile(file)
+                }
                 if (execution != null && showLogPanelAfterRun && shouldAutoShowLogBottomSheetOnRun()) {
                     showLogPanel()
                 }
@@ -4635,8 +4657,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @JvmOverloads
     fun run(showMessage: Boolean, file: File? = null, overriddenFullPath: String? = null): ScriptExecution? {
-        val originPath = overriddenFullPath
-            ?: ScriptOriginResolver.resolveFilePath(context, uri)
+        return runWithOrigin(
+            showMessage = showMessage,
+            file = file,
+            origin = captureEditorRunOrigin(overriddenFullPath),
+        )
+    }
+
+    private fun runWithOrigin(
+        showMessage: Boolean,
+        file: File?,
+        origin: EditorRunOrigin,
+    ): ScriptExecution? {
+        val originPath = origin.path
         val executableFile = file
             ?: originPath?.let(::File)
             ?: return null
@@ -4650,7 +4683,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             file = executableFile,
             workingDirectory = workingDirectory,
             overriddenFullPath = originPath,
-            originUri = uri?.toString(),
+            originUri = origin.uriText,
+            semanticDisplayName = origin.displayName,
+            originMimeType = origin.mimeType,
         ) ?: return null
         scriptExecutionId = execution.id
         syncPrimaryMenuState()
@@ -4658,8 +4693,40 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return execution
     }
 
-    private fun runTmpFile(file: File? = uri?.path?.let { File(it) }): ScriptExecution? {
-        return run(!shouldAutoShowLogBottomSheetOnRun(), file, uri?.path)
+    private fun runTmpFile(file: File, origin: EditorRunOrigin): ScriptExecution? {
+        return runWithOrigin(
+            !shouldAutoShowLogBottomSheetOnRun(),
+            file,
+            origin,
+        )
+    }
+
+    private fun captureEditorRunOrigin(overriddenFullPath: String? = null): EditorRunOrigin {
+        val currentUri = uri
+        return EditorRunOrigin(
+            documentIdentityGeneration = mDocumentIdentityGeneration,
+            fileLoadGeneration = mFileLoadGeneration.get(),
+            uri = currentUri,
+            uriText = currentUri?.toString(),
+            path = overriddenFullPath ?: ScriptOriginResolver.resolveFilePath(context, currentUri),
+            displayName = mDocumentDisplayName ?: name,
+            mimeType = currentUri?.let(context.contentResolver::getType),
+        )
+    }
+
+    private fun isEditorRunOriginCurrent(origin: EditorRunOrigin): Boolean =
+        !mDestroyed &&
+            origin.documentIdentityGeneration == mDocumentIdentityGeneration &&
+            origin.fileLoadGeneration == mFileLoadGeneration.get() &&
+            origin.uri == uri
+
+    private fun discardRunFile(file: File) {
+        if (mTmpSavedFileForRunning == file) {
+            mTmpSavedFileForRunning = null
+        }
+        if (file.exists() && !file.delete()) {
+            file.deleteOnExit()
+        }
     }
 
     private fun undo() {
@@ -7006,10 +7073,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun temporaryScriptExtensionWithDot(): String {
-        val fileName = uri?.path
-            ?.let { File(it).name }
+        val fileName = (mDocumentDisplayName ?: uri?.path?.let { File(it).name })
             ?.takeIf { it.isNotBlank() }
             ?: return ".js"
+        if (fileName.endsWith(".py", ignoreCase = true)) {
+            return ".py"
+        }
         if (fileName.endsWith(".node.js", ignoreCase = true)) {
             return ".node.js"
         }
@@ -7026,6 +7095,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private data class InitialPositionRequest(
         val lineNumber: Int,
         val columnNumber: Int,
+    )
+
+    private data class EditorRunOrigin(
+        val documentIdentityGeneration: Long,
+        val fileLoadGeneration: Long,
+        val uri: Uri?,
+        val uriText: String?,
+        val path: String?,
+        val displayName: String,
+        val mimeType: String?,
     )
 
     private data class EncodingDialogData(

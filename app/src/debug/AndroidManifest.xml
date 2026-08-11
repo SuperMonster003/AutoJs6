@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <queries>
+        <intent>
+            <action android:name="org.autojs.plugin.python.RUNTIME" />
+        </intent>
+    </queries>
+
     <application>
         <activity
             android:name="org.autojs.autojs.ui.pager.ScrollControllableViewPagerTestActivity"

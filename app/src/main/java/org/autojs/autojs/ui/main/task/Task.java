@@ -12,6 +12,7 @@ import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.NodeProjectLaunchKind;
+import org.autojs.autojs.script.PythonScriptSource;
 import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs.timing.IntentTask;
@@ -40,6 +41,9 @@ public abstract class Task {
     public abstract String getEngineName();
 
     public static class PendingTask extends Task {
+
+        private static final String PYTHON_FILE_SOURCE_KIND_V1 = "python_file_v1";
+        private static final String PYTHON_PROJECT_SOURCE_KIND_V1 = "python_project_v1";
 
         private final Context mContext;
         private TimedTask mTimedTask;
@@ -113,25 +117,58 @@ public abstract class Task {
             }
         }
 
+        private String getSourceKind() {
+            if (mTimedTask != null) {
+                return mTimedTask.getSourceKind();
+            }
+            assert mIntentTask != null;
+            return mIntentTask.getSourceKind();
+        }
+
+        private String getProjectRoot() {
+            if (mTimedTask != null) {
+                return mTimedTask.getProjectRoot();
+            }
+            assert mIntentTask != null;
+            return mIntentTask.getProjectRoot();
+        }
+
         @Override
         public String getEngineName() {
             String scriptPath = getScriptPath();
             try {
                 return createLaunch().getEngineName();
             } catch (Exception ignored) {
-                if (!JavaScriptSource.isJavaScriptFileName(scriptPath)) {
-                    return AutoFileSource.ENGINE;
-                }
-                if (JavaScriptSource.isNodeJsFileName(scriptPath)) {
-                    return JavaScriptSource.ENGINE_NODEJS;
-                }
-                return JavaScriptSource.ENGINE;
+                return resolveFallbackEngineName(scriptPath, getSourceKind(), getProjectRoot());
             }
         }
 
         @NonNull
+        @VisibleForTesting
+        static String resolveFallbackEngineName(
+                @NonNull String scriptPath,
+                @Nullable String sourceKind,
+                @Nullable String projectRoot) {
+            if (PYTHON_FILE_SOURCE_KIND_V1.equals(sourceKind)
+                    || PYTHON_PROJECT_SOURCE_KIND_V1.equals(sourceKind)
+                    || projectRoot != null) {
+                return PythonScriptSource.ENGINE;
+            }
+            if (!JavaScriptSource.isJavaScriptFileName(scriptPath)) {
+                return AutoFileSource.ENGINE;
+            }
+            if (JavaScriptSource.isNodeJsFileName(scriptPath)) {
+                return JavaScriptSource.ENGINE_NODEJS;
+            }
+            return JavaScriptSource.ENGINE;
+        }
+
+        @NonNull
         public ScriptLaunchSourceFactory.Launch createLaunch() {
-            return ScriptLaunchSourceFactory.createFileLaunch(new File(getScriptPath()));
+            String parent = new File(getScriptPath()).getAbsoluteFile().getParent();
+            return ScriptLaunchSourceFactory.createPersistedPathLaunch(
+                    getScriptPath(), getSourceKind(), getProjectRoot(), null, null,
+                    parent == null ? WorkingDirectoryUtils.getPath() : parent);
         }
 
         @NonNull

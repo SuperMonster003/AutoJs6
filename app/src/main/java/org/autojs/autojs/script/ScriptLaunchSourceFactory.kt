@@ -17,6 +17,9 @@ object ScriptLaunchSourceFactory {
         val nodeProjectLaunchSource: NodeProjectLaunchSource?
             get() = source as? NodeProjectLaunchSource
 
+        val pythonProjectSource: PythonProjectSource?
+            get() = source as? PythonProjectSource
+
         val nodeProjectLaunchKind: NodeProjectLaunchKind?
             get() = nodeProjectLaunchSource?.nodeProjectLaunchKind
 
@@ -57,6 +60,7 @@ object ScriptLaunchSourceFactory {
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
     ): Launch {
+        enforcePythonLaunchBoundary(*source.pythonLaunchLocations().toTypedArray())
         return Launch(
             source = source,
             workingDirectory = workingDirectory ?: source.launchWorkingDirectory(defaultWorkingDirectory),
@@ -72,7 +76,9 @@ object ScriptLaunchSourceFactory {
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = projectRoot.normalizedPath(),
     ): Launch {
+        PythonLaunchBoundaryPolicy.enforceDefaultOff(entryFile.path)
         val fileSource = NodeProjectScriptSourceFactory.createProjectEntry(projectRoot, entryFile, name)
+        PythonLaunchBoundaryPolicy.enforceDefaultOff(fileSource.file.path)
         return Launch(
             source = fileSource,
             workingDirectory = workingDirectory ?: fileSource.launchWorkingDirectory(entryFile.path, defaultWorkingDirectory),
@@ -89,12 +95,14 @@ object ScriptLaunchSourceFactory {
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = projectRoot.normalizedPath(),
     ): Launch {
+        PythonLaunchBoundaryPolicy.enforceDefaultOff(entryFile.path)
         val fileSource = NodeProjectScriptSourceFactory.createProjectLaunch(
             projectRoot = projectRoot,
             entryFile = entryFile,
             name = name,
             launchOptions = launchOptions,
         )
+        PythonLaunchBoundaryPolicy.enforceDefaultOff(fileSource.file.path)
         return Launch(
             source = fileSource,
             workingDirectory = workingDirectory ?: fileSource.launchWorkingDirectory(entryFile.path, defaultWorkingDirectory),
@@ -128,19 +136,259 @@ object ScriptLaunchSourceFactory {
 
     @JvmStatic
     @JvmOverloads
+    fun createPythonProjectLaunch(
+        admission: PythonProjectLaunchAdmission,
+        workingDirectory: String? = null,
+    ): Launch = createPythonProjectLaunchForPreview(
+        admission = admission,
+        workingDirectory = workingDirectory,
+        pythonPreviewEnabled = PythonRuntimePreviewFeature.isEnabled,
+    )
+
+    internal fun createPythonProjectLaunchForPreview(
+        admission: PythonProjectLaunchAdmission,
+        workingDirectory: String? = null,
+        pythonPreviewEnabled: Boolean,
+    ): Launch {
+        if (!pythonPreviewEnabled) {
+            PythonProjectLaunchPolicy.rejectExecutionUntilWorkspaceSupport(admission)
+        }
+        val source = PythonProjectSource.create(admission.projectRoot, admission.entryFile)
+        return Launch(
+            source = source,
+            workingDirectory = workingDirectory ?: source.projectRoot.normalizedPath(),
+        )
+    }
+
+    /**
+     * Default-off R3 boundary for callers whose semantic origin differs from
+     * their temporary or cached file. This is a rejection guard, not an engine route.
+     */
+    @JvmStatic
+    fun enforcePythonLaunchBoundary(vararg locations: String?) {
+        locations.filterNotNull().forEach(PythonLaunchBoundaryPolicy::enforceDefaultOff)
+    }
+
+    /** Rejects Python content-provider launches even when their URI has no suffix. */
+    @JvmStatic
+    fun enforcePythonMimeBoundary(mimeType: String?) {
+        PythonLaunchBoundaryPolicy.enforceDefaultOffMimeType(mimeType)
+    }
+
+    /** Validates an external URI without treating a local file URI as an unsupported provider. */
+    @JvmStatic
+    fun enforcePythonExternalUriBoundary(
+        scheme: String?,
+        uriPath: String?,
+        uriText: String?,
+        displayName: String?,
+        explicitMimeType: String?,
+        providerMimeType: String?,
+    ) {
+        val pathClassification = uriPath?.let(PythonLaunchBoundaryPolicy::classify)
+            ?: PythonLaunchClassification.NOT_PYTHON
+        val displayClassification = displayName?.let(PythonLaunchBoundaryPolicy::classify)
+            ?: PythonLaunchClassification.NOT_PYTHON
+        val uriClassification = uriText?.let(PythonLaunchBoundaryPolicy::classify)
+            ?: PythonLaunchClassification.NOT_PYTHON
+        val classifications = listOf(pathClassification, displayClassification, uriClassification)
+        if (PythonLaunchClassification.PYTHON_COMPILED_SOURCE_UNSUPPORTED in classifications) {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.COMPILED_SOURCE_UNSUPPORTED)
+        }
+        val pythonMime = PythonLaunchBoundaryPolicy.isPythonMimeType(explicitMimeType) ||
+            PythonLaunchBoundaryPolicy.isPythonMimeType(providerMimeType)
+        val pythonHint = classifications.any { it != PythonLaunchClassification.NOT_PYTHON } || pythonMime
+        if (!pythonHint) return
+
+        val normalizedScheme = scheme?.trim()?.lowercase().orEmpty()
+        val localFileUri = normalizedScheme.isEmpty() || normalizedScheme == "file"
+        if (!localFileUri) {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.URI_UNSUPPORTED)
+        }
+        if (pathClassification != PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME) {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.URI_UNSUPPORTED)
+        }
+        if (!PythonRuntimePreviewFeature.isEnabled) {
+            PythonLaunchBoundaryPolicy.enforceDefaultOff(checkNotNull(uriPath))
+        }
+    }
+
+    /**
+     * Returns `py` only for a single imported Python source. Project trees and compiled Python
+     * remain unsupported, while non-Python imports keep their legacy extension handling.
+     */
+    @JvmStatic
+    fun resolvePythonImportExtension(
+        displayName: String?,
+        uriPath: String?,
+        explicitMimeType: String?,
+        providerMimeType: String?,
+    ): String? {
+        if (listOfNotNull(displayName, uriPath).any(::isProjectDescriptorName)) {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.PROJECT_IMPORT_UNSUPPORTED)
+        }
+        val classifications = listOfNotNull(displayName, uriPath)
+            .map(PythonLaunchBoundaryPolicy::classify)
+        if (PythonLaunchClassification.PYTHON_COMPILED_SOURCE_UNSUPPORTED in classifications) {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.COMPILED_SOURCE_UNSUPPORTED)
+        }
+        val pythonName = PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME in classifications
+        val pythonMime = PythonLaunchBoundaryPolicy.isPythonMimeType(explicitMimeType) ||
+            PythonLaunchBoundaryPolicy.isPythonMimeType(providerMimeType)
+        if (!pythonName && !pythonMime) return null
+        val displayClassification = displayName?.let(PythonLaunchBoundaryPolicy::classify)
+            ?: PythonLaunchClassification.NOT_PYTHON
+        if (
+            displayName?.substringAfterLast('.', missingDelimiterValue = "")?.isNotEmpty() == true &&
+            displayClassification != PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME
+        ) {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.URI_UNSUPPORTED)
+        }
+        return PythonScriptSource.EXTENSION
+    }
+
+    @JvmStatic
+    @JvmOverloads
     fun createFileLaunch(
         file: File,
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
     ): Launch {
+        return createFileLaunchForPythonPreview(
+            file = file,
+            workingDirectory = workingDirectory,
+            defaultWorkingDirectory = defaultWorkingDirectory,
+            pythonPreviewEnabled = PythonRuntimePreviewFeature.isEnabled,
+        )
+    }
+
+    /**
+     * Creates an editor/cache launch whose bytes live in [sourceFile] while [semanticPath]
+     * identifies the user-visible local source. Non-file Python URIs remain unsupported.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun createSemanticFileLaunch(
+        sourceFile: File,
+        semanticPath: String?,
+        semanticUri: String? = null,
+        semanticDisplayName: String? = null,
+        semanticMimeType: String? = null,
+        workingDirectory: String? = null,
+        defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
+    ): Launch = createSemanticFileLaunchForPythonPreview(
+        sourceFile = sourceFile,
+        semanticPath = semanticPath,
+        semanticUri = semanticUri,
+        semanticDisplayName = semanticDisplayName,
+        semanticMimeType = semanticMimeType,
+        workingDirectory = workingDirectory,
+        defaultWorkingDirectory = defaultWorkingDirectory,
+        pythonPreviewEnabled = PythonRuntimePreviewFeature.isEnabled,
+    )
+
+    internal fun createSemanticFileLaunchForPythonPreview(
+        sourceFile: File,
+        semanticPath: String?,
+        semanticUri: String?,
+        semanticDisplayName: String?,
+        semanticMimeType: String?,
+        workingDirectory: String?,
+        defaultWorkingDirectory: String,
+        pythonPreviewEnabled: Boolean,
+    ): Launch {
+        val pathClassification = semanticPath?.let(PythonLaunchBoundaryPolicy::classify)
+            ?: PythonLaunchClassification.NOT_PYTHON
+        val displayClassification = semanticDisplayName?.let(PythonLaunchBoundaryPolicy::classify)
+            ?: PythonLaunchClassification.NOT_PYTHON
+        val uriClassification = semanticUri?.let(PythonLaunchBoundaryPolicy::classify)
+            ?: PythonLaunchClassification.NOT_PYTHON
+        val pythonMime = PythonLaunchBoundaryPolicy.isPythonMimeType(semanticMimeType)
+
+        listOf(pathClassification, displayClassification, uriClassification).forEach { classification ->
+            if (classification == PythonLaunchClassification.PYTHON_COMPILED_SOURCE_UNSUPPORTED) {
+                throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.COMPILED_SOURCE_UNSUPPORTED)
+            }
+        }
+        val pythonHint = pathClassification == PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME ||
+            displayClassification == PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME ||
+            uriClassification != PythonLaunchClassification.NOT_PYTHON ||
+            pythonMime
+        val uriScheme = semanticUri
+            ?.substringBefore(':', missingDelimiterValue = "")
+            ?.lowercase()
+        if (pythonHint && !uriScheme.isNullOrEmpty() && uriScheme != "file") {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.URI_UNSUPPORTED)
+        }
+        if (!pythonHint) {
+            return createFileLaunchForPythonPreview(
+                file = sourceFile,
+                workingDirectory = workingDirectory,
+                defaultWorkingDirectory = defaultWorkingDirectory,
+                pythonPreviewEnabled = pythonPreviewEnabled,
+            )
+        }
+        if (pathClassification != PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME) {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.URI_UNSUPPORTED)
+        }
+        if (!pythonPreviewEnabled) {
+            PythonLaunchBoundaryPolicy.enforceDefaultOff(checkNotNull(semanticPath))
+        }
+
+        val semanticFile = File(checkNotNull(semanticPath)).canonicalFile
+        val payloadFile = sourceFile.canonicalFile
+        check(semanticFile.isFile && payloadFile.isFile) {
+            "Python editor launch requires readable local source files"
+        }
+        val admission = PythonProjectLaunchPolicy.inspectContainingEntry(semanticFile)
+        val source = if (admission != null) {
+            PythonProjectSource.createWithSource(
+                projectRoot = admission.projectRoot,
+                entryFile = admission.entryFile,
+                sourceFile = payloadFile,
+            )
+        } else {
+            PythonFileSource(payloadFile, semanticFile).apply {
+                overriddenFullPath = semanticFile.path
+            }
+        }
+        source.originUri = semanticUri
+        return Launch(
+            source = source,
+            workingDirectory = admission?.projectRoot?.normalizedPath()
+                ?: workingDirectory
+                ?: semanticFile.parent
+                ?: defaultWorkingDirectory,
+        )
+    }
+
+    internal fun createFileLaunchForPythonPreview(
+        file: File,
+        workingDirectory: String? = null,
+        defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
+        pythonPreviewEnabled: Boolean,
+    ): Launch {
+        val pythonLaunch = createLocalPythonLaunchOrNull(
+            file = file,
+            workingDirectory = workingDirectory,
+            defaultWorkingDirectory = defaultWorkingDirectory,
+            pythonPreviewEnabled = pythonPreviewEnabled,
+        )
+        if (pythonLaunch != null) {
+            return pythonLaunch
+        }
+        PythonLaunchBoundaryPolicy.enforceDefaultOff(file.path)
+        rejectImplicitPythonProject(file)
         if (JavaScriptSource.isJavaScriptFileName(file.name)) {
-            return createPathLaunch(
+            return createPathLaunchForPythonPreview(
                 path = file.path,
                 workingDirectory = workingDirectory,
                 defaultWorkingDirectory = defaultWorkingDirectory,
+                pythonPreviewEnabled = pythonPreviewEnabled,
             )
         }
         val normalizedFile = file.normalizedFile()
+        PythonLaunchBoundaryPolicy.enforceDefaultOff(normalizedFile.path)
         return Launch(
             source = AutoFileSource(normalizedFile),
             workingDirectory = workingDirectory
@@ -157,7 +405,124 @@ object ScriptLaunchSourceFactory {
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
     ): Launch {
+        return createPathLaunchForPythonPreview(
+            path = path,
+            preExecuteScript = preExecuteScript,
+            workingDirectory = workingDirectory,
+            defaultWorkingDirectory = defaultWorkingDirectory,
+            pythonPreviewEnabled = PythonRuntimePreviewFeature.isEnabled,
+        )
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun createPersistedPathLaunch(
+        path: String,
+        sourceKind: String? = null,
+        projectRoot: String? = null,
+        preExecuteScript: String? = null,
+        workingDirectory: String? = null,
+        defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
+    ): Launch = createPersistedPathLaunchForPythonPreview(
+        path = path,
+        sourceKind = sourceKind,
+        projectRoot = projectRoot,
+        preExecuteScript = preExecuteScript,
+        workingDirectory = workingDirectory,
+        defaultWorkingDirectory = defaultWorkingDirectory,
+        pythonPreviewEnabled = PythonRuntimePreviewFeature.isEnabled,
+    )
+
+    internal fun createPersistedPathLaunchForPythonPreview(
+        path: String,
+        sourceKind: String?,
+        projectRoot: String?,
+        preExecuteScript: String?,
+        workingDirectory: String?,
+        defaultWorkingDirectory: String,
+        pythonPreviewEnabled: Boolean,
+    ): Launch {
+        if (sourceKind == null) {
+            if (projectRoot != null) {
+                throw PythonProjectLaunchException(PythonProjectLaunchError.CONTEXT_INVALID)
+            }
+            return createPathLaunchForPythonPreview(
+                path,
+                preExecuteScript,
+                workingDirectory,
+                defaultWorkingDirectory,
+                pythonPreviewEnabled,
+            )
+        }
+        return when (sourceKind) {
+            PersistedScriptLaunchPolicy.PYTHON_FILE_V1 -> {
+                if (projectRoot != null ||
+                    PythonLaunchBoundaryPolicy.classify(path) !=
+                    PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME
+                ) {
+                    throw PythonProjectLaunchException(PythonProjectLaunchError.CONTEXT_INVALID)
+                }
+                createPathLaunchForPythonPreview(
+                    path,
+                    preExecuteScript,
+                    workingDirectory,
+                    defaultWorkingDirectory,
+                    pythonPreviewEnabled,
+                )
+            }
+            PersistedScriptLaunchPolicy.PYTHON_PROJECT_V1 -> {
+                if (projectRoot.isNullOrBlank()) {
+                    throw PythonProjectLaunchException(PythonProjectLaunchError.CONTEXT_INVALID)
+                }
+                if (preExecuteScript != null) {
+                    throw PythonProjectLaunchException(PythonProjectLaunchError.PRE_EXECUTE_UNSUPPORTED)
+                }
+                val entry = File(path).canonicalFile
+                val admission = PythonProjectLaunchPolicy.inspect(File(projectRoot), entry)
+                    ?: throw PythonProjectLaunchException(PythonProjectLaunchError.CONTEXT_INVALID)
+                if (admission.entryFile != entry) {
+                    throw PythonProjectLaunchException(PythonProjectLaunchError.CONTEXT_INVALID)
+                }
+                createPythonProjectLaunchForPreview(admission, workingDirectory, pythonPreviewEnabled)
+            }
+            else -> throw PythonProjectLaunchException(PythonProjectLaunchError.CONTEXT_INVALID)
+        }
+    }
+
+    @JvmStatic
+    fun capturePersistedLaunchContext(path: String): PersistedScriptLaunchContext =
+        PersistedScriptLaunchPolicy.capture(path)
+
+    internal fun createPathLaunchForPythonPreview(
+        path: String,
+        preExecuteScript: String? = null,
+        workingDirectory: String? = null,
+        defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
+        pythonPreviewEnabled: Boolean,
+    ): Launch {
+        val pathClassification = PythonLaunchBoundaryPolicy.classify(path)
+        if (
+            preExecuteScript != null &&
+            pythonPreviewEnabled &&
+            pathClassification == PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME
+        ) {
+            throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.PRE_EXECUTE_UNSUPPORTED)
+        }
+        if (preExecuteScript == null) {
+            val pythonLaunch = createLocalPythonLaunchOrNull(
+                file = File(path),
+                workingDirectory = workingDirectory,
+                defaultWorkingDirectory = defaultWorkingDirectory,
+                pythonPreviewEnabled = pythonPreviewEnabled,
+            )
+            if (pythonLaunch != null) {
+                return pythonLaunch
+            }
+        }
+        PythonLaunchBoundaryPolicy.enforceDefaultOff(path)
+        rejectImplicitPythonProject(File(path))
         val fileSource = NodeProjectScriptSourceFactory.create(path)
+        PythonLaunchBoundaryPolicy.enforceDefaultOff(fileSource.file.path)
         val source = if (preExecuteScript == null) {
             fileSource
         } else {
@@ -171,6 +536,56 @@ object ScriptLaunchSourceFactory {
             source = source,
             workingDirectory = workingDirectory ?: fileSource.launchWorkingDirectory(path, defaultWorkingDirectory),
         )
+    }
+
+    /**
+     * Returns a Python launch only when both the caller-visible and canonical local paths are
+     * Python source names. All mismatches continue through the unconditional fail-closed guard.
+     */
+    private fun createLocalPythonLaunchOrNull(
+        file: File,
+        workingDirectory: String?,
+        defaultWorkingDirectory: String,
+        pythonPreviewEnabled: Boolean,
+    ): Launch? {
+        if (PythonLaunchBoundaryPolicy.classify(file.path) !=
+            PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME
+        ) {
+            return null
+        }
+        if (!pythonPreviewEnabled) return null
+        val normalizedFile = file.normalizedFile()
+        if (PythonLaunchBoundaryPolicy.classify(normalizedFile.path) !=
+            PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME
+        ) {
+            return null
+        }
+        return Launch(
+            source = PythonFileSource(normalizedFile),
+            workingDirectory = workingDirectory
+                ?: normalizedFile.parent
+                ?: defaultWorkingDirectory,
+        )
+    }
+
+    private fun rejectImplicitPythonProject(file: File) {
+        val projectRoot = when {
+            file.isDirectory -> file
+            file.name.equals("project.json", ignoreCase = true) -> file.parentFile ?: return
+            else -> return
+        }
+        val admission = PythonProjectLaunchPolicy.inspect(projectRoot, legacyMain = null) ?: return
+        require(admission.projectRoot.isDirectory) { "Python project admission is not normalized" }
+        throw PythonProjectLaunchException(PythonProjectLaunchError.CONTEXT_REQUIRED)
+    }
+
+    private fun isProjectDescriptorName(location: String): Boolean {
+        val fileName = location
+            .substringBefore('#')
+            .substringBefore('?')
+            .substringAfterLast('/')
+            .substringAfterLast('\\')
+        return fileName.equals("project.json", ignoreCase = true)
     }
 
     private fun JavaScriptFileSource.launchWorkingDirectory(
@@ -198,9 +613,36 @@ object ScriptLaunchSourceFactory {
         }
         return when (this) {
             is JavaScriptFileSource -> file.parent ?: defaultWorkingDirectory
+            is PythonProjectSource -> projectRoot.normalizedPath()
+            is PythonFileSource -> file.parent ?: defaultWorkingDirectory
             is AutoFileSource -> file.parent ?: defaultWorkingDirectory
             else -> defaultWorkingDirectory
         }
+    }
+
+    private fun ScriptSource.pythonLaunchLocations(): List<String?> {
+        val locations = mutableListOf<String?>(originPath, originUri)
+        when (this) {
+            is JavaScriptFileSource -> {
+                locations += file.path
+                locations += file.normalizedPath()
+            }
+            is AutoFileSource -> {
+                locations += file.path
+                locations += file.normalizedPath()
+            }
+            is PythonProjectSource -> {
+                locations += projectRoot.path
+                locations += entryPoint
+                locations += file.path
+                locations += file.normalizedPath()
+            }
+            is PythonFileSource -> {
+                locations += file.path
+                locations += file.normalizedPath()
+            }
+        }
+        return locations.distinct()
     }
 
     private fun File.normalizedPath(): String {

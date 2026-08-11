@@ -93,8 +93,12 @@ public class ShortcutCreateActivity extends AppCompatActivity {
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((dialog, which) -> {
-                    createShortcut();
-                    finish();
+                    try {
+                        createShortcut();
+                        finish();
+                    } catch (RuntimeException error) {
+                        ViewUtils.showToast(this, error.getMessage(), true);
+                    }
                 })
                 .cancelListener(dialog -> finish())
                 .show();
@@ -118,7 +122,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         }
         shortcut.name(mName.getText().toString())
                 .targetClass(ShortcutActivity.class)
-                .extras(new Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptFile.getPath()))
+                .extras(createLaunchExtras())
                 .send();
     }
 
@@ -149,14 +153,19 @@ public class ShortcutCreateActivity extends AppCompatActivity {
 
         /* To make each script be able to have its own individual icon. */
         String id = ShortcutActivity.class.getName() + "$" + name + "@" + System.currentTimeMillis();
-        Intent intent = new Intent(this, ShortcutActivity.class)
-                .putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptFile.getPath())
+        Intent intent = createLaunchExtras()
+                .setClass(this, ShortcutActivity.class)
                 .setAction(Intent.ACTION_MAIN);
         if (mIsDefaultIcon) {
             ShortcutUtils.requestPinShortcut(this, id, intent, name, name, R.drawable.ic_file_type_js_dark_green);
         } else {
             ShortcutUtils.requestPinShortcut(this, id, intent, name, name, mIcon.getDrawable());
         }
+    }
+
+    private Intent createLaunchExtras() {
+        Intent intent = new Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptFile.getPath());
+        return ScriptIntents.putCapturedPythonContext(intent, mScriptFile.getPath());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

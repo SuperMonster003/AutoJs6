@@ -45,7 +45,9 @@ class Engines(private val mScriptRuntime: ScriptRuntime) {
     }
 
     fun execAutoFile(path: String, config: ExecutionConfig?): ScriptExecution {
-        return AutoJs.instance.scriptEngineService.execute(AutoFileSource(mScriptRuntime.files.nonNullPath(path)), config)
+        val resolvedPath = mScriptRuntime.files.nonNullPath(path)
+        ScriptLaunchSourceFactory.enforcePythonLaunchBoundary(resolvedPath)
+        return AutoJs.instance.scriptEngineService.execute(AutoFileSource(resolvedPath), config)
     }
 
     fun all(): NativeArray = engines.toNativeArray()

@@ -10,6 +10,8 @@ import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.external.ScriptIntents;
+import org.autojs.autojs.script.PersistedScriptLaunchContext;
+import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 import org.autojs.autojs.storage.database.BaseModel;
 import org.autojs.autojs6.R;
 import org.joda.time.DateTime;
@@ -61,6 +63,10 @@ public class TimedTask extends BaseModel {
 
     String mScriptPath;
 
+    String mSourceKind;
+
+    String mProjectRoot;
+
     int mRepeatMode = REPEAT_MODE_UNKNOWN;
 
     int mEndMode = END_MODE_FOREVER;
@@ -87,6 +93,7 @@ public class TimedTask extends BaseModel {
         mLoopTimes = config.getLoopTimes();
         mInterval = config.getInterval();
         mRepeatMode = inferRepeatMode(timeFlag);
+        captureLaunchContext();
     }
 
     public boolean isDisposable() {
@@ -286,6 +293,28 @@ public class TimedTask extends BaseModel {
         mScriptPath = scriptPath;
     }
 
+    public String getSourceKind() {
+        return mSourceKind;
+    }
+
+    public void setSourceKind(String sourceKind) {
+        mSourceKind = sourceKind;
+    }
+
+    public String getProjectRoot() {
+        return mProjectRoot;
+    }
+
+    public void setProjectRoot(String projectRoot) {
+        mProjectRoot = projectRoot;
+    }
+
+    public void captureLaunchContext() {
+        PersistedScriptLaunchContext context = ScriptLaunchSourceFactory.capturePersistedLaunchContext(mScriptPath);
+        mSourceKind = context.getSourceKind();
+        mProjectRoot = context.getProjectRoot();
+    }
+
     public boolean isDaily() {
         return getRepeatMode() == REPEAT_MODE_DAILY;
     }
@@ -364,12 +393,19 @@ public class TimedTask extends BaseModel {
     }
 
     public Intent createIntent() {
-        return new Intent(TaskReceiver.ACTION_TASK)
+        Intent intent = new Intent(TaskReceiver.ACTION_TASK)
                 .putExtra(TaskReceiver.EXTRA_TASK_ID, getId())
                 .putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptPath)
                 .putExtra(ScriptIntents.EXTRA_KEY_DELAY, mDelay)
                 .putExtra(ScriptIntents.EXTRA_KEY_LOOP_TIMES, mLoopTimes)
                 .putExtra(ScriptIntents.EXTRA_KEY_LOOP_INTERVAL, mInterval);
+        if (mSourceKind != null) {
+            intent.putExtra(ScriptIntents.EXTRA_KEY_SOURCE_KIND, mSourceKind);
+        }
+        if (mProjectRoot != null) {
+            intent.putExtra(ScriptIntents.EXTRA_KEY_PROJECT_ROOT, mProjectRoot);
+        }
+        return intent;
     }
 
     public PendingIntent createPendingIntent(Context context) {

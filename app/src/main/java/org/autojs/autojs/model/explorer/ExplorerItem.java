@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.script.ScriptFile;
+import org.autojs.autojs.script.PythonScriptSource;
 import org.autojs.autojs.runtime.api.Mime;
 import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity;
 import org.autojs.autojs.util.FileUtils;
@@ -54,6 +55,9 @@ public interface ExplorerItem {
     ScriptFile toScriptFile();
 
     default boolean isExecutable() {
+        if (getType() == FileUtils.TYPE.PYTHON) {
+            return PythonScriptSource.isPreviewEnabled();
+        }
         return getType().isExecutable();
     }
 

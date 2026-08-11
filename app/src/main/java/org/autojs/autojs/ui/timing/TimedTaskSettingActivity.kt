@@ -31,6 +31,8 @@ import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
+import org.autojs.autojs.script.PersistedScriptLaunchContext
+import org.autojs.autojs.script.PythonProjectLaunchException
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.timing.ExactAlarmPermissionHelper.canScheduleExactAlarms
 import org.autojs.autojs.timing.ExactAlarmPermissionHelper.requestExactAlarmPermission
@@ -494,16 +496,32 @@ class TimedTaskSettingActivity : BaseActivity() {
         }.show(supportFragmentManager, tag)
     }
 
-    private fun createTimedTask(): TimedTask? = when {
-        mDisposableTaskRadio.isChecked -> createDisposableTask()
-        mCountdownTaskRadio.isChecked -> createCountdownTask()
-        mDailyTaskRadio.isChecked -> createDailyTask()
-        mWeeklyTaskRadio.isChecked -> createWeeklyTask()
-        mMonthlyTaskRadio.isChecked -> createMonthlyTask()
-        else -> createYearlyTask()
+    private fun createTimedTask(): TimedTask? {
+        val preservedContext = existingLaunchContext()
+        // TimedTask factories capture from their path. Use a non-Python draft path while editing,
+        // then restore the persisted context verbatim so stale and legacy records are not upgraded.
+        val constructionPath = if (preservedContext == null) {
+            mScriptFile.path
+        } else {
+            CONTEXT_PRESERVING_DRAFT_PATH
+        }
+        val task = when {
+            mDisposableTaskRadio.isChecked -> createDisposableTask(constructionPath)
+            mCountdownTaskRadio.isChecked -> createCountdownTask(constructionPath)
+            mDailyTaskRadio.isChecked -> createDailyTask(constructionPath)
+            mWeeklyTaskRadio.isChecked -> createWeeklyTask(constructionPath)
+            mMonthlyTaskRadio.isChecked -> createMonthlyTask(constructionPath)
+            else -> createYearlyTask(constructionPath)
+        } ?: return null
+        if (preservedContext != null) {
+            task.scriptPath = mScriptFile.path
+            task.sourceKind = preservedContext.sourceKind
+            task.projectRoot = preservedContext.projectRoot
+        }
+        return task
     }
 
-    private fun createWeeklyTask(): TimedTask? {
+    private fun createWeeklyTask(scriptPath: String): TimedTask? {
         var timeFlag: Long = 0
         for (i in mDayOfWeekCheckBoxes.indices) {
             if (mDayOfWeekCheckBoxes[i].isChecked) {
@@ -515,27 +533,27 @@ class TimedTaskSettingActivity : BaseActivity() {
             return null
         }
         val time = LocalTime(mWeeklyTaskTimePicker.hour, mWeeklyTaskTimePicker.minute)
-        return applyRepeatEnd(TimedTask.weeklyTask(time, timeFlag, mScriptFile.path, default))
+        return applyRepeatEnd(TimedTask.weeklyTask(time, timeFlag, scriptPath, default))
     }
 
-    private fun createDailyTask(): TimedTask? {
+    private fun createDailyTask(scriptPath: String): TimedTask? {
         val time = LocalTime(mDailyTaskTimePicker.hour, mDailyTaskTimePicker.minute)
-        return applyRepeatEnd(TimedTask.dailyTask(time, mScriptFile.path, ExecutionConfig()))
+        return applyRepeatEnd(TimedTask.dailyTask(time, scriptPath, ExecutionConfig()))
     }
 
-    private fun createMonthlyTask(): TimedTask? {
+    private fun createMonthlyTask(scriptPath: String): TimedTask? {
         val time = LocalTime(mMonthlyTaskTimePicker.hour, mMonthlyTaskTimePicker.minute)
         val date = DATE_FORMATTER.parseLocalDate(mMonthlyTaskDate.text.toString())
-        return applyRepeatEnd(TimedTask.monthlyTask(time, date.dayOfMonth, mScriptFile.path, default))
+        return applyRepeatEnd(TimedTask.monthlyTask(time, date.dayOfMonth, scriptPath, default))
     }
 
-    private fun createYearlyTask(): TimedTask? {
+    private fun createYearlyTask(scriptPath: String): TimedTask? {
         val time = LocalTime(mYearlyTaskTimePicker.hour, mYearlyTaskTimePicker.minute)
         val date = DATE_FORMATTER.parseLocalDate(mYearlyTaskDate.text.toString())
-        return applyRepeatEnd(TimedTask.yearlyTask(time, date.monthOfYear, date.dayOfMonth, mScriptFile.path, default))
+        return applyRepeatEnd(TimedTask.yearlyTask(time, date.monthOfYear, date.dayOfMonth, scriptPath, default))
     }
 
-    private fun createDisposableTask(): TimedTask? {
+    private fun createDisposableTask(scriptPath: String): TimedTask? {
         val time = TIME_FORMATTER.parseLocalTime(mDisposableTaskTime.text.toString())
         val date = DATE_FORMATTER.parseLocalDate(mDisposableTaskDate.text.toString())
         val dateTime = LocalDateTime(
@@ -546,10 +564,10 @@ class TimedTaskSettingActivity : BaseActivity() {
             showToast(this, R.string.text_disposable_task_time_before_now)
             return null
         }
-        return TimedTask.disposableTask(dateTime, mScriptFile.path, default)
+        return TimedTask.disposableTask(dateTime, scriptPath, default)
     }
 
-    private fun createCountdownTask(): TimedTask? {
+    private fun createCountdownTask(scriptPath: String): TimedTask? {
         val hours = parseCountdownValue(mCountdownTaskHours) ?: return null
         val minutes = parseCountdownValue(mCountdownTaskMinutes) ?: return null
         if (minutes >= MINUTES_PER_HOUR) {
@@ -564,7 +582,19 @@ class TimedTaskSettingActivity : BaseActivity() {
             showToast(this, R.string.text_countdown_duration_must_be_positive)
             return null
         }
-        return TimedTask.countdownTask(delayMillis, mScriptFile.path, default)
+        return TimedTask.countdownTask(delayMillis, scriptPath, default)
+    }
+
+    private fun existingLaunchContext(): PersistedScriptLaunchContext? = when {
+        mTimedTask != null -> PersistedScriptLaunchContext(
+            sourceKind = mTimedTask!!.sourceKind,
+            projectRoot = mTimedTask!!.projectRoot,
+        )
+        mIntentTask != null -> PersistedScriptLaunchContext(
+            sourceKind = mIntentTask!!.sourceKind,
+            projectRoot = mIntentTask!!.projectRoot,
+        )
+        else -> null
     }
 
     private fun parseCountdownValue(editText: EditText): Long? {
@@ -653,7 +683,12 @@ class TimedTaskSettingActivity : BaseActivity() {
             createOrUpdateIntentTask()
             return
         }
-        val task = createTimedTask() ?: return
+        val task = try {
+            createTimedTask()
+        } catch (error: PythonProjectLaunchException) {
+            showToast(this, error.message, true)
+            return
+        } ?: return
         if (mTimedTask == null) {
             addTask(task)
             if (mIntentTask != null) {
@@ -684,12 +719,24 @@ class TimedTaskSettingActivity : BaseActivity() {
         } else {
             actionString = ACTIONS[buttonId]
         }
-        val task = IntentTask().apply {
-            action = actionString
-            scriptPath = mScriptFile.path
-            if (actionString == DynamicBroadcastReceivers.ACTION_STARTUP) {
-                isLocal = true
+        val preservedContext = existingLaunchContext()
+        val task = try {
+            IntentTask().apply {
+                action = actionString
+                if (preservedContext == null) {
+                    setScriptPathAndCaptureContext(mScriptFile.path)
+                } else {
+                    scriptPath = mScriptFile.path
+                    sourceKind = preservedContext.sourceKind
+                    projectRoot = preservedContext.projectRoot
+                }
+                if (actionString == DynamicBroadcastReceivers.ACTION_STARTUP) {
+                    isLocal = true
+                }
             }
+        } catch (error: PythonProjectLaunchException) {
+            showToast(this, error.message, true)
+            return
         }
         when (val intentTask = mIntentTask) {
             null -> {
@@ -718,6 +765,7 @@ class TimedTaskSettingActivity : BaseActivity() {
         private const val LOG_TAG = "TimedTaskSettings"
         private const val MINUTES_PER_HOUR = 60
         private const val MILLIS_PER_MINUTE = 60_000L
+        private const val CONTEXT_PRESERVING_DRAFT_PATH = "autojs6-task-context-edit.js"
 
         @JvmField
         @Suppress("DEPRECATION")

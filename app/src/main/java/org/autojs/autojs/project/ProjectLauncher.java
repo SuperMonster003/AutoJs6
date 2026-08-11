@@ -10,6 +10,8 @@ import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor;
 import org.autojs.autojs.script.NodeProjectLaunchSource;
 import org.autojs.autojs.script.NodeProjectLaunchOptions;
+import org.autojs.autojs.script.PythonProjectLaunchAdmission;
+import org.autojs.autojs.script.PythonProjectLaunchPolicy;
 import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 import org.autojs.autojs6.R;
 
@@ -31,17 +33,29 @@ public class ProjectLauncher {
     private final boolean mNodeProject;
 
     @Nullable
+    private final PythonProjectLaunchAdmission mPythonProjectAdmission;
+
+    @Nullable
     private final ProjectConfig mProjectConfig;
 
     public ProjectLauncher(@NonNull String projectDir) {
         mProjectDir = projectDir;
         mProjectConfig = ProjectConfig.fromProjectDir(projectDir);
         mProjectRoot = new File(mProjectDir);
-        File nodeProjectEntry = NativeNodeEmbeddedProjectRunner.resolveProjectEntryFileIfNodeProject(mProjectRoot);
+        File legacyMain = new File(
+                mProjectDir,
+                mProjectConfig == null
+                        ? ProjectConfig.DEFAULT_MAIN_SCRIPT_FILE_NAME
+                        : mProjectConfig.getMainScriptFileName()
+        );
+        mPythonProjectAdmission = PythonProjectLaunchPolicy.inspect(mProjectRoot, legacyMain);
+        File nodeProjectEntry = mPythonProjectAdmission == null
+                ? NativeNodeEmbeddedProjectRunner.resolveProjectEntryFileIfNodeProject(mProjectRoot)
+                : null;
         mNodeProject = nodeProjectEntry != null;
-        mMainScriptFile = nodeProjectEntry == null
-                ? new File(mProjectDir, mProjectConfig == null ? ProjectConfig.DEFAULT_MAIN_SCRIPT_FILE_NAME : mProjectConfig.getMainScriptFileName())
-                : nodeProjectEntry;
+        mMainScriptFile = mPythonProjectAdmission != null
+                ? mPythonProjectAdmission.getEntryFile()
+                : nodeProjectEntry == null ? legacyMain : nodeProjectEntry;
     }
 
     public void launch(ScriptEngineService service) {
@@ -58,6 +72,9 @@ public class ProjectLauncher {
 
     @NonNull
     private ScriptLaunchSourceFactory.Launch createMainScriptLaunch() {
+        if (mPythonProjectAdmission != null) {
+            return ScriptLaunchSourceFactory.createPythonProjectLaunch(mPythonProjectAdmission, mProjectDir);
+        }
         if (!mNodeProject) {
             return ScriptLaunchSourceFactory.createPathLaunch(
                     mMainScriptFile.getPath(),
