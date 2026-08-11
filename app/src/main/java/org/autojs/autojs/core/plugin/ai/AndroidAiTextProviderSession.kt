@@ -122,7 +122,11 @@ internal class AndroidAiTextProviderSession(
 
         override fun onServiceDisconnected(name: ComponentName) {
             if (!closed.get()) {
-                callback.onBindingFailure(AiTextProviderSessionRunFailure.DISCONNECTED)
+                if (connectionDelivered.get()) {
+                    callback.onBinderDeath()
+                } else {
+                    callback.onBindingFailure(AiTextProviderSessionRunFailure.DISCONNECTED)
+                }
             }
         }
 
