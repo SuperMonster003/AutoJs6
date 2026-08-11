@@ -151,9 +151,12 @@ CLOSED
 - Host 使用 `retryOnRemoteException=false`。`openSession` 或 `detect` dispatch 后的
   `RemoteException`/death 不自动重放，因为无法证明远端尚未接收请求。
 
-同步 `openSession` 的拒绝使用 `ServiceSpecificException`，其整数 code 对应
-`YoloErrorCode.wireCode`，message 必须有界且不得包含文件路径或模型内容。detect
-已经 dispatch 后的失败只通过 callback terminal 传递，不再额外抛出第二个终态。
+同步 `openSession` 的拒绝使用 Binder 公共 SDK 可传输的 `IllegalArgumentException`；
+其 message 必须由 `YoloOpenSessionFailureCodec` 编码为版本化前缀、
+`YoloErrorCode.wireCode` 和有界文本。Host 只解析带已知前缀的异常，其他异常一律
+fail-closed 为内部错误；文本不得包含文件路径或模型内容。detect 已经 dispatch 后的
+失败只通过 callback terminal 传递，不再额外抛出第二个终态。平台内部的
+`ServiceSpecificException` 不属于第三方应用公开 SDK，协议 V1 不依赖该隐藏类型。
 
 每个 detect 还携带一个正数 `sequence`。同一 session 中每个新请求的 sequence 必须
 严格大于此前看到的 sequence（允许跳号）；Provider 即使以 BUSY/CLOSED 拒绝，也消费

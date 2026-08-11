@@ -7,12 +7,13 @@
 
 | 项目 | 本地事实 |
 | --- | --- |
-| 基线 | `work-yolo@10c6feb90`，R0 开始前工作树干净 |
+| R0 基线 | `work-yolo@10c6feb90`，R0 开始前工作树干净 |
+| R0 本地提交 | `3c170896d8e4b528f1aa85953a4698d1742c8344`，未 push |
 | 通用 Host | 已有 `AidlPluginHost`，包含发现、授权、显式组件绑定、连接池和 dedicated binding lease |
 | OCR Host | 当前是统一的 `OcrPluginHost`；raw SharedMemory/pipe 仍是其私有实现 |
-| YOLO Runtime | 主仓库和 sibling 目录均没有 NCNN/YOLO runtime 或 provider APK |
+| YOLO Runtime | R1 sibling 已有 CPU/arm64 NCNN/JNI provider 与 debug APK；主仓库仍不包含 runtime，且尚无 Host/Rhino 生产路由 |
 | R0 当前声明 | `SOURCE_DEPLOYED / STATIC_PASS / JVM_DIAGNOSTIC_PASS / AIDL_DIAGNOSTIC_PASS / ANDROID_BUILD_PASS`；不能证明 Binder/native/设备可运行 |
-| 生产入口 | 本次只读仓库审计未发现 Host、Rhino、插件中心、Manifest query 或自动执行入口；因此当前不可调用，不由 R0 marker gate 证明 |
+| 生产入口 | 当前 main 工作树没有 Host、Rhino、插件中心、Manifest query 或自动执行入口；因此仍不可调用，不由 R0 marker gate 证明 |
 
 ## 固定架构决定
 
@@ -90,14 +91,17 @@ R0 source exit：静态输出为 `YOLO_R0_STATIC=PASS` 和 `STATIC_MARKERS=PASS`
 
 - `STATIC`: `YOLO_R0_STATIC=PASS CHECKS=45 SOURCE_ONLY=YES STATIC_MARKERS=PASS`；
   `APP_DIRECT_DEPENDENCY=NOT_ADDED`，native 状态不由该 gate 评估。
-- `JVM_DIAGNOSTIC`: protocol-wire + YOLO 主源码由本机 `kotlinc-jvm 1.7.10`
-  编译通过，并在 JDK 21.0.1 上运行；3 个测试类共 `14/14` 通过。
+- `JVM_DIAGNOSTIC`: R0 commit 时的 protocol-wire + YOLO 主源码由本机
+  `kotlinc-jvm 1.7.10` 编译通过，并在 JDK 21.0.1 上运行；当时 3 个测试类共
+  `14/14` 通过。之后新增的 SDK-safe open failure codec 不沿用这条旧 diagnostic。
 - `AIDL_DIAGNOSTIC`: Android SDK build-tools 36.1.0 的 `aidl.exe` 使用 API 36
   `framework.aidl` 编译 3 个 YOLO AIDL 文件通过。
 - `ANDROID_BUILD`: Gradle 9.6.1、AGP 9.3.0、Kotlin 2.3.21、JDK 21 执行
-  `testDebugUnitTest + assembleDebug` 为 `BUILD SUCCESSFUL`；14 tests、0 failure，
+  `testDebugUnitTest + assembleDebug` 为 `BUILD SUCCESSFUL`；当前 17 tests、0 failure，
   `yolo-api-debug.aar` SHA-256 为
-  `89c1acb85fd9fe7ddb38796cdd5007d510746d377273a606979006de10b9eae5`。
+  `ce9763faa62977ef90af65ca42cf96670a8d59e68a057e309b92e9615ba06a37`；对应
+  `src/main` snapshot 为
+  `4cd47305c70b5c1533fbb16efe85bd9c572e571d05b841770976ee3593dd9174`。
 - `BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E / PRODUCTION`: `NOT_RUN` 或 `NOT_PRESENT`。
 
 ad-hoc JVM/AIDL 诊断只说明相应源码可被所列工具接受和聚焦逻辑行为；Gradle 结果只把
@@ -107,20 +111,20 @@ R0 提升到 `ANDROID_BUILD`，不覆盖 sibling APK、Binder/PFD、NCNN 或设�
 
 目标：先消除项目最大的未知量——Android/NCNN/model/decode 是否真实工作。
 
-- [ ] 创建独立 sibling `AutoJs6-Plugin-Yolo-NCNN`，生产实现不放进 `test-apps`。
-- [ ] 在 APK build 前交付 `common-plugin-api.aar`、`protocol-wire-api.aar`、
+- [x] 创建独立 sibling `AutoJs6-Plugin-Yolo-NCNN`，生产实现不放进 `test-apps`。
+- [x] 在 APK build 前交付 `common-plugin-api.aar`、`protocol-wire-api.aar`、
   `yolo-api.aar`，记录三者来源 commit 与 SHA-256；这不阻塞 sibling 源码搭建。
-- [ ] 固定 NCNN 版本、来源、hash、许可证、NDK、STL 和 ABI。
-- [ ] 首版只支持 CPU、`arm64-v8a`、detect 和一个已知模型 fixture。
-- [ ] 固定 manifest v1 的 NCNN graph/weights、input/output node 和一个 decoder。
-- [ ] 实现 `:yolo_provider` Service、session Binder、单 worker/零队列和 native handle 回收。
-- [ ] Service 使用 `org.autojs.permission.PLUGIN`；actionless exact-component bind 也返回 Binder。
-- [ ] 提供现有插件中心可识别的 `org.autojs.plugin.INFO` metadata service。
-- [ ] session 对 Host-owned callback Binder 执行 `linkToDeath`；Host death、open 失败和
+- [x] 固定 NCNN 版本、来源、hash、许可证、NDK、STL 和 ABI。
+- [x] 首版只支持 CPU、`arm64-v8a`、detect 和一个已知模型 fixture。
+- [x] 固定 manifest v1 的 NCNN graph/weights、input/output node 和一个 decoder。
+- [x] 实现 `:provider` Service、session Binder、单 worker/零队列和 native handle 回收。
+- [x] Service 使用 `org.autojs.permission.PLUGIN`；actionless exact-component bind 也返回 Binder。
+- [x] 提供现有插件中心可识别的 `org.autojs.plugin.INFO` metadata service。
+- [x] session 对 Host-owned callback Binder 执行 `linkToDeath`；Host death、open 失败和
   显式 close 走同一 native-handle/descriptor 回收路径。
-- [ ] 模型 artifact 严格验证 length/SHA-256/EOF 后才进入 NCNN。
-- [ ] 完成 RGBA_8888 -> letterbox -> inference -> decode/NMS -> 原图坐标。
-- [ ] 生成 provider debug APK；Vulkan、32 位和多 decoder 不作为 gate。
+- [x] 模型 artifact 严格验证 length/SHA-256/EOF 后才进入 NCNN。
+- [x] 完成 RGBA_8888 -> letterbox -> inference -> decode/NMS -> 原图坐标。
+- [x] 生成 provider debug APK；Vulkan、32 位和多 decoder 不作为 gate。
 
 主 gate：一个真实 `.so`、真实模型和固定图片在明确的非受保护 Android 环境上
 得到合法 Detection。证据拆成：
@@ -128,13 +132,19 @@ R0 提升到 `ANDROID_BUILD`，不覆盖 sibling APK、Binder/PFD、NCNN 或设�
 - `R1-BUILD`: AIDL/CMake/JNI link 和 APK 完成。
 - `R1-NATIVE`: 指定设备或模拟器上完成真实模型推理。
 
-R1 blocker 按证据层分开处理：
+2026-08-11 R1 exit：
 
-- `R1-SOURCE`：sibling 尚未创建；NCNN/model fixture 的来源、hash 和许可证尚未冻结。
-- `R1-BUILD`：先把 R0 固定为可引用的 commit 或 source snapshot hash，再生成并交付
-  3 个协议 AAR 及各自 SHA-256。
-- `R1-NATIVE`：需要获准的非受保护 Android 设备或模拟器；缺失时不阻塞 SOURCE，
-  但不得声明真实推理通过。
+- `R1-SOURCE=PASS`：sibling、协议 AAR、NCNN 20260526、严格 manifest 和本地
+  YOLO11n fixture 均已有 hash/许可/身份记录；sibling 初始提交与提交前确定性 source
+  snapshot 均写入 receipt，模型与测试图不进入 Git/Provider APK。
+- `R1-BUILD=PASS`：Gradle/AIDL/Kotlin/CMake/JNI link 与 arm64 debug APK 通过。
+- `R1-NATIVE=PASS`：授权设备 `968e9f18`（Xiaomi 23046RP50C、API 35、arm64）运行
+  一条真实 fixture smoke，得到 1 bus + 4 person；临时安装随后已卸载。
+- canonical receipt：`docs/dev/yolo-evidence/r1-summary.json`。
+
+边界保持不变：R1 smoke 直接覆盖 materialization/native engine，Host -> Provider 的
+Binder/PFD 竖切仍属于 R2；native model load 只有 deadline 前后检查，不声明可协作中止的
+硬超时证据。
 
 ## 单一验收入口与 receipt
 
