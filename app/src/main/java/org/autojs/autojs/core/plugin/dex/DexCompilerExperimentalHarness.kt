@@ -103,14 +103,22 @@ internal sealed class DexCompilerExperimentalOutcome {
             get() = artifact.cacheKeySha256
     }
 
-    data class RemoteFailure(
+    class RemoteFailure(
         val code: DexCompilerErrorCode,
         val phase: DexCompilerFailurePhase,
         val retryable: Boolean,
         val message: String? = null,
+        diagnostics: Collection<DexCompilerDiagnostic> = emptyList(),
     ) {
-        override fun toString(): String =
-            "RemoteFailure(code=$code, phase=$phase, retryable=$retryable, hasMessage=${!message.isNullOrEmpty()})"
+        val diagnostics: List<DexCompilerDiagnostic> =
+            java.util.Collections.unmodifiableList(java.util.ArrayList(diagnostics))
+
+        override fun toString(): String = buildString {
+            append("RemoteFailure(code=$code, phase=$phase, retryable=$retryable, ")
+            append("hasMessage=${!message.isNullOrEmpty()}, ")
+            append(DexCompilerDiagnosticSummary.from(diagnostics))
+            append(')')
+        }
     }
 
     data class UseLocalCompiler(
@@ -660,6 +668,7 @@ internal class DexCompilerExperimentalHarness(
                     phase = error.phase,
                     retryable = error.retryable,
                     message = error.message,
+                    diagnostics = error.diagnostics,
                 ),
             )
         }

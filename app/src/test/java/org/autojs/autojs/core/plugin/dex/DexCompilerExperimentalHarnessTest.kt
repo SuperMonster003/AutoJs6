@@ -364,7 +364,9 @@ class DexCompilerExperimentalHarnessTest {
         val fixture = Fixture()
         fixture.start()
 
-        fixture.callback.onFailed(DexCompilerCodec.encodeError(fixture.error()))
+        fixture.callback.onFailed(
+            DexCompilerCodec.encodeError(fixture.error(diagnostics = listOf(fixture.diagnostic()))),
+        )
         fixture.callback.onFailed(DexCompilerCodec.encodeError(fixture.error()))
         fixture.callback.onCompleted(DexCompilerCodec.encodeResult(fixture.result()))
         fixture.transport.bindingCallback!!.onBinderDeath()
@@ -375,8 +377,10 @@ class DexCompilerExperimentalHarnessTest {
         assertEquals(DexCompilerFailurePhase.COMPILATION, outcome.remoteFailure?.phase)
         assertEquals(false, outcome.remoteFailure?.retryable)
         assertEquals("Fixture failure", outcome.remoteFailure?.message)
+        assertEquals(listOf(fixture.diagnostic()), outcome.remoteFailure?.diagnostics)
         assertTrue(outcome.remoteFailure.toString().contains("hasMessage=true"))
         assertFalse(outcome.remoteFailure.toString().contains("Fixture failure"))
+        assertFalse(outcome.remoteFailure.toString().contains("Fixture diagnostic"))
         assertTrue(outcome.pluginWasDispatched)
         assertTrue(outcome.pluginOutputRollbackRequired)
         assertEquals(1, fixture.outcomes.size)

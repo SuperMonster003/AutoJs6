@@ -10,6 +10,7 @@ import org.autojs.autojs.core.plugin.dex.DexCompilerOptInDecision
 import org.autojs.autojs.core.plugin.dex.DexCompilerOptInOptions
 import org.autojs.autojs.core.plugin.dex.DexCompilerOptInPolicy
 import org.autojs.autojs.core.plugin.dex.DexCompilerOptInStore
+import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeDiagnostics
 import org.autojs.autojs.core.plugin.dex.DexCompilerServiceCandidate
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
@@ -125,7 +126,7 @@ class DexCompilerPreference : MaterialPreference {
 
     private fun refreshSummary() {
         val options = DexCompilerOptInStore.read()
-        val nextSummary = when {
+        val baseSummary = when {
             options.enabled && options.selectedComponent != null -> context.getString(
                 R.string.summary_dex_compiler_experimental_selected,
                 options.selectedComponent.exactLabel(),
@@ -136,6 +137,8 @@ class DexCompilerPreference : MaterialPreference {
             )
             else -> context.getString(R.string.summary_dex_compiler_experimental_disabled)
         }
+        val diagnosticSummary = DexCompilerRuntimeDiagnostics.latestSummary()
+        val nextSummary = if (diagnosticSummary == null) baseSummary else "$baseSummary\n$diagnosticSummary"
         if (summary?.toString() != nextSummary) summary = nextSummary
     }
 

@@ -348,6 +348,7 @@ internal class AndroidDexCompilerJarLoadCoordinator private constructor(
                 cacheHit = true,
             )
             is DexCompilerExperimentalOutcome.UseLocalCompiler -> {
+                DexCompilerRuntimeDiagnostics.record(outcome)
                 maybeOpenCircuit(outcome.failure, backend.blockingExecutor)
                 DexCompilerSingleFlightTerminal.Failure(
                     DexCompilerSharedAttemptFailure(

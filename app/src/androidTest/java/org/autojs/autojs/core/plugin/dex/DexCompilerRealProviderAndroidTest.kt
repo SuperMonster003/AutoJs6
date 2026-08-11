@@ -9,6 +9,9 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.rhino.AndroidClassLoader
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.dexcompiler.api.DexCompilerContract
+import org.autojs.plugin.dexcompiler.api.DexCompilerDiagnosticSeverity
+import org.autojs.plugin.dexcompiler.api.DexCompilerErrorCode
+import org.autojs.plugin.dexcompiler.api.DexCompilerFailurePhase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
@@ -225,6 +228,134 @@ class DexCompilerRealProviderAndroidTest {
                     !loaderCache.exists() || loaderCache.deleteRecursively(),
                 )
             }.exceptionOrNull()?.let(cleanupFailures::add)
+            cleanupFailures.forEach { cleanupFailure ->
+                val failure = primaryFailure
+                if (failure != null) failure.addSuppressed(cleanupFailure) else throw cleanupFailure
+            }
+        }
+    }
+
+    /**
+     * Representative R2 diagnostic evidence on the production coordinator path. This deliberately
+     * covers one API 26+ real D8 failure and recovery, not an all-API diagnostic matrix.
+     */
+    @Test
+    fun realProviderFailureIsRedactedAndTheNextProductionSessionSucceeds() {
+        val identity = requireRealProvider()
+        assumeTrue("Real D8 DiagnosticsHandler evidence requires API 26 or newer", Build.VERSION.SDK_INT >= 26)
+        val savedOptIn = snapshotOptInStore()
+        val token = UUID.randomUUID()
+        val invalidProgram = File(context.cacheDir, "dex-real-diagnostic-invalid-$token.jar")
+        val validProgram = File(context.cacheDir, "dex-real-diagnostic-valid-$token.jar")
+        val executor = Executors.newSingleThreadExecutor(
+            namedThreadFactory("dex-real-diagnostic-wiring"),
+        )
+        var exactGeneration: DexCompilerVerifiedArtifact? = null
+        var primaryFailure: Throwable? = null
+        try {
+            FileOutputStream(invalidProgram).use { output ->
+                output.write(invalidProgramJar())
+                output.fd.sync()
+            }
+            FileOutputStream(validProgram).use { output ->
+                output.write(uniqueProgramJar())
+                output.fd.sync()
+            }
+            assertEquals(
+                DexCompilerOptInOptions(enabled = true, selectedComponent = identity.component),
+                DexCompilerOptInStore.select(identity.component),
+            )
+            AndroidDexCompilerRuntime.initialize(context, eligibleProcess = true)
+            val coordinator = requireNotNull(AndroidDexCompilerRuntime.coordinatorOrNull()) {
+                "The production DEX compiler runtime was not initialized"
+            }
+            DexCompilerRuntimeDiagnostics.resetForTest()
+            val cacheRoot = File(context.noBackupFilesDir, "dex-compiler-experimental")
+
+            val future = executor.submit {
+                val failed = coordinator.compile(invalidProgram)
+                assertTrue(
+                    "Malformed class unexpectedly produced a remote artifact: $failed",
+                    failed is DexCompilerRuntimeDecision.UseLocal,
+                )
+                failed as DexCompilerRuntimeDecision.UseLocal
+                failed.fallbackInput?.close()
+                assertEquals(DexCompilerLocalReason.REMOTE_ATTEMPT_FAILED, failed.reason)
+                val remote = requireNotNull(failed.remoteFailure) {
+                    "Real D8 failure did not retain its structured remote failure"
+                }
+                assertEquals(DexCompilerErrorCode.COMPILATION_FAILED, remote.code)
+                assertEquals(DexCompilerFailurePhase.COMPILATION, remote.phase)
+                assertTrue("Real D8 failure did not retain diagnostics", remote.diagnostics.isNotEmpty())
+                assertTrue(
+                    "Real D8 failure retained no error diagnostic",
+                    remote.diagnostics.any { it.severity == DexCompilerDiagnosticSeverity.ERROR },
+                )
+                assertTrue(
+                    "Real D8 diagnostic category is not stable/bounded",
+                    remote.diagnostics.all { it.code.startsWith("D8.") && it.code.length <= 128 },
+                )
+                assertTrue("RemoteFailure.toString leaked the private input path", !remote.toString().contains(invalidProgram.absolutePath))
+                val processSummary = requireNotNull(DexCompilerRuntimeDiagnostics.latestSummary()) {
+                    "The shared producer did not record its process-local fallback summary"
+                }
+                assertTrue(processSummary.contains("LAST_PROVIDER_FALLBACK/PROCESS_ONLY"))
+                assertTrue(processSummary.contains("COMPILATION_FAILED/COMPILATION"))
+                assertTrue("Process summary leaked the private input path", !processSummary.contains(invalidProgram.absolutePath))
+                assertTrue(
+                    "A failed D8 session leaked a host transaction",
+                    cacheRoot.directChildNames().none { name ->
+                        name.startsWith("input-") || name.startsWith("output-") || name.startsWith("verified-")
+                    },
+                )
+
+                when (val recovered = coordinator.compile(validProgram)) {
+                    is DexCompilerRuntimeDecision.Published -> {
+                        exactGeneration = recovered.artifact
+                        recovered.fallbackInput.close()
+                        assertFixtureLoads(recovered.artifact)
+                    }
+                    is DexCompilerRuntimeDecision.UseLocal -> {
+                        recovered.fallbackInput?.close()
+                        throw AssertionError("The session after a real D8 failure did not recover: $recovered")
+                    }
+                    DexCompilerRuntimeDecision.Cancelled ->
+                        throw AssertionError("The session after a real D8 failure was cancelled")
+                }
+            }
+            try {
+                future.get(PRODUCTION_WIRING_WAIT_MILLIS, TimeUnit.MILLISECONDS)
+            } catch (timeout: java.util.concurrent.TimeoutException) {
+                future.cancel(true)
+                throw AssertionError("Real D8 diagnostic/recovery evidence did not finish in time").also {
+                    it.initCause(timeout)
+                }
+            }
+        } catch (error: Throwable) {
+            primaryFailure = error
+            throw error
+        } finally {
+            executor.shutdownNow()
+            val cleanupFailures = mutableListOf<Throwable>()
+            runCatching {
+                assertTrue(
+                    "The real diagnostic executor did not terminate",
+                    executor.awaitTermination(EXECUTOR_SHUTDOWN_WAIT_MILLIS, TimeUnit.MILLISECONDS),
+                )
+            }.exceptionOrNull()?.let(cleanupFailures::add)
+            exactGeneration?.let { artifact ->
+                runCatching {
+                    assertTrue("Unable to invalidate the recovered exact generation", artifact.invalidate())
+                    assertTrue("The recovered invalidated generation can still be opened", artifact.openRead() == null)
+                }.exceptionOrNull()?.let(cleanupFailures::add)
+            }
+            DexCompilerRuntimeDiagnostics.resetForTest()
+            runCatching { restoreOptInStore(savedOptIn) }
+                .exceptionOrNull()?.let(cleanupFailures::add)
+            listOf(invalidProgram, validProgram).forEach { program ->
+                runCatching { assertTrue("Unable to delete $program", !program.exists() || program.delete()) }
+                    .exceptionOrNull()?.let(cleanupFailures::add)
+            }
             cleanupFailures.forEach { cleanupFailure ->
                 val failure = primaryFailure
                 if (failure != null) failure.addSuppressed(cleanupFailure) else throw cleanupFailure
@@ -449,6 +580,21 @@ class DexCompilerRealProviderAndroidTest {
             output.toByteArray()
         }
     }
+
+    private fun invalidProgramJar(): ByteArray = ByteArrayOutputStream().use { output ->
+        ZipOutputStream(output).use { zip ->
+            // The provider's bounded archive validator intentionally checks only the class magic;
+            // the truncated class therefore reaches the real D8 diagnostic handler.
+            zip.writeStoredEntry(
+                "org/autojs/fixture/dexcompiler/Broken.class",
+                byteArrayOf(0xca.toByte(), 0xfe.toByte(), 0xba.toByte(), 0xbe.toByte()),
+            )
+        }
+        output.toByteArray()
+    }
+
+    private fun File.directChildNames(): Set<String> =
+        listFiles()?.mapTo(sortedSetOf()) { child -> child.name } ?: emptySet()
 
     private fun ZipOutputStream.writeStoredEntry(name: String, bytes: ByteArray) {
         val checksum = CRC32().apply { update(bytes) }.value
