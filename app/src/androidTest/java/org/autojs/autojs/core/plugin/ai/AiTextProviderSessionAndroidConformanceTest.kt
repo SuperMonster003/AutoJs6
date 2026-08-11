@@ -258,6 +258,32 @@ class AiTextProviderSessionAndroidConformanceTest {
         assertSettledExactlyOnce(result)
     }
 
+    @Test
+    fun callbackFromIsolatedProviderUidIsRejectedAndReleasesOwner() {
+        val result = runHostileScenario(modelId = FAKE_WRONG_UID_MODEL)
+
+        assertTranscriptRejected(result, AiTextProviderSessionFailure.CALLBACK_UID_MISMATCH)
+        assertTrue(
+            "A callback from the isolated UID published transcript data",
+            result.transcript.isEmpty(),
+        )
+        assertSettledExactlyOnce(result)
+    }
+
+    @Test
+    fun providerProcessDeathAfterStartedPublishesOneBinderDiedAndReleasesOwner() {
+        val result = runHostileScenario(modelId = FAKE_PROCESS_DEATH_MODEL)
+
+        val terminal = result.terminal as? AiTextProviderSessionRunEvent.Transcript
+        assertNotNull("Expected BinderDied transcript terminal, got ${result.terminal}", terminal)
+        assertEquals(AiTextProviderSessionEvent.BinderDied, checkNotNull(terminal).event)
+        assertEquals(1, result.transcript.filterIsInstance<AiTextProviderSessionEvent.Started>().size)
+        val chunk = result.transcript.filterIsInstance<AiTextProviderSessionEvent.Chunk>().single()
+        assertEquals(0L, chunk.chunk.sequence)
+        assertEquals("hostile", chunk.chunk.textDelta)
+        assertSettledExactlyOnce(result)
+    }
+
     private fun runHostileScenario(
         modelId: String,
         prompt: String = HOSTILE_PROMPT,
@@ -719,6 +745,8 @@ class AiTextProviderSessionAndroidConformanceTest {
         const val FAKE_SEQUENCE_GAP_MODEL = "fake.hostile.sequence-gap"
         const val FAKE_DUPLICATE_TERMINAL_MODEL = "fake.hostile.duplicate-terminal"
         const val FAKE_INVALID_FD_REFERENCE_MODEL = "fake.hostile.invalid-fd-ref"
+        const val FAKE_WRONG_UID_MODEL = "fake.hostile.wrong-uid"
+        const val FAKE_PROCESS_DEATH_MODEL = "fake.hostile.process-death"
         const val FAKE_STALL_MODEL = "fake.hostile.stall"
         const val COMPLETION_FD_TEXT = "descriptor completion across Binder"
         const val HOSTILE_PROMPT = "hostile Android session"
