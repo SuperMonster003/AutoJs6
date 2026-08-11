@@ -17,18 +17,20 @@ independent sibling project `AutoJs6-Plugin-AI-Text-Generation`. A non-invasive
 slice of Phase 2 now includes default-off pure Kotlin host selection,
 model-list, and session-transcript policies, read-only Android package discovery,
 an exact-component metadata handshake, and exact-component Android model-list
-and session coordinators/transports. One strict prompt-only production route now
-connects an explicitly selected `ai.ask` to those layers. The
-protocol layer also binds tool calls to the original request,
+and session coordinators/transports. Two strict prompt-only production routes
+now connect explicitly selected `ai.ask` and `ai.stream` calls to those layers.
+The protocol layer also binds tool calls to the original request,
 verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
 quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
 summaries. The Android session slice can explicitly exercise `openSession`, a
 generated `IAiTextCallback`, request PFDs, streaming credits, and callback PFD
-ownership. One API 31 production positive-path smoke now covers a real release
-provider, real model, and public Rhino `ai.ask`; remote `listingGeneration`
-proof, automatic UI selection, plugin-backed chat and stream, and the broader
-production matrix remain open. Installing either app alone still has no effect
-on the public AI module because no component is selected automatically.
+ownership. One API 31 production positive-path smoke covers a real release
+provider, real model, and public Rhino `ai.ask`; a separate API 31 public Rhino
+`ai.stream` smoke covers the test-only fake provider beyond the initial eight
+chunk credits. Remote `listingGeneration` proof, automatic UI selection,
+plugin-backed chat, real-provider streaming, and the broader production matrix
+remain open. Installing either app alone still has no effect on the public AI
+module because no component is selected automatically.
 Repository and Android runtime
 gates are tracked in
 [the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
@@ -74,9 +76,9 @@ would not become simpler merely by moving it across Binder:
   existing `ai.ask`, `ai.chat`, and `ai.stream` script facade.
 - `app/src/main/java/org/autojs/autojs/core/plugin/ai/` contains
   transport-independent selection, transcript, and session policies plus the
-  process-shared Android runner used only by an explicit plugin `ai.ask`. The
-  pure policies themselves do not query `PackageManager`, bind a service, read
-  a credential, or connect to the script facade.
+  process-shared Android runner used only by explicit plugin `ai.ask` and
+  `ai.stream` calls. The pure policies themselves do not query `PackageManager`,
+  bind a service, read a credential, or connect to the script facade.
 - `AiTextProviderSessionPolicy` now owns a default-off pure Kotlin session
   transcript: plan/request admission, provisional callbacks around a
   synchronous open, callback UID and size checks before asynchronous retention
@@ -85,16 +87,16 @@ would not become simpler merely by moving it across Binder:
 - The same package now contains read-only Android discovery, a metadata-only
   exact-component handshake, and an exact-component model-list
   coordinator/transport. The model-list adapter can call only the provider
-  metadata getters and `listModels()`; the explicit ask runner composes it with
-  the separate session adapter rather than expanding that surface.
+  metadata getters and `listModels()`; the explicit ask/stream runner composes
+  it with the separate session adapter rather than expanding that surface.
 - A separate `AiTextProviderSessionCoordinator` and
   `AndroidAiTextProviderSession` now adapt those transcript abstractions to one
   explicitly enabled, exact-component Android session. They revalidate bounded
   provider metadata on the same Binder used for `openSession`, capture callback
   UID before typed admission, preserve reliable callback-PFD state through
   ownership transfer, and serialize credit/death/terminal cleanup. Their entry
-  option still defaults off; only the explicit production ask runner constructs
-  enabled attempts. There is no automatic or UI construction path.
+  option still defaults off; only the explicit production ask/stream runner
+  constructs enabled attempts. There is no automatic or UI construction path.
 - Current `ai.chat` results include provider-native `message` and `raw` fields;
   transport tests prove that opaque reasoning/thinking signatures survive a
   later same-provider tool round trip. A provider-neutral protocol cannot claim
@@ -107,13 +109,25 @@ add credential, endpoint, retry, and compatibility risk. The stronger near-term
 benefit is extensibility: third parties can add a provider or a local text model
 without changing the stable script API.
 
-## Narrow Production `ai.ask` Route
+## Narrow Production `ai.ask` And `ai.stream` Routes
 
-Phase 2 now preserves the existing `ai.ask` signature while admitting this
-explicit shape:
+Phase 2 preserves the existing `ai.ask` and `ai.stream` signatures while
+admitting this explicit selector shape:
 
 ```javascript
 ai.ask(prompt, {
+    plugin: {
+        component: {
+            packageName: "org.example.provider",
+            className: "org.example.provider.AiTextService",
+        },
+        providerId: "example.provider",
+        modelId: "example-model",
+    },
+    timeout: 120000,
+});
+
+const stream = ai.stream(prompt, {
     plugin: {
         component: {
             packageName: "org.example.provider",
@@ -135,29 +149,35 @@ controls. It never reads the vault, sends HTTP, retries, or falls back to a
 built-in provider. When `plugin` is absent, the established cloud path remains
 unchanged.
 
-The first route accepts one plain-text user message only. It opens a
-non-streaming, inline, zero-request-descriptor session with no reasoning,
-structured JSON, usage, tools, or tool rounds. The exact component must pass
-the existing repeated identity checks, the provider must match the selected ID
-and remain `ON_DEVICE` with credential mode `NONE`, and model listing must plan
-the exact selected model. A plugin selector on `ai.chat` or `ai.stream` is
-rejected as unsupported without entering HTTP; neither method has a plugin
-production route.
+Both routes accept one plain-text user message only and send inline data with
+zero request descriptors and no reasoning, structured JSON, usage, tools, or
+tool rounds. `ai.ask` opens a non-streaming session; `ai.stream` requires the
+provider/model `STREAMING` capability and maps `Started` to `open`, each text
+chunk to `chunk` followed by `delta` in one dispatcher action, and completion to
+`done`. The exact component must pass the existing repeated identity checks,
+the provider must match the selected ID and remain `ON_DEVICE` with credential
+mode `NONE`, and model listing must plan the exact selected model. A plugin
+selector on `ai.chat` remains unsupported and fails without entering HTTP.
 
-One lazily created process backend owns a single routed-ask admission gate,
-single-thread orchestration/control/terminal/deadline lanes, a bounded
+One lazily created process backend owns one admission gate shared by routed ask
+and stream attempts, single-thread orchestration/control/terminal/deadline
+lanes, a bounded
 three-operation blocking pool, and the existing model-list/session process
 owners. One outer absolute deadline covers discovery through the active session
 terminal; lower owners retain settled cleanup responsibility. Per-script
 runtime owners cancel and close active handles once on shutdown and ignore late
-terminals; no operation is automatically retried after dispatch.
+terminals; public stream cancellation propagates to its bound plugin attempt,
+while runtime shutdown is silent. Natural completion only closes the handle.
+No operation is automatically retried after dispatch.
 
-The source/JVM gate remains green. Standalone K2/JUnit passed 15/15 tests
-(8 parser, 3 mapper, 4 runtime), and the focused Gradle run passed 19/19 (those
-15 plus 4 `AiService` integration cases), with 0 skipped, 0 failures, and 0
-errors; the same run assembled the host App Debug and instrumentation APKs. The
-production plugin separately passed `testDebugUnitTest`, `lintDebug`,
-`assembleDebug`, and `assembleRelease`.
+The source/JVM gate remains green. The earlier standalone K2/JUnit ask slice
+passed 15/15 tests (8 parser, 3 mapper, 4 runtime). After production commit
+`2ea3360a2` and test commit `50b43d00c`, the focused Gradle XML recorded 25/25
+tests across `AiPluginAskInputMapperTest` (3), `AiPluginAskRuntimeTest` (4),
+`AiPluginStreamRuntimeTest` (4), `AiServicePluginRouteTest` (5), and
+`AiStreamTest` (9), with 0 skipped, 0 failures, and 0 errors. The production
+plugin separately retained its completed `testDebugUnitTest`, `lintDebug`,
+`assembleDebug`, and `assembleRelease` evidence.
 
 On 2026-08-11,
 `AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
@@ -190,6 +210,35 @@ chat/stream, tools, structured output, usage, clipboard behavior, active-request
 update/uninstall, performance, or soak. DocumentsUI model import can also drift
 its last-location UI state because that state has no lossless snapshot/restore
 contract.
+
+Also on 2026-08-11, the exact method
+`AiTextPluginPublicStreamSmokeTest#publicRhinoAiStreamCompletesThroughExactFakeProvider`
+returned `OK (1 test)` in 1.645 seconds with instrumentation code `-1` on
+`QV710AF65F` (API 31, arm64-v8a, user 0). Source HEAD was
+`50b43d00cc634f8a220856bf68f936fc800442a4`. The method traversed the real
+`ScriptEngineService` and public Rhino `ai.stream`, with the exact test-only
+package `org.autojs.plugin.ai.text.fake`, service class
+`org.autojs.plugin.ai.text.fake.service.FakeAiTextProviderService`, provider
+`fake.local`, and model `fake.stream`. It observed one `open`, more
+than eight `chunk` events, the same number of `delta` events, and one `done`;
+both aggregates and `done.text` exactly reproduced the UTF-8 prompt. It observed
+no usage, tool-call, error, or cancellation event.
+
+The host arm64 App Debug, instrumentation, and fake-provider APK SHA-256 values
+were, respectively,
+`10782233667a77c2df5c02e1299dd0d6d4194cc188d4f586f8d23257dc5cc951`,
+`6025b35860be52b0477013327f7c458e12ce5751f568dfacf1ab299ae074d309`,
+and `6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
+Exact final checks found the three packages absent for users 0 and 10 and all
+nine reserved external data/media/obb paths absent.
+
+This public stream result is **PARTIAL** fake-provider evidence. It ended
+naturally and does not exercise public `stream.cancel()`, engine-stop
+cancellation, a real production provider/model stream, a release host, or any
+API/ABI matrix. The exactly-once public-cancel/completion race and silent
+runtime-close behavior remain JVM evidence in `AiStreamTest` and
+`AiPluginStreamRuntimeTest`; they must not be promoted to Android evidence. This
+additional public route closes neither broad R1 nor protocol exit criteria.
 
 ## Meaning Of Protocol Pack
 
@@ -536,8 +585,8 @@ a missing provider at final exact reinspection are only coordinator JVM cases
 before `openSession`; package absence before and after device testing is cleanup
 evidence, not an Android update or uninstall during an active session. Provider
 disable, host death, other API/ABI, real production plugin/model/runtime, UI,
-remote `listingGeneration`, and `ai.*` wiring evidence remain open. H2 does not
-close broad R1 or protocol exit criteria.
+remote `listingGeneration`, and the broader `ai.*` wiring matrix remain open.
+H2 does not close broad R1 or protocol exit criteria.
 
 A pure Java or Kotlin provider reports `supportedAbis = emptyArray()`. A local
 native model plugin declares its actual ABIs and should ship ABI splits plus a
@@ -830,9 +879,11 @@ one fake-provider death after an acknowledged chunk/credit cycle. It does not
 prove cross-process reliable-pipe status, deterministic Android no-credit
 behavior, active-session update/disable/uninstall, host death, or the version
 matrix. The separate public-route smoke above adds one real provider/model and
-one non-streaming public `ai.ask` positive path, but does not promote the fake
-hostile cells or supply the missing matrix. The no-credit and final-reinspection
-package-drift cases remain JVM evidence only.
+one non-streaming public `ai.ask` positive path. The separate public
+`ai.stream` smoke carries the normal fake stream through the public Rhino entry
+beyond eight credits, but does not promote hostile cells, device cancellation,
+or the missing matrix. The no-credit and final-reinspection package-drift cases
+remain JVM evidence only.
 
 ## Estimated Benefit And Cost
 
@@ -871,8 +922,9 @@ is directional evidence only, not an APK-size or performance measurement.
 - Keep the completed pure selection, model-list, and session-transcript policy
   core and the Android discovery, metadata-handshake, model-list, and
   `openSession`/PFD/`IAiTextCallback` transports fail-closed. Only the narrow
-  explicit `ai.ask` composition enables individual attempts; catalog-generation
-  proof, UI selection, and chat/stream adapters remain absent.
+  explicit `ai.ask` and `ai.stream` compositions enable individual attempts;
+  catalog-generation proof, UI selection, chat, and broader stream features
+  remain absent.
 - Retain the experimental provider selector without changing `ai.ask`,
   `ai.chat`, or `ai.stream` script signatures.
 - Keep built-in providers as the default and explicit fallback baseline.
