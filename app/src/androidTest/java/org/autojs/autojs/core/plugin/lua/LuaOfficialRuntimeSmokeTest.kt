@@ -1,0 +1,99 @@
+package org.autojs.autojs.core.plugin.lua
+
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.os.Looper
+import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.engine.LuaPluginScriptEngine
+import org.autojs.autojs.script.LuaScriptSource
+import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.lua.runtime.api.LuaPluginActions
+import org.autojs.plugin.lua.runtime.api.LuaRuntimeContract
+import org.autojs.plugin.lua.runtime.api.LuaValue
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
+import org.junit.Test
+import java.io.Reader
+
+/**
+ * Opt-in happy-path smoke for the real, independently installed Lua runtime provider.
+ *
+ * This intentionally does not reuse the hostile fixture or the debug fault service. The provider
+ * APK must be built with native execution and production discovery explicitly enabled; both
+ * repository defaults remain disabled.
+ */
+class LuaOfficialRuntimeSmokeTest {
+    private val instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val context = instrumentation.targetContext
+    private val packageManager = context.packageManager
+
+    @Test
+    fun officialProviderExecutesAndReleasesSequentialSessions() {
+        requirePilotEnvironment()
+
+        val infoService = singleEnabledService(LuaPluginActions.INFO)
+        val runtimeService = singleEnabledService(LuaRuntimeContract.SERVICE_ACTION)
+        assertEquals(OFFICIAL_PROVIDER_PACKAGE, infoService.packageName)
+        assertEquals(OFFICIAL_PROVIDER_PACKAGE, runtimeService.packageName)
+        assertEquals(EXPECTED_RUNTIME_PROCESS, infoService.processName)
+        assertEquals(EXPECTED_RUNTIME_PROCESS, runtimeService.processName)
+        assertEquals(LuaRuntimeContract.PLUGIN_PERMISSION, infoService.permission)
+        assertEquals(LuaRuntimeContract.PLUGIN_PERMISSION, runtimeService.permission)
+        assertTrue("Official Lua INFO service must be exported", infoService.exported)
+        assertTrue("Official Lua runtime service must be exported", runtimeService.exported)
+        assertEquals(
+            "Official Lua provider and host must have the same debug signer",
+            PackageManager.SIGNATURE_MATCH,
+            packageManager.checkSignatures(context.packageName, OFFICIAL_PROVIDER_PACKAGE),
+        )
+
+        val engine = LuaPluginScriptEngine(context)
+        try {
+            engine.init()
+            assertEquals(LuaValue.Int64Value(7L), engine.execute(source("return 7", "official-provider-first")))
+            assertEquals(LuaValue.Int64Value(8L), engine.execute(source("return 8", "official-provider-second")))
+        } finally {
+            engine.destroy()
+        }
+    }
+
+    private fun requirePilotEnvironment() {
+        val arguments = InstrumentationRegistry.getArguments()
+        assumeTrue(
+            "Official Lua provider smoke is opt-in; set $ARG_ENABLED=true",
+            arguments.getString(ARG_ENABLED).toBoolean(),
+        )
+        assertTrue("Official Lua provider smoke requires API 24 or newer", Build.VERSION.SDK_INT >= 24)
+        assertTrue("Official Lua provider smoke requires a debuggable host", BuildConfig.DEBUG)
+        assertEquals(HOST_PACKAGE, context.packageName)
+        assertTrue(
+            "Official Lua provider smoke must not run on the Android main thread",
+            Looper.myLooper() != Looper.getMainLooper(),
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    private fun singleEnabledService(action: String): ServiceInfo {
+        val services = packageManager.queryIntentServices(
+            Intent(action).setPackage(OFFICIAL_PROVIDER_PACKAGE),
+            0,
+        ).map { it.serviceInfo }
+        assertEquals("Expected exactly one enabled service for $action", 1, services.size)
+        return services.single()
+    }
+
+    private fun source(scriptText: String, name: String) = object : LuaScriptSource(name) {
+        override val script: String = scriptText
+        override val scriptReader: Reader? = null
+    }
+
+    private companion object {
+        const val ARG_ENABLED = "autojs.luaRuntime.officialProvider.enabled"
+        const val HOST_PACKAGE = "org.autojs.autojs6"
+        const val OFFICIAL_PROVIDER_PACKAGE = "io.github.supermonster003.autojs6.plugin.lua.runtime"
+        const val EXPECTED_RUNTIME_PROCESS = "$OFFICIAL_PROVIDER_PACKAGE:lua_runtime"
+    }
+}
