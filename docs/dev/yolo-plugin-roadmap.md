@@ -11,10 +11,11 @@
 | R0 本地提交 | `3c170896d8e4b528f1aa85953a4698d1742c8344`，未 push |
 | 通用 Host | 已有 `AidlPluginHost`，包含发现、授权、显式组件绑定、连接池和 dedicated binding lease |
 | OCR Host | 当前是统一的 `OcrPluginHost`；raw SharedMemory/pipe 仍是其私有实现 |
-| YOLO Runtime | R1 sibling 已有 CPU/arm64 NCNN/JNI provider；主仓库已有 R2 default-off Host/Binder/PFD 路由，但仍无 Rhino API |
+| YOLO Runtime | R1 sibling 已有 CPU/arm64 NCNN/JNI provider；主仓库已有 R2 default-off Host/Binder/PFD 路由和 R3 Rhino Preview API |
 | R0 当前声明 | `SOURCE_DEPLOYED / STATIC_PASS / JVM_DIAGNOSTIC_PASS / AIDL_DIAGNOSTIC_PASS / ANDROID_BUILD_PASS`；不能证明 Binder/native/设备可运行 |
 | R2 当前声明 | `SOURCE / ANDROID_BUILD / BINDER_PFD = PASS`；真实 NCNN 推理也经该链路复验，但不等于 Rhino `DEVICE_E2E` 或生产发布 |
-| 生产入口 | 插件中心可发现但 YOLO 默认关闭；目前只有内部 Host API 和 opt-in instrumentation，无 Rhino/Node/Explorer 自动执行入口 |
+| R3 当前声明 | `SOURCE / ANDROID_BUILD / DEVICE_E2E / PUBLIC_PREVIEW = PASS`；仍明确不声明 `PRODUCTION` |
+| 生产入口 | 插件中心可发现但 YOLO 默认关闭；Rhino 已提供显式 component 的 opt-in Preview，无静默 provider 选择或回退 |
 
 ## 固定架构决定
 
@@ -204,17 +205,40 @@ canonical receipt 必须包含命令、commit/source snapshot、输入 artifact 
 
 目标：提供第一个可用但仍显式启用的脚本闭环。
 
-- [ ] 通过 `Yolo(this).augment(target)` 注册 `yolo`，不只增加一个字段。
-- [ ] 实现 `yolo.load()`、`detector.detect()`、`detector.close()`。
-- [ ] detector 实现 `Closeable` 并注册到 `ScriptRuntime.closeableManager`。
-- [ ] 只接受显式 component/provider 或明确保存且已授权的选择。
-- [ ] 结果 bounds 使用原图坐标，可直接服务 click/swipe。
-- [ ] 增加一个最小截图/图片示例和稳定的脚本错误码。
+- [x] 通过 `Yolo(this).augment(target)` 注册 `yolo`，不只增加一个字段。
+- [x] 实现 `yolo.load()`、`detector.detect()`、`detector.close()`。
+- [x] detector 实现 `Closeable` 并注册到 `ScriptRuntime.closeableManager`。
+- [x] 只接受已授权的显式 exact component，不按 engine/package 静默选择或回退。
+- [x] 结果 `RectF` bounds 使用原图坐标，可直接读取中心点服务 click/swipe。
+- [x] 增加 `sample/yolo` 最小图片示例和稳定的 `YOLO_*` 脚本错误码。
 
 主 gate：记录一个命名 Host APK、Provider APK、模型 SHA-256、设备 API/ABI、脚本和
 结果的 `JS -> Host -> Binder/PFD -> JNI/NCNN -> Detection[]` receipt。
 
 R3 exit 只能声明 `PUBLIC_PREVIEW` 或 `PARTIAL_DEVICE`，不能声明生产完毕。
+
+2026-08-11 R3 exit：
+
+- `R3-SOURCE=PASS`：main revision
+  `e6833d5b7b5b84d151067371189abb2fa0ce89fe` 与 provider revision
+  `01b9093c55c7c1a78f39246c671e928df244483f` 均在 gate 前 clean；无 push。
+- `R3-ANDROID_BUILD=PASS`：Provider arm64 debug APK、Host arm64 debug APK 与 Host
+  instrumentation APK 串行 assemble；三者单 signer 且证书 SHA-256 一致。模型和图片
+  仅由 instrumentation 外部暂存，Host/Provider APK 均不包含模型。
+- `R3-DEVICE_E2E=PASS`：授权设备 `QV710AF65F`（API 31、arm64）在确认无 soak、无竞争
+  gate 且三个目标包预先不存在后，仅运行一个 opt-in instrumentation method。
+- 设备实际执行
+  `ScriptEngineService -> LoopBasedJavaScriptEngine (Rhino) -> yolo.load/detect/close ->`
+  `exact Host -> remote Binder/PFD -> provider JNI/NCNN`；没有直接调用测试专用 Host API。
+- 真实 YOLO11n 检测得到 1 bus + 4 person，五项与锁定 fixture 的 IoU 均大于
+  `0.9999994`；原图 `RectF` 中心点和重复 close 通过。
+- 运行后 Host/Provider/Test 三包和唯一 staging 目录均 absent；未启动 AVD。
+- canonical receipt：`docs/dev/yolo-evidence/r3-summary.json`；generated receipt SHA-256
+  `0f254c6cebf031dc0197263dd2a8ca957add85370d9b5fe4ede9257c4887c78b`。
+
+证据边界：`SOURCE / ANDROID_BUILD / BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E /
+PUBLIC_PREVIEW = PASS`；`STATIC/JVM` 没有由 R3 gate 重跑，`PRODUCTION = NOT_CLAIMED`。
+故障注入、连续帧资源增长和 release/升级/回滚仍分别保留到 R5/R6。
 
 ## R4：公开模型导入与有限兼容
 
