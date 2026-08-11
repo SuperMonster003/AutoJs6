@@ -1,13 +1,15 @@
 # DEX Compiler Protocol V1
 
-This document records the frozen V1 contract and the completed R1/R2 deployment
+This document records the frozen V1.0/V1.1 contract and the completed R1-R3 deployment
 boundary. The protocol AAR is a build-time SDK. The in-repository conformance
 provider is not a production D8 distribution; the real D8 provider lives in
 the independent sibling project `AutoJs6-Plugin-DEX-Compiler`. The experiment
 remains default-off. After the user explicitly selects an eligible same-signed
-exact component, only raw JAR calls from `runtime.loadJar` prefer the provider.
-Provider failure retains one built-in D8/dx fallback, cancellation does not
-change compilers, and AAR and generated-class loading remain on built-in paths.
+exact component, legacy raw JAR calls from `runtime.loadJar` use V1.0 and the
+explicit non-empty `runtime.loadJarWithClasspath(program, ...orderedClasspath)`
+entry uses V1.1. A permitted failure retains one same-semantics built-in attempt,
+cancellation does not change compilers, and AAR and generated-class loading
+remain on built-in paths.
 
 ## Modules
 
@@ -23,9 +25,11 @@ or native library. V1 is ABI independent.
 
 ## Scope
 
-V1 supports one bounded operation:
+V1 supports one bounded JAR-to-DEX operation with two input layouts:
 
-- Input: one read-only JAR snapshot.
+- V1.0 input: one read-only raw program JAR snapshot.
+- V1.1 input: one canonical bundle containing exactly one program JAR followed
+  by at least one ordered compile-only classpath JAR snapshot.
 - Compiler family: D8 only.
 - Modes: `DEBUG` and `RELEASE`.
 - Output: one write-only DEX indexed ZIP containing contiguous
@@ -33,16 +37,28 @@ V1 supports one bounded operation:
 - Runtime library model: `DEVICE_RUNTIME_BOOTCLASSPATH_V1`.
 - Concurrency: one session per provider process.
 
+The V1.1 classpath participates in compilation and ordered input identity. It is
+not copied into the DEX ZIP and is not loaded. Any referenced runtime type must
+already be visible from the final program loader's parent; a loader previously
+created by `runtime.loadJar` is a sibling and cannot satisfy that requirement.
+
 V1 does not support AAR normalization, R8 shrinking, keep rules, mapping or
-retrace data, caller supplied classpaths, desugared-library configuration,
-network compilation, loading the result in the provider, or deterministic byte
-identity claims.
+retrace data, arbitrary provider-side or filesystem classpaths, desugared-library
+configuration, network compilation, loading the result in the provider, or
+deterministic byte identity claims. V1.1 classpath JARs are host-frozen bounded
+bundle members, not the legacy arbitrary external-classpath capability; the
+provider still advertises `acceptsExternalClasspath=false`.
 
 ## Binder Surface
 
 `IDexCompilerProvider` exposes `getCompilerInfo`, `getCapabilities`, and
-`openSession`. `openSession` receives one encoded request, one program
-descriptor, one output descriptor, and one callback. It returns an
+`openSession`. `openSession` receives one encoded request, the existing
+`programFd`, one output descriptor, and one callback. V1.0 interprets
+`programFd` as the raw program JAR; V1.1 interprets it as the canonical input
+bundle. No AIDL method, transaction, Binder object, or PFD was added for V1.1.
+The minor version adds a capability extension whose tags remain optional to
+V1.0 readers, plus version-gated request fields that are mandatory in every
+V1.1 request; V1.0 golden bytes remain unchanged. `openSession` returns an
 `IDexCompilerSession` with idempotent `cancel` and `close` methods.
 
 The callback lane contains `onStarted`, `onProgress`, and exactly one of
@@ -119,11 +135,15 @@ explicit and same-signed, and the plugin is not promoted to the default compiler
 
 ## Descriptor Ownership
 
-The host snapshots mutable or non-seekable input into host-private storage and
-computes its size and SHA-256 before dispatch. The provider duplicates both
-descriptors before asynchronous use and closes the received arguments. Only
-the provider reads the program descriptor and only one provider worker writes
-the output descriptor.
+The host snapshots mutable or non-seekable inputs into host-private storage and
+computes each size and SHA-256 before dispatch. For V1.1 it writes those frozen
+members into canonical program/classpath order and records the bundle size,
+bundle SHA-256, per-member role/ordinal/identity, and ordered input-set
+fingerprint. Caller filesystem paths and outer JAR filenames do not cross
+Binder. The provider
+duplicates both descriptors before asynchronous use and closes the received
+arguments. Only the provider reads the input descriptor and only one provider
+worker writes the output descriptor.
 
 The output points at a host-owned staging transaction. A successful callback
 does not publish it. The provider must close its producer before the callback;
@@ -199,9 +219,17 @@ it. This removes the earlier ordering problem where the caller had to guess a
 provider fingerprint before discovery. The R1.1 raw-JAR adapter uses this
 post-handshake finalization before dispatch.
 
+Legacy `runtime.loadJar` fixes its request to V1.0 even when the provider also
+supports V1.1. Only the explicit entry with a non-empty ordered classpath asks
+for V1.1. A provider without the V1.1 bundle capability is not silently asked to
+compile V1.0 without the classpath. Classpath order, including repeated input
+positions, is preserved in the request, single-flight attempt identity, and
+separately versioned semantic cache key; this does not promise a deterministic
+winner for conflicting class definitions.
+
 The semantic cache key includes all inputs that may change executable output:
 
-- Input content SHA-256 and canonicalization policy.
+- Ordered input content identities, input-set fingerprint, and canonicalization policy.
 - Protocol version, compiler family and version.
 - Minimum API, debug or release mode, and output format.
 - Runtime-library model and ordered fingerprint.
@@ -217,6 +245,12 @@ entries, 256 MiB uncompressed input, 128 MiB total class bytes, 8 MiB per class,
 256 MiB output, 64 DEX entries, 64 KiB diagnostics, and a 300 second maximum
 deadline. The effective value is always the smallest host, provider, request,
 and protocol limit.
+
+V1.1 additionally allows at most 32 classpath JARs, 64 MiB compressed per
+classpath JAR, 128 MiB compressed classpath total, and 256 MiB for the complete
+canonical bundle. Its aggregate ceilings are 60,000 archive entries, 512 MiB
+uncompressed input, and 256 MiB of class data. These are protocol ceilings, not
+allocation targets or a promise that a smaller device-specific limit is safe.
 
 The experimental host currently rejects requests above a separate 16 MiB
 in-memory output ceiling before discovery. Its validator still materializes
@@ -269,13 +303,17 @@ until `DexClassLoader`.
 
 ## Failure And Degradation
 
-The R1.1 coordinator performs at most one plugin dispatch and never retries
-Binder work after dispatch. It requires the enabled experiment and one explicit
+The coordinator performs at most one plugin dispatch and never retries Binder
+work after dispatch. It requires the enabled experiment and one explicit
 same-signed exact component; V1 performs no automatic provider selection.
-Disabled, unavailable, pre-dispatch failure, remote failure, invalid output, or
-verified-artifact adoption failure claims at most one built-in D8/dx attempt.
-Post-dispatch fallback first rolls back plugin output. Cancellation propagates
-as interruption and never changes compilers or triggers fallback.
+For V1.0, disabled, unavailable, pre-dispatch failure, remote failure, invalid
+output, or verified-artifact adoption failure claims at most one built-in D8/dx
+attempt. For V1.1, the same permitted failures retain the exact frozen program
+and ordered classpath for at most one local D8 attempt. V1.1 must not ignore the
+classpath, silently downgrade to V1.0, or enter dx because those paths would
+change semantics. Post-dispatch fallback first rolls back plugin output.
+Cancellation propagates as interruption and never changes compilers or triggers
+fallback.
 
 That cancellation rule also applies inside single-flight. Any interrupted caller
 detaches without a local fallback. The shared producer continues while another
@@ -286,12 +324,13 @@ does not claim to stop CPU work already executing inside D8. A safety circuit
 opened by unsafe executor rejection or a suspected blocked Binder call remains
 open for the current process lifetime rather than speculatively recovering.
 
-Production source wiring is intentionally limited to the raw JAR branch used by
-`runtime.loadJar`. `loadAar`, `loadDex`, compatibility helpers, and
+Production source wiring covers the legacy raw JAR branch used by
+`runtime.loadJar` and the explicit ordered-classpath branch used by
+`runtime.loadJarWithClasspath`. `loadAar`, `loadDex`, compatibility helpers, and
 `GeneratedClassLoader.defineClass()` retain their existing built-in behavior.
 A verified DEX ZIP is copied into host-owned class-loader storage, rehashed, made
 read-only, and only then handed to `DexClassLoader`; an adoption failure can use
-the same retained input snapshot for the single local fallback.
+the same retained input set for the single local fallback.
 
 The source tree now also contains an explicitly opted-in
 `DexCompilerRealProviderAndroidTest` entry that pins the real package, exact
@@ -371,3 +410,25 @@ its 61-file manifest SHA-256 is
 This closes R2 without creating a new device matrix and without equating result
 termination with D8 CPU termination. Removing host compiler dependencies remains
 a later explicit decision.
+
+R3 adds the public Rhino
+`runtime.loadJarWithClasspath(program, ...orderedClasspath)` entry without
+changing the legacy overloads. Host commit
+`2e439a9738f7334cd4750535a884e0d5dce2d1cf` passed 20 DEX suites/176 tests and
+built the Debug and AndroidTest APKs. The representative evidence package at
+`D:\idea-projects\AutoJs6-DEX-R3-Evidence-20260811\classpath-entry-api34-fa6c21a7-7dda-4bee-9485-bf78906ed83c\report.json`
+records one real-provider method on the authorized `DEX_R1_API34_X64` API
+34/x86_64 target. It passed V1.1 compilation with a parent-visible fixture,
+final `DexClassLoader` execution, exclusion of the compile-only stub from the
+output, exact V1.1 cache reuse, and an independent V1.0 `runtime.loadJar`
+regression. The host/test/plugin APK SHA-256 values are
+`f2c3819135e0d83f5903c7dc5b495d6f607f9d8b22e95723acda17467e0eb8dd`,
+`874c8678acec802f96f3a4281c633737a55097919bfe149fe5bf42a9de97b1b9`, and
+`6f36eeb230643c8dfccfa40aca71310bfb0ebd4b6b7903b516d4ee12cbb13372`.
+The report SHA-256 is
+`af55c196f90422bbafccc5ddd98cd064e6cd1763346363b08f1bcbc0c12cbc40`;
+its self-excluding 116-entry `files.sha256.json` SHA-256 is
+`b4759c7fde31bfca866fbd02d4ac719c1193498b06df7cb6fadb574534fadf5e`.
+This is one representative vertical-path result, not a new API/ABI matrix or
+device proof for every fallback permutation, the API 24/25 CLI path, dependency
+resolution, a combined loader, or removal of the built-in compilers.
