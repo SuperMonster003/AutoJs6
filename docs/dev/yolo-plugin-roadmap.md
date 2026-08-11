@@ -11,10 +11,11 @@
 | R0 本地提交 | `3c170896d8e4b528f1aa85953a4698d1742c8344`，未 push |
 | 通用 Host | 已有 `AidlPluginHost`，包含发现、授权、显式组件绑定、连接池和 dedicated binding lease |
 | OCR Host | 当前是统一的 `OcrPluginHost`；raw SharedMemory/pipe 仍是其私有实现 |
-| YOLO Runtime | R1 sibling 已有 CPU/arm64 NCNN/JNI provider；主仓库已有 R2 default-off Host/Binder/PFD 路由和 R3 Rhino Preview API |
+| YOLO Runtime | R1 sibling 已有 CPU/arm64 NCNN/JNI provider；主仓库已有 R2 default-off Host/Binder/PFD 路由、R3 Rhino Preview API 和 R4 manifest 驱动的有限模型导入 |
 | R0 当前声明 | `SOURCE_DEPLOYED / STATIC_PASS / JVM_DIAGNOSTIC_PASS / AIDL_DIAGNOSTIC_PASS / ANDROID_BUILD_PASS`；不能证明 Binder/native/设备可运行 |
 | R2 当前声明 | `SOURCE / ANDROID_BUILD / BINDER_PFD = PASS`；真实 NCNN 推理也经该链路复验，但不等于 Rhino `DEVICE_E2E` 或生产发布 |
 | R3 当前声明 | `SOURCE / ANDROID_BUILD / DEVICE_E2E / PUBLIC_PREVIEW = PASS`；仍明确不声明 `PRODUCTION` |
+| R4 当前声明 | `SOURCE / ANDROID_BUILD / BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E / PUBLIC_MODEL_IMPORT = PASS`；仅覆盖同一 decoder 的 YOLO11 detect 有限兼容集，不声明 `PRODUCTION` |
 | 生产入口 | 插件中心可发现但 YOLO 默认关闭；Rhino 已提供显式 component 的 opt-in Preview，无静默 provider 选择或回退 |
 
 ## 固定架构决定
@@ -244,14 +245,41 @@ PUBLIC_PREVIEW = PASS`；`STATIC/JVM` 没有由 R3 gate 重跑，`PRODUCTION = N
 
 目标：从固定 fixture 扩展到用户模型，但仍保持可说明的兼容集合。
 
-- [ ] 发布并校验 manifest schema v1；不得用文件名猜 YOLO family。
-- [ ] 支持一个官方 fixture 和一个同 decoder 的自训练模型。
-- [ ] decoder registry 首先只开放明确实现的 decoder ID。
-- [ ] 对 manifest/node/task/shape/labels 做有界验证和明确错误。
-- [ ] capability 准确报告 backend/device/task/model-format/decoder/limit。
-- [ ] 评估并仅在收益明确时抽取 OCR/YOLO 共用 `PluginImageTransport`。
+- [x] 发布并校验 manifest schema v1；不得用文件名猜 YOLO family。
+- [x] 支持一个官方 fixture 和一个同 decoder 的自训练模型。
+- [x] decoder registry 首先只开放明确实现的 decoder ID。
+- [x] 对 manifest/node/task/shape/labels 做有界验证和明确错误。
+- [x] capability 准确报告 backend/device/task/model-format/decoder/limit。
+- [x] 已评估 OCR/YOLO 共用 `PluginImageTransport`；R4 无明确收益，继续延后且不作为门禁。
 
 主 gate：两个 manifest 驱动模型通过真实 native inference 与原图坐标检查。
+
+R4 exit（2026-08-11）：
+
+- [x] sibling `eaaf05d` 发布有限 manifest v1、单项 decoder registry、动态 1-256
+  类输出校验与协议 `MODEL_REJECTED`；`cdca31a` 固定 local-only 自训练 fixture
+  recipe/provenance，模型、训练数据和测试图均未进入 Git/APK。
+- [x] 主仓库 `923530e34` 将模型拒绝稳定映射为 Rhino
+  `YOLO_MODEL_REJECTED`；`a83dafd2b` 固定唯一 R4 双模型 gate。
+- [x] Provider Kotlin/AndroidTest/CMake/JNI 与 Host/AndroidTest 构建通过；R4 gate
+  自身未重跑 `STATIC/JVM`，因此这两层保持 `NOT_RUN_BY_R4_GATE`。
+- [x] `QV710AF65F` 在确认无 soak/并发设备任务后完成 API 31、arm64-v8a
+  单次 production Rhino gate：官方 YOLO11n 得到 1 bus + 4 person，最小参考
+  IoU `0.99999946`；自训练 1 类模型得到 1 个 `synthetic-target`，ground-truth
+  IoU `0.93100712`、参考 IoU `0.99999978`。
+- [x] 错误 shape `[1,6,8400]` 经公开 `yolo.load()` 稳定返回
+  `YOLO_MODEL_REJECTED`；未使用 family 文件名猜测或未知 decoder fallback。
+- [x] Host/Provider/instrumentation APK 均不包含模型；Provider 是唯一携带 arm64
+  YOLO native 的 APK，Host 与 Provider 同 signer、不同 UID、exact component。
+- [x] gate 前后三个临时包均不存在，唯一 staging 已删除，并已在 gate 后独立复查。
+- [x] canonical receipt：[`yolo-evidence/r4-summary.json`](yolo-evidence/r4-summary.json)；
+  generated receipt SHA-256
+  `2fcee2b83e69af5333d741c0e35c0c933011f3786bbebf917bb99c6b80b32f73`。
+
+证据边界：`SOURCE / ANDROID_BUILD / BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E /
+PUBLIC_MODEL_IMPORT = PASS`；兼容范围仅为 schema 中声明的 YOLO11 detect、NCNN、CPU、
+640、`in0/out0`、`ultralytics-detect` 和 1-256 labels。`PRODUCTION = NOT_CLAIMED`；
+故障注入、资源增长、RC/release、升级和回滚仍保留到 R5/R6。
 
 ## R5：聚焦可靠性、性能与 RC
 
