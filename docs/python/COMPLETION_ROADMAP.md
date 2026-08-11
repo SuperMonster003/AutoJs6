@@ -41,7 +41,7 @@
 | R3-P | **已完成（default-off 开发者预览）** | 单文件 Python 引擎纵向路径已通过代表性真机 smoke；公开入口仍关闭 |
 | R4 | **已完成（限定入口范围的开发者预览）** | Python 项目、编辑器及新建快捷方式/定时任务入口一致；content 项目树、Widget 与 Tasker 项目上下文明确延后 |
 | R5 | **已完成（default-off 能力预览）** | 不可变只读能力快照和最小 `autojs6` Python API 已通过构建及 API 31/arm64 代表性项目 smoke |
-| R6 | **进行中（P1 已完成，P2 待冻结）** | 默认关闭的 RC 准入、合规源码和聚焦编译已完成；下一步冻结可追溯产物 |
+| R6 | **进行中（Host `6.8.0` 版本身份已冻结，正式发布待完成）** | 稳定 app adapter、INRT 隔离、三件 AAR 本地分发和聚焦编译/单测已完成；下一步提交精确源码、重建稳定产物并复验 P3 |
 
 ## R0：协议与隔离基线（已完成）
 
@@ -294,13 +294,13 @@ P3 诊断 SHA-256 为 `517f8f1729d1fe494d480be915e673cb0e6396bfebdc81eff8bc14f6b
 - [x] 固化产品与维护决定：Chaquopy 是可信本地脚本运行时，不是 hostile-code sandbox；SM003 是长期发行 signer；`SuperMonster003` 同时承担 runtime、security 与 release owner；Plugin `0.1.0` 与 Host `6.8.0` 配对。
 - [x] 固化并在当前源码实现热插拔语义：Host 无需重启；安装或重新启用 Plugin 后，下一次新执行重新发现并 pin provider 身份；前台入口对缺失/禁用显示安装/启用提示，后台入口只返回稳定错误，二者都绝不 fallback；卸载、禁用或更新引起在途 Binder death 时终止该执行且不得重放，后续新执行再重新发现。
 - [x] 生成 `1.1.0`/`STABLE` 的本地三件 AAR distribution：`common-plugin-api-release.aar`、`protocol-wire-api-release.aar` 和 `python-runtime-api-release.aar`；sibling Plugin 已按 manifest/SHA-256 锁定三件 AAR 并完成聚焦 Debug/Release 编译与单测消费验证。
-- [ ] 冻结可发布的 Host `6.8.0` 最终身份及对应兼容约束。当前工作树仍标识为 `6.8.0 Alpha7`/`versionCode 5273`，本地 RC 证据不能代替正式 Host 身份。
+- [x] 冻结 Host `6.8.0` 的版本身份与配对约束：`VERSION_NAME=6.8.0`、`VERSION_BUILD`/`versionCode=5275`，Plugin `0.1.0` 与该 Host 版本配对。该勾选只确认版本身份，不代表源码 commit、AAR、provenance、P3、tag 或发布已经冻结或完成。
 - [ ] 完成官方 GitHub 身份与权限准备：目标仓库、`master` 分支和发布权限必须实际可用；当前授权决定不等于已认证、已推送、已打 tag 或已发布。
 - [ ] 在 AutoJs6 官方插件索引登记 Python Runtime 的包名、仓库、版本、Host 配对和 SM003 signer；索引未落地前不得宣称官方可发现。
-- [ ] 在最终源码冻结后重新生成 Host API 分发清单、Plugin `0.1.0` 版本/产物和 provenance，并对这些精确稳定产物重新运行最小 P3 集中复验；当前 dirty-tree 编译/单测和历史 RC/P3 均不能替代该复验。
+- [ ] 将本次版本与 Roadmap 变更提交为精确 Host source commit 后，重新生成 Host API 分发清单、Plugin `0.1.0` 版本/产物和 provenance，并对这些精确稳定产物重新运行最小 P3 集中复验；当前 dirty-tree 编译/单测和历史 RC/P3 均不能替代该复验。
 - [ ] 推送精确源码，创建 `v0.1.0` tag 与 GitHub Release，独立下载并复核发布资产，再生成唯一 production receipt；receipt 必须记录发布 URL/ID、tag commit、资产哈希、signer、Host 配对以及证据限制。
 
-P4 当前工作树证据：`verifyPythonReleaseApiDistributionGate` 为 PASS，distribution manifest SHA-256 为 `16cad933bb6a13b1eafa6e7a5af581db0736b97c6d2690ff51053005a1a35e96`，三件 AAR 的依赖边为 `python-runtime-api -> protocol-wire-api`，`common-plugin-api` 独立分发。Host 的上述 `9/9` 聚焦单测及 Debug/Release Kotlin 编译通过；sibling Plugin 的 `testDebugUnitTest` 为 `32/32`、零失败/错误/跳过，`compileDebugKotlin` 与 `compileReleaseKotlin` 通过。该 manifest 明确记录 Host `dirty=true`、`published=false`；producer gate 中的 `pluginConsumed=false` 不被篡改，独立的 sibling lock 与编译/测试只构成本地 consumer 证据。
+P4 版本身份冻结前的本地证据：`verifyPythonReleaseApiDistributionGate` 为 PASS，distribution manifest SHA-256 为 `16cad933bb6a13b1eafa6e7a5af581db0736b97c6d2690ff51053005a1a35e96`，三件 AAR 的依赖边为 `python-runtime-api -> protocol-wire-api`，`common-plugin-api` 独立分发。Host 的上述 `9/9` 聚焦单测及 Debug/Release Kotlin 编译通过；sibling Plugin 的 `testDebugUnitTest` 为 `32/32`、零失败/错误/跳过，`compileDebugKotlin` 与 `compileReleaseKotlin` 通过。该 manifest 明确记录 Host `dirty=true`、`published=false`，且不绑定当前 `6.8.0`/`5275` 版本身份；producer gate 中的 `pluginConsumed=false` 不被篡改，独立的 sibling lock 与编译/测试只构成历史本地 consumer 证据，必须按上一项重新生成和复验。
 
 P4 退出条件：正式 Host 身份、官方索引、GitHub tag/Release 与下载复核均可追溯，且新的 production receipt 明确声明 `published=true`、`stableRelease=true` 并回指全部冻结输入。当前尚未达到该条件，也不声称 `0.1.0` 已发布。
 
