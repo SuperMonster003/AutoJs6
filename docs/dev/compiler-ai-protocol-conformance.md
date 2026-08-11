@@ -32,40 +32,45 @@ behavior only for reproducible host conformance testing.
 | AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
 | AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
-| AI explicit ask route | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process/per-script lifecycle ownership, and stable terminal codes | Standalone K2/JUnit 15/15; focused Gradle 19/19 (8 parser + 3 mapper + 4 runtime + 4 service), 0 skipped/failures/errors; App Debug/instrumentation assembled; one real release-plugin/model public-route method on API 31 | PARTIAL, JVM/source plus one production positive-path device smoke |
+| AI explicit ask/stream routes | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process-shared admission, per-script lifecycle ownership, normalized stream events, and stable terminal codes | Earlier standalone ask K2/JUnit 15/15; focused Gradle 25/25 across mapper, ask/stream runtime, service, and `AiStream`, 0 skipped/failures/errors; one real-provider ask and one fake-provider stream public-route method on API 31 | PARTIAL, JVM/source plus two narrow positive-path device smokes |
 | AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models including isolated callback UID and provider process death, bounded executors, FD cleanup, and caller authentication | H1 fixture commit `edd10008f` and H2 fixture commit `10dad3e39`; conformance text provider unit corpus: 31 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM; Android hostile results remain PARTIAL below |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 
-### Explicit `ai.ask` Plugin Route Evidence
+### Explicit `ai.ask` And `ai.stream` Plugin Route Evidence
 
-The production `AiService` now chooses the plugin path only when the request
-options contain the `plugin` key. A missing key leaves legacy cloud ask/chat/
-stream behavior unchanged. A present key, including a null or malformed value,
-never consults the vault or HTTP path and never falls back. Admission requires
-one exact component package/class, provider ID, model ID, and an optional
-integer timeout from 1,000 through 600,000 milliseconds; the default is
-120,000. Cloud control aliases, explicit streaming, and unknown fields fail
-closed.
+The production `AiService` chooses the plugin path for `ai.ask` and `ai.stream`
+only when the request options contain the `plugin` key. A missing key leaves
+legacy cloud ask/chat/stream behavior unchanged. A present key, including a
+null or malformed value, never consults the vault or HTTP path and never falls
+back. Admission requires one exact component package/class, provider ID, model
+ID, and an optional integer timeout from 1,000 through 600,000 milliseconds;
+the default is 120,000. Cloud control aliases, an explicit `stream` option, and
+unknown fields fail closed.
 
-The request mapping admits exactly one plain-text user message. It creates one
-non-streaming inline request with zero request descriptors and no reasoning,
-structured output, usage, tools, or tool rounds. The composed Android runner
+The shared request mapping admits exactly one plain-text user message and sends
+one inline request with zero request descriptors and no reasoning, structured
+output, usage, tools, or tool rounds. `ai.ask` is non-streaming. `ai.stream`
+requires the planned model's `STREAMING` capability and maps `Started` to
+`open`, every nonempty text chunk to `chunk` then `delta` in one dispatcher
+action, and the aggregate completion to `done`. The composed Android runner
 reuses the exact-component discovery, handshake, model-list, and session
 coordinators, requires an `ON_DEVICE`/`NONE` provider and the exact planned
 model, and applies one outer absolute deadline from discovery through the active
 session terminal. Lower handles and coordinators retain settled cleanup
-ownership. A process-shared backend owns one ask admission gate, serialized
-orchestration/control/terminal/deadline lanes, a
-bounded three-operation blocking pool, and the existing coordinator process
-owners. Each script runtime owns cancellation and handle close; terminal and
-late-callback races have one visible winner and no post-dispatch retry.
+ownership. One process-shared backend and admission gate serialize ask and
+stream attempts over the same orchestration/control/terminal/deadline lanes,
+bounded three-operation blocking pool, and coordinator process owners. Each
+script runtime owns cancellation and handle close; terminal and late-callback
+races have one visible winner and no post-dispatch retry.
 
-The standalone K2/JUnit gate passed 15/15 tests: 8 option-parser, 3 mapper, and
-4 runtime lifecycle cases. A later focused Gradle run passed the final 19/19
-corpus--those 15 plus 4 `AiService` integration cases--with 0 skipped, 0
-failures, and 0 errors, and assembled the host App Debug and instrumentation
-APKs. The production plugin separately passed `testDebugUnitTest`, `lintDebug`,
-`assembleDebug`, and `assembleRelease`.
+The earlier standalone K2/JUnit ask gate passed 15/15 tests: 8 option-parser,
+3 mapper, and 4 runtime lifecycle cases. After production commit `2ea3360a2`
+and test commit `50b43d00c`, the focused Gradle XML recorded 25/25 tests across
+`AiPluginAskInputMapperTest` (3), `AiPluginAskRuntimeTest` (4),
+`AiPluginStreamRuntimeTest` (4), `AiServicePluginRouteTest` (5), and
+`AiStreamTest` (9), with 0 skipped, 0 failures, and 0 errors. The production
+plugin separately retained its completed `testDebugUnitTest`, `lintDebug`,
+`assembleDebug`, and `assembleRelease` evidence.
 
 The 2026-08-11 production positive-path smoke ran the exact method
 `AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
@@ -149,6 +154,48 @@ reserved_external_paths_post=all-three-absent
 documentsui_last_location_restore=not-lossless
 receipt_scope=local-only
 ```
+
+#### Public Fake-Provider Stream Route
+
+On 2026-08-11, the exact opt-in method
+`AiTextPluginPublicStreamSmokeTest#publicRhinoAiStreamCompletesThroughExactFakeProvider`
+returned `OK (1 test)` in 1.645 seconds with instrumentation code `-1` on
+`QV710AF65F` (API 31, arm64-v8a, user 0). Source HEAD was
+`50b43d00cc634f8a220856bf68f936fc800442a4`. The method used the real
+`ScriptEngineService` and public Rhino `ai.stream` with the exact test-only
+package `org.autojs.plugin.ai.text.fake`, service class
+`org.autojs.plugin.ai.text.fake.service.FakeAiTextProviderService`, provider
+`fake.local`, and model `fake.stream`.
+
+The UTF-8 prompt produced one `open` and more than eight `chunk` events, crossing
+the initial credit window, plus the same number of normalized `delta` events
+and one `done`. Both
+aggregates and `done.text` exactly equalled the prompt; the route/provider/model
+metadata matched the selector, and usage, tool-call, error, and cancellation
+counts were zero. The final public stream state was `done` with `isDone == true`.
+
+The candidate SHA-256 values were:
+
+- Host arm64 App Debug:
+  `10782233667a77c2df5c02e1299dd0d6d4194cc188d4f586f8d23257dc5cc951`.
+- App Debug instrumentation:
+  `6025b35860be52b0477013327f7c458e12ce5751f568dfacf1ab299ae074d309`.
+- Test-only fake provider:
+  `6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
+
+Exact final checks found the host, instrumentation, and fake-provider packages
+absent for users 0 and 10 and all nine reserved external data/media/obb paths
+absent.
+
+This is one **PARTIAL** public-route conformance cell, not production-model
+stream acceptance. The stream completed naturally. It did not exercise public
+`stream.cancel()`, force-stop the engine, or run a real production provider or
+model. Exactly-once public cancellation, the deterministic cancel/completion
+race, silent runtime close, synchronous terminal-before-handle behavior, and
+late-event suppression remain JVM evidence in `AiStreamTest` and
+`AiPluginStreamRuntimeTest`. Public active cancellation, engine-stop
+propagation on Android, a release host, and the API/ABI matrix remain open. This
+result closes no broad R1 checkbox or protocol exit criterion.
 
 ### Pure Kotlin AI Session Transcript Evidence
 
@@ -236,8 +283,9 @@ APK assembly pass.
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
 | AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a metadata, paged model list, one normal `fake.stream` session, and ordinary-pipe completion materialization |
 | AI public production `ai.ask` positive path | Real signed provider release, real model, public Rhino entry, exact component/provider/model selector, artifact/device hash match, reversible cleanup | PARTIAL, one API 31/arm64-v8a App Debug non-streaming one-shot method; no release-host or API matrix |
+| AI public conformance `ai.stream` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, normalized chunk/delta/done aggregation beyond eight initial credits, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; public active cancel/engine stop remain JVM-only and no real provider/model stream ran |
 | AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PARTIAL, API 31 only: seven H1 methods plus two H2 methods cover completion/tool descriptors, ordering, sequence, descriptor reference, bounded duplicate terminal, cancel-after-start, one isolated wrong UID, and one provider death; deterministic Android no-credit and update/disable/uninstall lifecycle remain pending |
-| AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal stream crossed 8 initial credits, a tool callback was rejected without execution, and one provider kill followed a chunk whose credit was causally replenished; real tool turns, host death, and the matrix remain pending |
+| AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal session and public Rhino fake stream crossed 8 initial credits, a tool callback was rejected without execution, and one provider kill followed a chunk whose credit was causally replenished; real tool turns, host death, and the matrix remain pending |
 | Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
 
 ### API 31 AI Partial Evidence
@@ -467,9 +515,9 @@ coordinator JVM final-reinspection failures before `openSession`: changed
 fail-closed pre-dispatch identity reinspection, not an installed-package update
 or uninstall during an Android session. Pre/post package absence above is only
 cleanup evidence. Provider disable, active-session update/uninstall, host death,
-the Android version/ABI matrix, real production plugin/model/runtime, remote
-`listingGeneration`, UI/runtime selection, and `ai.*` wiring remain open. No
-broad R1 checkbox or protocol exit criterion is closed by H2.
+the Android version/ABI matrix, broader production plugin/model/runtime matrix,
+remote `listingGeneration`, UI/runtime selection, and broader `ai.*` wiring
+remain open. No broad R1 checkbox or protocol exit criterion is closed by H2.
 
 ### API 25 Partial Evidence
 
@@ -537,16 +585,19 @@ The DEX adapter remains experimental and disconnected from
 compiler must contain the real D8 implementation; the fixed-output conformance provider can
 never be selected for production compilation.
 
-The AI protocol now has one narrow public connection: an exact, explicit,
-prompt-only plugin selector on `ai.ask`. Selector absence preserves the built-in
-cloud path; selector presence fails closed without vault, HTTP, retry, or
-fallback. One real release provider/model completed this route on one API 31
-device with an App Debug host, but that smoke does not promote the broader
-protocol. Promotion still requires the remaining installed-provider/version/
-hostile and API matrices, remote catalog-generation handling, release-host
-evidence, automatic UI-selection decisions, plugin-backed chat/stream
-decisions, and active-request update/disable/uninstall results. The pure
-policies and Android adapters remain fail-closed foundations outside that one
-composition. Image, audio, and video
+The AI protocol now has two narrow public connections: exact, explicit,
+prompt-only plugin selectors on `ai.ask` and `ai.stream`. Selector absence
+preserves the built-in cloud path; selector presence fails closed without vault,
+HTTP, retry, or fallback. One real release provider/model completed the ask
+route on one API 31 device with an App Debug host. A separate public stream
+method completed beyond eight credits with the test-only fake provider. Neither
+smoke promotes the broader protocol, and the stream method does not turn its JVM
+public-cancel/runtime-close coverage into Android evidence. Promotion still
+requires the remaining installed-provider/version/hostile and API matrices,
+remote catalog-generation handling, release-host evidence, automatic
+UI-selection decisions, plugin-backed chat and broader stream features, a real
+provider/model public stream, active public cancellation, and active-request
+update/disable/uninstall results. The pure policies and Android adapters remain
+fail-closed foundations outside those two compositions. Image, audio, and video
 require separate protocol reviews and cannot be added to the text plugin to
 satisfy this matrix.
