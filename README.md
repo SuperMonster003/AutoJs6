@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 8 月 11 日.
+数据更新于 2026 年 8 月 12 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/08/11
+###### 2026/08/12
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
@@ -177,6 +177,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Node.js 外部运行时插件后端, 支持强制 `plugin` 与可选回退 `pluginOptional` 模式, 常驻 Binder 会话及进程运行时, 信任/合约/ABI 校验和单活动零队列背压
 * `新增` Node.js 外部运行时插件后端支持请求级工作区归档传输 v2, 包含显式输入映射/输出回写/删除 tombstone 清单, 且不扫描宿主沙盒
 * `新增` 打包功能支持 Node.js 脚本项目, 并自动包含所需运行库
+* `新增` 独立 Python Runtime 插件后端, 支持通过单独的 CPython 插件进程运行本地 .py 文件及声明为 `type: python` 的脚本项目, 并校验固定组件/签名/协议/ABI, 支持热插拔且绝不回退到 JavaScript
+* `新增` Python 启动集成覆盖文件管理器/编辑器/本地 Run Intent/单文件 Import Intent/新建快捷方式/定时任务/广播任务并严格保留单文件或项目上下文; 项目支持内部 import/相对文件读取及只读 `autojs6.app/device/execution/project` API
 * `新增` 插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本转换/媒体信息等扩展接口
 * `新增` 插件系统提供版本化 TaggedWire 传输及 DEX 编译与供应商中立 AI 文本生成 v1 开发协议包, 并配备专用的一致性测试应用及恶意场景夹具
 * `新增` 插件系统支持离线项目文档扩展接口
@@ -616,7 +618,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 8 月 11 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 8 月 12 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

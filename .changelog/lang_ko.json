@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/11",
+      "released_date": "2026/08/12",
       "feature": [
         "Node.js 24.5.0 스크립트 런타임, \"nodejs\" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원",
         "Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원",
@@ -12,6 +12,8 @@
         "Node.js 외부 런타임 플러그인 백엔드에서 필수 `plugin` 및 폴백 가능한 `pluginOptional` 모드, 상주 Binder 세션 및 프로세스 런타임, 신뢰/계약/ABI 검증, 단일 활성 제로 큐 백프레셔 지원",
         "Node.js 외부 런타임 플러그인 백엔드에서 요청 범위 워크스페이스 아카이브 전송 v2, 명시적 입력 매핑, 출력 쓰기 반영, 삭제 tombstone 매니페스트를 지원하며 호스트 샌드박스를 스캔하지 않음",
         "앱 패키징 기능은 Node.js 스크립트 프로젝트를 지원하고 필요한 런타임 라이브러리를 자동 포함",
+        "독립 Python Runtime 플러그인 백엔드에서 로컬 .py 파일과 `type: python`으로 선언된 스크립트 프로젝트를 별도의 CPython 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 핫 플러그, JavaScript 폴백 금지를 지원",
+        "Python 실행 통합은 파일 관리자/편집기/로컬 Run Intent/단일 파일 Import Intent/새 바로 가기/예약 작업/브로드캐스트 작업을 포함하고 단일 파일 또는 프로젝트 컨텍스트를 엄격하게 유지; 프로젝트에서 내부 import/상대 파일 접근/읽기 전용 `autojs6.app/device/execution/project` API 지원",
         "플러그인 시스템에서 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/텍스트 변환/미디어 정보 등의 확장 API 지원",
         "플러그인 시스템에서 버전 지정 TaggedWire 전송과 DEX 컴파일/공급자 중립 AI 텍스트 생성을 위한 v1 개발 프로토콜 팩을 지원하고 전용 적합성 테스트 앱 및 적대적 fixture 제공",
         "플러그인 시스템에서 오프라인 프로젝트 문서 확장 인터페이스 지원",

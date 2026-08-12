@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/11
+###### 2026/08/12
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -17,6 +17,8 @@
 * `Fonctionnalité` Backend de plugin d'exécution Node.js externe avec mode `plugin` obligatoire et mode `pluginOptional` avec repli, sessions Binder persistantes et runtime à l'échelle du processus, validation de confiance/contrat/ABI et contre-pression sans file pour une seule exécution active
 * `Fonctionnalité` Le backend du plugin d'exécution Node.js externe prend en charge le transport d'archive d'espace de travail v2 limité à la requête, avec mappage explicite des entrées, réécriture des sorties et manifeste tombstone de suppression, sans analyser le sandbox hôte
 * `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
+* `Fonctionnalité` Backend de plugin Python Runtime indépendant, prenant en charge l'exécution des fichiers .py locaux et des projets de scripts déclarés avec `type: python` via un processus de plugin CPython distinct, avec validation du composant fixe/de la signature/du protocole/de l'ABI, branchement à chaud et aucun repli vers JavaScript
+* `Fonctionnalité` L'intégration de lancement Python couvre le gestionnaire de fichiers/l'éditeur/les Run Intent locaux/les Import Intent de fichier unique/les nouveaux raccourcis/les tâches planifiées/les tâches de diffusion et conserve un contexte strict de fichier unique ou de projet; les projets prennent en charge les imports internes, l'accès relatif aux fichiers et les API `autojs6.app/device/execution/project` en lecture seule
 * `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversion de texte/informations multimédias et plus encore
 * `Fonctionnalité` Le système de plugins fournit un transport TaggedWire versionné et des packs de protocole de développement v1 pour la compilation DEX et la génération de texte AI indépendante du fournisseur, avec des applications de test de conformité dédiées et des scénarios hostiles
 * `Fonctionnalité` Le système de plugins prend en charge une interface d'extension pour la documentation hors ligne du projet

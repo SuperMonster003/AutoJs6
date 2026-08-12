@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/11
+###### 2026/08/12
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
@@ -17,6 +17,8 @@
 * `新增` Node.js 外部运行时插件后端, 支持强制 `plugin` 与可选回退 `pluginOptional` 模式, 常驻 Binder 会话及进程运行时, 信任/合约/ABI 校验和单活动零队列背压
 * `新增` Node.js 外部运行时插件后端支持请求级工作区归档传输 v2, 包含显式输入映射/输出回写/删除 tombstone 清单, 且不扫描宿主沙盒
 * `新增` 打包功能支持 Node.js 脚本项目, 并自动包含所需运行库
+* `新增` 独立 Python Runtime 插件后端, 支持通过单独的 CPython 插件进程运行本地 .py 文件及声明为 `type: python` 的脚本项目, 并校验固定组件/签名/协议/ABI, 支持热插拔且绝不回退到 JavaScript
+* `新增` Python 启动集成覆盖文件管理器/编辑器/本地 Run Intent/单文件 Import Intent/新建快捷方式/定时任务/广播任务并严格保留单文件或项目上下文; 项目支持内部 import/相对文件读取及只读 `autojs6.app/device/execution/project` API
 * `新增` 插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本转换/媒体信息等扩展接口
 * `新增` 插件系统提供版本化 TaggedWire 传输及 DEX 编译与供应商中立 AI 文本生成 v1 开发协议包, 并配备专用的一致性测试应用及恶意场景夹具
 * `新增` 插件系统支持离线项目文档扩展接口

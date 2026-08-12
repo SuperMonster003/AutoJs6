@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 8 月 11 日 に更新されました.
+データは 2026 年 8 月 12 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/08/11
+###### 2026/08/12
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -177,6 +177,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Node.js 外部ランタイムプラグインバックエンドが必須の `plugin` モードとフォールバック可能な `pluginOptional` モード, 常駐 Binder セッションとプロセスランタイム, 信頼/コントラクト/ABI 検証, 単一実行ゼロキューのバックプレッシャーに対応
 * `新機能` Node.js 外部ランタイムプラグインバックエンドがリクエスト単位のワークスペースアーカイブ転送 v2 に対応し, 明示的な入力マッピング/出力の書き戻し/削除 tombstone マニフェストを提供しつつホストサンドボックスを走査しない構成を採用
 * `新機能` アプリのパッケージ化機能が Node.js スクリプトプロジェクトに対応し必要なランタイムライブラリを自動的に同梱
+* `新機能` 独立した Python Runtime プラグインバックエンドがローカル .py ファイルと `type: python` 宣言のスクリプトプロジェクトを別の CPython プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, ホットプラグ, JavaScript へのフォールバック禁止に対応
+* `新機能` Python 起動統合がファイルマネージャー/エディター/ローカル Run Intent/単一ファイル Import Intent/新規ショートカット/タイマータスク/ブロードキャストタスクを対象とし, 単一ファイルまたはプロジェクトの厳格なコンテキストを保持; プロジェクト内 import/相対ファイルアクセス/読み取り専用 `autojs6.app/device/execution/project` API に対応
 * `新機能` プラグインシステムが Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/テキスト変換/メディア情報などの拡張 API に対応
 * `新機能` プラグインシステムがバージョン化 TaggedWire 転送と DEX コンパイル/プロバイダー中立 AI テキスト生成向け v1 開発プロトコルパックに対応し, 専用の適合性テストアプリと敵対的 fixture を提供
 * `新機能` プラグインシステムがオフラインプロジェクトドキュメントの拡張インターフェースに対応
@@ -616,7 +618,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 8 月 11 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 8 月 12 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

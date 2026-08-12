@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 11 August 2026.
+Données mises à jour le 12 August 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/08/11
+###### 2026/08/12
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -177,6 +177,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Backend de plugin d'exécution Node.js externe avec mode `plugin` obligatoire et mode `pluginOptional` avec repli, sessions Binder persistantes et runtime à l'échelle du processus, validation de confiance/contrat/ABI et contre-pression sans file pour une seule exécution active
 * `Fonctionnalité` Le backend du plugin d'exécution Node.js externe prend en charge le transport d'archive d'espace de travail v2 limité à la requête, avec mappage explicite des entrées, réécriture des sorties et manifeste tombstone de suppression, sans analyser le sandbox hôte
 * `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
+* `Fonctionnalité` Backend de plugin Python Runtime indépendant, prenant en charge l'exécution des fichiers .py locaux et des projets de scripts déclarés avec `type: python` via un processus de plugin CPython distinct, avec validation du composant fixe/de la signature/du protocole/de l'ABI, branchement à chaud et aucun repli vers JavaScript
+* `Fonctionnalité` L'intégration de lancement Python couvre le gestionnaire de fichiers/l'éditeur/les Run Intent locaux/les Import Intent de fichier unique/les nouveaux raccourcis/les tâches planifiées/les tâches de diffusion et conserve un contexte strict de fichier unique ou de projet; les projets prennent en charge les imports internes, l'accès relatif aux fichiers et les API `autojs6.app/device/execution/project` en lecture seule
 * `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversion de texte/informations multimédias et plus encore
 * `Fonctionnalité` Le système de plugins fournit un transport TaggedWire versionné et des packs de protocole de développement v1 pour la compilation DEX et la génération de texte AI indépendante du fournisseur, avec des applications de test de conformité dédiées et des scénarios hostiles
 * `Fonctionnalité` Le système de plugins prend en charge une interface d'extension pour la documentation hors ligne du projet
@@ -616,7 +618,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 11 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 12 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

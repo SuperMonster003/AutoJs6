@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 11 August 2026 года.
+Данные обновлены на 12 August 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -166,7 +166,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/08/11
+###### 2026/08/12
 
 * `Новое` Среда выполнения скриптов Node.js 24.5.0 с поддержкой запуска с помощью директивы "nodejs" или таких расширений, как .node.js/.cjs/.mjs
 * `Новое` Среда выполнения Node.js поддерживает CommonJS/частичный ESM/локальный динамический import()/облегченный исходный код TypeScript (.ts/.mts/.cts)
@@ -177,6 +177,8 @@ AutoJs6 разработан на основе финальной версии �
 * `Новое` Бэкенд внешнего плагина среды выполнения Node.js с обязательным режимом `plugin` и режимом `pluginOptional` с откатом, постоянными сеансами Binder и средой выполнения на уровне процесса, проверкой доверия/контракта/ABI и обратным давлением без очереди для одного активного запуска
 * `Новое` Бэкенд внешнего плагина среды выполнения Node.js поддерживает транспорт архива рабочей области v2 на уровне запроса с явным сопоставлением входных файлов, обратной записью выходных файлов и манифестом tombstone для удалений без сканирования песочницы хоста
 * `Новое` Функция упаковки поддерживает проекты скриптов Node.js и автоматически включает необходимые библиотеки среды выполнения
+* `Новое` Независимый бэкенд плагина Python Runtime запускает локальные файлы .py и проекты скриптов с объявлением `type: python` в отдельном процессе плагина CPython, проверяет фиксированный компонент/подпись/протокол/ABI, поддерживает горячее подключение и не выполняет откат к JavaScript
+* `Новое` Интеграция запуска Python охватывает файловый менеджер/редактор/локальный Run Intent/Import Intent одного файла/новые ярлыки/задачи по расписанию/широковещательные задачи и строго сохраняет контекст отдельного файла или проекта; проекты поддерживают внутренние импорты, относительный доступ к файлам и API `autojs6.app/device/execution/project` только для чтения
 * `Новое` Система плагинов поддерживает интерфейсы расширения для Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/преобразования текста/информации о медиа и других функций
 * `Новое` Система плагинов предоставляет версионируемый транспорт TaggedWire и пакеты протоколов разработки v1 для компиляции DEX и нейтральной к поставщику генерации текста AI с выделенными приложениями проверки соответствия и враждебными сценариями
 * `Новое` Система плагинов поддерживает интерфейс расширения для офлайн-документации проекта
@@ -616,7 +618,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 11 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 12 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

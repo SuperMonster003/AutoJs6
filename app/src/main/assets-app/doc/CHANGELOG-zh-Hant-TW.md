@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/11
+###### 2026/08/12
 
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
 * `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
@@ -17,6 +17,8 @@
 * `新增` Node.js 外部執行階段插件後端, 支援強制 `plugin` 與可選回退 `pluginOptional` 模式, 常駐 Binder 工作階段及處理程序執行環境, 信任/合約/ABI 驗證和單一活動零佇列背壓
 * `新增` Node.js 外部執行階段插件後端支援請求層級工作區封存傳輸 v2, 包含明確輸入對應/輸出回寫/刪除 tombstone 清單, 且不掃描宿主沙盒
 * `新增` 打包功能支援 Node.js 腳本專案, 並自動包含所需執行階段程式庫
+* `新增` 獨立 Python Runtime 外掛後端, 支援透過單獨的 CPython 外掛處理程序執行本機 .py 檔案及宣告為 `type: python` 的腳本專案, 並驗證固定元件/簽章/協定/ABI, 支援熱插拔且絕不回退至 JavaScript
+* `新增` Python 啟動整合涵蓋檔案管理器/編輯器/本機 Run Intent/單一檔案 Import Intent/新建快捷方式/定時任務/廣播任務並嚴格保留單一檔案或專案上下文; 專案支援內部 import/相對檔案讀取及唯讀 `autojs6.app/device/execution/project` API
 * `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文字轉換/媒體資訊等擴充介面
 * `新增` 外掛系統提供版本化 TaggedWire 傳輸及 DEX 編譯與供應商中立 AI 文字生成 v1 開發協定套件, 並配備專用符合性測試應用程式及惡意情境夾具
 * `新增` 外掛系統支援離線專案文件擴充介面
