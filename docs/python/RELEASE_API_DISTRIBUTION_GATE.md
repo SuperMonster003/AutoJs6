@@ -1,15 +1,16 @@
 # Python Runtime release API distribution gate
 
-`verifyPythonReleaseApiDistributionGate` creates a local, current-tree pair of
-release AARs for the independent Python runtime plugin. The manifest records the
-current Python Runtime protocol version (now `1.1`) rather than a historical R1
-phase label. It does not publish an
-artifact and it does not prove plugin consumption, Android execution, Binder/PFD
-behavior, CPython execution, or device acceptance.
+`verifyPythonReleaseApiDistributionGate` creates a local, current-tree bundle of
+three release AARs for the independent Python runtime plugin. The manifest
+records the current Python Runtime protocol version (now `1.1`) rather than a
+historical R1 phase label. It does not publish an artifact and it does not prove
+plugin consumption, Android execution, Binder/PFD behavior, CPython execution,
+or device acceptance.
 
 ## Checkable contract
 
-- [x] Depend on both `:plugin-api:protocol-wire-api:assembleRelease` and
+- [x] Depend on `:plugin-api:common-plugin-api:assembleRelease`,
+  `:plugin-api:protocol-wire-api:assembleRelease`, and
   `:plugin-api:python-runtime-api:assembleRelease`.
 - [x] Order the Python Runtime assembly after Protocol Wire assembly even when
   Gradle parallel execution is enabled.
@@ -30,20 +31,11 @@ behavior, CPython execution, or device acceptance.
 - [x] Stage only the manifest-matched AAR bytes into the sibling plugin, rename
   them only at that explicit staging boundary, and pin their exact hashes.
 
-Current local evidence (2026-08-11):
-
-- manifest SHA-256:
-  `3d57594fe57c374978f3478c5729f5c613ed03635d516802a9d65cd0119a9ba1`;
-- `protocol-wire-api-release.aar`: 29,463 bytes,
-  `e044dd3cc9bed84e844174e0963b57a1f67902cf021ccb42d1031d3511ce46da`;
-- `python-runtime-api-release.aar`: 139,203 bytes,
-  `900e9c74db33340b1f1aa155d8e8454708338ee7ca763d1caafca33431ce42a4`.
-
-The sibling plugin contains byte-identical copies named
-`protocol-wire-api.aar` and `python-runtime-api.aar`. This staging does not
-change the receipt's local-only scope or its `published=false` claim.
-The plugin's separate Gradle build consumed the staged pair successfully; that
-downstream evidence does not retroactively widen this distribution receipt.
+Current-tree byte counts, hashes, source identity, and the exact three-artifact
+set are recorded in the generated `distribution-manifest.json`. Copies staged
+into the sibling plugin are renamed to `common-plugin-api.aar`,
+`protocol-wire-api.aar`, and `python-runtime-api.aar`. Downstream plugin
+consumption does not retroactively widen this distribution receipt.
 
 The source fingerprint covers `build.gradle.kts`, `settings.gradle.kts`, and all
 non-build files under `plugin-api/protocol-wire-api` and
@@ -64,11 +56,12 @@ a concurrent build. Then run:
 
 Expected outputs after a successful current-tree run:
 
+- `build/distributions/python-runtime-release/common-plugin-api-release.aar`
 - `build/distributions/python-runtime-release/protocol-wire-api-release.aar`
 - `build/distributions/python-runtime-release/python-runtime-api-release.aar`
 - `build/distributions/python-runtime-release/distribution-manifest.json`
 - `build/reports/python/release-api-distribution-gate.json`
 
 An absent receipt, task failure, hash mismatch, or changed source fingerprint is
-not releasable evidence. Even a PASS receipt means only that these two local
+not releasable evidence. Even a PASS receipt means only that these three local
 release AAR bytes were distributed from the recorded host tree.

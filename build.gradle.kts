@@ -661,7 +661,7 @@ tasks {
     val verifyPythonR1AndroidHarnessCompileGate = register("verifyPythonR1AndroidHarnessCompileGate") {
         group = "verification"
         description =
-            "Compiles the debug-only Python Android host harness and instrumentation sources without running a device."
+            "Compiles the Python AndroidTest host harness and instrumentation sources without running a device."
         dependsOn(
             ":app:compileAppDebugKotlin",
             ":app:compileAppDebugAndroidTestKotlin",
@@ -706,22 +706,22 @@ tasks {
                 "The debug manifest lacks the exact Python runtime <queries><intent><action> entry"
             }
 
-            val debugHarnessSource = file(
-                "app/src/debug/java/org/autojs/autojs/core/plugin/python/" +
+            val androidTestHarnessSource = file(
+                "app/src/androidTest/java/org/autojs/autojs/core/plugin/python/" +
                     "AndroidPythonRuntimeConformanceTransport.kt",
             )
-            check(debugHarnessSource.isFile) {
-                "Missing the exact debug-only Python Android transport source"
+            check(androidTestHarnessSource.isFile) {
+                "Missing the exact Python AndroidTest transport source"
             }
-            val debugHarnessText = debugHarnessSource.readText()
+            val androidTestHarnessText = androidTestHarnessSource.readText()
             listOf(
                 "IPythonRuntimeProvider.Stub.asInterface",
                 "Intent().setComponent",
                 "linkToDeath",
                 "PythonRuntimeContract.RUNTIME_ACTION",
             ).forEach { marker ->
-                check(marker in debugHarnessText) {
-                    "Debug-only Python Android transport is missing $marker"
+                check(marker in androidTestHarnessText) {
+                    "Python AndroidTest transport is missing $marker"
                 }
             }
 
@@ -831,7 +831,7 @@ tasks {
 
     register("verifyPythonR0").configure {
         group = "verification"
-        description = "Verifies the build-time Python Runtime v1 protocol baseline without enabling host routing."
+        description = "Verifies the build-time Python Runtime v1 protocol baseline without changing host routing."
         dependsOn(
             ":plugin-api:protocol-wire-api:testDebugUnitTest",
             ":plugin-api:protocol-wire-api:assembleDebug",
@@ -853,7 +853,8 @@ tasks {
                       "hostBoundaryChecked": true,
                       "androidBinderRuntime": false,
                       "cpythonExecution": false,
-                      "hostRouting": false,
+                      "hostRoutingChecked": false,
+                      "hostRoutingChangedByGate": false,
                       "deviceAcceptance": false
                     }
                     """.trimIndent() + "\n",
@@ -896,8 +897,10 @@ tasks {
             }
 
             val expectedHostPolicyResults = setOf(
+                "TEST-org.autojs.autojs.core.plugin.python.PythonProjectWorkspacePolicyTest.xml",
                 "TEST-org.autojs.autojs.core.plugin.python.PythonRuntimeProviderSelectionPolicyTest.xml",
                 "TEST-org.autojs.autojs.core.plugin.python.PythonRuntimeHostPlanningTest.xml",
+                "TEST-org.autojs.autojs.core.plugin.python.PythonRuntimePluginStateChangePolicyTest.xml",
             )
             val hostPolicyResultDirectory = file("app/build/test-results/testAppDebugUnitTest")
             requireExactSuites(
@@ -970,10 +973,7 @@ tasks {
                         appendLine("  \"gate\": \"verifyPythonR1ConformanceGate\",")
                         appendLine("  \"status\": \"PASS\",")
                         appendLine("  \"scope\": \"JVM_STATIC_ANDROID_COMPILE\",")
-                        appendLine(
-                            "  \"phaseCompletion\": " +
-                                "\"ANDROID_HARNESS_COMPILED_DEVICE_PENDING\",",
-                        )
+                        appendLine("  \"phaseCompletion\": \"STABLE_APP_HOST_COMPILED_DEVICE_NOT_RUN\",")
                         appendLine("  \"claims\": {")
                         appendLine("    \"protocolJvm\": true,")
                         appendLine("    \"fakeProviderJvm\": true,")
@@ -983,14 +983,15 @@ tasks {
                         appendLine("    \"distributionConsumerCompiled\": true,")
                         appendLine("    \"defaultOffHostBoundary\": true,")
                         appendLine("    \"androidTestSourcesCompiled\": true,")
-                        appendLine("    \"debugOnlyHostHarness\": true,")
+                        appendLine("    \"androidTestHostHarness\": true,")
                         appendLine("    \"androidBinderRuntime\": false,")
                         appendLine("    \"realPfdKernelSemantics\": false,")
                         appendLine("    \"callerUidSignerRuntime\": false,")
                         appendLine("    \"fakeProviderDeviceConformance\": false,")
                         appendLine("    \"productionPluginDeviceAcceptance\": false,")
                         appendLine("    \"cpythonExecution\": false,")
-                        appendLine("    \"hostRouting\": false")
+                        appendLine("    \"hostRouting\": true,")
+                        appendLine("    \"hostRoutingScope\": \"STABLE_APP_ONLY_INRT_UNSUPPORTED\"")
                         appendLine("  },")
                         appendLine("  \"artifacts\": [")
                         artifacts.forEachIndexed { index, artifact ->
