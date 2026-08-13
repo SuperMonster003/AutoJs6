@@ -13,9 +13,9 @@ exists.
 | Public AIDL compilation | PASS, GRADLE | R0 Gradle API gate, 14+50 JVM tests, `lua-runtime-api` debug AAR assembly | Cross-package calls, caller UID, Binder death |
 | Host proxy and `.lua` routing | PASS, LOCAL + DEVICE HAPPY PATH | App compilation plus focused JVM tests; pinned selection, explicit transport, bounded Binder lane, R2 fixture coverage, and opt-in official Provider smokes including `device.info` and controlled flat module snapshots | Android API/ABI matrix and broader product capability layer |
 | Hostile Android provider | PASS, DEVICE PARTIAL | R2 debug-only/testOnly fixture 2/2 JVM build plus 19/19 isolated methods on `QV710AF65F` API 31/arm64-v8a | Provider death, wrong UID/capability attacks, update/uninstall during a session, oversized source, OS-level FD evidence |
-| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing controlled console, arguments, `device.info`, flat module snapshots, and scalar results on API 31/arm64 with exact all-user restoration | More broker capabilities, recursive project modules, concurrent admission, blocking PFD, Android process OOM, API/ABI matrix, signed release and default production enablement |
-| Device/API/ABI acceptance | PASS, SINGLE DEVICE | API 31, arm64-v8a, 4 KiB, exact serial/artifact/restore evidence | API 24-36, x86_64, 16 KiB environments |
-| Release evidence | PENDING | R6 | Signed independent plugin APK and production soak |
+| PUC Lua JNI provider | PASS, SIGNED RC + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; signed provider-enabled RC; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing controlled console, arguments, `device.info`, flat module snapshots, and scalar results | More broker capabilities, recursive project modules, concurrent admission, blocking PFD, Android process OOM, and default production enablement |
+| Device/API/ABI acceptance | PASS, COMPACT M5 MATRIX | API 24/x86_64, API 31/arm64-v8a/4 KiB, and API 37/x86_64/16 KiB use the same frozen host/test/Provider artifact set with exact restore evidence | Full API 24-37 per-version matrix and production soak |
+| Release evidence | PASS, SIGNED RC | Independent `0.1.0-rc.1` provider-enabled APKs, official signer, 43/43 JVM tests, ABI/ELF/ZIP gates, compact device matrix, and scoped core regression | Public remote/tag/release upload, production soak, and the unresolved package-bin/project-workspace path |
 
 ## R0 Local Gate
 
@@ -273,8 +273,8 @@ returned the device API level, the runtime stayed in `:lua_runtime`, and all pac
 again for users 0 and 10. See `docs/dev/lua-runtime-device-info-smoke-2026-08-11.md`.
 
 Android hostile capability denial/replay, concurrent admission, cancel and callback-peer death,
-blocking/hostile PFD recovery, Android process OOM, release signing, API/ABI
-sampling, and default production enablement remain unestablished.
+blocking/hostile PFD recovery, Android process OOM, a full per-version API matrix, and default
+production enablement remain unestablished.
 
 At host revision `1c373d1330d23ab76747648a50532929509ece99` and sibling revision
 `9eddc6b1ba97a9b622f9cda977ef6b56fba729ca`, M4 added the optional
@@ -287,24 +287,41 @@ one execution and `true` on both calls, returned `Int64(1)`, ran in `:lua_runtim
 packages for users 0 and 10. Evidence is limited to an internal app-file happy path. See
 `docs/dev/lua-runtime-module-snapshot-smoke-2026-08-13.md`.
 
-Recheck the existing artifacts without ADB or rebuilding:
+At sibling revision `0497d5061171421e655e0256ef5a1fe1566c5a23`, M5 produced the signed,
+provider-enabled `0.1.0-rc.1` release candidate. Its 43/43 JVM tests and release artifact gate pass;
+all three APKs use the AutoJs6 official signer, have exact ABI inventories, 16 KiB ELF LOAD/ZIP
+alignment, and exclude the fault harness. The same frozen host/test/Provider artifacts passed the
+official production smoke on API 24/x86_64, API 31/arm64-v8a/4 KiB, and API 37/x86_64/16 KiB.
+Focused Explorer/editor/task routing tests and exact Rhino, native-editor, and canonical R6
+Node/Rhino device methods also passed. Node diagnostics—including the Node 1.1 cross-generation
+contract mismatch and the unresolved canonical R6 package-bin selector—and every rollback are
+retained in `docs/dev/lua-runtime-release-candidate-2026-08-13.md`. The Node PASS covers the
+engine-switch smoke, not package-bin/project-workspace execution; no public release or production
+soak is claimed.
+
+Recheck the frozen signed RC artifacts without ADB or rebuilding. The external signing files are
+read only so that the verifier can independently derive the expected certificate; their secrets are
+not printed. Historical debug/fault artifacts require a fresh matching build and are not covered by
+this command.
 
 ```powershell
 $sibling = 'E:\AutoJs6-Plugin-Lua-Runtime'
 git -C $sibling rev-parse HEAD
 python "$sibling\tools\verify_repository.py" --require-build-ready
-& "$sibling\tools\verify_debug_artifacts.ps1" `
+& "$sibling\tools\verify_release_candidate_artifacts.ps1" `
+    -InvocationStartedAtUtc '2026-08-13T06:59:11.0701661Z' `
+    -SigningPropertiesFile 'D:\idea-projects\AutoJs6\sign.properties' `
+    -SigningStoreFile 'D:\idea-projects\AutoJs6\app\sm003.jks' `
     -SdkRoot 'E:\.android\sdk' `
     -BuildToolsVersion '37.0.0' `
     -NdkVersion '28.2.13676358' `
-    -ExpectedTests 38 `
-    -RequireFaultHarness
+    -ExpectedTests 43
 exit $LASTEXITCODE
 ```
 
 ## Required Android Evidence
 
-The future R2/R6 reports must retain package/component/UID/signer identities,
+Future hostile-provider and release reports must retain package/component/UID/signer identities,
 host and provider versions, protocol/runtime slot, ABI/API/page-size, exact
 test selector, artifact digest, start/end time, and pass/fail/skip counts.
 Failures remain evidence and cannot be overwritten by a smoke, alternate

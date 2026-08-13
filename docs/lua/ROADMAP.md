@@ -32,7 +32,7 @@
 | M2 真实 Provider 闭环 | 已完成 | 宿主经 production INFO/RUNTIME 连续执行两次真实 Lua |
 | M3 最小 AutoJs 能力 | 已完成 | console、受限参数与首个 `device.info` broker 能力已闭环 |
 | M4 产品预览 | 已完成 | 编辑器运行、错误提示、快捷方式描述符与受控模块快照 |
-| M5 发布候选 | 未开始 | 签名、兼容抽样和独立发布 |
+| M5 发布候选 | 已完成 | 签名候选、兼容抽样和核心回归；尚未公开发布 |
 
 ## M0 — 协议与宿主接入（已完成）
 
@@ -89,15 +89,21 @@ timer、更多只读设备信息和受限模块加载在产品预览或后续版
 
 ## M5 — 发布候选
 
-- [ ] 生成签名、独立版本化、provider-enabled 的插件候选 APK，并验证默认/发布开关。
-- [ ] 做精简兼容抽样：最低支持 API、当前 API、ARM64 真机、x86_64 模拟器和 16 KiB。
-- [ ] 对 Rhino、Node.js、Explorer、编辑器和任务执行各做一次核心 smoke。
-- [ ] 保存失败证据和回滚结果；未通过的诊断不得改写为发布通过。
+- [x] 生成签名、独立版本化、provider-enabled 的插件候选 APK，并验证默认/发布开关。
+- [x] 做精简兼容抽样：API 24 x86_64、API 31 ARM64/4 KiB 和 API 37 x86_64/16 KiB。
+- [x] 对 Rhino、Node.js、Explorer、编辑器和任务路由各做一次核心 smoke。
+- [x] 保存失败证据和回滚结果；Node 1.1 跨代诊断与 canonical R6 package-bin 已知限制均未计入通过结果。
+
+M5 完成表示 `0.1.0-rc.1` 已形成可复核的本地签名候选，并以同一组冻结宿主、测试包和
+Provider 产物通过精简兼容抽样。它不表示已经创建公开 tag、推送独立远端、上传发布页或完成
+production soak；这些外部发布动作需要单独授权。
+本阶段的 Node.js 验收只覆盖 `r6_01` 真实引擎切换 smoke，任务验收只覆盖 focused JVM 路由；
+package-bin/project workspace 的设备路径仍是非阻断已知限制。
 
 ## 风险与增强清单（不阻塞当前阶段）
 
 - blocking/oversized PFD、OS 级 FD 泄漏、callback peer death、会话中 update/uninstall。
-- Android process OOM、极端并发、完整 API 24～36 逐版本矩阵。
+- Android process OOM、极端并发、完整 API 24～37 逐版本矩阵。
 - 文件/网络/shell/UI/无障碍能力、完整项目系统、递归模块图和更多句柄类型。
 - Lua 5.5、LuaJIT、调试器、打包、Java interop 和 richer UI。
 
@@ -117,6 +123,7 @@ timer、更多只读设备信息和受限模块加载在产品预览或后续版
 - M4 编辑器预览：[`docs/dev/lua-runtime-editor-preview-2026-08-11.md`](../dev/lua-runtime-editor-preview-2026-08-11.md)
 - M4 快捷方式描述符：[`docs/dev/lua-runtime-shortcut-preview-2026-08-11.md`](../dev/lua-runtime-shortcut-preview-2026-08-11.md)
 - M4 受控模块快照：[`docs/dev/lua-runtime-module-snapshot-smoke-2026-08-13.md`](../dev/lua-runtime-module-snapshot-smoke-2026-08-13.md)
+- M5 签名候选与兼容抽样：[`docs/dev/lua-runtime-release-candidate-2026-08-13.md`](../dev/lua-runtime-release-candidate-2026-08-13.md)
 
 ## 最小检查策略
 

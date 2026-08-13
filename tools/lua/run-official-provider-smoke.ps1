@@ -90,6 +90,58 @@ function Require-AdbSuccess {
     Write-Output "$Label=Success"
 }
 
+function Invoke-AdbBinaryToFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]] $Arguments,
+
+        [Parameter(Mandatory = $true)]
+        [string] $Destination
+    )
+
+    $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = $Adb
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    foreach ($argument in $Arguments) {
+        $startInfo.ArgumentList.Add($argument)
+    }
+
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    $destinationStream = [IO.File]::Open(
+        $Destination,
+        [IO.FileMode]::Create,
+        [IO.FileAccess]::Write,
+        [IO.FileShare]::None
+    )
+    try {
+        if (-not $process.Start()) {
+            throw "Unable to start adb"
+        }
+        $copyTask = $process.StandardOutput.BaseStream.CopyToAsync($destinationStream)
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        $timedOut = -not $process.WaitForExit($CommandTimeoutMillis)
+        if ($timedOut) {
+            $process.Kill($true)
+            $process.WaitForExit()
+        }
+        $copyTask.GetAwaiter().GetResult()
+        $errorOutput = $stderrTask.GetAwaiter().GetResult()
+        $lines = @($errorOutput -split "\r?\n" | Where-Object { $_.Length -gt 0 })
+        return [pscustomobject]@{
+            ExitCode = if ($timedOut) { -1 } else { $process.ExitCode }
+            TimedOut = $timedOut
+            Lines = $lines
+        }
+    } finally {
+        $destinationStream.Dispose()
+        $process.Dispose()
+    }
+}
+
 function Invoke-DeviceLines {
     param([Parameter(Mandatory = $true)][string[]] $Arguments)
 
@@ -110,6 +162,14 @@ function Get-AndroidUserIds {
         throw "No Android users were reported"
     }
     return $ids
+}
+
+function Get-DeviceProcesses {
+    if ($deviceSdk -ge 26) {
+        return @(Invoke-DeviceLines -Arguments @("shell", "ps", "-A", "-o", "PID,NAME"))
+    }
+    # Android 7.0 toolbox ps rejects both -A and -o; its default output still ends in NAME.
+    return @(Invoke-DeviceLines -Arguments @("shell", "ps"))
 }
 
 function Assert-PackagesAbsent {
@@ -137,6 +197,13 @@ $state = (Invoke-DeviceLines -Arguments @("get-state") | Select-Object -First 1)
 if ($state -ne "device") {
     throw "Device is not ready: $state"
 }
+$deviceSdkText = (Invoke-DeviceLines -Arguments @(
+    "shell", "getprop", "ro.build.version.sdk"
+) | Select-Object -First 1).Trim()
+$deviceSdk = 0
+if (-not [int]::TryParse($deviceSdkText, [ref] $deviceSdk) -or $deviceSdk -lt 24) {
+    throw "Unsupported or malformed device SDK: $deviceSdkText"
+}
 $userIds = @(Get-AndroidUserIds)
 Assert-PackagesAbsent -UserIds $userIds
 
@@ -144,7 +211,7 @@ $activity = @(Invoke-DeviceLines -Arguments @("shell", "dumpsys", "activity", "p
 if (@($activity | Select-String "mInstr=ActiveInstrumentation").Count -ne 0) {
     throw "Another instrumentation is active"
 }
-$processes = @(Invoke-DeviceLines -Arguments @("shell", "ps", "-A", "-o", "PID,NAME"))
+$processes = @(Get-DeviceProcesses)
 foreach ($packageName in $packages) {
     if (@($processes | Where-Object { $_ -match "\s$([regex]::Escape($packageName))(?::\S+)?\s*$" }).Count) {
         throw "A target process already exists: $packageName"
@@ -191,7 +258,26 @@ try {
         try {
             $pull = Invoke-AdbBounded -Arguments @("-s", $Serial, "pull", $remotePath, $auditCopy)
             if ($pull.TimedOut -or $pull.ExitCode -ne 0) {
-                throw "Unable to audit installed APK for $packageName"
+                if ($deviceSdk -ge 26) {
+                    throw "Unable to audit installed APK for ${packageName}: exit=$($pull.ExitCode), timeout=$($pull.TimedOut), output=$($pull.Lines -join ' | ')"
+                }
+                # Android 7 adbd sync can report a PackageManager path as missing even though
+                # the shell can read the world-readable base APK. Preserve the byte-exact audit
+                # through exec-out instead of weakening the installed-artifact hash check.
+                $fallback = @(Invoke-AdbBinaryToFile -Arguments @(
+                    "-s", $Serial, "exec-out", "cat", $remotePath
+                ) -Destination $auditCopy | Where-Object { $_ -is [pscustomobject] }) | Select-Object -Last 1
+                if ($null -eq $fallback) {
+                    throw "Unable to audit installed APK for ${packageName}: exec-out returned no status"
+                }
+                if (
+                    $fallback.TimedOut -or
+                    $fallback.ExitCode -ne 0 -or
+                    (Get-Item -LiteralPath $auditCopy).Length -eq 0
+                ) {
+                    throw "Unable to audit installed APK for ${packageName}: pull=$($pull.Lines -join ' | '), exec-out=$($fallback.Lines -join ' | ')"
+                }
+                Write-Output "APK_AUDIT_FALLBACK_${packageName}=exec-out"
             }
             $actualHash = (Get-FileHash -LiteralPath $auditCopy -Algorithm SHA256).Hash.ToLowerInvariant()
             if ($actualHash -ne $expectedHashes[$packageName]) {
@@ -222,9 +308,11 @@ try {
     ) {
         throw "Instrumentation receipt was rejected"
     }
+    Write-Output "OFFICIAL_PROVIDER_SMOKE=PASS"
+    # Retain the historical label so earlier evidence parsers remain compatible.
     Write-Output "M3_OFFICIAL_PROVIDER_SMOKE=PASS"
 
-    Invoke-DeviceLines -Arguments @("shell", "ps", "-A", "-o", "PID,NAME") |
+    Get-DeviceProcesses |
         Where-Object { $_ -match "\s$([regex]::Escape($providerPackage)):lua_runtime\s*$" } |
         ForEach-Object { Write-Output "REMOTE_PROCESS=$($_.Trim())" }
 } catch {
@@ -266,7 +354,7 @@ try {
             $cleanupFailures.Add("pm path remains for $packageName")
         }
     }
-    $processes = @(Invoke-DeviceLines -Arguments @("shell", "ps", "-A", "-o", "PID,NAME"))
+    $processes = @(Get-DeviceProcesses)
     foreach ($packageName in $packages) {
         if (@($processes | Where-Object { $_ -match "\s$([regex]::Escape($packageName))(?::\S+)?\s*$" }).Count) {
             $cleanupFailures.Add("process remains for $packageName")
