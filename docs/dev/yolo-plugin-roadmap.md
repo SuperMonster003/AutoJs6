@@ -330,8 +330,9 @@ R5 exit（2026-08-13）：
   `2a4a872cf3e13baffd0ad09076c811548e095407faa858b4f0ae3ef3cfbd2f9e`。
 
 证据边界：R5 的 RC 是本地 debug certificate 签发的 `TEST_SIGNED_NONDEBUGGABLE` 候选，
-不是生产签名 release；R5 RC 明确关闭 minify/resource shrink，正式 shrinker admission 保留到
-R6，`PRODUCTION = NOT_CLAIMED`。真实 Provider startup stale cleanup 仍
+不是生产签名 release；R5 当时验证的 RC artifact 明确关闭 minify/resource shrink，故 R5
+receipt 仍不含 shrinker 证据。后续 R6-A 可独立完成 shrinker 的源码/构建 admission，但不得
+回写或提升 R5 artifact。`PRODUCTION = NOT_CLAIMED`。真实 Provider startup stale cleanup 仍
 只有 JVM/Android build 证据；真实 NCNN provider death/recovery、16 KiB page 设备、长 soak、
 完整 API 矩阵、发布签名、索引、升级与回滚继续保留到 R6。
 
@@ -345,6 +346,46 @@ R6，`PRODUCTION = NOT_CLAIMED`。真实 Provider startup stale cleanup 仍
 - [ ] 继续保持 default-off、fail-closed、无 dispatch 后重试。
 
 主 gate：完整 `PRODUCTION` receipt；任何缺少的证据均保留对应的明确限制。
+
+### R6-A：发布源码与预检
+
+- [x] 增加 `verify-yolo-r6-publishable.ps1` 的 source/artifact 两个参数集；source 模式
+  只输出 `SOURCE_STATIC_PASS / PRODUCTION_NOT_RUN`，artifact 模式必须显式提供两份 APK、
+  发布负责人冻结的 Provider versionCode 和确认的生产证书 SHA-256 指纹。
+- [x] artifact 预检 fail-closed 校验 non-debuggable、Host/Provider 同生产 signer、APK
+  SHA-256、Provider arm64-only、Host/Provider model-free、NCNN provenance、NOTICE 和
+  静态 ELF 包装；已知 R5 TEST-SIGNED certificate 不可被提升。
+- [x] 固定首发 `UNINSTALL_REINSTALL_CODE1` 回滚手册；明确不得原位降级，回滚后保持
+  default-off 并重新显式授权/启用。
+- [x] 增加真实 Provider `am force-stop`、旧 session fail-closed/no-retry、显式重新选择并
+  reopen 的 opt-in instrumentation 与单 serial gate 源码。
+
+R6-A source gate 当前证据仅为源码/PowerShell parser 静态预检；未读取生产签名秘密，未检查生产 APK，
+未执行 ADB、索引或外部发布。因此只能记为 `SOURCE_STATIC_PASS / PRODUCTION_NOT_RUN`，且
+不生成 canonical `r6-summary.json`。
+
+### R6-B：生产 APK 与签名（待执行）
+
+- [ ] 由发布负责人提供/确认唯一生产 signer SHA-256 公钥指纹，并在受控环境签发 Host、
+  Provider 和 test-only instrumentation；不得把 keystore/alias/password 写入 receipt。
+- [ ] Provider 正式启用 minify/resource shrink 并通过 release build；artifact 预检绑定
+  Host/Provider 版本、证书指纹、长度和 SHA-256。
+- [ ] 生成可发布 APK receipt；静态 16 KiB ELF 证据仍不得替代对应 page-size 设备加载。
+
+### R6-C：索引、升级与回滚（待执行）
+
+- [ ] 索引固定 package/exact component/API 与 Host 兼容范围/ABI/backend/APK SHA-256，
+  且安装后保持 default-off、未授权。
+- [ ] 验证同 signer、versionCode 单调增加的升级，以及首发
+  `UNINSTALL_REINSTALL_CODE1` 回滚；不同 signer/identity/version drift 均 fail-closed。
+
+### R6-D：设备与发布（待执行）
+
+- [ ] 代表性 arm64 物理设备完成 production APK 冷/热推理与真实 Provider death/reopen。
+- [ ] 当前 API 36 arm64 emulator 完成相同验证；若本机 emulator ABI 与 arm64-only Provider
+  不兼容，必须提供可执行 arm64 环境或明确调整验收对象，不能用 x86_64 静态构建代替。
+- [ ] release note 与索引只列实际通过的 API/ABI/backend/model；最终 receipt 绑定所有
+  子报告的 APK SHA-256 后才可声明 `PRODUCTION=PASS`。
 
 ## 首发后 backlog（不阻塞 R1-R6）
 
