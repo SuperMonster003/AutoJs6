@@ -29,7 +29,7 @@ behavior only for reproducible host conformance testing.
 | AI models | Page token replay, scope, cycle, generation drift, and cross-page duplicate model IDs | `AiModelPageTokenPolicyTest` | PASS, JVM |
 | AI protocol | Shared wire, common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and pagination | Combined protocol/API corpus, 103 tests | PASS, JVM |
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
-| AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests | PASS, JVM |
+| AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests; D3#3 plugin commits `6489a59` / `af0c5fe` and host exact-test commit `b695c303` | PASS, JVM; PARTIAL, one API 35/arm64-v8a real-plugin listing-only Binder method |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
 | AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
 | AI explicit ask/chat/stream routes | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process-shared admission, per-script lifecycle ownership, normalized unary/chat/stream results, and stable terminal codes | Earlier ask/stream focused Gradle 25/25; chat tested-source commits `d480b6918` / `b0aa67684` focused Gradle 14/14 (3 mapper + 4 runtime + 7 service), 0 skipped/failures/errors; one real-provider ask plus fake-provider stream and chat public methods on API 31 | PARTIAL, JVM/source plus three narrow positive-path device smokes |
@@ -334,13 +334,61 @@ APK assembly pass.
 | D8 parity for default/static interface methods, missing libraries, and device boot libraries | Current local compiler versus production plugin | PENDING |
 | AAR normalization and resource behavior | Current local path versus production plugin | PENDING |
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
-| AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL, API 31/arm64-v8a metadata, paged model list, one normal `fake.stream` session, and ordinary-pipe completion materialization |
+| AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL: API 31/arm64-v8a fake-provider metadata, paged model list, one normal `fake.stream` session, and ordinary-pipe completion materialization; API 35/arm64-v8a real-plugin three-entry paged listing only |
 | AI public production `ai.ask` positive path | Real signed provider release, real model, public Rhino entry, exact component/provider/model selector, artifact/device hash match, reversible cleanup | PARTIAL, one API 31/arm64-v8a App Debug non-streaming one-shot method; no release-host or API matrix |
 | AI public conformance `ai.stream` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, normalized chunk/delta/done aggregation beyond eight initial credits, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; public active cancel/engine stop remain JVM-only and no real provider/model stream ran |
 | AI public conformance `ai.chat` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, exact normalized 12-key response, one terminal, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; no real provider/model, device failure/cancel path, release host, or matrix |
 | AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PARTIAL, API 31 only: seven H1 methods plus two H2 methods cover completion/tool descriptors, ordering, sequence, descriptor reference, bounded duplicate terminal, cancel-after-start, one isolated wrong UID, and one provider death; deterministic Android no-credit and update/disable/uninstall lifecycle remain pending |
 | AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal session and public Rhino fake stream crossed 8 initial credits, a tool callback was rejected without execution, and one provider kill followed a chunk whose credit was causally replenished; real tool turns, host death, and the matrix remain pending |
 | Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
+
+### API 35 AI D3#3 Exact Real-Plugin Model-List Evidence
+
+The 2026-08-13 D3#3 run used production plugin commit `6489a59`, focused
+plugin-test commit `af0c5fe`, and host exact-test commit `b695c303`. The target
+was Xiaomi 23046RP50C with both ADB transport serial and `ro.serialno`
+`968e9f18`, API 35, and `arm64-v8a`.
+
+The host App Debug, App Debug instrumentation, and real-plugin Debug APKs all
+verified with APK Signature Scheme v2 and the same certificate SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
+Their artifact and installed `base.apk` SHA-256 values matched exactly:
+
+- Host: `69149b0b2400e8d2069bffc9e495b49f4600c7b2a0a29d26c1c015ff4517f638`.
+- Instrumentation: `b9183783eaecd240b3ef517e2c0d4ff3356e654e25d7994a87cc2d2da1d7c0a3`.
+- Real plugin: `fffb8c9b02f247a48675892bd3f43c8cca757eac68f4c375ba03b7c68dbbbb94`.
+
+The outer transaction provisioned three eight-byte files solely as catalog
+rows. Each file intentionally lacked valid LiteRT-LM content and could not be
+used as a model. With `pageSize = 1`, the exact Binder list returned the frozen
+B/A/C order:
+
+| Fixture | Expected model ID |
+| --- | --- |
+| B | `litertlm.808c1f662212f7efb70b16956fb784a7` |
+| A | `litertlm.85515105bf0e6b25b0ed8ce1cc3801ab` |
+| C | `litertlm.c78909e014ed1db7552f0993df44a860` |
+
+All pages admitted the expected generation
+`litertlm-catalog-v2-43e043444d5ca606e2c33805c0d5f656`. The exact method
+`AiTextProviderModelListingAndroidConformanceTest#exactRealPluginListsExternallyProvisionedThreeModelCatalogAcrossStablePages`
+returned `OK (1 test)` in 0.691 seconds. It used the real exact-component
+handshake and model-list transports, completed off the Android main thread,
+published one terminal outcome, and retained the initial package identity at
+the final inspection.
+
+Preflight and post-cleanup both found zero installed-user rows for the three
+exact packages--`org.autojs.autojs6`, `org.autojs.autojs6.test`, and
+`io.github.supermonster003.autojs6.plugin.ai.text`--and all nine reserved
+external data/media/obb paths absent. The scoped cleanup receipt reported zero
+residuals.
+
+This is one narrow **PARTIAL** real-plugin Binder-list cell. The fixture is
+listing-only: the run performed no LiteRT-LM inference, never called
+`openSession`, and exercised no real model. It was not a soak and supplies no
+Android API/ABI matrix. Pre/post absence is scoped rollback evidence, not
+package update/uninstall-during-transcript evidence; catalog migration,
+management UI, sessions, and native model compatibility remain outside D3#3.
 
 ### API 31 AI Partial Evidence
 
