@@ -11,6 +11,7 @@ import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs.script.LuaScriptSource;
 import org.autojs.autojs.script.NodeProjectLaunchKind;
 import org.autojs.autojs.script.PythonScriptSource;
 import org.autojs.autojs.script.ScriptLaunchSourceFactory;
@@ -42,6 +43,7 @@ public abstract class Task {
 
     public static class PendingTask extends Task {
 
+        private static final String LUA_FILE_SOURCE_KIND_V1 = "lua_file_v1";
         private static final String PYTHON_FILE_SOURCE_KIND_V1 = "python_file_v1";
         private static final String PYTHON_PROJECT_SOURCE_KIND_V1 = "python_project_v1";
 
@@ -149,10 +151,16 @@ public abstract class Task {
                 @NonNull String scriptPath,
                 @Nullable String sourceKind,
                 @Nullable String projectRoot) {
+            if (LUA_FILE_SOURCE_KIND_V1.equals(sourceKind)) {
+                return LuaScriptSource.ENGINE;
+            }
             if (PYTHON_FILE_SOURCE_KIND_V1.equals(sourceKind)
                     || PYTHON_PROJECT_SOURCE_KIND_V1.equals(sourceKind)
                     || projectRoot != null) {
                 return PythonScriptSource.ENGINE;
+            }
+            if (LuaScriptSource.isLuaFileName(scriptPath)) {
+                return LuaScriptSource.ENGINE;
             }
             if (!JavaScriptSource.isJavaScriptFileName(scriptPath)) {
                 return AutoFileSource.ENGINE;

@@ -1,14 +1,27 @@
 package org.autojs.autojs.external
 
+import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs.script.PythonLaunchBoundaryError
 import org.autojs.autojs.script.PythonLaunchBoundaryException
 import org.autojs.autojs.script.PythonProjectLaunchError
 import org.autojs.autojs.script.PythonProjectLaunchException
+import org.autojs.autojs.script.PythonScriptSource
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 
 class ScriptIntentBoundaryPolicyTest {
+
+    @Test
+    fun androidIntentArgumentIsExcludedOnlyFromLua() {
+        assertFalse(ScriptIntents.shouldExposeAndroidIntentArgument(LuaScriptSource.ENGINE))
+        assertTrue(ScriptIntents.shouldExposeAndroidIntentArgument(JavaScriptSource.ENGINE))
+        assertTrue(ScriptIntents.shouldExposeAndroidIntentArgument(JavaScriptSource.ENGINE_NODEJS))
+        assertTrue(ScriptIntents.shouldExposeAndroidIntentArgument(PythonScriptSource.ENGINE))
+    }
 
     @Test
     fun nonLocalAndMixedUriRequestsFailWithStableErrors() {

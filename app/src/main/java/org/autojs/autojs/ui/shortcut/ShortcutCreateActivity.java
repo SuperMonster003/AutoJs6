@@ -26,6 +26,7 @@ import io.reactivex.schedulers.Schedulers;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.external.shortcut.Shortcut;
 import org.autojs.autojs.external.shortcut.ShortcutActivity;
+import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.util.BitmapUtils;
@@ -164,7 +165,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     }
 
     private Intent createLaunchExtras() {
-        Intent intent = new Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptFile.getPath());
+        Intent intent = ScriptShortcutIntentFactory.create(mScriptFile.getPath());
         return ScriptIntents.putCapturedPythonContext(intent, mScriptFile.getPath());
     }
 

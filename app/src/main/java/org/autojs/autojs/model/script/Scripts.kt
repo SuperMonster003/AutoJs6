@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
@@ -12,15 +13,14 @@ import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.external.shortcut.Shortcut
 import org.autojs.autojs.external.shortcut.ShortcutActivity
+import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
-import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.PythonScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.ui.python.PythonRuntimePluginUi
-import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs.util.ViewUtils
@@ -43,12 +43,7 @@ object Scripts {
     const val EXTRA_EXCEPTION_COLUMN_NUMBER = "columnNumber"
 
     @JvmField
-    val FILE_FILTER = FileFilter { file ->
-        file.isDirectory ||
-        JavaScriptSource.isJavaScriptFileName(file.name) ||
-        file.name.endsWith(FileUtils.TYPE.AUTO.extension, true) ||
-        (PythonScriptSource.isPreviewEnabled() && file.name.endsWith(".${PythonScriptSource.EXTENSION}", true))
-    }
+    val FILE_FILTER = FileFilter { file -> ScriptFileFilterPolicy.accepts(file, PythonScriptSource.isPreviewEnabled()) }
 
     private val BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER = object : SimpleScriptExecutionListener() {
 
@@ -73,7 +68,7 @@ object Scripts {
             } else {
                 globalAppContext.sendBroadcast(
                     newExecutionFinishedIntent()
-                        .putExtra(EXTRA_EXCEPTION_MESSAGE, e.message)
+                        .putExtra(EXTRA_EXCEPTION_MESSAGE, AndroidLuaRuntimeFailureMessages.resolve(globalAppContext, e))
                         .putExtra(EXTRA_EXCEPTION_LINE_NUMBER, line)
                         .putExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, col)
                 )
@@ -104,7 +99,7 @@ object Scripts {
 
     fun createShortcut(context: Context, scriptFile: ScriptFile) {
         val extras = ScriptIntents.putCapturedPythonContext(
-            Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.path),
+            ScriptShortcutIntentFactory.create(scriptFile.path),
             scriptFile.path,
         )
         Shortcut(context).name(scriptFile.simplifiedName)

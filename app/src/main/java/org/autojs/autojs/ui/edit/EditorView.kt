@@ -74,7 +74,6 @@ import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSenderInteractive
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
-import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
@@ -128,6 +127,7 @@ import org.autojs.autojs.ui.edit.editor.service.EditorFileSaveEncoding
 import org.autojs.autojs.ui.edit.editor.service.EditorFileService
 import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsRecord
 import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsResult
+import org.autojs.autojs.ui.edit.editor.service.EditorScriptRunPolicy
 import org.autojs.autojs.ui.edit.editor.service.EditorTextProvider
 import org.autojs.autojs.ui.edit.editor.service.EditorThemeFontService
 import org.autojs.autojs.ui.edit.editor.service.EditorVersionHistoryService
@@ -7074,19 +7074,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun temporaryScriptExtensionWithDot(): String {
-        val fileName = (mDocumentDisplayName ?: uri?.path?.let { File(it).name })
-            ?.takeIf { it.isNotBlank() }
-            ?: return ".js"
-        if (fileName.endsWith(".py", ignoreCase = true)) {
-            return ".py"
-        }
-        if (fileName.endsWith(".node.js", ignoreCase = true)) {
-            return ".node.js"
-        }
-        if (!JavaScriptSource.isJavaScriptFileName(fileName)) {
-            return ".js"
-        }
-        return "." + fileName.substringAfterLast('.', "js")
+        return EditorScriptRunPolicy.temporaryExtensionWithDot(
+            documentDisplayName = mDocumentDisplayName,
+            uriPath = uri?.path,
+            editorName = _name,
+        )
     }
 
     fun cleanBeforeExit() {

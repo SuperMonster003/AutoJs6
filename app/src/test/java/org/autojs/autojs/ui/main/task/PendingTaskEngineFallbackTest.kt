@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.main.task
 
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs.script.PythonScriptSource
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -17,8 +18,15 @@ class PendingTaskEngineFallbackTest {
     }
 
     @Test
+    fun explicitLuaContextKeepsLuaSemanticsWhenPathIsStale() {
+        assertFallback(LuaScriptSource.ENGINE, "renamed.js", "lua_file_v1", null)
+        assertFallback(LuaScriptSource.ENGINE, "renamed.js", "lua_file_v1", "/invalid/project")
+    }
+
+    @Test
     fun legacyNullContextKeepsExistingExtensionFallbacks() {
         assertFallback(AutoFileSource.ENGINE, "legacy.py", null, null)
+        assertFallback(LuaScriptSource.ENGINE, "legacy.lua", null, null)
         assertFallback(JavaScriptSource.ENGINE_NODEJS, "legacy.mjs", null, null)
         assertFallback(JavaScriptSource.ENGINE, "legacy.js", null, null)
     }

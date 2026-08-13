@@ -386,6 +386,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">Elemento de mapa selector no válido: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">La dirección IP no puede estar vacía</string>
     <string name="error_ipv6_port_requires_brackets">El puerto IPv6 debe especificarse con el formato \"[ipv6]:port\".</string>
+    <string name="error_lua_runtime_ambiguous">Hay varios plugins de Lua Runtime compatibles habilitados. Deshabilita los providers adicionales de Lua Runtime en el Centro de plugins y vuelve a intentarlo.</string>
+    <string name="error_lua_runtime_identity_or_bind">Lua Runtime ha cambiado o no se pudo iniciar. Vuelve a intentarlo; si el problema persiste, actualiza o vuelve a habilitar el plugin en el Centro de plugins.</string>
+    <string name="error_lua_runtime_incompatible">El Lua Runtime instalado no es compatible con esta versión de AutoJs6 o con el dispositivo. Actualiza AutoJs6 o el plugin Lua Runtime y vuelve a intentarlo.</string>
+    <string name="error_lua_runtime_unavailable">Lua Runtime no está disponible. Instala, habilita o autoriza el plugin oficial Lua Runtime en el Centro de plugins y vuelve a intentarlo.</string>
     <string name="error_max_listeners_exceeded">Se superó el número máximo de receptores: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 puede no tener acceso a la raíz para ejecutar el archivo \"auto</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() llamada con argumento nulo: %s</string>
@@ -442,6 +446,7 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">La ruta resuelta para \"%1$s\" no puede ser nula</string>
     <string name="error_save_failed">Error al guardar</string>
     <string name="error_script_is_on_exiting">El script está al salir</string>
+    <string name="error_script_shortcut_descriptor_mismatch">El acceso directo del script ya no coincide con el motor guardado. Vuelve a crear el acceso directo.</string>
     <string name="error_selector_method_without_calling">Se debería llamar al método selector en lugar de pasarlo como parámetro: %s</string>
     <string name="error_selector_result_type_with_compass">No se puede usar una brújula cuando el tipo de resultado es selector</string>
     <string name="error_set_both_icon_res_and_icon">No se puede establecer tanto el iconoRes como el icono</string>

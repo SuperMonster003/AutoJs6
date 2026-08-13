@@ -388,6 +388,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">잘못된 선택기 맵 요소: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP 주소는 비워둘 수 없습니다</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 포트는 \"[ipv6]:port\" 형식으로 지정해야 합니다.</string>
+    <string name="error_lua_runtime_ambiguous">호환되는 Lua Runtime 플러그인이 여러 개 활성화되어 있습니다. 플러그인 센터에서 불필요한 Lua Runtime provider를 비활성화한 후 다시 시도하세요.</string>
+    <string name="error_lua_runtime_identity_or_bind">Lua Runtime이 변경되었거나 시작되지 않았습니다. 다시 시도하세요; 문제가 계속되면 플러그인 센터에서 플러그인을 업데이트하거나 다시 활성화하세요.</string>
+    <string name="error_lua_runtime_incompatible">설치된 Lua Runtime이 현재 AutoJs6 버전 또는 기기와 호환되지 않습니다. AutoJs6 또는 Lua Runtime 플러그인을 업데이트한 후 다시 시도하세요.</string>
+    <string name="error_lua_runtime_unavailable">Lua Runtime을 사용할 수 없습니다. 플러그인 센터에서 공식 Lua Runtime 플러그인을 설치, 활성화 또는 승인한 후 다시 시도하세요.</string>
     <string name="error_max_listeners_exceeded">최대 청취자를 초과했습니다: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 은 \"auto\" 파일을 실행할 루트 액세스 권한이 없을 수 있습니다.</string>
     <string name="error_method_called_with_null_argument" formatted="false">널 인수로 호출 된 %s(): %s</string>
@@ -444,6 +448,7 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" 에 대한 해결된 경로는 null 일 수 없습니다</string>
     <string name="error_save_failed">저장에 실패했습니다</string>
     <string name="error_script_is_on_exiting">스크립트가 종료 중입니다</string>
+    <string name="error_script_shortcut_descriptor_mismatch">스크립트 바로 가기가 저장된 엔진과 더 이상 일치하지 않습니다. 바로 가기를 다시 만드세요.</string>
     <string name="error_selector_method_without_calling">셀렉터 메소드는 매개 변수로 전달되지 않고 호출되어야합니다: %s</string>
     <string name="error_selector_result_type_with_compass">결과 유형이 선택기 일 때 나침반을 사용할 수 없습니다</string>
     <string name="error_set_both_icon_res_and_icon">아이콘과 아이콘을 모두 설정할 수 없습니다</string>

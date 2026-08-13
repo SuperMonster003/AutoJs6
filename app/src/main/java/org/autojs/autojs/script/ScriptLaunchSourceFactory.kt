@@ -379,7 +379,7 @@ object ScriptLaunchSourceFactory {
         }
         PythonLaunchBoundaryPolicy.enforceDefaultOff(file.path)
         rejectImplicitPythonProject(file)
-        if (JavaScriptSource.isJavaScriptFileName(file.name)) {
+        if (LuaScriptSource.isLuaFileName(file.name) || JavaScriptSource.isJavaScriptFileName(file.name)) {
             return createPathLaunchForPythonPreview(
                 path = file.path,
                 workingDirectory = workingDirectory,
@@ -455,6 +455,23 @@ object ScriptLaunchSourceFactory {
             )
         }
         return when (sourceKind) {
+            PersistedScriptLaunchPolicy.LUA_FILE_V1 -> {
+                if (projectRoot != null ||
+                    preExecuteScript != null ||
+                    !LuaScriptSource.isLuaFileName(File(path).name)
+                ) {
+                    throw IllegalArgumentException(
+                        "LUA_PERSISTED_CONTEXT_INVALID: Persisted Lua launch context no longer matches its path",
+                    )
+                }
+                createPathLaunchForPythonPreview(
+                    path,
+                    preExecuteScript,
+                    workingDirectory,
+                    defaultWorkingDirectory,
+                    pythonPreviewEnabled,
+                )
+            }
             PersistedScriptLaunchPolicy.PYTHON_FILE_V1 -> {
                 if (projectRoot != null ||
                     PythonLaunchBoundaryPolicy.classify(path) !=
@@ -521,6 +538,18 @@ object ScriptLaunchSourceFactory {
         }
         PythonLaunchBoundaryPolicy.enforceDefaultOff(path)
         rejectImplicitPythonProject(File(path))
+        if (LuaScriptSource.isLuaFileName(File(path).name)) {
+            require(preExecuteScript == null) {
+                "Lua launch source does not support JavaScript preExecuteScript"
+            }
+            val fileSource = LuaFileSource(File(path).normalizedFile())
+            return Launch(
+                source = fileSource,
+                workingDirectory = workingDirectory
+                    ?: fileSource.file.parent
+                    ?: defaultWorkingDirectory,
+            )
+        }
         val fileSource = NodeProjectScriptSourceFactory.create(path)
         PythonLaunchBoundaryPolicy.enforceDefaultOff(fileSource.file.path)
         val source = if (preExecuteScript == null) {
@@ -613,6 +642,7 @@ object ScriptLaunchSourceFactory {
         }
         return when (this) {
             is JavaScriptFileSource -> file.parent ?: defaultWorkingDirectory
+            is LuaFileSource -> file.parent ?: defaultWorkingDirectory
             is PythonProjectSource -> projectRoot.normalizedPath()
             is PythonFileSource -> file.parent ?: defaultWorkingDirectory
             is AutoFileSource -> file.parent ?: defaultWorkingDirectory
@@ -628,6 +658,10 @@ object ScriptLaunchSourceFactory {
                 locations += file.normalizedPath()
             }
             is AutoFileSource -> {
+                locations += file.path
+                locations += file.normalizedPath()
+            }
+            is LuaFileSource -> {
                 locations += file.path
                 locations += file.normalizedPath()
             }

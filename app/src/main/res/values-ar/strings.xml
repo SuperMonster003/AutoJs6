@@ -388,6 +388,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">عنصر خريطة محدد غير صالح: {%s: %s (%s)}</string>
     <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
     <string name="error_ipv6_port_requires_brackets">يجب تحديد منفذ IPv6 بصيغة \"[ipv6]:port\".</string>
+    <string name="error_lua_runtime_ambiguous">تم تمكين عدة إضافات متوافقة لـ Lua Runtime. عطّل موفري Lua Runtime الزائدين في مركز الإضافات, ثم أعد المحاولة.</string>
+    <string name="error_lua_runtime_identity_or_bind">تغير Lua Runtime أو تعذر تشغيله. أعد المحاولة; إذا استمرت المشكلة, فحدّث الإضافة أو أعد تمكينها في مركز الإضافات.</string>
+    <string name="error_lua_runtime_incompatible">Lua Runtime المثبت غير متوافق مع إصدار AutoJs6 هذا أو مع الجهاز. حدّث AutoJs6 أو إضافة Lua Runtime, ثم أعد المحاولة.</string>
+    <string name="error_lua_runtime_unavailable">Lua Runtime غير متاح. ثبّت إضافة Lua Runtime الرسمية أو مكّنها أو فوّضها في مركز الإضافات, ثم أعد المحاولة.</string>
     <string name="error_max_listeners_exceeded">تم تجاوز الحد الأقصى لعدد المستمعين: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">قد لا يكون لدى AutoJs6 ملف الجذر لتشغيل ملف \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() دعا مع الوسيطة الفارغة: %s</string>
@@ -444,6 +448,7 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">المسار المُحلّ لـ \"%1$s\" لا يمكن أن يكون null</string>
     <string name="error_save_failed">فشل الحفظ</string>
     <string name="error_script_is_on_exiting">السيناريو عند الخروج</string>
+    <string name="error_script_shortcut_descriptor_mismatch">لم يعد اختصار البرنامج النصي يطابق المحرك المحفوظ. أعد إنشاء الاختصار.</string>
     <string name="error_selector_method_without_calling">يجب أن تسمى طريقة المحدد بدلاً من تمريرها كمعلمة: %s</string>
     <string name="error_selector_result_type_with_compass">لا يمكن استخدام بوصلة عندما يكون نوع النتيجة محددًا</string>
     <string name="error_set_both_icon_res_and_icon">لا يمكن تعيين كل من الأيقونات والأيقونة</string>

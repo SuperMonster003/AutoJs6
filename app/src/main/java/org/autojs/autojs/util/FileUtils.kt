@@ -314,6 +314,7 @@ object FileUtils {
     internal object TypeDataHolder {
         val JAVASCRIPT = TypeData(IconData("J"), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
         val NODE_JAVASCRIPT = TypeData(IconData("N"), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
+        val LUA = TypeData(IconData("L"), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
         val AUTO = TypeData(IconData("R", toTop = 1), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
         val APK = TypeData(IconData("❖", size = 23, toTop = 1, toEnd = 0.5), TYPE.IDENTITY_INSTALLABLE)
         val APK_EXT = TypeData(APK.iconData, TYPE.IDENTITY_INSTALLABLE)
@@ -477,7 +478,7 @@ object FileUtils {
         RUST("rs", TypeDataHolder.CODE),
 
         /** Lua script file, used for Lua scripting language. */
-        LUA("lua", TypeDataHolder.CODE),
+        LUA("lua", TypeDataHolder.LUA),
 
         /** PHP script file, used in server-side scripting. */
         PHP("php", TypeDataHolder.CODE),

@@ -16,6 +16,7 @@ import org.autojs.autojs.core.plugin.dex.AndroidDexCompilerRuntime
 import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
+import org.autojs.autojs.engine.LuaPluginScriptEngine
 import org.autojs.autojs.engine.NodeJavaScriptEngineFactory
 import org.autojs.autojs.engine.PythonPluginScriptEngine
 import org.autojs.autojs.engine.RootAutomatorEngine
@@ -31,6 +32,7 @@ import org.autojs.autojs.runtime.api.Shell
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs.script.PythonRuntimeChannelPolicy
 import org.autojs.autojs.script.PythonScriptSource
 import org.autojs.autojs.tool.UiHandler
@@ -73,6 +75,9 @@ abstract class AbstractAutoJs protected constructor(val application: Application
             scriptEngineManager.registerEngine(PythonScriptSource.ENGINE) {
                 PythonPluginScriptEngine(applicationContext, globalConsole)
             }
+        }
+        scriptEngineManager.registerEngine(LuaScriptSource.ENGINE) {
+            LuaPluginScriptEngine(applicationContext)
         }
         initContextFactory()
         scriptEngineManager.registerEngine(AutoFileSource.ENGINE) { RootAutomatorEngine(applicationContext) }

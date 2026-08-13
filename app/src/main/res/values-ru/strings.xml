@@ -386,6 +386,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">Неверный элемент карты селектора: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP-адрес не может быть пустым</string>
     <string name="error_ipv6_port_requires_brackets">Порт IPv6 должен быть указан в формате \"[ipv6]:port\".</string>
+    <string name="error_lua_runtime_ambiguous">Включено несколько совместимых плагинов Lua Runtime. Отключите лишние provider-компоненты Lua Runtime в Центре плагинов и повторите попытку.</string>
+    <string name="error_lua_runtime_identity_or_bind">Среда Lua Runtime изменилась или не запустилась. Повторите попытку; если проблема сохраняется, обновите или повторно включите плагин в Центре плагинов.</string>
+    <string name="error_lua_runtime_incompatible">Установленная среда Lua Runtime несовместима с этой версией AutoJs6 или устройством. Обновите AutoJs6 или плагин Lua Runtime и повторите попытку.</string>
+    <string name="error_lua_runtime_unavailable">Среда Lua Runtime недоступна. Установите, включите или авторизуйте официальный плагин Lua Runtime в Центре плагинов и повторите попытку.</string>
     <string name="error_max_listeners_exceeded">Превышено максимальное количество слушателей: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 может не иметь root-доступа для запуска файла \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() вызвана с нулевым аргументом: %s</string>
@@ -442,6 +446,7 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
     <string name="error_save_failed">Не удалось сохранить</string>
     <string name="error_script_is_on_exiting">Скрипт завершается</string>
+    <string name="error_script_shortcut_descriptor_mismatch">Ярлык скрипта больше не соответствует сохраненному движку. Создайте ярлык заново.</string>
     <string name="error_selector_method_without_calling">Метод селектора должен быть вызван, а не передан в качестве параметра: %s</string>
     <string name="error_selector_result_type_with_compass">Невозможно использовать компас, когда тип результата - селектор</string>
     <string name="error_set_both_icon_res_and_icon">Невозможно установить как iconRes, так и icon</string>

@@ -10,11 +10,15 @@ data class PersistedScriptLaunchContext(
 
 internal object PersistedScriptLaunchPolicy {
 
+    const val LUA_FILE_V1 = "lua_file_v1"
     const val PYTHON_FILE_V1 = "python_file_v1"
     const val PYTHON_PROJECT_V1 = "python_project_v1"
 
     fun capture(path: String): PersistedScriptLaunchContext {
         val file = File(path).canonicalFile
+        if (LuaScriptSource.isLuaFileName(file.name)) {
+            return PersistedScriptLaunchContext(LUA_FILE_V1, null)
+        }
         return when (PythonLaunchBoundaryPolicy.classify(file.path)) {
             PythonLaunchClassification.NOT_PYTHON -> PersistedScriptLaunchContext(null, null)
             PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME -> {

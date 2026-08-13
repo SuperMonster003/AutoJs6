@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/13
+###### 2026/08/14
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
@@ -20,6 +20,7 @@
 * `新增` 独立 Python Runtime 插件后端, 支持通过单独的 CPython 插件进程运行本地 .py 文件及声明为 `type: python` 的脚本项目, 并校验固定组件/签名/协议/ABI, 支持热插拔且绝不回退到 JavaScript
 * `新增` Python 启动集成覆盖文件管理器/编辑器/本地 Run Intent/单文件 Import Intent/新建快捷方式/定时任务/广播任务并严格保留单文件或项目上下文; 项目支持内部 import/相对文件读取及只读 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 执行支持通过 ExecutionConfig 键 `autojs6.python.stdinSnapshot` 提供可选的有界预置 stdin 快照, 并采用严格 ByteArray/UTF-8 文本准入, 提供器能力/大小协商及私有只读 PFD 传输与清理
+* `新增` 独立 Lua Runtime 插件后端, 支持通过单独的 PUC Lua 5.4.8 插件进程运行本地 .lua 文件, 并校验固定组件/签名/协议/ABI, 提供有界执行且绝不回退到 JavaScript
 * `新增` 插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本转换/媒体信息等扩展接口
 * `新增` 插件系统提供版本化 TaggedWire 传输及 DEX 编译与供应商中立 AI 文本生成 v1 开发协议包, 并配备专用的一致性测试应用及恶意场景夹具
 * `新增` 插件系统支持离线项目文档扩展接口

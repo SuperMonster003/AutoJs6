@@ -383,6 +383,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">不合法的選擇器集合元素: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP 地址不可為空</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 端口必須使用 \"[ipv6]:port\" 格式.</string>
+    <string name="error_lua_runtime_ambiguous">檢測到多個兼容且已啓用的 Lua 運行時插件. 請在插件中心禁用多餘的 Lua 運行時 Provider, 然後重試.</string>
+    <string name="error_lua_runtime_identity_or_bind">Lua 運行時發生變化或無法啓動. 請重試; 如問題持續, 請在插件中心更新或重新啓用該插件.</string>
+    <string name="error_lua_runtime_incompatible">已安裝的 Lua 運行時與當前 AutoJs6 版本或設備不兼容. 請更新 AutoJs6 或 Lua 運行時插件, 然後重試.</string>
+    <string name="error_lua_runtime_unavailable">Lua 運行時不可用. 請在插件中心安裝, 啓用或授權官方 Lua 運行時插件, 然後重試.</string>
     <string name="error_max_listeners_exceeded">超出最大監聽器數量限制: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 權限而無法運行 \"auto\" 文件</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 傳入的 %s 參數為空</string>
@@ -439,6 +443,7 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析後的路徑 \"%1$s\" 不可為 null</string>
     <string name="error_save_failed">保存失敗</string>
     <string name="error_script_is_on_exiting">腳本正在退出中</string>
+    <string name="error_script_shortcut_descriptor_mismatch">腳本快捷方式保存的引擎信息與當前文件不一致. 請重新創建該快捷方式.</string>
     <string name="error_selector_method_without_calling">選擇器方法需調用而不可作為參數直接傳入: %s</string>
     <string name="error_selector_result_type_with_compass">結果類型為 selector 時, 無法同時使用羅盤參數</string>
     <string name="error_set_both_icon_res_and_icon">不支持同時設置 iconRes 與 icon</string>

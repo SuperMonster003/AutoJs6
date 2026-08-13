@@ -77,6 +77,7 @@ private val pluginApi = listOf(
     "dex-compiler-api",
     "editor-api",
     "explorer-action-api",
+    "lua-runtime-api",
     "nodejs-api",
     "python-runtime-api",
     "apk-builder-template",
@@ -100,6 +101,7 @@ private val plugins = listOf(
 private val pluginConformanceTestApps = listOf(
     "ai-text-provider-conformance",
     "dex-compiler-conformance",
+    "lua-runtime-conformance",
     "python-runtime-conformance",
     "python-runtime-api-consumer",
 )

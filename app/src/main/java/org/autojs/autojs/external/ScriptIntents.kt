@@ -7,6 +7,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.model.script.PathChecker
 import org.autojs.autojs.model.script.Scripts
+import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs.script.PersistedScriptLaunchPolicy
 import org.autojs.autojs.script.PythonProjectLaunchError
 import org.autojs.autojs.script.PythonProjectLaunchException
@@ -283,9 +284,15 @@ object ScriptIntents {
             delay = intent.getLongExtra(EXTRA_KEY_DELAY, 0)
             loopTimes = intent.getIntExtra(EXTRA_KEY_LOOP_TIMES, 1)
             interval = intent.getLongExtra(EXTRA_KEY_LOOP_INTERVAL, 0)
-            setArgument("intent", intent)
+            if (shouldExposeAndroidIntentArgument(engineName)) {
+                setArgument("intent", intent)
+            }
         }
     }
+
+    @VisibleForTesting
+    internal fun shouldExposeAndroidIntentArgument(engineName: String): Boolean =
+        engineName != LuaScriptSource.ENGINE
 
     private fun JSONObject.optIntentString(key: String): String? {
         if (!has(key) || isNull(key)) {

@@ -387,6 +387,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">無効なセレクタマップ要素です. { %s: %s (%s) } です</string>
     <string name="error_ip_address_should_not_be_empty">IP アドレスは空であってはならない</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 のポートは \"[ipv6]:port\" 形式で指定する必要があります.</string>
+    <string name="error_lua_runtime_ambiguous">互換性のある Lua Runtime プラグインが複数有効です. プラグインセンターで余分な Lua Runtime provider を無効にしてから, もう一度お試しください.</string>
+    <string name="error_lua_runtime_identity_or_bind">Lua Runtime が変更されたか, 起動できませんでした. もう一度お試しください; 問題が解決しない場合は, プラグインセンターでプラグインを更新するか再度有効にしてください.</string>
+    <string name="error_lua_runtime_incompatible">インストールされている Lua Runtime は, この AutoJs6 バージョンまたはデバイスと互換性がありません. AutoJs6 または Lua Runtime プラグインを更新してから, もう一度お試しください.</string>
+    <string name="error_lua_runtime_unavailable">Lua Runtime を利用できません. プラグインセンターで公式 Lua Runtime プラグインをインストール, 有効化, または許可してから, もう一度お試しください.</string>
     <string name="error_max_listeners_exceeded">リスナーの最大数を超えています: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 は \"auto\" ファイルを実行するためのルートアクセス権を持っていない可能性があります</string>
     <string name="error_method_called_with_null_argument" formatted="false">null 引数で %s() が呼び出されました: %s</string>
@@ -443,6 +447,7 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" の解決済みパスは null にできません</string>
     <string name="error_save_failed">保存に失敗しました</string>
     <string name="error_script_is_on_exiting">スクリプトが終了してしまう</string>
+    <string name="error_script_shortcut_descriptor_mismatch">スクリプトのショートカットが保存済みのエンジンと一致しなくなりました. ショートカットを作り直してください.</string>
     <string name="error_selector_method_without_calling">セレクタメソッドはパラメータとして渡されるのではなく, 呼び出される必要があります: %s</string>
     <string name="error_selector_result_type_with_compass">結果タイプがセレクタの場合, コンパスを使用できません</string>
     <string name="error_set_both_icon_res_and_icon">iconRes とアイコンの両方を設定できません</string>

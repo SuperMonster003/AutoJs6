@@ -613,6 +613,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Explorer Action API
     implementation(project(":plugin-api:explorer-action-api"))
 
+    // Plugin API: Lua Runtime API
+    implementation(project(":plugin-api:lua-runtime-api"))
+
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
 

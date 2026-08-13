@@ -64,6 +64,12 @@ jobs:
             --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest \
             --tests org.autojs.autojs.core.plugin.ai.* \
             --tests org.autojs.autojs.core.plugin.dex.* \
+            --tests org.autojs.autojs.core.plugin.lua.* \
+            --tests org.autojs.autojs.engine.Lua* \
+            --tests org.autojs.autojs.external.shortcut.ScriptShortcutLaunchDescriptorTest \
+            --tests org.autojs.autojs.script.Lua* \
+            --tests org.autojs.autojs.ui.edit.editor.service.EditorScriptRunPolicyTest \
+            --tests org.autojs.autojs.util.Lua* \
             --no-daemon \
             --build-cache \
             --console=plain \
@@ -74,10 +80,14 @@ jobs:
             :plugin-api:ai-common-api:testDebugUnitTest \
             :plugin-api:ai-text-generation-api:testDebugUnitTest \
             :plugin-api:dex-compiler-api:testDebugUnitTest \
+            :plugin-api:lua-runtime-api:testDebugUnitTest \
+            :plugin-api:lua-runtime-api:assembleDebug \
             :test-apps:ai-text-provider-conformance:testDebugUnitTest \
             :test-apps:dex-compiler-conformance:testDebugUnitTest \
+            :test-apps:lua-runtime-conformance:testDebugUnitTest \
             :test-apps:ai-text-provider-conformance:assembleDebug \
             :test-apps:dex-compiler-conformance:assembleDebug \
+            :test-apps:lua-runtime-conformance:assembleDebug \
             --no-daemon \
             --build-cache \
             --console=plain \

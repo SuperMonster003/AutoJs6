@@ -386,6 +386,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">Elément de carte de sélecteur non valide : { %s : %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">L\'adresse IP ne peut pas être vide</string>
     <string name="error_ipv6_port_requires_brackets">Le port IPv6 doit être spécifié au format \"[ipv6]:port\".</string>
+    <string name="error_lua_runtime_ambiguous">Plusieurs plugins Lua Runtime compatibles sont activés. Désactivez les providers Lua Runtime supplémentaires dans le Centre des plugins, puis réessayez.</string>
+    <string name="error_lua_runtime_identity_or_bind">Lua Runtime a changé ou n\'a pas pu démarrer. Réessayez; si le problème persiste, mettez à jour ou réactivez le plugin dans le Centre des plugins.</string>
+    <string name="error_lua_runtime_incompatible">Le Lua Runtime installé est incompatible avec cette version d\'AutoJs6 ou cet appareil. Mettez à jour AutoJs6 ou le plugin Lua Runtime, puis réessayez.</string>
+    <string name="error_lua_runtime_unavailable">Lua Runtime n\'est pas disponible. Installez, activez ou autorisez le plugin Lua Runtime officiel dans le Centre des plugins, puis réessayez.</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded : %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 peut ne pas avoir l\'accès root pour exécuter le fichier \"auto\".</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() appelé avec un argument nul : %s</string>
@@ -442,6 +446,7 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Le chemin résolu pour \"%1$s\" ne peut pas être nul</string>
     <string name="error_save_failed">Echec de l\'enregistrement</string>
     <string name="error_script_is_on_exiting">Le script est en train de sortir</string>
+    <string name="error_script_shortcut_descriptor_mismatch">Le raccourci du script ne correspond plus au moteur enregistré. Recréez le raccourci.</string>
     <string name="error_selector_method_without_calling">La méthode du sélecteur doit être appelée plutôt que passée en paramètre : %s.</string>
     <string name="error_selector_result_type_with_compass">Impossible d\'utiliser un compas lorsque le type de résultat est un sélecteur</string>
     <string name="error_set_both_icon_res_and_icon">Impossible de définir iconRes et icon simultanément</string>

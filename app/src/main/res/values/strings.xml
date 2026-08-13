@@ -381,6 +381,10 @@
     <string name="error_invalid_selector_map_element" formatted="false">Invalid selector map element: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 port must be specified as \"[ipv6]:port\".</string>
+    <string name="error_lua_runtime_ambiguous">Multiple compatible Lua runtime plugins are enabled. Disable extra Lua runtime providers in Plugin Center, then try again.</string>
+    <string name="error_lua_runtime_identity_or_bind">Lua Runtime changed or could not be started. Try again; if the problem persists, update or re-enable the plugin in Plugin Center.</string>
+    <string name="error_lua_runtime_incompatible">The installed Lua Runtime is incompatible with this AutoJs6 version or device. Update AutoJs6 or the Lua Runtime plugin, then try again.</string>
+    <string name="error_lua_runtime_unavailable">Lua Runtime is unavailable. Install, enable, or authorize the official Lua Runtime plugin in Plugin Center, then try again.</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 may not have root access to run \"auto\" file</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
@@ -437,6 +441,7 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
     <string name="error_save_failed">Save failed</string>
     <string name="error_script_is_on_exiting">Script is on exiting</string>
+    <string name="error_script_shortcut_descriptor_mismatch">The script shortcut no longer matches its saved engine. Recreate the shortcut.</string>
     <string name="error_selector_method_without_calling">Selector method should be called rather than passed as a parameter: %s</string>
     <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
     <string name="error_set_both_icon_res_and_icon">Cannot set both iconRes and icon</string>
