@@ -287,13 +287,75 @@ function Invoke-YoloR5GateInstrumentation {
         [Parameter(Mandatory = $true)][string] $ClassName,
         [Parameter(Mandatory = $true)][string] $MethodName
     )
-    $output = @(Invoke-YoloR5GateAdb -AdbPath $AdbPath -Serial $Serial -Arguments @(
+    $arguments = @(
+        "-s", $Serial,
         "shell", "am", "instrument", "-w", "-r",
         "-e", $ArgumentName, "true",
         "-e", "class", "$ClassName#$MethodName",
         "$testPackage/$runner"
-    ))
-    $text = $output -join "`n"
+    )
+    $timeoutMillis = if ($ClassName -ceq $resourceClass) {
+        45 * 60 * 1000
+    } else {
+        5 * 60 * 1000
+    }
+    $display = "$AdbPath $($arguments -join ' ')"
+    Write-Host "> $display"
+    $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = $AdbPath
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    foreach ($argument in $arguments) {
+        $null = $startInfo.ArgumentList.Add($argument)
+    }
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    try {
+        Assert-YoloR5GateCondition ($process.Start()) "Could not start instrumentation: $display"
+        $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        if (-not $process.WaitForExit($timeoutMillis)) {
+            try { $process.Kill($true) } catch { }
+            $process.WaitForExit()
+            foreach ($packageName in @($testPackage, $hostPackage)) {
+                $stopInfo = [System.Diagnostics.ProcessStartInfo]::new()
+                $stopInfo.FileName = $AdbPath
+                $stopInfo.UseShellExecute = $false
+                $stopInfo.CreateNoWindow = $true
+                $stopInfo.RedirectStandardOutput = $true
+                $stopInfo.RedirectStandardError = $true
+                foreach ($argument in @("-s", $Serial, "shell", "am", "force-stop", $packageName)) {
+                    $null = $stopInfo.ArgumentList.Add($argument)
+                }
+                $stopProcess = [System.Diagnostics.Process]::new()
+                $stopProcess.StartInfo = $stopInfo
+                try {
+                    if ($stopProcess.Start() -and -not $stopProcess.WaitForExit(15000)) {
+                        try { $stopProcess.Kill($true) } catch { }
+                    }
+                } catch { } finally {
+                    $stopProcess.Dispose()
+                }
+            }
+            throw "$ClassName#$MethodName exceeded its $timeoutMillis ms wall-clock limit"
+        }
+        $process.WaitForExit()
+        $stdout = $stdoutTask.GetAwaiter().GetResult()
+        $stderr = $stderrTask.GetAwaiter().GetResult()
+        $text = @($stdout, $stderr) |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+            ForEach-Object { $_.TrimEnd() } |
+            Join-String -Separator "`n"
+        if (-not [string]::IsNullOrWhiteSpace($text)) { Write-Host $text }
+        Assert-YoloR5GateCondition ($process.ExitCode -eq 0) (
+            "$ClassName#$MethodName instrumentation exited with $($process.ExitCode)"
+        )
+    } finally {
+        $process.Dispose()
+    }
+    $output = @($text -split "`r?`n")
     Assert-YoloR5GateCondition ($text -match '(?m)^OK \(1 test\)\s*$') "$ClassName#$MethodName did not report one passing test"
     Assert-YoloR5GateCondition ($text -notmatch '(?im)^(FAILURES!!!|INSTRUMENTATION_FAILED:)|Process crashed|AssumptionViolated|INSTRUMENTATION_STATUS_CODE:\s*-3\s*$') (
         "$ClassName#$MethodName reported a failure, crash, or skipped assumption"
@@ -304,6 +366,7 @@ function Invoke-YoloR5GateInstrumentation {
         status = "PASS"
         outputSha256 = Get-YoloR5GateTextSha256 -Value $text
         output = @($output | ForEach-Object { [string]$_ })
+        wallClockTimeoutMillis = $timeoutMillis
     }
 }
 
