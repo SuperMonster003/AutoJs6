@@ -1,6 +1,6 @@
 # AutoJs6 Lua 独立运行时部署路线图
 
-最后更新：2026-08-11
+最后更新：2026-08-13
 
 本路线图面向一个由独立 APK 提供、运行在独立进程中的一等 `.lua` 脚本引擎。
 主文件只记录可交付里程碑；测试明细、哈希、命令输出和故障分析统一放入证据文档，
@@ -31,7 +31,7 @@
 | M1 独立 Native 运行时 | 已完成 | Lua 5.4.8/JNI、独立进程、ABI/16 KiB 和故障恢复 |
 | M2 真实 Provider 闭环 | 已完成 | 宿主经 production INFO/RUNTIME 连续执行两次真实 Lua |
 | M3 最小 AutoJs 能力 | 已完成 | console、受限参数与首个 `device.info` broker 能力已闭环 |
-| M4 产品预览 | 进行中 | 编辑器运行、错误提示与 Lua 快捷方式描述符已完成 |
+| M4 产品预览 | 已完成 | 编辑器运行、错误提示、快捷方式描述符与受控模块快照 |
 | M5 发布候选 | 未开始 | 签名、兼容抽样和独立发布 |
 
 ## M0 — 协议与宿主接入（已完成）
@@ -79,11 +79,11 @@ AutoJs 能力模块。
 本阶段不做：文件写入、网络、shell、UI、无障碍、通用 Java 反射和任意动态 C 模块。
 timer、更多只读设备信息和受限模块加载在产品预览或后续版本按需加入，不阻塞进入 M4。
 
-## M4 — 产品预览
+## M4 — 产品预览（已完成）
 
 - [x] 保存及未保存的编辑器 Lua 脚本都可运行，并给出可理解的安装、授权和错误提示。
 - [x] Lua 快捷方式持久保存并校验 V1 engine 描述符；旧 path-only 快捷方式保持兼容。
-- [ ] 增加显式、扁平、会话级的受控模块快照；语法高亮可以独立交付，不阻塞执行链。
+- [x] 增加显式、扁平、会话级的受控模块快照；语法高亮可以独立交付，不阻塞执行链。
 
 本阶段不做：完整项目系统、APK 打包、调试器、UI DSL 或 Rhino API 全兼容。
 
@@ -116,6 +116,7 @@ timer、更多只读设备信息和受限模块加载在产品预览或后续版
 - M3 `device.info` smoke：[`docs/dev/lua-runtime-device-info-smoke-2026-08-11.md`](../dev/lua-runtime-device-info-smoke-2026-08-11.md)
 - M4 编辑器预览：[`docs/dev/lua-runtime-editor-preview-2026-08-11.md`](../dev/lua-runtime-editor-preview-2026-08-11.md)
 - M4 快捷方式描述符：[`docs/dev/lua-runtime-shortcut-preview-2026-08-11.md`](../dev/lua-runtime-shortcut-preview-2026-08-11.md)
+- M4 受控模块快照：[`docs/dev/lua-runtime-module-snapshot-smoke-2026-08-13.md`](../dev/lua-runtime-module-snapshot-smoke-2026-08-13.md)
 
 ## 最小检查策略
 

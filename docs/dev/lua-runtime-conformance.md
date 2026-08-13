@@ -11,9 +11,9 @@ exists.
 | TaggedWire and value JVM tests | PASS, JVM | Round trip, canonical map order, golden bytes, malformed fields, limits, defensive copies | Binder framing, PFD I/O |
 | Negotiation and lifecycle JVM tests | PASS, JVM | Capability/limit intersection, credits, sequence, terminal, cancel/close, host-call replay | Android scheduling and races |
 | Public AIDL compilation | PASS, GRADLE | R0 Gradle API gate, 14+50 JVM tests, `lua-runtime-api` debug AAR assembly | Cross-package calls, caller UID, Binder death |
-| Host proxy and `.lua` routing | PASS, LOCAL + DEVICE HAPPY PATH | App compilation plus focused JVM tests; pinned selection, explicit transport, bounded Binder lane, R2 fixture coverage, and opt-in official Provider smokes including `device.info` | Android API/ABI matrix and broader product capability layer |
+| Host proxy and `.lua` routing | PASS, LOCAL + DEVICE HAPPY PATH | App compilation plus focused JVM tests; pinned selection, explicit transport, bounded Binder lane, R2 fixture coverage, and opt-in official Provider smokes including `device.info` and controlled flat module snapshots | Android API/ABI matrix and broader product capability layer |
 | Hostile Android provider | PASS, DEVICE PARTIAL | R2 debug-only/testOnly fixture 2/2 JVM build plus 19/19 isolated methods on `QV710AF65F` API 31/arm64-v8a | Provider death, wrong UID/capability attacks, update/uninstall during a session, oversized source, OS-level FD evidence |
-| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing controlled console, arguments, `device.info`, and scalar results on API 31/arm64 with exact all-user restoration | More broker capabilities, concurrent admission, blocking PFD, Android process OOM, API/ABI matrix, signed release and default production enablement |
+| PUC Lua JNI provider | PASS, BUILD/ARTIFACT + DEVICE PARTIAL; DEFAULT OFF | Immutable protocol/Lua intake; aligned APKs; direct-native and fault-recovery methods; opt-in production INFO/RUNTIME bind executing controlled console, arguments, `device.info`, flat module snapshots, and scalar results on API 31/arm64 with exact all-user restoration | More broker capabilities, recursive project modules, concurrent admission, blocking PFD, Android process OOM, API/ABI matrix, signed release and default production enablement |
 | Device/API/ABI acceptance | PASS, SINGLE DEVICE | API 31, arm64-v8a, 4 KiB, exact serial/artifact/restore evidence | API 24-36, x86_64, 16 KiB environments |
 | Release evidence | PENDING | R6 | Signed independent plugin APK and production soak |
 
@@ -275,6 +275,17 @@ again for users 0 and 10. See `docs/dev/lua-runtime-device-info-smoke-2026-08-11
 Android hostile capability denial/replay, concurrent admission, cancel and callback-peer death,
 blocking/hostile PFD recovery, Android process OOM, release signing, API/ABI
 sampling, and default production enablement remain unestablished.
+
+At host revision `1c373d1330d23ab76747648a50532929509ece99` and sibling revision
+`9eddc6b1ba97a9b622f9cda977ef6b56fba729ca`, M4 added the optional
+`module.snapshot.v1` session capability. The host freezes only flat strict-UTF-8 modules in the
+explicit `<entry-basename>.modules/` directory, returns bytes plus SHA-256 without a path, and the
+Provider uses a text-only execution-local `require` cache. Provider JVM tests passed 43/43; the
+affected host tests had 0 failures (32 executed passes and one Windows symlink assumption skip).
+One exact production Binder method on `QV710AF65F` required a nil-returning helper twice, observed
+one execution and `true` on both calls, returned `Int64(1)`, ran in `:lua_runtime`, and restored all
+packages for users 0 and 10. Evidence is limited to an internal app-file happy path. See
+`docs/dev/lua-runtime-module-snapshot-smoke-2026-08-13.md`.
 
 Recheck the existing artifacts without ADB or rebuilding:
 
