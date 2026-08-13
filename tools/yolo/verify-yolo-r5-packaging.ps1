@@ -34,6 +34,7 @@ $expectedNcnn = [ordered]@{
     cmakeVersion = "3.22.1"
 }
 $requiredAssetEntries = [ordered]@{
+    "assets/licenses/Apache-2.0.txt" = "app/src/main/assets/licenses/Apache-2.0.txt"
     "assets/licenses/MPL-2.0.txt" = "app/src/main/assets/licenses/MPL-2.0.txt"
     "assets/licenses/ncnn-20260526.txt" = "app/src/main/assets/licenses/ncnn-20260526.txt"
     "assets/third_party/ncnn/provenance.lock.json" = "app/src/main/assets/third_party/ncnn/provenance.lock.json"

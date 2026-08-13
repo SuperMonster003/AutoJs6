@@ -59,6 +59,7 @@ $trustSourcePath = Join-Path $repositoryRoot "app\src\main\java\org\autojs\autoj
 $modelWeightsNotDistributedPattern = '(?is)model weights.*not\s+distributed'
 $providerAllowedAssets = @(
     "assets/THIRD_PARTY_NOTICES.md",
+    "assets/licenses/Apache-2.0.txt",
     "assets/licenses/MPL-2.0.txt",
     "assets/licenses/ncnn-20260526.txt",
     "assets/third_party/ncnn/provenance.lock.json"
@@ -807,6 +808,8 @@ function Get-YoloR6PackagedNoticeEvidence {
     ) "Provider repository and Android asset THIRD_PARTY_NOTICES.md differ"
     $noticeText = [System.Text.UTF8Encoding]::new($false, $true).GetString($rootNoticeBytes)
     foreach ($pattern in @(
+        'Apache License 2\.0',
+        'assets/licenses/Apache-2\.0\.txt',
         'MPL-2\.0',
         'NCNN',
         'BSD 3-Clause|BSD-3-Clause',

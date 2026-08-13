@@ -343,7 +343,7 @@ release/RC admission；该新证据不得回写或提升 R5 artifact。`PRODUCTI
 - [ ] 生成签名 Host/Provider release APK、证书和 SHA-256 receipt。
 - [ ] 完成插件索引、显式授权/启用和版本兼容；升级与版本回滚按首发产品决定记录为
   `NOT_RUN_BY_PRODUCT_DECISION`。
-- [ ] 完成 NCNN provenance、NOTICE 和模型许可说明。
+- [ ] 完成 NCNN provenance、NOTICE、MPL-2.0、Kotlin runtime Apache-2.0 完整正文和模型许可说明。
 - [ ] 一台代表性 arm64 物理设备和一个当前 API arm64 环境完成冷/热推理及进程死亡恢复；
   当前主机无法运行 arm64 AVD 时允许 API 35+ arm64 实体机替代。
 - [ ] 发布说明列出实际验证的 API/ABI/backend/model，不暗示未验证能力。
@@ -400,6 +400,16 @@ attestation，且设备、索引和发布未完成前不生成 canonical `r6-sum
   用户包或其他任务则 fail-closed 保持 `NOT_RUN`，不能覆盖或用 x86_64 静态构建代替。
 - [ ] release note 与索引只列实际通过的 API/ABI/backend/model；最终 receipt 绑定所有
   子报告的 APK SHA-256 后才可声明 `PRODUCTION=PASS`。
+
+### R6-E：当前私有证据归档边界
+
+- [x] 创建 private Provider 仓库并在首次源码推送前、推送后分别确认
+  `visibility=private`；匿名 GitHub API 必须返回 `404`。
+- [ ] 许可证与最终产物证据刷新后，才允许创建精确 `v0.1.0` tag 和 private Draft
+  Release；草稿资产仅保留 Provider APK、脱敏证据摘要和索引准入候选，不上传 Host/
+  AndroidTest APK、原始 receipt、设备 serial 或本地绝对路径。
+- [ ] AutoJs6 `6.8.0 / 5275` 正式版公开前，不得将 Provider 仓库转为 public、不得发布
+  Release、不得推送 YOLO 官方索引条目。该边界是产品就绪条件，不得由私有归档证据绕过。
 
 ## 首发后 backlog（不阻塞 R1-R6）
 

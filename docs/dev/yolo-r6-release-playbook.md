@@ -27,7 +27,7 @@ TEST-SIGNED APK 或单台设备结果写成完整生产发布结论。
    Provider source-build receipt、发布负责人冻结的 `ExpectedProviderVersionCode` 和确认的
    `OfficialProductionSignerSha256`。它要求两仓 clean，并校验 non-debuggable、相同且匹配的
    signer、APK SHA-256、Provider arm64-only/严格 release-entry allowlist、NCNN
-   provenance/NOTICE 和静态 ELF 包装。Host 只声明已知 YOLO/NCNN payload absent，不能由
+   provenance/NOTICE、MPL-2.0 与 Kotlin runtime Apache-2.0 完整正文，以及静态 ELF 包装。Host 只声明已知 YOLO/NCNN payload absent，不能由
    denylist 推导通用 model-free。unsigned source receipt 或可编辑 JSON 不能证明最终 signed
    APK 的 build identity。`produce-yolo-r6-signed-artifacts.ps1` 在一个受控进程内绑定 clean
    source、构建调用、最终 signed APK 与后置的完整 unsigned Provider admission；consumer
@@ -81,7 +81,7 @@ TEST-SIGNED APK 或单台设备结果写成完整生产发布结论。
 
 - 使用已知 R5 TEST-SIGNED certificate、debuggable APK 或未显式提供生产 signer 指纹；
 - Host/Provider signer 不同，Provider 非 arm64-only，或任一生产 APK含 YOLO 模型；
-- provenance、MPL-2.0/NCNN notice、APK hash、索引 hash 或 release note 互不一致；
+- provenance、MPL-2.0/Kotlin Apache-2.0/NCNN notice、APK hash、索引 hash 或 release note 互不一致；
 - 真实 Provider 死亡后旧 session 可继续 dispatch、发生自动重试，或显式 reopen 失败；
 - 缺少代表性 arm64 物理设备或当前 API 环境证据；
 - 生产凭据、外部索引、发布目的地或最终版本尚未由负责人明确授权。
