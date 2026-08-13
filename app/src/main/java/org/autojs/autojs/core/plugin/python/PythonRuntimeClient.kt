@@ -431,7 +431,7 @@ internal class PythonRuntimeClient(
                         "Python Runtime failure arrived before admission"
                     }
                     policy.onFailed(decoded)
-                    reportPythonFailure(decoded)
+                    reportPythonFailure(source, decoded)
                     finishFailure(decoded.toHostException())
                 }
 
@@ -850,18 +850,8 @@ internal class PythonRuntimeClient(
         }
     }
 
-    private fun reportPythonFailure(error: PythonExecutionError) {
-        val traceback = error.traceback.joinToString(separator = "\n") { frame ->
-            "  at ${frame.fileName}:${frame.lineNumber} in ${frame.functionName}" +
-                frame.sourceLine?.let { "\n    $it" }.orEmpty()
-        }
-        val message = buildString {
-            append(error.code.name).append('/').append(error.phase.name).append(": ").append(error.message)
-            error.exceptionType?.let { append(" [").append(it).append(']') }
-            error.exceptionMessage?.let { append(' ').append(it) }
-            if (traceback.isNotEmpty()) append('\n').append(traceback)
-        }
-        globalConsole.write(Log.ERROR, message)
+    private fun reportPythonFailure(source: PythonFileSource, error: PythonExecutionError) {
+        globalConsole.write(Log.ERROR, PythonRuntimeFailurePresentationPolicy.messageFor(source, error))
     }
 
     companion object {

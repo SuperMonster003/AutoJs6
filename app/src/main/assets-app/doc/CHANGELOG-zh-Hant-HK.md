@@ -146,6 +146,7 @@
 * `優化` Node.js 外部插件常駐運行時加入 soak 測試及生產證據門禁, 覆蓋設備/ABI 矩陣/運行時生命週期/資源指標及 8 小時/24 小時穩定性
 * `優化` Node.js 原生校驗支持解析並驗證外部運行時插件的源碼及構建根目錄
 * `優化` Node.js 最終集成及發佈門禁在所需報告/當前源碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
+* `優化` 獨立 Python 腳本發生精確 ModuleNotFoundError 時在控制台追加安全提示, 引導 sibling/local 模組 import 使用包含 `project.json` 與 `type: python` 的明確 Python 項目, 且不暴露私有路徑
 * `優化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `優化` 文件管理器將媒體詳情查詢整合為單次 MediaInfo 快照, 減少 Binder 調用及等待時間
 * `優化` 文件外部查看與媒體播放回退只授予 URI 讀取權限

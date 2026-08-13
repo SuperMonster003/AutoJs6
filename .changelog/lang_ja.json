@@ -145,6 +145,7 @@
         "Node.js 外部プラグイン常駐ランタイムに soak テストと本番エビデンスゲートを追加し, デバイス/ABI マトリクス/ランタイムライフサイクル/リソース指標/8 時間および 24 時間の安定性を検証",
         "Node.js ネイティブ検証で外部ランタイムプラグインのソースおよびビルドルートを解決して検証",
         "Node.js の最終統合およびリリースゲートは, 必須レポート/現在のソースに基づくエビデンス/本番受け入れ成果物が欠落または期限切れの場合に fail-closed で判定",
+        "単体 Python スクリプトで正確な ModuleNotFoundError が発生した場合, コンソールに安全なヒントを追記し, 非公開パスを露出せずに sibling/local モジュールの import には `project.json` と `type: python` を指定した明示的な Python プロジェクトを案内",
         "ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 関連機能をプラグイン化",
         "ファイルマネージャーのメディア詳細取得を単一の MediaInfo スナップショットに統合, Binder 呼び出しと待機時間を削減",
         "外部アプリへのファイル表示とメディア再生のフォールバックを読み取り専用 URI アクセスに制限",

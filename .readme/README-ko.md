@@ -306,6 +306,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Node.js 외부 플러그인 상주 런타임에 soak 테스트 및 프로덕션 증거 게이트를 추가하여 기기/ABI 매트릭스/런타임 수명 주기/리소스 지표/8시간 및 24시간 안정성 검증
 * `개선` Node.js 네이티브 검증에서 외부 런타임 플러그인의 소스 및 빌드 루트를 확인하고 검증하도록 개선
 * `개선` 필수 보고서/현재 소스 증거/프로덕션 승인 산출물이 누락되거나 만료된 경우 Node.js 최종 통합 및 릴리스 게이트가 fail-closed로 판정되도록 개선
+* `개선` 독립 실행형 Python 스크립트에서 정확한 ModuleNotFoundError가 발생하면 콘솔에 안전한 안내를 추가하고, 비공개 경로를 노출하지 않으면서 sibling/local 모듈 import에는 `project.json`과 `type: python`을 지정한 명시적 Python 프로젝트 사용을 안내
 * `개선` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 관련 기능 플러그인화
 * `개선` 파일 관리자의 미디어 상세 정보 조회를 단일 MediaInfo 스냅샷으로 통합하여 Binder 호출 및 대기 시간 감소
 * `개선` 외부 파일 보기 및 미디어 재생 대체 경로를 읽기 전용 URI 접근으로 제한

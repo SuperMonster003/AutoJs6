@@ -306,6 +306,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Added persistent external-plugin runtime soak testing and Node.js production-evidence gates covering device/ABI matrices, runtime lifecycle, resource metrics, and 8-hour/24-hour stability
 * `Improvement` Updated Node.js native verification to resolve and validate the external runtime plugin source and build roots
 * `Improvement` Made Node.js final integration and release gates fail closed when required reports, current-source evidence, or production acceptance artifacts are missing or stale
+* `Improvement` Standalone Python scripts now append a safe console hint for an exact ModuleNotFoundError, directing sibling/local module imports to an explicit Python project with `project.json` and `type: python` without exposing private paths
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Consolidated file manager media detail queries into a single MediaInfo snapshot to reduce Binder calls and wait time
 * `Improvement` Limited external file viewing and media playback fallbacks to read-only URI access

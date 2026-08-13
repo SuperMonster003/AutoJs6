@@ -146,6 +146,7 @@
 * `Mejora` Añadidas pruebas soak del runtime persistente del plugin externo y puertas de evidencia de producción de Node.js que cubren matriz de dispositivos/ABI, ciclo de vida del runtime, métricas de recursos y estabilidad de 8 h/24 h
 * `Mejora` La verificación nativa de Node.js ahora resuelve y valida las raíces de código fuente y compilación del plugin de runtime externo
 * `Mejora` Las puertas de integración final y lanzamiento de Node.js aplican fail-closed cuando faltan o están obsoletos los informes requeridos, las evidencias de las fuentes actuales o los artefactos de aceptación de producción
+* `Mejora` Los scripts Python independientes ahora añaden a la consola una sugerencia segura ante un ModuleNotFoundError exacto, orientando la importación de módulos hermanos/locales a un proyecto Python explícito con `project.json` y `type: python`, sin exponer rutas privadas
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` Consolidadas las consultas de detalles multimedia del administrador de archivos en una única instantánea de MediaInfo para reducir las llamadas Binder y el tiempo de espera
 * `Mejora` Limitadas las alternativas de visualización y reproducción externas a permisos URI de solo lectura

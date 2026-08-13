@@ -306,6 +306,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Ajout de tests soak du runtime persistant du plugin externe et de portes de preuves de production Node.js couvrant la matrice appareils/ABI, le cycle de vie du runtime, les mesures de ressources et la stabilité sur 8 h/24 h
 * `Amélioration` La vérification native de Node.js résout et valide désormais les racines des sources et de la compilation du plugin d'exécution externe
 * `Amélioration` Les portes d'intégration finale et de livraison Node.js appliquent une stratégie fail-closed lorsque des rapports requis, des preuves correspondant aux sources actuelles ou des artefacts d'acceptation en production sont absents ou périmés
+* `Amélioration` Les scripts Python autonomes ajoutent désormais dans la console une indication sûre lors d'un ModuleNotFoundError exact, orientant l'importation de modules voisins/locaux vers un projet Python explicite avec `project.json` et `type: python`, sans exposer de chemins privés
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Regroupement des requêtes de détails multimédias du gestionnaire de fichiers en un seul instantané MediaInfo afin de réduire les appels Binder et le temps d'attente
 * `Amélioration` Limitation des replis d'affichage et de lecture externes aux accès URI en lecture seule
