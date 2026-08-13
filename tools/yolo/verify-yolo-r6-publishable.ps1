@@ -86,6 +86,16 @@ function Assert-YoloR6Condition {
     if (-not $Condition) { throw $Message }
 }
 
+function Assert-YoloR6Rejects {
+    param(
+        [Parameter(Mandatory = $true)][scriptblock] $Action,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $rejected = $false
+    try { $null = & $Action } catch { $rejected = $true }
+    Assert-YoloR6Condition $rejected "Self-test expected rejection: $Label"
+}
+
 function Get-YoloR6RequiredFile {
     param(
         [Parameter(Mandatory = $true)][string] $Path,
@@ -378,6 +388,191 @@ function Invoke-YoloR6ExternalText {
     return ($output -join "`n")
 }
 
+function Get-YoloR6XmlTreeInstrumentationNodes {
+    param(
+        [Parameter(Mandatory = $true)][string] $XmlTreeText,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $lines = @($XmlTreeText -split "`r?`n")
+    $elementStack = [System.Collections.Generic.List[object]]::new()
+    $manifestElements = [System.Collections.Generic.List[object]]::new()
+    $elements = [System.Collections.Generic.List[object]]::new()
+    for ($index = 0; $index -lt $lines.Count; $index++) {
+        $match = [regex]::Match($lines[$index], '^(?<indent>[ \t]*)E:\s+(?<name>[^\s(]+)(?:\s+\(line=[0-9]+\))?\s*$')
+        if (-not $match.Success) { continue }
+        $indent = $match.Groups['indent'].Value
+        while ($elementStack.Count -gt 0 -and ([string]$elementStack[$elementStack.Count - 1].indent).Length -ge $indent.Length) {
+            $elementStack.RemoveAt($elementStack.Count - 1)
+        }
+        $parentName = if ($elementStack.Count -gt 0) { [string]$elementStack[$elementStack.Count - 1].name } else { "" }
+        $record = [pscustomobject]@{
+            index = $index
+            indent = $indent
+            name = $match.Groups['name'].Value
+            parentName = $parentName
+        }
+        if ($record.name -ceq 'manifest') { $manifestElements.Add($record) }
+        if ($record.name -ceq 'instrumentation') {
+            Assert-YoloR6Condition ($record.parentName -ceq 'manifest') "$Label instrumentation node must be a direct child of the manifest"
+            $elements.Add($record)
+        }
+        $elementStack.Add($record)
+    }
+    Assert-YoloR6Condition ($manifestElements.Count -eq 1) "$Label manifest tree must contain exactly one manifest element"
+    $nodes = [System.Collections.Generic.List[object]]::new()
+    foreach ($element in $elements) {
+        $elementIndent = ([string]$element.indent).Length
+        $directAttributeIndent = $elementIndent + 2
+        $values = @{}
+        $enteredChildElement = $false
+        for ($index = [int]$element.index + 1; $index -lt $lines.Count; $index++) {
+            $child = [regex]::Match($lines[$index], '^(?<indent>[ \t]*)E:\s+')
+            if ($child.Success -and $child.Groups['indent'].Value.Length -le $elementIndent) { break }
+            if ($child.Success) { $enteredChildElement = $true; continue }
+            $attribute = [regex]::Match(
+                $lines[$index],
+                '^(?<indent>[ \t]*)A:\s+(?<key>[^\s(=]+)(?:\(0x[0-9a-fA-F]+\))?=(?<compiled>"[^"]*"|[^\s]+)(?:\s+\(Raw:\s+"(?<raw>[^"]*)"\))?\s*$'
+            )
+            if ($enteredChildElement -or -not $attribute.Success -or $attribute.Groups['indent'].Value.Length -ne $directAttributeIndent) { continue }
+            $qualifiedKey = $attribute.Groups['key'].Value
+            $androidPrefix = 'http://schemas.android.com/apk/res/android:'
+            if (-not $qualifiedKey.StartsWith($androidPrefix, [System.StringComparison]::Ordinal)) { continue }
+            $key = $qualifiedKey.Substring($androidPrefix.Length)
+            if ($key -notin @('name', 'targetPackage')) { continue }
+            if (-not $values.ContainsKey($key)) { $values[$key] = [System.Collections.Generic.List[string]]::new() }
+            Assert-YoloR6Condition $attribute.Groups['raw'].Success "$Label instrumentation $key has no Raw string value"
+            $value = $attribute.Groups['raw'].Value
+            $compiled = $attribute.Groups['compiled'].Value
+            if ($compiled.StartsWith('"') -and $compiled.EndsWith('"')) {
+                Assert-YoloR6Condition ($compiled.Substring(1, $compiled.Length - 2) -ceq $value) "$Label instrumentation $key compiled and raw values differ"
+            }
+            $values[$key].Add($value)
+        }
+        $names = @(if ($values.ContainsKey('name')) { @($values['name']) })
+        $targets = @(if ($values.ContainsKey('targetPackage')) { @($values['targetPackage']) })
+        Assert-YoloR6Condition ($names.Count -eq 1) "$Label instrumentation node must contain exactly one direct android:name attribute"
+        Assert-YoloR6Condition ($targets.Count -eq 1) "$Label instrumentation node must contain exactly one direct android:targetPackage attribute"
+        $nodes.Add([pscustomobject][ordered]@{ runner = $names[0]; targetPackage = $targets[0] })
+    }
+    return @($nodes)
+}
+
+function Get-YoloR6ApkIdentityFromText {
+    param(
+        [Parameter(Mandatory = $true)][string] $BadgingText,
+        [Parameter(Mandatory = $true)][string] $XmlTreeText,
+        [Parameter(Mandatory = $true)][ValidateSet("Ordinary", "Instrumentation")][string] $Kind,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $packageLines = @([regex]::Matches($BadgingText, '(?m)^package:[^\r\n]*$'))
+    Assert-YoloR6Condition ($packageLines.Count -eq 1) "$Label badging must contain exactly one package line"
+    $package = [regex]::Match(
+        $packageLines[0].Value,
+        "^package:\s+name='([^'\r\n]*)'\s+versionCode='([^'\r\n]*)'\s+versionName='([^'\r\n]*)'(?:\s|$)"
+    )
+    Assert-YoloR6Condition $package.Success "$Label badging package identity is malformed"
+    $badgingInstrumentationLines = @([regex]::Matches($BadgingText, '(?m)^instrumentation:[^\r\n]*$'))
+    Assert-YoloR6Condition ($badgingInstrumentationLines.Count -le 1) "$Label badging contains multiple instrumentation claims"
+    $badgingInstrumentation = $null
+    if ($badgingInstrumentationLines.Count -eq 1) {
+        $match = [regex]::Match($badgingInstrumentationLines[0].Value, "^instrumentation:\s+name='([^'\r\n]+)'\s+targetPackage='([^'\r\n]+)'(?:\s|$)")
+        Assert-YoloR6Condition $match.Success "$Label badging instrumentation claim is malformed"
+        $badgingInstrumentation = [pscustomobject]@{ runner = $match.Groups[1].Value; targetPackage = $match.Groups[2].Value }
+    }
+    $packageName = $package.Groups[1].Value
+    $rawVersionCode = $package.Groups[2].Value
+    $rawVersionName = $package.Groups[3].Value
+    Assert-YoloR6Condition (-not [string]::IsNullOrEmpty($packageName)) "$Label package name is empty"
+    $nodes = @(Get-YoloR6XmlTreeInstrumentationNodes -XmlTreeText $XmlTreeText -Label $Label)
+    if ($Kind -ceq "Ordinary") {
+        $parsedVersionCode = 0L
+        Assert-YoloR6Condition (
+            $rawVersionCode -cmatch '^[0-9]+$' -and
+            [long]::TryParse($rawVersionCode, [Globalization.NumberStyles]::None, [Globalization.CultureInfo]::InvariantCulture, [ref]$parsedVersionCode) -and
+            $parsedVersionCode -gt 0L
+        ) "$Label versionCode must be a positive 64-bit integer"
+        Assert-YoloR6Condition ($nodes.Count -eq 0) "$Label ordinary APK must not declare an instrumentation node"
+        Assert-YoloR6Condition ($null -eq $badgingInstrumentation) "$Label ordinary APK badging must not claim instrumentation"
+        $versionCode = $parsedVersionCode
+    } else {
+        Assert-YoloR6Condition ($packageName -ceq "org.autojs.autojs6.test") "$Label instrumentation package differs"
+        Assert-YoloR6Condition ([string]::IsNullOrEmpty($rawVersionCode)) "$Label instrumentation versionCode must be empty"
+        Assert-YoloR6Condition ([string]::IsNullOrEmpty($rawVersionName)) "$Label instrumentation versionName must be empty"
+        Assert-YoloR6Condition ($nodes.Count -eq 1) "$Label must declare exactly one instrumentation node"
+        Assert-YoloR6Condition ([string]$nodes[0].runner -ceq "androidx.test.runner.AndroidJUnitRunner") "$Label instrumentation runner differs"
+        Assert-YoloR6Condition ([string]$nodes[0].targetPackage -ceq "org.autojs.autojs6") "$Label instrumentation target package differs"
+        if ($null -ne $badgingInstrumentation) {
+            Assert-YoloR6Condition (
+                [string]$badgingInstrumentation.runner -ceq [string]$nodes[0].runner -and
+                [string]$badgingInstrumentation.targetPackage -ceq [string]$nodes[0].targetPackage
+            ) "$Label badging instrumentation claim differs from the manifest tree"
+        }
+        $versionCode = ""
+    }
+    return [pscustomobject][ordered]@{
+        packageName = $packageName
+        versionCode = $versionCode
+        versionName = $rawVersionName
+        debuggable = $BadgingText -match "(?m)^application-debuggable\s*$"
+        instrumentation = if ($Kind -ceq "Instrumentation") { $nodes[0] } else { $null }
+    }
+}
+
+function Get-YoloR6ApkIdentity {
+    param(
+        [Parameter(Mandatory = $true)][string] $Aapt2,
+        [Parameter(Mandatory = $true)][string] $ApkPath,
+        [Parameter(Mandatory = $true)][ValidateSet("Ordinary", "Instrumentation")][string] $Kind,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $badging = Invoke-YoloR6ExternalText -FilePath $Aapt2 -Arguments @("dump", "badging", $ApkPath) -Label "$Label badging inspection"
+    $xmlTree = Invoke-YoloR6ExternalText -FilePath $Aapt2 -Arguments @("dump", "xmltree", "--file", "AndroidManifest.xml", $ApkPath) -Label "$Label manifest inspection"
+    return Get-YoloR6ApkIdentityFromText -BadgingText $badging -XmlTreeText $xmlTree -Kind $Kind -Label $Label
+}
+
+function Get-YoloR6InstrumentationMetadataIdentity {
+    param(
+        [Parameter(Mandatory = $true)][string] $JsonText,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    try { $metadata = $JsonText | ConvertFrom-Json } catch { throw "$Label is invalid JSON" }
+    Assert-YoloR6Condition ($null -ne $metadata) "$Label is null"
+    Assert-YoloR6Condition ([int]$metadata.version -eq 3) "$Label schema must be version 3"
+    Assert-YoloR6Condition ([string]$metadata.artifactType.type -ceq "APK" -and [string]$metadata.artifactType.kind -ceq "Directory") "$Label artifactType differs"
+    Assert-YoloR6Condition ([string]$metadata.applicationId -ceq "org.autojs.autojs6.test") "$Label applicationId differs"
+    Assert-YoloR6Condition ([string]$metadata.variantName -ceq "appReleaseAndroidTest") "$Label variantName differs"
+    $elements = @($metadata.elements)
+    Assert-YoloR6Condition ($elements.Count -eq 1 -and $null -ne $elements[0]) "$Label must contain exactly one non-null element"
+    $element = $elements[0]
+    Assert-YoloR6Condition ([string]$element.type -ceq "SINGLE") "$Label element type differs"
+    Assert-YoloR6Condition ($null -ne $element.filters -and @($element.filters).Count -eq 0) "$Label filters must be empty"
+    Assert-YoloR6Condition ($null -ne $element.attributes -and @($element.attributes).Count -eq 0) "$Label attributes must be empty"
+    Assert-YoloR6Condition ($null -ne $element.versionCode -and [long]$element.versionCode -eq 0L) "$Label versionCode must be zero"
+    Assert-YoloR6Condition ($null -ne $element.versionName -and [string]$element.versionName -ceq "") "$Label versionName must be empty"
+    $outputFile = [string]$element.outputFile
+    Assert-YoloR6Condition ($outputFile -ceq "app-app-release-androidTest.apk") "$Label outputFile differs"
+    Assert-YoloR6Condition (-not [System.IO.Path]::IsPathRooted($outputFile) -and [System.IO.Path]::GetFileName($outputFile) -ceq $outputFile) "$Label outputFile must be a leaf name"
+    return [pscustomobject][ordered]@{
+        schemaVersion = 3
+        artifactType = [ordered]@{ type = "APK"; kind = "Directory" }
+        applicationId = "org.autojs.autojs6.test"
+        variantName = "appReleaseAndroidTest"
+        element = [ordered]@{ type = "SINGLE"; filters = @(); attributes = @(); versionCode = 0L; versionName = ""; outputFile = $outputFile }
+    }
+}
+
+function Get-YoloR6SingleSignerDigestFromText {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $counts = @([regex]::Matches($Text, '(?im)^Number of signers:\s*([0-9]+)\s*$'))
+    Assert-YoloR6Condition ($counts.Count -eq 1 -and [int]$counts[0].Groups[1].Value -eq 1) "$Label must have exactly one unambiguous signer-count claim"
+    $digests = @([regex]::Matches($Text, '(?im)certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$') | ForEach-Object { $_.Groups[1].Value.ToLowerInvariant() })
+    Assert-YoloR6Condition ($digests.Count -eq 1) "$Label must expose exactly one signer certificate SHA-256 claim"
+    return $digests[0]
+}
+
 function Get-YoloR6ApkProjectRevision {
     param(
         [Parameter(Mandatory = $true)][string] $ApkPath,
@@ -522,14 +717,54 @@ function Get-YoloR6ControlledBuildReceiptEvidence {
     Assert-YoloR6Condition ([string]$receipt.artifacts.instrumentation.controlledInvocationHostApkSha256 -ceq (Get-YoloR6Sha256 $HostApkPath)) "Controlled invocation Host hash differs"
     Assert-YoloR6Condition ([bool]$receipt.artifacts.instrumentation.targetVersionNotIndependentlyDerivedFromTestApk) "Instrumentation receipt overstates target-version derivation"
 
+    $metadataReceipt = $receipt.artifacts.instrumentation.outputMetadata
+    $expectedMetadataPath = [System.IO.Path]::GetFullPath((Join-Path $reportDirectory "r6-signed-artifacts/AutoJs6-v6.8.0-5275-release-androidTest.output-metadata.json"))
+    $metadataPath = Get-YoloR6RequiredFile -Path ([string]$metadataReceipt.file.path) -Label "controlled instrumentation output metadata"
+    Assert-YoloR6Condition ($metadataPath -ceq $expectedMetadataPath) "Controlled instrumentation output metadata path differs"
+    Assert-YoloR6Condition ([string]$metadataReceipt.file.sha256 -ceq (Get-YoloR6Sha256 $metadataPath)) "Controlled instrumentation output metadata SHA-256 is stale"
+    Assert-YoloR6Condition ([long]$metadataReceipt.file.length -eq (Get-Item -LiteralPath $metadataPath).Length) "Controlled instrumentation output metadata length is stale"
+    Assert-YoloR6Condition ([bool]$metadataReceipt.file.freshAfterBuildStart) "Controlled instrumentation output metadata was not fresh after build start"
+    $metadataIdentity = Get-YoloR6InstrumentationMetadataIdentity -JsonText (Get-Content -Raw -LiteralPath $metadataPath) -Label "controlled instrumentation output metadata"
+    $metadataReceiptIdentity = $metadataReceipt.identity
+    Assert-YoloR6Condition ([int]$metadataReceiptIdentity.schemaVersion -eq $metadataIdentity.schemaVersion) "Instrumentation metadata receipt schema differs"
+    Assert-YoloR6Condition (
+        [string]$metadataReceiptIdentity.artifactType.type -ceq [string]$metadataIdentity.artifactType.type -and
+        [string]$metadataReceiptIdentity.artifactType.kind -ceq [string]$metadataIdentity.artifactType.kind -and
+        [string]$metadataReceiptIdentity.applicationId -ceq [string]$metadataIdentity.applicationId -and
+        [string]$metadataReceiptIdentity.variantName -ceq [string]$metadataIdentity.variantName
+    ) "Instrumentation metadata receipt root identity differs"
+    Assert-YoloR6Condition (
+        [string]$metadataReceiptIdentity.element.type -ceq [string]$metadataIdentity.element.type -and
+        @($metadataReceiptIdentity.element.filters).Count -eq 0 -and
+        @($metadataReceiptIdentity.element.attributes).Count -eq 0 -and
+        [long]$metadataReceiptIdentity.element.versionCode -eq [long]$metadataIdentity.element.versionCode -and
+        [string]$metadataReceiptIdentity.element.versionName -ceq [string]$metadataIdentity.element.versionName -and
+        [string]$metadataReceiptIdentity.element.outputFile -ceq [string]$metadataIdentity.element.outputFile
+    ) "Instrumentation metadata receipt element identity differs"
+
     $apkSigner = Get-YoloR6RequiredFile -Path ([string]$AndroidTools.apkSigner) -Label "R5-selected apksigner"
     $aapt2 = Get-YoloR6RequiredFile -Path ([string]$AndroidTools.aapt2) -Label "R5-selected aapt2"
     $testSignatureText = Invoke-YoloR6ExternalText -FilePath $apkSigner -Arguments @("verify", "--verbose", "--print-certs", $InstrumentationApkPath) -Label "Instrumentation signature verification"
-    $testDigests = @([regex]::Matches($testSignatureText, '(?im)certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$') | ForEach-Object { $_.Groups[1].Value.ToLowerInvariant() } | Select-Object -Unique)
-    Assert-YoloR6Condition ($testDigests.Count -eq 1 -and $testDigests[0] -ceq $ExpectedSigner) "Instrumentation is not signed by the official production certificate"
-    $testBadging = Invoke-YoloR6ExternalText -FilePath $aapt2 -Arguments @("dump", "badging", $InstrumentationApkPath) -Label "Instrumentation identity inspection"
-    Assert-YoloR6Condition ($testBadging -match "(?m)^package: name='org\.autojs\.autojs6\.test'") "Instrumentation package identity differs"
-    Assert-YoloR6Condition ($testBadging -match "(?m)^instrumentation: name='androidx\.test\.runner\.AndroidJUnitRunner' targetPackage='org\.autojs\.autojs6'") "Instrumentation does not target the production Host"
+    $testSignerDigest = Get-YoloR6SingleSignerDigestFromText -Text $testSignatureText -Label "Instrumentation"
+    Assert-YoloR6Condition ($testSignerDigest -ceq $ExpectedSigner) "Instrumentation is not signed by the official production certificate"
+    $hostIdentity = Get-YoloR6ApkIdentity -Aapt2 $aapt2 -ApkPath $HostApkPath -Kind Ordinary -Label "Host"
+    $providerIdentity = Get-YoloR6ApkIdentity -Aapt2 $aapt2 -ApkPath $ProviderApkPath -Kind Ordinary -Label "Provider"
+    $testIdentity = Get-YoloR6ApkIdentity -Aapt2 $aapt2 -ApkPath $InstrumentationApkPath -Kind Instrumentation -Label "Instrumentation"
+    foreach ($comparison in @(
+        [pscustomobject]@{ actual = $hostIdentity; expected = $receipt.artifacts.host.identity; label = "Host" },
+        [pscustomobject]@{ actual = $providerIdentity; expected = $receipt.artifacts.provider.identity; label = "Provider" },
+        [pscustomobject]@{ actual = $testIdentity; expected = $receipt.artifacts.instrumentation.identity; label = "Instrumentation" }
+    )) {
+        Assert-YoloR6Condition ([string]$comparison.actual.packageName -ceq [string]$comparison.expected.packageName) "$($comparison.label) package differs from controlled receipt"
+        Assert-YoloR6Condition ([string]$comparison.actual.versionCode -ceq [string]$comparison.expected.versionCode) "$($comparison.label) versionCode differs from controlled receipt"
+        Assert-YoloR6Condition ([string]$comparison.actual.versionName -ceq [string]$comparison.expected.versionName) "$($comparison.label) versionName differs from controlled receipt"
+        Assert-YoloR6Condition ([bool]$comparison.actual.debuggable -eq [bool]$comparison.expected.debuggable) "$($comparison.label) debuggable state differs from controlled receipt"
+    }
+    Assert-YoloR6Condition (-not $hostIdentity.debuggable -and -not $providerIdentity.debuggable -and -not $testIdentity.debuggable) "A controlled release APK is debuggable"
+    Assert-YoloR6Condition (
+        [string]$testIdentity.instrumentation.runner -ceq [string]$receipt.artifacts.instrumentation.identity.instrumentation.runner -and
+        [string]$testIdentity.instrumentation.targetPackage -ceq [string]$receipt.artifacts.instrumentation.identity.instrumentation.targetPackage
+    ) "Instrumentation manifest identity differs from controlled receipt"
 
     $hostVcs = Get-YoloR6ApkProjectRevision -ApkPath $HostApkPath -Label "Host"
     $providerVcs = Get-YoloR6ApkProjectRevision -ApkPath $ProviderApkPath -Label "Provider"
@@ -790,6 +1025,88 @@ function Invoke-YoloR6SourcePreflight {
         $failed = $false
         try { $null = Get-YoloR6SignerDigest -Value $invalid } catch { $failed = $true }
         Assert-YoloR6Condition $failed "R6 signer parser accepted an invalid fingerprint sample"
+    }
+    $signerText = "Number of signers: 1`nSigner #1 certificate SHA-256 digest: $('b' * 64)"
+    Assert-YoloR6Condition ((Get-YoloR6SingleSignerDigestFromText -Text $signerText -Label "consumer signer self-test") -ceq ('b' * 64)) "Consumer signer identity parser self-test failed"
+    Assert-YoloR6Rejects -Label "consumer duplicate signer-count claim" -Action {
+        Get-YoloR6SingleSignerDigestFromText -Text "$signerText`nNumber of signers: 1" -Label "consumer duplicate signer-count self-test"
+    }
+    $ordinaryBadging = "package: name='org.autojs.autojs6' versionCode='5275' versionName='6.8.0' platformBuildVersionName='16'"
+    $ordinaryIdentity = Get-YoloR6ApkIdentityFromText -BadgingText $ordinaryBadging -XmlTreeText "  E: manifest" -Kind Ordinary -Label "consumer ordinary self-test"
+    Assert-YoloR6Condition ($ordinaryIdentity.versionCode -eq 5275L -and $null -eq $ordinaryIdentity.instrumentation) "Consumer ordinary APK parser self-test failed"
+    foreach ($invalidVersion in @("", "0", "9223372036854775808")) {
+        Assert-YoloR6Rejects -Label "consumer invalid ordinary versionCode $invalidVersion" -Action {
+            Get-YoloR6ApkIdentityFromText -BadgingText "package: name='org.autojs.autojs6' versionCode='$invalidVersion' versionName='6.8.0'" -XmlTreeText "  E: manifest" -Kind Ordinary -Label "consumer invalid ordinary version"
+        }
+    }
+    $testBadging = "package: name='org.autojs.autojs6.test' versionCode='' versionName='' platformBuildVersionName='16'"
+    $testXml = @'
+  E: manifest (line=2)
+    E: instrumentation (line=9)
+      A: http://schemas.android.com/apk/res/android:name(0x01010003)=0x7f010001 (Raw: "androidx.test.runner.AndroidJUnitRunner")
+      A: http://schemas.android.com/apk/res/android:targetPackage(0x01010021)="org.autojs.autojs6" (Raw: "org.autojs.autojs6")
+      E: meta-data (line=10)
+        A: http://schemas.android.com/apk/res/android:name="nested.decoy" (Raw: "nested.decoy")
+        A: http://schemas.android.com/apk/res/android:targetPackage="nested.target" (Raw: "nested.target")
+    A: http://schemas.android.com/apk/res/android:name="wrong.scope" (Raw: "wrong.scope")
+'@
+    $testIdentity = Get-YoloR6ApkIdentityFromText -BadgingText "$testBadging`ninstrumentation: name='androidx.test.runner.AndroidJUnitRunner' targetPackage='org.autojs.autojs6'" -XmlTreeText $testXml -Kind Instrumentation -Label "consumer instrumentation self-test"
+    Assert-YoloR6Condition (
+        $testIdentity.versionCode -ceq "" -and $testIdentity.versionName -ceq "" -and
+        [string]$testIdentity.instrumentation.runner -ceq "androidx.test.runner.AndroidJUnitRunner" -and
+        [string]$testIdentity.instrumentation.targetPackage -ceq "org.autojs.autojs6"
+    ) "Consumer instrumentation APK parser self-test failed"
+    $secondTestNode = @'
+    E: instrumentation (line=40)
+      A: http://schemas.android.com/apk/res/android:name="androidx.test.runner.AndroidJUnitRunner" (Raw: "androidx.test.runner.AndroidJUnitRunner")
+      A: http://schemas.android.com/apk/res/android:targetPackage="org.autojs.autojs6" (Raw: "org.autojs.autojs6")
+'@
+    $nestedTestNode = @'
+  E: manifest (line=2)
+    E: application (line=8)
+      E: instrumentation (line=9)
+        A: http://schemas.android.com/apk/res/android:name="androidx.test.runner.AndroidJUnitRunner" (Raw: "androidx.test.runner.AndroidJUnitRunner")
+        A: http://schemas.android.com/apk/res/android:targetPackage="org.autojs.autojs6" (Raw: "org.autojs.autojs6")
+'@
+    foreach ($sample in @(
+        [pscustomobject]@{ label = "consumer missing instrumentation"; badging = $testBadging; xml = "  E: manifest" },
+        [pscustomobject]@{ label = "consumer duplicate instrumentation"; badging = $testBadging; xml = "$testXml`n$secondTestNode" },
+        [pscustomobject]@{ label = "consumer wrong runner"; badging = $testBadging; xml = $testXml.Replace('androidx.test.runner.AndroidJUnitRunner', 'wrong.runner') },
+        [pscustomobject]@{ label = "consumer wrong target"; badging = $testBadging; xml = $testXml.Replace('org.autojs.autojs6', 'wrong.target') },
+        [pscustomobject]@{ label = "consumer forged badging"; badging = "$testBadging`ninstrumentation: name='androidx.test.runner.AndroidJUnitRunner' targetPackage='forged.target'"; xml = $testXml },
+        [pscustomobject]@{ label = "consumer duplicate package"; badging = "$testBadging`n$testBadging"; xml = $testXml },
+        [pscustomobject]@{ label = "consumer compiled without raw"; badging = $testBadging; xml = $testXml.Replace('0x7f010001 (Raw: "androidx.test.runner.AndroidJUnitRunner")', '0x7f010001') },
+        [pscustomobject]@{ label = "consumer missing direct runner"; badging = $testBadging; xml = $testXml.Replace('      A: http://schemas.android.com/apk/res/android:name(0x01010003)=0x7f010001 (Raw: "androidx.test.runner.AndroidJUnitRunner")' + "`n", '') },
+        [pscustomobject]@{ label = "consumer missing direct target"; badging = $testBadging; xml = $testXml.Replace('      A: http://schemas.android.com/apk/res/android:targetPackage(0x01010021)="org.autojs.autojs6" (Raw: "org.autojs.autojs6")' + "`n", '') },
+        [pscustomobject]@{ label = "consumer nested instrumentation"; badging = $testBadging; xml = $nestedTestNode },
+        [pscustomobject]@{ label = "consumer evil runner namespace"; badging = $testBadging; xml = $testXml.Replace('http://schemas.android.com/apk/res/android:name', 'evil:name') },
+        [pscustomobject]@{ label = "consumer evil target namespace"; badging = $testBadging; xml = $testXml.Replace('http://schemas.android.com/apk/res/android:targetPackage', 'evil:targetPackage') }
+    )) {
+        Assert-YoloR6Rejects -Label $sample.label -Action {
+            Get-YoloR6ApkIdentityFromText -BadgingText $sample.badging -XmlTreeText $sample.xml -Kind Instrumentation -Label $sample.label
+        }
+    }
+    $validMetadata = [ordered]@{
+        version = 3
+        artifactType = [ordered]@{ type = "APK"; kind = "Directory" }
+        applicationId = "org.autojs.autojs6.test"
+        variantName = "appReleaseAndroidTest"
+        elements = @([ordered]@{ type = "SINGLE"; filters = @(); attributes = @(); versionCode = 0; versionName = ""; outputFile = "app-app-release-androidTest.apk" })
+    }
+    $metadataIdentity = Get-YoloR6InstrumentationMetadataIdentity -JsonText ($validMetadata | ConvertTo-Json -Depth 8) -Label "consumer metadata self-test"
+    Assert-YoloR6Condition ($metadataIdentity.schemaVersion -eq 3 -and $metadataIdentity.element.outputFile -ceq "app-app-release-androidTest.apk") "Consumer instrumentation metadata parser self-test failed"
+    foreach ($mutation in @(
+        [pscustomobject]@{ label = "consumer metadata missing schema"; apply = { param($value) $value.Remove('version') } },
+        [pscustomobject]@{ label = "consumer metadata null element"; apply = { param($value) $value.elements = @($null) } },
+        [pscustomobject]@{ label = "consumer metadata ambiguous elements"; apply = { param($value) $value.elements = @($value.elements[0], $value.elements[0]) } },
+        [pscustomobject]@{ label = "consumer metadata rooted output"; apply = { param($value) $value.elements[0].outputFile = 'C:\invalid.apk' } },
+        [pscustomobject]@{ label = "consumer metadata nested output"; apply = { param($value) $value.elements[0].outputFile = 'nested/invalid.apk' } }
+    )) {
+        $candidate = $validMetadata | ConvertTo-Json -Depth 8 | ConvertFrom-Json -AsHashtable
+        & $mutation.apply $candidate
+        Assert-YoloR6Rejects -Label $mutation.label -Action {
+            Get-YoloR6InstrumentationMetadataIdentity -JsonText ($candidate | ConvertTo-Json -Depth 8) -Label $mutation.label
+        }
     }
     Assert-YoloR6Condition (
         "Model weights, training data, and images are not distributed in the Provider APK." -cmatch

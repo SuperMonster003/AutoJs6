@@ -213,6 +213,19 @@ function Invoke-R6ProducerCapture {
     return $output
 }
 
+function Get-R6ProducerSingleSignerDigestFromText {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $counts = @([regex]::Matches($Text, '(?im)^Number of signers:\s*([0-9]+)\s*$'))
+    Assert-R6ProducerCondition ($counts.Count -eq 1 -and [int]$counts[0].Groups[1].Value -eq 1) "$Label must have exactly one unambiguous signer-count claim"
+    $digests = @([regex]::Matches($Text, '(?im)certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$') |
+        ForEach-Object { $_.Groups[1].Value.ToLowerInvariant() })
+    Assert-R6ProducerCondition ($digests.Count -eq 1) "$Label must expose exactly one signer certificate SHA-256 claim"
+    return $digests[0]
+}
+
 function Get-R6ProducerApkSigner {
     param(
         [Parameter(Mandatory = $true)][string] $ApkSigner,
@@ -220,35 +233,151 @@ function Get-R6ProducerApkSigner {
         [Parameter(Mandatory = $true)][string] $Label
     )
     $output = Invoke-R6ProducerCapture -FilePath $ApkSigner -Arguments @("verify", "--verbose", "--print-certs", $Apk) -Label "$Label signature verification"
-    $text = $output -join "`n"
-    $count = [regex]::Match($text, '(?im)^Number of signers:\s*([0-9]+)\s*$')
-    Assert-R6ProducerCondition ($count.Success -and [int]$count.Groups[1].Value -eq 1) "$Label must have exactly one signer"
-    $digests = @([regex]::Matches($text, '(?im)certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$') |
-        ForEach-Object { $_.Groups[1].Value.ToLowerInvariant() } | Select-Object -Unique)
-    Assert-R6ProducerCondition ($digests.Count -eq 1) "$Label must expose exactly one signer certificate SHA-256"
-    return $digests[0]
+    return Get-R6ProducerSingleSignerDigestFromText -Text ($output -join "`n") -Label $Label
+}
+
+function Get-R6ProducerXmlTreeInstrumentationNodes {
+    param(
+        [Parameter(Mandatory = $true)][string] $XmlTreeText,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $lines = @($XmlTreeText -split "`r?`n")
+    $elementStack = [System.Collections.Generic.List[object]]::new()
+    $manifestElements = [System.Collections.Generic.List[object]]::new()
+    $elementMatches = [System.Collections.Generic.List[object]]::new()
+    for ($index = 0; $index -lt $lines.Count; $index++) {
+        $element = [regex]::Match($lines[$index], '^(?<indent>[ \t]*)E:\s+(?<name>[^\s(]+)(?:\s+\(line=[0-9]+\))?\s*$')
+        if (-not $element.Success) { continue }
+        $indent = $element.Groups['indent'].Value
+        while ($elementStack.Count -gt 0 -and ([string]$elementStack[$elementStack.Count - 1].indent).Length -ge $indent.Length) {
+            $elementStack.RemoveAt($elementStack.Count - 1)
+        }
+        $parentName = if ($elementStack.Count -gt 0) { [string]$elementStack[$elementStack.Count - 1].name } else { "" }
+        $record = [pscustomobject]@{
+            index = $index
+            indent = $indent
+            name = $element.Groups['name'].Value
+            parentName = $parentName
+        }
+        if ($record.name -ceq 'manifest') { $manifestElements.Add($record) }
+        if ($record.name -ceq 'instrumentation') {
+            Assert-R6ProducerCondition ($record.parentName -ceq 'manifest') "$Label instrumentation node must be a direct child of the manifest"
+            $elementMatches.Add($record)
+        }
+        $elementStack.Add($record)
+    }
+    Assert-R6ProducerCondition ($manifestElements.Count -eq 1) "$Label manifest tree must contain exactly one manifest element"
+
+    $nodes = [System.Collections.Generic.List[object]]::new()
+    foreach ($element in $elementMatches) {
+        $elementIndentLength = ([string]$element.indent).Length
+        $attributeIndentLength = $elementIndentLength + 2
+        $attributes = @{}
+        $enteredChildElement = $false
+        for ($index = [int]$element.index + 1; $index -lt $lines.Count; $index++) {
+            $childElement = [regex]::Match($lines[$index], '^(?<indent>[ \t]*)E:\s+')
+            if ($childElement.Success -and $childElement.Groups['indent'].Value.Length -le $elementIndentLength) { break }
+            if ($childElement.Success) { $enteredChildElement = $true; continue }
+            $attribute = [regex]::Match(
+                $lines[$index],
+                '^(?<indent>[ \t]*)A:\s+(?<key>[^\s(=]+)(?:\(0x[0-9a-fA-F]+\))?=(?<compiled>"[^"]*"|[^\s]+)(?:\s+\(Raw:\s+"(?<raw>[^"]*)"\))?\s*$'
+            )
+            if ($enteredChildElement -or -not $attribute.Success -or $attribute.Groups['indent'].Value.Length -ne $attributeIndentLength) { continue }
+            $qualifiedKey = $attribute.Groups['key'].Value
+            $androidPrefix = 'http://schemas.android.com/apk/res/android:'
+            if (-not $qualifiedKey.StartsWith($androidPrefix, [System.StringComparison]::Ordinal)) { continue }
+            $key = $qualifiedKey.Substring($androidPrefix.Length)
+            if ($key -notin @('name', 'targetPackage')) { continue }
+            if (-not $attributes.ContainsKey($key)) { $attributes[$key] = [System.Collections.Generic.List[string]]::new() }
+            Assert-R6ProducerCondition $attribute.Groups['raw'].Success "$Label instrumentation $key has no Raw string value"
+            $value = $attribute.Groups['raw'].Value
+            $compiled = $attribute.Groups['compiled'].Value
+            if ($compiled.StartsWith('"') -and $compiled.EndsWith('"')) {
+                Assert-R6ProducerCondition ($compiled.Substring(1, $compiled.Length - 2) -ceq $value) "$Label instrumentation $key compiled and raw values differ"
+            }
+            $attributes[$key].Add($value)
+        }
+        $names = @(if ($attributes.ContainsKey('name')) { @($attributes['name']) })
+        $targets = @(if ($attributes.ContainsKey('targetPackage')) { @($attributes['targetPackage']) })
+        Assert-R6ProducerCondition ($names.Count -eq 1) "$Label instrumentation node must contain exactly one direct android:name attribute"
+        Assert-R6ProducerCondition ($targets.Count -eq 1) "$Label instrumentation node must contain exactly one direct android:targetPackage attribute"
+        $nodes.Add([pscustomobject][ordered]@{ runner = $names[0]; targetPackage = $targets[0] })
+    }
+    return @($nodes)
+}
+
+function Get-R6ProducerApkIdentityFromText {
+    param(
+        [Parameter(Mandatory = $true)][string] $BadgingText,
+        [Parameter(Mandatory = $true)][string] $XmlTreeText,
+        [Parameter(Mandatory = $true)][ValidateSet("Ordinary", "Instrumentation")][string] $Kind,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $packageLines = @([regex]::Matches($BadgingText, '(?m)^package:[^\r\n]*$'))
+    Assert-R6ProducerCondition ($packageLines.Count -eq 1) "$Label badging must contain exactly one package line"
+    $package = [regex]::Match(
+        $packageLines[0].Value,
+        "^package:\s+name='([^'\r\n]*)'\s+versionCode='([^'\r\n]*)'\s+versionName='([^'\r\n]*)'(?:\s|$)"
+    )
+    Assert-R6ProducerCondition $package.Success "$Label badging package identity is malformed"
+    $badgingInstrumentationLines = @([regex]::Matches($BadgingText, '(?m)^instrumentation:[^\r\n]*$'))
+    Assert-R6ProducerCondition ($badgingInstrumentationLines.Count -le 1) "$Label badging contains multiple instrumentation claims"
+    $badgingInstrumentation = $null
+    if ($badgingInstrumentationLines.Count -eq 1) {
+        $match = [regex]::Match($badgingInstrumentationLines[0].Value, "^instrumentation:\s+name='([^'\r\n]+)'\s+targetPackage='([^'\r\n]+)'(?:\s|$)")
+        Assert-R6ProducerCondition $match.Success "$Label badging instrumentation claim is malformed"
+        $badgingInstrumentation = [pscustomobject]@{ runner = $match.Groups[1].Value; targetPackage = $match.Groups[2].Value }
+    }
+    $packageName = $package.Groups[1].Value
+    $rawVersionCode = $package.Groups[2].Value
+    $rawVersionName = $package.Groups[3].Value
+    Assert-R6ProducerCondition (-not [string]::IsNullOrEmpty($packageName)) "$Label package name is empty"
+    $nodes = @(Get-R6ProducerXmlTreeInstrumentationNodes -XmlTreeText $XmlTreeText -Label $Label)
+
+    if ($Kind -ceq "Ordinary") {
+        $parsedVersionCode = 0L
+        Assert-R6ProducerCondition (
+            $rawVersionCode -cmatch '^[0-9]+$' -and
+            [long]::TryParse($rawVersionCode, [Globalization.NumberStyles]::None, [Globalization.CultureInfo]::InvariantCulture, [ref]$parsedVersionCode) -and
+            $parsedVersionCode -gt 0L
+        ) "$Label versionCode must be a positive 64-bit integer"
+        Assert-R6ProducerCondition ($nodes.Count -eq 0) "$Label ordinary APK must not declare an instrumentation node"
+        Assert-R6ProducerCondition ($null -eq $badgingInstrumentation) "$Label ordinary APK badging must not claim instrumentation"
+        $versionCode = $parsedVersionCode
+    } else {
+        Assert-R6ProducerCondition ($packageName -ceq "org.autojs.autojs6.test") "$Label instrumentation package differs"
+        Assert-R6ProducerCondition ([string]::IsNullOrEmpty($rawVersionCode)) "$Label instrumentation versionCode must be empty"
+        Assert-R6ProducerCondition ([string]::IsNullOrEmpty($rawVersionName)) "$Label instrumentation versionName must be empty"
+        Assert-R6ProducerCondition ($nodes.Count -eq 1) "$Label must declare exactly one instrumentation node"
+        Assert-R6ProducerCondition ([string]$nodes[0].runner -ceq "androidx.test.runner.AndroidJUnitRunner") "$Label instrumentation runner differs"
+        Assert-R6ProducerCondition ([string]$nodes[0].targetPackage -ceq "org.autojs.autojs6") "$Label instrumentation target package differs"
+        if ($null -ne $badgingInstrumentation) {
+            Assert-R6ProducerCondition (
+                [string]$badgingInstrumentation.runner -ceq [string]$nodes[0].runner -and
+                [string]$badgingInstrumentation.targetPackage -ceq [string]$nodes[0].targetPackage
+            ) "$Label badging instrumentation claim differs from the manifest tree"
+        }
+        $versionCode = ""
+    }
+    return [pscustomobject][ordered]@{
+        packageName = $packageName
+        versionCode = $versionCode
+        versionName = $rawVersionName
+        debuggable = $BadgingText -match "(?m)^application-debuggable\s*$"
+        instrumentation = if ($Kind -ceq "Instrumentation") { $nodes[0] } else { $null }
+    }
 }
 
 function Get-R6ProducerApkIdentity {
     param(
         [Parameter(Mandatory = $true)][string] $Aapt2,
         [Parameter(Mandatory = $true)][string] $Apk,
+        [Parameter(Mandatory = $true)][ValidateSet("Ordinary", "Instrumentation")][string] $Kind,
         [Parameter(Mandatory = $true)][string] $Label
     )
-    $lines = Invoke-R6ProducerCapture -FilePath $Aapt2 -Arguments @("dump", "badging", $Apk) -Label "$Label badging inspection"
-    $text = $lines -join "`n"
-    $package = [regex]::Match($text, "(?m)^package: name='([^']+)' versionCode='([0-9]+)' versionName='([^']*)'")
-    Assert-R6ProducerCondition $package.Success "$Label package identity is missing"
-    $instrumentation = [regex]::Match($text, "(?m)^instrumentation: name='([^']+)' targetPackage='([^']+)'")
-    return [pscustomobject][ordered]@{
-        packageName = $package.Groups[1].Value
-        versionCode = [long]$package.Groups[2].Value
-        versionName = $package.Groups[3].Value
-        debuggable = $text -match "(?m)^application-debuggable\s*$"
-        instrumentation = if ($instrumentation.Success) {
-            [ordered]@{ runner = $instrumentation.Groups[1].Value; targetPackage = $instrumentation.Groups[2].Value }
-        } else { $null }
-    }
+    $badging = (Invoke-R6ProducerCapture -FilePath $Aapt2 -Arguments @("dump", "badging", $Apk) -Label "$Label badging inspection") -join "`n"
+    $xmlTree = (Invoke-R6ProducerCapture -FilePath $Aapt2 -Arguments @("dump", "xmltree", "--file", "AndroidManifest.xml", $Apk) -Label "$Label manifest inspection") -join "`n"
+    return Get-R6ProducerApkIdentityFromText -BadgingText $badging -XmlTreeText $xmlTree -Kind $Kind -Label $Label
 }
 
 function Get-R6ProducerApkVcsRevision {
@@ -322,11 +451,34 @@ function Resolve-R6ProducerApkFromMetadata {
     param(
         [Parameter(Mandatory = $true)][string] $MetadataPath,
         [Parameter(Mandatory = $true)][string] $Label,
-        [string] $Abi = ""
+        [string] $Abi = "",
+        [string] $ExpectedApplicationId = "",
+        [string] $ExpectedVariantName = "",
+        [string] $ExpectedOutputFile = ""
     )
     $path = Get-R6ProducerRequiredFile -Path $MetadataPath -Label "$Label output metadata"
     $metadata = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
     $elements = @($metadata.elements)
+    if (-not [string]::IsNullOrEmpty($ExpectedApplicationId)) {
+        Assert-R6ProducerCondition ($null -ne $metadata.version -and [int]$metadata.version -eq 3) "$Label output metadata schema must be version 3"
+        Assert-R6ProducerCondition (
+            $null -ne $metadata.artifactType -and
+            [string]$metadata.artifactType.type -ceq "APK" -and
+            [string]$metadata.artifactType.kind -ceq "Directory"
+        ) "$Label output metadata artifactType differs"
+        Assert-R6ProducerCondition ($null -ne $metadata.applicationId -and [string]$metadata.applicationId -ceq $ExpectedApplicationId) "$Label output metadata applicationId differs"
+        Assert-R6ProducerCondition ($null -ne $metadata.variantName -and [string]$metadata.variantName -ceq $ExpectedVariantName) "$Label output metadata variantName differs"
+        Assert-R6ProducerCondition ($elements.Count -eq 1 -and $null -ne $elements[0]) "$Label output metadata must contain exactly one non-null element"
+        $element = $elements[0]
+        Assert-R6ProducerCondition ($null -ne $element.type -and [string]$element.type -ceq "SINGLE") "$Label output metadata element type differs"
+        Assert-R6ProducerCondition ($null -ne $element.filters -and @($element.filters).Count -eq 0) "$Label output metadata filters must be empty"
+        Assert-R6ProducerCondition ($null -ne $element.attributes -and @($element.attributes).Count -eq 0) "$Label output metadata attributes must be empty"
+        Assert-R6ProducerCondition ($null -ne $element.versionCode -and [long]$element.versionCode -eq 0L) "$Label output metadata versionCode must be zero"
+        Assert-R6ProducerCondition ($null -ne $element.versionName -and [string]$element.versionName -ceq "") "$Label output metadata versionName must be empty"
+        Assert-R6ProducerCondition ($null -ne $element.outputFile -and [string]$element.outputFile -ceq $ExpectedOutputFile) "$Label output metadata outputFile differs"
+        Assert-R6ProducerCondition (-not [System.IO.Path]::IsPathRooted([string]$element.outputFile)) "$Label output metadata outputFile must be a leaf name"
+        Assert-R6ProducerCondition ([System.IO.Path]::GetFileName([string]$element.outputFile) -ceq [string]$element.outputFile) "$Label output metadata outputFile must not contain a directory"
+    }
     if ([string]::IsNullOrEmpty($Abi)) {
         Assert-R6ProducerCondition ($elements.Count -eq 1) "$Label output metadata must contain exactly one element"
         $selected = $elements[0]
@@ -337,7 +489,11 @@ function Resolve-R6ProducerApkFromMetadata {
         Assert-R6ProducerCondition ($matches.Count -eq 1) "$Label output metadata must contain exactly one $Abi element"
         $selected = $matches[0]
     }
-    return Get-R6ProducerRequiredFile -Path (Join-Path (Split-Path -Parent $path) ([string]$selected.outputFile)) -Label "$Label APK"
+    $selectedOutputFile = [string]$selected.outputFile
+    Assert-R6ProducerCondition (-not [string]::IsNullOrEmpty($selectedOutputFile)) "$Label output metadata selected element has no outputFile"
+    Assert-R6ProducerCondition (-not [System.IO.Path]::IsPathRooted($selectedOutputFile)) "$Label output metadata outputFile must be relative"
+    Assert-R6ProducerCondition ([System.IO.Path]::GetFileName($selectedOutputFile) -ceq $selectedOutputFile) "$Label output metadata outputFile must be a leaf name"
+    return Get-R6ProducerRequiredFile -Path (Join-Path (Split-Path -Parent $path) $selectedOutputFile) -Label "$Label APK"
 }
 
 function Assert-R6ProducerIgnoredSecretTarget {
@@ -630,6 +786,16 @@ function Remove-R6ProducerFixedOutput {
     return @($errors)
 }
 
+function Assert-R6ProducerRejects {
+    param(
+        [Parameter(Mandatory = $true)][scriptblock] $Action,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $rejected = $false
+    try { $null = & $Action } catch { $rejected = $true }
+    Assert-R6ProducerCondition $rejected "Self-test expected rejection: $Label"
+}
+
 if ($SelfTest) {
     $temporary = Join-Path ([System.IO.Path]::GetTempPath()) ("yolo-r6-producer-selftest-{0}.properties" -f [Guid]::NewGuid().ToString("N"))
     try {
@@ -642,6 +808,102 @@ if ($SelfTest) {
         Assert-R6ProducerCondition $failed "Signing properties parser accepted a missing required property"
         $pinned = Get-R6ProducerPinnedOfficialSigner
         Assert-R6ProducerCondition ($pinned.certificateSha256 -cmatch '^[0-9a-f]{64}$') "Official signer parser self-test failed"
+        $signerText = "Number of signers: 1`nSigner #1 certificate SHA-256 digest: $('a' * 64)"
+        Assert-R6ProducerCondition ((Get-R6ProducerSingleSignerDigestFromText -Text $signerText -Label "signer self-test") -ceq ('a' * 64)) "Signer identity parser self-test failed"
+        Assert-R6ProducerRejects -Label "duplicate signer-count claim" -Action {
+            Get-R6ProducerSingleSignerDigestFromText -Text "$signerText`nNumber of signers: 1" -Label "duplicate signer-count self-test"
+        }
+        $ordinaryBadging = "package: name='org.autojs.autojs6' versionCode='5275' versionName='6.8.0' platformBuildVersionName='16'"
+        $ordinaryIdentity = Get-R6ProducerApkIdentityFromText -BadgingText $ordinaryBadging -XmlTreeText "  E: manifest (line=2)" -Kind Ordinary -Label "ordinary self-test"
+        Assert-R6ProducerCondition ($ordinaryIdentity.versionCode -eq 5275L -and $null -eq $ordinaryIdentity.instrumentation) "Ordinary identity parser self-test failed"
+        Assert-R6ProducerRejects -Label "ordinary empty versionCode" -Action {
+            Get-R6ProducerApkIdentityFromText -BadgingText "package: name='org.autojs.autojs6' versionCode='' versionName='6.8.0'" -XmlTreeText "  E: manifest" -Kind Ordinary -Label "ordinary empty version"
+        }
+
+        $instrumentationBadging = "package: name='org.autojs.autojs6.test' versionCode='' versionName='' platformBuildVersionName='16'"
+        $instrumentationXml = @'
+  E: manifest (line=2)
+    E: instrumentation (line=9)
+      A: http://schemas.android.com/apk/res/android:name(0x01010003)=0x7f010001 (Raw: "androidx.test.runner.AndroidJUnitRunner")
+      A: http://schemas.android.com/apk/res/android:targetPackage(0x01010021)="org.autojs.autojs6" (Raw: "org.autojs.autojs6")
+      E: meta-data (line=10)
+        A: http://schemas.android.com/apk/res/android:name(0x01010003)="decoy.runner" (Raw: "decoy.runner")
+        A: http://schemas.android.com/apk/res/android:targetPackage(0x01010021)="decoy.target" (Raw: "decoy.target")
+    A: http://schemas.android.com/apk/res/android:name(0x01010003)="wrong.scope" (Raw: "wrong.scope")
+'@
+        $instrumentationIdentity = Get-R6ProducerApkIdentityFromText -BadgingText $instrumentationBadging -XmlTreeText $instrumentationXml -Kind Instrumentation -Label "instrumentation self-test"
+        Assert-R6ProducerCondition (
+            $instrumentationIdentity.versionCode -ceq "" -and
+            $instrumentationIdentity.versionName -ceq "" -and
+            [string]$instrumentationIdentity.instrumentation.runner -ceq "androidx.test.runner.AndroidJUnitRunner" -and
+            [string]$instrumentationIdentity.instrumentation.targetPackage -ceq "org.autojs.autojs6"
+        ) "Instrumentation identity parser self-test failed"
+
+        $secondInstrumentationXml = @'
+    E: instrumentation (line=40)
+      A: http://schemas.android.com/apk/res/android:name="androidx.test.runner.AndroidJUnitRunner" (Raw: "androidx.test.runner.AndroidJUnitRunner")
+      A: http://schemas.android.com/apk/res/android:targetPackage="org.autojs.autojs6" (Raw: "org.autojs.autojs6")
+'@
+        $nestedInstrumentationXml = @'
+  E: manifest (line=2)
+    E: application (line=8)
+      E: instrumentation (line=9)
+        A: http://schemas.android.com/apk/res/android:name="androidx.test.runner.AndroidJUnitRunner" (Raw: "androidx.test.runner.AndroidJUnitRunner")
+        A: http://schemas.android.com/apk/res/android:targetPackage="org.autojs.autojs6" (Raw: "org.autojs.autojs6")
+'@
+        $invalidIdentitySamples = @(
+            [pscustomobject]@{ label = "missing instrumentation"; badging = $instrumentationBadging; xml = "  E: manifest" },
+            [pscustomobject]@{ label = "duplicate instrumentation"; badging = $instrumentationBadging; xml = "$instrumentationXml`n$secondInstrumentationXml" },
+            [pscustomobject]@{ label = "wrong runner"; badging = $instrumentationBadging; xml = $instrumentationXml.Replace('androidx.test.runner.AndroidJUnitRunner', 'wrong.runner') },
+            [pscustomobject]@{ label = "wrong target"; badging = $instrumentationBadging; xml = $instrumentationXml.Replace('org.autojs.autojs6', 'wrong.target') },
+            [pscustomobject]@{ label = "fake badging instrumentation"; badging = "$instrumentationBadging`ninstrumentation: name='androidx.test.runner.AndroidJUnitRunner' targetPackage='forged.target'"; xml = $instrumentationXml },
+            [pscustomobject]@{ label = "duplicate package line"; badging = "$instrumentationBadging`n$instrumentationBadging"; xml = $instrumentationXml },
+            [pscustomobject]@{ label = "duplicate direct runner"; badging = $instrumentationBadging; xml = $instrumentationXml.Replace('      A: http://schemas.android.com/apk/res/android:targetPackage', '      A: http://schemas.android.com/apk/res/android:name="duplicate" (Raw: "duplicate")' + "`n" + '      A: http://schemas.android.com/apk/res/android:targetPackage') },
+            [pscustomobject]@{ label = "missing direct runner"; badging = $instrumentationBadging; xml = $instrumentationXml.Replace('      A: http://schemas.android.com/apk/res/android:name(0x01010003)=0x7f010001 (Raw: "androidx.test.runner.AndroidJUnitRunner")' + "`n", '') },
+            [pscustomobject]@{ label = "missing direct target"; badging = $instrumentationBadging; xml = $instrumentationXml.Replace('      A: http://schemas.android.com/apk/res/android:targetPackage(0x01010021)="org.autojs.autojs6" (Raw: "org.autojs.autojs6")' + "`n", '') },
+            [pscustomobject]@{ label = "nested instrumentation"; badging = $instrumentationBadging; xml = $nestedInstrumentationXml },
+            [pscustomobject]@{ label = "evil runner namespace"; badging = $instrumentationBadging; xml = $instrumentationXml.Replace('http://schemas.android.com/apk/res/android:name', 'evil:name') },
+            [pscustomobject]@{ label = "evil target namespace"; badging = $instrumentationBadging; xml = $instrumentationXml.Replace('http://schemas.android.com/apk/res/android:targetPackage', 'evil:targetPackage') }
+        )
+        foreach ($sample in $invalidIdentitySamples) {
+            Assert-R6ProducerRejects -Label $sample.label -Action {
+                Get-R6ProducerApkIdentityFromText -BadgingText $sample.badging -XmlTreeText $sample.xml -Kind Instrumentation -Label $sample.label
+            }
+        }
+
+        $metadataDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("yolo-r6-producer-metadata-selftest-{0}" -f [Guid]::NewGuid().ToString("N"))
+        $null = New-Item -ItemType Directory -Path $metadataDirectory
+        try {
+            $metadataPath = Join-Path $metadataDirectory "output-metadata.json"
+            $outputFile = "app-app-release-androidTest.apk"
+            [System.IO.File]::WriteAllBytes((Join-Path $metadataDirectory $outputFile), [byte[]](0))
+            $validMetadata = [ordered]@{
+                version = 3
+                artifactType = [ordered]@{ type = "APK"; kind = "Directory" }
+                applicationId = "org.autojs.autojs6.test"
+                variantName = "appReleaseAndroidTest"
+                elements = @([ordered]@{ type = "SINGLE"; filters = @(); attributes = @(); versionCode = 0; versionName = ""; outputFile = $outputFile })
+            }
+            [System.IO.File]::WriteAllText($metadataPath, ($validMetadata | ConvertTo-Json -Depth 8))
+            $resolved = Resolve-R6ProducerApkFromMetadata -MetadataPath $metadataPath -Label "metadata self-test" -ExpectedApplicationId "org.autojs.autojs6.test" -ExpectedVariantName "appReleaseAndroidTest" -ExpectedOutputFile $outputFile
+            Assert-R6ProducerCondition ($resolved -ceq [System.IO.Path]::GetFullPath((Join-Path $metadataDirectory $outputFile))) "Instrumentation metadata resolver self-test failed"
+            foreach ($mutation in @(
+                [pscustomobject]@{ label = "metadata missing schema"; apply = { param($value) $value.Remove('version') } },
+                [pscustomobject]@{ label = "metadata null element"; apply = { param($value) $value.elements = @($null) } },
+                [pscustomobject]@{ label = "metadata ambiguous elements"; apply = { param($value) $value.elements = @($value.elements[0], $value.elements[0]) } },
+                [pscustomobject]@{ label = "metadata rooted output"; apply = { param($value) $value.elements[0].outputFile = 'C:\invalid.apk' } },
+                [pscustomobject]@{ label = "metadata nested output"; apply = { param($value) $value.elements[0].outputFile = 'nested/invalid.apk' } }
+            )) {
+                $candidate = $validMetadata | ConvertTo-Json -Depth 8 | ConvertFrom-Json -AsHashtable
+                & $mutation.apply $candidate
+                [System.IO.File]::WriteAllText($metadataPath, ($candidate | ConvertTo-Json -Depth 8))
+                Assert-R6ProducerRejects -Label $mutation.label -Action {
+                    Resolve-R6ProducerApkFromMetadata -MetadataPath $metadataPath -Label $mutation.label -ExpectedApplicationId "org.autojs.autojs6.test" -ExpectedVariantName "appReleaseAndroidTest" -ExpectedOutputFile $outputFile
+                }
+            }
+        } finally {
+            if (Test-Path -LiteralPath $metadataDirectory) { Remove-Item -LiteralPath $metadataDirectory -Recurse -Force }
+        }
         $temporaryBatch = Join-Path ([System.IO.Path]::GetTempPath()) ("yolo-r6-producer-selftest-{0}.cmd" -f [Guid]::NewGuid().ToString("N"))
         [System.IO.File]::WriteAllText($temporaryBatch, "@exit /b 0`r`n", [System.Text.Encoding]::ASCII)
         $cmd = (Get-Command cmd.exe -ErrorAction Stop).Source
@@ -819,14 +1081,22 @@ try {
         )
         Invoke-R6ProducerGradle -Repository $mainBuildRoot -Arguments $mainGradleArguments -WaitSeconds $GradleClientWaitSeconds -BuildTimeoutSeconds 7200 -Label "host-and-release-instrumentation"
         $hostSignedOutput = Resolve-R6ProducerApkFromMetadata -MetadataPath (Join-Path $mainBuildRoot "app/build/outputs/apk/app/release/output-metadata.json") -Label "Host release" -Abi "arm64-v8a"
-        $testSignedOutput = Resolve-R6ProducerApkFromMetadata -MetadataPath (Join-Path $mainBuildRoot "app/build/outputs/apk/androidTest/app/release/output-metadata.json") -Label "release instrumentation"
+        $testMetadataSource = Join-Path $mainBuildRoot "app/build/outputs/apk/androidTest/app/release/output-metadata.json"
+        $testSignedOutput = Resolve-R6ProducerApkFromMetadata `
+            -MetadataPath $testMetadataSource `
+            -Label "release instrumentation" `
+            -ExpectedApplicationId "$hostPackage.test" `
+            -ExpectedVariantName "appReleaseAndroidTest" `
+            -ExpectedOutputFile "app-app-release-androidTest.apk"
         $hostSignedOutputRecord = Get-R6ProducerArtifact -Path $hostSignedOutput -BuildStartedUtc $mainBuildStartedUtc -Label "Host signed release"
         $testSignedOutputRecord = Get-R6ProducerArtifact -Path $testSignedOutput -BuildStartedUtc $mainBuildStartedUtc -Label "release instrumentation"
         $hostArtifactPath = Join-Path $artifactRoot "AutoJs6-v6.8.0-5275-release.apk"
         $testArtifactPath = Join-Path $artifactRoot "AutoJs6-v6.8.0-5275-release-androidTest.apk"
-        foreach ($path in @($hostArtifactPath, $testArtifactPath)) { if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force } }
+        $testMetadataArtifactPath = Join-Path $artifactRoot "AutoJs6-v6.8.0-5275-release-androidTest.output-metadata.json"
+        foreach ($path in @($hostArtifactPath, $testArtifactPath, $testMetadataArtifactPath)) { if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force } }
         Copy-Item -LiteralPath $hostSignedOutput -Destination $hostArtifactPath
         Copy-Item -LiteralPath $testSignedOutput -Destination $testArtifactPath
+        Copy-Item -LiteralPath $testMetadataSource -Destination $testMetadataArtifactPath
     } finally {
         Remove-R6ProducerSigningMaterial -Targets $mainSignTargets
         $mainSignTargets = $null
@@ -847,9 +1117,10 @@ try {
     $hostArtifact = Get-R6ProducerArtifact -Path $hostArtifactPath -BuildStartedUtc $mainBuildStartedUtc -Label "copied Host release"
     $providerArtifact = Get-R6ProducerArtifact -Path $providerArtifactPath -BuildStartedUtc $providerBuildStartedUtc -Label "copied Provider release"
     $testArtifact = Get-R6ProducerArtifact -Path $testArtifactPath -BuildStartedUtc $mainBuildStartedUtc -Label "copied instrumentation APK"
-    $hostIdentity = Get-R6ProducerApkIdentity -Aapt2 $tools.aapt2 -Apk $hostArtifact.path -Label "Host"
-    $providerIdentity = Get-R6ProducerApkIdentity -Aapt2 $tools.aapt2 -Apk $providerArtifact.path -Label "Provider"
-    $testIdentity = Get-R6ProducerApkIdentity -Aapt2 $tools.aapt2 -Apk $testArtifact.path -Label "Instrumentation"
+    $testMetadataArtifact = Get-R6ProducerArtifact -Path $testMetadataArtifactPath -BuildStartedUtc $mainBuildStartedUtc -Label "copied instrumentation output metadata"
+    $hostIdentity = Get-R6ProducerApkIdentity -Aapt2 $tools.aapt2 -Apk $hostArtifact.path -Kind Ordinary -Label "Host"
+    $providerIdentity = Get-R6ProducerApkIdentity -Aapt2 $tools.aapt2 -Apk $providerArtifact.path -Kind Ordinary -Label "Provider"
+    $testIdentity = Get-R6ProducerApkIdentity -Aapt2 $tools.aapt2 -Apk $testArtifact.path -Kind Instrumentation -Label "Instrumentation"
     Assert-R6ProducerCondition ($hostIdentity.packageName -ceq $hostPackage -and $hostIdentity.versionCode -eq $expectedHostVersionCode -and $hostIdentity.versionName -ceq $expectedHostVersionName) "Host release identity differs"
     Assert-R6ProducerCondition (-not $hostIdentity.debuggable) "Host release is debuggable"
     Assert-R6ProducerCondition ($providerIdentity.packageName -ceq $providerPackage -and $providerIdentity.versionCode -eq $expectedProviderVersionCode -and $providerIdentity.versionName -ceq $expectedProviderVersionName) "Provider release identity differs"
@@ -934,6 +1205,23 @@ try {
             provider = [ordered]@{ file = $providerArtifact; identity = $providerIdentity; signerSha256 = $declaredSigner; vcsRevision = $providerVcs; payloadBoundary = $providerBoundary; minified = $true; resourcesShrunk = $true; abi = "arm64-v8a" }
             instrumentation = [ordered]@{
                 file = $testArtifact
+                outputMetadata = [ordered]@{
+                    file = $testMetadataArtifact
+                    identity = [ordered]@{
+                        schemaVersion = 3
+                        artifactType = [ordered]@{ type = "APK"; kind = "Directory" }
+                        applicationId = "$hostPackage.test"
+                        variantName = "appReleaseAndroidTest"
+                        element = [ordered]@{
+                            type = "SINGLE"
+                            filters = @()
+                            attributes = @()
+                            versionCode = 0L
+                            versionName = ""
+                            outputFile = "app-app-release-androidTest.apk"
+                        }
+                    }
+                }
                 identity = $testIdentity
                 signerSha256 = $declaredSigner
                 releaseVariantInvocation = "SAME_CONTROLLED_INVOCATION_AS_HOST"
