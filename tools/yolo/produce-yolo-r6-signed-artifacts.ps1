@@ -598,6 +598,38 @@ function Assert-R6ProducerReportChildPath {
     return $candidate
 }
 
+function Remove-R6ProducerFixedOutput {
+    param(
+        [Parameter(Mandatory = $true)][string] $Path,
+        [Parameter(Mandatory = $true)][string] $Label,
+        [switch] $Recurse
+    )
+    $errors = [System.Collections.Generic.List[string]]::new()
+    $safePath = $null
+    try {
+        $safePath = Assert-R6ProducerReportChildPath -Path $Path
+        if (Test-Path -LiteralPath $safePath) {
+            if ($Recurse) {
+                Remove-Item -LiteralPath $safePath -Recurse -Force
+            } else {
+                Remove-Item -LiteralPath $safePath -Force
+            }
+        }
+    } catch {
+        $errors.Add("$Label removal failed: $($_.Exception.Message)")
+    }
+    if ($null -eq $safePath) {
+        $errors.Add("$Label absence could not be verified because its fixed path was not admitted")
+    } else {
+        try {
+            if (Test-Path -LiteralPath $safePath) { $errors.Add("$Label remains after cleanup") }
+        } catch {
+            $errors.Add("$Label absence check failed: $($_.Exception.Message)")
+        }
+    }
+    return @($errors)
+}
+
 if ($SelfTest) {
     $temporary = Join-Path ([System.IO.Path]::GetTempPath()) ("yolo-r6-producer-selftest-{0}.properties" -f [Guid]::NewGuid().ToString("N"))
     try {
@@ -678,13 +710,22 @@ try {
     Assert-R6ProducerCondition $mutexOwned "Timed out waiting for the global controlled Gradle build mutex"
     $runStarted = $true
 
-    $receiptPath = Assert-R6ProducerReportChildPath -Path $receiptPath
-    $artifactRoot = Assert-R6ProducerReportChildPath -Path $artifactRoot
-    $mainCloneStagingPath = Assert-R6ProducerReportChildPath -Path $mainCloneStagingPath
-    if (Test-Path -LiteralPath $receiptPath) { Remove-Item -LiteralPath $receiptPath -Force }
-    if (Test-Path -LiteralPath $artifactRoot) { Remove-Item -LiteralPath $artifactRoot -Recurse -Force }
-    if (Test-Path -LiteralPath $mainCloneStagingPath) { Remove-Item -LiteralPath $mainCloneStagingPath -Recurse -Force }
-    Assert-R6ProducerCondition (-not (Test-Path -LiteralPath $mainCloneStagingPath)) "Stale ordinary Host build clone could not be removed"
+    $invalidationErrors = [System.Collections.Generic.List[string]]::new()
+    foreach ($target in @(
+        [pscustomobject]@{ path = $receiptPath; label = "stale controlled receipt"; recurse = $false },
+        [pscustomobject]@{ path = $artifactRoot; label = "stale controlled artifact directory"; recurse = $true },
+        [pscustomobject]@{ path = $mainCloneStagingPath; label = "stale ordinary Host build clone"; recurse = $true }
+    )) {
+        foreach ($message in @(Remove-R6ProducerFixedOutput `
+            -Path $target.path `
+            -Label $target.label `
+            -Recurse:([bool]$target.recurse))) {
+            $invalidationErrors.Add([string]$message)
+        }
+    }
+    Assert-R6ProducerCondition ($invalidationErrors.Count -eq 0) (
+        "Controlled producer could not invalidate every fixed prior output: $($invalidationErrors -join '; ')"
+    )
     Wait-R6ProducerGradleWindow -TimeoutSeconds $GradleClientWaitSeconds
 
     # Only after the fixed previous outputs are invalidated may input validation begin. Thus an
@@ -928,12 +969,12 @@ try {
         if ($null -ne $providerRoot) {
             $secretCleanupPaths += @((Join-Path $providerRoot "sign.properties"), (Join-Path $providerRoot "app/$keyStoreLeaf"))
         }
-        $clonePath = $mainCloneStagingPath
-        try {
-            $safeClonePath = Assert-R6ProducerReportChildPath -Path $clonePath
-            if (Test-Path -LiteralPath $safeClonePath) { Remove-Item -LiteralPath $safeClonePath -Recurse -Force }
-        } catch { $cleanupErrors.Add($_.Exception.Message) }
-        if (Test-Path -LiteralPath $clonePath) { $cleanupErrors.Add("Temporary ordinary Host build clone remains") }
+        foreach ($message in @(Remove-R6ProducerFixedOutput `
+            -Path $mainCloneStagingPath `
+            -Label "temporary ordinary Host build clone" `
+            -Recurse)) {
+            $cleanupErrors.Add([string]$message)
+        }
         foreach ($path in $secretCleanupPaths) {
             if (Test-Path -LiteralPath $path) { $cleanupErrors.Add("Temporary signing material remains: $path") }
         }
@@ -948,12 +989,17 @@ try {
             }
         }
         if (-not $producerSucceeded -or $cleanupErrors.Count -gt 0) {
-            try {
-                $safeReceipt = Assert-R6ProducerReportChildPath -Path $receiptPath
-                if (Test-Path -LiteralPath $safeReceipt) { Remove-Item -LiteralPath $safeReceipt -Force }
-                $safeArtifactRoot = Assert-R6ProducerReportChildPath -Path $artifactRoot
-                if (Test-Path -LiteralPath $safeArtifactRoot) { Remove-Item -LiteralPath $safeArtifactRoot -Recurse -Force }
-            } catch { $cleanupErrors.Add($_.Exception.Message) }
+            foreach ($target in @(
+                [pscustomobject]@{ path = $receiptPath; label = "failed-run controlled receipt"; recurse = $false },
+                [pscustomobject]@{ path = $artifactRoot; label = "failed-run controlled artifact directory"; recurse = $true }
+            )) {
+                foreach ($message in @(Remove-R6ProducerFixedOutput `
+                    -Path $target.path `
+                    -Label $target.label `
+                    -Recurse:([bool]$target.recurse))) {
+                    $cleanupErrors.Add([string]$message)
+                }
+            }
         }
     }
     if ($mutexOwned -and $null -ne $globalMutex) { $globalMutex.ReleaseMutex() }
