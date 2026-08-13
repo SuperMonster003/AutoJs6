@@ -29,7 +29,7 @@ behavior only for reproducible host conformance testing.
 | AI models | Page token replay, scope, cycle, generation drift, and cross-page duplicate model IDs | `AiModelPageTokenPolicyTest` | PASS, JVM |
 | AI protocol | Shared wire, common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and pagination | Combined protocol/API corpus, 103 tests | PASS, JVM |
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
-| AI host model list | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, and terminal cleanup | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests; D3#3 plugin commits `6489a59` / `af0c5fe` and host exact-test commit `b695c303` | PASS, JVM; PARTIAL, one API 35/arm64-v8a real-plugin listing-only Binder method |
+| AI host model list and plugin selection | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, terminal cleanup, and explicit persistent model selection | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests; D3#3 plugin commits `6489a59` / `af0c5fe` and host exact-test commit `b695c303`; D3#4 plugin production/tested-source commits `98d438e` / `a6bc0e3` and host exact-test commit `6495079ea` | PASS, JVM; PARTIAL, one API 35/arm64-v8a real-plugin listing-only Binder method plus one API 31/arm64-v8a real-plugin manager-selection/Binder method |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
 | AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `AiTextProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
 | AI explicit ask/chat/stream routes | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process-shared admission, per-script lifecycle ownership, normalized unary/chat/stream results, and stable terminal codes | Earlier ask/stream focused Gradle 25/25; chat tested-source commits `d480b6918` / `b0aa67684` focused Gradle 14/14 (3 mapper + 4 runtime + 7 service), 0 skipped/failures/errors; one real-provider ask plus fake-provider stream and chat public methods on API 31 | PARTIAL, JVM/source plus three narrow positive-path device smokes |
@@ -334,7 +334,7 @@ APK assembly pass.
 | D8 parity for default/static interface methods, missing libraries, and device boot libraries | Current local compiler versus production plugin | PENDING |
 | AAR normalization and resource behavior | Current local path versus production plugin | PENDING |
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
-| AI exact-component metadata, model-list, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL: API 31/arm64-v8a fake-provider metadata, paged model list, one normal `fake.stream` session, and ordinary-pipe completion materialization; API 35/arm64-v8a real-plugin three-entry paged listing only |
+| AI exact-component metadata, model-list, selection, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL: API 31/arm64-v8a fake-provider metadata, paged model list, one normal `fake.stream` session, ordinary-pipe completion materialization, and real-plugin explicit A-to-B manager selection with restart persistence; API 35/arm64-v8a real-plugin three-entry paged listing only |
 | AI public production `ai.ask` positive path | Real signed provider release, real model, public Rhino entry, exact component/provider/model selector, artifact/device hash match, reversible cleanup | PARTIAL, one API 31/arm64-v8a App Debug non-streaming one-shot method; no release-host or API matrix |
 | AI public conformance `ai.stream` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, normalized chunk/delta/done aggregation beyond eight initial credits, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; public active cancel/engine stop remain JVM-only and no real provider/model stream ran |
 | AI public conformance `ai.chat` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, exact normalized 12-key response, one terminal, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; no real provider/model, device failure/cancel path, release host, or matrix |
@@ -389,6 +389,61 @@ listing-only: the run performed no LiteRT-LM inference, never called
 Android API/ABI matrix. Pre/post absence is scoped rollback evidence, not
 package update/uninstall-during-transcript evidence; catalog migration,
 management UI, sessions, and native model compatibility remain outside D3#3.
+
+### API 31 AI D3#4 Exact Real-Plugin Model-Selection Evidence
+
+The 2026-08-14 D3#4 run used plugin production commit `98d438e`, plugin tested
+source `a6bc0e3`, and host source/exact-test commit `6495079ea`. The plugin gate
+recorded 57/57 tests with no failures, errors, or skips, followed by passing
+`lintDebug`, Debug APK, and Release APK builds. The host build completed its
+622-task gate. The target was `QV710AF65F`, API 31, `arm64-v8a`.
+
+The host App Debug, App Debug instrumentation, and real-plugin Debug APKs all
+verified with APK Signature Scheme v2 and certificate SHA-256
+`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
+Their artifact and installed `base.apk` SHA-256 values matched exactly:
+
+- Host: `c9c04ddb272172632dba2989d57d112f0d39345b815f6c90f646b7f5f1f71c8a`.
+- Instrumentation: `1470aea7c6d6c0a992dbf084f626ca263bee993adb5223a65f547b0f74c1d476`.
+- Real plugin: `644ce44a08d9579acb6a4749c4f5d6bf557662c741ef32e927d05a5edf17c7f0`.
+
+The outer transaction provisioned two eight-byte catalog-only fixtures. Model
+A was initially selected as
+`litertlm.85515105bf0e6b25b0ed8ce1cc3801ab`; the production manager Activity
+exposed both rows and accepted an accessibility click selecting model B,
+`litertlm.808c1f662212f7efb70b16956fb784a7`. After force-stopping and
+restarting only the plugin package, the Activity still showed B selected and A
+unselected. Exact Binder listing before and after the switch published the same
+A/B model projection and generation
+`litertlm-catalog-v2-08e6ec0aff29d234cbdf6acb07be8916`; both model IDs remained
+individually resolvable through `planExact()`, and the exact package identity
+remained unchanged.
+
+The durable method-level entry is:
+
+```powershell
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiText.realModelSelection.conformance.enabled true -e autojs.aiText.realModelSelection.conformance.serial QV710AF65F -e autojs.aiText.realModelSelection.conformance.initialModelId litertlm.85515105bf0e6b25b0ed8ce1cc3801ab -e autojs.aiText.realModelSelection.conformance.targetModelId litertlm.808c1f662212f7efb70b16956fb784a7 -e autojs.aiText.realModelSelection.conformance.listingGeneration litertlm-catalog-v2-08e6ec0aff29d234cbdf6acb07be8916 -e class 'org.autojs.autojs.core.plugin.ai.AiTextProviderModelListingAndroidConformanceTest#exactRealPluginSelectionPersistsAcrossManagerProcessRestartWithoutChangingBinderCatalog' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+The final transaction strictly admitted exact `OK (1 test)`, instrumentation
+code `-1`, status `0`, and one executed test, then emitted
+`MODEL_SELECTION_TEST_PASS`. Its compact stdout retained the pass markers but
+not a runner duration. An immediately preceding invocation of the same method
+and tested artifacts recorded `Time: 1.99` and `OK (1 test)` with code `-1`;
+that time is supporting context, not the final transaction's measured time.
+
+Preflight and post-cleanup both found the three exact packages--
+`org.autojs.autojs6`, `org.autojs.autojs6.test`, and
+`io.github.supermonster003.autojs6.plugin.ai.text`--absent for users 0 and 10,
+and all nine reserved external data/media/obb paths absent.
+
+This is one narrow **PARTIAL** manager-selection and Binder-list cell. Both
+eight-byte files intentionally lacked valid LiteRT-LM content. The method did
+not invoke native model loading or inference, call `openSession`, run a
+generation, or keep an old active session across the selection. It therefore
+does not prove old-session survival or active-generation isolation. It was not
+a soak, API/ABI matrix, performance gate, or package update/uninstall test, and
+it makes no real-model compatibility claim.
 
 ### API 31 AI Partial Evidence
 
