@@ -16,7 +16,7 @@ $hostPackage = "org.autojs.autojs6"
 $providerPackage = "io.github.supermonster003.autojs6.plugin.yolo.ncnn"
 $fakeProviderPackage = "org.autojs.plugin.yolo.fake"
 $testPackage = "$hostPackage.test"
-$providerComponent = "$providerPackage/.provider.YoloProviderService"
+$providerComponent = "$providerPackage/$providerPackage.provider.YoloProviderService"
 $runner = "androidx.test.runner.AndroidJUnitRunner"
 $protectedQv710 = "QV710AF65F"
 
