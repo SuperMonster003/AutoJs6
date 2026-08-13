@@ -70,6 +70,7 @@ private val plugins = listOf(
 private val pluginConformanceTestApps = listOf(
     "ai-text-provider-conformance",
     "dex-compiler-conformance",
+    "yolo-provider-conformance",
 )
 
 include(

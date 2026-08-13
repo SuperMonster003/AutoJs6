@@ -13,5 +13,7 @@ provider component; it does not silently select or fall back to another provider
 
 Preview failures start with a stable `YOLO_*` code such as `YOLO_COMPONENT_REQUIRED`,
 `YOLO_MODEL_INVALID`, `YOLO_MODEL_REJECTED`, `YOLO_PROVIDER_UNAVAILABLE`, or
-`YOLO_DETECT_FAILED`. `YOLO_MODEL_REJECTED` means the provider rejected the manifest,
-model graph, weights, or declared decoder profile after the files were transferred.
+`YOLO_UNSUPPORTED_CAPABILITY`, or `YOLO_DETECT_FAILED`. `YOLO_MODEL_REJECTED` means the
+provider rejected the manifest, model graph, weights, or declared decoder profile after the
+files were transferred. `YOLO_UNSUPPORTED_CAPABILITY` means the requested device, decoder,
+protocol, or resource setting is outside the selected provider's advertised capabilities.

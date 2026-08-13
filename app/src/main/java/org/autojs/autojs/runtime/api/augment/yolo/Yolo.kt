@@ -16,6 +16,8 @@ import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.plugin.yolo.api.YoloContract
+import org.autojs.plugin.yolo.api.YoloContractException
+import org.autojs.plugin.yolo.api.YoloContractViolation
 import org.autojs.plugin.yolo.api.YoloDevice
 import org.autojs.plugin.yolo.api.YoloErrorCode
 import org.mozilla.javascript.NativeObject
@@ -76,14 +78,7 @@ class Yolo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                     }
                 } catch (error: Exception) {
                     rethrowIfInterrupted(error)
-                    val code = if (
-                        error is YoloSessionOpenException &&
-                        error.code == YoloErrorCode.MODEL_REJECTED
-                    ) {
-                        YoloScriptException.MODEL_REJECTED
-                    } else {
-                        YoloScriptException.SESSION_OPEN_FAILED
-                    }
+                    val code = openFailureScriptCode(error)
                     throw YoloScriptException(
                         code,
                         error.message ?: "the YOLO session could not be opened",
@@ -98,6 +93,27 @@ class Yolo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                     throw error
                 }
             }
+        }
+
+        private fun openFailureScriptCode(error: Exception): String {
+            val remoteCode = (error as? YoloSessionOpenException)?.code
+            if (remoteCode == YoloErrorCode.MODEL_REJECTED) {
+                return YoloScriptException.MODEL_REJECTED
+            }
+            if (
+                remoteCode == YoloErrorCode.UNSUPPORTED_CAPABILITY ||
+                remoteCode == YoloErrorCode.UNSUPPORTED_PROTOCOL
+            ) {
+                return YoloScriptException.UNSUPPORTED_CAPABILITY
+            }
+            val localViolation = (error as? YoloContractException)?.violation
+            if (
+                localViolation == YoloContractViolation.CAPABILITY_INCOMPATIBLE ||
+                localViolation == YoloContractViolation.PROTOCOL_INCOMPATIBLE
+            ) {
+                return YoloScriptException.UNSUPPORTED_CAPABILITY
+            }
+            return YoloScriptException.SESSION_OPEN_FAILED
         }
 
         private fun optionsOrEmpty(scriptRuntime: ScriptRuntime, rawOptions: Any?): NativeObject = when {
@@ -143,8 +159,8 @@ class Yolo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             val device = coerceStringOption(options, "device", "cpu").trim().lowercase()
             if (device != "cpu") {
                 throw YoloScriptException(
-                    YoloScriptException.INVALID_ARGUMENT,
-                    "R3 Preview only supports options.device=\"cpu\"",
+                    YoloScriptException.UNSUPPORTED_CAPABILITY,
+                    "the current YOLO provider profile supports options.device=\"cpu\" only",
                 )
             }
             val threads = coerceIntOption(
