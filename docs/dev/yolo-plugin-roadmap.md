@@ -1,7 +1,7 @@
 # AutoJs6 YOLO 独立插件部署 Roadmap
 
-本文是 `work-yolo` 的可执行状态表。它以 2026-08-11 的本地代码为准，
-不以公开仓库中较旧的 Paddle OCR 结构为准。
+本文是 `work-yolo` 的可执行状态表。它以 2026-08-11 的本地代码快照为起点，
+并更新至 2026-08-13 的 R5 证据；不以公开仓库中较旧的 Paddle OCR 结构为准。
 
 ## 当前结论
 
@@ -16,6 +16,7 @@
 | R2 当前声明 | `SOURCE / ANDROID_BUILD / BINDER_PFD = PASS`；真实 NCNN 推理也经该链路复验，但不等于 Rhino `DEVICE_E2E` 或生产发布 |
 | R3 当前声明 | `SOURCE / ANDROID_BUILD / DEVICE_E2E / PUBLIC_PREVIEW = PASS`；仍明确不声明 `PRODUCTION` |
 | R4 当前声明 | `SOURCE / ANDROID_BUILD / BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E / PUBLIC_MODEL_IMPORT = PASS`；仅覆盖同一 decoder 的 YOLO11 detect 有限兼容集，不声明 `PRODUCTION` |
+| R5 当前声明 | `SOURCE / ANDROID_BUILD / HOSTILE_BINDER / DESCRIPTOR_INTEGRITY / RESOURCE_200_FRAME / APK_PACKAGING / NATIVE_LOAD_ARM64_DEVICE = PASS`；`ELF_16K_COMPATIBLE = PASS_STATIC_ONLY`，性能只记录不设阈值；RC 是 `TEST_SIGNED_NONDEBUGGABLE`，不声明 `PRODUCTION` |
 | 生产入口 | 插件中心可发现但 YOLO 默认关闭；Rhino 已提供显式 component 的 opt-in Preview，无静默 provider 选择或回退 |
 
 ## 固定架构决定
@@ -285,15 +286,54 @@ PUBLIC_MODEL_IMPORT = PASS`；兼容范围仅为 schema 中声明的 YOLO11 dete
 
 目标：只补首发会造成数据泄漏、死锁、崩溃或明显不可用的验证。
 
-- [ ] 覆盖错误 signer/UID 或 identity drift、截断/长度/hash 错误 PFD。
-- [ ] 覆盖 duplicate/late terminal、busy、timeout、cancel/close 和 provider death。
-- [ ] 连续 100-500 帧检查 FD/session/native handle 无持续增长。
-- [ ] 分开记录冷启动、模型加载和 warm inference；噪声性能阈值不作为默认 gate。
-- [ ] 校验 APK ABI、native load、16 KiB page alignment 和 license assets。
-- [ ] 形成 CPU/arm64-v8a RC；未支持能力必须明确拒绝。
+- [x] 覆盖错误 signer/UID 或 identity drift、截断/长度/hash 错误 PFD。
+- [x] 覆盖 duplicate/late terminal、busy、timeout、cancel/close 和 provider death。
+- [x] 连续 100-500 帧检查 FD/session/native handle 无持续增长。
+- [x] 分开记录冷启动、模型加载和 warm inference；噪声性能阈值不作为默认 gate。
+- [x] 校验 APK ABI、native load、16 KiB page alignment 和 license assets。
+- [x] 形成 CPU/arm64-v8a RC；未支持能力必须明确拒绝。
 
 主 gate：一组聚焦的 JVM、Android、Binder、native 报告。API 24-36 全矩阵、24 小时
 soak、所有 YOLO 家族均不作为首发阻塞项。
+
+R5 exit（2026-08-13）：
+
+- [x] 主仓库 `c40464957` 与 sibling `2aa5b100e` 在 gate 前后均 clean；Provider
+  `testDebugUnitTest + assembleRc + compileDebugAndroidTestKotlin`、Host 与 instrumentation
+  APK、独立 hostile provider APK 串行构建通过，未使用 connected Gradle task；Provider
+  focused JVM policy/error tests 为 `8/8`。
+- [x] `QV710AF65F` 在确认无 soak/竞争 runner 后完成 API 31、arm64-v8a、4 KiB page
+  验证；五个定向 instrumentation 方法全部 PASS，运行前后四个临时包均 absent，唯一
+  staging 已删除，未启动 AVD。
+- [x] test-only fake provider 覆盖 duplicate/late terminal、Host BUSY、timeout cancel
+  ACK/no-ACK、wrong callback UID 与 provider death；production Host 均 fail-closed，dispatch
+  后无自动重试。这里的 death 证据只证明 fake provider 会使 pinned session 失效，未运行
+  真实 NCNN provider 进程死亡恢复。
+- [x] 真实 NCNN provider 对 regular PFD 的短长度、长长度、同长度错误 SHA-256 均返回
+  versioned `INVALID_REQUEST` 并关闭 Host descriptor；随后 valid model detect、幂等 close、
+  reopen 均通过，空闲态为 0 session / 0 native handle / 0 model directory。
+- [x] 真实 provider 完成 20 warmup + 200 measured：Host FD 早/晚中位数
+  `107 -> 107`，Provider FD `73 -> 73`；Host RSS 中位数 `279984 -> 275928 KiB`，
+  Provider RSS `190408 -> 196920 KiB`，未观察到阈值定义的 runaway。200 帧均有唯一终态、
+  图像 PFD 关闭且 provider PID 稳定；close/reopen 后 session/native handle/model directory
+  再次归零。
+- [x] 设备计时只作记录：cold target `257.475 ms`、session/model open `361.362 ms`、
+  first detect wall/provider inference `780.309/580 ms`；200 measured 的 wall/provider
+  p50 为 `391.427/269 ms`、p95 为 `426.258/300 ms`，没有性能 PASS/FAIL 阈值。
+- [x] Provider RC APK 为 `0.1.0-rc-test-signed`、non-debuggable、CPU/arm64-v8a、无模型；
+  设备真实推理证明 4 KiB page 环境的 arm64 native load。`libautojs_yolo.so` 三个 LOAD
+  segment 均为 16 KiB alignment 且 `zipalign -P 16` 通过，MPL-2.0、NCNN BSD-3-Clause
+  与 provenance assets 均逐字节校验；这只声明静态 `ELF_16K_COMPATIBLE`，没有 16 KiB
+  page 设备 load 证据。
+- [x] canonical receipt：[`yolo-evidence/r5-summary.json`](yolo-evidence/r5-summary.json)；
+  generated aggregate receipt SHA-256
+  `2a4a872cf3e13baffd0ad09076c811548e095407faa858b4f0ae3ef3cfbd2f9e`。
+
+证据边界：R5 的 RC 是本地 debug certificate 签发的 `TEST_SIGNED_NONDEBUGGABLE` 候选，
+不是生产签名 release；R5 RC 明确关闭 minify/resource shrink，正式 shrinker admission 保留到
+R6，`PRODUCTION = NOT_CLAIMED`。真实 Provider startup stale cleanup 仍
+只有 JVM/Android build 证据；真实 NCNN provider death/recovery、16 KiB page 设备、长 soak、
+完整 API 矩阵、发布签名、索引、升级与回滚继续保留到 R6。
 
 ## R6：有边界的生产发布
 
