@@ -48,7 +48,7 @@
 | `BINDER_PFD` | 指定 Android 环境中的 Binder、UID、FD 所有权 | NCNN 输出正确 |
 | `NATIVE_RUNTIME` | 指定 ABI 上 `.so`、模型加载和真实 inference | Host/Rhino 端到端 |
 | `DEVICE_E2E` | 指定设备、APK、模型和脚本的完整链路 | 未列出的设备/模型适用性 |
-| `PRODUCTION` | 签名、hash、索引、升级/回滚和发布 receipt | 未明确覆盖的 API/ABI/backend |
+| `PRODUCTION` | 签名、hash、索引、发布 receipt，以及产品决定要求的生命周期证据 | 未明确覆盖的 API/ABI/backend |
 
 低等级证据不得升级为高等级声明。设备证据缺失不会阻止下一阶段源码并行推进，
 但会阻止对应的 runtime/release 声明。
@@ -240,7 +240,8 @@ R3 exit 只能声明 `PUBLIC_PREVIEW` 或 `PARTIAL_DEVICE`，不能声明生产�
 
 证据边界：`SOURCE / ANDROID_BUILD / BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E /
 PUBLIC_PREVIEW = PASS`；`STATIC/JVM` 没有由 R3 gate 重跑，`PRODUCTION = NOT_CLAIMED`。
-故障注入、连续帧资源增长和 release/升级/回滚仍分别保留到 R5/R6。
+故障注入、连续帧资源增长和 release 分别保留到 R5/R6；首发升级/回滚是否执行由后续明确
+产品决定约束，当前最终决定为 `NOT_RUN_BY_PRODUCT_DECISION`。
 
 ## R4：公开模型导入与有限兼容
 
@@ -280,7 +281,8 @@ R4 exit（2026-08-11）：
 证据边界：`SOURCE / ANDROID_BUILD / BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E /
 PUBLIC_MODEL_IMPORT = PASS`；兼容范围仅为 schema 中声明的 YOLO11 detect、NCNN、CPU、
 640、`in0/out0`、`ultralytics-detect` 和 1-256 labels。`PRODUCTION = NOT_CLAIMED`；
-故障注入、资源增长、RC/release、升级和回滚仍保留到 R5/R6。
+故障注入、资源增长和 RC/release 仍保留到 R5/R6；升级与版本回滚最终按首发产品决定
+记录为 `NOT_RUN_BY_PRODUCT_DECISION`。
 
 ## R5：聚焦可靠性、性能与 RC
 
@@ -334,14 +336,16 @@ R5 exit（2026-08-13）：
 receipt 仍不含 shrinker 证据。后续 R6-A 已在独立 Provider source/build gate 中纳入 shrunk
 release/RC admission；该新证据不得回写或提升 R5 artifact。`PRODUCTION = NOT_CLAIMED`。真实 Provider startup stale cleanup 仍
 只有 JVM/Android build 证据；真实 NCNN provider death/recovery、16 KiB page 设备、长 soak、
-完整 API 矩阵、发布签名、索引、升级与回滚继续保留到 R6。
+完整 API 矩阵、发布签名与索引继续保留到 R6；升级与版本回滚按首发产品决定明确不运行。
 
 ## R6：有边界的生产发布
 
 - [ ] 生成签名 Host/Provider release APK、证书和 SHA-256 receipt。
-- [ ] 完成插件索引、显式授权/启用、版本兼容、升级和回滚。
+- [ ] 完成插件索引、显式授权/启用和版本兼容；升级与版本回滚按首发产品决定记录为
+  `NOT_RUN_BY_PRODUCT_DECISION`。
 - [ ] 完成 NCNN provenance、NOTICE 和模型许可说明。
-- [ ] 一台代表性 arm64 物理设备和一个当前 API 模拟器完成冷/热推理及进程死亡恢复。
+- [ ] 一台代表性 arm64 物理设备和一个当前 API arm64 环境完成冷/热推理及进程死亡恢复；
+  当前主机无法运行 arm64 AVD 时允许 API 35+ arm64 实体机替代。
 - [ ] 发布说明列出实际验证的 API/ABI/backend/model，不暗示未验证能力。
 - [ ] 继续保持 default-off、fail-closed、无 dispatch 后重试。
 
@@ -356,7 +360,8 @@ release/RC admission；该新证据不得回写或提升 R5 artifact。`PRODUCTI
   source-build receipt；fail-closed 校验 non-debuggable、同生产 signer、APK SHA-256、
   Provider arm64-only/严格 release-entry allowlist、NCNN provenance、NOTICE 和静态 ELF
   包装。Host 仅声明已知 YOLO/NCNN payload absent；已知 R5 TEST-SIGNED certificate 不可被提升。
-- [x] 固定首发 `UNINSTALL_REINSTALL_CODE1` 回滚手册；明确不得原位降级，回滚后保持
+- [x] 固定首发恢复/撤回手册：无 code 1 predecessor，不声明版本回滚；允许 exact v2
+  same-version recovery，缺陷版本先禁用/撤回索引并通过 v3 forward-fix，恢复后仍保持
   default-off 并重新显式授权/启用。
 - [x] 增加真实 Provider `am force-stop`、旧 session fail-closed/no-retry、显式重新选择并
   reopen 的 opt-in instrumentation 与单 serial gate 源码。
@@ -364,8 +369,9 @@ release/RC admission；该新证据不得回写或提升 R5 artifact。`PRODUCTI
 R6-A source gate 当前证据仅为源码/PowerShell parser 静态预检；未读取生产签名秘密，未检查生产 APK，
 未执行 ADB、索引或外部发布。因此只能记为 `SOURCE_STATIC_PASS / PRODUCTION_NOT_RUN`。当前
 artifact verifier 也不会把可编辑 JSON 或 unsigned Gradle output 当作 production signed APK
-的源码证明；在 Host/Provider 的受控 signed-build producer/receipt 尚未落地前固定为
-`PARTIAL_NO_CONTROLLED_SIGNED_BUILD_RECEIPT`，且不生成 canonical `r6-summary.json`。
+的源码证明；受控 producer 落地后，其 consumer 必须重新计算 exact APK hash/signer/version/
+VCS metadata，结果为 `PASS_CONTROLLED_SIGNED_BUILD`，但该 receipt 不是 cryptographic
+attestation，且设备、索引和发布未完成前不生成 canonical `r6-summary.json`。
 
 ### R6-B：生产 APK 与签名（待执行）
 
@@ -378,18 +384,20 @@ artifact verifier 也不会把可编辑 JSON 或 unsigned Gradle output 当作 p
   build identity 和 cryptographic source attestation 保持 false。
 - [ ] 生成可发布 APK receipt；静态 16 KiB ELF 证据仍不得替代对应 page-size 设备加载。
 
-### R6-C：索引、升级与回滚（待执行）
+### R6-C：索引与首发生命周期边界（待执行）
 
 - [ ] 索引固定 package/exact component/API 与 Host 兼容范围/ABI/backend/APK SHA-256，
   且安装后保持 default-off、未授权。
-- [ ] 验证同 signer、versionCode 单调增加的升级，以及首发
-  `UNINSTALL_REINSTALL_CODE1` 回滚；不同 signer/identity/version drift 均 fail-closed。
+- [ ] 索引绑定首发 `0.1.0 / versionCode=2`；本轮不制作 code 1 predecessor，升级与版本回滚
+  固定为 `NOT_RUN_BY_PRODUCT_DECISION`。同版本恢复只允许 archived exact v2；缺陷修复使用
+  v3 forward-fix，不同 signer/identity/version drift 均 fail-closed。
 
 ### R6-D：设备与发布（待执行）
 
 - [ ] 代表性 arm64 物理设备完成 production APK 冷/热推理与真实 Provider death/reopen。
-- [ ] 当前 API 36 arm64 emulator 完成相同验证；若本机 emulator ABI 与 arm64-only Provider
-  不兼容，必须提供可执行 arm64 环境或明确调整验收对象，不能用 x86_64 静态构建代替。
+- [ ] 当前 API arm64 环境完成相同验证。由于当前 x86_64 主机无法安装 arm64 AVD，产品
+  决定允许 API 35+ arm64 实体机替代；emulator 仍可用但不是必需。当前候选设备若已有
+  用户包或其他任务则 fail-closed 保持 `NOT_RUN`，不能覆盖或用 x86_64 静态构建代替。
 - [ ] release note 与索引只列实际通过的 API/ABI/backend/model；最终 receipt 绑定所有
   子报告的 APK SHA-256 后才可声明 `PRODUCTION=PASS`。
 

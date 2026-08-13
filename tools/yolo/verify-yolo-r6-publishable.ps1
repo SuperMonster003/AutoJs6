@@ -16,6 +16,10 @@ param(
 
     [Parameter(Mandatory = $true, ParameterSetName = "Artifact")]
     [ValidateNotNullOrEmpty()]
+    [string] $InstrumentationApk,
+
+    [Parameter(Mandatory = $true, ParameterSetName = "Artifact")]
+    [ValidateNotNullOrEmpty()]
     [string] $OfficialProductionSignerSha256,
 
     [Parameter(Mandatory = $true, ParameterSetName = "Artifact")]
@@ -33,6 +37,10 @@ param(
     [Parameter(Mandatory = $true, ParameterSetName = "Artifact")]
     [ValidateNotNullOrEmpty()]
     [string] $ProviderBuildReceipt,
+
+    [Parameter(Mandatory = $true, ParameterSetName = "Artifact")]
+    [ValidateNotNullOrEmpty()]
+    [string] $ControlledBuildReceipt,
 
     [Parameter(Mandatory = $true, ParameterSetName = "Artifact")]
     [ValidateNotNullOrEmpty()]
@@ -238,6 +246,7 @@ function Get-YoloR6ProviderBuildReceiptEvidence {
         [Parameter(Mandatory = $true)][string] $ReceiptPath,
         [Parameter(Mandatory = $true)][string] $SiblingRoot,
         [Parameter(Mandatory = $true)][string] $ExpectedProviderCommit,
+        [Parameter(Mandatory = $true)][long] $ExpectedHostVersionCode,
         [Parameter(Mandatory = $true)][string] $ProductionApkSha256,
         [Parameter(Mandatory = $true)][string] $ExpectedNoticeSha256,
         [Parameter(Mandatory = $true)][string] $ExpectedModelPolicySha256,
@@ -292,7 +301,25 @@ function Get-YoloR6ProviderBuildReceiptEvidence {
         $unexpectedReceiptAssets.Count -eq 0 -and
         $missingReceiptAssets.Count -eq 0
     ) "Provider build receipt assets differ from the strict release allowlist"
-    Assert-YoloR6Condition ([long]$receipt.identity.requiresHostVersion -eq 5274L) "Provider build receipt Host boundary differs"
+    Assert-YoloR6Condition ([long]$receipt.identity.requiresHostVersion -eq $ExpectedHostVersionCode) "Provider build receipt Host boundary differs"
+    $expectedProviderContract = [ordered]@{
+        runtimeComponent = "io.github.supermonster003.autojs6.plugin.yolo.ncnn/io.github.supermonster003.autojs6.plugin.yolo.ncnn.provider.YoloProviderService"
+        protocolApiMin = "1.0"
+        protocolApiMax = "1.0"
+        backend = "ncnn"
+        task = "detect"
+        decoder = "ultralytics-detect"
+        supportedAbis = @("arm64-v8a")
+    }
+    foreach ($field in @("runtimeComponent", "protocolApiMin", "protocolApiMax", "backend", "task", "decoder")) {
+        Assert-YoloR6Condition (
+            [string]$receipt.identity.$field -ceq [string]$expectedProviderContract[$field]
+        ) "Provider build receipt release contract field differs: $field"
+    }
+    $receiptSupportedAbis = @($receipt.identity.supportedAbis | ForEach-Object { [string]$_ })
+    Assert-YoloR6Condition (
+        $receiptSupportedAbis.Count -eq 1 -and $receiptSupportedAbis[0] -ceq $expectedProviderContract.supportedAbis[0]
+    ) "Provider build receipt supported ABI contract differs"
     Assert-YoloR6Condition ([string]$receipt.compliance.thirdPartyNoticesSha256 -ceq $ExpectedNoticeSha256) "Provider build receipt notice SHA-256 differs"
     Assert-YoloR6Condition ([string]$receipt.compliance.modelLicensePolicySha256 -ceq $ExpectedModelPolicySha256) "Provider build receipt model-policy SHA-256 differs"
     Assert-YoloR6Condition ([string]$receipt.compliance.releaseNotesDraftSha256 -ceq $ExpectedReleaseNoteSha256) "Provider build receipt release-note SHA-256 differs"
@@ -332,6 +359,7 @@ function Get-YoloR6ProviderBuildReceiptEvidence {
         unsignedReleaseSigned = $false
         minified = $true
         resourcesShrunk = $true
+        contract = $expectedProviderContract
         inspectedProductionApkSha256 = $ProductionApkSha256
         controlledSignedBuildReceipt = "NOT_AVAILABLE"
         sourceBuildLinkage = "CONTROLLED_PRODUCER_DECLARED_UNSIGNED_CLEAN_BUILD"
@@ -339,10 +367,196 @@ function Get-YoloR6ProviderBuildReceiptEvidence {
     }
 }
 
+function Invoke-YoloR6ExternalText {
+    param(
+        [Parameter(Mandatory = $true)][string] $FilePath,
+        [Parameter(Mandatory = $true)][string[]] $Arguments,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    $output = @(& $FilePath @Arguments 2>&1 | ForEach-Object { [string]$_ })
+    if ($LASTEXITCODE -ne 0) { throw "$Label failed" }
+    return ($output -join "`n")
+}
+
+function Get-YoloR6ApkProjectRevision {
+    param(
+        [Parameter(Mandatory = $true)][string] $ApkPath,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($ApkPath)
+    try {
+        $entries = @($archive.Entries | Where-Object { $_.FullName -ceq "META-INF/version-control-info.textproto" })
+        Assert-YoloR6Condition ($entries.Count -eq 1) "$Label must contain one Gradle VCS metadata entry"
+        $stream = $entries[0].Open()
+        $reader = [System.IO.StreamReader]::new($stream)
+        try { $text = $reader.ReadToEnd() } finally { $reader.Dispose(); $stream.Dispose() }
+    } finally {
+        $archive.Dispose()
+    }
+    $projectBlocks = @([regex]::Matches($text, '(?ms)repositories\s*\{(?<body>.*?)\}') | Where-Object {
+        $_.Groups['body'].Value -match '(?m)^\s*local_root_path:\s*"\$PROJECT_DIR"\s*$'
+    })
+    Assert-YoloR6Condition ($projectBlocks.Count -eq 1) "$Label VCS metadata must contain one PROJECT_DIR repository"
+    $revision = [regex]::Match($projectBlocks[0].Groups['body'].Value, '(?m)^\s*revision:\s*"([0-9a-f]{40})"\s*$')
+    Assert-YoloR6Condition $revision.Success "$Label PROJECT_DIR VCS metadata has no Git revision"
+    return $revision.Groups[1].Value
+}
+
+function Get-YoloR6ControlledBuildReceiptEvidence {
+    param(
+        [Parameter(Mandatory = $true)][string] $ReceiptPath,
+        [Parameter(Mandatory = $true)][string] $HostApkPath,
+        [Parameter(Mandatory = $true)][string] $ProviderApkPath,
+        [Parameter(Mandatory = $true)][string] $InstrumentationApkPath,
+        [Parameter(Mandatory = $true)][string] $ExpectedMainCommit,
+        [Parameter(Mandatory = $true)][string] $ExpectedProviderCommit,
+        [Parameter(Mandatory = $true)][string] $ExpectedSigner,
+        [Parameter(Mandatory = $true)][long] $ExpectedHostVersionCode,
+        [Parameter(Mandatory = $true)][long] $ExpectedProviderVersionCode,
+        [Parameter(Mandatory = $true)][object] $ProviderBuildEvidence,
+        [Parameter(Mandatory = $true)][object] $AndroidTools,
+        [Parameter(Mandatory = $true)][string] $SiblingRoot
+    )
+    $path = Get-YoloR6RequiredFile -Path $ReceiptPath -Label "controlled signed-build receipt"
+    $expectedPath = [System.IO.Path]::GetFullPath((Join-Path $reportDirectory "r6-controlled-signed-build.generated.json"))
+    Assert-YoloR6Condition ($path -ceq $expectedPath) "Controlled signed-build receipt must use its fixed report path"
+    try { $receipt = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json } catch { throw "Controlled signed-build receipt is invalid JSON" }
+    Assert-YoloR6Condition ([int]$receipt.schemaVersion -eq 1) "Controlled signed-build receipt schema differs"
+    Assert-YoloR6Condition ([string]$receipt.gate -ceq "yolo-r6-controlled-signed-build") "Controlled signed-build gate identity differs"
+    Assert-YoloR6Condition ([string]$receipt.mode -ceq "CONTROLLED_CLEAN_SIGNED_BUILD") "Controlled signed-build mode differs"
+    Assert-YoloR6Condition ([string]$receipt.result -ceq "PASS") "Controlled signed-build receipt did not pass"
+    Assert-YoloR6Condition ([string]$receipt.receiptSemantics -ceq "CONTROLLED_BUILD_RECEIPT_NOT_CRYPTOGRAPHIC_ATTESTATION") (
+        "Controlled receipt must not claim cryptographic attestation"
+    )
+    $producerPath = Get-YoloR6RequiredFile -Path (Join-Path $PSScriptRoot "produce-yolo-r6-signed-artifacts.ps1") -Label "controlled producer source"
+    Assert-YoloR6Condition ([System.IO.Path]::GetFullPath([string]$receipt.producer.path) -ceq $producerPath) "Controlled receipt producer path differs"
+    Assert-YoloR6Condition ([string]$receipt.producer.sha256 -ceq (Get-YoloR6Sha256 $producerPath)) "Controlled receipt producer source SHA-256 is stale"
+    Assert-YoloR6Condition ([bool]$receipt.producer.sameProcessPreBuildPostBuildAndArtifactVerification) "Controlled producer did not bind its checks in one process"
+    Assert-YoloR6Condition ([string]$receipt.producer.externalGradleClientChecks -ceq "PASS") "Controlled producer did not prove an exclusive Gradle window"
+
+    foreach ($source in @(
+        [pscustomobject]@{ value = $receipt.source.host; revision = $ExpectedMainCommit; label = "Host" },
+        [pscustomobject]@{ value = $receipt.source.provider; revision = $ExpectedProviderCommit; label = "Provider" }
+    )) {
+        Assert-YoloR6Condition ([bool]$source.value.unchanged) "$($source.label) source was not stable across controlled build"
+        Assert-YoloR6Condition ([string]$source.value.preBuild.revision -ceq $source.revision -and [string]$source.value.postBuild.revision -ceq $source.revision) "$($source.label) controlled source revision differs"
+        Assert-YoloR6Condition ([bool]$source.value.preBuild.clean -and [bool]$source.value.postBuild.clean) "$($source.label) controlled source was not clean"
+        Assert-YoloR6Condition (@($source.value.preBuild.status).Count -eq 0 -and @($source.value.postBuild.status).Count -eq 0) "$($source.label) controlled source status rows are nonempty"
+    }
+
+    Assert-YoloR6Condition ([string]$receipt.signing.officialCertificateSha256 -ceq $ExpectedSigner) "Controlled receipt signer differs"
+    Assert-YoloR6Condition ([string]$receipt.signing.pinnedSource.certificateSha256 -ceq $ExpectedSigner) "Controlled receipt signer is not Host-pinned"
+    Assert-YoloR6Condition (-not [bool]$receipt.signing.propertiesValuesRecorded -and -not [bool]$receipt.signing.propertiesDigestRecorded -and -not [bool]$receipt.signing.aliasRecorded) "Controlled receipt exposed signing-property material"
+    Assert-YoloR6Condition (-not [bool]$receipt.signing.secretValuesPassedOnCommandLine) "Controlled producer passed a signing secret on a command line"
+    Assert-YoloR6Condition ([bool]$receipt.signing.temporaryCopiesDeleted -and [bool]$receipt.signing.temporaryCopiesVerifiedAbsent) "Controlled producer did not prove signing-copy cleanup"
+    foreach ($secretPath in @(
+        (Join-Path $repositoryRoot "sign.properties"),
+        (Join-Path $repositoryRoot "app/sm003.jks"),
+        (Join-Path $SiblingRoot "sign.properties"),
+        (Join-Path $SiblingRoot "app/sm003.jks")
+    )) {
+        Assert-YoloR6Condition (-not (Test-Path -LiteralPath $secretPath)) "A temporary signing copy remains after the controlled build"
+    }
+
+    Assert-YoloR6Condition ([string]$receipt.providerUnsignedAdmission.receiptSha256 -ceq [string]$ProviderBuildEvidence.sha256) "Controlled receipt does not bind the admitted Provider source receipt"
+    Assert-YoloR6Condition ([string]$receipt.providerUnsignedAdmission.artifactSha256 -ceq [string]$ProviderBuildEvidence.unsignedReleaseSha256) "Controlled receipt does not bind the admitted unsigned Provider APK"
+    Assert-YoloR6Condition ([bool]$receipt.providerUnsignedAdmission.fullUnsignedEvidenceRebuiltAfterSignedBuild) "Controlled producer did not rebuild the complete unsigned Provider admission bundle"
+    foreach ($field in @("runtimeComponent", "protocolApiMin", "protocolApiMax", "backend", "task", "decoder")) {
+        Assert-YoloR6Condition (
+            [string]$receipt.providerUnsignedAdmission.contract.$field -ceq [string]$ProviderBuildEvidence.contract.$field
+        ) "Controlled receipt Provider contract differs from the fresh source receipt: $field"
+    }
+    $controlledSupportedAbis = @($receipt.providerUnsignedAdmission.contract.supportedAbis | ForEach-Object { [string]$_ })
+    $sourceSupportedAbis = @($ProviderBuildEvidence.contract.supportedAbis | ForEach-Object { [string]$_ })
+    Assert-YoloR6Condition (
+        $controlledSupportedAbis.Count -eq 1 -and
+        $sourceSupportedAbis.Count -eq 1 -and
+        $controlledSupportedAbis[0] -ceq $sourceSupportedAbis[0]
+    ) "Controlled receipt Provider supported ABI contract differs from the fresh source receipt"
+
+    $expectedProviderArguments = @(
+        "--no-daemon",
+        "-Pautojs.gradle.build.number.auto.increment.enabled=false",
+        "-Pautojs.gradle.build.time.update.enabled=false",
+        ":app:clean",
+        ":app:testDebugUnitTest",
+        ":app:assembleRelease"
+    )
+    $expectedHostArguments = @(
+        "--no-daemon",
+        "-Pautojs.gradle.build.number.auto.increment.enabled=false",
+        "-Pautojs.gradle.build.time.update.enabled=false",
+        "-PyoloR6ReleaseAndroidTest=true",
+        ":app:clean",
+        ":app:assembleAppRelease",
+        ":app:assembleAppReleaseAndroidTest"
+    )
+    Assert-YoloR6Condition ([string]$receipt.builds.provider.status -ceq "PASS" -and (@($receipt.builds.provider.arguments) -join "`n") -ceq ($expectedProviderArguments -join "`n")) "Controlled Provider build invocation differs"
+    Assert-YoloR6Condition ([string]$receipt.builds.hostAndInstrumentation.status -ceq "PASS" -and (@($receipt.builds.hostAndInstrumentation.arguments) -join "`n") -ceq ($expectedHostArguments -join "`n")) "Controlled Host build invocation differs"
+    Assert-YoloR6Condition ([string]$receipt.hostOrdinaryBuildClone.method -ceq "LOCAL_GIT_CLONE_NO_HARDLINKS_DETACHED_EXACT_COMMIT" -and [bool]$receipt.hostOrdinaryBuildClone.ordinaryGitDirectory -and [bool]$receipt.hostOrdinaryBuildClone.removedAfterBuild) "Controlled Host was not built from the required removed ordinary local clone"
+    Assert-YoloR6Condition ([string]$receipt.hostOrdinaryBuildClone.sourceRevision -ceq $ExpectedMainCommit) "Controlled Host ordinary clone revision differs"
+    Assert-YoloR6Condition ([string]$receipt.builds.hostAndInstrumentation.ordinaryClonePostBuild.revision -ceq $ExpectedMainCommit -and [bool]$receipt.builds.hostAndInstrumentation.ordinaryClonePostBuild.clean) "Controlled Host ordinary clone changed during build"
+    Assert-YoloR6Condition (-not (Test-Path -LiteralPath (Join-Path $reportDirectory "r6-main-build-clone.staging"))) "Temporary ordinary Host build clone remains"
+
+    foreach ($artifact in @(
+        [pscustomobject]@{ receipt = $receipt.artifacts.host; path = $HostApkPath; label = "Host" },
+        [pscustomobject]@{ receipt = $receipt.artifacts.provider; path = $ProviderApkPath; label = "Provider" },
+        [pscustomobject]@{ receipt = $receipt.artifacts.instrumentation; path = $InstrumentationApkPath; label = "Instrumentation" }
+    )) {
+        $actualPath = Get-YoloR6RequiredFile -Path $artifact.path -Label "$($artifact.label) controlled artifact"
+        Assert-YoloR6Condition ([System.IO.Path]::GetFullPath([string]$artifact.receipt.file.path) -ceq $actualPath) "$($artifact.label) receipt path differs"
+        Assert-YoloR6Condition ([string]$artifact.receipt.file.sha256 -ceq (Get-YoloR6Sha256 $actualPath)) "$($artifact.label) receipt SHA-256 is stale"
+        Assert-YoloR6Condition ([long]$artifact.receipt.file.length -eq (Get-Item -LiteralPath $actualPath).Length) "$($artifact.label) receipt length is stale"
+        Assert-YoloR6Condition ([bool]$artifact.receipt.file.freshAfterBuildStart) "$($artifact.label) was not fresh after controlled build start"
+        Assert-YoloR6Condition ([string]$artifact.receipt.signerSha256 -ceq $ExpectedSigner) "$($artifact.label) receipt signer differs"
+    }
+    Assert-YoloR6Condition ([long]$receipt.artifacts.host.identity.versionCode -eq $ExpectedHostVersionCode) "Controlled Host version differs"
+    Assert-YoloR6Condition ([long]$receipt.artifacts.provider.identity.versionCode -eq $ExpectedProviderVersionCode) "Controlled Provider version differs"
+    Assert-YoloR6Condition ([bool]$receipt.artifacts.provider.minified -and [bool]$receipt.artifacts.provider.resourcesShrunk) "Controlled Provider lacks shrinker evidence"
+    Assert-YoloR6Condition ([string]$receipt.artifacts.provider.abi -ceq "arm64-v8a") "Controlled Provider ABI differs"
+    Assert-YoloR6Condition ([string]$receipt.artifacts.instrumentation.identity.packageName -ceq "org.autojs.autojs6.test") "Controlled instrumentation package differs"
+    Assert-YoloR6Condition ([string]$receipt.artifacts.instrumentation.identity.instrumentation.targetPackage -ceq "org.autojs.autojs6") "Controlled instrumentation target differs"
+    Assert-YoloR6Condition ([string]$receipt.artifacts.instrumentation.releaseVariantInvocation -ceq "SAME_CONTROLLED_INVOCATION_AS_HOST") "Instrumentation was not linked to the controlled Host release invocation"
+    Assert-YoloR6Condition ([long]$receipt.artifacts.instrumentation.controlledInvocationHostVersionCode -eq $ExpectedHostVersionCode) "Controlled invocation Host version differs"
+    Assert-YoloR6Condition ([string]$receipt.artifacts.instrumentation.controlledInvocationHostApkSha256 -ceq (Get-YoloR6Sha256 $HostApkPath)) "Controlled invocation Host hash differs"
+    Assert-YoloR6Condition ([bool]$receipt.artifacts.instrumentation.targetVersionNotIndependentlyDerivedFromTestApk) "Instrumentation receipt overstates target-version derivation"
+
+    $apkSigner = Get-YoloR6RequiredFile -Path ([string]$AndroidTools.apkSigner) -Label "R5-selected apksigner"
+    $aapt2 = Get-YoloR6RequiredFile -Path ([string]$AndroidTools.aapt2) -Label "R5-selected aapt2"
+    $testSignatureText = Invoke-YoloR6ExternalText -FilePath $apkSigner -Arguments @("verify", "--verbose", "--print-certs", $InstrumentationApkPath) -Label "Instrumentation signature verification"
+    $testDigests = @([regex]::Matches($testSignatureText, '(?im)certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$') | ForEach-Object { $_.Groups[1].Value.ToLowerInvariant() } | Select-Object -Unique)
+    Assert-YoloR6Condition ($testDigests.Count -eq 1 -and $testDigests[0] -ceq $ExpectedSigner) "Instrumentation is not signed by the official production certificate"
+    $testBadging = Invoke-YoloR6ExternalText -FilePath $aapt2 -Arguments @("dump", "badging", $InstrumentationApkPath) -Label "Instrumentation identity inspection"
+    Assert-YoloR6Condition ($testBadging -match "(?m)^package: name='org\.autojs\.autojs6\.test'") "Instrumentation package identity differs"
+    Assert-YoloR6Condition ($testBadging -match "(?m)^instrumentation: name='androidx\.test\.runner\.AndroidJUnitRunner' targetPackage='org\.autojs\.autojs6'") "Instrumentation does not target the production Host"
+
+    $hostVcs = Get-YoloR6ApkProjectRevision -ApkPath $HostApkPath -Label "Host"
+    $providerVcs = Get-YoloR6ApkProjectRevision -ApkPath $ProviderApkPath -Label "Provider"
+    Assert-YoloR6Condition ($hostVcs -ceq $ExpectedMainCommit -and [string]$receipt.artifacts.host.vcsRevision -ceq $ExpectedMainCommit) "Host signed artifact is not bound to the expected source revision"
+    Assert-YoloR6Condition ($providerVcs -ceq $ExpectedProviderCommit -and [string]$receipt.artifacts.provider.vcsRevision -ceq $ExpectedProviderCommit) "Provider signed artifact is not bound to the expected source revision"
+
+    Assert-YoloR6Condition ([string]$receipt.releaseBoundary.upgradeRuntimeEvidence -ceq "NOT_RUN_BY_PRODUCT_DECISION") "Upgrade evidence boundary differs from product decision"
+    Assert-YoloR6Condition ([string]$receipt.releaseBoundary.versionRollbackEvidence -ceq "NOT_RUN_BY_PRODUCT_DECISION") "Rollback evidence boundary differs from product decision"
+    Assert-YoloR6Condition (-not [bool]$receipt.releaseBoundary.predecessorArtifactApplicable) "Controlled receipt unexpectedly claims a predecessor artifact"
+    return [pscustomobject][ordered]@{
+        path = $path
+        sha256 = Get-YoloR6Sha256 $path
+        schemaVersion = 1
+        exactArtifactsReverified = $true
+        signedArtifactSourceLinkageVerified = $true
+        cleanSourceBuildIdentityVerified = $true
+        secretCleanupReverified = $true
+        receiptIsCryptographicAttestation = $false
+        instrumentationApk = [ordered]@{ path = $InstrumentationApkPath; sha256 = Get-YoloR6Sha256 $InstrumentationApkPath; signerSha256 = $ExpectedSigner }
+    }
+}
+
 function Get-YoloR6PackagedNoticeEvidence {
     param(
         [Parameter(Mandatory = $true)][string] $ProviderApkPath,
-        [Parameter(Mandatory = $true)][string] $SiblingRoot
+        [Parameter(Mandatory = $true)][string] $SiblingRoot,
+        [Parameter(Mandatory = $true)][long] $ExpectedMinHostVersionCode
     )
     $rootNoticePath = Get-YoloR6RequiredFile -Path (Join-Path $SiblingRoot "THIRD_PARTY_NOTICES.md") -Label "Provider third-party notice"
     $assetNoticePath = Get-YoloR6RequiredFile -Path (Join-Path $SiblingRoot "app\src\main\assets\THIRD_PARTY_NOTICES.md") -Label "Provider notice asset source"
@@ -395,7 +609,7 @@ function Get-YoloR6PackagedNoticeEvidence {
     $releaseNoteText = Get-Content -Raw -LiteralPath $releaseNotePath
     foreach ($pattern in @(
         'Draft only',
-        'minimum version code: `5274`',
+        "minimum version code: ``$ExpectedMinHostVersionCode``",
         'ABI: `arm64-v8a` only',
         'Backend: NCNN `20260526`',
         'CPU only',
@@ -534,7 +748,8 @@ function Invoke-YoloR6SourcePreflight {
         'PRODUCTION_NOT_RUN'
     )
     Assert-YoloR6SourceSentinel -RelativePath "docs/dev/yolo-r6-release-playbook.md" -Patterns @(
-        'UNINSTALL_REINSTALL_CODE1',
+        'NOT_RUN_BY_PRODUCT_DECISION',
+        'ARCHIVED_EXACT_V2_REINSTALL_ONLY',
         'PROVIDER_KILL_EXPLICIT_REOPEN',
         '不得原位降级'
     )
@@ -547,8 +762,15 @@ function Invoke-YoloR6SourcePreflight {
         'ExpectedMainCommit',
         'strict-entry-allowlist-v1',
         'Provider APK must contain exactly one compiled markdown raw resource',
-        'PARTIAL_NO_CONTROLLED_SIGNED_BUILD_RECEIPT',
+        'PASS_CONTROLLED_SIGNED_BUILD',
+        'CONTROLLED_BUILD_RECEIPT_NOT_CRYPTOGRAPHIC_ATTESTATION',
         'Remove-Item -LiteralPath \$artifactReportPath'
+    )
+    Assert-YoloR6SourceSentinel -RelativePath "tools/yolo/produce-yolo-r6-signed-artifacts.ps1" -Patterns @(
+        'CONTROLLED_CLEAN_SIGNED_BUILD',
+        'CONTROLLED_BUILD_RECEIPT_NOT_CRYPTOGRAPHIC_ATTESTATION',
+        'temporaryCopiesVerifiedAbsent',
+        'yoloR6ReleaseAndroidTest=true'
     )
     Assert-YoloR6SourceSentinel -RelativePath "app/src/androidTest/java/org/autojs/autojs/core/plugin/yolo/YoloRealProviderR6RecoveryAndroidTest.kt" -Patterns @(
         'yoloR6RecoveryEnabled',
@@ -632,6 +854,8 @@ function Invoke-YoloR6SourcePreflight {
 }
 
 if ($PSCmdlet.ParameterSetName -ceq "Source") {
+    $null = New-Item -ItemType Directory -Path $reportDirectory -Force
+    if (Test-Path -LiteralPath $sourceReportPath -PathType Leaf) { Remove-Item -LiteralPath $sourceReportPath -Force }
     Invoke-YoloR6SourcePreflight
     return
 }
@@ -708,19 +932,37 @@ Assert-YoloR6Condition ([bool]$r5.ncnn.arm64StaticLibrary.provenanceMatch) "NCNN
 Assert-YoloR6Condition ([bool]$r5.ncnn.packagedProvenanceMatch) "Packaged NCNN provenance did not match"
 Assert-YoloR6Condition ([bool]$r5.ncnn.packagedLicenseMatch) "Packaged NCNN notice did not match"
 Assert-YoloR6Condition ([bool]$r5.ncnn.pluginLicense.normalizedContentMatch) "Packaged MPL-2.0 notice did not match"
-$releaseCompliance = Get-YoloR6PackagedNoticeEvidence -ProviderApkPath $providerApkPath -SiblingRoot $siblingRoot
+$releaseCompliance = Get-YoloR6PackagedNoticeEvidence `
+    -ProviderApkPath $providerApkPath `
+    -SiblingRoot $siblingRoot `
+    -ExpectedMinHostVersionCode ([long]$providerHostBoundary.minHostVersionCode)
 $providerZipPolicy = Get-YoloR6ProviderZipPolicyEvidence -ProviderApkPath $providerApkPath -SiblingRoot $siblingRoot
 $providerApkSha256 = Get-YoloR6Sha256 -Path $providerApkPath
 $providerBuildEvidence = Get-YoloR6ProviderBuildReceiptEvidence `
     -ReceiptPath $ProviderBuildReceipt `
     -SiblingRoot $siblingRoot `
     -ExpectedProviderCommit $providerIdentity.commit `
+    -ExpectedHostVersionCode ([long]$hostSourceVersion.versionCode) `
     -ProductionApkSha256 $providerApkSha256 `
     -ExpectedNoticeSha256 $releaseCompliance.thirdPartyNotice.sha256 `
     -ExpectedModelPolicySha256 $releaseCompliance.modelLicensePolicy.sha256 `
     -ExpectedReleaseNoteSha256 $releaseCompliance.releaseNoteDraft.sha256
-$artifactBuildIdentityProven = $false
-$artifactPreflightClaim = "PARTIAL_NO_CONTROLLED_SIGNED_BUILD_RECEIPT"
+$instrumentationApkPath = Get-YoloR6RequiredFile -Path $InstrumentationApk -Label "production-signed instrumentation APK"
+$controlledBuildEvidence = Get-YoloR6ControlledBuildReceiptEvidence `
+    -ReceiptPath $ControlledBuildReceipt `
+    -HostApkPath $hostApkPath `
+    -ProviderApkPath $providerApkPath `
+    -InstrumentationApkPath $instrumentationApkPath `
+    -ExpectedMainCommit $mainIdentity.commit `
+    -ExpectedProviderCommit $providerIdentity.commit `
+    -ExpectedSigner $expectedSigner `
+    -ExpectedHostVersionCode ([long]$hostSourceVersion.versionCode) `
+    -ExpectedProviderVersionCode $ExpectedProviderVersionCode `
+    -ProviderBuildEvidence $providerBuildEvidence `
+    -AndroidTools $r5.tools `
+    -SiblingRoot $siblingRoot
+$artifactBuildIdentityProven = $true
+$artifactPreflightClaim = "PASS_CONTROLLED_SIGNED_BUILD"
 
 $report = [ordered]@{
     schemaVersion = 2
@@ -751,8 +993,12 @@ $report = [ordered]@{
         providerVersionSourceSha256 = $providerSourceVersion.sha256
         expectedProviderVersionCode = $ExpectedProviderVersionCode
         providerApkAndSourceVersionMatch = $true
-        code1PredecessorCandidateApplicable = $ExpectedProviderVersionCode -gt 1L
-        upgradeRuntimeEvidence = "NOT_RUN"
+        predecessorArtifactApplicable = $false
+        predecessorReason = "Provider 0.1.0 versionCode 2 is the first release by explicit product decision."
+        upgradeRuntimeEvidence = "NOT_RUN_BY_PRODUCT_DECISION"
+        versionRollbackEvidence = "NOT_RUN_BY_PRODUCT_DECISION"
+        sameVersionRecovery = "ARCHIVED_EXACT_V2_REINSTALL_ONLY"
+        withdrawalMitigation = "DISABLE_PROVIDER_WITHDRAW_INDEX_PUBLISH_FORWARD_FIX_V3"
     }
     hostApk = [ordered]@{
         path = $hostApkPath
@@ -783,12 +1029,15 @@ $report = [ordered]@{
     releaseCompliance = $releaseCompliance
     providerZipPolicy = $providerZipPolicy
     providerBuildReceipt = $providerBuildEvidence
+    controlledSignedBuildReceipt = $controlledBuildEvidence
     evidenceBoundary = [ordered]@{
-        signingSecretRead = $false
+        signingSecretReadByConsumer = $false
         artifactBuildIdentityProven = $artifactBuildIdentityProven
-        providerSignedApkBuildIdentityProven = $false
-        hostSignedApkBuildIdentityProven = $false
+        providerSignedApkBuildIdentityProven = $true
+        hostSignedApkBuildIdentityProven = $true
+        instrumentationSignedApkBuildIdentityProven = $true
         cryptographicSourceAttestation = $false
+        controlledBuildReceiptIsNotCryptographicAttestation = $true
         staticElfAlignmentIsNotRuntimeLoadEvidence = $true
         deviceCommandsExecuted = $false
         pluginIndexChanged = $false
@@ -804,7 +1053,7 @@ $report = [ordered]@{
         LICENSE_AND_PROVENANCE = "PASS"
         DEVICE_RECOVERY = "NOT_RUN"
         PLUGIN_INDEX = "NOT_RUN"
-        UPGRADE_ROLLBACK = "NOT_RUN"
+        UPGRADE_ROLLBACK = "NOT_RUN_BY_PRODUCT_DECISION"
         PUBLICATION = "NOT_RUN"
         PRODUCTION = "PRODUCTION_NOT_RUN"
     }

@@ -5,7 +5,7 @@ param(
     [string] $DeviceSerial,
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet("representative-arm64-physical", "current-api-arm64-emulator")]
+    [ValidateSet("representative-arm64-physical", "current-api-arm64-emulator", "current-api-arm64-physical")]
     [string] $EnvironmentKind,
 
     [Parameter(Mandatory = $true)]
@@ -19,6 +19,10 @@ param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string] $InstrumentationApk,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string] $ControlledBuildReceipt,
 
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
@@ -59,6 +63,14 @@ $testClass = "org.autojs.autojs.core.plugin.yolo.YoloRealProviderR6RecoveryAndro
 $testMethod = "providerDeathFailsPinnedSessionWithoutRetryThenExplicitReopenSucceeds"
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
 $reportDirectory = Join-Path $repositoryRoot "build\reports\yolo"
+$reportPath = Join-Path $reportDirectory ("r6-recovery-{0}.generated.json" -f ($EnvironmentKind -replace '[^a-z0-9-]', '-'))
+$null = New-Item -ItemType Directory -Path $reportDirectory -Force
+$reportPrefix = [System.IO.Path]::GetFullPath($reportDirectory).TrimEnd('\') + '\'
+$reportPath = [System.IO.Path]::GetFullPath($reportPath)
+if (-not $reportPath.StartsWith($reportPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+    throw "R6 recovery report escaped its fixed report directory"
+}
+if (Test-Path -LiteralPath $reportPath -PathType Leaf) { Remove-Item -LiteralPath $reportPath -Force }
 
 function Assert-YoloR6RecoveryCondition {
     param(
@@ -122,23 +134,78 @@ function Get-YoloR6RecoverySha256 {
     return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant()
 }
 
+function Stop-YoloR6RecoveryTimedOutProcess {
+    param(
+        [Parameter(Mandatory = $true)][System.Diagnostics.Process] $Process,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+    try {
+        if (-not $Process.HasExited) { $Process.Kill($true) }
+    } catch {
+        if (-not $Process.HasExited) { throw "$Label timed out and process-tree termination failed: $($_.Exception.Message)" }
+    }
+    if (-not $Process.HasExited -and -not $Process.WaitForExit(10000)) {
+        throw "$Label timed out and its process tree did not exit within the 10-second termination limit"
+    }
+}
+
+function Invoke-YoloR6RecoveryProcess {
+    param(
+        [Parameter(Mandatory = $true)][string] $FilePath,
+        [string[]] $Arguments = @(),
+        [ValidateRange(1, 3600)][int] $TimeoutSeconds = 120,
+        [switch] $Quiet
+    )
+    if (-not $Quiet) { Write-Host "> $FilePath $($Arguments -join ' ')" }
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $isBatch = [IO.Path]::GetExtension($FilePath) -in @(".bat", ".cmd")
+    $process.StartInfo.FileName = if ($isBatch) { (Get-Command cmd.exe -ErrorAction Stop).Source } else { $FilePath }
+    $process.StartInfo.UseShellExecute = $false
+    $process.StartInfo.RedirectStandardOutput = $true
+    $process.StartInfo.RedirectStandardError = $true
+    $effectiveArguments = if ($isBatch) { @("/d", "/s", "/c", $FilePath) + $Arguments } else { $Arguments }
+    foreach ($argument in $effectiveArguments) { [void]$process.StartInfo.ArgumentList.Add($argument) }
+    try {
+        Assert-YoloR6RecoveryCondition ($process.Start()) "External command did not start: $FilePath"
+        $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+            Stop-YoloR6RecoveryTimedOutProcess -Process $process -Label $FilePath
+            throw "External command exceeded its $TimeoutSeconds-second wall-time limit: $FilePath"
+        }
+        $stdout = $stdoutTask.GetAwaiter().GetResult()
+        $stderr = $stderrTask.GetAwaiter().GetResult()
+        $lines = @(($stdout, $stderr) | Where-Object { -not [string]::IsNullOrEmpty($_) } | ForEach-Object { $_ -split '\r?\n' } | Where-Object { $_ -ne "" })
+        if (-not $Quiet) { $lines | ForEach-Object { Write-Host $_ } }
+        return [pscustomobject][ordered]@{ exitCode = $process.ExitCode; output = $lines }
+    } finally { $process.Dispose() }
+}
+
 function Invoke-YoloR6RecoveryExternal {
     param(
         [Parameter(Mandatory = $true)][string] $FilePath,
         [string[]] $Arguments = @(),
+        [ValidateRange(1, 3600)][int] $TimeoutSeconds = 120,
         [switch] $Quiet
     )
-    if (-not $Quiet) { Write-Host "> $FilePath $($Arguments -join ' ')" }
-    $output = @(& $FilePath @Arguments 2>&1)
-    $exitCode = $LASTEXITCODE
-    if (-not $Quiet) { $output | ForEach-Object { Write-Host $_ } }
-    if ($exitCode -ne 0) { throw "External command failed with exit code $exitCode`: $FilePath" }
-    return @($output | ForEach-Object { [string]$_ })
+    $result = Invoke-YoloR6RecoveryProcess -FilePath $FilePath -Arguments $Arguments -TimeoutSeconds $TimeoutSeconds -Quiet:$Quiet
+    if ($result.exitCode -ne 0) { throw "External command failed with exit code $($result.exitCode)`: $FilePath" }
+    return @($result.output)
 }
 
 function Invoke-YoloR6RecoveryAdb {
     param([string] $Adb, [string[]] $Arguments = @(), [switch] $Quiet)
-    return Invoke-YoloR6RecoveryExternal -FilePath $Adb -Arguments (@("-s", $DeviceSerial) + $Arguments) -Quiet:$Quiet
+    return Invoke-YoloR6RecoveryExternal -FilePath $Adb -Arguments (@("-s", $DeviceSerial) + $Arguments) -TimeoutSeconds 180 -Quiet:$Quiet
+}
+
+function Test-YoloR6RecoveryRemotePathAbsent {
+    param([string] $Adb, [string] $RemotePath)
+    $result = Invoke-YoloR6RecoveryProcess -FilePath $Adb -Arguments @("-s", $DeviceSerial, "shell", "ls", "-ld", $RemotePath) -TimeoutSeconds 30 -Quiet
+    $code = $result.exitCode
+    if ($code -eq 1) { return $true }
+    if ($code -eq 0) { return $false }
+    throw "Unable to verify cleanup of the exact R6 staging path on $DeviceSerial"
 }
 
 function Invoke-YoloR6RecoveryInstrumentation {
@@ -171,8 +238,7 @@ function Invoke-YoloR6RecoveryInstrumentation {
         $stdoutTask = $process.StandardOutput.ReadToEndAsync()
         $stderrTask = $process.StandardError.ReadToEndAsync()
         if (-not $process.WaitForExit($timeoutMillis)) {
-            try { $process.Kill($true) } catch { }
-            $process.WaitForExit()
+            Stop-YoloR6RecoveryTimedOutProcess -Process $process -Label "$testClass#$testMethod instrumentation"
             foreach ($packageName in @($testPackage, $hostPackage, $providerPackage)) {
                 try {
                     $null = Invoke-YoloR6RecoveryAdb -Adb $Adb -Arguments @(
@@ -182,7 +248,6 @@ function Invoke-YoloR6RecoveryInstrumentation {
             }
             throw "$testClass#$testMethod exceeded its $timeoutMillis ms wall-clock limit"
         }
-        $process.WaitForExit()
         $stdout = $stdoutTask.GetAwaiter().GetResult()
         $stderr = $stderrTask.GetAwaiter().GetResult()
         $text = @($stdout, $stderr) |
@@ -268,10 +333,29 @@ function Get-YoloR6RecoveryApplicationId {
 
 function Test-YoloR6RecoveryPackageInstalled {
     param([string] $Adb, [string] $PackageName)
-    $output = @(& $Adb -s $DeviceSerial shell pm path $PackageName 2>&1)
-    $code = $LASTEXITCODE
+    $result = Invoke-YoloR6RecoveryProcess -FilePath $Adb -Arguments @("-s", $DeviceSerial, "shell", "pm", "path", $PackageName) -TimeoutSeconds 30 -Quiet
+    $output = @($result.output)
+    $code = $result.exitCode
     if ($code -eq 0) { return (($output -join "`n") -match '(?m)^package:') }
+    if ($code -eq 1 -and -not (($output -join "`n") -match '(?m)^package:')) { return $false }
     throw "Unable to query package $PackageName on $DeviceSerial"
+}
+
+function Get-YoloR6RecoveryInstalledApkEvidence {
+    param(
+        [Parameter(Mandatory = $true)][string] $Adb,
+        [Parameter(Mandatory = $true)][string] $PackageName,
+        [Parameter(Mandatory = $true)][string] $InputApk
+    )
+    $pathOutput = (Invoke-YoloR6RecoveryAdb -Adb $Adb -Arguments @("shell", "pm", "path", $PackageName) -Quiet) -join "`n"
+    $paths = @([regex]::Matches($pathOutput, '(?m)^package:(/[^\r\n]+)\s*$') | ForEach-Object { $_.Groups[1].Value.Trim() })
+    Assert-YoloR6RecoveryCondition ($paths.Count -eq 1) "Installed package $PackageName must expose exactly one APK path"
+    $digestOutput = (Invoke-YoloR6RecoveryAdb -Adb $Adb -Arguments @("shell", "sha256sum", $paths[0]) -Quiet) -join "`n"
+    $digest = [regex]::Match($digestOutput, '(?im)^([0-9a-f]{64})\s+')
+    Assert-YoloR6RecoveryCondition $digest.Success "Device sha256sum did not return an APK digest for $PackageName"
+    $inputSha = Get-YoloR6RecoverySha256 -Path $InputApk
+    Assert-YoloR6RecoveryCondition ($digest.Groups[1].Value.ToLowerInvariant() -ceq $inputSha) "Installed APK digest differs for $PackageName"
+    return [pscustomobject][ordered]@{ packageName = $PackageName; installedPath = $paths[0]; inputSha256 = $inputSha; installedSha256 = $inputSha; exactBytesMatch = $true }
 }
 
 Assert-YoloR6RecoveryCondition ($DeviceSerial -cmatch '^[A-Za-z0-9._:-]+$') "Unsafe Android serial"
@@ -287,25 +371,34 @@ $expectedSigner = $OfficialProductionSignerSha256.Trim().ToLowerInvariant()
 Assert-YoloR6RecoveryCondition ($expectedSigner -cmatch '^[0-9a-f]{64}$') "Official production signer must be one SHA-256 digest"
 
 $publishableVerifier = Get-YoloR6RecoveryRequiredFile -Path (Join-Path $PSScriptRoot "verify-yolo-r6-publishable.ps1") -Label "R6 publishable verifier"
-& $publishableVerifier `
-    -ProviderApk $providerApkPath `
-    -HostApk $hostApkPath `
-    -OfficialProductionSignerSha256 $expectedSigner `
-    -ExpectedProviderVersionCode $ExpectedProviderVersionCode `
-    -ExpectedMainCommit $ExpectedMainCommit `
-    -ExpectedProviderCommit $ExpectedProviderCommit `
-    -ProviderBuildReceipt $ProviderBuildReceipt `
-    -SiblingPath $siblingRoot
+$pwsh = (Get-Command pwsh.exe -ErrorAction Stop).Source
+$publishableArguments = @(
+    "-NoLogo", "-NoProfile", "-NonInteractive", "-File", $publishableVerifier,
+    "-ProviderApk", $providerApkPath,
+    "-HostApk", $hostApkPath,
+    "-InstrumentationApk", $testApkPath,
+    "-OfficialProductionSignerSha256", $expectedSigner,
+    "-ExpectedProviderVersionCode", ([string]$ExpectedProviderVersionCode),
+    "-ExpectedMainCommit", $ExpectedMainCommit,
+    "-ExpectedProviderCommit", $ExpectedProviderCommit,
+    "-ProviderBuildReceipt", $ProviderBuildReceipt,
+    "-ControlledBuildReceipt", $ControlledBuildReceipt,
+    "-SiblingPath", $siblingRoot
+)
+Invoke-YoloR6RecoveryExternal -FilePath $pwsh -Arguments $publishableArguments -TimeoutSeconds 900 | Out-Null
 $publishableReportPath = Get-YoloR6RecoveryRequiredFile -Path (
     Join-Path $repositoryRoot "build\reports\yolo\r6-publishable.generated.json"
 ) -Label "R6 publishable artifact preflight report"
 $publishableReport = Get-Content -Raw -LiteralPath $publishableReportPath | ConvertFrom-Json
 Assert-YoloR6RecoveryCondition (
-    [string]$publishableReport.claims.PRODUCTION_ARTIFACT_PREFLIGHT -ceq "PASS" -and
+    [string]$publishableReport.claims.PRODUCTION_ARTIFACT_PREFLIGHT -ceq "PASS_CONTROLLED_SIGNED_BUILD" -and
     [bool]$publishableReport.evidenceBoundary.artifactBuildIdentityProven -and
-    [bool]$publishableReport.evidenceBoundary.cryptographicSourceAttestation
+    [bool]$publishableReport.evidenceBoundary.providerSignedApkBuildIdentityProven -and
+    [bool]$publishableReport.evidenceBoundary.hostSignedApkBuildIdentityProven -and
+    [bool]$publishableReport.evidenceBoundary.instrumentationSignedApkBuildIdentityProven -and
+    -not [bool]$publishableReport.evidenceBoundary.cryptographicSourceAttestation
 ) (
-    "R6 recovery refuses production APKs without a controlled signed-build receipt; " +
+    "R6 recovery refuses production APKs without a reverified controlled signed-build receipt; " +
     "current artifact preflight=$($publishableReport.claims.PRODUCTION_ARTIFACT_PREFLIGHT)"
 )
 
@@ -343,9 +436,12 @@ $pageSize = ((Invoke-YoloR6RecoveryAdb -Adb $tools.adb -Arguments @("shell", "ge
 $isEmulator = ((Invoke-YoloR6RecoveryAdb -Adb $tools.adb -Arguments @("shell", "getprop", "ro.kernel.qemu") -Quiet) -join "").Trim() -ceq "1"
 if ($EnvironmentKind -ceq "representative-arm64-physical") {
     Assert-YoloR6RecoveryCondition (-not $isEmulator) "The representative arm64 environment must be a physical device"
-} else {
+} elseif ($EnvironmentKind -ceq "current-api-arm64-emulator") {
     Assert-YoloR6RecoveryCondition $isEmulator "The current API environment must be an emulator"
     Assert-YoloR6RecoveryCondition ($apiLevel -eq 36) "The current API emulator must run the pinned compile/target API 36"
+} else {
+    Assert-YoloR6RecoveryCondition (-not $isEmulator) "The current API physical environment must be a physical device"
+    Assert-YoloR6RecoveryCondition ($apiLevel -ge 35) "The current API physical environment must run API 35 or newer"
 }
 $activeInstrumentation = (Invoke-YoloR6RecoveryAdb -Adb $tools.adb -Arguments @("shell", "dumpsys", "activity", "instrumentation") -Quiet) -join "`n"
 Assert-YoloR6RecoveryCondition ($activeInstrumentation -notmatch '(?m)^\s*Active instrumentation') "Another instrumentation runner is active on $DeviceSerial"
@@ -361,6 +457,8 @@ $cleanupErrors = [System.Collections.Generic.List[string]]::new()
 $instrumentationText = ""
 $instrumentationTimeoutMillis = 0
 $resultJson = $null
+$installedApkEvidence = $null
+$stagingAbsentAfterCleanup = $false
 try {
     Invoke-YoloR6RecoveryAdb -Adb $tools.adb -Arguments @("shell", "mkdir", "-p", $staging) | Out-Null
     foreach ($name in $fixtureNames) {
@@ -369,6 +467,12 @@ try {
     Invoke-YoloR6RecoveryAdb -Adb $tools.adb -Arguments @("install", "-r", $hostApkPath) | Out-Null
     Invoke-YoloR6RecoveryAdb -Adb $tools.adb -Arguments @("install", "-r", $providerApkPath) | Out-Null
     Invoke-YoloR6RecoveryAdb -Adb $tools.adb -Arguments @("install", "-r", "-t", $testApkPath) | Out-Null
+
+    $installedApkEvidence = [ordered]@{
+        host = Get-YoloR6RecoveryInstalledApkEvidence -Adb $tools.adb -PackageName $hostPackage -InputApk $hostApkPath
+        provider = Get-YoloR6RecoveryInstalledApkEvidence -Adb $tools.adb -PackageName $providerPackage -InputApk $providerApkPath
+        instrumentation = Get-YoloR6RecoveryInstalledApkEvidence -Adb $tools.adb -PackageName $testPackage -InputApk $testApkPath
+    }
 
     $instrumentationRun = Invoke-YoloR6RecoveryInstrumentation -Adb $tools.adb -FixtureRoot $staging
     $instrumentationText = $instrumentationRun.text
@@ -383,6 +487,9 @@ try {
 } finally {
     if ($staging -cmatch '^/data/local/tmp/autojs6-yolo-r6-[a-f0-9]{32}$') {
         try { Invoke-YoloR6RecoveryAdb -Adb $tools.adb -Arguments @("shell", "rm", "-rf", $staging) -Quiet | Out-Null } catch { $cleanupErrors.Add($_.Exception.Message) }
+        try { $stagingAbsentAfterCleanup = Test-YoloR6RecoveryRemotePathAbsent -Adb $tools.adb -RemotePath $staging }
+        catch { $cleanupErrors.Add($_.Exception.Message) }
+        if (-not $stagingAbsentAfterCleanup) { $cleanupErrors.Add("R6 staging path still exists after cleanup") }
     } else {
         $cleanupErrors.Add("Refused cleanup of unexpected staging path: $staging")
     }
@@ -399,6 +506,7 @@ try {
 }
 
 Assert-YoloR6RecoveryCondition ($cleanupErrors.Count -eq 0) "R6 recovery cleanup failed: $($cleanupErrors -join '; ')"
+Assert-YoloR6RecoveryCondition $stagingAbsentAfterCleanup "R6 staging cleanup was not independently confirmed"
 foreach ($packageName in @($testPackage, $providerPackage, $hostPackage)) {
     Assert-YoloR6RecoveryCondition (-not (Test-YoloR6RecoveryPackageInstalled -Adb $tools.adb -PackageName $packageName)) "Package remains after R6 cleanup: $packageName"
 }
@@ -416,21 +524,22 @@ $report = [ordered]@{
         provider = [ordered]@{ path = $providerApkPath; sha256 = Get-YoloR6RecoverySha256 -Path $providerApkPath }
         instrumentation = [ordered]@{ path = $testApkPath; sha256 = Get-YoloR6RecoverySha256 -Path $testApkPath }
     }
+    installedApks = $installedApkEvidence
     fixture = $fixtureEvidence
     instrumentation = [ordered]@{
         wallClockTimeoutMillis = $instrumentationTimeoutMillis
         result = $resultJson
     }
-    cleanup = [ordered]@{ packagesAbsent = $true; stagingAbsent = $true }
+    cleanup = [ordered]@{ packagesAbsent = $true; stagingPath = $staging; stagingAbsent = $stagingAbsentAfterCleanup; exactPostCheck = "PASS" }
     claims = [ordered]@{
         DEVICE_E2E = "PASS_FOR_THIS_EXPLICIT_ENVIRONMENT_ONLY"
         REAL_PROVIDER_DEATH_EXPLICIT_REOPEN = "PASS"
         DISPATCH_RETRY_AFTER_DEATH = "ABSENT"
-        PRODUCTION = "PRODUCTION_NOT_COMPLETE_PENDING_SECOND_ENVIRONMENT_INDEX_UPGRADE_ROLLBACK_AND_PUBLICATION"
+        UPGRADE_RUNTIME = "NOT_RUN_BY_PRODUCT_DECISION"
+        VERSION_ROLLBACK = "NOT_RUN_BY_PRODUCT_DECISION"
+        PRODUCTION = "PRODUCTION_NOT_COMPLETE_PENDING_SECOND_ENVIRONMENT_INDEX_AND_PUBLICATION"
     }
 }
-$null = New-Item -ItemType Directory -Path $reportDirectory -Force
-$reportPath = Join-Path $reportDirectory ("r6-recovery-{0}.generated.json" -f ($EnvironmentKind -replace '[^a-z0-9-]', '-'))
 [System.IO.File]::WriteAllText($reportPath, "$(ConvertTo-Json $report -Depth 14)`n", [System.Text.UTF8Encoding]::new($false))
 Write-Host "YOLO_R6_RECOVERY=PASS report=$reportPath"
 Write-Host "YOLO_R6_PRODUCTION=PRODUCTION_NOT_COMPLETE"
