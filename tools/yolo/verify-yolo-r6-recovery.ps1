@@ -28,6 +28,18 @@ param(
     [ValidateRange(1, [long]::MaxValue)]
     [long] $ExpectedProviderVersionCode,
 
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string] $ExpectedMainCommit,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string] $ExpectedProviderCommit,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string] $ProviderBuildReceipt,
+
     [string] $SiblingPath = "D:\idea-projects\AutoJs6-Plugin-Yolo-NCNN",
 
     [string] $FixtureRoot,
@@ -275,7 +287,27 @@ $expectedSigner = $OfficialProductionSignerSha256.Trim().ToLowerInvariant()
 Assert-YoloR6RecoveryCondition ($expectedSigner -cmatch '^[0-9a-f]{64}$') "Official production signer must be one SHA-256 digest"
 
 $publishableVerifier = Get-YoloR6RecoveryRequiredFile -Path (Join-Path $PSScriptRoot "verify-yolo-r6-publishable.ps1") -Label "R6 publishable verifier"
-& $publishableVerifier -ProviderApk $providerApkPath -HostApk $hostApkPath -OfficialProductionSignerSha256 $expectedSigner -ExpectedProviderVersionCode $ExpectedProviderVersionCode -SiblingPath $siblingRoot
+& $publishableVerifier `
+    -ProviderApk $providerApkPath `
+    -HostApk $hostApkPath `
+    -OfficialProductionSignerSha256 $expectedSigner `
+    -ExpectedProviderVersionCode $ExpectedProviderVersionCode `
+    -ExpectedMainCommit $ExpectedMainCommit `
+    -ExpectedProviderCommit $ExpectedProviderCommit `
+    -ProviderBuildReceipt $ProviderBuildReceipt `
+    -SiblingPath $siblingRoot
+$publishableReportPath = Get-YoloR6RecoveryRequiredFile -Path (
+    Join-Path $repositoryRoot "build\reports\yolo\r6-publishable.generated.json"
+) -Label "R6 publishable artifact preflight report"
+$publishableReport = Get-Content -Raw -LiteralPath $publishableReportPath | ConvertFrom-Json
+Assert-YoloR6RecoveryCondition (
+    [string]$publishableReport.claims.PRODUCTION_ARTIFACT_PREFLIGHT -ceq "PASS" -and
+    [bool]$publishableReport.evidenceBoundary.artifactBuildIdentityProven -and
+    [bool]$publishableReport.evidenceBoundary.cryptographicSourceAttestation
+) (
+    "R6 recovery refuses production APKs without a controlled signed-build receipt; " +
+    "current artifact preflight=$($publishableReport.claims.PRODUCTION_ARTIFACT_PREFLIGHT)"
+)
 
 $tools = Resolve-YoloR6RecoveryTools -SdkRoots @(Get-YoloR6RecoverySdkRoots -RepositoryRoots @($repositoryRoot, $siblingRoot))
 Assert-YoloR6RecoveryCondition ((Get-YoloR6RecoveryApplicationId -Aapt2 $tools.aapt2 -Apk $testApkPath -Label "Instrumentation") -ceq $testPackage) (

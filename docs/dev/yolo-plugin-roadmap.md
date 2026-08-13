@@ -331,8 +331,8 @@ R5 exit（2026-08-13）：
 
 证据边界：R5 的 RC 是本地 debug certificate 签发的 `TEST_SIGNED_NONDEBUGGABLE` 候选，
 不是生产签名 release；R5 当时验证的 RC artifact 明确关闭 minify/resource shrink，故 R5
-receipt 仍不含 shrinker 证据。后续 R6-A 可独立完成 shrinker 的源码/构建 admission，但不得
-回写或提升 R5 artifact。`PRODUCTION = NOT_CLAIMED`。真实 Provider startup stale cleanup 仍
+receipt 仍不含 shrinker 证据。后续 R6-A 已在独立 Provider source/build gate 中纳入 shrunk
+release/RC admission；该新证据不得回写或提升 R5 artifact。`PRODUCTION = NOT_CLAIMED`。真实 Provider startup stale cleanup 仍
 只有 JVM/Android build 证据；真实 NCNN provider death/recovery、16 KiB page 设备、长 soak、
 完整 API 矩阵、发布签名、索引、升级与回滚继续保留到 R6。
 
@@ -352,24 +352,30 @@ receipt 仍不含 shrinker 证据。后续 R6-A 可独立完成 shrinker 的源�
 - [x] 增加 `verify-yolo-r6-publishable.ps1` 的 source/artifact 两个参数集；source 模式
   只输出 `SOURCE_STATIC_PASS / PRODUCTION_NOT_RUN`，artifact 模式必须显式提供两份 APK、
   发布负责人冻结的 Provider versionCode 和确认的生产证书 SHA-256 指纹。
-- [x] artifact 预检 fail-closed 校验 non-debuggable、Host/Provider 同生产 signer、APK
-  SHA-256、Provider arm64-only、Host/Provider model-free、NCNN provenance、NOTICE 和
-  静态 ELF 包装；已知 R5 TEST-SIGNED certificate 不可被提升。
+- [x] artifact 预检要求显式 Host/Provider full commit、两个 clean worktree 和 Provider
+  source-build receipt；fail-closed 校验 non-debuggable、同生产 signer、APK SHA-256、
+  Provider arm64-only/严格 release-entry allowlist、NCNN provenance、NOTICE 和静态 ELF
+  包装。Host 仅声明已知 YOLO/NCNN payload absent；已知 R5 TEST-SIGNED certificate 不可被提升。
 - [x] 固定首发 `UNINSTALL_REINSTALL_CODE1` 回滚手册；明确不得原位降级，回滚后保持
   default-off 并重新显式授权/启用。
 - [x] 增加真实 Provider `am force-stop`、旧 session fail-closed/no-retry、显式重新选择并
   reopen 的 opt-in instrumentation 与单 serial gate 源码。
 
 R6-A source gate 当前证据仅为源码/PowerShell parser 静态预检；未读取生产签名秘密，未检查生产 APK，
-未执行 ADB、索引或外部发布。因此只能记为 `SOURCE_STATIC_PASS / PRODUCTION_NOT_RUN`，且
-不生成 canonical `r6-summary.json`。
+未执行 ADB、索引或外部发布。因此只能记为 `SOURCE_STATIC_PASS / PRODUCTION_NOT_RUN`。当前
+artifact verifier 也不会把可编辑 JSON 或 unsigned Gradle output 当作 production signed APK
+的源码证明；在 Host/Provider 的受控 signed-build producer/receipt 尚未落地前固定为
+`PARTIAL_NO_CONTROLLED_SIGNED_BUILD_RECEIPT`，且不生成 canonical `r6-summary.json`。
 
 ### R6-B：生产 APK 与签名（待执行）
 
 - [ ] 由发布负责人提供/确认唯一生产 signer SHA-256 公钥指纹，并在受控环境签发 Host、
   Provider 和 test-only instrumentation；不得把 keystore/alias/password 写入 receipt。
-- [ ] Provider 正式启用 minify/resource shrink 并通过 release build；artifact 预检绑定
-  Host/Provider 版本、证书指纹、长度和 SHA-256。
+- [ ] 将已启用且由独立 source/build gate admitted 的 minified/shrunk Provider release
+  交给受控 signed-build producer；artifact 预检绑定 Host/Provider 版本、证书指纹、长度和 SHA-256。
+- [ ] 受控 Host/Provider signed-build producer 生成不可由任意 JSON 字段提升的 receipt，
+  将 exact commit、clean source、构建调用和最终 signed APK SHA-256 绑定；此前 artifact
+  build identity 和 cryptographic source attestation 保持 false。
 - [ ] 生成可发布 APK receipt；静态 16 KiB ELF 证据仍不得替代对应 page-size 设备加载。
 
 ### R6-C：索引、升级与回滚（待执行）

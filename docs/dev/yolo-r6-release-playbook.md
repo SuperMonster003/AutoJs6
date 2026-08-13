@@ -21,11 +21,14 @@ TEST-SIGNED APK 或单台设备结果写成完整生产发布结论。
 
 1. `tools/yolo/verify-yolo-r6-publishable.ps1 -SourceOnly` 只产生
    `SOURCE_STATIC_PASS / PRODUCTION_NOT_RUN`。它不检查 APK。
-2. 同一脚本的 artifact 参数集必须显式接收 Host APK、Provider APK、发布负责人冻结的
-   `ExpectedProviderVersionCode` 和确认的 `OfficialProductionSignerSha256`。它校验
-   non-debuggable、相同且匹配的 signer、APK
-   SHA-256、Provider arm64-only、Host/Provider model-free、NCNN provenance/NOTICE 和
-   静态 ELF 包装；结果仍是 `PRODUCTION_NOT_RUN`，因为设备、索引与发布尚未发生。
+2. 同一脚本的 artifact 参数集必须显式接收 Host APK、Provider APK、两仓 full commit、
+   Provider source-build receipt、发布负责人冻结的 `ExpectedProviderVersionCode` 和确认的
+   `OfficialProductionSignerSha256`。它要求两仓 clean，并校验 non-debuggable、相同且匹配的
+   signer、APK SHA-256、Provider arm64-only/严格 release-entry allowlist、NCNN
+   provenance/NOTICE 和静态 ELF 包装。Host 只声明已知 YOLO/NCNN payload absent，不能由
+   denylist 推导通用 model-free。unsigned source receipt 或可编辑 JSON 不能证明最终 signed
+   APK 的 build identity，所以当前结果固定为
+   `PARTIAL_NO_CONTROLLED_SIGNED_BUILD_RECEIPT / PRODUCTION_NOT_RUN`。
 3. `tools/yolo/verify-yolo-r6-recovery.ps1` 每次只绑定一个显式 serial，执行真实 Provider
    冷/热推理、`PROVIDER_KILL_EXPLICIT_REOPEN`，并确认死亡后的旧 session fail-closed、
    没有自动重试。arm64 物理设备与 API 36 arm64 emulator 分别保存 receipt，不互相替代。
