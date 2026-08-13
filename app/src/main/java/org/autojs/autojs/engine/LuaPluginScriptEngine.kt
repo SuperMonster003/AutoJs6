@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.util.Log
+import org.autojs.autojs.core.plugin.lua.LuaRuntimeHostCapabilities
 import org.autojs.autojs.core.plugin.lua.LuaRuntimePluginHostFactory
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -92,11 +93,20 @@ class LuaPluginScriptEngine internal constructor(
                 }
                 try {
                     throwIfStopped()
+                    val modules = LuaModuleSnapshot.create(scriptSource)
+                    if (
+                        modules.moduleCount != 0 &&
+                        LuaRuntimeHostCapabilities.MODULE_SNAPSHOT !in connection.grantedCapabilities
+                    ) {
+                        throw LuaRuntimeExecutionException(
+                            "The selected Lua provider does not support controlled module snapshots",
+                        )
+                    }
                     val request = executionRequest(snapshot, connection, arguments)
                     val observer = LuaEngineExecutionObserver(request, connection.runtimeInfo, outputSink)
                     var session: LuaEngineRemoteSession? = null
                     try {
-                        val createdSession = connection.createExecution(request, snapshot, observer)
+                        val createdSession = connection.createExecution(request, snapshot, modules, observer)
                         session = createdSession
                         synchronized(lifecycleLock) {
                             check(currentSession.compareAndSet(null, createdSession)) {

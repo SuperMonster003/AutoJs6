@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import org.autojs.autojs.core.plugin.lua.LuaRuntimeHostCapabilities
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.script.LuaFileSource
 import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.plugin.lua.runtime.api.LuaCancellationReason
 import org.autojs.plugin.lua.runtime.api.LuaExecutionCancellation
@@ -30,6 +31,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 import java.io.Reader
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -76,6 +78,43 @@ class LuaPluginScriptEngineTest {
         assertEquals(LuaValue.Int64Value(7L), engine.execute(source()))
 
         assertEquals(emptyList<String>(), backend.lastRequest?.requiredCapabilities)
+        engine.destroy()
+    }
+
+    @Test
+    fun providerWithoutModuleCapabilityRejectsAnExplicitModuleDirectoryBeforeDispatch() {
+        val project = temporaryFolder.newFolder("legacy-provider-project")
+        val entry = project.resolve("main.lua").apply { writeText("return require('helper')") }
+        project.resolve("main.modules").apply { mkdir() }.resolve("helper.lua").writeText("return 1")
+        val backend = FakeBackend(Mode.COMPLETE, EMPTY_CAPABILITY_INFO)
+        val engine = LuaPluginScriptEngine(temporaryFolder.root, backend)
+
+        engine.init()
+        val failure = assertThrows(LuaRuntimeExecutionException::class.java) {
+            engine.execute(LuaFileSource(entry))
+        }
+
+        assertTrue(failure.message.orEmpty().contains("does not support controlled module snapshots"))
+        assertEquals(0, backend.createCount)
+        engine.destroy()
+    }
+
+    @Test
+    fun grantedModuleCapabilityFreezesModulesBeforeCreatingTheRemoteSession() {
+        val project = temporaryFolder.newFolder("lua-project")
+        val entry = File(project, "main.lua").apply { writeText("return require('helper')") }
+        val helper = File(project, "main.modules/helper.lua").apply {
+            parentFile.mkdirs()
+            writeText("return 'before'")
+        }
+        val backend = FakeBackend(Mode.COMPLETE)
+        val engine = LuaPluginScriptEngine(temporaryFolder.root, backend)
+
+        engine.init()
+        engine.execute(LuaFileSource(entry))
+        helper.writeText("return 'after'")
+
+        assertEquals("return 'before'", backend.lastModules?.sourceFor("helper")?.toString(Charsets.UTF_8))
         engine.destroy()
     }
 
@@ -452,6 +491,7 @@ class LuaPluginScriptEngineTest {
         var createCount = 0
         var connectionCloseCount = 0
         var lastRequest: LuaExecutionRequest? = null
+        var lastModules: LuaModuleSnapshot? = null
         var lastSession: FakeSession? = null
 
         override fun prepare(): LuaEnginePreparedRuntime {
@@ -484,10 +524,12 @@ class LuaPluginScriptEngineTest {
                 override fun createExecution(
                     request: LuaExecutionRequest,
                     source: LuaSourceSnapshot,
+                    modules: LuaModuleSnapshot,
                     observer: LuaEngineExecutionObserver,
                 ): LuaEngineRemoteSession {
                     createCount++
                     lastRequest = request
+                    lastModules = modules
                     assertEquals(source.lengthBytes, request.sourceLengthBytes)
                     if (mode == Mode.BLOCK_CREATE) {
                         createEntered.countDown()

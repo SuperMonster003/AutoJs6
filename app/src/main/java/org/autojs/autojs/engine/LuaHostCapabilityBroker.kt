@@ -41,6 +41,7 @@ internal sealed interface LuaHostDispatchOutcome {
 internal class LuaHostCapabilityDispatcher(
     private val executionId: LuaRequestId,
     grantedCapabilities: Collection<String>,
+    private val moduleSnapshot: LuaModuleSnapshot = LuaModuleSnapshot.EMPTY,
     private val deviceInfoSource: LuaDeviceInfoSource = AndroidLuaDeviceInfoSource,
 ) {
     private val grantedCapabilities = grantedCapabilities.toSet()
@@ -65,22 +66,16 @@ internal class LuaHostCapabilityDispatcher(
         }
 
         policy.open(request, descriptorCount)
-        if (request.arguments != EMPTY_ARGUMENTS) {
-            return failOpened(request, LuaHostErrorCode.INVALID_REQUEST, "Host capability expects no arguments")
-        }
-
         return try {
-            val value = when (request.capability) {
-                LuaRuntimeHostCapabilities.DEVICE_INFO -> deviceInfoSource.snapshot()
+            when (request.capability) {
+                LuaRuntimeHostCapabilities.DEVICE_INFO -> dispatchDeviceInfo(request)
+                LuaRuntimeHostCapabilities.MODULE_SNAPSHOT -> dispatchModuleSnapshot(request)
                 else -> return failOpened(
                     request,
                     LuaHostErrorCode.CAPABILITY_UNAVAILABLE,
                     "Host capability is unavailable",
                 )
             }
-            val result = LuaHostCallResult(request.executionId, request.callId, value)
-            policy.complete(result)
-            LuaHostDispatchOutcome.Completed(result)
         } catch (error: Throwable) {
             failOpened(request, LuaHostErrorCode.INTERNAL, "Host capability failed")
         }
@@ -105,6 +100,51 @@ internal class LuaHostCapabilityDispatcher(
         admittedCallIds += callId
     }
 
+    private fun dispatchDeviceInfo(request: LuaHostCallRequest): LuaHostDispatchOutcome {
+        if (request.arguments != EMPTY_ARGUMENTS) {
+            return failOpened(request, LuaHostErrorCode.INVALID_REQUEST, "Device info expects no arguments")
+        }
+        return complete(request, deviceInfoSource.snapshot())
+    }
+
+    private fun dispatchModuleSnapshot(request: LuaHostCallRequest): LuaHostDispatchOutcome {
+        val arguments = request.arguments as? LuaValue.MapValue
+            ?: return failOpened(
+                request,
+                LuaHostErrorCode.INVALID_REQUEST,
+                "Module snapshot expects a name map",
+            )
+        val name = (arguments.values.takeIf { it.size == 1 }?.get(MODULE_NAME_KEY)
+            as? LuaValue.StringValue)?.value
+            ?: return failOpened(
+                request,
+                LuaHostErrorCode.INVALID_REQUEST,
+                "Module snapshot expects exactly one string name",
+            )
+        if (!LuaModuleSnapshot.isValidModuleName(name)) {
+            return failOpened(request, LuaHostErrorCode.INVALID_REQUEST, "Lua module name is invalid")
+        }
+        val module = moduleSnapshot.moduleFor(name)
+        val value = if (module == null) {
+            LuaValue.MapValue(mapOf(MODULE_FOUND_KEY to LuaValue.BooleanValue(false)))
+        } else {
+            LuaValue.MapValue(
+                linkedMapOf(
+                    MODULE_FOUND_KEY to LuaValue.BooleanValue(true),
+                    MODULE_SOURCE_KEY to LuaValue.BytesValue(module.sourceBytes()),
+                    MODULE_SHA256_KEY to LuaValue.BytesValue(module.sha256.toByteArray()),
+                ),
+            )
+        }
+        return complete(request, value)
+    }
+
+    private fun complete(request: LuaHostCallRequest, value: LuaValue): LuaHostDispatchOutcome.Completed {
+        val result = LuaHostCallResult(request.executionId, request.callId, value)
+        policy.complete(result)
+        return LuaHostDispatchOutcome.Completed(result)
+    }
+
     private fun failOpened(
         request: LuaHostCallRequest,
         code: LuaHostErrorCode,
@@ -125,5 +165,9 @@ internal class LuaHostCapabilityDispatcher(
 
     private companion object {
         val EMPTY_ARGUMENTS = LuaValue.MapValue(emptyMap())
+        const val MODULE_NAME_KEY = "name"
+        const val MODULE_FOUND_KEY = "found"
+        const val MODULE_SOURCE_KEY = "source"
+        const val MODULE_SHA256_KEY = "sha256"
     }
 }

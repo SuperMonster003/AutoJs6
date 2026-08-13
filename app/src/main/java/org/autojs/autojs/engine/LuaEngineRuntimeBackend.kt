@@ -40,6 +40,7 @@ internal interface LuaEngineRuntimeConnection : Closeable {
     fun createExecution(
         request: LuaExecutionRequest,
         source: LuaSourceSnapshot,
+        modules: LuaModuleSnapshot,
         observer: LuaEngineExecutionObserver,
     ): LuaEngineRemoteSession
 }
@@ -98,6 +99,7 @@ internal class BinderLuaEngineRuntimeBackend(
         override fun createExecution(
             request: LuaExecutionRequest,
             source: LuaSourceSnapshot,
+            modules: LuaModuleSnapshot,
             observer: LuaEngineExecutionObserver,
         ): LuaEngineRemoteSession {
             require(acquired.pinnedIdentity.grantedCapabilities.containsAll(request.requiredCapabilities)) {
@@ -105,7 +107,7 @@ internal class BinderLuaEngineRuntimeBackend(
             }
             val sessionRef = AtomicReference<ILuaExecutionSession?>()
             val revoked = AtomicBoolean(false)
-            val broker = hostBroker(request, observer, revoked)
+            val broker = hostBroker(request, modules, observer, revoked)
             val revokeBroker: () -> Unit = {
                 revoked.set(true)
                 broker.close()
@@ -252,18 +254,21 @@ internal class BinderLuaEngineRuntimeBackend(
 
         private fun hostBroker(
             request: LuaExecutionRequest,
+            modules: LuaModuleSnapshot,
             observer: LuaEngineExecutionObserver,
             revoked: AtomicBoolean,
-        ) = SessionHostBroker(request, observer, revoked)
+        ) = SessionHostBroker(request, modules, observer, revoked)
 
         private inner class SessionHostBroker(
             private val request: LuaExecutionRequest,
+            modules: LuaModuleSnapshot,
             private val observer: LuaEngineExecutionObserver,
             private val revoked: AtomicBoolean,
         ) : ILuaHostCapabilityBroker.Stub() {
             private val dispatcher = LuaHostCapabilityDispatcher(
                 executionId = request.requestId,
                 grantedCapabilities = request.requiredCapabilities,
+                moduleSnapshot = modules,
             )
 
             override fun invoke(

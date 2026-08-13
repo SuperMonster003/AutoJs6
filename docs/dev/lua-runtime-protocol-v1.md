@@ -16,7 +16,7 @@ stdout/stderr, errors, cancellation, deadlines, and request-bound host
 capability calls. Source content is transported through a read-only
 `ParcelFileDescriptor`.
 
-V1.0 does not provide projects, arbitrary module graphs, UI, accessibility,
+V1.0 does not provide projects, arbitrary or recursive module graphs, UI, accessibility,
 network, shell, APK packaging, debugger, Java reflection, Java objects, a
 general Parcelable/Serializable channel, or Rhino `ScriptRuntime` access.
 There is no compatibility promise for precompiled Lua chunks across runtime
@@ -228,6 +228,30 @@ execution features; JSON can remain provider-local. The first broker calls are
 timer, read-only device information, controlled module loading, and restricted
 file access. File write, network, shell, UI, and accessibility are separate,
 default-denied capability families.
+
+### Controlled module snapshot capability
+
+`module.snapshot.v1` is an optional, session-bound host capability. It is not a
+filesystem API and never carries a path or URI. Before dispatch, the host may
+freeze direct `.lua` children of the explicit sibling directory
+`<entry-basename>.modules/`. A missing directory produces an empty snapshot;
+the host never scans the entry's ordinary parent directory.
+
+The preview contract admits at most 64 directory entries, 16 modules, 64 KiB
+per module, and 256 KiB across all module sources. Names are case-sensitive
+ASCII identifiers matching `[A-Za-z_][A-Za-z0-9_]{0,63}`. `autojs` is reserved,
+subdirectories are not admitted, symbolic-link/path escapes are rejected, and
+every source must be strict UTF-8 text. The host freezes bytes and SHA-256
+before session creation; later filesystem changes cannot alter that execution.
+
+The Provider invokes the capability with exactly `{name: string}`. A miss
+returns exactly `{found: false}`. A hit returns exactly
+`{found: true, source: bytes, sha256: bytes32}`; the Provider recomputes the
+digest before text-only loading. `require` caches the first result for the
+execution (`nil` becomes `true`, while `false` remains cached), rejects cycles,
+and never falls back to `package`, `loadfile`, disk search, binary chunks, or a
+dynamic C module. Unknown, ungranted, replayed, malformed, late, or post-close
+calls fail closed under the existing host-call policy.
 
 ## Limits And Error Semantics
 

@@ -10,6 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.engine.LuaPluginScriptEngine
 import org.autojs.autojs.engine.ScriptEngineService
+import org.autojs.autojs.script.LuaFileSource
 import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.lua.runtime.api.LuaPluginActions
@@ -82,6 +83,35 @@ class LuaOfficialRuntimeSmokeTest {
                 listOf(Log.INFO to stdout),
                 consoleEntries(stdout),
             )
+
+            val moduleRoot = context.cacheDir.resolve("lua-module-smoke-${UUID.randomUUID()}")
+            check(moduleRoot.mkdir()) { "Cannot create the Lua module smoke directory" }
+            try {
+                val entry = moduleRoot.resolve("main.lua").apply {
+                    writeText(
+                        """
+                        local first = require("helper")
+                        local second = require("helper")
+                        if first ~= true or second ~= true or _G.__module_hits ~= 1 then
+                            error("controlled module snapshot cache mismatch")
+                        end
+                        return _G.__module_hits
+                        """.trimIndent(),
+                    )
+                }
+                moduleRoot.resolve("main.modules").apply {
+                    check(mkdir()) { "Cannot create the Lua module snapshot root" }
+                    resolve("helper.lua").writeText(
+                        "_G.__module_hits = (_G.__module_hits or 0) + 1",
+                    )
+                }
+                assertEquals(
+                    LuaValue.Int64Value(1L),
+                    engine.execute(LuaFileSource(entry)),
+                )
+            } finally {
+                moduleRoot.deleteRecursively()
+            }
         } finally {
             engine.destroy()
         }

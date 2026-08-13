@@ -1,16 +1,20 @@
 package org.autojs.autojs.engine
 
 import org.autojs.autojs.core.plugin.lua.LuaRuntimeHostCapabilities
+import org.autojs.autojs.script.LuaFileSource
 import org.autojs.plugin.lua.runtime.api.LuaHostCallRequest
 import org.autojs.plugin.lua.runtime.api.LuaHostErrorCode
 import org.autojs.plugin.lua.runtime.api.LuaRequestId
 import org.autojs.plugin.lua.runtime.api.LuaRuntimeContract
+import org.autojs.plugin.lua.runtime.api.LuaSha256
 import org.autojs.plugin.lua.runtime.api.LuaValue
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.nio.file.Files
 
 class LuaHostCapabilityDispatcherTest {
 
@@ -104,6 +108,85 @@ class LuaHostCapabilityDispatcherTest {
         }
     }
 
+    @Test
+    fun grantedModuleSnapshotReturnsFrozenBytesAndExplicitMissingResult() {
+        val directory = Files.createTempDirectory("lua-host-module").toFile()
+        try {
+            val entry = directory.resolve("main.lua").apply { writeText("return require('helper')") }
+            val expected = "return 'frozen'".toByteArray()
+            directory.resolve("main.modules").apply { mkdir() }.resolve("helper.lua").writeBytes(expected)
+            val snapshot = LuaModuleSnapshot.create(LuaFileSource(entry))
+            val dispatcher = LuaHostCapabilityDispatcher(
+                executionId = EXECUTION_ID,
+                grantedCapabilities = listOf(LuaRuntimeHostCapabilities.MODULE_SNAPSHOT),
+                moduleSnapshot = snapshot,
+            )
+
+            val found = dispatcher.dispatch(moduleRequest("module-found", "helper"), descriptorCount = 0)
+            val foundValue = (found as LuaHostDispatchOutcome.Completed).result.value as LuaValue.MapValue
+            assertEquals(LuaValue.BooleanValue(true), foundValue.values["found"])
+            assertArrayEquals(
+                expected,
+                (foundValue.values["source"] as LuaValue.BytesValue).toByteArray(),
+            )
+            assertArrayEquals(
+                LuaSha256.digest(expected).toByteArray(),
+                (foundValue.values["sha256"] as LuaValue.BytesValue).toByteArray(),
+            )
+
+            val missing = dispatcher.dispatch(moduleRequest("module-missing", "absent"), descriptorCount = 0)
+            assertEquals(
+                LuaValue.MapValue(mapOf("found" to LuaValue.BooleanValue(false))),
+                (missing as LuaHostDispatchOutcome.Completed).result.value,
+            )
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun moduleSnapshotRequiresGrantAndExactNameShape() {
+        val denied = LuaHostCapabilityDispatcher(
+            executionId = EXECUTION_ID,
+            grantedCapabilities = listOf(LuaRuntimeHostCapabilities.DEVICE_INFO),
+        ).dispatch(moduleRequest("module-denied", "helper"), descriptorCount = 0)
+        assertEquals(
+            LuaHostErrorCode.CAPABILITY_DENIED,
+            (denied as LuaHostDispatchOutcome.Failed).error.code,
+        )
+
+        listOf(
+            EMPTY_ARGUMENTS,
+            LuaValue.MapValue(mapOf("name" to LuaValue.BooleanValue(true))),
+            LuaValue.MapValue(
+                mapOf(
+                    "name" to LuaValue.StringValue("helper"),
+                    "extra" to LuaValue.BooleanValue(true),
+                ),
+            ),
+            LuaValue.MapValue(mapOf("name" to LuaValue.StringValue("nested.helper"))),
+            LuaValue.MapValue(mapOf("name" to LuaValue.StringValue("autojs"))),
+        ).forEachIndexed { index, arguments ->
+            val dispatcher = LuaHostCapabilityDispatcher(
+                executionId = EXECUTION_ID,
+                grantedCapabilities = listOf(LuaRuntimeHostCapabilities.MODULE_SNAPSHOT),
+            )
+            val outcome = dispatcher.dispatch(
+                request = LuaHostCallRequest(
+                    executionId = EXECUTION_ID,
+                    callId = "invalid-module-$index",
+                    capability = LuaRuntimeHostCapabilities.MODULE_SNAPSHOT,
+                    arguments = arguments,
+                ),
+                descriptorCount = 0,
+            )
+            assertEquals(
+                LuaHostErrorCode.INVALID_REQUEST,
+                (outcome as LuaHostDispatchOutcome.Failed).error.code,
+            )
+        }
+    }
+
     private fun dispatcher(
         source: LuaDeviceInfoSource = LuaDeviceInfoSource { basicInfo() },
     ) = LuaHostCapabilityDispatcher(
@@ -120,6 +203,13 @@ class LuaHostCapabilityDispatcherTest {
         callId = callId,
         capability = LuaRuntimeHostCapabilities.DEVICE_INFO,
         arguments = arguments,
+    )
+
+    private fun moduleRequest(callId: String, name: String) = LuaHostCallRequest(
+        executionId = EXECUTION_ID,
+        callId = callId,
+        capability = LuaRuntimeHostCapabilities.MODULE_SNAPSHOT,
+        arguments = LuaValue.MapValue(mapOf("name" to LuaValue.StringValue(name))),
     )
 
     private fun basicInfo() = LuaValue.MapValue(

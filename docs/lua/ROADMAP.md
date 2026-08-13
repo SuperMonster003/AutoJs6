@@ -83,7 +83,7 @@ timer、更多只读设备信息和受限模块加载在产品预览或后续版
 
 - [x] 保存及未保存的编辑器 Lua 脚本都可运行，并给出可理解的安装、授权和错误提示。
 - [x] Lua 快捷方式持久保存并校验 V1 engine 描述符；旧 path-only 快捷方式保持兼容。
-- [ ] 增加受控模块快照；语法高亮可以独立交付，不阻塞执行链。
+- [ ] 增加显式、扁平、会话级的受控模块快照；语法高亮可以独立交付，不阻塞执行链。
 
 本阶段不做：完整项目系统、APK 打包、调试器、UI DSL 或 Rhino API 全兼容。
 
@@ -98,7 +98,7 @@ timer、更多只读设备信息和受限模块加载在产品预览或后续版
 
 - blocking/oversized PFD、OS 级 FD 泄漏、callback peer death、会话中 update/uninstall。
 - Android process OOM、极端并发、完整 API 24～36 逐版本矩阵。
-- 文件/网络/shell/UI/无障碍能力、项目/模块快照和更多句柄类型。
+- 文件/网络/shell/UI/无障碍能力、完整项目系统、递归模块图和更多句柄类型。
 - Lua 5.5、LuaJIT、调试器、打包、Java interop 和 richer UI。
 
 只有风险直接影响当前里程碑的 happy path、安全边界或资源上限时，才提升为阶段阻断项。
