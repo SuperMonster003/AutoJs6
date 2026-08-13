@@ -660,7 +660,7 @@ $providerRevision = Get-YoloR5GitText -Repository $siblingRoot -Arguments @("rev
 
 $ncnnLockPath = Get-YoloR5RequiredFile -Path (Join-Path $siblingRoot "third_party\ncnn\provenance.lock.json") -Label "NCNN provenance lock"
 $ncnnLockForTools = Get-Content -Raw -LiteralPath $ncnnLockPath | ConvertFrom-Json
-$sdkRoots = Get-YoloR5SdkRoots -RepositoryRoots @($repositoryRoot, $siblingRoot)
+$sdkRoots = @(Get-YoloR5SdkRoots -RepositoryRoots @($repositoryRoot, $siblingRoot))
 Assert-YoloR5PackagingCondition ($sdkRoots.Count -gt 0) "No Android SDK root is available"
 $buildTools = Resolve-YoloR5BuildTools -SdkRoots $sdkRoots
 $readElf = Resolve-YoloR5ReadElf -SdkRoots $sdkRoots -NdkVersion ([string]$ncnnLockForTools.ndkVersion)
