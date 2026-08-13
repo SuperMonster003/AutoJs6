@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/12
+###### 2026/08/13
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -19,6 +19,7 @@
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
 * `Feature` Independent Python Runtime plugin backend for running local .py files and script projects declared with `type: python` in a separate CPython plugin process, with fixed-component/signer/protocol/ABI validation, hot plugging, and no fallback to JavaScript
 * `Feature` Python launch integration covers the file manager/editor/local Run Intent/single-file Import Intent/new shortcuts/timed tasks/broadcast tasks and preserves strict single-file or project context; projects support internal imports, relative file access, and read-only `autojs6.app/device/execution/project` APIs
+* `Feature` Python Runtime execution supports optional bounded pre-supplied stdin snapshots via the ExecutionConfig key `autojs6.python.stdinSnapshot`, with strict ByteArray/UTF-8 text admission, provider capability/size negotiation, private read-only PFD transport, and cleanup
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/text conversion/media information and more
 * `Feature` Plugin system provides versioned TaggedWire transport and v1 developer protocol packs for DEX compilation and provider-neutral AI text generation, with dedicated conformance test apps and hostile fixtures
 * `Feature` Plugin system supports an extension interface for offline project documentation

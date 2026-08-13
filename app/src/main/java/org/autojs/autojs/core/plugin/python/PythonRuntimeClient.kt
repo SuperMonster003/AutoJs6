@@ -47,10 +47,12 @@ internal class PythonRuntimeClient(
     private val applicationContext = context.applicationContext
     private val transport = PythonRuntimeOfficialTransport(applicationContext)
 
-    fun createExecution(source: PythonFileSource): Execution = Execution(source)
+    fun createExecution(source: PythonFileSource, stdinSnapshot: ByteArray? = null): Execution =
+        Execution(source, stdinSnapshot?.copyOf())
 
     inner class Execution internal constructor(
         private val source: PythonFileSource,
+        stdinSnapshot: ByteArray?,
     ) {
 
         private val cancelled = AtomicBoolean(false)
@@ -61,6 +63,7 @@ internal class PythonRuntimeClient(
         private val pluginStateFailure = AtomicReference<PythonRuntimeHostException?>()
         private val binding = AtomicReference<PythonRuntimeOfficialTransport.Binding?>()
         private val executionSnapshot = AtomicReference<PythonPrivateExecutionSnapshot?>()
+        private val pendingStdinSnapshot = AtomicReference(stdinSnapshot)
         private val reservation = AtomicReference<PythonRuntimeDispatchRegistry.Reservation?>()
         private val registry = PythonRuntimeDispatchRegistry<IPythonExecutionSession>()
         private val stdout = ByteArrayOutputStream()
@@ -89,6 +92,7 @@ internal class PythonRuntimeClient(
                 pluginStateFailure.get()?.let { throw it }
                 throw error
             } finally {
+                pendingStdinSnapshot.getAndSet(null)?.fill(0)
                 PluginStateChangeRegistry.removeListener(pluginStateChangedListener)
             }
         }
@@ -100,12 +104,18 @@ internal class PythonRuntimeClient(
             checkProviderPreconditions(installed)
             checkExecutionActive()
             val requestId = PythonRequestId.fromUuid(UUID.randomUUID())
-            val snapshot = PythonPrivateExecutionSnapshot.create(
-                applicationContext,
-                source,
-                requestId,
-                { cancelled.get() || pluginStateFailure.get() != null },
-            ).also(executionSnapshot::set)
+            val stdinSnapshot = pendingStdinSnapshot.getAndSet(null)
+            val snapshot = try {
+                PythonPrivateExecutionSnapshot.create(
+                    applicationContext,
+                    source,
+                    requestId,
+                    stdinSnapshot,
+                    { cancelled.get() || pluginStateFailure.get() != null },
+                ).also(executionSnapshot::set)
+            } finally {
+                stdinSnapshot?.fill(0)
+            }
             try {
                 checkExecutionActive()
                 val connection = transport.bind(
@@ -145,8 +155,10 @@ internal class PythonRuntimeClient(
                 val timeoutMillis = minOf(DEFAULT_TIMEOUT_MILLIS, capabilities.limits.maxTimeoutMillis)
                 val requirement = PythonRuntimeCapabilityRequirement(
                     workspaceArchive = snapshot.hasWorkspace,
+                    stdinSnapshot = snapshot.hasStdin,
                     hostCapabilitySnapshot = true,
                     minimumSourceBytes = maxOf(1L, snapshot.sourceLengthBytes),
+                    minimumStdinBytes = snapshot.stdinLengthBytes ?: 0L,
                     minimumHostCapabilitySnapshotBytes = requireNotNull(snapshot.hostCapabilityLengthBytes),
                     minimumOutputBytes = outputBytes,
                     minimumOutputChunkBytes = outputChunkBytes,
@@ -159,27 +171,36 @@ internal class PythonRuntimeClient(
                     environment,
                     requirement,
                 )
+                val descriptorLayout = snapshot.descriptorLayout
                 val request = PythonExecutionRequest(
                     requestId = requestId,
                     protocolVersion = pinned.negotiatedProtocolVersion,
                     entryPoint = snapshot.entryPoint,
                     source = PythonPayloadReference(
                         kind = PythonPayloadKind.SOURCE,
-                        descriptorIndex = 0,
+                        descriptorIndex = descriptorLayout.sourceIndex,
                         declaredLengthBytes = snapshot.sourceLengthBytes,
                         sha256 = snapshot.sourceSha256,
                     ),
                     workspaceArchive = snapshot.workspaceLengthBytes?.let { length ->
                         PythonPayloadReference(
                             kind = PythonPayloadKind.WORKSPACE_ARCHIVE,
-                            descriptorIndex = 1,
+                            descriptorIndex = requireNotNull(descriptorLayout.workspaceIndex),
                             declaredLengthBytes = length,
                             sha256 = requireNotNull(snapshot.workspaceSha256),
                         )
                     },
+                    stdin = snapshot.stdinLengthBytes?.let { length ->
+                        PythonPayloadReference(
+                            kind = PythonPayloadKind.STDIN,
+                            descriptorIndex = requireNotNull(descriptorLayout.stdinIndex),
+                            declaredLengthBytes = length,
+                            sha256 = requireNotNull(snapshot.stdinSha256),
+                        )
+                    },
                     hostCapabilitySnapshot = PythonPayloadReference(
                         kind = PythonPayloadKind.HOST_CAPABILITY_SNAPSHOT,
-                        descriptorIndex = if (snapshot.hasWorkspace) 2 else 1,
+                        descriptorIndex = requireNotNull(descriptorLayout.hostCapabilityIndex),
                         declaredLengthBytes = requireNotNull(snapshot.hostCapabilityLengthBytes),
                         sha256 = requireNotNull(snapshot.hostCapabilitySha256),
                     ),
@@ -264,6 +285,7 @@ internal class PythonRuntimeClient(
 
         fun cancel() {
             cancelled.set(true)
+            pendingStdinSnapshot.getAndSet(null)?.fill(0)
             cancelRemoteSession()
             binding.getAndSet(null)?.close()
             executionSnapshot.getAndSet(null)?.close()
@@ -895,6 +917,7 @@ private fun PythonExecutionError.toHostException(): PythonRuntimeHostException {
         PythonErrorCode.BUSY -> PythonRuntimeHostError.BUSY
         PythonErrorCode.SOURCE_REJECTED -> PythonRuntimeHostError.SOURCE_INVALID
         PythonErrorCode.WORKSPACE_REJECTED -> PythonRuntimeHostError.WORKSPACE_INVALID
+        PythonErrorCode.STDIN_REJECTED -> PythonRuntimeHostError.STDIN_INVALID
         PythonErrorCode.HOST_CAPABILITY_SNAPSHOT_REJECTED ->
             PythonRuntimeHostError.HOST_CAPABILITY_SNAPSHOT_INVALID
         PythonErrorCode.SESSION_OPEN_FAILED,

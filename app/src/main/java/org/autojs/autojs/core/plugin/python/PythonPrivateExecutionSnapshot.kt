@@ -24,10 +24,11 @@ import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-/** Immutable host-private payloads which stay alive until Binder admission has copied both PFDs. */
+/** Immutable host-private payloads which stay alive until Binder admission has copied every PFD. */
 internal class PythonPrivateExecutionSnapshot private constructor(
     private val source: PrivatePayload,
     private val workspace: PrivatePayload?,
+    private val stdin: PrivatePayload?,
     private val hostCapabilities: PrivatePayload?,
     val entryPoint: String,
 ) : Closeable {
@@ -44,23 +45,39 @@ internal class PythonPrivateExecutionSnapshot private constructor(
     val workspaceSha256: PythonSha256?
         get() = workspace?.sha256
 
+    val stdinLengthBytes: Long?
+        get() = stdin?.lengthBytes
+
+    val stdinSha256: PythonSha256?
+        get() = stdin?.sha256
+
     val hostCapabilityLengthBytes: Long?
         get() = hostCapabilities?.lengthBytes
 
     val hostCapabilitySha256: PythonSha256?
         get() = hostCapabilities?.sha256
 
+    val descriptorLayout = PythonRuntimeDescriptorLayout.create(
+        hasWorkspace = workspace != null,
+        hasStdin = stdin != null,
+        hasHostCapabilities = hostCapabilities != null,
+    )
+
     val descriptorCount: Int
-        get() = 1 + listOfNotNull(workspace, hostCapabilities).size
+        get() = descriptorLayout.descriptorCount
 
     val hasWorkspace: Boolean
         get() = workspace != null
+
+    val hasStdin: Boolean
+        get() = stdin != null
 
     fun openReadOnlyDescriptors(): Array<ParcelFileDescriptor> {
         val opened = ArrayList<ParcelFileDescriptor>(descriptorCount)
         return try {
             opened += source.openReadOnly()
             workspace?.let { opened += it.openReadOnly() }
+            stdin?.let { opened += it.openReadOnly() }
             hostCapabilities?.let { opened += it.openReadOnly() }
             opened.toTypedArray()
         } catch (error: Throwable) {
@@ -71,6 +88,7 @@ internal class PythonPrivateExecutionSnapshot private constructor(
 
     override fun close() {
         hostCapabilities?.close()
+        stdin?.close()
         workspace?.close()
         source.close()
     }
@@ -80,28 +98,60 @@ internal class PythonPrivateExecutionSnapshot private constructor(
             context: Context,
             source: PythonFileSource,
             requestId: org.autojs.plugin.python.runtime.api.PythonRequestId,
+            stdinSnapshot: ByteArray?,
             cancelled: () -> Boolean,
         ): PythonPrivateExecutionSnapshot {
             val base = when (source) {
                 is PythonProjectSource -> createProject(context, source, cancelled)
                 else -> createSingleFile(context, source, cancelled)
             }
-            val capabilityFile = privateTempFile(
-                privateSnapshotDirectory(context),
-                "host-capabilities-",
-                ".json",
-            )
+            val stdinPayload = try {
+                stdinSnapshot?.let { bytes ->
+                    val stdinFile = privateTempFile(
+                        privateSnapshotDirectory(context),
+                        "stdin-",
+                        ".bin",
+                    )
+                    try {
+                        snapshotStdinBytes(bytes, stdinFile, cancelled)
+                    } catch (error: Throwable) {
+                        stdinFile.delete()
+                        throw error
+                    }
+                }
+            } catch (error: Throwable) {
+                base.close()
+                throw mapStdinSnapshotFailure(error)
+            }
+            val capabilityFile = try {
+                privateTempFile(
+                    privateSnapshotDirectory(context),
+                    "host-capabilities-",
+                    ".json",
+                )
+            } catch (error: Throwable) {
+                stdinPayload?.close()
+                base.close()
+                if (error is InterruptedException || error is PythonRuntimeHostException) throw error
+                throw PythonRuntimeHostException(
+                    PythonRuntimeHostError.HOST_CAPABILITY_SNAPSHOT_INVALID,
+                    "Python host capability snapshot could not be created",
+                    error,
+                )
+            }
             return try {
                 val capabilityBytes = PythonHostCapabilitySnapshot.create(context, requestId, source)
                 val capability = snapshotBytes(capabilityBytes, capabilityFile)
                 PythonPrivateExecutionSnapshot(
                     source = base.source,
                     workspace = base.workspace,
+                    stdin = stdinPayload,
                     hostCapabilities = capability,
                     entryPoint = base.entryPoint,
                 )
             } catch (error: Throwable) {
                 capabilityFile.delete()
+                stdinPayload?.close()
                 base.close()
                 if (error is InterruptedException || error is PythonRuntimeHostException) throw error
                 throw PythonRuntimeHostException(
@@ -128,7 +178,13 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                     maximumBytes = PythonRuntimeContract.MAX_SOURCE_BYTES,
                     cancelled = cancelled,
                 )
-                PythonPrivateExecutionSnapshot(payload, null, null, semanticSource.name)
+                PythonPrivateExecutionSnapshot(
+                    source = payload,
+                    workspace = null,
+                    stdin = null,
+                    hostCapabilities = null,
+                    entryPoint = semanticSource.name,
+                )
             } catch (error: Throwable) {
                 snapshot.delete()
                 throw mapSnapshotFailure(error, workspace = false)
@@ -218,6 +274,7 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                         workspaceFile.length(),
                         PythonSha256.fromBytes(workspaceDigest.digest()),
                     ),
+                    stdin = null,
                     hostCapabilities = null,
                     entryPoint = source.entryPoint,
                 )
@@ -274,6 +331,33 @@ internal class PythonPrivateExecutionSnapshot private constructor(
             FileOutputStream(destination, false).use { output ->
                 output.write(value)
                 digest.update(value)
+                output.flush()
+                output.fd.sync()
+            }
+            destination.setWritable(false, false)
+            destination.setReadable(true, true)
+            return PrivatePayload(destination, value.size.toLong(), PythonSha256.fromBytes(digest.digest()))
+        }
+
+        private fun snapshotStdinBytes(
+            value: ByteArray,
+            destination: File,
+            cancelled: () -> Boolean,
+        ): PrivatePayload {
+            require(value.size.toLong() <= PythonRuntimeContract.MAX_STDIN_BYTES) {
+                "Python stdin snapshot exceeds the protocol limit"
+            }
+            val digest = MessageDigest.getInstance("SHA-256")
+            FileOutputStream(destination, false).use { output ->
+                var offset = 0
+                while (offset < value.size) {
+                    if (cancelled()) throw InterruptedException("Python stdin snapshot was cancelled")
+                    val count = minOf(COPY_BUFFER_BYTES, value.size - offset)
+                    output.write(value, offset, count)
+                    digest.update(value, offset, count)
+                    offset += count
+                }
+                if (cancelled()) throw InterruptedException("Python stdin snapshot was cancelled")
                 output.flush()
                 output.fd.sync()
             }
@@ -375,6 +459,15 @@ internal class PythonPrivateExecutionSnapshot private constructor(
             }
             val label = if (workspace) "Python project workspace" else "Python source"
             return PythonRuntimeHostException(hostError, "$label could not be snapshotted", error)
+        }
+
+        private fun mapStdinSnapshotFailure(error: Throwable): Throwable {
+            if (error is InterruptedException || error is PythonRuntimeHostException) return error
+            return PythonRuntimeHostException(
+                PythonRuntimeHostError.STDIN_INVALID,
+                "Python stdin could not be snapshotted",
+                error,
+            )
         }
 
         private const val SNAPSHOT_DIRECTORY = "python-runtime-preview"

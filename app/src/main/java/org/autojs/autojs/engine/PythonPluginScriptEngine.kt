@@ -2,9 +2,11 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.plugin.python.PythonExecutionInputPolicy
 import org.autojs.autojs.core.plugin.python.PythonRuntimeClient
 import org.autojs.autojs.core.plugin.python.PythonRuntimeHostError
 import org.autojs.autojs.core.plugin.python.PythonRuntimeHostException
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.PythonFileSource
 import org.autojs.autojs.script.PythonRuntimeChannelPolicy
@@ -44,7 +46,14 @@ class PythonPluginScriptEngine(
                 PythonRuntimeHostError.SOURCE_INVALID,
                 "Python preview accepts only admitted local file or project sources",
             )
-        val execution = client.createExecution(fileSource)
+        val stdinSnapshot = PythonExecutionInputPolicy.resolveStdinSnapshot(
+            getTag(ExecutionConfig.tag) as? ExecutionConfig,
+        )
+        val execution = try {
+            client.createExecution(fileSource, stdinSnapshot)
+        } finally {
+            stdinSnapshot?.fill(0)
+        }
         if (!activeExecution.compareAndSet(null, execution)) {
             throw PythonRuntimeHostException(
                 PythonRuntimeHostError.BUSY,

@@ -87,6 +87,47 @@ class PythonRuntimeHostPlanningTest {
     }
 
     @Test
+    fun stdinRequestUsesTheDescriptorBetweenWorkspaceAndHostCapabilities() {
+        val runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+            protocolMax = PythonProtocolVersion(1, 1),
+        )
+        val capabilities = PythonRuntimeHostTestFixtures.capabilities(
+            supportsStdinSnapshot = true,
+            supportsHostCapabilitySnapshot = true,
+        )
+        val original = PythonRuntimeHostTestFixtures.candidate(
+            runtimeInfo = runtimeInfo,
+            capabilities = capabilities,
+        )
+        val pinned = selected(original)
+        val planned = PythonRuntimeHostRequestPlanner.plan(
+            pinned = pinned,
+            current = original,
+            environment = PythonRuntimeHostTestFixtures.environment(),
+            requirement = PythonRuntimeCapabilityRequirement(
+                workspaceArchive = true,
+                stdinSnapshot = true,
+                hostCapabilitySnapshot = true,
+                minimumStdinBytes = 6L,
+                minimumHostCapabilitySnapshotBytes = 32L,
+            ),
+            request = PythonRuntimeHostTestFixtures.request(
+                protocolVersion = PythonProtocolVersion(1, 1),
+                workspaceArchive = true,
+                stdinSnapshot = true,
+                hostCapabilitySnapshot = true,
+            ),
+            descriptorCount = 4,
+        ) as PythonRuntimeHostRequestPlanningResult.Planned
+
+        assertEquals(4, planned.plan.descriptorCount)
+        assertEquals(0, planned.plan.request.source.descriptorIndex)
+        assertEquals(1, requireNotNull(planned.plan.request.workspaceArchive).descriptorIndex)
+        assertEquals(2, requireNotNull(planned.plan.request.stdin).descriptorIndex)
+        assertEquals(3, requireNotNull(planned.plan.request.hostCapabilitySnapshot).descriptorIndex)
+    }
+
+    @Test
     fun dispatchClaimAtomicallyCrossesTheNoReplayBoundary() {
         val original = PythonRuntimeHostTestFixtures.candidate()
         val hostPlan = (plan(selected(original), original) as PythonRuntimeHostRequestPlanningResult.Planned).plan

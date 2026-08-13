@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Aug 12, 2026.
+Data updated on Aug 13, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,7 +166,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/08/12
+###### 2026/08/13
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -179,6 +179,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
 * `Feature` Independent Python Runtime plugin backend for running local .py files and script projects declared with `type: python` in a separate CPython plugin process, with fixed-component/signer/protocol/ABI validation, hot plugging, and no fallback to JavaScript
 * `Feature` Python launch integration covers the file manager/editor/local Run Intent/single-file Import Intent/new shortcuts/timed tasks/broadcast tasks and preserves strict single-file or project context; projects support internal imports, relative file access, and read-only `autojs6.app/device/execution/project` APIs
+* `Feature` Python Runtime execution supports optional bounded pre-supplied stdin snapshots via the ExecutionConfig key `autojs6.python.stdinSnapshot`, with strict ByteArray/UTF-8 text admission, provider capability/size negotiation, private read-only PFD transport, and cleanup
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/text conversion/media information and more
 * `Feature` Plugin system provides versioned TaggedWire transport and v1 developer protocol packs for DEX compilation and provider-neutral AI text generation, with dedicated conformance test apps and hostile fixtures
 * `Feature` Plugin system supports an extension interface for offline project documentation
@@ -618,7 +619,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Aug 12, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Aug 13, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

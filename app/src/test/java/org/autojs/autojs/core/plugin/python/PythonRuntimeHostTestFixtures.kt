@@ -134,6 +134,7 @@ internal object PythonRuntimeHostTestFixtures {
     fun request(
         protocolVersion: PythonProtocolVersion = PythonProtocolVersion(1, 0),
         workspaceArchive: Boolean = false,
+        stdinSnapshot: Boolean = false,
         hostCapabilitySnapshot: Boolean = false,
     ) = PythonExecutionRequest(
         requestId = requestId,
@@ -155,10 +156,22 @@ internal object PythonRuntimeHostTestFixtures {
         } else {
             null
         },
+        stdin = if (stdinSnapshot) {
+            PythonPayloadReference(
+                kind = PythonPayloadKind.STDIN,
+                descriptorIndex = 1 + if (workspaceArchive) 1 else 0,
+                declaredLengthBytes = 6L,
+                sha256 = PythonSha256.digest("input\n".toByteArray()),
+            )
+        } else {
+            null
+        },
         hostCapabilitySnapshot = if (hostCapabilitySnapshot) {
             PythonPayloadReference(
                 kind = PythonPayloadKind.HOST_CAPABILITY_SNAPSHOT,
-                descriptorIndex = if (workspaceArchive) 2 else 1,
+                descriptorIndex = 1 +
+                    (if (workspaceArchive) 1 else 0) +
+                    (if (stdinSnapshot) 1 else 0),
                 declaredLengthBytes = 32L,
                 sha256 = PythonSha256.digest(ByteArray(32) { it.toByte() }),
             )

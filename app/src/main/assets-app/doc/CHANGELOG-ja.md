@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/12
+###### 2026/08/13
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -19,6 +19,7 @@
 * `新機能` アプリのパッケージ化機能が Node.js スクリプトプロジェクトに対応し必要なランタイムライブラリを自動的に同梱
 * `新機能` 独立した Python Runtime プラグインバックエンドがローカル .py ファイルと `type: python` 宣言のスクリプトプロジェクトを別の CPython プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, ホットプラグ, JavaScript へのフォールバック禁止に対応
 * `新機能` Python 起動統合がファイルマネージャー/エディター/ローカル Run Intent/単一ファイル Import Intent/新規ショートカット/タイマータスク/ブロードキャストタスクを対象とし, 単一ファイルまたはプロジェクトの厳格なコンテキストを保持; プロジェクト内 import/相対ファイルアクセス/読み取り専用 `autojs6.app/device/execution/project` API に対応
+* `新機能` Python Runtime の実行は ExecutionConfig キー `autojs6.python.stdinSnapshot` を介した任意の上限付き事前供給 stdin スナップショットに対応し, ByteArray/UTF-8 テキストの厳格な受け入れ, プロバイダーの機能/サイズ交渉, 非公開の読み取り専用 PFD 転送とクリーンアップを行う
 * `新機能` プラグインシステムが Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/テキスト変換/メディア情報などの拡張 API に対応
 * `新機能` プラグインシステムがバージョン化 TaggedWire 転送と DEX コンパイル/プロバイダー中立 AI テキスト生成向け v1 開発プロトコルパックに対応し, 専用の適合性テストアプリと敵対的 fixture を提供
 * `新機能` プラグインシステムがオフラインプロジェクトドキュメントの拡張インターフェースに対応

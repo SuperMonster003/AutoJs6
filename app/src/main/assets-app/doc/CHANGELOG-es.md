@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/12
+###### 2026/08/13
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -19,6 +19,7 @@
 * `Nuevo` La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias
 * `Nuevo` Backend de plugin Python Runtime independiente, compatible con la ejecución de archivos .py locales y proyectos de scripts declarados con `type: python` mediante un proceso de plugin CPython separado, con validación de componente fijo/firma/protocolo/ABI, conexión en caliente y sin fallback a JavaScript
 * `Nuevo` La integración de inicio de Python abarca el administrador de archivos/editor/Run Intent local/Import Intent de archivo único/nuevos atajos/tareas programadas/tareas de broadcast y conserva un contexto estricto de archivo único o proyecto; los proyectos admiten imports internos, acceso relativo a archivos y API `autojs6.app/device/execution/project` de solo lectura
+* `Nuevo` La ejecución de Python Runtime admite instantáneas stdin opcionales, acotadas y predefinidas mediante la clave ExecutionConfig `autojs6.python.stdinSnapshot`, con admisión estricta de ByteArray/texto UTF-8, negociación de capacidad/tamaño del proveedor, transporte PFD privado de solo lectura y limpieza
 * `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversión de texto/información multimedia y más
 * `Nuevo` El sistema de plugins ofrece transporte TaggedWire versionado y paquetes de protocolo de desarrollo v1 para compilación DEX y generación de texto AI neutral respecto al proveedor, con aplicaciones de prueba de conformidad dedicadas y escenarios hostiles
 * `Nuevo` El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión

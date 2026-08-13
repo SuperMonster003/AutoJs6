@@ -105,6 +105,7 @@ internal data class PythonRuntimeCapabilityRequirement(
     val hostCapabilitySnapshot: Boolean = false,
     val cooperativeCancellation: Boolean = false,
     val minimumSourceBytes: Long = 1L,
+    val minimumStdinBytes: Long = 0L,
     val minimumHostCapabilitySnapshotBytes: Long = 0L,
     val minimumOutputBytes: Long = 1L,
     val minimumOutputChunkBytes: Int = 1,
@@ -114,6 +115,7 @@ internal data class PythonRuntimeCapabilityRequirement(
 ) {
     init {
         require(minimumSourceBytes > 0L)
+        require(minimumStdinBytes >= 0L)
         require(minimumHostCapabilitySnapshotBytes >= 0L)
         require(minimumOutputBytes > 0L)
         require(minimumOutputChunkBytes > 0)
@@ -124,7 +126,10 @@ internal data class PythonRuntimeCapabilityRequirement(
 
     fun isSatisfiedBy(value: PythonRuntimeCapabilities): Boolean =
         (!workspaceArchive || value.supportsWorkspaceArchive) &&
-            (!stdinSnapshot || value.supportsStdinSnapshot) &&
+            (
+                !stdinSnapshot ||
+                    value.supportsStdinSnapshot && value.limits.maxStdinBytes >= minimumStdinBytes
+                ) &&
             (!hostCapabilitySnapshot || value.supportsHostCapabilitySnapshot) &&
             (!cooperativeCancellation || value.supportsCooperativeCancellation) &&
             value.limits.maxSourceBytes >= minimumSourceBytes &&

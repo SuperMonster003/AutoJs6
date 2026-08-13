@@ -77,6 +77,25 @@ class PythonRuntimeProviderSelectionPolicyTest {
             rejection(candidate(), requirement = PythonRuntimeCapabilityRequirement(minimumOutputBytes = 8_192L)),
         )
         assertEquals(
+            PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+            rejection(
+                candidate(),
+                requirement = PythonRuntimeCapabilityRequirement(
+                    stdinSnapshot = true,
+                    minimumStdinBytes = 2_049L,
+                ),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+            rejection(
+                candidate().copy(
+                    capabilities = PythonRuntimeHostTestFixtures.capabilities(supportsStdinSnapshot = false),
+                ),
+                requirement = PythonRuntimeCapabilityRequirement(stdinSnapshot = true),
+            ),
+        )
+        assertEquals(
             PythonRuntimeProviderCandidateRejection.ABI_UNSUPPORTED,
             rejection(candidate(), environment = environment(currentAbi = "armeabi-v7a")),
         )
