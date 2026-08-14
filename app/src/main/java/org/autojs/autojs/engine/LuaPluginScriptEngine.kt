@@ -102,7 +102,7 @@ class LuaPluginScriptEngine internal constructor(
                             "The selected Lua provider does not support controlled module snapshots",
                         )
                     }
-                    val request = executionRequest(snapshot, connection, arguments)
+                    val request = executionRequest(snapshot, connection, arguments, modules)
                     val observer = LuaEngineExecutionObserver(request, connection.runtimeInfo, outputSink)
                     var session: LuaEngineRemoteSession? = null
                     try {
@@ -177,6 +177,7 @@ class LuaPluginScriptEngine internal constructor(
         snapshot: LuaSourceSnapshot,
         connection: LuaEngineRuntimeConnection,
         arguments: LuaValue.MapValue,
+        modules: LuaModuleSnapshot,
     ): LuaExecutionRequest {
         val limits = connection.runtimeInfo.limits
         return LuaExecutionRequest(
@@ -186,11 +187,21 @@ class LuaPluginScriptEngine internal constructor(
             sourceLengthBytes = snapshot.lengthBytes,
             sourceSha256 = snapshot.sha256,
             arguments = arguments,
-            requiredCapabilities = connection.grantedCapabilities,
+            requiredCapabilities = requiredCapabilities(connection, modules),
             outputByteLimit = minOf(LuaRuntimeContract.DEFAULT_OUTPUT_BYTES, limits.maxOutputBytes),
             memoryByteLimit = minOf(LuaRuntimeContract.DEFAULT_MEMORY_BYTES, limits.maxMemoryBytes),
             timeoutMillis = minOf(LuaRuntimeContract.DEFAULT_TIMEOUT_MILLIS, limits.maxExecutionMillis),
         )
+    }
+
+    private fun requiredCapabilities(
+        connection: LuaEngineRuntimeConnection,
+        modules: LuaModuleSnapshot,
+    ): List<String> = connection.grantedCapabilities.filter { capability ->
+        when (capability) {
+            LuaRuntimeHostCapabilities.MODULE_SNAPSHOT -> modules.moduleCount != 0
+            else -> true
+        }
     }
 
     private fun executionArguments(): LuaValue.MapValue = when (val config = getTag(ExecutionConfig.tag)) {
