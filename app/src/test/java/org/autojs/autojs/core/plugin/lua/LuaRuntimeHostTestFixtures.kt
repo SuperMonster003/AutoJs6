@@ -172,12 +172,16 @@ internal object LuaRuntimeHostTestFixtures {
         override val component: LuaRuntimeProviderComponent,
         override val provider: ILuaRuntimeProvider,
         private val beforeRuntimeInfo: (() -> Unit)? = null,
+        private val runtimeInfoTimeoutLimitMillis: Long? = null,
     ) : LuaRuntimeProviderBinding {
         var closeCalls = 0
         val runtimeInfoTimeouts = ArrayList<Long>()
 
         override fun readRuntimeInfo(timeoutMillis: Long): ByteArray {
             require(timeoutMillis > 0L)
+            runtimeInfoTimeoutLimitMillis?.let { limit ->
+                require(timeoutMillis <= limit) { "Runtime-info timeout widened after binding" }
+            }
             runtimeInfoTimeouts += timeoutMillis
             beforeRuntimeInfo?.invoke()
             return provider.getRuntimeInfo()
@@ -207,6 +211,7 @@ internal object LuaRuntimeHostTestFixtures {
         var afterInspect: ((LuaRuntimeProviderComponent, Int) -> Unit)? = null
         var afterBind: ((LuaRuntimeProviderComponent, Int) -> Unit)? = null
         var beforeRuntimeInfo: ((LuaRuntimeProviderComponent, Int) -> Unit)? = null
+        var enforceRuntimeInfoTimeoutAtBindLimit = false
 
         override fun discover(
             runtimeAction: String,
@@ -246,6 +251,9 @@ internal object LuaRuntimeHostTestFixtures {
                 component = boundComponent?.invoke(component, attempt) ?: component,
                 provider = provider,
                 beforeRuntimeInfo = { beforeRuntimeInfo?.invoke(component, attempt) },
+                runtimeInfoTimeoutLimitMillis = timeoutMillis.takeIf {
+                    enforceRuntimeInfoTimeoutAtBindLimit
+                },
             ).also(bindings::add)
         }
     }

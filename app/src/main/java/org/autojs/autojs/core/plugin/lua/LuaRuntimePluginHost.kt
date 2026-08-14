@@ -268,8 +268,9 @@ internal class LuaRuntimePluginHost(
             throw identityChanged("Pinned Lua runtime package metadata changed")
         }
 
-        val binding = try {
-            transport.bindExact(pinned.component, remainingMillis(deadlineNanos))
+        val (bindingTimeoutMillis, binding) = try {
+            val timeoutMillis = remainingMillis(deadlineNanos)
+            timeoutMillis to transport.bindExact(pinned.component, timeoutMillis)
         } catch (failure: Throwable) {
             failure.rethrowIfInterrupted()
             throw LuaRuntimeHostException(
@@ -290,7 +291,13 @@ internal class LuaRuntimePluginHost(
             return LuaRuntimeAcquiredProvider(
                 pinnedIdentity = pinned,
                 binding = binding,
-                beforeDispatch = { revalidateBeforeDispatch(pinned, binding) },
+                beforeDispatch = {
+                    revalidateBeforeDispatch(
+                        pinned = pinned,
+                        binding = binding,
+                        bindingTimeoutMillis = bindingTimeoutMillis,
+                    )
+                },
             )
         } catch (failure: Throwable) {
             runCatching { binding.close() }
@@ -326,10 +333,17 @@ internal class LuaRuntimePluginHost(
     private fun revalidateBeforeDispatch(
         pinned: LuaRuntimeProviderPinnedIdentity,
         binding: LuaRuntimeProviderBinding,
+        bindingTimeoutMillis: Long,
     ) {
         val deadlineNanos = newDeadline()
         val runtimeInfo = try {
-            decodeRuntimeInfo(binding, remainingMillis(deadlineNanos))
+            // The live binding retains the timeout admitted when it was acquired. A fresh
+            // pre-dispatch deadline may be a few milliseconds larger, so never widen the
+            // binding's original call budget while revalidating it.
+            decodeRuntimeInfo(
+                binding,
+                minOf(remainingMillis(deadlineNanos), bindingTimeoutMillis),
+            )
         } catch (failure: Throwable) {
             failure.rethrowIfInterrupted()
             throw identityChanged("Pinned Lua runtime information changed before dispatch", failure)

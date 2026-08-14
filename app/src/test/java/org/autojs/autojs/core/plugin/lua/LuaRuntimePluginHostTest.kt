@@ -124,6 +124,32 @@ class LuaRuntimePluginHostTest {
     }
 
     @Test
+    fun preDispatchRuntimeProbeNeverWidensTheFinalBindingBudget() {
+        val descriptor = descriptor()
+        val now = AtomicLong(0L)
+        val transport = fakeTransport(descriptor).apply {
+            providers[descriptor.component] = FakeProvider()
+            enforceRuntimeInfoTimeoutAtBindLimit = true
+        }
+        val host = host(
+            transport = transport,
+            handshakeTimeoutMillis = 10L,
+            nanoTime = now::get,
+        )
+        val prepared = host.prepare()
+        transport.afterDiscover = { now.addAndGet(TimeUnit.MILLISECONDS.toNanos(1L)) }
+        transport.afterBind = { _, _ -> now.addAndGet(TimeUnit.MILLISECONDS.toNanos(1L)) }
+
+        val acquired = host.acquire(prepared)
+        val finalBindingBudget = transport.bindTimeouts.last()
+        acquired.revalidateBeforeDispatch()
+
+        assertEquals(finalBindingBudget, transport.bindings.last().runtimeInfoTimeouts.last())
+        assertFalse(acquired.isClosed())
+        acquired.close()
+    }
+
+    @Test
     fun releasedSessionIsNotClosedAgainByProviderHandle() {
         val descriptor = descriptor()
         val transport = fakeTransport(descriptor).apply { providers[descriptor.component] = FakeProvider() }
