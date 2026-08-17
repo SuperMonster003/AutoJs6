@@ -355,9 +355,10 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
         if (!result.succeeded) {
             result.errorStack?.takeIf { it.isNotBlank() }?.let { printScriptOutput(Log.ERROR, it) }
-            val failureEnvelope = buildFailureEnvelope(request, result)
-            Log.e(TAG, failureEnvelope)
-            printScriptOutput(Log.ERROR, failureEnvelope)
+            // The full diagnostic envelope stays in logcat for debugging; the
+            // user console gets the JS stack above plus one readable line
+            // (error code + message), not a key-value wall (M1.5).
+            Log.e(TAG, buildFailureEnvelope(request, result))
             val message = result.errorMessage
                 ?: result.errorName
                 ?: "Native Node embedded script failed."

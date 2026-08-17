@@ -507,6 +507,18 @@ object NodeJsRuntimePluginBridge {
         val status = nativeValues[WORKSPACE_STATUS_KEY]
         val legacyScanRan = nativeValues[WORKSPACE_LEGACY_SCAN_KEY]
         val inputScanCount = nativeValues[WORKSPACE_INPUT_SCAN_COUNT_KEY]
+        // A plugin that rejects a request before native dispatch (for example
+        // unsupported TSX entries or policy-metadata failures) deliberately
+        // withholds the workspace commit so its private materializations never
+        // reach the host archive. That declared no-commit failure is a valid
+        // terminal response, not a lost execution.
+        val declaredPreDispatchFailure =
+            !result.getBoolean(NodeJsRuntimeContract.KEY_SUCCEEDED, false) &&
+                nativeValues[WORKSPACE_COMMIT_ALLOWED_KEY] == "false" &&
+                nativeValues[NATIVE_DISPATCH_STARTED_KEY] == "false"
+        if (declaredPreDispatchFailure) {
+            return true
+        }
         if (status != "committed" || legacyScanRan != "false" || inputScanCount != "0") {
             throw NodeRuntimePluginContractException(
                 "Node.js runtime plugin did not return a complete zero-scan workspace commit: " +
@@ -573,4 +585,8 @@ object NodeJsRuntimePluginBridge {
         "embedded_script.runtime_plugin.workspace.legacy_directory_scan_ran"
     private const val WORKSPACE_INPUT_SCAN_COUNT_KEY =
         "embedded_script.runtime_plugin.workspace.input_directory_scan_count"
+    private const val WORKSPACE_COMMIT_ALLOWED_KEY =
+        "embedded_script.runtime_plugin.workspace.commit_allowed"
+    private const val NATIVE_DISPATCH_STARTED_KEY =
+        "embedded_script.runtime_plugin.native_dispatch_started"
 }

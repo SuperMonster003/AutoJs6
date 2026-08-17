@@ -129,6 +129,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             "$TRANSPORT_PROTOCOL_DIRECTORY/deletions-v1.json"
         private const val MANIFEST_VERSION = 1
         private const val MANIFEST_MAX_BYTES = 1024 * 1024
+        private const val PROJECT_MARKER_NAME = "project.json"
         private const val COPY_BUFFER_BYTES = 32 * 1024
         internal const val MAX_FILES = 4_096
         internal const val MAX_BYTES = 64L * 1024L * 1024L
@@ -213,9 +214,14 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
         }
 
         /**
-         * Deliberately does not enumerate [root]. R4 requires the default
-         * execution path to remain free of legacy working-directory scans.
-         * Only paths already named by the request are eligible input entries.
+         * The default execution path deliberately does not enumerate [root]:
+         * R4 requires bare-script runs to remain free of legacy
+         * working-directory scans, so only paths already named by the request
+         * are eligible input entries. A directory carrying a project.json
+         * marker is a declared project run (M1.4): its tree must reach the
+         * plugin workspace through this archive, because a published v1
+         * module-source provider cannot materialize plaintext files into the
+         * plugin's private workspace on demand.
          */
         private fun isAndroidCredentialDataAlias(lexical: File, canonical: File): Boolean {
             fun normalized(path: String): String = path
@@ -275,6 +281,9 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             request.moduleSources.forEach { (name, source) ->
                 val (relative, _) = relativeCandidate(name) ?: return@forEach
                 entries[relative] = ExplicitInput.Bytes(source.toByteArray(StandardCharsets.UTF_8))
+            }
+            if (File(workingDirectory, PROJECT_MARKER_NAME).isFile) {
+                addDeclaredProjectTree(root, workingDirectory, ::addExistingExplicitPath)
             }
 
             val deleteEligibleInputFiles = entries
@@ -350,6 +359,50 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                 throw IOException("Node.js plugin workspace input archive exceeds the compressed-size limit.")
             }
             return deleteEligibleInputFiles
+        }
+
+        /**
+         * Walks a declared project (its working directory carries
+         * project.json) and names every regular file for the input archive.
+         * Symbolic links abort the run through [addExistingExplicitPath]'s
+         * lstat checks; entry-count and byte limits still apply during the
+         * archive write. Files that vanish between walk and archive are
+         * skipped by the existing addExistingExplicitPath contract.
+         */
+        private fun addDeclaredProjectTree(
+            root: File,
+            workingDirectory: File,
+            addExistingExplicitPath: (String) -> Unit,
+        ) {
+            val pending = ArrayDeque<File>().apply { add(workingDirectory) }
+            var visitedDirectories = 0
+            while (pending.isNotEmpty()) {
+                val directory = pending.removeFirst()
+                visitedDirectories += 1
+                if (visitedDirectories > MAX_FILES) {
+                    throw IOException("Node.js plugin project workspace exceeds the directory-count limit.")
+                }
+                val children = directory.listFiles() ?: continue
+                children.sortedBy(File::getName).forEach { child ->
+                    val stat = Os.lstat(child.path)
+                    when {
+                        OsConstants.S_ISLNK(stat.st_mode) -> throw IOException(
+                            "Node.js plugin project workspace contains a symbolic link: ${child.path}",
+                        )
+                        OsConstants.S_ISDIR(stat.st_mode) -> {
+                            if (!contains(root, child)) {
+                                throw IOException("Node.js plugin project directory escapes sandboxRoot.")
+                            }
+                            addExistingExplicitPath(child.absolutePath)
+                            pending.add(child)
+                        }
+                        OsConstants.S_ISREG(stat.st_mode) -> addExistingExplicitPath(child.absolutePath)
+                        else -> throw IOException(
+                            "Node.js plugin project workspace contains a special file: ${child.path}",
+                        )
+                    }
+                }
+            }
         }
 
         private fun inputManifest(deleteEligibleInputFiles: Set<String>): String = JSONObject()

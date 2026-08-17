@@ -181,6 +181,186 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         }
     }
 
+    /**
+     * M1.4: a project-shaped workspace (project.json, nested lib module, and
+     * a node_modules package — all plaintext, none pre-listed in
+     * moduleSources) must run through the workspace-archive transport. The
+     * input archive only carries explicitly named files, so the nested
+     * modules reach the plugin on demand through the module-source provider.
+     */
+    @Test
+    fun pluginRuntimeRunsProjectWithNodeModulesThroughWorkspaceTransport() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin project workspace smoke")
+        val runtimeInfo = runBlocking {
+            runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
+        }
+        assumeTrue(
+            "Install, enable, and authorize a Node.js runtime plugin to run the project workspace smoke.",
+            runtimeInfo != null,
+        )
+
+        val workDir = File(context.cacheDir, "node-runtime-plugin-project-workspace").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create Node plugin project working directory: $absolutePath" }
+        }
+        File(workDir, "project.json").writeText(
+            """{"name":"plugin-project-smoke","type":"node","main":"main.cjs"}""",
+            StandardCharsets.UTF_8,
+        )
+        File(workDir, "lib/helper.cjs").apply {
+            check(parentFile.mkdirs() || parentFile.isDirectory)
+            writeText("module.exports = { part: 'helper' };\n", StandardCharsets.UTF_8)
+        }
+        File(workDir, "node_modules/demo-pkg/package.json").apply {
+            check(parentFile.mkdirs() || parentFile.isDirectory)
+            writeText("""{"name":"demo-pkg","main":"./index.js"}""", StandardCharsets.UTF_8)
+        }
+        File(workDir, "node_modules/demo-pkg/index.js").writeText(
+            "module.exports = { part: 'demo-pkg' };\n",
+            StandardCharsets.UTF_8,
+        )
+        val mainSource = """
+            "nodejs";
+            const helper = require("./lib/helper.cjs");
+            const demo = require("demo-pkg");
+            console.log("plugin.project.parts=" + [helper.part, demo.part].join("+"));
+        """.trimIndent()
+        File(workDir, "main.cjs").writeText(mainSource, StandardCharsets.UTF_8)
+
+        val result = NodeJsRuntimePluginBridge.runScript(
+            context,
+            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                source = mainSource,
+                sourceName = File(workDir, "main.cjs").absolutePath,
+                workingDirectory = workDir.absolutePath,
+                sandboxRoot = workDir.absolutePath,
+                timeoutMs = 10_000L,
+            ),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin project workspace smoke", result)
+        assertTrue(result.stdout.contains("plugin.project.parts=helper+demo-pkg"))
+        assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.enabled"])
+        assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.workspace.mapped"])
+    }
+
+    /**
+     * M1.5: integration failures must surface as an error code plus one
+     * readable message, not a diagnostics key-value wall. Covers the three
+     * failure shapes users hit first: a thrown script error, a missing
+     * module, and unsupported TSX sources.
+     */
+    @Test
+    fun pluginRuntimeFailuresCarryReadableCodeAndMessage() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin failure readability smoke")
+        val runtimeInfo = runBlocking {
+            runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
+        }
+        assumeTrue(
+            "Install, enable, and authorize a Node.js runtime plugin to run the failure readability smoke.",
+            runtimeInfo != null,
+        )
+
+        val workDir = File(context.cacheDir, "node-runtime-plugin-failure-readability").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create Node plugin failure working directory: $absolutePath" }
+        }
+
+        data class FailureCase(
+            val label: String,
+            val sourceName: String,
+            val source: String,
+            // A plain JS throw carries no Node error code; its identity is
+            // the error name. Structured failures carry an explicit code.
+            val expectedCode: String?,
+            val expectedName: String?,
+            val expectedMessagePart: String,
+        )
+
+        listOf(
+            FailureCase(
+                label = "thrown script error",
+                sourceName = "<plugin-failure-thrown.js>",
+                source = """
+                    "nodejs";
+                    throw new Error("boom from user script");
+                """.trimIndent(),
+                expectedCode = null,
+                expectedName = "Error",
+                expectedMessagePart = "boom from user script",
+            ),
+            FailureCase(
+                label = "missing module",
+                sourceName = "<plugin-failure-missing-module.js>",
+                source = """
+                    "nodejs";
+                    require("./no-such-module.cjs");
+                """.trimIndent(),
+                expectedCode = "MODULE_NOT_FOUND",
+                expectedName = null,
+                expectedMessagePart = "no-such-module",
+            ),
+            FailureCase(
+                label = "unsupported tsx entry",
+                sourceName = File(workDir, "widget.tsx").absolutePath,
+                source = "export default <div />;",
+                expectedCode = "ERR_AUTOJS6_TYPESCRIPT_UNSUPPORTED_EXTENSION",
+                expectedName = null,
+                expectedMessagePart = "TSX",
+            ),
+        ).forEach { case ->
+            val result = NodeJsRuntimePluginBridge.runScript(
+                context,
+                NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                    source = case.source,
+                    sourceName = case.sourceName,
+                    workingDirectory = workDir.absolutePath,
+                    sandboxRoot = workDir.absolutePath,
+                    timeoutMs = 10_000L,
+                ),
+            )
+
+            assertTrue("${case.label}: run unexpectedly succeeded", !result.succeeded)
+            val code = result.errorCode.orEmpty()
+            val message = result.errorMessage.orEmpty()
+            case.expectedCode?.let { expected ->
+                assertTrue(
+                    "${case.label}: expected error code $expected, got '$code'",
+                    code == expected,
+                )
+            }
+            case.expectedName?.let { expected ->
+                assertTrue(
+                    "${case.label}: expected error name $expected, got '${result.errorName.orEmpty()}'",
+                    result.errorName.orEmpty() == expected,
+                )
+            }
+            assertTrue(
+                "${case.label}: message does not mention '${case.expectedMessagePart}': $message",
+                message.contains(case.expectedMessagePart, ignoreCase = true),
+            )
+            // The human-readable sentence must lead (an ERR_* code prefix and
+            // a file path are fine); the single-line require diagnostics
+            // context may follow it (the MVP suite pins that contract), but
+            // diagnostic key-value walls may not appear.
+            val firstSentence = message
+                .removePrefix("$code: ")
+                .substringBefore(". ")
+            assertTrue(
+                "${case.label}: leading sentence is not readable (${firstSentence.length} chars): $firstSentence",
+                firstSentence.isNotBlank() && firstSentence.length <= 250,
+            )
+            assertTrue(
+                "${case.label}: message repeats a boilerplate execution-failed prefix: $message",
+                !message.contains("plugin execution failed", ignoreCase = true),
+            )
+            assertTrue(
+                "${case.label}: message contains a diagnostics key-value wall: $message",
+                !message.contains("nativeValues=") && !message.contains("embedded_script."),
+            )
+        }
+    }
+
     private fun writeEncryptedScript(file: File, source: String) {
         file.parentFile?.let { parent -> check(parent.mkdirs() || parent.isDirectory) }
         val encrypted = AdvancedEncryptionStandard(
