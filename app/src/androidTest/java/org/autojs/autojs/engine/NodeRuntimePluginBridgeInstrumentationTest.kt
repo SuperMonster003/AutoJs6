@@ -395,4 +395,97 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         const val TEST_ENCRYPTION_KEY = "0123456789abcdef0123456789abcdef"
         const val TEST_ENCRYPTION_VECTOR = "0123456789abcdef"
     }
+    /**
+     * M3.1: the everyday automation APIs the roadmap targets (toast, clipboard,
+     * storage, shell, app metadata) all drive real host implementations through
+     * one live-bridge session. Each call round-trips a value the script can
+     * assert on, so a green run is end-to-end proof for all five modules.
+     */
+    @Test
+    fun pluginRuntimeDrivesCommonAutomationApisThroughLiveBridge() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin automation API smoke")
+        val runtimeInfo = runBlocking {
+            runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
+        }
+        assumeTrue(
+            "Install, enable, and authorize a Node.js runtime plugin to run the automation API smoke.",
+            runtimeInfo != null,
+        )
+        val capabilities = runtimeInfo
+            ?.getStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES)
+            .orEmpty()
+        assumeTrue(
+            "Node.js runtime plugin must advertise ${NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE}.",
+            NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE in capabilities,
+        )
+
+        val workDir = File(context.cacheDir, "node-runtime-plugin-automation-apis").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create Node plugin automation API working directory: $absolutePath" }
+        }
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "node": {
+                "permissions": ["toast", "clipboard", "storage", "shell", "app.query"]
+              }
+            }
+            """.trimIndent(),
+        )
+        val hostPackageName = context.packageName
+        val clipboardMarker = "m3.clipboard." + System.currentTimeMillis()
+        val result = NodeJsRuntimePluginBridge.runScript(
+            context,
+            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const toast = require("toast");
+                      await toast.showToast("m3 automation smoke", { timeoutMs: 5000 });
+                      console.log("m3.api.toast=ok");
+
+                      const clipboard = require("clipboard");
+                      await clipboard.setText("$clipboardMarker");
+                      const clipText = await clipboard.getText();
+                      console.log("m3.api.clipboard=" + clipText);
+
+                      const storages = require("storages");
+                      const store = storages.create("m3-automation-smoke");
+                      await store.put("answer", 42);
+                      const stored = await store.get("answer", -1);
+                      console.log("m3.api.storage=" + stored);
+
+                      const shell = require("shell");
+                      const shellResult = await shell.exec("echo m3-shell-ok");
+                      console.log("m3.api.shell.code=" + shellResult.code);
+                      console.log("m3.api.shell.out=" + String(shellResult.stdout || "").trim());
+
+                      const app = require("app");
+                      const appName = await app.getAppName("$hostPackageName");
+                      console.log("m3.api.appName.present=" + (typeof appName === "string" && appName.length > 0));
+                    })().catch((error) => {
+                      console.error("m3.api.error=" + (error && (error.stack || error.message) || error));
+                      process.exitCode = 1;
+                    });
+                """.trimIndent(),
+                sourceName = "<node-runtime-plugin-automation-apis.js>",
+                workingDirectory = workDir.absolutePath,
+                sandboxRoot = workDir.absolutePath,
+                timeoutMs = 30_000L,
+            ),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin automation API smoke", result)
+        assertTrue(result.stdout.contains("m3.api.toast=ok"))
+        assertTrue(result.stdout.contains("m3.api.clipboard=$clipboardMarker"))
+        assertTrue(result.stdout.contains("m3.api.storage=42"))
+        assertTrue(result.stdout.contains("m3.api.shell.code=0"))
+        assertTrue(result.stdout.contains("m3.api.shell.out=m3-shell-ok"))
+        assertTrue(result.stdout.contains("m3.api.appName.present=true"))
+        assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
+        assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
+        assertEquals("done", result.nativeValues["embedded_script.bridge_live_dispatch_status"])
+        // toast + setText + getText + put + get + exec + getAppName = 7 dispatches
+        assertEquals("7", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
+    }
 }
