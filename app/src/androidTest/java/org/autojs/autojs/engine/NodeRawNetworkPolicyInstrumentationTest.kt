@@ -4,6 +4,7 @@ import org.autojs.autojs6.BuildConfig
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -26,6 +27,12 @@ class NodeRawNetworkPolicyInstrumentationTest {
     @Test
     fun rawNetworkModulesStayDeniedAndCannotBeShadowed() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("raw network policy regression")
+        // M2.6 flipped the raw-network default to enabled; this denial-policy
+        // regression only applies to builds that opt back out.
+        Assume.assumeFalse(
+            "raw network modules are enabled in this build; denial policy does not apply",
+            BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+        )
         assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
 

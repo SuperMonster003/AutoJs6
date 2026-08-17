@@ -335,7 +335,10 @@ val nodeJsDynamicImportEnabled = nodeJsDynamicImportLocalEnabled || nodeJsDynami
 val nodeJsNetworkExperimentalEnabled = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsRawNetworkModulesExperimentalEnabled = providers.gradleProperty("autojs.nodejs.rawNetworkModules.experimental").orElse("false").get()
+// M2.6: raw Node network builtins (http/https/net/dns/tls) default on — the
+// desktop-Node experience the plugin targets. Set the property to false to
+// opt back out.
+val nodeJsRawNetworkModulesExperimentalEnabled = providers.gradleProperty("autojs.nodejs.rawNetworkModules.experimental").orElse("true").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val nodeJsWorkerThreadsExperimentalEnabled = providers.gradleProperty("autojs.nodejs.worker_threads.experimental").orElse("false").get()
