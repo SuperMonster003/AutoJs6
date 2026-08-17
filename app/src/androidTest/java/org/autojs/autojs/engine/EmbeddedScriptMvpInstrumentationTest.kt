@@ -27863,7 +27863,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             )
             assertFalse(missing.succeeded)
             assertEquals("MODULE_NOT_FOUND", missing.errorCode)
-            assertTrue(missing.errorMessage.orEmpty().contains("Cannot find Embedded Node local module"))
+            assertTrue(missing.errorMessage.orEmpty().contains("Cannot find module"))
             assertTrue(missing.errorMessage.orEmpty().contains("./missing-dynamic"))
 
             settleEmbeddedScriptServiceProcess()
@@ -31120,7 +31120,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             )
             assertFalse(missing.succeeded)
             assertEquals("Error", missing.errorName)
-            assertTrue(missing.errorMessage.orEmpty().contains("Cannot find Embedded Node local module"))
+            assertTrue(missing.errorMessage.orEmpty().contains("Cannot find module"))
             assertTrue(missing.errorMessage.orEmpty().contains("./missing"))
 
             settleEmbeddedScriptServiceProcess()
@@ -32020,7 +32020,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         )
         assertFalse(localModule.succeeded)
         assertEquals("Error", localModule.errorName)
-        assertTrue(localModule.errorMessage.orEmpty().contains("Cannot find Embedded Node local module"))
+        assertTrue(localModule.errorMessage.orEmpty().contains("Cannot find module"))
         assertTrue(localModule.errorMessage.orEmpty().contains("./local-module"))
 
         settleEmbeddedScriptServiceProcess()
