@@ -7,6 +7,7 @@ import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.runBlocking
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
+import org.autojs.plugin.nodejs.api.INodeJsRuntimeCallback
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -43,12 +44,13 @@ object NodeJsRuntimePluginBridge {
         context: Context,
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+        outputListener: ((type: String, text: String) -> Unit)? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val requestWithProvider = request.withHostModuleSourceProvider()
         if (!isRequested()) {
             return NativeNodeEmbeddedScriptService.runScript(context, requestWithProvider, launchSurface)
         }
-        val pluginResult = runScript(context, requestWithProvider, launchSurface)
+        val pluginResult = runScript(context, requestWithProvider, launchSurface, outputListener)
         if (pluginResult.isSafeForEmbeddedFallback() && !isRequired()) {
             Log.w(
                 TAG,
@@ -75,6 +77,7 @@ object NodeJsRuntimePluginBridge {
         context: Context,
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+        outputListener: ((type: String, text: String) -> Unit)? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
         val requestWithProvider = if (request.executionId.isNullOrBlank()) {
@@ -144,10 +147,32 @@ object NodeJsRuntimePluginBridge {
                             "before_backend_dispatch",
                         )
                     }
+                    val streamedEventCount = java.util.concurrent.atomic.AtomicInteger(0)
+                    val runtimeCallback = outputListener?.let { listener ->
+                        object : INodeJsRuntimeCallback.Stub() {
+                            override fun onEvent(event: Bundle?) {
+                                val type = event?.getString(NodeJsRuntimeContract.KEY_EVENT_TYPE) ?: return
+                                if (type != NodeJsRuntimeContract.EVENT_STDOUT &&
+                                    type != NodeJsRuntimeContract.EVENT_STDERR
+                                ) {
+                                    return
+                                }
+                                val text = event.getString(NodeJsRuntimeContract.KEY_EVENT_TEXT).orEmpty()
+                                if (text.isEmpty()) {
+                                    return
+                                }
+                                streamedEventCount.incrementAndGet()
+                                runCatching { listener(type, text) }.onFailure { error ->
+                                    Log.w(TAG, "Node.js runtime plugin output listener failed.", error)
+                                }
+                            }
+                        }
+                    }
                     val runResult = runBlocking {
                         NodeJsRuntimePluginHost.runScriptWithInfo(
                             context = context,
                             request = pluginRequest,
+                            callback = runtimeCallback,
                             reservation = checkNotNull(reservation),
                         )
                     }
@@ -176,7 +201,17 @@ object NodeJsRuntimePluginBridge {
                             backendDispatched = true,
                         )
                     } else {
-                        runResult.toEmbeddedScriptResult(requestWithProvider, startedAt)
+                        val scriptResult = runResult.toEmbeddedScriptResult(requestWithProvider, startedAt)
+                        if (streamedEventCount.get() > 0) {
+                            scriptResult.copy(
+                                nativeValues = scriptResult.nativeValues + mapOf(
+                                    "embedded_script.runtime_plugin.streamed_output_events" to
+                                            streamedEventCount.get().toString(),
+                                ),
+                            )
+                        } else {
+                            scriptResult
+                        }
                     }
                 } finally {
                     reservation?.let(NodeJsRuntimePluginHost::releaseExecution)

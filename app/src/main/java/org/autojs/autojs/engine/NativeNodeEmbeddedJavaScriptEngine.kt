@@ -8,6 +8,7 @@ import android.system.OsConstants
 import android.system.StructStat
 import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.json.JSONArray
 import org.json.JSONObject
 import org.autojs.autojs.engine.encryption.ScriptEncryption
@@ -230,7 +231,16 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         descriptorNativeValues: Map<String, String> = emptyMap(),
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        val result = NodeJsRuntimePluginBridge.runScriptWithEmbeddedFallback(androidContext, request)
+        val result = NodeJsRuntimePluginBridge.runScriptWithEmbeddedFallback(
+            androidContext,
+            request,
+            outputListener = { type, text ->
+                printScriptOutput(
+                    if (type == NodeJsRuntimeContract.EVENT_STDERR) Log.ERROR else Log.DEBUG,
+                    text,
+                )
+            },
+        )
         return if (descriptorNativeValues.isEmpty()) {
             result
         } else {
@@ -349,7 +359,13 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val resultNativeValues = lastRequestPreparationDiagnostics.toNativeValues() + result.nativeValues
         lastEmbeddedScriptResultNativeValues = resultNativeValues
         lastEmbeddedScriptResultPid = result.pid
-        if (!printStructuredConsoleOutput(resultNativeValues)) {
+        val streamedLiveOutput =
+            resultNativeValues["embedded_script.runtime_plugin.streamed_output_events"]
+                ?.toIntOrNull()?.let { it > 0 } == true
+        if (streamedLiveOutput) {
+            // Output already reached the console line by line while the script
+            // was running; replaying the terminal aggregate would print twice.
+        } else if (!printStructuredConsoleOutput(resultNativeValues)) {
             printScriptOutput(Log.DEBUG, result.stdout)
             printScriptOutput(Log.ERROR, result.stderr)
         }
