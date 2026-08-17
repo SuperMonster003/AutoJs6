@@ -21,6 +21,9 @@ object NodeBridgePermissionManifest {
     const val ENGINES = "engines"
     const val ENGINES_EXEC = "engines.exec"
     const val ACCESSIBILITY = "accessibility"
+    // M3.2: coordinate gestures are deliberately NOT implied by plain
+    // "accessibility" (registry gesturePolicy); scripts must declare this.
+    const val ACCESSIBILITY_GESTURE = "accessibility.gesture"
     const val SCREEN_CAPTURE = "screen_capture"
     const val IMAGE = "image"
     const val OCR = "ocr"
@@ -81,6 +84,7 @@ object NodeBridgePermissionManifest {
         ENGINES,
         ENGINES_EXEC,
         ACCESSIBILITY,
+        ACCESSIBILITY_GESTURE,
         SCREEN_CAPTURE,
         IMAGE,
         OCR,
@@ -390,7 +394,10 @@ object NodeBridgePermissionManifest {
                 else -> listOf(ENGINES)
             }
             NodeBridgeModules.DIALOGS -> listOf(DIALOGS)
-            NodeBridgeModules.ACCESSIBILITY -> listOf(ACCESSIBILITY)
+            NodeBridgeModules.ACCESSIBILITY -> when (method) {
+                "swipe", "gesture" -> listOf(ACCESSIBILITY, ACCESSIBILITY_GESTURE)
+                else -> listOf(ACCESSIBILITY)
+            }
             NodeBridgeModules.MEDIA_PROJECTION -> listOf(SCREEN_CAPTURE)
             NodeBridgeModules.IMAGE, NodeBridgeModules.IMAGES -> when (method) {
                 "captureScreen" -> listOf(IMAGE, SCREEN_CAPTURE)
@@ -493,7 +500,9 @@ object NodeBridgePermissionManifest {
             required == MEDIA_METADATA ||
             required == MEDIA_RECORDING ||
             required == APP_QUERY ||
-            required == PACKAGE_MANAGER_MUTATE
+            required == PACKAGE_MANAGER_MUTATE ||
+            // M3.2: coordinate gestures are never implied by "accessibility".
+            required == ACCESSIBILITY_GESTURE
         ) {
             return required in declared
         }

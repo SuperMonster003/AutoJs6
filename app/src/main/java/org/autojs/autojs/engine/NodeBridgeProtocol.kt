@@ -63,6 +63,7 @@ import okhttp3.WebSocketListener
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.accessibility.OnKeyListener
+import org.autojs.autojs.core.automator.GlobalActionAutomator
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -635,6 +636,8 @@ object NodeBridgeModules {
         "setText",
         "scrollForward",
         "scrollBackward",
+        "swipe",
+        "gesture",
     )
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
@@ -1528,8 +1531,89 @@ class AndroidNodeBridgeCapabilityProvider(
                 service,
                 AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
             )
+            "swipe" -> dispatchAccessibilitySwipe(request, service)
+            "gesture" -> dispatchAccessibilityGesture(request, service)
             else -> unavailable(request)
         }
+    }
+
+    /**
+     * M3.2: coordinate swipe through AccessibilityService.dispatchGesture.
+     * args: [x1, y1, x2, y2, durationMs?]. Returns "true" once the system
+     * reports the gesture completed, "false" when it was cancelled.
+     */
+    private fun dispatchAccessibilitySwipe(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val args = request.args()
+        val x1 = args.optInt(0, -1)
+        val y1 = args.optInt(1, -1)
+        val x2 = args.optInt(2, -1)
+        val y2 = args.optInt(3, -1)
+        val durationMs = args.optLong(4, 300L)
+        if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0 || durationMs <= 0L) {
+            return NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.invalidRequest(
+                    message = "accessibility.swipe requires non-negative x1, y1, x2, y2 and a positive durationMs.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val completed = accessibilityGestureAutomator(service)
+            .swipe(x1, y1, x2, y2, durationMs.coerceAtMost(MAX_ACCESSIBILITY_GESTURE_DURATION_MS))
+        return NodeBridgeResponse.success(request.id, completed.toString())
+    }
+
+    /**
+     * M3.2: free-path gesture. args: [durationMs, [[x, y], [x, y], ...]] —
+     * the same shape AutoJs6's Rhino gesture() takes after its duration
+     * argument. At least two points are required.
+     */
+    private fun dispatchAccessibilityGesture(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val args = request.args()
+        val durationMs = args.optLong(0, -1L)
+        val pointsJson = args.optJSONArray(1)
+        val points = ArrayList<IntArray>()
+        if (pointsJson != null) {
+            for (index in 0 until pointsJson.length()) {
+                val point = pointsJson.optJSONArray(index) ?: continue
+                val x = point.optInt(0, -1)
+                val y = point.optInt(1, -1)
+                if (x < 0 || y < 0) {
+                    points.clear()
+                    break
+                }
+                points.add(intArrayOf(x, y))
+            }
+        }
+        if (durationMs <= 0L || points.size < 2) {
+            return NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.invalidRequest(
+                    message = "accessibility.gesture requires a positive durationMs and at least two [x, y] points with non-negative coordinates.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val completed = accessibilityGestureAutomator(service)
+            .gesture(0L, durationMs.coerceAtMost(MAX_ACCESSIBILITY_GESTURE_DURATION_MS), *points.toTypedArray())
+        return NodeBridgeResponse.success(request.id, completed.toString())
+    }
+
+    private fun accessibilityGestureAutomator(
+        service: AutoJsAccessibilityService,
+    ): GlobalActionAutomator {
+        // No handler: the broker dispatch thread is not the main looper, so
+        // GlobalActionAutomator prepares its own looper and blocks until the
+        // system reports gesture completion.
+        return GlobalActionAutomator(appContext, null) { service }
     }
 
     private fun dispatchAccessibilityFindByText(
@@ -5118,6 +5202,9 @@ class AndroidNodeBridgeCapabilityProvider(
         const val MAX_ACTIVE_OVERLAY_SESSIONS = 4
         const val MLKIT_OCR_ENGINE = "mlkit-ocr"
         const val MLKIT_OCR_MODULE_LABEL = "ML Kit OCR"
+        // Gestures block a broker dispatch thread until completion; cap the
+        // requested duration so one call cannot pin it for minutes.
+        const val MAX_ACCESSIBILITY_GESTURE_DURATION_MS = 10_000L
     }
 }
 

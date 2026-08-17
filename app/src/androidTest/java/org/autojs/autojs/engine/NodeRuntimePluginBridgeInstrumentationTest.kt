@@ -488,4 +488,123 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         // toast + setText + getText + put + get + exec + getAppName = 7 dispatches
         assertEquals("7", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
     }
+    /**
+     * M3.2: coordinate swipe reaches AccessibilityService.dispatchGesture
+     * through the live bridge behind the dedicated accessibility.gesture
+     * capability. With an operational accessibility service the swipe must
+     * report completion; without one the script must see the readable
+     * capability-provider-missing failure instead of a hang or a crash. A
+     * second script omitting the capability must be rejected locally before
+     * the request ever leaves the plugin process.
+     */
+    @Test
+    fun pluginRuntimeSwipesThroughAccessibilityGestureCapability() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin swipe smoke")
+        val runtimeInfo = runBlocking {
+            runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
+        }
+        assumeTrue(
+            "Install, enable, and authorize a Node.js runtime plugin to run the swipe smoke.",
+            runtimeInfo != null,
+        )
+        val capabilities = runtimeInfo
+            ?.getStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES)
+            .orEmpty()
+        assumeTrue(
+            "Node.js runtime plugin must advertise ${NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE}.",
+            NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE in capabilities,
+        )
+
+        val workDir = File(context.cacheDir, "node-runtime-plugin-swipe").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create Node plugin swipe working directory: $absolutePath" }
+        }
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "node": {
+                "permissions": ["accessibility", "accessibility.gesture"]
+              }
+            }
+            """.trimIndent(),
+        )
+        val result = NodeJsRuntimePluginBridge.runScript(
+            context,
+            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const accessibility = require("accessibility");
+                      const enabled = await accessibility.isEnabled({ timeoutMs: 5000 });
+                      console.log("m3.swipe.serviceEnabled=" + enabled);
+                      try {
+                        const completed = await accessibility.swipe(200, 900, 200, 400, 320, { timeoutMs: 15000 });
+                        console.log("m3.swipe.completed=" + completed);
+                      } catch (error) {
+                        const code = String(error && (error.autojs6Code || error.code) || "");
+                        console.log("m3.swipe.failureCode=" + code);
+                        if (enabled || code !== "ERR_AUTOJS6_BRIDGE_CAPABILITY_PROVIDER_MISSING") {
+                          throw error;
+                        }
+                      }
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-runtime-plugin-swipe.js>",
+                workingDirectory = workDir.absolutePath,
+                sandboxRoot = workDir.absolutePath,
+                timeoutMs = 30_000L,
+            ),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin swipe smoke", result)
+        assertTrue(
+            "swipe must either complete (service on) or fail readably (service off): " + result.stdout,
+            result.stdout.contains("m3.swipe.completed=true") ||
+                result.stdout.contains("m3.swipe.failureCode=ERR_AUTOJS6_BRIDGE_CAPABILITY_PROVIDER_MISSING"),
+        )
+        // Without the dedicated capability the plugin rejects locally.
+        val deniedDir = File(context.cacheDir, "node-runtime-plugin-swipe-denied").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create Node plugin swipe denied working directory: $absolutePath" }
+        }
+        File(deniedDir, "project.json").writeText(
+            """
+            {
+              "node": {
+                "permissions": ["accessibility"]
+              }
+            }
+            """.trimIndent(),
+        )
+        val denied = NodeJsRuntimePluginBridge.runScript(
+            context,
+            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const accessibility = require("accessibility");
+                      try {
+                        await accessibility.swipe(100, 500, 100, 200, 200);
+                        console.log("m3.swipe.denied=missed");
+                      } catch (error) {
+                        console.log("m3.swipe.denied=" + String(error && (error.autojs6Code || error.code) || ""));
+                      }
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-runtime-plugin-swipe-denied.js>",
+                workingDirectory = deniedDir.absolutePath,
+                sandboxRoot = deniedDir.absolutePath,
+                timeoutMs = 15_000L,
+            ),
+        )
+        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin swipe capability denial", denied)
+        assertTrue(
+            "undeclared accessibility.gesture must be rejected before dispatch: " + denied.stdout,
+            denied.stdout.contains("m3.swipe.denied=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED"),
+        )
+        assertEquals(
+            "0",
+            denied.nativeValues["embedded_script.bridge_live_dispatch_count"],
+        )
+    }
 }

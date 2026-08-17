@@ -485,18 +485,19 @@ object NodeBridgeProviderRegistry {
             "statusReason" to "P13-20 partial gate: scoped readImage/recycle are live for OCR; screenshot and advanced image operations remain fail-closed",
         )
         ACCESSIBILITY_PROVIDER -> linkedMapOf(
-            "liveMethods" to "isEnabled,ensureEnabled,findByText,clickText,findOne,findAll,click,longClick,setText,scrollForward,scrollBackward,back,home,recentApps",
+            "liveMethods" to "isEnabled,ensureEnabled,findByText,clickText,findOne,findAll,click,longClick,setText,scrollForward,scrollBackward,back,home,recentApps,swipe,gesture",
             "selectorFields" to "text,desc,id,className,textContains,descContains,textMatches,descMatches,idMatches,classNameMatches,clickable,enabled,depth,boundsInside,boundsContains",
             "compatMethods" to "selector builders,findOne(number),find,findAll,click,longClick,setText,scrollForward,scrollBackward,exists,coordinate click,back,home,recentApps,recents",
-            "blockedMethods" to "swipe,gesture,powerDialog,waitFor,rawNode,rawUiObject,rootOrShizukuGestures",
+            "blockedMethods" to "powerDialog,waitFor,rawNode,rawUiObject,rootOrShizukuGestures",
             "liveServiceAvailable" to accessibilityOperational().toString(),
             "capability" to NodeBridgePermissionManifest.ACCESSIBILITY,
+            "gestureCapability" to NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE,
             "phase13Promotion" to "P13-19 partial accessibility selector promotion evidence gate",
             "packagedPromotion" to "blocked_until_packaged_accessibility_service_settings_lifecycle_and_disclosure_evidence",
             "coordinateClickPolicy" to "direct JS facade supports click(x,y); Android live provider currently accepts real clicks only through selector descriptors",
-            "gesturePolicy" to "gesture,root,Shizuku,raw input, and shell fallback paths require separate capabilities and must not be implied by accessibility",
+            "gesturePolicy" to "swipe/gesture are live behind the dedicated accessibility.gesture capability (M3.2); root, Shizuku, raw input, and shell fallback paths still require their own capabilities and must not be implied by accessibility",
             "rawObjectPolicy" to "no raw AccessibilityService, AccessibilityNodeInfo, UiObject, selector object, Context, Binder, or Java object crosses the bridge",
-            "statusReason" to "P13-19 partial gate: selector v2 JSON descriptors and controlled accessibility actions are live when an operational service is visible; advanced Pro parity remains blocked",
+            "statusReason" to "P13-19 partial gate: selector v2 JSON descriptors, controlled accessibility actions, and capability-gated coordinate gestures are live when an operational service is visible; advanced Pro parity remains blocked",
         )
         UI_PROVIDER -> linkedMapOf(
             "liveMethods" to "showLayout,update,batchUpdate,drainEvents,close",
