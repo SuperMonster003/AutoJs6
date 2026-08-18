@@ -398,8 +398,12 @@ pluginManagement {
                 name = "IntelliJIdea", vendor = "Jetbrains",
                 // @Reference AGP Upgrade Assistant integrated within JetBrains IntelliJ IDEA.
                 // @Updated by SuperMonster003 on Jul 17, 2026. (Manual)
+                //  ! Tops out at the 9.0 line on purpose: as of 2026.2 the JetBrains Android
+                //  ! plugin supports AGP 9.0.x, not 9.1. Both 2026.2 and 2026.2.1 therefore
+                //  ! land on the 2026.1.2 entry and get AGP 9.0.1.
+                //  ! zh-CN: 上限刻意停在 9.0 线: 截至 2026.2, JetBrains 的 Android 插件支持 AGP 9.0.x
+                //  ! 而非 9.1. 因此 2026.2 与 2026.2.1 都会落到 2026.1.2 条目, 得到 AGP 9.0.1.
                 agpVersionMap = mapOf(
-                    "2026.2" to "9.1.1",
                     "2026.1.2" to "9.0.1",
                     "2026.1" to "8.13.2",
                     "2025.2.2" to "8.12.0",
@@ -612,6 +616,21 @@ pluginManagement {
                     }
                     val maxSupportedAgpVersion = maxSupportedAgpVersionPrefix?.let { getAgpReleasedVersion(it) }
                     maxSupportedAgpVersion ?: return bestMatchingValue
+                    if (bestMatchingValue != null && isPlatformNewerThanVersionMap()) {
+                        // The platform is newer than every entry of the manually maintained
+                        // agpVersionMap, i.e. the map is stale. A newer IDE supports at least
+                        // what its predecessors did, so instead of silently downgrading to the
+                        // newest known entry (which may be too old to build this project),
+                        // fall back to auto selection: the newest released AGP compatible
+                        // with the current Gradle version.
+                        // zh-CN: 当前平台版本比 agpVersionMap 全部条目都新, 说明手动维护的映射表已滞后.
+                        // 更新的 IDE 至少支持其前代所支持的 AGP, 因此不再静默降级到映射表中最新的已知条目
+                        // (可能旧到无法构建本项目), 而是回退到 auto 选择: 与当前 Gradle 兼容的最新 AGP 正式版.
+                        bestMatchingOperationHintSuffix = identifier.autoSpecifiedSuffix
+                        console.versionInfo += "Notice: ${platform.fullName} ${platform.version} is newer than " +
+                                "all agpVersionMap entries, AGP falls back to auto selection"
+                        return maxSupportedAgpVersion
+                    }
                     bestMatchingValue ?: return maxSupportedAgpVersion.also {
                         bestMatchingOperationHintSuffix += identifier.autoSpecifiedSuffix
                     }
@@ -629,6 +648,16 @@ pluginManagement {
                 private fun getAgpReleasedVersion(referenceAgpVersion: String): String? {
                     val sortedAgpReleases = agpReleases.sortByVersionName(isDescend = true)
                     return sortedAgpReleases.find { it.startsWith(referenceAgpVersion) && !it.contains("-") }
+                }
+
+                private fun isPlatformNewerThanVersionMap(): Boolean {
+                    if (platform.version == consts.DEFAULT_VERSION) return false
+                    val newestKnownPlatformVersion = platform.agpVersionMap.keys
+                        .maxWithOrNull(utils::compareVersionStrings)
+                        ?: return false
+                    return runCatching {
+                        utils.compareVersionStrings(platform.version, newestKnownPlatformVersion) > 0
+                    }.getOrDefault(false)
                 }
 
             }
@@ -847,7 +876,15 @@ pluginManagement {
                 suffix += compatibilitySuffix
                 if (lib.id == "com.android.tools.build:gradle") {
                     selectedAgpVersion = version
-                    System.setProperty("gradle.java.version.coerced.by.gradle", "${getMaxSupportedJavaVersion(version)}")
+                    // @Hint: pass the Gradle version, not the AGP version.
+                    //  ! getMaxSupportedJavaVersion reads java-gradle-compat.properties, which maps
+                    //  ! a Java version to the Gradle version it needs, so feeding it an AGP version
+                    //  ! coerces the toolchain lower than necessary: on Gradle 9.3.0 with AGP 9.0.1
+                    //  ! it yields 24 where the table allows 25.
+                    //  ! zh-CN: 此处须传 Gradle 版本而非 AGP 版本. getMaxSupportedJavaVersion 依据
+                    //  ! java-gradle-compat.properties (Java 版本 -> 所需 Gradle 版本) 查表, 传入 AGP 版本
+                    //  ! 会把工具链上限压得过低: Gradle 9.3.0 配 AGP 9.0.1 时得到 24, 而按表应为 25.
+                    System.setProperty("gradle.java.version.coerced.by.gradle", "${getMaxSupportedJavaVersion(gradle.gradleVersion)}")
                     System.setProperty("gradle.java.version.overridden.by.user", "$overriddenJavaVersion")
                 }
 
