@@ -99,6 +99,10 @@ public class ScriptEngineService {
                     message = AndroidLuaRuntimeFailureMessages.resolve(getLanguageContext(), e);
                     if (engine instanceof JavaScriptEngine scriptEngine) {
                         scriptEngine.getRuntime().console.error(e);
+                    } else {
+                        // TODO by SuperMonster003 on Aug 15, 2026.
+                        //  ! engine.getRuntime().console.error(e);
+                        mGlobalConsole.error(e);
                     }
                 }
                 if (engine instanceof JavaScriptEngine scriptEngine) {
@@ -156,7 +160,7 @@ public class ScriptEngineService {
 
     private boolean shouldTrackExecution(ScriptExecution execution) {
         return !(execution instanceof ScriptExecuteActivity.ActivityScriptExecution activityExecution)
-                || activityExecution.isActivityStarted();
+               || activityExecution.isActivityStarted();
     }
 
     private ScriptExecution executeInternal(ScriptExecutionTask task) {
