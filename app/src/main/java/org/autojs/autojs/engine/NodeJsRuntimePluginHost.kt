@@ -675,14 +675,50 @@ object NodeJsRuntimePluginHost {
                 "Node.js runtime plugin reported an unsupported process ABI '$processAbi'.",
             )
         }
-        if (!runtimeInfo.getBoolean("persistentProcessRuntime", false) ||
-            !runtimeInfo.getBoolean("dedicatedRuntimeProcess", false) ||
-            runtimeInfo.getInt("maxConcurrentExecutions", 0) != 1 ||
-            runtimeInfo.getInt("queueCapacity", -1) != 0 ||
-            runtimeInfo.getString("cancellationMode") != "process_restart"
-        ) {
+        validateLifecycleContract(runtimeInfo)
+    }
+
+    /**
+     * The R5 lifecycle contract is about *semantics*, not about the exact
+     * scheduling knobs a plugin happens to use. A plugin stays compliant as
+     * long as it runs a persistent runtime in a dedicated process, admits one
+     * execution at a time, and can cancel an in-flight execution.
+     *
+     * Admission queue depth and the cancellation strategy are plugin-side
+     * implementation choices: a plugin may queue callers instead of rejecting
+     * them, and may attempt a cooperative stop before falling back to a process
+     * restart. Both keep single-active semantics intact, so neither is pinned
+     * to a literal value here.
+     */
+    private fun validateLifecycleContract(runtimeInfo: Bundle) {
+        if (!runtimeInfo.getBoolean("persistentProcessRuntime", false)) {
             throw NodeRuntimePluginContractException(
-                "Node.js runtime plugin does not satisfy the persistent single-active R5 lifecycle contract.",
+                "Node.js runtime plugin does not advertise a persistent process runtime.",
+            )
+        }
+        if (!runtimeInfo.getBoolean("dedicatedRuntimeProcess", false)) {
+            throw NodeRuntimePluginContractException(
+                "Node.js runtime plugin does not run in a dedicated runtime process.",
+            )
+        }
+        val maxConcurrentExecutions = runtimeInfo.getInt("maxConcurrentExecutions", 0)
+        if (maxConcurrentExecutions != 1) {
+            throw NodeRuntimePluginContractException(
+                "Node.js runtime plugin is not single-active; " +
+                        "maxConcurrentExecutions=$maxConcurrentExecutions, host requires 1.",
+            )
+        }
+        val queueCapacity = runtimeInfo.getInt("queueCapacity", -1)
+        if (queueCapacity < 0) {
+            throw NodeRuntimePluginContractException(
+                "Node.js runtime plugin reported an invalid admission queue capacity $queueCapacity.",
+            )
+        }
+        val cancellationMode = runtimeInfo.getString("cancellationMode").orEmpty()
+        if (cancellationMode !in SUPPORTED_CANCELLATION_MODES) {
+            throw NodeRuntimePluginContractException(
+                "Node.js runtime plugin reported an unsupported cancellation mode '$cancellationMode'; " +
+                        "host supports ${SUPPORTED_CANCELLATION_MODES.joinToString()}.",
             )
         }
     }
@@ -1162,6 +1198,17 @@ object NodeJsRuntimePluginHost {
         NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE,
         NodeJsRuntimeContract.CAPABILITY_ON_DEMAND_MODULE_SOURCE_PROVIDER,
         NodeJsRuntimeContract.CAPABILITY_SCOPED_WORKSPACE_ARCHIVE_TRANSPORT,
+    )
+
+    /**
+     * `process_restart` restarts the plugin process outright; the cooperative
+     * variant first asks the runtime to stop itself and only restarts the
+     * process when that does not release the execution in time. Both terminate
+     * an in-flight execution, which is all the host depends on.
+     */
+    private val SUPPORTED_CANCELLATION_MODES = setOf(
+        "process_restart",
+        "cooperative_stop_with_process_restart_fallback",
     )
 
     private val AUTHORIZED_STATES = setOf(

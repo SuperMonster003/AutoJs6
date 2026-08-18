@@ -86,7 +86,11 @@ class NodeRuntimePluginR5InstrumentationTest {
             assertEquals("plugin", result.nativeValues[PLUGIN_DIAGNOSTICS_SOURCE_KEY])
             assertEquals("true", result.nativeValues[PLUGIN_PERSISTENT_RUNTIME_KEY])
             assertEquals("1", result.nativeValues[PLUGIN_MAX_CONCURRENT_KEY])
-            assertEquals("0", result.nativeValues[PLUGIN_QUEUE_CAPACITY_KEY])
+            assertEquals(
+                "diagnostics queue capacity disagrees with the negotiated contract",
+                live.runtimeInfo.getInt("queueCapacity", -1).toString(),
+                result.nativeValues[PLUGIN_QUEUE_CAPACITY_KEY],
+            )
             assertEquals(live.runtimeInfo.getInt(NodeJsRuntimeContract.KEY_PID), result.pid)
             assertCoreRuntimeHealthy("R5 live plugin preflight", result)
         } finally {
@@ -309,14 +313,32 @@ class NodeRuntimePluginR5InstrumentationTest {
         }
     }
 
+    /**
+     * Single-active admission is observable as *serialization*, not as
+     * rejection: a plugin may either bounce excess callers with BUSY or hold
+     * them in a bounded queue. Both honour "one execution at a time", so this
+     * asserts the invariant every compliant plugin must satisfy — no two
+     * executions overlap — and only then checks the plugin's chosen strategy.
+     */
     @Test
-    fun r5_04_concurrentPluginCallsApplySingleActiveBackpressureWithoutQueueing() {
-        requireLivePlugin()
+    fun r5_04_concurrentPluginCallsApplySingleActiveBackpressure() {
+        val live = requireLivePlugin()
+        val queueCapacity = live.runtimeInfo.getInt("queueCapacity", -1)
+        assertTrue("R5 plugin reported an invalid queue capacity: $queueCapacity", queueCapacity >= 0)
         val workDir = freshWorkDir("backpressure")
-        val callerCount = 4
+        // One active execution plus a full queue: enough callers to create real
+        // contention under either strategy, and — for a queueing plugin — the
+        // largest set that can still be admitted without anyone bouncing.
+        // Floored at 2 so a zero-queue plugin is still put under contention.
+        val callerCount = (queueCapacity + 1).coerceAtLeast(2)
         val executor = Executors.newFixedThreadPool(callerCount)
         val ready = CountDownLatch(callerCount)
         val start = CountDownLatch(1)
+        // Overlap has to be observed from inside the runtime: by the time a
+        // result returns here the execution is already over, so only the script
+        // itself can witness a concurrent peer. The occupancy marker lives in
+        // the shared working directory because the plugin runs out-of-process.
+        val occupancyMarker = File(workDir, "active-execution.marker")
         try {
             val futures = (1..callerCount).map { index ->
                 executor.submit<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult> {
@@ -325,12 +347,29 @@ class NodeRuntimePluginR5InstrumentationTest {
                     runPlugin(
                         workDir = workDir,
                         label = "backpressure-$index",
-                        timeoutMs = 8_000L,
+                        // Queued callers spend this budget waiting for admission
+                        // before their own script even starts, so it has to cover
+                        // every predecessor's hold time plus its own.
+                        timeoutMs = backpressureCallerTimeoutMs(callerCount),
+                        env = mapOf(R5_OCCUPANCY_MARKER_ENV to occupancyMarker.absolutePath),
                         source = """
                             "nodejs";
                             (async function main() {
-                              await new Promise((resolve) => setTimeout(resolve, 1500));
-                              console.log("r5.backpressure.success=$index");
+                              const fs = require("fs");
+                              const marker = process.env.$R5_OCCUPANCY_MARKER_ENV;
+                              // wx fails if another execution is already inside
+                              // the runtime, which is exactly the violation.
+                              try {
+                                fs.writeFileSync(marker, String($index), { flag: "wx" });
+                              } catch (error) {
+                                throw new Error("r5.backpressure.overlap=" + $index + "/" + error.code);
+                              }
+                              try {
+                                await new Promise((resolve) => setTimeout(resolve, $BACKPRESSURE_SCRIPT_HOLD_MS));
+                                console.log("r5.backpressure.success=$index");
+                              } finally {
+                                fs.unlinkSync(marker);
+                              }
                             })();
                         """.trimIndent(),
                     )
@@ -338,22 +377,59 @@ class NodeRuntimePluginR5InstrumentationTest {
             }
             assertTrue("R5 backpressure callers did not become ready", ready.await(5L, TimeUnit.SECONDS))
             start.countDown()
-            val results = futures.map { it.get(15L, TimeUnit.SECONDS) }
+            val results = futures.map {
+                it.get(backpressureResultTimeoutMs(callerCount), TimeUnit.MILLISECONDS)
+            }
             val succeeded = results.filter { it.succeeded }
             val busy = results.filter { it.errorCode == NodeRuntimeErrorCodes.NODE_PLUGIN_BUSY }
 
-            assertEquals("exactly one concurrent plugin execution should be admitted: ${describe(results)}", 1, succeeded.size)
-            assertEquals("all non-admitted plugin executions should fail busy: ${describe(results)}", callerCount - 1, busy.size)
+            val overlapped = results.filter { it.errorMessage.orEmpty().contains("r5.backpressure.overlap=") }
+            assertTrue(
+                "plugin admitted overlapping executions: ${describe(results)}",
+                overlapped.isEmpty(),
+            )
+            assertFalse(
+                "occupancy marker outlived every execution: ${occupancyMarker.absolutePath}",
+                occupancyMarker.exists(),
+            )
+            assertTrue(
+                "no concurrent plugin execution was admitted: ${describe(results)}",
+                succeeded.isNotEmpty(),
+            )
+            assertEquals(
+                "every caller must either run or be rejected as busy: ${describe(results)}",
+                callerCount,
+                succeeded.size + busy.size,
+            )
+            if (queueCapacity == 0) {
+                assertEquals(
+                    "a zero-queue plugin must admit exactly one caller: ${describe(results)}",
+                    1,
+                    succeeded.size,
+                )
+            } else {
+                // A queueing plugin serializes rather than rejects, so with the
+                // queue exactly sized to the caller count nobody should bounce.
+                assertEquals(
+                    "a queueing plugin rejected callers that fit its queue: ${describe(results)}",
+                    callerCount,
+                    succeeded.size,
+                )
+            }
             busy.forEach { result ->
                 assertEquals("busy result unexpectedly allowed fallback", "false", result.nativeValues[FALLBACK_SAFE_KEY])
                 assertEquals("busy result did not report admission state", "busy", result.nativeValues[ADMISSION_STATUS_KEY])
-                assertEquals("busy result advertised a queue", "0", result.nativeValues[ADMISSION_QUEUE_CAPACITY_KEY])
+                assertEquals(
+                    "busy result misreported queue capacity",
+                    queueCapacity.toString(),
+                    result.nativeValues[ADMISSION_QUEUE_CAPACITY_KEY],
+                )
                 assertTrue(
                     "busy result omitted active execution attribution: ${result.nativeValues}",
                     result.nativeValues[ADMISSION_ACTIVE_EXECUTION_KEY].orEmpty().isNotBlank(),
                 )
             }
-            assertPluginSucceeded("R5 admitted backpressure execution", succeeded.single())
+            succeeded.forEach { assertPluginSucceeded("R5 admitted backpressure execution", it) }
         } finally {
             start.countDown()
             executor.shutdownNow()
@@ -431,6 +507,44 @@ class NodeRuntimePluginR5InstrumentationTest {
         }
         val capabilityError = captureContractFailure(missingCapability)
         assertTrue(capabilityError.message.orEmpty(), capabilityError.message.orEmpty().contains("missing mandatory capabilities"))
+    }
+
+    /**
+     * Queue depth and cancellation strategy are plugin-side implementation
+     * choices, so the host must accept every variant that still preserves
+     * single-active semantics — and keep rejecting the ones that do not.
+     */
+    @Test
+    fun r5_09_hostAcceptsCompliantLifecycleVariantsAndRejectsViolations() {
+        requireLivePlugin()
+        val compatible = lifecycleCompatibleRuntimeInfo()
+
+        SUPPORTED_CANCELLATION_MODES.forEach { mode ->
+            listOf(0, 1, 3).forEach { queueCapacity ->
+                val variant = Bundle(compatible).apply {
+                    putInt("queueCapacity", queueCapacity)
+                    putString("cancellationMode", mode)
+                }
+                NodeJsRuntimePluginHost.validateRuntimeInfoForTest(variant)
+            }
+        }
+
+        listOf(
+            "not single-active" to Bundle(compatible).apply { putInt("maxConcurrentExecutions", 2) },
+            "invalid admission queue capacity" to Bundle(compatible).apply { putInt("queueCapacity", -1) },
+            "unsupported cancellation mode" to Bundle(compatible).apply {
+                putString("cancellationMode", "kill_dash_nine")
+            },
+            "dedicated runtime process" to Bundle(compatible).apply {
+                putBoolean("dedicatedRuntimeProcess", false)
+            },
+            "persistent process runtime" to Bundle(compatible).apply {
+                putBoolean("persistentProcessRuntime", false)
+            },
+        ).forEach { (expectedMessage, violation) ->
+            val message = captureContractFailure(violation).message.orEmpty()
+            assertTrue("expected '$expectedMessage' but was '$message'", message.contains(expectedMessage))
+        }
     }
 
     @Test
@@ -651,7 +765,16 @@ class NodeRuntimePluginR5InstrumentationTest {
         assertTrue("R5 plugin does not advertise persistent process runtime", runtimeInfo.getBoolean("persistentProcessRuntime", false))
         assertTrue("R5 plugin runtime is not in a dedicated process", runtimeInfo.getBoolean("dedicatedRuntimeProcess", false))
         assertEquals("R5 plugin concurrent execution contract drift", 1, runtimeInfo.getInt("maxConcurrentExecutions", -1))
-        assertEquals("R5 plugin queue contract drift", 0, runtimeInfo.getInt("queueCapacity", -1))
+        // Queue depth is a plugin-side scheduling choice; single-active
+        // semantics come from maxConcurrentExecutions above.
+        assertTrue(
+            "R5 plugin advertised an invalid queue capacity: $runtimeInfo",
+            runtimeInfo.getInt("queueCapacity", -1) >= 0,
+        )
+        assertTrue(
+            "R5 plugin advertised an unsupported cancellation mode: $runtimeInfo",
+            runtimeInfo.getString("cancellationMode").orEmpty() in SUPPORTED_CANCELLATION_MODES,
+        )
         val pluginPid = runtimeInfo.getInt(NodeJsRuntimeContract.KEY_PID, -1)
         assertTrue("R5 plugin probe did not report a remote PID: $pluginPid", pluginPid > 0 && pluginPid != Process.myPid())
         val processAbi = runtimeInfo.getString("processAbi").orEmpty()
@@ -913,6 +1036,22 @@ class NodeRuntimePluginR5InstrumentationTest {
         putStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES, REQUIRED_HOST_CAPABILITIES.toTypedArray())
     }
 
+    /**
+     * [compatibleRuntimeInfo] stops at the capability stage; this carries it
+     * past the ABI and lifecycle gates so lifecycle fields can be varied one at
+     * a time. The ABI is taken from the device so it stays valid anywhere.
+     */
+    private fun lifecycleCompatibleRuntimeInfo() = compatibleRuntimeInfo().apply {
+        val deviceAbi = Build.SUPPORTED_ABIS.first()
+        putString("processAbi", deviceAbi)
+        putStringArray("supportedAbis", arrayOf(deviceAbi))
+        putBoolean("persistentProcessRuntime", true)
+        putBoolean("dedicatedRuntimeProcess", true)
+        putInt("maxConcurrentExecutions", 1)
+        putInt("queueCapacity", 0)
+        putString("cancellationMode", "process_restart")
+    }
+
     private fun captureContractFailure(runtimeInfo: Bundle): NodeRuntimePluginContractException {
         val failure = try {
             NodeJsRuntimePluginHost.validateRuntimeInfoForTest(runtimeInfo)
@@ -947,6 +1086,18 @@ class NodeRuntimePluginR5InstrumentationTest {
             FileInputStream(pfd.fileDescriptor).bufferedReader().use { reader -> reader.readText() }
         }
     }
+
+    /**
+     * A queued caller waits for every predecessor to finish before its own
+     * script starts, and the plugin spends the same budget on both, so the
+     * per-caller timeout has to scale with the caller count.
+     */
+    private fun backpressureCallerTimeoutMs(callerCount: Int): Long =
+        callerCount * BACKPRESSURE_SCRIPT_HOLD_MS + BACKPRESSURE_ADMISSION_SLACK_MS
+
+    /** Host-side ceiling: the caller budget plus room for Binder round trips. */
+    private fun backpressureResultTimeoutMs(callerCount: Int): Long =
+        backpressureCallerTimeoutMs(callerCount) + BACKPRESSURE_RESULT_SLACK_MS
 
     private fun configuredWarmSampleCount(): Int {
         val configured = InstrumentationRegistry.getArguments()
@@ -1016,6 +1167,10 @@ class NodeRuntimePluginR5InstrumentationTest {
         private const val RUNTIME_WARM_P95_LIMIT_MS = 400L
         private const val R5_MARKER_ENV = "AUTOJS6_R5_DISPATCH_MARKER"
         private const val R5_ACTIVE_MARKER_ENV = "AUTOJS6_R5_ACTIVE_MARKER"
+        private const val R5_OCCUPANCY_MARKER_ENV = "AUTOJS6_R5_OCCUPANCY_MARKER"
+        private const val BACKPRESSURE_SCRIPT_HOLD_MS = 1_500L
+        private const val BACKPRESSURE_ADMISSION_SLACK_MS = 8_000L
+        private const val BACKPRESSURE_RESULT_SLACK_MS = 10_000L
         private const val R5_WORKSPACE_INPUT_ENV = "AUTOJS6_R5_WORKSPACE_INPUT"
         private const val R5_WORKSPACE_OUTPUT_ENV = "AUTOJS6_R5_WORKSPACE_OUTPUT"
         private const val ACTIVE_CANCELLATION_SCRIPT_TIMEOUT_MS = 60_000L
@@ -1101,6 +1256,12 @@ class NodeRuntimePluginR5InstrumentationTest {
             "persistentProcessRuntime",
             "singleActiveBackpressure",
             "processRestartCancellation",
+        )
+
+        /** Mirrors the host-side allowlist in [NodeJsRuntimePluginHost]. */
+        private val SUPPORTED_CANCELLATION_MODES = setOf(
+            "process_restart",
+            "cooperative_stop_with_process_restart_fallback",
         )
         private val SHARED_LIFECYCLE_DIAGNOSTIC_KEYS = listOf(
             "embedded_script.runtime_state",

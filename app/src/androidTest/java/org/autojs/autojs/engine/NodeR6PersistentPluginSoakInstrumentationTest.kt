@@ -355,7 +355,12 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             runtimeInfo.getBoolean("dedicatedRuntimeProcess", false),
         )
         assertEquals("R6 plugin max-concurrency contract drift", 1, runtimeInfo.getInt("maxConcurrentExecutions", -1))
-        assertEquals("R6 plugin queue-capacity contract drift", 0, runtimeInfo.getInt("queueCapacity", -1))
+        // Admission queue depth is a plugin-side scheduling choice; the
+        // single-active guarantee comes from maxConcurrentExecutions above.
+        assertTrue(
+            "R6 plugin advertised an invalid queue capacity: $runtimeInfo",
+            runtimeInfo.getInt("queueCapacity", -1) >= 0,
+        )
         val processAbi = runtimeInfo.getString("processAbi").orEmpty()
         assertTrue("R6 plugin process ABI is missing", processAbi.isNotBlank())
         val supportedAbis = runtimeInfo.getStringArray("supportedAbis").orEmpty().toList()
