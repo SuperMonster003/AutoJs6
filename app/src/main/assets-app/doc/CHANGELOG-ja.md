@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/14
+###### 2026/08/19
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -79,6 +79,7 @@
 * `修正` Android プライベートディレクトリの /data/user/0 と /data/data のエイリアスが正規化されてプラグインリクエストに書き戻されず, 正当な Node.js workingDirectory が sandboxRoot を逸脱していると誤判定される問題
 * `修正` ホストに Node ランタイムを含まない nodePlugin ビルドで全 ABI の JNI/AAR ライブラリが誤って除外され, libjackpal-termexec2.so の欠落により Rhino Shell の初期化時にクラッシュする問題
 * `修正` apksigner の証明書ダイジェスト出力形式の変更により, Node.js R6 の証拠収集と検証で Android Build Tools 37 が報告する APK 署名者 ID が拒否される問題
+* `修正` IntelliJ IDEA で Android モジュールをビルドすると compileJava タスクの一致が曖昧になり失敗する問題
 * `修正` Android が現在割り当て済みのネイティブヒープを 0 バイトと報告すると, 正常な Node.js R6 常駐ランタイムの soak 証拠が拒否される問題
 * `修正` コレクターが最新の Inrt テンプレートを準備せずターゲット ABI も渡さないため, Node.js R6 のパッケージ APK 証拠がスキップされるか arm64 に固定される問題
 * `修正` ABI をまたぐアプリパッケージ時にインストール済みホストプロセスのネイティブライブラリが別 ABI ディレクトリへコピーされ, 32 ビットのパッケージアプリが 64 ビットのターミナルライブラリを読み込んでクラッシュする問題

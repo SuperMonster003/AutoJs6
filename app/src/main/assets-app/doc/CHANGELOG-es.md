@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/14
+###### 2026/08/19
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -79,6 +79,7 @@
 * `Corrección` Los alias /data/user/0 y /data/data de los directorios privados de Android no se normalizaban ni se volvían a escribir en las solicitudes del plugin, lo que hacía que un workingDirectory válido de Node.js se rechazara incorrectamente por exceder sandboxRoot
 * `Corrección` Las compilaciones nodePlugin sin un runtime Node en el host excluían incorrectamente las bibliotecas JNI/AAR de todas las ABI, lo que provocaba un cierre inesperado al inicializar Rhino Shell por la ausencia de libjackpal-termexec2.so
 * `Corrección` La recopilación y verificación de evidencias de Node.js R6 rechazaban las identidades de firma de APK informadas por Android Build Tools 37 porque apksigner cambió el formato de salida del resumen del certificado
+* `Corrección` Las compilaciones de módulos Android en IntelliJ IDEA fallaban debido a una coincidencia ambigua de la tarea compileJava
 * `Corrección` La evidencia soak de Node.js R6 podía rechazar un runtime persistente en buen estado cuando Android informaba cero bytes asignados actualmente al heap nativo
 * `Corrección` La evidencia de APK empaquetado de Node.js R6 se omitía o quedaba vinculada a arm64 porque el recopilador no preparaba una plantilla Inrt nueva ni pasaba la ABI de destino
 * `Corrección` El empaquetado de aplicaciones entre ABI podía copiar bibliotecas nativas del proceso host instalado a un directorio de otra ABI, lo que hacía que las aplicaciones empaquetadas de 32 bits cargaran bibliotecas de terminal de 64 bits y se cerraran inesperadamente

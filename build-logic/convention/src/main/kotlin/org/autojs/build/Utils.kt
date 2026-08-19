@@ -315,6 +315,7 @@ object Utils {
 
         val installer = {
             project.logInfo("[JvmConv] Detected Android plugin in module='${project.path}', installing configuration")
+            configureIntellijAndroidBuildTasks(project)
             applyKotlinAndroidPluginIfNeeded(project)
 
             System.getProperty("gradle.java.version.select").let { ver ->
@@ -333,6 +334,60 @@ object Utils {
 
         project.plugins.withId("com.android.application") { installer() }
         project.plugins.withId("com.android.library") { installer() }
+    }
+
+    /**
+     * IntelliJ IDEA's Android project builder requests the JVM lifecycle task names
+     * `compileJava` and `testClasses` for every imported module. Android Gradle Plugin
+     * exposes only variant-scoped equivalents, so Gradle otherwise treats `compileJava`
+     * as an ambiguous task abbreviation (for example, between debug, release, and test
+     * compilation tasks).
+     *
+     * Register exact IDEA-only aliases after AGP has created its variants. Prefer the
+     * unflavoured debug variant, then the app debug flavour used by the main AutoJs6
+     * run configuration, and finally the first available debug variant.
+     *
+     * zh-CN: IntelliJ IDEA 的 Android 项目构建器会为每个导入模块请求 JVM 生命周期
+     * 任务 `compileJava` 和 `testClasses`. Android Gradle Plugin 仅提供变体任务, 因此
+     * Gradle 会将 `compileJava` 视为存在歧义的任务缩写. 在 AGP 创建变体后注册仅供
+     * IDEA 使用的精确别名, 并优先选择无 flavor 的 debug 变体或主应用的 appDebug 变体.
+     */
+    private fun configureIntellijAndroidBuildTasks(project: Project) {
+        if (!System.getProperty("idea.active").toBoolean()) return
+
+        project.afterEvaluate {
+            val javaCompileTask = project.tasks.names
+                .filter { name ->
+                    name.startsWith("compile") &&
+                        name.endsWith("DebugJavaWithJavac") &&
+                        "AndroidTest" !in name &&
+                        "UnitTest" !in name
+                }
+                .minWithOrNull(
+                    compareBy<String> { name ->
+                        when (name) {
+                            "compileDebugJavaWithJavac" -> 0
+                            "compileAppDebugJavaWithJavac" -> 1
+                            else -> 2
+                        }
+                    }.thenBy { it },
+                ) ?: error("No debug Java compile task found for IntelliJ IDEA module '${project.path}'")
+
+            val unitTestSourcesTask = javaCompileTask
+                .removeSuffix("JavaWithJavac")
+                .plus("UnitTestSources")
+
+            project.tasks.register("compileJava") {
+                group = "build"
+                description = "IntelliJ IDEA compatibility alias for $javaCompileTask."
+                dependsOn(javaCompileTask)
+            }
+            project.tasks.register("testClasses") {
+                group = "build"
+                description = "IntelliJ IDEA compatibility alias for $unitTestSourcesTask."
+                dependsOn(unitTestSourcesTask)
+            }
+        }
     }
 
     // Module-level toolchain: Let AGP/Gradle know which JDK language level should be used for this module.

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/14
+###### 2026/08/19
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -79,6 +79,7 @@
 * `Correction` Les alias /data/user/0 et /data/data des répertoires privés Android n'étaient pas normalisés puis réécrits dans les requêtes du plugin, ce qui faisait considérer à tort un workingDirectory Node.js valide comme sortant de sandboxRoot
 * `Correction` Les builds nodePlugin sans environnement d'exécution Node côté hôte excluaient à tort les bibliothèques JNI/AAR de toutes les ABI, entraînant un plantage lors de l'initialisation de Rhino Shell en raison de l'absence de libjackpal-termexec2.so
 * `Correction` La collecte et la vérification des preuves Node.js R6 rejetaient les identités de signature APK signalées par Android Build Tools 37 car apksigner avait modifié le format de sortie de l'empreinte du certificat
+* `Correction` Les builds de modules Android dans IntelliJ IDEA échouaient en raison d'une correspondance ambiguë de la tâche compileJava
 * `Correction` Les preuves soak Node.js R6 pouvaient rejeter un environnement d'exécution persistant sain lorsqu'Android signalait zéro octet actuellement alloué au tas natif
 * `Correction` Les preuves d'APK empaqueté Node.js R6 étaient ignorées ou liées à arm64 car le collecteur ne préparait pas de modèle Inrt récent et ne transmettait pas l'ABI cible
 * `Correction` L'empaquetage d'applications entre ABI pouvait copier les bibliothèques natives du processus hôte installé dans le répertoire d'une autre ABI, amenant les applications empaquetées 32 bits à charger des bibliothèques de terminal 64 bits puis à planter
