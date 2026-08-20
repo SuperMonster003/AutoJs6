@@ -40,6 +40,8 @@ internal class NodeModuleSourceFileTransportSession(
     private val responseDirectory = File(root, "responses")
     private val running = AtomicBoolean(false)
     private val requestCount = AtomicInteger(0)
+    // Requests that produced no source: not_found and not_encrypted.
+    private val probeRequestCount = AtomicInteger(0)
     private val responseCount = AtomicInteger(0)
     private val failureCount = AtomicInteger(0)
     private val sourceBytes = AtomicLong(0L)
@@ -111,6 +113,14 @@ internal class NodeModuleSourceFileTransportSession(
     fun nativeValues(): Map<String, String> = linkedMapOf<String, String>().apply {
         put("embedded_script.module_provider.transport", "file_pfd_v1")
         put("embedded_script.module_provider.transport_request_count", requestCount.get().toString())
+        put(
+            "embedded_script.module_provider.transport_probe_request_count",
+            probeRequestCount.get().toString(),
+        )
+        put(
+            "embedded_script.module_provider.transport_probe_request_count_limit",
+            PROBE_COUNT_LIMIT.toString(),
+        )
         put("embedded_script.module_provider.transport_response_count", responseCount.get().toString())
         put("embedded_script.module_provider.transport_failure_count", failureCount.get().toString())
         put("embedded_script.module_provider.transport_source_bytes", sourceBytes.get().toString())
@@ -150,8 +160,15 @@ internal class NodeModuleSourceFileTransportSession(
         val currentRequestCount = requestCount.incrementAndGet()
         var sourceFile: File? = null
         val response = runCatching {
+            if (probeRequestCount.get() >= PROBE_COUNT_LIMIT) {
+                throw TransportBudgetException(
+                    budgetMessage("Module-source transport zero-yield probe budget is exhausted."),
+                )
+            }
             if (currentRequestCount > REQUEST_COUNT_LIMIT) {
-                throw TransportBudgetException("Module-source transport request-count budget is exhausted.")
+                throw TransportBudgetException(
+                    budgetMessage("Module-source transport request-count budget is exhausted."),
+                )
             }
             val requestJson = try {
                 JSONObject(readRequestTextBounded(requestFile))
@@ -203,6 +220,9 @@ internal class NodeModuleSourceFileTransportSession(
             val status = providerResponse.getString(KEY_STATUS).orEmpty()
             if (status !in STATUSES) {
                 throw InvalidTransportRequestException("Unknown module-source provider status.")
+            }
+            if (status in PROBE_STATUSES) {
+                probeRequestCount.incrementAndGet()
             }
             val descriptor = providerResponse.sourceDescriptor()
             JSONObject().apply {
@@ -474,6 +494,22 @@ internal class NodeModuleSourceFileTransportSession(
         }
     }
 
+    /**
+     * Appends the per-category counters so an exhausted budget is self
+     * explanatory. Without them a plaintext project reports an exhausted source
+     * budget while having transported zero sources, which reads as a
+     * contradiction.
+     */
+    private fun budgetMessage(reason: String): String = buildString {
+        append(reason)
+        append(" (requests=").append(requestCount.get())
+        append(", probes=").append(probeRequestCount.get())
+        append('/').append(PROBE_COUNT_LIMIT)
+        append(", sourceBytes=").append(sourceBytes.get())
+        append('/').append(MAX_TOTAL_SOURCE_BYTES)
+        append(')')
+    }
+
     private fun failureCategory(error: Throwable): String = when (error) {
         is ProviderCallTimeoutException -> "timed_out"
         is DeniedTransportRequestException -> "denied"
@@ -489,7 +525,11 @@ internal class NodeModuleSourceFileTransportSession(
         is ProviderCallTimeoutException -> "Module-source provider transport timed out."
         is DeniedTransportRequestException -> "Module-source provider transport denied the request."
         is InvalidTransportRequestException -> "Module-source provider transport received an invalid request."
-        is TransportBudgetException -> "Module-source provider transport budget is exhausted."
+        // Budget messages carry only counters and limits, never a path or
+        // source, and the counters are what make an exhausted budget
+        // diagnosable at all.
+        is TransportBudgetException ->
+            error.message ?: "Module-source provider transport budget is exhausted."
         is InterruptedException,
         is java.io.InterruptedIOException,
         -> "Module-source provider transport was interrupted."
@@ -508,7 +548,8 @@ internal class NodeModuleSourceFileTransportSession(
         const val MIN_TIMEOUT_MS = 1L
         const val MAX_TIMEOUT_MS = 30_000L
         const val MAX_REQUEST_JSON_BYTES = 64 * 1024
-        const val REQUEST_COUNT_LIMIT = 1_024
+        const val PROBE_COUNT_LIMIT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_PROBE_MAX_COUNT
+        const val REQUEST_COUNT_LIMIT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_REQUEST_MAX_COUNT
         const val COPY_BUFFER_BYTES = 32 * 1024
         const val MAX_SOURCE_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
         const val MAX_TOTAL_SOURCE_BYTES =
@@ -527,18 +568,21 @@ internal class NodeModuleSourceFileTransportSession(
         const val KEY_ERROR_MESSAGE = "errorMessage"
 
         const val STATUS_DECRYPTED = "decrypted"
+        const val STATUS_NOT_ENCRYPTED = "not_encrypted"
+        const val STATUS_NOT_FOUND = "not_found"
         const val STATUS_DENIED = "denied"
         const val STATUS_TIMED_OUT = "timed_out"
         const val STATUS_FAILED = "failed"
         val STATUSES = setOf(
             STATUS_DECRYPTED,
-            "not_encrypted",
-            "not_found",
+            STATUS_NOT_ENCRYPTED,
+            STATUS_NOT_FOUND,
             STATUS_DENIED,
             "cancelled",
             STATUS_TIMED_OUT,
             STATUS_FAILED,
         )
+        val PROBE_STATUSES = setOf(STATUS_NOT_ENCRYPTED, STATUS_NOT_FOUND)
         const val ERROR_PROVIDER_FAILED = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_FAILED"
         const val ERROR_PROVIDER_TIMEOUT = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_TIMEOUT"
         const val ERROR_PROVIDER_DENIED = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_DENIED"

@@ -81,6 +81,29 @@ object NodeRuntimeCapabilities {
     const val RUNTIME_MODULE_SOURCES_MAX_BYTES = 67_108_864
     const val RUNTIME_MODULE_SOURCE_MAX_COUNT = 8192
 
+    /**
+     * Ceiling for module-source requests that yield no source at all, namely
+     * `not_found` and `not_encrypted` results.
+     *
+     * The resolver probes several candidates per specifier (extension variants,
+     * directory index files, package export conditions), so a plain project with
+     * a large plaintext dependency graph legitimately issues far more requests
+     * than it ever resolves sources. Charging those probes against the source
+     * budget would reject ordinary projects that decrypt nothing, so they are
+     * bounded separately and much more loosely.
+     */
+    const val RUNTIME_MODULE_SOURCE_PROBE_MAX_COUNT = 131_072
+
+    /**
+     * Absolute per-execution request ceiling, kept only as a termination
+     * backstop. Productive requests are already bounded by
+     * [RUNTIME_MODULE_SOURCE_MAX_COUNT] and the byte budgets before any
+     * decryption happens, and zero-yield probes by
+     * [RUNTIME_MODULE_SOURCE_PROBE_MAX_COUNT].
+     */
+    const val RUNTIME_MODULE_SOURCE_REQUEST_MAX_COUNT =
+        RUNTIME_MODULE_SOURCE_MAX_COUNT + RUNTIME_MODULE_SOURCE_PROBE_MAX_COUNT
+
     val featureFlags = listOf(
         NodeRuntimeFeatureFlag(
             id = "esm",

@@ -185,7 +185,9 @@ class NodeBridgeUiDispatchService : Service() {
             }
             descriptors += patch
         }
-        session.batchUpdate(descriptors)
+        if (!session.batchUpdate(descriptors)) {
+            return invalidHandle(request)
+        }
         return NodeBridgeResponse.success(
             request.id,
             session.snapshot().toString(),
@@ -201,7 +203,9 @@ class NodeBridgeUiDispatchService : Service() {
         if (validation != null) {
             return invalid(request, validation)
         }
-        session.update(patch)
+        if (!session.update(patch)) {
+            return invalidHandle(request)
+        }
         return NodeBridgeResponse.success(
             request.id,
             session.snapshot().toString(),
@@ -210,23 +214,44 @@ class NodeBridgeUiDispatchService : Service() {
 
     private fun drainEvents(request: NodeBridgeRequest): NodeBridgeResponse {
         val args = request.argsArray()
-        val session = activeSession(request, args) ?: return invalidHandle(request)
+        val session = session(request, args, allowClosed = true) ?: return invalidHandle(request)
         val options = args.optJSONObject(1) ?: JSONObject()
         val maxEvents = options.optInt("maxEvents", DEFAULT_DRAIN_EVENTS).coerceIn(1, MAX_DRAIN_EVENTS)
-        return NodeBridgeResponse.success(request.id, session.drainEvents(maxEvents).toString())
+        val events = session.drainEvents(maxEvents)
+        if (session.isClosed() && events.hasTerminalCloseEvent(session.id)) {
+            NodeBridgeUiSessionStore.remove(session.id, session)
+        }
+        return NodeBridgeResponse.success(request.id, events.toString())
     }
 
     private fun close(request: NodeBridgeRequest): NodeBridgeResponse {
         val args = request.argsArray()
-        val session = activeSession(request, args) ?: return invalidHandle(request)
+        val session = session(request, args, allowClosed = true) ?: return invalidHandle(request)
         session.close(args.optJSONObject(1)?.optString("reason").orEmpty().ifBlank { "close" })
-        NodeBridgeUiSessionStore.remove(session.id)
+        NodeBridgeUiSessionStore.remove(session.id, session)
         return NodeBridgeResponse.success(request.id, "null")
     }
 
     private fun activeSession(request: NodeBridgeRequest, args: JSONArray): NodeBridgeUiSession? {
+        return session(request, args, allowClosed = false)
+    }
+
+    private fun session(
+        request: NodeBridgeRequest,
+        args: JSONArray,
+        allowClosed: Boolean,
+    ): NodeBridgeUiSession? {
         val id = args.optString(0).takeIf { it.isNotBlank() } ?: return null
-        return NodeBridgeUiSessionStore.get(id)?.takeUnless { it.isClosed() || request.module != NodeBridgeModules.UI }
+        return NodeBridgeUiSessionStore.get(id)?.takeUnless {
+            request.module != NodeBridgeModules.UI || (!allowClosed && it.isClosed())
+        }
+    }
+
+    private fun JSONArray.hasTerminalCloseEvent(sessionId: String): Boolean = (0 until length()).any { index ->
+        val event = optJSONObject(index) ?: return@any false
+        event.optString("type") == "close" &&
+            event.optString("handleId") == sessionId &&
+            event.optJSONObject("snapshot")?.optBoolean("closed") == true
     }
 
     private fun invalidHandle(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -317,6 +342,8 @@ object NodeBridgeUiSessionStore {
 
     fun remove(id: String): NodeBridgeUiSession? = sessions.remove(id)
 
+    fun remove(id: String, session: NodeBridgeUiSession): Boolean = sessions.remove(id, session)
+
     fun activeCount(): Int = sessions.size
 
     fun closeAll(reason: String = "close_all") {
@@ -332,6 +359,7 @@ class NodeBridgeUiSession(
 
     private val closed = AtomicBoolean(false)
     private val shown = AtomicBoolean(false)
+    private val eventLifecycleLock = Any()
     private val eventQueue = ConcurrentLinkedQueue<JSONObject>()
     private val eventCount = AtomicInteger(0)
     private val stateLock = Any()
@@ -363,14 +391,15 @@ class NodeBridgeUiSession(
         if (activityRef?.get() === activity) {
             activityRef = null
         }
-        if (!closed.get()) {
-            enqueueEvent(JSONObject().put("type", "close").put("reason", "activity_destroyed"))
-        }
+        close("activity_destroyed")
     }
 
     fun markShown() {
-        if (shown.compareAndSet(false, true)) {
-            enqueueEvent(JSONObject().put("type", "shown"))
+        synchronized(eventLifecycleLock) {
+            if (closed.get() || !shown.compareAndSet(false, true)) {
+                return
+            }
+            enqueueEventLocked(JSONObject().put("type", "shown"))
         }
     }
 
@@ -378,18 +407,25 @@ class NodeBridgeUiSession(
         descriptorText = descriptor.toString()
     }
 
-    fun update(patch: JSONObject) {
-        applyOrQueuePatch(patch)
-        enqueueEvent(JSONObject().put("type", "update").put("id", patch.optString("id")))
+    fun update(patch: JSONObject): Boolean {
+        if (!applyOrQueuePatch(patch)) {
+            return false
+        }
+        return enqueueEvent(JSONObject().put("type", "update").put("id", patch.optString("id")))
     }
 
-    fun batchUpdate(patches: List<JSONObject>) {
+    fun batchUpdate(patches: List<JSONObject>): Boolean {
+        if (closed.get()) {
+            return false
+        }
         val ids = JSONArray()
         patches.forEach { patch ->
-            applyOrQueuePatch(patch)
+            if (!applyOrQueuePatch(patch)) {
+                return false
+            }
             patch.optString("id").takeIf { it.isNotBlank() }?.let(ids::put)
         }
-        enqueueEvent(
+        return enqueueEvent(
             JSONObject()
                 .put("type", "batchUpdate")
                 .put("count", patches.size)
@@ -397,22 +433,31 @@ class NodeBridgeUiSession(
         )
     }
 
-    private fun applyOrQueuePatch(patch: JSONObject) {
+    private fun applyOrQueuePatch(patch: JSONObject): Boolean {
+        if (closed.get()) {
+            return false
+        }
         val activity = activityRef?.get()
         if (activity != null) {
             activity.applyPatch(patch)
         } else {
             synchronized(pendingPatches) {
+                if (closed.get()) {
+                    return false
+                }
                 pendingPatches += JSONObject(patch.toString())
             }
         }
+        return true
     }
 
     fun close(reason: String) {
-        if (!closed.compareAndSet(false, true)) {
+        if (!enqueueTerminalEvent(JSONObject().put("type", "close").put("reason", reason))) {
             return
         }
-        enqueueEvent(JSONObject().put("type", "close").put("reason", reason))
+        synchronized(pendingPatches) {
+            pendingPatches.clear()
+        }
         val activity = activityRef?.get()
         activity?.runOnUiThread {
             activity.finish()
@@ -424,8 +469,13 @@ class NodeBridgeUiSession(
         if (componentId.isBlank()) {
             return
         }
-        synchronized(stateLock) {
-            state[componentId] = JSONObject(value.toString())
+        synchronized(eventLifecycleLock) {
+            if (closed.get()) {
+                return
+            }
+            synchronized(stateLock) {
+                state[componentId] = JSONObject(value.toString())
+            }
         }
     }
 
@@ -458,7 +508,23 @@ class NodeBridgeUiSession(
         return events
     }
 
-    private fun enqueueEvent(rawEvent: JSONObject) {
+    private fun enqueueEvent(rawEvent: JSONObject): Boolean = synchronized(eventLifecycleLock) {
+        if (closed.get()) {
+            return@synchronized false
+        }
+        enqueueEventLocked(rawEvent)
+        true
+    }
+
+    private fun enqueueTerminalEvent(rawEvent: JSONObject): Boolean = synchronized(eventLifecycleLock) {
+        if (!closed.compareAndSet(false, true)) {
+            return@synchronized false
+        }
+        enqueueEventLocked(rawEvent)
+        true
+    }
+
+    private fun enqueueEventLocked(rawEvent: JSONObject) {
         val event = JSONObject(rawEvent.toString())
             .put("handleId", id)
             .put("snapshot", snapshot())

@@ -907,6 +907,7 @@ P14-39 does not add a new error code. It records the v1.2 closeout handoff as
 - Common cause: too many source records, a single module over `16777216` UTF-8 bytes, total supplied source over `67108864` UTF-8 bytes, or an on-demand response that would cross the request-scoped aggregate budget.
 - Example: resolving an encrypted CommonJS module whose decrypted UTF-8 source is larger than the per-module limit.
 - How to fix: reduce bundled dependencies or module size, split unsupported packages out of the packaged graph, or keep plaintext modules on scoped disk-backed loading.
+- Note: requests answered `not_found` or `not_encrypted` yield no source and are charged against a separate, much looser probe budget, so a plaintext project does not consume the source budget. Read the counters in the error message to identify which budget was exhausted: `decrypted`/`sourceBytes` at their limit means a genuine source overage, while `probes` at its limit means an unusually large or pathological resolution graph.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
 
 ## ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_CANCELLED

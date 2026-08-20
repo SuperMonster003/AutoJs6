@@ -124,8 +124,11 @@ For every provider request, the host must:
   identity drift;
 - enforce the supported extension and regular-file boundary;
 - probe the fixed encrypted header before any bounded payload read;
-- enforce per-source, aggregate-byte, source-count, request-count, timeout, and
-  cancellation limits before returning decrypted UTF-8 source;
+- enforce per-source, aggregate-byte, source-count, probe-count, request-count,
+  timeout, and cancellation limits before returning decrypted UTF-8 source;
+  source-count and byte limits are charged only for requests that yield source,
+  while `not_found` and `not_encrypted` results are bounded by the separate
+  probe-count limit;
 - retain stable source names without exposing decrypted source or private cache
   paths in diagnostics.
 

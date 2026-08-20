@@ -693,6 +693,115 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
         }
     }
 
+    /**
+     * A plaintext project resolves entirely through `not_found` and
+     * `not_encrypted` results. Those yield no source, so they must not consume
+     * the source budget no matter how large the dependency graph is.
+     */
+    @Test
+    fun directProviderDoesNotChargeZeroYieldProbesAgainstTheSourceBudget() {
+        val root = File(context.cacheDir, "embedded-engine-probe-budget-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create probe budget dir: $absolutePath" }
+        }
+        try {
+            val plaintext = File(root, "plaintext.cjs").apply {
+                writeText("module.exports = 'plaintext';", StandardCharsets.UTF_8)
+            }
+            val missing = File(root, "missing.cjs")
+            // Comfortably past the former 1024 request ceiling.
+            val probeRounds = 1_500
+
+            withDirectProvider(root) { fixture ->
+                repeat(probeRounds) { index ->
+                    assertProviderResponse(
+                        response = fixture.provider.resolveModuleSource(
+                            providerRequest(fixture.executionId, plaintext.absolutePath, "plain-$index"),
+                        ),
+                        requestId = "plain-$index",
+                        status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_NOT_ENCRYPTED,
+                    )
+                    assertProviderResponse(
+                        response = fixture.provider.resolveModuleSource(
+                            providerRequest(fixture.executionId, missing.absolutePath, "missing-$index"),
+                        ),
+                        requestId = "missing-$index",
+                        status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_NOT_FOUND,
+                    )
+                }
+
+                val diagnostics = fixture.provider.nativeDiagnostics
+                assertEquals(
+                    "zero-yield probes must not be rejected by any budget",
+                    "0",
+                    diagnostics.getString("embedded_script.module_provider.budget_rejected_count"),
+                )
+                assertEquals(
+                    "0",
+                    diagnostics.getString("embedded_script.module_provider.decrypted_source_count"),
+                )
+                assertEquals(
+                    "0",
+                    diagnostics.getString("embedded_script.module_provider.used_source_count"),
+                )
+                assertEquals(
+                    (probeRounds * 2).toString(),
+                    diagnostics.getString("embedded_script.module_provider.probe_request_count"),
+                )
+                assertEquals(
+                    probeRounds.toString(),
+                    diagnostics.getString("embedded_script.module_provider.not_encrypted_count"),
+                )
+                assertEquals(
+                    probeRounds.toString(),
+                    diagnostics.getString("embedded_script.module_provider.not_found_count"),
+                )
+            }
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    /**
+     * An exhausted budget must name its counters, otherwise a plaintext project
+     * reports an exhausted source budget while having resolved zero sources.
+     */
+    @Test
+    fun directProviderBudgetErrorMessageReportsCounters() {
+        val root = File(context.cacheDir, "embedded-engine-budget-message-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create budget message dir: $absolutePath" }
+        }
+        try {
+            withTestScriptEncryption {
+                val encrypted = File(root, "encrypted.cjs")
+                writeEncryptedScript(encrypted, "module.exports = 'budget';")
+
+                withDirectProvider(
+                    root = root,
+                    initialSourceCount = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT,
+                ) { fixture ->
+                    val budget = fixture.provider.resolveModuleSource(
+                        providerRequest(fixture.executionId, encrypted.absolutePath, "budget"),
+                    )
+                    val message = budget
+                        .getString(NodeJsRuntimeContract.KEY_ERROR_MESSAGE)
+                        .orEmpty()
+                    listOf("requests=", "probes=", "decrypted=", "sourceBytes=").forEach { counter ->
+                        assertTrue(
+                            "budget error message must report $counter but was: $message",
+                            counter in message,
+                        )
+                    }
+                    assertFalse(
+                        "budget error message must not leak a filesystem path but was: $message",
+                        encrypted.absolutePath in message,
+                    )
+                }
+            }
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
     private inline fun <T> withDirectProvider(
         root: File,
         timeoutMs: Long = DIRECT_PROVIDER_TIMEOUT_MS,

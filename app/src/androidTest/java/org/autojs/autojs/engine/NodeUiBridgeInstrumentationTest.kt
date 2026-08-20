@@ -110,6 +110,41 @@ class NodeUiBridgeInstrumentationTest {
     }
 
     @Test
+    fun uiSessionTerminalCloseRemainsLastAfterPostTerminalEventFlood() {
+        val session = NodeBridgeUiSession(
+            id = "ui-terminal-event-order",
+            descriptor = JSONObject().put("type", "Text").put("id", "title").put("text", "Before close"),
+        )
+        session.recordState("before", JSONObject().put("value", "kept"))
+        session.emitComponentEvent("click", "before")
+        assertTrue(session.update(JSONObject().put("id", "title").put("text", "Updated before close")))
+
+        session.close("terminal_test")
+        repeat(256) { index ->
+            session.recordState("late-$index", JSONObject().put("value", index))
+            session.emitComponentEvent("input", "late-$index", JSONObject().put("value", index))
+            session.markShown()
+            assertFalse(session.update(JSONObject().put("id", "title").put("text", "Late $index")))
+            assertFalse(session.batchUpdate(listOf(JSONObject().put("id", "title").put("text", "Late batch $index"))))
+        }
+        session.close("duplicate_terminal_test")
+
+        val events = session.drainEvents(512)
+        assertEquals(3, events.length())
+        assertEquals(1, events.eventTypeCount("close"))
+        val terminal = events.getJSONObject(events.length() - 1)
+        assertEquals("close", terminal.getString("type"))
+        assertEquals("terminal_test", terminal.getString("reason"))
+        assertTrue(terminal.getJSONObject("snapshot").getBoolean("closed"))
+
+        val snapshot = session.snapshot()
+        assertFalse(snapshot.getBoolean("shown"))
+        assertEquals(1, snapshot.getJSONObject("state").length())
+        assertTrue(snapshot.getJSONObject("state").has("before"))
+        assertEquals(0, session.drainEvents(512).length())
+    }
+
+    @Test
     fun jsUiModuleUsesFakeTransportForLayoutEventsAndPolicy() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node ui bridge protocol regression")
 
@@ -506,9 +541,18 @@ class NodeUiBridgeInstrumentationTest {
             assertTrue(destroyShow.toString(), destroyShow.ok)
             val destroyHandleId = JSONObject(destroyShow.resultJson.orEmpty()).getString("id")
             assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
+            val terminalBeforeDestroy = checkNotNull(NodeBridgeUiSessionStore.get(destroyHandleId)) {
+                "Missing UI session for closed-before-provider-destroy cleanup"
+            }
+            terminalBeforeDestroy.close("terminal_before_provider_destroy")
+            assertTrue(terminalBeforeDestroy.isClosed())
+            assertTrue(NodeBridgeUiSessionStore.get(destroyHandleId) === terminalBeforeDestroy)
             provider.destroy()
-            assertTrue("Provider destroy did not close UI", waitUntil { NodeBridgeUiSessionStore.get(destroyHandleId) == null })
+            assertTrue("Provider destroy did not remove the already-closed UI session", waitUntil {
+                NodeBridgeUiSessionStore.get(destroyHandleId) == null
+            })
             assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+            assertEquals("1", provider.nativeDiagnostics()["embedded_script.bridge_resource.destroy_closed_count"])
         } finally {
             provider.destroy()
             instrumentation.removeMonitor(monitor)
@@ -534,6 +578,7 @@ class NodeUiBridgeInstrumentationTest {
             )
             assertTrue(show.toString(), show.ok)
             handleId = JSONObject(show.resultJson.orEmpty()).getString("id")
+            val session = checkNotNull(NodeBridgeUiSessionStore.get(handleId)) { "Missing Back lifecycle UI session" }
             assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
 
             val activity = monitor.waitForActivityWithTimeout(5_000L) as? NodeBridgeUiActivity
@@ -545,6 +590,20 @@ class NodeUiBridgeInstrumentationTest {
             assertTrue("Back did not finish the Node UI Activity", waitUntil {
                 activity!!.isFinishing || activity.isDestroyed
             })
+            assertTrue("Activity destroy did not make the Node UI session terminal", waitUntil {
+                NodeBridgeUiSessionStore.get(handleId)?.isClosed() == true
+            })
+
+            val terminalUpdate = dispatch(
+                provider,
+                method = "update",
+                argsJson = """["$handleId",{"id":"title","text":"Must not apply"}]""",
+            )
+            assertFalse(terminalUpdate.toString(), terminalUpdate.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, terminalUpdate.error?.code)
+            assertTrue(terminalUpdate.error?.message.orEmpty().contains("active provider-owned UI handle"))
+
+            session.close("duplicate_after_activity_destroy")
 
             val events = waitForUiEvents(provider, handleId) { collected ->
                 collected.hasEventType("close")
@@ -552,6 +611,27 @@ class NodeUiBridgeInstrumentationTest {
             val close = events.firstEventType("close")
             assertEquals("ui.lifecycle.back.reason=activity_destroyed", "activity_destroyed", close.getString("reason"))
             assertEquals(handleId, close.getString("handleId"))
+            assertTrue(close.getJSONObject("snapshot").getBoolean("closed"))
+            assertEquals("Activity destroy must emit exactly one terminal close event", 1, events.eventTypeCount("close"))
+            assertTrue("Terminal drain did not remove the provider UI session", waitUntil {
+                NodeBridgeUiSessionStore.get(handleId) == null
+            })
+
+            val diagnostics = provider.nativeDiagnostics()
+            assertEquals("0", diagnostics["embedded_script.bridge_resource.active_count"])
+            assertEquals("1", diagnostics["embedded_script.bridge_resource.created_count"])
+            assertEquals("1", diagnostics["embedded_script.bridge_resource.closed_count"])
+            assertEquals("0", diagnostics["embedded_script.bridge_resource.destroy_closed_count"])
+            assertEquals(0, activeTypeCount(diagnostics, NodeBridgeResourceType.UI_SESSION))
+
+            val staleUpdate = dispatch(
+                provider,
+                method = "update",
+                argsJson = """["$handleId",{"id":"title","text":"Still must not apply"}]""",
+            )
+            assertFalse(staleUpdate.toString(), staleUpdate.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, staleUpdate.error?.code)
+            assertTrue(staleUpdate.error?.message.orEmpty().contains("owned by this execution"))
         } finally {
             provider.destroy()
             instrumentation.removeMonitor(monitor)
@@ -581,6 +661,7 @@ class NodeUiBridgeInstrumentationTest {
             )
             assertTrue(show.toString(), show.ok)
             handleId = JSONObject(show.resultJson.orEmpty()).getString("id")
+            val session = checkNotNull(NodeBridgeUiSessionStore.get(handleId)) { "Missing Recents UI session" }
             assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
 
             val activity = monitor.waitForActivityWithTimeout(5_000L) as? NodeBridgeUiActivity
@@ -596,12 +677,57 @@ class NodeUiBridgeInstrumentationTest {
                 activity!!.isFinishing || activity.isDestroyed
             })
 
-            val events = waitForUiEvents(provider, handleId) { collected ->
-                collected.hasEventType("close")
-            }
-            val close = events.firstEventType("close")
+            assertTrue("Task removal did not make the Node UI session terminal", waitUntil {
+                NodeBridgeUiSessionStore.get(handleId)?.isClosed() == true
+            })
+
+            session.close("duplicate_after_task_removal")
+
+            val firstDrain = dispatch(
+                provider,
+                method = "drainEvents",
+                argsJson = """["$handleId",{"maxEvents":1}]""",
+            )
+            assertTrue(firstDrain.toString(), firstDrain.ok)
+            val firstEvents = JSONArray(firstDrain.resultJson.orEmpty())
+            assertEquals(1, firstEvents.length())
+            assertTrue(firstEvents.hasEventType("shown"))
+            assertFalse(firstEvents.hasEventType("close"))
+            assertTrue("Non-terminal drain removed the closed UI session too early", NodeBridgeUiSessionStore.get(handleId) === session)
+            assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
+
+            val terminalDrain = dispatch(
+                provider,
+                method = "drainEvents",
+                argsJson = """["$handleId",{"maxEvents":1}]""",
+            )
+            assertTrue(terminalDrain.toString(), terminalDrain.ok)
+            val terminalEvents = JSONArray(terminalDrain.resultJson.orEmpty())
+            assertEquals(1, terminalEvents.length())
+            val close = terminalEvents.firstEventType("close")
             assertEquals("ui.lifecycle.recents_task_removed.reason=activity_destroyed", "activity_destroyed", close.getString("reason"))
             assertEquals(handleId, close.getString("handleId"))
+            assertTrue(close.getJSONObject("snapshot").getBoolean("closed"))
+            assertEquals("Task removal must emit exactly one terminal close event", 1, terminalEvents.eventTypeCount("close"))
+            assertTrue("Terminal drain did not remove the Recents UI session", waitUntil {
+                NodeBridgeUiSessionStore.get(handleId) == null
+            })
+
+            val diagnostics = provider.nativeDiagnostics()
+            assertEquals("0", diagnostics["embedded_script.bridge_resource.active_count"])
+            assertEquals("1", diagnostics["embedded_script.bridge_resource.created_count"])
+            assertEquals("1", diagnostics["embedded_script.bridge_resource.closed_count"])
+            assertEquals("0", diagnostics["embedded_script.bridge_resource.destroy_closed_count"])
+            assertEquals(0, activeTypeCount(diagnostics, NodeBridgeResourceType.UI_SESSION))
+
+            val staleUpdate = dispatch(
+                provider,
+                method = "update",
+                argsJson = """["$handleId",{"id":"title","text":"Must not apply after task removal"}]""",
+            )
+            assertFalse(staleUpdate.toString(), staleUpdate.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, staleUpdate.error?.code)
+            assertTrue(staleUpdate.error?.message.orEmpty().contains("owned by this execution"))
         } finally {
             provider.destroy()
             instrumentation.removeMonitor(monitor)
@@ -757,6 +883,12 @@ class NodeUiBridgeInstrumentationTest {
 
     private fun JSONArray.hasEventType(type: String): Boolean {
         return (0 until length()).any { index ->
+            getJSONObject(index).optString("type") == type
+        }
+    }
+
+    private fun JSONArray.eventTypeCount(type: String): Int {
+        return (0 until length()).count { index ->
             getJSONObject(index).optString("type") == type
         }
     }

@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
@@ -81,6 +82,8 @@ internal class NodeJsEncryptedModuleSourceProvider(
     private val activeWriteDescriptors = ConcurrentHashMap.newKeySet<ParcelFileDescriptor>()
 
     private val requestCount = AtomicInteger(0)
+    // Requests that produced no source: not_found and not_encrypted.
+    private val probeRequestCount = AtomicInteger(0)
     private val resolvedSourceCount = AtomicInteger(0)
     private val decryptedSourceCount = AtomicInteger(0)
     private val notEncryptedCount = AtomicInteger(0)
@@ -110,9 +113,15 @@ internal class NodeJsEncryptedModuleSourceProvider(
         val requestId = request
             ?.getString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_REQUEST_ID)
             .orEmpty()
-        val result = if (currentRequestCount > REQUEST_MAX_COUNT) {
+        // Probe budget first: it is the loose ceiling that ordinary resolution
+        // lives under. The absolute ceiling below only guards against a runtime
+        // that never stops asking.
+        val result = if (probeRequestCount.get() >= PROBE_MAX_COUNT) {
             budgetRejectedCount.incrementAndGet()
-            budgetExceeded("Module-source provider request-count budget is exhausted.")
+            budgetExceeded(budgetMessage("Module-source provider zero-yield probe budget is exhausted."))
+        } else if (currentRequestCount > REQUEST_MAX_COUNT) {
+            budgetRejectedCount.incrementAndGet()
+            budgetExceeded(budgetMessage("Module-source provider request-count budget is exhausted."))
         } else {
             synchronized(resolutionLock) {
                 runCatching { resolveLocked(request) }
@@ -129,6 +138,25 @@ internal class NodeJsEncryptedModuleSourceProvider(
         return result.toBundle(requestId, elapsedMs)
     }
 
+    /**
+     * Appends the per-category counters so an exhausted budget is self
+     * explanatory. Without them a plaintext project reports an exhausted source
+     * budget while having resolved zero sources, which reads as a contradiction.
+     */
+    private fun budgetMessage(reason: String): String = buildString {
+        append(reason)
+        append(" (requests=").append(requestCount.get())
+        append(", probes=").append(probeRequestCount.get())
+        append('/').append(PROBE_MAX_COUNT)
+        append(", notFound=").append(notFoundCount.get())
+        append(", notEncrypted=").append(notEncryptedCount.get())
+        append(", decrypted=").append(decryptedSourceCount.get())
+        append('/').append(SOURCE_MAX_COUNT)
+        append(", sourceBytes=").append(decryptedSourceBytes.get())
+        append('/').append(TOTAL_SOURCE_MAX_BYTES)
+        append(')')
+    }
+
     override fun getNativeDiagnostics(): Bundle {
         val budgetSnapshot = synchronized(resolutionLock) {
             usedSourceCount to usedSourceBytes
@@ -141,6 +169,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
             "embedded_script.module_provider.runtime_module" to
                     NodeJsRuntimeContract.RUNTIME_MODULE_SOURCE_PROVIDER_NAME,
             "embedded_script.module_provider.request_count" to requestCount.get().toString(),
+            "embedded_script.module_provider.probe_request_count" to probeRequestCount.get().toString(),
             "embedded_script.module_provider.resolved_source_count" to
                     resolvedSourceCount.get().toString(),
             "embedded_script.module_provider.decrypted_source_count" to
@@ -174,6 +203,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
             "embedded_script.module_provider.used_source_bytes" to budgetSnapshot.second.toString(),
             "embedded_script.module_provider.source_count_limit" to SOURCE_MAX_COUNT.toString(),
             "embedded_script.module_provider.request_count_limit" to REQUEST_MAX_COUNT.toString(),
+            "embedded_script.module_provider.probe_request_count_limit" to PROBE_MAX_COUNT.toString(),
             "embedded_script.module_provider.source_bytes_limit" to SOURCE_MAX_BYTES.toString(),
             "embedded_script.module_provider.aggregate_source_bytes_limit" to
                     TOTAL_SOURCE_MAX_BYTES.toString(),
@@ -197,6 +227,10 @@ internal class NodeJsEncryptedModuleSourceProvider(
             putInt(
                 NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_REQUEST_MAX_COUNT,
                 REQUEST_MAX_COUNT,
+            )
+            putInt(
+                NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_PROBE_MAX_COUNT,
+                PROBE_MAX_COUNT,
             )
             values.forEach(::putString)
             putStringArray(
@@ -320,11 +354,18 @@ internal class NodeJsEncryptedModuleSourceProvider(
         val expectedIdentity = FileIdentity.capture(pathStat)
 
         val descriptor = try {
-            Os.open(
-                canonicalPath,
-                OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
-                0,
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                Os.open(
+                    canonicalPath,
+                    OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                    0,
+                )
+            } else {
+                ParcelFileDescriptor.open(
+                    canonicalFile,
+                    ParcelFileDescriptor.MODE_READ_ONLY
+                ).fileDescriptor
+            }
         } catch (error: ErrnoException) {
             return resultForErrno(error, "Unable to open module-source path.")
         } catch (error: Exception) {
@@ -697,9 +738,12 @@ internal class NodeJsEncryptedModuleSourceProvider(
             NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_NOT_ENCRYPTED -> {
                 resolvedSourceCount.incrementAndGet()
                 notEncryptedCount.incrementAndGet()
+                probeRequestCount.incrementAndGet()
             }
-            NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_NOT_FOUND ->
+            NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_NOT_FOUND -> {
                 notFoundCount.incrementAndGet()
+                probeRequestCount.incrementAndGet()
+            }
             NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_DENIED -> deniedCount.incrementAndGet()
             NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_CANCELLED ->
                 cancelledCount.incrementAndGet()
@@ -820,7 +864,8 @@ internal class NodeJsEncryptedModuleSourceProvider(
         const val SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
         const val TOTAL_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
         const val SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
-        const val REQUEST_MAX_COUNT = 1_024
+        const val PROBE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_PROBE_MAX_COUNT
+        const val REQUEST_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_REQUEST_MAX_COUNT
         const val REQUEST_ID_MAX_CHARS = 256
         const val REQUEST_PATH_MAX_CHARS = 4_096
         const val AES_CIPHER_BLOCK_BYTES = 16L

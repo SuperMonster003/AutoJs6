@@ -12,6 +12,13 @@ plugins {
     id("org.autojs.build.versions")
     id("org.autojs.build.signs")
     id("org.autojs.build.jvm-convention")
+    // @Hint by JetBrains AI Assistant (Claude Opus 5) on Aug 18, 2026.
+    //  ! Must be declared BEFORE "com.android.application": the plugin defers its whole
+    //  ! configuration to an afterEvaluate callback, which has to be registered earlier than the
+    //  ! one AGP registers, so that the Android DSL is still writable when the callback runs.
+    //  ! zh-CN: 必须声明于 "com.android.application" 之前: 此插件将全部配置延迟至 afterEvaluate
+    //  ! 回调中执行, 该回调须早于 AGP 注册的回调, 以保证其运行时 Android DSL 仍可写入.
+    id("org.autojs.build.node-android-config")
     id("com.android.application")
     id("com.google.devtools.ksp")
     id("idea")
@@ -1031,8 +1038,6 @@ android {
 tasks {
 
 }
-
-apply(from = "node-android-config.gradle.kts")
 
 androidComponents {
     onVariants { variant ->

@@ -67,6 +67,8 @@
         "Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes"
       ],
       "fix": [
+        "Node.js UI handles could remain active after their Android Activity was destroyed, allowing late updates and retaining provider-owned resources until execution teardown",
+        "Node.js plugin execution could reject large plaintext dependency graphs and real-world node_modules workspaces because module-probe and workspace-archive budgets were too small",
         "Empty and simple Node.js scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full",
         "Persistent Node.js process was incorrectly retired when a short-lived script launcher UI became hidden",
         "An expected Binder disconnection callback from the persistent Node.js process after cleanly stopping an interactive long-running task in a packaged app could overwrite the stopped state with failed",

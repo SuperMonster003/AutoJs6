@@ -2312,7 +2312,7 @@ tasks.register<Exec>("verifyNodePhase13ProfileRollbackPlaybook") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("gradle.properties"))
     inputs.file(project.layout.projectDirectory.file("node-runtime-config.gradle.kts"))
-    inputs.file(project.layout.projectDirectory.file("node-android-config.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("build-logic/convention/src/main/kotlin/org/autojs/build/NodeAndroidConfigPlugin.kt"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeProfileRollbackPolicy.kt"))

@@ -700,6 +700,7 @@ private class ProcessOnDeviceAiPluginAskRunner(
 
         private fun finish(outcome: OnDeviceAiPluginAskOutcome): Boolean {
             if (!markTerminalAndRelease()) return false
+            val onModelList = onModelList
             when {
                 onModelList != null -> {
                     val listOutcome = when (outcome) {

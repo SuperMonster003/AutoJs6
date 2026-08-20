@@ -15,6 +15,16 @@ dependencies {
 
     implementation(libs.apache.commons.compress)
     implementation(libs.tukaani.xz)
+
+    // @Hint by JetBrains AI Assistant (Claude Opus 5) on Aug 18, 2026.
+    //  ! "compileOnly" is mandatory here: convention plugins only need the Android DSL types at
+    //  ! compile time, while at runtime the AGP instance loaded by the consuming module must be
+    //  ! reused. Bundling a second AGP copy would place the same classes in a different classloader
+    //  ! and break the DSL configuration with a ClassCastException.
+    //  ! zh-CN: 此处必须使用 "compileOnly": 约定插件仅在编译期需要 Android DSL 类型, 运行时则须复用
+    //  ! 消费方模块所加载的那份 AGP 实例. 若打包第二份 AGP, 相同的类将处于不同的类加载器中,
+    //  ! 导致配置 DSL 时抛出 ClassCastException.
+    compileOnly("com.android.tools.build:gradle:${System.getProperty("gradle.agp.version")}")
 }
 
 gradlePlugin {
@@ -48,6 +58,12 @@ gradlePlugin {
             implementationClass = "org.autojs.build.JvmConventionPlugin"
             displayName = "AutoJs6 JVM Convention Plugin"
             description = "Configures Java/Kotlin targets for Android modules using central Versions."
+        }
+        register("nodeAndroidConfigConvention") {
+            id = "org.autojs.build.node-android-config"
+            implementationClass = "org.autojs.build.NodeAndroidConfigPlugin"
+            displayName = "AutoJs6 Node Android Config Convention Plugin"
+            description = "Configures Embedded Node.js related Android DSL for the app module."
         }
         register("localAarRegisterConvention") {
             id = "org.autojs.build.local-arr-register-convention"

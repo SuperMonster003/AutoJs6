@@ -15,7 +15,7 @@ const FILES = {
   surfaceManifestDoc: "docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md",
   gradleProperties: "gradle.properties",
   runtimeConfig: "app/node-runtime-config.gradle.kts",
-  androidConfig: "app/node-android-config.gradle.kts",
+  androidConfig: "build-logic/convention/src/main/kotlin/org/autojs/build/NodeAndroidConfigPlugin.kt",
   phase13GradleGate: "app/node-phase13-gate.gradle.kts",
   nodeBridgeSources: "app/src/main/cpp/node_bridge_sources.cpp",
   rollbackPolicy: "app/src/main/java/org/autojs/autojs/engine/NodeProfileRollbackPolicy.kt",
@@ -85,20 +85,22 @@ function buildReport(files) {
   const runtimeBlock = block(files.nodeBridgeSources.text, "function __autojs6_profile_rollback_policy_report", "  function __autojs6_bridge_normalize_capability");
   const buildConfigBlock = files.androidConfig.text;
   const scenarios = [
-    scenario("gradle_property_switches", "Gradle and BuildConfig expose default-off profile and relaxed-capability rollback switches", [
+    scenario("gradle_property_switches", "Gradle and BuildConfig expose stable runtime capabilities plus default-off profile rollback switches", [
       ...PROFILE_PROPERTIES.map((property) => token(files.gradleProperties, `${property}=false`)),
       ...PROFILE_PROPERTIES.map((property) => token(files.runtimeConfig, `providers.gradleProperty("${property}")`)),
       token(files.androidConfig, "NODEJS_PROFILE_PRO_ENABLED"),
       token(files.androidConfig, "NODEJS_PROFILE_DESKTOP_ENABLED"),
       token(files.androidConfig, "NODEJS_PROFILE_DEBUG_UNSAFE_LAB_ENABLED"),
       token(files.androidConfig, "NODEJS_RELAXED_CAPABILITIES_ENABLED"),
-      token(files.runtimeConfig, "nodeJsReleaseForbiddenExperimentalFlags"),
-      token(files.runtimeConfig, "Release Node builds cannot enable experimental feature flag(s)"),
+      token(files.runtimeConfig, "val nodeJsEsmEnabled = true"),
+      token(files.runtimeConfig, "val nodeJsWorkerThreadsEnabled = true"),
+      token(files.androidConfig, "NODEJS_ESM_ENABLED"),
+      token(files.androidConfig, "NODEJS_WORKER_THREADS_ENABLED"),
     ]),
     scenario("kotlin_policy", "NodeProfileRollbackPolicy records per-profile and per-capability rollback actions without granting authority", [
       token(files.rollbackPolicy, "object NodeProfileRollbackPolicy"),
       token(files.rollbackPolicy, 'SCHEMA = "autojs6-node-profile-rollback-policy-v1"'),
-      token(files.rollbackPolicy, 'STATUS = "playbook_partial"'),
+      token(files.rollbackPolicy, 'STATUS = "stable_features"'),
       token(files.rollbackPolicy, 'PRO_PROFILE_PROPERTY = "autojs.nodejs.profile.pro.enabled"'),
       token(files.rollbackPolicy, 'DESKTOP_PROFILE_PROPERTY = "autojs.nodejs.profile.desktop.enabled"'),
       token(files.rollbackPolicy, 'DEBUG_UNSAFE_LAB_PROPERTY = "autojs.nodejs.profile.debugUnsafeLab.enabled"'),
@@ -119,7 +121,7 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "const profileRollbackPolicy = __autojs6_profile_rollback_policy_report(featureFlags);"),
       token(files.nodeBridgeSources, "profileRollbackPolicy,"),
       token(files.nodeBridgeSources, 'schema: "autojs6-node-profile-rollback-policy-v1"'),
-      token(files.nodeBridgeSources, 'status: "playbook_partial"'),
+      token(files.nodeBridgeSources, 'status: "stable_features"'),
       token(files.nodeBridgeSources, 'rollbackTargetProfile: "safe_default"'),
       token(files.nodeBridgeSources, 'profilePromotion: false'),
       token(files.nodeBridgeSources, 'grantsAuthority: false'),
@@ -152,11 +154,11 @@ function buildReport(files) {
       token(files.p13Report, "P13-51 records per-profile rollback playbook as partial"),
       token(files.p13Report, "Remote packaged kill switches are explicitly rejected for v1.1"),
       token(files.rollbackPlaybook, "autojs6-node-profile-rollback-policy-v1"),
-      token(files.rollbackPlaybook, "Remote packaged kill switches are explicitly rejected for v1.1"),
+      token(files.rollbackPlaybook, "Remote or undocumented packaged kill switches are rejected."),
       token(files.phase13GradleGate, "verifyNodePhase13ProfileRollbackPlaybook"),
       token(files.testingDoc, "verifyNodePhase13ProfileRollbackPlaybook"),
       token(files.ciGatesDoc, "verifyNodePhase13ProfileRollbackPlaybook"),
-      token(files.compatibilityProfile, "P13-51 records per-profile rollback playbook as partial"),
+      token(files.compatibilityProfile, "current stable runtime contract"),
       token(files.securityModel, "P13-51 records per-profile rollback playbook as partial"),
       token(files.proComparison, "P13-51 records per-profile rollback playbook as partial"),
       token(files.proAutoxNotes, "P13-51 records per-profile rollback playbook as partial"),
@@ -214,7 +216,7 @@ function buildReport(files) {
         kotlinBlock.includes('put("remoteKillSwitchPolicy", "rejected_v1_1_publish_safe_profile_patch")') &&
         runtimeBlock.includes("remoteKillSwitchAvailable: false") &&
         runtimeBlock.includes('remoteKillSwitchPolicy: "rejected_v1_1_publish_safe_profile_patch"') &&
-        files.rollbackPlaybook.text.includes("Remote packaged kill switches are explicitly rejected for v1.1"),
+        files.rollbackPlaybook.text.includes("Remote or undocumented packaged kill switches are rejected."),
       "P13-51 must explicitly reject remote packaged kill switches or provide a policy.",
     ),
     check(
@@ -227,7 +229,7 @@ function buildReport(files) {
     check(
       "runtime-wiring-deferred-until-profile-promotion",
       files.p13Report.text.includes("Runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted") &&
-        files.rollbackPlaybook.text.includes("Runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted") &&
+        files.rollbackPlaybook.text.includes("A rollback therefore requires an explicit profile/contract") &&
         runtimeBlock.includes("profilePromotion: false") &&
         runtimeBlock.includes('rollbackTargetProfile: "safe_default"') &&
         kotlinBlock.includes('put("profilePromotion", false)') &&

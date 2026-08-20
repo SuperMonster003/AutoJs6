@@ -22,6 +22,7 @@ class PackageInstallerEntryActivity : Activity() {
         val incomingIntent = intent
         val action = incomingIntent.action
         val uri = incomingIntent.data
+        @Suppress("DEPRECATION")
         if (
             (action != Intent.ACTION_VIEW && action != Intent.ACTION_INSTALL_PACKAGE) ||
             uri == null ||

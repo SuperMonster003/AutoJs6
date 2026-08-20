@@ -96,6 +96,14 @@ object NodeJsRuntimeContract {
     const val KEY_MODULE_SOURCE_PROVIDER_MAX_COUNT = "moduleSourceProviderMaxCount"
     const val KEY_MODULE_SOURCE_PROVIDER_REQUEST_MAX_COUNT = "moduleSourceProviderRequestMaxCount"
 
+    /**
+     * Ceiling for requests that yield no source, namely `not_found` and
+     * `not_encrypted`. Candidate probing scales with the resolved dependency
+     * graph rather than with the number of encrypted sources, so it is bounded
+     * separately from [KEY_MODULE_SOURCE_PROVIDER_MAX_COUNT].
+     */
+    const val KEY_MODULE_SOURCE_PROVIDER_PROBE_MAX_COUNT = "moduleSourceProviderProbeMaxCount"
+
     const val MODULE_SOURCE_PROVIDER_STATUS_DECRYPTED = "decrypted"
     const val MODULE_SOURCE_PROVIDER_STATUS_NOT_ENCRYPTED = "not_encrypted"
     const val MODULE_SOURCE_PROVIDER_STATUS_NOT_FOUND = "not_found"

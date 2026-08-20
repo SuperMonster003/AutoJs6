@@ -279,7 +279,7 @@ object ImageQuantPluginHost {
             .mapNotNull(Discovered::candidate)
             .maxByOrNull(Candidate::packageVersionCode)
             ?: throw discovered.firstNotNullOfOrNull(Discovered::error)
-            ?: buildLoadException(context, ImageQuantPluginLoadError.PLUGIN_NOT_FOUND)
+                ?: buildLoadException(context, ImageQuantPluginLoadError.PLUGIN_NOT_FOUND)
     }
 
     private fun stageCandidate(
@@ -527,6 +527,7 @@ object ImageQuantPluginHost {
             packageManager.getPackageInfo(packageName, 0)
         }
 
+    @Suppress("DEPRECATION")
     private fun metadataValue(
         serviceInfo: ServiceInfo,
         applicationInfo: ApplicationInfo,

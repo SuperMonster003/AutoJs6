@@ -287,7 +287,7 @@ object OpenCvPluginHost {
             .mapNotNull(Discovered::candidate)
             .maxByOrNull(Candidate::packageVersionCode)
             ?: throw discovered.firstNotNullOfOrNull(Discovered::error)
-            ?: buildLoadException(context, OpenCvPluginLoadError.PLUGIN_NOT_FOUND)
+                ?: buildLoadException(context, OpenCvPluginLoadError.PLUGIN_NOT_FOUND)
     }
 
     private fun stageCandidate(
@@ -467,6 +467,7 @@ object OpenCvPluginHost {
             packageManager.getPackageInfo(packageName, 0)
         }
 
+    @Suppress("DEPRECATION")
     private fun metadataValue(
         serviceInfo: ServiceInfo,
         applicationInfo: ApplicationInfo,

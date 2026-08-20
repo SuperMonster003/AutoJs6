@@ -70,6 +70,8 @@
 * `Feature` Packaged app configuration supports showing or hiding the "Log" and "Settings" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_
 * `Feature` App packaging supports remote builds using APK Builder Template plugins
 * `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
+* `Fix` Node.js UI handles could remain active after their Android Activity was destroyed, allowing late updates and retaining provider-owned resources until execution teardown
+* `Fix` Node.js plugin execution could reject large plaintext dependency graphs and real-world node_modules workspaces because module-probe and workspace-archive budgets were too small
 * `Fix` Empty and simple Node.js scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full
 * `Fix` Persistent Node.js process was incorrectly retired when a short-lived script launcher UI became hidden
 * `Fix` An expected Binder disconnection callback from the persistent Node.js process after cleanly stopping an interactive long-running task in a packaged app could overwrite the stopped state with failed

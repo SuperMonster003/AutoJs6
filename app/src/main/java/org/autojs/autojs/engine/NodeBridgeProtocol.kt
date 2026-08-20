@@ -1418,11 +1418,33 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
         NodeBridgeUiDispatchService.dispatch(appContext, request) { response ->
-            if (releaseOnClose) {
-                uiSessionIds.remove(sessionId)
-                resourceRegistry.release(sessionId, "ui.close")
+            val releaseReason = when {
+                releaseOnClose -> "ui.close"
+                request.method == "drainEvents" && response.hasTerminalUiCloseEvent(sessionId) -> "ui.terminal_close"
+                else -> null
+            }
+            if (releaseReason != null) {
+                releaseOwnedUiSession(sessionId, releaseReason)
             }
             callback(response)
+        }
+    }
+
+    private fun releaseOwnedUiSession(sessionId: String, reason: String) {
+        uiSessionIds.remove(sessionId)
+        resourceRegistry.release(sessionId, reason)
+    }
+
+    private fun NodeBridgeResponse.hasTerminalUiCloseEvent(sessionId: String): Boolean {
+        if (!ok) {
+            return false
+        }
+        val events = runCatching { JSONArray(resultJson.orEmpty()) }.getOrNull() ?: return false
+        return (0 until events.length()).any { index ->
+            val event = events.optJSONObject(index) ?: return@any false
+            event.optString("type") == "close" &&
+                event.optString("handleId") == sessionId &&
+                event.optJSONObject("snapshot")?.optBoolean("closed") == true
         }
     }
 

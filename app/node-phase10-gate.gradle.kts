@@ -289,7 +289,7 @@ tasks.register<Exec>("verifyNodePhase10WorkerWasiBoundary") {
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js")
     inputs.file(scriptFile)
     inputs.file(project.layout.projectDirectory.file("node-runtime-config.gradle.kts"))
-    inputs.file(project.layout.projectDirectory.file("node-android-config.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("build-logic/convention/src/main/kotlin/org/autojs/build/NodeAndroidConfigPlugin.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))

@@ -128,11 +128,17 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
         private const val OUTPUT_TOMBSTONE_PATH =
             "$TRANSPORT_PROTOCOL_DIRECTORY/deletions-v1.json"
         private const val MANIFEST_VERSION = 1
-        private const val MANIFEST_MAX_BYTES = 1024 * 1024
+        // Grows with MAX_FILES: the input manifest names every delete-eligible
+        // file, so 65536 entries at ~100-250 bytes per path need multi-megabyte
+        // room. Mirrored by the plugin's PluginWorkspaceArchiveSession.
+        private const val MANIFEST_MAX_BYTES = 16 * 1024 * 1024
         private const val PROJECT_MARKER_NAME = "project.json"
         private const val COPY_BUFFER_BYTES = 32 * 1024
-        internal const val MAX_FILES = 4_096
-        internal const val MAX_BYTES = 64L * 1024L * 1024L
+        // Sized for real npm node_modules trees; must stay aligned with the
+        // plugin's PluginWorkspaceArchiveSession hard limits, which clamp any
+        // request to min(HARD_MAX, requested) on the receiving side.
+        internal const val MAX_FILES = 65_536
+        internal const val MAX_BYTES = 256L * 1024L * 1024L
         private const val MAX_ARCHIVE_BYTES = MAX_BYTES + 8L * 1024L * 1024L
 
         fun create(

@@ -70,6 +70,8 @@
 * `Fonctionnalité` La configuration des applications empaquetées permet d'afficher ou de masquer les raccourcis de lanceur "Journal" et "Paramètres" _[`issue #550`](http://issues.autojs6.com/550)_
 * `Fonctionnalité` L'empaquetage d'applications prend en charge les compilations distantes à l'aide de plugins APK Builder Template
 * `Fonctionnalité` Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins
+* `Correction` Les handles d'interface Node.js pouvaient rester actifs après la destruction de leur Activity Android, autorisant des mises à jour tardives et conservant les ressources du fournisseur jusqu'à la fin de l'exécution
+* `Correction` L'exécution via le plugin Node.js pouvait refuser de grands graphes de dépendances en clair et des espaces node_modules réels, car les budgets de sondage des modules et d'archivage de l'espace de travail étaient trop faibles
 * `Correction` Les scripts Node.js vides ou simples démarraient lentement dans les répertoires de travail contenant de nombreux fichiers, car l'analyse inutile des modules lisait intégralement les fichiers candidats
 * `Correction` Le processus Node.js persistant était arrêté à tort lorsque l'interface éphémère de lancement de script devenait masquée
 * `Correction` La notification attendue de déconnexion Binder du processus Node.js persistant après l'arrêt propre d'une tâche interactive de longue durée dans une application empaquetée pouvait remplacer l'état stopped par failed
