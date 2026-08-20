@@ -317,12 +317,23 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
         val now = ZonedDateTime.now().toString()
 
         val directCanonicalBuiltins = directBuiltinAliases.values.toSet()
+        val defaultEnabledFeatureIds = featureFlags
+            .filter { it["defaultEnabled"] == true }
+            .mapNotNull { it["id"]?.toString() }
+            .toSet()
+        val rawNetworkEnabledByDefault = "raw_node_network_modules" in defaultEnabledFeatureIds
+        val effectiveDisabledBuiltinModuleNames = disabledBuiltinModuleNames
+            .filterNot { it == "worker_threads" && "worker_threads" in defaultEnabledFeatureIds }
+            .filterNot { it == "child_process" && "child_process" in defaultEnabledFeatureIds }
         val builtinStatuses = (commonJsBuiltinModuleNames + limitedBuiltinModuleNames + disabledBuiltinModuleNames + networkBuiltinModuleNames)
             .distinct()
             .sorted()
             .map { name ->
                 val status = when {
-                    name in disabledBuiltinModuleNames -> "disabled"
+                    name in effectiveDisabledBuiltinModuleNames -> "disabled"
+                    name == "worker_threads" && "worker_threads" in defaultEnabledFeatureIds -> "stable"
+                    name == "child_process" && "child_process" in defaultEnabledFeatureIds -> "stable"
+                    name in networkBuiltinModuleNames && rawNetworkEnabledByDefault -> "stable"
                     name in directCanonicalBuiltins -> "stable"
                     name in limitedBuiltinModuleNames -> "partial"
                     else -> "unsupported"
@@ -331,7 +342,13 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                     "name" to name,
                     "status" to status,
                     "nodeAlias" to "node:$name",
-                    "networkIo" to if (name in networkBuiltinModuleNames) "disabled-by-default" else "not-network",
+                    "networkIo" to if (name !in networkBuiltinModuleNames) {
+                        "not-network"
+                    } else if (rawNetworkEnabledByDefault) {
+                        "enabled-by-default-policy-controlled"
+                    } else {
+                        "disabled-by-default"
+                    },
                 )
             }
 
@@ -345,17 +362,17 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                     )
                 )
             }
-            add(mapOf("name" to "child_process", "status" to "disabled", "securityLevel" to "high"))
+            add(mapOf("name" to "child_process", "status" to "stable", "securityLevel" to "high"))
             add(mapOf("name" to "native_addon", "status" to "unsupported", "securityLevel" to "critical"))
             add(mapOf("name" to "process.binding", "status" to "disabled", "securityLevel" to "critical"))
             add(mapOf("name" to "process.dlopen", "status" to "disabled", "securityLevel" to "critical"))
-            add(mapOf("name" to "worker_threads", "status" to "experimental-disabled", "securityLevel" to "high"))
-            add(mapOf("name" to "raw_node_network", "status" to "disabled", "securityLevel" to "high"))
-            add(mapOf("name" to "dynamic_import", "status" to "partial", "securityLevel" to "medium"))
-            add(mapOf("name" to "esm", "status" to "partial", "securityLevel" to "medium"))
-            add(mapOf("name" to "vm", "status" to "disabled", "securityLevel" to "high"))
+            add(mapOf("name" to "worker_threads", "status" to "stable", "securityLevel" to "high"))
+            add(mapOf("name" to "raw_node_network", "status" to "stable", "securityLevel" to "high"))
+            add(mapOf("name" to "dynamic_import", "status" to "stable", "securityLevel" to "medium"))
+            add(mapOf("name" to "esm", "status" to "stable", "securityLevel" to "medium"))
+            add(mapOf("name" to "vm", "status" to "partial", "securityLevel" to "high"))
             add(mapOf("name" to "inspector", "status" to "disabled", "securityLevel" to "high"))
-            add(mapOf("name" to "java_interop", "status" to "unsupported", "securityLevel" to "critical"))
+            add(mapOf("name" to "java_interop", "status" to "stable", "securityLevel" to "critical"))
         }.distinctBy { it["name"] }.sortedBy { it["name"].toString() }
 
         val profile = linkedMapOf<String, Any?>(
@@ -391,7 +408,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                         .find(runtimeSource)?.groupValues?.get(1)?.replace("_", "")?.toLong(),
                 ),
             ),
-            "statusCategories" to listOf("stable", "partial", "experimental", "disabled", "unsupported", "planned"),
+            "statusCategories" to listOf("stable", "partial", "disabled", "unsupported", "planned"),
             "featureFlags" to featureFlags.map { flag ->
                 val property = flag["gradleProperty"]?.toString()
                 val defaultEnabled = flag["defaultEnabled"] as Boolean
@@ -408,7 +425,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
             "builtins" to linkedMapOf(
                 "directAliases" to directBuiltinAliases.toSortedMap(),
                 "limited" to limitedBuiltinModuleNames.sorted(),
-                "disabled" to disabledBuiltinModuleNames.sorted(),
+                "disabled" to effectiveDisabledBuiltinModuleNames.sorted(),
                 "network" to networkBuiltinModuleNames.sorted(),
                 "commonJsKnown" to commonJsBuiltinModuleNames.sorted(),
                 "statuses" to builtinStatuses,
@@ -417,7 +434,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                 linkedMapOf(
                     "name" to module,
                     "status" to when (module) {
-                        "fetch" -> "experimental"
+                        "fetch" -> "stable"
                         "accessibility", "media_projection", "image", "images", "dialogs", "ui" -> "partial"
                         else -> "stable"
                     },
@@ -496,7 +513,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
             appendLine(tableRow("---", "---", "---"))
             bridgeModules.forEach { (module, methods) ->
                 val status = when (module) {
-                    "fetch" -> "experimental"
+                    "fetch" -> "stable"
                     "accessibility", "media_projection", "image", "images", "dialogs", "ui" -> "partial"
                     else -> "stable"
                 }

@@ -1,5 +1,10 @@
 # Node Profile v1.1 User Draft
 
+> Historical v1.1 pre-GA draft. Node Profile v1.2 stable capability truth is in
+> [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md) and
+> [CAPABILITY_STABILITY_POLICY.md](CAPABILITY_STABILITY_POLICY.md). This file is
+> not a current build or runtime configuration source.
+
 This draft is the user-facing map for Node Profile v1.1 features. It describes
 what scripts can try today and what still requires a design gate, test provider,
 or future runtime work.
@@ -14,7 +19,7 @@ matrix, read
 - `stable`: intended as a supported user surface within the Safe Node Profile.
 - `partial`: usable subset with explicit limits; desktop Node or Rhino parity is
   not implied.
-- `experimental`: available only behind explicit capability/feature gates or
+- `pre-GA`: available only behind explicit capability/feature gates or
   provider support; behavior may still change.
 - `blocked`: documented shape only; normal user scripts should not rely on it.
 
@@ -70,15 +75,15 @@ reach an Android provider.
 | Feature | Status | User-facing note |
 | --- | --- | --- |
 | ESM scripts | partial | `.mjs`, `type=module`, local static imports, selected builtin imports, top-level await, ESM-to-CJS interop, package conditions, and local dynamic import are covered. Loader hooks and full desktop Node parity are not supported. |
-| `fetch` / `axios` | experimental | Controlled bridge-backed HTTP shape. Requires `network` capability and a provider-enabled build; raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` remain denied. |
-| WebSocket | experimental | Controlled bridge-backed connections with bounded messages and connection counts. Requires `network` capability and provider support; raw sockets remain denied. |
+| `fetch` / `axios` | pre-GA | Controlled bridge-backed HTTP shape. Requires `network` capability and a provider-enabled build; raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` remain denied. |
+| WebSocket | pre-GA | Controlled bridge-backed connections with bounded messages and connection counts. Requires `network` capability and provider support; raw sockets remain denied. |
 | OCR | partial | `require("ocr")` accepts opaque image handles. Real OCR model/provider availability is separate from the JavaScript API shape. |
 | `storage` / `storages` | partial | JSON-only key/value storage with project/package/working-directory isolation. No raw SharedPreferences or file handles are exposed. |
 | notifications | partial | Controlled post/cancel API with Android notification permission handling. Actions and richer notification layouts are not part of this draft. |
 | sensors | partial | Limited sensor set: accelerometer, gyroscope, and light. Subscriptions are bounded and close on provider destroy. |
 | UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
 | `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, CJS/ESM fired entries run through the dedicated scheduled runner, and raw Android scheduler APIs remain unavailable. |
-| JS-only plugins | experimental | Project-local `./plugins/<id>` manager with local install registration, enable/disable, config, dependency metadata, named exports, status/capability reporting, `start`/`stop` lifecycle hooks, owned resource cleanup, unload, and explicit debug-only reload. Packaged APK support is limited to already-packaged project-local JS-only plugins with explicit capabilities. Native plugins, signed archives, download installers, updates, Android provider adapters, and marketplace/runtime distribution are not enabled. |
+| JS-only plugins | pre-GA | Project-local `./plugins/<id>` manager with local install registration, enable/disable, config, dependency metadata, named exports, status/capability reporting, `start`/`stop` lifecycle hooks, owned resource cleanup, unload, and explicit debug-only reload. Packaged APK support is limited to already-packaged project-local JS-only plugins with explicit capabilities. Native plugins, signed archives, download installers, updates, Android provider adapters, and marketplace/runtime distribution are not enabled. |
 | execution modes beyond `one_shot` | partial | `interactive_long_running` is available only through the explicit interactive foreground runtime or packaged projects that opt in with `node.executionMode=interactive_long_running`, with a persistent Stop notification, `autojs6:lifecycle` checkpoint/explicit-restore hooks, and restart policy `never`. Packaged checkpoint/read/clear, Stop clean-exit, and task-removal clean-exit smoke evidence is present; P13-45/P13-52 record packaged metadata/disclosure policy diagnostics, while Android policy, broader device matrix, stress evidence, and packaged disclosure review/enforcement UI remain open under P13-07. `scheduled` is available only through the controlled WorkManager scheduled runner. Direct script requests still reject before user code, and `worker_computation` remains reserved. Normal scripts remain one-shot and timeout-bounded. |
 
 ## ESM Scripts
@@ -122,7 +127,7 @@ with `ERR_REQUIRE_ASYNC_MODULE`.
 
 ## Controlled Fetch And Axios
 
-Status: `experimental`.
+Status: `pre-GA`.
 
 Declare `network` before using controlled network modules:
 
@@ -167,7 +172,7 @@ console.log(response.status, response.data);
 
 Limits:
 
-- raw Node network modules remain disabled by default; debug/build-time experiments can enable `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` with `autojs.nodejs.rawNetworkModules.experimental=true`
+- native `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` are stable and enabled by default; they use Node semantics inside the Android sandbox and do not inherit controlled-provider request budgets
 - desktop axios adapters, agents, proxy tunneling, and custom adapters are
   denied
 - response size, redirect count, timeout, and concurrency are bounded
@@ -179,7 +184,7 @@ capability metadata, not from module presence.
 
 ## WebSocket
 
-Status: `experimental`.
+Status: `pre-GA`.
 
 ```js
 "nodejs";
@@ -381,7 +386,7 @@ Profile.
 
 ## JS-only Plugins
 
-Status: `experimental`.
+Status: `pre-GA`.
 
 Project-local plugins live under `./plugins/<id>` and require exact
 `plugin.<id>` capability opt-in:

@@ -63,11 +63,11 @@ Several entries are intentionally conservative:
 
 - `dialogs`, `media_projection`, and `image` have stable JavaScript protocol
   surfaces but still need full Activity/provider ownership before broader use.
-- controlled `fetch` and `websocket` remain experimental and default-off for
-  live Android network I/O.
-- `java_interop` remains experimental and default-off.
-- `worker_threads` remains blocked by native availability and is not a bridge
-  module users can rely on.
+- controlled `fetch` and `websocket` are stable and enabled for live Android
+  network I/O, subject to permission and provider policy.
+- allowlisted `java_interop` is stable and enabled.
+- `worker_threads` is a stable native builtin with a smaller worker authority
+  set; it is not an AutoJs bridge module.
 
 ## Scoring Model
 
@@ -272,8 +272,9 @@ image provider lifecycle is ready beyond scoped local-file handles.
 
 #### Controlled `http` Wrapper
 
-Do not add a separate Node-style `http` bridge in v1.1 while controlled network
-is still experimental.
+Do not add a separate Node-style `http` bridge. Native `http` is stable, while
+the controlled `fetch`/`axios`/`undici` surface remains the provider-backed
+API.
 
 If this is revisited, it should be a thin adapter over the controlled `fetch`
 provider, not raw `http`, `https`, `net`, `tls`, `dns`, agents, or sockets.

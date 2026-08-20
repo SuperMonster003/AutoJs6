@@ -149,13 +149,13 @@ object NodeBridgeProviderRegistry {
             displayName = "fetch/axios",
             modules = listOf(NodeBridgeModules.FETCH),
             capabilities = listOf(NodeBridgePermissionManifest.NETWORK),
-            packagedSupport = packagedProviderDependent("requires packaged network capability and the experimental network provider flag"),
+            packagedSupport = packagedProviderDependent("requires packaged network capability and the stable network provider"),
         ),
         provider(
             id = WEBSOCKET_PROVIDER,
             modules = listOf(NodeBridgeModules.WEBSOCKET),
             capabilities = listOf(NodeBridgePermissionManifest.NETWORK),
-            packagedSupport = packagedProviderDependent("requires packaged network capability and the experimental network provider flag"),
+            packagedSupport = packagedProviderDependent("requires packaged network capability and the stable network provider"),
         ),
         provider(
             id = OCR_PROVIDER,
@@ -359,7 +359,7 @@ object NodeBridgeProviderRegistry {
         NodeBridgePackagedSupport(NodeBridgePackagedSupportStatus.UNSUPPORTED, notes)
 
     private fun androidStatus(id: String, context: Context): NodeBridgeProviderStatus = when (id) {
-        FETCH_PROVIDER, WEBSOCKET_PROVIDER -> if (BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+        FETCH_PROVIDER, WEBSOCKET_PROVIDER -> if (BuildConfig.NODEJS_NETWORK_ENABLED) {
             NodeBridgeProviderStatus.AVAILABLE
         } else {
             NodeBridgeProviderStatus.UNAVAILABLE
@@ -629,13 +629,13 @@ object NodeBridgeProviderRegistry {
         RHINO_PROVIDER -> linkedMapOf(
             "liveMethods" to "run",
             "mode" to "json-only-poc",
-            "defaultPolicy" to "rhino.run without experimental:true rejects with ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+            "defaultPolicy" to "rhino.run without explicit:true rejects with ERR_AUTOJS6_RHINO_SHIM_DISABLED",
             "packagedSupport" to "unsupported",
             "packagedPolicy" to "P12-26 rejects packaged Rhino JSON-only execution until explicit shim metadata is designed; future metadata may authorize only JSON-only run, never install or globals",
-            "installPolicy" to "rhino.install remains unsupported by default; P13-14 allows explicit experimental Java proxy globals only when Java interop is enabled",
-            "globalsPolicy" to "no global importClass, importPackage, JavaAdapter, compat.rhino, or unrestricted Rhino globals are installed into V8; P13-14 Packages/java/android proxies route only through the Java allowlist experiment; P13-15 module import helpers and P13-16 JavaAdapter return stable unsupported errors",
+            "installPolicy" to "rhino.install remains unsupported by default; P13-14 allows explicit Java proxy globals only when Java interop is enabled",
+            "globalsPolicy" to "no global importClass, importPackage, JavaAdapter, compat.rhino, or unrestricted Rhino globals are installed into V8; Packages/java/android proxies route only through the stable Java allowlist; module import helpers and JavaAdapter return stable unsupported errors",
             "timeoutPolicy" to "timeoutMs is required; provider calls forceStop and destroy before reporting timeout lifecycle",
-            "statusReason" to "P12-25 live provider POC is available only for explicit experimental one-shot requests; P12-26 keeps packaged APK execution fail-closed",
+            "statusReason" to "P12-25 live provider POC is available only for explicit one-shot requests; P12-26 keeps packaged APK execution fail-closed",
         )
         else -> emptyMap()
     }

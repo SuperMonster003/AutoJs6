@@ -79,7 +79,7 @@ class NodeDoctorReportGeneratorInstrumentationTest {
             rollbackPolicy.getJSONObject("profileKillSwitches").getString(NodeProfileRollbackPolicy.PRO_COMPAT_OPT_IN),
         )
         assertEquals(
-            NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY,
+            "built_in_stable_no_build_switch",
             rollbackPolicy.getJSONObject("capabilityKillSwitches").getString("network"),
         )
         assertEquals(

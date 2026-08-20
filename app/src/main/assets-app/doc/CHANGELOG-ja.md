@@ -9,6 +9,7 @@
 ###### 2026/08/20
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
+* `新機能` Node.js の ESM/dynamic import()/ネットワークと WebSocket/ネイティブネットワークモジュール/worker_threads/child_process/Java 相互運用を正式機能として既定で有効化し, 権限宣言/許可リスト/サンドボックス/リソース予算による保護を維持
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
 * `新機能` Node.js ランタイムが実行単位のオンデマンド暗号化モジュールソースプロバイダーに対応しモジュールリゾルバーが実際に選択した候補だけを検査して復号
 * `新機能` Node.js ランタイムが制御された AutoJs6 ブリッジモジュールに対応し Safe Node Profile セキュリティポリシーを採用

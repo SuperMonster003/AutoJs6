@@ -6,7 +6,17 @@ plugin, while self-contained flavors and packaged apps retain Embedded Node.
 Both deliveries use the same process isolation, scoped filesystem, builtin,
 bridge, and feature-gate policy.
 
-The release threat model for Node Profile v1 is tracked in [security/THREAT_MODEL_V1.md](security/THREAT_MODEL_V1.md). Keep that document updated when adding or promoting any resolver, filesystem, bridge, bundler, packaged APK, or experimental feature surface.
+The release threat model for Node Profile v1 is tracked in [security/THREAT_MODEL_V1.md](security/THREAT_MODEL_V1.md). Keep that document updated when adding or promoting any resolver, filesystem, bridge, bundler, packaged APK, or non-stable capability surface.
+
+> Node Profile v1.2 precedence: ESM, dynamic import, controlled network,
+> WebSocket, native network builtins, `worker_threads`, `child_process`, and
+> allowlisted Java interop are stable and enabled in all Node builds. They have
+> no capability-specific Gradle properties or release blocks. Runtime
+> permissions, Android manifest policy, scoped paths, provider allowlists,
+> budgets, cancellation, and cleanup remain security boundaries. Inspector is
+> disabled; native addons and raw WASI remain unsupported. Sections explicitly
+> titled “Superseded v1.1” below are retained only to explain older phase
+> evidence and are not current configuration.
 
 ## Trust Boundary
 
@@ -198,7 +208,7 @@ low-memory signals.
 Runtime package installation is not a Safe Node Profile user capability. Projects may vendor pure JavaScript CommonJS dependencies, and host tooling may sanitize them at build time. Phase 13 adds `NodeAndroidPackageInstallManager` as an internal app-private local store for already-unpacked packages; it records `local_unpacked_host_managed` as the only allowed source substrate and still rejects lifecycle scripts, package `bin`, native payloads, symlinks, path escapes, raw registry sources, remote tarballs, unverified cache reuse, and registry/npm execution. AutoJs6 must not run package lifecycle scripts, native addon builds, arbitrary `.bin` commands, or registry downloads inside the Android runtime. See `docs/nodejs/design/PACKAGE_MANAGER.md`.
 P13-48 records package lock and integrity policy as partial. `NodePackageIntegrityPolicy` and `autojs6:profile.packageIntegrityProfile` define the shared lockfile, SHA-512 integrity, signature, rollback, cache cleanup, corruption recovery requirements, and machine-readable recovery action hints for Android package manager, plugin packages, and native addon artifacts. The policy does not promote unsigned plugin installs, unsigned native addon loads, lifecycle scripts, postinstall downloads, raw registry installs, or unverified cache reuse. Signed native addon artifact verification is delegated to the P13-39 packaged native path; P13-48 keeps shared integrity policy diagnostics fail-closed until that path exists.
 P13-49 records profile selection UX and diagnostics as partial. `NodeProfileSelectionDiagnostics` and `autojs6:profile.profileSelection` expose requested Safe/Pro/Desktop/Debug metadata, declared high-risk capabilities, synthesized Android permissions, blocked profile promotions, and failure hints without changing authority. Missing bridge capability errors identify the required profile, Node capability declaration, Android permission set, and `declarationExamples` snippets for project/package manifests, while the effective profile remains `safe_default` and user-selectable profile promotion stays disabled. Effective Pro/Desktop/Debug profile switching stays stable-denied for P13-49 v1.1.
-P13-51 records per-profile rollback playbook as partial. `NodeProfileRollbackPolicy` and `autojs6:profile.profileRollbackPolicy` expose default-off Pro/Desktop/Debug profile switches, default-off relaxed-capability aggregation, individual capability rollback actions, Safe-profile crash/stress fallback, and packaged Safe-profile downgrade guidance. The `raw_network` rollback id maps to `autojs.nodejs.rawNetworkModules.experimental` so the P13-50 corpus and P13-51 playbook use the same relaxed-capability name. The playbook is metadata-only and does not grant authority; runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted, while settings UI and privacy prompts remain future work.
+P13-51 records per-profile rollback playbook as partial. `NodeProfileRollbackPolicy` and `autojs6:profile.profileRollbackPolicy` expose default-off Pro/Desktop/Debug profile switches, default-off relaxed-capability aggregation, individual capability rollback actions, Safe-profile crash/stress fallback, and packaged Safe-profile downgrade guidance. The `raw_network` rollback id maps to `NODEJS_RAW_NETWORK_MODULES_ENABLED` so the P13-50 corpus and P13-51 playbook use the same relaxed-capability name. The playbook is metadata-only and does not grant authority; runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted, while settings UI and privacy prompts remain future work.
 The host dependency bundler rejects unsafe dependency trees before packaging. `.node` files are reported as `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` artifacts are reported as `NODE_GYP_ARTIFACT_UNSUPPORTED`. It also rejects every blocked lifecycle script variant (`preinstall`, `install`, `postinstall`, `prepare`), unchecked `.bin` entries, npm cache/log artifacts, symlink/path escapes, suspicious executable/native binaries, unsupported package-manager layouts, oversized files/packages/trees, and package metadata path references that are absolute, protocol-based, NUL-containing, or escape through `..`. A sanitized bundle is copied only after the scan reports zero issues, and the dependency report includes an SBOM-lite file, dependency compatibility analyzer status, deterministic bundle hash, and content-addressed cache key for packaged APK review. APK-builder preflight gates reject analyzer `unsafe` and `unsupported` statuses.
 
 The `require("plugins")` surface is a JS-only local manager, not a package
@@ -293,17 +303,24 @@ metadata, and execution-owned cleanup; it must not inherit Java interop,
 shell/root, native addon, raw process, raw network, or unrestricted filesystem
 authority.
 
-## Feature Flag Policy
+## Stable Capability State
 
-`NodeRuntimeCapabilities.featureFlags` is the source of truth for build-only, debug-only, project-allowed, packaged-allowed, and release-forbidden Node feature flags. Current experimental flags are build-time only and debug-only; `project.json` and `package.json` metadata must not enable them. Explicit `node.featureFlags`, `node.experimentalFlags`, `autojs6.node.featureFlags`, and `autojs6.node.experimentalFlags` entries are audited and rejected when they name unknown flags or flags whose project/package override policy is false.
+Shipped Node capabilities have fixed runtime states in
+`NodeRuntimeCapabilities.featureFlags`; the field name is retained as generic
+capability metadata, not as a set of opt-in switches. ESM, dynamic import,
+network, raw supported network builtins, `worker_threads`, `child_process`, and
+allowlisted Java interop are stable and enabled in debug and release builds.
+They have no Gradle, `project.json`, package-metadata, or release-only override.
+Unknown or attempted capability overrides are audited and rejected.
 
-Release builds reject release-forbidden experimental flags even when a Gradle property is supplied. Use debug experimental builds for validation, then return release builds to the Safe Node Profile defaults.
+Inspector and WASI remain disabled, while native addons remain unsupported.
+Their denial is an explicit product boundary rather than a build variant.
 
-## ESM Policy
+## ESM Boundary
 
-ESM is partial and enabled by default in Node Profile v1.1.
-
-The legacy ESM build switch is `autojs.nodejs.esm.experimental=true`. Dynamic import has its own local-only switch, `autojs.nodejs.dynamicImport.local=true`; the legacy broad experiment `autojs.nodejs.dynamicImport.experimental=false` remains release-forbidden. With ESM and local dynamic import enabled:
+ESM and scoped dynamic import are stable and enabled by default in Node Profile
+v1.2. No build switch or release exception is involved. Within the supported
+boundary:
 
 - `.mjs` routes to the Node backend and runs as partial ESM
 - static `import`/`export` syntax is accepted only in ESM entries and ESM graph modules
@@ -321,17 +338,16 @@ The `os` module must not expose raw device fingerprinting data. Network interfac
 
 The `crypto` module exposes bounded symmetric/hash helpers and a limited WebCrypto surface. It must not expose native Android keystore access, certificate inspection, asymmetric key APIs, native crypto handles, or unrestricted algorithm selection without a separate design gate.
 
-## Network Policy
+## Network Boundary
 
-Network is not a default live I/O capability of the Safe Node Profile. The controlled fetch wrapper exists, but the explicit design-gate flag keeps the Android/OkHttp provider disabled in normal builds:
+The controlled bridge-backed network surface and the supported native Node
+`dns`, `dns/promises`, `http`, `https`, `net`, and `tls` builtins are stable
+and enabled by default. They have no Gradle switch or release-only path. The
+native builtins follow Node semantics inside the Android application sandbox;
+they require the packaged app's Android network permission and cannot be
+shadowed by local `node_modules` packages. `dgram` remains disabled.
 
-```properties
-autojs.nodejs.network.experimental=false
-```
-
-Do not treat a present `http`, `https`, `net`, `tls`, `dns`, or fetch-shaped API as permission to perform I/O. The current `fetch` and `require("fetch")` APIs route through the AutoJs6 bridge and reject with `ERR_AUTOJS6_NETWORK_DISABLED` when the live provider is gated off. Raw network modules remain denied in the Safe profile. The denial applies to bare imports, `node:` aliases, and `node_modules` shadow attempts. Debug/build-time experiments may explicitly enable native Node `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` with `autojs.nodejs.rawNetworkModules.experimental=true`.
-
-Network enablement requires:
+Network use continues to require:
 
 - Android permission policy
 - packaged APK manifest policy
@@ -341,11 +357,20 @@ Network enablement requires:
 - privacy review
 - tests for denied and allowed paths
 
-The AutoJs6-controlled `fetch` wrapper is the preferred Safe-profile network path over unrestricted socket modules. Userland HTTP clients must use this controlled path or another explicit AutoJs6 bridge adapter unless a debug/build-time raw network experiment is intentionally enabled. The wrapper supports request timeout, abort, response-size budgeting, redirect budgeting, concurrent-request limits, unsupported-scheme rejection, and provider-side cancellation. The Android provider tracks live OkHttp calls and cancels them on provider destroy. Raw network authority must stay default-off and release-forbidden until policy, privacy, and rollback gates are complete.
+The AutoJs6-controlled `fetch` wrapper is preferred when a script needs host
+permission checks and provider-enforced request timeout, abort, response-size,
+redirect, concurrency, scheme, audit, and lifecycle-cleanup policy. Native
+builtins deliberately do not inherit those bridge budgets; scripts using them
+must bound streams, connections, timeouts, cancellation, and shutdown cleanup.
+Neither surface grants filesystem, Java, shell, process, accessibility, or any
+other bridge authority.
 
 See `docs/nodejs/design/NETWORK.md` for the current network design gate.
 
-Controlled WebSocket has an experimental bridge-backed MVP. `require("websocket")` is an AutoJs6-controlled module, not a desktop `ws` clone and not raw socket authority. The live Android/OkHttp provider remains disabled in normal builds by `autojs.nodejs.network.experimental=false`; normal provider calls reject with `ERR_AUTOJS6_NETWORK_DISABLED`.
+Controlled WebSocket is a stable bridge-backed surface. `require("websocket")`
+is an AutoJs6-controlled module, not a desktop `ws` clone and not raw socket
+authority. It is enabled in normal builds and retains provider permission,
+budget, lifecycle, and cleanup enforcement.
 
 The WebSocket wrapper must keep:
 
@@ -360,26 +385,17 @@ The WebSocket wrapper must keep:
 
 See `docs/nodejs/design/WEBSOCKET.md`.
 
-## Worker Threads Policy
+## Worker Threads Boundary
 
-`worker_threads` is not enabled in the default Safe Node Profile. The explicit experimental flag is:
+Native `worker_threads` is stable, enabled by default, and exposed through both
+bare and `node:` builtin names. It has no Gradle switch, request opt-in, project
+override, package override, or release-only path. A local
+`node_modules/worker_threads` package cannot shadow the builtin.
 
-```properties
-autojs.nodejs.worker_threads.experimental=false
-```
-
-With the flag off, `require("worker_threads")` rejects with the disabled-builtin error shape. `require("node:worker_threads")` exposes only a shape-only npm compatibility facade: `MessageChannel` / `MessagePort` are local compatibility objects, `Worker` construction creates an inert disabled worker, and worker execution or `postMessage()` rejects with `ERR_AUTOJS6_WORKER_DISABLED`. A local `node_modules/worker_threads` package must not shadow the bare-module denial.
-
-With the experimental request flag on, the bootstrap first checks whether the
-Embedded Node build exposes a usable native `worker_threads` module. If it does
-not, `require("worker_threads")` and `require("node:worker_threads")` fall back
-to the same shape-only facade with `nativeAvailable=false`; `Worker`
-construction remains inert, `postMessage()` rejects with
-`ERR_AUTOJS6_WORKER_DISABLED`, active-worker diagnostics stay at zero, and there
-is no same-thread fallback. When native workers are available, workers are pure
-JavaScript compute workers with a smaller capability set than the parent script.
-Worker source is resolved and read by the parent scoped resolver, then executed
-through a worker-local restricted `require`. Worker scripts must not access:
+Workers are pure JavaScript compute workers with a smaller capability set than
+the parent script. Worker source is resolved and read by the parent scoped
+resolver, then executed through a worker-local restricted `require`. Worker
+scripts must not access:
 
 - AutoJs bridge modules or `autojs6:bridge`
 - Android `Context`
@@ -393,64 +409,20 @@ through a worker-local restricted `require`. Worker scripts must not access:
 
 Bridge ownership remains in the parent script. Workers may exchange pure data
 with the parent through `parentPort.postMessage`, `worker.postMessage`, and
-`workerData`; the worker itself may not call bridge modules. The MVP allows one
-active worker, exposes `threadId`, uses a startup timeout, denies nested workers,
+`workerData`; the worker itself may not call bridge modules. The stable boundary
+exposes `threadId`, applies startup/resource limits, denies nested workers,
 tracks active workers per execution, and terminates active workers during parent
-success/failure cleanup. Packaged worker source graphs remain follow-up work.
+success/failure cleanup. Packaged worker graphs are covered by the runtime-kit
+and packaged smoke gates.
 
 See `docs/nodejs/design/WORKER_THREADS.md` for the current worker boundary.
 
-P13-34 records `worker_threads` opt-in promotion as partial. The new
-`workerThreadsProfile` diagnostics are not an authority grant: default
-`worker_threads` remains disabled, project/package opt-in remains unavailable,
-native workers must pass preflight before runnable claims, worker bridge modules
-remain denied, nested workers remain denied, and raw native handles do not cross
-into JavaScript. Current resource/crash evidence references are recorded, but
-native-available reruns, packaged worker evidence, and Android resource ceilings
-remain required before this boundary can relax.
-
-P14-28 refreshes the v1.2 worker native availability audit. The audited Node
-24.5 target ABI set is `arm64-v8a`, `armeabi-v7a`, and `x86_64`; `x86` stays
-fail-fast. The imported P13-34 machine report still records
-`worker.preflight.status=unavailable` with `ERR_AUTOJS6_WORKER_DISABLED`, so
-v1.2 keeps `worker_threads` intentionally unsupported for runnable execution.
-No default, project, packaged, or process-worker authority is promoted, and
-P14-29/P14-30 runnable/resource gates remain conditional on
-`worker.preflight.status=available`.
-
-P14-29 records the worker runnable/packaged smoke gate as conditional. Existing
-source anchors cover Worker lifecycle, CJS/ESM entries, worker capability
-isolation, MessageChannel/transfer, WorkerPool, exception/timeout recovery,
-parent cleanup, nested Worker denial, and packaged `.mjs` smoke. Because
-P14-28 reports native workers unavailable, these anchors do not grant runnable
-execution, packaged worker behavior, default authority, project/package opt-in,
-or a process-worker facade.
-
-P14-30 records the worker resource/RSS stress gate as conditional. Current
-source anchors cover sequential Worker create/terminate cycles, WorkerPool
-stress, cleanup, exception recovery, timeout recovery, RSS snapshots, and
-thread-count bounded assertions. Java heap, native heap, fd count, message
-queue, active worker, and active WorkerPool deltas remain future
-native-available archive requirements, so resource evidence does not relax the
-default worker denial.
-
-P14-31 closes the v1.2 process-worker replacement decision as
-`no_user_facing_facade_v1_2`. The P13-35 diagnostic profile remains visible,
-but no `process_worker`, `compute_worker`, `autojs6:process-worker`,
-WorkerPool replacement API, raw process handle, stdio stream, signal,
-`spawn`, `fork`, or packaged process-worker behavior is promoted. Future
-replacement work must first prove native WorkerPool evidence, execution slot
-accounting, cleanup/resource stress, packaged behavior, user-visible launch UX,
-security corpus coverage, rollback policy, and separation from `child_process`
-and `shell`.
-
-P14-32 records the v1.2 desktop runtime doc/release sync as
-`worker_intentionally_unsupported_v1_2`. The security corpus now carries an
-explicit `worker_threads` entry tied to P14-28 through P14-32 evidence, and the
-`child_process` corpus entry references the P14-31 no-facade process-worker
-decision. This sync does not relax default worker denial, `node:worker_threads`
-shape-only behavior, process-worker absence, raw process denial, or the
-separate scoped `shell` bridge boundary.
+The P13-34 and P14-28 through P14-32 reports remain archived promotion evidence.
+They predate the shipped runtime kit and do not define current authority. The
+current three-ABI runtime kit provides runnable native workers; the separate
+`process_worker` / `autojs6:process-worker` facade remains absent, while the
+documented WorkerPool API remains a host-managed compute abstraction distinct
+from both `worker_threads` and `child_process`.
 
 P14-33 records the v1.2 security regression corpus expansion in
 `docs/nodejs/security/NODE_PROFILE_V1_2_SECURITY_REGRESSION_CORPUS.json`.
@@ -476,7 +448,7 @@ success until archives are attached.
 P14-35 updates the TypeScript declaration profile matrix through
 `:app:verifyNodePhase14TypeDeclarationProfiles`. The new
 `NodeProfileV12CapabilityCatalog` records callable declaration rows, provider
-POC rows, stable-denied rows, intentionally unsupported worker/process-worker
+POC rows, stable-denied rows, the stable worker surface, unsupported process-worker
 rows, and packaged aggregate metadata as declaration-only profile truth. The
 matrix keeps `metadataOnly: true` and `grantsAuthority: false`; future-only
 methods remain visibly gated and runtime authority remains unchanged.
@@ -521,9 +493,9 @@ internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `ScriptRuntime` objects, raw Java `Thread` / `ThreadPoolExecutor` handles,
 Rhino `Synchronizer`, Java locks, and blocking `VolatileDispose` waits. The
 Safe Node Profile must not add `require("threads")`, `compat.threads`, a
-global `threads`, a global `sync`, or default `worker_threads` as a migration
-shortcut. Supported migration directions are `Promise`, `async` / `await`,
-timers, `AbortController`, bridge `timeoutMs`, explicit
+global `threads`, or a global `sync`. Supported migration directions are
+`Promise`, `async` / `await`, timers, `AbortController`, stable
+`worker_threads` for isolated pure-JavaScript compute work, bridge `timeoutMs`, explicit
 `engines.execScriptFile()` / `engines.execScript()` execution slots, and
 `work_manager` scheduled work. See
 `docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md`.
@@ -545,22 +517,43 @@ Reasons:
 Future support, if any, should be developer-mode only, separately gated, and based on an explicit plugin model with ABI,
 signature, packaging, and review policy. Runtime npm/native build tooling must not be used as the enablement path.
 
-P13-39 records native addon loading as partial. `nativeAddonProfile` reports
-default denial for `.node`, addon resolution, and `process.dlopen` while
+P13-39 records the archived native-addon assessment. The current
+`nativeAddonProfile` reports the surface as unsupported and denies `.node`,
+addon resolution, and `process.dlopen` while
 making signed packaged-only artifacts, ABI and hash allowlists, dependency
 scan, no download-exec, and crash isolation explicit promotion blockers. The
 current runtime still rejects arbitrary native addon files and private process
 native APIs before user code can turn them into embedded-process native code.
 
-## Java Interop Policy
+## Java-Interop Boundary
 
-Direct Java and Android interop is disabled in the default Safe Node Profile. Node scripts must use AutoJs bridge modules instead of raw `java.*`, `android.*`, Rhino `importClass`, `Packages`, reflection, class loaders, or Android object references. P13-12 exposes `$autojs.androidContext` only as a frozen unavailable descriptor and `$autojs.java` only as a gated facade; normal builds still reject Java calls with `ERR_AUTOJS6_JAVA_INTEROP_DISABLED`.
+Allowlisted Java interop is stable and enabled by default, with no Gradle,
+project, package, request, or release override. `require("java")` and
+`$autojs.java` expose the same provider-owned facade for reviewed
+`java.lang.Math`, `java.util.UUID`, and `android.graphics.Rect` operations.
+Arguments and results are JSON-safe values or execution-owned opaque handles;
+selected Rect instance calls, field reads, and explicit release/dispose are
+supported.
 
-The `java_interop` feature flag is critical, disabled by default, build-time experimental only, and not overrideable by `project.json` or packaged APK metadata. The current experiment exposes only `require("java")` and gated `$autojs.java` with a tiny allowlist for `java.lang.Math`, `java.util.UUID`, and opaque `android.graphics.Rect` handles. P13-13 permits selected Rect instance methods, field reads, and explicit release/dispose cleanup through provider-owned handles. It must not expose `Context`, `Activity`, `Service`, `AccessibilityService`, `MediaProjection`, `Intent`, Binder, `ClassLoader`, reflection, filesystem, process, native-library, or raw UI objects.
+This does not expose raw `Context`, `Activity`, `Service`,
+`AccessibilityService`, `MediaProjection`, `Intent`, Binder, `ClassLoader`,
+reflection, filesystem, process, native-library, or UI objects. Packaged
+metadata cannot expand the class/member allowlist, and other bridge permissions
+remain independently enforced.
 
-See `docs/nodejs/design/JAVA_INTEROP.md` for the mode comparison, allowlist candidates, Rhino compatibility boundary, and future test gate.
+See `docs/nodejs/design/JAVA_INTEROP.md` for the exact allowlist, lifecycle,
+packaging, and denial contract.
 
-Rhino compatibility shims are a separate migration concern. Node must not install Rhino globals, `importClass`, `Packages`, or `JavaAdapter` by default. S11-26 fixes the explicit `rhino.run({ source, timeoutMs, args })` / scoped `path` design. P12-24 reserves `require("rhino")` as a disabled facade in the current Safe Node Profile: `rhino.run()` without `experimental: true` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, `require("node:rhino")` remains unavailable, local `node_modules/rhino` cannot shadow the controlled module, and `compat.rhino` remains absent. P12-23 establishes a default-disabled POC gate, and P12-25 implements `rhino.run({ experimental: true, source|path, timeoutMs, args })` through `NodeBridgeRhinoExecutionService`, which executes outside the V8 isolate in an Android Rhino engine, accepts and returns only JSON-safe snapshots, enforces required timeouts, bounds console capture, destroys the Rhino engine after execution, and rejects Java objects, Rhino `Scriptable`, Android objects, functions, handles, threads, locks, native pointers, process/file descriptors, cycles, and prototype-bearing objects at the boundary. P13-14 adds a separate explicit experimental `rhino.install({ experimental: true })` Java proxy POC: it may install `Packages`, `java`, and `android` proxies only when Java interop is enabled, and those proxies route through the same allowlist bridge instead of exposing raw Rhino or Java objects. P13-15 keeps Rhino `importClass` and `importPackage` semantics unsupported; explicit `require("rhino").importClass()` / `.importPackage()` calls throw `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` and the migration path is local assignment from a P13-14 proxy target. P13-16 keeps `JavaAdapter` unsupported with `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED` and reserves `java.defineClass()` / `$autojs.java.defineClass()` as stable-denied replacement names until a bounded proxy-interface provider proves callback cleanup, thread dispatch, packaged policy, and leak diagnostics. Classloader, reflection, native library, and process authority remain denied. P12-26 records packaged metadata behavior as fail-closed. No packaged metadata shape is accepted in Phase 12; future metadata may authorize only JSON-only run or a similarly explicit proxy surface, never unrestricted globals, and packaged APK execution remains rejected until packaged timeout, crash, and destroy evidence exists. See `docs/nodejs/design/RHINO_SHIM.md`, `docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md`, `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`, `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md`, and `docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md`.
+Rhino compatibility shims are a separate migration concern. Node never installs
+Rhino globals automatically. `rhino.run({ explicit: true, ... })` is a
+JSON-only cross-engine adapter with scoped source/path, timeout, serialization,
+and cleanup policy. `rhino.install({ explicit: true, target })` installs only
+allowlisted `Packages`, `java`, and `android` proxies on the supplied
+target. Those proxies use the stable Java provider and never expose raw Rhino
+or Java objects. `importClass`, `importPackage`, and `JavaAdapter` remain
+unsupported; reflection, class loading, native loading, and process authority
+remain denied. See `docs/nodejs/design/RHINO_SHIM.md` and
+`docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md`.
 
 P12-32 promotes `s13n.bytes` only as a pure JavaScript compatibility helper
 through `require("s13n")` and `require("autojs6:compat").s13n.bytes`. It has no
@@ -617,7 +610,10 @@ Bridge capability manifests are optional for legacy compatibility. When a Node p
 
 Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activity`, `app.query`, `dialogs`, `engines`, `engines.exec`, `accessibility`, `screen_capture`, `image`, `ocr`, `storage`, `notifications`, `notifications.settings`, `media`, `media.audio`, `media.metadata`, `media.recording`, `sensors`, `ui`, `clipboard`, `device`, `device.power`, `shell`, `shell.root`, `shell.shizuku`, `network`, `work_manager`, and `java_interop`. Declaring a parent such as `app` or `engines` grants its ordinary child methods; `app.query`, `notifications.settings`, `media.audio`, `media.metadata`, `media.recording`, `device.power`, `shell.root`, and `shell.shizuku` must be declared explicitly. `media_projection` is accepted as an alias for `screen_capture`, and `storages` is accepted as an alias for `storage`.
 
-Declaring `network` is required for controlled `fetch`, `axios`, and `websocket` bridge dispatch when a capability manifest is enforced. Packaged builds map that capability to `android.permission.INTERNET`; doctor reports expose the mapping and the raw Node network module opt-in state.
+Declaring `network` is required for controlled `fetch`, `axios`, and
+`websocket` bridge dispatch when a capability manifest is enforced. Packaged
+builds map network use to `android.permission.INTERNET`; Doctor reports expose
+the permission mapping and the fixed stable native-network capability state.
 
 Bridge limit policy is optional and safe by default. Projects may lower or safely raise limits through `node.bridgeLimits` in `project.json` or `autojs6.node.bridgeLimits` in `package.json`; values above the hard maximum are ignored and reported through `profile.bridgeLimits.warnings`. The current policy bounds pending bridge calls, JS image handles, live shell commands, controlled fetch calls, controlled WebSocket sessions, and accessibility requests per second. Resource exhaustion uses `ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`; request-rate exhaustion uses `ERR_AUTOJS6_BRIDGE_RATE_LIMITED`.
 
@@ -640,7 +636,13 @@ Current `toast` and `app` support uses a private live transport in the main embe
 
 When the live transport configuration is absent, such as in older packaged inrt templates, the bridge falls back to the queued host-effect envelope. In queued mode JavaScript only observes that the request was accepted; the Android dispatch result is diagnostic output after script completion.
 
-Any provider-owned resource created through the bridge must be registered with the current execution id before JavaScript receives or depends on its handle. Registry records include an id, type, creation timestamp, owner execution id, metadata, and an idempotent close/recycle callback. On execution stop or service destroy, the provider closes all remaining registry entries, clears stale handle maps, and logs a leaked-resource summary through `embedded_script.bridge_resource.*` diagnostics. Current live registrations cover controlled fetch calls, controlled WebSocket sessions, shell executions, WorkManager-backed `work_manager` task registrations, notifications owned by the current Node execution, bounded sensor subscriptions, and experimental Java object handles; image handles, screen capturers, dialogs, UI sessions, and workers must use the same registry and limit policy when their Android providers become live.
+Any provider-owned resource created through the bridge must be registered with
+the current execution id before JavaScript receives or depends on its handle.
+Registry records include ownership, metadata, and an idempotent close callback.
+On execution stop or service destroy, the provider closes every remaining
+entry and reports leaks. Current registrations include controlled network,
+shell, WorkManager, notifications, sensors, and stable Java object handles;
+other live providers and workers follow the same ownership/limit policy.
 
 The JS-only plugin manager has a separate per-plugin owner registry for
 resources that plugin lifecycle code explicitly registers through
@@ -832,26 +834,25 @@ packaged disclosure, and rollback evidence. Shizuku service handles, Binder
 access, root shell handles, and raw process/file-descriptor/stream/signal
 objects remain denied.
 
-The `fetch` bridge is the controlled AutoJs6 Safe-profile replacement for Node raw network modules. JavaScript receives only a fetch-compatible Promise wrapper and buffered response helpers. Request descriptors are JSON-serialized, method-limited to `GET` and `POST`, bounded by `timeoutMs`, `maxResponseBytes`, `maxRedirects`, and max active request count, and may be cancelled through `AbortController.signal`. Only `http:` and `https:` URLs are accepted. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy cancels tracked OkHttp calls and must not call back into a destroyed Node environment.
+The `fetch` bridge is the controlled AutoJs6 network surface. JavaScript
+receives a fetch-compatible Promise wrapper and buffered response helpers.
+Request descriptors are JSON-serialized, method- and scheme-validated, bounded
+by `timeoutMs`, `maxResponseBytes`, `maxRedirects`, and active request
+count, and may be cancelled through `AbortController.signal`. The provider is
+enabled in ordinary Node builds. When the bridge permission manifest is
+enforced, missing `network` permission rejects before I/O. Provider destroy
+cancels tracked OkHttp calls and must not call back into a destroyed Node
+environment.
 
-P13-29 closes the controlled HTTP/HTTPS client subset for v1.1. The
-`http`/`https` modules remain controlled-fetch facades in the Safe profile and
-raw Node network modules remain disabled by default: server/listen, raw sockets,
-DNS/TLS session control, proxy/tunnel options, `CONNECT`, upgrade, and custom
-connector hooks reject before raw transport authority can be acquired.
+P13-29 records the older controlled-only HTTP/HTTPS milestone. In the v1.2
+baseline, native `http` and `https` are stable builtins while controlled
+`fetch`/`axios`/`undici` remain separate provider-backed APIs.
 
-P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision. By default, the `net`, `tls`,
-`dns`, and `dns/promises` modules are reserved limited builtins for compatibility
-probing and deterministic local behavior only. `net.connect()`,
-`net.createConnection()`, `net.Server.listen()`, `tls.connect()`,
-`tls.createConnection()`, `tls.Server.listen()`, DNS `resolve*()`/`reverse()`,
-TLS renegotiation, and keying-material export reject with the canonical AutoJs6
-network-disabled code. DNS lookup remains loopback/IP-literal-only and
-`dns.getServers()` returns an empty list so Android resolver servers, VPN/private
-network state, search domains, and local topology are not exposed.
-The release-forbidden `autojs.nodejs.rawNetworkModules.experimental=true`
-build/debug opt-in routes CommonJS `dns`, `dns/promises`, `http`, `https`,
-`net`, and `tls` to Node native builtins for Desktop parity experiments.
+P13-30 records the older limited-facade milestone. In v1.2, `net`, `tls`,
+`dns`, and `dns/promises` resolve to native Node builtins in Debug, Release,
+and packaged Node runtimes. They operate under the Android app sandbox and
+manifest; callers own socket/server count, timeout, buffering, TLS, and cleanup
+policy. They do not inherit the controlled bridge's per-request budgets.
 
 P13-31 records dgram UDP capability as stable-denied. `dgram` / `node:dgram`
 is not a shape facade and cannot be loaded through local package shadowing or
@@ -878,7 +879,15 @@ recursive watch remains unsupported. Packaged watcher/fd/FileHandle/stream
 close-on-destroy evidence and expanded-root reruns are still required before
 the Desktop profile can relax this boundary.
 
-The `websocket` bridge is the controlled AutoJs6 replacement for raw WebSocket sockets. JavaScript receives a Promise-based `connect()` API plus connection `send()`, `close()`, `on()`, `off()`, `addEventListener()`, and `removeEventListener()` methods with `onopen`/`onmessage`/`onclose`/`onerror` handler properties. Request descriptors are JSON-serialized, limited to `ws:` and `wss:`, bounded by `timeoutMs`, `maxMessageBytes`, `maxQueueSize`, and max active connection count, and may be cancelled through `AbortController.signal`. Binary frames cross the bridge as Base64. Event callbacks are drained through the bridge and must not call into JavaScript directly from OkHttp callbacks. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy closes tracked WebSocket sessions and must not call back into a destroyed Node environment.
+The `websocket` bridge is the stable controlled AutoJs6 WebSocket surface.
+JavaScript receives a Promise-based `connect()` API plus connection
+`send()`, `close()`, event methods, and handler properties. Request
+descriptors are JSON-serialized, limited to `ws:` and `wss:`, bounded by
+timeout, message, queue, and active-connection limits, and may be cancelled.
+Binary frames cross the bridge as Base64. Event callbacks are drained through
+the bridge and never invoke JavaScript directly from OkHttp callbacks. Missing
+declared `network` permission rejects before I/O when manifest enforcement is
+active; provider destroy closes tracked sessions.
 
 The `work_manager` bridge is a controlled scheduled-task surface, not direct Android scheduler access. JavaScript can call `scheduleOnce()`, `schedulePeriodic()`, `cancel()`, and `list()` through `require("work_manager")`; descriptors are JSON-only, `backend` is restricted to `embedded`, entries must be scoped relative paths, non-packaged entries must resolve to files inside the working directory, packaged entries may serialize metadata without a plaintext file at registration time, and periodic intervals are bounded. The S7-15 live provider persists task records under app-private storage and enqueues AndroidX WorkManager one-shot or periodic requests. S7-21 revalidates the scoped entry when the worker fires, launches embedded Node only through `executionMode=scheduled` plus `launchSurface=scheduled_runner`, supports CJS/ESM entries, stores stable `lastRun`/`runHistory` metadata, and still never returns WorkManager retry. The scheduled runner cannot expose interactive UI or unrestricted long-running periodic Node process authority. S7-19 records Android 16 JobScheduler quota diagnostics for WorkManager-backed Node tasks, but still does not expose raw quota controls or scheduler objects. S11-22 records Rhino `tasks` migration as a design gate: `tasks.addDisposableTask()` may later map to `work_manager.scheduleOnce()` for Node-owned scoped entries, but `tasks.addDailyTask()`, `tasks.addWeeklyTask()`, `tasks.addIntentTask()`, raw `TimedTask`/`IntentTask` objects, task update mutation, and full user task database parity are not provided by `work_manager`. P12-15 locks the `compat.tasks` v1 scope to disposable one-shot wrappers only, P12-16 implements `addDisposableTask` over `work_manager.scheduleOnce`, `removeTask(id)` over `work_manager.cancel`, and `queryTasks(options?)` over `work_manager.list` with JSON-safe ids and snapshots only, and P12-17 adds Rhino-name aliases `queryTimedTasks()`, `getTimedTask(id)`, and `removeTimedTask(id)` for Node-owned one-shot snapshots only. P12-17 keeps daily/weekly user-task database provider access rejected with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` and keeps update mutation blocked with `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`. P12-18 keeps `IntentTask` and broadcast-triggered task provider access rejected with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`; `addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`, and `removeIntentTask(id)` fail before bridge dispatch. Queued host fallback rejects work-manager requests so packaged templates without live bridge metadata cannot create persistent tasks as one-way effects. Raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, Intent, Bundle, Uri, IntentFilter, exact-alarm, boot, package-event, custom broadcast authority, raw `TimedTask`, and raw `IntentTask` remain denied.
 
@@ -1005,25 +1014,19 @@ Use the most specific code available. Avoid generic `Error` messages for securit
 
 During the compatibility migration, `error.code` may remain a Node-style code such as `EPERM` or an existing legacy AutoJs6 code such as `ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED`. New consumers should prefer `error.autojs6Code` when present. If a legacy code is preserved, `error.legacyCode` is also set.
 
-P13-35 records process-worker replacement as partial. The only runtime change is
-diagnostic metadata in `autojs6:profile.processWorkerReplacementProfile`; it
-does not create a process-worker facade. The current replacement direction is
-request-local `worker_threads.WorkerPool` after native preflight succeeds.
-`child_process` remains denied, `shell` stays a separately permissioned scoped
-command bridge, `worker_computation` stays reserved, and no raw process handle,
-spawn/fork, stdio stream, signal, bridge-module, nested-worker, or packaged
-process-worker authority is promoted. For P13-35 v1.1, there is no user-facing
-process-worker API or UX; P13-40 remains the separate child_process
-scoped-runner track.
+P13-35 remains historical evidence for the separate process-worker decision.
+The current `processWorkerReplacementProfile` reports WorkerPool as a
+host-managed compute abstraction, but does not create `process_worker`,
+`compute_worker`, or `autojs6:process-worker` facades. Stable native
+`worker_threads` and `child_process` are separate surfaces.
 
-P13-40 records child_process scoped runner as partial. `childProcessProfile` is
-diagnostic metadata only: `child_process` and `node:child_process` remain
-disabled builtins, and the existing `shell` bridge remains the separate
-capability-scoped command path. A future scoped runner must prove app-private
-allowlisted binaries, integrity checks, arbitrary-path denial, bounded
-stdin/stdout/stderr, timeout, cancellation, kill, cleanup, packaged disclosure,
-hostile corpus coverage, and rollback controls before any child-process-like
-Desktop profile authority can be promoted.
+P13-40 remains historical scoped-runner evidence. Current `child_process` and
+`node:child_process` resolve to Node's native builtin. They inherit Android
+UID/SELinux/manifest constraints and caller validation, not the separate
+`shell` bridge's app-private executable allowlist or provider resource budgets.
+Callers must validate commands/arguments, bound stdio and timeouts, and kill or
+reap children during cancellation and shutdown. The `shell` bridge remains a
+separately permissioned and budgeted command provider.
 
 P13-41 records ESM loader parity as partial. `esmLoaderProfile` is diagnostic
 metadata for the existing AutoJs6-managed partial ESM loader; it does not grant

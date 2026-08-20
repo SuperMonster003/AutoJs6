@@ -1,298 +1,53 @@
-# Rhino JSON-Only Shim
+# Rhino JSON-Only Execution Boundary
 
-Status: S11-26 design and POC gate plan; P12-23 establishes the Phase 12 POC
-gate; P12-24 reserves a disabled runtime facade; P12-25 implements the explicit
-JSON-only execution adapter POC behind `experimental: true`; P12-26 records
-packaged metadata behavior as fail-closed.
+Status: implemented explicit compatibility boundary.
 
-## Decision
+`require("rhino").run()` is an opt-in cross-engine call expressed by the
+request field `explicit: true`. It is not controlled by Gradle, build type,
+project metadata, or packaged feature flags.
 
-The only acceptable future Rhino shim shape is an explicit, isolated,
-JSON-only run API. The preferred module name for a future implementation is:
-
-```js
-const rhino = require("rhino");
-
-const result = await rhino.run({
-  source: "var input = arguments[0]; ({ value: input.value + 1 })",
-  args: [{ value: 41 }],
-  timeoutMs: 5000
-});
-```
-
-Current Node Profile v1.1 default behavior after P12-25:
-
-- `require("rhino")` resolves to a disabled facade;
-- `rhino.run()` without `experimental: true` rejects with
-  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
-- `rhino.run({ experimental: true, source|path, timeoutMs, args })` dispatches
-  to the Android Rhino JSON-only execution adapter POC;
-- `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
-- `require("node:rhino")` remains unavailable;
-- no `compat.rhino`;
-- no Rhino globals installed into V8;
-- no `importClass`, `importPackage`, `Packages`, `java.*`, `android.*`, or
-  `JavaAdapter` in Node.
-
-This shim is a migration escape hatch for legacy snippets that cannot yet be
-rewritten to Node bridge modules. It is not a way to make Node behave like
-Rhino.
-
-## API Shape
-
-Future POC API:
+## Request
 
 ```ts
-type JsonValue =
-  | null
-  | boolean
-  | number
-  | string
-  | readonly JsonValue[]
-  | { readonly [key: string]: JsonValue };
-
-interface RhinoRunRequest {
+{
+  explicit: true;
   source?: string;
   path?: string;
-  args?: JsonValue | readonly JsonValue[];
   timeoutMs: number;
-  cwd?: string;
-  permissions?: readonly string[];
-  captureStdout?: boolean;
-  captureStderr?: boolean;
-}
-
-interface RhinoRunResult {
-  schema: "autojs6-rhino-run-result-v1";
-  engine: "rhino";
-  ok: true;
-  executionId: string;
-  value: JsonValue | null;
-  stdout?: string;
-  stderr?: string;
-  durationMs: number;
+  args?: JsonValue;
 }
 ```
 
-Exactly one of `source` or `path` must be provided. `source` is inline legacy
-Rhino JavaScript. `path` is a scoped project-relative path. `timeoutMs` is required;
-the POC must reject missing, infinite, zero, negative, or excessive timeouts
-before dispatch.
+Exactly one of `source` or `path` is required. `path` is resolved inside the
+execution sandbox. Missing `explicit: true`, ambiguous source selection,
+invalid JSON values, path escape, oversized input, or invalid timeout rejects
+before Rhino execution.
 
-`args` must be a JSON-safe snapshot. The POC must reject:
+## Result
 
-- `undefined`;
-- functions;
-- symbols;
-- `bigint`;
-- `Date`, `RegExp`, `Map`, `Set`, class instances, and prototype-bearing
-  objects;
-- `ArrayBuffer`, typed arrays, `Buffer`, streams, file handles, image handles,
-  UI handles, accessibility node handles, and other opaque Node bridge handles;
-- Java objects, Rhino `Scriptable`, Android objects, native pointers, threads,
-  locks, and process handles;
-- cycles, excessive depth, excessive array length, excessive object key count,
-  and oversized serialized payloads.
+The adapter returns JSON-safe result data and bounded console output. It never
+returns a Rhino `Scriptable`, Java/Android object, function, native handle,
+thread/process object, file descriptor, cyclic graph, symbol, bigint, undefined
+value, or prototype-bearing object.
 
-The success value returned from Rhino must also be JSON-safe. Non-JSON return values fail
-with a stable error instead of becoming live wrappers. A Rhino snippet
-may create Java or Android objects internally only if the ordinary Rhino engine
-would allow it, but those objects must not cross back to Node.
+## Lifecycle
 
-## Error Shape
+The host creates an isolated Rhino engine for the request, enforces the deadline,
+captures bounded diagnostics, serializes the result, and destroys the engine.
+Timeout, cancellation, Node execution stop, service destruction, serialization
+failure, and provider failure all close the request without retaining Rhino
+runtime state.
 
-Future denials should use stable codes:
+## Security Invariants
 
-| Code | Use |
-| --- | --- |
-| `ERR_AUTOJS6_RHINO_SHIM_DISABLED` | `require("rhino")` or `rhino.run()` is not enabled in the current profile. |
-| `ERR_AUTOJS6_RHINO_SHIM_INVALID_REQUEST` | Request shape, `source`/`path`, `args`, timeout, or payload limits are invalid. |
-| `ERR_AUTOJS6_RHINO_SHIM_TIMEOUT` | Rhino execution exceeded `timeoutMs` and was cancelled. |
-| `ERR_AUTOJS6_RHINO_SHIM_CANCELLED` | Parent Node execution, service destroy, user stop, or provider cleanup cancelled the run. |
-| `ERR_AUTOJS6_RHINO_SHIM_JSON_DENIED` | Input or output is not JSON-safe. |
-| `ERR_AUTOJS6_RHINO_SHIM_JAVA_OBJECT_DENIED` | Rhino tried to return a Java, Android, Rhino `Scriptable`, native, thread, lock, or handle object. |
-| `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED` | `rhino.install()` is requested. |
+- no automatic Rhino globals in V8;
+- no shared Node/Rhino mutable object graph;
+- no Java or Android object transfer;
+- no unscoped filesystem access;
+- no native pointer, process, thread, lock, or descriptor transfer;
+- no packaged authorization inferred from a source file alone;
+- stable error codes for disabled, invalid, timeout, provider, and
+  serialization failures.
 
-Errors visible to Node must be JSON-safe objects. Stack traces may be included
-only as strings and must identify the Rhino execution id. The Node stack and
-Rhino stack must not expose live engine objects.
-
-## Engine Boundary
-
-`rhino.run()` must never execute Rhino inside the V8 isolate. The script manager owns engine creation,
-cancellation, logging, and lifecycle. A dedicated compatibility process remains
-the preferred containment model.
-
-Required POC boundary:
-
-- Node submits a JSON request envelope to an engine owner.
-- The engine owner creates an isolated Rhino execution or a dedicated
-  compatibility process.
-- The run has its own execution id, timeout, log capture, and cleanup hooks.
-- Parent Node stop, service destroy, timeout, and explicit cancellation must
-  cancel the Rhino run.
-- The Node side receives only JSON snapshots and stable error objects.
-- No Java object, Rhino `Scriptable`, Android object, function, closure,
-  thread, lock, native pointer, image handle, UI handle, accessibility node
-  handle, process handle, or file descriptor crosses into Node.
-
-The first implementation may reuse the existing in-process Rhino engine only as
-a transitional POC. If it does, the gate must explicitly prove timeout,
-cancellation, and cleanup behavior. A future dedicated process is preferred for
-crash containment and clearer lifecycle ownership.
-
-## Permission And Packaging Policy
-
-`rhino.run()` must not grant new authority merely because Node source imports
-the module. The POC must choose one of these explicit permission models before
-runtime enablement:
-
-- inherit only the parent Node execution capabilities and reject Rhino APIs
-  outside that capability set; or
-- require a separate packaged/project metadata opt-in listing allowed Rhino
-  bridge families.
-
-In either model:
-
-- P12-26 records packaged metadata behavior as fail-closed;
-- No packaged metadata shape is accepted in Phase 12;
-- future packaged APK support must opt in through explicit metadata;
-- missing metadata fails closed;
-- metadata may authorize only JSON-only run, never `install()` or globals;
-- no Android manifest entry, receiver, service, permission, or provider is
-  injected only because source text contains `require("rhino")`;
-- package diagnostics must report mixed Rhino/Node execution support and
-  denials;
-- raw Java/Android object return remains denied even when the Rhino snippet has
-  internal Java access.
-
-## Module Resolution Policy
-
-P12-24 reserves `require("rhino")` as a controlled AutoJs module name. In the
-default Safe Node Profile it returns only the disabled facade; it does not
-execute Rhino and does not expose a bridge provider.
-
-The controlled `rhino` module is reserved and a local `node_modules/rhino`
-package cannot shadow it. This prevents scripts from depending on different
-behavior between packaged and live runs.
-
-There is no `node:rhino` alias.
-
-## Relationship To Existing APIs
-
-Prefer migration in this order:
-
-1. Rewrite legacy code to explicit Node bridge modules.
-2. Use `require("autojs6:compat")` for implemented low-risk Rhino API facades.
-3. Use `engines.execScriptFile()` for whole-script dispatch when a legacy Rhino
-   script should remain a separate script.
-4. Consider future `rhino.run()` only for small, timeout-bounded snippets with
-   JSON input and output.
-
-`rhino.run()` must not expose or reuse `autojs6:compat` globals. It does not
-install `toast`, `files`, `images`, selector globals, `threads`, Java bridge
-globals, or any old AutoJs global into Node.
-
-## POC Gate Plan
-
-A future implementation gate must prove:
-
-- default Safe Node Profile reports `ERR_AUTOJS6_RHINO_SHIM_DISABLED` for
-  `rhino.run()` and does not execute Rhino;
-- `require("node:rhino")` is unavailable;
-- local `node_modules/rhino` shadowing behavior is documented and tested;
-- `rhino.install()` rejects with `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
-- requiring the module does not mutate `globalThis`;
-- `importClass`, `importPackage`, `Packages`, `java.*`, `android.*`, and
-  `JavaAdapter` remain unavailable in V8;
-- `rhino.run({ source, timeoutMs, args })` accepts only JSON-safe requests;
-- `rhino.run({ path, timeoutMs, args })` validates scoped project-relative
-  paths;
-- success returns a JSON-safe `RhinoRunResult`;
-- Rhino exceptions become stable JSON-safe Node errors;
-- timeouts cancel Rhino execution and clean resources;
-- parent Node stop, service destroy, and user stop cancel active runs;
-- Java, Android, Rhino `Scriptable`, function, thread, lock, image, UI,
-  accessibility, process, native pointer, and file descriptor returns are
-  denied;
-- stdout/stderr capture is bounded and attributed to the Rhino execution id;
-- concurrent runs are bounded, and overflow rejects before creating engines;
-- packaged APKs without explicit shim metadata fail closed;
-- no Phase 12 packaged metadata shape enables the P12-25 POC;
-- diagnostics record mixed-engine runs, denials, timeout, cancellation, and
-  cleanup counts.
-
-## P12-23 POC Gate
-
-P12-23 records the Phase 12 POC gate in
-`docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`. It keeps
-execution disabled and fixes the implementation preconditions before any
-adapter work:
-
-- release/default Safe Node Profile still denies the shim;
-- POC execution can only be considered behind an explicit experimental flag or
-  test metadata. This is the explicit experimental flag or test metadata rule;
-- `rhino.install()` remains permanently outside the JSON-only POC and must use
-  `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
-- the JSON validator must reject function, symbol, bigint, undefined, cycle,
-  prototype object, handle marker, Java object marker, Rhino `Scriptable`
-  marker, Android object marker, thread, lock, process, native pointer, and
-  file descriptor values;
-- no Rhino globals are installed into V8.
-
-## P12-24 Disabled Facade
-
-P12-24 reserves `require("rhino")` as the stable default-denial path:
-
-- the module is a frozen disabled facade with schema
-  `autojs6-rhino-json-only-shim-disabled-v1`;
-- `rhino.run()` returns a rejected Promise with
-  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
-- `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
-- the disabled facade reports `enabled: false`, `mode: "disabled"`,
-  `status().run: "disabled"`, and `status().install: "unsupported"`;
-- `require.resolve("rhino")` resolves to `rhino`, so
-  `node_modules/rhino` cannot shadow the controlled module;
-- `require("node:rhino")` remains unavailable because there is no Node builtin
-  alias;
-- no `compat.rhino`, Rhino globals, Java bridge globals, execution adapter, or
-  packaged metadata behavior is enabled.
-
-## P12-25 Execution Adapter POC
-
-P12-25 implements the explicit POC in
-`docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md`.
-
-The runtime request must carry `experimental: true` and exactly one of `source`
-or `path`. The current POC uses an `args` Rhino global for JSON-safe arguments,
-returns schema `autojs6-rhino-json-only-run-result-v1`, captures a bounded
-console summary, converts Rhino exceptions to JSON-safe errors, rejects raw
-Java/Android/Rhino wrapper returns, and destroys the `RhinoJavaScriptEngine` in
-the provider `finally` path. This POC does not install Rhino globals into V8,
-does not add `compat.rhino`, and does not promote packaged metadata support.
-
-## P12-26 Packaged Metadata Gate
-
-P12-26 records packaged metadata behavior as fail-closed in
-`docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md`.
-
-No packaged metadata shape is accepted in Phase 12. The provider registry marks
-the `rhino` bridge provider with `packagedSupport.status = unsupported`, and
-packaged APK execution remains rejected until a later phase defines metadata,
-package-builder preflight, packaged APK smoke, and timeout/crash/destroy
-evidence. Any future metadata may authorize only JSON-only run, not
-`install()` or globals.
-
-## S11-26 Acceptance
-
-- The design fixes a concrete explicit API candidate:
-  `rhino.run({ source, timeoutMs, args })` plus a scoped `path` variant.
-- All input and output is JSON-safe.
-- Rhino globals are not installed into V8.
-- Current runtime and type declarations expose the P12-24 disabled
-  `require("rhino")` facade plus the P12-25 explicit `experimental: true`
-  execution adapter POC; they still do not expose `compat.rhino`, Rhino globals,
-  or packaged execution support.
-- P12-26 records packaged metadata behavior as fail-closed: no packaged metadata
-  shape is accepted in Phase 12, and any future metadata may authorize only
-  JSON-only run.
+Java proxy installation is a separate explicit operation described in
+[RHINO_SHIM.md](RHINO_SHIM.md) and remains bound to the stable Java allowlist.

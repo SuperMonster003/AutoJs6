@@ -70,7 +70,7 @@ internal object NodeWorkerThreadsTestSupport {
             """.trimIndent(),
             sourceName = "<node-worker-native-preflight.js>",
             timeoutMs = 10_000L,
-            workerThreadsExperimentalEnabled = true,
+            workerThreadsEnabled = true,
         )
         NodeEmbeddedTestHarness.assertSucceeded("worker_threads native availability preflight", result)
         return when {

@@ -125,7 +125,7 @@ The bundler or packaged APK verifier must reject or report:
 - absolute paths in package targets
 - package `exports`/`imports` targets that escape the package root
 - packages exceeding configured size limits
-- ESM-only packages unless the relevant experimental ESM policy is active
+- ESM-only packages whose entry graph exceeds the stable scoped ESM policy
 - executable `.bin` entries that require shell semantics
 - hidden package manager caches that are not explicitly included by policy
 
@@ -254,8 +254,8 @@ The direct bundler task does not execute package code. The desktop-assisted npm 
 the project to a temporary host work directory, runs `npm ci --ignore-scripts --no-bin-links --install-links --no-audit
 --fund=false`, verifies `package.json` and `package-lock.json` were not mutated, rejects generated `.bin` entries, and
 then runs the same sanitizer. Both routes reject native addon files, lifecycle scripts, unsupported `.bin` entries,
-symlinks, path escapes, unsupported package-manager layouts, oversized files/packages/trees, excessive package counts, and
-default-profile ESM-only package metadata.
+symlinks, path escapes, unsupported package-manager layouts, oversized files/packages/trees, and excessive package
+counts. ESM-only package metadata is accepted by the stable scoped ESM loader.
 
 The dependency manifest records a normalized sanitized-project bundle hash and uses that hash as the content-addressed
 cache key. The hash covers `package.json`, optional `package-lock.json`, and `node_modules` file paths/content only; host
@@ -264,8 +264,8 @@ produce the same bundle hash. Package entries include package/version, integrity
 file count, total bytes, unsupported capability usage, and an AutoJs6 compatibility score. The SBOM-lite report mirrors
 the package identity, integrity, license, size, capability, and score fields for packaged APK review.
 
-`dependency-compatibility.json` is the v1.1 dependency compatibility analyzer output. It classifies the installed project
-as `compatible`, `compatible with capability`, `experimental`, `unsupported`, or `unsafe`; records ESM/CJS entry format,
+`dependency-compatibility.json` is the dependency compatibility analyzer output. It classifies the installed project as
+`compatible`, `compatible with capability`, `partial`, `unsupported`, or `unsafe`; records ESM/CJS entry format,
 required builtins, declared and required capabilities, native/lifecycle/raw-network/process/fs-scope signals,
 package exports/imports conditions, and expected packaged graph size; and is summarized from
 `dependency-manifest.json` so APK-builder preflight gates can reject `unsafe` and `unsupported` bundles before copying

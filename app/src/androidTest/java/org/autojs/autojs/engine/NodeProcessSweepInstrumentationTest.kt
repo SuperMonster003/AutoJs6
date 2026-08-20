@@ -312,7 +312,7 @@ class NodeProcessSweepInstrumentationTest {
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("process.permission declared manifest", declared)
-        val expectedWorkerPermission = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED.toString()
+        val expectedWorkerPermission = BuildConfig.NODEJS_WORKER_THREADS_ENABLED.toString()
         assertTrue(
             NodeEmbeddedTestHarness.describeResult("process.permission declared manifest", declared),
             declared.stdout.contains(

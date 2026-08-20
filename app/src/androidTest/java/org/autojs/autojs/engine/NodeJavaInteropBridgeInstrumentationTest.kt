@@ -39,11 +39,11 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertTrue(NodeBridgeModules.supports("java", "release"))
         assertTrue(NodeBridgeModules.supports("java", "dispose"))
         assertFalse(NodeBridgeModules.supports("java", "reflect"))
-        assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_ENABLED)
 
         val disabledProvider = AndroidNodeBridgeCapabilityProvider(
             context,
-            javaInteropExperimentalEnabled = false,
+            javaInteropEnabled = false,
         )
         val disabled = dispatchJava(
             disabledProvider,
@@ -55,7 +55,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
 
         val enabledProvider = AndroidNodeBridgeCapabilityProvider(
             context,
-            javaInteropExperimentalEnabled = true,
+            javaInteropEnabled = true,
         )
 
         val math = dispatchJava(
@@ -214,7 +214,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
               profile.featureFlags.java_interop.enabled,
               profile.featureFlags.java_interop.status,
               profile.featureFlags.java_interop.gradleProperty,
-              profile.experimentalFlags.javaInterop
+              profile.featureStates.javaInterop
             ].join("|"));
             console.log("java.disabled=" + resolveCode + "|" + requireCode);
             """.trimIndent(),
@@ -224,13 +224,13 @@ class NodeJavaInteropBridgeInstrumentationTest {
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("Java interop disabled gate", result)
-        assertTrue(result.stdout, result.stdout.contains("java.profile=false|experimental|autojs.nodejs.javaInterop.experimental|false"))
+        assertTrue(result.stdout, result.stdout.contains("java.profile=false|stable|autojs.nodejs.javaInterop.stable|false"))
         assertTrue(result.stdout, result.stdout.contains("java.disabled=ERR_AUTOJS6_JAVA_INTEROP_DISABLED|ERR_AUTOJS6_JAVA_INTEROP_DISABLED"))
     }
 
     @Test
-    fun jsJavaInteropExperimentalModuleUsesBridgeAndEnforcesAllowlist() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Java interop experimental fake bridge")
+    fun jsJavaInteropStableModuleUsesBridgeAndEnforcesAllowlist() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Java interop stable fake bridge")
 
         val workDir = File(context.cacheDir, "node-java-interop-enabled").apply {
             deleteRecursively()
@@ -397,7 +397,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
               console.log("java.profile=" + [
                 profile.featureFlags.java_interop.enabled,
                 profile.featureFlags.java_interop.status,
-                profile.experimentalFlags.javaInterop
+                profile.featureStates.javaInterop
               ].join("|"));
               console.log("java.methods=" + [
                 typeof java.findClass,
@@ -455,15 +455,15 @@ class NodeJavaInteropBridgeInstrumentationTest {
             "<node-java-interop-enabled.js>",
             workingDirectory = workDir,
             timeoutMs = 10_000L,
-            javaInteropExperimentalEnabled = true,
+            javaInteropEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("Java interop experimental fake bridge", result)
+        NodeEmbeddedTestHarness.assertSucceeded("Java interop stable fake bridge", result)
         assertTrue(result.stdout, result.stdout.contains("java.resolve=java"))
         assertTrue(result.stdout, result.stdout.contains("java.shadow=false"))
         assertTrue(result.stdout, result.stdout.contains("java.frozen=true"))
         assertTrue(result.stdout, result.stdout.contains("java.rect_frozen=true"))
-        assertTrue(result.stdout, result.stdout.contains("java.profile=true|experimental|true"))
+        assertTrue(result.stdout, result.stdout.contains("java.profile=true|stable|true"))
         assertTrue(
             result.stdout,
             result.stdout.contains(

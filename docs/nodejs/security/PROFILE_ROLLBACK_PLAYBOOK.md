@@ -2,68 +2,75 @@
 
 Schema: `autojs6-node-profile-rollback-policy-v1`
 
-P13-51 defines the rollback playbook for Safe/Pro/Desktop/Debug profile work.
-The policy is intentionally `playbook_partial` and `metadata_only_no_authority`:
-it documents the switches and fallback actions required before relaxed
-capability promotion, but it does not promote runtime authority.
+Node Profile v1.2 treats ESM, dynamic import, controlled network, WebSocket,
+native network builtins, `worker_threads`, `child_process`, and allowlisted
+Java interop as stable features. They have no capability-specific Gradle or
+runtime kill switch. A rollback therefore requires an explicit profile/contract
+release, not a hidden build variant.
 
-## Profile Switches
+## Runtime Profile Switches
 
-| Profile | Default | Gradle property | Rollback action | Fallback |
-| --- | --- | --- | --- | --- |
-| `safe_default` | on | `always_on` | keep the Safe Node Profile | `safe_default` |
-| `pro_compat_opt_in` | off | `autojs.nodejs.profile.pro.enabled=false` | disable Pro metadata and rebuild | `safe_default` |
-| `desktop_compat_opt_in` | off | `autojs.nodejs.profile.desktop.enabled=false` | disable Desktop metadata and rebuild | `safe_default` |
-| `debug_unsafe_lab` | off | `autojs.nodejs.profile.debugUnsafeLab.enabled=false` | disable debug unsafe lab and rebuild | `safe_default` |
-
-Release builds keep these promotion switches disabled until the corresponding
-promotion, privacy, and packaged gates are closed.
-
-## Capability Switches
-
-| Capability | Profile lane | Switch or current rollback | Rollback action |
+| Profile | Default | Property | Purpose |
 | --- | --- | --- | --- |
-| `network` | `desktop_compat_opt_in` | `autojs.nodejs.network.experimental=false` | disable controlled network provider experiments |
-| `raw_network` | `desktop_compat_opt_in` | `autojs.nodejs.rawNetworkModules.experimental=false` | disable raw native Node network builtins and match the P13-50 corpus capability id |
-| `raw_node_network_modules` | `desktop_compat_opt_in` | `autojs.nodejs.rawNetworkModules.experimental=false` | disable native Node network builtin experiments |
-| `worker_threads` | `desktop_compat_opt_in` | `autojs.nodejs.worker_threads.experimental=false` | disable worker runtime experiments |
-| `java_interop` | `pro_compat_opt_in` | `autojs.nodejs.javaInterop.experimental=false` | disable allowlist Java interop experiments |
-| all relaxed capabilities | Pro/Desktop | `autojs.nodejs.relaxedCapabilities.enabled=false` | keep the relaxed-capability bundle disabled |
-| `filesystem_relaxation` | `desktop_compat_opt_in` | `safe_profile_scoped_fs` | keep `workingDirectory` scoped fs only |
-| `child_process` | `desktop_compat_opt_in` | `stable_denial_no_runtime_switch` | keep `child_process` denied and use the scoped `shell` bridge |
-| `native_addon` | `desktop_compat_opt_in` | `stable_denial_no_runtime_switch` | keep `.node` and `process.dlopen` denied |
-| `inspector` | `debug_unsafe_lab` | `debug_profile_only_no_runtime_switch` | keep inspector denied outside future debug session gate |
-| `wasi` | `desktop_compat_opt_in` | `stable_denial_no_runtime_switch` | keep raw WASI denied |
-| `notifications.settings` | `pro_compat_opt_in` | `stable_partial_status_settings_only` | keep notification ownership and foreground disclosure disabled; fall back to permission/status snapshots and user-visible settings handoff |
-| `device.power` | `pro_compat_opt_in` | `stable_partial_status_settings_only` | keep wakelock, Doze mutation, and request-ignore-battery-optimization mutation flows denied; fall back to battery-optimization status and user-visible settings handoff |
+| `safe_default` | on | always on | Current stable Node runtime and scoped security baseline. |
+| `pro_compat_opt_in` | off | `autojs.nodejs.profile.pro.enabled` | Metadata/review lane for broader Pro compatibility work. |
+| `desktop_compat_opt_in` | off | `autojs.nodejs.profile.desktop.enabled` | Metadata/review lane for additional desktop parity. |
+| `debug_unsafe_lab` | off | `autojs.nodejs.profile.debugUnsafeLab.enabled` | Debug-only research surfaces such as a future Inspector session. |
 
-Capabilities that are not promoted yet roll back by staying on their existing
-stable denial or Safe-profile scoped behavior.
+These profile properties do not disable or enable the stable capability set.
+They may expose only separately documented non-stable work after its own
+security and packaging review.
 
-## Crash And Stress Triggers
+## Stable Feature Rollback
 
-| Trigger | Evidence | Required action |
+| Capability | Current state | Rollback action |
 | --- | --- | --- |
-| `native_crash` | `NodeCrashEvidenceStore` | disable requested profile and relaunch with `safe_default` |
-| `bridge_provider_crash` | `NodeCrashEvidenceStore` | disable the provider capability and relaunch with `safe_default` |
-| `stress_regression` | `verifyNodePhase13FullHeavyResourceStress` | disable the profile or capability until stress gate recovers |
-| `security_corpus_regression` | `RELAXED_CAPABILITY_SECURITY_CORPUS.json` | fail closed and keep the relaxed capability unpromoted |
-| `packaged_apk_regression` | packaged capability metadata and crash bundle | ship a Safe-profile patch or remove promoted metadata |
+| ESM / dynamic import | stable, built in | publish a versioned loader/profile demotion with migration notes and compatible errors |
+| controlled network / WebSocket | stable, built in | publish a versioned provider/profile demotion; preserve permission and cleanup diagnostics |
+| native network builtins | stable, built in | publish a versioned compatibility demotion; do not add a private Gradle switch |
+| `worker_threads` | stable, built in | publish a versioned profile/contract demotion; preserve lifecycle cleanup and never use same-thread fallback |
+| `child_process` | stable, built in | publish a versioned compatibility demotion and clearly separate the AutoJs `shell` bridge |
+| Java interop | stable allowlist | remove or narrow reviewed allowlist entries through a versioned release; preserve exact denial codes and handle cleanup |
 
-`safe_default` is the mandatory fallback for crash and stress recovery.
+Project/package metadata cannot alter these states. Release and host AAR tasks
+must contain the same stable contract as Debug builds.
+
+## Existing Denial/Partial Boundaries
+
+| Surface | Current action |
+| --- | --- |
+| filesystem expansion | keep `workingDirectory` scoped access and explicit authorized roots only |
+| native addons | keep `.node`, `process.dlopen`, and private native bindings unsupported |
+| Inspector | keep module/server/profiling authority disabled |
+| raw WASI | keep denied; pure WebAssembly remains the supported path |
+| UDP/`dgram` | keep denied until a separate socket/permission/resource design exists |
+| unrestricted Java | keep reflection, class loading, process/native loading, and raw Android objects denied |
+
+## Crash, Stress, And Security Triggers
+
+| Trigger | Immediate action | Release action |
+| --- | --- | --- |
+| native crash | stop the execution, archive native/Doctor evidence, disable the affected launch surface operationally where possible | issue a versioned runtime/plugin/profile patch |
+| provider crash | close owned resources and fail the request without replay | fix or demote the provider contract |
+| worker/process/socket leak | stop admission for the affected execution and archive resource counters | fix lifecycle behavior or publish an explicit demotion |
+| security corpus regression | fail CI/release and keep the vulnerable build unpublished | patch the boundary before release |
+| packaged APK regression | fail packaging/install-run gates | rebuild and publish a corrected package/profile contract |
+
+`safe_default` is the fallback policy baseline, but it includes the current
+stable Node capability set. It is not a legacy “everything disabled” profile.
 
 ## Packaged APK Downgrade
 
-Published packaged APKs use
-`publish_safe_profile_patch_or_remove_promoted_metadata` as the downgrade
-strategy:
+Published APK authority is changed only through a new auditable package:
 
-- remove `pro_compat_opt_in` or `desktop_compat_opt_in` metadata;
-- remove relaxed `node.permissions`;
-- rebuild the packaged APK with Safe profile defaults;
-- keep stable denial errors for undeclared capabilities;
-- record crash/stress evidence before re-enabling any profile or capability.
+- update the versioned runtime/profile contract;
+- remove or narrow affected declared permissions/metadata;
+- preserve stable denial diagnostics;
+- verify cleanup and Safe downgrade behavior;
+- regenerate and lock API, capability catalog, runtime kit, manifest, and
+  compatibility artifacts;
+- document the behavioral change and migration.
 
-Remote packaged kill switches are explicitly rejected for v1.1 because packaged
-rollback must be auditable through a published Safe-profile patch or removal of
-promoted metadata. Runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted. Settings UI, packaged builder UI, and privacy disclosure prompts are still future work.
+Remote or undocumented packaged kill switches are rejected. A capability
+demotion must remain visible in the profile, Doctor report, changelog, and
+release artifacts.

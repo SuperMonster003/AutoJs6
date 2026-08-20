@@ -34,7 +34,7 @@ declare module "rhino" {
     }
 
     export interface InstallOptions {
-      readonly experimental: true;
+      readonly explicit: true;
       readonly globals?: boolean;
       readonly target?: object;
     }
@@ -43,7 +43,7 @@ declare module "rhino" {
       readonly schema: "autojs6-rhino-install-java-proxy-v1";
       readonly module: "rhino";
       readonly mode: "java-allowlist-proxy";
-      readonly experimental: true;
+      readonly explicit: true;
       readonly globalsInstalled: boolean;
       readonly installed: readonly ["Packages", "java", "android"];
       readonly javaInterop: AutoJs6Node.AutoJsJavaPolicy;
@@ -65,7 +65,7 @@ declare module "rhino" {
     export type JsonValue = JsonPrimitive | readonly JsonValue[] | { readonly [key: string]: JsonValue };
 
     export interface RunBaseRequest {
-      readonly experimental: true;
+      readonly explicit: true;
       readonly timeoutMs: number;
       readonly args?: readonly JsonValue[];
       readonly cwd?: string;

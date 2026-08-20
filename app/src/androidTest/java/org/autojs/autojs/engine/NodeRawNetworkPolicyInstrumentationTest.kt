@@ -31,10 +31,10 @@ class NodeRawNetworkPolicyInstrumentationTest {
         // regression only applies to builds that opt back out.
         Assume.assumeFalse(
             "raw network modules are enabled in this build; denial policy does not apply",
-            BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+            BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
         )
-        assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
-        assertFalse(BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_NETWORK_ENABLED)
+        assertFalse(BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED)
 
         val workDir = File(context.cacheDir, "node-raw-network-policy-${System.nanoTime()}").apply {
             deleteRecursively()

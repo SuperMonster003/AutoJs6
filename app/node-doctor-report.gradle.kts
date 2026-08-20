@@ -320,7 +320,7 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
             "network" to linkedMapOf(
                 "capability" to "network",
                 "requiresDeclaration" to true,
-                "providerFeatureFlag" to "autojs.nodejs.network.experimental",
+                "providerMode" to "stable",
                 "providerEnabled" to networkFeatureEnabled,
                 "requiredAndroidPermissions" to listOf("android.permission.INTERNET"),
                 "requiresAndroidInternet" to true,
@@ -719,7 +719,7 @@ val generateNodeNightlyReport = tasks.register("generateNodeNightlyReport") {
                 "moduleSourcesReady" to packagedSmokeSummary["embedded.node.packaged.smoke.module_sources.ready"],
             ),
             "nativeLibraries" to nativeLibraries,
-            "experimentalFeatures" to featureFlags,
+            "runtimeFeatures" to featureFlags,
             "inputs" to listOfNotNull(
                 doctorJsonFile,
                 releaseManifestFile,
@@ -779,10 +779,10 @@ val generateNodeNightlyReport = tasks.register("generateNodeNightlyReport") {
             appendLine("- seed directory: `${fuzzSeedDir.nodeDoctorPathRelativeTo(rootProject.projectDir)}`")
             appendLine("- saved seeds: `${fuzzSeedFiles.size}`")
             appendLine()
-            appendLine("## Native And Feature Flags")
+            appendLine("## Native And Runtime Features")
             appendLine()
             appendLine("- native hash entries: `${(nativeLibraries["hashEntries"] as? List<*>)?.size ?: "unavailable"}`")
-            appendLine("- experimental feature entries: `${featureFlags.size}`")
+            appendLine("- runtime feature entries: `${featureFlags.size}`")
             appendLine()
             appendLine("JSON report: `${nightlyJsonProvider.get().asFile.nodeDoctorPathRelativeTo(rootProject.projectDir)}`")
         }

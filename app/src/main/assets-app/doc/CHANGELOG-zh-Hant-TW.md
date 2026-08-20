@@ -9,6 +9,7 @@
 ###### 2026/08/20
 
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
+* `新增` Node.js 的 ESM/dynamic import()/網路與 WebSocket/原生網路模組/worker_threads/child_process/Java 互通能力成為正式功能並預設啟用, 同時保留權限宣告/允許清單/沙箱及資源預算保護
 * `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
 * `新增` Node.js 執行環境支援單次執行範圍的隨選加密模組原始碼提供者, 僅探測及解密模組解析器實際選定的候選檔案
 * `新增` Node.js 執行環境支援受控 AutoJs6 橋接模組, 並採用 Safe Node Profile 安全策略

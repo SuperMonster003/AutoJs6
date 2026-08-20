@@ -9,6 +9,7 @@
 ###### 2026/08/20
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
+* `Feature` Node.js ESM, dynamic import(), network and WebSocket, native network modules, worker_threads, child_process, and Java interop are stable features enabled by default, while permission declarations, allowlists, sandboxing, and resource budgets remain enforced
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
 * `Feature` Node.js runtime supports a per-execution on-demand encrypted-module source provider that probes and decrypts only candidates actually selected by the module resolver
 * `Feature` Node.js runtime supports controlled AutoJs6 bridge modules and adopts the Safe Node Profile security policy

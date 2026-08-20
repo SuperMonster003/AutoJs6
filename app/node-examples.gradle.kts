@@ -4,7 +4,7 @@ import org.gradle.api.tasks.Exec
 import java.io.File
 import java.security.MessageDigest
 
-private val nodeExampleKnownStatuses = setOf("stable", "partial", "experimental")
+private val nodeExampleKnownStatuses = setOf("stable", "partial", "disabled", "unsupported")
 private val nodeExampleIgnoredDirectories = setOf("npm-ci-pure-js", "autojs6-pm-fixture")
 private val nodeExampleKnownTags = setOf(
     "main-app",

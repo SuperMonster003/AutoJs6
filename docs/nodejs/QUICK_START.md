@@ -31,11 +31,11 @@ Stable Node routing accepts:
 - `.node.js`
 - `.cjs`
 - `.mjs` as a Node route
-- `.ts`, `.mts`, and `.cts` in the v1.1 lightweight TypeScript profile
+- `.ts`, `.mts`, and `.cts` in the v1.2 lightweight TypeScript profile
 - `project.json` with `type: "node"` or `projectType: "node"`
 - encrypted script metadata that marks the script as a Node entry
 
-`.mjs` preserves user intent and routes to Node. In Node Profile v1.1, `.mjs` runs through the partial ESM path by
+`.mjs` preserves user intent and routes to Node. In Node Profile v1.2, `.mjs` runs through the stable partial ESM path by
 default. CommonJS remains the widest-compatibility path. Dynamic `import()` is available only through the local-only
 profile for relative modules, allowed builtins, and scoped packages.
 

@@ -43,8 +43,8 @@ class NodeWebSocketBridgeInstrumentationTest {
     @Test
     fun websocketMvpUsesControlledBridgeAndKeepsRawSocketsDisabled() {
         assumeFalse(
-            "The fake-provider WebSocket MVP regression is only meaningful when autojs.nodejs.network.experimental=false.",
-            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+            "The fake-provider WebSocket MVP regression is only meaningful when autojs.nodejs.network.stable=false.",
+            BuildConfig.NODEJS_NETWORK_ENABLED,
         )
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("websocket bridge MVP")
         assertTrue(NodeBridgeModules.supports("websocket", "connect"))
@@ -54,7 +54,7 @@ class NodeWebSocketBridgeInstrumentationTest {
         assertFalse(NodeBridgeModules.supports("websocket", "listen"))
 
         val websocketFlag = NodeRuntimeCapabilities.featureFlagsById["websocket"]
-        assertEquals("experimental", websocketFlag?.status)
+        assertEquals("stable", websocketFlag?.status)
         assertEquals("high", websocketFlag?.securityLevel)
         assertFalse(websocketFlag?.defaultEnabled ?: true)
 
@@ -339,7 +339,7 @@ class NodeWebSocketBridgeInstrumentationTest {
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("websocket bridge MVP", result)
-            assertTrue(result.stdout, result.stdout.contains("websocket.profile=false|false|experimental|false"))
+            assertTrue(result.stdout, result.stdout.contains("websocket.profile=false|false|stable|false"))
             assertTrue(result.stdout, result.stdout.contains("websocket.resolve=websocket"))
             assertTrue(result.stdout, result.stdout.contains("websocket.shadow=false"))
             assertTrue(result.stdout, result.stdout.contains("websocket.frozen=true"))
@@ -366,10 +366,10 @@ class NodeWebSocketBridgeInstrumentationTest {
     }
 
     @Test
-    fun jsWebSocketUsesAndroidLiveProviderWhenNetworkExperimentEnabled() {
+    fun jsWebSocketUsesAndroidLiveProviderWhenNetworkEnabled() {
         assumeTrue(
-            "Build with -Pautojs.nodejs.network.experimental=true to run the live controlled WebSocket provider smoke.",
-            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+            "Build with -Pautojs.nodejs.network.stable=true to run the live controlled WebSocket provider smoke.",
+            BuildConfig.NODEJS_NETWORK_ENABLED,
         )
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node controlled WebSocket live provider smoke")
 
@@ -516,8 +516,8 @@ class NodeWebSocketBridgeInstrumentationTest {
     @Test
     fun androidWebSocketProviderClosesActiveLiveConnectionOnDestroy() {
         assumeTrue(
-            "Build with -Pautojs.nodejs.network.experimental=true to run the live controlled WebSocket destroy smoke.",
-            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+            "Build with -Pautojs.nodejs.network.stable=true to run the live controlled WebSocket destroy smoke.",
+            BuildConfig.NODEJS_NETWORK_ENABLED,
         )
 
         ControlledWebSocketLoopbackServer().use { server ->
@@ -563,8 +563,8 @@ class NodeWebSocketBridgeInstrumentationTest {
     @Test
     fun androidWebSocketProviderStaysDisabledInNormalBuilds() {
         assumeFalse(
-            "This default-denial regression is only meaningful when autojs.nodejs.network.experimental=false.",
-            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+            "This default-denial regression is only meaningful when autojs.nodejs.network.stable=false.",
+            BuildConfig.NODEJS_NETWORK_ENABLED,
         )
 
         val provider = AndroidNodeBridgeCapabilityProvider(context)

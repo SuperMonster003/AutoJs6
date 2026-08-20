@@ -3,7 +3,7 @@
 This guide explains how existing AutoJs6 Rhino scripts should move to the Embedded Node runtime. Node support is a second engine with a different compatibility profile; it is not a drop-in replacement for Rhino globals.
 
 If you are adapting scripts from Auto.js Pro 9 or AutoX.js v7, also read [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md).
-For the current v1.1 Node feature status, read [NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md).
+For the current Node Profile v1.2 status, read [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
 ## Phase 13 Profile Migration Status
 
@@ -26,12 +26,13 @@ runtime promotion gate says so.
 
 | Area | P13-56 label | Migration guidance |
 | --- | --- | --- |
-| Node entry points, CommonJS, partial local ESM, JSON modules, timers, `console`, `process`, `Buffer`, and scoped project files | Desktop-compatible | Use `.cjs` or `"nodejs";` plus explicit imports. Keep filesystem paths project-scoped and avoid raw desktop assumptions. |
+| Node entry points, CommonJS, scoped ESM/dynamic import, JSON modules, timers, `console`, `process`, `Buffer`, and scoped project files | Desktop-compatible | Use `.cjs`, `.mjs`, package `type=module`, or `"nodejs";` plus explicit imports. Keep filesystem paths project-scoped and avoid raw loader/filesystem assumptions. |
 | covered `autojs6:compat` Rhino `augment` migrations and explicit bridge modules such as toast/files/storage/app/device/shell/image/OCR/accessibility wrappers | Pro-compatible | Prefer explicit `require()` modules or `require("autojs6:compat")`; do not depend on automatic Rhino global injection. |
 | `sample/nodejs/pro-parity-suite` | Pro-compatible documentation catalog, gated runtime | Use the snippets as migration examples for `$autojs.java`, `rhino.install`, UI, overlay/floaty, tasks, screenshot/OCR, and accessibility. They document required capabilities and skip reasons but do not grant Pro authority. |
-| `sample/nodejs/desktop-parity-suite` | Desktop-compatible documentation catalog, gated runtime | Use the snippets as desktop Node migration examples for ESM, `worker_threads`, HTTP/HTTPS, raw network modules opt-in, advanced fs, WASI, inspector, and pure-JS npm dependency patterns. Safe-profile denial output remains part of the contract. |
-| `profile_capabilities.d.ts` | Desktop-compatible and Pro-compatible metadata, gated runtime | Use the TypeScript matrix to record profile requirements with `ProfileModuleModeFor`, `ProfileRequiredFor`, `SafeDefaultModeFor`, and `PackagedBehaviorFor`, including the `raw_network` desktop marker. The declarations are metadata-only and do not make denied modules callable. |
-| `$autojs.java`, raw `java` / `android`, `rhino.install`, `Packages`, `importClass`, `importPackage`, `JavaAdapter`, raw `floaty`, unrestricted UI-thread execution, daily/weekly task rows, raw network sockets, expanded filesystem roots, `vm`, `inspector`, raw WASI, native addons, `child_process`, Android npm CLI, registry install, lifecycle scripts, and native payloads | gated/diagnostic-only or unsupported | Keep these scripts on Rhino, rewrite them to explicit bridge modules, or wait for a future Pro/Desktop profile promotion gate. Do not infer availability from debug diagnostics or provider POC evidence. |
+| `sample/nodejs/desktop-parity-suite` | Desktop-compatible mixed catalog | Use the snippets for stable ESM, `worker_threads`, native/controlled HTTP and networking, plus still-gated advanced fs, WASI, inspector, and pure-JS npm patterns. Stable-capability and denial output are both part of the contract. |
+| `profile_capabilities.d.ts` | Desktop-compatible and Pro-compatible metadata | Use the TypeScript matrix to distinguish stable Safe-profile rows from partial, gated, disabled, and unsupported rows. The declarations remain metadata-only and never bypass runtime policy. |
+| `$autojs.java`, `require("java")`, explicit `rhino.install`, supported native networking, `worker_threads`, and `child_process` | stable with bounded policy | Use the exact Java allowlist, Android/network permissions, worker isolation/resource budgets, and native child-process Android sandbox/caller-validation contract. These stable surfaces have no build or profile opt-in. |
+| raw Android/JVM objects, `importClass`, `importPackage`, `JavaAdapter`, raw `floaty`, unrestricted UI-thread execution, daily/weekly task rows, `dgram`, expanded filesystem roots, Inspector, raw WASI, native addons, Android npm CLI, registry install, lifecycle scripts, and native payloads | gated, disabled, or unsupported | Keep these scripts on Rhino, rewrite them to explicit bridge modules, or use a documented supported alternative. Do not infer availability from diagnostics or provider POC evidence. |
 
 ## Entry Points
 
@@ -51,7 +52,7 @@ main.cjs
 main.mjs
 ```
 
-`.mjs` currently routes to the Node backend and runs through the Node Profile v1.1 partial ESM path. Use CommonJS (`require`) when you need the widest compatibility; partial ESM supports local static imports, selected builtin imports, and ESM-to-CJS interop, but not the full desktop Node loader.
+`.mjs` routes to the Node backend and runs through the stable Node Profile v1.2 partial ESM path. Use CommonJS (`require`) when you need the widest compatibility; partial ESM supports local static imports, selected builtin imports, and ESM-to-CJS interop, but not the full desktop Node loader.
 
 For projects, prefer:
 
@@ -128,7 +129,15 @@ If a script needs Android or AutoJs functionality, use an AutoJs bridge module.
 
 ## Rhino Compatibility Shim
 
-P12-24 reserves `require("rhino")` in the default Safe Node Profile as a disabled JSON-only shim facade. P12-25 implements an explicit `experimental: true` JSON-only execution adapter POC for small Rhino snippets or scoped files. Calls without `experimental: true` still reject, default `rhino.install()` still rejects, and Node does not automatically install old AutoJs globals. P13-14 adds only an explicit experimental Java proxy install for `Packages` / `java` / `android`; P13-15 and P13-16 keep `importClass`, `importPackage`, and `JavaAdapter` as stable unsupported helpers. The explicit migration helper for implemented Rhino-style APIs remains `require("autojs6:compat")`; it does not install globals unless the script calls `compat.install({ globals: true })`.
+P12-24 reserves `require("rhino")` as a JSON-only compatibility facade.
+The current adapter accepts small Rhino snippets or scoped files only with
+`explicit: true`; calls without that consent field reject and Node never
+installs old AutoJs globals automatically. Explicit
+`rhino.install({ explicit: true })` may create `Packages` / `java` /
+`android` proxies through the stable Java allowlist. `importClass`,
+`importPackage`, and `JavaAdapter` remain unsupported. The preferred helper
+for implemented Rhino-style APIs remains `require("autojs6:compat")`; it
+installs globals only after `compat.install({ globals: true })`.
 
 Do not migrate scripts by expecting these Rhino-era surfaces to appear inside Node:
 
@@ -150,14 +159,14 @@ The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](desig
 const rhino = require("rhino");
 
 const result = await rhino.run({
-  experimental: true,
+  explicit: true,
   source: "({ value: args[0].value + 1 })",
   args: [{ value: 41 }],
   timeoutMs: 5000
 });
 ```
 
-In P12-25, `rhino.run()` without `experimental: true` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, and `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`. The POC accepts and returns only JSON-safe values, is timeout-bounded, and does not install Rhino globals into V8. It must reject Java objects, Rhino `Scriptable`, Android objects, functions, image/UI/accessibility handles, native pointers, threads, locks, process handles, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects at the engine boundary.
+In P12-25, `rhino.run()` without `explicit: true` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, and `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`. The POC accepts and returns only JSON-safe values, is timeout-bounded, and does not install Rhino globals into V8. It must reject Java objects, Rhino `Scriptable`, Android objects, functions, image/UI/accessibility handles, native pointers, threads, locks, process handles, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects at the engine boundary.
 
 P12-23 establishes the default-disabled POC gate in
 [RHINO_JSON_ONLY_SHIM_POC_GATE.md](reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md).
@@ -185,7 +194,10 @@ const device = require("device");
 const shell = require("shell");
 ```
 
-Use Node builtins only within the supported profile. Raw `child_process`, native addons, unrestricted network modules, and unrestricted filesystem access remain disabled by default.
+Use Node builtins within their documented boundaries. `child_process` and the
+supported native network builtins are stable; native addons, `dgram`, Inspector,
+WASI, unrestricted filesystem roots, and private Node bindings remain disabled
+or unsupported.
 
 ## Phase 12 Promoted Compatibility Examples
 
@@ -264,7 +276,7 @@ not cross into Node.
 Rejected compatibility APIs should fail with stable error codes instead of
 silently falling back to unsafe behavior:
 
-- `rhino.run()` without `experimental: true` rejects with
+- `rhino.run()` without `explicit: true` rejects with
   `ERR_AUTOJS6_RHINO_SHIM_DISABLED`.
 - `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`.
 - `s13n.color`, `s13n.point`, `s13n.throwable`, and `s13n.time` reject with
@@ -373,19 +385,21 @@ Rhino scripts may use older thread APIs. Node scripts should prefer:
 - `async` / `await`
 - timers and `timers/promises`
 - `AbortController`
+- stable `worker_threads` for isolated pure-JavaScript compute work
 - bridge APIs with timeout options
 - explicit `engines.execScriptFile()` / `engines.execScript()` slots for
   separate bounded executions
 - `work_manager` for scheduled bounded work
 
-The `threads` module is not available in Node scripts, and Node
-`worker_threads` remains disabled by default. Do not migrate Rhino code by
-expecting `require("threads")`, `compat.threads`, a global `threads`, a global
-`sync`, or default `worker_threads` to exist.
+The Rhino `threads` module is not available in Node scripts. Do not migrate
+shared Rhino/Java thread state by expecting `require("threads")`,
+`compat.threads`, a global `threads`, or a global `sync`. Stable
+`worker_threads` is suitable only for isolated pure-JavaScript compute work and
+cannot access AutoJs bridge modules or raw Android objects.
 
-P12-20 rechecked `worker_threads`, process slot, and execution-mode maturity and
-kept that boundary. The internal worker path is native-availability gated, not a
-release migration target; `worker_computation` remains reserved, and
+P12-20 is archived pre-release evidence for `worker_threads`, process slots,
+and execution-mode maturity. The current native worker path is stable;
+`worker_computation` remains reserved, and
 `second_execution_slot` was still open at P12. P13-06 later closed
 `second_execution_slot` for scheduler/stress evidence; P13-08 still owns
 long-duration soak through `full_heavy_resource_stress`. See
@@ -1004,7 +1018,12 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Replace `files` helpers with scoped `fs` or `fs/promises`.
 - Keep file paths relative to the project working directory.
 - Remove direct Java object access.
-- Do not rely on default `require("rhino")` execution; P12-25 requires an explicit `experimental: true` JSON-only POC request. Default `rhino.install()` remains rejected, while P13-14 permits only explicit experimental Java proxy install through the allowlist. `importClass` / `importPackage` return stable unsupported errors; P13-16 also keeps `JavaAdapter` unsupported with `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED` and reserves `java.defineClass()` / `$autojs.java.defineClass()` as stable-denied replacement names.
+- Do not rely on implicit `require("rhino")` execution. Use
+  `explicit: true` for the JSON-only adapter or Java proxy installation.
+  `importClass` / `importPackage` return stable unsupported errors;
+  `JavaAdapter` remains unsupported with
+  `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`, and `java.defineClass()` /
+  `$autojs.java.defineClass()` remain reserved denied names.
 - Confirm unsupported builtins still fail with `ERR_AUTOJS6_*`.
 - Review `docs/nodejs/examples/rhino-compat` for checked
   toast/files/storage/selector/image/ocr/app/device/shell/tasks/barcode
@@ -1042,9 +1061,9 @@ The v1.2 migration status is:
 - recorder: `recorder.getStatus()` and denial-oriented examples are migration
   evidence; real recorder sessions, foreground microphone disclosure, temp
   output ownership, and packaged stress remain future-only.
-- worker policy: P14-32 records `worker_intentionally_unsupported_v1_2`;
-  runnable `worker_threads`, packaged workers, WorkerPool replacement APIs,
-  process-worker facades, and raw `child_process` remain unavailable.
+- worker/process policy: bounded runnable and packaged `worker_threads`,
+  WorkerPool, and native `child_process` are stable; separate process-worker
+  facades remain unavailable.
 - packaged behavior: P14-34 records the aggregate packaged gate as
   `host_contract_ready`; it is a deterministic host contract, not a real
   device install-run success claim.

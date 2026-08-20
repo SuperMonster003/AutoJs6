@@ -120,7 +120,7 @@ Current adapter v1 status:
 
 ## Conditional
 
-- `worker_threads`: `intentionally_unsupported`
+- `worker_threads`: `closed` (stable three-ABI runtime kit; separate process-worker facade remains absent)
 - `controlled_wasi`: `closed`
 - `x86`: `optional`
 

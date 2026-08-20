@@ -35,7 +35,7 @@ a separate provider contract before any runtime API is exposed.
 ## Current Decision
 
 Expose only the narrow declarative Activity UI provider for `require("ui")` in
-Node Profile v1.1.
+Node Profile v1.2.
 
 The current module accepts JSON-only layout descriptors through
 `showLayout(layoutJson, options?)`, returns an opaque `UiHandle`, supports

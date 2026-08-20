@@ -358,12 +358,12 @@ object NodeJsRuntimePluginBridge {
                 NodeJsRuntimeContract.KEY_RUNTIME_MODULE_SOURCES,
                 runtimeModuleSources,
             )
-            putBoolean(NodeJsRuntimeContract.KEY_ESM_EXPERIMENTAL_ENABLED, esmExperimentalEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, dynamicImportExperimentalEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED, rawNodeNetworkModulesExperimentalEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_EXPERIMENTAL_ENABLED, workerThreadsExperimentalEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_EXPERIMENTAL_ENABLED, childProcessExperimentalEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_EXPERIMENTAL_ENABLED, javaInteropExperimentalEnabled)
+            putBoolean(NodeJsRuntimeContract.KEY_ESM_ENABLED, esmEnabled)
+            putBoolean(NodeJsRuntimeContract.KEY_DYNAMIC_IMPORT_ENABLED, dynamicImportEnabled)
+            putBoolean(NodeJsRuntimeContract.KEY_RAW_NODE_NETWORK_MODULES_ENABLED, rawNodeNetworkModulesEnabled)
+            putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_ENABLED, workerThreadsEnabled)
+            putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_ENABLED, childProcessEnabled)
+            putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_ENABLED, javaInteropEnabled)
             putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker)
             moduleSourceProvider?.let { provider ->
                 putBinder(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER, provider.asBinder())

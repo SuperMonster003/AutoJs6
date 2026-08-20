@@ -197,7 +197,7 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
             .get()
             .asFile
 
-        val featureFlagDefaults = linkedMapOf(
+        val runtimeCapabilityDefaults = linkedMapOf(
             "autojs.nodejs.backend" to effectiveBackend,
             "autojs.nodejs.releaseFlavor" to releaseFlavor,
             "autojs.nodejs.releaseAbis" to expectedAbis,
@@ -205,30 +205,14 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
                 "autojs.nodejs.embedded.script.enabled",
                 true,
             ),
-            "autojs.nodejs.esm.experimental" to nodeProfileReleaseManifestBooleanProperty(
-                "autojs.nodejs.esm.experimental",
-                true,
-            ),
-            "autojs.nodejs.dynamicImport.local" to nodeProfileReleaseManifestBooleanProperty(
-                "autojs.nodejs.dynamicImport.local",
-                true,
-            ),
-            "autojs.nodejs.dynamicImport.experimental" to nodeProfileReleaseManifestBooleanProperty(
-                "autojs.nodejs.dynamicImport.experimental",
-                false,
-            ),
-            "autojs.nodejs.network.experimental" to nodeProfileReleaseManifestBooleanProperty(
-                "autojs.nodejs.network.experimental",
-                false,
-            ),
-            "autojs.nodejs.worker_threads.experimental" to nodeProfileReleaseManifestBooleanProperty(
-                "autojs.nodejs.worker_threads.experimental",
-                false,
-            ),
-            "autojs.nodejs.javaInterop.experimental" to nodeProfileReleaseManifestBooleanProperty(
-                "autojs.nodejs.javaInterop.experimental",
-                false,
-            ),
+            "esm" to true,
+            "dynamicImport" to true,
+            "network" to true,
+            "rawNodeNetworkModules" to true,
+            "webSocket" to true,
+            "workerThreads" to true,
+            "childProcess" to true,
+            "javaInterop" to true,
             "autojs.nodejs.timelineTrace" to nodeProfileReleaseManifestBooleanProperty(
                 "autojs.nodejs.timelineTrace",
                 false,
@@ -268,7 +252,7 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
             ),
             "nodeProfile" to linkedMapOf(
                 "name" to "AutoJs6 Safe Node Profile",
-                "engine" to "autojs6-node-profile-v1.1",
+                "engine" to "autojs6-node-profile-v1.2",
                 "expectedNode" to "v24.5.0",
                 "releaseFlavor" to releaseFlavor,
                 "backend" to effectiveBackend,
@@ -314,7 +298,7 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
                     "sha256" to nodeProfileReleaseManifestSha256(packagingPreflightReport),
                 ),
             ),
-            "featureFlagDefaults" to featureFlagDefaults,
+            "runtimeCapabilityDefaults" to runtimeCapabilityDefaults,
         )
 
         val reportDir = reportDirProvider.get().asFile
@@ -366,11 +350,11 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
                     appendLine("| `$name` | ${info["exists"]} | `${info["sha256"] ?: "unavailable"}` |")
                 }
                 appendLine()
-                appendLine("## Feature Flags")
+                appendLine("## Runtime Capabilities")
                 appendLine()
                 appendLine("| Property | Effective value |")
                 appendLine("| --- | --- |")
-                featureFlagDefaults.forEach { (name, value) ->
+                runtimeCapabilityDefaults.forEach { (name, value) ->
                     appendLine("| `$name` | `$value` |")
                 }
             }

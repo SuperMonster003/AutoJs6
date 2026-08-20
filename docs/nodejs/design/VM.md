@@ -36,7 +36,7 @@ The native module is available for compatibility, not isolation. Scripts must no
 
 - no access to raw Android or AutoJs bridge objects is injected
 - no bypass of scoped filesystem policy is granted by the loader
-- disabled builtins such as `child_process`, `inspector`, `wasi`, and default-off `worker_threads` remain governed by their own policies
+- stable `child_process` and `worker_threads`, plus disabled Inspector/WASI, remain governed by their own independent policies; VM is not a bypass for any of them
 - VM code that uses native timeout options is still owned by the embedded script lifecycle
 - focused memory and compiled-script budget evidence covers repeated `vm.Script` and context workloads
 - packaged APK smoke coverage now exercises a fixture package that uses `vm.Script`

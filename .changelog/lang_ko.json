@@ -4,6 +4,7 @@
       "released_date": "2026/08/20",
       "feature": [
         "Node.js 24.5.0 스크립트 런타임, \"nodejs\" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원",
+        "Node.js ESM/dynamic import()/네트워크 및 WebSocket/네이티브 네트워크 모듈/worker_threads/child_process/Java 상호 운용 기능을 정식 기능으로 기본 활성화하고, 권한 선언/허용 목록/샌드박스/리소스 예산 보호는 계속 적용",
         "Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원",
         "Node.js 런타임에서 실행 범위 온디맨드 암호화 모듈 소스 제공자를 지원하고 모듈 해석기가 실제로 선택한 후보만 검사 및 복호화",
         "Node.js 런타임에서 제어된 AutoJs6 브리지 모듈을 지원하고 Safe Node Profile 보안 정책을 적용",

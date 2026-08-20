@@ -207,7 +207,7 @@ class NodeCompatCorpusInstrumentationTest {
                 source = source,
                 sourceName = File(corpusDir, "main.cjs").absolutePath,
                 workingDirectory = corpusDir,
-                esmExperimentalEnabled = true,
+                esmEnabled = true,
                 timeoutMs = 15_000L,
             )
 
@@ -273,7 +273,7 @@ class NodeCompatCorpusInstrumentationTest {
                     """.trimIndent(),
                     dynamicDep.absolutePath to """export default "dynamic";""",
                 ),
-                esmExperimentalEnabled = true,
+                esmEnabled = true,
                 timeoutMs = 15_000L,
             )
 

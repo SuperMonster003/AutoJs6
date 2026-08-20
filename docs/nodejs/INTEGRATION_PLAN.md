@@ -1,223 +1,99 @@
 # AutoJs6 Node.js Integration Plan
 
-This document is the engineering map for the AutoJs6 Node runtime. It records
-the current Safe Node Profile boundary and the staged expansion path toward
-Auto.js Pro compatibility plus broader desktop Node.js compatibility.
-
-For the remaining checkable work and completion criteria, see
+Status: Node Profile v1.2 is the current integration baseline. Implemented Node
+capabilities are compiled in and enabled for ordinary Debug, Release, host API,
+and packaged-AAR builds. The detailed deployment sequence remains in
 [COMPLETION_ROADMAP.md](COMPLETION_ROADMAP.md).
 
-## Product Goal
+## Runtime Topology
 
-AutoJs6 provides Node.js as a controlled Android script runtime:
+AutoJs6 selects one of four release/runtime arrangements:
 
-- real Node/V8/libuv runtime through either the external runtime plugin or
-  host-packaged `libnode.so`
-- AutoJs6-owned bootstrap and CommonJS loader
-- scoped filesystem access
-- restricted builtin surface
-- a dedicated external plugin process by default, with the isolated
-  `:nodejs_embedded` service retained for self-contained flavors and packaged apps
-- packaged APK support through native library injection and manifest synthesis
-- diagnostics and release gates
-- native crash diagnostics through native dependency and symbol archive reports
+- `nodePlugin`: the host discovers the independently installed Node runtime
+  plugin and talks to it through published API contract v2.
+- `nodeFull`: the host packages all supported Embedded Node ABIs.
+- `nodeMini`: the host packages an explicitly selected supported ABI subset.
+- `rhinoOnly`: no Node payload is packaged and Rhino remains the execution
+  backend.
 
-The default product surface remains the Safe Node Profile, but the long-term
-target is broader: explicit profiles should gradually approach Auto.js Pro
-capabilities and desktop Node.js capabilities where Android can support them.
-High-risk capabilities must move through design, opt-in profile, verification,
-packaged evidence, and rollback gates before becoming user-facing.
+The Node runtime executes in the isolated `:nodejs_embedded` process. Host-owned
+Android capabilities are reached through versioned bridge providers; project
+files and encrypted module graphs are supplied through scoped transports rather
+than unrestricted host filesystem access.
 
-## Current Runtime Chain
+Supported Node ABIs are `arm64-v8a`, `armeabi-v7a`, and `x86_64`. `x86` remains
+unsupported and fails packaging preflight.
 
-```text
-Default main app
-  -> ScriptEngineManager -> Node backend selector
-  -> NodeJsRuntimePluginBridge -> authorized external Binder service
-  -> dedicated plugin process -> Node/V8/libuv
+## Stable Capabilities
 
-Self-contained nodeFull/nodeMini and packaged APKs
-  -> ScriptEngineManager -> Node backend selector
-  -> NativeNodeEmbeddedJavaScriptEngine
-  -> NativeNodeEmbeddedScriptService in :nodejs_embedded
-  -> NativeNodeEmbeddedRuntimeBridge -> libautojs6-node.so -> libnode.so
+These capabilities are part of every Node-enabled build:
+
+| Capability | Product boundary |
+| --- | --- |
+| ESM | `.mjs`, package `type=module`, static imports/exports, top-level await, `import.meta`, and scoped local resolution. |
+| Dynamic import | Local/package/builtin imports through the scoped loader; remote URL imports stay denied. |
+| Controlled network | `fetch`, AutoJs6 `axios`/`undici` adapters, and provider-owned HTTP I/O with permission, timeout, redirect, and size policy. |
+| WebSocket | Provider-owned `ws:`/`wss:` sessions with connection, queue, message, timeout, and lifecycle limits. |
+| Raw network builtins | Native `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`, subject to Android sandbox/manifest policy and caller-managed Node limits. |
+| Workers | Native `worker_threads` with a bounded worker profile, scoped source loading, smaller authority than the parent, and cleanup accounting. |
+| Child processes | Native `child_process`, subject to Android sandbox and caller-managed validation, timeout, cancellation, stdio, and cleanup. |
+| Java interop | `require("java")`, `$autojs.java`, and explicit Rhino proxy installation through a strict class/member allowlist and opaque handles. |
+
+There are no Node capability opt-in Gradle properties. Stable host/plugin request
+keys are `esmEnabled`, `dynamicImportEnabled`,
+`rawNodeNetworkModulesEnabled`, `workerThreadsEnabled`,
+`childProcessEnabled`, and `javaInteropEnabled`. The host always sends the
+stable set enabled; project/package feature overrides are rejected.
+
+## Boundaries That Remain
+
+Formal availability is separate from authority:
+
+- bridge calls require declared runtime capabilities and provider support;
+- network I/O requires runtime network authorization and Android
+  `android.permission.INTERNET` where packaging rules require it;
+- filesystem access remains scoped to the execution sandbox;
+- Java interop does not expose reflection, class loaders, unrestricted package
+  traversal, native-library loading, `Runtime`, or `ProcessBuilder`;
+- worker scopes do not inherit unrestricted AutoJs bridge, Java, shell,
+  Inspector, or nested-worker authority;
+- process, socket, worker, response, message, source, memory, and duration
+  budgets remain enforced;
+- service stop, timeout, cancellation, and native failure must close all
+  provider-owned resources.
+
+Inspector remains disabled. Native addons and unrestricted WASI remain
+unsupported. Scoped `fs`, `zlib`, and `vm` retain their documented partial
+status; formalizing the shipped capabilities does not overstate those surfaces.
+
+## Build And Artifact Contract
+
+Ordinary build commands must require no feature-specific properties:
+
+```powershell
+.\gradlew.bat :plugin-api:nodejs-api:bundleReleaseAar
+.\gradlew.bat :app:assembleAppRelease
 ```
 
-Packaged APKs use the same runtime shape and must carry:
+Release and AAR creation must not reject, strip, or rewrite the stable capability
+set. Generated `BuildConfig` fields use stable names and are `true` for every
+Node-enabled variant. Published plugin artifacts use runtime contract v2 and
+versioned API/catalog/runtime-kit manifests with locked SHA-256 hashes.
 
-- `lib/<abi>/libnode.so`
-- `lib/<abi>/libautojs6-node.so`
-- `lib/<abi>/libc++_shared.so`
-- `NativeNodeEmbeddedScriptService` manifest entry
-- foreground service permissions and `specialUse` type for the embedded service
-- Node project metadata and module sources when required
+## Verification Before Deployment
 
-## Backend Switches
+Each deployment increment should verify, as applicable:
 
-The Gradle property `autojs.nodejs.backend` selects the runtime backend.
+1. host and plugin API contract tests;
+2. Kotlin/Java compilation and Android instrumentation compilation;
+3. all three native ABIs and runtime-kit payload hashes;
+4. compatibility profile generation and verification;
+5. type declarations, examples, packaging preflight, and AAR contents;
+6. live loopback network/WebSocket and device worker/process tests on the
+   approved device profile;
+7. changelog generation in every supported language;
+8. a clean logical commit before checking a Roadmap item.
 
-Supported values:
-
-- `plugin`: required external Binder runtime; default for `nodePlugin`.
-- `pluginOptional`: external runtime first, with one embedded fallback only
-  when failure occurs before user-code dispatch; valid only for `nodeFull` and
-  `nodeMini`.
-- `embedded`: default for `nodeFull` and `nodeMini`; runs scripts through the
-  embedded Node service.
-- `native`: keeps the native one-shot backend available as a regression oracle.
-- `rhino`: routes Node-capable launches back to Rhino where explicitly requested.
-- `auto`: reserved switch for backend selection policy.
-
-Related properties:
-
-- `autojs.nodejs.embedded.script.enabled=true`
-- `autojs.nodejs.releaseFlavor=nodePlugin`
-- optional `autojs.nodejs.releaseAbis` for `nodeMini`
-- `autojs.nodejs.embedded.probe.level=0`
-- `autojs.nodejs.embedded.probe.timeout.ms=3000`
-- `autojs.nodejs.embedded.probe.lifecycle=false`
-- `autojs.nodejs.esm.experimental=true`
-- `autojs.nodejs.dynamicImport.local=true`
-- `autojs.nodejs.dynamicImport.experimental=false`
-- `autojs.nodejs.network.experimental=false`
-- `autojs.nodejs.worker_threads.experimental=false`
-- optional Embedded Node performance benchmark: `NodeEmbeddedPerformanceInstrumentationTest`
-- extended Embedded Node memory leak stress gate: `NodeEmbeddedMemoryLeakStressInstrumentationTest`
-- native crash symbol archive gate: `nativeNodeSymbolArchiveReport`
-- checked-in example project smoke: `NodeExampleProjectInstrumentationTest`
-
-Release/gate tasks enforce the flavor/backend matrix in
-[design/RELEASE_FLAVORS.md](design/RELEASE_FLAVORS.md). The external service
-lifecycle, trust, contract, fallback, and no-replay rules are defined in
-[design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md).
-
-## Example Projects
-
-Checked-in Node examples live under `sample/nodejs/`. See [EXAMPLES.md](EXAMPLES.md) for the project list, expected output files, and smoke-test command.
-
-## Quick Start And Release Surface
-
-Start with [QUICK_START.md](QUICK_START.md) for the smallest stable Node script shape. The GA-facing v1 capability
-contract is frozen in [releases/NODE_PROFILE_V1_STABLE_SURFACE.md](releases/NODE_PROFILE_V1_STABLE_SURFACE.md), with
-user-visible limitations in [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md).
-
-## Migration Guide
-
-Rhino users should start with [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). The guide covers Node entry points, global API differences, Promise-based bridge calls, scoped filesystem behavior, and packaged APK differences.
-
-Users adapting Auto.js Pro 9 or AutoX.js v7 scripts should also read [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md), which documents behavior-level differences without claiming implementation equivalence.
-
-## Routing Rules
-
-Node routing is enabled by:
-
-- `"nodejs";` or `"node";` directive
-- `.node.js`
-- `.cjs`
-- `.mjs`
-- nearest `project.json` with `type` or `projectType` set to `node`
-- encrypted script headers carrying the Node execution flag
-
-Important: `.mjs` currently routes to the Node backend, but ESM execution is still a controlled/unsupported path unless an explicit future ESM feature gate enables it.
-
-## Phase Order
-
-### P0 Baseline and Code Map
-
-- Keep this document set current.
-- Keep `NodeRuntimeCapabilities` as the Kotlin-side capability registry.
-- Keep `require("autojs6:profile")` as the JavaScript-side read-only profile snapshot.
-- Record supported, limited, disabled, and planned capabilities.
-- Keep current test commands and packaged APK checks discoverable.
-
-### P1 Embedded Lifecycle Hardening
-
-- Introduce explicit runtime state transitions.
-- Unify success, error, timeout, stop, service destroy, and native crash cleanup.
-- Track per-execution identifiers and native handles.
-- Add lifecycle stress instrumentation tests.
-
-### P2 Errors and Diagnostics
-
-- Stabilize `ERR_AUTOJS6_*` error codes.
-- Add resolver trace for package and builtin resolution.
-- Expand packaged APK diagnostic reporting.
-
-### P3 Compatibility Expansion
-
-- Expand only low-risk builtins by default.
-- Keep high-risk features behind design gates and feature flags.
-
-### P4 AutoJs API Bridge
-
-- Add an asynchronous bridge protocol before exposing user modules.
-- Route Android and AutoJs API calls through capability providers.
-- Reject pending bridge calls when the script service stops.
-- Track provider-owned bridge resources per execution and close leaked handles on stop/destroy.
-- Apply per-execution bridge concurrency and resource limits before provider calls can flood the service.
-- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, controlled WorkManager-backed `work_manager` scheduling, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, protocol-gated `media_projection`/`image`, and Activity-owned live `ui`.
-
-### P5 Release Gates
-
-- Aggregate local release verification tasks.
-- Keep device instrumentation and packaged smoke as first-class gates.
-- Keep `nodePlugin`, `nodeFull`, `nodeMini`, and `rhinoOnly` release packaging policy explicit and verified. See `docs/nodejs/design/RELEASE_FLAVORS.md`.
-- Keep rollback steps explicit and auditable. See `docs/nodejs/ROLLBACK_PLAYBOOK.md`.
-- Keep PR, nightly, and release gates split so routine checks stay fast while release gates remain complete. See `docs/nodejs/CI_GATES.md`.
-- Keep optional startup/RSS benchmarks available for lifecycle and native-load changes without making noisy timing data a default release failure.
-- Keep extended memory leak stress available for lifecycle, fs, bridge, and image-handle changes.
-- Keep device-specific gates reproducible through `docs/nodejs/DEVICE_MATRIX.md` and `autojs.nodejs.test.deviceProfile`.
-
-### P6-P8 Longer-Term Compatibility
-
-- Evaluate `fs.promises`, stream, zlib, ESM, network, workers, Java interop, and native addons one at a time.
-- Keep scheduled/background task execution design-gated; S7-15 permits only controlled WorkManager-backed timed Node work through `work_manager`, and Node must not get raw Android scheduler or broadcast authority.
-- Treat controlled `fetch` as the only approved network MVP; live provider enablement remains behind `autojs.nodejs.network.experimental=false` by default.
-- Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; workers must not access AutoJs bridge modules or Android objects.
-- Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md` and `autojs.nodejs.javaInterop.experimental=false`; the default product path is explicit AutoJs bridge modules, not raw `java.*`, `android.*`, reflection, class loaders, or Rhino adapter APIs.
-- Keep Rhino compatibility shims behind `docs/nodejs/design/RHINO_SHIM.md`; Node must not install old Rhino globals or Java bridge globals by default.
-- Each high-risk feature needs a design document, flag, tests, packaged smoke, and rollback path.
-- Keep current design gates in `docs/nodejs/design/` synchronized when broad compatibility surfaces change.
-
-### P13 Pro/Desktop Parity Expansion
-
-- Use `docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md`
-  as the next implementation checklist after Phase 12.
-- Split runtime behavior into Safe, Pro compatibility, Desktop compatibility,
-  and debug lab profiles.
-- Revisit selected Phase 12 disabled or blocked surfaces through explicit
-  capability, permission, testing, packaged smoke, and rollback gates.
-- Treat Auto.js Pro parity and desktop Node.js parity as long-term opt-in
-  targets, not silent changes to the default runtime.
-
-## Global Invariants
-
-1. Preserve Rhino compatibility.
-2. Keep the release-flavor-derived backend policy: required `plugin` for
-   `nodePlugin`, `embedded` or `pluginOptional` for self-contained Node flavors,
-   and `rhino` for `rhinoOnly`; retain diagnostic switches in debug builds.
-3. Keep the native one-shot backend until embedded lifecycle stress coverage is mature.
-4. Support both the main app and packaged APKs.
-5. Treat the default exposed runtime as AutoJs6 Safe Node Profile while Pro and
-   Desktop parity expand only through explicit opt-in profiles and gates.
-6. Do not open high-risk capabilities without an explicit task and gate.
-7. Android and AutoJs API calls from Node must be asynchronous from the JavaScript perspective.
-8. Callbacks into JavaScript must be marshalled onto the Node event loop thread.
-9. Scoped filesystem policy must remain enforced.
-10. Feature work must include positive tests, negative/security tests, packaged impact checks when relevant, and documentation updates.
-
-## Immediate Next Tasks
-
-1. Harden the private live bridge transport and refresh packaged templates so packaged apps can use the same live path.
-2. Keep `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, protocol-gated `media_projection`/`image`, and Activity-owned live `ui` stable while designing the remaining real capability providers.
-3. Treat `project.json node.permissions` and `package.json autojs6.node.permissions` as the bridge capability manifest when present; missing declarations reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
-3. Treat `project.json node.bridgeLimits` and `package.json autojs6.node.bridgeLimits` as safe bridge limit overrides; above-hard-max values must be ignored with diagnostics.
-3. Design the real accessibility and MediaProjection/image providers before enabling Android-backed actions, screenshot capture, image decoding, or live node/image handles. Accessibility selector descriptors and node snapshots must remain JSON-only.
-4. Keep scheduled/background task execution behind `docs/nodejs/design/WORK_MANAGER.md`; `work_manager` now has a controlled WorkManager-backed timed MVP, while user-visible task database migration, boot/broadcast triggers, restart policy, and packaged manifest gates remain future work.
-5. Keep ESM constrained by `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=true`; `.mjs` is a Node Profile v1.1 partial ESM route, not a full desktop Node loader. Keep dynamic import local-only through `autojs.nodejs.dynamicImport.local=true`; the legacy `autojs.nodejs.dynamicImport.experimental=false` switch remains release-forbidden.
-6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds. Raw Node `dns`/`http`/`https`/`net`/`tls` modules remain denied in the Safe profile unless a debug/build-time run explicitly enables `autojs.nodejs.rawNetworkModules.experimental=true`.
-7. Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; Task 42 freezes the worker boundary without enabling worker execution.
-8. Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md`; `java_interop` is a default-off allowlist experiment and must not expose raw Java, Android, reflection, class-loader, native-library, process, or filesystem authority.
-9. Use `docs/nodejs/PERFORMANCE.md`, `NodeEmbeddedPerformanceInstrumentationTest`, and `NodeEmbeddedMemoryLeakStressInstrumentationTest` when changing embedded startup, native load, service lifecycle, bridge, fs, or image-handle behavior.
-10. Refresh the packaged inrt template so `app.versionName` and `app.versionCode` can become exact packaged gates.
-11. Keep packaged APK verification in the loop for every bridge-facing module.
+Historical phase reports and immutable release manifests remain evidence of how
+the runtime reached this baseline. They are not current configuration inputs and
+must never be parsed as build switches.

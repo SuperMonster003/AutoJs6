@@ -9,6 +9,7 @@
 ###### 2026/08/20
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
+* `新增` Node.js 的 ESM/dynamic import()/網絡與 WebSocket/原生網絡模組/worker_threads/child_process/Java 互操作能力成為正式功能並預設啟用, 同時保留權限聲明/白名單/沙箱及資源預算保護
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
 * `新增` Node.js 運行時支持單次執行範圍的按需加密模塊源碼提供器, 僅探測及解密模塊解析器實際選定的候選文件
 * `新增` Node.js 運行時支持受控 AutoJs6 橋接模塊, 並採用 Safe Node Profile 安全策略

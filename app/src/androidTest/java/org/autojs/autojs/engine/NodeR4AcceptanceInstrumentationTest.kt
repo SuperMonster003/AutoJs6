@@ -40,8 +40,8 @@ class NodeR4AcceptanceInstrumentationTest {
         NodeEmbeddedTestHarness.assumePersistentRuntimeEnabled("R4 runtime-warm acceptance")
         assumeTrue(
             "R4 paired acceptance includes static ESM and requires " +
-                    "BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED=true.",
-            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+                    "BuildConfig.NODEJS_ESM_ENABLED=true.",
+            BuildConfig.NODEJS_ESM_ENABLED,
         )
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
     }
@@ -443,7 +443,7 @@ class NodeR4AcceptanceInstrumentationTest {
         .put("embeddedScriptExecutionEnabled", BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED)
         .put("persistentRuntimeBuildEnabled", BuildConfig.NODEJS_EMBEDDED_PERSISTENT_RUNTIME_ENABLED)
         .put("persistentRuntimeEffectiveEnabled", NodeEmbeddedProcessSessionManager.isEnabled())
-        .put("esmExperimentalEnabled", BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
+        .put("esmEnabled", BuildConfig.NODEJS_ESM_ENABLED)
         .put("acceptanceArgument", acceptanceEnabled())
 
     private fun acceptanceEnabled(): Boolean =

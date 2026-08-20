@@ -4083,10 +4083,6 @@ val verifyNode2417UpgradeGate = tasks.register("verifyNode2417UpgradeGate") {
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
     val runtimeSlot = providers.gradleProperty("autojs.nodejs.runtimeSlot").orElse("node24_5").get()
-    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental")
-        .orElse("false")
-        .get()
-        .equals("true", ignoreCase = true)
     if (deviceProfile in setOf("sony", "full") && runtimeSlot == "node24_current") {
         dependsOn(
             "verifyEmbeddedNodeDebug",
@@ -4102,11 +4098,6 @@ val verifyNode2417UpgradeGate = tasks.register("verifyNode2417UpgradeGate") {
         if (runtimeSlot != "node24_current") {
             throw GradleException(
                 "$name must be run with -Pautojs.nodejs.runtimeSlot=node24_current and candidate 24.17 artifacts."
-            )
-        }
-        if (!networkExperimental) {
-            throw GradleException(
-                "$name requires -Pautojs.nodejs.network.experimental=true so live fetch/WebSocket providers are covered."
             )
         }
     }
@@ -4196,7 +4187,7 @@ val verifyNodeNightlyGate = tasks.register("verifyNodeNightlyGate") {
 
 val verifyNodePackagedEsmGate = tasks.register("verifyNodePackagedEsmGate") {
     group = "verification"
-    description = "Runs the focused Node Profile v1.1 packaged ESM/dynamic import APK gate on a connected Sony/full device profile."
+    description = "Runs the focused stable Node Profile v1.2 packaged ESM/dynamic import APK gate on a connected Sony/full device profile."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
     if (deviceProfile in setOf("sony", "full")) {
@@ -4251,15 +4242,11 @@ val verifyNodeLiveProviderGate = tasks.register("verifyNodeLiveProviderGate") {
     description = "Runs the focused Node Phase 7 live-provider gate and writes build/reports/nodejs/live-provider-summary.json."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
-    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
     if (deviceProfile in setOf("sony", "full")) {
         dependsOn("generateNodeLiveProviderSummary")
     }
     doFirst {
         embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
-        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
-            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so fetch/websocket live providers are covered.")
-        }
     }
 }
 
@@ -4268,15 +4255,11 @@ val verifyNodeLiveFetchGate = tasks.register("verifyNodeLiveFetchGate") {
     description = "Runs the focused Node Phase 7 controlled fetch/axios live-provider gate on a connected Sony/full device profile."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
-    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
     if (deviceProfile in setOf("sony", "full")) {
         dependsOn("connectedAppDebugAndroidTest")
     }
     doFirst {
         embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
-        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
-            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so the Android live network provider is enabled.")
-        }
     }
 }
 
@@ -4285,15 +4268,11 @@ val verifyNodeLiveWebSocketGate = tasks.register("verifyNodeLiveWebSocketGate") 
     description = "Runs the focused Node Phase 7 controlled WebSocket live-provider gate on a connected Sony/full device profile."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
-    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
     if (deviceProfile in setOf("sony", "full")) {
         dependsOn("connectedAppDebugAndroidTest")
     }
     doFirst {
         embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
-        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
-            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so the Android live network provider is enabled.")
-        }
     }
 }
 

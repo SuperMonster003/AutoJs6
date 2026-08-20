@@ -80,7 +80,7 @@ objects.
 
 | Rhino API | S11-24 status | Node migration |
 | --- | --- | --- |
-| `floaty.__module` | unsupported | No `require("floaty")`, `compat.floaty`, or global `floaty` is exposed; use the P12-13 `require("ui.overlay")` provider POC for JSON-only overlay migration experiments. |
+| `floaty.__module` | unsupported | No `require("floaty")`, `compat.floaty`, or global `floaty` is exposed; use the P12-13 `require("ui.overlay")` provider POC for JSON-only overlay migration prototypes. |
 | `floaty.hasPermission()` | unsupported | P12-13 exposes `ui.overlay.hasPermission()` over fake transport under `ui.overlay.permission`; Rhino-name facade remains unavailable. |
 | `floaty.requestPermission()` | unsupported | P12-14 exposes `ui.overlay.openPermissionSettings()` as an explicit live gate with dry-run evidence; no silent prompt path is allowed. |
 | `floaty.ensurePermission()` | unsupported | P12-14 exposes Android permission snapshot evidence only; it does not grant permission or create overlays. |

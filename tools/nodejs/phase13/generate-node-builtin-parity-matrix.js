@@ -90,7 +90,8 @@ function main() {
       status: policyViolations.length === 0 ? "passed" : "failed",
       builtinsCovered: checkById(checks, "builtins-covered"),
       disabledVisible: checkById(checks, "disabled-builtins-visible"),
-      networkGated: checkById(checks, "network-builtins-gated"),
+      stableNativeVisible: checkById(checks, "stable-native-builtins-visible"),
+      networkStable: checkById(checks, "network-builtins-stable"),
     },
   };
   const markdown = renderMarkdown(output);
@@ -120,8 +121,9 @@ function buildReport(files) {
   const commonJs = parseKotlinStringCollection(files.capabilities.text, "commonJsBuiltinModuleNames");
   const disabled = parseKotlinStringCollection(files.capabilities.text, "disabledBuiltinModuleNames");
   const network = parseKotlinStringCollection(files.capabilities.text, "networkBuiltinModuleNames");
+  const featureStates = parseRuntimeFeatureStates(files.capabilities.text);
   const allBuiltins = Array.from(new Set([...DESKTOP_BUILTINS, ...limited, ...commonJs, ...disabled, ...network])).sort();
-  const modules = allBuiltins.map((name) => classifyBuiltin(name, { limited, commonJs, disabled, network }));
+  const modules = allBuiltins.map((name) => classifyBuiltin(name, { limited, commonJs, disabled, network, featureStates }));
   return {
     sourceSets: {
       desktopReferenceCount: DESKTOP_BUILTINS.length,
@@ -142,13 +144,15 @@ function classifyBuiltin(name, sets) {
   const network = sets.network.includes(bareName) || sets.network.includes(name);
   const limited = sets.limited.includes(bareName) || sets.limited.includes(name);
   const commonJs = sets.commonJs.includes(bareName) || sets.commonJs.includes(name);
-  if (bareName === "child_process" && disabled && commonJs) {
+  const nativeFeatureId = nativeFeatureForBuiltin(bareName);
+  const nativeFeature = nativeFeatureId ? sets.featureStates.get(nativeFeatureId) : null;
+  if (nativeFeature && nativeFeature.status === "stable" && nativeFeature.defaultEnabled) {
     return {
       name,
-      status: "experimental",
-      targetProfile: "desktop_compat_opt_in",
-      source: ["commonjs-known", "native opt-in"],
-      nextStep: nextStepForExperimental(bareName),
+      status: "stable_native",
+      targetProfile: "safe_default",
+      source: Array.from(new Set(["native-stable", ...sourceTags({ disabled: false, network, limited, commonJs })])),
+      nextStep: stableNativeNoteFor(bareName),
     };
   }
   if (disabled) {
@@ -199,12 +203,12 @@ function classifyBuiltin(name, sets) {
 
 function networkNextStepFor(name) {
   if (name === "http" || name === "https") {
-    return "P13-29 records the controlled client subset as ready; raw server/listen, proxy/tunnel, custom TLS/session control, and broader packaged install/run network evidence remain future work.";
+    return "The controlled client facade remains policy-bound; if the stable raw builtin is disabled by a request, server/listen and raw socket authority stay unavailable for that execution.";
   }
   if (name === "net" || name === "tls" || name === "dns" || name === "dns/promises") {
-    return "P13-30 records ready staged limited facades and a release-forbidden raw network module opt-in; release/default client sockets, server sockets, network DNS policy, TLS sessions, fd leak proof, and packaged live-network evidence remain future raw-network promotion gates.";
+    return "If the stable raw-network capability is disabled by a request, only the controlled facade remains; Android sandbox and manifest policy continue to bound native networking.";
   }
-  return "P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy.";
+  return "Keep Android sandbox, manifest, and caller resource policy explicit for network-shaped builtins.";
 }
 
 function nextStepForLimited(name) {
@@ -238,11 +242,14 @@ function nextStepForLimited(name) {
   return "Keep current Safe subset unless a future Phase 13 task promotes broader desktop conformance.";
 }
 
-function nextStepForExperimental(name) {
+function stableNativeNoteFor(name) {
   if (name === "child_process") {
-    return "P13-40 records child_process scoped-runner diagnostics as partial; Safe/default keeps child_process denied, while debug builds can enable Node's native builtin with `autojs.nodejs.child_process.experimental=true`. App-private allowlisted binaries, bounded stdio, timeout/cancel/kill cleanup, packaged evidence, and hostile corpus coverage remain future work before release/profile promotion.";
+    return "Stable native Node builtin. It follows Android app-sandbox and caller validation semantics; it does not inherit the separate `shell` bridge allowlist or resource budget.";
   }
-  return "Keep experimental builtin opt-ins debug-only until the corresponding Phase 13 promotion gate closes.";
+  if (name === "worker_threads") {
+    return "Stable native Node builtin with default-on runtime support; callers remain responsible for worker lifecycle and resource limits.";
+  }
+  return "Stable native Node network builtin. Android sandbox/manifest policy and caller resource handling remain authoritative; controlled bridge budgets do not wrap raw native I/O.";
 }
 
 function highRiskProfileFor(name) {
@@ -258,7 +265,7 @@ function highRiskProfileFor(name) {
 function nextStepForDisabled(name) {
   switch (name) {
     case "child_process":
-      return "P13-40 records child_process scoped-runner diagnostics as partial; Safe/default keeps child_process denied while app-private allowlisted binaries, bounded stdio, timeout/cancel/kill cleanup, packaged evidence, and hostile corpus coverage remain future work.";
+      return "The stable native builtin is unavailable only when explicitly disabled for the current runtime request.";
     case "dgram":
       return "P13-31 records UDP/dgram as stable-denied for v1.1; unicast client, server bind/listen, multicast, broadcast, packaged INTERNET policy, and fd leak proof remain future work.";
     case "inspector":
@@ -268,7 +275,7 @@ function nextStepForDisabled(name) {
     case "wasi":
       return "P13-38 records controlled WASI diagnostics as partial; pure WebAssembly is the supported v1.1 runtime path while raw and controlled WASI APIs stay stable-denied, with controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remaining future work.";
     case "worker_threads":
-      return "P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, native preflight, and current resource/crash references are covered while native runnable evidence, native-available resource/RSS reruns, packaged worker smoke, and final Desktop worker policy remain open.";
+      return "The stable native builtin is unavailable only when explicitly disabled for the current runtime request.";
     case "zlib/promises":
       return "P13-43 records zlib/promises as a stable disabled gap while callback, sync, and stream zlib subsets stay covered.";
     default:
@@ -283,6 +290,29 @@ function sourceTags(flags) {
   if (flags.disabled) tags.push("disabled");
   if (flags.network) tags.push("network");
   return tags;
+}
+
+function nativeFeatureForBuiltin(name) {
+  if (name === "child_process") return "child_process";
+  if (name === "worker_threads") return "worker_threads";
+  if (["dns", "dns/promises", "http", "https", "net", "tls"].includes(name)) {
+    return "raw_node_network_modules";
+  }
+  return null;
+}
+
+function parseRuntimeFeatureStates(text) {
+  const output = new Map();
+  for (const match of text.matchAll(/NodeRuntimeFeatureFlag\(([\s\S]*?)\n\s*\),/g)) {
+    const block = match[1];
+    const id = /\bid\s*=\s*"([^"]+)"/.exec(block)?.[1];
+    const defaultEnabled = /\bdefaultEnabled\s*=\s*(true|false)/.exec(block)?.[1];
+    const status = /\bstatus\s*=\s*"([^"]+)"/.exec(block)?.[1];
+    if (id && defaultEnabled && status) {
+      output.set(id, { defaultEnabled: defaultEnabled === "true", status });
+    }
+  }
+  return output;
 }
 
 function parseKotlinStringCollection(text, name) {
@@ -304,30 +334,29 @@ function buildChecks(files, report, markdown) {
     ),
     check(
       "disabled-builtins-visible",
-      ["dgram", "inspector", "wasi", "worker_threads"].every((name) =>
+      ["dgram", "inspector", "wasi"].every((name) =>
         report.modules.some((module) => module.name === name && module.status === "disabled")),
       "High-risk disabled builtins must stay visible in the matrix.",
     ),
     check(
-      "experimental-builtins-visible",
-      report.modules.some((module) =>
-        module.name === "child_process" &&
-          module.status === "experimental" &&
-          module.targetProfile === "desktop_compat_opt_in" &&
-          module.nextStep.includes("autojs.nodejs.child_process.experimental=true")),
-      "Release-forbidden experimental builtins must stay visible with their opt-in property.",
+      "stable-native-builtins-visible",
+      ["child_process", "worker_threads", "dns", "dns/promises", "http", "https", "net", "tls"].every((name) =>
+        report.modules.some((module) =>
+          module.name === name && module.status === "stable_native" && module.targetProfile === "safe_default")),
+      "Default-on native builtins must stay visible as stable_native.",
     ),
     check(
-      "network-builtins-gated",
+      "network-builtins-stable",
       ["dns", "dns/promises", "http", "https", "net", "tls"].every((name) =>
-        report.modules.some((module) => module.name === name && module.status === "limited_network_gated")),
-      "Network-shaped builtins must be marked limited_network_gated until P13 network promotion tasks land.",
+        report.modules.some((module) => module.name === name && module.status === "stable_native")),
+      "Default-on raw network builtins must be marked stable_native.",
     ),
     check(
       "docs-mention-builtins",
-      files.compatibilityProfile.text.includes("Supported and Limited Builtins") &&
-        files.compatibilityProfile.text.includes("Registry-disabled builtin module names"),
-      "Compatibility profile must keep the existing builtin policy documentation.",
+      files.compatibilityProfile.text.includes("## Builtins") &&
+        files.compatibilityProfile.text.includes("| child_process | stable |") &&
+        files.compatibilityProfile.text.includes("| inspector | disabled |"),
+      "Compatibility profile must document current stable and disabled builtin policy.",
     ),
     check(
       "task-checklist-current",
@@ -338,7 +367,7 @@ function buildChecks(files, report, markdown) {
     check(
       "markdown-current",
       markdown.includes("# Node Builtin Desktop Parity Matrix") &&
-        markdown.includes("`limited_network_gated`") &&
+        markdown.includes("`stable_native`") &&
         markdown.includes("`missing_from_registry`"),
       "Generated markdown must expose status vocabulary and desktop gap state.",
     ),
@@ -371,9 +400,9 @@ function renderMarkdown(report) {
     "",
     "## Status Vocabulary",
     "",
+    "- `stable_native`: available by default from the embedded Node runtime.",
     "- `partial`: available as a Safe Node subset or wrapper.",
     "- `limited_network_gated`: present for controlled feature detection or facade behavior, but raw network I/O remains gated.",
-    "- `experimental`: available only behind a release-forbidden build-time/debug opt-in.",
     "- `disabled`: registry-disabled with stable denial.",
     "- `known_not_wrapped`: known to the CommonJS registry but not currently surfaced as a limited wrapper.",
     "- `missing_from_registry`: in the desktop reference list but not explicitly classified by the current registry.",

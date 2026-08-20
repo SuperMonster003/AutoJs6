@@ -14,7 +14,7 @@ declare namespace AutoJs6Node {
     readonly packagedAllowed: boolean;
     readonly releaseForbidden: boolean;
     readonly securityLevel: "low" | "medium" | "high" | "critical" | string;
-    readonly status: "partial" | "experimental" | "disabled" | "unsupported" | string;
+    readonly status: "stable" | "partial" | "disabled" | "unsupported" | string;
   }
 
   export interface EsmLoaderProfile {
@@ -391,14 +391,15 @@ declare namespace AutoJs6Node {
 
   export interface ProfileRollbackReleasePolicy {
     readonly releaseBuildForbidsDebugUnsafeLab: boolean;
-    readonly releaseBuildForbidsExperimentalProfiles: boolean;
+    readonly releaseBuildHasFeatureGates: boolean;
+    readonly stableFeaturesIncluded: boolean;
     readonly safeProfileReleaseFallback: boolean;
-    readonly rollbackPropertiesDefaultFalse: boolean;
+    readonly runtimePoliciesRemainEnforced: boolean;
   }
 
   export interface ProfileRollbackPolicy {
     readonly schema: "autojs6-node-profile-rollback-policy-v1" | string;
-    readonly status: "playbook_partial" | string;
+    readonly status: "stable_features" | string;
     readonly defaultProfile: "safe_default" | string;
     readonly effectiveProfile: "safe_default" | string;
     readonly rollbackTargetProfile: "safe_default" | string;
@@ -578,10 +579,10 @@ declare namespace AutoJs6Node {
   }
 
   export interface WorkerThreadsProfile {
-    readonly status: "disabled_by_default" | "experimental_opt_in_preflight" | string;
+    readonly status: "stable" | "disabled_by_request" | string;
     readonly defaultEnabled: boolean;
-    readonly requestLocalOptIn: boolean;
-    readonly nativeAvailability: "preflight_required" | string;
+    readonly requestEnabled: boolean;
+    readonly nativeAvailability: "available" | string;
     readonly messageChannel: "partial" | "unsupported" | string;
     readonly transferList: "partial" | "unsupported" | string;
     readonly workerPool: "partial" | "unsupported" | string;
@@ -597,8 +598,8 @@ declare namespace AutoJs6Node {
     readonly api: "not_introduced" | "autojs6_process_worker" | string;
     readonly facade: "not_introduced" | string;
     readonly preferredPrimitive: "worker_threads.WorkerPool" | string;
-    readonly workerThreads: "request_local_experimental_preflight" | string;
-    readonly childProcess: "denied" | string;
+    readonly workerThreads: "stable_enabled" | string;
+    readonly childProcess: "stable_enabled" | string;
     readonly shellBridge: "separate_scoped_command_bridge" | string;
     readonly executionMode: "worker_computation_reserved" | string;
     readonly secondExecutionSlot: "closed_by_p13_06" | string;
@@ -606,14 +607,14 @@ declare namespace AutoJs6Node {
     readonly messageSizeBytes: number;
     readonly maxQueuedMessages: number;
     readonly cleanup: "worker_pool_close_or_execution_destroy" | string;
-    readonly packagedBehavior: "not_promoted" | string;
+    readonly packagedBehavior: "stable" | string;
     readonly bridgeModules: "denied" | string;
     readonly nestedWorkers: boolean;
     readonly rawProcessHandles: boolean;
   }
 
   export interface VmProfile {
-    readonly status: "disabled_by_default" | "experimental_opt_in" | "native_available" | string;
+    readonly status: "native_available" | string;
     readonly defaultEnabled: boolean;
     readonly targetProfiles: readonly string[];
     readonly module: "denied" | "partial" | "native_available" | string;
@@ -705,31 +706,30 @@ declare namespace AutoJs6Node {
   }
 
   export interface ChildProcessProfile {
-    readonly status: "disabled_by_default" | "desktop_opt_in" | string;
+    readonly status: "stable" | "disabled_by_request" | string;
     readonly defaultEnabled: boolean;
     readonly targetProfiles: readonly string[];
-    readonly module: "denied" | "partial" | string;
-    readonly nodePrefix: "denied" | string;
-    readonly scopedRunner: "deferred" | "partial" | string;
+    readonly module: "native_available" | "denied" | string;
+    readonly nodePrefix: "native_available" | "denied" | string;
+    readonly implementation: "native_node_builtin" | "denied" | string;
     readonly shellBridge: "separate_scoped_command_bridge" | string;
     readonly androidShellProvider: "available_with_shell_capability" | string;
-    readonly appPrivateBinaries: "required_before_enablement" | string;
-    readonly allowlistedBinaries: "required_before_enablement" | string;
-    readonly arbitraryPaths: "denied" | string;
-    readonly cwd: "scoped_working_directory" | string;
-    readonly env: "string_map_scoped" | string;
-    readonly stdin: "deferred" | "bounded_required" | string;
-    readonly stdout: "bounded_required" | string;
-    readonly stderr: "bounded_required" | string;
-    readonly timeout: "required" | string;
-    readonly cancellation: "required_before_enablement" | string;
-    readonly kill: "required_before_enablement" | string;
-    readonly cleanup: "required_before_enablement" | string;
-    readonly processHandles: "denied" | string;
-    readonly fdStreams: "denied" | string;
-    readonly detached: "denied" | string;
-    readonly shellOperators: "denied" | string;
-    readonly packagedBehavior: "not_promoted" | string;
+    readonly appPrivateBinaryAllowlist: "not_enforced_by_native_builtin" | string;
+    readonly executablePolicy: "android_app_sandbox_and_caller_validation" | "denied" | string;
+    readonly cwd: "native_node_options" | "denied" | string;
+    readonly env: "native_node_options" | "denied" | string;
+    readonly stdin: "native_node_streams" | "deferred" | string;
+    readonly stdout: "native_node_streams_caller_bounded" | "denied" | string;
+    readonly stderr: "native_node_streams_caller_bounded" | "denied" | string;
+    readonly timeout: "caller_managed" | "required" | string;
+    readonly cancellation: "native_node_kill" | "required_before_enablement" | string;
+    readonly kill: "native_available" | "required_before_enablement" | string;
+    readonly cleanup: "native_node_lifecycle" | "required_before_enablement" | string;
+    readonly processHandles: "native_available" | "denied" | string;
+    readonly fdStreams: "native_available" | "denied" | string;
+    readonly detached: "native_node_options" | "denied" | string;
+    readonly shellOperators: "native_shell_option" | "denied" | string;
+    readonly packagedBehavior: "stable" | "disabled_by_request" | string;
     readonly rawProcessHandles: boolean;
     readonly rawSignals: boolean;
   }
@@ -766,9 +766,9 @@ declare namespace AutoJs6Node {
     readonly disabledBuiltins: readonly string[];
     readonly networkBuiltins: readonly string[];
     readonly highRiskCapabilities: Readonly<Record<string, boolean>>;
-    readonly experimentalFlags: Readonly<Record<string, boolean>>;
+    readonly featureStates: Readonly<Record<string, boolean>>;
     readonly featureFlags: Readonly<Record<string, FeatureFlagDescriptor>>;
-    readonly enabledExperimentalFlags: readonly string[];
+    readonly enabledFeatures: readonly string[];
     readonly deniedFeatureFlags: readonly string[];
     readonly errorCodes: Readonly<Record<string, string | Readonly<Record<string, string>>>>;
     readonly compileCache: Readonly<Record<string, unknown>>;
@@ -827,7 +827,7 @@ declare namespace AutoJs6Node {
   export interface AutoJsJavaFacade extends AutoJsJavaModule {
     readonly schema: "autojs6-node-autojs-java-v1";
     readonly enabled: boolean;
-    readonly experimental: boolean;
+    readonly stable: boolean;
     readonly mode: "disabled" | "allowlist" | string;
     readonly reason: string;
     create(

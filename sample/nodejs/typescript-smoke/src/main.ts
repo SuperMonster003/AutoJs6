@@ -214,13 +214,13 @@ async function smoke(): Promise<void> {
   const rhinoStatus: rhino.Status = rhino.status();
   const rhinoRunDenied: Promise<never> = rhino.run({ source: "1 + 1", timeoutMs: 1000, args: [] });
   const rhinoRunPoc: Promise<rhino.RunResult<{ readonly sum: number }>> = rhino.run<{ readonly sum: number }>({
-    experimental: true,
+    explicit: true,
     source: "({ sum: args[0] + args[1] });",
     args: [2, 3],
     timeoutMs: 1000
   });
   const rhinoInstallDenied: () => never = rhino.install;
-  const rhinoInstallResult: rhino.InstallResult = rhino.install({ experimental: true, target: {} });
+  const rhinoInstallResult: rhino.InstallResult = rhino.install({ explicit: true, target: {} });
   const rhinoImportClassDenied: () => never = rhino.importClass;
   const rhinoImportPackageDenied: () => never = rhino.importPackage;
   const rhinoJavaAdapterDenied: (...args: readonly unknown[]) => never = rhino.JavaAdapter;
@@ -750,14 +750,14 @@ async function smoke(): Promise<void> {
   const desktopRuntimeProfileId: AutoJs6Node.RuntimeProfileId = "desktop_compat_opt_in";
   const debugRuntimeProfileId: AutoJs6Node.RuntimeProfileId = "debug_unsafe_lab";
   const safeToastMode: AutoJs6Node.ProfileModuleModeFor<"toast", "safe_default"> = "available";
-  const safeJavaMode: AutoJs6Node.ProfileModuleModeFor<"java", "safe_default"> = "denied";
-  const proJavaMode: AutoJs6Node.ProfileModuleModeFor<"java", "pro_compat_opt_in"> = "profile_gated";
+  const safeJavaMode: AutoJs6Node.ProfileModuleModeFor<"java", "safe_default"> = "available";
+  const proJavaMode: AutoJs6Node.ProfileModuleModeFor<"java", "pro_compat_opt_in"> = "available";
   const proOverlayMode: AutoJs6Node.ProfileModuleModeFor<"ui.overlay", "pro_compat_opt_in"> = "profile_gated";
-  const safeWorkerMode: AutoJs6Node.ProfileModuleModeFor<"worker_threads", "safe_default"> = "denied";
-  const desktopWorkerMode: AutoJs6Node.ProfileModuleModeFor<"worker_threads", "desktop_compat_opt_in"> = "profile_gated";
-  const desktopHttpMode: AutoJs6Node.ProfileModuleModeFor<"http", "desktop_compat_opt_in"> = "partial";
-  const safeRawNetworkMode: AutoJs6Node.ProfileModuleModeFor<"raw_network", "safe_default"> = "denied";
-  const desktopRawNetworkMode: AutoJs6Node.ProfileModuleModeFor<"raw_network", "desktop_compat_opt_in"> = "profile_gated";
+  const safeWorkerMode: AutoJs6Node.ProfileModuleModeFor<"worker_threads", "safe_default"> = "available";
+  const desktopWorkerMode: AutoJs6Node.ProfileModuleModeFor<"worker_threads", "desktop_compat_opt_in"> = "available";
+  const desktopHttpMode: AutoJs6Node.ProfileModuleModeFor<"http", "desktop_compat_opt_in"> = "available";
+  const safeRawNetworkMode: AutoJs6Node.ProfileModuleModeFor<"raw_network", "safe_default"> = "available";
+  const desktopRawNetworkMode: AutoJs6Node.ProfileModuleModeFor<"raw_network", "desktop_compat_opt_in"> = "available";
   const desktopWasiMode: AutoJs6Node.ProfileModuleModeFor<"wasi", "desktop_compat_opt_in"> = "profile_gated";
   const debugInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "debug_unsafe_lab"> = "profile_gated";
   const safeInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "safe_default"> = "denied";
@@ -765,9 +765,9 @@ async function smoke(): Promise<void> {
   const packageManagerSafeMode: AutoJs6Node.SafeDefaultModeFor<"package_manager"> = "partial";
   const packageManagerTargetMode: AutoJs6Node.TargetProfileModeFor<"package_manager"> = "partial";
   const packageManagerPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"package_manager"> = "partial";
-  const autojsJavaPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"$autojs.java"> = "metadata_only";
+  const autojsJavaPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"$autojs.java"> = "supported";
   const npmPureJsSafeMode: AutoJs6Node.SafeDefaultModeFor<"npm.pure_js"> = "partial";
-  const workerRequiresDeclaration: AutoJs6Node.ProfileModuleRequiresDeclaration<"worker_threads"> = true;
+  const workerRequiresDeclaration: AutoJs6Node.ProfileModuleRequiresDeclaration<"worker_threads"> = false;
   const toastRequiresDeclaration: AutoJs6Node.ProfileModuleRequiresDeclaration<"toast"> = false;
   const profileDeclarationMatrix: AutoJs6Node.ProfileDeclarationMatrix = {
     schema: "autojs6-node-profile-declaration-matrix-v1",
@@ -787,13 +787,13 @@ async function smoke(): Promise<void> {
   const v12MediaProjectionMode: AutoJs6Node.NodeProfileV12ModeFor<"media_projection", "pro_compat_opt_in"> = "profile_gated";
   const v12WorkManagerMode: AutoJs6Node.NodeProfileV12ModeFor<"work_manager", "pro_compat_opt_in"> = "partial";
   const v12RecorderMode: AutoJs6Node.NodeProfileV12ModeFor<"recorder.session", "safe_default"> = "denied";
-  const v12WorkerMode: AutoJs6Node.NodeProfileV12ModeFor<"worker_threads", "desktop_compat_opt_in"> = "denied";
+  const v12WorkerMode: AutoJs6Node.NodeProfileV12ModeFor<"worker_threads", "desktop_compat_opt_in"> = "available";
   const v12OverlayState: AutoJs6Node.NodeProfileV12StateFor<"ui.overlay"> = "provider_poc_not_promoted";
   const v12PackagedAggregateEvidence: AutoJs6Node.NodeProfileV12PackagedEvidenceFor<"packaged.aggregate"> = "host_contract_ready";
-  const v12WorkerEvidence: AutoJs6Node.NodeProfileV12PackagedEvidenceFor<"worker_threads"> = "conditional_skip_native_unavailable";
+  const v12WorkerEvidence: AutoJs6Node.NodeProfileV12PackagedEvidenceFor<"worker_threads"> = "runtime_kit";
   const v12RecorderFutureOnly: AutoJs6Node.NodeProfileV12FutureOnlyFor<"recorder.session"> = true;
   const v12PackagedAggregateFutureOnly: AutoJs6Node.NodeProfileV12FutureOnlyFor<"packaged.aggregate"> = false;
-  const v12FutureOnlyCapability: AutoJs6Node.NodeProfileV12FutureOnlyCapabilityName = "worker_threads";
+  const v12FutureOnlyCapability: AutoJs6Node.NodeProfileV12FutureOnlyCapabilityName = "process_worker";
   const v12StableDeniedCapability: AutoJs6Node.NodeProfileV12StableDeniedCapabilityName = "media.playback";
   const v12DeclarationMatrix: AutoJs6Node.NodeProfileV12DeclarationMatrix = {
     schema: "autojs6-node-profile-v1-2-declaration-matrix-v1",
@@ -848,7 +848,7 @@ async function smoke(): Promise<void> {
   const filesystemRawFd: boolean = autojsProfile.filesystemProfile.advancedApis.rawFd;
   const filesystemWatcherLimit: number = autojsProfile.filesystemProfile.limits.watcherLimit;
   const workerThreadsProfileStatus: string = autojsProfile.workerThreadsProfile.status;
-  const workerThreadsRequestLocalOptIn: boolean = autojsProfile.workerThreadsProfile.requestLocalOptIn;
+  const workerThreadsRequestEnabled: boolean = autojsProfile.workerThreadsProfile.requestEnabled;
   const workerThreadsMaxWorkers: number = autojsProfile.workerThreadsProfile.policy.maxWorkers;
   const workerThreadsBridgeModules: string = autojsProfile.workerThreadsProfile.bridgeModules;
   const processWorkerReplacementStatus: string = autojsProfile.processWorkerReplacementProfile.status;
@@ -875,9 +875,9 @@ async function smoke(): Promise<void> {
   const nativeAddonProfileDownloadExec: boolean = autojsProfile.nativeAddonProfile.downloadExec;
   const childProcessProfileStatus: string = autojsProfile.childProcessProfile.status;
   const childProcessProfileTargetProfiles: readonly string[] = autojsProfile.childProcessProfile.targetProfiles;
-  const childProcessProfileScopedRunner: string = autojsProfile.childProcessProfile.scopedRunner;
+  const childProcessProfileImplementation: string = autojsProfile.childProcessProfile.implementation;
   const childProcessProfileShellBridge: string = autojsProfile.childProcessProfile.shellBridge;
-  const childProcessProfileAllowlistedBinaries: string = autojsProfile.childProcessProfile.allowlistedBinaries;
+  const childProcessProfileAppPrivateBinaryAllowlist: string = autojsProfile.childProcessProfile.appPrivateBinaryAllowlist;
   const childProcessProfileRawHandles: boolean = autojsProfile.childProcessProfile.rawProcessHandles;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
@@ -1214,7 +1214,7 @@ async function smoke(): Promise<void> {
   void filesystemRawFd;
   void filesystemWatcherLimit;
   void workerThreadsProfileStatus;
-  void workerThreadsRequestLocalOptIn;
+  void workerThreadsRequestEnabled;
   void workerThreadsMaxWorkers;
   void workerThreadsBridgeModules;
   void processWorkerReplacementStatus;
@@ -1241,9 +1241,9 @@ async function smoke(): Promise<void> {
   void nativeAddonProfileDownloadExec;
   void childProcessProfileStatus;
   void childProcessProfileTargetProfiles;
-  void childProcessProfileScopedRunner;
+  void childProcessProfileImplementation;
   void childProcessProfileShellBridge;
-  void childProcessProfileAllowlistedBinaries;
+  void childProcessProfileAppPrivateBinaryAllowlist;
   void childProcessProfileRawHandles;
   void compatTimedTasks;
   void compatTimedTask;

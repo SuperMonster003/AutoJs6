@@ -3,6 +3,12 @@
 This document records the current test commands for the external runtime
 plugin, Embedded Node, and packaged Node work.
 
+Node Profile v1.2 test precedence: ESM, dynamic import, controlled network,
+WebSocket, native network builtins, `worker_threads`, `child_process`, and
+allowlisted Java interop are stable and enabled in Debug and Release. Current
+gates run without capability-specific Gradle properties. Older phase sections
+are retained as historical evidence and do not define present availability.
+
 ## Shared Deployment Context
 
 Use [NODE_DEPLOYMENT_SHARED_CONTEXT.md](NODE_DEPLOYMENT_SHARED_CONTEXT.md)
@@ -41,7 +47,7 @@ checked templates (`commonjs-app`, `esm-app`, `automation-script`,
 missing entries, invalid package names, unknown permissions, unsupported TSX
 entries, and unsafe dependency bundles. The JSON output includes a
 compatibility analyzer status (`compatible`, `compatible with capability`,
-`experimental`, `unsupported`, or `unsafe`) plus required builtins, capability
+`partial`, `unsupported`, or `unsafe`) plus required builtins, capability
 requirements, dependency graph size, package export-condition usage, entry
 format, and APK-builder preflight metadata.
 
@@ -475,10 +481,16 @@ Phase 7 S7-16 live-provider gate:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This gate runs only live-provider or live fail-closed availability tests for `fetch`, `websocket`, OCR, storage, notifications, sensors, accessibility/image, UI, and `work_manager`; fake-provider regression tests are deliberately excluded. It writes `app/build/reports/nodejs/live-provider-summary.json` after connected instrumentation, including each expected test method, provider, interaction requirement, fake-provider policy, skip policy, XML status, skip/failure message, device profile, result XML path, and policy violations. Unexpected skips, missing expected tests, failures, and errors fail the gate. Allowed skips must report a reason; if the Android runner emits an empty `<skipped />`, the summary uses the gate's explicit `skipPolicy` as the recorded reason and marks `skipReasonSource` as `summary-policy`. Fetch and WebSocket are included in this aggregate gate, so it requires `autojs.nodejs.network.experimental=true`; normal release builds still keep live network providers default-off.
+This gate runs live-provider or fail-closed availability tests for `fetch`,
+`websocket`, OCR, storage, notifications, sensors, accessibility/image, UI,
+and `work_manager`; fake-provider regression tests are deliberately excluded.
+It writes `app/build/reports/nodejs/live-provider-summary.json` with per-test
+provider, interaction, skip, XML, device, and policy metadata. Fetch and
+WebSocket use the stable network build; a skip must be a documented
+device/provider condition, never a missing capability property.
 
 Stable bridge API conformance:
 
@@ -686,7 +698,7 @@ querystring/URL utilities, glob/path matching, crypto hashing, stream utilities,
 feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`. The v1.1/S7-48 corpus grew from
 7 to 13 fixtures and added an ESM-only dependency, a hybrid CJS/ESM package, Buffer helpers, fetch-wrapper fallback
 behavior, assertion/test helper patterns, `AsyncLocalStorage`, `stream/promises`, WebCrypto digest helpers, worker CPU
-package fallback behavior while `worker_threads` remains default-disabled, a tiny test-runner package, and a database
+package fallback behavior from the historical pre-release worker path, a tiny test-runner package, and a database
 abstraction package. S8-46 grows the corpus from 13 to 20 fixtures while keeping the pass rate at 100%: it adds native
 TypeScript source project shape, CJS `require(esm)`, default-denied `node:http`, `FormData`/`fetch`, scoped
 `FileHandle`, `fs.watch()` lifecycle, and compile-cache-shaped package coverage. S9-46 grows the corpus from 20 to 30
@@ -745,7 +757,7 @@ Phase 7 functional gate:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:verifyNodePhase7Gate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+.\gradlew.bat --console=plain :app:verifyNodePhase7Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 This gate selects the Phase 7 focused instrumentation set and writes
@@ -811,7 +823,7 @@ extract `.tgz` files with Tar Slip/link denial, write `autojs6-lock.json`, and
 exercise `install`, `installFromTarball`, `update`, `remove`, `list`, `verify`,
 and `prune`. Its negative tests cover integrity mismatch, tar path escape,
 disabled lifecycle scripts, native addon files, and non-HTTPS registry protocol.
-The gate is host-managed and experimental; Android runtime package installation,
+The gate is host-managed and partial; Android runtime package installation,
 full npm CLI behavior, hoisting, package-manager hooks, and peer installation
 remain deferred.
 
@@ -860,8 +872,8 @@ Phase 13 `$autojs` global v1:
 `EmbeddedScriptMvpInstrumentationTest#autojsGlobalV1ExposesFrozenDiagnosticsAndGatedJavaFacade`
 verifies that `globalThis.$autojs` is installed before user code as a frozen
 read-only global, that `$autojs.profile` matches `require("autojs6:profile")`,
-that `$autojs.androidContext` is diagnostic-only, and that default
-`$autojs.java` calls reject with `ERR_AUTOJS6_JAVA_INTEROP_DISABLED`.
+that `$autojs.androidContext` is diagnostic-only, and that stable
+`$autojs.java` calls remain constrained to the exact class/member allowlist.
 
 Phase 13 Java interop allowlist:
 
@@ -871,7 +883,7 @@ Phase 13 Java interop allowlist:
 ```
 
 `verifyNodePhase13JavaInteropAllowlist` records the P13-13 ready Java interop
-state: default-disabled Java interop, allowlisted `findClass` / constructor /
+state: stable default-enabled Java interop, allowlisted `findClass` / constructor /
 static calls, Rect handle instance calls, Rect field reads, explicit
 release/dispose cleanup, TypeScript declarations, and fail-closed classloader /
 reflection / native-library / process boundaries. P13-13 also records the
@@ -889,7 +901,7 @@ Phase 13 `rhino.install` Java proxy:
 
 `verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 ready Rhino
 install state: default `rhino.install()` rejection, `node_modules/rhino`
-shadowing protection, explicit experimental `Packages` / `java` / `android`
+shadowing protection, `explicit: true` `Packages` / `java` / `android`
 proxy installation, Java allowlist routing, and continued absence of
 `importClass`, `importPackage`, and `JavaAdapter`. Packaged metadata remains
 fail-closed for v1.1. Real Pro profile selector is delegated to the aggregate
@@ -910,7 +922,7 @@ Rhino `importClass` / `importPackage` semantics stay unsupported in Node.
 Explicit `require("rhino").importClass()` / `.importPackage()` calls return
 `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`, global helpers remain absent, and the
 documented migration path is local assignment from a
-`rhino.install({ experimental: true, target })` Java proxy scope.
+`rhino.install({ explicit: true, target })` Java proxy scope.
 
 Phase 13 JavaAdapter / defineClass replacement decision:
 
@@ -1010,12 +1022,11 @@ multi-instance as `blocked_primary_only` because reserved process slots exist
 but `effectiveMaxActiveSlots` remains `1`, and packaged long-running service
 mode is still not promoted.
 
-`verifyNodePhase10WorkerWasiBoundary` writes the S10-37 through S10-42
-machine-readable report. It records default-disabled `worker_threads`, native
-worker availability blockers, blocked MessageChannel/transfer and WorkerPool
-promotion, pure WebAssembly compile/instantiate support, raw `wasi`/`node:wasi`
-denial, and deferred controlled WASI plus packaged WASM cache/asset gates.
-Run `verifyNodeWorkerWasiGate` on Sony for the focused device proof.
+`verifyNodePhase10WorkerWasiBoundary` writes the archived S10-37 through S10-42
+machine-readable promotion report. Its worker-denial decision is superseded by
+the stable three-ABI worker runtime kit; its pure WebAssembly support and raw
+`wasi`/`node:wasi` denial evidence remain applicable. Run the current
+`verifyNodeWorkerGate` for stable worker conformance.
 
 Current doctor diagnostics:
 
@@ -1062,7 +1073,8 @@ denial before dispatch, UI handle cleanup without raw View exposure, JS-only
 plugin `.node`, path, and requested-capability rejection before plugin code
 executes, worker-local bridge module denial when worker support is available or
 worker_threads fail-closed when unavailable, long-running timer exhaustion
-timeout diagnostics, shell usage while `child_process` remains disabled, and
+timeout diagnostics, separation between controlled shell and stable native
+`child_process`, and
 zlib stream error cleanup. Packaged ESM escape, packaged dynamic import escape,
 and stale runtime compatibility descriptor mismatch stay covered by the focused
 packaged ESM/dynamic-import and launch-failure gates.
@@ -1086,7 +1098,11 @@ denial, direct `.node` `require()`/`require.resolve()` denial, package `main`
 denial, `process.dlopen`/`process.binding`/`process._linkedBinding` denial,
 and require-cache non-loading. P13-39 records native addon loading as partial.
 
-The network portion also asserts that normal builds keep `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=false` and `BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED=false`; Safe-profile raw network operations stay denied unless the explicit raw Node network module opt-in is enabled for a focused experiment.
+The network portion asserts
+`BuildConfig.NODEJS_NETWORK_ENABLED=true` and
+`BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED=true` in normal builds,
+native builtin shadow protection, controlled-provider permission/budget
+policy, and continued denial of `dgram`.
 
 Current resolver fuzzer extended instrumentation:
 
@@ -1287,7 +1303,8 @@ hooks/skip/todo/timeout/failure handling, late async activity detection, S7-34 `
 `readline/promises`, `AbortSignal`, `structuredClone`, and limited global/WebCrypto coverage including random values,
 UUIDs, SHA digest, HMAC sign/verify/export, and negative cases, controlled
 `process.getBuiltinModule()` guard behavior, native `vm` availability, and
-unchanged denial for disabled builtins such as `child_process` and `dgram`.
+stable native `child_process`, plus unchanged denial for `dgram`, Inspector,
+WASI, native addons, and private Node bindings.
 
 Current `vm` native availability focused instrumentation:
 
@@ -1553,7 +1570,10 @@ Current `shell` bridge focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeShellBridgeInstrumentationTest"
 ```
 
-This suite verifies the `shell` bridge registry, fake provider request/response behavior, `require("shell")`, shadowing protection, `execFile()` scoped path/argument wrapping, `checkAccess()` reports for root and unsupported Shizuku access, `setDefaultTimeout()` fallback behavior, timeout propagation, `cwd` and `env` normalization, explicit root permission tagging, manifest-declared `shell`/`shell.root` capability behavior, real Android non-root command execution, non-zero exit results, timeout result shape, policy denials, and that `child_process` remains disabled.
+This suite verifies the `shell` bridge registry, fake provider request/response
+behavior, scoped `execFile()`, root/Shizuku policy, timeouts, `cwd`/`env`,
+capability tags, real non-root execution, cleanup, and clear separation from
+stable native `child_process`.
 
 Current controlled fetch bridge focused instrumentation:
 
@@ -1561,16 +1581,25 @@ Current controlled fetch bridge focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest"
 ```
 
-This suite verifies the `fetch` bridge registry, fake provider GET/POST behavior, `require("fetch")`, global `fetch`, shadowing protection, object and array headers, string/Buffer/Uint8Array bodies, `Response.text()`/`json()`/`arrayBuffer()`, `response.body.stream()` Web Stream reads, timeout rejection, abort-before-dispatch and abort-during-dispatch rejection, response-size budget rejection, unsupported URL scheme rejection, redirect limit plus `redirect: "manual"`/`"error"` behavior, max concurrent request rejection, service-destroy rejection cleanup, fetch diagnostics counters, raw `http`/`https`/`net` and `node:https` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`. It also verifies the Task 167 `require("axios")` compatibility layer: reserved module resolution, fake-provider `get`/`post`/`request`, `baseURL`, params serialization, headers, timeout, `responseType: json/text/arraybuffer`, Axios-like error shape, custom adapter/agent/proxy denial, and raw `node:https` denial.
+This suite verifies the `fetch` bridge registry, fake provider GET/POST
+behavior, `require("fetch")`, global `fetch`, shadowing protection, headers
+and bodies, response helpers/Web Streams, timeout, abort, response and redirect
+budgets, unsupported schemes, concurrency, service-destroy cleanup, and
+diagnostics. It also verifies the AutoJs6 `axios` adapter. Native
+`http`/`https`/`net` are tested separately as stable builtins rather than
+being treated as controlled-provider denials.
 
 Current controlled fetch/axios live-provider subgate:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+.\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This explicit experimental subgate runs only the live Android provider methods and is also included by the S7-16 aggregate live-provider gate. It starts an on-device loopback HTTP server, verifies real OkHttp-backed `fetch` GET/POST, headers, query params, string and `Uint8Array` bodies, `json()`/`arrayBuffer()` responses, redirect follow, response-size rejection, timeout rejection, fetch-backed `axios.get`/`axios.post`, raw `http`/`net` denial, provider diagnostics, and provider destroy cancellation of an active request. Normal release builds still keep `autojs.nodejs.network.experimental=false`.
+This stable live-provider subgate starts an on-device loopback HTTP server and
+verifies OkHttp-backed `fetch` and `axios`, headers, query/body/response
+forms, redirects, size and timeout rejection, permission policy, diagnostics,
+and provider-destroy cancellation. It requires no capability property.
 
 Current controlled WebSocket bridge focused instrumentation:
 
@@ -1578,16 +1607,24 @@ Current controlled WebSocket bridge focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest"
 ```
 
-This suite verifies the registry/profile experimental state for `websocket`, fake-provider connect/send/receive/close behavior, connect headers/protocols/maxQueueSize descriptors, text and binary send/receive, `on`/`off`, `addEventListener`/`removeEventListener`, `onopen`/`onmessage`/`onerror`/`onclose` handler properties, close event shape, `require("websocket")`, shadowing protection, timeout rejection, unsupported scheme rejection, max connection rejection, message-size budget rejection, service-destroy rejection cleanup, WebSocket diagnostics counters, raw `net`/`tls` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`.
+This suite verifies stable WebSocket profile state, fake-provider
+connect/send/receive/close, headers/protocols/queues, text/binary frames,
+listener and handler APIs, shadowing protection, timeout/scheme/connection/
+message limits, pending-call and service-destroy cleanup, and diagnostics.
+Native `net`/`tls` are separate stable builtins.
 
 Current controlled WebSocket live-provider subgate:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This explicit experimental subgate starts an on-device loopback WebSocket server and is also included by the S7-16 aggregate live-provider gate. It verifies real OkHttp-backed `websocket.connect()`, headers, protocol negotiation, text and binary roundtrip, close events, inbound message-size rejection, connect timeout rejection, raw `net`/`tls` denial, live diagnostics, and provider destroy cleanup of an active socket. Normal release builds still keep `autojs.nodejs.network.experimental=false`.
+This stable live-provider subgate starts an on-device loopback WebSocket server
+and verifies real OkHttp-backed connect, headers, protocol negotiation,
+text/binary roundtrip, close, inbound size and connect timeout rejection,
+permission policy, diagnostics, and destroy cleanup. It requires no capability
+property.
 
 Current raw network policy focused instrumentation:
 
@@ -1595,7 +1632,10 @@ Current raw network policy focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRawNetworkPolicyInstrumentationTest"
 ```
 
-This suite verifies that controlled `fetch` and `websocket` modules cannot be shadowed, raw `http`, `https`, `net`, `tls`, `dns`, `dns/promises`, and `dgram` stay denied, `node:` aliases stay denied or limited in the same way, and local `node_modules` fixtures cannot bypass the Safe Node Profile network policy.
+This suite verifies that controlled `fetch` and `websocket` modules and
+native `http`, `https`, `net`, `tls`, `dns`, and `dns/promises`
+builtins cannot be shadowed; bare and `node:` aliases resolve consistently;
+native calls work under Android constraints; and `dgram` stays denied.
 
 S8-21 keeps this default-denial policy intact. The controlled `http`/`https`
 client facade runs only with an enforced manifest declaring `network`, and still
@@ -1784,15 +1824,13 @@ Phase 13 net/tls/dns staged compatibility status gate:
 ```
 
 This host gate records P13-30 as ready for the v1.1 limited-facade decision. It requires the default limited `net`,
-`tls`, `dns`, and `dns/promises` builtins, focused device evidence, the
-debug/build-time `autojs.nodejs.rawNetworkModules.experimental=true` native
-module opt-in path, TypeScript declarations, desktop builtin matrix updates,
-security/profile docs, and release matrix text. It keeps release/default client
-sockets and server listen authority rejected for v1.1, keeps DNS privacy closed
-by denying resolver/search-domain/VPN/topology exposure, and keeps the raw
-network opt-in release-forbidden. TLS sessions, fd leak proof, packaged
-INTERNET proof, and live Android network evidence remain future promotion
-gates before any raw socket or live network authority is promoted.
+`tls`, `dns`, and `dns/promises` builtins, focused device evidence, stable
+Debug/Release availability, TypeScript declarations, desktop builtin matrix
+updates, security/profile docs, and release matrix text. Current native modules
+follow Node semantics inside the Android sandbox and require Android INTERNET
+permission; they do not inherit controlled-provider budgets. DNS privacy
+continues to deny resolver/search-domain/VPN/topology diagnostics, and `dgram`
+remains disabled.
 
 Phase 13 dgram UDP decision gate:
 
@@ -1844,7 +1882,12 @@ Current Java interop allowlist focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeJavaInteropBridgeInstrumentationTest"
 ```
 
-This suite verifies `BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED=false`, disabled default `require("java")`, shadowing protection against `node_modules/java`, request-local experimental enablement, fake transport serialization, `java.lang.Math`, `java.util.UUID`, opaque `android.graphics.Rect` handles, Rect instance method calls, Rect field reads, explicit release/dispose cleanup, provider destroy cleanup, and denial of Runtime, ProcessBuilder, System native-library loading, ClassLoader, and reflection classes.
+This suite verifies `BuildConfig.NODEJS_JAVA_INTEROP_ENABLED=true`, stable
+`require("java")`, shadowing protection against `node_modules/java`, fake
+transport serialization, `java.lang.Math`, `java.util.UUID`, opaque
+`android.graphics.Rect` handles, instance methods/fields, explicit
+release/dispose and provider-destroy cleanup, and denial of Runtime,
+ProcessBuilder, native-library loading, ClassLoader, and reflection.
 
 Task 124 GA evaluation report: [reports/JAVA_INTEROP_EVALUATION.md](reports/JAVA_INTEROP_EVALUATION.md).
 
@@ -1854,7 +1897,10 @@ Current bridge resource registry focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest"
 ```
 
-This suite verifies direct registry cleanup for image-handle, screen-capturer, and WebSocket resource types; idempotent close behavior; leaked-resource diagnostics; Android provider cleanup for experimental Java object handles; `work_manager` registration cancellation and destroy cleanup; and shell timeout cleanup through the live provider resource registry.
+This suite verifies direct registry cleanup for image-handle, screen-capturer,
+WebSocket, and stable Java object-handle resource types; idempotent close
+behavior; leaked-resource diagnostics; `work_manager` cancellation/destroy
+cleanup; and shell timeout cleanup through the live provider registry.
 
 Current Phase 7 bridge/resource stress instrumentation:
 
@@ -1867,7 +1913,7 @@ Current Phase 7 bridge/resource stress instrumentation:
 This suite loops the v1.1 bridge module surface through JS fake transport and Android provider paths. It covers repeated
 OCR calls, storage CRUD, notifications post/cancel or permission-denied cleanup, sensors subscribe/unsubscribe when a
 supported sensor is available, accessibility selector queries, image operations and recycle calls, UI show/close,
-shell timeout cleanup, and WebSocket open/close or default-disabled provider denial. S7-47 adds
+shell timeout cleanup, and stable WebSocket open/close plus permission/provider denial. S7-47 adds
 `NodePhase7ResourceStressInstrumentationTest`, which records RSS, Java heap, native heap, thread count, fd count,
 test-only libuv handle counts, and bridge diagnostics while stressing database open/transaction/close, real
 WorkManager scheduled task execution/cancel cleanup, and JS-only plugin lifecycle load/start/stop/unload cleanup.
@@ -1877,7 +1923,7 @@ Use `autojs.nodejs.bridgeStress.iterations`, `autojs.nodejs.phase7Resource.provi
 `autojs.nodejs.phase7Resource.workManagerIterations`, and `autojs.nodejs.phase7Resource.pluginIterations` to scale the
 loop for local triage or nightly gates. `verifyNodePhase7ResourceStressGate` also selects the existing long-running
 stress, live fetch/WebSocket destroy cleanup, live OCR/sensor/UI/WorkManager resource cleanup, and worker resource
-stress classes; live network cases still require `autojs.nodejs.network.experimental=true` to run instead of skip.
+stress classes; live network cases still require `NODEJS_NETWORK_ENABLED=true` to run instead of skip.
 
 Phase 13 full heavy resource stress status gate:
 
@@ -1973,33 +2019,31 @@ Current `worker_threads` bootstrap/design gate focused instrumentation:
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This suite runs `NodeWorkerThreadsBootstrapInstrumentationTest` and
-`NodeWorkerThreadsDesignGateInstrumentationTest` in normal builds. It verifies
-request-local default denial, JavaScript profile flags, bare
-`worker_threads` denial, default `node:worker_threads` shape-only facade with
-inert disabled `Worker`, `require.resolve("worker_threads")` denial before
-`node_modules/worker_threads` shadowing, frozen profile flags, and the
-request-local experimental preflight. The preflight must report either a usable
-native Worker bootstrap surface (`Worker`, `isMainThread`, `parentPort`,
-`workerData`, `threadId`, `MessageChannel`, `MessagePort`, bounded messaging
-policy, diagnostics) or stable
-`ERR_AUTOJS6_WORKER_DISABLED` diagnostics with `nativeAvailable=false` and zero
-active workers.
+This stable gate runs `NodeWorkerThreadsBootstrapInstrumentationTest`,
+`NodeWorkerThreadsDesignGateInstrumentationTest`,
+`NodeWorkerThreadsStableInstrumentationTest`, resource stress, and packaged
+worker smoke. It requires `featureStates.workerThreads=true`, shadow
+protection, and a usable native Worker surface (`Worker`, `isMainThread`,
+`parentPort`, `workerData`, `threadId`, `MessageChannel`,
+`MessagePort`) on every published ABI. It also verifies bounded messages and
+queues, scoped sources, transfer validation, WorkerPool behavior, smaller
+worker authority, termination, and zero leaked workers/ports/pools. Native
+unavailability or a skipped runnable path is a conformance failure.
 
-Task 122 GA evaluation report: [reports/WORKER_EXPERIMENTAL_EVALUATION.md](reports/WORKER_EXPERIMENTAL_EVALUATION.md).
+Task 122 GA evaluation report: [reports/WORKER_PRE_GA_EVALUATION.md](reports/WORKER_PRE_GA_EVALUATION.md).
 
 Task 146 v1.1 worker policy: [releases/V1_1_WORKER_POLICY.md](releases/V1_1_WORKER_POLICY.md).
 
 S8-44 partial-promotion recheck: [reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md](reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md).
 
-Current experimental worker_threads focused instrumentation:
+Historical pre-GA `worker_threads` focused evidence:
 
 ```powershell
-.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.worker_threads.experimental=true" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This suite verifies the default disabled path when the build-level flag is off,
-then enables the request-local experimental flag to cover local CommonJS worker
+This archived suite originally verified the pre-release disabled path and
+request-local enablement for local CommonJS worker
 scripts, local CJS/JSON dependencies, `workerData`,
 `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path
 escape rejection, shadowing protection, Worker diagnostics counters, and denial
@@ -2042,7 +2086,7 @@ Current QV710AF65F P13-34 gate evidence on 2026-06-28:
 
 ```powershell
 $env:ANDROID_SERIAL='QV710AF65F'
-.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.worker_threads.experimental=true" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Result: passed on QV710AF65F / XQ-AT72 / Android 12 with `tests=16`,
@@ -2051,7 +2095,7 @@ worker cases skipped through the native preflight with
 `worker.preflight.status=unavailable` and `ERR_AUTOJS6_WORKER_DISABLED`, so this
 archives the current gate run but does not prove runnable worker support.
 
-Current experimental worker_threads resource stress instrumentation:
+Current stable `worker_threads` resource stress instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest"
@@ -2061,10 +2105,8 @@ This suite verifies 100 sequential worker create/terminate cycles, WorkerPool
 stress across 100 jobs plus failure/cancel/timeout/transfer recovery,
 parent-completion cleanup for pending worker messages and active pools, worker
 cleanup diagnostics counters, and coarse RSS/thread-count snapshots around the
-sequential and pool stress cases. It is skipped when the S7-24
-native-availability preflight reports
-`ERR_AUTOJS6_WORKER_DISABLED`, and it must pass on the Sony gate device before
-workers can be advertised as a runnable experiment.
+sequential and pool stress cases. It must execute and pass on the selected gate
+device; a native-availability skip is a release failure.
 
 Phase 13 worker_threads opt-in promotion gate:
 
@@ -2072,18 +2114,11 @@ Phase 13 worker_threads opt-in promotion gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13WorkerThreadsOptInPromotion
 ```
 
-This host gate records P13-34 as partial. It requires
-`workerThreadsProfile` diagnostics, default disabled/shadow-denial evidence,
-request-local experimental preflight evidence, existing native-available worker,
-MessageChannel, transfer-list, WorkerPool, resource-stress, and packaged worker
-smoke source markers, TypeScript declarations, the desktop builtin matrix, and
-Phase13 docs. It keeps native runnable evidence on target ABIs, archived
-native-available experimental worker gate output, native-available packaged
-`.mjs` worker smoke evidence, release disclosure, and native-available Android
-RSS/resource reruns open. Current resource/crash evidence references are
-recorded in the P13-34 report, while nested-worker, SharedArrayBuffer/Atomics,
-resourceLimits, and one-worker thread ceilings are documented as policy
-boundaries.
+This host gate is retained as P13-34 historical evidence. The current stable
+contract is enforced by `verifyNodeWorkerGate`, ABI native availability,
+packaged runnable smoke, TypeScript declarations, the desktop builtin matrix,
+and Android RSS/resource reruns. Nested workers, worker bridge/Java/shell/
+network access, and broader resource ceilings remain denied policy boundaries.
 
 Phase 14 worker native availability audit:
 
@@ -2091,14 +2126,12 @@ Phase 14 worker native availability audit:
 .\gradlew.bat --console=plain :app:verifyNodePhase14WorkerNativeAvailability
 ```
 
-This host gate records P14-28 as ready with a refreshed intentional non-support
-decision. It verifies Node 24.5 `libnode.so` artifacts for `arm64-v8a`,
-`armeabi-v7a`, and `x86_64`, confirms `x86` remains fail-fast, imports the
-P13-34 generated worker report, audits Android loader and crash-signature
-anchors, and keeps default/project/packaged worker authority plus
-process-worker facade authority unpromoted. P14-29 and P14-30 runnable/resource
-worker gates remain conditional on a future `worker.preflight.status=available`
-result.
+This archived host gate records the pre-release P14-28 decision. Its
+non-support conclusion is superseded by the stable Node 24.5 runtime kit for
+`arm64-v8a`, `armeabi-v7a`, and `x86_64`; `x86` remains fail-fast. Current
+conformance requires native availability, loader/dependency integrity, crash
+attribution, and runnable workers on every published ABI. The separate
+process-worker facade remains absent.
 
 Phase 14 worker runnable/packaged smoke gate:
 
@@ -2106,13 +2139,11 @@ Phase 14 worker runnable/packaged smoke gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase14WorkerRunnablePackagedSmoke
 ```
 
-This host gate records P14-29 as ready with
-`conditional_skip_native_unavailable`. It imports P14-28 native availability,
-verifies source anchors for basic Worker lifecycle, CJS/ESM entries, worker
+This archived host gate records the earlier conditional P14-29 decision.
+Current stable conformance executes Worker lifecycle, CJS/ESM entries,
 capability isolation, MessageChannel/transfer, WorkerPool, exception/timeout
-recovery, parent cleanup, nested Worker denial, and packaged `.mjs` smoke, and
-keeps runnable execution, packaged execution, default authority,
-project/package opt-in, and process-worker facade promotion disabled.
+recovery, parent cleanup, nested-worker denial, and packaged `.mjs` smoke;
+skipping because native workers are unavailable is a failure on published ABIs.
 
 Phase 14 worker resource/RSS stress gate:
 
@@ -2120,14 +2151,13 @@ Phase 14 worker resource/RSS stress gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase14WorkerResourceRssStress
 ```
 
-This host gate records P14-30 as ready with
-`conditional_skip_native_unavailable`. It imports P14-28 and P14-29 generated
-reports, verifies source anchors for 100 sequential Worker create/terminate
+This archived host gate records the earlier conditional P14-30 decision.
+Current stable resource conformance executes 100 sequential Worker create/terminate
 cycles, WorkerPool reuse/failure/cancel/timeout/transfer/shutdown, parent
 cleanup, pending worker-message cleanup, exception recovery, timeout recovery,
 RSS snapshots, and thread-count bounded assertions, and records worker-specific
 Java heap, native heap, fd count, queue, active worker, and active WorkerPool
-deltas as future native-available archive requirements.
+deltas as active runtime-kit regression evidence.
 
 Phase 14 process-worker replacement decision gate:
 
@@ -2152,15 +2182,15 @@ Phase 14 desktop runtime docs/release policy sync gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase14DesktopRuntimeDocSync
 ```
 
-This host gate records P14-32 as ready with
-`worker_intentionally_unsupported_v1_2`. It imports P14-28, P14-29, P14-30, and
+This historical host gate records the earlier P14-32 planning decision. It
+imports P14-28, P14-29, P14-30, and
 P14-31 generated reports, verifies TypeScript declaration references, worker
 design docs, desktop examples, release matrix, migration cookbook,
 compatibility profile, security model, security corpus, error catalog,
-Pro/AutoX migration notes, testing, and CI docs. It keeps runnable workers,
-packaged workers, WorkerPool replacement API, process-worker facade, raw
-process handles, stdio, signals, `spawn`, `fork`, and stable `child_process`
-authority unpromoted for v1.2.
+Pro/AutoX migration notes, testing, and CI docs. Its non-support conclusion is
+superseded by the stable v1.2 worker contract. Current gates require runnable
+and packaged workers plus WorkerPool behavior. Separate `process_worker` /
+`compute_worker` facades remain absent; native `child_process` is stable.
 
 Phase 13 process-worker replacement decision gate:
 
@@ -2170,14 +2200,14 @@ Phase 13 process-worker replacement decision gate:
 
 This host gate records P13-35 as partial. It requires
 `processWorkerReplacementProfile` diagnostics, absence of a callable
-`process_worker`/`compute_worker` facade, default `child_process` denial,
-default worker denial, WorkerPool replacement-path evidence, reserved
+`process_worker`/`compute_worker` facade, separation from stable
+`child_process` and stable bounded workers, WorkerPool replacement-path evidence, reserved
 `worker_computation`, P13-06-closed `second_execution_slot` diagnostics,
 TypeScript declarations, the desktop builtin matrix, and Phase13 docs. It keeps native
 WorkerPool evidence, packaged process-worker behavior, slot accounting,
 cleanup stress, and future launch-surface evidence open while keeping P13-35
-v1.1 without a user-facing process-worker API or UX. P13-40 is the separate
-track for any future scoped `child_process` runner.
+v1.1 without a user-facing process-worker API or UX. Stable native
+`child_process` remains a distinct Node builtin, not a process-worker facade.
 
 Phase 13 child_process scoped runner decision gate:
 
@@ -2185,13 +2215,12 @@ Phase 13 child_process scoped runner decision gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13ChildProcessScopedRunnerDecision
 ```
 
-This host gate records P13-40 as partial. It requires `childProcessProfile`
-diagnostics, stable `child_process` / `node:child_process` require and resolve
-denial, local shadow-package protection, the separate `shell` bridge evidence,
-TypeScript declarations, the desktop builtin matrix, and Phase13 docs. It keeps
-any callable child_process module, scoped runner API, app-private binary
-allowlist, bounded stdio, cancel/kill/cleanup semantics, packaged behavior, and
-hostile corpus coverage open.
+This host gate is retained as historical P13-40 scoped-runner evidence. Current
+conformance requires stable bare/`node:` native `child_process`, local shadow
+protection, Android sandbox/manifest/caller validation, three-ABI and packaged
+behavior, and an explicit separation from the permissioned, budgeted `shell`
+bridge. Native callers own command validation, stdio/timeout limits,
+cancellation, kill, cleanup, and child reaping.
 
 Phase 13 child_process scoped runner decision instrumentation:
 
@@ -2199,10 +2228,11 @@ Phase 13 child_process scoped runner decision instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeChildProcessPhase13DecisionInstrumentationTest"
 ```
 
-This suite verifies `childProcessProfile` diagnostics, default feature-flag
-denial, `child_process` / `node:child_process` require and resolve denial,
-shadow-package protection, and the separate `shell` bridge path through a fake
-transport. P13-40 records child_process scoped runner as partial.
+This suite retains the historical disabled-request cases and now also verifies
+stable `childProcessProfile` diagnostics, native bare/`node:` resolution,
+shadow-package protection, Android/caller-owned limits, and the separate
+`shell` bridge path. P13-40 is evidence history, not the current authority
+contract.
 
 Phase 13 ESM loader parity decision gate:
 
@@ -2211,7 +2241,7 @@ Phase 13 ESM loader parity decision gate:
 ```
 
 This host gate records P13-41 as partial. It requires `esmLoaderProfile`
-diagnostics, the default partial ESM/local dynamic-import feature flags,
+diagnostics, stable default ESM/local dynamic-import capability states,
 focused local ESM loader evidence, packaged ESM gate references, source-map
 stack evidence, TypeScript declarations, surface manifest evidence, release
 matrix updates, and Phase13 docs. It keeps raw Node loader hooks, raw
@@ -2466,9 +2496,10 @@ This host gate records P13-50 as partial. It requires
 `NodeSecurityRegressionInstrumentationTest` additions, companion raw
 network/filesystem/Java/child_process/native addon/inspector/WASI evidence,
 per-capability runtime guards and promotion preconditions, surface manifest
-evidence, release matrix updates, and Phase 13 docs. It keeps
-raw sockets, expanded filesystem roots, raw process/native handles, raw WASI,
-inspector, native addons, and release Java interop unpromoted.
+evidence, release matrix updates, and Phase 13 docs. Current native supported
+networking, `child_process`, workers, and allowlisted Java interop are stable
+regression rows; expanded filesystem roots, raw WASI, Inspector, and native
+addons remain gated, disabled, or unsupported.
 
 Phase 13 relaxed-capability security corpus focused instrumentation:
 
@@ -2477,9 +2508,9 @@ Phase 13 relaxed-capability security corpus focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest#phase13JavaInteropRelaxedCapabilityCorpusKeepsAllowlistAndDenials"
 ```
 
-These focused tests cover raw network denial, scoped fs positive and escape
-paths, shell-bridge replacement for `child_process`, native addon denial,
-inspector denial, pure WebAssembly with raw WASI denial, and Java interop
+These focused tests cover stable native-network policy plus `dgram` denial,
+scoped-fs positive and escape paths, native `child_process` separation from the
+`shell` bridge, native-addon denial, Inspector denial, pure WebAssembly with raw WASI denial, and Java interop
 allowlist/denylist behavior. P13-50 records relaxed-capability security corpus
 as partial; runtime guards and promotion preconditions remain evidence-only and
 do not grant authority.
@@ -2754,7 +2785,7 @@ This suite verifies the centralized `NodeRuntimeCapabilities.featureFlags` regis
 Current ESM partial focused instrumentation:
 
 ```powershell
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmStableInstrumentationTest"
 ```
 
 This suite verifies that `.mjs` can still be rejected by an explicit ESM-off diagnostic request, then covers default partial `.mjs` entry execution, `.js` entry routing from source-level ESM syntax, `$remote/...` import.meta direct-execution metadata, local static `.mjs` imports, top-level await, package `type=module` entry routing, scoped import escape denial, ESM default import from CommonJS, ESM JSON import attributes with CommonJS cache sharing, missing/unknown JSON attribute denial, scoped `import.meta.url`/`filename`/`dirname`/`main`/`resolve()` metadata, `import.meta.resolve()` for local/package/allowed-builtin specifiers, disabled builtin denial from `import.meta.resolve()`, ESM import of supported builtins, disabled builtin rejection from ESM, CJS `require()` of synchronous ESM graphs, CJS `require()` rejection for async ESM graphs with `ERR_REQUIRE_ASYNC_MODULE`, package `exports`/`imports` condition selection with resolver trace for both ESM and CommonJS importers, `autojs6` custom condition selection, package key order preservation, inactive `development`/`production` diagnostics, package-condition native addon denial, `.mjs` package targets, nested package imports, self-reference, null blocking, unsafe target denial, explicit dynamic import off rejection, local dynamic import of `.mjs`, CommonJS, and JSON modules, allowed builtin dynamic import, disabled builtin dynamic import denial, package dynamic import with ESM conditions, dynamic import scoped escape denial, and URL/absolute dynamic import rejection.
@@ -2782,7 +2813,7 @@ cache hit/miss lines; cache hits still export, install, launch, and assert
 logcat markers on device. Broader dynamic import package graphs remain
 design-gated follow-ups.
 
-Current GA promotion evaluation: `docs/nodejs/reports/ESM_EXPERIMENTAL_EVALUATION.md`.
+Current GA promotion evaluation: `docs/nodejs/reports/ESM_PRE_GA_EVALUATION.md`.
 Current v1.1 promotion evaluation: `docs/nodejs/releases/V1_1_ESM_PROMOTION.md`.
 
 Phase 10 packages the same evidence as a first-class parity gate:
@@ -2986,7 +3017,10 @@ If `autojs.embeddedNode.expectedAbis` is omitted, the verifier derives the ABI p
 
 See `docs/nodejs/design/RELEASE_FLAVORS.md`.
 
-The packaged diagnostic report also prints whether the inspected manifest declares `android.permission.INTERNET`. Controlled fetch and controlled WebSocket remain disabled in normal builds unless a packaged project opts into network explicitly; raw Node network modules remain denied in the Safe profile and are available only for debug/build-time runs that explicitly enable `autojs.nodejs.rawNetworkModules.experimental=true`.
+The packaged diagnostic report prints whether the manifest declares
+`android.permission.INTERNET`. Controlled fetch/WebSocket and native network
+builtins are stable; packaging policy must include the permission whenever the
+Node package can perform network I/O. No capability property is accepted.
 
 Template refresh and smoke artifact collection:
 
@@ -3107,11 +3141,11 @@ Every release candidate should cover these classes of denial:
 - `worker_threads`
 - native addon `.node`
 - network I/O
-- `worker_threads` default denial and design-gate flag
+- `worker_threads` stable native availability and bounded worker policy
 - static ESM import
 - dynamic import
-- `autojs.nodejs.esm.experimental=true` keeps `.mjs` enabled by default; explicit ESM-off requests still reject
-- `autojs.nodejs.worker_threads.experimental=false` keeps worker execution rejected by default while preserving the `node:worker_threads` shape-only npm facade
+- `NODEJS_ESM_ENABLED=true` keeps `.mjs` and scoped dynamic import enabled
+- `NODEJS_WORKER_THREADS_ENABLED=true` requires native runnable workers
 - absolute filesystem paths
 - `..` filesystem escape
 - NUL byte paths
@@ -3313,8 +3347,8 @@ Running `verifyNodePhase9Gate` finalizes with this summary automatically.
 fails on `libnode.so`, default runtime slot, capability constant, or
 moduleSources budget drift. `generateNodePhase10CapabilityTruth` writes
 `build/reports/nodejs/phase10-capability-truth.json` and `.md` with
-implemented, live-provider, packaged-supported, experimental, blocked, and
-disabled labels. `verifyNodePhase10ProviderRegistryV2` records S10-11 Provider
+stable, partial, live-provider, packaged-supported, disabled, unsupported, and
+planned labels. `verifyNodePhase10ProviderRegistryV2` records S10-11 Provider
 Registry v2 metadata and Doctor wiring. `generateNodePhase10SkipAudit` records
 unresolved skip/assume/ignore sites for packaged, live provider, worker,
 long-running, WASI, Inspector, and device-requirement categories.
@@ -3430,7 +3464,8 @@ reports. Running `verifyNodeV11AlphaGate` finalizes with this summary automatica
 `generateNodeV11BetaSummary` writes `build/reports/nodejs/v1.1-beta-summary.json` from the current build, packaged host,
 tooling, and device reports. Running `verifyNodeV11BetaGate` finalizes with this summary automatically.
 `verifyNodeV11BetaBlockerRegister` writes `app/build/reports/nodejs/v1.1-beta-blockers.json` and is part of the beta
-gate so RC-blocking experimental, protocol-gated, blocked, and explicit-subgate surfaces stay recorded.
+gate so historical RC-blocking pre-GA, protocol-gated, blocked, and
+explicit-subgate surfaces stay recorded.
 `verifyNodeV11RcReadiness` writes `app/build/reports/nodejs/v1.1-rc-readiness.json` and requires a clean beta summary,
 ready packaged aggregate, and beta blocker statuses of `deferred` or `closed` before RC planning starts.
 

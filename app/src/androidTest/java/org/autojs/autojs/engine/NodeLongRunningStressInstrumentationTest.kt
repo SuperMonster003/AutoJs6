@@ -199,7 +199,7 @@ class NodeLongRunningStressInstrumentationTest {
                 waitUntil { activeTypeCount(provider, NodeBridgeResourceType.SHELL_EXECUTION) == 1 },
             )
 
-            if (!BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+            if (!BuildConfig.NODEJS_NETWORK_ENABLED) {
                 val websocket = dispatch(
                     provider = provider,
                     module = "websocket",

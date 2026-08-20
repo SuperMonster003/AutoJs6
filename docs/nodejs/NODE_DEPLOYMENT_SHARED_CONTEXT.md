@@ -12,13 +12,11 @@ budgets, or local-worktree constraints would save future retries.
 - Node.js integration work should use `D:\idea-projects\AutoJs6-nodejs`.
 - `D:\idea-projects\AutoJs6` is the master worktree and should not receive
   Node.js feature-branch changes.
-- `gradle.properties` may contain local experimental Node.js validation flags.
-  Do not stage or commit those local switches unless explicitly requested.
-- When a Safe-profile denial test must ignore local experimental switches, pass
-  an explicit Gradle property on the command line instead of editing
-  `gradle.properties`. For example, fixed real npm corpus network-denial
-  validation can use `-Pautojs.nodejs.network.experimental=false` when the
-  local worktree has network experiments enabled.
+- `gradle.properties` must not contain capability opt-ins for ESM, dynamic
+  import, network, raw network builtins, workers, child processes, or Java
+  interop. Those capabilities are compiled in and enabled.
+- Device/profile, runtime backend, ABI, probe, and test-fixture properties remain
+  valid orchestration inputs, but they must not alter the stable capability set.
 
 ## Timeout Defaults
 
@@ -97,11 +95,10 @@ uninstalled, reinstalled, and reset as needed for Node.js validation.
   verifier, report token, or evidence path changes.
 - Stable-denial evidence should remain explicit when a capability is gated by
   policy, profile, packaging metadata, or missing native/runtime support.
-- When `-Pautojs.nodejs.network.experimental=true` is passed, bridge/resource
-  stress WebSocket cases may exercise the live network path and return a
-  fail-closed network timeout instead of the default network-disabled denial.
-  For Safe-profile denial evidence, pass
-  `-Pautojs.nodejs.network.experimental=false` explicitly.
+- Network and WebSocket stress cases always use the stable network build. Select
+  fake versus live providers through the test fixture/device profile; do not use
+  a capability property. Denial evidence should exercise permission, URL,
+  timeout, quota, provider-availability, or Android manifest policy directly.
 - P13-08 has verifier, real-soak runner, instrumentation, and archive-helper
   coverage. Use `tools/nodejs/phase13/run-full-heavy-resource-soak.js` for the
   8h/24h runs. Do not synthesize `quick-soak-8h.json` or

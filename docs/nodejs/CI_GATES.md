@@ -107,7 +107,9 @@ build/reports/nodejs/nightly-report.json
 build/reports/nodejs/nightly-report.md
 ```
 
-The report summarizes commit state, device/profile, latest connected-test XML counts and failures, perf and memory reports, fuzzer seeds, packaged smoke readiness, native hashes, and experimental feature flags.
+The report summarizes commit state, device/profile, latest connected-test XML
+counts and failures, perf and memory reports, fuzzer seeds, packaged smoke
+readiness, native hashes, and stable capability states.
 Fuzzer failure seeds are collected from connected-test XML into `build/reports/nodejs/fuzz-seeds/` and can be replayed with `:app:replayNodeFuzzerSeed`.
 
 ## v1.1 Alpha Gate
@@ -222,7 +224,6 @@ $env:ANDROID_SERIAL="QV710AF65F"
   "-Pautojs.nodejs.patchCandidateJniLibs=D:\path\to\jniLibs" `
   "-Pautojs.nodejs.patchCandidateHeaders=D:\path\to\include\node" `
   "-Pautojs.nodejs.test.deviceProfile=sony" `
-  "-Pautojs.nodejs.network.experimental=true"
 ```
 
 `verifyNode2417UpgradeGate` fails fast unless `node24_current` is selected. It
@@ -364,9 +365,9 @@ packaged APK evidence into focused first-wave gates:
 
 `verifyNodePhase10RuntimeFreeze` fails if the recorded `libnode.so` hashes,
 default `node24_5` slot, Node 24.5 capability constants, or moduleSources
-budgets drift. `generateNodePhase10CapabilityTruth` records implemented,
-live-provider, packaged-supported, experimental, blocked, and disabled
-capabilities without promoting fake-provider-only results.
+budgets drift. `generateNodePhase10CapabilityTruth` records stable, partial,
+live-provider, packaged-supported, disabled, unsupported, and planned
+capabilities without overstating fake-provider-only results.
 `verifyNodePhase10ProviderRegistryV2` verifies the S10-11 provider registry
 metadata, Doctor report wiring, Phase 10 `statusCode` vocabulary,
 `healthCheck`, `activeResources`, `lastError`, and packaged-support fields. The
@@ -402,7 +403,7 @@ not promote full Java/Rhino parity.
 `verifyNodePhase13JavaInteropAllowlist` records the P13-13 ready Java interop
 allowlist state: `require("java")` and `$autojs.java` expose explicit
 findClass/type, constructor, static call, Rect instance call, Rect field read,
-and release/dispose helpers only when the build-time experiment is enabled.
+and release/dispose helpers through the stable allowlisted provider.
 P13-13 also records the Java method budget policy for future allowlist
 expansion. Classloader, reflection, native-library, process authority,
 thread-dispatch / `$autojs.java.setThreadMode` APIs, and expanded-budget
@@ -410,8 +411,8 @@ enforcement remain fail-closed. Pro profile promotion is delegated to the
 aggregate Java/Rhino surface gate rather than counted as a separate P13-13
 allowlist blocker.
 `verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 ready
-`rhino.install` state: default install rejection remains, while explicit
-experimental installs can add `Packages`, `java`, and `android` Java proxies
+`rhino.install` state: default install rejection remains, while calls with
+`explicit: true` can add `Packages`, `java`, and `android` Java proxies
 that route through the same allowlist bridge. The P13-16 `JavaAdapter` /
 `defineClass` replacement decision is satisfied as a stable-denial gate;
 packaged metadata remains fail-closed for v1.1. Real Pro profile selector is
@@ -646,7 +647,7 @@ soak commands, canonical report paths, and exact acceptance contract.
 The final status vocabulary is only `completed` or `blocked`;
 `completed_with_recorded_blockers` is not valid for required internal
 capabilities. The Safe-profile conditional decisions are resolved:
-`worker_threads` is intentionally unsupported, controlled WASI is closed with
+`worker_threads` is closed through the stable three-ABI runtime kit, controlled WASI is closed with
 pure WebAssembly as the supported path, and `x86` is optional. Node 24.17
 remains a non-blocking external runtime maintenance lane, and `node24_5`
 remains the default runtime. See
@@ -660,9 +661,9 @@ full release gate:
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony"
-.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
-.\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
-.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveOcrGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveStorageNotificationsGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveSensorsGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -673,7 +674,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase7ResourceStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
-.\gradlew.bat --console=plain :app:verifyNodePhase7Gate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+.\gradlew.bat --console=plain :app:verifyNodePhase7Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 `verifyNodePhase7Gate` combines the current focused gate set, the dependency
@@ -688,16 +689,17 @@ classes automatically unless
 The S7-16 live-provider gate runs only live-provider or fail-closed availability
 tests for fetch, WebSocket, OCR, storage, notifications, sensors,
 accessibility/image, UI, and `work_manager`; fake-provider tests are excluded.
-It requires `autojs.nodejs.network.experimental=true` so fetch and WebSocket are
-real Android I/O instead of skipped, and writes
+Stable network support is already compiled in; provider selection and device
+availability determine whether fetch and WebSocket execute real Android I/O.
+The gate writes
 `app/build/reports/nodejs/live-provider-summary.json` with per-test interaction,
 skip, and status metadata.
-`verifyNodeLiveFetchGate` is an explicit experimental subgate: it fails unless
-`autojs.nodejs.network.experimental=true` is set, then runs loopback
-controlled-fetch/axios Android I/O plus provider destroy cancellation coverage.
-`verifyNodeLiveWebSocketGate` follows the same opt-in rule for controlled
-WebSocket Android I/O, including loopback text/binary roundtrip, close,
-timeout/size-limit rejection, raw socket denial, and destroy cleanup.
+`verifyNodeLiveFetchGate` is the focused stable live-provider subgate. It runs
+loopback controlled-fetch/axios Android I/O plus provider destroy cancellation
+coverage without a capability property. `verifyNodeLiveWebSocketGate` follows
+the same rule for controlled WebSocket Android I/O, including loopback
+text/binary roundtrip, close, timeout/size-limit rejection, permission policy,
+and destroy cleanup.
 `verifyNodeLiveOcrGate` validates the live MLKit OCR provider over
 provider-owned image handles created by the scoped `image.readImage()` path,
 including region recognition, `image.recycle()`, unknown-handle denial, and
@@ -812,21 +814,12 @@ handling, TLS provider failure handling, and proxy configuration denial, while
 packaged INTERNET evidence, live provider HTTP smoke, raw sockets,
 server/listen, DNS/TLS session control, and proxy support require separate
 evidence.
-P13-30 additionally uses `verifyNodePhase13NetTlsDnsStagedCompatibility` as
-the host promotion-status gate for staged `net`/`tls`/`dns` compatibility and
-keeps the desktop network/fs surface partial: reserved builtin identity,
-shadow denial, socket/server shape metadata, `SocketAddress`, `BlockList`,
-loopback/IP-literal DNS lookup, DNS privacy guardrails, TLS metadata,
-fail-closed default connect/listen/resolve/session APIs, and the
-release-forbidden `autojs.nodejs.rawNetworkModules.experimental=true` native
-module opt-in path are covered, while release/default client sockets, server
-sockets, Android resolver/search-domain/VPN/topology exposure, and release raw
-network promotion are explicitly rejected for v1.1. TLS sessions, fd leak proof,
-packaged INTERNET evidence, and live Android network evidence require separate
-promotion evidence.
-The raw-network opt-in external DNS sample is opportunistic evidence rather
-than a deterministic CI prerequisite: native DNS errors are accepted as long as
-AutoJs6 raw-network policy denial is not produced while the opt-in is enabled.
+P13-30 remains the historical staged-compatibility evidence. Current gates
+require stable native `net`/`tls`/`dns`/`dns/promises` availability for
+bare and `node:` imports, shadow protection, client/server and DNS/TLS
+behavior, packaged `INTERNET` evidence, and lifecycle/fd cleanup without a
+capability property. External DNS remains opportunistic because device,
+resolver, VPN, and network state are not deterministic CI prerequisites.
 P13-31 additionally uses `verifyNodePhase13DgramUdpDecision` as the host
 decision gate for UDP and keeps the desktop network/fs surface partial:
 `dgram`/`node:dgram`, `require.resolve()`, transitive package require, and
@@ -873,44 +866,33 @@ checkpoint, one-shot recovery, and provider-destroy cleanup of owned
 notification, sensor, UI, shell, and WebSocket counters. It also continues
 lifecycle/resource stress coverage for timeouts, queueing, cleanup, and
 reserved-mode rejection before user code.
-`verifyNodeWorkerGate` covers the S7-24 worker bootstrap boundary. In normal
-builds it runs `NodeWorkerThreadsBootstrapInstrumentationTest` and
-`NodeWorkerThreadsDesignGateInstrumentationTest`: default `worker_threads`
-requires and resolves stay denied before local shadow packages, profile flags
-remain false, and a request-local experimental preflight reports either a usable
-native Worker surface or stable `ERR_AUTOJS6_WORKER_DISABLED` diagnostics. When
-`autojs.nodejs.worker_threads.experimental=true` is supplied, runnable worker
-creation and resource stress classes remain promotion gates; they are skipped
-with an explicit native-availability reason on the current Embedded Node build
-instead of weakening the contract with a same-thread fallback.
-`verifyNodePhase13WorkerThreadsOptInPromotion` records P13-34 as the Phase 13
-worker decision gate. It requires `workerThreadsProfile` diagnostics, default
-denial/shadow protection, request-local experimental native preflight, existing
-worker/MessageChannel/WorkerPool/resource/packaged evidence anchors, and docs
-updates while keeping default worker authority, project/package opt-in, native
-runnable claims, native-available packaged worker promotion, nested-worker
-policy, and Android resource ceilings unpromoted. Current resource/crash
-evidence references are recorded, but native-available resource/RSS reruns
-remain promotion work.
+`verifyNodeWorkerGate` is the stable worker conformance gate. It runs
+`NodeWorkerThreadsBootstrapInstrumentationTest`,
+`NodeWorkerThreadsDesignGateInstrumentationTest`,
+`NodeWorkerThreadsStableInstrumentationTest`, packaged worker smoke, and
+resource stress without a capability property. Native Worker availability is
+required on every published ABI; a skip or shape-only fallback is a conformance
+failure. The gate also verifies shadow protection, scoped source loading,
+MessageChannel/transfer behavior, WorkerPool limits, smaller worker authority,
+termination, and cleanup.
+`verifyNodePhase13WorkerThreadsOptInPromotion` is retained as historical P13-34
+evidence; it no longer defines the current availability contract.
 `verifyNodePhase13ProcessWorkerReplacementDecision` records P13-35 as the
 process-worker replacement decision gate. It requires
 `processWorkerReplacementProfile` diagnostics, no callable
 `process_worker`/`compute_worker` facade, WorkerPool as the current replacement
-path, continued `child_process` denial, `shell` as a separate scoped command
+path, stable `child_process` as a separate native builtin, `shell` as a separate scoped command
 bridge, reserved `worker_computation`, P13-06-closed `second_execution_slot`
 diagnostics, and docs updates while keeping native WorkerPool proof, packaged behavior, slot
 accounting, cleanup stress, and future launch-surface evidence open. P13-35
-v1.1 has no user-facing process-worker API or UX; P13-40 is the separate track
-for any future scoped `child_process` runner.
-`verifyNodePhase13ChildProcessScopedRunnerDecision` records P13-40 as the
-child_process scoped runner decision gate. It requires `childProcessProfile`
-diagnostics, stable `child_process` / `node:child_process` require/resolve
-denial, local shadow-package protection, separate `shell` bridge evidence,
-TypeScript declarations, desktop builtin matrix evidence, surface manifest
-evidence, and docs updates while keeping any callable child_process module,
-scoped runner API, app-private binary allowlist, bounded stdio,
-cancel/kill/cleanup semantics, packaged behavior, and hostile corpus coverage
-unpromoted. P13-40 records child_process scoped runner as partial.
+v1.1 has no user-facing process-worker API or UX; native `child_process` is not
+that facade.
+`verifyNodePhase13ChildProcessScopedRunnerDecision` is retained as historical
+P13-40 scoped-runner evidence. Current conformance instead requires stable bare
+and `node:` native `child_process`, shadow protection, three-ABI/runtime-kit and
+packaged behavior, Android sandbox/caller validation, and explicit distinction
+from the permissioned `shell` bridge. The native builtin does not inherit the
+bridge's app-private executable allowlist or resource budgets.
 `verifyNodePhase13EsmLoaderParityDecision` records P13-41 as the ESM loader
 parity decision gate. It requires `esmLoaderProfile` diagnostics, focused
 local ESM loader evidence, existing ESM/package/source-map/security evidence,
@@ -1010,13 +992,16 @@ relaxed-capability security corpus gate. It requires
 `NodeSecurityRegressionInstrumentationTest` coverage, companion raw
 network/filesystem/Java/child_process/native addon/inspector/WASI evidence,
 per-capability runtime guards and promotion preconditions, surface manifest
-evidence, and docs updates while keeping raw sockets,
-expanded filesystem roots, raw process/native handles, raw WASI, inspector,
-native addons, and release Java interop unpromoted. P13-50 records
-relaxed-capability security corpus as partial.
+evidence, and docs updates. Current stable native network, worker,
+child-process, and allowlisted Java rows require ongoing positive/negative,
+abuse, lifecycle, cleanup, packaged, and rollback regression coverage;
+expanded filesystem roots, raw WASI, Inspector, and native addons remain
+gated, disabled, or unsupported. P13-50 records the historical corpus baseline.
 `verifyNodePhase13ProfileRollbackPlaybook` records P13-51 as the per-profile
-rollback playbook gate. It requires default-off Pro/Desktop/Debug profile and
-relaxed-capability Gradle switches, `NodeProfileRollbackPolicy`,
+rollback playbook gate. Current stable capabilities have no Gradle kill
+switches; the playbook covers runtime policy, profile containment, release
+revert, and the remaining Pro/Desktop/Debug profile controls through
+`NodeProfileRollbackPolicy`,
 `autojs6:profile.profileRollbackPolicy`, Node Doctor rollback diagnostics,
 focused instrumentation, TypeScript declarations, surface manifest evidence,
 and docs updates while keeping effective authority at `safe_default` and
@@ -1132,10 +1117,10 @@ native heap, Java heap, thread count, fd count, test-only libuv handle counts,
 and bridge resource diagnostics while combining long-running stress, bridge
 resource leak loops, live fetch/WebSocket destroy cleanup, OCR/sensor/UI/
 WorkManager cleanup, database open/transaction/close stress, WorkManager
-scheduled execution cleanup, plugin load/unload lifecycle cleanup, and worker
-resource stress when native workers are available. Live network entries still
-require `autojs.nodejs.network.experimental=true`; otherwise those tests skip
-with the same explicit opt-in reason as the live provider gates.
+scheduled execution cleanup, plugin load/unload lifecycle cleanup, and stable
+worker resource stress. Live network entries use the stable provider build and
+may skip only for a documented device/provider availability reason, not for a
+capability flag.
 
 `verifyNodePhase13FullHeavyResourceStress` is the Phase 13 status gate for the
 final 8 hour quick soak and 24 hour final soak. It consumes
@@ -1350,11 +1335,10 @@ The `:app:verifyNodePhase14DesktopRuntimeDocSync` gate writes
 P14-31 generated reports, verifies TypeScript declaration references, worker
 design docs, desktop examples, release matrix, migration cookbook,
 compatibility profile, security model, security corpus, error catalog,
-Pro/AutoX migration notes, testing, and CI docs, and records
-`worker_intentionally_unsupported_v1_2` without promoting runnable workers,
-packaged workers, WorkerPool replacement API, process-worker facade, raw
-process handles, stdio, signals, `spawn`, `fork`, or stable `child_process`
-authority.
+Pro/AutoX migration notes, testing, and CI docs. Its historical worker
+non-support decision is superseded by the stable v1.2 worker/child-process
+baseline; the gate remains phase evidence and must not disable current
+capabilities.
 The `:app:verifyNodePhase14SecurityRegressionCorpus` gate writes
 `phase14-security-regression-corpus.json` plus `.md`, imports P14-07 through
 P14-32 generated reports, verifies the v1.2 security corpus positive, negative,

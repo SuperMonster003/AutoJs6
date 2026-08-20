@@ -209,7 +209,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.js").absolutePath,
             workingDirectory = workDir,
-            childProcessExperimentalEnabled = false,
+            childProcessEnabled = false,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("core builtin CJS compatibility", result)
@@ -814,7 +814,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
             timeoutMs = 10_000L,
         )
 
@@ -1235,7 +1235,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("core builtin ESM compatibility", result)

@@ -52,19 +52,19 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
         assertEquals(NodeProfileRollbackPolicy.DEBUG_UNSAFE_LAB_PROPERTY, profileSwitches.getString(NodeProfileRollbackPolicy.DEBUG_UNSAFE_LAB))
 
         val capabilitySwitches = policy.getJSONObject("capabilityKillSwitches")
-        assertEquals(NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("network"))
+        assertEquals("built_in_stable_no_build_switch", capabilitySwitches.getString("network"))
         assertEquals(
-            NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
+            "built_in_stable_no_build_switch",
             capabilitySwitches.getString("raw_network"),
         )
         assertEquals(
-            NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
+            "built_in_stable_no_build_switch",
             capabilitySwitches.getString("raw_node_network_modules"),
         )
-        assertEquals(NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("worker_threads"))
-        assertEquals(NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("java_interop"))
+        assertEquals("built_in_stable_no_build_switch", capabilitySwitches.getString("worker_threads"))
+        assertEquals("built_in_stable_no_build_switch", capabilitySwitches.getString("java_interop"))
         assertEquals(NodeProfileRollbackPolicy.RELAXED_CAPABILITIES_PROPERTY, capabilitySwitches.getString("all_relaxed_capabilities"))
-        assertEquals(NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("child_process"))
+        assertEquals("built_in_stable_no_build_switch", capabilitySwitches.getString("child_process"))
 
         val profileStates = policy.getJSONArray("profileStates").toString()
         assertTrue(profileStates.contains(NodeProfileRollbackPolicy.SAFE_DEFAULT))
@@ -122,16 +122,16 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
                 assert.strictEqual(rollback.independentProfileDisable, true);
                 assert.strictEqual(rollback.profileKillSwitches.pro_compat_opt_in, "${NodeProfileRollbackPolicy.PRO_PROFILE_PROPERTY}");
                 assert.strictEqual(rollback.profileKillSwitches.desktop_compat_opt_in, "${NodeProfileRollbackPolicy.DESKTOP_PROFILE_PROPERTY}");
-                assert.strictEqual(rollback.capabilityKillSwitches.network, "${NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY}");
-                assert.strictEqual(rollback.capabilityKillSwitches.raw_network, "${NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY}");
-                assert.strictEqual(rollback.capabilityKillSwitches.raw_node_network_modules, "${NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY}");
-                assert.strictEqual(rollback.capabilityKillSwitches.child_process, "${NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY}");
+                assert.strictEqual(rollback.capabilityKillSwitches.network, "built_in_stable_no_build_switch");
+                assert.strictEqual(rollback.capabilityKillSwitches.raw_network, "built_in_stable_no_build_switch");
+                assert.strictEqual(rollback.capabilityKillSwitches.raw_node_network_modules, "built_in_stable_no_build_switch");
+                assert.strictEqual(rollback.capabilityKillSwitches.child_process, "built_in_stable_no_build_switch");
                 assert.strictEqual(rollback.capabilityKillSwitches.all_relaxed_capabilities, "${NodeProfileRollbackPolicy.RELAXED_CAPABILITIES_PROPERTY}");
                 assert.ok(rollback.profileStates.some((item) => item.id === "safe_default" && item.enabled === true));
                 assert.ok(rollback.profileStates.some((item) => item.id === "desktop_compat_opt_in" && item.fallbackProfile === "safe_default"));
-                assert.ok(rollback.capabilityStates.some((item) => item.id === "raw_network" && item.enabled === false));
-                assert.ok(rollback.capabilityStates.some((item) => item.id === "raw_node_network_modules" && item.enabled === false));
-                assert.ok(rollback.capabilityStates.some((item) => item.id === "child_process" && item.enabled === false));
+                assert.ok(rollback.capabilityStates.some((item) => item.id === "raw_network" && item.enabled === true));
+                assert.ok(rollback.capabilityStates.some((item) => item.id === "raw_node_network_modules" && item.enabled === true));
+                assert.ok(rollback.capabilityStates.some((item) => item.id === "child_process" && item.enabled === true));
                 assert.ok(rollback.rollbackTriggers.some((item) => item.id === "stress_regression" && item.fallbackProfile === "safe_default"));
                 assert.strictEqual(rollback.packagedDowngrade.strategy, "publish_safe_profile_patch_or_remove_promoted_metadata");
                 assert.strictEqual(rollback.packagedDowngrade.remoteKillSwitchPolicy, "rejected_v1_1_publish_safe_profile_patch");
@@ -153,7 +153,6 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
             sourceName = "<node-profile-rollback-phase13-p13-51.js>",
             workingDirectory = root,
             timeoutMs = 10_000L,
-            childProcessExperimentalEnabled = false,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("P13-51 profile rollback playbook", result)

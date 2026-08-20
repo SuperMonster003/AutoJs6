@@ -311,10 +311,8 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
         )
         unsupportedSource.resolve("main.cjs").appendText(
             """
-            const net = require("net");
-            const childProcess = require("child_process");
-            void net;
-            void childProcess;
+            const inspector = require("inspector");
+            void inspector;
             """.trimIndent() + "\n",
         )
         val unsupportedSourceReport = nodeProjectWizardJson(
@@ -322,7 +320,7 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
             listOf("validate", unsupportedSource.absolutePath),
             expectSuccess = false,
         )
-        assertNodeProjectWizardIssueCodes(unsupportedSourceReport, "CAPABILITY_DECLARATION_MISSING")
+        assertNodeProjectWizardIssueCodes(unsupportedSourceReport, "CAPABILITY_UNSUPPORTED")
         val unsupportedCompatibility = unsupportedSourceReport["compatibility"] as? Map<*, *>
             ?: throw GradleException("Unsupported source fixture did not include compatibility analysis.")
         if (unsupportedCompatibility["status"] != "unsupported") {

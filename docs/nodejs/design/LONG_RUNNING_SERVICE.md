@@ -503,7 +503,7 @@ Any release with long-running service mode enabled must verify:
   active resource summary plus runtime heartbeat/budget/checkpoint diagnostics
 - checkpoint payloads remain JSON-only, app-private, project-scoped,
   size-limited, and explicit-restore only
-- raw network and dangerous process APIs remain denied
+- native networking and `child_process` remain inside the Android sandbox and must be explicitly bounded and cleaned up; root/Shizuku, native addons, private bindings, and raw Android objects remain denied
 - provider destroy leaves no active provider resources, shell commands,
   WebSocket counters, or close errors
 - service mode is documented as explicit and user-visible

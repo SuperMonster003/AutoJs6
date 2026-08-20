@@ -212,13 +212,13 @@ object NodeDoctorReportGenerator {
     }
 
     private fun featureFlagEnabled(id: String): Boolean = when (id) {
-        "esm" -> BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED
-        "dynamic_import" -> BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED
-        "network" -> BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED
-        "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED
-        "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED
-        "child_process" -> BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED
-        "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED
+        "esm" -> BuildConfig.NODEJS_ESM_ENABLED
+        "dynamic_import" -> BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED
+        "network" -> BuildConfig.NODEJS_NETWORK_ENABLED
+        "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED
+        "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_ENABLED
+        "child_process" -> BuildConfig.NODEJS_CHILD_PROCESS_ENABLED
+        "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_ENABLED
         else -> NodeRuntimeCapabilities.featureFlagsById[id]?.defaultEnabled ?: false
     }
 
@@ -261,13 +261,13 @@ object NodeDoctorReportGenerator {
         put("commonJs", true)
         put("esmDefaultEnabled", NodeRuntimeCapabilities.featureFlagsById.getValue("esm").defaultEnabled)
         put("nativeAddonDefaultEnabled", false)
-        put("childProcessDefaultEnabled", false)
+        put("childProcessDefaultEnabled", true)
     }
 
     private fun disabledBuiltinModuleNames(): Set<String> {
         return NodeRuntimeCapabilities.disabledBuiltinModuleNames
-            .filterNot { it == "worker_threads" && BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED }
-            .filterNot { it == "child_process" && BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED }
+            .filterNot { it == "worker_threads" && BuildConfig.NODEJS_WORKER_THREADS_ENABLED }
+            .filterNot { it == "child_process" && BuildConfig.NODEJS_CHILD_PROCESS_ENABLED }
             .toSet()
     }
 
@@ -295,15 +295,15 @@ object NodeDoctorReportGenerator {
         return JSONObject().apply {
             put("capability", NodeBridgePermissionManifest.NETWORK)
             put("requiresDeclaration", true)
-            put("providerFeatureFlag", "autojs.nodejs.network.experimental")
-            put("providerEnabled", BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
+            put("providerMode", "stable")
+            put("providerEnabled", BuildConfig.NODEJS_NETWORK_ENABLED)
             put("requiredAndroidPermissions", JSONArray(requiredAndroidPermissions))
             put(
                 "requiresAndroidInternet",
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET in requiredAndroidPermissions,
             )
             put("controlledModules", JSONArray(listOf("fetch", "axios", "websocket")))
-            put("rawNodeNetworkModulesEnabled", BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
+            put("rawNodeNetworkModulesEnabled", BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED)
         }
     }
 

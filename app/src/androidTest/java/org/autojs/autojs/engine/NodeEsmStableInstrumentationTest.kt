@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
-class NodeEsmExperimentalInstrumentationTest {
+class NodeEsmStableInstrumentationTest {
 
     private val context
         get() = NodeEmbeddedTestHarness.targetContext
@@ -30,14 +30,14 @@ class NodeEsmExperimentalInstrumentationTest {
     @Test
     fun mjsEntryCanStillRejectWhenEsmIsExplicitlyDisabled() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM partial explicit-off regression")
-        assertTrue(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
+        assertTrue(BuildConfig.NODEJS_ESM_ENABLED)
 
         val workDir = freshWorkDir("esm-default-off")
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """console.log("unexpected");""",
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = false,
+            esmEnabled = false,
         )
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("mjs disabled", result), result.succeeded)
@@ -290,7 +290,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalLocalStaticImportCannotEscapeWorkingDirectory() {
+    fun stableLocalStaticImportCannotEscapeWorkingDirectory() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM scoped import guard")
         val parent = freshWorkDir("esm-import-escape-parent")
         val workDir = File(parent, "project").apply { mkdirs() }
@@ -300,10 +300,10 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """import { value } from "../outside.mjs"; console.log(value);""",
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
-        assertFalse(NodeEmbeddedTestHarness.describeResult("experimental import escape", result), result.succeeded)
+        assertFalse(NodeEmbeddedTestHarness.describeResult("stable import escape", result), result.succeeded)
         assertEquals("ERR_AUTOJS6_FS_PATH_ESCAPE", result.errorCode)
         assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
         assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
@@ -311,7 +311,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalEsmImportsCommonJsDefault() {
+    fun stableEsmImportsCommonJsDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM importing CommonJS")
         val workDir = freshWorkDir("esm-import-cjs")
         val entry = File(workDir, "main.mjs")
@@ -324,15 +324,15 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = entry.absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("experimental esm imports cjs default", result)
+        NodeEmbeddedTestHarness.assertSucceeded("stable esm imports cjs default", result)
         assertTrue(result.stdout.contains("esm.cjs.default=cjs/true"))
     }
 
     @Test
-    fun experimentalEsmImportsSupportedBuiltins() {
+    fun stableEsmImportsSupportedBuiltins() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM importing supported builtins")
         val workDir = freshWorkDir("esm-import-builtins")
         File(workDir, "node_modules/buffer/index.js").apply {
@@ -363,15 +363,15 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("experimental esm imports builtins", result)
+        NodeEmbeddedTestHarness.assertSucceeded("stable esm imports builtins", result)
         assertTrue(result.stdout.contains("esm.builtin=entry.txt/true/true"))
     }
 
     @Test
-    fun experimentalEsmImportDisabledBuiltinFails() {
+    fun stableEsmImportDisabledBuiltinFails() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM disabled builtin guard")
         val workDir = freshWorkDir("esm-import-disabled-builtin")
 
@@ -379,16 +379,16 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """import cp from "node:child_process"; console.log(cp);""",
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
-        assertFalse(NodeEmbeddedTestHarness.describeResult("experimental disabled builtin import", result), result.succeeded)
+        assertFalse(NodeEmbeddedTestHarness.describeResult("stable disabled builtin import", result), result.succeeded)
         assertEquals(NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED, result.errorCode)
         assertTrue(result.errorMessage.orEmpty().contains("child_process"))
     }
 
     @Test
-    fun experimentalCommonJsRequireMjsSupportsSyncGraphAndRejectsAsyncGraph() {
+    fun stableCommonJsRequireMjsSupportsSyncGraphAndRejectsAsyncGraph() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("CJS require ESM sync boundary")
         val workDir = freshWorkDir("cjs-require-esm")
         File(workDir, "dep.mjs").writeText("""export const value = "esm";""")
@@ -401,7 +401,7 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs require sync mjs", result)
@@ -413,7 +413,7 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """require("./async-dep.mjs");""",
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("cjs require async mjs", asyncResult), asyncResult.succeeded)
@@ -422,7 +422,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalEsmMultilineStaticImportsWorkForRequireAndStaticImport() {
+    fun stableEsmMultilineStaticImportsWorkForRequireAndStaticImport() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM multiline static imports")
         val workDir = freshWorkDir("esm-multiline-imports")
         File(workDir, "side-effect.mjs").writeText("""globalThis.__autojs6MultilineImportSideEffect = "side";""")
@@ -453,7 +453,7 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs require ESM multiline static import", cjs)
@@ -469,7 +469,7 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("ESM multiline static import", esm)
@@ -477,7 +477,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalEsmReExportsWorkForRequireAndStaticImport() {
+    fun stableEsmReExportsWorkForRequireAndStaticImport() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM re-export support")
         val workDir = freshWorkDir("esm-reexports")
         File(workDir, "dep.mjs").writeText(
@@ -525,7 +525,7 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs require ESM re-exports", cjs)
@@ -554,7 +554,7 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("ESM static re-exports", esm)
@@ -562,7 +562,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalEsmJsonImportAttributesUseCommonJsJsonCache() {
+    fun stableEsmJsonImportAttributesUseCommonJsJsonCache() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM JSON import attributes")
         val workDir = freshWorkDir("esm-json-attributes")
         File(workDir, "config.json").writeText("""{"name":"local-json","count":2}""")
@@ -599,7 +599,7 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("ESM JSON import attributes", result)
@@ -610,7 +610,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalEsmJsonImportAttributesRejectMissingAndUnknownAttributes() {
+    fun stableEsmJsonImportAttributesRejectMissingAndUnknownAttributes() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM JSON import attribute denial")
         val workDir = freshWorkDir("esm-json-attribute-denial")
         File(workDir, "config.json").writeText("""{"name":"local-json"}""")
@@ -620,7 +620,7 @@ class NodeEsmExperimentalInstrumentationTest {
                 source = source,
                 sourceName = File(workDir, "$label.mjs").absolutePath,
                 workingDirectory = workDir,
-                esmExperimentalEnabled = true,
+                esmEnabled = true,
             )
             assertFalse(NodeEmbeddedTestHarness.describeResult(label, result), result.succeeded)
             assertEquals(NodeRuntimeErrorCodes.EMBEDDED_NODE_ESM_UNSUPPORTED, result.errorCode)
@@ -656,7 +656,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalImportMetaExposesScopedMetadataAndResolve() {
+    fun stableImportMetaExposesScopedMetadataAndResolve() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM import.meta")
         val workDir = freshWorkDir("esm-import-meta")
         File(workDir, "dep.mjs").writeText(
@@ -702,7 +702,7 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("ESM import.meta", result)
@@ -716,7 +716,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalPackageExportsConditionsSplitByImporterMode() {
+    fun stablePackageExportsConditionsSplitByImporterMode() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package condition selection")
         val workDir = freshWorkDir("esm-package-conditions")
         val packageDir = File(workDir, "node_modules/condition-pkg").apply { mkdirs() }
@@ -746,7 +746,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("esm package import condition", esm)
@@ -765,7 +765,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs package require condition", cjs)
@@ -776,7 +776,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalPackageExportsAllowMjsTargetsAndDefaultFallback() {
+    fun stablePackageExportsAllowMjsTargetsAndDefaultFallback() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package exports .mjs targets")
         val workDir = freshWorkDir("esm-package-exports-mjs")
         val importPackage = File(workDir, "node_modules/import-target-pkg").apply { mkdirs() }
@@ -822,7 +822,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("esm package exports .mjs target", esm)
@@ -840,7 +840,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs package exports require target", cjs)
@@ -849,7 +849,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalPackageImportsConditionsSplitByImporterMode() {
+    fun stablePackageImportsConditionsSplitByImporterMode() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package imports condition selection")
         val workDir = freshWorkDir("esm-package-imports")
         File(workDir, "package.json").writeText(
@@ -882,7 +882,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("esm package imports conditions", esm)
@@ -902,7 +902,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs package imports conditions", cjs)
@@ -912,7 +912,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalPackageAutojs6ConditionPreservesPackageKeyOrderAndPolicy() {
+    fun stablePackageAutojs6ConditionPreservesPackageKeyOrderAndPolicy() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package autojs6 condition")
         val workDir = freshWorkDir("esm-package-autojs6-condition")
         File(workDir, "package.json").writeText(
@@ -1032,7 +1032,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("esm package autojs6 condition", esm)
@@ -1054,7 +1054,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs package autojs6 condition", cjs)
@@ -1064,7 +1064,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalNestedPackageImportAndSelfReferenceUseEsmConditions() {
+    fun stableNestedPackageImportAndSelfReferenceUseEsmConditions() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM nested package import and self-reference")
         val workDir = freshWorkDir("esm-nested-self-reference")
 
@@ -1118,7 +1118,7 @@ class NodeEsmExperimentalInstrumentationTest {
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
             env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("esm nested package and self-reference", result)
@@ -1129,7 +1129,7 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalPackageNullBlockingAndUnsafeTargetsFail() {
+    fun stablePackageNullBlockingAndUnsafeTargetsFail() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package denial paths")
         val workDir = freshWorkDir("esm-package-denials")
 
@@ -1142,7 +1142,7 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """import blocked from "null-pkg/blocked"; console.log(blocked);""",
             sourceName = File(workDir, "null-main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("esm null blocking", nullBlocked), nullBlocked.succeeded)
@@ -1161,7 +1161,7 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """import unsafe from "unsafe-pkg"; console.log(unsafe);""",
             sourceName = File(workDir, "unsafe-main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
+            esmEnabled = true,
         )
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("esm unsafe target", unsafe), unsafe.succeeded)
@@ -1172,8 +1172,8 @@ class NodeEsmExperimentalInstrumentationTest {
     @Test
     fun dynamicImportCanStillRejectWhenExplicitlyDisabled() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("dynamic import explicit-off regression")
-        assertTrue(BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED)
-        assertTrue(BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED)
+        assertTrue(BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED)
+        assertTrue(BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED)
         val workDir = freshWorkDir("esm-dynamic-default-off")
         File(workDir, "dep.mjs").writeText("""export const value = "unexpected";""")
 
@@ -1181,8 +1181,8 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """const mod = await import("./dep.mjs"); console.log(mod.value);""",
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = false,
+            esmEnabled = true,
+            dynamicImportEnabled = false,
         )
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("dynamic import disabled", result), result.succeeded)

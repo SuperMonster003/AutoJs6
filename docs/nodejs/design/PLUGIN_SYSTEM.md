@@ -382,7 +382,7 @@ Plugins must not expand Java interop.
 
 Rules:
 
-- `java_interop` remains disabled by default
+- stable `java_interop` keeps its exact host-owned allowlist
 - plugins cannot add classes to the Java allowlist at runtime
 - plugins cannot expose raw `Context`, `Activity`, `Service`, `View`, Binder,
   `ClassLoader`, reflection, filesystem, process, or native-library APIs
@@ -504,7 +504,7 @@ Before any implementation, add tests for:
 - missing project capability rejects before plugin code runs
 - plugin requested capability not declared by plugin manifest rejects
 - native files reject while native plugins are disabled
-- Java interop remains disabled through plugins
+- plugins cannot expand the stable Java class/member allowlist or export raw Java/Android objects
 - packaged verifier fails closed for missing plugin, unsupported native code, and
   Android manifest mismatch
 - diagnostics report plugin id, version, signer, and capability state

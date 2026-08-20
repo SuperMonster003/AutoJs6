@@ -8,7 +8,7 @@ function codeOf(error) {
   try {
     const rhino = require("rhino");
     const target = {};
-    const result = rhino.install({ experimental: true, target });
+    const result = rhino.install({ explicit: true, target });
     console.log("sample.pro-parity-suite.rhino-install.keys=" + Object.keys(result.globals || target).sort().join(","));
   } catch (error) {
     console.log("sample.pro-parity-suite.rhino-install.skipped=" + codeOf(error));

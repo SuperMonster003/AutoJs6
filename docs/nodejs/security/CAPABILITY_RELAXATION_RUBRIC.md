@@ -1,13 +1,13 @@
 # Capability Relaxation Rubric
 
-This rubric is the Phase 13 gate for relaxing current Safe Node Profile
-boundaries. It applies to high-risk Auto.js Pro and desktop Node.js surfaces
-such as Java interop, raw network, broader filesystem access, `worker_threads`,
-WASI, inspector, `vm`, `child_process`, native addon loading, root/Shizuku, UI
-overlay, screenshot, recorder, and Android-side package installation.
+This rubric preserves the Phase 13 promotion criteria for capabilities that
+remain gated, disabled, or unsupported. In Node Profile v1.2, ESM, dynamic
+import, controlled/native supported networking, WebSocket, `worker_threads`,
+native `child_process`, and allowlisted Java interop have already graduated;
+their rows below describe ongoing security boundaries rather than opt-in gates.
 
-The default `safe_default` profile must continue to fail closed unless a task
-explicitly promotes a capability into that profile.
+The default `safe_default` profile must continue to fail closed for any surface
+that has not graduated into the stable baseline.
 
 ## Profiles
 
@@ -37,8 +37,8 @@ Every relaxation task must answer these questions before promotion:
 
 - Profile: Which of `pro_compat_opt_in`, `desktop_compat_opt_in`, or
   `debug_unsafe_lab` owns the feature?
-- Capability declaration: Which `project.json`, package metadata, or Gradle
-  property enables it?
+- Capability declaration: Which runtime permission or project/package metadata
+  authorizes it? Stable builtins must not depend on Gradle properties.
 - Android permissions: Which manifest or runtime permissions are required?
 - User disclosure: Does the feature require notification, foreground service,
   settings screen, or runtime warning?
@@ -52,21 +52,21 @@ Every relaxation task must answer these questions before promotion:
   is required?
 - Negative path: What stable error appears when the profile, capability,
   provider, permission, ABI, Android version, or external dependency is absent?
-- Rollback: Which single property, manifest switch, or profile policy disables
-  the feature after release?
+- Rollback: Which runtime policy, manifest boundary, release revert, or other
+  audited mechanism contains a regression after release?
 
 ## Feature-Specific Requirements
 
-| Capability | Extra requirements before promotion |
+| Capability | Current boundary or extra requirements before promotion |
 | --- | --- |
-| Java/Android interop | Class/package allowlist, reflection denial, classloader denial, native library denial, object lifetime ownership, UI-thread dispatch policy. |
-| `require("rhino").install()` | Must be layered on controlled Java interop, keep Safe profile disabled, and prevent `node_modules/rhino` shadowing bypass. |
-| Raw network | Host/port policy, TLS error behavior, connection and byte budgets, background policy, fd cleanup, packaged `INTERNET` metadata. |
+| Java/Android interop | Stable exact class/member allowlist, reflection/classloader/native-library denial, execution-owned handles, cleanup, and UI-thread dispatch policy. |
+| `require("rhino").install()` | Stable only through `explicit: true`, layered on controlled Java interop, with no default global mutation and no `node_modules/rhino` shadowing bypass. |
+| Native network | Stable `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` follow Android sandbox/manifest policy and require caller-owned connection, byte, timeout, TLS, and fd cleanup limits; `dgram` remains disabled. |
 | Broader filesystem | Explicit authorized roots, SAF or user grant policy, symlink/realpath escape denial, `/proc`/`/sys`/`/dev` policy, scoped fallback. |
-| `worker_threads` | Bridge module isolation, nested-worker policy, message budget, crash isolation, packaged behavior, second execution slot interaction. |
+| `worker_threads` | Stable bridge-module/Android-object isolation, nested-worker denial, worker/message/memory/time budgets, crash recovery, cleanup, and packaged runtime-kit behavior. |
 | WASI | Explicit preopen roots, env/args policy, fd budget, clock/random policy, no unrestricted host filesystem. |
 | Inspector | Debug-only first, ADB-only binding, release denial, profile data privacy review. |
-| `child_process` | Allowlisted executable roots, no arbitrary path execution, stdin/stdout/stderr budgets, timeout/kill cleanup. |
+| `child_process` | Stable native Node semantics inside Android UID/SELinux/manifest constraints; callers validate executable paths/arguments, bound stdio/timeouts, and kill or reap children. It does not inherit the `shell` bridge allowlist or budgets. |
 | Native addon | ABI allowlist, packaged-only or signed artifact policy, hash/integrity lock, no download-and-execute, crash evidence. |
 | UI/floaty/screenshot/recorder | Foreground disclosure, Android permission flow, lifecycle cleanup, Back/Recents behavior where applicable. |
 | Android-side package installation | Transactional install/update/remove/list/verify/prune, lock file, integrity check, lifecycle script denial by default. |
@@ -86,16 +86,16 @@ A task cannot move to `opt_in_promoted` unless it includes:
 - migration/user documentation;
 - rollback documentation.
 
-P13-50 adds `RELAXED_CAPABILITY_SECURITY_CORPUS.json` as the shared relaxed
-capability corpus index. Any future promotion of raw network, filesystem
-relaxation, Java interop, `child_process`, native addon loading, inspector, or
-WASI must keep that corpus updated with positive tests, negative tests, abuse
-cases, CI evidence, runtime guards, promotion preconditions, and rollback
-posture before moving beyond diagnostic or controlled fail-closed behavior.
+P13-50 adds `RELAXED_CAPABILITY_SECURITY_CORPUS.json` as the shared capability
+security corpus index. Graduated network, Java, worker, and child-process rows
+must retain positive, negative, abuse, runtime-guard, packaged, cleanup, and
+rollback regression coverage. Future filesystem relaxation, native addons,
+Inspector, WASI, or other gated surfaces must add the same evidence before
+promotion.
 
 ## Release Rule
 
-`debug_unsafe_lab` and critical-risk surfaces cannot be accepted in release
-builds unless a later task explicitly promotes them to `opt_in_promoted` with
-the full evidence set. Missing evidence must fail closed, not silently fall back
+`debug_unsafe_lab` and ungraduated critical-risk surfaces cannot be accepted in
+release builds without the full evidence set. Missing evidence must fail
+closed, not silently fall back
 to broader authority.

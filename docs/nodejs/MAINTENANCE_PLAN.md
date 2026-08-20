@@ -26,9 +26,11 @@ authority surface by accident.
 - External workspace v2 remains explicit-input and zero-host-scan. Output and
   deletion tombstones are applied only after a complete commit, and no request
   is replayed after plugin dispatch may have started.
-- Native addons, unrestricted `child_process`, raw network, inspector, unrestricted Java/Android interop, and unrestricted
-  `worker_threads` remain default-off or disabled unless a documented promotion gate passes. Native `vm` is available after
-  P13-36 but remains documented as a non-sandbox compatibility surface.
+- ESM, dynamic import, controlled network/WebSocket, native network builtins,
+  bounded `worker_threads`, native `child_process`, and allowlisted Java
+  interop remain stable and enabled. Inspector, native addons, raw WASI,
+  `dgram`, unrestricted Java, and broader worker authority remain denied.
+  Native `vm` remains a non-sandbox partial compatibility surface.
 - Packaged APK support remains a first-class release target.
 
 ## Weekly Smoke
@@ -106,10 +108,11 @@ quarterly, or sooner for security advisories:
 
 Patch releases may upgrade libnode only when the compatibility, size, crash, and packaged evidence is attached.
 
-## Experimental Promotion Reviews
+## Capability Stability Reviews
 
-Use [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md) as the source of truth. Reviews must not promote
-an experimental feature by documentation change alone.
+Use [CAPABILITY_STABILITY_POLICY.md](CAPABILITY_STABILITY_POLICY.md) as the
+source of truth. Reviews must not change a capability status by documentation
+alone.
 
 ESM review:
 
@@ -122,16 +125,19 @@ ESM review:
 
 Worker review:
 
-- verify native `worker_threads` availability before advertising runnable support;
+- verify native `worker_threads` availability on every published ABI;
 - require worker timeout, termination, resource limit, memory/thread stress, and bridge/raw-network denial evidence;
-- keep workers outside the default GA profile unless the experimental flag is explicitly enabled.
+- preserve the bounded worker profile and fail release if runnable coverage
+  skips.
 
 Network and WebSocket review:
 
-- prove raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` remain denied;
+- prove native `http`, `https`, `net`, `tls`, and `dns` stay available,
+  separately prove controlled-provider limits, and keep `dgram` denied;
 - require Android `INTERNET` manifest checks, timeout/abort/size limits, privacy review, and live-provider smoke on an
   approved device profile;
-- keep live providers default-off until approved.
+- keep live providers enabled while permission, privacy, budget, and cleanup
+  tests pass.
 
 Java interop review:
 
@@ -157,7 +163,8 @@ Classify the issue:
 - P0: security boundary bypass, data exposure, or reproducible release build crash on normal stable APIs;
 - P1: packaged APK launch crash, lifecycle crash, memory runaway, or bridge resource leak;
 - P2: compatibility regression with stable CommonJS, scoped fs, or documented bridge APIs;
-- P3: experimental feature failure, diagnostic polish, or device-specific infrastructure issue.
+- P3: partial/non-stable surface failure, diagnostic polish, or device-specific
+  infrastructure issue.
 
 P0/P1 fixes require a focused regression test, release note, and backport decision. Native crashes require symbolication
 against the matching `nativeNodeSymbolArchiveReport` output before closure.
@@ -172,7 +179,8 @@ Node Profile v1.x patch releases may include:
 - stricter diagnostics and stable error-code coverage;
 - scoped fs, resolver, packaged APK, bridge, and lifecycle hardening that does not remove documented stable behavior;
 - new optional bridge fields or docs when older scripts continue to work;
-- experimental feature fixes that remain behind their existing flags.
+- fixes for partial, disabled, unsupported, or planned surfaces that do not
+  change their published status.
 
 See [releases/V1_0_X_HOTFIX_POLICY.md](releases/V1_0_X_HOTFIX_POLICY.md) for the v1.0.x hotfix boundary and minimum gate.
 
@@ -191,12 +199,12 @@ warning unless the change fixes an active security boundary bypass.
 
 ## Deprecation Policy
 
-Experimental feature removal:
+Non-stable surface removal:
 
-- experimental APIs may be removed or redesigned in v1.x when they are unsafe, unavailable on supported devices, or fail
+- non-stable APIs may be removed or redesigned in v1.x when they are unsafe, unavailable on supported devices, or fail
   resource gates;
 - removal must be documented in release notes and known issues;
-- stable APIs must not depend on experimental APIs.
+- stable APIs must not depend on planned or unsupported APIs.
 
 Error-code stability:
 

@@ -80,7 +80,7 @@ class NodeBridgeRhinoExecutionService : Service() {
             ?: return NodeBridgeResponse.failure(
                 request.id,
                 NodeBridgeError.invalidRequest(
-                    message = "rhino.run requires experimental:true, exactly one of source/path, timeoutMs, scoped cwd, and JSON args.",
+                    message = "rhino.run requires explicit:true, exactly one of source/path, timeoutMs, scoped cwd, and JSON args.",
                     module = request.module,
                     method = request.method,
                 ),
@@ -422,7 +422,7 @@ class NodeBridgeRhinoExecutionService : Service() {
             fun fromRequest(request: NodeBridgeRequest): RhinoRunDescriptor? {
                 val args = runCatching { JSONArray(request.argsJson.ifBlank { "[]" }) }.getOrNull() ?: return null
                 val options = args.optJSONObject(0) ?: return null
-                if (options.optBoolean("experimental", false) != true) {
+                if (options.optBoolean("explicit", false) != true) {
                     return null
                 }
                 val timeoutMs = options.optLong("timeoutMs", 0L)

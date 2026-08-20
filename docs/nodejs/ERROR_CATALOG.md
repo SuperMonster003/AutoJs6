@@ -477,49 +477,27 @@ partial packaged overlay smoke gate through `:app:installAndRunNodeV14PackagedOv
 
 ## P14-28 worker native availability decision
 
-P14-28 does not add a new error code. It refreshes the v1.2 worker native
-availability decision around the existing worker errors:
-
-- `ERR_AUTOJS6_WORKER_DISABLED` remains the expected native-unavailable
-  preflight outcome for the current Node 24.5 artifacts.
-- `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, `ERR_AUTOJS6_WORKER_TIMEOUT`, and
-  WorkerPool errors stay future runnable-gate evidence until native workers are
-  available.
-- Android loader failures for ABI mismatch, missing `libnode.so`, missing
-  `libc++_shared.so`, missing dependent libraries, and missing symbols remain
-  native loader diagnostics, not user-script worker authority.
-- Default, project, packaged, and process-worker authority remain unpromoted.
+P14-28 does not add a new error code. Its native-unavailable decision is
+archived promotion evidence superseded by the three-ABI stable runtime kit.
+`ERR_AUTOJS6_WORKER_DISABLED` now indicates an incompatible or corrupt runtime
+artifact, an unsupported platform condition, or an explicitly disabled test
+request—not normal v1.2 behavior. Android loader failures for ABI mismatch,
+missing libraries, dependencies, or symbols remain native loader diagnostics.
 
 ## P14-29 worker runnable/packaged smoke decision
 
-P14-29 does not add a new error code. It records the runnable and packaged
-worker smoke gate as `conditional_skip_native_unavailable`:
-
-- `ERR_AUTOJS6_WORKER_DISABLED` remains the current precondition failure for
-  runnable and packaged Worker execution.
-- `ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED`,
-  `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, `ERR_AUTOJS6_WORKER_TIMEOUT`, and
-  WorkerPool task errors remain native-available source anchors only.
-- Packaged `.mjs` worker markers such as
-  `packaged.worker_threads.esm.ready=true` are not release evidence until the
-  native preflight reports `worker.preflight.status=available`.
-- Default, project, packaged, and process-worker authority remain unpromoted.
+P14-29 does not add a new error code. Its conditional smoke decision is
+archived evidence. Runnable CJS/ESM workers and packaged worker graphs are part
+of the stable runtime kit. `ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED`,
+`ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, `ERR_AUTOJS6_WORKER_TIMEOUT`, termination,
+and WorkerPool task errors remain active policy and recovery diagnostics.
 
 ## P14-30 worker resource/RSS stress decision
 
-P14-30 does not add a new error code. It records the worker resource/RSS stress
-gate as `conditional_skip_native_unavailable`:
-
-- Worker resource errors and cleanup counters remain source anchors until the
-  native preflight reports `worker.preflight.status=available`.
-- `ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT`,
-  `ERR_AUTOJS6_WORKER_TERMINATED`, and WorkerPool task errors remain
-  native-available recovery evidence, not release support.
-- RSS/thread source anchors are present, but Java heap, native heap, fd count,
-  message queue, active worker, and active WorkerPool deltas still need a
-  native-worker-capable archive.
-- Worker authority remains disabled until native, packaged, and resource gates
-  pass together.
+P14-30 does not add a new error code. Its conditional resource decision is
+archived evidence; current worker count, message, memory, timeout, termination,
+cleanup, RSS/thread, and WorkerPool diagnostics protect the stable worker
+surface and remain regression gates.
 
 ## P14-31 process-worker replacement decision
 
@@ -528,25 +506,25 @@ decision as `no_user_facing_facade_v1_2`:
 
 - `process_worker`, `compute_worker`, and `autojs6:process-worker` remain
   absent rather than rejecting with new runtime-specific codes.
-- `child_process` and `node:child_process` keep the existing disabled-builtin
-  error shape in stable profiles.
+- `child_process` and `node:child_process` are separate stable native builtins;
+  they are not aliases for a process-worker facade.
 - `shell` remains the separately permissioned scoped command bridge and is not
   process-worker authority.
-- Raw process handles, stdio streams, signals, `spawn`, `fork`, packaged
-  process-worker behavior, and WorkerPool replacement API authority remain
-  unpromoted until a future WorkerPool-compatible gate owns the evidence.
+- A separate process-worker facade remains absent. This does not remove native
+  `child_process` handles, stdio, signals, `spawn`, or `fork` from their own
+  stable Node builtin.
 
 ## P14-32 desktop runtime doc sync
 
-P14-32 does not add a new error code. It records desktop runtime docs and
-release policy as `worker_intentionally_unsupported_v1_2`:
+P14-32 does not add a new error code. Its older worker non-support decision is
+superseded by `worker_threads_stable_enabled_v1_2`:
 
-- `ERR_AUTOJS6_WORKER_DISABLED` remains the expected runnable worker preflight
-  failure for current v1.2 evidence.
+- `ERR_AUTOJS6_WORKER_DISABLED` now indicates an incompatible runtime/ABI or
+  a documented future demotion, not the normal v1.2 path.
 - `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, worker timeout, WorkerPool task, and
   worker resource errors remain future native-available evidence only.
-- `child_process` / `node:child_process` keep the existing disabled-builtin
-  error shape in stable profiles.
+- `child_process` / `node:child_process` resolve to the stable native builtin;
+  platform or caller failures use native/runtime errors rather than a build gate.
 - `process_worker`, `compute_worker`, and `autojs6:process-worker` remain
   absent, not newly introduced rejecting modules.
 - `shell` remains the separate scoped command bridge and is not process-worker
@@ -638,7 +616,7 @@ checklist as `release_candidate_checklist_ready` behind
 - The checklist separates required v1.2 RC blockers from the v1.3 future
   promotion backlog.
 - Release notes draft labels such as `provider_poc_not_promoted`,
-  `worker_intentionally_unsupported_v1_2`, `host_contract_ready`, and
+  `worker_threads_stable_enabled_v1_2`, `host_contract_ready`, and
   `phase14_summary_gate_ready` are evidence labels, not new error codes.
 - Runtime authority remains unchanged and release tag approval remains false.
 
@@ -732,18 +710,21 @@ P14-39 does not add a new error code. It records the v1.2 closeout handoff as
 ## ERR_AUTOJS6_BUILTIN_DISABLED
 
 - Meaning: A Node builtin is disabled by the Safe Node Profile.
-- Common cause: requiring `child_process`, `inspector`, `dgram`, `wasi`, or another denied builtin.
-- Example: `require("child_process")`.
+- Common cause: requiring `inspector`, `dgram`, `wasi`, or another denied
+  builtin.
+- Example: `require("inspector")`.
 - How to fix: use the AutoJs-controlled module for the task, or keep the dependency out of the stable profile.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED
 
-- Meaning: dynamic `import()` is disabled in the current profile.
-- Common cause: an ESM or bundler output uses `import()` while the dynamic-import feature flag is off.
-- Example: `await import("./module.mjs")` in a stable build.
-- How to fix: use CommonJS `require()` for stable scripts, or run only in an explicitly enabled experimental build.
-- Related docs: [design/ESM.md](design/ESM.md), [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md).
+- Meaning: dynamic `import()` is unavailable for the current request/path.
+- Common cause: a host/plugin contract mismatch, a remote/protocol specifier, or
+  another form outside the stable scoped loader.
+- Example: `await import("https://example.com/module.mjs")`.
+- How to fix: verify contract v2 and use a local, package, or supported builtin
+  specifier inside the scoped module graph.
+- Related docs: [design/ESM.md](design/ESM.md), [CAPABILITY_STABILITY_POLICY.md](CAPABILITY_STABILITY_POLICY.md).
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED
 
@@ -774,7 +755,9 @@ P14-39 does not add a new error code. It records the v1.2 closeout handoff as
 - Meaning: Legacy code value for disabled controlled fetch or network access.
 - Common cause: compatibility path preserving the old `error.code` while attaching `autojs6Code=ERR_AUTOJS6_NETWORK_DISABLED`.
 - Example: `await fetch("https://example.com")` when the live network provider is disabled.
-- How to fix: keep network behind an explicit experimental gate, or use fake providers in tests.
+- How to fix: verify stable network build state, declared bridge permission,
+  Android manifest permission, and provider availability; use fake providers
+  only for deterministic unit/instrumentation tests.
 - Related docs: [design/NETWORK.md](design/NETWORK.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_INVALID_STATE
@@ -790,7 +773,8 @@ P14-39 does not add a new error code. It records the v1.2 closeout handoff as
 - Meaning: Legacy code value for disabled network access.
 - Common cause: compatibility path preserving the old `error.code` while attaching `autojs6Code=ERR_AUTOJS6_NETWORK_DISABLED`.
 - Example: a limited raw network shim rejects before I/O.
-- How to fix: use controlled network only in approved experimental builds.
+- How to fix: verify host/plugin contract v2 and stable native network artifact
+  conformance; use the controlled provider when its budgets are desired.
 - Related docs: [design/NETWORK.md](design/NETWORK.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT
@@ -879,16 +863,19 @@ P14-39 does not add a new error code. It records the v1.2 closeout handoff as
 - Meaning: controlled Java interop denied access to a class.
 - Common cause: the class is outside the allowlist or belongs to a blocked category.
 - Example: requesting `java.lang.Runtime`.
-- How to fix: avoid Java interop in stable scripts, or use only allowlisted experimental classes in debug validation.
+- How to fix: use only documented allowlisted classes and members or an
+  AutoJs bridge module.
 - Related docs: [design/JAVA_INTEROP.md](design/JAVA_INTEROP.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_JAVA_INTEROP_DISABLED
 
-- Meaning: Java interop is disabled in the current profile.
-- Common cause: the Java interop experimental flag is off.
-- Example: requiring or calling the Java bridge in a normal build.
-- How to fix: keep the feature out of release scripts unless a future promotion task enables it.
-- Related docs: [design/JAVA_INTEROP.md](design/JAVA_INTEROP.md), [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md).
+- Meaning: stable Java interop was unavailable for the current request.
+- Common cause: host/plugin contract mismatch, incompatible runtime artifact, or
+  a deliberately demoted future profile.
+- Example: a plugin built against contract v1 receives the v2 Java request.
+- How to fix: install/use the matching v1.2 runtime plugin and verify
+  `NODEJS_JAVA_INTEROP_ENABLED=true` in Doctor/profile output.
+- Related docs: [design/JAVA_INTEROP.md](design/JAVA_INTEROP.md), [CAPABILITY_STABILITY_POLICY.md](CAPABILITY_STABILITY_POLICY.md).
 
 ## ERR_AUTOJS6_JAVA_METHOD_DENIED
 
@@ -992,10 +979,14 @@ silently falls back to a project-wide directory scan.
 
 ## ERR_AUTOJS6_NETWORK_DISABLED
 
-- Meaning: controlled network access is disabled in the current build or provider.
-- Common cause: normal builds keep live network providers disabled; default raw network modules also reject before I/O unless the explicit raw Node network module opt-in is enabled.
-- Example: `await fetch("https://example.com")` in a normal build.
-- How to fix: use fake providers in tests or an explicitly approved experimental network build.
+- Meaning: controlled network access was denied before I/O.
+- Common cause: missing declared `network` permission, missing Android
+  `INTERNET` manifest permission, unavailable/destroyed provider, or an
+  incompatible runtime contract.
+- Example: `await fetch("https://example.com")` without the enforced bridge
+  permission.
+- How to fix: declare/authorize the capability, verify the packaged manifest and
+  provider state, and inspect Doctor diagnostics.
 - Related docs: [design/NETWORK.md](design/NETWORK.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_NETWORK_ERROR
@@ -1003,7 +994,8 @@ silently falls back to a project-wide directory scan.
 - Meaning: a controlled network operation failed with a provider or transport error that is not one of the more specific network codes.
 - Common cause: provider exception, transport failure, rejected axios-compatible request wrapper, or an unexpected fake-provider failure.
 - Example: a controlled axios request rejects without a timeout, abort, size, URL, permission, or policy-specific code.
-- How to fix: inspect the wrapped error details, retry only when the operation is idempotent, and keep live network behind the approved experimental gate.
+- How to fix: inspect the wrapped error details, retry only when the operation
+  is idempotent, and preserve timeout/cancellation/resource bounds.
 - Related docs: [design/NETWORK.md](design/NETWORK.md), [design/WEBSOCKET.md](design/WEBSOCKET.md).
 
 ## ERR_AUTOJS6_NETWORK_INVALID_URL
@@ -1192,7 +1184,7 @@ silently falls back to a project-wide directory scan.
 - Common cause: an explicit ESM-off diagnostic request resolves `require()` to `.mjs` or a package target selected as ESM.
 - Example: `require("./module.mjs")`.
 - How to fix: use the default v1.1 partial ESM profile for synchronous ESM graphs, or provide a CommonJS package branch for older/ESM-off profiles.
-- Related docs: [design/ESM.md](design/ESM.md), [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md).
+- Related docs: [design/ESM.md](design/ESM.md), [CAPABILITY_STABILITY_POLICY.md](CAPABILITY_STABILITY_POLICY.md).
 
 ## ERR_REQUIRE_ASYNC_MODULE
 
@@ -1229,46 +1221,52 @@ silently falls back to a project-wide directory scan.
 ## ERR_AUTOJS6_WORKER_BRIDGE_DENIED
 
 - Meaning: a worker attempted to access AutoJs bridge capabilities.
-- Common cause: experimental `worker_threads` code imports bridge modules from a worker.
+- Common cause: stable `worker_threads` code imports a capability denied by the
+  smaller worker profile.
 - Example: a worker calls `require("toast")`.
 - How to fix: keep workers pure-JS and route AutoJs bridge calls through the main script.
 - Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_WORKER_DISABLED
 
-- Meaning: `worker_threads` is disabled in the current profile.
-- Common cause: normal builds keep worker support behind an experimental flag.
-- Example: `require("worker_threads")` in a stable build.
-- How to fix: avoid workers in stable scripts or use an experimental validation build.
-- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md).
+- Meaning: the native Worker surface is unavailable despite the stable runtime
+  contract.
+- Common cause: incompatible plugin/runtime artifact, unsupported ABI payload,
+  or a documented future profile demotion.
+- Example: `require("worker_threads")` reports native unavailability in a
+  Node-enabled v1.2 build.
+- How to fix: install the matching v1.2 runtime artifact and treat a published
+  ABI failure as a release conformance bug.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [CAPABILITY_STABILITY_POLICY.md](CAPABILITY_STABILITY_POLICY.md).
 
 ## ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED
 
 - Meaning: the worker count or resource limit was exceeded.
-- Common cause: too many active experimental workers.
+- Common cause: too many active stable workers or a resource budget violation.
 - Example: creating more workers than the profile permits.
 - How to fix: terminate existing workers and keep worker concurrency below the limit.
 - Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
 
 ## ERR_AUTOJS6_WORKER_POOL_CLOSED
 
-- Meaning: an experimental `WorkerPool` rejected work because the pool is closed or closing.
+- Meaning: a stable `WorkerPool` rejected work because the pool is closed or closing.
 - Common cause: submitting a task after `close()` or service shutdown started.
 - Example: calling `pool.run()` after the pool has rejected pending tasks during close.
-- How to fix: stop submitting work after close begins and create a new pool only in an explicitly enabled worker profile.
+- How to fix: stop submitting work after close begins and create a new bounded
+  pool when the execution still owns the workload.
 - Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [TESTING.md](TESTING.md).
 
 ## ERR_AUTOJS6_WORKER_POOL_QUEUE_FULL
 
-- Meaning: an experimental `WorkerPool` task queue reached its configured limit.
+- Meaning: a stable `WorkerPool` task queue reached its configured limit.
 - Common cause: submitting tasks faster than workers can complete them.
 - Example: enqueueing another task when the pool queue limit is already full.
-- How to fix: throttle submissions, await previous tasks, or lower concurrency in stable scripts by avoiding worker pools.
+- How to fix: throttle submissions, await previous tasks, or lower concurrency.
 - Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
 
 ## ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED
 
-- Meaning: an experimental `WorkerPool` task was cancelled before completion.
+- Meaning: a stable `WorkerPool` task was cancelled before completion.
 - Common cause: caller cancellation, pool close, worker termination, or timeout cleanup.
 - Example: cancelling a pending task with an `AbortSignal`.
 - How to fix: handle cancellation as a normal control path and clean task-local resources.
@@ -1276,7 +1274,7 @@ silently falls back to a project-wide directory scan.
 
 ## ERR_AUTOJS6_WORKER_POOL_TASK_FAILED
 
-- Meaning: an experimental `WorkerPool` task failed while executing or while receiving its result.
+- Meaning: a stable `WorkerPool` task failed while executing or while receiving its result.
 - Common cause: worker exception, rejected task handler, worker exit, or unexpected worker error.
 - Example: a pool task throws before posting its result.
 - How to fix: catch task errors, keep worker code pure JavaScript, and inspect worker diagnostics.
@@ -1284,10 +1282,10 @@ silently falls back to a project-wide directory scan.
 
 ## ERR_AUTOJS6_WORKER_POOL_TASK_TIMEOUT
 
-- Meaning: an experimental `WorkerPool` task exceeded its timeout.
+- Meaning: a stable `WorkerPool` task exceeded its timeout.
 - Common cause: CPU-bound work, a hung promise, or a worker that does not respond before the task deadline.
 - Example: a pool task loops indefinitely and never posts a result.
-- How to fix: keep worker tasks bounded, add cooperative cancellation, and avoid workers in stable scripts.
+- How to fix: keep worker tasks bounded and add cooperative cancellation.
 - Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
 
 ## ERR_AUTOJS6_WORKER_TERMINATED

@@ -3,8 +3,8 @@
 `tools/nodejs/project/autojs6-node-project.js` is a host-side helper for
 creating and validating Safe Node Profile project directories. It does not run
 inside Android and does not loosen runtime policy.
-For the current v1.1 feature status behind these templates, see
-[NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md).
+For the current v1.2 feature status behind these templates, see
+[COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
 ## Create
 
@@ -26,7 +26,7 @@ node tools/nodejs/project/autojs6-node-project.js create `
 Available templates:
 
 - `commonjs-app`: minimal CommonJS app.
-- `esm-app`: partial ESM app using `.mjs`.
+- `esm-app`: stable ESM app using `.mjs`.
 - `automation-script`: starter with `toast` and `app` bridge metadata.
 - `screenshot-ocr-script`: starter with `image`, `screen_capture`, and `ocr`
   bridge metadata.
@@ -82,7 +82,7 @@ as one of:
 
 - `compatible`
 - `compatible with capability`
-- `experimental`
+- `partial`
 - `unsupported`
 - `unsafe`
 

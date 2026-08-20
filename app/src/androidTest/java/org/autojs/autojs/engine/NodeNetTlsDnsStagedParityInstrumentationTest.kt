@@ -422,7 +422,7 @@ class NodeNetTlsDnsStagedParityInstrumentationTest {
 
                       console.log("p13ntd.raw.profile=" + [
                         profile.featureFlags.raw_node_network_modules.enabled,
-                        profile.experimentalFlags.rawNodeNetworkModules,
+                        profile.featureStates.rawNodeNetworkModules,
                         profile.highRiskCapabilities.rawNodeNetworkModules
                       ].join("|"));
                       console.log("p13ntd.raw.same=" + [
@@ -444,7 +444,7 @@ class NodeNetTlsDnsStagedParityInstrumentationTest {
                 sourceName = "<node-raw-network-opt-in-p13-30.js>",
                 workingDirectory = workDir,
                 timeoutMs = 20_000L,
-                rawNodeNetworkModulesExperimentalEnabled = true,
+                rawNodeNetworkModulesEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("raw Node network modules opt-in", result)

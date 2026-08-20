@@ -1859,10 +1859,10 @@ class EmbeddedScriptMvpInstrumentationTest {
               profile.nativeAddon,
               profile.scopedFs
             ].join("/"));
-            console.log("profile.experimental=" + [
-              profile.experimentalFlags.esm,
-              profile.experimentalFlags.network,
-              profile.experimentalFlags.workerThreads
+            console.log("profile.stable=" + [
+              profile.featureStates.esm,
+              profile.featureStates.network,
+              profile.featureStates.workerThreads
             ].join("/"));
             console.log("profile.frozen=" + [
               Object.isFrozen(profile),
@@ -1870,7 +1870,7 @@ class EmbeddedScriptMvpInstrumentationTest {
               Object.isFrozen(profile.limitedBuiltins),
               Object.isFrozen(profile.disabledBuiltins),
               Object.isFrozen(profile.highRiskCapabilities),
-              Object.isFrozen(profile.experimentalFlags),
+              Object.isFrozen(profile.featureStates),
               Object.isFrozen(profile.errorCodes),
               Object.isFrozen(profile.errorCodes.legacyAliases)
             ].join("/"));
@@ -1899,7 +1899,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertTrue(result.stdout.contains("profile.identity=true"))
         assertTrue(result.stdout.contains("profile.resolve=autojs6:profile"))
         assertTrue(result.stdout.contains("profile.flags=true/true/true/false/false/false/true"))
-        assertTrue(result.stdout.contains("profile.experimental=true/false/false"))
+        assertTrue(result.stdout.contains("profile.stable=true/true/true"))
         assertTrue(result.stdout.contains("profile.frozen=true/true/true/true/true/true/true/true"))
         assertTrue(result.stdout.contains("profile.builtins=true/true/true/true/true/false"))
         assertTrue(result.stdout.contains("profile.errors=ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED"))
@@ -1977,7 +1977,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             ].join("/"));
             console.log("autojs.java=" + [
               autojs.java.enabled,
-              autojs.java.experimental,
+              autojs.java.stable,
               autojs.java.mode,
               typeof autojs.java.findClass,
               typeof autojs.java.type,
@@ -1993,7 +1993,7 @@ class EmbeddedScriptMvpInstrumentationTest {
 
         assertTrue(result.errorMessage.orEmpty(), result.succeeded)
         assertTrue(result.stdout.contains("autojs.global=object/false/false/false/true"))
-        assertTrue(result.stdout.contains("autojs.identity=true/true/string/number/autojs6-node-profile-v1.1/true"))
+        assertTrue(result.stdout.contains("autojs.identity=true/true/string/number/autojs6-node-profile-v1.2/true"))
         assertTrue(result.stdout.contains("autojs.frozen=true/true/true/true/true/true/true/true"))
         assertTrue(result.stdout.contains("autojs.context=false/true/android.content.Context/string/true"))
         assertTrue(result.stdout.contains("autojs.java=false/false/disabled/function/function/function/function/function/true"))
@@ -2036,7 +2036,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("err.builtin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
         assertTrue(result.stdout, result.stdout.contains("err.getBuiltin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
         assertTrue(result.stdout, result.stdout.contains("err.process=ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/"))
-        if (BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+        if (BuildConfig.NODEJS_NETWORK_ENABLED) {
             assertTrue(result.stdout, result.stdout.contains("err.fetch=ERR_AUTOJS6_NETWORK_"))
         } else {
             assertTrue(
@@ -11788,7 +11788,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             })();
             """.trimIndent(),
             "<embedded-node-worker-threads-facade-source.js>",
-            workerThreadsExperimentalEnabled = false,
+            workerThreadsEnabled = false,
         )
 
         assertTrue(result.errorMessage.orEmpty(), result.succeeded)
@@ -28442,7 +28442,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     fun esmPartialSupportsMjsEntrypointsAndCommonJsRequireSyncBoundary() {
         assumeEmbeddedScriptExecutionEnabled()
 
-        assertTrue(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
+        assertTrue(BuildConfig.NODEJS_ESM_ENABLED)
         val scriptDir = File(context.cacheDir, "embedded-esm-gate-${System.nanoTime()}").apply {
             check(mkdirs()) { "Failed to create ESM gate test dir: $absolutePath" }
         }
@@ -32113,7 +32113,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         moduleSources: Map<String, String> = emptyMap(),
         runtimeModuleSources: Map<String, String> = emptyMap(),
         env: Map<String, String> = emptyMap(),
-        workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        workerThreadsEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             context,
@@ -32125,7 +32125,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 env = env,
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
-                workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
+                workerThreadsEnabled = workerThreadsEnabled,
             ),
         )
     }

@@ -1,268 +1,62 @@
-# Controlled WebSocket Design Gate
+# Controlled WebSocket
 
-Status: experimental MVP, live provider disabled by default, explicit live-provider subgate available. This document defines the boundary for the controlled WebSocket module without enabling raw `net` or `tls`.
+Status: stable and enabled by default in Node Profile v1.2.
 
-## Goal
+The controlled WebSocket module provides provider-owned WebSocket sessions
+without treating a raw socket as an AutoJs bridge handle. It shares the stable
+network capability and has no separate build or release flag.
 
-AutoJs6 exposes a controlled WebSocket module for automation scripts that need server push or realtime control channels. The Safe Node Profile must not implement this by opening Node raw socket modules.
+## API Shape
 
-The target shape is:
+`require("websocket")` exposes a Promise-based `connect()` operation. A
+connection supports:
 
-```text
-JS websocket module
-  -> AutoJs6 bridge request
-  -> NativeNodeEmbeddedScriptService
-  -> app-owned WebSocket provider
-  -> Android/OkHttp WebSocket stack
-```
+- text and binary `send()`;
+- `close()`;
+- `on()`/`off()` and
+  `addEventListener()`/`removeEventListener()`;
+- `onopen`, `onmessage`, `onerror`, and `onclose` properties;
+- explicit event draining through the host bridge.
 
-Raw Node networking remains outside the profile:
+Requests accept only `ws:` and `wss:` URLs. Headers, subprotocols, connect
+timeout, queue size, and message limits are normalized before dispatch.
 
-- `net`
-- `tls`
-- raw `http` upgrade APIs
-- raw `https` upgrade APIs
-- `dgram`
+## Authorization And Limits
 
-## Module Shape
+Controlled sessions require the runtime `network` permission when the bridge
+permission manifest is enforced, plus Android `INTERNET` permission in the
+packaged application. The provider enforces maximum active connections,
+outbound queue length, frame/message size, connect timeout, cancellation, and
+resource ownership by execution id.
 
-Preferred user module:
+OkHttp callbacks never invoke JavaScript directly. Events are serialized and
+drained through the versioned bridge. Execution stop, provider destruction, or
+runtime cancellation closes every owned session and prevents callbacks into a
+destroyed Node environment.
 
-```js
-const websocket = require("websocket");
+Native `net` and `tls` are separate stable Node builtins. Their presence does
+not bypass the controlled module's authorization or limits, and the controlled
+module does not attempt to wrap their API.
 
-const connection = await websocket.connect("wss://example.com/socket", {
-  timeoutMs: 10000,
-  maxMessageBytes: 65536,
-});
+## Contract And Diagnostics
 
-connection.on("message", (message) => {
-  console.log(message.text);
-});
+- `NODEJS_NETWORK_ENABLED=true`
+- `featureStates.webSocket=true`
+- stable capability status
+- provider source `runtime:stable-network`
+- Doctor/profile output includes connection, queue, message, timeout, cleanup,
+  and permission state
 
-await connection.send("hello");
-await connection.close(1000, "done");
-```
+Project/package feature metadata cannot disable or enable WebSocket. Release and
+AAR tasks contain no WebSocket opt-in path.
 
-The module should be a controlled AutoJs6 module, not a transparent desktop `ws` clone. A future npm-compat adapter may be layered on top, but it must use the same provider and policy.
-
-## Current API
-
-```ts
-type WebSocketUrl = string; // ws: or wss: only
-
-interface ConnectOptions {
-  headers?: Record<string, string> | Array<[string, string]>;
-  timeoutMs?: number;
-  maxMessageBytes?: number;
-  maxQueueSize?: number;
-  protocols?: string[];
-  signal?: AbortSignal;
-}
-
-interface WebSocketMessage {
-  type: "text" | "binary";
-  text?: string;
-  dataBase64?: string;
-}
-
-interface WebSocketConnection {
-  id: string;
-  url: string;
-  readyState: "connecting" | "open" | "closing" | "closed";
-  onopen: (() => void) | null;
-  onmessage: ((message: WebSocketMessage) => void) | null;
-  onclose: ((event: { type: "close"; code: number; reason: string }) => void) | null;
-  onerror: ((error: Error) => void) | null;
-  send(data: string | Buffer | ArrayBuffer | Uint8Array): Promise<void>;
-  close(code?: number, reason?: string): Promise<void>;
-  on(event: "open" | "message" | "close" | "error", listener: Function): this;
-  off(event: "open" | "message" | "close" | "error", listener: Function): this;
-  addEventListener(event: "open" | "message" | "close" | "error", listener: Function): this;
-  removeEventListener(event: "open" | "message" | "close" | "error", listener: Function): this;
-}
-
-function connect(url: WebSocketUrl, options?: ConnectOptions): Promise<WebSocketConnection>;
-```
-
-## Policy
-
-The current policy is intentionally small:
-
-- max connections per script: `2`
-- default connect timeout: `10000` ms
-- hard connect timeout cap: `60000` ms
-- default inbound message budget: `65536` bytes
-- hard inbound message budget: `1048576` bytes
-- default max queued inbound messages before user code drains events: `32`
-- accepted schemes: `ws:` and `wss:` only
-- reject `file:`, `content:`, `about:`, `data:`, `http:`, and `https:` URLs
-- no automatic reconnect in v1
-- no background keepalive or foreground-service promotion in v1
-
-Overflow behavior:
-
-- too many connections: reject `connect()` with `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
-- connect timeout: reject with `ERR_AUTOJS6_NETWORK_TIMEOUT`
-- abort signal: reject or close with `ERR_AUTOJS6_NETWORK_ABORTED`
-- inbound message too large: close the connection and emit/reject with `ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE`
-- unsupported scheme: reject with `ERR_AUTOJS6_NETWORK_INVALID_URL`
-
-## Binary Support
-
-Binary messages should cross the bridge as Base64 strings, not raw native pointers. The JavaScript wrapper may expose `Buffer` when the Safe Node `buffer` module is available.
-
-No streaming binary frames in v1. Every message is budgeted before delivery.
-
-## Ping And Pong
-
-The provider may rely on OkHttp platform ping behavior if available. User scripts should not receive raw ping/pong frames in v1.
-
-If ping configuration is later exposed, it must be bounded:
-
-- minimum interval
-- maximum interval
-- close on missed pong
-- service destroy cancels timers
-
-## Reconnect
-
-No automatic reconnect in v1. Reconnect loops are easy to turn into background network activity. Userland can reconnect explicitly, but every new connection must pass the same policy and lifecycle checks.
-
-A future reconnect helper needs a separate gate covering:
-
-- max attempts
-- backoff bounds
-- foreground/background behavior
-- battery impact
-- packaged APK disclosure
-
-## Lifecycle
-
-Each connection must be registered under the current Node execution id.
-
-On script stop, timeout, service destroy, or process shutdown:
-
-- close all active connections
-- reject pending `connect()` and `send()` calls
-- remove all event listeners
-- release provider handles
-- prevent callbacks from re-entering a destroyed Node environment
-
-Callbacks into JavaScript must be marshalled onto the Node event loop thread.
-
-## Bridge Protocol
-
-Current bridge methods:
-
-```text
-websocket.connect
-websocket.send
-websocket.close
-websocket.drainEvents
-```
-
-Request shape:
-
-```json
-{
-  "id": "bridge-call-id",
-  "module": "websocket",
-  "method": "connect",
-  "args": [{
-    "url": "wss://example.com/socket",
-    "headers": [["authorization", "Bearer redacted"]],
-    "protocols": ["json"],
-    "timeoutMs": 10000,
-    "maxMessageBytes": 65536
-  }],
-  "timeoutMs": 10000,
-  "permissions": ["network"]
-}
-```
-
-Event delivery should not call into JavaScript directly from an OkHttp callback. Use a bounded event queue and let the JS side drain events through the bridge or live transport.
-
-## Packaged APK
-
-Packaged APKs that opt into live controlled WebSocket need:
-
-- explicit project metadata opt-in
-- `android.permission.INTERNET`
-- packaged verifier report entry
-- release checklist item proving raw `net`/`tls` still fail
-
-No INTERNET permission should be added solely because the runtime contains the controlled WebSocket module. Normal builds keep `autojs.nodejs.network.experimental=false`, and the Android provider rejects with `ERR_AUTOJS6_NETWORK_DISABLED` before network I/O.
-
-## Diagnostics
-
-The provider exposes counters similar to controlled fetch:
-
-- active connection count
-- max active connection count
-- connect timeout count
-- policy rejection count
-- closed-on-destroy count
-- completed connect count
-- bytes received and sent, capped or redacted for logs
-
-Native values should use the `embedded_script.websocket_*` prefix.
-
-## MVP Tests
-
-Current focused instrumentation:
+## Verification
 
 ```powershell
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-Covered paths:
-
-- experimental state visible in `require("autojs6:profile")`
-- `require("websocket")` reserved by the Safe Node Profile
-- fake provider connect/open/close
-- connect descriptor headers, protocols, and max queue size
-- send text
-- receive text
-- send/receive binary Base64 payloads
-- `on`/`off`, `addEventListener`/`removeEventListener`, and `onopen`/`onmessage`/`onerror`/`onclose` handler properties
-- close event object and error event delivery
-- max connection rejection
-- max message size rejection
-- unsupported scheme rejection
-- connect timeout
-- service destroy rejects pending connection
-- raw `net.connect()` remains denied
-- raw `tls.connect()` remains denied
-- normal Android provider rejects with `ERR_AUTOJS6_NETWORK_DISABLED`
-- packaged verifier reports `android.permission.INTERNET` only when project metadata opts in
-
-Current live-provider instrumentation:
-
-```powershell
-$env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
-```
-
-This explicit experimental subgate uses an on-device loopback WebSocket server
-and the Android OkHttp provider. It covers connect, headers, protocol
-negotiation, text and binary messages, close, inbound message-size rejection,
-connect timeout, raw `net`/`tls` denial, diagnostics, and provider destroy
-cleanup. It does not make controlled WebSocket default-on and does not expose
-raw socket modules.
-
-## Non-Goals
-
-The MVP does not implement:
-
-- desktop `ws` compatibility
-- raw socket upgrade APIs
-- reconnect helper
-- streaming frames
-- custom TLS certificates
-- proxy customization
-- background keepalive
-- worker-thread WebSocket access
-- live provider enablement in normal release builds
-- ping/pong user APIs
-- automatic packaged INTERNET permission injection solely because the module exists
+The gate covers fake and live provider connect/send/receive/close flows,
+protocol negotiation, binary frames, handler APIs, timeout, cancellation,
+scheme denial, connection and message budgets, shadow protection, diagnostics,
+manifest permission, and destroy cleanup.

@@ -28,19 +28,19 @@
     },
     {
       "id": "worker-threads",
-      "title": "worker_threads opt-in migration",
+      "title": "stable worker_threads migration",
       "file": "snippets/worker-threads.cjs",
-      "targetProfile": "desktop_compat_opt_in",
+      "targetProfile": "safe_default",
       "requiredCapabilities": ["worker_threads"],
       "expectedOutput": "sample.desktop-parity-suite.worker-threads=PASS",
       "safeProfile": {
         "profile": "safe_default",
-        "denialExample": "snippets/safe-denials.cjs",
-        "expectedOutput": "sample.desktop-parity-suite.safe-denial.worker-threads=DENIED",
-        "behavior": "Safe profile rejects default worker authority and requires explicit native preflight"
+        "verificationExample": "snippets/worker-threads.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.worker-threads=PASS",
+        "behavior": "Stable native workers are available with bridge isolation, nested-worker denial, resource budgets, and lifecycle cleanup"
       },
-      "packagedBehavior": "packaged worker execution remains gated by native preflight and source graph evidence",
-      "skipReason": "native worker_threads provider may be unavailable"
+      "packagedBehavior": "packaged worker execution is provided by the three-ABI runtime kit with scoped source graphs",
+      "skipReason": "runtime errors report unsupported Android/ABI conditions rather than a feature gate"
     },
     {
       "id": "http-https",
@@ -51,28 +51,28 @@
       "expectedOutput": "sample.desktop-parity-suite.http-https=PASS",
       "safeProfile": {
         "profile": "safe_default",
-        "denialExample": "snippets/safe-denials.cjs",
-        "expectedOutput": "sample.desktop-parity-suite.safe-denial.http-https=DENIED",
-        "behavior": "Safe profile denies raw server/listen/CONNECT/socket authority"
+        "verificationExample": "snippets/http-https.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.http-https=PASS",
+        "behavior": "Controlled HTTP/HTTPS is stable and permissioned; native HTTP/HTTPS is stable with caller-owned limits"
       },
       "packagedBehavior": "packaged network requires explicit capability, Android permission, and provider evidence",
       "skipReason": "controlled HTTP/HTTPS provider or network permission may be unavailable"
     },
     {
       "id": "raw-network",
-      "title": "raw native Node network module opt-in migration",
+      "title": "stable native Node network module migration",
       "file": "snippets/raw-network.cjs",
-      "targetProfile": "desktop_compat_opt_in",
+      "targetProfile": "safe_default",
       "requiredCapabilities": ["raw_network"],
       "expectedOutput": "sample.desktop-parity-suite.raw-network=PASS",
       "safeProfile": {
         "profile": "safe_default",
-        "denialExample": "snippets/safe-denials.cjs",
-        "expectedOutput": "sample.desktop-parity-suite.safe-denial.raw-network=DENIED",
-        "behavior": "Safe profile denies native Node http/https/net/tls/dns module authority unless raw_network is explicitly enabled"
+        "verificationExample": "snippets/raw-network.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.raw-network=PASS",
+        "behavior": "Native http/https/net/tls/dns modules are stable; dgram remains disabled and native calls do not inherit controlled-provider budgets"
       },
-      "packagedBehavior": "packaged raw network requires reviewed disclosure, INTERNET permission proof, and rollback policy evidence",
-      "skipReason": "raw native Node network modules may be unavailable or disabled by profile policy"
+      "packagedBehavior": "packaged native network requires Android INTERNET permission and remains inside the application sandbox",
+      "skipReason": "platform or permission failures are runtime errors, not profile or build feature gates"
     },
     {
       "id": "fs-advanced",

@@ -47,7 +47,7 @@ plain JavaScript `v8.startupSnapshot` feature check:
   flow rather than the current explicit `NewContext()` path;
 - the snapshot must match the exact Node version and V8 flags;
 - the snapshot data must outlive the isolate that uses it;
-- the embedder snapshot API is documented as experimental and may change across
+- the upstream embedder snapshot API is unstable and may change across
   Node versions;
 - `CanUseCustomSnapshotPerIsolate()` is currently documented by the bundled
   Node headers as unavailable when V8 shared readonly heap constraints apply.

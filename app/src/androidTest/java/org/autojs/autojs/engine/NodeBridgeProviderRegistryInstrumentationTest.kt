@@ -87,7 +87,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         val healthById = NodeBridgeProviderRegistry.androidHealth(context).associateBy { it.definition.id }
 
         assertEquals(
-            if (BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+            if (BuildConfig.NODEJS_NETWORK_ENABLED) {
                 NodeBridgeProviderStatus.AVAILABLE
             } else {
                 NodeBridgeProviderStatus.UNAVAILABLE

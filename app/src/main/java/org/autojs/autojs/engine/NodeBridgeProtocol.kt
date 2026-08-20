@@ -757,7 +757,7 @@ class FakeNodeBridgeCapabilityProvider(
 class AndroidNodeBridgeCapabilityProvider(
     context: Context,
     private val engineInfo: NodeBridgeEngineInfo = NodeBridgeEngineInfo.fromContext(context),
-    private val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+    private val javaInteropEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
     private val bridgeLimits: NodeBridgeLimits.Policy = NodeBridgeLimits.defaults,
 ) : NodeBridgeCapabilityProvider {
 
@@ -3945,11 +3945,11 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private fun dispatchJava(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val response = runCatching {
-            if (!javaInteropExperimentalEnabled) {
+            if (!javaInteropEnabled) {
                 return@runCatching NodeBridgeResponse.failure(
                     request.id,
                     NodeBridgeError.javaInterop(
-                        message = "AutoJs6 Java interop is disabled; enable autojs.nodejs.javaInterop.experimental for an allowlist-only experiment.",
+                        message = "AutoJs6 Java interop is unavailable for this request; the stable allowlist policy remains enforced.",
                         code = NodeRuntimeErrorCodes.JAVA_INTEROP_DISABLED,
                         module = request.module,
                         method = request.method,
@@ -4125,12 +4125,12 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchFetch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        if (!BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+        if (!BuildConfig.NODEJS_NETWORK_ENABLED) {
             callback(
                 NodeBridgeResponse.failure(
                     request.id,
                     NodeBridgeError.network(
-                        message = "AutoJs6 controlled fetch is disabled; enable autojs.nodejs.network.experimental in an experimental build.",
+                        message = "AutoJs6 controlled fetch is unavailable for this request; verify the network permission policy.",
                         code = NodeRuntimeErrorCodes.NETWORK_DISABLED,
                         module = request.module,
                         method = request.method,
@@ -4255,12 +4255,12 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchWebSocket(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        if (!BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+        if (!BuildConfig.NODEJS_NETWORK_ENABLED) {
             callback(
                 NodeBridgeResponse.failure(
                     request.id,
                     NodeBridgeError.network(
-                        message = "AutoJs6 controlled WebSocket is disabled; enable autojs.nodejs.network.experimental in an experimental build.",
+                        message = "AutoJs6 controlled WebSocket is unavailable for this request; verify the network permission policy.",
                         code = NodeRuntimeErrorCodes.NETWORK_DISABLED,
                         module = request.module,
                         method = request.method,
@@ -5905,7 +5905,7 @@ private object ControlledJavaInteropPolicy {
     fun describeClass(className: String): JSONObject {
         return JSONObject().apply {
             put("className", className)
-            put("experimental", true)
+            put("explicit", true)
             put("constructable", className == "android.graphics.Rect")
             put(
                 "staticMethods",

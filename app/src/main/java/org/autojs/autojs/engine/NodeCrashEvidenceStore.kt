@@ -433,14 +433,13 @@ object NodeCrashEvidenceStore {
 
     private fun runtimeFlagEnabled(flag: NodeRuntimeFeatureFlag): Boolean {
         return when (flag.id) {
-            "esm" -> BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED
-            "dynamic_import" -> BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED ||
-                    BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED
-            "network" -> BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED
-            "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED
-            "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED
-            "child_process" -> BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED
-            "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED
+            "esm" -> BuildConfig.NODEJS_ESM_ENABLED
+            "dynamic_import" -> BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED
+            "network" -> BuildConfig.NODEJS_NETWORK_ENABLED
+            "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED
+            "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_ENABLED
+            "child_process" -> BuildConfig.NODEJS_CHILD_PROCESS_ENABLED
+            "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_ENABLED
             else -> flag.defaultEnabled
         }
     }

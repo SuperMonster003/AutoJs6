@@ -5,7 +5,12 @@ v9 文档说明哪些能力已经具备、哪些能力尚需完成，以及 Rhin
 JavaScript API，尤其是 `org/autojs/autojs/runtime/api/augment` 中主要 API，
 在 Node.js 引擎中的迁移状态。
 
-盘点时间：2026-07-18。
+盘点时间：2026-08-20。
+
+Node Profile v1.2 当前优先结论：ESM、动态导入、受控网络、WebSocket、
+原生网络 builtins、`worker_threads`、`child_process` 与 allowlist Java
+interop 均已稳定且默认启用，不再接受能力级 Gradle 开关。下文 P13/P14
+段落保留为演进证据；与本结论冲突的旧阶段状态不再代表当前运行时合同。
 
 当前版本基线来自根目录 `version.properties`：
 
@@ -127,7 +132,7 @@ P12 surface 标为 provider gap：
 当前代码中的 Node Profile：
 
 - Profile：`AutoJs6 Safe Node Profile`
-- Engine version：`autojs6-node-profile-v1.1`
+- Engine version：`autojs6-node-profile-v1.2`
 - Node header/runtime baseline：`v24.5.0`
 - 默认 runtime slot：`node24_5`
 - 默认构建后端：`plugin`
@@ -320,8 +325,8 @@ CommonJS 用户入口。
 - raw `net`、`tls`、`dns`、`dgram`、socket server、upgrade、CONNECT 等仍保持拒绝。
 - `http`、`https` 不是 Pro v9 示例中那种无限制桌面 Node 能力，必须按
   AutoJs6 网络策略和 provider 状态理解。
-- live network 默认需要 `autojs.nodejs.network.experimental=true` 和
-  `network` capability。
+- live network 在 Node build 中默认可用；受控 provider 在权限清单启用
+  时仍要求 `network` capability，APK 仍需 `INTERNET`。
 
 ### scoped filesystem
 
@@ -423,8 +428,8 @@ capability 映射示例：
 | `clipboard` | `getText`, `setText`, `hasText` | 对应 Pro v9 `clip_manager` 和 Rhino `setClip/getClip` 的受控形态 |
 | `device` | `isScreenOn`, `wakeUp`, `vibrate` | 设备信息/动作子集，范围小于 Rhino `device` |
 | `shell` | `exec` | 非交互 shell，替代部分 Rhino shell 用法；root 需显式 capability |
-| `fetch` | `request` | 受控网络，默认 experimental |
-| `websocket` | `connect`, `send`, `close`, `drainEvents` | 受控 WebSocket，默认 experimental |
+| `fetch` | `request` | 稳定受控网络，默认启用 |
+| `websocket` | `connect`, `send`, `close`, `drainEvents` | 稳定受控 WebSocket，默认启用 |
 | `work_manager` | `scheduleOnce`, `schedulePeriodic`, `cancel`, `list` | 受控 WorkManager 调度，不是完整 Rhino `tasks` |
 | `java` | `type`, `callStatic`, `new` | 实验性 allowlist，不是 Rhino Java bridge |
 
@@ -455,9 +460,9 @@ TypeScript 声明还覆盖：
 | npm | Android 终端内 `npm i --no-bin-links` | Android 运行时 npm install 尚未完成，当前偏 host/vendor |
 | Node builtins | 文档示例更接近普通 Node 使用 | 受 Safe Profile 约束，很多 builtin 是 wrapper 或 denial |
 | 文件系统 | 示例可读 Android 绝对路径 | scoped fs，默认拒绝越权路径 |
-| Java/Android | `$autojs.java`、`require("rhino").install()` | P13-12 已有只读 `$autojs` 和 gated `$autojs.java` facade；P13-13 增加实验 allowlist 下的 `java.lang.Math`、`java.util.UUID`、`android.graphics.Rect` handle 构造/实例调用/字段读取/释放；P13-14 增加显式 experimental `rhino.install` Java proxy，可安装 `Packages`、`java`、`android` 代理但仍只走 allowlist；P13-15 决定 `importClass`/`importPackage` 在 Node 中稳定拒绝并给出赋值式迁移；P13-16 决定 `JavaAdapter` 稳定拒绝并预留 `java.defineClass()` / `$autojs.java.defineClass()` replacement；默认仍拒绝 Java 调用，线程 dispatch、实际 proxy-interface provider 和完整 Java/Rhino parity 仍未完成 |
+| Java/Android | `$autojs.java`、`require("rhino").install()` | allowlist Java facade 已稳定启用；`java.lang.Math`、`java.util.UUID`、`android.graphics.Rect` 通过 JSON/opaque handle 使用；`rhino.install({ explicit: true })` 可安装受同一 allowlist 约束的代理；`importClass`/`importPackage`/`JavaAdapter` 仍稳定拒绝 |
 | Rhino 全局兼容 | 第一代 API 保留在 Rhino；Node 需 require 新模块 | Rhino 保留；Node 有显式 `autojs6:compat`，但不默认安装 globals |
-| 线程 | Node event loop，`worker_threads` 方向受限 | `worker_threads` 默认关闭，Rhino `threads` 不作为 Node 兼容目标 |
+| 线程 | Node event loop，`worker_threads` 方向受限 | bounded `worker_threads` 稳定启用；Rhino `threads` 共享对象模型不作为兼容目标 |
 | UI 线程 | `"nodejs ui"` / `"ui-thread"` | P13-11 已补 `NodeEntryDirective` metadata、descriptor/project config 透传和 gate；P13-17 记录 direct `require("ui")` live Activity provider evidence、JSON layout/update/event drain/close 和 provider cleanup；Activity lifecycle、Back/Recents、orientation、live packaged UI、实际 UI-thread dispatch 仍未等价 |
 | 网络 | 文档列出 `http/https` 等 Node 能力 | raw network 默认拒绝，推荐受控 `fetch`/`axios`/`websocket` |
 | 打包 | Pro v9 自有打包体系 | AutoJs6 已有 packaged smoke、runtime libs、release flavor、ABI 策略和 packaged long-running；R6 仍需用当前 persistent/plugin 生命周期重验 packaged 证据 |
@@ -530,9 +535,9 @@ const compat = require("autojs6:compat");
 - `"nodejs compat"` directive 在 Phase 11A 中被拒绝，原因是过于隐式，不利于
   source scanning 和 packaged 行为审计。
 - `require("rhino-compat")` 被保留，不作为当前入口。
-- `require("rhino")` 已保留为受控 facade；`rhino.run({ experimental: true })`
+- `require("rhino")` 已保留为受控 facade；`rhino.run({ explicit: true })`
   是 JSON-only POC；默认 `rhino.install()` 仍拒绝。
-- P13-14 只实现了显式 experimental `rhino.install` Java proxy POC，尚不是
+- `rhino.install({ explicit: true })` 提供稳定 allowlist Java proxy，但不是
   Pro v9 的完整 `require("rhino").install()` 等价行为。
 - P13-15 已决策 `importClass` / `importPackage`：Node 中不模拟 Rhino 动态
   import 语义，显式 helper 返回 `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`，
@@ -628,7 +633,7 @@ await ok.click({ timeoutMs: 3000 });
 | `storages` | 本地存储 | `storage/storages`, `autojs6:compat.storages` | 部分，JSON-only、命名空间隔离 |
 | `sqlite` | SQLite helpers | `database/sqlite`, callable `compat.sqlite` | `supported_async` |
 | `shell` / `shizuku` | shell/root/shizuku | `shell.exec`, callable `compat.shell` | shell 部分；Shizuku 未开放 |
-| `http` | Rhino http helpers | controlled `fetch` / `axios` / network facade | API 不等价，默认 experimental |
+| `http` | Rhino http helpers | controlled `fetch` / `axios` / network facade；另有原生 Node `http` | API 不等价，但均默认可用 |
 | `web` / `WebSocket` | WebSocket 等 | `websocket` controlled bridge | 部分 |
 | `media` | 播放/录音等多媒体 | 暂无完整 Node bridge | 部分或待实现 |
 | `sensors` | 传感器监听 | `sensors` limited subset | 部分 |
@@ -649,7 +654,7 @@ await ok.click({ timeoutMs: 3000 });
 | `formatter` / `converter` | 格式化、单位转换 | `formatter/fmt`, `converter/cvt` | 已有子集 |
 | `s13n` / `jsox` / `util` | 序列化、JS 扩展、工具 | `s13n.bytes`, `autojs6:compat.s13n.bytes`, Node builtin 或暂无对应 | `s13n.bytes` 已支持，其余继续分批决策 |
 | `continuation` | Rhino continuation/coroutine | Node Promise/async 模型 | 不建议等价迁移 |
-| Java bridge | `Packages`, `java.*`, `android.*`, `importClass`, `JavaAdapter` | P13-13 experimental `java` allowlist；P13-14 `rhino.install` Java proxy POC；P13-15 rejects `importClass`/`importPackage` with stable migration guidance | 默认不等价 |
+| Java bridge | `Packages`, `java.*`, `android.*`, `importClass`, `JavaAdapter` | 稳定 `java` allowlist 与 explicit `rhino.install` proxy；`importClass`/`importPackage`/`JavaAdapter` stable-denied | 非完整 Rhino 等价 |
 
 ### 最关键的脚本开发者缺口
 
@@ -746,7 +751,7 @@ java.lang.StringBuilder;      // 当前不是默认 Node 能力
 - `websocket`
 - `work_manager`
 - JS-only `plugins`
-- experimental `java`
+- stable allowlisted `java`
 
 ### 已有或部分可用的 Rhino compat facade
 
@@ -845,8 +850,8 @@ final gate。完整命令和证据字段见
 
 当前 Safe profile 的 conditional decisions 已解决：
 
-- `worker_threads`：`intentionally_unsupported`；默认保持拒绝，未来 promotion
-  需要重新打开 native、packaged、resource 和 security evidence gate。
+- `worker_threads`：`closed`；已通过三 ABI runtime kit 稳定启用，native、
+  packaged、resource、cleanup 和 security evidence 继续作为回归门禁。
 - `controlled_wasi`：`closed`；当前只支持纯 WebAssembly，raw/controlled
   WASI API 保持拒绝，未来 `autojs6:wasi` 是独立 promotion work。
 - `x86`：`optional`，不是 Phase 11 必需 ABI。
@@ -854,11 +859,11 @@ final gate。完整命令和证据字段见
 ### 与 Pro v9 的能力差距
 
 - Android 端运行时 `npm install` 和全局 npm 安装能力未完成。
-- P13-12 已提供 `$autojs` global v1 和 gated `$autojs.java` facade；P13-13
-  已在实验 allowlist 下补充 Rect handle 实例调用、字段读取和释放；默认仍拒绝
-  Java 调用，完整 Java object/thread parity 尚未完成。
-- 默认 `require("rhino").install()` 仍拒绝；P13-14 仅提供
-  `rhino.install({ experimental: true })` Java proxy POC。
+- P13-12/P13-13 的 `$autojs.java` 与 `require("java")` 已正式化为稳定精确
+  allowlist，支持 Math、UUID 与 Rect handle 的受控调用、字段读取和释放；
+  反射、ClassLoader、进程、原生库与 raw Android object 仍拒绝。
+- 默认无参数 `require("rhino").install()` 仍拒绝自动全局变更；
+  `rhino.install({ explicit: true, target })` 是稳定显式 Java proxy 入口。
 - P13-15 已决定 `importClass` / `importPackage` 不作为 Node 能力；显式
   helper 稳定返回 `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`。
 - P13-16 已决定 `JavaAdapter` 不作为 Node 能力；显式 helper 稳定返回
@@ -1155,43 +1160,36 @@ grant lifecycle, packaged smoke, and per-root symlink/realpath audit land.
 
 P13-33 records desktop fs advanced APIs as partial: scoped streams,
 `FileHandle`, fd APIs, `opendir`, watchers, and `realpath` are present enough
-for current Node Profile v1.1 evidence, but remain scoped, execution-owned, and
+for current Node Profile v1.2 evidence, but remain scoped, execution-owned, and
 Android-platform-limited. Pro scripts that expect broad filesystem roots, raw
 native fds, recursive watchers, or desktop-identical packaged watcher/fd
 lifecycle behavior still need future profile promotion work.
 
-P13-34 records `worker_threads` opt-in promotion as partial: Safe Node still
-rejects worker threads by default, while `workerThreadsProfile` describes the
-request-local experimental preflight, worker policy, bridge isolation,
-MessageChannel/transfer-list/WorkerPool targets, and packaged worker state.
-This is not yet Pro/desktop parity for worker scripts because native
-availability, native-available experimental gate evidence, native-available
-packaged `.mjs` worker smoke, and Android resource ceilings remain open. Current
-resource/crash evidence references are recorded, but must be rerun on a
-native-worker-capable target before promotion.
+P13-34 records the historical worker promotion work. The current v1.2 contract
+requires native runnable `worker_threads` on every published ABI, bounded
+MessageChannel/transfer-list/WorkerPool behavior, packaged `.mjs` worker
+smoke, smaller worker authority, and Android resource/RSS evidence.
 
 P13-35 records process-worker replacement as partial: Safe Node now exposes
 `processWorkerReplacementProfile` diagnostics that choose
 `worker_threads.WorkerPool` as the current replacement path without introducing
-a `process_worker` or `compute_worker` facade. `child_process` remains denied,
-`shell` remains the scoped command bridge, `worker_computation` stays
+a `process_worker` or `compute_worker` facade. Native `child_process` is a
+separate stable builtin, `shell` remains the scoped capability bridge, and
+`worker_computation` stays
 unpromoted, and `second_execution_slot` is inherited as closed by P13-06
 without promoting a process-worker facade. For v1.1 there is no user-facing process-worker API or UX; any scoped
 `child_process` runner remains a separate P13-40 track.
 
-P14-32 records the v1.2 desktop runtime doc/release sync as
-`worker_intentionally_unsupported_v1_2`: runnable `worker_threads`, packaged
-workers, WorkerPool replacement APIs, `process_worker`, `compute_worker`,
-raw process handles, stdio streams, signals, `spawn`, `fork`, and stable
-`child_process` authority remain unpromoted until native, packaged, resource,
-UX, security, and rollback evidence exists.
+P14-32 records the older v1.2 planning decision. It is superseded by the current
+`worker_threads_stable_enabled_v1_2` baseline. `process_worker` and
+`compute_worker` facades remain absent; native `child_process` is separately
+stable.
 
-P13-40 records child_process scoped runner as partial: Safe Node now exposes
-`childProcessProfile` diagnostics while `child_process` and
-`node:child_process` stay denied. The current migration path remains the
-separate `shell` bridge; a real Desktop scoped runner still needs app-private
-allowlisted binaries, bounded stdio, timeout/cancel/kill/cleanup behavior,
-packaged evidence, and hostile corpus coverage.
+P13-40 records the historical scoped-runner plan. Current v1.2 exposes native
+`child_process` and `node:child_process` by default under the Android app
+sandbox, while the `shell` bridge remains a separate controlled provider.
+Executable validation, timeout, stdio bounds, cancel/kill, and child cleanup
+are caller responsibilities for the native builtin.
 
 P13-41 records ESM loader parity as partial: Safe Node now exposes
 `esmLoaderProfile` diagnostics for the AutoJs6-managed partial ESM loader.
@@ -1292,12 +1290,13 @@ native addon loading, inspector, and WASI in
 `RELAXED_CAPABILITY_SECURITY_CORPUS.json`, with positive tests, negative tests,
 abuse cases, CI evidence, runtime guards, promotion preconditions, and rollback
 posture. This creates the security evidence lane needed for Pro/Desktop parity,
-but raw sockets, expanded roots, raw process/native handles, raw WASI,
-inspector, native addons, and release Java interop remain unpromoted.
+当前受支持的原生 socket、`child_process`、worker 与 allowlist Java interop
+均作为稳定能力接受安全语料回归；扩展文件系统根、raw WASI、Inspector 与
+native addon 仍属于门禁、禁用或不支持能力。
 
 P13-51 records per-profile rollback playbook as partial: AutoJs6 Node now
-documents default-off Pro/Desktop/Debug profile switches, relaxed-capability
-rollback switches, Safe-profile crash/stress fallback, and packaged APK
+documents the remaining Pro/Desktop/Debug profile controls, stable-capability
+runtime policy/release-revert containment, Safe-profile crash/stress fallback, and packaged APK
 downgrade actions through `NodeProfileRollbackPolicy`,
 `autojs6:profile.profileRollbackPolicy`, and Node Doctor. This supports the
 long-term Auto.js Pro plus desktop Node target without silently granting
@@ -1417,10 +1416,9 @@ The v1.2 Pro comparison status is:
 - recorder: status and denial-oriented examples are migration evidence; real
   recording sessions, foreground microphone disclosure, temp output ownership,
   and packaged stress remain future-only.
-- worker policy: P14-32 records `worker_intentionally_unsupported_v1_2`;
-  runnable workers, packaged workers, WorkerPool replacement APIs,
-  process-worker facades, and raw `child_process` are not v1.2 Pro/Desktop
-  runtime claims.
+- worker/process policy: bounded runnable and packaged `worker_threads` plus
+  native `child_process` are stable; separate process-worker facades remain
+  absent.
 - packaged behavior: P14-34 is `host_contract_ready`, not a real device
   install-run archive claim.
 - rollback: Safe downgrade, packaged metadata mismatch, profile rollback, and

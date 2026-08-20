@@ -66,32 +66,15 @@ data class NodeRuntimeFeatureFlag(
         get() = packagedApkOverrideAllowed
 
     val releaseForbidden: Boolean
-        get() = status == "experimental" || securityLevel == "high" || securityLevel == "critical"
+        get() = status == "disabled" || status == "unsupported"
 }
 
 object NodeRuntimeCapabilities {
 
     const val PROFILE_NAME = "AutoJs6 Safe Node Profile"
-    const val ENGINE_VERSION = "autojs6-node-profile-v1.1"
+    const val ENGINE_VERSION = "autojs6-node-profile-v1.2"
     const val NODE_HEADER_VERSION = "24.5.0"
     const val NODE_VERSION_EXPECTED_PREFIX = "v24.5.0"
-
-    const val ESM_EXPERIMENTAL_PROPERTY = "autojs.nodejs.esm.experimental"
-    const val ESM_EXPERIMENTAL_DEFAULT = true
-    const val DYNAMIC_IMPORT_LOCAL_PROPERTY = "autojs.nodejs.dynamicImport.local"
-    const val DYNAMIC_IMPORT_LOCAL_DEFAULT = true
-    const val DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY = "autojs.nodejs.dynamicImport.experimental"
-    const val DYNAMIC_IMPORT_EXPERIMENTAL_DEFAULT = false
-    const val NETWORK_EXPERIMENTAL_PROPERTY = "autojs.nodejs.network.experimental"
-    const val NETWORK_EXPERIMENTAL_DEFAULT = false
-    const val RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY = "autojs.nodejs.rawNetworkModules.experimental"
-    const val RAW_NETWORK_MODULES_EXPERIMENTAL_DEFAULT = false
-    const val WORKER_THREADS_EXPERIMENTAL_PROPERTY = "autojs.nodejs.worker_threads.experimental"
-    const val WORKER_THREADS_EXPERIMENTAL_DEFAULT = false
-    const val CHILD_PROCESS_EXPERIMENTAL_PROPERTY = "autojs.nodejs.child_process.experimental"
-    const val CHILD_PROCESS_EXPERIMENTAL_DEFAULT = false
-    const val JAVA_INTEROP_EXPERIMENTAL_PROPERTY = "autojs.nodejs.javaInterop.experimental"
-    const val JAVA_INTEROP_EXPERIMENTAL_DEFAULT = false
 
     const val RUNTIME_SCRIPT_SOURCE_MAX_BYTES = 524_288
     const val RUNTIME_MODULE_SOURCE_MAX_BYTES = 16_777_216
@@ -102,68 +85,68 @@ object NodeRuntimeCapabilities {
         NodeRuntimeFeatureFlag(
             id = "esm",
             diagnosticName = "esm",
-            gradleProperty = ESM_EXPERIMENTAL_PROPERTY,
-            defaultEnabled = ESM_EXPERIMENTAL_DEFAULT,
-            buildTimeOverrideAllowed = true,
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "medium",
-            status = "partial",
+            status = "stable",
         ),
         NodeRuntimeFeatureFlag(
             id = "dynamic_import",
             diagnosticName = "dynamicImport",
-            gradleProperty = DYNAMIC_IMPORT_LOCAL_PROPERTY,
-            defaultEnabled = DYNAMIC_IMPORT_LOCAL_DEFAULT,
-            buildTimeOverrideAllowed = true,
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "medium",
-            status = "partial",
+            status = "stable",
         ),
         NodeRuntimeFeatureFlag(
             id = "network",
             diagnosticName = "network",
-            gradleProperty = NETWORK_EXPERIMENTAL_PROPERTY,
-            defaultEnabled = NETWORK_EXPERIMENTAL_DEFAULT,
-            buildTimeOverrideAllowed = true,
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "experimental",
+            status = "stable",
         ),
         NodeRuntimeFeatureFlag(
             id = "raw_node_network_modules",
             diagnosticName = "rawNodeNetworkModules",
-            gradleProperty = RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
-            defaultEnabled = RAW_NETWORK_MODULES_EXPERIMENTAL_DEFAULT,
-            buildTimeOverrideAllowed = true,
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "experimental",
+            status = "stable",
         ),
         NodeRuntimeFeatureFlag(
             id = "websocket",
             diagnosticName = "webSocket",
             gradleProperty = null,
-            defaultEnabled = false,
+            defaultEnabled = true,
             buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "experimental",
+            status = "stable",
         ),
         NodeRuntimeFeatureFlag(
             id = "worker_threads",
             diagnosticName = "workerThreads",
-            gradleProperty = WORKER_THREADS_EXPERIMENTAL_PROPERTY,
-            defaultEnabled = WORKER_THREADS_EXPERIMENTAL_DEFAULT,
-            buildTimeOverrideAllowed = true,
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "experimental",
+            status = "stable",
         ),
         NodeRuntimeFeatureFlag(
             id = "fs_streams",
@@ -212,13 +195,13 @@ object NodeRuntimeCapabilities {
         NodeRuntimeFeatureFlag(
             id = "java_interop",
             diagnosticName = "javaInterop",
-            gradleProperty = JAVA_INTEROP_EXPERIMENTAL_PROPERTY,
-            defaultEnabled = JAVA_INTEROP_EXPERIMENTAL_DEFAULT,
-            buildTimeOverrideAllowed = true,
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "critical",
-            status = "experimental",
+            status = "stable",
         ),
         NodeRuntimeFeatureFlag(
             id = "native_addon",
@@ -234,13 +217,13 @@ object NodeRuntimeCapabilities {
         NodeRuntimeFeatureFlag(
             id = "child_process",
             diagnosticName = "childProcess",
-            gradleProperty = CHILD_PROCESS_EXPERIMENTAL_PROPERTY,
-            defaultEnabled = CHILD_PROCESS_EXPERIMENTAL_DEFAULT,
-            buildTimeOverrideAllowed = true,
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "experimental",
+            status = "stable",
         ),
     )
     val featureFlagsById = featureFlags.associateBy { it.id }
@@ -250,8 +233,6 @@ object NodeRuntimeCapabilities {
             put(flag.diagnosticName.lowercase(Locale.US), flag.id)
             flag.gradleProperty?.let { put(it.lowercase(Locale.US), flag.id) }
         }
-        put(DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY.lowercase(Locale.US), "dynamic_import")
-        put(RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY.lowercase(Locale.US), "raw_node_network_modules")
         put("dynamicimport", "dynamic_import")
         put("rawnodenetworkmodules", "raw_node_network_modules")
         put("workerthreads", "worker_threads")
@@ -268,10 +249,6 @@ object NodeRuntimeCapabilities {
     val projectAllowedFeatureFlags = featureFlags.filter { it.projectAllowed }
     val packagedAllowedFeatureFlags = featureFlags.filter { it.packagedAllowed }
     val releaseForbiddenFeatureFlags = featureFlags.filter { it.releaseForbidden }
-    val experimentalFlags = featureFlags
-        .filter { it.status == "experimental" && it.gradleProperty != null }
-        .associate { it.gradleProperty!! to it.defaultEnabled }
-
     fun normalizeFeatureFlagId(value: String): String {
         val normalized = value
             .trim()
@@ -371,9 +348,9 @@ object NodeRuntimeCapabilities {
                 flag == null -> "unknown_flag"
                 target == NodeRuntimeFeatureFlagOverrideTarget.PROJECT_JSON && !flag.projectJsonOverrideAllowed -> "project_json_override_denied"
                 target == NodeRuntimeFeatureFlagOverrideTarget.PACKAGED_APK && !flag.packagedApkOverrideAllowed -> "packaged_apk_override_denied"
-                target == NodeRuntimeFeatureFlagOverrideTarget.BUILD_DEBUG && requestedValue && !flag.buildTimeOverrideAllowed -> "build_time_override_denied"
+                target == NodeRuntimeFeatureFlagOverrideTarget.BUILD_DEBUG && !flag.buildTimeOverrideAllowed -> "build_time_override_denied"
                 target == NodeRuntimeFeatureFlagOverrideTarget.BUILD_RELEASE && requestedValue && flag.releaseForbidden -> "release_forbidden"
-                target == NodeRuntimeFeatureFlagOverrideTarget.BUILD_RELEASE && requestedValue && !flag.buildTimeOverrideAllowed -> "build_time_override_denied"
+                target == NodeRuntimeFeatureFlagOverrideTarget.BUILD_RELEASE && !flag.buildTimeOverrideAllowed -> "build_time_override_denied"
                 else -> null
             }
             if (reason == null && flag != null) {
@@ -576,7 +553,6 @@ object NodeRuntimeCapabilities {
     ): Map<String, Boolean> {
         val requested = linkedMapOf<String, Boolean>()
         collectFeatureFlagValue(nodeConfig.opt("featureFlags"), "$source.featureFlags", requested, warnings)
-        collectFeatureFlagValue(nodeConfig.opt("experimentalFlags"), "$source.experimentalFlags", requested, warnings)
         return requested
     }
 

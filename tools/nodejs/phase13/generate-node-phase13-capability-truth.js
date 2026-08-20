@@ -119,7 +119,7 @@ function parseFeatureFlags(text) {
       packagedApkOverrideAllowed: match[7] === "true",
       securityLevel: match[8],
       status: match[9],
-      releaseForbidden: match[9] === "experimental" || ["high", "critical"].includes(match[8]),
+      releaseForbidden: match[9] === "disabled" || match[9] === "unsupported",
     });
   }
   return flags;
@@ -164,6 +164,7 @@ function buildChecks(files, report) {
   const riskyEnabledByDefault = report.featureFlags.filter((flag) =>
     flag.defaultEnabled &&
       ["high", "critical"].includes(flag.securityLevel) &&
+      flag.status !== "stable" &&
       !documentedDefaultOnHighRisk.has(flag.id));
   const requiredProfiles = [
     "safe_default",
@@ -196,18 +197,18 @@ function buildChecks(files, report) {
     check(
       "high-risk-denied-by-default",
       riskyEnabledByDefault.length === 0,
-      "High and critical security feature flags must remain disabled by default unless a documented promotion gate explicitly defaults them on.",
+      "Non-stable high and critical feature flags must remain disabled by default unless the current profile explicitly documents the partial surface.",
     ),
     check(
       "profile-docs-current",
       includesAll(files.profileDocs.text, [
-        "Phase 13 Profile Model",
-        "safe_default",
-        "pro_compat_opt_in",
-        "desktop_compat_opt_in",
-        "debug_unsafe_lab",
+        "AutoJs6 Node.js Compatibility Profile",
+        "## Feature Flags",
+        "| worker_threads | true | true | stable |",
+        "| child_process | true | true | stable |",
+        "| inspector | false | false | disabled |",
       ]),
-      "Compatibility profile docs must describe the Phase 13 profile model.",
+      "Compatibility profile docs must describe the current stable and disabled runtime capabilities.",
     ),
     check(
       "task-checklist-current",

@@ -109,7 +109,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                     )
                     .put(
                         "livenessRecoverabilityRationale",
-                        "A process kill would end the continuous-runtime reuse experiment. " +
+                        "A process kill would end the continuous-runtime reuse soak run. " +
                                 "Periodic checks instead validate the live required-plugin Binder session, " +
                                 "runtime-ready state, persistent-process contract, stable PID, and host reconnect metadata. " +
                                 "Process-death recovery is proven separately by device scenario R5_07.",

@@ -166,7 +166,7 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
                 executeFile(fixture.root, missingEntry, "missing CommonJS module"),
             )
 
-            if (BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED) {
+            if (BuildConfig.NODEJS_ESM_ENABLED) {
                 File(fixture.root, "plain-esm-child.mjs").writeText(
                     """export const value = "plain-esm-ok";""",
                     StandardCharsets.UTF_8,
@@ -276,7 +276,7 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
                 assertEquals(1L, encryptedPackageProvider.decryptedSourceCount)
                 assertTrue(encryptedPackageProvider.sourceBytes > 0L)
 
-                if (BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED) {
+                if (BuildConfig.NODEJS_ESM_ENABLED) {
                     writeEncryptedScript(
                         File(fixture.root, "encrypted-static-esm-child.mjs"),
                         """export const value = "encrypted-static-esm-ok";""",
@@ -300,9 +300,9 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
                 }
 
                 if (
-                    BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED &&
-                    BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED &&
-                    BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED
+                    BuildConfig.NODEJS_ESM_ENABLED &&
+                    BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED &&
+                    BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED
                 ) {
                     writeEncryptedScript(
                         File(fixture.root, "encrypted-dynamic-import-child.mjs"),

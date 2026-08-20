@@ -151,7 +151,7 @@ const KNOWN_NODE_BUILTINS = new Set([
 const COMPATIBILITY_STATUS_RANK = new Map([
   ["compatible", 0],
   ["compatible with capability", 1],
-  ["experimental", 2],
+  ["partial", 2],
   ["unsupported", 3],
   ["unsafe", 4]
 ]);
@@ -874,10 +874,10 @@ function analyzeCompatibility(root, projectJson, packageJson, dependencyScan) {
     signal(
       signals,
       "package-exports",
-      "experimental",
+      "partial",
       "PACKAGE_EXPORTS_CONDITIONS_PARTIAL",
       "node_modules",
-      "Dependency graph uses package exports/imports conditions covered by the v1.1 partial resolver gate."
+      "Dependency graph uses package exports/imports conditions covered by the current partial resolver."
     );
   }
   if (dependencyScan.fileCount > MAX_DEPENDENCY_SCAN_ENTRIES) {
@@ -886,19 +886,33 @@ function analyzeCompatibility(root, projectJson, packageJson, dependencyScan) {
 
   for (const [capability, modules] of capabilityRequirements) {
     const declared = declaredCapabilities.has(capability);
-    const baseStatus = capability === "raw_network" || capability === "child_process" || capability === "vm" || capability === "inspector"
+    const baseStatus = capability === "inspector"
       ? "unsupported"
-      : capability === "worker_threads"
-        ? "experimental"
-        : "compatible with capability";
-    const status = !declared && baseStatus === "compatible with capability" ? "unsupported" : baseStatus;
+      : capability === "vm"
+        ? "partial"
+        : capability === "raw_network" || capability === "child_process" || capability === "worker_threads"
+          ? "compatible"
+          : "compatible with capability";
+    const declarationRequired = baseStatus === "compatible with capability";
+    const unsupported = baseStatus === "unsupported";
+    const status = !declared && declarationRequired ? "unsupported" : baseStatus;
     signal(
       signals,
       "capability",
       status,
-      declared ? "CAPABILITY_REQUIRED" : "CAPABILITY_DECLARATION_MISSING",
+      unsupported
+        ? "CAPABILITY_UNSUPPORTED"
+        : !declarationRequired
+          ? "RUNTIME_CAPABILITY_AVAILABLE"
+          : declared
+            ? "CAPABILITY_REQUIRED"
+            : "CAPABILITY_DECLARATION_MISSING",
       root,
-      "Project requires capability '" + capability + "' from " + Array.from(modules).sort().join(", ") + ".",
+      unsupported
+        ? "Runtime capability '" + capability + "' is unsupported for " + Array.from(modules).sort().join(", ") + "."
+        : declarationRequired
+          ? "Project requires capability '" + capability + "' from " + Array.from(modules).sort().join(", ") + "."
+          : "Runtime capability '" + capability + "' is available for " + Array.from(modules).sort().join(", ") + ".",
       { capability, declared, modules: Array.from(modules).sort() }
     );
   }
@@ -967,7 +981,7 @@ function analyzeEntryFormat(root, projectJson, packageJson, signals) {
       ? "cjs"
       : "unknown";
   if (format === "esm") {
-    signal(signals, "module-format", "experimental", "ESM_ENTRY_PARTIAL", entryValue || root, "ESM entry support is partial in Node Profile v1.1.");
+    signal(signals, "module-format", "compatible", "ESM_ENTRY_STABLE", entryValue || root, "ESM entry support is stable in Node Profile v1.2.");
   }
   return {
     path: entryValue,
@@ -1148,8 +1162,8 @@ function compatibilityHint(code, status) {
   if (code === "CAPABILITY_DECLARATION_MISSING") {
     return "Declare the required Safe Node Profile capability in project.json or package.json.";
   }
-  if (code === "ESM_ENTRY_PARTIAL" || code === "PACKAGE_EXPORTS_CONDITIONS_PARTIAL") {
-    return "Keep this project on the v1.1 partial support gate and retain CommonJS fallback coverage where possible.";
+  if (code === "PACKAGE_EXPORTS_CONDITIONS_PARTIAL") {
+    return "Retain CommonJS fallback coverage for package condition combinations outside the current resolver subset.";
   }
   if (status === "unsafe") {
     return "Remove the unsafe native/process/fs behavior before packaging.";

@@ -7,7 +7,7 @@ import org.json.JSONObject
 object NodeProfileRollbackPolicy {
 
     const val SCHEMA = "autojs6-node-profile-rollback-policy-v1"
-    const val STATUS = "playbook_partial"
+    const val STATUS = "stable_features"
 
     const val SAFE_DEFAULT = NodeProfileSelectionDiagnostics.SAFE_DEFAULT
     const val PRO_COMPAT_OPT_IN = NodeProfileSelectionDiagnostics.PRO_COMPAT_OPT_IN
@@ -25,14 +25,7 @@ object NodeProfileRollbackPolicy {
         DEBUG_UNSAFE_LAB_PROPERTY,
     )
 
-    fun capabilityKillSwitchProperties(): List<String> = listOf(
-        NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY,
-        NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
-        NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY,
-        NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY,
-        NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY,
-        RELAXED_CAPABILITIES_PROPERTY,
-    )
+    fun capabilityKillSwitchProperties(): List<String> = emptyList()
 
     fun toJsonObject(): JSONObject = JSONObject().apply {
         put("schema", SCHEMA)
@@ -78,14 +71,14 @@ object NodeProfileRollbackPolicy {
         .put(DEBUG_UNSAFE_LAB, DEBUG_UNSAFE_LAB_PROPERTY)
 
     private fun capabilityKillSwitchesJson(): JSONObject = JSONObject()
-        .put("network", NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY)
-        .put("raw_network", NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY)
-        .put("worker_threads", NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY)
-        .put("java_interop", NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY)
+        .put("network", "built_in_stable_no_build_switch")
+        .put("raw_network", "built_in_stable_no_build_switch")
+        .put("worker_threads", "built_in_stable_no_build_switch")
+        .put("java_interop", "built_in_stable_no_build_switch")
         .put("all_relaxed_capabilities", RELAXED_CAPABILITIES_PROPERTY)
-        .put("raw_node_network_modules", NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY)
+        .put("raw_node_network_modules", "built_in_stable_no_build_switch")
         .put("filesystem_relaxation", "safe_profile_scoped_fs")
-        .put("child_process", NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY)
+        .put("child_process", "built_in_stable_no_build_switch")
         .put("native_addon", "stable_denial_no_runtime_switch")
         .put("inspector", "debug_profile_only_no_runtime_switch")
         .put("wasi", "stable_denial_no_runtime_switch")
@@ -128,38 +121,38 @@ object NodeProfileRollbackPolicy {
     private fun capabilityStates(): List<CapabilityState> = listOf(
         CapabilityState(
             id = "network",
-            profile = DESKTOP_COMPAT_OPT_IN,
-            property = NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY,
-            enabled = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
-            rollbackAction = "set_autojs_nodejs_network_experimental_false",
+            profile = SAFE_DEFAULT,
+            property = "built_in_stable",
+            enabled = BuildConfig.NODEJS_NETWORK_ENABLED,
+            rollbackAction = "enforce_network_permission_policy",
         ),
         CapabilityState(
             id = "raw_network",
-            profile = DESKTOP_COMPAT_OPT_IN,
-            property = NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
-            enabled = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
-            rollbackAction = "set_autojs_nodejs_rawNetworkModules_experimental_false",
+            profile = SAFE_DEFAULT,
+            property = "built_in_stable",
+            enabled = BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
+            rollbackAction = "enforce_network_and_sandbox_policy",
         ),
         CapabilityState(
             id = "raw_node_network_modules",
-            profile = DESKTOP_COMPAT_OPT_IN,
-            property = NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
-            enabled = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
-            rollbackAction = "set_autojs_nodejs_rawNetworkModules_experimental_false",
+            profile = SAFE_DEFAULT,
+            property = "built_in_stable",
+            enabled = BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
+            rollbackAction = "enforce_network_and_sandbox_policy",
         ),
         CapabilityState(
             id = "worker_threads",
-            profile = DESKTOP_COMPAT_OPT_IN,
-            property = NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY,
-            enabled = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
-            rollbackAction = "set_autojs_nodejs_worker_threads_experimental_false",
+            profile = SAFE_DEFAULT,
+            property = "built_in_stable",
+            enabled = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
+            rollbackAction = "enforce_worker_resource_policy",
         ),
         CapabilityState(
             id = "java_interop",
-            profile = PRO_COMPAT_OPT_IN,
-            property = NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY,
-            enabled = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
-            rollbackAction = "set_autojs_nodejs_javaInterop_experimental_false",
+            profile = SAFE_DEFAULT,
+            property = "built_in_stable",
+            enabled = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
+            rollbackAction = "enforce_java_allowlist_policy",
         ),
         CapabilityState(
             id = "all_relaxed_capabilities",
@@ -177,10 +170,10 @@ object NodeProfileRollbackPolicy {
         ),
         CapabilityState(
             id = "child_process",
-            profile = DESKTOP_COMPAT_OPT_IN,
-            property = NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY,
-            enabled = BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
-            rollbackAction = "set_autojs_nodejs_child_process_experimental_false",
+            profile = SAFE_DEFAULT,
+            property = "built_in_stable",
+            enabled = BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
+            rollbackAction = "enforce_process_permission_policy",
         ),
         CapabilityState(
             id = "native_addon",
@@ -260,9 +253,10 @@ object NodeProfileRollbackPolicy {
 
     private fun releasePolicyJson(): JSONObject = JSONObject()
         .put("releaseBuildForbidsDebugUnsafeLab", true)
-        .put("releaseBuildForbidsExperimentalProfiles", true)
+        .put("releaseBuildHasFeatureGates", false)
+        .put("stableFeaturesIncluded", true)
         .put("safeProfileReleaseFallback", true)
-        .put("rollbackPropertiesDefaultFalse", true)
+        .put("runtimePoliciesRemainEnforced", true)
 
     private data class ProfileState(
         val id: String,

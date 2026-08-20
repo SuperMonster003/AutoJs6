@@ -16,8 +16,8 @@ Ask for these before triage starts:
   release, debug, or packaged APK build.
 - script entry type: editor script, project file, packaged APK entry, `.cjs`,
   `.mjs`, package bin, or `package.json` script entry.
-- selected backend and feature flags, including Node identity profile and any
-  experimental flags.
+- selected backend, Node identity/profile, stable capability states, and any
+  non-stable profile surface involved.
 - Node Doctor JSON/text report.
 - logcat excerpt covering process start through crash or timeout.
 - native tombstone or Android bugreport excerpt when a native crash occurred.
@@ -90,8 +90,8 @@ Use these labels consistently:
   directory, or package target escape failures.
 - `node-resolver`: CommonJS, package exports/imports, dynamic require fallback,
   or resolver trace failures.
-- `node-experimental`: ESM, worker, controlled network, Java interop, `vm`, or
-  other non-stable feature failures.
+- `node-capability`: ESM, worker, controlled/native network, child process,
+  Java interop, `vm`, or other capability failures.
 
 Severity:
 
@@ -101,14 +101,15 @@ Severity:
   bridge resource leak.
 - P2: stable CommonJS, scoped fs, bridge, resolver, or packaged compatibility
   regression.
-- P3: experimental feature failure, diagnostics polish, device infrastructure,
+- P3: partial/non-stable surface failure, diagnostics polish, device infrastructure,
   or documentation-only issue.
 
 ## First Response Checklist
 
 1. Confirm whether the report is main app or packaged APK.
 2. Confirm production identity versus side-by-side test identity.
-3. Check whether the failing API is stable, experimental, or explicitly denied.
+3. Check whether the failing API is stable, partial, disabled, unsupported, or
+   planned.
 4. Check the logcat crash process: main app, `:nodejs_embedded`, packaged app,
    or test instrumentation.
 5. Check the release manifest and Node Doctor for feature flags and native

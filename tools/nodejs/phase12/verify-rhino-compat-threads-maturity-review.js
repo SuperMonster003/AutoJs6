@@ -15,7 +15,7 @@ const FILES = {
   threadsPolicy: "docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md",
   workerDesign: "docs/nodejs/design/WORKER_THREADS.md",
   workerPolicy: "docs/nodejs/releases/V1_1_WORKER_POLICY.md",
-  workerEvaluation: "docs/nodejs/reports/WORKER_EXPERIMENTAL_EVALUATION.md",
+  workerEvaluation: "docs/nodejs/reports/WORKER_PRE_GA_EVALUATION.md",
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.md",
   migration: "docs/nodejs/MIGRATION_FROM_RHINO.md",
   runtimeCapabilities: "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt",

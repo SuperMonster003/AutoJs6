@@ -980,10 +980,10 @@ class NodeFetchBridgeInstrumentationTest {
     }
 
     @Test
-    fun jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled() {
+    fun jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkEnabled() {
         assumeTrue(
-            "Build with -Pautojs.nodejs.network.experimental=true to run the live controlled fetch provider smoke.",
-            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+            "Build with -Pautojs.nodejs.network.stable=true to run the live controlled fetch provider smoke.",
+            BuildConfig.NODEJS_NETWORK_ENABLED,
         )
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node controlled fetch live provider smoke")
 
@@ -1179,8 +1179,8 @@ class NodeFetchBridgeInstrumentationTest {
     @Test
     fun androidFetchProviderCancelsActiveLiveRequestOnDestroy() {
         assumeTrue(
-            "Build with -Pautojs.nodejs.network.experimental=true to run the live controlled fetch cancellation smoke.",
-            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+            "Build with -Pautojs.nodejs.network.stable=true to run the live controlled fetch cancellation smoke.",
+            BuildConfig.NODEJS_NETWORK_ENABLED,
         )
 
         ControlledFetchLoopbackServer().use { server ->
@@ -1226,8 +1226,8 @@ class NodeFetchBridgeInstrumentationTest {
     @Test
     fun androidFetchProviderStaysDisabledInNormalBuilds() {
         assumeFalse(
-            "This default-denial regression is only meaningful when autojs.nodejs.network.experimental=false.",
-            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+            "This default-denial regression is only meaningful when autojs.nodejs.network.stable=false.",
+            BuildConfig.NODEJS_NETWORK_ENABLED,
         )
 
         val provider = AndroidNodeBridgeCapabilityProvider(context)

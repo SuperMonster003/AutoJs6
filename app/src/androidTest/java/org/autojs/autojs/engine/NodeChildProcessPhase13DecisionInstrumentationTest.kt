@@ -22,8 +22,8 @@ class NodeChildProcessPhase13DecisionInstrumentationTest {
     }
 
     @Test
-    fun childProcessProfileKeepsBuiltinDeniedAndShellSeparateWhenDisabled() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-40 child_process scoped runner decision")
+    fun childProcessProfileCanDisableStableBuiltinWhileKeepingShellSeparate() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("stable child_process request-disable behavior")
 
         val workDir = File(context.cacheDir, "node-child-process-p13-40-${System.nanoTime()}").apply {
             deleteRecursively()
@@ -90,12 +90,11 @@ class NodeChildProcessPhase13DecisionInstrumentationTest {
                         Array.isArray(childProcessProfile.targetProfiles) && childProcessProfile.targetProfiles.join(","),
                         childProcessProfile.module,
                         childProcessProfile.nodePrefix,
-                        childProcessProfile.scopedRunner,
+                        childProcessProfile.implementation,
                         childProcessProfile.shellBridge,
                         childProcessProfile.androidShellProvider,
-                        childProcessProfile.appPrivateBinaries,
-                        childProcessProfile.allowlistedBinaries,
-                        childProcessProfile.arbitraryPaths,
+                        childProcessProfile.appPrivateBinaryAllowlist,
+                        childProcessProfile.executablePolicy,
                         childProcessProfile.cwd,
                         childProcessProfile.env,
                         childProcessProfile.stdin,
@@ -167,26 +166,25 @@ class NodeChildProcessPhase13DecisionInstrumentationTest {
                 sourceName = "<node-child-process-phase13-p13-40.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
-                childProcessExperimentalEnabled = false,
+                childProcessEnabled = false,
                 runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to shellManifest.toJson()),
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("P13-40 child_process scoped runner decision", result)
+            NodeEmbeddedTestHarness.assertSucceeded("stable child_process request-disable behavior", result)
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "p13child.profile=disabled_by_default|false|desktop_compat_opt_in|" +
-                        "denied|denied|deferred|separate_scoped_command_bridge|" +
-                        "available_with_shell_capability|required_before_enablement|" +
-                        "required_before_enablement|denied|scoped_working_directory|string_map_scoped|" +
-                        "deferred|bounded_required|bounded_required|required|required_before_enablement|" +
+                    "p13child.profile=disabled_by_request|true|safe_default|" +
+                        "denied|denied|denied|separate_scoped_command_bridge|" +
+                        "available_with_shell_capability|not_enforced_by_native_builtin|denied|denied|denied|" +
+                        "deferred|denied|denied|required|required_before_enablement|" +
                         "required_before_enablement|required_before_enablement|denied|denied|denied|" +
-                        "denied|not_promoted|false|false|true|true",
+                        "denied|disabled_by_request|false|false|true|true",
                 ),
             )
             assertTrue(
                 result.stdout,
-                result.stdout.contains("p13child.boundary=false|false|false|false|false|true|true|undefined|undefined|undefined"),
+                result.stdout.contains("p13child.boundary=false|false|true|false|false|false|true|undefined|undefined|undefined"),
             )
             assertTrue(
                 result.stdout,
@@ -216,8 +214,8 @@ class NodeChildProcessPhase13DecisionInstrumentationTest {
     }
 
     @Test
-    fun childProcessExperimentalOptInExposesNativeBuiltin() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-44 child_process experimental opt-in")
+    fun childProcessStableRequestExposesNativeBuiltin() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("stable child_process runtime")
 
         val workDir = File(context.cacheDir, "node-child-process-opt-in-${System.nanoTime()}").apply {
             deleteRecursively()
@@ -275,14 +273,14 @@ class NodeChildProcessPhase13DecisionInstrumentationTest {
                 sourceName = "<node-child-process-phase13-opt-in.mjs>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
-                childProcessExperimentalEnabled = true,
+                childProcessEnabled = true,
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("P13-44 child_process experimental opt-in", result)
+            NodeEmbeddedTestHarness.assertSucceeded("stable child_process runtime", result)
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "p13child.opt.profile=experimental_opt_in_native|native_available|native_available|true|true|false",
+                    "p13child.opt.profile=stable|native_available|native_available|true|true|false",
                 ),
             )
             assertTrue(

@@ -120,8 +120,8 @@ object NodeDeveloperRepl {
                     timeoutMs = options.timeoutMs.coerceAtLeast(1L),
                     env = options.env,
                     runtimeModuleSources = runtimeModuleSources,
-                    workerThreadsExperimentalEnabled = false,
-                    javaInteropExperimentalEnabled = false,
+                    workerThreadsEnabled = false,
+                    javaInteropEnabled = false,
                 ),
             )
         }

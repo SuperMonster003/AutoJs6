@@ -505,7 +505,7 @@ async function verifyFixture(options) {
     status: policyViolations.length === 0 ? "ready" : "failed",
     packageManager: {
       name: "autojs6-pm",
-      mode: "host_managed_experimental",
+      mode: "host_managed_partial",
       androidRuntimeInstall: false,
       fullNpmCliCompatible: false,
       lifecycleScriptsExecuted: false,
@@ -791,11 +791,10 @@ function analyzePackage(packageDir) {
       }
     }
   }
-  const hasEsm = packageJson.type === "module" || Boolean(packageJson.module);
   const requiredCapabilities = Array.from(new Set(issues.map((issue) => issue.capability).filter(Boolean))).sort();
   const blocking = issues.some((issue) => issue.severity === "unsafe" || issue.severity === "unsupported");
   return {
-    status: blocking ? "unsafe" : hasEsm ? "experimental" : requiredCapabilities.length > 0 ? "capability_required" : "compatible",
+    status: blocking ? "unsafe" : requiredCapabilities.length > 0 ? "capability_required" : "compatible",
     blocking,
     entryFormat: packageJson.type === "module" ? "esm" : "commonjs",
     requiredCapabilities,

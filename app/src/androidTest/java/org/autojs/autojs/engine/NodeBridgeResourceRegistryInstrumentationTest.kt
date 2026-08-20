@@ -90,7 +90,7 @@ class NodeBridgeResourceRegistryInstrumentationTest {
         val provider = AndroidNodeBridgeCapabilityProvider(
             context,
             NodeBridgeEngineInfo.fromContext(context, id = "resource-java-provider-1"),
-            javaInteropExperimentalEnabled = true,
+            javaInteropEnabled = true,
         )
         val rect = dispatch(
             provider,
@@ -117,7 +117,7 @@ class NodeBridgeResourceRegistryInstrumentationTest {
         val nextProvider = AndroidNodeBridgeCapabilityProvider(
             context,
             NodeBridgeEngineInfo.fromContext(context, id = "resource-java-provider-2"),
-            javaInteropExperimentalEnabled = true,
+            javaInteropEnabled = true,
         )
         val nextDiagnostics = nextProvider.nativeDiagnostics()
         assertEquals("0", nextDiagnostics["embedded_script.bridge_resource.active_count"])

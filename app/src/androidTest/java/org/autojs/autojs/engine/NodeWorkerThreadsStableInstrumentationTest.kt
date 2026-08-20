@@ -11,7 +11,7 @@ import org.junit.Test
 import java.io.File
 import java.nio.charset.StandardCharsets
 
-class NodeWorkerThreadsExperimentalInstrumentationTest {
+class NodeWorkerThreadsStableInstrumentationTest {
 
     private val context = NodeEmbeddedTestHarness.targetContext
 
@@ -29,10 +29,10 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
     fun workerThreadsRemainDisabledByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads default gate")
         assumeTrue(
-            "Default worker_threads denial gate runs only when the build-level experimental flag is disabled.",
-            !BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+            "Default worker_threads denial gate runs only when the build-level stable flag is disabled.",
+            !BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
         )
-        assertFalse(BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_WORKER_THREADS_ENABLED)
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
@@ -47,23 +47,23 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                 }
             """.trimIndent(),
             sourceName = "<node-worker-default-disabled.js>",
-            workerThreadsExperimentalEnabled = false,
+            workerThreadsEnabled = false,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("worker_threads default gate", result)
         assertTrue(result.stdout, result.stdout.contains("worker.default=${NodeRuntimeErrorCodes.BUILTIN_DISABLED}"))
-        assertEquals("false", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+        assertEquals("false", result.nativeValues["embedded_script.request.worker_threads_enabled"])
         assertEquals("false", result.nativeValues["embedded_script.worker_threads_enabled"])
     }
 
     @Test
-    fun experimentalWorkerThreadsRunPureJsWorkersOnly() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads experimental")
-        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads experimental runnable smoke")
+    fun stableWorkerThreadsRunPureJsWorkersOnly() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads stable")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads stable runnable smoke")
 
-        val workDir = File(context.cacheDir, "node-worker-experimental-${System.nanoTime()}").apply {
+        val workDir = File(context.cacheDir, "node-worker-stable-${System.nanoTime()}").apply {
             deleteRecursively()
-            check(mkdirs()) { "Failed to create worker experimental work dir: $absolutePath" }
+            check(mkdirs()) { "Failed to create worker stable work dir: $absolutePath" }
         }
         try {
             File(workDir, "math.cjs").writeText(
@@ -166,7 +166,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                       console.log("worker.profile=" + [
                         profile.workerThreads,
                         profile.highRiskCapabilities.workerThreads,
-                        profile.experimentalFlags.workerThreads,
+                        profile.featureStates.workerThreads,
                         profile.featureFlags.worker_threads.enabled,
                         profile.disabledBuiltins.includes("worker_threads")
                       ].join("|"));
@@ -236,13 +236,13 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                       ].join("|"));
                     })();
                 """.trimIndent(),
-                sourceName = "<node-worker-experimental.js>",
+                sourceName = "<node-worker-stable.js>",
                 workingDirectory = workDir,
                 timeoutMs = 15_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("worker_threads experimental", result)
+            NodeEmbeddedTestHarness.assertSucceeded("worker_threads stable", result)
             assertTrue(result.stdout, result.stdout.contains("worker.profile=true|true|true|true|false"))
             assertTrue(result.stdout, result.stdout.contains("worker.resolve=worker_threads|worker_threads"))
             assertTrue(result.stdout, result.stdout.contains("worker.shadow=false"))
@@ -259,7 +259,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             )
             assertTrue(result.stdout, result.stdout.contains("worker.escape=${NodeRuntimeErrorCodes.FS_PATH_ESCAPE}"))
             assertTrue(result.stdout, result.stdout.contains("worker.diagnostics=0|1|"))
-            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_enabled"])
             assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
             assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
         } finally {
@@ -268,7 +268,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalWorkerThreadsSupportCjsAndEsmEntries() {
+    fun stableWorkerThreadsSupportCjsAndEsmEntries() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads CJS/ESM entry")
         NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads CJS/ESM entry")
 
@@ -431,7 +431,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                 sourceName = "<node-worker-entry.js>",
                 workingDirectory = workDir,
                 timeoutMs = 15_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker_threads CJS/ESM entry", result)
@@ -445,7 +445,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                 ),
             )
             assertTrue(result.stdout, result.stdout.contains("worker.entry.escape=${NodeRuntimeErrorCodes.FS_PATH_ESCAPE}"))
-            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_enabled"])
             assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
             assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
         } finally {
@@ -454,7 +454,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalWorkerThreadsUseIsolatedWorkerProfile() {
+    fun stableWorkerThreadsUseIsolatedWorkerProfile() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads capability isolation")
         NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads capability isolation")
 
@@ -564,7 +564,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                 sourceName = "<node-worker-profile.js>",
                 workingDirectory = workDir,
                 timeoutMs = 15_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker_threads capability isolation", result)
@@ -583,7 +583,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                 ),
             )
             assertTrue(result.stdout, result.stdout.contains("worker.profile.exit=0"))
-            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_enabled"])
             assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
             assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
         } finally {
@@ -593,7 +593,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalWorkerThreadsSupportControlledWorkerPool() {
+    fun stableWorkerThreadsSupportControlledWorkerPool() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads WorkerPool")
         NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads WorkerPool")
 
@@ -736,7 +736,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                 sourceName = "<node-worker-pool.js>",
                 workingDirectory = workDir,
                 timeoutMs = 20_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker_threads WorkerPool", result)
@@ -748,7 +748,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("worker.pool.running=delay"))
             assertTrue(result.stdout, result.stdout.contains("worker.pool.timeout=${NodeRuntimeErrorCodes.WORKER_POOL_TASK_TIMEOUT}"))
             assertTrue(result.stdout, result.stdout.contains("worker.pool.shutdown=0|0|3|1|1|1"))
-            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_enabled"])
             assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
             assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
             assertEquals("0", result.nativeValues["embedded_script.worker_pool_active_count"])
@@ -762,7 +762,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalWorkerThreadsSupportMessageChannelAndTransferList() {
+    fun stableWorkerThreadsSupportMessageChannelAndTransferList() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads MessageChannel transferList")
         NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads MessageChannel transferList")
 
@@ -956,7 +956,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                 sourceName = "<node-worker-message-channel.js>",
                 workingDirectory = workDir,
                 timeoutMs = 20_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker_threads MessageChannel transferList", result)
@@ -973,7 +973,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("worker.message.invalidTransferError=DataCloneError"))
             assertTrue(result.stdout, result.stdout.contains("worker.message.queueError=DataCloneError"))
             assertTrue(result.stdout, result.stdout.contains("worker.message.diagnostics=0|"))
-            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_enabled"])
             assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
             assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
             assertEquals("0", result.nativeValues["embedded_script.worker_message_port_active_count"])

@@ -116,17 +116,17 @@ object NodeProjectRuntimeCompatibilityDescriptor {
 
         val features = json.optJSONObject("features") ?: return
         features.optBooleanOrNull("esmPartial")?.let { required ->
-            require(!required || BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED) {
+            require(!required || BuildConfig.NODEJS_ESM_ENABLED) {
                 "Packaged Node runtime compatibility descriptor requires partial ESM support"
             }
         }
         features.optBooleanOrNull("dynamicImportLocal")?.let { required ->
-            require(!required || BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED) {
+            require(!required || BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED) {
                 "Packaged Node runtime compatibility descriptor requires local dynamic import support"
             }
         }
         features.optBooleanOrNull("workerThreads")?.let { required ->
-            require(!required || BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED) {
+            require(!required || BuildConfig.NODEJS_WORKER_THREADS_ENABLED) {
                 "Packaged Node runtime compatibility descriptor requires worker_threads support"
             }
         }
@@ -139,9 +139,9 @@ object NodeProjectRuntimeCompatibilityDescriptor {
 
     @JvmStatic
     fun currentJson(
-        esmPartial: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
-        dynamicImportLocal: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED,
-        workerThreads: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        esmPartial: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
+        dynamicImportLocal: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
+        workerThreads: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
     ): JSONObject {
         return JSONObject()
             .put("schema", SCHEMA)
@@ -190,9 +190,9 @@ object NodeProjectRuntimeCompatibilityDescriptor {
 
     @JvmStatic
     fun currentText(
-        esmPartial: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
-        dynamicImportLocal: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED,
-        workerThreads: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        esmPartial: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
+        dynamicImportLocal: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
+        workerThreads: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
     ): String = currentJson(
         esmPartial = esmPartial,
         dynamicImportLocal = dynamicImportLocal,

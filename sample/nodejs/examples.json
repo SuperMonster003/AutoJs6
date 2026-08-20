@@ -138,7 +138,7 @@
     },
     {
       "name": "live-fetch",
-      "status": "experimental",
+      "status": "stable",
       "tags": [
         "phase7",
         "main-app",
@@ -150,7 +150,7 @@
     },
     {
       "name": "live-websocket",
-      "status": "experimental",
+      "status": "stable",
       "tags": [
         "phase7",
         "main-app",
@@ -200,7 +200,7 @@
     },
     {
       "name": "worker-cpu",
-      "status": "experimental",
+      "status": "stable",
       "tags": [
         "phase7",
         "main-app",
@@ -347,7 +347,7 @@
     },
     {
       "name": "inspector-debug",
-      "status": "experimental",
+      "status": "disabled",
       "tags": [
         "phase8",
         "main-app",
@@ -360,7 +360,7 @@
     },
     {
       "name": "cpu-profile",
-      "status": "experimental",
+      "status": "disabled",
       "tags": [
         "phase8",
         "main-app",
@@ -373,7 +373,7 @@
     },
     {
       "name": "hardened-sandbox",
-      "status": "experimental",
+      "status": "partial",
       "tags": [
         "phase8",
         "main-app",
@@ -397,7 +397,7 @@
     },
     {
       "name": "startup-snapshot",
-      "status": "experimental",
+      "status": "disabled",
       "tags": [
         "phase9",
         "main-app",
@@ -409,7 +409,7 @@
     },
     {
       "name": "heap-snapshot",
-      "status": "experimental",
+      "status": "disabled",
       "tags": [
         "phase9",
         "main-app",
@@ -422,7 +422,7 @@
     },
     {
       "name": "multi-instance",
-      "status": "experimental",
+      "status": "partial",
       "tags": [
         "phase9",
         "main-app",
@@ -434,7 +434,7 @@
     },
     {
       "name": "sandboxed-script",
-      "status": "experimental",
+      "status": "stable",
       "tags": [
         "phase9",
         "main-app",
@@ -459,7 +459,7 @@
     },
     {
       "name": "wasi-scoped-fs",
-      "status": "experimental",
+      "status": "disabled",
       "tags": [
         "phase9",
         "main-app",
@@ -473,7 +473,7 @@
     },
     {
       "name": "wasm-worker",
-      "status": "experimental",
+      "status": "partial",
       "tags": [
         "phase9",
         "main-app",
@@ -487,7 +487,7 @@
     },
     {
       "name": "wasm-plugin",
-      "status": "experimental",
+      "status": "partial",
       "tags": [
         "phase9",
         "main-app",
@@ -511,7 +511,7 @@
     },
     {
       "name": "persistent-storage",
-      "status": "experimental",
+      "status": "stable",
       "tags": [
         "phase10",
         "main-app",
@@ -547,7 +547,7 @@
     },
     {
       "name": "controlled-wasi",
-      "status": "experimental",
+      "status": "disabled",
       "tags": [
         "phase10",
         "main-app",
@@ -559,7 +559,7 @@
     },
     {
       "name": "package-install",
-      "status": "experimental",
+      "status": "partial",
       "tags": [
         "phase10",
         "main-app",
@@ -582,7 +582,7 @@
     },
     {
       "name": "provider-health",
-      "status": "experimental",
+      "status": "stable",
       "tags": [
         "phase10",
         "main-app",
@@ -628,7 +628,7 @@
     },
     {
       "name": "debug-hot-reload",
-      "status": "experimental",
+      "status": "partial",
       "tags": [
         "phase10",
         "main-app",

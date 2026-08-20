@@ -14,11 +14,11 @@
       "id": "java-interop",
       "title": "$autojs.java allowlist call",
       "file": "snippets/java-interop.cjs",
-      "targetProfile": "pro_compat_opt_in",
+      "targetProfile": "safe_default",
       "requiredCapabilities": ["java_interop"],
       "expectedOutput": "sample.pro-parity-suite.java-interop=PASS",
-      "packagedBehavior": "metadata-only until Pro profile promotion and Java allowlist review",
-      "skipReason": "java_interop requires explicit Pro/debug opt-in and allowlist provider readiness"
+      "packagedBehavior": "stable packaged allowlist; metadata cannot expand classes or members",
+      "skipReason": "stable provider still rejects classes, members, handles, or calls outside the reviewed allowlist"
     },
     {
       "id": "rhino-install",
@@ -27,8 +27,8 @@
       "targetProfile": "pro_compat_opt_in",
       "requiredCapabilities": ["rhino", "java_interop"],
       "expectedOutput": "sample.pro-parity-suite.rhino-install=PASS",
-      "packagedBehavior": "experimental metadata-only proxy install; no default global mutation",
-      "skipReason": "rhino.install({ experimental: true }) depends on the Java proxy provider"
+      "packagedBehavior": "stable explicit proxy install; no default global mutation",
+      "skipReason": "rhino.install({ explicit: true }) depends on the Java proxy provider"
     },
     {
       "id": "ui-layout",

@@ -49,7 +49,7 @@ class NodeModuleCompileCacheInstrumentationTest {
                         export default label;
                     """.trimIndent(),
                 ),
-                esmExperimentalEnabled = true,
+                esmEnabled = true,
                 timeoutMs = 15_000L,
             )
 

@@ -421,31 +421,34 @@
         "P14-31",
         "P14-32"
       ],
-      "currentState": "worker_intentionally_unsupported_v1_2",
+      "currentState": "worker_threads_stable_enabled_v1_2",
       "positiveCases": [
-        "workerThreadsProfile and processWorkerReplacementProfile diagnostics are documented",
-        "P14-28 audits Node 24.5 ABI artifacts and records native worker unavailability"
+        "workerThreadsProfile reports stable enablement and bounded worker authority",
+        "Node 24.5 ABI artifacts expose usable native workers on every published ABI",
+        "runnable and packaged worker smoke plus WorkerPool resource stress pass"
       ],
       "negativeCases": [
-        "runnable worker, packaged worker, WorkerPool replacement API, process_worker, compute_worker, and autojs6:process-worker remain unpromoted",
-        "raw process handles, stdio streams, signals, spawn, fork, stable child_process authority, bridge modules, nested workers, and raw native handles remain denied"
+        "process_worker, compute_worker, and autojs6:process-worker remain absent",
+        "worker bridge modules, Java, shell, network, nested workers, and raw native handles remain denied",
+        "native child_process stays a separate main-runtime capability and is not inherited by workers"
       ],
       "abuseCases": [
         "process-worker facade bypass through WorkerPool",
         "worker bridge module import",
-        "packaged .mjs worker source graph without native preflight",
-        "raw child_process shell confusion"
+        "packaged .mjs worker path or dependency escape",
+        "worker attempt to reach stable parent child_process authority"
       ],
       "runtimeGuards": [
-        "worker.preflight.status=available is required before runnable promotion",
-        "node:worker_threads remains shape-only while native workers are unavailable",
-        "child_process remains disabled and shell remains separate scoped bridge"
+        "NODEJS_WORKER_THREADS_ENABLED remains true in Debug and Release",
+        "native worker availability is a release conformance requirement",
+        "worker count, message, queue, path, transfer, termination, and cleanup limits remain enforced",
+        "child_process and shell remain separate from worker authority"
       ],
       "promotionPreconditions": [
-        "native, runnable, packaged, resource/RSS, execution slot, UX, security corpus, and rollback evidence must pass before worker/process promotion",
-        "P14-34 packaged aggregate smoke must not count worker source anchors as packaged release evidence while native preflight is unavailable"
+        "native, runnable, packaged, resource/RSS, execution-slot, security-corpus, and cleanup evidence stays green",
+        "P14-34 packaged aggregate smoke must execute the worker path rather than count source anchors alone"
       ],
-      "rollback": "Keep autojs.nodejs.worker_threads.experimental=false, project/package worker opt-in disabled, no process-worker facade, and child_process denied."
+      "rollback": "Demote through a documented profile/contract release; keep project/package overrides rejected and do not add a same-thread fallback."
     },
     {
       "id": "packaged_metadata_safe_downgrade",

@@ -2,7 +2,7 @@ package org.autojs.plugin.nodejs.api
 
 object NodeJsRuntimeContract {
 
-    const val CONTRACT_VERSION = 1
+    const val CONTRACT_VERSION = 2
     const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
     const val MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 1
     const val WORKSPACE_ARCHIVE_TRANSPORT_CONTRACT_VERSION = 2
@@ -48,12 +48,12 @@ object NodeJsRuntimeContract {
     const val KEY_RUNTIME_MODULE_SOURCE_NAMES = "runtimeModuleSourceNames"
     const val KEY_RUNTIME_MODULE_SOURCES = "runtimeModuleSources"
 
-    const val KEY_ESM_EXPERIMENTAL_ENABLED = "esmExperimentalEnabled"
-    const val KEY_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED = "dynamicImportExperimentalEnabled"
-    const val KEY_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED = "rawNodeNetworkModulesExperimentalEnabled"
-    const val KEY_WORKER_THREADS_EXPERIMENTAL_ENABLED = "workerThreadsExperimentalEnabled"
-    const val KEY_CHILD_PROCESS_EXPERIMENTAL_ENABLED = "childProcessExperimentalEnabled"
-    const val KEY_JAVA_INTEROP_EXPERIMENTAL_ENABLED = "javaInteropExperimentalEnabled"
+    const val KEY_ESM_ENABLED = "esmEnabled"
+    const val KEY_DYNAMIC_IMPORT_ENABLED = "dynamicImportEnabled"
+    const val KEY_RAW_NODE_NETWORK_MODULES_ENABLED = "rawNodeNetworkModulesEnabled"
+    const val KEY_WORKER_THREADS_ENABLED = "workerThreadsEnabled"
+    const val KEY_CHILD_PROCESS_ENABLED = "childProcessEnabled"
+    const val KEY_JAVA_INTEROP_ENABLED = "javaInteropEnabled"
 
     const val KEY_SUCCEEDED = "succeeded"
     const val KEY_EXIT_CODE = "exitCode"

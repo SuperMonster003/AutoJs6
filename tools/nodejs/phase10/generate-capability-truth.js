@@ -7,16 +7,16 @@ const path = require("path");
 const CAPABILITIES = [
   {
     id: "esm",
-    status: ["implemented", "packaged_supported", "experimental"],
+    status: ["stable", "implemented", "packaged_supported"],
     evidence: [
-      "NodeEsmExperimentalInstrumentationTest",
-      "installAndRunExperimentalEsmEmbeddedNodePackagedApk",
+      "NodeEsmStableInstrumentationTest",
+      "installAndRunStableEsmEmbeddedNodePackagedApk",
     ],
-    notes: "Partial ESM is enabled for local project graphs and packaged APK smokes.",
+    notes: "ESM is enabled by default for local project graphs and packaged APK smokes.",
   },
   {
     id: "dynamic_import",
-    status: ["implemented", "packaged_supported", "experimental"],
+    status: ["stable", "implemented", "packaged_supported"],
     evidence: [
       "NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED",
       "installAndRunDynamicImportLocalEmbeddedNodePackagedApk",
@@ -25,25 +25,25 @@ const CAPABILITIES = [
   },
   {
     id: "fetch_axios",
-    status: ["live_provider", "experimental"],
+    status: ["stable", "live_provider"],
     evidence: [
-      "jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled",
+      "jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkEnabled",
       "verifyNodeLiveFetchGate",
     ],
-    notes: "Controlled Android provider requires network capability and -Pautojs.nodejs.network.experimental=true.",
+    notes: "The controlled Android provider is enabled by default and dispatch still requires the project network capability.",
   },
   {
     id: "websocket",
-    status: ["live_provider", "experimental"],
+    status: ["stable", "live_provider"],
     evidence: [
-      "jsWebSocketUsesAndroidLiveProviderWhenNetworkExperimentEnabled",
+      "jsWebSocketUsesAndroidLiveProviderWhenNetworkEnabled",
       "verifyNodeLiveWebSocketGate",
     ],
-    notes: "Controlled WebSocket provider requires the same experimental network opt-in.",
+    notes: "The controlled WebSocket provider is enabled by default and retains capability and resource checks.",
   },
   {
     id: "ocr",
-    status: ["live_provider", "experimental"],
+    status: ["live_provider", "partial"],
     evidence: [
       "kotlinOcrLiveProviderRecognizesMlKitImageHandle",
       "androidOcrRejectsUnknownImageHandleWithoutLeakingResources",
@@ -67,7 +67,7 @@ const CAPABILITIES = [
   },
   {
     id: "sensors",
-    status: ["live_provider", "experimental"],
+    status: ["live_provider", "partial"],
     evidence: [
       "androidProviderListsSensorsAndCleansUpLiveSubscriptionWhenAvailable",
       "androidProviderReportsUnavailableWhenSensorManagerMissing",
@@ -76,7 +76,7 @@ const CAPABILITIES = [
   },
   {
     id: "accessibility",
-    status: ["live_provider", "experimental"],
+    status: ["live_provider", "partial"],
     evidence: [
       "providerFindsAndClicksControlledUiWhenAccessibilityServiceIsEnabled",
       "jsAccessibilitySelectorV2HonorsTimeoutAndCancellation",
@@ -85,13 +85,13 @@ const CAPABILITIES = [
   },
   {
     id: "image",
-    status: ["blocked"],
+    status: ["planned", "disabled"],
     evidence: ["androidImageExpansionRejectsUntilProviderIsConnected"],
     notes: "Current gate proves fail-closed provider behavior; full live image provider remains a Phase 10 target.",
   },
   {
     id: "ui",
-    status: ["live_provider", "experimental"],
+    status: ["live_provider", "partial"],
     evidence: [
       "jsUiModuleUsesAndroidLiveProviderForButtonAndInputEvents",
       "androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource",
@@ -100,7 +100,7 @@ const CAPABILITIES = [
   },
   {
     id: "work_manager",
-    status: ["live_provider", "packaged_supported", "experimental"],
+    status: ["live_provider", "packaged_supported", "partial"],
     evidence: [
       "androidWorkManagerProviderSchedulesLiveMetadataAndEnforcesPathPolicy",
       "androidWorkManagerLiveProviderExecutesPackagedProjectEntryAndPersistsResult",
@@ -109,18 +109,18 @@ const CAPABILITIES = [
   },
   {
     id: "shell",
-    status: ["implemented", "experimental"],
+    status: ["stable", "implemented"],
     evidence: ["NodeShellBridgeInstrumentationTest", "shell capability"],
-    notes: "Controlled bridge surface only; unrestricted child_process remains disabled.",
+    notes: "The controlled bridge surface remains capability-gated and separate from the stable native child_process builtin.",
   },
   {
     id: "workers",
-    status: ["disabled", "blocked"],
+    status: ["stable", "implemented", "packaged_supported"],
     evidence: [
-      "verifyNodePhase10WorkerWasiBoundary",
-      "NodeWorkerThreadsDesignGateInstrumentationTest",
+      "NodeWorkerThreadsStableInstrumentationTest",
+      "installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk",
     ],
-    notes: "worker_threads remains default disabled and blocked by native availability; experimental worker code stays internal/debug-only.",
+    notes: "worker_threads is enabled by default with native and packaged coverage.",
   },
   {
     id: "wasi",
@@ -134,7 +134,7 @@ const CAPABILITIES = [
   },
   {
     id: "package_manager",
-    status: ["implemented", "experimental"],
+    status: ["implemented", "partial"],
     evidence: [
       "verifyNodePhase10Autojs6PmFixture",
       "verifyNodeDependencyManagerFixture",
@@ -144,7 +144,7 @@ const CAPABILITIES = [
   },
   {
     id: "typescript_build",
-    status: ["implemented", "packaged_supported", "experimental"],
+    status: ["implemented", "packaged_supported", "partial"],
     evidence: [
       "verifyNodePhase10DeveloperExperience",
       "NodeTypeScriptInstrumentationTest",
@@ -154,7 +154,7 @@ const CAPABILITIES = [
   },
   {
     id: "source_maps",
-    status: ["implemented", "packaged_supported", "experimental"],
+    status: ["implemented", "packaged_supported", "partial"],
     evidence: [
       "NodeSourceMapStackTraceInstrumentationTest",
       "embedded_script.source_map_loaded_count",
@@ -164,7 +164,7 @@ const CAPABILITIES = [
   },
   {
     id: "embedded_test_runner",
-    status: ["implemented", "experimental"],
+    status: ["implemented", "partial"],
     evidence: [
       "nodeTestEmbeddedSubsetRunsSingleRuntimeTap",
       "nodeTestEmbeddedSubsetReportsFailuresTimeoutsAndLateAsyncActivity",
@@ -174,7 +174,7 @@ const CAPABILITIES = [
   },
   {
     id: "watch_hot_reload",
-    status: ["implemented", "experimental", "disabled"],
+    status: ["implemented", "partial", "disabled"],
     evidence: [
       "verifyNodePhase10DeveloperExperience",
       "pluginLifecycleResourcesAndDebugReload",
@@ -184,7 +184,7 @@ const CAPABILITIES = [
   },
   {
     id: "crash_evidence_bundle",
-    status: ["implemented", "experimental"],
+    status: ["implemented", "partial"],
     evidence: [
       "verifyNodePhase10CrashAdapterCutover",
       "phase10-crash-evidence-bundle",
@@ -204,7 +204,7 @@ const CAPABILITIES = [
   },
   {
     id: "long_running",
-    status: ["implemented", "experimental"],
+    status: ["implemented", "partial"],
     evidence: [
       "verifyNodePhase10LongRunningActivation",
       "NodeInteractiveLongRunningInstrumentationTest",
@@ -214,7 +214,7 @@ const CAPABILITIES = [
   },
   {
     id: "multi_instance",
-    status: ["blocked", "experimental"],
+    status: ["planned", "disabled"],
     evidence: [
       "verifyNodePhase10LongRunningActivation",
       "NodeEmbeddedProcessPoolPolicyInstrumentationTest",
@@ -252,10 +252,12 @@ function main() {
     gate: "generateNodePhase10CapabilityTruth",
     statusVocabulary: [
       "implemented",
+      "stable",
+      "partial",
+      "planned",
       "fake_provider_only",
       "live_provider",
       "packaged_supported",
-      "experimental",
       "blocked",
       "disabled",
     ],

@@ -9,8 +9,8 @@
   },
   "example": {
     "capabilities": ["wasm", "worker"],
-    "expectedProvider": "design-gated worker/process isolation",
-    "packagedSupport": "not supported for user code in this phase",
-    "securityLimitations": ["worker_threads remains default-disabled", "WASM worker resource limits are not promoted"]
+    "expectedProvider": "stable native worker_threads compute isolation",
+    "packagedSupport": "supported by the three-ABI runtime kit",
+    "securityLimitations": ["workers cannot access AutoJs bridge modules or raw Android objects", "WASM work remains bounded by worker resource and cleanup policy"]
   }
 }

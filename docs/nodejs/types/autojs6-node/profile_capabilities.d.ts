@@ -55,14 +55,15 @@ declare namespace AutoJs6Node {
     readonly "ui": ProfileModuleSpec<"ui", "pro_compat_opt_in", "profile_gated", "partial", "gated">;
     readonly "ui.overlay": ProfileModuleSpec<"ui.overlay", "pro_compat_opt_in", "denied", "profile_gated", "gated">;
     readonly "work_manager": ProfileModuleSpec<"work_manager", "pro_compat_opt_in", "partial", "partial", "partial">;
-    readonly "java": ProfileModuleSpec<"java", "pro_compat_opt_in", "denied", "profile_gated", "metadata_only">;
-    readonly "$autojs.java": ProfileModuleSpec<"$autojs.java", "pro_compat_opt_in", "denied", "profile_gated", "metadata_only">;
-    readonly "rhino.install": ProfileModuleSpec<"rhino.install", "pro_compat_opt_in", "denied", "profile_gated", "metadata_only">;
-    readonly "esm": ProfileModuleSpec<"esm", "desktop_compat_opt_in", "partial", "partial", "partial">;
-    readonly "worker_threads": ProfileModuleSpec<"worker_threads", "desktop_compat_opt_in", "denied", "profile_gated", "gated">;
-    readonly "http": ProfileModuleSpec<"http", "desktop_compat_opt_in", "partial", "partial", "gated">;
-    readonly "https": ProfileModuleSpec<"https", "desktop_compat_opt_in", "partial", "partial", "gated">;
-    readonly "raw_network": ProfileModuleSpec<"raw_network", "desktop_compat_opt_in", "denied", "profile_gated", "gated">;
+    readonly "java": ProfileModuleSpec<"java", "pro_compat_opt_in", "available", "available", "supported">;
+    readonly "$autojs.java": ProfileModuleSpec<"$autojs.java", "pro_compat_opt_in", "available", "available", "supported">;
+    readonly "rhino.install": ProfileModuleSpec<"rhino.install", "pro_compat_opt_in", "available", "available", "supported">;
+    readonly "esm": ProfileModuleSpec<"esm", "desktop_compat_opt_in", "available", "available", "supported">;
+    readonly "worker_threads": ProfileModuleSpec<"worker_threads", "desktop_compat_opt_in", "available", "available", "supported">;
+    readonly "child_process": ProfileModuleSpec<"child_process", "desktop_compat_opt_in", "available", "available", "supported">;
+    readonly "http": ProfileModuleSpec<"http", "desktop_compat_opt_in", "available", "available", "supported">;
+    readonly "https": ProfileModuleSpec<"https", "desktop_compat_opt_in", "available", "available", "supported">;
+    readonly "raw_network": ProfileModuleSpec<"raw_network", "desktop_compat_opt_in", "available", "available", "supported">;
     readonly "fs.advanced": ProfileModuleSpec<"fs.advanced", "desktop_compat_opt_in", "partial", "partial", "gated">;
     readonly "wasi": ProfileModuleSpec<"wasi", "desktop_compat_opt_in", "denied", "profile_gated", "gated">;
     readonly "inspector": ProfileModuleSpec<"inspector", "debug_unsafe_lab", "denied", "profile_gated", "denied">;
@@ -122,6 +123,7 @@ declare namespace AutoJs6Node {
     | "P14-35";
 
   export type NodeProfileV12CapabilityState =
+    | "stable"
     | "provider_poc_not_promoted"
     | "policy_ready_not_promoted"
     | "host_contract_ready"
@@ -136,6 +138,7 @@ declare namespace AutoJs6Node {
 
   export type NodeProfileV12PackagedEvidence =
     | "not_applicable"
+    | "runtime_kit"
     | "imported_packaged_smoke"
     | "host_contract_ready"
     | "future_device_archive_required"
@@ -190,7 +193,8 @@ declare namespace AutoJs6Node {
     readonly "recorder.session": NodeProfileV12CapabilitySpec<"recorder.session", "pro_compat_opt_in", "denied", "profile_gated", "provider_poc_not_promoted", "denial_declaration", "future_device_archive_required", "P14-25", true>;
     readonly "media.playback": NodeProfileV12CapabilitySpec<"media.playback", "pro_compat_opt_in", "denied", "denied", "stable_denied", "denial_declaration", "stable_denied", "P14-26", true>;
     readonly "mediastore": NodeProfileV12CapabilitySpec<"mediastore", "pro_compat_opt_in", "denied", "denied", "stable_denied", "denial_declaration", "stable_denied", "P14-26", true>;
-    readonly "worker_threads": NodeProfileV12CapabilitySpec<"worker_threads", "desktop_compat_opt_in", "denied", "denied", "intentionally_unsupported", "diagnostic_declaration", "conditional_skip_native_unavailable", "P14-32", true>;
+    readonly "worker_threads": NodeProfileV12CapabilitySpec<"worker_threads", "desktop_compat_opt_in", "available", "available", "stable", "callable_declaration", "runtime_kit", "P14-32", false>;
+    readonly "child_process": NodeProfileV12CapabilitySpec<"child_process", "desktop_compat_opt_in", "available", "available", "stable", "callable_declaration", "runtime_kit", "P14-32", false>;
     readonly "process_worker": NodeProfileV12CapabilitySpec<"process_worker", "desktop_compat_opt_in", "unsupported", "unsupported", "intentionally_unsupported", "diagnostic_declaration", "stable_denied", "P14-31", true>;
     readonly "packaged.aggregate": NodeProfileV12CapabilitySpec<"packaged.aggregate", "pro_compat_opt_in", "denied", "profile_gated", "host_contract_ready", "declaration_only_metadata", "host_contract_ready", "P14-34", false>;
   }

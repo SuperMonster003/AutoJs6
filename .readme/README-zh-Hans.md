@@ -169,6 +169,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 ###### 2026/08/20
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
+* `新增` Node.js 的 ESM/dynamic import()/网络与 WebSocket/原生网络模块/worker_threads/child_process/Java 互操作能力成为正式功能并默认启用, 同时保留权限声明/白名单/沙箱及资源预算保护
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
 * `新增` Node.js 运行时支持单次执行范围的按需加密模块源码提供器, 仅探测及解密模块解析器实际选定的候选文件
 * `新增` Node.js 运行时支持受控 AutoJs6 桥接模块, 并采用 Safe Node Profile 安全策略

@@ -25,7 +25,7 @@ const FILES = {
   workerStressTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt",
   packagedSmokeTest: "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
   workerDesignDoc: "docs/nodejs/design/WORKER_THREADS.md",
-  workerEvaluation: "docs/nodejs/reports/WORKER_EXPERIMENTAL_EVALUATION.md",
+  workerEvaluation: "docs/nodejs/reports/WORKER_PRE_GA_EVALUATION.md",
   workerPhase8Recheck: "docs/nodejs/reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md",
   typesAutojsGlobal: "docs/nodejs/types/autojs6-node/autojs_global.d.ts",
   typesReadme: "docs/nodejs/types/autojs6-node/README.md",

@@ -262,7 +262,7 @@ object NodeBridgePermissionManifest {
     fun runtimeModuleSourceForWorkingDirectory(
         workingDirectory: String?,
         sandboxRoot: String?,
-        includeBuildNetworkPolicy: Boolean = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+        includeBuildNetworkPolicy: Boolean = BuildConfig.NODEJS_NETWORK_ENABLED,
     ): String = fromRuntimeWorkingDirectory(
         workingDirectory = workingDirectory,
         sandboxRoot = sandboxRoot,
@@ -294,7 +294,7 @@ object NodeBridgePermissionManifest {
         val sources = (
                 primary.sources.filterNot { it == "none" } +
                         fallback.sources.filterNot { it == "none" } +
-                        if (includeBuildNetworkPolicy) listOf("gradle:autojs.nodejs.network.experimental") else emptyList()
+                        if (includeBuildNetworkPolicy) listOf("runtime:stable-network") else emptyList()
                 )
             .distinct()
         return buildManifest(

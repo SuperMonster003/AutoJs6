@@ -37,7 +37,7 @@ permission/settings/packaged/cleanup evidence while keeping live overlay
 creation fail-closed.
 
 After P12-13, the current Node profile has a `require("ui.overlay")` fake
-transport surface for JSON-only provider experiments. It still has no
+transport surface for JSON-only provider prototyping. It still has no
 `require("floaty")`, `compat.floaty`, or global `floaty` runtime surface. The
 P12-14 live gate exposes permission/settings/cleanup evidence only; the Android
 live overlay provider remains fail-closed for `show`, `update`, `drainEvents`,

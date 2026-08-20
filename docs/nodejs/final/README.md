@@ -83,7 +83,8 @@ gate. See [R6_ACCEPTANCE_EVIDENCE.md](../R6_ACCEPTANCE_EVIDENCE.md) for the four
 collector commands, exact selectors, artifacts, and canonical report paths.
 
 The current conditional decisions are resolved for the Safe profile:
-`worker_threads` is intentionally unsupported, controlled WASI is closed by
-supporting pure WebAssembly while raw WASI stays denied, and `x86` is optional.
+`worker_threads` is closed through the stable three-ABI runtime kit, controlled
+WASI is closed by supporting pure WebAssembly while raw WASI stays denied, and
+`x86` is optional. The separate process-worker facade remains absent.
 The Node 24.17 Android artifact lane remains deferred external runtime
 maintenance and does not block completion on the Node 24.5 baseline.

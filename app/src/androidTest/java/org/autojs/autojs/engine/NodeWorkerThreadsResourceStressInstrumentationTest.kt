@@ -76,7 +76,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 sourceName = "<node-worker-resource-sequence.js>",
                 workingDirectory = workDir,
                 timeoutMs = 90_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker sequence terminate", result)
@@ -256,7 +256,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 sourceName = "<node-worker-pool-stress.js>",
                 workingDirectory = workDir,
                 timeoutMs = 60_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker pool stress", result)
@@ -330,7 +330,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 sourceName = "<node-worker-pool-parent-cleanup.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker pool parent cleanup", result)
@@ -379,7 +379,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 sourceName = "<node-worker-resource-throw.js>",
                 workingDirectory = workDir,
                 timeoutMs = 15_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker exception", result)
@@ -393,7 +393,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 """.trimIndent(),
                 sourceName = "<node-worker-resource-recovery.js>",
                 timeoutMs = 5_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
             NodeEmbeddedTestHarness.assertSucceeded("worker exception recovery", recovery)
             assertTrue(recovery.stdout, recovery.stdout.contains("worker.resource.recovery=v24.5.0"))
@@ -427,7 +427,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 sourceName = "<node-worker-resource-timeout.js>",
                 workingDirectory = workDir,
                 timeoutMs = 1_200L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             assertFalse(NodeEmbeddedTestHarness.describeResult("worker timeout", timeout), timeout.succeeded)
@@ -442,7 +442,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 """.trimIndent(),
                 sourceName = "<node-worker-resource-timeout-recovery.js>",
                 timeoutMs = 5_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
             NodeEmbeddedTestHarness.assertSucceeded("worker timeout recovery", recovery)
             assertTrue(recovery.stdout, recovery.stdout.contains("worker.resource.timeout.recovery=v24.5.0"))
@@ -482,7 +482,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 sourceName = "<node-worker-resource-cleanup.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker completion cleanup", result)

@@ -277,7 +277,7 @@ function renderMarkdown(report) {
   lines.push("");
   lines.push("```powershell");
   lines.push(".\\gradlew.bat --console=plain :app:generateNode2417UpgradeGateReport");
-  lines.push(".\\gradlew.bat --console=plain :app:verifyNode2417UpgradeGate \"-Pautojs.nodejs.test.deviceProfile=sony\" \"-Pautojs.nodejs.network.experimental=true\"");
+  lines.push(".\\gradlew.bat --console=plain :app:verifyNode2417UpgradeGate \"-Pautojs.nodejs.test.deviceProfile=sony\"");
   lines.push("```");
   lines.push("");
   return lines.join("\n");

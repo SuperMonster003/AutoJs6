@@ -24,7 +24,7 @@ const FILES = {
   typesReadme: "docs/nodejs/types/autojs6-node/README.md",
   typescriptSmoke: "sample/nodejs/typescript-smoke/src/main.ts",
   designEsm: "docs/nodejs/design/ESM.md",
-  esmEvaluation: "docs/nodejs/reports/ESM_EXPERIMENTAL_EVALUATION.md",
+  esmEvaluation: "docs/nodejs/reports/ESM_PRE_GA_EVALUATION.md",
   v11EsmPromotion: "docs/nodejs/releases/V1_1_ESM_PROMOTION.md",
   compatibilityProfile: "docs/nodejs/COMPATIBILITY_PROFILE.md",
   securityModel: "docs/nodejs/SECURITY_MODEL.md",

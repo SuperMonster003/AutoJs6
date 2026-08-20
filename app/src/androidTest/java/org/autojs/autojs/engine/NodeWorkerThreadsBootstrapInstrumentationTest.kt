@@ -62,7 +62,7 @@ class NodeWorkerThreadsBootstrapInstrumentationTest {
                     console.log("worker.bootstrap.profile=" + [
                       profile.workerThreads,
                       profile.highRiskCapabilities.workerThreads,
-                      profile.experimentalFlags.workerThreads,
+                      profile.featureStates.workerThreads,
                       profile.featureFlags.worker_threads.enabled,
                       profile.disabledBuiltins.includes("worker_threads")
                     ].join("|"));
@@ -84,7 +84,7 @@ class NodeWorkerThreadsBootstrapInstrumentationTest {
                 sourceName = "<node-worker-bootstrap-default-denial.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
-                workerThreadsExperimentalEnabled = false,
+                workerThreadsEnabled = false,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker_threads bootstrap default denial", result)
@@ -99,7 +99,7 @@ class NodeWorkerThreadsBootstrapInstrumentationTest {
     }
 
     @Test
-    fun experimentalRequestReportsNativeAvailabilityOrStableDisabled() {
+    fun stableRequestReportsNativeAvailabilityOrStableDisabled() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads bootstrap preflight")
 
         NodeWorkerThreadsTestSupport.probeNativeWorkerThreads()

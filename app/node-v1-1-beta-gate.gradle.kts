@@ -201,7 +201,6 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
         val gateTaskRequested = requestedTasks.any { taskName ->
             taskName == "verifyNodeV11BetaGate" || taskName.endsWith(":verifyNodeV11BetaGate")
         }
-        val workerExperimental = nodeV11BetaBooleanProperty("autojs.nodejs.worker_threads.experimental")
         val templateOverride =
             nodeV11BetaBooleanProperty("autojs.embeddedNode.packagedSmoke.templateOverride") ||
                     nodeV11BetaBooleanProperty("autojs.embeddedNode.packagedSmokeTemplateOverride")
@@ -219,7 +218,7 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
                 "area" to "alpha capability coverage",
                 "status" to "required",
                 "tests" to listOf(
-                    "NodeEsmExperimentalInstrumentationTest",
+                    "NodeEsmStableInstrumentationTest",
                     "NodeModernCoreDifferentialInstrumentationTest",
                     "generateNodeModernCoreDifferentialReport",
                     "NodeRealNpmCompatInstrumentationTest",
@@ -262,22 +261,18 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
                 "area" to "packaged ESM template override",
                 "status" to if (templateOverride) "explicit-subgate-enabled" else "explicit-subgate-required",
                 "tests" to listOf(
-                    "EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk",
+                    "EmbeddedNodePackagedApkSmokeTest#installAndRunStableEsmEmbeddedNodePackagedApk",
                     "EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk",
                 ),
             ),
             linkedMapOf(
                 "area" to "worker threads",
-                "status" to if (workerExperimental) "experimental-enabled" else "blocked-default",
-                "tests" to if (workerExperimental) {
-                    listOf(
-                        "NodeWorkerThreadsDesignGateInstrumentationTest",
-                        "NodeWorkerThreadsExperimentalInstrumentationTest",
-                        "NodeWorkerThreadsResourceStressInstrumentationTest",
-                    )
-                } else {
-                    listOf("NodeWorkerThreadsDesignGateInstrumentationTest")
-                },
+                "status" to "stable-required",
+                "tests" to listOf(
+                    "NodeWorkerThreadsDesignGateInstrumentationTest",
+                    "NodeWorkerThreadsStableInstrumentationTest",
+                    "NodeWorkerThreadsResourceStressInstrumentationTest",
+                ),
             ),
         )
 
@@ -364,7 +359,7 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
                 "Run with ANDROID_SERIAL targeting the Sony unattended device and -P$nodeV11BetaDeviceProfileProperty=$nodeV11BetaDeviceProfile.",
                 "The beta device profile keeps the default normal fuzzer budget; run extended fuzzer budget as a separate stress subgate.",
                 "Packaged .mjs and dynamic import install-and-run smokes remain explicit template-override subgates until the refreshed inrt template is default.",
-                "Worker runtime stress is included only when autojs.nodejs.worker_threads.experimental=true.",
+                "Worker runtime stress is part of the stable capability gate.",
             ),
         )
 

@@ -114,7 +114,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
         assertTrue(buildNetworkManifest.enforced)
         assertTrue(buildNetworkManifest.permissions.contains(NodeBridgePermissionManifest.NETWORK))
         assertTrue(buildNetworkManifest.permissions.contains(NodeBridgePermissionManifest.TOAST))
-        assertTrue(buildNetworkManifest.sources.contains("gradle:autojs.nodejs.network.experimental"))
+        assertTrue(buildNetworkManifest.sources.contains("gradle:autojs.nodejs.network.stable"))
         assertTrue(buildNetworkManifest.androidPermissions.contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET))
     }
 

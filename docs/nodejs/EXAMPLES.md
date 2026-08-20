@@ -174,15 +174,17 @@ The catalog remains migration evidence for desktop parity planning; packaged
 desktop execution, raw worker/raw-network/expanded-root/WASI/inspector authority,
 and Android package-manager parity remain gated by future promotion evidence.
 
-P14-32 docs sync keeps the v1.2 desktop runtime examples guarded under the
-`worker_intentionally_unsupported_v1_2` release decision. `worker_threads`, WorkerPool, process-worker, and raw `child_process` examples remain static, guarded, or denial-oriented; they are not runnable v1.2 release smoke until native worker availability, packaged worker behavior, WorkerPool resource stress, process-worker UX, security corpus, and rollback gates pass.
+The current v1.2 examples treat bounded `worker_threads`, WorkerPool, and
+native `child_process` as runnable stable surfaces. Separate process-worker
+facades remain absent. Runnable/package/resource evidence, not source anchors,
+must back the examples.
 
 P14-36 records v1.2 migration and Pro comparison docs as ready. Example claims
 match executable evidence and do not imply raw Android object parity. Pro UI and
 floaty, accessibility, screenshot/OCR, tasks, notifications, recorder, worker
 policy, packaged behavior, and rollback examples must keep their current
 evidence labels: `provider_poc_not_promoted`,
-`worker_intentionally_unsupported_v1_2`, `host_contract_ready`, and
+`worker_threads_stable_enabled_v1_2`, `host_contract_ready`, and
 `NodeProfileV12CapabilityCatalog` are not runtime grants, and runtime authority
 remains unchanged. Example docs must not imply raw `Context`, raw `Activity`,
 raw `View`, raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw
@@ -268,7 +270,8 @@ The stable examples target AutoJs6 Safe Node Profile and generally avoid:
 
 Phase 7 and later examples that use ESM, dynamic import, TypeScript, live providers, workers, long-running mode,
 scheduled tasks, database, controlled HTTP, advanced scoped fs, compile-cache, inspector, sandbox, WASM/WASI, multi-instance, snapshot, or plugin/UI surfaces declare those capabilities explicitly and include graceful
-unavailable-provider paths where a permission, experimental flag, or hardware provider may be absent.
+unavailable-provider paths where a permission, partial provider, or hardware
+provider may be absent. Stable Node capabilities do not require feature flags.
 
 Examples that use Android capabilities such as accessibility or media projection are written to handle unavailable permissions without crashing.
 

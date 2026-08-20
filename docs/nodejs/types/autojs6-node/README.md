@@ -58,7 +58,7 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `jsox.mathx`
 - `rhino`
 - `plugins`
-- `java` (experimental allowlist gate only)
+- `java` (stable allowlist-only interop)
 - global `$autojs`
 - `autojs6:profile`
 
@@ -69,15 +69,16 @@ P13-54 example surfaces including `$autojs.java`, `java`,
 `worker_threads`, HTTP/HTTPS, raw network, advanced fs, WASI, inspector, and
 npm dependency usage. It provides `RuntimeProfileId`, `ProfileModuleCatalog`,
 `ProfileModuleModeFor`, `ProfileRequiredFor`, and related conditional helpers.
-These types document profile requirements and Safe-profile denial behavior;
-they do not declare denied desktop modules as callable modules or grant
-runtime authority.
-The profile declaration matrix does not declare denied desktop modules as callable modules.
+These types distinguish stable Safe-profile capabilities from still-gated or
+unsupported surfaces; they do not grant runtime authority or bypass runtime
+permissions and policy. The profile declaration matrix does not declare denied
+desktop modules as callable modules.
 
 P14-35 adds the v1.2 `NodeProfileV12CapabilityCatalog` and
 `NodeProfileV12DeclarationMatrix`. This matrix records callable declaration
-rows, provider POC rows, stable-denied rows, intentionally unsupported
-worker/process-worker rows, and the P14-34 packaged aggregate smoke row. The
+rows, provider POC rows, stable-denied rows, stable runtime-kit worker and
+child-process rows, the intentionally unsupported process-worker row, and the
+P14-34 packaged aggregate smoke row. The
 helpers include `NodeProfileV12ModeFor`, `NodeProfileV12StateFor`,
 `NodeProfileV12PackagedEvidenceFor`, `NodeProfileV12FutureOnlyFor`, and
 `NodeProfileV12StableDeniedCapabilityName`. They are metadata-only and keep
@@ -98,14 +99,16 @@ The `autojs6:lifecycle` module is available only inside the explicit interactive
 P13-12 adds the read-only `$autojs` global v1 and the matching
 `autojs6:profile` declaration. `$autojs.version`, `$autojs.profile`, and the
 `$autojs.androidContext` descriptor are diagnostics-only in the Safe Node
-Profile; `$autojs.java` is a gated facade that reports the Java interop policy
-and rejects by default with the runtime Java interop error code.
+Profile; `$autojs.java` is a stable allowlisted facade that reports its exact
+Java interop policy and rejects classes, members, handles, or calls outside
+that policy.
 
-P13-13 extends the declarations for the experimental `java` module and
+P13-13 introduced the declarations for the `java` module and
 `$autojs.java` facade with allowlist-only Java object handles. The declared
 handle helpers cover `call`, `callInstance`, `getField`, `release`, and
-`dispose`; default builds still reject Java interop unless the build-time
-`autojs.nodejs.javaInterop.experimental` gate is enabled.
+`dispose`. Java interop is now included in every build and enabled by default;
+the class/member allowlist, reflection denial, handle ownership, timeout, and
+resource cleanup policies remain mandatory.
 
 P13-32 extends the `autojs6:profile` declaration with
 `filesystemProfile`. The field is diagnostic-only in the current Safe profile:
@@ -118,24 +121,24 @@ streams, `FileHandle`, fd APIs, `opendir`, watchers, and `realpath`; they do
 not expose raw native fds or expanded filesystem roots.
 
 P13-34 extends the `autojs6:profile` declaration with `workerThreadsProfile`.
-The field reports default denial, request-local experimental preflight, bounded
-worker policy, bridge denial, WorkerPool, transfer-list, and packaged behavior
-diagnostics; it does not make `worker_threads` a default, project, or packaged
-capability.
+The field reports stable default enablement, request state, bounded worker
+policy, bridge denial, WorkerPool, transfer-list, and packaged behavior
+diagnostics. Worker execution remains isolated from AutoJs bridge modules and
+Android objects and is subject to worker/message/memory/time budgets.
 
 P13-35 extends the `autojs6:profile` declaration with
 `processWorkerReplacementProfile`. The field reports that the current
 process-worker replacement path is `worker_threads.WorkerPool`, while the
-callable `process_worker`/`compute_worker` facade, raw `child_process`, raw
-process handles, and packaged process-worker behavior remain unintroduced.
+callable `process_worker`/`compute_worker` facade and packaged
+process-worker behavior remain unintroduced. Native `child_process` is a
+separate stable builtin.
 
-P14-32 records the v1.2 desktop runtime declaration sync as
-`worker_intentionally_unsupported_v1_2`. `workerThreadsProfile`,
-`processWorkerReplacementProfile`, and `childProcessProfile` remain diagnostic
-declarations only: they do not make runnable workers, packaged workers,
-WorkerPool replacement APIs, `process_worker`, `compute_worker`,
-`autojs6:process-worker`, raw process handles, stdio streams, signals, `spawn`,
-`fork`, or stable `child_process` authority callable.
+The current v1.2 declaration baseline is
+`worker_threads_stable_enabled_v1_2`. `workerThreadsProfile` and
+`childProcessProfile` describe callable stable runtime surfaces;
+`processWorkerReplacementProfile` remains diagnostic because
+`process_worker`, `compute_worker`, and `autojs6:process-worker` are not
+introduced.
 
 P13-36 extends the `autojs6:profile` declaration with `vmProfile`. The field
 reports native VM availability, non-sandbox boundaries, and the focused
@@ -347,19 +350,25 @@ shape-only `Agent` fields are declared. Server/listen, raw sockets, proxy and
 tunnel options, custom TLS/session control, and broader packaged install/run
 network behavior remain future work.
 
-P13-30 records the v1.1 net/tls/dns staged compatibility gate. By default,
+P13-30 records the v1.1 net/tls/dns staged compatibility gate. The
 `net`, `node:net`, `tls`, `node:tls`, `dns`, `node:dns`, `dns/promises`, and
 `node:dns/promises` are typed as limited builtins for package probing and
 deterministic local behavior: socket/server shapes, `SocketAddress`,
 `BlockList`, TLS context/socket metadata, DNS loopback/IP-literal lookup,
 `resolve(hostname, rrtype)`, TTL resolve options, TLSA and other record result
-shapes, and DNS constants are declared. Debug/build-time runs can explicitly
-enable native Node `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`
-with `autojs.nodejs.rawNetworkModules.experimental=true`; broader release
-promotion, server listeners, Android resolver policy, fd/native-handle proof,
-and packaged live-network behavior remain future work.
+shapes, and DNS constants are declared. Native Node `dns`, `dns/promises`,
+`http`, `https`, `net`, and `tls` are included and enabled in normal and
+release builds. Network permission declarations, sandbox boundaries, resolver
+policy, fd/native-handle ownership, and packaged policy checks remain enforced.
 
-P12-24 reserves `require("rhino")` as a disabled JSON-only shim facade. P12-25 adds an explicit `rhino.run({ experimental: true, source|path, timeoutMs, args })` JSON-only POC that returns frozen `RunResult` records and never installs Rhino globals. Calls without `experimental: true` still reject with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`; default `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, `require("node:rhino")` is not an alias, and no `compat.rhino` surface is declared. P13-14 adds typed `rhino.install({ experimental: true, globals?, target? })` support for the explicit Java proxy POC only: the returned `InstallResult` records `Packages`, `java`, and `android` proxy installation through the Java interop allowlist, while `JavaAdapter` remains unavailable. P13-15 declares `rhino.importClass()` and `rhino.importPackage()` as stable `never` helpers that throw `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; migration should use assignment from an explicit proxy target. P13-16 declares `rhino.JavaAdapter()` as a stable `never` helper that throws `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`, and reserves `java.defineClass()` / `$autojs.java.defineClass()` as stable-denied replacement names until a bounded proxy-interface provider exists.
+`require("rhino")` exposes a stable, explicit JSON-only migration adapter.
+`rhino.run({ explicit: true, source|path, timeoutMs, args })` returns frozen
+`RunResult` records and never installs Rhino globals automatically. The
+explicit Java proxy route is `rhino.install({ explicit: true, globals?,
+target? })`; it installs only `Packages`, `java`, and `android` proxies backed
+by the Java allowlist. `rhino.importClass()`, `rhino.importPackage()`,
+`rhino.JavaAdapter()`, `java.defineClass()`, and `$autojs.java.defineClass()`
+remain stable-denied because no bounded implementation exists.
 
 `input_observer` is a P12 provider POC. It exposes `observeKeys`, `drainEvents`, `close`, and `getAvailableSources` against fake-source JSON snapshots and the P12-06 `accessibility` live-source gate. Live key observation requires an operational AutoJs6 accessibility service and still remains subject to P12-07 cleanup/security/packaged policy evidence.
 

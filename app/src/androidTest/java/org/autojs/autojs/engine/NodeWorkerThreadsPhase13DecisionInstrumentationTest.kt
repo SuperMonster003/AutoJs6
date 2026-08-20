@@ -22,7 +22,7 @@ class NodeWorkerThreadsPhase13DecisionInstrumentationTest {
     }
 
     @Test
-    fun workerThreadsProfileKeepsDefaultDeniedAndExperimentalPreflightExplicit() {
+    fun workerThreadsProfileKeepsDefaultDeniedAndStablePreflightExplicit() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-34 worker_threads promotion decision")
 
         val workDir = File(context.cacheDir, "node-worker-p13-34-${System.nanoTime()}").apply {
@@ -78,7 +78,7 @@ class NodeWorkerThreadsPhase13DecisionInstrumentationTest {
                     console.log("p13worker.default=" + [
                       profile.workerThreads,
                       profile.highRiskCapabilities.workerThreads,
-                      profile.experimentalFlags.workerThreads,
+                      profile.featureStates.workerThreads,
                       profile.featureFlags.worker_threads.enabled,
                       profile.disabledBuiltins.includes("worker_threads"),
                       worker.status,
@@ -149,7 +149,7 @@ class NodeWorkerThreadsPhase13DecisionInstrumentationTest {
                 sourceName = "<node-worker-phase13-default-p13-34.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
-                workerThreadsExperimentalEnabled = false,
+                workerThreadsEnabled = false,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("P13-34 worker_threads default decision", denied)

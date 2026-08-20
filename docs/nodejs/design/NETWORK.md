@@ -1,442 +1,99 @@
-# Network Controlled Fetch MVP v1
+# Node Network Support
 
-Status: controlled fetch MVP implemented, live network provider gated. `autojs.nodejs.network.experimental=false` is the default, so normal builds keep controlled provider I/O disabled while the JavaScript API, bridge protocol, diagnostics, and fake-provider tests are in place. P13-30 separately adds a release-forbidden `autojs.nodejs.rawNetworkModules.experimental=false` default for raw Node network module experiments.
+Status: stable and enabled by default in Node Profile v1.2.
 
-## Goal
+## Two Network Surfaces
 
-AutoJs6 should eventually support a controlled HTTP client for automation scripts without exposing the raw desktop Node networking stack.
+AutoJs6 exposes two deliberately distinct network surfaces.
 
-The Safe Node Profile must keep these separate:
+The controlled surface consists of global `fetch()`, `require("fetch")`, the
+AutoJs6 `axios` and `undici` compatibility adapters, and the controlled
+WebSocket provider. Requests cross the host capability bridge and are governed
+by declared `network` permission, URL policy, timeouts, cancellation, redirect
+limits, response/message budgets, concurrency limits, diagnostics, and
+provider-owned cleanup.
 
-- compatibility shims that let packages detect modules
-- stable denial errors for unsafe operations
-- an explicit controlled network capability that is permissioned, cancellable, bounded, and package-aware
+The native surface consists of Node's `dns`, `dns/promises`, `http`,
+`https`, `net`, and `tls` builtins. These are genuine Node builtins and
+follow Node API semantics. They run inside the Android app/process sandbox and
+require the packaged app's Android network permission. They do not inherit the
+controlled provider's per-request bridge budgets, so callers must set Node
+timeouts, close agents/sockets/servers, and bound buffering themselves.
 
-Task 40 froze the design and diagnostics. Task 41 adds the controlled `fetch`/`require("fetch")` wrapper and bridge request shape without opening raw Node networking modules.
+`dgram` remains disabled. Availability of either surface does not grant
+filesystem, Java, shell, process, accessibility, or other AutoJs bridge
+authority.
 
-## Feature Flag
+## Runtime Contract
 
-The gate flag is:
+Network support has no feature-specific Gradle properties or release-only
+paths. Current wiring:
 
-```properties
-autojs.nodejs.network.experimental=false
+- BuildConfig: `NODEJS_NETWORK_ENABLED=true` and
+  `NODEJS_RAW_NETWORK_MODULES_ENABLED=true`
+- host/plugin request contract v2:
+  `rawNodeNetworkModulesEnabled=true`
+- profile snapshot: `featureStates.network=true` and
+  `featureStates.rawNodeNetworkModules=true`
+- controlled provider source: `runtime:stable-network`
+- capability status: `stable`
+
+The transport boolean exists only for host/plugin contract negotiation.
+AutoJs6 sends it enabled, and project/package metadata cannot override it.
+
+## Controlled Fetch Boundary
+
+The controlled provider accepts `http:` and `https:` URLs and supports
+Promise-based requests, `AbortController`, bounded redirects, headers, string
+and byte bodies, and buffered text/JSON/ArrayBuffer responses. Its exact method,
+body, timeout, response-size, concurrency, and redirect limits are reported in
+the runtime profile and Doctor diagnostics.
+
+The `axios` and `undici` modules are AutoJs6 compatibility adapters over this
+provider. They are not unrestricted copies of their desktop packages and do not
+expose custom socket agents, proxy tunnels, connector injection, or arbitrary
+transport adapters.
+
+When the bridge permission manifest is enforced, missing `network` permission
+rejects before controlled I/O. Provider destruction or execution cancellation
+must abort tracked calls and suppress callbacks into a destroyed runtime.
+
+## Native Builtin Boundary
+
+Bare and `node:` aliases resolve to the same native builtin. Local
+`node_modules` entries cannot shadow builtin names. Native sockets and servers
+remain constrained by Android/Linux application identity, SELinux, the app
+manifest, available executables/certificates, and Node's own APIs.
+
+Because native builtins do not use the controlled bridge, using them is an
+explicit choice by script authors. Production scripts should define their own
+timeouts, connection limits, body/stream budgets, TLS policy, cancellation, and
+shutdown cleanup.
+
+## Packaging
+
+Node-enabled packages that perform network I/O must contain
+`android.permission.INTERNET` according to the packaging manifest policy.
+Packaging preflight reports the permission and the stable network capability
+state. Release and host AAR generation never require a network feature flag.
+
+## Verification
+
+Current gates cover:
+
+- controlled fake-provider request/response, timeout, abort, redirect, size,
+  scheme, concurrency, diagnostics, and cleanup behavior;
+- on-device loopback HTTP and WebSocket I/O through the Android provider;
+- native `dns`, HTTP(S), TCP, and TLS availability for bare and `node:`
+  imports;
+- builtin shadow protection;
+- packaged manifest and APK smoke;
+- service-destroy and long-running resource cleanup.
+
+Run live tests with only the device profile:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
-
-Current wiring:
-
-- Gradle property default: `false`
-- BuildConfig field: `NODEJS_NETWORK_EXPERIMENTAL_ENABLED`
-- Kotlin capability registry: `NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY`
-- JavaScript profile snapshot: `require("autojs6:profile").experimentalFlags.network === false`
-
-The flag gates the live Android/OkHttp provider. With the flag off, the JavaScript wrapper and bridge module exist, but the Android provider rejects requests with `ERR_AUTOJS6_NETWORK_DISABLED` before network I/O.
-
-Raw Node network modules use a separate debug/build-time flag:
-
-```properties
-autojs.nodejs.rawNetworkModules.experimental=false
-```
-
-With this flag off, `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`
-remain AutoJs6 limited or controlled facades. With it on, CommonJS `require()`
-routes those selected modules to Node native builtins for Desktop parity
-experiments. This does not change the controlled fetch provider policy.
-
-## Current Default Behavior
-
-Default behavior with the flag off:
-
-- global `fetch()` is an AutoJs6 controlled wrapper and rejects with the current network-disabled policy code shape when routed to the default Android provider
-- `require("fetch")` returns the same controlled wrapper shape for CommonJS scripts
-- `http`, `https`, `net`, `tls`, `dns`, and `dns/promises` remain limited compatibility modules whose I/O operations reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.rawNetworkModules.experimental=false`
-- `dgram` remains a disabled builtin
-- no raw socket, server, DNS query, TLS session, datagram, or unrestricted HTTP request is permitted
-- packaged APK smoke must keep the same denial behavior
-
-Network-related module names may be recognized for feature detection. Recognition is not permission to perform I/O.
-
-## Implemented MVP Shape
-
-The implemented MVP is a controlled `fetch` client, not raw Node `http` or `https`.
-
-Reasons:
-
-- `fetch` is Promise-first and maps naturally to bridge cancellation
-- `AbortController.signal` gives a clear cancellation contract
-- request and response bodies can be budgeted before exposing stream semantics
-- the API can be backed by Android or AutoJs6 providers without giving Node direct socket authority
-
-Task 167 adds an explicit AutoJs6-owned `require("axios")` compatibility adapter on top of the same controlled fetch provider. It is not the desktop axios package and does not enable raw Node `http`, `https`, socket agents, proxy tunneling, or custom adapters.
-
-Task S8-25 adds an explicit AutoJs6-owned `require("undici")` compatibility
-facade on top of the same controlled fetch provider. It is not the desktop
-Undici runtime and does not enable raw dispatchers, socket pools, custom
-connectors, proxy tunneling, upgrades, streams, or pipelines.
-
-User-facing entries:
-
-```js
-const response = await fetch("https://example.com/data.json", {
-  method: "GET",
-  timeoutMs: 30000,
-  maxResponseBytes: 33554432,
-  maxRedirects: 5,
-  signal: abortController.signal,
-});
-```
-
-CommonJS scripts can also use:
-
-```js
-const fetch = require("fetch");
-const response = await fetch("https://example.com/data.json", {
-  method: "POST",
-  body: JSON.stringify({ ok: true }),
-  headers: { "content-type": "application/json" },
-  timeoutMs: 30000,
-  maxResponseBytes: 33554432,
-  maxRedirects: 5,
-});
-```
-
-The wrapper supports:
-
-- `GET` and `POST`
-- object or array headers
-- string, `Buffer`, `ArrayBuffer`, typed-array, and Blob-like bodies
-- `timeoutMs`
-- `AbortController.signal`
-- `maxResponseBytes`
-- `maxRedirects`
-- `Response.text()`, `Response.arrayBuffer()`, and `Response.json()`
-- `Response.body.stream()` for bounded Web Stream reads
-- `require("fetch").policy`
-- `require("fetch").diagnostics()`
-
-The axios-shaped adapter supports:
-
-- `axios(config)`, `axios.request(config)`, `axios.get(url, config?)`, and `axios.post(url, data?, config?)`
-- `baseURL`, default params serialization, headers, `timeout`, and response body budgets through the fetch policy
-- `responseType: "json" | "text" | "arraybuffer"`
-- Axios-like error shape with `name="AxiosError"`, `isAxiosError`, `code`, `autojs6Code`, and `response` for non-2xx status responses
-- stable denial for `adapter`, `httpAgent`, `httpsAgent`, `agent`, `transport`, `socketPath`, custom `paramsSerializer`, and proxy configuration
-
-`require("axios")` is reserved by the Safe Node Profile and cannot be shadowed by `node_modules/axios`.
-
-The Undici-shaped facade supports:
-
-- `undici.fetch(input, init?)` backed by controlled fetch
-- `undici.request(input, init?)` returning limited status, headers, body,
-  trailers, opaque, and context fields
-- Web Platform constructor reuse for `Headers`, `Request`, `Response`,
-  `FormData`, and `File`
-- shape-only `Dispatcher`, `Agent`, `MockAgent`, and `DecoratorHandler`
-- stable denial for dispatcher injection, custom `connect` / `factory`,
-  `socketPath`, proxy/tunnel options, raw `connect`, `upgrade`, `stream`,
-  `pipeline`, and direct `dispatch()`
-
-`require("undici")` is reserved by the Safe Node Profile and cannot be
-shadowed by `node_modules/undici`.
-
-## Authority Boundary
-
-Node must not open sockets directly.
-
-Future network requests should flow through:
-
-```text
-JS fetch wrapper
-  -> AutoJs6 bridge request
-  -> NativeNodeEmbeddedScriptService
-  -> app-owned network provider
-  -> Android/OkHttp HTTP stack
-```
-
-The current Android provider owns:
-
-- Android permission checks
-- request execution
-- cancellation
-- TLS configuration
-- proxy policy
-- response size enforcement
-- service-destroy cleanup
-
-The JavaScript wrapper owns only argument normalization, Promise lifecycle, and stable error conversion.
-
-Normal builds still reject at provider entry because `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED` is false.
-
-## Request Policy
-
-Controlled fetch is bounded before it reaches any raw network authority. Current policy:
-
-- max concurrent user fetches per script: `16`
-- default timeout: `30000` ms
-- hard timeout cap: `120000` ms
-- default max response body: `33554432` bytes
-- hard max response body: `67108864` bytes
-- default redirect count: `5`
-- hard redirect count: `10`
-- allowed URL schemes: `http:` and `https:` only
-
-The JavaScript wrapper rejects `file:`, `content:`, `about:`, `data:`, malformed URLs, redirect targets outside `http:`/`https:`, GET bodies, redirect overflow, and concurrent-request overflow with stable `ERR_AUTOJS6_NETWORK_*` errors. The Android provider repeats the core policy for live OkHttp requests so fake-provider behavior and live-provider behavior do not diverge.
-
-Diagnostics are intentionally exposed as counters, not raw provider handles:
-
-```js
-const fetch = require("fetch");
-
-console.log(fetch.policy.maxConcurrentRequests);
-console.log(fetch.diagnostics());
-```
-
-The diagnostics snapshot includes active request count, max active request count, timeout count, policy rejection count, abort count, and completed count. Native live bridge results also append provider-side fetch counters under `embedded_script.fetch_*`.
-
-## Raw Module Policy
-
-These raw modules remain disabled for I/O in the Safe/default profile:
-
-- `http`
-- `https`
-- `net`
-- `tls`
-- `dns`
-- `dns/promises`
-- `dgram`
-
-The P13-30 raw Node network opt-in can enable native `http`, `https`, `net`,
-`tls`, `dns`, and `dns/promises` in debug/build-time runs. It does not enable
-`dgram` and does not replace the controlled fetch policy for packaged/default
-behavior.
-
-Controlled fetch support must not imply support for:
-
-- `http.Agent`
-- raw sockets
-- socket servers
-- DNS resolver APIs
-- TLS socket APIs
-- UDP datagrams
-- HTTP upgrade or CONNECT tunnels
-- desktop axios adapters based on raw `http`/`https`, agents, proxy tunneling, or custom transport
-- desktop Undici dispatchers, socket pools, custom connectors, upgrades,
-  streams, pipelines, proxy tunneling, or direct dispatcher dispatch
-
-## Android Permission Policy
-
-The main app may already declare `android.permission.INTERNET` for other product features. That does not make network part of the Safe Node Profile.
-
-Packaged APKs include `android.permission.INTERNET` for Node only when project metadata explicitly opts into controlled network with the bridge capability manifest:
-
-- no network opt-in: Node network disabled and no Node-driven INTERNET requirement
-- network opt-in: `network` capability declared, `android.permission.INTERNET` merged into the packaged manifest, controlled client enabled only when the experimental provider flag is on, raw modules still denied unless the separate debug/build-time raw module flag is enabled
-
-Project-level opt-in:
-
-```json
-{
-  "node": {
-    "permissions": ["network"]
-  }
-}
-```
-
-Package-level opt-in:
-
-```json
-{
-  "autojs6": {
-    "node": {
-      "permissions": ["network"]
-    }
-  }
-}
-```
-
-The doctor report exposes the bridge capability manifest schema, the `network -> android.permission.INTERNET` mapping, the network provider feature flag state, and the controlled modules (`fetch`, `axios`, `undici`, `http`/`https` client facade, and `websocket`). Missing declarations reject bridge calls before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
-
-## Timeout
-
-Requests have a default timeout. Current defaults:
-
-- default timeout: `30000` ms
-- hard upper bound: `120000` ms unless a later release gate justifies more
-
-Timeout rejects the JavaScript Promise with `ERR_AUTOJS6_NETWORK_TIMEOUT` and cancels the provider request.
-
-## Abort
-
-`AbortController.signal` is supported in the controlled fetch wrapper.
-
-Required behavior:
-
-- abort before dispatch rejects without starting provider I/O
-- abort during dispatch cancels provider I/O
-- abort after completion is ignored
-- service destroy behaves like a provider-side abort for every pending request
-
-## Redirects
-
-The live provider does not follow redirects implicitly. The controlled JavaScript wrapper receives each 3xx response, validates the `Location` target against the same scheme policy, and dispatches the next request only while the request still has redirect budget remaining.
-
-Current behavior:
-
-- default redirect budget: `5`
-- hard redirect cap: `10`
-- redirect overflow rejects with `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
-- malformed or unsupported redirect targets reject with `ERR_AUTOJS6_NETWORK_INVALID_URL`
-- `redirect: "manual"` returns the 3xx response to user code
-- `redirect: "error"` rejects on the first redirect
-
-The controlled `http` / `https` client facade is stricter than global
-`fetch()`: it uses manual redirect handling by default so package-level Node
-client behavior does not silently follow redirects unless `redirect` or
-`maxRedirects` is explicitly configured.
-
-## Body Budgets
-
-The first implementation is buffer-oriented, not network-stream-oriented.
-`Response.body` is the current Blob-backed body object, so scripts that need a
-Web Stream should call `response.body.stream()`. Direct spec-style
-`Response.body` as a `ReadableStream`, streaming request bodies, and streaming
-network responses remain deferred to a later design gate.
-
-Recommended defaults:
-
-- default max response body: `33554432` bytes
-- hard max response body: `67108864` bytes
-- request body budget documented separately before uploads are enabled
-
-Responses exceeding the active budget reject with `ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE` before returning partial data to user code.
-
-## TLS And Certificates
-
-MVP TLS behavior should use the Android platform trust store.
-
-Out of scope for v1:
-
-- accepting invalid certificates
-- custom CA bundles
-- certificate pinning
-- client certificates
-- exposing raw certificate objects
-- TLS socket customization
-
-Any certificate customization needs a separate design gate because it affects privacy, packaging, and user trust.
-
-The controlled `https` client facade enforces this by rejecting
-`rejectUnauthorized=false`, custom secure contexts, client certificate fields,
-request-level `createConnection`, and unsafe agent TLS options with
-`ERR_AUTOJS6_NETWORK_POLICY_DENIED`.
-
-## Proxy Policy
-
-MVP should use the Android/system proxy behavior of the chosen provider.
-
-Out of scope for v1:
-
-- per-request proxy configuration
-- SOCKS proxy support
-- proxy authentication APIs
-- proxy bypass lists
-
-## Background And Foreground Behavior
-
-The first network client should be suitable for short, script-scoped requests.
-
-It must not add:
-
-- background upload/download jobs
-- wake locks
-- long-running transfer services
-- foreground service promotion
-- retry-after-reboot behavior
-
-Long-running downloads or background sync belong in a separate task and should coordinate with the scheduled/background task design gate.
-
-## Service Destroy Cancellation
-
-When `NativeNodeEmbeddedScriptService` stops or is destroyed:
-
-- all pending network bridge calls must be cancelled
-- JavaScript Promises must reject
-- provider handles must be released
-- no callback may re-enter a destroyed Node environment
-
-This must be tested with fake providers before any live network provider is exposed.
-
-## Error Shape
-
-Existing default denials use:
-
-- `ERR_AUTOJS6_NETWORK_DISABLED`
-- current fetch legacy code shape where applicable
-
-Controlled client errors include:
-
-- `ERR_AUTOJS6_NETWORK_ABORTED`
-- `ERR_AUTOJS6_NETWORK_TIMEOUT`
-- `ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE`
-- `ERR_AUTOJS6_NETWORK_INVALID_URL`
-- `ERR_AUTOJS6_NETWORK_PERMISSION_DENIED`
-- `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
-
-Bridge transport failures should continue to use bridge-level errors such as `ERR_AUTOJS6_BRIDGE_TIMEOUT` and `ERR_AUTOJS6_BRIDGE_PROCESS_DEAD`.
-
-## Test Gate
-
-Before live network capability is enabled in release builds, tests must cover:
-
-- flag off keeps global fetch and default raw modules denied
-- `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED` is false in normal builds
-- `BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED` is false in normal builds
-- `require("autojs6:profile").experimentalFlags.network` is false
-- `require("autojs6:profile").experimentalFlags.rawNodeNetworkModules` is false by default
-- raw modules remain denied in the Safe profile even if live controlled fetch is enabled
-- fake provider success for GET and POST: covered by `NodeFetchBridgeInstrumentationTest`
-- object/array headers, string/Buffer/Uint8Array request bodies, and `Response.text()`/`json()`/`arrayBuffer()`: covered by `NodeFetchBridgeInstrumentationTest`
-- timeout cancellation: covered by `NodeFetchBridgeInstrumentationTest`
-- abort before dispatch and during dispatch: covered by `NodeFetchBridgeInstrumentationTest`
-- response body budget rejection: covered by `NodeFetchBridgeInstrumentationTest`
-- max concurrent request rejection: covered by `NodeFetchBridgeInstrumentationTest`
-- unsupported scheme rejection: covered by `NodeFetchBridgeInstrumentationTest`
-- redirect limit, `redirect: "manual"`, and `redirect: "error"` behavior: covered by `NodeFetchBridgeInstrumentationTest`
-- service destroy rejection and active-count cleanup: covered by `NodeFetchBridgeInstrumentationTest`
-- diagnostics counters for active, timeout, policy rejection, and abort paths: covered by `NodeFetchBridgeInstrumentationTest`
-- `require("axios")` fetch-backed adapter surface, params serialization, response types, Axios-like errors, custom adapter/agent/proxy denial, and `node_modules/axios` shadow denial: covered by `NodeFetchBridgeInstrumentationTest`
-- `require("undici")` fetch-backed facade surface, `request()` result shape,
-  Web Platform constructor reuse, safe dispatcher/agent/mock-agent shapes,
-  custom connector/dispatcher/proxy/socket denial, and
-  `node_modules/undici` shadow denial: covered by
-  `NodeUndiciFacadeInstrumentationTest`
-- offline HTTP npm-shaped fixtures for packages using `http.get()`,
-  `https.request()`, `IncomingMessage` `data` / `end`, form-style POST
-  bodies, request-level `AbortSignal`, and safe Agent options: covered by
-  `NodeHttpNpmCorpusInstrumentationTest`
-- explicit live Android fetch/axios smoke: covered by `verifyNodeLiveFetchGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback server and the Android OkHttp provider
-- explicit live Android WebSocket smoke: covered by `verifyNodeLiveWebSocketGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback WebSocket server and the Android OkHttp provider
-- default raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests
-- raw Node network module opt-in: covered by `NodeNetTlsDnsStagedParityInstrumentationTest`
-- default Android provider disabled with the flag off: covered by `NodeFetchBridgeInstrumentationTest`
-- service destroy cancellation: covered by `verifyNodeLiveFetchGate`; provider destroy cancels tracked OkHttp calls and returns a stable abort result
-- packaged APK manifest behavior with and without opt-in: capability metadata drives `INTERNET` merging, and verifier/doctor reports expose the mapping and manifest result
-
-## Non-Goals
-
-Task 41 does not enable these in the controlled fetch path; P13-30 raw module
-experiments are tracked separately:
-
-- global network access
-- `node:http`
-- `node:https`
-- `node:net`
-- `node:tls`
-- `node:dns`
-- `node:dgram`
-- desktop/userland axios adapters backed by raw network authority
-- desktop/userland Undici dispatchers, raw connectors, socket pools, proxy
-  tunneling, upgrades, streams, and pipelines
-- request streaming
-- response streaming
-- background transfers
-- custom TLS or proxy configuration

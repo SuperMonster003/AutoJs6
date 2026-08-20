@@ -2,11 +2,11 @@
   "schema": "autojs6-node-relaxed-capability-security-corpus-v1",
   "task": "P13-50",
   "status": "ready",
-  "updatedAt": "2026-07-02",
+  "updatedAt": "2026-08-20",
   "policy": {
     "defaultProfile": "safe_default",
     "profilePromotion": false,
-    "rawCapabilitiesPromoted": false,
+    "rawCapabilitiesPromoted": true,
     "minimumEvidence": [
       "positiveTests",
       "negativeTests",
@@ -20,21 +20,21 @@
   "capabilities": [
     {
       "id": "raw_network",
-      "profile": "desktop_compat_opt_in",
+      "profile": "safe_default",
       "risk": "high",
       "positiveTests": [
-        "profileSelection reports network as a Desktop-profile high-risk capability with android.permission.INTERNET",
-        "controlled fetch/http/net/tls/dns facades keep documented diagnostics under existing P13-29/P13-30 tests",
-        "raw Node dns/dns-promises/http/https/net/tls native builtins are available only when autojs.nodejs.rawNetworkModules.experimental=true"
+        "profile reports controlled and native network capabilities enabled with android.permission.INTERNET packaging policy",
+        "controlled fetch and WebSocket retain permission, timeout, budget, cancellation, and cleanup diagnostics",
+        "raw Node dns/dns-promises/http/https/net/tls native builtins resolve for bare and node-prefixed imports"
       ],
       "negativeTests": [
-        "Safe profile keeps raw network disabled by default",
-        "server/listen, DNS resolution, raw socket connect, unsupported schemes, and credential-bearing URLs reject without leaking secrets"
+        "dgram remains disabled and native network builtins cannot be shadowed by node_modules",
+        "controlled provider rejects missing permission, unsupported schemes, exhausted budgets, and credential-bearing diagnostics without leaking secrets"
       ],
       "abuseCases": [
         "loopback server bind",
         "raw socket outbound connect",
-        "DNS resolution without network opt-in",
+        "DNS resolution without required Android permission or policy context",
         "credential redaction in denied URL diagnostics"
       ],
       "ciEvidence": [
@@ -44,18 +44,17 @@
         "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
       ],
       "runtimeGuards": [
-        "ERR_AUTOJS6_NETWORK_DISABLED for Safe-profile fetch/http/https/net/tls/dns attempts",
-        "NODEJS_NETWORK_EXPERIMENTAL_ENABLED remains false in release",
-        "NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED remains false in release",
+        "NODEJS_NETWORK_ENABLED remains true in Debug and Release",
+        "NODEJS_RAW_NETWORK_MODULES_ENABLED remains true in Debug and Release",
+        "controlled-provider permission and resource limits remain enforced",
         "credential-bearing denied URLs must be redacted in diagnostics"
       ],
       "promotionPreconditions": [
-        "P13-51 rollback playbook has a raw-network kill switch",
         "P13-52 privacy disclosure covers outbound network and DNS lookup behavior",
-        "packaged APK metadata and review UI record raw network authority",
-        "positive, negative, and abuse tests are green on connected Android CI before enabling"
+        "packaged APK manifest and diagnostics record network authority",
+        "positive, negative, lifecycle, and abuse tests stay green on connected Android CI"
       ],
-      "rollback": "Keep NODEJS_NETWORK_EXPERIMENTAL_ENABLED false and NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED false."
+      "rollback": "Demote through a documented profile/contract release; do not reintroduce a private Gradle capability switch."
     },
     {
       "id": "filesystem_relaxation",
@@ -97,14 +96,14 @@
     },
     {
       "id": "java_interop",
-      "profile": "pro_compat_opt_in",
+      "profile": "safe_default",
       "risk": "critical",
       "positiveTests": [
-        "debug experimental provider can call allowlisted java.lang.Math and manage JSON-safe Android handles",
-        "profileSelection and featureFlags report Java interop as high-risk disabled by default"
+        "stable provider can call allowlisted java.lang.Math and manage JSON-safe Android handles",
+        "profile featureStates reports Java interop enabled and critical"
       ],
       "negativeTests": [
-        "default Java module require/resolve is denied and cannot be shadowed",
+        "Java module cannot be shadowed and its allowlist cannot be expanded by project or package metadata",
         "Runtime.exec, ProcessBuilder, ClassLoader, reflection, System.loadLibrary, denied mutation, and released handles reject"
       ],
       "abuseCases": [
@@ -120,32 +119,30 @@
         "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
       ],
       "runtimeGuards": [
-        "ERR_AUTOJS6_JAVA_INTEROP_DISABLED when Java interop is disabled",
+        "NODEJS_JAVA_INTEROP_ENABLED remains true in Debug and Release",
         "ERR_AUTOJS6_JAVA_CLASS_DENIED for Runtime, ProcessBuilder, ClassLoader, and System.loadLibrary",
         "ERR_AUTOJS6_JAVA_REFLECTION_DENIED for reflection classes",
         "released Java handles must reject stale use"
       ],
       "promotionPreconditions": [
-        "P13-51 rollback playbook has a Java interop kill switch",
         "P13-52 privacy disclosure covers host object access and Android API reach",
-        "packaged APK metadata rejects Java interop authority unless reviewed allowlist and disclosure evidence exist",
+        "packaged APK metadata cannot expand Java interop authority",
         "allowlist review explicitly rejects process execution, class loading, reflection, and native loading",
-        "allowlist and denylist tests are green on connected Android CI before enabling"
+        "allowlist, denylist, handle-lifecycle, and packaged tests stay green on connected Android CI"
       ],
-      "rollback": "Keep NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED false in release and reject project/package overrides."
+      "rollback": "Demote through a documented profile/contract release while preserving project/package override rejection."
     },
     {
       "id": "worker_threads",
-      "profile": "desktop_compat_opt_in",
+      "profile": "safe_default",
       "risk": "critical",
       "positiveTests": [
-        "workerThreadsProfile documents default denial, request-local native preflight, MessageChannel, WorkerPool, transfer-list, and packaged behavior state",
-        "P14-28 audits Node 24.5 target ABI artifacts and records worker native availability as intentionally unsupported for v1.2"
+        "workerThreadsProfile reports stable enablement, native availability, MessageChannel, WorkerPool, transfer-list, and packaged behavior",
+        "published ABI artifacts provide a usable native Worker bootstrap"
       ],
       "negativeTests": [
-        "Safe profile keeps worker_threads disabled by default",
-        "node:worker_threads remains shape-only while native preflight is unavailable",
-        "workers cannot access bridge modules, nested workers, raw native handles, raw process APIs, shell, or child_process"
+        "worker_threads cannot be shadowed and native unavailability is a conformance failure",
+        "workers cannot access bridge modules, nested workers, raw native handles, raw process APIs, Java, shell, or network"
       ],
       "abuseCases": [
         "worker bridge module import",
@@ -156,7 +153,7 @@
       ],
       "ciEvidence": [
         "NodeWorkerThreadsBootstrapInstrumentationTest",
-        "NodeWorkerThreadsExperimentalInstrumentationTest",
+        "NodeWorkerThreadsStableInstrumentationTest",
         "NodeWorkerThreadsResourceStressInstrumentationTest",
         "verifyNodePhase14WorkerNativeAvailability",
         "verifyNodePhase14WorkerRunnablePackagedSmoke",
@@ -164,32 +161,30 @@
         "verifyNodePhase14DesktopRuntimeDocSync"
       ],
       "runtimeGuards": [
-        "ERR_AUTOJS6_WORKER_DISABLED for unavailable runnable workers",
-        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED for worker bridge access when workers become native-available",
-        "worker_threads experimental flag remains false in release profiles",
-        "project and packaged worker opt-in remains unavailable for v1.2",
+        "NODEJS_WORKER_THREADS_ENABLED remains true in Debug and Release",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED for worker bridge access",
+        "worker count, message, queue, source, transfer, and lifecycle limits remain enforced",
         "process-worker facade remains absent"
       ],
       "promotionPreconditions": [
-        "P14-32 desktop runtime doc sync keeps worker_intentionally_unsupported_v1_2 until native, packaged, resource, UX, security, and rollback evidence exists",
-        "P14-28 must report native worker availability on every selected target ABI before runnable promotion",
-        "P14-29 runnable and packaged smoke must execute on native-worker-capable devices",
-        "P14-30 resource/RSS stress must archive Java heap, native heap, fd, thread, queue, worker, and WorkerPool deltas",
+        "native worker availability remains verified on every selected ABI",
+        "runnable and packaged smoke executes on supported devices",
+        "resource/RSS stress archives Java heap, native heap, fd, thread, queue, worker, and WorkerPool deltas",
         "P14-31 process-worker replacement must remain no-facade unless a future WorkerPool-compatible API owns slot accounting and packaged UX"
       ],
-      "rollback": "Keep autojs.nodejs.worker_threads.experimental=false, keep project/package worker opt-in disabled, and keep node:worker_threads as shape-only until native, packaged, resource, security, and rollback gates pass."
+      "rollback": "Demote through a documented profile/contract release; do not restore a build opt-in or same-thread fallback."
     },
     {
       "id": "child_process",
-      "profile": "desktop_compat_opt_in",
+      "profile": "safe_default",
       "risk": "high",
       "positiveTests": [
         "separate shell bridge remains available only with shell capability",
-        "childProcessProfile documents scoped-runner requirements"
+        "childProcessProfile documents stable native Node behavior and Android/caller-owned limits"
       ],
       "negativeTests": [
-        "child_process and node:child_process require/resolve are denied and cannot be shadowed",
-        "raw process handles, spawn/fork, detached mode, signals, and fd streams remain unavailable"
+        "child_process and node:child_process cannot be shadowed",
+        "native child_process does not grant root, Shizuku, Java, bridge, native-addon, or Inspector authority"
       ],
       "abuseCases": [
         "child_process shadow package",
@@ -203,19 +198,17 @@
         "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
       ],
       "runtimeGuards": [
-        "ERR_AUTOJS6_BUILTIN_DISABLED for child_process and node:child_process",
-        "ERR_AUTOJS6_PROCESS_API_DISABLED for raw process handles",
+        "NODEJS_CHILD_PROCESS_ENABLED remains true in Debug and Release",
         "shell bridge remains separate from child_process authority",
-        "detached mode, inherited fds, signals, and raw stdio streams remain unavailable"
+        "callers own executable validation, timeout, stdio bounds, cancellation, kill, and child reaping"
       ],
       "promotionPreconditions": [
-        "P14-31 process-worker replacement keeps no user-facing facade and no raw process authority for v1.2",
-        "P13-51 rollback playbook has a child_process scoped-runner kill switch",
+        "P14-31 process-worker replacement keeps no user-facing process-worker facade; native child_process remains a separate stable builtin",
         "P13-52 privacy disclosure covers command execution and process output",
-        "packaged APK metadata records allowed binaries, cwd, env, timeout, and stdio policy",
-        "spawn/fork/shell-confusion abuse tests are green on connected Android CI before enabling"
+        "packaged APK diagnostics record stable child process authority",
+        "spawn/fork/shell-confusion/cleanup abuse tests stay green on connected Android CI"
       ],
-      "rollback": "Keep child_process builtin disabled and route command execution through the scoped shell bridge only."
+      "rollback": "Demote through a documented profile/contract release; do not hide native availability behind a private build switch."
     },
     {
       "id": "native_addon",

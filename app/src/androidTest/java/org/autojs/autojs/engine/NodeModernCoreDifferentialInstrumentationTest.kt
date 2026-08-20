@@ -174,8 +174,8 @@ class NodeModernCoreDifferentialInstrumentationTest {
                 workingDirectory = workDir,
                 timeoutMs = 20_000L,
                 runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
-                esmExperimentalEnabled = true,
-                dynamicImportExperimentalEnabled = true,
+                esmEnabled = true,
+                dynamicImportEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("modern core differential corpus", result)

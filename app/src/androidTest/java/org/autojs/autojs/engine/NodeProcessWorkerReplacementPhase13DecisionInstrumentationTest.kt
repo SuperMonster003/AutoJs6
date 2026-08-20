@@ -109,8 +109,8 @@ class NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest {
                 sourceName = "<node-process-worker-phase13-p13-35.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
-                workerThreadsExperimentalEnabled = false,
-                childProcessExperimentalEnabled = false,
+                workerThreadsEnabled = false,
+                childProcessEnabled = false,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("P13-35 process-worker replacement decision", result)
@@ -118,7 +118,7 @@ class NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest {
                 result.stdout,
                 result.stdout.contains(
                     "p13processworker.profile=decision_partial|not_introduced|not_introduced|" +
-                        "worker_threads.WorkerPool|request_local_experimental_preflight|denied|" +
+                        "worker_threads.WorkerPool|request_local_stable_preflight|denied|" +
                         "separate_scoped_command_bridge|worker_computation_reserved|closed_by_p13_06|" +
                         "workingDirectory|65536|32|worker_pool_close_or_execution_destroy|" +
                         "not_promoted|denied|false|false|true",
@@ -145,7 +145,7 @@ class NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest {
                 result.stdout.contains("p13processworker.workerThreadsBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
             )
             assertTrue(result.stdout, result.stdout.contains("p13processworker.ready=true"))
-            assertEquals("false", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("false", result.nativeValues["embedded_script.request.worker_threads_enabled"])
             result.nativeValues["embedded_script.worker_threads_enabled"]?.let { assertEquals("false", it) }
             result.nativeValues["embedded_script.worker_active_count"]?.let { assertEquals("0", it) }
         } finally {

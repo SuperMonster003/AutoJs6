@@ -164,7 +164,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
     }
 
     @Test
-    fun rhinoJsonOnlyPocRunsBehindExplicitExperimentalRequest() {
+    fun rhinoJsonOnlyPocRunsBehindExplicitCompatibilityRequest() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Rhino JSON-only POC")
 
         val workDir = File(context.cacheDir, "node-rhino-json-only-poc-${System.nanoTime()}").apply {
@@ -187,7 +187,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                   const rhino = require("rhino");
 
                   const inline = await rhino.run({
-                    experimental: true,
+                    explicit: true,
                     name: "inline.rhino.js",
                     source: 'console.log("source", args[0], args[1]); ({ sum: args[0] + args[1], nested: { ok: true } });',
                     args: [2, 3],
@@ -203,7 +203,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                   assert.match(inline.console.lines[0].message, /source 2 3/);
 
                   const fromPath = await rhino.run({
-                    experimental: true,
+                    explicit: true,
                     path: "legacy.rhino.js",
                     args: [{ label: "ok" }],
                     timeoutMs: 5000
@@ -214,7 +214,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                   assert.match(fromPath.sourceName, /legacy\.rhino\.js$/);
 
                   const thrown = await rhino.run({
-                    experimental: true,
+                    explicit: true,
                     source: 'throw new Error("boom");',
                     timeoutMs: 5000
                   });
@@ -224,7 +224,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                   assert.match(thrown.error.message, /boom/);
 
                   const unsafe = await rhino.run({
-                    experimental: true,
+                    explicit: true,
                     source: "runtime;",
                     timeoutMs: 5000
                   });
@@ -232,7 +232,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                   assert.strictEqual(unsafe.error.code, "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT");
 
                   const timedOut = await rhino.run({
-                    experimental: true,
+                    explicit: true,
                     source: "sleep(5000); 1;",
                     timeoutMs: 100
                   });
@@ -269,7 +269,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
     }
 
     @Test
-    fun rhinoInstallExperimentalJavaProxyUsesAllowlistWhenJavaInteropEnabled() {
+    fun rhinoInstallExplicitJavaProxyUsesAllowlistWhenJavaInteropEnabled() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Rhino install Java proxy POC")
 
         val workDir = File(context.cacheDir, "node-rhino-install-java-proxy-${System.nanoTime()}").apply {
@@ -373,7 +373,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                   }
                   assert.strictEqual(defaultInstallCode, "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED");
 
-                  const installed = rhino.install({ experimental: true, globals: true });
+                  const installed = rhino.install({ explicit: true, globals: true });
                   assert.strictEqual(Object.isFrozen(installed), true);
                   assert.deepStrictEqual(installed.installed, ["Packages", "java", "android"]);
                   assert.strictEqual(installed.globalsInstalled, true);
@@ -442,7 +442,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                 sourceName = "<node-rhino-install-java-proxy.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
-                javaInteropExperimentalEnabled = true,
+                javaInteropEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("Rhino install Java proxy POC", result)

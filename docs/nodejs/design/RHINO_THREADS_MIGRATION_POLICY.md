@@ -182,15 +182,15 @@ deferred work, use `work_manager`:
 
 ## Worker Boundary
 
-`worker_threads` remains disabled by default. The internal experimental flag
-`autojs.nodejs.worker_threads.experimental=false` is not a user-visible release
-opt-in. When the flag is off, `require("worker_threads")`,
-`require("node:worker_threads")`, and shadowing attempts fail closed. When the
-flag is on, current builds still perform native availability preflight and may
-fail with `ERR_AUTOJS6_WORKER_DISABLED`.
+`worker_threads` is stable and enabled by default. The generated
+`NODEJS_WORKER_THREADS_ENABLED=true` field is a build invariant, not a
+user-visible opt-in. `require("worker_threads")` and
+`require("node:worker_threads")` expose the bounded native worker surface and
+cannot be shadowed. Native unavailability on a published ABI is a conformance
+failure.
 
-If native workers become available later, they are still not a Rhino `threads`
-replacement. The allowed worker shape is pure JavaScript computation with
+Native workers are still not a drop-in Rhino `threads` replacement. The
+allowed worker shape is pure JavaScript computation with
 restricted module loading, scoped filesystem wrappers, bounded messages,
 structured-clone-safe data, no AutoJs bridge modules, no Java/Android objects,
 no raw shared mutable objects, no same-runtime callbacks, and no nested worker
@@ -199,10 +199,11 @@ authority unless a separate gate approves it.
 ## P12-20 Maturity Review
 
 P12-20 rechecked `worker_threads`, process slot, and execution-mode maturity
-for Phase 12 and kept the S11-25 conclusion:
+for Phase 12. The following bullets are historical pre-GA evidence superseded
+by the v1.2 stable worker baseline:
 
 - default `worker_threads` remains closed;
-- the experimental worker path is an internal native-availability/preflight
+- the pre-GA worker path was an internal native-availability/preflight
   gate, not a user-facing migration target;
 - runnable worker creation, stress, and packaged worker source graph evidence
   remain blocked until native workers are available and the focused suites pass;
@@ -231,8 +232,8 @@ and MessageChannel-style handoffs.
 
 P12-22 records that Phase 12 does not promote a compute/process-worker
 replacement API. `worker_computation` remains `reserved`,
-P13-06 closes `second_execution_slot`, and `worker_threads` remains default-off
-and native-availability gated. Any future API must be separately named, must
+P13-06 closes `second_execution_slot`. The v1.2 baseline later enabled native
+`worker_threads`. Any separate process-worker API must be separately named, must
 not reuse `threads` or `worker_threads`, and must pass worker/process
 permissions, scoped script path, message size, cleanup, nested worker denial,
 bridge module isolation, resource stress, packaged behavior, and final blocker
@@ -242,11 +243,12 @@ See `docs/nodejs/reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md`.
 
 ## Acceptance
 
-- No default `worker_threads`.
+- Stable `worker_threads` is available, but no Rhino shared-object/thread API
+  is emulated.
 - No `require("threads")`, `compat.threads`, global `threads`, or global
   `sync`.
 - No shared Rhino object model, `ScriptRuntime`, `Thread`, `ThreadPoolExecutor`,
   `Synchronizer`, `ReentrantLock`, `AtomicLong`, or `VolatileDispose` exposure.
 - Status manifest keeps all Rhino `threads` entries `blocked_by_design`.
 - Migration examples point to `async` / `await`, timeout/cancellation, explicit
-  script/process slots, `work_manager`, and future policy-gated compute workers.
+  script/process slots, `work_manager`, and bounded native workers.

@@ -31,7 +31,7 @@ class NodeSecurityRegressionInstrumentationTest {
     @Test
     fun dangerousApisAndNetworkOperationsStayDenied() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node security regression corpus")
-        assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_NETWORK_ENABLED)
 
         val source = """
             "nodejs";
@@ -763,7 +763,7 @@ class NodeSecurityRegressionInstrumentationTest {
                 workingDirectory = workDir,
                 timeoutMs = 15_000L,
                 runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
-                workerThreadsExperimentalEnabled = true,
+                workerThreadsEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("Node Phase 5 plugin and worker security regression", result)
@@ -977,8 +977,8 @@ class NodeSecurityRegressionInstrumentationTest {
     @Test
     fun phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Phase 13 relaxed capability security corpus")
-        assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
-        assertFalse(BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_NETWORK_ENABLED)
+        assertFalse(BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED)
 
         val workDir = freshWorkDir("node-security-p13-50-relaxed-corpus")
         val outsideDir = freshWorkDir("node-security-p13-50-outside")
@@ -1228,11 +1228,11 @@ class NodeSecurityRegressionInstrumentationTest {
 
     @Test
     fun phase13JavaInteropRelaxedCapabilityCorpusKeepsAllowlistAndDenials() {
-        assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_ENABLED)
 
         val disabledProvider = AndroidNodeBridgeCapabilityProvider(
             context,
-            javaInteropExperimentalEnabled = false,
+            javaInteropEnabled = false,
         )
         try {
             val disabled = dispatchJava(
@@ -1248,7 +1248,7 @@ class NodeSecurityRegressionInstrumentationTest {
 
         val enabledProvider = AndroidNodeBridgeCapabilityProvider(
             context,
-            javaInteropExperimentalEnabled = true,
+            javaInteropEnabled = true,
         )
         try {
             val math = dispatchJava(

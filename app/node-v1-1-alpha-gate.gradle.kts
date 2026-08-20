@@ -113,7 +113,6 @@ val generateNodeV11AlphaSummary = tasks.register("generateNodeV11AlphaSummary") 
         val gateTaskRequested = requestedTasks.any { taskName ->
             taskName == "verifyNodeV11AlphaGate" || taskName.endsWith(":verifyNodeV11AlphaGate")
         }
-        val workerExperimental = nodeV11AlphaBooleanProperty("autojs.nodejs.worker_threads.experimental")
         fun alphaStressArgument(name: String, defaultValue: String): String =
             providers.gradleProperty(name).orElse(defaultValue).get()
         val alphaStressArguments = linkedMapOf(
@@ -128,7 +127,7 @@ val generateNodeV11AlphaSummary = tasks.register("generateNodeV11AlphaSummary") 
                 "area" to "ESM partial",
                 "status" to "required",
                 "tests" to listOf(
-                    "NodeEsmExperimentalInstrumentationTest",
+                    "NodeEsmStableInstrumentationTest",
                     "NodeSourceMapStackTraceInstrumentationTest",
                     "NodeCompatCorpusInstrumentationTest",
                     "NodeModernCoreDifferentialInstrumentationTest",
@@ -189,16 +188,12 @@ val generateNodeV11AlphaSummary = tasks.register("generateNodeV11AlphaSummary") 
             ),
             linkedMapOf(
                 "area" to "worker threads",
-                "status" to if (workerExperimental) "experimental-enabled" else "design-gate-only",
-                "tests" to if (workerExperimental) {
-                    listOf(
-                        "NodeWorkerThreadsDesignGateInstrumentationTest",
-                        "NodeWorkerThreadsExperimentalInstrumentationTest",
-                        "NodeWorkerThreadsResourceStressInstrumentationTest",
-                    )
-                } else {
-                    listOf("NodeWorkerThreadsDesignGateInstrumentationTest")
-                },
+                "status" to "stable-required",
+                "tests" to listOf(
+                    "NodeWorkerThreadsDesignGateInstrumentationTest",
+                    "NodeWorkerThreadsStableInstrumentationTest",
+                    "NodeWorkerThreadsResourceStressInstrumentationTest",
+                ),
             ),
         )
 
@@ -270,7 +265,7 @@ val generateNodeV11AlphaSummary = tasks.register("generateNodeV11AlphaSummary") 
             "notes" to listOf(
                 "This is a functional v1.1 milestone gate, not a release candidate or tag gate.",
                 "Run with ANDROID_SERIAL targeting the Sony unattended device and -P$nodeV11AlphaDeviceProfileProperty=$nodeV11AlphaDeviceProfile.",
-                "Worker runtime stress is included only when autojs.nodejs.worker_threads.experimental=true.",
+                "Worker runtime stress is part of the stable capability gate.",
             ),
         )
 

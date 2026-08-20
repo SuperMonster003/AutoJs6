@@ -65,7 +65,7 @@ private val nodeDependencyBundlerCapabilityBuiltins = linkedMapOf(
 private val nodeDependencyCompatibilityStatusRank = linkedMapOf(
     "compatible" to 0,
     "compatible with capability" to 1,
-    "experimental" to 2,
+    "partial" to 2,
     "unsupported" to 3,
     "unsafe" to 4,
 )
@@ -425,9 +425,6 @@ private fun nodeDependencyBundlerUnsupportedCapabilities(packageDir: File, packa
     if (nodeDependencyBundlerForbiddenScripts.any { scripts?.containsKey(it) == true }) {
         capabilities += "lifecycle_scripts"
     }
-    if (packageJson["type"] == "module") {
-        capabilities += "esm_only"
-    }
     if (packageJson.containsKey("bin")) {
         capabilities += "bin_entries"
     }
@@ -511,8 +508,8 @@ private fun nodeDependencyCompatibilityDeclaredCapabilities(projectRoot: File): 
 private fun nodeDependencyCompatibilityHint(code: String, status: String): String = when {
     code == "CAPABILITY_DECLARATION_MISSING" ->
         "Declare the required Safe Node Profile capability in project.json or package.json."
-    code == "ESM_ENTRY_PARTIAL" || code == "PACKAGE_EXPORTS_CONDITIONS_PARTIAL" ->
-        "Keep this project on the v1.1 partial support gate and retain CommonJS fallback coverage where possible."
+    code == "PACKAGE_EXPORTS_CONDITIONS_PARTIAL" ->
+        "Retain CommonJS fallback coverage for package condition combinations outside the current resolver subset."
     status == "unsafe" ->
         "Remove the unsafe native/process/fs behavior before packaging."
     status == "unsupported" ->
@@ -556,7 +553,6 @@ private fun nodeDependencyCompatibilityStatusForIssue(code: String): String = wh
     "SUSPICIOUS_EXECUTABLE_UNSUPPORTED",
     "SYMLINK_UNSUPPORTED",
     -> "unsafe"
-    "ESM_ONLY_PACKAGE_UNSUPPORTED" -> "experimental"
     else -> "unsupported"
 }
 
@@ -564,14 +560,15 @@ private fun nodeDependencyCompatibilityStatusForCapability(capability: String): 
     "lifecycle_scripts",
     "native_addon",
     "native_process_api",
-    "java_interop",
     -> "unsafe"
     "worker_threads",
-    "esm_only",
-    -> "experimental"
     "raw_network",
     "child_process",
+    -> "compatible"
     "vm",
+    -> "partial"
+    "java_interop",
+    -> "compatible with capability"
     "inspector",
     "bin_entries",
     -> "unsupported"
@@ -683,7 +680,6 @@ private fun nodeDependencyCompatibilityAnalyzeSource(
 
 private fun nodeDependencyCompatibilityEntry(
     projectRoot: File,
-    signals: MutableList<Map<String, Any?>>,
 ): Map<String, Any?> {
     val projectJson = nodeDependencyBundlerReadJsonObject(projectRoot.resolve("project.json"))
     val packageJson = nodeDependencyBundlerReadJsonObject(projectRoot.resolve("package.json"))
@@ -696,15 +692,6 @@ private fun nodeDependencyCompatibilityEntry(
         extension == ".mjs" || (extension == ".js" && packageType == "module") -> "esm"
         extension == ".cjs" || extension == ".js" -> "cjs"
         else -> "unknown"
-    }
-    if (format == "esm") {
-        signals += nodeDependencyCompatibilitySignal(
-            "module-format",
-            "experimental",
-            "ESM_ENTRY_PARTIAL",
-            entry.ifBlank { projectRoot.path },
-            "ESM entry support is partial in Node Profile v1.1.",
-        )
     }
     return linkedMapOf(
         "path" to entry,
@@ -723,7 +710,7 @@ private fun nodeDependencyCompatibilityReport(
     val declaredCapabilities = nodeDependencyCompatibilityDeclaredCapabilities(projectRoot)
     val requiredBuiltins = linkedMapOf<String, MutableSet<String>>()
     val capabilityRequirements = linkedMapOf<String, MutableSet<String>>()
-    val entry = nodeDependencyCompatibilityEntry(projectRoot, signals)
+    val entry = nodeDependencyCompatibilityEntry(projectRoot)
     val sourceFiles = nodeDependencyCompatibilitySourceFiles(projectRoot)
     sourceFiles.forEach { file ->
         nodeDependencyCompatibilityAnalyzeSource(projectRoot, file, requiredBuiltins, capabilityRequirements, signals)
@@ -780,10 +767,10 @@ private fun nodeDependencyCompatibilityReport(
     if (packageExportsCount > 0 || packageImportsCount > 0) {
         signals += nodeDependencyCompatibilitySignal(
             "package-exports",
-            "experimental",
+            "partial",
             "PACKAGE_EXPORTS_CONDITIONS_PARTIAL",
             "node_modules",
-            "Dependency graph uses package exports/imports conditions covered by the v1.1 partial resolver gate.",
+            "Dependency graph uses package exports/imports conditions covered by the current partial resolver.",
         )
     }
     if (scan.totalBytes > policy.maxTotalBytes || scan.packages.size > policy.maxPackageCount) {
@@ -799,13 +786,26 @@ private fun nodeDependencyCompatibilityReport(
     capabilityRequirements.forEach { (capability, modules) ->
         val declared = capability in declaredCapabilities
         val baseStatus = nodeDependencyCompatibilityStatusForCapability(capability)
-        val status = if (!declared && baseStatus == "compatible with capability") "unsupported" else baseStatus
+        val declarationRequired = baseStatus == "compatible with capability"
+        val unsupported = baseStatus == "unsupported"
+        val status = if (!declared && declarationRequired) "unsupported" else baseStatus
         signals += nodeDependencyCompatibilitySignal(
             category = "capability",
             status = status,
-            code = if (declared) "CAPABILITY_REQUIRED" else "CAPABILITY_DECLARATION_MISSING",
+            code = when {
+                unsupported -> "CAPABILITY_UNSUPPORTED"
+                !declarationRequired -> "RUNTIME_CAPABILITY_AVAILABLE"
+                declared -> "CAPABILITY_REQUIRED"
+                else -> "CAPABILITY_DECLARATION_MISSING"
+            },
             file = projectRoot.path,
-            message = "Project requires capability '$capability' from ${modules.sorted().joinToString(", ")}.",
+            message = if (unsupported) {
+                "Runtime capability '$capability' is unsupported for ${modules.sorted().joinToString(", ")}."
+            } else if (declarationRequired) {
+                "Project requires capability '$capability' from ${modules.sorted().joinToString(", ")}."
+            } else {
+                "Stable runtime capability '$capability' is used by ${modules.sorted().joinToString(", ")}."
+            },
             extra = mapOf(
                 "capability" to capability,
                 "declared" to declared,
@@ -958,9 +958,6 @@ private fun scanNodeDependencyBundle(projectRoot: File, policy: NodeDependencyBu
             if (scripts?.containsKey(scriptName) == true) {
                 issue("LIFECYCLE_SCRIPT_DISABLED", packageJson, "Lifecycle script '$scriptName' is not allowed.")
             }
-        }
-        if (json["type"] == "module") {
-            issue("ESM_ONLY_PACKAGE_UNSUPPORTED", packageJson, "ESM-only package metadata is not supported by the default profile.")
         }
         nodeDependencyBundlerAuditPackageJsonPathReferences(packageJson, json, ::issue)
 

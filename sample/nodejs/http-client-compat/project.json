@@ -5,12 +5,12 @@
   "node": {
     "backend": "embedded",
     "timeoutMs": 10000,
-    "permissions": []
+    "permissions": ["network"]
   },
   "example": {
     "capabilities": ["http", "network"],
     "expectedProvider": "Embedded Node controlled HTTP facade",
     "packagedSupport": "main-app example only in this phase",
-    "securityLimitations": ["network disabled by default", "no raw net/tls/dns/dgram promotion"]
+    "securityLimitations": ["controlled requests require the network declaration", "native dgram remains disabled"]
   }
 }

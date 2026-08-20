@@ -9204,23 +9204,23 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
-    fun installAndRunExperimentalEsmEmbeddedNodePackagedApk() {
+    fun installAndRunStableEsmEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged partial ESM smoke requires embedded script execution build support.",
             BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
         )
         assumeTrue(
-            "Embedded Node.js packaged partial ESM smoke requires Node Profile v1.1 ESM to be enabled.",
-            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+            "Embedded Node.js packaged partial ESM smoke requires stable Node Profile v1.2 ESM support.",
+            BuildConfig.NODEJS_ESM_ENABLED,
         )
 
         assumePackagedSmokeTemplateAvailable("Packaged partial ESM install-and-run smoke")
 
         val outputApk = buildPackagedGateDiagnosticsApk(
-            rootName = "embedded-node-packaged-experimental-esm-smoke",
-            outputApkName = EXPERIMENTAL_ESM_APK_NAME,
-            projectName = EXPERIMENTAL_ESM_PROJECT_NAME,
-            packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
+            rootName = "embedded-node-packaged-stable-esm-smoke",
+            outputApkName = STABLE_ESM_APK_NAME,
+            projectName = STABLE_ESM_PROJECT_NAME,
+            packageName = STABLE_ESM_PACKAGE_NAME,
             mainScriptName = "main.mjs",
             mainScript = """
                 import path from "path";
@@ -9268,15 +9268,15 @@ class EmbeddedNodePackagedApkSmokeTest {
                 const ready = value === 42 && suffix === "esm-v1" && awaited === "awaited" &&
                   builtinOk && fullPathOk && graph && security && stackOk;
 
-                console.log("packaged.experimental_esm.ready=" + ready);
-                console.log("packaged.experimental_esm.entry=" + (value === 42 && suffix === "esm-v1"));
-                console.log("packaged.experimental_esm.tla=" + (awaited === "awaited"));
-                console.log("packaged.experimental_esm.builtin=" + builtinOk);
-                console.log("packaged.experimental_esm.full_path=" + fullPathOk);
-                console.log("packaged.experimental_esm.type_module=" + (typed.value === "typed-module" && typedFilenameOk === true));
-                console.log("packaged.experimental_esm.graph=" + graph);
-                console.log("packaged.experimental_esm.security=" + security);
-                console.log("packaged.experimental_esm.stack_source=" + stackOk);
+                console.log("packaged.stable_esm.ready=" + ready);
+                console.log("packaged.stable_esm.entry=" + (value === 42 && suffix === "esm-v1"));
+                console.log("packaged.stable_esm.tla=" + (awaited === "awaited"));
+                console.log("packaged.stable_esm.builtin=" + builtinOk);
+                console.log("packaged.stable_esm.full_path=" + fullPathOk);
+                console.log("packaged.stable_esm.type_module=" + (typed.value === "typed-module" && typedFilenameOk === true));
+                console.log("packaged.stable_esm.graph=" + graph);
+                console.log("packaged.stable_esm.security=" + security);
+                console.log("packaged.stable_esm.stack_source=" + stackOk);
             """.trimIndent() + "\n",
             extraFiles = packagedRuntimeCompatibilityDescriptorFiles(
                     esmPartial = true,
@@ -9295,10 +9295,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                 """.trimIndent() + "\n",
                 "legacy.cjs" to """module.exports = { value: "legacy" };""" + "\n",
             ),
-            runtimeMarkers = EXPERIMENTAL_ESM_RUNTIME_MARKERS,
-            requiredTemplateDexMarkers = EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS,
+            runtimeMarkers = STABLE_ESM_RUNTIME_MARKERS,
+            requiredTemplateDexMarkers = STABLE_ESM_TEMPLATE_DEX_MARKERS,
         )
-        assertInstallAndRunPackagedExperimentalEsmSmoke(outputApk)
+        assertInstallAndRunPackagedStableEsmSmoke(outputApk)
     }
 
     @Test
@@ -9308,8 +9308,8 @@ class EmbeddedNodePackagedApkSmokeTest {
             BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
         )
         assumeTrue(
-            "Embedded Node.js packaged dynamic import local install-and-run smoke requires Node Profile v1.1 dynamic import local support.",
-            BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED && BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+            "Embedded Node.js packaged dynamic import local install-and-run smoke requires stable Node Profile v1.2 dynamic import support.",
+            BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
         )
 
         assumePackagedSmokeTemplateAvailable("Packaged dynamic import local install-and-run smoke")
@@ -9386,12 +9386,12 @@ class EmbeddedNodePackagedApkSmokeTest {
             BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
         )
         assumeTrue(
-            "Embedded Node.js packaged worker_threads ESM smoke requires worker_threads experimental build support.",
-            BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+            "Embedded Node.js packaged worker_threads ESM smoke requires worker_threads stable build support.",
+            BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
         )
         assumeTrue(
-            "Embedded Node.js packaged worker_threads ESM smoke requires Node Profile v1.1 ESM to be enabled.",
-            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+            "Embedded Node.js packaged worker_threads ESM smoke requires stable Node Profile v1.2 ESM support.",
+            BuildConfig.NODEJS_ESM_ENABLED,
         )
         NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("packaged worker_threads ESM smoke")
 
@@ -14861,13 +14861,13 @@ $nodeConfigJson
         )
     }
 
-    private fun assertInstallAndRunPackagedExperimentalEsmSmoke(outputApk: File) {
+    private fun assertInstallAndRunPackagedStableEsmSmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
-            packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
-            shellApkPath = "/data/local/tmp/autojs6-packaged-node-experimental-esm-smoke.apk",
+            packageName = STABLE_ESM_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-stable-esm-smoke.apk",
             label = "packaged partial ESM smoke",
-            requiredMarkers = EXPERIMENTAL_ESM_RUNTIME_MARKERS,
+            requiredMarkers = STABLE_ESM_RUNTIME_MARKERS,
         )
     }
 
@@ -16343,9 +16343,9 @@ $nodeConfigJson
         private const val ESM_DIAGNOSTICS_PROJECT_NAME = "PackagedNodeEsmDiagnosticsSmoke"
         private const val ESM_DIAGNOSTICS_PACKAGE_NAME = "org.autojs6.packaged.node.esm.diagnostics.smoke"
         private const val ESM_DIAGNOSTICS_APK_NAME = "PackagedNodeEsmDiagnosticsSmoke_v1.0.0.apk"
-        private const val EXPERIMENTAL_ESM_PROJECT_NAME = "PackagedNodeExperimentalEsmSmoke"
-        private const val EXPERIMENTAL_ESM_PACKAGE_NAME = "org.autojs6.packaged.node.experimental.esm.smoke"
-        private const val EXPERIMENTAL_ESM_APK_NAME = "PackagedNodeExperimentalEsmSmoke_v1.0.0.apk"
+        private const val STABLE_ESM_PROJECT_NAME = "PackagedNodeStableEsmSmoke"
+        private const val STABLE_ESM_PACKAGE_NAME = "org.autojs6.packaged.node.stable.esm.smoke"
+        private const val STABLE_ESM_APK_NAME = "PackagedNodeStableEsmSmoke_v1.0.0.apk"
         private const val DYNAMIC_IMPORT_DIAGNOSTICS_PROJECT_NAME = "PackagedNodeDynamicImportDiagnosticsSmoke"
         private const val DYNAMIC_IMPORT_DIAGNOSTICS_PACKAGE_NAME =
             "org.autojs6.packaged.node.dynamicimport.diagnostics.smoke"
@@ -17053,19 +17053,19 @@ $nodeConfigJson
             "packaged.diagnostics.esm.code=ok",
             "packaged.diagnostics.esm.message=true",
         )
-        private val EXPERIMENTAL_ESM_RUNTIME_MARKERS = listOf(
-            "packaged.experimental_esm.ready=true",
-            "packaged.experimental_esm.entry=true",
-            "packaged.experimental_esm.tla=true",
-            "packaged.experimental_esm.builtin=true",
-            "packaged.experimental_esm.full_path=true",
-            "packaged.experimental_esm.type_module=true",
-            "packaged.experimental_esm.graph=true",
-            "packaged.experimental_esm.security=true",
-            "packaged.experimental_esm.stack_source=true",
+        private val STABLE_ESM_RUNTIME_MARKERS = listOf(
+            "packaged.stable_esm.ready=true",
+            "packaged.stable_esm.entry=true",
+            "packaged.stable_esm.tla=true",
+            "packaged.stable_esm.builtin=true",
+            "packaged.stable_esm.full_path=true",
+            "packaged.stable_esm.type_module=true",
+            "packaged.stable_esm.graph=true",
+            "packaged.stable_esm.security=true",
+            "packaged.stable_esm.stack_source=true",
         )
-        private val EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS = listOf(
-            "esmExperimentalEnabled=",
+        private val STABLE_ESM_TEMPLATE_DEX_MARKERS = listOf(
+            "esmEnabled=",
         )
         private val DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS = listOf(
             "packaged.dynamic_import.ready=true",
@@ -17089,8 +17089,8 @@ $nodeConfigJson
             "packaged.worker_threads.esm.exit=0",
         )
         private val WORKER_THREADS_ESM_TEMPLATE_DEX_MARKERS =
-            EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS + listOf(
-                "workerThreadsExperimentalEnabled=",
+            STABLE_ESM_TEMPLATE_DEX_MARKERS + listOf(
+                "workerThreadsEnabled=",
             )
         private val TIMEOUT_DIAGNOSTICS_RUNTIME_MARKERS = listOf(
             "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",

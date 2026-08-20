@@ -2,7 +2,13 @@
 
 This document compares user-visible behavior only. It is not an implementation-equivalence claim and does not infer private internals of other projects.
 
-References last reviewed: 2026-06-14.
+References last reviewed: 2026-08-20.
+
+Current v1.2 baseline: ESM, dynamic import, controlled network/WebSocket,
+native network builtins, bounded `worker_threads`, native `child_process`,
+and allowlisted Java interop are stable and enabled without capability-specific
+Gradle properties. Older P13/P14 paragraphs are retained as historical
+comparison evidence where explicitly identified.
 
 - Auto.js Pro 9 public docs: <https://www.wuyunai.com/docs/v9/>
 - AutoX.js v7 public docs: <https://autoxjs.dayudada.com/v7/docs/nodejs/intro/>
@@ -57,7 +63,7 @@ AutoJs6 behavior:
 
 - `"nodejs";` and `"node";` route to the Node backend.
 - `.node.js`, `.cjs`, and `.mjs` route to the Node backend.
-- `.mjs` runs through the Node Profile v1.1 partial ESM path by default.
+- `.mjs` runs through the stable Node Profile v1.2 partial ESM path by default.
 - CommonJS `require()` can load synchronous partial ESM graphs and rejects async
   ESM graphs with `ERR_REQUIRE_ASYNC_MODULE`.
 
@@ -103,9 +109,9 @@ AutoJs6 behavior:
 - pure JavaScript CommonJS packages are the primary compatibility target.
 - checked-in `node_modules` package trees are supported.
 - `npm install`, postinstall scripts, and native addon installation are not supported by the Safe Node Profile.
-- raw Node network modules remain disabled by default, with a debug/build-time `autojs.nodejs.rawNetworkModules.experimental=true` opt-in for native `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`.
-- runnable `worker_threads` remains disabled by default; `node:worker_threads`
-  exposes only a shape facade for npm feature detection.
+- native `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`
+  are stable and enabled; `dgram` remains denied.
+- bounded runnable `worker_threads` is stable and enabled.
 - native `.node` addons remain disabled by default.
 
 P13-39 records native addon loading as partial. AutoJs6 now reports
@@ -164,7 +170,7 @@ Current user-facing bridge modules include:
 - `ui`
 - `ui.overlay`
 - `shell`
-- controlled `fetch` when the network experiment is explicitly enabled
+- stable controlled `fetch` with declared network permission
 
 Some modules are intentionally narrower than Pro/AutoX counterparts.
 
@@ -255,7 +261,7 @@ AutoJs6 behavior:
   `floaty.window()` / `floaty.rawWindow()` View parity remain unavailable.
 
 Porting note: use `ui.overlay` only for JSON-only overlay migration
-experiments. Production scripts should not depend on live overlay windows until
+prototypes. Production scripts should not depend on live overlay windows until
 the provider is promoted.
 
 ## Tasks And User Task Database
@@ -370,39 +376,32 @@ state. Scripts should still treat these as scoped compatibility APIs: raw native
 fd access, recursive watchers, expanded roots, and full packaged
 watcher/fd/FileHandle lifecycle parity are not yet Pro/Desktop-promoted.
 
-P13-34 records `worker_threads` opt-in promotion as partial. AutoJs6 Node keeps
-runnable workers disabled by default while exposing a `node:worker_threads`
-shape facade for npm feature detection, and `workerThreadsProfile` is
-diagnostic only. Pro/AutoX scripts should not treat worker threads as a
-portable threading replacement until native worker availability, packaged worker
-smoke, crash evidence, and Android resource ceilings are promoted.
+P13-34 is archived promotion evidence. Current AutoJs6 Node exposes stable
+native `worker_threads` through both bare and `node:` names. Workers remain
+pure-JavaScript compute isolates: they cannot call AutoJs bridge modules or use
+raw Android objects, nested workers remain denied, and message, worker-count,
+memory, timeout, cleanup, and packaged runtime-kit policy still applies.
 
-P13-35 records process-worker replacement as partial. AutoJs6 Node exposes
+P13-35 records the historical process-worker replacement decision. AutoJs6 Node exposes
 `processWorkerReplacementProfile` diagnostics to show that WorkerPool is the
-current replacement path, but it does not add `process_worker`,
-`compute_worker`, raw `child_process`, raw process handles, or packaged
-process-worker behavior. Scripts that need old threading/process-worker
+current replacement path, but it does not add `process_worker` or
+`compute_worker` facades. Native `child_process` is now a separate stable
+builtin. Scripts that need old shared threading/process-worker
 semantics should remain on Rhino or explicit bridge-backed alternatives until a
 future profile promotes them. For v1.1 there is no user-facing process-worker
 API or UX, and any scoped `child_process` runner remains a separate P13-40
 track.
 
-P14-32 records the v1.2 desktop runtime doc/release sync as
-`worker_intentionally_unsupported_v1_2`. Pro/AutoX migration docs should keep
-`worker_threads`, WorkerPool replacement APIs, process-worker facades,
-packaged workers, raw process handles, stdio streams, signals, `spawn`, `fork`,
-and stable `child_process` authority out of v1.2 runtime claims until native,
-packaged, resource, UX, security, and rollback evidence exists.
+P14-32 records an older planning decision superseded by
+`worker_threads_stable_enabled_v1_2`. Bounded runnable/packaged workers and
+native `child_process` are current runtime claims; separate process-worker
+facades remain absent.
 
-P13-40 records child_process scoped runner as partial. AutoJs6 Node exposes
-`childProcessProfile` diagnostics and keeps `child_process` /
-`node:child_process` denied by default. Debug/Desktop compatibility builds can
-set `autojs.nodejs.child_process.experimental=true` to route CommonJS and ESM
-imports to Node's native builtin before local shadow packages, which helps
-desktop npm packages that expect `node:child_process`. Continue using the
-controlled `shell` bridge for the Safe-profile migration path until a future
-Desktop profile promotes a scoped runner with app-private binary allowlists and
-cleanup evidence.
+P13-40 records the historical scoped-runner plan. Current builds route
+`child_process` and `node:child_process` to Node's native builtin before local
+shadow packages. It follows Android sandbox and caller-managed executable,
+timeout, stdio, cancellation, and cleanup policy. The controlled `shell`
+bridge remains a separate capability provider.
 
 P13-41 records ESM loader parity as partial. AutoJs6 Node exposes
 `esmLoaderProfile` diagnostics for the current AutoJs6-managed ESM subset:
@@ -559,19 +558,19 @@ P13-54 records desktop Node parity examples as partial. AutoJs6 Node now ships
 `sample/nodejs/desktop-parity-suite`, a guarded catalog for ESM,
 `worker_threads`, HTTP/HTTPS, raw network, advanced fs, WASI, inspector, and
 sanitized pure JavaScript npm dependency migration. The catalog records `desktop_compat_opt_in`,
-required capabilities, expected output, Safe-profile denial output, packaged
-behavior, and skip reasons. A focused runtime smoke subset runs managed local
+required capabilities, expected output, stable-capability and denial output,
+packaged behavior, and platform failure notes. A focused runtime smoke subset runs managed local
 ESM, controlled HTTP/HTTPS facade shape without live network I/O, the checked-in
 pure JavaScript dependency path, and scoped advanced fs FileHandle/watch
 behavior; high-risk desktop
-snippets remain documentation and static-verification evidence only, are not
+WASI/Inspector/expanded-fs snippets remain documentation and static-verification evidence only, are not
 part of default runtime smoke, and do not grant Desktop profile authority.
 
 P13-55 records TypeScript profile declarations as partial. AutoJs6 Node now
 ships `profile_capabilities.d.ts`, a declaration-only matrix for
 Safe/Pro/Desktop/Debug profile differences across the P13-53 and P13-54
-surfaces, including the `raw_network` desktop opt-in marker. Scripts can
-type-check profile requirements and Safe-profile denial behavior with
+surfaces, including stable worker, Java, ESM, HTTP/HTTPS, raw supported network,
+and child-process rows. Scripts can type-check stable and gated behavior with
 `ProfileModuleModeFor` and related helpers, but denied desktop modules are not
 declared as callable modules and no Pro/Desktop authority is granted by the
 declaration package.
@@ -579,11 +578,13 @@ declaration package.
 P13-56 records migration and Pro9 comparison docs as partial. Existing
 AutoJs/Rhino bridge modules and covered `autojs6:compat` wrappers are the main
 Pro-compatible migration lane. Local CJS/partial ESM, scoped filesystem,
-controlled HTTP/HTTPS, and host-managed pure-JS dependencies are the main
-Desktop-compatible migration lane. `$autojs.java`, `rhino.install`, raw Java or
+controlled HTTP/HTTPS, stable native networking, workers, and host-managed
+pure-JS dependencies are the main Desktop-compatible migration lane.
+Allowlisted `$autojs.java`, `require("java")`, and explicit `rhino.install`
+are stable; raw Java or
 Android globals, raw floaty, unrestricted UI-thread execution, daily/weekly task
-rows, raw network sockets, expanded filesystem roots, `worker_threads`, `vm`,
-`inspector`, raw WASI, native addons, `child_process`, Android npm CLI,
+rows, expanded filesystem roots, `vm`, `inspector`, raw WASI, native addons,
+Android npm CLI,
 registry install, lifecycle scripts, and native payloads remain
 gated/diagnostic-only or unsupported until a later profile promotion gate lands.
 
@@ -598,16 +599,16 @@ Auto.js Pro 9 public docs describe `$autojs.java` and a `rhino` module for Java/
 
 AutoJs6 behavior:
 
-- direct Java/Android object access is not part of the default Safe Node Profile.
+- allowlisted Java interop is stable in the default Node profile; unrestricted Java/Android object access is not.
 - P13-12 provides `$autojs` global v1 as a read-only diagnostic and gated entry
   surface: `$autojs.androidContext` is not a raw `Context`, and `$autojs.java`
-  rejects by default unless the Java interop experiment is enabled.
-- P13-13 extends the experiment with allowlist-only `java.lang.Math`,
+  routes through the stable, allowlist-only Java provider.
+- P13-13 adds allowlist-only `java.lang.Math`,
   `java.util.UUID`, and `android.graphics.Rect` handle construction, selected
   instance calls, field reads, and explicit release/dispose cleanup.
-- P13-14 adds an explicit `rhino.install({ experimental: true })` Java proxy
+- P13-14 adds an explicit `rhino.install({ explicit: true })` Java proxy
   POC: `Packages`, `java`, and `android` can be installed only when the Java
-  interop experiment is enabled, and all calls still route through the same
+  interop provider is available, and all calls still route through the same
   allowlist. Default `rhino.install()` remains rejected.
 - P13-15 keeps Rhino `importClass` / `importPackage` semantics unsupported in
   Node. Explicit `require("rhino").importClass()` / `.importPackage()` calls
@@ -622,9 +623,11 @@ AutoJs6 behavior:
 - AutoJs capabilities should be requested through bridge modules.
 - raw Android services, activities, accessibility nodes, media projection objects, and bitmap pointers are not exposed directly.
 
-Porting note: treat `$autojs global v1`, `java.*`, `android.*`,
-`importClass`, `JavaAdapter`, `defineClass`, and Rhino-style Java access as gated migration work. Prefer
-explicit bridge APIs where available.
+Porting note: use `$autojs.java`, `require("java")`, or explicit
+`rhino.install({ explicit: true, target })` only within the reviewed allowlist.
+`importClass`, `JavaAdapter`, `defineClass`, reflection, class loading, native
+loading, and raw Android objects remain unsupported. Prefer explicit bridge
+APIs for Android capabilities.
 
 ## Threads
 
@@ -635,9 +638,10 @@ AutoX.js v7 public docs also describe replacing Node-engine multithreading with 
 AutoJs6 behavior:
 
 - Rhino `threads` APIs are not available in Node scripts.
-- runnable `worker_threads` is disabled by default; `node:worker_threads` is
-  shape-only for npm feature detection.
-- background work should use Promise-based APIs, bridge providers, or future design-gated task APIs.
+- native `worker_threads` is stable for isolated pure-JavaScript compute work,
+  with bridge/Android-object denial and resource/lifecycle budgets.
+- background Android work should still use Promise-based APIs, bridge
+  providers, `work_manager`, or explicit engine execution slots.
 
 Porting note: convert threaded Rhino code to `async` / `await` and bridge calls.
 
@@ -647,11 +651,14 @@ Auto.js Pro 9 public docs list `http` and `https` as usable Node builtins.
 
 AutoJs6 behavior:
 
-- raw Node `http`, `https`, `net`, `tls`, `dns`, and `dgram` remain denied by default; `http`, `https`, `net`, `tls`, `dns`, and `dns/promises` can be enabled only through the debug/build-time raw network modules opt-in.
-- the controlled `fetch` direction is documented separately and remains feature-gated.
-- packaged APK INTERNET permission is only expected when controlled network is explicitly enabled.
+- native Node `http`, `https`, `net`, `tls`, `dns`, and `dns/promises` are
+  stable and enabled by default; `dgram` remains disabled.
+- controlled `fetch`, axios/undici compatibility, and WebSocket are stable
+  bridge-backed surfaces with host permissions and budgets.
+- packaged network use requires Android `INTERNET`; native builtins do not
+  inherit controlled-provider per-request budgets.
 
-Porting note: do not assume Node socket or HTTP builtins are available in the Safe profile. Use the controlled network design for packaged/default behavior, or the raw network modules opt-in for Desktop parity experiments.
+Porting note: supported Node socket and HTTP builtins are stable in the current profile. Prefer the controlled network facade when host-enforced permissions, budgets, cancellation, and audit metadata are required; native builtins require script-owned limits and cleanup.
 
 ## Packaged APKs
 
@@ -687,9 +694,8 @@ The v1.2 compatibility status is:
   packaged post/cancel and OEM behavior require future archives.
 - recorder: status and denial-oriented examples are migration evidence; real
   recording sessions and packaged recorder stress remain future-only.
-- worker policy: P14-32 records `worker_intentionally_unsupported_v1_2`;
-  runnable workers, packaged workers, WorkerPool replacement APIs, and
-  process-worker facades are not v1.2 runtime claims.
+- worker/process policy: bounded runnable/packaged workers and native
+  `child_process` are stable; separate process-worker facades are absent.
 - packaged behavior: P14-34 records `host_contract_ready`, a deterministic host
   contract rather than a real device install-run archive claim.
 - rollback: Safe downgrade, packaged metadata mismatch, profile rollback, and
@@ -711,27 +717,31 @@ AutoJs6 v1.2 does not expose raw `BroadcastReceiver` objects.
 | --- | --- | --- | --- |
 | Default `.js` engine | Rhino | Rhino | Rhino compatibility preserved |
 | Node directive | `"nodejs";` | suffix-focused docs | `"nodejs";` / `"node";` |
-| `.mjs` | Node + ESM | Node + ESM | Partial ESM |
-| Main module style | `require()` | `import` | `require()` |
-| Dynamic import | not the AutoJs6 target | documented as unsupported | disabled by default |
+| `.mjs` | Node + ESM | Node + ESM | Stable scoped ESM |
+| Main module style | `require()` | `import` | CommonJS and scoped ESM |
+| Dynamic import | not the AutoJs6 target | documented as unsupported | stable for scoped local/package/data imports |
 | npm install | documented user workflow | not the AutoJs6 target | unsupported |
 | Pure-JS CJS packages | broad npm-oriented docs | not equivalent | supported target |
 | Scoped fs | not described as AutoJs6 policy | not equivalent | enforced |
-| Raw `http`/`https` | documented as usable | not equivalent | disabled by default |
-| `worker_threads` | documented with Auto.js API restrictions | no old-style multithreading | runnable workers disabled by default; `node:worker_threads` shape facade only |
+| Raw `http`/`https` | documented as usable | not equivalent | stable native builtins inside Android sandbox |
+| `worker_threads` | documented with Auto.js API restrictions | no old-style multithreading | stable native workers with bridge isolation and budgets |
 | `tasks` / user task database | timed task database APIs | compatibility varies | P13-21 partial: `work_manager` and one-shot `compat.tasks` only |
-| Direct Java/Android access | `$autojs` / `rhino` docs | Java Promise direction | bridge modules only by default |
+| Direct Java/Android access | `$autojs` / `rhino` docs | Java Promise direction | stable exact allowlist; raw Android/JVM objects denied |
 | Packaged APK Node runtime | product-specific | product-specific | verified Safe Node Profile |
 
 ## Recommended Adaptation Steps
 
 1. Convert entry files to `.cjs` or add `"nodejs";`.
-2. Convert ESM/import-first code to CommonJS `require()`.
+2. Keep scoped ESM/import-first code where supported; remove raw loader hooks,
+   network imports, absolute/file URL escapes, or custom loader authority.
 3. Vendor pure-JS dependencies instead of relying on `npm install`.
 4. Replace absolute filesystem paths with scoped project-relative paths.
-5. Replace raw network modules with controlled network APIs only when explicitly enabled.
-6. Replace direct Java/Android access with AutoJs6 bridge modules.
-7. Replace threads with Promise-based control flow.
+5. Choose controlled networking for host-enforced budgets, or apply explicit
+   caller-owned limits and cleanup when using stable native networking.
+6. Keep Java calls inside the exact stable allowlist and replace raw Android
+   access with AutoJs6 bridge modules.
+7. Replace shared Rhino threads with Promise-based control flow or stable,
+   isolated `worker_threads` compute workers.
 8. Run `NodeSecurityRegressionInstrumentationTest` when changing compatibility assumptions.
 9. Run packaged APK diagnostics when packaging adapted scripts.
 

@@ -1,4 +1,4 @@
-﻿import groovy.json.JsonOutput
+import groovy.json.JsonOutput
 import java.time.Instant
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -9,12 +9,12 @@ private fun <T> nodeJsInstrumentationInput(name: String): T =
     extensions.extraProperties.get(nodeJsInstrumentationExtraName(name)) as T
 
 private val taskNames = nodeJsInstrumentationInput<List<String>>("taskNames")
-private val nodeJsNetworkExperimentalEnabled = nodeJsInstrumentationInput<Boolean>("nodeJsNetworkExperimentalEnabled")
-private val nodeJsWorkerThreadsExperimentalEnabled = nodeJsInstrumentationInput<Boolean>("nodeJsWorkerThreadsExperimentalEnabled")
+private val nodeJsNetworkEnabled = nodeJsInstrumentationInput<Boolean>("nodeJsNetworkEnabled")
+private val nodeJsWorkerThreadsEnabled = nodeJsInstrumentationInput<Boolean>("nodeJsWorkerThreadsEnabled")
 private val nodeJsTestDeviceProfile = nodeJsInstrumentationInput<String?>("nodeJsTestDeviceProfile")
 
 val nodeJsV11AlphaInstrumentationClasses = listOf(
-    "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
+    "org.autojs.autojs.engine.NodeEsmStableInstrumentationTest",
     "org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest",
     "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
     "org.autojs.autojs.engine.NodeWebPlatformGlobalsInstrumentationTest",
@@ -53,11 +53,11 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunV11BridgeEmbeddedNodePackagedApk",
-) + if (nodeJsWorkerThreadsExperimentalEnabled) {
+) + if (nodeJsWorkerThreadsEnabled) {
     listOf(
         "org.autojs.autojs.engine.NodeWorkerThreadsBootstrapInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
-        "org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsStableInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
         "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk",
     )
@@ -87,7 +87,7 @@ val nodeJsV11BetaInstrumentationClasses = (
         ).distinct()
 val nodeJsPackagedEsmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunFullCompatibilityEmbeddedNodePackagedApk",
-    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunStableEsmEmbeddedNodePackagedApk",
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk",
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
 )
@@ -148,10 +148,10 @@ val nodeJsLiveProviderGateCases = listOf(
     mapOf(
         "provider" to "fetch",
         "className" to "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest",
-        "methodName" to "jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled",
+        "methodName" to "jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkEnabled",
         "interaction" to "none",
         "skipAllowed" to "false",
-        "skipPolicy" to "must run; pass -Pautojs.nodejs.network.experimental=true",
+        "skipPolicy" to "must run; stable network support is enabled directly",
     ),
     mapOf(
         "provider" to "fetch",
@@ -159,15 +159,15 @@ val nodeJsLiveProviderGateCases = listOf(
         "methodName" to "androidFetchProviderCancelsActiveLiveRequestOnDestroy",
         "interaction" to "none",
         "skipAllowed" to "false",
-        "skipPolicy" to "must run; pass -Pautojs.nodejs.network.experimental=true",
+        "skipPolicy" to "must run; stable network support is enabled directly",
     ),
     mapOf(
         "provider" to "websocket",
         "className" to "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest",
-        "methodName" to "jsWebSocketUsesAndroidLiveProviderWhenNetworkExperimentEnabled",
+        "methodName" to "jsWebSocketUsesAndroidLiveProviderWhenNetworkEnabled",
         "interaction" to "none",
         "skipAllowed" to "false",
-        "skipPolicy" to "must run; pass -Pautojs.nodejs.network.experimental=true",
+        "skipPolicy" to "must run; stable network support is enabled directly",
     ),
     mapOf(
         "provider" to "websocket",
@@ -175,7 +175,7 @@ val nodeJsLiveProviderGateCases = listOf(
         "methodName" to "androidWebSocketProviderClosesActiveLiveConnectionOnDestroy",
         "interaction" to "none",
         "skipAllowed" to "false",
-        "skipPolicy" to "must run; pass -Pautojs.nodejs.network.experimental=true",
+        "skipPolicy" to "must run; stable network support is enabled directly",
     ),
     mapOf(
         "provider" to "ocr",
@@ -342,11 +342,11 @@ val nodeJsLiveProviderGateInstrumentationClasses = nodeJsLiveProviderGateCases.m
     "${testCase.getValue("className")}#${testCase.getValue("methodName")}"
 }
 val nodeJsLiveFetchGateInstrumentationClasses = listOf(
-    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled",
+    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkEnabled",
     "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#androidFetchProviderCancelsActiveLiveRequestOnDestroy",
 )
 val nodeJsLiveWebSocketGateInstrumentationClasses = listOf(
-    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#jsWebSocketUsesAndroidLiveProviderWhenNetworkExperimentEnabled",
+    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#jsWebSocketUsesAndroidLiveProviderWhenNetworkEnabled",
     "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#androidWebSocketProviderClosesActiveLiveConnectionOnDestroy",
 )
 val nodeJsLiveOcrGateInstrumentationClasses = listOf(
@@ -396,11 +396,11 @@ val nodeJsLongRunningGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
 )
-val nodeJsWorkerGateInstrumentationClasses = if (nodeJsWorkerThreadsExperimentalEnabled) {
+val nodeJsWorkerGateInstrumentationClasses = if (nodeJsWorkerThreadsEnabled) {
     listOf(
         "org.autojs.autojs.engine.NodeWorkerThreadsBootstrapInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
-        "org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsStableInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
         "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk",
     )
@@ -411,7 +411,7 @@ val nodeJsWorkerGateInstrumentationClasses = if (nodeJsWorkerThreadsExperimental
     )
 }
 val nodeJsModernCoreGateInstrumentationClasses = listOf(
-    "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
+    "org.autojs.autojs.engine.NodeEsmStableInstrumentationTest",
     "org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest",
     "org.autojs.autojs.engine.NodeFeatureFlagRegistryInstrumentationTest",
     "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest",
@@ -502,7 +502,7 @@ val nodeJs2417UpgradeGateInstrumentationClasses = (
         listOf(
             "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
             "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
-            "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
+            "org.autojs.autojs.engine.NodeEsmStableInstrumentationTest",
             "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
             "org.autojs.autojs.engine.NodeModernCoreDifferentialInstrumentationTest",
             "org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest",
@@ -577,7 +577,7 @@ val nodeJsPhase8GateInstrumentationClasses = (
                 nodeJsTypeScriptGateInstrumentationClasses +
                 listOf(
                     "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
-                    "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
+                    "org.autojs.autojs.engine.NodeEsmStableInstrumentationTest",
                     "org.autojs.autojs.engine.NodeInspectorDesignGateInstrumentationTest",
                     "org.autojs.autojs.engine.NodeInspectorSecurityGateInstrumentationTest",
                 ) +
@@ -623,7 +623,7 @@ val nodeJsPhase8GateCoverageGroups = listOf(
     "typescript_runtime" to nodeJsTypeScriptGateInstrumentationClasses,
     "module_semantics" to listOf(
         "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
-        "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
+        "org.autojs.autojs.engine.NodeEsmStableInstrumentationTest",
     ),
     "http_compatibility" to nodeJsPhase8HttpGateInstrumentationClasses,
     "advanced_fs" to nodeJsPhase8AdvancedFsGateInstrumentationClasses,
@@ -690,8 +690,8 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
     outputs.upToDateWhen { false }
 
     doFirst {
-        if (!nodeJsNetworkExperimentalEnabled) {
-            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so fetch/websocket live providers are covered.")
+        if (!nodeJsNetworkEnabled) {
+            throw GradleException("$name requires stable fetch/websocket live-provider coverage.")
         }
     }
 
@@ -841,8 +841,8 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
             "gate" to "verifyNodeLiveProviderGate",
             "deviceProfile" to nodeJsTestDeviceProfile,
             "devices" to devices.toList(),
-            "networkExperimentalRequired" to true,
-            "networkExperimentalEnabled" to nodeJsNetworkExperimentalEnabled,
+            "networkRequired" to true,
+            "networkEnabled" to nodeJsNetworkEnabled,
             "fakeProvidersAllowed" to false,
             "skipReasonRequired" to true,
             "resultXml" to xmlFiles.map { file -> file.relativeTo(projectDir).invariantSeparatorsPath },
@@ -1026,8 +1026,8 @@ val generateNodePhase7Summary = tasks.register(nodeJsPhase7SummaryTaskName) {
             "task" to "S7-49 Phase 7 Functional Gate",
             "gate" to "verifyNodePhase7Gate",
             "deviceProfile" to nodeJsTestDeviceProfile,
-            "networkExperimentalEnabled" to nodeJsNetworkExperimentalEnabled,
-            "workerThreadsExperimentalEnabled" to nodeJsWorkerThreadsExperimentalEnabled,
+            "networkEnabled" to nodeJsNetworkEnabled,
+            "workerThreadsEnabled" to nodeJsWorkerThreadsEnabled,
             "devices" to devices.toList(),
             "resultXml" to xmlFiles.map { file -> file.relativeTo(projectDir).invariantSeparatorsPath },
             "hostGates" to nodeJsPhase7HostGateNames.map { taskName ->
@@ -1215,8 +1215,8 @@ val generateNodePhase8Summary = tasks.register(nodeJsPhase8SummaryTaskName) {
             "task" to "S8-50 Phase 8 Summary And Capability Matrix",
             "gate" to "verifyNodePhase8Gate",
             "deviceProfile" to nodeJsTestDeviceProfile,
-            "networkExperimentalEnabled" to nodeJsNetworkExperimentalEnabled,
-            "workerThreadsExperimentalEnabled" to nodeJsWorkerThreadsExperimentalEnabled,
+            "networkEnabled" to nodeJsNetworkEnabled,
+            "workerThreadsEnabled" to nodeJsWorkerThreadsEnabled,
             "devices" to devices.toList(),
             "resultXml" to xmlFiles.map { file -> file.relativeTo(projectDir).invariantSeparatorsPath },
             "hostGates" to nodeJsPhase8HostGateNames.map { taskName ->
@@ -1296,7 +1296,7 @@ val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
         "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
         "org.autojs.autojs.engine.NodeModernCoreDifferentialInstrumentationTest",
         "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
-    ) + if (nodeJsWorkerThreadsExperimentalEnabled) {
+    ) + if (nodeJsWorkerThreadsEnabled) {
         listOf("org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest")
     } else {
         emptyList()

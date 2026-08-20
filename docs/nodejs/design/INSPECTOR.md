@@ -170,7 +170,7 @@ Keep inspector disabled by default.
 The first acceptable implementation, if ever needed, should be:
 
 ```properties
-autojs.nodejs.inspector.experimental=false
+Inspector policy remains disabled
 ```
 
 with all of these constraints:

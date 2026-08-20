@@ -9,6 +9,7 @@
 ###### 2026/08/20
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
+* `Nuevo` ESM, dynamic import(), red y WebSocket, módulos de red nativos, worker_threads, child_process e interoperabilidad con Java de Node.js son funciones estables habilitadas de forma predeterminada, mientras se mantienen las declaraciones de permisos, listas de permitidos, aislamiento y presupuestos de recursos
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
 * `Nuevo` El entorno de ejecución Node.js admite un proveedor bajo demanda de código fuente de módulos cifrados para cada ejecución, que inspecciona y descifra solo los candidatos seleccionados realmente por el mecanismo de resolución de módulos
 * `Nuevo` El entorno de ejecución Node.js admite módulos puente controlados de AutoJs6 y adopta la política de seguridad Safe Node Profile

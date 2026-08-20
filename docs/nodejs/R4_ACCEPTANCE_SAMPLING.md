@@ -221,7 +221,7 @@ top-level contract is:
     "embeddedScriptExecutionEnabled": true,
     "persistentRuntimeBuildEnabled": true,
     "persistentRuntimeEffectiveEnabled": true,
-    "esmExperimentalEnabled": true,
+    "esmEnabled": true,
     "acceptanceArgument": true
   },
   "fixture": {

@@ -758,12 +758,12 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.runtimeModuleSources.values.toTypedArray(),
                     preparedRequest.env.keys.toTypedArray(),
                     preparedRequest.env.values.toTypedArray(),
-                    preparedRequest.esmExperimentalEnabled,
-                    preparedRequest.dynamicImportExperimentalEnabled,
-                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
-                    preparedRequest.workerThreadsExperimentalEnabled,
-                    preparedRequest.childProcessExperimentalEnabled,
-                    preparedRequest.javaInteropExperimentalEnabled,
+                    preparedRequest.esmEnabled,
+                    preparedRequest.dynamicImportEnabled,
+                    preparedRequest.rawNodeNetworkModulesEnabled,
+                    preparedRequest.workerThreadsEnabled,
+                    preparedRequest.childProcessEnabled,
+                    preparedRequest.javaInteropEnabled,
                 )
             } else if (preparedRequest.runtimeModuleSources.isEmpty()) {
                 nativeRunEmbeddedScriptLifecycleWithModulesV2(
@@ -775,12 +775,12 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.moduleSources.values.toTypedArray(),
                     preparedRequest.env.keys.toTypedArray(),
                     preparedRequest.env.values.toTypedArray(),
-                    preparedRequest.esmExperimentalEnabled,
-                    preparedRequest.dynamicImportExperimentalEnabled,
-                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
-                    preparedRequest.workerThreadsExperimentalEnabled,
-                    preparedRequest.childProcessExperimentalEnabled,
-                    preparedRequest.javaInteropExperimentalEnabled,
+                    preparedRequest.esmEnabled,
+                    preparedRequest.dynamicImportEnabled,
+                    preparedRequest.rawNodeNetworkModulesEnabled,
+                    preparedRequest.workerThreadsEnabled,
+                    preparedRequest.childProcessEnabled,
+                    preparedRequest.javaInteropEnabled,
                 )
             } else {
                 nativeRunEmbeddedScriptLifecycleWithRuntimeModulesV2(
@@ -794,12 +794,12 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.runtimeModuleSources.values.toTypedArray(),
                     preparedRequest.env.keys.toTypedArray(),
                     preparedRequest.env.values.toTypedArray(),
-                    preparedRequest.esmExperimentalEnabled,
-                    preparedRequest.dynamicImportExperimentalEnabled,
-                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
-                    preparedRequest.workerThreadsExperimentalEnabled,
-                    preparedRequest.childProcessExperimentalEnabled,
-                    preparedRequest.javaInteropExperimentalEnabled,
+                    preparedRequest.esmEnabled,
+                    preparedRequest.dynamicImportEnabled,
+                    preparedRequest.rawNodeNetworkModulesEnabled,
+                    preparedRequest.workerThreadsEnabled,
+                    preparedRequest.childProcessEnabled,
+                    preparedRequest.javaInteropEnabled,
                 )
             }
             payload ?: emptyArray()
@@ -1204,12 +1204,12 @@ object NativeNodeEmbeddedRuntimeBridge {
         updatePart(Build.SUPPORTED_ABIS.joinToString(","))
         updatePart(Build.VERSION.SDK_INT.toString())
         updatePart(compileCacheLoaderVersion())
-        updatePart(request.esmExperimentalEnabled.toString())
-        updatePart(request.dynamicImportExperimentalEnabled.toString())
-        updatePart(request.rawNodeNetworkModulesExperimentalEnabled.toString())
-        updatePart(request.workerThreadsExperimentalEnabled.toString())
-        updatePart(request.childProcessExperimentalEnabled.toString())
-        updatePart(request.javaInteropExperimentalEnabled.toString())
+        updatePart(request.esmEnabled.toString())
+        updatePart(request.dynamicImportEnabled.toString())
+        updatePart(request.rawNodeNetworkModulesEnabled.toString())
+        updatePart(request.workerThreadsEnabled.toString())
+        updatePart(request.childProcessEnabled.toString())
+        updatePart(request.javaInteropEnabled.toString())
     }.take(32)
 
     private fun compileCacheProjectKey(request: EmbeddedScriptRequest): String = sha256Hex {
@@ -15566,12 +15566,12 @@ object NativeNodeEmbeddedRuntimeBridge {
         sandboxRoot: String?,
         envNames: Array<String>,
         envValues: Array<String>,
-        esmExperimentalEnabled: Boolean,
-        dynamicImportExperimentalEnabled: Boolean,
-        rawNodeNetworkModulesExperimentalEnabled: Boolean,
-        workerThreadsExperimentalEnabled: Boolean,
-        childProcessExperimentalEnabled: Boolean,
-        javaInteropExperimentalEnabled: Boolean,
+        esmEnabled: Boolean,
+        dynamicImportEnabled: Boolean,
+        rawNodeNetworkModulesEnabled: Boolean,
+        workerThreadsEnabled: Boolean,
+        childProcessEnabled: Boolean,
+        javaInteropEnabled: Boolean,
     ): Array<String>?
 
     private external fun nativeRunEmbeddedScriptLifecycleWithModulesV2(
@@ -15583,12 +15583,12 @@ object NativeNodeEmbeddedRuntimeBridge {
         moduleSources: Array<String>,
         envNames: Array<String>,
         envValues: Array<String>,
-        esmExperimentalEnabled: Boolean,
-        dynamicImportExperimentalEnabled: Boolean,
-        rawNodeNetworkModulesExperimentalEnabled: Boolean,
-        workerThreadsExperimentalEnabled: Boolean,
-        childProcessExperimentalEnabled: Boolean,
-        javaInteropExperimentalEnabled: Boolean,
+        esmEnabled: Boolean,
+        dynamicImportEnabled: Boolean,
+        rawNodeNetworkModulesEnabled: Boolean,
+        workerThreadsEnabled: Boolean,
+        childProcessEnabled: Boolean,
+        javaInteropEnabled: Boolean,
     ): Array<String>?
 
     private external fun nativeRunEmbeddedScriptLifecycleWithRuntimeModulesV2(
@@ -15602,12 +15602,12 @@ object NativeNodeEmbeddedRuntimeBridge {
         runtimeModuleSources: Array<String>,
         envNames: Array<String>,
         envValues: Array<String>,
-        esmExperimentalEnabled: Boolean,
-        dynamicImportExperimentalEnabled: Boolean,
-        rawNodeNetworkModulesExperimentalEnabled: Boolean,
-        workerThreadsExperimentalEnabled: Boolean,
-        childProcessExperimentalEnabled: Boolean,
-        javaInteropExperimentalEnabled: Boolean,
+        esmEnabled: Boolean,
+        dynamicImportEnabled: Boolean,
+        rawNodeNetworkModulesEnabled: Boolean,
+        workerThreadsEnabled: Boolean,
+        childProcessEnabled: Boolean,
+        javaInteropEnabled: Boolean,
     ): Array<String>?
 
     private external fun nativeRunEmbeddedScriptAdapterV1Diagnostics(
@@ -15630,12 +15630,12 @@ object NativeNodeEmbeddedRuntimeBridge {
         runtimeModuleSources: Array<String>,
         envNames: Array<String>,
         envValues: Array<String>,
-        esmExperimentalEnabled: Boolean,
-        dynamicImportExperimentalEnabled: Boolean,
-        rawNodeNetworkModulesExperimentalEnabled: Boolean,
-        workerThreadsExperimentalEnabled: Boolean,
-        childProcessExperimentalEnabled: Boolean,
-        javaInteropExperimentalEnabled: Boolean,
+        esmEnabled: Boolean,
+        dynamicImportEnabled: Boolean,
+        rawNodeNetworkModulesEnabled: Boolean,
+        workerThreadsEnabled: Boolean,
+        childProcessEnabled: Boolean,
+        javaInteropEnabled: Boolean,
     ): Array<String>?
 
     private fun isProbePropertyEnabled(propertyName: String): Boolean {
@@ -17914,12 +17914,12 @@ object NativeNodeEmbeddedRuntimeBridge {
         val env: Map<String, String> = emptyMap(),
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
-        val esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
-        val dynamicImportExperimentalEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
-        val rawNodeNetworkModulesExperimentalEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
-        val workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
-        val childProcessExperimentalEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
-        val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+        val esmEnabled: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
+        val dynamicImportEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
+        val rawNodeNetworkModulesEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
+        val workerThreadsEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
+        val childProcessEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
+        val javaInteropEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
         val spawnDepth: Int = 0,
         val runtimeAdapter: String? = null,
         val processPoolSlot: String? = null,

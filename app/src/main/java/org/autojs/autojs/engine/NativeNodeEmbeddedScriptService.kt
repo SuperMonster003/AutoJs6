@@ -1,4 +1,4 @@
-﻿package org.autojs.autojs.engine
+package org.autojs.autojs.engine
 
 import android.app.Notification
 import android.app.PendingIntent
@@ -457,13 +457,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val workingDirectory = preparedServiceRequest.workingDirectory?.takeIf { it.isNotBlank() }
         val executionMode = NodeExecutionModePolicy.normalize(preparedServiceRequest.executionMode)
         val timeoutMs = preparedServiceRequest.timeoutMs.coerceAtLeast(1L)
-        val esmExperimentalEnabled = preparedServiceRequest.esmExperimentalEnabled
-        val dynamicImportLocalEnabled = BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED
-        val dynamicImportExperimentalEnabled = preparedServiceRequest.dynamicImportExperimentalEnabled
-        val rawNodeNetworkModulesExperimentalEnabled = preparedServiceRequest.rawNodeNetworkModulesExperimentalEnabled
-        val workerThreadsExperimentalEnabled = preparedServiceRequest.workerThreadsExperimentalEnabled
-        val childProcessExperimentalEnabled = preparedServiceRequest.childProcessExperimentalEnabled
-        val javaInteropExperimentalEnabled = preparedServiceRequest.javaInteropExperimentalEnabled
+        val esmEnabled = preparedServiceRequest.esmEnabled
+        val dynamicImportLocalEnabled = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED
+        val dynamicImportEnabled = preparedServiceRequest.dynamicImportEnabled
+        val rawNodeNetworkModulesEnabled = preparedServiceRequest.rawNodeNetworkModulesEnabled
+        val workerThreadsEnabled = preparedServiceRequest.workerThreadsEnabled
+        val childProcessEnabled = preparedServiceRequest.childProcessEnabled
+        val javaInteropEnabled = preparedServiceRequest.javaInteropEnabled
         val spawnDepth = preparedServiceRequest.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
         val env = preparedServiceRequest.env
         val moduleSources = preparedServiceRequest.moduleSources
@@ -592,7 +592,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             provider = AndroidNodeBridgeCapabilityProvider(
                 this,
                 engineInfo,
-                javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
+                javaInteropEnabled = javaInteropEnabled,
                 bridgeLimits = bridgeLimits,
             ),
         )
@@ -633,12 +633,12 @@ open class NativeNodeEmbeddedScriptService : Service() {
             env = env,
             moduleSources = moduleSources,
             runtimeModuleSources = enrichedRuntimeModuleSources,
-            esmExperimentalEnabled = esmExperimentalEnabled,
-            dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
-            rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled,
-            workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
-            childProcessExperimentalEnabled = childProcessExperimentalEnabled,
-            javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
+            esmEnabled = esmEnabled,
+            dynamicImportEnabled = dynamicImportEnabled,
+            rawNodeNetworkModulesEnabled = rawNodeNetworkModulesEnabled,
+            workerThreadsEnabled = workerThreadsEnabled,
+            childProcessEnabled = childProcessEnabled,
+            javaInteropEnabled = javaInteropEnabled,
             executionId = executionId,
             queueMode = queueMode,
             queueTimeoutMs = queueTimeoutMs,
@@ -695,13 +695,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     "script.enter executionId=$executionId processName=$processName pid=$pid sourceName=$sourceName " +
                     "env=${env.size} moduleSources=${moduleSources.size} runtimeModuleSources=${enrichedRuntimeModuleSources.size} " +
                     "sandboxRoot=${request.sandboxRoot.orEmpty()} " +
-                    "esmExperimentalEnabled=$esmExperimentalEnabled " +
+                    "esmEnabled=$esmEnabled " +
                     "dynamicImportLocalEnabled=$dynamicImportLocalEnabled " +
-                    "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
-                    "rawNodeNetworkModulesExperimentalEnabled=$rawNodeNetworkModulesExperimentalEnabled " +
-                    "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
-                    "childProcessExperimentalEnabled=$childProcessExperimentalEnabled " +
-                    "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +
+                    "dynamicImportEnabled=$dynamicImportEnabled " +
+                    "rawNodeNetworkModulesEnabled=$rawNodeNetworkModulesEnabled " +
+                    "workerThreadsEnabled=$workerThreadsEnabled " +
+                    "childProcessEnabled=$childProcessEnabled " +
+                    "javaInteropEnabled=$javaInteropEnabled " +
                     "queueMode=$queueMode queued=${slotLease.queued} queueWaitMs=${slotLease.queueWaitMs} " +
                     "executionMode=$executionMode " +
                     "processPool=${processPoolPlan.mode}/${processPoolPlan.selectedSlot.id} " +
@@ -1381,7 +1381,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(
                         workingDirectory,
                         sandboxRoot,
-                        includeBuildNetworkPolicy = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+                        includeBuildNetworkPolicy = BuildConfig.NODEJS_NETWORK_ENABLED,
                     ),
                 )
             }
@@ -2404,13 +2404,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_EXECUTION_MODE = "execution_mode"
         private const val EXTRA_LAUNCH_SURFACE = "launch_surface"
         private const val EXTRA_TIMEOUT_MS = "timeout_ms"
-        private const val EXTRA_ESM_EXPERIMENTAL_ENABLED = "esm_experimental_enabled"
-        private const val EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED = "dynamic_import_experimental_enabled"
-        private const val EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED =
-            "raw_node_network_modules_experimental_enabled"
-        private const val EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED = "worker_threads_experimental_enabled"
-        private const val EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED = "child_process_experimental_enabled"
-        private const val EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED = "java_interop_experimental_enabled"
+        private const val EXTRA_ESM_ENABLED = "esm_enabled"
+        private const val EXTRA_DYNAMIC_IMPORT_ENABLED = "dynamic_import_enabled"
+        private const val EXTRA_RAW_NODE_NETWORK_MODULES_ENABLED =
+            "raw_node_network_modules_enabled"
+        private const val EXTRA_WORKER_THREADS_ENABLED = "worker_threads_enabled"
+        private const val EXTRA_CHILD_PROCESS_ENABLED = "child_process_enabled"
+        private const val EXTRA_JAVA_INTEROP_ENABLED = "java_interop_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_RUNTIME_ADAPTER = "runtime_adapter"
         private const val EXTRA_PROCESS_POOL_SLOT = "process_pool_slot"
@@ -3343,15 +3343,15 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_EXECUTION_MODE, scheduledRequestForService.executionMode)
                 putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
                 putExtra(EXTRA_TIMEOUT_MS, scheduledRequestForService.timeoutMs.coerceAtLeast(1L))
-                putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, scheduledRequestForService.esmExperimentalEnabled)
-                putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, scheduledRequestForService.dynamicImportExperimentalEnabled)
+                putExtra(EXTRA_ESM_ENABLED, scheduledRequestForService.esmEnabled)
+                putExtra(EXTRA_DYNAMIC_IMPORT_ENABLED, scheduledRequestForService.dynamicImportEnabled)
                 putExtra(
-                    EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
-                    scheduledRequestForService.rawNodeNetworkModulesExperimentalEnabled,
+                    EXTRA_RAW_NODE_NETWORK_MODULES_ENABLED,
+                    scheduledRequestForService.rawNodeNetworkModulesEnabled,
                 )
-                putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, scheduledRequestForService.workerThreadsExperimentalEnabled)
-                putExtra(EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED, scheduledRequestForService.childProcessExperimentalEnabled)
-                putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, scheduledRequestForService.javaInteropExperimentalEnabled)
+                putExtra(EXTRA_WORKER_THREADS_ENABLED, scheduledRequestForService.workerThreadsEnabled)
+                putExtra(EXTRA_CHILD_PROCESS_ENABLED, scheduledRequestForService.childProcessEnabled)
+                putExtra(EXTRA_JAVA_INTEROP_ENABLED, scheduledRequestForService.javaInteropEnabled)
                 putExtra(
                     EXTRA_SPAWN_DEPTH,
                     scheduledRequestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
@@ -3882,18 +3882,18 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     putExtra(EXTRA_EXECUTION_MODE, requestForService.executionMode)
                     putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
                     putExtra(EXTRA_TIMEOUT_MS, requestForService.timeoutMs.coerceAtLeast(1L))
-                    putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, requestForService.esmExperimentalEnabled)
+                    putExtra(EXTRA_ESM_ENABLED, requestForService.esmEnabled)
                     putExtra(
-                        EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
-                        requestForService.dynamicImportExperimentalEnabled,
+                        EXTRA_DYNAMIC_IMPORT_ENABLED,
+                        requestForService.dynamicImportEnabled,
                     )
                     putExtra(
-                        EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
-                        requestForService.rawNodeNetworkModulesExperimentalEnabled,
+                        EXTRA_RAW_NODE_NETWORK_MODULES_ENABLED,
+                        requestForService.rawNodeNetworkModulesEnabled,
                     )
-                    putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
-                    putExtra(EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED, requestForService.childProcessExperimentalEnabled)
-                    putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
+                    putExtra(EXTRA_WORKER_THREADS_ENABLED, requestForService.workerThreadsEnabled)
+                    putExtra(EXTRA_CHILD_PROCESS_ENABLED, requestForService.childProcessEnabled)
+                    putExtra(EXTRA_JAVA_INTEROP_ENABLED, requestForService.javaInteropEnabled)
                     putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                     putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
                     putExtra(EXTRA_PROCESS_POOL_SLOT, requestForService.processPoolSlot)
@@ -5262,29 +5262,29 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 env = envExtra(),
                 moduleSources = moduleSourcesExtra(),
                 runtimeModuleSources = runtimeModuleSourcesExtra(),
-                esmExperimentalEnabled = getBooleanExtra(
-                    EXTRA_ESM_EXPERIMENTAL_ENABLED,
-                    BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+                esmEnabled = getBooleanExtra(
+                    EXTRA_ESM_ENABLED,
+                    BuildConfig.NODEJS_ESM_ENABLED,
                 ),
-                dynamicImportExperimentalEnabled = getBooleanExtra(
-                    EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
-                    BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                dynamicImportEnabled = getBooleanExtra(
+                    EXTRA_DYNAMIC_IMPORT_ENABLED,
+                    BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
                 ),
-                rawNodeNetworkModulesExperimentalEnabled = getBooleanExtra(
-                    EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
-                    BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                rawNodeNetworkModulesEnabled = getBooleanExtra(
+                    EXTRA_RAW_NODE_NETWORK_MODULES_ENABLED,
+                    BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
                 ),
-                workerThreadsExperimentalEnabled = getBooleanExtra(
-                    EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED,
-                    BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+                workerThreadsEnabled = getBooleanExtra(
+                    EXTRA_WORKER_THREADS_ENABLED,
+                    BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
                 ),
-                childProcessExperimentalEnabled = getBooleanExtra(
-                    EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
-                    BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
+                childProcessEnabled = getBooleanExtra(
+                    EXTRA_CHILD_PROCESS_ENABLED,
+                    BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
                 ),
-                javaInteropExperimentalEnabled = getBooleanExtra(
-                    EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
-                    BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+                javaInteropEnabled = getBooleanExtra(
+                    EXTRA_JAVA_INTEROP_ENABLED,
+                    BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
                 ),
                 spawnDepth = getIntExtra(EXTRA_SPAWN_DEPTH, 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
                 runtimeAdapter = getStringExtra(EXTRA_RUNTIME_ADAPTER)?.takeIf { it.isNotBlank() },
@@ -5342,12 +5342,12 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 put("env", orderedStringMapJson(request.env))
                 put("moduleSources", orderedStringMapJson(request.moduleSources))
                 put("runtimeModuleSources", orderedStringMapJson(request.runtimeModuleSources))
-                put("esmExperimentalEnabled", request.esmExperimentalEnabled)
-                put("dynamicImportExperimentalEnabled", request.dynamicImportExperimentalEnabled)
-                put("rawNodeNetworkModulesExperimentalEnabled", request.rawNodeNetworkModulesExperimentalEnabled)
-                put("workerThreadsExperimentalEnabled", request.workerThreadsExperimentalEnabled)
-                put("childProcessExperimentalEnabled", request.childProcessExperimentalEnabled)
-                put("javaInteropExperimentalEnabled", request.javaInteropExperimentalEnabled)
+                put("esmEnabled", request.esmEnabled)
+                put("dynamicImportEnabled", request.dynamicImportEnabled)
+                put("rawNodeNetworkModulesEnabled", request.rawNodeNetworkModulesEnabled)
+                put("workerThreadsEnabled", request.workerThreadsEnabled)
+                put("childProcessEnabled", request.childProcessEnabled)
+                put("javaInteropEnabled", request.javaInteropEnabled)
                 put("spawnDepth", request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 request.runtimeAdapter?.takeIf { it.isNotBlank() }?.let { put("runtimeAdapter", it) }
                 request.processPoolSlot?.takeIf { it.isNotBlank() }?.let { put("processPoolSlot", it) }
@@ -5376,29 +5376,29 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 env = orderedStringMapFromJson(json.optJSONArray("env")),
                 moduleSources = orderedStringMapFromJson(json.optJSONArray("moduleSources")),
                 runtimeModuleSources = orderedStringMapFromJson(json.optJSONArray("runtimeModuleSources")),
-                esmExperimentalEnabled = json.optBoolean(
-                    "esmExperimentalEnabled",
-                    BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+                esmEnabled = json.optBoolean(
+                    "esmEnabled",
+                    BuildConfig.NODEJS_ESM_ENABLED,
                 ),
-                dynamicImportExperimentalEnabled = json.optBoolean(
-                    "dynamicImportExperimentalEnabled",
-                    BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                dynamicImportEnabled = json.optBoolean(
+                    "dynamicImportEnabled",
+                    BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
                 ),
-                rawNodeNetworkModulesExperimentalEnabled = json.optBoolean(
-                    "rawNodeNetworkModulesExperimentalEnabled",
-                    BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                rawNodeNetworkModulesEnabled = json.optBoolean(
+                    "rawNodeNetworkModulesEnabled",
+                    BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
                 ),
-                workerThreadsExperimentalEnabled = json.optBoolean(
-                    "workerThreadsExperimentalEnabled",
-                    BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+                workerThreadsEnabled = json.optBoolean(
+                    "workerThreadsEnabled",
+                    BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
                 ),
-                childProcessExperimentalEnabled = json.optBoolean(
-                    "childProcessExperimentalEnabled",
-                    BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
+                childProcessEnabled = json.optBoolean(
+                    "childProcessEnabled",
+                    BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
                 ),
-                javaInteropExperimentalEnabled = json.optBoolean(
-                    "javaInteropExperimentalEnabled",
-                    BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+                javaInteropEnabled = json.optBoolean(
+                    "javaInteropEnabled",
+                    BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
                 ),
                 spawnDepth = json.optInt("spawnDepth", 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
                 runtimeAdapter = json.optString("runtimeAdapter").takeIf { it.isNotBlank() },

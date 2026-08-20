@@ -322,34 +322,15 @@ val nodeJsEmbeddedScriptEnabled = providers.gradleProperty("autojs.nodejs.embedd
 val nodeJsEmbeddedPersistentRuntimeEnabled = providers.gradleProperty("autojs.nodejs.embedded.persistentRuntime").orElse("true").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsEsmExperimentalEnabled = providers.gradleProperty("autojs.nodejs.esm.experimental").orElse("true").get()
-    .trim()
-    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsDynamicImportLocalEnabled = providers.gradleProperty("autojs.nodejs.dynamicImport.local").orElse("true").get()
-    .trim()
-    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsDynamicImportExperimentalEnabled = providers.gradleProperty("autojs.nodejs.dynamicImport.experimental").orElse("false").get()
-    .trim()
-    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsDynamicImportEnabled = nodeJsDynamicImportLocalEnabled || nodeJsDynamicImportExperimentalEnabled
-val nodeJsNetworkExperimentalEnabled = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false").get()
-    .trim()
-    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-// M2.6: raw Node network builtins (http/https/net/dns/tls) default on — the
-// desktop-Node experience the plugin targets. Set the property to false to
-// opt back out.
-val nodeJsRawNetworkModulesExperimentalEnabled = providers.gradleProperty("autojs.nodejs.rawNetworkModules.experimental").orElse("true").get()
-    .trim()
-    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsWorkerThreadsExperimentalEnabled = providers.gradleProperty("autojs.nodejs.worker_threads.experimental").orElse("false").get()
-    .trim()
-    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsChildProcessExperimentalEnabled = providers.gradleProperty("autojs.nodejs.child_process.experimental").orElse("false").get()
-    .trim()
-    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsJavaInteropExperimentalEnabled = providers.gradleProperty("autojs.nodejs.javaInterop.experimental").orElse("false").get()
-    .trim()
-    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+// Stable runtime capabilities are part of every build. Runtime permissions,
+// allowlists, sandboxing, and resource budgets remain the security boundary.
+val nodeJsEsmEnabled = true
+val nodeJsDynamicImportEnabled = true
+val nodeJsNetworkEnabled = true
+val nodeJsRawNetworkModulesEnabled = true
+val nodeJsWorkerThreadsEnabled = true
+val nodeJsChildProcessEnabled = true
+val nodeJsJavaInteropEnabled = true
 val nodeJsProfileProEnabled = providers.gradleProperty("autojs.nodejs.profile.pro.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
@@ -365,39 +346,6 @@ val nodeJsRelaxedCapabilitiesEnabled = providers.gradleProperty("autojs.nodejs.r
 val nodeJsTimelineTraceEnabled = providers.gradleProperty("autojs.nodejs.timelineTrace").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsReleaseTaskRequested = taskNames.any { rawTaskName ->
-    val taskName = rawTaskName.substringAfterLast(':')
-    taskName.contains("Release") &&
-            (
-                    taskName.startsWith("assemble", ignoreCase = true) ||
-                            taskName.startsWith("bundle", ignoreCase = true) ||
-                            taskName.startsWith("package", ignoreCase = true) ||
-                            taskName.startsWith("publish", ignoreCase = true) ||
-                            taskName.startsWith("verify", ignoreCase = true) ||
-                            taskName.startsWith("generate", ignoreCase = true)
-                    )
-}
-val nodeJsReleaseForbiddenExperimentalFlags = linkedMapOf(
-    "autojs.nodejs.dynamicImport.experimental" to nodeJsDynamicImportExperimentalEnabled,
-    "autojs.nodejs.network.experimental" to nodeJsNetworkExperimentalEnabled,
-    "autojs.nodejs.rawNetworkModules.experimental" to nodeJsRawNetworkModulesExperimentalEnabled,
-    "autojs.nodejs.worker_threads.experimental" to nodeJsWorkerThreadsExperimentalEnabled,
-    "autojs.nodejs.child_process.experimental" to nodeJsChildProcessExperimentalEnabled,
-    "autojs.nodejs.javaInterop.experimental" to nodeJsJavaInteropExperimentalEnabled,
-    "autojs.nodejs.profile.pro.enabled" to nodeJsProfileProEnabled,
-    "autojs.nodejs.profile.desktop.enabled" to nodeJsProfileDesktopEnabled,
-    "autojs.nodejs.profile.debugUnsafeLab.enabled" to nodeJsProfileDebugUnsafeLabEnabled,
-    "autojs.nodejs.relaxedCapabilities.enabled" to nodeJsRelaxedCapabilitiesEnabled,
-)
-if (nodeJsReleaseTaskRequested) {
-    val enabledForbiddenFlags = nodeJsReleaseForbiddenExperimentalFlags.filterValues { it }.keys
-    if (enabledForbiddenFlags.isNotEmpty()) {
-        throw GradleException(
-            "Release Node builds cannot enable experimental feature flag(s): ${enabledForbiddenFlags.joinToString()}. " +
-                    "Use a debug experimental build for validation and keep release builds on the Safe Node Profile defaults."
-        )
-    }
-}
 val nodeJsTestDeviceProfile = providers.gradleProperty("autojs.nodejs.test.deviceProfile").orNull
     ?.trim()
     ?.lowercase()
@@ -452,8 +400,8 @@ val nodeJsFuzzerReplayRunnerClass = nodeJsFuzzerReplayClass?.let { replayClass -
 }
 extra.apply {
     set("nodeJsInstrumentation.taskNames", taskNames)
-    set("nodeJsInstrumentation.nodeJsNetworkExperimentalEnabled", nodeJsNetworkExperimentalEnabled)
-    set("nodeJsInstrumentation.nodeJsWorkerThreadsExperimentalEnabled", nodeJsWorkerThreadsExperimentalEnabled)
+    set("nodeJsInstrumentation.nodeJsNetworkEnabled", nodeJsNetworkEnabled)
+    set("nodeJsInstrumentation.nodeJsWorkerThreadsEnabled", nodeJsWorkerThreadsEnabled)
     set("nodeJsInstrumentation.nodeJsTestDeviceProfile", nodeJsTestDeviceProfile)
 }
 
@@ -583,14 +531,13 @@ listOf(
     "nodeJsEmbeddedProbeLifecycleEnabled" to nodeJsEmbeddedProbeLifecycleEnabled,
     "nodeJsEmbeddedScriptEnabled" to nodeJsEmbeddedScriptEnabled,
     "nodeJsEmbeddedPersistentRuntimeEnabled" to nodeJsEmbeddedPersistentRuntimeEnabled,
-    "nodeJsEsmExperimentalEnabled" to nodeJsEsmExperimentalEnabled,
-    "nodeJsDynamicImportLocalEnabled" to nodeJsDynamicImportLocalEnabled,
+    "nodeJsEsmEnabled" to nodeJsEsmEnabled,
     "nodeJsDynamicImportEnabled" to nodeJsDynamicImportEnabled,
-    "nodeJsNetworkExperimentalEnabled" to nodeJsNetworkExperimentalEnabled,
-    "nodeJsRawNetworkModulesExperimentalEnabled" to nodeJsRawNetworkModulesExperimentalEnabled,
-    "nodeJsWorkerThreadsExperimentalEnabled" to nodeJsWorkerThreadsExperimentalEnabled,
-    "nodeJsChildProcessExperimentalEnabled" to nodeJsChildProcessExperimentalEnabled,
-    "nodeJsJavaInteropExperimentalEnabled" to nodeJsJavaInteropExperimentalEnabled,
+    "nodeJsNetworkEnabled" to nodeJsNetworkEnabled,
+    "nodeJsRawNetworkModulesEnabled" to nodeJsRawNetworkModulesEnabled,
+    "nodeJsWorkerThreadsEnabled" to nodeJsWorkerThreadsEnabled,
+    "nodeJsChildProcessEnabled" to nodeJsChildProcessEnabled,
+    "nodeJsJavaInteropEnabled" to nodeJsJavaInteropEnabled,
     "nodeJsProfileProEnabled" to nodeJsProfileProEnabled,
     "nodeJsProfileDesktopEnabled" to nodeJsProfileDesktopEnabled,
     "nodeJsProfileDebugUnsafeLabEnabled" to nodeJsProfileDebugUnsafeLabEnabled,
