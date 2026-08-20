@@ -592,6 +592,8 @@
     <string name="summary_ai_default_profile">Default: %1$s</string>
     <string name="summary_ai_default_profile_none">No default profile. Add a profile to use the global ai module.</string>
     <string name="summary_ai_default_profile_unavailable">Default profile is unavailable: %1$s</string>
+    <string name="summary_ai_local_plugin_installed">Manage on-device models of the local AI plugin</string>
+    <string name="summary_ai_local_plugin_not_installed">Not installed. Tap to open Plugin Center and install it</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">Profile ID: %1$s\nStatus: %2$s\nEncrypted data is preserved. Tap to remove it.</string>
     <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
@@ -737,6 +739,7 @@
     <string name="text_ai_delete_profile_confirm">Delete provider profile \"%1$s\" and its encrypted API key?</string>
     <string name="text_ai_delete_unavailable_profile_confirm">This profile cannot be read. Delete its preserved encrypted data?\n\nProfile ID: %1$s</string>
     <string name="text_ai_edit_profile">Edit provider profile</string>
+    <string name="text_ai_local_plugin">Local AI plugin</string>
     <string name="text_ai_model">Default model</string>
     <string name="text_ai_new_profile">New provider profile</string>
     <string name="text_ai_profile_unavailable">Unavailable AI profile</string>

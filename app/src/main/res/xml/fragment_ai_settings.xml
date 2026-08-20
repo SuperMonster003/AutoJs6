@@ -19,4 +19,16 @@
         app:layout="@layout/preference_category_custom"
         app:title="@string/text_ai_profiles" />
 
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_ai_local_plugin">
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:key="@string/key_ai_local_plugin"
+            app:layout="@layout/preference_custom"
+            app:summary="@string/summary_ai_local_plugin_not_installed"
+            app:title="@string/text_ai_local_plugin" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
 </PreferenceScreen>

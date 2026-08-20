@@ -599,6 +599,8 @@
     <string name="summary_ai_default_profile">기본값: %1$s</string>
     <string name="summary_ai_default_profile_none">기본 프로필이 없습니다. 전역 ai 모듈을 사용하려면 프로필을 추가하세요.</string>
     <string name="summary_ai_default_profile_unavailable">기본 프로필을 사용할 수 없음: %1$s</string>
+    <string name="summary_ai_local_plugin_installed">로컬 AI 플러그인의 온디바이스 모델 관리</string>
+    <string name="summary_ai_local_plugin_not_installed">설치되지 않음. 플러그인 센터를 열어 설치하려면 탭하세요</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">프로필 ID: %1$s\n상태: %2$s\n암호화된 데이터가 보존되어 있습니다. 탭하여 삭제하세요.</string>
     <string name="summary_all_files_access">AutoJs6 가 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
@@ -744,6 +746,7 @@
     <string name="text_ai_delete_profile_confirm">공급자 프로필 \"%1$s\" 및 암호화된 API 키를 삭제하시겠습니까?</string>
     <string name="text_ai_delete_unavailable_profile_confirm">이 프로필을 읽을 수 없습니다. 보존된 암호화 데이터를 삭제하시겠습니까?\n\n프로필 ID: %1$s</string>
     <string name="text_ai_edit_profile">공급자 프로필 편집</string>
+    <string name="text_ai_local_plugin">로컬 AI 플러그인</string>
     <string name="text_ai_model">기본 모델</string>
     <string name="text_ai_new_profile">새 공급자 프로필</string>
     <string name="text_ai_profile_unavailable">사용할 수 없는 AI 프로필</string>

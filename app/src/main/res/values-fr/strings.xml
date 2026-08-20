@@ -597,6 +597,8 @@
     <string name="summary_ai_default_profile">Par défaut: %1$s</string>
     <string name="summary_ai_default_profile_none">Aucun profil par défaut. Ajoutez un profil pour utiliser le module global ai.</string>
     <string name="summary_ai_default_profile_unavailable">Profil par défaut indisponible: %1$s</string>
+    <string name="summary_ai_local_plugin_installed">Gérer les modèles locaux du plugin IA local</string>
+    <string name="summary_ai_local_plugin_not_installed">Non installé. Appuyez pour ouvrir le Centre de plugins et installer le plugin</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">ID du profil: %1$s\nÉtat: %2$s\nLes données chiffrées sont conservées. Appuyez pour les supprimer.</string>
     <string name="summary_all_files_access">Permet à AutoJs6 d\'accéder à tous les fichiers, y compris ceux du stockage externe</string>
@@ -742,6 +744,7 @@
     <string name="text_ai_delete_profile_confirm">Supprimer le profil fournisseur \"%1$s\" et sa clé API chiffrée?</string>
     <string name="text_ai_delete_unavailable_profile_confirm">Ce profil est illisible. Supprimer ses données chiffrées conservées?\n\nID du profil: %1$s</string>
     <string name="text_ai_edit_profile">Modifier le profil fournisseur</string>
+    <string name="text_ai_local_plugin">Plugin IA local</string>
     <string name="text_ai_model">Modèle par défaut</string>
     <string name="text_ai_new_profile">Nouveau profil fournisseur</string>
     <string name="text_ai_profile_unavailable">Profil AI indisponible</string>

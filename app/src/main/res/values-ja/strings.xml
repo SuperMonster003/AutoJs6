@@ -598,6 +598,8 @@
     <string name="summary_ai_default_profile">デフォルト: %1$s</string>
     <string name="summary_ai_default_profile_none">デフォルトプロファイルがありません. グローバル ai モジュールを使用するにはプロファイルを追加してください.</string>
     <string name="summary_ai_default_profile_unavailable">デフォルトプロファイルを利用できません: %1$s</string>
+    <string name="summary_ai_local_plugin_installed">ローカル AI プラグインのオンデバイスモデルを管理</string>
+    <string name="summary_ai_local_plugin_not_installed">未インストール. タップしてプラグインセンターからインストール</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">プロファイル ID: %1$s\n状態: %2$s\n暗号化データは保持されています. タップすると削除できます.</string>
     <string name="summary_all_files_access">AutoJs6 が外部ストレージを含むすべてのファイルにアクセスすることを許可します</string>
@@ -743,6 +745,7 @@
     <string name="text_ai_delete_profile_confirm">プロバイダープロファイル \"%1$s\" と暗号化された API キーを削除しますか?</string>
     <string name="text_ai_delete_unavailable_profile_confirm">このプロファイルを読み取れません. 保持されている暗号化データを削除しますか?\n\nプロファイル ID: %1$s</string>
     <string name="text_ai_edit_profile">プロバイダープロファイルを編集</string>
+    <string name="text_ai_local_plugin">ローカル AI プラグイン</string>
     <string name="text_ai_model">デフォルトモデル</string>
     <string name="text_ai_new_profile">新しいプロバイダープロファイル</string>
     <string name="text_ai_profile_unavailable">利用できない AI プロファイル</string>

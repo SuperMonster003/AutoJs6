@@ -594,6 +594,8 @@
     <string name="summary_ai_default_profile">預設設定: %1$s</string>
     <string name="summary_ai_default_profile_none">尚無預設設定. 新增設定後即可使用全域 ai 模組.</string>
     <string name="summary_ai_default_profile_unavailable">預設設定無法使用: %1$s</string>
+    <string name="summary_ai_local_plugin_installed">管理本地 AI 插件嘅裝置端模型</string>
+    <string name="summary_ai_local_plugin_not_installed">未安裝. 點擊打開插件中心進行安裝</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">設定 ID: %1$s\n狀態: %2$s\n加密資料仍被保留. 點按可將其刪除.</string>
     <string name="summary_all_files_access">允許 AutoJs6 訪問所有文件, 包括外部存儲</string>
@@ -739,6 +741,7 @@
     <string name="text_ai_delete_profile_confirm">確定刪除服務商設定 \"%1$s\" 及其加密的 API 金鑰嗎?</string>
     <string name="text_ai_delete_unavailable_profile_confirm">無法讀取此設定. 是否刪除保留的加密資料?\n\n設定 ID: %1$s</string>
     <string name="text_ai_edit_profile">編輯服務商設定</string>
+    <string name="text_ai_local_plugin">本地 AI 插件</string>
     <string name="text_ai_model">預設模型</string>
     <string name="text_ai_new_profile">新增服務商設定</string>
     <string name="text_ai_profile_unavailable">無法使用的 AI 設定</string>

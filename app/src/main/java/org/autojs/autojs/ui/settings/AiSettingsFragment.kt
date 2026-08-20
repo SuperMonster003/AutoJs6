@@ -8,6 +8,8 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.ai.AiProviderProfileInspection
 import org.autojs.autojs.core.ai.AiProviderProfileSummary
 import org.autojs.autojs.core.ai.AiProviderVault
+import org.autojs.autojs.core.plugin.ai.AiTextOfficialPlugin
+import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.ViewUtils
@@ -32,6 +34,12 @@ class AiSettingsFragment : PreferenceFragmentCompat() {
                 showDefaultProfileDialog()
                 true
             }
+
+        findPreference<MaterialPreference>(getString(R.string.key_ai_local_plugin))
+            ?.setOnPreferenceClickListener {
+                openLocalAiPlugin()
+                true
+            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -42,7 +50,29 @@ class AiSettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         refreshProfiles()
+        refreshLocalPluginPreference()
     }
+
+    private fun refreshLocalPluginPreference() {
+        findPreference<MaterialPreference>(getString(R.string.key_ai_local_plugin))?.apply {
+            summary = when (localAiPluginLaunchIntent()) {
+                null -> getString(R.string.summary_ai_local_plugin_not_installed)
+                else -> getString(R.string.summary_ai_local_plugin_installed)
+            }
+        }
+    }
+
+    private fun openLocalAiPlugin() {
+        val launchIntent = localAiPluginLaunchIntent()
+        if (launchIntent != null) {
+            runCatching { startActivity(launchIntent) }
+            return
+        }
+        PluginCenterActivity.launch(requireContext())
+    }
+
+    private fun localAiPluginLaunchIntent() = requireContext().packageManager
+        .getLaunchIntentForPackage(AiTextOfficialPlugin.PACKAGE_NAME)
 
     private fun refreshProfiles() {
         val inspection = runCatching(vault::inspectProfiles).getOrElse {

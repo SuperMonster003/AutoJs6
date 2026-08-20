@@ -597,6 +597,8 @@
     <string name="summary_ai_default_profile">По умолчанию: %1$s</string>
     <string name="summary_ai_default_profile_none">Профиль по умолчанию отсутствует. Добавьте профиль для использования глобального модуля ai.</string>
     <string name="summary_ai_default_profile_unavailable">Профиль по умолчанию недоступен: %1$s</string>
+    <string name="summary_ai_local_plugin_installed">Управление локальными моделями локального ИИ-плагина</string>
+    <string name="summary_ai_local_plugin_not_installed">Не установлен. Нажмите, чтобы открыть Центр плагинов и установить его</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">ID профиля: %1$s\nСостояние: %2$s\nЗашифрованные данные сохранены. Нажмите, чтобы удалить их.</string>
     <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
@@ -742,6 +744,7 @@
     <string name="text_ai_delete_profile_confirm">Удалить профиль поставщика \"%1$s\" и его зашифрованный ключ API?</string>
     <string name="text_ai_delete_unavailable_profile_confirm">Этот профиль невозможно прочитать. Удалить сохраненные зашифрованные данные?\n\nID профиля: %1$s</string>
     <string name="text_ai_edit_profile">Изменить профиль поставщика</string>
+    <string name="text_ai_local_plugin">Локальный ИИ-плагин</string>
     <string name="text_ai_model">Модель по умолчанию</string>
     <string name="text_ai_new_profile">Новый профиль поставщика</string>
     <string name="text_ai_profile_unavailable">Недоступный профиль AI</string>

@@ -599,6 +599,8 @@
     <string name="summary_ai_default_profile">الافتراضي: %1$s</string>
     <string name="summary_ai_default_profile_none">لا يوجد ملف تعريف افتراضي. أضف ملف تعريف لاستخدام وحدة ai العامة.</string>
     <string name="summary_ai_default_profile_unavailable">ملف التعريف الافتراضي غير متاح: %1$s</string>
+    <string name="summary_ai_local_plugin_installed">إدارة النماذج المحلية لإضافة الذكاء الاصطناعي المحلية</string>
+    <string name="summary_ai_local_plugin_not_installed">غير مثبتة. انقر لفتح مركز الإضافات وتثبيتها</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">معرّف ملف التعريف: %1$s\nالحالة: %2$s\nتم الاحتفاظ بالبيانات المشفرة. اضغط لإزالتها.</string>
     <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
@@ -744,6 +746,7 @@
     <string name="text_ai_delete_profile_confirm">هل تريد حذف ملف تعريف المزود \"%1$s\" ومفتاح API المشفر الخاص به؟</string>
     <string name="text_ai_delete_unavailable_profile_confirm">تعذرت قراءة ملف التعريف هذا. هل تريد حذف بياناته المشفرة المحفوظة?\n\nمعرّف ملف التعريف: %1$s</string>
     <string name="text_ai_edit_profile">تعديل ملف تعريف المزود</string>
+    <string name="text_ai_local_plugin">إضافة الذكاء الاصطناعي المحلية</string>
     <string name="text_ai_model">النموذج الافتراضي</string>
     <string name="text_ai_new_profile">ملف تعريف مزود جديد</string>
     <string name="text_ai_profile_unavailable">ملف تعريف AI غير متاح</string>
