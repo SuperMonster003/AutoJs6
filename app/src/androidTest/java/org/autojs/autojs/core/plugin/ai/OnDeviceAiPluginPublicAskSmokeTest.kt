@@ -252,7 +252,11 @@ class OnDeviceAiPluginPublicAskSmokeTest {
               providerId: ${JSONObject.quote(REAL_PROVIDER_ID)},
               modelId: ${JSONObject.quote(parameters.modelId)}
             },
-            timeout: ${parameters.timeoutMillis}
+            timeout: ${parameters.timeoutMillis},
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.9,
+            maxTokens: 32
           }
         ).then(
           text => files.write(markerPath, JSON.stringify({

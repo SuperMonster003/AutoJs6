@@ -7,7 +7,6 @@ import android.os.ParcelFileDescriptor
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.ai.common.api.AiPayloadReference
-import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ondeviceai.api.AiContentPart
 import org.autojs.plugin.ondeviceai.api.AiGenerationOptions
 import org.autojs.plugin.ondeviceai.api.AiMessage
@@ -15,6 +14,7 @@ import org.autojs.plugin.ondeviceai.api.AiMessageRole
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilities
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiProtocol
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiRequest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -407,7 +407,7 @@ class OnDeviceAiProviderSessionAndroidConformanceTest {
         val promptBytes = prompt.toByteArray(Charsets.UTF_8)
         return OnDeviceAiRequest(
             requestId = "android-hostile-${modelId.substringAfterLast('.')}",
-            protocolVersion = AiProtocolVersion(1, 0),
+            protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
             providerId = pinned.providerId,
             modelId = modelId,
             messages = listOf(
@@ -496,7 +496,7 @@ class OnDeviceAiProviderSessionAndroidConformanceTest {
         )
         return OnDeviceAiRequest(
             requestId = "android-session-request",
-            protocolVersion = AiProtocolVersion(1, 0),
+            protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
             providerId = pinned.providerId,
             modelId = FAKE_STREAM_MODEL,
             messages = listOf(

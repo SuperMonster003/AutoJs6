@@ -11,7 +11,6 @@ import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ondeviceai.api.AiContentPart
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
-import org.autojs.plugin.ondeviceai.api.AiGenerationOptions
 import org.autojs.plugin.ondeviceai.api.AiMessage
 import org.autojs.plugin.ondeviceai.api.AiMessageRole
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilities
@@ -556,15 +555,10 @@ private class ProcessOnDeviceAiPluginAskRunner(
                             ),
                         ),
                     ),
-                    options = AiGenerationOptions(
+                    options = request.toGenerationOptions(
                         stream = streaming,
-                        includeReasoning = false,
-                        structuredJson = false,
-                        reportUsage = false,
                         maximumOutputBytes = outputLimit,
-                        maximumToolRounds = 0,
                         timeoutMillis = remaining.coerceAtMost(OnDeviceAiLimits.MAX_TIMEOUT_MILLIS),
-                        responseMimeType = OnDeviceAiMimeType.PLAIN,
                         requiredCapabilityIds = if (streaming) {
                             listOf(OnDeviceAiCapabilityId.STREAMING)
                         } else {

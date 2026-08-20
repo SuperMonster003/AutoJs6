@@ -303,7 +303,7 @@ internal class OnDeviceAiProviderSessionPolicy(
             if (request.options.stream) add(OnDeviceAiCapabilityId.STREAMING)
             if (request.options.includeReasoning) add(OnDeviceAiCapabilityId.REASONING)
             if (request.options.structuredJson) add(OnDeviceAiCapabilityId.STRUCTURED_JSON)
-            if (request.options.reportUsage || request.options.maximumOutputTokens != null) {
+            if (request.options.reportUsage) {
                 add(OnDeviceAiCapabilityId.USAGE)
             }
         }

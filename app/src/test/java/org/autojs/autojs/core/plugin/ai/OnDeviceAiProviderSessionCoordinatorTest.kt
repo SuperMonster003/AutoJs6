@@ -2,7 +2,6 @@ package org.autojs.autojs.core.plugin.ai
 
 import org.autojs.plugin.ai.common.api.AiCommonCodec
 import org.autojs.plugin.ai.common.api.AiPayloadReference
-import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ondeviceai.api.AiCompletionResult
 import org.autojs.plugin.ondeviceai.api.AiContentPart
 import org.autojs.plugin.ondeviceai.api.AiFinishReason
@@ -1031,7 +1030,7 @@ private class SessionCoordinatorFixture(
     )
     val request = OnDeviceAiRequest(
         requestId = "session-request",
-        protocolVersion = AiProtocolVersion(1, 0),
+        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
         providerId = PROVIDER_ID,
         modelId = MODEL_ID,
         messages = listOf(

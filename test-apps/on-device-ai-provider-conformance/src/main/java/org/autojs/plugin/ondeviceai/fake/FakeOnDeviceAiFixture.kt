@@ -4,11 +4,11 @@ import org.autojs.plugin.ai.common.api.AiCredentialMode
 import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.ai.common.api.AiProviderInfo
 import org.autojs.plugin.ai.common.api.AiProtocolRange
-import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ondeviceai.api.AiModelInfo
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilities
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiProtocol
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiRequest
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiVersionPolicy
 
@@ -24,7 +24,7 @@ object FakeOnDeviceAiFixture {
     const val MODEL_REASONING = "fake.reasoning"
     const val MODEL_TOOLS = "fake.tools"
 
-    val protocolVersion = AiProtocolVersion(1, 0)
+    val protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1
 
     val providerInfo = AiProviderInfo(
         providerId = PROVIDER_ID,

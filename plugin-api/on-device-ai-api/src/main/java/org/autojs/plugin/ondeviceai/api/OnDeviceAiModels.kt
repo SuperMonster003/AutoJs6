@@ -326,12 +326,26 @@ class AiGenerationOptions(
     val responseMimeType: String = OnDeviceAiMimeType.PLAIN,
     val responseSchema: AiPayloadReference? = null,
     requiredCapabilityIds: List<String> = emptyList(),
+    val temperature: Double? = null,
+    val topK: Int? = null,
+    val topP: Double? = null,
 ) {
     val requiredCapabilityIds: List<String> = immutableListSnapshot(requiredCapabilityIds)
 
     init {
         require(maximumOutputBytes in 1L..OnDeviceAiLimits.MAX_STREAMING_OUTPUT_BYTES)
-        maximumOutputTokens?.let { require(it > 0L) }
+        maximumOutputTokens?.let {
+            require(it in 1L..OnDeviceAiLimits.MAX_OUTPUT_TOKENS) {
+                "Maximum output tokens are outside the supported range"
+            }
+        }
+        temperature?.let {
+            require(it.isFinite() && it >= 0.0) { "Temperature must be finite and non-negative" }
+        }
+        topK?.let { require(it > 0) { "Top K must be positive" } }
+        topP?.let {
+            require(it.isFinite() && it in 0.0..1.0) { "Top P must be finite and between 0 and 1" }
+        }
         require(maximumToolRounds in 0..OnDeviceAiLimits.MAX_TOOL_ROUNDS)
         require(timeoutMillis in OnDeviceAiLimits.MIN_TIMEOUT_MILLIS..OnDeviceAiLimits.MAX_TIMEOUT_MILLIS)
         require(responseMimeType in OnDeviceAiMimeType.INPUT_VALUES)
@@ -360,6 +374,9 @@ class AiGenerationOptions(
     operator fun component9() = responseMimeType
     operator fun component10() = responseSchema
     operator fun component11() = requiredCapabilityIds
+    operator fun component12() = temperature
+    operator fun component13() = topK
+    operator fun component14() = topP
 
     fun copy(
         stream: Boolean = this.stream,
@@ -373,6 +390,9 @@ class AiGenerationOptions(
         responseMimeType: String = this.responseMimeType,
         responseSchema: AiPayloadReference? = this.responseSchema,
         requiredCapabilityIds: List<String> = this.requiredCapabilityIds,
+        temperature: Double? = this.temperature,
+        topK: Int? = this.topK,
+        topP: Double? = this.topP,
     ) = AiGenerationOptions(
         stream = stream,
         includeReasoning = includeReasoning,
@@ -385,6 +405,9 @@ class AiGenerationOptions(
         responseMimeType = responseMimeType,
         responseSchema = responseSchema,
         requiredCapabilityIds = requiredCapabilityIds,
+        temperature = temperature,
+        topK = topK,
+        topP = topP,
     )
 
     override fun equals(other: Any?): Boolean =
@@ -399,7 +422,10 @@ class AiGenerationOptions(
             timeoutMillis == other.timeoutMillis &&
             responseMimeType == other.responseMimeType &&
             responseSchema == other.responseSchema &&
-            requiredCapabilityIds == other.requiredCapabilityIds
+            requiredCapabilityIds == other.requiredCapabilityIds &&
+            temperature == other.temperature &&
+            topK == other.topK &&
+            topP == other.topP
 
     override fun hashCode(): Int = dataClassHashCode(
         stream,
@@ -413,12 +439,16 @@ class AiGenerationOptions(
         responseMimeType,
         responseSchema,
         requiredCapabilityIds,
+        temperature,
+        topK,
+        topP,
     )
 
     override fun toString(): String =
         "AiGenerationOptions(stream=$stream, includeReasoning=$includeReasoning, " +
             "structuredJson=$structuredJson, reportUsage=$reportUsage, " +
             "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
+            "temperature=$temperature, topK=$topK, topP=$topP, " +
             "maximumToolRounds=$maximumToolRounds, timeoutMillis=$timeoutMillis, " +
             "responseMimeType=$responseMimeType, responseSchema=$responseSchema, " +
             "requiredCapabilityIds=$requiredCapabilityIds)"

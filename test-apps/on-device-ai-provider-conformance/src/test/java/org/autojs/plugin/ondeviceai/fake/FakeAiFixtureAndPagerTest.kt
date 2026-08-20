@@ -2,7 +2,6 @@ package org.autojs.plugin.ondeviceai.fake
 
 import org.autojs.plugin.ai.common.api.AiCredentialMode
 import org.autojs.plugin.ai.common.api.AiDataLocality
-import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ondeviceai.api.AiModelListRequest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -58,9 +57,9 @@ class FakeAiFixtureAndPagerTest {
 
     @Test
     fun modelPaginationIsDeterministicAndCompletesWithoutDuplicates() {
-        val first = FakeAiModelPager.page(AiModelListRequest(AiProtocolVersion(1, 0), pageSize = 2))
+        val first = FakeAiModelPager.page(AiModelListRequest(FakeOnDeviceAiFixture.protocolVersion, pageSize = 2))
         val second = FakeAiModelPager.page(
-            AiModelListRequest(AiProtocolVersion(1, 0), pageSize = 2, pageToken = first.nextPageToken),
+            AiModelListRequest(FakeOnDeviceAiFixture.protocolVersion, pageSize = 2, pageToken = first.nextPageToken),
         )
 
         assertEquals(listOf("fake.echo", "fake.stream"), first.models.map { it.modelId })
@@ -71,22 +70,22 @@ class FakeAiFixtureAndPagerTest {
 
     @Test
     fun modelTokenBindsPageSizeAndRejectsMalformedOrOutOfRangeOffsets() {
-        val first = FakeAiModelPager.page(AiModelListRequest(AiProtocolVersion(1, 0), pageSize = 1))
+        val first = FakeAiModelPager.page(AiModelListRequest(FakeOnDeviceAiFixture.protocolVersion, pageSize = 1))
 
         assertThrows(IllegalArgumentException::class.java) {
             FakeAiModelPager.page(
-                AiModelListRequest(AiProtocolVersion(1, 0), pageSize = 2, pageToken = first.nextPageToken),
+                AiModelListRequest(FakeOnDeviceAiFixture.protocolVersion, pageSize = 2, pageToken = first.nextPageToken),
             )
         }
         assertThrows(IllegalArgumentException::class.java) {
             FakeAiModelPager.page(
-                AiModelListRequest(AiProtocolVersion(1, 0), pageSize = 1, pageToken = "malformed"),
+                AiModelListRequest(FakeOnDeviceAiFixture.protocolVersion, pageSize = 1, pageToken = "malformed"),
             )
         }
         assertThrows(IllegalArgumentException::class.java) {
             FakeAiModelPager.page(
                 AiModelListRequest(
-                    AiProtocolVersion(1, 0),
+                    FakeOnDeviceAiFixture.protocolVersion,
                     pageSize = 1,
                     pageToken = "fake-models-v1:99:1",
                 ),

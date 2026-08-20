@@ -136,7 +136,7 @@ object OnDeviceAiCodec {
     }
 
     fun encodeGenerationOptions(value: AiGenerationOptions): ByteArray =
-        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, 1, 0)
+        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, 1, 1)
             .boolean(1, value.stream, true)
             .boolean(2, value.includeReasoning, true)
             .boolean(3, value.structuredJson, true)
@@ -148,10 +148,13 @@ object OnDeviceAiCodec {
             .string(9, value.responseMimeType, true)
             .apply { value.responseSchema?.let { document(10, AiCommonCodec.encodePayloadReference(it)) } }
             .strings(11, value.requiredCapabilityIds)
+            .apply { value.temperature?.let { float64(12, it) } }
+            .apply { value.topK?.let { int32(13, it) } }
+            .apply { value.topP?.let { float64(14, it) } }
             .encode()
 
     fun decodeGenerationOptions(bytes: ByteArray): AiGenerationOptions {
-        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, (1..11).toSet(), setOf(11))
+        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, (1..14).toSet(), setOf(11))
         return AiGenerationOptions(
             stream = document.requireBoolean(1),
             includeReasoning = document.requireBoolean(2),
@@ -164,6 +167,9 @@ object OnDeviceAiCodec {
             responseMimeType = document.requireString(9),
             responseSchema = document.optionalDocument(10)?.let(AiCommonCodec::decodePayloadReference),
             requiredCapabilityIds = document.strings(11),
+            temperature = document.optionalFloat64(12),
+            topK = document.optionalInt32(13),
+            topP = document.optionalFloat64(14),
         )
     }
 

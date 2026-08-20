@@ -177,6 +177,39 @@ class OnDeviceAiCodecTest {
     }
 
     @Test
+    fun generationSamplingOptionsRoundTripAndRejectInvalidRanges() {
+        val options = AiGenerationOptions(
+            stream = true,
+            includeReasoning = false,
+            structuredJson = false,
+            reportUsage = false,
+            maximumOutputBytes = 4_096,
+            maximumOutputTokens = 512,
+            timeoutMillis = 30_000,
+            temperature = 0.75,
+            topK = 32,
+            topP = 0.9,
+        )
+
+        assertEquals(options, OnDeviceAiCodec.decodeGenerationOptions(OnDeviceAiCodec.encodeGenerationOptions(options)))
+        listOf(Double.NaN, Double.POSITIVE_INFINITY, -0.1).forEach { invalid ->
+            assertThrows(IllegalArgumentException::class.java) {
+                options.copy(temperature = invalid)
+            }
+        }
+        listOf(Double.NaN, Double.POSITIVE_INFINITY, -0.1, 1.1).forEach { invalid ->
+            assertThrows(IllegalArgumentException::class.java) {
+                options.copy(topP = invalid)
+            }
+        }
+        assertThrows(IllegalArgumentException::class.java) { options.copy(topK = 0) }
+        assertThrows(IllegalArgumentException::class.java) { options.copy(maximumOutputTokens = 0) }
+        assertThrows(IllegalArgumentException::class.java) {
+            options.copy(maximumOutputTokens = OnDeviceAiLimits.MAX_OUTPUT_TOKENS + 1L)
+        }
+    }
+
+    @Test
     fun toolCallAndResultBatchesRoundTrip() {
         val calls = AiToolCallBatch(
             listOf(
@@ -277,7 +310,7 @@ class OnDeviceAiCodecTest {
         responseSchema: AiPayloadReference? = null,
     ) = OnDeviceAiRequest(
         requestId = "request-1",
-        protocolVersion = AiProtocolVersion(1, 0),
+        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
         providerId = "fake.local",
         modelId = "fake.tools",
         messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(messagePayload)))),
@@ -293,6 +326,9 @@ class OnDeviceAiCodecTest {
             responseMimeType = if (responseSchema == null) OnDeviceAiMimeType.PLAIN else OnDeviceAiMimeType.JSON,
             responseSchema = responseSchema,
             requiredCapabilityIds = listOf(OnDeviceAiCapabilityId.STREAMING),
+            temperature = 0.75,
+            topK = 32,
+            topP = 0.9,
         ),
         tools = listOf(AiToolDefinition("lookup", "Look up a value", schemaPayload)),
     )

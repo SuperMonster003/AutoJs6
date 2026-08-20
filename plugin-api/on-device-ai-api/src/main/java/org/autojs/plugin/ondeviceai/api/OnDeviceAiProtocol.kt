@@ -10,9 +10,16 @@ object OnDeviceAiProtocol {
     const val ACTION_PROVIDER = "org.autojs.plugin.ON_DEVICE_AI"
     const val PLUGIN_PERMISSION = AiCommonProtocol.PLUGIN_PERMISSION
 
+    /**
+     * Protocol 1.1 makes generation sampling explicit. The contract has not been published yet,
+     * so hosts and providers deliberately require the exact version instead of pretending that a
+     * 1.0 provider can honor fields it would silently ignore.
+     */
+    val PROTOCOL_V1_1 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 1)
+
     val HOST_PROTOCOL_RANGE = AiProtocolRange(
-        AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 0),
-        AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, AiCommonProtocol.MINOR_VERSION),
+        PROTOCOL_V1_1,
+        PROTOCOL_V1_1,
     )
 
     const val SCHEMA_CAPABILITIES = 0x4F44_0001
@@ -104,8 +111,20 @@ object OnDeviceAiLimits {
     const val MAX_MODEL_PAGE_TOKEN_BYTES = 4 * 1024
     const val MAX_MODEL_PAGE_ENVELOPE_BYTES = 128 * 1024
     const val MAX_MODEL_PAGE_TOKEN_LEDGER_ENTRIES = 4 * 1024
+    const val MAX_OUTPUT_TOKENS = 2_147_483_647L
     const val MIN_TIMEOUT_MILLIS = 1_000L
     const val MAX_TIMEOUT_MILLIS = 10L * 60L * 1_000L
+}
+
+/**
+ * LiteRT-LM requires a complete sampler triple whenever any sampler override is present. These
+ * values mirror its stable engine baseline. Leaving every sampler option unset still delegates to
+ * the model/engine defaults instead of installing this triple.
+ */
+object OnDeviceAiSamplingDefaults {
+    const val TOP_K = 1
+    const val TOP_P = 0.95
+    const val TEMPERATURE = 1.0
 }
 
 object OnDeviceAiVersionPolicy {

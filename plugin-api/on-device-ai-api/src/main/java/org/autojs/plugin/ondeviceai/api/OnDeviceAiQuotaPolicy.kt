@@ -85,7 +85,6 @@ object OnDeviceAiQuotaPolicy {
             if (request.options.includeReasoning) add(OnDeviceAiCapabilityId.REASONING)
             if (request.options.structuredJson) add(OnDeviceAiCapabilityId.STRUCTURED_JSON)
             if (request.options.reportUsage) add(OnDeviceAiCapabilityId.USAGE)
-            if (request.options.maximumOutputTokens != null) add(OnDeviceAiCapabilityId.USAGE)
             if (request.tools.isNotEmpty() || request.options.maximumToolRounds > 0) add(OnDeviceAiCapabilityId.TOOLS)
         }
         require(requiredCapabilities.all { it in provider.supportedCapabilityIds() }) {
@@ -332,12 +331,6 @@ object OnDeviceAiQuotaPolicy {
             ?: observedUsage
         if (request.options.reportUsage) {
             require(finalUsage != null) { "Requested usage was not reported" }
-        }
-        request.options.maximumOutputTokens?.let { maximumTokens ->
-            val outputTokens = requireNotNull(finalUsage?.outputTokens) {
-                "Output-token usage is required to verify the requested token limit"
-            }
-            require(outputTokens <= maximumTokens) { "Completion output tokens exceed the requested limit" }
         }
         val reasoningTokens = result.reasoning?.reasoningTokens
         if (reasoningTokens != null && finalUsage?.reasoningTokens != null) {

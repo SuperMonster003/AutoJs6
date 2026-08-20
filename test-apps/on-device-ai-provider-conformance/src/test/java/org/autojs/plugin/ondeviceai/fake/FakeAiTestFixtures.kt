@@ -1,7 +1,6 @@
 package org.autojs.plugin.ondeviceai.fake
 
 import org.autojs.plugin.ai.common.api.AiPayloadReference
-import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ondeviceai.api.AiContentPart
 import org.autojs.plugin.ondeviceai.api.AiGenerationOptions
 import org.autojs.plugin.ondeviceai.api.AiMessage
@@ -23,7 +22,7 @@ internal fun fakeRequest(
     tools: List<AiToolDefinition> = emptyList(),
 ) = OnDeviceAiRequest(
     requestId = "fake-request",
-    protocolVersion = AiProtocolVersion(1, 0),
+    protocolVersion = FakeOnDeviceAiFixture.protocolVersion,
     providerId = FakeOnDeviceAiFixture.PROVIDER_ID,
     modelId = modelId,
     messages = listOf(

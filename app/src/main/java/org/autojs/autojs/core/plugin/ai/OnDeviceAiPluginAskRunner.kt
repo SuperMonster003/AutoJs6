@@ -2,7 +2,9 @@ package org.autojs.autojs.core.plugin.ai
 
 import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiValidation
+import org.autojs.plugin.ondeviceai.api.AiGenerationOptions
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
 import java.io.Closeable
 
 internal class OnDeviceAiPluginAskRequest(
@@ -13,6 +15,10 @@ internal class OnDeviceAiPluginAskRequest(
     val prompt: String,
     val timeoutMillis: Long,
     val maximumOutputBytes: Long = DEFAULT_MAXIMUM_OUTPUT_BYTES,
+    val maximumOutputTokens: Long? = null,
+    val temperature: Double? = null,
+    val topK: Int? = null,
+    val topP: Double? = null,
 ) {
     init {
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
@@ -29,17 +35,51 @@ internal class OnDeviceAiPluginAskRequest(
         require(maximumOutputBytes in 1L..OnDeviceAiLimits.MAX_OUTPUT_BYTES) {
             "Invalid on-device AI plugin output limit"
         }
+        maximumOutputTokens?.let {
+            require(it in 1L..OnDeviceAiLimits.MAX_OUTPUT_TOKENS) {
+                "Invalid on-device AI plugin token limit"
+            }
+        }
+        temperature?.let {
+            require(it.isFinite() && it >= 0.0) { "Invalid on-device AI plugin temperature" }
+        }
+        topK?.let { require(it > 0) { "Invalid on-device AI plugin topK" } }
+        topP?.let {
+            require(it.isFinite() && it in 0.0..1.0) { "Invalid on-device AI plugin topP" }
+        }
     }
 
     override fun toString(): String =
         "OnDeviceAiPluginAskRequest(component=$component, providerId=$providerId, modelId=$modelId, " +
             "promptBytes=${AiValidation.utf8Size(prompt)}, timeoutMillis=$timeoutMillis, " +
-            "maximumOutputBytes=$maximumOutputBytes)"
+            "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
+            "temperature=$temperature, topK=$topK, topP=$topP)"
 
     internal companion object {
         const val DEFAULT_MAXIMUM_OUTPUT_BYTES = 64L * 1024L
     }
 }
+
+internal fun OnDeviceAiPluginAskRequest.toGenerationOptions(
+    stream: Boolean,
+    maximumOutputBytes: Long,
+    timeoutMillis: Long,
+    requiredCapabilityIds: List<String>,
+) = AiGenerationOptions(
+    stream = stream,
+    includeReasoning = false,
+    structuredJson = false,
+    reportUsage = false,
+    maximumOutputBytes = maximumOutputBytes,
+    maximumOutputTokens = maximumOutputTokens,
+    maximumToolRounds = 0,
+    timeoutMillis = timeoutMillis,
+    responseMimeType = OnDeviceAiMimeType.PLAIN,
+    requiredCapabilityIds = requiredCapabilityIds,
+    temperature = temperature,
+    topK = topK,
+    topP = topP,
+)
 
 internal enum class OnDeviceAiPluginAskFailure {
     INVALID_REQUEST,

@@ -19,6 +19,7 @@ import org.autojs.plugin.ondeviceai.api.OnDeviceAiChunk
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCodec
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiProtocol
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiRequest
 import org.autojs.plugin.ondeviceai.api.AiToolCall
 import org.autojs.plugin.ondeviceai.api.AiToolCallBatch
@@ -126,6 +127,25 @@ class OnDeviceAiProviderSessionTest {
 
         harness.drain()
         assertRejected(harness, OnDeviceAiProviderSessionFailure.PLAN_REQUEST_MISMATCH)
+    }
+
+    @Test
+    fun tokenLimitDispatchDoesNotRequireUsageModelCapability() {
+        val request = request(maximumOutputTokens = 64)
+        val plan = plan(
+            modelCapabilityIds = setOf(
+                OnDeviceAiCapabilityId.STREAMING,
+                OnDeviceAiCapabilityId.REASONING,
+                OnDeviceAiCapabilityId.TOOLS,
+                OnDeviceAiCapabilityId.STRUCTURED_JSON,
+            ),
+        )
+        val harness = harness(request = request, plan = plan)
+
+        assertTrue(harness.policy.beginOpen() is OnDeviceAiProviderSessionOpenDecision.Dispatch)
+        harness.policy.commitOpenFailed()
+        harness.drain()
+        assertRejected(harness, OnDeviceAiProviderSessionFailure.OPEN_FAILED)
     }
 
     @Test
@@ -1832,7 +1852,15 @@ class OnDeviceAiProviderSessionTest {
         return Harness(plan, request, requestLease, lane, fallback, events, policy)
     }
 
-    private fun plan(): OnDeviceAiHostSessionPlan {
+    private fun plan(
+        modelCapabilityIds: Set<String> = setOf(
+            OnDeviceAiCapabilityId.STREAMING,
+            OnDeviceAiCapabilityId.REASONING,
+            OnDeviceAiCapabilityId.TOOLS,
+            OnDeviceAiCapabilityId.STRUCTURED_JSON,
+            OnDeviceAiCapabilityId.USAGE,
+        ),
+    ): OnDeviceAiHostSessionPlan {
         val selected = OnDeviceAiProviderSelectionPolicy.select(
             candidates = listOf(OnDeviceAiHostTestFixtures.candidate()),
             environment = OnDeviceAiHostTestFixtures.environment(),
@@ -1844,13 +1872,7 @@ class OnDeviceAiProviderSessionTest {
             pinnedProvider = selected.pinned,
             listingGeneration = "fixture-generation",
             modelId = MODEL_ID,
-            modelCapabilityIds = setOf(
-                OnDeviceAiCapabilityId.STREAMING,
-                OnDeviceAiCapabilityId.REASONING,
-                OnDeviceAiCapabilityId.TOOLS,
-                OnDeviceAiCapabilityId.STRUCTURED_JSON,
-                OnDeviceAiCapabilityId.USAGE,
-            ),
+            modelCapabilityIds = modelCapabilityIds,
             effectiveMaximumContextBytes = 512L * 1024L,
             effectiveMaximumOutputBytes = 256L * 1024L,
             credentialDisposition = OnDeviceAiCredentialIsolationPolicy.disposition(selected.pinned),
@@ -1860,10 +1882,11 @@ class OnDeviceAiProviderSessionTest {
     private fun request(
         stream: Boolean = false,
         reportUsage: Boolean = false,
+        maximumOutputTokens: Long? = null,
         payload: AiPayloadReference = textPayload("hello"),
     ) = OnDeviceAiRequest(
         requestId = "request-session",
-        protocolVersion = AiProtocolVersion(1, 0),
+        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
         providerId = PROVIDER_ID,
         modelId = MODEL_ID,
         messages = listOf(
@@ -1878,6 +1901,7 @@ class OnDeviceAiProviderSessionTest {
             structuredJson = false,
             reportUsage = reportUsage,
             maximumOutputBytes = 4_096,
+            maximumOutputTokens = maximumOutputTokens,
             maximumToolRounds = 0,
             timeoutMillis = 30_000,
         ),

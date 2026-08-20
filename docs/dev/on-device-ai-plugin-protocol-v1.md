@@ -1,6 +1,9 @@
 # On-Device AI Plugin Protocol V1
 
 This document records the frozen provider-neutral text-generation protocol.
+The current unpublished contract is protocol 1.1. Hosts and providers require
+that exact minor version because 1.1 adds generation controls that a 1.0 peer
+would otherwise decode without honoring.
 The two API AARs and the in-repository conformance test app are contract and
 hostile-test infrastructure. The first production on-device provider lives in
 the independent sibling project `AutoJs6-Plugin-On-Device-AI`. The SDK
@@ -34,6 +37,7 @@ The protocol supports:
 - Provider information and version-range negotiation.
 - Paged model discovery with provider-scoped, single-use page tokens.
 - One-shot and streaming text generation.
+- Optional temperature, top-K, top-P, and output-token generation controls.
 - Plain UTF-8 text and structured JSON output.
 - Bounded provider-neutral reasoning summaries and token counts.
 - Provider-neutral usage accounting.
@@ -79,6 +83,13 @@ tool rounds, 2 MiB input text, 32 MiB streaming output, 16 request descriptors,
 32 session descriptors, and a ten minute deadline. Smaller message-specific
 and provider limits apply. Descriptor references must be unique, in range, and
 collectively consume every supplied descriptor exactly once.
+
+Protocol 1.1 adds nullable `temperature`, `topK`, and `topP` fields to
+`AiGenerationOptions`; `maximumOutputTokens` remains the nullable output-token
+ceiling. Temperature must be finite and non-negative, top-K must be positive,
+top-P must be finite in the inclusive range 0 through 1, and the token ceiling
+must be an integer from 1 through 2,147,483,647. A token ceiling is enforced by
+the provider and does not require the `usage` capability or a usage callback.
 
 The request descriptor limit applies to the request-opening Binder event. The
 session descriptor limit applies independently to each later session method or
@@ -467,6 +478,10 @@ ai.ask(prompt, {
         modelId: "example-model",
     },
     timeout: 120000,
+    temperature: 0.7,
+    topK: 40,
+    topP: 0.9,
+    maxTokens: 256,
 });
 
 ai.chat(prompt, {
@@ -505,10 +520,22 @@ opened if fewer than 1,000 milliseconds remain.
 
 Presence of the `plugin` key is the fail-closed routing decision, including
 when its value is null or malformed. The selector rejects unknown nested or
-outer fields, any explicit `stream` option, and every cloud control alias for
-profile, provider, base URL, model, or API key. It does not read the provider
-vault, construct a cloud request, issue HTTP, retry, or fall back to a built-in
-provider. Absence of `plugin` preserves the legacy cloud path unchanged.
+outer fields other than `timeout`, `temperature`, `topK`, `topP`, and
+`maxTokens`; it also rejects any explicit `stream` option and every cloud
+control alias for profile, provider, base URL, model, or API key. A null
+generation control means unspecified. Numeric controls are parsed without
+rounding or string coercion and must satisfy the protocol ranges above. It does
+not read the provider vault, construct a cloud request, issue HTTP, retry, or
+fall back to a built-in provider. Absence of `plugin` preserves the legacy
+cloud path unchanged.
+
+The production On-Device AI provider leaves LiteRT-LM's model/engine sampler
+defaults untouched when `temperature`, `topK`, and `topP` are all unspecified.
+LiteRT-LM requires a complete sampler configuration when any one is overridden,
+so a partial override fills omitted controls with the stable baseline
+`temperature: 1`, `topK: 1`, and `topP: 0.95`. The provider passes the resolved
+triple to `SamplerConfig` and the optional token ceiling to both conversation
+configuration and asynchronous message generation.
 
 All three routes accept exactly one message object with only `role: "user"` and
 a nonempty string `content`; a prompt string is normalized to that shape by the

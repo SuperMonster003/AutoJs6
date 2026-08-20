@@ -368,31 +368,36 @@ class OnDeviceAiQuotaPolicyTest {
     }
 
     @Test
-    fun terminalTokenLimitRequiresVerifiableOutputUsage() {
+    fun terminalTokenLimitIsProviderEnforcedAndDoesNotRequireUsageReporting() {
         val request = request(
             message = textPayload("Hello"),
             maximumOutputTokens = 2,
         )
-        assertThrows(IllegalArgumentException::class.java) {
-            OnDeviceAiQuotaPolicy.validateCompletion(
-                request,
-                AiCompletionResult(textPayload("ok"), AiFinishReason.STOP),
-                descriptorCount = 0,
-                maximumDescriptors = 0,
-            )
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            OnDeviceAiQuotaPolicy.validateCompletion(
-                request,
-                AiCompletionResult(
-                    textPayload("ok"),
-                    AiFinishReason.STOP,
-                    usage = AiUsage(outputTokens = 3),
-                ),
-                descriptorCount = 0,
-                maximumDescriptors = 0,
-            )
-        }
+        val snapshot = OnDeviceAiQuotaPolicy.validateCompletion(
+            request,
+            AiCompletionResult(textPayload("ok"), AiFinishReason.STOP),
+            descriptorCount = 0,
+            maximumDescriptors = 0,
+        )
+
+        assertEquals("ok", snapshot.outputText)
+        assertEquals(null, snapshot.finalUsage)
+    }
+
+    @Test
+    fun tokenLimitDoesNotRequireProviderUsageCapability() {
+        val request = request(
+            message = textPayload("Hello"),
+            maximumOutputTokens = 64,
+        )
+
+        val snapshot = OnDeviceAiQuotaPolicy.validateRequest(
+            request = request,
+            provider = capabilities(usage = false),
+            descriptorCount = 0,
+        )
+
+        assertEquals(5L, snapshot.inputBytes)
     }
 
     @Test
@@ -419,10 +424,10 @@ class OnDeviceAiQuotaPolicyTest {
         val selected = OnDeviceAiVersionPolicy.negotiate(
             AiProtocolRange(AiProtocolVersion(1, 0), AiProtocolVersion(1, 1)),
         )
-        assertEquals(AiProtocolVersion(1, 0), selected)
-        OnDeviceAiVersionPolicy.requireSelected(AiProtocolVersion(1, 0), selected)
+        assertEquals(OnDeviceAiProtocol.PROTOCOL_V1_1, selected)
+        OnDeviceAiVersionPolicy.requireSelected(OnDeviceAiProtocol.PROTOCOL_V1_1, selected)
         assertThrows(IllegalArgumentException::class.java) {
-            OnDeviceAiVersionPolicy.requireSelected(AiProtocolVersion(1, 1), selected)
+            OnDeviceAiVersionPolicy.requireSelected(AiProtocolVersion(1, 0), selected)
         }
         assertThrows(IllegalArgumentException::class.java) {
             OnDeviceAiVersionPolicy.negotiate(
@@ -441,7 +446,7 @@ class OnDeviceAiQuotaPolicyTest {
         tools: List<AiToolDefinition> = emptyList(),
     ) = OnDeviceAiRequest(
         requestId = "request-quota",
-        protocolVersion = AiProtocolVersion(1, 0),
+        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
         providerId = "fake.local",
         modelId = "fake.echo",
         messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(message)))),
