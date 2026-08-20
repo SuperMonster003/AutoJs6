@@ -1,11 +1,11 @@
 package org.autojs.autojs.runtime.api.ai
 
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskFailure
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskHandle
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamEvent
-import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamRunner
-import org.autojs.autojs.core.plugin.ai.AiTextProviderComponent
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
@@ -54,9 +54,9 @@ class AiPluginStreamRuntimeTest {
         val expectedText = (0 until 10).joinToString(separator = "") { "piece-$it|" }
         val runner = FakeStreamRunner(
             synchronousEvents = buildList {
-                add(AiTextPluginStreamEvent.Opened)
-                repeat(10) { add(AiTextPluginStreamEvent.Chunk("piece-$it|")) }
-                add(AiTextPluginStreamEvent.Completed(expectedText))
+                add(OnDeviceAiPluginStreamEvent.Opened)
+                repeat(10) { add(OnDeviceAiPluginStreamEvent.Chunk("piece-$it|")) }
+                add(OnDeviceAiPluginStreamEvent.Completed(expectedText))
             },
         )
         val runtime = runtime(runner, scheduler = scheduled::addLast)
@@ -119,7 +119,7 @@ class AiPluginStreamRuntimeTest {
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
 
-        runner.emit(AiTextPluginStreamEvent.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(OnDeviceAiPluginStreamEvent.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         assertTrue(scheduled.isEmpty())
         assertEquals(1, runner.handle.closeCount.get())
         runtime.close()
@@ -151,14 +151,14 @@ class AiPluginStreamRuntimeTest {
         runtime.stream(request()).once(AiStream.EVENT_DONE, listener { args ->
             first.set((args[0] as Scriptable)["text"] as String)
         })
-        runner.emit(AiTextPluginStreamEvent.Completed("first"))
+        runner.emit(OnDeviceAiPluginStreamEvent.Completed("first"))
         scheduled.removeFirst().invoke()
         assertEquals("first", first.get())
 
         runtime.stream(request()).once(AiStream.EVENT_DONE, listener { args ->
             second.set((args[0] as Scriptable)["text"] as String)
         })
-        runner.emit(AiTextPluginStreamEvent.Completed("second"))
+        runner.emit(OnDeviceAiPluginStreamEvent.Completed("second"))
         scheduled.removeFirst().invoke()
 
         assertEquals("second", second.get())
@@ -206,7 +206,7 @@ class AiPluginStreamRuntimeTest {
         scheduled.removeFirst().invoke()
 
         try {
-            runner.emit(AiTextPluginStreamEvent.Completed("natural completion lost the race"))
+            runner.emit(OnDeviceAiPluginStreamEvent.Completed("natural completion lost the race"))
             assertEquals(1, runner.handle.cancelCount.get())
             assertEquals(1, runner.handle.closeCount.get())
         } finally {
@@ -224,7 +224,7 @@ class AiPluginStreamRuntimeTest {
         assertEquals(1, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
 
-        runner.emit(AiTextPluginStreamEvent.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(OnDeviceAiPluginStreamEvent.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         runtime.close()
         assertEquals(1, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
@@ -244,8 +244,8 @@ class AiPluginStreamRuntimeTest {
 
         runtime.close()
         runtime.close()
-        runner.emit(AiTextPluginStreamEvent.Completed("late"))
-        runner.emit(AiTextPluginStreamEvent.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(OnDeviceAiPluginStreamEvent.Completed("late"))
+        runner.emit(OnDeviceAiPluginStreamEvent.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
 
         assertEquals("cancelled", stream.state)
         assertTrue(stream.isDone)
@@ -273,10 +273,10 @@ class AiPluginStreamRuntimeTest {
         cancellationActionWrapper = cancellationActionWrapper,
     )
 
-    private fun request() = AiTextPluginAskRequest(
-        component = AiTextProviderComponent(
+    private fun request() = OnDeviceAiPluginAskRequest(
+        component = OnDeviceAiProviderComponent(
             packageName = "org.example.provider",
-            className = "org.example.provider.AiTextService",
+            className = "org.example.provider.OnDeviceAiService",
         ),
         providerId = "example.provider",
         modelId = "example-model",
@@ -296,28 +296,28 @@ class AiPluginStreamRuntimeTest {
         ScriptableObject.getProperty(this, name)
 
     private class FakeStreamRunner(
-        private val synchronousEvents: List<AiTextPluginStreamEvent> = emptyList(),
-    ) : AiTextPluginStreamRunner {
-        private val callback = AtomicReference<((AiTextPluginStreamEvent) -> Unit)?>()
+        private val synchronousEvents: List<OnDeviceAiPluginStreamEvent> = emptyList(),
+    ) : OnDeviceAiPluginStreamRunner {
+        private val callback = AtomicReference<((OnDeviceAiPluginStreamEvent) -> Unit)?>()
         val startCount = AtomicInteger()
         val handle = RecordingHandle()
 
         override fun startStream(
-            request: AiTextPluginAskRequest,
-            onEvent: (AiTextPluginStreamEvent) -> Unit,
-        ): AiTextPluginAskHandle {
+            request: OnDeviceAiPluginAskRequest,
+            onEvent: (OnDeviceAiPluginStreamEvent) -> Unit,
+        ): OnDeviceAiPluginAskHandle {
             startCount.incrementAndGet()
             callback.set(onEvent)
             synchronousEvents.forEach(onEvent)
             return handle
         }
 
-        fun emit(event: AiTextPluginStreamEvent) {
+        fun emit(event: OnDeviceAiPluginStreamEvent) {
             checkNotNull(callback.get())(event)
         }
     }
 
-    private class RecordingHandle : AiTextPluginAskHandle {
+    private class RecordingHandle : OnDeviceAiPluginAskHandle {
         val cancelCount = AtomicInteger()
         val closeCount = AtomicInteger()
 

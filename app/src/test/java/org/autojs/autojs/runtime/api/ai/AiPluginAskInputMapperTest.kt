@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.ai
 
 import com.google.gson.JsonParser
-import org.autojs.autojs.core.plugin.ai.AiTextProviderComponent
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -21,9 +21,9 @@ class AiPluginAskInputMapperTest {
         val request = AiPluginAskInputMapper.map(input, defaultTimeoutMillis = 9_000L)
 
         assertEquals(
-            AiTextProviderComponent(
+            OnDeviceAiProviderComponent(
                 packageName = "org.example.provider",
-                className = "org.example.provider.AiTextService",
+                className = "org.example.provider.OnDeviceAiService",
             ),
             request.component,
         )
@@ -103,7 +103,7 @@ class AiPluginAskInputMapperTest {
               "plugin": {
                 "component": {
                   "packageName": "org.example.provider",
-                  "className": "org.example.provider.AiTextService"
+                  "className": "org.example.provider.OnDeviceAiService"
                 },
                 "providerId": "example.provider",
                 "modelId": "example-model"

@@ -13,7 +13,7 @@ conformance test app.
 Implementation status on 2026-08-11: Phase 1 is implemented as a
 provider-neutral text protocol pack and an isolated conformance test app under
 `test-apps`. Phase 3 now has a real CPU-only on-device provider in the
-independent sibling project `AutoJs6-Plugin-AI-Text-Generation`. A non-invasive
+independent sibling project `AutoJs6-Plugin-On-Device-AI`. A non-invasive
 slice of Phase 2 now includes default-off pure Kotlin host selection,
 model-list, and session-transcript policies, read-only Android package discovery,
 an exact-component metadata handshake, and exact-component Android model-list
@@ -24,7 +24,7 @@ The protocol layer also binds tool calls to the original request,
 verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
 quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
 summaries. The Android session slice can explicitly exercise `openSession`, a
-generated `IAiTextCallback`, request PFDs, streaming credits, and callback PFD
+generated `IOnDeviceAiCallback`, request PFDs, streaming credits, and callback PFD
 ownership. One API 31 production positive-path smoke covers a real release
 provider, real model, and public Rhino `ai.ask`; separate API 31 public Rhino
 `ai.stream` and `ai.chat` smokes cover the test-only fake provider beyond the
@@ -37,7 +37,7 @@ Repository and Android runtime
 gates are tracked in
 [the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
 contract is documented in
-[AI Text Plugin Protocol V1](ai-text-plugin-protocol-v1.md).
+[On-Device AI Plugin Protocol V1](on-device-ai-plugin-protocol-v1.md).
 
 V1 supports provider-neutral text generation only: one-shot chat, chat over a
 supplied message history, streaming text, reasoning metadata, tool-call
@@ -82,7 +82,7 @@ would not become simpler merely by moving it across Binder:
   `ai.chat`, and `ai.stream` calls. The pure policies themselves do not query
   `PackageManager`, bind a service, read a credential, or connect to the script
   facade.
-- `AiTextProviderSessionPolicy` now owns a default-off pure Kotlin session
+- `OnDeviceAiProviderSessionPolicy` now owns a default-off pure Kotlin session
   transcript: plan/request admission, provisional callbacks around a
   synchronous open, callback UID and size checks before asynchronous retention
   or decode, bounded credits and ingress, descriptor cleanup, and one terminal outcome. Its
@@ -93,8 +93,8 @@ would not become simpler merely by moving it across Binder:
   metadata getters and `listModels()`; the explicit ask/chat/stream runner
   composes it with the separate session adapter rather than expanding that
   surface.
-- A separate `AiTextProviderSessionCoordinator` and
-  `AndroidAiTextProviderSession` now adapt those transcript abstractions to one
+- A separate `OnDeviceAiProviderSessionCoordinator` and
+  `AndroidOnDeviceAiProviderSession` now adapt those transcript abstractions to one
   explicitly enabled, exact-component Android session. They revalidate bounded
   provider metadata on the same Binder used for `openSession`, capture callback
   UID before typed admission, preserve reliable callback-PFD state through
@@ -125,7 +125,7 @@ ai.ask(prompt, {
     plugin: {
         component: {
             packageName: "org.example.provider",
-            className: "org.example.provider.AiTextService",
+            className: "org.example.provider.OnDeviceAiService",
         },
         providerId: "example.provider",
         modelId: "example-model",
@@ -137,7 +137,7 @@ ai.chat(prompt, {
     plugin: {
         component: {
             packageName: "org.example.provider",
-            className: "org.example.provider.AiTextService",
+            className: "org.example.provider.OnDeviceAiService",
         },
         providerId: "example.provider",
         modelId: "example-model",
@@ -149,7 +149,7 @@ const stream = ai.stream(prompt, {
     plugin: {
         component: {
             packageName: "org.example.provider",
-            className: "org.example.provider.AiTextService",
+            className: "org.example.provider.OnDeviceAiService",
         },
         providerId: "example.provider",
         modelId: "example-model",
@@ -210,7 +210,7 @@ commit `2d256b99f` and test commit `c35f199b8`; those integration commits are
 traceability references, not the source of the tested APKs.
 
 On 2026-08-11,
-`AiTextPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
+`OnDeviceAiPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
 completed on `QV710AF65F` (API 31, arm64-v8a). The method traversed the real
 Rhino `ScriptEngineService`, public global `ai.ask` with an explicit plugin
 selector, the release plugin service/provider, and one real 2,583,085,056-byte
@@ -242,13 +242,13 @@ can also drift its last-location UI state because that state has no lossless
 snapshot/restore contract.
 
 Also on 2026-08-11, the exact method
-`AiTextPluginPublicStreamSmokeTest#publicRhinoAiStreamCompletesThroughExactFakeProvider`
+`OnDeviceAiPluginPublicStreamSmokeTest#publicRhinoAiStreamCompletesThroughExactFakeProvider`
 returned `OK (1 test)` in 1.645 seconds with instrumentation code `-1` on
 `QV710AF65F` (API 31, arm64-v8a, user 0). Source HEAD was
 `50b43d00cc634f8a220856bf68f936fc800442a4`. The method traversed the real
 `ScriptEngineService` and public Rhino `ai.stream`, with the exact test-only
-package `org.autojs.plugin.ai.text.fake`, service class
-`org.autojs.plugin.ai.text.fake.service.FakeAiTextProviderService`, provider
+package `org.autojs.plugin.ondeviceai.fake`, service class
+`org.autojs.plugin.ondeviceai.fake.service.FakeOnDeviceAiProviderService`, provider
 `fake.local`, and model `fake.stream`. It observed one `open`, more
 than eight `chunk` events, the same number of `delta` events, and one `done`;
 both aggregates and `done.text` exactly reproduced the UTF-8 prompt. It observed
@@ -271,15 +271,15 @@ runtime-close behavior remain JVM evidence in `AiStreamTest` and
 additional public route closes neither broad R1 nor protocol exit criteria.
 
 The same date also has one exact public chat conformance smoke.
-`AiTextPluginPublicChatSmokeTest#publicRhinoAiChatReturnsNormalizedResponseThroughExactFakeProvider`
+`OnDeviceAiPluginPublicChatSmokeTest#publicRhinoAiChatReturnsNormalizedResponseThroughExactFakeProvider`
 reported `OK (1 test)`, `Time: 1.54`, and instrumentation code `-1` on
 `QV710AF65F` (API 31, arm64-v8a, user 0). The APK-tested source was
 `b0aa6768484d6046551264f69ecc84b527bbb442`, following feature commit
 `d480b6918`; the corresponding main integration commits are `2d256b99f` and
 `c35f199b8`, but were not the APK source. The method traversed the real
 `ScriptEngineService` and public Rhino `ai.chat`, selecting the exact test-only
-package `org.autojs.plugin.ai.text.fake`, service class
-`org.autojs.plugin.ai.text.fake.service.FakeAiTextProviderService`, provider
+package `org.autojs.plugin.ondeviceai.fake`, service class
+`org.autojs.plugin.ondeviceai.fake.service.FakeOnDeviceAiProviderService`, provider
 `fake.local`, and model `fake.echo`.
 
 The Promise resolved exactly once after natural completion. Its response had
@@ -317,11 +317,11 @@ ai-common-api
   protocol versions, stable IDs, capabilities, errors, usage, finish reasons,
   locality, credential mode, modality, bounded metadata, and PFD references
 
-ai-text-generation-api
+on-device-ai-api
   messages, chat requests, stream chunks, reasoning metadata, tools, sessions,
   callbacks, cancellation, and flow control
 
-ai-text-generation-conformance
+on-device-ai-conformance
   conformance provider, hostile fixtures, host harness, and compatibility corpus
 ```
 
@@ -388,19 +388,19 @@ V1 explicitly excludes:
 A conceptual v1 Binder surface is:
 
 ```text
-IAiTextProvider
+IOnDeviceAiProvider
   getInfo()
   getCapabilities()
   listModels(pageToken, callback)
-  openSession(request, callback) -> IAiTextSession
+  openSession(request, callback) -> IOnDeviceAiSession
 
-IAiTextSession
+IOnDeviceAiSession
   grantCredits(count)
   submitToolResults(results)
   cancel()
   close()
 
-IAiTextCallback
+IOnDeviceAiCallback
   onStarted(metadata)
   onChunk(sequence, chunk)
   onToolCalls(calls)
@@ -476,7 +476,7 @@ normalized signer set, package version, last-update time, provider metadata,
 negotiated protocol, and capabilities, then requires an exact revalidation
 immediately before dispatch. A callback UID must equal the pinned package UID.
 
-`AndroidAiTextProviderDiscovery` can supply package snapshots when called
+`AndroidOnDeviceAiProviderDiscovery` can supply package snapshots when called
 explicitly, and the metadata handshake and model-list transport can bind an
 actionless intent to one exact component. Both verify the AIDL interface
 descriptor before constructing a proxy. The model-list coordinator uses the
@@ -499,10 +499,10 @@ provider.
 The Android session coordinator follows the same rule with a stricter dispatch
 sequence. It checks the plan/package pin before admission, performs four exact
 package inspections, binds the exact component with an actionless intent,
-verifies `IAiTextProvider`, reads bounded provider info and capabilities from
+verifies `IOnDeviceAiProvider`, reads bounded provider info and capabilities from
 that same Binder, revalidates the pinned metadata, and performs the final exact
 inspection immediately before one synchronous `openSession`. It verifies the
-returned `IAiTextSession` descriptor and links death before accepting the
+returned `IOnDeviceAiSession` descriptor and links death before accepting the
 remote. Callback-before-return is buffered provisionally and becomes visible
 only after the synchronous open commits.
 
@@ -537,7 +537,7 @@ action string or package name supplied inside a Parcel is not caller proof. The
 provider must separately check `Binder.getCallingUid()` and the packages/signers
 associated with that UID against its expected authorized host identity.
 
-`AiTextProviderSessionPolicy` is a separate default-off pure Kotlin transcript
+`OnDeviceAiProviderSessionPolicy` is a separate default-off pure Kotlin transcript
 owner. It validates an already pinned plan and request before producing a
 dispatch decision. Callbacks arriving before the synchronous open transaction
 returns are provisional and become listener-visible only after
@@ -980,7 +980,7 @@ is directional evidence only, not an APK-size or performance measurement.
 
 ### Phase 1: Build-Time Pack And Conformance Test App
 
-- Publish `ai-common-api` and `ai-text-generation-api` as lightweight AARs.
+- Publish `ai-common-api` and `on-device-ai-api` as lightweight AARs.
 - Add binary API checks, hostile Parcelable fixtures, and a conformance APK.
 - Run the full version, lifecycle, flow-control, PFD, and vault-secrecy matrix.
 
@@ -988,7 +988,7 @@ is directional evidence only, not an APK-size or performance measurement.
 
 - Keep the completed pure selection, model-list, and session-transcript policy
   core and the Android discovery, metadata-handshake, model-list, and
-  `openSession`/PFD/`IAiTextCallback` transports fail-closed. Only the narrow
+  `openSession`/PFD/`IOnDeviceAiCallback` transports fail-closed. Only the narrow
   explicit `ai.ask`, `ai.chat`, and `ai.stream` compositions enable individual
   attempts; catalog-generation proof, UI selection, multi-message/plugin-native
   chat compatibility, and broader stream features remain absent.

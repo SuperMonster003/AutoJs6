@@ -8,7 +8,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.ai.AiProviderProfileInspection
 import org.autojs.autojs.core.ai.AiProviderProfileSummary
 import org.autojs.autojs.core.ai.AiProviderVault
-import org.autojs.autojs.core.plugin.ai.AiTextOfficialPlugin
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiOfficialPlugin
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
@@ -72,7 +72,7 @@ class AiSettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun localAiPluginLaunchIntent() = requireContext().packageManager
-        .getLaunchIntentForPackage(AiTextOfficialPlugin.PACKAGE_NAME)
+        .getLaunchIntentForPackage(OnDeviceAiOfficialPlugin.PACKAGE_NAME)
 
     private fun refreshProfiles() {
         val inspection = runCatching(vault::inspectProfiles).getOrElse {

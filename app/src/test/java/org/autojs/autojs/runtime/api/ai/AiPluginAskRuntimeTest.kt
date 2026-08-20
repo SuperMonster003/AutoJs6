@@ -1,11 +1,11 @@
 package org.autojs.autojs.runtime.api.ai
 
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskFailure
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskHandle
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskOutcome
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRunner
-import org.autojs.autojs.core.plugin.ai.AiTextProviderComponent
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskOutcome
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import org.junit.Assert.assertEquals
@@ -20,7 +20,7 @@ class AiPluginAskRuntimeTest {
     @Test
     fun synchronousCompletionClosesHandleOnceAndLateFailureIsIgnored() {
         val dispatchers = TestDispatchers()
-        val runner = FakeRunner(AiTextPluginAskOutcome.Completed("exact answer"))
+        val runner = FakeRunner(OnDeviceAiPluginAskOutcome.Completed("exact answer"))
         val runtime = AiPluginAskRuntime({ runner }, dispatchers::create)
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -35,7 +35,7 @@ class AiPluginAskRuntimeTest {
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
 
-        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
         assertEquals("exact answer", resolved.get())
         assertNull(rejected.get())
@@ -69,12 +69,12 @@ class AiPluginAskRuntimeTest {
 
         runtime.ask(request()).onResolve(callback(first::set))
         assertEquals(1, providerCalls.get())
-        runner.emit(AiTextPluginAskOutcome.Completed("first async answer"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("first async answer"))
         dispatchers.drain()
         assertEquals("first async answer", first.get())
 
         runtime.chat(request()).onResolve(callback(second::set))
-        runner.emit(AiTextPluginAskOutcome.Completed("second async answer"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("second async answer"))
         dispatchers.drain()
         assertPluginChatResponse(second.get(), "second async answer")
         assertEquals(1, providerCalls.get())
@@ -90,7 +90,7 @@ class AiPluginAskRuntimeTest {
         val rejected = AtomicReference<Any?>()
 
         runtime.ask(request()).onReject(callback(rejected::set))
-        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.BUSY))
+        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.BUSY))
         dispatchers.drain()
 
         val error = rejected.get() as Map<*, *>
@@ -115,8 +115,8 @@ class AiPluginAskRuntimeTest {
             .onReject(callback { rejectCount.incrementAndGet() })
         runtime.close()
         runtime.close()
-        runner.emit(AiTextPluginAskOutcome.Completed("late"))
-        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
 
         assertEquals(1, runner.handle.cancelCount.get())
@@ -158,10 +158,10 @@ class AiPluginAskRuntimeTest {
         assertEquals("example-model", response["model"])
     }
 
-    private fun request() = AiTextPluginAskRequest(
-        component = AiTextProviderComponent(
+    private fun request() = OnDeviceAiPluginAskRequest(
+        component = OnDeviceAiProviderComponent(
             packageName = "org.example.provider",
-            className = "org.example.provider.AiTextService",
+            className = "org.example.provider.OnDeviceAiService",
         ),
         providerId = "example.provider",
         modelId = "example-model",
@@ -188,35 +188,35 @@ class AiPluginAskRuntimeTest {
     }
 
     private class FakeRunner(
-        private val synchronousOutcome: AiTextPluginAskOutcome? = null,
+        private val synchronousOutcome: OnDeviceAiPluginAskOutcome? = null,
         terminalOnCancel: Boolean = false,
-    ) : AiTextPluginAskRunner {
+    ) : OnDeviceAiPluginAskRunner {
         val startCount = AtomicInteger()
-        private val callback = AtomicReference<((AiTextPluginAskOutcome) -> Unit)?>()
+        private val callback = AtomicReference<((OnDeviceAiPluginAskOutcome) -> Unit)?>()
         val handle = RecordingHandle {
             if (terminalOnCancel) {
-                emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.CANCELLED))
+                emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.CANCELLED))
             }
         }
 
         override fun start(
-            request: AiTextPluginAskRequest,
-            onOutcome: (AiTextPluginAskOutcome) -> Unit,
-        ): AiTextPluginAskHandle {
+            request: OnDeviceAiPluginAskRequest,
+            onOutcome: (OnDeviceAiPluginAskOutcome) -> Unit,
+        ): OnDeviceAiPluginAskHandle {
             startCount.incrementAndGet()
             callback.set(onOutcome)
             synchronousOutcome?.let(onOutcome)
             return handle
         }
 
-        fun emit(outcome: AiTextPluginAskOutcome) {
+        fun emit(outcome: OnDeviceAiPluginAskOutcome) {
             checkNotNull(callback.get())(outcome)
         }
     }
 
     private class RecordingHandle(
         private val onCancel: () -> Unit,
-    ) : AiTextPluginAskHandle {
+    ) : OnDeviceAiPluginAskHandle {
         val cancelCount = AtomicInteger()
         val closeCount = AtomicInteger()
 

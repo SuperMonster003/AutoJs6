@@ -1,4 +1,4 @@
-﻿@file:Suppress("SpellCheckingInspection", "AvoidApplyPluginMethod")
+@file:Suppress("SpellCheckingInspection", "AvoidApplyPluginMethod")
 
 import com.android.build.api.variant.FilterConfiguration
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
@@ -598,8 +598,8 @@ dependencies /* Unclassified */ {
     // Plugin API: AI Common API
     implementation(project(":plugin-api:ai-common-api"))
 
-    // Plugin API: AI Text Generation API
-    implementation(project(":plugin-api:ai-text-generation-api"))
+    // Plugin API: On-Device AI API
+    implementation(project(":plugin-api:on-device-ai-api"))
 
     // Plugin API: Common API
     implementation(project(":plugin-api:common-plugin-api"))

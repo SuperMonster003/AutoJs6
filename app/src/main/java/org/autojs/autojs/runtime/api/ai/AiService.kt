@@ -27,12 +27,12 @@ import org.autojs.autojs.core.ai.transport.AiStreamProtocolException
 import org.autojs.autojs.core.ai.transport.AiToolCall
 import org.autojs.autojs.core.ai.transport.AiUsage
 import org.autojs.autojs.core.ai.transport.SseReader
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRunner
-import org.autojs.autojs.core.plugin.ai.AiTextPluginModelListRequest
-import org.autojs.autojs.core.plugin.ai.AiTextPluginModelListRunner
-import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamRunner
-import org.autojs.autojs.core.plugin.ai.AiTextProviderComponent
-import org.autojs.autojs.core.plugin.ai.AndroidAiTextPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListRequest
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
+import org.autojs.autojs.core.plugin.ai.AndroidOnDeviceAiPluginAskRunner
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
@@ -75,7 +75,7 @@ class AiService private constructor(
         {
             AiPluginAskRuntime(
                 runnerProvider = {
-                    AndroidAiTextPluginAskRunner.create(context.applicationContext)
+                    AndroidOnDeviceAiPluginAskRunner.create(context.applicationContext)
                 },
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
             )
@@ -83,7 +83,7 @@ class AiService private constructor(
         {
             AiPluginStreamRuntime(
                 runnerProvider = {
-                    AndroidAiTextPluginAskRunner.createStream(context.applicationContext)
+                    AndroidOnDeviceAiPluginAskRunner.createStream(context.applicationContext)
                 },
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
                 bridges = scriptRuntime.bridges,
@@ -92,7 +92,7 @@ class AiService private constructor(
         {
             AiPluginModelListRuntime(
                 runnerProvider = {
-                    AndroidAiTextPluginAskRunner.createModelList(context.applicationContext)
+                    AndroidOnDeviceAiPluginAskRunner.createModelList(context.applicationContext)
                 },
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
             )
@@ -103,12 +103,12 @@ class AiService private constructor(
         context: Context,
         scriptRuntime: ScriptRuntime,
         sourceClient: OkHttpClient,
-        pluginAskRunner: AiTextPluginAskRunner,
+        pluginAskRunner: OnDeviceAiPluginAskRunner,
         pluginDispatcherFactory: () -> AiAsyncDispatcher,
-        pluginStreamRunner: AiTextPluginStreamRunner =
-            AndroidAiTextPluginAskRunner.createStream(context.applicationContext),
-        pluginModelListRunner: AiTextPluginModelListRunner =
-            AndroidAiTextPluginAskRunner.createModelList(context.applicationContext),
+        pluginStreamRunner: OnDeviceAiPluginStreamRunner =
+            AndroidOnDeviceAiPluginAskRunner.createStream(context.applicationContext),
+        pluginModelListRunner: OnDeviceAiPluginModelListRunner =
+            AndroidOnDeviceAiPluginAskRunner.createModelList(context.applicationContext),
     ) : this(
         context,
         scriptRuntime,
@@ -248,8 +248,8 @@ class AiService private constructor(
         }
         val selection = requireNotNull(control.pluginSelection)
         val request = try {
-            AiTextPluginModelListRequest(
-                component = AiTextProviderComponent(selection.packageName, selection.className),
+            OnDeviceAiPluginModelListRequest(
+                component = OnDeviceAiProviderComponent(selection.packageName, selection.className),
                 providerId = selection.providerId,
                 timeoutMillis = control.timeoutMillis ?: DEFAULT_CALL_TIMEOUT_MILLIS,
             )

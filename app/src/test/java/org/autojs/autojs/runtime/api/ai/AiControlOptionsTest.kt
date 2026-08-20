@@ -51,7 +51,7 @@ class AiControlOptionsTest {
         assertEquals(
             AiPluginSelection(
                 packageName = "org.example.provider",
-                className = "org.example.provider.AiTextService",
+                className = "org.example.provider.OnDeviceAiService",
                 providerId = "example.provider",
                 modelId = "example-model",
             ),
@@ -123,9 +123,9 @@ class AiControlOptionsTest {
 
     @Test
     fun pluginShorthandSelectsOfficialOnDevicePlugin() {
-        val officialPackage = "io.github.supermonster003.autojs6.plugin.ai.text"
-        val officialClass = "$officialPackage.provider.AiTextProviderService"
-        val officialProvider = "autojs6.local.text"
+        val officialPackage = "io.github.supermonster003.autojs6.plugin.ondeviceai"
+        val officialClass = "$officialPackage.provider.OnDeviceAiProviderService"
+        val officialProvider = "autojs6.on-device-ai"
 
         val boolean = AiControlOptions.takeFrom(
             JsonParser.parseString("""{"plugin":true}""").asJsonObject,
@@ -147,7 +147,7 @@ class AiControlOptionsTest {
         assertEquals(
             AiPluginSelection(
                 packageName = "org.example.provider",
-                className = "org.example.provider.AiTextService",
+                className = "org.example.provider.OnDeviceAiService",
                 providerId = "example.provider",
                 modelId = null,
             ),
@@ -264,7 +264,7 @@ class AiControlOptionsTest {
           "plugin": {
             "component": {
               "packageName": "org.example.provider",
-              "className": "org.example.provider.AiTextService"
+              "className": "org.example.provider.OnDeviceAiService"
             },
             "providerId": "example.provider",
             "modelId": "example-model"
@@ -280,7 +280,7 @@ class AiControlOptionsTest {
           "plugin": {
             "component": {
               "packageName": "org.example.provider",
-              "className": "org.example.provider.AiTextService"
+              "className": "org.example.provider.OnDeviceAiService"
             },
             "providerId": "example.provider"
           }

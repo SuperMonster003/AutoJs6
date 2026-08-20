@@ -1,8 +1,8 @@
 package org.autojs.autojs.runtime.api.ai
 
 import com.google.gson.JsonObject
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.AiTextProviderComponent
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 
 /** Strict, prompt-only admission for the first explicitly selected local plugin route. */
 internal object AiPluginAskInputMapper {
@@ -19,7 +19,7 @@ internal object AiPluginAskInputMapper {
     fun map(
         input: AiRequestInput,
         defaultTimeoutMillis: Long,
-    ): AiTextPluginAskRequest {
+    ): OnDeviceAiPluginAskRequest {
         val control = requirePluginControl(input)
         val selection = requireNotNull(control.pluginSelection)
         require(input.messages.size() == 1) {
@@ -42,8 +42,8 @@ internal object AiPluginAskInputMapper {
         require(message.entrySet().isEmpty()) {
             "AI plugin ask message contains unsupported fields"
         }
-        return AiTextPluginAskRequest(
-            component = AiTextProviderComponent(selection.packageName, selection.className),
+        return OnDeviceAiPluginAskRequest(
+            component = OnDeviceAiProviderComponent(selection.packageName, selection.className),
             providerId = selection.providerId,
             modelId = selection.modelId,
             prompt = prompt,

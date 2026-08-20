@@ -23,7 +23,7 @@ import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
-import org.autojs.plugin.ai.text.api.AiTextProtocol
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiProtocol
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
@@ -857,7 +857,7 @@ class PluginCenterViewModel : ViewModel() {
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
         private val BARCODE_SERVICE_ENGINES = setOf("mlkit-barcode")
         private val SERVICE_ACTION_BY_ENGINE = mapOf(
-            "ai-text-generation" to AiTextProtocol.ACTION_TEXT_PROVIDER,
+            "on-device-ai" to OnDeviceAiProtocol.ACTION_PROVIDER,
             "mlkit-ocr" to OcrPluginHost.ACTION_OCR,
             "paddle-ocr" to OcrPluginHost.ACTION_OCR,
             "rapid-ocr" to OcrPluginHost.ACTION_OCR,

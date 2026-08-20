@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 8 月 19 日.
+数据更新于 2026 年 8 月 20 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -182,7 +182,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Python Runtime 执行支持通过 ExecutionConfig 键 `autojs6.python.stdinSnapshot` 提供可选的有界预置 stdin 快照, 并采用严格 ByteArray/UTF-8 文本准入, 提供器能力/大小协商及私有只读 PFD 传输与清理
 * `新增` 独立 Lua Runtime 插件后端, 支持通过单独的 PUC Lua 5.4.8 插件进程运行本地 .lua 文件, 并校验固定组件/签名/协议/ABI, 提供有界执行且绝不回退到 JavaScript
 * `新增` 插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本转换/媒体信息等扩展接口
-* `新增` 插件系统提供版本化 TaggedWire 传输及 DEX 编译与供应商中立 AI 文本生成 v1 开发协议包, 并配备专用的一致性测试应用及恶意场景夹具
+* `新增` 插件系统提供版本化 TaggedWire 传输及 DEX 编译与 On-Device AI v1 开发协议包, 并配备专用的一致性测试应用及恶意场景夹具
 * `新增` 插件系统支持离线项目文档扩展接口
 * `新增` 文件管理器支持单文件只读 Explorer Action 插件扩展接口, 并在主文件页面的更多菜单中动态加载插件动作
 * `新增` 文件管理器支持 Explorer Action 协议 v2 主操作, 通过三个独立插件提供图像查看, 音频播放和视频播放
@@ -223,7 +223,6 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 代码编辑器支持沉浸式全屏模式, 设置会持久保存且可从菜单或设置页面切换; 从屏幕边缘滑动可临时显示系统栏, 返回键会优先退出全屏而非离开编辑器
 * `新增` 代码编辑器支持底部日志面板显示 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `新增` 代码编辑器底部日志面板支持堆栈帧代码跳转 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
-* `修复` IntelliJ IDEA 构建 Android 模块时因 compileJava 任务匹配歧义而失败的问题
 * `新增` 代码编辑器底部日志面板提供 "运行/停止" 按钮, 可便捷启停脚本
 * `新增` 代码编辑器支持专属设置页面及编辑器内设置对话框, 提供主题预览/亮暗模式独立配置/字体/行号槽/自动换行等显示选项
 * `新增` 设置页面提供 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
@@ -240,6 +239,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` Android 私有目录 /data/user/0 与 /data/data 别名未规范化写回插件请求, 导致合法 Node.js workingDirectory 被误判为越过 sandboxRoot 的问题
 * `修复` nodePlugin 在宿主不含 Node 运行时时错误排除所有 ABI 的 JNI/AAR 库, 导致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而崩溃的问题
 * `修复` Node.js R6 证据采集及验证因 apksigner 证书摘要输出格式变更而拒绝 Android Build Tools 37 报告的 APK 签名身份的问题
+* `修复` IntelliJ IDEA 构建 Android 模块时因 compileJava 任务匹配歧义而失败的问题
 * `修复` Android 报告当前已分配原生堆字节数为零时, 健康的 Node.js R6 持久运行时 soak 证据被错误拒绝的问题
 * `修复` Node.js R6 打包 APK 证据因采集器未准备当前 Inrt 模板或传入目标 ABI 而被跳过或错误绑定 arm64 的问题
 * `修复` 跨 ABI 打包应用时错误将已安装宿主进程的原生库复制到其他 ABI 目录, 导致 32 位打包应用加载 64 位终端库并崩溃的问题
@@ -319,7 +319,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` DEX 编译器 R1 已闭环, 同时保持默认关闭与精确组件显式 opt-in: R1.1 生产加载链路 7/7、R1.2 自动化 4/4、R1.3 真实 provider 矩阵 7/7、退出条件 3/3. API 34 production routing 8/8, 宿主 DEX 16 suites/149 tests、wire 4/24、fake-provider 5/25 及插件 48 tests 全通过, lint 0 error. Canonical campaign f3c2b1af-be93-41e7-b541-f167f90e5cc1 在 API 24/25 使用 D8 CLI、API 26/28/34/36 在 x86_64 使用 D8Command、API 31 使用 QV arm64 多用户真机, 七个真实 provider 单元全部 PASS; 较早失败或主动终止的 campaign 继续原样保留. last-waiter 协作取消与更广泛恢复仍是未勾选的 R2 工作
 * `优化` DEX 编译器实验性一致性测试扩展至真实 Android Binder 传输与产物存储, 覆盖精确签名组件, 恶意回调/输出/超时场景, 目标 API 感知的 DEX 校验及 DexClassLoader 执行
 * `优化` 默认关闭的纯 AI 文本宿主策略支持确定性信任选择, 精确身份锁定与重验证, 宿主/供应商能力交集, 歧义候选拒绝, 插件管理凭据隔离, 不含敏感内容的安全诊断, 取消/终态会话竞态的确定性所有权, 请求绑定的工具及 descriptor JSON 验证, streaming 聚合长度/SHA-256/配额校验, 解码后 JSON 重复键拒绝, 含敏感数据的模型 `toString` 摘要化及能力集合的域分离缓存键
-* `优化` 默认关闭且未接线的 AI 文本宿主基线没有生产调用点. 只读 PackageManager 精确 action 发现/精确组件复查及显式组件 metadata-only Binder 握手, 与新增的精确组件 Android 模型枚举 coordinator/transport 保持分离. metadata 握手仅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在执行时进程内熔断组件; getter 返回后的严格解码及 worker queue/绑定/最终复查阶段超时不会触发熔断. 模型枚举 coordinator 使用同一个 descriptor 已验证 Binder 重新验证有界 provider metadata 并调用 `listModels()`, 在每次初始或续页 dispatch 及每次 callback 准入前精确复查包身份. callback 在唯一一次防御性复制前验证 pinned UID, 对应 page/error 类型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整稳定的 pinned identity 隔离, 并受不驱逐的单 provider 及进程总预算约束. 进程级 single-flight gate, 唯一终态所有者及幂等清理覆盖绑定, death recipient, callback 注册, deadline 与 operation lease. 与 metadata 握手不同, 若模型枚举 deadline 到期时任何已准入 platform/transport operation 尚未退出, 将 fail-closed 地在进程内熔断该精确组件; 熔断无法硬中止操作, gate/watchdog 会保持占用直至晚到退出. 仍无 session dispatch 或 `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 集成, `ai.*` 路由及任何生产调用点
+* `优化` 默认关闭且未接线的 AI 文本宿主基线没有生产调用点. 只读 PackageManager 精确 action 发现/精确组件复查及显式组件 metadata-only Binder 握手, 与新增的精确组件 Android 模型枚举 coordinator/transport 保持分离. metadata 握手仅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在执行时进程内熔断组件; getter 返回后的严格解码及 worker queue/绑定/最终复查阶段超时不会触发熔断. 模型枚举 coordinator 使用同一个 descriptor 已验证 Binder 重新验证有界 provider metadata 并调用 `listModels()`, 在每次初始或续页 dispatch 及每次 callback 准入前精确复查包身份. callback 在唯一一次防御性复制前验证 pinned UID, 对应 page/error 类型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整稳定的 pinned identity 隔离, 并受不驱逐的单 provider 及进程总预算约束. 进程级 single-flight gate, 唯一终态所有者及幂等清理覆盖绑定, death recipient, callback 注册, deadline 与 operation lease. 与 metadata 握手不同, 若模型枚举 deadline 到期时任何已准入 platform/transport operation 尚未退出, 将 fail-closed 地在进程内熔断该精确组件; 熔断无法硬中止操作, gate/watchdog 会保持占用直至晚到退出. 仍无 session dispatch 或 `openSession`, request/result PFD transport, `IOnDeviceAiCallback`, credit flow, runtime/UI 集成, `ai.*` 路由及任何生产调用点
 * `优化` Ace WebView 运行时/JavaScript bridge/内置语言服务/静态资源完成插件化, 降低宿主 APK 耦合并支持独立安装及更新
 * `优化` 项目离线文档完成插件化, 降低宿主 APK 体积并支持独立安装及更新
 * `优化` 离线项目文档首次加载的文件清单解析及完整 SHA-256 校验移至后台线程, 避免阻塞界面
@@ -341,6 +341,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 项目字符串资源完成多语言翻译同步/文件分类/名称排序及 ASCII 标点规范化
 * `优化` 限制 APK 语言资源仅保留项目支持的 10 种配置, 降低安装包体积
 * `优化` 构建系统支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本并降低 Gradle 启动内存压力
+* `优化` 未发布的本地 AI 插件合约统一更名为 On-Device AI, 同步调整 API 模块/Binder 描述符/协议 schema 域/发现 action/官方组件标识及一致性测试夹具
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -622,7 +623,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 8 月 19 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 8 月 20 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

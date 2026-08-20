@@ -17,7 +17,7 @@
         "Python Runtime 执行支持通过 ExecutionConfig 键 `autojs6.python.stdinSnapshot` 提供可选的有界预置 stdin 快照, 并采用严格 ByteArray/UTF-8 文本准入, 提供器能力/大小协商及私有只读 PFD 传输与清理",
         "独立 Lua Runtime 插件后端, 支持通过单独的 PUC Lua 5.4.8 插件进程运行本地 .lua 文件, 并校验固定组件/签名/协议/ABI, 提供有界执行且绝不回退到 JavaScript",
         "插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本转换/媒体信息等扩展接口",
-        "插件系统提供版本化 TaggedWire 传输及 DEX 编译与供应商中立 AI 文本生成 v1 开发协议包, 并配备专用的一致性测试应用及恶意场景夹具",
+        "插件系统提供版本化 TaggedWire 传输及 DEX 编译与 On-Device AI v1 开发协议包, 并配备专用的一致性测试应用及恶意场景夹具",
         "插件系统支持离线项目文档扩展接口",
         "文件管理器支持单文件只读 Explorer Action 插件扩展接口, 并在主文件页面的更多菜单中动态加载插件动作",
         "文件管理器支持 Explorer Action 协议 v2 主操作, 通过三个独立插件提供图像查看, 音频播放和视频播放",
@@ -158,7 +158,7 @@
         "DEX 编译器 R1 已闭环, 同时保持默认关闭与精确组件显式 opt-in: R1.1 生产加载链路 7/7、R1.2 自动化 4/4、R1.3 真实 provider 矩阵 7/7、退出条件 3/3. API 34 production routing 8/8, 宿主 DEX 16 suites/149 tests、wire 4/24、fake-provider 5/25 及插件 48 tests 全通过, lint 0 error. Canonical campaign f3c2b1af-be93-41e7-b541-f167f90e5cc1 在 API 24/25 使用 D8 CLI、API 26/28/34/36 在 x86_64 使用 D8Command、API 31 使用 QV arm64 多用户真机, 七个真实 provider 单元全部 PASS; 较早失败或主动终止的 campaign 继续原样保留. last-waiter 协作取消与更广泛恢复仍是未勾选的 R2 工作",
         "DEX 编译器实验性一致性测试扩展至真实 Android Binder 传输与产物存储, 覆盖精确签名组件, 恶意回调/输出/超时场景, 目标 API 感知的 DEX 校验及 DexClassLoader 执行",
         "默认关闭的纯 AI 文本宿主策略支持确定性信任选择, 精确身份锁定与重验证, 宿主/供应商能力交集, 歧义候选拒绝, 插件管理凭据隔离, 不含敏感内容的安全诊断, 取消/终态会话竞态的确定性所有权, 请求绑定的工具及 descriptor JSON 验证, streaming 聚合长度/SHA-256/配额校验, 解码后 JSON 重复键拒绝, 含敏感数据的模型 `toString` 摘要化及能力集合的域分离缓存键",
-        "默认关闭且未接线的 AI 文本宿主基线没有生产调用点. 只读 PackageManager 精确 action 发现/精确组件复查及显式组件 metadata-only Binder 握手, 与新增的精确组件 Android 模型枚举 coordinator/transport 保持分离. metadata 握手仅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在执行时进程内熔断组件; getter 返回后的严格解码及 worker queue/绑定/最终复查阶段超时不会触发熔断. 模型枚举 coordinator 使用同一个 descriptor 已验证 Binder 重新验证有界 provider metadata 并调用 `listModels()`, 在每次初始或续页 dispatch 及每次 callback 准入前精确复查包身份. callback 在唯一一次防御性复制前验证 pinned UID, 对应 page/error 类型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整稳定的 pinned identity 隔离, 并受不驱逐的单 provider 及进程总预算约束. 进程级 single-flight gate, 唯一终态所有者及幂等清理覆盖绑定, death recipient, callback 注册, deadline 与 operation lease. 与 metadata 握手不同, 若模型枚举 deadline 到期时任何已准入 platform/transport operation 尚未退出, 将 fail-closed 地在进程内熔断该精确组件; 熔断无法硬中止操作, gate/watchdog 会保持占用直至晚到退出. 仍无 session dispatch 或 `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 集成, `ai.*` 路由及任何生产调用点",
+        "默认关闭且未接线的 AI 文本宿主基线没有生产调用点. 只读 PackageManager 精确 action 发现/精确组件复查及显式组件 metadata-only Binder 握手, 与新增的精确组件 Android 模型枚举 coordinator/transport 保持分离. metadata 握手仅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在执行时进程内熔断组件; getter 返回后的严格解码及 worker queue/绑定/最终复查阶段超时不会触发熔断. 模型枚举 coordinator 使用同一个 descriptor 已验证 Binder 重新验证有界 provider metadata 并调用 `listModels()`, 在每次初始或续页 dispatch 及每次 callback 准入前精确复查包身份. callback 在唯一一次防御性复制前验证 pinned UID, 对应 page/error 类型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整稳定的 pinned identity 隔离, 并受不驱逐的单 provider 及进程总预算约束. 进程级 single-flight gate, 唯一终态所有者及幂等清理覆盖绑定, death recipient, callback 注册, deadline 与 operation lease. 与 metadata 握手不同, 若模型枚举 deadline 到期时任何已准入 platform/transport operation 尚未退出, 将 fail-closed 地在进程内熔断该精确组件; 熔断无法硬中止操作, gate/watchdog 会保持占用直至晚到退出. 仍无 session dispatch 或 `openSession`, request/result PFD transport, `IOnDeviceAiCallback`, credit flow, runtime/UI 集成, `ai.*` 路由及任何生产调用点",
         "Ace WebView 运行时/JavaScript bridge/内置语言服务/静态资源完成插件化, 降低宿主 APK 耦合并支持独立安装及更新",
         "项目离线文档完成插件化, 降低宿主 APK 体积并支持独立安装及更新",
         "离线项目文档首次加载的文件清单解析及完整 SHA-256 校验移至后台线程, 避免阻塞界面",
@@ -179,7 +179,8 @@
         "插件中心完善多语言更新日志/语言缓存/官方认证/索引加载等功能",
         "项目字符串资源完成多语言翻译同步/文件分类/名称排序及 ASCII 标点规范化",
         "限制 APK 语言资源仅保留项目支持的 10 种配置, 降低安装包体积",
-        "构建系统支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本并降低 Gradle 启动内存压力"
+        "构建系统支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本并降低 Gradle 启动内存压力",
+        "未发布的本地 AI 插件合约统一更名为 On-Device AI, 同步调整 API 模块/Binder 描述符/协议 schema 域/发现 action/官方组件标识及一致性测试夹具"
       ],
       "dependency": [
         "模块化 Android AXML",

@@ -22,7 +22,7 @@
 * `新增` Python Runtime 執行支持通過 ExecutionConfig 鍵 `autojs6.python.stdinSnapshot` 提供可選的有界預置 stdin 快照, 並採用嚴格 ByteArray/UTF-8 文本准入, 提供器能力/大小協商及私有只讀 PFD 傳輸與清理
 * `新增` 獨立 Lua Runtime 插件後端, 支持通過單獨的 PUC Lua 5.4.8 插件進程運行本地 .lua 文件, 並校驗固定組件/簽名/協議/ABI, 提供有界執行且絕不回退到 JavaScript
 * `新增` 插件系統支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本轉換/媒體信息等擴展接口
-* `新增` 插件系統提供版本化 TaggedWire 傳輸及 DEX 編譯與供應商中立 AI 文本生成 v1 開發協議包, 並配備專用的一致性測試應用程式及惡意場景夾具
+* `新增` 插件系統提供版本化 TaggedWire 傳輸及 DEX 編譯與 On-Device AI v1 開發協議包, 並配備專用的一致性測試應用程式及惡意場景夾具
 * `新增` 插件系統支持離線項目文檔擴展接口
 * `新增` 文件管理器支持單文件只讀 Explorer Action 插件擴展接口, 並在主文件頁面的更多菜單中動態加載插件動作
 * `新增` 文件管理器支持 Explorer Action 協議 v2 主操作, 通過三個獨立插件提供圖像查看, 音頻播放和視頻播放
@@ -159,7 +159,7 @@
 * `優化` DEX 編譯器 R1 已閉環, 同時保持預設關閉與精確組件明確 opt-in: R1.1 生產載入鏈路 7/7、R1.2 自動化 4/4、R1.3 真實 provider 矩陣 7/7、退出條件 3/3. API 34 production routing 8/8, 主程式 DEX 16 suites/149 tests、wire 4/24、fake-provider 5/25 及插件 48 tests 全部通過, lint 0 error. Canonical campaign f3c2b1af-be93-41e7-b541-f167f90e5cc1 在 API 24/25 使用 D8 CLI、API 26/28/34/36 在 x86_64 使用 D8Command、API 31 使用 QV arm64 多用戶實體裝置, 七個真實 provider 單元全部 PASS; 較早失敗或主動終止的 campaign 繼續原樣保留. last-waiter 協作取消與更廣泛恢復仍是未勾選的 R2 工作
 * `優化` DEX 編譯器實驗性一致性測試擴展至真實 Android Binder 傳輸與產物存儲, 覆蓋精確簽名組件, 惡意回調/輸出/超時場景, 目標 API 感知的 DEX 校驗及 DexClassLoader 執行
 * `優化` 默認關閉的純 AI 文本宿主策略支持確定性信任選擇, 精確身份鎖定與重新驗證, 宿主/供應商能力交集, 歧義候選拒絕, 插件管理憑據隔離, 不含敏感內容的安全診斷, 取消/終態會話競態的確定性所有權, 請求綁定的工具及 descriptor JSON 驗證, streaming 聚合長度/SHA-256/配額校驗, 解碼後 JSON 重複鍵拒絕, 含敏感數據的模型 `toString` 摘要化及能力集合的域分離緩存鍵
-* `優化` 默認關閉且未接線的 AI 文本宿主基線沒有生產調用點. 只讀 PackageManager 精確 action 發現/精確組件複查及顯式組件 metadata-only Binder 握手, 與新增的精確組件 Android 模型列舉 coordinator/transport 保持分離. metadata 握手僅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在執行時於進程內熔斷組件; getter 返回後的嚴格解碼及 worker queue/綁定/最終複查階段超時不會觸發熔斷. 模型列舉 coordinator 使用同一個 descriptor 已驗證 Binder 重新驗證有界 provider metadata 並調用 `listModels()`, 在每次初始或續頁 dispatch 及每次 callback 准入前精確複查包身份. callback 在唯一一次防禦性複製前驗證 pinned UID, 對應 page/error 類型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整穩定的 pinned identity 隔離, 並受不驅逐的單 provider 及進程總預算約束. 進程級 single-flight gate, 唯一終態所有者及冪等清理覆蓋綁定, death recipient, callback 註冊, deadline 與 operation lease. 與 metadata 握手不同, 若模型列舉 deadline 到期時任何已准入 platform/transport operation 尚未退出, 將 fail-closed 地於進程內熔斷該精確組件; 熔斷無法強制中止操作, gate/watchdog 會保持佔用直至延遲退出. 仍無 session dispatch 或 `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 整合, `ai.*` 路由及任何生產調用點
+* `優化` 默認關閉且未接線的 AI 文本宿主基線沒有生產調用點. 只讀 PackageManager 精確 action 發現/精確組件複查及顯式組件 metadata-only Binder 握手, 與新增的精確組件 Android 模型列舉 coordinator/transport 保持分離. metadata 握手僅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在執行時於進程內熔斷組件; getter 返回後的嚴格解碼及 worker queue/綁定/最終複查階段超時不會觸發熔斷. 模型列舉 coordinator 使用同一個 descriptor 已驗證 Binder 重新驗證有界 provider metadata 並調用 `listModels()`, 在每次初始或續頁 dispatch 及每次 callback 准入前精確複查包身份. callback 在唯一一次防禦性複製前驗證 pinned UID, 對應 page/error 類型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整穩定的 pinned identity 隔離, 並受不驅逐的單 provider 及進程總預算約束. 進程級 single-flight gate, 唯一終態所有者及冪等清理覆蓋綁定, death recipient, callback 註冊, deadline 與 operation lease. 與 metadata 握手不同, 若模型列舉 deadline 到期時任何已准入 platform/transport operation 尚未退出, 將 fail-closed 地於進程內熔斷該精確組件; 熔斷無法強制中止操作, gate/watchdog 會保持佔用直至延遲退出. 仍無 session dispatch 或 `openSession`, request/result PFD transport, `IOnDeviceAiCallback`, credit flow, runtime/UI 整合, `ai.*` 路由及任何生產調用點
 * `優化` Ace WebView 運行時/JavaScript bridge/內置語言服務/靜態資源完成插件化, 降低宿主 APK 耦合並支持獨立安裝及更新
 * `優化` 項目離線文檔完成插件化, 降低宿主 APK 體積並支持獨立安裝及更新
 * `優化` 離線項目文檔首次加載的文件清單解析及完整 SHA-256 校驗移至後台線程, 避免阻塞界面
@@ -181,6 +181,7 @@
 * `優化` 項目字符串資源完成多語言翻譯同步/文件分類/名稱排序及 ASCII 標點規範化
 * `優化` 限制 APK 語言資源僅保留項目支持的 10 種配置, 降低安裝包體積
 * `優化` 構建系統支持動態匹配 Kotlin/KSP/AGP/R8 兼容版本並降低 Gradle 啟動內存壓力
+* `優化` 未發佈的本地 AI 插件合約統一更名為 On-Device AI, 同步調整 API 模組/Binder 描述符/協議 schema 域/發現 action/官方組件標識及一致性測試夾具
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

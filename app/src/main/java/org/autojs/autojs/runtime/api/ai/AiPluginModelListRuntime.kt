@@ -1,10 +1,10 @@
 package org.autojs.autojs.runtime.api.ai
 
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskFailure
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskHandle
-import org.autojs.autojs.core.plugin.ai.AiTextPluginModelListOutcome
-import org.autojs.autojs.core.plugin.ai.AiTextPluginModelListRequest
-import org.autojs.autojs.core.plugin.ai.AiTextPluginModelListRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListOutcome
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListRequest
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListRunner
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import java.io.Closeable
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 /** Per-script owner for read-only plugin model listings surfaced as `ai.models()`. */
 internal class AiPluginModelListRuntime(
-    runnerProvider: () -> AiTextPluginModelListRunner,
+    runnerProvider: () -> OnDeviceAiPluginModelListRunner,
     private val dispatcherFactory: () -> AiAsyncDispatcher,
 ) : Closeable {
 
@@ -23,7 +23,7 @@ internal class AiPluginModelListRuntime(
     private val runnerDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED, runnerProvider)
     private val runner by runnerDelegate
 
-    fun list(request: AiTextPluginModelListRequest): ScriptPromiseAdapter {
+    fun list(request: OnDeviceAiPluginModelListRequest): ScriptPromiseAdapter {
         val attempt = newAttempt()
         if (closed.get()) {
             attempt.cancelSilently()
@@ -32,7 +32,7 @@ internal class AiPluginModelListRuntime(
         val selectedRunner = try {
             runner
         } catch (_: Exception) {
-            attempt.fail(failure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+            attempt.fail(failure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE))
             return attempt.promiseAdapter
         }
         attempt.start(selectedRunner, request)
@@ -71,25 +71,25 @@ internal class AiPluginModelListRuntime(
         private val dispatcher: AiAsyncDispatcher,
         val promiseAdapter: ScriptPromiseAdapter,
     ) {
-        private val handle = AtomicReference<AiTextPluginAskHandle?>()
+        private val handle = AtomicReference<OnDeviceAiPluginAskHandle?>()
         private val terminal = AtomicBoolean(false)
         private val cancelRequested = AtomicBoolean(false)
         private val handleCleaned = AtomicBoolean(false)
 
         fun start(
-            selectedRunner: AiTextPluginModelListRunner,
-            request: AiTextPluginModelListRequest,
+            selectedRunner: OnDeviceAiPluginModelListRunner,
+            request: OnDeviceAiPluginModelListRequest,
         ) {
             if (terminal.get()) return
             val returned = try {
                 selectedRunner.listModels(request, ::accept)
             } catch (_: Exception) {
-                fail(failure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+                fail(failure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE))
                 return
             }
             if (!handle.compareAndSet(null, returned)) {
                 runCatching(returned::close)
-                fail(failure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+                fail(failure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE))
                 return
             }
             cleanupHandleIfTerminal()
@@ -112,9 +112,9 @@ internal class AiPluginModelListRuntime(
             }
         }
 
-        private fun accept(outcome: AiTextPluginModelListOutcome) {
+        private fun accept(outcome: OnDeviceAiPluginModelListOutcome) {
             when (outcome) {
-                is AiTextPluginModelListOutcome.Completed -> {
+                is OnDeviceAiPluginModelListOutcome.Completed -> {
                     val value = outcome.models.map { model ->
                         linkedMapOf<String, Any?>(
                             "modelId" to model.modelId,
@@ -128,7 +128,7 @@ internal class AiPluginModelListRuntime(
                         dispatcher.resolve(promiseAdapter, value, onDelivered)
                     }
                 }
-                is AiTextPluginModelListOutcome.Failed ->
+                is OnDeviceAiPluginModelListOutcome.Failed ->
                     fail(failure(outcome.failure))
             }
         }
@@ -157,7 +157,7 @@ internal class AiPluginModelListRuntime(
     }
 
     private companion object {
-        fun failure(failure: AiTextPluginAskFailure): AiPluginRouteException =
+        fun failure(failure: OnDeviceAiPluginAskFailure): AiPluginRouteException =
             AiPluginRouteException(
                 code = failure.name,
                 message = "AI plugin models failed (${failure.name})" +

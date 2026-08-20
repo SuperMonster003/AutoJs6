@@ -54,7 +54,7 @@
             <action android:name="org.autojs.plugin.DEX_COMPILER" />
         </intent>
         <intent>
-            <action android:name="org.autojs.plugin.AI_TEXT_GENERATION" />
+            <action android:name="org.autojs.plugin.ON_DEVICE_AI" />
         </intent>
         <intent>
             <action android:name="org.autojs.plugin.EDITOR" />

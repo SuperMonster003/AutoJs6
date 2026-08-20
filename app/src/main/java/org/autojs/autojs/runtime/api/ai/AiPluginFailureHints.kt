@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.ai
 
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
 
 /**
  * Actionable, non-sensitive hints appended to plugin-route error messages so a script author can
@@ -8,14 +8,14 @@ import org.autojs.autojs.core.plugin.ai.AiTextPluginAskFailure
  */
 internal object AiPluginFailureHints {
 
-    fun forFailure(failure: AiTextPluginAskFailure): String = when (failure) {
-        AiTextPluginAskFailure.PROVIDER_NOT_FOUND ->
+    fun forFailure(failure: OnDeviceAiPluginAskFailure): String = when (failure) {
+        OnDeviceAiPluginAskFailure.PROVIDER_NOT_FOUND ->
             "; the AI plugin is not installed, install it from Plugin Center"
-        AiTextPluginAskFailure.PROVIDER_DISABLED ->
+        OnDeviceAiPluginAskFailure.PROVIDER_DISABLED ->
             "; the AI plugin is disabled, enable it in Plugin Center"
-        AiTextPluginAskFailure.MODEL_NOT_FOUND ->
+        OnDeviceAiPluginAskFailure.MODEL_NOT_FOUND ->
             "; no matching model is imported, import one on the plugin's model manager page"
-        AiTextPluginAskFailure.MODEL_AMBIGUOUS ->
+        OnDeviceAiPluginAskFailure.MODEL_AMBIGUOUS ->
             "; multiple models are imported, pass an explicit modelId (see ai.models())"
         else -> ""
     }

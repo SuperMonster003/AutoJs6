@@ -5,13 +5,13 @@ import android.content.ContextWrapper
 import android.content.SharedPreferences
 import com.google.gson.JsonParser
 import okhttp3.OkHttpClient
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskFailure
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskHandle
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskOutcome
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRunner
-import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamEvent
-import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskOutcome
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
@@ -34,7 +34,7 @@ class AiServicePluginRouteTest {
     fun synchronousPluginChatCompletionReusesExactPromptRouteAndReturnsNormalizedShapeWithoutCloudFallback() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
-            synchronousOutcome = AiTextPluginAskOutcome.Completed("exact local chat answer"),
+            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("exact local chat answer"),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -61,7 +61,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, rejectCount.get())
         assertEquals(1, runner.startCount.get())
         assertEquals("org.example.provider", runner.request.get()?.component?.packageName)
-        assertEquals("org.example.provider.AiTextService", runner.request.get()?.component?.className)
+        assertEquals("org.example.provider.OnDeviceAiService", runner.request.get()?.component?.className)
         assertEquals("example.provider", runner.request.get()?.providerId)
         assertEquals("example-model", runner.request.get()?.modelId)
         assertEquals("prompt", runner.request.get()?.prompt)
@@ -71,7 +71,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, TestContext.preferenceCallCount.get())
         assertEquals(0, httpCallCount.get())
 
-        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
         assertPluginChatResponse(resolved.get(), "exact local chat answer")
         assertNull(rejected.get())
@@ -103,7 +103,7 @@ class AiServicePluginRouteTest {
                 rejectCount.incrementAndGet()
                 rejected.set(error)
             })
-        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.BINDER_DIED))
+        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.BINDER_DIED))
         dispatchers.drain()
 
         assertNull(resolved.get())
@@ -120,7 +120,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
 
-        runner.emit(AiTextPluginAskOutcome.Completed("late completion must not win"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late completion must not win"))
         dispatchers.drain()
         assertNull(resolved.get())
         assertEquals(error, rejected.get())
@@ -135,7 +135,7 @@ class AiServicePluginRouteTest {
     fun synchronousPluginCompletionResolvesExactTextAndClosesHandleOnce() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
-            synchronousOutcome = AiTextPluginAskOutcome.Completed("exact local answer"),
+            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("exact local answer"),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -150,7 +150,7 @@ class AiServicePluginRouteTest {
         assertNull(rejected.get())
         assertEquals(1, runner.startCount.get())
         assertEquals("org.example.provider", runner.request.get()?.component?.packageName)
-        assertEquals("org.example.provider.AiTextService", runner.request.get()?.component?.className)
+        assertEquals("org.example.provider.OnDeviceAiService", runner.request.get()?.component?.className)
         assertEquals("example.provider", runner.request.get()?.providerId)
         assertEquals("example-model", runner.request.get()?.modelId)
         assertEquals("prompt", runner.request.get()?.prompt)
@@ -158,7 +158,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
 
-        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
         assertEquals("exact local answer", resolved.get())
         assertNull(rejected.get())
@@ -178,7 +178,7 @@ class AiServicePluginRouteTest {
         service.ask(pluginInput())
             .onResolve(callback(resolved::set))
             .onReject(callback(rejected::set))
-        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.BINDER_DIED))
+        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.BINDER_DIED))
         dispatchers.drain()
 
         assertNull(resolved.get())
@@ -233,8 +233,8 @@ class AiServicePluginRouteTest {
             .onReject(callback { rejectCount.incrementAndGet() })
         service.close()
         service.close()
-        runner.emit(AiTextPluginAskOutcome.Completed("late completion"))
-        runner.emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late completion"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
 
         assertEquals(1, runner.startCount.get())
@@ -255,14 +255,14 @@ class AiServicePluginRouteTest {
 
         val stream = service.stream(pluginInput(timeoutMillis = 2_500L))
         stream.once(AiStream.EVENT_ERROR, streamCallback(errors::set))
-        streamRunner.emit(AiTextPluginStreamEvent.Failed(AiTextPluginAskFailure.BINDER_DIED))
+        streamRunner.emit(OnDeviceAiPluginStreamEvent.Failed(OnDeviceAiPluginAskFailure.BINDER_DIED))
         dispatchers.drain()
 
         assertEquals("error", stream.state)
         assertEquals(true, stream.isDone)
         assertEquals(1, streamRunner.startCount.get())
         assertEquals("org.example.provider", streamRunner.request.get()?.component?.packageName)
-        assertEquals("org.example.provider.AiTextService", streamRunner.request.get()?.component?.className)
+        assertEquals("org.example.provider.OnDeviceAiService", streamRunner.request.get()?.component?.className)
         assertEquals("example.provider", streamRunner.request.get()?.providerId)
         assertEquals("example-model", streamRunner.request.get()?.modelId)
         assertEquals("prompt", streamRunner.request.get()?.prompt)
@@ -275,7 +275,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, streamRunner.handle.cancelCount.get())
         assertEquals(1, streamRunner.handle.closeCount.get())
 
-        streamRunner.emit(AiTextPluginStreamEvent.Completed("late cloud fallback must not win"))
+        streamRunner.emit(OnDeviceAiPluginStreamEvent.Completed("late cloud fallback must not win"))
         dispatchers.drain()
         assertEquals(1, streamRunner.handle.closeCount.get())
         service.close()
@@ -284,7 +284,7 @@ class AiServicePluginRouteTest {
     private fun service(
         runner: FakePluginAskRunner,
         dispatchers: TestDispatchers,
-        streamRunner: AiTextPluginStreamRunner = FakePluginStreamRunner(),
+        streamRunner: OnDeviceAiPluginStreamRunner = FakePluginStreamRunner(),
         httpCallCount: AtomicInteger = AtomicInteger(),
     ) = AiService(
         context = testContext(),
@@ -371,7 +371,7 @@ class AiServicePluginRouteTest {
                   "plugin": {
                     "component": {
                       "packageName": "org.example.provider",
-                      "className": "org.example.provider.AiTextService"
+                      "className": "org.example.provider.OnDeviceAiService"
                     },
                     "providerId": "example.provider",
                     "modelId": "example-model"
@@ -426,22 +426,22 @@ class AiServicePluginRouteTest {
     }
 
     private class FakePluginAskRunner(
-        private val synchronousOutcome: AiTextPluginAskOutcome? = null,
+        private val synchronousOutcome: OnDeviceAiPluginAskOutcome? = null,
         terminalOnCancel: Boolean = false,
-    ) : AiTextPluginAskRunner {
+    ) : OnDeviceAiPluginAskRunner {
         val startCount = AtomicInteger()
-        val request = AtomicReference<AiTextPluginAskRequest?>()
-        private val callback = AtomicReference<((AiTextPluginAskOutcome) -> Unit)?>()
+        val request = AtomicReference<OnDeviceAiPluginAskRequest?>()
+        private val callback = AtomicReference<((OnDeviceAiPluginAskOutcome) -> Unit)?>()
         val handle = RecordingHandle {
             if (terminalOnCancel) {
-                emit(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.CANCELLED))
+                emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.CANCELLED))
             }
         }
 
         override fun start(
-            request: AiTextPluginAskRequest,
-            onOutcome: (AiTextPluginAskOutcome) -> Unit,
-        ): AiTextPluginAskHandle {
+            request: OnDeviceAiPluginAskRequest,
+            onOutcome: (OnDeviceAiPluginAskOutcome) -> Unit,
+        ): OnDeviceAiPluginAskHandle {
             startCount.incrementAndGet()
             this.request.set(request)
             callback.set(onOutcome)
@@ -449,35 +449,35 @@ class AiServicePluginRouteTest {
             return handle
         }
 
-        fun emit(outcome: AiTextPluginAskOutcome) {
+        fun emit(outcome: OnDeviceAiPluginAskOutcome) {
             checkNotNull(callback.get())(outcome)
         }
     }
 
-    private class FakePluginStreamRunner : AiTextPluginStreamRunner {
+    private class FakePluginStreamRunner : OnDeviceAiPluginStreamRunner {
         val startCount = AtomicInteger()
-        val request = AtomicReference<AiTextPluginAskRequest?>()
-        private val callback = AtomicReference<((AiTextPluginStreamEvent) -> Unit)?>()
+        val request = AtomicReference<OnDeviceAiPluginAskRequest?>()
+        private val callback = AtomicReference<((OnDeviceAiPluginStreamEvent) -> Unit)?>()
         val handle = RecordingHandle {}
 
         override fun startStream(
-            request: AiTextPluginAskRequest,
-            onEvent: (AiTextPluginStreamEvent) -> Unit,
-        ): AiTextPluginAskHandle {
+            request: OnDeviceAiPluginAskRequest,
+            onEvent: (OnDeviceAiPluginStreamEvent) -> Unit,
+        ): OnDeviceAiPluginAskHandle {
             startCount.incrementAndGet()
             this.request.set(request)
             callback.set(onEvent)
             return handle
         }
 
-        fun emit(event: AiTextPluginStreamEvent) {
+        fun emit(event: OnDeviceAiPluginStreamEvent) {
             checkNotNull(callback.get())(event)
         }
     }
 
     private class RecordingHandle(
         private val onCancel: () -> Unit,
-    ) : AiTextPluginAskHandle {
+    ) : OnDeviceAiPluginAskHandle {
         val cancelCount = AtomicInteger()
         val closeCount = AtomicInteger()
 

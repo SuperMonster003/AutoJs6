@@ -1,10 +1,10 @@
 package org.autojs.autojs.runtime.api.ai
 
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskFailure
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskHandle
-import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamEvent
-import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import org.autojs.autojs.runtime.api.augment.ai.AiStream
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 /** Per-script owner for prompt-only local plugin streams. */
 internal class AiPluginStreamRuntime(
-    runnerProvider: () -> AiTextPluginStreamRunner,
+    runnerProvider: () -> OnDeviceAiPluginStreamRunner,
     private val dispatcherFactory: () -> AiAsyncDispatcher,
     private val bridges: ScriptBridges,
     private val cancellationActionWrapper: ((() -> Unit) -> () -> Unit) = { action -> action },
@@ -26,7 +26,7 @@ internal class AiPluginStreamRuntime(
     private val runnerDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED, runnerProvider)
     private val runner by runnerDelegate
 
-    fun stream(request: AiTextPluginAskRequest): AiStream {
+    fun stream(request: OnDeviceAiPluginAskRequest): AiStream {
         val attempt = newAttempt(request)
         if (closed.get()) {
             attempt.cancelSilently()
@@ -35,7 +35,7 @@ internal class AiPluginStreamRuntime(
         val selectedRunner = try {
             runner
         } catch (_: Exception) {
-            attempt.fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+            attempt.fail(pluginFailure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE))
             return attempt.stream
         }
         attempt.start(selectedRunner, request)
@@ -61,7 +61,7 @@ internal class AiPluginStreamRuntime(
         active.clear()
     }
 
-    private fun newAttempt(request: AiTextPluginAskRequest?): ActiveStream {
+    private fun newAttempt(request: OnDeviceAiPluginAskRequest?): ActiveStream {
         lateinit var attempt: ActiveStream
         val controller = AiStream.Controller(
             dispatcher = dispatcherFactory(),
@@ -77,10 +77,10 @@ internal class AiPluginStreamRuntime(
     }
 
     private inner class ActiveStream(
-        private val request: AiTextPluginAskRequest?,
+        private val request: OnDeviceAiPluginAskRequest?,
         private val controller: AiStream.Controller,
     ) {
-        private val handle = AtomicReference<AiTextPluginAskHandle?>()
+        private val handle = AtomicReference<OnDeviceAiPluginAskHandle?>()
         private val terminal = AtomicBoolean(false)
         private val cancelRequested = AtomicBoolean(false)
         private val handleCleaned = AtomicBoolean(false)
@@ -89,19 +89,19 @@ internal class AiPluginStreamRuntime(
             get() = controller.stream
 
         fun start(
-            selectedRunner: AiTextPluginStreamRunner,
-            request: AiTextPluginAskRequest,
+            selectedRunner: OnDeviceAiPluginStreamRunner,
+            request: OnDeviceAiPluginAskRequest,
         ) {
             if (terminal.get()) return
             val returned = try {
                 selectedRunner.startStream(request, ::accept)
             } catch (_: Exception) {
-                fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+                fail(pluginFailure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE))
                 return
             }
             if (!handle.compareAndSet(null, returned)) {
                 runCatching(returned::close)
-                fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE))
+                fail(pluginFailure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE))
                 return
             }
             cleanupHandleIfTerminal()
@@ -123,18 +123,18 @@ internal class AiPluginStreamRuntime(
             cleanupHandleIfTerminal()
         }
 
-        private fun accept(event: AiTextPluginStreamEvent) {
+        private fun accept(event: OnDeviceAiPluginStreamEvent) {
             when (event) {
-                AiTextPluginStreamEvent.Opened -> dispatchNonTerminal {
+                OnDeviceAiPluginStreamEvent.Opened -> dispatchNonTerminal {
                     controller.open(openMetadata())
                 }
-                is AiTextPluginStreamEvent.Chunk -> dispatchNonTerminal {
+                is OnDeviceAiPluginStreamEvent.Chunk -> dispatchNonTerminal {
                     controller.textChunk(event.text, normalizedChunk(event.text))
                 }
-                is AiTextPluginStreamEvent.Completed -> finishNaturally {
+                is OnDeviceAiPluginStreamEvent.Completed -> finishNaturally {
                     controller.complete(completion(event.text))
                 }
-                is AiTextPluginStreamEvent.Failed -> finishNaturally {
+                is OnDeviceAiPluginStreamEvent.Failed -> finishNaturally {
                     controller.fail(pluginFailure(event.failure).toPluginStreamPublicValue())
                 }
             }
@@ -157,7 +157,7 @@ internal class AiPluginStreamRuntime(
             }
             try {
                 controller.fail(
-                    pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE)
+                    pluginFailure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE)
                         .toPluginStreamPublicValue(),
                 )
             } finally {
@@ -219,7 +219,7 @@ internal class AiPluginStreamRuntime(
     private companion object {
         const val PLUGIN_ROUTE = "plugin"
 
-        fun pluginFailure(failure: AiTextPluginAskFailure): AiPluginRouteException =
+        fun pluginFailure(failure: OnDeviceAiPluginAskFailure): AiPluginRouteException =
             AiPluginRouteException(
                 code = failure.name,
                 message = "AI plugin stream failed (${failure.name})" +
