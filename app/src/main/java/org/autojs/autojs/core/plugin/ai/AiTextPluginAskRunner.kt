@@ -8,14 +8,15 @@ import java.io.Closeable
 internal class AiTextPluginAskRequest(
     val component: AiTextProviderComponent,
     val providerId: String,
-    val modelId: String,
+    /** Null selects the provider's single installed model; ambiguity fails the request. */
+    val modelId: String?,
     val prompt: String,
     val timeoutMillis: Long,
     val maximumOutputBytes: Long = DEFAULT_MAXIMUM_OUTPUT_BYTES,
 ) {
     init {
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
-        require(AiValidation.STABLE_ID.matches(modelId)) { "Invalid model ID" }
+        modelId?.let { require(AiValidation.STABLE_ID.matches(it)) { "Invalid model ID" } }
         AiValidation.requireUtf8(
             prompt,
             1,
@@ -43,6 +44,7 @@ internal class AiTextPluginAskRequest(
 internal enum class AiTextPluginAskFailure {
     INVALID_REQUEST,
     PROVIDER_NOT_FOUND,
+    PROVIDER_DISABLED,
     PROVIDER_REJECTED,
     BUSY,
     FUSED,
@@ -50,6 +52,7 @@ internal enum class AiTextPluginAskFailure {
     TIMED_OUT,
     BINDER_DIED,
     MODEL_NOT_FOUND,
+    MODEL_AMBIGUOUS,
     MODEL_CAPABILITY_MISMATCH,
     SESSION_REJECTED,
     PROVIDER_FAILED,
@@ -57,9 +60,13 @@ internal enum class AiTextPluginAskFailure {
 }
 
 internal sealed class AiTextPluginAskOutcome {
-    class Completed(val text: String) : AiTextPluginAskOutcome() {
+    class Completed(
+        val text: String,
+        /** The model that actually served the request, once resolved from the catalog. */
+        val modelId: String? = null,
+    ) : AiTextPluginAskOutcome() {
         override fun toString(): String =
-            "Completed(textBytes=${AiValidation.utf8Size(text)})"
+            "Completed(textBytes=${AiValidation.utf8Size(text)}, modelId=$modelId)"
     }
 
     data class Failed(val failure: AiTextPluginAskFailure) : AiTextPluginAskOutcome()
@@ -110,5 +117,42 @@ internal fun interface AiTextPluginStreamRunner {
     fun startStream(
         request: AiTextPluginAskRequest,
         onEvent: (AiTextPluginStreamEvent) -> Unit,
+    ): AiTextPluginAskHandle
+}
+
+/** Read-only model catalog listing against an explicitly selected plugin component. */
+internal class AiTextPluginModelListRequest(
+    val component: AiTextProviderComponent,
+    val providerId: String,
+    val timeoutMillis: Long,
+) {
+    init {
+        require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
+        require(timeoutMillis in AiTextLimits.MIN_TIMEOUT_MILLIS..AiTextLimits.MAX_TIMEOUT_MILLIS) {
+            "Invalid AI text plugin timeout"
+        }
+    }
+}
+
+internal class AiTextPluginModelSummary(
+    val modelId: String,
+    val displayName: String,
+    val capabilityIds: List<String>,
+    val maximumContextBytes: Long,
+    val maximumOutputBytes: Long,
+)
+
+internal sealed class AiTextPluginModelListOutcome {
+    class Completed(models: List<AiTextPluginModelSummary>) : AiTextPluginModelListOutcome() {
+        val models: List<AiTextPluginModelSummary> = models.toList()
+    }
+
+    data class Failed(val failure: AiTextPluginAskFailure) : AiTextPluginModelListOutcome()
+}
+
+internal fun interface AiTextPluginModelListRunner {
+    fun listModels(
+        request: AiTextPluginModelListRequest,
+        onOutcome: (AiTextPluginModelListOutcome) -> Unit,
     ): AiTextPluginAskHandle
 }

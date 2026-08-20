@@ -222,7 +222,8 @@ internal class AiPluginStreamRuntime(
         fun pluginFailure(failure: AiTextPluginAskFailure): AiPluginRouteException =
             AiPluginRouteException(
                 code = failure.name,
-                message = "AI plugin stream failed (${failure.name})",
+                message = "AI plugin stream failed (${failure.name})" +
+                    AiPluginFailureHints.forFailure(failure),
             )
     }
 }

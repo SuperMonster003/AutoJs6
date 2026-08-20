@@ -28,7 +28,10 @@ import org.autojs.autojs.core.ai.transport.AiToolCall
 import org.autojs.autojs.core.ai.transport.AiUsage
 import org.autojs.autojs.core.ai.transport.SseReader
 import org.autojs.autojs.core.plugin.ai.AiTextPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AiTextPluginModelListRequest
+import org.autojs.autojs.core.plugin.ai.AiTextPluginModelListRunner
 import org.autojs.autojs.core.plugin.ai.AiTextPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.AiTextProviderComponent
 import org.autojs.autojs.core.plugin.ai.AndroidAiTextPluginAskRunner
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
@@ -58,6 +61,7 @@ class AiService private constructor(
     sourceClient: OkHttpClient,
     pluginAskRuntimeFactory: () -> AiPluginAskRuntime,
     pluginStreamRuntimeFactory: () -> AiPluginStreamRuntime,
+    pluginModelListRuntimeFactory: () -> AiPluginModelListRuntime,
 ) {
 
     constructor(
@@ -85,6 +89,14 @@ class AiService private constructor(
                 bridges = scriptRuntime.bridges,
             )
         },
+        {
+            AiPluginModelListRuntime(
+                runnerProvider = {
+                    AndroidAiTextPluginAskRunner.createModelList(context.applicationContext)
+                },
+                dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
+            )
+        },
     )
 
     internal constructor(
@@ -95,6 +107,8 @@ class AiService private constructor(
         pluginDispatcherFactory: () -> AiAsyncDispatcher,
         pluginStreamRunner: AiTextPluginStreamRunner =
             AndroidAiTextPluginAskRunner.createStream(context.applicationContext),
+        pluginModelListRunner: AiTextPluginModelListRunner =
+            AndroidAiTextPluginAskRunner.createModelList(context.applicationContext),
     ) : this(
         context,
         scriptRuntime,
@@ -112,6 +126,12 @@ class AiService private constructor(
                 bridges = scriptRuntime.bridges,
             )
         },
+        {
+            AiPluginModelListRuntime(
+                runnerProvider = { pluginModelListRunner },
+                dispatcherFactory = pluginDispatcherFactory,
+            )
+        },
     )
 
     private val vault = AiProviderVault(context)
@@ -125,6 +145,9 @@ class AiService private constructor(
     }
     private val pluginStreamRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         pluginStreamRuntimeFactory()
+    }
+    private val pluginModelListRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        pluginModelListRuntimeFactory()
     }
 
     fun ask(input: AiRequestInput): ScriptPromiseAdapter {
@@ -213,6 +236,29 @@ class AiService private constructor(
         return stream
     }
 
+    /**
+     * Lists models of an explicitly selected local AI plugin. `options.plugin` follows the same
+     * shorthand as ask/chat/stream (`true` or a partial selector picks the official plugin).
+     */
+    fun models(input: AiRequestInput): ScriptPromiseAdapter {
+        val control = try {
+            AiPluginAskInputMapper.requirePluginControl(input)
+        } catch (_: Exception) {
+            return pluginModelListRuntime().reject(invalidPluginRequest())
+        }
+        val selection = requireNotNull(control.pluginSelection)
+        val request = try {
+            AiTextPluginModelListRequest(
+                component = AiTextProviderComponent(selection.packageName, selection.className),
+                providerId = selection.providerId,
+                timeoutMillis = control.timeoutMillis ?: DEFAULT_CALL_TIMEOUT_MILLIS,
+            )
+        } catch (_: Exception) {
+            return pluginModelListRuntime().reject(invalidPluginRequest())
+        }
+        return pluginModelListRuntime().list(request)
+    }
+
     fun profiles(): List<Map<String, Any?>> {
         return vault.inspectProfiles().entries.map(AiProviderProfileInspection::toPublicValue)
     }
@@ -256,6 +302,9 @@ class AiService private constructor(
             }
             if (pluginStreamRuntimeDelegate.isInitialized()) {
                 pluginStreamRuntimeDelegate.value.close()
+            }
+            if (pluginModelListRuntimeDelegate.isInitialized()) {
+                pluginModelListRuntimeDelegate.value.close()
             }
             activeStreams.toList().forEach(AiStream.Controller::cancelSilently)
             activePromises.entries.toList().forEach { (dispatcher, callReference) ->
@@ -305,6 +354,11 @@ class AiService private constructor(
 
     private fun pluginStreamRuntime(): AiPluginStreamRuntime =
         pluginStreamRuntimeDelegate.value.also { runtime ->
+            if (closed.get()) runtime.close()
+        }
+
+    private fun pluginModelListRuntime(): AiPluginModelListRuntime =
+        pluginModelListRuntimeDelegate.value.also { runtime ->
             if (closed.get()) runtime.close()
         }
 

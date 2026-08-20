@@ -73,17 +73,10 @@ class AiControlOptionsTest {
         val cases = listOf(
             Case("null", "AI plugin selection must be an object"),
             Case("[]", "AI plugin selection must be an object"),
-            Case(
-                """{"providerId":"example.provider","modelId":"example-model"}""",
-                "AI plugin component is required",
-            ),
+            Case("false", "AI plugin selection must not be false"),
             Case(
                 """{"component":{},"modelId":"example-model"}""",
                 "AI plugin providerId is required",
-            ),
-            Case(
-                """{"component":{},"providerId":"example.provider"}""",
-                "AI plugin modelId is required",
             ),
             Case(
                 """{"component":{},"providerId":1,"modelId":"example-model"}""",
@@ -126,6 +119,40 @@ class AiControlOptionsTest {
             }
             assertEquals(case.expectedMessage, error.message)
         }
+    }
+
+    @Test
+    fun pluginShorthandSelectsOfficialOnDevicePlugin() {
+        val officialPackage = "io.github.supermonster003.autojs6.plugin.ai.text"
+        val officialClass = "$officialPackage.provider.AiTextProviderService"
+        val officialProvider = "autojs6.local.text"
+
+        val boolean = AiControlOptions.takeFrom(
+            JsonParser.parseString("""{"plugin":true}""").asJsonObject,
+        )
+        assertEquals(
+            AiPluginSelection(officialPackage, officialClass, officialProvider, modelId = null),
+            boolean.pluginSelection,
+        )
+
+        val withModel = AiControlOptions.takeFrom(
+            JsonParser.parseString("""{"plugin":{"modelId":"example-model"}}""").asJsonObject,
+        )
+        assertEquals(
+            AiPluginSelection(officialPackage, officialClass, officialProvider, "example-model"),
+            withModel.pluginSelection,
+        )
+
+        val explicitComponentWithoutModel = AiControlOptions.takeFrom(pluginOptionsWithoutModel())
+        assertEquals(
+            AiPluginSelection(
+                packageName = "org.example.provider",
+                className = "org.example.provider.AiTextService",
+                providerId = "example.provider",
+                modelId = null,
+            ),
+            explicitComponentWithoutModel.pluginSelection,
+        )
     }
 
     @Test
@@ -243,6 +270,20 @@ class AiControlOptionsTest {
             "modelId": "example-model"
           }
           $extra
+        }
+        """,
+    ).asJsonObject
+
+    private fun pluginOptionsWithoutModel() = JsonParser.parseString(
+        """
+        {
+          "plugin": {
+            "component": {
+              "packageName": "org.example.provider",
+              "className": "org.example.provider.AiTextService"
+            },
+            "providerId": "example.provider"
+          }
         }
         """,
     ).asJsonObject

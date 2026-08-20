@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.ai
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.autojs.autojs.core.ai.AiProviderSelector
+import org.autojs.autojs.core.plugin.ai.AiTextOfficialPlugin
 import org.autojs.plugin.ai.common.api.AiValidation
 import java.util.UUID
 
@@ -108,20 +109,35 @@ internal data class AiControlOptions(
         }
 
         private fun parsePluginSelection(value: JsonElement): AiPluginSelection {
+            if (value.isJsonPrimitive && value.asJsonPrimitive.isBoolean) {
+                require(value.asBoolean) { "AI plugin selection must not be false" }
+                return officialPluginSelection(modelId = null)
+            }
             require(value.isJsonObject) { "AI plugin selection must be an object" }
             val plugin = value.asJsonObject.deepCopy()
             val componentElement = plugin.remove("component")
-                ?: throw IllegalArgumentException("AI plugin component is required")
+            val modelId = plugin.takeOptionalString("modelId", "AI plugin modelId")?.also {
+                require(AiValidation.STABLE_ID.matches(it)) { "AI plugin modelId is invalid" }
+            }
+            if (componentElement == null) {
+                // Omitted component selects the official on-device plugin; providerId may still
+                // be pinned explicitly, and modelId may be omitted for its single-model default.
+                val providerId = plugin.takeOptionalString("providerId", "AI plugin providerId")
+                    ?: AiTextOfficialPlugin.PROVIDER_ID
+                require(plugin.entrySet().isEmpty()) {
+                    "AI plugin selection contains unsupported fields"
+                }
+                require(AiValidation.STABLE_ID.matches(providerId)) {
+                    "AI plugin providerId is invalid"
+                }
+                return officialPluginSelection(modelId = modelId, providerId = providerId)
+            }
             val providerId = plugin.takeRequiredString("providerId", "AI plugin providerId")
-            val modelId = plugin.takeRequiredString("modelId", "AI plugin modelId")
             require(plugin.entrySet().isEmpty()) {
                 "AI plugin selection contains unsupported fields"
             }
             require(AiValidation.STABLE_ID.matches(providerId)) {
                 "AI plugin providerId is invalid"
-            }
-            require(AiValidation.STABLE_ID.matches(modelId)) {
-                "AI plugin modelId is invalid"
             }
             require(componentElement.isJsonObject) {
                 "AI plugin component must be an object"
@@ -146,9 +162,29 @@ internal data class AiControlOptions(
             )
         }
 
+        private fun officialPluginSelection(
+            modelId: String?,
+            providerId: String = AiTextOfficialPlugin.PROVIDER_ID,
+        ) = AiPluginSelection(
+            packageName = AiTextOfficialPlugin.PACKAGE_NAME,
+            className = AiTextOfficialPlugin.CLASS_NAME,
+            providerId = providerId,
+            modelId = modelId,
+        )
+
         private fun JsonObject.takeRequiredString(name: String, label: String): String {
             val value = remove(name)
                 ?: throw IllegalArgumentException("$label is required")
+            return requireCleanString(value, label)
+        }
+
+        private fun JsonObject.takeOptionalString(name: String, label: String): String? {
+            val value = remove(name) ?: return null
+            if (value.isJsonNull) return null
+            return requireCleanString(value, label)
+        }
+
+        private fun requireCleanString(value: JsonElement, label: String): String {
             require(value.isJsonPrimitive && value.asJsonPrimitive.isString) {
                 "$label must be a string"
             }
@@ -214,9 +250,10 @@ internal data class AiControlOptions(
     }
 }
 
+/** [modelId] may be omitted; the plugin route then resolves the provider's selected model. */
 internal data class AiPluginSelection(
     val packageName: String,
     val className: String,
     val providerId: String,
-    val modelId: String,
+    val modelId: String?,
 )

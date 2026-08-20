@@ -3,6 +3,7 @@ package org.autojs.autojs.core.plugin.ai
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiCredentialMode
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 internal class AndroidAiTextPluginAskRunner private constructor(
     private val applicationContext: Context,
-) : AiTextPluginAskRunner, AiTextPluginStreamRunner {
+) : AiTextPluginAskRunner, AiTextPluginStreamRunner, AiTextPluginModelListRunner {
 
     override fun start(
         request: AiTextPluginAskRequest,
@@ -48,11 +49,19 @@ internal class AndroidAiTextPluginAskRunner private constructor(
         onEvent: (AiTextPluginStreamEvent) -> Unit,
     ): AiTextPluginAskHandle = processBackend(applicationContext).startStream(request, onEvent)
 
+    override fun listModels(
+        request: AiTextPluginModelListRequest,
+        onOutcome: (AiTextPluginModelListOutcome) -> Unit,
+    ): AiTextPluginAskHandle = processBackend(applicationContext).listModels(request, onOutcome)
+
     companion object {
         fun create(context: Context): AiTextPluginAskRunner =
             AndroidAiTextPluginAskRunner(context.applicationContext)
 
         fun createStream(context: Context): AiTextPluginStreamRunner =
+            AndroidAiTextPluginAskRunner(context.applicationContext)
+
+        fun createModelList(context: Context): AiTextPluginModelListRunner =
             AndroidAiTextPluginAskRunner(context.applicationContext)
 
         private val backendLock = Any()
@@ -73,8 +82,8 @@ internal class AndroidAiTextPluginAskRunner private constructor(
 }
 
 private class ProcessAiTextPluginAskRunner(
-    applicationContext: Context,
-) : AiTextPluginAskRunner, AiTextPluginStreamRunner {
+    private val applicationContext: Context,
+) : AiTextPluginAskRunner, AiTextPluginStreamRunner, AiTextPluginModelListRunner {
     private val admission = AtomicBoolean(false)
     private val threadFactory = AiTextPluginAskThreadFactory()
     private val orchestrationExecutor =
@@ -165,6 +174,30 @@ private class ProcessAiTextPluginAskRunner(
         ).also(Attempt::start)
     }
 
+    override fun listModels(
+        request: AiTextPluginModelListRequest,
+        onOutcome: (AiTextPluginModelListOutcome) -> Unit,
+    ): AiTextPluginAskHandle {
+        if (!admission.compareAndSet(false, true)) {
+            deliver { onOutcome(AiTextPluginModelListOutcome.Failed(AiTextPluginAskFailure.BUSY)) }
+            return CompletedAiTextPluginAskHandle
+        }
+        return Attempt(
+            backend = this,
+            request = AiTextPluginAskRequest(
+                component = request.component,
+                providerId = request.providerId,
+                modelId = null,
+                prompt = MODEL_LIST_PLACEHOLDER_PROMPT,
+                timeoutMillis = request.timeoutMillis,
+            ),
+            streaming = false,
+            onOutcome = null,
+            onStreamEvent = null,
+            onModelList = onOutcome,
+        ).also(Attempt::start)
+    }
+
     private fun deliver(action: () -> Unit) {
         if (!execute(orchestrationExecutor) { runCatching(action) }) runCatching(action)
     }
@@ -213,12 +246,16 @@ private class ProcessAiTextPluginAskRunner(
         private val streaming: Boolean,
         private val onOutcome: ((AiTextPluginAskOutcome) -> Unit)?,
         private val onStreamEvent: ((AiTextPluginStreamEvent) -> Unit)?,
+        private val onModelList: ((AiTextPluginModelListOutcome) -> Unit)? = null,
     ) : AiTextPluginAskHandle {
         private val lock = Any()
         private val startedAtMillis = backend.now()
         private val deadlineAtMillis = saturatingAdd(startedAtMillis, request.timeoutMillis)
         private val promptBytes = request.prompt.toByteArray(Charsets.UTF_8)
         private val requirement = backend.requirement(promptBytes.size, streaming)
+
+        /** The model the catalog resolved for this attempt; echoed on completion. */
+        private var resolvedModelId: String? = request.modelId
 
         private var terminal = false
         private var stageHandle: Closeable? = null
@@ -234,6 +271,10 @@ private class ProcessAiTextPluginAskRunner(
                 return
             }
             installDeadline(deadline)
+            if (!PluginEnableStore.isEnabled(backend.applicationContext, request.component.packageName)) {
+                finish(AiTextPluginAskOutcome.Failed(AiTextPluginAskFailure.PROVIDER_DISABLED))
+                return
+            }
             enqueue(::beginDiscovery)
         }
 
@@ -428,7 +469,27 @@ private class ProcessAiTextPluginAskRunner(
                         fail(AiTextPluginAskFailure.PROVIDER_REJECTED)
                         return
                     }
-                    when (val planned = catalog.planExact(request.modelId, requirement)) {
+                    if (onModelList != null) {
+                        finishModelList(catalog)
+                        return
+                    }
+                    val plannedModelId = request.modelId ?: run {
+                        // An omitted modelId only ever resolves against a single-model catalog;
+                        // anything else must stay an explicit, deterministic script decision.
+                        when (catalog.models.size) {
+                            0 -> {
+                                fail(AiTextPluginAskFailure.MODEL_NOT_FOUND)
+                                return
+                            }
+                            1 -> catalog.models.single().modelId
+                            else -> {
+                                fail(AiTextPluginAskFailure.MODEL_AMBIGUOUS)
+                                return
+                            }
+                        }
+                    }
+                    resolvedModelId = plannedModelId
+                    when (val planned = catalog.planExact(plannedModelId, requirement)) {
                         AiTextProviderExactModelPlanResult.ModelNotFound ->
                             fail(AiTextPluginAskFailure.MODEL_NOT_FOUND)
                         AiTextProviderExactModelPlanResult.ModelCapabilityMismatch ->
@@ -437,7 +498,7 @@ private class ProcessAiTextPluginAskRunner(
                             val plan = planned.plan
                             if (plan.pinnedProvider != pinned ||
                                 plan.pinnedProvider.providerId != request.providerId ||
-                                plan.modelId != request.modelId
+                                plan.modelId != plannedModelId
                             ) {
                                 fail(AiTextPluginAskFailure.PROVIDER_REJECTED)
                             } else {
@@ -447,6 +508,20 @@ private class ProcessAiTextPluginAskRunner(
                     }
                 }
             }
+        }
+
+        private fun finishModelList(catalog: AiTextProviderModelCatalog) {
+            detachStage()
+            val summaries = catalog.models.map { model ->
+                AiTextPluginModelSummary(
+                    modelId = model.modelId,
+                    displayName = model.displayName,
+                    capabilityIds = model.capabilityIds,
+                    maximumContextBytes = model.maximumContextBytes,
+                    maximumOutputBytes = model.maximumOutputBytes,
+                )
+            }
+            finishList(AiTextPluginModelListOutcome.Completed(summaries))
         }
 
         private fun beginSession(
@@ -465,7 +540,7 @@ private class ProcessAiTextPluginAskRunner(
                     requestId = "${if (streaming) "stream" else "ask"}-${UUID.randomUUID()}",
                     protocolVersion = plan.pinnedProvider.protocolVersion,
                     providerId = request.providerId,
-                    modelId = request.modelId,
+                    modelId = plan.modelId,
                     messages = listOf(
                         AiMessage(
                             role = AiMessageRole.USER,
@@ -547,7 +622,12 @@ private class ProcessAiTextPluginAskRunner(
                         terminalSession(AiTextPluginAskFailure.SESSION_REJECTED)
                     is AiTextProviderSessionEvent.Completed -> {
                         detachStage()
-                        finish(AiTextPluginAskOutcome.Completed(transcript.result.outputText))
+                        finish(
+                            AiTextPluginAskOutcome.Completed(
+                                text = transcript.result.outputText,
+                                modelId = resolvedModelId,
+                            ),
+                        )
                     }
                     is AiTextProviderSessionEvent.ProviderFailed ->
                         terminalSession(AiTextPluginAskFailure.PROVIDER_FAILED)
@@ -625,6 +705,40 @@ private class ProcessAiTextPluginAskRunner(
         }
 
         private fun finish(outcome: AiTextPluginAskOutcome): Boolean {
+            if (!markTerminalAndRelease()) return false
+            when {
+                onModelList != null -> {
+                    val listOutcome = when (outcome) {
+                        // A completed ask outcome cannot reach a model-list attempt; map it
+                        // defensively instead of throwing inside terminal delivery.
+                        is AiTextPluginAskOutcome.Completed ->
+                            AiTextPluginModelListOutcome.Failed(AiTextPluginAskFailure.INTERNAL_FAILURE)
+                        is AiTextPluginAskOutcome.Failed ->
+                            AiTextPluginModelListOutcome.Failed(outcome.failure)
+                    }
+                    runCatching { onModelList.invoke(listOutcome) }
+                }
+                streaming -> {
+                    val event = when (outcome) {
+                        is AiTextPluginAskOutcome.Completed ->
+                            AiTextPluginStreamEvent.Completed(outcome.text)
+                        is AiTextPluginAskOutcome.Failed ->
+                            AiTextPluginStreamEvent.Failed(outcome.failure)
+                    }
+                    runCatching { checkNotNull(onStreamEvent).invoke(event) }
+                }
+                else -> runCatching { checkNotNull(onOutcome).invoke(outcome) }
+            }
+            return true
+        }
+
+        private fun finishList(outcome: AiTextPluginModelListOutcome): Boolean {
+            if (!markTerminalAndRelease()) return false
+            runCatching { checkNotNull(onModelList).invoke(outcome) }
+            return true
+        }
+
+        private fun markTerminalAndRelease(): Boolean {
             val resources = synchronized(lock) {
                 if (terminal) return false
                 terminal = true
@@ -637,17 +751,6 @@ private class ProcessAiTextPluginAskRunner(
             resources.first?.let { runCatching { it.close() } }
             resources.second?.let { runCatching { it.close() } }
             backend.releaseAdmission()
-            if (streaming) {
-                val event = when (outcome) {
-                    is AiTextPluginAskOutcome.Completed ->
-                        AiTextPluginStreamEvent.Completed(outcome.text)
-                    is AiTextPluginAskOutcome.Failed ->
-                        AiTextPluginStreamEvent.Failed(outcome.failure)
-                }
-                runCatching { checkNotNull(onStreamEvent).invoke(event) }
-            } else {
-                runCatching { checkNotNull(onOutcome).invoke(outcome) }
-            }
             return true
         }
 
@@ -664,6 +767,9 @@ private class ProcessAiTextPluginAskRunner(
 
     private companion object {
         const val MAXIMUM_BLOCKING_OPERATIONS = 3
+
+        /** Satisfies request validation for catalog-only attempts; never sent to a provider. */
+        const val MODEL_LIST_PLACEHOLDER_PROMPT = "-"
 
         val HOST_CAPABILITIES = AiTextCapabilities(
             supportsStreaming = true,

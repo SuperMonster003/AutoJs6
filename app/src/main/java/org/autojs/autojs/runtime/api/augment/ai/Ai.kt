@@ -26,6 +26,7 @@ class Ai(
         ::ask.name,
         ::chat.name,
         ::stream.name,
+        ::models.name,
         ::profiles.name,
         ::providers.name,
         ::defaultProfile.name,
@@ -57,6 +58,13 @@ class Ai(
     }
 
     @RhinoRuntimeFunctionInterface
+    fun models(runtime: ScriptRuntime, args: Array<out Any?>): Any {
+        check(runtime === scriptRuntime) { "AI module belongs to a different script runtime" }
+        val input = parseModelListArguments(args)
+        return aiService.models(input).toJsPromise(runtime)
+    }
+
+    @RhinoRuntimeFunctionInterface
     fun profiles(runtime: ScriptRuntime, args: Array<out Any?>): List<Map<String, Any?>> {
         check(runtime === scriptRuntime) { "AI module belongs to a different script runtime" }
         return ensureArgumentsIsEmpty(args, aiService::profiles)
@@ -84,6 +92,26 @@ class Ai(
     }
 
     companion object {
+
+        /** `ai.models()` defaults to the official on-device plugin; options may narrow it. */
+        internal fun parseModelListArguments(args: Array<out Any?>): AiRequestInput {
+            return ensureArgumentsLengthInRange(args, 0..1) { argumentList ->
+                val options = argumentList.getOrNull(0)
+                    ?.takeUnless { it.isJsNullish() }
+                    ?.let { parseObject(it, "options") }
+                    ?: JsonObject()
+                if (!options.has("plugin")) {
+                    options.addProperty("plugin", true)
+                }
+                val messages = JsonArray().apply {
+                    add(JsonObject().apply {
+                        addProperty("role", "user")
+                        addProperty("content", "-")
+                    })
+                }
+                AiRequestInput(messages, options)
+            }
+        }
 
         internal fun parseRequestArguments(args: Array<out Any?>): AiRequestInput {
             return ensureArgumentsLengthInRange(args, 1..2) { argumentList ->

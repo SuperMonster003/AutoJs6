@@ -132,7 +132,7 @@ internal class AiPluginAskRuntime(
             when (outcome) {
                 is AiTextPluginAskOutcome.Completed -> {
                     val value = try {
-                        completionValue(outcome.text)
+                        completionValue(outcome)
                     } catch (_: Exception) {
                         fail(pluginFailure(AiTextPluginAskFailure.INTERNAL_FAILURE, operation))
                         return
@@ -146,10 +146,15 @@ internal class AiPluginAskRuntime(
             }
         }
 
-        private fun completionValue(text: String): Any = when (operation) {
-            Operation.ASK -> text
-            Operation.CHAT -> pluginChatResponse(requireNotNull(request), text)
-        }
+        private fun completionValue(outcome: AiTextPluginAskOutcome.Completed): Any =
+            when (operation) {
+                Operation.ASK -> outcome.text
+                Operation.CHAT -> pluginChatResponse(
+                    requireNotNull(request),
+                    outcome.text,
+                    outcome.modelId,
+                )
+            }
 
         private fun finish(
             dispatch: (onDelivered: () -> Unit) -> Boolean,
@@ -188,12 +193,14 @@ internal class AiPluginAskRuntime(
         ): AiPluginRouteException =
             AiPluginRouteException(
                 code = failure.name,
-                message = "AI plugin ${operation.publicName} failed (${failure.name})",
+                message = "AI plugin ${operation.publicName} failed (${failure.name})" +
+                    AiPluginFailureHints.forFailure(failure),
             )
 
         fun pluginChatResponse(
             request: AiTextPluginAskRequest,
             text: String,
+            resolvedModelId: String? = null,
         ): Map<String, Any?> = linkedMapOf(
             "text" to text,
             "reasoning" to "",
@@ -206,7 +213,7 @@ internal class AiPluginAskRuntime(
             "profile" to null,
             "route" to PLUGIN_ROUTE,
             "provider" to request.providerId,
-            "model" to request.modelId,
+            "model" to (resolvedModelId ?: request.modelId),
         )
     }
 }
