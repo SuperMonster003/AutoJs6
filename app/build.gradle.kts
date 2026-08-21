@@ -1302,9 +1302,9 @@ tasks.register("generateRuntimeKit") {
     }
 }
 
-apply(from = "node-build-tasks.gradle.kts")
+apply(from = "node-examples.gradle.kts")
 
-apply(from = "node-gradle-scripts.gradle.kts")
+apply(from = "node-project-wizard.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

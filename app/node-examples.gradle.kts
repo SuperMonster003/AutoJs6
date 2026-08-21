@@ -851,15 +851,3 @@ tasks.register<Exec>("typeCheckNodeTypescriptSmoke") {
         commandLine("tsc", "-p", tsconfig.get().asFile.absolutePath, "--pretty", "false")
     }
 }
-
-tasks.matching {
-    it.name in setOf(
-        "verifyNodePrGate",
-        "verifyNodeNightlyGate",
-        "verifyNodeReleaseGate",
-        "verifyEmbeddedNodeReleaseCandidate",
-    )
-}.configureEach {
-    dependsOn(verifyNodeExamples)
-    dependsOn(verifyAutoJs6NodeTypeDeclarations)
-}

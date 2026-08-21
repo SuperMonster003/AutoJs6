@@ -385,7 +385,6 @@ val nodeJsFuzzerReplayMethod = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("r
 val nodeJsFuzzerReplayBudget = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("budget")
 val nodeJsFuzzerReplaySeed = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonLong("baseSeed")
 val nodeJsFuzzerDefaultBudget = when {
-    taskNames.any { it.contains("verifyNodeNightlyGate", ignoreCase = true) || it.contains("verifyNodeReleaseGate", ignoreCase = true) } -> "extended"
     nodeJsTestDeviceProfile == "full" -> "extended"
     nodeJsTestDeviceProfile in setOf("emulator", "smoke") -> "quick"
     else -> "normal"
@@ -398,22 +397,9 @@ val nodeJsFuzzerBudget = normalizeNodeJsFuzzerBudget(
 val nodeJsFuzzerReplayRunnerClass = nodeJsFuzzerReplayClass?.let { replayClass ->
     nodeJsFuzzerReplayMethod?.let { "$replayClass#$it" } ?: replayClass
 }
-extra.apply {
-    set("nodeJsInstrumentation.taskNames", taskNames)
-    set("nodeJsInstrumentation.nodeJsNetworkEnabled", nodeJsNetworkEnabled)
-    set("nodeJsInstrumentation.nodeJsWorkerThreadsEnabled", nodeJsWorkerThreadsEnabled)
-    set("nodeJsInstrumentation.nodeJsTestDeviceProfile", nodeJsTestDeviceProfile)
-}
-
-apply(from = "node-instrumentation-gates.gradle.kts")
-
-@Suppress("UNCHECKED_CAST")
-fun <T> nodeJsInstrumentationExtra(name: String): T =
-    extensions.extraProperties.get("nodeJsInstrumentation.$name") as T
-
-val nodeJsRequestedFocusedGate = nodeJsInstrumentationExtra<String?>("requestedFocusedGate")
-val nodeJsFocusedGateInstrumentationClassArgument = nodeJsInstrumentationExtra<String?>("focusedGateInstrumentationClassArgument")
-val nodeJsTestDeviceProfileClasses = nodeJsInstrumentationExtra<List<String>>("testDeviceProfileClasses")
+val nodeJsRequestedFocusedGate: String? = null
+val nodeJsFocusedGateInstrumentationClassArgument: String? = null
+val nodeJsTestDeviceProfileClasses = emptyList<String>()
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }

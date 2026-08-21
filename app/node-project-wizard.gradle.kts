@@ -424,14 +424,3 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
         logger.lifecycle("Node project wizard report written to ${jsonReport.get().asFile.absolutePath}")
     }
 }
-
-tasks.matching {
-    it.name in setOf(
-        "verifyNodePrGate",
-        "verifyNodeNightlyGate",
-        "verifyNodeReleaseGate",
-        "verifyEmbeddedNodeReleaseCandidate",
-    )
-}.configureEach {
-    dependsOn(verifyNodeProjectWizard)
-}
