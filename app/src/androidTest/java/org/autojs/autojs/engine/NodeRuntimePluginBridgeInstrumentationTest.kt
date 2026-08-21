@@ -542,8 +542,12 @@ class NodeRuntimePluginBridgeInstrumentationTest {
                         console.log("m3.swipe.completed=" + completed);
                       } catch (error) {
                         const code = String(error && (error.autojs6Code || error.code) || "");
+                        const message = String(error && error.message || "");
+                        const readable = message.includes("requires") &&
+                          message.includes("accessibility capability provider");
                         console.log("m3.swipe.failureCode=" + code);
-                        if (enabled || code !== "ERR_AUTOJS6_BRIDGE_CAPABILITY_PROVIDER_MISSING") {
+                        console.log("m3.swipe.failureReadable=" + readable);
+                        if (enabled || code !== "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED" || !readable) {
                           throw error;
                         }
                       }
@@ -560,7 +564,10 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         assertTrue(
             "swipe must either complete (service on) or fail readably (service off): " + result.stdout,
             result.stdout.contains("m3.swipe.completed=true") ||
-                result.stdout.contains("m3.swipe.failureCode=ERR_AUTOJS6_BRIDGE_CAPABILITY_PROVIDER_MISSING"),
+                (
+                    result.stdout.contains("m3.swipe.failureCode=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED") &&
+                        result.stdout.contains("m3.swipe.failureReadable=true")
+                    ),
         )
         // Without the dedicated capability the plugin rejects locally.
         val deniedDir = File(context.cacheDir, "node-runtime-plugin-swipe-denied").apply {

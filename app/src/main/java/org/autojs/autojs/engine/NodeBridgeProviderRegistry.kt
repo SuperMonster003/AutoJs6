@@ -136,7 +136,7 @@ object NodeBridgeProviderRegistry {
     private const val MEDIA_PROJECTION_PROVIDER = "media_projection"
     private const val IMAGE_PROVIDER = "image"
     private const val UI_PROVIDER = "ui"
-    private const val UI_OVERLAY_PROVIDER = "ui.overlay"
+    private const val UI_OVERLAY_PROVIDER = NodeBridgePermissionManifest.UI_OVERLAY
     private const val WORK_MANAGER_PROVIDER = "work_manager"
     private const val PACKAGE_MANAGER_PROVIDER = "package_manager"
     private const val SHELL_PROVIDER = "shell"

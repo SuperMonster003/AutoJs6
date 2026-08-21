@@ -278,7 +278,7 @@ class NodeAndroidPackageInstallManager(
         "android_package_manager.remote_tarball_install" to "disabled",
         "android_package_manager.unverified_cache_reuse" to "disabled",
         "android_package_manager.install_authority" to INSTALL_AUTHORITY,
-        "android_package_manager.mutation_capability" to "package_manager.mutate",
+        "android_package_manager.mutation_capability" to NodeBridgePermissionManifest.PACKAGE_MANAGER_MUTATE,
         "android_package_manager.mutation_confirmation" to "allowMutation_required",
         "android_package_manager.js_bridge" to "guarded_mutation_partial",
         "package_integrity_policy.schema" to NodePackageIntegrityPolicy.SCHEMA,

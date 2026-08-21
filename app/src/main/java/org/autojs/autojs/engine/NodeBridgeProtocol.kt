@@ -575,37 +575,37 @@ data class NodeBridgeEngineInfo(
 
 object NodeBridgeModules {
 
-    const val TOAST = "toast"
-    const val APP = "app"
-    const val ENGINES = "engines"
-    const val DIALOGS = "dialogs"
-    const val ACCESSIBILITY = "accessibility"
+    const val TOAST = NodeBridgePermissionManifest.TOAST
+    const val APP = NodeBridgePermissionManifest.APP
+    const val ENGINES = NodeBridgePermissionManifest.ENGINES
+    const val DIALOGS = NodeBridgePermissionManifest.DIALOGS
+    const val ACCESSIBILITY = NodeBridgePermissionManifest.ACCESSIBILITY
     const val MEDIA_PROJECTION = "media_projection"
-    const val IMAGE = "image"
+    const val IMAGE = NodeBridgePermissionManifest.IMAGE
     const val IMAGES = "images"
-    const val OCR = "ocr"
-    const val BARCODE = "barcode"
-    const val MEDIA = "media"
+    const val OCR = NodeBridgePermissionManifest.OCR
+    const val BARCODE = NodeBridgePermissionManifest.BARCODE
+    const val MEDIA = NodeBridgePermissionManifest.MEDIA
     const val MEDIAINFO = "mediainfo"
     const val RECORDER = "recorder"
-    const val STORAGE = "storage"
+    const val STORAGE = NodeBridgePermissionManifest.STORAGE
     const val STORAGES = "storages"
-    const val DATABASE = "database"
+    const val DATABASE = NodeBridgePermissionManifest.DATABASE
     const val SQLITE = "sqlite"
-    const val NOTIFICATIONS = "notifications"
-    const val SENSORS = "sensors"
-    const val UI = "ui"
-    const val UI_OVERLAY = "ui.overlay"
-    const val CLIPBOARD = "clipboard"
-    const val DEVICE = "device"
-    const val SHELL = "shell"
+    const val NOTIFICATIONS = NodeBridgePermissionManifest.NOTIFICATIONS
+    const val SENSORS = NodeBridgePermissionManifest.SENSORS
+    const val UI = NodeBridgePermissionManifest.UI
+    const val UI_OVERLAY = NodeBridgePermissionManifest.UI_OVERLAY
+    const val CLIPBOARD = NodeBridgePermissionManifest.CLIPBOARD
+    const val DEVICE = NodeBridgePermissionManifest.DEVICE
+    const val SHELL = NodeBridgePermissionManifest.SHELL
     const val FETCH = "fetch"
     const val WEBSOCKET = "websocket"
-    const val WORK_MANAGER = "work_manager"
-    const val PACKAGE_MANAGER = "package_manager"
+    const val WORK_MANAGER = NodeBridgePermissionManifest.WORK_MANAGER
+    const val PACKAGE_MANAGER = NodeBridgePermissionManifest.PACKAGE_MANAGER
     const val JAVA = "java"
-    const val RHINO = "rhino"
-    const val INPUT_OBSERVER = "input_observer"
+    const val RHINO = NodeBridgePermissionManifest.RHINO
+    const val INPUT_OBSERVER = NodeBridgePermissionManifest.INPUT_OBSERVER
 
     val toastMethods = setOf("showToast", "toast")
     val appMethods = setOf(
@@ -905,7 +905,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
                 "ui" to uiSessionIds.size,
-                "ui.overlay" to overlaySessionIds.size,
+                NodeBridgeModules.UI_OVERLAY to overlaySessionIds.size,
                 "input_observer" to inputObserverSubscriptions.size,
                 "work_manager" to workManagerTasks.size,
                 "package_manager" to runCatching { packageInstallManager.list().size }.getOrDefault(0),

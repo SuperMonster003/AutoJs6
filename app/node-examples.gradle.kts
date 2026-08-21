@@ -119,6 +119,14 @@ private val nodeTypeDeclarationModules = listOf(
     "plugins",
 )
 
+// Every intentional difference must live here with a concrete reason. The
+// verifier also rejects stale entries, so exceptions cannot silently become
+// permanent after the corresponding catalog is republished.
+private val nodeCapabilityDocumentedDifferences = mapOf(
+    "catalog_missing:accessibility.gesture" to
+            "The immutable 1.2.0 catalog predates M3.2; plugin C++ preflight and both permission manifests enforce it. Remove this exception when the next catalog is published.",
+)
+
 private fun nodeExampleReadJsonObject(file: File): Map<*, *> =
     JsonSlurper().parse(file) as? Map<*, *>
         ?: throw GradleException("Expected JSON object in ${file.absolutePath}")
@@ -129,6 +137,43 @@ private fun nodeExampleDisplayPath(file: File): String =
 
 private fun nodeExampleList(value: Any?): List<String> =
     (value as? List<*>).orEmpty().map { it.toString() }
+
+private fun nodeCapabilitySourceValues(
+    sourceFile: File,
+    constantsPattern: Regex,
+    listPattern: Regex,
+): Set<String> {
+    if (!sourceFile.isFile) {
+        throw GradleException("Missing Node capability manifest: ${sourceFile.absolutePath}")
+    }
+    val source = sourceFile.readText(Charsets.UTF_8)
+    val constants = constantsPattern.findAll(source).associate { match ->
+        match.groupValues[1] to match.groupValues[2]
+    }
+    val listBody = listPattern.find(source)?.groupValues?.get(1)
+        ?: throw GradleException("Could not locate the defined capability list in ${sourceFile.absolutePath}")
+    val names = Regex("\\b[A-Z][A-Z0-9_]+\\b")
+        .findAll(listBody)
+        .map { it.value }
+        .toList()
+    val unresolved = names.filterNot(constants::containsKey).distinct().sorted()
+    if (unresolved.isNotEmpty()) {
+        throw GradleException(
+            "Unresolved capability constants in ${sourceFile.absolutePath}: $unresolved"
+        )
+    }
+    val values = names.map(constants::getValue)
+    val duplicates = values.groupingBy { it }.eachCount()
+        .filterValues { it > 1 }
+        .keys
+        .sorted()
+    if (duplicates.isNotEmpty()) {
+        throw GradleException(
+            "Duplicate defined capabilities in ${sourceFile.absolutePath}: $duplicates"
+        )
+    }
+    return values.toSortedSet()
+}
 
 private fun nodeExamplePluginProjectRoot(overridePath: String?): File {
     val candidate = overridePath
@@ -476,6 +521,160 @@ tasks.register("verifyNodePluginExampleMirror") {
             )
         }
         logger.lifecycle("Verified Node plugin example mirror with ${pluginInventory.size} files from ${pluginExamplesRoot.absolutePath}.")
+    }
+}
+
+tasks.register("verifyNodeCapabilityManifestAlignment") {
+    group = "verification"
+    description = "Verifies host/plugin Node bridge capability manifests against the published catalog."
+
+    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
+        .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
+    val pluginRoot = nodeExamplePluginProjectRoot(pluginRootOverride.orNull)
+    val hostManifest = project.layout.projectDirectory
+        .file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt")
+        .asFile
+    val hostNodeSources = project.layout.projectDirectory
+        .dir("src/main/java/org/autojs/autojs/engine")
+        .asFile
+    val pluginManifest = pluginRoot.resolve(
+        "app/src/main/java/io/github/supermonster003/autojs6/plugin/nodejs/NodeBridgePermissionManifest.java"
+    )
+    val catalogFile = pluginRoot.resolve(
+        "releases/nodejs-capability-catalog/1.2.0/node-capability-catalog.json"
+    )
+    val reportFile = layout.buildDirectory.file("reports/nodejs/capability-manifest-alignment.json")
+
+    inputs.file(hostManifest)
+    inputs.dir(hostNodeSources)
+    inputs.file(pluginManifest)
+    inputs.file(catalogFile)
+    outputs.file(reportFile)
+
+    doLast {
+        val hostCapabilities = nodeCapabilitySourceValues(
+            sourceFile = hostManifest,
+            constantsPattern = Regex(
+                "const\\s+val\\s+([A-Z0-9_]+)\\s*=\\s*\"([^\"]+)\""
+            ),
+            listPattern = Regex(
+                "val\\s+definedCapabilities:\\s+List<String>\\s*=\\s*listOf\\((.*?)\\r?\\n\\s*\\)",
+                RegexOption.DOT_MATCHES_ALL,
+            ),
+        )
+        val pluginCapabilities = nodeCapabilitySourceValues(
+            sourceFile = pluginManifest,
+            constantsPattern = Regex(
+                "(?:public|private)\\s+static\\s+final\\s+String\\s+([A-Z0-9_]+)\\s*=\\s*\"([^\"]+)\""
+            ),
+            listPattern = Regex(
+                "private\\s+static\\s+final\\s+List<String>\\s+DEFINED_CAPABILITIES\\s*=\\s*immutableList\\((.*?)\\r?\\n\\s*\\);",
+                RegexOption.DOT_MATCHES_ALL,
+            ),
+        )
+
+        val catalog = nodeExampleReadJsonObject(catalogFile)
+        val bridge = catalog["bridge"] as? Map<*, *>
+            ?: throw GradleException("Missing bridge object in ${catalogFile.absolutePath}")
+        val permissionEntries = bridge["permissionCapabilities"] as? List<*>
+            ?: throw GradleException("Missing bridge.permissionCapabilities in ${catalogFile.absolutePath}")
+        val catalogCapabilities = permissionEntries.mapIndexed { index, rawEntry ->
+            val entry = rawEntry as? Map<*, *>
+                ?: throw GradleException("bridge.permissionCapabilities[$index] must be an object")
+            entry["id"]?.toString()?.takeIf(String::isNotBlank)
+                ?: throw GradleException("bridge.permissionCapabilities[$index].id must be non-empty")
+        }.toSortedSet()
+        val operations = bridge["operations"] as? List<*>
+            ?: throw GradleException("Missing bridge.operations in ${catalogFile.absolutePath}")
+        val operationCapabilities = operations
+            .flatMap { rawOperation ->
+                val operation = rawOperation as? Map<*, *>
+                    ?: throw GradleException("Every bridge operation must be an object")
+                nodeExampleList(operation["requiredCapabilities"])
+            }
+            .toSortedSet()
+
+        val actualDifferences = mutableSetOf<String>()
+        (hostCapabilities - pluginCapabilities).forEach { actualDifferences += "host_only:$it" }
+        (pluginCapabilities - hostCapabilities).forEach { actualDifferences += "plugin_only:$it" }
+        (pluginCapabilities - catalogCapabilities).forEach { actualDifferences += "catalog_missing:$it" }
+        (catalogCapabilities - pluginCapabilities).forEach { actualDifferences += "catalog_only:$it" }
+        (operationCapabilities - catalogCapabilities).forEach {
+            actualDifferences += "catalog_operation_undefined:$it"
+        }
+
+        val documentedKeys = nodeCapabilityDocumentedDifferences.keys
+        val unresolvedDifferences = (actualDifferences - documentedKeys).sorted()
+        val staleDocumentedDifferences = (documentedKeys - actualDifferences).sorted()
+        val differenceRows = actualDifferences.sorted().map { key ->
+            linkedMapOf<String, Any?>(
+                "key" to key,
+                "documented" to nodeCapabilityDocumentedDifferences.containsKey(key),
+                "reason" to nodeCapabilityDocumentedDifferences[key],
+            )
+        }
+
+        val dottedCapabilities = hostCapabilities.filter { '.' in it }
+        val quotedDottedCapability = if (dottedCapabilities.isEmpty()) {
+            null
+        } else {
+            Regex(
+                "\"(" + dottedCapabilities
+                    .sortedByDescending(String::length)
+                    .joinToString("|") { Regex.escape(it) } + ")\""
+            )
+        }
+        val hostManifestPath = hostManifest.canonicalFile
+        val hostLiteralOccurrences = hostNodeSources.walkTopDown()
+            .filter { file ->
+                file.isFile && file.extension == "kt" && file.canonicalFile != hostManifestPath
+            }
+            .flatMap { file ->
+                file.readLines(Charsets.UTF_8).asSequence().mapIndexedNotNull { index, line ->
+                    quotedDottedCapability?.find(line)?.let { match ->
+                        "${file.relativeTo(project.projectDir).invariantSeparatorsPath}:${index + 1}:${match.groupValues[1]}"
+                    }
+                }
+            }
+            .sorted()
+            .toList()
+
+        val matches = unresolvedDifferences.isEmpty() &&
+                staleDocumentedDifferences.isEmpty() &&
+                hostLiteralOccurrences.isEmpty()
+        val report = linkedMapOf<String, Any?>(
+            "schema" to "autojs6-node-capability-manifest-alignment-v1",
+            "pluginRoot" to pluginRoot.absolutePath,
+            "hostManifest" to nodeExampleDisplayPath(hostManifest),
+            "pluginManifest" to pluginManifest.absolutePath,
+            "catalog" to catalogFile.absolutePath,
+            "hostCapabilityCount" to hostCapabilities.size,
+            "pluginCapabilityCount" to pluginCapabilities.size,
+            "catalogCapabilityCount" to catalogCapabilities.size,
+            "catalogOperationCount" to operations.size,
+            "matches" to matches,
+            "differences" to differenceRows,
+            "unresolvedDifferences" to unresolvedDifferences,
+            "staleDocumentedDifferences" to staleDocumentedDifferences,
+            "hostDottedCapabilityLiteralsOutsideManifest" to hostLiteralOccurrences,
+        )
+        reportFile.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(JsonOutput.prettyPrint(JsonOutput.toJson(report)) + "\n")
+        }
+
+        if (!matches) {
+            throw GradleException(
+                "Node capability manifests are not aligned: unresolved=$unresolvedDifferences, " +
+                        "staleExceptions=$staleDocumentedDifferences, " +
+                        "hostLiterals=$hostLiteralOccurrences. See ${nodeExampleDisplayPath(reportFile.get().asFile)}."
+            )
+        }
+        logger.lifecycle(
+            "Verified Node capability manifests: host=${hostCapabilities.size}, " +
+                    "plugin=${pluginCapabilities.size}, catalog=${catalogCapabilities.size}, " +
+                    "documentedDifferences=${actualDifferences.size}."
+        )
     }
 }
 
