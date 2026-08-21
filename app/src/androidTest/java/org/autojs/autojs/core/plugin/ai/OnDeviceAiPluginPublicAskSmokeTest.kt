@@ -13,6 +13,7 @@ import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.json.JSONObject
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendProfile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
@@ -156,6 +157,11 @@ class OnDeviceAiPluginPublicAskSmokeTest {
                     assertEquals("object", result.optString("jsonType"))
                     assertEquals("string", result.optString("answerType"))
                     assertEquals("boolean", result.optString("okType"))
+                    assertEquals(parameters.backend, result.optString("backendId"))
+                    assertEquals("available", result.optString("backendAvailability"))
+                    assertEquals("unavailable", result.optString("npuAvailability"))
+                    assertEquals("npu-runtime-not-packaged", result.optString("npuUnavailableReason"))
+                    assertEquals("MODEL_CAPABILITY_MISMATCH", result.optString("npuRejectionCode"))
                     val parsed = JSONObject(result.getString("text"))
                     assertTrue("Structured JSON omitted answer", parsed.has("answer"))
                     assertTrue("Structured JSON omitted ok", parsed.has("ok"))
@@ -230,7 +236,14 @@ class OnDeviceAiPluginPublicAskSmokeTest {
             "Public AI plugin ask timeout must be in $MINIMUM_ROUTE_TIMEOUT_MILLIS..$MAXIMUM_ROUTE_TIMEOUT_MILLIS ms",
             timeoutMillis in MINIMUM_ROUTE_TIMEOUT_MILLIS..MAXIMUM_ROUTE_TIMEOUT_MILLIS,
         )
-        return SmokeParameters(modelId, prompt, timeoutMillis)
+        val backend = arguments.getString(ARG_BACKEND)?.trim()?.lowercase()
+            ?.takeIf(String::isNotEmpty)
+            ?: OnDeviceAiBackendProfile.CPU
+        assertTrue(
+            "$ARG_BACKEND must be one of ${OnDeviceAiBackendProfile.VALUES.sorted().joinToString()}",
+            backend in OnDeviceAiBackendProfile.VALUES,
+        )
+        return SmokeParameters(modelId, prompt, timeoutMillis, backend)
     }
 
     @Suppress("DEPRECATION")
@@ -262,34 +275,70 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         """
         "rhino";
         const markerPath = ${JSONObject.quote("./$MARKER_NAME")};
-        ai.chat(
-          [
-            { role: "system", content: ${JSONObject.quote(DEFAULT_SYSTEM_PROMPT)} },
-            { role: "user", content: ${JSONObject.quote(parameters.prompt)} }
-          ],
-          {
-            plugin: {
-              component: {
-                packageName: ${JSONObject.quote(REAL_PLUGIN_PACKAGE)},
-                className: ${JSONObject.quote(REAL_SERVICE_CLASS)}
-              },
-              providerId: ${JSONObject.quote(REAL_PROVIDER_ID)},
-              modelId: ${JSONObject.quote(parameters.modelId)}
-            },
-            timeout: ${parameters.timeoutMillis},
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.9,
-            maxTokens: 64,
-            structuredJson: true,
-            responseSchema: {
-              type: "object",
-              properties: {
-                answer: { type: "string" },
-                ok: { type: "boolean" }
-              },
-              required: [ "answer", "ok" ]
+        const plugin = {
+          component: {
+            packageName: ${JSONObject.quote(REAL_PLUGIN_PACKAGE)},
+            className: ${JSONObject.quote(REAL_SERVICE_CLASS)}
+          },
+          providerId: ${JSONObject.quote(REAL_PROVIDER_ID)},
+          modelId: ${JSONObject.quote(parameters.modelId)}
+        };
+        let selectedBackendProfile;
+        let npuBackendProfile;
+        let npuRejectionCode;
+        ai.models({ plugin: plugin, timeout: ${parameters.timeoutMillis} }).then(
+          models => {
+            const model = models.find(item => item.modelId === ${JSONObject.quote(parameters.modelId)});
+            if (!model) throw new Error("Selected model was absent from ai.models()");
+            const profiles = Array.isArray(model.backendProfiles) ? model.backendProfiles : [];
+            selectedBackendProfile = profiles.find(item => item.id === ${JSONObject.quote(parameters.backend)});
+            npuBackendProfile = profiles.find(item => item.id === "npu");
+            if (!selectedBackendProfile || selectedBackendProfile.availability !== "available") {
+              throw new Error("Selected backend was not reported available by ai.models()");
             }
+            if (!npuBackendProfile || npuBackendProfile.availability !== "unavailable") {
+              throw new Error("NPU backend was not reported unavailable by ai.models()");
+            }
+            return ai.chat("This NPU request must be rejected before generation.", {
+              plugin: plugin,
+              timeout: ${parameters.timeoutMillis},
+              maxTokens: 1,
+              backend: "npu"
+            }).then(
+              () => {
+                throw new Error("Unavailable NPU backend unexpectedly generated a response");
+              },
+              error => {
+                npuRejectionCode = String(error && error.code || "");
+                if (npuRejectionCode !== "MODEL_CAPABILITY_MISMATCH") {
+                  throw new Error("Unexpected NPU rejection code: " + npuRejectionCode);
+                }
+                return ai.chat(
+                  [
+                    { role: "system", content: ${JSONObject.quote(DEFAULT_SYSTEM_PROMPT)} },
+                    { role: "user", content: ${JSONObject.quote(parameters.prompt)} }
+                  ],
+                  {
+                    plugin: plugin,
+                    timeout: ${parameters.timeoutMillis},
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.9,
+                    maxTokens: 64,
+                    backend: ${JSONObject.quote(parameters.backend)},
+                    structuredJson: true,
+                    responseSchema: {
+                      type: "object",
+                      properties: {
+                        answer: { type: "string" },
+                        ok: { type: "boolean" }
+                      },
+                      required: [ "answer", "ok" ]
+                    }
+                  }
+                );
+              }
+            );
           }
         ).then(
           response => {
@@ -304,6 +353,11 @@ class OnDeviceAiPluginPublicAskSmokeTest {
               jsonType: parsed !== null && !Array.isArray(parsed) ? typeof parsed : "invalid",
               answerType: typeof parsed.answer,
               okType: typeof parsed.ok,
+              backendId: selectedBackendProfile.id,
+              backendAvailability: selectedBackendProfile.availability,
+              npuAvailability: npuBackendProfile.availability,
+              npuUnavailableReason: npuBackendProfile.unavailableReason,
+              npuRejectionCode: npuRejectionCode,
               inputTokens: usage.inputTokens,
               outputTokens: usage.outputTokens,
               totalTokens: usage.totalTokens,
@@ -366,6 +420,7 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         val modelId: String,
         val prompt: String,
         val timeoutMillis: Long,
+        val backend: String,
     )
 
     private companion object {
@@ -374,6 +429,7 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         const val ARG_MODEL_ID = "autojs.onDeviceAi.publicAskSmoke.modelId"
         const val ARG_PROMPT = "autojs.onDeviceAi.publicAskSmoke.prompt"
         const val ARG_TIMEOUT_MILLIS = "autojs.onDeviceAi.publicAskSmoke.timeoutMillis"
+        const val ARG_BACKEND = "autojs.onDeviceAi.publicAskSmoke.backend"
 
         const val HOST_PACKAGE = "org.autojs.autojs6"
         const val REAL_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.ondeviceai"

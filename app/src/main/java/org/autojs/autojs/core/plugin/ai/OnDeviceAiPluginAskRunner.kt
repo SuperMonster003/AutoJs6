@@ -4,9 +4,11 @@ import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.common.api.AiUsage
 import org.autojs.plugin.ai.common.api.AiValidation
+import org.autojs.plugin.ondeviceai.api.AiBackendProfileInfo
 import org.autojs.plugin.ondeviceai.api.AiGenerationOptions
 import org.autojs.plugin.ondeviceai.api.AiJsonSyntaxValidator
 import org.autojs.plugin.ondeviceai.api.AiMessageRole
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendProfile
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
@@ -73,6 +75,7 @@ internal class OnDeviceAiPluginAskRequest(
     val topK: Int? = null,
     val topP: Double? = null,
     val responseSchemaJson: String? = null,
+    val backendProfile: String = OnDeviceAiBackendProfile.CPU,
 ) {
     val messages: List<OnDeviceAiPluginMessage> = messages.toList()
     val inputBytes: Long = this.messages.sumOf { it.contentBytes.toLong() }
@@ -109,6 +112,9 @@ internal class OnDeviceAiPluginAskRequest(
         topP?.let {
             require(it.isFinite() && it in 0.0..1.0) { "Invalid on-device AI plugin topP" }
         }
+        require(backendProfile in OnDeviceAiBackendProfile.VALUES) {
+            "Invalid on-device AI plugin backend profile"
+        }
         responseSchemaJson?.let { schema ->
             AiValidation.requireUtf8(
                 schema,
@@ -129,6 +135,7 @@ internal class OnDeviceAiPluginAskRequest(
             "inputBytes=$inputBytes, timeoutMillis=$timeoutMillis, " +
             "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
             "temperature=$temperature, topK=$topK, topP=$topP, " +
+            "backendProfile=$backendProfile, " +
             "structuredJson=$structuredJson, responseSchemaBytes=$responseSchemaBytes)"
 
     internal companion object {
@@ -171,6 +178,7 @@ internal fun OnDeviceAiPluginAskRequest.toGenerationOptions(
     topK = topK,
     topP = topP,
     persistentSession = persistentSession,
+    backendProfile = backendProfile,
 )
 
 internal enum class OnDeviceAiPluginAskFailure {
@@ -279,7 +287,10 @@ internal class OnDeviceAiPluginModelSummary(
     val capabilityIds: List<String>,
     val maximumContextBytes: Long,
     val maximumOutputBytes: Long,
-)
+    backendProfiles: List<AiBackendProfileInfo>,
+) {
+    val backendProfiles: List<AiBackendProfileInfo> = backendProfiles.toList()
+}
 
 internal sealed class OnDeviceAiPluginModelListOutcome {
     class Completed(models: List<OnDeviceAiPluginModelSummary>) : OnDeviceAiPluginModelListOutcome() {

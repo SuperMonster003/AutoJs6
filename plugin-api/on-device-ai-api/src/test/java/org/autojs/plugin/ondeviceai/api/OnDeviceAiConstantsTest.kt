@@ -9,7 +9,7 @@ class OnDeviceAiConstantsTest {
     @Test
     fun protocolAndSamplerDefaultsArePinnedForGenerationOptionInterop() {
         assertEquals(OnDeviceAiProtocol.PROTOCOL_V1_2, OnDeviceAiProtocol.HOST_PROTOCOL_RANGE.minimum)
-        assertEquals(OnDeviceAiProtocol.PROTOCOL_V1_2, OnDeviceAiProtocol.HOST_PROTOCOL_RANGE.maximum)
+        assertEquals(OnDeviceAiProtocol.PROTOCOL_V1_3, OnDeviceAiProtocol.HOST_PROTOCOL_RANGE.maximum)
         assertEquals(1, OnDeviceAiSamplingDefaults.TOP_K)
         assertEquals(0.95, OnDeviceAiSamplingDefaults.TOP_P, 0.0)
         assertEquals(1.0, OnDeviceAiSamplingDefaults.TEMPERATURE, 0.0)
@@ -19,6 +19,9 @@ class OnDeviceAiConstantsTest {
     fun publicStringEnumSetsCannotBeMutatedThroughAForcedMutableCast() {
         listOf(
             OnDeviceAiCapabilityId.VALUES,
+            OnDeviceAiBackendProfile.VALUES,
+            OnDeviceAiBackendAvailability.VALUES,
+            OnDeviceAiBackendUnavailableReason.VALUES,
             OnDeviceAiMimeType.INPUT_VALUES,
             OnDeviceAiMimeType.SCHEMA_VALUES,
         ).forEach { values ->

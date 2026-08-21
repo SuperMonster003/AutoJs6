@@ -8,6 +8,8 @@ import org.autojs.plugin.ondeviceai.api.AiModelListRequest
 import org.autojs.plugin.ondeviceai.api.AiModelPageTokenLedger
 import org.autojs.plugin.ondeviceai.api.AiModelPaginationPolicy
 import org.autojs.plugin.ondeviceai.api.AiModelTokenScope
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendAvailability
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendProfile
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCodec
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
 import java.util.Collections
@@ -82,6 +84,7 @@ internal sealed class OnDeviceAiProviderExactModelPlanResult {
     data class Planned(val plan: OnDeviceAiHostSessionPlan) : OnDeviceAiProviderExactModelPlanResult()
     object ModelNotFound : OnDeviceAiProviderExactModelPlanResult()
     object ModelCapabilityMismatch : OnDeviceAiProviderExactModelPlanResult()
+    object BackendUnavailable : OnDeviceAiProviderExactModelPlanResult()
 }
 
 /** Immutable, provider-pinned result of one complete model-list transcript. */
@@ -102,10 +105,19 @@ internal class OnDeviceAiProviderModelCatalog internal constructor(
     fun planExact(
         modelId: String,
         requirement: OnDeviceAiCapabilityRequirement = OnDeviceAiCapabilityRequirement(),
+        backendProfile: String = OnDeviceAiBackendProfile.CPU,
     ): OnDeviceAiProviderExactModelPlanResult {
         require(AiValidation.STABLE_ID.matches(modelId)) { "Invalid model ID" }
         val model = models.singleOrNull { it.modelId == modelId }
             ?: return OnDeviceAiProviderExactModelPlanResult.ModelNotFound
+        require(backendProfile in OnDeviceAiBackendProfile.VALUES) { "Invalid backend profile" }
+        if (model.backendProfiles.none { profile ->
+                profile.profileId == backendProfile &&
+                    profile.availability == OnDeviceAiBackendAvailability.AVAILABLE
+            }
+        ) {
+            return OnDeviceAiProviderExactModelPlanResult.BackendUnavailable
+        }
         return when (
             val planned = OnDeviceAiHostSessionPlanner.plan(
                 selected = OnDeviceAiProviderSelectionResult.Selected(pinnedProvider),

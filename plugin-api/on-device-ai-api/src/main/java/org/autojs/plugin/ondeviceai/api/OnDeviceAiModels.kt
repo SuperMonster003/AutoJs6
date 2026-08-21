@@ -190,7 +190,25 @@ data class AiModelListRequest(
 
     override fun toString(): String =
         "AiModelListRequest(protocolVersion=$protocolVersion, pageSize=$pageSize, " +
-            "pageTokenPresent=${pageToken != null})"
+        "pageTokenPresent=${pageToken != null})"
+}
+
+data class AiBackendProfileInfo(
+    val profileId: String,
+    val availability: String,
+    val unavailableReason: String? = null,
+) {
+    init {
+        require(profileId in OnDeviceAiBackendProfile.VALUES) { "Unknown backend profile" }
+        require(availability in OnDeviceAiBackendAvailability.VALUES) { "Unknown backend availability" }
+        if (availability == OnDeviceAiBackendAvailability.AVAILABLE) {
+            require(unavailableReason == null) { "An available backend cannot have an unavailable reason" }
+        } else {
+            require(unavailableReason in OnDeviceAiBackendUnavailableReason.VALUES) {
+                "An unavailable backend requires a known reason"
+            }
+        }
+    }
 }
 
 class AiModelInfo(
@@ -199,8 +217,15 @@ class AiModelInfo(
     capabilityIds: List<String>,
     val maximumContextBytes: Long,
     val maximumOutputBytes: Long,
+    backendProfiles: List<AiBackendProfileInfo> = listOf(
+        AiBackendProfileInfo(
+            profileId = OnDeviceAiBackendProfile.CPU,
+            availability = OnDeviceAiBackendAvailability.AVAILABLE,
+        ),
+    ),
 ) {
     val capabilityIds: List<String> = immutableListSnapshot(capabilityIds)
+    val backendProfiles: List<AiBackendProfileInfo> = immutableListSnapshot(backendProfiles)
 
     init {
         require(AiValidation.STABLE_ID.matches(modelId)) { "Invalid model ID" }
@@ -209,6 +234,10 @@ class AiModelInfo(
         require(capabilityIds.all { it in OnDeviceAiCapabilityId.VALUES }) { "Unknown model capability" }
         require(maximumContextBytes in 1L..OnDeviceAiLimits.MAX_TOTAL_INPUT_BYTES)
         require(maximumOutputBytes in 1L..OnDeviceAiLimits.MAX_STREAMING_OUTPUT_BYTES)
+        require(backendProfiles.isNotEmpty()) { "A model must declare at least one backend profile" }
+        require(backendProfiles.map { it.profileId }.distinct().size == backendProfiles.size) {
+            "Duplicate model backend profile"
+        }
     }
 
     operator fun component1() = modelId
@@ -216,6 +245,7 @@ class AiModelInfo(
     operator fun component3() = capabilityIds
     operator fun component4() = maximumContextBytes
     operator fun component5() = maximumOutputBytes
+    operator fun component6() = backendProfiles
 
     fun copy(
         modelId: String = this.modelId,
@@ -223,7 +253,15 @@ class AiModelInfo(
         capabilityIds: List<String> = this.capabilityIds,
         maximumContextBytes: Long = this.maximumContextBytes,
         maximumOutputBytes: Long = this.maximumOutputBytes,
-    ) = AiModelInfo(modelId, displayName, capabilityIds, maximumContextBytes, maximumOutputBytes)
+        backendProfiles: List<AiBackendProfileInfo> = this.backendProfiles,
+    ) = AiModelInfo(
+        modelId,
+        displayName,
+        capabilityIds,
+        maximumContextBytes,
+        maximumOutputBytes,
+        backendProfiles,
+    )
 
     override fun equals(other: Any?): Boolean =
         this === other || other is AiModelInfo &&
@@ -231,14 +269,23 @@ class AiModelInfo(
             displayName == other.displayName &&
             capabilityIds == other.capabilityIds &&
             maximumContextBytes == other.maximumContextBytes &&
-            maximumOutputBytes == other.maximumOutputBytes
+            maximumOutputBytes == other.maximumOutputBytes &&
+            backendProfiles == other.backendProfiles
 
     override fun hashCode(): Int =
-        dataClassHashCode(modelId, displayName, capabilityIds, maximumContextBytes, maximumOutputBytes)
+        dataClassHashCode(
+            modelId,
+            displayName,
+            capabilityIds,
+            maximumContextBytes,
+            maximumOutputBytes,
+            backendProfiles,
+        )
 
     override fun toString(): String =
         "AiModelInfo(modelId=$modelId, displayName=$displayName, capabilityIds=$capabilityIds, " +
-            "maximumContextBytes=$maximumContextBytes, maximumOutputBytes=$maximumOutputBytes)"
+            "maximumContextBytes=$maximumContextBytes, maximumOutputBytes=$maximumOutputBytes, " +
+            "backendProfiles=$backendProfiles)"
 }
 
 class AiModelPage(
@@ -338,6 +385,7 @@ class AiGenerationOptions(
     val topK: Int? = null,
     val topP: Double? = null,
     val persistentSession: Boolean = false,
+    val backendProfile: String = OnDeviceAiBackendProfile.CPU,
 ) {
     val requiredCapabilityIds: List<String> = immutableListSnapshot(requiredCapabilityIds)
 
@@ -360,6 +408,7 @@ class AiGenerationOptions(
         require(responseMimeType in OnDeviceAiMimeType.INPUT_VALUES)
         require(requiredCapabilityIds.distinct().size == requiredCapabilityIds.size)
         require(requiredCapabilityIds.all { it in OnDeviceAiCapabilityId.VALUES }) { "Unknown required capability" }
+        require(backendProfile in OnDeviceAiBackendProfile.VALUES) { "Unknown backend profile" }
         if (structuredJson) {
             require(responseMimeType == OnDeviceAiMimeType.JSON)
         } else {
@@ -387,6 +436,7 @@ class AiGenerationOptions(
     operator fun component13() = topK
     operator fun component14() = topP
     operator fun component15() = persistentSession
+    operator fun component16() = backendProfile
 
     fun copy(
         stream: Boolean = this.stream,
@@ -404,6 +454,7 @@ class AiGenerationOptions(
         topK: Int? = this.topK,
         topP: Double? = this.topP,
         persistentSession: Boolean = this.persistentSession,
+        backendProfile: String = this.backendProfile,
     ) = AiGenerationOptions(
         stream = stream,
         includeReasoning = includeReasoning,
@@ -420,6 +471,7 @@ class AiGenerationOptions(
         topK = topK,
         topP = topP,
         persistentSession = persistentSession,
+        backendProfile = backendProfile,
     )
 
     override fun equals(other: Any?): Boolean =
@@ -438,7 +490,8 @@ class AiGenerationOptions(
             temperature == other.temperature &&
             topK == other.topK &&
             topP == other.topP &&
-            persistentSession == other.persistentSession
+            persistentSession == other.persistentSession &&
+            backendProfile == other.backendProfile
 
     override fun hashCode(): Int = dataClassHashCode(
         stream,
@@ -456,6 +509,7 @@ class AiGenerationOptions(
         topK,
         topP,
         persistentSession,
+        backendProfile,
     )
 
     override fun toString(): String =
@@ -463,7 +517,7 @@ class AiGenerationOptions(
             "structuredJson=$structuredJson, reportUsage=$reportUsage, " +
             "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
             "temperature=$temperature, topK=$topK, topP=$topP, " +
-            "persistentSession=$persistentSession, " +
+            "persistentSession=$persistentSession, backendProfile=$backendProfile, " +
             "maximumToolRounds=$maximumToolRounds, timeoutMillis=$timeoutMillis, " +
             "responseMimeType=$responseMimeType, responseSchema=$responseSchema, " +
             "requiredCapabilityIds=$requiredCapabilityIds)"

@@ -13,9 +13,12 @@ object OnDeviceAiProtocol {
     /** Protocol 1.2 adds an explicitly negotiated persistent Conversation lifecycle. */
     val PROTOCOL_V1_2 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 2)
 
+    /** Protocol 1.3 adds explicit inference backend profiles and device availability reporting. */
+    val PROTOCOL_V1_3 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 3)
+
     val HOST_PROTOCOL_RANGE = AiProtocolRange(
         PROTOCOL_V1_2,
-        PROTOCOL_V1_2,
+        PROTOCOL_V1_3,
     )
 
     const val SCHEMA_CAPABILITIES = 0x4F44_0001
@@ -35,6 +38,34 @@ object OnDeviceAiProtocol {
     const val SCHEMA_TEXT_CHUNK = 0x4F44_000F
     const val SCHEMA_REASONING_METADATA = 0x4F44_0010
     const val SCHEMA_COMPLETION_RESULT = 0x4F44_0011
+    const val SCHEMA_BACKEND_PROFILE_INFO = 0x4F44_0012
+}
+
+object OnDeviceAiBackendProfile {
+    const val CPU = "cpu"
+    const val GPU = "gpu"
+    const val NPU = "npu"
+
+    val VALUES: Set<String> = immutableSetOf(CPU, GPU, NPU)
+}
+
+object OnDeviceAiBackendAvailability {
+    const val AVAILABLE = "available"
+    const val UNAVAILABLE = "unavailable"
+
+    val VALUES: Set<String> = immutableSetOf(AVAILABLE, UNAVAILABLE)
+}
+
+object OnDeviceAiBackendUnavailableReason {
+    const val ABI_UNSUPPORTED = "abi-unsupported"
+    const val OPENCL_LIBRARY_UNAVAILABLE = "opencl-library-unavailable"
+    const val NPU_RUNTIME_NOT_PACKAGED = "npu-runtime-not-packaged"
+
+    val VALUES: Set<String> = immutableSetOf(
+        ABI_UNSUPPORTED,
+        OPENCL_LIBRARY_UNAVAILABLE,
+        NPU_RUNTIME_NOT_PACKAGED,
+    )
 }
 
 object OnDeviceAiCapabilityId {

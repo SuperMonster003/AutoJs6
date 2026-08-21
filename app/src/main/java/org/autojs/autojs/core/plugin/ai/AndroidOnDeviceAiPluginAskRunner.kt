@@ -577,10 +577,18 @@ private class ProcessOnDeviceAiPluginAskRunner(
                         }
                     }
                     resolvedModelId = plannedModelId
-                    when (val planned = catalog.planExact(plannedModelId, requirement)) {
+                    when (
+                        val planned = catalog.planExact(
+                            plannedModelId,
+                            requirement,
+                            request.backendProfile,
+                        )
+                    ) {
                         OnDeviceAiProviderExactModelPlanResult.ModelNotFound ->
                             fail(OnDeviceAiPluginAskFailure.MODEL_NOT_FOUND)
                         OnDeviceAiProviderExactModelPlanResult.ModelCapabilityMismatch ->
+                            fail(OnDeviceAiPluginAskFailure.MODEL_CAPABILITY_MISMATCH)
+                        OnDeviceAiProviderExactModelPlanResult.BackendUnavailable ->
                             fail(OnDeviceAiPluginAskFailure.MODEL_CAPABILITY_MISMATCH)
                         is OnDeviceAiProviderExactModelPlanResult.Planned -> {
                             val plan = planned.plan
@@ -609,6 +617,7 @@ private class ProcessOnDeviceAiPluginAskRunner(
                     capabilityIds = model.capabilityIds,
                     maximumContextBytes = model.maximumContextBytes,
                     maximumOutputBytes = model.maximumOutputBytes,
+                    backendProfiles = model.backendProfiles,
                 )
             }
             finishList(OnDeviceAiPluginModelListOutcome.Completed(summaries))

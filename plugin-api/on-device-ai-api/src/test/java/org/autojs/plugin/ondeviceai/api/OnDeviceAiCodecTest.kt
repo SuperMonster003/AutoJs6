@@ -24,6 +24,21 @@ class OnDeviceAiCodecTest {
                     capabilityIds = listOf(OnDeviceAiCapabilityId.STREAMING, OnDeviceAiCapabilityId.USAGE),
                     maximumContextBytes = 1024,
                     maximumOutputBytes = 2048,
+                    backendProfiles = listOf(
+                        AiBackendProfileInfo(
+                            OnDeviceAiBackendProfile.CPU,
+                            OnDeviceAiBackendAvailability.AVAILABLE,
+                        ),
+                        AiBackendProfileInfo(
+                            OnDeviceAiBackendProfile.GPU,
+                            OnDeviceAiBackendAvailability.AVAILABLE,
+                        ),
+                        AiBackendProfileInfo(
+                            OnDeviceAiBackendProfile.NPU,
+                            OnDeviceAiBackendAvailability.UNAVAILABLE,
+                            OnDeviceAiBackendUnavailableReason.NPU_RUNTIME_NOT_PACKAGED,
+                        ),
+                    ),
                 ),
             ),
             nextPageToken = "page-token-2",
@@ -42,7 +57,13 @@ class OnDeviceAiCodecTest {
             acceptedSchemaMimeTypes = schemaMimeTypes,
         )
         val capabilityIds = mutableListOf(OnDeviceAiCapabilityId.STREAMING)
-        val model = AiModelInfo("fake.echo", "Fake echo", capabilityIds, 1024, 2048)
+        val backendProfiles = mutableListOf(
+            AiBackendProfileInfo(
+                OnDeviceAiBackendProfile.CPU,
+                OnDeviceAiBackendAvailability.AVAILABLE,
+            ),
+        )
+        val model = AiModelInfo("fake.echo", "Fake echo", capabilityIds, 1024, 2048, backendProfiles)
         val models = mutableListOf(model)
         val page = AiModelPage("generation-1", models)
         val part = AiContentPart(textPayload("Hello"))
@@ -80,6 +101,7 @@ class OnDeviceAiCodecTest {
         textMimeTypes.clear()
         schemaMimeTypes.clear()
         capabilityIds.clear()
+        backendProfiles.clear()
         models.clear()
         parts.clear()
         requiredCapabilityIds.clear()
@@ -91,6 +113,7 @@ class OnDeviceAiCodecTest {
         assertEquals(listOf(OnDeviceAiMimeType.PLAIN, OnDeviceAiMimeType.JSON), negotiatedCapabilities.acceptedTextMimeTypes)
         assertEquals(listOf(OnDeviceAiMimeType.JSON), negotiatedCapabilities.acceptedSchemaMimeTypes)
         assertEquals(listOf(OnDeviceAiCapabilityId.STREAMING), model.capabilityIds)
+        assertEquals(listOf(OnDeviceAiBackendProfile.CPU), model.backendProfiles.map { it.profileId })
         assertEquals(listOf(model), page.models)
         assertEquals(listOf(part), message.parts)
         assertEquals(listOf(OnDeviceAiCapabilityId.STREAMING), options.requiredCapabilityIds)
@@ -101,6 +124,7 @@ class OnDeviceAiCodecTest {
 
         assertEquals(negotiatedCapabilities.acceptedTextMimeTypes, negotiatedCapabilities.component15())
         assertEquals(model.capabilityIds, model.component3())
+        assertEquals(model.backendProfiles, model.component6())
         val (_, componentModels) = page
         val (_, componentParts) = message
         val (_, _, _, _, _, _, _, _, _, _, componentRequiredCapabilityIds) = options
@@ -118,6 +142,13 @@ class OnDeviceAiCodecTest {
         assertFrozen(negotiatedCapabilities.acceptedTextMimeTypes, OnDeviceAiMimeType.PLAIN)
         assertFrozen(negotiatedCapabilities.acceptedSchemaMimeTypes, OnDeviceAiMimeType.JSON)
         assertFrozen(model.capabilityIds, OnDeviceAiCapabilityId.USAGE)
+        assertFrozen(
+            model.backendProfiles,
+            AiBackendProfileInfo(
+                OnDeviceAiBackendProfile.GPU,
+                OnDeviceAiBackendAvailability.AVAILABLE,
+            ),
+        )
         assertFrozen(page.models, model)
         assertFrozen(message.parts, part)
         assertFrozen(options.requiredCapabilityIds, OnDeviceAiCapabilityId.USAGE)
@@ -190,6 +221,7 @@ class OnDeviceAiCodecTest {
             topK = 32,
             topP = 0.9,
             persistentSession = true,
+            backendProfile = OnDeviceAiBackendProfile.GPU,
         )
 
         assertEquals(options, OnDeviceAiCodec.decodeGenerationOptions(OnDeviceAiCodec.encodeGenerationOptions(options)))
@@ -207,6 +239,14 @@ class OnDeviceAiCodecTest {
         assertThrows(IllegalArgumentException::class.java) { options.copy(maximumOutputTokens = 0) }
         assertThrows(IllegalArgumentException::class.java) {
             options.copy(maximumOutputTokens = OnDeviceAiLimits.MAX_OUTPUT_TOKENS + 1L)
+        }
+        assertThrows(IllegalArgumentException::class.java) { options.copy(backendProfile = "unknown") }
+        assertThrows(IllegalArgumentException::class.java) {
+            AiBackendProfileInfo(
+                OnDeviceAiBackendProfile.GPU,
+                OnDeviceAiBackendAvailability.AVAILABLE,
+                OnDeviceAiBackendUnavailableReason.OPENCL_LIBRARY_UNAVAILABLE,
+            )
         }
     }
 

@@ -4,6 +4,7 @@ import com.google.gson.JsonParser
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.autojs.autojs.core.plugin.ai.toGenerationOptions
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendProfile
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
 import org.junit.Assert.assertEquals
@@ -147,7 +148,8 @@ class AiPluginAskInputMapperTest {
                     "temperature": 0.75,
                     "topK": 32,
                     "topP": 0.9,
-                    "maxTokens": 512
+                    "maxTokens": 512,
+                    "backend": "GPU"
                 """.trimIndent(),
             ),
             defaultTimeoutMillis = 9_000L,
@@ -157,6 +159,7 @@ class AiPluginAskInputMapperTest {
         assertEquals(32, request.topK)
         assertEquals(0.9, request.topP!!, 0.0)
         assertEquals(512L, request.maximumOutputTokens)
+        assertEquals(OnDeviceAiBackendProfile.GPU, request.backendProfile)
         val protocolOptions = request.toGenerationOptions(
             stream = true,
             maximumOutputBytes = 4_096,
@@ -167,6 +170,7 @@ class AiPluginAskInputMapperTest {
         assertEquals(32, protocolOptions.topK)
         assertEquals(0.9, protocolOptions.topP!!, 0.0)
         assertEquals(512L, protocolOptions.maximumOutputTokens)
+        assertEquals(OnDeviceAiBackendProfile.GPU, protocolOptions.backendProfile)
         assertEquals(listOf(OnDeviceAiCapabilityId.STREAMING), protocolOptions.requiredCapabilityIds)
         assertTrue(protocolOptions.reportUsage)
 
@@ -175,6 +179,7 @@ class AiPluginAskInputMapperTest {
         assertNull(defaults.topK)
         assertNull(defaults.topP)
         assertNull(defaults.maximumOutputTokens)
+        assertEquals(OnDeviceAiBackendProfile.CPU, defaults.backendProfile)
     }
 
     @Test
@@ -190,6 +195,8 @@ class AiPluginAskInputMapperTest {
             "\"maxTokens\": 0",
             "\"maxTokens\": 1.5",
             "\"maxTokens\": 2147483648",
+            "\"backend\": 7",
+            "\"backend\": \"dsp\"",
         ).forEach { option ->
             assertThrows(option, IllegalArgumentException::class.java) {
                 AiPluginAskInputMapper.map(

@@ -122,6 +122,16 @@ internal class AiPluginModelListRuntime(
                             "capabilityIds" to model.capabilityIds,
                             "maximumContextBytes" to model.maximumContextBytes,
                             "maximumOutputBytes" to model.maximumOutputBytes,
+                            "backendProfiles" to model.backendProfiles.map { profile ->
+                                linkedMapOf<String, Any?>(
+                                    "id" to profile.profileId,
+                                    "availability" to profile.availability,
+                                ).apply {
+                                    profile.unavailableReason?.let { reason ->
+                                        put("unavailableReason", reason)
+                                    }
+                                }
+                            },
                         )
                     }
                     finish { onDelivered ->

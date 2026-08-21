@@ -5,6 +5,7 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendProfile
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
 
 /** Strict text-message admission for the explicitly selected local plugin route. */
@@ -37,6 +38,12 @@ internal object AiPluginAskInputMapper {
             require(it in 1L..OnDeviceAiLimits.MAX_OUTPUT_TOKENS) {
                 "AI option maxTokens must be between 1 and ${OnDeviceAiLimits.MAX_OUTPUT_TOKENS}"
             }
+        }
+        val backendProfile = pluginOptions.takeOptionalString("backend", "AI option backend")
+            ?.lowercase()
+            ?: OnDeviceAiBackendProfile.CPU
+        require(backendProfile in OnDeviceAiBackendProfile.VALUES) {
+            "AI option backend must be one of ${OnDeviceAiBackendProfile.VALUES.sorted().joinToString()}"
         }
         val structuredJsonOption = pluginOptions.takeOptionalBoolean(
             "structuredJson",
@@ -96,6 +103,7 @@ internal object AiPluginAskInputMapper {
             topK = topK,
             topP = topP,
             responseSchemaJson = effectiveResponseSchemaJson,
+            backendProfile = backendProfile,
         )
     }
 
@@ -149,6 +157,16 @@ internal object AiPluginAskInputMapper {
             }
         }
         return string
+    }
+
+    private fun JsonObject.takeOptionalString(name: String, label: String): String? {
+        val value = remove(name) ?: return null
+        if (value.isJsonNull) return null
+        require(value.isJsonPrimitive && value.asJsonPrimitive.isString) { "$label must be a string" }
+        return value.asString.trim().also { string ->
+            require(string.isNotEmpty()) { "$label must not be empty" }
+            require(string.none(Character::isISOControl)) { "$label contains control characters" }
+        }
     }
 
     private const val DEFAULT_RESPONSE_SCHEMA_JSON = "{\"type\":\"object\"}"

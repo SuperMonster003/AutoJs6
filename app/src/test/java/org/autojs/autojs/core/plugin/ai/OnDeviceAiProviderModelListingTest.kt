@@ -4,10 +4,14 @@ import org.autojs.plugin.ai.common.api.AiCommonCodec
 import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiError
 import org.autojs.plugin.ai.common.api.AiErrorCode
+import org.autojs.plugin.ondeviceai.api.AiBackendProfileInfo
 import org.autojs.plugin.ondeviceai.api.AiModelInfo
 import org.autojs.plugin.ondeviceai.api.AiModelListRequest
 import org.autojs.plugin.ondeviceai.api.AiModelPage
 import org.autojs.plugin.ondeviceai.api.AiModelPageTokenLedger
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendAvailability
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendProfile
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendUnavailableReason
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCodec
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
@@ -587,6 +591,10 @@ class OnDeviceAiProviderModelListingTest {
                 ),
             ),
         )
+        assertSame(
+            OnDeviceAiProviderExactModelPlanResult.BackendUnavailable,
+            catalog.planExact(MODEL_ONE, backendProfile = OnDeviceAiBackendProfile.GPU),
+        )
         assertFalse(catalog.toString().contains(SECRET_MODEL_DISPLAY))
         assertFalse(completed.toString().contains(SECRET_MODEL_DISPLAY))
     }
@@ -632,12 +640,24 @@ class OnDeviceAiProviderModelListingTest {
         modelId: String,
         displayName: String = "Fixture model",
         capabilities: List<String> = listOf(OnDeviceAiCapabilityId.STREAMING),
+        backendProfiles: List<AiBackendProfileInfo> = listOf(
+            AiBackendProfileInfo(
+                OnDeviceAiBackendProfile.CPU,
+                OnDeviceAiBackendAvailability.AVAILABLE,
+            ),
+            AiBackendProfileInfo(
+                OnDeviceAiBackendProfile.GPU,
+                OnDeviceAiBackendAvailability.UNAVAILABLE,
+                OnDeviceAiBackendUnavailableReason.OPENCL_LIBRARY_UNAVAILABLE,
+            ),
+        ),
     ) = AiModelInfo(
         modelId = modelId,
         displayName = displayName,
         capabilityIds = capabilities,
         maximumContextBytes = 64L * 1024L,
         maximumOutputBytes = 64L * 1024L,
+        backendProfiles = backendProfiles,
     )
 
     private fun dispatch(

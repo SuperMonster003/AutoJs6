@@ -68,22 +68,41 @@ object OnDeviceAiCodec {
     }
 
     fun encodeModelInfo(value: AiModelInfo): ByteArray =
-        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_MODEL_INFO, 1, 0)
+        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_MODEL_INFO, 1, 1)
             .string(1, value.modelId, true)
             .string(2, value.displayName, true)
             .strings(3, value.capabilityIds)
             .int64(4, value.maximumContextBytes, true)
             .int64(5, value.maximumOutputBytes, true)
+            .apply { value.backendProfiles.forEach { document(6, encodeBackendProfileInfo(it)) } }
             .encode()
 
     fun decodeModelInfo(bytes: ByteArray): AiModelInfo {
-        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_MODEL_INFO, (1..5).toSet(), setOf(3))
+        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_MODEL_INFO, (1..6).toSet(), setOf(3, 6))
+        val backendProfiles = document.documents(6).map(::decodeBackendProfileInfo)
         return AiModelInfo(
             modelId = document.requireString(1),
             displayName = document.requireString(2),
             capabilityIds = document.strings(3),
             maximumContextBytes = document.requireInt64(4),
             maximumOutputBytes = document.requireInt64(5),
+            backendProfiles = backendProfiles.ifEmpty(::defaultBackendProfiles),
+        )
+    }
+
+    fun encodeBackendProfileInfo(value: AiBackendProfileInfo): ByteArray =
+        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_BACKEND_PROFILE_INFO, 1, 0)
+            .string(1, value.profileId, true)
+            .string(2, value.availability, true)
+            .apply { value.unavailableReason?.let { string(3, it, true) } }
+            .encode()
+
+    fun decodeBackendProfileInfo(bytes: ByteArray): AiBackendProfileInfo {
+        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_BACKEND_PROFILE_INFO, (1..3).toSet())
+        return AiBackendProfileInfo(
+            profileId = document.requireString(1),
+            availability = document.requireString(2),
+            unavailableReason = document.optionalString(3),
         )
     }
 
@@ -138,7 +157,11 @@ object OnDeviceAiCodec {
     }
 
     fun encodeGenerationOptions(value: AiGenerationOptions): ByteArray =
-        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, 1, 2)
+        TaggedWireWriter(
+            OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS,
+            1,
+            if (value.backendProfile == OnDeviceAiBackendProfile.CPU) 2 else 3,
+        )
             .boolean(1, value.stream, true)
             .boolean(2, value.includeReasoning, true)
             .boolean(3, value.structuredJson, true)
@@ -154,10 +177,16 @@ object OnDeviceAiCodec {
             .apply { value.topK?.let { int32(13, it) } }
             .apply { value.topP?.let { float64(14, it) } }
             .boolean(15, value.persistentSession, true)
+            .apply {
+                if (value.backendProfile != OnDeviceAiBackendProfile.CPU) {
+                    // An older provider must reject instead of silently falling back to CPU.
+                    string(16, value.backendProfile, true)
+                }
+            }
             .encode()
 
     fun decodeGenerationOptions(bytes: ByteArray): AiGenerationOptions {
-        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, (1..15).toSet(), setOf(11))
+        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, (1..16).toSet(), setOf(11))
         return AiGenerationOptions(
             stream = document.requireBoolean(1),
             includeReasoning = document.requireBoolean(2),
@@ -174,6 +203,7 @@ object OnDeviceAiCodec {
             topK = document.optionalInt32(13),
             topP = document.optionalFloat64(14),
             persistentSession = document.requireBoolean(15),
+            backendProfile = document.optionalString(16) ?: OnDeviceAiBackendProfile.CPU,
         )
     }
 
@@ -358,4 +388,11 @@ object OnDeviceAiCodec {
         .requireSchema(schemaId, 1)
         .rejectUnknownRequiredFields(knownTags)
         .validateKnownCardinality(knownTags, repeatedTags)
+
+    private fun defaultBackendProfiles(): List<AiBackendProfileInfo> = listOf(
+        AiBackendProfileInfo(
+            profileId = OnDeviceAiBackendProfile.CPU,
+            availability = OnDeviceAiBackendAvailability.AVAILABLE,
+        ),
+    )
 }
