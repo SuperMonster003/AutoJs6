@@ -1,1 +1,0 @@
-Starting: Intent { cmp=org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias }

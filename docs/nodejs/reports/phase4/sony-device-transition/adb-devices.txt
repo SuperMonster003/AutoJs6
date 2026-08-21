@@ -1,3 +1,0 @@
-List of devices attached
-QV710AF65F             device product:XQ-AT72_CN model:XQ_AT72 device:XQ-AT72 transport_id:15
-

@@ -1,3 +1,0 @@
-List of devices attached
-63751f63               device product:OPD2413 model:OPD2413 device:OP615EL1 transport_id:8
-QV710AF65F             device product:XQ-AT72_CN model:XQ_AT72 device:XQ-AT72 transport_id:6

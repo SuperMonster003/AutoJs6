@@ -1,1 +1,0 @@
-instrumentation:org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner (target=org.autojs.autojs6)

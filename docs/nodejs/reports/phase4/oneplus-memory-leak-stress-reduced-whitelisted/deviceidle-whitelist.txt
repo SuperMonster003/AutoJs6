@@ -1,2 +1,0 @@
-Added: org.autojs.autojs6
-Added: org.autojs.autojs6.test

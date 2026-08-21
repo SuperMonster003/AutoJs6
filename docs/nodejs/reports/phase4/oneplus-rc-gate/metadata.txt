@@ -1,4 +1,0 @@
-Phase 4 Task 91 OnePlus RC Gate
-Started: 2026-06-15T17:28:40.7061547+08:00
-ANDROID_SERIAL=63751f63
-Command: .\gradlew.bat --console=plain :app:verifyEmbeddedNodeReleaseCandidate

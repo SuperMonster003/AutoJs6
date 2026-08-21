@@ -1,3 +1,0 @@
-06-15 17:29:05.947  1932  1932 W android.hardware.power.stats-impl.oplus: PruneException: Unknown binder exception (2) pruned into EX_TRANSACTION_FAILED
-06-15 17:29:06.450  4125  4413 D HWUI    : OplusRenderNodeAnimator end!
-06-15 17:29:08.540  4125  4413 D HWUI    : OplusRenderNodeAnimator end!

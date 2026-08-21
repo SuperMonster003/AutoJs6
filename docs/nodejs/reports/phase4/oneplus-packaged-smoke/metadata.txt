@@ -1,5 +1,0 @@
-Phase 4 Task 92 OnePlus packaged smoke
-Started: 2026-06-15T17:36:20.9655890+08:00
-ANDROID_SERIAL=63751f63
-Runner: org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
-Class: org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest

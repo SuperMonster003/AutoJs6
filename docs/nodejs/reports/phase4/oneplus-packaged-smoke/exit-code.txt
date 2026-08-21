@@ -1,5 +1,0 @@
-assembleExitCode=0
-appInstallExitCode=0
-testInstallExitCode=0
-instrumentationExitCode=0
-Finished: 2026-06-15T18:15:40.2059897+08:00
