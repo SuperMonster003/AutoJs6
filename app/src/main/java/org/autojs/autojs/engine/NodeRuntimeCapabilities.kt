@@ -104,6 +104,18 @@ object NodeRuntimeCapabilities {
     const val RUNTIME_MODULE_SOURCE_REQUEST_MAX_COUNT =
         RUNTIME_MODULE_SOURCE_MAX_COUNT + RUNTIME_MODULE_SOURCE_PROBE_MAX_COUNT
 
+    /**
+     * The module-source contract version this host's providers actually speak.
+     *
+     * Pinned to v1 on purpose: the shared contract in `nodejs-api` advanced to
+     * v2 (operation-aware requests such as `materialize_missing_plaintext`),
+     * but the host providers only implement v1 resolve semantics, and the
+     * plugin's one-shot v2-to-v1 downgrade negotiation relies on providers
+     * answering with exactly this version. Raise it only together with a real
+     * v2 operation implementation.
+     */
+    const val RUNTIME_MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 1
+
     val featureFlags = listOf(
         NodeRuntimeFeatureFlag(
             id = "esm",

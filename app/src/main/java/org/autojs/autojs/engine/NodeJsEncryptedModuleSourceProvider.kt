@@ -164,7 +164,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
         val rootStatus = root.currentStatus().diagnosticName
         val values = linkedMapOf(
             "embedded_script.module_provider.contract_version" to
-                    NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION.toString(),
+                    PROVIDER_CONTRACT_VERSION.toString(),
             "embedded_script.module_provider.id" to providerId,
             "embedded_script.module_provider.runtime_module" to
                     NodeJsRuntimeContract.RUNTIME_MODULE_SOURCE_PROVIDER_NAME,
@@ -214,7 +214,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
         return Bundle().apply {
             putInt(
                 NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION,
-                NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
+                PROVIDER_CONTRACT_VERSION,
             )
             putString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_ID, providerId)
             putString(NodeJsRuntimeContract.KEY_EXECUTION_ID, executionId)
@@ -228,10 +228,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
                 NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_REQUEST_MAX_COUNT,
                 REQUEST_MAX_COUNT,
             )
-            putInt(
-                NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_PROBE_MAX_COUNT,
-                PROBE_MAX_COUNT,
-            )
+            putInt(KEY_PROBE_MAX_COUNT, PROBE_MAX_COUNT)
             values.forEach(::putString)
             putStringArray(
                 NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD,
@@ -258,7 +255,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
             NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION,
             0,
         )
-        if (requestVersion != NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION) {
+        if (requestVersion != PROVIDER_CONTRACT_VERSION) {
             return invalidRequest(
                 "Unsupported module-source provider request version: $requestVersion.",
                 "contract_version_mismatch",
@@ -767,7 +764,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
             return Bundle().apply {
                 putInt(
                     NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION,
-                    NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
+                    PROVIDER_CONTRACT_VERSION,
                 )
                 putString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_REQUEST_ID, requestId)
                 putString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_STATUS, status)
@@ -860,6 +857,14 @@ internal class NodeJsEncryptedModuleSourceProvider(
     }
 
     private companion object {
+
+        // The shared contract in nodejs-api advanced to v2; this provider still
+        // speaks v1 resolve semantics and the plugin negotiates down to it.
+        const val PROVIDER_CONTRACT_VERSION =
+            NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_PROVIDER_CONTRACT_VERSION
+
+        // Host-local diagnostics key; the shared v2 contract no longer carries it.
+        const val KEY_PROBE_MAX_COUNT = "moduleSourceProviderProbeMaxCount"
 
         const val SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
         const val TOTAL_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES

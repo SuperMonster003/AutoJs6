@@ -576,7 +576,7 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
                     ).apply {
                         putInt(
                             NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION,
-                            NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION + 1,
+                            NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_PROVIDER_CONTRACT_VERSION + 1,
                         )
                     }
                     val versionMismatch = fixture.provider.resolveModuleSource(versionMismatchRequest)
@@ -836,7 +836,7 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
     ): Bundle = Bundle().apply {
         putInt(
             NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION,
-            NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
+            NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
         )
         putString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_REQUEST_ID, requestId)
         putString(NodeJsRuntimeContract.KEY_EXECUTION_ID, executionId)
@@ -850,7 +850,7 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
         status: String,
     ) {
         assertEquals(
-            NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
+            NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
             response.getInt(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION),
         )
         assertEquals(

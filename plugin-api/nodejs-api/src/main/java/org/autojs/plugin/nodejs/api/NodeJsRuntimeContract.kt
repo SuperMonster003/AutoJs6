@@ -3,9 +3,24 @@ package org.autojs.plugin.nodejs.api
 object NodeJsRuntimeContract {
 
     const val CONTRACT_VERSION = 2
+    const val MIN_CONTRACT_VERSION = 2
+    const val MAX_CONTRACT_VERSION = CONTRACT_VERSION
     const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
-    const val MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 1
+    const val MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 2
+    // Module-source transport versioning remains independent from the runtime
+    // request contract so both published transport revisions stay readable.
+    const val MODULE_SOURCE_PROVIDER_MIN_CONTRACT_VERSION = 1
+    const val MODULE_SOURCE_PROVIDER_MAX_CONTRACT_VERSION = 2
     const val WORKSPACE_ARCHIVE_TRANSPORT_CONTRACT_VERSION = 2
+
+    @JvmStatic
+    fun supportsContractVersion(version: Int): Boolean =
+        version in MIN_CONTRACT_VERSION..MAX_CONTRACT_VERSION
+
+    @JvmStatic
+    fun supportsModuleSourceProviderContractVersion(version: Int): Boolean =
+        version in MODULE_SOURCE_PROVIDER_MIN_CONTRACT_VERSION..
+            MODULE_SOURCE_PROVIDER_MAX_CONTRACT_VERSION
 
     const val KEY_CONTRACT_VERSION = "contractVersion"
     const val KEY_RUNTIME_SLOT = "runtimeSlot"
@@ -81,6 +96,9 @@ object NodeJsRuntimeContract {
 
     const val KEY_MODULE_SOURCE_PROVIDER = "moduleSourceProvider"
     const val KEY_MODULE_SOURCE_PROVIDER_VERSION = "moduleSourceProviderVersion"
+    const val KEY_MODULE_SOURCE_PROVIDER_OPERATION = "moduleSourceProviderOperation"
+    const val KEY_MODULE_SOURCE_PROVIDER_DEADLINE_ELAPSED_REALTIME_MS =
+        "moduleSourceProviderDeadlineElapsedRealtimeMs"
     const val KEY_MODULE_SOURCE_PROVIDER_ID = "moduleSourceProviderId"
     const val KEY_MODULE_SOURCE_PROVIDER_PATH = "moduleSourceProviderPath"
     const val KEY_MODULE_SOURCE_PROVIDER_REQUEST_ID = "moduleSourceProviderRequestId"
@@ -96,21 +114,18 @@ object NodeJsRuntimeContract {
     const val KEY_MODULE_SOURCE_PROVIDER_MAX_COUNT = "moduleSourceProviderMaxCount"
     const val KEY_MODULE_SOURCE_PROVIDER_REQUEST_MAX_COUNT = "moduleSourceProviderRequestMaxCount"
 
-    /**
-     * Ceiling for requests that yield no source, namely `not_found` and
-     * `not_encrypted`. Candidate probing scales with the resolved dependency
-     * graph rather than with the number of encrypted sources, so it is bounded
-     * separately from [KEY_MODULE_SOURCE_PROVIDER_MAX_COUNT].
-     */
-    const val KEY_MODULE_SOURCE_PROVIDER_PROBE_MAX_COUNT = "moduleSourceProviderProbeMaxCount"
-
     const val MODULE_SOURCE_PROVIDER_STATUS_DECRYPTED = "decrypted"
+    const val MODULE_SOURCE_PROVIDER_STATUS_PLAINTEXT = "plaintext"
     const val MODULE_SOURCE_PROVIDER_STATUS_NOT_ENCRYPTED = "not_encrypted"
     const val MODULE_SOURCE_PROVIDER_STATUS_NOT_FOUND = "not_found"
     const val MODULE_SOURCE_PROVIDER_STATUS_DENIED = "denied"
     const val MODULE_SOURCE_PROVIDER_STATUS_CANCELLED = "cancelled"
     const val MODULE_SOURCE_PROVIDER_STATUS_TIMED_OUT = "timed_out"
     const val MODULE_SOURCE_PROVIDER_STATUS_FAILED = "failed"
+
+    const val MODULE_SOURCE_PROVIDER_OPERATION_RESOLVE_EXISTING = "resolve_existing"
+    const val MODULE_SOURCE_PROVIDER_OPERATION_MATERIALIZE_MISSING_PLAINTEXT =
+        "materialize_missing_plaintext"
 
     const val ERROR_MODULE_SOURCE_PROVIDER_INVALID_REQUEST =
         "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_INVALID_REQUEST"
@@ -139,5 +154,7 @@ object NodeJsRuntimeContract {
     const val CAPABILITY_HOST_CAPABILITY_BROKER = "hostCapabilityBroker"
     const val CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE = "hostCapabilityLiveBridge"
     const val CAPABILITY_ON_DEMAND_MODULE_SOURCE_PROVIDER = "onDemandModuleSourceProvider"
+    const val CAPABILITY_HOST_PLAINTEXT_MODULE_SOURCE_MATERIALIZATION =
+        "hostPlaintextModuleSourceMaterialization"
     const val CAPABILITY_SCOPED_WORKSPACE_ARCHIVE_TRANSPORT = "scopedWorkspaceArchiveTransport"
 }
