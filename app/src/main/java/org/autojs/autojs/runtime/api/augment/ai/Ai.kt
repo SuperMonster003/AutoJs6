@@ -7,6 +7,8 @@ import com.google.gson.JsonParser
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.runtime.api.ai.AiRequestInput
 import org.autojs.autojs.runtime.api.ai.AiService
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -26,6 +28,7 @@ class Ai(
         ::ask.name,
         ::chat.name,
         ::stream.name,
+        ::session.name,
         ::models.name,
         ::profiles.name,
         ::providers.name,
@@ -55,6 +58,12 @@ class Ai(
     fun stream(runtime: ScriptRuntime, args: Array<out Any?>): AiStream {
         check(runtime === scriptRuntime) { "AI module belongs to a different script runtime" }
         return aiService.stream(parseRequestArguments(args))
+    }
+
+    @RhinoRuntimeFunctionInterface
+    fun session(runtime: ScriptRuntime, args: Array<out Any?>): Any {
+        check(runtime === scriptRuntime) { "AI module belongs to a different script runtime" }
+        return aiService.session(parseSessionArguments(args)).toJsPromise(runtime)
     }
 
     @RhinoRuntimeFunctionInterface
@@ -92,6 +101,58 @@ class Ai(
     }
 
     companion object {
+
+        /** `ai.session()` is an explicitly local, persistent on-device plugin route. */
+        internal fun parseSessionArguments(args: Array<out Any?>): AiRequestInput {
+            return ensureArgumentsLengthInRange(args, 0..1) { argumentList ->
+                val options = argumentList.getOrNull(0)
+                    ?.takeUnless { it.isJsNullish() }
+                    ?.let { parseObject(it, "session options") }
+                    ?: JsonObject()
+                if (!options.has("plugin")) options.addProperty("plugin", true)
+
+                val system = options.remove("system")?.let { value ->
+                    require(value.isJsonPrimitive && value.asJsonPrimitive.isString) {
+                        "AI session option system must be a string"
+                    }
+                    value.asString.also {
+                        require(it.isNotEmpty()) { "AI session option system must not be empty" }
+                    }
+                }
+                val messages = JsonArray().apply {
+                    system?.let { content ->
+                        add(JsonObject().apply {
+                            addProperty("role", "system")
+                            addProperty("content", content)
+                        })
+                    }
+                    // Planning needs the same request shape as the first turn. This marker is
+                    // replaced before any request is sent to the provider.
+                    add(JsonObject().apply {
+                        addProperty("role", "user")
+                        addProperty("content", "-")
+                    })
+                }
+                AiRequestInput(messages, options)
+            }
+        }
+
+        internal fun parseSessionTurnArguments(
+            args: Array<out Any?>,
+        ): OnDeviceAiPluginMessage {
+            return ensureArgumentsLengthInRange(args, 1..1) { argumentList ->
+                val prompt = parseJson(argumentList[0], "session prompt")
+                if (!prompt.isJsonPrimitive || !prompt.asJsonPrimitive.isString) {
+                    throw WrappedIllegalArgumentException(
+                        "AI session prompt must be a string",
+                    )
+                }
+                OnDeviceAiPluginMessage(
+                    role = OnDeviceAiPluginMessageRole.USER,
+                    content = prompt.asString,
+                )
+            }
+        }
 
         /** `ai.models()` defaults to the official on-device plugin; options may narrow it. */
         internal fun parseModelListArguments(args: Array<out Any?>): AiRequestInput {

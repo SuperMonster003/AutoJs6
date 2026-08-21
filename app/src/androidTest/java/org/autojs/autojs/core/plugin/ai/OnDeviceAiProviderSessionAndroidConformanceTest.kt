@@ -407,7 +407,7 @@ class OnDeviceAiProviderSessionAndroidConformanceTest {
         val promptBytes = prompt.toByteArray(Charsets.UTF_8)
         return OnDeviceAiRequest(
             requestId = "android-hostile-${modelId.substringAfterLast('.')}",
-            protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
+            protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_2,
             providerId = pinned.providerId,
             modelId = modelId,
             messages = listOf(
@@ -496,7 +496,7 @@ class OnDeviceAiProviderSessionAndroidConformanceTest {
         )
         return OnDeviceAiRequest(
             requestId = "android-session-request",
-            protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
+            protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_2,
             providerId = pinned.providerId,
             modelId = FAKE_STREAM_MODEL,
             messages = listOf(

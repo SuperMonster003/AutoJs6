@@ -4,6 +4,8 @@ import android.os.ParcelFileDescriptor;
 
 oneway interface IOnDeviceAiSession {
 
+    void generateNext(in byte[] request, in ParcelFileDescriptor[] descriptors);
+
     void grantCredits(int count);
 
     void submitToolResults(in byte[] results, in ParcelFileDescriptor[] descriptors);

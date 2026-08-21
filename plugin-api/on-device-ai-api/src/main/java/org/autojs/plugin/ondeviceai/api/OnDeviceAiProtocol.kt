@@ -10,16 +10,12 @@ object OnDeviceAiProtocol {
     const val ACTION_PROVIDER = "org.autojs.plugin.ON_DEVICE_AI"
     const val PLUGIN_PERMISSION = AiCommonProtocol.PLUGIN_PERMISSION
 
-    /**
-     * Protocol 1.1 makes generation sampling explicit. The contract has not been published yet,
-     * so hosts and providers deliberately require the exact version instead of pretending that a
-     * 1.0 provider can honor fields it would silently ignore.
-     */
-    val PROTOCOL_V1_1 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 1)
+    /** Protocol 1.2 adds an explicitly negotiated persistent Conversation lifecycle. */
+    val PROTOCOL_V1_2 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 2)
 
     val HOST_PROTOCOL_RANGE = AiProtocolRange(
-        PROTOCOL_V1_1,
-        PROTOCOL_V1_1,
+        PROTOCOL_V1_2,
+        PROTOCOL_V1_2,
     )
 
     const val SCHEMA_CAPABILITIES = 0x4F44_0001
@@ -47,8 +43,16 @@ object OnDeviceAiCapabilityId {
     const val TOOLS = "tools"
     const val STRUCTURED_JSON = "structured-json"
     const val USAGE = "usage"
+    const val PERSISTENT_SESSION = "persistent-session"
 
-    val VALUES: Set<String> = immutableSetOf(STREAMING, REASONING, TOOLS, STRUCTURED_JSON, USAGE)
+    val VALUES: Set<String> = immutableSetOf(
+        STREAMING,
+        REASONING,
+        TOOLS,
+        STRUCTURED_JSON,
+        USAGE,
+        PERSISTENT_SESSION,
+    )
 }
 
 object AiMessageRole {

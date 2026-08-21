@@ -24,7 +24,7 @@ object FakeOnDeviceAiFixture {
     const val MODEL_REASONING = "fake.reasoning"
     const val MODEL_TOOLS = "fake.tools"
 
-    val protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1
+    val protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_2
 
     val providerInfo = AiProviderInfo(
         providerId = PROVIDER_ID,

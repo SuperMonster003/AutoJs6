@@ -7,6 +7,7 @@ import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.Context
@@ -92,6 +93,32 @@ class AiInputCompatibilityTest {
                 .getAsJsonArray("content")[0].asJsonObject
                 .get("text").asString,
         )
+    }
+
+    @Test
+    fun sessionOptionsCreateSystemPrefaceAndLocalPlanningMarker() {
+        val options = evaluate(
+            """({ system: "Keep answers short", temperature: 0.25 })""",
+        )
+
+        val input = Ai.parseSessionArguments(arrayOf(options))
+
+        assertTrue(input.options.get("plugin").asBoolean)
+        assertFalse(input.options.has("system"))
+        assertEquals(0.25, input.options.get("temperature").asDouble, 0.0)
+        assertEquals(2, input.messages.size())
+        assertEquals("system", input.messages[0].asJsonObject.get("role").asString)
+        assertEquals("Keep answers short", input.messages[0].asJsonObject.get("content").asString)
+        assertEquals("user", input.messages[1].asJsonObject.get("role").asString)
+        assertEquals("-", input.messages[1].asJsonObject.get("content").asString)
+    }
+
+    @Test
+    fun sessionTurnAcceptsExactlyOneNewUserPrompt() {
+        val message = Ai.parseSessionTurnArguments(arrayOf("Only this turn is serialized"))
+
+        assertEquals("USER", message.role.name)
+        assertEquals("Only this turn is serialized", message.content)
     }
 
     @Test

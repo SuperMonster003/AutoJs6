@@ -6,9 +6,9 @@ import org.junit.Test
 class OnDeviceAiGoldenWireTest {
 
     @Test
-    fun firstModelPageRequestMatchesProtocolV11GoldenDocument() {
+    fun firstModelPageRequestMatchesProtocolV12GoldenDocument() {
         val request = AiModelListRequest(
-            protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
+            protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_2,
             pageSize = 32,
         )
 
@@ -33,7 +33,7 @@ class OnDeviceAiGoldenWireTest {
         const val GOLDEN_HEX =
             "414a365700000001000000584f440002000000010000000000000003" +
                 "0000000100000001000000010000000400000001" +
-                "0000000200000001000000010000000400000001" +
+                "0000000200000001000000010000000400000002" +
                 "0000000300000001000000010000000400000020"
     }
 }

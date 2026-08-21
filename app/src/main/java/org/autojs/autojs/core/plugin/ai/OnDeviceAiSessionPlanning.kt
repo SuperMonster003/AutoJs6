@@ -190,6 +190,7 @@ private fun MessageDigest.putCapabilities(value: OnDeviceAiCapabilities) {
     put(value.supportsTools)
     put(value.supportsStructuredJson)
     put(value.supportsUsage)
+    put(value.supportsPersistentSessions)
     put(value.maximumMessages)
     put(value.maximumContentParts)
     put(value.maximumToolDefinitions)

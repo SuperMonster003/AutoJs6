@@ -7,7 +7,7 @@ import org.autojs.plugin.protocol.wire.TaggedWireWriter
 
 object OnDeviceAiCodec {
     fun encodeCapabilities(value: OnDeviceAiCapabilities): ByteArray =
-        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_CAPABILITIES, 1, 0)
+        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_CAPABILITIES, 1, 1)
             .boolean(1, value.supportsStreaming, true)
             .boolean(2, value.supportsReasoning, true)
             .boolean(3, value.supportsTools, true)
@@ -24,10 +24,11 @@ object OnDeviceAiCodec {
             .int32(14, value.maximumSessionDescriptors, true)
             .strings(15, value.acceptedTextMimeTypes)
             .strings(16, value.acceptedSchemaMimeTypes)
+            .boolean(17, value.supportsPersistentSessions, true)
             .encode()
 
     fun decodeCapabilities(bytes: ByteArray): OnDeviceAiCapabilities {
-        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_CAPABILITIES, (1..16).toSet(), setOf(15, 16))
+        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_CAPABILITIES, (1..17).toSet(), setOf(15, 16))
         return OnDeviceAiCapabilities(
             supportsStreaming = document.requireBoolean(1),
             supportsReasoning = document.requireBoolean(2),
@@ -45,6 +46,7 @@ object OnDeviceAiCodec {
             maximumSessionDescriptors = document.requireInt32(14),
             acceptedTextMimeTypes = document.strings(15),
             acceptedSchemaMimeTypes = document.strings(16),
+            supportsPersistentSessions = document.requireBoolean(17),
         )
     }
 
@@ -136,7 +138,7 @@ object OnDeviceAiCodec {
     }
 
     fun encodeGenerationOptions(value: AiGenerationOptions): ByteArray =
-        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, 1, 1)
+        TaggedWireWriter(OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, 1, 2)
             .boolean(1, value.stream, true)
             .boolean(2, value.includeReasoning, true)
             .boolean(3, value.structuredJson, true)
@@ -151,10 +153,11 @@ object OnDeviceAiCodec {
             .apply { value.temperature?.let { float64(12, it) } }
             .apply { value.topK?.let { int32(13, it) } }
             .apply { value.topP?.let { float64(14, it) } }
+            .boolean(15, value.persistentSession, true)
             .encode()
 
     fun decodeGenerationOptions(bytes: ByteArray): AiGenerationOptions {
-        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, (1..14).toSet(), setOf(11))
+        val document = document(bytes, OnDeviceAiProtocol.SCHEMA_GENERATION_OPTIONS, (1..15).toSet(), setOf(11))
         return AiGenerationOptions(
             stream = document.requireBoolean(1),
             includeReasoning = document.requireBoolean(2),
@@ -170,6 +173,7 @@ object OnDeviceAiCodec {
             temperature = document.optionalFloat64(12),
             topK = document.optionalInt32(13),
             topP = document.optionalFloat64(14),
+            persistentSession = document.requireBoolean(15),
         )
     }
 

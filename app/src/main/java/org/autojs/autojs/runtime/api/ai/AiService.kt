@@ -30,12 +30,14 @@ import org.autojs.autojs.core.ai.transport.SseReader
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListRequest
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginSessionRunner
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.autojs.autojs.core.plugin.ai.AndroidOnDeviceAiPluginAskRunner
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.augment.ai.AiSessionNativeObject
 import org.autojs.autojs.runtime.api.augment.ai.AiStream
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -61,6 +63,7 @@ class AiService private constructor(
     sourceClient: OkHttpClient,
     pluginAskRuntimeFactory: () -> AiPluginAskRuntime,
     pluginStreamRuntimeFactory: () -> AiPluginStreamRuntime,
+    pluginSessionRuntimeFactory: () -> AiPluginSessionRuntime,
     pluginModelListRuntimeFactory: () -> AiPluginModelListRuntime,
 ) {
 
@@ -90,6 +93,14 @@ class AiService private constructor(
             )
         },
         {
+            AiPluginSessionRuntime(
+                runnerProvider = {
+                    AndroidOnDeviceAiPluginAskRunner.createSession(context.applicationContext)
+                },
+                dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
+            )
+        },
+        {
             AiPluginModelListRuntime(
                 runnerProvider = {
                     AndroidOnDeviceAiPluginAskRunner.createModelList(context.applicationContext)
@@ -107,6 +118,8 @@ class AiService private constructor(
         pluginDispatcherFactory: () -> AiAsyncDispatcher,
         pluginStreamRunner: OnDeviceAiPluginStreamRunner =
             AndroidOnDeviceAiPluginAskRunner.createStream(context.applicationContext),
+        pluginSessionRunner: OnDeviceAiPluginSessionRunner =
+            AndroidOnDeviceAiPluginAskRunner.createSession(context.applicationContext),
         pluginModelListRunner: OnDeviceAiPluginModelListRunner =
             AndroidOnDeviceAiPluginAskRunner.createModelList(context.applicationContext),
     ) : this(
@@ -127,6 +140,12 @@ class AiService private constructor(
             )
         },
         {
+            AiPluginSessionRuntime(
+                runnerProvider = { pluginSessionRunner },
+                dispatcherFactory = pluginDispatcherFactory,
+            )
+        },
+        {
             AiPluginModelListRuntime(
                 runnerProvider = { pluginModelListRunner },
                 dispatcherFactory = pluginDispatcherFactory,
@@ -139,12 +158,16 @@ class AiService private constructor(
     private val activePromises =
         ConcurrentHashMap<AiAsyncDispatcher, AtomicReference<Call?>>()
     private val activeStreams = ConcurrentHashMap.newKeySet<AiStream.Controller>()
+    private val activePluginSessions = ConcurrentHashMap.newKeySet<AiSessionNativeObject>()
     private val client = AiHttpClientFactory.create(sourceClient)
     private val pluginAskRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         pluginAskRuntimeFactory()
     }
     private val pluginStreamRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         pluginStreamRuntimeFactory()
+    }
+    private val pluginSessionRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        pluginSessionRuntimeFactory()
     }
     private val pluginModelListRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         pluginModelListRuntimeFactory()
@@ -236,6 +259,21 @@ class AiService private constructor(
         return stream
     }
 
+    fun session(input: AiRequestInput): ScriptPromiseAdapter {
+        val request = try {
+            AiPluginAskInputMapper.map(input, DEFAULT_CALL_TIMEOUT_MILLIS)
+        } catch (_: Exception) {
+            return rejectPluginSession(invalidPluginRequest())
+        }
+        val target = AiSessionNativeObject(
+            scriptRuntime = scriptRuntime,
+            baseRequest = request,
+            onClosed = activePluginSessions::remove,
+        )
+        activePluginSessions.add(target)
+        return pluginSessionRuntime().open(request, target)
+    }
+
     /**
      * Lists models of an explicitly selected local AI plugin. `options.plugin` follows the same
      * shorthand as ask/chat/stream (`true` or a partial selector picks the official plugin).
@@ -303,9 +341,13 @@ class AiService private constructor(
             if (pluginStreamRuntimeDelegate.isInitialized()) {
                 pluginStreamRuntimeDelegate.value.close()
             }
+            if (pluginSessionRuntimeDelegate.isInitialized()) {
+                pluginSessionRuntimeDelegate.value.close()
+            }
             if (pluginModelListRuntimeDelegate.isInitialized()) {
                 pluginModelListRuntimeDelegate.value.close()
             }
+            activePluginSessions.toList().forEach(AiSessionNativeObject::close)
             activeStreams.toList().forEach(AiStream.Controller::cancelSilently)
             activePromises.entries.toList().forEach { (dispatcher, callReference) ->
                 dispatcher.cancelSilently {
@@ -315,6 +357,7 @@ class AiService private constructor(
             }
         } finally {
             activeStreams.clear()
+            activePluginSessions.clear()
             activePromises.clear()
             AiHttpClientFactory.close(client)
         }
@@ -357,6 +400,11 @@ class AiService private constructor(
             if (closed.get()) runtime.close()
         }
 
+    private fun pluginSessionRuntime(): AiPluginSessionRuntime =
+        pluginSessionRuntimeDelegate.value.also { runtime ->
+            if (closed.get()) runtime.close()
+        }
+
     private fun pluginModelListRuntime(): AiPluginModelListRuntime =
         pluginModelListRuntimeDelegate.value.also { runtime ->
             if (closed.get()) runtime.close()
@@ -367,6 +415,17 @@ class AiService private constructor(
             code = PLUGIN_INVALID_REQUEST,
             message = "AI plugin request is invalid",
         )
+
+    private fun rejectPluginSession(error: Exception): ScriptPromiseAdapter {
+        val promise = ScriptPromiseAdapter()
+        val dispatcher = AiAsyncDispatcher(scriptRuntime)
+        if (closed.get()) {
+            dispatcher.cancelSilently()
+        } else {
+            dispatcher.reject(promise, error.toPublicError())
+        }
+        return promise
+    }
 
     private fun enqueue(
         input: AiRequestInput,

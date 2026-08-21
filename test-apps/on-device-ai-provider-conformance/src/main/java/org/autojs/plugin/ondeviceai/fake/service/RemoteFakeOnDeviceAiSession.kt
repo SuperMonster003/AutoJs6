@@ -160,6 +160,25 @@ internal class RemoteFakeOnDeviceAiSession(
         if (!accepted) pendingResultDescriptors.release(ownedResults)
     }
 
+    override fun generateNext(
+        request: ByteArray?,
+        descriptors: Array<out ParcelFileDescriptor>?,
+    ) {
+        try {
+            callerVerifier.enforceSessionOwner(ownerUid)
+        } catch (error: Throwable) {
+            OwnedParcelFileDescriptors.closeIncoming(descriptors)
+            throw error
+        }
+        OwnedParcelFileDescriptors.closeIncoming(descriptors)
+        if (machine.isActive) {
+            finishFailed(
+                AiErrorCode.UNSUPPORTED_CAPABILITY,
+                "Persistent fake sessions are not supported",
+            )
+        }
+    }
+
     override fun cancel() {
         callerVerifier.enforceSessionOwner(ownerUid)
         if (!machine.isActive) return

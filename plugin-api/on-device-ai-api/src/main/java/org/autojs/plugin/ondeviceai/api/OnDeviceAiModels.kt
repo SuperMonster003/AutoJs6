@@ -29,6 +29,7 @@ class OnDeviceAiCapabilities(
     val maximumSessionDescriptors: Int,
     acceptedTextMimeTypes: List<String>,
     acceptedSchemaMimeTypes: List<String>,
+    val supportsPersistentSessions: Boolean = false,
 ) {
     val acceptedTextMimeTypes: List<String> = immutableListSnapshot(acceptedTextMimeTypes)
     val acceptedSchemaMimeTypes: List<String> = immutableListSnapshot(acceptedSchemaMimeTypes)
@@ -72,6 +73,7 @@ class OnDeviceAiCapabilities(
     operator fun component14() = maximumSessionDescriptors
     operator fun component15() = acceptedTextMimeTypes
     operator fun component16() = acceptedSchemaMimeTypes
+    operator fun component17() = supportsPersistentSessions
 
     fun supportedCapabilityIds(): Set<String> = buildSet {
         if (supportsStreaming) add(OnDeviceAiCapabilityId.STREAMING)
@@ -79,6 +81,7 @@ class OnDeviceAiCapabilities(
         if (supportsTools) add(OnDeviceAiCapabilityId.TOOLS)
         if (supportsStructuredJson) add(OnDeviceAiCapabilityId.STRUCTURED_JSON)
         if (supportsUsage) add(OnDeviceAiCapabilityId.USAGE)
+        if (supportsPersistentSessions) add(OnDeviceAiCapabilityId.PERSISTENT_SESSION)
     }
 
     fun copy(
@@ -98,6 +101,7 @@ class OnDeviceAiCapabilities(
         maximumSessionDescriptors: Int = this.maximumSessionDescriptors,
         acceptedTextMimeTypes: List<String> = this.acceptedTextMimeTypes,
         acceptedSchemaMimeTypes: List<String> = this.acceptedSchemaMimeTypes,
+        supportsPersistentSessions: Boolean = this.supportsPersistentSessions,
     ) = OnDeviceAiCapabilities(
         supportsStreaming = supportsStreaming,
         supportsReasoning = supportsReasoning,
@@ -115,6 +119,7 @@ class OnDeviceAiCapabilities(
         maximumSessionDescriptors = maximumSessionDescriptors,
         acceptedTextMimeTypes = acceptedTextMimeTypes,
         acceptedSchemaMimeTypes = acceptedSchemaMimeTypes,
+        supportsPersistentSessions = supportsPersistentSessions,
     )
 
     override fun equals(other: Any?): Boolean =
@@ -134,7 +139,8 @@ class OnDeviceAiCapabilities(
             maximumRequestDescriptors == other.maximumRequestDescriptors &&
             maximumSessionDescriptors == other.maximumSessionDescriptors &&
             acceptedTextMimeTypes == other.acceptedTextMimeTypes &&
-            acceptedSchemaMimeTypes == other.acceptedSchemaMimeTypes
+            acceptedSchemaMimeTypes == other.acceptedSchemaMimeTypes &&
+            supportsPersistentSessions == other.supportsPersistentSessions
 
     override fun hashCode(): Int = dataClassHashCode(
         supportsStreaming,
@@ -153,6 +159,7 @@ class OnDeviceAiCapabilities(
         maximumSessionDescriptors,
         acceptedTextMimeTypes,
         acceptedSchemaMimeTypes,
+        supportsPersistentSessions,
     )
 
     override fun toString(): String =
@@ -165,7 +172,8 @@ class OnDeviceAiCapabilities(
             "maximumRequestDescriptors=$maximumRequestDescriptors, " +
             "maximumSessionDescriptors=$maximumSessionDescriptors, " +
             "acceptedTextMimeTypes=$acceptedTextMimeTypes, " +
-            "acceptedSchemaMimeTypes=$acceptedSchemaMimeTypes)"
+            "acceptedSchemaMimeTypes=$acceptedSchemaMimeTypes, " +
+            "supportsPersistentSessions=$supportsPersistentSessions)"
 }
 
 data class AiModelListRequest(
@@ -329,6 +337,7 @@ class AiGenerationOptions(
     val temperature: Double? = null,
     val topK: Int? = null,
     val topP: Double? = null,
+    val persistentSession: Boolean = false,
 ) {
     val requiredCapabilityIds: List<String> = immutableListSnapshot(requiredCapabilityIds)
 
@@ -377,6 +386,7 @@ class AiGenerationOptions(
     operator fun component12() = temperature
     operator fun component13() = topK
     operator fun component14() = topP
+    operator fun component15() = persistentSession
 
     fun copy(
         stream: Boolean = this.stream,
@@ -393,6 +403,7 @@ class AiGenerationOptions(
         temperature: Double? = this.temperature,
         topK: Int? = this.topK,
         topP: Double? = this.topP,
+        persistentSession: Boolean = this.persistentSession,
     ) = AiGenerationOptions(
         stream = stream,
         includeReasoning = includeReasoning,
@@ -408,6 +419,7 @@ class AiGenerationOptions(
         temperature = temperature,
         topK = topK,
         topP = topP,
+        persistentSession = persistentSession,
     )
 
     override fun equals(other: Any?): Boolean =
@@ -425,7 +437,8 @@ class AiGenerationOptions(
             requiredCapabilityIds == other.requiredCapabilityIds &&
             temperature == other.temperature &&
             topK == other.topK &&
-            topP == other.topP
+            topP == other.topP &&
+            persistentSession == other.persistentSession
 
     override fun hashCode(): Int = dataClassHashCode(
         stream,
@@ -442,6 +455,7 @@ class AiGenerationOptions(
         temperature,
         topK,
         topP,
+        persistentSession,
     )
 
     override fun toString(): String =
@@ -449,6 +463,7 @@ class AiGenerationOptions(
             "structuredJson=$structuredJson, reportUsage=$reportUsage, " +
             "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
             "temperature=$temperature, topK=$topK, topP=$topP, " +
+            "persistentSession=$persistentSession, " +
             "maximumToolRounds=$maximumToolRounds, timeoutMillis=$timeoutMillis, " +
             "responseMimeType=$responseMimeType, responseSchema=$responseSchema, " +
             "requiredCapabilityIds=$requiredCapabilityIds)"

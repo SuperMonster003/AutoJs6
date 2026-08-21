@@ -53,6 +53,28 @@ class AndroidOnDeviceAiPluginMessagesTest {
             streaming.requiredCapabilityIds,
         )
         assertEquals(request.inputBytes, streaming.minimumContextBytes)
+
+        val persistent = onDeviceAiPluginCapabilityRequirement(
+            request,
+            streaming = false,
+            persistentSession = true,
+        )
+        assertEquals(
+            setOf(OnDeviceAiCapabilityId.USAGE, OnDeviceAiCapabilityId.PERSISTENT_SESSION),
+            persistent.requiredCapabilityIds,
+        )
+        val options = request.toGenerationOptions(
+            stream = false,
+            maximumOutputBytes = 1024,
+            timeoutMillis = request.timeoutMillis,
+            requiredCapabilityIds = persistent.requiredCapabilityIds.toList(),
+            persistentSession = true,
+        )
+        assertTrue(options.persistentSession)
+        assertEquals(
+            setOf(OnDeviceAiCapabilityId.USAGE, OnDeviceAiCapabilityId.PERSISTENT_SESSION),
+            options.requiredCapabilityIds.toSet(),
+        )
     }
 
     @Test

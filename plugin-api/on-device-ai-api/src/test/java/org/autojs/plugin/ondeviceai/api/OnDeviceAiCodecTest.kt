@@ -14,7 +14,7 @@ import org.junit.Test
 class OnDeviceAiCodecTest {
     @Test
     fun capabilitiesAndModelPagesRoundTrip() {
-        val capabilities = capabilities()
+        val capabilities = capabilities(persistent = true)
         val page = AiModelPage(
             listingGeneration = "generation-1",
             models = listOf(
@@ -189,6 +189,7 @@ class OnDeviceAiCodecTest {
             temperature = 0.75,
             topK = 32,
             topP = 0.9,
+            persistentSession = true,
         )
 
         assertEquals(options, OnDeviceAiCodec.decodeGenerationOptions(OnDeviceAiCodec.encodeGenerationOptions(options)))
@@ -310,7 +311,7 @@ class OnDeviceAiCodecTest {
         responseSchema: AiPayloadReference? = null,
     ) = OnDeviceAiRequest(
         requestId = "request-1",
-        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
+        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_2,
         providerId = "fake.local",
         modelId = "fake.tools",
         messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(messagePayload)))),
@@ -347,12 +348,14 @@ internal fun capabilities(
     tools: Boolean = true,
     structuredJson: Boolean = true,
     usage: Boolean = true,
+    persistent: Boolean = false,
 ) = OnDeviceAiCapabilities(
     supportsStreaming = streaming,
     supportsReasoning = reasoning,
     supportsTools = tools,
     supportsStructuredJson = structuredJson,
     supportsUsage = usage,
+    supportsPersistentSessions = persistent,
     maximumMessages = OnDeviceAiLimits.MAX_MESSAGES,
     maximumContentParts = OnDeviceAiLimits.MAX_CONTENT_PARTS,
     maximumToolDefinitions = if (tools) OnDeviceAiLimits.MAX_TOOL_DEFINITIONS else 0,

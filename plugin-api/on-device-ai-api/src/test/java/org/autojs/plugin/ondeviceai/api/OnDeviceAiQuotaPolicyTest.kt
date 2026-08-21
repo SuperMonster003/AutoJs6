@@ -38,6 +38,28 @@ class OnDeviceAiQuotaPolicyTest {
     }
 
     @Test
+    fun persistentSessionMustBeDeclaredByBothRequestAndProvider() {
+        val persistentRequest = request(
+            message = textPayload("Hello"),
+            persistentSession = true,
+        )
+
+        assertThrows(IllegalArgumentException::class.java) {
+            OnDeviceAiQuotaPolicy.validateRequest(
+                persistentRequest,
+                capabilities(persistent = false),
+                descriptorCount = 0,
+            )
+        }
+        val snapshot = OnDeviceAiQuotaPolicy.validateRequest(
+            persistentRequest,
+            capabilities(persistent = true),
+            descriptorCount = 0,
+        )
+        assertEquals(5L, snapshot.inputBytes)
+    }
+
+    @Test
     fun descriptorReferencesMustExactlyMatchBinderArray() {
         val request = request(
             message = descriptorPayload(OnDeviceAiMimeType.PLAIN, 5, 0, charset = "utf-8"),
@@ -422,10 +444,10 @@ class OnDeviceAiQuotaPolicyTest {
     @Test
     fun textVersionMustBeNegotiatedAndThenMatchedExactly() {
         val selected = OnDeviceAiVersionPolicy.negotiate(
-            AiProtocolRange(AiProtocolVersion(1, 0), AiProtocolVersion(1, 1)),
+            AiProtocolRange(AiProtocolVersion(1, 0), AiProtocolVersion(1, 2)),
         )
-        assertEquals(OnDeviceAiProtocol.PROTOCOL_V1_1, selected)
-        OnDeviceAiVersionPolicy.requireSelected(OnDeviceAiProtocol.PROTOCOL_V1_1, selected)
+        assertEquals(OnDeviceAiProtocol.PROTOCOL_V1_2, selected)
+        OnDeviceAiVersionPolicy.requireSelected(OnDeviceAiProtocol.PROTOCOL_V1_2, selected)
         assertThrows(IllegalArgumentException::class.java) {
             OnDeviceAiVersionPolicy.requireSelected(AiProtocolVersion(1, 0), selected)
         }
@@ -444,9 +466,10 @@ class OnDeviceAiQuotaPolicyTest {
         maximumOutputBytes: Long = 4096,
         maximumOutputTokens: Long? = null,
         tools: List<AiToolDefinition> = emptyList(),
+        persistentSession: Boolean = false,
     ) = OnDeviceAiRequest(
         requestId = "request-quota",
-        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
+        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_2,
         providerId = "fake.local",
         modelId = "fake.echo",
         messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(message)))),
@@ -459,6 +482,12 @@ class OnDeviceAiQuotaPolicyTest {
             maximumOutputTokens = maximumOutputTokens,
             maximumToolRounds = if (tools.isEmpty()) 0 else 1,
             timeoutMillis = 30_000,
+            requiredCapabilityIds = if (persistentSession) {
+                listOf(OnDeviceAiCapabilityId.PERSISTENT_SESSION)
+            } else {
+                emptyList()
+            },
+            persistentSession = persistentSession,
         ),
         tools = tools,
     )

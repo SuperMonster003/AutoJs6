@@ -1886,7 +1886,7 @@ class OnDeviceAiProviderSessionTest {
         payload: AiPayloadReference = textPayload("hello"),
     ) = OnDeviceAiRequest(
         requestId = "request-session",
-        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
+        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_2,
         providerId = PROVIDER_ID,
         modelId = MODEL_ID,
         messages = listOf(

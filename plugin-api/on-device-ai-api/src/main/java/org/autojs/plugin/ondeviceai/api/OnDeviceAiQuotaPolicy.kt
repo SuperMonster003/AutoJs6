@@ -85,6 +85,7 @@ object OnDeviceAiQuotaPolicy {
             if (request.options.includeReasoning) add(OnDeviceAiCapabilityId.REASONING)
             if (request.options.structuredJson) add(OnDeviceAiCapabilityId.STRUCTURED_JSON)
             if (request.options.reportUsage) add(OnDeviceAiCapabilityId.USAGE)
+            if (request.options.persistentSession) add(OnDeviceAiCapabilityId.PERSISTENT_SESSION)
             if (request.tools.isNotEmpty() || request.options.maximumToolRounds > 0) add(OnDeviceAiCapabilityId.TOOLS)
         }
         require(requiredCapabilities.all { it in provider.supportedCapabilityIds() }) {
@@ -420,6 +421,8 @@ object OnDeviceAiCapabilityNegotiator {
             maximumSessionDescriptors = minOf(host.maximumSessionDescriptors, provider.maximumSessionDescriptors),
             acceptedTextMimeTypes = host.acceptedTextMimeTypes.filter { it in provider.acceptedTextMimeTypes },
             acceptedSchemaMimeTypes = host.acceptedSchemaMimeTypes.filter { it in provider.acceptedSchemaMimeTypes },
+            supportsPersistentSessions =
+                host.supportsPersistentSessions && provider.supportsPersistentSessions,
         )
     }
 }

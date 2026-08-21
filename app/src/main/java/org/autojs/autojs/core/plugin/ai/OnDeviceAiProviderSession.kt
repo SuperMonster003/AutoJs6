@@ -299,6 +299,9 @@ internal class OnDeviceAiProviderSessionPolicy(
         if (request.tools.isNotEmpty() || request.options.maximumToolRounds > 0 ||
             OnDeviceAiCapabilityId.TOOLS in request.options.requiredCapabilityIds
         ) return OnDeviceAiProviderSessionFailure.TOOLS_UNSUPPORTED
+        if (request.options.persistentSession) {
+            return OnDeviceAiProviderSessionFailure.REQUEST_INVALID
+        }
         val required = request.options.requiredCapabilityIds.toMutableSet().apply {
             if (request.options.stream) add(OnDeviceAiCapabilityId.STREAMING)
             if (request.options.includeReasoning) add(OnDeviceAiCapabilityId.REASONING)

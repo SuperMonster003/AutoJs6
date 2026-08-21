@@ -122,6 +122,7 @@ internal fun OnDeviceAiPluginAskRequest.toGenerationOptions(
     maximumOutputBytes: Long,
     timeoutMillis: Long,
     requiredCapabilityIds: List<String>,
+    persistentSession: Boolean = false,
 ) = AiGenerationOptions(
     stream = stream,
     includeReasoning = false,
@@ -136,6 +137,7 @@ internal fun OnDeviceAiPluginAskRequest.toGenerationOptions(
     temperature = temperature,
     topK = topK,
     topP = topP,
+    persistentSession = persistentSession,
 )
 
 internal enum class OnDeviceAiPluginAskFailure {
@@ -151,6 +153,7 @@ internal enum class OnDeviceAiPluginAskFailure {
     MODEL_NOT_FOUND,
     MODEL_AMBIGUOUS,
     MODEL_CAPABILITY_MISMATCH,
+    SESSION_CLOSED,
     SESSION_REJECTED,
     PROVIDER_FAILED,
     INTERNAL_FAILURE,
@@ -257,5 +260,31 @@ internal fun interface OnDeviceAiPluginModelListRunner {
     fun listModels(
         request: OnDeviceAiPluginModelListRequest,
         onOutcome: (OnDeviceAiPluginModelListOutcome) -> Unit,
+    ): OnDeviceAiPluginAskHandle
+}
+
+/** A planned local plugin Conversation whose model and sampling controls are fixed at creation. */
+internal interface OnDeviceAiPluginSession : Closeable {
+    val providerId: String
+    val modelId: String
+    val isClosed: Boolean
+
+    fun startTurn(
+        message: OnDeviceAiPluginMessage,
+        streaming: Boolean,
+        onOutcome: ((OnDeviceAiPluginAskOutcome) -> Unit)?,
+        onStreamEvent: ((OnDeviceAiPluginStreamEvent) -> Unit)?,
+    ): OnDeviceAiPluginAskHandle
+}
+
+internal sealed class OnDeviceAiPluginSessionOpenOutcome {
+    data class Completed(val session: OnDeviceAiPluginSession) : OnDeviceAiPluginSessionOpenOutcome()
+    data class Failed(val failure: OnDeviceAiPluginAskFailure) : OnDeviceAiPluginSessionOpenOutcome()
+}
+
+internal fun interface OnDeviceAiPluginSessionRunner {
+    fun openSession(
+        request: OnDeviceAiPluginAskRequest,
+        onOutcome: (OnDeviceAiPluginSessionOpenOutcome) -> Unit,
     ): OnDeviceAiPluginAskHandle
 }

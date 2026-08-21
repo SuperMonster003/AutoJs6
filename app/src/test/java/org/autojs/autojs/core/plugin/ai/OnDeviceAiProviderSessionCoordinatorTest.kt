@@ -1030,7 +1030,7 @@ private class SessionCoordinatorFixture(
     )
     val request = OnDeviceAiRequest(
         requestId = "session-request",
-        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_1,
+        protocolVersion = OnDeviceAiProtocol.PROTOCOL_V1_2,
         providerId = PROVIDER_ID,
         modelId = MODEL_ID,
         messages = listOf(
