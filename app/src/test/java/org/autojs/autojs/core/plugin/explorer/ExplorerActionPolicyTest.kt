@@ -19,6 +19,11 @@ class ExplorerActionPolicyTest {
             protocolVersion = 1,
             placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
         )
+        val selection = descriptor(
+            protocolVersion = 4,
+            placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+            cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+        )
 
         listOf(
             ExplorerActionEntryPoint.DEFAULT_CLICK,
@@ -40,6 +45,13 @@ class ExplorerActionPolicyTest {
                 ExplorerSurface.MAIN_FILES,
                 ExplorerActionEntryPoint.OVERFLOW_MENU,
                 primary,
+            ),
+        )
+        assertTrue(
+            ExplorerActionPolicy.allows(
+                ExplorerSurface.MAIN_FILES,
+                ExplorerActionEntryPoint.SELECTION_TOOLBAR,
+                selection,
             ),
         )
     }
@@ -85,6 +97,7 @@ class ExplorerActionPolicyTest {
     private fun descriptor(
         protocolVersion: Int,
         placement: Int,
+        cardinality: Int? = null,
     ): ExplorerActionDescriptor {
         return ExplorerActionCatalogPolicy.normalizeDescriptor(
             protocolVersion = protocolVersion,
@@ -95,6 +108,7 @@ class ExplorerActionPolicyTest {
             activityClassName = ".ViewActivity",
             priority = 0,
             targetKind = ExplorerActionValues.TARGET_FILE,
+            cardinality = cardinality,
             accessMode = ExplorerActionValues.ACCESS_READ_ONLY,
             placement = placement,
             mimeTypes = listOf("*/*"),

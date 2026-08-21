@@ -188,6 +188,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` File manager supports single-file read-only Explorer Action plugin extensions and dynamically loads their actions in the overflow menu of the main file page
 * `Feature` File manager supports Explorer Action protocol v2 primary actions to provide image viewing, audio playback, and video playback through three independent plugins
 * `Feature` File manager supports Explorer Action protocol v3 output transactions with bounded write-only content URIs, output validation, crash recovery, and atomic publication of sibling files
+* `Feature` File manager Explorer Action protocol v4 supports ordered file/directory/mixed targets and same-parent multi-selection actions, exposes plugin compression in directory menus and a five-cell vertical selection bar, and provides request-scoped host file sessions for controlled reads and atomic sibling output
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting

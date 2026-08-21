@@ -131,6 +131,94 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV4SupportsDirectoryAndOrderedMixedTargets() {
+        val directoryAction = descriptor(
+            protocolVersion = 4,
+            targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            mimeTypes = emptyList(),
+        ) ?: error("Expected a valid directory descriptor")
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                directoryAction,
+                ExplorerActionTarget(
+                    mimeType = "inode/directory",
+                    extension = "",
+                    kind = ExplorerActionValues.TARGET_DIRECTORY,
+                ),
+            ),
+        )
+        assertFalse(
+            ExplorerActionCatalogPolicy.matches(
+                directoryAction,
+                ExplorerActionTarget("text/plain", "txt"),
+            ),
+        )
+
+        val mixedSelectionAction = descriptor(
+            protocolVersion = 4,
+            targetKind = ExplorerActionValues.TARGET_MIXED,
+            cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+            placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+            mimeTypes = listOf("*/*"),
+        ) ?: error("Expected a valid mixed selection descriptor")
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                mixedSelectionAction,
+                listOf(
+                    ExplorerActionTarget("text/plain", "txt"),
+                    ExplorerActionTarget(
+                        mimeType = "inode/directory",
+                        extension = "",
+                        kind = ExplorerActionValues.TARGET_DIRECTORY,
+                    ),
+                ),
+            ),
+        )
+        assertFalse(ExplorerActionCatalogPolicy.matches(mixedSelectionAction, emptyList()))
+    }
+
+    @Test
+    fun protocolV4RequiresExplicitCardinalityAndValidPlacementPairing() {
+        assertNull(descriptor(protocolVersion = 4))
+        assertNull(
+            descriptor(
+                protocolVersion = 4,
+                cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 4,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+            ),
+        )
+    }
+
+    @Test
+    fun createInParentAccessIsAvailableOnlyToProtocolV4Actions() {
+        assertNull(
+            descriptor(
+                protocolVersion = 3,
+                accessMode = ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+            ),
+        )
+        val createAction = descriptor(
+            protocolVersion = 4,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            accessMode = ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+        ) ?: error("Expected a valid create-in-parent descriptor")
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                createAction,
+                ExplorerActionTarget("text/plain", "txt"),
+            ),
+        )
+    }
+
+    @Test
     fun descriptorRejectsInvalidIdentifiersAndActivityNames() {
         assertNull(descriptor(id = "Preview"))
         assertNull(descriptor(activityClassName = "com.example.preview/PreviewActivity"))
@@ -157,12 +245,13 @@ class ExplorerActionCatalogPolicyTest {
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(1L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(2L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(3L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(4L))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(4L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 3))
-        assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(2L, 3))
-        assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 3))
+        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(5L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(4L, 4))
+        assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 4))
+        assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 4))
 
         assertTrue(ExplorerActionAvailabilityPolicy.isHostVersionCompatible(5_268L, 5_268L))
         assertTrue(ExplorerActionAvailabilityPolicy.isHostVersionCompatible(5_268L, null))
@@ -216,6 +305,7 @@ class ExplorerActionCatalogPolicyTest {
         activityClassName: String = ".PreviewActivity",
         priority: Int = 0,
         targetKind: Int = ExplorerActionValues.TARGET_FILE,
+        cardinality: Int? = null,
         accessMode: Int = ExplorerActionValues.ACCESS_READ_ONLY,
         placement: Int = ExplorerActionValues.PLACEMENT_OVERFLOW,
         mimeTypes: Collection<String>? = listOf("text/*"),
@@ -230,6 +320,7 @@ class ExplorerActionCatalogPolicyTest {
             activityClassName = activityClassName,
             priority = priority,
             targetKind = targetKind,
+            cardinality = cardinality,
             accessMode = accessMode,
             placement = placement,
             mimeTypes = mimeTypes,

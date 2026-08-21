@@ -177,6 +177,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private var mOnSelectionToolbarStateChangeListener: OnSelectionToolbarStateChangeListener? = null
     private var mPluginActionProvider: ExplorerPluginActionProvider? = null
     private var mPluginActionSurface = ExplorerSurface.UNSPECIFIED
+    private var mSelectionPluginAction: ResolvedExplorerAction? = null
 
     private val mPageStateHistory = Stack<ExplorerPageState>()
     private var mDirectorySpanSize = 2
@@ -254,6 +255,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         binding.selectionClose.setOnClickListener { clearSelection() }
         binding.selectionCopy.setOnClickListener { copySelectedItems() }
         binding.selectionMove.setOnClickListener { moveSelectedItems() }
+        binding.selectionPlugin.setOnClickListener { launchSelectedPluginAction() }
         binding.selectionDelete.setOnClickListener { deleteSelectedItems() }
     }
 
@@ -334,12 +336,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 binding.selectionCloseText,
                 binding.selectionCopyText,
                 binding.selectionMoveText,
+                binding.selectionPluginText,
                 binding.selectionDeleteText,
             ).forEach { it.setTextColor(foregroundColor) }
             listOf<ImageView>(
                 binding.selectionCloseIcon,
                 binding.selectionCopyIcon,
                 binding.selectionMoveIcon,
+                binding.selectionPluginIcon,
                 binding.selectionDeleteIcon,
             ).forEach { ImageViewCompat.setImageTintList(it, foregroundTint) }
         }
@@ -701,6 +705,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             updateSelectionActionState(binding.selectionCopy, selectedItems.all { it.canCopy() })
             updateSelectionActionState(binding.selectionMove, selectedItems.all { it.canMove() })
             updateSelectionActionState(binding.selectionDelete, selectedItems.all { it.canDelete() })
+            val pluginAction = if (selectedItems.isEmpty()) {
+                null
+            } else {
+                runCatching {
+                    mPluginActionProvider?.actionsFor(
+                        mPluginActionSurface,
+                        ExplorerActionEntryPoint.SELECTION_TOOLBAR,
+                        selectedItems.toList(),
+                    )?.firstOrNull()
+                }.onFailure { error ->
+                    Log.w(LOG_TAG, "Failed to resolve Explorer selection plugin action", error)
+                }.getOrNull()
+            }
+            mSelectionPluginAction = pluginAction
+            binding.selectionPlugin.isVisible = pluginAction != null
+            pluginAction?.let { action ->
+                binding.selectionPluginText.text = action.actionLabel
+                binding.selectionPlugin.contentDescription = action.actionLabel
+            }
             setSelectionToolbarShown(selectedCount > 0)
         }
         mProjectToolbar.updateVisibility()
@@ -757,6 +780,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     ) {
         mPluginActionSurface = if (provider == null) ExplorerSurface.UNSPECIFIED else surface
         mPluginActionProvider = provider
+        if (mSelectedItems.isNotEmpty()) {
+            updateSelectionToolbar()
+        }
     }
 
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage) {
@@ -767,6 +793,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         mExplorerRootPath = rootPage.path
         setRootPage(rootPage)
         mExplorer!!.registerChangeListener(this)
+    }
+
+    private fun launchSelectedPluginAction() {
+        val action = mSelectionPluginAction ?: return
+        val selectedItems = mSelectedItems.values.toList()
+        if (selectedItems.isEmpty()) return
+        val provider = mPluginActionProvider ?: return
+        provider.launch(
+            context,
+            mPluginActionSurface,
+            ExplorerActionEntryPoint.SELECTION_TOOLBAR,
+            selectedItems,
+            action,
+        )
+            .onSuccess { clearSelection() }
+            .onFailure { error ->
+                Log.e(LOG_TAG, "Failed to launch Explorer selection plugin action", error)
+                ViewUtils.showToast(context, error.message ?: error.toString(), true)
+            }
     }
 
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage, currentPage: ExplorerPage) {
@@ -1817,7 +1862,44 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             if (!explorerPage.path.startsWith(samplePath)) {
                 menu.removeItem(R.id.action_reset)
             }
+            val pluginMenuItems = mutableMapOf<Int, ResolvedExplorerAction>()
+            runCatching {
+                mPluginActionProvider?.actionsFor(
+                    mPluginActionSurface,
+                    ExplorerActionEntryPoint.OVERFLOW_MENU,
+                    explorerPage,
+                ).orEmpty()
+            }
+                .getOrElse { error ->
+                    Log.w(LOG_TAG, "Failed to resolve Explorer directory plugin actions", error)
+                    emptyList()
+                }
+                .forEachIndexed { index, action ->
+                    val menuId = View.generateViewId()
+                    menu.add(
+                        Menu.NONE,
+                        menuId,
+                        PLUGIN_ACTION_MENU_ORDER_START + index,
+                        action.menuTitle,
+                    )
+                    pluginMenuItems[menuId] = action
+                }
             popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+                pluginMenuItems[item.itemId]?.let { pluginAction ->
+                    val provider = mPluginActionProvider ?: return@setOnMenuItemClickListener false
+                    provider.launch(
+                        context,
+                        mPluginActionSurface,
+                        ExplorerActionEntryPoint.OVERFLOW_MENU,
+                        explorerPage,
+                        pluginAction,
+                    )
+                        .onSuccess { notifyItemOperated() }
+                        .onFailure { error ->
+                            ViewUtils.showToast(context, error.message ?: error.toString(), true)
+                        }
+                    return@setOnMenuItemClickListener true
+                }
                 val selectedItem = selectedItem ?: return@setOnMenuItemClickListener false
                 val explorerView = this@ExplorerView
                 when (item.itemId) {

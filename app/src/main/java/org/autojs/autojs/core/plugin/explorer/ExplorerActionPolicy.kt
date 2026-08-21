@@ -15,6 +15,7 @@ internal enum class ExplorerActionEntryPoint(
     PRIMARY_BUTTON(ExplorerActionValues.PLACEMENT_PRIMARY),
     MEDIA_INFO_DIALOG(ExplorerActionValues.PLACEMENT_PRIMARY),
     OVERFLOW_MENU(ExplorerActionValues.PLACEMENT_OVERFLOW),
+    SELECTION_TOOLBAR(ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR),
 }
 
 internal object ExplorerActionPolicy {

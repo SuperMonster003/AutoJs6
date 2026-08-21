@@ -11,4 +11,7 @@ object ExplorerActionIntentValues {
 
     const val CLIP_ITEM_COUNT_READ_ONLY = 2
     const val CLIP_ITEM_COUNT_OUTPUT_TRANSACTION = 1
+
+    /** v4 ClipData contains only the ordered target URIs. Parent metadata is not granted. */
+    fun v4ClipItemCount(targetCount: Int): Int = targetCount
 }

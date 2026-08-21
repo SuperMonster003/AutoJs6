@@ -42,6 +42,7 @@ internal object ExplorerActionCatalogParser {
                 activityClassName = action.getString(ExplorerActionCatalogKeys.ACTIVITY_CLASS_NAME),
                 priority = action.getInt(ExplorerActionCatalogKeys.PRIORITY, 0),
                 targetKind = action.getInt(ExplorerActionCatalogKeys.TARGET_KIND, 0),
+                cardinality = action.getIntOrNull(ExplorerActionCatalogKeys.CARDINALITY),
                 accessMode = action.getInt(ExplorerActionCatalogKeys.ACCESS_MODE, 0),
                 placement = action.getInt(ExplorerActionCatalogKeys.PLACEMENT, 0),
                 mimeTypes = action.getStringArrayList(ExplorerActionCatalogKeys.MIME_TYPES),

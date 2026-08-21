@@ -5,10 +5,27 @@ object ExplorerActionIntentExtras {
 
     const val ACTION_ID = "${PREFIX}ACTION_ID"
     const val PROTOCOL_VERSION = "${PREFIX}PROTOCOL_VERSION"
+    const val REQUEST_ID = "${PREFIX}REQUEST_ID"
     const val DISPLAY_NAME = "${PREFIX}DISPLAY_NAME"
     const val SIZE = "${PREFIX}SIZE"
 
-    /** v1/v2 read-only actions only. v3 output transactions deliberately omit the parent URI. */
+    /** v4 ordered ArrayList<Bundle>; each element uses [ExplorerActionTargetKeys]. */
+    const val TARGETS = "${PREFIX}TARGETS"
+
+    /** v4 human-readable common parent path. It is display metadata, not a filesystem grant. */
+    const val PARENT_DISPLAY_PATH = "${PREFIX}PARENT_DISPLAY_PATH"
+
+    /**
+     * v4 Bundle containing an [IExplorerActionHostSession] under
+     * [ExplorerActionHostSessionKeys.BINDER]. Present only when the action needs directory,
+     * multiple-target, or create-in-parent capabilities.
+     */
+    const val HOST_SESSION = "${PREFIX}HOST_SESSION"
+
+    /**
+     * v1/v2 grant this parent URI through ClipData. v4 supplies it only as ungranted context;
+     * plugins must not assume it is readable. v3 output transactions deliberately omit it.
+     */
     const val PARENT_URI = "${PREFIX}PARENT_URI"
     const val HOST_PACKAGE_NAME = "${PREFIX}HOST_PACKAGE_NAME"
     const val HOST_VERSION_NAME = "${PREFIX}HOST_VERSION_NAME"

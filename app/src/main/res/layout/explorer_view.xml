@@ -75,7 +75,7 @@
         <LinearLayout
             android:id="@+id/selection_actions"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="64dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
@@ -87,16 +87,16 @@
                 android:background="?selectableItemBackground"
                 android:contentDescription="@string/text_clear_file_selection"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingHorizontal="2dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="5dp">
 
                 <ImageView
                     android:id="@+id/selection_close_icon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:translationY="0.5dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="2dp"
                     android:src="@drawable/ic_close_black_24dp"
                     tools:ignore="ContentDescription" />
 
@@ -109,7 +109,7 @@
                     android:gravity="center"
                     android:maxLines="1"
                     android:text="@string/text_exit"
-                    android:textSize="14sp" />
+                    android:textSize="11sp" />
 
             </LinearLayout>
 
@@ -121,17 +121,17 @@
                 android:background="?selectableItemBackground"
                 android:contentDescription="@string/text_copy_to"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingHorizontal="2dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="5dp">
 
                 <ImageView
                     android:id="@+id/selection_copy_icon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:translationY="0.5dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:layout_gravity="center"
                     android:padding="1dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="2dp"
                     android:src="@drawable/ic_content_copy_black_24dp"
                     tools:ignore="ContentDescription" />
 
@@ -144,7 +144,7 @@
                     android:gravity="center"
                     android:maxLines="1"
                     android:text="@string/text_copy_to"
-                    android:textSize="14sp" />
+                    android:textSize="11sp" />
 
             </LinearLayout>
 
@@ -156,17 +156,17 @@
                 android:background="?selectableItemBackground"
                 android:contentDescription="@string/text_move_to"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingHorizontal="2dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="5dp">
 
                 <ImageView
                     android:id="@+id/selection_move_icon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:translationY="0.5dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:padding="1.5dp"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="2dp"
                     android:src="@drawable/ic_move_to"
                     tools:ignore="ContentDescription" />
 
@@ -179,7 +179,46 @@
                     android:gravity="center"
                     android:maxLines="1"
                     android:text="@string/text_move_to"
-                    android:textSize="14sp" />
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/selection_plugin"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?selectableItemBackground"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="5dp"
+                android:visibility="gone"
+                tools:contentDescription="Compress..."
+                tools:ignore="TypographyEllipsis"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/selection_plugin_icon"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="2dp"
+                    android:padding="1dp"
+                    android:src="@drawable/ic_archive_black_48dp"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/selection_plugin_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textSize="11sp"
+                    tools:ignore="TypographyEllipsis"
+                    tools:text="Compress..." />
 
             </LinearLayout>
 
@@ -191,16 +230,16 @@
                 android:background="?selectableItemBackground"
                 android:contentDescription="@string/text_delete"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingHorizontal="2dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="5dp">
 
                 <ImageView
                     android:id="@+id/selection_delete_icon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:translationY="0.5dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="2dp"
                     android:src="@drawable/ic_delete_black_24dp"
                     tools:ignore="ContentDescription" />
 
@@ -213,7 +252,7 @@
                     android:gravity="center"
                     android:maxLines="1"
                     android:text="@string/text_delete"
-                    android:textSize="14sp" />
+                    android:textSize="11sp" />
 
             </LinearLayout>
 

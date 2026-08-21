@@ -22,6 +22,7 @@ internal object ExplorerActionCatalogPolicy {
         activityClassName: String?,
         priority: Int,
         targetKind: Int,
+        cardinality: Int? = null,
         accessMode: Int,
         placement: Int,
         mimeTypes: Collection<String>?,
@@ -46,11 +47,37 @@ internal object ExplorerActionCatalogPolicy {
         val normalizedLabelFallback = sanitizeDisplayText(labelFallback, ExplorerActionProtocol.MAX_LABEL_LENGTH)
         if (normalizedLabelResourceName == null && normalizedLabelFallback == null) return null
         val normalizedActivityClassName = normalizeActivityClassName(packageName, activityClassName) ?: return null
-        if (targetKind != ExplorerActionValues.TARGET_FILE) return null
-        if (accessMode != ExplorerActionValues.ACCESS_READ_ONLY) return null
+        val normalizedCardinality = when {
+            protocolVersion < MULTI_TARGET_PROTOCOL_VERSION -> {
+                if (cardinality != null && cardinality != ExplorerActionValues.CARDINALITY_SINGLE) return null
+                ExplorerActionValues.CARDINALITY_SINGLE
+            }
+            cardinality == ExplorerActionValues.CARDINALITY_SINGLE ||
+                cardinality == ExplorerActionValues.CARDINALITY_MULTIPLE -> cardinality
+            else -> return null
+        }
+        val targetKindSupported = when {
+            protocolVersion < MULTI_TARGET_PROTOCOL_VERSION -> targetKind == ExplorerActionValues.TARGET_FILE
+            else -> targetKind == ExplorerActionValues.TARGET_FILE ||
+                targetKind == ExplorerActionValues.TARGET_DIRECTORY ||
+                targetKind == ExplorerActionValues.TARGET_MIXED
+        }
+        if (!targetKindSupported) return null
+        val accessModeSupported = when (accessMode) {
+            ExplorerActionValues.ACCESS_READ_ONLY -> true
+            ExplorerActionValues.ACCESS_CREATE_IN_PARENT ->
+                protocolVersion >= MULTI_TARGET_PROTOCOL_VERSION
+            else -> false
+        }
+        if (!accessModeSupported) return null
         val placementSupported = when (placement) {
             ExplorerActionValues.PLACEMENT_OVERFLOW -> true
-            ExplorerActionValues.PLACEMENT_PRIMARY -> protocolVersion >= PRIMARY_PLACEMENT_PROTOCOL_VERSION
+            ExplorerActionValues.PLACEMENT_PRIMARY ->
+                protocolVersion >= PRIMARY_PLACEMENT_PROTOCOL_VERSION &&
+                    normalizedCardinality == ExplorerActionValues.CARDINALITY_SINGLE
+            ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR ->
+                protocolVersion >= MULTI_TARGET_PROTOCOL_VERSION &&
+                    normalizedCardinality == ExplorerActionValues.CARDINALITY_MULTIPLE
             else -> false
         }
         if (!placementSupported) return null
@@ -58,7 +85,12 @@ internal object ExplorerActionCatalogPolicy {
         val normalizedMimeTypes = normalizeMatchers(mimeTypes, ::normalizeMimeType)
         val normalizedExtensions = normalizeMatchers(extensions, ::normalizeExtension)
         if (normalizedMimeTypes == null || normalizedExtensions == null) return null
-        if (normalizedMimeTypes.isEmpty() && normalizedExtensions.isEmpty()) return null
+        if (
+            targetKind != ExplorerActionValues.TARGET_DIRECTORY &&
+            normalizedMimeTypes.isEmpty() && normalizedExtensions.isEmpty()
+        ) {
+            return null
+        }
         val normalizedOutput = ExplorerActionOutputPolicy.normalize(
             protocolVersion = protocolVersion,
             outputMode = outputMode,
@@ -68,7 +100,11 @@ internal object ExplorerActionCatalogPolicy {
         ) ?: return null
         if (
             normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE &&
-            placement != ExplorerActionValues.PLACEMENT_OVERFLOW
+            (
+                placement != ExplorerActionValues.PLACEMENT_OVERFLOW ||
+                    targetKind != ExplorerActionValues.TARGET_FILE ||
+                    normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE
+                )
         ) {
             return null
         }
@@ -81,6 +117,7 @@ internal object ExplorerActionCatalogPolicy {
             activityClassName = normalizedActivityClassName,
             priority = priority.coerceIn(MIN_PRIORITY, MAX_PRIORITY),
             targetKind = targetKind,
+            cardinality = normalizedCardinality,
             accessMode = accessMode,
             placement = placement,
             mimeTypes = normalizedMimeTypes,
@@ -92,23 +129,34 @@ internal object ExplorerActionCatalogPolicy {
         )
     }
 
-    fun matches(descriptor: ExplorerActionDescriptor, target: ExplorerActionTarget): Boolean {
-        if (descriptor.targetKind != ExplorerActionValues.TARGET_FILE) return false
-        if (descriptor.accessMode != ExplorerActionValues.ACCESS_READ_ONLY) return false
+    fun matches(descriptor: ExplorerActionDescriptor, target: ExplorerActionTarget): Boolean =
+        matches(descriptor, listOf(target))
+
+    fun matches(descriptor: ExplorerActionDescriptor, targets: List<ExplorerActionTarget>): Boolean {
+        if (targets.isEmpty() || targets.size > ExplorerActionProtocol.MAX_TARGETS_PER_REQUEST) return false
         if (
-            descriptor.placement != ExplorerActionValues.PLACEMENT_OVERFLOW &&
-            descriptor.placement != ExplorerActionValues.PLACEMENT_PRIMARY
+            descriptor.cardinality == ExplorerActionValues.CARDINALITY_SINGLE && targets.size != 1 ||
+            descriptor.cardinality != ExplorerActionValues.CARDINALITY_SINGLE &&
+                descriptor.cardinality != ExplorerActionValues.CARDINALITY_MULTIPLE
         ) {
             return false
         }
-
-        val normalizedTargetMimeType = normalizeMimeType(target.mimeType)
-        val normalizedTargetExtension = normalizeExtension(target.extension)
-        val mimeMatches = normalizedTargetMimeType != null && descriptor.mimeTypes.any { pattern ->
-            mimeMatches(pattern, normalizedTargetMimeType)
+        if (
+            descriptor.accessMode != ExplorerActionValues.ACCESS_READ_ONLY &&
+            descriptor.accessMode != ExplorerActionValues.ACCESS_CREATE_IN_PARENT
+        ) {
+            return false
         }
-        val extensionMatches = normalizedTargetExtension != null && normalizedTargetExtension in descriptor.extensions
-        return mimeMatches || extensionMatches
+        if (
+            descriptor.placement != ExplorerActionValues.PLACEMENT_OVERFLOW &&
+            descriptor.placement != ExplorerActionValues.PLACEMENT_PRIMARY &&
+            descriptor.placement != ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR
+        ) {
+            return false
+        }
+        return targets.all { target ->
+            targetKindMatches(descriptor.targetKind, target.kind) && matchType(descriptor, target)
+        }
     }
 
     fun normalizeActivityClassName(packageName: String, activityClassName: String?): String? {
@@ -174,8 +222,31 @@ internal object ExplorerActionCatalogPolicy {
                 (patternParts[1] == "*" || patternParts[1] == actualParts[1])
     }
 
+    private fun targetKindMatches(declaredKind: Int, actualKind: Int): Boolean = when (declaredKind) {
+        ExplorerActionValues.TARGET_FILE -> actualKind == ExplorerActionValues.TARGET_FILE
+        ExplorerActionValues.TARGET_DIRECTORY -> actualKind == ExplorerActionValues.TARGET_DIRECTORY
+        ExplorerActionValues.TARGET_MIXED ->
+            actualKind == ExplorerActionValues.TARGET_FILE ||
+                actualKind == ExplorerActionValues.TARGET_DIRECTORY
+        else -> false
+    }
+
+    private fun matchType(descriptor: ExplorerActionDescriptor, target: ExplorerActionTarget): Boolean {
+        if (target.kind == ExplorerActionValues.TARGET_DIRECTORY && descriptor.mimeTypes.isEmpty() && descriptor.extensions.isEmpty()) {
+            return true
+        }
+        val normalizedTargetMimeType = normalizeMimeType(target.mimeType)
+        val normalizedTargetExtension = normalizeExtension(target.extension)
+        val mimeMatches = normalizedTargetMimeType != null && descriptor.mimeTypes.any { pattern ->
+            mimeMatches(pattern, normalizedTargetMimeType)
+        }
+        val extensionMatches = normalizedTargetExtension != null && normalizedTargetExtension in descriptor.extensions
+        return mimeMatches || extensionMatches
+    }
+
     private const val MIN_PRIORITY = -10_000
     private const val MAX_PRIORITY = 10_000
     private const val MAX_EXTENSION_LENGTH = 64
     private const val PRIMARY_PLACEMENT_PROTOCOL_VERSION = 2
+    private const val MULTI_TARGET_PROTOCOL_VERSION = 4
 }

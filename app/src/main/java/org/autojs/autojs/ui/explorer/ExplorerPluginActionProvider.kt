@@ -11,8 +11,22 @@ internal interface ExplorerPluginActionProvider {
     fun actionsFor(
         surface: ExplorerSurface,
         entryPoint: ExplorerActionEntryPoint,
-        item: ExplorerItem,
+        items: List<ExplorerItem>,
     ): List<ResolvedExplorerAction>
+
+    fun actionsFor(
+        surface: ExplorerSurface,
+        entryPoint: ExplorerActionEntryPoint,
+        item: ExplorerItem,
+    ): List<ResolvedExplorerAction> = actionsFor(surface, entryPoint, listOf(item))
+
+    fun launch(
+        context: Context,
+        surface: ExplorerSurface,
+        entryPoint: ExplorerActionEntryPoint,
+        items: List<ExplorerItem>,
+        action: ResolvedExplorerAction,
+    ): Result<Unit>
 
     fun launch(
         context: Context,
@@ -20,5 +34,5 @@ internal interface ExplorerPluginActionProvider {
         entryPoint: ExplorerActionEntryPoint,
         item: ExplorerItem,
         action: ResolvedExplorerAction,
-    ): Result<Unit>
+    ): Result<Unit> = launch(context, surface, entryPoint, listOf(item), action)
 }

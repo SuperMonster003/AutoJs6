@@ -8,6 +8,7 @@ internal data class ExplorerActionDescriptor(
     val activityClassName: String,
     val priority: Int,
     val targetKind: Int,
+    val cardinality: Int,
     val accessMode: Int,
     val placement: Int,
     val mimeTypes: Set<String>,
@@ -21,4 +22,5 @@ internal data class ExplorerActionDescriptor(
 internal data class ExplorerActionTarget(
     val mimeType: String,
     val extension: String,
+    val kind: Int = org.autojs.plugin.explorer.api.ExplorerActionValues.TARGET_FILE,
 )

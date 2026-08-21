@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference
 internal data class ResolvedExplorerAction(
     val packageName: String,
     val component: ComponentName,
+    val actionLabel: String,
     val menuTitle: String,
     val descriptor: ExplorerActionDescriptor,
 )
@@ -69,6 +70,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
                             ResolvedExplorerAction(
                                 packageName = packageName,
                                 component = component,
+                                actionLabel = label,
                                 menuTitle = menuTitle,
                                 descriptor = descriptor,
                             ),
@@ -90,22 +92,52 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
     override fun actionsFor(
         surface: ExplorerSurface,
         entryPoint: ExplorerActionEntryPoint,
-        item: ExplorerItem,
+        items: List<ExplorerItem>,
     ): List<ResolvedExplorerAction> {
-        return matchingActionsFor(item).filter { action ->
+        return matchingActionsFor(items).filter { action ->
             ExplorerActionPolicy.allows(surface, entryPoint, action.descriptor)
         }
     }
 
-    private fun matchingActionsFor(item: ExplorerItem): List<ResolvedExplorerAction> {
-        val file = File(item.path)
-        if (!file.isFile || !file.canRead()) return emptyList()
-        val target = ExplorerActionTarget(
-            mimeType = Mime.fromFileOrWildcard(file.path),
-            extension = file.extension.lowercase(Locale.ROOT),
-        )
+    private fun matchingActionsFor(items: List<ExplorerItem>): List<ResolvedExplorerAction> {
+        if (items.isEmpty() || items.size > ExplorerActionProtocol.MAX_TARGETS_PER_REQUEST) return emptyList()
+        if (!targetsShareCanonicalParent(items)) return emptyList()
+        val targets = items.map { item -> targetFor(item) ?: return emptyList() }
         return snapshot.get().filter { action ->
-            ExplorerActionCatalogPolicy.matches(action.descriptor, target)
+            ExplorerActionCatalogPolicy.matches(action.descriptor, targets)
+        }
+    }
+
+    private fun targetsShareCanonicalParent(items: List<ExplorerItem>): Boolean {
+        var commonParent: File? = null
+        items.forEach { item ->
+            val parent = runCatching {
+                File(item.path).canonicalFile.parentFile?.canonicalFile
+            }.getOrNull() ?: return false
+            if (commonParent == null) {
+                commonParent = parent
+            } else if (parent != commonParent) {
+                return false
+            }
+        }
+        return commonParent != null
+    }
+
+    private fun targetFor(item: ExplorerItem): ExplorerActionTarget? {
+        val file = File(item.path)
+        if (!file.canRead()) return null
+        return when {
+            file.isFile -> ExplorerActionTarget(
+                mimeType = Mime.fromFileOrWildcard(file.path),
+                extension = file.extension.lowercase(Locale.ROOT),
+                kind = org.autojs.plugin.explorer.api.ExplorerActionValues.TARGET_FILE,
+            )
+            file.isDirectory -> ExplorerActionTarget(
+                mimeType = DIRECTORY_MIME_TYPE,
+                extension = "",
+                kind = org.autojs.plugin.explorer.api.ExplorerActionValues.TARGET_DIRECTORY,
+            )
+            else -> null
         }
     }
 
@@ -113,13 +145,13 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         context: Context,
         surface: ExplorerSurface,
         entryPoint: ExplorerActionEntryPoint,
-        item: ExplorerItem,
+        items: List<ExplorerItem>,
         action: ResolvedExplorerAction,
     ): Result<Unit> {
         if (!ExplorerActionPolicy.allows(surface, entryPoint, action.descriptor)) {
             return Result.failure(IllegalArgumentException("Explorer Action is not allowed on $surface from $entryPoint"))
         }
-        if (action !in matchingActionsFor(item)) {
+        if (action !in matchingActionsFor(items)) {
             return Result.failure(IllegalStateException("Explorer Action no longer matches the target: ${action.descriptor.id}"))
         }
         if (!PluginEnableStore.isEnabled(context, action.packageName, true)) {
@@ -128,7 +160,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         if (!PluginTrustManager.isAuthorized(context, action.packageName)) {
             return Result.failure(IllegalStateException("Explorer Action plugin is not authorized: ${action.packageName}"))
         }
-        return ExplorerActionLauncher.launch(context, surface, item, action)
+        return ExplorerActionLauncher.launch(context, surface, items, action)
     }
 
     private fun isAvailablePlugin(
@@ -189,4 +221,5 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
     }
 
     private const val TAG = "ExplorerActionRegistry"
+    private const val DIRECTORY_MIME_TYPE = "inode/directory"
 }

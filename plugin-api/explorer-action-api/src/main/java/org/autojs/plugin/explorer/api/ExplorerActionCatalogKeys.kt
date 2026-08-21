@@ -10,6 +10,8 @@ object ExplorerActionCatalogKeys {
     const val ACTIVITY_CLASS_NAME = "activityClassName"
     const val PRIORITY = "priority"
     const val TARGET_KIND = "targetKind"
+    /** v4. Omitted descriptors retain the v1-v3 single-target behavior. */
+    const val CARDINALITY = "cardinality"
     const val ACCESS_MODE = "accessMode"
     const val PLACEMENT = "placement"
     const val MIME_TYPES = "mimeTypes"
