@@ -27,12 +27,12 @@ class AccessibilityEventWrapper(event: AccessibilityEvent) {
     }
 
     private fun getIndexInParent(node: AccessibilityNodeInfo): Int {
-        var index = 0
-        val parent = node.parent ?: return 0
-        while (parent.getChild(index) != node) {
-            index++
+        return try {
+            val parent = node.parent ?: return -1
+            findIndexInParent(parent.childCount, parent::getChild, node)
+        } catch (_: RuntimeException) {
+            -1
         }
-        return index
     }
 }
 
