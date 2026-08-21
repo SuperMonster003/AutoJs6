@@ -77,9 +77,15 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
     override fun onAccessibilityEvent(service: AccessibilityService, event: AccessibilityEvent): Boolean {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val window = service.getWindow(event.windowId)
-            if (window?.isFocused != false) {
+            val activeRoot = if (window == null) service.rootInActiveWindow else null
+            if (shouldAcceptWindowStateChange(
+                    eventWindowId = event.windowId,
+                    eventPackage = event.packageName,
+                    eventWindowFocused = window?.isFocused,
+                    activeRootWindowId = activeRoot?.windowId,
+                    activeRootPackage = activeRoot?.packageName,
+                )) {
                 setLatestComponent(event.packageName, event.className)
-                return false
             }
         }
         return false
@@ -189,6 +195,20 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
 
         private const val LOG_TAG = "ActivityInfoProvider"
     }
+}
+
+internal fun shouldAcceptWindowStateChange(
+    eventWindowId: Int,
+    eventPackage: CharSequence?,
+    eventWindowFocused: Boolean?,
+    activeRootWindowId: Int?,
+    activeRootPackage: CharSequence?,
+): Boolean = when (eventWindowFocused) {
+    true -> true
+    false -> false
+    null -> eventPackage != null &&
+        eventWindowId == activeRootWindowId &&
+        eventPackage.toString() == activeRootPackage?.toString()
 }
 
 private fun AccessibilityService.getWindow(windowId: Int): AccessibilityWindowInfo? {
