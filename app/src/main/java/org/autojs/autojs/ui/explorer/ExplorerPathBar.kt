@@ -1,6 +1,8 @@
 package org.autojs.autojs.ui.explorer
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -52,7 +54,7 @@ class ExplorerPathBar @JvmOverloads constructor(
     }
 
     private fun createSegmentView(segment: ExplorerPathSegment, isCurrent: Boolean) =
-        AppCompatTextView(context).apply {
+        OpticallyCenteredTextView(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -65,10 +67,11 @@ class ExplorerPathBar @JvmOverloads constructor(
             setTextSize(TypedValue.COMPLEX_UNIT_SP, PATH_TEXT_SIZE_SP)
             setPadding(dp(SEGMENT_HORIZONTAL_PADDING_DP), 0, dp(SEGMENT_HORIZONTAL_PADDING_DP), 0)
             setTextColor(
-                ContextCompat.getColor(
-                    context,
-                    if (isCurrent) R.color.text_color_primary else R.color.text_color_primary_alpha_40,
-                ),
+                if (isCurrent) {
+                    resolveThemeColor(android.R.attr.textColorPrimary)
+                } else {
+                    ContextCompat.getColor(context, R.color.explorer_category_operation_button)
+                },
             )
             typeface = Typeface.create(
                 if (isCurrent) "sans-serif-medium" else "sans-serif",
@@ -82,7 +85,7 @@ class ExplorerPathBar @JvmOverloads constructor(
             }
         }
 
-    private fun createSeparatorView() = AppCompatTextView(context).apply {
+    private fun createSeparatorView() = OpticallyCenteredTextView(context).apply {
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -92,8 +95,20 @@ class ExplorerPathBar @JvmOverloads constructor(
         includeFontPadding = false
         text = PATH_SEPARATOR
         setTextSize(TypedValue.COMPLEX_UNIT_SP, SEPARATOR_TEXT_SIZE_SP)
-        setTextColor(ContextCompat.getColor(context, R.color.text_color_primary_alpha_30))
+        setTextColor(ContextCompat.getColor(context, R.color.explorer_category_operation_button))
         setPadding(dp(SEPARATOR_HORIZONTAL_PADDING_DP), 0, dp(SEPARATOR_HORIZONTAL_PADDING_DP), 0)
+    }
+
+    private fun resolveThemeColor(attribute: Int): Int {
+        val typedValue = TypedValue()
+        check(context.theme.resolveAttribute(attribute, typedValue, true)) {
+            "Unable to resolve theme color attribute: $attribute"
+        }
+        return if (typedValue.resourceId != 0) {
+            ContextCompat.getColor(context, typedValue.resourceId)
+        } else {
+            typedValue.data
+        }
     }
 
     private fun AppCompatTextView.setSelectableItemBackground() {
@@ -108,6 +123,41 @@ class ExplorerPathBar @JvmOverloads constructor(
         value,
         resources.displayMetrics,
     ).roundToInt()
+
+    private class OpticallyCenteredTextView(context: Context) : AppCompatTextView(context) {
+
+        private val textBounds = Rect()
+
+        override fun onDraw(canvas: Canvas) {
+            val value = text?.toString().orEmpty()
+            if (value.isEmpty()) {
+                super.onDraw(canvas)
+                return
+            }
+
+            paint.getTextBounds(value, 0, value.length, textBounds)
+            if (textBounds.isEmpty) {
+                super.onDraw(canvas)
+                return
+            }
+
+            // Font line boxes vary across Latin, CJK fallback fonts, and the larger separator.
+            // Align the rendered glyph bounds while leaving the full-height click target untouched.
+            val contentCenterY = paddingTop + (height - paddingTop - paddingBottom) / 2F
+            val textCenterY = baseline + (textBounds.top + textBounds.bottom) / 2F
+            val verticalOffset = (contentCenterY - textCenterY).roundToInt()
+            if (verticalOffset == 0) {
+                super.onDraw(canvas)
+                return
+            }
+
+            val checkpoint = canvas.save()
+            canvas.translate(0F, verticalOffset.toFloat())
+            super.onDraw(canvas)
+            canvas.restoreToCount(checkpoint)
+        }
+
+    }
 
     private companion object {
         const val PATH_SEPARATOR = "\u203A"
