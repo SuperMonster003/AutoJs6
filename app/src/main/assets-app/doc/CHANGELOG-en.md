@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js ESM, dynamic import(), network and WebSocket, native network modules, worker_threads, child_process, and Java interop are stable features enabled by default, while permission declarations, allowlists, sandboxing, and resource budgets remain enforced
@@ -41,6 +41,7 @@
 * `Feature` JavaScript (Rhino) modules support compatible power/settings/work_manager interfaces and an AppInfo wrapper, and complete selected Base64/Crypto/WebSocket/ByteString/automator/images/timers APIs from Auto.js Pro 9.3.11
 * `Feature` Global JavaScript (Rhino) ai module supports OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible providers, ask/chat/stream calls, and multi-round tool-call continuation; Developer options provide encrypted multi-profile configuration and credential management, while compatible endpoints on local loopback addresses can run without an API key
 * `Feature` `ai.ask`, `ai.chat`, and `ai.stream` local-plugin routes support prompt-only one-shot and streaming requests; `plugin: true` shorthand selects the official on-device AI plugin and the model ID may be omitted for a single-model catalog; new `ai.models` method lists plugin models, clear errors are raised when the plugin is not installed/enabled or has no model, and AI service settings provide a local AI plugin entry
+* `Feature` Global JavaScript (Rhino) yolo module provides a default-off exact-component YOLO provider route with versioned Binder/PFD transport, manifest-driven NCNN model loading, object detection, explicit cancellation and resource cleanup, and no silent provider fallback
 * `Feature` Global JavaScript (Rhino) tts module provides system text-to-speech, intelligent long-text chunking, logical queues, voice and language discovery with offline voice filtering, observable tasks and audio events, silence insertion, and file synthesis with atomic publication; it also includes timeouts, backpressure, runtime cleanup, and protection against fallback from a requested engine
 * `Feature` device.getMarketName method, for obtaining the device's "market name" _[`issue #513`](http://issues.autojs6.com/513)_
 * `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js の ESM/dynamic import()/ネットワークと WebSocket/ネイティブネットワークモジュール/worker_threads/child_process/Java 相互運用を正式機能として既定で有効化し, 権限宣言/許可リスト/サンドボックス/リソース予算による保護を維持
@@ -41,6 +41,7 @@
 * `新機能` JavaScript (Rhino) モジュールで power/settings/work_manager 互換 API と AppInfo ラッパーをサポートし, Auto.js Pro 9.3.11 の一部の Base64/Crypto/WebSocket/ByteString/automator/images/timers API を拡充
 * `新機能` グローバル JavaScript (Rhino) ai モジュールが OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible プロバイダー, ask/chat/stream 呼び出し, ツール呼び出しの複数ラウンド継続に対応; 開発者向けオプションで暗号化された複数プロファイルと認証情報を管理でき, ローカルループバックアドレス上の互換エンドポイントは API キーなしで実行可能
 * `新機能` `ai.ask`, `ai.chat`, `ai.stream` ローカルプラグイン経路がプロンプトのみの単発及びストリーミングリクエストに対応. `plugin: true` の短縮指定で公式オンデバイス AI プラグインを選択でき, 単一モデル環境ではモデル ID を省略可能. 新設の `ai.models` メソッドでプラグインモデルを列挙でき, プラグイン未インストール/無効/モデル未導入時に明確なエラーを通知. AI サービス設定にローカル AI プラグイン入口を追加
+* `新機能` グローバル JavaScript (Rhino) yolo モジュールが, デフォルト無効の明示コンポーネント YOLO プロバイダールート, バージョン管理された Binder/PFD 転送, マニフェスト駆動の NCNN モデル読み込み, 物体検出, 明示的なキャンセルとリソース解放, プロバイダーへの暗黙フォールバック防止に対応
 * `新機能` グローバル JavaScript (Rhino) tts モジュールがシステム音声合成, 長文のインテリジェント分割, 論理キュー, オフライン音声の絞り込みを含む音声と言語の検索, 監視可能なタスクと音声イベント, 無音挿入, アトミックな公開を用いたファイルへの音声合成に対応; タイムアウト, バックプレッシャー, ランタイムクリーンアップ, 指定エンジンからのフォールバック防止も提供
 * `新機能` device.getMarketName メソッド, デバイスの "市場名" 取得用 _[`issue #513`](http://issues.autojs6.com/513)_
 * `新機能` タイマータスクが月次/年次/カウントダウンタスクと繰り返し終了条件に対応 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_

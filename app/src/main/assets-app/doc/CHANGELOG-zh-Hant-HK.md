@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 的 ESM/dynamic import()/網絡與 WebSocket/原生網絡模組/worker_threads/child_process/Java 互操作能力成為正式功能並預設啟用, 同時保留權限聲明/白名單/沙箱及資源預算保護
@@ -41,6 +41,7 @@
 * `新增` JavaScript (Rhino) 模塊支持 power/settings/work_manager 兼容接口及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全局 JavaScript (Rhino) ai 模塊支持 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 調用及工具調用多輪續接; 開發者選項支持加密的多設定及憑證管理, 本機迴環地址上的兼容端點可免 API 金鑰運行
 * `新增` `ai.ask`, `ai.chat` 及 `ai.stream` 本機插件路由支持僅提示詞的單次及串流請求, 可透過 `plugin: true` 簡寫選擇官方裝置端 AI 插件, 單模型場景可省略模型 ID; 新增 `ai.models` 方法枚舉插件模型, 插件未安裝/未啟用/無模型時給出明確錯誤提示; AI 服務設置提供本機 AI 插件入口
+* `新增` 全局 JavaScript (Rhino) yolo 模塊提供預設關閉的精確元件 YOLO 提供方路由, 支持版本化 Binder/PFD 傳輸, 清單驅動的 NCNN 模型載入, 物件偵測, 明確取消及資源清理, 且不會靜默回退提供方
 * `新增` 全局 JavaScript (Rhino) tts 模塊提供系統文字轉語音/長文本智能分段/邏輯隊列/語音及語言發現/離線語音篩選/可觀察任務及音頻事件/靜音插入/採用原子發佈的文件合成, 並具備超時/背壓/運行時清理及指定引擎防回退保護
 * `新增` device.getMarketName 方法, 用於獲取設備的 "市場名稱" _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` 定時任務支持按月/按年/倒計時任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_

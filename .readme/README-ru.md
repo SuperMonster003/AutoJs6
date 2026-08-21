@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 20 August 2026 года.
+Данные обновлены на 21 August 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -166,7 +166,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
 * `Новое` Среда выполнения скриптов Node.js 24.5.0 с поддержкой запуска с помощью директивы "nodejs" или таких расширений, как .node.js/.cjs/.mjs
 * `Новое` ESM, dynamic import(), сеть и WebSocket, собственные сетевые модули, worker_threads, child_process и интеграция с Java в Node.js стали стабильными возможностями и включены по умолчанию, при этом сохраняются декларации разрешений, списки разрешенного, песочница и лимиты ресурсов
@@ -201,6 +201,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Новое` Модули JavaScript (Rhino) поддерживают совместимые интерфейсы power/settings/work_manager и оболочку AppInfo, а также дополняют отдельные API Base64/Crypto/WebSocket/ByteString/automator/images/timers из Auto.js Pro 9.3.11
 * `Новое` Глобальный модуль ai для JavaScript (Rhino) поддерживает поставщиков OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible, вызовы ask/chat/stream и многораундовое продолжение вызовов инструментов; параметры разработчика предоставляют зашифрованное управление несколькими профилями и учетными данными, а совместимые конечные точки на локальном адресе обратной петли могут работать без ключа API
 * `Новое` Маршруты локального плагина `ai.ask`, `ai.chat` и `ai.stream` поддерживают разовые и потоковые запросы только с подсказкой; сокращение `plugin: true` выбирает официальный локальный AI-плагин, а идентификатор модели можно опустить при единственной модели; новый метод `ai.models` перечисляет модели плагина, при отсутствии/отключении плагина или модели выдаются понятные ошибки; в настройках AI-сервиса появился вход локального AI-плагина
+* `Новое` Глобальный модуль yolo для JavaScript (Rhino) предоставляет отключенный по умолчанию маршрут к точно заданному компоненту YOLO-провайдера с версионированным транспортом Binder/PFD, загрузкой моделей NCNN по манифесту, обнаружением объектов, явной отменой и очисткой ресурсов, без неявного перехода на другого провайдера
 * `Новое` Глобальный модуль tts для JavaScript (Rhino) предоставляет системный синтез речи, интеллектуальное разбиение длинного текста, логические очереди, поиск голосов и языков с фильтром офлайн-голосов, наблюдаемые задачи и аудиособытия, вставку тишины и синтез в файл с атомарной публикацией; также предусмотрены тайм-ауты, обратное давление, очистка во время работы и защита от перехода на резервный движок, когда запрошен конкретный движок
 * `Новое` Метод device.getMarketName, для получения "маркетингового названия" устройства _[`issue #513`](http://issues.autojs6.com/513)_
 * `Новое` Задачи по расписанию поддерживают ежемесячные/ежегодные задачи/задачи с обратным отсчетом и условия завершения повторения _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
@@ -626,7 +627,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 20 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 21 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

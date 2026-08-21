@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 8 월 20 일.
+데이터 갱신일: 2026 년 8 월 21 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js ESM/dynamic import()/네트워크 및 WebSocket/네이티브 네트워크 모듈/worker_threads/child_process/Java 상호 운용 기능을 정식 기능으로 기본 활성화하고, 권한 선언/허용 목록/샌드박스/리소스 예산 보호는 계속 적용
@@ -201,6 +201,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` JavaScript (Rhino) 모듈에서 power/settings/work_manager 호환 인터페이스와 AppInfo 래퍼를 지원하고 Auto.js Pro 9.3.11의 일부 Base64/Crypto/WebSocket/ByteString/automator/images/timers API를 보완
 * `추가` 전역 JavaScript (Rhino) ai 모듈에서 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 공급자, ask/chat/stream 호출 및 도구 호출의 다중 라운드 연속 실행 지원; 개발자 옵션에서 암호화된 다중 프로필과 자격 증명을 관리할 수 있으며 로컬 루프백 주소의 호환 엔드포인트는 API 키 없이 실행 가능
 * `추가` `ai.ask`, `ai.chat` 및 `ai.stream` 로컬 플러그인 경로에서 프롬프트 전용 단일 및 스트리밍 요청 지원. `plugin: true` 축약형으로 공식 온디바이스 AI 플러그인을 선택할 수 있고 단일 모델 환경에서는 모델 ID 생략 가능. 새 `ai.models` 메서드로 플러그인 모델을 열거하며, 플러그인 미설치/비활성/모델 없음 상태에서 명확한 오류 메시지 제공. AI 서비스 설정에 로컬 AI 플러그인 입구 추가
+* `추가` 전역 JavaScript (Rhino) yolo 모듈에서 기본 비활성화된 명시적 컴포넌트 YOLO 공급자 경로, 버전이 지정된 Binder/PFD 전송, 매니페스트 기반 NCNN 모델 로딩, 객체 탐지, 명시적 취소 및 리소스 정리, 공급자 자동 폴백 방지 지원
 * `추가` 전역 JavaScript (Rhino) tts 모듈에서 시스템 음성 합성, 긴 텍스트 지능형 분할, 논리 큐, 오프라인 음성 필터링을 포함한 음성 및 언어 검색, 관찰 가능한 작업과 오디오 이벤트, 무음 삽입, 원자적 게시를 사용하는 파일 합성 지원; 시간 제한, 백프레셔, 런타임 정리 및 지정 엔진에서 다른 엔진으로의 폴백 방지 기능도 제공
 * `추가` device.getMarketName 메서드, 기기의 "제품명" 확인용 _[`issue #513`](http://issues.autojs6.com/513)_
 * `추가` 예약 작업에서 월간/연간/카운트다운 작업 및 반복 종료 조건 지원 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
@@ -626,7 +627,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 8 월 20 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 8 월 21 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

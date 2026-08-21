@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Aug 20, 2026.
+Data updated on Aug 21, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,7 +166,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js ESM, dynamic import(), network and WebSocket, native network modules, worker_threads, child_process, and Java interop are stable features enabled by default, while permission declarations, allowlists, sandboxing, and resource budgets remain enforced
@@ -201,6 +201,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` JavaScript (Rhino) modules support compatible power/settings/work_manager interfaces and an AppInfo wrapper, and complete selected Base64/Crypto/WebSocket/ByteString/automator/images/timers APIs from Auto.js Pro 9.3.11
 * `Feature` Global JavaScript (Rhino) ai module supports OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible providers, ask/chat/stream calls, and multi-round tool-call continuation; Developer options provide encrypted multi-profile configuration and credential management, while compatible endpoints on local loopback addresses can run without an API key
 * `Feature` `ai.ask`, `ai.chat`, and `ai.stream` local-plugin routes support prompt-only one-shot and streaming requests; `plugin: true` shorthand selects the official on-device AI plugin and the model ID may be omitted for a single-model catalog; new `ai.models` method lists plugin models, clear errors are raised when the plugin is not installed/enabled or has no model, and AI service settings provide a local AI plugin entry
+* `Feature` Global JavaScript (Rhino) yolo module provides a default-off exact-component YOLO provider route with versioned Binder/PFD transport, manifest-driven NCNN model loading, object detection, explicit cancellation and resource cleanup, and no silent provider fallback
 * `Feature` Global JavaScript (Rhino) tts module provides system text-to-speech, intelligent long-text chunking, logical queues, voice and language discovery with offline voice filtering, observable tasks and audio events, silence insertion, and file synthesis with atomic publication; it also includes timeouts, backpressure, runtime cleanup, and protection against fallback from a requested engine
 * `Feature` device.getMarketName method, for obtaining the device's "market name" _[`issue #513`](http://issues.autojs6.com/513)_
 * `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
@@ -626,7 +627,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Aug 20, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Aug 21, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

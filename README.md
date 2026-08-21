@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 8 月 20 日.
+数据更新于 2026 年 8 月 21 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,18 +166,18 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
-* `新增` 通过独立 Node.js Runtime 插件提供 Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本; 宿主 APK 不再内嵌 libnode
+* `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 的 ESM/dynamic import()/网络与 WebSocket/原生网络模块/worker_threads/child_process/Java 互操作能力成为正式功能并默认启用, 同时保留权限声明/白名单/沙箱及资源预算保护
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
 * `新增` Node.js 运行时支持单次执行范围的按需加密模块源码提供器, 仅探测及解密模块解析器实际选定的候选文件
 * `新增` Node.js 运行时支持受控 AutoJs6 桥接模块, 并采用 Safe Node Profile 安全策略
-* `新增` Node.js Runtime 插件支持常驻服务进程及进程级 Node/V8 平台复用, 同时为每次脚本执行创建独立 isolate 及 Environment
-* `新增` Node.js Runtime 插件支持空闲或内存压力下的回收, 显式关闭及异常进程隔离重建
-* `新增` Node.js 外部运行时插件后端, 采用必需的 `plugin` 模式, 支持常驻 Binder 会话及进程运行时, 信任/合约/ABI 校验和单活动零队列背压; 插件不可用时明确失败且不回退 Rhino
+* `新增` Node.js 运行时支持常驻服务进程及进程级 Node/V8 平台复用, 同时为每次脚本执行创建独立 isolate 及 Environment
+* `新增` Node.js 常驻运行时支持空闲或内存压力下的回收, 显式关闭及异常进程隔离重建
+* `新增` Node.js 外部运行时插件后端, 支持强制 `plugin` 与可选回退 `pluginOptional` 模式, 常驻 Binder 会话及进程运行时, 信任/合约/ABI 校验和单活动零队列背压
 * `新增` Node.js 外部运行时插件后端支持请求级工作区归档传输 v2, 包含显式输入映射/输出回写/删除 tombstone 清单, 且不扫描宿主沙盒
-* `调整` Node.js 运行时完全由外部插件持有; 宿主及导出的应用不再打包 Node.js 运行库, Node.js 项目需在已安装并授权插件的 AutoJs6 中运行
+* `新增` 打包功能支持 Node.js 脚本项目, 并自动包含所需运行库
 * `新增` 独立 Python Runtime 插件后端, 支持通过单独的 CPython 插件进程运行本地 .py 文件及声明为 `type: python` 的脚本项目, 并校验固定组件/签名/协议/ABI, 支持热插拔且绝不回退到 JavaScript
 * `新增` Python 启动集成覆盖文件管理器/编辑器/本地 Run Intent/单文件 Import Intent/新建快捷方式/定时任务/广播任务并严格保留单文件或项目上下文; 项目支持内部 import/相对文件读取及只读 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 执行支持通过 ExecutionConfig 键 `autojs6.python.stdinSnapshot` 提供可选的有界预置 stdin 快照, 并采用严格 ByteArray/UTF-8 文本准入, 提供器能力/大小协商及私有只读 PFD 传输与清理
@@ -201,6 +201,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` JavaScript (Rhino) 模块支持 power/settings/work_manager 兼容接口及 AppInfo 包装, 并完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全局 JavaScript (Rhino) ai 模块支持 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服务商, 提供 ask/chat/stream 调用及工具调用多轮续接; 开发者选项支持加密的多配置及凭据管理, 本机回环地址上的兼容端点可免 API 密钥运行
 * `新增` `ai.ask`, `ai.chat` 与 `ai.stream` 本地插件路由支持仅提示词的单次及流式请求, 可通过 `plugin: true` 简写选择官方设备端 AI 插件, 单模型场景可省略模型 ID; 新增 `ai.models` 方法枚举插件模型, 插件未安装/未启用/无模型时给出明确错误提示; AI 服务设置提供本地 AI 插件入口
+* `新增` 全局 JavaScript (Rhino) yolo 模块提供默认关闭的精确组件 YOLO 提供方路由, 支持版本化 Binder/PFD 传输, 基于清单的 NCNN 模型加载, 目标检测, 显式取消及资源清理, 且不静默回退提供方
 * `新增` 全局 JavaScript (Rhino) tts 模块提供系统文字转语音/长文本智能分段/逻辑队列/语音及语言发现/离线语音筛选/可观察任务及音频事件/静音插入/采用原子发布的文件合成, 并具备超时/背压/运行时清理及指定引擎防回退保护
 * `新增` device.getMarketName 方法, 用于获取设备的 "市场名称" _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` ui.useAndroidLayout 方法, 用于 Android 原生布局控件支持
@@ -630,7 +631,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 8 月 20 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 8 月 21 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

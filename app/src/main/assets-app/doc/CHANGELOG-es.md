@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` ESM, dynamic import(), red y WebSocket, módulos de red nativos, worker_threads, child_process e interoperabilidad con Java de Node.js son funciones estables habilitadas de forma predeterminada, mientras se mantienen las declaraciones de permisos, listas de permitidos, aislamiento y presupuestos de recursos
@@ -41,6 +41,7 @@
 * `Nuevo` Los módulos JavaScript (Rhino) admiten interfaces compatibles con power/settings/work_manager y el contenedor AppInfo, y completan determinadas API de Base64/Crypto/WebSocket/ByteString/automator/images/timers de Auto.js Pro 9.3.11
 * `Nuevo` El módulo global ai de JavaScript (Rhino) admite los proveedores OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible, las llamadas ask/chat/stream y la continuación multirronda de llamadas a herramientas; las opciones de desarrollador ofrecen gestión cifrada de múltiples perfiles y credenciales, y los endpoints compatibles en direcciones de bucle local pueden funcionar sin clave API
 * `Nuevo` Las rutas de plugin local `ai.ask`, `ai.chat` y `ai.stream` admiten solicitudes puntuales y en streaming de solo prompt; la abreviatura `plugin: true` selecciona el plugin de IA local oficial y el ID de modelo puede omitirse con un catálogo de un solo modelo; el nuevo método `ai.models` enumera los modelos del plugin, se emiten errores claros cuando el plugin no está instalado/habilitado o no tiene modelo, y los ajustes del servicio de IA ofrecen una entrada al plugin de IA local
+* `Nuevo` El módulo global yolo de JavaScript (Rhino) ofrece una ruta desactivada por defecto a un componente exacto del proveedor YOLO, con transporte Binder/PFD versionado, carga de modelos NCNN basada en manifiesto, detección de objetos, cancelación y limpieza explícitas, sin conmutación silenciosa a otro proveedor
 * `Nuevo` El módulo global tts de JavaScript (Rhino) ofrece síntesis de voz del sistema, segmentación inteligente de textos largos, colas lógicas, detección de voces e idiomas con filtrado de voces sin conexión, tareas observables y eventos de audio, inserción de silencios y síntesis en archivos con publicación atómica; también incluye tiempos de espera, contrapresión, limpieza en tiempo de ejecución y protección contra el uso de un motor alternativo cuando se solicita uno específico
 * `Nuevo` Método device.getMarketName, para obtener el "nombre comercial" del dispositivo _[`issue #513`](http://issues.autojs6.com/513)_
 * `Nuevo` Las tareas programadas admiten tareas mensuales/anuales/con cuenta atrás y condiciones para finalizar la repetición _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_

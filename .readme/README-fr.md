@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 20 August 2026.
+Données mises à jour le 21 August 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/08/20
+###### 2026/08/21
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` ESM, dynamic import(), le réseau et WebSocket, les modules réseau natifs, worker_threads, child_process et l'interopérabilité Java de Node.js sont des fonctions stables activées par défaut, tandis que les déclarations d'autorisation, listes d'autorisation, bacs à sable et budgets de ressources restent appliqués
@@ -201,6 +201,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Les modules JavaScript (Rhino) prennent en charge les interfaces compatibles power/settings/work_manager et l'enveloppe AppInfo, et complètent certaines API Base64/Crypto/WebSocket/ByteString/automator/images/timers d'Auto.js Pro 9.3.11
 * `Fonctionnalité` Le module global ai JavaScript (Rhino) prend en charge les fournisseurs OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible, les appels ask/chat/stream et la poursuite multi-tour des appels d'outils; les options pour les développeurs proposent une gestion chiffrée de plusieurs profils et identifiants, et les points de terminaison compatibles sur l'adresse de bouclage locale peuvent fonctionner sans clé API
 * `Fonctionnalité` Les routes de plugin local `ai.ask`, `ai.chat` et `ai.stream` prennent en charge les requêtes ponctuelles et en streaming limitées à une invite; le raccourci `plugin: true` sélectionne le plugin IA local officiel et l'ID de modèle peut être omis avec un catalogue à modèle unique; la nouvelle méthode `ai.models` énumère les modèles du plugin, des erreurs claires sont émises si le plugin n'est pas installé/activé ou sans modèle, et les réglages du service IA offrent une entrée vers le plugin IA local
+* `Fonctionnalité` Le module global yolo JavaScript (Rhino) fournit une route désactivée par défaut vers un composant précis de fournisseur YOLO, avec transport Binder/PFD versionné, chargement des modèles NCNN piloté par manifeste, détection d'objets, annulation et nettoyage des ressources explicites, sans repli silencieux vers un fournisseur
 * `Fonctionnalité` Le module global tts JavaScript (Rhino) propose la synthèse vocale du système, le découpage intelligent des textes longs, des files logiques, la découverte des voix et des langues avec filtrage des voix hors ligne, des tâches observables et des événements audio, l'insertion de silences et la synthèse vers des fichiers avec publication atomique; il intègre aussi les délais d'expiration, la contre-pression, le nettoyage à l'exécution et la protection contre l'emploi d'un moteur de repli lorsqu'un moteur précis est demandé
 * `Fonctionnalité` Méthode device.getMarketName, pour obtenir le "nom commercial" de l'appareil _[`issue #513`](http://issues.autojs6.com/513)_
 * `Fonctionnalité` Les tâches planifiées prennent en charge les tâches mensuelles/annuelles/avec compte à rebours et les conditions de fin de répétition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
@@ -626,7 +627,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 20 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 21 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
