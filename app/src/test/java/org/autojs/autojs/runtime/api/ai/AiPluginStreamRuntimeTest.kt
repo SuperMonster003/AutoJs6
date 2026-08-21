@@ -5,6 +5,7 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginUsage
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
@@ -58,13 +59,15 @@ class AiPluginStreamRuntimeTest {
             synchronousEvents = buildList {
                 add(OnDeviceAiPluginStreamEvent.Opened)
                 repeat(10) { add(OnDeviceAiPluginStreamEvent.Chunk("piece-$it|")) }
-                add(OnDeviceAiPluginStreamEvent.Completed(expectedText))
+                add(OnDeviceAiPluginStreamEvent.Usage(usage()))
+                add(OnDeviceAiPluginStreamEvent.Completed(expectedText, usage()))
             },
         )
         val runtime = runtime(runner, scheduler = scheduled::addLast)
         val observed = mutableListOf<String>()
         val chunkText = StringBuilder()
         val deltaText = StringBuilder()
+        val reportedUsage = AtomicReference<Scriptable?>()
         val done = AtomicReference<Scriptable?>()
 
         val stream = runtime.stream(request())
@@ -90,6 +93,10 @@ class AiPluginStreamRuntimeTest {
             deltaText.append(args[0])
             observed += "delta"
         })
+        stream.once(AiStream.EVENT_USAGE, listener { args ->
+            reportedUsage.set(args[0] as Scriptable)
+            observed += "usage"
+        })
         stream.once(AiStream.EVENT_DONE, listener { args ->
             done.set(args[0] as Scriptable)
             observed += "done"
@@ -105,7 +112,8 @@ class AiPluginStreamRuntimeTest {
         assertEquals(expectedText, done.get()?.get("text"))
         assertEquals("", done.get()?.get("reasoning"))
         assertEquals(0L, (done.get()?.get("toolCalls") as NativeArray).length)
-        assertNull(done.get()?.get("usage"))
+        assertPluginUsage(checkNotNull(reportedUsage.get()))
+        assertPluginUsage(done.get()?.get("usage") as Scriptable)
         assertNull(done.get()?.get("finishReason"))
         assertNull(done.get()?.get("message"))
         assertNull(done.get()?.get("error"))
@@ -117,6 +125,7 @@ class AiPluginStreamRuntimeTest {
         assertEquals(1, observed.count { it == "open" })
         assertEquals(10, observed.count { it == "chunk" })
         assertEquals(10, observed.count { it == "delta" })
+        assertEquals(1, observed.count { it == "usage" })
         assertEquals(1, observed.count { it == "done" })
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
@@ -153,14 +162,14 @@ class AiPluginStreamRuntimeTest {
         runtime.stream(request()).once(AiStream.EVENT_DONE, listener { args ->
             first.set((args[0] as Scriptable)["text"] as String)
         })
-        runner.emit(OnDeviceAiPluginStreamEvent.Completed("first"))
+        runner.emit(OnDeviceAiPluginStreamEvent.Completed("first", usage()))
         scheduled.removeFirst().invoke()
         assertEquals("first", first.get())
 
         runtime.stream(request()).once(AiStream.EVENT_DONE, listener { args ->
             second.set((args[0] as Scriptable)["text"] as String)
         })
-        runner.emit(OnDeviceAiPluginStreamEvent.Completed("second"))
+        runner.emit(OnDeviceAiPluginStreamEvent.Completed("second", usage()))
         scheduled.removeFirst().invoke()
 
         assertEquals("second", second.get())
@@ -208,7 +217,7 @@ class AiPluginStreamRuntimeTest {
         scheduled.removeFirst().invoke()
 
         try {
-            runner.emit(OnDeviceAiPluginStreamEvent.Completed("natural completion lost the race"))
+            runner.emit(OnDeviceAiPluginStreamEvent.Completed("natural completion lost the race", usage()))
             assertEquals(1, runner.handle.cancelCount.get())
             assertEquals(1, runner.handle.closeCount.get())
         } finally {
@@ -246,7 +255,7 @@ class AiPluginStreamRuntimeTest {
 
         runtime.close()
         runtime.close()
-        runner.emit(OnDeviceAiPluginStreamEvent.Completed("late"))
+        runner.emit(OnDeviceAiPluginStreamEvent.Completed("late", usage()))
         runner.emit(OnDeviceAiPluginStreamEvent.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
 
         assertEquals("cancelled", stream.state)
@@ -284,6 +293,23 @@ class AiPluginStreamRuntimeTest {
         modelId = "example-model",
         messages = listOf(OnDeviceAiPluginMessage(OnDeviceAiPluginMessageRole.USER, "prompt")),
         timeoutMillis = 5_000L,
+    )
+
+    private fun assertPluginUsage(usage: Scriptable) {
+        assertEquals(12L, (usage["inputTokens"] as Number).toLong())
+        assertEquals(3L, (usage["outputTokens"] as Number).toLong())
+        assertEquals(15L, (usage["totalTokens"] as Number).toLong())
+        assertNull(usage["reasoningTokens"])
+        assertNull(usage["cachedInputTokens"])
+        val raw = usage["raw"] as Scriptable
+        assertEquals(250L, (raw["durationMillis"] as Number).toLong())
+    }
+
+    private fun usage() = OnDeviceAiPluginUsage(
+        inputTokens = 12,
+        outputTokens = 3,
+        totalTokens = 15,
+        durationMillis = 250,
     )
 
     private fun listener(action: (Array<out Any?>) -> Unit): Callable =

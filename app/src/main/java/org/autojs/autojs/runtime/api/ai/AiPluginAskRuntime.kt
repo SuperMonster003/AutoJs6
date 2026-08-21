@@ -5,6 +5,7 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskOutcome
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginUsage
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import java.io.Closeable
@@ -152,6 +153,7 @@ internal class AiPluginAskRuntime(
                 Operation.CHAT -> pluginChatResponse(
                     requireNotNull(request),
                     outcome.text,
+                    outcome.usage,
                     outcome.modelId,
                 )
             }
@@ -200,12 +202,13 @@ internal class AiPluginAskRuntime(
         fun pluginChatResponse(
             request: OnDeviceAiPluginAskRequest,
             text: String,
+            usage: OnDeviceAiPluginUsage,
             resolvedModelId: String? = null,
         ): Map<String, Any?> = linkedMapOf(
             "text" to text,
             "reasoning" to "",
             "toolCalls" to emptyList<Any?>(),
-            "usage" to null,
+            "usage" to usage.toPluginPublicValue(),
             "finishReason" to null,
             "message" to null,
             "error" to null,
@@ -217,6 +220,15 @@ internal class AiPluginAskRuntime(
         )
     }
 }
+
+internal fun OnDeviceAiPluginUsage.toPluginPublicValue(): Map<String, Any?> = linkedMapOf(
+    "inputTokens" to inputTokens,
+    "outputTokens" to outputTokens,
+    "totalTokens" to totalTokens,
+    "reasoningTokens" to null,
+    "cachedInputTokens" to null,
+    "raw" to durationMillis?.let { linkedMapOf("durationMillis" to it) },
+)
 
 internal class AiPluginRouteException(
     val code: String,

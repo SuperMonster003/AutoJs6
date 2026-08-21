@@ -51,10 +51,9 @@ internal fun onDeviceAiPluginCapabilityRequirement(
     request: OnDeviceAiPluginAskRequest,
     streaming: Boolean,
 ): OnDeviceAiCapabilityRequirement = OnDeviceAiCapabilityRequirement(
-    requiredCapabilityIds = if (streaming) {
-        setOf(OnDeviceAiCapabilityId.STREAMING)
-    } else {
-        emptySet()
+    requiredCapabilityIds = buildSet {
+        add(OnDeviceAiCapabilityId.USAGE)
+        if (streaming) add(OnDeviceAiCapabilityId.STREAMING)
     },
     minimumMessages = request.messages.size,
     minimumContentParts = request.messages.size,
@@ -566,10 +565,9 @@ private class ProcessOnDeviceAiPluginAskRunner(
                         stream = streaming,
                         maximumOutputBytes = outputLimit,
                         timeoutMillis = remaining.coerceAtMost(OnDeviceAiLimits.MAX_TIMEOUT_MILLIS),
-                        requiredCapabilityIds = if (streaming) {
-                            listOf(OnDeviceAiCapabilityId.STREAMING)
-                        } else {
-                            emptyList()
+                        requiredCapabilityIds = buildList {
+                            add(OnDeviceAiCapabilityId.USAGE)
+                            if (streaming) add(OnDeviceAiCapabilityId.STREAMING)
                         },
                     ),
                 )
@@ -619,13 +617,21 @@ private class ProcessOnDeviceAiPluginAskRunner(
                             publish(OnDeviceAiPluginStreamEvent.Chunk(transcript.chunk.textDelta))
                         }
                     }
-                    is OnDeviceAiProviderSessionEvent.Usage ->
-                        terminalSession(OnDeviceAiPluginAskFailure.SESSION_REJECTED)
+                    is OnDeviceAiProviderSessionEvent.Usage -> {
+                        val usage = transcript.usage.toPluginUsage()
+                        if (streaming) publish(OnDeviceAiPluginStreamEvent.Usage(usage))
+                    }
                     is OnDeviceAiProviderSessionEvent.Completed -> {
+                        val usage = transcript.result.finalUsage?.toPluginUsage()
+                        if (usage == null) {
+                            terminalSession(OnDeviceAiPluginAskFailure.SESSION_REJECTED)
+                            return
+                        }
                         detachStage()
                         finish(
                             OnDeviceAiPluginAskOutcome.Completed(
                                 text = transcript.result.outputText,
+                                usage = usage,
                                 modelId = resolvedModelId,
                             ),
                         )
@@ -723,7 +729,7 @@ private class ProcessOnDeviceAiPluginAskRunner(
                 streaming -> {
                     val event = when (outcome) {
                         is OnDeviceAiPluginAskOutcome.Completed ->
-                            OnDeviceAiPluginStreamEvent.Completed(outcome.text)
+                            OnDeviceAiPluginStreamEvent.Completed(outcome.text, outcome.usage)
                         is OnDeviceAiPluginAskOutcome.Failed ->
                             OnDeviceAiPluginStreamEvent.Failed(outcome.failure)
                     }

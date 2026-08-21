@@ -44,11 +44,14 @@ class AndroidOnDeviceAiPluginMessagesTest {
         assertEquals(2, unary.minimumMessages)
         assertEquals(2, unary.minimumContentParts)
         assertEquals(request.inputBytes, unary.minimumContextBytes)
-        assertEquals(emptySet<String>(), unary.requiredCapabilityIds)
+        assertEquals(setOf(OnDeviceAiCapabilityId.USAGE), unary.requiredCapabilityIds)
         assertEquals(setOf(OnDeviceAiMimeType.PLAIN), unary.requiredTextMimeTypes)
 
         val streaming = onDeviceAiPluginCapabilityRequirement(request, streaming = true)
-        assertEquals(setOf(OnDeviceAiCapabilityId.STREAMING), streaming.requiredCapabilityIds)
+        assertEquals(
+            setOf(OnDeviceAiCapabilityId.STREAMING, OnDeviceAiCapabilityId.USAGE),
+            streaming.requiredCapabilityIds,
+        )
         assertEquals(request.inputBytes, streaming.minimumContextBytes)
     }
 

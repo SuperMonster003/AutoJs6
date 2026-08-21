@@ -8,6 +8,7 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginUsage
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import org.junit.Assert.assertEquals
@@ -22,7 +23,7 @@ class AiPluginAskRuntimeTest {
     @Test
     fun synchronousCompletionClosesHandleOnceAndLateFailureIsIgnored() {
         val dispatchers = TestDispatchers()
-        val runner = FakeRunner(OnDeviceAiPluginAskOutcome.Completed("exact answer"))
+        val runner = FakeRunner(OnDeviceAiPluginAskOutcome.Completed("exact answer", usage()))
         val runtime = AiPluginAskRuntime({ runner }, dispatchers::create)
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -71,12 +72,12 @@ class AiPluginAskRuntimeTest {
 
         runtime.ask(request()).onResolve(callback(first::set))
         assertEquals(1, providerCalls.get())
-        runner.emit(OnDeviceAiPluginAskOutcome.Completed("first async answer"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("first async answer", usage()))
         dispatchers.drain()
         assertEquals("first async answer", first.get())
 
         runtime.chat(request()).onResolve(callback(second::set))
-        runner.emit(OnDeviceAiPluginAskOutcome.Completed("second async answer"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("second async answer", usage()))
         dispatchers.drain()
         assertPluginChatResponse(second.get(), "second async answer")
         assertEquals(1, providerCalls.get())
@@ -117,7 +118,7 @@ class AiPluginAskRuntimeTest {
             .onReject(callback { rejectCount.incrementAndGet() })
         runtime.close()
         runtime.close()
-        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late", usage()))
         runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
 
@@ -149,7 +150,13 @@ class AiPluginAskRuntimeTest {
         assertEquals(expectedText, response["text"])
         assertEquals("", response["reasoning"])
         assertEquals(emptyList<Any?>(), response["toolCalls"])
-        assertNull(response["usage"])
+        val usage = response["usage"] as Map<*, *>
+        assertEquals(12L, usage["inputTokens"])
+        assertEquals(3L, usage["outputTokens"])
+        assertEquals(15L, usage["totalTokens"])
+        assertNull(usage["reasoningTokens"])
+        assertNull(usage["cachedInputTokens"])
+        assertEquals(250L, (usage["raw"] as Map<*, *>)["durationMillis"])
         assertNull(response["finishReason"])
         assertNull(response["message"])
         assertNull(response["error"])
@@ -169,6 +176,13 @@ class AiPluginAskRuntimeTest {
         modelId = "example-model",
         messages = listOf(OnDeviceAiPluginMessage(OnDeviceAiPluginMessageRole.USER, "prompt")),
         timeoutMillis = 5_000L,
+    )
+
+    private fun usage() = OnDeviceAiPluginUsage(
+        inputTokens = 12,
+        outputTokens = 3,
+        totalTokens = 15,
+        durationMillis = 250,
     )
 
     private fun callback(action: (Any?) -> Unit) = object : ScriptPromiseAdapter.Callback {

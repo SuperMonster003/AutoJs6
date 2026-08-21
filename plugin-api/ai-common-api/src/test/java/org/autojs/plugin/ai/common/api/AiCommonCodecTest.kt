@@ -103,7 +103,7 @@ class AiCommonCodecTest {
             retryDisposition = AiRetryDisposition.NEVER,
             providerCode = "fake_failure",
         )
-        val usage = AiUsage(10, 5, 15, 2, 1)
+        val usage = AiUsage(10, 5, 15, 2, 1, 1_234)
 
         assertEquals(error, AiCommonCodec.decodeError(AiCommonCodec.encodeError(error)))
         assertEquals(usage, AiCommonCodec.decodeUsage(AiCommonCodec.encodeUsage(usage)))
@@ -145,18 +145,22 @@ class AiCommonCodecTest {
 
     @Test
     fun usageMustRemainMonotonicWhenBothSnapshotsReportACounter() {
-        val first = AiUsage(inputTokens = 10, outputTokens = 2, totalTokens = 12)
-        assertTrue(AiUsagePolicy.isMonotonic(first, AiUsage(10, 3, 13)))
-        assertFalse(AiUsagePolicy.isMonotonic(first, AiUsage(9, 3, 12)))
+        val first = AiUsage(inputTokens = 10, outputTokens = 2, totalTokens = 12, durationMillis = 50)
+        assertTrue(AiUsagePolicy.isMonotonic(first, AiUsage(10, 3, 13, durationMillis = 60)))
+        assertFalse(AiUsagePolicy.isMonotonic(first, AiUsage(9, 3, 12, durationMillis = 60)))
+        assertFalse(AiUsagePolicy.isMonotonic(first, AiUsage(outputTokens = 3, durationMillis = 49)))
         assertTrue(AiUsagePolicy.isMonotonic(first, AiUsage(outputTokens = 3)))
     }
 
     @Test
     fun partialUsageSnapshotsCannotResetAnOmittedCounter() {
-        val first = AiUsage(inputTokens = 10, outputTokens = 2, totalTokens = 20)
+        val first = AiUsage(inputTokens = 10, outputTokens = 2, totalTokens = 20, durationMillis = 50)
         val merged = AiUsagePolicy.mergeMonotonic(first, AiUsage(outputTokens = 3))
 
-        assertEquals(AiUsage(inputTokens = 10, outputTokens = 3, totalTokens = 20), merged)
+        assertEquals(
+            AiUsage(inputTokens = 10, outputTokens = 3, totalTokens = 20, durationMillis = 50),
+            merged,
+        )
         assertThrows(IllegalArgumentException::class.java) {
             AiUsagePolicy.mergeMonotonic(merged, AiUsage(inputTokens = 9))
         }
@@ -184,12 +188,16 @@ class AiCommonCodecTest {
         assertThrows(IllegalArgumentException::class.java) {
             AiUsage(inputTokens = Long.MAX_VALUE, outputTokens = 1, totalTokens = Long.MAX_VALUE)
         }
+        assertThrows(IllegalArgumentException::class.java) {
+            AiUsage(outputTokens = 1, durationMillis = -1)
+        }
         AiUsage(
             inputTokens = 8,
             outputTokens = 8,
             totalTokens = 16,
             reasoningTokens = 3,
             cachedInputTokens = 2,
+            durationMillis = 1_234,
         )
     }
 

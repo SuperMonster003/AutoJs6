@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.ai
 
 import org.autojs.plugin.ai.common.api.AiCommonLimits
+import org.autojs.plugin.ai.common.api.AiUsage
 import org.autojs.plugin.ai.common.api.AiValidation
 import org.autojs.plugin.ondeviceai.api.AiGenerationOptions
 import org.autojs.plugin.ondeviceai.api.AiMessageRole
@@ -32,6 +33,29 @@ internal class OnDeviceAiPluginMessage(
     override fun toString(): String =
         "OnDeviceAiPluginMessage(role=$role, contentBytes=$contentBytes)"
 }
+
+internal data class OnDeviceAiPluginUsage(
+    val inputTokens: Long?,
+    val outputTokens: Long?,
+    val totalTokens: Long?,
+    val durationMillis: Long?,
+) {
+    init {
+        require(listOf(inputTokens, outputTokens, totalTokens).any { it != null }) {
+            "On-device AI plugin usage must contain a token count"
+        }
+        require(listOf(inputTokens, outputTokens, totalTokens, durationMillis).filterNotNull().all { it >= 0L }) {
+            "On-device AI plugin usage values must not be negative"
+        }
+    }
+}
+
+internal fun AiUsage.toPluginUsage() = OnDeviceAiPluginUsage(
+    inputTokens = inputTokens,
+    outputTokens = outputTokens,
+    totalTokens = totalTokens,
+    durationMillis = durationMillis,
+)
 
 internal class OnDeviceAiPluginAskRequest(
     val component: OnDeviceAiProviderComponent,
@@ -102,7 +126,7 @@ internal fun OnDeviceAiPluginAskRequest.toGenerationOptions(
     stream = stream,
     includeReasoning = false,
     structuredJson = false,
-    reportUsage = false,
+    reportUsage = true,
     maximumOutputBytes = maximumOutputBytes,
     maximumOutputTokens = maximumOutputTokens,
     maximumToolRounds = 0,
@@ -135,11 +159,12 @@ internal enum class OnDeviceAiPluginAskFailure {
 internal sealed class OnDeviceAiPluginAskOutcome {
     class Completed(
         val text: String,
+        val usage: OnDeviceAiPluginUsage,
         /** The model that actually served the request, once resolved from the catalog. */
         val modelId: String? = null,
     ) : OnDeviceAiPluginAskOutcome() {
         override fun toString(): String =
-            "Completed(textBytes=${AiValidation.utf8Size(text)}, modelId=$modelId)"
+            "Completed(textBytes=${AiValidation.utf8Size(text)}, modelId=$modelId, usage=$usage)"
     }
 
     data class Failed(val failure: OnDeviceAiPluginAskFailure) : OnDeviceAiPluginAskOutcome()
@@ -178,9 +203,14 @@ internal sealed class OnDeviceAiPluginStreamEvent {
             "Chunk(textBytes=${AiValidation.utf8Size(text)})"
     }
 
-    class Completed(val text: String) : OnDeviceAiPluginStreamEvent() {
+    data class Usage(val usage: OnDeviceAiPluginUsage) : OnDeviceAiPluginStreamEvent()
+
+    class Completed(
+        val text: String,
+        val usage: OnDeviceAiPluginUsage,
+    ) : OnDeviceAiPluginStreamEvent() {
         override fun toString(): String =
-            "Completed(textBytes=${AiValidation.utf8Size(text)})"
+            "Completed(textBytes=${AiValidation.utf8Size(text)}, usage=$usage)"
     }
 
     data class Failed(val failure: OnDeviceAiPluginAskFailure) : OnDeviceAiPluginStreamEvent()

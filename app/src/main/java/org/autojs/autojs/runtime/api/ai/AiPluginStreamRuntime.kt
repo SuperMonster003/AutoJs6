@@ -5,6 +5,7 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginUsage
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import org.autojs.autojs.runtime.api.augment.ai.AiStream
@@ -131,8 +132,11 @@ internal class AiPluginStreamRuntime(
                 is OnDeviceAiPluginStreamEvent.Chunk -> dispatchNonTerminal {
                     controller.textChunk(event.text, normalizedChunk(event.text))
                 }
+                is OnDeviceAiPluginStreamEvent.Usage -> dispatchNonTerminal {
+                    controller.usage(event.usage.toPluginPublicValue())
+                }
                 is OnDeviceAiPluginStreamEvent.Completed -> finishNaturally {
-                    controller.complete(completion(event.text))
+                    controller.complete(completion(event.text, event.usage))
                 }
                 is OnDeviceAiPluginStreamEvent.Failed -> finishNaturally {
                     controller.fail(pluginFailure(event.failure).toPluginStreamPublicValue())
@@ -200,11 +204,14 @@ internal class AiPluginStreamRuntime(
             "raw" to null,
         )
 
-        private fun completion(text: String): Map<String, Any?> = linkedMapOf(
+        private fun completion(
+            text: String,
+            usage: OnDeviceAiPluginUsage,
+        ): Map<String, Any?> = linkedMapOf(
             "text" to text,
             "reasoning" to "",
             "toolCalls" to emptyList<Any?>(),
-            "usage" to null,
+            "usage" to usage.toPluginPublicValue(),
             "finishReason" to null,
             "message" to null,
             "error" to null,

@@ -186,9 +186,11 @@ data class AiError(
 }
 
 /**
- * Cumulative V1 usage snapshot. When all three values are present, [totalTokens] is at least
+ * Cumulative V1 usage snapshot. When all three token totals are present, [totalTokens] is at least
  * [inputTokens] plus [outputTokens]. Reasoning and cached-input counters are detail counters and
  * are not added again because a provider may already include them in output or input tokens.
+ * [durationMillis] is the provider-measured generation duration and deliberately excludes host
+ * discovery, binding, catalog, and dispatch overhead.
  */
 data class AiUsage(
     val inputTokens: Long? = null,
@@ -196,9 +198,17 @@ data class AiUsage(
     val totalTokens: Long? = null,
     val reasoningTokens: Long? = null,
     val cachedInputTokens: Long? = null,
+    val durationMillis: Long? = null,
 ) {
     init {
-        val counters = listOf(inputTokens, outputTokens, totalTokens, reasoningTokens, cachedInputTokens)
+        val counters = listOf(
+            inputTokens,
+            outputTokens,
+            totalTokens,
+            reasoningTokens,
+            cachedInputTokens,
+            durationMillis,
+        )
         require(counters.any { it != null }) { "At least one usage counter is required" }
         require(counters.filterNotNull().all { it >= 0L }) { "Usage counters must not be negative" }
         if (totalTokens != null && inputTokens != null && outputTokens != null) {
@@ -292,7 +302,8 @@ object AiUsagePolicy {
             monotonic(previous.outputTokens, next.outputTokens) &&
             monotonic(previous.totalTokens, next.totalTokens) &&
             monotonic(previous.reasoningTokens, next.reasoningTokens) &&
-            monotonic(previous.cachedInputTokens, next.cachedInputTokens)
+            monotonic(previous.cachedInputTokens, next.cachedInputTokens) &&
+            monotonic(previous.durationMillis, next.durationMillis)
     }
 
     /**
@@ -313,6 +324,7 @@ object AiUsagePolicy {
             totalTokens = next.totalTokens ?: previous.totalTokens,
             reasoningTokens = next.reasoningTokens ?: previous.reasoningTokens,
             cachedInputTokens = next.cachedInputTokens ?: previous.cachedInputTokens,
+            durationMillis = next.durationMillis ?: previous.durationMillis,
         )
     }
 

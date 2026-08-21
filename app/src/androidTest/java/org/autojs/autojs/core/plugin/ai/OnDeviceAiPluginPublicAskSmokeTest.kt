@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Opt-in device smoke for the public Rhino multi-message `ai.ask(..., { plugin: ... })` route.
+ * Opt-in device smoke for the public Rhino multi-message `ai.chat(..., { plugin: ... })` route.
  *
  * This deliberately starts a normal script through [org.autojs.autojs.engine.ScriptEngineService]
  * instead of invoking an AI coordinator or Binder transport from the test process. The exact real
@@ -40,32 +40,32 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         get() = AutoJs.instance.scriptEngineService
 
     @Test
-    fun publicRhinoAiAskWithSystemPromptCompletesThroughExactRealPlugin() {
+    fun publicRhinoAiChatWithSystemPromptReturnsUsageThroughExactRealPlugin() {
         val parameters = requireOptInParameters()
         requireRealProviderPreflight()
 
-        awaitNoRegisteredEngines("before public AI plugin ask smoke")
+        awaitNoRegisteredEngines("before public AI plugin chat smoke")
 
         val workDir = File(
             context.cacheDir,
-            "ai-public-ask-smoke-${UUID.randomUUID()}",
+            "ai-public-chat-smoke-${UUID.randomUUID()}",
         ).apply {
-            check(mkdirs()) { "Unable to create public AI plugin ask smoke directory: $absolutePath" }
+            check(mkdirs()) { "Unable to create public AI plugin chat smoke directory: $absolutePath" }
         }
         var primaryFailure: Throwable? = null
         try {
-            runPublicAsk(workDir, parameters)
+            runPublicChat(workDir, parameters)
         } catch (error: Throwable) {
             primaryFailure = error
             throw error
         } finally {
             var cleanupFailure: Throwable? = null
             cleanupFailure = captureCleanupFailure(cleanupFailure) {
-                awaitNoRegisteredEngines("after public AI plugin ask smoke")
+                awaitNoRegisteredEngines("after public AI plugin chat smoke")
             }
             cleanupFailure = captureCleanupFailure(cleanupFailure) {
                 check(workDir.deleteRecursively()) {
-                    "Unable to remove public AI plugin ask smoke directory: ${workDir.absolutePath}"
+                    "Unable to remove public AI plugin chat smoke directory: ${workDir.absolutePath}"
                 }
             }
             cleanupFailure?.let { failure ->
@@ -74,13 +74,13 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         }
     }
 
-    private fun runPublicAsk(
+    private fun runPublicChat(
         workDir: File,
         parameters: SmokeParameters,
     ) {
         val marker = File(workDir, MARKER_NAME)
         val sourceFile = File(workDir, SCRIPT_NAME).apply {
-            writeText(publicAskSource(parameters), Charsets.UTF_8)
+            writeText(publicChatSource(parameters), Charsets.UTF_8)
         }
         val source = JavaScriptFileSource(sourceFile)
         assertEquals(JavaScriptSource.ENGINE, source.engineName)
@@ -114,41 +114,54 @@ class OnDeviceAiPluginPublicAskSmokeTest {
             val hardTimeoutMillis = parameters.timeoutMillis + SCRIPT_TERMINAL_MARGIN_MILLIS
             if (!completed.await(hardTimeoutMillis, TimeUnit.MILLISECONDS)) {
                 throw AssertionError(
-                    "Timed out after ${hardTimeoutMillis}ms waiting for public AI plugin ask script",
+                    "Timed out after ${hardTimeoutMillis}ms waiting for public AI plugin chat script",
                 )
             }
             awaitEngineRemoved(execution.id)
             engineRemovedNaturally = true
             scriptFailure.get()?.let { error ->
-                throw AssertionError("Public AI plugin ask script failed", error)
+                throw AssertionError("Public AI plugin chat script failed", error)
             }
             assertTrue(
-                "Public AI plugin ask did not execute through the production Rhino engine",
+                "Public AI plugin chat did not execute through the production Rhino engine",
                 startedEngineClass.get()?.let(RhinoJavaScriptEngine::class.java::isAssignableFrom) == true,
             )
-            assertTrue("Public AI plugin ask script did not publish its marker", marker.isFile)
+            assertTrue("Public AI plugin chat script did not publish its marker", marker.isFile)
             assertTrue(
-                "Public AI plugin ask marker exceeded its bounded size",
+                "Public AI plugin chat marker exceeded its bounded size",
                 marker.length() in 1L..MAXIMUM_MARKER_BYTES,
             )
 
             val result = JSONObject(marker.readText(Charsets.UTF_8))
             when (val status = result.optString("status")) {
                 "resolved" -> {
-                    assertEquals("string", result.optString("type"))
+                    assertEquals("object", result.optString("type"))
                     assertTrue(
-                        "Public AI plugin ask completed with empty text",
+                        "Public AI plugin chat completed with empty text",
                         result.optString("text").isNotBlank(),
+                    )
+                    listOf("inputTokens", "outputTokens", "totalTokens", "durationMillis").forEach { key ->
+                        assertTrue("Public AI plugin chat omitted $key", result.has(key) && !result.isNull(key))
+                    }
+                    val inputTokens = result.getLong("inputTokens")
+                    val outputTokens = result.getLong("outputTokens")
+                    val totalTokens = result.getLong("totalTokens")
+                    assertTrue("Public AI plugin chat reported no input tokens", inputTokens > 0L)
+                    assertTrue("Public AI plugin chat reported no output tokens", outputTokens > 0L)
+                    assertEquals(inputTokens + outputTokens, totalTokens)
+                    assertTrue(
+                        "Public AI plugin chat reported a negative generation duration",
+                        result.getLong("durationMillis") >= 0L,
                     )
                 }
                 "rejected" -> throw AssertionError(
-                    "Public AI plugin ask rejected " +
+                    "Public AI plugin chat rejected " +
                         "route=${result.optString("route")} " +
                         "code=${result.optString("code")} " +
                         "name=${result.optString("name")} " +
                         "message=${result.optString("message")}",
                 )
-                else -> throw AssertionError("Public AI plugin ask wrote unknown marker status: $status")
+                else -> throw AssertionError("Public AI plugin chat wrote unknown marker status: $status")
             }
         } catch (error: Throwable) {
             primaryFailure = error
@@ -158,7 +171,7 @@ class OnDeviceAiPluginPublicAskSmokeTest {
                 var cleanupFailure: Throwable? = null
                 cleanupFailure = captureCleanupFailure(cleanupFailure) {
                     checkNotNull(execution.engine) {
-                        "Public AI plugin ask execution never created its owned engine"
+                        "Public AI plugin chat execution never created its owned engine"
                     }.forceStop()
                 }
                 cleanupFailure = captureCleanupFailure(cleanupFailure) {
@@ -174,7 +187,7 @@ class OnDeviceAiPluginPublicAskSmokeTest {
     private fun requireOptInParameters(): SmokeParameters {
         val arguments = InstrumentationRegistry.getArguments()
         assumeTrue(
-            "Public AI plugin ask smoke is opt-in; pass -e $ARG_ENABLED true",
+            "Public AI plugin chat smoke is opt-in; pass -e $ARG_ENABLED true",
             arguments.getString(ARG_ENABLED) == "true",
         )
 
@@ -195,7 +208,7 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         val prompt = arguments.getString(ARG_PROMPT)?.takeIf(String::isNotEmpty)
             ?: DEFAULT_PROMPT
         assertTrue(
-            "Public AI plugin ask prompt must contain 1..$MAXIMUM_PROMPT_BYTES UTF-8 bytes",
+            "Public AI plugin chat prompt must contain 1..$MAXIMUM_PROMPT_BYTES UTF-8 bytes",
             prompt.toByteArray(Charsets.UTF_8).size in 1..MAXIMUM_PROMPT_BYTES,
         )
 
@@ -214,8 +227,8 @@ class OnDeviceAiPluginPublicAskSmokeTest {
 
     @Suppress("DEPRECATION")
     private fun requireRealProviderPreflight() {
-        assertTrue("Public AI plugin ask smoke requires API 24 or newer", Build.VERSION.SDK_INT >= 24)
-        assertEquals("Public AI plugin ask smoke must target the canonical host", HOST_PACKAGE, context.packageName)
+        assertTrue("Public AI plugin chat smoke requires API 24 or newer", Build.VERSION.SDK_INT >= 24)
+        assertEquals("Public AI plugin chat smoke must target the canonical host", HOST_PACKAGE, context.packageName)
         val serviceInfo = try {
             context.packageManager.getServiceInfo(
                 REAL_COMPONENT,
@@ -237,11 +250,11 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         assertEquals(PLUGIN_PERMISSION, serviceInfo.permission)
     }
 
-    private fun publicAskSource(parameters: SmokeParameters): String =
+    private fun publicChatSource(parameters: SmokeParameters): String =
         """
         "rhino";
         const markerPath = ${JSONObject.quote("./$MARKER_NAME")};
-        ai.ask(
+        ai.chat(
           [
             { role: "system", content: ${JSONObject.quote(DEFAULT_SYSTEM_PROMPT)} },
             { role: "user", content: ${JSONObject.quote(parameters.prompt)} }
@@ -262,11 +275,19 @@ class OnDeviceAiPluginPublicAskSmokeTest {
             maxTokens: 32
           }
         ).then(
-          text => files.write(markerPath, JSON.stringify({
-            status: "resolved",
-            type: typeof text,
-            text: String(text)
-          })),
+          response => {
+            const usage = response && response.usage || {};
+            const rawUsage = usage.raw || {};
+            files.write(markerPath, JSON.stringify({
+              status: "resolved",
+              type: typeof response,
+              text: String(response && response.text || ""),
+              inputTokens: usage.inputTokens,
+              outputTokens: usage.outputTokens,
+              totalTokens: usage.totalTokens,
+              durationMillis: rawUsage.durationMillis
+            }));
+          },
           error => {
             const safe = error || {};
             files.write(markerPath, JSON.stringify({
@@ -339,8 +360,8 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         const val REAL_PROVIDER_ID = "autojs6.on-device-ai"
         const val PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN"
 
-        const val SCRIPT_NAME = "public-ai-plugin-ask.js"
-        const val MARKER_NAME = "public-ai-plugin-ask-result.json"
+        const val SCRIPT_NAME = "public-ai-plugin-chat.js"
+        const val MARKER_NAME = "public-ai-plugin-chat-result.json"
         const val DEFAULT_PROMPT = "Reply with exactly OK."
         const val DEFAULT_SYSTEM_PROMPT = "Answer the user's request directly and concisely."
         const val DEFAULT_ROUTE_TIMEOUT_MILLIS = 180_000L

@@ -75,22 +75,24 @@ object AiCommonCodec {
         )
     }
 
-    fun encodeUsage(value: AiUsage): ByteArray = TaggedWireWriter(AiCommonProtocol.SCHEMA_USAGE, 1, 0)
+    fun encodeUsage(value: AiUsage): ByteArray = TaggedWireWriter(AiCommonProtocol.SCHEMA_USAGE, 1, 1)
         .apply { value.inputTokens?.let { int64(1, it) } }
         .apply { value.outputTokens?.let { int64(2, it) } }
         .apply { value.totalTokens?.let { int64(3, it) } }
         .apply { value.reasoningTokens?.let { int64(4, it) } }
         .apply { value.cachedInputTokens?.let { int64(5, it) } }
+        .apply { value.durationMillis?.let { int64(6, it) } }
         .encode()
 
     fun decodeUsage(bytes: ByteArray): AiUsage {
-        val document = document(bytes, AiCommonProtocol.SCHEMA_USAGE, (1..5).toSet())
+        val document = document(bytes, AiCommonProtocol.SCHEMA_USAGE, (1..6).toSet())
         return AiUsage(
             inputTokens = document.optionalInt64(1),
             outputTokens = document.optionalInt64(2),
             totalTokens = document.optionalInt64(3),
             reasoningTokens = document.optionalInt64(4),
             cachedInputTokens = document.optionalInt64(5),
+            durationMillis = document.optionalInt64(6),
         )
     }
 

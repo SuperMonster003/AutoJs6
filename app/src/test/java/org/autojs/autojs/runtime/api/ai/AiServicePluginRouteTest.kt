@@ -13,6 +13,7 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginUsage
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
@@ -35,7 +36,7 @@ class AiServicePluginRouteTest {
     fun synchronousPluginChatCompletionReusesExactPromptRouteAndReturnsNormalizedShapeWithoutCloudFallback() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
-            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("exact local chat answer"),
+            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("exact local chat answer", usage()),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -121,7 +122,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
 
-        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late completion must not win"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late completion must not win", usage()))
         dispatchers.drain()
         assertNull(resolved.get())
         assertEquals(error, rejected.get())
@@ -136,7 +137,7 @@ class AiServicePluginRouteTest {
     fun synchronousPluginCompletionResolvesExactTextAndClosesHandleOnce() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
-            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("exact local answer"),
+            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("exact local answer", usage()),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -197,7 +198,7 @@ class AiServicePluginRouteTest {
     fun pluginAskForwardsSystemAndConversationMessagesInOrderWithoutCloudFallback() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
-            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("system-aware answer"),
+            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("system-aware answer", usage()),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -286,7 +287,7 @@ class AiServicePluginRouteTest {
             .onReject(callback { rejectCount.incrementAndGet() })
         service.close()
         service.close()
-        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late completion"))
+        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late completion", usage()))
         runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
 
@@ -328,7 +329,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, streamRunner.handle.cancelCount.get())
         assertEquals(1, streamRunner.handle.closeCount.get())
 
-        streamRunner.emit(OnDeviceAiPluginStreamEvent.Completed("late cloud fallback must not win"))
+        streamRunner.emit(OnDeviceAiPluginStreamEvent.Completed("late cloud fallback must not win", usage()))
         dispatchers.drain()
         assertEquals(1, streamRunner.handle.closeCount.get())
         service.close()
@@ -386,7 +387,17 @@ class AiServicePluginRouteTest {
         assertEquals(expectedText, response["text"])
         assertEquals("", response["reasoning"])
         assertEquals(emptyList<Any?>(), response["toolCalls"])
-        assertNull(response["usage"])
+        assertEquals(
+            mapOf(
+                "inputTokens" to 12L,
+                "outputTokens" to 3L,
+                "totalTokens" to 15L,
+                "reasoningTokens" to null,
+                "cachedInputTokens" to null,
+                "raw" to mapOf("durationMillis" to 250L),
+            ),
+            response["usage"],
+        )
         assertNull(response["finishReason"])
         assertNull(response["message"])
         assertNull(response["error"])
@@ -403,6 +414,13 @@ class AiServicePluginRouteTest {
         assertEquals("INVALID_REQUEST", error["code"])
         assertEquals("AI plugin request is invalid", error["message"])
     }
+
+    private fun usage() = OnDeviceAiPluginUsage(
+        inputTokens = 12L,
+        outputTokens = 3L,
+        totalTokens = 15L,
+        durationMillis = 250L,
+    )
 
     private fun testContext(): TestContext {
         val unsafe = Unsafe::class.java.getDeclaredField("theUnsafe").run {

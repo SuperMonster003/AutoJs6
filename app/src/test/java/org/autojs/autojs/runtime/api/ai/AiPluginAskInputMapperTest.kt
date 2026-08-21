@@ -167,6 +167,7 @@ class AiPluginAskInputMapperTest {
         assertEquals(0.9, protocolOptions.topP!!, 0.0)
         assertEquals(512L, protocolOptions.maximumOutputTokens)
         assertEquals(listOf(OnDeviceAiCapabilityId.STREAMING), protocolOptions.requiredCapabilityIds)
+        assertTrue(protocolOptions.reportUsage)
 
         val defaults = AiPluginAskInputMapper.map(input("""[{"role":"user","content":"prompt"}]"""), 9_000L)
         assertNull(defaults.temperature)
