@@ -1,5 +1,11 @@
 # Auto.js Pro v9 对照下的 AutoJs6 Node.js 集成现状
 
+> [!WARNING]
+> 这是 M5 迁移前的历史对照快照. 文中的宿主内嵌运行时、libnode、
+> nodeFull/nodeMini、阶段报告及工具路径均已退役, 不再代表当前实现.
+> 当前职责边界与能力以 [README.md](README.md) 和
+> [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md) 为准.
+
 本文记录当前仓库在集成 Node.js 能力方面的实际状态，并对照 Auto.js Pro
 v9 文档说明哪些能力已经具备、哪些能力尚需完成，以及 Rhino 时代内置
 JavaScript API，尤其是 `org/autojs/autojs/runtime/api/augment` 中主要 API，

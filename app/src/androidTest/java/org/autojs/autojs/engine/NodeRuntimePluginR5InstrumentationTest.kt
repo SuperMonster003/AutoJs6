@@ -139,7 +139,7 @@ class NodeRuntimePluginR5InstrumentationTest {
     )
 
     private fun assertPluginSucceeded(label: String, result: NodePluginScriptResult) {
-        NodeEmbeddedTestHarness.assertSucceeded(label, result)
+        NodePluginTestHarness.assertSucceeded(label, result)
         assertEquals("$label did not execute in the plugin backend", "true", result.nativeValues[PLUGIN_ENABLED_KEY])
         assertEquals("$label unexpectedly became fallback-safe", "false", result.nativeValues[FALLBACK_SAFE_KEY])
     }

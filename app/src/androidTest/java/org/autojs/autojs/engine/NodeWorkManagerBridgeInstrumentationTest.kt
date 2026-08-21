@@ -19,12 +19,12 @@ import java.util.concurrent.TimeUnit
 
 class NodeWorkManagerBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
     private val ownerKeys = mutableSetOf<String>()
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
         ownerKeys.clear()
     }
 
@@ -34,7 +34,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
             NodeWorkManagerBridgeScheduler.cancelAllForOwner(context, ownerKey)
         }
         ownerKeys.clear()
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -105,7 +105,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
 
     @Test
     fun jsWorkManagerModuleUsesFakeTransportAndSerializesPackagedMetadata() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node work_manager bridge focused regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node work_manager bridge focused regression")
 
         val workDir = File(context.cacheDir, "node-bridge-work-manager-shadow").apply {
             deleteRecursively()
@@ -117,7 +117,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
         }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("work_manager"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -331,7 +331,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("work_manager fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("work_manager fake bridge", result)
         assertTrue(result.stdout.contains("work.resolve=work_manager"))
         assertTrue(result.stdout.contains("work.shadow=false"))
         assertTrue(result.stdout.contains("work.frozen=true"))
@@ -439,7 +439,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
 
     @Test
     fun androidWorkManagerLiveProviderExecutesPackagedProjectEntryAndPersistsResult() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node work_manager live provider one-shot execution")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node work_manager live provider one-shot execution")
 
         val workDir = File(context.cacheDir, "node-bridge-work-manager-live-packaged").apply {
             deleteRecursively()
@@ -510,7 +510,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
 
     @Test
     fun androidWorkManagerScheduledRunnerExecutesEsmEntryAndPersistsHistory() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node work_manager scheduled runner ESM execution")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node work_manager scheduled runner ESM execution")
 
         val workDir = File(context.cacheDir, "node-bridge-work-manager-scheduled-esm").apply {
             deleteRecursively()
@@ -575,7 +575,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
 
     @Test
     fun androidWorkManagerLiveProviderCancelPreventsDelayedExecution() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node work_manager live provider cancellation")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node work_manager live provider cancellation")
 
         val workDir = File(context.cacheDir, "node-bridge-work-manager-live-cancel").apply {
             deleteRecursively()

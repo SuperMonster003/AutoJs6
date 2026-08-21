@@ -97,7 +97,7 @@ object NodeExecutionModePolicy {
     ): String {
         val definition = definition(mode)
         val reason = definition.unsupportedReason?.let { " $it" }.orEmpty()
-        return "Embedded Node executionMode '${definition.mode}' is not supported for launchSurface '$launchSurface' by the Phase 7 runtime state machine.$reason " +
+        return "Node.js plugin executionMode '${definition.mode}' is not supported for launchSurface '$launchSurface' by the host launch policy.$reason " +
             "Use '$MODE_ONE_SHOT' with a positive timeout for normal scripts."
     }
 
@@ -106,6 +106,8 @@ object NodeExecutionModePolicy {
         launchSurface: String = LAUNCH_SURFACE_SCRIPT,
     ): Map<String, String> {
         val definition = definition(mode)
+        // `embedded_script.*` is a published diagnostic wire namespace. It is retained for
+        // plugin compatibility and does not mean that the host embeds a Node.js runtime.
         return linkedMapOf(
             "embedded_script.execution_mode" to definition.mode,
             "embedded_script.execution_mode_status" to definition.status,
@@ -173,12 +175,12 @@ object NodeExecutionModePolicy {
             status = "available",
             supportedLaunchSurfaces = setOf(LAUNCH_SURFACE_SCRIPT),
             timeoutPolicy = "required_positive_timeout",
-            foregroundRequirement = "transient_embedded_service",
-            notificationRequirement = "transient_execution_notification",
+            foregroundRequirement = "plugin_owned_runtime",
+            notificationRequirement = "plugin_and_host_policy_dependent",
             allowedProviders = ONE_SHOT_PROVIDERS,
             restartPolicy = "never",
             resourceQuotaProfile = "one_shot_default",
-            stopSemantics = "timeout_or_user_stop_destroys_runtime",
+            stopSemantics = "timeout_or_user_stop_cancels_plugin_execution",
         ),
         Definition(
             mode = MODE_INTERACTIVE_LONG_RUNNING,
@@ -252,7 +254,7 @@ object NodeExecutionModePolicy {
             restartPolicy = "never",
             resourceQuotaProfile = "hardened_sandbox_broker_only",
             stopSemantics = "broker_stop_then_isolated_process_destroy",
-            unsupportedReason = "Hardened isolated runtime mode is a Phase 8 manifest POC and requires a Binder capability broker before execution.",
+            unsupportedReason = "Hardened isolated runtime mode is not part of the external plugin contract.",
         ),
     )
 

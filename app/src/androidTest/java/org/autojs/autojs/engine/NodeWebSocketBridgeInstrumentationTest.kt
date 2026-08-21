@@ -28,16 +28,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeWebSocketBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -46,7 +46,7 @@ class NodeWebSocketBridgeInstrumentationTest {
             "The fake-provider WebSocket MVP regression is only meaningful when autojs.nodejs.network.stable=false.",
             BuildConfig.NODEJS_NETWORK_ENABLED,
         )
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("websocket bridge MVP")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("websocket bridge MVP")
         assertTrue(NodeBridgeModules.supports("websocket", "connect"))
         assertTrue(NodeBridgeModules.supports("websocket", "send"))
         assertTrue(NodeBridgeModules.supports("websocket", "close"))
@@ -71,7 +71,7 @@ class NodeWebSocketBridgeInstrumentationTest {
         }
 
         try {
-            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            val result = NodePluginTestHarness.runPluginScript(
                 source = """
                     "nodejs";
                     (async function main() {
@@ -338,7 +338,7 @@ class NodeWebSocketBridgeInstrumentationTest {
                 timeoutMs = 10_000L,
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("websocket bridge MVP", result)
+            NodePluginTestHarness.assertSucceeded("websocket bridge MVP", result)
             assertTrue(result.stdout, result.stdout.contains("websocket.profile=false|false|stable|false"))
             assertTrue(result.stdout, result.stdout.contains("websocket.resolve=websocket"))
             assertTrue(result.stdout, result.stdout.contains("websocket.shadow=false"))
@@ -371,11 +371,11 @@ class NodeWebSocketBridgeInstrumentationTest {
             "Build with -Pautojs.nodejs.network.stable=true to run the live controlled WebSocket provider smoke.",
             BuildConfig.NODEJS_NETWORK_ENABLED,
         )
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node controlled WebSocket live provider smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled WebSocket live provider smoke")
 
         ControlledWebSocketLoopbackServer().use { server ->
             val baseUrl = server.baseUrl
-            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            val result = NodePluginTestHarness.runPluginScript(
                 source = """
                     "nodejs";
                     (async function main() {
@@ -492,8 +492,8 @@ class NodeWebSocketBridgeInstrumentationTest {
                 timeoutMs = 15_000L,
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("websocket live provider", result)
-            val resultDetails = NodeEmbeddedTestHarness.describeResult("websocket live provider", result)
+            NodePluginTestHarness.assertSucceeded("websocket live provider", result)
+            val resultDetails = NodePluginTestHarness.describeResult("websocket live provider", result)
             assertTrue(resultDetails, result.stdout.contains("live.websocket.ready=server-ready:live:json:mode=live|64"))
             assertTrue(resultDetails, result.stdout.contains("live.websocket.echo=echo:hello|AQID"))
             assertTrue(resultDetails, result.stdout.contains("live.websocket.close=1000|done"))

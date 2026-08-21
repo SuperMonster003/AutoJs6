@@ -18,12 +18,12 @@ class NodeEnginesBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        settleEmbeddedScriptServiceProcess()
+        settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        settleEmbeddedScriptServiceProcess()
+        settlePluginRuntime()
     }
 
     @Test
@@ -36,7 +36,7 @@ class NodeEnginesBridgeInstrumentationTest {
 
     @Test
     fun jsEnginesExecUsesFakeTransportAndRejectsInvalidInputs() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node engines bridge fake transport")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node engines bridge fake transport")
 
         val workDir = File(context.cacheDir, "node-bridge-engines-exec-fake").apply {
             deleteRecursively()
@@ -49,7 +49,7 @@ class NodeEnginesBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create engines shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -129,7 +129,7 @@ class NodeEnginesBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("engines exec fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("engines exec fake bridge", result)
         assertTrue(result.stdout.contains("engines.exec.resolve=engines"))
         assertTrue(result.stdout.contains("engines.exec.shadow=false"))
         assertTrue(result.stdout.contains("engines.exec.methods=function|function|undefined"))
@@ -148,9 +148,9 @@ class NodeEnginesBridgeInstrumentationTest {
 
     @Test
     fun jsEnginesExecRejectsRecursiveSpawnAtDepthOne() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node engines recursive spawn denial")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node engines recursive spawn denial")
 
-        val result = NodeEmbeddedTestHarness.runPluginScript(
+        val result = NodePluginTestHarness.runPluginScript(
                 source = """
                     "nodejs";
                     (async function main() {
@@ -172,7 +172,7 @@ class NodeEnginesBridgeInstrumentationTest {
                 spawnDepth = 1,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("engines recursive spawn denial", result)
+        NodePluginTestHarness.assertSucceeded("engines recursive spawn denial", result)
         assertTrue(result.stdout.contains("engines.recursive.depth=1"))
         assertTrue(result.stdout.contains("engines.recursive.code=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.nativeValues["embedded_script.bridge_live_dispatch_count"].orEmpty() != "1")
@@ -180,7 +180,7 @@ class NodeEnginesBridgeInstrumentationTest {
 
     @Test
     fun androidEnginesProviderStartsScopedRhinoScriptsAndDeniesNodeChild() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node engines live exec bridge")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node engines live exec bridge")
 
         val workDir = File(context.cacheDir, "node-bridge-engines-exec-live").apply {
             deleteRecursively()
@@ -193,7 +193,7 @@ class NodeEnginesBridgeInstrumentationTest {
             """.trimIndent(),
         )
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -233,7 +233,7 @@ class NodeEnginesBridgeInstrumentationTest {
             timeoutMs = 10000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("engines live exec bridge", result)
+        NodePluginTestHarness.assertSucceeded("engines live exec bridge", result)
         assertTrue(result.stdout.contains("engines.live.script.idType=number"))
         assertTrue(result.stdout.contains("engines.live.script.source=task35-rhino-child"))
         assertTrue(result.stdout.contains("engines.live.script.depth=1"))
@@ -243,8 +243,8 @@ class NodeEnginesBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("engines.live.fileEscape=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
     }
 
-    private fun settleEmbeddedScriptServiceProcess() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+    private fun settlePluginRuntime() {
+        NodePluginTestHarness.settlePluginRuntime()
         context.stopService(Intent(context, NodeBridgeEngineDispatchService::class.java))
     }
 }

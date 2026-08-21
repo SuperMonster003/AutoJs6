@@ -1,5 +1,10 @@
 # R6 Acceptance Evidence
 
+> [!WARNING]
+> Historical R6 evidence snapshot. The retained instrumentation concepts still inform
+> current testing, but the referenced evidence scripts and report archive were retired
+> by M5. Use [TESTING.md](TESTING.md) for executable commands.
+
 R6 revalidates production evidence after the move to a persistent
 process-global Node runtime and a required external runtime plugin. Historical
 Phase 11/13 capability closures remain valid, but they do not replace current

@@ -12,16 +12,16 @@ import java.io.File
 
 class NodeInputObserverBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -203,7 +203,7 @@ class NodeInputObserverBridgeInstrumentationTest {
 
     @Test
     fun jsInputObserverUsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node input_observer fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node input_observer fake transport regression")
 
         val workDir = File(context.cacheDir, "node-bridge-input-observer-shadow").apply {
             deleteRecursively()
@@ -213,7 +213,7 @@ class NodeInputObserverBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create input_observer shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, observeKeys: () => "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -300,7 +300,7 @@ class NodeInputObserverBridgeInstrumentationTest {
             timeoutMs = 30_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("input_observer fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("input_observer fake bridge", result)
         assertTrue(result.stdout.contains("input_observer.resolve=input_observer"))
         assertTrue(result.stdout.contains("input_observer.shadow=false"))
         assertTrue(result.stdout.contains("input_observer.frozen=true"))
@@ -316,10 +316,10 @@ class NodeInputObserverBridgeInstrumentationTest {
 
     @Test
     fun jsInputObserverRequiresManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node input_observer manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node input_observer manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(emptyList())
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -345,7 +345,7 @@ class NodeInputObserverBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("input_observer manifest denial", result)
+        NodePluginTestHarness.assertSucceeded("input_observer manifest denial", result)
         assertTrue(
             result.stdout,
             result.stdout.contains("input_observer.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|input_observer,input_observer.keys|0|0"),

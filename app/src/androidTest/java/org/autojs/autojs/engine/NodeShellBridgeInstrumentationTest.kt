@@ -18,12 +18,12 @@ class NodeShellBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -71,7 +71,7 @@ class NodeShellBridgeInstrumentationTest {
 
     @Test
     fun jsShellModuleUsesFakeTransportAndKeepsChildProcessDisabled() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node shell bridge focused regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node shell bridge focused regression")
 
         val workDir = File(context.cacheDir, "node-bridge-shell-shadow").apply {
             deleteRecursively()
@@ -87,7 +87,7 @@ class NodeShellBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create shell shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, exec: () => "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -186,7 +186,7 @@ class NodeShellBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("shell fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("shell fake bridge", result)
         assertTrue(result.stdout.contains("shell.resolve=shell"))
         assertTrue(result.stdout.contains("shell.shadow=false"))
         assertTrue(result.stdout.contains("shell.frozen=true"))
@@ -214,10 +214,10 @@ class NodeShellBridgeInstrumentationTest {
 
     @Test
     fun jsShellModuleIsChildProcessAlternativeAndRequiresDeclaredCapability() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node shell child_process alternative policy")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node shell child_process alternative policy")
 
         val shellManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("shell"))
-        val allowed = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val allowed = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -269,7 +269,7 @@ class NodeShellBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to shellManifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("shell child_process alternative declared capability", allowed)
+        NodePluginTestHarness.assertSucceeded("shell child_process alternative declared capability", allowed)
         assertTrue(allowed.stdout.contains("shell.policy.child_process=ERR_AUTOJS6_BUILTIN_DISABLED"))
         assertTrue(allowed.stdout.contains("shell.policy.exec=0/allowed/1"))
         assertTrue(allowed.stdout.contains("shell.policy.access=true|false|false|shell.root|shell.shizuku"))
@@ -282,10 +282,10 @@ class NodeShellBridgeInstrumentationTest {
         assertTrue(allowed.stdout.contains("shell.policy.methods=function|function|function|function|undefined|undefined"))
         assertTrue(allowed.stdout.contains("shell.policy.pending=0"))
 
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
 
         val toastOnlyManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("toast"))
-        val denied = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val denied = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -330,7 +330,7 @@ class NodeShellBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to toastOnlyManifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("shell child_process alternative missing capability", denied)
+        NodePluginTestHarness.assertSucceeded("shell child_process alternative missing capability", denied)
         assertTrue(
             denied.stdout.contains(
                 "shell.policy.manifest_denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}/shell/0",
@@ -342,9 +342,9 @@ class NodeShellBridgeInstrumentationTest {
 
     @Test
     fun abortSignalCancelsInFlightShellExecAndClearsPendingBridgeCall() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node shell AbortSignal cancellation")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node shell AbortSignal cancellation")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -387,7 +387,7 @@ class NodeShellBridgeInstrumentationTest {
             "<embedded-autojs-shell-abort-signal.js>",
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("shell AbortSignal cancellation", result)
+        NodePluginTestHarness.assertSucceeded("shell AbortSignal cancellation", result)
         assertTrue(result.stdout.contains("shell.abort.request_count=1"))
         assertTrue(result.stdout.contains("shell.abort.code=${NodeRuntimeErrorCodes.BRIDGE_CANCELLED}"))
         assertTrue(result.stdout.contains("shell.abort.module_method=shell/exec"))

@@ -8,21 +8,21 @@ import java.io.File
 
 class NodeUtilityBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
     fun jsJsoxMathxPureFacadeBlocksShadowingAndDefaultGlobalMutation() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node utility-heavy Rhino module regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node utility-heavy Rhino module regression")
 
         val workDir = File(context.cacheDir, "node-utility-jsox-shadow").apply {
             deleteRecursively()
@@ -34,7 +34,7 @@ class NodeUtilityBridgeInstrumentationTest {
             }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
         }
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (function main() {
@@ -163,7 +163,7 @@ class NodeUtilityBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("jsox mathx utility facade", result)
+        NodePluginTestHarness.assertSucceeded("jsox mathx utility facade", result)
         assertTrue(result.stdout.contains("jsox.resolve=jsox|jsox.mathx|jsox.arrayx|jsox.numberx"))
         assertTrue(result.stdout.contains("jsox.shadow=false|false|false|false"))
         assertTrue(result.stdout.contains("jsox.frozen=true|true|true|true|true|true|true|true|true|true|true|true"))

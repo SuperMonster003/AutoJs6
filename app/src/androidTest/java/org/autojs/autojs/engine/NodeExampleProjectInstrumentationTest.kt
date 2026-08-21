@@ -9,47 +9,47 @@ import java.io.File
 
 class NodeExampleProjectInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settlePluginRuntime()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settlePluginRuntime()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
     fun helloNodeExampleRuns() {
-        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node example project smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node example project smoke")
 
         val result = runExample("hello-node")
 
-        NodeEmbeddedTestHarness.assertSucceeded("hello-node example", result)
+        NodePluginTestHarness.assertSucceeded("hello-node example", result)
         assertTrue(result.stdout, result.stdout.contains("sample.hello-node.node=v24.5.0"))
         assertTrue(result.stdout, result.stdout.contains("sample.hello-node=PASS"))
     }
 
     @Test
     fun toastAppExampleRuns() {
-        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node toast/app example smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node toast/app example smoke")
 
         val result = runExample("toast-app")
 
-        NodeEmbeddedTestHarness.assertSucceeded("toast-app example", result)
+        NodePluginTestHarness.assertSucceeded("toast-app example", result)
         assertTrue(result.stdout, result.stdout.contains("sample.toast-app.package="))
         assertTrue(result.stdout, result.stdout.contains("sample.toast-app=PASS"))
         assertTrue(
-            NodeEmbeddedTestHarness.describeResult("toast-app live bridge dispatch", result),
+            NodePluginTestHarness.describeResult("toast-app live bridge dispatch", result),
             result.nativeValues["embedded_script.bridge_live_dispatch_count"] == "1",
         )
     }
 
     @Test
     fun commonJsFsNpmAndDisabledFeatureExamplesRun() {
-        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node stable example suite smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node stable example suite smoke")
 
         listOf(
             "cjs-package",
@@ -58,63 +58,63 @@ class NodeExampleProjectInstrumentationTest {
             "npm-pure-js-cjs",
             "disabled-features-demo",
         ).forEach { exampleName ->
-            NodeEmbeddedTestHarness.settlePluginRuntime()
+            NodePluginTestHarness.settlePluginRuntime()
             val result = runExample(exampleName)
 
-            NodeEmbeddedTestHarness.assertSucceeded("$exampleName example", result)
+            NodePluginTestHarness.assertSucceeded("$exampleName example", result)
             assertTrue(
-                NodeEmbeddedTestHarness.describeResult("$exampleName output", result),
+                NodePluginTestHarness.describeResult("$exampleName output", result),
                 result.stdout.contains("sample.$exampleName=PASS"),
             )
-            NodeEmbeddedTestHarness.settlePluginRuntime()
+            NodePluginTestHarness.settlePluginRuntime()
         }
     }
 
     @Test
     fun permissionAwareBridgeExamplesRun() {
-        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node permission-aware bridge example smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node permission-aware bridge example smoke")
 
         listOf(
             "accessibility-click-text",
             "screenshot-find-image",
         ).forEach { exampleName ->
-            NodeEmbeddedTestHarness.settlePluginRuntime()
+            NodePluginTestHarness.settlePluginRuntime()
             val result = runExample(exampleName)
 
-            NodeEmbeddedTestHarness.assertSucceeded("$exampleName example", result)
+            NodePluginTestHarness.assertSucceeded("$exampleName example", result)
             assertTrue(
-                NodeEmbeddedTestHarness.describeResult("$exampleName output", result),
+                NodePluginTestHarness.describeResult("$exampleName output", result),
                 result.stdout.contains("sample.$exampleName=PASS"),
             )
-            NodeEmbeddedTestHarness.settlePluginRuntime()
+            NodePluginTestHarness.settlePluginRuntime()
         }
     }
 
     @Test
     fun typeScriptRuntimeExamplesRun() {
-        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node TypeScript example smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node TypeScript example smoke")
 
         listOf(
             "typescript-cjs",
             "typescript-esm",
         ).forEach { exampleName ->
-            NodeEmbeddedTestHarness.settlePluginRuntime()
+            NodePluginTestHarness.settlePluginRuntime()
             val result = runExample(exampleName)
 
-            NodeEmbeddedTestHarness.assertSucceeded("$exampleName example", result)
+            NodePluginTestHarness.assertSucceeded("$exampleName example", result)
             assertTrue(result.stdout, result.stdout.contains("sample.$exampleName=PASS"))
-            NodeEmbeddedTestHarness.settlePluginRuntime()
+            NodePluginTestHarness.settlePluginRuntime()
         }
     }
 
     @Test
     fun desktopParitySafeSubsetExamplesRun() {
-        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node desktop parity safe subset example smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node desktop parity safe subset example smoke")
 
         val result = runExample("desktop-parity-suite", "smoke.cjs")
-        val description = NodeEmbeddedTestHarness.describeResult("desktop-parity-suite safe subset smoke", result)
+        val description = NodePluginTestHarness.describeResult("desktop-parity-suite safe subset smoke", result)
 
-        NodeEmbeddedTestHarness.assertSucceeded("desktop-parity-suite safe subset smoke", result)
+        NodePluginTestHarness.assertSucceeded("desktop-parity-suite safe subset smoke", result)
         assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.smoke.catalog=4"))
         assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.esm-loader=PASS"))
         assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.http-https.shape=function,function,function,function"))
@@ -128,11 +128,11 @@ class NodeExampleProjectInstrumentationTest {
 
     @Test
     fun proParitySafeSubsetExamplesRun() {
-        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node Pro parity safe subset example smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node Pro parity safe subset example smoke")
 
         val result = runExample("pro-parity-suite", "smoke.cjs")
 
-        NodeEmbeddedTestHarness.assertSucceeded("pro-parity-suite safe subset smoke", result)
+        NodePluginTestHarness.assertSucceeded("pro-parity-suite safe subset smoke", result)
         assertTrue(result.stdout, result.stdout.contains("sample.pro-parity-suite.smoke.catalog=2"))
         assertTrue(result.stdout, result.stdout.contains("sample.pro-parity-suite.ui-layout=PASS"))
         assertTrue(result.stdout, result.stdout.contains("sample.pro-parity-suite.tasks-work-manager=PASS"))
@@ -149,11 +149,11 @@ class NodeExampleProjectInstrumentationTest {
             check(mkdirs()) { "Failed to create Node example project directory: $absolutePath" }
         }
         return try {
-            NodeEmbeddedTestHarness.copyAssetTree(exampleName, projectDir)
+            NodePluginTestHarness.copyAssetTree(exampleName, projectDir)
             val main = exampleMainFile(projectDir, entryOverride)
             val timeoutMs = exampleTimeoutMs(projectDir)
             check(main.isFile) { "Node example $exampleName is missing declared main file: ${main.absolutePath}" }
-            NodeEmbeddedTestHarness.runPluginScript(
+            NodePluginTestHarness.runPluginScript(
                 source = main.readText(),
                 sourceName = main.absolutePath,
                 workingDirectory = projectDir,

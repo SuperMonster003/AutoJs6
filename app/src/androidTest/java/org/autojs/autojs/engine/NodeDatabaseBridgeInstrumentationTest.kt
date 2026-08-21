@@ -14,16 +14,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeDatabaseBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -44,7 +44,7 @@ class NodeDatabaseBridgeInstrumentationTest {
 
     @Test
     fun jsDatabaseBridgeUsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node database bridge fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node database bridge fake transport regression")
 
         val workDir = databaseWorkDir("node-bridge-database-shadow")
         listOf("database", "sqlite").forEach { module ->
@@ -53,7 +53,7 @@ class NodeDatabaseBridgeInstrumentationTest {
             }.resolve("index.js").writeText("""module.exports = { shadow: true, open: () => "shadow" };""")
         }
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -123,7 +123,7 @@ class NodeDatabaseBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("database fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("database fake bridge", result)
         assertTrue(result.stdout.contains("database.resolve=database|sqlite"))
         assertTrue(result.stdout.contains("database.shadow=false|false"))
         assertTrue(result.stdout.contains("database.node_sqlite=${NodeRuntimeErrorCodes.BUILTIN_DISABLED}"))
@@ -137,10 +137,10 @@ class NodeDatabaseBridgeInstrumentationTest {
 
     @Test
     fun jsDatabaseRequiresManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node database manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node database manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(emptyList())
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -166,7 +166,7 @@ class NodeDatabaseBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("database manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("database manifest capability denial", result)
         assertTrue(
             result.stdout.contains(
                 "database.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|database|0|0",
@@ -176,10 +176,10 @@ class NodeDatabaseBridgeInstrumentationTest {
 
     @Test
     fun androidDatabaseProviderPersistsTransactionsAndDeniesEscapes() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node database Android provider regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node database Android provider regression")
 
         val workDir = databaseWorkDir("node-bridge-database-live")
-        val writeResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val writeResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -200,11 +200,11 @@ class NodeDatabaseBridgeInstrumentationTest {
             "<embedded-autojs-database-android-write.js>",
             workingDirectory = workDir,
         )
-        NodeEmbeddedTestHarness.assertSucceeded("database Android write", writeResult)
+        NodePluginTestHarness.assertSucceeded("database Android write", writeResult)
         assertTrue(writeResult.stdout.contains("database.android.write=2|2|alpha|2"))
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
 
-        val readResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val readResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -218,11 +218,11 @@ class NodeDatabaseBridgeInstrumentationTest {
             "<embedded-autojs-database-android-read.js>",
             workingDirectory = workDir,
         )
-        NodeEmbeddedTestHarness.assertSucceeded("database Android read", readResult)
+        NodePluginTestHarness.assertSucceeded("database Android read", readResult)
         assertTrue(readResult.stdout.contains("database.android.read=beta|2"))
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
 
-        val deniedResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val deniedResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -247,7 +247,7 @@ class NodeDatabaseBridgeInstrumentationTest {
             "<embedded-autojs-database-android-denied.js>",
             workingDirectory = workDir,
         )
-        NodeEmbeddedTestHarness.assertSucceeded("database Android policy denial", deniedResult)
+        NodePluginTestHarness.assertSucceeded("database Android policy denial", deniedResult)
         assertTrue(
             deniedResult.stdout.contains(
                 "database.android.denied=${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}",

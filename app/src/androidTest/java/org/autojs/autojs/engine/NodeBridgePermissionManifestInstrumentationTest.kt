@@ -12,16 +12,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeBridgePermissionManifestInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -565,10 +565,10 @@ class NodeBridgePermissionManifestInstrumentationTest {
 
     @Test
     fun jsManifestAllowsDeclaredToastRejectsUndeclaredAccessibilityAndReportsCapabilities() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge permission manifest focused regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node bridge permission manifest focused regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("toast"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -611,7 +611,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("bridge permission manifest JS gate", result)
+        NodePluginTestHarness.assertSucceeded("bridge permission manifest JS gate", result)
         assertTrue(result.stdout.contains("bridge.perm.toast.requests=1/toast"))
         assertTrue(
             result.stdout.contains(

@@ -15,16 +15,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeMediaBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -93,7 +93,7 @@ class NodeMediaBridgeInstrumentationTest {
 
     @Test
     fun jsMediaModulesUseFakeTransportCompatFacadeAndBlockShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node media bridge fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node media bridge fake transport regression")
 
         val workDir = File(context.cacheDir, "node-bridge-media-shadow").apply {
             deleteRecursively()
@@ -105,7 +105,7 @@ class NodeMediaBridgeInstrumentationTest {
             }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
         }
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -183,7 +183,7 @@ class NodeMediaBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("media fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("media fake bridge", result)
         assertTrue(result.stdout.contains("media.resolve=media|mediainfo|recorder"))
         assertTrue(result.stdout.contains("media.shadow=false|false|false"))
         assertTrue(result.stdout.contains("media.frozen=true|true|true|true|true|true"))
@@ -200,10 +200,10 @@ class NodeMediaBridgeInstrumentationTest {
 
     @Test
     fun jsMediaCapabilitiesRequireExactManifestBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node media exact manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node media exact manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("media"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -234,7 +234,7 @@ class NodeMediaBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("media exact manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("media exact manifest capability denial", result)
         assertTrue(result.stdout.contains("media.manifest.audio=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|media.audio|0|0"))
         assertTrue(result.stdout.contains("media.manifest.metadata=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|media.metadata|0|0"))
         assertTrue(result.stdout.contains("media.manifest.recording=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|media.recording|0|0"))

@@ -12,16 +12,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeBridgeConcurrencyLimitsInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -105,9 +105,9 @@ class NodeBridgeConcurrencyLimitsInstrumentationTest {
 
     @Test
     fun jsBridgePendingCallLimitRejectsBeforeDispatchFlood() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge pending limit regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node bridge pending limit regression")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -154,15 +154,15 @@ class NodeBridgeConcurrencyLimitsInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("bridge pending call limit", result)
+        NodePluginTestHarness.assertSucceeded("bridge pending call limit", result)
         assertTrue(result.stdout, result.stdout.contains("bridge.limit.pending=1|${NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT}|1|0|${NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD}"))
     }
 
     @Test
     fun jsImageHandleLimitAllowsRecycleThenReuse() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge image handle limit regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node bridge image handle limit regression")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -215,13 +215,13 @@ class NodeBridgeConcurrencyLimitsInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("bridge image handle limit", result)
+        NodePluginTestHarness.assertSucceeded("bridge image handle limit", result)
         assertTrue(result.stdout, result.stdout.contains("bridge.limit.image=1|image:one.png|${NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT}|image:three.png|readImage:one.png,recycle:image:one.png,readImage:three.png|0"))
     }
 
     @Test
     fun projectJsonBridgeLimitOverridesAreInjectedIntoProfile() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge limit project config regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node bridge limit project config regression")
 
         val workDir = File(context.cacheDir, "node-bridge-limit-project").apply {
             deleteRecursively()
@@ -242,7 +242,7 @@ class NodeBridgeConcurrencyLimitsInstrumentationTest {
             """.trimIndent(),
         )
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             const profile = require("autojs6:profile");
@@ -259,7 +259,7 @@ class NodeBridgeConcurrencyLimitsInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("bridge limit project config", result)
+        NodePluginTestHarness.assertSucceeded("bridge limit project config", result)
         assertTrue(result.stdout, result.stdout.contains("bridge.limit.project=2|1|2|project.json:node.bridgeLimits|true"))
     }
 

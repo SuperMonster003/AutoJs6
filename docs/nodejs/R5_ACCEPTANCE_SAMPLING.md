@@ -1,5 +1,10 @@
 # Node.js Runtime Plugin R5 Acceptance Sampling
 
+> [!WARNING]
+> Historical R5 acceptance snapshot. Its nodeMini/pluginOptional build procedure,
+> native host reports, and report paths were retired by M5. Current acceptance is in
+> [TESTING.md](TESTING.md) and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
+
 Status: accepted
 Review date: 2026-07-18
 Time zone: Asia/Shanghai

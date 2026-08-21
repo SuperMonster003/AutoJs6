@@ -1,94 +1,46 @@
-# AutoJs6 Node Capability Stability Policy
+# AutoJs6 Node.js Capability Stability Policy
 
-This policy defines how Node.js runtime capabilities are classified, validated,
-released, and, when necessary, demoted. A capability cannot change stability by
-documentation alone.
+Last reviewed: 2026-08-21.
 
-## Current Stable Runtime Set
+This policy covers capabilities that cross the runtime-plugin/host boundary. Node
+core behavior and native runtime implementation are owned and versioned by the
+runtime plugin; Android automation authority is owned and enforced by the host.
 
-The AutoJs6 Node Profile v1.2 runtime ships these capabilities enabled in every
-Debug and Release build:
+## Stability Rules
 
-- ESM entry loading and local dynamic `import()`
-- controlled `fetch`, `axios`, `undici`, and WebSocket providers
-- native `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` builtins
-- `worker_threads`
-- `child_process`
-- allowlisted Java/Android interop
+A capability is stable only when all of the following are true:
 
-They have no Gradle opt-in property, release-only block, project/package
-override, or packaged-APK opt-in. Host/plugin request contract v2 uses stable
-`*Enabled` field names, and `require("autojs6:profile")` exposes their current
-state through `featureStates` and `enabledFeatures`.
+1. The plugin declares the script-facing requirement and performs local preflight.
+2. The plugin permission manifest knows the capability.
+3. The host permission manifest maps it to the correct module/method and Android
+   permissions.
+4. A host provider implements the operation with bounded JSON-safe values.
+5. The capability catalog records the public surface, or a time-bounded historical
+   exception explains why the current catalog does not yet contain it.
+6. A real-plugin instrumentation test covers success and denial behavior.
 
-Stable availability does not bypass authorization. Runtime permissions,
-Android manifest permissions, Java allowlists, scoped filesystem rules,
-process/network policies, resource budgets, cancellation, and lifecycle cleanup
-remain mandatory.
+Documentation alone cannot promote a capability.
 
-## Status Values
+## Registration Order
 
-The current compatibility profile uses:
+Register new capabilities in this order:
 
-- `stable`: enabled and supported within the documented AutoJs6 boundary.
-- `partial`: enabled, but intentionally smaller than the desktop Node surface.
-- `disabled`: compiled or recognized but denied by product policy.
-- `unsupported`: intentionally unavailable and not advertised as runnable.
-- `planned`: design work only; no runtime claim.
+1. Plugin node_bridge_sources.cpp.
+2. Plugin NodeBridgePermissionManifest.java.
+3. Host NodeBridgePermissionManifest.kt.
+4. The next plugin capability catalog.
 
-Current non-stable examples include partial scoped `fs`, `zlib`, and `vm`;
-disabled Inspector; and unsupported native addons. A disabled or unsupported
-surface must never be made runnable by an undocumented build property.
+Then run the host task **verifyNodeCapabilityManifestAlignment** with an explicit
+plugin root. The plugin and host manifests deliberately remain separate because
+they protect different process boundaries.
 
-## Required Evidence For Promotion
+## Compatibility
 
-Any move to `stable` requires all applicable evidence:
+Removing or narrowing a published capability requires a contract/version decision
+and an actionable error. Unknown declarations may be transported for forward
+compatibility, but the host never grants an unknown operation. Runtime internals,
+raw Android objects, file descriptors, native pointers, and unrestricted Java
+reflection are not capabilities and must not cross the bridge.
 
-- positive runtime and API-contract tests;
-- denial/security tests for out-of-bound behavior;
-- packaged APK smoke or a documented, enforced packaged exclusion;
-- compatibility corpus coverage for resolver/npm changes;
-- lifecycle and resource stress for threads, sockets, processes, files, native
-  handles, and Android resources;
-- stable error codes for rejected operations;
-- host/plugin contract and artifact compatibility checks;
-- compatibility profile, type declarations, examples, and release-note updates;
-- a rollback or disablement plan that does not depend on silently changing the
-  public contract.
-
-## Capability-Specific Requirements
-
-ESM and dynamic import require scoped resolution, package-mode, CommonJS
-interoperability, import attributes, encrypted/module-source graphs, packaged
-execution, source-map, and path-escape coverage.
-
-Network and WebSocket require Android `INTERNET` manifest validation, URL and
-permission checks, timeouts, abort/cancel behavior, response/message budgets,
-redirect policy, live loopback tests, resource cleanup, and privacy-safe
-diagnostics.
-
-Raw network builtins require explicit verification that Android sandboxing and
-runtime network permission policy still apply and that their presence does not
-grant unrelated AutoJs bridge authority.
-
-Workers require native availability on every published ABI, worker-data and
-message semantics, transfer-list validation, count/queue/message budgets,
-termination, packaged execution, memory/thread stress, and a smaller worker
-authority set than the parent script.
-
-Child processes require process-permission enforcement, Android sandbox
-behavior, bounded stdio and timeouts, cancellation/kill cleanup, lifecycle
-diagnostics, and denial of authority escalation.
-
-Java interop requires an allowlist audit for every class/member, opaque-handle
-lifecycle tests, and denial of reflection, class loaders, `Runtime`,
-`ProcessBuilder`, native-library loading, and raw Android context/UI objects.
-
-## Demotion And Disablement
-
-Demote or disable a capability when a security boundary can be bypassed,
-packaged behavior is nondeterministic, supported ABIs disagree, lifecycle
-stress leaks resources, or compatibility claims exceed verified behavior.
-Demotion requires release notes, generated-profile changes, compatible error
-behavior where possible, and an explicit migration path. It must not be hidden
-behind a private build switch.
+See [Security model](SECURITY_MODEL.md) and the plugin repository's
+**docs/HOST-API.md** for the current script-facing surface.

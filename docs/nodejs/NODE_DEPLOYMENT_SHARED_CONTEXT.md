@@ -1,5 +1,10 @@
 # AutoJs6 Embedded Node.js Deployment Shared Context
 
+> [!WARNING]
+> Historical deployment snapshot. The host no longer embeds Node.js, builds native
+> Node variants, or owns the phase/soak tools referenced below. Current deployment
+> requires the external runtime plugin; see [INTEGRATION_PLAN.md](INTEGRATION_PLAN.md).
+
 This document records shared constraints that apply across Embedded Node.js
 deployment, Phase 13 closeout, connected-device validation, packaged APK smoke,
 and long-running stress work.

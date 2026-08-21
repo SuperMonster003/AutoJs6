@@ -1,5 +1,11 @@
 # Compatibility Notes: Auto.js Pro 9 And AutoX.js v7
 
+> [!WARNING]
+> Historical comparison snapshot from before the M5 plugin-only ownership migration.
+> Embedded-runtime classes, nodeFull/nodeMini flavors, phase fixtures, and build
+> commands below are not current AutoJs6 instructions. Use
+> [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md) for the supported surface.
+
 This document compares user-visible behavior only. It is not an implementation-equivalence claim and does not infer private internals of other projects.
 
 References last reviewed: 2026-08-20.

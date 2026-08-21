@@ -585,7 +585,7 @@ object NodeBridgeProviderRegistry {
             "taskDatabaseRawObjectPolicy" to "no raw TimedTask, scheduler, database cursor, mutable row handle, or IntentTask crosses the bridge",
             "rawBroadcastObjectPolicy" to "no raw BroadcastReceiver, Intent, IntentFilter, PendingIntent, Bundle, Uri, PackageManager, signature, icon, or package-list object crosses the bridge",
             "requireTasksPolicy" to "require(\"tasks\"), global tasks, and raw Rhino task objects remain unavailable until a dedicated Pro profile provider lands",
-            "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
+            "statusReason" to "WorkManager-backed external Node.js plugin task scheduling",
         )
         PACKAGE_MANAGER_PROVIDER -> linkedMapOf(
             "liveMethods" to "list,verify,prune,planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall,install,update,remove",

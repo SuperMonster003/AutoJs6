@@ -1,5 +1,10 @@
 # R4 On-Demand Module Preparation Acceptance Sampling
 
+> [!WARNING]
+> Historical R4 evidence for the retired nodeMini/embedded path. The provider design
+> remains useful context, but current execution is plugin-only. See
+> [INTEGRATION_PLAN.md](INTEGRATION_PLAN.md).
+
 This note records the commands, report shape, and completed primary-device
 results for R4 acceptance. Compile success, a focused instrumentation pass,
 and an unfilled JSON record alone are not device acceptance evidence.

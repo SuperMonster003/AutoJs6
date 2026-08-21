@@ -14,16 +14,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeOverlayBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -173,7 +173,7 @@ class NodeOverlayBridgeInstrumentationTest {
 
     @Test
     fun jsOverlayUsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node ui.overlay fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node ui.overlay fake transport regression")
 
         val workDir = File(context.cacheDir, "node-bridge-ui-overlay-shadow").apply {
             deleteRecursively()
@@ -183,7 +183,7 @@ class NodeOverlayBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create ui.overlay shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, show: () => "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -292,7 +292,7 @@ class NodeOverlayBridgeInstrumentationTest {
             timeoutMs = 30_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("ui.overlay fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("ui.overlay fake bridge", result)
         assertTrue(result.stdout.contains("overlay.resolve=ui.overlay"))
         assertTrue(result.stdout.contains("overlay.shadow=false"))
         assertTrue(result.stdout.contains("overlay.frozen=true"))
@@ -311,10 +311,10 @@ class NodeOverlayBridgeInstrumentationTest {
 
     @Test
     fun jsOverlayRequiresManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node ui.overlay manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node ui.overlay manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(emptyList())
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -343,7 +343,7 @@ class NodeOverlayBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("ui.overlay manifest denial", result)
+        NodePluginTestHarness.assertSucceeded("ui.overlay manifest denial", result)
         assertTrue(
             result.stdout,
             result.stdout.contains("overlay.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|ui.overlay|0|0"),

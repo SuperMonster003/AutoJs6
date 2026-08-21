@@ -12,12 +12,12 @@ class NodeDeviceBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -79,9 +79,9 @@ class NodeDeviceBridgeInstrumentationTest {
 
     @Test
     fun jsDeviceModuleUsesFakeTransportAndKeepsSensitiveFieldsAbsent() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node device bridge focused regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node device bridge focused regression")
 
-        val workDir = File(NodeEmbeddedTestHarness.targetContext.cacheDir, "node-bridge-device-shadow").apply {
+        val workDir = File(NodePluginTestHarness.targetContext.cacheDir, "node-bridge-device-shadow").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create device bridge working directory: $absolutePath" }
         }
@@ -89,7 +89,7 @@ class NodeDeviceBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create device shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, imei: "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -185,7 +185,7 @@ class NodeDeviceBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("device fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("device fake bridge", result)
         assertTrue(result.stdout.contains("device.resolve=device"))
         assertTrue(result.stdout.contains("device.shadow=false"))
         assertTrue(result.stdout.contains("device.frozen=true"))
@@ -203,10 +203,10 @@ class NodeDeviceBridgeInstrumentationTest {
 
     @Test
     fun jsDevicePowerRequiresExplicitManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node device power manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node device power manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("device"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -232,7 +232,7 @@ class NodeDeviceBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("device power manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("device power manifest capability denial", result)
         assertTrue(
             result.stdout.contains(
                 "device.power.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|device.power|0|0",

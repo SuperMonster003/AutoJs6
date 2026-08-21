@@ -489,6 +489,8 @@ private fun JSONObject.optionalStringArray(name: String): List<String> {
 data class NodeBridgeEngineInfo(
     val id: String,
     val engineName: String = "nodejs",
+    // Historical wire token consumed by the plugin's work_manager shim. It identifies the
+    // Node execution family and does not imply that this host packages or loads libnode.
     val backend: String = "embedded",
     val sourceName: String = "",
     val cwd: String = "",
@@ -5660,10 +5662,13 @@ private data class ControlledWorkTaskDescriptor(
             appContext: Context,
             engineInfo: NodeBridgeEngineInfo,
         ): ControlledWorkTaskParseResult {
+            // `embedded` is the v1 work_manager wire token implemented by the runtime plugin.
+            // Keep accepting it until that contract is versioned; the host itself has no
+            // embedded Node runtime.
             val backend = payload.optString("backend", "embedded").ifBlank { "embedded" }
             if (!backend.equals("embedded", ignoreCase = true)) {
                 return ControlledWorkTaskParseResult(
-                    error = workTaskError(request, "work_manager supports only the embedded Node backend."),
+                    error = workTaskError(request, "work_manager supports only its legacy backend=\"embedded\" plugin wire token."),
                 )
             }
 

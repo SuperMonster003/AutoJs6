@@ -1,5 +1,10 @@
 # R2 Persistent Runtime Acceptance Sampling
 
+> [!WARNING]
+> Historical R2 evidence for the retired host embedded-runtime topology. Commands,
+> properties, and report paths below are not current release gates. See
+> [TESTING.md](TESTING.md).
+
 This note defines the focused device sampling added for R2. It does not replace
 the longer leak, crash, packaged APK, or final soak gates.
 

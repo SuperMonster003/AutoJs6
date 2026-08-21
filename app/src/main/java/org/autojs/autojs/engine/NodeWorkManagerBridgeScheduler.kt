@@ -275,7 +275,7 @@ object NodeWorkManagerBridgeScheduler {
                     result.errorCode,
                     result.errorName,
                     result.errorMessage,
-                ).joinToString(": ").ifBlank { "Embedded Node task failed." }
+                ).joinToString(": ").ifBlank { "Node.js plugin task failed." }
             }
             if (!result.succeeded) {
                 Log.w(TAG, "WorkManager task $id finished with failure: $failure")

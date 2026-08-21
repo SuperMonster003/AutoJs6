@@ -40,7 +40,7 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
             if (value == null) System.clearProperty(name) else System.setProperty(name, value)
         }
         NodeJsRuntimePluginHost.invalidateForTest(context)
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -77,7 +77,7 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
                 ),
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("R6 required-plugin Safe Node denials", result)
+            NodePluginTestHarness.assertSucceeded("R6 required-plugin Safe Node denials", result)
             assertEquals("R6 security request did not execute in the probed plugin process", pluginPid, result.pid)
             assertEquals("R6 security diagnostics did not come from the plugin", "plugin", result.nativeValues[DIAGNOSTICS_SOURCE_KEY])
             assertEquals("R6 security execution retained bridge resources", "0", result.nativeValues[BRIDGE_ACTIVE_COUNT_KEY])
@@ -85,7 +85,7 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("security.required_plugin.ready=true"))
             REQUIRED_OUTPUT_LABELS.forEach { label ->
                 assertTrue(
-                    NodeEmbeddedTestHarness.describeResult("missing required-plugin security output $label", result),
+                    NodePluginTestHarness.describeResult("missing required-plugin security output $label", result),
                     result.stdout.contains("security.$label="),
                 )
             }

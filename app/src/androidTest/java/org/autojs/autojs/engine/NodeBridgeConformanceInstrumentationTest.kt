@@ -10,16 +10,16 @@ import java.io.File
 
 class NodeBridgeConformanceInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -38,7 +38,7 @@ class NodeBridgeConformanceInstrumentationTest {
 
     @Test
     fun jsStableBridgeModuleExportsAndPromiseContractsAreStable() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge conformance suite")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node bridge conformance suite")
 
         val workDir = File(context.cacheDir, "node-bridge-conformance").apply {
             deleteRecursively()
@@ -47,7 +47,7 @@ class NodeBridgeConformanceInstrumentationTest {
         File(workDir, "main.cjs").writeText("""console.log("scheduled");""")
         writeBridgePermissionManifest(workDir)
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -1079,7 +1079,7 @@ class NodeBridgeConformanceInstrumentationTest {
             timeoutMs = 30_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("bridge API conformance", result)
+        NodePluginTestHarness.assertSucceeded("bridge API conformance", result)
         assertTrue(result.stdout, result.stdout.contains("bridge.conformance=PASS"))
         assertTrue(result.stdout, result.stdout.contains("bridge.conformance.pending=0"))
     }
@@ -1095,7 +1095,7 @@ class NodeBridgeConformanceInstrumentationTest {
 
     @Test
     fun jsBridgeConformanceErrorCapabilityAndDestroyCleanupAreStable() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge conformance error semantics")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node bridge conformance error semantics")
 
         val fullManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(
             listOf(
@@ -1104,7 +1104,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 "accessibility",
             ),
         )
-        val errorResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val errorResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -1163,7 +1163,7 @@ class NodeBridgeConformanceInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to fullManifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("bridge API conformance errors", errorResult)
+        NodePluginTestHarness.assertSucceeded("bridge API conformance errors", errorResult)
         assertTrue(
             errorResult.stdout.contains(
                 "bridge.conformance.error=${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|dialogs|alert",
@@ -1175,10 +1175,10 @@ class NodeBridgeConformanceInstrumentationTest {
             ),
         )
 
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
 
         val restrictedManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("toast"))
-        val capabilityResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val capabilityResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -1223,7 +1223,7 @@ class NodeBridgeConformanceInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to restrictedManifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("bridge API conformance capabilities", capabilityResult)
+        NodePluginTestHarness.assertSucceeded("bridge API conformance capabilities", capabilityResult)
         assertTrue(
             capabilityResult.stdout.contains(
                 "bridge.conformance.capability=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|dialogs|alert|dialogs|0|0",

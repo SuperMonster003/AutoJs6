@@ -24,16 +24,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeFetchBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -95,7 +95,7 @@ class NodeFetchBridgeInstrumentationTest {
 
     @Test
     fun jsFetchModuleUsesFakeTransportAndKeepsRawModulesDisabled() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node fetch bridge focused regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node fetch bridge focused regression")
 
         val workDir = File(context.cacheDir, "node-bridge-fetch-shadow").apply {
             deleteRecursively()
@@ -105,7 +105,7 @@ class NodeFetchBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create fetch shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -262,7 +262,7 @@ class NodeFetchBridgeInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("fetch fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("fetch fake bridge", result)
         assertTrue(result.stdout.contains("fetch.resolve=fetch"))
         assertTrue(result.stdout.contains("fetch.shadow=false"))
         assertTrue(result.stdout.contains("fetch.frozen=true"))
@@ -281,9 +281,9 @@ class NodeFetchBridgeInstrumentationTest {
 
     @Test
     fun jsFetchPartialSurfaceHandlesBodiesResponsesAbortAndRedirectModes() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node fetch partial surface regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node fetch partial surface regression")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -492,7 +492,7 @@ class NodeFetchBridgeInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("fetch partial surface", result)
+        NodePluginTestHarness.assertSucceeded("fetch partial surface", result)
         assertTrue(result.stdout.contains("fetch.surface.string=POST|alpha|text|text/plain|string"))
         assertTrue(result.stdout.contains("fetch.surface.uint8=POST|bin|base64|uint8"))
         assertTrue(result.stdout.contains("fetch.surface.arrayBuffer=200|yes|0102ff"))
@@ -509,9 +509,9 @@ class NodeFetchBridgeInstrumentationTest {
 
     @Test
     fun jsFetchPolicyHardeningUsesFakeTransport() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node fetch policy hardening regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node fetch policy hardening regression")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -713,8 +713,8 @@ class NodeFetchBridgeInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("fetch policy hardening", result)
-        val resultDetails = NodeEmbeddedTestHarness.describeResult("fetch policy hardening output", result)
+        NodePluginTestHarness.assertSucceeded("fetch policy hardening", result)
+        val resultDetails = NodePluginTestHarness.describeResult("fetch policy hardening output", result)
         assertTrue(resultDetails, result.stdout.contains("fetch.policy=16|30000|33554432|5"))
         assertTrue(
             resultDetails,
@@ -736,7 +736,7 @@ class NodeFetchBridgeInstrumentationTest {
 
     @Test
     fun jsAxiosCompatibilityLayerUsesControlledFetchOnly() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node axios controlled fetch compatibility regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node axios controlled fetch compatibility regression")
 
         val workDir = File(context.cacheDir, "node-bridge-axios-shadow").apply {
             deleteRecursively()
@@ -746,7 +746,7 @@ class NodeFetchBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create axios shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -951,7 +951,7 @@ class NodeFetchBridgeInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("axios controlled fetch", result)
+        NodePluginTestHarness.assertSucceeded("axios controlled fetch", result)
         assertTrue(result.stdout.contains("axios.resolve=axios"))
         assertTrue(result.stdout.contains("axios.shadow=false"))
         assertTrue(result.stdout.contains("axios.surface=function|function|function|function|true|true|autojs6-controlled-fetch"))
@@ -985,11 +985,11 @@ class NodeFetchBridgeInstrumentationTest {
             "Build with -Pautojs.nodejs.network.stable=true to run the live controlled fetch provider smoke.",
             BuildConfig.NODEJS_NETWORK_ENABLED,
         )
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node controlled fetch live provider smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled fetch live provider smoke")
 
         ControlledFetchLoopbackServer().use { server ->
             val baseUrl = server.baseUrl
-            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            val result = NodePluginTestHarness.runPluginScript(
                 """
                 "nodejs";
                 (async function main() {
@@ -1156,8 +1156,8 @@ class NodeFetchBridgeInstrumentationTest {
                 timeoutMs = 15_000L,
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("fetch live provider", result)
-            val resultDetails = NodeEmbeddedTestHarness.describeResult("fetch live provider", result)
+            NodePluginTestHarness.assertSucceeded("fetch live provider", result)
+            val resultDetails = NodePluginTestHarness.describeResult("fetch live provider", result)
             assertTrue(resultDetails, result.stdout.contains("live.fetch.get=200|GET|via=fetch|live"))
             assertTrue(resultDetails, result.stdout.contains("live.fetch.postText=201|POST|payload|text/plain"))
             assertTrue(resultDetails, result.stdout.contains("live.fetch.postBytes=201|POST|ABC|uint8"))

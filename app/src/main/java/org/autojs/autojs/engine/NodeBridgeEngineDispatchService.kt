@@ -72,7 +72,7 @@ class NodeBridgeEngineDispatchService : Service() {
             ?: return policyFailure(request, "engines.execScript requires scoped cwd, positive timeoutMs, and allowed spawn depth.")
         val source = StringScriptSource(name, script).apply { prefix = "\$engine/" }
         if (source.engineName == JavaScriptSource.ENGINE_NODEJS) {
-            return policyFailure(request, "engines.execScript cannot start nested embedded Node scripts yet.")
+            return policyFailure(request, "engines.execScript cannot start nested Node.js plugin executions yet.")
         }
         val execution = runCatching {
             AutoJs.instance.scriptEngineService.execute(source, config)
@@ -116,7 +116,7 @@ class NodeBridgeEngineDispatchService : Service() {
             )
         }
         if (launch.source.engineName == JavaScriptSource.ENGINE_NODEJS) {
-            return policyFailure(request, "engines.execScriptFile cannot start nested embedded Node scripts yet.")
+            return policyFailure(request, "engines.execScriptFile cannot start nested Node.js plugin executions yet.")
         }
         val executionConfig = launch.createExecutionConfig(
             base = config,

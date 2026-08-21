@@ -14,16 +14,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeStorageBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -43,7 +43,7 @@ class NodeStorageBridgeInstrumentationTest {
 
     @Test
     fun jsStorageBridgeUsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node storage bridge fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node storage bridge fake transport regression")
 
         val workDir = File(context.cacheDir, "node-bridge-storage-shadow").apply {
             deleteRecursively()
@@ -55,7 +55,7 @@ class NodeStorageBridgeInstrumentationTest {
             }.resolve("index.js").writeText("""module.exports = { shadow: true, create: () => "shadow" };""")
         }
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -120,7 +120,7 @@ class NodeStorageBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("storage fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("storage fake bridge", result)
         assertTrue(result.stdout.contains("storage.resolve=storage|storages"))
         assertTrue(result.stdout.contains("storage.shadow=false|false"))
         assertTrue(result.stdout.contains("storage.frozen=true|true|true"))
@@ -133,10 +133,10 @@ class NodeStorageBridgeInstrumentationTest {
 
     @Test
     fun jsStorageRequiresManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node storage manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node storage manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(emptyList())
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -162,7 +162,7 @@ class NodeStorageBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("storage manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("storage manifest capability denial", result)
         assertTrue(
             result.stdout.contains(
                 "storage.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|storage|0|0",
@@ -172,12 +172,12 @@ class NodeStorageBridgeInstrumentationTest {
 
     @Test
     fun androidStorageProviderPersistsAndScopesByWorkingDirectory() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node storage Android provider regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node storage Android provider regression")
 
         val firstWorkDir = storageWorkDir("node-bridge-storage-android-one")
         val secondWorkDir = storageWorkDir("node-bridge-storage-android-two")
 
-        val writeResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val writeResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -190,11 +190,11 @@ class NodeStorageBridgeInstrumentationTest {
             "<embedded-autojs-storage-android-write.js>",
             workingDirectory = firstWorkDir,
         )
-        NodeEmbeddedTestHarness.assertSucceeded("storage Android write", writeResult)
+        NodePluginTestHarness.assertSucceeded("storage Android write", writeResult)
         assertTrue(writeResult.stdout.contains("storage.android.write=done"))
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
 
-        val readResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val readResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -209,11 +209,11 @@ class NodeStorageBridgeInstrumentationTest {
             "<embedded-autojs-storage-android-read.js>",
             workingDirectory = firstWorkDir,
         )
-        NodeEmbeddedTestHarness.assertSucceeded("storage Android read", readResult)
+        NodePluginTestHarness.assertSucceeded("storage Android read", readResult)
         assertTrue(readResult.stdout.contains("storage.android.same=persist|1|true|token"))
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
 
-        val aliasResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val aliasResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -226,11 +226,11 @@ class NodeStorageBridgeInstrumentationTest {
             "<embedded-autojs-storage-android-alias.js>",
             workingDirectory = firstWorkDir,
         )
-        NodeEmbeddedTestHarness.assertSucceeded("storage Android storages alias", aliasResult)
+        NodePluginTestHarness.assertSucceeded("storage Android storages alias", aliasResult)
         assertTrue(aliasResult.stdout.contains("storage.android.alias=ok"))
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
 
-        val isolatedResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val isolatedResult = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -242,7 +242,7 @@ class NodeStorageBridgeInstrumentationTest {
             "<embedded-autojs-storage-android-isolated.js>",
             workingDirectory = secondWorkDir,
         )
-        NodeEmbeddedTestHarness.assertSucceeded("storage Android namespace isolation", isolatedResult)
+        NodePluginTestHarness.assertSucceeded("storage Android namespace isolation", isolatedResult)
         assertTrue(isolatedResult.stdout.contains("storage.android.other=missing"))
     }
 

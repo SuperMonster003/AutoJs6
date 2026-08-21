@@ -168,16 +168,16 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 ###### 2026/08/20
 
-* `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
+* `新增` 通过独立 Node.js Runtime 插件提供 Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本; 宿主 APK 不再内嵌 libnode
 * `新增` Node.js 的 ESM/dynamic import()/网络与 WebSocket/原生网络模块/worker_threads/child_process/Java 互操作能力成为正式功能并默认启用, 同时保留权限声明/白名单/沙箱及资源预算保护
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
 * `新增` Node.js 运行时支持单次执行范围的按需加密模块源码提供器, 仅探测及解密模块解析器实际选定的候选文件
 * `新增` Node.js 运行时支持受控 AutoJs6 桥接模块, 并采用 Safe Node Profile 安全策略
-* `新增` Node.js 运行时支持常驻服务进程及进程级 Node/V8 平台复用, 同时为每次脚本执行创建独立 isolate 及 Environment
-* `新增` Node.js 常驻运行时支持空闲或内存压力下的回收, 显式关闭及异常进程隔离重建
-* `新增` Node.js 外部运行时插件后端, 支持强制 `plugin` 与可选回退 `pluginOptional` 模式, 常驻 Binder 会话及进程运行时, 信任/合约/ABI 校验和单活动零队列背压
+* `新增` Node.js Runtime 插件支持常驻服务进程及进程级 Node/V8 平台复用, 同时为每次脚本执行创建独立 isolate 及 Environment
+* `新增` Node.js Runtime 插件支持空闲或内存压力下的回收, 显式关闭及异常进程隔离重建
+* `新增` Node.js 外部运行时插件后端, 采用必需的 `plugin` 模式, 支持常驻 Binder 会话及进程运行时, 信任/合约/ABI 校验和单活动零队列背压; 插件不可用时明确失败且不回退 Rhino
 * `新增` Node.js 外部运行时插件后端支持请求级工作区归档传输 v2, 包含显式输入映射/输出回写/删除 tombstone 清单, 且不扫描宿主沙盒
-* `新增` 打包功能支持 Node.js 脚本项目, 并自动包含所需运行库
+* `调整` Node.js 运行时完全由外部插件持有; 宿主及导出的应用不再打包 Node.js 运行库, Node.js 项目需在已安装并授权插件的 AutoJs6 中运行
 * `新增` 独立 Python Runtime 插件后端, 支持通过单独的 CPython 插件进程运行本地 .py 文件及声明为 `type: python` 的脚本项目, 并校验固定组件/签名/协议/ABI, 支持热插拔且绝不回退到 JavaScript
 * `新增` Python 启动集成覆盖文件管理器/编辑器/本地 Run Intent/单文件 Import Intent/新建快捷方式/定时任务/广播任务并严格保留单文件或项目上下文; 项目支持内部 import/相对文件读取及只读 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 执行支持通过 ExecutionConfig 键 `autojs6.python.stdinSnapshot` 提供可选的有界预置 stdin 快照, 并采用严格 ByteArray/UTF-8 文本准入, 提供器能力/大小协商及私有只读 PFD 传输与清理

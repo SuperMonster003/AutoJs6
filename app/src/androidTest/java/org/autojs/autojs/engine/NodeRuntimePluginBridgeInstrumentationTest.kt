@@ -21,17 +21,17 @@ class NodeRuntimePluginBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
     fun pluginRuntimeUsesLiveHostBridgeForDeviceCall() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin live bridge smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node runtime plugin live bridge smoke")
         val runtimeInfo = runBlocking {
             runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
         }
@@ -79,7 +79,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
             ),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin live bridge device smoke", result)
+        NodePluginTestHarness.assertSucceeded("Node runtime plugin live bridge device smoke", result)
         assertTrue(result.stdout.contains("plugin.live.device.screenOnType=boolean"))
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.enabled"])
         assertEquals("plugin", result.nativeValues["embedded_script.runtime_plugin.diagnostics_source"])
@@ -123,7 +123,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
      */
     @Test
     fun pluginRuntimeDecryptsEncryptedModuleThroughHostV1Provider() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin encrypted module smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node runtime plugin encrypted module smoke")
         val runtimeInfo = runBlocking {
             runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
         }
@@ -163,7 +163,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
                 ),
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin encrypted module smoke", result)
+            NodePluginTestHarness.assertSucceeded("Node runtime plugin encrypted module smoke", result)
             assertTrue(result.stdout.contains("plugin.encrypted.value=plugin-encrypted-42"))
             assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.enabled"])
             assertEquals(
@@ -190,7 +190,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
      */
     @Test
     fun pluginRuntimeRunsProjectWithNodeModulesThroughWorkspaceTransport() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin project workspace smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node runtime plugin project workspace smoke")
         val runtimeInfo = runBlocking {
             runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
         }
@@ -238,7 +238,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
             ),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin project workspace smoke", result)
+        NodePluginTestHarness.assertSucceeded("Node runtime plugin project workspace smoke", result)
         assertTrue(result.stdout.contains("plugin.project.parts=helper+demo-pkg"))
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.enabled"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.workspace.mapped"])
@@ -252,7 +252,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
      */
     @Test
     fun pluginRuntimeFailuresCarryReadableCodeAndMessage() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin failure readability smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node runtime plugin failure readability smoke")
         val runtimeInfo = runBlocking {
             runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
         }
@@ -403,7 +403,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
      */
     @Test
     fun pluginRuntimeDrivesCommonAutomationApisThroughLiveBridge() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin automation API smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node runtime plugin automation API smoke")
         val runtimeInfo = runBlocking {
             runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
         }
@@ -475,7 +475,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
             ),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin automation API smoke", result)
+        NodePluginTestHarness.assertSucceeded("Node runtime plugin automation API smoke", result)
         assertTrue(result.stdout.contains("m3.api.toast=ok"))
         // Android may redact clipboard reads while the instrumentation target is not the
         // foreground app. The bridge dispatch counters below still prove setText/getText both
@@ -502,7 +502,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
      */
     @Test
     fun pluginRuntimeSwipesThroughAccessibilityGestureCapability() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node runtime plugin swipe smoke")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node runtime plugin swipe smoke")
         val runtimeInfo = runBlocking {
             runCatching { NodeJsRuntimePluginHost.probe(context) }.getOrNull()
         }
@@ -563,7 +563,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
             ),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin swipe smoke", result)
+        NodePluginTestHarness.assertSucceeded("Node runtime plugin swipe smoke", result)
         assertTrue(
             "swipe must either complete (service on) or fail readably (service off): " + result.stdout,
             result.stdout.contains("m3.swipe.completed=true") ||
@@ -607,7 +607,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
                 timeoutMs = 15_000L,
             ),
         )
-        NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin swipe capability denial", denied)
+        NodePluginTestHarness.assertSucceeded("Node runtime plugin swipe capability denial", denied)
         assertTrue(
             "undeclared accessibility.gesture must be rejected before dispatch: " + denied.stdout,
             denied.stdout.contains("m3.swipe.denied=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED"),

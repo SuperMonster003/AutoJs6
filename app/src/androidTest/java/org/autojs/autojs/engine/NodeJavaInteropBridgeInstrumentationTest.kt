@@ -16,16 +16,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeJavaInteropBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -181,7 +181,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
 
     @Test
     fun jsJavaInteropModuleIsDeniedByDefaultAndCannotBeShadowed() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Java interop disabled gate")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node Java interop disabled gate")
 
         val workDir = File(context.cacheDir, "node-java-interop-disabled").apply {
             deleteRecursively()
@@ -191,7 +191,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create Java interop shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             const profile = require("autojs6:profile");
@@ -223,14 +223,14 @@ class NodeJavaInteropBridgeInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("Java interop disabled gate", result)
+        NodePluginTestHarness.assertSucceeded("Java interop disabled gate", result)
         assertTrue(result.stdout, result.stdout.contains("java.profile=false|stable|autojs.nodejs.javaInterop.stable|false"))
         assertTrue(result.stdout, result.stdout.contains("java.disabled=ERR_AUTOJS6_JAVA_INTEROP_DISABLED|ERR_AUTOJS6_JAVA_INTEROP_DISABLED"))
     }
 
     @Test
     fun jsJavaInteropStableModuleUsesBridgeAndEnforcesAllowlist() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Java interop stable fake bridge")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node Java interop stable fake bridge")
 
         val workDir = File(context.cacheDir, "node-java-interop-enabled").apply {
             deleteRecursively()
@@ -240,7 +240,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create Java interop shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -458,7 +458,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
             javaInteropEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("Java interop stable fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("Java interop stable fake bridge", result)
         assertTrue(result.stdout, result.stdout.contains("java.resolve=java"))
         assertTrue(result.stdout, result.stdout.contains("java.shadow=false"))
         assertTrue(result.stdout, result.stdout.contains("java.frozen=true"))

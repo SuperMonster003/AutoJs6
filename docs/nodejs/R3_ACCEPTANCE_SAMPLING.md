@@ -1,5 +1,10 @@
 # R3 Startup-Chain Acceptance Sampling
 
+> [!WARNING]
+> Historical R3 evidence for the retired host embedded-runtime topology. Commands,
+> classes, flavors, and report paths below are retained only as an audit snapshot.
+> See [TESTING.md](TESTING.md).
+
 This note records the R3 real-engine regression, the expanded timing contract,
 and the focused Sony acceptance procedure. It supplements the R2 persistent
 runtime report. It does not replace packaged APK, multi-device, memory-growth,

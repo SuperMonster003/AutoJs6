@@ -1,5 +1,10 @@
 # Rhino Augment Compatibility Matrix
 
+> [!WARNING]
+> Historical generated Phase 11A inventory. Its report generators and phase manifests
+> were retired; this file is not the current Node.js capability source. Use
+> [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md) and the plugin HOST-API.
+
 This Phase 11A matrix is generated from the Rhino augment inventory, the checked-in status manifest, and the Node bridge/types/docs gap report. It is a module-level tracking document; API-level details remain in `build/reports/nodejs/rhino-augment-api-inventory.json` and `build/reports/nodejs/rhino-node-compat-gap.json`.
 
 P12-34 keeps promoted Phase 12 examples and stable rejection guidance synchronized with `MIGRATION_FROM_RHINO.md`, the Pro 9 comparison, `SECURITY_MODEL.md`, `TESTING.md`, and the type declaration README.

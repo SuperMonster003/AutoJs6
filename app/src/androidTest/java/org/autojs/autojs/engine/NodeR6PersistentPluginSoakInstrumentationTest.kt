@@ -401,7 +401,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                 ),
             ),
         )
-        NodeEmbeddedTestHarness.assertSucceeded("R6 persistent plugin cycle $cycle", result)
+        NodePluginTestHarness.assertSucceeded("R6 persistent plugin cycle $cycle", result)
         val payload = parsePayload(result.stdout)
             ?: throw AssertionError("R6 cycle $cycle omitted $RESOURCE_PAYLOAD_PREFIX: ${result.stdout}")
         return CycleResult(result, payload)

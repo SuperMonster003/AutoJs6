@@ -20,12 +20,12 @@ class NodeOcrBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -93,9 +93,9 @@ class NodeOcrBridgeInstrumentationTest {
 
     @Test
     fun jsOcrBridgeUsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node OCR bridge fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node OCR bridge fake transport regression")
 
-        val workDir = File(NodeEmbeddedTestHarness.targetContext.cacheDir, "node-bridge-ocr-shadow").apply {
+        val workDir = File(NodePluginTestHarness.targetContext.cacheDir, "node-bridge-ocr-shadow").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create OCR bridge working directory: $absolutePath" }
         }
@@ -103,7 +103,7 @@ class NodeOcrBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create OCR shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, recognize: () => "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -170,7 +170,7 @@ class NodeOcrBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("OCR fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("OCR fake bridge", result)
         assertTrue(result.stdout.contains("ocr.resolve=ocr"))
         assertTrue(result.stdout.contains("ocr.shadow=false"))
         assertTrue(result.stdout.contains("ocr.frozen=true"))
@@ -186,9 +186,9 @@ class NodeOcrBridgeInstrumentationTest {
 
     @Test
     fun jsOcrRejectsInvalidImageBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node OCR invalid argument regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node OCR invalid argument regression")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -223,7 +223,7 @@ class NodeOcrBridgeInstrumentationTest {
             "<embedded-autojs-ocr-invalid.js>",
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("OCR invalid image handles", result)
+        NodePluginTestHarness.assertSucceeded("OCR invalid image handles", result)
         assertFalse(result.stdout.contains(":unexpected"))
         assertTrue(result.stdout.contains("ocr.invalid=null:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|empty:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|string:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|text:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|bounds:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.stdout.contains("ocr.invalid.requests=0"))
@@ -231,10 +231,10 @@ class NodeOcrBridgeInstrumentationTest {
 
     @Test
     fun jsOcrRequiresManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node OCR manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node OCR manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("image"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -261,7 +261,7 @@ class NodeOcrBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("OCR manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("OCR manifest capability denial", result)
         assertTrue(
             result.stdout.contains(
                 "ocr.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|ocr|0|0",
@@ -271,12 +271,12 @@ class NodeOcrBridgeInstrumentationTest {
 
     @Test
     fun kotlinOcrLiveProviderRecognizesMlKitImageHandle() {
-        val ocrHealth = NodeBridgeProviderRegistry.androidHealth(NodeEmbeddedTestHarness.targetContext)
+        val ocrHealth = NodeBridgeProviderRegistry.androidHealth(NodePluginTestHarness.targetContext)
             .associateBy { it.definition.id }
             .getValue("ocr")
         assumeTrue("MLKit OCR provider must be available for live OCR gate", ocrHealth.status == NodeBridgeProviderStatus.AVAILABLE)
 
-        val workDir = File(NodeEmbeddedTestHarness.targetContext.cacheDir, "node-bridge-ocr-live").apply {
+        val workDir = File(NodePluginTestHarness.targetContext.cacheDir, "node-bridge-ocr-live").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create OCR live working directory: $absolutePath" }
         }
@@ -293,9 +293,9 @@ class NodeOcrBridgeInstrumentationTest {
         )
 
         val provider = AndroidNodeBridgeCapabilityProvider(
-            NodeEmbeddedTestHarness.targetContext,
+            NodePluginTestHarness.targetContext,
             NodeBridgeEngineInfo.fromContext(
-                NodeEmbeddedTestHarness.targetContext,
+                NodePluginTestHarness.targetContext,
                 id = "ocr-live-provider",
                 sourceName = "ocr-live-provider.cjs",
                 cwd = workDir.absolutePath,
@@ -392,10 +392,10 @@ class NodeOcrBridgeInstrumentationTest {
 
     @Test
     fun androidOcrRejectsUnknownImageHandleWithoutLeakingResources() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node OCR Android unknown-handle regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node OCR Android unknown-handle regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("ocr", "image"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -414,7 +414,7 @@ class NodeOcrBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("OCR Android unknown handle rejection", result)
+        NodePluginTestHarness.assertSucceeded("OCR Android unknown handle rejection", result)
         assertFalse(result.stdout.contains("unexpected"))
         assertTrue(result.stdout.contains("ocr.android.denied=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST/ERR_AUTOJS6_BRIDGE_INVALID_REQUEST/ocr/recognizeText"))
         result.nativeValues["embedded_script.bridge_live_enabled"]?.let { assertEquals("true", it) }
@@ -453,7 +453,7 @@ class NodeOcrBridgeInstrumentationTest {
     }
 
     private fun writeLiveOcrFixture(file: File) {
-        val source = BitmapFactory.decodeResource(NodeEmbeddedTestHarness.targetContext.resources, PaddleOcrR.drawable.paddle_ocr_test)
+        val source = BitmapFactory.decodeResource(NodePluginTestHarness.targetContext.resources, PaddleOcrR.drawable.paddle_ocr_test)
             ?: error("Failed to decode OCR fixture resource")
         val scaled = Bitmap.createScaledBitmap(source, source.width * 4, source.height * 4, false)
         file.outputStream().use { out ->

@@ -133,7 +133,7 @@
     <string name="description_night_mode">用於控制並反映 AutoJs6 夜間模式策略.\n\n注: 夜間模式開關與自動夜間模式開關互相關聯且互相影響.</string>
     <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等. 夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面. 夜間模式可提升設備在低光環境下的易用性, 同時有助於提升弱視或光敏感用戶的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓操作系統的夜間模式設置一致\n總是開啓: AutoJs6 保持開啓夜間模式 (忽略操作系統設置)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略操作系統設置)\n\n注: 跟隨系統功能僅支持安卓 API 級別 28 (安卓 9) [P] 及以上操作系統.</string>
     <string name="description_night_mode_preference_more">啓用安卓系統的夜間模式:\n- API 級別 29 (安卓 10) [Q] 及以上: 通過 [ 設置 -> 顯示 -> 主題 ] 開啓.\n- API 級別 28 (安卓 9) [P]: 通過 [ 開發者選項 -> 夜間模式 ] 開啓.\n\n對於基於 WebView 組件的內容 (如 AutoJs6 的文檔頁面), 夜間模式支持需要滿足以下條件:\n1. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P]: 版本不低於 105\n2. WebView 組件頁面內容可適配夜間模式 (通過 CSS 或 安卓 XML 資源等方式實現)</string>
-    <string name="description_nodejs_doctor_report_preference">匯出後端類型, Node 版本, ABI, 功能標誌, 原生庫雜湊值, 能力設定檔, 最近錯誤狀態和打包模板狀態. 不包含用戶指令碼內容及敏感環境變數值.</string>
+    <string name="description_nodejs_doctor_report_preference">匯出外部 Node.js 執行階段插件的探索及探測狀態, 合約與 Node 版本, ABI, 宿主策略標誌, 能力設定檔及最近錯誤狀態. 不包含用戶指令碼內容及敏感環境變數值.</string>
     <string name="description_notification_access">\"通知使用權\" (或 \"通知讀取權限\") 允許 AutoJs6 讀取系統通知內容, 使腳本可以監聽通知或獲取通知文本等.</string>
     <string name="description_pointer_location">\"指針位置\" 是安卓開發者選項中的調試功能.\n開啓後, 系統會在屏幕上顯示觸摸點的 [座標/移動軌跡/數量/大小/移動速度/壓力] 等信息, 便於相關腳本的 [編寫/調試/校對] 等.</string>
     <string name="description_post_notifications">\"發送通知\" 權限允許 AutoJs6 向系統發佈通知, 使腳本可以在通知欄發佈並管理自定義通知等.\n\n注: 在 Android 13+ 設備上未授予該權限時, 部分通知可能無法顯示, 並可能影響前台服務的啓動與穩定性.</string>

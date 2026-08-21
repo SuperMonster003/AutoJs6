@@ -16,12 +16,12 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -171,9 +171,9 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
 
     @Test
     fun jsAccessibilitySelectorV2UsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node accessibility selector bridge focused regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node accessibility selector bridge focused regression")
 
-        val workDir = File(NodeEmbeddedTestHarness.targetContext.cacheDir, "node-bridge-accessibility-selector-v2-shadow").apply {
+        val workDir = File(NodePluginTestHarness.targetContext.cacheDir, "node-bridge-accessibility-selector-v2-shadow").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create accessibility selector working directory: $absolutePath" }
         }
@@ -181,7 +181,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create accessibility shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, text: () => ({ shadow: true }) };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -332,7 +332,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("accessibility selector fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("accessibility selector fake bridge", result)
         assertTrue(result.stdout.contains("a11y.selector.resolve=accessibility"))
         assertTrue(result.stdout.contains("a11y.selector.shadow=false"))
         assertTrue(result.stdout.contains("a11y.selector.frozen=true"))
@@ -357,9 +357,9 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
 
     @Test
     fun jsRhinoCompatSelectorFacadeUsesFakeTransport() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Rhino compat selector facade regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node Rhino compat selector facade regression")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -490,7 +490,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             "<embedded-autojs-rhino-compat-selector-fake.js>",
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("Rhino compat selector fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("Rhino compat selector fake bridge", result)
         assertTrue(result.stdout.contains("rhino.compat.selector.defaultGlobals=true"))
         assertTrue(result.stdout.contains("rhino.compat.selector.status="))
         assertFalse(result.stdout.contains("rhino.compat.selector.status=-1"))
@@ -504,9 +504,9 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
 
     @Test
     fun jsAccessibilitySelectorV2RejectsInvalidDescriptorsBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node accessibility selector invalid descriptor regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node accessibility selector invalid descriptor regression")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -571,16 +571,16 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             "<embedded-autojs-accessibility-selector-invalid.js>",
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("accessibility selector invalid descriptors", result)
+        NodePluginTestHarness.assertSucceeded("accessibility selector invalid descriptors", result)
         assertTrue(result.stdout.contains("a11y.selector.invalid=empty:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|nul:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|emptyRegex:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|badDepth:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|badBounds:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|missingField:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|wrongType:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|clickMissingField:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|setTextNul:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.stdout.contains("a11y.selector.invalid.requests=0"))
     }
 
     @Test
     fun jsAccessibilitySelectorV2HonorsTimeoutAndCancellation() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node accessibility selector timeout/cancellation regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node accessibility selector timeout/cancellation regression")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -620,7 +620,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             "<embedded-autojs-accessibility-selector-timeout-cancel.js>",
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("accessibility selector timeout/cancellation", result)
+        NodePluginTestHarness.assertSucceeded("accessibility selector timeout/cancellation", result)
         assertTrue(
             result.stdout.contains(
                 "a11y.selector.timeout_cancel=${NodeRuntimeErrorCodes.BRIDGE_TIMEOUT}|${NodeRuntimeErrorCodes.BRIDGE_CANCELLED}|1|0|false",
@@ -630,14 +630,14 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
 
     @Test
     fun androidAccessibilitySelectorV2RejectsUntilProviderIsConnected() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node accessibility selector Android rejection regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node accessibility selector Android rejection regression")
         assumeTrue(
             "This rejection-path regression applies when the accessibility provider is not connected in the current process.",
             !AutoJsAccessibilityService.hasInstance() || !AutoJsAccessibilityService.hasOperationalState,
         )
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("accessibility"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -671,7 +671,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("accessibility selector Android rejection", result)
+        NodePluginTestHarness.assertSucceeded("accessibility selector Android rejection", result)
         assertTrue(result.stdout.contains("a11y.selector.android.enabled=false"))
         assertTrue(result.stdout.contains("a11y.selector.android.ensured=false"))
         assertFalse(result.stdout.contains(":unexpected"))

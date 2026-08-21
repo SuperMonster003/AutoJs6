@@ -1,5 +1,11 @@
 # AutoJs6 Node.js Completion Roadmap
 
+> [!WARNING]
+> Historical implementation roadmap. M5 retired the host embedded runtime, native
+> packaging chain, phase gates, and nodeFull/nodeMini flavors. Completed/unchecked
+> items below describe the pre-M5 topology and must not be used as current commands.
+> See [README.md](README.md) for current ownership.
+
 Last updated: 2026-07-20
 
 This checklist separates two completion targets:

@@ -18,16 +18,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeNotificationsBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -57,7 +57,7 @@ class NodeNotificationsBridgeInstrumentationTest {
 
     @Test
     fun jsNotificationsBridgeUsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node notifications bridge fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node notifications bridge fake transport regression")
 
         val workDir = File(context.cacheDir, "node-bridge-notifications-shadow").apply {
             deleteRecursively()
@@ -67,7 +67,7 @@ class NodeNotificationsBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create notifications shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, notify: () => "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -152,7 +152,7 @@ class NodeNotificationsBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("notifications fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("notifications fake bridge", result)
         assertTrue(result.stdout.contains("notifications.resolve=notifications"))
         assertTrue(result.stdout.contains("notifications.shadow=false"))
         assertTrue(result.stdout.contains("notifications.frozen=true"))
@@ -170,10 +170,10 @@ class NodeNotificationsBridgeInstrumentationTest {
 
     @Test
     fun jsNotificationsRequiresManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node notifications manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node notifications manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(emptyList())
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -199,7 +199,7 @@ class NodeNotificationsBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("notifications manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("notifications manifest capability denial", result)
         assertTrue(
             result.stdout.contains(
                 "notifications.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|notifications|0|0",
@@ -209,10 +209,10 @@ class NodeNotificationsBridgeInstrumentationTest {
 
     @Test
     fun jsNotificationsSettingsRequiresExplicitManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node notifications settings manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node notifications settings manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("notifications"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -238,7 +238,7 @@ class NodeNotificationsBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("notifications settings manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("notifications settings manifest capability denial", result)
         assertTrue(
             result.stdout.contains(
                 "notifications.settings.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|notifications.settings|0|0",

@@ -18,12 +18,12 @@ class NodeBarcodeBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -81,9 +81,9 @@ class NodeBarcodeBridgeInstrumentationTest {
 
     @Test
     fun jsBarcodeBridgeUsesFakeTransportPathInputsAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node barcode bridge fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node barcode bridge fake transport regression")
 
-        val workDir = File(NodeEmbeddedTestHarness.targetContext.cacheDir, "node-bridge-barcode-shadow").apply {
+        val workDir = File(NodePluginTestHarness.targetContext.cacheDir, "node-bridge-barcode-shadow").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create barcode bridge working directory: $absolutePath" }
         }
@@ -91,7 +91,7 @@ class NodeBarcodeBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create barcode shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, detect: () => "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -192,7 +192,7 @@ class NodeBarcodeBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("barcode fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("barcode fake bridge", result)
         assertTrue(result.stdout.contains("barcode.resolve=barcode"))
         assertTrue(result.stdout.contains("barcode.shadow=false"))
         assertTrue(result.stdout.contains("barcode.frozen=true"))
@@ -213,10 +213,10 @@ class NodeBarcodeBridgeInstrumentationTest {
 
     @Test
     fun jsBarcodeRequiresManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node barcode manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node barcode manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("image"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -243,7 +243,7 @@ class NodeBarcodeBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("barcode manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("barcode manifest capability denial", result)
         assertTrue(
             result.stdout.contains(
                 "barcode.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|barcode|0|0",
@@ -253,12 +253,12 @@ class NodeBarcodeBridgeInstrumentationTest {
 
     @Test
     fun kotlinBarcodeLiveProviderScansMlKitImageHandleAndCleansUp() {
-        val barcodeHealth = NodeBridgeProviderRegistry.androidHealth(NodeEmbeddedTestHarness.targetContext)
+        val barcodeHealth = NodeBridgeProviderRegistry.androidHealth(NodePluginTestHarness.targetContext)
             .associateBy { it.definition.id }
             .getValue("barcode")
         assumeTrue("MLKit barcode provider must be available for live barcode gate", barcodeHealth.status == NodeBridgeProviderStatus.AVAILABLE)
 
-        val workDir = File(NodeEmbeddedTestHarness.targetContext.cacheDir, "node-bridge-barcode-live").apply {
+        val workDir = File(NodePluginTestHarness.targetContext.cacheDir, "node-bridge-barcode-live").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create barcode live working directory: $absolutePath" }
         }
@@ -275,9 +275,9 @@ class NodeBarcodeBridgeInstrumentationTest {
         )
 
         val provider = AndroidNodeBridgeCapabilityProvider(
-            NodeEmbeddedTestHarness.targetContext,
+            NodePluginTestHarness.targetContext,
             NodeBridgeEngineInfo.fromContext(
-                NodeEmbeddedTestHarness.targetContext,
+                NodePluginTestHarness.targetContext,
                 id = "barcode-live-provider",
                 sourceName = "barcode-live-provider.cjs",
                 cwd = workDir.absolutePath,

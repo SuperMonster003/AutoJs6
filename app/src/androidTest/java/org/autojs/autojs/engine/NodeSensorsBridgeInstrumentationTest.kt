@@ -17,16 +17,16 @@ import java.util.concurrent.TimeUnit
 
 class NodeSensorsBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -44,7 +44,7 @@ class NodeSensorsBridgeInstrumentationTest {
 
     @Test
     fun jsSensorsBridgeUsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node sensors bridge fake transport regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node sensors bridge fake transport regression")
 
         val workDir = File(context.cacheDir, "node-bridge-sensors-shadow").apply {
             deleteRecursively()
@@ -54,7 +54,7 @@ class NodeSensorsBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create sensors shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, once: () => "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -134,7 +134,7 @@ class NodeSensorsBridgeInstrumentationTest {
             timeoutMs = 30_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("sensors fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("sensors fake bridge", result)
         assertTrue(result.stdout.contains("sensors.resolve=sensors"))
         assertTrue(result.stdout.contains("sensors.shadow=false"))
         assertTrue(result.stdout.contains("sensors.frozen=true"))
@@ -150,10 +150,10 @@ class NodeSensorsBridgeInstrumentationTest {
 
     @Test
     fun jsSensorsRequiresManifestCapabilityBeforeDispatch() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node sensors manifest capability regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node sensors manifest capability regression")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(emptyList())
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -179,7 +179,7 @@ class NodeSensorsBridgeInstrumentationTest {
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("sensors manifest capability denial", result)
+        NodePluginTestHarness.assertSucceeded("sensors manifest capability denial", result)
         assertTrue(
             result.stdout.contains(
                 "sensors.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|sensors|0|0",

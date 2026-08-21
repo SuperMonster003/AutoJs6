@@ -8,7 +8,7 @@ import org.junit.Test
 
 class NodeBridgeProviderRegistryInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Test
     fun providerRegistryDefinesPhase7LiveProviderSurface() {

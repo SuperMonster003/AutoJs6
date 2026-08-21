@@ -1,99 +1,44 @@
-# AutoJs6 Node.js Integration Plan
+# AutoJs6 Node.js Host/Plugin Integration
 
-Status: Node Profile v1.2 is the current integration baseline. Implemented Node
-capabilities are compiled in and enabled for ordinary Debug, Release, host API,
-and packaged-AAR builds. The detailed deployment sequence remains in
-[COMPLETION_ROADMAP.md](COMPLETION_ROADMAP.md).
+Last reviewed: 2026-08-21.
+
+The migration is complete: Node runtime execution is plugin-only.
 
 ## Runtime Topology
 
-AutoJs6 selects one of four release/runtime arrangements:
+1. The host recognizes a Node-marked file or project.
+2. NodePluginJavaScriptEngine builds a bounded request.
+3. The host discovers and validates the fixed runtime-plugin service, signature,
+   authorization, host-version range, contract version, and ABI.
+4. The host transfers an explicit workspace archive and module-source provider
+   handles through the published AIDL contract.
+5. The plugin owns Node/V8/libuv startup, module resolution, TypeScript processing,
+   execution, cancellation, and runtime cleanup.
+6. Plugin bridge calls return to the host capability broker.
+7. The host validates declaration, permission, provider health, limits, and resource
+   ownership before invoking Android/AutoJs6 APIs.
+8. Results and permitted workspace changes return to the host.
 
-- `nodePlugin`: the host discovers the independently installed Node runtime
-  plugin and talks to it through published API contract v2.
-- `nodeFull`: the host packages all supported Embedded Node ABIs.
-- `nodeMini`: the host packages an explicitly selected supported ABI subset.
-- `rhinoOnly`: no Node payload is packaged and Rhino remains the execution
-  backend.
+## Source Boundaries
 
-The Node runtime executes in the isolated `:nodejs_embedded` process. Host-owned
-Android capabilities are reached through versioned bridge providers; project
-files and encrypted module graphs are supplied through scoped transports rather
-than unrestricted host filesystem access.
+The host retains the plugin client, script routing, workspace transport, capability
+manifest/broker/providers, encrypted module-source provider, Android policy, project
+descriptor resolution, Node Doctor, user docs/types, and examples.
 
-Supported Node ABIs are `arm64-v8a`, `armeabi-v7a`, and `x86_64`. `x86` remains
-unsupported and fails packaging preflight.
+The plugin retains libnode and all C++/JNI runtime code, runtime services, Node module
+loader and compatibility shims, JavaScript-side preflight, and native-runtime tests.
 
-## Stable Capabilities
+The nodejs-api contract is authored in the plugin and mirrored into the host.
+Capabilities and examples have separate cross-repository manual guards.
 
-These capabilities are part of every Node-enabled build:
+## Build Policy
 
-| Capability | Product boundary |
-| --- | --- |
-| ESM | `.mjs`, package `type=module`, static imports/exports, top-level await, `import.meta`, and scoped local resolution. |
-| Dynamic import | Local/package/builtin imports through the scoped loader; remote URL imports stay denied. |
-| Controlled network | `fetch`, AutoJs6 `axios`/`undici` adapters, and provider-owned HTTP I/O with permission, timeout, redirect, and size policy. |
-| WebSocket | Provider-owned `ws:`/`wss:` sessions with connection, queue, message, timeout, and lifecycle limits. |
-| Raw network builtins | Native `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`, subject to Android sandbox/manifest policy and caller-managed Node limits. |
-| Workers | Native `worker_threads` with a bounded worker profile, scoped source loading, smaller authority than the parent, and cleanup accounting. |
-| Child processes | Native `child_process`, subject to Android sandbox and caller-managed validation, timeout, cancellation, stdio, and cleanup. |
-| Java interop | `require("java")`, `$autojs.java`, and explicit Rhino proxy installation through a strict class/member allowlist and opaque handles. |
+- **nodePlugin** is the normal release mode and resolves to the plugin backend.
+- **rhinoOnly** disables Node execution.
+- Historical native/embedded/auto/pluginOptional backend names migrate to plugin.
+- Historical nodeFull/nodeMini release flavors fail with a migration message.
+- The host APK never copies native libraries from the plugin repository.
+- Exported applications cannot request an Embedded Node.js library.
 
-There are no Node capability opt-in Gradle properties. Stable host/plugin request
-keys are `esmEnabled`, `dynamicImportEnabled`,
-`rawNodeNetworkModulesEnabled`, `workerThreadsEnabled`,
-`childProcessEnabled`, and `javaInteropEnabled`. The host always sends the
-stable set enabled; project/package feature overrides are rejected.
-
-## Boundaries That Remain
-
-Formal availability is separate from authority:
-
-- bridge calls require declared runtime capabilities and provider support;
-- network I/O requires runtime network authorization and Android
-  `android.permission.INTERNET` where packaging rules require it;
-- filesystem access remains scoped to the execution sandbox;
-- Java interop does not expose reflection, class loaders, unrestricted package
-  traversal, native-library loading, `Runtime`, or `ProcessBuilder`;
-- worker scopes do not inherit unrestricted AutoJs bridge, Java, shell,
-  Inspector, or nested-worker authority;
-- process, socket, worker, response, message, source, memory, and duration
-  budgets remain enforced;
-- service stop, timeout, cancellation, and native failure must close all
-  provider-owned resources.
-
-Inspector remains disabled. Native addons and unrestricted WASI remain
-unsupported. Scoped `fs`, `zlib`, and `vm` retain their documented partial
-status; formalizing the shipped capabilities does not overstate those surfaces.
-
-## Build And Artifact Contract
-
-Ordinary build commands must require no feature-specific properties:
-
-```powershell
-.\gradlew.bat :plugin-api:nodejs-api:bundleReleaseAar
-.\gradlew.bat :app:assembleAppRelease
-```
-
-Release and AAR creation must not reject, strip, or rewrite the stable capability
-set. Generated `BuildConfig` fields use stable names and are `true` for every
-Node-enabled variant. Published plugin artifacts use runtime contract v2 and
-versioned API/catalog/runtime-kit manifests with locked SHA-256 hashes.
-
-## Verification Before Deployment
-
-Each deployment increment should verify, as applicable:
-
-1. host and plugin API contract tests;
-2. Kotlin/Java compilation and Android instrumentation compilation;
-3. all three native ABIs and runtime-kit payload hashes;
-4. compatibility profile generation and verification;
-5. type declarations, examples, packaging preflight, and AAR contents;
-6. live loopback network/WebSocket and device worker/process tests on the
-   approved device profile;
-7. changelog generation in every supported language;
-8. a clean logical commit before checking a Roadmap item.
-
-Historical phase reports and immutable release manifests remain evidence of how
-the runtime reached this baseline. They are not current configuration inputs and
-must never be parsed as build switches.
+See [Testing](TESTING.md) for acceptance and [Security model](SECURITY_MODEL.md)
+for authority boundaries.

@@ -412,7 +412,7 @@ object NodeRuntimeCapabilities {
         )
     }
 
-    val backendSwitches = setOf("rhino", "native", "embedded", "plugin", "pluginOptional", "auto")
+    val backendSwitches = setOf("rhino", "plugin")
 
     val nodeRouteFileSuffixes = setOf(".node.js", ".cjs", ".mjs", ".ts", ".mts", ".cts", ".tsx")
     val commonJsModuleExtensions = setOf("js", "cjs", "cts", "ts", "json")

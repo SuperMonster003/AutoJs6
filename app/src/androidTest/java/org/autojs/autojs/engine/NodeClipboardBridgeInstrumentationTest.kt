@@ -13,12 +13,12 @@ class NodeClipboardBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -63,9 +63,9 @@ class NodeClipboardBridgeInstrumentationTest {
 
     @Test
     fun jsClipboardModuleUsesFakeTransportAndBlocksShadowing() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node clipboard bridge focused regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node clipboard bridge focused regression")
 
-        val workDir = File(NodeEmbeddedTestHarness.targetContext.cacheDir, "node-bridge-clipboard-shadow").apply {
+        val workDir = File(NodePluginTestHarness.targetContext.cacheDir, "node-bridge-clipboard-shadow").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create clipboard bridge working directory: $absolutePath" }
         }
@@ -73,7 +73,7 @@ class NodeClipboardBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create clipboard shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, getText: () => "shadow" };""")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -124,7 +124,7 @@ class NodeClipboardBridgeInstrumentationTest {
             workingDirectory = workDir,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("clipboard fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("clipboard fake bridge", result)
         assertTrue(result.stdout.contains("clipboard.resolve=clipboard"))
         assertTrue(result.stdout.contains("clipboard.shadow=false"))
         assertTrue(result.stdout.contains("clipboard.frozen=true"))

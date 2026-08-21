@@ -29,18 +29,18 @@ import kotlin.concurrent.thread
 
 class NodeUiBridgeInstrumentationTest {
 
-    private val context = NodeEmbeddedTestHarness.targetContext
+    private val context = NodePluginTestHarness.targetContext
 
     @Before
     fun settleBefore() {
         NodeBridgeUiSessionStore.closeAll("ui-test-before")
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
         NodeBridgeUiSessionStore.closeAll("ui-test-after")
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -146,7 +146,7 @@ class NodeUiBridgeInstrumentationTest {
 
     @Test
     fun jsUiModuleUsesFakeTransportForLayoutEventsAndPolicy() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node ui bridge protocol regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node ui bridge protocol regression")
 
         val workDir = File(context.cacheDir, "node-bridge-ui-shadow").apply {
             deleteRecursively()
@@ -157,7 +157,7 @@ class NodeUiBridgeInstrumentationTest {
         }.resolve("index.js").writeText("""module.exports = { shadow: true, showLayout: () => "shadow" };""")
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("ui"))
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+        val result = NodePluginTestHarness.runPluginScript(
             """
             "nodejs";
             (async function main() {
@@ -284,7 +284,7 @@ class NodeUiBridgeInstrumentationTest {
             timeoutMs = 30_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("ui fake bridge", result)
+        NodePluginTestHarness.assertSucceeded("ui fake bridge", result)
         assertTrue(result.stdout.contains("ui.resolve=ui"))
         assertTrue(result.stdout.contains("ui.shadow=false"))
         assertTrue(result.stdout.contains("ui.frozen=true"))
@@ -304,7 +304,7 @@ class NodeUiBridgeInstrumentationTest {
 
     @Test
     fun jsUiModuleUsesAndroidLiveProviderForButtonAndInputEvents() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node ui live provider regression")
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node ui live provider regression")
 
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val monitor = instrumentation.addMonitor(NodeBridgeUiActivity::class.java.name, null, false)
@@ -318,7 +318,7 @@ class NodeUiBridgeInstrumentationTest {
         try {
             thread(name = "AutoJs6NodeUiLiveJsTest", isDaemon = true) {
                 resultRef.set(
-                    NodeEmbeddedTestHarness.runEmbeddedScript(
+                    NodePluginTestHarness.runPluginScript(
                         """
                         "nodejs";
                         (async function main() {
@@ -380,7 +380,7 @@ class NodeUiBridgeInstrumentationTest {
                 val result = resultRef.get()
                 assertNotNull(
                     "Node UI Activity did not open for JS live test" + (
-                        result?.let { "\n${NodeEmbeddedTestHarness.describeResult("ui live bridge", it)}" }
+                        result?.let { "\n${NodePluginTestHarness.describeResult("ui live bridge", it)}" }
                             ?: "\nMissing JS live ui result"
                         ),
                     activity,
@@ -401,14 +401,14 @@ class NodeUiBridgeInstrumentationTest {
             }
             assertTrue("Timed out waiting for JS live ui result", latch.await(35, TimeUnit.SECONDS))
             val result = checkNotNull(resultRef.get()) { "Missing JS live ui result" }
-            NodeEmbeddedTestHarness.assertSucceeded("ui live bridge", result)
+            NodePluginTestHarness.assertSucceeded("ui live bridge", result)
             assertTrue(Regex("""ui\.live\.clicked=ok:ui-[^\r\n|]+\|true""").containsMatchIn(result.stdout))
             assertTrue(result.stdout.contains("ui.live.input=Bob|true"))
             assertTrue(result.stdout.contains("ui.live.no_raw_view=true"))
         } finally {
             instrumentation.removeMonitor(monitor)
             NodeBridgeUiSessionStore.closeAll("ui-live-js-test-cleanup")
-            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            NodePluginTestHarness.settlePluginRuntime()
         }
     }
 

@@ -47,7 +47,7 @@ class NodeR6EngineSwitchInstrumentationTest {
         NodeJsRuntimePluginHost.invalidateForTest(context)
         service.stopAll()
         awaitNoRegisteredEngines("before R6 engine-switch test")
-        NodeEmbeddedTestHarness.settlePluginRuntime()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @After
@@ -62,7 +62,7 @@ class NodeR6EngineSwitchInstrumentationTest {
             }
         }
         NodeJsRuntimePluginHost.invalidateForTest(context)
-        NodeEmbeddedTestHarness.settlePluginRuntime()
+        NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
