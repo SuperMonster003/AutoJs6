@@ -79,6 +79,7 @@ internal fun onDeviceAiPluginCapabilityRequirement(
         add(OnDeviceAiCapabilityId.USAGE)
         if (streaming) add(OnDeviceAiCapabilityId.STREAMING)
         if (persistentSession) add(OnDeviceAiCapabilityId.PERSISTENT_SESSION)
+        if (request.structuredJson) add(OnDeviceAiCapabilityId.STRUCTURED_JSON)
     },
     minimumMessages = request.messages.size,
     minimumContentParts = request.messages.size,
@@ -86,7 +87,15 @@ internal fun onDeviceAiPluginCapabilityRequirement(
     minimumOutputBytes = 1L,
     minimumRequestDescriptors = 0,
     minimumSessionDescriptors = 0,
-    requiredTextMimeTypes = setOf(OnDeviceAiMimeType.PLAIN),
+    requiredTextMimeTypes = buildSet {
+        add(OnDeviceAiMimeType.PLAIN)
+        if (request.structuredJson) add(OnDeviceAiMimeType.JSON)
+    },
+    requiredSchemaMimeTypes = if (request.structuredJson) {
+        setOf(OnDeviceAiMimeType.JSON)
+    } else {
+        emptySet()
+    },
 )
 
 /**
@@ -630,6 +639,7 @@ private class ProcessOnDeviceAiPluginAskRunner(
                         requiredCapabilityIds = buildList {
                             add(OnDeviceAiCapabilityId.USAGE)
                             if (streaming) add(OnDeviceAiCapabilityId.STREAMING)
+                            if (request.structuredJson) add(OnDeviceAiCapabilityId.STRUCTURED_JSON)
                         },
                     ),
                 )
@@ -1335,6 +1345,7 @@ private class ProcessOnDeviceAiPluginAskRunner(
                             add(OnDeviceAiCapabilityId.USAGE)
                             add(OnDeviceAiCapabilityId.PERSISTENT_SESSION)
                             if (streaming) add(OnDeviceAiCapabilityId.STREAMING)
+                            if (owner.request.structuredJson) add(OnDeviceAiCapabilityId.STRUCTURED_JSON)
                         },
                         persistentSession = true,
                     ),

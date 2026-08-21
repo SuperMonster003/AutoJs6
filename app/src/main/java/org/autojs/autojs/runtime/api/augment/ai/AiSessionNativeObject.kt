@@ -144,6 +144,7 @@ internal class AiSessionNativeObject(
             temperature = baseRequest.temperature,
             topK = baseRequest.topK,
             topP = baseRequest.topP,
+            responseSchemaJson = baseRequest.responseSchemaJson,
         )
 
     private fun requireSession(): OnDeviceAiPluginSession = session.get()

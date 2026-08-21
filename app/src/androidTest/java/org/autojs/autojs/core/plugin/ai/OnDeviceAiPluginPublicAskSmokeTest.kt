@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Opt-in device smoke for the public Rhino multi-message `ai.chat(..., { plugin: ... })` route.
+ * Opt-in device smoke for native structured JSON through the public Rhino plugin route.
  *
  * This deliberately starts a normal script through [org.autojs.autojs.engine.ScriptEngineService]
  * instead of invoking an AI coordinator or Binder transport from the test process. The exact real
@@ -40,7 +40,7 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         get() = AutoJs.instance.scriptEngineService
 
     @Test
-    fun publicRhinoAiChatWithSystemPromptReturnsUsageThroughExactRealPlugin() {
+    fun publicRhinoAiChatReturnsNativeSchemaConstrainedJsonThroughExactRealPlugin() {
         val parameters = requireOptInParameters()
         requireRealProviderPreflight()
 
@@ -153,6 +153,14 @@ class OnDeviceAiPluginPublicAskSmokeTest {
                         "Public AI plugin chat reported a negative generation duration",
                         result.getLong("durationMillis") >= 0L,
                     )
+                    assertEquals("object", result.optString("jsonType"))
+                    assertEquals("string", result.optString("answerType"))
+                    assertEquals("boolean", result.optString("okType"))
+                    val parsed = JSONObject(result.getString("text"))
+                    assertTrue("Structured JSON omitted answer", parsed.has("answer"))
+                    assertTrue("Structured JSON omitted ok", parsed.has("ok"))
+                    assertTrue("Structured JSON answer is not a string", parsed.get("answer") is String)
+                    assertTrue("Structured JSON ok is not a boolean", parsed.get("ok") is Boolean)
                 }
                 "rejected" -> throw AssertionError(
                     "Public AI plugin chat rejected " +
@@ -272,16 +280,30 @@ class OnDeviceAiPluginPublicAskSmokeTest {
             temperature: 0.7,
             topK: 40,
             topP: 0.9,
-            maxTokens: 32
+            maxTokens: 64,
+            structuredJson: true,
+            responseSchema: {
+              type: "object",
+              properties: {
+                answer: { type: "string" },
+                ok: { type: "boolean" }
+              },
+              required: [ "answer", "ok" ]
+            }
           }
         ).then(
           response => {
             const usage = response && response.usage || {};
             const rawUsage = usage.raw || {};
+            const text = String(response && response.text || "");
+            const parsed = JSON.parse(text);
             files.write(markerPath, JSON.stringify({
               status: "resolved",
               type: typeof response,
-              text: String(response && response.text || ""),
+              text: text,
+              jsonType: parsed !== null && !Array.isArray(parsed) ? typeof parsed : "invalid",
+              answerType: typeof parsed.answer,
+              okType: typeof parsed.ok,
               inputTokens: usage.inputTokens,
               outputTokens: usage.outputTokens,
               totalTokens: usage.totalTokens,
@@ -362,7 +384,8 @@ class OnDeviceAiPluginPublicAskSmokeTest {
 
         const val SCRIPT_NAME = "public-ai-plugin-chat.js"
         const val MARKER_NAME = "public-ai-plugin-chat-result.json"
-        const val DEFAULT_PROMPT = "Reply with exactly OK."
+        const val DEFAULT_PROMPT =
+            "Return an object whose answer field is exactly OK and whose ok field is true."
         const val DEFAULT_SYSTEM_PROMPT = "Answer the user's request directly and concisely."
         const val DEFAULT_ROUTE_TIMEOUT_MILLIS = 180_000L
         const val MINIMUM_ROUTE_TIMEOUT_MILLIS = 1_000L

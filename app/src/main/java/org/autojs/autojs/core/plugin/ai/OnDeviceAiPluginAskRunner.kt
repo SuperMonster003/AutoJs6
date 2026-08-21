@@ -1,10 +1,13 @@
 package org.autojs.autojs.core.plugin.ai
 
 import org.autojs.plugin.ai.common.api.AiCommonLimits
+import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.common.api.AiUsage
 import org.autojs.plugin.ai.common.api.AiValidation
 import org.autojs.plugin.ondeviceai.api.AiGenerationOptions
+import org.autojs.plugin.ondeviceai.api.AiJsonSyntaxValidator
 import org.autojs.plugin.ondeviceai.api.AiMessageRole
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
 import java.io.Closeable
@@ -69,9 +72,12 @@ internal class OnDeviceAiPluginAskRequest(
     val temperature: Double? = null,
     val topK: Int? = null,
     val topP: Double? = null,
+    val responseSchemaJson: String? = null,
 ) {
     val messages: List<OnDeviceAiPluginMessage> = messages.toList()
     val inputBytes: Long = this.messages.sumOf { it.contentBytes.toLong() }
+    val responseSchemaBytes: Int? = responseSchemaJson?.let(AiValidation::utf8Size)
+    val structuredJson: Boolean = responseSchemaJson != null
 
     init {
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
@@ -103,6 +109,18 @@ internal class OnDeviceAiPluginAskRequest(
         topP?.let {
             require(it.isFinite() && it in 0.0..1.0) { "Invalid on-device AI plugin topP" }
         }
+        responseSchemaJson?.let { schema ->
+            AiValidation.requireUtf8(
+                schema,
+                1,
+                OnDeviceAiLimits.MAX_ONE_SCHEMA_BYTES.toInt(),
+                "on-device AI response schema",
+            )
+            AiJsonSyntaxValidator.requireValid(schema)
+            require(schema.trimStart().startsWith('{')) {
+                "The on-device AI response schema must be a JSON object"
+            }
+        }
     }
 
     override fun toString(): String =
@@ -110,7 +128,8 @@ internal class OnDeviceAiPluginAskRequest(
             "messageCount=${messages.size}, messageRoles=${messages.map { it.role }}, " +
             "inputBytes=$inputBytes, timeoutMillis=$timeoutMillis, " +
             "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
-            "temperature=$temperature, topK=$topK, topP=$topP)"
+            "temperature=$temperature, topK=$topK, topP=$topP, " +
+            "structuredJson=$structuredJson, responseSchemaBytes=$responseSchemaBytes)"
 
     internal companion object {
         const val DEFAULT_MAXIMUM_OUTPUT_BYTES = 64L * 1024L
@@ -126,14 +145,28 @@ internal fun OnDeviceAiPluginAskRequest.toGenerationOptions(
 ) = AiGenerationOptions(
     stream = stream,
     includeReasoning = false,
-    structuredJson = false,
+    structuredJson = structuredJson,
     reportUsage = true,
     maximumOutputBytes = maximumOutputBytes,
     maximumOutputTokens = maximumOutputTokens,
     maximumToolRounds = 0,
     timeoutMillis = timeoutMillis,
-    responseMimeType = OnDeviceAiMimeType.PLAIN,
-    requiredCapabilityIds = requiredCapabilityIds,
+    responseMimeType = if (structuredJson) OnDeviceAiMimeType.JSON else OnDeviceAiMimeType.PLAIN,
+    responseSchema = responseSchemaJson?.let { schema ->
+        val bytes = schema.toByteArray(Charsets.UTF_8)
+        AiPayloadReference(
+            mimeType = OnDeviceAiMimeType.JSON,
+            declaredLengthBytes = bytes.size.toLong(),
+            inlineBytes = bytes,
+            charset = "utf-8",
+        )
+    },
+    requiredCapabilityIds = buildList {
+        addAll(requiredCapabilityIds)
+        if (structuredJson && OnDeviceAiCapabilityId.STRUCTURED_JSON !in this) {
+            add(OnDeviceAiCapabilityId.STRUCTURED_JSON)
+        }
+    },
     temperature = temperature,
     topK = topK,
     topP = topP,

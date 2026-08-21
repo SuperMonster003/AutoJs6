@@ -100,6 +100,52 @@ class AndroidOnDeviceAiPluginMessagesTest {
     }
 
     @Test
+    fun structuredJsonRequiresJsonCapabilitiesAndCarriesAnInlineSchema() {
+        val schema = """{"type":"object","properties":{"ok":{"type":"boolean"}}}"""
+        val request = OnDeviceAiPluginAskRequest(
+            component = OnDeviceAiProviderComponent(
+                packageName = "org.example.provider",
+                className = "org.example.provider.OnDeviceAiService",
+            ),
+            providerId = "example.provider",
+            modelId = "example-model",
+            messages = listOf(OnDeviceAiPluginMessage(OnDeviceAiPluginMessageRole.USER, "Return JSON")),
+            timeoutMillis = 5_000L,
+            responseSchemaJson = schema,
+        )
+
+        val requirement = onDeviceAiPluginCapabilityRequirement(request, streaming = true)
+        assertEquals(
+            setOf(
+                OnDeviceAiCapabilityId.STREAMING,
+                OnDeviceAiCapabilityId.STRUCTURED_JSON,
+                OnDeviceAiCapabilityId.USAGE,
+            ),
+            requirement.requiredCapabilityIds,
+        )
+        assertEquals(
+            setOf(OnDeviceAiMimeType.PLAIN, OnDeviceAiMimeType.JSON),
+            requirement.requiredTextMimeTypes,
+        )
+        assertEquals(setOf(OnDeviceAiMimeType.JSON), requirement.requiredSchemaMimeTypes)
+
+        val options = request.toGenerationOptions(
+            stream = true,
+            maximumOutputBytes = 1024,
+            timeoutMillis = request.timeoutMillis,
+            requiredCapabilityIds = listOf(OnDeviceAiCapabilityId.STREAMING),
+        )
+        assertTrue(options.structuredJson)
+        assertEquals(OnDeviceAiMimeType.JSON, options.responseMimeType)
+        assertEquals(
+            schema,
+            AiValidation.decodeUtf8(checkNotNull(options.responseSchema?.inlineBytes)),
+        )
+        assertTrue(OnDeviceAiCapabilityId.STRUCTURED_JSON in options.requiredCapabilityIds)
+        assertFalse(schema in request.toString())
+    }
+
+    @Test
     fun requestRejectsInvalidMessageCountsFinalRolesAndAggregateInput() {
         assertThrows(IllegalArgumentException::class.java) { request(emptyList()) }
         assertThrows(IllegalArgumentException::class.java) {

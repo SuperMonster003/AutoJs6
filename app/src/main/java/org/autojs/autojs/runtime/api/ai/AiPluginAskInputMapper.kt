@@ -38,6 +38,26 @@ internal object AiPluginAskInputMapper {
                 "AI option maxTokens must be between 1 and ${OnDeviceAiLimits.MAX_OUTPUT_TOKENS}"
             }
         }
+        val structuredJsonOption = pluginOptions.takeOptionalBoolean(
+            "structuredJson",
+            "AI option structuredJson",
+        )
+        val responseSchemaJson = pluginOptions.remove("responseSchema")?.let { value ->
+            if (value.isJsonNull) {
+                null
+            } else {
+                require(value.isJsonObject) { "AI option responseSchema must be a JSON object" }
+                value.asJsonObject.toString()
+            }
+        }
+        require(structuredJsonOption != false || responseSchemaJson == null) {
+            "AI option responseSchema cannot be combined with structuredJson false"
+        }
+        val effectiveResponseSchemaJson = if (structuredJsonOption == true || responseSchemaJson != null) {
+            responseSchemaJson ?: DEFAULT_RESPONSE_SCHEMA_JSON
+        } else {
+            null
+        }
         val control = AiControlOptions.takeFrom(pluginOptions)
         require(control.pluginSelection != null) { "AI plugin selection is required" }
         val selection = requireNotNull(control.pluginSelection)
@@ -75,7 +95,15 @@ internal object AiPluginAskInputMapper {
             temperature = temperature,
             topK = topK,
             topP = topP,
+            responseSchemaJson = effectiveResponseSchemaJson,
         )
+    }
+
+    private fun JsonObject.takeOptionalBoolean(name: String, label: String): Boolean? {
+        val value = remove(name) ?: return null
+        if (value.isJsonNull) return null
+        require(value.isJsonPrimitive && value.asJsonPrimitive.isBoolean) { "$label must be a boolean" }
+        return value.asBoolean
     }
 
     private fun JsonObject.takeOptionalDouble(name: String, label: String): Double? {
@@ -122,4 +150,6 @@ internal object AiPluginAskInputMapper {
         }
         return string
     }
+
+    private const val DEFAULT_RESPONSE_SCHEMA_JSON = "{\"type\":\"object\"}"
 }

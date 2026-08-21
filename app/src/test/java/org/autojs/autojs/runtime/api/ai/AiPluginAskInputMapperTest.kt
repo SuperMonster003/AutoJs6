@@ -5,6 +5,7 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.autojs.autojs.core.plugin.ai.toGenerationOptions
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
+import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -189,6 +190,73 @@ class AiPluginAskInputMapperTest {
             "\"maxTokens\": 0",
             "\"maxTokens\": 1.5",
             "\"maxTokens\": 2147483648",
+        ).forEach { option ->
+            assertThrows(option, IllegalArgumentException::class.java) {
+                AiPluginAskInputMapper.map(
+                    input(
+                        messages = """[{"role":"user","content":"prompt"}]""",
+                        optionSuffix = ", $option",
+                    ),
+                    defaultTimeoutMillis = 9_000L,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun pluginAskMapsNativeStructuredJsonSchemaAndProvidesAnObjectDefault() {
+        val schemaRequest = AiPluginAskInputMapper.map(
+            input(
+                messages = """[{"role":"user","content":"Return the requested object"}]""",
+                optionSuffix = """,
+                    "responseSchema": {
+                      "type": "object",
+                      "properties": {"answer": {"type": "string"}},
+                      "required": ["answer"]
+                    }
+                """.trimIndent(),
+            ),
+            defaultTimeoutMillis = 9_000L,
+        )
+
+        assertTrue(schemaRequest.structuredJson)
+        assertEquals(
+            """{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"]}""",
+            schemaRequest.responseSchemaJson,
+        )
+        val schemaOptions = schemaRequest.toGenerationOptions(
+            stream = true,
+            maximumOutputBytes = 4_096,
+            timeoutMillis = 8_000,
+            requiredCapabilityIds = listOf(OnDeviceAiCapabilityId.STREAMING),
+        )
+        assertTrue(schemaOptions.structuredJson)
+        assertEquals(OnDeviceAiMimeType.JSON, schemaOptions.responseMimeType)
+        assertEquals(
+            setOf(OnDeviceAiCapabilityId.STREAMING, OnDeviceAiCapabilityId.STRUCTURED_JSON),
+            schemaOptions.requiredCapabilityIds.toSet(),
+        )
+        assertEquals(
+            schemaRequest.responseSchemaJson,
+            checkNotNull(schemaOptions.responseSchema?.inlineBytes).toString(Charsets.UTF_8),
+        )
+
+        val defaultRequest = AiPluginAskInputMapper.map(
+            input(
+                messages = """[{"role":"user","content":"Return an object"}]""",
+                optionSuffix = ", \"structuredJson\": true",
+            ),
+            defaultTimeoutMillis = 9_000L,
+        )
+        assertEquals("""{"type":"object"}""", defaultRequest.responseSchemaJson)
+    }
+
+    @Test
+    fun pluginAskRejectsInvalidStructuredJsonOptionCombinations() {
+        listOf(
+            "\"structuredJson\": \"yes\"",
+            "\"responseSchema\": []",
+            "\"structuredJson\": false, \"responseSchema\": {\"type\": \"object\"}",
         ).forEach { option ->
             assertThrows(option, IllegalArgumentException::class.java) {
                 AiPluginAskInputMapper.map(
