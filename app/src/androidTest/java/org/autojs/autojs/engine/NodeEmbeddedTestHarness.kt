@@ -1,16 +1,19 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
-import android.content.Intent
-import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs.App
 import org.autojs.autojs6.BuildConfig
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import java.io.File
 
+/**
+ * Shared instrumentation support for the external Node.js runtime plugin.
+ *
+ * The historical object and method names remain temporarily source-compatible with
+ * host-capability tests; none of these helpers starts or inspects an embedded runtime.
+ */
 internal object NodeEmbeddedTestHarness {
 
     val targetContext: Context
@@ -18,13 +21,6 @@ internal object NodeEmbeddedTestHarness {
 
     private val testContext: Context
         get() = InstrumentationRegistry.getInstrumentation().context
-
-    fun assumeEmbeddedScriptExecutionEnabled(label: String = "embedded Node instrumentation") {
-        assumeTrue(
-            "Build with -Pautojs.nodejs.embedded.script.enabled=true to run $label.",
-            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
-        )
-    }
 
     fun assumePluginRuntimeAvailable(label: String = "Node.js runtime plugin instrumentation") {
         val probe = runCatching {
@@ -36,37 +32,15 @@ internal object NodeEmbeddedTestHarness {
         )
     }
 
-    fun assumePersistentRuntimeEnabled(label: String = "persistent embedded Node instrumentation") {
-        assumeTrue(
-            "Build with -Pautojs.nodejs.embedded.persistentRuntime=true on Android 10 or newer to run $label.",
-            NodeEmbeddedProcessSessionManager.isEnabled(),
-        )
-    }
+    fun assumeEmbeddedScriptExecutionEnabled(label: String = "Node.js runtime plugin instrumentation") =
+        assumePluginRuntimeAvailable(label)
 
-    fun settleEmbeddedScriptServiceProcess() {
-        (targetContext.applicationContext as? App)?.cancelDeferredNativeNodePrewarm()
-        if (NodeEmbeddedProcessSessionManager.isEnabled()) {
-            check(
-                NodeEmbeddedProcessSessionManager.shutdownAllAndAwait(
-                    context = targetContext,
-                    reason = "instrumentation_test_settle",
-                ),
-            ) { "Timed out while shutting down persistent embedded Node process sessions." }
-            NodeEmbeddedProcessSessionManager.reopenForUse()
-            check(!NodeEmbeddedProcessSessionManager.isClosing()) {
-                "Persistent embedded Node process session manager did not reopen after test settlement."
-            }
-            return
-        }
-        NodeEmbeddedProcessPoolPolicy.declaredSlots.forEach { slot ->
-            targetContext.stopService(Intent(targetContext, slot.serviceClass))
-        }
-        SystemClock.sleep(750L)
-    }
+    fun assumePersistentRuntimeEnabled(label: String = "persistent Node.js runtime plugin instrumentation") =
+        assumePluginRuntimeAvailable(label)
 
-    fun settlePluginRuntime() {
-        (targetContext.applicationContext as? App)?.cancelDeferredNativeNodePrewarm()
-    }
+    fun settlePluginRuntime() = Unit
+
+    fun settleEmbeddedScriptServiceProcess() = settlePluginRuntime()
 
     fun runPluginScript(
         source: String,
@@ -84,29 +58,34 @@ internal object NodeEmbeddedTestHarness {
         childProcessEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
         javaInteropEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
         runtimeAdapter: String? = null,
-    ): NodePluginScriptResult {
-        return NodeJsRuntimePluginBridge.runScript(
-            targetContext,
-            NodePluginScriptRequest(
-                source = source,
-                sourceName = sourceName,
-                workingDirectory = workingDirectory.absolutePath,
-                sandboxRoot = (sandboxRoot ?: workingDirectory).absolutePath,
-                timeoutMs = timeoutMs,
-                env = env,
-                moduleSources = moduleSources,
-                runtimeModuleSources = runtimeModuleSources,
-                esmEnabled = esmEnabled,
-                dynamicImportEnabled = dynamicImportEnabled,
-                rawNodeNetworkModulesEnabled = rawNodeNetworkModulesEnabled,
-                workerThreadsEnabled = workerThreadsEnabled,
-                childProcessEnabled = childProcessEnabled,
-                javaInteropEnabled = javaInteropEnabled,
-                runtimeAdapter = runtimeAdapter,
-            ),
-        )
-    }
+        executionId: String? = null,
+        executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        spawnDepth: Int = 0,
+    ): NodePluginScriptResult = NodeJsRuntimePluginBridge.runScript(
+        targetContext,
+        NodePluginScriptRequest(
+            source = source,
+            sourceName = sourceName,
+            workingDirectory = workingDirectory.absolutePath,
+            sandboxRoot = (sandboxRoot ?: workingDirectory).absolutePath,
+            executionId = executionId,
+            executionMode = executionMode,
+            timeoutMs = timeoutMs,
+            env = env,
+            moduleSources = moduleSources,
+            runtimeModuleSources = runtimeModuleSources,
+            esmEnabled = esmEnabled,
+            dynamicImportEnabled = dynamicImportEnabled,
+            rawNodeNetworkModulesEnabled = rawNodeNetworkModulesEnabled,
+            workerThreadsEnabled = workerThreadsEnabled,
+            childProcessEnabled = childProcessEnabled,
+            javaInteropEnabled = javaInteropEnabled,
+            spawnDepth = spawnDepth,
+            runtimeAdapter = runtimeAdapter,
+        ),
+    )
 
+    @Suppress("UNUSED_PARAMETER")
     fun runEmbeddedScript(
         source: String,
         sourceName: String,
@@ -126,72 +105,41 @@ internal object NodeEmbeddedTestHarness {
         queueMode: String = NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
         queueTimeoutMs: Long = 0L,
         processPoolSlot: String? = null,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return NodeJsRuntimePluginBridge.runScript(
-            targetContext,
-            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
-                source = source,
-                sourceName = sourceName,
-                workingDirectory = workingDirectory.absolutePath,
-                sandboxRoot = sandboxRoot?.absolutePath,
-                timeoutMs = timeoutMs,
-                env = env,
-                moduleSources = moduleSources,
-                runtimeModuleSources = runtimeModuleSources,
-                esmEnabled = esmEnabled,
-                dynamicImportEnabled = dynamicImportEnabled,
-                rawNodeNetworkModulesEnabled = rawNodeNetworkModulesEnabled,
-                workerThreadsEnabled = workerThreadsEnabled,
-                childProcessEnabled = childProcessEnabled,
-                javaInteropEnabled = javaInteropEnabled,
-                runtimeAdapter = runtimeAdapter,
-                queueMode = queueMode,
-                queueTimeoutMs = queueTimeoutMs,
-                processPoolSlot = processPoolSlot,
-            ),
-        )
-    }
-
-    fun assertSucceeded(label: String, result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult) {
-        assertTrue(describeResult(label, result), result.succeeded)
-        assertTrue("$label timed out\n${describeResult(label, result)}", !result.timedOut)
-    }
+    ): NodePluginScriptResult = runPluginScript(
+        source = source,
+        sourceName = sourceName,
+        workingDirectory = workingDirectory,
+        sandboxRoot = sandboxRoot,
+        timeoutMs = timeoutMs,
+        env = env,
+        moduleSources = moduleSources,
+        runtimeModuleSources = runtimeModuleSources,
+        esmEnabled = esmEnabled,
+        dynamicImportEnabled = dynamicImportEnabled,
+        rawNodeNetworkModulesEnabled = rawNodeNetworkModulesEnabled,
+        workerThreadsEnabled = workerThreadsEnabled,
+        childProcessEnabled = childProcessEnabled,
+        javaInteropEnabled = javaInteropEnabled,
+        runtimeAdapter = runtimeAdapter,
+    )
 
     fun assertSucceeded(label: String, result: NodePluginScriptResult) {
         assertTrue(describeResult(label, result), result.succeeded)
         assertTrue("$label timed out\n${describeResult(label, result)}", !result.timedOut)
     }
 
-    fun describeResult(label: String, result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult): String {
-        return buildString {
-            appendLine(label)
-            appendLine("succeeded=${result.succeeded}")
-            appendLine("exitCode=${result.exitCode}")
-            appendLine("errorCode=${result.errorCode}")
-            appendLine("errorName=${result.errorName}")
-            appendLine("errorMessage=${result.errorMessage}")
-            appendLine("stdout:")
-            appendLine(result.stdout)
-            appendLine("stderr:")
-            appendLine(result.stderr)
-            appendLine("nativeValues=${result.nativeValues}")
-        }
-    }
-
-    fun describeResult(label: String, result: NodePluginScriptResult): String {
-        return buildString {
-            appendLine(label)
-            appendLine("succeeded=${result.succeeded}")
-            appendLine("exitCode=${result.exitCode}")
-            appendLine("errorCode=${result.errorCode}")
-            appendLine("errorName=${result.errorName}")
-            appendLine("errorMessage=${result.errorMessage}")
-            appendLine("stdout:")
-            appendLine(result.stdout)
-            appendLine("stderr:")
-            appendLine(result.stderr)
-            appendLine("nativeValues=${result.nativeValues}")
-        }
+    fun describeResult(label: String, result: NodePluginScriptResult): String = buildString {
+        appendLine(label)
+        appendLine("succeeded=${result.succeeded}")
+        appendLine("exitCode=${result.exitCode}")
+        appendLine("errorCode=${result.errorCode}")
+        appendLine("errorName=${result.errorName}")
+        appendLine("errorMessage=${result.errorMessage}")
+        appendLine("stdout:")
+        appendLine(result.stdout)
+        appendLine("stderr:")
+        appendLine(result.stderr)
+        appendLine("nativeValues=${result.nativeValues}")
     }
 
     fun copyAssetTree(assetPath: String, target: File) {
@@ -203,9 +151,7 @@ internal object NodeEmbeddedTestHarness {
             }
         } else {
             target.mkdirs()
-            children.forEach { child ->
-                copyAssetTree("$assetPath/$child", File(target, child))
-            }
+            children.forEach { child -> copyAssetTree("$assetPath/$child", File(target, child)) }
         }
     }
 }

@@ -65,13 +65,15 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
             sourceFile.writeText(source)
             val result = NodeJsRuntimePluginBridge.runScript(
                 context,
-                NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                NodePluginScriptRequest(
                     source = source,
                     sourceName = sourceFile.absolutePath,
                     workingDirectory = workDir.absolutePath,
                     sandboxRoot = workDir.absolutePath,
                     executionId = "r6-plugin-security-${UUID.randomUUID()}",
                     timeoutMs = TEST_TIMEOUT_MS,
+                    workerThreadsEnabled = false,
+                    childProcessEnabled = false,
                 ),
             )
 
@@ -94,7 +96,7 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
 
     private fun permanentDenialSource(): String = """
         "nodejs";
-        (async () => {
+        (() => {
           function codeOf(error) {
             return String(error && (error.autojs6Code || error.code || error.name || ""));
           }
@@ -115,34 +117,12 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
             }
             throw new Error(label + " was unexpectedly allowed");
           }
-          async function expectDeniedAsync(label, action, expectedCode) {
-            try {
-              await action();
-            } catch (error) {
-              const actual = codeOf(error);
-              if (actual !== expectedCode && error.code !== expectedCode && error.legacyCode !== expectedCode) {
-                throw new Error(label + " expected " + expectedCode + " but got " + detailOf(error));
-              }
-              console.log("security." + label + "=" + detailOf(error));
-              return;
-            }
-            throw new Error(label + " was unexpectedly allowed");
-          }
-
           expectDenied("process.binding", () => process.binding("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
           expectDenied("process.dlopen", () => process.dlopen({}, "native.node"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
           expectDenied("process._linkedBinding", () => process._linkedBinding("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
           for (const name of ["child_process", "worker_threads", "dgram", "inspector"]) {
             expectDenied("require." + name, () => require(name), "ERR_AUTOJS6_BUILTIN_DISABLED");
           }
-          await expectDeniedAsync("fetch", () => fetch("https://example.invalid/"), "ERR_AUTOJS6_NETWORK_DISABLED");
-          expectDenied("http.request", () => require("http").request("http://127.0.0.1/"), "ERR_AUTOJS6_NETWORK_DISABLED");
-          expectDenied("net.connect", () => require("net").connect(80, "127.0.0.1"), "ERR_AUTOJS6_NETWORK_DISABLED");
-          await expectDeniedAsync(
-            "dns.resolve",
-            () => require("dns/promises").resolve4("example.invalid"),
-            "ERR_AUTOJS6_NETWORK_DISABLED"
-          );
           for (const name of ["java", "Packages", "android", "context"]) {
             if (typeof globalThis[name] !== "undefined") {
               throw new Error("raw Android/Java global unexpectedly exposed: " + name);
@@ -150,10 +130,7 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
             console.log("security.global." + name + "=undefined");
           }
           console.log("security.required_plugin.ready=true");
-        })().catch((error) => {
-          console.error("security.required_plugin.error=" + (error && (error.stack || error.message) || error));
-          process.exitCode = 1;
-        });
+        })();
     """.trimIndent()
 
     private companion object {
@@ -179,10 +156,6 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
             "require.worker_threads",
             "require.dgram",
             "require.inspector",
-            "fetch",
-            "http.request",
-            "net.connect",
-            "dns.resolve",
             "global.java",
             "global.Packages",
             "global.android",

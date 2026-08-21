@@ -1,1 +1,0 @@
-realnpm.buffer-fetch-assert=buffer:6175746f6a7336/autojs6/true|fetch:wrapper/safe/fixture|assert:strict/match/rejects

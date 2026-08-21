@@ -130,7 +130,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         }
         var cycles = 0
         var nextSampleAt = startElapsedMs
-        var previousResult: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null
+        var previousResult: NodePluginScriptResult? = null
         var firstIdentity: RuntimeIdentity? = null
         var lastCycle: CycleResult? = null
         var lastSampledCycle = 0
@@ -388,7 +388,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         val stateModule = File(workDir, "state.cjs")
         val result = NodeJsRuntimePluginBridge.runScript(
             context,
-            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+            NodePluginScriptRequest(
                 source = pluginCycleSource(cycle),
                 sourceName = "r6-soak-$cycle.js",
                 workingDirectory = workDir.absolutePath,
@@ -456,7 +456,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
 
     private fun assertPluginCycleSucceeded(
         cycle: Int,
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        result: NodePluginScriptResult,
         payload: JSONObject,
     ) {
         assertEquals("cycle $cycle did not use plugin backend", "true", result.nativeValues[PLUGIN_ENABLED_KEY])
@@ -481,7 +481,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         }
     }
 
-    private fun runtimeIdentity(result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult): RuntimeIdentity =
+    private fun runtimeIdentity(result: NodePluginScriptResult): RuntimeIdentity =
         RuntimeIdentity(
             pid = result.pid,
             processName = result.processName,
@@ -494,8 +494,8 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
     private fun assertStableRuntimeIdentity(
         cycle: Int,
         first: RuntimeIdentity,
-        previous: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
-        current: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        previous: NodePluginScriptResult,
+        current: NodePluginScriptResult,
         currentIdentity: RuntimeIdentity,
     ) {
         assertEquals("cycle $cycle changed plugin PID", first.pid, currentIdentity.pid)
@@ -712,7 +712,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         return detail
     }
 
-    private fun hasUnexpectedPluginProcess(result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult): Boolean {
+    private fun hasUnexpectedPluginProcess(result: NodePluginScriptResult): Boolean {
         val processName = result.processName
         assertTrue("R6 plugin process name is missing", processName.isNotBlank())
         require(PROCESS_NAME_PATTERN.matches(processName)) { "Unsafe plugin process name '$processName'." }
@@ -776,7 +776,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             ?.let(::JSONObject)
 
     private fun requireNativeLong(
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        result: NodePluginScriptResult,
         key: String,
     ): Long = result.nativeValues[key]?.toLongOrNull()
         ?: throw AssertionError("R6 plugin result omitted numeric $key: ${result.nativeValues}")
@@ -886,7 +886,7 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         arguments.getString(name)?.toIntOrNull() ?: defaultValue
 
     private data class CycleResult(
-        val result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        val result: NodePluginScriptResult,
         val payload: JSONObject,
     )
 

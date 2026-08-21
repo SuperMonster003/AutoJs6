@@ -308,7 +308,7 @@ class NodeUiBridgeInstrumentationTest {
 
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val monitor = instrumentation.addMonitor(NodeBridgeUiActivity::class.java.name, null, false)
-        val resultRef = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        val resultRef = AtomicReference<NodePluginScriptResult?>()
         val latch = CountDownLatch(1)
         val workDir = File(context.cacheDir, "node-bridge-ui-live-js").apply {
             deleteRecursively()

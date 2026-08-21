@@ -1,1 +1,0 @@
-realnpm.wasm-utility-v2=wasm:v2/42/valid

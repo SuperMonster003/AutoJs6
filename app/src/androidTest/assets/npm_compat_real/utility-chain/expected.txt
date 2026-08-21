@@ -1,1 +1,0 @@
-realnpm.utility-chain=is-number:true|is-odd:true|kind:buffer|once:ALPHA:ALPHA:1

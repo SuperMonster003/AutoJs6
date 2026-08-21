@@ -1,1 +1,0 @@
-realnpm.lockfile-reader=lockfile:2/2

@@ -1,1 +1,0 @@
-realnpm.core-feature-detect=constants:number/true/number|types:true/true/true|events:ready/0|diagnostics:core-feature:1:true:false

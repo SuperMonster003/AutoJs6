@@ -1,1 +1,0 @@
-realnpm.formdata-fetch-package=formdata:fetch/alpha=1,beta=two/

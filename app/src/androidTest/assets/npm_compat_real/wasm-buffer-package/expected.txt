@@ -1,1 +1,0 @@
-realnpm.wasm-buffer-package=wasm:buffer/17/321

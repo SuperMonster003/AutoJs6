@@ -1,1 +1,0 @@
-httpnpm.redirect-follow=200|OK|/redirect-final|redirect-ok

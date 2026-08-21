@@ -150,9 +150,7 @@ class NodeEnginesBridgeInstrumentationTest {
     fun jsEnginesExecRejectsRecursiveSpawnAtDepthOne() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node engines recursive spawn denial")
 
-        val result = NativeNodeEmbeddedScriptService.runScript(
-            context,
-            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+        val result = NodeEmbeddedTestHarness.runPluginScript(
                 source = """
                     "nodejs";
                     (async function main() {
@@ -168,11 +166,10 @@ class NodeEnginesBridgeInstrumentationTest {
                       console.log("engines.recursive.code=" + code);
                     })();
                 """.trimIndent(),
-                sourceName = "<embedded-autojs-engines-recursive.js>",
-                workingDirectory = context.cacheDir.absolutePath,
+                sourceName = "<node-plugin-autojs-engines-recursive.js>",
+                workingDirectory = context.cacheDir,
                 timeoutMs = 5000L,
                 spawnDepth = 1,
-            ),
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("engines recursive spawn denial", result)

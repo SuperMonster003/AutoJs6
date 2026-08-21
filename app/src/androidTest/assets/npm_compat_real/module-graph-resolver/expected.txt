@@ -1,1 +1,0 @@
-realnpm.module-graph-resolver=graph:require=./cjs.cjs/import=./esm.mjs/keys=2
