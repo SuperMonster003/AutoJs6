@@ -37,6 +37,7 @@
         "全局 JavaScript (Rhino) ai 模塊支持 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 調用及工具調用多輪續接; 開發者選項支持加密的多設定及憑證管理, 本機迴環地址上的兼容端點可免 API 金鑰運行",
         "`ai.ask`, `ai.chat` 及 `ai.stream` 本機插件路由支持按順序傳入純文字 `system`, `user` 同 `assistant` 消息歷史嘅單次及串流請求, 並要求最後一條消息係 `user` 角色; 可透過 `plugin: true` 簡寫選擇官方裝置端 AI 插件, 單模型場景可省略模型 ID; 新增 `ai.models` 方法枚舉插件模型, 插件未安裝/未啟用/無模型時給出明確錯誤提示; AI 服務設置提供本機 AI 插件入口; 插件生成會回傳精確嘅輸入/輸出/總 token 數, `ai.chat` 透過 `usage` 提供呢啲資料, 並喺 `usage.raw.durationMillis` 提供插件實測生成耗時",
         "全局 JavaScript (Rhino) `ai.session` API 可建立持久裝置端插件 Conversation, 為會話固定提供商/模型/生成參數, 後續 `ask`/`chat`/`stream` 輪次只發送新嘅用戶提示詞; 正常完成後保留上下文, 取消/逾時/協議失敗或顯式關閉時釋放整個會話",
+        "`ai.ask`/`ai.chat`/`ai.stream` 同持久 `ai.session` 本機插件路由支持 `structuredJson` 同 JSON 物件 `responseSchema`; schema 會隱式啟用 LiteRT-LM 原生 JSON Schema 約束解碼, 會話每輪固定同一 schema, 完成結果保持 JSON 文字並執行嚴格語法驗證",
         "全局 JavaScript (Rhino) yolo 模塊提供預設關閉的精確元件 YOLO 提供方路由, 支持版本化 Binder/PFD 傳輸, 清單驅動的 NCNN 模型載入, 物件偵測, 明確取消及資源清理, 且不會靜默回退提供方",
         "全局 JavaScript (Rhino) tts 模塊提供系統文字轉語音/長文本智能分段/邏輯隊列/語音及語言發現/離線語音篩選/可觀察任務及音頻事件/靜音插入/採用原子發佈的文件合成, 並具備超時/背壓/運行時清理及指定引擎防回退保護",
         "device.getMarketName 方法, 用於獲取設備的 \"市場名稱\" _[`issue #513`](http://issues.autojs6.com/513)_",

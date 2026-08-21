@@ -42,6 +42,7 @@
 * `新增` 全局 JavaScript (Rhino) ai 模块支持 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服务商, 提供 ask/chat/stream 调用及工具调用多轮续接; 开发者选项支持加密的多配置及凭据管理, 本机回环地址上的兼容端点可免 API 密钥运行
 * `新增` `ai.ask`, `ai.chat` 与 `ai.stream` 本地插件路由支持按顺序传入纯文本 `system`, `user` 与 `assistant` 消息历史的单次及流式请求, 并要求最后一条消息为 `user` 角色; 可通过 `plugin: true` 简写选择官方设备端 AI 插件, 单模型场景可省略模型 ID; 新增 `ai.models` 方法枚举插件模型, 插件未安装/未启用/无模型时给出明确错误提示; AI 服务设置提供本地 AI 插件入口; 插件生成会返回精确的输入/输出/总 token 数, `ai.chat` 通过 `usage` 暴露这些数据, 并在 `usage.raw.durationMillis` 中提供插件实测生成耗时
 * `新增` 全局 JavaScript (Rhino) `ai.session` API 可创建持久设备端插件 Conversation, 为会话固定提供商/模型/生成参数, 后续 `ask`/`chat`/`stream` 轮次只发送新的用户提示词; 正常完成后保留上下文, 取消/超时/协议失败或显式关闭时释放整个会话
+* `新增` `ai.ask`/`ai.chat`/`ai.stream` 与持久 `ai.session` 本地插件路由支持 `structuredJson` 和 JSON 对象 `responseSchema`; schema 会隐式启用 LiteRT-LM 原生 JSON Schema 约束解码, 会话为每轮固定同一 schema, 完成结果保持 JSON 文本并执行严格语法验证
 * `新增` 全局 JavaScript (Rhino) yolo 模块提供默认关闭的精确组件 YOLO 提供方路由, 支持版本化 Binder/PFD 传输, 基于清单的 NCNN 模型加载, 目标检测, 显式取消及资源清理, 且不静默回退提供方
 * `新增` 全局 JavaScript (Rhino) tts 模块提供系统文字转语音/长文本智能分段/逻辑队列/语音及语言发现/离线语音筛选/可观察任务及音频事件/静音插入/采用原子发布的文件合成, 并具备超时/背压/运行时清理及指定引擎防回退保护
 * `新增` device.getMarketName 方法, 用于获取设备的 "市场名称" _[`issue #513`](http://issues.autojs6.com/513)_
