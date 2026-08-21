@@ -40,7 +40,7 @@ object NodeDeveloperRepl {
         context: Context,
         source: String,
         options: Options = Options(),
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+    ): NodePluginScriptResult {
         return start(context, options).use { session ->
             session.evaluate(source)
         }
@@ -102,7 +102,7 @@ object NodeDeveloperRepl {
         private val evalCounter = AtomicInteger(0)
         private val runtimeModuleSources = buildRuntimeModuleSources(options)
 
-        fun evaluate(source: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        fun evaluate(source: String): NodePluginScriptResult {
             check(!closed.get()) {
                 "AutoJs6 Node developer REPL session is already closed."
             }
@@ -111,9 +111,9 @@ object NodeDeveloperRepl {
                 workingDirectory,
                 ".autojs6-node-repl-eval-$evalIndex.js",
             ).absolutePath
-            return NodeJsRuntimePluginBridge.runScriptWithEmbeddedFallback(
+            return NodeJsRuntimePluginBridge.runScript(
                 context,
-                NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                NodePluginScriptRequest(
                     source = wrapEvalSource(source),
                     sourceName = sourceName,
                     workingDirectory = workingDirectory.absolutePath,

@@ -26,10 +26,6 @@ import org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputCoordin
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
-import org.autojs.autojs.engine.NativeNodeProcessService
-import org.autojs.autojs.engine.NativeNodeEmbeddedScriptService
-import org.autojs.autojs.engine.NodeCrashEvidenceStore
-import org.autojs.autojs.engine.NodeEmbeddedProcessSessionManager
 import org.autojs.autojs.engine.NodeJsRuntimePluginHost
 import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.event.GlobalKeyObserver
@@ -70,12 +66,12 @@ class App : Application(), WorkManagerConfiguration.Provider {
         private set
 
     private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
-    private val deferredNativeNodePrewarmScheduled = AtomicBoolean(false)
+    private val deferredNodePluginPrewarmScheduled = AtomicBoolean(false)
     private val deferredMaintenanceScheduled = AtomicBoolean(false)
 
-    private val deferredNativeNodePrewarm = Runnable {
-        if (deferredNativeNodePrewarmScheduled.compareAndSet(true, false)) {
-            Thread(::prewarmNativeNodeIfNeeded, "AutoJs6-Node-StartupPrewarm").start()
+    private val deferredNodePluginPrewarm = Runnable {
+        if (deferredNodePluginPrewarmScheduled.compareAndSet(true, false)) {
+            Thread(::prewarmNodePluginIfNeeded, "AutoJs6-Node-Plugin-StartupPrewarm").start()
         }
     }
 
@@ -96,9 +92,6 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 ThemeColorManager.init()
                 setUpDefaultNightMode()
             }
-            isNativeNodeProcess() -> {
-                setUpDebugEnvironment()
-            }
             else /* Main process. */ -> {
                 OCRPredictorNative.installOpenCvRuntimeLoader {
                     OpenCvPluginHost.ensureLoaded(applicationContext)
@@ -110,15 +103,9 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 }
                 setUpDebugEnvironment()
                 setUpLeakCanary()
-                collectPendingNodeCrashEvidence()
-                // The fallback branch also serves auxiliary app processes such as
-                // :background. Only the package's main process may own persistent
-                // Node service bindings; otherwise independent managers can keep the
-                // same slot alive and make retirement appear to time out.
                 if (getProcessNameCompat() == applicationInfo.processName) {
                     EditorEnginePreferences.initialize(this)
-                    NodeEmbeddedProcessSessionManager.reopenForUse()
-                    scheduleNativeNodePrewarmIfNeeded()
+                    scheduleNodePluginPrewarmIfNeeded()
                     if (!AbstractAutoJs.isInrt) {
                         OpenCvPluginHost.preload(this)
                     }
@@ -285,39 +272,27 @@ class App : Application(), WorkManagerConfiguration.Provider {
         }
     }
 
-    private fun prewarmNativeNodeIfNeeded() {
+    private fun prewarmNodePluginIfNeeded() {
         when (NodeRuntimeBackend.current()) {
-            NodeRuntimeBackend.NATIVE,
-            NodeRuntimeBackend.AUTO -> {
-                runCatching { NativeNodeProcessService.prewarm(this) }
-                    .onFailure { Log.w(TAG, "Failed to prewarm native Node.js process.", it) }
-            }
-            NodeRuntimeBackend.EMBEDDED -> {
-                runCatching { NativeNodeEmbeddedScriptService.prewarmRuntime(this) }
-                    .onFailure { Log.w(TAG, "Failed to prewarm embedded Node.js process runtime.", it) }
-            }
-            NodeRuntimeBackend.PLUGIN,
-            NodeRuntimeBackend.PLUGIN_OPTIONAL -> {
+            NodeRuntimeBackend.PLUGIN -> {
                 runCatching {
                     runBlocking { NodeJsRuntimePluginHost.prewarm(this@App) }
                 }.onFailure { Log.w(TAG, "Failed to prewarm external Node.js runtime plugin.", it) }
             }
-            NodeRuntimeBackend.RHINO -> Unit
+            NodeRuntimeBackend.RHINO,
+            NodeRuntimeBackend.DISABLED -> Unit
         }
     }
 
-    private fun scheduleNativeNodePrewarmIfNeeded() {
+    private fun scheduleNodePluginPrewarmIfNeeded() {
         when (NodeRuntimeBackend.current()) {
-            NodeRuntimeBackend.NATIVE,
-            NodeRuntimeBackend.AUTO,
-            NodeRuntimeBackend.EMBEDDED,
-            NodeRuntimeBackend.PLUGIN,
-            NodeRuntimeBackend.PLUGIN_OPTIONAL -> {
-                if (deferredNativeNodePrewarmScheduled.compareAndSet(false, true)) {
-                    mainHandler.postDelayed(deferredNativeNodePrewarm, NATIVE_NODE_PREWARM_DELAY_MILLIS)
+            NodeRuntimeBackend.PLUGIN -> {
+                if (deferredNodePluginPrewarmScheduled.compareAndSet(false, true)) {
+                    mainHandler.postDelayed(deferredNodePluginPrewarm, NODE_PLUGIN_PREWARM_DELAY_MILLIS)
                 }
             }
-            NodeRuntimeBackend.RHINO -> Unit
+            NodeRuntimeBackend.RHINO,
+            NodeRuntimeBackend.DISABLED -> Unit
         }
     }
 
@@ -325,9 +300,9 @@ class App : Application(), WorkManagerConfiguration.Provider {
      * Cancels only an application-startup prewarm that has not begun yet. A real Node request
      * must take precedence so that the delayed task cannot start competing service processes.
      */
-    internal fun cancelDeferredNativeNodePrewarm() {
-        if (deferredNativeNodePrewarmScheduled.compareAndSet(true, false)) {
-            mainHandler.removeCallbacks(deferredNativeNodePrewarm)
+    internal fun cancelDeferredNodePluginPrewarm() {
+        if (deferredNodePluginPrewarmScheduled.compareAndSet(true, false)) {
+            mainHandler.removeCallbacks(deferredNodePluginPrewarm)
         }
     }
 
@@ -352,18 +327,6 @@ class App : Application(), WorkManagerConfiguration.Provider {
             .onFailure { Log.w(TAG, "Failed to schedule periodic temporary script cleanup.", it) }
     }
 
-    private fun collectPendingNodeCrashEvidence() {
-        runCatching {
-            NodeCrashEvidenceStore.collectPending(this, "app.onCreate")
-        }.onSuccess { collected ->
-            if (collected.length() > 0) {
-                Log.w(TAG, "Collected pending Node crash evidence bundles: ${collected.length()}")
-            }
-        }.onFailure {
-            Log.w(TAG, "Failed to collect pending Node crash evidence bundles.", it)
-        }
-    }
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         ViewUtils.onConfigurationChangedForNightMode(newConfig)
         EventBus.getDefault().post(newConfig)
@@ -376,45 +339,25 @@ class App : Application(), WorkManagerConfiguration.Provider {
     }
 
     /**
-     * Starts the same non-blocking cleanup as [clear] and exposes its Node shutdown task so the
-     * real app-exit path can wait for it without starting a duplicate shutdown operation.
+     * Starts the same cleanup as [clear] and returns an already-completed compatibility future.
+     * The Node runtime lives in the plugin process and owns its own lifecycle.
      */
     fun clearForExit(): Future<Boolean> = clearAsync()
 
     private fun clearAsync(): Future<Boolean> {
-        cancelDeferredNativeNodePrewarm()
-        val closingEpoch = NodeEmbeddedProcessSessionManager.beginClosing()
-        val nodeShutdownTask = FutureTask {
-            runCatching {
-                NodeEmbeddedProcessSessionManager.shutdownAllAndAwait(
-                    context = this,
-                    reason = "app.clear",
-                    expectedClosingEpoch = closingEpoch,
-                )
-            }.onFailure {
-                Log.w(TAG, "Failed to shut down embedded Node.js process sessions.", it)
-            }.getOrDefault(false)
-        }
-        Thread(nodeShutdownTask, "AutoJs6-Node-AppShutdown").start()
+        cancelDeferredNodePluginPrewarm()
         if (deferredMaintenanceScheduled.compareAndSet(true, false)) {
             mainHandler.removeCallbacks(deferredMaintenance)
         }
         dynamicBroadcastReceivers.unregisterAll()
         InAppEventBus.clear()
-        return nodeShutdownTask
-    }
-
-    override fun onTrimMemory(level: Int) {
-        if (getProcessNameCompat() == applicationInfo.processName) {
-            NodeEmbeddedProcessSessionManager.onTrimMemory(this, level)
-        }
-        super.onTrimMemory(level)
+        return FutureTask<Boolean> { true }.also(FutureTask<Boolean>::run)
     }
 
     companion object {
 
         private const val TAG = "App"
-        private const val NATIVE_NODE_PREWARM_DELAY_MILLIS = 1_800L
+        private const val NODE_PLUGIN_PREWARM_DELAY_MILLIS = 1_800L
         private const val MAINTENANCE_SCHEDULING_DELAY_MILLIS = 2_500L
 
         private lateinit var instance: WeakReference<App>
@@ -424,11 +367,6 @@ class App : Application(), WorkManagerConfiguration.Provider {
 
         private fun String.matchesProcessNameSuffix(): Boolean {
             return getProcessNameCompat().endsWith(this)
-        }
-
-        private fun isNativeNodeProcess(): Boolean {
-            val processSuffix = getProcessNameCompat().substringAfterLast(':')
-            return processSuffix == "nodejs" || processSuffix.startsWith("nodejs_")
         }
 
         fun getProcessNameCompat(): String {

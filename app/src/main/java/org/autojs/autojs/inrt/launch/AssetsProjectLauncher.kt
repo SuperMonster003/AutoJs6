@@ -8,9 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
-import org.autojs.autojs.engine.NativeNodeEmbeddedProjectRunner
-import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
-import org.autojs.autojs.engine.NativeNodeEmbeddedScriptService
+import org.autojs.autojs.engine.NodeProjectRunner
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
 import org.autojs.autojs.engine.NodeExecutionModePolicy
 import org.autojs.autojs.engine.encryption.ScriptEncryption
@@ -91,9 +89,6 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         }
         try {
             val launch = createMainScriptLaunch()
-            if (startPackagedLongRunningIfRequested(launch, activity)) {
-                return
-            }
             val source = launch.source as JavaScriptSource
             val config = launch.createExecutionConfig()
             if (source.executionMode and JavaScriptSource.EXECUTION_MODE_UI != 0) {
@@ -183,7 +178,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
     private fun resolveMainScriptFile(): File {
         val projectRoot = File(mProjectDir)
         return try {
-            NativeNodeEmbeddedProjectRunner.resolveProjectEntryFileIfNodeProject(projectRoot)
+            NodeProjectRunner.resolveProjectEntryFileIfNodeProject(projectRoot)
                 ?.also { entryFile ->
                     Log.d(TAG, "$INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER entry=${entryFile.path}")
                 }
@@ -207,7 +202,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
 
     private fun createMainScriptLaunch(): ScriptLaunchSourceFactory.Launch {
         val projectRoot = File(mProjectDir)
-        if (!NativeNodeEmbeddedProjectRunner.isNodeProjectRoot(projectRoot)) {
+        if (!NodeProjectRunner.isNodeProjectRoot(projectRoot)) {
             return ScriptLaunchSourceFactory.createPathLaunch(
                 path = mMainScriptFile.path,
                 workingDirectory = mProjectDir,
@@ -246,7 +241,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             throw e
         }
         try {
-            request?.let { NativeNodeEmbeddedProjectRunner.resolveProjectLaunchPlanWithDescriptor(it) }
+            request?.let { NodeProjectRunner.resolveProjectLaunchPlanWithDescriptor(it) }
         } catch (e: Exception) {
             logNodeProjectLaunchFailure("project_request", projectRoot, mMainScriptFile, launchSource, request, e)
             throw e
@@ -277,49 +272,6 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
                     "envKeys=${launchSource?.nodeProjectEnv?.keys?.sorted()?.joinToString(prefix = "[", postfix = "]").orEmpty()}",
         )
         return launch
-    }
-
-    private fun startPackagedLongRunningIfRequested(
-        launch: ScriptLaunchSourceFactory.Launch,
-        activity: Activity?,
-    ): Boolean {
-        val launchSource = launch.nodeProjectLaunchSource ?: return false
-        val executionMode = NodeExecutionModePolicy.normalize(launchSource.nodeProjectExecutionMode)
-        if (executionMode != NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING) {
-            return false
-        }
-        val source = launch.source as? JavaScriptSource
-            ?: throw IllegalStateException("Packaged Node long-running launch requires a JavaScript source.")
-        if (NodeEntryDirective.requiresUiActivity(launchSource.nodeProjectEntryDirective)) {
-            throw IllegalStateException("Packaged Node long-running launch does not support UI entry directives yet.")
-        }
-        val engine = NativeNodeEmbeddedJavaScriptEngine(mActivity.applicationContext)
-        val request = engine.prepareNodeProjectLaunchRequest(source)
-            ?: throw IllegalStateException("Packaged Node long-running launch requires a Node project source.")
-        val session = NativeNodeEmbeddedScriptService.startPackagedLongRunning(
-            context = mActivity,
-            request = request,
-        )
-        val statusState = session.status?.optString("state").orEmpty()
-        Log.i(
-            TAG,
-            "$INRT_NODE_PROJECT_PACKAGED_LONG_RUNNING_MARKER " +
-                    "executionId=${session.executionId} " +
-                    "started=${session.started} " +
-                    "state=$statusState " +
-                    "sourceName=${request.sourceName} " +
-                    "timeoutMs=${request.timeoutMs} " +
-                    "moduleSources=${request.moduleSources.size} " +
-                    "runtimeModuleSources=${request.runtimeModuleSources.size}",
-        )
-        if (!session.started) {
-            val message = session.error?.errorMessage
-                ?: session.status?.optString("message")?.takeIf { it.isNotBlank() }
-                ?: "Failed to start packaged Node long-running service."
-            throw IllegalStateException(message)
-        }
-        finishHostActivity(activity)
-        return true
     }
 
     private fun NodeProjectLaunchOptions.withNodeConfigDefaults(
@@ -356,7 +308,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         projectRoot: File,
         entryFile: File?,
         launchSource: NodeProjectLaunchSource?,
-        request: NativeNodeEmbeddedProjectRunner.ProjectRequest?,
+        request: NodeProjectRunner.ProjectRequest?,
         error: Throwable,
     ) {
         val marker = NodeProjectLaunchDiagnostics.launchFailureMarker(
@@ -390,7 +342,5 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         private const val INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER = "autojs6.inrt.node_project_runner.v1"
         private const val INRT_NODE_PROJECT_LAUNCH_SOURCE_TEMPLATE_MARKER =
             "autojs6.inrt.node_project_launch_source.v2"
-        private const val INRT_NODE_PROJECT_PACKAGED_LONG_RUNNING_MARKER =
-            "autojs6.inrt.node_project_packaged_long_running.v1"
     }
 }

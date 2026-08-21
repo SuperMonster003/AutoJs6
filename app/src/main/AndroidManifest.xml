@@ -570,16 +570,6 @@
         <service android:name="org.autojs.autojs.external.ScriptExecutionIntentService" />
 
         <service
-            android:name="org.autojs.autojs.engine.NativeNodeProcessService"
-            android:exported="false"
-            android:process=":nodejs" />
-
-        <service
-            android:name="org.autojs.autojs.engine.NativeNodeProcessServiceSlot1"
-            android:exported="false"
-            android:process=":nodejs_1" />
-
-        <service
             android:name="org.autojs.autojs.engine.NodeBridgeEngineDispatchService"
             android:exported="false" />
 
@@ -596,61 +586,6 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:theme="@style/AppTheme" />
-
-        <service
-            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedProbeService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse"
-            android:process=":nodejs_probe">
-
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Run isolated embedded Node diagnostics without touching the main app process" />
-        </service>
-
-        <service
-            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedScriptService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse"
-            android:process=":nodejs_embedded">
-
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Run isolated embedded Node scripts without touching the main app process" />
-        </service>
-
-        <receiver
-            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveStopReceiver"
-            android:exported="false"
-            android:process=":nodejs_embedded" />
-
-        <service
-            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedScriptServiceSlot1"
-            android:exported="false"
-            android:foregroundServiceType="specialUse"
-            android:process=":nodejs_embedded_1">
-
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Reserved embedded Node process-pool slot for explicit long-running sessions" />
-        </service>
-
-        <service
-            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedScriptServiceSlot2"
-            android:exported="false"
-            android:foregroundServiceType="specialUse"
-            android:process=":nodejs_embedded_2">
-
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Reserved embedded Node process-pool overflow slot for isolated script execution" />
-        </service>
-
-        <service
-            android:name="org.autojs.autojs.engine.NativeNodeSandboxedScriptService"
-            android:exported="false"
-            android:isolatedProcess="true"
-            android:process=":nodejs_sandboxed" />
 
         <activity android:name="org.autojs.autojs.external.tasker.TaskPrefEditActivity" />
 

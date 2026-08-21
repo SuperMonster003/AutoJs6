@@ -3,7 +3,7 @@ package org.autojs.autojs.project;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import org.autojs.autojs.engine.NativeNodeEmbeddedProjectRunner;
+import org.autojs.autojs.engine.NodeProjectRunner;
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics;
 import org.autojs.autojs.engine.ScriptEngineService;
 import org.autojs.autojs.execution.ExecutionConfig;
@@ -50,7 +50,7 @@ public class ProjectLauncher {
         );
         mPythonProjectAdmission = PythonProjectLaunchPolicy.inspect(mProjectRoot, legacyMain);
         File nodeProjectEntry = mPythonProjectAdmission == null
-                ? NativeNodeEmbeddedProjectRunner.resolveProjectEntryFileIfNodeProject(mProjectRoot)
+                ? NodeProjectRunner.resolveProjectEntryFileIfNodeProject(mProjectRoot)
                 : null;
         mNodeProject = nodeProjectEntry != null;
         mMainScriptFile = mPythonProjectAdmission != null
@@ -105,7 +105,7 @@ public class ProjectLauncher {
             throw e;
         }
         NodeProjectLaunchSource launchSource = launch.getNodeProjectLaunchSource();
-        NativeNodeEmbeddedProjectRunner.ProjectRequest request;
+        NodeProjectRunner.ProjectRequest request;
         try {
             request = launch.buildNodeProjectRequestOrNull();
         } catch (RuntimeException e) {
@@ -114,7 +114,7 @@ public class ProjectLauncher {
         }
         try {
             if (request != null) {
-                NativeNodeEmbeddedProjectRunner.INSTANCE.resolveProjectLaunchPlanWithDescriptor(request);
+                NodeProjectRunner.INSTANCE.resolveProjectLaunchPlanWithDescriptor(request);
             }
         } catch (RuntimeException e) {
             logNodeProjectLaunchFailure("project_request", launchSource, request, e);
@@ -126,7 +126,7 @@ public class ProjectLauncher {
     private void logNodeProjectLaunchFailure(
             @NonNull String stage,
             @Nullable NodeProjectLaunchSource launchSource,
-            @Nullable NativeNodeEmbeddedProjectRunner.ProjectRequest request,
+            @Nullable NodeProjectRunner.ProjectRequest request,
             @NonNull Throwable error
     ) {
         Log.e(

@@ -17,7 +17,7 @@ object NodeProjectLaunchDiagnostics {
         projectRoot: File,
         entryFile: File?,
         launchSource: NodeProjectLaunchSource?,
-        request: NativeNodeEmbeddedProjectRunner.ProjectRequest?,
+        request: NodeProjectRunner.ProjectRequest?,
         error: Throwable,
     ): String {
         val requestLaunchKind = request
@@ -49,7 +49,7 @@ object NodeProjectLaunchDiagnostics {
     }
 
     @JvmStatic
-    fun runnerRequestFailureMarker(descriptor: NativeNodeEmbeddedProjectRunner.Descriptor): String {
+    fun runnerRequestFailureMarker(descriptor: NodeProjectRunner.Descriptor): String {
         return buildString {
             append(RUNNER_REQUEST_FAILURE_MARKER)
             append(" kind=").append(descriptor.kind)

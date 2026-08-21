@@ -67,16 +67,15 @@ class NodePluginJavaScriptEngine(
     private fun buildRequest(source: JavaScriptSource): NodePluginScriptRequest {
         val launchSource = source as? NodeProjectLaunchSource
         if (launchSource != null) {
-            val plan = NativeNodeEmbeddedProjectRunner
+            val plan = NodeProjectRunner
                 .resolveProjectLaunchPlanWithDescriptor(
-                    NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource),
+                    NodeProjectRunner.buildProjectRequest(launchSource),
                 )
                 .let { resolved ->
                     resolved.copy(entrySource = readSource(resolved.entryFile))
                 }
-            return NativeNodeEmbeddedProjectRunner
+            return NodeProjectRunner
                 .buildResolvedProjectLaunchRequest(plan)
-                .toPluginScriptRequest()
                 .copy(spawnDepth = currentSpawnDepth())
         }
 

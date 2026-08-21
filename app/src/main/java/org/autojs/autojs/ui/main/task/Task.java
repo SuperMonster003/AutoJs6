@@ -4,7 +4,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import org.autojs.autojs.engine.NativeNodeEmbeddedProjectRunner;
+import org.autojs.autojs.engine.NodeProjectRunner;
 import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.execution.ScriptExecution;
@@ -197,7 +197,7 @@ public abstract class Task {
         }
 
         @Nullable
-        public NativeNodeEmbeddedProjectRunner.ProjectRequest createNodeProjectRequestOrNull() {
+        public NodeProjectRunner.ProjectRequest createNodeProjectRequestOrNull() {
             try {
                 return createLaunch().buildNodeProjectRequestOrNull();
             } catch (Exception ignored) {

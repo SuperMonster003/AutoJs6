@@ -201,13 +201,13 @@ object NodeProfileRollbackPolicy {
     private fun rollbackTriggers(): List<RollbackTrigger> = listOf(
         RollbackTrigger(
             id = "native_crash",
-            evidence = "NodeCrashEvidenceStore",
+            evidence = "runtime plugin lifecycle diagnostics",
             fallbackProfile = SAFE_DEFAULT,
             action = "disable_requested_profile_and_relaunch_safe_default",
         ),
         RollbackTrigger(
             id = "bridge_provider_crash",
-            evidence = "NodeCrashEvidenceStore",
+            evidence = "host bridge provider diagnostics",
             fallbackProfile = SAFE_DEFAULT,
             action = "disable_provider_capability_then_relaunch_safe_default",
         ),

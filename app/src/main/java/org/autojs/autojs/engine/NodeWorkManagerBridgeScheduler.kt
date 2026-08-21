@@ -152,9 +152,9 @@ object NodeWorkManagerBridgeScheduler {
             return androidx.work.ListenableWorker.Result.failure()
         }
 
-        val result = NodeJsRuntimePluginBridge.runScriptWithEmbeddedFallback(
+        val result = NodeJsRuntimePluginBridge.runScript(
             appContext,
-            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+            NodePluginScriptRequest(
                 source = entry.source,
                 sourceName = entry.entryPath,
                 workingDirectory = running.optString("workingDirectory").takeIf { it.isNotBlank() },
@@ -162,8 +162,6 @@ object NodeWorkManagerBridgeScheduler {
                 executionMode = NodeExecutionModePolicy.MODE_SCHEDULED,
                 timeoutMs = running.optLong("timeoutMs", ControlledWorkManagerPolicy.DEFAULT_TASK_TIMEOUT_MS)
                     .coerceAtLeast(1L),
-                captureStdout = true,
-                captureStderr = true,
                 env = mapOf(
                     "AUTOJS6_NODE_SCHEDULED_TASK_ID" to id,
                     "AUTOJS6_NODE_SCHEDULED_TASK_TYPE" to running.optString("type"),
@@ -262,7 +260,7 @@ object NodeWorkManagerBridgeScheduler {
         id: String,
         record: JSONObject,
         startedAt: Long,
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        result: NodePluginScriptResult,
     ) {
         updateRecord(context, id) { latest ->
             val nextStatus = when {
@@ -293,7 +291,7 @@ object NodeWorkManagerBridgeScheduler {
         succeeded: Boolean,
         status: String,
         failureReason: String?,
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null,
+        result: NodePluginScriptResult? = null,
     ) {
         val finishedAt = System.currentTimeMillis()
         target.put("status", status)
@@ -320,7 +318,7 @@ object NodeWorkManagerBridgeScheduler {
         finishedAt: Long,
         succeeded: Boolean,
         failureReason: String?,
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?,
+        result: NodePluginScriptResult?,
     ): JSONObject {
         return JSONObject().apply {
             put("startedAtEpochMs", startedAt)
@@ -357,7 +355,7 @@ object NodeWorkManagerBridgeScheduler {
         record.put("runHistory", retained)
     }
 
-    private fun scheduledNativeValues(result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?): JSONObject {
+    private fun scheduledNativeValues(result: NodePluginScriptResult?): JSONObject {
         val nativeValues = result?.nativeValues.orEmpty()
         val scheduledModeValues = NodeExecutionModePolicy.nativeValues(
             NodeExecutionModePolicy.MODE_SCHEDULED,

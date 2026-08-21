@@ -7,11 +7,15 @@ import org.junit.Test
 class NodeRuntimeBackendTest {
 
     @Test
-    fun pluginBackendsHaveDistinctRequiredAndOptionalValues() {
+    fun pluginAndHistoricalHostBackendsResolveToPlugin() {
         assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.from("plugin"))
         assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.from("node-plugin"))
-        assertEquals(NodeRuntimeBackend.PLUGIN_OPTIONAL, NodeRuntimeBackend.from("pluginOptional"))
-        assertEquals(NodeRuntimeBackend.PLUGIN_OPTIONAL, NodeRuntimeBackend.from("plugin-optional"))
+        assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.from("pluginOptional"))
+        assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.from("plugin-optional"))
+        assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.from("embedded"))
+        assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.from("native"))
+        assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.from("auto"))
+        assertEquals(NodeRuntimeBackend.DISABLED, NodeRuntimeBackend.from("disabled"))
     }
 
     @Test

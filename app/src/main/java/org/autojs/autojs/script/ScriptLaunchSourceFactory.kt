@@ -1,6 +1,6 @@
 package org.autojs.autojs.script
 
-import org.autojs.autojs.engine.NativeNodeEmbeddedProjectRunner
+import org.autojs.autojs.engine.NodeProjectRunner
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import java.io.File
@@ -23,9 +23,9 @@ object ScriptLaunchSourceFactory {
         val nodeProjectLaunchKind: NodeProjectLaunchKind?
             get() = nodeProjectLaunchSource?.nodeProjectLaunchKind
 
-        fun buildNodeProjectRequestOrNull(): NativeNodeEmbeddedProjectRunner.ProjectRequest? {
+        fun buildNodeProjectRequestOrNull(): NodeProjectRunner.ProjectRequest? {
             val launchSource = nodeProjectLaunchSource ?: return null
-            return NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource)
+            return NodeProjectRunner.buildProjectRequest(launchSource)
         }
 
         @JvmOverloads
@@ -115,7 +115,7 @@ object ScriptLaunchSourceFactory {
         path: String,
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
-    ): NativeNodeEmbeddedProjectRunner.ProjectRequest? {
+    ): NodeProjectRunner.ProjectRequest? {
         return createNodeProjectRequestOrNull(File(path), workingDirectory, defaultWorkingDirectory)
     }
 
@@ -125,7 +125,7 @@ object ScriptLaunchSourceFactory {
         file: File,
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
-    ): NativeNodeEmbeddedProjectRunner.ProjectRequest? {
+    ): NodeProjectRunner.ProjectRequest? {
         return createFileLaunch(file, workingDirectory, defaultWorkingDirectory).buildNodeProjectRequestOrNull()
     }
 

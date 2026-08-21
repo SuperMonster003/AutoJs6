@@ -1,6 +1,6 @@
 package org.autojs.autojs.script
 
-import org.autojs.autojs.engine.NativeNodeEmbeddedProjectRunner
+import org.autojs.autojs.engine.NodeProjectRunner
 import java.io.File
 
 object NodeProjectScriptSourceFactory {
@@ -21,7 +21,7 @@ object NodeProjectScriptSourceFactory {
             ?.normalizedCanonicalFile()
             ?: return createFileSource(normalizedFile, name)
         val entryFile = runCatching {
-            NativeNodeEmbeddedProjectRunner
+            NodeProjectRunner
                 .resolveProjectEntryFileIfNodeProject(projectRoot)
                 ?.normalizedCanonicalFile()
         }.getOrNull() ?: return createFileSource(normalizedFile, name)

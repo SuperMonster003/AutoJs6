@@ -1,6 +1,5 @@
 package org.autojs.autojs.engine
 
-import android.content.Context
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeEntryDirective
 import org.autojs.autojs.script.NodeProjectLaunchKind
@@ -9,7 +8,8 @@ import org.json.JSONObject
 import java.io.File
 import java.nio.charset.StandardCharsets
 
-object NativeNodeEmbeddedProjectRunner {
+/** Resolves host project descriptors into requests for the external Node.js runtime plugin. */
+object NodeProjectRunner {
 
     data class Request(
         val projectRoot: File,
@@ -186,26 +186,10 @@ object NativeNodeEmbeddedProjectRunner {
         }
     }
 
-    fun runProject(
-        context: Context,
-        request: ProjectRequest,
-        executionId: String? = null,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return runResolvedProjectLaunchPlan(context, resolveProjectLaunchPlanWithDescriptor(request), executionId)
-    }
-
-    fun runResolvedProjectLaunchPlan(
-        context: Context,
-        plan: ProjectLaunchPlan,
-        executionId: String? = null,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return runNormalized(context, plan.toEntryRequest(), describe(plan), executionId)
-    }
-
     fun buildResolvedProjectLaunchRequest(
         plan: ProjectLaunchPlan,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
-        return buildEmbeddedScriptRequest(plan.toEntryRequest(), describe(plan))
+    ): NodePluginScriptRequest {
+        return buildPluginScriptRequest(plan.toEntryRequest(), describe(plan))
     }
 
     fun resolveProjectLaunchPlanWithDescriptor(request: ProjectRequest): ProjectLaunchPlan {
@@ -351,42 +335,21 @@ object NativeNodeEmbeddedProjectRunner {
         )
     }
 
-    fun run(
-        context: Context,
-        request: Request,
-        executionId: String? = null,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        val normalizedRequest = normalizeRequest(request)
-        return runNormalized(context, normalizedRequest, describe(normalizedRequest), executionId)
-    }
-
     fun buildResolvedEntryRequest(
         request: Request,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+    ): NodePluginScriptRequest {
         val normalizedRequest = normalizeRequest(request)
-        return buildEmbeddedScriptRequest(normalizedRequest, describe(normalizedRequest))
+        return buildPluginScriptRequest(normalizedRequest, describe(normalizedRequest))
     }
 
     fun describeResolvedEntryRequest(request: Request): Descriptor {
         return describe(normalizeRequest(request))
     }
 
-    private fun runNormalized(
-        context: Context,
+    private fun buildPluginScriptRequest(
         request: Request,
         descriptor: Descriptor,
-        executionId: String? = null,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        val embeddedRequest = buildEmbeddedScriptRequest(request, descriptor)
-            .let { if (executionId == null) it else it.copy(executionId = executionId) }
-        val result = NativeNodeEmbeddedScriptService.runScript(context, embeddedRequest)
-        return withDescriptorNativeValues(result, descriptor)
-    }
-
-    private fun buildEmbeddedScriptRequest(
-        request: Request,
-        descriptor: Descriptor,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+    ): NodePluginScriptRequest {
         val projectRoot = request.projectRoot.canonicalFile
         val entryFile = request.entryFile.canonicalFile
         val workingDirectory = request.workingDirectory.canonicalFile
@@ -425,7 +388,7 @@ object NativeNodeEmbeddedProjectRunner {
                 append('\n')
             }
         }
-        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+        return NodePluginScriptRequest(
             source = source,
             sourceName = entryFile.canonicalPath,
             workingDirectory = projectRoot.canonicalPath,
@@ -434,35 +397,7 @@ object NativeNodeEmbeddedProjectRunner {
             timeoutMs = request.timeoutMs,
             moduleSources = request.moduleSources,
             runtimeModuleSources = request.runtimeModuleSources,
-            processPoolSlot = request.processPoolSlot,
-            processPoolSlotSource = request.processPoolSlotSource,
         )
-    }
-
-    fun runPackageBin(
-        context: Context,
-        request: PackageBinRequest,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        val baseDescriptor = describe(normalizePackageBinRequest(request))
-        val plan = runCatching {
-            resolvePackageBinLaunchPlan(request)
-        }.getOrElse { error ->
-            throw illegalRequest(error.message ?: error.javaClass.name, baseDescriptor)
-        }
-        return runNormalized(context, plan.toEntryRequest(), describe(plan))
-    }
-
-    fun runPackageScript(
-        context: Context,
-        request: PackageScriptRequest,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        val baseDescriptor = describe(normalizePackageScriptRequest(request))
-        val plan = runCatching {
-            resolvePackageScriptLaunchPlan(request)
-        }.getOrElse { error ->
-            throw illegalRequest(error.message ?: error.javaClass.name, baseDescriptor)
-        }
-        return runNormalized(context, plan.toEntryRequest(), describe(plan))
     }
 
     fun resolvePackageBinLaunchPlan(request: PackageBinRequest): ProjectLaunchPlan {
@@ -868,7 +803,7 @@ object NativeNodeEmbeddedProjectRunner {
 
     fun describe(
         request: Request,
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        result: NodePluginScriptResult,
     ): String {
         return buildString {
             append(describe(request).toDebugString())
@@ -884,7 +819,7 @@ object NativeNodeEmbeddedProjectRunner {
 
     fun describe(
         request: ProjectRequest,
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        result: NodePluginScriptResult,
         entryFile: File? = null,
     ): String {
         return buildString {
@@ -901,7 +836,7 @@ object NativeNodeEmbeddedProjectRunner {
 
     fun describe(
         request: PackageBinRequest,
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        result: NodePluginScriptResult,
         entryFile: File? = null,
     ): String {
         return buildString {
@@ -918,7 +853,7 @@ object NativeNodeEmbeddedProjectRunner {
 
     fun describe(
         request: PackageScriptRequest,
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        result: NodePluginScriptResult,
         entryFile: File? = null,
         binName: String? = null,
         scriptCommand: String? = null,
@@ -1254,15 +1189,7 @@ object NativeNodeEmbeddedProjectRunner {
     }
 
     private fun normalizeDescriptorProcessPoolSlot(value: String?): String? {
-        val normalized = value?.trim()?.takeIf { it.isNotBlank() } ?: return null
-        require(
-            normalized == NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID ||
-                    normalized == NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
-        ) {
-            "Node project processPoolSlot must be ${NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID} " +
-                    "or ${NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID}: $normalized"
-        }
-        return normalized
+        return value?.trim()?.takeIf { it.isNotBlank() }
     }
 
     private fun normalizeDescriptorProcessPoolSlotSource(
@@ -1276,16 +1203,7 @@ object NativeNodeEmbeddedProjectRunner {
             }
             return null
         }
-        require(
-            normalized == null ||
-                    normalized == NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST ||
-                    normalized == NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
-        ) {
-            "Node project processPoolSlotSource must be " +
-                    "${NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST} or " +
-                    "${NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER}: $normalized"
-        }
-        return normalized ?: NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST
+        return normalized ?: "legacy_descriptor"
     }
 
     private fun projectRequestLaunchKind(request: ProjectRequest): String {
@@ -1315,13 +1233,6 @@ object NativeNodeEmbeddedProjectRunner {
                 processPoolSlotSource = processPoolSlotSource,
             ),
         )
-    }
-
-    private fun withDescriptorNativeValues(
-        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
-        descriptor: Descriptor,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return result.copy(nativeValues = result.nativeValues + descriptor.toNativeValues())
     }
 
     private fun illegalRequest(

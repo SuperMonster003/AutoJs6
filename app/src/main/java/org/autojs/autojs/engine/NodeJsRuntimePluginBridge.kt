@@ -28,71 +28,13 @@ object NodeJsRuntimePluginBridge {
     private val executionLifecycleLock = Any()
 
     fun isRequested(): Boolean {
-        return NodeRuntimeBackend.current() in setOf(
-            NodeRuntimeBackend.PLUGIN,
-            NodeRuntimeBackend.PLUGIN_OPTIONAL,
-        ) ||
+        return NodeRuntimeBackend.current() == NodeRuntimeBackend.PLUGIN ||
                 booleanSystemProperty(PLUGIN_RUNTIME_ENABLED_PROPERTY)
     }
 
     fun isRequired(): Boolean {
         return NodeRuntimeBackend.current() == NodeRuntimeBackend.PLUGIN ||
                 booleanSystemProperty(PLUGIN_RUNTIME_REQUIRED_PROPERTY)
-    }
-
-    fun runScriptWithEmbeddedFallback(
-        context: Context,
-        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
-        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
-        outputListener: ((type: String, text: String) -> Unit)? = null,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        val requestWithProvider = request.withHostModuleSourceProvider()
-        if (!isRequested()) {
-            return NativeNodeEmbeddedScriptService.runScript(context, requestWithProvider, launchSurface)
-        }
-        val pluginResult = runScript(
-            context,
-            requestWithProvider.toPluginScriptRequest(),
-            launchSurface,
-            outputListener,
-        )
-        if (pluginResult.isSafeForEmbeddedFallback() && !isRequired()) {
-            Log.w(
-                TAG,
-                "Node.js runtime plugin failed; falling back to embedded service " +
-                        "sourceName=${request.sourceName} errorCode=${pluginResult.errorCode.orEmpty()}",
-            )
-            val fallbackResult = NativeNodeEmbeddedScriptService.runScript(
-                context,
-                requestWithProvider.copy(moduleSourceProvider = null),
-                launchSurface,
-            )
-            return fallbackResult.copy(
-                nativeValues = fallbackResult.nativeValues + mapOf(
-                    "embedded_script.runtime_plugin.optional_fallback_used" to "true",
-                    "embedded_script.runtime_plugin.optional_fallback_reason" to
-                            pluginResult.errorCode.orEmpty(),
-                ),
-            )
-        }
-        return pluginResult
-            .withLaunchSurfaceNativeValue(launchSurface)
-            .toEmbeddedScriptResult()
-    }
-
-    /** Compatibility overload used only while the retired embedded test surface still compiles. */
-    fun runScript(
-        context: Context,
-        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
-        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
-        outputListener: ((type: String, text: String) -> Unit)? = null,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return runScript(
-            context = context,
-            request = request.toPluginScriptRequest(),
-            launchSurface = launchSurface,
-            outputListener = outputListener,
-        ).toEmbeddedScriptResult()
     }
 
     fun runScript(
@@ -223,7 +165,7 @@ object NodeJsRuntimePluginBridge {
                             backendDispatched = true,
                         )
                     } else {
-                        val scriptResult = runResult.toEmbeddedScriptResult(requestWithProvider, startedAt)
+                        val scriptResult = runResult.toPluginScriptResult(requestWithProvider, startedAt)
                         if (streamedEventCount.get() > 0) {
                             scriptResult.copy(
                                 nativeValues = scriptResult.nativeValues + mapOf(
@@ -345,17 +287,6 @@ object NodeJsRuntimePluginBridge {
             .onFailure { error -> Log.w(TAG, "module_source_provider.cancel.failed", error) }
     }
 
-    private fun NodePluginScriptResult.withLaunchSurfaceNativeValue(
-        launchSurface: String,
-    ): NodePluginScriptResult {
-        if (launchSurface.isBlank()) {
-            return this
-        }
-        return copy(
-            nativeValues = nativeValues + ("embedded_script.execution_mode_launch_surface" to launchSurface),
-        )
-    }
-
     private fun NodePluginScriptRequest.toPluginBundle(
         hostCapabilityBroker: NodeJsHostCapabilityBroker,
     ): Bundle {
@@ -393,11 +324,11 @@ object NodeJsRuntimePluginBridge {
         }
     }
 
-    private fun NodeJsRuntimePluginHost.ScriptRunResult.toEmbeddedScriptResult(
+    private fun NodeJsRuntimePluginHost.ScriptRunResult.toPluginScriptResult(
         request: NodePluginScriptRequest,
         startedAt: Long,
     ): NodePluginScriptResult {
-        return result.toEmbeddedScriptResult(
+        return result.toPluginScriptResult(
             request = request,
             startedAt = startedAt,
             runtimeInfo = runtimeInfo,
@@ -406,7 +337,7 @@ object NodeJsRuntimePluginBridge {
         )
     }
 
-    private fun Bundle.toEmbeddedScriptResult(
+    private fun Bundle.toPluginScriptResult(
         request: NodePluginScriptRequest,
         startedAt: Long,
         runtimeInfo: Bundle,
@@ -530,10 +461,6 @@ object NodeJsRuntimePluginBridge {
             ) + diagnostics,
             workingDirectory = request.workingDirectory,
         )
-    }
-
-    private fun NodePluginScriptResult.isSafeForEmbeddedFallback(): Boolean {
-        return nativeValues["embedded_script.runtime_plugin.fallback_safe"] == "true"
     }
 
     private fun Bundle.putStringMap(namesKey: String, valuesKey: String, map: Map<String, String>) {
