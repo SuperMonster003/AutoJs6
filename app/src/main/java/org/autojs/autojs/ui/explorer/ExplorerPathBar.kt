@@ -1,7 +1,10 @@
 package org.autojs.autojs.ui.explorer
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -127,6 +130,7 @@ class ExplorerPathBar @JvmOverloads constructor(
     private class OpticallyCenteredTextView(context: Context) : AppCompatTextView(context) {
 
         private val textBounds = Rect()
+        private var inkCenterFromBaseline: Float? = null
 
         override fun onDraw(canvas: Canvas) {
             val value = text?.toString().orEmpty()
@@ -135,16 +139,17 @@ class ExplorerPathBar @JvmOverloads constructor(
                 return
             }
 
-            paint.getTextBounds(value, 0, value.length, textBounds)
-            if (textBounds.isEmpty) {
+            val centerFromBaseline = inkCenterFromBaseline
+                ?: measureInkCenterFromBaseline(value)?.also { inkCenterFromBaseline = it }
+            if (centerFromBaseline == null) {
                 super.onDraw(canvas)
                 return
             }
 
-            // Font line boxes vary across Latin, CJK fallback fonts, and the larger separator.
-            // Align the rendered glyph bounds while leaving the full-height click target untouched.
+            // Latin descenders can make equal glyph bounds still look top-heavy next to CJK text.
+            // Align the alpha-weighted ink centers while leaving the full-height click target untouched.
             val contentCenterY = paddingTop + (height - paddingTop - paddingBottom) / 2F
-            val textCenterY = baseline + (textBounds.top + textBounds.bottom) / 2F
+            val textCenterY = baseline + centerFromBaseline
             val verticalOffset = (contentCenterY - textCenterY).roundToInt()
             if (verticalOffset == 0) {
                 super.onDraw(canvas)
@@ -157,6 +162,48 @@ class ExplorerPathBar @JvmOverloads constructor(
             canvas.restoreToCount(checkpoint)
         }
 
+        private fun measureInkCenterFromBaseline(value: String): Float? {
+            paint.getTextBounds(value, 0, value.length, textBounds)
+            if (textBounds.isEmpty) return null
+
+            val sampleWidth = textBounds.width() + INK_SAMPLE_PADDING_PX * 2
+            val sampleHeight = textBounds.height() + INK_SAMPLE_PADDING_PX * 2
+            val sampleBaseline = INK_SAMPLE_PADDING_PX - textBounds.top.toFloat()
+            val bitmap = Bitmap.createBitmap(sampleWidth, sampleHeight, Bitmap.Config.ARGB_8888)
+            return try {
+                val samplePaint = Paint(paint).apply {
+                    color = Color.WHITE
+                    alpha = 255
+                    clearShadowLayer()
+                }
+                Canvas(bitmap).drawText(
+                    value,
+                    INK_SAMPLE_PADDING_PX - textBounds.left.toFloat(),
+                    sampleBaseline,
+                    samplePaint,
+                )
+
+                val pixels = IntArray(sampleWidth * sampleHeight)
+                bitmap.getPixels(pixels, 0, sampleWidth, 0, 0, sampleWidth, sampleHeight)
+                var totalAlpha = 0L
+                var alphaWeightedY = 0.0
+                pixels.forEachIndexed { index, pixel ->
+                    val pixelAlpha = Color.alpha(pixel)
+                    if (pixelAlpha == 0) return@forEachIndexed
+                    val pixelCenterY = index / sampleWidth + 0.5
+                    totalAlpha += pixelAlpha
+                    alphaWeightedY += pixelCenterY * pixelAlpha
+                }
+                if (totalAlpha == 0L) {
+                    null
+                } else {
+                    (alphaWeightedY / totalAlpha - sampleBaseline).toFloat()
+                }
+            } finally {
+                bitmap.recycle()
+            }
+        }
+
     }
 
     private companion object {
@@ -165,5 +212,6 @@ class ExplorerPathBar @JvmOverloads constructor(
         const val SEPARATOR_TEXT_SIZE_SP = 21F
         const val SEGMENT_HORIZONTAL_PADDING_DP = 5F
         const val SEPARATOR_HORIZONTAL_PADDING_DP = 1F
+        const val INK_SAMPLE_PADDING_PX = 2
     }
 }
