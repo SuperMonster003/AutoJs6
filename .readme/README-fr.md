@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 21 August 2026.
+Données mises à jour le 22 August 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/08/21
+###### 2026/08/22
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` ESM, dynamic import(), le réseau et WebSocket, les modules réseau natifs, worker_threads, child_process et l'interopérabilité Java de Node.js sont des fonctions stables activées par défaut, tandis que les déclarations d'autorisation, listes d'autorisation, bacs à sable et budgets de ressources restent appliqués
@@ -212,7 +212,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge la prévisualisation sécurisée des fichiers Markdown et HTML, avec rendu GFM, plusieurs thèmes, CSS personnalisé et chargement contrôlé des ressources du même répertoire
 * `Fonctionnalité` Les aperçus Markdown et HTML prennent en charge le mode plein écran, avec un paramètre "Démarrer en mode plein écran" désactivé par défaut
 * `Fonctionnalité` Le gestionnaire de fichiers propose des actions par icône tout à gauche pour l'aperçu Markdown/HTML, l'affichage des images et la lecture audio/vidéo; l'application peut servir de visionneuse multimédia système, avec lecture audio en arrière-plan et commandes de notification
-* `Fonctionnalité` Barre de chemin du gestionnaire de fichiers avec affichage du chemin actuel, mise en évidence du dossier actuel, accès direct aux dossiers parents, défilement automatique jusqu'à la fin des chemins longs et navigation horizontale
+* `Fonctionnalité` Barre de chemin épinglée en haut du gestionnaire de fichiers avec affichage du chemin actuel, mise en évidence du dossier actuel, accès direct aux dossiers parents, défilement automatique jusqu'à la fin des chemins longs et navigation horizontale
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge les informations sur les images et l'affichage détaillé des données EXIF
 * `Fonctionnalité` L'édition d'images et la conversion de formats sont assurées par le plugin Image Tools indépendant; lorsque le plugin est indisponible, seules les actions correspondantes sont masquées, tandis que l'affichage des images, les informations sur les images et les données EXIF restent disponibles
 * `Fonctionnalité` La visionneuse d'images découvre automatiquement toutes les images du même répertoire et prend en charge le zoom par pincement synchronisé sur le point focal, la navigation par glissement et par boutons précédent/suivant de la barre d'outils, une barre d'informations compacte sur trois lignes pour la position/la résolution/la taille/le format/la date de modification/EXIF, le mode plein écran, un paramètre de démarrage en plein écran et une couleur d'arrière-plan configurable avec historique, tandis que l'ActionBar, les barres système et les icônes adaptent leurs couleurs et leur contraste à l'arrière-plan
@@ -631,7 +631,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 21 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 22 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

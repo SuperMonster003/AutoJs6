@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 8 月 21 日 に更新されました.
+データは 2026 年 8 月 22 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/08/21
+###### 2026/08/22
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js の ESM/dynamic import()/ネットワークと WebSocket/ネイティブネットワークモジュール/worker_threads/child_process/Java 相互運用を正式機能として既定で有効化し, 権限宣言/許可リスト/サンドボックス/リソース予算による保護を維持
@@ -212,7 +212,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` ファイルマネージャーが Markdown と HTML ファイルの安全なプレビューに対応し, GFM レンダリング/複数テーマ/カスタム CSS/同一ディレクトリリソースの制御された読み込みを提供
 * `新機能` Markdown と HTML プレビューが全画面モードに対応し, デフォルトで無効の "全画面モードで起動" 設定を提供
 * `新機能` ファイルマネージャーで Markdown/HTML プレビューと画像表示/音声/動画再生を最左端のアイコンから実行可能; アプリをシステムメディアビューアーとして登録でき, 音声はバックグラウンド再生と通知コントロールに対応
-* `新機能` ファイルマネージャーのパスバーで現在のパス表示/現在のディレクトリの強調/親ディレクトリへの直接移動/長いパスの末尾への自動スクロール/横方向の閲覧に対応
+* `新機能` ファイルマネージャー上部に固定されたパスバーで現在のパス表示/現在のディレクトリの強調/親ディレクトリへの直接移動/長いパスの末尾への自動スクロール/横方向の閲覧に対応
 * `新機能` ファイルマネージャーが画像情報と詳細な EXIF 表示に対応
 * `新機能` 画像編集と形式変換を独立した Image Tools プラグインで提供し, プラグインが利用できない場合は対応アクションのみ非表示, 画像表示/画像情報/EXIF 表示には影響なし
 * `新機能` 画像ビューアーが同一ディレクトリ内の全画像を自動検出し, 指の焦点に追従するピンチズーム, スワイプ及びツールバーの前後ボタンによる移動, 位置/解像度/サイズ/形式/更新日時/EXIF を示すコンパクトな 3 行情報バー, 全画面モード/全画面起動設定/履歴付きの背景色設定に対応し, ActionBar/システムバー/アイコンの配色と明暗コントラストが背景色に自動適応
@@ -631,7 +631,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 8 月 21 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 8 月 22 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

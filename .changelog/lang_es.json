@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/21",
+      "released_date": "2026/08/22",
       "feature": [
         "Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva \"nodejs\" o extensiones como .node.js/.cjs/.mjs",
         "ESM, dynamic import(), red y WebSocket, módulos de red nativos, worker_threads, child_process e interoperabilidad con Java de Node.js son funciones estables habilitadas de forma predeterminada, mientras se mantienen las declaraciones de permisos, listas de permitidos, aislamiento y presupuestos de recursos",
@@ -47,7 +47,7 @@
         "El administrador de archivos admite la vista previa segura de archivos Markdown y HTML, con renderizado GFM, varios temas, CSS personalizado y carga controlada de recursos del mismo directorio",
         "Las vistas previas de Markdown y HTML admiten el modo de pantalla completa, con una opción \"Iniciar en modo de pantalla completa\" desactivada de forma predeterminada",
         "El administrador de archivos admite acciones con iconos en el extremo izquierdo para previsualizar Markdown/HTML, ver imágenes y reproducir audio/video; la aplicación puede actuar como visor multimedia del sistema, con reproducción de audio en segundo plano y controles de notificación",
-        "Barra de ruta del administrador de archivos con visualización de la ruta actual, resaltado del directorio actual, acceso directo a directorios superiores, desplazamiento automático al final de rutas largas y exploración horizontal",
+        "Barra de ruta fijada en la parte superior del administrador de archivos con visualización de la ruta actual, resaltado del directorio actual, acceso directo a directorios superiores, desplazamiento automático al final de rutas largas y exploración horizontal",
         "El administrador de archivos admite información de imágenes y visualización detallada de EXIF",
         "La edición de imágenes y la conversión de formatos se proporcionan mediante el plugin independiente Image Tools; cuando el plugin no está disponible, solo se ocultan las acciones correspondientes, mientras la visualización de imágenes, la información de imágenes y los datos EXIF siguen disponibles",
         "El visor de imágenes detecta automáticamente todas las imágenes del mismo directorio y admite zoom por pellizco sincronizado con el punto focal, navegación por deslizamiento y botones anterior/siguiente de la barra de herramientas, una barra compacta de información de tres filas para posición/resolución/tamaño/formato/fecha de modificación/EXIF, modo de pantalla completa, una opción para iniciar en pantalla completa y un color de fondo configurable con historial, mientras ActionBar, las barras del sistema y los iconos adaptan sus colores y contraste al fondo",

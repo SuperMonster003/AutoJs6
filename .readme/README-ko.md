@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 8 월 21 일.
+데이터 갱신일: 2026 년 8 월 22 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/21
+###### 2026/08/22
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js ESM/dynamic import()/네트워크 및 WebSocket/네이티브 네트워크 모듈/worker_threads/child_process/Java 상호 운용 기능을 정식 기능으로 기본 활성화하고, 권한 선언/허용 목록/샌드박스/리소스 예산 보호는 계속 적용
@@ -212,7 +212,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 파일 관리자에서 Markdown 및 HTML 파일의 안전한 미리 보기를 지원하고 GFM 렌더링/다중 테마/사용자 지정 CSS/제어된 동일 디렉터리 리소스 로딩 제공
 * `추가` Markdown 및 HTML 미리 보기에서 전체 화면 모드를 지원하고 기본적으로 비활성화된 "전체 화면 모드로 시작" 설정 제공
 * `추가` 파일 관리자에서 Markdown/HTML 미리보기 및 이미지 보기/오디오/비디오 재생을 맨 왼쪽 아이콘으로 실행 지원; 앱을 시스템 미디어 뷰어로 등록할 수 있으며 오디오는 백그라운드 재생 및 알림 제어 지원
-* `추가` 파일 관리자 경로 표시줄에서 현재 경로 표시/현재 디렉터리 강조/상위 디렉터리 바로 이동/긴 경로 끝 자동 스크롤/가로 탐색 지원
+* `추가` 파일 관리자 상단에 고정된 경로 표시줄에서 현재 경로 표시/현재 디렉터리 강조/상위 디렉터리 바로 이동/긴 경로 끝 자동 스크롤/가로 탐색 지원
 * `추가` 파일 관리자에서 이미지 정보 및 상세 EXIF 보기 지원
 * `추가` 이미지 편집 및 형식 변환을 독립 Image Tools 플러그인으로 제공하며, 플러그인을 사용할 수 없을 때 해당 작업만 숨기고 이미지 보기/이미지 정보/EXIF 보기는 그대로 유지
 * `추가` 이미지 뷰어에서 동일 디렉터리의 모든 이미지를 자동 탐색하고 손가락 초점에 동기화된 핀치 줌, 스와이프 및 도구 모음 이전/다음 버튼 탐색, 위치/해상도/크기/형식/수정 시간/EXIF를 표시하는 간결한 3줄 정보 표시줄, 전체 화면 모드/전체 화면 시작 설정/기록이 있는 배경색 설정을 지원하며 ActionBar/시스템 표시줄/아이콘의 색상과 명암 대비가 배경색에 자동 적응
@@ -631,7 +631,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 8 월 21 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 8 월 22 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

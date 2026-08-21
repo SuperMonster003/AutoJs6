@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 21 de August de 2026.
+Datos actualizados el 22 de August de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/08/21
+###### 2026/08/22
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` ESM, dynamic import(), red y WebSocket, módulos de red nativos, worker_threads, child_process e interoperabilidad con Java de Node.js son funciones estables habilitadas de forma predeterminada, mientras se mantienen las declaraciones de permisos, listas de permitidos, aislamiento y presupuestos de recursos
@@ -212,7 +212,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` El administrador de archivos admite la vista previa segura de archivos Markdown y HTML, con renderizado GFM, varios temas, CSS personalizado y carga controlada de recursos del mismo directorio
 * `Nuevo` Las vistas previas de Markdown y HTML admiten el modo de pantalla completa, con una opción "Iniciar en modo de pantalla completa" desactivada de forma predeterminada
 * `Nuevo` El administrador de archivos admite acciones con iconos en el extremo izquierdo para previsualizar Markdown/HTML, ver imágenes y reproducir audio/video; la aplicación puede actuar como visor multimedia del sistema, con reproducción de audio en segundo plano y controles de notificación
-* `Nuevo` Barra de ruta del administrador de archivos con visualización de la ruta actual, resaltado del directorio actual, acceso directo a directorios superiores, desplazamiento automático al final de rutas largas y exploración horizontal
+* `Nuevo` Barra de ruta fijada en la parte superior del administrador de archivos con visualización de la ruta actual, resaltado del directorio actual, acceso directo a directorios superiores, desplazamiento automático al final de rutas largas y exploración horizontal
 * `Nuevo` El administrador de archivos admite información de imágenes y visualización detallada de EXIF
 * `Nuevo` La edición de imágenes y la conversión de formatos se proporcionan mediante el plugin independiente Image Tools; cuando el plugin no está disponible, solo se ocultan las acciones correspondientes, mientras la visualización de imágenes, la información de imágenes y los datos EXIF siguen disponibles
 * `Nuevo` El visor de imágenes detecta automáticamente todas las imágenes del mismo directorio y admite zoom por pellizco sincronizado con el punto focal, navegación por deslizamiento y botones anterior/siguiente de la barra de herramientas, una barra compacta de información de tres filas para posición/resolución/tamaño/formato/fecha de modificación/EXIF, modo de pantalla completa, una opción para iniciar en pantalla completa y un color de fondo configurable con historial, mientras ActionBar, las barras del sistema y los iconos adaptan sus colores y contraste al fondo
@@ -631,7 +631,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 21 de August de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 22 de August de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

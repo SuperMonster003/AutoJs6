@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 8 月 21 日.
+数据更新于 2026 年 8 月 22 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/08/21
+###### 2026/08/22
 
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 的 ESM/dynamic import()/网络与 WebSocket/原生网络模块/worker_threads/child_process/Java 互操作能力成为正式功能并默认启用, 同时保留权限声明/白名单/沙箱及资源预算保护
@@ -213,7 +213,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 文件管理器支持安全预览 Markdown 与 HTML 文件, 提供 GFM 渲染/多套主题/自定义 CSS 及受控的同目录资源加载
 * `新增` Markdown 与 HTML 预览支持全屏模式及默认关闭的 "以全屏模式启动" 设置
 * `新增` 文件管理器支持通过最左侧图标按钮预览 Markdown/HTML 及查看图片/播放音频/视频; 应用可注册为系统媒体查看器, 音频支持后台播放及通知栏联动控制
-* `新增` 文件管理器路径栏, 支持显示当前路径及高亮当前目录, 点击父级目录直接跳转, 长路径自动定位到末端及横向滑动浏览
+* `新增` 文件管理器置顶路径栏, 支持显示当前路径及高亮当前目录, 点击父级目录直接跳转, 长路径自动定位到末端及横向滑动浏览
 * `新增` 文件管理器支持查看图片文件信息及 EXIF 详情
 * `新增` 图片编辑及格式转换由独立的 Image Tools 插件提供, 插件不可用时仅隐藏对应动作, 不影响图片查看/图片信息/EXIF 详情
 * `新增` 图片查看器支持自动遍历同目录图片, 提供紧跟双指焦点的同步缩放, 左右滑动及工具栏前后按钮切换, 显示序号/分辨率/大小/格式/修改时间/EXIF 的紧凑三行信息栏, 全屏模式/以全屏模式启动/带历史记录的背景色设置, ActionBar/系统栏/图标可随背景色自适应配色及明暗对比
@@ -635,7 +635,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 8 月 21 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 8 月 22 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

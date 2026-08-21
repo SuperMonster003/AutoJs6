@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 21 August 2026.
+تم تحديث البيانات في 22 August 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/08/21
+###### 2026/08/22
 
 * `إضافة جديدة` بيئة تشغيل نصوص Node.js 24.5.0, تدعم التشغيل عبر توجيه "nodejs" او امتدادات مثل .node.js/.cjs/.mjs
 * `إضافة جديدة` اصبحت قدرات Node.js الخاصة بـ ESM و dynamic import() والشبكة و WebSocket ووحدات الشبكة الاصلية و worker_threads و child_process والتكامل مع Java ميزات مستقرة ومفعلة افتراضيا, مع استمرار فرض تعريفات الاذونات والقوائم المسموح بها والعزل وميزانيات الموارد
@@ -212,7 +212,7 @@
 * `إضافة جديدة` مدير الملفات يدعم المعاينة الآمنة لملفات Markdown وHTML, مع تصيير GFM وسمات متعددة وCSS مخصص وتحميل مضبوط لموارد الدليل نفسه
 * `إضافة جديدة` تدعم معاينات Markdown وHTML وضع ملء الشاشة, مع إعداد "بدء التشغيل في وضع ملء الشاشة" معطل افتراضيا
 * `إضافة جديدة` يدعم مدير الملفات أزرار أيقونات في أقصى اليسار لمعاينة Markdown/HTML وعرض الصور وتشغيل الصوت/الفيديو; ويمكن تسجيل التطبيق كعارض وسائط للنظام, مع تشغيل الصوت في الخلفية والتحكم من الإشعارات
-* `إضافة جديدة` شريط مسار مدير الملفات مع عرض المسار الحالي, وتمييز الدليل الحالي, والانتقال المباشر إلى المجلدات العليا, والتمرير التلقائي إلى نهاية المسارات الطويلة, والتصفح الأفقي
+* `إضافة جديدة` شريط مسار مثبت في أعلى مدير الملفات مع عرض المسار الحالي, وتمييز الدليل الحالي, والانتقال المباشر إلى المجلدات العليا, والتمرير التلقائي إلى نهاية المسارات الطويلة, والتصفح الأفقي
 * `إضافة جديدة` يدعم مدير الملفات معلومات الصور وعرض بيانات EXIF التفصيلية
 * `إضافة جديدة` يوفر مكون Image Tools الإضافي المستقل تحرير الصور وتحويل الصيغ; وعندما لا يتوفر المكون الإضافي تخفى الإجراءات المقابلة فقط, بينما تبقى ميزات عرض الصور ومعلومات الصور وبيانات EXIF متاحة
 * `إضافة جديدة` يكتشف عارض الصور تلقائيا جميع الصور في الدليل نفسه, ويدعم التكبير بالقرص المتزامن مع بؤرة الأصابع, والتنقل بالسحب وبزري السابق/التالي في شريط الأدوات, وشريط معلومات مدمجا من ثلاثة أسطر للموضع/الدقة/الحجم/الصيغة/وقت التعديل/EXIF, ووضع ملء الشاشة, وإعداد بدء التشغيل بملء الشاشة, ولون خلفية قابل للتخصيص مع سجل, بينما تتكيف ألوان وتباين ActionBar وأشرطة النظام والأيقونات تلقائيا مع الخلفية
@@ -631,7 +631,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 21 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 22 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

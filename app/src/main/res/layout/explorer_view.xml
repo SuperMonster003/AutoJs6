@@ -12,19 +12,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <org.autojs.autojs.ui.explorer.ExplorerProjectToolbar
-            android:id="@+id/project_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="2dp"
-            android:foreground="?selectableItemBackground"
-            app:cardElevation="0.97dp"
-            app:cardUseCompatPadding="true" />
-
+        <!-- Matches explorer_category.xml: 13sp text with 8dp top and bottom padding. -->
         <org.autojs.autojs.ui.explorer.ExplorerPathBar
             android:id="@+id/explorer_path_bar"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="33.5dp"
             android:clipToPadding="false"
             android:layoutDirection="ltr"
             android:paddingHorizontal="8dp" />
@@ -33,6 +25,15 @@
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:background="?android:divider" />
+
+        <org.autojs.autojs.ui.explorer.ExplorerProjectToolbar
+            android:id="@+id/project_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="2dp"
+            android:foreground="?selectableItemBackground"
+            app:cardElevation="0.97dp"
+            app:cardUseCompatPadding="true" />
 
         <androidx.recyclerview.widget.ThemeColorRecyclerView
             android:id="@+id/explorer_item_list"
