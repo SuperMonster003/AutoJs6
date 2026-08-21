@@ -60,6 +60,10 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     private var mFabVisibilityBeforeSelectionToolbar = View.VISIBLE
     private var mFabTranslationYBeforeSelectionToolbar = 0f
     private var mFabStateSavedForSelectionToolbar = false
+    private var mArchiveModeShown = false
+    private var mFabVisibilityBeforeArchive = View.VISIBLE
+    private var mFabTranslationYBeforeArchive = 0f
+    private var mFabStateSavedForArchive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +95,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
                     handleSelectionToolbarStateChanged(shown)
                 }
             })
+            explorerView.setOnArchiveModeStateChangeListener(::handleArchiveModeStateChanged)
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -190,6 +195,36 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         }
     }
 
+    private fun handleArchiveModeStateChanged(shown: Boolean) {
+        mArchiveModeShown = shown
+        if (shown) {
+            if (!mFabStateSavedForArchive) {
+                mFabVisibilityBeforeArchive = fab.visibility
+                mFabTranslationYBeforeArchive = fab.translationY
+                mFabStateSavedForArchive = true
+            }
+            mFloatingActionMenu?.let { if (it.isExpanded) it.collapse() }
+            val behavior = (fab.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? ScrollAwareFABBehavior
+            behavior?.setScrollAware(false)
+            fab.animate().cancel()
+            mFloatingActionMenu?.translationY = 0f
+            fab.hide()
+            return
+        }
+        restoreFabAfterArchive()
+    }
+
+    private fun restoreFabAfterArchive() {
+        if (!mFabStateSavedForArchive) return
+        mFabStateSavedForArchive = false
+        mFloatingActionMenu?.translationY = 0f
+        val behavior = (fab.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? ScrollAwareFABBehavior
+        behavior?.setScrollAware(true)
+        fab.animate().cancel()
+        fab.translationY = mFabTranslationYBeforeArchive
+        if (mFabVisibilityBeforeArchive == View.VISIBLE) fab.show() else fab.hide()
+    }
+
     private fun viewFile(item: ExplorerItem): Boolean {
         val context = context ?: GlobalAppContext.get()
         val exceptionHolder = view?.let { SnackExceptionHolder(it) } ?: ToastExceptionHolder(context)
@@ -252,6 +287,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
             saveFabStateForSelectionToolbarIfNeeded()
             hideFabForSelectionToolbar()
         }
+        if (mArchiveModeShown) handleArchiveModeStateChanged(true)
     }
 
     override fun onPageHide() {
@@ -260,6 +296,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         if (mSelectionToolbarShown) {
             restoreFabAfterSelectionToolbar()
         }
+        if (mArchiveModeShown) restoreFabAfterArchive()
         mIsCurrentPageFiles = false
     }
 
@@ -296,12 +333,14 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         mExplorerView?.setOnSelectionToolbarStateChangeListener(null)
         mExplorerView?.setPluginActionProvider(ExplorerSurface.UNSPECIFIED, null)
+        mExplorerView?.releasePluginResources()
         restoreFabAfterSelectionToolbar()
+        restoreFabAfterArchive()
         mExplorerView = null
         mFloatingActionMenu = null
+        super.onDestroyView()
     }
 
     override fun onDetach() {
@@ -310,6 +349,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     }
 
     override fun onClick(button: FloatingActionButton, pos: Int) {
+        if (mArchiveModeShown) return
         mExplorerView?.let { view ->
             val ctx = context ?: return@let
             when (pos) {

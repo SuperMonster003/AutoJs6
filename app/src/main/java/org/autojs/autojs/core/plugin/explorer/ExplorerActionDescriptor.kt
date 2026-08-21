@@ -11,6 +11,7 @@ internal data class ExplorerActionDescriptor(
     val cardinality: Int,
     val accessMode: Int,
     val placement: Int,
+    val presentation: Int,
     val mimeTypes: Set<String>,
     val extensions: Set<String>,
     val outputMode: Int,

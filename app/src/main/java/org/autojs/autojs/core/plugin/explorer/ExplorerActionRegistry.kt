@@ -3,20 +3,26 @@ package org.autojs.autojs.core.plugin.explorer
 import android.content.ComponentName
 import android.content.Context
 import android.os.Build
+import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
+import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginResourceResolver
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.explorer.ExplorerPluginActionProvider
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.explorer.api.ExplorerActionCapabilityKeys
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
+import org.autojs.plugin.explorer.api.ExplorerActionValues
+import org.autojs.plugin.explorer.api.ExplorerArchiveRequestKeys
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicReference
@@ -27,6 +33,7 @@ internal data class ResolvedExplorerAction(
     val actionLabel: String,
     val menuTitle: String,
     val descriptor: ExplorerActionDescriptor,
+    val pluginTarget: AidlPluginHost.Discovered,
 )
 
 internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
@@ -73,6 +80,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
                                 actionLabel = label,
                                 menuTitle = menuTitle,
                                 descriptor = descriptor,
+                                pluginTarget = candidate,
                             ),
                         )
                     }
@@ -148,6 +156,9 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         items: List<ExplorerItem>,
         action: ResolvedExplorerAction,
     ): Result<Unit> {
+        if (action.descriptor.presentation != ExplorerActionValues.PRESENTATION_ACTIVITY) {
+            return Result.failure(IllegalArgumentException("Explorer Action requires host presentation: ${action.descriptor.id}"))
+        }
         if (!ExplorerActionPolicy.allows(surface, entryPoint, action.descriptor)) {
             return Result.failure(IllegalArgumentException("Explorer Action is not allowed on $surface from $entryPoint"))
         }
@@ -161,6 +172,54 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
             return Result.failure(IllegalStateException("Explorer Action plugin is not authorized: ${action.packageName}"))
         }
         return ExplorerActionLauncher.launch(context, surface, items, action)
+    }
+
+    override suspend fun openArchive(
+        context: Context,
+        surface: ExplorerSurface,
+        entryPoint: ExplorerActionEntryPoint,
+        item: ExplorerItem,
+        action: ResolvedExplorerAction,
+    ): ExplorerArchiveSessionConnection = withContext(Dispatchers.IO) {
+        require(action.descriptor.presentation == ExplorerActionValues.PRESENTATION_HOST_EXPLORER) {
+            "Explorer Action does not provide a host archive session"
+        }
+        require(ExplorerActionPolicy.allows(surface, entryPoint, action.descriptor)) {
+            "Explorer Action is not allowed on $surface from $entryPoint"
+        }
+        require(action in matchingActionsFor(listOf(item))) {
+            "Explorer Action no longer matches the target: ${action.descriptor.id}"
+        }
+        check(PluginEnableStore.isEnabled(context, action.packageName, true)) {
+            "Explorer Action plugin is disabled: ${action.packageName}"
+        }
+        check(PluginTrustManager.isAuthorized(context, action.packageName)) {
+            "Explorer Action plugin is not authorized: ${action.packageName}"
+        }
+
+        val source = File(item.path).canonicalFile
+        require(source.isFile && source.canRead()) { "Archive source is not a readable file: ${item.name}" }
+        val request = Bundle().apply {
+            putString(
+                ExplorerArchiveRequestKeys.DISPLAY_NAME,
+                item.name.take(ExplorerActionProtocol.MAX_ARCHIVE_DISPLAY_NAME_LENGTH),
+            )
+            putLong(ExplorerArchiveRequestKeys.SIZE, source.length())
+            putLong(ExplorerArchiveRequestKeys.LAST_MODIFIED, item.lastModified())
+        }
+        ParcelFileDescriptor.open(source, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+            val leased = ExplorerActionPluginHost.openArchive(
+                context = context.applicationContext,
+                target = action.pluginTarget,
+                source = descriptor,
+                request = request,
+            )
+            ExplorerArchiveSessionConnection.create(
+                remote = leased.value,
+                bindingLease = leased.bindingLease,
+                sourcePath = source.path,
+            )
+        }
     }
 
     private fun isAvailablePlugin(

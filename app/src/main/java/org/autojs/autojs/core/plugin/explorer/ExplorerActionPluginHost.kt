@@ -2,10 +2,12 @@ package org.autojs.autojs.core.plugin.explorer
 
 import android.content.Context
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.explorer.api.ExplorerActionPluginActions
 import org.autojs.plugin.explorer.api.IExplorerActionPlugin
+import org.autojs.plugin.explorer.api.IExplorerArchiveSession
 
 object ExplorerActionPluginHost {
 
@@ -27,4 +29,14 @@ object ExplorerActionPluginHost {
         context: Context,
         target: AidlPluginHost.Discovered,
     ): Bundle = host.call(context, target) { proxy -> proxy.getActionCatalog() }
+
+    suspend fun openArchive(
+        context: Context,
+        target: AidlPluginHost.Discovered,
+        source: ParcelFileDescriptor,
+        request: Bundle,
+    ): AidlPluginHost.LeasedCall<IExplorerArchiveSession> =
+        host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
+            requireNotNull(proxy.openArchive(source, request)) { "Explorer Action plugin returned no archive session" }
+        }
 }

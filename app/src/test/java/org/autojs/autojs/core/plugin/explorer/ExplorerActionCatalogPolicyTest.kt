@@ -219,6 +219,53 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV5HostExplorerPresentationIsStrictlyReadOnlyAndPrimary() {
+        val embedded = descriptor(
+            protocolVersion = 5,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+            presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+        ) ?: error("Expected a valid host Explorer descriptor")
+        assertEquals(ExplorerActionValues.PRESENTATION_HOST_EXPLORER, embedded.presentation)
+
+        assertNull(
+            descriptor(
+                protocolVersion = 4,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 5,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 5,
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+                mimeTypes = emptyList(),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 5,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            ),
+        )
+    }
+
+    @Test
     fun descriptorRejectsInvalidIdentifiersAndActivityNames() {
         assertNull(descriptor(id = "Preview"))
         assertNull(descriptor(activityClassName = "com.example.preview/PreviewActivity"))
@@ -246,9 +293,10 @@ class ExplorerActionCatalogPolicyTest {
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(2L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(3L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(4L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(5L))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(5L))
+        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(6L))
         assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(4L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 4))
@@ -308,6 +356,7 @@ class ExplorerActionCatalogPolicyTest {
         cardinality: Int? = null,
         accessMode: Int = ExplorerActionValues.ACCESS_READ_ONLY,
         placement: Int = ExplorerActionValues.PLACEMENT_OVERFLOW,
+        presentation: Int? = null,
         mimeTypes: Collection<String>? = listOf("text/*"),
         extensions: Collection<String>? = emptyList(),
     ): ExplorerActionDescriptor? {
@@ -323,6 +372,7 @@ class ExplorerActionCatalogPolicyTest {
             cardinality = cardinality,
             accessMode = accessMode,
             placement = placement,
+            presentation = presentation,
             mimeTypes = mimeTypes,
             extensions = extensions,
         )

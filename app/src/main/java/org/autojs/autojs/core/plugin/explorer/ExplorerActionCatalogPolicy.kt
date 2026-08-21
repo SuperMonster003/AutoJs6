@@ -25,6 +25,7 @@ internal object ExplorerActionCatalogPolicy {
         cardinality: Int? = null,
         accessMode: Int,
         placement: Int,
+        presentation: Int? = null,
         mimeTypes: Collection<String>?,
         extensions: Collection<String>?,
         outputMode: Int? = null,
@@ -81,6 +82,17 @@ internal object ExplorerActionCatalogPolicy {
             else -> false
         }
         if (!placementSupported) return null
+        val normalizedPresentation = when {
+            protocolVersion < HOST_EXPLORER_PROTOCOL_VERSION -> {
+                if (presentation != null && presentation != ExplorerActionValues.PRESENTATION_ACTIVITY) return null
+                ExplorerActionValues.PRESENTATION_ACTIVITY
+            }
+            presentation == null || presentation == ExplorerActionValues.PRESENTATION_ACTIVITY ->
+                ExplorerActionValues.PRESENTATION_ACTIVITY
+            presentation == ExplorerActionValues.PRESENTATION_HOST_EXPLORER ->
+                ExplorerActionValues.PRESENTATION_HOST_EXPLORER
+            else -> return null
+        }
 
         val normalizedMimeTypes = normalizeMatchers(mimeTypes, ::normalizeMimeType)
         val normalizedExtensions = normalizeMatchers(extensions, ::normalizeExtension)
@@ -108,6 +120,19 @@ internal object ExplorerActionCatalogPolicy {
         ) {
             return null
         }
+        if (
+            normalizedPresentation == ExplorerActionValues.PRESENTATION_HOST_EXPLORER &&
+            (
+                protocolVersion < HOST_EXPLORER_PROTOCOL_VERSION ||
+                    targetKind != ExplorerActionValues.TARGET_FILE ||
+                    normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE ||
+                    accessMode != ExplorerActionValues.ACCESS_READ_ONLY ||
+                    normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE ||
+                    placement != ExplorerActionValues.PLACEMENT_PRIMARY
+                )
+        ) {
+            return null
+        }
 
         return ExplorerActionDescriptor(
             protocolVersion = protocolVersion,
@@ -120,6 +145,7 @@ internal object ExplorerActionCatalogPolicy {
             cardinality = normalizedCardinality,
             accessMode = accessMode,
             placement = placement,
+            presentation = normalizedPresentation,
             mimeTypes = normalizedMimeTypes,
             extensions = normalizedExtensions,
             outputMode = normalizedOutput.mode,
@@ -249,4 +275,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val MAX_EXTENSION_LENGTH = 64
     private const val PRIMARY_PLACEMENT_PROTOCOL_VERSION = 2
     private const val MULTI_TARGET_PROTOCOL_VERSION = 4
+    private const val HOST_EXPLORER_PROTOCOL_VERSION = 5
 }

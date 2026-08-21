@@ -25,6 +25,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.ImageViewCompat
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -36,10 +38,19 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionEntryPoint
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionExecution
 import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
+import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerFileItem
+import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
+import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerPage
+import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerProvider
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getInt
 import org.autojs.autojs.core.pref.Pref.getLinkedList
@@ -99,6 +110,7 @@ import org.autojs.autojs6.databinding.ExplorerDirectoryBinding
 import org.autojs.autojs6.databinding.ExplorerFileBinding
 import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding
 import org.autojs.autojs6.databinding.ExplorerViewBinding
+import org.autojs.plugin.explorer.api.ExplorerActionValues
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.util.LinkedList
@@ -115,6 +127,15 @@ private data class ExplorerItemActionState(
     val runAsMedia: Boolean,
     val installVisible: Boolean,
     val infoVisible: Boolean,
+)
+
+private data class ArchiveNavigationState(
+    val provider: ArchiveExplorerProvider,
+    val previousExplorer: Explorer,
+    val previousRootPath: String?,
+    val previousPageState: ExplorerView.ExplorerPageState,
+    val previousHistory: List<ExplorerView.ExplorerPageState>,
+    val sourceParentSegments: List<ExplorerPathSegment>,
 )
 
 /**
@@ -178,6 +199,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private var mPluginActionProvider: ExplorerPluginActionProvider? = null
     private var mPluginActionSurface = ExplorerSurface.UNSPECIFIED
     private var mSelectionPluginAction: ResolvedExplorerAction? = null
+    private var mArchiveNavigationState: ArchiveNavigationState? = null
+    private var mArchiveOpenJob: Job? = null
+    private var mOnArchiveModeStateChangeListener: ((Boolean) -> Unit)? = null
 
     private val mPageStateHistory = Stack<ExplorerPageState>()
     private var mDirectorySpanSize = 2
@@ -502,6 +526,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        mArchiveOpenJob?.cancel()
+        mArchiveOpenJob = null
+        closeArchiveNavigation(restorePrevious = false)
         mExplorer?.unregisterChangeListener(this)
         mPageStateHistory.clear()
         unblockListScrollAfterLongPress()
@@ -517,8 +544,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     override fun onRefresh() {
         currentPageState.scrollY = 0
         mExplorer?.notifyChildrenChanged(currentPage)
-        mProjectToolbar.refresh()
-        mProjectToolbar.updateVisibility()
+        if (mArchiveNavigationState == null) mProjectToolbar.refresh()
+        updateProjectToolbarVisibility()
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
@@ -726,7 +753,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             }
             setSelectionToolbarShown(selectedCount > 0)
         }
-        mProjectToolbar.updateVisibility()
+        updateProjectToolbarVisibility()
     }
 
     private fun updateSelectionActionState(view: View, enabled: Boolean) {
@@ -785,7 +812,20 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
     }
 
+    internal fun setOnArchiveModeStateChangeListener(listener: ((Boolean) -> Unit)?) {
+        mOnArchiveModeStateChangeListener = listener
+        listener?.invoke(mArchiveNavigationState != null)
+    }
+
+    internal fun releasePluginResources() {
+        mArchiveOpenJob?.cancel()
+        mArchiveOpenJob = null
+        closeArchiveNavigation(restorePrevious = false)
+        mOnArchiveModeStateChangeListener = null
+    }
+
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage) {
+        closeArchiveNavigation(restorePrevious = false)
         if (mExplorer != null) {
             mExplorer!!.unregisterChangeListener(this)
         }
@@ -799,8 +839,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         val action = mSelectionPluginAction ?: return
         val selectedItems = mSelectedItems.values.toList()
         if (selectedItems.isEmpty()) return
-        val provider = mPluginActionProvider ?: return
-        provider.launch(
+        if (mPluginActionProvider == null) return
+        dispatchPluginAction(
             context,
             mPluginActionSurface,
             ExplorerActionEntryPoint.SELECTION_TOOLBAR,
@@ -815,12 +855,107 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage, currentPage: ExplorerPage) {
+        closeArchiveNavigation(restorePrevious = false)
         mExplorer?.unregisterChangeListener(this)
         mExplorer = explorer
         mExplorerRootPath = rootPage.path
         setCurrentPageState(ExplorerPageState(rootPage))
         mExplorer?.registerChangeListener(this)
         enterChildPage(currentPage)
+    }
+
+    private fun dispatchPluginAction(
+        context: Context,
+        surface: ExplorerSurface,
+        entryPoint: ExplorerActionEntryPoint,
+        items: List<ExplorerItem>,
+        action: ResolvedExplorerAction,
+    ): Result<Unit> {
+        val provider = mPluginActionProvider
+            ?: return Result.failure(IllegalStateException("Explorer Action provider is unavailable"))
+        if (action.descriptor.presentation != ExplorerActionValues.PRESENTATION_HOST_EXPLORER) {
+            return provider.launch(context, surface, entryPoint, items, action)
+        }
+        if (items.size != 1) {
+            return Result.failure(IllegalArgumentException("Host archive sessions require one file"))
+        }
+        val lifecycleOwner = findViewTreeLifecycleOwner()
+            ?: return Result.failure(IllegalStateException("Explorer lifecycle is unavailable"))
+        if (mArchiveOpenJob?.isActive == true) return Result.success(Unit)
+
+        mArchiveOpenJob = lifecycleOwner.lifecycleScope.launch {
+            var connection: ExplorerArchiveSessionConnection? = null
+            try {
+                isRefreshing = true
+                connection = provider.openArchive(context, surface, entryPoint, items.single(), action)
+                enterArchiveNavigation(connection)
+                connection = null
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                Log.e(LOG_TAG, "Failed to open host archive session", error)
+                ViewUtils.showToast(context, error.message ?: error.toString(), true)
+            } finally {
+                connection?.close()
+                isRefreshing = false
+                mArchiveOpenJob = null
+            }
+        }
+        return Result.success(Unit)
+    }
+
+    private fun enterArchiveNavigation(connection: ExplorerArchiveSessionConnection) {
+        closeArchiveNavigation(restorePrevious = true)
+        saveCurrentScrollPosition()
+        val previousExplorer = requireNotNull(mExplorer) { "Explorer is unavailable" }
+        val sourceParentPath = File(connection.sourcePath).parentFile?.path
+            ?: ExplorerPathSegmentBuilder.filesystemRoot(connection.sourcePath)
+        val sourceParentSegments = createPathSegments(sourceParentPath)
+        val provider = ArchiveExplorerProvider(connection)
+        val state = ArchiveNavigationState(
+            provider = provider,
+            previousExplorer = previousExplorer,
+            previousRootPath = mExplorerRootPath,
+            previousPageState = currentPageState,
+            previousHistory = mPageStateHistory.toList(),
+            sourceParentSegments = sourceParentSegments,
+        )
+
+        previousExplorer.unregisterChangeListener(this)
+        mArchiveNavigationState = state
+        mExplorer = Explorer(provider, 0)
+        mExplorerRootPath = provider.rootPage.path
+        mPageStateHistory.clear()
+        mExplorer?.registerChangeListener(this)
+        setRootPage(provider.rootPage)
+        updateProjectToolbarVisibility()
+        mOnArchiveModeStateChangeListener?.invoke(true)
+    }
+
+    private fun closeArchiveNavigation(restorePrevious: Boolean) {
+        val state = mArchiveNavigationState ?: return
+        mArchiveNavigationState = null
+        mExplorer?.unregisterChangeListener(this)
+        state.provider.close()
+        mOnArchiveModeStateChangeListener?.invoke(false)
+        if (!restorePrevious) return
+
+        mExplorer = state.previousExplorer
+        mExplorerRootPath = state.previousRootPath
+        mPageStateHistory.clear()
+        mPageStateHistory.addAll(state.previousHistory)
+        setCurrentPageState(state.previousPageState)
+        mExplorer?.registerChangeListener(this)
+        refreshCurrentPage()
+        updateProjectToolbarVisibility()
+    }
+
+    private fun updateProjectToolbarVisibility() {
+        if (mArchiveNavigationState != null) {
+            mProjectToolbar.visibility = GONE
+        } else {
+            mProjectToolbar.updateVisibility()
+        }
     }
 
     fun setExplorer(rootPath: String?, currentPath: String) {
@@ -843,7 +978,17 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun updatePathBar(page: ExplorerPage) {
-        binding?.explorerPathBar?.setSegments(createPathSegments(page.path))
+        binding?.explorerPathBar?.setSegments(createPathSegments(page))
+    }
+
+    private fun createPathSegments(page: ExplorerPage): List<ExplorerPathSegment> {
+        val archiveState = mArchiveNavigationState
+        if (archiveState != null && page is ArchiveExplorerPage) {
+            return archiveState.sourceParentSegments + archiveState.provider.ancestors(page).map { archivePage ->
+                ExplorerPathSegment(archivePage.name, archivePage.path)
+            }
+        }
+        return createPathSegments(page.path)
     }
 
     private fun createPathSegments(currentPath: String): List<ExplorerPathSegment> {
@@ -892,6 +1037,21 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun navigateToPath(targetPath: String) {
+        val archiveState = mArchiveNavigationState
+        if (archiveState != null) {
+            val archivePage = archiveState.provider.pageForPath(targetPath)
+            if (archivePage != null) {
+                if (archivePage.path == currentPage.path) return
+                clearSelection()
+                saveCurrentScrollPosition()
+                saveCurrentPageIntoHistory()
+                setCurrentPageState(ExplorerPageState(archivePage))
+                refreshCurrentPage()
+                return
+            }
+            closeArchiveNavigation(restorePrevious = true)
+            if (targetPath == currentPage.path) return
+        }
         if (targetPath == currentPage.path) return
         clearSelection()
         saveCurrentScrollPosition()
@@ -928,7 +1088,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun canGoBack(): Boolean {
-        return isInSelectionMode || !mPageStateHistory.empty()
+        return isInSelectionMode || !mPageStateHistory.empty() || mArchiveNavigationState != null
     }
 
     fun goBack() {
@@ -936,8 +1096,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             clearSelection()
             return
         }
-        setCurrentPageState(mPageStateHistory.pop())
-        refreshCurrentPage()
+        if (mPageStateHistory.isNotEmpty()) {
+            setCurrentPageState(mPageStateHistory.pop())
+            refreshCurrentPage()
+        } else {
+            closeArchiveNavigation(restorePrevious = true)
+        }
     }
 
     fun saveViewStates() {
@@ -961,7 +1125,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private fun savePageState() {
         val layoutManager = explorerItemListView!!.layoutManager as LinearLayoutManager?
         if (layoutManager != null) {
-            val currentScrollY = layoutManager.findFirstCompletelyVisibleItemPosition()
+            val currentScrollY = mArchiveNavigationState?.previousPageState?.scrollY
+                ?: layoutManager.findFirstCompletelyVisibleItemPosition()
             putInt(getPrefKey("page_state"), currentScrollY)
         }
     }
@@ -990,14 +1155,18 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     //  ! Apparently, a more graceful way is needed.
     //  ! zh-CN: 显然, 需要一个更优雅的实现方式.
     private fun saveExplorerState() {
-        val currentPath = currentPage.path
+        val archiveState = mArchiveNavigationState
+        val persistentPageState = archiveState?.previousPageState ?: currentPageState
+        val persistentHistory = archiveState?.previousHistory ?: mPageStateHistory.toList()
+        val currentPath = persistentPageState.page?.path ?: return
         putString(getPrefKey("explorer_current"), currentPath)
 
-        val rootPath = if (mPageStateHistory.isEmpty()) path else mPageStateHistory.firstElement().page!!.path
+        val rootPath = archiveState?.previousRootPath
+            ?: if (persistentHistory.isEmpty()) path else persistentHistory.first().page!!.path
         putString(getPrefKey("explorer_root"), rootPath)
 
         val historyItems = LinkedList<String>()
-        for (explorerPageState in mPageStateHistory) {
+        for (explorerPageState in persistentHistory) {
             historyItems.add(
                 (explorerPageState.page!!.path
                         + "," + explorerPageState.scrollY
@@ -1033,12 +1202,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun canGoUp(): Boolean {
+        val archivePage = currentPage as? ArchiveExplorerPage
+        if (archivePage != null) return archivePage.parentId != null
         return !externalStoragePath.startsWith(currentPage.path)
     }
 
     fun goUp() {
         clearSelection()
         saveCurrentPageIntoHistory()
+        val archiveState = mArchiveNavigationState
+        val archivePage = currentPage as? ArchiveExplorerPage
+        if (archiveState != null && archivePage != null) {
+            val parent = archivePage.parentId?.let { parentId ->
+                archiveState.provider.ancestors(archivePage)
+                    .firstOrNull { it.entryId == parentId }
+            } ?: return
+            setCurrentPageState(ExplorerPageState(parent))
+            refreshCurrentPage()
+            return
+        }
         val currentPagePath = currentPage.path
         val nextPagePath = if (Explorers.Providers.workspace().isCurrentSampleDir(currentDirectory)) {
             path
@@ -1124,7 +1306,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 isRefreshing = false
             }
             .subscribe({ newManager: ExplorerItemManager ->
-                mProjectToolbar.updateVisibility()
+                updateProjectToolbarVisibility()
                 explorerItemManager = newManager
                 notifyDataSetChanged()
                 post { scrollToPositionImmediately() }
@@ -1316,16 +1498,24 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             setVisibilityIf(mActionIconContainer, false)
 
             Observable.fromCallable {
-                val primaryAction = ExplorerPrimaryActionResolver.resolve(item.type)
-                val pluginPrimaryAction = runCatching {
-                    mPluginActionProvider?.actionsFor(
-                        mPluginActionSurface,
-                        ExplorerActionEntryPoint.PRIMARY_BUTTON,
-                        item,
-                    )?.firstOrNull()
-                }.onFailure { error ->
-                    Log.w(LOG_TAG, "Failed to resolve primary Explorer plugin action", error)
-                }.getOrNull()
+                val primaryAction = if (item is ArchiveExplorerItem) {
+                    null
+                } else {
+                    ExplorerPrimaryActionResolver.resolve(item.type)
+                }
+                val pluginPrimaryAction = if (item is ArchiveExplorerItem) {
+                    null
+                } else {
+                    runCatching {
+                        mPluginActionProvider?.actionsFor(
+                            mPluginActionSurface,
+                            ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                            item,
+                        )?.firstOrNull()
+                    }.onFailure { error ->
+                        Log.w(LOG_TAG, "Failed to resolve primary Explorer plugin action", error)
+                    }.getOrNull()
+                }
                 val hasPrimaryAction = primaryAction != null || pluginPrimaryAction != null
                 val shouldEditShow = item.isTextEditable || (item.isExternalEditable && !item.type.isImageFile())
                 val shouldRunAsMedia =
@@ -1477,6 +1667,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 toggleItemSelection(mExplorerItem)
                 return
             }
+            if (mExplorerItem is ArchiveExplorerFileItem) {
+                ViewUtils.showToast(context, R.string.text_unavailable)
+                return
+            }
             val pluginAction = resolvePluginAction(ExplorerActionEntryPoint.DEFAULT_CLICK)
             if (pluginAction == null) {
                 dispatchHostItemClick()
@@ -1500,7 +1694,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
         private fun bindSelectionState(item: ExplorerItem) {
             mItem.setBackgroundColor(context.getColor(if (isItemSelected(item)) R.color.window_background_selected else R.color.item_background_dark))
-            setVisibilityIf(mOptions, if (isInSelectionMode) INVISIBLE else VISIBLE)
+            setVisibilityIf(
+                mOptions,
+                when {
+                    item is ArchiveExplorerItem -> GONE
+                    isInSelectionMode -> INVISIBLE
+                    else -> VISIBLE
+                },
+            )
             if (isInSelectionMode) {
                 if (mActionIconContainer.isVisible) {
                     setVisibilityIf(mActionIconContainer, INVISIBLE)
@@ -1593,13 +1794,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             pluginAction: ResolvedExplorerAction,
             item: ExplorerItem = mExplorerItem,
         ): Boolean {
-            val provider = mPluginActionProvider ?: return false
+            if (mPluginActionProvider == null) return false
             return runCatching {
-                provider.launch(
+                dispatchPluginAction(
                     context,
                     mPluginActionSurface,
                     entryPoint,
-                    item,
+                    listOf(item),
                     pluginAction,
                 ).getOrThrow()
             }.onFailure { error ->
@@ -1758,12 +1959,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 if (pluginAction == null) {
                     return@setOnMenuItemClickListener this@ExplorerView.onMenuItemClick(menuItem)
                 }
-                val provider = mPluginActionProvider ?: return@setOnMenuItemClickListener false
-                provider.launch(
+                dispatchPluginAction(
                     context,
                     mPluginActionSurface,
                     ExplorerActionEntryPoint.OVERFLOW_MENU,
-                    actionItem,
+                    listOf(actionItem),
                     pluginAction,
                 )
                     .onSuccess { notifyItemOperated() }
@@ -1819,6 +2019,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             binding.item.setCardBackgroundColor(context.getColor(if (isItemSelected(data)) R.color.window_background_selected else R.color.item_background))
             mOptions.visibility = when {
                 data is ExplorerSamplePage -> GONE
+                data is ArchiveExplorerPage -> GONE
                 isInSelectionMode -> INVISIBLE
                 else -> VISIBLE
             }
@@ -1886,12 +2087,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 }
             popupMenu.setOnMenuItemClickListener { item: MenuItem ->
                 pluginMenuItems[item.itemId]?.let { pluginAction ->
-                    val provider = mPluginActionProvider ?: return@setOnMenuItemClickListener false
-                    provider.launch(
+                    dispatchPluginAction(
                         context,
                         mPluginActionSurface,
                         ExplorerActionEntryPoint.OVERFLOW_MENU,
-                        explorerPage,
+                        listOf(explorerPage),
                         pluginAction,
                     )
                         .onSuccess { notifyItemOperated() }

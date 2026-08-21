@@ -45,6 +45,7 @@ internal object ExplorerActionCatalogParser {
                 cardinality = action.getIntOrNull(ExplorerActionCatalogKeys.CARDINALITY),
                 accessMode = action.getInt(ExplorerActionCatalogKeys.ACCESS_MODE, 0),
                 placement = action.getInt(ExplorerActionCatalogKeys.PLACEMENT, 0),
+                presentation = action.getIntOrNull(ExplorerActionCatalogKeys.PRESENTATION),
                 mimeTypes = action.getStringArrayList(ExplorerActionCatalogKeys.MIME_TYPES),
                 extensions = action.getStringArrayList(ExplorerActionCatalogKeys.EXTENSIONS),
                 outputMode = action.getIntOrNull(ExplorerActionCatalogKeys.OUTPUT_MODE),

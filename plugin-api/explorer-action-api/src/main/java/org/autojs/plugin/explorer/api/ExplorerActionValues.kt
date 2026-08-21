@@ -15,6 +15,10 @@ object ExplorerActionValues {
     const val PLACEMENT_PRIMARY = 2
     const val PLACEMENT_SELECTION_TOOLBAR = 3
 
+    const val PRESENTATION_ACTIVITY = 1
+    /** v5. The host renders a read-only archive session in its own Explorer UI. */
+    const val PRESENTATION_HOST_EXPLORER = 2
+
     const val OUTPUT_NONE = 0
     const val OUTPUT_CREATE_SIBLING = 1
 }

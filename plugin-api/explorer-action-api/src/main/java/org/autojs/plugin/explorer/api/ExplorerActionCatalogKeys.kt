@@ -8,6 +8,8 @@ object ExplorerActionCatalogKeys {
     const val LABEL_RESOURCE_NAME = "labelResourceName"
     const val LABEL_FALLBACK = "labelFallback"
     const val ACTIVITY_CLASS_NAME = "activityClassName"
+    /** v5. Omitted descriptors are launched as activities. */
+    const val PRESENTATION = "presentation"
     const val PRIORITY = "priority"
     const val TARGET_KIND = "targetKind"
     /** v4. Omitted descriptors retain the v1-v3 single-target behavior. */
