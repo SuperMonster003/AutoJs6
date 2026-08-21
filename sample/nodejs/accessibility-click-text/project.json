@@ -4,6 +4,7 @@
   "main": "main.cjs",
   "node": {
     "backend": "embedded",
-    "timeoutMs": 10000
+    "timeoutMs": 10000,
+    "permissions": ["accessibility"]
   }
 }

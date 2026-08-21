@@ -4,6 +4,7 @@
   "main": "main.cjs",
   "node": {
     "backend": "embedded",
-    "timeoutMs": 15000
+    "timeoutMs": 15000,
+    "permissions": ["image", "screen_capture"]
   }
 }

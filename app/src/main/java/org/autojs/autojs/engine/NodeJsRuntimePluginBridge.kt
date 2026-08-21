@@ -50,7 +50,12 @@ object NodeJsRuntimePluginBridge {
         if (!isRequested()) {
             return NativeNodeEmbeddedScriptService.runScript(context, requestWithProvider, launchSurface)
         }
-        val pluginResult = runScript(context, requestWithProvider, launchSurface, outputListener)
+        val pluginResult = runScript(
+            context,
+            requestWithProvider.toPluginScriptRequest(),
+            launchSurface,
+            outputListener,
+        )
         if (pluginResult.isSafeForEmbeddedFallback() && !isRequired()) {
             Log.w(
                 TAG,
@@ -70,15 +75,32 @@ object NodeJsRuntimePluginBridge {
                 ),
             )
         }
-        return pluginResult.withLaunchSurfaceNativeValue(launchSurface)
+        return pluginResult
+            .withLaunchSurfaceNativeValue(launchSurface)
+            .toEmbeddedScriptResult()
     }
 
+    /** Compatibility overload used only while the retired embedded test surface still compiles. */
     fun runScript(
         context: Context,
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         outputListener: ((type: String, text: String) -> Unit)? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return runScript(
+            context = context,
+            request = request.toPluginScriptRequest(),
+            launchSurface = launchSurface,
+            outputListener = outputListener,
+        ).toEmbeddedScriptResult()
+    }
+
+    fun runScript(
+        context: Context,
+        request: NodePluginScriptRequest,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+        outputListener: ((type: String, text: String) -> Unit)? = null,
+    ): NodePluginScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
         val requestWithProvider = if (request.executionId.isNullOrBlank()) {
             request.copy(executionId = UUID.randomUUID().toString())
@@ -283,12 +305,12 @@ object NodeJsRuntimePluginBridge {
     }
 
     private fun pluginCancellationResult(
-        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        request: NodePluginScriptRequest,
         startedAt: Long,
         stage: String,
         backendDispatched: Boolean = false,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+    ): NodePluginScriptResult {
+        return NodePluginScriptResult(
             succeeded = false,
             exitCode = 1,
             resultText = null,
@@ -323,9 +345,9 @@ object NodeJsRuntimePluginBridge {
             .onFailure { error -> Log.w(TAG, "module_source_provider.cancel.failed", error) }
     }
 
-    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withLaunchSurfaceNativeValue(
+    private fun NodePluginScriptResult.withLaunchSurfaceNativeValue(
         launchSurface: String,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+    ): NodePluginScriptResult {
         if (launchSurface.isBlank()) {
             return this
         }
@@ -334,7 +356,7 @@ object NodeJsRuntimePluginBridge {
         )
     }
 
-    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.toPluginBundle(
+    private fun NodePluginScriptRequest.toPluginBundle(
         hostCapabilityBroker: NodeJsHostCapabilityBroker,
     ): Bundle {
         return Bundle().apply {
@@ -372,9 +394,9 @@ object NodeJsRuntimePluginBridge {
     }
 
     private fun NodeJsRuntimePluginHost.ScriptRunResult.toEmbeddedScriptResult(
-        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        request: NodePluginScriptRequest,
         startedAt: Long,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+    ): NodePluginScriptResult {
         return result.toEmbeddedScriptResult(
             request = request,
             startedAt = startedAt,
@@ -385,12 +407,12 @@ object NodeJsRuntimePluginBridge {
     }
 
     private fun Bundle.toEmbeddedScriptResult(
-        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        request: NodePluginScriptRequest,
         startedAt: Long,
         runtimeInfo: Bundle,
         candidate: NodeJsRuntimePluginHost.Candidate,
         hostDiagnostics: NodeJsRuntimePluginHost.OperationDiagnostics,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+    ): NodePluginScriptResult {
         val capabilities = runtimeInfo.getStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES).orEmpty()
         val succeeded = getBoolean(NodeJsRuntimeContract.KEY_SUCCEEDED, false)
         val timedOut = getBoolean(NodeJsRuntimeContract.KEY_TIMED_OUT, false)
@@ -431,7 +453,7 @@ object NodeJsRuntimePluginBridge {
                 ).forEach { (key, value) -> putFallback(key, value) }
                 putAll(hostDiagnostics.toNativeValues())
             }
-        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+        return NodePluginScriptResult(
             succeeded = succeeded,
             exitCode = optionalInt(NodeJsRuntimeContract.KEY_EXIT_CODE),
             resultText = getString(NodeJsRuntimeContract.KEY_RESULT_TEXT),
@@ -454,10 +476,10 @@ object NodeJsRuntimePluginBridge {
     }
 
     private fun pluginFailureResult(
-        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        request: NodePluginScriptRequest,
         startedAt: Long,
         error: Throwable,
-    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+    ): NodePluginScriptResult {
         val operationError = error as? NodeRuntimePluginOperationException
         val fallbackSafe = when (error) {
             is NodeRuntimePluginUnavailableException,
@@ -479,7 +501,7 @@ object NodeJsRuntimePluginBridge {
         }
         val candidate = operationError?.candidate
         val diagnostics = operationError?.diagnostics?.toNativeValues().orEmpty()
-        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+        return NodePluginScriptResult(
             succeeded = false,
             exitCode = 1,
             resultText = null,
@@ -510,7 +532,7 @@ object NodeJsRuntimePluginBridge {
         )
     }
 
-    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.isSafeForEmbeddedFallback(): Boolean {
+    private fun NodePluginScriptResult.isSafeForEmbeddedFallback(): Boolean {
         return nativeValues["embedded_script.runtime_plugin.fallback_safe"] == "true"
     }
 
@@ -576,13 +598,13 @@ object NodeJsRuntimePluginBridge {
         val terminalState: String
         val transitions: String
         if (succeeded) {
-            terminalState = NodeEmbeddedRuntimeState.STOPPED.name
+            terminalState = "STOPPED"
             transitions = "CREATED->STARTING|STARTING->RUNNING|RUNNING->DRAINING|DRAINING->STOPPED"
         } else if (timedOut) {
-            terminalState = NodeEmbeddedRuntimeState.STOPPING.name
+            terminalState = "STOPPING"
             transitions = "CREATED->STARTING|STARTING->RUNNING|RUNNING->TIMED_OUT|TIMED_OUT->STOPPING"
         } else {
-            terminalState = NodeEmbeddedRuntimeState.STOPPING.name
+            terminalState = "STOPPING"
             transitions = "CREATED->STARTING|STARTING->RUNNING|RUNNING->FAILED|FAILED->STOPPING"
         }
         return linkedMapOf(

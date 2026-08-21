@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 internal class NodeJsHostCapabilityBroker(
     context: Context,
-    request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+    request: NodePluginScriptRequest,
     launchSurface: String,
 ) : INodeJsHostCapabilityBroker.Stub() {
 

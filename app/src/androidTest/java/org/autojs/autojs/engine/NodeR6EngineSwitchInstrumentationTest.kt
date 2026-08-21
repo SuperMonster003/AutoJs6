@@ -47,7 +47,7 @@ class NodeR6EngineSwitchInstrumentationTest {
         NodeJsRuntimePluginHost.invalidateForTest(context)
         service.stopAll()
         awaitNoRegisteredEngines("before R6 engine-switch test")
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodeEmbeddedTestHarness.settlePluginRuntime()
     }
 
     @After
@@ -62,7 +62,7 @@ class NodeR6EngineSwitchInstrumentationTest {
             }
         }
         NodeJsRuntimePluginHost.invalidateForTest(context)
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodeEmbeddedTestHarness.settlePluginRuntime()
     }
 
     @Test
@@ -213,7 +213,7 @@ class NodeR6EngineSwitchInstrumentationTest {
     }
 
     private fun assertRequiredPluginExecution(label: String, observation: EngineObservation): PluginRun {
-        assertEquals("$label did not use the native Node host engine", NativeNodeEmbeddedJavaScriptEngine::class.java, observation.engineClass)
+        assertEquals("$label did not use the Node.js runtime plugin engine", NodePluginJavaScriptEngine::class.java, observation.engineClass)
         assertEquals("$label source routing drifted", JavaScriptSource.ENGINE_NODEJS, observation.sourceEngineName)
         assertEquals("$label did not return Node exit code 0", 0, observation.result)
         assertTrue("$label plugin PID is not remote: ${observation.pid}", observation.pid > 0 && observation.pid != Process.myPid())
@@ -284,15 +284,16 @@ class NodeR6EngineSwitchInstrumentationTest {
 
             override fun onSuccess(execution: ScriptExecution, result: Any?) {
                 val engine = execution.engine
-                val nativeEngine = engine as? NativeNodeEmbeddedJavaScriptEngine
+                val pluginEngine = engine as? NodePluginJavaScriptEngine
+                val pluginResult = pluginEngine?.lastPluginScriptResult
                 observation.set(
                     EngineObservation(
                         executionId = execution.id,
                         engineClass = engine.javaClass,
                         sourceEngineName = execution.source.engineName.orEmpty(),
                         result = result,
-                        pid = nativeEngine?.lastEmbeddedScriptResultPid ?: -1,
-                        nativeValues = nativeEngine?.lastEmbeddedScriptResultNativeValues?.toMap().orEmpty(),
+                        pid = pluginResult?.pid ?: -1,
+                        nativeValues = pluginResult?.nativeValues.orEmpty(),
                     ),
                 )
                 completed.countDown()

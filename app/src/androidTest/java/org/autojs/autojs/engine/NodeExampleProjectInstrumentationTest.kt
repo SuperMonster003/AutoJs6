@@ -13,17 +13,17 @@ class NodeExampleProjectInstrumentationTest {
 
     @Before
     fun settleBefore() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodeEmbeddedTestHarness.settlePluginRuntime()
     }
 
     @After
     fun settleAfter() {
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        NodeEmbeddedTestHarness.settlePluginRuntime()
     }
 
     @Test
     fun helloNodeExampleRuns() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node example project smoke")
+        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node example project smoke")
 
         val result = runExample("hello-node")
 
@@ -34,7 +34,7 @@ class NodeExampleProjectInstrumentationTest {
 
     @Test
     fun toastAppExampleRuns() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node toast/app example smoke")
+        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node toast/app example smoke")
 
         val result = runExample("toast-app")
 
@@ -49,7 +49,7 @@ class NodeExampleProjectInstrumentationTest {
 
     @Test
     fun commonJsFsNpmAndDisabledFeatureExamplesRun() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node stable example suite smoke")
+        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node stable example suite smoke")
 
         listOf(
             "cjs-package",
@@ -58,52 +58,58 @@ class NodeExampleProjectInstrumentationTest {
             "npm-pure-js-cjs",
             "disabled-features-demo",
         ).forEach { exampleName ->
-            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            NodeEmbeddedTestHarness.settlePluginRuntime()
             val result = runExample(exampleName)
 
             NodeEmbeddedTestHarness.assertSucceeded("$exampleName example", result)
-            assertTrue(result.stdout, result.stdout.contains("sample.$exampleName=PASS"))
-            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            assertTrue(
+                NodeEmbeddedTestHarness.describeResult("$exampleName output", result),
+                result.stdout.contains("sample.$exampleName=PASS"),
+            )
+            NodeEmbeddedTestHarness.settlePluginRuntime()
         }
     }
 
     @Test
     fun permissionAwareBridgeExamplesRun() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node permission-aware bridge example smoke")
+        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node permission-aware bridge example smoke")
 
         listOf(
             "accessibility-click-text",
             "screenshot-find-image",
         ).forEach { exampleName ->
-            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            NodeEmbeddedTestHarness.settlePluginRuntime()
             val result = runExample(exampleName)
 
             NodeEmbeddedTestHarness.assertSucceeded("$exampleName example", result)
-            assertTrue(result.stdout, result.stdout.contains("sample.$exampleName=PASS"))
-            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            assertTrue(
+                NodeEmbeddedTestHarness.describeResult("$exampleName output", result),
+                result.stdout.contains("sample.$exampleName=PASS"),
+            )
+            NodeEmbeddedTestHarness.settlePluginRuntime()
         }
     }
 
     @Test
     fun typeScriptRuntimeExamplesRun() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node TypeScript example smoke")
+        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node TypeScript example smoke")
 
         listOf(
             "typescript-cjs",
             "typescript-esm",
         ).forEach { exampleName ->
-            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            NodeEmbeddedTestHarness.settlePluginRuntime()
             val result = runExample(exampleName)
 
             NodeEmbeddedTestHarness.assertSucceeded("$exampleName example", result)
             assertTrue(result.stdout, result.stdout.contains("sample.$exampleName=PASS"))
-            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            NodeEmbeddedTestHarness.settlePluginRuntime()
         }
     }
 
     @Test
     fun desktopParitySafeSubsetExamplesRun() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node desktop parity safe subset example smoke")
+        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node desktop parity safe subset example smoke")
 
         val result = runExample("desktop-parity-suite", "smoke.cjs")
         val description = NodeEmbeddedTestHarness.describeResult("desktop-parity-suite safe subset smoke", result)
@@ -122,7 +128,7 @@ class NodeExampleProjectInstrumentationTest {
 
     @Test
     fun proParitySafeSubsetExamplesRun() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Pro parity safe subset example smoke")
+        NodeEmbeddedTestHarness.assumePluginRuntimeAvailable("Node Pro parity safe subset example smoke")
 
         val result = runExample("pro-parity-suite", "smoke.cjs")
 
@@ -133,11 +139,11 @@ class NodeExampleProjectInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("sample.pro-parity-suite.smoke=PASS"))
     }
 
-    private fun runExample(exampleName: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+    private fun runExample(exampleName: String): NodePluginScriptResult {
         return runExample(exampleName, null)
     }
 
-    private fun runExample(exampleName: String, entryOverride: String?): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+    private fun runExample(exampleName: String, entryOverride: String?): NodePluginScriptResult {
         val projectDir = File(context.cacheDir, "node-example-$exampleName-${System.nanoTime()}").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create Node example project directory: $absolutePath" }
@@ -147,7 +153,7 @@ class NodeExampleProjectInstrumentationTest {
             val main = exampleMainFile(projectDir, entryOverride)
             val timeoutMs = exampleTimeoutMs(projectDir)
             check(main.isFile) { "Node example $exampleName is missing declared main file: ${main.absolutePath}" }
-            NodeEmbeddedTestHarness.runEmbeddedScript(
+            NodeEmbeddedTestHarness.runPluginScript(
                 source = main.readText(),
                 sourceName = main.absolutePath,
                 workingDirectory = projectDir,

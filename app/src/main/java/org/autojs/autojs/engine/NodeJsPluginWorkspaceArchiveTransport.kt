@@ -143,7 +143,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
 
         fun create(
             context: Context,
-            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            request: NodePluginScriptRequest,
         ): NodeJsPluginWorkspaceArchiveTransport {
             val appContext = context.applicationContext
             val fallbackRoot = File(
@@ -239,7 +239,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
         private fun writeExplicitInputArchive(
             root: File,
             workingDirectory: File,
-            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            request: NodePluginScriptRequest,
             archive: File,
         ): Set<String> {
             var fileCount = 0

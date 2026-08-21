@@ -19,7 +19,7 @@ object NodeJavaScriptEngineFactory {
             NodeRuntimeBackend.NATIVE -> NativeNodeJavaScriptEngine(context)
             NodeRuntimeBackend.EMBEDDED -> NativeNodeEmbeddedJavaScriptEngine(context)
             NodeRuntimeBackend.PLUGIN,
-            NodeRuntimeBackend.PLUGIN_OPTIONAL -> NativeNodeEmbeddedJavaScriptEngine(context)
+            NodeRuntimeBackend.PLUGIN_OPTIONAL -> NodePluginJavaScriptEngine(context)
             NodeRuntimeBackend.AUTO -> when {
                 NativeNodeRuntimeBridge.isAvailable -> NativeNodeJavaScriptEngine(context)
                 else -> {

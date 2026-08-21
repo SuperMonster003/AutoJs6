@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.App
 import org.autojs.autojs6.BuildConfig
 import org.junit.Assert.assertTrue
@@ -22,6 +23,16 @@ internal object NodeEmbeddedTestHarness {
         assumeTrue(
             "Build with -Pautojs.nodejs.embedded.script.enabled=true to run $label.",
             BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+    }
+
+    fun assumePluginRuntimeAvailable(label: String = "Node.js runtime plugin instrumentation") {
+        val probe = runCatching {
+            runBlocking { NodeJsRuntimePluginHost.probe(targetContext) }
+        }
+        assumeTrue(
+            "$label requires a discoverable, trusted Node.js runtime plugin: ${probe.exceptionOrNull()?.message}",
+            probe.isSuccess,
         )
     }
 
@@ -53,6 +64,49 @@ internal object NodeEmbeddedTestHarness {
         SystemClock.sleep(750L)
     }
 
+    fun settlePluginRuntime() {
+        (targetContext.applicationContext as? App)?.cancelDeferredNativeNodePrewarm()
+    }
+
+    fun runPluginScript(
+        source: String,
+        sourceName: String,
+        workingDirectory: File = targetContext.cacheDir,
+        sandboxRoot: File? = null,
+        timeoutMs: Long = 10_000L,
+        env: Map<String, String> = emptyMap(),
+        moduleSources: Map<String, String> = emptyMap(),
+        runtimeModuleSources: Map<String, String> = emptyMap(),
+        esmEnabled: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
+        dynamicImportEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
+        rawNodeNetworkModulesEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
+        workerThreadsEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
+        childProcessEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
+        javaInteropEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
+        runtimeAdapter: String? = null,
+    ): NodePluginScriptResult {
+        return NodeJsRuntimePluginBridge.runScript(
+            targetContext,
+            NodePluginScriptRequest(
+                source = source,
+                sourceName = sourceName,
+                workingDirectory = workingDirectory.absolutePath,
+                sandboxRoot = (sandboxRoot ?: workingDirectory).absolutePath,
+                timeoutMs = timeoutMs,
+                env = env,
+                moduleSources = moduleSources,
+                runtimeModuleSources = runtimeModuleSources,
+                esmEnabled = esmEnabled,
+                dynamicImportEnabled = dynamicImportEnabled,
+                rawNodeNetworkModulesEnabled = rawNodeNetworkModulesEnabled,
+                workerThreadsEnabled = workerThreadsEnabled,
+                childProcessEnabled = childProcessEnabled,
+                javaInteropEnabled = javaInteropEnabled,
+                runtimeAdapter = runtimeAdapter,
+            ),
+        )
+    }
+
     fun runEmbeddedScript(
         source: String,
         sourceName: String,
@@ -73,7 +127,7 @@ internal object NodeEmbeddedTestHarness {
         queueTimeoutMs: Long = 0L,
         processPoolSlot: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return NativeNodeEmbeddedScriptService.runScript(
+        return NodeJsRuntimePluginBridge.runScript(
             targetContext,
             NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
                 source = source,
@@ -103,7 +157,28 @@ internal object NodeEmbeddedTestHarness {
         assertTrue("$label timed out\n${describeResult(label, result)}", !result.timedOut)
     }
 
+    fun assertSucceeded(label: String, result: NodePluginScriptResult) {
+        assertTrue(describeResult(label, result), result.succeeded)
+        assertTrue("$label timed out\n${describeResult(label, result)}", !result.timedOut)
+    }
+
     fun describeResult(label: String, result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult): String {
+        return buildString {
+            appendLine(label)
+            appendLine("succeeded=${result.succeeded}")
+            appendLine("exitCode=${result.exitCode}")
+            appendLine("errorCode=${result.errorCode}")
+            appendLine("errorName=${result.errorName}")
+            appendLine("errorMessage=${result.errorMessage}")
+            appendLine("stdout:")
+            appendLine(result.stdout)
+            appendLine("stderr:")
+            appendLine(result.stderr)
+            appendLine("nativeValues=${result.nativeValues}")
+        }
+    }
+
+    fun describeResult(label: String, result: NodePluginScriptResult): String {
         return buildString {
             appendLine(label)
             appendLine("succeeded=${result.succeeded}")
