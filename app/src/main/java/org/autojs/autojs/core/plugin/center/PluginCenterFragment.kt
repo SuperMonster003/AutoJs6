@@ -31,6 +31,7 @@ import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
+import org.autojs.autojs.core.plugin.yolo.YoloPluginHost
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
@@ -41,6 +42,7 @@ import org.autojs.autojs6.databinding.FragmentPluginCenterBinding
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
+import org.autojs.plugin.yolo.api.YoloContract
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -919,6 +921,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 OfflineDocsPluginHost.probe(contextRef, item.packageName)
             }
             OpenCvPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
+            YoloContract.SERVICE_ACTION -> {
+                YoloPluginHost.probePackage(contextRef, item.packageName)
+            }
             else -> {
                 when {
                     item.isOcrService || item.engine in OCR_SERVICE_ENGINES -> OcrPluginHost.probe(contextRef, item.packageName)
@@ -936,13 +941,14 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 if (!isAdded || _binding == null) return@launch
 
                 val item = latestFullItems.firstOrNull { it.packageName == packageName && it.isInstalled } ?: return@repeat
-                val canAutoEnable = when (item.authorizedState) {
-                    PluginAuthorizedState.OFFICIAL,
-                    PluginAuthorizedState.TRUSTED,
-                    PluginAuthorizedState.USER_GRANTED,
-                        -> true
-                    else -> false
-                }
+                val canAutoEnable = PluginDefaultEnabledPolicy.isEnabledByDefault(item.engine) &&
+                        when (item.authorizedState) {
+                            PluginAuthorizedState.OFFICIAL,
+                            PluginAuthorizedState.TRUSTED,
+                            PluginAuthorizedState.USER_GRANTED,
+                                -> true
+                            else -> false
+                        }
                 if (!canAutoEnable || item.isEnabled) return@launch
                 if (item.isAwaitingFreshInstallProbe()) {
                     vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope)

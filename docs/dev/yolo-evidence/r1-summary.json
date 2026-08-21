@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-08-11T09:36:18.9099416Z",
+  "gate": "YOLO_R1",
+  "status": {
+    "source": "PASS",
+    "build": "PASS",
+    "native": "PASS",
+    "binderPfdProviderE2e": "NOT_RUN_R2",
+    "productionRoute": "NOT_ADDED"
+  },
+  "commands": [
+    ".\\gradlew.bat --console=plain :plugin-api:yolo-api:testDebugUnitTest :plugin-api:yolo-api:assembleDebug",
+    ".\\tools\\yolo\\verify-yolo-r1.ps1 -DeviceSerial 968e9f18"
+  ],
+  "main": {
+    "baseCommit": "3c170896d8e4b528f1aa85953a4698d1742c8344",
+    "baseCommitMessage": "feat: add YOLO plugin protocol R0",
+    "yoloApiMainSourceSnapshotSha256": "4cd47305c70b5c1533fbb16efe85bd9c572e571d05b841770976ee3593dd9174",
+    "sdkSafeOpenFailureCodec": true,
+    "unitTests": {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "sibling": {
+    "path": "D:\\idea-projects\\AutoJs6-Plugin-Yolo-NCNN",
+    "gitStateAtGate": "UNBORN:master",
+    "checkpointCommit": "01b9093c55c7c1a78f39246c671e928df244483f",
+    "checkpointTree": "2f63d991985ebdfa8241637529993b2c006ca374",
+    "remotes": 0,
+    "license": "MPL-2.0",
+    "applicationId": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+    "providerId": "autojs6-yolo-ncnn",
+    "sourceSnapshot": {
+      "scope": "git ls-files --others --exclude-standard",
+      "sort": "ordinal relative path",
+      "entryFormat": "<lowercase SHA-256><two spaces><slash-normalized relative path><LF>",
+      "encoding": "UTF-8 without BOM",
+      "files": 111,
+      "sha256": "24ea94fa0efd128f65ec1ddff630f19d045a340a5184912993f8193468e14335"
+    }
+  },
+  "protocolAars": [
+    {
+      "name": "common-plugin-api.aar",
+      "length": 10882,
+      "sha256": "d745bb24d6a6995e68ebea27d592faec162f0bad4f9bf70cb038a480ad8c6df2"
+    },
+    {
+      "name": "protocol-wire-api.aar",
+      "length": 30717,
+      "sha256": "6c597ec095852eac7e6277574191141100dc96b6c5a803725ed540f42aa7d871"
+    },
+    {
+      "name": "yolo-api.aar",
+      "length": 129532,
+      "sha256": "ce9763faa62977ef90af65ca42cf96670a8d59e68a057e309b92e9615ba06a37"
+    }
+  ],
+  "ncnn": {
+    "release": "20260526",
+    "upstreamRevision": "e54f7b1f88434e1d844ea0551b880a1cfb079ce1",
+    "archiveSha256": "85b18b875488585c2d21360430e0e54abb6c04aa88094b471c20208ab55ff796",
+    "arm64StaticLibrarySha256": "505e484ae18b59e51cb35343506146ab101e608a86f8c1d0834e761b99b2a490",
+    "licenseSha256": "7c974bac98848df46be1af5bdaa3c3c9c01f6082a90f55caeb7f60c6208aa255",
+    "ndk": "29.0.14206865",
+    "cmake": "3.22.1",
+    "stl": "c++_static",
+    "abi": "arm64-v8a",
+    "vulkan": false
+  },
+  "fixture": {
+    "distribution": "LOCAL_VALIDATION_ONLY",
+    "model": "YOLO11n detect",
+    "exporter": "ultralytics 8.4.117 / pnnx 20260526",
+    "input": "in0 [1,3,640,640] RGB/255",
+    "output": "out0 [1,84,8400] no objectness",
+    "decoder": "ultralytics-detect",
+    "modelParamSha256": "041f788d58e9831f33fdfe00296e4d815e6d2421146ac55b3056cc8813441998",
+    "modelBinSha256": "2c75384fc331b576c1de59ae16524578831b1a50b5eed9f63878fa8f16464bbb",
+    "imageSha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63",
+    "manifestSha256": "ab729b5f63cccc22fe63d30b71973778e06db2a4a1354882c46bb35cc3c2d39a"
+  },
+  "build": {
+    "gradle": "9.5.0",
+    "agp": "9.2.1",
+    "kotlin": "2.3.20",
+    "jdk": "21",
+    "providerApk": {
+      "length": 6072776,
+      "sha256": "a595a0521b7025b67e6fff87cdf99328cdd3b8192ecdfd918ed3627e38aeebf7",
+      "nativeEntry": "lib/arm64-v8a/libautojs_yolo.so",
+      "containsModelOrImage": false
+    },
+    "instrumentationApk": {
+      "length": 10441796,
+      "sha256": "1c7d71c98a1d34f81d6c6de3bbcb58d05833de9a1d2a3cbc650d5325386d4060"
+    },
+    "nativeLibrary": {
+      "length": 8428664,
+      "sha256": "f688f9559f22348ecb8bd5f4d022d4813e184c3996bf7968d8f029c329fbd087"
+    }
+  },
+  "device": {
+    "serial": "968e9f18",
+    "model": "23046RP50C",
+    "apiLevel": 35,
+    "abiList": "arm64-v8a,armeabi-v7a,armeabi",
+    "fingerprint": "Xiaomi/liuqin/liuqin:15/AQ3A.241006.001/OS2.0.9.0.VMYCNXM:user/release-keys",
+    "protectedSerialTouched": false,
+    "instrumentationTests": 1,
+    "elapsedMillis": 78,
+    "detections": [
+      { "classId": 5, "label": "bus", "confidence": 0.9392049312591553, "bounds": [11.918380737304688, 228.39425659179688, 799.22509765625, 735.2150268554688] },
+      { "classId": 0, "label": "person", "confidence": 0.9019904732704163, "bounds": [48.592716217041016, 397.960693359375, 243.21273803710938, 904.5357055664062] },
+      { "classId": 0, "label": "person", "confidence": 0.8492761254310608, "bounds": [670.556396484375, 392.5901184082031, 810, 879.6233520507812] },
+      { "classId": 0, "label": "person", "confidence": 0.8327871561050415, "bounds": [223.11959838867188, 405.57794189453125, 345.2289733886719, 859.7220458984375] },
+      { "classId": 0, "label": "person", "confidence": 0.3993437588214874, "bounds": [0, 550.1927490234375, 66.00817108154297, 871.7786254882812] }
+    ],
+    "cleanup": {
+      "providerPackageAbsent": true,
+      "testPackageAbsent": true
+    }
+  },
+  "limitations": [
+    "R1 instrumentation calls the materialization and native engine boundary directly; Host-to-provider Binder/PFD E2E belongs to R2.",
+    "The session-open deadline is checked before and after native model construction, but model loading is not cooperatively abortable; no hard-timeout claim is made.",
+    "The YOLO11n model and bus image remain ignored local fixtures and are not shipped in the provider APK."
+  ]
+}

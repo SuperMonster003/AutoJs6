@@ -110,6 +110,7 @@ private val pluginApi = listOf(
     "offline-docs-api",
     "opencv-api",
     "mlkit-barcode-api",
+    "yolo-api",
     "paddle-ocr-api",
     "paddle-ocr-engine",
     "rapid-ocr-engine",
@@ -125,6 +126,7 @@ private val pluginConformanceTestApps = listOf(
     "lua-runtime-conformance",
     "python-runtime-conformance",
     "python-runtime-api-consumer",
+    "yolo-provider-conformance",
 )
 
 include(

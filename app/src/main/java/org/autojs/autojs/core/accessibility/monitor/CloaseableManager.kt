@@ -4,22 +4,36 @@ import java.io.Closeable
 
 class CloseableManager {
 
-    private val mCloseables = hashSetOf<Closeable>()
+    private val mCloseables = linkedSetOf<Closeable>()
 
+    @Synchronized
     fun add(closeable: Closeable) {
-        mCloseables.add(closeable)
+        mCloseables += closeable
     }
 
     fun recycleAll() {
-        val iterator = mCloseables.iterator()
-        while (iterator.hasNext()) {
-            iterator.next().close()
+        val closeables = synchronized(this) {
+            mCloseables.toList().also { mCloseables.clear() }
         }
-        mCloseables.clear()
+        var firstFailure: Throwable? = null
+        closeables.forEach { closeable ->
+            try {
+                closeable.close()
+            } catch (failure: Throwable) {
+                val priorFailure = firstFailure
+                if (priorFailure == null) {
+                    firstFailure = failure
+                } else if (priorFailure !== failure) {
+                    priorFailure.addSuppressed(failure)
+                }
+            }
+        }
+        firstFailure?.let { throw it }
     }
 
+    @Synchronized
     fun remove(closeable: Closeable) {
-        mCloseables.remove(closeable)
+        mCloseables -= closeable
     }
 
 }

@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "roadmapStage": "R5",
+  "status": "PASS",
+  "evidenceLevel": "clean-source-serial-build-test-signed-nondebuggable-arm64-device-hostile-descriptor-resource",
+  "generatedAtUtc": "2026-08-13T05:13:47.0466281Z",
+  "mainRevision": "c40464957239e1378acd7be92647a4c863ac60e5",
+  "providerRevision": "2aa5b100edd5e0f7691cb7edb3dd3b38c194f77d",
+  "sourceRepositoriesCleanBeforeAndAfter": true,
+  "evidenceStatus": {
+    "source": "PASS",
+    "androidBuild": "PASS",
+    "hostileBinder": "PASS",
+    "wrongCallbackUid": "PASS",
+    "descriptorIntegrity": "PASS",
+    "resource200Frame": "PASS",
+    "apkPackaging": "PASS",
+    "elf16kCompatible": "PASS_STATIC_ONLY",
+    "nativeLoadArm64Device": "PASS",
+    "nativeLoad16kDevice": "NOT_RUN_NO_16K_DEVICE",
+    "performance": "RECORDED_NO_THRESHOLD",
+    "soak": "NOT_RUN",
+    "rc": "TEST_SIGNED_NONDEBUGGABLE_DEVICE_VALIDATED",
+    "production": "NOT_CLAIMED"
+  },
+  "generatedReceipts": {
+    "aggregate": {
+      "path": "build/reports/yolo/r5-summary.generated.json",
+      "sha256": "2a4a872cf3e13baffd0ad09076c811548e095407faa858b4f0ae3ef3cfbd2f9e"
+    },
+    "hostile": {
+      "path": "build/reports/yolo/r5-hostile-device.generated.json",
+      "sha256": "c7102378bb434b87760830a235ac38f0ccb4e3e6afc8539d7ebbfdaed0a26c03"
+    },
+    "descriptor": {
+      "path": "build/reports/yolo/r5-descriptor-device.generated.json",
+      "sha256": "fe850de0ffdee4109ede90a7b0c7e2f7317ac4c1cd66a00f143bb80ee7086f6d"
+    },
+    "resource": {
+      "path": "build/reports/yolo/r5-resource-device.generated.json",
+      "sha256": "631171ec8955820e6cb82068e7e015d64577bed8a2c6eae27a732e714a61c47a"
+    },
+    "packaging": {
+      "path": "build/reports/yolo/r5-packaging.generated.json",
+      "sha256": "3c6138cb65e57bf60d8b69d755f86f7e26a2753b692369e324a2f115c16604fa"
+    }
+  },
+  "invocation": {
+    "command": "pwsh -NoProfile -File .\\tools\\yolo\\verify-yolo-r5.ps1 -DeviceSerial QV710AF65F -SiblingPath D:\\idea-projects\\AutoJs6-Plugin-Yolo-NCNN -Qv710SoakConfirmedIdle",
+    "explicitDeviceSerial": "QV710AF65F",
+    "parallelGradle": false,
+    "connectedGradleTasks": [],
+    "providerGradleTasks": [
+      ":app:testDebugUnitTest",
+      ":app:assembleRc",
+      ":app:compileDebugAndroidTestKotlin"
+    ],
+    "hostGradleTasks": [
+      ":app:assembleAppDebug",
+      ":app:assembleAppDebugAndroidTest",
+      ":test-apps:yolo-provider-conformance:assembleDebug"
+    ]
+  },
+  "device": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "api": 31,
+    "abi": "arm64-v8a",
+    "fingerprint": "Sony/XQ-AT72_CN/XQ-AT72:12/58.2.A.10.44A/058002A0100044A0891821322:user/release-keys",
+    "pageSizeBytes": 4096,
+    "qv710SoakConfirmedIdle": true,
+    "competingRunnerScanImmediatelyBeforeAdb": "PASS",
+    "temporaryAvdStarted": false
+  },
+  "apks": {
+    "host": {
+      "applicationId": "org.autojs.autojs6",
+      "sha256": "9e057b0d0424ba63ebe10a1bbf7a833bf3e467ac5353f419f5d6c9076b42f499",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8"
+    },
+    "instrumentation": {
+      "applicationId": "org.autojs.autojs6.test",
+      "sha256": "a3701bd1029bf4236b782b86d09e0c266db8d62360e982cce9dde8e82379322c",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8"
+    },
+    "providerRc": {
+      "applicationId": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+      "versionName": "0.1.0-rc-test-signed",
+      "sha256": "270e75793f8d812066a8210fe88b9235c910d6ab2d2562394d940db007c23aa7",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "debuggable": false,
+      "testSigned": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "modelFree": true
+    },
+    "fakeProvider": {
+      "applicationId": "org.autojs.plugin.yolo.fake",
+      "sha256": "0559f7fb534dd2fe603a0a945baeb3f3fee85e1712e5821bdfb1148d1fa2170b",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "testOnly": true
+    },
+    "allFourSameSigner": true
+  },
+  "instrumentation": {
+    "runner": "androidx.test.runner.AndroidJUnitRunner",
+    "passedTests": 5,
+    "tests": [
+      {
+        "class": "org.autojs.autojs.core.plugin.yolo.YoloProviderR5ConformanceAndroidTest",
+        "method": "duplicateAndLateTerminalsFailClosedWithoutCompletingAnotherRequest",
+        "status": "PASS"
+      },
+      {
+        "class": "org.autojs.autojs.core.plugin.yolo.YoloProviderR5ConformanceAndroidTest",
+        "method": "busyAndBothTimeoutCancellationOutcomesAreDeterministic",
+        "status": "PASS"
+      },
+      {
+        "class": "org.autojs.autojs.core.plugin.yolo.YoloProviderR5ConformanceAndroidTest",
+        "method": "wrongCallbackUidAndProviderDeathInvalidateThePinnedSession",
+        "status": "PASS"
+      },
+      {
+        "class": "org.autojs.autojs.core.plugin.yolo.YoloRealProviderR5DescriptorAndroidTest",
+        "method": "hostileRegularDescriptorsFailVersionedThenProductionHostDetectsAndReopens",
+        "status": "PASS"
+      },
+      {
+        "class": "org.autojs.autojs.core.plugin.yolo.YoloRealProviderR5ResourceAndroidTest",
+        "method": "productionHostMaintainsBoundedResourcesAcrossTwoHundredFrames",
+        "status": "PASS"
+      }
+    ]
+  },
+  "providerJvmTests": {
+    "status": "PASS",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": [
+      "StaleModelSessionCleanupTest",
+      "YoloProviderDiagnosticsTest",
+      "YoloProviderServiceErrorsTest"
+    ],
+    "scope": "JVM_POLICY_AND_ERROR_CODEC_ONLY",
+    "unsupportedCapabilityAndProtocolStableMapping": "PASS"
+  },
+  "hostileProvider": {
+    "productionHost": true,
+    "fakeProviderIsSeparateTestOnlyPackage": true,
+    "explicitExactProviderSelection": true,
+    "cases": [
+      "duplicate-terminal",
+      "late-old-terminal",
+      "host-busy",
+      "timeout-cancel-ack",
+      "timeout-cancel-no-ack",
+      "wrong-callback-uid",
+      "provider-death"
+    ],
+    "identityNegative": "wrong-callback-uid",
+    "temporaryWrongSignerPackage": "NOT_CREATED_UID_NEGATIVE_USED",
+    "retryAfterDispatch": "NOT_PERFORMED",
+    "providerDeathScope": "TEST_ONLY_FAKE_PROVIDER_SESSION_INVALIDATION"
+  },
+  "descriptorIntegrity": {
+    "realNcnnProvider": true,
+    "actionlessExactComponentBind": true,
+    "remoteProviderBinder": true,
+    "hostileDescriptors": [
+      {
+        "case": "descriptor-shorter-than-declared",
+        "actualSize": 1689,
+        "declaredSize": 1690,
+        "stableCode": "INVALID_REQUEST",
+        "versionedFailure": true,
+        "hostDescriptorsClosed": true
+      },
+      {
+        "case": "descriptor-longer-than-declared",
+        "actualSize": 1689,
+        "declaredSize": 1688,
+        "stableCode": "INVALID_REQUEST",
+        "versionedFailure": true,
+        "hostDescriptorsClosed": true
+      },
+      {
+        "case": "same-length-bad-sha256",
+        "actualSize": 1689,
+        "declaredSize": 1689,
+        "stableCode": "INVALID_REQUEST",
+        "versionedFailure": true,
+        "hostDescriptorsClosed": true
+      }
+    ],
+    "idleAfterHostileDescriptors": {
+      "activeSessions": 0,
+      "sessionGate": false,
+      "activeNativeHandles": 0,
+      "modelDirCount": 0
+    },
+    "validProductionReopen": {
+      "detections": 5,
+      "minimumReferenceIou": 0.9999994629995906,
+      "maximumConfidenceDelta": 2.980232238769531e-7,
+      "modelDescriptorsClosedAfterOpen": true,
+      "imageDescriptorClosedAfterDispatch": true,
+      "uniqueTerminal": true,
+      "idempotentClose": true,
+      "reopenSucceeded": true,
+      "idleAfterBothCloses": true
+    }
+  },
+  "resourceRun": {
+    "realNcnnProvider": true,
+    "warmupFrames": 20,
+    "measuredFrames": 200,
+    "resourceSampleIntervalFrames": 20,
+    "resourceSampleCount": 11,
+    "uniqueTerminalEveryFrame": true,
+    "imagePfdClosedEveryFrame": true,
+    "providerPidStableEveryFrame": true,
+    "resources": {
+      "providerFd": {
+        "earlyMedian": 73,
+        "lateMedian": 73,
+        "delta": 0,
+        "allowance": 2,
+        "status": "PASS"
+      },
+      "hostFd": {
+        "earlyMedian": 107,
+        "lateMedian": 107,
+        "delta": 0,
+        "allowance": 2,
+        "status": "PASS"
+      },
+      "providerRssKb": {
+        "earlyMedian": 190408,
+        "lateMedian": 196920,
+        "delta": 6512,
+        "tolerance": 38082,
+        "runaway": false
+      },
+      "hostRssKb": {
+        "earlyMedian": 279984,
+        "lateMedian": 275928,
+        "delta": -4056,
+        "tolerance": 55997,
+        "runaway": false
+      },
+      "afterPrimaryClose": {
+        "activeSessions": 0,
+        "sessionGate": false,
+        "activeNativeHandles": 0,
+        "modelDirCount": 0
+      },
+      "afterReopenClose": {
+        "activeSessions": 0,
+        "sessionGate": false,
+        "activeNativeHandles": 0,
+        "modelDirCount": 0
+      }
+    },
+    "timingsMillis": {
+      "clock": "SystemClock.elapsedRealtimeNanos",
+      "coldTargetWall": 257.474635,
+      "sessionOpenWall": 361.361979,
+      "firstDetectWall": 780.309322,
+      "firstProviderInference": 580,
+      "warmupWall": {
+        "count": 20,
+        "p50": 379.96927,
+        "p95": 529.654062,
+        "mean": 416.61107789999994
+      },
+      "warmupProvider": {
+        "count": 20,
+        "p50": 274,
+        "p95": 418,
+        "mean": 300.45
+      },
+      "measuredWall": {
+        "count": 200,
+        "p50": 391.427135,
+        "p95": 426.257708,
+        "mean": 393.43670324000004
+      },
+      "measuredProvider": {
+        "count": 200,
+        "p50": 269,
+        "p95": 300,
+        "mean": 276.06
+      },
+      "performanceThresholdApplied": false
+    }
+  },
+  "packaging": {
+    "providerCandidate": "TEST_SIGNED_NONDEBUGGABLE_RC",
+    "applicationId": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+    "versionName": "0.1.0-rc-test-signed",
+    "minSdk": 24,
+    "targetSdk": 36,
+    "abis": [
+      "arm64-v8a"
+    ],
+    "modelFree": true,
+    "buildIdentity": {
+      "standalonePackagingSubgateArtifactBuildIdentityProven": false,
+      "aggregateSerializedCleanBuildAttribution": true,
+      "minifyEnabled": false,
+      "shrinkResourcesEnabled": false,
+      "releaseShrinkerAdmission": "R6"
+    },
+    "native": {
+      "entry": "lib/arm64-v8a/libautojs_yolo.so",
+      "length": 5319472,
+      "sha256": "67d5e81d077b778855547b3ee41e8e6643c86a0a095163486b8d2dbf538152e0",
+      "elfClass": "ELF64",
+      "elfType": "DYN",
+      "machine": "AArch64",
+      "loadSegmentAlignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "allLoadOffsetsCongruent": true,
+      "zipalign16k": "PASS",
+      "packagingStrategy": "extracted-native"
+    },
+    "licenseAssets": {
+      "assets/licenses/MPL-2.0.txt": {
+        "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04",
+        "sourceBytesMatch": true
+      },
+      "assets/licenses/ncnn-20260526.txt": {
+        "sha256": "7c974bac98848df46be1af5bdaa3c3c9c01f6082a90f55caeb7f60c6208aa255",
+        "sourceBytesMatch": true
+      },
+      "assets/third_party/ncnn/provenance.lock.json": {
+        "sha256": "75667400295a93a756d5b5278d0cedad297d94b6f3dc046ddcdafe0458396099",
+        "sourceBytesMatch": true
+      }
+    },
+    "ncnnVersion": "20260526",
+    "ncnnLicense": "BSD-3-Clause",
+    "ndkVersion": "29.0.14206865",
+    "stl": "c++_static",
+    "vulkan": false,
+    "elf16kClaim": "PASS_STATIC_ONLY",
+    "nativeLoadArm64DeviceClaim": "PASS_ON_4K_PAGE_DEVICE_VIA_REAL_INFERENCE",
+    "nativeLoad16kDeviceClaim": "NOT_RUN_NO_16K_DEVICE"
+  },
+  "fixture": {
+    "name": "official-yolo11n-bus",
+    "modelAndImageExternalOnly": true,
+    "modelManifestSha256": "ab729b5f63cccc22fe63d30b71973778e06db2a4a1354882c46bb35cc3c2d39a",
+    "modelParamSha256": "041f788d58e9831f33fdfe00296e4d815e6d2421146ac55b3056cc8813441998",
+    "modelBinSha256": "2c75384fc331b576c1de59ae16524578831b1a50b5eed9f63878fa8f16464bbb",
+    "imageSha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63",
+    "result": "1 bus + 4 person"
+  },
+  "lifecycleEvidenceBoundary": {
+    "fakeProviderDeathInvalidatesPinnedHostSession": "PASS",
+    "realNcnnProviderDeathRecovery": "NOT_RUN",
+    "realNcnnProviderStartupStaleCleanup": "JVM_AND_ANDROID_BUILD_EVIDENCE_ONLY",
+    "longSoak": "NOT_RUN",
+    "fullApiMatrix": "NOT_RUN",
+    "performanceThreshold": "NOT_APPLIED",
+    "staticElf16kIsDeviceLoadEvidence": false
+  },
+  "cleanup": {
+    "packagesAbsentBefore": true,
+    "packagesAbsentAfter": true,
+    "uniqueStagingRemoved": true,
+    "temporaryAvdStarted": false
+  },
+  "claims": {
+    "R5": "PASS",
+    "RC": "TEST_SIGNED_NONDEBUGGABLE_DEVICE_VALIDATED",
+    "PRODUCTION": "NOT_CLAIMED"
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "roadmapStage": "R3",
+  "status": "PASS",
+  "evidenceLevel": "real-device-production-rhino-exact-provider-ncnn",
+  "generatedAtUtc": "2026-08-11T11:57:28.1367137Z",
+  "mainRevision": "e6833d5b7b5b84d151067371189abb2fa0ce89fe",
+  "providerRevision": "01b9093c55c7c1a78f39246c671e928df244483f",
+  "sourceRepositoriesClean": true,
+  "evidenceStatus": {
+    "source": "PASS",
+    "static": "NOT_RUN_BY_R3_GATE",
+    "jvm": "NOT_RUN_BY_R3_GATE",
+    "androidBuild": "PASS",
+    "binderPfd": "PASS_VIA_PRODUCTION_HOST_CHAIN",
+    "nativeRuntime": "PASS",
+    "deviceE2e": "PASS",
+    "production": "NOT_CLAIMED_PUBLIC_PREVIEW_ONLY"
+  },
+  "generatedReceipt": {
+    "path": "build/reports/yolo/r3-summary.generated.json",
+    "sha256": "0f254c6cebf031dc0197263dd2a8ca957add85370d9b5fe4ede9257c4887c78b"
+  },
+  "invocation": {
+    "script": "tools/yolo/verify-yolo-r3.ps1",
+    "explicitDeviceSerial": "QV710AF65F",
+    "gradleTasks": [
+      ":app:assembleDebug",
+      ":app:assembleAppDebug",
+      ":app:assembleAppDebugAndroidTest"
+    ]
+  },
+  "device": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "api": 31,
+    "abi": "arm64-v8a",
+    "fingerprint": "Sony/XQ-AT72_CN/XQ-AT72:12/58.2.A.10.44A/058002A0100044A0891821322:user/release-keys",
+    "qv710SoakConfirmedIdle": true,
+    "temporaryAvdStarted": false
+  },
+  "provider": {
+    "component": "io.github.supermonster003.autojs6.plugin.yolo.ncnn/.provider.YoloProviderService",
+    "sameSigner": true,
+    "separateUid": true
+  },
+  "script": {
+    "engineClass": "org.autojs.autojs.engine.LoopBasedJavaScriptEngine",
+    "sha256": "4beea2bd192726d86c0d07da809a88565d2b0163614c1252013bc045beb14d14",
+    "publicApiPresent": true,
+    "idempotentClose": true,
+    "rectCentersUsable": true
+  },
+  "apks": {
+    "host": {
+      "path": "E:\\AutoJs6-Worktree-Yolo\\app\\build\\outputs\\apk\\app\\debug\\autojs6-v6.8.0-alpha7-arm64-v8a.apk",
+      "sha256": "ad44abd5b95176612a6c55fb00e9052531adfee3ccbca40525ca52da950d3700",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true,
+      "pluginNativeAbsent": true
+    },
+    "provider": {
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Yolo-NCNN\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-yolo-ncnn-v0.1.0-arm64-v8a.apk",
+      "sha256": "a595a0521b7025b67e6fff87cdf99328cdd3b8192ecdfd918ed3627e38aeebf7",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true,
+      "arm64NativePresent": true
+    },
+    "instrumentation": {
+      "path": "E:\\AutoJs6-Worktree-Yolo\\app\\build\\outputs\\apk\\androidTest\\app\\debug\\app-app-debug-androidTest.apk",
+      "sha256": "db881332ccb21f72b454fea1836f7b342b2f1ea639d4e5dd7402109a267736fb",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true,
+      "pluginNativeAbsent": true
+    }
+  },
+  "fixture": {
+    "model-manifest-v1.json": {
+      "length": 1689,
+      "sha256": "ab729b5f63cccc22fe63d30b71973778e06db2a4a1354882c46bb35cc3c2d39a"
+    },
+    "expected-bus-detections.json": {
+      "length": 1242,
+      "sha256": "b79f7f914fab82cf4a9c80e72e1453e7cf3dd6a986b5e3d45481927410268d5f"
+    },
+    "model.ncnn.param": {
+      "length": 22713,
+      "sha256": "041f788d58e9831f33fdfe00296e4d815e6d2421146ac55b3056cc8813441998"
+    },
+    "model.ncnn.bin": {
+      "length": 10566144,
+      "sha256": "2c75384fc331b576c1de59ae16524578831b1a50b5eed9f63878fa8f16464bbb"
+    },
+    "bus.jpg": {
+      "length": 137419,
+      "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
+    }
+  },
+  "fixtureDeployment": {
+    "manifestSourceName": "model-manifest-v1.json",
+    "manifestStagedName": "model.json",
+    "modelAndImageExternalOnly": true
+  },
+  "instrumentation": {
+    "runner": "androidx.test.runner.AndroidJUnitRunner",
+    "class": "org.autojs.autojs.runtime.api.augment.yolo.YoloRhinoR3AndroidTest",
+    "method": "publicYoloApiRunsProductionRhinoThroughExactRemoteProvider",
+    "singleMethodOnly": true,
+    "passedTests": 1
+  },
+  "test": {
+    "status": "PASS",
+    "defaultOffObserved": true,
+    "productionRhino": true,
+    "publicApiPresent": true,
+    "idempotentClose": true,
+    "rectCentersUsable": true,
+    "imageWidth": 810,
+    "imageHeight": 1080,
+    "detections": [
+      {
+        "classId": 5,
+        "label": "bus",
+        "confidence": 0.9392049312591553,
+        "bounds": [11.918380737304688, 228.39425659179688, 799.22509765625, 735.2150268554688],
+        "center": [405.5717468261719, 481.80462646484375]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.9019904732704163,
+        "bounds": [48.592716217041016, 397.960693359375, 243.21273803710938, 904.5357055664062],
+        "center": [145.90272521972656, 651.2481689453125]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.8492761254310608,
+        "bounds": [670.556396484375, 392.5901184082031, 810, 879.6233520507812],
+        "center": [740.2781982421875, 636.1067504882812]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.8327871561050415,
+        "bounds": [223.11959838867188, 405.57794189453125, 345.2289733886719, 859.7220458984375],
+        "center": [284.1742858886719, 632.6500244140625]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.3993437588214874,
+        "bounds": [0, 550.1927490234375, 66.00817108154297, 871.7786254882812],
+        "center": [33.004085540771484, 710.9857177734375]
+      }
+    ],
+    "comparisons": [
+      {"classId": 5, "label": "bus", "iou": 0.9999999069711301, "confidenceDelta": 5.960464477539063e-8},
+      {"classId": 0, "label": "person", "iou": 0.9999995445697621, "confidenceDelta": 2.980232238769531e-7},
+      {"classId": 0, "label": "person", "iou": 0.9999999997700463, "confidenceDelta": 0},
+      {"classId": 0, "label": "person", "iou": 0.9999999997989771, "confidenceDelta": 2.980232238769531e-7},
+      {"classId": 0, "label": "person", "iou": 0.9999994629995906, "confidenceDelta": 5.960464477539063e-8}
+    ]
+  },
+  "chain": {
+    "productionRhino": true,
+    "publicYoloApi": true,
+    "exactComponent": true,
+    "externalProviderUid": true,
+    "binderPfdHostBoundary": true,
+    "providerJniNcnn": true
+  },
+  "cleanup": {
+    "packagesAbsentBefore": true,
+    "packagesAbsentAfter": true,
+    "uniqueStagingRemoved": true,
+    "manuallyRecheckedAfterGate": true
+  },
+  "claims": {
+    "SOURCE": "PASS",
+    "ANDROID_BUILD": "PASS",
+    "DEVICE_E2E": "PASS",
+    "PUBLIC_PREVIEW": "PASS",
+    "PRODUCTION": "NOT_CLAIMED"
+  }
+}

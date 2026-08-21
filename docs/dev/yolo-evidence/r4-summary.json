@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "roadmapStage": "R4",
+  "status": "PASS",
+  "evidenceLevel": "real-device-production-rhino-two-model-public-import-exact-provider-ncnn",
+  "generatedAtUtc": "2026-08-11T13:47:11.0642014Z",
+  "mainRevision": "a83dafd2bf7b2221463e63d73f11579d2ddfff2e",
+  "providerRevision": "cdca31ad4ca450852bf293bcce0666c8f00c627d",
+  "sourceRepositoriesClean": true,
+  "evidenceStatus": {
+    "source": "PASS",
+    "static": "NOT_RUN_BY_R4_GATE",
+    "jvm": "NOT_RUN_BY_R4_GATE",
+    "androidBuild": "PASS",
+    "binderPfd": "PASS_VIA_PRODUCTION_HOST_CHAIN",
+    "nativeRuntime": "PASS",
+    "deviceE2e": "PASS",
+    "publicModelImport": "PASS",
+    "production": "NOT_CLAIMED_R4_PUBLIC_MODEL_IMPORT_ONLY"
+  },
+  "generatedReceipt": {
+    "path": "build/reports/yolo/r4-summary.generated.json",
+    "sha256": "2fcee2b83e69af5333d741c0e35c0c933011f3786bbebf917bb99c6b80b32f73"
+  },
+  "invocation": {
+    "script": "tools/yolo/verify-yolo-r4.ps1",
+    "explicitDeviceSerial": "QV710AF65F",
+    "qv710SoakConfirmedIdle": true,
+    "gradleTasks": [
+      ":app:assembleDebug",
+      ":app:assembleAppDebug",
+      ":app:assembleAppDebugAndroidTest"
+    ]
+  },
+  "device": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "api": 31,
+    "abi": "arm64-v8a",
+    "fingerprint": "Sony/XQ-AT72_CN/XQ-AT72:12/58.2.A.10.44A/058002A0100044A0891821322:user/release-keys",
+    "temporaryAvdStarted": false
+  },
+  "provider": {
+    "component": "io.github.supermonster003.autojs6.plugin.yolo.ncnn/.provider.YoloProviderService",
+    "sameSigner": true,
+    "separateUid": true,
+    "decoderIds": ["ultralytics-detect"]
+  },
+  "script": {
+    "engineClass": "org.autojs.autojs.engine.LoopBasedJavaScriptEngine",
+    "sha256": "e8c3709d19df886170e6cf9a6d6823def4d482f9721d09c1f4cd922d1f83f2a3",
+    "publicApiPresent": true,
+    "idempotentClose": true,
+    "officialRectCentersUsable": true,
+    "customRectCentersUsable": true
+  },
+  "apks": {
+    "host": {
+      "sha256": "f135c7512d0151cdd92eb98bd6b7208680d9aa2ff77162aade9c3047d06dca30",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true,
+      "pluginNativeAbsent": true
+    },
+    "provider": {
+      "sha256": "e6710c4686bf3d559b79babaa042f399c70fb318190773b997ac1f6571388f0b",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true,
+      "arm64NativePresent": true
+    },
+    "instrumentation": {
+      "sha256": "f94a4d95669c4f20a61b3928441da9ce5fe4cfcd56414d05da84bfa106bf8ddd",
+      "signerSha256": "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8",
+      "modelFree": true,
+      "pluginNativeAbsent": true
+    }
+  },
+  "models": {
+    "official": {
+      "name": "yolo11n",
+      "labels": 80,
+      "outputShape": [1, 84, 8400],
+      "decoderId": "ultralytics-detect",
+      "fixtureHashes": {
+        "model-manifest-v1.json": {"length": 1689, "sha256": "ab729b5f63cccc22fe63d30b71973778e06db2a4a1354882c46bb35cc3c2d39a"},
+        "model.ncnn.param": {"length": 22713, "sha256": "041f788d58e9831f33fdfe00296e4d815e6d2421146ac55b3056cc8813441998"},
+        "model.ncnn.bin": {"length": 10566144, "sha256": "2c75384fc331b576c1de59ae16524578831b1a50b5eed9f63878fa8f16464bbb"},
+        "bus.jpg": {"length": 137419, "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"},
+        "expected-bus-detections.json": {"length": 1242, "sha256": "b79f7f914fab82cf4a9c80e72e1453e7cf3dd6a986b5e3d45481927410268d5f"}
+      },
+      "result": {
+        "detections": 5,
+        "labels": {"bus": 1, "person": 4},
+        "minimumReferenceIou": 0.9999994629995906,
+        "maximumConfidenceDelta": 2.980232238769531e-7,
+        "originalCoordinates": true
+      }
+    },
+    "custom": {
+      "name": "yolo11n-synthetic",
+      "labels": 1,
+      "outputShape": [1, 5, 8400],
+      "decoderId": "ultralytics-detect",
+      "localValidationOnly": true,
+      "fixtureHashes": {
+        "model-manifest-v1.json": {"length": 531, "sha256": "a560f1810b25a62a7ad9a09867ab18f65cf5758e0168e6eaa3f9525d7e29ac27"},
+        "model.ncnn.param": {"length": 22638, "sha256": "7da440f6d3627d695211d079b5b2fa6bde4e331ce04e0321535c9bb222c59496"},
+        "model.ncnn.bin": {"length": 10430540, "sha256": "4470cc8498b96d04dad02a087a9d310786fca1142ba3113efcab23ffb77b3c15"},
+        "synthetic-heldout.png": {"length": 4173, "sha256": "0c8143456c8dcb248a64ff12c66dd1287538c07768cac2a3fa14df0b767b2e9c"},
+        "expected-synthetic-detection.json": {"length": 877, "sha256": "e1da675f9d39efc90e53254d282e86951031ac48859a31256a2d136be18683b9"}
+      },
+      "result": {
+        "detections": 1,
+        "label": "synthetic-target",
+        "confidence": 0.035259220749139786,
+        "bounds": [287.9212646484375, 160.68710327148438, 503.3575439453125, 301.0795593261719],
+        "groundTruthIou": 0.9310071220417985,
+        "referenceIou": 0.9999997826266999,
+        "confidenceDelta": 7.078051567077637e-8,
+        "originalCoordinates": true
+      }
+    }
+  },
+  "negative": {
+    "case": "output-shape-row-count-mismatch",
+    "manifestShape": [1, 6, 8400],
+    "publicApi": "yolo.load",
+    "stableErrorCode": "YOLO_MODEL_REJECTED"
+  },
+  "instrumentation": {
+    "runner": "androidx.test.runner.AndroidJUnitRunner",
+    "class": "org.autojs.autojs.runtime.api.augment.yolo.YoloRhinoR4AndroidTest",
+    "method": "publicYoloApiImportsOfficialAndCustomModelsThroughExactRemoteProvider",
+    "singleMethodOnly": true,
+    "passedTests": 1
+  },
+  "chain": {
+    "productionRhino": true,
+    "publicYoloApi": true,
+    "exactComponent": true,
+    "externalProviderUid": true,
+    "binderPfdHostBoundary": true,
+    "providerJniNcnn": true
+  },
+  "cleanup": {
+    "packagesAbsentBefore": true,
+    "packagesAbsentAfter": true,
+    "uniqueStagingRemoved": true,
+    "manuallyRecheckedAfterGate": true
+  },
+  "claims": {
+    "SOURCE": "PASS",
+    "ANDROID_BUILD": "PASS",
+    "DEVICE_E2E": "PASS",
+    "PUBLIC_MODEL_IMPORT": "PASS",
+    "PRODUCTION": "NOT_CLAIMED"
+  }
+}

@@ -56,7 +56,7 @@ class ScrollControllableViewPagerInstrumentationTest {
     @Test
     fun cancelsDragWhenActivePointerIsMissing() {
         val activity = instrumentation.startActivitySync(
-            Intent(instrumentation.targetContext, ScrollControllableViewPagerTestActivity::class.java)
+            Intent(instrumentation.context, ScrollControllableViewPagerTestActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         ) as ScrollControllableViewPagerTestActivity
         lateinit var pager: ScrollControllableViewPager

@@ -57,6 +57,9 @@
             <action android:name="org.autojs.plugin.ON_DEVICE_AI" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.YOLO" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.EDITOR" />
             <category android:name="ace-editor" />
         </intent>

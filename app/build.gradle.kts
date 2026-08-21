@@ -31,6 +31,18 @@ val flavorNameApp = "app"
 val flavorNameInrt = "inrt"
 val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
+val yoloR6ReleaseAndroidTestProperty = "yoloR6ReleaseAndroidTest"
+val yoloR6ReleaseAndroidTest = providers.gradleProperty(yoloR6ReleaseAndroidTestProperty)
+    .map { value ->
+        when (val normalized = value.trim().lowercase()) {
+            "true", "1", "yes", "on" -> true
+            "false", "0", "no", "off" -> false
+            else -> throw GradleException(
+                "$yoloR6ReleaseAndroidTestProperty must be one of true/false, 1/0, yes/no, or on/off; was '$normalized'",
+            )
+        }
+    }
+    .orElse(false)
 val buildActionAssemble = "assemble"
 val buildConfigFieldNameIsInrt = "is${flavorNameInrt.uppercaseFirstChar()}"
 val buildTypeNames = listOf(buildTypeDebug, buildTypeRelease)
@@ -658,6 +670,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: Rapid OCR Engine
     implementation(project(":plugin-api:rapid-ocr-engine"))
+
+    // Plugin API: YOLO API
+    implementation(project(":plugin-api:yolo-api"))
 }
 
 dependencies /* MIME */ {
@@ -860,6 +875,13 @@ android {
                 ).let { arguments(it) }
             }
         }
+    }
+
+    // R6 production-device evidence must exercise the exact release Host while keeping normal
+    // developer builds on the default debug instrumentation target. The controlled producer is
+    // the only caller that enables this property and requires the production signing config.
+    if (yoloR6ReleaseAndroidTest.get()) {
+        testBuildType = buildTypeRelease
     }
 
     flavorDimensions.add(flavorDimension)

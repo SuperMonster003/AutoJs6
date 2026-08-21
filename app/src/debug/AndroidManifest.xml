@@ -6,11 +6,4 @@
         </intent>
     </queries>
 
-    <application>
-        <activity
-            android:name="org.autojs.autojs.ui.pager.ScrollControllableViewPagerTestActivity"
-            android:exported="false"
-            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
-    </application>
-
 </manifest>

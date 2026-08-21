@@ -47,6 +47,8 @@ AGENTS.md
 !/tools/nodejs/**
 !/tools/python/
 !/tools/python/**
+!/tools/yolo/
+!/tools/yolo/**
 
 /gradle/wrappers/backup/
 
