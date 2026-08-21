@@ -5,6 +5,8 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskOutcome
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
@@ -165,7 +167,7 @@ class AiPluginAskRuntimeTest {
         ),
         providerId = "example.provider",
         modelId = "example-model",
-        prompt = "prompt",
+        messages = listOf(OnDeviceAiPluginMessage(OnDeviceAiPluginMessageRole.USER, "prompt")),
         timeoutMillis = 5_000L,
     )
 

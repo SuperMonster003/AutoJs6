@@ -10,6 +10,7 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskOutcome
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
 import org.autojs.autojs.rhino.TopLevelScope
@@ -64,7 +65,7 @@ class AiServicePluginRouteTest {
         assertEquals("org.example.provider.OnDeviceAiService", runner.request.get()?.component?.className)
         assertEquals("example.provider", runner.request.get()?.providerId)
         assertEquals("example-model", runner.request.get()?.modelId)
-        assertEquals("prompt", runner.request.get()?.prompt)
+        assertEquals("prompt", runner.request.get()?.messages?.single()?.content)
         assertEquals(2_500L, runner.request.get()?.timeoutMillis)
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
@@ -153,7 +154,7 @@ class AiServicePluginRouteTest {
         assertEquals("org.example.provider.OnDeviceAiService", runner.request.get()?.component?.className)
         assertEquals("example.provider", runner.request.get()?.providerId)
         assertEquals("example-model", runner.request.get()?.modelId)
-        assertEquals("prompt", runner.request.get()?.prompt)
+        assertEquals("prompt", runner.request.get()?.messages?.single()?.content)
         assertEquals(2_500L, runner.request.get()?.timeoutMillis)
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
@@ -189,6 +190,58 @@ class AiServicePluginRouteTest {
         assertEquals(1, runner.startCount.get())
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
+        service.close()
+    }
+
+    @Test
+    fun pluginAskForwardsSystemAndConversationMessagesInOrderWithoutCloudFallback() {
+        val dispatchers = TestDispatchers()
+        val runner = FakePluginAskRunner(
+            synchronousOutcome = OnDeviceAiPluginAskOutcome.Completed("system-aware answer"),
+        )
+        val resolved = AtomicReference<Any?>()
+        val rejected = AtomicReference<Any?>()
+        val httpCallCount = AtomicInteger()
+        TestContext.preferenceCallCount.set(0)
+        val service = service(runner, dispatchers, httpCallCount = httpCallCount)
+
+        service.ask(
+            pluginInput(
+                messages = """[
+                    {"role":"system","content":"Reply with the configured marker."},
+                    {"role":"user","content":"first question"},
+                    {"role":"assistant","content":"first answer"},
+                    {"role":"user","content":"final question"}
+                ]""",
+            ),
+        )
+            .onResolve(callback(resolved::set))
+            .onReject(callback(rejected::set))
+        dispatchers.drain()
+
+        assertEquals("system-aware answer", resolved.get())
+        assertNull(rejected.get())
+        val request = checkNotNull(runner.request.get())
+        assertEquals(
+            listOf(
+                OnDeviceAiPluginMessageRole.SYSTEM,
+                OnDeviceAiPluginMessageRole.USER,
+                OnDeviceAiPluginMessageRole.ASSISTANT,
+                OnDeviceAiPluginMessageRole.USER,
+            ),
+            request.messages.map { it.role },
+        )
+        assertEquals(
+            listOf(
+                "Reply with the configured marker.",
+                "first question",
+                "first answer",
+                "final question",
+            ),
+            request.messages.map { it.content },
+        )
+        assertEquals(0, TestContext.preferenceCallCount.get())
+        assertEquals(0, httpCallCount.get())
         service.close()
     }
 
@@ -265,7 +318,7 @@ class AiServicePluginRouteTest {
         assertEquals("org.example.provider.OnDeviceAiService", streamRunner.request.get()?.component?.className)
         assertEquals("example.provider", streamRunner.request.get()?.providerId)
         assertEquals("example-model", streamRunner.request.get()?.modelId)
-        assertEquals("prompt", streamRunner.request.get()?.prompt)
+        assertEquals("prompt", streamRunner.request.get()?.messages?.single()?.content)
         assertEquals(2_500L, streamRunner.request.get()?.timeoutMillis)
         val error = (errors.get() as Wrapper).unwrap() as Map<*, *>
         assertEquals("plugin", error["route"])
@@ -359,12 +412,13 @@ class AiServicePluginRouteTest {
         return unsafe.allocateInstance(TestContext::class.java) as TestContext
     }
 
-    private fun pluginInput(timeoutMillis: Long? = null): AiRequestInput {
+    private fun pluginInput(
+        timeoutMillis: Long? = null,
+        messages: String = """[{"role":"user","content":"prompt"}]""",
+    ): AiRequestInput {
         val timeout = timeoutMillis?.let { ", \"timeout\": $it" }.orEmpty()
         return AiRequestInput(
-            messages = JsonParser.parseString(
-                """[{"role":"user","content":"prompt"}]""",
-            ).asJsonArray,
+            messages = JsonParser.parseString(messages).asJsonArray,
             options = JsonParser.parseString(
                 """
                 {

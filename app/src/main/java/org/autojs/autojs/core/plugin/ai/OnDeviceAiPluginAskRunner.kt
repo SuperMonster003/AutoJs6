@@ -3,16 +3,42 @@ package org.autojs.autojs.core.plugin.ai
 import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiValidation
 import org.autojs.plugin.ondeviceai.api.AiGenerationOptions
+import org.autojs.plugin.ondeviceai.api.AiMessageRole
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
 import java.io.Closeable
+
+internal enum class OnDeviceAiPluginMessageRole(val protocolValue: Int) {
+    SYSTEM(AiMessageRole.SYSTEM),
+    USER(AiMessageRole.USER),
+    ASSISTANT(AiMessageRole.ASSISTANT),
+}
+
+internal class OnDeviceAiPluginMessage(
+    val role: OnDeviceAiPluginMessageRole,
+    val content: String,
+) {
+    val contentBytes: Int = AiValidation.utf8Size(content)
+
+    init {
+        AiValidation.requireUtf8(
+            content,
+            1,
+            AiCommonLimits.MAX_INLINE_PAYLOAD_BYTES,
+            "on-device AI plugin message content",
+        )
+    }
+
+    override fun toString(): String =
+        "OnDeviceAiPluginMessage(role=$role, contentBytes=$contentBytes)"
+}
 
 internal class OnDeviceAiPluginAskRequest(
     val component: OnDeviceAiProviderComponent,
     val providerId: String,
     /** Null selects the provider's single installed model; ambiguity fails the request. */
     val modelId: String?,
-    val prompt: String,
+    messages: List<OnDeviceAiPluginMessage>,
     val timeoutMillis: Long,
     val maximumOutputBytes: Long = DEFAULT_MAXIMUM_OUTPUT_BYTES,
     val maximumOutputTokens: Long? = null,
@@ -20,15 +46,21 @@ internal class OnDeviceAiPluginAskRequest(
     val topK: Int? = null,
     val topP: Double? = null,
 ) {
+    val messages: List<OnDeviceAiPluginMessage> = messages.toList()
+    val inputBytes: Long = this.messages.sumOf { it.contentBytes.toLong() }
+
     init {
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
         modelId?.let { require(AiValidation.STABLE_ID.matches(it)) { "Invalid model ID" } }
-        AiValidation.requireUtf8(
-            prompt,
-            1,
-            AiCommonLimits.MAX_INLINE_PAYLOAD_BYTES,
-            "on-device AI plugin prompt",
-        )
+        require(this.messages.size in 1..OnDeviceAiLimits.MAX_MESSAGES) {
+            "Invalid on-device AI plugin message count"
+        }
+        require(this.messages.last().role == OnDeviceAiPluginMessageRole.USER) {
+            "The final on-device AI plugin message must have the user role"
+        }
+        require(inputBytes in 1L..OnDeviceAiLimits.MAX_TOTAL_INPUT_BYTES) {
+            "Invalid on-device AI plugin input size"
+        }
         require(timeoutMillis in OnDeviceAiLimits.MIN_TIMEOUT_MILLIS..OnDeviceAiLimits.MAX_TIMEOUT_MILLIS) {
             "Invalid on-device AI plugin timeout"
         }
@@ -51,7 +83,8 @@ internal class OnDeviceAiPluginAskRequest(
 
     override fun toString(): String =
         "OnDeviceAiPluginAskRequest(component=$component, providerId=$providerId, modelId=$modelId, " +
-            "promptBytes=${AiValidation.utf8Size(prompt)}, timeoutMillis=$timeoutMillis, " +
+            "messageCount=${messages.size}, messageRoles=${messages.map { it.role }}, " +
+            "inputBytes=$inputBytes, timeoutMillis=$timeoutMillis, " +
             "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
             "temperature=$temperature, topK=$topK, topP=$topP)"
 
@@ -124,7 +157,7 @@ internal fun interface OnDeviceAiPluginAskRunner {
 }
 
 /**
- * Provider-neutral events for the narrow prompt-only plugin stream route.
+ * Provider-neutral events for the local text-message plugin stream route.
  *
  * Binder/session identities and provider-native payloads deliberately remain below this boundary.
  */

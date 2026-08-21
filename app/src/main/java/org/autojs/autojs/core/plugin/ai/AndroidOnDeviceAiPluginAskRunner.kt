@@ -12,7 +12,6 @@ import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ondeviceai.api.AiContentPart
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
 import org.autojs.plugin.ondeviceai.api.AiMessage
-import org.autojs.plugin.ondeviceai.api.AiMessageRole
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilities
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
@@ -29,6 +28,42 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+
+internal fun OnDeviceAiPluginAskRequest.toProtocolMessages(): List<AiMessage> = messages.map { message ->
+    val contentBytes = message.content.toByteArray(Charsets.UTF_8)
+    check(contentBytes.size == message.contentBytes) { "AI plugin message UTF-8 size changed" }
+    AiMessage(
+        role = message.role.protocolValue,
+        parts = listOf(
+            AiContentPart(
+                AiPayloadReference(
+                    mimeType = OnDeviceAiMimeType.PLAIN,
+                    declaredLengthBytes = contentBytes.size.toLong(),
+                    inlineBytes = contentBytes,
+                    charset = "utf-8",
+                ),
+            ),
+        ),
+    )
+}
+
+internal fun onDeviceAiPluginCapabilityRequirement(
+    request: OnDeviceAiPluginAskRequest,
+    streaming: Boolean,
+): OnDeviceAiCapabilityRequirement = OnDeviceAiCapabilityRequirement(
+    requiredCapabilityIds = if (streaming) {
+        setOf(OnDeviceAiCapabilityId.STREAMING)
+    } else {
+        emptySet()
+    },
+    minimumMessages = request.messages.size,
+    minimumContentParts = request.messages.size,
+    minimumContextBytes = request.inputBytes,
+    minimumOutputBytes = 1L,
+    minimumRequestDescriptors = 0,
+    minimumSessionDescriptors = 0,
+    requiredTextMimeTypes = setOf(OnDeviceAiMimeType.PLAIN),
+)
 
 /**
  * Lazily initialized process owner for the explicit, default-off Android on-device AI plugin route.
@@ -187,7 +222,12 @@ private class ProcessOnDeviceAiPluginAskRunner(
                 component = request.component,
                 providerId = request.providerId,
                 modelId = null,
-                prompt = MODEL_LIST_PLACEHOLDER_PROMPT,
+                messages = listOf(
+                    OnDeviceAiPluginMessage(
+                        role = OnDeviceAiPluginMessageRole.USER,
+                        content = MODEL_LIST_PLACEHOLDER_PROMPT,
+                    ),
+                ),
                 timeoutMillis = request.timeoutMillis,
             ),
             streaming = false,
@@ -220,25 +260,6 @@ private class ProcessOnDeviceAiPluginAskRunner(
 
     private fun now(): Long = SystemClock.elapsedRealtime()
 
-    private fun requirement(
-        promptBytes: Int,
-        streaming: Boolean,
-    ): OnDeviceAiCapabilityRequirement =
-        OnDeviceAiCapabilityRequirement(
-            requiredCapabilityIds = if (streaming) {
-                setOf(OnDeviceAiCapabilityId.STREAMING)
-            } else {
-                emptySet()
-            },
-            minimumMessages = 1,
-            minimumContentParts = 1,
-            minimumContextBytes = promptBytes.toLong(),
-            minimumOutputBytes = 1L,
-            minimumRequestDescriptors = 0,
-            minimumSessionDescriptors = 0,
-            requiredTextMimeTypes = setOf(OnDeviceAiMimeType.PLAIN),
-        )
-
     private class Attempt(
         private val backend: ProcessOnDeviceAiPluginAskRunner,
         private val request: OnDeviceAiPluginAskRequest,
@@ -250,8 +271,8 @@ private class ProcessOnDeviceAiPluginAskRunner(
         private val lock = Any()
         private val startedAtMillis = backend.now()
         private val deadlineAtMillis = saturatingAdd(startedAtMillis, request.timeoutMillis)
-        private val promptBytes = request.prompt.toByteArray(Charsets.UTF_8)
-        private val requirement = backend.requirement(promptBytes.size, streaming)
+        private val protocolMessages = request.toProtocolMessages()
+        private val requirement = onDeviceAiPluginCapabilityRequirement(request, streaming)
 
         /** The model the catalog resolved for this attempt; echoed on completion. */
         private var resolvedModelId: String? = request.modelId
@@ -540,21 +561,7 @@ private class ProcessOnDeviceAiPluginAskRunner(
                     protocolVersion = plan.pinnedProvider.protocolVersion,
                     providerId = request.providerId,
                     modelId = plan.modelId,
-                    messages = listOf(
-                        AiMessage(
-                            role = AiMessageRole.USER,
-                            parts = listOf(
-                                AiContentPart(
-                                    AiPayloadReference(
-                                        mimeType = OnDeviceAiMimeType.PLAIN,
-                                        declaredLengthBytes = promptBytes.size.toLong(),
-                                        inlineBytes = promptBytes,
-                                        charset = "utf-8",
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
+                    messages = protocolMessages,
                     options = request.toGenerationOptions(
                         stream = streaming,
                         maximumOutputBytes = outputLimit,

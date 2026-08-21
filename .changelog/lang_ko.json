@@ -35,7 +35,7 @@
         "ui.useAndroidLayout에서 Android 네이티브 레이아웃 위젯, include/merge, 스크립트 프로젝트의 res 참조 및 shape/selector/layer-list 등의 Drawable XML 지원",
         "JavaScript (Rhino) 모듈에서 power/settings/work_manager 호환 인터페이스와 AppInfo 래퍼를 지원하고 Auto.js Pro 9.3.11의 일부 Base64/Crypto/WebSocket/ByteString/automator/images/timers API를 보완",
         "전역 JavaScript (Rhino) ai 모듈에서 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 공급자, ask/chat/stream 호출 및 도구 호출의 다중 라운드 연속 실행 지원; 개발자 옵션에서 암호화된 다중 프로필과 자격 증명을 관리할 수 있으며 로컬 루프백 주소의 호환 엔드포인트는 API 키 없이 실행 가능",
-        "`ai.ask`, `ai.chat` 및 `ai.stream` 로컬 플러그인 경로에서 프롬프트 전용 단일 및 스트리밍 요청 지원. `plugin: true` 축약형으로 공식 온디바이스 AI 플러그인을 선택할 수 있고 단일 모델 환경에서는 모델 ID 생략 가능. 새 `ai.models` 메서드로 플러그인 모델을 열거하며, 플러그인 미설치/비활성/모델 없음 상태에서 명확한 오류 메시지 제공. AI 서비스 설정에 로컬 AI 플러그인 입구 추가",
+        "`ai.ask`, `ai.chat` 및 `ai.stream` 로컬 플러그인 경로에서 순서가 유지되는 일반 텍스트 `system`, `user`, `assistant` 메시지 기록의 단일 및 스트리밍 요청을 지원하고 마지막 메시지에 `user` 역할을 요구. `plugin: true` 축약형으로 공식 온디바이스 AI 플러그인을 선택할 수 있고 단일 모델 환경에서는 모델 ID 생략 가능. 새 `ai.models` 메서드로 플러그인 모델을 열거하며, 플러그인 미설치/비활성/모델 없음 상태에서 명확한 오류 메시지 제공. AI 서비스 설정에 로컬 AI 플러그인 입구 추가",
         "전역 JavaScript (Rhino) yolo 모듈에서 기본 비활성화된 명시적 컴포넌트 YOLO 공급자 경로, 버전이 지정된 Binder/PFD 전송, 매니페스트 기반 NCNN 모델 로딩, 객체 탐지, 명시적 취소 및 리소스 정리, 공급자 자동 폴백 방지 지원",
         "전역 JavaScript (Rhino) tts 모듈에서 시스템 음성 합성, 긴 텍스트 지능형 분할, 논리 큐, 오프라인 음성 필터링을 포함한 음성 및 언어 검색, 관찰 가능한 작업과 오디오 이벤트, 무음 삽입, 원자적 게시를 사용하는 파일 합성 지원; 시간 제한, 백프레셔, 런타임 정리 및 지정 엔진에서 다른 엔진으로의 폴백 방지 기능도 제공",
         "device.getMarketName 메서드, 기기의 \"제품명\" 확인용 _[`issue #513`](http://issues.autojs6.com/513)_",

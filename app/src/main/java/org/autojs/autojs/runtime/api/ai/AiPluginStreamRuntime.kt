@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-/** Per-script owner for prompt-only local plugin streams. */
+/** Per-script owner for local plugin text-message streams. */
 internal class AiPluginStreamRuntime(
     runnerProvider: () -> OnDeviceAiPluginStreamRunner,
     private val dispatcherFactory: () -> AiAsyncDispatcher,

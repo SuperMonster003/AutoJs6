@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Opt-in device smoke for the public Rhino `ai.ask(..., { plugin: ... })` production route.
+ * Opt-in device smoke for the public Rhino multi-message `ai.ask(..., { plugin: ... })` route.
  *
  * This deliberately starts a normal script through [org.autojs.autojs.engine.ScriptEngineService]
  * instead of invoking an AI coordinator or Binder transport from the test process. The exact real
@@ -40,7 +40,7 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         get() = AutoJs.instance.scriptEngineService
 
     @Test
-    fun publicRhinoAiAskCompletesThroughExactRealPlugin() {
+    fun publicRhinoAiAskWithSystemPromptCompletesThroughExactRealPlugin() {
         val parameters = requireOptInParameters()
         requireRealProviderPreflight()
 
@@ -242,7 +242,10 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         "rhino";
         const markerPath = ${JSONObject.quote("./$MARKER_NAME")};
         ai.ask(
-          ${JSONObject.quote(parameters.prompt)},
+          [
+            { role: "system", content: ${JSONObject.quote(DEFAULT_SYSTEM_PROMPT)} },
+            { role: "user", content: ${JSONObject.quote(parameters.prompt)} }
+          ],
           {
             plugin: {
               component: {
@@ -339,6 +342,7 @@ class OnDeviceAiPluginPublicAskSmokeTest {
         const val SCRIPT_NAME = "public-ai-plugin-ask.js"
         const val MARKER_NAME = "public-ai-plugin-ask-result.json"
         const val DEFAULT_PROMPT = "Reply with exactly OK."
+        const val DEFAULT_SYSTEM_PROMPT = "Answer the user's request directly and concisely."
         const val DEFAULT_ROUTE_TIMEOUT_MILLIS = 180_000L
         const val MINIMUM_ROUTE_TIMEOUT_MILLIS = 1_000L
         const val MAXIMUM_ROUTE_TIMEOUT_MILLIS = 600_000L

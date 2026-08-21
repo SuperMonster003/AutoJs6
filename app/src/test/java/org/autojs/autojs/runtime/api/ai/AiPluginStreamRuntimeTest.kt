@@ -5,6 +5,8 @@ import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.ScriptBridges
@@ -280,7 +282,7 @@ class AiPluginStreamRuntimeTest {
         ),
         providerId = "example.provider",
         modelId = "example-model",
-        prompt = "prompt",
+        messages = listOf(OnDeviceAiPluginMessage(OnDeviceAiPluginMessageRole.USER, "prompt")),
         timeoutMillis = 5_000L,
     )
 

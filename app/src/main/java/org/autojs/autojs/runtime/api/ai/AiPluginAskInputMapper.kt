@@ -2,10 +2,12 @@ package org.autojs.autojs.runtime.api.ai
 
 import com.google.gson.JsonObject
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
+import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
 import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
 
-/** Strict, prompt-only admission for the first explicitly selected local plugin route. */
+/** Strict text-message admission for the explicitly selected local plugin route. */
 internal object AiPluginAskInputMapper {
 
     fun hasPluginSelection(input: AiRequestInput): Boolean = input.options.has("plugin")
@@ -39,31 +41,35 @@ internal object AiPluginAskInputMapper {
         val control = AiControlOptions.takeFrom(pluginOptions)
         require(control.pluginSelection != null) { "AI plugin selection is required" }
         val selection = requireNotNull(control.pluginSelection)
-        require(input.messages.size() == 1) {
-            "AI plugin ask requires exactly one user text message"
+        require(input.messages.size() in 1..OnDeviceAiLimits.MAX_MESSAGES) {
+            "AI plugin ask message count is invalid"
         }
-        val element = input.messages[0]
-        require(element.isJsonObject) {
-            "AI plugin ask requires exactly one user text message"
-        }
-        val message = element.asJsonObject.deepCopy()
-        val role = message.takeRequiredString("role", "AI plugin message role")
-        require(role.lowercase() == "user") {
-            "AI plugin ask requires exactly one user text message"
-        }
-        val prompt = message.takeRequiredString(
-            name = "content",
-            label = "AI plugin message content",
-            trim = false,
-        )
-        require(message.entrySet().isEmpty()) {
-            "AI plugin ask message contains unsupported fields"
+        val messages = input.messages.map { element ->
+            require(element.isJsonObject) { "AI plugin messages must be objects" }
+            val message = element.asJsonObject.deepCopy()
+            val role = when (
+                message.takeRequiredString("role", "AI plugin message role").lowercase()
+            ) {
+                "system" -> OnDeviceAiPluginMessageRole.SYSTEM
+                "user" -> OnDeviceAiPluginMessageRole.USER
+                "assistant" -> OnDeviceAiPluginMessageRole.ASSISTANT
+                else -> throw IllegalArgumentException("AI plugin message role is unsupported")
+            }
+            val content = message.takeRequiredString(
+                name = "content",
+                label = "AI plugin message content",
+                trim = false,
+            )
+            require(message.entrySet().isEmpty()) {
+                "AI plugin ask message contains unsupported fields"
+            }
+            OnDeviceAiPluginMessage(role, content)
         }
         return OnDeviceAiPluginAskRequest(
             component = OnDeviceAiProviderComponent(selection.packageName, selection.className),
             providerId = selection.providerId,
             modelId = selection.modelId,
-            prompt = prompt,
+            messages = messages,
             timeoutMillis = control.timeoutMillis ?: defaultTimeoutMillis,
             maximumOutputTokens = maximumOutputTokens,
             temperature = temperature,

@@ -40,7 +40,7 @@
 * `新機能` ui.useAndroidLayout が Android ネイティブレイアウトウィジェット, include/merge, スクリプトプロジェクトの res 参照, shape/selector/layer-list などの Drawable XML に対応
 * `新機能` JavaScript (Rhino) モジュールで power/settings/work_manager 互換 API と AppInfo ラッパーをサポートし, Auto.js Pro 9.3.11 の一部の Base64/Crypto/WebSocket/ByteString/automator/images/timers API を拡充
 * `新機能` グローバル JavaScript (Rhino) ai モジュールが OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible プロバイダー, ask/chat/stream 呼び出し, ツール呼び出しの複数ラウンド継続に対応; 開発者向けオプションで暗号化された複数プロファイルと認証情報を管理でき, ローカルループバックアドレス上の互換エンドポイントは API キーなしで実行可能
-* `新機能` `ai.ask`, `ai.chat`, `ai.stream` ローカルプラグイン経路がプロンプトのみの単発及びストリーミングリクエストに対応. `plugin: true` の短縮指定で公式オンデバイス AI プラグインを選択でき, 単一モデル環境ではモデル ID を省略可能. 新設の `ai.models` メソッドでプラグインモデルを列挙でき, プラグイン未インストール/無効/モデル未導入時に明確なエラーを通知. AI サービス設定にローカル AI プラグイン入口を追加
+* `新機能` `ai.ask`, `ai.chat`, `ai.stream` ローカルプラグイン経路が, 順序を保持したプレーンテキストの `system`, `user`, `assistant` メッセージ履歴による単発及びストリーミングリクエストに対応し, 最後のメッセージには `user` ロールを要求. `plugin: true` の短縮指定で公式オンデバイス AI プラグインを選択でき, 単一モデル環境ではモデル ID を省略可能. 新設の `ai.models` メソッドでプラグインモデルを列挙でき, プラグイン未インストール/無効/モデル未導入時に明確なエラーを通知. AI サービス設定にローカル AI プラグイン入口を追加
 * `新機能` グローバル JavaScript (Rhino) yolo モジュールが, デフォルト無効の明示コンポーネント YOLO プロバイダールート, バージョン管理された Binder/PFD 転送, マニフェスト駆動の NCNN モデル読み込み, 物体検出, 明示的なキャンセルとリソース解放, プロバイダーへの暗黙フォールバック防止に対応
 * `新機能` グローバル JavaScript (Rhino) tts モジュールがシステム音声合成, 長文のインテリジェント分割, 論理キュー, オフライン音声の絞り込みを含む音声と言語の検索, 監視可能なタスクと音声イベント, 無音挿入, アトミックな公開を用いたファイルへの音声合成に対応; タイムアウト, バックプレッシャー, ランタイムクリーンアップ, 指定エンジンからのフォールバック防止も提供
 * `新機能` device.getMarketName メソッド, デバイスの "市場名" 取得用 _[`issue #513`](http://issues.autojs6.com/513)_
