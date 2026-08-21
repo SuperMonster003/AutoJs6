@@ -161,6 +161,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private lateinit var mProjectToolbar: ExplorerProjectToolbar
 
     private var mExplorer: Explorer? = null
+    private var mExplorerRootPath: String? = null
 
     private val mExplorerAdapter = ExplorerAdapter()
     private var mFilter: ((ExplorerItem) -> Boolean)? = null
@@ -241,6 +242,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             binding.projectToolbar.also {
                 mProjectToolbar = it
             }
+            binding.explorerPathBar.setOnParentPathClickListener(::navigateToPath)
             setupSelectionToolbar(binding)
             applySelectionToolbarTheme(ThemeColorManager.currentThemeColor)
         }
@@ -739,14 +741,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     fun enterDirectChildPage(childItemGroup: ExplorerPage) {
         clearSelection()
-        val layoutManager = explorerItemListView!!.layoutManager as LinearLayoutManager?
-        if (layoutManager != null) {
-            // @Overwrite by SuperMonster003 on Apr 3, 2023.
-            //  ! Should be "first" instead of "last".
-            //  ! zh-CN: 应该是 "first" 而非 "last".
-            //  # mCurrentPageState.scrollY = layoutManager.findLastCompletelyVisibleItemPosition();
-            currentPageState.scrollY = layoutManager.findFirstCompletelyVisibleItemPosition()
-        }
+        saveCurrentScrollPosition()
         saveCurrentPageIntoHistory()
         setCurrentPageState(ExplorerPageState(childItemGroup))
         refreshCurrentPage()
@@ -769,6 +764,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mExplorer!!.unregisterChangeListener(this)
         }
         mExplorer = explorer
+        mExplorerRootPath = rootPage.path
         setRootPage(rootPage)
         mExplorer!!.registerChangeListener(this)
     }
@@ -776,6 +772,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage, currentPage: ExplorerPage) {
         mExplorer?.unregisterChangeListener(this)
         mExplorer = explorer
+        mExplorerRootPath = rootPage.path
         setCurrentPageState(ExplorerPageState(rootPage))
         mExplorer?.registerChangeListener(this)
         enterChildPage(currentPage)
@@ -797,6 +794,74 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private fun setCurrentPageState(pageState: ExplorerPageState) {
         currentPageState = pageState
+        pageState.page?.let(::updatePathBar)
+    }
+
+    private fun updatePathBar(page: ExplorerPage) {
+        binding?.explorerPathBar?.setSegments(createPathSegments(page.path))
+    }
+
+    private fun createPathSegments(currentPath: String): List<ExplorerPathSegment> {
+        findSampleRootPath(currentPath)?.let { sampleRootPath ->
+            val workspaceSegments = ExplorerPathSegmentBuilder.build(
+                currentPath = path,
+                rootPath = externalStoragePath,
+                rootLabel = context.getString(R.string.term_internal_strorage),
+            )
+            val sampleSegments = ExplorerPathSegmentBuilder.build(
+                currentPath = currentPath,
+                rootPath = sampleRootPath,
+                rootLabel = context.getString(R.string.text_sample),
+            )
+            return workspaceSegments + sampleSegments
+        }
+
+        if (ExplorerPathSegmentBuilder.isSameOrDescendant(currentPath, externalStoragePath)) {
+            return ExplorerPathSegmentBuilder.build(
+                currentPath = currentPath,
+                rootPath = externalStoragePath,
+                rootLabel = context.getString(R.string.term_internal_strorage),
+            )
+        }
+
+        val configuredRoot = mExplorerRootPath
+            ?.takeIf { ExplorerPathSegmentBuilder.isSameOrDescendant(currentPath, it) }
+        val displayRoot = configuredRoot ?: ExplorerPathSegmentBuilder.filesystemRoot(currentPath)
+        return ExplorerPathSegmentBuilder.build(
+            currentPath = currentPath,
+            rootPath = displayRoot,
+            rootLabel = ExplorerPathSegmentBuilder.labelForPath(displayRoot),
+        )
+    }
+
+    private fun findSampleRootPath(currentPath: String): String? {
+        val workspaceProvider = Explorers.Providers.workspace()
+        if (mExplorer?.provider !== workspaceProvider) return null
+
+        var directory: File? = File(currentPath)
+        while (directory != null && workspaceProvider.isInSampleDir(directory)) {
+            if (workspaceProvider.isCurrentSampleDir(directory)) return directory.path
+            directory = directory.parentFile
+        }
+        return null
+    }
+
+    private fun navigateToPath(targetPath: String) {
+        if (targetPath == currentPage.path) return
+        clearSelection()
+        saveCurrentScrollPosition()
+        saveCurrentPageIntoHistory()
+        setCurrentPageState(ExplorerPageState(ExplorerDirPage.createRoot(targetPath)))
+        refreshCurrentPage()
+    }
+
+    private fun saveCurrentScrollPosition() {
+        val layoutManager = explorerItemListView?.layoutManager as? LinearLayoutManager ?: return
+        // @Overwrite by SuperMonster003 on Apr 3, 2023.
+        //  ! Should be "first" instead of "last".
+        //  ! zh-CN: 应该是 "first" 而非 "last".
+        //  # mCurrentPageState.scrollY = layoutManager.findLastCompletelyVisibleItemPosition();
+        currentPageState.scrollY = layoutManager.findFirstCompletelyVisibleItemPosition()
     }
 
     private fun enterChildPage(childPage: ExplorerPage) {

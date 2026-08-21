@@ -47,6 +47,7 @@
         "File manager supports secure Markdown and HTML previews with GFM rendering, multiple themes, custom CSS, and controlled same-directory resource loading",
         "Markdown and HTML previews support fullscreen mode, with a \"Start in fullscreen mode\" setting that is disabled by default",
         "File manager supports leftmost icon actions for Markdown/HTML preview and image viewing/audio/video playback; the app can act as a system media viewer, with background audio playback and notification controls",
+        "File manager path bar with current-path display, current-directory highlighting, direct navigation to parent directories, automatic end scrolling for long paths, and horizontal browsing",
         "File manager supports image information and detailed EXIF viewing",
         "Image editing and format conversion are provided by the independent Image Tools plugin; when the plugin is unavailable, only the corresponding actions are hidden, while image viewing, image information, and EXIF viewing remain available",
         "Image viewer automatically discovers all images in the same directory and supports synchronized focal-point pinch zoom, swipe and toolbar previous/next navigation, a compact three-row information bar for position/resolution/size/format/modification time/EXIF, fullscreen mode, a start-in-fullscreen setting, and a configurable background color with history, while the ActionBar, system bars, and icons adapt their colors and contrast to the background",

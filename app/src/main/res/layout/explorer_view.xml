@@ -21,6 +21,19 @@
             app:cardElevation="0.97dp"
             app:cardUseCompatPadding="true" />
 
+        <org.autojs.autojs.ui.explorer.ExplorerPathBar
+            android:id="@+id/explorer_path_bar"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:clipToPadding="false"
+            android:layoutDirection="ltr"
+            android:paddingHorizontal="8dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?android:divider" />
+
         <androidx.recyclerview.widget.ThemeColorRecyclerView
             android:id="@+id/explorer_item_list"
             android:layout_width="match_parent"
