@@ -24,7 +24,6 @@ import org.autojs.autojs.apkbuilder.ApkPluginLibraryVariant
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
-import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
@@ -118,7 +117,6 @@ object RemoteApkBuildRequestPreparer {
         try {
             notifyProgress(progressListener, "Preparing remote build config", projectConfig.packageName)
             val remoteConfig = cloneForRemoteRequest(projectConfig)
-            applyHostSideConfigAdjustments(source, projectConfig, remoteConfig)
             validateEmbeddedNodeBuildRequirements(projectConfig)
             notifyProgress(progressListener, "Archiving project files", source.path)
             val sourcePathInArchive = writeProjectArchive(
@@ -241,41 +239,15 @@ object RemoteApkBuildRequestPreparer {
         return remoteConfigGson.toJson(projectConfig)
     }
 
-    private fun applyHostSideConfigAdjustments(
-        source: File,
-        projectConfig: ProjectConfig,
-        remoteConfig: ProjectConfig,
-    ) {
-        applyNodeBridgeAndroidManifestPermissions(source, projectConfig, remoteConfig)
-    }
-
-    private fun applyNodeBridgeAndroidManifestPermissions(
-        source: File,
-        projectConfig: ProjectConfig,
-        remoteConfig: ProjectConfig,
-    ) {
-        if (!source.isDirectory || !projectConfig.libs.contains(ApkBuildLibrary.EMBEDDED_NODE_JS.label)) {
-            return
-        }
-        val requiredPermissions = NodeBridgePermissionManifest.androidPermissionsForWorkingDirectory(source.path)
-        if (requiredPermissions.isEmpty()) {
-            return
-        }
-        val mergedPermissions = LinkedHashSet(remoteConfig.permissions)
-        mergedPermissions.addAll(requiredPermissions)
-        remoteConfig.setPermissions(ArrayList(mergedPermissions))
-    }
-
     private fun validateEmbeddedNodeBuildRequirements(projectConfig: ProjectConfig) {
         if (!projectConfig.libs.contains(ApkBuildLibrary.EMBEDDED_NODE_JS.label)) {
             return
         }
-        if (!BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED) {
-            throw IOException(
-                "Embedded Node.js packaged apps require embedded script execution build support. " +
-                        "Rebuild AutoJs6 with -Pautojs.nodejs.embedded.script.enabled=true before packaging."
-            )
-        }
+        throw IOException(
+            "Embedded Node.js packaging was retired because the runtime is owned by the external plugin. " +
+                    "Remove the Embedded Node.js library from this packaged project; run Node.js scripts " +
+                    "from the AutoJs6 host with the runtime plugin installed."
+        )
     }
 
     private fun writeProjectArchive(

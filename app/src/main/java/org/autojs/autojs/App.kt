@@ -30,7 +30,6 @@ import org.autojs.autojs.engine.NodeJsRuntimePluginHost
 import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
-import org.autojs.autojs.inrt.InrtNodeRuntimeOverride
 import org.autojs.autojs.inrt.InrtShortcuts
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
@@ -48,8 +47,6 @@ import org.autojs.autojs6.R
 import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
-import java.util.concurrent.Future
-import java.util.concurrent.FutureTask
 import java.util.concurrent.atomic.AtomicBoolean
 import androidx.work.Configuration as WorkManagerConfiguration
 import org.autojs.autojs.inrt.Pref as InrtPref
@@ -97,7 +94,6 @@ class App : Application(), WorkManagerConfiguration.Provider {
                     OpenCvPluginHost.ensureLoaded(applicationContext)
                 }
                 if (AbstractAutoJs.isInrt) {
-                    InrtNodeRuntimeOverride.apply(this)
                     InrtPref.syncLaunchConfigWithBuild()
                     InrtShortcuts.syncToExplicitIntents()
                 }
@@ -335,23 +331,18 @@ class App : Application(), WorkManagerConfiguration.Provider {
     }
 
     fun clear() {
-        clearAsync()
+        clearInternal()
     }
 
-    /**
-     * Starts the same cleanup as [clear] and returns an already-completed compatibility future.
-     * The Node runtime lives in the plugin process and owns its own lifecycle.
-     */
-    fun clearForExit(): Future<Boolean> = clearAsync()
+    fun clearForExit() = clearInternal()
 
-    private fun clearAsync(): Future<Boolean> {
+    private fun clearInternal() {
         cancelDeferredNodePluginPrewarm()
         if (deferredMaintenanceScheduled.compareAndSet(true, false)) {
             mainHandler.removeCallbacks(deferredMaintenance)
         }
         dynamicBroadcastReceivers.unregisterAll()
         InAppEventBus.clear()
-        return FutureTask<Boolean> { true }.also(FutureTask<Boolean>::run)
     }
 
     companion object {

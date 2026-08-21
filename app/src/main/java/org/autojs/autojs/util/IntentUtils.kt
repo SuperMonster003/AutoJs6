@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.provider.OpenableColumns
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
@@ -44,11 +43,7 @@ import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import java.io.File
 import java.io.FileNotFoundException
-import java.util.concurrent.CancellationException
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import kotlin.system.exitProcess
 
 /**
@@ -367,9 +362,6 @@ object IntentUtils {
     object App {
 
         private const val UNIQUE_REQUEST_CODE = 1001
-        private const val TAG = "IntentUtils"
-        // Leave a small publication margin beyond the session manager's five-second deadline.
-        private const val NODE_SHUTDOWN_EXIT_WAIT_MILLIS = 5_500L
 
         @JvmStatic
         @JvmOverloads
@@ -455,7 +447,7 @@ object IntentUtils {
             AutoJs.instance.scriptEngineService.stopAll()
             AutoJs.instance.clear()
 
-            val appShutdownTask = org.autojs.autojs.App.app.clearForExit()
+            org.autojs.autojs.App.app.clearForExit()
 
             WrappedShizuku.onDestroy()
 
@@ -475,28 +467,7 @@ object IntentUtils {
                 finishAllAppTasksSafely(context)
             }
 
-            if (!awaitNodeShutdownBeforeExit(appShutdownTask, NODE_SHUTDOWN_EXIT_WAIT_MILLIS)) {
-                Log.w(TAG, "Embedded Node.js process sessions did not finish shutting down before app exit.")
-            }
             exitProcess(0)
-        }
-
-        internal fun awaitNodeShutdownBeforeExit(
-            shutdownTask: Future<Boolean>,
-            timeoutMs: Long,
-        ): Boolean {
-            return try {
-                shutdownTask.get(timeoutMs.coerceAtLeast(1L), TimeUnit.MILLISECONDS)
-            } catch (_: TimeoutException) {
-                false
-            } catch (_: CancellationException) {
-                false
-            } catch (_: ExecutionException) {
-                false
-            } catch (_: InterruptedException) {
-                Thread.currentThread().interrupt()
-                false
-            }
         }
 
         private fun getLaunchIntent(context: Context): Intent? {

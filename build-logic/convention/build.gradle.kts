@@ -63,7 +63,7 @@ gradlePlugin {
             id = "org.autojs.build.node-android-config"
             implementationClass = "org.autojs.build.NodeAndroidConfigPlugin"
             displayName = "AutoJs6 Node Android Config Convention Plugin"
-            description = "Configures Embedded Node.js related Android DSL for the app module."
+            description = "Configures host policy for the external Node.js runtime plugin."
         }
         register("localAarRegisterConvention") {
             id = "org.autojs.build.local-arr-register-convention"

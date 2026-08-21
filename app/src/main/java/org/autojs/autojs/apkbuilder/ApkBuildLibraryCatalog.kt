@@ -14,8 +14,6 @@ import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.mediainfo.api.IMediainfoPlugin
 import org.autojs.plugin.mediainfo.api.MediainfoPluginIds
 import org.autojs.plugin.mlkit.barcode.api.IBarcodePlugin
-import org.autojs.plugin.nodejs.api.NodeJsPluginActions
-import org.autojs.plugin.nodejs.api.NodeJsPluginIds
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import org.autojs.plugin.opencc.api.IOpenccPlugin
 import org.autojs.plugin.opencc.api.OpenccPluginIds
@@ -48,25 +46,11 @@ enum class ApkBuildLibrary(
         ),
     ),
 
+    // Retained only so legacy project configs can receive an explicit migration error.
     EMBEDDED_NODE_JS(
         label = "Embedded Node.js",
         aliases = listOf("node", "nodejs", "node.js", "embedded-node", "embedded-nodejs", "embedded_nodejs"),
-        plugin = ApkPluginLibrary(
-            action = NodeJsPluginActions.INFO,
-            onServiceConnected = { binder: IBinder ->
-                IPluginInfoProvider.Stub.asInterface(binder).info
-            },
-            variants = listOf(
-                ApkPluginLibraryVariant(
-                    variant = NodeJsPluginIds.VARIANT_NODE_24_5,
-                    libsToInclude = listOf(
-                        "libnode.so",
-                        "libautojs6-node.so",
-                        "libc++_shared.so",
-                    ),
-                ),
-            ),
-        ),
+        enumerable = false,
     ),
 
     OPENCV(
