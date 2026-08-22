@@ -16,6 +16,8 @@ class ScriptFileFilterPolicyTest {
         assertTrue(ScriptFileFilterPolicy.accepts(temporaryFolder.newFolder("folder"), pythonEnabled = false))
         assertTrue(ScriptFileFilterPolicy.accepts(temporaryFolder.newFile("main.LUA"), pythonEnabled = false))
         assertTrue(ScriptFileFilterPolicy.accepts(temporaryFolder.newFile("main.js"), pythonEnabled = false))
+        assertTrue(ScriptFileFilterPolicy.accepts(temporaryFolder.newFile("Main.JAVA"), pythonEnabled = false))
+        assertTrue(ScriptFileFilterPolicy.accepts(temporaryFolder.newFile("Main.KT"), pythonEnabled = false))
         assertTrue(ScriptFileFilterPolicy.accepts(temporaryFolder.newFile("main.AUTO"), pythonEnabled = false))
         assertFalse(ScriptFileFilterPolicy.accepts(temporaryFolder.newFile("notes.txt"), pythonEnabled = true))
     }

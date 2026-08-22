@@ -377,7 +377,15 @@ object ScriptLaunchSourceFactory {
         if (pythonLaunch != null) {
             return pythonLaunch
         }
+        // Preserve Python's stable boundary errors before interpreting a URI-like string as a
+        // platform File. On Windows in particular, canonicalizing `content://...` can fail first.
         PythonLaunchBoundaryPolicy.enforceDefaultOff(file.path)
+        file.requireNoCanonicalJvmRoutingMismatch()
+        createJvmFileLaunchOrNull(
+            file = file,
+            workingDirectory = workingDirectory,
+            defaultWorkingDirectory = defaultWorkingDirectory,
+        )?.let { return it }
         rejectImplicitPythonProject(file)
         if (LuaScriptSource.isLuaFileName(file.name) || JavaScriptSource.isJavaScriptFileName(file.name)) {
             return createPathLaunchForPythonPreview(
@@ -536,7 +544,17 @@ object ScriptLaunchSourceFactory {
                 return pythonLaunch
             }
         }
+        // Python routes own their rejection semantics; JVM canonical-path hardening applies only
+        // after this guard has established that the request is not a Python source or URI.
         PythonLaunchBoundaryPolicy.enforceDefaultOff(path)
+        val requestedFile = File(path)
+        requestedFile.requireNoCanonicalJvmRoutingMismatch()
+        createJvmFileLaunchOrNull(
+            file = requestedFile,
+            preExecuteScript = preExecuteScript,
+            workingDirectory = workingDirectory,
+            defaultWorkingDirectory = defaultWorkingDirectory,
+        )?.let { return it }
         rejectImplicitPythonProject(File(path))
         if (LuaScriptSource.isLuaFileName(File(path).name)) {
             require(preExecuteScript == null) {
@@ -642,6 +660,7 @@ object ScriptLaunchSourceFactory {
         }
         return when (this) {
             is JavaScriptFileSource -> file.parent ?: defaultWorkingDirectory
+            is JvmFileSource -> file.parent ?: defaultWorkingDirectory
             is LuaFileSource -> file.parent ?: defaultWorkingDirectory
             is PythonProjectSource -> projectRoot.normalizedPath()
             is PythonFileSource -> file.parent ?: defaultWorkingDirectory
@@ -658,6 +677,10 @@ object ScriptLaunchSourceFactory {
                 locations += file.normalizedPath()
             }
             is AutoFileSource -> {
+                locations += file.path
+                locations += file.normalizedPath()
+            }
+            is JvmFileSource -> {
                 locations += file.path
                 locations += file.normalizedPath()
             }
@@ -679,8 +702,47 @@ object ScriptLaunchSourceFactory {
         return locations.distinct()
     }
 
+    private fun createJvmFileLaunchOrNull(
+        file: File,
+        preExecuteScript: String? = null,
+        workingDirectory: String?,
+        defaultWorkingDirectory: String,
+    ): Launch? {
+        if (JvmSourceKind.fromFileName(file.name) == null) {
+            if (JvmSourceKind.isUnsupportedJvmFileName(file.name)) {
+                throw UnsupportedJvmSourceException(file.path)
+            }
+            return null
+        }
+        require(preExecuteScript == null) {
+            "JVM source launch does not support preExecuteScript; run the source file without a JavaScript prefix."
+        }
+        return Launch(
+            source = JvmFileSource(file),
+            workingDirectory = workingDirectory
+                ?: file.parent
+                ?: defaultWorkingDirectory,
+        )
+    }
+
     private fun File.normalizedPath(): String {
         return runCatching { canonicalPath }.getOrElse { absolutePath }
+    }
+
+    private fun File.requireNoCanonicalJvmRoutingMismatch() {
+        val canonical = runCatching { canonicalFile }.getOrElse {
+            throw UnsafeJvmSourcePathException(
+                path,
+                "the canonical routing target cannot be resolved",
+            )
+        }
+        // Resolve common aliased prefixes such as /sdcard. Refuse only a routing-class change.
+        if (JvmSourceKind.hasCanonicalJvmRoutingMismatch(name, canonical.name)) {
+            throw UnsafeJvmSourcePathException(
+                path,
+                "requested file type differs from canonical JVM source or artifact '${canonical.name}'",
+            )
+        }
     }
 
     private fun File.normalizedFile(): File {

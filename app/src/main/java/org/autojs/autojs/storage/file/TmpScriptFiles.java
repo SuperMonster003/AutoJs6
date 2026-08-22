@@ -5,6 +5,7 @@ import org.autojs.autojs.pio.PFiles;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 
@@ -26,6 +27,24 @@ public class TmpScriptFiles {
         ensureTmpDir(context);
         File tmp = new File(getTmpDir(context), "tmp-" + System.currentTimeMillis() + sanitizeExtension(extensionWithDot));
         tmp.createNewFile();
+        return tmp;
+    }
+
+    /** Creates an exact compilation-unit name in a fresh private directory. */
+    public static File createWithExactName(Context context, String fileName) throws IOException {
+        if (fileName == null || fileName.isBlank() || !new File(fileName).getName().equals(fileName)
+                || fileName.indexOf('\0') >= 0) {
+            throw new IllegalArgumentException("Invalid exact tmp script file name");
+        }
+        ensureTmpDir(context);
+        File dir = new File(getTmpDir(context), "tmp-" + UUID.randomUUID());
+        if (!dir.mkdir()) {
+            throw new IOException("Failed to create tmp script directory: " + dir);
+        }
+        File tmp = new File(dir, fileName);
+        if (!tmp.createNewFile()) {
+            throw new IOException("Failed to create tmp script file: " + tmp);
+        }
         return tmp;
     }
 

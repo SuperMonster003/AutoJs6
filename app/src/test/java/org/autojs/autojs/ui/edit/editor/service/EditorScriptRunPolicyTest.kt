@@ -6,6 +6,39 @@ import org.junit.Test
 class EditorScriptRunPolicyTest {
 
     @Test
+    fun javaAndKotlinDocumentsFollowTheJvmSourceFeatureFlag() {
+        listOf("Main.java", "Main.JAVA", "Main.kt", "Main.KT").forEach { fileName ->
+            assertEquals(
+                org.autojs.autojs6.BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+                EditorScriptRunPolicy.isRunEnabledForDocument(fileName, null, null),
+            )
+        }
+    }
+
+    @Test
+    fun kotlinScriptsAndJvmArtifactsCannotRunFromEditor() {
+        listOf("Main.kts", "Main.class", "Main.jar", "Main.dex").forEach { fileName ->
+            assertEquals(false, EditorScriptRunPolicy.isRunEnabledForDocument(fileName, null, null))
+        }
+    }
+
+    @Test
+    fun javaTemporaryBufferKeepsJavaRouting() {
+        assertEquals(
+            ".java",
+            EditorScriptRunPolicy.temporaryExtensionWithDot("Main.java", null, null),
+        )
+    }
+
+    @Test
+    fun kotlinTemporaryBufferKeepsKotlinRouting() {
+        assertEquals(
+            ".kt",
+            EditorScriptRunPolicy.temporaryExtensionWithDot("Main.kt", null, null),
+        )
+    }
+
+    @Test
     fun fileUriPathPreservesLuaRouting() {
         assertEquals(
             ".lua",

@@ -96,6 +96,7 @@ private val pluginApi = listOf(
     "ai-common-api",
     "on-device-ai-api",
     "dex-compiler-api",
+    "jvm-source-api",
     "editor-api",
     "explorer-action-api",
     "lua-runtime-api",

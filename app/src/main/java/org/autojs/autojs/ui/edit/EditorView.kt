@@ -454,12 +454,30 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 ?.name
                 ?.takeIf(String::isNotBlank)
             updateEditorStatusMetadata()
+            refreshDocumentRunPolicy()
         }
 
     private fun currentDocumentPathOrName(): String? {
         return uri?.path?.takeIf { it.isNotBlank() }
             ?: uri?.toString()?.takeIf { it.isNotBlank() }
             ?: _name?.takeIf { it.isNotBlank() }
+    }
+
+    private fun isRunEnabledForCurrentDocument(): Boolean =
+        mRunEnabledByIntent && mRunEnabledForDocument
+
+    private fun refreshDocumentRunPolicy() {
+        mRunEnabledForDocument = EditorScriptRunPolicy.isRunEnabledForDocument(
+            documentDisplayName = mDocumentDisplayName,
+            uriPath = uri?.path,
+            editorName = _name,
+        )
+        findViewById<View>(R.id.run)?.visibility = if (isRunEnabledForCurrentDocument()) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        syncPrimaryMenuState()
     }
 
     private fun syncEditorDocumentPath() {
@@ -659,6 +677,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mDebugging = false
     private var mTmpSavedFileForRunning: File? = null
     private var mReadOnlyLockedByIntent = false
+    private var mRunEnabledByIntent = true
+    private var mRunEnabledForDocument = true
     private var mAceShortcutReturnSelection: EditorSelection? = null
     private var mAceShortcutLastObservedSelection: EditorSelection? = null
     private var mAceShortcutReturnJumpInProgress = false
@@ -969,7 +989,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mHadDirectEditSinceSave = false
         }
 
-        syncPrimaryMenuState()
+        mRunEnabledByIntent = intent.getBooleanExtra(EXTRA_RUN_ENABLED, true)
+        refreshDocumentRunPolicy()
 
         val name = intent.getStringExtra(EXTRA_NAME)
         if (name != null) {
@@ -997,9 +1018,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     findViewById<View>(R.id.undo).visibility = GONE
                     findViewById<View>(R.id.redo).visibility = GONE
                 }
-                if (!intent.getBooleanExtra(EXTRA_RUN_ENABLED, true)) {
-                    findViewById<View>(R.id.run).visibility = GONE
-                }
+                refreshDocumentRunPolicy()
                 if (readOnly) {
                     editor.setReadOnly(true)
                 }
@@ -1915,6 +1934,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                             }
                             mDocumentDisplayName = displayName
                             updateEditorStatusMetadata()
+                            refreshDocumentRunPolicy()
                         }
                     }
                     loadUriWithKnownSize(
@@ -2609,7 +2629,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mLargeFileMode -> {
                 // Large file: keep undo/redo disabled; save is enabled only when text changed by explicit edits.
                 // zh-CN: 大文件: 撤销/重做保持禁用; 保存仅在明确编辑导致文本变化时启用.
-                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.run, isRunEnabledForCurrentDocument())
                 setMenuItemStatus(R.id.undo, false)
                 setMenuItemStatus(R.id.redo, false)
                 setMenuItemStatus(R.id.save, saveStickyDirty && !mFileStateRequiresReload)
@@ -2617,7 +2637,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             else -> {
                 // Normal mode.
                 // zh-CN: 普通模式.
-                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.run, isRunEnabledForCurrentDocument())
                 val historyNavigationIdle = mPendingHistoryNavigation == null
                 setMenuItemStatus(R.id.undo, historyNavigationIdle && !mReadOnly && editor.canUndo)
                 setMenuItemStatus(R.id.redo, historyNavigationIdle && !mReadOnly && editor.canRedo)
@@ -4462,7 +4482,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mLargeFileMode = false
                 saveStickyDirty = false
                 mHadDirectEditSinceSave = false
-                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.run, isRunEnabledForCurrentDocument())
                 setMenuItemStatus(R.id.undo, false)
                 setMenuItemStatus(R.id.redo, false)
                 setMenuItemStatus(R.id.save, false)
@@ -4626,6 +4646,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @SuppressLint("CheckResult")
     fun runAndSaveFileIfNeeded(showLogPanelAfterRun: Boolean = true) {
+        if (!isRunEnabledForCurrentDocument()) return
         val runOrigin = captureEditorRunOrigin()
         runScriptTextProvider.saveToTmpFile()
             .observeOn(AndroidSchedulers.mainThread())
@@ -4657,6 +4678,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @JvmOverloads
     fun run(showMessage: Boolean, file: File? = null, overriddenFullPath: String? = null): ScriptExecution? {
+        if (!isRunEnabledForCurrentDocument()) return null
         return runWithOrigin(
             showMessage = showMessage,
             file = file,
@@ -4917,9 +4939,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .replace(R.id.toolbar_menu, mNormalToolbar)
             .commitAllowingStateLoss()
 
-        // Sync menu state after toolbar switch to avoid stale enabled flags.
-        // zh-CN: 切换工具栏后同步一次菜单状态, 避免 enabled 标记过期.
-        post { syncPrimaryMenuState() }
+        // setUri may have run before this toolbar view existed; refresh visibility and menu state.
+        post { refreshDocumentRunPolicy() }
     }
 
     fun replace() {

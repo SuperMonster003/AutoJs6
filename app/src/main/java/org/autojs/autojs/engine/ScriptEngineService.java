@@ -5,6 +5,7 @@ import android.os.Build;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import org.autojs.autojs.core.plugin.jvm.JvmSourceUserFacingException;
 import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages;
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.execution.LoopedBasedJavaScriptExecution;
@@ -99,6 +100,11 @@ public class ScriptEngineService {
                     message = AndroidLuaRuntimeFailureMessages.resolve(getLanguageContext(), e);
                     if (engine instanceof JavaScriptEngine scriptEngine) {
                         scriptEngine.getRuntime().console.error(e);
+                    } else if (e instanceof JvmSourceUserFacingException) {
+                        // Provider/compiler details are streamed by RemoteJvmScriptEngine. Keep the
+                        // stable terminal message in Console without exposing the Binder cause chain.
+                        message = e.getMessage();
+                        mGlobalConsole.error(message);
                     } else {
                         // TODO by SuperMonster003 on Aug 15, 2026.
                         //  ! engine.getRuntime().console.error(e);

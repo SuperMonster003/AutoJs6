@@ -54,6 +54,9 @@
             <action android:name="org.autojs.plugin.DEX_COMPILER" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.JVM_SOURCE" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.ON_DEVICE_AI" />
         </intent>
         <intent>
@@ -717,7 +720,7 @@
             android:exported="true"
             android:label="@string/text_run_script"
             android:taskAffinity="org.autojs.autojs.external.open.RunIntentActivity"
-            android:theme="@android:style/Theme.NoDisplay">
+            android:theme="@style/AppTheme.Transparent">
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

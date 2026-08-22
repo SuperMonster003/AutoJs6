@@ -5,7 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.plugin.jvm.JvmSourceExplicitRunner
 import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages
+import org.autojs.autojs.core.plugin.python.PythonInteractiveInputAuthorization
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
@@ -16,10 +18,12 @@ import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.script.PythonScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
+import org.autojs.autojs.ui.jvm.JvmSourcePluginUi
 import org.autojs.autojs.ui.python.PythonRuntimePluginUi
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
@@ -183,7 +187,17 @@ object Scripts {
         launch: ScriptLaunchSourceFactory.Launch,
         config: ExecutionConfig,
     ): ScriptExecution? = try {
-        AutoJs.instance.scriptEngineService.execute(launch.source, config)
+        val source = launch.source
+        if (source is JvmFileSource) {
+            JvmSourceExplicitRunner.runJvmSourceExplicit(
+                file = source.file,
+                config = config,
+                overriddenFullPath = source.overriddenFullPath,
+                originUri = source.originUri,
+            )
+        } else {
+            AutoJs.instance.scriptEngineService.execute(source, config)
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         ViewUtils.showToast(context, e.message, true)
@@ -207,10 +221,19 @@ object Scripts {
         config: ExecutionConfig,
     ): ScriptExecution? {
         if (
+            launch.source is JvmFileSource &&
+            !JvmSourcePluginUi.ensureAvailableForInteractiveLaunch(context, launch.source.sourceKind)
+        ) {
+            return null
+        }
+        if (
             launch.engineName == PythonScriptSource.ENGINE &&
             !PythonRuntimePluginUi.ensureAvailableForInteractiveLaunch(context)
         ) {
             return null
+        }
+        if (launch.engineName == PythonScriptSource.ENGINE) {
+            PythonInteractiveInputAuthorization.authorizeForeground(config, context)
         }
         return executeLaunch(context, launch, config)
     }
@@ -280,14 +303,36 @@ object Scripts {
         ) {
             return null
         }
-        return AutoJs.instance.scriptEngineService.execute(
-            launch.source.apply {
-                this.overriddenFullPath = overriddenFullPath
-                this.originUri = originUri
-            },
-            BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
-            launch.createExecutionConfig()
-        )
+        val source = launch.source.apply {
+            this.overriddenFullPath = overriddenFullPath
+            this.originUri = originUri
+        }
+        if (
+            interactiveContext != null &&
+            source is JvmFileSource &&
+            !JvmSourcePluginUi.ensureAvailableForInteractiveLaunch(interactiveContext, source.sourceKind)
+        ) {
+            return null
+        }
+        val config = launch.createExecutionConfig()
+        if (interactiveContext != null && launch.engineName == PythonScriptSource.ENGINE) {
+            PythonInteractiveInputAuthorization.authorizeForeground(config, interactiveContext)
+        }
+        return if (source is JvmFileSource) {
+            JvmSourceExplicitRunner.runJvmSourceExplicit(
+                file = source.file,
+                listener = BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
+                config = config,
+                overriddenFullPath = source.overriddenFullPath,
+                originUri = source.originUri,
+            )
+        } else {
+            AutoJs.instance.scriptEngineService.execute(
+                source,
+                BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
+                config,
+            )
+        }
     }
 
     @JvmStatic
