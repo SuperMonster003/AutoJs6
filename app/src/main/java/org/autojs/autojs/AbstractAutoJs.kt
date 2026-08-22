@@ -13,10 +13,12 @@ import org.autojs.autojs.core.accessibility.LayoutInspector
 import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
+import org.autojs.autojs.core.plugin.jvm.RemoteJvmSourceHost
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.NodeJavaScriptEngineFactory
 import org.autojs.autojs.engine.RootAutomatorEngine
+import org.autojs.autojs.engine.RemoteJvmScriptEngine
 import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.engine.ScriptEngineServiceBuilder
@@ -29,6 +31,7 @@ import org.autojs.autojs.runtime.api.Shell
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
@@ -64,6 +67,19 @@ abstract class AbstractAutoJs protected constructor(val application: Application
         scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_NODEJS) {
             val rt = createRuntime()
             NodeJavaScriptEngineFactory.create(applicationContext).also { it.runtime = rt }
+        }
+        if (BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED) {
+            scriptEngineManager.registerEngine(JvmFileSource.ENGINE) {
+                RemoteJvmScriptEngine(
+                    RemoteJvmSourceHost.createAndroid(
+                        context = applicationContext,
+                        featureEnabled = BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+                        hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+                        launchPackage = appUtils::launchPackage,
+                    ),
+                    globalConsole,
+                )
+            }
         }
         initContextFactory()
         scriptEngineManager.registerEngine(AutoFileSource.ENGINE) { RootAutomatorEngine(applicationContext) }

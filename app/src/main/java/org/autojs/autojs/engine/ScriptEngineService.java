@@ -5,6 +5,7 @@ import android.os.Build;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import org.autojs.autojs.core.plugin.jvm.JvmSourceUserFacingException;
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.execution.LoopedBasedJavaScriptExecution;
 import org.autojs.autojs.execution.RunnableScriptExecution;
@@ -98,6 +99,11 @@ public class ScriptEngineService {
                     message = e.getMessage();
                     if (engine instanceof JavaScriptEngine scriptEngine) {
                         scriptEngine.getRuntime().console.error(e);
+                    } else if (e instanceof JvmSourceUserFacingException) {
+                        // JVM compiler/runtime details are streamed by RemoteJvmScriptEngine. Keep
+                        // the stable terminal reason in the same AutoJs6 console as well; never
+                        // print the internal Binder/provider cause chain here.
+                        mGlobalConsole.error(message);
                     }
                 }
                 if (engine instanceof JavaScriptEngine scriptEngine) {

@@ -133,6 +133,13 @@ object ScriptLaunchSourceFactory {
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
     ): Launch {
+        file.requireNoCanonicalJvmRoutingMismatch()
+        createJvmFileLaunchOrNull(
+            file = file,
+            workingDirectory = workingDirectory,
+            defaultWorkingDirectory = defaultWorkingDirectory,
+        )?.let { return it }
+        val normalizedFile = file.normalizedFile()
         if (JavaScriptSource.isJavaScriptFileName(file.name)) {
             return createPathLaunch(
                 path = file.path,
@@ -140,7 +147,6 @@ object ScriptLaunchSourceFactory {
                 defaultWorkingDirectory = defaultWorkingDirectory,
             )
         }
-        val normalizedFile = file.normalizedFile()
         return Launch(
             source = AutoFileSource(normalizedFile),
             workingDirectory = workingDirectory
@@ -157,6 +163,14 @@ object ScriptLaunchSourceFactory {
         workingDirectory: String? = null,
         defaultWorkingDirectory: String = WorkingDirectoryUtils.path,
     ): Launch {
+        val requestedFile = File(path)
+        requestedFile.requireNoCanonicalJvmRoutingMismatch()
+        createJvmFileLaunchOrNull(
+            file = requestedFile,
+            preExecuteScript = preExecuteScript,
+            workingDirectory = workingDirectory,
+            defaultWorkingDirectory = defaultWorkingDirectory,
+        )?.let { return it }
         val fileSource = NodeProjectScriptSourceFactory.create(path)
         val source = if (preExecuteScript == null) {
             fileSource
@@ -198,13 +212,55 @@ object ScriptLaunchSourceFactory {
         }
         return when (this) {
             is JavaScriptFileSource -> file.parent ?: defaultWorkingDirectory
+            is JvmFileSource -> file.parent ?: defaultWorkingDirectory
             is AutoFileSource -> file.parent ?: defaultWorkingDirectory
             else -> defaultWorkingDirectory
         }
     }
 
+    private fun createJvmFileLaunchOrNull(
+        file: File,
+        preExecuteScript: String? = null,
+        workingDirectory: String?,
+        defaultWorkingDirectory: String,
+    ): Launch? {
+        if (JvmSourceKind.fromFileName(file.name) == null) {
+            if (JvmSourceKind.isUnsupportedJvmFileName(file.name)) {
+                throw UnsupportedJvmSourceException(file.path)
+            }
+            return null
+        }
+        require(preExecuteScript == null) {
+            "JVM source launch does not support preExecuteScript; run the source file without a JavaScript prefix."
+        }
+        return Launch(
+            source = JvmFileSource(file),
+            workingDirectory = workingDirectory
+                ?: file.parent
+                ?: defaultWorkingDirectory,
+        )
+    }
+
     private fun File.normalizedPath(): String {
         return runCatching { canonicalPath }.getOrElse { absolutePath }
+    }
+
+    private fun File.requireNoCanonicalJvmRoutingMismatch() {
+        val canonical = runCatching { canonicalFile }.getOrElse {
+            throw UnsafeJvmSourcePathException(
+                path,
+                "the canonical routing target cannot be resolved",
+            )
+        }
+        // Symlinked prefixes (/sdcard, /data/user/0, ...) are resolved rather than rejected;
+        // only a routing-class change after canonicalization is refused (Roadmap v2 M1).
+        // zh-CN: 符号链接前缀 (/sdcard 等) 做解析而非拒绝; 仅拦截规范化后路由类型变化的请求.
+        if (JvmSourceKind.hasCanonicalJvmRoutingMismatch(name, canonical.name)) {
+            throw UnsafeJvmSourcePathException(
+                path,
+                "requested file type differs from canonical JVM source or artifact '${canonical.name}'",
+            )
+        }
     }
 
     private fun File.normalizedFile(): File {

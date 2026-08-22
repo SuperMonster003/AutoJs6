@@ -67,6 +67,9 @@ val apkBuilderIncludeBuiltInTemplate = providers.provider {
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val jvmSourceExperimentalEnabled = providers.gradleProperty("autojs.jvmSource.experimental")
+    .map { value -> value.trim().lowercase() in setOf("true", "1", "yes", "on") }
+    .orElse(false)
 
 fun verifyOpenCvPluginSeparation(
     apkDirectory: File,
@@ -607,6 +610,9 @@ dependencies /* Unclassified */ {
     // Plugin API: DEX Compiler API
     implementation(project(":plugin-api:dex-compiler-api"))
 
+    // Plugin API: JVM Source API
+    implementation(project(":plugin-api:jvm-source-api"))
+
     // Plugin API: Editor API
     implementation(project(":plugin-api:editor-api"))
 
@@ -837,6 +843,7 @@ android {
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
         buildConfigField("boolean", "APK_BUILDER_BUILT_IN_TEMPLATE_INCLUDED", apkBuilderIncludeBuiltInTemplate.get().toString())
+        buildConfigField("boolean", "JVM_SOURCE_EXPERIMENTAL_ENABLED", jvmSourceExperimentalEnabled.get().toString())
         buildConfigField("boolean", buildConfigFieldNameIsInrt, "false")
 
         javaCompileOptions {

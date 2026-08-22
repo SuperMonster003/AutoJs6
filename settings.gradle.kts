@@ -45,6 +45,7 @@ private val pluginApi = listOf(
     "ai-common-api",
     "ai-text-generation-api",
     "dex-compiler-api",
+    "jvm-source-api",
     "editor-api",
     "explorer-action-api",
     "nodejs-api",

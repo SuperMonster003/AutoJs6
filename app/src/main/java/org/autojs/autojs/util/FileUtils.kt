@@ -327,6 +327,9 @@ object FileUtils {
         val DISK_IMAGE = TypeData(IconData("⊚", size = 25, toTop = 1))
         val DISK_IMAGE_CUE_SHEET = TypeData(DISK_IMAGE.iconData, TYPE.IDENTITY_TEXT_EDITABLE)
         val CODE = TypeData(IconData("⌗", toTop = 1), TYPE.IDENTITY_TEXT_EDITABLE)
+
+        /** Java source: text-editable and runnable via the JVM source plugin pipeline. */
+        val JAVA_SOURCE = TypeData(IconData("⌗", toTop = 1), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
         val COMPILE = TypeData(IconData("☍"))
         val ARCHIVE = TypeData(IconData("❒", toTop = 3, toEnd = 0.5))
         val FIRMWARE = TypeData(IconData("⩩", size = 22, toStart = 0.5, toTop = 1))
@@ -404,8 +407,8 @@ object FileUtils {
 
         // 编程语言 (Programming language)
 
-        /** Java source file, used in Java applications. */
-        JAVA("java", TypeDataHolder.CODE),
+        /** Java source file, runnable through the JVM source plugin (Roadmap v2 M1). */
+        JAVA("java", TypeDataHolder.JAVA_SOURCE),
 
         /** TypeScript source file, a typed superset of JavaScript. */
         TYPESCRIPT(

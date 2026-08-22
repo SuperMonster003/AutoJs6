@@ -74,7 +74,6 @@ import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
-import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
@@ -449,12 +448,31 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 ?.name
                 ?.takeIf(String::isNotBlank)
             updateEditorStatusMetadata()
+            refreshDocumentRunPolicy()
         }
 
     private fun currentDocumentPathOrName(): String? {
         return uri?.path?.takeIf { it.isNotBlank() }
             ?: uri?.toString()?.takeIf { it.isNotBlank() }
             ?: _name?.takeIf { it.isNotBlank() }
+    }
+
+    private fun isRunEnabledForCurrentDocument(): Boolean {
+        return mRunEnabledByIntent && mRunEnabledForDocument
+    }
+
+    private fun refreshDocumentRunPolicy(
+        fileNameOrPath: String? = mDocumentDisplayName ?: currentDocumentPathOrName(),
+    ) {
+        mRunEnabledForDocument = EditorScriptRunPolicy.isRunEnabledForDocument(fileNameOrPath)
+        // setUri may fire before the toolbar hierarchy is inflated; the run entry is then absent.
+        // zh-CN: setUri 可能早于工具栏视图树完成; 此时运行按钮尚不存在, 需空安全处理.
+        findViewById<View?>(R.id.run)?.visibility = if (isRunEnabledForCurrentDocument()) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        syncPrimaryMenuState()
     }
 
     private fun syncEditorDocumentPath() {
@@ -654,6 +672,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mDebugging = false
     private var mTmpSavedFileForRunning: File? = null
     private var mReadOnlyLockedByIntent = false
+    private var mRunEnabledByIntent = true
+    private var mRunEnabledForDocument = true
     private var mAceShortcutReturnSelection: EditorSelection? = null
     private var mAceShortcutLastObservedSelection: EditorSelection? = null
     private var mAceShortcutReturnJumpInProgress = false
@@ -966,6 +986,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         syncPrimaryMenuState()
 
+        mRunEnabledByIntent = intent.getBooleanExtra(EXTRA_RUN_ENABLED, true)
         val name = intent.getStringExtra(EXTRA_NAME)
         if (name != null) {
             this.name = name
@@ -992,9 +1013,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     findViewById<View>(R.id.undo).visibility = GONE
                     findViewById<View>(R.id.redo).visibility = GONE
                 }
-                if (!intent.getBooleanExtra(EXTRA_RUN_ENABLED, true)) {
-                    findViewById<View>(R.id.run).visibility = GONE
-                }
+                refreshDocumentRunPolicy(mDocumentDisplayName ?: currentDocumentPathOrName())
                 if (readOnly) {
                     editor.setReadOnly(true)
                 }
@@ -1907,6 +1926,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                         if (this.uri == uri) {
                             mDocumentDisplayName = displayName
                             updateEditorStatusMetadata()
+                            refreshDocumentRunPolicy(displayName)
                         }
                     }
                     loadUriWithKnownSize(
@@ -2601,7 +2621,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mLargeFileMode -> {
                 // Large file: keep undo/redo disabled; save is enabled only when text changed by explicit edits.
                 // zh-CN: 大文件: 撤销/重做保持禁用; 保存仅在明确编辑导致文本变化时启用.
-                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.run, isRunEnabledForCurrentDocument())
                 setMenuItemStatus(R.id.undo, false)
                 setMenuItemStatus(R.id.redo, false)
                 setMenuItemStatus(R.id.save, saveStickyDirty && !mFileStateRequiresReload)
@@ -2609,7 +2629,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             else -> {
                 // Normal mode.
                 // zh-CN: 普通模式.
-                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.run, isRunEnabledForCurrentDocument())
                 val historyNavigationIdle = mPendingHistoryNavigation == null
                 setMenuItemStatus(R.id.undo, historyNavigationIdle && !mReadOnly && editor.canUndo)
                 setMenuItemStatus(R.id.redo, historyNavigationIdle && !mReadOnly && editor.canRedo)
@@ -4618,6 +4638,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @SuppressLint("CheckResult")
     fun runAndSaveFileIfNeeded(showLogPanelAfterRun: Boolean = true) {
+        if (!isRunEnabledForCurrentDocument()) return
         runScriptTextProvider.saveToTmpFile()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ file: File ->
@@ -4635,6 +4656,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @JvmOverloads
     fun run(showMessage: Boolean, file: File? = null, overriddenFullPath: String? = null): ScriptExecution? {
+        if (!isRunEnabledForCurrentDocument()) return null
         val originPath = overriddenFullPath
             ?: ScriptOriginResolver.resolveFilePath(context, uri)
         val executableFile = file
@@ -4849,9 +4871,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .replace(R.id.toolbar_menu, mNormalToolbar)
             .commitAllowingStateLoss()
 
-        // Sync menu state after toolbar switch to avoid stale enabled flags.
-        // zh-CN: 切换工具栏后同步一次菜单状态, 避免 enabled 标记过期.
-        post { syncPrimaryMenuState() }
+        // Re-apply the document run policy after toolbar switch: the run button may not have
+        // existed when setUri ran, so both its visibility and the menu state need a refresh.
+        // zh-CN: 切换工具栏后重新应用运行策略: setUri 时运行按钮可能尚未存在, 可见性与菜单状态都需刷新.
+        post { refreshDocumentRunPolicy() }
     }
 
     fun replace() {
@@ -7006,17 +7029,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun temporaryScriptExtensionWithDot(): String {
-        val fileName = uri?.path
-            ?.let { File(it).name }
-            ?.takeIf { it.isNotBlank() }
-            ?: return ".js"
-        if (fileName.endsWith(".node.js", ignoreCase = true)) {
-            return ".node.js"
-        }
-        if (!JavaScriptSource.isJavaScriptFileName(fileName)) {
-            return ".js"
-        }
-        return "." + fileName.substringAfterLast('.', "js")
+        return EditorScriptRunPolicy.temporaryScriptExtensionWithDot(
+            mDocumentDisplayName ?: currentDocumentPathOrName(),
+        )
     }
 
     fun cleanBeforeExit() {

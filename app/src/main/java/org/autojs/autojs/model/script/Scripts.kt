@@ -14,7 +14,10 @@ import org.autojs.autojs.external.shortcut.Shortcut
 import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.core.plugin.jvm.JvmSourceExplicitRunner
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.JvmFileSource
+import org.autojs.autojs.script.JvmSourceKind
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
@@ -160,7 +163,20 @@ object Scripts {
         launch: ScriptLaunchSourceFactory.Launch,
         config: ExecutionConfig,
     ): ScriptExecution? = try {
-        AutoJs.instance.scriptEngineService.execute(launch.source, config)
+        val source = launch.source
+        if (source is JvmFileSource) {
+            // Explorer, external intents, shortcuts and tasks all funnel through here; JVM sources
+            // must be re-minted by the explicit runner because execution is token-gated.
+            // zh-CN: 文件列表/外部 intent/快捷方式/任务均汇聚于此; JVM 源码执行受 token 门控, 需经显式 runner 重新签发.
+            JvmSourceExplicitRunner.runJvmSourceExplicit(
+                file = source.file,
+                config = config,
+                overriddenFullPath = source.overriddenFullPath,
+                originUri = source.originUri,
+            )
+        } else {
+            AutoJs.instance.scriptEngineService.execute(source, config)
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         ViewUtils.showToast(context, e.message, true)
@@ -170,6 +186,18 @@ object Scripts {
     @JvmStatic
     @JvmOverloads
     fun runWithBroadcastSender(file: File, workingDirectory: String?, overriddenFullPath: String?, originUri: String? = null): ScriptExecution? {
+        if (JvmSourceKind.fromFileName(file.name) == JvmSourceKind.JAVA) {
+            // JVM source execution is token-gated: only the explicit runner can mint an
+            // execution-authorized source, so the editor/explorer run path must go through it.
+            // zh-CN: JVM 源码执行受 token 门控: 只有显式 runner 能签发授权, 编辑器/文件列表运行必须经由它.
+            return JvmSourceExplicitRunner.runJvmSourceExplicit(
+                file = file,
+                listener = BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
+                config = ExecutionConfig(workingDirectory = workingDirectory ?: file.parent ?: ""),
+                overriddenFullPath = overriddenFullPath,
+                originUri = originUri,
+            )
+        }
         val launch = ScriptLaunchSourceFactory.createFileLaunch(
             file = file,
             workingDirectory = workingDirectory,

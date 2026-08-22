@@ -29,6 +29,22 @@ public class TmpScriptFiles {
         return tmp;
     }
 
+    /**
+     * Creates a tmp script file with an exact file name inside a fresh unique subdirectory,
+     * for engines whose compilation unit name is significant (e.g. "Main.java").
+     * zh-CN: 在唯一子目录中以精确文件名创建临时脚本文件 (如 "Main.java"), 用于对编译单元名敏感的引擎.
+     */
+    public static File createWithExactName(Context context, String fileName) throws IOException {
+        ensureTmpDir(context);
+        File dir = new File(getTmpDir(context), "tmp-" + System.currentTimeMillis());
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IOException("Failed to create tmp script directory: " + dir);
+        }
+        File tmp = new File(dir, fileName);
+        tmp.createNewFile();
+        return tmp;
+    }
+
     public static void clearTmpDir(Context context, long maxAgeMs) {
         File dir = getTmpDir(context);
         PFiles.deleteRecursivelyOlderThan(dir, maxAgeMs);

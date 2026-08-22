@@ -7,10 +7,14 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
+import org.autojs.autojs.core.plugin.jvm.JvmSourceExplicitRunner;
+import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.script.JvmSourceKind;
 import org.autojs.autojs.script.StringScriptSource;
+import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.ScriptOriginResolver;
 import org.autojs.autojs.util.ViewUtils;
@@ -47,6 +51,16 @@ public class RunIntentActivity extends Activity {
 
         String originPath = ScriptOriginResolver.resolveFilePath(this, uri);
         String displayName = IntentUtils.getFileName(this, uri);
+        if (JvmSourceKind.fromFileName(displayName) == JvmSourceKind.JAVA
+                || JvmSourceKind.fromFileName(originPath) == JvmSourceKind.JAVA) {
+            // Content-provided .java sources are staged into a private tmp file and executed
+            // through the explicit JVM source runner (Roadmap v2 M1).
+            // zh-CN: content 提供的 .java 源码先落入私有临时文件, 再经显式 JVM runner 执行.
+            runJavaSourceFromContent(uri, originPath);
+            return;
+        }
+        JvmSourceKind.requireNoJavaScriptFallback(displayName);
+        JvmSourceKind.requireNoJavaScriptFallback(originPath);
         String sourceName = PFiles.getNameWithoutExtension(displayName);
 
         InputStream stream = getContentResolver().openInputStream(uri);
@@ -60,6 +74,25 @@ public class RunIntentActivity extends Activity {
 
         String workingDirectory = originPath == null ? null : new File(originPath).getParent();
         Scripts.run(this, source, workingDirectory);
+    }
+
+    private void runJavaSourceFromContent(Uri uri, @Nullable String originPath) throws IOException {
+        InputStream stream = getContentResolver().openInputStream(uri);
+        if (stream == null) {
+            throw new FileNotFoundException(uri.toString());
+        }
+        File tmpFile = TmpScriptFiles.createWithExactName(this, "Main.java");
+        PFiles.write(tmpFile, PFiles.read(stream));
+        String workingDirectory = originPath == null ? tmpFile.getParent() : new File(originPath).getParent();
+        ExecutionConfig config = new ExecutionConfig();
+        config.setWorkingDirectory(workingDirectory == null ? "" : workingDirectory);
+        JvmSourceExplicitRunner.runJvmSourceExplicit(
+                tmpFile,
+                null,
+                config,
+                originPath,
+                uri.toString()
+        );
     }
 
 }

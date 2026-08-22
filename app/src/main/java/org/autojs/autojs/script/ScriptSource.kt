@@ -20,7 +20,7 @@ abstract class ScriptSource(private val sourceName: String) : Serializable {
 
     var prefix: String? = null
 
-    val extension = FileUtils.TYPE.JAVASCRIPT.extension
+    open val extension = FileUtils.TYPE.JAVASCRIPT.extension
 
     val name
         get() = overriddenFullPath?.let { PFiles.getNameWithoutExtension(it) } ?: sourceName
