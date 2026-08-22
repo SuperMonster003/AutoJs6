@@ -42,6 +42,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionEntryPoint
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionExecution
 import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
@@ -50,6 +51,7 @@ import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerFileItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerPage
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerProvider
+import org.autojs.autojs.core.plugin.explorer.archive.ArchiveEntryTooLargeException
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getInt
@@ -201,6 +203,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private var mSelectionPluginAction: ResolvedExplorerAction? = null
     private var mArchiveNavigationState: ArchiveNavigationState? = null
     private var mArchiveOpenJob: Job? = null
+    private var mArchiveEntryOpenJob: Job? = null
     private var mOnArchiveModeStateChangeListener: ((Boolean) -> Unit)? = null
 
     private val mPageStateHistory = Stack<ExplorerPageState>()
@@ -528,6 +531,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         super.onDetachedFromWindow()
         mArchiveOpenJob?.cancel()
         mArchiveOpenJob = null
+        mArchiveEntryOpenJob?.cancel()
+        mArchiveEntryOpenJob = null
         closeArchiveNavigation(restorePrevious = false)
         mExplorer?.unregisterChangeListener(this)
         mPageStateHistory.clear()
@@ -820,6 +825,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     internal fun releasePluginResources() {
         mArchiveOpenJob?.cancel()
         mArchiveOpenJob = null
+        mArchiveEntryOpenJob?.cancel()
+        mArchiveEntryOpenJob = null
         closeArchiveNavigation(restorePrevious = false)
         mOnArchiveModeStateChangeListener = null
     }
@@ -911,7 +918,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         val sourceParentPath = File(connection.sourcePath).parentFile?.path
             ?: ExplorerPathSegmentBuilder.filesystemRoot(connection.sourcePath)
         val sourceParentSegments = createPathSegments(sourceParentPath)
-        val provider = ArchiveExplorerProvider(connection)
+        val provider = ArchiveExplorerProvider(connection, context.cacheDir)
         val state = ArchiveNavigationState(
             provider = provider,
             previousExplorer = previousExplorer,
@@ -934,6 +941,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private fun closeArchiveNavigation(restorePrevious: Boolean) {
         val state = mArchiveNavigationState ?: return
+        mArchiveEntryOpenJob?.cancel()
+        mArchiveEntryOpenJob = null
+        isRefreshing = false
         mArchiveNavigationState = null
         mExplorer?.unregisterChangeListener(this)
         state.provider.close()
@@ -948,6 +958,76 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         mExplorer?.registerChangeListener(this)
         refreshCurrentPage()
         updateProjectToolbarVisibility()
+    }
+
+    private fun openArchiveEntry(
+        item: ArchiveExplorerFileItem,
+        action: ExplorerPrimaryAction?,
+    ) {
+        val state = mArchiveNavigationState
+        if (state == null || action == null || !item.canOpenEntry) {
+            ViewUtils.showToast(context, R.string.text_unavailable)
+            return
+        }
+        val maxBytes = when (action) {
+            ExplorerPrimaryAction.DOCUMENT_PREVIEW -> DocumentPreviewActivity.MAX_DOCUMENT_BYTES.toLong()
+            ExplorerPrimaryAction.IMAGE_VIEW,
+            ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,
+            -> MAX_ARCHIVE_IMAGE_PREVIEW_BYTES
+            ExplorerPrimaryAction.MEDIA_PLAY -> MAX_ARCHIVE_MEDIA_PREVIEW_BYTES
+        }
+        if (item.size > maxBytes) {
+            ViewUtils.showToast(
+                context,
+                context.getString(
+                    R.string.error_document_preview_file_too_large,
+                    PFiles.formatSizeWithUnit(maxBytes),
+                ),
+                true,
+            )
+            return
+        }
+        if (mArchiveEntryOpenJob?.isActive == true) return
+        val lifecycleOwner = findViewTreeLifecycleOwner() ?: return
+        mArchiveEntryOpenJob = lifecycleOwner.lifecycleScope.launch {
+            val openingJob = coroutineContext[Job]
+            try {
+                isRefreshing = true
+                val materialized = withContext(Dispatchers.IO) {
+                    state.provider.materializeEntry(item, maxBytes)
+                }
+                if (mArchiveNavigationState !== state) return@launch
+                when (action) {
+                    ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
+                        DocumentPreviewActivity.launch(context, materialized.path, item.name)
+                    }
+                    ExplorerPrimaryAction.IMAGE_VIEW,
+                    ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,
+                    -> ExplorerFileItem(materialized, null).view(context)
+                    ExplorerPrimaryAction.MEDIA_PLAY -> ExplorerFileItem(materialized, null).play(context)
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                if (mArchiveNavigationState === state) {
+                    Log.e(LOG_TAG, "Failed to open archive entry", error)
+                    val message = if (error is ArchiveEntryTooLargeException) {
+                        context.getString(
+                            R.string.error_document_preview_file_too_large,
+                            PFiles.formatSizeWithUnit(error.limitBytes),
+                        )
+                    } else {
+                        context.getString(R.string.text_cannot_read_file)
+                    }
+                    ViewUtils.showToast(context, message, true)
+                }
+            } finally {
+                if (mArchiveEntryOpenJob === openingJob) {
+                    isRefreshing = false
+                    mArchiveEntryOpenJob = null
+                }
+            }
+        }
     }
 
     private fun updateProjectToolbarVisibility() {
@@ -1498,10 +1578,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             setVisibilityIf(mActionIconContainer, false)
 
             Observable.fromCallable {
-                val primaryAction = if (item is ArchiveExplorerItem) {
-                    null
-                } else {
-                    ExplorerPrimaryActionResolver.resolve(item.type)
+                val primaryAction = when (item) {
+                    is ArchiveExplorerFileItem -> ExplorerPrimaryActionResolver
+                        .resolve(item.type)
+                        ?.takeIf { item.canOpenEntry }
+                    is ArchiveExplorerItem -> null
+                    else -> ExplorerPrimaryActionResolver.resolve(item.type)
                 }
                 val pluginPrimaryAction = if (item is ArchiveExplorerItem) {
                     null
@@ -1668,7 +1750,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 return
             }
             if (mExplorerItem is ArchiveExplorerFileItem) {
-                ViewUtils.showToast(context, R.string.text_unavailable)
+                openArchiveEntry(
+                    mExplorerItem as ArchiveExplorerFileItem,
+                    ExplorerPrimaryActionResolver.resolve(mExplorerItem.type),
+                )
+                notifyItemOperated()
                 return
             }
             val pluginAction = resolvePluginAction(ExplorerActionEntryPoint.DEFAULT_CLICK)
@@ -1747,6 +1833,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             val pluginAction = mPrimaryPluginAction
             if (action == null && pluginAction == null) return
             mRequestHostDialogHide?.run()
+            if (mExplorerItem is ArchiveExplorerFileItem) {
+                openArchiveEntry(mExplorerItem as ArchiveExplorerFileItem, action)
+                notifyItemOperated()
+                return
+            }
             val fallback = { openHostPrimaryViewer(action) }
             if (pluginAction != null) {
                 ExplorerActionExecution.withFallback(
@@ -2291,6 +2382,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private const val SELECTION_TOOLBAR_CONTENT_HEIGHT_DP = 81F
         private const val SELECTION_TOOLBAR_SHOW_DURATION = 120L
         private const val SELECTION_TOOLBAR_HIDE_DURATION = 90L
+        private const val MAX_ARCHIVE_IMAGE_PREVIEW_BYTES = 256L * 1024L * 1024L
+        private const val MAX_ARCHIVE_MEDIA_PREVIEW_BYTES = 512L * 1024L * 1024L
 
         @Suppress("ConstPropertyName")
         private const val positionOfCategoryDir = 0

@@ -30,6 +30,7 @@
 * `Nuevo` El administrador de archivos admite transacciones de salida del protocolo Explorer Action v3 con URI de contenido de solo escritura y límites definidos, validación de salida, recuperación tras fallos y publicación atómica de archivos en el mismo directorio
 * `Nuevo` El protocolo Explorer Action v4 del administrador de archivos admite objetivos ordenados de archivos/carpetas/mixtos y selecciones con el mismo directorio padre, muestra la compresión de plugins en menús de carpetas y en una barra vertical de cinco acciones, y ofrece sesiones de archivos del host para lecturas controladas y salida atómica en el mismo directorio
 * `Nuevo` El protocolo Explorer Action v5 del administrador de archivos permite que plugins fiables, limitados a un archivo de solo lectura, presenten directorios de archivos paginados en la lista Explorer nativa, la barra de ruta, el tema y la pila Atrás mediante sesiones Binder vinculadas al UID
+* `Nuevo` El protocolo Explorer Action v6 del administrador de archivos muestra vistas previas de entradas legibles de documentos, imágenes, audio y vídeo mediante los visores existentes del host
 * `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
 * `Nuevo` El Centro de plugins admite el montaje automático de plugins SDK
 * `Nuevo` El Centro de plugins admite la ordenación por prioridad de múltiples variantes

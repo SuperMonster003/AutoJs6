@@ -81,7 +81,7 @@ class DocumentPreviewActivity : BaseActivity() {
             setContentView(it.root)
             it.previewWebView.setBackgroundColor(getColor(R.color.window_background))
         }
-        setToolbarAsBack(previewFile.name)
+        setToolbarAsBack(intent.getStringExtra(EXTRA_DISPLAY_NAME) ?: previewFile.name)
         setFullscreenMode(fullscreenMode, invalidateMenu = false)
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
@@ -329,11 +329,13 @@ class DocumentPreviewActivity : BaseActivity() {
         const val MAX_DOCUMENT_BYTES = 8 * 1024 * 1024
 
         private const val EXTRA_PATH = "path"
+        private const val EXTRA_DISPLAY_NAME = "display_name"
         private const val STATE_FULLSCREEN_MODE = "fullscreen_mode"
 
-        fun launch(context: Context, path: String) {
+        fun launch(context: Context, path: String, displayName: String? = null) {
             Intent(context, DocumentPreviewActivity::class.java)
                 .putExtra(EXTRA_PATH, path)
+                .putExtra(EXTRA_DISPLAY_NAME, displayName)
                 .startSafely(context)
         }
     }

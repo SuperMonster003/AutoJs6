@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.explorer.archive
 
+import android.os.ParcelFileDescriptor
 import io.reactivex.Single
 import java.io.File
 import org.autojs.autojs.model.explorer.ExplorerItem
@@ -17,6 +18,7 @@ internal sealed class ArchiveExplorerItem(
     private val uncompressedSize: Long,
     val compressedSize: Long,
     val canExtractEntry: Boolean,
+    val canOpenEntry: Boolean,
 ) : ExplorerItem {
 
     override fun getName(): String = displayName
@@ -84,6 +86,7 @@ internal class ArchiveExplorerFileItem(
     uncompressedSize = info.size,
     compressedSize = info.compressedSize,
     canExtractEntry = info.canExtract,
+    canOpenEntry = info.canOpen,
 )
 
 internal class ArchiveExplorerPage internal constructor(
@@ -104,6 +107,7 @@ internal class ArchiveExplorerPage internal constructor(
     uncompressedSize = size,
     compressedSize = -1L,
     canExtractEntry = canExtract,
+    canOpenEntry = false,
 ), ExplorerPage {
 
     private var children: MutableList<ExplorerItem> = mutableListOf()
@@ -132,7 +136,13 @@ internal class ArchiveExplorerPage internal constructor(
 
 internal class ArchiveExplorerProvider(
     private val connection: ExplorerArchiveSessionClient,
+    cacheDirectory: File,
 ) : ExplorerProvider {
+
+    private val entryMaterializer = ArchiveEntryMaterializer(
+        cacheDirectory = cacheDirectory,
+        sessionId = connection.info.sessionId,
+    )
 
     private val itemInfoById = LinkedHashMap<String, ExplorerArchiveItemInfo>()
     private val pageById = LinkedHashMap<String, ArchiveExplorerPage>()
@@ -181,13 +191,37 @@ internal class ArchiveExplorerProvider(
                     rememberPage(it)
                 }
             } else {
-                loaded.addChild(ArchiveExplorerFileItem(info, parent, path))
+                loaded.addChild(
+                    ArchiveExplorerFileItem(
+                        info.copy(canOpen = connection.info.canOpenEntries && info.canExtract),
+                        parent,
+                        path,
+                    ),
+                )
             }
         }
         loaded
     }
 
     fun pageForPath(path: String): ArchiveExplorerPage? = pageByPath[path]
+
+    fun materializeEntry(item: ArchiveExplorerFileItem, maxBytes: Long): File {
+        check(item.canOpenEntry) { "Archive entry cannot be opened" }
+        val info = requireNotNull(itemInfoById[item.entryId]) { "Archive entry metadata is unavailable" }
+        check(!info.isDirectory && info.name == item.name && info.size == item.size) {
+            "Archive entry metadata changed"
+        }
+        val input = ParcelFileDescriptor.AutoCloseInputStream(connection.openEntry(item.entryId))
+        return input.use { stream ->
+            entryMaterializer.materialize(
+                entryId = item.entryId,
+                displayName = item.name,
+                expectedSize = item.size,
+                maxBytes = maxBytes,
+                input = stream,
+            )
+        }
+    }
 
     fun ancestors(page: ArchiveExplorerPage): List<ArchiveExplorerPage> {
         val result = ArrayList<ArchiveExplorerPage>()
@@ -203,7 +237,10 @@ internal class ArchiveExplorerProvider(
         return result.asReversed()
     }
 
-    fun close() = connection.close()
+    fun close() {
+        connection.close()
+        entryMaterializer.close()
+    }
 
     private fun rememberPage(page: ArchiveExplorerPage) {
         pageById[page.entryId] = page

@@ -7,6 +7,8 @@ object ExplorerArchiveSessionKeys {
     const val DISPLAY_NAME = "displayName"
     const val SOURCE_SIZE = "sourceSize"
     const val SOURCE_LAST_MODIFIED = "sourceLastModified"
+    /** False or absent for protocol v5 sessions. */
+    const val CAN_OPEN_ENTRIES = "canOpenEntries"
 
     const val ITEMS = "items"
     const val NEXT_OFFSET = "nextOffset"

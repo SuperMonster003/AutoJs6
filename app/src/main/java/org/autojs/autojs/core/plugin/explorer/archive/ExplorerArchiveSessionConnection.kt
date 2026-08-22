@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.explorer.archive
 
 import android.os.Bundle
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
 import androidx.core.os.BundleCompat
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerArchiveSessionKeys
@@ -14,6 +15,7 @@ internal interface ExplorerArchiveSessionClient : Closeable {
     val sourcePath: String
     val info: ExplorerArchiveSessionInfo
     fun listAllChildren(parentId: String): List<ExplorerArchiveItemInfo>
+    fun openEntry(entryId: String): ParcelFileDescriptor
 }
 
 internal data class ExplorerArchiveSessionInfo(
@@ -22,6 +24,7 @@ internal data class ExplorerArchiveSessionInfo(
     val displayName: String,
     val sourceSize: Long,
     val sourceLastModified: Long,
+    val canOpenEntries: Boolean,
 )
 
 internal data class ExplorerArchiveItemInfo(
@@ -33,6 +36,7 @@ internal data class ExplorerArchiveItemInfo(
     val compressedSize: Long,
     val lastModified: Long,
     val canExtract: Boolean,
+    val canOpen: Boolean = false,
 )
 
 internal class ExplorerArchiveSessionConnection private constructor(
@@ -86,6 +90,24 @@ internal class ExplorerArchiveSessionConnection private constructor(
                 "Archive session pagination did not advance"
             }
             offset = nextOffset
+        }
+    }
+
+    override fun openEntry(entryId: String): ParcelFileDescriptor {
+        check(!closed.get()) { "Archive session is closed" }
+        check(info.canOpenEntries) { "Archive session does not support opening entries" }
+        requireValidId(entryId, "archive entry")
+        val descriptor = requireNotNull(remote.openEntry(entryId)) {
+            "Archive session returned no entry descriptor"
+        }
+        return try {
+            require(descriptor.fileDescriptor.valid()) {
+                "Archive session returned an invalid entry descriptor"
+            }
+            descriptor
+        } catch (error: Throwable) {
+            descriptor.close()
+            throw error
         }
     }
 
@@ -176,6 +198,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
                         sourceLastModified = bundle
                             .getLong(ExplorerArchiveSessionKeys.SOURCE_LAST_MODIFIED, 0L)
                             .coerceAtLeast(0L),
+                        canOpenEntries = bundle.getBoolean(
+                            ExplorerArchiveSessionKeys.CAN_OPEN_ENTRIES,
+                            false,
+                        ),
                     ),
                 )
             } catch (error: Throwable) {
