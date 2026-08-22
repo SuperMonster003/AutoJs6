@@ -4,13 +4,16 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.SystemClock
+import android.util.Base64
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.plugin.python.PythonRuntimeExecutionResult
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
+import org.autojs.autojs.script.PythonProjectLaunchPolicy
 import org.autojs.autojs.script.PythonProjectSource
+import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.python.runtime.api.PythonSha256
 import org.junit.After
@@ -169,6 +172,267 @@ class PythonU1R2AcceptanceInstrumentationTest {
         }
     }
 
+    @Test
+    fun configuredNinetySecondProjectStreamsBeforeTerminalAndCompletes() {
+        val projectRoot = freshProjectRoot()
+        val tickMarker = "M1_LIVE_TICK_${UUID.randomUUID()}"
+        val endMarker = "M1_LIVE_END_${UUID.randomUUID()}"
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                import time
+
+                for second in range($LONG_SLEEP_SECONDS):
+                    print("$tickMarker:{}".format(second), flush=True)
+                    time.sleep(1)
+                print("$endMarker", flush=True)
+                """.trimIndent() + "\n",
+                timeoutMillis = LONG_PROJECT_TIMEOUT_MILLIS,
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val source = requireNotNull(launch.pythonProjectSource)
+            assertEquals(LONG_PROJECT_TIMEOUT_MILLIS, source.timeoutMillis)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            val checkpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M1 live-output execution")
+                awaitConsoleSince(checkpoint, "$tickMarker:2", LIVE_OUTPUT_TIMEOUT_SECONDS)
+                assertEquals(
+                    "Repeated live-output ticks only appeared after the Python execution terminated",
+                    1L,
+                    pending.completed.count,
+                )
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M1 90-second configured execution",
+                    LONG_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M1 90-second configured execution")
+                assertEquals(0, result.terminal.exitCode)
+                assertConsoleSince(checkpoint, "$tickMarker:0")
+                assertConsoleSince(checkpoint, "$tickMarker:${LONG_SLEEP_SECONDS - 1}")
+                assertConsoleSince(checkpoint, endMarker)
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M1 live-output")
+        }
+    }
+
+    @Test
+    fun outputBeyondLegacyFourMiBLimitCompletesWithFinalMarker() {
+        val projectRoot = freshProjectRoot()
+        val finalMarker = "M1_LONG_OUTPUT_END_${UUID.randomUUID()}"
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                import sys
+
+                sys.stdout.write("L" * $LONG_OUTPUT_PAYLOAD_BYTES)
+                print("$finalMarker", flush=True)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            val checkpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M1 long-output execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M1 long-output execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M1 long-output execution")
+                val expectedBytes = LONG_OUTPUT_PAYLOAD_BYTES.toLong() +
+                    finalMarker.toByteArray(Charsets.UTF_8).size + 1L
+                assertEquals(expectedBytes, result.terminal.stdoutBytes)
+                assertTrue(
+                    "Python stdout did not exceed the former 4 MiB Host limit",
+                    result.terminal.stdoutBytes > LEGACY_OUTPUT_LIMIT_BYTES,
+                )
+                assertConsoleSince(checkpoint, finalMarker)
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M1 long-output")
+        }
+    }
+
+    @Test
+    fun stdlibHttpsRequestCompletesThroughPluginInternetPermission() {
+        val networkUrl = InstrumentationRegistry.getArguments().getString(ARG_NETWORK_URL).orEmpty()
+        assumeTrue(
+            "M1 HTTPS smoke requires -e $ARG_NETWORK_URL https://...",
+            networkUrl.startsWith("https://"),
+        )
+        val encodedUrl = Base64.encodeToString(networkUrl.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+        val projectRoot = freshProjectRoot()
+        val marker = "M1_HTTPS_OK_${UUID.randomUUID()}"
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                import base64
+                import urllib.request
+
+                url = base64.b64decode("$encodedUrl").decode("utf-8")
+                with urllib.request.urlopen(url, timeout=20) as response:
+                    payload = response.read(64)
+                    print("$marker:{}:{}".format(response.status, len(payload)), flush=True)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            val checkpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M1 HTTPS execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M1 HTTPS execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                assertSuccessful(pending, "M1 HTTPS execution")
+                assertConsoleSince(checkpoint, "$marker:200:")
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M1 HTTPS")
+        }
+    }
+
+    @Test
+    fun forceStopRetiresProviderProcessAndImmediateNextRunSucceeds() {
+        val firstRoot = freshProjectRoot()
+        val secondRoot = freshProjectRoot()
+        val firstMarker = "M1_STOP_FIRST_${UUID.randomUUID()}"
+        val secondMarker = "M1_STOP_SECOND_${UUID.randomUUID()}"
+        try {
+            writeSimpleProject(
+                firstRoot,
+                """
+                import os
+                import time
+
+                print("$firstMarker:{}".format(os.getpid()), flush=True)
+                while True:
+                    time.sleep(1)
+                """.trimIndent() + "\n",
+            )
+            val firstLaunch = admittedProjectLaunch(firstRoot)
+            val firstPending = PendingProjectExecution(firstRoot.canonicalPath)
+            val firstCheckpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(firstPending.listener)
+            val firstPid: Int
+            try {
+                service.execute(firstLaunch.source, firstLaunch.createExecutionConfig())
+                val execution = awaitStarted(firstPending, "M1 force-stop execution")
+                awaitConsoleSince(firstCheckpoint, firstMarker, LIVE_OUTPUT_TIMEOUT_SECONDS)
+                firstPid = consolePidSince(firstCheckpoint, firstMarker)
+                execution.engine.forceStop()
+                awaitCompleted(
+                    firstPending,
+                    execution,
+                    "M1 force-stop execution",
+                    STOP_TIMEOUT_SECONDS,
+                )
+                assertEquals(1, firstPending.startCount.get())
+                assertEquals(0, firstPending.successCount.get())
+                assertEquals(1, firstPending.exceptionCount.get())
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(firstPending.listener)
+            }
+
+            writeSimpleProject(
+                secondRoot,
+                """
+                import os
+
+                print("$secondMarker:{}".format(os.getpid()), flush=True)
+                """.trimIndent() + "\n",
+            )
+            val secondLaunch = admittedProjectLaunch(secondRoot)
+            val secondPending = PendingProjectExecution(secondRoot.canonicalPath)
+            val secondCheckpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(secondPending.listener)
+            try {
+                service.execute(secondLaunch.source, secondLaunch.createExecutionConfig())
+                val execution = awaitStarted(secondPending, "M1 immediate restart execution")
+                awaitCompleted(
+                    secondPending,
+                    execution,
+                    "M1 immediate restart execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                assertSuccessful(secondPending, "M1 immediate restart execution")
+                assertConsoleSince(secondCheckpoint, secondMarker)
+                val secondPid = consolePidSince(secondCheckpoint, secondMarker)
+                assertTrue(
+                    "Python provider PID did not change after force-stop: $firstPid",
+                    firstPid != secondPid,
+                )
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(secondPending.listener)
+            }
+        } finally {
+            cleanProjectRoot(firstRoot, "M1 force-stop first")
+            cleanProjectRoot(secondRoot, "M1 force-stop second")
+        }
+    }
+
+    @Test
+    fun unattendedInputFailsWithEofInsteadOfWaitingForUi() {
+        val projectRoot = freshProjectRoot()
+        val prompt = "M1_UNATTENDED_INPUT_${UUID.randomUUID()}"
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                print("M1_UNATTENDED_BEFORE", flush=True)
+                input("$prompt")
+                raise AssertionError("unattended input unexpectedly returned")
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            val checkpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M1 unattended-input execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M1 unattended-input execution",
+                    STOP_TIMEOUT_SECONDS,
+                )
+                assertEquals(1, pending.startCount.get())
+                assertEquals(0, pending.successCount.get())
+                assertEquals(1, pending.exceptionCount.get())
+                assertNotNull("Unattended input failed without a Host exception", pending.error.get())
+                assertConsoleSince(checkpoint, prompt)
+                assertConsoleSince(checkpoint, "EOFError")
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M1 unattended-input")
+        }
+    }
+
     private fun writeProject(projectRoot: File, token: String) {
         File(projectRoot, "project.json").writeText(
             """{"type":"python","main":"$ENTRY_POINT"}""",
@@ -193,11 +457,11 @@ class PythonU1R2AcceptanceInstrumentationTest {
 
             print("$token", flush=True)
             print('$STDOUT_JSON_LOOKALIKE_ESCAPED', flush=True)
-            sys.stderr.write("$STDERR_MARKER\\n")
+            sys.stderr.write("$STDERR_MARKER\n")
             sys.stderr.flush()
             artifact_path = artifacts.path("$ARTIFACT_PATH")
             with open(artifact_path, "wb") as output:
-                output.write(b"U1-R2 artifact bytes\\x00\\xff")
+                output.write(b"U1-R2 artifact bytes\x00\xff")
             result.set({
                 "artifact": "$ARTIFACT_PATH",
                 "module": __spec__.name,
@@ -210,6 +474,25 @@ class PythonU1R2AcceptanceInstrumentationTest {
         )
     }
 
+    private fun writeSimpleProject(projectRoot: File, source: String, timeoutMillis: Long? = null) {
+        val timeoutProperty = timeoutMillis?.let { value -> ",\"timeout\":$value" }.orEmpty()
+        File(projectRoot, "project.json").writeText(
+            "{\"type\":\"python\",\"main\":\"$SIMPLE_ENTRY_POINT\"$timeoutProperty}",
+            Charsets.UTF_8,
+        )
+        File(projectRoot, SIMPLE_ENTRY_POINT).writeText(source, Charsets.UTF_8)
+    }
+
+    private fun admittedProjectLaunch(projectRoot: File): ScriptLaunchSourceFactory.Launch {
+        val admission = requireNotNull(PythonProjectLaunchPolicy.inspect(projectRoot, null)) {
+            "Python project was not admitted: $projectRoot"
+        }
+        return ScriptLaunchSourceFactory.createPythonProjectLaunch(
+            admission,
+            projectRoot.canonicalPath,
+        )
+    }
+
     private fun freshProjectRoot(): File = File(
         context.cacheDir,
         "python-u1r2-public-${UUID.randomUUID()}",
@@ -218,12 +501,52 @@ class PythonU1R2AcceptanceInstrumentationTest {
     }
 
     private fun assertConsoleSince(checkpoint: Int, expected: String) {
+        assertTrue(
+            "Global console did not contain '$expected' after checkpoint $checkpoint:\n" +
+                consoleExcerptSince(checkpoint),
+            consoleContainsSince(checkpoint, expected),
+        )
+    }
+
+    private fun awaitConsoleSince(checkpoint: Int, expected: String, timeoutSeconds: Long) {
+        val deadline = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(timeoutSeconds)
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (consoleContainsSince(checkpoint, expected)) return
+            SystemClock.sleep(CONSOLE_POLL_MILLIS)
+        }
+        throw AssertionError(
+            "Global console did not contain '$expected' within $timeoutSeconds seconds:\n" +
+                consoleExcerptSince(checkpoint),
+        )
+    }
+
+    private fun consoleContainsSince(checkpoint: Int, expected: String): Boolean =
+        synchronized(console.logEntries) {
+            console.logEntries.any { entry ->
+                entry.id >= checkpoint && entry.content.toString().contains(expected)
+            }
+        }
+
+    private fun consoleExcerptSince(checkpoint: Int): String = synchronized(console.logEntries) {
+        console.logEntries
+            .asSequence()
+            .filter { entry -> entry.id >= checkpoint }
+            .map { entry -> entry.content.toString() }
+            .joinToString("\n")
+            .takeLast(MAX_CONSOLE_DIAGNOSTIC_CHARS)
+    }
+
+    private fun consolePidSince(checkpoint: Int, marker: String): Int {
+        val expression = Regex("${Regex.escape(marker)}:(\\d+)")
         val text = synchronized(console.logEntries) {
             console.logEntries
+                .asSequence()
                 .filter { entry -> entry.id >= checkpoint }
                 .joinToString("\n") { entry -> entry.content.toString() }
         }
-        assertTrue("Global console did not contain '$expected' after checkpoint $checkpoint:\n$text", text.contains(expected))
+        return requireNotNull(expression.find(text)?.groupValues?.get(1)?.toIntOrNull()) {
+            "Global console did not expose a provider PID for $marker: ${text.takeLast(MAX_CONSOLE_DIAGNOSTIC_CHARS)}"
+        }
     }
 
     private fun consoleCheckpoint(): Int = synchronized(console.logEntries) {
@@ -257,6 +580,48 @@ class PythonU1R2AcceptanceInstrumentationTest {
             SystemClock.sleep(ENGINE_REMOVAL_POLL_MILLIS)
         }
         throw AssertionError("$label left engines=${service.engines}, executions=${service.scriptExecutions}")
+    }
+
+    private fun awaitStarted(pending: PendingProjectExecution, label: String): ScriptExecution {
+        assertTrue(
+            "$label did not reach the unified start callback",
+            pending.started.await(START_TIMEOUT_SECONDS, TimeUnit.SECONDS),
+        )
+        return requireNotNull(pending.execution.get()) { "$label started without ScriptExecution" }
+    }
+
+    private fun awaitCompleted(
+        pending: PendingProjectExecution,
+        execution: ScriptExecution,
+        label: String,
+        timeoutSeconds: Long,
+    ) {
+        if (!pending.completed.await(timeoutSeconds, TimeUnit.SECONDS)) {
+            execution.engine.forceStop()
+            throw AssertionError("$label did not reach a Host terminal callback")
+        }
+        awaitEngineRemoved(execution.id, label)
+    }
+
+    private fun assertSuccessful(
+        pending: PendingProjectExecution,
+        label: String,
+    ): PythonRuntimeExecutionResult {
+        assertEquals("$label start callback count", 1, pending.startCount.get())
+        assertEquals("$label success callback count", 1, pending.successCount.get())
+        assertEquals("$label exception callback count", 0, pending.exceptionCount.get())
+        assertEquals("$label exposed a Host error", null, pending.error.get())
+        return requireNotNull(pending.result.get() as? PythonRuntimeExecutionResult) {
+            "$label did not return PythonRuntimeExecutionResult"
+        }
+    }
+
+    private fun cleanProjectRoot(projectRoot: File, label: String) {
+        service.stopAll()
+        awaitNoRegisteredEngines("during $label cleanup")
+        check(projectRoot.deleteRecursively() || !projectRoot.exists()) {
+            "Unable to remove $label directory: $projectRoot"
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -315,11 +680,13 @@ class PythonU1R2AcceptanceInstrumentationTest {
 
     private companion object {
         const val ARG_ENABLED = "autojs.python.u1r2.public.enabled"
+        const val ARG_NETWORK_URL = "autojs.python.m1.networkUrl"
         const val HOST_PACKAGE = "org.autojs.autojs6"
         const val REAL_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.python.runtime"
         const val ENTRY_MODE_ARGUMENT = "autojs6.python.entryMode"
         const val PACKAGE_NAME = "u1r2case"
         const val ENTRY_POINT = "$PACKAGE_NAME/main.py"
+        const val SIMPLE_ENTRY_POINT = "main.py"
         const val ARTIFACT_PATH = "reports/u1-r2.bin"
         const val STDERR_MARKER = "U1R2_STDERR_DIAGNOSTIC"
         const val STDOUT_JSON_LOOKALIKE = "{\"stdout\":\"diagnostic-only\"}\n"
@@ -333,7 +700,17 @@ class PythonU1R2AcceptanceInstrumentationTest {
         val TRANSPORT_SNAPSHOT_PREFIXES = listOf("source-", "workspace-", "stdin-", "host-capabilities-")
         const val START_TIMEOUT_SECONDS = 20L
         const val EXECUTION_TIMEOUT_SECONDS = 90L
+        const val LIVE_OUTPUT_TIMEOUT_SECONDS = 30L
+        const val STOP_TIMEOUT_SECONDS = 30L
+        const val SMOKE_EXECUTION_TIMEOUT_SECONDS = 90L
+        const val LONG_EXECUTION_TIMEOUT_SECONDS = 150L
+        const val LONG_SLEEP_SECONDS = 90
+        const val LONG_PROJECT_TIMEOUT_MILLIS = 120_000L
+        const val LEGACY_OUTPUT_LIMIT_BYTES = 4L * 1024L * 1024L
+        const val LONG_OUTPUT_PAYLOAD_BYTES = 4 * 1024 * 1024 + 256 * 1024
         const val ENGINE_REMOVAL_TIMEOUT_MILLIS = 10_000L
         const val ENGINE_REMOVAL_POLL_MILLIS = 50L
+        const val CONSOLE_POLL_MILLIS = 50L
+        const val MAX_CONSOLE_DIAGNOSTIC_CHARS = 4_096
     }
 }
