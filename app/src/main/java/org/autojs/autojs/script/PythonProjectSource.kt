@@ -1,5 +1,6 @@
 package org.autojs.autojs.script
 
+import org.autojs.autojs.core.plugin.python.PythonExecutionTimeoutPolicy
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.text.Normalizer
@@ -14,6 +15,7 @@ class PythonProjectSource private constructor(
     entryFile: File,
     sourceFile: File,
     val entryPoint: String,
+    val timeoutMillis: Long?,
 ) : PythonFileSource(sourceFile, entryFile) {
 
     val projectEntryFile: File
@@ -21,14 +23,20 @@ class PythonProjectSource private constructor(
 
     companion object {
         @JvmStatic
-        fun create(projectRoot: File, entryFile: File): PythonProjectSource {
-            return createWithSource(projectRoot, entryFile, entryFile)
+        @JvmOverloads
+        fun create(
+            projectRoot: File,
+            entryFile: File,
+            timeoutMillis: Long? = null,
+        ): PythonProjectSource {
+            return createWithSource(projectRoot, entryFile, entryFile, timeoutMillis)
         }
 
         internal fun createWithSource(
             projectRoot: File,
             entryFile: File,
             sourceFile: File,
+            timeoutMillis: Long? = null,
         ): PythonProjectSource {
             val root = projectRoot.canonicalFile
             val entry = entryFile.canonicalFile
@@ -36,6 +44,10 @@ class PythonProjectSource private constructor(
             require(root.isDirectory) { "Python project root must be a directory" }
             require(entry.isFile) { "Python project entry point must be a regular file" }
             require(source.isFile) { "Python project source snapshot must be a regular file" }
+            require(
+                timeoutMillis == null ||
+                    PythonExecutionTimeoutPolicy.isValidConfiguredTimeout(timeoutMillis),
+            ) { "Python project timeout is outside the host limit" }
             val rootPrefix = root.path.trimEnd(File.separatorChar) + File.separator
             val ignoreCase = WINDOWS_ABSOLUTE_PATH.matches(root.path)
             require(entry.path.startsWith(rootPrefix, ignoreCase = ignoreCase)) {
@@ -45,7 +57,7 @@ class PythonProjectSource private constructor(
                 .substring(rootPrefix.length)
                 .replace(File.separatorChar, '/')
             validateEntryPoint(relative)
-            return PythonProjectSource(root, entry, source, relative).apply {
+            return PythonProjectSource(root, entry, source, relative, timeoutMillis).apply {
                 if (source != entry) overriddenFullPath = entry.path
             }
         }

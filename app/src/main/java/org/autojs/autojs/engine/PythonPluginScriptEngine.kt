@@ -10,6 +10,7 @@ import org.autojs.autojs.core.plugin.python.PythonRuntimeHostException
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.PythonFileSource
+import org.autojs.autojs.script.PythonProjectSource
 import org.autojs.autojs.script.PythonRuntimeChannelPolicy
 import org.autojs.autojs.script.PythonScriptSource
 import java.util.concurrent.atomic.AtomicReference
@@ -52,7 +53,13 @@ class PythonPluginScriptEngine(
         val stdinSnapshot = PythonExecutionInputPolicy.resolveStdinSnapshot(executionConfig)
         val interactiveInputGrant = PythonInteractiveInputAuthorization.resolve(executionConfig)
         val execution = try {
-            client.createExecution(fileSource, entryMode, stdinSnapshot, interactiveInputGrant)
+            client.createExecution(
+                fileSource,
+                entryMode,
+                stdinSnapshot,
+                interactiveInputGrant,
+                (fileSource as? PythonProjectSource)?.timeoutMillis,
+            )
         } finally {
             stdinSnapshot?.fill(0)
         }

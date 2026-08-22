@@ -153,7 +153,11 @@ object ScriptLaunchSourceFactory {
         if (!pythonPreviewEnabled) {
             PythonProjectLaunchPolicy.rejectExecutionUntilWorkspaceSupport(admission)
         }
-        val source = PythonProjectSource.create(admission.projectRoot, admission.entryFile)
+        val source = PythonProjectSource.create(
+            admission.projectRoot,
+            admission.entryFile,
+            admission.timeoutMillis,
+        )
         return Launch(
             source = source,
             workingDirectory = workingDirectory ?: source.projectRoot.normalizedPath(),
@@ -346,6 +350,7 @@ object ScriptLaunchSourceFactory {
                 projectRoot = admission.projectRoot,
                 entryFile = admission.entryFile,
                 sourceFile = payloadFile,
+                timeoutMillis = admission.timeoutMillis,
             )
         } else {
             PythonFileSource(payloadFile, semanticFile).apply {

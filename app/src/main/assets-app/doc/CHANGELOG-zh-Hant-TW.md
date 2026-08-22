@@ -164,6 +164,7 @@
 * `最佳化` Node.js 最終整合及發佈閘門在必要報告/目前原始碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
 * `最佳化` 獨立 Python 指令碼發生精確 ModuleNotFoundError 時在控制檯附加安全提示, 引導 sibling/local 模組 import 使用包含 `project.json` 與 `type: python` 的明確 Python 專案, 且不揭露私人路徑
 * `最佳化` Python Runtime 輸出 chunk 到達時立即寫入宿主控制檯, 使用按 stdout/stderr 獨立的增量 UTF-8 解碼保留跨 chunk 碼點, 並將端到端輸出上限提高至 16 MiB
+* `最佳化` Python 專案的 project.json 支援 timeout 正整數毫秒設定, 預設 5 分鐘、最大 30 分鐘, 並持續受執行階段外掛上限約束
 * `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `最佳化` 檔案管理器將媒體詳細資訊查詢整合為單次 MediaInfo 快照, 減少 Binder 呼叫及等待時間
 * `最佳化` 檔案外部檢視及媒體播放降級僅授予 URI 讀取權限

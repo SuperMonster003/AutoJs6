@@ -5,6 +5,7 @@ import com.google.gson.JsonParser
 import com.google.gson.Strictness
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
+import org.autojs.autojs.core.plugin.python.PythonExecutionTimeoutPolicy
 import java.io.File
 import java.io.StringReader
 import java.nio.ByteBuffer
@@ -37,7 +38,7 @@ object PythonProjectLaunchPolicy {
         }
 
         val entry = resolveEntry(normalizedRoot, main)
-        return PythonProjectLaunchAdmission(normalizedRoot, entry)
+        return PythonProjectLaunchAdmission(normalizedRoot, entry, declaration.timeoutMillis)
     }
 
     /**
@@ -136,7 +137,24 @@ object PythonProjectLaunchPolicy {
         return Declaration(
             projectType = type ?: alias,
             main = stringValue(json, "main"),
+            timeoutMillis = timeoutMillisValue(json),
         )
+    }
+
+    private fun timeoutMillisValue(json: JsonObject): Long? {
+        val value = json.get("timeout") ?: return null
+        if (!value.isJsonPrimitive || !value.asJsonPrimitive.isNumber) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.CONFIG_INVALID)
+        }
+        val encoded = value.asJsonPrimitive.asString
+        val timeoutMillis = if (JSON_INTEGER.matches(encoded)) encoded.toLongOrNull() else null
+        if (
+            timeoutMillis == null ||
+            !PythonExecutionTimeoutPolicy.isValidConfiguredTimeout(timeoutMillis)
+        ) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.CONFIG_INVALID)
+        }
+        return timeoutMillis
     }
 
     private fun stringValue(json: JsonObject, name: String): String? {
@@ -201,6 +219,7 @@ object PythonProjectLaunchPolicy {
     private data class Declaration(
         val projectType: String?,
         val main: String?,
+        val timeoutMillis: Long?,
     )
 
     private const val PROJECT_CONFIG_NAME = "project.json"
@@ -209,6 +228,7 @@ object PythonProjectLaunchPolicy {
     private const val MAX_PROJECT_ANCESTORS = 64
     private val WINDOWS_ABSOLUTE_PATH = Regex("^[A-Za-z]:[\\\\/].*")
     private val URI_SCHEME = Regex("^[A-Za-z][A-Za-z0-9+.-]*:")
+    private val JSON_INTEGER = Regex("-?(?:0|[1-9][0-9]*)")
     private val PYTHON_TYPE_HINT = Regex("\\\"(?:type|projectType)\\\"\\s*:\\s*\\\"python\\\"", RegexOption.IGNORE_CASE)
     private val PYTHON_MAIN_HINT = Regex("\\\"main\\\"\\s*:\\s*\\\"[^\\\"]+\\.pyc?\\\"", RegexOption.IGNORE_CASE)
 }
@@ -216,6 +236,7 @@ object PythonProjectLaunchPolicy {
 data class PythonProjectLaunchAdmission(
     val projectRoot: File,
     val entryFile: File,
+    val timeoutMillis: Long?,
 )
 
 enum class PythonProjectLaunchError(

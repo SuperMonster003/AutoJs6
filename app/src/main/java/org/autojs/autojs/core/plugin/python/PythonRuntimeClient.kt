@@ -57,11 +57,13 @@ internal class PythonRuntimeClient(
         entryMode: PythonEntryMode = PythonEntryMode.FILE,
         stdinSnapshot: ByteArray? = null,
         interactiveInputGrant: PythonInteractiveInputGrant? = null,
+        configuredTimeoutMillis: Long? = null,
     ): Execution = Execution(
         source,
         entryMode,
         stdinSnapshot?.copyOf(),
         interactiveInputGrant?.openController(),
+        configuredTimeoutMillis,
     )
 
     inner class Execution internal constructor(
@@ -69,6 +71,7 @@ internal class PythonRuntimeClient(
         private val entryMode: PythonEntryMode,
         stdinSnapshot: ByteArray?,
         private val interactiveInputController: PythonInteractiveInputController?,
+        private val configuredTimeoutMillis: Long?,
     ) {
 
         private val cancelled = AtomicBoolean(false)
@@ -172,7 +175,10 @@ internal class PythonRuntimeClient(
                 val outputBytes = minOf(DEFAULT_OUTPUT_BYTES, capabilities.limits.maxOutputBytes)
                 val outputChunkBytes = minOf(DEFAULT_OUTPUT_CHUNK_BYTES, capabilities.limits.maxOutputChunkBytes)
                 val outputChunks = minOf(DEFAULT_OUTPUT_CHUNKS, capabilities.limits.maxOutputChunks, outputBytes)
-                val timeoutMillis = minOf(DEFAULT_TIMEOUT_MILLIS, capabilities.limits.maxTimeoutMillis)
+                val timeoutMillis = PythonExecutionTimeoutPolicy.resolve(
+                    configuredTimeoutMillis,
+                    capabilities.limits.maxTimeoutMillis,
+                )
                 val inputPromptBytes = minOf(DEFAULT_INPUT_PROMPT_BYTES, capabilities.limits.maxInputPromptBytes)
                 val inputReplyBytes = minOf(DEFAULT_INPUT_REPLY_BYTES, capabilities.limits.maxInputReplyBytes)
                 val inputPrompts = minOf(DEFAULT_INPUT_PROMPTS, capabilities.limits.maxInputPrompts)
@@ -1030,7 +1036,6 @@ internal class PythonRuntimeClient(
         private const val BIND_TIMEOUT_MILLIS = 10_000L
         private const val PROVIDER_RPC_TIMEOUT_MILLIS = 10_000L
         private const val PROVIDER_RPC_POLL_MILLIS = 100L
-        private const val DEFAULT_TIMEOUT_MILLIS = 5L * 60L * 1_000L
         private const val TERMINAL_GRACE_MILLIS = 15_000L
         private const val DEFAULT_OUTPUT_BYTES = 16L * 1024L * 1024L
         private const val DEFAULT_OUTPUT_CHUNK_BYTES = 32 * 1024

@@ -324,6 +324,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 필수 보고서/현재 소스 증거/프로덕션 승인 산출물이 누락되거나 만료된 경우 Node.js 최종 통합 및 릴리스 게이트가 fail-closed로 판정되도록 개선
 * `개선` 독립 실행형 Python 스크립트에서 정확한 ModuleNotFoundError가 발생하면 콘솔에 안전한 안내를 추가하고, 비공개 경로를 노출하지 않으면서 sibling/local 모듈 import에는 `project.json`과 `type: python`을 지정한 명시적 Python 프로젝트 사용을 안내
 * `개선` Python Runtime 출력 chunk를 도착 즉시 Host 콘솔에 기록하고 stdout/stderr별 증분 UTF-8 디코딩으로 chunk 사이에 나뉜 코드 포인트를 보존하며 종단 간 출력 상한을 16 MiB로 확대
+* `개선` Python 프로젝트의 project.json에서 양의 정수 밀리초 timeout을 지원하고 기본값은 5분, 최대값은 30분으로 하며 Runtime 플러그인 상한도 계속 적용
 * `개선` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 관련 기능 플러그인화
 * `개선` 파일 관리자의 미디어 상세 정보 조회를 단일 MediaInfo 스냅샷으로 통합하여 Binder 호출 및 대기 시간 감소
 * `개선` 외부 파일 보기 및 미디어 재생 대체 경로를 읽기 전용 URI 접근으로 제한

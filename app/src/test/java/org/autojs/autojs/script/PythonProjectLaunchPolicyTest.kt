@@ -25,6 +25,7 @@ class PythonProjectLaunchPolicyTest {
 
         assertEquals(root.canonicalFile, admission.projectRoot)
         assertEquals(entry.canonicalFile, admission.entryFile)
+        assertNull(admission.timeoutMillis)
         val launch = ScriptLaunchSourceFactory.createPythonProjectLaunchForPreview(
             admission = admission,
             pythonPreviewEnabled = true,
@@ -33,6 +34,7 @@ class PythonProjectLaunchPolicyTest {
         assertEquals(root.canonicalFile, projectSource.projectRoot)
         assertEquals(entry.canonicalFile, projectSource.file)
         assertEquals("main.py", projectSource.entryPoint)
+        assertNull(projectSource.timeoutMillis)
         assertEquals(root.canonicalPath, launch.workingDirectory)
         assertTrue(launch.pythonProjectSource === projectSource)
         assertProjectError(PythonProjectLaunchError.EXECUTION_NOT_ACTIVATED) {
@@ -41,6 +43,52 @@ class PythonProjectLaunchPolicyTest {
                 pythonPreviewEnabled = false,
             )
         }
+    }
+
+    @Test
+    fun exactIntegerTimeoutMillisFlowsFromManifestIntoProjectSource() {
+        val root = project("""{"type":"python","main":"main.py","timeout":90000}""")
+        val entry = File(root, "main.py").apply { writeText("print('configured timeout')") }
+
+        val admission = requireNotNull(PythonProjectLaunchPolicy.inspect(root, entry))
+        val launch = ScriptLaunchSourceFactory.createPythonProjectLaunchForPreview(
+            admission = admission,
+            pythonPreviewEnabled = true,
+        )
+
+        assertEquals(90_000L, admission.timeoutMillis)
+        assertEquals(90_000L, (launch.source as PythonProjectSource).timeoutMillis)
+    }
+
+    @Test
+    fun timeoutMustBeAnExactPositiveIntegerWithinThirtyMinutes() {
+        listOf(
+            "0",
+            "-1",
+            "1800001",
+            "1.5",
+            "1e3",
+            "\"90000\"",
+            "null",
+            "true",
+        ).forEach { timeout ->
+            val root = project("""{"type":"python","main":"main.py","timeout":$timeout}""")
+            val entry = File(root, "main.py").apply { writeText("print('invalid timeout')") }
+
+            assertProjectError(PythonProjectLaunchError.CONFIG_INVALID) {
+                PythonProjectLaunchPolicy.inspect(root, entry)
+            }
+        }
+    }
+
+    @Test
+    fun thirtyMinuteTimeoutIsAcceptedAtTheInclusiveBoundary() {
+        val root = project("""{"type":"python","main":"main.py","timeout":1800000}""")
+        val entry = File(root, "main.py").apply { writeText("print('maximum timeout')") }
+
+        val admission = requireNotNull(PythonProjectLaunchPolicy.inspect(root, entry))
+
+        assertEquals(1_800_000L, admission.timeoutMillis)
     }
 
     @Test
