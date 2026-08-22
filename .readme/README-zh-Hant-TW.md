@@ -181,7 +181,10 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 獨立 Python Runtime 外掛後端, 支援透過單獨的 CPython 外掛處理程序執行本機 .py 檔案及宣告為 `type: python` 的腳本專案, 並驗證固定元件/簽章/協定/ABI, 支援熱插拔且絕不回退至 JavaScript
 * `新增` Python 啟動整合涵蓋檔案管理器/編輯器/本機 Run Intent/單一檔案 Import Intent/新建快捷方式/定時任務/廣播任務並嚴格保留單一檔案或專案上下文; 專案支援內部 import/相對檔案讀取及唯讀 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 執行支援透過 ExecutionConfig 鍵 `autojs6.python.stdinSnapshot` 提供可選的有界預置 stdin 快照, 並採用嚴格 ByteArray/UTF-8 文字准入, 提供者能力/大小協商及私有唯讀 PFD 傳輸與清理
+* `新增` Python Runtime 協定 1.4 為每次執行協商明確嚴格 JSON 結果與可選輸出 artifact, 對數量, 正規化路徑, 單個/合計大小, 精確 PFD 引用與 SHA-256 設限; Host 僅接收型別化結果且絕不從 stdout 推斷
 * `新增` 獨立 Lua Runtime 外掛後端, 支援透過單獨的 PUC Lua 5.4.8 外掛處理程序執行本機 .lua 檔案, 並驗證固定元件/簽章/協定/ABI, 提供有界執行且絕不回退至 JavaScript
+* `新增` 獨立 Java/Kotlin JVM Source Runtime 外掛後端, 支援在隔離處理程序中編譯及執行單一 .java/.kt 指令碼, 提供 package/import, 即時 console 輸出, 可取消 sleep, 主程式 toast 與明確能力協商
+* `新增` JVM Source Runtime 支援範圍為單一檔案 Java 8 (Java provider 最低 API 24) 與 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次發布僅在 API 31/arm64-v8a 實機完成 smoke, 不宣告未驗證 API 層級
 * `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文字轉換/媒體資訊等擴充介面
 * `新增` 外掛系統提供版本化 TaggedWire 傳輸及 DEX 編譯與 On-Device AI v1 開發協定套件, 並配備專用符合性測試應用程式及惡意情境夾具
 * `新增` 外掛系統支援離線專案文件擴充介面

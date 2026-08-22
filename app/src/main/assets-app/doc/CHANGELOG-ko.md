@@ -21,7 +21,10 @@
 * `추가` 독립 Python Runtime 플러그인 백엔드에서 로컬 .py 파일과 `type: python`으로 선언된 스크립트 프로젝트를 별도의 CPython 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 핫 플러그, JavaScript 폴백 금지를 지원
 * `추가` Python 실행 통합은 파일 관리자/편집기/로컬 Run Intent/단일 파일 Import Intent/새 바로 가기/예약 작업/브로드캐스트 작업을 포함하고 단일 파일 또는 프로젝트 컨텍스트를 엄격하게 유지; 프로젝트에서 내부 import/상대 파일 접근/읽기 전용 `autojs6.app/device/execution/project` API 지원
 * `추가` Python Runtime 실행은 ExecutionConfig 키 `autojs6.python.stdinSnapshot`을 통한 선택적이고 제한된 사전 제공 stdin 스냅샷을 지원하며, 엄격한 ByteArray/UTF-8 텍스트 허용, 공급자 기능/크기 협상, 비공개 읽기 전용 PFD 전송 및 정리를 적용
+* `추가` Python Runtime 프로토콜 1.4는 실행별 명시적 엄격 JSON 결과와 선택적 output artifact를 협상하고 count, normalized path, file/aggregate size, exact PFD reference 및 SHA-256을 제한하며 Host는 typed result만 소비하고 stdout에서 추론하지 않음
 * `추가` 독립 Lua Runtime 플러그인 백엔드에서 로컬 .lua 파일을 별도의 PUC Lua 5.4.8 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 제한된 실행, JavaScript 폴백 금지를 지원
+* `추가` Java/Kotlin용 독립 JVM Source Runtime 플러그인 백엔드에서 단일 .java/.kt 파일을 격리 프로세스로 컴파일 및 실행하고 package/import, 실시간 console 출력, 취소 가능한 sleep, 호스트 toast, 명시적 capability 협상을 지원
+* `추가` JVM Source Runtime 지원 범위는 단일 파일 Java 8 (Java provider 최소 API 24) 및 Kotlin 2.3 (Kotlin provider 최소 API 26)이며, 이번 릴리스의 실제 기기 smoke는 API 31/arm64-v8a에서만 수행했고 검증하지 않은 API 수준은 지원을 주장하지 않음
 * `추가` 플러그인 시스템에서 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/텍스트 변환/미디어 정보 등의 확장 API 지원
 * `추가` 플러그인 시스템에서 버전 지정 TaggedWire 전송과 DEX 컴파일/On-Device AI를 위한 v1 개발 프로토콜 팩을 지원하고 전용 적합성 테스트 앱 및 적대적 fixture 제공
 * `추가` 플러그인 시스템에서 오프라인 프로젝트 문서 확장 인터페이스 지원
