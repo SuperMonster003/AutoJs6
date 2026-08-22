@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/22
+###### 2026/08/23
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` ESM, dynamic import(), le réseau et WebSocket, les modules réseau natifs, worker_threads, child_process et l'interopérabilité Java de Node.js sont des fonctions stables activées par défaut, tandis que les déclarations d'autorisation, listes d'autorisation, bacs à sable et budgets de ressources restent appliqués
@@ -163,6 +163,7 @@
 * `Amélioration` La vérification native de Node.js résout et valide désormais les racines des sources et de la compilation du plugin d'exécution externe
 * `Amélioration` Les portes d'intégration finale et de livraison Node.js appliquent une stratégie fail-closed lorsque des rapports requis, des preuves correspondant aux sources actuelles ou des artefacts d'acceptation en production sont absents ou périmés
 * `Amélioration` Les scripts Python autonomes ajoutent désormais dans la console une indication sûre lors d'un ModuleNotFoundError exact, orientant l'importation de modules voisins/locaux vers un projet Python explicite avec `project.json` et `type: python`, sans exposer de chemins privés
+* `Amélioration` Les chunks de sortie Python Runtime sont écrits dans la console Host dès leur arrivée, avec un décodage UTF-8 incrémental indépendant pour stdout/stderr qui préserve les points de code répartis entre chunks et une limite de sortie de bout en bout de 16 MiB
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Regroupement des requêtes de détails multimédias du gestionnaire de fichiers en un seul instantané MediaInfo afin de réduire les appels Binder et le temps d'attente
 * `Amélioration` Limitation des replis d'affichage et de lecture externes aux accès URI en lecture seule

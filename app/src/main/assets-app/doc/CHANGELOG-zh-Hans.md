@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/22
+###### 2026/08/23
 
 * `新增` Node.js Runtime 插件, 内置 Node.js 24.5.0 运行时, 支持识别 "nodejs" 模式参数或识别文件扩展名 (.node.js/.cjs/.mjs) 运行 Node.js 脚本
 * `新增` Python Runtime 插件, 内置 Chaquopy 17.0.0 与 CPython 3.13.9, 支持识别文件扩展名 (.py) 运行 Python 脚本
@@ -141,6 +141,7 @@
 * `优化` Node.js 原生校验支持解析并验证外部运行时插件的源码及构建根目录
 * `优化` Node.js 最终集成及发布门禁在所需报告/当前源码证据/生产验收产物缺失或过期时采用 fail-closed 策略
 * `优化` 独立 Python 脚本发生精确 ModuleNotFoundError 时在控制台追加安全提示, 引导 sibling/local 模块 import 使用包含 `project.json` 与 `type: python` 的显式 Python 项目, 且不暴露私有路径
+* `优化` Python Runtime 输出 chunk 到达时立即写入宿主控制台, 使用按 stdout/stderr 独立的增量 UTF-8 解码保留跨 chunk 码点, 并将端到端输出上限提高到 16 MiB
 * `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
 * `优化` 文件管理器将媒体详情查询整合为单次 MediaInfo 快照, 减少 Binder 调用及等待时间
 * `优化` 文件外部查看与媒体播放降级仅授予 URI 读取权限

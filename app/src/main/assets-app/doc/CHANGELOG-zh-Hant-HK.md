@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/22
+###### 2026/08/23
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 的 ESM/dynamic import()/網絡與 WebSocket/原生網絡模組/worker_threads/child_process/Java 互操作能力成為正式功能並預設啟用, 同時保留權限聲明/白名單/沙箱及資源預算保護
@@ -163,6 +163,7 @@
 * `優化` Node.js 原生校驗支持解析並驗證外部運行時插件的源碼及構建根目錄
 * `優化` Node.js 最終集成及發佈門禁在所需報告/當前源碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
 * `優化` 獨立 Python 腳本發生精確 ModuleNotFoundError 時在控制台追加安全提示, 引導 sibling/local 模組 import 使用包含 `project.json` 與 `type: python` 的明確 Python 項目, 且不暴露私有路徑
+* `優化` Python Runtime 輸出 chunk 到達時立即寫入宿主控制台, 使用按 stdout/stderr 獨立的增量 UTF-8 解碼保留跨 chunk 碼點, 並將端到端輸出上限提高至 16 MiB
 * `優化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `優化` 文件管理器將媒體詳情查詢整合為單次 MediaInfo 快照, 減少 Binder 調用及等待時間
 * `優化` 文件外部查看與媒體播放回退只授予 URI 讀取權限

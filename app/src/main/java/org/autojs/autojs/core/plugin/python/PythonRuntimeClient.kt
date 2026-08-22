@@ -30,7 +30,6 @@ import org.autojs.plugin.python.runtime.api.PythonPayloadReference
 import org.autojs.plugin.python.runtime.api.PythonRequestId
 import org.autojs.plugin.python.runtime.api.PythonResultPolicy
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCodec
-import java.io.ByteArrayOutputStream
 import java.util.UUID
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CancellationException
@@ -83,9 +82,10 @@ internal class PythonRuntimeClient(
         private val pendingStdinSnapshot = AtomicReference(stdinSnapshot)
         private val reservation = AtomicReference<PythonRuntimeDispatchRegistry.Reservation?>()
         private val registry = PythonRuntimeDispatchRegistry<IPythonExecutionSession>()
-        private val stdout = ByteArrayOutputStream()
-        private val stderr = ByteArrayOutputStream()
+        private val stdout = PythonUtf8OutputDecoder()
+        private val stderr = PythonUtf8OutputDecoder()
         private val outputFlushed = AtomicBoolean(false)
+        private val outputLock = Any()
         private val inputTask = AtomicReference<FutureTask<*>?>()
         private val pluginStateLock = Any()
 
@@ -358,7 +358,7 @@ internal class PythonRuntimeClient(
                     registry.release(reserved)?.let { session -> runCatching { session.close() } }
                 }
                 executionSnapshot.getAndSet(null)?.close()
-                runCatching { flushBufferedOutput() }
+                runCatching { finishLiveOutput() }
             }
         }
 
@@ -679,10 +679,11 @@ internal class PythonRuntimeClient(
             val policy = requireNotNull(reserved.plan.admissionPlan.sessionPolicy) {
                 "Python Runtime output arrived before admission"
             }
-            policy.onOutput(decoded, callbackStream)
-            val output = if (callbackStream == PythonOutputStream.STDOUT) stdout else stderr
-            synchronized(output) {
-                output.write(decoded.toByteArray())
+            synchronized(outputLock) {
+                policy.onOutput(decoded, callbackStream)
+                val output = if (callbackStream == PythonOutputStream.STDOUT) stdout else stderr
+                val logLevel = if (callbackStream == PythonOutputStream.STDOUT) Log.INFO else Log.ERROR
+                writeLiveOutput(output, decoded.toByteArray(), logLevel)
             }
             if (!cancelled.get()) {
                 policy.grantOutputCredits(1)
@@ -873,19 +874,19 @@ internal class PythonRuntimeClient(
             interactiveInputController?.cancel()
         }
 
-        private fun flushBufferedOutput() {
+        private fun finishLiveOutput() {
             if (!outputFlushed.compareAndSet(false, true)) return
-            writeBufferedOutput(stdout, Log.INFO)
-            writeBufferedOutput(stderr, Log.ERROR)
+            synchronized(outputLock) {
+                writeLiveOutput(stdout.finish(), Log.INFO)
+                writeLiveOutput(stderr.finish(), Log.ERROR)
+            }
         }
 
-        private fun writeBufferedOutput(output: ByteArrayOutputStream, logLevel: Int) {
-            val bytes = synchronized(output) { output.toByteArray() }
-            if (bytes.isNotEmpty()) {
-                // Decode once at the terminal boundary so a UTF-8 code point split across chunks
-                // is never replaced by per-chunk decoding.
-                globalConsole.write(logLevel, bytes.toString(Charsets.UTF_8))
-            }
+        private fun writeLiveOutput(output: PythonUtf8OutputDecoder, bytes: ByteArray, logLevel: Int) =
+            writeLiveOutput(output.decode(bytes), logLevel)
+
+        private fun writeLiveOutput(text: String, logLevel: Int) {
+            if (text.isNotEmpty()) globalConsole.write(logLevel, text)
         }
 
         private fun checkExecutionActive() {
@@ -1031,7 +1032,7 @@ internal class PythonRuntimeClient(
         private const val PROVIDER_RPC_POLL_MILLIS = 100L
         private const val DEFAULT_TIMEOUT_MILLIS = 5L * 60L * 1_000L
         private const val TERMINAL_GRACE_MILLIS = 15_000L
-        private const val DEFAULT_OUTPUT_BYTES = 4L * 1024L * 1024L
+        private const val DEFAULT_OUTPUT_BYTES = 16L * 1024L * 1024L
         private const val DEFAULT_OUTPUT_CHUNK_BYTES = 32 * 1024
         private const val DEFAULT_OUTPUT_CHUNKS = 16_384L
         private const val DEFAULT_INPUT_PROMPT_BYTES = 4 * 1024

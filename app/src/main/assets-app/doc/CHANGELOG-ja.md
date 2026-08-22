@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/22
+###### 2026/08/23
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js の ESM/dynamic import()/ネットワークと WebSocket/ネイティブネットワークモジュール/worker_threads/child_process/Java 相互運用を正式機能として既定で有効化し, 権限宣言/許可リスト/サンドボックス/リソース予算による保護を維持
@@ -163,6 +163,7 @@
 * `改善` Node.js ネイティブ検証で外部ランタイムプラグインのソースおよびビルドルートを解決して検証
 * `改善` Node.js の最終統合およびリリースゲートは, 必須レポート/現在のソースに基づくエビデンス/本番受け入れ成果物が欠落または期限切れの場合に fail-closed で判定
 * `改善` 単体 Python スクリプトで正確な ModuleNotFoundError が発生した場合, コンソールに安全なヒントを追記し, 非公開パスを露出せずに sibling/local モジュールの import には `project.json` と `type: python` を指定した明示的な Python プロジェクトを案内
+* `改善` Python Runtime の出力 chunk を到着時に Host コンソールへ書き込み, stdout/stderr ごとの増分 UTF-8 デコードで chunk をまたぐコードポイントを保持し, エンドツーエンドの出力上限を 16 MiB に拡大
 * `改善` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 関連機能をプラグイン化
 * `改善` ファイルマネージャーのメディア詳細取得を単一の MediaInfo スナップショットに統合, Binder 呼び出しと待機時間を削減
 * `改善` 外部アプリへのファイル表示とメディア再生のフォールバックを読み取り専用 URI アクセスに制限
