@@ -101,12 +101,25 @@ internal data class PythonRuntimeProviderSelectionOptions(
 
 internal data class PythonRuntimeCapabilityRequirement(
     val workspaceArchive: Boolean = false,
+    val moduleEntry: Boolean = false,
     val stdinSnapshot: Boolean = false,
     val hostCapabilitySnapshot: Boolean = false,
+    val interactiveInput: Boolean = false,
+    val structuredJsonResult: Boolean = false,
+    val outputArtifacts: Boolean = false,
     val cooperativeCancellation: Boolean = false,
     val minimumSourceBytes: Long = 1L,
     val minimumStdinBytes: Long = 0L,
     val minimumHostCapabilitySnapshotBytes: Long = 0L,
+    val minimumInputPromptBytes: Int = 0,
+    val minimumInputReplyBytes: Int = 0,
+    val minimumInputPrompts: Int = 0,
+    val minimumInputWaitMillis: Long = 0L,
+    val minimumStructuredJsonBytes: Int = 0,
+    val minimumOutputArtifacts: Int = 0,
+    val minimumOutputArtifactPathBytes: Int = 0,
+    val minimumOutputArtifactBytes: Long = 0L,
+    val minimumTotalOutputArtifactBytes: Long = 0L,
     val minimumOutputBytes: Long = 1L,
     val minimumOutputChunkBytes: Int = 1,
     val minimumOutputChunks: Long = 1L,
@@ -117,6 +130,15 @@ internal data class PythonRuntimeCapabilityRequirement(
         require(minimumSourceBytes > 0L)
         require(minimumStdinBytes >= 0L)
         require(minimumHostCapabilitySnapshotBytes >= 0L)
+        require(minimumInputPromptBytes >= 0)
+        require(minimumInputReplyBytes >= 0)
+        require(minimumInputPrompts >= 0)
+        require(minimumInputWaitMillis >= 0L)
+        require(minimumStructuredJsonBytes >= 0)
+        require(minimumOutputArtifacts >= 0)
+        require(minimumOutputArtifactPathBytes >= 0)
+        require(minimumOutputArtifactBytes >= 0L)
+        require(minimumTotalOutputArtifactBytes >= 0L)
         require(minimumOutputBytes > 0L)
         require(minimumOutputChunkBytes > 0)
         require(minimumOutputChunks > 0L)
@@ -126,12 +148,34 @@ internal data class PythonRuntimeCapabilityRequirement(
 
     fun isSatisfiedBy(value: PythonRuntimeCapabilities): Boolean =
         (!workspaceArchive || value.supportsWorkspaceArchive) &&
+            (!moduleEntry || value.supportsModuleEntry) &&
             (
                 !stdinSnapshot ||
                     value.supportsStdinSnapshot && value.limits.maxStdinBytes >= minimumStdinBytes
                 ) &&
             (!hostCapabilitySnapshot || value.supportsHostCapabilitySnapshot) &&
+            (
+                !interactiveInput ||
+                    value.supportsInteractiveInput &&
+                    value.limits.maxInputPromptBytes >= minimumInputPromptBytes &&
+                    value.limits.maxInputReplyBytes >= minimumInputReplyBytes &&
+                    value.limits.maxInputPrompts >= minimumInputPrompts &&
+                    value.limits.maxInputWaitMillis >= minimumInputWaitMillis
+                ) &&
             (!cooperativeCancellation || value.supportsCooperativeCancellation) &&
+            (
+                !structuredJsonResult ||
+                    value.supportsStructuredJsonResult &&
+                    value.limits.maxStructuredJsonBytes >= minimumStructuredJsonBytes
+                ) &&
+            (
+                !outputArtifacts ||
+                    value.supportsOutputArtifacts &&
+                    value.limits.maxOutputArtifacts >= minimumOutputArtifacts &&
+                    value.limits.maxOutputArtifactPathBytes >= minimumOutputArtifactPathBytes &&
+                    value.limits.maxOutputArtifactBytes >= minimumOutputArtifactBytes &&
+                    value.limits.maxTotalOutputArtifactBytes >= minimumTotalOutputArtifactBytes
+                ) &&
             value.limits.maxSourceBytes >= minimumSourceBytes &&
             value.limits.maxHostCapabilitySnapshotBytes >= minimumHostCapabilitySnapshotBytes &&
             value.limits.maxOutputBytes >= minimumOutputBytes &&

@@ -260,6 +260,82 @@ class PythonRuntimeSessionPolicyTest {
     }
 
     @Test
+    fun interactivePromptsAndRepliesAreMonotonicSingleShotAndBounded() {
+        val policy = startedInteractivePolicy()
+        policy.onInputPrompt(PythonRuntimeFixtures.inputPrompt)
+        assertTrue(policy.replyInput(PythonRuntimeFixtures.inputValueReply))
+        policy.onInputPrompt(
+            PythonRuntimeFixtures.inputPrompt.copy(promptId = PythonPromptId.fromLong(2)),
+        )
+        assertTrue(
+            policy.replyInput(
+                PythonRuntimeFixtures.inputEofReply.copy(promptId = PythonPromptId.fromLong(2)),
+            ),
+        )
+        policy.onResult(result(), descriptorCount = 0)
+        assertEquals(PythonExecutionSessionPolicy.Terminal.RESULT, policy.terminal)
+        assertFalse(policy.replyInput(PythonRuntimeFixtures.inputValueReply))
+
+        val duplicateReply = startedInteractivePolicy()
+        duplicateReply.onInputPrompt(PythonRuntimeFixtures.inputPrompt)
+        assertTrue(duplicateReply.replyInput(PythonRuntimeFixtures.inputValueReply))
+        assertThrows(IllegalStateException::class.java) {
+            duplicateReply.replyInput(PythonRuntimeFixtures.inputValueReply)
+        }
+        assertEquals(PythonExecutionSessionPolicy.State.CLOSED, duplicateReply.state)
+
+        val wrongId = startedInteractivePolicy()
+        assertThrows(IllegalStateException::class.java) {
+            wrongId.onInputPrompt(
+                PythonRuntimeFixtures.inputPrompt.copy(promptId = PythonPromptId.fromLong(2)),
+            )
+        }
+        assertEquals(PythonExecutionSessionPolicy.State.CLOSED, wrongId.state)
+
+        val promptLimit = startedInteractivePolicy(
+            PythonRuntimeFixtures.interactiveInputPolicy.copy(maxPrompts = 1),
+        )
+        promptLimit.onInputPrompt(PythonRuntimeFixtures.inputPrompt)
+        promptLimit.replyInput(PythonRuntimeFixtures.inputEofReply)
+        assertThrows(IllegalStateException::class.java) {
+            promptLimit.onInputPrompt(
+                PythonRuntimeFixtures.inputPrompt.copy(promptId = PythonPromptId.fromLong(2)),
+            )
+        }
+        assertEquals(PythonExecutionSessionPolicy.State.CLOSED, promptLimit.state)
+    }
+
+    @Test
+    fun interactivePromptRequiresAuthorizationAndTerminalEventsInvalidateLateReplies() {
+        val unauthorized = startedPolicy()
+        assertThrows(IllegalArgumentException::class.java) {
+            unauthorized.onInputPrompt(PythonRuntimeFixtures.inputPrompt)
+        }
+        assertEquals(PythonExecutionSessionPolicy.State.CLOSED, unauthorized.state)
+
+        val failed = startedInteractivePolicy()
+        failed.onInputPrompt(PythonRuntimeFixtures.inputPrompt)
+        failed.onFailed(
+            PythonExecutionError(
+                PythonRuntimeFixtures.requestId,
+                PythonErrorCode.INPUT_TIMEOUT,
+                PythonFailurePhase.INTERACTIVE_INPUT,
+                "input wait expired",
+                retryableBeforeDispatch = false,
+            ),
+        )
+        assertEquals(PythonExecutionSessionPolicy.Terminal.FAILED, failed.terminal)
+        assertFalse(failed.replyInput(PythonRuntimeFixtures.inputValueReply))
+
+        val pendingResult = startedInteractivePolicy()
+        pendingResult.onInputPrompt(PythonRuntimeFixtures.inputPrompt)
+        assertThrows(IllegalStateException::class.java) {
+            pendingResult.onResult(result(), descriptorCount = 0)
+        }
+        assertEquals(PythonExecutionSessionPolicy.State.CLOSED, pendingResult.state)
+    }
+
+    @Test
     fun localCloseMayEndWithoutAProtocolTerminalCallback() {
         val policy = policy()
         assertNull(policy.terminal)
@@ -289,6 +365,60 @@ class PythonRuntimeSessionPolicyTest {
     ) = policy(maxOutputBytes, maxChunkBytes, maxOutputChunks).apply {
         requestStart()
         onStarted(started(maxOutputBytes, maxChunkBytes, maxOutputChunks))
+    }
+
+    @Test
+    fun protocol14AcceptsOnlyAuthorizedStructuredResultDescriptors() {
+        val accepted = PythonExecutionSessionPolicy(
+            PythonRuntimeFixtures.r4ResultRequest,
+            maximumCredits = 4,
+            expectedPythonVersion = PythonRuntimeFixtures.runtimeInfo.pythonVersion,
+        ).apply {
+            requestStart()
+            onStarted(
+                started(maxOutputChunks = 128).copy(protocolVersion = PythonProtocolVersion(1, 4)),
+            )
+        }
+        accepted.onResult(PythonRuntimeFixtures.structuredResult, descriptorCount = 1)
+        assertEquals(PythonExecutionSessionPolicy.Terminal.RESULT, accepted.terminal)
+
+        val mismatch = PythonExecutionSessionPolicy(
+            PythonRuntimeFixtures.r4ResultRequest,
+            maximumCredits = 4,
+            expectedPythonVersion = PythonRuntimeFixtures.runtimeInfo.pythonVersion,
+        ).apply {
+            requestStart()
+            onStarted(
+                started(maxOutputChunks = 128).copy(protocolVersion = PythonProtocolVersion(1, 4)),
+            )
+        }
+        assertThrows(PythonRuntimeContractException::class.java) {
+            mismatch.onResult(PythonRuntimeFixtures.structuredResult, descriptorCount = 0)
+        }
+        assertEquals(PythonExecutionSessionPolicy.State.CLOSED, mismatch.state)
+    }
+
+    private fun startedInteractivePolicy(
+        inputPolicy: PythonInteractiveInputPolicy = PythonRuntimeFixtures.interactiveInputPolicy,
+    ) = PythonExecutionSessionPolicy(
+        PythonExecutionRequest(
+            requestId = PythonRuntimeFixtures.requestId,
+            protocolVersion = PythonProtocolVersion(1, 3),
+            entryPoint = "main.py",
+            source = PythonRuntimeFixtures.source,
+            timeoutMillis = 30_000,
+            maxOutputBytes = 1_024,
+            maxOutputChunkBytes = 256,
+            maxOutputChunks = 128,
+            interactiveInput = inputPolicy,
+        ),
+        maximumCredits = 4,
+        expectedPythonVersion = PythonRuntimeFixtures.runtimeInfo.pythonVersion,
+    ).apply {
+        requestStart()
+        onStarted(
+            started(maxOutputChunks = 128).copy(protocolVersion = PythonProtocolVersion(1, 3)),
+        )
     }
 
     private fun started(

@@ -15,15 +15,20 @@ import org.autojs.plugin.python.runtime.api.IPythonExecutionCallback
 import org.autojs.plugin.python.runtime.api.IPythonExecutionSession
 import org.autojs.plugin.python.runtime.api.IPythonSessionOpenCallback
 import org.autojs.plugin.python.runtime.api.PythonErrorCode
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonExecutionError
 import org.autojs.plugin.python.runtime.api.PythonExecutionRequest
 import org.autojs.plugin.python.runtime.api.PythonExecutionResult
 import org.autojs.plugin.python.runtime.api.PythonImplementation
+import org.autojs.plugin.python.runtime.api.PythonInputPrompt
+import org.autojs.plugin.python.runtime.api.PythonInputReply
+import org.autojs.plugin.python.runtime.api.PythonInteractiveInputPolicy
 import org.autojs.plugin.python.runtime.api.PythonIsolationMode
 import org.autojs.plugin.python.runtime.api.PythonOutputStream
 import org.autojs.plugin.python.runtime.api.PythonPayloadKind
 import org.autojs.plugin.python.runtime.api.PythonPayloadReference
 import org.autojs.plugin.python.runtime.api.PythonRequestId
+import org.autojs.plugin.python.runtime.api.PythonResultPolicy
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCodec
 import java.io.ByteArrayOutputStream
 import java.util.UUID
@@ -31,6 +36,7 @@ import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CancellationException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutionException
+import java.util.concurrent.FutureTask
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -47,18 +53,29 @@ internal class PythonRuntimeClient(
     private val applicationContext = context.applicationContext
     private val transport = PythonRuntimeOfficialTransport(applicationContext)
 
-    fun createExecution(source: PythonFileSource, stdinSnapshot: ByteArray? = null): Execution =
-        Execution(source, stdinSnapshot?.copyOf())
+    fun createExecution(
+        source: PythonFileSource,
+        entryMode: PythonEntryMode = PythonEntryMode.FILE,
+        stdinSnapshot: ByteArray? = null,
+        interactiveInputGrant: PythonInteractiveInputGrant? = null,
+    ): Execution = Execution(
+        source,
+        entryMode,
+        stdinSnapshot?.copyOf(),
+        interactiveInputGrant?.openController(),
+    )
 
     inner class Execution internal constructor(
         private val source: PythonFileSource,
+        private val entryMode: PythonEntryMode,
         stdinSnapshot: ByteArray?,
+        private val interactiveInputController: PythonInteractiveInputController?,
     ) {
 
         private val cancelled = AtomicBoolean(false)
         private val terminalClaimed = AtomicBoolean(false)
         private val terminal = CountDownLatch(1)
-        private val result = AtomicReference<PythonExecutionResult?>()
+        private val result = AtomicReference<PythonRuntimeExecutionResult?>()
         private val failure = AtomicReference<Throwable?>()
         private val pluginStateFailure = AtomicReference<PythonRuntimeHostException?>()
         private val binding = AtomicReference<PythonRuntimeOfficialTransport.Binding?>()
@@ -69,6 +86,7 @@ internal class PythonRuntimeClient(
         private val stdout = ByteArrayOutputStream()
         private val stderr = ByteArrayOutputStream()
         private val outputFlushed = AtomicBoolean(false)
+        private val inputTask = AtomicReference<FutureTask<*>?>()
         private val pluginStateLock = Any()
 
         private val pluginStateChangedListener: (String) -> Unit = { packageName ->
@@ -84,7 +102,7 @@ internal class PythonRuntimeClient(
             }
         }
 
-        fun run(): PythonExecutionResult {
+        fun run(): PythonRuntimeExecutionResult {
             PluginStateChangeRegistry.addListener(pluginStateChangedListener)
             return try {
                 runWithPluginStateObserver()
@@ -93,11 +111,12 @@ internal class PythonRuntimeClient(
                 throw error
             } finally {
                 pendingStdinSnapshot.getAndSet(null)?.fill(0)
+                closeInteractiveInput()
                 PluginStateChangeRegistry.removeListener(pluginStateChangedListener)
             }
         }
 
-        private fun runWithPluginStateObserver(): PythonExecutionResult {
+        private fun runWithPluginStateObserver(): PythonRuntimeExecutionResult {
             requireRuntimeChannelEnabled()
             checkExecutionActive()
             val installed = inspectInstalledProvider()
@@ -110,6 +129,7 @@ internal class PythonRuntimeClient(
                     applicationContext,
                     source,
                     requestId,
+                    entryMode,
                     stdinSnapshot,
                     { cancelled.get() || pluginStateFailure.get() != null },
                 ).also(executionSnapshot::set)
@@ -153,13 +173,54 @@ internal class PythonRuntimeClient(
                 val outputChunkBytes = minOf(DEFAULT_OUTPUT_CHUNK_BYTES, capabilities.limits.maxOutputChunkBytes)
                 val outputChunks = minOf(DEFAULT_OUTPUT_CHUNKS, capabilities.limits.maxOutputChunks, outputBytes)
                 val timeoutMillis = minOf(DEFAULT_TIMEOUT_MILLIS, capabilities.limits.maxTimeoutMillis)
+                val inputPromptBytes = minOf(DEFAULT_INPUT_PROMPT_BYTES, capabilities.limits.maxInputPromptBytes)
+                val inputReplyBytes = minOf(DEFAULT_INPUT_REPLY_BYTES, capabilities.limits.maxInputReplyBytes)
+                val inputPrompts = minOf(DEFAULT_INPUT_PROMPTS, capabilities.limits.maxInputPrompts)
+                val inputWaitMillis = minOf(
+                    DEFAULT_INPUT_WAIT_MILLIS,
+                    capabilities.limits.maxInputWaitMillis,
+                    timeoutMillis,
+                )
+                val structuredJsonBytes = minOf(
+                    DEFAULT_STRUCTURED_JSON_BYTES,
+                    capabilities.limits.maxStructuredJsonBytes,
+                )
+                val outputArtifacts = minOf(
+                    DEFAULT_OUTPUT_ARTIFACTS,
+                    capabilities.limits.maxOutputArtifacts,
+                )
+                val outputArtifactPathBytes = minOf(
+                    DEFAULT_OUTPUT_ARTIFACT_PATH_BYTES,
+                    capabilities.limits.maxOutputArtifactPathBytes,
+                )
+                val outputArtifactBytes = minOf(
+                    DEFAULT_OUTPUT_ARTIFACT_BYTES,
+                    capabilities.limits.maxOutputArtifactBytes,
+                )
+                val totalOutputArtifactBytes = minOf(
+                    DEFAULT_TOTAL_OUTPUT_ARTIFACT_BYTES,
+                    capabilities.limits.maxTotalOutputArtifactBytes,
+                )
                 val requirement = PythonRuntimeCapabilityRequirement(
                     workspaceArchive = snapshot.hasWorkspace,
+                    moduleEntry = snapshot.entryMode == PythonEntryMode.MODULE,
                     stdinSnapshot = snapshot.hasStdin,
                     hostCapabilitySnapshot = true,
+                    interactiveInput = interactiveInputController != null,
+                    structuredJsonResult = true,
+                    outputArtifacts = true,
                     minimumSourceBytes = maxOf(1L, snapshot.sourceLengthBytes),
                     minimumStdinBytes = snapshot.stdinLengthBytes ?: 0L,
                     minimumHostCapabilitySnapshotBytes = requireNotNull(snapshot.hostCapabilityLengthBytes),
+                    minimumInputPromptBytes = if (interactiveInputController == null) 0 else maxOf(1, inputPromptBytes),
+                    minimumInputReplyBytes = if (interactiveInputController == null) 0 else maxOf(1, inputReplyBytes),
+                    minimumInputPrompts = if (interactiveInputController == null) 0 else maxOf(1, inputPrompts),
+                    minimumInputWaitMillis = if (interactiveInputController == null) 0L else maxOf(1L, inputWaitMillis),
+                    minimumStructuredJsonBytes = maxOf(1, structuredJsonBytes),
+                    minimumOutputArtifacts = maxOf(1, outputArtifacts),
+                    minimumOutputArtifactPathBytes = maxOf(1, outputArtifactPathBytes),
+                    minimumOutputArtifactBytes = maxOf(1L, outputArtifactBytes),
+                    minimumTotalOutputArtifactBytes = maxOf(1L, totalOutputArtifactBytes),
                     minimumOutputBytes = outputBytes,
                     minimumOutputChunkBytes = outputChunkBytes,
                     minimumOutputChunks = outputChunks,
@@ -172,6 +233,21 @@ internal class PythonRuntimeClient(
                     requirement,
                 )
                 val descriptorLayout = snapshot.descriptorLayout
+                val interactiveInputPolicy = interactiveInputController?.let {
+                    PythonInteractiveInputPolicy(
+                        maxPrompts = inputPrompts,
+                        maxPromptBytes = inputPromptBytes,
+                        maxReplyBytes = inputReplyBytes,
+                        replyTimeoutMillis = inputWaitMillis,
+                    )
+                }
+                val resultPolicy = PythonResultPolicy(
+                    maxStructuredJsonBytes = structuredJsonBytes,
+                    maxArtifacts = outputArtifacts,
+                    maxArtifactPathBytes = outputArtifactPathBytes,
+                    maxArtifactBytes = outputArtifactBytes,
+                    maxTotalArtifactBytes = totalOutputArtifactBytes,
+                )
                 val request = PythonExecutionRequest(
                     requestId = requestId,
                     protocolVersion = pinned.negotiatedProtocolVersion,
@@ -208,6 +284,9 @@ internal class PythonRuntimeClient(
                     maxOutputBytes = outputBytes,
                     maxOutputChunkBytes = outputChunkBytes,
                     maxOutputChunks = outputChunks,
+                    entryMode = snapshot.entryMode,
+                    interactiveInput = interactiveInputPolicy,
+                    resultPolicy = resultPolicy,
                 )
                 val refreshedMetadata = callProviderRpc(
                     operation = "pre-dispatch metadata revalidation",
@@ -285,6 +364,7 @@ internal class PythonRuntimeClient(
 
         fun cancel() {
             cancelled.set(true)
+            closeInteractiveInput()
             pendingStdinSnapshot.getAndSet(null)?.fill(0)
             cancelRemoteSession()
             binding.getAndSet(null)?.close()
@@ -297,6 +377,7 @@ internal class PythonRuntimeClient(
             if (!terminalClaimed.compareAndSet(false, true)) return
             pluginStateFailure.set(error)
             failure.set(error)
+            closeInteractiveInput()
             retireRemoteSession()
             binding.getAndSet(null)?.close()
             executionSnapshot.getAndSet(null)?.close()
@@ -415,7 +496,12 @@ internal class PythonRuntimeClient(
                                 "Python Runtime result arrived before admission"
                             }
                             policy.onResult(decoded, descriptorArray.size)
-                            result.set(decoded)
+                            result.set(
+                                PythonRuntimeResultReceiver.receive(
+                                    decoded,
+                                    received.toTypedArray(),
+                                ),
+                            )
                             finishTerminal()
                         }
                     } finally {
@@ -446,6 +532,17 @@ internal class PythonRuntimeClient(
                     // Only the local cancel() path marks user cancellation. Provider
                     // cancellation is a protocol terminal and must not mask timeout/lost errors.
                     finishTerminal()
+                }
+
+                override fun onInputPrompt(prompt: ByteArray?) = fromPinnedProvider {
+                    val decoded = PythonRuntimeCodec.decodeInputPrompt(
+                        requireNotNull(prompt) { "Python Runtime input prompt is null" },
+                    )
+                    val policy = requireNotNull(reserved.plan.admissionPlan.sessionPolicy) {
+                        "Python Runtime input prompt arrived before admission"
+                    }
+                    policy.onInputPrompt(decoded)
+                    dispatchInteractiveInput(decoded, sessionRef, reserved)
                 }
             }
             val admissionCallback = object : IPythonSessionOpenCallback.Stub() {
@@ -616,6 +713,7 @@ internal class PythonRuntimeClient(
 
         private fun abortForHostTimeout(): Boolean {
             if (!terminalClaimed.compareAndSet(false, true)) return false
+            closeInteractiveInput()
             cancelRemoteSession()
             binding.getAndSet(null)?.close()
             executionSnapshot.getAndSet(null)?.close()
@@ -693,14 +791,86 @@ internal class PythonRuntimeClient(
         }
 
         private fun finishTerminal() {
-            if (terminalClaimed.compareAndSet(false, true)) terminal.countDown()
+            if (terminalClaimed.compareAndSet(false, true)) {
+                closeInteractiveInput()
+                terminal.countDown()
+            }
+        }
+
+        private fun dispatchInteractiveInput(
+            prompt: PythonInputPrompt,
+            session: AtomicReference<IPythonExecutionSession?>,
+            reserved: PythonRuntimeDispatchRegistry.Reservation,
+        ) {
+            val controller = requireNotNull(interactiveInputController) {
+                "Python Runtime emitted input without a foreground controller"
+            }
+            inputTask.get()?.takeIf { it.isDone }?.let { completed ->
+                inputTask.compareAndSet(completed, null)
+            }
+            val taskHolder = AtomicReference<FutureTask<*>?>()
+            val task = FutureTask<Unit> {
+                try {
+                    val response = controller.request(prompt)
+                    val reply = PythonInputReply(
+                        requestId = prompt.requestId,
+                        promptId = prompt.promptId,
+                        status = response.status,
+                        value = response.value,
+                    )
+                    val policy = requireNotNull(reserved.plan.admissionPlan.sessionPolicy) {
+                        "Python Runtime input reply lost its session policy"
+                    }
+                    if (policy.replyInput(reply)) {
+                        // Release the Host task slot before the remote reply wakes Python. A second
+                        // input() may synchronously emit its prompt before this FutureTask reaches
+                        // its completed state, but it cannot do so before replyInput returns there.
+                        inputTask.compareAndSet(taskHolder.get(), null)
+                        requireNotNull(session.get()) { "Python Runtime input prompt has no open session" }
+                            .replyInput(PythonRuntimeCodec.encodeInputReply(reply))
+                    }
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                } catch (error: Throwable) {
+                    if (!terminalClaimed.get()) {
+                        finishFailure(
+                            PythonRuntimeHostException(
+                                PythonRuntimeHostError.INTERACTIVE_INPUT_FAILED,
+                                "Python interactive input could not produce a bounded reply",
+                                error,
+                            ),
+                        )
+                        cancelRemoteSession()
+                    }
+                } finally {
+                    inputTask.compareAndSet(taskHolder.get(), null)
+                }
+            }
+            taskHolder.set(task)
+            check(inputTask.compareAndSet(null, task)) { "A Python input task is already active" }
+            try {
+                INPUT_EXECUTOR.execute(task)
+            } catch (error: RejectedExecutionException) {
+                inputTask.compareAndSet(task, null)
+                throw PythonRuntimeHostException(
+                    PythonRuntimeHostError.INTERACTIVE_INPUT_FAILED,
+                    "Python interactive input could not enter the bounded UI lane",
+                    error,
+                )
+            }
         }
 
         private fun finishFailure(error: Throwable) {
             if (terminalClaimed.compareAndSet(false, true)) {
                 failure.set(error)
+                closeInteractiveInput()
                 terminal.countDown()
             }
+        }
+
+        private fun closeInteractiveInput() {
+            inputTask.getAndSet(null)?.cancel(true)
+            interactiveInputController?.cancel()
         }
 
         private fun flushBufferedOutput() {
@@ -864,6 +1034,15 @@ internal class PythonRuntimeClient(
         private const val DEFAULT_OUTPUT_BYTES = 4L * 1024L * 1024L
         private const val DEFAULT_OUTPUT_CHUNK_BYTES = 32 * 1024
         private const val DEFAULT_OUTPUT_CHUNKS = 16_384L
+        private const val DEFAULT_INPUT_PROMPT_BYTES = 4 * 1024
+        private const val DEFAULT_INPUT_REPLY_BYTES = 64 * 1024
+        private const val DEFAULT_INPUT_PROMPTS = 128
+        private const val DEFAULT_INPUT_WAIT_MILLIS = 2L * 60L * 1_000L
+        private const val DEFAULT_STRUCTURED_JSON_BYTES = 64 * 1024
+        private const val DEFAULT_OUTPUT_ARTIFACTS = 8
+        private const val DEFAULT_OUTPUT_ARTIFACT_PATH_BYTES = 512
+        private const val DEFAULT_OUTPUT_ARTIFACT_BYTES = 2L * 1024L * 1024L
+        private const val DEFAULT_TOTAL_OUTPUT_ARTIFACT_BYTES = 4L * 1024L * 1024L
 
         private val PROVIDER_RPC_EXECUTOR = ThreadPoolExecutor(
             1,
@@ -873,6 +1052,18 @@ internal class PythonRuntimeClient(
             ArrayBlockingQueue(1),
             { runnable ->
                 Thread(runnable, "python-runtime-provider-rpc").apply { isDaemon = true }
+            },
+            ThreadPoolExecutor.AbortPolicy(),
+        )
+
+        private val INPUT_EXECUTOR = ThreadPoolExecutor(
+            1,
+            1,
+            0L,
+            TimeUnit.MILLISECONDS,
+            ArrayBlockingQueue(1),
+            { runnable ->
+                Thread(runnable, "python-runtime-interactive-input").apply { isDaemon = true }
             },
             ThreadPoolExecutor.AbortPolicy(),
         )
@@ -917,6 +1108,9 @@ private fun PythonExecutionError.toHostException(): PythonRuntimeHostException {
         -> PythonRuntimeHostError.SESSION_REJECTED
         PythonErrorCode.RUNTIME_CRASHED -> PythonRuntimeHostError.EXECUTION_LOST
         PythonErrorCode.TIMEOUT -> PythonRuntimeHostError.EXECUTION_TIMEOUT
+        PythonErrorCode.INPUT_TIMEOUT,
+        PythonErrorCode.INPUT_LIMIT_EXCEEDED,
+        -> PythonRuntimeHostError.INTERACTIVE_INPUT_FAILED
         else -> PythonRuntimeHostError.EXECUTION_FAILED
     }
     return PythonRuntimeHostException(

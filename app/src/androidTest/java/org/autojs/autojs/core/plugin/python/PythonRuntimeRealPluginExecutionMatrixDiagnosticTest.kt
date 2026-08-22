@@ -352,7 +352,7 @@ class PythonRuntimeRealPluginExecutionMatrixDiagnosticTest {
             return runCatching(action).onFailure(::failCallback).isSuccess
         }
 
-        val executionCallback = object : IPythonExecutionCallback.Stub() {
+        val executionCallback = object : NonInteractivePythonExecutionCallback() {
             override fun onStarted(metadata: ByteArray?) {
                 fromPinnedProvider {
                     val started = PythonRuntimeCodec.decodeSessionStarted(

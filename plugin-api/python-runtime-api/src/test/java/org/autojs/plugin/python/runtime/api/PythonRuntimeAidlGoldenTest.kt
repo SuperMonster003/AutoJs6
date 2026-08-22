@@ -52,8 +52,8 @@ class PythonRuntimeAidlGoldenTest {
         val AIDL_PACKAGE_PATH: Path = Paths.get("org", "autojs", "plugin", "python", "runtime", "api")
 
         val GOLDEN_SHA256 = linkedMapOf(
-            "IPythonExecutionCallback.aidl" to "cacd897f23bd468ed41558a7467d900defd2e5bac3e9ccc4d62c20f4f53b598a",
-            "IPythonExecutionSession.aidl" to "a99156173a323e6aabc9d78148f4a90bb9010b4408acb3d9e0c8bfa0cc1b9823",
+            "IPythonExecutionCallback.aidl" to "69e283c172fec2aa069fe640eb41f80d42f731eb31124735de7cc4873907431c",
+            "IPythonExecutionSession.aidl" to "566aab5f7076df5075ae4403de2578315be2adf623e2051b059cc85c1887725a",
             "IPythonRuntimeProvider.aidl" to "fe8bcd7561e8aeded1bb729ac57f47e65eaa94e3c3d70ca8b94e3acc77ca3a83",
             "IPythonSessionOpenCallback.aidl" to "927b0af34edcf509491c209f9b581c0f740393158d6fab75f191acc8843741c9",
         )

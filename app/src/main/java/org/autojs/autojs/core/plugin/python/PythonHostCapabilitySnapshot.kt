@@ -2,7 +2,6 @@ package org.autojs.autojs.core.plugin.python
 
 import android.content.Context
 import android.os.Build
-import org.autojs.autojs.script.PythonProjectSource
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.python.runtime.api.PythonRequestId
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
@@ -20,14 +19,12 @@ internal object PythonHostCapabilitySnapshot {
         context: Context,
         requestId: PythonRequestId,
         source: org.autojs.autojs.script.PythonFileSource,
+        entryPoint: String,
     ): ByteArray = encode(
         Document(
             executionId = requestId.toString(),
-            entryPoint = when (source) {
-                is PythonProjectSource -> source.entryPoint
-                else -> source.semanticFile.name
-            },
-            projectFilesAvailable = source is PythonProjectSource,
+            entryPoint = entryPoint,
+            projectFilesAvailable = source is org.autojs.autojs.script.PythonProjectSource,
             app = AppSnapshot(
                 packageName = context.packageName,
                 versionName = BuildConfig.VERSION_NAME,

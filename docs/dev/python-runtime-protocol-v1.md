@@ -1,7 +1,13 @@
 # Python Runtime Plugin Protocol V1
 
 Status: versioned V1 contract. R0 froze 1.0; the backward-compatible R5-P1
-extension raises the current maximum to 1.1 without changing the AIDL surface.
+extension added the 1.1 host capability snapshot, U1-R2 added explicit module
+entry at 1.2, and U1-R2 interactive input appends a typed prompt/reply channel
+at 1.3. Protocol 1.4 adds explicit bounded JSON results and hash-manifested
+output artifacts without changing AIDL: it uses the descriptor array already
+declared by `onResult`. Protocol 1.3 appended one method to each execution AIDL
+interface; existing declarations and transaction numbers otherwise remain
+unchanged.
 This protocol does not enable Python execution in the AutoJs6 host by itself.
 
 ## Decision
@@ -50,6 +56,7 @@ IPythonExecutionSession
     oneway void grantOutputCredits(int count)
     oneway void cancel()
     oneway void close()
+    oneway void replyInput(byte[] reply)
 
 IPythonExecutionCallback
     oneway void onStarted(byte[] metadata)
@@ -58,6 +65,7 @@ IPythonExecutionCallback
     oneway void onResult(byte[] result, ParcelFileDescriptor[] descriptors)
     oneway void onFailed(byte[] error)
     oneway void onCancelled(byte[] cancellation)
+    oneway void onInputPrompt(byte[] prompt)
 ```
 
 All metadata uses the deterministic tagged wire described in
@@ -125,16 +133,21 @@ binary mixing of separately copied AARs; R1 must verify a synchronized
 | Schema | ID | Purpose |
 | --- | ---: | --- |
 | Runtime info | `0x50590001` | Provider and CPython identity plus protocol range |
-| Capabilities | `0x50590002` | ABI, optional transports, cancellation and limits |
+| Capabilities | `0x50590002` | ABI, optional transports/entry modes, cancellation and limits |
 | Resource limits | `0x50590003` | Provider ceilings bounded by host hard limits |
 | Payload reference | `0x50590004` | PFD index, role, exact length and SHA-256 |
-| Execution request | `0x50590010` | Relative entry point, source and execution limits |
+| Execution request | `0x50590010` | Relative file/dotted module entry point, source and execution limits |
 | Session started | `0x50590011` | Negotiated limits, first sequence and runtime generation |
 | Output chunk | `0x50590012` | Shared sequence, stream identity and bounded bytes |
 | Execution result | `0x50590013` | Exit code, elapsed time and exact output counters |
 | Traceback frame | `0x50590014` | Structured Python frame metadata |
 | Execution error | `0x50590015` | Stable code/phase and optional Python exception |
 | Cancellation | `0x50590016` | Reason, phase and elapsed time |
+| Interactive input policy | `0x50590017` | Execution-specific prompt/reply ceilings |
+| Input prompt | `0x50590018` | Typed prompt ID, text, echo and reply deadline |
+| Input reply | `0x50590019` | Exactly one value, EOF or cancelled response |
+| Result policy | `0x5059001a` | Execution-specific JSON and artifact limits |
+| Output artifact | `0x5059001b` | Logical path, result PFD index, exact length and SHA-256 |
 
 Schema major `1` is required. A future minor may add optional fields. Unknown
 optional fields are skipped; unknown required fields, duplicate scalar fields,
@@ -177,6 +190,10 @@ Capabilities (`0x50590002`):
 | 8 | `INT32` | R | cancellation mode |
 | 9 | `DOCUMENT` | R | resource limits |
 | 10 | `BOOLEAN` | O | host capability snapshot support; absent means false |
+| 11 | `BOOLEAN` | O | module-entry support; absent means false |
+| 12 | `BOOLEAN` | O | interactive built-in input support; absent means false |
+| 13 | `BOOLEAN` | O | structured JSON result support; absent means false |
+| 14 | `BOOLEAN` | O | output artifact support; absent means false |
 
 Resource limits (`0x50590003`):
 
@@ -194,6 +211,15 @@ Resource limits (`0x50590003`):
 | 10 | `INT32` | R | maximum concurrent sessions; V1 requires `1` |
 | 11 | `INT64` | R | maximum output chunks |
 | 12 | `INT64` | O | maximum host capability snapshot bytes; absent means zero |
+| 13 | `INT32` | O | maximum input prompt bytes; absent means zero |
+| 14 | `INT32` | O | maximum input reply bytes; absent means zero |
+| 15 | `INT32` | O | maximum input prompts per execution; absent means zero |
+| 16 | `INT64` | O | maximum wait per input reply in milliseconds; absent means zero |
+| 17 | `INT32` | O | maximum structured JSON UTF-8 bytes; absent means zero |
+| 18 | `INT32` | O | maximum output artifacts; absent means zero |
+| 19 | `INT32` | O | maximum output artifact path UTF-8 bytes; absent means zero |
+| 20 | `INT64` | O | maximum bytes in one output artifact; absent means zero |
+| 21 | `INT64` | O | maximum aggregate output artifact bytes; absent means zero |
 
 Payload reference (`0x50590004`):
 
@@ -221,6 +247,39 @@ Execution request (`0x50590010`):
 | 11 | `INT32` | R | maximum output chunk bytes |
 | 12 | `INT64` | R | maximum output chunks |
 | 13 | `DOCUMENT` | O | host capability snapshot payload reference |
+| 14 | `INT32` | O | entry mode; absent means file; module is required-for-reader |
+| 15 | `DOCUMENT` | O | interactive input policy; presence is required-for-reader |
+| 16 | `DOCUMENT` | O | result policy; presence is required-for-reader |
+
+Tag 14 remains absent for file mode. When it selects module mode, its wire
+header carries the required-for-reader flag: a pre-1.2 reader must reject the
+unknown field rather than silently execute the dotted entry with file
+semantics.
+
+Tag 15 is absent for background/non-interactive execution. When present, its
+wire header is required-for-reader: a pre-1.3 reader rejects the request rather
+than accepting user code which may later block or read an unintended process
+stdin. The nested policy uses schema `0x50590017`:
+
+| Tag | Type | Card. | Field |
+| ---: | --- | :---: | --- |
+| 1 | `INT32` | R | maximum prompts for this execution |
+| 2 | `INT32` | R | maximum UTF-8 prompt bytes |
+| 3 | `INT32` | R | maximum UTF-8 reply bytes |
+| 4 | `INT64` | R | monotonic reply deadline duration in milliseconds |
+
+Tag 16 is absent when no explicit result channel is authorized. When present,
+its wire header is required-for-reader: a pre-1.4 reader rejects the request
+rather than executing code whose result contract it cannot enforce. The nested
+policy uses schema `0x5059001a`:
+
+| Tag | Type | Card. | Field |
+| ---: | --- | :---: | --- |
+| 1 | `INT32` | R | maximum structured JSON UTF-8 bytes; zero disables JSON |
+| 2 | `INT32` | R | maximum artifact count; zero disables artifacts |
+| 3 | `INT32` | R | maximum logical artifact path UTF-8 bytes |
+| 4 | `INT64` | R | maximum bytes in one artifact |
+| 5 | `INT64` | R | maximum aggregate artifact bytes |
 
 Session started (`0x50590011`):
 
@@ -256,6 +315,23 @@ Execution result (`0x50590013`):
 | 5 | `INT64` | R | stderr bytes |
 | 6 | `INT64` | R | stdout chunks |
 | 7 | `INT64` | R | stderr chunks |
+| 8 | `UTF8` | O | strict structured JSON; presence is required-for-reader |
+| 9 | `DOCUMENT` | * | output artifact; each occurrence is required-for-reader |
+
+An output artifact uses schema `0x5059001b`:
+
+| Tag | Type | Card. | Field |
+| ---: | --- | :---: | --- |
+| 1 | `UTF8` | R | unique normalized logical relative path |
+| 2 | `FD_REF` | R | index in the `onResult` descriptor array |
+| 3 | `INT64` | R | exact byte length |
+| 4 | `BYTES` | R | 32-byte SHA-256 |
+
+Every result descriptor is referenced exactly once. Count, path, per-file and
+aggregate sizes must fit both hard V1 ceilings and the request policy. A Host
+must validate the typed terminal metadata before it reads any result PFD, then
+require a regular file, exact length, immediate EOF, and matching SHA-256.
+stdout/stderr are never parsed or reinterpreted as a result.
 
 Traceback frame (`0x50590014`):
 
@@ -289,6 +365,26 @@ Cancellation (`0x50590016`):
 | 3 | `INT32` | R | cancellation phase |
 | 4 | `INT64` | R | elapsed milliseconds |
 
+Input prompt (`0x50590018`):
+
+| Tag | Type | Card. | Field |
+| ---: | --- | :---: | --- |
+| 1 | `BYTES` | R | request ID |
+| 2 | `INT64` | R | positive, execution-scoped monotonic prompt ID |
+| 3 | `UTF8` | R | bounded prompt text; may be empty |
+| 4 | `INT32` | R | echo policy |
+| 5 | `INT32` | R | maximum UTF-8 reply bytes for this prompt |
+| 6 | `INT64` | R | reply timeout in milliseconds |
+
+Input reply (`0x50590019`):
+
+| Tag | Type | Card. | Field |
+| ---: | --- | :---: | --- |
+| 1 | `BYTES` | R | request ID |
+| 2 | `INT64` | R | exact pending prompt ID |
+| 3 | `INT32` | R | reply status |
+| 4 | `UTF8` | O | value text; required only for `VALUE`, including empty text |
+
 ### Enum Wire Codes
 
 | Enum | Code | Meaning |
@@ -297,12 +393,19 @@ Cancellation (`0x50590016`):
 | Isolation mode | 1 | dedicated plugin process |
 | Cancellation mode | 1 | process restart only |
 | Cancellation mode | 2 | cooperative, then process restart |
+| Python entry mode | 1 | file |
+| Python entry mode | 2 | module |
 | Payload kind | 1 | source |
 | Payload kind | 2 | workspace archive |
 | Payload kind | 3 | stdin snapshot |
 | Payload kind | 4 | host capability snapshot |
 | Output stream | 1 | stdout |
 | Output stream | 2 | stderr |
+| Input echo | 1 | visible text |
+| Input echo | 2 | hidden/password text |
+| Input reply status | 1 | value |
+| Input reply status | 2 | EOF |
+| Input reply status | 3 | cancelled |
 | Traceback origin | 1 | project |
 | Traceback origin | 2 | standard library |
 | Traceback origin | 3 | installed package |
@@ -314,12 +417,14 @@ Error codes are `INVALID_REQUEST=1`, `UNSUPPORTED_PROTOCOL=2`,
 `WORKSPACE_REJECTED=6`, `PYTHON_EXCEPTION=7`, `TIMEOUT=8`,
 `OUTPUT_LIMIT_EXCEEDED=9`, `CANCELLATION_FAILED=10`,
 `RUNTIME_CRASHED=11`, `STORAGE_EXHAUSTED=12`, `INTERNAL=13`,
-`SESSION_OPEN_FAILED=14`, `STDIN_REJECTED=15`, and
-`HOST_CAPABILITY_SNAPSHOT_REJECTED=16`. Codes are append-only.
+`SESSION_OPEN_FAILED=14`, `STDIN_REJECTED=15`,
+`HOST_CAPABILITY_SNAPSHOT_REJECTED=16`, `INPUT_TIMEOUT=17`,
+`INPUT_LIMIT_EXCEEDED=18`, and `OUTPUT_ARTIFACT_REJECTED=19`. Codes are
+append-only.
 
 Failure phases are `NEGOTIATION=1`, `SESSION_OPEN=2`, `INPUT_VALIDATION=3`,
-`RUNTIME_START=4`, `EXECUTION=5`, `OUTPUT=6`, `CANCELLATION=7`, and
-`CLEANUP=8`. Admission rejection is limited to the negotiation/session-open
+`RUNTIME_START=4`, `EXECUTION=5`, `OUTPUT=6`, `CANCELLATION=7`,
+`CLEANUP=8`, `INTERACTIVE_INPUT=9`, and `RESULT=10`. Admission rejection is limited to the negotiation/session-open
 phases and their allowed pre-dispatch error codes. An execution callback must
 always encode the safe-to-retry-before-dispatch field as false.
 
@@ -327,7 +432,8 @@ always encode the safe-to-retry-before-dispatch field as false.
 `HOST_CAPABILITY_SNAPSHOT_REJECTED` use `INPUT_VALIDATION`;
 `PYTHON_EXCEPTION` uses `EXECUTION`;
 `OUTPUT_LIMIT_EXCEEDED` uses `OUTPUT`; and `CANCELLATION_FAILED` uses
-`CANCELLATION`. Timeout, runtime crash, storage exhaustion, and internal errors
+`CANCELLATION`. `INPUT_TIMEOUT` and `INPUT_LIMIT_EXCEEDED` use
+`INTERACTIVE_INPUT`; `OUTPUT_ARTIFACT_REJECTED` uses `RESULT`. Timeout, runtime crash, storage exhaustion, and internal errors
 may identify the post-dispatch phase in which they occurred. This mapping is
 part of V1 and prevents provider-specific error/phase combinations.
 
@@ -391,11 +497,24 @@ another descriptor, the digest check and
 receiver-private snapshot remain the execution boundary. CPython consumes only
 the published private snapshot.
 
-The source entry point is a normalized project-relative `.py` path. Absolute
-paths, Windows drive prefixes (including `C:main.py`), backslashes, empty
-segments, `.`/`..`, control characters, non-NFC text, and non-Python extensions
-are rejected. An empty source payload is a valid Python program when its length
-and empty-content SHA-256 match. The wire never exposes a host sandbox path.
+In file mode, the source entry point is a normalized project-relative `.py`
+path. Absolute paths, Windows drive prefixes (including `C:main.py`),
+backslashes, empty segments, `.`/`..`, control characters, non-NFC text, and
+non-Python extensions are rejected. An empty source payload is a valid Python
+program when its length and empty-content SHA-256 match. The wire never exposes
+a host sandbox path.
+
+Protocol 1.2 module mode is explicit and requires both a project workspace and
+`supportsModuleEntry=true`. Its entry point is a normalized dotted ASCII module
+name. Every segment must be a non-keyword Python identifier, and `__init__` is
+rejected as a final segment. The source path must use the exact lowercase
+`.py` extension and no directory or filename stem may itself contain a dot, so
+the mapping stays reversible. The Host deterministically maps an admitted entry
+such as `pkg/main.py` to `pkg.main`; the provider maps it back to
+`pkg/main.py`, requires the staged file to equal the independently verified
+SOURCE bytes, prepends only the project root to `sys.path`, and executes it as
+`__main__` with standard module metadata. Module capability additionally
+requires workspace-archive capability and a protocol range reaching 1.2.
 
 Workspace archives remain a negotiated optional transport. A provider may
 advertise `supportsWorkspaceArchive=true` only after ZIP entry normalization,
@@ -426,8 +545,9 @@ capabilities not explicitly listed. The provider validates it before
 than a live host callback. Detailed compatibility rules are in
 `docs/python/R5_P1_CAPABILITY_SNAPSHOT_PROTOCOL.md`.
 
-The `onResult` descriptor array is reserved for compatible evolution. Protocol
-1.0 and 1.1 require it to be empty.
+Protocol 1.0 through 1.3 require the `onResult` descriptor array to be empty.
+Protocol 1.4 authorizes only output artifacts named by the typed result manifest
+under the exact descriptor-reference and byte/digest rules above.
 
 ## Lifecycle And Replay Boundary
 
@@ -457,6 +577,23 @@ The session rules are:
 - Total non-empty output chunk count is negotiated and bounded independently of
   the byte limit, and therefore cannot exceed the accepted output byte count.
 - Result counters must exactly match accepted chunks.
+- A result-enabled request accepts only explicitly typed strict JSON and
+  manifest-referenced regular-file PFDs; stdout text has no result semantics.
+- Result PFDs and private snapshots remain owned until callback delivery and are
+  closed/deleted on delivery failure, cancellation, timeout, death, or close.
+- An interactive request permits at most one pending prompt. Prompt IDs start
+  at 1 and increase exactly once per accepted prompt; request ID, prompt ID,
+  UTF-8 byte ceilings, echo policy and deadline are validated on both sides.
+- Each accepted prompt receives at most one exact reply. A duplicate,
+  out-of-order, oversized or unsolicited prompt/reply fails closed. A terminal
+  event invalidates the pending prompt, and a late reply is ignored.
+- Only a foreground user-gesture launch may attach the Host's opaque input
+  authorization and Material dialog controller. Background launches omit tag
+  15, never open UI, retain finite stdin-snapshot semantics, and reach immediate
+  EOF after that snapshot is exhausted.
+- Cancellation, the execution deadline, callback Binder death, local close,
+  service destruction and runtime-generation retirement all wake a Plugin
+  thread waiting for an input reply. No wait may keep an old generation alive.
 - At most one result, failure, or cancellation callback is accepted as terminal.
   A local close or Binder death may end ownership without a terminal callback.
 - No callback is accepted after terminal or close.
@@ -482,6 +619,7 @@ cancellation.
 
 The requested timeout starts at the provider's first accepted `start()` using
 a monotonic elapsed-time clock. It covers input snapshot read/hash/EOF checks,
+interactive reply waits,
 runtime startup, execution, output draining, cooperative cancellation grace,
 and hard process retirement. The host also keeps a conservative deadline from
 its dispatch call. `openSession` has a separate short RPC/admission deadline and
@@ -498,6 +636,15 @@ must never perform potentially blocking payload reads.
 | Workspace expanded bytes | 256 MiB |
 | stdin snapshot | 16 MiB |
 | Host capability snapshot | 64 KiB |
+| One interactive prompt | 16 KiB UTF-8 |
+| One interactive reply | 64 KiB UTF-8 |
+| Interactive prompts per execution | 1,024 |
+| One interactive reply wait | 30 minutes |
+| Structured JSON result | 64 KiB UTF-8 |
+| Output artifacts | 16 |
+| One output artifact path | 1024 UTF-8 bytes |
+| One output artifact | 4 MiB |
+| Aggregate output artifacts | 8 MiB |
 | stdout + stderr | 32 MiB |
 | One output chunk | 48 KiB |
 | Output chunks per execution | 65,536 |
@@ -513,18 +660,25 @@ must never perform potentially blocking payload reads.
 | Traceback field text | 4 KiB each |
 
 Provider-advertised and request-specific limits may only narrow these values.
-Workspace, stdin, and host-capability-snapshot limits must be zero when the
-corresponding capability is disabled. The authoritative complete set remains `PythonRuntimeContract`; this
+Workspace, stdin, host-capability-snapshot, interactive-input, structured-result
+and output-artifact limits must be zero when the corresponding capability is
+disabled. The authoritative complete set remains `PythonRuntimeContract`; this
 table highlights its transport and diagnostic resource ceilings.
 
 ## R0 Scope And Non-Goals
 
-R0 freezes and tests the 1.0 build-time protocol only. It covers CPython identity,
-finite source/PFD metadata, optional finite workspace/stdin transports, stdout/stderr,
-structured tracebacks, exit code, JVM state-machine representations of
-timeout/cancellation, and compatibility rules. R5-P1 extends the same build-time
-contract with the optional 1.1 host-capability snapshot transport. Neither set of
-static/API evidence is Android Binder or device evidence.
+R0 froze and tested the 1.0 build-time protocol. It covers CPython identity,
+finite source/PFD metadata, optional finite workspace/stdin transports,
+stdout/stderr, structured tracebacks, exit code, JVM state-machine
+representations of timeout/cancellation, and compatibility rules. R5-P1
+extends the same build-time contract with the optional 1.1 host-capability
+snapshot transport. U1-R2 extends it at 1.2 with explicit, capability-gated
+file/module entry negotiation and at 1.3 with foreground-only typed built-in
+input prompts, one-shot replies and required-reader compatibility behavior. At
+1.4 it adds request-scoped strict JSON results and optional output artifacts
+bounded by count, normalized path, per-file/aggregate size, exact PFD reference,
+and SHA-256. It never infers a result from stdout.
+None of this static/API evidence is Android Binder or device evidence.
 
 R0 does not provide a runtime APK, bind a service, route `.py`, register a
 script engine, change packaged APKs, or expose an AutoJs6 capability. It cannot
@@ -532,7 +686,9 @@ be cited as Android Binder, CPython, ABI, 16 KiB page-size, native-wheel,
 performance, real timeout enforcement, cancellation effectiveness, or device
 evidence.
 
-V1 does not authorize UI mode, online `pip install`, runtime-downloaded code,
+V1 does not authorize general or background UI. Protocol 1.3 authorizes only
+the bounded foreground prompt/reply controller carried by an opaque
+user-gesture execution grant. V1 does not authorize online `pip install`, runtime-downloaded code,
 arbitrary Java/Android interoperability, raw `Context`/`ScriptRuntime`/View
 objects, debugger ports, shell, accessibility, unrestricted filesystem access,
 or automatic fallback to Rhino.

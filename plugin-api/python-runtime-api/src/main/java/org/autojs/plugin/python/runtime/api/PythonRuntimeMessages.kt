@@ -29,6 +29,15 @@ data class PythonRuntimeResourceLimits(
     val maxTimeoutMillis: Long,
     val maxConcurrentSessions: Int,
     val maxHostCapabilitySnapshotBytes: Long = 0L,
+    val maxInputPromptBytes: Int = 0,
+    val maxInputReplyBytes: Int = 0,
+    val maxInputPrompts: Int = 0,
+    val maxInputWaitMillis: Long = 0L,
+    val maxStructuredJsonBytes: Int = 0,
+    val maxOutputArtifacts: Int = 0,
+    val maxOutputArtifactPathBytes: Int = 0,
+    val maxOutputArtifactBytes: Long = 0L,
+    val maxTotalOutputArtifactBytes: Long = 0L,
 )
 
 class PythonRuntimeCapabilities(
@@ -42,6 +51,10 @@ class PythonRuntimeCapabilities(
     val cancellationMode: PythonCancellationMode,
     val limits: PythonRuntimeResourceLimits,
     val supportsHostCapabilitySnapshot: Boolean = false,
+    val supportsModuleEntry: Boolean = false,
+    val supportsInteractiveInput: Boolean = false,
+    val supportsStructuredJsonResult: Boolean = false,
+    val supportsOutputArtifacts: Boolean = false,
 ) {
     val supportedAbis: List<String> = immutableList(supportedAbis)
 
@@ -55,7 +68,11 @@ class PythonRuntimeCapabilities(
         supportsCooperativeCancellation == other.supportsCooperativeCancellation &&
         cancellationMode == other.cancellationMode &&
         limits == other.limits &&
-        supportsHostCapabilitySnapshot == other.supportsHostCapabilitySnapshot
+        supportsHostCapabilitySnapshot == other.supportsHostCapabilitySnapshot &&
+        supportsModuleEntry == other.supportsModuleEntry &&
+        supportsInteractiveInput == other.supportsInteractiveInput &&
+        supportsStructuredJsonResult == other.supportsStructuredJsonResult &&
+        supportsOutputArtifacts == other.supportsOutputArtifacts
 
     override fun hashCode(): Int = listOf(
         implementation,
@@ -68,6 +85,10 @@ class PythonRuntimeCapabilities(
         cancellationMode,
         limits,
         supportsHostCapabilitySnapshot,
+        supportsModuleEntry,
+        supportsInteractiveInput,
+        supportsStructuredJsonResult,
+        supportsOutputArtifacts,
     ).hashCode()
 }
 
@@ -94,6 +115,9 @@ class PythonExecutionRequest(
         maxOutputBytes,
     ).toInt(),
     val maxOutputChunks: Long = minOf(PythonRuntimeContract.MAX_OUTPUT_CHUNKS, maxOutputBytes),
+    val entryMode: PythonEntryMode = PythonEntryMode.FILE,
+    val interactiveInput: PythonInteractiveInputPolicy? = null,
+    val resultPolicy: PythonResultPolicy? = null,
 ) {
     val arguments: List<String> = immutableList(arguments)
 
@@ -101,6 +125,9 @@ class PythonExecutionRequest(
         requestId == other.requestId &&
         protocolVersion == other.protocolVersion &&
         entryPoint == other.entryPoint &&
+        entryMode == other.entryMode &&
+        interactiveInput == other.interactiveInput &&
+        resultPolicy == other.resultPolicy &&
         source == other.source &&
         workspaceArchive == other.workspaceArchive &&
         stdin == other.stdin &&
@@ -115,6 +142,9 @@ class PythonExecutionRequest(
         requestId,
         protocolVersion,
         entryPoint,
+        entryMode,
+        interactiveInput,
+        resultPolicy,
         source,
         workspaceArchive,
         stdin,
@@ -126,6 +156,38 @@ class PythonExecutionRequest(
         maxOutputChunks,
     ).hashCode()
 }
+
+data class PythonInteractiveInputPolicy(
+    val maxPrompts: Int,
+    val maxPromptBytes: Int,
+    val maxReplyBytes: Int,
+    val replyTimeoutMillis: Long,
+)
+
+/** Execution-scoped bounds for explicit JSON results and optional output descriptors. */
+data class PythonResultPolicy(
+    val maxStructuredJsonBytes: Int,
+    val maxArtifacts: Int,
+    val maxArtifactPathBytes: Int,
+    val maxArtifactBytes: Long,
+    val maxTotalArtifactBytes: Long,
+)
+
+data class PythonInputPrompt(
+    val requestId: PythonRequestId,
+    val promptId: PythonPromptId,
+    val text: String,
+    val echo: PythonInputEcho,
+    val maxReplyBytes: Int,
+    val replyTimeoutMillis: Long,
+)
+
+data class PythonInputReply(
+    val requestId: PythonRequestId,
+    val promptId: PythonPromptId,
+    val status: PythonInputReplyStatus,
+    val value: String? = null,
+)
 
 data class PythonSessionStarted(
     val requestId: PythonRequestId,
@@ -163,7 +225,7 @@ class PythonOutputChunk(
         "PythonOutputChunk(requestId=$requestId, sequence=$sequence, stream=$stream, sizeBytes=${value.size})"
 }
 
-data class PythonExecutionResult(
+class PythonExecutionResult(
     val requestId: PythonRequestId,
     val exitCode: Int,
     val elapsedMillis: Long,
@@ -171,6 +233,41 @@ data class PythonExecutionResult(
     val stderrBytes: Long,
     val stdoutChunks: Long,
     val stderrChunks: Long,
+    val structuredJson: String? = null,
+    outputArtifacts: Collection<PythonOutputArtifact> = emptyList(),
+) {
+    val outputArtifacts: List<PythonOutputArtifact> = immutableList(outputArtifacts)
+
+    override fun equals(other: Any?): Boolean = other is PythonExecutionResult &&
+        requestId == other.requestId &&
+        exitCode == other.exitCode &&
+        elapsedMillis == other.elapsedMillis &&
+        stdoutBytes == other.stdoutBytes &&
+        stderrBytes == other.stderrBytes &&
+        stdoutChunks == other.stdoutChunks &&
+        stderrChunks == other.stderrChunks &&
+        structuredJson == other.structuredJson &&
+        outputArtifacts == other.outputArtifacts
+
+    override fun hashCode(): Int = listOf(
+        requestId,
+        exitCode,
+        elapsedMillis,
+        stdoutBytes,
+        stderrBytes,
+        stdoutChunks,
+        stderrChunks,
+        structuredJson,
+        outputArtifacts,
+    ).hashCode()
+}
+
+/** Metadata for one result descriptor; bytes are never embedded in the result document. */
+data class PythonOutputArtifact(
+    val path: String,
+    val descriptorIndex: Int,
+    val declaredLengthBytes: Long,
+    val sha256: PythonSha256,
 )
 
 data class PythonTracebackFrame(

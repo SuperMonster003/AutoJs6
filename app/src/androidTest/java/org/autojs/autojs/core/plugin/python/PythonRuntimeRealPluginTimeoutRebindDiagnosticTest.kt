@@ -245,7 +245,7 @@ class PythonRuntimeRealPluginTimeoutRebindDiagnosticTest {
             return runCatching(action).onFailure(::failCallback).isSuccess
         }
 
-        val executionCallback = object : IPythonExecutionCallback.Stub() {
+        val executionCallback = object : NonInteractivePythonExecutionCallback() {
             override fun onStarted(metadata: ByteArray?) {
                 val callingUid = Binder.getCallingUid()
                 accept(callingUid) {
@@ -441,7 +441,7 @@ class PythonRuntimeRealPluginTimeoutRebindDiagnosticTest {
             return runCatching(action).onFailure(::failCallback).isSuccess
         }
 
-        val executionCallback = object : IPythonExecutionCallback.Stub() {
+        val executionCallback = object : NonInteractivePythonExecutionCallback() {
             override fun onStarted(metadata: ByteArray?) {
                 val callingUid = Binder.getCallingUid()
                 accept(callingUid) {

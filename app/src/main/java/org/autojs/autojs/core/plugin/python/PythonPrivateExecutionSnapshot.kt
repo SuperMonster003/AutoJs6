@@ -7,7 +7,10 @@ import android.system.OsConstants
 import org.autojs.autojs.script.PythonFileSource
 import org.autojs.autojs.script.PythonProjectLaunchPolicy
 import org.autojs.autojs.script.PythonProjectSource
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
+import org.autojs.plugin.python.runtime.api.PythonRuntimeContractException
+import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
 import org.autojs.plugin.python.runtime.api.PythonSha256
 import java.io.BufferedOutputStream
 import java.io.Closeable
@@ -31,6 +34,7 @@ internal class PythonPrivateExecutionSnapshot private constructor(
     private val stdin: PrivatePayload?,
     private val hostCapabilities: PrivatePayload?,
     val entryPoint: String,
+    val entryMode: PythonEntryMode,
 ) : Closeable {
 
     val sourceLengthBytes: Long
@@ -98,9 +102,11 @@ internal class PythonPrivateExecutionSnapshot private constructor(
             context: Context,
             source: PythonFileSource,
             requestId: org.autojs.plugin.python.runtime.api.PythonRequestId,
+            entryMode: PythonEntryMode,
             stdinSnapshot: ByteArray?,
             cancelled: () -> Boolean,
         ): PythonPrivateExecutionSnapshot {
+            val requestEntryPoint = resolveRequestEntryPoint(source, entryMode)
             val base = when (source) {
                 is PythonProjectSource -> createProject(context, source, cancelled)
                 else -> createSingleFile(context, source, cancelled)
@@ -140,14 +146,20 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                 )
             }
             return try {
-                val capabilityBytes = PythonHostCapabilitySnapshot.create(context, requestId, source)
+                val capabilityBytes = PythonHostCapabilitySnapshot.create(
+                    context,
+                    requestId,
+                    source,
+                    requestEntryPoint,
+                )
                 val capability = snapshotBytes(capabilityBytes, capabilityFile)
                 PythonPrivateExecutionSnapshot(
                     source = base.source,
                     workspace = base.workspace,
                     stdin = stdinPayload,
                     hostCapabilities = capability,
-                    entryPoint = base.entryPoint,
+                    entryPoint = requestEntryPoint,
+                    entryMode = entryMode,
                 )
             } catch (error: Throwable) {
                 capabilityFile.delete()
@@ -184,6 +196,7 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                     stdin = null,
                     hostCapabilities = null,
                     entryPoint = semanticSource.name,
+                    entryMode = PythonEntryMode.FILE,
                 )
             } catch (error: Throwable) {
                 snapshot.delete()
@@ -277,6 +290,7 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                     stdin = null,
                     hostCapabilities = null,
                     entryPoint = source.entryPoint,
+                    entryMode = PythonEntryMode.FILE,
                 )
             } catch (error: Throwable) {
                 sourceFile.delete()
@@ -338,6 +352,30 @@ internal class PythonPrivateExecutionSnapshot private constructor(
             destination.setReadable(true, true)
             return PrivatePayload(destination, value.size.toLong(), PythonSha256.fromBytes(digest.digest()))
         }
+
+        private fun resolveRequestEntryPoint(source: PythonFileSource, entryMode: PythonEntryMode): String =
+            when (entryMode) {
+                PythonEntryMode.FILE -> when (source) {
+                    is PythonProjectSource -> source.entryPoint
+                    else -> source.semanticFile.name
+                }
+                PythonEntryMode.MODULE -> {
+                    val project = source as? PythonProjectSource
+                        ?: throw PythonRuntimeHostException(
+                            PythonRuntimeHostError.ENTRY_MODE_INVALID,
+                            "Python module entry requires an explicitly admitted project",
+                        )
+                    try {
+                        PythonRuntimeValidation.moduleNameForFileEntryPoint(project.entryPoint)
+                    } catch (error: PythonRuntimeContractException) {
+                        throw PythonRuntimeHostException(
+                            PythonRuntimeHostError.ENTRY_MODE_INVALID,
+                            "Python project entry point cannot be represented as a module name",
+                            error,
+                        )
+                    }
+                }
+            }
 
         private fun snapshotStdinBytes(
             value: ByteArray,

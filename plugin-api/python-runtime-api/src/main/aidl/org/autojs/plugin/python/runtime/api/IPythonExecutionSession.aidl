@@ -9,4 +9,6 @@ oneway interface IPythonExecutionSession {
     void cancel();
 
     void close();
+
+    void replyInput(in byte[] reply);
 }

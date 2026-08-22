@@ -276,7 +276,7 @@ class PythonRuntimeRealPluginReliablePipeDiagnosticTest {
             }
         }
 
-        val executionCallback = object : IPythonExecutionCallback.Stub() {
+        val executionCallback = object : NonInteractivePythonExecutionCallback() {
             override fun onStarted(metadata: ByteArray?) {
                 val callingUid = Binder.getCallingUid()
                 unexpected(callingUid, startedCount, "onStarted")
@@ -461,7 +461,7 @@ class PythonRuntimeRealPluginReliablePipeDiagnosticTest {
             }
         }
 
-        val executionCallback = object : IPythonExecutionCallback.Stub() {
+        val executionCallback = object : NonInteractivePythonExecutionCallback() {
             override fun onStarted(metadata: ByteArray?) {
                 val callingUid = Binder.getCallingUid()
                 accept(callingUid) {

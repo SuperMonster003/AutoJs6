@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.python
 
 import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -11,6 +12,37 @@ import org.junit.Test
 import java.nio.charset.StandardCharsets
 
 class PythonExecutionInputPolicyTest {
+
+    @Test
+    fun entryModeDefaultsToFileAndAcceptsOnlyTheTwoExactWireNames() {
+        assertEquals(PythonEntryMode.FILE, PythonExecutionInputPolicy.resolveEntryMode(null))
+        assertEquals(PythonEntryMode.FILE, PythonExecutionInputPolicy.resolveEntryMode(ExecutionConfig()))
+        assertEquals(
+            PythonEntryMode.FILE,
+            PythonExecutionInputPolicy.resolveEntryMode(ExecutionConfig().apply {
+                setArgument(PythonExecutionInputPolicy.ENTRY_MODE_ARGUMENT, "file")
+            }),
+        )
+        assertEquals(
+            PythonEntryMode.MODULE,
+            PythonExecutionInputPolicy.resolveEntryMode(ExecutionConfig().apply {
+                setArgument(PythonExecutionInputPolicy.ENTRY_MODE_ARGUMENT, StringBuilder("module"))
+            }),
+        )
+    }
+
+    @Test
+    fun invalidEntryModeUsesItsStableHostError() {
+        listOf("", "MODULE", " module", 2).forEach { value ->
+            val config = ExecutionConfig().apply {
+                setArgument(PythonExecutionInputPolicy.ENTRY_MODE_ARGUMENT, value)
+            }
+            val error = assertThrows(PythonRuntimeHostException::class.java) {
+                PythonExecutionInputPolicy.resolveEntryMode(config)
+            }
+            assertEquals(PythonRuntimeHostError.ENTRY_MODE_INVALID, error.error)
+        }
+    }
 
     @Test
     fun absentArgumentDoesNotCreateAStdinDescriptorButExplicitEmptyInputDoes() {

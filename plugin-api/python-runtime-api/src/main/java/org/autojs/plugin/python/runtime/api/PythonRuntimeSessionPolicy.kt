@@ -60,6 +60,9 @@ class PythonExecutionSessionPolicy(
     private var observedStderrBytes = 0L
     private var observedStdoutChunks = 0L
     private var observedStderrChunks = 0L
+    private var pendingInputPrompt: PythonInputPrompt? = null
+    private var nextInputPromptId = 1L
+    private var observedInputPrompts = 0
 
     init {
         PythonRuntimeValidation.validateRequest(expectedRequest)
@@ -185,18 +188,71 @@ class PythonExecutionSessionPolicy(
     }
 
     @Synchronized
+    fun onInputPrompt(prompt: PythonInputPrompt) {
+        acceptCallback {
+            requireStarted()
+            val inputPolicy = requireNotNull(expectedRequest.interactiveInput) {
+                "Provider emitted an interactive input prompt without request authorization"
+            }
+            PythonRuntimeValidation.validateInputPrompt(prompt)
+            require(prompt.requestId == expectedRequest.requestId) { "Input prompt request ID does not match" }
+            check(prompt.promptId.value == nextInputPromptId) {
+                "Expected input prompt ID $nextInputPromptId but received ${prompt.promptId.value}"
+            }
+            check(pendingInputPrompt == null) { "An interactive input prompt is already pending" }
+            check(observedInputPrompts < inputPolicy.maxPrompts) {
+                "Interactive input prompt count exceeds the request limit"
+            }
+            check(prompt.text.toByteArray(Charsets.UTF_8).size <= inputPolicy.maxPromptBytes) {
+                "Interactive input prompt exceeds the request byte limit"
+            }
+            check(prompt.maxReplyBytes <= inputPolicy.maxReplyBytes) {
+                "Interactive input reply limit exceeds the request limit"
+            }
+            check(prompt.replyTimeoutMillis <= inputPolicy.replyTimeoutMillis) {
+                "Interactive input timeout exceeds the request limit"
+            }
+            pendingInputPrompt = prompt
+            observedInputPrompts++
+            check(nextInputPromptId < Long.MAX_VALUE) { "Interactive input prompt ID is exhausted" }
+            nextInputPromptId++
+        }
+    }
+
+    @Synchronized
+    fun replyInput(reply: PythonInputReply): Boolean {
+        if (state == State.TERMINAL || state == State.CLOSED) return false
+        acceptCallback {
+            requireStarted()
+            PythonRuntimeValidation.validateInputReply(reply)
+            val pending = checkNotNull(pendingInputPrompt) { "No interactive input prompt is pending" }
+            require(reply.requestId == expectedRequest.requestId) { "Input reply request ID does not match" }
+            require(reply.promptId == pending.promptId) { "Input reply prompt ID does not match" }
+            reply.value?.let { value ->
+                check(value.toByteArray(Charsets.UTF_8).size <= pending.maxReplyBytes) {
+                    "Interactive input reply exceeds the prompt byte limit"
+                }
+            }
+            pendingInputPrompt = null
+        }
+        return true
+    }
+
+    @Synchronized
     fun onResult(result: PythonExecutionResult, descriptorCount: Int) {
         acceptCallback {
             requireStarted()
-            PythonRuntimeValidation.validateResult(result)
+            PythonRuntimeValidation.validateResultAgainstPolicy(
+                result,
+                expectedRequest.resultPolicy,
+                descriptorCount,
+            )
             require(result.requestId == expectedRequest.requestId) { "Result request ID does not match" }
-            require(descriptorCount == 0) {
-                "Python Runtime protocol v1.0 reserves result descriptors and requires an empty descriptor array"
-            }
             require(result.stdoutBytes == observedStdoutBytes) { "Result stdout byte count does not match the stream" }
             require(result.stderrBytes == observedStderrBytes) { "Result stderr byte count does not match the stream" }
             require(result.stdoutChunks == observedStdoutChunks) { "Result stdout chunk count does not match the stream" }
             require(result.stderrChunks == observedStderrChunks) { "Result stderr chunk count does not match the stream" }
+            check(pendingInputPrompt == null) { "Result arrived while an interactive input prompt was pending" }
             acceptTerminal(Terminal.RESULT)
         }
     }
@@ -240,6 +296,7 @@ class PythonExecutionSessionPolicy(
         check(state != State.TERMINAL) { "A terminal event has already been accepted" }
         check(state != State.CLOSED) { "Session is closed" }
         terminal = value
+        pendingInputPrompt = null
         state = State.TERMINAL
     }
 

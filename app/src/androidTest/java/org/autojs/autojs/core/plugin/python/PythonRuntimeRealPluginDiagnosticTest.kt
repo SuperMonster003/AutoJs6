@@ -220,7 +220,7 @@ class PythonRuntimeRealPluginDiagnosticTest {
             acceptFromPinnedProvider(action)
         }
 
-        val executionCallback = object : IPythonExecutionCallback.Stub() {
+        val executionCallback = object : NonInteractivePythonExecutionCallback() {
             override fun onStarted(metadata: ByteArray?) = fromPinnedProvider {
                 val started = PythonRuntimeCodec.decodeSessionStarted(
                     requireNotNull(metadata) { "Real Python Runtime started metadata is null" },

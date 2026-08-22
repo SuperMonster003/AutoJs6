@@ -149,7 +149,7 @@ class PythonRuntimeU1R1StartLeaseInstrumentationTest {
                 )
             }
 
-            val executionCallback = object : IPythonExecutionCallback.Stub() {
+            val executionCallback = object : NonInteractivePythonExecutionCallback() {
                 override fun onStarted(metadata: ByteArray?) = acceptProviderCallback {
                     unexpectedExecutionCallback("started metadata")
                 }
@@ -403,7 +403,7 @@ class PythonRuntimeU1R1StartLeaseInstrumentationTest {
             runCatching(action).onFailure(::failCallback)
         }
 
-        val executionCallback = object : IPythonExecutionCallback.Stub() {
+        val executionCallback = object : NonInteractivePythonExecutionCallback() {
             override fun onStarted(metadata: ByteArray?) = acceptProviderCallback {
                 check(startedCount.incrementAndGet() == 1) { "Recovery session started more than once" }
                 val decoded = PythonRuntimeCodec.decodeSessionStarted(

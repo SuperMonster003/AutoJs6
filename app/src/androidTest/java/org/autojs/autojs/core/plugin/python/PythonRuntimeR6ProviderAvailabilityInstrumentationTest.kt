@@ -51,9 +51,9 @@ class PythonRuntimeR6ProviderAvailabilityInstrumentationTest {
                 Expected.DISABLED -> assertFailure(outcome.exceptionOrNull(), PythonRuntimeHostError.PLUGIN_DISABLED)
                 Expected.AVAILABLE -> {
                     val result = outcome.getOrThrow()
-                    assertEquals("Recovered provider returned a non-zero exit code", 0, result.exitCode)
-                    assertTrue("Recovered provider did not account for stdout", result.stdoutBytes > 0L)
-                    assertEquals("Recovered provider unexpectedly emitted stderr", 0L, result.stderrBytes)
+                    assertEquals("Recovered provider returned a non-zero exit code", 0, result.terminal.exitCode)
+                    assertTrue("Recovered provider did not account for stdout", result.terminal.stdoutBytes > 0L)
+                    assertEquals("Recovered provider unexpectedly emitted stderr", 0L, result.terminal.stderrBytes)
                 }
             }
         } finally {

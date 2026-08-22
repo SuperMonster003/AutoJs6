@@ -2,12 +2,15 @@ package org.autojs.autojs.core.plugin.python
 
 import org.autojs.plugin.python.runtime.api.PythonCancellationMode
 import org.autojs.plugin.python.runtime.api.PythonExecutionRequest
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonImplementation
 import org.autojs.plugin.python.runtime.api.PythonIsolationMode
+import org.autojs.plugin.python.runtime.api.PythonInteractiveInputPolicy
 import org.autojs.plugin.python.runtime.api.PythonPayloadKind
 import org.autojs.plugin.python.runtime.api.PythonPayloadReference
 import org.autojs.plugin.python.runtime.api.PythonProtocolVersion
 import org.autojs.plugin.python.runtime.api.PythonRequestId
+import org.autojs.plugin.python.runtime.api.PythonResultPolicy
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCapabilities
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
 import org.autojs.plugin.python.runtime.api.PythonRuntimeInfo
@@ -44,6 +47,10 @@ internal object PythonRuntimeHostTestFixtures {
         supportsWorkspaceArchive: Boolean = true,
         supportsStdinSnapshot: Boolean = true,
         supportsHostCapabilitySnapshot: Boolean = false,
+        supportsModuleEntry: Boolean = false,
+        supportsInteractiveInput: Boolean = false,
+        supportsStructuredJsonResult: Boolean = false,
+        supportsOutputArtifacts: Boolean = false,
         supportsCooperativeCancellation: Boolean = true,
         maxOutputBytes: Long = 4_096L,
     ): PythonRuntimeCapabilities {
@@ -60,10 +67,19 @@ internal object PythonRuntimeHostTestFixtures {
             maxTimeoutMillis = 10_000L,
             maxConcurrentSessions = PythonRuntimeContract.MAX_CONCURRENT_SESSIONS,
             maxHostCapabilitySnapshotBytes = if (supportsHostCapabilitySnapshot) {
-                PythonRuntimeContract.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES.toLong()
+                PythonRuntimeContract.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES
             } else {
                 0L
             },
+            maxInputPromptBytes = if (supportsInteractiveInput) 1_024 else 0,
+            maxInputReplyBytes = if (supportsInteractiveInput) 2_048 else 0,
+            maxInputPrompts = if (supportsInteractiveInput) 8 else 0,
+            maxInputWaitMillis = if (supportsInteractiveInput) 1_000L else 0L,
+            maxStructuredJsonBytes = if (supportsStructuredJsonResult) 4_096 else 0,
+            maxOutputArtifacts = if (supportsOutputArtifacts) 4 else 0,
+            maxOutputArtifactPathBytes = if (supportsOutputArtifacts) 256 else 0,
+            maxOutputArtifactBytes = if (supportsOutputArtifacts) 2_048L else 0L,
+            maxTotalOutputArtifactBytes = if (supportsOutputArtifacts) 4_096L else 0L,
         )
         return PythonRuntimeCapabilities(
             implementation = PythonImplementation.CPYTHON,
@@ -80,6 +96,10 @@ internal object PythonRuntimeHostTestFixtures {
             },
             limits = limits,
             supportsHostCapabilitySnapshot = supportsHostCapabilitySnapshot,
+            supportsModuleEntry = supportsModuleEntry,
+            supportsInteractiveInput = supportsInteractiveInput,
+            supportsStructuredJsonResult = supportsStructuredJsonResult,
+            supportsOutputArtifacts = supportsOutputArtifacts,
         )
     }
 
@@ -136,10 +156,13 @@ internal object PythonRuntimeHostTestFixtures {
         workspaceArchive: Boolean = false,
         stdinSnapshot: Boolean = false,
         hostCapabilitySnapshot: Boolean = false,
+        entryMode: PythonEntryMode = PythonEntryMode.FILE,
+        interactiveInput: Boolean = false,
+        resultPolicy: Boolean = false,
     ) = PythonExecutionRequest(
         requestId = requestId,
         protocolVersion = protocolVersion,
-        entryPoint = "main.py",
+        entryPoint = if (entryMode == PythonEntryMode.MODULE) "pkg.main" else "main.py",
         source = PythonPayloadReference(
             kind = PythonPayloadKind.SOURCE,
             descriptorIndex = 0,
@@ -182,5 +205,27 @@ internal object PythonRuntimeHostTestFixtures {
         maxOutputBytes = 1_024L,
         maxOutputChunkBytes = 256,
         maxOutputChunks = 1_024L,
+        entryMode = entryMode,
+        interactiveInput = if (interactiveInput) {
+            PythonInteractiveInputPolicy(
+                maxPrompts = 4,
+                maxPromptBytes = 512,
+                maxReplyBytes = 1_024,
+                replyTimeoutMillis = 500L,
+            )
+        } else {
+            null
+        },
+        resultPolicy = if (resultPolicy) {
+            PythonResultPolicy(
+                maxStructuredJsonBytes = 2_048,
+                maxArtifacts = 2,
+                maxArtifactPathBytes = 128,
+                maxArtifactBytes = 1_024L,
+                maxTotalArtifactBytes = 2_048L,
+            )
+        } else {
+            null
+        },
     )
 }

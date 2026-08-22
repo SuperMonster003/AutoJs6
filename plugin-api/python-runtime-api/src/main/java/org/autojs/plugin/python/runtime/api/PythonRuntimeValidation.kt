@@ -38,6 +38,32 @@ object PythonRuntimeValidation {
     private val PROVIDER_ID = Regex("[a-z0-9][a-z0-9._-]{0,127}")
     private val PYTHON_VERSION = Regex("[0-9]+(?:\\.[0-9]+){1,3}(?:[a-zA-Z0-9.+_-]*)?")
     private val ANDROID_ABI = Regex("[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
+    private val MODULE_SEGMENT = Regex("[A-Za-z_][A-Za-z0-9_]*")
+
+    /** Deterministically maps an admitted project file such as `pkg/main.py` to `pkg.main`. */
+    fun moduleNameForFileEntryPoint(fileEntryPoint: String): String {
+        validateLogicalRelativePath(
+            fileEntryPoint,
+            "Module source entry point",
+            PythonRuntimeContract.MAX_ENTRY_POINT_BYTES,
+        )
+        requireValue(fileEntryPoint.endsWith(".py")) {
+            "Module source entry point must use the exact lowercase .py extension"
+        }
+        val moduleSegments = fileEntryPoint.dropLast(3).split('/')
+        requireValue(moduleSegments.none { '.' in it }) {
+            "Module source entry point segments must not contain dots"
+        }
+        val moduleName = moduleSegments.joinToString(".")
+        validateModuleEntryPoint(moduleName)
+        return moduleName
+    }
+
+    /** Maps a validated dotted module name to the one SOURCE path materialized by the provider. */
+    fun fileEntryPointForModuleName(moduleEntryPoint: String): String {
+        validateModuleEntryPoint(moduleEntryPoint)
+        return moduleEntryPoint.replace('.', '/') + ".py"
+    }
 
     fun validateRuntimeInfo(info: PythonRuntimeInfo) {
         validateProtocolRange(info.protocolMin, info.protocolMax, "runtime")
@@ -92,6 +118,9 @@ object PythonRuntimeValidation {
         ) {
             "Cooperative cancellation capability does not match the cancellation mode"
         }
+        requireValue(!capabilities.supportsModuleEntry || capabilities.supportsWorkspaceArchive) {
+            "Module entry support requires workspace archive support"
+        }
         validateLimits(capabilities.limits, capabilities)
     }
 
@@ -112,11 +141,26 @@ object PythonRuntimeValidation {
                 "Host capability snapshot support requires protocol 1.1 or newer"
             }
         }
+        if (capabilities.supportsModuleEntry) {
+            requireCapability(runtimeInfo.protocolMax >= MODULE_ENTRY_PROTOCOL) {
+                "Module entry support requires protocol 1.2 or newer"
+            }
+        }
+        if (capabilities.supportsInteractiveInput) {
+            requireCapability(runtimeInfo.protocolMax >= INTERACTIVE_INPUT_PROTOCOL) {
+                "Interactive input support requires protocol 1.3 or newer"
+            }
+        }
+        if (capabilities.supportsStructuredJsonResult || capabilities.supportsOutputArtifacts) {
+            requireCapability(runtimeInfo.protocolMax >= STRUCTURED_RESULT_PROTOCOL) {
+                "Structured result support requires protocol 1.4 or newer"
+            }
+        }
     }
 
     fun validateRequest(request: PythonExecutionRequest) {
         validateProtocolVersion(request.protocolVersion, "request")
-        validateEntryPoint(request.entryPoint)
+        validateEntryPoint(request.entryPoint, request.entryMode)
         validatePayloadReference(request.source)
         requireValue(request.source.kind == PythonPayloadKind.SOURCE) {
             "Source descriptor has the wrong payload kind"
@@ -144,6 +188,32 @@ object PythonRuntimeValidation {
                 "Host capability snapshots require Python Runtime protocol 1.1 or newer"
             }
             requireValue(it.declaredLengthBytes > 0L) { "Host capability snapshot must not be empty" }
+        }
+        if (request.entryMode == PythonEntryMode.MODULE) {
+            requireValue(
+                request.protocolVersion.major == MODULE_ENTRY_PROTOCOL.major &&
+                    request.protocolVersion >= MODULE_ENTRY_PROTOCOL,
+            ) { "Module entry requires Python Runtime protocol 1.2 or newer" }
+            requireValue(request.workspaceArchive != null) {
+                "Module entry requires a workspace archive"
+            }
+        }
+        request.interactiveInput?.let { policy ->
+            requireValue(
+                request.protocolVersion.major == INTERACTIVE_INPUT_PROTOCOL.major &&
+                    request.protocolVersion >= INTERACTIVE_INPUT_PROTOCOL,
+            ) { "Interactive input requires Python Runtime protocol 1.3 or newer" }
+            validateInteractiveInputPolicy(policy)
+            requireValue(policy.replyTimeoutMillis <= request.timeoutMillis) {
+                "Interactive input reply timeout exceeds the execution timeout"
+            }
+        }
+        request.resultPolicy?.let { policy ->
+            requireValue(
+                request.protocolVersion.major == STRUCTURED_RESULT_PROTOCOL.major &&
+                    request.protocolVersion >= STRUCTURED_RESULT_PROTOCOL,
+            ) { "Structured results require Python Runtime protocol 1.4 or newer" }
+            validateResultPolicy(policy)
         }
         requireValue(request.arguments.size <= PythonRuntimeContract.MAX_ARGUMENTS) {
             "Argument count exceeds the protocol limit"
@@ -202,6 +272,11 @@ object PythonRuntimeValidation {
                 "Workspace archive exceeds the provider limit"
             }
         }
+        if (request.entryMode == PythonEntryMode.MODULE) {
+            requireCapability(capabilities.supportsModuleEntry) {
+                "Provider does not support module entry"
+            }
+        }
         request.stdin?.let {
             requireCapability(capabilities.supportsStdinSnapshot) {
                 "Provider does not support stdin snapshots"
@@ -217,6 +292,50 @@ object PythonRuntimeValidation {
             requireCapability(
                 it.declaredLengthBytes <= capabilities.limits.maxHostCapabilitySnapshotBytes,
             ) { "Host capability snapshot exceeds the provider limit" }
+        }
+        request.interactiveInput?.let { policy ->
+            requireCapability(capabilities.supportsInteractiveInput) {
+                "Provider does not support interactive input"
+            }
+            requireCapability(policy.maxPrompts <= capabilities.limits.maxInputPrompts) {
+                "Interactive input prompt count exceeds the provider limit"
+            }
+            requireCapability(policy.maxPromptBytes <= capabilities.limits.maxInputPromptBytes) {
+                "Interactive input prompt bytes exceed the provider limit"
+            }
+            requireCapability(policy.maxReplyBytes <= capabilities.limits.maxInputReplyBytes) {
+                "Interactive input reply bytes exceed the provider limit"
+            }
+            requireCapability(policy.replyTimeoutMillis <= capabilities.limits.maxInputWaitMillis) {
+                "Interactive input wait exceeds the provider limit"
+            }
+        }
+        request.resultPolicy?.let { policy ->
+            if (policy.maxStructuredJsonBytes > 0) {
+                requireCapability(capabilities.supportsStructuredJsonResult) {
+                    "Provider does not support structured JSON results"
+                }
+                requireCapability(policy.maxStructuredJsonBytes <= capabilities.limits.maxStructuredJsonBytes) {
+                    "Structured JSON result bytes exceed the provider limit"
+                }
+            }
+            if (policy.maxArtifacts > 0) {
+                requireCapability(capabilities.supportsOutputArtifacts) {
+                    "Provider does not support output artifacts"
+                }
+                requireCapability(policy.maxArtifacts <= capabilities.limits.maxOutputArtifacts) {
+                    "Output artifact count exceeds the provider limit"
+                }
+                requireCapability(
+                    policy.maxArtifactPathBytes <= capabilities.limits.maxOutputArtifactPathBytes,
+                ) { "Output artifact path bytes exceed the provider limit" }
+                requireCapability(policy.maxArtifactBytes <= capabilities.limits.maxOutputArtifactBytes) {
+                    "Output artifact bytes exceed the provider limit"
+                }
+                requireCapability(
+                    policy.maxTotalArtifactBytes <= capabilities.limits.maxTotalOutputArtifactBytes,
+                ) { "Aggregate output artifact bytes exceed the provider limit" }
+            }
         }
         requireCapability(request.timeoutMillis <= capabilities.limits.maxTimeoutMillis) {
             "Execution timeout exceeds the provider limit"
@@ -283,6 +402,55 @@ object PythonRuntimeValidation {
         }
     }
 
+    fun validateInteractiveInputPolicy(policy: PythonInteractiveInputPolicy) {
+        requireValue(policy.maxPrompts in 1..PythonRuntimeContract.MAX_INPUT_PROMPTS) {
+            "Interactive input prompt count limit is invalid"
+        }
+        requireValue(policy.maxPromptBytes in 1..PythonRuntimeContract.MAX_INPUT_PROMPT_BYTES) {
+            "Interactive input prompt byte limit is invalid"
+        }
+        requireValue(policy.maxReplyBytes in 1..PythonRuntimeContract.MAX_INPUT_REPLY_BYTES) {
+            "Interactive input reply byte limit is invalid"
+        }
+        requireValue(policy.replyTimeoutMillis in 1L..PythonRuntimeContract.MAX_INPUT_WAIT_MILLIS) {
+            "Interactive input reply timeout is invalid"
+        }
+    }
+
+    fun validateInputPrompt(prompt: PythonInputPrompt) {
+        requireUtf8Text(
+            prompt.text,
+            "Interactive input prompt",
+            PythonRuntimeContract.MAX_INPUT_PROMPT_BYTES,
+            allowEmpty = true,
+        )
+        requireValue(prompt.maxReplyBytes in 1..PythonRuntimeContract.MAX_INPUT_REPLY_BYTES) {
+            "Interactive input prompt reply byte limit is invalid"
+        }
+        requireValue(prompt.replyTimeoutMillis in 1L..PythonRuntimeContract.MAX_INPUT_WAIT_MILLIS) {
+            "Interactive input prompt timeout is invalid"
+        }
+    }
+
+    fun validateInputReply(reply: PythonInputReply) {
+        when (reply.status) {
+            PythonInputReplyStatus.VALUE -> {
+                requireValue(reply.value != null) { "Interactive input value reply is missing text" }
+                requireUtf8Text(
+                    reply.value!!,
+                    "Interactive input reply",
+                    PythonRuntimeContract.MAX_INPUT_REPLY_BYTES,
+                    allowEmpty = true,
+                )
+            }
+            PythonInputReplyStatus.EOF,
+            PythonInputReplyStatus.CANCELLED,
+            -> requireValue(reply.value == null) {
+                "Non-value interactive input reply must not contain text"
+            }
+        }
+    }
+
     fun validateResult(result: PythonExecutionResult) {
         requireValue(result.exitCode in 0..255) { "Python exit code is invalid" }
         requireValue(result.elapsedMillis >= 0L) { "Result elapsed time must not be negative" }
@@ -303,6 +471,139 @@ object PythonRuntimeValidation {
         }
         requireValue(result.stderrBytes <= PythonRuntimeContract.MAX_OUTPUT_BYTES - result.stdoutBytes) {
             "Result aggregate output byte count exceeds the protocol limit"
+        }
+        result.structuredJson?.let(::validateStructuredJson)
+        requireValue(result.outputArtifacts.size <= PythonRuntimeContract.MAX_OUTPUT_ARTIFACTS) {
+            "Result output artifact count exceeds the protocol limit"
+        }
+        requireValue(result.outputArtifacts.map(PythonOutputArtifact::path).distinct().size == result.outputArtifacts.size) {
+            "Result output artifact paths contain duplicates"
+        }
+        var totalArtifactBytes = 0L
+        result.outputArtifacts.forEach { artifact ->
+            validateOutputArtifact(artifact)
+            totalArtifactBytes = Math.addExact(totalArtifactBytes, artifact.declaredLengthBytes)
+            requireValue(totalArtifactBytes <= PythonRuntimeContract.MAX_TOTAL_OUTPUT_ARTIFACT_BYTES) {
+                "Result aggregate output artifact bytes exceed the protocol limit"
+            }
+        }
+    }
+
+    fun validateResultPolicy(policy: PythonResultPolicy) {
+        requireValue(policy.maxStructuredJsonBytes in 0..PythonRuntimeContract.MAX_STRUCTURED_JSON_BYTES) {
+            "Structured JSON result limit is invalid"
+        }
+        val artifactsEnabled = policy.maxArtifacts > 0
+        if (artifactsEnabled) {
+            requireValue(policy.maxArtifacts <= PythonRuntimeContract.MAX_OUTPUT_ARTIFACTS) {
+                "Output artifact count limit is invalid"
+            }
+            requireValue(
+                policy.maxArtifactPathBytes in 1..PythonRuntimeContract.MAX_OUTPUT_ARTIFACT_PATH_BYTES,
+            ) { "Output artifact path limit is invalid" }
+            requireValue(policy.maxArtifactBytes in 0L..PythonRuntimeContract.MAX_OUTPUT_ARTIFACT_BYTES) {
+                "Output artifact byte limit is invalid"
+            }
+            requireValue(
+                policy.maxTotalArtifactBytes in 0L..PythonRuntimeContract.MAX_TOTAL_OUTPUT_ARTIFACT_BYTES,
+            ) { "Aggregate output artifact byte limit is invalid" }
+            requireValue(policy.maxArtifactBytes <= policy.maxTotalArtifactBytes) {
+                "Per-artifact byte limit exceeds the aggregate limit"
+            }
+        } else {
+            requireValue(
+                policy.maxArtifacts == 0 &&
+                    policy.maxArtifactPathBytes == 0 &&
+                    policy.maxArtifactBytes == 0L &&
+                    policy.maxTotalArtifactBytes == 0L,
+            ) { "Disabled output artifacts must use zero limits" }
+        }
+        requireValue(policy.maxStructuredJsonBytes > 0 || artifactsEnabled) {
+            "Result policy must enable structured JSON or output artifacts"
+        }
+    }
+
+    fun validateOutputArtifact(artifact: PythonOutputArtifact) {
+        validateOutputArtifactPath(artifact.path)
+        requireValue(artifact.descriptorIndex >= 0) {
+            "Output artifact descriptor index must not be negative"
+        }
+        requireValue(
+            artifact.declaredLengthBytes in 0L..PythonRuntimeContract.MAX_OUTPUT_ARTIFACT_BYTES,
+        ) { "Output artifact length exceeds the protocol limit" }
+    }
+
+    fun validateOutputArtifactPath(
+        path: String,
+        maximumBytes: Int = PythonRuntimeContract.MAX_OUTPUT_ARTIFACT_PATH_BYTES,
+    ) {
+        requireValue(maximumBytes in 1..PythonRuntimeContract.MAX_OUTPUT_ARTIFACT_PATH_BYTES) {
+            "Output artifact path limit is invalid"
+        }
+        validateLogicalRelativePath(path, "Output artifact path", maximumBytes)
+    }
+
+    fun validateResultAgainstPolicy(
+        result: PythonExecutionResult,
+        policy: PythonResultPolicy?,
+        descriptorCount: Int,
+    ) {
+        validateResult(result)
+        if (policy == null) {
+            requireValue(result.structuredJson == null && result.outputArtifacts.isEmpty()) {
+                "Provider emitted explicit results without request authorization"
+            }
+            requireDescriptor(descriptorCount == 0) {
+                "Result descriptors require request authorization"
+            }
+            return
+        }
+        validateResultPolicy(policy)
+        result.structuredJson?.let { structuredJson ->
+            requireValue(policy.maxStructuredJsonBytes > 0) {
+                "Provider emitted structured JSON without request authorization"
+            }
+            requireValue(utf8Size(structuredJson, "Structured JSON result") <= policy.maxStructuredJsonBytes) {
+                "Structured JSON result exceeds the request limit"
+            }
+        }
+        requireValue(result.outputArtifacts.size <= policy.maxArtifacts) {
+            "Output artifact count exceeds the request limit"
+        }
+        var totalBytes = 0L
+        result.outputArtifacts.forEach { artifact ->
+            requireValue(utf8Size(artifact.path, "Output artifact path") <= policy.maxArtifactPathBytes) {
+                "Output artifact path exceeds the request limit"
+            }
+            requireValue(artifact.declaredLengthBytes <= policy.maxArtifactBytes) {
+                "Output artifact exceeds the request byte limit"
+            }
+            totalBytes = Math.addExact(totalBytes, artifact.declaredLengthBytes)
+            requireValue(totalBytes <= policy.maxTotalArtifactBytes) {
+                "Output artifacts exceed the aggregate request limit"
+            }
+        }
+        validateResultDescriptorReferences(result, descriptorCount)
+    }
+
+    fun validateResultDescriptorReferences(result: PythonExecutionResult, descriptorCount: Int) {
+        requireDescriptor(descriptorCount >= 0) { "Result descriptor count must not be negative" }
+        requireDescriptor(descriptorCount == result.outputArtifacts.size) {
+            "Result descriptor count does not match the output artifact count"
+        }
+        val seen = BooleanArray(descriptorCount)
+        result.outputArtifacts.forEach { artifact ->
+            val index = artifact.descriptorIndex
+            requireDescriptor(index in 0 until descriptorCount) {
+                "Output artifact descriptor index is out of range"
+            }
+            requireDescriptor(!seen[index]) {
+                "Output artifact descriptor index is referenced more than once"
+            }
+            seen[index] = true
+        }
+        requireDescriptor(seen.all { it }) {
+            "Every result descriptor must be referenced exactly once"
         }
     }
 
@@ -363,6 +664,15 @@ object PythonRuntimeValidation {
             PythonErrorCode.CANCELLATION_FAILED -> requireValue(error.phase == PythonFailurePhase.CANCELLATION) {
                 "Cancellation failures must use the cancellation phase"
             }
+            PythonErrorCode.INPUT_TIMEOUT,
+            PythonErrorCode.INPUT_LIMIT_EXCEEDED,
+            -> requireValue(error.phase == PythonFailurePhase.INTERACTIVE_INPUT) {
+                "Interactive input failures must use the interactive-input phase"
+            }
+            PythonErrorCode.OUTPUT_ARTIFACT_REJECTED ->
+                requireValue(error.phase == PythonFailurePhase.RESULT) {
+                    "Output artifact failures must use the result phase"
+                }
             PythonErrorCode.TIMEOUT,
             PythonErrorCode.RUNTIME_CRASHED,
             PythonErrorCode.STORAGE_EXHAUSTED,
@@ -462,6 +772,62 @@ object PythonRuntimeValidation {
                 "Unsupported host capability snapshot transport must advertise a zero limit"
             }
         }
+        if (capabilities.supportsInteractiveInput) {
+            requireValue(limits.maxInputPromptBytes in 1..PythonRuntimeContract.MAX_INPUT_PROMPT_BYTES) {
+                "Interactive input prompt byte limit is invalid"
+            }
+            requireValue(limits.maxInputReplyBytes in 1..PythonRuntimeContract.MAX_INPUT_REPLY_BYTES) {
+                "Interactive input reply byte limit is invalid"
+            }
+            requireValue(limits.maxInputPrompts in 1..PythonRuntimeContract.MAX_INPUT_PROMPTS) {
+                "Interactive input prompt count limit is invalid"
+            }
+            requireValue(limits.maxInputWaitMillis in 1L..PythonRuntimeContract.MAX_INPUT_WAIT_MILLIS) {
+                "Interactive input wait limit is invalid"
+            }
+        } else {
+            requireValue(
+                limits.maxInputPromptBytes == 0 &&
+                    limits.maxInputReplyBytes == 0 &&
+                    limits.maxInputPrompts == 0 &&
+                    limits.maxInputWaitMillis == 0L,
+            ) { "Unsupported interactive input must advertise zero limits" }
+        }
+        if (capabilities.supportsStructuredJsonResult) {
+            requireValue(
+                limits.maxStructuredJsonBytes in 1..PythonRuntimeContract.MAX_STRUCTURED_JSON_BYTES,
+            ) { "Structured JSON result byte limit is invalid" }
+        } else {
+            requireValue(limits.maxStructuredJsonBytes == 0) {
+                "Unsupported structured JSON results must advertise a zero limit"
+            }
+        }
+        if (capabilities.supportsOutputArtifacts) {
+            requireValue(limits.maxOutputArtifacts in 1..PythonRuntimeContract.MAX_OUTPUT_ARTIFACTS) {
+                "Output artifact count limit is invalid"
+            }
+            requireValue(
+                limits.maxOutputArtifactPathBytes in
+                    1..PythonRuntimeContract.MAX_OUTPUT_ARTIFACT_PATH_BYTES,
+            ) { "Output artifact path byte limit is invalid" }
+            requireValue(
+                limits.maxOutputArtifactBytes in 1L..PythonRuntimeContract.MAX_OUTPUT_ARTIFACT_BYTES,
+            ) { "Output artifact byte limit is invalid" }
+            requireValue(
+                limits.maxTotalOutputArtifactBytes in
+                    1L..PythonRuntimeContract.MAX_TOTAL_OUTPUT_ARTIFACT_BYTES,
+            ) { "Aggregate output artifact byte limit is invalid" }
+            requireValue(limits.maxOutputArtifactBytes <= limits.maxTotalOutputArtifactBytes) {
+                "Per-artifact byte limit exceeds the aggregate provider limit"
+            }
+        } else {
+            requireValue(
+                limits.maxOutputArtifacts == 0 &&
+                    limits.maxOutputArtifactPathBytes == 0 &&
+                    limits.maxOutputArtifactBytes == 0L &&
+                    limits.maxTotalOutputArtifactBytes == 0L,
+            ) { "Unsupported output artifacts must advertise zero limits" }
+        }
         requireValue(limits.maxOutputBytes in 1L..PythonRuntimeContract.MAX_OUTPUT_BYTES) {
             "Output byte limit is invalid"
         }
@@ -501,10 +867,36 @@ object PythonRuntimeValidation {
         requireValue(reference.declaredLengthBytes <= maximum) { "Declared payload length exceeds the protocol limit" }
     }
 
-    private fun validateEntryPoint(entryPoint: String) {
-        validateLogicalRelativePath(entryPoint, "Entry point", PythonRuntimeContract.MAX_ENTRY_POINT_BYTES)
-        requireValue(entryPoint.endsWith(".py", ignoreCase = true)) {
-            "Entry point must use the .py extension"
+    private fun validateEntryPoint(entryPoint: String, entryMode: PythonEntryMode) {
+        when (entryMode) {
+            PythonEntryMode.FILE -> {
+                validateLogicalRelativePath(entryPoint, "Entry point", PythonRuntimeContract.MAX_ENTRY_POINT_BYTES)
+                requireValue(entryPoint.endsWith(".py", ignoreCase = true)) {
+                    "File entry point must use the .py extension"
+                }
+            }
+            PythonEntryMode.MODULE -> validateModuleEntryPoint(entryPoint)
+        }
+    }
+
+    private fun validateModuleEntryPoint(entryPoint: String) {
+        requireUtf8Text(
+            entryPoint,
+            "Module entry point",
+            PythonRuntimeContract.MAX_ENTRY_POINT_BYTES,
+        )
+        requireValue(Normalizer.normalize(entryPoint, Normalizer.Form.NFC) == entryPoint) {
+            "Module entry point must use Unicode NFC normalization"
+        }
+        val segments = entryPoint.split('.')
+        requireValue(segments.all(MODULE_SEGMENT::matches)) {
+            "Module entry point must be a normalized dotted Python name"
+        }
+        requireValue(segments.none(PYTHON_KEYWORDS::contains)) {
+            "Module entry point contains a Python keyword"
+        }
+        requireValue(segments.last() != "__init__") {
+            "Module entry point must not target a package initializer"
         }
     }
 
@@ -570,6 +962,17 @@ object PythonRuntimeValidation {
         }
     }
 
+    private fun validateStructuredJson(value: String) {
+        requireUtf8Text(
+            value,
+            "Structured JSON result",
+            PythonRuntimeContract.MAX_STRUCTURED_JSON_BYTES,
+        )
+        requireValue(runCatching { StrictJsonParser(value).validate() }.isSuccess) {
+            "Structured JSON result is malformed"
+        }
+    }
+
     private fun requireUtf8Text(value: String, label: String, maxBytes: Int, allowEmpty: Boolean = false) {
         requireValue(allowEmpty || value.isNotBlank()) { "$label must not be blank" }
         requireValue(utf8Size(value, label) <= maxBytes) { "$label exceeds $maxBytes UTF-8 bytes" }
@@ -618,6 +1021,15 @@ object PythonRuntimeValidation {
 
     private val WINDOWS_DRIVE_PREFIX = Regex("^[a-zA-Z]:.*")
     private val HOST_CAPABILITY_SNAPSHOT_PROTOCOL = PythonProtocolVersion(1, 1)
+    private val MODULE_ENTRY_PROTOCOL = PythonProtocolVersion(1, 2)
+    private val INTERACTIVE_INPUT_PROTOCOL = PythonProtocolVersion(1, 3)
+    private val STRUCTURED_RESULT_PROTOCOL = PythonProtocolVersion(1, 4)
+    private val PYTHON_KEYWORDS = setOf(
+        "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class",
+        "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global",
+        "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return",
+        "try", "while", "with", "yield",
+    )
     private val ADMISSION_ERROR_CODES = setOf(
         PythonErrorCode.INVALID_REQUEST,
         PythonErrorCode.UNSUPPORTED_PROTOCOL,
@@ -638,5 +1050,126 @@ object PythonRuntimeValidation {
         PythonErrorCode.RUNTIME_CRASHED,
         PythonErrorCode.STORAGE_EXHAUSTED,
         PythonErrorCode.INTERNAL,
+        PythonErrorCode.INPUT_TIMEOUT,
+        PythonErrorCode.INPUT_LIMIT_EXCEEDED,
+        PythonErrorCode.OUTPUT_ARTIFACT_REJECTED,
     )
+}
+
+/** Dependency-free strict JSON grammar used by the shared JVM/Android protocol module. */
+private class StrictJsonParser(private val text: String) {
+    private var offset = 0
+
+    fun validate() {
+        whitespace()
+        value(0)
+        whitespace()
+        require(offset == text.length)
+    }
+
+    private fun value(depth: Int) {
+        require(depth <= MAX_DEPTH && offset < text.length)
+        when (text[offset]) {
+            '{' -> objectValue(depth + 1)
+            '[' -> arrayValue(depth + 1)
+            '"' -> stringValue()
+            't' -> literal("true")
+            'f' -> literal("false")
+            'n' -> literal("null")
+            '-', in '0'..'9' -> numberValue()
+            else -> throw IllegalArgumentException("Invalid JSON value")
+        }
+    }
+
+    private fun objectValue(depth: Int) {
+        offset++
+        whitespace()
+        if (take('}')) return
+        while (true) {
+            stringValue()
+            whitespace()
+            require(take(':'))
+            whitespace()
+            value(depth)
+            whitespace()
+            if (take('}')) return
+            require(take(','))
+            whitespace()
+        }
+    }
+
+    private fun arrayValue(depth: Int) {
+        offset++
+        whitespace()
+        if (take(']')) return
+        while (true) {
+            value(depth)
+            whitespace()
+            if (take(']')) return
+            require(take(','))
+            whitespace()
+        }
+    }
+
+    private fun stringValue() {
+        require(take('"'))
+        while (offset < text.length) {
+            when (val character = text[offset++]) {
+                '"' -> return
+                '\\' -> {
+                    require(offset < text.length)
+                    when (text[offset++]) {
+                        '"', '\\', '/', 'b', 'f', 'n', 'r', 't' -> Unit
+                        'u' -> repeat(4) {
+                            require(offset < text.length && text[offset++].digitToIntOrNull(16) != null)
+                        }
+                        else -> throw IllegalArgumentException("Invalid JSON escape")
+                    }
+                }
+                else -> require(character >= ' ')
+            }
+        }
+        throw IllegalArgumentException("Unterminated JSON string")
+    }
+
+    private fun numberValue() {
+        take('-')
+        require(offset < text.length)
+        if (take('0')) {
+            require(offset >= text.length || text[offset] !in '0'..'9')
+        } else {
+            require(text[offset] in '1'..'9')
+            while (offset < text.length && text[offset] in '0'..'9') offset++
+        }
+        if (take('.')) {
+            require(offset < text.length && text[offset] in '0'..'9')
+            while (offset < text.length && text[offset] in '0'..'9') offset++
+        }
+        if (offset < text.length && (text[offset] == 'e' || text[offset] == 'E')) {
+            offset++
+            if (offset < text.length && (text[offset] == '+' || text[offset] == '-')) offset++
+            require(offset < text.length && text[offset] in '0'..'9')
+            while (offset < text.length && text[offset] in '0'..'9') offset++
+        }
+    }
+
+    private fun literal(value: String) {
+        require(text.regionMatches(offset, value, 0, value.length))
+        offset += value.length
+    }
+
+    private fun whitespace() {
+        while (offset < text.length && text[offset] in JSON_WHITESPACE) offset++
+    }
+
+    private fun take(expected: Char): Boolean {
+        if (offset >= text.length || text[offset] != expected) return false
+        offset++
+        return true
+    }
+
+    private companion object {
+        const val MAX_DEPTH = 64
+        val JSON_WHITESPACE = setOf(' ', '\t', '\n', '\r')
+    }
 }

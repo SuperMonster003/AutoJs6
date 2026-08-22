@@ -1,12 +1,63 @@
 package org.autojs.plugin.python.runtime.api
 
 import org.autojs.plugin.protocol.wire.TaggedWireException
+import org.autojs.plugin.protocol.wire.TaggedWireDocument
+import org.autojs.plugin.protocol.wire.TaggedWireError
 import org.autojs.plugin.protocol.wire.TaggedWireWriter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class PythonRuntimeCompatibilityTest {
+    @Test
+    fun minorCapabilitiesAreOptionalForOlderReadersWhileNewRequestSemanticsAreRequired() {
+        TaggedWireDocument.decode(
+            PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.r2Capabilities),
+        ).rejectUnknownRequiredFields((1..10).toSet())
+        TaggedWireDocument.decode(
+            PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.r3Capabilities),
+        ).rejectUnknownRequiredFields((1..11).toSet())
+        TaggedWireDocument.decode(
+            PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.r4Capabilities),
+        ).rejectUnknownRequiredFields((1..12).toSet())
+
+        val legacyRequestTags = (1..13).toSet()
+        TaggedWireDocument.decode(
+            PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.request),
+        ).rejectUnknownRequiredFields(legacyRequestTags)
+
+        val error = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.r2ModuleRequest),
+            ).rejectUnknownRequiredFields(legacyRequestTags)
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, error.error)
+
+        val moduleAwareRequestTags = (1..14).toSet()
+        val interactiveError = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.r3InteractiveRequest),
+            ).rejectUnknownRequiredFields(moduleAwareRequestTags)
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, interactiveError.error)
+
+        val interactiveAwareRequestTags = (1..15).toSet()
+        val resultError = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.r4ResultRequest),
+            ).rejectUnknownRequiredFields(interactiveAwareRequestTags)
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, resultError.error)
+
+        val legacyResultTags = (1..7).toSet()
+        val structuredResultError = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(
+                PythonRuntimeCodec.encodeExecutionResult(PythonRuntimeFixtures.structuredResult),
+            ).rejectUnknownRequiredFields(legacyResultTags)
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, structuredResultError.error)
+    }
+
     @Test
     fun futureMinorUnknownOptionalFieldIsSkipped() {
         val encoded = cancellationWriter(schemaMajor = 1, schemaMinor = 1)

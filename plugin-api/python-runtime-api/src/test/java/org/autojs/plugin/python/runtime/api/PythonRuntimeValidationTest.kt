@@ -50,6 +50,17 @@ class PythonRuntimeValidationTest {
             PythonRuntimeFixtures.r5Capabilities,
             PythonRuntimeFixtures.runtimeInfo.copy(protocolMax = PythonProtocolVersion(1, 1)),
         )
+        val protocol11Only = assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateCapabilitiesAgainstInfo(
+                PythonRuntimeFixtures.r2Capabilities,
+                PythonRuntimeFixtures.runtimeInfo.copy(protocolMax = PythonProtocolVersion(1, 1)),
+            )
+        }
+        assertEquals(PythonRuntimeContractViolation.CAPABILITY_INCOMPATIBLE, protocol11Only.violation)
+        PythonRuntimeValidation.validateCapabilitiesAgainstInfo(
+            PythonRuntimeFixtures.r2Capabilities,
+            PythonRuntimeFixtures.runtimeInfo.copy(protocolMax = PythonProtocolVersion(1, 2)),
+        )
     }
 
     @Test
@@ -94,6 +105,82 @@ class PythonRuntimeValidationTest {
             }
         }
         PythonRuntimeValidation.validateRequest(requestWithPath("SRC/Main.PY"))
+    }
+
+    @Test
+    fun moduleEntryRequiresProtocol12WorkspaceCapabilityAndNormalizedDottedName() {
+        assertEquals(
+            "pkg.main",
+            PythonRuntimeValidation.moduleNameForFileEntryPoint("pkg/main.py"),
+        )
+        assertEquals(
+            "pkg/main.py",
+            PythonRuntimeValidation.fileEntryPointForModuleName("pkg.main"),
+        )
+        listOf("main.py", "pkg/main.py", "pkg/sub/main.py").forEach { fileEntryPoint ->
+            assertEquals(
+                fileEntryPoint,
+                PythonRuntimeValidation.fileEntryPointForModuleName(
+                    PythonRuntimeValidation.moduleNameForFileEntryPoint(fileEntryPoint),
+                ),
+            )
+        }
+        PythonRuntimeValidation.validateRequestAgainst(
+            PythonRuntimeFixtures.r2ModuleRequest,
+            PythonRuntimeFixtures.r2Capabilities,
+            PythonProtocolVersion(1, 2),
+            4,
+        )
+
+        listOf(
+            "pkg/main",
+            ".pkg.main",
+            "pkg..main",
+            "pkg.main-impl",
+            "pkg.class",
+            "pkg.__init__",
+            "pkg.módulo",
+        ).forEach { entryPoint ->
+            assertThrows(PythonRuntimeContractException::class.java) {
+                PythonRuntimeValidation.validateRequest(
+                    moduleRequest(entryPoint = entryPoint),
+                )
+            }
+        }
+
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateRequest(
+                moduleRequest(protocolVersion = PythonProtocolVersion(1, 1)),
+            )
+        }
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateRequest(
+                moduleRequest(workspaceArchive = null),
+            )
+        }
+        val unsupported = assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateRequestAgainst(
+                PythonRuntimeFixtures.r2ModuleRequest,
+                PythonRuntimeFixtures.r5Capabilities,
+                PythonProtocolVersion(1, 2),
+                4,
+            )
+        }
+        assertEquals(PythonRuntimeContractViolation.CAPABILITY_INCOMPATIBLE, unsupported.violation)
+
+        listOf(
+            "pkg/__init__.py",
+            "pkg/class.py",
+            "pkg/not-python.txt",
+            "pkg/módulo.py",
+            "pkg/Main.PY",
+            "pkg.v1/main.py",
+            "pkg/main.test.py",
+        ).forEach { path ->
+            assertThrows(PythonRuntimeContractException::class.java) {
+                PythonRuntimeValidation.moduleNameForFileEntryPoint(path)
+            }
+        }
     }
 
     @Test
@@ -233,6 +320,109 @@ class PythonRuntimeValidationTest {
     }
 
     @Test
+    fun interactiveInputRequiresProtocol13CapabilityAndNarrowedLimits() {
+        PythonRuntimeValidation.validateCapabilitiesAgainstInfo(
+            PythonRuntimeFixtures.r3Capabilities,
+            PythonRuntimeFixtures.r3RuntimeInfo,
+        )
+        PythonRuntimeValidation.validateRequestAgainst(
+            interactiveRequest(),
+            PythonRuntimeFixtures.r3Capabilities,
+            PythonProtocolVersion(1, 3),
+            1,
+        )
+
+        val protocol12 = assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateRequest(
+                interactiveRequest(protocolVersion = PythonProtocolVersion(1, 2)),
+            )
+        }
+        assertEquals(PythonRuntimeContractViolation.INVALID_VALUE, protocol12.violation)
+
+        val protocol12Provider = assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateCapabilitiesAgainstInfo(
+                PythonRuntimeFixtures.r3Capabilities,
+                PythonRuntimeFixtures.r3RuntimeInfo.copy(protocolMax = PythonProtocolVersion(1, 2)),
+            )
+        }
+        assertEquals(PythonRuntimeContractViolation.CAPABILITY_INCOMPATIBLE, protocol12Provider.violation)
+
+        val unsupported = assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateRequestAgainst(
+                interactiveRequest(),
+                PythonRuntimeFixtures.r2Capabilities,
+                PythonProtocolVersion(1, 3),
+                1,
+            )
+        }
+        assertEquals(PythonRuntimeContractViolation.CAPABILITY_INCOMPATIBLE, unsupported.violation)
+
+        listOf(
+            PythonRuntimeFixtures.interactiveInputPolicy.copy(maxPrompts = 0),
+            PythonRuntimeFixtures.interactiveInputPolicy.copy(maxPromptBytes = 0),
+            PythonRuntimeFixtures.interactiveInputPolicy.copy(maxReplyBytes = 0),
+            PythonRuntimeFixtures.interactiveInputPolicy.copy(replyTimeoutMillis = 0),
+        ).forEach { policy ->
+            assertThrows(PythonRuntimeContractException::class.java) {
+                PythonRuntimeValidation.validateRequest(interactiveRequest(policy = policy))
+            }
+        }
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateRequest(
+                interactiveRequest(
+                    policy = PythonRuntimeFixtures.interactiveInputPolicy.copy(replyTimeoutMillis = 30_001),
+                ),
+            )
+        }
+
+        val strayLimits = PythonRuntimeCapabilities(
+            implementation = PythonImplementation.CPYTHON,
+            pythonVersion = "3.13.9",
+            supportedAbis = listOf("arm64-v8a"),
+            supportsWorkspaceArchive = true,
+            supportsStdinSnapshot = true,
+            supportsStructuredTraceback = true,
+            supportsCooperativeCancellation = true,
+            cancellationMode = PythonCancellationMode.COOPERATIVE_THEN_PROCESS_RESTART,
+            limits = PythonRuntimeFixtures.limits.copy(maxInputPrompts = 1),
+        )
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateCapabilities(strayLimits)
+        }
+    }
+
+    @Test
+    fun typedInputPromptAndRepliesEnforceStatusAndUtf8Bounds() {
+        PythonRuntimeValidation.validateInputPrompt(PythonRuntimeFixtures.inputPrompt)
+        PythonRuntimeValidation.validateInputReply(PythonRuntimeFixtures.inputValueReply)
+        PythonRuntimeValidation.validateInputReply(PythonRuntimeFixtures.inputEofReply)
+        PythonRuntimeValidation.validateInputReply(
+            PythonRuntimeFixtures.inputValueReply.copy(value = ""),
+        )
+
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonPromptId.fromLong(0)
+        }
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateInputPrompt(
+                PythonRuntimeFixtures.inputPrompt.copy(
+                    text = "x".repeat(PythonRuntimeContract.MAX_INPUT_PROMPT_BYTES + 1),
+                ),
+            )
+        }
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateInputReply(
+                PythonRuntimeFixtures.inputValueReply.copy(value = null),
+            )
+        }
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateInputReply(
+                PythonRuntimeFixtures.inputEofReply.copy(value = "unexpected"),
+            )
+        }
+    }
+
+    @Test
     fun pythonExceptionRequiresStructuredNonRetryableMetadata() {
         val missingMetadata = PythonExecutionError(
             PythonRuntimeFixtures.requestId,
@@ -358,6 +548,17 @@ class PythonRuntimeValidationTest {
                 retryableBeforeDispatch = false,
             ),
         )
+        listOf(PythonErrorCode.INPUT_TIMEOUT, PythonErrorCode.INPUT_LIMIT_EXCEEDED).forEach { code ->
+            PythonRuntimeValidation.validateExecutionError(
+                PythonExecutionError(
+                    PythonRuntimeFixtures.requestId,
+                    code,
+                    PythonFailurePhase.INTERACTIVE_INPUT,
+                    "interactive input failed",
+                    retryableBeforeDispatch = false,
+                ),
+            )
+        }
         PythonRuntimeValidation.validateExecutionError(
             PythonExecutionError(
                 PythonRuntimeFixtures.requestId,
@@ -398,6 +599,19 @@ class PythonRuntimeValidationTest {
                 ),
             )
         }
+        listOf(PythonErrorCode.INPUT_TIMEOUT, PythonErrorCode.INPUT_LIMIT_EXCEEDED).forEach { code ->
+            assertThrows(PythonRuntimeContractException::class.java) {
+                PythonRuntimeValidation.validateExecutionError(
+                    PythonExecutionError(
+                        PythonRuntimeFixtures.requestId,
+                        code,
+                        PythonFailurePhase.EXECUTION,
+                        "wrong phase",
+                        retryableBeforeDispatch = false,
+                    ),
+                )
+            }
+        }
         assertThrows(PythonRuntimeContractException::class.java) {
             PythonRuntimeValidation.validateExecutionError(
                 PythonExecutionError(
@@ -434,6 +648,93 @@ class PythonRuntimeValidationTest {
     }
 
     @Test
+    fun structuredResultsRequireProtocol14StrictJsonAndExactArtifactReferences() {
+        PythonRuntimeValidation.validateCapabilitiesAgainstInfo(
+            PythonRuntimeFixtures.r4Capabilities,
+            PythonRuntimeFixtures.r4RuntimeInfo,
+        )
+        PythonRuntimeValidation.validateRequestAgainst(
+            PythonRuntimeFixtures.r4ResultRequest,
+            PythonRuntimeFixtures.r4Capabilities,
+            PythonProtocolVersion(1, 4),
+            4,
+        )
+        PythonRuntimeValidation.validateResultAgainstPolicy(
+            PythonRuntimeFixtures.structuredResult,
+            PythonRuntimeFixtures.resultPolicy,
+            descriptorCount = 1,
+        )
+
+        val protocol13 = PythonExecutionRequest(
+            requestId = PythonRuntimeFixtures.requestId,
+            protocolVersion = PythonProtocolVersion(1, 3),
+            entryPoint = "main.py",
+            source = PythonRuntimeFixtures.source,
+            resultPolicy = PythonRuntimeFixtures.resultPolicy,
+        )
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateRequest(protocol13)
+        }
+
+        listOf(
+            "{\"missing\":true",
+            "[1,]",
+            "NaN",
+            "01",
+            "\"unterminated",
+        ).forEach { malformed ->
+            assertThrows(PythonRuntimeContractException::class.java) {
+                PythonRuntimeValidation.validateResult(
+                    resultWith(structuredJson = malformed),
+                )
+            }
+        }
+        listOf("/absolute", "../escape", "dir\\file", "dir//file").forEach { path ->
+            assertThrows(PythonRuntimeContractException::class.java) {
+                PythonRuntimeValidation.validateOutputArtifactPath(path)
+            }
+        }
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateResultAgainstPolicy(
+                PythonRuntimeFixtures.structuredResult,
+                PythonRuntimeFixtures.resultPolicy,
+                descriptorCount = 0,
+            )
+        }
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateResultAgainstPolicy(
+                PythonRuntimeFixtures.structuredResult,
+                policy = null,
+                descriptorCount = 1,
+            )
+        }
+    }
+
+    @Test
+    fun outputArtifactRejectionUsesTheDedicatedResultPhase() {
+        PythonRuntimeValidation.validateExecutionError(
+            PythonExecutionError(
+                PythonRuntimeFixtures.requestId,
+                PythonErrorCode.OUTPUT_ARTIFACT_REJECTED,
+                PythonFailurePhase.RESULT,
+                "artifact rejected",
+                retryableBeforeDispatch = false,
+            ),
+        )
+        assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateExecutionError(
+                PythonExecutionError(
+                    PythonRuntimeFixtures.requestId,
+                    PythonErrorCode.OUTPUT_ARTIFACT_REJECTED,
+                    PythonFailurePhase.OUTPUT,
+                    "wrong phase",
+                    retryableBeforeDispatch = false,
+                ),
+            )
+        }
+    }
+
+    @Test
     fun diagnosticsDoNotRenderOutputPayloadBytes() {
         val marker = "secret-output-marker"
         val chunk = PythonOutputChunk(
@@ -451,6 +752,45 @@ class PythonRuntimeValidationTest {
         protocolVersion = PythonProtocolVersion(1, 0),
         entryPoint = path,
         source = PythonRuntimeFixtures.source,
+    )
+
+    private fun resultWith(structuredJson: String?) = PythonExecutionResult(
+        requestId = PythonRuntimeFixtures.requestId,
+        exitCode = 0,
+        elapsedMillis = 1,
+        stdoutBytes = 0,
+        stderrBytes = 0,
+        stdoutChunks = 0,
+        stderrChunks = 0,
+        structuredJson = structuredJson,
+    )
+
+    private fun moduleRequest(
+        entryPoint: String = "pkg.main",
+        protocolVersion: PythonProtocolVersion = PythonProtocolVersion(1, 2),
+        workspaceArchive: PythonPayloadReference? = PythonRuntimeFixtures.workspace,
+    ) = PythonExecutionRequest(
+        requestId = PythonRuntimeFixtures.requestId,
+        protocolVersion = protocolVersion,
+        entryPoint = entryPoint,
+        source = PythonRuntimeFixtures.source,
+        workspaceArchive = workspaceArchive,
+        entryMode = PythonEntryMode.MODULE,
+    )
+
+    private fun interactiveRequest(
+        policy: PythonInteractiveInputPolicy = PythonRuntimeFixtures.interactiveInputPolicy,
+        protocolVersion: PythonProtocolVersion = PythonProtocolVersion(1, 3),
+    ) = PythonExecutionRequest(
+        requestId = PythonRuntimeFixtures.requestId,
+        protocolVersion = protocolVersion,
+        entryPoint = "main.py",
+        source = PythonRuntimeFixtures.source,
+        timeoutMillis = 30_000,
+        maxOutputBytes = 1_024,
+        maxOutputChunkBytes = 256,
+        maxOutputChunks = 128,
+        interactiveInput = policy,
     )
 
     private fun assertDescriptorMismatch(block: () -> Unit) {

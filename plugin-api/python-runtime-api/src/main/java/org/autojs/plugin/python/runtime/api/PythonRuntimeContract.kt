@@ -12,7 +12,7 @@ object PythonRuntimeContract {
     const val ENGINE_ID = "python"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 1
+    const val PROTOCOL_MINOR = 4
     const val SCHEMA_MAJOR = 1
     const val SCHEMA_MINOR = 0
 
@@ -27,6 +27,11 @@ object PythonRuntimeContract {
     const val SCHEMA_TRACEBACK_FRAME = 0x5059_0014
     const val SCHEMA_EXECUTION_ERROR = 0x5059_0015
     const val SCHEMA_CANCELLATION = 0x5059_0016
+    const val SCHEMA_INTERACTIVE_INPUT_POLICY = 0x5059_0017
+    const val SCHEMA_INPUT_PROMPT = 0x5059_0018
+    const val SCHEMA_INPUT_REPLY = 0x5059_0019
+    const val SCHEMA_RESULT_POLICY = 0x5059_001a
+    const val SCHEMA_OUTPUT_ARTIFACT = 0x5059_001b
 
     const val SOURCE_MIME_TYPE = "text/x-python"
     const val WORKSPACE_MIME_TYPE = "application/vnd.autojs6.python.workspace+zip"
@@ -45,6 +50,15 @@ object PythonRuntimeContract {
     const val MAX_OUTSTANDING_OUTPUT_CREDITS = 8
     const val MAX_TIMEOUT_MILLIS = 24L * 60L * 60L * 1_000L
     const val DEFAULT_TIMEOUT_MILLIS = 5L * 60L * 1_000L
+    const val MAX_INPUT_PROMPT_BYTES = 16 * 1024
+    const val MAX_INPUT_REPLY_BYTES = 64 * 1024
+    const val MAX_INPUT_PROMPTS = 1_024
+    const val MAX_INPUT_WAIT_MILLIS = 30L * 60L * 1_000L
+    const val MAX_STRUCTURED_JSON_BYTES = 64 * 1024
+    const val MAX_OUTPUT_ARTIFACTS = 16
+    const val MAX_OUTPUT_ARTIFACT_PATH_BYTES = 1024
+    const val MAX_OUTPUT_ARTIFACT_BYTES = 4L * 1024L * 1024L
+    const val MAX_TOTAL_OUTPUT_ARTIFACT_BYTES = 8L * 1024L * 1024L
     const val MAX_CONCURRENT_SESSIONS = 1
     const val MAX_ARGUMENTS = 128
     const val MAX_ARGUMENT_BYTES = 4 * 1024
@@ -80,6 +94,12 @@ enum class PythonCancellationMode(val wireCode: Int) {
     COOPERATIVE_THEN_PROCESS_RESTART(2),
 }
 
+/** Selects whether [PythonExecutionRequest.entryPoint] is a file path or importable module name. */
+enum class PythonEntryMode(val wireCode: Int) {
+    FILE(1),
+    MODULE(2),
+}
+
 enum class PythonPayloadKind(val wireCode: Int) {
     SOURCE(1),
     WORKSPACE_ARCHIVE(2),
@@ -90,6 +110,17 @@ enum class PythonPayloadKind(val wireCode: Int) {
 enum class PythonOutputStream(val wireCode: Int) {
     STDOUT(1),
     STDERR(2),
+}
+
+enum class PythonInputEcho(val wireCode: Int) {
+    VISIBLE(1),
+    HIDDEN(2),
+}
+
+enum class PythonInputReplyStatus(val wireCode: Int) {
+    VALUE(1),
+    EOF(2),
+    CANCELLED(3),
 }
 
 enum class PythonTracebackOrigin(val wireCode: Int) {
@@ -116,6 +147,9 @@ enum class PythonErrorCode(val wireCode: Int) {
     SESSION_OPEN_FAILED(14),
     STDIN_REJECTED(15),
     HOST_CAPABILITY_SNAPSHOT_REJECTED(16),
+    INPUT_TIMEOUT(17),
+    INPUT_LIMIT_EXCEEDED(18),
+    OUTPUT_ARTIFACT_REJECTED(19),
 }
 
 enum class PythonFailurePhase(val wireCode: Int) {
@@ -127,6 +161,8 @@ enum class PythonFailurePhase(val wireCode: Int) {
     OUTPUT(6),
     CANCELLATION(7),
     CLEANUP(8),
+    INTERACTIVE_INPUT(9),
+    RESULT(10),
 }
 
 enum class PythonCancellationReason(val wireCode: Int) {
@@ -216,5 +252,26 @@ class PythonRequestId private constructor(private val value: ByteArray) {
                 .putLong(value.leastSignificantBits)
                 .array(),
         )
+    }
+}
+
+/** Monotonic, execution-scoped identifier for exactly one interactive input prompt. */
+class PythonPromptId private constructor(val value: Long) {
+    override fun equals(other: Any?): Boolean = other is PythonPromptId && value == other.value
+
+    override fun hashCode(): Int = value.hashCode()
+
+    override fun toString(): String = value.toString()
+
+    companion object {
+        fun fromLong(value: Long): PythonPromptId {
+            if (value <= 0L) {
+                throw PythonRuntimeContractException(
+                    PythonRuntimeContractViolation.INVALID_VALUE,
+                    "Prompt ID must be positive",
+                )
+            }
+            return PythonPromptId(value)
+        }
     }
 }

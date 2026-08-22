@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.content.Context
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.plugin.python.PythonExecutionInputPolicy
+import org.autojs.autojs.core.plugin.python.PythonInteractiveInputAuthorization
 import org.autojs.autojs.core.plugin.python.PythonRuntimeClient
 import org.autojs.autojs.core.plugin.python.PythonRuntimeHostError
 import org.autojs.autojs.core.plugin.python.PythonRuntimeHostException
@@ -46,15 +47,17 @@ class PythonPluginScriptEngine(
                 PythonRuntimeHostError.SOURCE_INVALID,
                 "Python preview accepts only admitted local file or project sources",
             )
-        val stdinSnapshot = PythonExecutionInputPolicy.resolveStdinSnapshot(
-            getTag(ExecutionConfig.tag) as? ExecutionConfig,
-        )
+        val executionConfig = getTag(ExecutionConfig.tag) as? ExecutionConfig
+        val entryMode = PythonExecutionInputPolicy.resolveEntryMode(executionConfig)
+        val stdinSnapshot = PythonExecutionInputPolicy.resolveStdinSnapshot(executionConfig)
+        val interactiveInputGrant = PythonInteractiveInputAuthorization.resolve(executionConfig)
         val execution = try {
-            client.createExecution(fileSource, stdinSnapshot)
+            client.createExecution(fileSource, entryMode, stdinSnapshot, interactiveInputGrant)
         } finally {
             stdinSnapshot?.fill(0)
         }
         if (!activeExecution.compareAndSet(null, execution)) {
+            execution.cancel()
             throw PythonRuntimeHostException(
                 PythonRuntimeHostError.BUSY,
                 "Python engine already owns an active execution",

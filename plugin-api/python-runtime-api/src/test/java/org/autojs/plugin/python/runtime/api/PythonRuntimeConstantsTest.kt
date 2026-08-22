@@ -12,7 +12,7 @@ class PythonRuntimeConstantsTest {
         assertEquals("org.autojs.permission.PLUGIN", PythonRuntimeContract.PLUGIN_PERMISSION)
         assertEquals("text/x-python", PythonRuntimeContract.SOURCE_MIME_TYPE)
         assertEquals(1, PythonRuntimeContract.PROTOCOL_MAJOR)
-        assertEquals(1, PythonRuntimeContract.PROTOCOL_MINOR)
+        assertEquals(4, PythonRuntimeContract.PROTOCOL_MINOR)
         assertEquals(1, PythonRuntimeContract.SCHEMA_MAJOR)
         assertEquals(0, PythonRuntimeContract.SCHEMA_MINOR)
         assertEquals(64L * 1024L, PythonRuntimeContract.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES)
@@ -33,6 +33,11 @@ class PythonRuntimeConstantsTest {
                 0x5059_0014,
                 0x5059_0015,
                 0x5059_0016,
+                0x5059_0017,
+                0x5059_0018,
+                0x5059_0019,
+                0x5059_001a,
+                0x5059_001b,
             ),
             listOf(
                 PythonRuntimeContract.SCHEMA_RUNTIME_INFO,
@@ -46,6 +51,11 @@ class PythonRuntimeConstantsTest {
                 PythonRuntimeContract.SCHEMA_TRACEBACK_FRAME,
                 PythonRuntimeContract.SCHEMA_EXECUTION_ERROR,
                 PythonRuntimeContract.SCHEMA_CANCELLATION,
+                PythonRuntimeContract.SCHEMA_INTERACTIVE_INPUT_POLICY,
+                PythonRuntimeContract.SCHEMA_INPUT_PROMPT,
+                PythonRuntimeContract.SCHEMA_INPUT_REPLY,
+                PythonRuntimeContract.SCHEMA_RESULT_POLICY,
+                PythonRuntimeContract.SCHEMA_OUTPUT_ARTIFACT,
             ),
         )
     }
@@ -62,6 +72,10 @@ class PythonRuntimeConstantsTest {
             PythonCancellationMode.entries.map { it.name to it.wireCode },
         )
         assertEquals(
+            listOf("FILE" to 1, "MODULE" to 2),
+            PythonEntryMode.entries.map { it.name to it.wireCode },
+        )
+        assertEquals(
             listOf(
                 "SOURCE" to 1,
                 "WORKSPACE_ARCHIVE" to 2,
@@ -73,6 +87,14 @@ class PythonRuntimeConstantsTest {
         assertEquals(
             listOf("STDOUT" to 1, "STDERR" to 2),
             PythonOutputStream.entries.map { it.name to it.wireCode },
+        )
+        assertEquals(
+            listOf("VISIBLE" to 1, "HIDDEN" to 2),
+            PythonInputEcho.entries.map { it.name to it.wireCode },
+        )
+        assertEquals(
+            listOf("VALUE" to 1, "EOF" to 2, "CANCELLED" to 3),
+            PythonInputReplyStatus.entries.map { it.name to it.wireCode },
         )
         assertEquals(
             listOf("PROJECT" to 1, "STDLIB" to 2, "PACKAGE" to 3, "GENERATED" to 4),
@@ -96,6 +118,9 @@ class PythonRuntimeConstantsTest {
                 "SESSION_OPEN_FAILED" to 14,
                 "STDIN_REJECTED" to 15,
                 "HOST_CAPABILITY_SNAPSHOT_REJECTED" to 16,
+                "INPUT_TIMEOUT" to 17,
+                "INPUT_LIMIT_EXCEEDED" to 18,
+                "OUTPUT_ARTIFACT_REJECTED" to 19,
             ),
             PythonErrorCode.entries.map { it.name to it.wireCode },
         )
@@ -109,6 +134,8 @@ class PythonRuntimeConstantsTest {
                 "OUTPUT" to 6,
                 "CANCELLATION" to 7,
                 "CLEANUP" to 8,
+                "INTERACTIVE_INPUT" to 9,
+                "RESULT" to 10,
             ),
             PythonFailurePhase.entries.map { it.name to it.wireCode },
         )

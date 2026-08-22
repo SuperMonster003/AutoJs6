@@ -49,6 +49,12 @@ class PythonRuntimeCodecRoundTripTest {
             result,
             PythonRuntimeCodec.decodeExecutionResult(PythonRuntimeCodec.encodeExecutionResult(result)),
         )
+        assertEquals(
+            PythonRuntimeFixtures.structuredResult,
+            PythonRuntimeCodec.decodeExecutionResult(
+                PythonRuntimeCodec.encodeExecutionResult(PythonRuntimeFixtures.structuredResult),
+            ),
+        )
 
         val error = PythonExecutionError(
             requestId = PythonRuntimeFixtures.requestId,
@@ -83,15 +89,47 @@ class PythonRuntimeCodecRoundTripTest {
             cancellation,
             PythonRuntimeCodec.decodeCancellation(PythonRuntimeCodec.encodeCancellation(cancellation)),
         )
+
+        val prompt = PythonRuntimeFixtures.inputPrompt
+        assertEquals(
+            prompt,
+            PythonRuntimeCodec.decodeInputPrompt(PythonRuntimeCodec.encodeInputPrompt(prompt)),
+        )
+
+        listOf(PythonRuntimeFixtures.inputValueReply, PythonRuntimeFixtures.inputEofReply).forEach { reply ->
+            assertEquals(
+                reply,
+                PythonRuntimeCodec.decodeInputReply(PythonRuntimeCodec.encodeInputReply(reply)),
+            )
+        }
     }
 
     @Test
-    fun protocol11CapabilitySnapshotFieldsRoundTripWhileLegacyDefaultsStayDisabled() {
+    fun optionalMinorVersionFieldsRoundTripWhileLegacyDefaultsStayDisabled() {
         val legacyCapabilities = PythonRuntimeCodec.decodeCapabilities(
             PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.capabilities),
         )
         assertFalse(legacyCapabilities.supportsHostCapabilitySnapshot)
+        assertFalse(legacyCapabilities.supportsModuleEntry)
+        assertFalse(legacyCapabilities.supportsInteractiveInput)
+        assertFalse(legacyCapabilities.supportsStructuredJsonResult)
+        assertFalse(legacyCapabilities.supportsOutputArtifacts)
         assertEquals(0L, legacyCapabilities.limits.maxHostCapabilitySnapshotBytes)
+        assertEquals(0, legacyCapabilities.limits.maxInputPromptBytes)
+        assertEquals(0, legacyCapabilities.limits.maxInputReplyBytes)
+        assertEquals(0, legacyCapabilities.limits.maxInputPrompts)
+        assertEquals(0L, legacyCapabilities.limits.maxInputWaitMillis)
+        assertEquals(0, legacyCapabilities.limits.maxStructuredJsonBytes)
+        assertEquals(0, legacyCapabilities.limits.maxOutputArtifacts)
+        assertEquals(0, legacyCapabilities.limits.maxOutputArtifactPathBytes)
+        assertEquals(0L, legacyCapabilities.limits.maxOutputArtifactBytes)
+        assertEquals(0L, legacyCapabilities.limits.maxTotalOutputArtifactBytes)
+        assertEquals(
+            PythonEntryMode.FILE,
+            PythonRuntimeCodec.decodeExecutionRequest(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.request),
+            ).entryMode,
+        )
 
         assertEquals(
             PythonRuntimeFixtures.r5Capabilities,
@@ -103,6 +141,42 @@ class PythonRuntimeCodecRoundTripTest {
             PythonRuntimeFixtures.r5Request,
             PythonRuntimeCodec.decodeExecutionRequest(
                 PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.r5Request),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeFixtures.r2Capabilities,
+            PythonRuntimeCodec.decodeCapabilities(
+                PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.r2Capabilities),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeFixtures.r2ModuleRequest,
+            PythonRuntimeCodec.decodeExecutionRequest(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.r2ModuleRequest),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeFixtures.r3Capabilities,
+            PythonRuntimeCodec.decodeCapabilities(
+                PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.r3Capabilities),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeFixtures.r3InteractiveRequest,
+            PythonRuntimeCodec.decodeExecutionRequest(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.r3InteractiveRequest),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeFixtures.r4Capabilities,
+            PythonRuntimeCodec.decodeCapabilities(
+                PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.r4Capabilities),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeFixtures.r4ResultRequest,
+            PythonRuntimeCodec.decodeExecutionRequest(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.r4ResultRequest),
             ),
         )
     }

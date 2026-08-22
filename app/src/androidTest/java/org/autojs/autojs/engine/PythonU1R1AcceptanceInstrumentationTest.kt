@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.plugin.python.PythonRuntimeExecutionResult
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
@@ -193,9 +194,12 @@ class PythonU1R1AcceptanceInstrumentationTest {
                 PythonPluginScriptEngine::class.java,
                 pending.engineClass.get(),
             )
-            val result = pending.result.get() as? PythonExecutionResult
-            assertNotNull("$label did not return a typed PythonExecutionResult", result)
-            requireNotNull(result)
+            val hostResult = pending.result.get() as? PythonRuntimeExecutionResult
+            assertNotNull("$label did not return a Host-owned PythonRuntimeExecutionResult", hostResult)
+            requireNotNull(hostResult)
+            val result = hostResult.terminal
+            assertEquals("$label unexpectedly returned structured JSON", null, hostResult.structuredJson)
+            assertTrue("$label unexpectedly returned output artifacts", hostResult.outputArtifacts.isEmpty())
             assertEquals("$label returned a non-zero exit code", 0, result.exitCode)
             assertEquals(
                 "$label stdout byte accounting drifted",

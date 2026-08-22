@@ -15,6 +15,11 @@ object PythonRuntimeCodec {
         maxFieldBytes = PythonRuntimeContract.MAX_OUTPUT_CHUNK_BYTES,
         maxFields = 16,
     )
+    private val INPUT_MESSAGE_LIMITS = TaggedWireLimits(
+        maxDocumentBytes = PythonRuntimeContract.MAX_METADATA_BYTES,
+        maxFieldBytes = PythonRuntimeContract.MAX_INPUT_REPLY_BYTES,
+        maxFields = 32,
+    )
 
     fun encodeRuntimeInfo(value: PythonRuntimeInfo): ByteArray {
         PythonRuntimeValidation.validateRuntimeInfo(value)
@@ -74,6 +79,18 @@ object PythonRuntimeCodec {
                 if (value.supportsHostCapabilitySnapshot) {
                     boolean(CapabilitiesTags.SUPPORTS_HOST_CAPABILITY_SNAPSHOT, true)
                 }
+                if (value.supportsModuleEntry) {
+                    boolean(CapabilitiesTags.SUPPORTS_MODULE_ENTRY, true)
+                }
+                if (value.supportsInteractiveInput) {
+                    boolean(CapabilitiesTags.SUPPORTS_INTERACTIVE_INPUT, true)
+                }
+                if (value.supportsStructuredJsonResult) {
+                    boolean(CapabilitiesTags.SUPPORTS_STRUCTURED_JSON_RESULT, true)
+                }
+                if (value.supportsOutputArtifacts) {
+                    boolean(CapabilitiesTags.SUPPORTS_OUTPUT_ARTIFACTS, true)
+                }
             }
             .encode()
     }
@@ -98,6 +115,14 @@ object PythonRuntimeCodec {
                 limits = decodeLimits(document.requireDocument(CapabilitiesTags.LIMITS)),
                 supportsHostCapabilitySnapshot =
                     document.optionalBoolean(CapabilitiesTags.SUPPORTS_HOST_CAPABILITY_SNAPSHOT) ?: false,
+                supportsModuleEntry =
+                    document.optionalBoolean(CapabilitiesTags.SUPPORTS_MODULE_ENTRY) ?: false,
+                supportsInteractiveInput =
+                    document.optionalBoolean(CapabilitiesTags.SUPPORTS_INTERACTIVE_INPUT) ?: false,
+                supportsStructuredJsonResult =
+                    document.optionalBoolean(CapabilitiesTags.SUPPORTS_STRUCTURED_JSON_RESULT) ?: false,
+                supportsOutputArtifacts =
+                    document.optionalBoolean(CapabilitiesTags.SUPPORTS_OUTPUT_ARTIFACTS) ?: false,
             ).also(PythonRuntimeValidation::validateCapabilities)
         }
 
@@ -116,6 +141,27 @@ object PythonRuntimeCodec {
                 value.stdin?.let { document(RequestTags.STDIN, encodePayloadReference(it)) }
                 value.hostCapabilitySnapshot?.let {
                     document(RequestTags.CAPABILITY_SNAPSHOT, encodePayloadReference(it))
+                }
+                if (value.entryMode != PythonEntryMode.FILE) {
+                    int32(
+                        RequestTags.ENTRY_MODE,
+                        value.entryMode.wireCode,
+                        requiredForReader = true,
+                    )
+                }
+                value.interactiveInput?.let {
+                    document(
+                        RequestTags.INTERACTIVE_INPUT_POLICY,
+                        encodeInteractiveInputPolicy(it),
+                        requiredForReader = true,
+                    )
+                }
+                value.resultPolicy?.let {
+                    document(
+                        RequestTags.RESULT_POLICY,
+                        encodeResultPolicy(it),
+                        requiredForReader = true,
+                    )
                 }
                 strings(RequestTags.ARGUMENT, value.arguments)
             }
@@ -151,6 +197,13 @@ object PythonRuntimeCodec {
                 maxOutputBytes = document.requireInt64(RequestTags.MAX_OUTPUT_BYTES),
                 maxOutputChunkBytes = document.requireInt32(RequestTags.MAX_OUTPUT_CHUNK_BYTES),
                 maxOutputChunks = document.requireInt64(RequestTags.MAX_OUTPUT_CHUNKS),
+                entryMode = document.optionalInt32(RequestTags.ENTRY_MODE)
+                    ?.let(::entryMode)
+                    ?: PythonEntryMode.FILE,
+                interactiveInput = document.optionalDocument(RequestTags.INTERACTIVE_INPUT_POLICY)
+                    ?.let(::decodeInteractiveInputPolicy),
+                resultPolicy = document.optionalDocument(RequestTags.RESULT_POLICY)
+                    ?.let(::decodeResultPolicy),
             ).also(PythonRuntimeValidation::validateRequest)
         }
 
@@ -211,6 +264,60 @@ object PythonRuntimeCodec {
             ).also(PythonRuntimeValidation::validateOutputChunk)
         }
 
+    fun encodeInputPrompt(value: PythonInputPrompt): ByteArray {
+        PythonRuntimeValidation.validateInputPrompt(value)
+        return writer(PythonRuntimeContract.SCHEMA_INPUT_PROMPT, INPUT_MESSAGE_LIMITS)
+            .bytes(InputPromptTags.REQUEST_ID, value.requestId.toByteArray())
+            .int64(InputPromptTags.PROMPT_ID, value.promptId.value)
+            .string(InputPromptTags.TEXT, value.text)
+            .int32(InputPromptTags.ECHO, value.echo.wireCode)
+            .int32(InputPromptTags.MAX_REPLY_BYTES, value.maxReplyBytes)
+            .int64(InputPromptTags.REPLY_TIMEOUT_MILLIS, value.replyTimeoutMillis)
+            .encode()
+    }
+
+    fun decodeInputPrompt(bytes: ByteArray): PythonInputPrompt =
+        document(
+            bytes,
+            PythonRuntimeContract.SCHEMA_INPUT_PROMPT,
+            InputPromptTags.ALL,
+            limits = INPUT_MESSAGE_LIMITS,
+        ).let { document ->
+            PythonInputPrompt(
+                requestId = PythonRequestId.fromBytes(document.requireBytes(InputPromptTags.REQUEST_ID)),
+                promptId = PythonPromptId.fromLong(document.requireInt64(InputPromptTags.PROMPT_ID)),
+                text = document.requireString(InputPromptTags.TEXT),
+                echo = inputEcho(document.requireInt32(InputPromptTags.ECHO)),
+                maxReplyBytes = document.requireInt32(InputPromptTags.MAX_REPLY_BYTES),
+                replyTimeoutMillis = document.requireInt64(InputPromptTags.REPLY_TIMEOUT_MILLIS),
+            ).also(PythonRuntimeValidation::validateInputPrompt)
+        }
+
+    fun encodeInputReply(value: PythonInputReply): ByteArray {
+        PythonRuntimeValidation.validateInputReply(value)
+        return writer(PythonRuntimeContract.SCHEMA_INPUT_REPLY, INPUT_MESSAGE_LIMITS)
+            .bytes(InputReplyTags.REQUEST_ID, value.requestId.toByteArray())
+            .int64(InputReplyTags.PROMPT_ID, value.promptId.value)
+            .int32(InputReplyTags.STATUS, value.status.wireCode)
+            .apply { value.value?.let { string(InputReplyTags.VALUE, it) } }
+            .encode()
+    }
+
+    fun decodeInputReply(bytes: ByteArray): PythonInputReply =
+        document(
+            bytes,
+            PythonRuntimeContract.SCHEMA_INPUT_REPLY,
+            InputReplyTags.ALL,
+            limits = INPUT_MESSAGE_LIMITS,
+        ).let { document ->
+            PythonInputReply(
+                requestId = PythonRequestId.fromBytes(document.requireBytes(InputReplyTags.REQUEST_ID)),
+                promptId = PythonPromptId.fromLong(document.requireInt64(InputReplyTags.PROMPT_ID)),
+                status = inputReplyStatus(document.requireInt32(InputReplyTags.STATUS)),
+                value = document.optionalString(InputReplyTags.VALUE),
+            ).also(PythonRuntimeValidation::validateInputReply)
+        }
+
     fun encodeExecutionResult(value: PythonExecutionResult): ByteArray {
         PythonRuntimeValidation.validateResult(value)
         return writer(PythonRuntimeContract.SCHEMA_EXECUTION_RESULT)
@@ -221,11 +328,28 @@ object PythonRuntimeCodec {
             .int64(ResultTags.STDERR_BYTES, value.stderrBytes)
             .int64(ResultTags.STDOUT_CHUNKS, value.stdoutChunks)
             .int64(ResultTags.STDERR_CHUNKS, value.stderrChunks)
+            .apply {
+                value.structuredJson?.let {
+                    string(ResultTags.STRUCTURED_JSON, it, requiredForReader = true)
+                }
+                value.outputArtifacts.forEach {
+                    document(
+                        ResultTags.OUTPUT_ARTIFACT,
+                        encodeOutputArtifact(it),
+                        requiredForReader = true,
+                    )
+                }
+            }
             .encode()
     }
 
     fun decodeExecutionResult(bytes: ByteArray): PythonExecutionResult =
-        document(bytes, PythonRuntimeContract.SCHEMA_EXECUTION_RESULT, ResultTags.ALL).let { document ->
+        document(
+            bytes,
+            PythonRuntimeContract.SCHEMA_EXECUTION_RESULT,
+            ResultTags.ALL,
+            ResultTags.REPEATED,
+        ).let { document ->
             PythonExecutionResult(
                 requestId = PythonRequestId.fromBytes(document.requireBytes(ResultTags.REQUEST_ID)),
                 exitCode = document.requireInt32(ResultTags.EXIT_CODE),
@@ -234,6 +358,8 @@ object PythonRuntimeCodec {
                 stderrBytes = document.requireInt64(ResultTags.STDERR_BYTES),
                 stdoutChunks = document.requireInt64(ResultTags.STDOUT_CHUNKS),
                 stderrChunks = document.requireInt64(ResultTags.STDERR_CHUNKS),
+                structuredJson = document.optionalString(ResultTags.STRUCTURED_JSON),
+                outputArtifacts = document.documents(ResultTags.OUTPUT_ARTIFACT).map(::decodeOutputArtifact),
             ).also(PythonRuntimeValidation::validateResult)
         }
 
@@ -312,6 +438,33 @@ object PythonRuntimeCodec {
                         value.maxHostCapabilitySnapshotBytes,
                     )
                 }
+                if (value.maxInputPromptBytes > 0) {
+                    int32(LimitsTags.MAX_INPUT_PROMPT_BYTES, value.maxInputPromptBytes)
+                }
+                if (value.maxInputReplyBytes > 0) {
+                    int32(LimitsTags.MAX_INPUT_REPLY_BYTES, value.maxInputReplyBytes)
+                }
+                if (value.maxInputPrompts > 0) {
+                    int32(LimitsTags.MAX_INPUT_PROMPTS, value.maxInputPrompts)
+                }
+                if (value.maxInputWaitMillis > 0L) {
+                    int64(LimitsTags.MAX_INPUT_WAIT_MILLIS, value.maxInputWaitMillis)
+                }
+                if (value.maxStructuredJsonBytes > 0) {
+                    int32(LimitsTags.MAX_STRUCTURED_JSON_BYTES, value.maxStructuredJsonBytes)
+                }
+                if (value.maxOutputArtifacts > 0) {
+                    int32(LimitsTags.MAX_OUTPUT_ARTIFACTS, value.maxOutputArtifacts)
+                }
+                if (value.maxOutputArtifactPathBytes > 0) {
+                    int32(LimitsTags.MAX_OUTPUT_ARTIFACT_PATH_BYTES, value.maxOutputArtifactPathBytes)
+                }
+                if (value.maxOutputArtifactBytes > 0L) {
+                    int64(LimitsTags.MAX_OUTPUT_ARTIFACT_BYTES, value.maxOutputArtifactBytes)
+                }
+                if (value.maxTotalOutputArtifactBytes > 0L) {
+                    int64(LimitsTags.MAX_TOTAL_OUTPUT_ARTIFACT_BYTES, value.maxTotalOutputArtifactBytes)
+                }
             }
             .encode()
 
@@ -333,7 +486,88 @@ object PythonRuntimeCodec {
                 maxConcurrentSessions = document.requireInt32(LimitsTags.MAX_CONCURRENT_SESSIONS),
                 maxHostCapabilitySnapshotBytes =
                     document.optionalInt64(LimitsTags.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES) ?: 0L,
+                maxInputPromptBytes = document.optionalInt32(LimitsTags.MAX_INPUT_PROMPT_BYTES) ?: 0,
+                maxInputReplyBytes = document.optionalInt32(LimitsTags.MAX_INPUT_REPLY_BYTES) ?: 0,
+                maxInputPrompts = document.optionalInt32(LimitsTags.MAX_INPUT_PROMPTS) ?: 0,
+                maxInputWaitMillis = document.optionalInt64(LimitsTags.MAX_INPUT_WAIT_MILLIS) ?: 0L,
+                maxStructuredJsonBytes =
+                    document.optionalInt32(LimitsTags.MAX_STRUCTURED_JSON_BYTES) ?: 0,
+                maxOutputArtifacts = document.optionalInt32(LimitsTags.MAX_OUTPUT_ARTIFACTS) ?: 0,
+                maxOutputArtifactPathBytes =
+                    document.optionalInt32(LimitsTags.MAX_OUTPUT_ARTIFACT_PATH_BYTES) ?: 0,
+                maxOutputArtifactBytes =
+                    document.optionalInt64(LimitsTags.MAX_OUTPUT_ARTIFACT_BYTES) ?: 0L,
+                maxTotalOutputArtifactBytes =
+                    document.optionalInt64(LimitsTags.MAX_TOTAL_OUTPUT_ARTIFACT_BYTES) ?: 0L,
             )
+        }
+
+    private fun encodeResultPolicy(value: PythonResultPolicy): ByteArray =
+        writer(PythonRuntimeContract.SCHEMA_RESULT_POLICY)
+            .int32(ResultPolicyTags.MAX_STRUCTURED_JSON_BYTES, value.maxStructuredJsonBytes)
+            .int32(ResultPolicyTags.MAX_ARTIFACTS, value.maxArtifacts)
+            .int32(ResultPolicyTags.MAX_ARTIFACT_PATH_BYTES, value.maxArtifactPathBytes)
+            .int64(ResultPolicyTags.MAX_ARTIFACT_BYTES, value.maxArtifactBytes)
+            .int64(ResultPolicyTags.MAX_TOTAL_ARTIFACT_BYTES, value.maxTotalArtifactBytes)
+            .encode()
+
+    private fun decodeResultPolicy(bytes: ByteArray): PythonResultPolicy =
+        document(
+            bytes,
+            PythonRuntimeContract.SCHEMA_RESULT_POLICY,
+            ResultPolicyTags.ALL,
+        ).let { document ->
+            PythonResultPolicy(
+                maxStructuredJsonBytes = document.requireInt32(ResultPolicyTags.MAX_STRUCTURED_JSON_BYTES),
+                maxArtifacts = document.requireInt32(ResultPolicyTags.MAX_ARTIFACTS),
+                maxArtifactPathBytes = document.requireInt32(ResultPolicyTags.MAX_ARTIFACT_PATH_BYTES),
+                maxArtifactBytes = document.requireInt64(ResultPolicyTags.MAX_ARTIFACT_BYTES),
+                maxTotalArtifactBytes = document.requireInt64(ResultPolicyTags.MAX_TOTAL_ARTIFACT_BYTES),
+            ).also(PythonRuntimeValidation::validateResultPolicy)
+        }
+
+    private fun encodeOutputArtifact(value: PythonOutputArtifact): ByteArray =
+        writer(PythonRuntimeContract.SCHEMA_OUTPUT_ARTIFACT)
+            .string(OutputArtifactTags.PATH, value.path)
+            .fileDescriptorRef(OutputArtifactTags.DESCRIPTOR_INDEX, value.descriptorIndex)
+            .int64(OutputArtifactTags.DECLARED_LENGTH_BYTES, value.declaredLengthBytes)
+            .bytes(OutputArtifactTags.SHA256, value.sha256.toByteArray())
+            .encode()
+
+    private fun decodeOutputArtifact(bytes: ByteArray): PythonOutputArtifact =
+        document(
+            bytes,
+            PythonRuntimeContract.SCHEMA_OUTPUT_ARTIFACT,
+            OutputArtifactTags.ALL,
+        ).let { document ->
+            PythonOutputArtifact(
+                path = document.requireString(OutputArtifactTags.PATH),
+                descriptorIndex = document.requireFileDescriptorRef(OutputArtifactTags.DESCRIPTOR_INDEX),
+                declaredLengthBytes = document.requireInt64(OutputArtifactTags.DECLARED_LENGTH_BYTES),
+                sha256 = PythonSha256.fromBytes(document.requireBytes(OutputArtifactTags.SHA256)),
+            ).also(PythonRuntimeValidation::validateOutputArtifact)
+        }
+
+    private fun encodeInteractiveInputPolicy(value: PythonInteractiveInputPolicy): ByteArray =
+        writer(PythonRuntimeContract.SCHEMA_INTERACTIVE_INPUT_POLICY)
+            .int32(InteractiveInputPolicyTags.MAX_PROMPTS, value.maxPrompts)
+            .int32(InteractiveInputPolicyTags.MAX_PROMPT_BYTES, value.maxPromptBytes)
+            .int32(InteractiveInputPolicyTags.MAX_REPLY_BYTES, value.maxReplyBytes)
+            .int64(InteractiveInputPolicyTags.REPLY_TIMEOUT_MILLIS, value.replyTimeoutMillis)
+            .encode()
+
+    private fun decodeInteractiveInputPolicy(bytes: ByteArray): PythonInteractiveInputPolicy =
+        document(
+            bytes,
+            PythonRuntimeContract.SCHEMA_INTERACTIVE_INPUT_POLICY,
+            InteractiveInputPolicyTags.ALL,
+        ).let { document ->
+            PythonInteractiveInputPolicy(
+                maxPrompts = document.requireInt32(InteractiveInputPolicyTags.MAX_PROMPTS),
+                maxPromptBytes = document.requireInt32(InteractiveInputPolicyTags.MAX_PROMPT_BYTES),
+                maxReplyBytes = document.requireInt32(InteractiveInputPolicyTags.MAX_REPLY_BYTES),
+                replyTimeoutMillis = document.requireInt64(InteractiveInputPolicyTags.REPLY_TIMEOUT_MILLIS),
+            ).also(PythonRuntimeValidation::validateInteractiveInputPolicy)
         }
 
     private fun encodePayloadReference(value: PythonPayloadReference): ByteArray =
@@ -406,6 +640,10 @@ object PythonRuntimeCodec {
     private fun cancellationMode(code: Int) =
         enumValue(PythonCancellationMode.entries, code, "cancellation mode") { it.wireCode }
 
+    private fun entryMode(code: Int) = enumValue(PythonEntryMode.entries, code, "entry mode") {
+        it.wireCode
+    }
+
     private fun payloadKind(code: Int) = enumValue(PythonPayloadKind.entries, code, "payload kind") {
         it.wireCode
     }
@@ -413,6 +651,13 @@ object PythonRuntimeCodec {
     private fun outputStream(code: Int) = enumValue(PythonOutputStream.entries, code, "output stream") {
         it.wireCode
     }
+
+    private fun inputEcho(code: Int) = enumValue(PythonInputEcho.entries, code, "input echo") {
+        it.wireCode
+    }
+
+    private fun inputReplyStatus(code: Int) =
+        enumValue(PythonInputReplyStatus.entries, code, "input reply status") { it.wireCode }
 
     private fun tracebackOrigin(code: Int) = enumValue(PythonTracebackOrigin.entries, code, "traceback origin") {
         it.wireCode
@@ -467,7 +712,11 @@ object PythonRuntimeCodec {
         const val CANCELLATION_MODE = 8
         const val LIMITS = 9
         const val SUPPORTS_HOST_CAPABILITY_SNAPSHOT = 10
-        val ALL = (1..10).toSet()
+        const val SUPPORTS_MODULE_ENTRY = 11
+        const val SUPPORTS_INTERACTIVE_INPUT = 12
+        const val SUPPORTS_STRUCTURED_JSON_RESULT = 13
+        const val SUPPORTS_OUTPUT_ARTIFACTS = 14
+        val ALL = (1..14).toSet()
         val REPEATED = setOf(SUPPORTED_ABIS)
     }
 
@@ -484,7 +733,16 @@ object PythonRuntimeCodec {
         const val MAX_CONCURRENT_SESSIONS = 10
         const val MAX_OUTPUT_CHUNKS = 11
         const val MAX_HOST_CAPABILITY_SNAPSHOT_BYTES = 12
-        val ALL = (1..12).toSet()
+        const val MAX_INPUT_PROMPT_BYTES = 13
+        const val MAX_INPUT_REPLY_BYTES = 14
+        const val MAX_INPUT_PROMPTS = 15
+        const val MAX_INPUT_WAIT_MILLIS = 16
+        const val MAX_STRUCTURED_JSON_BYTES = 17
+        const val MAX_OUTPUT_ARTIFACTS = 18
+        const val MAX_OUTPUT_ARTIFACT_PATH_BYTES = 19
+        const val MAX_OUTPUT_ARTIFACT_BYTES = 20
+        const val MAX_TOTAL_OUTPUT_ARTIFACT_BYTES = 21
+        val ALL = (1..21).toSet()
     }
 
     private object PayloadTags {
@@ -509,7 +767,10 @@ object PythonRuntimeCodec {
         const val MAX_OUTPUT_CHUNK_BYTES = 11
         const val MAX_OUTPUT_CHUNKS = 12
         const val CAPABILITY_SNAPSHOT = 13
-        val ALL = (1..13).toSet()
+        const val ENTRY_MODE = 14
+        const val INTERACTIVE_INPUT_POLICY = 15
+        const val RESULT_POLICY = 16
+        val ALL = (1..16).toSet()
         val REPEATED = setOf(ARGUMENT)
     }
 
@@ -542,7 +803,10 @@ object PythonRuntimeCodec {
         const val STDERR_BYTES = 5
         const val STDOUT_CHUNKS = 6
         const val STDERR_CHUNKS = 7
-        val ALL = (1..7).toSet()
+        const val STRUCTURED_JSON = 8
+        const val OUTPUT_ARTIFACT = 9
+        val ALL = (1..9).toSet()
+        val REPEATED = setOf(OUTPUT_ARTIFACT)
     }
 
     private object TracebackTags {
@@ -572,6 +836,49 @@ object PythonRuntimeCodec {
         const val REASON = 2
         const val PHASE = 3
         const val ELAPSED_MILLIS = 4
+        val ALL = (1..4).toSet()
+    }
+
+    private object InteractiveInputPolicyTags {
+        const val MAX_PROMPTS = 1
+        const val MAX_PROMPT_BYTES = 2
+        const val MAX_REPLY_BYTES = 3
+        const val REPLY_TIMEOUT_MILLIS = 4
+        val ALL = (1..4).toSet()
+    }
+
+    private object ResultPolicyTags {
+        const val MAX_STRUCTURED_JSON_BYTES = 1
+        const val MAX_ARTIFACTS = 2
+        const val MAX_ARTIFACT_PATH_BYTES = 3
+        const val MAX_ARTIFACT_BYTES = 4
+        const val MAX_TOTAL_ARTIFACT_BYTES = 5
+        val ALL = (1..5).toSet()
+    }
+
+    private object OutputArtifactTags {
+        const val PATH = 1
+        const val DESCRIPTOR_INDEX = 2
+        const val DECLARED_LENGTH_BYTES = 3
+        const val SHA256 = 4
+        val ALL = (1..4).toSet()
+    }
+
+    private object InputPromptTags {
+        const val REQUEST_ID = 1
+        const val PROMPT_ID = 2
+        const val TEXT = 3
+        const val ECHO = 4
+        const val MAX_REPLY_BYTES = 5
+        const val REPLY_TIMEOUT_MILLIS = 6
+        val ALL = (1..6).toSet()
+    }
+
+    private object InputReplyTags {
+        const val REQUEST_ID = 1
+        const val PROMPT_ID = 2
+        const val STATUS = 3
+        const val VALUE = 4
         val ALL = (1..4).toSet()
     }
 }

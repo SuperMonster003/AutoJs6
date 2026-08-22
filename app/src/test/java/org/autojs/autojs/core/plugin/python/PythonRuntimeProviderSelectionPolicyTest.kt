@@ -90,9 +90,106 @@ class PythonRuntimeProviderSelectionPolicyTest {
             PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
             rejection(
                 candidate().copy(
+                    runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                        protocolMax = PythonProtocolVersion(1, 2),
+                    ),
+                ),
+                requirement = PythonRuntimeCapabilityRequirement(
+                    workspaceArchive = true,
+                    moduleEntry = true,
+                ),
+            ),
+        )
+        val moduleCapable = candidate().copy(
+            runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                protocolMax = PythonProtocolVersion(1, 2),
+            ),
+            capabilities = PythonRuntimeHostTestFixtures.capabilities(supportsModuleEntry = true),
+        )
+        assertTrue(
+            select(
+                listOf(moduleCapable),
+                requirement = PythonRuntimeCapabilityRequirement(
+                    workspaceArchive = true,
+                    moduleEntry = true,
+                ),
+            ) is PythonRuntimeProviderSelectionResult.Selected,
+        )
+        assertEquals(
+            PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+            rejection(
+                candidate().copy(
                     capabilities = PythonRuntimeHostTestFixtures.capabilities(supportsStdinSnapshot = false),
                 ),
                 requirement = PythonRuntimeCapabilityRequirement(stdinSnapshot = true),
+            ),
+        )
+        val interactiveRequirement = PythonRuntimeCapabilityRequirement(
+            interactiveInput = true,
+            minimumInputPromptBytes = 512,
+            minimumInputReplyBytes = 1_024,
+            minimumInputPrompts = 4,
+            minimumInputWaitMillis = 500L,
+        )
+        assertEquals(
+            PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+            rejection(
+                candidate().copy(
+                    runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                        protocolMax = PythonProtocolVersion(1, 3),
+                    ),
+                ),
+                requirement = interactiveRequirement,
+            ),
+        )
+        val interactiveCapable = candidate().copy(
+            runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                protocolMax = PythonProtocolVersion(1, 3),
+            ),
+            capabilities = PythonRuntimeHostTestFixtures.capabilities(supportsInteractiveInput = true),
+        )
+        assertTrue(
+            select(listOf(interactiveCapable), requirement = interactiveRequirement) is
+                PythonRuntimeProviderSelectionResult.Selected,
+        )
+        assertEquals(
+            PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+            rejection(
+                interactiveCapable,
+                requirement = interactiveRequirement.copy(minimumInputReplyBytes = 2_049),
+            ),
+        )
+        val resultRequirement = PythonRuntimeCapabilityRequirement(
+            structuredJsonResult = true,
+            outputArtifacts = true,
+            minimumStructuredJsonBytes = 2_048,
+            minimumOutputArtifacts = 2,
+            minimumOutputArtifactPathBytes = 128,
+            minimumOutputArtifactBytes = 1_024L,
+            minimumTotalOutputArtifactBytes = 2_048L,
+        )
+        val resultCapable = candidate().copy(
+            runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                protocolMax = PythonProtocolVersion(1, 4),
+            ),
+            capabilities = PythonRuntimeHostTestFixtures.capabilities(
+                supportsStructuredJsonResult = true,
+                supportsOutputArtifacts = true,
+            ),
+        )
+        assertTrue(
+            select(listOf(resultCapable), requirement = resultRequirement) is
+                PythonRuntimeProviderSelectionResult.Selected,
+        )
+        assertEquals(
+            PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+            rejection(candidate(), requirement = resultRequirement),
+        )
+        assertEquals(
+            PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+            rejection(
+                resultCapable,
+                requirement = resultRequirement.copy(minimumOutputArtifactBytes = 2_049L),
             ),
         )
         assertEquals(

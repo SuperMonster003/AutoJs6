@@ -141,7 +141,7 @@ class PythonRuntimeR6SessionRelayInstrumentationTest {
                     opened.countDown()
                 }
             }
-            val executionCallback = object : IPythonExecutionCallback.Stub() {
+            val executionCallback = object : NonInteractivePythonExecutionCallback() {
                 override fun onStarted(metadata: ByteArray?) {
                     synchronized(callbackUids) { callbackUids += Binder.getCallingUid() }
                     requireNotNull(metadata) { "Session started metadata is null" }

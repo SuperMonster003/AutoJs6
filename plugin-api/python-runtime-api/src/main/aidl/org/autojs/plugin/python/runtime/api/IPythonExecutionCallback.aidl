@@ -15,4 +15,6 @@ oneway interface IPythonExecutionCallback {
     void onFailed(in byte[] error);
 
     void onCancelled(in byte[] cancellation);
+
+    void onInputPrompt(in byte[] prompt);
 }

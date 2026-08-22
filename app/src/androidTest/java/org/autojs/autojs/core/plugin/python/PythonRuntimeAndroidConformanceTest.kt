@@ -209,7 +209,7 @@ class PythonRuntimeAndroidConformanceTest {
                 acceptFromPinnedProvider(action)
             }
 
-            val executionCallback = object : IPythonExecutionCallback.Stub() {
+            val executionCallback = object : NonInteractivePythonExecutionCallback() {
                 override fun onStarted(metadata: ByteArray?) = fromPinnedProvider {
                     policy.onStarted(
                         PythonRuntimeCodec.decodeSessionStarted(
@@ -431,7 +431,7 @@ class PythonRuntimeAndroidConformanceTest {
                 }
             }
 
-            val executionCallback = object : IPythonExecutionCallback.Stub() {
+            val executionCallback = object : NonInteractivePythonExecutionCallback() {
                 override fun onStarted(metadata: ByteArray?) {
                     val callingUid = Binder.getCallingUid()
                     rejectUnexpectedCallback(callingUid, "started metadata")

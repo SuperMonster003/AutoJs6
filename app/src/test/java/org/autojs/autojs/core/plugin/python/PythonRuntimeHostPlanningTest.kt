@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.python
 
 import org.autojs.plugin.python.runtime.api.PythonExecutionSessionPolicy
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonProtocolVersion
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContractViolation
 import org.junit.Assert.assertEquals
@@ -87,6 +88,35 @@ class PythonRuntimeHostPlanningTest {
     }
 
     @Test
+    fun moduleRequestRequiresProtocol12CapabilityAndKeepsDottedEntryPoint() {
+        val original = PythonRuntimeHostTestFixtures.candidate(
+            runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                protocolMax = PythonProtocolVersion(1, 2),
+            ),
+            capabilities = PythonRuntimeHostTestFixtures.capabilities(supportsModuleEntry = true),
+        )
+        val pinned = selected(original)
+        val planned = PythonRuntimeHostRequestPlanner.plan(
+            pinned = pinned,
+            current = original,
+            environment = PythonRuntimeHostTestFixtures.environment(),
+            requirement = PythonRuntimeCapabilityRequirement(
+                workspaceArchive = true,
+                moduleEntry = true,
+            ),
+            request = PythonRuntimeHostTestFixtures.request(
+                protocolVersion = PythonProtocolVersion(1, 2),
+                workspaceArchive = true,
+                entryMode = PythonEntryMode.MODULE,
+            ),
+            descriptorCount = 2,
+        ) as PythonRuntimeHostRequestPlanningResult.Planned
+
+        assertEquals(PythonEntryMode.MODULE, planned.plan.request.entryMode)
+        assertEquals("pkg.main", planned.plan.request.entryPoint)
+    }
+
+    @Test
     fun stdinRequestUsesTheDescriptorBetweenWorkspaceAndHostCapabilities() {
         val runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
             protocolMax = PythonProtocolVersion(1, 1),
@@ -125,6 +155,93 @@ class PythonRuntimeHostPlanningTest {
         assertEquals(1, requireNotNull(planned.plan.request.workspaceArchive).descriptorIndex)
         assertEquals(2, requireNotNull(planned.plan.request.stdin).descriptorIndex)
         assertEquals(3, requireNotNull(planned.plan.request.hostCapabilitySnapshot).descriptorIndex)
+    }
+
+    @Test
+    fun foregroundInteractiveInputIsExplicitlyPlannedWithoutAddingDescriptors() {
+        val original = PythonRuntimeHostTestFixtures.candidate(
+            runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                protocolMax = PythonProtocolVersion(1, 3),
+            ),
+            capabilities = PythonRuntimeHostTestFixtures.capabilities(supportsInteractiveInput = true),
+        )
+        val pinned = selected(original)
+        val planned = PythonRuntimeHostRequestPlanner.plan(
+            pinned = pinned,
+            current = original,
+            environment = PythonRuntimeHostTestFixtures.environment(),
+            requirement = PythonRuntimeCapabilityRequirement(
+                interactiveInput = true,
+                minimumInputPromptBytes = 512,
+                minimumInputReplyBytes = 1_024,
+                minimumInputPrompts = 4,
+                minimumInputWaitMillis = 500L,
+            ),
+            request = PythonRuntimeHostTestFixtures.request(
+                protocolVersion = PythonProtocolVersion(1, 3),
+                interactiveInput = true,
+            ),
+            descriptorCount = 1,
+        ) as PythonRuntimeHostRequestPlanningResult.Planned
+
+        assertEquals(1, planned.plan.descriptorCount)
+        assertEquals(
+            PythonRuntimeHostTestFixtures.request(
+                protocolVersion = PythonProtocolVersion(1, 3),
+                interactiveInput = true,
+            ).interactiveInput,
+            planned.plan.request.interactiveInput,
+        )
+        assertFalse(planned.plan.admissionPlan.sessionPolicy != null)
+        val registry = PythonRuntimeDispatchRegistry<Any>()
+        val reservation = requireNotNull(registry.reserve(planned.plan))
+        assertTrue(
+            registry.acceptOpened(reservation, Any()) is PythonRuntimeDispatchRegistry.Opened.Owned,
+        )
+        assertTrue(planned.plan.admissionPlan.sessionPolicy != null)
+    }
+
+    @Test
+    fun protocol14ResultPolicyIsPlannedWithoutInputDescriptorsAndOwnsTerminalDescriptors() {
+        val original = PythonRuntimeHostTestFixtures.candidate(
+            runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                protocolMax = PythonProtocolVersion(1, 4),
+            ),
+            capabilities = PythonRuntimeHostTestFixtures.capabilities(
+                supportsStructuredJsonResult = true,
+                supportsOutputArtifacts = true,
+            ),
+        )
+        val pinned = selected(original)
+        val request = PythonRuntimeHostTestFixtures.request(
+            protocolVersion = PythonProtocolVersion(1, 4),
+            resultPolicy = true,
+        )
+        val planned = PythonRuntimeHostRequestPlanner.plan(
+            pinned = pinned,
+            current = original,
+            environment = PythonRuntimeHostTestFixtures.environment(),
+            requirement = PythonRuntimeCapabilityRequirement(
+                structuredJsonResult = true,
+                outputArtifacts = true,
+                minimumStructuredJsonBytes = 2_048,
+                minimumOutputArtifacts = 2,
+                minimumOutputArtifactPathBytes = 128,
+                minimumOutputArtifactBytes = 1_024L,
+                minimumTotalOutputArtifactBytes = 2_048L,
+            ),
+            request = request,
+            descriptorCount = 1,
+        ) as PythonRuntimeHostRequestPlanningResult.Planned
+
+        assertEquals(1, planned.plan.descriptorCount)
+        assertEquals(request.resultPolicy, planned.plan.request.resultPolicy)
+        val registry = PythonRuntimeDispatchRegistry<Any>()
+        val reservation = requireNotNull(registry.reserve(planned.plan))
+        assertTrue(
+            registry.acceptOpened(reservation, Any()) is PythonRuntimeDispatchRegistry.Opened.Owned,
+        )
+        assertTrue(planned.plan.admissionPlan.sessionPolicy != null)
     }
 
     @Test

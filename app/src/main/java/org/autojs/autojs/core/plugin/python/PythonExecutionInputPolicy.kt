@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.python
 
 import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
 import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
@@ -14,6 +15,24 @@ internal object PythonExecutionInputPolicy {
      * [CharSequence] is snapshotted as strict UTF-8. No other value type is accepted.
      */
     const val STDIN_SNAPSHOT_ARGUMENT = "autojs6.python.stdinSnapshot"
+
+    /** Optional [ExecutionConfig] argument. Missing means the backward-compatible file mode. */
+    const val ENTRY_MODE_ARGUMENT = "autojs6.python.entryMode"
+
+    fun resolveEntryMode(config: ExecutionConfig?): PythonEntryMode {
+        if (config == null || !config.arguments.containsKey(ENTRY_MODE_ARGUMENT)) return PythonEntryMode.FILE
+        val value = config.getArgument(ENTRY_MODE_ARGUMENT) as? CharSequence
+            ?: invalidEntryMode(
+                "ExecutionConfig argument $ENTRY_MODE_ARGUMENT must be the string 'file' or 'module'",
+            )
+        return when (value.toString()) {
+            "file" -> PythonEntryMode.FILE
+            "module" -> PythonEntryMode.MODULE
+            else -> invalidEntryMode(
+                "ExecutionConfig argument $ENTRY_MODE_ARGUMENT must be exactly 'file' or 'module'",
+            )
+        }
+    }
 
     fun resolveStdinSnapshot(config: ExecutionConfig?): ByteArray? {
         if (config == null || !config.arguments.containsKey(STDIN_SNAPSHOT_ARGUMENT)) return null
@@ -55,4 +74,7 @@ internal object PythonExecutionInputPolicy {
 
     private fun invalidStdin(message: String, cause: Throwable? = null): Nothing =
         throw PythonRuntimeHostException(PythonRuntimeHostError.STDIN_INVALID, message, cause)
+
+    private fun invalidEntryMode(message: String): Nothing =
+        throw PythonRuntimeHostException(PythonRuntimeHostError.ENTRY_MODE_INVALID, message)
 }
