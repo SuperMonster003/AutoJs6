@@ -88,6 +88,9 @@ internal object PythonHostCapabilities {
     const val SELECTOR_FIND = "selector.find"
     const val SELECTOR_CLICK = "selector.click"
     const val SELECTOR_SET_TEXT = "selector.set_text"
+    const val IMAGES_CAPTURE_SCREEN = "images.capture_screen"
+    const val IMAGES_READ_CHUNK = "images.read_chunk"
+    const val IMAGES_RELEASE = "images.release"
 
     val ENABLED = setOf(
         TOAST_SHOW,
@@ -124,6 +127,9 @@ internal object PythonHostCapabilities {
         SELECTOR_FIND,
         SELECTOR_CLICK,
         SELECTOR_SET_TEXT,
+        IMAGES_CAPTURE_SCREEN,
+        IMAGES_READ_CHUNK,
+        IMAGES_RELEASE,
     )
 }
 
@@ -548,6 +554,12 @@ internal interface PythonHostCapabilityActions {
 
     fun setNodeText(nodeId: String, text: String): Boolean
 
+    fun captureScreen(format: String, quality: Int): PythonHostScreenImageDescriptor
+
+    fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk
+
+    fun releaseScreenImage(imageId: String)
+
     fun close() = Unit
 }
 
@@ -570,6 +582,16 @@ internal class AndroidPythonHostCapabilityActions(
     }
     private val selector = PythonHostSelectorScope {
         requireAccessibilityService().rootInActiveWindow
+    }
+    private val screenImages = PythonHostScreenImageScope { format, quality ->
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            throw PythonHostCapabilityScreenCaptureUnavailableException()
+        }
+        PythonHostAccessibilityScreenCapture.capture(
+            service = requireAccessibilityService(),
+            format = format,
+            quality = quality,
+        )
     }
     private val hostFiles = PythonHostFileScope(fileRoot)
     private val hostEngines = PythonHostEngineScope(
@@ -783,7 +805,21 @@ internal class AndroidPythonHostCapabilityActions(
         withAccessibility { selector.setText(nodeId, text) }
     }
 
-    override fun close() = selector.close()
+    override fun captureScreen(format: String, quality: Int): PythonHostScreenImageDescriptor =
+        screenImages.capture(format, quality)
+
+    override fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk =
+        screenImages.readChunk(imageId, offset)
+
+    override fun releaseScreenImage(imageId: String) = screenImages.release(imageId)
+
+    override fun close() {
+        try {
+            selector.close()
+        } finally {
+            screenImages.close()
+        }
+    }
 
     private fun ensureNotificationPostingAllowed() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -1105,6 +1141,30 @@ internal class PythonHostCapabilityDispatcher(
                         ),
                     )
                 }
+                PythonHostCapabilities.IMAGES_CAPTURE_SCREEN -> {
+                    request.requireArguments(ARG_FORMAT, ARG_QUALITY)
+                    encodeSuccess(
+                        request,
+                        actions.captureScreen(
+                            request.imageFormatArgument(),
+                            request.imageQualityArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.IMAGES_READ_CHUNK -> {
+                    request.requireArguments(ARG_IMAGE_ID, ARG_OFFSET)
+                    encodeSuccess(
+                        request,
+                        actions.readScreenImageChunk(
+                            request.imageIdArgument(),
+                            request.imageOffsetArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.IMAGES_RELEASE -> {
+                    actions.releaseScreenImage(request.singleImageIdArgument())
+                    encodeSuccess(request, null)
+                }
                 else -> encodeFailure(
                     request,
                     ERROR_CAPABILITY_UNAVAILABLE,
@@ -1160,6 +1220,24 @@ internal class PythonHostCapabilityDispatcher(
                 request,
                 ERROR_SELECTOR_SCAN_LIMIT_EXCEEDED,
                 "Host selector scan reached its node or depth limit",
+            )
+        } catch (_: PythonHostCapabilityScreenCaptureUnavailableException) {
+            encodeFailure(
+                request,
+                ERROR_SCREEN_CAPTURE_UNAVAILABLE,
+                "Accessibility screenshot capture requires Android 11 or newer",
+            )
+        } catch (_: PythonHostCapabilityScreenCaptureFailedException) {
+            encodeFailure(
+                request,
+                ERROR_SCREEN_CAPTURE_FAILED,
+                "Accessibility screenshot capture failed",
+            )
+        } catch (_: PythonHostCapabilityStaleImageException) {
+            encodeFailure(
+                request,
+                ERROR_STALE_IMAGE,
+                "Host screen image is stale or no longer retained",
             )
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
@@ -1239,6 +1317,8 @@ internal class PythonHostCapabilityDispatcher(
                 is PythonHostEngineLaunch -> add(KEY_VALUE, value.toJson())
                 is PythonHostSelectorSnapshot -> add(KEY_VALUE, value.toJson())
                 is PythonHostSelectorNode -> add(KEY_VALUE, value.toJson())
+                is PythonHostScreenImageDescriptor -> add(KEY_VALUE, value.toJson())
+                is PythonHostScreenImageChunk -> add(KEY_VALUE, value.toJson())
                 is List<*> -> add(
                     KEY_VALUE,
                     JsonArray().apply {
@@ -1414,6 +1494,40 @@ internal class PythonHostCapabilityDispatcher(
             allowEmpty = false,
         )
 
+        fun imageFormatArgument(): String = textArgument(
+            ARG_FORMAT,
+            maxBytes = 8,
+            allowEmpty = false,
+        ).also { format ->
+            require(format in PythonHostImagePolicy.FORMATS) {
+                "Python Host image format is unsupported"
+            }
+        }
+
+        fun imageQualityArgument(): Int = integerArgument(
+            name = ARG_QUALITY,
+            minimum = PythonHostImagePolicy.MIN_QUALITY,
+            maximum = PythonHostImagePolicy.MAX_QUALITY,
+        )
+
+        fun singleImageIdArgument(): String {
+            requireArguments(ARG_IMAGE_ID)
+            return imageIdArgument()
+        }
+
+        fun imageIdArgument(): String = textArgument(
+            ARG_IMAGE_ID,
+            pattern = PythonHostImagePolicy.IMAGE_ID,
+            maxBytes = PythonHostImagePolicy.MAX_IMAGE_ID_BYTES,
+            allowEmpty = false,
+        )
+
+        fun imageOffsetArgument(): Int = integerArgument(
+            name = ARG_OFFSET,
+            minimum = 0,
+            maximum = PythonHostImagePolicy.MAX_IMAGE_BYTES - 1,
+        )
+
         fun selectorQueryArgument(): PythonHostSelectorQuery {
             val query = arguments.get(ARG_QUERY)
                 ?.takeIf(JsonElement::isJsonObject)
@@ -1489,6 +1603,10 @@ internal class PythonHostCapabilityDispatcher(
         const val ARG_MAX_NODES = "maxNodes"
         const val ARG_MAX_DEPTH = "maxDepth"
         const val ARG_NODE_ID = "nodeId"
+        const val ARG_FORMAT = "format"
+        const val ARG_QUALITY = "quality"
+        const val ARG_IMAGE_ID = "imageId"
+        const val ARG_OFFSET = "offset"
         const val QUERY_TEXT = "text"
         const val QUERY_TEXT_CONTAINS = "textContains"
         const val QUERY_DESCRIPTION = "description"
@@ -1517,6 +1635,9 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_ACCESSIBILITY_UNAVAILABLE = "ACCESSIBILITY_UNAVAILABLE"
         const val ERROR_STALE_NODE = "STALE_NODE"
         const val ERROR_SELECTOR_SCAN_LIMIT_EXCEEDED = "SELECTOR_SCAN_LIMIT_EXCEEDED"
+        const val ERROR_SCREEN_CAPTURE_UNAVAILABLE = "SCREEN_CAPTURE_UNAVAILABLE"
+        const val ERROR_SCREEN_CAPTURE_FAILED = "SCREEN_CAPTURE_FAILED"
+        const val ERROR_STALE_IMAGE = "STALE_IMAGE"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")
         val WEB_URL = Regex("https?://.+", RegexOption.IGNORE_CASE)

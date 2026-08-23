@@ -36,6 +36,7 @@
 * `新增` Python Runtime 協定 1.5 Host broker 開放不含絕對路徑的目前引擎資訊, 確定性停止自身及最多 16 次限定範圍的非 Python Host 子指令碼非同步啟動; provider 保持單一工作階段期間巢狀 Python 穩定傳回 NESTED_PYTHON_NOT_ALLOWED
 * `新增` Python Runtime 協定 1.5 Host broker 開放有界的無障礙點擊, 長按, 定時按壓, 滑動, 返回及主畫面操作; 座標與持續時間經過嚴格驗證, 無障礙服務不可用時穩定傳回 ACCESSIBILITY_UNAVAILABLE
 * `新增` Python Runtime 協定 1.5 Host broker 開放有界且綁定單次執行的無障礙樹快照與 AND 組合選擇器查詢, 透過不透明節點引用執行明確點擊與文字設定; 快照, 掃描, 字串, 保留節點及回應均有固定上限, 無障礙不可用, 掃描不完整與節點過期時傳回穩定的型別化錯誤
+* `新增` Python Runtime 協定 1.5 Host broker 透過 Android 11+ 無障礙服務開放執行級螢幕截圖, 以 PNG/JPEG 編碼並只保留一張影像, 透過 32 KiB 順序分塊及 SHA-256 中繼資料傳輸, 編碼大小上限為 4 MiB, 支援明確釋放並在終態覆寫位元組; 不開啟權限介面, 無障礙不可用, 截圖失敗, 影像控制代碼過期及超限均傳回穩定的型別化錯誤
 * `新增` Python Runtime 明確嚴格 JSON 結果在腳本終態後以 `[result]` 前綴寫入宿主控制台, 已驗證輸出 artifact 原子發布到專案或腳本目錄下的 `.python-artifacts` 執行專屬目錄並列印絕對路徑; 此保留目錄不進入後續專案快照
 * `新增` 獨立 Lua Runtime 外掛後端, 支援透過單獨的 PUC Lua 5.4.8 外掛處理程序執行本機 .lua 檔案, 並驗證固定元件/簽章/協定/ABI, 提供有界執行且絕不回退至 JavaScript
 * `新增` 獨立 Java/Kotlin JVM Source Runtime 外掛後端, 支援在隔離處理程序中編譯及執行單一 .java/.kt 指令碼, 提供 package/import, 即時 console 輸出, 可取消 sleep, 主程式 toast 與明確能力協商

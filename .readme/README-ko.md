@@ -196,6 +196,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` Python Runtime 1.5 Host broker는 절대 경로가 없는 현재 engine 정보, 결정적 self-stop 및 비 Python Host script에 대한 범위 제한 비동기 child 실행을 최대 16회 제공; provider가 단일 session을 유지하는 동안 중첩 Python은 NESTED_PYTHON_NOT_ALLOWED로 안정적으로 실패
 * `추가` Python Runtime 1.5 Host broker는 제한된 accessibility click, long click, 시간 지정 press, swipe, Back 및 Home 동작을 제공; 좌표와 지속 시간을 엄격히 검증하고 accessibility service를 사용할 수 없으면 ACCESSIBILITY_UNAVAILABLE로 결정적으로 실패
 * `추가` Python Runtime 1.5 Host broker는 실행 범위에 한정된 accessibility tree snapshot과 AND 조합 selector query를 제공하고 불투명한 node reference로 명시적 click 및 text 설정을 수행; snapshot, scan, 문자열, 보존 node 및 response에 고정 상한을 적용하며 accessibility 사용 불가, 불완전 scan 및 stale node는 안정적인 typed error로 실패
+* `추가` Python Runtime 1.5 Host broker는 Android 11+ accessibility screenshot을 실행 범위의 PNG/JPEG byte로 제공하고 보존 이미지 1개, 순서가 보장된 32 KiB chunk, 4 MiB 인코딩 상한, SHA-256 metadata, 명시적 release 및 종료 시 byte 삭제를 적용; 권한 UI를 열지 않으며 accessibility 사용 불가, capture 실패, stale image handle 및 상한 초과는 안정적인 typed error로 실패
 * `추가` Python Runtime의 명시적 엄격 JSON 결과를 스크립트 종료 후 `[result]` 접두사와 함께 Host 콘솔에 기록하고, 검증된 output artifact를 프로젝트 또는 스크립트 디렉터리의 `.python-artifacts` 아래 실행 전용 디렉터리에 원자적으로 게시한 뒤 절대 경로를 출력하며 이 예약 디렉터리는 이후 프로젝트 스냅샷에서 제외
 * `추가` 독립 Lua Runtime 플러그인 백엔드에서 로컬 .lua 파일을 별도의 PUC Lua 5.4.8 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 제한된 실행, JavaScript 폴백 금지를 지원
 * `추가` Java/Kotlin용 독립 JVM Source Runtime 플러그인 백엔드에서 단일 .java/.kt 파일을 격리 프로세스로 컴파일 및 실행하고 package/import, 실시간 console 출력, 취소 가능한 sleep, 호스트 toast, 명시적 capability 협상을 지원
