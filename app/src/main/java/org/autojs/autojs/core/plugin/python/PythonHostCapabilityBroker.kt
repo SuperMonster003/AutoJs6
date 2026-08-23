@@ -23,6 +23,8 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
+import org.autojs.autojs.core.automator.GlobalActionAutomator
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.execution.ExecutionConfig
@@ -76,6 +78,12 @@ internal object PythonHostCapabilities {
     const val ENGINES_CURRENT = "engines.current"
     const val ENGINES_STOP_SELF = "engines.stop_self"
     const val ENGINES_RUN = "engines.run"
+    const val AUTOMATOR_CLICK = "automator.click"
+    const val AUTOMATOR_LONG_CLICK = "automator.long_click"
+    const val AUTOMATOR_PRESS = "automator.press"
+    const val AUTOMATOR_SWIPE = "automator.swipe"
+    const val AUTOMATOR_BACK = "automator.back"
+    const val AUTOMATOR_HOME = "automator.home"
 
     val ENABLED = setOf(
         TOAST_SHOW,
@@ -102,7 +110,18 @@ internal object PythonHostCapabilities {
         ENGINES_CURRENT,
         ENGINES_STOP_SELF,
         ENGINES_RUN,
+        AUTOMATOR_CLICK,
+        AUTOMATOR_LONG_CLICK,
+        AUTOMATOR_PRESS,
+        AUTOMATOR_SWIPE,
+        AUTOMATOR_BACK,
+        AUTOMATOR_HOME,
     )
+}
+
+internal object PythonHostAutomatorPolicy {
+    const val MAX_COORDINATE = 1_000_000
+    const val MAX_DURATION_MILLIS = 4_000
 }
 
 internal enum class PythonHostConsoleLevel {
@@ -496,6 +515,18 @@ internal interface PythonHostCapabilityActions {
     fun requestStopSelf()
 
     fun runScript(path: String): PythonHostEngineLaunch
+
+    fun click(x: Int, y: Int): Boolean
+
+    fun longClick(x: Int, y: Int): Boolean
+
+    fun press(x: Int, y: Int, durationMillis: Int): Boolean
+
+    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, durationMillis: Int): Boolean
+
+    fun back(): Boolean
+
+    fun home(): Boolean
 }
 
 internal class AndroidPythonHostCapabilityActions(
@@ -512,6 +543,9 @@ internal class AndroidPythonHostCapabilityActions(
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
     private val app = AppUtils(appContext)
+    private val accessibilityAutomator = GlobalActionAutomator(appContext, mainHandler) {
+        AutoJsAccessibilityService.instance
+    }
     private val hostFiles = PythonHostFileScope(fileRoot)
     private val hostEngines = PythonHostEngineScope(
         source = source,
@@ -684,6 +718,27 @@ internal class AndroidPythonHostCapabilityActions(
 
     override fun runScript(path: String): PythonHostEngineLaunch = hostEngines.runScript(path)
 
+    override fun click(x: Int, y: Int): Boolean = withAccessibility {
+        accessibilityAutomator.click(x, y)
+    }
+
+    override fun longClick(x: Int, y: Int): Boolean = withAccessibility {
+        accessibilityAutomator.longClick(x, y)
+    }
+
+    override fun press(x: Int, y: Int, durationMillis: Int): Boolean = withAccessibility {
+        accessibilityAutomator.press(x, y, durationMillis)
+    }
+
+    override fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, durationMillis: Int): Boolean =
+        withAccessibility {
+            accessibilityAutomator.swipe(x1, y1, x2, y2, durationMillis.toLong())
+        }
+
+    override fun back(): Boolean = withAccessibility(accessibilityAutomator::back)
+
+    override fun home(): Boolean = withAccessibility(accessibilityAutomator::home)
+
     private fun ensureNotificationPostingAllowed() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
@@ -705,6 +760,13 @@ internal class AndroidPythonHostCapabilityActions(
 
     private fun dialogController(): PythonInteractiveInputController = interactiveInputController
         ?: throw PythonHostCapabilityInteractiveNotAllowedException()
+
+    private fun <T> withAccessibility(action: () -> T): T {
+        if (!AutoJsAccessibilityService.hasInstance() || !AutoJsAccessibilityService.hasOperationalState) {
+            throw PythonHostCapabilityAccessibilityUnavailableException()
+        }
+        return action()
+    }
 
     private fun <T> onMain(action: () -> T): T {
         if (Looper.myLooper() == Looper.getMainLooper()) return action()
@@ -901,6 +963,58 @@ internal class PythonHostCapabilityDispatcher(
                     request,
                     actions.runScript(request.singleFilePathArgument()),
                 )
+                PythonHostCapabilities.AUTOMATOR_CLICK -> {
+                    request.requireArguments(ARG_X, ARG_Y)
+                    encodeSuccess(
+                        request,
+                        actions.click(
+                            request.coordinateArgument(ARG_X),
+                            request.coordinateArgument(ARG_Y),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.AUTOMATOR_LONG_CLICK -> {
+                    request.requireArguments(ARG_X, ARG_Y)
+                    encodeSuccess(
+                        request,
+                        actions.longClick(
+                            request.coordinateArgument(ARG_X),
+                            request.coordinateArgument(ARG_Y),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.AUTOMATOR_PRESS -> {
+                    request.requireArguments(ARG_X, ARG_Y, ARG_DURATION_MILLIS)
+                    encodeSuccess(
+                        request,
+                        actions.press(
+                            request.coordinateArgument(ARG_X),
+                            request.coordinateArgument(ARG_Y),
+                            request.durationArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.AUTOMATOR_SWIPE -> {
+                    request.requireArguments(ARG_X1, ARG_Y1, ARG_X2, ARG_Y2, ARG_DURATION_MILLIS)
+                    encodeSuccess(
+                        request,
+                        actions.swipe(
+                            request.coordinateArgument(ARG_X1),
+                            request.coordinateArgument(ARG_Y1),
+                            request.coordinateArgument(ARG_X2),
+                            request.coordinateArgument(ARG_Y2),
+                            request.durationArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.AUTOMATOR_BACK -> {
+                    request.requireArguments()
+                    encodeSuccess(request, actions.back())
+                }
+                PythonHostCapabilities.AUTOMATOR_HOME -> {
+                    request.requireArguments()
+                    encodeSuccess(request, actions.home())
+                }
                 else -> encodeFailure(
                     request,
                     ERROR_CAPABILITY_UNAVAILABLE,
@@ -938,6 +1052,12 @@ internal class PythonHostCapabilityDispatcher(
                 request,
                 ERROR_ENGINE_LAUNCH_LIMIT_EXCEEDED,
                 "Python child engine launch quota is exhausted",
+            )
+        } catch (_: PythonHostCapabilityAccessibilityUnavailableException) {
+            encodeFailure(
+                request,
+                ERROR_ACCESSIBILITY_UNAVAILABLE,
+                "AutoJs6 accessibility service is unavailable",
             )
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
@@ -1146,6 +1266,26 @@ internal class PythonHostCapabilityDispatcher(
                 value
             }
         }
+
+        fun coordinateArgument(name: String): Int = integerArgument(
+            name = name,
+            minimum = 0,
+            maximum = PythonHostAutomatorPolicy.MAX_COORDINATE,
+        )
+
+        fun durationArgument(): Int = integerArgument(
+            name = ARG_DURATION_MILLIS,
+            minimum = 1,
+            maximum = PythonHostAutomatorPolicy.MAX_DURATION_MILLIS,
+        )
+
+        private fun integerArgument(name: String, minimum: Int, maximum: Int): Int {
+            val value = arguments.requireLong(name)
+            require(value in minimum.toLong()..maximum.toLong()) {
+                "Python host capability integer argument is outside its allowed range"
+            }
+            return value.toInt()
+        }
     }
 
     private companion object {
@@ -1168,6 +1308,13 @@ internal class PythonHostCapabilityDispatcher(
         const val ARG_TITLE = "title"
         const val ARG_DEFAULT = "default"
         const val ARG_ITEMS = "items"
+        const val ARG_X = "x"
+        const val ARG_Y = "y"
+        const val ARG_X1 = "x1"
+        const val ARG_Y1 = "y1"
+        const val ARG_X2 = "x2"
+        const val ARG_Y2 = "y2"
+        const val ARG_DURATION_MILLIS = "durationMillis"
         const val ERROR_CAPABILITY_UNAVAILABLE = "CAPABILITY_UNAVAILABLE"
         const val ERROR_INVALID_ARGUMENT = "INVALID_ARGUMENT"
         const val ERROR_HOST_FAILURE = "HOST_FAILURE"
@@ -1183,6 +1330,7 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_INTERACTIVE_NOT_ALLOWED = "INTERACTIVE_NOT_ALLOWED"
         const val ERROR_NESTED_PYTHON_NOT_ALLOWED = "NESTED_PYTHON_NOT_ALLOWED"
         const val ERROR_ENGINE_LAUNCH_LIMIT_EXCEEDED = "ENGINE_LAUNCH_LIMIT_EXCEEDED"
+        const val ERROR_ACCESSIBILITY_UNAVAILABLE = "ACCESSIBILITY_UNAVAILABLE"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")
         val WEB_URL = Regex("https?://.+", RegexOption.IGNORE_CASE)
@@ -1264,6 +1412,8 @@ internal class PythonHostCapabilityInteractiveNotAllowedException : RuntimeExcep
 internal class PythonHostCapabilityNestedPythonException : RuntimeException()
 
 internal class PythonHostCapabilityEngineLaunchLimitException : RuntimeException()
+
+internal class PythonHostCapabilityAccessibilityUnavailableException : RuntimeException()
 
 private fun JsonObject.requireString(name: String): String {
     val value = get(name)
