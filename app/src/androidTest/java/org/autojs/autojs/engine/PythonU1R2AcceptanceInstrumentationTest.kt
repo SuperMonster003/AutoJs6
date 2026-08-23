@@ -826,6 +826,76 @@ class PythonU1R2AcceptanceInstrumentationTest {
     }
 
     @Test
+    fun boundedScreenColorSearchFindsControlledTargetThroughPublicPythonEngine() {
+        assumeTrue(
+            "Python accessibility screen color search requires Android 11 or newer",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R,
+        )
+        val projectRoot = freshProjectRoot()
+        val activity = launchAccessibilitySmokeActivity()
+        try {
+            ensureAccessibilityServiceStarted("M3 screen color acceptance")
+            instrumentation.runOnMainSync {
+                activity.window.decorView.sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+                )
+            }
+            assumeTrue(
+                "The AutoJs6 accessibility service connected but did not become operational",
+                AutoJsAccessibilityService.waitForOperational(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+            )
+            val captureBounds = AtomicReference<IntArray>()
+            instrumentation.runOnMainSync {
+                captureBounds.set(activity.captureTargetBoundsOnScreen())
+            }
+            val bounds = requireNotNull(captureBounds.get())
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import images, result
+
+                match = images.find_color(
+                    ${NodeAccessibilitySmokeActivity.CAPTURE_TARGET_COLOR and 0x00ffffff},
+                    region=(${bounds[0]}, ${bounds[1]}, ${bounds[2]}, ${bounds[3]}),
+                    threshold=$SCREEN_CAPTURE_COLOR_TOLERANCE,
+                )
+                result.set({"match": None if match is None else list(match)})
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 screen color execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 screen color execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 screen color execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertFalse("Controlled screen color was not found", structured.isNull("match"))
+                val match = structured.getJSONArray("match")
+                assertEquals(2, match.length())
+                assertTrue(match.getInt(0) in bounds[0] until bounds[0] + bounds[2])
+                assertTrue(match.getInt(1) in bounds[1] until bounds[1] + bounds[3])
+                assertTrue(result.outputArtifacts.isEmpty())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                if (!activity.isFinishing) activity.finish()
+            }
+            restoreHostForeground()
+            cleanProjectRoot(projectRoot, "M3 screen color")
+        }
+    }
+
+    @Test
     fun automatorFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
         assumeFalse(
             "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
@@ -977,6 +1047,61 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
         } finally {
             cleanProjectRoot(projectRoot, "M3 unavailable screen capture")
+        }
+    }
+
+    @Test
+    fun findColorFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
+        assumeTrue(
+            "Python accessibility screen color search requires Android 11 or newer",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R,
+        )
+        assumeFalse(
+            "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
+            AutoJsAccessibilityService.hasInstance(),
+        )
+        val projectRoot = freshProjectRoot()
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import images, result
+                from autojs6.errors import CapabilityUnavailableError
+
+                try:
+                    images.find_color(0x123456)
+                    outcome = {"error": "NO_ERROR", "message": ""}
+                except CapabilityUnavailableError as error:
+                    outcome = {"error": type(error).__name__, "message": str(error)}
+                result.set(outcome)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 unavailable screen color execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 unavailable screen color execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 unavailable screen color execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("CapabilityUnavailableError", structured.getString("error"))
+                assertEquals(
+                    "AutoJs6 accessibility service is unavailable",
+                    structured.getString("message"),
+                )
+                assertTrue(result.outputArtifacts.isEmpty())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 unavailable screen color")
         }
     }
 
