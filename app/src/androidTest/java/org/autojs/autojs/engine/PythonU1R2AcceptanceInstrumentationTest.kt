@@ -1397,7 +1397,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
     private fun launchAccessibilitySmokeActivity(): NodeAccessibilitySmokeActivity {
         NodeAccessibilitySmokeActivity.reset()
         return instrumentation.startActivitySync(
-            Intent(instrumentation.context, NodeAccessibilitySmokeActivity::class.java)
+            Intent(context, NodeAccessibilitySmokeActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         ).let { activity ->
             instrumentation.waitForIdleSync()

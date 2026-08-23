@@ -19,7 +19,6 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val arguments = InstrumentationRegistry.getArguments()
     private val targetContext = instrumentation.targetContext
-    private val testContext = instrumentation.context
     private var activity: NodeAccessibilitySmokeActivity? = null
 
     @After
@@ -153,7 +152,7 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
         }
         NodeAccessibilitySmokeActivity.reset()
         activity = instrumentation.startActivitySync(
-            Intent(testContext, NodeAccessibilitySmokeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            Intent(targetContext, NodeAccessibilitySmokeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         ) as NodeAccessibilitySmokeActivity
         instrumentation.waitForIdleSync()
         Thread.sleep(500L)
