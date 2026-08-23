@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.python
 
 import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Looper
 import android.view.Display
@@ -27,9 +28,20 @@ internal object PythonHostImagePolicy {
     const val MAX_IMAGE_ID_BYTES = 64
     const val MAX_COLOR = 0x00ff_ffff
     const val MAX_COLOR_THRESHOLD = 255
+    const val MAX_TEMPLATE_BYTES = 1024 * 1024
+    const val MAX_TEMPLATE_CHUNK_BYTES = 24 * 1024
+    const val MAX_TEMPLATE_CHUNK_BASE64_BYTES = MAX_TEMPLATE_CHUNK_BYTES / 3 * 4
+    const val MAX_TEMPLATE_DIMENSION = 2_048
+    const val MAX_TEMPLATE_PIXELS = 1024 * 1024
+    const val MAX_TEMPLATE_MATCH_REGION_PIXELS = 4 * 1024 * 1024
+    const val MAX_TEMPLATE_MATCH_COMPARISONS = 16 * 1024 * 1024
+    const val MAX_TEMPLATE_ANCHORS = 16
+    const val MAX_TEMPLATE_ID_BYTES = 64
 
     val FORMATS = setOf("png", "jpeg")
     val IMAGE_ID = Regex("image-[1-9][0-9]*")
+    val TEMPLATE_ID = Regex("template-[1-9][0-9]*")
+    val SHA256 = Regex("[0-9a-f]{64}")
 }
 
 internal data class PythonHostImageRegion(
@@ -148,6 +160,516 @@ internal object PythonHostColorSearch {
         } finally {
             row.fill(0)
         }
+    }
+}
+
+internal data class PythonHostDecodedImageTemplate(
+    val width: Int,
+    val height: Int,
+    /** Ownership transfers to [PythonHostImageTemplateScope]. */
+    val pixels: IntArray,
+)
+
+internal class PythonHostImageTemplate private constructor(
+    val width: Int,
+    val height: Int,
+    val pixels: IntArray,
+    val opaqueOffsets: IntArray,
+    val anchorOffsets: IntArray,
+) {
+    fun clear() {
+        pixels.fill(0)
+        opaqueOffsets.fill(0)
+        anchorOffsets.fill(0)
+    }
+
+    companion object {
+        fun fromDecoded(decoded: PythonHostDecodedImageTemplate): PythonHostImageTemplate {
+            if (decoded.width <= 0 || decoded.height <= 0) {
+                throw PythonHostCapabilityInvalidImageTemplateException()
+            }
+            if (
+                decoded.width > PythonHostImagePolicy.MAX_TEMPLATE_DIMENSION ||
+                decoded.height > PythonHostImagePolicy.MAX_TEMPLATE_DIMENSION ||
+                decoded.width.toLong() * decoded.height > PythonHostImagePolicy.MAX_TEMPLATE_PIXELS
+            ) {
+                throw PythonHostCapabilityResultLimitException()
+            }
+            if (decoded.pixels.size != decoded.width * decoded.height) {
+                throw PythonHostCapabilityInvalidImageTemplateException()
+            }
+            val opaqueOffsets = IntArray(decoded.pixels.count(::isOpaque))
+            var opaqueIndex = 0
+            decoded.pixels.forEachIndexed { offset, pixel ->
+                if (isOpaque(pixel)) opaqueOffsets[opaqueIndex++] = offset
+            }
+            if (opaqueOffsets.isEmpty()) {
+                throw PythonHostCapabilityInvalidImageTemplateException()
+            }
+            val anchorCount = minOf(PythonHostImagePolicy.MAX_TEMPLATE_ANCHORS, opaqueOffsets.size)
+            val anchors = IntArray(anchorCount)
+            if (anchorCount == 1) {
+                anchors[0] = opaqueOffsets[0]
+            } else {
+                anchors.indices.forEach { index ->
+                    anchors[index] = opaqueOffsets[
+                        index * (opaqueOffsets.size - 1) / (anchorCount - 1)
+                    ]
+                }
+            }
+            return PythonHostImageTemplate(
+                width = decoded.width,
+                height = decoded.height,
+                pixels = decoded.pixels,
+                opaqueOffsets = opaqueOffsets,
+                anchorOffsets = anchors,
+            )
+        }
+
+        private fun isOpaque(pixel: Int): Boolean = pixel ushr 24 == 0xff
+    }
+}
+
+internal data class PythonHostImageTemplateDescriptor(
+    val id: String,
+    val format: String,
+    val byteLength: Int,
+) {
+    fun toJson(): JsonObject = JsonObject().apply {
+        addProperty("schema", SCHEMA)
+        addProperty("id", id)
+        addProperty("format", format)
+        addProperty("byteLength", byteLength)
+    }
+
+    private companion object {
+        const val SCHEMA = "autojs6-python-image-template-v1"
+    }
+}
+
+internal data class PythonHostImageTemplateChunkAck(
+    val templateId: String,
+    val offset: Int,
+    val nextOffset: Int,
+    val complete: Boolean,
+    val width: Int,
+    val height: Int,
+) {
+    fun toJson(): JsonObject = JsonObject().apply {
+        addProperty("schema", SCHEMA)
+        addProperty("templateId", templateId)
+        addProperty("offset", offset)
+        addProperty("nextOffset", nextOffset)
+        addProperty("complete", complete)
+        addProperty("width", width)
+        addProperty("height", height)
+    }
+
+    private companion object {
+        const val SCHEMA = "autojs6-python-image-template-chunk-v1"
+    }
+}
+
+internal data class PythonHostImageMatch(
+    val found: Boolean,
+    val x: Int,
+    val y: Int,
+) {
+    init {
+        require(
+            (found && x >= 0 && y >= 0) || (!found && x == NOT_FOUND && y == NOT_FOUND),
+        ) { "Python Host image match coordinates are inconsistent" }
+    }
+
+    fun toJson(): JsonObject = JsonObject().apply {
+        addProperty("schema", SCHEMA)
+        addProperty("found", found)
+        addProperty("x", x)
+        addProperty("y", y)
+    }
+
+    companion object {
+        const val NOT_FOUND = -1
+        private const val SCHEMA = "autojs6-python-image-match-v1"
+
+        fun found(x: Int, y: Int) = PythonHostImageMatch(true, x, y)
+
+        fun missing() = PythonHostImageMatch(false, NOT_FOUND, NOT_FOUND)
+    }
+}
+
+/** Owns at most one bounded encoded upload or decoded template for a Python execution. */
+internal class PythonHostImageTemplateScope(
+    private val decode: (format: String, bytes: ByteArray) -> PythonHostDecodedImageTemplate =
+        PythonHostImageTemplateDecoder::decode,
+) : AutoCloseable {
+    private var pending: PendingTemplate? = null
+    private var retained: RetainedTemplate? = null
+    private var generation = 0L
+    private var closed = false
+
+    @Synchronized
+    fun begin(format: String, byteLength: Int, sha256: String): PythonHostImageTemplateDescriptor {
+        check(!closed) { "Python Host image template scope is closed" }
+        require(format in PythonHostImagePolicy.FORMATS) { "Python Host template format is invalid" }
+        require(byteLength in 1..PythonHostImagePolicy.MAX_TEMPLATE_BYTES) {
+            "Python Host template byte length is invalid"
+        }
+        require(PythonHostImagePolicy.SHA256.matches(sha256)) {
+            "Python Host template SHA-256 is invalid"
+        }
+
+        clearRetained()
+        generation += 1L
+        val descriptor = PythonHostImageTemplateDescriptor(
+            id = "template-$generation",
+            format = format,
+            byteLength = byteLength,
+        )
+        val bytes = try {
+            ByteArray(byteLength)
+        } catch (error: OutOfMemoryError) {
+            throw PythonHostCapabilityResultLimitException(error)
+        }
+        pending = PendingTemplate(descriptor, sha256, bytes)
+        return descriptor
+    }
+
+    @Synchronized
+    fun writeChunk(templateId: String, offset: Int, data: String): PythonHostImageTemplateChunkAck {
+        check(!closed) { "Python Host image template scope is closed" }
+        val upload = pending
+            ?.takeIf { it.descriptor.id == templateId }
+            ?: throw PythonHostCapabilityStaleTemplateException()
+        var decodedChunk = ByteArray(0)
+        try {
+            require(offset == upload.nextOffset) { "Python Host template chunk offset is not contiguous" }
+            decodedChunk = runCatching { Base64.getDecoder().decode(data) }
+                .getOrElse { error ->
+                    throw IllegalArgumentException("Python Host template chunk is not Base64", error)
+                }
+            require(Base64.getEncoder().encodeToString(decodedChunk) == data) {
+                "Python Host template chunk Base64 is not canonical"
+            }
+            require(decodedChunk.size in 1..PythonHostImagePolicy.MAX_TEMPLATE_CHUNK_BYTES) {
+                "Python Host template chunk size is invalid"
+            }
+            require(offset <= upload.bytes.size - decodedChunk.size) {
+                "Python Host template chunk exceeds its declared byte length"
+            }
+            val nextOffset = offset + decodedChunk.size
+            if (nextOffset < upload.bytes.size) {
+                require(decodedChunk.size == PythonHostImagePolicy.MAX_TEMPLATE_CHUNK_BYTES) {
+                    "Python Host template upload has a short non-final chunk"
+                }
+            }
+            decodedChunk.copyInto(upload.bytes, destinationOffset = offset)
+            upload.nextOffset = nextOffset
+            if (nextOffset < upload.bytes.size) {
+                return PythonHostImageTemplateChunkAck(
+                    templateId = templateId,
+                    offset = offset,
+                    nextOffset = nextOffset,
+                    complete = false,
+                    width = 0,
+                    height = 0,
+                )
+            }
+
+            if (sha256(upload.bytes) != upload.sha256) {
+                throw PythonHostCapabilityInvalidImageTemplateException()
+            }
+            val decoded = decode.invoke(upload.descriptor.format, upload.bytes)
+            var templateOwnershipTransferred = false
+            try {
+                val template = PythonHostImageTemplate.fromDecoded(decoded)
+                retained = RetainedTemplate(upload.descriptor, template)
+                templateOwnershipTransferred = true
+                pending = null
+                upload.bytes.fill(0)
+                return PythonHostImageTemplateChunkAck(
+                    templateId = templateId,
+                    offset = offset,
+                    nextOffset = nextOffset,
+                    complete = true,
+                    width = template.width,
+                    height = template.height,
+                )
+            } finally {
+                if (!templateOwnershipTransferred) decoded.pixels.fill(0)
+            }
+        } catch (error: Throwable) {
+            clearRetained()
+            throw error
+        } finally {
+            decodedChunk.fill(0)
+        }
+    }
+
+    @Synchronized
+    fun find(
+        templateId: String,
+        source: PythonHostPixelSource,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+    ): PythonHostImageMatch {
+        check(!closed) { "Python Host image template scope is closed" }
+        val template = retained
+            ?.takeIf { it.descriptor.id == templateId }
+            ?.template
+            ?: throw PythonHostCapabilityStaleTemplateException()
+        return PythonHostTemplateSearch.find(source, template, threshold, region)
+    }
+
+    @Synchronized
+    fun release(templateId: String) {
+        check(!closed) { "Python Host image template scope is closed" }
+        if (pending?.descriptor?.id != templateId && retained?.descriptor?.id != templateId) {
+            throw PythonHostCapabilityStaleTemplateException()
+        }
+        clearRetained()
+    }
+
+    @Synchronized
+    override fun close() {
+        if (closed) return
+        closed = true
+        clearRetained()
+    }
+
+    private fun clearRetained() {
+        pending?.bytes?.fill(0)
+        pending = null
+        retained?.template?.clear()
+        retained = null
+    }
+
+    private fun sha256(bytes: ByteArray): String {
+        val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
+        val encoded = CharArray(digest.size * 2)
+        digest.forEachIndexed { index, value ->
+            val unsigned = value.toInt() and 0xff
+            encoded[index * 2] = HEX[unsigned ushr 4]
+            encoded[index * 2 + 1] = HEX[unsigned and 0x0f]
+        }
+        digest.fill(0)
+        return String(encoded)
+    }
+
+    private data class PendingTemplate(
+        val descriptor: PythonHostImageTemplateDescriptor,
+        val sha256: String,
+        val bytes: ByteArray,
+        var nextOffset: Int = 0,
+    )
+
+    private data class RetainedTemplate(
+        val descriptor: PythonHostImageTemplateDescriptor,
+        val template: PythonHostImageTemplate,
+    )
+
+    private companion object {
+        val HEX = "0123456789abcdef".toCharArray()
+    }
+}
+
+internal object PythonHostImageTemplateDecoder {
+    fun decode(format: String, bytes: ByteArray): PythonHostDecodedImageTemplate {
+        if (!hasSignature(bytes, format)) {
+            throw PythonHostCapabilityInvalidImageTemplateException()
+        }
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        try {
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        } catch (error: OutOfMemoryError) {
+            throw PythonHostCapabilityResultLimitException(error)
+        } catch (error: RuntimeException) {
+            throw PythonHostCapabilityInvalidImageTemplateException(error)
+        }
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
+            throw PythonHostCapabilityInvalidImageTemplateException()
+        }
+        if (
+            bounds.outWidth > PythonHostImagePolicy.MAX_TEMPLATE_DIMENSION ||
+            bounds.outHeight > PythonHostImagePolicy.MAX_TEMPLATE_DIMENSION ||
+            bounds.outWidth.toLong() * bounds.outHeight > PythonHostImagePolicy.MAX_TEMPLATE_PIXELS
+        ) {
+            throw PythonHostCapabilityResultLimitException()
+        }
+        val options = BitmapFactory.Options().apply {
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+            inScaled = false
+        }
+        val bitmap = try {
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+                ?: throw PythonHostCapabilityInvalidImageTemplateException()
+        } catch (error: OutOfMemoryError) {
+            throw PythonHostCapabilityResultLimitException(error)
+        } catch (error: PythonHostCapabilityInvalidImageTemplateException) {
+            throw error
+        } catch (error: RuntimeException) {
+            throw PythonHostCapabilityInvalidImageTemplateException(error)
+        }
+        var pixels = IntArray(0)
+        try {
+            if (bitmap.width != bounds.outWidth || bitmap.height != bounds.outHeight) {
+                throw PythonHostCapabilityInvalidImageTemplateException()
+            }
+            pixels = try {
+                IntArray(bitmap.width * bitmap.height)
+            } catch (error: OutOfMemoryError) {
+                throw PythonHostCapabilityResultLimitException(error)
+            }
+            bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+            return PythonHostDecodedImageTemplate(bitmap.width, bitmap.height, pixels).also {
+                pixels = IntArray(0)
+            }
+        } finally {
+            pixels.fill(0)
+            bitmap.recycle()
+        }
+    }
+
+    private fun hasSignature(bytes: ByteArray, format: String): Boolean = when (format) {
+        "png" -> bytes.size >= PNG_SIGNATURE.size &&
+            PNG_SIGNATURE.indices.all { bytes[it] == PNG_SIGNATURE[it] }
+        "jpeg" -> bytes.size >= 4 &&
+            bytes[0] == 0xff.toByte() &&
+            bytes[1] == 0xd8.toByte() &&
+            bytes[bytes.lastIndex - 1] == 0xff.toByte() &&
+            bytes[bytes.lastIndex] == 0xd9.toByte()
+        else -> false
+    }
+
+    private val PNG_SIGNATURE = byteArrayOf(
+        0x89.toByte(),
+        0x50,
+        0x4e,
+        0x47,
+        0x0d,
+        0x0a,
+        0x1a,
+        0x0a,
+    )
+}
+
+/** Deterministic row-major masked RGB template search with a hard comparison budget. */
+internal object PythonHostTemplateSearch {
+    fun find(
+        bitmap: Bitmap,
+        template: PythonHostImageTemplate,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+    ): PythonHostImageMatch = find(
+        source = object : PythonHostPixelSource {
+            override val width = bitmap.width
+            override val height = bitmap.height
+
+            override fun readRow(x: Int, y: Int, width: Int, destination: IntArray) {
+                bitmap.getPixels(destination, 0, width, x, y, width, 1)
+            }
+        },
+        template = template,
+        threshold = threshold,
+        region = region,
+    )
+
+    fun find(
+        source: PythonHostPixelSource,
+        template: PythonHostImageTemplate,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+        maximumComparisons: Int = PythonHostImagePolicy.MAX_TEMPLATE_MATCH_COMPARISONS,
+    ): PythonHostImageMatch {
+        require(threshold in 0..PythonHostImagePolicy.MAX_COLOR_THRESHOLD) {
+            "Python Host image threshold is invalid"
+        }
+        require(maximumComparisons > 0) { "Python Host image comparison budget is invalid" }
+        require(
+            source.width in 1..PythonHostImagePolicy.MAX_DIMENSION &&
+                source.height in 1..PythonHostImagePolicy.MAX_DIMENSION &&
+                source.width.toLong() * source.height <= PythonHostImagePolicy.MAX_PIXELS,
+        ) { "Python Host pixel source exceeds its fixed bounds" }
+        val search = region ?: PythonHostImageRegion(0, 0, source.width, source.height)
+        require(
+            search.x.toLong() + search.width <= source.width &&
+                search.y.toLong() + search.height <= source.height,
+        ) { "Python Host image search region exceeds the screenshot" }
+        if (search.width.toLong() * search.height > PythonHostImagePolicy.MAX_TEMPLATE_MATCH_REGION_PIXELS) {
+            throw PythonHostCapabilityResultLimitException()
+        }
+        require(template.width <= search.width && template.height <= search.height) {
+            "Python Host template does not fit the image search region"
+        }
+
+        val screenPixels = try {
+            IntArray(search.width * search.height)
+        } catch (error: OutOfMemoryError) {
+            throw PythonHostCapabilityResultLimitException(error)
+        }
+        val row = IntArray(search.width)
+        try {
+            repeat(search.height) { rowOffset ->
+                source.readRow(search.x, search.y + rowOffset, search.width, row)
+                row.copyInto(screenPixels, destinationOffset = rowOffset * search.width)
+            }
+            var comparisons = 0
+            val candidateWidth = search.width - template.width + 1
+            val candidateHeight = search.height - template.height + 1
+            for (candidateY in 0 until candidateHeight) {
+                for (candidateX in 0 until candidateWidth) {
+                    var anchorsMatch = true
+                    for (templateOffset in template.anchorOffsets) {
+                        comparisons += 1
+                        if (comparisons > maximumComparisons) {
+                            throw PythonHostCapabilityResultLimitException()
+                        }
+                        if (!matches(screenPixels, search.width, candidateX, candidateY, template, templateOffset, threshold)) {
+                            anchorsMatch = false
+                            break
+                        }
+                    }
+                    if (!anchorsMatch) continue
+
+                    var templateMatches = true
+                    for (templateOffset in template.opaqueOffsets) {
+                        comparisons += 1
+                        if (comparisons > maximumComparisons) {
+                            throw PythonHostCapabilityResultLimitException()
+                        }
+                        if (!matches(screenPixels, search.width, candidateX, candidateY, template, templateOffset, threshold)) {
+                            templateMatches = false
+                            break
+                        }
+                    }
+                    if (templateMatches) {
+                        return PythonHostImageMatch.found(search.x + candidateX, search.y + candidateY)
+                    }
+                }
+            }
+            return PythonHostImageMatch.missing()
+        } finally {
+            row.fill(0)
+            screenPixels.fill(0)
+        }
+    }
+
+    private fun matches(
+        screenPixels: IntArray,
+        screenWidth: Int,
+        candidateX: Int,
+        candidateY: Int,
+        template: PythonHostImageTemplate,
+        templateOffset: Int,
+        threshold: Int,
+    ): Boolean {
+        val templateY = templateOffset / template.width
+        val templateX = templateOffset - templateY * template.width
+        val screenPixel = screenPixels[(candidateY + templateY) * screenWidth + candidateX + templateX]
+        val templatePixel = template.pixels[templateOffset]
+        return abs((screenPixel ushr 16 and 0xff) - (templatePixel ushr 16 and 0xff)) <= threshold &&
+            abs((screenPixel ushr 8 and 0xff) - (templatePixel ushr 8 and 0xff)) <= threshold &&
+            abs((screenPixel and 0xff) - (templatePixel and 0xff)) <= threshold
     }
 }
 
@@ -543,3 +1065,9 @@ internal class PythonHostCapabilityScreenCaptureFailedException(
 ) : RuntimeException(cause)
 
 internal class PythonHostCapabilityStaleImageException : RuntimeException()
+
+internal class PythonHostCapabilityInvalidImageTemplateException(
+    cause: Throwable? = null,
+) : RuntimeException(cause)
+
+internal class PythonHostCapabilityStaleTemplateException : RuntimeException()

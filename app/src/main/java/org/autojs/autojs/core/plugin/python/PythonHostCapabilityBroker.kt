@@ -90,6 +90,10 @@ internal object PythonHostCapabilities {
     const val SELECTOR_SET_TEXT = "selector.set_text"
     const val IMAGES_CAPTURE_SCREEN = "images.capture_screen"
     const val IMAGES_FIND_COLOR = "images.find_color"
+    const val IMAGES_BEGIN_TEMPLATE = "images.begin_template"
+    const val IMAGES_WRITE_TEMPLATE_CHUNK = "images.write_template_chunk"
+    const val IMAGES_FIND_IMAGE = "images.find_image"
+    const val IMAGES_RELEASE_TEMPLATE = "images.release_template"
     const val IMAGES_READ_CHUNK = "images.read_chunk"
     const val IMAGES_RELEASE = "images.release"
 
@@ -130,6 +134,10 @@ internal object PythonHostCapabilities {
         SELECTOR_SET_TEXT,
         IMAGES_CAPTURE_SCREEN,
         IMAGES_FIND_COLOR,
+        IMAGES_BEGIN_TEMPLATE,
+        IMAGES_WRITE_TEMPLATE_CHUNK,
+        IMAGES_FIND_IMAGE,
+        IMAGES_RELEASE_TEMPLATE,
         IMAGES_READ_CHUNK,
         IMAGES_RELEASE,
     )
@@ -564,6 +572,26 @@ internal interface PythonHostCapabilityActions {
         region: PythonHostImageRegion?,
     ): PythonHostColorMatch
 
+    fun beginImageTemplate(
+        format: String,
+        byteLength: Int,
+        sha256: String,
+    ): PythonHostImageTemplateDescriptor
+
+    fun writeImageTemplateChunk(
+        templateId: String,
+        offset: Int,
+        data: String,
+    ): PythonHostImageTemplateChunkAck
+
+    fun findScreenImage(
+        templateId: String,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+    ): PythonHostImageMatch
+
+    fun releaseImageTemplate(templateId: String)
+
     fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk
 
     fun releaseScreenImage(imageId: String)
@@ -601,6 +629,7 @@ internal class AndroidPythonHostCapabilityActions(
             quality = quality,
         )
     }
+    private val imageTemplates = PythonHostImageTemplateScope()
     private val hostFiles = PythonHostFileScope(fileRoot)
     private val hostEngines = PythonHostEngineScope(
         source = source,
@@ -826,6 +855,42 @@ internal class AndroidPythonHostCapabilityActions(
         PythonHostColorSearch.find(bitmap, color, threshold, region)
     }
 
+    override fun beginImageTemplate(
+        format: String,
+        byteLength: Int,
+        sha256: String,
+    ): PythonHostImageTemplateDescriptor = imageTemplates.begin(format, byteLength, sha256)
+
+    override fun writeImageTemplateChunk(
+        templateId: String,
+        offset: Int,
+        data: String,
+    ): PythonHostImageTemplateChunkAck = imageTemplates.writeChunk(templateId, offset, data)
+
+    override fun findScreenImage(
+        templateId: String,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+    ): PythonHostImageMatch = PythonHostAccessibilityScreenCapture.useCapturedBitmap(
+        service = requireAccessibilityService(),
+    ) { bitmap ->
+        imageTemplates.find(
+            templateId = templateId,
+            source = object : PythonHostPixelSource {
+                override val width = bitmap.width
+                override val height = bitmap.height
+
+                override fun readRow(x: Int, y: Int, width: Int, destination: IntArray) {
+                    bitmap.getPixels(destination, 0, width, x, y, width, 1)
+                }
+            },
+            threshold = threshold,
+            region = region,
+        )
+    }
+
+    override fun releaseImageTemplate(templateId: String) = imageTemplates.release(templateId)
+
     override fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk =
         screenImages.readChunk(imageId, offset)
 
@@ -835,7 +900,11 @@ internal class AndroidPythonHostCapabilityActions(
         try {
             selector.close()
         } finally {
-            screenImages.close()
+            try {
+                screenImages.close()
+            } finally {
+                imageTemplates.close()
+            }
         }
     }
 
@@ -1180,6 +1249,43 @@ internal class PythonHostCapabilityDispatcher(
                         ),
                     )
                 }
+                PythonHostCapabilities.IMAGES_BEGIN_TEMPLATE -> {
+                    request.requireArguments(ARG_FORMAT, ARG_BYTE_LENGTH, ARG_SHA256)
+                    encodeSuccess(
+                        request,
+                        actions.beginImageTemplate(
+                            request.imageFormatArgument(),
+                            request.templateByteLengthArgument(),
+                            request.templateSha256Argument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.IMAGES_WRITE_TEMPLATE_CHUNK -> {
+                    request.requireArguments(ARG_TEMPLATE_ID, ARG_OFFSET, ARG_DATA)
+                    encodeSuccess(
+                        request,
+                        actions.writeImageTemplateChunk(
+                            request.templateIdArgument(),
+                            request.templateOffsetArgument(),
+                            request.templateChunkArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.IMAGES_FIND_IMAGE -> {
+                    request.requireArguments(ARG_TEMPLATE_ID, ARG_THRESHOLD, ARG_REGION)
+                    encodeSuccess(
+                        request,
+                        actions.findScreenImage(
+                            request.templateIdArgument(),
+                            request.imageColorThresholdArgument(),
+                            request.imageRegionArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.IMAGES_RELEASE_TEMPLATE -> {
+                    actions.releaseImageTemplate(request.singleTemplateIdArgument())
+                    encodeSuccess(request, null)
+                }
                 PythonHostCapabilities.IMAGES_READ_CHUNK -> {
                     request.requireArguments(ARG_IMAGE_ID, ARG_OFFSET)
                     encodeSuccess(
@@ -1268,6 +1374,18 @@ internal class PythonHostCapabilityDispatcher(
                 ERROR_STALE_IMAGE,
                 "Host screen image is stale or no longer retained",
             )
+        } catch (_: PythonHostCapabilityInvalidImageTemplateException) {
+            encodeFailure(
+                request,
+                ERROR_INVALID_IMAGE_TEMPLATE,
+                "Image template is invalid or unsupported",
+            )
+        } catch (_: PythonHostCapabilityStaleTemplateException) {
+            encodeFailure(
+                request,
+                ERROR_STALE_TEMPLATE,
+                "Host image template is stale or no longer retained",
+            )
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
         } catch (_: Throwable) {
@@ -1349,6 +1467,9 @@ internal class PythonHostCapabilityDispatcher(
                 is PythonHostScreenImageDescriptor -> add(KEY_VALUE, value.toJson())
                 is PythonHostScreenImageChunk -> add(KEY_VALUE, value.toJson())
                 is PythonHostColorMatch -> add(KEY_VALUE, value.toJson())
+                is PythonHostImageTemplateDescriptor -> add(KEY_VALUE, value.toJson())
+                is PythonHostImageTemplateChunkAck -> add(KEY_VALUE, value.toJson())
+                is PythonHostImageMatch -> add(KEY_VALUE, value.toJson())
                 is List<*> -> add(
                     KEY_VALUE,
                     JsonArray().apply {
@@ -1598,6 +1719,43 @@ internal class PythonHostCapabilityDispatcher(
             maximum = PythonHostImagePolicy.MAX_IMAGE_BYTES - 1,
         )
 
+        fun templateByteLengthArgument(): Int = integerArgument(
+            name = ARG_BYTE_LENGTH,
+            minimum = 1,
+            maximum = PythonHostImagePolicy.MAX_TEMPLATE_BYTES,
+        )
+
+        fun templateSha256Argument(): String = textArgument(
+            ARG_SHA256,
+            pattern = PythonHostImagePolicy.SHA256,
+            maxBytes = 64,
+            allowEmpty = false,
+        )
+
+        fun singleTemplateIdArgument(): String {
+            requireArguments(ARG_TEMPLATE_ID)
+            return templateIdArgument()
+        }
+
+        fun templateIdArgument(): String = textArgument(
+            ARG_TEMPLATE_ID,
+            pattern = PythonHostImagePolicy.TEMPLATE_ID,
+            maxBytes = PythonHostImagePolicy.MAX_TEMPLATE_ID_BYTES,
+            allowEmpty = false,
+        )
+
+        fun templateOffsetArgument(): Int = integerArgument(
+            name = ARG_OFFSET,
+            minimum = 0,
+            maximum = PythonHostImagePolicy.MAX_TEMPLATE_BYTES - 1,
+        )
+
+        fun templateChunkArgument(): String = textArgument(
+            ARG_DATA,
+            maxBytes = PythonHostImagePolicy.MAX_TEMPLATE_CHUNK_BASE64_BYTES,
+            allowEmpty = false,
+        )
+
         fun selectorQueryArgument(): PythonHostSelectorQuery {
             val query = arguments.get(ARG_QUERY)
                 ?.takeIf(JsonElement::isJsonObject)
@@ -1679,6 +1837,10 @@ internal class PythonHostCapabilityDispatcher(
         const val ARG_THRESHOLD = "threshold"
         const val ARG_REGION = "region"
         const val ARG_IMAGE_ID = "imageId"
+        const val ARG_TEMPLATE_ID = "templateId"
+        const val ARG_BYTE_LENGTH = "byteLength"
+        const val ARG_SHA256 = "sha256"
+        const val ARG_DATA = "data"
         const val ARG_OFFSET = "offset"
         const val REGION_X = "x"
         const val REGION_Y = "y"
@@ -1715,6 +1877,8 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_SCREEN_CAPTURE_UNAVAILABLE = "SCREEN_CAPTURE_UNAVAILABLE"
         const val ERROR_SCREEN_CAPTURE_FAILED = "SCREEN_CAPTURE_FAILED"
         const val ERROR_STALE_IMAGE = "STALE_IMAGE"
+        const val ERROR_INVALID_IMAGE_TEMPLATE = "INVALID_IMAGE_TEMPLATE"
+        const val ERROR_STALE_TEMPLATE = "STALE_TEMPLATE"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
         val IMAGE_REGION_KEYS = setOf(REGION_X, REGION_Y, REGION_WIDTH, REGION_HEIGHT)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")
@@ -1788,7 +1952,9 @@ internal class PythonHostCapabilityPathNotFoundException : RuntimeException()
 
 internal class PythonHostCapabilityPathTypeException : RuntimeException()
 
-internal class PythonHostCapabilityResultLimitException : RuntimeException()
+internal class PythonHostCapabilityResultLimitException(
+    cause: Throwable? = null,
+) : RuntimeException(cause)
 
 internal class PythonHostCapabilityFileEncodingException(cause: Throwable) : RuntimeException(cause)
 
