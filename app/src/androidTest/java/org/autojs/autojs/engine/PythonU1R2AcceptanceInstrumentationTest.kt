@@ -956,6 +956,190 @@ class PythonU1R2AcceptanceInstrumentationTest {
         }
     }
 
+    @Test
+    fun hostEnginesExposeSafeCurrentMetadataAndLaunchScopedJavaScript() {
+        val projectRoot = freshProjectRoot()
+        val childMarker = File(projectRoot, ENGINE_CHILD_MARKER_PATH)
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import engines, result
+                from autojs6.errors import HostCapabilityError
+
+                current = engines.current()
+                child = engines.run("child.js")
+                try:
+                    engines.run("nested.py")
+                    nested_code = "NO_ERROR"
+                except HostCapabilityError as error:
+                    nested_code = error.code
+                result.set({
+                    "child": child,
+                    "current": current,
+                    "nestedCode": nested_code,
+                })
+                """.trimIndent() + "\n",
+            )
+            File(projectRoot, "child.js").writeText(
+                "files.write(files.join(files.cwd(), \"$ENGINE_CHILD_MARKER_PATH\"), \"$ENGINE_CHILD_MARKER_TEXT\");\n",
+                Charsets.UTF_8,
+            )
+            File(projectRoot, "nested.py").writeText(
+                "raise AssertionError('nested Python must not start')\n",
+                Charsets.UTF_8,
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 engines current/run execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 engines current/run execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 engines current/run execution")
+                val structuredJson = requireNotNull(result.structuredJson) {
+                    "M3 engines current/run execution did not expose a structured result"
+                }
+                assertFalse(
+                    "M3 engines current metadata leaked the execution root",
+                    structuredJson.contains(projectRoot.canonicalPath, ignoreCase = true),
+                )
+                val root = JSONObject(structuredJson)
+                assertEquals("NESTED_PYTHON_NOT_ALLOWED", root.getString("nestedCode"))
+
+                val current = root.getJSONObject("current")
+                assertEquals("autojs6-python-engine-info-v1", current.getString("schema"))
+                assertEquals(execution.id, current.getInt("id"))
+                assertEquals("python", current.getString("engineName"))
+                assertEquals(SIMPLE_ENTRY_POINT, current.getString("entryPoint"))
+                assertTrue(current.getBoolean("project"))
+                assertTrue(current.getLong("startedAtMillis") > 0L)
+                val sourceName = current.getString("sourceName")
+                assertTrue("M3 current engine source name is blank", sourceName.isNotBlank())
+                assertFalse("M3 current engine source name exposed a path", '/' in sourceName || '\\' in sourceName)
+
+                val child = root.getJSONObject("child")
+                assertEquals("autojs6-python-engine-launch-v1", child.getString("schema"))
+                assertEquals("child.js", child.getString("path"))
+                assertFalse("Nested Python unexpectedly launched", child.getString("engineName") == "python")
+                assertTrue(child.getString("sourceName").isNotBlank())
+                val childExecutionId = child.getInt("id")
+                assertTrue("M3 child engine ID is invalid", childExecutionId >= 0)
+                awaitFileContent(
+                    childMarker,
+                    ENGINE_CHILD_MARKER_TEXT,
+                    "M3 scoped JavaScript child",
+                )
+                awaitEngineRemoved(childExecutionId, "M3 scoped JavaScript child")
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 engines current/run")
+        }
+    }
+
+    @Test
+    fun hostEngineStopSelfRetiresProviderAndPreventsFollowingCode() {
+        val firstRoot = freshProjectRoot()
+        val secondRoot = freshProjectRoot()
+        val firstMarker = "M3_STOP_SELF_FIRST_${UUID.randomUUID()}"
+        val secondMarker = "M3_STOP_SELF_SECOND_${UUID.randomUUID()}"
+        try {
+            writeSimpleProject(
+                firstRoot,
+                """
+                import os
+                from autojs6 import engines, files
+
+                print("$firstMarker:{}".format(os.getpid()), flush=True)
+                files.write_text("$ENGINE_STOP_BEFORE_PATH", "before")
+                engines.stop_self()
+                files.write_text("$ENGINE_STOP_AFTER_PATH", "after")
+                """.trimIndent() + "\n",
+            )
+            val firstLaunch = admittedProjectLaunch(firstRoot)
+            val firstPending = PendingProjectExecution(firstRoot.canonicalPath)
+            val firstCheckpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(firstPending.listener)
+            val firstPid: Int
+            try {
+                service.execute(firstLaunch.source, firstLaunch.createExecutionConfig())
+                val execution = awaitStarted(firstPending, "M3 engines stop-self execution")
+                awaitConsoleSince(firstCheckpoint, firstMarker, LIVE_OUTPUT_TIMEOUT_SECONDS)
+                firstPid = consolePidSince(firstCheckpoint, firstMarker)
+                awaitCompleted(
+                    firstPending,
+                    execution,
+                    "M3 engines stop-self execution",
+                    STOP_TIMEOUT_SECONDS,
+                )
+                assertEquals(1, firstPending.startCount.get())
+                assertEquals(
+                    "M3 stop-self must produce exactly one Host terminal callback",
+                    1,
+                    firstPending.successCount.get() + firstPending.exceptionCount.get(),
+                )
+                awaitFileContent(
+                    File(firstRoot, ENGINE_STOP_BEFORE_PATH),
+                    "before",
+                    "M3 engines stop-self before marker",
+                )
+                assertFalse(
+                    "Python code after engines.stop_self() unexpectedly executed",
+                    File(firstRoot, ENGINE_STOP_AFTER_PATH).exists(),
+                )
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(firstPending.listener)
+            }
+
+            writeSimpleProject(
+                secondRoot,
+                """
+                import os
+                from autojs6 import result
+
+                print("$secondMarker:{}".format(os.getpid()), flush=True)
+                result.set({"restarted": True})
+                """.trimIndent() + "\n",
+            )
+            val secondLaunch = admittedProjectLaunch(secondRoot)
+            val secondPending = PendingProjectExecution(secondRoot.canonicalPath)
+            val secondCheckpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(secondPending.listener)
+            try {
+                service.execute(secondLaunch.source, secondLaunch.createExecutionConfig())
+                val execution = awaitStarted(secondPending, "M3 engines stop-self restart")
+                awaitCompleted(
+                    secondPending,
+                    execution,
+                    "M3 engines stop-self restart",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(secondPending, "M3 engines stop-self restart")
+                assertEquals("{\"restarted\":true}", result.structuredJson)
+                assertConsoleSince(secondCheckpoint, secondMarker)
+                val secondPid = consolePidSince(secondCheckpoint, secondMarker)
+                assertTrue(
+                    "Python provider PID did not change after engines.stop_self(): $firstPid",
+                    firstPid != secondPid,
+                )
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(secondPending.listener)
+            }
+        } finally {
+            cleanProjectRoot(firstRoot, "M3 engines stop-self first")
+            cleanProjectRoot(secondRoot, "M3 engines stop-self restart")
+        }
+    }
+
     private fun runForegroundFileEntry(
         activity: Activity,
         sourceFile: File,
@@ -1288,6 +1472,15 @@ class PythonU1R2AcceptanceInstrumentationTest {
         )
     }
 
+    private fun awaitFileContent(file: File, expected: String, label: String) {
+        val deadline = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(LIVE_OUTPUT_TIMEOUT_SECONDS)
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (file.isFile && runCatching { file.readText(Charsets.UTF_8) }.getOrNull() == expected) return
+            SystemClock.sleep(CONSOLE_POLL_MILLIS)
+        }
+        throw AssertionError("$label did not publish $file with the expected UTF-8 text")
+    }
+
     private fun consoleContainsSince(checkpoint: Int, expected: String): Boolean =
         synchronized(console.logEntries) {
             console.logEntries.any { entry ->
@@ -1539,6 +1732,10 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val DIALOG_SELECT_SECOND = "M3 second"
         const val EXPECTED_DIALOG_RESULT_JSON =
             "{\"alert\":true,\"confirmed\":true,\"reply\":\"$DIALOG_PROMPT_REPLY\",\"selected\":1}"
+        const val ENGINE_CHILD_MARKER_PATH = "engine-child-marker.txt"
+        const val ENGINE_CHILD_MARKER_TEXT = "child-ran"
+        const val ENGINE_STOP_BEFORE_PATH = "before-stop.txt"
+        const val ENGINE_STOP_AFTER_PATH = "after-stop.txt"
         const val ENTRY_MODE_ARGUMENT = "autojs6.python.entryMode"
         const val PACKAGE_NAME = "u1r2case"
         const val ENTRY_POINT = "$PACKAGE_NAME/main.py"

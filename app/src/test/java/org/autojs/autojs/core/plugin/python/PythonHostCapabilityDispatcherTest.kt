@@ -124,6 +124,19 @@ class PythonHostCapabilityDispatcherTest {
                 ),
             ),
         )
+        assertEquals(
+            ENGINE_INFO.toJson(),
+            success(dispatcher.dispatch(request(22, PythonHostCapabilities.ENGINES_CURRENT))),
+        )
+        assertEquals(
+            ENGINE_LAUNCH.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(23, PythonHostCapabilities.ENGINES_RUN, "path" to "child.js"),
+                ),
+            ),
+        )
+        assertNull(success(dispatcher.dispatch(request(24, PythonHostCapabilities.ENGINES_STOP_SELF))))
 
         assertEquals(listOf("hello"), actions.toasts)
         assertEquals("copy", actions.clipboard)
@@ -144,6 +157,60 @@ class PythonHostCapabilityDispatcherTest {
         assertEquals(listOf("Confirm" to "confirm text"), actions.confirmations)
         assertEquals(listOf(Triple("Prompt", "prompt text", "seed")), actions.prompts)
         assertEquals(listOf("Select" to listOf("first", "second")), actions.selections)
+        assertEquals(listOf("child.js"), actions.scriptPaths)
+        assertEquals(1, actions.stopSelfRequests)
+    }
+
+    @Test
+    fun validatesEngineArgumentsAndMapsBoundedLaunchFailures() {
+        val actions = RecordingActions()
+        val dispatcher = dispatcher(actions)
+
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(
+                dispatcher.dispatch(
+                    request(1, PythonHostCapabilities.ENGINES_CURRENT, "path" to "child.js"),
+                ),
+            ),
+        )
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(
+                dispatcher.dispatch(
+                    request(2, PythonHostCapabilities.ENGINES_STOP_SELF, "path" to "child.js"),
+                ),
+            ),
+        )
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(
+                dispatcher.dispatch(
+                    request(3, PythonHostCapabilities.ENGINES_RUN, "path" to "../outside.js"),
+                ),
+            ),
+        )
+        assertEquals(0, actions.stopSelfRequests)
+        assertEquals(emptyList<String>(), actions.scriptPaths)
+
+        actions.engineFailure = PythonHostCapabilityNestedPythonException()
+        assertEquals(
+            "NESTED_PYTHON_NOT_ALLOWED",
+            failureCode(
+                dispatcher.dispatch(
+                    request(4, PythonHostCapabilities.ENGINES_RUN, "path" to "child.py"),
+                ),
+            ),
+        )
+        actions.engineFailure = PythonHostCapabilityEngineLaunchLimitException()
+        assertEquals(
+            "ENGINE_LAUNCH_LIMIT_EXCEEDED",
+            failureCode(
+                dispatcher.dispatch(
+                    request(5, PythonHostCapabilities.ENGINES_RUN, "path" to "child.js"),
+                ),
+            ),
+        )
     }
 
     @Test
@@ -390,9 +457,12 @@ class PythonHostCapabilityDispatcherTest {
         val confirmations = mutableListOf<Pair<String, String>>()
         val prompts = mutableListOf<Triple<String, String, String>>()
         val selections = mutableListOf<Pair<String, List<String>>>()
+        val scriptPaths = mutableListOf<String>()
+        var stopSelfRequests = 0
         var denyNotice = false
         var fileFailure: RuntimeException? = null
         var dialogFailure: RuntimeException? = null
+        var engineFailure: RuntimeException? = null
 
         override fun showToast(text: String) {
             toasts += text
@@ -482,6 +552,19 @@ class PythonHostCapabilityDispatcherTest {
             selections += title to items
             return 1
         }
+
+        override fun currentEngine(): PythonHostEngineInfo = ENGINE_INFO
+
+        override fun requestStopSelf() {
+            engineFailure?.let { throw it }
+            stopSelfRequests += 1
+        }
+
+        override fun runScript(path: String): PythonHostEngineLaunch {
+            engineFailure?.let { throw it }
+            scriptPaths += path
+            return ENGINE_LAUNCH.copy(path = path)
+        }
     }
 
     private companion object {
@@ -497,6 +580,20 @@ class PythonHostCapabilityDispatcherTest {
             notificationMaxVolume = 7,
             alarmVolume = 5,
             alarmMaxVolume = 7,
+        )
+        val ENGINE_INFO = PythonHostEngineInfo(
+            id = 17,
+            engineName = "python",
+            sourceName = "main",
+            entryPoint = "main.py",
+            project = true,
+            startedAtMillis = 123456789L,
+        )
+        val ENGINE_LAUNCH = PythonHostEngineLaunch(
+            id = 18,
+            engineName = "org.autojs.autojs.script.JavaScriptSource.Engine",
+            sourceName = "child",
+            path = "child.js",
         )
     }
 }
