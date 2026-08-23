@@ -20,7 +20,7 @@ import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 internal data class TypeScriptExecutableSource(
     val sourceName: String,
     val javaScript: String,
-    val sourceMap: String,
+    val sourceMapBinding: TypeScriptSourceMapBinding,
     val generatedSourceName: String,
     val diagnostics: List<TypeScriptDiagnostic>,
 )
@@ -60,13 +60,21 @@ internal object TypeScriptExecutionCompiler {
             throw error
         }
         return when (output) {
-            is TypeScriptCompilationOutput.Emitted -> TypeScriptExecutableSource(
-                sourceName = sourceName,
-                javaScript = output.javaScript,
-                sourceMap = output.sourceMap,
-                generatedSourceName = source.fullPath + GENERATED_SUFFIX,
-                diagnostics = output.diagnostics,
-            )
+            is TypeScriptCompilationOutput.Emitted -> {
+                val generatedSourceName = source.fullPath + GENERATED_SUFFIX
+                TypeScriptExecutableSource(
+                    sourceName = sourceName,
+                    javaScript = output.javaScript,
+                    sourceMapBinding = TypeScriptSourceMapBinding.parse(
+                        sourceMapText = output.sourceMap,
+                        generatedSourceName = generatedSourceName,
+                        expectedGeneratedFileName = output.entryModulePath.substringAfterLast('/'),
+                        originalSourceName = sourceName,
+                    ),
+                    generatedSourceName = generatedSourceName,
+                    diagnostics = output.diagnostics,
+                )
+            }
             is TypeScriptCompilationOutput.Diagnostics -> throw TypeScriptDiagnosticsException(
                 message = context.getString(R.string.error_typescript_compilation_failed),
                 sourceName = sourceName,

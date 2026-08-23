@@ -52,6 +52,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.javascript.RhinoException
 
 @RunWith(AndroidJUnit4::class)
 class TypeScriptCompilerPluginClientDeviceTest {
@@ -518,6 +519,53 @@ class TypeScriptCompilerPluginClientDeviceTest {
         } finally {
             console.clear()
             System.clearProperty(markerKey)
+        }
+    }
+
+    @Test
+    fun runtimeErrorsMapBackToClickableTypeScriptSource() {
+        val marker = "typescript-runtime-map-marker-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            withSource(
+                name = "runtime map.ts",
+                source = """
+                    function failAtTypeScriptLine(): never {
+                        const message: string = "$marker"
+                        throw new Error(message)
+                    }
+                    failAtTypeScriptLine()
+                """.trimIndent(),
+            ) { source ->
+                val expectedLineNumber = 3
+                val terminal = executeAndAwait(source)
+                val failure = terminal.failure.get()
+
+                assertFalse(terminal.succeeded.get())
+                assertTrue(
+                    "Expected RhinoException, got " + (failure?.javaClass?.name ?: "no failure"),
+                    failure is RhinoException,
+                )
+                assertTrue(terminal.execution.engine is LoopBasedJavaScriptEngine)
+
+                val consoleMessage = awaitConsoleMessage(marker)
+                assertTrue(consoleMessage.contains("${source.name}:$expectedLineNumber"))
+                assertFalse(consoleMessage.contains(".generated.js"))
+                val link = StackFrameParser.parse(consoleMessage).single { candidate ->
+                    candidate.sourceName == source.name &&
+                        candidate.lineIndex == expectedLineNumber - 1
+                }
+                assertEquals(0, link.columnNumber)
+                assertTrue(
+                    StackFrameTargetResolver.matchesCurrentFile(
+                        link.sourceName,
+                        source.absolutePath,
+                    ),
+                )
+            }
+        } finally {
+            console.clear()
         }
     }
 

@@ -93,7 +93,10 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         try {
             val executable = (source as? CompiledTypeScriptSource)?.executable
             executable?.let { compiled ->
-                setTag(TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG, compiled.sourceMap)
+                setTag(
+                    TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG,
+                    compiled.sourceMapBinding,
+                )
                 setTag(
                     TypeScriptExecutionCompiler.GENERATED_SOURCE_ENGINE_TAG,
                     compiled.generatedSourceName,

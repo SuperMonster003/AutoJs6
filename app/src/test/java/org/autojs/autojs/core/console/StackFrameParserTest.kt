@@ -58,6 +58,25 @@ class StackFrameParserTest {
     }
 
     @Test
+    fun parseV8TypeScriptFramesWithSpacesWithoutCreatingSuffixDuplicates() {
+        val frames = StackFrameParser.parse(
+            """
+                Error: runtime failure
+                    at failAtSource (my runtime script.ts:3)
+                    at another runtime script.ts:8
+            """.trimIndent(),
+        )
+
+        assertEquals(2, frames.size)
+        assertEquals("my runtime script.ts", frames[0].sourceName)
+        assertEquals(2, frames[0].lineIndex)
+        assertEquals(0, frames[0].columnNumber)
+        assertEquals("another runtime script.ts", frames[1].sourceName)
+        assertEquals(7, frames[1].lineIndex)
+        assertEquals(0, frames[1].columnNumber)
+    }
+
+    @Test
     fun ignoreStackFramesWithOverflowingNumbers() {
         val frames = StackFrameParser.parse(
             "script.js:999999999999999999999:1\nscript.ts:1:999999999999999999999",

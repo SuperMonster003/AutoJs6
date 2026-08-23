@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import org.autojs.autojs.core.plugin.jvm.JvmSourceUserFacingException;
 import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages;
+import org.autojs.autojs.core.plugin.typescript.TypeScriptRuntimeStackTraceFormatter;
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.execution.LoopedBasedJavaScriptExecution;
 import org.autojs.autojs.execution.RunnableScriptExecution;
@@ -103,7 +104,7 @@ public class ScriptEngineService {
                         message = compilationException.getMessage();
                         mGlobalConsole.error(compilationException.getConsoleMessage());
                     } else if (engine instanceof JavaScriptEngine scriptEngine) {
-                        scriptEngine.getRuntime().console.error(e);
+                        logJavaScriptRuntimeFailure(scriptEngine, e);
                     } else if (e instanceof JvmSourceUserFacingException) {
                         // Provider/compiler details are streamed by RemoteJvmScriptEngine. Keep the
                         // stable terminal message in Console without exposing the Binder cause chain.
@@ -119,7 +120,7 @@ public class ScriptEngineService {
                     Throwable uncaughtException = engine.getUncaughtException();
                     if (uncaughtException != null) {
                         message = uncaughtException.getMessage();
-                        scriptEngine.getRuntime().console.error(uncaughtException);
+                        logJavaScriptRuntimeFailure(scriptEngine, uncaughtException);
                     }
                 }
                 if (message != null) {
@@ -138,6 +139,14 @@ public class ScriptEngineService {
 
     public Console getGlobalConsole() {
         return mGlobalConsole;
+    }
+
+    private static void logJavaScriptRuntimeFailure(
+            JavaScriptEngine engine,
+            Throwable error
+    ) {
+        String mappedStackTrace = TypeScriptRuntimeStackTraceFormatter.format(engine, error);
+        engine.getRuntime().console.error(mappedStackTrace == null ? error : mappedStackTrace);
     }
 
     public Context getLanguageContext() {

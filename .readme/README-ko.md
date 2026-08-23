@@ -182,6 +182,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 로컬 단일 파일 .ts 스크립트를 Rhino 실행 전에 독립 컴파일러 플러그인으로 전달하고 UTF-8 소스 식별자와 Source Map 출력을 보존하며, 형식 오류를 실행 전에 거부하고 Node.js 플러그인이나 원본 TypeScript 실행으로 폴백하지 않음; 지원하지 않는 TSX/선언 파일과 컴파일러 사용 불가 상태는 명시적인 현지화 오류를 반환
 * `추가` "ui" 모드 지시문을 사용하는 로컬 단일 파일 .ts 스크립트에서 컴파일 후 Rhino Activity의 문자열 XML 레이아웃 실행, 뷰 조회, 클릭 콜백, 텍스트 갱신 및 명시적 UI 종료 지원; 네이티브 TSX 레이아웃 문법은 계속 명시적으로 거부
 * `추가` TypeScript 컴파일러 진단을 소스 파일, 1 기반 줄과 열, 심각도 및 TS 오류 코드를 포함한 호스트 ScriptCompilationException 레코드로 노출하고, Console과 편집기 하단 로그 패널에 해당 소스 위치로 이동하는 깔끔한 클릭 가능 위치를 표시
+* `추가` Rhino TypeScript 런타임 예외에서 컴파일러 Source Map v3를 사용해 생성된 JavaScript 스택 프레임을 원본 .ts 파일과 줄로 매핑하고, 제공되지 않은 열을 만들지 않으며, Console과 편집기 로그 패널의 매핑 위치를 클릭 가능하게 유지
 * `추가` 독립 Python Runtime 플러그인 백엔드에서 로컬 .py 파일과 `type: python`으로 선언된 스크립트 프로젝트를 별도의 CPython 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 핫 플러그, JavaScript 폴백 금지를 지원
 * `추가` Python 실행 통합은 파일 관리자/편집기/로컬 Run Intent/단일 파일 Import Intent/새 바로 가기/예약 작업/브로드캐스트 작업을 포함하고 단일 파일 또는 프로젝트 컨텍스트를 엄격하게 유지; 프로젝트에서 내부 import/상대 파일 접근/읽기 전용 `autojs6.app/device/execution/project` API 지원
 * `추가` Python Runtime 실행은 ExecutionConfig 키 `autojs6.python.stdinSnapshot`을 통한 선택적이고 제한된 사전 제공 stdin 스냅샷을 지원하며, 엄격한 ByteArray/UTF-8 텍스트 허용, 공급자 기능/크기 협상, 비공개 읽기 전용 PFD 전송 및 정리를 적용

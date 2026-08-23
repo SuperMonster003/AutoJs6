@@ -22,6 +22,7 @@
 * `新增` 本地單文件 .ts 腳本會先經獨立編譯插件再由 Rhino 執行, 保留 UTF-8 源文件身份與 Source Map 輸出, 類型錯誤在執行前拒絕, 且絕不回退到 Node.js 插件或直接執行原始 TypeScript; 不支持的 TSX/聲明文件及編譯器不可用場景會返回明確的本地化錯誤
 * `新增` 帶 "ui" 模式參數的本地單文件 .ts 腳本支持編譯後在 Rhino Activity 中執行字符串 XML 佈局, 包含視圖查找, 點擊回調, 文本更新及顯式關閉 UI; 原生 TSX 佈局語法仍會被明確拒絕
 * `新增` TypeScript 編譯診斷以宿主 ScriptCompilationException 記錄提供源文件, 1 基行列, 嚴重級別與 TS 錯誤碼; Console 與編輯器底部日誌面板顯示可點擊的乾淨位置, 可跳轉到對應源碼位置
+* `新增` Rhino TypeScript 運行異常會消費編譯器 Source Map v3, 將生成 JavaScript 堆棧幀映射回原 .ts 文件與行號, 不虛構 Rhino 未提供的列號, Console 與編輯器日誌面板中的映射位置可直接點擊跳轉
 * `新增` 獨立 Python Runtime 插件後端, 支持通過單獨的 CPython 插件進程運行本地 .py 文件及聲明為 `type: python` 的腳本項目, 並校驗固定組件/簽名/協議/ABI, 支持熱插拔且絕不回退到 JavaScript
 * `新增` Python 啟動集成覆蓋文件管理器/編輯器/本地 Run Intent/單文件 Import Intent/新建快捷方式/定時任務/廣播任務並嚴格保留單文件或項目上下文; 項目支持內部 import/相對文件讀取及只讀 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 執行支持通過 ExecutionConfig 鍵 `autojs6.python.stdinSnapshot` 提供可選的有界預置 stdin 快照, 並採用嚴格 ByteArray/UTF-8 文本准入, 提供器能力/大小協商及私有只讀 PFD 傳輸與清理

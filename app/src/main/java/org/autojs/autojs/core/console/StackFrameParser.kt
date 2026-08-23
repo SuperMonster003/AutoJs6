@@ -12,6 +12,16 @@ object StackFrameParser {
         RegexOption.IGNORE_CASE,
     )
 
+    private val parenthesizedV8StackFramePattern = Regex(
+        """(?m)^[\t ]*at[\t ]+[^\r\n]*\(((?:file:)?[^\r\n]+?(?:\.node\.js|\.(?:mjs|cjs|mts|cts|tsx?|js))):(\d+)(?::(\d+))?\)[\t ]*$""",
+        RegexOption.IGNORE_CASE,
+    )
+
+    private val directV8StackFramePattern = Regex(
+        """(?m)^[\t ]*at[\t ]+((?:file:)?[^\r\n]+?(?:\.node\.js|\.(?:mjs|cjs|mts|cts|tsx?|js))):(\d+)(?::(\d+))?[\t ]*$""",
+        RegexOption.IGNORE_CASE,
+    )
+
     @JvmStatic
     fun parse(text: CharSequence?): List<StackFrameLink> {
         if (text.isNullOrEmpty()) {
@@ -20,14 +30,23 @@ object StackFrameParser {
         val diagnosticLinks = compilationDiagnosticPattern.findAll(text).mapNotNull { match ->
             match.toStackFrameLink(sourceGroup = 1, lineGroup = 2, columnGroup = 3)
         }.toList()
+        val v8Links = sequenceOf(
+            parenthesizedV8StackFramePattern,
+            directV8StackFramePattern,
+        ).flatMap { pattern ->
+            pattern.findAll(text).mapNotNull { match ->
+                match.toStackFrameLink(sourceGroup = 1, lineGroup = 2, columnGroup = 3)
+            }
+        }.toList()
+        val authoritativeLinks = diagnosticLinks + v8Links
         val stackFrameLinks = stackFramePattern.findAll(text).mapNotNull { match ->
             match.toStackFrameLink(sourceGroup = 2, lineGroup = 3, columnGroup = 4)
         }.filter { candidate ->
-            diagnosticLinks.none { diagnostic ->
-                candidate.start < diagnostic.end && diagnostic.start < candidate.end
+            authoritativeLinks.none { authoritative ->
+                candidate.start < authoritative.end && authoritative.start < candidate.end
             }
         }
-        return (diagnosticLinks + stackFrameLinks)
+        return (authoritativeLinks + stackFrameLinks)
             .distinctBy { link ->
                 listOf(
                     link.sourceName,
