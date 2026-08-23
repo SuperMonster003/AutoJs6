@@ -185,6 +185,57 @@ class PythonHostCapabilityDispatcherTest {
         )
         assertEquals(true, success(dispatcher.dispatch(request(29, PythonHostCapabilities.AUTOMATOR_BACK))))
         assertEquals(true, success(dispatcher.dispatch(request(30, PythonHostCapabilities.AUTOMATOR_HOME))))
+        assertEquals(
+            SELECTOR_SNAPSHOT.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        31,
+                        PythonHostCapabilities.SELECTOR_SNAPSHOT,
+                        "maxNodes" to 64,
+                        "maxDepth" to 16,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            SELECTOR_NODE.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        32,
+                        PythonHostCapabilities.SELECTOR_FIND,
+                        "query" to linkedMapOf(
+                            "textContains" to "smoke",
+                            "clickable" to true,
+                        ),
+                        "maxNodes" to 512,
+                        "maxDepth" to 32,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            true,
+            success(
+                dispatcher.dispatch(
+                    request(33, PythonHostCapabilities.SELECTOR_CLICK, "nodeId" to SELECTOR_NODE.id),
+                ),
+            ),
+        )
+        assertEquals(
+            true,
+            success(
+                dispatcher.dispatch(
+                    request(
+                        34,
+                        PythonHostCapabilities.SELECTOR_SET_TEXT,
+                        "nodeId" to SELECTOR_NODE.id,
+                        "text" to "updated",
+                    ),
+                ),
+            ),
+        )
 
         assertEquals(listOf("hello"), actions.toasts)
         assertEquals("copy", actions.clipboard)
@@ -213,6 +264,19 @@ class PythonHostCapabilityDispatcherTest {
         assertEquals(listOf(listOf(10, 20, 110, 220, 300)), actions.swipes)
         assertEquals(1, actions.backRequests)
         assertEquals(1, actions.homeRequests)
+        assertEquals(listOf(64 to 16), actions.selectorSnapshots)
+        assertEquals(
+            listOf(
+                Triple(
+                    PythonHostSelectorQuery(textContains = "smoke", clickable = true),
+                    512,
+                    32,
+                ),
+            ),
+            actions.selectorFinds,
+        )
+        assertEquals(listOf(SELECTOR_NODE.id), actions.nodeClicks)
+        assertEquals(listOf(SELECTOR_NODE.id to "updated"), actions.nodeTexts)
     }
 
     @Test
@@ -317,14 +381,124 @@ class PythonHostCapabilityDispatcherTest {
     }
 
     @Test
+    fun validatesSelectorBoundsQueriesAndStableFailures() {
+        val actions = RecordingActions()
+        val dispatcher = dispatcher(actions)
+        val invalidRequests = listOf(
+            request(
+                1,
+                PythonHostCapabilities.SELECTOR_SNAPSHOT,
+                "maxNodes" to 0,
+                "maxDepth" to 16,
+            ),
+            request(
+                2,
+                PythonHostCapabilities.SELECTOR_SNAPSHOT,
+                "maxNodes" to PythonHostSelectorPolicy.MAX_SNAPSHOT_NODES,
+                "maxDepth" to PythonHostSelectorPolicy.MAX_DEPTH + 1L,
+            ),
+            request(
+                3,
+                PythonHostCapabilities.SELECTOR_FIND,
+                "query" to emptyMap<String, Any>(),
+                "maxNodes" to 1,
+                "maxDepth" to 0,
+            ),
+            request(
+                4,
+                PythonHostCapabilities.SELECTOR_FIND,
+                "query" to mapOf("unsupported" to "value"),
+                "maxNodes" to 1,
+                "maxDepth" to 0,
+            ),
+            request(
+                5,
+                PythonHostCapabilities.SELECTOR_FIND,
+                "query" to mapOf("text" to ""),
+                "maxNodes" to 1,
+                "maxDepth" to 0,
+            ),
+            request(
+                6,
+                PythonHostCapabilities.SELECTOR_FIND,
+                "query" to mapOf("clickable" to "true"),
+                "maxNodes" to 1,
+                "maxDepth" to 0,
+            ),
+            request(
+                7,
+                PythonHostCapabilities.SELECTOR_FIND,
+                "query" to mapOf("text" to "target"),
+                "maxNodes" to PythonHostSelectorPolicy.MAX_FIND_NODES + 1L,
+                "maxDepth" to 0,
+            ),
+            request(8, PythonHostCapabilities.SELECTOR_CLICK, "nodeId" to "raw-handle"),
+            request(
+                9,
+                PythonHostCapabilities.SELECTOR_SET_TEXT,
+                "nodeId" to SELECTOR_NODE.id,
+                "text" to "x".repeat(PythonHostSelectorPolicy.MAX_SET_TEXT_BYTES + 1),
+            ),
+        )
+        invalidRequests.forEach { encoded ->
+            assertEquals("INVALID_ARGUMENT", failureCode(dispatcher.dispatch(encoded)))
+        }
+        assertTrue(actions.selectorSnapshots.isEmpty())
+        assertTrue(actions.selectorFinds.isEmpty())
+        assertTrue(actions.nodeClicks.isEmpty())
+        assertTrue(actions.nodeTexts.isEmpty())
+
+        actions.selectorFailure = PythonHostCapabilityAccessibilityUnavailableException()
+        assertEquals(
+            "ACCESSIBILITY_UNAVAILABLE",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        10,
+                        PythonHostCapabilities.SELECTOR_SNAPSHOT,
+                        "maxNodes" to 1,
+                        "maxDepth" to 0,
+                    ),
+                ),
+            ),
+        )
+        actions.selectorFailure = PythonHostCapabilityStaleNodeException()
+        assertEquals(
+            "STALE_NODE",
+            failureCode(
+                dispatcher.dispatch(
+                    request(11, PythonHostCapabilities.SELECTOR_CLICK, "nodeId" to SELECTOR_NODE.id),
+                ),
+            ),
+        )
+        actions.selectorFailure = PythonHostCapabilitySelectorScanLimitException()
+        assertEquals(
+            "SELECTOR_SCAN_LIMIT_EXCEEDED",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        12,
+                        PythonHostCapabilities.SELECTOR_FIND,
+                        "query" to mapOf("text" to "missing"),
+                        "maxNodes" to 1,
+                        "maxDepth" to 0,
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun bindsExecutionIdRejectsReplayAndRejectsEveryCallAfterClose() {
-        val dispatcher = dispatcher(RecordingActions())
+        val actions = RecordingActions()
+        val dispatcher = dispatcher(actions)
         val request = request(1, PythonHostCapabilities.CLIP_GET)
         assertEquals("", success(dispatcher.dispatch(request)))
         assertEquals("REPLAYED_CALL", failureCode(dispatcher.dispatch(request)))
 
         assertTrue(dispatcher.close())
         assertFalse(dispatcher.close())
+        assertEquals(1, actions.closeRequests)
         assertEquals(
             "BROKER_CLOSED",
             failureCode(dispatcher.dispatch(request(2, PythonHostCapabilities.CLIP_GET))),
@@ -509,21 +683,31 @@ class PythonHostCapabilityDispatcherTest {
         addProperty("callId", callId)
         addProperty("capability", capability)
         add("arguments", JsonObject().apply {
-            arguments.forEach { (name, value) ->
-                when (value) {
-                    is Iterable<*> -> add(
-                        name,
-                        com.google.gson.JsonArray().apply {
-                            value.forEach { entry -> add(requireNotNull(entry).toString()) }
-                        },
-                    )
-                    is Boolean -> addProperty(name, value)
-                    is Number -> addProperty(name, value)
-                    else -> addProperty(name, value.toString())
-                }
-            }
+            arguments.forEach { (name, value) -> addTestValue(name, value) }
         })
     }.toString().toByteArray()
+
+    private fun JsonObject.addTestValue(name: String, value: Any) {
+        when (value) {
+            is Map<*, *> -> add(
+                name,
+                JsonObject().apply {
+                    value.forEach { (nestedName, nestedValue) ->
+                        addTestValue(nestedName as String, requireNotNull(nestedValue))
+                    }
+                },
+            )
+            is Iterable<*> -> add(
+                name,
+                com.google.gson.JsonArray().apply {
+                    value.forEach { entry -> add(requireNotNull(entry).toString()) }
+                },
+            )
+            is Boolean -> addProperty(name, value)
+            is Number -> addProperty(name, value)
+            else -> addProperty(name, value.toString())
+        }
+    }
 
     private fun success(encoded: ByteArray): Any? {
         val response = JsonParser.parseString(String(encoded)).asJsonObject
@@ -565,14 +749,20 @@ class PythonHostCapabilityDispatcherTest {
         val longClicks = mutableListOf<Pair<Int, Int>>()
         val presses = mutableListOf<Triple<Int, Int, Int>>()
         val swipes = mutableListOf<List<Int>>()
+        val selectorSnapshots = mutableListOf<Pair<Int, Int>>()
+        val selectorFinds = mutableListOf<Triple<PythonHostSelectorQuery, Int, Int>>()
+        val nodeClicks = mutableListOf<String>()
+        val nodeTexts = mutableListOf<Pair<String, String>>()
         var stopSelfRequests = 0
         var backRequests = 0
         var homeRequests = 0
+        var closeRequests = 0
         var denyNotice = false
         var fileFailure: RuntimeException? = null
         var dialogFailure: RuntimeException? = null
         var engineFailure: RuntimeException? = null
         var automatorFailure: RuntimeException? = null
+        var selectorFailure: RuntimeException? = null
 
         override fun showToast(text: String) {
             toasts += text
@@ -711,6 +901,38 @@ class PythonHostCapabilityDispatcherTest {
             homeRequests += 1
             return true
         }
+
+        override fun selectorSnapshot(maxNodes: Int, maxDepth: Int): PythonHostSelectorSnapshot {
+            selectorFailure?.let { throw it }
+            selectorSnapshots += maxNodes to maxDepth
+            return SELECTOR_SNAPSHOT
+        }
+
+        override fun selectorFind(
+            query: PythonHostSelectorQuery,
+            maxNodes: Int,
+            maxDepth: Int,
+        ): PythonHostSelectorNode? {
+            selectorFailure?.let { throw it }
+            selectorFinds += Triple(query, maxNodes, maxDepth)
+            return SELECTOR_NODE
+        }
+
+        override fun clickNode(nodeId: String): Boolean {
+            selectorFailure?.let { throw it }
+            nodeClicks += nodeId
+            return true
+        }
+
+        override fun setNodeText(nodeId: String, text: String): Boolean {
+            selectorFailure?.let { throw it }
+            nodeTexts += nodeId to text
+            return true
+        }
+
+        override fun close() {
+            closeRequests += 1
+        }
     }
 
     private companion object {
@@ -740,6 +962,34 @@ class PythonHostCapabilityDispatcherTest {
             engineName = "org.autojs.autojs.script.JavaScriptSource.Engine",
             sourceName = "child",
             path = "child.js",
+        )
+        val SELECTOR_NODE = PythonHostSelectorNode(
+            id = "node-1-1",
+            parentId = null,
+            depth = 2,
+            childCount = 0,
+            text = "AutoJs6 selector smoke",
+            description = "Selector smoke description",
+            resourceId = "org.autojs.autojs6:id/selector_smoke",
+            className = "android.widget.Button",
+            packageName = "org.autojs.autojs6",
+            bounds = PythonHostSelectorBounds(1, 2, 101, 202),
+            clickable = true,
+            editable = false,
+            enabled = true,
+            focused = false,
+            selected = false,
+            checkable = false,
+            checked = false,
+            scrollable = false,
+            password = false,
+            visibleToUser = true,
+            truncatedFields = emptyList(),
+        )
+        val SELECTOR_SNAPSHOT = PythonHostSelectorSnapshot(
+            generation = 1,
+            truncated = false,
+            nodes = listOf(SELECTOR_NODE),
         )
     }
 }
