@@ -18,6 +18,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.app.NotificationManagerCompat
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.plugin.python.PythonHostNoticePolicy
 import org.autojs.autojs.core.plugin.python.PythonRuntimeExecutionResult
 import org.autojs.autojs.execution.ScriptExecution
@@ -503,6 +504,88 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
         } finally {
             cleanProjectRoot(projectRoot, "M3 Host files")
+        }
+    }
+
+    @Test
+    fun boundedAutomatorActionsRoundTripThroughPublicPythonEngine() {
+        assumeTrue(
+            "Enable the AutoJs6 accessibility service before running the Python automator acceptance",
+            AutoJsAccessibilityService.waitForOperational(3_000L),
+        )
+        val projectRoot = freshProjectRoot()
+        val activity = launchAccessibilitySmokeActivity()
+        val buttonCenter = AtomicReference<IntArray>()
+        val swipeCoordinates = AtomicReference<Array<IntArray>>()
+        instrumentation.runOnMainSync {
+            buttonCenter.set(activity.buttonCenterOnScreen())
+            swipeCoordinates.set(activity.swipeCoordinatesOnScreen())
+        }
+        val button = requireNotNull(buttonCenter.get())
+        val swipe = requireNotNull(swipeCoordinates.get())
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import automator, result
+
+                actions = {
+                    "click": automator.click(${button[0]}, ${button[1]}),
+                    "press": automator.press(${button[0]}, ${button[1]}, 100),
+                    "longClick": automator.long_click(${button[0]}, ${button[1]}),
+                    "swipe": automator.swipe(
+                        ${swipe[0][0]}, ${swipe[0][1]},
+                        ${swipe[1][0]}, ${swipe[1][1]},
+                        300,
+                    ),
+                    "back": automator.back(),
+                    "home": automator.home(),
+                }
+                result.set(actions)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 automator execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 automator execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 automator execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                listOf("click", "press", "longClick", "swipe", "back", "home").forEach { action ->
+                    assertTrue("M3 automator action '$action' returned false", structured.getBoolean(action))
+                }
+                assertTrue(
+                    "Timed out waiting for Python click/press on the controlled button",
+                    NodeAccessibilitySmokeActivity.awaitClick(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+                )
+                assertTrue(
+                    "Timed out waiting for Python long-click on the controlled button",
+                    NodeAccessibilitySmokeActivity.awaitLongClick(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+                )
+                assertTrue(
+                    "Timed out waiting for Python swipe on the controlled target",
+                    NodeAccessibilitySmokeActivity.awaitSwipe(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+                )
+                assertEquals(2, NodeAccessibilitySmokeActivity.clickedCount())
+                assertEquals(1, NodeAccessibilitySmokeActivity.longClickedCount())
+                assertEquals(1, NodeAccessibilitySmokeActivity.swipedCount())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                if (!activity.isFinishing) activity.finish()
+            }
+            restoreHostForeground()
+            cleanProjectRoot(projectRoot, "M3 automator")
         }
     }
 
@@ -1311,6 +1394,28 @@ class PythonU1R2AcceptanceInstrumentationTest {
         activity as LogActivity
     }
 
+    private fun launchAccessibilitySmokeActivity(): NodeAccessibilitySmokeActivity {
+        NodeAccessibilitySmokeActivity.reset()
+        return instrumentation.startActivitySync(
+            Intent(instrumentation.context, NodeAccessibilitySmokeActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        ).let { activity ->
+            instrumentation.waitForIdleSync()
+            SystemClock.sleep(AUTOMATOR_ACTIVITY_SETTLE_MILLIS)
+            activity as NodeAccessibilitySmokeActivity
+        }
+    }
+
+    private fun restoreHostForeground() {
+        val launchIntent = requireNotNull(context.packageManager.getLaunchIntentForPackage(HOST_PACKAGE)) {
+            "Unable to resolve the canonical AutoJs6 launcher"
+        }
+        context.startActivity(
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+        )
+        instrumentation.waitForIdleSync()
+    }
+
     private fun replyToForegroundPrompt(prompt: String, reply: String, password: Boolean) {
         val deadline = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(INPUT_DIALOG_TIMEOUT_SECONDS)
         var lastTree = ""
@@ -1972,6 +2077,8 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val INPUT_DIALOG_POLL_MILLIS = 100L
         const val INPUT_DIALOG_SETTLE_MILLIS = 100L
         const val NOTICE_TIMEOUT_MILLIS = 5_000L
+        const val AUTOMATOR_ACTIVITY_SETTLE_MILLIS = 500L
+        const val AUTOMATOR_EVENT_TIMEOUT_MILLIS = 5_000L
         const val MAX_CONSOLE_DIAGNOSTIC_CHARS = 4_096
     }
 }

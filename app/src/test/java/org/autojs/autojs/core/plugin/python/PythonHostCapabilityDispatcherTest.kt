@@ -137,6 +137,54 @@ class PythonHostCapabilityDispatcherTest {
             ),
         )
         assertNull(success(dispatcher.dispatch(request(24, PythonHostCapabilities.ENGINES_STOP_SELF))))
+        assertEquals(
+            true,
+            success(
+                dispatcher.dispatch(
+                    request(25, PythonHostCapabilities.AUTOMATOR_CLICK, "x" to 120, "y" to 240),
+                ),
+            ),
+        )
+        assertEquals(
+            true,
+            success(
+                dispatcher.dispatch(
+                    request(26, PythonHostCapabilities.AUTOMATOR_LONG_CLICK, "x" to 121, "y" to 241),
+                ),
+            ),
+        )
+        assertEquals(
+            true,
+            success(
+                dispatcher.dispatch(
+                    request(
+                        27,
+                        PythonHostCapabilities.AUTOMATOR_PRESS,
+                        "x" to 122,
+                        "y" to 242,
+                        "durationMillis" to 75,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            true,
+            success(
+                dispatcher.dispatch(
+                    request(
+                        28,
+                        PythonHostCapabilities.AUTOMATOR_SWIPE,
+                        "x1" to 10,
+                        "y1" to 20,
+                        "x2" to 110,
+                        "y2" to 220,
+                        "durationMillis" to 300,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(true, success(dispatcher.dispatch(request(29, PythonHostCapabilities.AUTOMATOR_BACK))))
+        assertEquals(true, success(dispatcher.dispatch(request(30, PythonHostCapabilities.AUTOMATOR_HOME))))
 
         assertEquals(listOf("hello"), actions.toasts)
         assertEquals("copy", actions.clipboard)
@@ -159,6 +207,12 @@ class PythonHostCapabilityDispatcherTest {
         assertEquals(listOf("Select" to listOf("first", "second")), actions.selections)
         assertEquals(listOf("child.js"), actions.scriptPaths)
         assertEquals(1, actions.stopSelfRequests)
+        assertEquals(listOf(120 to 240), actions.clicks)
+        assertEquals(listOf(121 to 241), actions.longClicks)
+        assertEquals(listOf(Triple(122, 242, 75)), actions.presses)
+        assertEquals(listOf(listOf(10, 20, 110, 220, 300)), actions.swipes)
+        assertEquals(1, actions.backRequests)
+        assertEquals(1, actions.homeRequests)
     }
 
     @Test
@@ -211,6 +265,55 @@ class PythonHostCapabilityDispatcherTest {
                 ),
             ),
         )
+    }
+
+    @Test
+    fun validatesAutomatorArgumentsAndMapsMissingAccessibility() {
+        val actions = RecordingActions()
+        val dispatcher = dispatcher(actions)
+
+        val invalidRequests = listOf(
+            request(1, PythonHostCapabilities.AUTOMATOR_CLICK, "x" to -1, "y" to 0),
+            request(
+                2,
+                PythonHostCapabilities.AUTOMATOR_LONG_CLICK,
+                "x" to PythonHostAutomatorPolicy.MAX_COORDINATE + 1L,
+                "y" to 0,
+            ),
+            request(
+                3,
+                PythonHostCapabilities.AUTOMATOR_PRESS,
+                "x" to 0,
+                "y" to 0,
+                "durationMillis" to 0,
+            ),
+            request(
+                4,
+                PythonHostCapabilities.AUTOMATOR_SWIPE,
+                "x1" to 0,
+                "y1" to 0,
+                "x2" to 1,
+                "y2" to 1,
+                "durationMillis" to PythonHostAutomatorPolicy.MAX_DURATION_MILLIS + 1L,
+            ),
+            request(5, PythonHostCapabilities.AUTOMATOR_BACK, "unexpected" to true),
+            request(6, PythonHostCapabilities.AUTOMATOR_CLICK, "x" to true, "y" to 0),
+        )
+        invalidRequests.forEach { encoded ->
+            assertEquals("INVALID_ARGUMENT", failureCode(dispatcher.dispatch(encoded)))
+        }
+        assertTrue(actions.clicks.isEmpty())
+        assertTrue(actions.longClicks.isEmpty())
+        assertTrue(actions.presses.isEmpty())
+        assertTrue(actions.swipes.isEmpty())
+        assertEquals(0, actions.backRequests)
+
+        actions.automatorFailure = PythonHostCapabilityAccessibilityUnavailableException()
+        assertEquals(
+            "ACCESSIBILITY_UNAVAILABLE",
+            failureCode(dispatcher.dispatch(request(7, PythonHostCapabilities.AUTOMATOR_HOME))),
+        )
+        assertEquals(0, actions.homeRequests)
     }
 
     @Test
@@ -458,11 +561,18 @@ class PythonHostCapabilityDispatcherTest {
         val prompts = mutableListOf<Triple<String, String, String>>()
         val selections = mutableListOf<Pair<String, List<String>>>()
         val scriptPaths = mutableListOf<String>()
+        val clicks = mutableListOf<Pair<Int, Int>>()
+        val longClicks = mutableListOf<Pair<Int, Int>>()
+        val presses = mutableListOf<Triple<Int, Int, Int>>()
+        val swipes = mutableListOf<List<Int>>()
         var stopSelfRequests = 0
+        var backRequests = 0
+        var homeRequests = 0
         var denyNotice = false
         var fileFailure: RuntimeException? = null
         var dialogFailure: RuntimeException? = null
         var engineFailure: RuntimeException? = null
+        var automatorFailure: RuntimeException? = null
 
         override fun showToast(text: String) {
             toasts += text
@@ -564,6 +674,42 @@ class PythonHostCapabilityDispatcherTest {
             engineFailure?.let { throw it }
             scriptPaths += path
             return ENGINE_LAUNCH.copy(path = path)
+        }
+
+        override fun click(x: Int, y: Int): Boolean {
+            automatorFailure?.let { throw it }
+            clicks += x to y
+            return true
+        }
+
+        override fun longClick(x: Int, y: Int): Boolean {
+            automatorFailure?.let { throw it }
+            longClicks += x to y
+            return true
+        }
+
+        override fun press(x: Int, y: Int, durationMillis: Int): Boolean {
+            automatorFailure?.let { throw it }
+            presses += Triple(x, y, durationMillis)
+            return true
+        }
+
+        override fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, durationMillis: Int): Boolean {
+            automatorFailure?.let { throw it }
+            swipes += listOf(x1, y1, x2, y2, durationMillis)
+            return true
+        }
+
+        override fun back(): Boolean {
+            automatorFailure?.let { throw it }
+            backRequests += 1
+            return true
+        }
+
+        override fun home(): Boolean {
+            automatorFailure?.let { throw it }
+            homeRequests += 1
+            return true
         }
     }
 
