@@ -18,6 +18,7 @@
 * `추가` Node.js 외부 런타임 플러그인 백엔드에서 필수 `plugin` 및 폴백 가능한 `pluginOptional` 모드, 상주 Binder 세션 및 프로세스 런타임, 신뢰/계약/ABI 검증, 단일 활성 제로 큐 백프레셔 지원
 * `추가` Node.js 외부 런타임 플러그인 백엔드에서 요청 범위 워크스페이스 아카이브 전송 v2, 명시적 입력 매핑, 출력 쓰기 반영, 삭제 tombstone 매니페스트를 지원하며 호스트 샌드박스를 스캔하지 않음
 * `추가` 앱 패키징 기능은 Node.js 스크립트 프로젝트를 지원하고 필요한 런타임 라이브러리를 자동 포함
+* `추가` 독립 TypeScript 컴파일러 플러그인 클라이언트, 고정된 AIDL/R2 아카이브 계약 검증, UTF-8 단일 파일 Rhino 컴파일, 제한된 진단 및 필수 Source Map 출력 지원
 * `추가` 독립 Python Runtime 플러그인 백엔드에서 로컬 .py 파일과 `type: python`으로 선언된 스크립트 프로젝트를 별도의 CPython 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 핫 플러그, JavaScript 폴백 금지를 지원
 * `추가` Python 실행 통합은 파일 관리자/편집기/로컬 Run Intent/단일 파일 Import Intent/새 바로 가기/예약 작업/브로드캐스트 작업을 포함하고 단일 파일 또는 프로젝트 컨텍스트를 엄격하게 유지; 프로젝트에서 내부 import/상대 파일 접근/읽기 전용 `autojs6.app/device/execution/project` API 지원
 * `추가` Python Runtime 실행은 ExecutionConfig 키 `autojs6.python.stdinSnapshot`을 통한 선택적이고 제한된 사전 제공 stdin 스냅샷을 지원하며, 엄격한 ByteArray/UTF-8 텍스트 허용, 공급자 기능/크기 협상, 비공개 읽기 전용 PFD 전송 및 정리를 적용

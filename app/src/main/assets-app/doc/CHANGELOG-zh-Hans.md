@@ -9,6 +9,7 @@
 ###### 2026/08/23
 
 * `新增` Node.js Runtime 插件, 内置 Node.js 24.5.0 运行时, 支持识别 "nodejs" 模式参数或识别文件扩展名 (.node.js/.cjs/.mjs) 运行 Node.js 脚本
+* `新增` 独立 TypeScript 编译插件客户端, 校验冻结的 AIDL/R2 归档协议, 支持 UTF-8 单文件 Rhino 编译, 有界诊断及强制 Source Map 输出
 * `新增` Python Runtime 插件, 内置 Chaquopy 17.0.0 与 CPython 3.13.9, 支持识别文件扩展名 (.py) 运行 Python 脚本
 * `新增` Python Runtime 协议 1.4 为每次执行协商显式严格 JSON 结果与可选输出 artifact, 对数量, 规范化路径, 单个/合计大小, 精确 PFD 引用及 SHA-256 设限; Host 仅消费类型化结果且绝不从 stdout 推断
 * `新增` Python Runtime 协议 1.5 新增执行级同步 Host 能力 broker, 校验固定插件 UID, 采用严格有界 JSON, 调用配额, 防重放与生命周期约束, 执行终态后拒绝调用; 首批低风险能力向 Python 脚本开放 toast, 剪贴板读写及应用启动/打开 URL
