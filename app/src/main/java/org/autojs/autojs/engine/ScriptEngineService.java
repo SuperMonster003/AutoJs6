@@ -20,6 +20,7 @@ import org.autojs.autojs.lang.ThreadCompat;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs.runtime.api.augment.engines.Engines;
+import org.autojs.autojs.runtime.exception.ScriptCompilationException;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
@@ -98,7 +99,10 @@ public class ScriptEngineService {
                 String message = null;
                 if (!ScriptInterruptedException.causedByInterrupt(e)) {
                     message = AndroidLuaRuntimeFailureMessages.resolve(getLanguageContext(), e);
-                    if (engine instanceof JavaScriptEngine scriptEngine) {
+                    if (e instanceof ScriptCompilationException compilationException) {
+                        message = compilationException.getMessage();
+                        mGlobalConsole.error(compilationException.getConsoleMessage());
+                    } else if (engine instanceof JavaScriptEngine scriptEngine) {
                         scriptEngine.getRuntime().console.error(e);
                     } else if (e instanceof JvmSourceUserFacingException) {
                         // Provider/compiler details are streamed by RemoteJvmScriptEngine. Keep the

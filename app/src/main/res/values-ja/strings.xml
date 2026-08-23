@@ -459,6 +459,7 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必要なプロパティ \"%1$s\" のトランスフォーマーは null を返すことができません</string>
     <string name="error_thread_is_not_alive">スレッドが生きていない</string>
     <string name="error_timeout_while_querying_plugin_info">%1$s プラグイン情報の取得がタイムアウトしました.</string>
+    <string name="error_typescript_compilation_failed">TypeScript のコンパイルに失敗しました</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript コンパイラプラグインを利用できません. プラグインセンターでインストールまたは有効化してから再試行してください.</string>
     <string name="error_typescript_source_not_executable">TypeScript ソース \"%1$s\" は Rhino 単一ファイルプロファイルでは実行できません</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">現在のファイルパスが不明なため, ファイルのエンコーディングを変更できません</string>

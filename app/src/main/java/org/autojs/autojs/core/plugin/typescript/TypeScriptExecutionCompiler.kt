@@ -4,7 +4,11 @@ import android.content.Context
 import java.io.File
 import java.io.Reader
 import java.io.StringReader
+import java.net.URI
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.runtime.exception.ScriptCompilationDiagnostic
+import org.autojs.autojs.runtime.exception.ScriptCompilationDiagnosticSeverity
+import org.autojs.autojs.runtime.exception.ScriptCompilationException
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.ScriptSource
@@ -64,8 +68,9 @@ internal object TypeScriptExecutionCompiler {
                 diagnostics = output.diagnostics,
             )
             is TypeScriptCompilationOutput.Diagnostics -> throw TypeScriptDiagnosticsException(
+                message = context.getString(R.string.error_typescript_compilation_failed),
                 sourceName = sourceName,
-                diagnostics = output.diagnostics,
+                typeScriptDiagnostics = output.diagnostics,
             )
         }
     }
@@ -83,17 +88,53 @@ internal object TypeScriptExecutionCompiler {
     }
 
     fun formatDiagnostic(sourceName: String, diagnostic: TypeScriptDiagnostic): String {
-        val category = when (diagnostic.category) {
-            TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_WARNING -> "warning"
-            TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_ERROR -> "error"
-            TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_SUGGESTION -> "suggestion"
-            TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_MESSAGE -> "message"
-            else -> "diagnostic"
+        return diagnostic.toScriptCompilationDiagnostic(sourceName).consoleLine
+    }
+
+    fun TypeScriptDiagnostic.toScriptCompilationDiagnostic(
+        fallbackSourceName: String,
+    ): ScriptCompilationDiagnostic {
+        return ScriptCompilationDiagnostic(
+            sourceName = sourceName(uri) ?: fallbackSourceName,
+            lineNumber = range?.line,
+            columnNumber = range?.column,
+            severity = compilationSeverity(category),
+            code = "TS$code",
+            message = message,
+            relatedInformation = relatedInformation.map { related ->
+                ScriptCompilationDiagnostic(
+                    sourceName = sourceName(related.uri) ?: fallbackSourceName,
+                    lineNumber = related.range?.line,
+                    columnNumber = related.range?.column,
+                    severity = compilationSeverity(related.category),
+                    code = "TS${related.code}",
+                    message = related.message,
+                )
+            },
+        )
+    }
+
+    private fun compilationSeverity(category: Int): ScriptCompilationDiagnosticSeverity =
+        when (category) {
+            TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_WARNING ->
+                ScriptCompilationDiagnosticSeverity.WARNING
+            TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_ERROR ->
+                ScriptCompilationDiagnosticSeverity.ERROR
+            TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_SUGGESTION ->
+                ScriptCompilationDiagnosticSeverity.SUGGESTION
+            TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_MESSAGE ->
+                ScriptCompilationDiagnosticSeverity.MESSAGE
+            else -> ScriptCompilationDiagnosticSeverity.MESSAGE
         }
-        val location = diagnostic.range?.let { range ->
-            "$sourceName:${range.line}:${range.column}"
-        } ?: sourceName
-        return "$location - $category TS${diagnostic.code}: ${diagnostic.message}"
+
+    private fun sourceName(uri: String?): String? {
+        if (uri.isNullOrBlank()) {
+            return null
+        }
+        return runCatching { URI(uri).path }
+            .getOrNull()
+            ?.substringAfterLast('/')
+            ?.takeIf(String::isNotBlank)
     }
 
     const val SOURCE_MAP_ENGINE_TAG = "typescript_source_map_v3"
@@ -117,17 +158,19 @@ internal class CompiledTypeScriptSource(
 }
 
 internal class TypeScriptDiagnosticsException(
+    message: String,
     sourceName: String,
-    val diagnostics: List<TypeScriptDiagnostic>,
-) : RuntimeException(
-    buildString {
-        append("TypeScript compilation failed")
-        diagnostics.forEach { diagnostic ->
-            append('\n')
-            append(TypeScriptExecutionCompiler.formatDiagnostic(sourceName, diagnostic))
+    typeScriptDiagnostics: List<TypeScriptDiagnostic>,
+) : ScriptCompilationException(
+    message = message,
+    diagnostics = typeScriptDiagnostics.map { diagnostic ->
+        with(TypeScriptExecutionCompiler) {
+            diagnostic.toScriptCompilationDiagnostic(sourceName)
         }
     },
-)
+) {
+    val typeScriptDiagnostics: List<TypeScriptDiagnostic> = typeScriptDiagnostics.toList()
+}
 
 internal class TypeScriptExecutionException(
     message: String,

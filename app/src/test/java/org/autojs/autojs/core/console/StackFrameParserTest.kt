@@ -12,7 +12,7 @@ class StackFrameParserTest {
 
         assertEquals("/sdcard/scripts/test.js", frame.sourceName)
         assertEquals(9, frame.lineIndex)
-        assertEquals(5, frame.columnNumber)
+        assertEquals(4, frame.columnNumber)
     }
 
     @Test
@@ -33,7 +33,7 @@ class StackFrameParserTest {
 
             assertEquals("/sdcard/project/main.$extension", frame.sourceName)
             assertEquals(6, frame.lineIndex)
-            assertEquals(3, frame.columnNumber)
+            assertEquals(2, frame.columnNumber)
         }
     }
 
@@ -43,12 +43,25 @@ class StackFrameParserTest {
 
         assertEquals("file:///sdcard/project/main.mjs", frame.sourceName)
         assertEquals(11, frame.lineIndex)
-        assertEquals(9, frame.columnNumber)
+        assertEquals(8, frame.columnNumber)
+    }
+
+    @Test
+    fun parseCompilationDiagnosticWithSpacesInSourceName() {
+        val frame = StackFrameParser.parse(
+            "TypeScript compilation failed\nmy script.ts:3:7 - error TS2322: Type mismatch",
+        ).single()
+
+        assertEquals("my script.ts", frame.sourceName)
+        assertEquals(2, frame.lineIndex)
+        assertEquals(6, frame.columnNumber)
     }
 
     @Test
     fun ignoreStackFramesWithOverflowingNumbers() {
-        val frames = StackFrameParser.parse("script.js:999999999999999999999:1")
+        val frames = StackFrameParser.parse(
+            "script.js:999999999999999999999:1\nscript.ts:1:999999999999999999999",
+        )
 
         assertTrue(frames.isEmpty())
     }

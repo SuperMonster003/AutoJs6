@@ -31,13 +31,17 @@ import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.AppOps
 import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.core.console.StackFrameParser
 import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
+import org.autojs.autojs.runtime.exception.ScriptCompilationDiagnosticSeverity
+import org.autojs.autojs.runtime.exception.ScriptCompilationException
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.TypeScriptFileSource
+import org.autojs.autojs.ui.log.StackFrameTargetResolver
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs6.R
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
@@ -462,7 +466,9 @@ class TypeScriptCompilerPluginClientDeviceTest {
     @Test
     fun typeErrorsNeverFallBackToRawRhinoExecution() {
         val markerKey = "autojs6.typescript.rejected.${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
         System.clearProperty(markerKey)
+        console.clear()
         try {
             withSource(
                 name = "rejected.ts",
@@ -477,12 +483,40 @@ class TypeScriptCompilerPluginClientDeviceTest {
                 val failure = terminal.failure.get()
 
                 assertFalse(terminal.succeeded.get())
-                assertTrue(failure is TypeScriptDiagnosticsException)
-                assertTrue(failure?.message?.contains("TS2322") == true)
+                assertTrue(
+                    "Expected ScriptCompilationException, got " +
+                        (failure?.javaClass?.name ?: "no failure"),
+                    failure is ScriptCompilationException,
+                )
+                failure as ScriptCompilationException
+                assertEquals(
+                    context.getString(R.string.error_typescript_compilation_failed),
+                    failure.message,
+                )
+                val diagnostic = failure.diagnostics.single { it.code == "TS2322" }
+                assertEquals(source.name, diagnostic.sourceName)
+                assertEquals(ScriptCompilationDiagnosticSeverity.ERROR, diagnostic.severity)
+                assertTrue(diagnostic.lineNumber != null && diagnostic.lineNumber > 0)
+                assertTrue(diagnostic.columnNumber != null && diagnostic.columnNumber > 0)
+
+                val consoleMessage = awaitConsoleMessage("TS2322")
+                assertTrue(consoleMessage.endsWith(failure.consoleMessage))
+                assertFalse(consoleMessage.contains(TypeScriptDiagnosticsException::class.java.name))
+                val link = StackFrameParser.parse(consoleMessage).single()
+                assertEquals(source.name, link.sourceName)
+                assertEquals(diagnostic.lineNumber!! - 1, link.lineIndex)
+                assertEquals(diagnostic.columnNumber!! - 1, link.columnNumber)
+                assertTrue(
+                    StackFrameTargetResolver.matchesCurrentFile(
+                        link.sourceName,
+                        source.absolutePath,
+                    ),
+                )
                 assertEquals(null, System.getProperty(markerKey))
                 assertEquals(null, terminal.execution.engine)
             }
         } finally {
+            console.clear()
             System.clearProperty(markerKey)
         }
     }
@@ -962,6 +996,21 @@ class TypeScriptCompilerPluginClientDeviceTest {
         return ExecutionTerminal(execution, succeeded, failure)
     }
 
+    private fun awaitConsoleMessage(fragment: String): String {
+        val console = AutoJs.instance.globalConsole
+        val deadline = SystemClock.uptimeMillis() + CONSOLE_TIMEOUT_MILLIS
+        while (SystemClock.uptimeMillis() < deadline) {
+            synchronized(console.logEntries) {
+                console.logEntries.lastOrNull { entry -> fragment in entry.content }?.let { entry ->
+                    return entry.content.toString()
+                }
+            }
+            SystemClock.sleep(50)
+        }
+        fail("Console did not contain $fragment")
+        error("Unreachable")
+    }
+
     private data class ExecutionTerminal(
         val execution: ScriptExecution,
         val succeeded: AtomicBoolean,
@@ -986,6 +1035,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
 
     private companion object {
         const val EXECUTION_TIMEOUT_SECONDS = 90L
+        const val CONSOLE_TIMEOUT_MILLIS = 5_000L
         const val HTTP_TIMEOUT_MILLIS = 10_000
         const val ACCESSIBILITY_TIMEOUT_MILLIS = 30_000L
         const val ACCESSIBILITY_POLL_MILLIS = 100L

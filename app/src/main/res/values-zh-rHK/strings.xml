@@ -455,6 +455,7 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需屬性 \"%1$s\" 的轉換器不能返回空值</string>
     <string name="error_thread_is_not_alive">線程處於非活動狀態</string>
     <string name="error_timeout_while_querying_plugin_info">查詢 %1$s 插件信息超時.</string>
+    <string name="error_typescript_compilation_failed">TypeScript 編譯失敗</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript 編譯插件不可用. 請在插件中心安裝或啓用後重試.</string>
     <string name="error_typescript_source_not_executable">TypeScript 源文件 \"%1$s\" 不能在 Rhino 單文件設定中執行</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">當前文件路徑未知, 無法更改文件編碼</string>

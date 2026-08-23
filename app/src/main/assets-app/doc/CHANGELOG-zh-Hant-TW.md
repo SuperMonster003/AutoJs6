@@ -21,6 +21,7 @@
 * `新增` 獨立 TypeScript 編譯外掛客戶端, 驗證凍結的 AIDL/R2 封存協定, 支援 UTF-8 單一檔案 Rhino 編譯, 有界診斷及強制 Source Map 輸出
 * `新增` 本機單一檔案 .ts 腳本會先經獨立編譯外掛再由 Rhino 執行, 保留 UTF-8 來源檔案識別與 Source Map 輸出, 型別錯誤在執行前拒絕, 且絕不回退至 Node.js 外掛或直接執行原始 TypeScript; 不支援的 TSX/宣告檔案及編譯器不可用情境會傳回明確的本地化錯誤
 * `新增` 帶有 "ui" 模式參數的本機單一檔案 .ts 腳本支援編譯後在 Rhino Activity 中執行字串 XML 版面配置, 包含檢視查找, 點擊回呼, 文字更新及明確關閉 UI; 原生 TSX 版面配置語法仍會遭明確拒絕
+* `新增` TypeScript 編譯診斷以宿主 ScriptCompilationException 記錄提供來源檔案, 1 基行列, 嚴重層級與 TS 錯誤碼; Console 與編輯器底部日誌面板顯示可點擊的乾淨位置, 可跳轉至對應原始碼位置
 * `新增` 獨立 Python Runtime 外掛後端, 支援透過單獨的 CPython 外掛處理程序執行本機 .py 檔案及宣告為 `type: python` 的腳本專案, 並驗證固定元件/簽章/協定/ABI, 支援熱插拔且絕不回退至 JavaScript
 * `新增` Python 啟動整合涵蓋檔案管理器/編輯器/本機 Run Intent/單一檔案 Import Intent/新建快捷方式/定時任務/廣播任務並嚴格保留單一檔案或專案上下文; 專案支援內部 import/相對檔案讀取及唯讀 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 執行支援透過 ExecutionConfig 鍵 `autojs6.python.stdinSnapshot` 提供可選的有界預置 stdin 快照, 並採用嚴格 ByteArray/UTF-8 文字准入, 提供者能力/大小協商及私有唯讀 PFD 傳輸與清理
@@ -105,6 +106,7 @@
 * `修復` Node.js R6 打包 APK 證據因收集器未準備目前 Inrt 範本或傳入目標 ABI 而遭跳過或錯誤綁定 arm64 的問題
 * `修復` 跨 ABI 打包應用程式時錯誤將已安裝宿主處理程序的原生程式庫複製到其他 ABI 目錄, 導致 32 位打包應用程式載入 64 位終端程式庫並當機的問題
 * `修復` TypeScript UI 腳本在引擎建立前編譯失敗時, 全域執行監聽器存取不存在的引擎可能導致宿主在回報診斷的同時當機的問題
+* `修復` 堆疊框架與編譯診斷連結將 1 基原始碼欄號直接當作 0 基編輯器偏移, 導致游標多前進一個字元的問題
 * `修復` DEX 編譯器實驗性宿主可能接受與要求 minApi 不相容的 DEX 版本, 錯誤拒絕合法的 65,536 field/method ID 邊界, 並在排隊的 pipe drain 延遲啟動時重新建立已回復的暫存成品
 * `修復` runtime.loadJar 無法正常動態載入由較高 Java 版本編譯的 class 檔案的問題
 * `修復` app.isInstalled/kill 等方法無法正常使用套件名稱引數的問題 _[`issue #495`](http://issues.autojs6.com/495)_

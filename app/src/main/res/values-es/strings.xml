@@ -458,6 +458,7 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">El transformador para la propiedad requerida \"%1$s\" no puede devolver un valor nulo</string>
     <string name="error_thread_is_not_alive">El hilo no está vivo</string>
     <string name="error_timeout_while_querying_plugin_info">Tiempo de espera agotado al consultar la información del plugin %1$s.</string>
+    <string name="error_typescript_compilation_failed">La compilación de TypeScript falló</string>
     <string name="error_typescript_compiler_plugin_unavailable">El plugin compilador TypeScript no está disponible. Instálelo o actívelo en el Centro de plugins y vuelva a intentarlo.</string>
     <string name="error_typescript_source_not_executable">El origen TypeScript \"%1$s\" no se puede ejecutar con el perfil Rhino de un solo archivo</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se puede cambiar la codificación del archivo</string>

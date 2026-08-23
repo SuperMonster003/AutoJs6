@@ -172,6 +172,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 独立 TypeScript 编译插件客户端, 校验冻结的 AIDL/R2 归档协议, 支持 UTF-8 单文件 Rhino 编译, 有界诊断及强制 Source Map 输出
 * `新增` 本地单文件 .ts 脚本会先经独立编译插件再由 Rhino 执行, 保留 UTF-8 源文件身份与 Source Map 输出, 类型错误在执行前拒绝, 且绝不回退到 Node.js 插件或直接执行原始 TypeScript; 不受支持的 TSX/声明文件及编译器不可用场景会返回明确的本地化错误
 * `新增` 带 "ui" 模式参数的本地单文件 .ts 脚本支持经编译后在 Rhino Activity 中执行字符串 XML 布局, 包含视图查找, 点击回调, 文本更新及显式关闭 UI; 原生 TSX 布局语法仍会被明确拒绝
+* `新增` TypeScript 编译诊断以宿主 ScriptCompilationException 记录提供源文件, 1 基行列, 严重级别与 TS 错误码; Console 与编辑器底部日志面板显示可点击的干净位置, 可跳转到对应源码位置
 * `新增` Python Runtime 插件, 内置 Chaquopy 17.0.0 与 CPython 3.13.9, 支持识别文件扩展名 (.py) 运行 Python 脚本
 * `新增` Python Runtime 协议 1.4 为每次执行协商显式严格 JSON 结果与可选输出 artifact, 对数量, 规范化路径, 单个/合计大小, 精确 PFD 引用及 SHA-256 设限; Host 仅消费类型化结果且绝不从 stdout 推断
 * `新增` Python Runtime 协议 1.5 新增执行级同步 Host 能力 broker, 校验固定插件 UID, 采用严格有界 JSON, 调用配额, 防重放与生命周期约束, 执行终态后拒绝调用; 完整首批低风险能力向 Python 脚本开放 toast, 剪贴板读写, 应用启动/打开 URL, 动态电量/屏幕/亮度/音量信息, 分级宿主控制台输出及权限感知通知
@@ -241,6 +242,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` Node.js R6 打包 APK 证据因采集器未准备当前 Inrt 模板或传入目标 ABI 而被跳过或错误绑定 arm64 的问题
 * `修复` 跨 ABI 打包应用时错误将已安装宿主进程的原生库复制到其他 ABI 目录, 导致 32 位打包应用加载 64 位终端库并崩溃的问题
 * `修复` TypeScript UI 脚本在引擎创建前编译失败时, 全局执行监听器访问不存在的引擎可能导致宿主在报告诊断的同时崩溃的问题
+* `修复` 堆栈帧与编译诊断链接将 1 基源码列号直接当作 0 基编辑器偏移, 导致光标多前进一个字符的问题
 * `修复` DEX 编译器实验性宿主可能接受与请求 minApi 不兼容的 DEX 版本, 错误拒绝合法的 65,536 field/method ID 边界, 并在排队的 pipe drain 延迟启动时重新创建已回滚的临时产物
 * `修复` runtime.loadJar 无法正常动态加载由较高 Java 版本编译的 class 文件的问题
 * `修复` app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_

@@ -20,6 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -266,7 +267,8 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
      * @param baseColor the base text color
      * @return CharSequence with clickable spans for stack frames
      */
-    private CharSequence createClickableContent(CharSequence content, int baseColor) {
+    @VisibleForTesting
+    CharSequence createClickableContent(CharSequence content, int baseColor) {
         if (!mEnableStackFrameLinks) {
             return content;
         }
