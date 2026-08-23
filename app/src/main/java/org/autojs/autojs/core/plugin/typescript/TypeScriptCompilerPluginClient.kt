@@ -90,17 +90,86 @@ internal class TypeScriptCompilerPluginClient(
         }
 
         val sourceBytes = readBoundedSource(sourceFile)
-        val requestId = "host-" + UUID.randomUUID()
         val canonicalPath = sourceIdentity?.takeIf(String::isNotBlank)
             ?: runCatching { sourceFile.canonicalPath }.getOrElse { sourceFile.absolutePath }
         val projectId = "single-file-" +
             sha256(TypeScriptUtf8.encode(canonicalPath, "TypeScript source path")).take(32)
+        try {
+            compileArchive(
+                timeoutMs = timeoutMs,
+                targetProfile = targetProfile,
+                entrySourceName = sourceName,
+            ) { requestId, authority, inputFile ->
+                TypeScriptSingleFileArchive.write(
+                    sourceName = sourceName,
+                    sourceBytes = sourceBytes,
+                    requestId = requestId,
+                    projectId = projectId,
+                    authority = authority,
+                    destination = inputFile,
+                )
+            }
+        } finally {
+            sourceBytes.fill(0)
+        }
+    }
+
+    suspend fun compileProject(
+        projectRoot: File,
+        entryFile: File,
+        targetProfile: String,
+        timeoutMs: Long = TypeScriptCompilerContract.DEFAULT_TIMEOUT_MS,
+    ): TypeScriptCompilationOutput = withContext(Dispatchers.IO) {
+        require(timeoutMs in TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS..
+            TypeScriptCompilerContract.MAX_TIMEOUT_MS)
+        val root = runCatching { projectRoot.canonicalFile }.getOrElse { projectRoot.absoluteFile }
+        val entry = runCatching { entryFile.canonicalFile }.getOrElse { entryFile.absoluteFile }
+        require(root.isDirectory) { "TypeScript project root is not a directory." }
+        require(entry.isFile) { "TypeScript project entry is not a regular file." }
+        require(targetProfile in TypeScriptCompilerContract.TARGET_PROFILES)
+        require(
+            TypeScriptCompilerContract.supportedExtensions(targetProfile)
+                .any(entry.name::endsWith),
+        ) {
+            "The $targetProfile TypeScript profile does not accept ${entry.name}."
+        }
+        require(
+            listOf(".d.ts", ".d.mts", ".d.cts").none(entry.name::endsWith),
+        ) {
+            "TypeScript declaration files are not executable entries."
+        }
+        val projectId = "directory-" + sha256(
+            TypeScriptUtf8.encode(root.path, "TypeScript project root"),
+        ).take(32)
+        compileArchive(
+            timeoutMs = timeoutMs,
+            targetProfile = targetProfile,
+            entrySourceName = entry.name,
+        ) { requestId, authority, inputFile ->
+            TypeScriptProjectArchive.write(
+                projectRoot = root,
+                entryFile = entry,
+                requestId = requestId,
+                projectId = projectId,
+                authority = authority,
+                destination = inputFile,
+            )
+        }
+    }
+
+    private suspend fun compileArchive(
+        timeoutMs: Long,
+        targetProfile: String,
+        entrySourceName: String,
+        prepare: (String, TypeScriptCompilerAuthority, File) -> TypeScriptPreparedCompilation,
+    ): TypeScriptCompilationOutput {
+        val requestId = "host-" + UUID.randomUUID()
         val inputFile = File.createTempFile("typescript-input-", ".zip", appContext.cacheDir)
         val outputFile = File.createTempFile("typescript-output-", ".zip", appContext.cacheDir)
         var leased: AidlPluginHost.LeasedCall<StartedCompilation>? = null
         var terminalReceived = false
 
-        try {
+        return try {
             val target = host.selectOrThrow(
                 context = appContext,
                 engineId = TypeScriptPluginIds.ID,
@@ -118,16 +187,9 @@ internal class TypeScriptCompilerPluginClient(
                 val authority = authorityFrom(
                     info = compiler.compilerInfo,
                     targetProfile = targetProfile,
-                    sourceName = sourceName,
+                    sourceName = entrySourceName,
                 )
-                val prepared = TypeScriptSingleFileArchive.write(
-                    sourceName = sourceName,
-                    sourceBytes = sourceBytes,
-                    requestId = requestId,
-                    projectId = projectId,
-                    authority = authority,
-                    destination = inputFile,
-                )
+                val prepared = prepare(requestId, authority, inputFile)
                 val callback = CompilationCallback()
                 val ticket = startCompilation(
                     compiler = compiler,
@@ -224,7 +286,6 @@ internal class TypeScriptCompilerPluginClient(
                     }
             }
             runCatching { leased?.bindingLease?.close() }
-            sourceBytes.fill(0)
             runCatching { inputFile.delete() }
             runCatching { outputFile.delete() }
         }
@@ -418,6 +479,27 @@ internal class TypeScriptCompilerPluginClient(
             } else {
                 null
             },
+            packageMetadataSchemaRevision = if (
+                targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+            ) {
+                info.getInt(TypeScriptR2Contract.KEY_PACKAGE_METADATA_SCHEMA_REVISION, -1)
+            } else {
+                null
+            },
+            packageMetadataPolicyRevision = if (
+                targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+            ) {
+                info.getInt(TypeScriptR2Contract.KEY_PACKAGE_METADATA_POLICY_REVISION, -1)
+            } else {
+                null
+            },
+            packageMetadataPolicyFingerprint = if (
+                targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+            ) {
+                info.requireString(TypeScriptR2Contract.KEY_PACKAGE_METADATA_POLICY_FINGERPRINT)
+            } else {
+                null
+            },
         )
     }
 
@@ -504,6 +586,24 @@ internal class TypeScriptCompilerPluginClient(
             putString(
                 TypeScriptR2Contract.KEY_CONFIG_POLICY_FINGERPRINT,
                 requireNotNull(prepared.authority.configPolicyFingerprint),
+            )
+        }
+        prepared.packageMetadata?.let { packageMetadata ->
+            putInt(
+                TypeScriptR2Contract.KEY_PACKAGE_METADATA_SCHEMA_REVISION,
+                requireNotNull(prepared.authority.packageMetadataSchemaRevision),
+            )
+            putInt(
+                TypeScriptR2Contract.KEY_PACKAGE_METADATA_POLICY_REVISION,
+                requireNotNull(prepared.authority.packageMetadataPolicyRevision),
+            )
+            putString(
+                TypeScriptR2Contract.KEY_PACKAGE_METADATA_POLICY_FINGERPRINT,
+                requireNotNull(prepared.authority.packageMetadataPolicyFingerprint),
+            )
+            putString(
+                TypeScriptR2Contract.KEY_PACKAGE_METADATA_INVENTORY_FINGERPRINT,
+                packageMetadata.inventoryFingerprint,
             )
         }
         putString(

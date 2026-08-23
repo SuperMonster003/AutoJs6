@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.typescript
 
 import java.io.File
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptPluginIds
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
@@ -10,6 +11,86 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TypeScriptCompilationOutputReaderTest {
+
+    @Test
+    fun readsAndPairsEveryModuleInAProjectEmission() {
+        val root = Files.createTempDirectory("typescript-output-project-").toFile()
+        val input = File.createTempFile("typescript-project-output-input-", ".zip")
+        val output = File.createTempFile("typescript-project-output-test-", ".zip")
+        try {
+            File(root, "project.json").writeText("""{"main":"main.ts"}""")
+            File(root, "main.ts").writeText("import { value } from './lib/value'; toast(value);\n")
+            val library = File(root, "lib").apply { mkdirs() }
+            File(library, "value.ts").writeText("export const value: number = 42;\n")
+            val prepared = TypeScriptProjectArchive.write(
+                projectRoot = root,
+                entryFile = File(root, "main.ts"),
+                requestId = "host-project-output-test",
+                projectId = "project-output-test",
+                authority = authority(),
+                destination = input,
+            )
+            val mainJavaScript = "const value_1 = require('./lib/value'); toast(value_1.value);\n"
+                .toByteArray(StandardCharsets.UTF_8)
+            val valueJavaScript = "exports.value = 42;\n".toByteArray(StandardCharsets.UTF_8)
+            val mainMap = sourceMap("main.js", "main.ts")
+            val valueMap = sourceMap("value.js", "value.ts")
+            val diagnostics = diagnosticsJson(prepared, emptyList())
+            val artifacts = listOf(
+                artifact("diagnostics.json", "diagnostics", diagnostics, emptyList()),
+                artifact("maps/lib/value.js.map", "source_map", valueMap, listOf("sources/lib/value.ts")),
+                artifact("maps/main.js.map", "source_map", mainMap, listOf("sources/main.ts")),
+                artifact("modules/lib/value.js", "javascript", valueJavaScript, listOf("sources/lib/value.ts")),
+                artifact("modules/main.js", "javascript", mainJavaScript, listOf("sources/main.ts")),
+            )
+            val manifest = outputManifest(
+                prepared = prepared,
+                outcome = TypeScriptCompilerContract.OUTCOME_EMITTED,
+                emitSkipped = false,
+                diagnosticCount = 0,
+                emittedModuleCount = 2,
+                entryModulePath = "modules/main.js",
+                artifacts = artifacts,
+            )
+            StoredZipV1Writer.write(
+                output,
+                linkedMapOf(
+                    "compilation-manifest.json" to manifest,
+                    "diagnostics.json" to diagnostics,
+                    "maps/lib/value.js.map" to valueMap,
+                    "maps/main.js.map" to mainMap,
+                    "modules/lib/value.js" to valueJavaScript,
+                    "modules/main.js" to mainJavaScript,
+                ),
+            )
+            val result = TypeScriptCompilationOutputReader.read(
+                outputFile = output,
+                prepared = prepared,
+                terminal = TypeScriptTerminalResult(
+                    requestId = prepared.requestId,
+                    outcome = TypeScriptCompilerContract.OUTCOME_EMITTED,
+                    succeeded = true,
+                    errorCode = null,
+                    errorMessage = null,
+                    diagnosticCount = 0,
+                    emittedModuleCount = 2,
+                    outputManifestSha256 = sha256(manifest),
+                ),
+            ) as TypeScriptCompilationOutput.Emitted
+
+            assertEquals(2, result.modules.size)
+            assertEquals(mainJavaScript.toString(StandardCharsets.UTF_8), result.javaScript)
+            assertEquals(
+                listOf("lib/value.ts", "main.ts"),
+                result.modules.map { module -> module.source.projectRelativePath },
+            )
+            assertTrue(result.modules.all { module -> module.source.originalFile?.isFile == true })
+        } finally {
+            root.walkBottomUp().forEach { entry -> entry.delete() }
+            input.delete()
+            output.delete()
+        }
+    }
 
     @Test
     fun readsDigestBoundSingleFileEmission() {
@@ -245,6 +326,11 @@ class TypeScriptCompilationOutputReaderTest {
             authority = authority(),
             destination = destination,
         )
+
+    private fun sourceMap(generatedFile: String, originalFile: String): ByteArray =
+        ("{\"version\":3,\"file\":\"$generatedFile\",\"sourceRoot\":\"\"," +
+            "\"sources\":[\"../sources/$originalFile\"],\"names\":[]," +
+            "\"mappings\":\"AAAA\"}").toByteArray(StandardCharsets.UTF_8)
 
     private fun diagnosticsJson(
         prepared: TypeScriptPreparedCompilation,
@@ -513,6 +599,9 @@ class TypeScriptCompilationOutputReaderTest {
         profileRevision = 2,
         configSchemaRevision = TypeScriptCompilerAuthority.CONFIG_NONE_SCHEMA_REVISION,
         configKind = TypeScriptR2Contract.CONFIG_KIND_NONE,
+        packageMetadataSchemaRevision = 1,
+        packageMetadataPolicyRevision = 1,
+        packageMetadataPolicyFingerprint = PACKAGE_METADATA_POLICY_FINGERPRINT,
     )
 
     private fun objectJson(vararg fields: Pair<String, String>): String =
@@ -542,4 +631,9 @@ class TypeScriptCompilationOutputReaderTest {
         val sha256: String,
         val sourcePaths: List<String>,
     )
+
+    private companion object {
+        const val PACKAGE_METADATA_POLICY_FINGERPRINT =
+            "fab8fec29ed0f0a1de65594620e233c9a9bef2fa514dac16c3079d5570325e97"
+    }
 }

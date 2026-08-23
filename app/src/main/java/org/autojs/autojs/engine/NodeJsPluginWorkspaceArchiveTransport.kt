@@ -133,6 +133,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
         // room. Mirrored by the plugin's PluginWorkspaceArchiveSession.
         private const val MANIFEST_MAX_BYTES = 16 * 1024 * 1024
         private const val PROJECT_MARKER_NAME = "project.json"
+        private const val PACKAGE_MARKER_NAME = "package.json"
         private const val COPY_BUFFER_BYTES = 32 * 1024
         // Sized for real npm node_modules trees; must stay aligned with the
         // plugin's PluginWorkspaceArchiveSession hard limits, which clamp any
@@ -288,7 +289,10 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                 val (relative, _) = relativeCandidate(name) ?: return@forEach
                 entries[relative] = ExplicitInput.Bytes(source.toByteArray(StandardCharsets.UTF_8))
             }
-            if (File(workingDirectory, PROJECT_MARKER_NAME).isFile) {
+            if (
+                File(workingDirectory, PROJECT_MARKER_NAME).isFile ||
+                File(workingDirectory, PACKAGE_MARKER_NAME).isFile
+            ) {
                 addDeclaredProjectTree(root, workingDirectory, ::addExistingExplicitPath)
             }
 

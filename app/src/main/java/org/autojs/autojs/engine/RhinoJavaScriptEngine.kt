@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.View
 import org.autojs.autojs.core.plugin.typescript.CompiledTypeScriptSource
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
+import org.autojs.autojs.core.plugin.typescript.TypeScriptMaterializedRhinoProject
+import org.autojs.autojs.core.plugin.typescript.TypeScriptSourceMapBindings
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AndroidRhinoAssetLoader
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
@@ -44,6 +46,7 @@ import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.commonjs.module.RequireBuilder
+import org.mozilla.javascript.commonjs.module.Require
 import org.mozilla.javascript.commonjs.module.provider.MultiModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import org.mozilla.javascript.lc.type.TypeInfo
@@ -61,6 +64,8 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     private val mWrapFactory = WrapFactory()
     private val mAssetLoader = AndroidRhinoAssetLoader(androidContext)
+    private lateinit var mRequire: Require
+    private var mMaterializedTypeScriptProject: TypeScriptMaterializedRhinoProject? = null
     val context: Context = enterContext()
     val scriptable: TopLevelScope = createScope(context)
 
@@ -91,15 +96,31 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     public override fun doExecution(source: JavaScriptSource): Any? {
         try {
+            mMaterializedTypeScriptProject?.close()
+            mMaterializedTypeScriptProject = null
             val executable = (source as? CompiledTypeScriptSource)?.executable
             executable?.let { compiled ->
+                val bindings: TypeScriptSourceMapBindings
+                val generatedSourceName: String
+                if (compiled.isProjectCompilation) {
+                    val project = TypeScriptMaterializedRhinoProject.create(
+                        androidContext,
+                        compiled,
+                    )
+                    mMaterializedTypeScriptProject = project
+                    bindings = compiled.sourceMapBindings(project.generatedSourceNames)
+                    generatedSourceName = project.entryFile.canonicalPath
+                } else {
+                    bindings = TypeScriptSourceMapBindings.single(compiled.sourceMapBinding)
+                    generatedSourceName = compiled.generatedSourceName
+                }
                 setTag(
                     TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG,
-                    compiled.sourceMapBinding,
+                    bindings,
                 )
                 setTag(
                     TypeScriptExecutionCompiler.GENERATED_SOURCE_ENGINE_TAG,
-                    compiled.generatedSourceName,
+                    generatedSourceName,
                 )
                 compiled.diagnostics.forEach { diagnostic ->
                     runtime.console.warn(
@@ -109,6 +130,9 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
                         ),
                     )
                 }
+            }
+            mMaterializedTypeScriptProject?.let { project ->
+                return mRequire.requireMain(context, project.entryFile.canonicalPath)
             }
             val reader = preprocess(source.nonNullScriptReader)
             val sourceName = executable?.generatedSourceName ?: source.fullPath
@@ -134,6 +158,8 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     @Synchronized
     override fun destroy() {
+        mMaterializedTypeScriptProject?.close()
+        mMaterializedTypeScriptProject = null
         super.destroy()
         Log.d(TAG, "on destroy")
         Context.exit()
@@ -234,11 +260,11 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
                 SoftCachingModuleScriptProvider(provider),
             )
         )
-        RequireBuilder()
+        mRequire = RequireBuilder()
             .setModuleScriptProvider(moduleScriptProvider)
             .setSandboxed(true)
             .createRequire(context, scope)
-            .install(scope)
+        mRequire.install(scope)
     }
 
     protected fun createScope(context: Context) = TopLevelScope().apply {

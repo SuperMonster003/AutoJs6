@@ -24,6 +24,9 @@ internal data class TypeScriptCompilerAuthority(
     val configKind: String,
     val configPolicyRevision: Int? = null,
     val configPolicyFingerprint: String? = null,
+    val packageMetadataSchemaRevision: Int? = null,
+    val packageMetadataPolicyRevision: Int? = null,
+    val packageMetadataPolicyFingerprint: String? = null,
 ) {
     init {
         require(targetProfile in TypeScriptCompilerContract.TARGET_PROFILES)
@@ -59,6 +62,20 @@ internal data class TypeScriptCompilerAuthority(
             targetProfile != TypeScriptCompilerContract.PROFILE_NODE ||
                 configKind == TypeScriptR2Contract.CONFIG_KIND_NONE,
         )
+        if (targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
+            require(requireNotNull(packageMetadataSchemaRevision) > 0)
+            require(requireNotNull(packageMetadataPolicyRevision) > 0)
+            requireLowerSha256(
+                requireNotNull(packageMetadataPolicyFingerprint),
+                "package metadata policy fingerprint",
+            )
+        } else {
+            require(
+                packageMetadataSchemaRevision == null &&
+                    packageMetadataPolicyRevision == null &&
+                    packageMetadataPolicyFingerprint == null,
+            )
+        }
     }
 
     companion object {
@@ -67,6 +84,21 @@ internal data class TypeScriptCompilerAuthority(
         const val MAX_VERSION_CHARS = 128
     }
 }
+
+internal data class TypeScriptPreparedSource(
+    val archivePath: String,
+    val projectRelativePath: String,
+    val originalFile: File?,
+    val sha256: String,
+)
+
+internal data class TypeScriptPreparedPackageMetadata(
+    val archivePath: String,
+    val size: Long,
+    val sha256: String,
+    val inventoryFingerprint: String,
+    val typeState: String,
+)
 
 internal data class TypeScriptPreparedCompilation(
     val requestId: String,
@@ -79,6 +111,9 @@ internal data class TypeScriptPreparedCompilation(
     val configByteLength: Long?,
     val configSha256: String?,
     val authority: TypeScriptCompilerAuthority,
+    val rootPaths: List<String> = listOf(entryPath),
+    val sourceFiles: List<TypeScriptPreparedSource> = emptyList(),
+    val packageMetadata: TypeScriptPreparedPackageMetadata? = null,
 )
 
 internal object TypeScriptSingleFileArchive {
@@ -171,6 +206,15 @@ internal object TypeScriptSingleFileArchive {
             configByteLength = configBytes?.size?.toLong(),
             configSha256 = configSha256,
             authority = authority,
+            rootPaths = listOf(entryPath),
+            sourceFiles = listOf(
+                TypeScriptPreparedSource(
+                    archivePath = entryPath,
+                    projectRelativePath = canonicalSourceName,
+                    originalFile = null,
+                    sha256 = sourceSha256,
+                ),
+            ),
         )
     }
 

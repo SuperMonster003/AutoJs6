@@ -20,6 +20,7 @@
         "Rhino の TypeScript 実行時例外はコンパイラの Source Map v3 を利用し, 生成 JavaScript のスタックフレームを元の .ts ファイルと行へマッピングし, 利用できない列を捏造せず, Console とエディタログパネルでマッピング位置をクリック可能な状態に維持",
         "ローカルの単一ファイル .mts/.cts スクリプトを独立 TypeScript コンパイラプラグインの Node profile で .mjs/.cjs にコンパイルしてから Node.js Runtime プラグインで実行し, UTF-8 ファイル名を保持して従来の TypeScript 正規表現除去を迂回; プロジェクトの package メタデータ対応までは単一ファイル Node .ts を明示的に拒否",
         "Node TypeScript の実行例外でコンパイラの Source Map v3 を使用し, V8 スタックフレームを元の .mts/.cts ファイルの正確な行と列へマッピングし, Console とエディターログパネルのマッピング位置から直接ジャンプ可能",
+        "TypeScript プロジェクトを Rhino または Node 向けの単一 Program として有界スナップショットからコンパイルし, 相対 import, CommonJS 循環依存, JSON 実行時ファイル, package の `type` コンテキスト, import 先モジュールの診断, モジュール単位の Source Map スタックマッピングを保持; package メタデータは厳格に検証し lifecycle scripts を拒否",
         "独立した Python Runtime プラグインバックエンドがローカル .py ファイルと `type: python` 宣言のスクリプトプロジェクトを別の CPython プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, ホットプラグ, JavaScript へのフォールバック禁止に対応",
         "Python 起動統合がファイルマネージャー/エディター/ローカル Run Intent/単一ファイル Import Intent/新規ショートカット/タイマータスク/ブロードキャストタスクを対象とし, 単一ファイルまたはプロジェクトの厳格なコンテキストを保持; プロジェクト内 import/相対ファイルアクセス/読み取り専用 `autojs6.app/device/execution/project` API に対応",
         "Python Runtime の実行は ExecutionConfig キー `autojs6.python.stdinSnapshot` を介した任意の上限付き事前供給 stdin スナップショットに対応し, ByteArray/UTF-8 テキストの厳格な受け入れ, プロバイダーの機能/サイズ交渉, 非公開の読み取り専用 PFD 転送とクリーンアップを行う",

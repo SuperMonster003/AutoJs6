@@ -179,6 +179,9 @@ class TypeScriptSingleFileArchiveTest {
         profileRevision = 2,
         configSchemaRevision = TypeScriptCompilerAuthority.CONFIG_NONE_SCHEMA_REVISION,
         configKind = TypeScriptR2Contract.CONFIG_KIND_NONE,
+        packageMetadataSchemaRevision = 1,
+        packageMetadataPolicyRevision = 1,
+        packageMetadataPolicyFingerprint = PACKAGE_METADATA_POLICY_FINGERPRINT,
     )
 
     private fun expectedInventoryFingerprint(
@@ -248,5 +251,7 @@ class TypeScriptSingleFileArchiveTest {
         const val PROJECT_ID = "single-file-test-project"
         const val UTF8_FLAG = 1 shl 11
         const val LOCAL_HEADER_SIGNATURE = 0x04034b50L
+        const val PACKAGE_METADATA_POLICY_FINGERPRINT =
+            "fab8fec29ed0f0a1de65594620e233c9a9bef2fa514dac16c3079d5570325e97"
     }
 }

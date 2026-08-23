@@ -25,7 +25,57 @@ internal data class TypeScriptExecutableSource(
     val sourceMapBinding: TypeScriptSourceMapBinding,
     val generatedSourceName: String,
     val diagnostics: List<TypeScriptDiagnostic>,
-)
+    val modules: List<TypeScriptEmittedModule>,
+    val entryModulePath: String,
+    val projectRoot: File?,
+    val projectSources: List<TypeScriptPreparedSource>,
+    val packageMetadata: TypeScriptPreparedPackageMetadata?,
+) {
+
+    val isProjectCompilation: Boolean
+        get() = projectRoot != null
+
+    val entryModule: TypeScriptEmittedModule
+        get() = modules.single { module -> module.javaScriptPath == entryModulePath }
+
+    fun runtimeRelativeGeneratedPath(module: TypeScriptEmittedModule): String {
+        val path = module.generatedMapping?.generatedPath
+            ?.removePrefix("/outputs/")
+            ?: module.javaScriptPath.removePrefix("modules/")
+        require(
+            path.isNotBlank() && !path.startsWith('/') && !path.endsWith('/') && '\\' !in path,
+        ) { "TypeScript generated module has no canonical runtime path." }
+        require(path.split('/').all { segment -> segment.isNotBlank() && segment != "." && segment != ".." })
+        return path
+    }
+
+    fun sourceMapBindings(
+        generatedSourceNames: Map<String, String>,
+        entryGeneratedLineOffset: Int = 0,
+    ): TypeScriptSourceMapBindings {
+        require(generatedSourceNames.keys == modules.mapTo(linkedSetOf(), TypeScriptEmittedModule::javaScriptPath))
+        return TypeScriptSourceMapBindings.of(
+            modules.map { module ->
+                TypeScriptSourceMapBinding.parse(
+                    sourceMapText = module.sourceMap,
+                    generatedSourceName = requireNotNull(generatedSourceNames[module.javaScriptPath]),
+                    expectedGeneratedFileName = module.javaScriptPath.substringAfterLast('/'),
+                    originalSourceName = module.source.originalFile?.path
+                        ?: if (projectRoot == null && module.javaScriptPath == entryModulePath) {
+                            sourceName
+                        } else {
+                            module.source.projectRelativePath
+                        },
+                    generatedLineOffset = if (module.javaScriptPath == entryModulePath) {
+                        entryGeneratedLineOffset
+                    } else {
+                        0
+                    },
+                )
+            },
+        )
+    }
+}
 
 internal object TypeScriptExecutionCompiler {
 
@@ -34,9 +84,6 @@ internal object TypeScriptExecutionCompiler {
     fun prepare(context: Context, source: ScriptSource): ScriptSource {
         if (source !is JavaScriptFileSource || !source.isCompilerBackedTypeScriptSource) {
             return source
-        }
-        require(source !is NodeProjectLaunchSource) {
-            "Node TypeScript project entries require the multi-file project compiler path."
         }
         val targetProfile = if (source.engineName == JavaScriptSource.ENGINE_NODEJS) {
             TypeScriptCompilerContract.PROFILE_NODE
@@ -56,14 +103,24 @@ internal object TypeScriptExecutionCompiler {
             ?: source.originPath?.takeIf(String::isNotBlank)
             ?: source.originUri?.takeIf(String::isNotBlank)
             ?: runCatching { source.file.canonicalPath }.getOrElse { source.file.absolutePath }
+        val projectRoot = source.typeScriptProjectRoot(targetProfile)
         val output = try {
             runBlocking {
-                TypeScriptCompilerPluginClient(context).compileSingleFile(
-                    sourceFile = source.file,
-                    sourceName = sourceName,
-                    sourceIdentity = sourceIdentity,
-                    targetProfile = targetProfile,
-                )
+                val client = TypeScriptCompilerPluginClient(context)
+                if (projectRoot == null) {
+                    client.compileSingleFile(
+                        sourceFile = source.file,
+                        sourceName = sourceName,
+                        sourceIdentity = sourceIdentity,
+                        targetProfile = targetProfile,
+                    )
+                } else {
+                    client.compileProject(
+                        projectRoot = projectRoot,
+                        entryFile = source.file,
+                        targetProfile = targetProfile,
+                    )
+                }
             }
         } catch (error: TypeScriptCompilerException) {
             if (error.code == TypeScriptCompilerContract.ERROR_COMPILER_UNAVAILABLE) {
@@ -78,24 +135,39 @@ internal object TypeScriptExecutionCompiler {
             is TypeScriptCompilationOutput.Emitted -> {
                 val generatedFileName = output.entryModulePath.substringAfterLast('/')
                 val generatedSourceName = if (
-                    targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+                    projectRoot != null
                 ) {
+                    File(
+                        projectRoot,
+                        output.entryModule.runtimeRelativeGeneratedPath(),
+                    ).path
+                } else if (targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
                     NODE_GENERATED_SOURCE_PREFIX + generatedFileName.substringAfterLast('.')
                 } else {
                     source.fullPath + GENERATED_SUFFIX
                 }
+                val entryBinding = TypeScriptSourceMapBinding.parse(
+                    sourceMapText = output.sourceMap,
+                    generatedSourceName = generatedSourceName,
+                    expectedGeneratedFileName = generatedFileName,
+                    originalSourceName = if (projectRoot == null) {
+                        sourceName
+                    } else {
+                        output.entryModule.source.originalFile?.path ?: source.file.path
+                    },
+                )
                 TypeScriptExecutableSource(
                     sourceName = sourceName,
                     targetProfile = targetProfile,
                     javaScript = output.javaScript,
-                    sourceMapBinding = TypeScriptSourceMapBinding.parse(
-                        sourceMapText = output.sourceMap,
-                        generatedSourceName = generatedSourceName,
-                        expectedGeneratedFileName = generatedFileName,
-                        originalSourceName = sourceName,
-                    ),
+                    sourceMapBinding = entryBinding,
                     generatedSourceName = generatedSourceName,
                     diagnostics = output.diagnostics,
+                    modules = output.modules,
+                    entryModulePath = output.entryModulePath,
+                    projectRoot = projectRoot,
+                    projectSources = output.projectSources,
+                    packageMetadata = output.packageMetadata,
                 )
             }
             is TypeScriptCompilationOutput.Diagnostics -> throw TypeScriptDiagnosticsException(
@@ -105,6 +177,35 @@ internal object TypeScriptExecutionCompiler {
             )
         }
     }
+
+    private fun TypeScriptEmittedModule.runtimeRelativeGeneratedPath(): String {
+        val path = generatedMapping?.generatedPath
+            ?.removePrefix("/outputs/")
+            ?: javaScriptPath.removePrefix("modules/")
+        require(path.isNotBlank() && !path.startsWith('/') && '\\' !in path)
+        return path
+    }
+
+    private fun JavaScriptFileSource.typeScriptProjectRoot(targetProfile: String): File? {
+        val launchRoot = (this as? NodeProjectLaunchSource)?.nodeProjectRootFile
+        if (launchRoot != null) return launchRoot.normalizedCanonicalFile()
+        if (targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
+            nodeProjectRoot?.let { return it.normalizedCanonicalFile() }
+        }
+        var directory = file.normalizedCanonicalFile().parentFile
+        while (directory != null) {
+            val hasBoundary = PROJECT_BOUNDARY_NAMES.any { name ->
+                File(directory, name).isFile
+            } || targetProfile == TypeScriptCompilerContract.PROFILE_NODE &&
+                File(directory, NODE_PACKAGE_BOUNDARY_NAME).isFile
+            if (hasBoundary) return directory.normalizedCanonicalFile()
+            directory = directory.parentFile
+        }
+        return null
+    }
+
+    private fun File.normalizedCanonicalFile(): File =
+        runCatching { canonicalFile }.getOrElse { absoluteFile.normalize() }
 
     private fun JavaScriptFileSource.compilationName(): String {
         if (this is TypeScriptFileSource) {
@@ -172,6 +273,8 @@ internal object TypeScriptExecutionCompiler {
     const val GENERATED_SOURCE_ENGINE_TAG = "typescript_generated_source"
     private const val NODE_GENERATED_SOURCE_PREFIX = "autojs-typescript-entry.generated."
     private const val GENERATED_SUFFIX = ".generated.js"
+    private const val NODE_PACKAGE_BOUNDARY_NAME = "package.json"
+    private val PROJECT_BOUNDARY_NAMES = listOf("project.json", "tsconfig.json")
 }
 
 internal class CompiledTypeScriptSource(

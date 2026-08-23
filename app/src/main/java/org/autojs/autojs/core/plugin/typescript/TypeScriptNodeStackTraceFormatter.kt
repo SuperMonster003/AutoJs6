@@ -4,15 +4,16 @@ package org.autojs.autojs.core.plugin.typescript
 internal object TypeScriptNodeStackTraceFormatter {
 
     fun format(binding: TypeScriptSourceMapBinding, stack: String): String? {
+        return format(TypeScriptSourceMapBindings.single(binding), stack)
+    }
+
+    fun format(bindings: TypeScriptSourceMapBindings, stack: String): String? {
         if (stack.isBlank()) return null
         var mapped = false
         val rendered = logicalLines(stack).map { line ->
             val frame = parseFrame(line) ?: return@map line
-            if (!sameGeneratedFile(frame.sourceName, binding.generatedSourceName)) {
-                return@map line
-            }
-            val original = binding.originalPositionFor(
-                frameSourceName = binding.generatedSourceName,
+            val original = bindings.originalPositionFor(
+                frameSourceName = frame.sourceName,
                 generatedLineNumber = frame.lineNumber,
                 generatedColumnIndex = frame.columnNumber - 1,
             ) ?: return@map line
@@ -65,13 +66,6 @@ internal object TypeScriptNodeStackTraceFormatter {
             columnNumber = columnNumber,
             suffix = line.substring(payloadEnd),
         )
-    }
-
-    private fun sameGeneratedFile(frameSourceName: String, generatedSourceName: String): Boolean {
-        fun basename(value: String): String = value
-            .replace('\\', '/')
-            .substringAfterLast('/')
-        return basename(frameSourceName) == basename(generatedSourceName)
     }
 
     private data class Frame(

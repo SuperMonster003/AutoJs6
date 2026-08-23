@@ -42,6 +42,7 @@ import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.runtime.exception.ScriptCompilationDiagnosticSeverity
 import org.autojs.autojs.runtime.exception.ScriptCompilationException
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.TypeScriptFileSource
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
@@ -135,6 +136,225 @@ class TypeScriptCompilerPluginClientDeviceTest {
             }
         } finally {
             System.clearProperty(markerKey)
+        }
+    }
+
+    @Test
+    fun executesRhinoProjectWithImportsCycleJsonAndMoreThanTenModules() {
+        val markerKey = "autojs6.typescript.rhino-project.${System.nanoTime()}"
+        System.clearProperty(markerKey)
+        try {
+            withProject { root ->
+                File(root, "project.json").writeText("""{"main":"main.ts"}""")
+                File(root, "tsconfig.json").writeText(
+                    """{"compilerOptions":{"strict":true}}""",
+                )
+                val chain = File(root, "chain").apply { mkdirs() }
+                repeat(11) { index ->
+                    File(chain, "m$index.ts").writeText(
+                        if (index == 10) {
+                            "export const value: number = 30;\n"
+                        } else {
+                            "import { value as next } from './m${index + 1}'; " +
+                                "export const value: number = next + 1;\n"
+                        },
+                    )
+                }
+                val cycle = File(root, "cycle").apply { mkdirs() }
+                File(cycle, "a.ts").writeText(
+                    "import { fromB } from './b'; " +
+                        "export const base: number = 40; " +
+                        "export function cycleValue(): number { return fromB() + 1; }\n",
+                )
+                File(cycle, "b.ts").writeText(
+                    "import { base } from './a'; " +
+                        "export function fromB(): number { return base; }\n",
+                )
+                File(root, "data.json").writeText("""{"bonus":2}""")
+                val entry = File(root, "main.ts").apply {
+                    writeText(
+                        """
+                        declare const java: any
+                        declare function require(path: string): any
+                        const payload = require('./data.json') as { bonus: number }
+                        import { value } from './chain/m0'
+                        import { cycleValue } from './cycle/a'
+                        const total: number = value + cycleValue() + payload.bonus
+                        java.lang.System.setProperty('$markerKey', String(total))
+                        """.trimIndent(),
+                    )
+                }
+
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(entry)
+                assertTrue(launch.source is TypeScriptFileSource)
+                val terminal = executeAndAwait(launch.source, root.path)
+                terminal.failure.get()?.let { error ->
+                    throw AssertionError("Rhino TypeScript project execution failed", error)
+                }
+                assertTrue(terminal.succeeded.get())
+                assertEquals("83", System.getProperty(markerKey))
+            }
+        } finally {
+            System.clearProperty(markerKey)
+        }
+    }
+
+    @Test
+    fun returnsProjectDiagnosticFromImportedTypeScriptModule() {
+        withProject { root ->
+            File(root, "project.json").writeText("""{"main":"main.ts"}""")
+            File(root, "main.ts").writeText("import { value } from './lib/bad'; toast(value);\n")
+            val library = File(root, "lib").apply { mkdirs() }
+            File(library, "bad.ts").writeText("export const value: number = 'wrong';\n")
+
+            val output = runBlocking {
+                TypeScriptCompilerPluginClient(context).compileProject(
+                    projectRoot = root,
+                    entryFile = File(root, "main.ts"),
+                    targetProfile = org.autojs.plugin.typescript.api.TypeScriptCompilerContract.PROFILE_RHINO,
+                )
+            }
+            assertTrue(output is TypeScriptCompilationOutput.Diagnostics)
+            output as TypeScriptCompilationOutput.Diagnostics
+            assertTrue(output.diagnostics.any { diagnostic ->
+                diagnostic.isError && diagnostic.uri?.endsWith("/lib/bad.ts") == true
+            })
+        }
+    }
+
+    @Test
+    fun executesCommonJsNodeTsProjectWithCycleJsonAndMoreThanTenModules() =
+        assertNodeTsProjectExecution(packageType = "commonjs", includeJson = true, includeCycle = true)
+
+    @Test
+    fun executesEsmNodeTsProjectWithMoreThanTenModules() =
+        assertNodeTsProjectExecution(packageType = "module", includeJson = false, includeCycle = false)
+
+    @Test
+    fun mapsImportedNodeProjectRuntimeFailureBackToTypeScriptSources() {
+        val marker = "typescript-node-project-map-${System.nanoTime()}"
+        withProject { root ->
+            File(root, "project.json").writeText("""{"type":"node","main":"main.ts"}""")
+            File(root, "package.json").writeText("""{"type":"commonjs"}""")
+            File(root, "main.ts").writeText(
+                "import { fail } from './lib/fail.js';\nfail();\n",
+            )
+            val library = File(root, "lib").apply { mkdirs() }
+            File(library, "fail.ts").writeText(
+                """
+                export function fail(): never {
+                    const message: string = '$marker'
+                    throw new Error(message)
+                }
+                """.trimIndent(),
+            )
+
+            val launch = ScriptLaunchSourceFactory.createFileLaunch(File(root, "main.ts"))
+            assertTrue(launch.source is NodeProjectLaunchSource)
+            val terminal = executeAndAwait(launch.source, root.path)
+            assertFalse(terminal.succeeded.get())
+            assertTrue(terminal.failure.get() is NodePluginScriptExecutionException)
+            val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+            val mappedStack = requireNotNull(engine.lastPluginScriptResult?.errorStack)
+            assertTrue(
+                "Expected imported TypeScript frame at fail.ts:3, got:\n$mappedStack",
+                mappedStack.contains("/lib/fail.ts:3:"),
+            )
+            assertTrue(
+                "Expected entry TypeScript frame at main.ts:2, got:\n$mappedStack",
+                mappedStack.contains("/main.ts:2:"),
+            )
+            assertFalse("Generated JavaScript frame leaked:\n$mappedStack", mappedStack.contains("lib/fail.js"))
+        }
+    }
+
+    private fun assertNodeTsProjectExecution(
+        packageType: String,
+        includeJson: Boolean,
+        includeCycle: Boolean,
+    ) {
+        val marker = "typescript-node-project-$packageType-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            withProject { root ->
+                File(root, "project.json").writeText("""{"type":"node","main":"main.ts"}""")
+                File(root, "package.json").writeText("""{"type":"$packageType"}""")
+                val chain = File(root, "chain").apply { mkdirs() }
+                repeat(11) { index ->
+                    File(chain, "m$index.ts").writeText(
+                        if (index == 10) {
+                            "export const value: number = 30;\n"
+                        } else {
+                            "import { value as next } from './m${index + 1}.js'; " +
+                                "export const value: number = next + 1;\n"
+                        },
+                    )
+                }
+                val dependency = File(root, "dependency").apply { mkdirs() }
+                File(dependency, "a.ts").writeText(
+                    if (includeCycle) {
+                        "import { fromB } from './b.js'; " +
+                            "export const base: number = 40; " +
+                            "export function dependencyValue(): number { return fromB() + 1; }\n"
+                    } else {
+                        "import { base } from './b.js'; " +
+                            "export function dependencyValue(): number { return base + 1; }\n"
+                    },
+                )
+                File(dependency, "b.ts").writeText(
+                    if (includeCycle) {
+                        "import { base } from './a.js'; " +
+                            "export function fromB(): number { return base; }\n"
+                    } else {
+                        "export const base: number = 40;\n"
+                    },
+                )
+                if (includeJson) File(root, "data.json").writeText("""{"bonus":2}""")
+                val jsonExpression = if (includeJson) {
+                    "declare function require(path: string): any; " +
+                        "const payload = require('./data.json') as { bonus: number }; " +
+                        "const bonus: number = payload.bonus;"
+                } else {
+                    "const bonus: number = 2;"
+                }
+                val entry = File(root, "main.ts").apply {
+                    writeText(
+                        "import { value } from './chain/m0.js'; " +
+                            "import { dependencyValue } from './dependency/a.js'; " +
+                            "$jsonExpression " +
+                            "const total: number = value + dependencyValue() + bonus; " +
+                            "console.log('$marker:' + total);\n",
+                    )
+                }
+
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(entry)
+                assertTrue(launch.source is NodeProjectLaunchSource)
+                val terminal = executeAndAwait(launch.source, root.path)
+                terminal.failure.get()?.let { error ->
+                    val details = (error as? ScriptCompilationException)?.consoleMessage
+                    throw AssertionError(
+                        buildString {
+                            append("Node TypeScript $packageType project execution failed")
+                            if (details != null) {
+                                append('\n')
+                                append(details)
+                            }
+                        },
+                        error,
+                    )
+                }
+                assertTrue(terminal.succeeded.get())
+                val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                assertTrue(requireNotNull(engine.lastPluginScriptResult).succeeded)
+                val consoleMessage = awaitConsoleMessage(marker)
+                assertTrue(
+                    "Expected $marker:83 in Node console, got: $consoleMessage",
+                    consoleMessage.contains("$marker:83"),
+                )
+            }
+        } finally {
+            console.clear()
         }
     }
 
@@ -752,6 +972,16 @@ class TypeScriptCompilerPluginClientDeviceTest {
             val sourceFile = File(root, name)
             sourceFile.writeText(source, Charsets.UTF_8)
             block(sourceFile)
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    private fun withProject(block: (File) -> Unit) {
+        val root = File(context.cacheDir, "typescript-project-${System.nanoTime()}")
+        check(root.mkdirs())
+        try {
+            block(root)
         } finally {
             root.deleteRecursively()
         }

@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.plugin.typescript
 
+import java.net.URI
+
 internal data class TypeScriptOriginalSourcePosition(
     val sourceName: String,
     val lineNumber: Int,
@@ -11,6 +13,7 @@ internal class TypeScriptSourceMapBinding private constructor(
     val generatedSourceName: String,
     val generatedFileName: String,
     val originalSourceName: String,
+    private val generatedLineOffset: Int,
     private val sourceMap: TypeScriptSourceMapV3,
 ) {
 
@@ -22,8 +25,10 @@ internal class TypeScriptSourceMapBinding private constructor(
         if (!matchesGeneratedSource(frameSourceName)) {
             return null
         }
+        val sourceMapLineNumber = generatedLineNumber - generatedLineOffset
+        if (sourceMapLineNumber <= 0) return null
         val position = sourceMap.originalPositionFor(
-            generatedLineNumber = generatedLineNumber,
+            generatedLineNumber = sourceMapLineNumber,
             generatedColumnIndex = generatedColumnIndex,
         ) ?: return null
         return TypeScriptOriginalSourcePosition(
@@ -33,10 +38,28 @@ internal class TypeScriptSourceMapBinding private constructor(
         )
     }
 
-    private fun matchesGeneratedSource(frameSourceName: String): Boolean {
-        val frame = normalizePath(frameSourceName)
-        val generated = normalizePath(generatedSourceName)
+    internal fun matchesGeneratedSource(frameSourceName: String): Boolean {
+        val frame = normalizeGeneratedSourceIdentity(frameSourceName)
+        val generated = normalizeGeneratedSourceIdentity(generatedSourceName)
         return frame == generated
+    }
+
+    internal fun hasGeneratedBasename(frameSourceName: String): Boolean =
+        generatedBasename(frameSourceName) == generatedBasename(generatedSourceName)
+
+    internal fun generatedSuffixSegmentCount(frameSourceName: String): Int {
+        val frameSegments = normalizedGeneratedPathSegments(frameSourceName)
+        val generatedSegments = normalizedGeneratedPathSegments(generatedSourceName)
+        var count = 0
+        while (
+            count < frameSegments.size &&
+            count < generatedSegments.size &&
+            frameSegments[frameSegments.lastIndex - count] ==
+            generatedSegments[generatedSegments.lastIndex - count]
+        ) {
+            count += 1
+        }
+        return count
     }
 
     companion object {
@@ -46,20 +69,22 @@ internal class TypeScriptSourceMapBinding private constructor(
             generatedSourceName: String,
             expectedGeneratedFileName: String,
             originalSourceName: String,
+            generatedLineOffset: Int = 0,
         ): TypeScriptSourceMapBinding {
             require(generatedSourceName.isNotBlank())
             require(expectedGeneratedFileName.isNotBlank())
             require(originalSourceName.isNotBlank())
+            require(generatedLineOffset >= 0)
             val sourceMap = TypeScriptSourceMapV3.parse(
                 sourceMapText = sourceMapText,
                 expectedGeneratedFileName = expectedGeneratedFileName,
             )
             require(sourceMap.sources.size == 1) {
-                "The single-file TypeScript profile must emit exactly one Source Map source."
+                "Each emitted TypeScript module must identify exactly one Source Map source."
             }
             require(
-                normalizePath(sourceMap.sources.single()).substringAfterLast('/') ==
-                    normalizePath(originalSourceName).substringAfterLast('/'),
+                generatedBasename(sourceMap.sources.single()) ==
+                    generatedBasename(originalSourceName),
             ) {
                 "The TypeScript Source Map does not identify the entry source."
             }
@@ -67,13 +92,93 @@ internal class TypeScriptSourceMapBinding private constructor(
                 generatedSourceName = generatedSourceName,
                 generatedFileName = sourceMap.file,
                 originalSourceName = originalSourceName,
+                generatedLineOffset = generatedLineOffset,
                 sourceMap = sourceMap,
             )
         }
-
-        private fun normalizePath(path: String): String = path.replace('\\', '/')
     }
 }
+
+/** One execution's fail-closed mapping set for every emitted TypeScript module. */
+internal class TypeScriptSourceMapBindings private constructor(
+    val bindings: List<TypeScriptSourceMapBinding>,
+) {
+
+    init {
+        require(bindings.isNotEmpty())
+        require(bindings.map(TypeScriptSourceMapBinding::generatedSourceName).distinct().size == bindings.size)
+    }
+
+    fun originalPositionFor(
+        frameSourceName: String,
+        generatedLineNumber: Int,
+        generatedColumnIndex: Int? = null,
+    ): TypeScriptOriginalSourcePosition? {
+        val exact = bindings.filter { binding -> binding.matchesGeneratedSource(frameSourceName) }
+        if (exact.size == 1) {
+            return exact.single().originalPositionFor(
+                frameSourceName = exact.single().generatedSourceName,
+                generatedLineNumber = generatedLineNumber,
+                generatedColumnIndex = generatedColumnIndex,
+            )
+        }
+        if (exact.isNotEmpty()) return null
+
+        // The external Node plugin materializes the same project-relative paths below its own
+        // private workspace root. Prefer the longest unique multi-segment suffix so projects may
+        // contain repeated basenames without confusing two emitted modules.
+        val suffixCandidates = bindings.mapNotNull { binding ->
+            binding.generatedSuffixSegmentCount(frameSourceName)
+                .takeIf { segmentCount -> segmentCount >= 2 }
+                ?.let { segmentCount -> binding to segmentCount }
+        }
+        val strongestSuffixLength = suffixCandidates.maxOfOrNull { (_, length) -> length }
+        val suffixMatches = suffixCandidates.filter { (_, length) -> length == strongestSuffixLength }
+        if (suffixMatches.size == 1) {
+            val binding = suffixMatches.single().first
+            return binding.originalPositionFor(
+                frameSourceName = binding.generatedSourceName,
+                generatedLineNumber = generatedLineNumber,
+                generatedColumnIndex = generatedColumnIndex,
+            )
+        }
+        if (suffixMatches.isNotEmpty()) return null
+
+        // Some Rhino/V8 builds retain only a generated basename. Map it only when
+        // that basename is unique in this execution; ambiguity stays unmapped.
+        val basenameMatches = bindings.filter { binding ->
+            binding.hasGeneratedBasename(frameSourceName)
+        }
+        if (basenameMatches.size != 1) return null
+        val binding = basenameMatches.single()
+        return binding.originalPositionFor(
+            frameSourceName = binding.generatedSourceName,
+            generatedLineNumber = generatedLineNumber,
+            generatedColumnIndex = generatedColumnIndex,
+        )
+    }
+
+    companion object {
+        fun of(bindings: List<TypeScriptSourceMapBinding>): TypeScriptSourceMapBindings =
+            TypeScriptSourceMapBindings(bindings.toList())
+
+        fun single(binding: TypeScriptSourceMapBinding): TypeScriptSourceMapBindings =
+            TypeScriptSourceMapBindings(listOf(binding))
+    }
+}
+
+private fun normalizeGeneratedSourceIdentity(value: String): String {
+    val uriPath = runCatching {
+        URI(value).takeIf { uri -> uri.scheme.equals("file", ignoreCase = true) }?.path
+    }.getOrNull()
+    return (uriPath ?: value).replace('\\', '/').removePrefix("file://")
+}
+
+private fun generatedBasename(value: String): String =
+    normalizeGeneratedSourceIdentity(value).substringAfterLast('/')
+
+private fun normalizedGeneratedPathSegments(value: String): List<String> =
+    normalizeGeneratedSourceIdentity(value).trimEnd('/').split('/').filter(String::isNotEmpty)
 
 private class TypeScriptSourceMapV3 private constructor(
     val file: String,

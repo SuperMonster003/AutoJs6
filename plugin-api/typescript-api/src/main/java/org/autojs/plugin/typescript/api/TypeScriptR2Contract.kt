@@ -19,6 +19,13 @@ object TypeScriptR2Contract {
     const val KEY_CONFIG_SHA256 = "configSha256"
     const val KEY_CONFIG_POLICY_REVISION = "configPolicyRevision"
     const val KEY_CONFIG_POLICY_FINGERPRINT = "configPolicyFingerprint"
+    /* Optional public NodeNext revision-2 authority for controlled package.json metadata. */
+    const val KEY_PACKAGE_METADATA_SCHEMA_REVISION = "packageMetadataSchemaRevision"
+    const val KEY_PACKAGE_METADATA_POLICY_REVISION = "packageMetadataPolicyRevision"
+    const val KEY_PACKAGE_METADATA_POLICY_FINGERPRINT =
+        "packageMetadataPolicyFingerprint"
+    const val KEY_PACKAGE_METADATA_INVENTORY_FINGERPRINT =
+        "packageMetadataInventoryFingerprint"
     /* Exact public NodeNext revision-2 authority advertised alongside default Rhino metadata. */
     const val KEY_NODE_PROFILE_REVISION = "nodeProfileRevision"
     const val KEY_NODE_CONFIG_SCHEMA_REVISION = "nodeConfigSchemaRevision"

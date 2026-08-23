@@ -5,7 +5,9 @@ import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.plugin.typescript.CompiledTypeScriptSource
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
+import org.autojs.autojs.core.plugin.typescript.TypeScriptNodeRuntimeProjectBuilder
 import org.autojs.autojs.core.plugin.typescript.TypeScriptNodeStackTraceFormatter
+import org.autojs.autojs.core.plugin.typescript.TypeScriptSourceMapBindings
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
@@ -32,9 +34,31 @@ class NodePluginJavaScriptEngine(
         val compiled = (source as? CompiledTypeScriptSource)?.executable?.takeIf { executable ->
             executable.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
         }
+        val executionId = newExecutionId()
+        val request = buildRequest(source).copy(executionId = executionId)
+        val sourceMapBindings = compiled?.let { executable ->
+            val generatedNames = if (executable.isProjectCompilation) {
+                val root = requireNotNull(executable.projectRoot).normalizedCanonicalFile()
+                executable.modules.associate { module ->
+                    module.javaScriptPath to File(
+                        root,
+                        executable.runtimeRelativeGeneratedPath(module),
+                    ).absoluteFile.normalize().path
+                }
+            } else {
+                mapOf(executable.entryModulePath to request.sourceName)
+            }
+            executable.sourceMapBindings(
+                generatedSourceNames = generatedNames,
+                entryGeneratedLineOffset = request.sourceLineOffset,
+            )
+        }
         compiled?.let { executable ->
-            setTag(TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG, executable.sourceMapBinding)
-            setTag(TypeScriptExecutionCompiler.GENERATED_SOURCE_ENGINE_TAG, executable.generatedSourceName)
+            setTag(
+                TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG,
+                requireNotNull(sourceMapBindings),
+            )
+            setTag(TypeScriptExecutionCompiler.GENERATED_SOURCE_ENGINE_TAG, request.sourceName)
             executable.diagnostics.forEach { diagnostic ->
                 runtime.console.warn(
                     TypeScriptExecutionCompiler.formatDiagnostic(
@@ -44,8 +68,6 @@ class NodePluginJavaScriptEngine(
                 )
             }
         }
-        val executionId = newExecutionId()
-        val request = buildRequest(source).copy(executionId = executionId)
         activeExecutionId = executionId
         val rawResult = try {
             NodeJsRuntimePluginBridge.runScript(
@@ -71,7 +93,7 @@ class NodePluginJavaScriptEngine(
             rawResult
         } else {
             val mappedStack = TypeScriptNodeStackTraceFormatter.format(
-                binding = compiled.sourceMapBinding,
+                bindings = requireNotNull(sourceMapBindings),
                 stack = rawResult.errorStack,
             )
             if (mappedStack == null) rawResult else rawResult.copy(errorStack = mappedStack)
@@ -98,6 +120,44 @@ class NodePluginJavaScriptEngine(
             compiled?.executable?.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
         ) {
             val original = compiled.originalSource
+            val executable = compiled.executable
+            if (executable.isProjectCompilation) {
+                val projectRoot = requireNotNull(executable.projectRoot).normalizedCanonicalFile()
+                val sourceFile = original.file.normalizedCanonicalFile()
+                require(sourceFile.path.startsWith(projectRoot.path + File.separator)) {
+                    "Compiled Node TypeScript entry escapes its project root."
+                }
+                val runtimeProject = TypeScriptNodeRuntimeProjectBuilder.build(executable)
+                val launchSource = original as? NodeProjectLaunchSource
+                val projectRequest = if (launchSource == null) {
+                    NodeProjectRunner.buildResolvedEntryRequest(
+                        NodeProjectRunner.Request(
+                            projectRoot = projectRoot,
+                            entryFile = sourceFile,
+                            workingDirectory = projectRoot,
+                            entrySource = executable.javaScript,
+                            moduleSources = runtimeProject.moduleSources,
+                        ),
+                    )
+                } else {
+                    val plan = NodeProjectRunner.resolveProjectLaunchPlanWithDescriptor(
+                        NodeProjectRunner.buildProjectRequest(launchSource),
+                    )
+                    require(plan.entryFile.normalizedCanonicalFile().path == sourceFile.path) {
+                        "Compiled Node TypeScript launch resolved a different project entry."
+                    }
+                    NodeProjectRunner.buildResolvedProjectLaunchRequest(
+                        plan.copy(
+                            entrySource = executable.javaScript,
+                            moduleSources = plan.moduleSources + runtimeProject.moduleSources,
+                        ),
+                    )
+                }
+                return projectRequest.copy(
+                    sourceName = runtimeProject.entryGeneratedSourceName,
+                    spawnDepth = currentSpawnDepth(),
+                )
+            }
             val sourceFile = original.file.normalizedCanonicalFile()
             val workingDirectory = sourceFile.parentFile?.normalizedCanonicalFile()
                 ?: cwd()?.takeIf(String::isNotBlank)?.let(::File)?.normalizedCanonicalFile()

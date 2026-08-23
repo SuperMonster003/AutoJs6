@@ -47,15 +47,44 @@ internal data class TypeScriptDiagnostic(
         get() = category == TypeScriptR2Contract.DIAGNOSTIC_CATEGORY_ERROR
 }
 
+internal data class TypeScriptGeneratedModuleMapping(
+    val sourcePath: String,
+    val originalSourceUri: String,
+    val moduleFormat: String,
+    val outputExtension: String,
+    val generatedPath: String,
+    val sourceMapPath: String,
+    val generatedUri: String,
+)
+
+internal data class TypeScriptEmittedModule(
+    val sourcePaths: List<String>,
+    val source: TypeScriptPreparedSource,
+    val javaScriptPath: String,
+    val javaScript: String,
+    val sourceMapPath: String,
+    val sourceMap: String,
+    val generatedMapping: TypeScriptGeneratedModuleMapping?,
+)
+
 internal sealed interface TypeScriptCompilationOutput {
     val diagnostics: List<TypeScriptDiagnostic>
 
     data class Emitted(
-        val javaScript: String,
-        val sourceMap: String,
+        val modules: List<TypeScriptEmittedModule>,
         val entryModulePath: String,
+        val projectSources: List<TypeScriptPreparedSource>,
+        val packageMetadata: TypeScriptPreparedPackageMetadata?,
         override val diagnostics: List<TypeScriptDiagnostic>,
-    ) : TypeScriptCompilationOutput
+    ) : TypeScriptCompilationOutput {
+        val entryModule: TypeScriptEmittedModule = modules.single { module ->
+            module.javaScriptPath == entryModulePath
+        }
+        val javaScript: String
+            get() = entryModule.javaScript
+        val sourceMap: String
+            get() = entryModule.sourceMap
+    }
 
     data class Diagnostics(
         override val diagnostics: List<TypeScriptDiagnostic>,
@@ -232,14 +261,17 @@ internal object TypeScriptCompilationOutputReader {
         require(manifest["effectiveOptions"] is Map<*, *>) {
             "TypeScript output manifest effectiveOptions is not an object."
         }
-        if (prepared.authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
-            validateNodeResultAuthority(
+        val nodeMappings =
+            if (prepared.authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
+                validateNodeResultAuthority(
                 manifest = manifest,
                 prepared = prepared,
                 terminal = terminal,
                 effectiveOptionsFingerprint = effectiveOptionsFingerprint,
-            )
-        }
+                )
+            } else {
+                emptyMap()
+            }
 
         val descriptors = manifest.requireObjectList("files").map(::artifactDescriptor)
         require(
@@ -291,32 +323,85 @@ internal object TypeScriptCompilationOutputReader {
         return when (terminal.outcome) {
             TypeScriptCompilerContract.OUTCOME_EMITTED -> {
                 require(manifest.requireBoolean("emitSkipped").not())
-                require(terminal.emittedModuleCount == 1)
-                val javaScript = descriptors.singleOrNull { it.kind == KIND_JAVASCRIPT }
-                    ?: error("Single-file TypeScript output has no unique JavaScript module.")
-                val sourceMap = descriptors.singleOrNull { it.kind == KIND_SOURCE_MAP }
-                    ?: error("Single-file TypeScript output has no unique Source Map.")
+                require(terminal.emittedModuleCount > 0)
+                val javaScripts = descriptors.filter { it.kind == KIND_JAVASCRIPT }
+                val sourceMaps = descriptors.filter { it.kind == KIND_SOURCE_MAP }
+                require(javaScripts.size == terminal.emittedModuleCount) {
+                    "TypeScript output JavaScript count does not match its terminal result."
+                }
+                require(sourceMaps.size == terminal.emittedModuleCount) {
+                    "TypeScript output Source Map count does not match its terminal result."
+                }
                 val entryModulePath = manifest.requireNullableString("entryModulePath")
                     ?: error("Emitted TypeScript output has no entry module.")
-                require(entryModulePath == javaScript.path)
+                require(javaScripts.any { descriptor -> descriptor.path == entryModulePath })
+                val sourceMapsByPath = sourceMaps.associateBy(ArtifactDescriptor::path)
+                require(sourceMapsByPath.size == sourceMaps.size)
+                val preparedSourcesByPath = prepared.sourceFiles
+                    .associateBy(TypeScriptPreparedSource::archivePath)
+                require(preparedSourcesByPath.size == prepared.sourceFiles.size)
+                val modules = javaScripts.map { javaScript ->
+                    require(javaScript.path.startsWith("modules/"))
+                    val expectedSourceMapPath =
+                        "maps/" + javaScript.path.removePrefix("modules/") + ".map"
+                    val sourceMap = requireNotNull(sourceMapsByPath[expectedSourceMapPath]) {
+                        "TypeScript JavaScript module has no paired Source Map."
+                    }
+                    require(javaScript.sourcePaths.size == 1) {
+                        "Each emitted TypeScript module must identify exactly one caller source."
+                    }
+                    require(javaScript.sourcePaths == sourceMap.sourcePaths)
+                    val preparedSource = requireNotNull(
+                        preparedSourcesByPath[javaScript.sourcePaths.single()],
+                    ) {
+                        "TypeScript output identifies a source outside the caller snapshot."
+                    }
+                    val mapping = if (
+                        prepared.authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+                    ) {
+                        val generatedPath = "/outputs/" +
+                            javaScript.path.removePrefix("modules/")
+                        requireNotNull(nodeMappings[generatedPath]) {
+                            "Node JavaScript output has no generated-module mapping."
+                        }.also { generated ->
+                            require(generated.sourceMapPath == "$generatedPath.map")
+                            require(javaScript.sourcePaths == listOf(generated.sourcePath.removePrefix("/")))
+                        }
+                    } else {
+                        null
+                    }
+                    TypeScriptEmittedModule(
+                        sourcePaths = javaScript.sourcePaths,
+                        source = preparedSource,
+                        javaScriptPath = javaScript.path,
+                        javaScript = TypeScriptUtf8.decode(
+                            requireNotNull(payloads[javaScript.path]),
+                            "emitted JavaScript",
+                        ),
+                        sourceMapPath = sourceMap.path,
+                        sourceMap = TypeScriptUtf8.decode(
+                            requireNotNull(payloads[sourceMap.path]),
+                            "Source Map",
+                        ),
+                        generatedMapping = mapping,
+                    )
+                }
                 require(
-                    sourceMap.path ==
-                        "maps/" + javaScript.path.removePrefix("modules/") + ".map",
+                    modules.map(TypeScriptEmittedModule::sourceMapPath).toSet() ==
+                        sourceMapsByPath.keys,
                 )
-                require(
-                    javaScript.sourcePaths == listOf(prepared.entryPath) &&
-                        sourceMap.sourcePaths == listOf(prepared.entryPath),
-                )
+                if (prepared.authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
+                    require(
+                        modules.mapNotNull(TypeScriptEmittedModule::generatedMapping)
+                            .map(TypeScriptGeneratedModuleMapping::generatedPath)
+                            .toSet() == nodeMappings.keys,
+                    )
+                }
                 TypeScriptCompilationOutput.Emitted(
-                    javaScript = TypeScriptUtf8.decode(
-                        requireNotNull(payloads[javaScript.path]),
-                        "emitted JavaScript",
-                    ),
-                    sourceMap = TypeScriptUtf8.decode(
-                        requireNotNull(payloads[sourceMap.path]),
-                        "Source Map",
-                    ),
+                    modules = modules,
                     entryModulePath = entryModulePath,
+                    projectSources = prepared.sourceFiles,
+                    packageMetadata = prepared.packageMetadata,
                     diagnostics = diagnostics,
                 )
             }
@@ -338,7 +423,7 @@ internal object TypeScriptCompilationOutputReader {
         prepared: TypeScriptPreparedCompilation,
         terminal: TypeScriptTerminalResult,
         effectiveOptionsFingerprint: String,
-    ) {
+    ): Map<String, TypeScriptGeneratedModuleMapping> {
         manifest.requireInt("nodeModuleOutputPolicySchemaRevision").requireEqual(1)
         manifest.requireInt("nodeModuleOutputPolicyRevision").requireEqual(1)
         val moduleOutputPolicyFingerprint =
@@ -351,99 +436,213 @@ internal object TypeScriptCompilationOutputReader {
         manifest.requireInt("generatedMappingPolicyRevision").requireEqual(1)
         manifest.requireInt("resolverPolicyRevision").requireEqual(2)
         manifest.requireLowerSha256("snapshotTargetInventoryFingerprint")
-        require(manifest.getValue("packageMetadataInventoryFingerprint") == null)
-        require(manifest.getValue("packageFormatCatalogFingerprint") == null)
+        val packageMetadata = prepared.packageMetadata
+        if (packageMetadata == null) {
+            require(manifest.getValue("packageMetadataInventoryFingerprint") == null)
+            require(manifest.getValue("packageFormatCatalogFingerprint") == null)
+        } else {
+            manifest.requireString("packageMetadataInventoryFingerprint")
+                .requireEqual(packageMetadata.inventoryFingerprint)
+            val expectedCatalogFingerprint = packageFormatCatalogFingerprint(
+                prepared = prepared,
+                packageMetadata = packageMetadata,
+                moduleOutputPolicyFingerprint = moduleOutputPolicyFingerprint,
+            )
+            manifest.requireString("packageFormatCatalogFingerprint")
+                .requireEqual(expectedCatalogFingerprint)
+        }
         require(manifest.getValue("packageTargetInventoryFingerprint") == null)
         manifest.requireLowerSha256("targetUniverseFingerprint")
 
-        val sourcePath = "/${prepared.entryPath}"
-        manifest.requireString("resultSnapshotEntryPath").requireEqual(sourcePath)
-        require(manifest.requireStringList("resultSnapshotRootNames") == listOf(sourcePath))
+        val entrySourcePath = "/${prepared.entryPath}"
+        manifest.requireString("resultSnapshotEntryPath").requireEqual(entrySourcePath)
+        val expectedRootNames = prepared.rootPaths.map { path -> "/$path" }.sorted()
+        require(manifest.requireStringList("resultSnapshotRootNames") == expectedRootNames)
 
         val mappings = manifest.requireObjectList("generatedModuleMappings")
         require(mappings.size == terminal.emittedModuleCount)
         if (terminal.outcome == TypeScriptCompilerContract.OUTCOME_DIAGNOSTICS) {
             require(mappings.isEmpty())
-            return
+            return emptyMap()
         }
-
-        val mapping = mappings.single()
-        mapping.requireExactKeys(GENERATED_MODULE_MAPPING_KEYS, "generated module mapping")
-        val sourceExtension = when {
-            sourcePath.endsWith(".mts") -> ".mts"
-            sourcePath.endsWith(".cts") -> ".cts"
-            else -> error("Single-file Node output has an unsupported source extension.")
-        }
-        val moduleFormat = if (sourceExtension == ".mts") "esm" else "commonjs"
-        val outputExtension = if (sourceExtension == ".mts") ".mjs" else ".cjs"
-        val generatedPath = sourcePath.removePrefix("/sources/")
-            .removeSuffix(sourceExtension)
-            .let { relativePath -> "/outputs/$relativePath$outputExtension" }
-        val sourceMapPath = "$generatedPath.map"
         val projectNamespace = "p-" + sha256(
             TypeScriptUtf8.encode(prepared.projectId, "TypeScript project ID"),
         )
-        val generatedUri = "autojs://generated/$projectNamespace/" +
-            generatedPath.removePrefix("/").split('/').joinToString("/", transform = ::percentEncode)
+        val admittedSourcePaths = expectedRootNames.toHashSet()
+        val parsedMappings = mappings.map { mapping ->
+            mapping.requireExactKeys(GENERATED_MODULE_MAPPING_KEYS, "generated module mapping")
+            val sourcePath = mapping.requireString("sourcePath")
+            require(sourcePath in admittedSourcePaths)
+            val sourceExtension = when {
+                sourcePath.endsWith(".mts") -> ".mts"
+                sourcePath.endsWith(".cts") -> ".cts"
+                sourcePath.endsWith(".ts") && !sourcePath.endsWith(".d.ts") -> ".ts"
+                else -> error("Node output has an unsupported source extension.")
+            }
+            val packageTypeState: String
+            val packageInventoryFingerprint: String
+            val packageBoundary: String
+            val moduleFormat: String
+            val outputExtension: String
+            when (sourceExtension) {
+                ".mts" -> {
+                    packageTypeState = "none"
+                    packageInventoryFingerprint = "none"
+                    packageBoundary = "none"
+                    moduleFormat = "esm"
+                    outputExtension = ".mjs"
+                }
+                ".cts" -> {
+                    packageTypeState = "none"
+                    packageInventoryFingerprint = "none"
+                    packageBoundary = "none"
+                    moduleFormat = "commonjs"
+                    outputExtension = ".cjs"
+                }
+                else -> {
+                    val metadata = requireNotNull(packageMetadata) {
+                        "Node .ts output requires bound package metadata."
+                    }
+                    packageTypeState = metadata.typeState
+                    packageInventoryFingerprint = metadata.inventoryFingerprint
+                    packageBoundary = "/"
+                    moduleFormat = if (metadata.typeState == "module") "esm" else "commonjs"
+                    outputExtension = ".js"
+                }
+            }
+            val generatedPath = sourcePath.removePrefix("/sources/")
+                .removeSuffix(sourceExtension)
+                .let { relativePath -> "/outputs/$relativePath$outputExtension" }
+            val sourceMapPath = "$generatedPath.map"
+            val originalSourceUri = sourceUri(prepared.projectId, sourcePath)
+            val generatedUri = "autojs://generated/$projectNamespace/" +
+                generatedPath.removePrefix("/").split('/')
+                    .joinToString("/", transform = ::percentEncode)
 
-        mapping.requireString("sourcePath").requireEqual(sourcePath)
-        mapping.requireString("projectNamespace").requireEqual(projectNamespace)
-        mapping.requireString("originalSourceUri").requireEqual(prepared.entrySourceUri)
-        mapping.requireString("moduleFormat").requireEqual(moduleFormat)
-        mapping.requireString("outputExtension").requireEqual(outputExtension)
-        mapping.requireString("generatedPath").requireEqual(generatedPath)
-        mapping.requireString("sourceMapPath").requireEqual(sourceMapPath)
-        mapping.requireString("generatedUri").requireEqual(generatedUri)
+            mapping.requireString("projectNamespace").requireEqual(projectNamespace)
+            mapping.requireString("originalSourceUri").requireEqual(originalSourceUri)
+            mapping.requireString("moduleFormat").requireEqual(moduleFormat)
+            mapping.requireString("outputExtension").requireEqual(outputExtension)
+            mapping.requireString("generatedPath").requireEqual(generatedPath)
+            mapping.requireString("sourceMapPath").requireEqual(sourceMapPath)
+            mapping.requireString("generatedUri").requireEqual(generatedUri)
 
-        val expectedEvidence = buildString {
-            append("schema=")
-            append(GENERATED_MAPPING_SCHEMA)
-            append("|schemaRevision=1")
-            append("|mappingPolicyRevision=1")
-            append("|moduleOutputPolicyRevision=1")
-            append("|moduleOutputPolicyFingerprint=")
-            append(moduleOutputPolicyFingerprint)
-            append("|profile=node")
-            append("|profileSchemaRevision=")
-            append(prepared.authority.profileSchemaRevision)
-            append("|profileRevision=")
-            append(prepared.authority.profileRevision)
-            append("|configSchemaRevision=")
-            append(prepared.authority.configSchemaRevision)
-            append("|configKind=")
-            append(percentEncode(prepared.authority.configKind))
-            append("|effectiveOptionsFingerprint=")
-            append(effectiveOptionsFingerprint)
-            append("|runtimeCapabilitiesFingerprint=")
-            append(prepared.authority.runtimeCapabilitiesFingerprint)
-            append("|projectNamespace=")
-            append(percentEncode(projectNamespace))
-            append("|sourcePath=")
-            append(percentEncode(sourcePath))
-            append("|originalSourceUri=")
-            append(percentEncode(prepared.entrySourceUri))
-            append("|moduleFormat=")
-            append(percentEncode(moduleFormat))
-            append("|packageTypeState=none")
-            append("|packageMetadataInventoryFingerprint=none")
-            append("|packageBoundary=none")
-            append("|outputExtension=")
-            append(percentEncode(outputExtension))
-            append("|generatedPath=")
-            append(percentEncode(generatedPath))
-            append("|sourceMapPath=")
-            append(percentEncode(sourceMapPath))
-            append("|generatedUri=")
-            append(percentEncode(generatedUri))
-        }
-        require(expectedEvidence.all { character -> character.code in 0x20..0x7e })
-        mapping.requireString("canonicalEvidence").requireEqual(expectedEvidence)
-        mapping.requireString("fingerprint").also { fingerprint ->
-            requireLowerSha256(fingerprint, "generated module mapping fingerprint")
-            fingerprint.requireEqual(
-                sha256(TypeScriptUtf8.encode(expectedEvidence, "generated mapping evidence")),
+            val expectedEvidence = buildString {
+                append("schema=")
+                append(GENERATED_MAPPING_SCHEMA)
+                append("|schemaRevision=1")
+                append("|mappingPolicyRevision=1")
+                append("|moduleOutputPolicyRevision=1")
+                append("|moduleOutputPolicyFingerprint=")
+                append(moduleOutputPolicyFingerprint)
+                append("|profile=node")
+                append("|profileSchemaRevision=")
+                append(prepared.authority.profileSchemaRevision)
+                append("|profileRevision=")
+                append(prepared.authority.profileRevision)
+                append("|configSchemaRevision=")
+                append(prepared.authority.configSchemaRevision)
+                append("|configKind=")
+                append(percentEncode(prepared.authority.configKind))
+                append("|effectiveOptionsFingerprint=")
+                append(effectiveOptionsFingerprint)
+                append("|runtimeCapabilitiesFingerprint=")
+                append(prepared.authority.runtimeCapabilitiesFingerprint)
+                append("|projectNamespace=")
+                append(percentEncode(projectNamespace))
+                append("|sourcePath=")
+                append(percentEncode(sourcePath))
+                append("|originalSourceUri=")
+                append(percentEncode(originalSourceUri))
+                append("|moduleFormat=")
+                append(percentEncode(moduleFormat))
+                append("|packageTypeState=")
+                append(percentEncode(packageTypeState))
+                append("|packageMetadataInventoryFingerprint=")
+                append(percentEncode(packageInventoryFingerprint))
+                append("|packageBoundary=")
+                append(percentEncode(packageBoundary))
+                append("|outputExtension=")
+                append(percentEncode(outputExtension))
+                append("|generatedPath=")
+                append(percentEncode(generatedPath))
+                append("|sourceMapPath=")
+                append(percentEncode(sourceMapPath))
+                append("|generatedUri=")
+                append(percentEncode(generatedUri))
+            }
+            require(expectedEvidence.all { character -> character.code in 0x20..0x7e })
+            mapping.requireString("canonicalEvidence").requireEqual(expectedEvidence)
+            mapping.requireString("fingerprint").also { fingerprint ->
+                requireLowerSha256(fingerprint, "generated module mapping fingerprint")
+                fingerprint.requireEqual(
+                    sha256(TypeScriptUtf8.encode(expectedEvidence, "generated mapping evidence")),
+                )
+            }
+            TypeScriptGeneratedModuleMapping(
+                sourcePath = sourcePath,
+                originalSourceUri = originalSourceUri,
+                moduleFormat = moduleFormat,
+                outputExtension = outputExtension,
+                generatedPath = generatedPath,
+                sourceMapPath = sourceMapPath,
+                generatedUri = generatedUri,
             )
         }
+        require(parsedMappings.map(TypeScriptGeneratedModuleMapping::sourcePath) ==
+            parsedMappings.map(TypeScriptGeneratedModuleMapping::sourcePath).sorted())
+        require(parsedMappings.map(TypeScriptGeneratedModuleMapping::sourcePath).distinct().size ==
+            parsedMappings.size)
+        require(parsedMappings.map(TypeScriptGeneratedModuleMapping::generatedPath).distinct().size ==
+            parsedMappings.size)
+        return parsedMappings.associateBy(TypeScriptGeneratedModuleMapping::generatedPath)
+    }
+
+    private fun packageFormatCatalogFingerprint(
+        prepared: TypeScriptPreparedCompilation,
+        packageMetadata: TypeScriptPreparedPackageMetadata,
+        moduleOutputPolicyFingerprint: String,
+    ): String {
+        val authority = prepared.authority
+        val canonicalInput = buildString {
+            append("autojs6.typescript.node-package-format.catalog.v1")
+            append("|schemaRevision=1")
+            append("|catalogRevision=1")
+            append("|profileSchemaRevision=")
+            append(authority.profileSchemaRevision)
+            append("|profileRevision=")
+            append(authority.profileRevision)
+            append("|nodeModuleOutputPolicySchemaRevision=1")
+            append("|nodeModuleOutputPolicyRevision=1")
+            append("|nodeModuleOutputPolicyFingerprint=")
+            append(moduleOutputPolicyFingerprint)
+            append("|packageMetadataSchemaRevision=")
+            append(requireNotNull(authority.packageMetadataSchemaRevision))
+            append("|packageMetadataPolicyRevision=")
+            append(requireNotNull(authority.packageMetadataPolicyRevision))
+            append("|packageMetadataPolicyFingerprint=")
+            append(requireNotNull(authority.packageMetadataPolicyFingerprint))
+            append("|packageMetadataInventoryFingerprint=")
+            append(packageMetadata.inventoryFingerprint)
+            append("|record=")
+            append(packageMetadata.archivePath)
+            append(",/,")
+            append(packageMetadata.size)
+            append(',')
+            append(packageMetadata.sha256)
+            append(',')
+            append(packageMetadata.typeState)
+        }
+        require(canonicalInput.all { character -> character.code in 0x20..0x7e })
+        return sha256(canonicalInput.toByteArray(Charsets.US_ASCII))
+    }
+
+    private fun sourceUri(projectId: String, sourcePath: String): String {
+        val projectNamespace = "p-" + sha256(
+            TypeScriptUtf8.encode(projectId, "TypeScript project ID"),
+        )
+        return "autojs://source/$projectNamespace/" +
+            sourcePath.removePrefix("/").split('/').joinToString("/", transform = ::percentEncode)
     }
 
     private fun percentEncode(value: String): String {

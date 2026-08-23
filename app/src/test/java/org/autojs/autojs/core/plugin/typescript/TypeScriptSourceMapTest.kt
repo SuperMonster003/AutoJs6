@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.typescript
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -124,6 +125,76 @@ class TypeScriptSourceMapTest {
         assertTrue(flattened.contains("fail ($originalSource:3:5)"))
         assertTrue(flattened.contains("untouched (bootstrap.mjs:4:9)"))
         assertTrue(flattened.contains('\n'))
+    }
+
+    @Test
+    fun mapsMultipleNodeModulesAndComposesEntryBootstrapLineOffset() {
+        fun projectBinding(
+            generated: String,
+            generatedFile: String,
+            original: String,
+            lineOffset: Int = 0,
+        ) = TypeScriptSourceMapBinding.parse(
+            sourceMapText =
+                "{\"version\":3,\"file\":\"$generatedFile\",\"sourceRoot\":\"\"," +
+                    "\"sources\":[\"../sources/${original.substringAfterLast('/')}\"]," +
+                    "\"names\":[],\"mappings\":\"AAAA;AACA\"}",
+            generatedSourceName = generated,
+            expectedGeneratedFileName = generatedFile,
+            originalSourceName = original,
+            generatedLineOffset = lineOffset,
+        )
+
+        val bindings = TypeScriptSourceMapBindings.of(
+            listOf(
+                projectBinding("/runtime/main.js", "main.js", "/project/main.ts", 3),
+                projectBinding("/runtime/lib/value.js", "value.js", "/project/lib/value.ts"),
+            ),
+        )
+        val formatted = requireNotNull(
+            TypeScriptNodeStackTraceFormatter.format(
+                bindings = bindings,
+                stack = buildString {
+                    appendLine("Error: multi-module")
+                    appendLine("    at entry (file:///runtime/main.js:4:1)")
+                    append("    at imported (/runtime/lib/value.js:2:1)")
+                },
+            ),
+        )
+
+        assertTrue(formatted.contains("entry (/project/main.ts:1:1)"))
+        assertTrue(formatted.contains("imported (/project/lib/value.ts:2:1)"))
+        assertFalse(formatted.contains("/runtime/main.js"))
+        assertFalse(formatted.contains("/runtime/lib/value.js"))
+    }
+
+    @Test
+    fun leavesAmbiguousGeneratedBasenamesUnmapped() {
+        fun sharedBinding(directory: String, original: String) = TypeScriptSourceMapBinding.parse(
+            sourceMapText =
+                "{\"version\":3,\"file\":\"shared.js\",\"sourceRoot\":\"\"," +
+                    "\"sources\":[\"$original\"],\"names\":[],\"mappings\":\"AAAA\"}",
+            generatedSourceName = "/runtime/$directory/shared.js",
+            expectedGeneratedFileName = "shared.js",
+            originalSourceName = original,
+        )
+        val bindings = TypeScriptSourceMapBindings.of(
+            listOf(sharedBinding("a", "a.ts"), sharedBinding("b", "b.ts")),
+        )
+
+        val mappedByRelativeSuffix = TypeScriptNodeStackTraceFormatter.format(
+            bindings = bindings,
+            stack = "Error: workspace     at fail (/plugin/workspace/sandbox/a/shared.js:1:1)",
+        )
+        assertNotNull(mappedByRelativeSuffix)
+        assertTrue(requireNotNull(mappedByRelativeSuffix).contains("fail (a.ts:1:1)"))
+
+        assertNull(
+            TypeScriptNodeStackTraceFormatter.format(
+                bindings = bindings,
+                stack = "Error: ambiguous     at fail (shared.js:1:1)",
+            ),
+        )
     }
 
     private fun binding(

@@ -9,12 +9,17 @@ internal object TypeScriptRuntimeStackTraceFormatter {
 
     @JvmStatic
     fun format(engine: JavaScriptEngine, error: Throwable): String? {
-        val binding = engine.getTag(TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG)
-            as? TypeScriptSourceMapBinding ?: return null
+        val bindings = when (
+            val value = engine.getTag(TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG)
+        ) {
+            is TypeScriptSourceMapBindings -> value
+            is TypeScriptSourceMapBinding -> TypeScriptSourceMapBindings.single(value)
+            else -> return null
+        }
         val rhinoError = error as? RhinoException ?: return null
         return runCatching {
             format(
-                binding = binding,
+                bindings = bindings,
                 details = rhinoError.details(),
                 frames = rhinoError.scriptStack.toList(),
                 originSourceName = rhinoError.sourceName(),
@@ -29,10 +34,24 @@ internal object TypeScriptRuntimeStackTraceFormatter {
         frames: List<ScriptStackElement>,
         originSourceName: String? = null,
         originLineNumber: Int = 0,
+    ): String? = format(
+        bindings = TypeScriptSourceMapBindings.single(binding),
+        details = details,
+        frames = frames,
+        originSourceName = originSourceName,
+        originLineNumber = originLineNumber,
+    )
+
+    internal fun format(
+        bindings: TypeScriptSourceMapBindings,
+        details: String,
+        frames: List<ScriptStackElement>,
+        originSourceName: String? = null,
+        originLineNumber: Int = 0,
     ): String? {
         var mappedAnyFrame = false
         val renderedFrames = frames.map { frame ->
-            val original = binding.originalPositionFor(
+            val original = bindings.originalPositionFor(
                 frameSourceName = frame.fileName,
                 generatedLineNumber = frame.lineNumber,
             )
@@ -52,7 +71,7 @@ internal object TypeScriptRuntimeStackTraceFormatter {
         }.toMutableList()
 
         if (!mappedAnyFrame && !originSourceName.isNullOrBlank() && originLineNumber > 0) {
-            binding.originalPositionFor(originSourceName, originLineNumber)?.let { original ->
+            bindings.originalPositionFor(originSourceName, originLineNumber)?.let { original ->
                 mappedAnyFrame = true
                 renderedFrames.add(
                     0,

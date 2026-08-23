@@ -381,8 +381,9 @@ object NodeProjectRunner {
             )
         }
 
+        val bootstrap = buildBootstrap(request, projectRoot, entryFile, workingDirectory)
         val source = buildString {
-            append(buildBootstrap(request, projectRoot, entryFile, workingDirectory))
+            append(bootstrap)
             append(stripShebang(request.entrySource ?: entryFile.readText(StandardCharsets.UTF_8)))
             if (!endsWith("\n")) {
                 append('\n')
@@ -391,6 +392,7 @@ object NodeProjectRunner {
         return NodePluginScriptRequest(
             source = source,
             sourceName = entryFile.canonicalPath,
+            sourceLineOffset = if (request.entrySource == null) 0 else bootstrap.count { it == '\n' },
             workingDirectory = projectRoot.canonicalPath,
             sandboxRoot = projectRoot.canonicalPath,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),

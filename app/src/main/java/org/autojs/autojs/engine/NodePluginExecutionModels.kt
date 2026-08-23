@@ -7,6 +7,8 @@ import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 data class NodePluginScriptRequest(
     val source: String,
     val sourceName: String,
+    /** Host-only prologue lines prepended before [source]'s generated TypeScript entry. */
+    val sourceLineOffset: Int = 0,
     val workingDirectory: String? = null,
     val sandboxRoot: String? = null,
     val executionId: String? = null,
