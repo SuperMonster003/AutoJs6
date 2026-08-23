@@ -3,11 +3,15 @@ package org.autojs.autojs.engine
 import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.plugin.typescript.CompiledTypeScriptSource
+import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
+import org.autojs.autojs.core.plugin.typescript.TypeScriptNodeStackTraceFormatter
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchSource
+import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import java.io.File
 import java.io.IOException
 import java.util.UUID
@@ -25,10 +29,25 @@ class NodePluginJavaScriptEngine(
         private set
 
     override fun doExecution(source: JavaScriptSource): Any? {
+        val compiled = (source as? CompiledTypeScriptSource)?.executable?.takeIf { executable ->
+            executable.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+        }
+        compiled?.let { executable ->
+            setTag(TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG, executable.sourceMapBinding)
+            setTag(TypeScriptExecutionCompiler.GENERATED_SOURCE_ENGINE_TAG, executable.generatedSourceName)
+            executable.diagnostics.forEach { diagnostic ->
+                runtime.console.warn(
+                    TypeScriptExecutionCompiler.formatDiagnostic(
+                        executable.sourceName,
+                        diagnostic,
+                    ),
+                )
+            }
+        }
         val executionId = newExecutionId()
         val request = buildRequest(source).copy(executionId = executionId)
         activeExecutionId = executionId
-        val result = try {
+        val rawResult = try {
             NodeJsRuntimePluginBridge.runScript(
                 context = androidContext,
                 request = request,
@@ -48,6 +67,15 @@ class NodePluginJavaScriptEngine(
                 activeExecutionId = null
             }
         }
+        val result = if (compiled == null || rawResult.errorStack.isNullOrBlank()) {
+            rawResult
+        } else {
+            val mappedStack = TypeScriptNodeStackTraceFormatter.format(
+                binding = compiled.sourceMapBinding,
+                stack = rawResult.errorStack,
+            )
+            if (mappedStack == null) rawResult else rawResult.copy(errorStack = mappedStack)
+        }
         lastPluginScriptResult = result
         return finishExecution(request, result)
     }
@@ -65,6 +93,23 @@ class NodePluginJavaScriptEngine(
     }
 
     private fun buildRequest(source: JavaScriptSource): NodePluginScriptRequest {
+        val compiled = source as? CompiledTypeScriptSource
+        if (
+            compiled?.executable?.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+        ) {
+            val original = compiled.originalSource
+            val sourceFile = original.file.normalizedCanonicalFile()
+            val workingDirectory = sourceFile.parentFile?.normalizedCanonicalFile()
+                ?: cwd()?.takeIf(String::isNotBlank)?.let(::File)?.normalizedCanonicalFile()
+                ?: androidContext.cacheDir.normalizedCanonicalFile()
+            return NodePluginScriptRequest(
+                source = normalizeSource(compiled.executable.javaScript),
+                sourceName = compiled.executable.generatedSourceName,
+                workingDirectory = workingDirectory.path,
+                sandboxRoot = workingDirectory.path,
+                spawnDepth = currentSpawnDepth(),
+            )
+        }
         val launchSource = source as? NodeProjectLaunchSource
         if (launchSource != null) {
             val plan = NodeProjectRunner

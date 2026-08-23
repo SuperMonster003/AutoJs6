@@ -11,6 +11,7 @@ import org.autojs.autojs.runtime.exception.ScriptCompilationDiagnosticSeverity
 import org.autojs.autojs.runtime.exception.ScriptCompilationException
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.TypeScriptFileSource
 import org.autojs.autojs6.R
@@ -19,6 +20,7 @@ import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 
 internal data class TypeScriptExecutableSource(
     val sourceName: String,
+    val targetProfile: String,
     val javaScript: String,
     val sourceMapBinding: TypeScriptSourceMapBinding,
     val generatedSourceName: String,
@@ -30,13 +32,25 @@ internal object TypeScriptExecutionCompiler {
     /** Runs on the script worker thread before an engine is created. */
     @JvmStatic
     fun prepare(context: Context, source: ScriptSource): ScriptSource {
-        if (source !is JavaScriptFileSource || !source.isRhinoTypeScriptSource) {
+        if (source !is JavaScriptFileSource || !source.isCompilerBackedTypeScriptSource) {
             return source
         }
-        return CompiledTypeScriptSource(source, compile(context, source))
+        require(source !is NodeProjectLaunchSource) {
+            "Node TypeScript project entries require the multi-file project compiler path."
+        }
+        val targetProfile = if (source.engineName == JavaScriptSource.ENGINE_NODEJS) {
+            TypeScriptCompilerContract.PROFILE_NODE
+        } else {
+            TypeScriptCompilerContract.PROFILE_RHINO
+        }
+        return CompiledTypeScriptSource(source, compile(context, source, targetProfile))
     }
 
-    private fun compile(context: Context, source: JavaScriptFileSource): TypeScriptExecutableSource {
+    private fun compile(
+        context: Context,
+        source: JavaScriptFileSource,
+        targetProfile: String,
+    ): TypeScriptExecutableSource {
         val sourceName = source.compilationName()
         val sourceIdentity = (source as? TypeScriptFileSource)?.compilationSourceIdentity
             ?: source.originPath?.takeIf(String::isNotBlank)
@@ -48,6 +62,7 @@ internal object TypeScriptExecutionCompiler {
                     sourceFile = source.file,
                     sourceName = sourceName,
                     sourceIdentity = sourceIdentity,
+                    targetProfile = targetProfile,
                 )
             }
         } catch (error: TypeScriptCompilerException) {
@@ -61,14 +76,22 @@ internal object TypeScriptExecutionCompiler {
         }
         return when (output) {
             is TypeScriptCompilationOutput.Emitted -> {
-                val generatedSourceName = source.fullPath + GENERATED_SUFFIX
+                val generatedFileName = output.entryModulePath.substringAfterLast('/')
+                val generatedSourceName = if (
+                    targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+                ) {
+                    NODE_GENERATED_SOURCE_PREFIX + generatedFileName.substringAfterLast('.')
+                } else {
+                    source.fullPath + GENERATED_SUFFIX
+                }
                 TypeScriptExecutableSource(
                     sourceName = sourceName,
+                    targetProfile = targetProfile,
                     javaScript = output.javaScript,
                     sourceMapBinding = TypeScriptSourceMapBinding.parse(
                         sourceMapText = output.sourceMap,
                         generatedSourceName = generatedSourceName,
-                        expectedGeneratedFileName = output.entryModulePath.substringAfterLast('/'),
+                        expectedGeneratedFileName = generatedFileName,
                         originalSourceName = sourceName,
                     ),
                     generatedSourceName = generatedSourceName,
@@ -91,7 +114,7 @@ internal object TypeScriptExecutionCompiler {
             originPath?.let(::File)?.name,
             file.name,
         ).filterNotNull()
-            .firstOrNull(org.autojs.autojs.script.JavaScriptSource::isRhinoTypeScriptFileName)
+            .firstOrNull(JavaScriptSource::isCompilerBackedTypeScriptFileName)
             ?: "main.ts"
     }
 
@@ -147,6 +170,7 @@ internal object TypeScriptExecutionCompiler {
 
     const val SOURCE_MAP_ENGINE_TAG = "typescript_source_map_v3"
     const val GENERATED_SOURCE_ENGINE_TAG = "typescript_generated_source"
+    private const val NODE_GENERATED_SOURCE_PREFIX = "autojs-typescript-entry.generated."
     private const val GENERATED_SUFFIX = ".generated.js"
 }
 
@@ -156,7 +180,11 @@ internal class CompiledTypeScriptSource(
 ) : JavaScriptSource(executable.sourceName.substringBeforeLast('.', executable.sourceName)) {
 
     override val engineName: String
-        get() = ENGINE
+        get() = if (executable.targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
+            ENGINE_NODEJS
+        } else {
+            ENGINE
+        }
 
     override fun getScript(): String = executable.javaScript
 

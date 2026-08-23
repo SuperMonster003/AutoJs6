@@ -34,11 +34,14 @@ import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.console.StackFrameParser
 import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
+import org.autojs.autojs.engine.NodePluginJavaScriptEngine
+import org.autojs.autojs.engine.NodePluginScriptExecutionException
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.runtime.exception.ScriptCompilationDiagnosticSeverity
 import org.autojs.autojs.runtime.exception.ScriptCompilationException
+import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.TypeScriptFileSource
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
@@ -129,6 +132,157 @@ class TypeScriptCompilerPluginClientDeviceTest {
                 assertTrue(terminal.succeeded.get())
                 assertTrue(terminal.execution.engine is LoopBasedJavaScriptEngine)
                 assertEquals("executed", System.getProperty(markerKey))
+            }
+        } finally {
+            System.clearProperty(markerKey)
+        }
+    }
+
+    @Test
+    fun routesMtsAndCtsThroughCompilerBeforeNodePlugin() {
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            listOf(
+                Triple("节点.mts", ".mjs", "esm"),
+                Triple("node-entry.cts", ".cjs", "commonjs"),
+            ).forEach { (sourceName, generatedExtension, moduleKind) ->
+                val marker = "typescript-node-$moduleKind-${System.nanoTime()}"
+                withSource(
+                    name = sourceName,
+                    source = """
+                        const values: readonly number[] = [20, 22]
+                        const total: number = values.reduce(
+                            (sum: number, value: number): number => sum + value,
+                            0,
+                        )
+                        console.log("$marker:" + total)
+                    """.trimIndent(),
+                ) { source ->
+                    val launch = ScriptLaunchSourceFactory.createFileLaunch(source)
+                    assertEquals(JavaScriptSource.ENGINE_NODEJS, launch.engineName)
+                    val terminal = executeAndAwait(launch.source, source.parent.orEmpty())
+
+                    terminal.failure.get()?.let { error ->
+                        throw AssertionError("Compiled Node TypeScript execution failed", error)
+                    }
+                    assertTrue(terminal.succeeded.get())
+                    val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                    val result = requireNotNull(engine.lastPluginScriptResult)
+                    assertTrue(result.succeeded)
+                    assertTrue(result.sourceName.endsWith(generatedExtension))
+                    assertFalse(
+                        "The legacy Node TypeScript stripper must not see generated JavaScript",
+                        "embedded_script.typescript.stripped" in result.nativeValues,
+                    )
+                    assertTrue(awaitConsoleMessage(marker).contains("$marker:42"))
+                }
+            }
+        } finally {
+            console.clear()
+        }
+    }
+
+    @Test
+    fun mapsNodeRuntimeErrorsBackToTypeScriptLineAndColumn() =
+        assertNodeRuntimeErrorMapsBackToTypeScript(extension = "mts")
+
+    @Test
+    fun mapsCommonJsNodeRuntimeErrorsBackToTypeScriptLineAndColumn() =
+        assertNodeRuntimeErrorMapsBackToTypeScript(extension = "cts")
+
+    private fun assertNodeRuntimeErrorMapsBackToTypeScript(extension: String) {
+        val marker = "typescript-node-$extension-runtime-map-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            withSource(
+                name = "node runtime map.$extension",
+                source = """
+                    const heading: string = "source-map"
+                    function failAtTypeScriptLine(): never {
+                        const message: string = "$marker"
+                        throw new Error(message)
+                    }
+                    void heading
+                    failAtTypeScriptLine()
+                """.trimIndent(),
+            ) { source ->
+                val expectedLineNumber = 4
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(source)
+                val terminal = executeAndAwait(launch.source, source.parent.orEmpty())
+                val failure = terminal.failure.get()
+
+                assertFalse(terminal.succeeded.get())
+                assertTrue(
+                    "Expected NodePluginScriptExecutionException, got " +
+                        (failure?.javaClass?.name ?: "no failure"),
+                    failure is NodePluginScriptExecutionException,
+                )
+                val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                val result = requireNotNull(engine.lastPluginScriptResult)
+                val mappedStack = requireNotNull(result.errorStack)
+                assertTrue(
+                    "Mapped Node stack did not identify the TypeScript throw location: $mappedStack",
+                    mappedStack.contains("${source.name}:$expectedLineNumber:11"),
+                )
+                assertFalse(mappedStack.contains("autojs-typescript-entry.generated."))
+                assertTrue(awaitConsoleMessage(marker).contains(marker))
+
+                val consoleFrame = awaitConsoleMessage("${source.name}:$expectedLineNumber:")
+                assertTrue(consoleFrame.contains("${source.name}:$expectedLineNumber:11"))
+                val links = StackFrameParser.parse(consoleFrame)
+                assertTrue(
+                    "Mapped Node console frame was not linkable: <$consoleFrame>; links=$links",
+                    links.any { candidate ->
+                        candidate.sourceName == source.name &&
+                            candidate.lineIndex == expectedLineNumber - 1
+                    },
+                )
+                val link = links.single { candidate ->
+                    candidate.sourceName == source.name &&
+                        candidate.lineIndex == expectedLineNumber - 1
+                }
+                assertEquals(10, link.columnNumber)
+                assertTrue(
+                    StackFrameTargetResolver.matchesCurrentFile(
+                        link.sourceName,
+                        source.absolutePath,
+                    ),
+                )
+            }
+        } finally {
+            console.clear()
+        }
+    }
+
+    @Test
+    fun nodeDirectiveTsFailsClosedUntilPackageMetadataIsAvailable() {
+        val markerKey = "autojs6.typescript.node-ts-closed.${System.nanoTime()}"
+        System.clearProperty(markerKey)
+        try {
+            withSource(
+                name = "node-directive.ts",
+                source = """
+                    "nodejs";
+                    declare const java: any
+                    java.lang.System.setProperty("$markerKey", "must-not-run")
+                """.trimIndent(),
+            ) { source ->
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(source)
+                assertEquals(JavaScriptSource.ENGINE_NODEJS, launch.engineName)
+                val terminal = executeAndAwait(launch.source, source.parent.orEmpty())
+                val failure = terminal.failure.get()
+
+                assertFalse(terminal.succeeded.get())
+                assertTrue(failure is IllegalArgumentException)
+                assertTrue(
+                    failure?.message.orEmpty().contains(
+                        "Single-file Node .ts compilation requires project package metadata",
+                    ),
+                )
+                assertEquals(null, terminal.execution.engine)
+                assertEquals(null, System.getProperty(markerKey))
             }
         } finally {
             System.clearProperty(markerKey)

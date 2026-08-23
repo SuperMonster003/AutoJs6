@@ -86,6 +86,46 @@ class TypeScriptSourceMapTest {
         )
     }
 
+    @Test
+    fun mapsNodeV8FramesWithRealColumnsAndKeepsUnrelatedFrames() {
+        val generatedSource = "autojs-typescript-entry.generated.mjs"
+        val originalSource = "node task.mts"
+        val binding = TypeScriptSourceMapBinding.parse(
+            sourceMapText =
+                "{\"version\":3,\"file\":\"main.mjs\",\"sourceRoot\":\"\"," +
+                    "\"sources\":[\"../sources/node task.mts\"],\"names\":[]," +
+                    "\"mappings\":\"AAAA;AAEI\"}",
+            generatedSourceName = generatedSource,
+            expectedGeneratedFileName = "main.mjs",
+            originalSourceName = originalSource,
+        )
+        val formatted = requireNotNull(
+            TypeScriptNodeStackTraceFormatter.format(
+                binding = binding,
+                stack = buildString {
+                    appendLine("Error: node-typescript-map-marker")
+                    appendLine("    at fail (file:///runtime/$generatedSource:2:7)")
+                    append("    at untouched (bootstrap.mjs:4:9)")
+                },
+            ),
+        )
+
+        assertTrue(formatted.contains("fail ($originalSource:3:5)"))
+        assertTrue(formatted.contains("untouched (bootstrap.mjs:4:9)"))
+        assertFalse(formatted.contains(generatedSource))
+
+        val flattened = requireNotNull(
+            TypeScriptNodeStackTraceFormatter.format(
+                binding = binding,
+                stack = "Error: flattened     at fail ($generatedSource:2:7)     " +
+                    "at untouched (bootstrap.mjs:4:9)",
+            ),
+        )
+        assertTrue(flattened.contains("fail ($originalSource:3:5)"))
+        assertTrue(flattened.contains("untouched (bootstrap.mjs:4:9)"))
+        assertTrue(flattened.contains('\n'))
+    }
+
     private fun binding(
         mappings: String,
         file: String = GENERATED_FILE,

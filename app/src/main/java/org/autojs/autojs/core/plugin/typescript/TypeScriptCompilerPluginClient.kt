@@ -49,12 +49,31 @@ internal class TypeScriptCompilerPluginClient(
         timeoutMs: Long = TypeScriptCompilerContract.DEFAULT_TIMEOUT_MS,
         sourceName: String = sourceFile.name,
         sourceIdentity: String? = null,
+        targetProfile: String = TypeScriptCompilerContract.PROFILE_RHINO,
     ): TypeScriptCompilationOutput = withContext(Dispatchers.IO) {
         require(timeoutMs in TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS..
             TypeScriptCompilerContract.MAX_TIMEOUT_MS)
         require(sourceFile.isFile) { "TypeScript source is not a regular file." }
-        require(sourceName.endsWith(".ts", ignoreCase = true)) {
-            "The Rhino TypeScript compiler accepts only a .ts single-file entry."
+        require(
+            listOf(".d.ts", ".d.mts", ".d.cts").none { declarationExtension ->
+                sourceName.endsWith(declarationExtension, ignoreCase = true)
+            },
+        ) {
+            "TypeScript declaration files are not executable entries."
+        }
+        require(targetProfile in TypeScriptCompilerContract.TARGET_PROFILES)
+        require(
+            TypeScriptCompilerContract.supportedExtensions(targetProfile)
+                .any(sourceName::endsWith),
+        ) {
+            "The $targetProfile TypeScript profile does not accept $sourceName."
+        }
+        require(
+            targetProfile != TypeScriptCompilerContract.PROFILE_NODE ||
+                sourceName.endsWith(".mts") || sourceName.endsWith(".cts"),
+        ) {
+            "Single-file Node .ts compilation requires project package metadata; " +
+                "use .mts/.cts until project compilation is enabled."
         }
         require(
             sourceName.isNotBlank() &&
@@ -76,7 +95,6 @@ internal class TypeScriptCompilerPluginClient(
             ?: runCatching { sourceFile.canonicalPath }.getOrElse { sourceFile.absolutePath }
         val projectId = "single-file-" +
             sha256(TypeScriptUtf8.encode(canonicalPath, "TypeScript source path")).take(32)
-        val entrySourceUri = "autojs://source/$projectId/" + percentEncode(sourceName)
         val inputFile = File.createTempFile("typescript-input-", ".zip", appContext.cacheDir)
         val outputFile = File.createTempFile("typescript-output-", ".zip", appContext.cacheDir)
         var leased: AidlPluginHost.LeasedCall<StartedCompilation>? = null
@@ -97,13 +115,16 @@ internal class TypeScriptCompilerPluginClient(
                 requireContract(compiler)
                 val prewarmResult = compiler.prewarm(prewarmRequest(timeoutMs))
                 prewarmResult.throwCompilerErrorIfPresent()
-                val authority = authorityFrom(compiler.compilerInfo)
+                val authority = authorityFrom(
+                    info = compiler.compilerInfo,
+                    targetProfile = targetProfile,
+                    sourceName = sourceName,
+                )
                 val prepared = TypeScriptSingleFileArchive.write(
                     sourceName = sourceName,
                     sourceBytes = sourceBytes,
                     requestId = requestId,
                     projectId = projectId,
-                    entrySourceUri = entrySourceUri,
                     authority = authority,
                     destination = inputFile,
                 )
@@ -221,7 +242,11 @@ internal class TypeScriptCompilerPluginClient(
         }
     }
 
-    private fun authorityFrom(info: Bundle): TypeScriptRhinoCompilerAuthority {
+    private fun authorityFrom(
+        info: Bundle,
+        targetProfile: String,
+        sourceName: String,
+    ): TypeScriptCompilerAuthority {
         info.throwCompilerErrorIfPresent()
         requireBundleInt(
             info,
@@ -280,31 +305,72 @@ internal class TypeScriptCompilerPluginClient(
         )
         require(
             info.getStringArray(TypeScriptPluginCapabilityKeys.TARGET_PROFILES)
-                ?.contains(TypeScriptCompilerContract.PROFILE_RHINO) == true,
+                ?.contains(targetProfile) == true,
         ) {
-            "The TypeScript compiler does not advertise the Rhino profile."
+            "The TypeScript compiler does not advertise the $targetProfile profile."
         }
+        val supportedExtensionsKey = when (targetProfile) {
+            TypeScriptCompilerContract.PROFILE_RHINO ->
+                TypeScriptPluginCapabilityKeys.RHINO_SUPPORTED_EXTENSIONS
+            TypeScriptCompilerContract.PROFILE_NODE ->
+                TypeScriptPluginCapabilityKeys.NODE_SUPPORTED_EXTENSIONS
+            else -> error("Unsupported TypeScript target profile: $targetProfile")
+        }
+        val sourceExtension = TypeScriptCompilerContract.supportedExtensions(targetProfile)
+            .single { extension -> sourceName.endsWith(extension) }
         require(
-            info.getStringArray(TypeScriptPluginCapabilityKeys.RHINO_SUPPORTED_EXTENSIONS)
-                ?.contains(".ts") == true,
+            info.getStringArray(supportedExtensionsKey)?.contains(sourceExtension) == true,
         ) {
-            "The TypeScript compiler does not advertise Rhino .ts input."
+            "The TypeScript compiler does not advertise $targetProfile $sourceExtension input."
         }
-        requireBundleString(
-            info,
-            TypeScriptR2Contract.KEY_CONFIG_KIND,
-            TypeScriptR2Contract.CONFIG_KIND_TSCONFIG,
-        )
+        val profileRevisionKey: String
+        val configSchemaRevisionKey: String
+        val configKindKey: String
+        val declarationProfileFingerprintKey: String
+        val runtimeCapabilitiesFingerprintKey: String
+        if (targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
+            profileRevisionKey = TypeScriptR2Contract.KEY_NODE_PROFILE_REVISION
+            configSchemaRevisionKey = TypeScriptR2Contract.KEY_NODE_CONFIG_SCHEMA_REVISION
+            configKindKey = TypeScriptR2Contract.KEY_NODE_CONFIG_KIND
+            declarationProfileFingerprintKey =
+                TypeScriptR2Contract.KEY_NODE_DECLARATION_PROFILE_FINGERPRINT
+            runtimeCapabilitiesFingerprintKey =
+                TypeScriptR2Contract.KEY_NODE_RUNTIME_CAPABILITIES_FINGERPRINT
+        } else {
+            profileRevisionKey = TypeScriptR2Contract.KEY_PROFILE_REVISION
+            configSchemaRevisionKey = TypeScriptR2Contract.KEY_CONFIG_SCHEMA_REVISION
+            configKindKey = TypeScriptR2Contract.KEY_CONFIG_KIND
+            declarationProfileFingerprintKey =
+                TypeScriptR2Contract.KEY_DECLARATION_PROFILE_FINGERPRINT
+            runtimeCapabilitiesFingerprintKey =
+                TypeScriptCompilerContract.KEY_RUNTIME_CAPABILITIES_FINGERPRINT
+        }
+        val configKind = info.requireString(configKindKey)
+        require(
+            configKind == if (targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
+                TypeScriptR2Contract.CONFIG_KIND_NONE
+            } else {
+                TypeScriptR2Contract.CONFIG_KIND_TSCONFIG
+            },
+        ) {
+            "The TypeScript compiler advertises an incompatible $targetProfile config kind."
+        }
         requireBundleInt(
             info,
-            TypeScriptR2Contract.KEY_CONFIG_SCHEMA_REVISION,
-            TypeScriptR2Contract.CONTROLLED_TSCONFIG_SCHEMA_REVISION,
+            configSchemaRevisionKey,
+            if (configKind == TypeScriptR2Contract.CONFIG_KIND_NONE) {
+                TypeScriptCompilerAuthority.CONFIG_NONE_SCHEMA_REVISION
+            } else {
+                TypeScriptR2Contract.CONTROLLED_TSCONFIG_SCHEMA_REVISION
+            },
         )
-        requireBundleInt(
-            info,
-            TypeScriptR2Contract.KEY_CONFIG_POLICY_REVISION,
-            TypeScriptR2Contract.CONTROLLED_TSCONFIG_POLICY_REVISION,
-        )
+        if (configKind == TypeScriptR2Contract.CONFIG_KIND_TSCONFIG) {
+            requireBundleInt(
+                info,
+                TypeScriptR2Contract.KEY_CONFIG_POLICY_REVISION,
+                TypeScriptR2Contract.CONTROLLED_TSCONFIG_POLICY_REVISION,
+            )
+        }
         val status = requireNotNull(
             info.getString(TypeScriptPluginCapabilityKeys.SERVICE_STATUS),
         )
@@ -317,7 +383,8 @@ internal class TypeScriptCompilerPluginClient(
             TypeScriptCompilerContract.BACKEND_WEBVIEW_WORKER,
         )
 
-        return TypeScriptRhinoCompilerAuthority(
+        return TypeScriptCompilerAuthority(
+            targetProfile = targetProfile,
             compilerVersion = info.requireString(
                 TypeScriptPluginCapabilityKeys.COMPILER_VERSION,
             ),
@@ -328,25 +395,29 @@ internal class TypeScriptCompilerPluginClient(
                 TypeScriptCompilerContract.KEY_DECLARATIONS_FINGERPRINT,
             ),
             declarationProfileFingerprint = info.requireString(
-                TypeScriptR2Contract.KEY_DECLARATION_PROFILE_FINGERPRINT,
+                declarationProfileFingerprintKey,
             ),
             runtimeCapabilitiesFingerprint = info.requireString(
-                TypeScriptCompilerContract.KEY_RUNTIME_CAPABILITIES_FINGERPRINT,
+                runtimeCapabilitiesFingerprintKey,
             ),
             profileSchemaRevision = TypeScriptCompilerContract.PROFILE_SCHEMA_REVISION,
-            profileRevision = info.getInt(TypeScriptR2Contract.KEY_PROFILE_REVISION, -1),
-            configSchemaRevision = info.getInt(
-                TypeScriptR2Contract.KEY_CONFIG_SCHEMA_REVISION,
-                -1,
-            ),
-            configKind = info.requireString(TypeScriptR2Contract.KEY_CONFIG_KIND),
-            configPolicyRevision = info.getInt(
-                TypeScriptR2Contract.KEY_CONFIG_POLICY_REVISION,
-                -1,
-            ),
-            configPolicyFingerprint = info.requireString(
-                TypeScriptR2Contract.KEY_CONFIG_POLICY_FINGERPRINT,
-            ),
+            profileRevision = info.getInt(profileRevisionKey, -1),
+            configSchemaRevision = info.getInt(configSchemaRevisionKey, -1),
+            configKind = configKind,
+            configPolicyRevision = if (
+                configKind == TypeScriptR2Contract.CONFIG_KIND_TSCONFIG
+            ) {
+                info.getInt(TypeScriptR2Contract.KEY_CONFIG_POLICY_REVISION, -1)
+            } else {
+                null
+            },
+            configPolicyFingerprint = if (
+                configKind == TypeScriptR2Contract.CONFIG_KIND_TSCONFIG
+            ) {
+                info.requireString(TypeScriptR2Contract.KEY_CONFIG_POLICY_FINGERPRINT)
+            } else {
+                null
+            },
         )
     }
 
@@ -397,7 +468,7 @@ internal class TypeScriptCompilerPluginClient(
         putString(TypeScriptCompilerContract.KEY_ENTRY_SOURCE_URI, prepared.entrySourceUri)
         putString(
             TypeScriptCompilerContract.KEY_TARGET_PROFILE,
-            TypeScriptCompilerContract.PROFILE_RHINO,
+            prepared.authority.targetProfile,
         )
         putString(
             TypeScriptCompilerContract.KEY_COMPILATION_MODE,
@@ -423,16 +494,18 @@ internal class TypeScriptCompilerPluginClient(
             prepared.authority.configSchemaRevision,
         )
         putString(TypeScriptR2Contract.KEY_CONFIG_KIND, prepared.authority.configKind)
-        putLong(TypeScriptR2Contract.KEY_CONFIG_BYTE_LENGTH, prepared.configByteLength)
-        putString(TypeScriptR2Contract.KEY_CONFIG_SHA256, prepared.configSha256)
-        putInt(
-            TypeScriptR2Contract.KEY_CONFIG_POLICY_REVISION,
-            prepared.authority.configPolicyRevision,
-        )
-        putString(
-            TypeScriptR2Contract.KEY_CONFIG_POLICY_FINGERPRINT,
-            prepared.authority.configPolicyFingerprint,
-        )
+        prepared.configByteLength?.let { byteLength ->
+            putLong(TypeScriptR2Contract.KEY_CONFIG_BYTE_LENGTH, byteLength)
+            putString(TypeScriptR2Contract.KEY_CONFIG_SHA256, requireNotNull(prepared.configSha256))
+            putInt(
+                TypeScriptR2Contract.KEY_CONFIG_POLICY_REVISION,
+                requireNotNull(prepared.authority.configPolicyRevision),
+            )
+            putString(
+                TypeScriptR2Contract.KEY_CONFIG_POLICY_FINGERPRINT,
+                requireNotNull(prepared.authority.configPolicyFingerprint),
+            )
+        }
         putString(
             TypeScriptCompilerContract.KEY_COMPILER_DISTRIBUTION_FINGERPRINT,
             prepared.authority.compilerDistributionFingerprint,
@@ -609,30 +682,6 @@ internal class TypeScriptCompilerPluginClient(
         }
     }
 
-    private fun percentEncode(value: String): String {
-        val bytes = TypeScriptUtf8.encode(value, "TypeScript source name")
-        return buildString(bytes.size) {
-            bytes.forEach { byte ->
-                val unsigned = byte.toInt() and 0xff
-                if (
-                    unsigned in 'a'.code..'z'.code ||
-                    unsigned in 'A'.code..'Z'.code ||
-                    unsigned in '0'.code..'9'.code ||
-                    unsigned == '-'.code ||
-                    unsigned == '.'.code ||
-                    unsigned == '_'.code ||
-                    unsigned == '~'.code
-                ) {
-                    append(unsigned.toChar())
-                } else {
-                    append('%')
-                    append(HEX_DIGITS[unsigned ushr 4])
-                    append(HEX_DIGITS[unsigned and 0x0f])
-                }
-            }
-        }
-    }
-
     private fun requireBundleBoolean(bundle: Bundle, key: String, expected: Boolean) {
         require(bundle.containsKey(key) && bundle.getBoolean(key) == expected) {
             "The TypeScript compiler capability $key is incompatible."
@@ -687,6 +736,5 @@ internal class TypeScriptCompilerPluginClient(
         const val MODULE_LABEL = "TypeScript compiler"
         const val LOCAL_TERMINAL_GRACE_MS = 5_000L
         const val EMPTY_TSCONFIG_BYTES = 2L
-        const val HEX_DIGITS = "0123456789ABCDEF"
     }
 }

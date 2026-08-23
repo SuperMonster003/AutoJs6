@@ -13,12 +13,12 @@ object StackFrameParser {
     )
 
     private val parenthesizedV8StackFramePattern = Regex(
-        """(?m)^[\t ]*at[\t ]+[^\r\n]*\(((?:file:)?[^\r\n]+?(?:\.node\.js|\.(?:mjs|cjs|mts|cts|tsx?|js))):(\d+)(?::(\d+))?\)[\t ]*$""",
+        """(?m)^[\t ]*(?:\d{2}:\d{2}:\d{2}\.\d{3}/[VDIWEA]:[\t ]*)?at[\t ]+[^\r\n]*\(((?:file:)?[^\r\n]+?(?:\.node\.js|\.(?:mjs|cjs|mts|cts|tsx?|js))):(\d+)(?::(\d+))?\)[\t ]*$""",
         RegexOption.IGNORE_CASE,
     )
 
     private val directV8StackFramePattern = Regex(
-        """(?m)^[\t ]*at[\t ]+((?:file:)?[^\r\n]+?(?:\.node\.js|\.(?:mjs|cjs|mts|cts|tsx?|js))):(\d+)(?::(\d+))?[\t ]*$""",
+        """(?m)^[\t ]*(?:\d{2}:\d{2}:\d{2}\.\d{3}/[VDIWEA]:[\t ]*)?at[\t ]+((?:file:)?[^\r\n]+?(?:\.node\.js|\.(?:mjs|cjs|mts|cts|tsx?|js))):(\d+)(?::(\d+))?[\t ]*$""",
         RegexOption.IGNORE_CASE,
     )
 

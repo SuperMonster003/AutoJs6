@@ -19,6 +19,11 @@ class JavaScriptSourceTest {
         assertFalse(JavaScriptSource.isNodeJsFileName("main.ts"))
         assertTrue(JavaScriptSource.isNodeJsFileName("main.mts"))
         assertFalse(JavaScriptSource.isRhinoTypeScriptFileName("main.mts"))
+        assertTrue(JavaScriptSource.isCompilerBackedTypeScriptFileName("main.ts"))
+        assertTrue(JavaScriptSource.isCompilerBackedTypeScriptFileName("main.mts"))
+        assertTrue(JavaScriptSource.isCompilerBackedTypeScriptFileName("main.cts"))
+        assertFalse(JavaScriptSource.isCompilerBackedTypeScriptFileName("component.tsx"))
+        assertFalse(JavaScriptSource.isCompilerBackedTypeScriptFileName("types.d.mts"))
         assertTrue(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("component.tsx"))
         assertTrue(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("types.d.ts"))
         assertFalse(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("main.ts"))
@@ -60,6 +65,32 @@ class JavaScriptSourceTest {
             assertEquals("你好.ts", (launch.source as TypeScriptFileSource).compilationSourceName)
         } finally {
             sourceFile.delete()
+        }
+    }
+
+    @Test
+    fun nodeTypeScriptExtensionsAndDirectiveSelectNodeEngine() {
+        val mts = File.createTempFile("autojs6-typescript-node-route-", ".mts")
+        val directedTs = File.createTempFile("autojs6-typescript-node-directive-", ".ts")
+        try {
+            mts.writeText("const value: number = 42; export { value }")
+            directedTs.writeText("\"nodejs\";\nconst value: number = 42")
+
+            val mtsLaunch = ScriptLaunchSourceFactory.createFileLaunch(
+                file = mts,
+                defaultWorkingDirectory = mts.parent.orEmpty(),
+            )
+            val directedLaunch = ScriptLaunchSourceFactory.createFileLaunch(
+                file = directedTs,
+                defaultWorkingDirectory = directedTs.parent.orEmpty(),
+            )
+
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, mtsLaunch.engineName)
+            assertTrue((mtsLaunch.source as JavaScriptFileSource).isCompilerBackedTypeScriptSource)
+            assertTrue(directedLaunch.source is TypeScriptFileSource)
+        } finally {
+            mts.delete()
+            directedTs.delete()
         }
     }
 }

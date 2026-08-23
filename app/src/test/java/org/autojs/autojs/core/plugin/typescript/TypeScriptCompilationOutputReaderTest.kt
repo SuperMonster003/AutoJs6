@@ -89,6 +89,86 @@ class TypeScriptCompilationOutputReaderTest {
     }
 
     @Test
+    fun readsNodeMtsEmissionWithMjsEntryAndSourceMap() {
+        val input = File.createTempFile("typescript-node-output-input-", ".zip")
+        val output = File.createTempFile("typescript-node-output-test-", ".zip")
+        try {
+            val prepared = TypeScriptSingleFileArchive.write(
+                sourceName = "main.mts",
+                sourceBytes = "const value: number = 42;\nexport { value };\n"
+                    .toByteArray(StandardCharsets.UTF_8),
+                requestId = "host-node-output-test",
+                projectId = "single-file-node-output-test",
+                authority = nodeAuthority(),
+                destination = input,
+            )
+            val javaScript = "const value = 42;\nexport { value };\n//# sourceMappingURL=main.mjs.map\n"
+                .toByteArray(StandardCharsets.UTF_8)
+            val sourceMap = (
+                "{\"version\":3,\"file\":\"main.mjs\",\"sourceRoot\":\"\"," +
+                    "\"sources\":[\"../sources/main.mts\"],\"names\":[],\"mappings\":\"AAAA\"}"
+                ).toByteArray(StandardCharsets.UTF_8)
+            val diagnostics = diagnosticsJson(prepared, emptyList())
+            val artifacts = listOf(
+                artifact("diagnostics.json", "diagnostics", diagnostics, emptyList()),
+                artifact(
+                    "maps/main.mjs.map",
+                    "source_map",
+                    sourceMap,
+                    listOf(prepared.entryPath),
+                ),
+                artifact(
+                    "modules/main.mjs",
+                    "javascript",
+                    javaScript,
+                    listOf(prepared.entryPath),
+                ),
+            )
+            val manifest = outputManifest(
+                prepared = prepared,
+                outcome = TypeScriptCompilerContract.OUTCOME_EMITTED,
+                emitSkipped = false,
+                diagnosticCount = 0,
+                emittedModuleCount = 1,
+                entryModulePath = "modules/main.mjs",
+                artifacts = artifacts,
+            )
+            StoredZipV1Writer.write(
+                output,
+                linkedMapOf(
+                    "compilation-manifest.json" to manifest,
+                    "diagnostics.json" to diagnostics,
+                    "maps/main.mjs.map" to sourceMap,
+                    "modules/main.mjs" to javaScript,
+                ),
+            )
+            val result = TypeScriptCompilationOutputReader.read(
+                outputFile = output,
+                prepared = prepared,
+                terminal = TypeScriptTerminalResult(
+                    requestId = prepared.requestId,
+                    outcome = TypeScriptCompilerContract.OUTCOME_EMITTED,
+                    succeeded = true,
+                    errorCode = null,
+                    errorMessage = null,
+                    diagnosticCount = 0,
+                    emittedModuleCount = 1,
+                    outputManifestSha256 = sha256(manifest),
+                ),
+            )
+
+            assertTrue(result is TypeScriptCompilationOutput.Emitted)
+            result as TypeScriptCompilationOutput.Emitted
+            assertEquals("modules/main.mjs", result.entryModulePath)
+            assertEquals(javaScript.toString(StandardCharsets.UTF_8), result.javaScript)
+            assertEquals(sourceMap.toString(StandardCharsets.UTF_8), result.sourceMap)
+        } finally {
+            input.delete()
+            output.delete()
+        }
+    }
+
+    @Test
     fun readsDiagnosticsOnlyOutcomeWithoutExecutableArtifact() {
         val input = File.createTempFile("typescript-output-input-", ".zip")
         val output = File.createTempFile("typescript-output-test-", ".zip")
@@ -162,7 +242,6 @@ class TypeScriptCompilationOutputReaderTest {
             sourceBytes = "const value: number = 42;\n".toByteArray(StandardCharsets.UTF_8),
             requestId = "host-output-test",
             projectId = "single-file-output-test",
-            entrySourceUri = "autojs://source/single-file-output-test/main.ts",
             authority = authority(),
             destination = destination,
         )
@@ -177,7 +256,7 @@ class TypeScriptCompilationOutputReaderTest {
             TypeScriptR2Contract.DIAGNOSTICS_QUOTA_REVISION.toString(),
         "requestId" to quoted(prepared.requestId),
         "projectId" to quoted(prepared.projectId),
-        "targetProfile" to quoted(TypeScriptCompilerContract.PROFILE_RHINO),
+        "targetProfile" to quoted(prepared.authority.targetProfile),
         "profileSchemaRevision" to prepared.authority.profileSchemaRevision.toString(),
         "profileRevision" to prepared.authority.profileRevision.toString(),
         "configSchemaRevision" to prepared.authority.configSchemaRevision.toString(),
@@ -211,7 +290,7 @@ class TypeScriptCompilationOutputReaderTest {
         "projectId" to quoted(prepared.projectId),
         "entrySourceUri" to quoted(prepared.entrySourceUri),
         "entryModulePath" to (entryModulePath?.let(::quoted) ?: "null"),
-        "targetProfile" to quoted(TypeScriptCompilerContract.PROFILE_RHINO),
+        "targetProfile" to quoted(prepared.authority.targetProfile),
         "profileSchemaRevision" to prepared.authority.profileSchemaRevision.toString(),
         "profileRevision" to prepared.authority.profileRevision.toString(),
         "configSchemaRevision" to prepared.authority.configSchemaRevision.toString(),
@@ -250,6 +329,11 @@ class TypeScriptCompilationOutputReaderTest {
         "diagnosticsPath" to quoted(TypeScriptR2Contract.OUTPUT_ARCHIVE_DIAGNOSTICS_PATH),
         "effectiveOptions" to "{}",
         "effectiveOptionsFingerprint" to quoted("9".repeat(64)),
+        *nodeOutputManifestFields(
+            prepared = prepared,
+            emittedModuleCount = emittedModuleCount,
+            effectiveOptionsFingerprint = "9".repeat(64),
+        ).toTypedArray(),
         "moduleInventoryFingerprint" to quoted("a".repeat(64)),
         "artifactInventoryFingerprint" to quoted("b".repeat(64)),
         "files" to artifacts.joinToString(
@@ -258,6 +342,131 @@ class TypeScriptCompilationOutputReaderTest {
             transform = ::artifactJson,
         ),
     ).toByteArray(StandardCharsets.UTF_8)
+
+    private fun nodeOutputManifestFields(
+        prepared: TypeScriptPreparedCompilation,
+        emittedModuleCount: Int,
+        effectiveOptionsFingerprint: String,
+    ): List<Pair<String, String>> {
+        if (prepared.authority.targetProfile != TypeScriptCompilerContract.PROFILE_NODE) {
+            return emptyList()
+        }
+        val sourcePath = "/${prepared.entryPath}"
+        val sourceExtension = if (sourcePath.endsWith(".mts")) ".mts" else ".cts"
+        val moduleFormat = if (sourceExtension == ".mts") "esm" else "commonjs"
+        val outputExtension = if (sourceExtension == ".mts") ".mjs" else ".cjs"
+        val generatedPath = sourcePath.removePrefix("/sources/")
+            .removeSuffix(sourceExtension)
+            .let { relativePath -> "/outputs/$relativePath$outputExtension" }
+        val sourceMapPath = "$generatedPath.map"
+        val projectNamespace = "p-" + sha256(
+            TypeScriptUtf8.encode(prepared.projectId, "TypeScript project ID"),
+        )
+        val generatedUri = "autojs://generated/$projectNamespace/" +
+            generatedPath.removePrefix("/").split('/').joinToString("/", transform = ::percentEncode)
+        val moduleOutputPolicyFingerprint =
+            "5c2294f0ee9d6d25bd2132b4ea24866d0a5f9caaa521a63bf81ffe1d897f6ce7"
+        val canonicalEvidence = buildString {
+            append("schema=autojs6.typescript.generated-module-mapping")
+            append("|schemaRevision=1")
+            append("|mappingPolicyRevision=1")
+            append("|moduleOutputPolicyRevision=1")
+            append("|moduleOutputPolicyFingerprint=")
+            append(moduleOutputPolicyFingerprint)
+            append("|profile=node")
+            append("|profileSchemaRevision=")
+            append(prepared.authority.profileSchemaRevision)
+            append("|profileRevision=")
+            append(prepared.authority.profileRevision)
+            append("|configSchemaRevision=")
+            append(prepared.authority.configSchemaRevision)
+            append("|configKind=")
+            append(percentEncode(prepared.authority.configKind))
+            append("|effectiveOptionsFingerprint=")
+            append(effectiveOptionsFingerprint)
+            append("|runtimeCapabilitiesFingerprint=")
+            append(prepared.authority.runtimeCapabilitiesFingerprint)
+            append("|projectNamespace=")
+            append(percentEncode(projectNamespace))
+            append("|sourcePath=")
+            append(percentEncode(sourcePath))
+            append("|originalSourceUri=")
+            append(percentEncode(prepared.entrySourceUri))
+            append("|moduleFormat=")
+            append(percentEncode(moduleFormat))
+            append("|packageTypeState=none")
+            append("|packageMetadataInventoryFingerprint=none")
+            append("|packageBoundary=none")
+            append("|outputExtension=")
+            append(percentEncode(outputExtension))
+            append("|generatedPath=")
+            append(percentEncode(generatedPath))
+            append("|sourceMapPath=")
+            append(percentEncode(sourceMapPath))
+            append("|generatedUri=")
+            append(percentEncode(generatedUri))
+        }
+        val mappings = if (emittedModuleCount == 0) {
+            "[]"
+        } else {
+            "[" + objectJson(
+                "sourcePath" to quoted(sourcePath),
+                "projectNamespace" to quoted(projectNamespace),
+                "originalSourceUri" to quoted(prepared.entrySourceUri),
+                "moduleFormat" to quoted(moduleFormat),
+                "outputExtension" to quoted(outputExtension),
+                "generatedPath" to quoted(generatedPath),
+                "sourceMapPath" to quoted(sourceMapPath),
+                "generatedUri" to quoted(generatedUri),
+                "canonicalEvidence" to quoted(canonicalEvidence),
+                "fingerprint" to quoted(
+                    sha256(TypeScriptUtf8.encode(canonicalEvidence, "mapping evidence")),
+                ),
+            ) + "]"
+        }
+        return listOf(
+            "nodeModuleOutputPolicySchemaRevision" to "1",
+            "nodeModuleOutputPolicyRevision" to "1",
+            "nodeModuleOutputPolicyFingerprint" to quoted(moduleOutputPolicyFingerprint),
+            "generatedMappingSchema" to
+                quoted("autojs6.typescript.generated-module-mapping"),
+            "generatedMappingSchemaRevision" to "1",
+            "generatedMappingPolicyRevision" to "1",
+            "resolverPolicyRevision" to "2",
+            "snapshotTargetInventoryFingerprint" to quoted("c".repeat(64)),
+            "packageMetadataInventoryFingerprint" to "null",
+            "packageFormatCatalogFingerprint" to "null",
+            "packageTargetInventoryFingerprint" to "null",
+            "targetUniverseFingerprint" to quoted("d".repeat(64)),
+            "resultSnapshotEntryPath" to quoted(sourcePath),
+            "resultSnapshotRootNames" to "[${quoted(sourcePath)}]",
+            "generatedModuleMappings" to mappings,
+        )
+    }
+
+    private fun percentEncode(value: String): String {
+        val bytes = TypeScriptUtf8.encode(value, "TypeScript Node output identity")
+        return buildString(bytes.size) {
+            bytes.forEach { byte ->
+                val unsigned = byte.toInt() and 0xff
+                if (
+                    unsigned in 'a'.code..'z'.code ||
+                    unsigned in 'A'.code..'Z'.code ||
+                    unsigned in '0'.code..'9'.code ||
+                    unsigned == '-'.code ||
+                    unsigned == '.'.code ||
+                    unsigned == '_'.code ||
+                    unsigned == '~'.code
+                ) {
+                    append(unsigned.toChar())
+                } else {
+                    append('%')
+                    append("0123456789ABCDEF"[unsigned ushr 4])
+                    append("0123456789ABCDEF"[unsigned and 0x0f])
+                }
+            }
+        }
+    }
 
     private fun artifactJson(artifact: Artifact): String = objectJson(
         "path" to quoted(artifact.path),
@@ -278,7 +487,8 @@ class TypeScriptCompilationOutputReaderTest {
         sourcePaths: List<String>,
     ) = Artifact(path, kind, bytes.size.toLong(), sha256(bytes), sourcePaths)
 
-    private fun authority() = TypeScriptRhinoCompilerAuthority(
+    private fun authority() = TypeScriptCompilerAuthority(
+        targetProfile = TypeScriptCompilerContract.PROFILE_RHINO,
         compilerVersion = "6.0.3",
         compilerDistributionFingerprint = "1".repeat(64),
         declarationsFingerprint = "2".repeat(64),
@@ -290,6 +500,19 @@ class TypeScriptCompilationOutputReaderTest {
         configKind = TypeScriptR2Contract.CONFIG_KIND_TSCONFIG,
         configPolicyRevision = TypeScriptR2Contract.CONTROLLED_TSCONFIG_POLICY_REVISION,
         configPolicyFingerprint = "5".repeat(64),
+    )
+
+    private fun nodeAuthority() = TypeScriptCompilerAuthority(
+        targetProfile = TypeScriptCompilerContract.PROFILE_NODE,
+        compilerVersion = "6.0.3",
+        compilerDistributionFingerprint = "1".repeat(64),
+        declarationsFingerprint = "2".repeat(64),
+        declarationProfileFingerprint = "3".repeat(64),
+        runtimeCapabilitiesFingerprint = "4".repeat(64),
+        profileSchemaRevision = TypeScriptCompilerContract.PROFILE_SCHEMA_REVISION,
+        profileRevision = 2,
+        configSchemaRevision = TypeScriptCompilerAuthority.CONFIG_NONE_SCHEMA_REVISION,
+        configKind = TypeScriptR2Contract.CONFIG_KIND_NONE,
     )
 
     private fun objectJson(vararg fields: Pair<String, String>): String =

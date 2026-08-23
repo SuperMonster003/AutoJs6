@@ -77,13 +77,6 @@ public class JavaScriptFileSource extends JavaScriptSource {
         } else {
             mode = flags;
         }
-        if (isRhinoTypeScriptSource()) {
-            if ((mode & EXECUTION_MODE_NODEJS) != 0) {
-                throw new IllegalArgumentException(
-                        "A single-file .ts script cannot request the Node.js engine before Node profile support."
-                );
-            }
-        }
         return mode;
     }
 
@@ -117,6 +110,10 @@ public class JavaScriptFileSource extends JavaScriptSource {
 
     public boolean isRhinoTypeScriptSource() {
         return JavaScriptSource.isRhinoTypeScriptFileName(getSemanticFile().getName());
+    }
+
+    public boolean isCompilerBackedTypeScriptSource() {
+        return JavaScriptSource.isCompilerBackedTypeScriptFileName(getSemanticFile().getName());
     }
 
     @Nullable

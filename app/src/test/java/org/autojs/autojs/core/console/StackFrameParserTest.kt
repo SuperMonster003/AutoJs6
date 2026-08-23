@@ -77,6 +77,17 @@ class StackFrameParserTest {
     }
 
     @Test
+    fun parseV8TypeScriptFrameAfterConsoleTimestampPrefix() {
+        val frame = StackFrameParser.parse(
+            "21:19:14.153/E:     at failAtTypeScriptLine (node runtime map.mts:4:11)",
+        ).single()
+
+        assertEquals("node runtime map.mts", frame.sourceName)
+        assertEquals(3, frame.lineIndex)
+        assertEquals(10, frame.columnNumber)
+    }
+
+    @Test
     fun ignoreStackFramesWithOverflowingNumbers() {
         val frames = StackFrameParser.parse(
             "script.js:999999999999999999999:1\nscript.ts:1:999999999999999999999",

@@ -9,6 +9,7 @@ import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -25,7 +26,6 @@ class TypeScriptSingleFileArchiveTest {
                 sourceBytes = source,
                 requestId = REQUEST_ID,
                 projectId = PROJECT_ID,
-                entrySourceUri = ENTRY_SOURCE_URI,
                 authority = authority(),
                 destination = archive,
             )
@@ -93,7 +93,6 @@ class TypeScriptSingleFileArchiveTest {
                     sourceBytes = byteArrayOf(0xc3.toByte(), 0x28),
                     requestId = REQUEST_ID,
                     projectId = PROJECT_ID,
-                    entrySourceUri = ENTRY_SOURCE_URI,
                     authority = authority(),
                     destination = archive,
                 )
@@ -104,7 +103,58 @@ class TypeScriptSingleFileArchiveTest {
         }
     }
 
-    private fun authority() = TypeScriptRhinoCompilerAuthority(
+    @Test
+    fun writesNodeRevisionTwoArchiveWithoutSyntheticTsConfig() {
+        val archive = File.createTempFile("typescript-node-input-test-", ".zip")
+        try {
+            val source = "const answer: number = 42;\nexport { answer };\n"
+                .toByteArray(StandardCharsets.UTF_8)
+            val prepared = TypeScriptSingleFileArchive.write(
+                sourceName = "入口.mts",
+                sourceBytes = source,
+                requestId = REQUEST_ID,
+                projectId = PROJECT_ID,
+                authority = nodeAuthority(),
+                destination = archive,
+            )
+
+            val namespace = "p-" + sha256(
+                PROJECT_ID.toByteArray(StandardCharsets.UTF_8),
+            )
+            assertEquals("sources/入口.mts", prepared.entryPath)
+            assertEquals(
+                "autojs://source/$namespace/sources/%E5%85%A5%E5%8F%A3.mts",
+                prepared.entrySourceUri,
+            )
+            assertNull(prepared.configByteLength)
+            assertNull(prepared.configSha256)
+            ZipFile(archive).use { zip ->
+                val entries = zip.entries().asSequence().toList()
+                assertEquals(
+                    listOf("request-manifest.json", "sources/入口.mts"),
+                    entries.map(ZipEntry::getName),
+                )
+                val manifestBytes = zip.getInputStream(entries.first()).use { it.readBytes() }
+                val manifest = TypeScriptStrictJson.parseObject(manifestBytes)
+                assertEquals(TypeScriptCompilerContract.PROFILE_NODE, manifest["targetProfile"])
+                assertEquals(TypeScriptR2Contract.CONFIG_KIND_NONE, manifest["configKind"])
+                assertFalse(manifest.containsKey("config"))
+                assertEquals(
+                    expectedInventoryFingerprint(
+                        path = "sources/入口.mts",
+                        source = source,
+                        includeConfig = false,
+                    ),
+                    manifest["callerInventoryFingerprint"],
+                )
+            }
+        } finally {
+            archive.delete()
+        }
+    }
+
+    private fun authority() = TypeScriptCompilerAuthority(
+        targetProfile = TypeScriptCompilerContract.PROFILE_RHINO,
         compilerVersion = "6.0.3",
         compilerDistributionFingerprint = "1".repeat(64),
         declarationsFingerprint = "2".repeat(64),
@@ -118,12 +168,29 @@ class TypeScriptSingleFileArchiveTest {
         configPolicyFingerprint = "5".repeat(64),
     )
 
-    private fun expectedInventoryFingerprint(path: String, source: ByteArray): String {
+    private fun nodeAuthority() = TypeScriptCompilerAuthority(
+        targetProfile = TypeScriptCompilerContract.PROFILE_NODE,
+        compilerVersion = "6.0.3",
+        compilerDistributionFingerprint = "1".repeat(64),
+        declarationsFingerprint = "2".repeat(64),
+        declarationProfileFingerprint = "3".repeat(64),
+        runtimeCapabilitiesFingerprint = "4".repeat(64),
+        profileSchemaRevision = TypeScriptCompilerContract.PROFILE_SCHEMA_REVISION,
+        profileRevision = 2,
+        configSchemaRevision = TypeScriptCompilerAuthority.CONFIG_NONE_SCHEMA_REVISION,
+        configKind = TypeScriptR2Contract.CONFIG_KIND_NONE,
+    )
+
+    private fun expectedInventoryFingerprint(
+        path: String,
+        source: ByteArray,
+        includeConfig: Boolean = true,
+    ): String {
         val config = "{}".toByteArray(StandardCharsets.UTF_8)
         val digest = MessageDigest.getInstance("SHA-256")
         digest.update("autojs6.typescript.input-inventory.v1\n".toByteArray(StandardCharsets.US_ASCII))
         digest.updateRecord("source", "/" + path, source)
-        digest.updateRecord("config", "tsconfig.json", config)
+        if (includeConfig) digest.updateRecord("config", "tsconfig.json", config)
         return digest.digest().toLowerHex()
     }
 
@@ -179,7 +246,6 @@ class TypeScriptSingleFileArchiveTest {
     private companion object {
         const val REQUEST_ID = "host-test-request"
         const val PROJECT_ID = "single-file-test-project"
-        const val ENTRY_SOURCE_URI = "autojs://source/single-file-test-project/main.ts"
         const val UTF8_FLAG = 1 shl 11
         const val LOCAL_HEADER_SIGNATURE = 0x04034b50L
     }

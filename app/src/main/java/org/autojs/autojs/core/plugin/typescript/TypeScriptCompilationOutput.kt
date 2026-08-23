@@ -144,7 +144,14 @@ internal object TypeScriptCompilationOutputReader {
         prepared: TypeScriptPreparedCompilation,
         terminal: TypeScriptTerminalResult,
     ): TypeScriptCompilationOutput {
-        manifest.requireExactKeys(OUTPUT_MANIFEST_KEYS, "output manifest")
+        val expectedManifestKeys = if (
+            prepared.authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+        ) {
+            NODE_OUTPUT_MANIFEST_KEYS
+        } else {
+            OUTPUT_MANIFEST_KEYS
+        }
+        manifest.requireExactKeys(expectedManifestKeys, "output manifest")
         manifest.requireString("schema").requireEqual(TypeScriptR2Contract.OUTPUT_ARCHIVE_SCHEMA)
         manifest.requireInt("revision").requireEqual(
             TypeScriptR2Contract.OUTPUT_ARCHIVE_SCHEMA_REVISION,
@@ -160,7 +167,7 @@ internal object TypeScriptCompilationOutputReader {
         manifest.requireString("requestId").requireEqual(prepared.requestId)
         manifest.requireString("projectId").requireEqual(prepared.projectId)
         manifest.requireString("entrySourceUri").requireEqual(prepared.entrySourceUri)
-        manifest.requireString("targetProfile").requireEqual(TypeScriptCompilerContract.PROFILE_RHINO)
+        manifest.requireString("targetProfile").requireEqual(prepared.authority.targetProfile)
         manifest.requireInt("profileSchemaRevision").requireEqual(
             prepared.authority.profileSchemaRevision,
         )
@@ -213,7 +220,8 @@ internal object TypeScriptCompilationOutputReader {
         manifest.requireLowerSha256("callerInventoryFingerprint")
         manifest.requireLowerSha256("retainedInventoryFingerprint")
         manifest.requireLowerSha256("declarationInventoryFingerprint")
-        manifest.requireLowerSha256("effectiveOptionsFingerprint")
+        val effectiveOptionsFingerprint =
+            manifest.requireLowerSha256("effectiveOptionsFingerprint")
         manifest.requireLowerSha256("moduleInventoryFingerprint")
         manifest.requireLowerSha256("artifactInventoryFingerprint")
         manifest.requireNonNegativeInt("declarationFileCount")
@@ -223,6 +231,14 @@ internal object TypeScriptCompilationOutputReader {
         manifest.requireNonNegativeLong("largestRetainedFileBytes")
         require(manifest["effectiveOptions"] is Map<*, *>) {
             "TypeScript output manifest effectiveOptions is not an object."
+        }
+        if (prepared.authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
+            validateNodeResultAuthority(
+                manifest = manifest,
+                prepared = prepared,
+                terminal = terminal,
+                effectiveOptionsFingerprint = effectiveOptionsFingerprint,
+            )
         }
 
         val descriptors = manifest.requireObjectList("files").map(::artifactDescriptor)
@@ -317,6 +333,143 @@ internal object TypeScriptCompilationOutputReader {
         }
     }
 
+    private fun validateNodeResultAuthority(
+        manifest: Map<String, Any?>,
+        prepared: TypeScriptPreparedCompilation,
+        terminal: TypeScriptTerminalResult,
+        effectiveOptionsFingerprint: String,
+    ) {
+        manifest.requireInt("nodeModuleOutputPolicySchemaRevision").requireEqual(1)
+        manifest.requireInt("nodeModuleOutputPolicyRevision").requireEqual(1)
+        val moduleOutputPolicyFingerprint =
+            manifest.requireLowerSha256("nodeModuleOutputPolicyFingerprint")
+        moduleOutputPolicyFingerprint.requireEqual(NODE_MODULE_OUTPUT_POLICY_FINGERPRINT)
+        manifest.requireString("generatedMappingSchema").requireEqual(
+            GENERATED_MAPPING_SCHEMA,
+        )
+        manifest.requireInt("generatedMappingSchemaRevision").requireEqual(1)
+        manifest.requireInt("generatedMappingPolicyRevision").requireEqual(1)
+        manifest.requireInt("resolverPolicyRevision").requireEqual(2)
+        manifest.requireLowerSha256("snapshotTargetInventoryFingerprint")
+        require(manifest.getValue("packageMetadataInventoryFingerprint") == null)
+        require(manifest.getValue("packageFormatCatalogFingerprint") == null)
+        require(manifest.getValue("packageTargetInventoryFingerprint") == null)
+        manifest.requireLowerSha256("targetUniverseFingerprint")
+
+        val sourcePath = "/${prepared.entryPath}"
+        manifest.requireString("resultSnapshotEntryPath").requireEqual(sourcePath)
+        require(manifest.requireStringList("resultSnapshotRootNames") == listOf(sourcePath))
+
+        val mappings = manifest.requireObjectList("generatedModuleMappings")
+        require(mappings.size == terminal.emittedModuleCount)
+        if (terminal.outcome == TypeScriptCompilerContract.OUTCOME_DIAGNOSTICS) {
+            require(mappings.isEmpty())
+            return
+        }
+
+        val mapping = mappings.single()
+        mapping.requireExactKeys(GENERATED_MODULE_MAPPING_KEYS, "generated module mapping")
+        val sourceExtension = when {
+            sourcePath.endsWith(".mts") -> ".mts"
+            sourcePath.endsWith(".cts") -> ".cts"
+            else -> error("Single-file Node output has an unsupported source extension.")
+        }
+        val moduleFormat = if (sourceExtension == ".mts") "esm" else "commonjs"
+        val outputExtension = if (sourceExtension == ".mts") ".mjs" else ".cjs"
+        val generatedPath = sourcePath.removePrefix("/sources/")
+            .removeSuffix(sourceExtension)
+            .let { relativePath -> "/outputs/$relativePath$outputExtension" }
+        val sourceMapPath = "$generatedPath.map"
+        val projectNamespace = "p-" + sha256(
+            TypeScriptUtf8.encode(prepared.projectId, "TypeScript project ID"),
+        )
+        val generatedUri = "autojs://generated/$projectNamespace/" +
+            generatedPath.removePrefix("/").split('/').joinToString("/", transform = ::percentEncode)
+
+        mapping.requireString("sourcePath").requireEqual(sourcePath)
+        mapping.requireString("projectNamespace").requireEqual(projectNamespace)
+        mapping.requireString("originalSourceUri").requireEqual(prepared.entrySourceUri)
+        mapping.requireString("moduleFormat").requireEqual(moduleFormat)
+        mapping.requireString("outputExtension").requireEqual(outputExtension)
+        mapping.requireString("generatedPath").requireEqual(generatedPath)
+        mapping.requireString("sourceMapPath").requireEqual(sourceMapPath)
+        mapping.requireString("generatedUri").requireEqual(generatedUri)
+
+        val expectedEvidence = buildString {
+            append("schema=")
+            append(GENERATED_MAPPING_SCHEMA)
+            append("|schemaRevision=1")
+            append("|mappingPolicyRevision=1")
+            append("|moduleOutputPolicyRevision=1")
+            append("|moduleOutputPolicyFingerprint=")
+            append(moduleOutputPolicyFingerprint)
+            append("|profile=node")
+            append("|profileSchemaRevision=")
+            append(prepared.authority.profileSchemaRevision)
+            append("|profileRevision=")
+            append(prepared.authority.profileRevision)
+            append("|configSchemaRevision=")
+            append(prepared.authority.configSchemaRevision)
+            append("|configKind=")
+            append(percentEncode(prepared.authority.configKind))
+            append("|effectiveOptionsFingerprint=")
+            append(effectiveOptionsFingerprint)
+            append("|runtimeCapabilitiesFingerprint=")
+            append(prepared.authority.runtimeCapabilitiesFingerprint)
+            append("|projectNamespace=")
+            append(percentEncode(projectNamespace))
+            append("|sourcePath=")
+            append(percentEncode(sourcePath))
+            append("|originalSourceUri=")
+            append(percentEncode(prepared.entrySourceUri))
+            append("|moduleFormat=")
+            append(percentEncode(moduleFormat))
+            append("|packageTypeState=none")
+            append("|packageMetadataInventoryFingerprint=none")
+            append("|packageBoundary=none")
+            append("|outputExtension=")
+            append(percentEncode(outputExtension))
+            append("|generatedPath=")
+            append(percentEncode(generatedPath))
+            append("|sourceMapPath=")
+            append(percentEncode(sourceMapPath))
+            append("|generatedUri=")
+            append(percentEncode(generatedUri))
+        }
+        require(expectedEvidence.all { character -> character.code in 0x20..0x7e })
+        mapping.requireString("canonicalEvidence").requireEqual(expectedEvidence)
+        mapping.requireString("fingerprint").also { fingerprint ->
+            requireLowerSha256(fingerprint, "generated module mapping fingerprint")
+            fingerprint.requireEqual(
+                sha256(TypeScriptUtf8.encode(expectedEvidence, "generated mapping evidence")),
+            )
+        }
+    }
+
+    private fun percentEncode(value: String): String {
+        val bytes = TypeScriptUtf8.encode(value, "TypeScript Node output identity")
+        return buildString(bytes.size) {
+            bytes.forEach { byte ->
+                val unsigned = byte.toInt() and 0xff
+                if (
+                    unsigned in 'a'.code..'z'.code ||
+                    unsigned in 'A'.code..'Z'.code ||
+                    unsigned in '0'.code..'9'.code ||
+                    unsigned == '-'.code ||
+                    unsigned == '.'.code ||
+                    unsigned == '_'.code ||
+                    unsigned == '~'.code
+                ) {
+                    append(unsigned.toChar())
+                } else {
+                    append('%')
+                    append(HEX_DIGITS[unsigned ushr 4])
+                    append(HEX_DIGITS[unsigned and 0x0f])
+                }
+            }
+        }
+    }
+
     private fun artifactDescriptor(value: Map<String, Any?>): ArtifactDescriptor {
         value.requireExactKeys(ARTIFACT_DESCRIPTOR_KEYS, "artifact descriptor")
         val path = value.requireString("path")
@@ -345,7 +498,7 @@ internal object TypeScriptCompilationOutputReader {
         )
         root.requireString("requestId").requireEqual(prepared.requestId)
         root.requireString("projectId").requireEqual(prepared.projectId)
-        root.requireString("targetProfile").requireEqual(TypeScriptCompilerContract.PROFILE_RHINO)
+        root.requireString("targetProfile").requireEqual(prepared.authority.targetProfile)
         root.requireInt("profileSchemaRevision").requireEqual(
             prepared.authority.profileSchemaRevision,
         )
@@ -553,6 +706,11 @@ internal object TypeScriptCompilationOutputReader {
     private const val KIND_JAVASCRIPT = "javascript"
     private const val KIND_SOURCE_MAP = "source_map"
     private const val COMPILER_API = "createIncrementalProgram"
+    private const val GENERATED_MAPPING_SCHEMA =
+        "autojs6.typescript.generated-module-mapping"
+    private const val NODE_MODULE_OUTPUT_POLICY_FINGERPRINT =
+        "5c2294f0ee9d6d25bd2132b4ea24866d0a5f9caaa521a63bf81ffe1d897f6ce7"
+    private val HEX_DIGITS = "0123456789ABCDEF".toCharArray()
     private val CANONICAL_INTEGER = Regex("""-?(0|[1-9][0-9]*)""")
     private val ARTIFACT_DESCRIPTOR_KEYS = setOf("path", "kind", "size", "sha256", "sourcePaths")
     private val DIAGNOSTIC_KEYS =
@@ -560,6 +718,18 @@ internal object TypeScriptCompilationOutputReader {
     private val RELATED_INFORMATION_KEYS =
         setOf("uri", "range", "category", "code", "message")
     private val RANGE_KEYS = setOf("start", "length", "line", "column")
+    private val GENERATED_MODULE_MAPPING_KEYS = setOf(
+        "sourcePath",
+        "projectNamespace",
+        "originalSourceUri",
+        "moduleFormat",
+        "outputExtension",
+        "generatedPath",
+        "sourceMapPath",
+        "generatedUri",
+        "canonicalEvidence",
+        "fingerprint",
+    )
     private val DIAGNOSTICS_DOCUMENT_KEYS = setOf(
         "schema",
         "revision",
@@ -625,5 +795,22 @@ internal object TypeScriptCompilationOutputReader {
         "moduleInventoryFingerprint",
         "artifactInventoryFingerprint",
         "files",
+    )
+    private val NODE_OUTPUT_MANIFEST_KEYS = OUTPUT_MANIFEST_KEYS + setOf(
+        "nodeModuleOutputPolicySchemaRevision",
+        "nodeModuleOutputPolicyRevision",
+        "nodeModuleOutputPolicyFingerprint",
+        "generatedMappingSchema",
+        "generatedMappingSchemaRevision",
+        "generatedMappingPolicyRevision",
+        "resolverPolicyRevision",
+        "snapshotTargetInventoryFingerprint",
+        "packageMetadataInventoryFingerprint",
+        "packageFormatCatalogFingerprint",
+        "packageTargetInventoryFingerprint",
+        "targetUniverseFingerprint",
+        "resultSnapshotEntryPath",
+        "resultSnapshotRootNames",
+        "generatedModuleMappings",
     )
 }

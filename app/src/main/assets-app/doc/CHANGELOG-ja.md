@@ -23,6 +23,8 @@
 * `新機能` "ui" モード指定を持つローカル単一ファイル .ts スクリプトで, コンパイル後の Rhino Activity による文字列 XML レイアウト実行, ビュー検索, クリックコールバック, テキスト更新, 明示的な UI 終了に対応; ネイティブ TSX レイアウト構文は引き続き明示的に拒否
 * `新機能` TypeScript コンパイラ診断をソースファイル, 1 始まりの行と列, 重大度, TS エラーコードを持つホストの ScriptCompilationException レコードとして公開; Console とエディタ下部ログパネルに対応するソース位置へ移動できる明瞭なクリック可能位置を表示
 * `新機能` Rhino の TypeScript 実行時例外はコンパイラの Source Map v3 を利用し, 生成 JavaScript のスタックフレームを元の .ts ファイルと行へマッピングし, 利用できない列を捏造せず, Console とエディタログパネルでマッピング位置をクリック可能な状態に維持
+* `新機能` ローカルの単一ファイル .mts/.cts スクリプトを独立 TypeScript コンパイラプラグインの Node profile で .mjs/.cjs にコンパイルしてから Node.js Runtime プラグインで実行し, UTF-8 ファイル名を保持して従来の TypeScript 正規表現除去を迂回; プロジェクトの package メタデータ対応までは単一ファイル Node .ts を明示的に拒否
+* `新機能` Node TypeScript の実行例外でコンパイラの Source Map v3 を使用し, V8 スタックフレームを元の .mts/.cts ファイルの正確な行と列へマッピングし, Console とエディターログパネルのマッピング位置から直接ジャンプ可能
 * `新機能` 独立した Python Runtime プラグインバックエンドがローカル .py ファイルと `type: python` 宣言のスクリプトプロジェクトを別の CPython プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, ホットプラグ, JavaScript へのフォールバック禁止に対応
 * `新機能` Python 起動統合がファイルマネージャー/エディター/ローカル Run Intent/単一ファイル Import Intent/新規ショートカット/タイマータスク/ブロードキャストタスクを対象とし, 単一ファイルまたはプロジェクトの厳格なコンテキストを保持; プロジェクト内 import/相対ファイルアクセス/読み取り専用 `autojs6.app/device/execution/project` API に対応
 * `新機能` Python Runtime の実行は ExecutionConfig キー `autojs6.python.stdinSnapshot` を介した任意の上限付き事前供給 stdin スナップショットに対応し, ByteArray/UTF-8 テキストの厳格な受け入れ, プロバイダーの機能/サイズ交渉, 非公開の読み取り専用 PFD 転送とクリーンアップを行う
