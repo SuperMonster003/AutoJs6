@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 
+/** Debug-only controlled surface for real accessibility gesture acceptance tests. */
 class NodeAccessibilitySmokeActivity : Activity() {
 
     private lateinit var button: Button
