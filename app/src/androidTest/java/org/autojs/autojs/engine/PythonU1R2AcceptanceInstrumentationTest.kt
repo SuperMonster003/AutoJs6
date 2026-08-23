@@ -1395,6 +1395,19 @@ class PythonU1R2AcceptanceInstrumentationTest {
         }
     }
 
+    private fun assertSuccessful(
+        pending: PendingFileExecution,
+        label: String,
+    ): PythonRuntimeExecutionResult {
+        assertEquals("$label start callback count", 1, pending.startCount.get())
+        assertEquals("$label success callback count", 1, pending.successCount.get())
+        assertEquals("$label exception callback count", 0, pending.exceptionCount.get())
+        assertEquals("$label exposed a Host error", null, pending.error.get())
+        return requireNotNull(pending.result.get() as? PythonRuntimeExecutionResult) {
+            "$label did not return PythonRuntimeExecutionResult"
+        }
+    }
+
     private fun cleanProjectRoot(projectRoot: File, label: String) {
         service.stopAll()
         awaitNoRegisteredEngines("during $label cleanup")
