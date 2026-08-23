@@ -93,7 +93,7 @@ internal data class PythonRuntimeProviderEnvironment(
     }
 }
 
-/** The production-safe default is disabled, even when an eligible APK is installed. */
+/** The pure evaluator defaults off; the admitted production Host path explicitly enables it. */
 internal data class PythonRuntimeProviderSelectionOptions(
     val enabled: Boolean = false,
     val preferredComponent: PythonRuntimeProviderComponent? = null,

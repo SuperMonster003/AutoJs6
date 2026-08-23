@@ -8,7 +8,7 @@ import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
 import java.nio.charset.StandardCharsets
 
 /**
- * A bounded, immutable host-created document for the R5 read-only preview API.
+ * A bounded, immutable host-created document for the stable read-only snapshot API.
  *
  * The document deliberately contains no Android identifier, Context, Binder or Java object. It is
  * transported as one ordinary exact-length/SHA-256 PFD and parsed inside the isolated runtime.

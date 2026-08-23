@@ -91,7 +91,7 @@ object PythonProjectLaunchPolicy {
         return null
     }
 
-    /** R4-P1 recognizes valid projects but deliberately keeps execution fail-closed. */
+    /** Compatibility guard for callers which explicitly disable the stable runtime channel. */
     @JvmStatic
     fun rejectExecutionUntilWorkspaceSupport(admission: PythonProjectLaunchAdmission) {
         require(admission.projectRoot.isAbsolute) { "Python project admission is not normalized" }

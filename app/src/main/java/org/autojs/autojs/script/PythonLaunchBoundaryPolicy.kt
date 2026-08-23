@@ -7,9 +7,10 @@ import java.util.Locale
 /**
  * Classifies Python-looking launch locations before a legacy engine source is created.
  *
- * R3 deliberately lands this fail-closed boundary before the production Python engine.
- * Until that engine is enabled, a Python launch must never fall through to Rhino,
- * Node.js, or RootAutomator merely because it entered through a different host API.
+ * The stable Python engine now owns admitted `.py` files in the normal Host flavor. This
+ * fail-closed boundary remains for unsupported locations and Host flavors: a Python launch must
+ * never fall through to Rhino, Node.js, or RootAutomator merely because it entered through a
+ * different Host API.
  */
 internal object PythonLaunchBoundaryPolicy {
 

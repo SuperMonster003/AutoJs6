@@ -1,19 +1,28 @@
 package org.autojs.autojs.engine
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
 import android.os.SystemClock
 import android.util.Base64
+import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.plugin.python.PythonRuntimeExecutionResult
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
+import org.autojs.autojs.model.script.ScriptFile
+import org.autojs.autojs.model.script.Scripts
+import org.autojs.autojs.script.PythonFileSource
 import org.autojs.autojs.script.PythonProjectLaunchPolicy
 import org.autojs.autojs.script.PythonProjectSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
+import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.autojs.plugin.python.runtime.api.PythonSha256
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
@@ -501,6 +510,178 @@ class PythonU1R2AcceptanceInstrumentationTest {
         }
     }
 
+    @Test
+    fun editorAndExplorerForegroundEntriesAcceptVisibleAndHiddenDialogInput() {
+        val root = File(context.cacheDir, "python-m2-interactive-${UUID.randomUUID()}").apply {
+            check(mkdirs()) { "Unable to create M2 interactive-input directory: $this" }
+        }
+        val activity = launchForegroundActivity()
+        try {
+            val editorFile = File(root, "editor.py").apply {
+                writeText(
+                    """
+                    from autojs6 import result
+
+                    reply = input("$EDITOR_PROMPT")
+                    result.set({"entry": "editor", "matched": reply == "$EDITOR_REPLY"})
+                    """.trimIndent() + "\n",
+                    Charsets.UTF_8,
+                )
+            }
+            runForegroundFileEntry(
+                activity = activity,
+                sourceFile = editorFile,
+                label = "M2 editor interactive input",
+                prompt = EDITOR_PROMPT,
+                reply = EDITOR_REPLY,
+                password = false,
+                expectedStructuredJson = EXPECTED_EDITOR_INPUT_JSON,
+            ) {
+                Scripts.runWithBroadcastSenderInteractive(
+                    context = activity,
+                    file = editorFile,
+                    workingDirectory = root.canonicalPath,
+                    overriddenFullPath = editorFile.canonicalPath,
+                )
+            }
+
+            val explorerFile = File(root, "explorer.py").apply {
+                writeText(
+                    """
+                    import getpass
+                    from autojs6 import result
+
+                    reply = getpass.getpass("$EXPLORER_PROMPT")
+                    result.set({"entry": "explorer", "matched": reply == "$EXPLORER_REPLY"})
+                    """.trimIndent() + "\n",
+                    Charsets.UTF_8,
+                )
+            }
+            runForegroundFileEntry(
+                activity = activity,
+                sourceFile = explorerFile,
+                label = "M2 Explorer hidden interactive input",
+                prompt = EXPLORER_PROMPT,
+                reply = EXPLORER_REPLY,
+                password = true,
+                expectedStructuredJson = EXPECTED_EXPLORER_INPUT_JSON,
+            ) {
+                Scripts.runInteractive(activity, ScriptFile(explorerFile.path))
+            }
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+            assertTrue(
+                "Unable to remove M2 interactive-input directory: $root",
+                !root.exists() || root.deleteRecursively(),
+            )
+        }
+    }
+
+    private fun runForegroundFileEntry(
+        activity: Activity,
+        sourceFile: File,
+        label: String,
+        prompt: String,
+        reply: String,
+        password: Boolean,
+        expectedStructuredJson: String,
+        launch: () -> ScriptExecution?,
+    ) {
+        val pending = PendingFileExecution(sourceFile.canonicalPath)
+        val checkpoint = consoleCheckpoint()
+        service.registerGlobalScriptExecutionListener(pending.listener)
+        try {
+            val submitted = AtomicReference<ScriptExecution?>()
+            instrumentation.runOnMainSync { submitted.set(launch()) }
+            assertNotNull("$label was not submitted", submitted.get())
+            assertTrue(
+                "$label did not reach the unified start callback",
+                pending.started.await(START_TIMEOUT_SECONDS, TimeUnit.SECONDS),
+            )
+            val execution = requireNotNull(pending.execution.get()) { "$label started without ScriptExecution" }
+            assertEquals(submitted.get()?.id, execution.id)
+            replyToForegroundPrompt(prompt, reply, password)
+            awaitCompleted(pending, execution, label, SMOKE_EXECUTION_TIMEOUT_SECONDS)
+            awaitEngineRemoved(execution.id, label)
+
+            assertEquals(1, pending.startCount.get())
+            assertEquals(1, pending.successCount.get())
+            assertEquals(0, pending.exceptionCount.get())
+            assertEquals(null, pending.error.get())
+            val result = pending.result.get() as? PythonRuntimeExecutionResult
+            assertNotNull("$label did not return the Host-owned result type", result)
+            assertEquals(expectedStructuredJson, requireNotNull(result).structuredJson)
+            assertConsoleSince(checkpoint, prompt)
+            assertFalse(
+                "$label leaked the submitted reply to the global console",
+                consoleContainsSince(checkpoint, reply),
+            )
+            assertPrivateTransportSnapshotsRemoved()
+        } finally {
+            service.unregisterGlobalScriptExecutionListener(pending.listener)
+        }
+    }
+
+    private fun launchForegroundActivity(): LogActivity = instrumentation.startActivitySync(
+        Intent(context, LogActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+    ).let { activity ->
+        instrumentation.waitForIdleSync()
+        activity as LogActivity
+    }
+
+    private fun replyToForegroundPrompt(prompt: String, reply: String, password: Boolean) {
+        val deadline = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(INPUT_DIALOG_TIMEOUT_SECONDS)
+        var lastTree = ""
+        while (SystemClock.elapsedRealtime() < deadline) {
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            if (root != null) {
+                val nodes = accessibilityTree(root)
+                lastTree = nodes.joinToString(" | ") { node ->
+                    "${node.className}:${node.text}:${node.isPassword}:${node.isClickable}"
+                }.takeLast(MAX_CONSOLE_DIAGNOSTIC_CHARS)
+                val promptVisible = nodes.any { node -> node.text?.toString() == prompt }
+                val input = nodes.firstOrNull { node ->
+                    node.className?.toString() == "android.widget.EditText" && node.isEditable
+                }
+                val confirm = nodes.firstOrNull { node ->
+                    node.text?.toString() == context.getString(R.string.dialog_button_confirm) && node.isClickable
+                }
+                if (promptVisible && input != null && confirm != null) {
+                    assertEquals("Unexpected password visibility for prompt '$prompt'", password, input.isPassword)
+                    val arguments = Bundle().apply {
+                        putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, reply)
+                    }
+                    assertTrue(
+                        "Unable to enter the bounded reply for prompt '$prompt'",
+                        input.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments),
+                    )
+                    SystemClock.sleep(INPUT_DIALOG_SETTLE_MILLIS)
+                    assertTrue(
+                        "Unable to confirm the bounded reply for prompt '$prompt'",
+                        confirm.performAction(AccessibilityNodeInfo.ACTION_CLICK),
+                    )
+                    return
+                }
+            }
+            SystemClock.sleep(INPUT_DIALOG_POLL_MILLIS)
+        }
+        throw AssertionError("Foreground Python input dialog did not become actionable for '$prompt': $lastTree")
+    }
+
+    private fun accessibilityTree(root: AccessibilityNodeInfo): List<AccessibilityNodeInfo> {
+        val nodes = ArrayList<AccessibilityNodeInfo>()
+        val pending = ArrayDeque<AccessibilityNodeInfo>()
+        pending.add(root)
+        while (pending.isNotEmpty()) {
+            val node = pending.removeFirst()
+            nodes += node
+            for (index in 0 until node.childCount) {
+                node.getChild(index)?.let(pending::addLast)
+            }
+        }
+        return nodes
+    }
+
     private fun writeProject(projectRoot: File, token: String) {
         File(projectRoot, "project.json").writeText(
             """{"type":"python","entryMode":"module","main":"$PACKAGE_NAME.main"}""",
@@ -687,6 +868,21 @@ class PythonU1R2AcceptanceInstrumentationTest {
         awaitEngineRemoved(execution.id, label)
     }
 
+    private fun awaitCompleted(
+        pending: PendingFileExecution,
+        execution: ScriptExecution,
+        label: String,
+        timeoutSeconds: Long,
+    ) {
+        if (!pending.completed.await(timeoutSeconds, TimeUnit.SECONDS)) {
+            execution.engine.forceStop()
+            throw AssertionError("$label did not reach a Host terminal callback")
+        }
+        pending.error.get()?.let { error ->
+            throw AssertionError("$label failed through the public Host engine").apply { initCause(error) }
+        }
+    }
+
     private fun assertSuccessful(
         pending: PendingProjectExecution,
         label: String,
@@ -762,11 +958,58 @@ class PythonU1R2AcceptanceInstrumentationTest {
         }
     }
 
+    private inner class PendingFileExecution(private val expectedPath: String) {
+        val execution = AtomicReference<ScriptExecution?>()
+        val started = CountDownLatch(1)
+        val completed = CountDownLatch(1)
+        val startCount = AtomicInteger(0)
+        val successCount = AtomicInteger(0)
+        val exceptionCount = AtomicInteger(0)
+        val result = AtomicReference<Any?>()
+        val error = AtomicReference<Throwable?>()
+
+        val listener = object : SimpleScriptExecutionListener() {
+            override fun onStart(execution: ScriptExecution) {
+                if (!matches(execution)) return
+                this@PendingFileExecution.execution.compareAndSet(null, execution)
+                startCount.incrementAndGet()
+                started.countDown()
+            }
+
+            override fun onSuccess(execution: ScriptExecution, value: Any?) {
+                if (!matches(execution)) return
+                this@PendingFileExecution.execution.compareAndSet(null, execution)
+                successCount.incrementAndGet()
+                result.set(value)
+                completed.countDown()
+            }
+
+            override fun onException(execution: ScriptExecution, throwable: Throwable) {
+                if (!matches(execution)) return
+                this@PendingFileExecution.execution.compareAndSet(null, execution)
+                exceptionCount.incrementAndGet()
+                error.set(throwable)
+                completed.countDown()
+            }
+        }
+
+        private fun matches(execution: ScriptExecution): Boolean {
+            val source = execution.source as? PythonFileSource ?: return false
+            return runCatching { source.file.canonicalPath }.getOrElse { source.file.absolutePath } == expectedPath
+        }
+    }
+
     private companion object {
         const val ARG_ENABLED = "autojs.python.u1r2.public.enabled"
         const val ARG_NETWORK_URL = "autojs.python.m1.networkUrl"
         const val HOST_PACKAGE = "org.autojs.autojs6"
         const val REAL_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.python.runtime"
+        const val EDITOR_PROMPT = "M2_EDITOR_INPUT> "
+        const val EDITOR_REPLY = "editor-visible-reply"
+        const val EXPLORER_PROMPT = "M2_EXPLORER_PASSWORD> "
+        const val EXPLORER_REPLY = "explorer-hidden-reply"
+        const val EXPECTED_EDITOR_INPUT_JSON = "{\"entry\":\"editor\",\"matched\":true}"
+        const val EXPECTED_EXPLORER_INPUT_JSON = "{\"entry\":\"explorer\",\"matched\":true}"
         const val ENTRY_MODE_ARGUMENT = "autojs6.python.entryMode"
         const val PACKAGE_NAME = "u1r2case"
         const val ENTRY_POINT = "$PACKAGE_NAME/main.py"
@@ -798,6 +1041,9 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val ENGINE_REMOVAL_TIMEOUT_MILLIS = 10_000L
         const val ENGINE_REMOVAL_POLL_MILLIS = 50L
         const val CONSOLE_POLL_MILLIS = 50L
+        const val INPUT_DIALOG_TIMEOUT_SECONDS = 30L
+        const val INPUT_DIALOG_POLL_MILLIS = 100L
+        const val INPUT_DIALOG_SETTLE_MILLIS = 100L
         const val MAX_CONSOLE_DIAGNOSTIC_CHARS = 4_096
     }
 }
