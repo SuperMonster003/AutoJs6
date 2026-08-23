@@ -57,6 +57,25 @@ class PythonHostCapabilityDispatcherTest {
             ),
         )
         assertEquals(
+            COLOR_MATCH.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        38,
+                        PythonHostCapabilities.IMAGES_FIND_COLOR,
+                        "color" to 0x123456,
+                        "threshold" to 2,
+                        "region" to mapOf(
+                            "x" to 10,
+                            "y" to 20,
+                            "width" to 100,
+                            "height" to 200,
+                        ),
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
             true,
             success(dispatcher.dispatch(request(14, PythonHostCapabilities.FILES_EXISTS, "path" to "written.txt"))),
         )
@@ -317,6 +336,16 @@ class PythonHostCapabilityDispatcherTest {
         assertEquals(listOf("png" to 100), actions.screenCaptures)
         assertEquals(listOf(SCREEN_IMAGE.id to 0), actions.screenChunkReads)
         assertEquals(listOf(SCREEN_IMAGE.id), actions.screenReleases)
+        assertEquals(
+            listOf(
+                Triple(
+                    0x123456,
+                    2,
+                    PythonHostImageRegion(10, 20, 100, 200),
+                ),
+            ),
+            actions.screenColorSearches,
+        )
     }
 
     @Test
@@ -574,6 +603,80 @@ class PythonHostCapabilityDispatcherTest {
                 PythonHostCapabilities.IMAGES_RELEASE,
                 "imageId" to "image-0",
             ),
+            request(
+                8,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to -1,
+                "threshold" to 0,
+                "region" to null,
+            ),
+            request(
+                9,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to PythonHostImagePolicy.MAX_COLOR + 1,
+                "threshold" to 0,
+                "region" to null,
+            ),
+            request(
+                10,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to -1,
+                "region" to null,
+            ),
+            request(
+                11,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to PythonHostImagePolicy.MAX_COLOR_THRESHOLD + 1,
+                "region" to null,
+            ),
+            request(
+                12,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to "0,0,1,1",
+            ),
+            request(
+                13,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to mapOf("x" to 0, "y" to 0, "width" to 1),
+            ),
+            request(
+                14,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to mapOf(
+                    "x" to 0,
+                    "y" to 0,
+                    "width" to 1,
+                    "height" to 1,
+                    "extra" to 1,
+                ),
+            ),
+            request(
+                15,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to mapOf("x" to 0, "y" to 0, "width" to 0, "height" to 1),
+            ),
+            request(
+                16,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to mapOf(
+                    "x" to PythonHostImagePolicy.MAX_DIMENSION - 1,
+                    "y" to 0,
+                    "width" to 2,
+                    "height" to 1,
+                ),
+            ),
         )
         invalidRequests.forEach { encoded ->
             assertEquals("INVALID_ARGUMENT", failureCode(dispatcher.dispatch(encoded)))
@@ -581,6 +684,23 @@ class PythonHostCapabilityDispatcherTest {
         assertTrue(actions.screenCaptures.isEmpty())
         assertTrue(actions.screenChunkReads.isEmpty())
         assertTrue(actions.screenReleases.isEmpty())
+        assertTrue(actions.screenColorSearches.isEmpty())
+
+        assertEquals(
+            COLOR_MATCH.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        17,
+                        PythonHostCapabilities.IMAGES_FIND_COLOR,
+                        "color" to 0x123456,
+                        "threshold" to 0,
+                        "region" to null,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(listOf(Triple(0x123456, 0, null)), actions.screenColorSearches)
 
         val failures = listOf(
             PythonHostCapabilityAccessibilityUnavailableException() to "ACCESSIBILITY_UNAVAILABLE",
@@ -595,10 +715,24 @@ class PythonHostCapabilityDispatcherTest {
                 failureCode(
                     dispatcher.dispatch(
                         request(
-                            (index + 8).toLong(),
+                            (index + 20).toLong(),
                             PythonHostCapabilities.IMAGES_CAPTURE_SCREEN,
                             "format" to "png",
                             "quality" to 100,
+                        ),
+                    ),
+                ),
+            )
+            assertEquals(
+                expectedCode,
+                failureCode(
+                    dispatcher.dispatch(
+                        request(
+                            (index + 30).toLong(),
+                            PythonHostCapabilities.IMAGES_FIND_COLOR,
+                            "color" to 0x123456,
+                            "threshold" to 0,
+                            "region" to null,
                         ),
                     ),
                 ),
@@ -610,7 +744,7 @@ class PythonHostCapabilityDispatcherTest {
             failureCode(
                 dispatcher.dispatch(
                     request(
-                        12,
+                        40,
                         PythonHostCapabilities.IMAGES_READ_CHUNK,
                         "imageId" to SCREEN_IMAGE.id,
                         "offset" to 0,
@@ -807,7 +941,7 @@ class PythonHostCapabilityDispatcherTest {
     private fun request(
         callId: Long,
         capability: String,
-        vararg arguments: Pair<String, Any>,
+        vararg arguments: Pair<String, Any?>,
         executionId: String = EXECUTION_ID,
     ): ByteArray = JsonObject().apply {
         addProperty("version", 1)
@@ -819,13 +953,14 @@ class PythonHostCapabilityDispatcherTest {
         })
     }.toString().toByteArray()
 
-    private fun JsonObject.addTestValue(name: String, value: Any) {
+    private fun JsonObject.addTestValue(name: String, value: Any?) {
         when (value) {
+            null -> add(name, JsonNull.INSTANCE)
             is Map<*, *> -> add(
                 name,
                 JsonObject().apply {
                     value.forEach { (nestedName, nestedValue) ->
-                        addTestValue(nestedName as String, requireNotNull(nestedValue))
+                        addTestValue(nestedName as String, nestedValue)
                     }
                 },
             )
@@ -886,6 +1021,7 @@ class PythonHostCapabilityDispatcherTest {
         val nodeClicks = mutableListOf<String>()
         val nodeTexts = mutableListOf<Pair<String, String>>()
         val screenCaptures = mutableListOf<Pair<String, Int>>()
+        val screenColorSearches = mutableListOf<Triple<Int, Int, PythonHostImageRegion?>>()
         val screenChunkReads = mutableListOf<Pair<String, Int>>()
         val screenReleases = mutableListOf<String>()
         var stopSelfRequests = 0
@@ -1072,6 +1208,16 @@ class PythonHostCapabilityDispatcherTest {
             return SCREEN_IMAGE
         }
 
+        override fun findScreenColor(
+            color: Int,
+            threshold: Int,
+            region: PythonHostImageRegion?,
+        ): PythonHostColorMatch {
+            imageFailure?.let { throw it }
+            screenColorSearches += Triple(color, threshold, region)
+            return COLOR_MATCH
+        }
+
         override fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk {
             imageFailure?.let { throw it }
             screenChunkReads += imageId to offset
@@ -1159,5 +1305,6 @@ class PythonHostCapabilityDispatcherTest {
             nextOffset = 3,
             eof = true,
         )
+        val COLOR_MATCH = PythonHostColorMatch.found(17, 29)
     }
 }
