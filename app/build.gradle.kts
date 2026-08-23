@@ -647,6 +647,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Python Runtime API
     implementation(project(":plugin-api:python-runtime-api"))
 
+    // Plugin API: TypeScript Compiler API
+    implementation(project(":plugin-api:typescript-api"))
+
     // Plugin API: APK Builder Template API
     implementation(project(":plugin-api:apk-builder-template"))
 

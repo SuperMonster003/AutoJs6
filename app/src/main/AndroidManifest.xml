@@ -42,6 +42,9 @@
             <action android:name="org.autojs.plugin.lua.RUNTIME" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.typescript.COMPILER" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.EXPLORER_ACTION" />
         </intent>
         <intent>
