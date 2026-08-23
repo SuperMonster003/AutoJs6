@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.UiAutomation
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
+import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.Base64
 import android.util.Log
@@ -516,10 +518,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
         val projectRoot = freshProjectRoot()
         val activity = launchAccessibilitySmokeActivity()
         try {
-            assumeTrue(
-                "Enable the AutoJs6 accessibility service before running the Python automator acceptance",
-                AutoJsAccessibilityService.waitForStarted(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
-            )
+            ensureAccessibilityServiceStarted("M3 automator acceptance")
             instrumentation.runOnMainSync {
                 activity.window.decorView.sendAccessibilityEvent(
                     AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
@@ -607,10 +606,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
         val projectRoot = freshProjectRoot()
         val activity = launchAccessibilitySmokeActivity()
         try {
-            assumeTrue(
-                "Enable the AutoJs6 accessibility service before running the Python selector acceptance",
-                AutoJsAccessibilityService.waitForStarted(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
-            )
+            ensureAccessibilityServiceStarted("M3 selector acceptance")
             instrumentation.runOnMainSync {
                 activity.window.decorView.sendAccessibilityEvent(
                     AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
@@ -725,10 +721,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
         val projectRoot = freshProjectRoot()
         val activity = launchAccessibilitySmokeActivity()
         try {
-            assumeTrue(
-                "Enable the AutoJs6 accessibility service before running screen capture acceptance",
-                AutoJsAccessibilityService.waitForStarted(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
-            )
+            ensureAccessibilityServiceStarted("M3 screen capture acceptance")
             instrumentation.runOnMainSync {
                 activity.window.decorView.sendAccessibilityEvent(
                     AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
@@ -798,7 +791,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
                 )
                 assertEquals(bytes.size, structured.getInt("byteLength"))
                 assertEquals(PythonSha256.digest(bytes), artifact.sha256)
-                assertEquals(artifact.sha256, structured.getString("sha256"))
+                assertEquals(artifact.sha256.toHexString(), structured.getString("sha256"))
 
                 val bitmap = requireNotNull(BitmapFactory.decodeByteArray(bytes, 0, bytes.size)) {
                     "Python screen capture artifact is not a decodable PNG"
@@ -2311,6 +2304,58 @@ class PythonU1R2AcceptanceInstrumentationTest {
         false
     }
 
+    private fun ensureAccessibilityServiceStarted(description: String) {
+        if (AutoJsAccessibilityService.hasInstance()) return
+
+        val services = Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+        ).orEmpty()
+        val enabledServices = services.split(':').filter(String::isNotBlank)
+        assertTrue(
+            "AutoJs6 accessibility service is not enabled for $description",
+            AUTOJS_ACCESSIBILITY_SERVICE in enabledServices,
+        )
+        val servicesWithoutAutoJs = enabledServices
+            .filterNot(AUTOJS_ACCESSIBILITY_SERVICE::equals)
+            .joinToString(":")
+        val automation = instrumentation.getUiAutomation(
+            UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES,
+        )
+        automation.adoptShellPermissionIdentity(Manifest.permission.WRITE_SECURE_SETTINGS)
+        var detached = false
+        try {
+            assertTrue(
+                "Could not refresh the AutoJs6 accessibility service for $description",
+                Settings.Secure.putString(
+                    context.contentResolver,
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                    servicesWithoutAutoJs,
+                ),
+            )
+            detached = true
+            SystemClock.sleep(ACCESSIBILITY_BINDING_REFRESH_MILLIS)
+        } finally {
+            if (detached) {
+                Settings.Secure.putString(
+                    context.contentResolver,
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                    services,
+                )
+                Settings.Secure.putInt(
+                    context.contentResolver,
+                    Settings.Secure.ACCESSIBILITY_ENABLED,
+                    1,
+                )
+            }
+            automation.dropShellPermissionIdentity()
+        }
+        assertTrue(
+            "AutoJs6 accessibility service did not start for $description",
+            AutoJsAccessibilityService.waitForStarted(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
+        )
+    }
+
     private fun colorsNear(expected: Int, actual: Int, tolerance: Int): Boolean =
         kotlin.math.abs(Color.red(expected) - Color.red(actual)) <= tolerance &&
             kotlin.math.abs(Color.green(expected) - Color.green(actual)) <= tolerance &&
@@ -2412,6 +2457,8 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val ARG_PROJECT_LOCAL_PACKAGE_ARCHIVE = "autojs.python.m4.packageArchive"
         const val HOST_PACKAGE = "org.autojs.autojs6"
         const val REAL_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.python.runtime"
+        const val AUTOJS_ACCESSIBILITY_SERVICE =
+            "$HOST_PACKAGE/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
         const val EDITOR_PROMPT = "M2_EDITOR_INPUT> "
         const val EDITOR_REPLY = "editor-visible-reply"
         const val EXPLORER_PROMPT = "M2_EXPLORER_PASSWORD> "
@@ -2487,6 +2534,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val INPUT_DIALOG_SETTLE_MILLIS = 100L
         const val NOTICE_TIMEOUT_MILLIS = 5_000L
         const val AUTOMATOR_SERVICE_TIMEOUT_MILLIS = 30_000L
+        const val ACCESSIBILITY_BINDING_REFRESH_MILLIS = 750L
         const val AUTOMATOR_ACTIVITY_SETTLE_MILLIS = 500L
         const val AUTOMATOR_EVENT_TIMEOUT_MILLIS = 5_000L
         const val MAX_CONSOLE_DIAGNOSTIC_CHARS = 4_096
