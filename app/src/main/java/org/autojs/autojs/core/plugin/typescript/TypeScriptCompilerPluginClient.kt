@@ -63,7 +63,7 @@ internal class TypeScriptCompilerPluginClient(
         }
         require(targetProfile in TypeScriptCompilerContract.TARGET_PROFILES)
         require(
-            TypeScriptCompilerContract.supportedExtensions(targetProfile)
+            TypeScriptSourceExtensions.forProfile(targetProfile)
                 .any(sourceName::endsWith),
         ) {
             "The $targetProfile TypeScript profile does not accept $sourceName."
@@ -128,7 +128,7 @@ internal class TypeScriptCompilerPluginClient(
         require(entry.isFile) { "TypeScript project entry is not a regular file." }
         require(targetProfile in TypeScriptCompilerContract.TARGET_PROFILES)
         require(
-            TypeScriptCompilerContract.supportedExtensions(targetProfile)
+            TypeScriptSourceExtensions.forProfile(targetProfile)
                 .any(entry.name::endsWith),
         ) {
             "The $targetProfile TypeScript profile does not accept ${entry.name}."
@@ -377,7 +377,7 @@ internal class TypeScriptCompilerPluginClient(
                 TypeScriptPluginCapabilityKeys.NODE_SUPPORTED_EXTENSIONS
             else -> error("Unsupported TypeScript target profile: $targetProfile")
         }
-        val sourceExtension = TypeScriptCompilerContract.supportedExtensions(targetProfile)
+        val sourceExtension = TypeScriptSourceExtensions.forProfile(targetProfile)
             .single { extension -> sourceName.endsWith(extension) }
         require(
             info.getStringArray(supportedExtensionsKey)?.contains(sourceExtension) == true,

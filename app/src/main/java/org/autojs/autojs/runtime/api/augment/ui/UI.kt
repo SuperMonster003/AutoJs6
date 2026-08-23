@@ -108,6 +108,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
     override val selfAssignmentProperties = listOf<Pair<Any, Any?>>(
         WIDGET_KEY to mWidgetConstructor,
+        ("__autojs6TsxFragment" to TypeScriptTsxRuntime.FragmentToken) to AS_GLOBAL,
     )
 
     override val selfAssignmentFunctions = listOf(
@@ -116,6 +117,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ::inflate.name,
         ::useAndroidLayout.name,
         ::isUiThread.name to AS_GLOBAL,
+        ::__autojs6Tsx.name to AS_GLOBAL,
         ::post.name,
         ::layout.name,
         ::layoutFile.name,
@@ -376,6 +378,13 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun __autojs6Tsx(
+            scriptRuntime: ScriptRuntime,
+            args: Array<out Any?>,
+        ): Any = TypeScriptTsxRuntime.create(args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun __inflate__(scriptRuntime: ScriptRuntime, args: Array<out Any?>): View = ensureArgumentsLengthInRange(args, 2..4) { argList ->
             val (ctx, xml, parent, isAttachedToParent) = argList
             __inflateRhinoRuntime__(scriptRuntime, ctx, xml, parent, isAttachedToParent)
@@ -511,11 +520,14 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun layout(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { xml ->
             ensureActivity(scriptRuntime) { activity ->
                 scriptRuntime.ui.layoutInflater.context = activity
-                scriptRuntime.ui.layoutInflater.inflate(
-                    toXMLString(xml),
+                val tsxLayout = TypeScriptTsxRuntime.renderOrNull(xml)
+                val inflated = scriptRuntime.ui.layoutInflater.inflate(
+                    tsxLayout?.xml ?: toXMLString(xml),
                     activity.window.decorView as ViewGroup,
                     false,
-                ).let { setContentViewRhinoRuntime(scriptRuntime, it) }
+                )
+                tsxLayout?.attachClickHandlers(scriptRuntime, inflated)
+                setContentViewRhinoRuntime(scriptRuntime, inflated)
             }
             UNDEFINED
         }

@@ -19,8 +19,8 @@
 * `新增` Node.js 外部執行階段插件後端支援請求層級工作區封存傳輸 v2, 包含明確輸入對應/輸出回寫/刪除 tombstone 清單, 且不掃描宿主沙盒
 * `新增` 打包功能支援 Node.js 腳本專案, 並自動包含所需執行階段程式庫
 * `新增` 獨立 TypeScript 編譯外掛客戶端, 驗證凍結的 AIDL/R2 封存協定, 支援 UTF-8 單一檔案 Rhino 編譯, 有界診斷及強制 Source Map 輸出
-* `新增` 本機單一檔案 .ts 腳本會先經獨立編譯外掛再由 Rhino 執行, 保留 UTF-8 來源檔案識別與 Source Map 輸出, 型別錯誤在執行前拒絕, 且絕不回退至 Node.js 外掛或直接執行原始 TypeScript; 不支援的 TSX/宣告檔案及編譯器不可用情境會傳回明確的本地化錯誤
-* `新增` 帶有 "ui" 模式參數的本機單一檔案 .ts 腳本支援編譯後在 Rhino Activity 中執行字串 XML 版面配置, 包含檢視查找, 點擊回呼, 文字更新及明確關閉 UI; 原生 TSX 版面配置語法仍會遭明確拒絕
+* `新增` 本機單一檔案 .ts 與 Rhino .tsx 腳本會先經獨立編譯外掛再由 Rhino 執行, 保留 UTF-8 來源檔案識別與 Source Map 輸出, 型別錯誤在執行前拒絕, 且絕不回退至 Node.js 外掛或直接執行原始 TypeScript; 不支援的宣告檔案及編譯器不可用情境會傳回明確的本地化錯誤
+* `新增` 帶有 "ui" 模式參數的本機單一檔案 .ts/.tsx 腳本支援編譯後在 Rhino Activity 中執行字串 XML 及原生 TSX 版面配置, 包含受控內建標籤, Fragment, 純量屬性, 檢視查找, 點擊回呼, 文字更新及明確關閉 UI
 * `新增` TypeScript 編譯診斷以宿主 ScriptCompilationException 記錄提供來源檔案, 1 基行列, 嚴重層級與 TS 錯誤碼; Console 與編輯器底部日誌面板顯示可點擊的乾淨位置, 可跳轉至對應原始碼位置
 * `新增` Rhino TypeScript 執行例外會取用編譯器 Source Map v3, 將產生的 JavaScript 堆疊框架映射回原始 .ts 檔案與行號, 不虛構 Rhino 未提供的欄號, Console 與編輯器日誌面板中的映射位置可直接點擊跳轉
 * `新增` 本機單一檔案 .mts/.cts 腳本會先經獨立 TypeScript 編譯外掛的 Node profile 編譯為 .mjs/.cjs, 再交由 Node.js Runtime 外掛執行, 保留 UTF-8 檔名並略過舊有 TypeScript 正規表示式剝離; 單一檔案 Node .ts 在專案 package 中繼資料支援完成前會遭明確拒絕

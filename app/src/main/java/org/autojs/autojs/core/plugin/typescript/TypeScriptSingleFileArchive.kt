@@ -384,7 +384,7 @@ internal object TypeScriptSingleFileArchive {
     private fun canonicalSourceName(sourceName: String, targetProfile: String): String {
         val candidate = sourceName.takeIf { name ->
             name.isNotBlank() &&
-                TypeScriptCompilerContract.supportedExtensions(targetProfile)
+                TypeScriptSourceExtensions.forProfile(targetProfile)
                     .any(name::endsWith) &&
                 name != "." &&
                 name != ".." &&

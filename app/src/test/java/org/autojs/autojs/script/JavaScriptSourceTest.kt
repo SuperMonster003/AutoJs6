@@ -22,9 +22,11 @@ class JavaScriptSourceTest {
         assertTrue(JavaScriptSource.isCompilerBackedTypeScriptFileName("main.ts"))
         assertTrue(JavaScriptSource.isCompilerBackedTypeScriptFileName("main.mts"))
         assertTrue(JavaScriptSource.isCompilerBackedTypeScriptFileName("main.cts"))
-        assertFalse(JavaScriptSource.isCompilerBackedTypeScriptFileName("component.tsx"))
+        assertTrue(JavaScriptSource.isCompilerBackedTypeScriptFileName("component.tsx"))
+        assertTrue(JavaScriptSource.isRhinoTypeScriptFileName("component.tsx"))
+        assertFalse(JavaScriptSource.isNodeJsFileName("component.tsx"))
         assertFalse(JavaScriptSource.isCompilerBackedTypeScriptFileName("types.d.mts"))
-        assertTrue(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("component.tsx"))
+        assertFalse(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("component.tsx"))
         assertTrue(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("types.d.ts"))
         assertFalse(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("main.ts"))
     }
@@ -34,6 +36,25 @@ class JavaScriptSourceTest {
         val sourceFile = File.createTempFile("autojs6-typescript-route-", ".ts")
         try {
             sourceFile.writeText("const value: number = 42")
+
+            val launch = ScriptLaunchSourceFactory.createFileLaunch(
+                file = sourceFile,
+                defaultWorkingDirectory = sourceFile.parent.orEmpty(),
+            )
+
+            assertTrue(launch.source is TypeScriptFileSource)
+            assertEquals(JavaScriptSource.ENGINE, launch.engineName)
+            assertEquals(sourceFile.name, (launch.source as TypeScriptFileSource).compilationSourceName)
+        } finally {
+            sourceFile.delete()
+        }
+    }
+
+    @Test
+    fun tsxFileUsesCompilerBackedRhinoSource() {
+        val sourceFile = File.createTempFile("autojs6-typescript-route-", ".tsx")
+        try {
+            sourceFile.writeText("\"ui\"; ui.layout(<text text=\"TSX\" />)")
 
             val launch = ScriptLaunchSourceFactory.createFileLaunch(
                 file = sourceFile,

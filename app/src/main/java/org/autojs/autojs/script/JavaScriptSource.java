@@ -160,7 +160,6 @@ public abstract class JavaScriptSource extends ScriptSource {
                 lowerCaseName.endsWith(".cjs") ||
                 lowerCaseName.endsWith(".mts") ||
                 lowerCaseName.endsWith(".cts") ||
-                lowerCaseName.endsWith(".tsx") ||
                 lowerCaseName.endsWith(".node.js");
     }
 
@@ -169,7 +168,7 @@ public abstract class JavaScriptSource extends ScriptSource {
             return false;
         }
         String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
-        return lowerCaseName.endsWith(".ts") &&
+        return (lowerCaseName.endsWith(".ts") || lowerCaseName.endsWith(".tsx")) &&
                 !isTypeScriptDeclarationFileName(lowerCaseName);
     }
 
@@ -182,6 +181,7 @@ public abstract class JavaScriptSource extends ScriptSource {
             return false;
         }
         return lowerCaseName.endsWith(".ts") ||
+                lowerCaseName.endsWith(".tsx") ||
                 lowerCaseName.endsWith(".mts") ||
                 lowerCaseName.endsWith(".cts");
     }
@@ -191,8 +191,7 @@ public abstract class JavaScriptSource extends ScriptSource {
             return false;
         }
         String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
-        return lowerCaseName.endsWith(".tsx") ||
-                isTypeScriptDeclarationFileName(lowerCaseName);
+        return isTypeScriptDeclarationFileName(lowerCaseName);
     }
 
     public static boolean isJavaScriptFileName(String fileName) {

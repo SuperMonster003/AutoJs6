@@ -224,10 +224,12 @@ internal object TypeScriptProjectArchive {
         if (relativePath.split('/').any { segment -> segment.equals("node_modules", true) }) {
             return false
         }
-        if (name.endsWith(".tsx") || name.endsWith(".d.mts") || name.endsWith(".d.cts")) {
+        if (name.endsWith(".d.mts") || name.endsWith(".d.cts")) {
             return false
         }
         return when {
+            targetProfile == TypeScriptCompilerContract.PROFILE_RHINO &&
+                name.endsWith(".tsx") -> true
             name.endsWith(".ts") -> true
             targetProfile == TypeScriptCompilerContract.PROFILE_NODE &&
                 (name.endsWith(".mts") || name.endsWith(".cts")) -> true
@@ -240,6 +242,8 @@ internal object TypeScriptProjectArchive {
     private fun isExecutableSource(relativePath: String, targetProfile: String): Boolean {
         if (relativePath.endsWith(".d.ts")) return false
         return relativePath.endsWith(".ts") ||
+            targetProfile == TypeScriptCompilerContract.PROFILE_RHINO &&
+            relativePath.endsWith(".tsx") ||
             targetProfile == TypeScriptCompilerContract.PROFILE_NODE &&
             (relativePath.endsWith(".mts") || relativePath.endsWith(".cts"))
     }

@@ -84,6 +84,47 @@ class TypeScriptSingleFileArchiveTest {
     }
 
     @Test
+    fun writesRhinoRevisionTwoTsxArchiveWithoutChangingFrozenApiExtensions() {
+        val archive = File.createTempFile("typescript-tsx-input-test-", ".zip")
+        try {
+            assertEquals(
+                listOf(".ts"),
+                TypeScriptCompilerContract.supportedExtensions(
+                    TypeScriptCompilerContract.PROFILE_RHINO,
+                ).asList(),
+            )
+            val source = "const view = <text text=\"Hello TSX\" />;\n"
+                .toByteArray(StandardCharsets.UTF_8)
+            val prepared = TypeScriptSingleFileArchive.write(
+                sourceName = "界面.tsx",
+                sourceBytes = source,
+                requestId = REQUEST_ID,
+                projectId = PROJECT_ID,
+                authority = authority(profileRevision = 2),
+                destination = archive,
+            )
+
+            assertEquals("sources/界面.tsx", prepared.entryPath)
+            assertEquals("界面.tsx", prepared.sourceFiles.single().projectRelativePath)
+            assertEquals(listOf("sources/界面.tsx"), prepared.rootPaths)
+            ZipFile(archive).use { zip ->
+                val entries = zip.entries().asSequence().map(ZipEntry::getName).toList()
+                assertEquals(
+                    listOf("request-manifest.json", "tsconfig.json", "sources/界面.tsx"),
+                    entries,
+                )
+                val manifestBytes = zip.getInputStream(zip.getEntry("request-manifest.json"))
+                    .use { it.readBytes() }
+                val manifest = TypeScriptStrictJson.parseObject(manifestBytes)
+                assertEquals("sources/界面.tsx", manifest.getValue("entryPath"))
+                assertEquals(2, manifest.int("profileRevision"))
+            }
+        } finally {
+            archive.delete()
+        }
+    }
+
+    @Test
     fun rejectsMalformedUtf8SourceBeforeWritingArchive() {
         val archive = File.createTempFile("typescript-input-test-", ".zip")
         try {
@@ -153,7 +194,7 @@ class TypeScriptSingleFileArchiveTest {
         }
     }
 
-    private fun authority() = TypeScriptCompilerAuthority(
+    private fun authority(profileRevision: Int = 1) = TypeScriptCompilerAuthority(
         targetProfile = TypeScriptCompilerContract.PROFILE_RHINO,
         compilerVersion = "6.0.3",
         compilerDistributionFingerprint = "1".repeat(64),
@@ -161,7 +202,7 @@ class TypeScriptSingleFileArchiveTest {
         declarationProfileFingerprint = "3".repeat(64),
         runtimeCapabilitiesFingerprint = "4".repeat(64),
         profileSchemaRevision = TypeScriptCompilerContract.PROFILE_SCHEMA_REVISION,
-        profileRevision = 1,
+        profileRevision = profileRevision,
         configSchemaRevision = TypeScriptR2Contract.CONTROLLED_TSCONFIG_SCHEMA_REVISION,
         configKind = TypeScriptR2Contract.CONFIG_KIND_TSCONFIG,
         configPolicyRevision = TypeScriptR2Contract.CONTROLLED_TSCONFIG_POLICY_REVISION,

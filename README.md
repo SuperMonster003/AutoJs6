@@ -170,8 +170,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 * `新增` Node.js Runtime 插件, 内置 Node.js 24.5.0 运行时, 支持识别 "nodejs" 模式参数或识别文件扩展名 (.node.js/.cjs/.mjs) 运行 Node.js 脚本
 * `新增` 独立 TypeScript 编译插件客户端, 校验冻结的 AIDL/R2 归档协议, 支持 UTF-8 单文件 Rhino 编译, 有界诊断及强制 Source Map 输出
-* `新增` 本地单文件 .ts 脚本会先经独立编译插件再由 Rhino 执行, 保留 UTF-8 源文件身份与 Source Map 输出, 类型错误在执行前拒绝, 且绝不回退到 Node.js 插件或直接执行原始 TypeScript; 不受支持的 TSX/声明文件及编译器不可用场景会返回明确的本地化错误
-* `新增` 带 "ui" 模式参数的本地单文件 .ts 脚本支持经编译后在 Rhino Activity 中执行字符串 XML 布局, 包含视图查找, 点击回调, 文本更新及显式关闭 UI; 原生 TSX 布局语法仍会被明确拒绝
+* `新增` 本地单文件 .ts 及 Rhino .tsx 脚本会先经独立编译插件再由 Rhino 执行, 保留 UTF-8 源文件身份与 Source Map 输出, 类型错误在执行前拒绝, 且绝不回退到 Node.js 插件或直接执行原始 TypeScript; 不受支持的声明文件及编译器不可用场景会返回明确的本地化错误
+* `新增` 带 "ui" 模式参数的本地单文件 .ts/.tsx 脚本支持经编译后在 Rhino Activity 中执行字符串 XML 及原生 TSX 布局, 包含受控内置标签, Fragment, 标量属性, 视图查找, 点击回调, 文本更新及显式关闭 UI
 * `新增` TypeScript 编译诊断以宿主 ScriptCompilationException 记录提供源文件, 1 基行列, 严重级别与 TS 错误码; Console 与编辑器底部日志面板显示可点击的干净位置, 可跳转到对应源码位置
 * `新增` Rhino TypeScript 运行异常会消费编译器 Source Map v3, 将生成 JavaScript 堆栈帧映射回原 .ts 文件与行号, 不虚构 Rhino 未提供的列号, Console 与编辑器日志面板中的映射位置可直接点击跳转
 * `新增` 本地单文件 .mts/.cts 脚本会先经独立 TypeScript 编译插件的 Node profile 编译为 .mjs/.cjs, 再交由 Node.js Runtime 插件执行, 保留 UTF-8 文件名并绕过旧的 TypeScript 正则剥离; 单文件 Node .ts 在项目 package 元数据支持完成前会被明确拒绝

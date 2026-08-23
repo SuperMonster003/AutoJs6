@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.SystemClock
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -107,6 +108,26 @@ class TypeScriptCompilerPluginClientDeviceTest {
                         diagnostic.range != null
                 },
             )
+        }
+    }
+
+    @Test
+    fun compilesNativeTsxWithSourceMapThroughRealPluginBinder() {
+        withSource(
+            name = "component.tsx",
+            source = "\"ui\"; ui.layout(<text text=\"TypeScript TSX\" />)",
+        ) { source ->
+            val output = runBlocking {
+                TypeScriptCompilerPluginClient(context).compileSingleFile(source)
+            }
+
+            assertTrue(output is TypeScriptCompilationOutput.Emitted)
+            output as TypeScriptCompilationOutput.Emitted
+            assertTrue(output.javaScript.contains("__autojs6Tsx("))
+            assertTrue(output.sourceMap.contains("\"version\":3"))
+            assertTrue(output.sourceMap.contains("component.tsx"))
+            assertTrue(output.entryModulePath.endsWith("component.js"))
+            assertFalse(output.diagnostics.any(TypeScriptDiagnostic::isError))
         }
     }
 
@@ -950,7 +971,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
         val markerKey = "autojs6.typescript.ui.${System.nanoTime()}"
         System.clearProperty(markerKey)
         try {
-            withAccessibilityNodeClick(UI_BUTTON_TEXT) {
+            withInstrumentationNodeClick(UI_BUTTON_TEXT) {
                 withSource(
                     name = "string-xml-ui.ts",
                     source = """
@@ -978,6 +999,49 @@ class TypeScriptCompilerPluginClientDeviceTest {
 
                     terminal.failure.get()?.let { error ->
                         throw AssertionError("String XML TypeScript UI smoke failed", error)
+                    }
+                    assertTrue(terminal.succeeded.get())
+                    assertEquals("clicked", System.getProperty(markerKey))
+                }
+            }
+        } finally {
+            System.clearProperty(markerKey)
+        }
+    }
+
+    @Test
+    fun runsNativeTsxUiFromStrictTypeScript() {
+        val markerKey = "autojs6.typescript.tsx-ui.${System.nanoTime()}"
+        System.clearProperty(markerKey)
+        try {
+            withInstrumentationNodeClick(TSX_UI_BUTTON_TEXT) {
+                withSource(
+                    name = "native-ui.tsx",
+                    source = """
+                        "ui";
+                        declare const java: any
+                        ui.layout(
+                            <vertical gravity="center" padding={24}>
+                                <>
+                                    <text id="status" textSize="20sp">TypeScript TSX ready</text>
+                                    <button onClick={() => {
+                                        const status: UI.View | null = ui.findView("status")
+                                        if (status === null) {
+                                            throw new Error("Native TSX status view was not inflated")
+                                        }
+                                        status.setText("TypeScript TSX clicked")
+                                        java.lang.System.setProperty("$markerKey", "clicked")
+                                        ui.finish()
+                                    }}>$TSX_UI_BUTTON_TEXT</button>
+                                </>
+                            </vertical>,
+                        )
+                    """.trimIndent(),
+                ) { source ->
+                    val terminal = executeAndAwait(source)
+
+                    terminal.failure.get()?.let { error ->
+                        throw AssertionError("Native TSX TypeScript UI smoke failed", error)
                     }
                     assertTrue(terminal.succeeded.get())
                     assertEquals("clicked", System.getProperty(markerKey))
@@ -1090,28 +1154,6 @@ class TypeScriptCompilerPluginClientDeviceTest {
             }
         } finally {
             console.clear()
-        }
-    }
-
-    @Test
-    fun rejectsTsxWithLocalizedSingleFileProfileError() {
-        withSource(
-            name = "component.tsx",
-            source = "const view = <text>Hello</text>",
-        ) { source ->
-            val launch = ScriptLaunchSourceFactory.createFileLaunch(source)
-            try {
-                AutoJs.instance.scriptEngineService.execute(
-                    launch.source,
-                    ExecutionConfig(workingDirectory = source.parent.orEmpty()),
-                )
-                fail("Ordinary single-file TSX must be rejected before engine creation")
-            } catch (error: IllegalArgumentException) {
-                assertEquals(
-                    context.getString(R.string.error_typescript_source_not_executable, source.name),
-                    error.message,
-                )
-            }
         }
     }
 
@@ -1299,6 +1341,78 @@ class TypeScriptCompilerPluginClientDeviceTest {
         )
     }
 
+    private fun withInstrumentationNodeClick(text: String, block: () -> Unit) {
+        val automation = instrumentation.getUiAutomation(
+            UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES,
+        )
+        val completed = CountDownLatch(1)
+        val failure = AtomicReference<Throwable>()
+        val thread = Thread({
+            try {
+                val node = waitForInstrumentationNode(
+                    automation = automation,
+                    timeoutMillis = ACCESSIBILITY_TIMEOUT_MILLIS,
+                ) { candidate ->
+                    candidate.packageName?.toString() == context.packageName &&
+                        candidate.text?.toString()?.equals(text, ignoreCase = true) == true
+                }
+                val clicked = clickNodeOrAncestor(node)
+                Log.i(TEST_LOG_TAG, "Instrumentation node '$text' click result: $clicked")
+                assertTrue("Could not click instrumentation node '$text'", clicked)
+            } catch (error: Throwable) {
+                Log.e(TEST_LOG_TAG, "Instrumentation node '$text' action failed", error)
+                failure.set(error)
+            } finally {
+                completed.countDown()
+            }
+        }, "typescript-ui-automation-${System.nanoTime()}").apply {
+            isDaemon = true
+            start()
+        }
+        try {
+            block()
+            assertTrue(
+                "Instrumentation node click did not complete: '$text'",
+                completed.await(ACCESSIBILITY_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS),
+            )
+            failure.get()?.let { error ->
+                throw AssertionError("Instrumentation node click failed: '$text'", error)
+            }
+        } finally {
+            thread.interrupt()
+            thread.join(2_000L)
+        }
+    }
+
+    private fun waitForInstrumentationNode(
+        automation: UiAutomation,
+        timeoutMillis: Long,
+        predicate: (AccessibilityNodeInfo) -> Boolean,
+    ): AccessibilityNodeInfo {
+        val deadline = SystemClock.uptimeMillis() + timeoutMillis
+        while (SystemClock.uptimeMillis() < deadline) {
+            val roots = automation.windows.mapNotNull { window -> window.root }.ifEmpty {
+                listOfNotNull(automation.rootInActiveWindow)
+            }
+            val compatibilityDialogOk = findAccessibilityNode(roots) { candidate ->
+                candidate.packageName?.toString() == SYSTEM_FRAMEWORK_PACKAGE &&
+                    candidate.className?.toString() == BUTTON_CLASS_NAME &&
+                    candidate.text?.toString()?.equals("OK", ignoreCase = true) == true
+            }
+            if (
+                compatibilityDialogOk != null &&
+                clickNodeOrAncestor(compatibilityDialogOk)
+            ) {
+                Log.i(TEST_LOG_TAG, "Dismissed Android app compatibility dialog")
+                SystemClock.sleep(ACCESSIBILITY_POLL_MILLIS)
+                continue
+            }
+            findAccessibilityNode(roots, predicate)?.let { return it }
+            SystemClock.sleep(ACCESSIBILITY_POLL_MILLIS)
+        }
+        throw AssertionError("Instrumentation node was not found within ${timeoutMillis}ms")
+    }
+
     private fun withAccessibilityAutomation(
         description: String,
         action: () -> Unit,
@@ -1430,6 +1544,13 @@ class TypeScriptCompilerPluginClientDeviceTest {
         val roots = service.windows.mapNotNull { window -> window.root }.ifEmpty {
             listOfNotNull(service.rootInActiveWindow)
         }
+        return findAccessibilityNode(roots, predicate)
+    }
+
+    private fun findAccessibilityNode(
+        roots: List<AccessibilityNodeInfo>,
+        predicate: (AccessibilityNodeInfo) -> Boolean,
+    ): AccessibilityNodeInfo? {
         val queue = ArrayDeque<AccessibilityNodeInfo>()
         roots.forEach(queue::addLast)
         var visited = 0
@@ -1616,6 +1737,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
     }
 
     private companion object {
+        const val TEST_LOG_TAG = "TypeScriptDeviceTest"
         const val EXECUTION_TIMEOUT_SECONDS = 90L
         const val CONSOLE_TIMEOUT_MILLIS = 5_000L
         const val HTTP_TIMEOUT_MILLIS = 10_000
@@ -1626,6 +1748,8 @@ class TypeScriptCompilerPluginClientDeviceTest {
         const val SERVICE_TEARDOWN_TIMEOUT_MILLIS = 10_000L
         const val MAX_ACCESSIBILITY_NODES = 512
         const val MAX_ACCESSIBILITY_ANCESTORS = 4
+        const val SYSTEM_FRAMEWORK_PACKAGE = "android"
+        const val BUTTON_CLASS_NAME = "android.widget.Button"
         const val SYSTEM_UI_PACKAGE = "com.android.systemui"
         const val AUTOJS_ACCESSIBILITY_SERVICE =
             "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
@@ -1636,6 +1760,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
         )
         const val SPINNER_ITEM_ID = "android:id/text1"
         const val UI_BUTTON_TEXT = "Finish TypeScript UI"
+        const val TSX_UI_BUTTON_TEXT = "Finish TypeScript TSX"
         val SCREEN_SHARE_MODE_IDS = setOf(
             "com.android.systemui:id/screen_share_mode_spinner",
             "com.android.systemui:id/screen_share_mode_options",
