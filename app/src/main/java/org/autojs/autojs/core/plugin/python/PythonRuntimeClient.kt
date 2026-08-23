@@ -438,6 +438,7 @@ internal class PythonRuntimeClient(
                     context = applicationContext,
                     executionId = reserved.requestId.toString(),
                     expectedPluginUid = pinned.packageUid,
+                    fileRoot = PythonHostFilePolicy.rootFor(source),
                     globalConsole = globalConsole,
                     onViolation = { error ->
                         finishFailure(

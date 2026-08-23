@@ -18,6 +18,7 @@ import android.os.Looper
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
@@ -25,13 +26,18 @@ import com.google.gson.JsonParser
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.ScriptToast
+import org.autojs.autojs.script.PythonFileSource
+import org.autojs.autojs.script.PythonProjectSource
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs6.R
 import org.autojs.plugin.python.runtime.api.IPythonHostCapabilityBroker
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
+import java.io.File
 import java.nio.ByteBuffer
+import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
+import java.text.Normalizer
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.FutureTask
@@ -52,6 +58,12 @@ internal object PythonHostCapabilities {
     const val CONSOLE_WARN = "console.warn"
     const val CONSOLE_ERROR = "console.error"
     const val NOTICE_SHOW = "notice.show"
+    const val FILES_READ_TEXT = "files.read_text"
+    const val FILES_WRITE_TEXT = "files.write_text"
+    const val FILES_EXISTS = "files.exists"
+    const val FILES_IS_FILE = "files.is_file"
+    const val FILES_IS_DIR = "files.is_dir"
+    const val FILES_LIST = "files.list"
 
     val ENABLED = setOf(
         TOAST_SHOW,
@@ -65,6 +77,12 @@ internal object PythonHostCapabilities {
         CONSOLE_WARN,
         CONSOLE_ERROR,
         NOTICE_SHOW,
+        FILES_READ_TEXT,
+        FILES_WRITE_TEXT,
+        FILES_EXISTS,
+        FILES_IS_FILE,
+        FILES_IS_DIR,
+        FILES_LIST,
     )
 }
 
@@ -131,6 +149,138 @@ internal object PythonHostNoticePolicy {
     fun tagForExecution(executionId: String) = "$TAG_PREFIX$executionId"
 }
 
+internal object PythonHostFilePolicy {
+    const val ROOT_PATH = "."
+    const val MAX_PATH_BYTES = 4 * 1024
+    const val MAX_TEXT_BYTES = PythonRuntimeContract.MAX_HOST_CAPABILITY_TEXT_BYTES
+    const val MAX_LIST_ENTRIES = 128
+    const val MAX_NAME_BYTES = 255
+
+    fun rootFor(source: PythonFileSource): File {
+        val candidate = (source as? PythonProjectSource)?.projectRoot
+            ?: requireNotNull(source.semanticFile.absoluteFile.parentFile) {
+                "Python standalone source has no parent directory"
+            }
+        return candidate.canonicalFile.also { root ->
+            require(root.isDirectory) { "Python Host file root must be a directory" }
+        }
+    }
+
+    fun normalizeRelative(value: String): String {
+        require(value.isNotEmpty()) { "Python Host file path is empty" }
+        require(value.toByteArray(StandardCharsets.UTF_8).size <= MAX_PATH_BYTES) {
+            "Python Host file path exceeds the byte limit"
+        }
+        require(
+            value == ROOT_PATH ||
+                !value.startsWith('/') &&
+                !WINDOWS_DRIVE_PATH.matches(value) &&
+                '\\' !in value &&
+                value.none(Character::isISOControl) &&
+                Normalizer.normalize(value, Normalizer.Form.NFC) == value &&
+                value.split('/').none { it.isEmpty() || it == "." || it == ".." },
+        ) {
+            "Python Host file path must be normalized and relative"
+        }
+        return value
+    }
+
+    private val WINDOWS_DRIVE_PATH = Regex("^[A-Za-z]:.*")
+}
+
+internal class PythonHostFileScope(root: File) {
+    private val root = root.canonicalFile.also { candidate ->
+        require(candidate.isDirectory) { "Python Host file root must be a directory" }
+    }
+    private val rootPrefix = root.path.trimEnd(File.separatorChar) + File.separator
+    private val ignoreCase = File.separatorChar == '\\'
+
+    fun readText(path: String): String {
+        val file = resolve(path)
+        if (!file.exists()) throw PythonHostCapabilityPathNotFoundException()
+        if (!file.isFile) throw PythonHostCapabilityPathTypeException()
+        if (file.length() > PythonHostFilePolicy.MAX_TEXT_BYTES) {
+            throw PythonHostCapabilityResultLimitException()
+        }
+        val bytes = file.readBytes()
+        if (bytes.size > PythonHostFilePolicy.MAX_TEXT_BYTES) {
+            throw PythonHostCapabilityResultLimitException()
+        }
+        return decodeStrictUtf8(bytes)
+    }
+
+    fun writeText(path: String, text: String) {
+        val file = resolve(path)
+        if (file.exists() && !file.isFile) throw PythonHostCapabilityPathTypeException()
+        val parent = file.parentFile
+        if (parent == null || !parent.exists()) throw PythonHostCapabilityPathNotFoundException()
+        if (!parent.isDirectory) throw PythonHostCapabilityPathTypeException()
+        val bytes = encodeStrictUtf8(text)
+        require(bytes.size <= PythonHostFilePolicy.MAX_TEXT_BYTES) {
+            "Python Host file text exceeds the byte limit"
+        }
+        file.writeBytes(bytes)
+    }
+
+    fun exists(path: String): Boolean = resolve(path).exists()
+
+    fun isFile(path: String): Boolean = resolve(path).isFile
+
+    fun isDirectory(path: String): Boolean = resolve(path).isDirectory
+
+    fun list(path: String): List<String> {
+        val directory = resolve(path)
+        if (!directory.exists()) throw PythonHostCapabilityPathNotFoundException()
+        if (!directory.isDirectory) throw PythonHostCapabilityPathTypeException()
+        val entries = directory.list()?.toList()
+            ?: throw PythonHostCapabilityPermissionDeniedException()
+        if (entries.size > PythonHostFilePolicy.MAX_LIST_ENTRIES) {
+            throw PythonHostCapabilityResultLimitException()
+        }
+        entries.forEach { entry ->
+            if (
+                entry.isEmpty() ||
+                '/' in entry ||
+                '\\' in entry ||
+                entry.any(Character::isISOControl) ||
+                Normalizer.normalize(entry, Normalizer.Form.NFC) != entry ||
+                encodeStrictUtf8(entry).size > PythonHostFilePolicy.MAX_NAME_BYTES
+            ) {
+                throw PythonHostCapabilityResultLimitException()
+            }
+        }
+        return entries.sorted()
+    }
+
+    private fun resolve(path: String): File {
+        val relative = PythonHostFilePolicy.normalizeRelative(path)
+        if (relative == PythonHostFilePolicy.ROOT_PATH) return root
+        val candidate = File(root, relative.replace('/', File.separatorChar)).canonicalFile
+        require(candidate.path.startsWith(rootPrefix, ignoreCase = ignoreCase)) {
+            "Python Host file path escapes the execution root"
+        }
+        return candidate
+    }
+
+    private fun decodeStrictUtf8(value: ByteArray): String = runCatching {
+        StandardCharsets.UTF_8
+            .newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT)
+            .decode(ByteBuffer.wrap(value))
+            .toString()
+    }.getOrElse { throw PythonHostCapabilityFileEncodingException(it) }
+
+    private fun encodeStrictUtf8(value: String): ByteArray = runCatching {
+        val encoded = StandardCharsets.UTF_8
+            .newEncoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT)
+            .encode(CharBuffer.wrap(value))
+        ByteArray(encoded.remaining()).also(encoded::get)
+    }.getOrElse { throw IllegalArgumentException("Python Host file text is not valid UTF-8", it) }
+}
+
 internal interface PythonHostCapabilityActions {
     fun showToast(text: String)
 
@@ -149,16 +299,30 @@ internal interface PythonHostCapabilityActions {
     fun writeConsole(level: PythonHostConsoleLevel, text: String)
 
     fun postNotice(text: String)
+
+    fun readFileText(path: String): String
+
+    fun writeFileText(path: String, text: String)
+
+    fun fileExists(path: String): Boolean
+
+    fun isFile(path: String): Boolean
+
+    fun isDirectory(path: String): Boolean
+
+    fun listDirectory(path: String): List<String>
 }
 
 internal class AndroidPythonHostCapabilityActions(
     context: Context,
     executionId: String,
+    fileRoot: File,
     private val globalConsole: GlobalConsole,
 ) : PythonHostCapabilityActions {
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
     private val app = AppUtils(appContext)
+    private val hostFiles = PythonHostFileScope(fileRoot)
     private val toastOwnerId = "python@$executionId"
     private val notificationTag = PythonHostNoticePolicy.tagForExecution(executionId)
 
@@ -267,6 +431,18 @@ internal class AndroidPythonHostCapabilityActions(
             notification,
         )
     }
+
+    override fun readFileText(path: String): String = hostFiles.readText(path)
+
+    override fun writeFileText(path: String, text: String) = hostFiles.writeText(path, text)
+
+    override fun fileExists(path: String): Boolean = hostFiles.exists(path)
+
+    override fun isFile(path: String): Boolean = hostFiles.isFile(path)
+
+    override fun isDirectory(path: String): Boolean = hostFiles.isDirectory(path)
+
+    override fun listDirectory(path: String): List<String> = hostFiles.list(path)
 
     private fun ensureNotificationPostingAllowed() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -398,6 +574,35 @@ internal class PythonHostCapabilityDispatcher(
                     )
                     encodeSuccess(request, null)
                 }
+                PythonHostCapabilities.FILES_READ_TEXT -> encodeSuccess(
+                    request,
+                    actions.readFileText(request.singleFilePathArgument()),
+                )
+                PythonHostCapabilities.FILES_WRITE_TEXT -> {
+                    val path = request.filePathArgument(ARG_TEXT)
+                    val text = request.textArgument(
+                        ARG_TEXT,
+                        maxBytes = PythonHostFilePolicy.MAX_TEXT_BYTES,
+                    )
+                    actions.writeFileText(path, text)
+                    encodeSuccess(request, null)
+                }
+                PythonHostCapabilities.FILES_EXISTS -> encodeSuccess(
+                    request,
+                    actions.fileExists(request.singleFilePathArgument()),
+                )
+                PythonHostCapabilities.FILES_IS_FILE -> encodeSuccess(
+                    request,
+                    actions.isFile(request.singleFilePathArgument()),
+                )
+                PythonHostCapabilities.FILES_IS_DIR -> encodeSuccess(
+                    request,
+                    actions.isDirectory(request.singleFilePathArgument()),
+                )
+                PythonHostCapabilities.FILES_LIST -> encodeSuccess(
+                    request,
+                    actions.listDirectory(request.singleFilePathArgument()),
+                )
                 else -> encodeFailure(
                     request,
                     ERROR_CAPABILITY_UNAVAILABLE,
@@ -408,6 +613,16 @@ internal class PythonHostCapabilityDispatcher(
             encodeFailure(request, ERROR_HOST_TIMEOUT, "Host capability timed out")
         } catch (_: PythonHostCapabilityPermissionDeniedException) {
             encodeFailure(request, ERROR_PERMISSION_DENIED, "Host capability permission was denied")
+        } catch (_: SecurityException) {
+            encodeFailure(request, ERROR_PERMISSION_DENIED, "Host capability permission was denied")
+        } catch (_: PythonHostCapabilityPathNotFoundException) {
+            encodeFailure(request, ERROR_PATH_NOT_FOUND, "Host file path does not exist")
+        } catch (_: PythonHostCapabilityPathTypeException) {
+            encodeFailure(request, ERROR_PATH_TYPE_MISMATCH, "Host file path has the wrong type")
+        } catch (_: PythonHostCapabilityFileEncodingException) {
+            encodeFailure(request, ERROR_FILE_ENCODING, "Host file is not valid UTF-8")
+        } catch (_: PythonHostCapabilityResultLimitException) {
+            encodeFailure(request, ERROR_RESULT_LIMIT_EXCEEDED, "Host capability result exceeds its limit")
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
         } catch (_: Throwable) {
@@ -480,6 +695,12 @@ internal class PythonHostCapabilityDispatcher(
                 is String -> addProperty(KEY_VALUE, value)
                 is Boolean -> addProperty(KEY_VALUE, value)
                 is PythonHostDeviceInfo -> add(KEY_VALUE, value.toJson())
+                is List<*> -> add(
+                    KEY_VALUE,
+                    JsonArray().apply {
+                        value.forEach { entry -> add(requireNotNull(entry) as String) }
+                    },
+                )
                 else -> error("Unsupported Python host capability result type: ${value::class.java.name}")
             }
         },
@@ -532,6 +753,15 @@ internal class PythonHostCapabilityDispatcher(
             allowEmpty: Boolean = true,
         ): String {
             requireArguments(name)
+            return textArgument(name, pattern, maxBytes, allowEmpty)
+        }
+
+        fun textArgument(
+            name: String,
+            pattern: Regex? = null,
+            maxBytes: Int = PythonRuntimeContract.MAX_HOST_CAPABILITY_TEXT_BYTES,
+            allowEmpty: Boolean = true,
+        ): String {
             val value = arguments.requireString(name)
             require(value.toByteArray(StandardCharsets.UTF_8).size <= maxBytes) {
                 "Python host capability text argument exceeds the byte limit"
@@ -543,6 +773,22 @@ internal class PythonHostCapabilityDispatcher(
                 "Python host capability text argument has an invalid shape"
             }
             return value
+        }
+
+        fun singleFilePathArgument(): String {
+            requireArguments(ARG_PATH)
+            return filePathArgument()
+        }
+
+        fun filePathArgument(vararg additionalArguments: String): String {
+            requireArguments(ARG_PATH, *additionalArguments)
+            return PythonHostFilePolicy.normalizeRelative(
+                textArgument(
+                    ARG_PATH,
+                    maxBytes = PythonHostFilePolicy.MAX_PATH_BYTES,
+                    allowEmpty = false,
+                ),
+            )
         }
     }
 
@@ -562,6 +808,7 @@ internal class PythonHostCapabilityDispatcher(
         const val ARG_PACKAGE = "package"
         const val ARG_NAME = "name"
         const val ARG_URL = "url"
+        const val ARG_PATH = "path"
         const val ERROR_CAPABILITY_UNAVAILABLE = "CAPABILITY_UNAVAILABLE"
         const val ERROR_INVALID_ARGUMENT = "INVALID_ARGUMENT"
         const val ERROR_HOST_FAILURE = "HOST_FAILURE"
@@ -571,6 +818,9 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_REPLAYED_CALL = "REPLAYED_CALL"
         const val ERROR_CALL_LIMIT_EXCEEDED = "CALL_LIMIT_EXCEEDED"
         const val ERROR_RESULT_LIMIT_EXCEEDED = "RESULT_LIMIT_EXCEEDED"
+        const val ERROR_PATH_NOT_FOUND = "PATH_NOT_FOUND"
+        const val ERROR_PATH_TYPE_MISMATCH = "PATH_TYPE_MISMATCH"
+        const val ERROR_FILE_ENCODING = "FILE_ENCODING_ERROR"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")
         val WEB_URL = Regex("https?://.+", RegexOption.IGNORE_CASE)
@@ -581,11 +831,13 @@ internal class PythonHostCapabilityBroker(
     context: Context,
     executionId: String,
     private val expectedPluginUid: Int,
+    fileRoot: File,
     globalConsole: GlobalConsole,
     private val onViolation: (Throwable) -> Unit,
     actions: PythonHostCapabilityActions = AndroidPythonHostCapabilityActions(
         context,
         executionId,
+        fileRoot,
         globalConsole,
     ),
 ) : IPythonHostCapabilityBroker.Stub(), AutoCloseable {
@@ -626,6 +878,14 @@ internal class PythonHostCapabilityBroker(
 private class PythonHostCapabilityTimeoutException(cause: Throwable) : RuntimeException(cause)
 
 internal class PythonHostCapabilityPermissionDeniedException : RuntimeException()
+
+internal class PythonHostCapabilityPathNotFoundException : RuntimeException()
+
+internal class PythonHostCapabilityPathTypeException : RuntimeException()
+
+internal class PythonHostCapabilityResultLimitException : RuntimeException()
+
+internal class PythonHostCapabilityFileEncodingException(cause: Throwable) : RuntimeException(cause)
 
 private fun JsonObject.requireString(name: String): String {
     val value = get(name)
