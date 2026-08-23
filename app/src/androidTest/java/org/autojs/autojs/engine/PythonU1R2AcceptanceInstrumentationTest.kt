@@ -509,21 +509,21 @@ class PythonU1R2AcceptanceInstrumentationTest {
 
     @Test
     fun boundedAutomatorActionsRoundTripThroughPublicPythonEngine() {
-        assumeTrue(
-            "Enable the AutoJs6 accessibility service before running the Python automator acceptance",
-            AutoJsAccessibilityService.waitForOperational(3_000L),
-        )
         val projectRoot = freshProjectRoot()
         val activity = launchAccessibilitySmokeActivity()
-        val buttonCenter = AtomicReference<IntArray>()
-        val swipeCoordinates = AtomicReference<Array<IntArray>>()
-        instrumentation.runOnMainSync {
-            buttonCenter.set(activity.buttonCenterOnScreen())
-            swipeCoordinates.set(activity.swipeCoordinatesOnScreen())
-        }
-        val button = requireNotNull(buttonCenter.get())
-        val swipe = requireNotNull(swipeCoordinates.get())
         try {
+            assumeTrue(
+                "Enable the AutoJs6 accessibility service before running the Python automator acceptance",
+                AutoJsAccessibilityService.waitForOperational(3_000L),
+            )
+            val buttonCenter = AtomicReference<IntArray>()
+            val swipeCoordinates = AtomicReference<Array<IntArray>>()
+            instrumentation.runOnMainSync {
+                buttonCenter.set(activity.buttonCenterOnScreen())
+                swipeCoordinates.set(activity.swipeCoordinatesOnScreen())
+            }
+            val button = requireNotNull(buttonCenter.get())
+            val swipe = requireNotNull(swipeCoordinates.get())
             writeSimpleProject(
                 projectRoot,
                 """
