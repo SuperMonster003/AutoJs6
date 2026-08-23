@@ -1,6 +1,9 @@
 package org.autojs.autojs.engine
 
+import android.Manifest
 import android.app.Activity
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -8,10 +11,14 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
+import android.service.notification.StatusBarNotification
 import android.util.Base64
+import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
+import androidx.core.app.NotificationManagerCompat
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.plugin.python.PythonHostNoticePolicy
 import org.autojs.autojs.core.plugin.python.PythonRuntimeExecutionResult
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
@@ -25,6 +32,7 @@ import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.python.runtime.api.PythonSha256
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -324,6 +332,90 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
             instrumentation.runOnMainSync { activity.finish() }
             cleanProjectRoot(projectRoot, "M3 host capability broker")
+        }
+    }
+
+    @Test
+    fun remainingFirstBatchHostCapabilitiesRoundTripThroughProtocol15Broker() {
+        val projectRoot = freshProjectRoot()
+        val marker = "M3_BROKER_REST_OK_${UUID.randomUUID()}"
+        val notificationExpected = canPostPythonNotice()
+        val checkpoint = consoleCheckpoint()
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import console, device, notice, result
+                from autojs6.errors import HostCapabilityError
+
+                marker = "$marker"
+                current = device.info()
+                console.log(marker + ":log")
+                console.warn(marker + ":warn")
+                console.error(marker + ":error")
+                try:
+                    notice(marker)
+                    notice_status = "posted"
+                except HostCapabilityError as error:
+                    notice_status = error.code
+
+                result.set({"device": current, "notice": notice_status})
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 remaining Host capabilities execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 remaining Host capabilities execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 remaining Host capabilities execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                val device = structured.getJSONObject("device")
+                assertEquals("autojs6-python-device-info-v1", device.getString("schema"))
+                val battery = device.getJSONObject("battery")
+                assertTrue(battery.getDouble("percent") in 0.0..100.0)
+                battery.getBoolean("charging")
+                val screen = device.getJSONObject("screen")
+                screen.getBoolean("on")
+                assertTrue(screen.getInt("brightness") >= -1)
+                val volume = device.getJSONObject("volume")
+                listOf("music", "notification", "alarm").forEach { stream ->
+                    val level = volume.getJSONObject(stream)
+                    val current = level.getInt("current")
+                    val maximum = level.getInt("max")
+                    assertTrue("$stream volume is negative", current >= 0)
+                    assertTrue("$stream max volume is negative", maximum >= 0)
+                    assertTrue("$stream volume exceeds its maximum", current <= maximum)
+                }
+
+                assertConsoleLevelSince(checkpoint, "$marker:log", Log.DEBUG)
+                assertConsoleLevelSince(checkpoint, "$marker:warn", Log.WARN)
+                assertConsoleLevelSince(checkpoint, "$marker:error", Log.ERROR)
+
+                if (notificationExpected) {
+                    assertEquals("posted", structured.getString("notice"))
+                    val posted = awaitPythonNotice(marker)
+                    assertEquals(
+                        PythonHostNoticePolicy.tagForExecution(result.terminal.requestId.toString()),
+                        posted.tag,
+                    )
+                    assertEquals(PythonHostNoticePolicy.NOTIFICATION_ID, posted.id)
+                } else {
+                    assertEquals("PERMISSION_DENIED", structured.getString("notice"))
+                }
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cancelPythonNotices(marker)
+            cleanProjectRoot(projectRoot, "M3 remaining Host capabilities")
         }
     }
 
@@ -851,6 +943,63 @@ class PythonU1R2AcceptanceInstrumentationTest {
         )
     }
 
+    private fun assertConsoleLevelSince(checkpoint: Int, expected: String, expectedLevel: Int) {
+        val entry = synchronized(console.logEntries) {
+            console.logEntries.firstOrNull { candidate ->
+                candidate.id >= checkpoint && candidate.content.toString().contains(expected)
+            }
+        }
+        assertNotNull(
+            "Global console did not contain '$expected' after checkpoint $checkpoint:\n" +
+                consoleExcerptSince(checkpoint),
+            entry,
+        )
+        assertEquals("Global console level for '$expected'", expectedLevel, requireNotNull(entry).level)
+    }
+
+    private fun canPostPythonNotice(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return false
+        }
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return true
+        val channel = context.getSystemService(NotificationManager::class.java)
+            ?.getNotificationChannel(PythonHostNoticePolicy.CHANNEL_ID)
+        return channel?.importance != NotificationManager.IMPORTANCE_NONE
+    }
+
+    private fun awaitPythonNotice(marker: String): StatusBarNotification {
+        val manager = requireNotNull(context.getSystemService(NotificationManager::class.java))
+        val deadline = SystemClock.elapsedRealtime() + NOTICE_TIMEOUT_MILLIS
+        while (SystemClock.elapsedRealtime() < deadline) {
+            manager.activeNotifications.firstOrNull { notification ->
+                notificationText(notification) == marker
+            }?.let { return it }
+            SystemClock.sleep(CONSOLE_POLL_MILLIS)
+        }
+        throw AssertionError("AutoJs6 Python notification did not become active for marker $marker")
+    }
+
+    private fun cancelPythonNotices(marker: String) {
+        val manager = context.getSystemService(NotificationManager::class.java) ?: return
+        manager.activeNotifications
+            .filter { notification ->
+                notification.tag?.startsWith(PythonHostNoticePolicy.TAG_PREFIX) == true &&
+                    notificationText(notification) == marker
+            }
+            .forEach { notification -> manager.cancel(notification.tag, notification.id) }
+    }
+
+    private fun notificationText(notification: StatusBarNotification): String? =
+        notification.notification.extras
+            ?.getCharSequence(Notification.EXTRA_BIG_TEXT)
+            ?.toString()
+            ?: notification.notification.extras
+                ?.getCharSequence(Notification.EXTRA_TEXT)
+                ?.toString()
+
     private fun awaitConsoleSince(checkpoint: Int, expected: String, timeoutSeconds: Long) {
         val deadline = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(timeoutSeconds)
         while (SystemClock.elapsedRealtime() < deadline) {
@@ -1122,6 +1271,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val INPUT_DIALOG_TIMEOUT_SECONDS = 30L
         const val INPUT_DIALOG_POLL_MILLIS = 100L
         const val INPUT_DIALOG_SETTLE_MILLIS = 100L
+        const val NOTICE_TIMEOUT_MILLIS = 5_000L
         const val MAX_CONSOLE_DIAGNOSTIC_CHARS = 4_096
     }
 }

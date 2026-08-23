@@ -12,7 +12,7 @@ import org.junit.Test
 
 class PythonHostCapabilityDispatcherTest {
     @Test
-    fun dispatchesTheFirstLowRiskCapabilitySliceWithTypedJsonResults() {
+    fun dispatchesTheCompleteFirstLowRiskCapabilitySliceWithTypedJsonResults() {
         val actions = RecordingActions()
         val dispatcher = dispatcher(actions)
 
@@ -31,12 +31,29 @@ class PythonHostCapabilityDispatcherTest {
             true,
             success(dispatcher.dispatch(request(6, PythonHostCapabilities.APP_OPEN_URL, "url" to "https://example.org"))),
         )
+        assertEquals(
+            DEVICE_INFO.toJson(),
+            success(dispatcher.dispatch(request(7, PythonHostCapabilities.DEVICE_INFO))),
+        )
+        assertNull(success(dispatcher.dispatch(request(8, PythonHostCapabilities.CONSOLE_LOG, "text" to "log"))))
+        assertNull(success(dispatcher.dispatch(request(9, PythonHostCapabilities.CONSOLE_WARN, "text" to "warn"))))
+        assertNull(success(dispatcher.dispatch(request(10, PythonHostCapabilities.CONSOLE_ERROR, "text" to "error"))))
+        assertNull(success(dispatcher.dispatch(request(11, PythonHostCapabilities.NOTICE_SHOW, "text" to "notice"))))
 
         assertEquals(listOf("hello"), actions.toasts)
         assertEquals("copy", actions.clipboard)
         assertEquals(listOf("org.example.app"), actions.packages)
         assertEquals(listOf("Example"), actions.apps)
         assertEquals(listOf("https://example.org"), actions.urls)
+        assertEquals(
+            listOf(
+                PythonHostConsoleLevel.LOG to "log",
+                PythonHostConsoleLevel.WARN to "warn",
+                PythonHostConsoleLevel.ERROR to "error",
+            ),
+            actions.console,
+        )
+        assertEquals(listOf("notice"), actions.notices)
     }
 
     @Test
@@ -76,6 +93,17 @@ class PythonHostCapabilityDispatcherTest {
             "INVALID_ARGUMENT",
             failureCode(invalid.dispatch(request(1, PythonHostCapabilities.APP_LAUNCH, "package" to "bad package"))),
         )
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(invalid.dispatch(request(2, PythonHostCapabilities.NOTICE_SHOW, "text" to ""))),
+        )
+
+        actions.denyNotice = true
+        assertEquals(
+            "PERMISSION_DENIED",
+            failureCode(invalid.dispatch(request(3, PythonHostCapabilities.NOTICE_SHOW, "text" to "denied"))),
+        )
+        assertTrue(actions.notices.isEmpty())
 
         val bounded = PythonHostCapabilityDispatcher(
             executionId = EXECUTION_ID,
@@ -131,6 +159,7 @@ class PythonHostCapabilityDispatcherTest {
         return when (val value = response.get("value")) {
             null, JsonNull.INSTANCE -> null
             else -> when {
+                value.isJsonObject -> value.asJsonObject
                 value.asJsonPrimitive.isBoolean -> value.asBoolean
                 value.asJsonPrimitive.isString -> value.asString
                 else -> error("Unexpected test response type")
@@ -150,6 +179,9 @@ class PythonHostCapabilityDispatcherTest {
         val packages = mutableListOf<String>()
         val apps = mutableListOf<String>()
         val urls = mutableListOf<String>()
+        val console = mutableListOf<Pair<PythonHostConsoleLevel, String>>()
+        val notices = mutableListOf<String>()
+        var denyNotice = false
 
         override fun showToast(text: String) {
             toasts += text
@@ -175,9 +207,32 @@ class PythonHostCapabilityDispatcherTest {
             urls += url
             return true
         }
+
+        override fun getDeviceInfo(): PythonHostDeviceInfo = DEVICE_INFO
+
+        override fun writeConsole(level: PythonHostConsoleLevel, text: String) {
+            console += level to text
+        }
+
+        override fun postNotice(text: String) {
+            if (denyNotice) throw PythonHostCapabilityPermissionDeniedException()
+            notices += text
+        }
     }
 
     private companion object {
         const val EXECUTION_ID = "12345678-1234-5678-9abc-def012345678"
+        val DEVICE_INFO = PythonHostDeviceInfo(
+            batteryPercent = 88.5,
+            charging = true,
+            screenOn = true,
+            brightness = 127,
+            musicVolume = 7,
+            musicMaxVolume = 15,
+            notificationVolume = 4,
+            notificationMaxVolume = 7,
+            alarmVolume = 5,
+            alarmMaxVolume = 7,
+        )
     }
 }
