@@ -7,8 +7,11 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.widget.doAfterTextChanged
+import org.autojs.autojs6.R
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -18,6 +21,7 @@ import kotlin.math.abs
 class NodeAccessibilitySmokeActivity : Activity() {
 
     private lateinit var button: Button
+    private lateinit var selectorInput: EditText
     private lateinit var swipeTarget: TextView
     private var swipeDownY = 0f
 
@@ -31,6 +35,7 @@ class NodeAccessibilitySmokeActivity : Activity() {
             gravity = Gravity.CENTER
         }
         button = Button(this).apply {
+            id = R.id.python_selector_button
             text = BUTTON_TEXT
             contentDescription = BUTTON_DESC
             setOnClickListener {
@@ -43,6 +48,17 @@ class NodeAccessibilitySmokeActivity : Activity() {
                 status.text = LONG_CLICKED_TEXT
                 longClickLatch.countDown()
                 true
+            }
+        }
+        selectorInput = EditText(this).apply {
+            id = R.id.python_selector_input
+            setText(SELECTOR_INPUT_INITIAL_TEXT)
+            contentDescription = SELECTOR_INPUT_DESC
+            isSingleLine = true
+            doAfterTextChanged { editable ->
+                if (editable?.toString() == SELECTOR_INPUT_UPDATED_TEXT) {
+                    inputTextLatch.countDown()
+                }
             }
         }
         swipeTarget = TextView(this).apply {
@@ -82,6 +98,13 @@ class NodeAccessibilitySmokeActivity : Activity() {
                     ),
                 )
                 addView(
+                    selectorInput,
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ),
+                )
+                addView(
                     swipeTarget,
                     LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -115,6 +138,9 @@ class NodeAccessibilitySmokeActivity : Activity() {
         const val TARGET_DESC = "AutoJs6 Node accessibility smoke description"
         const val BUTTON_TEXT = "AutoJs6 Node accessibility smoke click"
         const val BUTTON_DESC = "AutoJs6 Node accessibility smoke button"
+        const val SELECTOR_INPUT_DESC = "AutoJs6 Python selector smoke input"
+        const val SELECTOR_INPUT_INITIAL_TEXT = "selector seed"
+        const val SELECTOR_INPUT_UPDATED_TEXT = "selector updated"
         const val CLICKED_TEXT = "AutoJs6 Node accessibility smoke clicked"
         const val LONG_CLICKED_TEXT = "AutoJs6 Node accessibility smoke long clicked"
         const val SWIPE_TEXT = "AutoJs6 accessibility smoke swipe"
@@ -135,6 +161,9 @@ class NodeAccessibilitySmokeActivity : Activity() {
         @Volatile
         private var swipeLatch = CountDownLatch(1)
 
+        @Volatile
+        private var inputTextLatch = CountDownLatch(1)
+
         fun reset() {
             clickCount.set(0)
             longClickCount.set(0)
@@ -142,6 +171,7 @@ class NodeAccessibilitySmokeActivity : Activity() {
             clickLatch = CountDownLatch(1)
             longClickLatch = CountDownLatch(1)
             swipeLatch = CountDownLatch(1)
+            inputTextLatch = CountDownLatch(1)
         }
 
         fun awaitClick(timeoutMs: Long): Boolean {
@@ -154,6 +184,10 @@ class NodeAccessibilitySmokeActivity : Activity() {
 
         fun awaitSwipe(timeoutMs: Long): Boolean {
             return swipeLatch.await(timeoutMs, TimeUnit.MILLISECONDS)
+        }
+
+        fun awaitInputText(timeoutMs: Long): Boolean {
+            return inputTextLatch.await(timeoutMs, TimeUnit.MILLISECONDS)
         }
 
         fun clickedCount(): Int = clickCount.get()
