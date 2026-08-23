@@ -601,6 +601,120 @@ class PythonU1R2AcceptanceInstrumentationTest {
     }
 
     @Test
+    fun boundedSelectorRoundTripsSnapshotFindClickSetTextAndStaleNode() {
+        val projectRoot = freshProjectRoot()
+        val activity = launchAccessibilitySmokeActivity()
+        try {
+            assumeTrue(
+                "Enable the AutoJs6 accessibility service before running the Python selector acceptance",
+                AutoJsAccessibilityService.waitForStarted(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
+            )
+            instrumentation.runOnMainSync {
+                activity.window.decorView.sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+                )
+            }
+            assumeTrue(
+                "The AutoJs6 accessibility service connected but did not become operational",
+                AutoJsAccessibilityService.waitForOperational(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+            )
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import result, selector
+                from autojs6.errors import HostCapabilityError
+
+                tree = selector.snapshot(max_nodes=128, max_depth=16)
+                tree_button = next(node for node in tree["nodes"] if node["text"] == "${NodeAccessibilitySmokeActivity.BUTTON_TEXT}")
+                tree_input = next(node for node in tree["nodes"] if node["description"] == "${NodeAccessibilitySmokeActivity.SELECTOR_INPUT_DESC}")
+                button = selector.find(text="${NodeAccessibilitySmokeActivity.BUTTON_TEXT}", clickable=True)
+                editor = selector.find(
+                    description="${NodeAccessibilitySmokeActivity.SELECTOR_INPUT_DESC}",
+                    editable=True,
+                )
+                missing = selector.find(text="AutoJs6 selector definitely missing") is None
+                clicked = selector.click(button)
+                text_set = selector.set_text(editor, "${NodeAccessibilitySmokeActivity.SELECTOR_INPUT_UPDATED_TEXT}")
+
+                selector.snapshot(max_nodes=1, max_depth=0)
+                try:
+                    selector.click(button)
+                    stale_code = "NO_ERROR"
+                    stale_message = ""
+                except HostCapabilityError as error:
+                    stale_code = error.code
+                    stale_message = str(error)
+
+                result.set({
+                    "schema": tree["schema"],
+                    "truncated": tree["truncated"],
+                    "nodeCount": len(tree["nodes"]),
+                    "buttonResourceId": tree_button["resourceId"],
+                    "inputResourceId": tree_input["resourceId"],
+                    "clicked": clicked,
+                    "textSet": text_set,
+                    "missing": missing,
+                    "staleCode": stale_code,
+                    "staleMessage": stale_message,
+                })
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 selector execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 selector execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 selector execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("autojs6-python-ui-tree-v1", structured.getString("schema"))
+                assertFalse(structured.getBoolean("truncated"))
+                assertTrue(structured.getInt("nodeCount") >= 4)
+                assertEquals(
+                    "$HOST_PACKAGE:id/python_selector_button",
+                    structured.getString("buttonResourceId"),
+                )
+                assertEquals(
+                    "$HOST_PACKAGE:id/python_selector_input",
+                    structured.getString("inputResourceId"),
+                )
+                assertTrue(structured.getBoolean("clicked"))
+                assertTrue(structured.getBoolean("textSet"))
+                assertTrue(structured.getBoolean("missing"))
+                assertEquals("STALE_NODE", structured.getString("staleCode"))
+                assertEquals(
+                    "STALE_NODE: Host selector node is stale or no longer retained",
+                    structured.getString("staleMessage"),
+                )
+                assertTrue(
+                    "Timed out waiting for the Python selector click",
+                    NodeAccessibilitySmokeActivity.awaitClick(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+                )
+                assertTrue(
+                    "Timed out waiting for the Python selector text action",
+                    NodeAccessibilitySmokeActivity.awaitInputText(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+                )
+                assertEquals(1, NodeAccessibilitySmokeActivity.clickedCount())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                if (!activity.isFinishing) activity.finish()
+            }
+            restoreHostForeground()
+            cleanProjectRoot(projectRoot, "M3 selector")
+        }
+    }
+
+    @Test
     fun automatorFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
         assumeFalse(
             "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
@@ -647,6 +761,56 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
         } finally {
             cleanProjectRoot(projectRoot, "M3 unavailable automator")
+        }
+    }
+
+    @Test
+    fun selectorFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
+        assumeFalse(
+            "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
+            AutoJsAccessibilityService.hasInstance(),
+        )
+        val projectRoot = freshProjectRoot()
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import result, selector
+                from autojs6.errors import CapabilityUnavailableError
+
+                try:
+                    selector.snapshot(max_nodes=1, max_depth=0)
+                    outcome = {"error": "NO_ERROR", "message": ""}
+                except CapabilityUnavailableError as error:
+                    outcome = {"error": type(error).__name__, "message": str(error)}
+                result.set(outcome)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 unavailable selector execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 unavailable selector execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 unavailable selector execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("CapabilityUnavailableError", structured.getString("error"))
+                assertEquals(
+                    "AutoJs6 accessibility service is unavailable",
+                    structured.getString("message"),
+                )
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 unavailable selector")
         }
     }
 

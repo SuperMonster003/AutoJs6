@@ -37,6 +37,7 @@ class NodeAccessibilitySmokeActivity : Activity() {
         button = Button(this).apply {
             id = R.id.python_selector_button
             text = BUTTON_TEXT
+            isAllCaps = false
             contentDescription = BUTTON_DESC
             setOnClickListener {
                 clickCount.incrementAndGet()
