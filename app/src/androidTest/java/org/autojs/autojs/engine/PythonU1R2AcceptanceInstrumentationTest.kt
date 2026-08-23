@@ -830,6 +830,134 @@ class PythonU1R2AcceptanceInstrumentationTest {
         }
     }
 
+    @Test
+    fun foregroundDialogsRoundTripThroughProtocol15Broker() {
+        val root = File(context.cacheDir, "python-m3-dialogs-${UUID.randomUUID()}").apply {
+            check(mkdirs()) { "Unable to create M3 dialog directory: $this" }
+        }
+        val sourceFile = File(root, "dialogs.py").apply {
+            writeText(
+                """
+                from autojs6 import dialogs, result
+
+                dialogs.alert("$DIALOG_ALERT_TEXT", title="$DIALOG_ALERT_TITLE")
+                confirmed = dialogs.confirm("$DIALOG_CONFIRM_TEXT", title="$DIALOG_CONFIRM_TITLE")
+                reply = dialogs.prompt(
+                    "$DIALOG_PROMPT_TEXT",
+                    default="$DIALOG_PROMPT_DEFAULT",
+                    title="$DIALOG_PROMPT_TITLE",
+                )
+                selected = dialogs.select(
+                    ["$DIALOG_SELECT_FIRST", "$DIALOG_SELECT_SECOND"],
+                    title="$DIALOG_SELECT_TITLE",
+                )
+                result.set({
+                    "alert": True,
+                    "confirmed": confirmed,
+                    "reply": reply,
+                    "selected": selected,
+                })
+                """.trimIndent() + "\n",
+                Charsets.UTF_8,
+            )
+        }
+        val activity = launchForegroundActivity()
+        val pending = PendingFileExecution(sourceFile.canonicalPath)
+        service.registerGlobalScriptExecutionListener(pending.listener)
+        try {
+            val submitted = AtomicReference<ScriptExecution?>()
+            instrumentation.runOnMainSync {
+                submitted.set(Scripts.runInteractive(activity, ScriptFile(sourceFile.path)))
+            }
+            assertNotNull("M3 foreground dialog execution was not submitted", submitted.get())
+            assertTrue(
+                "M3 foreground dialog execution did not reach the unified start callback",
+                pending.started.await(START_TIMEOUT_SECONDS, TimeUnit.SECONDS),
+            )
+            val execution = requireNotNull(pending.execution.get()) {
+                "M3 foreground dialog execution started without ScriptExecution"
+            }
+            assertEquals(submitted.get()?.id, execution.id)
+
+            clickForegroundDialogButton(
+                DIALOG_ALERT_TITLE,
+                DIALOG_ALERT_TEXT,
+                context.getString(R.string.dialog_button_confirm),
+            )
+            clickForegroundDialogButton(
+                DIALOG_CONFIRM_TITLE,
+                DIALOG_CONFIRM_TEXT,
+                context.getString(R.string.dialog_button_confirm),
+            )
+            replyToForegroundPrompt(DIALOG_PROMPT_TEXT, DIALOG_PROMPT_REPLY, password = false)
+            clickForegroundDialogItem(DIALOG_SELECT_TITLE, DIALOG_SELECT_SECOND)
+
+            awaitCompleted(
+                pending,
+                execution,
+                "M3 foreground dialog execution",
+                SMOKE_EXECUTION_TIMEOUT_SECONDS,
+            )
+            awaitEngineRemoved(execution.id, "M3 foreground dialog execution")
+            assertEquals(1, pending.startCount.get())
+            assertEquals(1, pending.successCount.get())
+            assertEquals(0, pending.exceptionCount.get())
+            assertEquals(null, pending.error.get())
+            val result = pending.result.get() as? PythonRuntimeExecutionResult
+            assertNotNull("M3 foreground dialogs did not return the Host-owned result type", result)
+            assertEquals(EXPECTED_DIALOG_RESULT_JSON, requireNotNull(result).structuredJson)
+            assertPrivateTransportSnapshotsRemoved()
+        } finally {
+            service.unregisterGlobalScriptExecutionListener(pending.listener)
+            instrumentation.runOnMainSync { activity.finish() }
+            assertTrue(
+                "Unable to remove M3 foreground dialog directory: $root",
+                !root.exists() || root.deleteRecursively(),
+            )
+        }
+    }
+
+    @Test
+    fun backgroundDialogsFailClosedWithoutOpeningUi() {
+        val projectRoot = freshProjectRoot()
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import dialogs, result
+                from autojs6.errors import HostCapabilityError
+
+                try:
+                    dialogs.alert("must not open")
+                    code = "NO_ERROR"
+                except HostCapabilityError as error:
+                    code = error.code
+                result.set({"code": code})
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 background dialog rejection")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 background dialog rejection",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 background dialog rejection")
+                assertEquals("{\"code\":\"INTERACTIVE_NOT_ALLOWED\"}", result.structuredJson)
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 background dialog rejection")
+        }
+    }
+
     private fun runForegroundFileEntry(
         activity: Activity,
         sourceFile: File,
@@ -920,6 +1048,67 @@ class PythonU1R2AcceptanceInstrumentationTest {
         }
         throw AssertionError("Foreground Python input dialog did not become actionable for '$prompt': $lastTree")
     }
+
+    private fun clickForegroundDialogButton(title: String, text: String, buttonText: String) {
+        val deadline = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(INPUT_DIALOG_TIMEOUT_SECONDS)
+        var lastTree = ""
+        while (SystemClock.elapsedRealtime() < deadline) {
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            if (root != null) {
+                val nodes = accessibilityTree(root)
+                lastTree = accessibilitySummary(nodes)
+                val titleVisible = nodes.any { node -> node.text?.toString() == title }
+                val textVisible = nodes.any { node -> node.text?.toString() == text }
+                val button = nodes.firstOrNull { node ->
+                    node.text?.toString() == buttonText && node.isClickable
+                }
+                if (titleVisible && textVisible && button != null) {
+                    assertTrue(
+                        "Unable to click '$buttonText' in foreground dialog '$title'",
+                        button.performAction(AccessibilityNodeInfo.ACTION_CLICK),
+                    )
+                    SystemClock.sleep(INPUT_DIALOG_SETTLE_MILLIS)
+                    return
+                }
+            }
+            SystemClock.sleep(INPUT_DIALOG_POLL_MILLIS)
+        }
+        throw AssertionError("Foreground dialog '$title' did not become actionable: $lastTree")
+    }
+
+    private fun clickForegroundDialogItem(title: String, itemText: String) {
+        val deadline = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(INPUT_DIALOG_TIMEOUT_SECONDS)
+        var lastTree = ""
+        while (SystemClock.elapsedRealtime() < deadline) {
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            if (root != null) {
+                val nodes = accessibilityTree(root)
+                lastTree = accessibilitySummary(nodes)
+                val titleVisible = nodes.any { node -> node.text?.toString() == title }
+                val item = nodes.firstOrNull { node -> node.text?.toString() == itemText }
+                if (titleVisible && item != null && clickNodeOrAncestor(item)) {
+                    SystemClock.sleep(INPUT_DIALOG_SETTLE_MILLIS)
+                    return
+                }
+            }
+            SystemClock.sleep(INPUT_DIALOG_POLL_MILLIS)
+        }
+        throw AssertionError("Foreground dialog item '$itemText' in '$title' did not become actionable: $lastTree")
+    }
+
+    private fun clickNodeOrAncestor(node: AccessibilityNodeInfo): Boolean {
+        var current: AccessibilityNodeInfo? = node
+        repeat(5) {
+            val candidate = current ?: return false
+            if (candidate.isClickable && candidate.performAction(AccessibilityNodeInfo.ACTION_CLICK)) return true
+            current = candidate.parent
+        }
+        return false
+    }
+
+    private fun accessibilitySummary(nodes: List<AccessibilityNodeInfo>): String = nodes.joinToString(" | ") { node ->
+        "${node.className}:${node.text}:${node.isPassword}:${node.isClickable}"
+    }.takeLast(MAX_CONSOLE_DIAGNOSTIC_CHARS)
 
     private fun accessibilityTree(root: AccessibilityNodeInfo): List<AccessibilityNodeInfo> {
         val nodes = ArrayList<AccessibilityNodeInfo>()
@@ -1320,6 +1509,19 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val EXPLORER_REPLY = "explorer-hidden-reply"
         const val EXPECTED_EDITOR_INPUT_JSON = "{\"entry\":\"editor\",\"matched\":true}"
         const val EXPECTED_EXPLORER_INPUT_JSON = "{\"entry\":\"explorer\",\"matched\":true}"
+        const val DIALOG_ALERT_TITLE = "M3 Alert"
+        const val DIALOG_ALERT_TEXT = "M3 alert text"
+        const val DIALOG_CONFIRM_TITLE = "M3 Confirm"
+        const val DIALOG_CONFIRM_TEXT = "M3 confirm text"
+        const val DIALOG_PROMPT_TITLE = "M3 Prompt"
+        const val DIALOG_PROMPT_TEXT = "M3 prompt text"
+        const val DIALOG_PROMPT_DEFAULT = "M3 default"
+        const val DIALOG_PROMPT_REPLY = "M3 typed reply"
+        const val DIALOG_SELECT_TITLE = "M3 Select"
+        const val DIALOG_SELECT_FIRST = "M3 first"
+        const val DIALOG_SELECT_SECOND = "M3 second"
+        const val EXPECTED_DIALOG_RESULT_JSON =
+            "{\"alert\":true,\"confirmed\":true,\"reply\":\"$DIALOG_PROMPT_REPLY\",\"selected\":1}"
         const val ENTRY_MODE_ARGUMENT = "autojs6.python.entryMode"
         const val PACKAGE_NAME = "u1r2case"
         const val ENTRY_POINT = "$PACKAGE_NAME/main.py"

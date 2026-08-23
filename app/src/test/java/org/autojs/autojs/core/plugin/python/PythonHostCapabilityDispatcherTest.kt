@@ -72,6 +72,58 @@ class PythonHostCapabilityDispatcherTest {
             listOf("seed.txt", "written.txt"),
             success(dispatcher.dispatch(request(17, PythonHostCapabilities.FILES_LIST, "path" to "."))),
         )
+        assertNull(
+            success(
+                dispatcher.dispatch(
+                    request(
+                        18,
+                        PythonHostCapabilities.DIALOGS_ALERT,
+                        "title" to "Alert",
+                        "text" to "alert text",
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            true,
+            success(
+                dispatcher.dispatch(
+                    request(
+                        19,
+                        PythonHostCapabilities.DIALOGS_CONFIRM,
+                        "title" to "Confirm",
+                        "text" to "confirm text",
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            "typed value",
+            success(
+                dispatcher.dispatch(
+                    request(
+                        20,
+                        PythonHostCapabilities.DIALOGS_PROMPT,
+                        "title" to "Prompt",
+                        "text" to "prompt text",
+                        "default" to "seed",
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            1,
+            success(
+                dispatcher.dispatch(
+                    request(
+                        21,
+                        PythonHostCapabilities.DIALOGS_SELECT,
+                        "title" to "Select",
+                        "items" to listOf("first", "second"),
+                    ),
+                ),
+            ),
+        )
 
         assertEquals(listOf("hello"), actions.toasts)
         assertEquals("copy", actions.clipboard)
@@ -88,6 +140,10 @@ class PythonHostCapabilityDispatcherTest {
         )
         assertEquals(listOf("notice"), actions.notices)
         assertEquals(mapOf("seed.txt" to "seed", "written.txt" to "written"), actions.fileTexts)
+        assertEquals(listOf("Alert" to "alert text"), actions.alerts)
+        assertEquals(listOf("Confirm" to "confirm text"), actions.confirmations)
+        assertEquals(listOf(Triple("Prompt", "prompt text", "seed")), actions.prompts)
+        assertEquals(listOf("Select" to listOf("first", "second")), actions.selections)
     }
 
     @Test
@@ -191,6 +247,68 @@ class PythonHostCapabilityDispatcherTest {
     }
 
     @Test
+    fun boundsDialogArgumentsAndMapsMissingForegroundAuthority() {
+        val actions = RecordingActions()
+        val dispatcher = dispatcher(actions)
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        1,
+                        PythonHostCapabilities.DIALOGS_ALERT,
+                        "title" to "",
+                        "text" to "text",
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        2,
+                        PythonHostCapabilities.DIALOGS_SELECT,
+                        "title" to "Select",
+                        "items" to emptyList<String>(),
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        3,
+                        PythonHostCapabilities.DIALOGS_SELECT,
+                        "title" to "Select",
+                        "items" to List(PythonHostDialogPolicy.MAX_ITEMS + 1) { "item" },
+                    ),
+                ),
+            ),
+        )
+        assertTrue(actions.alerts.isEmpty())
+        assertTrue(actions.selections.isEmpty())
+
+        actions.dialogFailure = PythonHostCapabilityInteractiveNotAllowedException()
+        assertEquals(
+            "INTERACTIVE_NOT_ALLOWED",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        4,
+                        PythonHostCapabilities.DIALOGS_CONFIRM,
+                        "title" to "Confirm",
+                        "text" to "foreground only",
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun rejectsMalformedOrOversizedJsonBeforeDispatch() {
         val dispatcher = dispatcher(RecordingActions())
         assertThrows(IllegalArgumentException::class.java) {
@@ -221,7 +339,19 @@ class PythonHostCapabilityDispatcherTest {
         addProperty("callId", callId)
         addProperty("capability", capability)
         add("arguments", JsonObject().apply {
-            arguments.forEach { (name, value) -> addProperty(name, value.toString()) }
+            arguments.forEach { (name, value) ->
+                when (value) {
+                    is Iterable<*> -> add(
+                        name,
+                        com.google.gson.JsonArray().apply {
+                            value.forEach { entry -> add(requireNotNull(entry).toString()) }
+                        },
+                    )
+                    is Boolean -> addProperty(name, value)
+                    is Number -> addProperty(name, value)
+                    else -> addProperty(name, value.toString())
+                }
+            }
         })
     }.toString().toByteArray()
 
@@ -234,6 +364,7 @@ class PythonHostCapabilityDispatcherTest {
                 value.isJsonObject -> value.asJsonObject
                 value.isJsonArray -> value.asJsonArray.map { it.asString }
                 value.asJsonPrimitive.isBoolean -> value.asBoolean
+                value.asJsonPrimitive.isNumber -> value.asInt
                 value.asJsonPrimitive.isString -> value.asString
                 else -> error("Unexpected test response type")
             }
@@ -255,8 +386,13 @@ class PythonHostCapabilityDispatcherTest {
         val console = mutableListOf<Pair<PythonHostConsoleLevel, String>>()
         val notices = mutableListOf<String>()
         val fileTexts = linkedMapOf<String, String>()
+        val alerts = mutableListOf<Pair<String, String>>()
+        val confirmations = mutableListOf<Pair<String, String>>()
+        val prompts = mutableListOf<Triple<String, String, String>>()
+        val selections = mutableListOf<Pair<String, List<String>>>()
         var denyNotice = false
         var fileFailure: RuntimeException? = null
+        var dialogFailure: RuntimeException? = null
 
         override fun showToast(text: String) {
             toasts += text
@@ -322,6 +458,29 @@ class PythonHostCapabilityDispatcherTest {
         override fun listDirectory(path: String): List<String> {
             fileFailure?.let { throw it }
             return fileTexts.keys.sorted()
+        }
+
+        override fun showDialogAlert(title: String, text: String) {
+            dialogFailure?.let { throw it }
+            alerts += title to text
+        }
+
+        override fun showDialogConfirm(title: String, text: String): Boolean {
+            dialogFailure?.let { throw it }
+            confirmations += title to text
+            return true
+        }
+
+        override fun showDialogPrompt(title: String, text: String, defaultValue: String): String? {
+            dialogFailure?.let { throw it }
+            prompts += Triple(title, text, defaultValue)
+            return "typed value"
+        }
+
+        override fun showDialogSelect(title: String, items: List<String>): Int? {
+            dialogFailure?.let { throw it }
+            selections += title to items
+            return 1
         }
     }
 
