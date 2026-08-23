@@ -514,7 +514,14 @@ class PythonU1R2AcceptanceInstrumentationTest {
         try {
             assumeTrue(
                 "Enable the AutoJs6 accessibility service before running the Python automator acceptance",
-                AutoJsAccessibilityService.waitForOperational(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
+                AutoJsAccessibilityService.waitForStarted(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
+            )
+            instrumentation.runOnMainSync {
+                activity.window.decorView.announceForAccessibility(AUTOMATOR_ACCESSIBILITY_PROBE)
+            }
+            assumeTrue(
+                "The AutoJs6 accessibility service connected but did not become operational",
+                AutoJsAccessibilityService.waitForOperational(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
             )
             val buttonCenter = AtomicReference<IntArray>()
             val swipeCoordinates = AtomicReference<Array<IntArray>>()
@@ -2077,9 +2084,10 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val INPUT_DIALOG_POLL_MILLIS = 100L
         const val INPUT_DIALOG_SETTLE_MILLIS = 100L
         const val NOTICE_TIMEOUT_MILLIS = 5_000L
-        const val AUTOMATOR_SERVICE_TIMEOUT_MILLIS = 15_000L
+        const val AUTOMATOR_SERVICE_TIMEOUT_MILLIS = 30_000L
         const val AUTOMATOR_ACTIVITY_SETTLE_MILLIS = 500L
         const val AUTOMATOR_EVENT_TIMEOUT_MILLIS = 5_000L
+        const val AUTOMATOR_ACCESSIBILITY_PROBE = "AutoJs6 Python automator accessibility probe"
         const val MAX_CONSOLE_DIAGNOSTIC_CHARS = 4_096
     }
 }
