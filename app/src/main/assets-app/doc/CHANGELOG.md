@@ -26,6 +26,7 @@
 * `新增` Python Runtime 协议 1.5 Host broker 开放有界的无障碍点击, 长按, 定时按压, 滑动, 返回及主页操作; 坐标与持续时间经过严格校验, 无障碍服务不可用时稳定返回 ACCESSIBILITY_UNAVAILABLE
 * `新增` Python Runtime 协议 1.5 Host broker 开放有界且绑定单次执行的无障碍树快照与 AND 组合选择器查询, 通过不透明节点引用执行显式点击与文本设置; 快照, 扫描, 字符串, 保留节点及响应均有固定上限, 无障碍不可用, 扫描不完整与节点过期时返回稳定的类型化错误
 * `新增` Python Runtime 协议 1.5 Host broker 通过 Android 11+ 无障碍服务开放执行级屏幕截图, 以 PNG/JPEG 编码并仅保留一张图像, 通过 32 KiB 顺序分块和 SHA-256 元数据传输, 编码大小上限为 4 MiB, 支持显式释放且在终态覆盖字节; 不打开权限界面, 无障碍不可用, 截图失败, 图像句柄过期与越限均返回稳定的类型化错误
+* `新增` Python Runtime 协议 1.5 Host broker 可在最新的 Android 11+ 无障碍截图中按可选区域和逐通道阈值搜索有界 RGB 颜色, 按行优先返回首个坐标或确定性的未命中结果, 不传输或保留图像字节
 * `新增` Python Runtime 显式严格 JSON 结果在脚本终态后以 `[result]` 前缀写入宿主控制台, 已校验输出 artifact 原子发布到项目或脚本目录下的 `.python-artifacts` 执行专属目录并打印绝对路径; 该保留目录不进入后续项目快照
 * `新增` Lua Runtime 插件, 内置 PUC Lua 5.4.8, 支持识别文件扩展名 (.lua) 运行 Lua 脚本
 * `新增` 独立 Java/Kotlin JVM Source Runtime 插件后端, 支持在隔离进程中编译和运行单文件 .java/.kt 脚本, 提供 package/import, 实时 console 输出, 可取消 sleep, 宿主 toast 与显式能力协商

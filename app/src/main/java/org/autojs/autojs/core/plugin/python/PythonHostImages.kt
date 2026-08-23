@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import kotlin.math.abs
 
 /** Fixed bounds for execution-local Python screenshot transfer. */
 internal object PythonHostImagePolicy {
@@ -24,9 +25,130 @@ internal object PythonHostImagePolicy {
     const val MIN_QUALITY = 1
     const val MAX_QUALITY = 100
     const val MAX_IMAGE_ID_BYTES = 64
+    const val MAX_COLOR = 0x00ff_ffff
+    const val MAX_COLOR_THRESHOLD = 255
 
     val FORMATS = setOf("png", "jpeg")
     val IMAGE_ID = Regex("image-[1-9][0-9]*")
+}
+
+internal data class PythonHostImageRegion(
+    val x: Int,
+    val y: Int,
+    val width: Int,
+    val height: Int,
+) {
+    init {
+        require(x >= 0 && y >= 0) { "Python Host image region origin is invalid" }
+        require(width > 0 && height > 0) { "Python Host image region size is invalid" }
+        require(
+            x.toLong() + width <= PythonHostImagePolicy.MAX_DIMENSION &&
+                y.toLong() + height <= PythonHostImagePolicy.MAX_DIMENSION,
+        ) { "Python Host image region exceeds the fixed dimension bound" }
+    }
+}
+
+internal data class PythonHostColorMatch(
+    val found: Boolean,
+    val x: Int,
+    val y: Int,
+) {
+    init {
+        require(
+            (found && x >= 0 && y >= 0) || (!found && x == NOT_FOUND && y == NOT_FOUND),
+        ) { "Python Host color match coordinates are inconsistent" }
+    }
+
+    fun toJson(): JsonObject = JsonObject().apply {
+        addProperty("schema", SCHEMA)
+        addProperty("found", found)
+        addProperty("x", x)
+        addProperty("y", y)
+    }
+
+    companion object {
+        const val NOT_FOUND = -1
+        private const val SCHEMA = "autojs6-python-color-match-v1"
+
+        fun found(x: Int, y: Int) = PythonHostColorMatch(true, x, y)
+
+        fun missing() = PythonHostColorMatch(false, NOT_FOUND, NOT_FOUND)
+    }
+}
+
+internal interface PythonHostPixelSource {
+    val width: Int
+    val height: Int
+
+    fun readRow(x: Int, y: Int, width: Int, destination: IntArray)
+}
+
+/** Bounded row-major RGB search which never retains Android image objects. */
+internal object PythonHostColorSearch {
+    fun find(
+        bitmap: Bitmap,
+        color: Int,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+    ): PythonHostColorMatch = find(
+        source = object : PythonHostPixelSource {
+            override val width = bitmap.width
+            override val height = bitmap.height
+
+            override fun readRow(x: Int, y: Int, width: Int, destination: IntArray) {
+                bitmap.getPixels(destination, 0, width, x, y, width, 1)
+            }
+        },
+        color = color,
+        threshold = threshold,
+        region = region,
+    )
+
+    fun find(
+        source: PythonHostPixelSource,
+        color: Int,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+    ): PythonHostColorMatch {
+        require(color in 0..PythonHostImagePolicy.MAX_COLOR) {
+            "Python Host color is outside the RGB range"
+        }
+        require(threshold in 0..PythonHostImagePolicy.MAX_COLOR_THRESHOLD) {
+            "Python Host color threshold is invalid"
+        }
+        require(
+            source.width in 1..PythonHostImagePolicy.MAX_DIMENSION &&
+                source.height in 1..PythonHostImagePolicy.MAX_DIMENSION &&
+                source.width.toLong() * source.height <= PythonHostImagePolicy.MAX_PIXELS,
+        ) { "Python Host pixel source exceeds its fixed bounds" }
+        val search = region ?: PythonHostImageRegion(0, 0, source.width, source.height)
+        require(
+            search.x.toLong() + search.width <= source.width &&
+                search.y.toLong() + search.height <= source.height,
+        ) { "Python Host color search region exceeds the screenshot" }
+
+        val targetRed = color ushr 16 and 0xff
+        val targetGreen = color ushr 8 and 0xff
+        val targetBlue = color and 0xff
+        val row = IntArray(search.width)
+        try {
+            for (y in search.y until search.y + search.height) {
+                source.readRow(search.x, y, search.width, row)
+                row.forEachIndexed { offset, pixel ->
+                    if (
+                        abs((pixel ushr 16 and 0xff) - targetRed) <= threshold &&
+                        abs((pixel ushr 8 and 0xff) - targetGreen) <= threshold &&
+                        abs((pixel and 0xff) - targetBlue) <= threshold
+                    ) {
+                        return PythonHostColorMatch.found(search.x + offset, y)
+                    }
+                }
+            }
+            return PythonHostColorMatch.missing()
+        } finally {
+            row.fill(0)
+        }
+    }
 }
 
 internal data class PythonHostCapturedScreenImage(
@@ -212,22 +334,33 @@ internal object PythonHostAccessibilityScreenCapture {
         service: org.autojs.autojs.core.accessibility.AccessibilityService,
         format: String,
         quality: Int,
-    ): PythonHostCapturedScreenImage {
+    ): PythonHostCapturedScreenImage = useCapturedBitmap(service) { capturedBitmap ->
+        PythonHostCapturedScreenImage(
+            format = format,
+            width = capturedBitmap.width,
+            height = capturedBitmap.height,
+            bytes = encode(capturedBitmap, format, quality),
+        )
+    }
+
+    fun <T> useCapturedBitmap(
+        service: org.autojs.autojs.core.accessibility.AccessibilityService,
+        action: (Bitmap) -> T,
+    ): T {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             throw PythonHostCapabilityScreenCaptureUnavailableException()
         }
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw PythonHostCapabilityScreenCaptureFailedException()
         }
-        return captureApi30(service, format, quality)
+        return useCapturedBitmapApi30(service, action)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun captureApi30(
+    private fun <T> useCapturedBitmapApi30(
         service: org.autojs.autojs.core.accessibility.AccessibilityService,
-        format: String,
-        quality: Int,
-    ): PythonHostCapturedScreenImage {
+        action: (Bitmap) -> T,
+    ): T {
         val deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(CAPTURE_TIMEOUT_MILLIS)
         var bitmap: Bitmap? = null
         for (attempt in 1..MAX_ATTEMPTS) {
@@ -257,12 +390,7 @@ internal object PythonHostAccessibilityScreenCapture {
         val capturedBitmap = bitmap ?: throw PythonHostCapabilityScreenCaptureFailedException()
         try {
             validateBitmap(capturedBitmap)
-            return PythonHostCapturedScreenImage(
-                format = format,
-                width = capturedBitmap.width,
-                height = capturedBitmap.height,
-                bytes = encode(capturedBitmap, format, quality),
-            )
+            return action(capturedBitmap)
         } finally {
             capturedBitmap.recycle()
         }

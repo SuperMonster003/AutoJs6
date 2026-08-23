@@ -89,6 +89,7 @@ internal object PythonHostCapabilities {
     const val SELECTOR_CLICK = "selector.click"
     const val SELECTOR_SET_TEXT = "selector.set_text"
     const val IMAGES_CAPTURE_SCREEN = "images.capture_screen"
+    const val IMAGES_FIND_COLOR = "images.find_color"
     const val IMAGES_READ_CHUNK = "images.read_chunk"
     const val IMAGES_RELEASE = "images.release"
 
@@ -128,6 +129,7 @@ internal object PythonHostCapabilities {
         SELECTOR_CLICK,
         SELECTOR_SET_TEXT,
         IMAGES_CAPTURE_SCREEN,
+        IMAGES_FIND_COLOR,
         IMAGES_READ_CHUNK,
         IMAGES_RELEASE,
     )
@@ -556,6 +558,12 @@ internal interface PythonHostCapabilityActions {
 
     fun captureScreen(format: String, quality: Int): PythonHostScreenImageDescriptor
 
+    fun findScreenColor(
+        color: Int,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+    ): PythonHostColorMatch
+
     fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk
 
     fun releaseScreenImage(imageId: String)
@@ -807,6 +815,16 @@ internal class AndroidPythonHostCapabilityActions(
 
     override fun captureScreen(format: String, quality: Int): PythonHostScreenImageDescriptor =
         screenImages.capture(format, quality)
+
+    override fun findScreenColor(
+        color: Int,
+        threshold: Int,
+        region: PythonHostImageRegion?,
+    ): PythonHostColorMatch = PythonHostAccessibilityScreenCapture.useCapturedBitmap(
+        service = requireAccessibilityService(),
+    ) { bitmap ->
+        PythonHostColorSearch.find(bitmap, color, threshold, region)
+    }
 
     override fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk =
         screenImages.readChunk(imageId, offset)
@@ -1151,6 +1169,17 @@ internal class PythonHostCapabilityDispatcher(
                         ),
                     )
                 }
+                PythonHostCapabilities.IMAGES_FIND_COLOR -> {
+                    request.requireArguments(ARG_COLOR, ARG_THRESHOLD, ARG_REGION)
+                    encodeSuccess(
+                        request,
+                        actions.findScreenColor(
+                            request.imageColorArgument(),
+                            request.imageColorThresholdArgument(),
+                            request.imageRegionArgument(),
+                        ),
+                    )
+                }
                 PythonHostCapabilities.IMAGES_READ_CHUNK -> {
                     request.requireArguments(ARG_IMAGE_ID, ARG_OFFSET)
                     encodeSuccess(
@@ -1319,6 +1348,7 @@ internal class PythonHostCapabilityDispatcher(
                 is PythonHostSelectorNode -> add(KEY_VALUE, value.toJson())
                 is PythonHostScreenImageDescriptor -> add(KEY_VALUE, value.toJson())
                 is PythonHostScreenImageChunk -> add(KEY_VALUE, value.toJson())
+                is PythonHostColorMatch -> add(KEY_VALUE, value.toJson())
                 is List<*> -> add(
                     KEY_VALUE,
                     JsonArray().apply {
@@ -1510,6 +1540,46 @@ internal class PythonHostCapabilityDispatcher(
             maximum = PythonHostImagePolicy.MAX_QUALITY,
         )
 
+        fun imageColorArgument(): Int = integerArgument(
+            name = ARG_COLOR,
+            minimum = 0,
+            maximum = PythonHostImagePolicy.MAX_COLOR,
+        )
+
+        fun imageColorThresholdArgument(): Int = integerArgument(
+            name = ARG_THRESHOLD,
+            minimum = 0,
+            maximum = PythonHostImagePolicy.MAX_COLOR_THRESHOLD,
+        )
+
+        fun imageRegionArgument(): PythonHostImageRegion? {
+            val value = arguments.get(ARG_REGION)
+                ?: throw IllegalArgumentException("Python Host image region is missing")
+            if (value.isJsonNull) return null
+            val region = value.takeIf(JsonElement::isJsonObject)?.asJsonObject
+                ?: throw IllegalArgumentException("Python Host image region must be an object or null")
+            require(region.keySet() == IMAGE_REGION_KEYS) {
+                "Python Host image region has missing or unexpected fields"
+            }
+            fun coordinate(name: String, maximum: Int): Int {
+                val encoded = region.requireLong(name)
+                require(encoded in 0L..maximum.toLong()) {
+                    "Python Host image region field '$name' is outside its allowed range"
+                }
+                return encoded.toInt()
+            }
+            return PythonHostImageRegion(
+                x = coordinate(REGION_X, PythonHostImagePolicy.MAX_DIMENSION - 1),
+                y = coordinate(REGION_Y, PythonHostImagePolicy.MAX_DIMENSION - 1),
+                width = coordinate(REGION_WIDTH, PythonHostImagePolicy.MAX_DIMENSION).also {
+                    require(it > 0) { "Python Host image region width must be positive" }
+                },
+                height = coordinate(REGION_HEIGHT, PythonHostImagePolicy.MAX_DIMENSION).also {
+                    require(it > 0) { "Python Host image region height must be positive" }
+                },
+            )
+        }
+
         fun singleImageIdArgument(): String {
             requireArguments(ARG_IMAGE_ID)
             return imageIdArgument()
@@ -1605,8 +1675,15 @@ internal class PythonHostCapabilityDispatcher(
         const val ARG_NODE_ID = "nodeId"
         const val ARG_FORMAT = "format"
         const val ARG_QUALITY = "quality"
+        const val ARG_COLOR = "color"
+        const val ARG_THRESHOLD = "threshold"
+        const val ARG_REGION = "region"
         const val ARG_IMAGE_ID = "imageId"
         const val ARG_OFFSET = "offset"
+        const val REGION_X = "x"
+        const val REGION_Y = "y"
+        const val REGION_WIDTH = "width"
+        const val REGION_HEIGHT = "height"
         const val QUERY_TEXT = "text"
         const val QUERY_TEXT_CONTAINS = "textContains"
         const val QUERY_DESCRIPTION = "description"
@@ -1639,6 +1716,7 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_SCREEN_CAPTURE_FAILED = "SCREEN_CAPTURE_FAILED"
         const val ERROR_STALE_IMAGE = "STALE_IMAGE"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
+        val IMAGE_REGION_KEYS = setOf(REGION_X, REGION_Y, REGION_WIDTH, REGION_HEIGHT)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")
         val WEB_URL = Regex("https?://.+", RegexOption.IGNORE_CASE)
     }
