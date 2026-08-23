@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 23 August 2026 года.
+Данные обновлены на 24 August 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -166,7 +166,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `Новое` Среда выполнения скриптов Node.js 24.5.0 с поддержкой запуска с помощью директивы "nodejs" или таких расширений, как .node.js/.cjs/.mjs
 * `Новое` ESM, dynamic import(), сеть и WebSocket, собственные сетевые модули, worker_threads, child_process и интеграция с Java в Node.js стали стабильными возможностями и включены по умолчанию, при этом сохраняются декларации разрешений, списки разрешенного, песочница и лимиты ресурсов
@@ -339,6 +339,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Улучшение` Добавлены soak-тесты постоянной среды выполнения внешнего плагина и шлюзы производственных доказательств Node.js для матрицы устройств/ABI, жизненного цикла среды выполнения, метрик ресурсов и стабильности в течение 8/24 часов
 * `Улучшение` Нативная проверка Node.js теперь разрешает и проверяет корневые каталоги исходного кода и сборки внешнего плагина среды выполнения
 * `Улучшение` Шлюзы финальной интеграции и выпуска Node.js работают по принципу fail-closed, если обязательные отчеты, доказательства для текущего исходного кода или артефакты приемки в производственной среде отсутствуют либо устарели
+* `Улучшение` Устаревшее удаление TypeScript на основе регулярных выражений по умолчанию отключено для прямых и динамических входов Node.js, а результат компилятора обязателен без явно включенного временного флага совместимости для конкретного запроса
 * `Улучшение` Для автономных скриптов Python при точном ModuleNotFoundError в консоль добавляется безопасная подсказка, направляющая импорт соседних/локальных модулей в явно объявленный проект Python с `project.json` и `type: python` без раскрытия приватных путей
 * `Улучшение` Chunks вывода Python Runtime записываются в консоль Host по мере поступления, независимое инкрементальное декодирование UTF-8 для stdout/stderr сохраняет кодовые точки между chunks, а сквозной лимит вывода увеличен до 16 MiB
 * `Улучшение` project.json проектов Python поддерживает положительный целочисленный timeout в миллисекундах: 5 минут по умолчанию, максимум 30 минут и дополнительное ограничение со стороны плагина Runtime
@@ -659,7 +660,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 23 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 24 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

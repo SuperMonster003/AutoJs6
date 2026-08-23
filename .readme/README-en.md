@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Aug 23, 2026.
+Data updated on Aug 24, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,7 +166,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js ESM, dynamic import(), network and WebSocket, native network modules, worker_threads, child_process, and Java interop are stable features enabled by default, while permission declarations, allowlists, sandboxing, and resource budgets remain enforced
@@ -339,6 +339,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Added persistent external-plugin runtime soak testing and Node.js production-evidence gates covering device/ABI matrices, runtime lifecycle, resource metrics, and 8-hour/24-hour stability
 * `Improvement` Updated Node.js native verification to resolve and validate the external runtime plugin source and build roots
 * `Improvement` Made Node.js final integration and release gates fail closed when required reports, current-source evidence, or production acceptance artifacts are missing or stale
+* `Improvement` Disabled legacy regex-based TypeScript stripping by default for raw and dynamic Node.js inputs, requiring compiler output unless a temporary request-scoped compatibility flag is explicitly enabled
 * `Improvement` Standalone Python scripts now append a safe console hint for an exact ModuleNotFoundError, directing sibling/local module imports to an explicit Python project with `project.json` and `type: python` without exposing private paths
 * `Improvement` Python Runtime output chunks are written to the Host console as they arrive, with independent incremental UTF-8 decoding for stdout/stderr preserving code points split across chunks and a 16 MiB end-to-end output limit
 * `Improvement` Python project.json supports a positive-integer timeout in milliseconds, defaulting to 5 minutes, capped at 30 minutes, and still bounded by the Runtime plugin limit
@@ -659,7 +660,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Aug 23, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Aug 24, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

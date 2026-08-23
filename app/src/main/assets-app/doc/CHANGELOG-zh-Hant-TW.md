@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
 * `新增` Node.js 的 ESM/dynamic import()/網路與 WebSocket/原生網路模組/worker_threads/child_process/Java 互通能力成為正式功能並預設啟用, 同時保留權限宣告/允許清單/沙箱及資源預算保護
@@ -179,6 +179,7 @@
 * `最佳化` Node.js 外部外掛常駐執行環境加入 soak 測試及生產證據閘門, 涵蓋裝置/ABI 矩陣/執行環境生命週期/資源指標及 8 小時/24 小時穩定性
 * `最佳化` Node.js 原生驗證支援解析並驗證外部執行階段外掛的原始碼及建置根目錄
 * `最佳化` Node.js 最終整合及發佈閘門在必要報告/目前原始碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
+* `最佳化` Node.js 原始及動態輸入預設關閉舊 TypeScript 正規表示式 stripping, 僅在明確啟用暫時請求層級相容開關時保留, 一般執行統一要求編譯器產物
 * `最佳化` 獨立 Python 指令碼發生精確 ModuleNotFoundError 時在控制檯附加安全提示, 引導 sibling/local 模組 import 使用包含 `project.json` 與 `type: python` 的明確 Python 專案, 且不揭露私人路徑
 * `最佳化` Python Runtime 輸出 chunk 到達時立即寫入宿主控制檯, 使用按 stdout/stderr 獨立的增量 UTF-8 解碼保留跨 chunk 碼點, 並將端到端輸出上限提高至 16 MiB
 * `最佳化` Python 專案的 project.json 支援 timeout 正整數毫秒設定, 預設 5 分鐘、最大 30 分鐘, 並持續受執行階段外掛上限約束

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/23",
+      "released_date": "2026/08/24",
       "feature": [
         "Node.js 24.5.0 腳本運行時, 支持通過 \"nodejs\" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本",
         "Node.js 的 ESM/dynamic import()/網絡與 WebSocket/原生網絡模組/worker_threads/child_process/Java 互操作能力成為正式功能並預設啟用, 同時保留權限聲明/白名單/沙箱及資源預算保護",
@@ -178,6 +178,7 @@
         "Node.js 外部插件常駐運行時加入 soak 測試及生產證據門禁, 覆蓋設備/ABI 矩陣/運行時生命週期/資源指標及 8 小時/24 小時穩定性",
         "Node.js 原生校驗支持解析並驗證外部運行時插件的源碼及構建根目錄",
         "Node.js 最終集成及發佈門禁在所需報告/當前源碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略",
+        "Node.js 原始及動態輸入預設關閉舊 TypeScript 正則 stripping, 僅在明確啟用臨時請求級兼容開關時保留, 常規執行統一要求編譯器產物",
         "獨立 Python 腳本發生精確 ModuleNotFoundError 時在控制台追加安全提示, 引導 sibling/local 模組 import 使用包含 `project.json` 與 `type: python` 的明確 Python 項目, 且不暴露私有路徑",
         "Python Runtime 輸出 chunk 到達時立即寫入宿主控制台, 使用按 stdout/stderr 獨立的增量 UTF-8 解碼保留跨 chunk 碼點, 並將端到端輸出上限提高至 16 MiB",
         "Python 項目的 project.json 支持 timeout 正整數毫秒配置, 默認 5 分鐘、最大 30 分鐘, 並繼續受運行時插件上限約束",

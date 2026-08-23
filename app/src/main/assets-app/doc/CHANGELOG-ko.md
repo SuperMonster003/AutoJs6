@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js ESM/dynamic import()/네트워크 및 WebSocket/네이티브 네트워크 모듈/worker_threads/child_process/Java 상호 운용 기능을 정식 기능으로 기본 활성화하고, 권한 선언/허용 목록/샌드박스/리소스 예산 보호는 계속 적용
@@ -179,6 +179,7 @@
 * `개선` Node.js 외부 플러그인 상주 런타임에 soak 테스트 및 프로덕션 증거 게이트를 추가하여 기기/ABI 매트릭스/런타임 수명 주기/리소스 지표/8시간 및 24시간 안정성 검증
 * `개선` Node.js 네이티브 검증에서 외부 런타임 플러그인의 소스 및 빌드 루트를 확인하고 검증하도록 개선
 * `개선` 필수 보고서/현재 소스 증거/프로덕션 승인 산출물이 누락되거나 만료된 경우 Node.js 최종 통합 및 릴리스 게이트가 fail-closed로 판정되도록 개선
+* `개선` Node.js raw 및 dynamic 입력에서 기존 정규식 기반 TypeScript stripping을 기본적으로 비활성화하고, 임시 요청 범위 호환 플래그를 명시적으로 활성화하지 않으면 컴파일러 출력을 요구
 * `개선` 독립 실행형 Python 스크립트에서 정확한 ModuleNotFoundError가 발생하면 콘솔에 안전한 안내를 추가하고, 비공개 경로를 노출하지 않으면서 sibling/local 모듈 import에는 `project.json`과 `type: python`을 지정한 명시적 Python 프로젝트 사용을 안내
 * `개선` Python Runtime 출력 chunk를 도착 즉시 Host 콘솔에 기록하고 stdout/stderr별 증분 UTF-8 디코딩으로 chunk 사이에 나뉜 코드 포인트를 보존하며 종단 간 출력 상한을 16 MiB로 확대
 * `개선` Python 프로젝트의 project.json에서 양의 정수 밀리초 timeout을 지원하고 기본값은 5분, 최대값은 30분으로 하며 Runtime 플러그인 상한도 계속 적용

@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 23 August 2026.
+Données mises à jour le 24 August 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` ESM, dynamic import(), le réseau et WebSocket, les modules réseau natifs, worker_threads, child_process et l'interopérabilité Java de Node.js sont des fonctions stables activées par défaut, tandis que les déclarations d'autorisation, listes d'autorisation, bacs à sable et budgets de ressources restent appliqués
@@ -339,6 +339,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Ajout de tests soak du runtime persistant du plugin externe et de portes de preuves de production Node.js couvrant la matrice appareils/ABI, le cycle de vie du runtime, les mesures de ressources et la stabilité sur 8 h/24 h
 * `Amélioration` La vérification native de Node.js résout et valide désormais les racines des sources et de la compilation du plugin d'exécution externe
 * `Amélioration` Les portes d'intégration finale et de livraison Node.js appliquent une stratégie fail-closed lorsque des rapports requis, des preuves correspondant aux sources actuelles ou des artefacts d'acceptation en production sont absents ou périmés
+* `Amélioration` Désactivation par défaut du stripping TypeScript historique fondé sur des expressions régulières pour les entrées Node.js brutes et dynamiques, avec sortie du compilateur obligatoire sauf activation explicite d'une option temporaire de compatibilité propre à la requête
 * `Amélioration` Les scripts Python autonomes ajoutent désormais dans la console une indication sûre lors d'un ModuleNotFoundError exact, orientant l'importation de modules voisins/locaux vers un projet Python explicite avec `project.json` et `type: python`, sans exposer de chemins privés
 * `Amélioration` Les chunks de sortie Python Runtime sont écrits dans la console Host dès leur arrivée, avec un décodage UTF-8 incrémental indépendant pour stdout/stderr qui préserve les points de code répartis entre chunks et une limite de sortie de bout en bout de 16 MiB
 * `Amélioration` Le project.json des projets Python accepte un timeout entier positif en millisecondes, de 5 minutes par défaut, plafonné à 30 minutes et toujours limité par le plugin Runtime
@@ -659,7 +660,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 23 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 24 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

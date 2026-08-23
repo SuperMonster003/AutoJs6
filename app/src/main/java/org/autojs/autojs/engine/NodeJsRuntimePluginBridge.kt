@@ -313,6 +313,9 @@ object NodeJsRuntimePluginBridge {
             )
             putBoolean(NodeJsRuntimeContract.KEY_ESM_ENABLED, esmEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_DYNAMIC_IMPORT_ENABLED, dynamicImportEnabled)
+            // AutoJs6 owns TypeScript compilation. Never ask the Node runtime
+            // plugin to revive its migration-only regex stripping path.
+            putBoolean(NodeJsRuntimeContract.KEY_LEGACY_TYPESCRIPT_STRIPPING_ENABLED, false)
             putBoolean(NodeJsRuntimeContract.KEY_RAW_NODE_NETWORK_MODULES_ENABLED, rawNodeNetworkModulesEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_ENABLED, workerThreadsEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_ENABLED, childProcessEnabled)

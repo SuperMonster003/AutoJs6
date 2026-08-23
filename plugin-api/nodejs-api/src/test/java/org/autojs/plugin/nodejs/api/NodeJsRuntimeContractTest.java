@@ -68,4 +68,14 @@ public class NodeJsRuntimeContractTest {
                 "hostPlaintextModuleSourceMaterialization",
                 NodeJsRuntimeContract.CAPABILITY_HOST_PLAINTEXT_MODULE_SOURCE_MATERIALIZATION);
     }
+
+    @Test
+    public void legacyTypeScriptStrippingIsAnExplicitMigrationOnlyRequestKey() {
+        assertEquals(
+                "legacyTypeScriptStrippingEnabled",
+                NodeJsRuntimeContract.KEY_LEGACY_TYPESCRIPT_STRIPPING_ENABLED);
+        assertEquals(
+                "ERR_AUTOJS6_TYPESCRIPT_COMPILER_REQUIRED",
+                NodeJsRuntimeContract.ERROR_TYPESCRIPT_COMPILER_REQUIRED);
+    }
 }

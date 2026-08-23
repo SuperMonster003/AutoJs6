@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` ESM, dynamic import(), red y WebSocket, módulos de red nativos, worker_threads, child_process e interoperabilidad con Java de Node.js son funciones estables habilitadas de forma predeterminada, mientras se mantienen las declaraciones de permisos, listas de permitidos, aislamiento y presupuestos de recursos
@@ -179,6 +179,7 @@
 * `Mejora` Añadidas pruebas soak del runtime persistente del plugin externo y puertas de evidencia de producción de Node.js que cubren matriz de dispositivos/ABI, ciclo de vida del runtime, métricas de recursos y estabilidad de 8 h/24 h
 * `Mejora` La verificación nativa de Node.js ahora resuelve y valida las raíces de código fuente y compilación del plugin de runtime externo
 * `Mejora` Las puertas de integración final y lanzamiento de Node.js aplican fail-closed cuando faltan o están obsoletos los informes requeridos, las evidencias de las fuentes actuales o los artefactos de aceptación de producción
+* `Mejora` Desactivado de forma predeterminada el stripping de TypeScript heredado basado en expresiones regulares para entradas Node.js directas y dinámicas, exigiendo la salida del compilador salvo que se active explícitamente una opción temporal de compatibilidad por solicitud
 * `Mejora` Los scripts Python independientes ahora añaden a la consola una sugerencia segura ante un ModuleNotFoundError exacto, orientando la importación de módulos hermanos/locales a un proyecto Python explícito con `project.json` y `type: python`, sin exponer rutas privadas
 * `Mejora` Los chunks de salida de Python Runtime se escriben en la consola Host al llegar, con decodificación UTF-8 incremental independiente para stdout/stderr que conserva los puntos de código divididos entre chunks y un límite de salida integral de 16 MiB
 * `Mejora` El project.json de los proyectos Python admite un timeout entero positivo en milisegundos, con 5 minutos por defecto, un máximo de 30 minutos y siempre limitado por el plugin Runtime

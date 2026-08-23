@@ -63,6 +63,13 @@ object NodeJsRuntimeContract {
     const val KEY_RUNTIME_MODULE_SOURCE_NAMES = "runtimeModuleSourceNames"
     const val KEY_RUNTIME_MODULE_SOURCES = "runtimeModuleSources"
 
+    /**
+     * Temporary migration-only opt-in for the runtime plugin's legacy regex
+     * TypeScript erasure. The runtime defaults this key to false: production
+     * hosts must compile TypeScript before dispatching JavaScript to Node.
+     */
+    const val KEY_LEGACY_TYPESCRIPT_STRIPPING_ENABLED = "legacyTypeScriptStrippingEnabled"
+
     const val KEY_ESM_ENABLED = "esmEnabled"
     const val KEY_DYNAMIC_IMPORT_ENABLED = "dynamicImportEnabled"
     const val KEY_RAW_NODE_NETWORK_MODULES_ENABLED = "rawNodeNetworkModulesEnabled"
@@ -136,6 +143,7 @@ object NodeJsRuntimeContract {
     const val ERROR_MODULE_SOURCE_PROVIDER_BUDGET_EXCEEDED =
         "ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED"
     const val ERROR_MODULE_SOURCE_PROVIDER_FAILED = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_FAILED"
+    const val ERROR_TYPESCRIPT_COMPILER_REQUIRED = "ERR_AUTOJS6_TYPESCRIPT_COMPILER_REQUIRED"
 
     const val RUNTIME_MODULE_SOURCE_PROVIDER_NAME = "autojs6:module-source-provider"
 

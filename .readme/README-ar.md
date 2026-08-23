@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 23 August 2026.
+تم تحديث البيانات في 24 August 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `إضافة جديدة` بيئة تشغيل نصوص Node.js 24.5.0, تدعم التشغيل عبر توجيه "nodejs" او امتدادات مثل .node.js/.cjs/.mjs
 * `إضافة جديدة` اصبحت قدرات Node.js الخاصة بـ ESM و dynamic import() والشبكة و WebSocket ووحدات الشبكة الاصلية و worker_threads و child_process والتكامل مع Java ميزات مستقرة ومفعلة افتراضيا, مع استمرار فرض تعريفات الاذونات والقوائم المسموح بها والعزل وميزانيات الموارد
@@ -339,6 +339,7 @@
 * `تحسين` اضافة اختبارات soak لبيئة التشغيل الدائمة في الاضافة الخارجية وبوابات ادلة الانتاج لـ Node.js, تغطي مصفوفة الاجهزة/ABI ودورة حياة بيئة التشغيل ومقاييس الموارد والاستقرار لمدة 8 ساعات/24 ساعة
 * `تحسين` تحقق Node.js الاصلي يحل ويتحقق من جذور شفرة المصدر والبناء لاضافة بيئة التشغيل الخارجية
 * `تحسين` بوابات التكامل النهائي والاصدار لـ Node.js تعتمد سياسة fail-closed عند فقدان التقارير المطلوبة او ادلة المصدر الحالي او عناصر قبول الانتاج او انتهاء صلاحيتها
+* `تحسين` تعطيل ازالة TypeScript القديمة بالتعبيرات النمطية افتراضيا لمدخلات Node.js الخام والديناميكية, مع اشتراط مخرجات المترجم ما لم يفعل طلب مؤقت وصريح وضع التوافق القديم
 * `تحسين` تضيف النصوص المستقلة بلغة Python تلميحا آمنا الى وحدة التحكم عند حدوث ModuleNotFoundError دقيق, ويوجه استيراد الوحدات الشقيقة او المحلية الى مشروع Python صريح يحتوي على `project.json` و `type: python` دون كشف المسارات الخاصة
 * `تحسين` تكتب chunks خرج Python Runtime في وحدة تحكم Host فور وصولها, مع فك UTF-8 تزايدي مستقل لكل من stdout/stderr يحفظ نقاط الترميز الممتدة بين chunks ورفع حد الخرج المتكامل إلى 16 MiB
 * `تحسين` يدعم project.json لمشاريع Python قيمة timeout موجبة صحيحة بالميلي ثانية, افتراضيا 5 دقائق وبحد أقصى 30 دقيقة, مع استمرار تطبيق حد ملحق Runtime
@@ -659,7 +660,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 23 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 24 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

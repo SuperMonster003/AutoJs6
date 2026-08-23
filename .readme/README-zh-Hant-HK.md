@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-數據更新於 2026 年 8 月 23 日.
+數據更新於 2026 年 8 月 24 日.
 
 數據條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 的 ESM/dynamic import()/網絡與 WebSocket/原生網絡模組/worker_threads/child_process/Java 互操作能力成為正式功能並預設啟用, 同時保留權限聲明/白名單/沙箱及資源預算保護
@@ -339,6 +339,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` Node.js 外部插件常駐運行時加入 soak 測試及生產證據門禁, 覆蓋設備/ABI 矩陣/運行時生命週期/資源指標及 8 小時/24 小時穩定性
 * `優化` Node.js 原生校驗支持解析並驗證外部運行時插件的源碼及構建根目錄
 * `優化` Node.js 最終集成及發佈門禁在所需報告/當前源碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
+* `優化` Node.js 原始及動態輸入預設關閉舊 TypeScript 正則 stripping, 僅在明確啟用臨時請求級兼容開關時保留, 常規執行統一要求編譯器產物
 * `優化` 獨立 Python 腳本發生精確 ModuleNotFoundError 時在控制台追加安全提示, 引導 sibling/local 模組 import 使用包含 `project.json` 與 `type: python` 的明確 Python 項目, 且不暴露私有路徑
 * `優化` Python Runtime 輸出 chunk 到達時立即寫入宿主控制台, 使用按 stdout/stderr 獨立的增量 UTF-8 解碼保留跨 chunk 碼點, 並將端到端輸出上限提高至 16 MiB
 * `優化` Python 項目的 project.json 支持 timeout 正整數毫秒配置, 默認 5 分鐘、最大 30 分鐘, 並繼續受運行時插件上限約束
@@ -659,7 +660,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 23 日, AutoJs6 可支持 JDK 最高版本為 `26`.
+截至 2026 年 8 月 24 日, AutoJs6 可支持 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

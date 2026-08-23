@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/23
+###### 2026/08/24
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js ESM, dynamic import(), network and WebSocket, native network modules, worker_threads, child_process, and Java interop are stable features enabled by default, while permission declarations, allowlists, sandboxing, and resource budgets remain enforced
@@ -179,6 +179,7 @@
 * `Improvement` Added persistent external-plugin runtime soak testing and Node.js production-evidence gates covering device/ABI matrices, runtime lifecycle, resource metrics, and 8-hour/24-hour stability
 * `Improvement` Updated Node.js native verification to resolve and validate the external runtime plugin source and build roots
 * `Improvement` Made Node.js final integration and release gates fail closed when required reports, current-source evidence, or production acceptance artifacts are missing or stale
+* `Improvement` Disabled legacy regex-based TypeScript stripping by default for raw and dynamic Node.js inputs, requiring compiler output unless a temporary request-scoped compatibility flag is explicitly enabled
 * `Improvement` Standalone Python scripts now append a safe console hint for an exact ModuleNotFoundError, directing sibling/local module imports to an explicit Python project with `project.json` and `type: python` without exposing private paths
 * `Improvement` Python Runtime output chunks are written to the Host console as they arrive, with independent incremental UTF-8 decoding for stdout/stderr preserving code points split across chunks and a 16 MiB end-to-end output limit
 * `Improvement` Python project.json supports a positive-integer timeout in milliseconds, defaulting to 5 minutes, capped at 30 minutes, and still bounded by the Runtime plugin limit

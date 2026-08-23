@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/23",
+      "released_date": "2026/08/24",
       "feature": [
         "Node.js 24.5.0 スクリプトランタイム, \"nodejs\" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応",
         "Node.js の ESM/dynamic import()/ネットワークと WebSocket/ネイティブネットワークモジュール/worker_threads/child_process/Java 相互運用を正式機能として既定で有効化し, 権限宣言/許可リスト/サンドボックス/リソース予算による保護を維持",
@@ -178,6 +178,7 @@
         "Node.js 外部プラグイン常駐ランタイムに soak テストと本番エビデンスゲートを追加し, デバイス/ABI マトリクス/ランタイムライフサイクル/リソース指標/8 時間および 24 時間の安定性を検証",
         "Node.js ネイティブ検証で外部ランタイムプラグインのソースおよびビルドルートを解決して検証",
         "Node.js の最終統合およびリリースゲートは, 必須レポート/現在のソースに基づくエビデンス/本番受け入れ成果物が欠落または期限切れの場合に fail-closed で判定",
+        "Node.js の raw および dynamic 入力で旧来の正規表現ベース TypeScript stripping を既定で無効化し, 一時的なリクエスト単位の互換フラグを明示的に有効化しない限りコンパイラ出力を必須化",
         "単体 Python スクリプトで正確な ModuleNotFoundError が発生した場合, コンソールに安全なヒントを追記し, 非公開パスを露出せずに sibling/local モジュールの import には `project.json` と `type: python` を指定した明示的な Python プロジェクトを案内",
         "Python Runtime の出力 chunk を到着時に Host コンソールへ書き込み, stdout/stderr ごとの増分 UTF-8 デコードで chunk をまたぐコードポイントを保持し, エンドツーエンドの出力上限を 16 MiB に拡大",
         "Python プロジェクトの project.json で正の整数ミリ秒の timeout を指定可能にし, 既定値を 5 分、上限を 30 分として Runtime プラグインの上限も引き続き適用",
