@@ -20,6 +20,9 @@ class PythonRuntimeCompatibilityTest {
         TaggedWireDocument.decode(
             PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.r4Capabilities),
         ).rejectUnknownRequiredFields((1..12).toSet())
+        TaggedWireDocument.decode(
+            PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.brokerCapabilities),
+        ).rejectUnknownRequiredFields((1..14).toSet())
 
         val legacyRequestTags = (1..13).toSet()
         TaggedWireDocument.decode(

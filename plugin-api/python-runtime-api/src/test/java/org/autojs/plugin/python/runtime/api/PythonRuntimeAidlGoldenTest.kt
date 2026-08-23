@@ -54,7 +54,8 @@ class PythonRuntimeAidlGoldenTest {
         val GOLDEN_SHA256 = linkedMapOf(
             "IPythonExecutionCallback.aidl" to "69e283c172fec2aa069fe640eb41f80d42f731eb31124735de7cc4873907431c",
             "IPythonExecutionSession.aidl" to "566aab5f7076df5075ae4403de2578315be2adf623e2051b059cc85c1887725a",
-            "IPythonRuntimeProvider.aidl" to "fe8bcd7561e8aeded1bb729ac57f47e65eaa94e3c3d70ca8b94e3acc77ca3a83",
+            "IPythonHostCapabilityBroker.aidl" to "3d286fd1c9b69f8bd52e75d4cb99c42bc9f8bb20199ade7a5ec41a75e2874527",
+            "IPythonRuntimeProvider.aidl" to "bd3f89d3407d285605bf04bf04e56fca13009aa90eb89c57416f6d042828d213",
             "IPythonSessionOpenCallback.aidl" to "927b0af34edcf509491c209f9b581c0f740393158d6fab75f191acc8843741c9",
         )
     }

@@ -55,6 +55,7 @@ class PythonRuntimeCapabilities(
     val supportsInteractiveInput: Boolean = false,
     val supportsStructuredJsonResult: Boolean = false,
     val supportsOutputArtifacts: Boolean = false,
+    val supportsHostCapabilityBroker: Boolean = false,
 ) {
     val supportedAbis: List<String> = immutableList(supportedAbis)
 
@@ -72,7 +73,8 @@ class PythonRuntimeCapabilities(
         supportsModuleEntry == other.supportsModuleEntry &&
         supportsInteractiveInput == other.supportsInteractiveInput &&
         supportsStructuredJsonResult == other.supportsStructuredJsonResult &&
-        supportsOutputArtifacts == other.supportsOutputArtifacts
+        supportsOutputArtifacts == other.supportsOutputArtifacts &&
+        supportsHostCapabilityBroker == other.supportsHostCapabilityBroker
 
     override fun hashCode(): Int = listOf(
         implementation,
@@ -89,6 +91,7 @@ class PythonRuntimeCapabilities(
         supportsInteractiveInput,
         supportsStructuredJsonResult,
         supportsOutputArtifacts,
+        supportsHostCapabilityBroker,
     ).hashCode()
 }
 

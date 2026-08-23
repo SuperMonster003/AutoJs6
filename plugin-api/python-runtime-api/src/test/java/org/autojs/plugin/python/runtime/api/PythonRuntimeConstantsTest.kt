@@ -12,10 +12,14 @@ class PythonRuntimeConstantsTest {
         assertEquals("org.autojs.permission.PLUGIN", PythonRuntimeContract.PLUGIN_PERMISSION)
         assertEquals("text/x-python", PythonRuntimeContract.SOURCE_MIME_TYPE)
         assertEquals(1, PythonRuntimeContract.PROTOCOL_MAJOR)
-        assertEquals(4, PythonRuntimeContract.PROTOCOL_MINOR)
+        assertEquals(5, PythonRuntimeContract.PROTOCOL_MINOR)
         assertEquals(1, PythonRuntimeContract.SCHEMA_MAJOR)
         assertEquals(0, PythonRuntimeContract.SCHEMA_MINOR)
         assertEquals(64L * 1024L, PythonRuntimeContract.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES)
+        assertEquals(64 * 1024, PythonRuntimeContract.MAX_HOST_CAPABILITY_REQUEST_BYTES)
+        assertEquals(64 * 1024, PythonRuntimeContract.MAX_HOST_CAPABILITY_RESPONSE_BYTES)
+        assertEquals(1_024, PythonRuntimeContract.MAX_HOST_CAPABILITY_CALLS)
+        assertEquals(5_000L, PythonRuntimeContract.HOST_CAPABILITY_CALL_TIMEOUT_MILLIS)
     }
 
     @Test

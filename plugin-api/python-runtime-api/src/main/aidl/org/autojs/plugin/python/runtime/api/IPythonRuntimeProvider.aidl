@@ -3,6 +3,7 @@ package org.autojs.plugin.python.runtime.api;
 import android.os.ParcelFileDescriptor;
 import org.autojs.plugin.python.runtime.api.IPythonExecutionCallback;
 import org.autojs.plugin.python.runtime.api.IPythonExecutionSession;
+import org.autojs.plugin.python.runtime.api.IPythonHostCapabilityBroker;
 import org.autojs.plugin.python.runtime.api.IPythonSessionOpenCallback;
 
 interface IPythonRuntimeProvider {
@@ -14,6 +15,14 @@ interface IPythonRuntimeProvider {
     void openSession(
         in byte[] request,
         in ParcelFileDescriptor[] descriptors,
+        IPythonSessionOpenCallback admissionCallback,
+        IPythonExecutionCallback executionCallback
+    );
+
+    void openSessionWithHostCapabilities(
+        in byte[] request,
+        in ParcelFileDescriptor[] descriptors,
+        IPythonHostCapabilityBroker hostCapabilityBroker,
         IPythonSessionOpenCallback admissionCallback,
         IPythonExecutionCallback executionCallback
     );

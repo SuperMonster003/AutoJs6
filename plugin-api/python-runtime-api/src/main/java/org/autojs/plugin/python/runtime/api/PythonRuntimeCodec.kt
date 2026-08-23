@@ -91,6 +91,9 @@ object PythonRuntimeCodec {
                 if (value.supportsOutputArtifacts) {
                     boolean(CapabilitiesTags.SUPPORTS_OUTPUT_ARTIFACTS, true)
                 }
+                if (value.supportsHostCapabilityBroker) {
+                    boolean(CapabilitiesTags.SUPPORTS_HOST_CAPABILITY_BROKER, true)
+                }
             }
             .encode()
     }
@@ -123,6 +126,8 @@ object PythonRuntimeCodec {
                     document.optionalBoolean(CapabilitiesTags.SUPPORTS_STRUCTURED_JSON_RESULT) ?: false,
                 supportsOutputArtifacts =
                     document.optionalBoolean(CapabilitiesTags.SUPPORTS_OUTPUT_ARTIFACTS) ?: false,
+                supportsHostCapabilityBroker =
+                    document.optionalBoolean(CapabilitiesTags.SUPPORTS_HOST_CAPABILITY_BROKER) ?: false,
             ).also(PythonRuntimeValidation::validateCapabilities)
         }
 
@@ -716,7 +721,8 @@ object PythonRuntimeCodec {
         const val SUPPORTS_INTERACTIVE_INPUT = 12
         const val SUPPORTS_STRUCTURED_JSON_RESULT = 13
         const val SUPPORTS_OUTPUT_ARTIFACTS = 14
-        val ALL = (1..14).toSet()
+        const val SUPPORTS_HOST_CAPABILITY_BROKER = 15
+        val ALL = (1..15).toSet()
         val REPEATED = setOf(SUPPORTED_ABIS)
     }
 

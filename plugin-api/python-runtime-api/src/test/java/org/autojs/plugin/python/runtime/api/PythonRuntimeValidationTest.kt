@@ -61,6 +61,27 @@ class PythonRuntimeValidationTest {
             PythonRuntimeFixtures.r2Capabilities,
             PythonRuntimeFixtures.runtimeInfo.copy(protocolMax = PythonProtocolVersion(1, 2)),
         )
+        PythonRuntimeValidation.validateCapabilitiesAgainstInfo(
+            PythonRuntimeFixtures.brokerCapabilities,
+            PythonRuntimeFixtures.brokerRuntimeInfo,
+        )
+        val brokerOnProtocol14 = assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateCapabilitiesAgainstInfo(
+                PythonRuntimeFixtures.brokerCapabilities,
+                PythonRuntimeFixtures.r4RuntimeInfo,
+            )
+        }
+        assertEquals(PythonRuntimeContractViolation.CAPABILITY_INCOMPATIBLE, brokerOnProtocol14.violation)
+        val protocol15WithoutBroker = assertThrows(PythonRuntimeContractException::class.java) {
+            PythonRuntimeValidation.validateCapabilitiesAgainstInfo(
+                PythonRuntimeFixtures.r4Capabilities,
+                PythonRuntimeFixtures.brokerRuntimeInfo,
+            )
+        }
+        assertEquals(
+            PythonRuntimeContractViolation.CAPABILITY_INCOMPATIBLE,
+            protocol15WithoutBroker.violation,
+        )
     }
 
     @Test

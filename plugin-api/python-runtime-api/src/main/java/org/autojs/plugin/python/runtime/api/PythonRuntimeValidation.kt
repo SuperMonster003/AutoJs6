@@ -156,6 +156,19 @@ object PythonRuntimeValidation {
                 "Structured result support requires protocol 1.4 or newer"
             }
         }
+        if (capabilities.supportsHostCapabilityBroker) {
+            requireCapability(runtimeInfo.protocolMax >= HOST_CAPABILITY_BROKER_PROTOCOL) {
+                "Host capability broker support requires protocol 1.5 or newer"
+            }
+        }
+        if (
+            runtimeInfo.protocolMin <= HOST_CAPABILITY_BROKER_PROTOCOL &&
+            runtimeInfo.protocolMax >= HOST_CAPABILITY_BROKER_PROTOCOL
+        ) {
+            requireCapability(capabilities.supportsHostCapabilityBroker) {
+                "A runtime advertising protocol 1.5 requires host capability broker support"
+            }
+        }
     }
 
     fun validateRequest(request: PythonExecutionRequest) {
@@ -1024,6 +1037,7 @@ object PythonRuntimeValidation {
     private val MODULE_ENTRY_PROTOCOL = PythonProtocolVersion(1, 2)
     private val INTERACTIVE_INPUT_PROTOCOL = PythonProtocolVersion(1, 3)
     private val STRUCTURED_RESULT_PROTOCOL = PythonProtocolVersion(1, 4)
+    private val HOST_CAPABILITY_BROKER_PROTOCOL = PythonProtocolVersion(1, 5)
     private val PYTHON_KEYWORDS = setOf(
         "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class",
         "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global",

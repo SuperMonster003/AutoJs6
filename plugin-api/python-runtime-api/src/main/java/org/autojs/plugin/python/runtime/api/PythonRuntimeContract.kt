@@ -12,7 +12,7 @@ object PythonRuntimeContract {
     const val ENGINE_ID = "python"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 4
+    const val PROTOCOL_MINOR = 5
     const val SCHEMA_MAJOR = 1
     const val SCHEMA_MINOR = 0
 
@@ -59,6 +59,11 @@ object PythonRuntimeContract {
     const val MAX_OUTPUT_ARTIFACT_PATH_BYTES = 1024
     const val MAX_OUTPUT_ARTIFACT_BYTES = 4L * 1024L * 1024L
     const val MAX_TOTAL_OUTPUT_ARTIFACT_BYTES = 8L * 1024L * 1024L
+    const val MAX_HOST_CAPABILITY_REQUEST_BYTES = 64 * 1024
+    const val MAX_HOST_CAPABILITY_RESPONSE_BYTES = 64 * 1024
+    const val MAX_HOST_CAPABILITY_CALLS = 1_024
+    const val MAX_HOST_CAPABILITY_TEXT_BYTES = 32 * 1024
+    const val HOST_CAPABILITY_CALL_TIMEOUT_MILLIS = 5_000L
     const val MAX_CONCURRENT_SESSIONS = 1
     const val MAX_ARGUMENTS = 128
     const val MAX_ARGUMENT_BYTES = 4 * 1024

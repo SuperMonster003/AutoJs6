@@ -36,6 +36,12 @@ internal object PythonRuntimeFixtures {
         providerVersionCode = 4,
     )
 
+    val brokerRuntimeInfo = runtimeInfo.copy(
+        protocolMax = PythonProtocolVersion(1, 5),
+        providerVersionName = "1.5.0",
+        providerVersionCode = 5,
+    )
+
     val limits = PythonRuntimeResourceLimits(
         maxSourceBytes = 1024 * 1024,
         maxWorkspaceArchiveBytes = 8L * 1024L * 1024L,
@@ -140,6 +146,24 @@ internal object PythonRuntimeFixtures {
         supportsInteractiveInput = true,
         supportsStructuredJsonResult = true,
         supportsOutputArtifacts = true,
+    )
+
+    val brokerCapabilities = PythonRuntimeCapabilities(
+        implementation = PythonImplementation.CPYTHON,
+        pythonVersion = "3.13.9",
+        supportedAbis = listOf("arm64-v8a", "x86_64"),
+        supportsWorkspaceArchive = true,
+        supportsStdinSnapshot = true,
+        supportsStructuredTraceback = true,
+        supportsCooperativeCancellation = true,
+        cancellationMode = PythonCancellationMode.COOPERATIVE_THEN_PROCESS_RESTART,
+        limits = r4Capabilities.limits,
+        supportsHostCapabilitySnapshot = true,
+        supportsModuleEntry = true,
+        supportsInteractiveInput = true,
+        supportsStructuredJsonResult = true,
+        supportsOutputArtifacts = true,
+        supportsHostCapabilityBroker = true,
     )
 
     val source = PythonPayloadReference(
