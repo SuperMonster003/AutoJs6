@@ -420,6 +420,89 @@ class PythonU1R2AcceptanceInstrumentationTest {
     }
 
     @Test
+    fun hostFilesRoundTripThroughProtocol15BrokerWithoutEscapingProjectRoot() {
+        val projectRoot = freshProjectRoot()
+        val marker = "M3_HOST_FILES_OK_${UUID.randomUUID()}"
+        val seedFile = File(projectRoot, "host-seed.txt")
+        val outputFile = File(projectRoot, "host-output.txt")
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                import os
+
+                from autojs6 import files, result
+                from autojs6.errors import HostCapabilityError
+
+                seed = files.read_text("host-seed.txt")
+                existed_before = files.exists("host-output.txt")
+                files.write_text("host-output.txt", "$marker:" + seed)
+
+                try:
+                    files.read_text("missing.txt")
+                    missing_code = "NO_ERROR"
+                except HostCapabilityError as error:
+                    missing_code = error.code
+
+                try:
+                    files.exists("../outside.txt")
+                    unsafe_path = "NO_ERROR"
+                except ValueError:
+                    unsafe_path = "VALUE_ERROR"
+
+                entries = files.list()
+                result.set({
+                    "content": files.read_text("host-output.txt"),
+                    "existedAfter": files.exists("host-output.txt"),
+                    "existedBefore": existed_before,
+                    "isDirectory": files.is_dir("."),
+                    "isFile": files.is_file("host-output.txt"),
+                    "listed": "host-output.txt" in entries,
+                    "missingCode": missing_code,
+                    "unsafePath": unsafe_path,
+                    "workspaceSeesWrite": os.path.exists("host-output.txt"),
+                })
+                """.trimIndent() + "\n",
+            )
+            seedFile.writeText("seed", Charsets.UTF_8)
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 Host files execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 Host files execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 Host files execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("$marker:seed", structured.getString("content"))
+                assertFalse(structured.getBoolean("existedBefore"))
+                assertTrue(structured.getBoolean("existedAfter"))
+                assertTrue(structured.getBoolean("isDirectory"))
+                assertTrue(structured.getBoolean("isFile"))
+                assertTrue(structured.getBoolean("listed"))
+                assertEquals("PATH_NOT_FOUND", structured.getString("missingCode"))
+                assertEquals("VALUE_ERROR", structured.getString("unsafePath"))
+                assertFalse(
+                    "Live Host write unexpectedly mutated the frozen CPython workspace",
+                    structured.getBoolean("workspaceSeesWrite"),
+                )
+                assertTrue("Host file write did not create a regular file", outputFile.isFile)
+                assertEquals("$marker:seed", outputFile.readText(Charsets.UTF_8))
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 Host files")
+        }
+    }
+
+    @Test
     fun configuredNinetySecondProjectStreamsBeforeTerminalAndCompletes() {
         val projectRoot = freshProjectRoot()
         val tickMarker = "M1_LIVE_TICK_${UUID.randomUUID()}"

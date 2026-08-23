@@ -12,8 +12,9 @@ import org.junit.Test
 
 class PythonHostCapabilityDispatcherTest {
     @Test
-    fun dispatchesTheCompleteFirstLowRiskCapabilitySliceWithTypedJsonResults() {
+    fun dispatchesEnabledCapabilitiesWithTypedJsonResults() {
         val actions = RecordingActions()
+        actions.fileTexts["seed.txt"] = "seed"
         val dispatcher = dispatcher(actions)
 
         assertNull(success(dispatcher.dispatch(request(1, PythonHostCapabilities.TOAST_SHOW, "text" to "hello"))))
@@ -39,6 +40,38 @@ class PythonHostCapabilityDispatcherTest {
         assertNull(success(dispatcher.dispatch(request(9, PythonHostCapabilities.CONSOLE_WARN, "text" to "warn"))))
         assertNull(success(dispatcher.dispatch(request(10, PythonHostCapabilities.CONSOLE_ERROR, "text" to "error"))))
         assertNull(success(dispatcher.dispatch(request(11, PythonHostCapabilities.NOTICE_SHOW, "text" to "notice"))))
+        assertEquals(
+            "seed",
+            success(dispatcher.dispatch(request(12, PythonHostCapabilities.FILES_READ_TEXT, "path" to "seed.txt"))),
+        )
+        assertNull(
+            success(
+                dispatcher.dispatch(
+                    request(
+                        13,
+                        PythonHostCapabilities.FILES_WRITE_TEXT,
+                        "path" to "written.txt",
+                        "text" to "written",
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            true,
+            success(dispatcher.dispatch(request(14, PythonHostCapabilities.FILES_EXISTS, "path" to "written.txt"))),
+        )
+        assertEquals(
+            true,
+            success(dispatcher.dispatch(request(15, PythonHostCapabilities.FILES_IS_FILE, "path" to "written.txt"))),
+        )
+        assertEquals(
+            true,
+            success(dispatcher.dispatch(request(16, PythonHostCapabilities.FILES_IS_DIR, "path" to "."))),
+        )
+        assertEquals(
+            listOf("seed.txt", "written.txt"),
+            success(dispatcher.dispatch(request(17, PythonHostCapabilities.FILES_LIST, "path" to "."))),
+        )
 
         assertEquals(listOf("hello"), actions.toasts)
         assertEquals("copy", actions.clipboard)
@@ -54,6 +87,7 @@ class PythonHostCapabilityDispatcherTest {
             actions.console,
         )
         assertEquals(listOf("notice"), actions.notices)
+        assertEquals(mapOf("seed.txt" to "seed", "written.txt" to "written"), actions.fileTexts)
     }
 
     @Test
@@ -97,11 +131,19 @@ class PythonHostCapabilityDispatcherTest {
             "INVALID_ARGUMENT",
             failureCode(invalid.dispatch(request(2, PythonHostCapabilities.NOTICE_SHOW, "text" to ""))),
         )
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(
+                invalid.dispatch(
+                    request(3, PythonHostCapabilities.FILES_READ_TEXT, "path" to "../outside.txt"),
+                ),
+            ),
+        )
 
         actions.denyNotice = true
         assertEquals(
             "PERMISSION_DENIED",
-            failureCode(invalid.dispatch(request(3, PythonHostCapabilities.NOTICE_SHOW, "text" to "denied"))),
+            failureCode(invalid.dispatch(request(4, PythonHostCapabilities.NOTICE_SHOW, "text" to "denied"))),
         )
         assertTrue(actions.notices.isEmpty())
 
@@ -116,6 +158,36 @@ class PythonHostCapabilityDispatcherTest {
             "CALL_LIMIT_EXCEEDED",
             failureCode(bounded.dispatch(request(2, PythonHostCapabilities.CLIP_GET))),
         )
+    }
+
+    @Test
+    fun mapsBoundedFileFailuresToStableCodes() {
+        val actions = RecordingActions()
+        val dispatcher = dispatcher(actions)
+        val failures = listOf(
+            PythonHostCapabilityPathNotFoundException() to "PATH_NOT_FOUND",
+            PythonHostCapabilityPathTypeException() to "PATH_TYPE_MISMATCH",
+            PythonHostCapabilityFileEncodingException(IllegalArgumentException()) to "FILE_ENCODING_ERROR",
+            PythonHostCapabilityResultLimitException() to "RESULT_LIMIT_EXCEEDED",
+            SecurityException() to "PERMISSION_DENIED",
+        )
+
+        failures.forEachIndexed { index, (failure, expectedCode) ->
+            actions.fileFailure = failure
+            assertEquals(
+                expectedCode,
+                failureCode(
+                    dispatcher.dispatch(
+                        request(
+                            (index + 1).toLong(),
+                            PythonHostCapabilities.FILES_READ_TEXT,
+                            "path" to "seed.txt",
+                        ),
+                    ),
+                ),
+            )
+        }
+        assertTrue(actions.fileTexts.isEmpty())
     }
 
     @Test
@@ -160,6 +232,7 @@ class PythonHostCapabilityDispatcherTest {
             null, JsonNull.INSTANCE -> null
             else -> when {
                 value.isJsonObject -> value.asJsonObject
+                value.isJsonArray -> value.asJsonArray.map { it.asString }
                 value.asJsonPrimitive.isBoolean -> value.asBoolean
                 value.asJsonPrimitive.isString -> value.asString
                 else -> error("Unexpected test response type")
@@ -181,7 +254,9 @@ class PythonHostCapabilityDispatcherTest {
         val urls = mutableListOf<String>()
         val console = mutableListOf<Pair<PythonHostConsoleLevel, String>>()
         val notices = mutableListOf<String>()
+        val fileTexts = linkedMapOf<String, String>()
         var denyNotice = false
+        var fileFailure: RuntimeException? = null
 
         override fun showToast(text: String) {
             toasts += text
@@ -217,6 +292,36 @@ class PythonHostCapabilityDispatcherTest {
         override fun postNotice(text: String) {
             if (denyNotice) throw PythonHostCapabilityPermissionDeniedException()
             notices += text
+        }
+
+        override fun readFileText(path: String): String {
+            fileFailure?.let { throw it }
+            return fileTexts[path].orEmpty()
+        }
+
+        override fun writeFileText(path: String, text: String) {
+            fileFailure?.let { throw it }
+            fileTexts[path] = text
+        }
+
+        override fun fileExists(path: String): Boolean {
+            fileFailure?.let { throw it }
+            return path == "." || path in fileTexts
+        }
+
+        override fun isFile(path: String): Boolean {
+            fileFailure?.let { throw it }
+            return path in fileTexts
+        }
+
+        override fun isDirectory(path: String): Boolean {
+            fileFailure?.let { throw it }
+            return path == "."
+        }
+
+        override fun listDirectory(path: String): List<String> {
+            fileFailure?.let { throw it }
+            return fileTexts.keys.sorted()
         }
     }
 
