@@ -22,6 +22,7 @@ class NodeAccessibilitySmokeActivity : Activity() {
 
     private lateinit var button: Button
     private lateinit var selectorInput: EditText
+    private lateinit var captureTarget: TextView
     private lateinit var swipeTarget: TextView
     private var swipeDownY = 0f
 
@@ -61,6 +62,10 @@ class NodeAccessibilitySmokeActivity : Activity() {
                     inputTextLatch.countDown()
                 }
             }
+        }
+        captureTarget = TextView(this).apply {
+            contentDescription = CAPTURE_TARGET_DESC
+            setBackgroundColor(CAPTURE_TARGET_COLOR)
         }
         swipeTarget = TextView(this).apply {
             text = SWIPE_TEXT
@@ -106,6 +111,13 @@ class NodeAccessibilitySmokeActivity : Activity() {
                     ),
                 )
                 addView(
+                    captureTarget,
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        (CAPTURE_TARGET_HEIGHT_DP * resources.displayMetrics.density).toInt(),
+                    ),
+                )
+                addView(
                     swipeTarget,
                     LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -117,6 +129,8 @@ class NodeAccessibilitySmokeActivity : Activity() {
     }
 
     fun buttonCenterOnScreen(): IntArray = centerOnScreen(button)
+
+    fun captureTargetCenterOnScreen(): IntArray = centerOnScreen(captureTarget)
 
     fun swipeCoordinatesOnScreen(): Array<IntArray> {
         val location = IntArray(2)
@@ -142,10 +156,13 @@ class NodeAccessibilitySmokeActivity : Activity() {
         const val SELECTOR_INPUT_DESC = "AutoJs6 Python selector smoke input"
         const val SELECTOR_INPUT_INITIAL_TEXT = "selector seed"
         const val SELECTOR_INPUT_UPDATED_TEXT = "selector updated"
+        const val CAPTURE_TARGET_DESC = "AutoJs6 Python screen capture smoke target"
         const val CLICKED_TEXT = "AutoJs6 Node accessibility smoke clicked"
         const val LONG_CLICKED_TEXT = "AutoJs6 Node accessibility smoke long clicked"
         const val SWIPE_TEXT = "AutoJs6 accessibility smoke swipe"
         const val SWIPE_DESC = "AutoJs6 accessibility smoke swipe target"
+        val CAPTURE_TARGET_COLOR: Int = Color.rgb(0x12, 0x34, 0x56)
+        private const val CAPTURE_TARGET_HEIGHT_DP = 96
         private const val SWIPE_TARGET_HEIGHT_DP = 240
         private const val SWIPE_MIN_DISTANCE_PX = 40f
 
