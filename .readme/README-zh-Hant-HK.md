@@ -198,7 +198,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Python Runtime 協議 1.5 Host broker 開放有界且綁定單次執行的無障礙樹快照與 AND 組合選擇器查詢, 透過不透明節點引用執行明確點擊與文字設定; 快照, 掃描, 字串, 保留節點及回應均有固定上限, 無障礙不可用, 掃描不完整與節點過期時返回穩定的類型化錯誤
 * `新增` Python Runtime 協議 1.5 Host broker 透過 Android 11+ 無障礙服務開放執行級螢幕截圖, 以 PNG/JPEG 編碼並只保留一張圖像, 透過 32 KiB 順序分塊及 SHA-256 元數據傳輸, 編碼大小上限為 4 MiB, 支持明確釋放並在終態覆寫字節; 不開啟權限介面, 無障礙不可用, 截圖失敗, 圖像句柄過期及超限均返回穩定的類型化錯誤
 * `新增` Python Runtime 協議 1.5 Host broker 可在最新的 Android 11+ 無障礙截圖中按可選區域及逐通道閾值搜尋有界 RGB 顏色, 按行優先返回首個座標或確定性的未命中結果, 不傳輸或保留圖像字節
-* `新增` Python Runtime 協議 1.5 Host broker 接收一份執行級 PNG/JPEG 模板, 透過 24 KiB 順序分塊、1 MiB 編碼上限及 SHA-256 校驗上傳, 解碼上限為單邊 2048 像素及總計 100 萬像素, 並以不透明模板像素和 RGB 閾值在最新的 Android 11+ 無障礙截圖中按行優先確定性匹配; 生命週期、區域及比較預算均 fail-closed, 且不依賴 OpenCV 運行時
+* `新增` Python Runtime 協議 1.5 Host broker 接收一份執行級 PNG/JPEG 模板, 透過 24 KiB 順序分塊、1 MiB 編碼上限及 SHA-256 校驗上傳, 解碼上限為單邊 2048 像素及總計 100 萬像素, 並以不透明模板像素和 RGB 閾值在最新的 Android 11+ 無障礙截圖中按行優先確定性匹配; 生命週期、區域及比較預算均 fail-closed, 且不依賴 OpenCV 運行時, Android 強制的 333 ms 截圖請求間隔僅在收到精確的間隔過短錯誤時於 350 ms 後在既有截止時間內有界重試
 * `新增` Python Runtime 明確嚴格 JSON 結果在腳本終態後以 `[result]` 前綴寫入宿主控制台, 已校驗輸出 artifact 原子發布到項目或腳本目錄下的 `.python-artifacts` 執行專屬目錄並打印絕對路徑; 該保留目錄不進入後續項目快照
 * `新增` 獨立 Lua Runtime 插件後端, 支持通過單獨的 PUC Lua 5.4.8 插件進程運行本地 .lua 文件, 並校驗固定組件/簽名/協議/ABI, 提供有界執行且絕不回退到 JavaScript
 * `新增` 獨立 Java/Kotlin JVM Source Runtime 插件後端, 支持在隔離進程中編譯及運行單文件 .java/.kt 腳本, 提供 package/import, 實時 console 輸出, 可取消 sleep, 宿主 toast 及顯式能力協商
