@@ -717,13 +717,13 @@ class TypeScriptCompilerPluginClientDeviceTest {
         withAccessibilityAutomation(
             description = "media-projection ${consent.name.lowercase()}",
             action = {
-                val initialButtonId = when (consent) {
-                    MediaProjectionConsent.ALLOW -> POSITIVE_BUTTON_ID
-                    MediaProjectionConsent.DENY -> NEGATIVE_BUTTON_ID
+                val initialButtonIds = when (consent) {
+                    MediaProjectionConsent.ALLOW -> setOf(POSITIVE_BUTTON_ID)
+                    MediaProjectionConsent.DENY -> NEGATIVE_BUTTON_IDS
                 }
                 waitForAccessibilityNode(ACCESSIBILITY_TIMEOUT_MILLIS) { node ->
                     node.packageName?.toString() == SYSTEM_UI_PACKAGE &&
-                        node.viewIdResourceName == initialButtonId
+                        node.viewIdResourceName in initialButtonIds
                 }
 
                 if (consent == MediaProjectionConsent.ALLOW) {
@@ -743,7 +743,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
 
                 val terminalButton = waitForAccessibilityNode(ACCESSIBILITY_TIMEOUT_MILLIS) { node ->
                     node.packageName?.toString() == SYSTEM_UI_PACKAGE &&
-                        node.viewIdResourceName == initialButtonId
+                        node.viewIdResourceName in initialButtonIds
                 }
                 assertTrue("Could not click the media-projection consent button", clickNodeOrAncestor(terminalButton))
             },
@@ -1096,7 +1096,10 @@ class TypeScriptCompilerPluginClientDeviceTest {
         const val AUTOJS_ACCESSIBILITY_SERVICE =
             "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
         const val POSITIVE_BUTTON_ID = "android:id/button1"
-        const val NEGATIVE_BUTTON_ID = "android:id/button2"
+        val NEGATIVE_BUTTON_IDS = setOf(
+            "android:id/button2",
+            "android:id/button3",
+        )
         const val SPINNER_ITEM_ID = "android:id/text1"
         const val UI_BUTTON_TEXT = "Finish TypeScript UI"
         val SCREEN_SHARE_MODE_IDS = setOf(
