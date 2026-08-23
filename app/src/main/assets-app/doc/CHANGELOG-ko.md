@@ -37,6 +37,7 @@
 * `추가` JVM Source Runtime 지원 범위는 단일 파일 Java 8 (Java provider 최소 API 24) 및 Kotlin 2.3 (Kotlin provider 최소 API 26)이며, 이번 릴리스의 실제 기기 smoke는 API 31/arm64-v8a에서만 수행했고 검증하지 않은 API 수준은 지원을 주장하지 않음
 * `추가` 플러그인 시스템에서 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/텍스트 변환/미디어 정보 등의 확장 API 지원
 * `추가` 플러그인 시스템에서 버전 지정 TaggedWire 전송과 DEX 컴파일/On-Device AI를 위한 v1 개발 프로토콜 팩을 지원하고 전용 적합성 테스트 앱 및 적대적 fixture 제공
+* `추가` AutoJs6 공식 플러그인이 서명으로 보호된 버전 지정 읽기 전용 설정 계약을 통해 호스트 테마 색상/다크 모드 정책/언어의 모양 스냅샷을 읽도록 지원
 * `추가` 플러그인 시스템에서 오프라인 프로젝트 문서 확장 인터페이스 지원
 * `추가` 파일 관리자가 단일 파일 읽기 전용 Explorer Action 플러그인 확장을 지원하고 기본 파일 페이지의 더보기 메뉴에 플러그인 작업을 동적으로 로드
 * `추가` 파일 관리자가 Explorer Action 프로토콜 v2의 기본 작업을 지원하여 이미지 보기, 오디오 재생, 비디오 재생을 3개의 독립 플러그인으로 제공

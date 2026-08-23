@@ -197,6 +197,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` JVM Source Runtime 支援範圍為單一檔案 Java 8 (Java provider 最低 API 24) 與 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次發布僅在 API 31/arm64-v8a 實機完成 smoke, 不宣告未驗證 API 層級
 * `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文字轉換/媒體資訊等擴充介面
 * `新增` 外掛系統提供版本化 TaggedWire 傳輸及 DEX 編譯與 On-Device AI v1 開發協定套件, 並配備專用符合性測試應用程式及惡意情境夾具
+* `新增` AutoJs6 官方外掛可透過簽章權限保護的版本化唯讀設定協定, 讀取主程式主題色, 深色模式策略及語言的外觀快照
 * `新增` 外掛系統支援離線專案文件擴充介面
 * `新增` 檔案管理器支援單一檔案唯讀 Explorer Action 外掛擴充介面, 並在主檔案頁面的更多選單中動態載入外掛動作
 * `新增` 檔案管理器支援 Explorer Action 協定 v2 主要操作, 透過三個獨立外掛提供圖片檢視, 音訊播放及影片播放

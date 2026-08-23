@@ -24,6 +24,7 @@
 * `新增` Lua Runtime 插件, 内置 PUC Lua 5.4.8, 支持识别文件扩展名 (.lua) 运行 Lua 脚本
 * `新增` 独立 Java/Kotlin JVM Source Runtime 插件后端, 支持在隔离进程中编译和运行单文件 .java/.kt 脚本, 提供 package/import, 实时 console 输出, 可取消 sleep, 宿主 toast 与显式能力协商
 * `新增` JVM Source Runtime 支持范围为单文件 Java 8 (Java provider 最低 API 24) 与 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次发布仅在 API 31/arm64-v8a 真机完成 smoke, 不声明未验证 API 级别
+* `新增` AutoJs6 官方插件可通过签名权限保护的版本化只读设置契约, 读取宿主主题色, 暗色模式策略及语言的外观快照
 * `新增` ai 模块, 支持单次及流式请求 (参阅 项目文档 > [人工智能](https://docs.autojs6.com/#/ai))
 * `新增` `ai.ask`, `ai.chat` 与 `ai.stream` 本地插件路由支持按顺序传入纯文本 `system`, `user` 与 `assistant` 消息历史的单次及流式请求, 并要求最后一条消息为 `user` 角色; 可通过 `plugin: true` 简写选择官方设备端 AI 插件, 单模型场景可省略模型 ID; 新增 `ai.models` 方法枚举插件模型, 插件未安装/未启用/无模型时给出明确错误提示; AI 服务设置提供本地 AI 插件入口; 插件生成会返回精确的输入/输出/总 token 数, `ai.chat` 通过 `usage` 暴露这些数据, 并在 `usage.raw.durationMillis` 中提供插件实测生成耗时
 * `新增` 全局 JavaScript (Rhino) `ai.session` API 可创建持久设备端插件 Conversation, 为会话固定提供商/模型/生成参数, 后续 `ask`/`chat`/`stream` 轮次只发送新的用户提示词; 正常完成后保留上下文, 取消/超时/协议失败或显式关闭时释放整个会话

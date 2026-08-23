@@ -32,6 +32,7 @@
         "JVM Source Runtime 支持範圍為單文件 Java 8 (Java provider 最低 API 24) 及 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次發佈僅在 API 31/arm64-v8a 真機完成 smoke, 不聲明未驗證 API 級別",
         "插件系統支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本轉換/媒體信息等擴展接口",
         "插件系統提供版本化 TaggedWire 傳輸及 DEX 編譯與 On-Device AI v1 開發協議包, 並配備專用的一致性測試應用程式及惡意場景夾具",
+        "AutoJs6 官方插件可通過簽名權限保護的版本化唯讀設定協議, 讀取宿主主題色, 深色模式策略及語言的外觀快照",
         "插件系統支持離線項目文檔擴展接口",
         "文件管理器支持單文件只讀 Explorer Action 插件擴展接口, 並在主文件頁面的更多菜單中動態加載插件動作",
         "文件管理器支持 Explorer Action 協議 v2 主操作, 通過三個獨立插件提供圖像查看, 音頻播放和視頻播放",

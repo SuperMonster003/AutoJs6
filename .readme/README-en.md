@@ -197,6 +197,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` JVM Source Runtime support scope is single-file Java 8 (Java provider min API 24) and Kotlin 2.3 (Kotlin provider min API 26); this release was device-smoked only on API 31/arm64-v8a and makes no claim for untested API levels
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/text conversion/media information and more
 * `Feature` Plugin system provides versioned TaggedWire transport and v1 developer protocol packs for DEX compilation and On-Device AI, with dedicated conformance test apps and hostile fixtures
+* `Feature` Official AutoJs6 plugins can read a versioned, read-only host appearance snapshot for theme colors, dark-mode policy, and language through the signature-protected settings contract
 * `Feature` Plugin system supports an extension interface for offline project documentation
 * `Feature` File manager supports single-file read-only Explorer Action plugin extensions and dynamically loads their actions in the overflow menu of the main file page
 * `Feature` File manager supports Explorer Action protocol v2 primary actions to provide image viewing, audio playback, and video playback through three independent plugins

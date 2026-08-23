@@ -37,6 +37,7 @@
 * `Nuevo` El alcance de JVM Source Runtime es Java 8 de un solo archivo (plugin Java, API mínima 24) y Kotlin 2.3 (plugin Kotlin, API mínima 26); esta versión solo se probó en un dispositivo API 31/arm64-v8a y no afirma compatibilidad con niveles API no probados
 * `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversión de texto/información multimedia y más
 * `Nuevo` El sistema de plugins ofrece transporte TaggedWire versionado y paquetes de protocolo de desarrollo v1 para compilación DEX y On-Device AI, con aplicaciones de prueba de conformidad dedicadas y escenarios hostiles
+* `Nuevo` Los plugins oficiales de AutoJs6 pueden leer una instantánea versionada y de solo lectura de la apariencia del host para los colores del tema, la política del modo oscuro y el idioma mediante el contrato de configuración protegido por firma
 * `Nuevo` El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión
 * `Nuevo` El explorador de archivos admite extensiones de plugin Explorer Action de solo lectura para un archivo y carga dinámicamente sus acciones en el menú adicional de la página principal de archivos
 * `Nuevo` El explorador de archivos admite acciones principales de Explorer Action con el protocolo v2 para ofrecer visualización de imágenes, reproducción de audio y reproducción de video mediante tres plugins independientes
