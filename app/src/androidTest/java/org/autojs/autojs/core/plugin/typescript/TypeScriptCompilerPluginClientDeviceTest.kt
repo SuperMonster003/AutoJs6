@@ -15,10 +15,12 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.TypeScriptFileSource
+import org.autojs.autojs6.R
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -127,6 +129,28 @@ class TypeScriptCompilerPluginClientDeviceTest {
             }
         } finally {
             System.clearProperty(markerKey)
+        }
+    }
+
+    @Test
+    fun rejectsTsxWithLocalizedSingleFileProfileError() {
+        withSource(
+            name = "component.tsx",
+            source = "const view = <text>Hello</text>",
+        ) { source ->
+            val launch = ScriptLaunchSourceFactory.createFileLaunch(source)
+            try {
+                AutoJs.instance.scriptEngineService.execute(
+                    launch.source,
+                    ExecutionConfig(workingDirectory = source.parent.orEmpty()),
+                )
+                fail("Ordinary single-file TSX must be rejected before engine creation")
+            } catch (error: IllegalArgumentException) {
+                assertEquals(
+                    context.getString(R.string.error_typescript_source_not_executable, source.name),
+                    error.message,
+                )
+            }
         }
     }
 

@@ -173,6 +173,15 @@ public abstract class JavaScriptSource extends ScriptSource {
                 !isTypeScriptDeclarationFileName(lowerCaseName);
     }
 
+    public static boolean isUnsupportedSingleFileTypeScriptFileName(String fileName) {
+        if (fileName == null) {
+            return false;
+        }
+        String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
+        return lowerCaseName.endsWith(".tsx") ||
+                isTypeScriptDeclarationFileName(lowerCaseName);
+    }
+
     public static boolean isJavaScriptFileName(String fileName) {
         if (fileName == null) {
             return false;

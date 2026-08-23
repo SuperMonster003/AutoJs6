@@ -454,6 +454,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">The transformer for required property \"%1$s\" cannot return nullish</string>
     <string name="error_thread_is_not_alive">Thread is not alive</string>
     <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
+    <string name="error_typescript_compiler_plugin_unavailable">TypeScript Compiler plugin is unavailable. Install or enable it in Plugin Center, then try again.</string>
+    <string name="error_typescript_source_not_executable">TypeScript source \"%1$s\" is not executable in the single-file Rhino profile</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Current file path is unknown, unable to change file encoding</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Current file path is unknown, unable to display version history</string>

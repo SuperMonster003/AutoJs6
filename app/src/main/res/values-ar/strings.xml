@@ -460,6 +460,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">لا يمكن لمحول الخاصية المطلوبة \"%1$s\" إرجاع قيمة فارغة</string>
     <string name="error_thread_is_not_alive">الموضوع ليس على قيد الحياة</string>
     <string name="error_timeout_while_querying_plugin_info">انتهت مهلة الاستعلام عن معلومات المكوّن الإضافي %1$s.</string>
+    <string name="error_typescript_compiler_plugin_unavailable">ملحق مترجم TypeScript غير متاح. ثبته أو مكّنه في مركز الملحقات ثم أعد المحاولة.</string>
+    <string name="error_typescript_source_not_executable">لا يمكن تنفيذ مصدر TypeScript \"%1$s\" ضمن ملف تعريف Rhino للملف الواحد</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف, لا يمكن تغيير ترميز الملف</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن عرض تفاصيل الملف</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن عرض سجل الاصدارات</string>

@@ -19,6 +19,9 @@ class JavaScriptSourceTest {
         assertFalse(JavaScriptSource.isNodeJsFileName("main.ts"))
         assertTrue(JavaScriptSource.isNodeJsFileName("main.mts"))
         assertFalse(JavaScriptSource.isRhinoTypeScriptFileName("main.mts"))
+        assertTrue(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("component.tsx"))
+        assertTrue(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("types.d.ts"))
+        assertFalse(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("main.ts"))
     }
 
     @Test

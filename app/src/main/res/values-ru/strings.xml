@@ -458,6 +458,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Преобразователь для требуемого свойства \"%1$s\" не может возвращать пустое значение</string>
     <string name="error_thread_is_not_alive">Нить не жива</string>
     <string name="error_timeout_while_querying_plugin_info">Тайм-аут при запросе информации о плагине %1$s.</string>
+    <string name="error_typescript_compiler_plugin_unavailable">Плагин компилятора TypeScript недоступен. Установите или включите его в Центре плагинов и повторите попытку.</string>
+    <string name="error_typescript_source_not_executable">Исходный файл TypeScript \"%1$s\" нельзя выполнить в однофайловом профиле Rhino</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно изменить кодировку файла</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать сведения о файле</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать историю версий</string>

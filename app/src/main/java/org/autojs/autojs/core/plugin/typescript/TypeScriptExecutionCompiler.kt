@@ -9,6 +9,8 @@ import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.TypeScriptFileSource
+import org.autojs.autojs6.R
+import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 
 internal data class TypeScriptExecutableSource(
@@ -36,12 +38,22 @@ internal object TypeScriptExecutionCompiler {
             ?: source.originPath?.takeIf(String::isNotBlank)
             ?: source.originUri?.takeIf(String::isNotBlank)
             ?: runCatching { source.file.canonicalPath }.getOrElse { source.file.absolutePath }
-        val output = runBlocking {
-            TypeScriptCompilerPluginClient(context).compileSingleFile(
-                sourceFile = source.file,
-                sourceName = sourceName,
-                sourceIdentity = sourceIdentity,
-            )
+        val output = try {
+            runBlocking {
+                TypeScriptCompilerPluginClient(context).compileSingleFile(
+                    sourceFile = source.file,
+                    sourceName = sourceName,
+                    sourceIdentity = sourceIdentity,
+                )
+            }
+        } catch (error: TypeScriptCompilerException) {
+            if (error.code == TypeScriptCompilerContract.ERROR_COMPILER_UNAVAILABLE) {
+                throw TypeScriptExecutionException(
+                    context.getString(R.string.error_typescript_compiler_plugin_unavailable),
+                    error,
+                )
+            }
+            throw error
         }
         return when (output) {
             is TypeScriptCompilationOutput.Emitted -> TypeScriptExecutableSource(
@@ -116,3 +128,8 @@ internal class TypeScriptDiagnosticsException(
         }
     },
 )
+
+internal class TypeScriptExecutionException(
+    message: String,
+    cause: Throwable,
+) : RuntimeException(message, cause)

@@ -458,6 +458,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Le transformateur pour la propriété requise \"%1$s\" ne peut pas retourner une valeur nulle</string>
     <string name="error_thread_is_not_alive">Thread n\'est pas vivant</string>
     <string name="error_timeout_while_querying_plugin_info">Délai d\'attente dépassé lors de la requête des informations du plugin %1$s.</string>
+    <string name="error_typescript_compiler_plugin_unavailable">Le plugin compilateur TypeScript n\'est pas disponible. Installez-le ou activez-le dans le Centre des plugins, puis réessayez.</string>
+    <string name="error_typescript_source_not_executable">La source TypeScript \"%1$s\" n\'est pas exécutable avec le profil Rhino à fichier unique</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible de modifier l\'encodage du fichier</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible d\'afficher les details du fichier</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible d\'afficher l\'historique des versions</string>

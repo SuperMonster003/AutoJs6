@@ -1,10 +1,13 @@
 package org.autojs.autojs.script;
 
+import static org.autojs.autojs.util.StringUtils.str;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,6 +60,13 @@ public class JavaScriptFileSource extends JavaScriptSource {
 
     @Override
     protected int parseExecutionMode() {
+        File semanticFile = getSemanticFile();
+        if (JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName(semanticFile.getName())) {
+            throw new IllegalArgumentException(str(
+                    R.string.error_typescript_source_not_executable,
+                    semanticFile.getName()
+            ));
+        }
         short flags = EncryptedScriptFileHeader.getHeaderFlags(mFile);
         int mode;
         if (flags == EncryptedScriptFileHeader.FLAG_INVALID_FILE) {
