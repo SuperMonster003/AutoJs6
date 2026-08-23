@@ -14,6 +14,7 @@ import android.os.SystemClock
 import android.service.notification.StatusBarNotification
 import android.util.Base64
 import android.util.Log
+import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.app.NotificationManagerCompat
 import androidx.test.platform.app.InstrumentationRegistry
@@ -40,6 +41,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
@@ -517,7 +519,9 @@ class PythonU1R2AcceptanceInstrumentationTest {
                 AutoJsAccessibilityService.waitForStarted(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
             )
             instrumentation.runOnMainSync {
-                activity.window.decorView.announceForAccessibility(AUTOMATOR_ACCESSIBILITY_PROBE)
+                activity.window.decorView.sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+                )
             }
             assumeTrue(
                 "The AutoJs6 accessibility service connected but did not become operational",
@@ -593,6 +597,56 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
             restoreHostForeground()
             cleanProjectRoot(projectRoot, "M3 automator")
+        }
+    }
+
+    @Test
+    fun automatorFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
+        assumeFalse(
+            "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
+            AutoJsAccessibilityService.hasInstance(),
+        )
+        val projectRoot = freshProjectRoot()
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import automator, result
+                from autojs6.errors import CapabilityUnavailableError
+
+                try:
+                    automator.click(1, 1)
+                    outcome = {"error": "NO_ERROR", "message": ""}
+                except CapabilityUnavailableError as error:
+                    outcome = {"error": type(error).__name__, "message": str(error)}
+                result.set(outcome)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 unavailable automator execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 unavailable automator execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 unavailable automator execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("CapabilityUnavailableError", structured.getString("error"))
+                assertEquals(
+                    "AutoJs6 accessibility service is unavailable",
+                    structured.getString("message"),
+                )
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 unavailable automator")
         }
     }
 
@@ -2087,7 +2141,6 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val AUTOMATOR_SERVICE_TIMEOUT_MILLIS = 30_000L
         const val AUTOMATOR_ACTIVITY_SETTLE_MILLIS = 500L
         const val AUTOMATOR_EVENT_TIMEOUT_MILLIS = 5_000L
-        const val AUTOMATOR_ACCESSIBILITY_PROBE = "AutoJs6 Python automator accessibility probe"
         const val MAX_CONSOLE_DIAGNOSTIC_CHARS = 4_096
     }
 }
