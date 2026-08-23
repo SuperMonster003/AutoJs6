@@ -236,6 +236,43 @@ class PythonHostCapabilityDispatcherTest {
                 ),
             ),
         )
+        assertEquals(
+            SCREEN_IMAGE.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        35,
+                        PythonHostCapabilities.IMAGES_CAPTURE_SCREEN,
+                        "format" to "png",
+                        "quality" to 100,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            SCREEN_CHUNK.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        36,
+                        PythonHostCapabilities.IMAGES_READ_CHUNK,
+                        "imageId" to SCREEN_IMAGE.id,
+                        "offset" to 0,
+                    ),
+                ),
+            ),
+        )
+        assertNull(
+            success(
+                dispatcher.dispatch(
+                    request(
+                        37,
+                        PythonHostCapabilities.IMAGES_RELEASE,
+                        "imageId" to SCREEN_IMAGE.id,
+                    ),
+                ),
+            ),
+        )
 
         assertEquals(listOf("hello"), actions.toasts)
         assertEquals("copy", actions.clipboard)
@@ -277,6 +314,9 @@ class PythonHostCapabilityDispatcherTest {
         )
         assertEquals(listOf(SELECTOR_NODE.id), actions.nodeClicks)
         assertEquals(listOf(SELECTOR_NODE.id to "updated"), actions.nodeTexts)
+        assertEquals(listOf("png" to 100), actions.screenCaptures)
+        assertEquals(listOf(SCREEN_IMAGE.id to 0), actions.screenChunkReads)
+        assertEquals(listOf(SCREEN_IMAGE.id), actions.screenReleases)
     }
 
     @Test
@@ -482,6 +522,98 @@ class PythonHostCapabilityDispatcherTest {
                         "query" to mapOf("text" to "missing"),
                         "maxNodes" to 1,
                         "maxDepth" to 0,
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun validatesImageArgumentsAndMapsStableCaptureFailures() {
+        val actions = RecordingActions()
+        val dispatcher = dispatcher(actions)
+        val invalidRequests = listOf(
+            request(
+                1,
+                PythonHostCapabilities.IMAGES_CAPTURE_SCREEN,
+                "format" to "jpg",
+                "quality" to 100,
+            ),
+            request(
+                2,
+                PythonHostCapabilities.IMAGES_CAPTURE_SCREEN,
+                "format" to "png",
+                "quality" to 0,
+            ),
+            request(
+                3,
+                PythonHostCapabilities.IMAGES_CAPTURE_SCREEN,
+                "format" to "jpeg",
+                "quality" to 101,
+            ),
+            request(
+                4,
+                PythonHostCapabilities.IMAGES_READ_CHUNK,
+                "imageId" to "raw-handle",
+                "offset" to 0,
+            ),
+            request(
+                5,
+                PythonHostCapabilities.IMAGES_READ_CHUNK,
+                "imageId" to SCREEN_IMAGE.id,
+                "offset" to -1,
+            ),
+            request(
+                6,
+                PythonHostCapabilities.IMAGES_READ_CHUNK,
+                "imageId" to SCREEN_IMAGE.id,
+                "offset" to PythonHostImagePolicy.MAX_IMAGE_BYTES,
+            ),
+            request(
+                7,
+                PythonHostCapabilities.IMAGES_RELEASE,
+                "imageId" to "image-0",
+            ),
+        )
+        invalidRequests.forEach { encoded ->
+            assertEquals("INVALID_ARGUMENT", failureCode(dispatcher.dispatch(encoded)))
+        }
+        assertTrue(actions.screenCaptures.isEmpty())
+        assertTrue(actions.screenChunkReads.isEmpty())
+        assertTrue(actions.screenReleases.isEmpty())
+
+        val failures = listOf(
+            PythonHostCapabilityAccessibilityUnavailableException() to "ACCESSIBILITY_UNAVAILABLE",
+            PythonHostCapabilityScreenCaptureUnavailableException() to "SCREEN_CAPTURE_UNAVAILABLE",
+            PythonHostCapabilityScreenCaptureFailedException() to "SCREEN_CAPTURE_FAILED",
+            PythonHostCapabilityResultLimitException() to "RESULT_LIMIT_EXCEEDED",
+        )
+        failures.forEachIndexed { index, (failure, expectedCode) ->
+            actions.imageFailure = failure
+            assertEquals(
+                expectedCode,
+                failureCode(
+                    dispatcher.dispatch(
+                        request(
+                            (index + 8).toLong(),
+                            PythonHostCapabilities.IMAGES_CAPTURE_SCREEN,
+                            "format" to "png",
+                            "quality" to 100,
+                        ),
+                    ),
+                ),
+            )
+        }
+        actions.imageFailure = PythonHostCapabilityStaleImageException()
+        assertEquals(
+            "STALE_IMAGE",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        12,
+                        PythonHostCapabilities.IMAGES_READ_CHUNK,
+                        "imageId" to SCREEN_IMAGE.id,
+                        "offset" to 0,
                     ),
                 ),
             ),
@@ -753,6 +885,9 @@ class PythonHostCapabilityDispatcherTest {
         val selectorFinds = mutableListOf<Triple<PythonHostSelectorQuery, Int, Int>>()
         val nodeClicks = mutableListOf<String>()
         val nodeTexts = mutableListOf<Pair<String, String>>()
+        val screenCaptures = mutableListOf<Pair<String, Int>>()
+        val screenChunkReads = mutableListOf<Pair<String, Int>>()
+        val screenReleases = mutableListOf<String>()
         var stopSelfRequests = 0
         var backRequests = 0
         var homeRequests = 0
@@ -763,6 +898,7 @@ class PythonHostCapabilityDispatcherTest {
         var engineFailure: RuntimeException? = null
         var automatorFailure: RuntimeException? = null
         var selectorFailure: RuntimeException? = null
+        var imageFailure: RuntimeException? = null
 
         override fun showToast(text: String) {
             toasts += text
@@ -930,6 +1066,23 @@ class PythonHostCapabilityDispatcherTest {
             return true
         }
 
+        override fun captureScreen(format: String, quality: Int): PythonHostScreenImageDescriptor {
+            imageFailure?.let { throw it }
+            screenCaptures += format to quality
+            return SCREEN_IMAGE
+        }
+
+        override fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk {
+            imageFailure?.let { throw it }
+            screenChunkReads += imageId to offset
+            return SCREEN_CHUNK
+        }
+
+        override fun releaseScreenImage(imageId: String) {
+            imageFailure?.let { throw it }
+            screenReleases += imageId
+        }
+
         override fun close() {
             closeRequests += 1
         }
@@ -990,6 +1143,21 @@ class PythonHostCapabilityDispatcherTest {
             generation = 1,
             truncated = false,
             nodes = listOf(SELECTOR_NODE),
+        )
+        val SCREEN_IMAGE = PythonHostScreenImageDescriptor(
+            id = "image-1",
+            format = "png",
+            width = 1080,
+            height = 2400,
+            byteLength = 3,
+            sha256 = "0".repeat(64),
+        )
+        val SCREEN_CHUNK = PythonHostScreenImageChunk(
+            imageId = SCREEN_IMAGE.id,
+            offset = 0,
+            data = "AAEC",
+            nextOffset = 3,
+            eof = true,
         )
     }
 }
