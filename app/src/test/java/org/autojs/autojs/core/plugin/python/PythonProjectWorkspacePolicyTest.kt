@@ -49,10 +49,24 @@ class PythonProjectWorkspacePolicyTest {
     }
 
     @Test
-    fun workspaceLimitsRemainTheR4MinimumProfile() {
-        assertEquals(16L * 1024L * 1024L, PythonProjectWorkspacePolicy.MAX_ARCHIVE_BYTES)
-        assertEquals(1_024, PythonProjectWorkspacePolicy.MAX_ENTRIES)
-        assertEquals(32L * 1024L * 1024L, PythonProjectWorkspacePolicy.MAX_UNCOMPRESSED_BYTES)
+    fun workspaceLimitsExposeTheProjectLocalPackageProfile() {
+        assertEquals(64L * 1024L * 1024L, PythonProjectWorkspacePolicy.MAX_ARCHIVE_BYTES)
+        assertEquals(8_192, PythonProjectWorkspacePolicy.MAX_ENTRIES)
+        assertEquals(128L * 1024L * 1024L, PythonProjectWorkspacePolicy.MAX_UNCOMPRESSED_BYTES)
+    }
+
+    @Test
+    fun projectPlanAcceptsMoreThanTheLegacyWorkspaceEntryLimit() {
+        val root = temporaryFolder.newFolder()
+        val entry = File(root, "main.py").apply { writeText("print('ok')\n") }
+        repeat(1_025) { index ->
+            File(root, "vendored_$index.py").writeText("VALUE = $index\n")
+        }
+
+        val plan = PythonProjectWorkspacePolicy.plan(PythonProjectSource.create(root, entry))
+
+        assertEquals(1_026, plan.files.size)
+        assertEquals(1_025, plan.files.count { !it.entryPoint })
     }
 
     @Test

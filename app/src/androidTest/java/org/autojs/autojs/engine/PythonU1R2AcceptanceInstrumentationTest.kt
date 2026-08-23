@@ -43,12 +43,16 @@ import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.Random
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import java.util.zip.ZipInputStream
 
 /**
  * Opt-in U1-R2 acceptance through the public Host engine and the exact real CPython plugin.
@@ -641,6 +645,121 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
         } finally {
             cleanProjectRoot(projectRoot, "M1 HTTPS")
+        }
+    }
+
+    @Test
+    fun projectLocalRequestsCrossesLegacyWorkspaceLimitsAndCompletesHttps() {
+        val arguments = InstrumentationRegistry.getArguments()
+        val networkUrl = arguments.getString(ARG_NETWORK_URL).orEmpty()
+        val packageArchivePath = arguments.getString(ARG_PROJECT_LOCAL_PACKAGE_ARCHIVE).orEmpty()
+        assumeTrue(
+            "M4 project-local requests smoke requires -e $ARG_NETWORK_URL https://...",
+            networkUrl.startsWith("https://"),
+        )
+        assumeTrue(
+            "M4 project-local requests smoke requires -e $ARG_PROJECT_LOCAL_PACKAGE_ARCHIVE <device-zip>",
+            packageArchivePath.isNotBlank(),
+        )
+        val packageArchive = File(packageArchivePath).canonicalFile
+        val externalFilesRoot = requireNotNull(context.getExternalFilesDir(null)).canonicalFile
+        assertTrue(
+            "M4 package fixture must remain below the target app external-files directory",
+            packageArchive.path.startsWith(externalFilesRoot.path + File.separator),
+        )
+        assertTrue(
+            "M4 package fixture is not a bounded regular ZIP: $packageArchive",
+            packageArchive.isFile && packageArchive.length() in 1L..M4_PACKAGE_FIXTURE_MAX_ARCHIVE_BYTES,
+        )
+
+        val encodedUrl = Base64.encodeToString(networkUrl.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+        val projectRoot = freshProjectRoot()
+        try {
+            var projectFileCount = unpackProjectLocalPackageFixture(packageArchive, projectRoot)
+            val paddingRoot = File(projectRoot, "m4_workspace_padding").apply {
+                check(mkdirs()) { "Unable to create M4 workspace padding directory: $this" }
+            }
+            writeRepeatedBytes(
+                File(paddingRoot, "expanded-zeroes.bin"),
+                M4_EXPANDED_ZERO_BYTES,
+                random = null,
+            )
+            projectFileCount++
+            writeRepeatedBytes(
+                File(paddingRoot, "compressed-random.bin"),
+                M4_INCOMPRESSIBLE_BYTES,
+                random = Random(M4_RANDOM_SEED),
+            )
+            projectFileCount++
+            while (projectFileCount < M4_TARGET_ARCHIVE_FILES) {
+                File(paddingRoot, "entry-${projectFileCount.toString().padStart(4, '0')}.txt")
+                    .writeText("m4-$projectFileCount\n", Charsets.UTF_8)
+                projectFileCount++
+            }
+            writeSimpleProject(
+                projectRoot,
+                """
+                import base64
+                import importlib.metadata
+                import os
+                from pathlib import Path
+
+                import certifi
+                import charset_normalizer
+                import idna
+                import requests
+                import urllib3
+                from autojs6 import result
+
+                root = Path.cwd().resolve()
+                request_source = Path(requests.__file__).resolve()
+                assert os.path.commonpath((str(root), str(request_source))) == str(root)
+                url = base64.b64decode("$encodedUrl").decode("utf-8")
+                response = requests.get(url, timeout=20)
+                result.set({
+                    "bytes": len(response.content),
+                    "certifi": importlib.metadata.version("certifi"),
+                    "charsetNormalizer": importlib.metadata.version("charset-normalizer"),
+                    "idna": importlib.metadata.version("idna"),
+                    "requests": importlib.metadata.version("requests"),
+                    "status": response.status_code,
+                    "urllib3": importlib.metadata.version("urllib3"),
+                    "workspaceFiles": $projectFileCount,
+                })
+                """.trimIndent() + "\n",
+            )
+
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M4 project-local requests execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M4 project-local requests execution",
+                    LONG_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M4 project-local requests execution")
+                val root = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals(200, root.getInt("status"))
+                assertTrue("M4 HTTPS response was empty", root.getInt("bytes") > 0)
+                assertEquals(M4_REQUESTS_VERSION, root.getString("requests"))
+                assertEquals(M4_URLLIB3_VERSION, root.getString("urllib3"))
+                assertEquals(M4_CERTIFI_VERSION, root.getString("certifi"))
+                assertEquals(M4_CHARSET_NORMALIZER_VERSION, root.getString("charsetNormalizer"))
+                assertEquals(M4_IDNA_VERSION, root.getString("idna"))
+                assertTrue(
+                    "M4 fixture did not cross the legacy workspace entry limit",
+                    root.getInt("workspaceFiles") > LEGACY_WORKSPACE_ENTRY_LIMIT,
+                )
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M4 project-local requests")
         }
     }
 
@@ -1378,6 +1497,74 @@ class PythonU1R2AcceptanceInstrumentationTest {
         File(projectRoot, SIMPLE_ENTRY_POINT).writeText(source, Charsets.UTF_8)
     }
 
+    private fun unpackProjectLocalPackageFixture(archive: File, projectRoot: File): Int {
+        val canonicalRoot = projectRoot.canonicalFile
+        val rootPrefix = canonicalRoot.path + File.separator
+        var entries = 0
+        var files = 0
+        var expandedBytes = 0L
+        ZipInputStream(FileInputStream(archive).buffered()).use { zip ->
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                entries++
+                check(entries <= M4_PACKAGE_FIXTURE_MAX_ENTRIES) {
+                    "M4 package fixture exceeds its entry limit"
+                }
+                val name = entry.name
+                check(name.isNotEmpty() && '\\' !in name && !name.startsWith('/')) {
+                    "M4 package fixture contains an invalid path"
+                }
+                val destination = File(canonicalRoot, name).canonicalFile
+                check(destination.path.startsWith(rootPrefix)) {
+                    "M4 package fixture path escapes the project root"
+                }
+                if (entry.isDirectory) {
+                    check(destination.isDirectory || destination.mkdirs()) {
+                        "Unable to create M4 package fixture directory: $destination"
+                    }
+                } else {
+                    val parent = requireNotNull(destination.parentFile)
+                    check(parent.isDirectory || parent.mkdirs()) {
+                        "Unable to create M4 package fixture parent: $parent"
+                    }
+                    check(!destination.exists() && destination.createNewFile()) {
+                        "M4 package fixture contains a duplicate path: $name"
+                    }
+                    FileOutputStream(destination, false).buffered().use { output ->
+                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                        while (true) {
+                            val count = zip.read(buffer)
+                            if (count < 0) break
+                            if (count == 0) continue
+                            expandedBytes = Math.addExact(expandedBytes, count.toLong())
+                            check(expandedBytes <= M4_PACKAGE_FIXTURE_MAX_UNCOMPRESSED_BYTES) {
+                                "M4 package fixture exceeds its expanded-size limit"
+                            }
+                            output.write(buffer, 0, count)
+                        }
+                    }
+                    files++
+                }
+                zip.closeEntry()
+            }
+        }
+        check(files > 0) { "M4 package fixture contains no regular files" }
+        return files
+    }
+
+    private fun writeRepeatedBytes(file: File, length: Int, random: Random?) {
+        val buffer = ByteArray(64 * 1024)
+        var remaining = length
+        FileOutputStream(file, false).buffered().use { output ->
+            while (remaining > 0) {
+                random?.nextBytes(buffer) ?: buffer.fill(0)
+                val count = minOf(buffer.size, remaining)
+                output.write(buffer, 0, count)
+                remaining -= count
+            }
+        }
+    }
+
     private fun admittedProjectLaunch(projectRoot: File): ScriptLaunchSourceFactory.Launch {
         val admission = requireNotNull(PythonProjectLaunchPolicy.inspect(projectRoot, null)) {
             "Python project was not admitted: $projectRoot"
@@ -1711,6 +1898,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
     private companion object {
         const val ARG_ENABLED = "autojs.python.u1r2.public.enabled"
         const val ARG_NETWORK_URL = "autojs.python.m1.networkUrl"
+        const val ARG_PROJECT_LOCAL_PACKAGE_ARCHIVE = "autojs.python.m4.packageArchive"
         const val HOST_PACKAGE = "org.autojs.autojs6"
         const val REAL_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.python.runtime"
         const val EDITOR_PROMPT = "M2_EDITOR_INPUT> "
@@ -1763,6 +1951,19 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val LONG_SLEEP_SECONDS = 90
         const val LONG_PROJECT_TIMEOUT_MILLIS = 120_000L
         const val LEGACY_OUTPUT_LIMIT_BYTES = 4L * 1024L * 1024L
+        const val LEGACY_WORKSPACE_ENTRY_LIMIT = 1_024
+        const val M4_TARGET_ARCHIVE_FILES = 1_100
+        const val M4_EXPANDED_ZERO_BYTES = 33 * 1024 * 1024
+        const val M4_INCOMPRESSIBLE_BYTES = 17 * 1024 * 1024
+        const val M4_PACKAGE_FIXTURE_MAX_ARCHIVE_BYTES = 8L * 1024L * 1024L
+        const val M4_PACKAGE_FIXTURE_MAX_UNCOMPRESSED_BYTES = 16L * 1024L * 1024L
+        const val M4_PACKAGE_FIXTURE_MAX_ENTRIES = 2_048
+        const val M4_RANDOM_SEED = 0x4D345041434B4147L
+        const val M4_REQUESTS_VERSION = "2.34.2"
+        const val M4_URLLIB3_VERSION = "2.7.0"
+        const val M4_CERTIFI_VERSION = "2026.7.22"
+        const val M4_CHARSET_NORMALIZER_VERSION = "3.4.9"
+        const val M4_IDNA_VERSION = "3.18"
         const val LONG_OUTPUT_PAYLOAD_BYTES = 4 * 1024 * 1024 + 256 * 1024
         const val ENGINE_REMOVAL_TIMEOUT_MILLIS = 10_000L
         const val ENGINE_REMOVAL_POLL_MILLIS = 50L

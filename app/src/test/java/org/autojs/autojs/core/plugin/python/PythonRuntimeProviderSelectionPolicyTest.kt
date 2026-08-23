@@ -115,6 +115,26 @@ class PythonRuntimeProviderSelectionPolicyTest {
                 ),
             ) is PythonRuntimeProviderSelectionResult.Selected,
         )
+        val workspaceRequirement = PythonRuntimeCapabilityRequirement(
+            workspaceArchive = true,
+            minimumWorkspaceArchiveBytes = 8_192L,
+            minimumWorkspaceEntries = 32,
+            minimumWorkspaceUncompressedBytes = 16_384L,
+        )
+        assertTrue(
+            select(listOf(candidate()), requirement = workspaceRequirement) is
+                PythonRuntimeProviderSelectionResult.Selected,
+        )
+        listOf(
+            workspaceRequirement.copy(minimumWorkspaceArchiveBytes = 8_193L),
+            workspaceRequirement.copy(minimumWorkspaceEntries = 33),
+            workspaceRequirement.copy(minimumWorkspaceUncompressedBytes = 16_385L),
+        ).forEach { oversizedRequirement ->
+            assertEquals(
+                PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+                rejection(candidate(), requirement = oversizedRequirement),
+            )
+        }
         assertEquals(
             PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
             rejection(
