@@ -19,6 +19,7 @@ class PythonProjectSource private constructor(
     val entryPoint: String,
     val timeoutMillis: Long?,
     val entryMode: PythonEntryMode,
+    val stdin: PythonProjectStdinSource?,
 ) : PythonFileSource(sourceFile, entryFile) {
 
     val projectEntryFile: File
@@ -32,8 +33,9 @@ class PythonProjectSource private constructor(
             entryFile: File,
             timeoutMillis: Long? = null,
             entryMode: PythonEntryMode = PythonEntryMode.FILE,
+            stdin: PythonProjectStdinSource? = null,
         ): PythonProjectSource {
-            return createWithSource(projectRoot, entryFile, entryFile, timeoutMillis, entryMode)
+            return createWithSource(projectRoot, entryFile, entryFile, timeoutMillis, entryMode, stdin)
         }
 
         internal fun createWithSource(
@@ -42,6 +44,7 @@ class PythonProjectSource private constructor(
             sourceFile: File,
             timeoutMillis: Long? = null,
             entryMode: PythonEntryMode = PythonEntryMode.FILE,
+            stdin: PythonProjectStdinSource? = null,
         ): PythonProjectSource {
             val root = projectRoot.canonicalFile
             val entry = entryFile.canonicalFile
@@ -65,7 +68,8 @@ class PythonProjectSource private constructor(
             if (entryMode == PythonEntryMode.MODULE) {
                 PythonRuntimeValidation.moduleNameForFileEntryPoint(relative)
             }
-            return PythonProjectSource(root, entry, source, relative, timeoutMillis, entryMode).apply {
+            stdin?.let { PythonProjectLaunchPolicy.validateStdinSource(root, it) }
+            return PythonProjectSource(root, entry, source, relative, timeoutMillis, entryMode, stdin).apply {
                 if (source != entry) overriddenFullPath = entry.path
             }
         }

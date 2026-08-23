@@ -326,6 +326,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` Python Runtime 輸出 chunk 到達時立即寫入宿主控制檯, 使用按 stdout/stderr 獨立的增量 UTF-8 解碼保留跨 chunk 碼點, 並將端到端輸出上限提高至 16 MiB
 * `最佳化` Python 專案的 project.json 支援 timeout 正整數毫秒設定, 預設 5 分鐘、最大 30 分鐘, 並持續受執行階段外掛上限約束
 * `最佳化` Python 專案的 project.json 支援透過 "entryMode": "module" 與正規化點分 main 名稱宣告模組入口, 以標準 Python 模組語意執行並支援套件內相對匯入
+* `最佳化` Python 專案的 project.json 支援以內嵌文字或明確的專案內相對檔案宣告有限 stdin 快照, 讓 sys.stdin.read() 無需互動提示即可讀取預先提供的輸入
 * `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `最佳化` 檔案管理器將媒體詳細資訊查詢整合為單次 MediaInfo 快照, 減少 Binder 呼叫及等待時間
 * `最佳化` 檔案外部檢視及媒體播放降級僅授予 URI 讀取權限

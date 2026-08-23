@@ -35,15 +35,22 @@ object ScriptLaunchSourceFactory {
             base: ExecutionConfig = ExecutionConfig(),
             overrideWorkingDirectory: Boolean = true,
         ): ExecutionConfig {
+            val projectSource = pythonProjectSource
+            val stdinSnapshot = projectSource?.stdin?.let { stdin ->
+                PythonProjectLaunchPolicy.snapshotStdin(projectSource.projectRoot, stdin)
+            }
             return base.apply {
                 if (overrideWorkingDirectory || workingDirectory.isBlank()) {
                     workingDirectory = this@Launch.workingDirectory
                 }
-                pythonProjectSource?.let { source ->
+                projectSource?.let { source ->
                     setArgument(
                         PythonExecutionInputPolicy.ENTRY_MODE_ARGUMENT,
                         source.entryMode.executionConfigValue(),
                     )
+                    if (stdinSnapshot != null) {
+                        setArgument(PythonExecutionInputPolicy.STDIN_SNAPSHOT_ARGUMENT, stdinSnapshot)
+                    }
                 }
             }
         }
@@ -166,6 +173,7 @@ object ScriptLaunchSourceFactory {
             entryFile = admission.entryFile,
             timeoutMillis = admission.timeoutMillis,
             entryMode = admission.entryMode,
+            stdin = admission.stdin,
         )
         return Launch(
             source = source,
@@ -361,6 +369,7 @@ object ScriptLaunchSourceFactory {
                 sourceFile = payloadFile,
                 timeoutMillis = admission.timeoutMillis,
                 entryMode = admission.entryMode,
+                stdin = admission.stdin,
             )
         } else {
             PythonFileSource(payloadFile, semanticFile).apply {

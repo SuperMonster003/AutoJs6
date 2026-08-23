@@ -9,11 +9,15 @@ import org.autojs.autojs.core.plugin.python.PythonExecutionTimeoutPolicy
 import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContractException
 import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.StringReader
 import java.nio.ByteBuffer
+import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
+import java.text.Normalizer
 
 /** Strict admission for Python projects transported as bounded workspace snapshots. */
 object PythonProjectLaunchPolicy {
@@ -45,11 +49,13 @@ object PythonProjectLaunchPolicy {
         }
 
         val entry = resolveEntry(normalizedRoot, main, declaration.entryMode)
+        declaration.stdin?.let { validateStdinSource(normalizedRoot, it) }
         return PythonProjectLaunchAdmission(
             normalizedRoot,
             entry,
             declaration.timeoutMillis,
             declaration.entryMode,
+            declaration.stdin,
         )
     }
 
@@ -151,7 +157,27 @@ object PythonProjectLaunchPolicy {
             main = stringValue(json, "main"),
             timeoutMillis = timeoutMillisValue(json),
             entryMode = entryModeValue(json),
+            stdin = stdinValue(json),
         )
+    }
+
+    private fun stdinValue(json: JsonObject): PythonProjectStdinSource? {
+        val value = json.get("stdin") ?: return null
+        if (value.isJsonPrimitive && value.asJsonPrimitive.isString) {
+            return PythonProjectStdinSource.InlineText(value.asString)
+        }
+        if (!value.isJsonObject) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_INVALID)
+        }
+        val stdinObject = value.asJsonObject
+        if (stdinObject.size() != 1 || !stdinObject.has(STDIN_FILE_PROPERTY)) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_INVALID)
+        }
+        val file = stdinObject.get(STDIN_FILE_PROPERTY)
+        if (!file.isJsonPrimitive || !file.asJsonPrimitive.isString) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_INVALID)
+        }
+        return PythonProjectStdinSource.ProjectFile(file.asString)
     }
 
     private fun entryModeValue(json: JsonObject): PythonEntryMode =
@@ -231,6 +257,108 @@ object PythonProjectLaunchPolicy {
         return normalizedEntry
     }
 
+    internal fun validateStdinSource(projectRoot: File, source: PythonProjectStdinSource) {
+        when (source) {
+            is PythonProjectStdinSource.InlineText -> validateInlineStdin(source.text)
+            is PythonProjectStdinSource.ProjectFile -> resolveStdinFile(projectRoot, source.relativePath)
+        }
+    }
+
+    internal fun snapshotStdin(projectRoot: File, source: PythonProjectStdinSource): Any =
+        when (source) {
+            is PythonProjectStdinSource.InlineText -> {
+                validateInlineStdin(source.text)
+                source.text
+            }
+            is PythonProjectStdinSource.ProjectFile -> readStdinFile(projectRoot, source.relativePath)
+        }
+
+    private fun validateInlineStdin(text: String) {
+        if (strictUtf8Length(text) > MAX_STDIN_SNAPSHOT_BYTES) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_TOO_LARGE)
+        }
+    }
+
+    private fun strictUtf8Length(text: String): Long =
+        try {
+            StandardCharsets.UTF_8.newEncoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                .encode(CharBuffer.wrap(text))
+                .remaining()
+                .toLong()
+        } catch (error: Exception) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_INVALID, error)
+        }
+
+    private fun resolveStdinFile(projectRoot: File, relativePath: String): File {
+        if (
+            relativePath.isBlank() ||
+            strictUtf8Length(relativePath) > MAX_STDIN_PATH_BYTES ||
+            Normalizer.normalize(relativePath, Normalizer.Form.NFC) != relativePath ||
+            relativePath.any(Character::isISOControl) ||
+            relativePath.startsWith('/') ||
+            relativePath.startsWith('\\') ||
+            '\\' in relativePath ||
+            WINDOWS_ABSOLUTE_PATH.matches(relativePath) ||
+            URI_SCHEME.containsMatchIn(relativePath)
+        ) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_INVALID)
+        }
+        val segments = relativePath.split('/')
+        if (segments.any { it.isEmpty() || it == "." || it == ".." }) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_INVALID)
+        }
+
+        val candidate = segments.fold(projectRoot) { parent, segment -> File(parent, segment) }
+        val normalizedFile = candidate.strictCanonicalFile(PythonProjectLaunchError.STDIN_ESCAPES_ROOT)
+        if (candidate.absoluteFile.path != normalizedFile.path) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_ESCAPES_ROOT)
+        }
+        val rootPath = projectRoot.path.trimEnd(File.separatorChar) + File.separator
+        if (!normalizedFile.path.startsWith(rootPath, ignoreCase = WINDOWS_ABSOLUTE_PATH.matches(projectRoot.path))) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_ESCAPES_ROOT)
+        }
+        if (!normalizedFile.isFile) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_MISSING)
+        }
+        if (normalizedFile.length() > MAX_STDIN_SNAPSHOT_BYTES) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_TOO_LARGE)
+        }
+        return normalizedFile
+    }
+
+    private fun readStdinFile(projectRoot: File, relativePath: String): ByteArray {
+        val source = resolveStdinFile(projectRoot, relativePath)
+        val output = ByteArrayOutputStream(minOf(source.length(), MAX_STDIN_SNAPSHOT_BYTES).toInt())
+        val buffer = ByteArray(STDIN_COPY_BUFFER_BYTES)
+        try {
+            FileInputStream(source).use { input ->
+                var total = 0L
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    total += count
+                    if (total > MAX_STDIN_SNAPSHOT_BYTES) {
+                        throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_TOO_LARGE)
+                    }
+                    output.write(buffer, 0, count)
+                }
+            }
+            val revalidated = resolveStdinFile(projectRoot, relativePath)
+            if (revalidated != source) {
+                throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_ESCAPES_ROOT)
+            }
+            return output.toByteArray()
+        } catch (error: PythonProjectLaunchException) {
+            throw error
+        } catch (error: Exception) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.STDIN_INVALID, error)
+        } finally {
+            buffer.fill(0)
+        }
+    }
+
     private fun containsPythonDeclarationHint(text: String): Boolean =
         PYTHON_TYPE_HINT.containsMatchIn(text) || PYTHON_MAIN_HINT.containsMatchIn(text)
 
@@ -249,14 +377,19 @@ object PythonProjectLaunchPolicy {
         val main: String?,
         val timeoutMillis: Long?,
         val entryMode: PythonEntryMode,
+        val stdin: PythonProjectStdinSource?,
     )
 
     private const val PROJECT_CONFIG_NAME = "project.json"
     private const val PYTHON_PROJECT_TYPE = "python"
     private const val FILE_ENTRY_MODE = "file"
     private const val MODULE_ENTRY_MODE = "module"
+    private const val STDIN_FILE_PROPERTY = "file"
     private const val MAX_PROJECT_CONFIG_BYTES = 64L * 1024L
     private const val MAX_PROJECT_ANCESTORS = 64
+    internal const val MAX_STDIN_SNAPSHOT_BYTES = 1L * 1024L * 1024L
+    private const val MAX_STDIN_PATH_BYTES = 4 * 1024
+    private const val STDIN_COPY_BUFFER_BYTES = 16 * 1024
     private val WINDOWS_ABSOLUTE_PATH = Regex("^[A-Za-z]:[\\\\/].*")
     private val URI_SCHEME = Regex("^[A-Za-z][A-Za-z0-9+.-]*:")
     private val JSON_INTEGER = Regex("-?(?:0|[1-9][0-9]*)")
@@ -269,7 +402,14 @@ data class PythonProjectLaunchAdmission(
     val entryFile: File,
     val timeoutMillis: Long?,
     val entryMode: PythonEntryMode = PythonEntryMode.FILE,
+    val stdin: PythonProjectStdinSource? = null,
 )
+
+sealed class PythonProjectStdinSource {
+    data class InlineText(val text: String) : PythonProjectStdinSource()
+
+    data class ProjectFile(val relativePath: String) : PythonProjectStdinSource()
+}
 
 enum class PythonProjectLaunchError(
     val stableCode: String,
@@ -294,6 +434,22 @@ enum class PythonProjectLaunchError(
     ENTRY_MISSING(
         "PYTHON_PROJECT_ENTRY_MISSING",
         "Python project entry does not exist",
+    ),
+    STDIN_INVALID(
+        "PYTHON_PROJECT_STDIN_INVALID",
+        "Python project stdin declaration is invalid",
+    ),
+    STDIN_ESCAPES_ROOT(
+        "PYTHON_PROJECT_STDIN_ESCAPES_ROOT",
+        "Python project stdin file escapes the project root",
+    ),
+    STDIN_MISSING(
+        "PYTHON_PROJECT_STDIN_MISSING",
+        "Python project stdin file does not exist",
+    ),
+    STDIN_TOO_LARGE(
+        "PYTHON_PROJECT_STDIN_TOO_LARGE",
+        "Python project stdin snapshot exceeds the 1 MiB limit",
     ),
     ENTRY_NOT_DECLARED(
         "PYTHON_PROJECT_ENTRY_NOT_DECLARED",

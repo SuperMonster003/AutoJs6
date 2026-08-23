@@ -308,7 +308,8 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                 admission.projectRoot == source.projectRoot &&
                     admission.entryFile == source.projectEntryFile &&
                     admission.timeoutMillis == source.timeoutMillis &&
-                    admission.entryMode == source.entryMode,
+                    admission.entryMode == source.entryMode &&
+                    admission.stdin == source.stdin,
             ) { "Python project declaration changed before snapshot" }
         }
 

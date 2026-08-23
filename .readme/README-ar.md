@@ -326,6 +326,7 @@
 * `تحسين` تكتب chunks خرج Python Runtime في وحدة تحكم Host فور وصولها, مع فك UTF-8 تزايدي مستقل لكل من stdout/stderr يحفظ نقاط الترميز الممتدة بين chunks ورفع حد الخرج المتكامل إلى 16 MiB
 * `تحسين` يدعم project.json لمشاريع Python قيمة timeout موجبة صحيحة بالميلي ثانية, افتراضيا 5 دقائق وبحد أقصى 30 دقيقة, مع استمرار تطبيق حد ملحق Runtime
 * `تحسين` يدعم project.json لمشاريع Python مدخل module صريحا عبر "entryMode": "module" واسم main نقطي مطبع, مما يتيح imports نسبية داخل الحزمة باستخدام دلالات modules القياسية في Python
+* `تحسين` يدعم project.json لمشاريع Python لقطات stdin محدودة كنص مضمن أو ملف صريح نسبي إلى المشروع, مما يتيح لـ sys.stdin.read() استهلاك إدخال مقدم مسبقا دون مطالبات تفاعلية
 * `تحسين` تحويل وظائف ML Kit OCR و ML Kit Barcode و Rapid OCR و OpenCV و Image Quantization و OpenCC و Pinyin و Pinyin4j و MediaInfo الى اضافات
 * `تحسين` دمج استعلامات تفاصيل الوسائط في مدير الملفات في لقطة MediaInfo واحدة لتقليل استدعاءات Binder ووقت الانتظار
 * `تحسين` تقييد مسارات الرجوع لعرض الملفات وتشغيل الوسائط الخارجية بمنح الوصول للقراءة فقط عبر URI

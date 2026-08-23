@@ -169,6 +169,58 @@ class PythonU1R2AcceptanceInstrumentationTest {
     }
 
     @Test
+    fun projectManifestFileStdinFeedsSysStdinWithoutInteractivePrompt() {
+        val projectRoot = freshProjectRoot()
+        val marker = "M2_STDIN_OK_${UUID.randomUUID()}"
+        val expectedStdin = "first line\n雪山输入\nlast line\n"
+        val expectedBytes = expectedStdin.toByteArray(Charsets.UTF_8)
+        val encodedExpected = Base64.encodeToString(expectedBytes, Base64.NO_WRAP)
+        try {
+            writeStdinProject(
+                projectRoot,
+                expectedBytes,
+                """
+                import base64
+                import sys
+
+                expected = base64.b64decode("$encodedExpected")
+                actual = sys.stdin.read()
+                assert actual.encode("utf-8") == expected
+                assert sys.stdin.read() == ""
+                print("$marker:" + base64.b64encode(actual.encode("utf-8")).decode("ascii"), flush=True)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val config = launch.createExecutionConfig()
+            val configuredStdin = config.getArgument(STDIN_SNAPSHOT_ARGUMENT) as? ByteArray
+            assertNotNull("project.json stdin file did not reach ExecutionConfig", configuredStdin)
+            assertArrayEquals(expectedBytes, configuredStdin)
+
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            val checkpoint = consoleCheckpoint()
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, config)
+                val execution = awaitStarted(pending, "M2 project stdin execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M2 project stdin execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M2 project stdin execution")
+                assertEquals(0, result.terminal.exitCode)
+                assertConsoleSince(checkpoint, "$marker:$encodedExpected")
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M2 project stdin")
+        }
+    }
+
+    @Test
     fun configuredNinetySecondProjectStreamsBeforeTerminalAndCompletes() {
         val projectRoot = freshProjectRoot()
         val tickMarker = "M1_LIVE_TICK_${UUID.randomUUID()}"
@@ -479,6 +531,22 @@ class PythonU1R2AcceptanceInstrumentationTest {
         File(projectRoot, SIMPLE_ENTRY_POINT).writeText(source, Charsets.UTF_8)
     }
 
+    private fun writeStdinProject(projectRoot: File, stdin: ByteArray, source: String) {
+        File(projectRoot, "project.json").writeText(
+            "{\"type\":\"python\",\"main\":\"$SIMPLE_ENTRY_POINT\"," +
+                "\"stdin\":{\"file\":\"$STDIN_FILE_PATH\"}}",
+            Charsets.UTF_8,
+        )
+        File(projectRoot, STDIN_FILE_PATH).apply {
+            val fixtureDirectory = requireNotNull(parentFile)
+            check(fixtureDirectory.mkdirs()) {
+                "Unable to create stdin fixture directory: $fixtureDirectory"
+            }
+            writeBytes(stdin)
+        }
+        File(projectRoot, SIMPLE_ENTRY_POINT).writeText(source, Charsets.UTF_8)
+    }
+
     private fun admittedProjectLaunch(projectRoot: File): ScriptLaunchSourceFactory.Launch {
         val admission = requireNotNull(PythonProjectLaunchPolicy.inspect(projectRoot, null)) {
             "Python project was not admitted: $projectRoot"
@@ -683,6 +751,8 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val PACKAGE_NAME = "u1r2case"
         const val ENTRY_POINT = "$PACKAGE_NAME/main.py"
         const val SIMPLE_ENTRY_POINT = "main.py"
+        const val STDIN_FILE_PATH = "fixtures/stdin.txt"
+        const val STDIN_SNAPSHOT_ARGUMENT = "autojs6.python.stdinSnapshot"
         const val ARTIFACT_PATH = "reports/u1-r2.bin"
         const val STDERR_MARKER = "U1R2_STDERR_DIAGNOSTIC"
         const val STDOUT_JSON_LOOKALIKE = "{\"stdout\":\"diagnostic-only\"}\n"

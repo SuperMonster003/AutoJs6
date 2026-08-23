@@ -166,6 +166,7 @@
 * `Amélioration` Les chunks de sortie Python Runtime sont écrits dans la console Host dès leur arrivée, avec un décodage UTF-8 incrémental indépendant pour stdout/stderr qui préserve les points de code répartis entre chunks et une limite de sortie de bout en bout de 16 MiB
 * `Amélioration` Le project.json des projets Python accepte un timeout entier positif en millisecondes, de 5 minutes par défaut, plafonné à 30 minutes et toujours limité par le plugin Runtime
 * `Amélioration` Le project.json des projets Python accepte une entrée de module explicite via "entryMode": "module" et un nom main pointé normalisé, permettant les imports relatifs au paquet avec la sémantique standard des modules Python
+* `Amélioration` Le project.json des projets Python accepte des instantanés stdin finis sous forme de texte intégré ou de fichier explicite relatif au projet, ce qui permet à sys.stdin.read() de consommer une entrée prédéfinie sans invite interactive
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Regroupement des requêtes de détails multimédias du gestionnaire de fichiers en un seul instantané MediaInfo afin de réduire les appels Binder et le temps d'attente
 * `Amélioration` Limitation des replis d'affichage et de lecture externes aux accès URI en lecture seule
