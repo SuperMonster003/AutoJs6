@@ -2,8 +2,12 @@ package org.autojs.autojs.core.plugin.typescript
 
 import android.content.Context
 import java.io.File
+import java.io.Reader
+import java.io.StringReader
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.script.JavaScriptFileSource
+import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.TypeScriptFileSource
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 
@@ -17,7 +21,16 @@ internal data class TypeScriptExecutableSource(
 
 internal object TypeScriptExecutionCompiler {
 
-    fun compile(context: Context, source: JavaScriptFileSource): TypeScriptExecutableSource {
+    /** Runs on the script worker thread before an engine is created. */
+    @JvmStatic
+    fun prepare(context: Context, source: ScriptSource): ScriptSource {
+        if (source !is JavaScriptFileSource || !source.isRhinoTypeScriptSource) {
+            return source
+        }
+        return CompiledTypeScriptSource(source, compile(context, source))
+    }
+
+    private fun compile(context: Context, source: JavaScriptFileSource): TypeScriptExecutableSource {
         val sourceName = source.compilationName()
         val sourceIdentity = (source as? TypeScriptFileSource)?.compilationSourceIdentity
             ?: source.originPath?.takeIf(String::isNotBlank)
@@ -74,6 +87,21 @@ internal object TypeScriptExecutionCompiler {
     const val SOURCE_MAP_ENGINE_TAG = "typescript_source_map_v3"
     const val GENERATED_SOURCE_ENGINE_TAG = "typescript_generated_source"
     private const val GENERATED_SUFFIX = ".generated.js"
+}
+
+internal class CompiledTypeScriptSource(
+    val originalSource: JavaScriptFileSource,
+    val executable: TypeScriptExecutableSource,
+) : JavaScriptSource(executable.sourceName.substringBeforeLast('.', executable.sourceName)) {
+
+    override val engineName: String
+        get() = ENGINE
+
+    override fun getScript(): String = executable.javaScript
+
+    override fun getScriptReader(): Reader = StringReader(executable.javaScript)
+
+    override fun toString(): String = executable.generatedSourceName
 }
 
 internal class TypeScriptDiagnosticsException(

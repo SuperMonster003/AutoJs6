@@ -1,6 +1,8 @@
 package org.autojs.autojs.execution;
 
 import android.util.Log;
+import androidx.annotation.Nullable;
+import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler;
 import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.engine.ScriptEngineManager;
 import org.autojs.autojs.lang.ThreadCompat;
@@ -14,6 +16,7 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
 
     private static final String TAG = "RunnableJSExecution";
     private ScriptEngine<? extends ScriptSource> mScriptEngine;
+    private ScriptSource mExecutionSource;
     private final ScriptEngineManager mScriptEngineManager;
 
     public RunnableScriptExecution(ScriptEngineManager manager, ScriptExecutionTask task) {
@@ -28,8 +31,20 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
     }
 
     public Object execute() {
-        mScriptEngine = mScriptEngineManager.createEngineOfSourceOrThrow(getSource(), getId());
-        mScriptEngine.setTag(ExecutionConfig.tag, getConfig());
+        try {
+            mExecutionSource = TypeScriptExecutionCompiler.prepare(
+                    mScriptEngineManager.getAndroidContext(),
+                    getSource()
+            );
+            mScriptEngine = mScriptEngineManager.createEngineOfSourceOrThrow(mExecutionSource, getId());
+            mScriptEngine.setTag(ExecutionConfig.tag, getConfig());
+        } catch (Throwable e) {
+            if (mScriptEngine != null) {
+                mScriptEngine.destroy();
+            }
+            onException(mScriptEngine, e);
+            return null;
+        }
         return execute(mScriptEngine);
     }
 
@@ -53,7 +68,7 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
         }
     }
 
-    protected void onException(ScriptEngine<? extends ScriptSource> engine, Throwable e) {
+    protected void onException(@Nullable ScriptEngine<? extends ScriptSource> engine, Throwable e) {
         Log.w(TAG, "onException: engine = " + engine, e);
         getListener().onException(this, e);
     }
@@ -61,12 +76,12 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
     private void prepare(ScriptEngine<? extends ScriptSource> engine) {
         engine.setTag(ScriptEngine.TAG_WORKING_DIRECTORY, getConfig().getWorkingDirectory());
         engine.setTag(ScriptEngine.TAG_ENV_PATH, getConfig().getEnvPath());
-        engine.setTag(ScriptEngine.TAG_SOURCE, getSource());
+        engine.setTag(ScriptEngine.TAG_SOURCE, getExecutionSource());
         engine.init();
     }
 
     protected Object doExecution(ScriptEngine<? extends ScriptSource> engine) {
-        engine.setTag(ScriptEngine.TAG_SOURCE, getSource());
+        engine.setTag(ScriptEngine.TAG_SOURCE, getExecutionSource());
         getListener().onStart(this);
         Object result = null;
         long delay = getConfig().getDelay();
@@ -76,7 +91,7 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
         }
         long interval = getConfig().getInterval();
         sleep(delay);
-        ScriptSource source = getSource();
+        ScriptSource source = getExecutionSource();
         for (int i = 0; i < times; i++) {
             result = execute(engine, source);
             sleep(interval);
@@ -98,6 +113,10 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
         } catch (InterruptedException e) {
             throw new ScriptInterruptedException();
         }
+    }
+
+    protected ScriptSource getExecutionSource() {
+        return mExecutionSource == null ? getSource() : mExecutionSource;
     }
 
     @Override

@@ -123,7 +123,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
                 assertTrue(failure is TypeScriptDiagnosticsException)
                 assertTrue(failure?.message?.contains("TS2322") == true)
                 assertEquals(null, System.getProperty(markerKey))
-                assertTrue(terminal.execution.engine is LoopBasedJavaScriptEngine)
+                assertEquals(null, terminal.execution.engine)
             }
         } finally {
             System.clearProperty(markerKey)

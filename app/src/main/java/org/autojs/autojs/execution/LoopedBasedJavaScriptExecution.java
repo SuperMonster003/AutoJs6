@@ -20,7 +20,8 @@ public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
         if (!(engine instanceof LoopBasedJavaScriptEngine javaScriptEngine)) {
             return super.doExecution(engine);
         }
-        engine.setTag(ScriptEngine.TAG_SOURCE, getSource());
+        JavaScriptSource source = (JavaScriptSource) getExecutionSource();
+        engine.setTag(ScriptEngine.TAG_SOURCE, source);
         getListener().onStart(this);
         long delay = getConfig().getDelay();
         sleep(delay);
@@ -34,14 +35,14 @@ public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
                 times--;
                 if (times > 0) {
                     sleep(interval);
-                    javaScriptEngine.execute(getSource());
+                    javaScriptEngine.execute(source);
                     return false;
                 }
                 javaScriptEngine.getRuntime().loopers.setMainLooperQuitHandler(null);
                 return true;
             }
         });
-        javaScriptEngine.execute(getSource());
+        javaScriptEngine.execute(source);
 
         return null;
     }
