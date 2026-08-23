@@ -8,6 +8,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -715,6 +717,122 @@ class PythonU1R2AcceptanceInstrumentationTest {
     }
 
     @Test
+    fun boundedScreenCapturePublishesVerifiedPngArtifactThroughPublicPythonEngine() {
+        assumeTrue(
+            "Python accessibility screen capture requires Android 11 or newer",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R,
+        )
+        val projectRoot = freshProjectRoot()
+        val activity = launchAccessibilitySmokeActivity()
+        try {
+            assumeTrue(
+                "Enable the AutoJs6 accessibility service before running screen capture acceptance",
+                AutoJsAccessibilityService.waitForStarted(AUTOMATOR_SERVICE_TIMEOUT_MILLIS),
+            )
+            instrumentation.runOnMainSync {
+                activity.window.decorView.sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+                )
+            }
+            assumeTrue(
+                "The AutoJs6 accessibility service connected but did not become operational",
+                AutoJsAccessibilityService.waitForOperational(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+            )
+            val captureTarget = AtomicReference<IntArray>()
+            instrumentation.runOnMainSync {
+                captureTarget.set(activity.captureTargetCenterOnScreen())
+            }
+            writeSimpleProject(
+                projectRoot,
+                """
+                import hashlib
+                import os
+
+                from autojs6 import images, result
+
+                target = images.capture_screen(
+                    format="png",
+                    quality=100,
+                    path="$SCREEN_CAPTURE_ARTIFACT_PATH",
+                )
+                with open(target, "rb") as stream:
+                    payload = stream.read()
+                result.set({
+                    "artifactPath": "$SCREEN_CAPTURE_ARTIFACT_PATH",
+                    "byteLength": len(payload),
+                    "privatePathAbsolute": os.path.isabs(target),
+                    "pngSignature": payload[:8].hex(),
+                    "sha256": hashlib.sha256(payload).hexdigest(),
+                })
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 screen capture execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 screen capture execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 screen capture execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals(
+                    SCREEN_CAPTURE_ARTIFACT_PATH,
+                    structured.getString("artifactPath"),
+                )
+                assertTrue(structured.getBoolean("privatePathAbsolute"))
+                assertEquals("89504e470d0a1a0a", structured.getString("pngSignature"))
+
+                val artifact = result.outputArtifacts.single()
+                val bytes = artifact.toByteArray()
+                assertEquals(SCREEN_CAPTURE_ARTIFACT_PATH, artifact.path)
+                assertEquals(bytes.size.toLong(), artifact.sizeBytes)
+                assertTrue("Python screen capture is empty", bytes.isNotEmpty())
+                assertTrue(
+                    "Python screen capture exceeds the 4 MiB contract",
+                    bytes.size <= SCREEN_CAPTURE_MAX_BYTES,
+                )
+                assertEquals(bytes.size, structured.getInt("byteLength"))
+                assertEquals(PythonSha256.digest(bytes), artifact.sha256)
+                assertEquals(artifact.sha256, structured.getString("sha256"))
+
+                val bitmap = requireNotNull(BitmapFactory.decodeByteArray(bytes, 0, bytes.size)) {
+                    "Python screen capture artifact is not a decodable PNG"
+                }
+                try {
+                    val target = requireNotNull(captureTarget.get())
+                    assertTrue(target[0] in 0 until bitmap.width)
+                    assertTrue(target[1] in 0 until bitmap.height)
+                    val actual = bitmap.getPixel(target[0], target[1])
+                    assertTrue(
+                        "Captured target pixel ${colorHex(actual)} differs from ${colorHex(NodeAccessibilitySmokeActivity.CAPTURE_TARGET_COLOR)}",
+                        colorsNear(
+                            NodeAccessibilitySmokeActivity.CAPTURE_TARGET_COLOR,
+                            actual,
+                            SCREEN_CAPTURE_COLOR_TOLERANCE,
+                        ),
+                    )
+                } finally {
+                    bitmap.recycle()
+                }
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                if (!activity.isFinishing) activity.finish()
+            }
+            restoreHostForeground()
+            cleanProjectRoot(projectRoot, "M3 screen capture")
+        }
+    }
+
+    @Test
     fun automatorFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
         assumeFalse(
             "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
@@ -811,6 +929,61 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
         } finally {
             cleanProjectRoot(projectRoot, "M3 unavailable selector")
+        }
+    }
+
+    @Test
+    fun screenCaptureFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
+        assumeTrue(
+            "Python accessibility screen capture requires Android 11 or newer",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R,
+        )
+        assumeFalse(
+            "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
+            AutoJsAccessibilityService.hasInstance(),
+        )
+        val projectRoot = freshProjectRoot()
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import images, result
+                from autojs6.errors import CapabilityUnavailableError
+
+                try:
+                    images.capture_screen()
+                    outcome = {"error": "NO_ERROR", "message": ""}
+                except CapabilityUnavailableError as error:
+                    outcome = {"error": type(error).__name__, "message": str(error)}
+                result.set(outcome)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 unavailable screen capture execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 unavailable screen capture execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 unavailable screen capture execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("CapabilityUnavailableError", structured.getString("error"))
+                assertEquals(
+                    "AutoJs6 accessibility service is unavailable",
+                    structured.getString("message"),
+                )
+                assertTrue(result.outputArtifacts.isEmpty())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 unavailable screen capture")
         }
     }
 
@@ -2138,6 +2311,14 @@ class PythonU1R2AcceptanceInstrumentationTest {
         false
     }
 
+    private fun colorsNear(expected: Int, actual: Int, tolerance: Int): Boolean =
+        kotlin.math.abs(Color.red(expected) - Color.red(actual)) <= tolerance &&
+            kotlin.math.abs(Color.green(expected) - Color.green(actual)) <= tolerance &&
+            kotlin.math.abs(Color.blue(expected) - Color.blue(actual)) <= tolerance &&
+            kotlin.math.abs(Color.alpha(expected) - Color.alpha(actual)) <= tolerance
+
+    private fun colorHex(color: Int): String = "#%08X".format(color)
+
     private inner class PendingProjectExecution(private val expectedProjectRoot: String) {
         val execution = AtomicReference<ScriptExecution?>()
         val started = CountDownLatch(1)
@@ -2262,6 +2443,9 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val STDIN_SNAPSHOT_ARGUMENT = "autojs6.python.stdinSnapshot"
         const val PUBLISHED_ARTIFACT_ROOT = ".python-artifacts"
         const val ARTIFACT_PATH = "reports/u1-r2.bin"
+        const val SCREEN_CAPTURE_ARTIFACT_PATH = "screens/python-capture.png"
+        const val SCREEN_CAPTURE_MAX_BYTES = 4 * 1024 * 1024
+        const val SCREEN_CAPTURE_COLOR_TOLERANCE = 2
         const val STDERR_MARKER = "U1R2_STDERR_DIAGNOSTIC"
         const val STDOUT_JSON_LOOKALIKE = "{\"stdout\":\"diagnostic-only\"}\n"
         const val STDOUT_JSON_LOOKALIKE_ESCAPED = "{\\\"stdout\\\":\\\"diagnostic-only\\\"}"
