@@ -440,6 +440,7 @@ internal class PythonRuntimeClient(
                     expectedPluginUid = pinned.packageUid,
                     fileRoot = PythonHostFilePolicy.rootFor(source),
                     globalConsole = globalConsole,
+                    interactiveInputController = interactiveInputController,
                     onViolation = { error ->
                         finishFailure(
                             PythonRuntimeHostException(

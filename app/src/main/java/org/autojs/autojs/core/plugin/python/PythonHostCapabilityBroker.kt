@@ -64,6 +64,10 @@ internal object PythonHostCapabilities {
     const val FILES_IS_FILE = "files.is_file"
     const val FILES_IS_DIR = "files.is_dir"
     const val FILES_LIST = "files.list"
+    const val DIALOGS_ALERT = "dialogs.alert"
+    const val DIALOGS_CONFIRM = "dialogs.confirm"
+    const val DIALOGS_PROMPT = "dialogs.prompt"
+    const val DIALOGS_SELECT = "dialogs.select"
 
     val ENABLED = setOf(
         TOAST_SHOW,
@@ -83,6 +87,10 @@ internal object PythonHostCapabilities {
         FILES_IS_FILE,
         FILES_IS_DIR,
         FILES_LIST,
+        DIALOGS_ALERT,
+        DIALOGS_CONFIRM,
+        DIALOGS_PROMPT,
+        DIALOGS_SELECT,
     )
 }
 
@@ -311,6 +319,14 @@ internal interface PythonHostCapabilityActions {
     fun isDirectory(path: String): Boolean
 
     fun listDirectory(path: String): List<String>
+
+    fun showDialogAlert(title: String, text: String)
+
+    fun showDialogConfirm(title: String, text: String): Boolean
+
+    fun showDialogPrompt(title: String, text: String, defaultValue: String): String?
+
+    fun showDialogSelect(title: String, items: List<String>): Int?
 }
 
 internal class AndroidPythonHostCapabilityActions(
@@ -318,6 +334,7 @@ internal class AndroidPythonHostCapabilityActions(
     executionId: String,
     fileRoot: File,
     private val globalConsole: GlobalConsole,
+    private val interactiveInputController: PythonInteractiveInputController?,
 ) : PythonHostCapabilityActions {
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -444,6 +461,39 @@ internal class AndroidPythonHostCapabilityActions(
 
     override fun listDirectory(path: String): List<String> = hostFiles.list(path)
 
+    override fun showDialogAlert(title: String, text: String) {
+        val response = dialogController().requestDialog(PythonHostDialogRequest.Alert(title, text))
+        check(response === PythonHostDialogResponse.Acknowledged) {
+            "Python alert dialog returned the wrong response type"
+        }
+    }
+
+    override fun showDialogConfirm(title: String, text: String): Boolean {
+        val response = dialogController().requestDialog(PythonHostDialogRequest.Confirm(title, text))
+        return (response as? PythonHostDialogResponse.Confirmation)?.confirmed
+            ?: error("Python confirm dialog returned the wrong response type")
+    }
+
+    override fun showDialogPrompt(title: String, text: String, defaultValue: String): String? {
+        val response = dialogController().requestDialog(
+            PythonHostDialogRequest.Prompt(title, text, defaultValue),
+        )
+        val promptValue = response as? PythonHostDialogResponse.PromptValue
+            ?: error("Python prompt dialog returned the wrong response type")
+        return promptValue.value?.also { value ->
+            if (value.toByteArray(StandardCharsets.UTF_8).size > PythonHostDialogPolicy.MAX_PROMPT_REPLY_BYTES) {
+                throw PythonHostCapabilityResultLimitException()
+            }
+        }
+    }
+
+    override fun showDialogSelect(title: String, items: List<String>): Int? {
+        val response = dialogController().requestDialog(PythonHostDialogRequest.Select(title, items))
+        val selection = response as? PythonHostDialogResponse.Selection
+            ?: error("Python select dialog returned the wrong response type")
+        return selection.index
+    }
+
     private fun ensureNotificationPostingAllowed() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
@@ -462,6 +512,9 @@ internal class AndroidPythonHostCapabilityActions(
             }
         }
     }
+
+    private fun dialogController(): PythonInteractiveInputController = interactiveInputController
+        ?: throw PythonHostCapabilityInteractiveNotAllowedException()
 
     private fun <T> onMain(action: () -> T): T {
         if (Looper.myLooper() == Looper.getMainLooper()) return action()
@@ -603,6 +656,48 @@ internal class PythonHostCapabilityDispatcher(
                     request,
                     actions.listDirectory(request.singleFilePathArgument()),
                 )
+                PythonHostCapabilities.DIALOGS_ALERT -> {
+                    request.requireArguments(ARG_TITLE, ARG_TEXT)
+                    actions.showDialogAlert(
+                        request.dialogTitleArgument(),
+                        request.dialogTextArgument(),
+                    )
+                    encodeSuccess(request, null)
+                }
+                PythonHostCapabilities.DIALOGS_CONFIRM -> {
+                    request.requireArguments(ARG_TITLE, ARG_TEXT)
+                    encodeSuccess(
+                        request,
+                        actions.showDialogConfirm(
+                            request.dialogTitleArgument(),
+                            request.dialogTextArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.DIALOGS_PROMPT -> {
+                    request.requireArguments(ARG_TITLE, ARG_TEXT, ARG_DEFAULT)
+                    encodeSuccess(
+                        request,
+                        actions.showDialogPrompt(
+                            request.dialogTitleArgument(),
+                            request.dialogTextArgument(),
+                            request.textArgument(
+                                ARG_DEFAULT,
+                                maxBytes = PythonHostDialogPolicy.MAX_PROMPT_REPLY_BYTES,
+                            ),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.DIALOGS_SELECT -> {
+                    request.requireArguments(ARG_TITLE, ARG_ITEMS)
+                    encodeSuccess(
+                        request,
+                        actions.showDialogSelect(
+                            request.dialogTitleArgument(),
+                            request.dialogItemsArgument(),
+                        ),
+                    )
+                }
                 else -> encodeFailure(
                     request,
                     ERROR_CAPABILITY_UNAVAILABLE,
@@ -623,6 +718,12 @@ internal class PythonHostCapabilityDispatcher(
             encodeFailure(request, ERROR_FILE_ENCODING, "Host file is not valid UTF-8")
         } catch (_: PythonHostCapabilityResultLimitException) {
             encodeFailure(request, ERROR_RESULT_LIMIT_EXCEEDED, "Host capability result exceeds its limit")
+        } catch (_: PythonHostCapabilityInteractiveNotAllowedException) {
+            encodeFailure(
+                request,
+                ERROR_INTERACTIVE_NOT_ALLOWED,
+                "Host dialog requires a foreground user-authorized execution",
+            )
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
         } catch (_: Throwable) {
@@ -694,6 +795,7 @@ internal class PythonHostCapabilityDispatcher(
                 null -> add(KEY_VALUE, JsonNull.INSTANCE)
                 is String -> addProperty(KEY_VALUE, value)
                 is Boolean -> addProperty(KEY_VALUE, value)
+                is Int -> addProperty(KEY_VALUE, value)
                 is PythonHostDeviceInfo -> add(KEY_VALUE, value.toJson())
                 is List<*> -> add(
                     KEY_VALUE,
@@ -790,6 +892,43 @@ internal class PythonHostCapabilityDispatcher(
                 ),
             )
         }
+
+        fun dialogTitleArgument(): String = textArgument(
+            ARG_TITLE,
+            maxBytes = PythonHostDialogPolicy.MAX_TITLE_BYTES,
+            allowEmpty = false,
+        )
+
+        fun dialogTextArgument(): String = textArgument(
+            ARG_TEXT,
+            maxBytes = PythonHostDialogPolicy.MAX_TEXT_BYTES,
+        )
+
+        fun dialogItemsArgument(): List<String> {
+            val array = arguments.get(ARG_ITEMS)
+                ?.takeIf(JsonElement::isJsonArray)
+                ?.asJsonArray
+                ?: throw IllegalArgumentException("Python dialog items must be an array")
+            require(array.size() in 1..PythonHostDialogPolicy.MAX_ITEMS) {
+                "Python dialog item count exceeds its limit"
+            }
+            var totalBytes = 0
+            return array.map { element ->
+                require(element.isJsonPrimitive && element.asJsonPrimitive.isString) {
+                    "Python dialog item must be text"
+                }
+                val value = element.asString
+                val size = value.toByteArray(StandardCharsets.UTF_8).size
+                require(value.isNotEmpty() && size <= PythonHostDialogPolicy.MAX_ITEM_BYTES) {
+                    "Python dialog item is empty or exceeds its byte limit"
+                }
+                totalBytes += size
+                require(totalBytes <= PythonHostDialogPolicy.MAX_TOTAL_ITEM_BYTES) {
+                    "Python dialog items exceed their aggregate byte limit"
+                }
+                value
+            }
+        }
     }
 
     private companion object {
@@ -809,6 +948,9 @@ internal class PythonHostCapabilityDispatcher(
         const val ARG_NAME = "name"
         const val ARG_URL = "url"
         const val ARG_PATH = "path"
+        const val ARG_TITLE = "title"
+        const val ARG_DEFAULT = "default"
+        const val ARG_ITEMS = "items"
         const val ERROR_CAPABILITY_UNAVAILABLE = "CAPABILITY_UNAVAILABLE"
         const val ERROR_INVALID_ARGUMENT = "INVALID_ARGUMENT"
         const val ERROR_HOST_FAILURE = "HOST_FAILURE"
@@ -821,6 +963,7 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_PATH_NOT_FOUND = "PATH_NOT_FOUND"
         const val ERROR_PATH_TYPE_MISMATCH = "PATH_TYPE_MISMATCH"
         const val ERROR_FILE_ENCODING = "FILE_ENCODING_ERROR"
+        const val ERROR_INTERACTIVE_NOT_ALLOWED = "INTERACTIVE_NOT_ALLOWED"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")
         val WEB_URL = Regex("https?://.+", RegexOption.IGNORE_CASE)
@@ -833,12 +976,14 @@ internal class PythonHostCapabilityBroker(
     private val expectedPluginUid: Int,
     fileRoot: File,
     globalConsole: GlobalConsole,
+    interactiveInputController: PythonInteractiveInputController?,
     private val onViolation: (Throwable) -> Unit,
     actions: PythonHostCapabilityActions = AndroidPythonHostCapabilityActions(
         context,
         executionId,
         fileRoot,
         globalConsole,
+        interactiveInputController,
     ),
 ) : IPythonHostCapabilityBroker.Stub(), AutoCloseable {
     private val closed = AtomicBoolean(false)
@@ -886,6 +1031,8 @@ internal class PythonHostCapabilityPathTypeException : RuntimeException()
 internal class PythonHostCapabilityResultLimitException : RuntimeException()
 
 internal class PythonHostCapabilityFileEncodingException(cause: Throwable) : RuntimeException(cause)
+
+internal class PythonHostCapabilityInteractiveNotAllowedException : RuntimeException()
 
 private fun JsonObject.requireString(name: String): String {
     val value = get(name)
