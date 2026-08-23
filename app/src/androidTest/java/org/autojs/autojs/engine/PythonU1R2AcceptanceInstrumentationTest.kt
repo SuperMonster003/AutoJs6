@@ -896,6 +896,88 @@ class PythonU1R2AcceptanceInstrumentationTest {
     }
 
     @Test
+    fun boundedScreenTemplateSearchFindsControlledTargetThroughPublicPythonEngine() {
+        assumeTrue(
+            "Python accessibility screen template search requires Android 11 or newer",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R,
+        )
+        val projectRoot = freshProjectRoot()
+        val activity = launchAccessibilitySmokeActivity()
+        try {
+            ensureAccessibilityServiceStarted("M3 screen template acceptance")
+            instrumentation.runOnMainSync {
+                activity.window.decorView.sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+                )
+            }
+            assumeTrue(
+                "The AutoJs6 accessibility service connected but did not become operational",
+                AutoJsAccessibilityService.waitForOperational(AUTOMATOR_EVENT_TIMEOUT_MILLIS),
+            )
+            val captureBounds = AtomicReference<IntArray>()
+            instrumentation.runOnMainSync {
+                captureBounds.set(activity.captureTargetBoundsOnScreen())
+            }
+            val bounds = requireNotNull(captureBounds.get())
+            writeSimpleProject(
+                projectRoot,
+                """
+                import base64
+
+                from autojs6 import images, result
+
+                target = base64.b64decode("$SCREEN_TEMPLATE_TARGET_PNG_BASE64")
+                absent = base64.b64decode("$SCREEN_TEMPLATE_ABSENT_PNG_BASE64")
+                region = (${bounds[0]}, ${bounds[1]}, ${bounds[2]}, ${bounds[3]})
+                match = images.find_image(target, region=region, threshold=$SCREEN_CAPTURE_COLOR_TOLERANCE)
+                miss = images.find_image(absent, region=region, threshold=0)
+                result.set({
+                    "match": None if match is None else list(match),
+                    "miss": None if miss is None else list(miss),
+                    "templateBytes": len(target),
+                })
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 screen template execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 screen template execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 screen template execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals(SCREEN_TEMPLATE_TARGET_BYTES, structured.getInt("templateBytes"))
+                assertFalse("Controlled screen template was not found", structured.isNull("match"))
+                val match = structured.getJSONArray("match")
+                assertEquals(2, match.length())
+                assertTrue(
+                    match.getInt(0) in bounds[0]..(bounds[0] + bounds[2] - SCREEN_TEMPLATE_SIDE),
+                )
+                assertTrue(
+                    match.getInt(1) in bounds[1]..(bounds[1] + bounds[3] - SCREEN_TEMPLATE_SIDE),
+                )
+                assertTrue("Absent screen template unexpectedly matched", structured.isNull("miss"))
+                assertTrue(result.outputArtifacts.isEmpty())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                if (!activity.isFinishing) activity.finish()
+            }
+            restoreHostForeground()
+            cleanProjectRoot(projectRoot, "M3 screen template")
+        }
+    }
+
+    @Test
     fun automatorFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
         assumeFalse(
             "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
@@ -1102,6 +1184,64 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
         } finally {
             cleanProjectRoot(projectRoot, "M3 unavailable screen color")
+        }
+    }
+
+    @Test
+    fun findImageFailsClosedWithoutAccessibilityThroughPublicPythonEngine() {
+        assumeTrue(
+            "Python accessibility screen template search requires Android 11 or newer",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R,
+        )
+        assumeFalse(
+            "This acceptance requires the AutoJs6 accessibility service to remain unavailable",
+            AutoJsAccessibilityService.hasInstance(),
+        )
+        val projectRoot = freshProjectRoot()
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                import base64
+
+                from autojs6 import images, result
+                from autojs6.errors import CapabilityUnavailableError
+
+                template = base64.b64decode("$SCREEN_TEMPLATE_TARGET_PNG_BASE64")
+                try:
+                    images.find_image(template)
+                    outcome = {"error": "NO_ERROR", "message": ""}
+                except CapabilityUnavailableError as error:
+                    outcome = {"error": type(error).__name__, "message": str(error)}
+                result.set(outcome)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 unavailable screen template execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 unavailable screen template execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 unavailable screen template execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("CapabilityUnavailableError", structured.getString("error"))
+                assertEquals(
+                    "AutoJs6 accessibility service is unavailable",
+                    structured.getString("message"),
+                )
+                assertTrue(result.outputArtifacts.isEmpty())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 unavailable screen template")
         }
     }
 
@@ -2618,6 +2758,12 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val SCREEN_CAPTURE_ARTIFACT_PATH = "screens/python-capture.png"
         const val SCREEN_CAPTURE_MAX_BYTES = 4 * 1024 * 1024
         const val SCREEN_CAPTURE_COLOR_TOLERANCE = 2
+        const val SCREEN_TEMPLATE_SIDE = 3
+        const val SCREEN_TEMPLATE_TARGET_BYTES = 73
+        const val SCREEN_TEMPLATE_TARGET_PNG_BASE64 =
+            "iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAEElEQVR4nGMQMgmDIAYsLABP/gV9MIEa5AAAAABJRU5ErkJggg=="
+        const val SCREEN_TEMPLATE_ABSENT_PNG_BASE64 =
+            "iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAEUlEQVR4nGP4d2cXBDFgYQEAXp0XNXCQT6cAAAAASUVORK5CYII="
         const val STDERR_MARKER = "U1R2_STDERR_DIAGNOSTIC"
         const val STDOUT_JSON_LOOKALIKE = "{\"stdout\":\"diagnostic-only\"}\n"
         const val STDOUT_JSON_LOOKALIKE_ESCAPED = "{\\\"stdout\\\":\\\"diagnostic-only\\\"}"
