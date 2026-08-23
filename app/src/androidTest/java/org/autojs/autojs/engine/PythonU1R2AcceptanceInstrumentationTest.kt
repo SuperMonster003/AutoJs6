@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.app.Activity
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -246,6 +247,83 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
         } finally {
             cleanProjectRoot(projectRoot, "M2 project stdin")
+        }
+    }
+
+    @Test
+    fun firstLowRiskHostCapabilitiesRoundTripThroughProtocol15Broker() {
+        val projectRoot = freshProjectRoot()
+        val marker = "M3_BROKER_OK_${UUID.randomUUID()}"
+        val activity = launchForegroundActivity()
+        val clipboard = requireNotNull(context.getSystemService(ClipboardManager::class.java))
+        val originalClip = clipboard.primaryClip
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                from autojs6 import app, clip, result, toast
+                from autojs6.errors import HostCapabilityError
+
+                marker = "$marker"
+                toast(marker)
+                clip.set(marker)
+                observed = clip.get()
+                launch_missing = app.launch("org.autojs6.m3.missing")
+                launch_app_missing = app.launch_app("AutoJs6 M3 Missing Application")
+
+                try:
+                    app.open_url("ftp://invalid-for-m3-acceptance.example")
+                    open_url_code = "NO_ERROR"
+                except HostCapabilityError as error:
+                    open_url_code = error.code
+
+                result.set({
+                    "clip": observed,
+                    "launchAppMissing": launch_app_missing,
+                    "launchMissing": launch_missing,
+                    "openUrlCode": open_url_code,
+                    "toast": True,
+                })
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 host capability broker execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 host capability broker execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 host capability broker execution")
+                assertEquals(
+                    "{\"clip\":\"$marker\",\"launchAppMissing\":false," +
+                        "\"launchMissing\":false,\"openUrlCode\":\"INVALID_ARGUMENT\",\"toast\":true}",
+                    result.structuredJson,
+                )
+                assertEquals(
+                    marker,
+                    clipboard.primaryClip
+                        ?.takeIf { it.itemCount > 0 }
+                        ?.getItemAt(0)
+                        ?.coerceToText(context)
+                        ?.toString(),
+                )
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            if (originalClip == null) {
+                clipboard.clearPrimaryClip()
+            } else {
+                clipboard.setPrimaryClip(originalClip)
+            }
+            instrumentation.runOnMainSync { activity.finish() }
+            cleanProjectRoot(projectRoot, "M3 host capability broker")
         }
     }
 
