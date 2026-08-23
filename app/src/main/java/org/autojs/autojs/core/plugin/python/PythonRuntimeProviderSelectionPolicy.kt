@@ -109,6 +109,9 @@ internal data class PythonRuntimeCapabilityRequirement(
     val outputArtifacts: Boolean = false,
     val cooperativeCancellation: Boolean = false,
     val minimumSourceBytes: Long = 1L,
+    val minimumWorkspaceArchiveBytes: Long = 0L,
+    val minimumWorkspaceEntries: Int = 0,
+    val minimumWorkspaceUncompressedBytes: Long = 0L,
     val minimumStdinBytes: Long = 0L,
     val minimumHostCapabilitySnapshotBytes: Long = 0L,
     val minimumInputPromptBytes: Int = 0,
@@ -128,6 +131,9 @@ internal data class PythonRuntimeCapabilityRequirement(
 ) {
     init {
         require(minimumSourceBytes > 0L)
+        require(minimumWorkspaceArchiveBytes >= 0L)
+        require(minimumWorkspaceEntries >= 0)
+        require(minimumWorkspaceUncompressedBytes >= 0L)
         require(minimumStdinBytes >= 0L)
         require(minimumHostCapabilitySnapshotBytes >= 0L)
         require(minimumInputPromptBytes >= 0)
@@ -147,7 +153,13 @@ internal data class PythonRuntimeCapabilityRequirement(
     }
 
     fun isSatisfiedBy(value: PythonRuntimeCapabilities): Boolean =
-        (!workspaceArchive || value.supportsWorkspaceArchive) &&
+        (
+            !workspaceArchive ||
+                value.supportsWorkspaceArchive &&
+                value.limits.maxWorkspaceArchiveBytes >= minimumWorkspaceArchiveBytes &&
+                value.limits.maxWorkspaceEntries >= minimumWorkspaceEntries &&
+                value.limits.maxWorkspaceUncompressedBytes >= minimumWorkspaceUncompressedBytes
+            ) &&
             (!moduleEntry || value.supportsModuleEntry) &&
             (
                 !stdinSnapshot ||

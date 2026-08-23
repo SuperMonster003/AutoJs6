@@ -339,6 +339,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Python Runtime output chunks are written to the Host console as they arrive, with independent incremental UTF-8 decoding for stdout/stderr preserving code points split across chunks and a 16 MiB end-to-end output limit
 * `Improvement` Python project.json supports a positive-integer timeout in milliseconds, defaulting to 5 minutes, capped at 30 minutes, and still bounded by the Runtime plugin limit
 * `Improvement` Python project.json supports explicit module entry through "entryMode": "module" and a normalized dotted main name, enabling package-relative imports with standard Python module semantics
+* `Improvement` Raise Python project workspace limits to 64 MiB compressed, 8192 file entries, and 128 MiB extracted, and match the snapshot's actual three-dimensional requirement against Runtime Provider capabilities before dispatch to support project-local pure-Python dependencies
 * `Improvement` Python project.json supports finite stdin snapshots as inline text or an explicit project-relative file, allowing sys.stdin.read() to consume pre-supplied input without interactive prompts
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Consolidated file manager media detail queries into a single MediaInfo snapshot to reduce Binder calls and wait time

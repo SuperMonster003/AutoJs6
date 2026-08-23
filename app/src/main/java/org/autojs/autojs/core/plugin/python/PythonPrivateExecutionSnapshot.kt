@@ -31,11 +31,26 @@ import java.util.zip.ZipOutputStream
 internal class PythonPrivateExecutionSnapshot private constructor(
     private val source: PrivatePayload,
     private val workspace: PrivatePayload?,
+    val workspaceEntryCount: Int?,
+    val workspaceUncompressedBytes: Long?,
     private val stdin: PrivatePayload?,
     private val hostCapabilities: PrivatePayload?,
     val entryPoint: String,
     val entryMode: PythonEntryMode,
 ) : Closeable {
+
+    init {
+        require(
+            (workspace == null) ==
+                (workspaceEntryCount == null && workspaceUncompressedBytes == null),
+        ) { "Workspace metrics must be present exactly when a workspace payload is present" }
+        require(workspaceEntryCount == null || workspaceEntryCount >= 0) {
+            "Workspace entry count must not be negative"
+        }
+        require(workspaceUncompressedBytes == null || workspaceUncompressedBytes >= 0L) {
+            "Workspace uncompressed size must not be negative"
+        }
+    }
 
     val sourceLengthBytes: Long
         get() = source.lengthBytes
@@ -156,6 +171,8 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                 PythonPrivateExecutionSnapshot(
                     source = base.source,
                     workspace = base.workspace,
+                    workspaceEntryCount = base.workspaceEntryCount,
+                    workspaceUncompressedBytes = base.workspaceUncompressedBytes,
                     stdin = stdinPayload,
                     hostCapabilities = capability,
                     entryPoint = requestEntryPoint,
@@ -193,6 +210,8 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                 PythonPrivateExecutionSnapshot(
                     source = payload,
                     workspace = null,
+                    workspaceEntryCount = null,
+                    workspaceUncompressedBytes = null,
                     stdin = null,
                     hostCapabilities = null,
                     entryPoint = semanticSource.name,
@@ -287,6 +306,8 @@ internal class PythonPrivateExecutionSnapshot private constructor(
                         workspaceFile.length(),
                         PythonSha256.fromBytes(workspaceDigest.digest()),
                     ),
+                    workspaceEntryCount = archiveEntries,
+                    workspaceUncompressedBytes = expandedBytes,
                     stdin = null,
                     hostCapabilities = null,
                     entryPoint = source.entryPoint,
@@ -531,9 +552,9 @@ internal class PythonPrivateExecutionSnapshot private constructor(
 
 /** Pure traversal policy; byte capture revalidates every planned file with lstat/open/fstat. */
 internal object PythonProjectWorkspacePolicy {
-    const val MAX_ARCHIVE_BYTES = 16L * 1024L * 1024L
-    const val MAX_ENTRIES = 1_024
-    const val MAX_UNCOMPRESSED_BYTES = 32L * 1024L * 1024L
+    const val MAX_ARCHIVE_BYTES = 64L * 1024L * 1024L
+    const val MAX_ENTRIES = 8_192
+    const val MAX_UNCOMPRESSED_BYTES = 128L * 1024L * 1024L
     private const val MAX_PATH_BYTES = 4 * 1024
 
     data class PlannedFile(
@@ -562,6 +583,7 @@ internal object PythonProjectWorkspacePolicy {
         val paths = NodePathSet()
         var entrySeen = false
         var visitedDirectories = 0
+        var plannedWorkspaceFiles = 0
 
         fun visit(directory: File, depth: Int) {
             check(depth <= MAX_DEPTH) { "Python workspace exceeds the directory-depth limit" }
@@ -596,9 +618,10 @@ internal object PythonProjectWorkspacePolicy {
                         val isEntry = canonical == entry
                         entrySeen = entrySeen || isEntry
                         if (!isEntry) {
-                            check(planned.count { !it.entryPoint } < MAX_ENTRIES) {
+                            check(plannedWorkspaceFiles < MAX_ENTRIES) {
                                 "Python workspace exceeds the entry-count limit"
                             }
+                            plannedWorkspaceFiles++
                         }
                         planned += PlannedFile(canonical, canonical, relative, isEntry)
                     }

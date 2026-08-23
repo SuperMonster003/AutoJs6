@@ -339,6 +339,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` Python Runtime の出力 chunk を到着時に Host コンソールへ書き込み, stdout/stderr ごとの増分 UTF-8 デコードで chunk をまたぐコードポイントを保持し, エンドツーエンドの出力上限を 16 MiB に拡大
 * `改善` Python プロジェクトの project.json で正の整数ミリ秒の timeout を指定可能にし, 既定値を 5 分、上限を 30 分として Runtime プラグインの上限も引き続き適用
 * `改善` Python プロジェクトの project.json で "entryMode": "module" と正規化されたドット区切りの main 名による明示的なモジュールエントリを指定可能にし, 標準 Python モジュールセマンティクスでパッケージ相対 import に対応
+* `改善` Python project workspace 上限を圧縮後 64 MiB、file entry 8192 件、展開後 128 MiB に拡張し、dispatch 前に snapshot の実際の 3 次元要件と Runtime Provider capability を照合して project-local pure-Python dependency に対応
 * `改善` Python プロジェクトの project.json でインラインテキストまたは明示的なプロジェクト相対ファイルによる有限 stdin スナップショットを指定可能にし, sys.stdin.read() が対話プロンプトなしで事前入力を読み取れるように対応
 * `改善` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 関連機能をプラグイン化
 * `改善` ファイルマネージャーのメディア詳細取得を単一の MediaInfo スナップショットに統合, Binder 呼び出しと待機時間を削減
