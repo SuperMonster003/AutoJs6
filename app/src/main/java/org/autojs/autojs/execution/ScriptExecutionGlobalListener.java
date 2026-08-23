@@ -30,6 +30,9 @@ public class ScriptExecutionGlobalListener implements ScriptExecutionListener {
 
     private void onFinish(ScriptExecution execution) {
         ScriptEngine<? extends ScriptSource> engine = execution.getEngine();
+        if (engine == null) {
+            return;
+        }
         Long startTime = (Long) engine.getTag(ENGINE_TAG_START_TIME);
         if (startTime != null) {
             printSeconds(execution, startTime);

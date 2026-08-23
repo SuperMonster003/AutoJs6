@@ -27,6 +27,7 @@ import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.eventloop.SimpleEvent
+import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine.ExecuteCallback
@@ -35,7 +36,9 @@ import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.execution.ScriptExecution.AbstractScriptExecution
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
+import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
@@ -74,6 +77,8 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
     private var mExecutionListener: ScriptExecutionListener? = null
     private var mScriptSource: ScriptSource? = null
     private var mResult: Any? = null
+    private var mPreparationThread: ThreadCompat? = null
+    private var mIsResumed = false
 
     private val mMediator = OnActivityResultDelegate.Mediator()
 
@@ -137,14 +142,55 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
             return
         }
         mScriptExecution = execution
-        mScriptSource = mScriptExecution.source
-        mScriptEngine = mScriptExecution.createEngine(this)
         mExecutionListener = mScriptExecution.listener
-        mRuntime = (mScriptEngine as JavaScriptEngine?)!!.runtime.also { rt ->
-            eventEmitter = EventEmitter(rt.bridges)
+        val source = mScriptExecution.source
+        mScriptSource = source
+        if (source is JavaScriptFileSource && source.isRhinoTypeScriptSource) {
+            prepareTypeScriptAndRun(source, savedInstanceState)
+        } else {
+            initializeAndRun(source, savedInstanceState)
         }
-        runScript()
-        emit("create", savedInstanceState)
+    }
+
+    private fun prepareTypeScriptAndRun(source: ScriptSource, savedInstanceState: Bundle?) {
+        mPreparationThread = ThreadCompat(
+            Runnable {
+                try {
+                    val prepared = TypeScriptExecutionCompiler.prepare(applicationContext, source)
+                    runOnUiThread {
+                        mPreparationThread = null
+                        if (!isFinishing && !isDestroyed) {
+                            initializeAndRun(prepared, savedInstanceState)
+                        }
+                    }
+                } catch (error: Throwable) {
+                    runOnUiThread {
+                        mPreparationThread = null
+                        if (!isFinishing && !isDestroyed) {
+                            onException(error)
+                        }
+                    }
+                }
+            },
+            "TypeScriptUiPreparation-${mScriptExecution.id}",
+        ).also(ThreadCompat::start)
+    }
+
+    private fun initializeAndRun(source: ScriptSource, savedInstanceState: Bundle?) {
+        try {
+            mScriptSource = source
+            mScriptEngine = mScriptExecution.createEngine(this, source)
+            mRuntime = (mScriptEngine as JavaScriptEngine?)!!.runtime.also { runtime ->
+                eventEmitter = EventEmitter(runtime.bridges)
+            }
+            runScript()
+            emit("create", savedInstanceState)
+            if (mIsResumed) {
+                emit("resume")
+            }
+        } catch (error: Throwable) {
+            onException(error)
+        }
     }
 
     private fun runScript() {
@@ -205,6 +251,8 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         super.onDestroy()
         Log.d(LOG_TAG, "onDestroy")
 
+        mPreparationThread?.interrupt()
+        mPreparationThread = null
         mRuntime?.loopers?.waitWhenIdle(false)
 
         if (::mScriptEngine.isInitialized) {
@@ -223,6 +271,9 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         mExecutionListener = null
         mScriptSource = null
         mResult = null
+        if (::mScriptExecution.isInitialized) {
+            ScriptEngineService.getInstance().removeScriptExecution(mScriptExecution.id)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -232,13 +283,19 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
     }
 
     override fun onPause() {
-        emit("pause")
+        if (::eventEmitter.isInitialized) {
+            emit("pause")
+        }
+        mIsResumed = false
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        emit("resume")
+        mIsResumed = true
+        if (::eventEmitter.isInitialized) {
+            emit("resume")
+        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -280,7 +337,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         event ?: return
         try {
             mRuntime?.events?.emit(event, *args)
-            eventEmitter.emit(event, *args)
+            emitter?.emit(event, *args)
         } catch (e: Exception) {
             mRuntime?.exit(e)
         }
@@ -299,7 +356,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
             private set
 
         @Suppress("unused", "UNUSED_PARAMETER")
-        fun createEngine(activity: Activity?): ScriptEngine<*> {
+        fun createEngine(activity: Activity?, source: ScriptSource = this.source): ScriptEngine<*> {
             mScriptEngine?.forceStop()
             return mScriptEngineManager.createEngineOfSourceOrThrow(source, id)
                 .apply { setTag(ExecutionConfig.tag, config) }

@@ -20,6 +20,7 @@
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
 * `Feature` Independent TypeScript compiler plugin client with frozen AIDL/R2 archive contract validation, UTF-8 single-file Rhino compilation, bounded diagnostics, and mandatory Source Map output
 * `Feature` Local single-file .ts scripts now pass through the independent compiler plugin before Rhino execution, preserve their UTF-8 source identity and Source Map output, reject type errors before execution, and never fall back to the Node.js plugin or raw TypeScript; unsupported TSX/declaration files and an unavailable compiler return explicit localized errors
+* `Feature` Local single-file .ts scripts using the "ui" directive support, after compilation, Rhino Activity execution with string XML layouts, view lookup, click callbacks, text updates, and explicit UI closure; native TSX layout syntax remains explicitly rejected
 * `Feature` Independent Python Runtime plugin backend for running local .py files and script projects declared with `type: python` in a separate CPython plugin process, with fixed-component/signer/protocol/ABI validation, hot plugging, and no fallback to JavaScript
 * `Feature` Python launch integration covers the file manager/editor/local Run Intent/single-file Import Intent/new shortcuts/timed tasks/broadcast tasks and preserves strict single-file or project context; projects support internal imports, relative file access, and read-only `autojs6.app/device/execution/project` APIs
 * `Feature` Python Runtime execution supports optional bounded pre-supplied stdin snapshots via the ExecutionConfig key `autojs6.python.stdinSnapshot`, with strict ByteArray/UTF-8 text admission, provider capability/size negotiation, private read-only PFD transport, and cleanup
@@ -103,6 +104,7 @@
 * `Fix` Node.js R6 soak evidence could reject a healthy persistent runtime when Android reported zero currently allocated native-heap bytes
 * `Fix` Node.js R6 packaged APK evidence was skipped or bound to arm64 because the collector did not stage a fresh Inrt template or pass the target ABI
 * `Fix` Cross-ABI app packaging could copy native libraries from the installed host process into another ABI directory, causing 32-bit packaged apps to load 64-bit terminal libraries and crash
+* `Fix` TypeScript UI scripts with compilation failures before engine creation could crash the host while reporting diagnostics because the global execution listener dereferenced a missing engine
 * `Fix` Experimental DEX compiler host could accept DEX versions incompatible with the requested minApi, reject the valid 65,536 field/method ID boundary, and recreate a rolled-back partial artifact when a queued pipe drain started late
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_

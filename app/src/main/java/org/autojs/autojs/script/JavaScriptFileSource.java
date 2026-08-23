@@ -83,9 +83,6 @@ public class JavaScriptFileSource extends JavaScriptSource {
                         "A single-file .ts script cannot request the Node.js engine before Node profile support."
                 );
             }
-            if ((mode & EXECUTION_MODE_UI) != 0) {
-                throw new IllegalArgumentException("TypeScript UI-mode execution is not supported yet.");
-            }
         }
         return mode;
     }

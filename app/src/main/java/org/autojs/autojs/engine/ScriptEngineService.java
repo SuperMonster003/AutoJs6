@@ -239,6 +239,10 @@ public class ScriptEngineService {
         return mScriptExecutions.get(id);
     }
 
+    public void removeScriptExecution(int id) {
+        mScriptExecutions.remove(id);
+    }
+
     private void emitEngineEvent(String eventName, ScriptEngine<? extends ScriptSource> engine, Object... args) {
         for (ScriptEngine<?> scriptEngine : getEngines()) {
             if (scriptEngine instanceof JavaScriptEngine jsEngine) {
