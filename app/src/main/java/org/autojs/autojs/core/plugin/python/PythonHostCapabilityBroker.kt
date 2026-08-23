@@ -84,6 +84,10 @@ internal object PythonHostCapabilities {
     const val AUTOMATOR_SWIPE = "automator.swipe"
     const val AUTOMATOR_BACK = "automator.back"
     const val AUTOMATOR_HOME = "automator.home"
+    const val SELECTOR_SNAPSHOT = "selector.snapshot"
+    const val SELECTOR_FIND = "selector.find"
+    const val SELECTOR_CLICK = "selector.click"
+    const val SELECTOR_SET_TEXT = "selector.set_text"
 
     val ENABLED = setOf(
         TOAST_SHOW,
@@ -116,6 +120,10 @@ internal object PythonHostCapabilities {
         AUTOMATOR_SWIPE,
         AUTOMATOR_BACK,
         AUTOMATOR_HOME,
+        SELECTOR_SNAPSHOT,
+        SELECTOR_FIND,
+        SELECTOR_CLICK,
+        SELECTOR_SET_TEXT,
     )
 }
 
@@ -527,6 +535,20 @@ internal interface PythonHostCapabilityActions {
     fun back(): Boolean
 
     fun home(): Boolean
+
+    fun selectorSnapshot(maxNodes: Int, maxDepth: Int): PythonHostSelectorSnapshot
+
+    fun selectorFind(
+        query: PythonHostSelectorQuery,
+        maxNodes: Int,
+        maxDepth: Int,
+    ): PythonHostSelectorNode?
+
+    fun clickNode(nodeId: String): Boolean
+
+    fun setNodeText(nodeId: String, text: String): Boolean
+
+    fun close() = Unit
 }
 
 internal class AndroidPythonHostCapabilityActions(
@@ -545,6 +567,9 @@ internal class AndroidPythonHostCapabilityActions(
     private val app = AppUtils(appContext)
     private val accessibilityAutomator = GlobalActionAutomator(appContext, mainHandler) {
         AutoJsAccessibilityService.instance
+    }
+    private val selector = PythonHostSelectorScope {
+        requireAccessibilityService().rootInActiveWindow
     }
     private val hostFiles = PythonHostFileScope(fileRoot)
     private val hostEngines = PythonHostEngineScope(
@@ -739,6 +764,27 @@ internal class AndroidPythonHostCapabilityActions(
 
     override fun home(): Boolean = withAccessibility(accessibilityAutomator::home)
 
+    override fun selectorSnapshot(maxNodes: Int, maxDepth: Int): PythonHostSelectorSnapshot =
+        onMain { withAccessibility { selector.snapshot(maxNodes, maxDepth) } }
+
+    override fun selectorFind(
+        query: PythonHostSelectorQuery,
+        maxNodes: Int,
+        maxDepth: Int,
+    ): PythonHostSelectorNode? = onMain {
+        withAccessibility { selector.find(query, maxNodes, maxDepth) }
+    }
+
+    override fun clickNode(nodeId: String): Boolean = onMain {
+        withAccessibility { selector.click(nodeId) }
+    }
+
+    override fun setNodeText(nodeId: String, text: String): Boolean = onMain {
+        withAccessibility { selector.setText(nodeId, text) }
+    }
+
+    override fun close() = selector.close()
+
     private fun ensureNotificationPostingAllowed() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
@@ -762,10 +808,16 @@ internal class AndroidPythonHostCapabilityActions(
         ?: throw PythonHostCapabilityInteractiveNotAllowedException()
 
     private fun <T> withAccessibility(action: () -> T): T {
+        requireAccessibilityService()
+        return action()
+    }
+
+    private fun requireAccessibilityService(): AutoJsAccessibilityService {
         if (!AutoJsAccessibilityService.hasInstance() || !AutoJsAccessibilityService.hasOperationalState) {
             throw PythonHostCapabilityAccessibilityUnavailableException()
         }
-        return action()
+        return AutoJsAccessibilityService.instance
+            ?: throw PythonHostCapabilityAccessibilityUnavailableException()
     }
 
     private fun <T> onMain(action: () -> T): T {
@@ -1015,6 +1067,44 @@ internal class PythonHostCapabilityDispatcher(
                     request.requireArguments()
                     encodeSuccess(request, actions.home())
                 }
+                PythonHostCapabilities.SELECTOR_SNAPSHOT -> {
+                    request.requireArguments(ARG_MAX_NODES, ARG_MAX_DEPTH)
+                    encodeSuccess(
+                        request,
+                        actions.selectorSnapshot(
+                            request.snapshotNodeLimitArgument(),
+                            request.selectorDepthArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.SELECTOR_FIND -> {
+                    request.requireArguments(ARG_QUERY, ARG_MAX_NODES, ARG_MAX_DEPTH)
+                    encodeSuccess(
+                        request,
+                        actions.selectorFind(
+                            request.selectorQueryArgument(),
+                            request.findNodeLimitArgument(),
+                            request.selectorDepthArgument(),
+                        ),
+                    )
+                }
+                PythonHostCapabilities.SELECTOR_CLICK -> encodeSuccess(
+                    request,
+                    actions.clickNode(request.singleNodeIdArgument()),
+                )
+                PythonHostCapabilities.SELECTOR_SET_TEXT -> {
+                    request.requireArguments(ARG_NODE_ID, ARG_TEXT)
+                    encodeSuccess(
+                        request,
+                        actions.setNodeText(
+                            request.nodeIdArgument(),
+                            request.textArgument(
+                                ARG_TEXT,
+                                maxBytes = PythonHostSelectorPolicy.MAX_SET_TEXT_BYTES,
+                            ),
+                        ),
+                    )
+                }
                 else -> encodeFailure(
                     request,
                     ERROR_CAPABILITY_UNAVAILABLE,
@@ -1059,6 +1149,18 @@ internal class PythonHostCapabilityDispatcher(
                 ERROR_ACCESSIBILITY_UNAVAILABLE,
                 "AutoJs6 accessibility service is unavailable",
             )
+        } catch (_: PythonHostCapabilityStaleNodeException) {
+            encodeFailure(
+                request,
+                ERROR_STALE_NODE,
+                "Host selector node is stale or no longer retained",
+            )
+        } catch (_: PythonHostCapabilitySelectorScanLimitException) {
+            encodeFailure(
+                request,
+                ERROR_SELECTOR_SCAN_LIMIT_EXCEEDED,
+                "Host selector scan reached its node or depth limit",
+            )
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
         } catch (_: Throwable) {
@@ -1079,6 +1181,7 @@ internal class PythonHostCapabilityDispatcher(
         if (closed) return false
         closed = true
         admittedCallIds.clear()
+        runCatching(actions::close)
         return true
     }
 
@@ -1134,6 +1237,8 @@ internal class PythonHostCapabilityDispatcher(
                 is PythonHostDeviceInfo -> add(KEY_VALUE, value.toJson())
                 is PythonHostEngineInfo -> add(KEY_VALUE, value.toJson())
                 is PythonHostEngineLaunch -> add(KEY_VALUE, value.toJson())
+                is PythonHostSelectorSnapshot -> add(KEY_VALUE, value.toJson())
+                is PythonHostSelectorNode -> add(KEY_VALUE, value.toJson())
                 is List<*> -> add(
                     KEY_VALUE,
                     JsonArray().apply {
@@ -1279,6 +1384,71 @@ internal class PythonHostCapabilityDispatcher(
             maximum = PythonHostAutomatorPolicy.MAX_DURATION_MILLIS,
         )
 
+        fun snapshotNodeLimitArgument(): Int = integerArgument(
+            name = ARG_MAX_NODES,
+            minimum = 1,
+            maximum = PythonHostSelectorPolicy.MAX_SNAPSHOT_NODES,
+        )
+
+        fun findNodeLimitArgument(): Int = integerArgument(
+            name = ARG_MAX_NODES,
+            minimum = 1,
+            maximum = PythonHostSelectorPolicy.MAX_FIND_NODES,
+        )
+
+        fun selectorDepthArgument(): Int = integerArgument(
+            name = ARG_MAX_DEPTH,
+            minimum = 0,
+            maximum = PythonHostSelectorPolicy.MAX_DEPTH,
+        )
+
+        fun singleNodeIdArgument(): String {
+            requireArguments(ARG_NODE_ID)
+            return nodeIdArgument()
+        }
+
+        fun nodeIdArgument(): String = textArgument(
+            ARG_NODE_ID,
+            pattern = PythonHostSelectorPolicy.NODE_ID,
+            maxBytes = 64,
+            allowEmpty = false,
+        )
+
+        fun selectorQueryArgument(): PythonHostSelectorQuery {
+            val query = arguments.get(ARG_QUERY)
+                ?.takeIf(JsonElement::isJsonObject)
+                ?.asJsonObject
+                ?: throw IllegalArgumentException("Python selector query must be an object")
+            require(query.keySet().isNotEmpty() && query.keySet().all { it in PythonHostSelectorPolicy.QUERY_KEYS }) {
+                "Python selector query contains missing or unsupported conditions"
+            }
+            fun text(name: String): String? {
+                if (!query.has(name)) return null
+                val value = query.requireString(name)
+                require(
+                    value.isNotEmpty() &&
+                        value.toByteArray(StandardCharsets.UTF_8).size <=
+                        PythonHostSelectorPolicy.MAX_QUERY_TEXT_BYTES,
+                ) {
+                    "Python selector query text is empty or exceeds its byte limit"
+                }
+                return value
+            }
+            fun flag(name: String): Boolean? = if (query.has(name)) query.requireBoolean(name) else null
+            return PythonHostSelectorQuery(
+                text = text(QUERY_TEXT),
+                textContains = text(QUERY_TEXT_CONTAINS),
+                description = text(QUERY_DESCRIPTION),
+                descriptionContains = text(QUERY_DESCRIPTION_CONTAINS),
+                resourceId = text(QUERY_RESOURCE_ID),
+                className = text(QUERY_CLASS_NAME),
+                clickable = flag(QUERY_CLICKABLE),
+                editable = flag(QUERY_EDITABLE),
+                enabled = flag(QUERY_ENABLED),
+                scrollable = flag(QUERY_SCROLLABLE),
+            )
+        }
+
         private fun integerArgument(name: String, minimum: Int, maximum: Int): Int {
             val value = arguments.requireLong(name)
             require(value in minimum.toLong()..maximum.toLong()) {
@@ -1315,6 +1485,20 @@ internal class PythonHostCapabilityDispatcher(
         const val ARG_X2 = "x2"
         const val ARG_Y2 = "y2"
         const val ARG_DURATION_MILLIS = "durationMillis"
+        const val ARG_QUERY = "query"
+        const val ARG_MAX_NODES = "maxNodes"
+        const val ARG_MAX_DEPTH = "maxDepth"
+        const val ARG_NODE_ID = "nodeId"
+        const val QUERY_TEXT = "text"
+        const val QUERY_TEXT_CONTAINS = "textContains"
+        const val QUERY_DESCRIPTION = "description"
+        const val QUERY_DESCRIPTION_CONTAINS = "descriptionContains"
+        const val QUERY_RESOURCE_ID = "resourceId"
+        const val QUERY_CLASS_NAME = "className"
+        const val QUERY_CLICKABLE = "clickable"
+        const val QUERY_EDITABLE = "editable"
+        const val QUERY_ENABLED = "enabled"
+        const val QUERY_SCROLLABLE = "scrollable"
         const val ERROR_CAPABILITY_UNAVAILABLE = "CAPABILITY_UNAVAILABLE"
         const val ERROR_INVALID_ARGUMENT = "INVALID_ARGUMENT"
         const val ERROR_HOST_FAILURE = "HOST_FAILURE"
@@ -1331,6 +1515,8 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_NESTED_PYTHON_NOT_ALLOWED = "NESTED_PYTHON_NOT_ALLOWED"
         const val ERROR_ENGINE_LAUNCH_LIMIT_EXCEEDED = "ENGINE_LAUNCH_LIMIT_EXCEEDED"
         const val ERROR_ACCESSIBILITY_UNAVAILABLE = "ACCESSIBILITY_UNAVAILABLE"
+        const val ERROR_STALE_NODE = "STALE_NODE"
+        const val ERROR_SELECTOR_SCAN_LIMIT_EXCEEDED = "SELECTOR_SCAN_LIMIT_EXCEEDED"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")
         val WEB_URL = Regex("https?://.+", RegexOption.IGNORE_CASE)
@@ -1415,6 +1601,10 @@ internal class PythonHostCapabilityEngineLaunchLimitException : RuntimeException
 
 internal class PythonHostCapabilityAccessibilityUnavailableException : RuntimeException()
 
+internal class PythonHostCapabilityStaleNodeException : RuntimeException()
+
+internal class PythonHostCapabilitySelectorScanLimitException : RuntimeException()
+
 private fun JsonObject.requireString(name: String): String {
     val value = get(name)
     require(value != null && value.isJsonPrimitive && value.asJsonPrimitive.isString) {
@@ -1432,6 +1622,14 @@ private fun JsonObject.requireLong(name: String): Long {
     require(INTEGER.matches(encoded)) { "Python host capability field '$name' must be an integer" }
     return encoded.toLongOrNull()
         ?: throw IllegalArgumentException("Python host capability field '$name' is outside the integer range")
+}
+
+private fun JsonObject.requireBoolean(name: String): Boolean {
+    val value = get(name)
+    require(value != null && value.isJsonPrimitive && value.asJsonPrimitive.isBoolean) {
+        "Python host capability field '$name' must be a boolean"
+    }
+    return value.asBoolean
 }
 
 private val INTEGER = Regex("-?(?:0|[1-9][0-9]*)")

@@ -35,6 +35,7 @@
 * `新增` Python Runtime 協議 1.5 Host broker 僅向經用戶授權的前台啟動開放有界 alert/confirm/prompt/select 對話框; 後台啟動穩定返回 INTERACTIVE_NOT_ALLOWED, 取消或執行終態清理會關閉活動對話框 UI
 * `新增` Python Runtime 協議 1.5 Host broker 開放不含絕對路徑的目前引擎資訊, 確定性停止自身及最多 16 次限定範圍的非 Python Host 子指令碼非同步啟動; provider 保持單一工作階段期間巢狀 Python 穩定返回 NESTED_PYTHON_NOT_ALLOWED
 * `新增` Python Runtime 協議 1.5 Host broker 開放有界的無障礙點擊, 長按, 定時按壓, 滑動, 返回及主畫面操作; 座標與持續時間經過嚴格校驗, 無障礙服務不可用時穩定返回 ACCESSIBILITY_UNAVAILABLE
+* `新增` Python Runtime 協議 1.5 Host broker 開放有界且綁定單次執行的無障礙樹快照與 AND 組合選擇器查詢, 透過不透明節點引用執行明確點擊與文字設定; 快照, 掃描, 字串, 保留節點及回應均有固定上限, 無障礙不可用, 掃描不完整與節點過期時返回穩定的類型化錯誤
 * `新增` Python Runtime 明確嚴格 JSON 結果在腳本終態後以 `[result]` 前綴寫入宿主控制台, 已校驗輸出 artifact 原子發布到項目或腳本目錄下的 `.python-artifacts` 執行專屬目錄並打印絕對路徑; 該保留目錄不進入後續項目快照
 * `新增` 獨立 Lua Runtime 插件後端, 支持通過單獨的 PUC Lua 5.4.8 插件進程運行本地 .lua 文件, 並校驗固定組件/簽名/協議/ABI, 提供有界執行且絕不回退到 JavaScript
 * `新增` 獨立 Java/Kotlin JVM Source Runtime 插件後端, 支持在隔離進程中編譯及運行單文件 .java/.kt 腳本, 提供 package/import, 實時 console 輸出, 可取消 sleep, 宿主 toast 及顯式能力協商

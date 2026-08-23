@@ -24,6 +24,7 @@
 * `新增` Python Runtime 协议 1.5 Host broker 仅向经用户授权的前台启动开放有界 alert/confirm/prompt/select 对话框; 后台启动稳定返回 INTERACTIVE_NOT_ALLOWED, 取消或执行终态清理会关闭活动对话框 UI
 * `新增` Python Runtime 协议 1.5 Host broker 开放不含绝对路径的当前引擎信息, 确定性停止自身及最多 16 次限定范围的非 Python Host 子脚本异步启动; provider 保持单会话期间嵌套 Python 稳定返回 NESTED_PYTHON_NOT_ALLOWED
 * `新增` Python Runtime 协议 1.5 Host broker 开放有界的无障碍点击, 长按, 定时按压, 滑动, 返回及主页操作; 坐标与持续时间经过严格校验, 无障碍服务不可用时稳定返回 ACCESSIBILITY_UNAVAILABLE
+* `新增` Python Runtime 协议 1.5 Host broker 开放有界且绑定单次执行的无障碍树快照与 AND 组合选择器查询, 通过不透明节点引用执行显式点击与文本设置; 快照, 扫描, 字符串, 保留节点及响应均有固定上限, 无障碍不可用, 扫描不完整与节点过期时返回稳定的类型化错误
 * `新增` Python Runtime 显式严格 JSON 结果在脚本终态后以 `[result]` 前缀写入宿主控制台, 已校验输出 artifact 原子发布到项目或脚本目录下的 `.python-artifacts` 执行专属目录并打印绝对路径; 该保留目录不进入后续项目快照
 * `新增` Lua Runtime 插件, 内置 PUC Lua 5.4.8, 支持识别文件扩展名 (.lua) 运行 Lua 脚本
 * `新增` 独立 Java/Kotlin JVM Source Runtime 插件后端, 支持在隔离进程中编译和运行单文件 .java/.kt 脚本, 提供 package/import, 实时 console 输出, 可取消 sleep, 宿主 toast 与显式能力协商

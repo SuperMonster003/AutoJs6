@@ -195,6 +195,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Python Runtime 1.5 Host broker はユーザー承認済みのフォアグラウンド起動に限り, 上限付き alert/confirm/prompt/select dialog を提供; バックグラウンド起動は INTERACTIVE_NOT_ALLOWED で失敗し, キャンセルまたは終端 cleanup は表示中の dialog UI を閉じる
 * `新機能` Python Runtime 1.5 Host broker は絶対パスを含まない現在の engine 情報, 確定的な自己停止, および非 Python Host script のスコープ限定非同期 child 起動を最大 16 回提供; provider が単一 session の間, ネストした Python は NESTED_PYTHON_NOT_ALLOWED で安定して失敗する
 * `新機能` Python Runtime 1.5 Host broker は上限付きの accessibility click, long click, 時間指定 press, swipe, Back, Home 操作を提供; 座標と継続時間を厳密に検証し, accessibility service が利用できない場合は ACCESSIBILITY_UNAVAILABLE で確定的に失敗する
+* `新機能` Python Runtime 1.5 Host broker は実行スコープ内の上限付き accessibility tree snapshot と AND 結合 selector query を提供し, 不透明な node reference で明示的な click と text 設定を実行; snapshot, scan, 文字列, 保持 node, response に固定上限を設け, accessibility 利用不可, 不完全な scan, stale node は安定した typed error で失敗する
 * `新機能` Python Runtime の明示的な厳密 JSON result をスクリプト終了後に `[result]` 接頭辞付きで Host コンソールへ書き込み, 検証済み output artifact をプロジェクトまたはスクリプトディレクトリ内の `.python-artifacts` 配下にある実行専用ディレクトリへアトミックに公開して絶対パスを表示; この予約ディレクトリは以後のプロジェクトスナップショットから除外
 * `新機能` 独立した Lua Runtime プラグインバックエンドがローカル .lua ファイルを別の PUC Lua 5.4.8 プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, 上限付き実行, JavaScript へのフォールバック禁止に対応
 * `新機能` Java/Kotlin 用の独立 JVM Source Runtime プラグインバックエンドが単一ファイルの .java/.kt を分離プロセスでコンパイル/実行し, package/import, リアルタイム console 出力, キャンセル可能な sleep, ホスト toast, 明示的な capability ネゴシエーションに対応
