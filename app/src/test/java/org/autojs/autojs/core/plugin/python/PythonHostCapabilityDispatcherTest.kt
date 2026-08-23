@@ -57,6 +57,25 @@ class PythonHostCapabilityDispatcherTest {
             ),
         )
         assertEquals(
+            COLOR_MATCH.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        38,
+                        PythonHostCapabilities.IMAGES_FIND_COLOR,
+                        "color" to 0x123456,
+                        "threshold" to 2,
+                        "region" to mapOf(
+                            "x" to 10,
+                            "y" to 20,
+                            "width" to 100,
+                            "height" to 200,
+                        ),
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
             true,
             success(dispatcher.dispatch(request(14, PythonHostCapabilities.FILES_EXISTS, "path" to "written.txt"))),
         )
@@ -273,6 +292,64 @@ class PythonHostCapabilityDispatcherTest {
                 ),
             ),
         )
+        assertEquals(
+            IMAGE_TEMPLATE.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        39,
+                        PythonHostCapabilities.IMAGES_BEGIN_TEMPLATE,
+                        "format" to "png",
+                        "byteLength" to 3,
+                        "sha256" to "0".repeat(64),
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            IMAGE_TEMPLATE_CHUNK.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        40,
+                        PythonHostCapabilities.IMAGES_WRITE_TEMPLATE_CHUNK,
+                        "templateId" to IMAGE_TEMPLATE.id,
+                        "offset" to 0,
+                        "data" to "AAEC",
+                    ),
+                ),
+            ),
+        )
+        assertEquals(
+            IMAGE_MATCH.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        41,
+                        PythonHostCapabilities.IMAGES_FIND_IMAGE,
+                        "templateId" to IMAGE_TEMPLATE.id,
+                        "threshold" to 3,
+                        "region" to mapOf(
+                            "x" to 5,
+                            "y" to 6,
+                            "width" to 70,
+                            "height" to 80,
+                        ),
+                    ),
+                ),
+            ),
+        )
+        assertNull(
+            success(
+                dispatcher.dispatch(
+                    request(
+                        42,
+                        PythonHostCapabilities.IMAGES_RELEASE_TEMPLATE,
+                        "templateId" to IMAGE_TEMPLATE.id,
+                    ),
+                ),
+            ),
+        )
 
         assertEquals(listOf("hello"), actions.toasts)
         assertEquals("copy", actions.clipboard)
@@ -317,6 +394,35 @@ class PythonHostCapabilityDispatcherTest {
         assertEquals(listOf("png" to 100), actions.screenCaptures)
         assertEquals(listOf(SCREEN_IMAGE.id to 0), actions.screenChunkReads)
         assertEquals(listOf(SCREEN_IMAGE.id), actions.screenReleases)
+        assertEquals(
+            listOf(
+                Triple(
+                    0x123456,
+                    2,
+                    PythonHostImageRegion(10, 20, 100, 200),
+                ),
+            ),
+            actions.screenColorSearches,
+        )
+        assertEquals(
+            listOf(Triple("png", 3, "0".repeat(64))),
+            actions.templateBegins,
+        )
+        assertEquals(
+            listOf(TemplateChunkCall(IMAGE_TEMPLATE.id, 0, "AAEC")),
+            actions.templateChunks,
+        )
+        assertEquals(
+            listOf(
+                Triple(
+                    IMAGE_TEMPLATE.id,
+                    3,
+                    PythonHostImageRegion(5, 6, 70, 80),
+                ),
+            ),
+            actions.screenImageSearches,
+        )
+        assertEquals(listOf(IMAGE_TEMPLATE.id), actions.templateReleases)
     }
 
     @Test
@@ -574,6 +680,148 @@ class PythonHostCapabilityDispatcherTest {
                 PythonHostCapabilities.IMAGES_RELEASE,
                 "imageId" to "image-0",
             ),
+            request(
+                8,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to -1,
+                "threshold" to 0,
+                "region" to null,
+            ),
+            request(
+                9,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to PythonHostImagePolicy.MAX_COLOR + 1,
+                "threshold" to 0,
+                "region" to null,
+            ),
+            request(
+                10,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to -1,
+                "region" to null,
+            ),
+            request(
+                11,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to PythonHostImagePolicy.MAX_COLOR_THRESHOLD + 1,
+                "region" to null,
+            ),
+            request(
+                12,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to "0,0,1,1",
+            ),
+            request(
+                13,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to mapOf("x" to 0, "y" to 0, "width" to 1),
+            ),
+            request(
+                14,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to mapOf(
+                    "x" to 0,
+                    "y" to 0,
+                    "width" to 1,
+                    "height" to 1,
+                    "extra" to 1,
+                ),
+            ),
+            request(
+                15,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to mapOf("x" to 0, "y" to 0, "width" to 0, "height" to 1),
+            ),
+            request(
+                16,
+                PythonHostCapabilities.IMAGES_FIND_COLOR,
+                "color" to 0,
+                "threshold" to 0,
+                "region" to mapOf(
+                    "x" to PythonHostImagePolicy.MAX_DIMENSION - 1,
+                    "y" to 0,
+                    "width" to 2,
+                    "height" to 1,
+                ),
+            ),
+            request(
+                41,
+                PythonHostCapabilities.IMAGES_BEGIN_TEMPLATE,
+                "format" to "webp",
+                "byteLength" to 3,
+                "sha256" to "0".repeat(64),
+            ),
+            request(
+                42,
+                PythonHostCapabilities.IMAGES_BEGIN_TEMPLATE,
+                "format" to "png",
+                "byteLength" to 0,
+                "sha256" to "0".repeat(64),
+            ),
+            request(
+                43,
+                PythonHostCapabilities.IMAGES_BEGIN_TEMPLATE,
+                "format" to "png",
+                "byteLength" to PythonHostImagePolicy.MAX_TEMPLATE_BYTES + 1,
+                "sha256" to "0".repeat(64),
+            ),
+            request(
+                44,
+                PythonHostCapabilities.IMAGES_BEGIN_TEMPLATE,
+                "format" to "png",
+                "byteLength" to 3,
+                "sha256" to "A".repeat(64),
+            ),
+            request(
+                45,
+                PythonHostCapabilities.IMAGES_WRITE_TEMPLATE_CHUNK,
+                "templateId" to "template-0",
+                "offset" to 0,
+                "data" to "AAEC",
+            ),
+            request(
+                46,
+                PythonHostCapabilities.IMAGES_WRITE_TEMPLATE_CHUNK,
+                "templateId" to IMAGE_TEMPLATE.id,
+                "offset" to -1,
+                "data" to "AAEC",
+            ),
+            request(
+                47,
+                PythonHostCapabilities.IMAGES_WRITE_TEMPLATE_CHUNK,
+                "templateId" to IMAGE_TEMPLATE.id,
+                "offset" to 0,
+                "data" to "",
+            ),
+            request(
+                48,
+                PythonHostCapabilities.IMAGES_WRITE_TEMPLATE_CHUNK,
+                "templateId" to IMAGE_TEMPLATE.id,
+                "offset" to 0,
+                "data" to "A".repeat(PythonHostImagePolicy.MAX_TEMPLATE_CHUNK_BASE64_BYTES + 1),
+            ),
+            request(
+                49,
+                PythonHostCapabilities.IMAGES_FIND_IMAGE,
+                "templateId" to IMAGE_TEMPLATE.id,
+                "threshold" to -1,
+                "region" to null,
+            ),
+            request(
+                50,
+                PythonHostCapabilities.IMAGES_RELEASE_TEMPLATE,
+                "templateId" to "template-0",
+            ),
         )
         invalidRequests.forEach { encoded ->
             assertEquals("INVALID_ARGUMENT", failureCode(dispatcher.dispatch(encoded)))
@@ -581,6 +829,27 @@ class PythonHostCapabilityDispatcherTest {
         assertTrue(actions.screenCaptures.isEmpty())
         assertTrue(actions.screenChunkReads.isEmpty())
         assertTrue(actions.screenReleases.isEmpty())
+        assertTrue(actions.screenColorSearches.isEmpty())
+        assertTrue(actions.templateBegins.isEmpty())
+        assertTrue(actions.templateChunks.isEmpty())
+        assertTrue(actions.screenImageSearches.isEmpty())
+        assertTrue(actions.templateReleases.isEmpty())
+
+        assertEquals(
+            COLOR_MATCH.toJson(),
+            success(
+                dispatcher.dispatch(
+                    request(
+                        17,
+                        PythonHostCapabilities.IMAGES_FIND_COLOR,
+                        "color" to 0x123456,
+                        "threshold" to 0,
+                        "region" to null,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(listOf(Triple(0x123456, 0, null)), actions.screenColorSearches)
 
         val failures = listOf(
             PythonHostCapabilityAccessibilityUnavailableException() to "ACCESSIBILITY_UNAVAILABLE",
@@ -595,10 +864,38 @@ class PythonHostCapabilityDispatcherTest {
                 failureCode(
                     dispatcher.dispatch(
                         request(
-                            (index + 8).toLong(),
+                            (index + 20).toLong(),
                             PythonHostCapabilities.IMAGES_CAPTURE_SCREEN,
                             "format" to "png",
                             "quality" to 100,
+                        ),
+                    ),
+                ),
+            )
+            assertEquals(
+                expectedCode,
+                failureCode(
+                    dispatcher.dispatch(
+                        request(
+                            (index + 30).toLong(),
+                            PythonHostCapabilities.IMAGES_FIND_COLOR,
+                            "color" to 0x123456,
+                            "threshold" to 0,
+                            "region" to null,
+                        ),
+                    ),
+                ),
+            )
+            assertEquals(
+                expectedCode,
+                failureCode(
+                    dispatcher.dispatch(
+                        request(
+                            (index + 60).toLong(),
+                            PythonHostCapabilities.IMAGES_FIND_IMAGE,
+                            "templateId" to IMAGE_TEMPLATE.id,
+                            "threshold" to 0,
+                            "region" to null,
                         ),
                     ),
                 ),
@@ -610,10 +907,40 @@ class PythonHostCapabilityDispatcherTest {
             failureCode(
                 dispatcher.dispatch(
                     request(
-                        12,
+                        40,
                         PythonHostCapabilities.IMAGES_READ_CHUNK,
                         "imageId" to SCREEN_IMAGE.id,
                         "offset" to 0,
+                    ),
+                ),
+            ),
+        )
+        actions.imageFailure = PythonHostCapabilityInvalidImageTemplateException()
+        assertEquals(
+            "INVALID_IMAGE_TEMPLATE",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        70,
+                        PythonHostCapabilities.IMAGES_BEGIN_TEMPLATE,
+                        "format" to "png",
+                        "byteLength" to 3,
+                        "sha256" to "0".repeat(64),
+                    ),
+                ),
+            ),
+        )
+        actions.imageFailure = PythonHostCapabilityStaleTemplateException()
+        assertEquals(
+            "STALE_TEMPLATE",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        71,
+                        PythonHostCapabilities.IMAGES_FIND_IMAGE,
+                        "templateId" to IMAGE_TEMPLATE.id,
+                        "threshold" to 0,
+                        "region" to null,
                     ),
                 ),
             ),
@@ -807,7 +1134,7 @@ class PythonHostCapabilityDispatcherTest {
     private fun request(
         callId: Long,
         capability: String,
-        vararg arguments: Pair<String, Any>,
+        vararg arguments: Pair<String, Any?>,
         executionId: String = EXECUTION_ID,
     ): ByteArray = JsonObject().apply {
         addProperty("version", 1)
@@ -819,13 +1146,14 @@ class PythonHostCapabilityDispatcherTest {
         })
     }.toString().toByteArray()
 
-    private fun JsonObject.addTestValue(name: String, value: Any) {
+    private fun JsonObject.addTestValue(name: String, value: Any?) {
         when (value) {
+            null -> add(name, JsonNull.INSTANCE)
             is Map<*, *> -> add(
                 name,
                 JsonObject().apply {
                     value.forEach { (nestedName, nestedValue) ->
-                        addTestValue(nestedName as String, requireNotNull(nestedValue))
+                        addTestValue(nestedName as String, nestedValue)
                     }
                 },
             )
@@ -863,6 +1191,12 @@ class PythonHostCapabilityDispatcherTest {
         return response.getAsJsonObject("error").get("code").asString
     }
 
+    private data class TemplateChunkCall(
+        val templateId: String,
+        val offset: Int,
+        val data: String,
+    )
+
     private class RecordingActions : PythonHostCapabilityActions {
         val toasts = mutableListOf<String>()
         var clipboard = ""
@@ -886,6 +1220,11 @@ class PythonHostCapabilityDispatcherTest {
         val nodeClicks = mutableListOf<String>()
         val nodeTexts = mutableListOf<Pair<String, String>>()
         val screenCaptures = mutableListOf<Pair<String, Int>>()
+        val screenColorSearches = mutableListOf<Triple<Int, Int, PythonHostImageRegion?>>()
+        val templateBegins = mutableListOf<Triple<String, Int, String>>()
+        val templateChunks = mutableListOf<TemplateChunkCall>()
+        val screenImageSearches = mutableListOf<Triple<String, Int, PythonHostImageRegion?>>()
+        val templateReleases = mutableListOf<String>()
         val screenChunkReads = mutableListOf<Pair<String, Int>>()
         val screenReleases = mutableListOf<String>()
         var stopSelfRequests = 0
@@ -1072,6 +1411,51 @@ class PythonHostCapabilityDispatcherTest {
             return SCREEN_IMAGE
         }
 
+        override fun findScreenColor(
+            color: Int,
+            threshold: Int,
+            region: PythonHostImageRegion?,
+        ): PythonHostColorMatch {
+            imageFailure?.let { throw it }
+            screenColorSearches += Triple(color, threshold, region)
+            return COLOR_MATCH
+        }
+
+        override fun beginImageTemplate(
+            format: String,
+            byteLength: Int,
+            sha256: String,
+        ): PythonHostImageTemplateDescriptor {
+            imageFailure?.let { throw it }
+            templateBegins += Triple(format, byteLength, sha256)
+            return IMAGE_TEMPLATE
+        }
+
+        override fun writeImageTemplateChunk(
+            templateId: String,
+            offset: Int,
+            data: String,
+        ): PythonHostImageTemplateChunkAck {
+            imageFailure?.let { throw it }
+            templateChunks += TemplateChunkCall(templateId, offset, data)
+            return IMAGE_TEMPLATE_CHUNK
+        }
+
+        override fun findScreenImage(
+            templateId: String,
+            threshold: Int,
+            region: PythonHostImageRegion?,
+        ): PythonHostImageMatch {
+            imageFailure?.let { throw it }
+            screenImageSearches += Triple(templateId, threshold, region)
+            return IMAGE_MATCH
+        }
+
+        override fun releaseImageTemplate(templateId: String) {
+            imageFailure?.let { throw it }
+            templateReleases += templateId
+        }
+
         override fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk {
             imageFailure?.let { throw it }
             screenChunkReads += imageId to offset
@@ -1159,5 +1543,20 @@ class PythonHostCapabilityDispatcherTest {
             nextOffset = 3,
             eof = true,
         )
+        val COLOR_MATCH = PythonHostColorMatch.found(17, 29)
+        val IMAGE_TEMPLATE = PythonHostImageTemplateDescriptor(
+            id = "template-1",
+            format = "png",
+            byteLength = 3,
+        )
+        val IMAGE_TEMPLATE_CHUNK = PythonHostImageTemplateChunkAck(
+            templateId = IMAGE_TEMPLATE.id,
+            offset = 0,
+            nextOffset = 3,
+            complete = true,
+            width = 2,
+            height = 2,
+        )
+        val IMAGE_MATCH = PythonHostImageMatch.found(17, 29)
     }
 }

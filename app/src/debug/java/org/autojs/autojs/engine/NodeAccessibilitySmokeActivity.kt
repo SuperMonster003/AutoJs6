@@ -132,6 +132,12 @@ class NodeAccessibilitySmokeActivity : Activity() {
 
     fun captureTargetCenterOnScreen(): IntArray = centerOnScreen(captureTarget)
 
+    fun captureTargetBoundsOnScreen(): IntArray {
+        val location = IntArray(2)
+        captureTarget.getLocationOnScreen(location)
+        return intArrayOf(location[0], location[1], captureTarget.width, captureTarget.height)
+    }
+
     fun swipeCoordinatesOnScreen(): Array<IntArray> {
         val location = IntArray(2)
         swipeTarget.getLocationOnScreen(location)
