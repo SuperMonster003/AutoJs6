@@ -879,15 +879,13 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
             assertEquals(submitted.get()?.id, execution.id)
 
-            clickForegroundDialogButton(
+            clickForegroundDialogPositiveButton(
                 DIALOG_ALERT_TITLE,
                 DIALOG_ALERT_TEXT,
-                context.getString(R.string.dialog_button_confirm),
             )
-            clickForegroundDialogButton(
+            clickForegroundDialogPositiveButton(
                 DIALOG_CONFIRM_TITLE,
                 DIALOG_CONFIRM_TEXT,
-                context.getString(R.string.dialog_button_confirm),
             )
             replyToForegroundPrompt(DIALOG_PROMPT_TEXT, DIALOG_PROMPT_REPLY, password = false)
             clickForegroundDialogItem(DIALOG_SELECT_TITLE, DIALOG_SELECT_SECOND)
@@ -1024,9 +1022,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
                 val input = nodes.firstOrNull { node ->
                     node.className?.toString() == "android.widget.EditText" && node.isEditable
                 }
-                val confirm = nodes.firstOrNull { node ->
-                    node.text?.toString() == context.getString(R.string.dialog_button_confirm) && node.isClickable
-                }
+                val confirm = findPositiveDialogButton(nodes)
                 if (promptVisible && input != null && confirm != null) {
                     assertEquals("Unexpected password visibility for prompt '$prompt'", password, input.isPassword)
                     val arguments = Bundle().apply {
@@ -1049,7 +1045,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
         throw AssertionError("Foreground Python input dialog did not become actionable for '$prompt': $lastTree")
     }
 
-    private fun clickForegroundDialogButton(title: String, text: String, buttonText: String) {
+    private fun clickForegroundDialogPositiveButton(title: String, text: String) {
         val deadline = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(INPUT_DIALOG_TIMEOUT_SECONDS)
         var lastTree = ""
         while (SystemClock.elapsedRealtime() < deadline) {
@@ -1059,12 +1055,10 @@ class PythonU1R2AcceptanceInstrumentationTest {
                 lastTree = accessibilitySummary(nodes)
                 val titleVisible = nodes.any { node -> node.text?.toString() == title }
                 val textVisible = nodes.any { node -> node.text?.toString() == text }
-                val button = nodes.firstOrNull { node ->
-                    node.text?.toString() == buttonText && node.isClickable
-                }
+                val button = findPositiveDialogButton(nodes)
                 if (titleVisible && textVisible && button != null) {
                     assertTrue(
-                        "Unable to click '$buttonText' in foreground dialog '$title'",
+                        "Unable to click the positive button in foreground dialog '$title'",
                         button.performAction(AccessibilityNodeInfo.ACTION_CLICK),
                     )
                     SystemClock.sleep(INPUT_DIALOG_SETTLE_MILLIS)
@@ -1074,6 +1068,16 @@ class PythonU1R2AcceptanceInstrumentationTest {
             SystemClock.sleep(INPUT_DIALOG_POLL_MILLIS)
         }
         throw AssertionError("Foreground dialog '$title' did not become actionable: $lastTree")
+    }
+
+    private fun findPositiveDialogButton(
+        nodes: List<AccessibilityNodeInfo>,
+    ): AccessibilityNodeInfo? = nodes.firstOrNull { node ->
+        node.isClickable &&
+            (
+                node.viewIdResourceName?.substringAfterLast('/') == "md_buttonDefaultPositive" ||
+                    node.text?.toString() == context.getString(R.string.dialog_button_confirm)
+            )
     }
 
     private fun clickForegroundDialogItem(title: String, itemText: String) {
@@ -1107,7 +1111,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
     }
 
     private fun accessibilitySummary(nodes: List<AccessibilityNodeInfo>): String = nodes.joinToString(" | ") { node ->
-        "${node.className}:${node.text}:${node.isPassword}:${node.isClickable}"
+        "${node.className}:${node.viewIdResourceName}:${node.text}:${node.isPassword}:${node.isClickable}"
     }.takeLast(MAX_CONSOLE_DIAGNOSTIC_CHARS)
 
     private fun accessibilityTree(root: AccessibilityNodeInfo): List<AccessibilityNodeInfo> {
