@@ -27,6 +27,7 @@ import org.autojs.plugin.python.runtime.api.PythonIsolationMode
 import org.autojs.plugin.python.runtime.api.PythonOutputStream
 import org.autojs.plugin.python.runtime.api.PythonPayloadKind
 import org.autojs.plugin.python.runtime.api.PythonPayloadReference
+import org.autojs.plugin.python.runtime.api.PythonProtocolVersion
 import org.autojs.plugin.python.runtime.api.PythonRequestId
 import org.autojs.plugin.python.runtime.api.PythonResultPolicy
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCodec
@@ -90,6 +91,7 @@ internal class PythonRuntimeClient(
         private val outputFlushed = AtomicBoolean(false)
         private val outputLock = Any()
         private val inputTask = AtomicReference<FutureTask<*>?>()
+        private val hostCapabilityBroker = AtomicReference<PythonHostCapabilityBroker?>()
         private val pluginStateLock = Any()
 
         private val pluginStateChangedListener: (String) -> Unit = { packageName ->
@@ -358,6 +360,7 @@ internal class PythonRuntimeClient(
                 }
                 throw error
             } finally {
+                closeHostCapabilityBroker()
                 // Suppress the expected death caused by closing a dispatched process-retirement session.
                 binding.getAndSet(null)?.close()
                 reservation.getAndSet(null)?.let { reserved ->
@@ -370,6 +373,7 @@ internal class PythonRuntimeClient(
 
         fun cancel() {
             cancelled.set(true)
+            closeHostCapabilityBroker()
             closeInteractiveInput()
             pendingStdinSnapshot.getAndSet(null)?.fill(0)
             cancelRemoteSession()
@@ -383,6 +387,7 @@ internal class PythonRuntimeClient(
             if (!terminalClaimed.compareAndSet(false, true)) return
             pluginStateFailure.set(error)
             failure.set(error)
+            closeHostCapabilityBroker()
             closeInteractiveInput()
             retireRemoteSession()
             binding.getAndSet(null)?.close()
@@ -425,6 +430,32 @@ internal class PythonRuntimeClient(
             snapshot: PythonPrivateExecutionSnapshot,
         ) {
             val sessionRef = AtomicReference<IPythonExecutionSession?>()
+            val broker = if (pinned.negotiatedProtocolVersion >= HOST_CAPABILITY_BROKER_PROTOCOL) {
+                check(pinned.capabilities.supportsHostCapabilityBroker) {
+                    "Python Runtime protocol 1.5 was negotiated without broker support"
+                }
+                PythonHostCapabilityBroker(
+                    context = applicationContext,
+                    executionId = reserved.requestId.toString(),
+                    expectedPluginUid = pinned.packageUid,
+                    onViolation = { error ->
+                        finishFailure(
+                            PythonRuntimeHostException(
+                                PythonRuntimeHostError.CONTRACT_VIOLATION,
+                                "Python Runtime host capability broker received an invalid call",
+                                error,
+                            ),
+                        )
+                        cancelRemoteSession()
+                    },
+                ).also { created ->
+                    check(hostCapabilityBroker.compareAndSet(null, created)) {
+                        "Python Runtime host capability broker was already installed"
+                    }
+                }
+            } else {
+                null
+            }
 
             fun fromPinnedProvider(action: () -> Unit) {
                 if (!PythonRuntimeProviderCallbackCallerPolicy.isExpectedUid(pinned, Binder.getCallingUid())) {
@@ -622,12 +653,23 @@ internal class PythonRuntimeClient(
                             timeoutError = PythonRuntimeHostError.SESSION_REJECTED,
                             failureError = PythonRuntimeHostError.SESSION_REJECTED,
                         ) {
-                            provider.openSession(
-                                PythonRuntimeCodec.encodeExecutionRequest(reserved.plan.request),
-                                descriptors,
-                                admissionCallback,
-                                executionCallback,
-                            )
+                            val encodedRequest = PythonRuntimeCodec.encodeExecutionRequest(reserved.plan.request)
+                            if (broker == null) {
+                                provider.openSession(
+                                    encodedRequest,
+                                    descriptors,
+                                    admissionCallback,
+                                    executionCallback,
+                                )
+                            } else {
+                                provider.openSessionWithHostCapabilities(
+                                    encodedRequest,
+                                    descriptors,
+                                    broker,
+                                    admissionCallback,
+                                    executionCallback,
+                                )
+                            }
                         }
                     } catch (error: PythonRuntimeHostException) {
                         if (error.error == PythonRuntimeHostError.SESSION_REJECTED) {
@@ -720,6 +762,7 @@ internal class PythonRuntimeClient(
 
         private fun abortForHostTimeout(): Boolean {
             if (!terminalClaimed.compareAndSet(false, true)) return false
+            closeHostCapabilityBroker()
             closeInteractiveInput()
             cancelRemoteSession()
             binding.getAndSet(null)?.close()
@@ -799,6 +842,7 @@ internal class PythonRuntimeClient(
 
         private fun finishTerminal() {
             if (terminalClaimed.compareAndSet(false, true)) {
+                closeHostCapabilityBroker()
                 closeInteractiveInput()
                 terminal.countDown()
             }
@@ -870,6 +914,7 @@ internal class PythonRuntimeClient(
         private fun finishFailure(error: Throwable) {
             if (terminalClaimed.compareAndSet(false, true)) {
                 failure.set(error)
+                closeHostCapabilityBroker()
                 closeInteractiveInput()
                 terminal.countDown()
             }
@@ -878,6 +923,10 @@ internal class PythonRuntimeClient(
         private fun closeInteractiveInput() {
             inputTask.getAndSet(null)?.cancel(true)
             interactiveInputController?.cancel()
+        }
+
+        private fun closeHostCapabilityBroker() {
+            hostCapabilityBroker.getAndSet(null)?.close()
         }
 
         private fun finishLiveOutput() {
@@ -1049,6 +1098,7 @@ internal class PythonRuntimeClient(
         private const val DEFAULT_OUTPUT_ARTIFACT_PATH_BYTES = 512
         private const val DEFAULT_OUTPUT_ARTIFACT_BYTES = 2L * 1024L * 1024L
         private const val DEFAULT_TOTAL_OUTPUT_ARTIFACT_BYTES = 4L * 1024L * 1024L
+        private val HOST_CAPABILITY_BROKER_PROTOCOL = PythonProtocolVersion(1, 5)
 
         private val PROVIDER_RPC_EXECUTOR = ThreadPoolExecutor(
             1,
