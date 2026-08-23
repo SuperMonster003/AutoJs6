@@ -62,6 +62,9 @@ class PythonPluginScriptEngine(
                 stdinSnapshot,
                 interactiveInputGrant,
                 (fileSource as? PythonProjectSource)?.timeoutMillis,
+                id,
+                startTime,
+                ::forceStop,
             )
         } finally {
             stdinSnapshot?.fill(0)

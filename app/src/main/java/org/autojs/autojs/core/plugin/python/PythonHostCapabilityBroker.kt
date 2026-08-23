@@ -24,10 +24,14 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.engine.ScriptEngineService
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.ScriptToast
 import org.autojs.autojs.script.PythonFileSource
 import org.autojs.autojs.script.PythonProjectSource
+import org.autojs.autojs.script.PythonScriptSource
+import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs6.R
 import org.autojs.plugin.python.runtime.api.IPythonHostCapabilityBroker
@@ -44,6 +48,7 @@ import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.round
 
 internal object PythonHostCapabilities {
@@ -68,6 +73,9 @@ internal object PythonHostCapabilities {
     const val DIALOGS_CONFIRM = "dialogs.confirm"
     const val DIALOGS_PROMPT = "dialogs.prompt"
     const val DIALOGS_SELECT = "dialogs.select"
+    const val ENGINES_CURRENT = "engines.current"
+    const val ENGINES_STOP_SELF = "engines.stop_self"
+    const val ENGINES_RUN = "engines.run"
 
     val ENABLED = setOf(
         TOAST_SHOW,
@@ -91,6 +99,9 @@ internal object PythonHostCapabilities {
         DIALOGS_CONFIRM,
         DIALOGS_PROMPT,
         DIALOGS_SELECT,
+        ENGINES_CURRENT,
+        ENGINES_STOP_SELF,
+        ENGINES_RUN,
     )
 }
 
@@ -260,6 +271,21 @@ internal class PythonHostFileScope(root: File) {
         return entries.sorted()
     }
 
+    fun requireRegularFile(path: String): File {
+        val file = resolve(path)
+        if (!file.exists()) throw PythonHostCapabilityPathNotFoundException()
+        if (!file.isFile) throw PythonHostCapabilityPathTypeException()
+        return file
+    }
+
+    fun contains(file: File): Boolean {
+        val candidate = file.canonicalFile
+        return candidate == root || candidate.path.startsWith(rootPrefix, ignoreCase = ignoreCase)
+    }
+
+    val rootDirectory: File
+        get() = root
+
     private fun resolve(path: String): File {
         val relative = PythonHostFilePolicy.normalizeRelative(path)
         if (relative == PythonHostFilePolicy.ROOT_PATH) return root
@@ -287,6 +313,143 @@ internal class PythonHostFileScope(root: File) {
             .encode(CharBuffer.wrap(value))
         ByteArray(encoded.remaining()).also(encoded::get)
     }.getOrElse { throw IllegalArgumentException("Python Host file text is not valid UTF-8", it) }
+}
+
+internal object PythonHostEnginePolicy {
+    const val INFO_SCHEMA = "autojs6-python-engine-info-v1"
+    const val LAUNCH_SCHEMA = "autojs6-python-engine-launch-v1"
+    const val MAX_SCRIPT_LAUNCHES = 16
+    const val MAX_ENGINE_NAME_BYTES = 256
+    const val MAX_SOURCE_NAME_BYTES = 1024
+}
+
+internal data class PythonHostEngineInfo(
+    val id: Int,
+    val engineName: String,
+    val sourceName: String,
+    val entryPoint: String,
+    val project: Boolean,
+    val startedAtMillis: Long,
+) {
+    fun toJson(): JsonObject = JsonObject().apply {
+        addProperty("schema", PythonHostEnginePolicy.INFO_SCHEMA)
+        addProperty("id", id)
+        addProperty("engineName", engineName)
+        addProperty("sourceName", sourceName)
+        addProperty("entryPoint", entryPoint)
+        addProperty("project", project)
+        addProperty("startedAtMillis", startedAtMillis)
+    }
+}
+
+internal data class PythonHostEngineLaunch(
+    val id: Int,
+    val engineName: String,
+    val sourceName: String,
+    val path: String,
+) {
+    fun toJson(): JsonObject = JsonObject().apply {
+        addProperty("schema", PythonHostEnginePolicy.LAUNCH_SCHEMA)
+        addProperty("id", id)
+        addProperty("engineName", engineName)
+        addProperty("sourceName", sourceName)
+        addProperty("path", path)
+    }
+}
+
+/** Bounded execution-local access to Host engine identity, self-stop and child launch. */
+internal class PythonHostEngineScope(
+    source: PythonFileSource,
+    private val hostFiles: PythonHostFileScope,
+    engineId: Int,
+    engineStartedAtMillis: Long,
+    private val stopSelf: () -> Unit,
+    private val scriptLauncher: (ScriptLaunchSourceFactory.Launch, ExecutionConfig) -> PythonHostEngineLaunch =
+        { launch, config ->
+            val execution = ScriptEngineService.getInstance().execute(launch.source, config)
+            PythonHostEngineLaunch(
+                id = execution.id,
+                engineName = launch.engineName,
+                sourceName = launch.source.name,
+                path = launch.source.name,
+            )
+        },
+) {
+    private val launchedScripts = AtomicInteger(0)
+    private val info = PythonHostEngineInfo(
+        id = engineId,
+        engineName = PythonScriptSource.ENGINE,
+        sourceName = source.name.takeIf(String::isNotBlank) ?: source.semanticFile.name,
+        entryPoint = (source as? PythonProjectSource)?.entryPoint ?: source.semanticFile.name,
+        project = source is PythonProjectSource,
+        startedAtMillis = engineStartedAtMillis.coerceAtLeast(0L),
+    ).also(::validateInfo)
+
+    fun current(): PythonHostEngineInfo = info
+
+    fun requestStopSelf() = stopSelf()
+
+    fun runScript(path: String): PythonHostEngineLaunch {
+        val relative = PythonHostFilePolicy.normalizeRelative(path)
+        val file = hostFiles.requireRegularFile(relative)
+        val launch = ScriptLaunchSourceFactory.createPathLaunch(
+            path = file.path,
+            workingDirectory = hostFiles.rootDirectory.path,
+            defaultWorkingDirectory = hostFiles.rootDirectory.path,
+        )
+        if (launch.engineName == PythonScriptSource.ENGINE) {
+            throw PythonHostCapabilityNestedPythonException()
+        }
+        launch.nodeProjectLaunchSource?.nodeProjectRootFile?.let { projectRoot ->
+            require(hostFiles.contains(projectRoot)) {
+                "Python child engine project root escapes the execution root"
+            }
+        }
+        require(hostFiles.contains(File(launch.workingDirectory))) {
+            "Python child engine working directory escapes the execution root"
+        }
+        validateLaunchCandidate(launch)
+        val count = launchedScripts.incrementAndGet()
+        if (count > PythonHostEnginePolicy.MAX_SCRIPT_LAUNCHES) {
+            launchedScripts.decrementAndGet()
+            throw PythonHostCapabilityEngineLaunchLimitException()
+        }
+        val config = launch.createExecutionConfig(
+            base = ExecutionConfig(workingDirectory = hostFiles.rootDirectory.path),
+            overrideWorkingDirectory = true,
+        )
+        return try {
+            scriptLauncher(launch, config).copy(path = relative).also(::validateLaunch)
+        } catch (error: Throwable) {
+            launchedScripts.decrementAndGet()
+            throw error
+        }
+    }
+
+    private fun validateInfo(value: PythonHostEngineInfo) {
+        require(value.id >= -1) { "Python Host engine ID is invalid" }
+        requireBoundedName(value.engineName, "engine name", PythonHostEnginePolicy.MAX_ENGINE_NAME_BYTES)
+        requireBoundedName(value.sourceName, "source name", PythonHostEnginePolicy.MAX_SOURCE_NAME_BYTES)
+        requireBoundedName(value.entryPoint, "entry point", PythonHostFilePolicy.MAX_PATH_BYTES)
+    }
+
+    private fun validateLaunch(value: PythonHostEngineLaunch) {
+        require(value.id >= 0) { "Python child engine ID is invalid" }
+        requireBoundedName(value.engineName, "child engine name", PythonHostEnginePolicy.MAX_ENGINE_NAME_BYTES)
+        requireBoundedName(value.sourceName, "child source name", PythonHostEnginePolicy.MAX_SOURCE_NAME_BYTES)
+        PythonHostFilePolicy.normalizeRelative(value.path)
+    }
+
+    private fun validateLaunchCandidate(value: ScriptLaunchSourceFactory.Launch) {
+        requireBoundedName(value.engineName, "child engine name", PythonHostEnginePolicy.MAX_ENGINE_NAME_BYTES)
+        requireBoundedName(value.source.name, "child source name", PythonHostEnginePolicy.MAX_SOURCE_NAME_BYTES)
+    }
+
+    private fun requireBoundedName(value: String, label: String, maxBytes: Int) {
+        require(value.isNotBlank() && value.toByteArray(StandardCharsets.UTF_8).size <= maxBytes) {
+            "Python Host $label is invalid"
+        }
+    }
 }
 
 internal interface PythonHostCapabilityActions {
@@ -327,12 +490,22 @@ internal interface PythonHostCapabilityActions {
     fun showDialogPrompt(title: String, text: String, defaultValue: String): String?
 
     fun showDialogSelect(title: String, items: List<String>): Int?
+
+    fun currentEngine(): PythonHostEngineInfo
+
+    fun requestStopSelf()
+
+    fun runScript(path: String): PythonHostEngineLaunch
 }
 
 internal class AndroidPythonHostCapabilityActions(
     context: Context,
     executionId: String,
     fileRoot: File,
+    source: PythonFileSource,
+    engineId: Int,
+    engineStartedAtMillis: Long,
+    stopSelf: () -> Unit,
     private val globalConsole: GlobalConsole,
     private val interactiveInputController: PythonInteractiveInputController?,
 ) : PythonHostCapabilityActions {
@@ -340,6 +513,13 @@ internal class AndroidPythonHostCapabilityActions(
     private val mainHandler = Handler(Looper.getMainLooper())
     private val app = AppUtils(appContext)
     private val hostFiles = PythonHostFileScope(fileRoot)
+    private val hostEngines = PythonHostEngineScope(
+        source = source,
+        hostFiles = hostFiles,
+        engineId = engineId,
+        engineStartedAtMillis = engineStartedAtMillis,
+        stopSelf = stopSelf,
+    )
     private val toastOwnerId = "python@$executionId"
     private val notificationTag = PythonHostNoticePolicy.tagForExecution(executionId)
 
@@ -493,6 +673,16 @@ internal class AndroidPythonHostCapabilityActions(
             ?: error("Python select dialog returned the wrong response type")
         return selection.index
     }
+
+    override fun currentEngine(): PythonHostEngineInfo = hostEngines.current()
+
+    override fun requestStopSelf() {
+        check(mainHandler.post(hostEngines::requestStopSelf)) {
+            "AutoJs6 main dispatcher rejected a Python self-stop request"
+        }
+    }
+
+    override fun runScript(path: String): PythonHostEngineLaunch = hostEngines.runScript(path)
 
     private fun ensureNotificationPostingAllowed() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -698,6 +888,19 @@ internal class PythonHostCapabilityDispatcher(
                         ),
                     )
                 }
+                PythonHostCapabilities.ENGINES_CURRENT -> {
+                    request.requireArguments()
+                    encodeSuccess(request, actions.currentEngine())
+                }
+                PythonHostCapabilities.ENGINES_STOP_SELF -> {
+                    request.requireArguments()
+                    actions.requestStopSelf()
+                    encodeSuccess(request, null)
+                }
+                PythonHostCapabilities.ENGINES_RUN -> encodeSuccess(
+                    request,
+                    actions.runScript(request.singleFilePathArgument()),
+                )
                 else -> encodeFailure(
                     request,
                     ERROR_CAPABILITY_UNAVAILABLE,
@@ -723,6 +926,18 @@ internal class PythonHostCapabilityDispatcher(
                 request,
                 ERROR_INTERACTIVE_NOT_ALLOWED,
                 "Host dialog requires a foreground user-authorized execution",
+            )
+        } catch (_: PythonHostCapabilityNestedPythonException) {
+            encodeFailure(
+                request,
+                ERROR_NESTED_PYTHON_NOT_ALLOWED,
+                "Nested Python Runtime executions are unavailable while the current session is active",
+            )
+        } catch (_: PythonHostCapabilityEngineLaunchLimitException) {
+            encodeFailure(
+                request,
+                ERROR_ENGINE_LAUNCH_LIMIT_EXCEEDED,
+                "Python child engine launch quota is exhausted",
             )
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
@@ -797,6 +1012,8 @@ internal class PythonHostCapabilityDispatcher(
                 is Boolean -> addProperty(KEY_VALUE, value)
                 is Int -> addProperty(KEY_VALUE, value)
                 is PythonHostDeviceInfo -> add(KEY_VALUE, value.toJson())
+                is PythonHostEngineInfo -> add(KEY_VALUE, value.toJson())
+                is PythonHostEngineLaunch -> add(KEY_VALUE, value.toJson())
                 is List<*> -> add(
                     KEY_VALUE,
                     JsonArray().apply {
@@ -964,6 +1181,8 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_PATH_TYPE_MISMATCH = "PATH_TYPE_MISMATCH"
         const val ERROR_FILE_ENCODING = "FILE_ENCODING_ERROR"
         const val ERROR_INTERACTIVE_NOT_ALLOWED = "INTERACTIVE_NOT_ALLOWED"
+        const val ERROR_NESTED_PYTHON_NOT_ALLOWED = "NESTED_PYTHON_NOT_ALLOWED"
+        const val ERROR_ENGINE_LAUNCH_LIMIT_EXCEEDED = "ENGINE_LAUNCH_LIMIT_EXCEEDED"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")
         val WEB_URL = Regex("https?://.+", RegexOption.IGNORE_CASE)
@@ -975,6 +1194,10 @@ internal class PythonHostCapabilityBroker(
     executionId: String,
     private val expectedPluginUid: Int,
     fileRoot: File,
+    source: PythonFileSource,
+    engineId: Int,
+    engineStartedAtMillis: Long,
+    stopSelf: () -> Unit,
     globalConsole: GlobalConsole,
     interactiveInputController: PythonInteractiveInputController?,
     private val onViolation: (Throwable) -> Unit,
@@ -982,6 +1205,10 @@ internal class PythonHostCapabilityBroker(
         context,
         executionId,
         fileRoot,
+        source,
+        engineId,
+        engineStartedAtMillis,
+        stopSelf,
         globalConsole,
         interactiveInputController,
     ),
@@ -1033,6 +1260,10 @@ internal class PythonHostCapabilityResultLimitException : RuntimeException()
 internal class PythonHostCapabilityFileEncodingException(cause: Throwable) : RuntimeException(cause)
 
 internal class PythonHostCapabilityInteractiveNotAllowedException : RuntimeException()
+
+internal class PythonHostCapabilityNestedPythonException : RuntimeException()
+
+internal class PythonHostCapabilityEngineLaunchLimitException : RuntimeException()
 
 private fun JsonObject.requireString(name: String): String {
     val value = get(name)

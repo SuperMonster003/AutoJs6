@@ -59,12 +59,18 @@ internal class PythonRuntimeClient(
         stdinSnapshot: ByteArray? = null,
         interactiveInputGrant: PythonInteractiveInputGrant? = null,
         configuredTimeoutMillis: Long? = null,
+        engineId: Int = -1,
+        engineStartedAtMillis: Long = 0L,
+        stopSelf: () -> Unit = {},
     ): Execution = Execution(
         source,
         entryMode,
         stdinSnapshot?.copyOf(),
         interactiveInputGrant?.openController(),
         configuredTimeoutMillis,
+        engineId,
+        engineStartedAtMillis,
+        stopSelf,
     )
 
     inner class Execution internal constructor(
@@ -73,6 +79,9 @@ internal class PythonRuntimeClient(
         stdinSnapshot: ByteArray?,
         private val interactiveInputController: PythonInteractiveInputController?,
         private val configuredTimeoutMillis: Long?,
+        private val engineId: Int,
+        private val engineStartedAtMillis: Long,
+        private val stopSelf: () -> Unit,
     ) {
 
         private val cancelled = AtomicBoolean(false)
@@ -439,6 +448,10 @@ internal class PythonRuntimeClient(
                     executionId = reserved.requestId.toString(),
                     expectedPluginUid = pinned.packageUid,
                     fileRoot = PythonHostFilePolicy.rootFor(source),
+                    source = source,
+                    engineId = engineId,
+                    engineStartedAtMillis = engineStartedAtMillis,
+                    stopSelf = stopSelf,
                     globalConsole = globalConsole,
                     interactiveInputController = interactiveInputController,
                     onViolation = { error ->

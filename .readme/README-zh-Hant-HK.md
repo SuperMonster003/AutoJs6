@@ -189,6 +189,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Python Runtime 協議 1.5 新增執行級同步 Host 能力 broker, 校驗固定插件 UID, 採用嚴格有界 JSON, 調用配額, 防重放及生命週期約束, 執行終態後拒絕調用; 完整首批低風險能力向 Python 腳本開放 toast, 剪貼簿讀寫, 應用程式啟動/開啟 URL, 動態電量/螢幕/亮度/音量資料, 分級宿主控制台輸出及權限感知通知
 * `新增` Python Runtime 協議 1.5 Host broker 支援在目前專案根目錄或單一檔案腳本目錄內進行有界 UTF-8 文字讀寫, 路徑存在/類型檢查及排序的直接目錄列舉; 正規化相對路徑與穩定上限阻止存取越過執行根目錄
 * `新增` Python Runtime 協議 1.5 Host broker 僅向經用戶授權的前台啟動開放有界 alert/confirm/prompt/select 對話框; 後台啟動穩定返回 INTERACTIVE_NOT_ALLOWED, 取消或執行終態清理會關閉活動對話框 UI
+* `新增` Python Runtime 協議 1.5 Host broker 開放不含絕對路徑的目前引擎資訊, 確定性停止自身及最多 16 次限定範圍的非 Python Host 子指令碼非同步啟動; provider 保持單一工作階段期間巢狀 Python 穩定返回 NESTED_PYTHON_NOT_ALLOWED
 * `新增` Python Runtime 明確嚴格 JSON 結果在腳本終態後以 `[result]` 前綴寫入宿主控制台, 已校驗輸出 artifact 原子發布到項目或腳本目錄下的 `.python-artifacts` 執行專屬目錄並打印絕對路徑; 該保留目錄不進入後續項目快照
 * `新增` 獨立 Lua Runtime 插件後端, 支持通過單獨的 PUC Lua 5.4.8 插件進程運行本地 .lua 文件, 並校驗固定組件/簽名/協議/ABI, 提供有界執行且絕不回退到 JavaScript
 * `新增` 獨立 Java/Kotlin JVM Source Runtime 插件後端, 支持在隔離進程中編譯及運行單文件 .java/.kt 腳本, 提供 package/import, 實時 console 輸出, 可取消 sleep, 宿主 toast 及顯式能力協商

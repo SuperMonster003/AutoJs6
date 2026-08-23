@@ -189,6 +189,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` Python Runtime 프로토콜 1.5는 실행 범위 동기 Host capability broker를 추가하고 고정 plugin UID 검증, 엄격하고 제한된 JSON, 호출 quota, replay/lifetime 보호 및 실행 종료 후 사용 금지를 적용; 완성된 첫 번째 저위험 기능으로 Python script에 toast, clipboard 읽기/쓰기, app 실행 및 URL 열기, 동적 배터리/화면/밝기/볼륨 정보, 레벨별 Host console 출력 및 권한 인식 알림을 제공
 * `추가` Python Runtime 1.5 Host broker는 현재 project root 또는 단일 script 디렉터리 안에서 제한된 UTF-8 text 읽기/쓰기, 존재/유형 확인 및 정렬된 직접 목록을 제공; 정규화된 상대 path와 안정적인 제한으로 실행 root 이탈을 차단
 * `추가` Python Runtime 1.5 Host broker는 사용자가 승인한 foreground 실행에만 제한된 alert/confirm/prompt/select dialog를 제공; background 실행은 INTERACTIVE_NOT_ALLOWED로 실패하고 취소 또는 종료 정리는 활성 dialog UI를 닫음
+* `추가` Python Runtime 1.5 Host broker는 절대 경로가 없는 현재 engine 정보, 결정적 self-stop 및 비 Python Host script에 대한 범위 제한 비동기 child 실행을 최대 16회 제공; provider가 단일 session을 유지하는 동안 중첩 Python은 NESTED_PYTHON_NOT_ALLOWED로 안정적으로 실패
 * `추가` Python Runtime의 명시적 엄격 JSON 결과를 스크립트 종료 후 `[result]` 접두사와 함께 Host 콘솔에 기록하고, 검증된 output artifact를 프로젝트 또는 스크립트 디렉터리의 `.python-artifacts` 아래 실행 전용 디렉터리에 원자적으로 게시한 뒤 절대 경로를 출력하며 이 예약 디렉터리는 이후 프로젝트 스냅샷에서 제외
 * `추가` 독립 Lua Runtime 플러그인 백엔드에서 로컬 .lua 파일을 별도의 PUC Lua 5.4.8 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 제한된 실행, JavaScript 폴백 금지를 지원
 * `추가` Java/Kotlin용 독립 JVM Source Runtime 플러그인 백엔드에서 단일 .java/.kt 파일을 격리 프로세스로 컴파일 및 실행하고 package/import, 실시간 console 출력, 취소 가능한 sleep, 호스트 toast, 명시적 capability 협상을 지원

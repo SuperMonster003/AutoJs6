@@ -189,6 +189,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Python Runtime プロトコル 1.5 は実行スコープの同期 Host capability broker を追加し, 固定 plugin UID 検証, 厳密かつ有界な JSON, call quota, replay/lifetime guard, 終了後の利用禁止を適用; 完成した最初の低リスク機能として Python script に toast, clipboard 読み書き, app 起動, URL オープン, 動的なバッテリー/画面/明るさ/音量情報, レベル付き Host console 出力, 権限を考慮した通知を公開
 * `新機能` Python Runtime 1.5 Host broker は現在のプロジェクトルートまたは単一 script のディレクトリ内で有界 UTF-8 text 読み書き, 存在/種類確認, ソート済み直下一覧を提供; 正規化相対 path と固定上限により実行ルート外へのアクセスを防止
 * `新機能` Python Runtime 1.5 Host broker はユーザー承認済みのフォアグラウンド起動に限り, 上限付き alert/confirm/prompt/select dialog を提供; バックグラウンド起動は INTERACTIVE_NOT_ALLOWED で失敗し, キャンセルまたは終端 cleanup は表示中の dialog UI を閉じる
+* `新機能` Python Runtime 1.5 Host broker は絶対パスを含まない現在の engine 情報, 確定的な自己停止, および非 Python Host script のスコープ限定非同期 child 起動を最大 16 回提供; provider が単一 session の間, ネストした Python は NESTED_PYTHON_NOT_ALLOWED で安定して失敗する
 * `新機能` Python Runtime の明示的な厳密 JSON result をスクリプト終了後に `[result]` 接頭辞付きで Host コンソールへ書き込み, 検証済み output artifact をプロジェクトまたはスクリプトディレクトリ内の `.python-artifacts` 配下にある実行専用ディレクトリへアトミックに公開して絶対パスを表示; この予約ディレクトリは以後のプロジェクトスナップショットから除外
 * `新機能` 独立した Lua Runtime プラグインバックエンドがローカル .lua ファイルを別の PUC Lua 5.4.8 プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, 上限付き実行, JavaScript へのフォールバック禁止に対応
 * `新機能` Java/Kotlin 用の独立 JVM Source Runtime プラグインバックエンドが単一ファイルの .java/.kt を分離プロセスでコンパイル/実行し, package/import, リアルタイム console 出力, キャンセル可能な sleep, ホスト toast, 明示的な capability ネゴシエーションに対応
