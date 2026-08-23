@@ -182,6 +182,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Python 起動統合がファイルマネージャー/エディター/ローカル Run Intent/単一ファイル Import Intent/新規ショートカット/タイマータスク/ブロードキャストタスクを対象とし, 単一ファイルまたはプロジェクトの厳格なコンテキストを保持; プロジェクト内 import/相対ファイルアクセス/読み取り専用 `autojs6.app/device/execution/project` API に対応
 * `新機能` Python Runtime の実行は ExecutionConfig キー `autojs6.python.stdinSnapshot` を介した任意の上限付き事前供給 stdin スナップショットに対応し, ByteArray/UTF-8 テキストの厳格な受け入れ, プロバイダーの機能/サイズ交渉, 非公開の読み取り専用 PFD 転送とクリーンアップを行う
 * `新機能` Python Runtime プロトコル 1.4 は実行ごとに明示的な厳密 JSON result と任意 output artifact を交渉し, count, normalized path, file/aggregate size, exact PFD reference, SHA-256 を制限; Host は typed result だけを受け取り stdout から推測しない
+* `新機能` Python Runtime の明示的な厳密 JSON result をスクリプト終了後に `[result]` 接頭辞付きで Host コンソールへ書き込み, 検証済み output artifact をプロジェクトまたはスクリプトディレクトリ内の `.python-artifacts` 配下にある実行専用ディレクトリへアトミックに公開して絶対パスを表示; この予約ディレクトリは以後のプロジェクトスナップショットから除外
 * `新機能` 独立した Lua Runtime プラグインバックエンドがローカル .lua ファイルを別の PUC Lua 5.4.8 プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, 上限付き実行, JavaScript へのフォールバック禁止に対応
 * `新機能` Java/Kotlin 用の独立 JVM Source Runtime プラグインバックエンドが単一ファイルの .java/.kt を分離プロセスでコンパイル/実行し, package/import, リアルタイム console 出力, キャンセル可能な sleep, ホスト toast, 明示的な capability ネゴシエーションに対応
 * `新機能` JVM Source Runtime のサポート範囲は単一ファイル Java 8 (Java provider の最小 API 24) と Kotlin 2.3 (Kotlin provider の最小 API 26); 本リリースの実機 smoke は API 31/arm64-v8a のみで, 未検証 API レベルはサポートを表明しない

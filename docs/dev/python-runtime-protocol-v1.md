@@ -549,6 +549,29 @@ Protocol 1.0 through 1.3 require the `onResult` descriptor array to be empty.
 Protocol 1.4 authorizes only output artifacts named by the typed result manifest
 under the exact descriptor-reference and byte/digest rules above.
 
+After the protocol receiver has copied and verified a successful protocol 1.4
+result, the current Host presents it as follows without changing the wire
+contract:
+
+- A non-null `structuredJson` value is appended to the global console as
+  `[result] <json>`. JSON-looking stdout remains ordinary diagnostic output.
+- Verified artifacts are first written to a hidden staging directory, with the
+  logical path, byte length and SHA-256 revalidated, and then published by one
+  same-parent directory rename. The final directory is
+  `<project-root>/.python-artifacts/execution-<engine-id>-<request-uuid>/` for a
+  project or the equivalent path below a single script's parent directory.
+  Every published file is reported as `[artifact] <absolute-path>`.
+- The `.python-artifacts` top-level directory is reserved for Host-published
+  results and excluded from later Python project workspace snapshots, so prior
+  outputs cannot consume transport budgets or become source input. A project
+  entry point inside this directory is rejected.
+- No artifact directory is created when the result contains no artifacts.
+  Existing execution directories are never overwritten. Interruption, unsafe
+  paths, filesystem conflicts or write/publish failures remove the staging
+  tree and fail the Host execution with
+  `PYTHON_RUNTIME_RESULT_PUBLICATION_FAILED` instead of reporting a successful
+  partial publication.
+
 ## Lifecycle And Replay Boundary
 
 `openSession` validates admission metadata and acquires descriptor ownership but

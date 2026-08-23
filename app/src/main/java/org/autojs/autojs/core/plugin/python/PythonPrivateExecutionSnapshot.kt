@@ -552,6 +552,12 @@ internal object PythonProjectWorkspacePolicy {
         check(entry == source.projectEntryFile && contains(root, entry)) {
             "Python project entry point is not canonical"
         }
+        check(
+            !source.entryPoint.substringBefore('/').equals(
+                PythonRuntimeResultPresenter.OUTPUT_DIRECTORY_NAME,
+                ignoreCase = true,
+            ),
+        ) { "Python project entry point uses the reserved result directory" }
         val planned = ArrayList<PlannedFile>()
         val paths = NodePathSet()
         var entrySeen = false
@@ -563,6 +569,12 @@ internal object PythonProjectWorkspacePolicy {
             val children = directory.listFiles()
                 ?: error("Python project directory could not be enumerated")
             children.sortedBy { it.name }.forEach { child ->
+                if (
+                    depth == 0 &&
+                    child.name.equals(PythonRuntimeResultPresenter.OUTPUT_DIRECTORY_NAME, ignoreCase = true)
+                ) {
+                    return@forEach
+                }
                 val canonical = child.canonicalFile
                 check(child.absoluteFile.path == canonical.path) {
                     "Python project contains a symbolic-link or non-canonical path"

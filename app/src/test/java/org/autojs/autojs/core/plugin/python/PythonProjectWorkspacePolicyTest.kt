@@ -83,6 +83,34 @@ class PythonProjectWorkspacePolicyTest {
         assertEquals("src/main.py", sourceInput.relativePath)
     }
 
+    @Test
+    fun publishedArtifactDirectoryIsReservedAndExcludedFromLaterSnapshots() {
+        val root = temporaryFolder.newFolder()
+        val entry = File(root, "main.py").apply { writeText("print('ok')\n") }
+        File(root, "project.json").writeText("""{"type":"python","main":"main.py"}""")
+        File(root, "${PythonRuntimeResultPresenter.OUTPUT_DIRECTORY_NAME}/execution-1/reports/result.bin")
+            .apply {
+                requireNotNull(parentFile).mkdirs()
+                writeBytes(byteArrayOf(0, 1, 2))
+            }
+
+        val plan = PythonProjectWorkspacePolicy.plan(PythonProjectSource.create(root, entry))
+
+        assertEquals(listOf("main.py", "project.json"), plan.files.map { it.relativePath })
+    }
+
+    @Test
+    fun projectEntryPointCannotUseTheReservedArtifactDirectory() {
+        val root = temporaryFolder.newFolder()
+        val entry = File(root, "${PythonRuntimeResultPresenter.OUTPUT_DIRECTORY_NAME}/main.py").apply {
+            requireNotNull(parentFile).mkdirs()
+            writeText("print('not source')\n")
+        }
+        val source = PythonProjectSource.create(root, entry)
+
+        assertRejected { PythonProjectWorkspacePolicy.plan(source) }
+    }
+
     private fun assertRejected(block: () -> Unit) {
         try {
             block()

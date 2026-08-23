@@ -171,6 +171,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Node.js Runtime 插件, 内置 Node.js 24.5.0 运行时, 支持识别 "nodejs" 模式参数或识别文件扩展名 (.node.js/.cjs/.mjs) 运行 Node.js 脚本
 * `新增` Python Runtime 插件, 内置 Chaquopy 17.0.0 与 CPython 3.13.9, 支持识别文件扩展名 (.py) 运行 Python 脚本
 * `新增` Python Runtime 协议 1.4 为每次执行协商显式严格 JSON 结果与可选输出 artifact, 对数量, 规范化路径, 单个/合计大小, 精确 PFD 引用及 SHA-256 设限; Host 仅消费类型化结果且绝不从 stdout 推断
+* `新增` Python Runtime 显式严格 JSON 结果在脚本终态后以 `[result]` 前缀写入宿主控制台, 已校验输出 artifact 原子发布到项目或脚本目录下的 `.python-artifacts` 执行专属目录并打印绝对路径; 该保留目录不进入后续项目快照
 * `新增` Lua Runtime 插件, 内置 PUC Lua 5.4.8, 支持识别文件扩展名 (.lua) 运行 Lua 脚本
 * `新增` 独立 Java/Kotlin JVM Source Runtime 插件后端, 支持在隔离进程中编译和运行单文件 .java/.kt 脚本, 提供 package/import, 实时 console 输出, 可取消 sleep, 宿主 toast 与显式能力协商
 * `新增` JVM Source Runtime 支持范围为单文件 Java 8 (Java provider 最低 API 24) 与 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次发布仅在 API 31/arm64-v8a 真机完成 smoke, 不声明未验证 API 级别

@@ -35,9 +35,9 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * Opt-in U1-R2 acceptance through the public Host engine and the exact real CPython plugin.
  *
- * The test deliberately keeps stdout diagnostic-only. The explicit JSON value and the artifact
- * are returned through the Host-owned result surface, and the artifact bytes are checked after the
- * Host has enforced descriptor length, EOF, and SHA-256.
+ * The test deliberately keeps stdout diagnostic-only. The explicit JSON value remains available
+ * through the Host-owned result surface and is printed with a typed prefix. Verified artifacts are
+ * also atomically published below the project root and their absolute paths are printed.
  */
 class PythonU1R2AcceptanceInstrumentationTest {
 
@@ -149,10 +149,30 @@ class PythonU1R2AcceptanceInstrumentationTest {
                     ARTIFACT_BYTES,
                     artifact.toByteArray(),
                 )
+                val publishedDirectory = File(
+                    projectRoot.canonicalFile,
+                    "$PUBLISHED_ARTIFACT_ROOT/execution-${execution.id}-${result.terminal.requestId}",
+                )
+                val publishedArtifact = File(publishedDirectory, ARTIFACT_PATH)
+                assertTrue("Published artifact directory is not user-visible", publishedDirectory.isDirectory)
+                assertTrue("Published artifact is not a regular file", publishedArtifact.isFile)
+                assertArrayEquals(
+                    "Published artifact bytes changed after Host verification",
+                    ARTIFACT_BYTES,
+                    publishedArtifact.readBytes(),
+                )
+                assertTrue(
+                    "Artifact publication left a staging directory",
+                    File(projectRoot, PUBLISHED_ARTIFACT_ROOT).listFiles().orEmpty().none { candidate ->
+                        candidate.name.startsWith(".")
+                    },
+                )
 
                 assertConsoleSince(checkpoint, token)
                 assertConsoleSince(checkpoint, STDOUT_JSON_LOOKALIKE.trim())
                 assertConsoleSince(checkpoint, EXPECTED_STDERR.trim())
+                assertConsoleSince(checkpoint, "[result] $EXPECTED_STRUCTURED_JSON")
+                assertConsoleSince(checkpoint, "[artifact] ${publishedArtifact.absolutePath}")
                 assertPrivateTransportSnapshotsRemoved()
                 assertEquals(listOf(PythonPluginScriptEngine::class.java), createdEngineClasses)
             } finally {
@@ -753,6 +773,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val SIMPLE_ENTRY_POINT = "main.py"
         const val STDIN_FILE_PATH = "fixtures/stdin.txt"
         const val STDIN_SNAPSHOT_ARGUMENT = "autojs6.python.stdinSnapshot"
+        const val PUBLISHED_ARTIFACT_ROOT = ".python-artifacts"
         const val ARTIFACT_PATH = "reports/u1-r2.bin"
         const val STDERR_MARKER = "U1R2_STDERR_DIAGNOSTIC"
         const val STDOUT_JSON_LOOKALIKE = "{\"stdout\":\"diagnostic-only\"}\n"

@@ -1,12 +1,14 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.plugin.python.PythonExecutionInputPolicy
 import org.autojs.autojs.core.plugin.python.PythonInteractiveInputAuthorization
 import org.autojs.autojs.core.plugin.python.PythonRuntimeClient
 import org.autojs.autojs.core.plugin.python.PythonRuntimeHostError
 import org.autojs.autojs.core.plugin.python.PythonRuntimeHostException
+import org.autojs.autojs.core.plugin.python.PythonRuntimeResultPresenter
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.PythonFileSource
@@ -21,6 +23,7 @@ class PythonPluginScriptEngine(
     globalConsole: GlobalConsole,
 ) : ScriptEngine.AbstractScriptEngine<PythonScriptSource>() {
 
+    private val globalConsole = globalConsole
     private val client = PythonRuntimeClient(context, globalConsole)
     private val activeExecution = AtomicReference<PythonRuntimeClient.Execution?>()
     private val executionThread = AtomicReference<Thread?>()
@@ -72,7 +75,11 @@ class PythonPluginScriptEngine(
         }
         executionThread.set(Thread.currentThread())
         return try {
-            execution.run()
+            val result = execution.run()
+            PythonRuntimeResultPresenter.present(fileSource, id, result).consoleLines.forEach { line ->
+                globalConsole.println(Log.INFO, line)
+            }
+            result
         } catch (error: InterruptedException) {
             Thread.interrupted()
             throw ScriptInterruptedException(error)
