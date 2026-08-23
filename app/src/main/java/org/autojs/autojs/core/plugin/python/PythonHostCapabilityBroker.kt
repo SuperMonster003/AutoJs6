@@ -1,18 +1,32 @@
 package org.autojs.autojs.core.plugin.python
 
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Binder
+import android.os.Build
+import android.os.PowerManager
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.ScriptToast
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs6.R
 import org.autojs.plugin.python.runtime.api.IPythonHostCapabilityBroker
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
 import java.nio.ByteBuffer
@@ -24,6 +38,7 @@ import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.round
 
 internal object PythonHostCapabilities {
     const val TOAST_SHOW = "toast.show"
@@ -32,6 +47,11 @@ internal object PythonHostCapabilities {
     const val APP_LAUNCH = "app.launch"
     const val APP_LAUNCH_APP = "app.launch_app"
     const val APP_OPEN_URL = "app.open_url"
+    const val DEVICE_INFO = "device.info"
+    const val CONSOLE_LOG = "console.log"
+    const val CONSOLE_WARN = "console.warn"
+    const val CONSOLE_ERROR = "console.error"
+    const val NOTICE_SHOW = "notice.show"
 
     val ENABLED = setOf(
         TOAST_SHOW,
@@ -40,7 +60,75 @@ internal object PythonHostCapabilities {
         APP_LAUNCH,
         APP_LAUNCH_APP,
         APP_OPEN_URL,
+        DEVICE_INFO,
+        CONSOLE_LOG,
+        CONSOLE_WARN,
+        CONSOLE_ERROR,
+        NOTICE_SHOW,
     )
+}
+
+internal enum class PythonHostConsoleLevel {
+    LOG,
+    WARN,
+    ERROR,
+}
+
+internal data class PythonHostDeviceInfo(
+    val batteryPercent: Double,
+    val charging: Boolean,
+    val screenOn: Boolean,
+    val brightness: Int,
+    val musicVolume: Int,
+    val musicMaxVolume: Int,
+    val notificationVolume: Int,
+    val notificationMaxVolume: Int,
+    val alarmVolume: Int,
+    val alarmMaxVolume: Int,
+) {
+    fun toJson(): JsonObject = JsonObject().apply {
+        addProperty("schema", SCHEMA)
+        add(
+            "battery",
+            JsonObject().apply {
+                addProperty("percent", batteryPercent)
+                addProperty("charging", charging)
+            },
+        )
+        add(
+            "screen",
+            JsonObject().apply {
+                addProperty("on", screenOn)
+                addProperty("brightness", brightness)
+            },
+        )
+        add(
+            "volume",
+            JsonObject().apply {
+                add("music", volumeJson(musicVolume, musicMaxVolume))
+                add("notification", volumeJson(notificationVolume, notificationMaxVolume))
+                add("alarm", volumeJson(alarmVolume, alarmMaxVolume))
+            },
+        )
+    }
+
+    private fun volumeJson(current: Int, maximum: Int) = JsonObject().apply {
+        addProperty("current", current)
+        addProperty("max", maximum)
+    }
+
+    private companion object {
+        const val SCHEMA = "autojs6-python-device-info-v1"
+    }
+}
+
+internal object PythonHostNoticePolicy {
+    const val CHANNEL_ID = "autojs6-python"
+    const val NOTIFICATION_ID = 1
+    const val MAX_TEXT_BYTES = 4 * 1024
+    const val TAG_PREFIX = "autojs6-python:"
+
+    fun tagForExecution(executionId: String) = "$TAG_PREFIX$executionId"
 }
 
 internal interface PythonHostCapabilityActions {
@@ -55,16 +143,24 @@ internal interface PythonHostCapabilityActions {
     fun launchApp(label: String): Boolean
 
     fun openUrl(url: String): Boolean
+
+    fun getDeviceInfo(): PythonHostDeviceInfo
+
+    fun writeConsole(level: PythonHostConsoleLevel, text: String)
+
+    fun postNotice(text: String)
 }
 
 internal class AndroidPythonHostCapabilityActions(
     context: Context,
     executionId: String,
+    private val globalConsole: GlobalConsole,
 ) : PythonHostCapabilityActions {
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
     private val app = AppUtils(appContext)
     private val toastOwnerId = "python@$executionId"
+    private val notificationTag = PythonHostNoticePolicy.tagForExecution(executionId)
 
     override fun showToast(text: String) = onMain {
         ScriptToast.enqueueToast(appContext, toastOwnerId, text)
@@ -92,6 +188,103 @@ internal class AndroidPythonHostCapabilityActions(
                 Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             )
         }.isSuccess
+    }
+
+    override fun getDeviceInfo(): PythonHostDeviceInfo = onMain {
+        val batteryIntent = appContext.registerReceiver(
+            null,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED),
+        ) ?: error("Android battery state is unavailable")
+        val batteryLevel = batteryIntent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
+        val batteryScale = batteryIntent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
+        require(batteryLevel >= 0 && batteryScale > 0) { "Android battery state is invalid" }
+        val batteryStatus = batteryIntent.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1)
+        val audio = requireNotNull(appContext.getSystemService(AudioManager::class.java)) {
+            "Android audio service is unavailable"
+        }
+        val power = requireNotNull(appContext.getSystemService(PowerManager::class.java)) {
+            "Android power service is unavailable"
+        }
+        PythonHostDeviceInfo(
+            batteryPercent = round((batteryLevel.toDouble() / batteryScale) * 1_000.0) / 10.0,
+            charging = batteryStatus == android.os.BatteryManager.BATTERY_STATUS_CHARGING ||
+                batteryStatus == android.os.BatteryManager.BATTERY_STATUS_FULL,
+            screenOn = power.isInteractive,
+            brightness = Settings.System.getInt(
+                appContext.contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS,
+                -1,
+            ),
+            musicVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC),
+            musicMaxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+            notificationVolume = audio.getStreamVolume(AudioManager.STREAM_NOTIFICATION),
+            notificationMaxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION),
+            alarmVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM),
+            alarmMaxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_ALARM),
+        )
+    }
+
+    override fun writeConsole(level: PythonHostConsoleLevel, text: String) = onMain {
+        when (level) {
+            PythonHostConsoleLevel.LOG -> globalConsole.log(text)
+            PythonHostConsoleLevel.WARN -> globalConsole.warn(text)
+            PythonHostConsoleLevel.ERROR -> globalConsole.error(text)
+        }
+    }
+
+    override fun postNotice(text: String) = onMain {
+        ensureNotificationPostingAllowed()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = requireNotNull(appContext.getSystemService(NotificationManager::class.java)) {
+                "Android notification service is unavailable"
+            }
+            if (manager.getNotificationChannel(PythonHostNoticePolicy.CHANNEL_ID) == null) {
+                manager.createNotificationChannel(
+                    NotificationChannel(
+                        PythonHostNoticePolicy.CHANNEL_ID,
+                        "AutoJs6 Python",
+                        NotificationManager.IMPORTANCE_DEFAULT,
+                    ).apply {
+                        description = "Notifications posted by AutoJs6 Python scripts"
+                        lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+                    },
+                )
+            }
+        }
+        val notification = NotificationCompat.Builder(appContext, PythonHostNoticePolicy.CHANNEL_ID)
+            .setSmallIcon(R.drawable.autojs6_status_bar_icon)
+            .setContentTitle("AutoJs6 Python")
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setLocalOnly(true)
+            .build()
+        NotificationManagerCompat.from(appContext).notify(
+            notificationTag,
+            PythonHostNoticePolicy.NOTIFICATION_ID,
+            notification,
+        )
+    }
+
+    private fun ensureNotificationPostingAllowed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            throw PythonHostCapabilityPermissionDeniedException()
+        }
+        if (!NotificationManagerCompat.from(appContext).areNotificationsEnabled()) {
+            throw PythonHostCapabilityPermissionDeniedException()
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = appContext.getSystemService(NotificationManager::class.java)
+                ?.getNotificationChannel(PythonHostNoticePolicy.CHANNEL_ID)
+            if (channel?.importance == NotificationManager.IMPORTANCE_NONE) {
+                throw PythonHostCapabilityPermissionDeniedException()
+            }
+        }
     }
 
     private fun <T> onMain(action: () -> T): T {
@@ -170,6 +363,41 @@ internal class PythonHostCapabilityDispatcher(
                     request,
                     actions.openUrl(request.singleTextArgument(ARG_URL, WEB_URL)),
                 )
+                PythonHostCapabilities.DEVICE_INFO -> {
+                    request.requireArguments()
+                    encodeSuccess(request, actions.getDeviceInfo())
+                }
+                PythonHostCapabilities.CONSOLE_LOG -> {
+                    actions.writeConsole(
+                        PythonHostConsoleLevel.LOG,
+                        request.singleTextArgument(ARG_TEXT),
+                    )
+                    encodeSuccess(request, null)
+                }
+                PythonHostCapabilities.CONSOLE_WARN -> {
+                    actions.writeConsole(
+                        PythonHostConsoleLevel.WARN,
+                        request.singleTextArgument(ARG_TEXT),
+                    )
+                    encodeSuccess(request, null)
+                }
+                PythonHostCapabilities.CONSOLE_ERROR -> {
+                    actions.writeConsole(
+                        PythonHostConsoleLevel.ERROR,
+                        request.singleTextArgument(ARG_TEXT),
+                    )
+                    encodeSuccess(request, null)
+                }
+                PythonHostCapabilities.NOTICE_SHOW -> {
+                    actions.postNotice(
+                        request.singleTextArgument(
+                            ARG_TEXT,
+                            maxBytes = PythonHostNoticePolicy.MAX_TEXT_BYTES,
+                            allowEmpty = false,
+                        ),
+                    )
+                    encodeSuccess(request, null)
+                }
                 else -> encodeFailure(
                     request,
                     ERROR_CAPABILITY_UNAVAILABLE,
@@ -178,6 +406,8 @@ internal class PythonHostCapabilityDispatcher(
             }
         } catch (_: PythonHostCapabilityTimeoutException) {
             encodeFailure(request, ERROR_HOST_TIMEOUT, "Host capability timed out")
+        } catch (_: PythonHostCapabilityPermissionDeniedException) {
+            encodeFailure(request, ERROR_PERMISSION_DENIED, "Host capability permission was denied")
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
         } catch (_: Throwable) {
@@ -249,6 +479,7 @@ internal class PythonHostCapabilityDispatcher(
                 null -> add(KEY_VALUE, JsonNull.INSTANCE)
                 is String -> addProperty(KEY_VALUE, value)
                 is Boolean -> addProperty(KEY_VALUE, value)
+                is PythonHostDeviceInfo -> add(KEY_VALUE, value.toJson())
                 else -> error("Unsupported Python host capability result type: ${value::class.java.name}")
             }
         },
@@ -294,11 +525,19 @@ internal class PythonHostCapabilityDispatcher(
             }
         }
 
-        fun singleTextArgument(name: String, pattern: Regex? = null): String {
+        fun singleTextArgument(
+            name: String,
+            pattern: Regex? = null,
+            maxBytes: Int = PythonRuntimeContract.MAX_HOST_CAPABILITY_TEXT_BYTES,
+            allowEmpty: Boolean = true,
+        ): String {
             requireArguments(name)
             val value = arguments.requireString(name)
-            require(value.toByteArray(StandardCharsets.UTF_8).size <= PythonRuntimeContract.MAX_HOST_CAPABILITY_TEXT_BYTES) {
+            require(value.toByteArray(StandardCharsets.UTF_8).size <= maxBytes) {
                 "Python host capability text argument exceeds the byte limit"
+            }
+            require(allowEmpty || value.isNotEmpty()) {
+                "Python host capability text argument is empty"
             }
             require(pattern == null || pattern.matches(value)) {
                 "Python host capability text argument has an invalid shape"
@@ -327,6 +566,7 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_INVALID_ARGUMENT = "INVALID_ARGUMENT"
         const val ERROR_HOST_FAILURE = "HOST_FAILURE"
         const val ERROR_HOST_TIMEOUT = "HOST_TIMEOUT"
+        const val ERROR_PERMISSION_DENIED = "PERMISSION_DENIED"
         const val ERROR_BROKER_CLOSED = "BROKER_CLOSED"
         const val ERROR_REPLAYED_CALL = "REPLAYED_CALL"
         const val ERROR_CALL_LIMIT_EXCEEDED = "CALL_LIMIT_EXCEEDED"
@@ -341,8 +581,13 @@ internal class PythonHostCapabilityBroker(
     context: Context,
     executionId: String,
     private val expectedPluginUid: Int,
+    globalConsole: GlobalConsole,
     private val onViolation: (Throwable) -> Unit,
-    actions: PythonHostCapabilityActions = AndroidPythonHostCapabilityActions(context, executionId),
+    actions: PythonHostCapabilityActions = AndroidPythonHostCapabilityActions(
+        context,
+        executionId,
+        globalConsole,
+    ),
 ) : IPythonHostCapabilityBroker.Stub(), AutoCloseable {
     private val closed = AtomicBoolean(false)
     private val dispatcher = PythonHostCapabilityDispatcher(
@@ -379,6 +624,8 @@ internal class PythonHostCapabilityBroker(
 }
 
 private class PythonHostCapabilityTimeoutException(cause: Throwable) : RuntimeException(cause)
+
+internal class PythonHostCapabilityPermissionDeniedException : RuntimeException()
 
 private fun JsonObject.requireString(name: String): String {
     val value = get(name)

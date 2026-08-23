@@ -24,7 +24,7 @@
 * `新增` Python 啟動集成覆蓋文件管理器/編輯器/本地 Run Intent/單文件 Import Intent/新建快捷方式/定時任務/廣播任務並嚴格保留單文件或項目上下文; 項目支持內部 import/相對文件讀取及只讀 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 執行支持通過 ExecutionConfig 鍵 `autojs6.python.stdinSnapshot` 提供可選的有界預置 stdin 快照, 並採用嚴格 ByteArray/UTF-8 文本准入, 提供器能力/大小協商及私有只讀 PFD 傳輸與清理
 * `新增` Python Runtime 協議 1.4 為每次執行協商明確嚴格 JSON 結果及可選輸出 artifact, 對數量, 標準化路徑, 每個/合計大小, 精確 PFD 引用及 SHA-256 設限; Host 只接收類型化結果且絕不從 stdout 推斷
-* `新增` Python Runtime 協議 1.5 新增執行級同步 Host 能力 broker, 校驗固定插件 UID, 採用嚴格有界 JSON, 調用配額, 防重放及生命週期約束, 執行終態後拒絕調用; 首批低風險能力向 Python 腳本開放 toast, 剪貼簿讀寫及應用程式啟動/開啟 URL
+* `新增` Python Runtime 協議 1.5 新增執行級同步 Host 能力 broker, 校驗固定插件 UID, 採用嚴格有界 JSON, 調用配額, 防重放及生命週期約束, 執行終態後拒絕調用; 完整首批低風險能力向 Python 腳本開放 toast, 剪貼簿讀寫, 應用程式啟動/開啟 URL, 動態電量/螢幕/亮度/音量資料, 分級宿主控制台輸出及權限感知通知
 * `新增` Python Runtime 明確嚴格 JSON 結果在腳本終態後以 `[result]` 前綴寫入宿主控制台, 已校驗輸出 artifact 原子發布到項目或腳本目錄下的 `.python-artifacts` 執行專屬目錄並打印絕對路徑; 該保留目錄不進入後續項目快照
 * `新增` 獨立 Lua Runtime 插件後端, 支持通過單獨的 PUC Lua 5.4.8 插件進程運行本地 .lua 文件, 並校驗固定組件/簽名/協議/ABI, 提供有界執行且絕不回退到 JavaScript
 * `新增` 獨立 Java/Kotlin JVM Source Runtime 插件後端, 支持在隔離進程中編譯及運行單文件 .java/.kt 腳本, 提供 package/import, 實時 console 輸出, 可取消 sleep, 宿主 toast 及顯式能力協商

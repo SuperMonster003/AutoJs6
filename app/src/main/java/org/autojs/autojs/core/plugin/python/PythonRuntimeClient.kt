@@ -438,6 +438,7 @@ internal class PythonRuntimeClient(
                     context = applicationContext,
                     executionId = reserved.requestId.toString(),
                     expectedPluginUid = pinned.packageUid,
+                    globalConsole = globalConsole,
                     onViolation = { error ->
                         finishFailure(
                             PythonRuntimeHostException(
