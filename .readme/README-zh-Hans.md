@@ -303,6 +303,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 独立 Python 脚本发生精确 ModuleNotFoundError 时在控制台追加安全提示, 引导 sibling/local 模块 import 使用包含 `project.json` 与 `type: python` 的显式 Python 项目, 且不暴露私有路径
 * `优化` Python Runtime 输出 chunk 到达时立即写入宿主控制台, 使用按 stdout/stderr 独立的增量 UTF-8 解码保留跨 chunk 码点, 并将端到端输出上限提高到 16 MiB
 * `优化` Python 项目的 project.json 支持 timeout 正整数毫秒配置, 默认 5 分钟、最大 30 分钟, 并继续受运行时插件上限约束
+* `优化` Python 项目的 project.json 支持通过 "entryMode": "module" 与规范化点分 main 名称声明模块入口, 以标准 Python 模块语义运行并支持包内相对导入
 * `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
 * `优化` 文件管理器将媒体详情查询整合为单次 MediaInfo 快照, 减少 Binder 调用及等待时间
 * `优化` 文件外部查看与媒体播放降级仅授予 URI 读取权限

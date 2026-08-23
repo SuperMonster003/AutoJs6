@@ -306,7 +306,9 @@ internal class PythonPrivateExecutionSnapshot private constructor(
             ) ?: error("Python project declaration disappeared before snapshot")
             check(
                 admission.projectRoot == source.projectRoot &&
-                    admission.entryFile == source.projectEntryFile,
+                    admission.entryFile == source.projectEntryFile &&
+                    admission.timeoutMillis == source.timeoutMillis &&
+                    admission.entryMode == source.entryMode,
             ) { "Python project declaration changed before snapshot" }
         }
 

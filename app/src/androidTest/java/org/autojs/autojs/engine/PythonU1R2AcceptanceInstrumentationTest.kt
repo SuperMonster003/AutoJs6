@@ -8,7 +8,6 @@ import android.util.Base64
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.plugin.python.PythonRuntimeExecutionResult
-import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.script.PythonProjectLaunchPolicy
@@ -96,16 +95,13 @@ class PythonU1R2AcceptanceInstrumentationTest {
         service.registerEngineLifecycleCallback(lifecycle)
         try {
             writeProject(projectRoot, token)
-            val entry = File(projectRoot, ENTRY_POINT)
-            val source = PythonProjectSource.create(projectRoot, entry)
-            val config = ExecutionConfig(workingDirectory = projectRoot.canonicalPath).apply {
-                setArgument(ENTRY_MODE_ARGUMENT, "module")
-            }
+            val launch = admittedProjectLaunch(projectRoot)
+            val config = launch.createExecutionConfig()
             val pending = PendingProjectExecution(projectRoot.canonicalPath)
             val checkpoint = consoleCheckpoint()
             service.registerGlobalScriptExecutionListener(pending.listener)
             try {
-                val submitted = service.execute(source, config)
+                val submitted = service.execute(launch.source, config)
                 assertTrue(
                     "U1-R2 module execution did not reach the unified start callback",
                     pending.started.await(START_TIMEOUT_SECONDS, TimeUnit.SECONDS),
@@ -435,7 +431,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
 
     private fun writeProject(projectRoot: File, token: String) {
         File(projectRoot, "project.json").writeText(
-            """{"type":"python","main":"$ENTRY_POINT"}""",
+            """{"type":"python","entryMode":"module","main":"$PACKAGE_NAME.main"}""",
             Charsets.UTF_8,
         )
         val packageRoot = File(projectRoot, PACKAGE_NAME).apply {

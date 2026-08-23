@@ -6,13 +6,16 @@ import com.google.gson.Strictness
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import org.autojs.autojs.core.plugin.python.PythonExecutionTimeoutPolicy
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
+import org.autojs.plugin.python.runtime.api.PythonRuntimeContractException
+import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
 import java.io.File
 import java.io.StringReader
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
 
-/** Strict admission for R4 Python projects. Execution remains closed until workspace transport lands. */
+/** Strict admission for Python projects transported as bounded workspace snapshots. */
 object PythonProjectLaunchPolicy {
 
     @JvmStatic
@@ -25,10 +28,14 @@ object PythonProjectLaunchPolicy {
         val projectType = declaration.projectType?.trim()
         val main = declaration.main?.trim()
         val pythonType = projectType.equals(PYTHON_PROJECT_TYPE, ignoreCase = true)
-        val pythonMain = main?.let(::isPythonEntryName) == true
+        val pythonMain = declaration.entryMode == PythonEntryMode.FILE && main?.let(::isPythonEntryName) == true
 
         if (!pythonType) {
-            if (pythonMain || legacyMain?.name?.let(::isPythonEntryName) == true) {
+            if (
+                pythonMain ||
+                declaration.entryMode == PythonEntryMode.MODULE ||
+                legacyMain?.name?.let(::isPythonEntryName) == true
+            ) {
                 throw PythonProjectLaunchException(PythonProjectLaunchError.TYPE_REQUIRED)
             }
             return null
@@ -37,8 +44,13 @@ object PythonProjectLaunchPolicy {
             throw PythonProjectLaunchException(PythonProjectLaunchError.CONFIG_INVALID)
         }
 
-        val entry = resolveEntry(normalizedRoot, main)
-        return PythonProjectLaunchAdmission(normalizedRoot, entry, declaration.timeoutMillis)
+        val entry = resolveEntry(normalizedRoot, main, declaration.entryMode)
+        return PythonProjectLaunchAdmission(
+            normalizedRoot,
+            entry,
+            declaration.timeoutMillis,
+            declaration.entryMode,
+        )
     }
 
     /**
@@ -138,8 +150,16 @@ object PythonProjectLaunchPolicy {
             projectType = type ?: alias,
             main = stringValue(json, "main"),
             timeoutMillis = timeoutMillisValue(json),
+            entryMode = entryModeValue(json),
         )
     }
+
+    private fun entryModeValue(json: JsonObject): PythonEntryMode =
+        when (stringValue(json, "entryMode") ?: FILE_ENTRY_MODE) {
+            FILE_ENTRY_MODE -> PythonEntryMode.FILE
+            MODULE_ENTRY_MODE -> PythonEntryMode.MODULE
+            else -> throw PythonProjectLaunchException(PythonProjectLaunchError.CONFIG_INVALID)
+        }
 
     private fun timeoutMillisValue(json: JsonObject): Long? {
         val value = json.get("timeout") ?: return null
@@ -165,18 +185,26 @@ object PythonProjectLaunchPolicy {
         return value.asString
     }
 
-    private fun resolveEntry(projectRoot: File, main: String): File {
+    private fun resolveEntry(projectRoot: File, main: String, entryMode: PythonEntryMode): File {
+        val fileEntryPoint = when (entryMode) {
+            PythonEntryMode.FILE -> main
+            PythonEntryMode.MODULE -> try {
+                PythonRuntimeValidation.fileEntryPointForModuleName(main)
+            } catch (error: PythonRuntimeContractException) {
+                throw PythonProjectLaunchException(PythonProjectLaunchError.ENTRY_INVALID, error)
+            }
+        }
         if (
-            main.indexOf('\u0000') >= 0 ||
-            main.startsWith('/') ||
-            main.startsWith('\\') ||
-            '\\' in main ||
-            WINDOWS_ABSOLUTE_PATH.matches(main) ||
-            URI_SCHEME.containsMatchIn(main)
+            fileEntryPoint.indexOf('\u0000') >= 0 ||
+            fileEntryPoint.startsWith('/') ||
+            fileEntryPoint.startsWith('\\') ||
+            '\\' in fileEntryPoint ||
+            WINDOWS_ABSOLUTE_PATH.matches(fileEntryPoint) ||
+            URI_SCHEME.containsMatchIn(fileEntryPoint)
         ) {
             throw PythonProjectLaunchException(PythonProjectLaunchError.ENTRY_INVALID)
         }
-        val segments = main.split('/')
+        val segments = fileEntryPoint.split('/')
         if (
             segments.isEmpty() ||
             segments.any { it.isEmpty() || it == "." || it == ".." } ||
@@ -220,10 +248,13 @@ object PythonProjectLaunchPolicy {
         val projectType: String?,
         val main: String?,
         val timeoutMillis: Long?,
+        val entryMode: PythonEntryMode,
     )
 
     private const val PROJECT_CONFIG_NAME = "project.json"
     private const val PYTHON_PROJECT_TYPE = "python"
+    private const val FILE_ENTRY_MODE = "file"
+    private const val MODULE_ENTRY_MODE = "module"
     private const val MAX_PROJECT_CONFIG_BYTES = 64L * 1024L
     private const val MAX_PROJECT_ANCESTORS = 64
     private val WINDOWS_ABSOLUTE_PATH = Regex("^[A-Za-z]:[\\\\/].*")
@@ -237,6 +268,7 @@ data class PythonProjectLaunchAdmission(
     val projectRoot: File,
     val entryFile: File,
     val timeoutMillis: Long?,
+    val entryMode: PythonEntryMode = PythonEntryMode.FILE,
 )
 
 enum class PythonProjectLaunchError(

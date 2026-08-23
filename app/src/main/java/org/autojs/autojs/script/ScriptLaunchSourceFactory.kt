@@ -1,8 +1,10 @@
 package org.autojs.autojs.script
 
+import org.autojs.autojs.core.plugin.python.PythonExecutionInputPolicy
 import org.autojs.autojs.engine.NodeProjectRunner
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.util.WorkingDirectoryUtils
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import java.io.File
 
 object ScriptLaunchSourceFactory {
@@ -36,6 +38,12 @@ object ScriptLaunchSourceFactory {
             return base.apply {
                 if (overrideWorkingDirectory || workingDirectory.isBlank()) {
                     workingDirectory = this@Launch.workingDirectory
+                }
+                pythonProjectSource?.let { source ->
+                    setArgument(
+                        PythonExecutionInputPolicy.ENTRY_MODE_ARGUMENT,
+                        source.entryMode.executionConfigValue(),
+                    )
                 }
             }
         }
@@ -154,9 +162,10 @@ object ScriptLaunchSourceFactory {
             PythonProjectLaunchPolicy.rejectExecutionUntilWorkspaceSupport(admission)
         }
         val source = PythonProjectSource.create(
-            admission.projectRoot,
-            admission.entryFile,
-            admission.timeoutMillis,
+            projectRoot = admission.projectRoot,
+            entryFile = admission.entryFile,
+            timeoutMillis = admission.timeoutMillis,
+            entryMode = admission.entryMode,
         )
         return Launch(
             source = source,
@@ -351,6 +360,7 @@ object ScriptLaunchSourceFactory {
                 entryFile = admission.entryFile,
                 sourceFile = payloadFile,
                 timeoutMillis = admission.timeoutMillis,
+                entryMode = admission.entryMode,
             )
         } else {
             PythonFileSource(payloadFile, semanticFile).apply {
@@ -752,5 +762,10 @@ object ScriptLaunchSourceFactory {
 
     private fun File.normalizedFile(): File {
         return runCatching { canonicalFile }.getOrElse { absoluteFile }
+    }
+
+    private fun PythonEntryMode.executionConfigValue(): String = when (this) {
+        PythonEntryMode.FILE -> "file"
+        PythonEntryMode.MODULE -> "module"
     }
 }

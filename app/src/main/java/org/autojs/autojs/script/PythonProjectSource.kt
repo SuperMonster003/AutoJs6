@@ -1,6 +1,8 @@
 package org.autojs.autojs.script
 
 import org.autojs.autojs.core.plugin.python.PythonExecutionTimeoutPolicy
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
+import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.text.Normalizer
@@ -16,6 +18,7 @@ class PythonProjectSource private constructor(
     sourceFile: File,
     val entryPoint: String,
     val timeoutMillis: Long?,
+    val entryMode: PythonEntryMode,
 ) : PythonFileSource(sourceFile, entryFile) {
 
     val projectEntryFile: File
@@ -28,8 +31,9 @@ class PythonProjectSource private constructor(
             projectRoot: File,
             entryFile: File,
             timeoutMillis: Long? = null,
+            entryMode: PythonEntryMode = PythonEntryMode.FILE,
         ): PythonProjectSource {
-            return createWithSource(projectRoot, entryFile, entryFile, timeoutMillis)
+            return createWithSource(projectRoot, entryFile, entryFile, timeoutMillis, entryMode)
         }
 
         internal fun createWithSource(
@@ -37,6 +41,7 @@ class PythonProjectSource private constructor(
             entryFile: File,
             sourceFile: File,
             timeoutMillis: Long? = null,
+            entryMode: PythonEntryMode = PythonEntryMode.FILE,
         ): PythonProjectSource {
             val root = projectRoot.canonicalFile
             val entry = entryFile.canonicalFile
@@ -57,7 +62,10 @@ class PythonProjectSource private constructor(
                 .substring(rootPrefix.length)
                 .replace(File.separatorChar, '/')
             validateEntryPoint(relative)
-            return PythonProjectSource(root, entry, source, relative, timeoutMillis).apply {
+            if (entryMode == PythonEntryMode.MODULE) {
+                PythonRuntimeValidation.moduleNameForFileEntryPoint(relative)
+            }
+            return PythonProjectSource(root, entry, source, relative, timeoutMillis, entryMode).apply {
                 if (source != entry) overriddenFullPath = entry.path
             }
         }

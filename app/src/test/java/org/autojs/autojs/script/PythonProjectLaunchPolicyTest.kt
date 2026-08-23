@@ -1,5 +1,7 @@
 package org.autojs.autojs.script
 
+import org.autojs.autojs.core.plugin.python.PythonExecutionInputPolicy
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -26,6 +28,7 @@ class PythonProjectLaunchPolicyTest {
         assertEquals(root.canonicalFile, admission.projectRoot)
         assertEquals(entry.canonicalFile, admission.entryFile)
         assertNull(admission.timeoutMillis)
+        assertEquals(PythonEntryMode.FILE, admission.entryMode)
         val launch = ScriptLaunchSourceFactory.createPythonProjectLaunchForPreview(
             admission = admission,
             pythonPreviewEnabled = true,
@@ -35,13 +38,79 @@ class PythonProjectLaunchPolicyTest {
         assertEquals(entry.canonicalFile, projectSource.file)
         assertEquals("main.py", projectSource.entryPoint)
         assertNull(projectSource.timeoutMillis)
+        assertEquals(PythonEntryMode.FILE, projectSource.entryMode)
         assertEquals(root.canonicalPath, launch.workingDirectory)
         assertTrue(launch.pythonProjectSource === projectSource)
+        assertEquals(
+            "file",
+            launch.createExecutionConfig().getArgument(PythonExecutionInputPolicy.ENTRY_MODE_ARGUMENT),
+        )
         assertProjectError(PythonProjectLaunchError.EXECUTION_NOT_ACTIVATED) {
             ScriptLaunchSourceFactory.createPythonProjectLaunchForPreview(
                 admission = admission,
                 pythonPreviewEnabled = false,
             )
+        }
+    }
+
+    @Test
+    fun dottedModuleManifestFlowsIntoSourceAndExecutionConfig() {
+        val root = project("""{"type":"python","entryMode":"module","main":"pkg.main"}""")
+        File(root, "pkg/__init__.py").apply {
+            parentFile.mkdirs()
+            writeText("")
+        }
+        val entry = File(root, "pkg/main.py").apply { writeText("from . import sibling") }
+
+        val admission = requireNotNull(PythonProjectLaunchPolicy.inspect(root, entry))
+        val launch = ScriptLaunchSourceFactory.createPythonProjectLaunchForPreview(
+            admission = admission,
+            pythonPreviewEnabled = true,
+        )
+        val source = launch.source as PythonProjectSource
+
+        assertEquals(entry.canonicalFile, admission.entryFile)
+        assertEquals(PythonEntryMode.MODULE, admission.entryMode)
+        assertEquals("pkg/main.py", source.entryPoint)
+        assertEquals(PythonEntryMode.MODULE, source.entryMode)
+        assertEquals(
+            "module",
+            launch.createExecutionConfig().getArgument(PythonExecutionInputPolicy.ENTRY_MODE_ARGUMENT),
+        )
+        assertEquals(
+            admission,
+            PythonProjectLaunchPolicy.inspectContainingEntry(entry),
+        )
+    }
+
+    @Test
+    fun moduleEntryRequiresExactModeAndNormalizedDottedMain() {
+        listOf("MODULE", "module ", "", "unknown").forEach { entryMode ->
+            val root = project("""{"type":"python","entryMode":"$entryMode","main":"pkg.main"}""")
+            assertProjectError(PythonProjectLaunchError.CONFIG_INVALID) {
+                PythonProjectLaunchPolicy.inspect(root, null)
+            }
+        }
+        listOf("true", "null", "1", "{}").forEach { entryMode ->
+            val root = project("""{"type":"python","entryMode":$entryMode,"main":"pkg.main"}""")
+            assertProjectError(PythonProjectLaunchError.CONFIG_INVALID) {
+                PythonProjectLaunchPolicy.inspect(root, null)
+            }
+        }
+        listOf("pkg/main", ".pkg", "pkg..main", "pkg.class", "pkg.__init__", "pkg.café").forEach { main ->
+            val root = project("""{"type":"python","entryMode":"module","main":"$main"}""")
+            assertProjectError(PythonProjectLaunchError.ENTRY_INVALID) {
+                PythonProjectLaunchPolicy.inspect(root, null)
+            }
+        }
+    }
+
+    @Test
+    fun moduleEntryStillRequiresExplicitPythonProjectType() {
+        val root = project("""{"type":"javascript","entryMode":"module","main":"pkg.main"}""")
+
+        assertProjectError(PythonProjectLaunchError.TYPE_REQUIRED) {
+            PythonProjectLaunchPolicy.inspect(root, null)
         }
     }
 

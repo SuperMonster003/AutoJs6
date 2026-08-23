@@ -165,6 +165,7 @@
 * `Mejora` Los scripts Python independientes ahora añaden a la consola una sugerencia segura ante un ModuleNotFoundError exacto, orientando la importación de módulos hermanos/locales a un proyecto Python explícito con `project.json` y `type: python`, sin exponer rutas privadas
 * `Mejora` Los chunks de salida de Python Runtime se escriben en la consola Host al llegar, con decodificación UTF-8 incremental independiente para stdout/stderr que conserva los puntos de código divididos entre chunks y un límite de salida integral de 16 MiB
 * `Mejora` El project.json de los proyectos Python admite un timeout entero positivo en milisegundos, con 5 minutos por defecto, un máximo de 30 minutos y siempre limitado por el plugin Runtime
+* `Mejora` El project.json de los proyectos Python admite una entrada de módulo explícita mediante "entryMode": "module" y un nombre main punteado normalizado, lo que permite importaciones relativas de paquete con la semántica estándar de módulos Python
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` Consolidadas las consultas de detalles multimedia del administrador de archivos en una única instantánea de MediaInfo para reducir las llamadas Binder y el tiempo de espera
 * `Mejora` Limitadas las alternativas de visualización y reproducción externas a permisos URI de solo lectura
