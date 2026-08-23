@@ -844,11 +844,20 @@ internal class PythonHostScreenImageScope(
     }
 }
 
+/** Bounded retry policy for Android's documented 333 ms accessibility screenshot throttle. */
+internal object PythonHostScreenshotRetryPolicy {
+    const val RETRY_DELAY_MILLIS = 350L
+    const val MAX_ATTEMPTS = 3
+
+    fun canRetry(errorCode: Int, attempt: Int, remainingNanos: Long): Boolean =
+        errorCode == AndroidAccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT &&
+            attempt in 1 until MAX_ATTEMPTS &&
+            remainingNanos > TimeUnit.MILLISECONDS.toNanos(RETRY_DELAY_MILLIS)
+}
+
 /** Android 11+ accessibility screenshot capture with a fixed deadline and bounded encoded output. */
 internal object PythonHostAccessibilityScreenCapture {
     private const val CAPTURE_TIMEOUT_MILLIS = 4_000L
-    private const val RETRY_DELAY_MILLIS = 50L
-    private const val MAX_ATTEMPTS = 3
     private const val INTERNAL_FAILURE = -1
     private const val TIMEOUT_FAILURE = -2
 
@@ -885,7 +894,7 @@ internal object PythonHostAccessibilityScreenCapture {
     ): T {
         val deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(CAPTURE_TIMEOUT_MILLIS)
         var bitmap: Bitmap? = null
-        for (attempt in 1..MAX_ATTEMPTS) {
+        for (attempt in 1..PythonHostScreenshotRetryPolicy.MAX_ATTEMPTS) {
             val remainingNanos = deadlineNanos - System.nanoTime()
             if (remainingNanos <= 0L) throw PythonHostCapabilityScreenCaptureFailedException()
             when (val result = takeScreenshot(service, remainingNanos)) {
@@ -894,14 +903,14 @@ internal object PythonHostAccessibilityScreenCapture {
                     break
                 }
                 is ScreenshotResult.Failure -> {
-                    val canRetry =
-                        result.errorCode == AndroidAccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT &&
-                            attempt < MAX_ATTEMPTS &&
-                            deadlineNanos - System.nanoTime() >
-                            TimeUnit.MILLISECONDS.toNanos(RETRY_DELAY_MILLIS)
+                    val canRetry = PythonHostScreenshotRetryPolicy.canRetry(
+                        errorCode = result.errorCode,
+                        attempt = attempt,
+                        remainingNanos = deadlineNanos - System.nanoTime(),
+                    )
                     if (!canRetry) throw PythonHostCapabilityScreenCaptureFailedException()
                     try {
-                        Thread.sleep(RETRY_DELAY_MILLIS)
+                        Thread.sleep(PythonHostScreenshotRetryPolicy.RETRY_DELAY_MILLIS)
                     } catch (_: InterruptedException) {
                         Thread.currentThread().interrupt()
                         throw PythonHostCapabilityScreenCaptureFailedException()
