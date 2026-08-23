@@ -158,6 +158,7 @@
         "Node.js 原生校验支持解析并验证外部运行时插件的源码及构建根目录",
         "Node.js 最终集成及发布门禁在所需报告/当前源码证据/生产验收产物缺失或过期时采用 fail-closed 策略",
         "Node.js 原始及动态输入默认关闭旧 TypeScript 正则 stripping, 仅在显式启用临时请求级兼容开关时保留, 常规执行统一要求编译器产物",
+        "Node.js TypeScript 计算式 import() 在闭合编译快照内将 .ts/.mts/.cts 确定性映射到预编译的 .js/.mjs/.cjs 模块, 未命中/歧义/越界目标返回稳定错误且不回退读取运行时新增的 TypeScript 源码",
         "独立 Python 脚本发生精确 ModuleNotFoundError 时在控制台追加安全提示, 引导 sibling/local 模块 import 使用包含 `project.json` 与 `type: python` 的显式 Python 项目, 且不暴露私有路径",
         "Python Runtime 输出 chunk 到达时立即写入宿主控制台, 使用按 stdout/stderr 独立的增量 UTF-8 解码保留跨 chunk 码点, 并将端到端输出上限提高到 16 MiB",
         "Python 项目的 project.json 支持 timeout 正整数毫秒配置, 默认 5 分钟、最大 30 分钟, 并继续受运行时插件上限约束",

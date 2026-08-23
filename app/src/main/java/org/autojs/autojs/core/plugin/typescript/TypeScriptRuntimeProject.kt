@@ -7,12 +7,14 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.LinkedHashMap
+import java.util.LinkedHashSet
 import java.util.UUID
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 
 internal data class TypeScriptNodeRuntimeProject(
     val moduleSources: Map<String, String>,
     val generatedSourceNames: Map<String, String>,
+    val precompiledSourceNames: Set<String>,
     val entryGeneratedSourceName: String,
 )
 
@@ -113,6 +115,7 @@ internal object TypeScriptNodeRuntimeProjectBuilder {
         }
 
         val generatedSourceNames = LinkedHashMap<String, String>(executable.modules.size)
+        val precompiledSourceNames = LinkedHashSet<String>(executable.modules.size)
         executable.modules.forEach { module ->
             val relative = executable.runtimeRelativeGeneratedPath(module)
             requireNoRuntimeSupportCollision(relative, runtimeSupportPaths)
@@ -125,10 +128,18 @@ internal object TypeScriptNodeRuntimeProjectBuilder {
             }
             moduleSources[generated.path] = module.javaScript
             generatedSourceNames[module.javaScriptPath] = generated.path
+            val original = File(projectRoot, module.source.projectRelativePath)
+                .absoluteFile
+                .normalize()
+            require(original.isInsideOrSame(projectRoot)) {
+                "TypeScript source module escapes its project root."
+            }
+            precompiledSourceNames.add(original.path)
         }
         return TypeScriptNodeRuntimeProject(
             moduleSources = moduleSources,
             generatedSourceNames = generatedSourceNames,
+            precompiledSourceNames = precompiledSourceNames,
             entryGeneratedSourceName = requireNotNull(
                 generatedSourceNames[executable.entryModulePath],
             ),

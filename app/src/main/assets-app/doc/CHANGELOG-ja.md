@@ -181,6 +181,7 @@
 * `改善` Node.js ネイティブ検証で外部ランタイムプラグインのソースおよびビルドルートを解決して検証
 * `改善` Node.js の最終統合およびリリースゲートは, 必須レポート/現在のソースに基づくエビデンス/本番受け入れ成果物が欠落または期限切れの場合に fail-closed で判定
 * `改善` Node.js の raw および dynamic 入力で旧来の正規表現ベース TypeScript stripping を既定で無効化し, 一時的なリクエスト単位の互換フラグを明示的に有効化しない限りコンパイラ出力を必須化
+* `改善` Node.js TypeScript の計算式 import() specifier を閉じたコンパイル snapshot 内で .ts/.mts/.cts から事前コンパイル済み .js/.mjs/.cjs module へ決定的にマッピングし, 未検出/曖昧/境界外の target には安定したエラーを返して実行時に追加された TypeScript source へ fallback しないよう改善
 * `改善` 単体 Python スクリプトで正確な ModuleNotFoundError が発生した場合, コンソールに安全なヒントを追記し, 非公開パスを露出せずに sibling/local モジュールの import には `project.json` と `type: python` を指定した明示的な Python プロジェクトを案内
 * `改善` Python Runtime の出力 chunk を到着時に Host コンソールへ書き込み, stdout/stderr ごとの増分 UTF-8 デコードで chunk をまたぐコードポイントを保持し, エンドツーエンドの出力上限を 16 MiB に拡大
 * `改善` Python プロジェクトの project.json で正の整数ミリ秒の timeout を指定可能にし, 既定値を 5 分、上限を 30 分として Runtime プラグインの上限も引き続き適用

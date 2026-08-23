@@ -155,6 +155,8 @@ class NodePluginJavaScriptEngine(
                 }
                 return projectRequest.copy(
                     sourceName = runtimeProject.entryGeneratedSourceName,
+                    typeScriptPrecompiledSnapshot = true,
+                    typeScriptPrecompiledSourceNames = runtimeProject.precompiledSourceNames,
                     spawnDepth = currentSpawnDepth(),
                 )
             }
@@ -167,6 +169,7 @@ class NodePluginJavaScriptEngine(
                 sourceName = compiled.executable.generatedSourceName,
                 workingDirectory = workingDirectory.path,
                 sandboxRoot = workingDirectory.path,
+                typeScriptPrecompiledSnapshot = true,
                 spawnDepth = currentSpawnDepth(),
             )
         }

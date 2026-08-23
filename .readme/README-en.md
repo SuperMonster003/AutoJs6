@@ -341,6 +341,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Updated Node.js native verification to resolve and validate the external runtime plugin source and build roots
 * `Improvement` Made Node.js final integration and release gates fail closed when required reports, current-source evidence, or production acceptance artifacts are missing or stale
 * `Improvement` Disabled legacy regex-based TypeScript stripping by default for raw and dynamic Node.js inputs, requiring compiler output unless a temporary request-scoped compatibility flag is explicitly enabled
+* `Improvement` Mapped computed Node.js TypeScript import() specifiers from .ts/.mts/.cts to their precompiled .js/.mjs/.cjs modules within the closed compilation snapshot, with stable errors for missing, ambiguous, or escaping targets and no late TypeScript source fallback
 * `Improvement` Standalone Python scripts now append a safe console hint for an exact ModuleNotFoundError, directing sibling/local module imports to an explicit Python project with `project.json` and `type: python` without exposing private paths
 * `Improvement` Python Runtime output chunks are written to the Host console as they arrive, with independent incremental UTF-8 decoding for stdout/stderr preserving code points split across chunks and a 16 MiB end-to-end output limit
 * `Improvement` Python project.json supports a positive-integer timeout in milliseconds, defaulting to 5 minutes, capped at 30 minutes, and still bounded by the Runtime plugin limit

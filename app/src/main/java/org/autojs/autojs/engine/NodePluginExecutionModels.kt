@@ -17,6 +17,8 @@ data class NodePluginScriptRequest(
     val env: Map<String, String> = emptyMap(),
     val moduleSources: Map<String, String> = emptyMap(),
     val runtimeModuleSources: Map<String, String> = emptyMap(),
+    val typeScriptPrecompiledSnapshot: Boolean = false,
+    val typeScriptPrecompiledSourceNames: Set<String> = emptySet(),
     val esmEnabled: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
     val dynamicImportEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
     val rawNodeNetworkModulesEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,

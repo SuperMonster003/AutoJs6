@@ -311,6 +311,14 @@ object NodeJsRuntimePluginBridge {
                 NodeJsRuntimeContract.KEY_RUNTIME_MODULE_SOURCES,
                 runtimeModuleSources,
             )
+            putBoolean(
+                NodeJsRuntimeContract.KEY_TYPESCRIPT_PRECOMPILED_SNAPSHOT,
+                typeScriptPrecompiledSnapshot,
+            )
+            putStringArray(
+                NodeJsRuntimeContract.KEY_TYPESCRIPT_PRECOMPILED_SOURCE_NAMES,
+                typeScriptPrecompiledSourceNames.sorted().toTypedArray(),
+            )
             putBoolean(NodeJsRuntimeContract.KEY_ESM_ENABLED, esmEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_DYNAMIC_IMPORT_ENABLED, dynamicImportEnabled)
             // AutoJs6 owns TypeScript compilation. Never ask the Node runtime

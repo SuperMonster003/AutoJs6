@@ -36,6 +36,7 @@ import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.NodePluginJavaScriptEngine
 import org.autojs.autojs.engine.NodePluginScriptExecutionException
+import org.autojs.autojs.engine.NodeRuntimeErrorCodes
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
@@ -351,6 +352,147 @@ class TypeScriptCompilerPluginClientDeviceTest {
                 assertTrue(
                     "Expected $marker:83 in Node console, got: $consoleMessage",
                     consoleMessage.contains("$marker:83"),
+                )
+            }
+        } finally {
+            console.clear()
+        }
+    }
+
+    @Test
+    fun mapsComputedTypeScriptSpecifiersOnlyWithinClosedNodeSnapshot() {
+        val marker = "typescript-node-dynamic-snapshot-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            withProject { root ->
+                File(root, "project.json").writeText("""{"type":"node","main":"main.mts"}""")
+                File(root, "package.json").writeText("""{"type":"module"}""")
+                File(root, "value.ts").writeText("export const value: number = 10\n")
+                File(root, "value.mts").writeText("export const value: number = 20\n")
+                File(root, "value.cts").writeText("export const value: number = 12\n")
+                val entry = File(root, "main.mts").apply {
+                    writeText(
+                        """
+                        import { value } from "./value.mjs"
+
+                        function errorCode(error: unknown): string {
+                            return String((error as { code?: unknown }).code ?? "")
+                        }
+
+                        const extensions: readonly string[] = ["ts", "mts", "cts"]
+                        const loaded: Array<{ value: number }> = await Promise.all(
+                            extensions.map(async (extension: string) =>
+                                await import("./value." + extension) as { value: number },
+                            ),
+                        )
+                        const total: number = loaded.reduce(
+                            (sum: number, item: { value: number }): number => sum + item.value,
+                            0,
+                        )
+                        if (value !== 20) throw new Error("Static ESM control import failed")
+
+                        let ambiguous: string = ""
+                        const extensionlessTarget: string = "./value"
+                        try {
+                            await import(extensionlessTarget)
+                        } catch (error: unknown) {
+                            ambiguous = errorCode(error)
+                        }
+
+                        const fsSpecifier: string = "node:" + "fs"
+                        const runtimeFs = await import(fsSpecifier) as {
+                            writeFileSync(path: string, data: string): void
+                        }
+                        runtimeFs.writeFileSync("./late.mts", "export const value: number = 99\\n")
+                        let missing: string = ""
+                        const lateTarget: string = "./late." + "mts"
+                        try {
+                            await import(lateTarget)
+                        } catch (error: unknown) {
+                            missing = errorCode(error)
+                        }
+
+                        let escaping: string = ""
+                        const escapingTarget: string = "../escape." + "mts"
+                        try {
+                            await import(escapingTarget)
+                        } catch (error: unknown) {
+                            escaping = errorCode(error)
+                        }
+
+                        console.log("$marker:" + [total, ambiguous, missing, escaping].join("|"))
+                        """.trimIndent(),
+                    )
+                }
+
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(entry)
+                assertTrue(launch.source is NodeProjectLaunchSource)
+                val terminal = executeAndAwait(launch.source, root.path)
+                terminal.failure.get()?.let { error ->
+                    val details = (error as? ScriptCompilationException)?.consoleMessage
+                    throw AssertionError(
+                        "Closed-snapshot dynamic TypeScript execution failed" +
+                            if (details.isNullOrBlank()) "" else "\n$details",
+                        error,
+                    )
+                }
+                assertTrue(terminal.succeeded.get())
+                val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                val result = requireNotNull(engine.lastPluginScriptResult)
+                assertTrue(result.succeeded)
+                val expected = listOf(
+                    "42",
+                    NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS,
+                    NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND,
+                    NodeRuntimeErrorCodes.FS_PATH_ESCAPE,
+                ).joinToString("|")
+                val consoleMessage = awaitConsoleMessage(marker)
+                assertTrue(
+                    "Expected $marker:$expected in Node console, got: $consoleMessage",
+                    consoleMessage.contains("$marker:$expected"),
+                )
+                assertEquals(
+                    "true",
+                    result.nativeValues[
+                        "embedded_script.typescript.dynamic_specifier.snapshot_enabled"
+                    ],
+                )
+                assertEquals(
+                    "4",
+                    result.nativeValues[
+                        "embedded_script.typescript.dynamic_specifier.source_count"
+                    ],
+                )
+                assertEquals(
+                    "3",
+                    result.nativeValues[
+                        "embedded_script.typescript.dynamic_specifier.mapped_count"
+                    ],
+                )
+                assertEquals(
+                    "2",
+                    result.nativeValues[
+                        "embedded_script.typescript.dynamic_specifier.rejected_count"
+                    ],
+                )
+                assertEquals(
+                    "1",
+                    result.nativeValues[
+                        "embedded_script.typescript.dynamic_specifier.ambiguous_count"
+                    ],
+                )
+                assertEquals(
+                    NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND,
+                    result.nativeValues[
+                        "embedded_script.typescript.dynamic_specifier.last_error_code"
+                    ],
+                )
+                assertEquals(
+                    "0",
+                    result.nativeValues[
+                        "embedded_script.module_provider.missing_candidate_request_count"
+                    ],
                 )
             }
         } finally {

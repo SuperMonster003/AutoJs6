@@ -70,6 +70,14 @@ object NodeJsRuntimeContract {
      */
     const val KEY_LEGACY_TYPESCRIPT_STRIPPING_ENABLED = "legacyTypeScriptStrippingEnabled"
 
+    /**
+     * Marks a request whose TypeScript graph was compiled from a closed host
+     * snapshot. In this mode the runtime maps .ts/.mts/.cts specifiers only to
+     * matching JavaScript records already present in moduleSources.
+     */
+    const val KEY_TYPESCRIPT_PRECOMPILED_SNAPSHOT = "typeScriptPrecompiledSnapshot"
+    const val KEY_TYPESCRIPT_PRECOMPILED_SOURCE_NAMES = "typeScriptPrecompiledSourceNames"
+
     const val KEY_ESM_ENABLED = "esmEnabled"
     const val KEY_DYNAMIC_IMPORT_ENABLED = "dynamicImportEnabled"
     const val KEY_RAW_NODE_NETWORK_MODULES_ENABLED = "rawNodeNetworkModulesEnabled"
@@ -144,6 +152,10 @@ object NodeJsRuntimeContract {
         "ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED"
     const val ERROR_MODULE_SOURCE_PROVIDER_FAILED = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_FAILED"
     const val ERROR_TYPESCRIPT_COMPILER_REQUIRED = "ERR_AUTOJS6_TYPESCRIPT_COMPILER_REQUIRED"
+    const val ERROR_TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND =
+        "ERR_AUTOJS6_TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND"
+    const val ERROR_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS =
+        "ERR_AUTOJS6_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS"
 
     const val RUNTIME_MODULE_SOURCE_PROVIDER_NAME = "autojs6:module-source-provider"
 

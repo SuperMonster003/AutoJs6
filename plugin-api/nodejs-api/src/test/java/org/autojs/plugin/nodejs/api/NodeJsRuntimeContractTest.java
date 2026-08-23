@@ -78,4 +78,20 @@ public class NodeJsRuntimeContractTest {
                 "ERR_AUTOJS6_TYPESCRIPT_COMPILER_REQUIRED",
                 NodeJsRuntimeContract.ERROR_TYPESCRIPT_COMPILER_REQUIRED);
     }
+
+    @Test
+    public void precompiledTypeScriptSnapshotHasStableRequestAndFailureCodes() {
+        assertEquals(
+                "typeScriptPrecompiledSnapshot",
+                NodeJsRuntimeContract.KEY_TYPESCRIPT_PRECOMPILED_SNAPSHOT);
+        assertEquals(
+                "typeScriptPrecompiledSourceNames",
+                NodeJsRuntimeContract.KEY_TYPESCRIPT_PRECOMPILED_SOURCE_NAMES);
+        assertEquals(
+                "ERR_AUTOJS6_TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND",
+                NodeJsRuntimeContract.ERROR_TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND);
+        assertEquals(
+                "ERR_AUTOJS6_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS",
+                NodeJsRuntimeContract.ERROR_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS);
+    }
 }
