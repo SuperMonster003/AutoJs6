@@ -342,12 +342,23 @@ object ScriptLaunchSourceFactory {
             throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.URI_UNSUPPORTED)
         }
         if (!pythonHint) {
-            return createFileLaunchForPythonPreview(
+            val launch = createFileLaunchForPythonPreview(
                 file = sourceFile,
                 workingDirectory = workingDirectory,
                 defaultWorkingDirectory = defaultWorkingDirectory,
                 pythonPreviewEnabled = pythonPreviewEnabled,
             )
+            (launch.source as? TypeScriptFileSource)?.semanticFileName = sequenceOf(
+                semanticDisplayName,
+                semanticPath?.let(::File)?.name,
+                semanticUri
+                    ?.substringBefore('?')
+                    ?.substringBefore('#')
+                    ?.replace('\\', '/')
+                    ?.substringAfterLast('/'),
+            ).filterNotNull()
+                .firstOrNull(JavaScriptSource::isRhinoTypeScriptFileName)
+            return launch
         }
         if (pathClassification != PythonLaunchClassification.PYTHON_SOURCE_REQUIRES_RUNTIME) {
             throw PythonLaunchBoundaryException(PythonLaunchBoundaryError.URI_UNSUPPORTED)

@@ -5,6 +5,7 @@ import android.graphics.Paint
 import android.os.Build
 import android.util.Log
 import android.view.View
+import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AndroidRhinoAssetLoader
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
@@ -23,6 +24,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.proxy.PaintProxyObject
+import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -48,6 +50,7 @@ import org.mozilla.javascript.lc.type.TypeInfo
 import java.io.File
 import java.io.IOException
 import java.io.Reader
+import java.io.StringReader
 import java.net.URI
 import java.util.Locale
 
@@ -89,8 +92,32 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     public override fun doExecution(source: JavaScriptSource): Any? {
         try {
-            val reader = preprocess(source.nonNullScriptReader)
-            val script = context.compileReader(reader, source.fullPath, 1, null)
+            val executable = if (
+                source is JavaScriptFileSource && source.isRhinoTypeScriptSource
+            ) {
+                TypeScriptExecutionCompiler.compile(androidContext, source).also { compiled ->
+                    setTag(TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG, compiled.sourceMap)
+                    setTag(
+                        TypeScriptExecutionCompiler.GENERATED_SOURCE_ENGINE_TAG,
+                        compiled.generatedSourceName,
+                    )
+                    compiled.diagnostics.forEach { diagnostic ->
+                        runtime.console.warn(
+                            TypeScriptExecutionCompiler.formatDiagnostic(
+                                compiled.sourceName,
+                                diagnostic,
+                            ),
+                        )
+                    }
+                }
+            } else {
+                null
+            }
+            val reader = preprocess(
+                executable?.javaScript?.let(::StringReader) ?: source.nonNullScriptReader,
+            )
+            val sourceName = executable?.generatedSourceName ?: source.fullPath
+            val script = context.compileReader(reader, sourceName, 1, null)
             return if (hasFeature(ScriptConfig.FEATURE_CONTINUATION)) {
                 context.executeScriptWithContinuations(script, scriptable)
             } else {

@@ -179,6 +179,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Node.js 外部運行時插件後端支援請求級工作區歸檔傳輸 v2, 包含顯式輸入映射/輸出回寫/刪除 tombstone 清單, 且不掃描宿主沙盒
 * `新增` 打包功能支持 Node.js 腳本項目, 並自動包含所需運行庫
 * `新增` 獨立 TypeScript 編譯插件客戶端, 校驗凍結的 AIDL/R2 歸檔協議, 支持 UTF-8 單文件 Rhino 編譯, 有界診斷及強制 Source Map 輸出
+* `新增` 本地單文件 .ts 腳本會先經獨立編譯插件再由 Rhino 執行, 保留 UTF-8 源文件身份與 Source Map 輸出, 類型錯誤在執行前拒絕, 且絕不回退到 Node.js 插件或直接執行原始 TypeScript
 * `新增` 獨立 Python Runtime 插件後端, 支持通過單獨的 CPython 插件進程運行本地 .py 文件及聲明為 `type: python` 的腳本項目, 並校驗固定組件/簽名/協議/ABI, 支持熱插拔且絕不回退到 JavaScript
 * `新增` Python 啟動集成覆蓋文件管理器/編輯器/本地 Run Intent/單文件 Import Intent/新建快捷方式/定時任務/廣播任務並嚴格保留單文件或項目上下文; 項目支持內部 import/相對文件讀取及只讀 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 執行支持通過 ExecutionConfig 鍵 `autojs6.python.stdinSnapshot` 提供可選的有界預置 stdin 快照, 並採用嚴格 ByteArray/UTF-8 文本准入, 提供器能力/大小協商及私有只讀 PFD 傳輸與清理

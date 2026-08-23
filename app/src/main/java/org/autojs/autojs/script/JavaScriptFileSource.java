@@ -58,14 +58,26 @@ public class JavaScriptFileSource extends JavaScriptSource {
     @Override
     protected int parseExecutionMode() {
         short flags = EncryptedScriptFileHeader.getHeaderFlags(mFile);
+        int mode;
         if (flags == EncryptedScriptFileHeader.FLAG_INVALID_FILE) {
-            int mode = super.parseExecutionMode();
+            mode = super.parseExecutionMode();
             if (isNodeJsExtension()) {
                 mode |= EXECUTION_MODE_NODEJS;
             }
-            return mode;
+        } else {
+            mode = flags;
         }
-        return flags;
+        if (isRhinoTypeScriptSource()) {
+            if ((mode & EXECUTION_MODE_NODEJS) != 0) {
+                throw new IllegalArgumentException(
+                        "A single-file .ts script cannot request the Node.js engine before Node profile support."
+                );
+            }
+            if ((mode & EXECUTION_MODE_UI) != 0) {
+                throw new IllegalArgumentException("TypeScript UI-mode execution is not supported yet.");
+            }
+        }
+        return mode;
     }
 
     @Override
@@ -94,6 +106,10 @@ public class JavaScriptFileSource extends JavaScriptSource {
 
     public File getFile() {
         return mFile;
+    }
+
+    public boolean isRhinoTypeScriptSource() {
+        return JavaScriptSource.isRhinoTypeScriptFileName(getSemanticFile().getName());
     }
 
     @Nullable

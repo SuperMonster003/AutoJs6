@@ -8,6 +8,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
@@ -46,22 +47,36 @@ internal class TypeScriptCompilerPluginClient(
     suspend fun compileSingleFile(
         sourceFile: File,
         timeoutMs: Long = TypeScriptCompilerContract.DEFAULT_TIMEOUT_MS,
+        sourceName: String = sourceFile.name,
+        sourceIdentity: String? = null,
     ): TypeScriptCompilationOutput = withContext(Dispatchers.IO) {
         require(timeoutMs in TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS..
             TypeScriptCompilerContract.MAX_TIMEOUT_MS)
         require(sourceFile.isFile) { "TypeScript source is not a regular file." }
-        require(sourceFile.name.endsWith(".ts", ignoreCase = true)) {
+        require(sourceName.endsWith(".ts", ignoreCase = true)) {
             "The Rhino TypeScript compiler accepts only a .ts single-file entry."
+        }
+        require(
+            sourceName.isNotBlank() &&
+                sourceName != "." &&
+                sourceName != ".." &&
+                sourceName.none { character ->
+                    character == '/' ||
+                        character == '\\' ||
+                        character.code in 0x00..0x1f ||
+                        character.code in 0x7f..0x9f
+                },
+        ) {
+            "The TypeScript source name is not a canonical single-file name."
         }
 
         val sourceBytes = readBoundedSource(sourceFile)
         val requestId = "host-" + UUID.randomUUID()
-        val canonicalPath = runCatching { sourceFile.canonicalPath }.getOrElse {
-            sourceFile.absolutePath
-        }
+        val canonicalPath = sourceIdentity?.takeIf(String::isNotBlank)
+            ?: runCatching { sourceFile.canonicalPath }.getOrElse { sourceFile.absolutePath }
         val projectId = "single-file-" +
             sha256(TypeScriptUtf8.encode(canonicalPath, "TypeScript source path")).take(32)
-        val entrySourceUri = "autojs://source/$projectId/" + percentEncode(sourceFile.name)
+        val entrySourceUri = "autojs://source/$projectId/" + percentEncode(sourceName)
         val inputFile = File.createTempFile("typescript-input-", ".zip", appContext.cacheDir)
         val outputFile = File.createTempFile("typescript-output-", ".zip", appContext.cacheDir)
         var leased: AidlPluginHost.LeasedCall<StartedCompilation>? = null
@@ -84,7 +99,7 @@ internal class TypeScriptCompilerPluginClient(
                 prewarmResult.throwCompilerErrorIfPresent()
                 val authority = authorityFrom(compiler.compilerInfo)
                 val prepared = TypeScriptSingleFileArchive.write(
-                    sourceName = sourceFile.name,
+                    sourceName = sourceName,
                     sourceBytes = sourceBytes,
                     requestId = requestId,
                     projectId = projectId,
@@ -161,6 +176,8 @@ internal class TypeScriptCompilerPluginClient(
                 )
             }
         } catch (error: TypeScriptCompilerException) {
+            throw error
+        } catch (error: CancellationException) {
             throw error
         } catch (error: Throwable) {
             throw TypeScriptCompilerException(

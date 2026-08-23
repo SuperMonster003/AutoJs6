@@ -160,9 +160,17 @@ public abstract class JavaScriptSource extends ScriptSource {
                 lowerCaseName.endsWith(".cjs") ||
                 lowerCaseName.endsWith(".mts") ||
                 lowerCaseName.endsWith(".cts") ||
-                lowerCaseName.endsWith(".ts") ||
                 lowerCaseName.endsWith(".tsx") ||
                 lowerCaseName.endsWith(".node.js");
+    }
+
+    public static boolean isRhinoTypeScriptFileName(String fileName) {
+        if (fileName == null) {
+            return false;
+        }
+        String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
+        return lowerCaseName.endsWith(".ts") &&
+                !isTypeScriptDeclarationFileName(lowerCaseName);
     }
 
     public static boolean isJavaScriptFileName(String fileName) {
