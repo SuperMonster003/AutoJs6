@@ -1240,7 +1240,7 @@ tasks.register("generateRuntimeKit") {
         writeDigestManifestJson(kitDir.resolve("native-libs.json"), "template-native-libs", nativeLibEntries)
 
         val apkBuilderProtocolVersion = 2
-        val remoteBuildProtocolVersion = 2
+        val remoteBuildProtocolVersion = 3
         val runtimeKitId = "autojs6-runtime-v$versionName+$versionCode-$gitSha"
 
         kitDir.resolve("build-contract.json").writeText(

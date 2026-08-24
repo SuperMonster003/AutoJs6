@@ -18,6 +18,8 @@ internal object TypeScriptProjectArchive {
         projectId: String,
         authority: TypeScriptCompilerAuthority,
         destination: File,
+        sourceContentReader: TypeScriptSourceContentReader =
+            PlaintextTypeScriptSourceContentReader,
     ): TypeScriptPreparedCompilation {
         require(requestId.isNotBlank())
         require(requestId.length <= TypeScriptCompilerContract.MAX_REQUEST_ID_CHARS)
@@ -31,7 +33,7 @@ internal object TypeScriptProjectArchive {
             "TypeScript project entry is outside its project root."
         }
 
-        val sources = collectSources(root, authority.targetProfile)
+        val sources = collectSources(root, authority.targetProfile, sourceContentReader)
         val entryRelativePath = entry.relativePathInside(root)
         val entryPath = "sources/$entryRelativePath"
         require(sources.any { source -> source.archivePath == entryPath }) {
@@ -163,57 +165,84 @@ internal object TypeScriptProjectArchive {
     private fun collectSources(
         root: File,
         targetProfile: String,
+        sourceContentReader: TypeScriptSourceContentReader,
     ): List<ProjectSource> {
-        val sources = root.walkTopDown()
-            .onEnter { directory ->
-                directory == root || directory.name !in EXCLUDED_DIRECTORY_NAMES
+        val sources = mutableListOf<ProjectSource>()
+        try {
+            root.walkTopDown()
+                .onEnter { directory ->
+                    directory == root || directory.name !in EXCLUDED_DIRECTORY_NAMES
+                }
+                .filter(File::isFile)
+                .forEach { candidate ->
+                    val file = candidate.normalizedCanonicalFile()
+                    require(file.isInside(root)) {
+                        "TypeScript project source escapes its project root."
+                    }
+                    require(candidate.absoluteFile.normalize().path == file.path) {
+                        "TypeScript project sources may not traverse symbolic links."
+                    }
+                    val relativePath = file.relativePathInside(root)
+                    if (
+                        relativePath.split('/').any { segment ->
+                            segment.equals("node_modules", true)
+                        }
+                    ) {
+                        return@forEach
+                    }
+                    if (
+                        targetProfile == TypeScriptCompilerContract.PROFILE_NODE &&
+                        file.name.equals(PACKAGE_METADATA_PATH, ignoreCase = true) &&
+                        !relativePath.equals(PACKAGE_METADATA_PATH, ignoreCase = true)
+                    ) {
+                        error(
+                            "Nested TypeScript package boundaries are not supported: " +
+                                relativePath,
+                        )
+                    }
+                    if (!isSnapshotSource(relativePath, targetProfile)) return@forEach
+                    requireCanonicalRelativePath(relativePath)
+                    val bytes = sourceContentReader.read(
+                        file,
+                        TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+                    )
+                    var retained = false
+                    try {
+                        require(
+                            bytes.size.toLong() <=
+                                TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+                        ) {
+                            "TypeScript project source exceeds its byte limit: $relativePath"
+                        }
+                        TypeScriptUtf8.decode(bytes, "TypeScript project source $relativePath")
+                        sources += ProjectSource(
+                            archivePath = "sources/$relativePath",
+                            projectRelativePath = relativePath,
+                            file = file,
+                            bytes = bytes,
+                            sha256 = sha256(bytes),
+                        )
+                        retained = true
+                    } finally {
+                        if (!retained) bytes.fill(0)
+                    }
+                }
+            sources.sortBy(ProjectSource::archivePath)
+            require(sources.isNotEmpty()) {
+                "TypeScript project contains no admitted source files."
             }
-            .filter(File::isFile)
-            .mapNotNull { candidate ->
-                val file = candidate.normalizedCanonicalFile()
-                require(file.isInside(root)) {
-                    "TypeScript project source escapes its project root."
-                }
-                require(candidate.absoluteFile.normalize().path == file.path) {
-                    "TypeScript project sources may not traverse symbolic links."
-                }
-                val relativePath = file.relativePathInside(root)
-                if (relativePath.split('/').any { segment -> segment.equals("node_modules", true) }) {
-                    return@mapNotNull null
-                }
-                if (
-                    targetProfile == TypeScriptCompilerContract.PROFILE_NODE &&
-                    file.name.equals(PACKAGE_METADATA_PATH, ignoreCase = true) &&
-                    !relativePath.equals(PACKAGE_METADATA_PATH, ignoreCase = true)
-                ) {
-                    error("Nested TypeScript package boundaries are not supported: $relativePath")
-                }
-                if (!isSnapshotSource(relativePath, targetProfile)) return@mapNotNull null
-                requireCanonicalRelativePath(relativePath)
-                val bytes = readBounded(
-                    file,
-                    TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
-                )
-                TypeScriptUtf8.decode(bytes, "TypeScript project source $relativePath")
-                ProjectSource(
-                    archivePath = "sources/$relativePath",
-                    projectRelativePath = relativePath,
-                    file = file,
-                    bytes = bytes,
-                    sha256 = sha256(bytes),
-                )
+            require(sources.map(ProjectSource::archivePath).distinct().size == sources.size)
+            require(
+                sources.map { source -> source.archivePath.asciiCaseFold() }.distinct().size ==
+                    sources.size,
+            ) {
+                "TypeScript project sources contain an ASCII case-fold collision."
             }
-            .sortedBy(ProjectSource::archivePath)
-            .toList()
-        require(sources.isNotEmpty()) { "TypeScript project contains no admitted source files." }
-        require(sources.map(ProjectSource::archivePath).distinct().size == sources.size)
-        require(
-            sources.map { source -> source.archivePath.asciiCaseFold() }.distinct().size ==
-                sources.size,
-        ) {
-            "TypeScript project sources contain an ASCII case-fold collision."
+            return sources
+        } catch (error: Throwable) {
+            sources.forEach { source -> source.bytes.fill(0) }
+            throw error
         }
-        return sources
     }
 
     private fun isSnapshotSource(relativePath: String, targetProfile: String): Boolean {

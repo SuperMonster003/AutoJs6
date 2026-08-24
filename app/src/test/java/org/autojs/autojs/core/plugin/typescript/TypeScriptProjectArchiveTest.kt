@@ -162,6 +162,40 @@ class TypeScriptProjectArchiveTest {
         }
     }
 
+    @Test
+    fun clearsAllSourceSnapshotsWhenPreparationFails() {
+        withProject { root ->
+            File(root, "a.ts").writeText("export const a = 1;\n")
+            File(root, "b.ts").writeText("export const b = 2;\n")
+            val snapshots = mutableListOf<ByteArray>()
+            var readCount = 0
+            val error = runCatching {
+                TypeScriptProjectArchive.write(
+                    projectRoot = root,
+                    entryFile = File(root, "a.ts"),
+                    requestId = REQUEST_ID,
+                    projectId = PROJECT_ID,
+                    authority = rhinoAuthority(),
+                    destination = File(root, "input.zip"),
+                    sourceContentReader = TypeScriptSourceContentReader { file, _ ->
+                        readCount += 1
+                        val bytes = if (readCount == 2) {
+                            byteArrayOf(0xc3.toByte())
+                        } else {
+                            file.readBytes()
+                        }
+                        snapshots += bytes
+                        bytes
+                    },
+                )
+            }.exceptionOrNull()
+
+            assertTrue(error != null)
+            assertEquals(2, snapshots.size)
+            assertTrue(snapshots.all { bytes -> bytes.all { byte -> byte == 0.toByte() } })
+        }
+    }
+
     private fun withProject(block: (File) -> Unit) {
         val root = Files.createTempDirectory("typescript-project-test-").toFile()
         try {

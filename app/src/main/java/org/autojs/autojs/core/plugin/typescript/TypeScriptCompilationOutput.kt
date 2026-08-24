@@ -75,6 +75,10 @@ internal sealed interface TypeScriptCompilationOutput {
         val entryModulePath: String,
         val projectSources: List<TypeScriptPreparedSource>,
         val packageMetadata: TypeScriptPreparedPackageMetadata?,
+        val projectId: String,
+        val authority: TypeScriptCompilerAuthority,
+        val configByteLength: Long?,
+        val configSha256: String?,
         override val diagnostics: List<TypeScriptDiagnostic>,
     ) : TypeScriptCompilationOutput {
         val entryModule: TypeScriptEmittedModule = modules.single { module ->
@@ -402,6 +406,10 @@ internal object TypeScriptCompilationOutputReader {
                     entryModulePath = entryModulePath,
                     projectSources = prepared.sourceFiles,
                     packageMetadata = prepared.packageMetadata,
+                    projectId = prepared.projectId,
+                    authority = prepared.authority,
+                    configByteLength = prepared.configByteLength,
+                    configSha256 = prepared.configSha256,
                     diagnostics = diagnostics,
                 )
             }

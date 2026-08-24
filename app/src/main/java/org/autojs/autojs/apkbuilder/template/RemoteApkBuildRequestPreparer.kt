@@ -17,6 +17,8 @@ import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
+import org.autojs.autojs.core.plugin.typescript.TypeScriptApkBuildCompiler
+import org.autojs.autojs.core.plugin.typescript.TypeScriptApkBuildPlan
 import org.autojs.autojs.apkbuilder.ApkBuildLibrary
 import org.autojs.autojs.apkbuilder.ApkBuildLibraryCatalog
 import org.autojs.autojs.apkbuilder.ApkPluginLibrary
@@ -30,6 +32,7 @@ import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequestExtraKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
+import org.autojs.plugin.apkbuilder.template.TypeScriptBuildStagingCipher
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import java.io.Closeable
@@ -69,6 +72,60 @@ object RemoteApkBuildRequestPreparer {
         val variant: ApkPluginLibraryVariant,
     )
 
+    private data class ArchivedProjectSource(
+        val path: String,
+        val kind: String,
+    )
+
+    private class TypeScriptStagingEncryption private constructor(
+        val key: ByteArray,
+        val encryptedPaths: Set<String>,
+    ) : Closeable {
+
+        fun addTo(extras: Bundle) {
+            extras.putInt(
+                ApkBuildRequestExtraKeys.TYPESCRIPT_STAGING_ENCRYPTION_VERSION,
+                TypeScriptBuildStagingCipher.VERSION,
+            )
+            extras.putByteArray(
+                ApkBuildRequestExtraKeys.TYPESCRIPT_STAGING_ENCRYPTION_KEY,
+                key.copyOf(),
+            )
+            extras.putStringArrayList(
+                ApkBuildRequestExtraKeys.TYPESCRIPT_STAGING_ENCRYPTED_PATHS,
+                ArrayList(encryptedPaths.sorted()),
+            )
+        }
+
+        override fun close() {
+            key.fill(0)
+        }
+
+        companion object {
+            fun forPlan(plan: TypeScriptApkBuildPlan?): TypeScriptStagingEncryption? {
+                if (plan?.requiresEncryptedStaging != true) return null
+                val encryptedPaths = plan.entries
+                    .map { entry -> entry.relativePath }
+                    .filter(::isJavaScriptPath)
+                    .toSet()
+                require(encryptedPaths.isNotEmpty()) {
+                    "Encrypted TypeScript APK output contains no JavaScript staging entries."
+                }
+                return TypeScriptStagingEncryption(
+                    key = TypeScriptBuildStagingCipher.generateKey(),
+                    encryptedPaths = encryptedPaths,
+                )
+            }
+
+            private fun isJavaScriptPath(path: String): Boolean {
+                val lower = path.lowercase()
+                return lower.endsWith(".js") ||
+                    lower.endsWith(".mjs") ||
+                    lower.endsWith(".cjs")
+            }
+        }
+    }
+
     data class Prepared(
         val request: ApkBuildRequest,
         val archiveFile: File,
@@ -78,6 +135,7 @@ object RemoteApkBuildRequestPreparer {
             runCatching { request.projectArchiveFd?.close() }
             runCatching { request.nativeLibrariesArchiveFd?.close() }
             runCatching { request.keyStoreFd?.close() }
+            clearTypeScriptStagingKey(request.extras)
         }
 
         fun cleanup() {
@@ -114,18 +172,35 @@ object RemoteApkBuildRequestPreparer {
         var projectArchiveFd: ParcelFileDescriptor? = null
         var nativeLibrariesArchiveFd: ParcelFileDescriptor? = null
         var keyStoreFd: ParcelFileDescriptor? = null
+        var typeScriptPlan: TypeScriptApkBuildPlan? = null
+        var typeScriptStagingEncryption: TypeScriptStagingEncryption? = null
+        var requestExtras: Bundle? = null
         try {
             notifyProgress(progressListener, "Preparing remote build config", projectConfig.packageName)
             val remoteConfig = cloneForRemoteRequest(projectConfig)
             validateEmbeddedNodeBuildRequirements(projectConfig)
+            typeScriptPlan = TypeScriptApkBuildCompiler.prepare(
+                context = appContext,
+                projectConfig = projectConfig,
+                source = source,
+                cancelSignal = cancelSignal,
+            )
+            typeScriptPlan?.let { plan ->
+                remoteConfig.setMainScriptFileName(plan.mainScriptPath)
+            }
+            typeScriptStagingEncryption = TypeScriptStagingEncryption.forPlan(typeScriptPlan)
             notifyProgress(progressListener, "Archiving project files", source.path)
-            val sourcePathInArchive = writeProjectArchive(
+            val archivedSource = writeProjectArchive(
                 archiveFile,
                 source,
                 projectConfig,
                 remoteConfig,
+                typeScriptPlan,
+                typeScriptStagingEncryption,
                 cancelSignal,
             )
+            typeScriptPlan?.close()
+            typeScriptPlan = null
             ensureNotCancelled(cancelSignal)
             notifyProgress(progressListener, "Preparing remote build inputs", projectConfig.libs.joinToString(", "))
             nativeLibrariesArchiveFile = writeBuildInputsArchive(
@@ -174,6 +249,22 @@ object RemoteApkBuildRequestPreparer {
             keyStoreFd = keyStoreFile?.let {
                 ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY)
             }
+            requestExtras = Bundle().apply {
+                putInt(ApkBuildRequestExtraKeys.ARCHIVE_FORMAT_VERSION, ARCHIVE_FORMAT_VERSION)
+                putString(
+                    ApkBuildRequestExtraKeys.SOURCE_KIND,
+                    archivedSource.kind,
+                )
+                putString(ApkBuildRequestExtraKeys.SOURCE_ROOT_PATH, SOURCE_ROOT_ENTRY)
+                putString(ApkBuildRequestExtraKeys.SOURCE_PATH, archivedSource.path)
+                if (remoteConfig.iconPath == REMOTE_ICON_ENTRY) {
+                    putString(ApkBuildRequestExtraKeys.ICON_PATH, REMOTE_ICON_ENTRY)
+                }
+                putString(ApkBuildRequestExtraKeys.HOST_OUTPUT_FILE_NAME, outputFileName)
+                typeScriptStagingEncryption?.addTo(this)
+            }
+            typeScriptStagingEncryption?.close()
+            typeScriptStagingEncryption = null
             val request = ApkBuildRequest(
                 hostPackageName = appContext.packageName,
                 hostVersionName = BuildConfig.VERSION_NAME,
@@ -194,29 +285,16 @@ object RemoteApkBuildRequestPreparer {
                 keyAliasPassword = keyAliasPassword,
                 outputFileName = outputFileName,
                 allowRiskyBuild = true,
-                extras = Bundle().apply {
-                    putInt(ApkBuildRequestExtraKeys.ARCHIVE_FORMAT_VERSION, ARCHIVE_FORMAT_VERSION)
-                    putString(
-                        ApkBuildRequestExtraKeys.SOURCE_KIND,
-                        if (source.isDirectory) {
-                            ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY
-                        } else {
-                            ApkBuildRequestExtraKeys.SOURCE_KIND_FILE
-                        },
-                    )
-                    putString(ApkBuildRequestExtraKeys.SOURCE_ROOT_PATH, SOURCE_ROOT_ENTRY)
-                    putString(ApkBuildRequestExtraKeys.SOURCE_PATH, sourcePathInArchive)
-                    if (remoteConfig.iconPath == REMOTE_ICON_ENTRY) {
-                        putString(ApkBuildRequestExtraKeys.ICON_PATH, REMOTE_ICON_ENTRY)
-                    }
-                    putString(ApkBuildRequestExtraKeys.HOST_OUTPUT_FILE_NAME, outputFileName)
-                },
+                extras = requestExtras,
             )
             return Prepared(request, archiveFile, nativeLibrariesArchiveFile)
         } catch (error: Throwable) {
             runCatching { projectArchiveFd?.close() }
             runCatching { nativeLibrariesArchiveFd?.close() }
             runCatching { keyStoreFd?.close() }
+            runCatching { typeScriptPlan?.close() }
+            runCatching { typeScriptStagingEncryption?.close() }
+            clearTypeScriptStagingKey(requestExtras)
             deletePreparedFile(archiveFile)
             nativeLibrariesArchiveFile?.let(::deletePreparedFile)
             throw error
@@ -255,19 +333,52 @@ object RemoteApkBuildRequestPreparer {
         source: File,
         projectConfig: ProjectConfig,
         remoteConfig: ProjectConfig,
+        typeScriptPlan: TypeScriptApkBuildPlan?,
+        typeScriptStagingEncryption: TypeScriptStagingEncryption?,
         cancelSignal: AtomicBoolean?,
-    ): String {
+    ): ArchivedProjectSource {
+        val useDirectorySource = source.isDirectory || typeScriptPlan?.forceDirectorySource == true
         var sourcePathInArchive = SOURCE_ROOT_ENTRY
         writeZipFile(archiveFile, Deflater.BEST_SPEED) { zip ->
             ensureNotCancelled(cancelSignal)
-            if (source.isDirectory) {
-                addDirectoryTree(
-                    zip = zip,
-                    root = source.canonicalFile,
-                    entryRoot = SOURCE_ROOT_ENTRY,
-                    excludedDirs = projectConfig.excludedDirs.mapNotNull { runCatching { it.canonicalFile }.getOrNull() },
-                    cancelSignal = cancelSignal,
-                )
+            if (useDirectorySource) {
+                if (source.isDirectory) {
+                    addDirectoryTree(
+                        zip = zip,
+                        root = source.canonicalFile,
+                        entryRoot = SOURCE_ROOT_ENTRY,
+                        excludedDirs = projectConfig.excludedDirs.mapNotNull {
+                            runCatching { it.canonicalFile }.getOrNull()
+                        },
+                        typeScriptPlan = typeScriptPlan,
+                        cancelSignal = cancelSignal,
+                    )
+                } else {
+                    addDirectoryEntry(zip, "$SOURCE_ROOT_ENTRY/")
+                }
+                typeScriptPlan?.entries?.forEach { entry ->
+                    ensureNotCancelled(cancelSignal)
+                    val stagedBytes = if (
+                        entry.relativePath in
+                        typeScriptStagingEncryption?.encryptedPaths.orEmpty()
+                    ) {
+                        TypeScriptBuildStagingCipher.encrypt(
+                            entry.bytes,
+                            requireNotNull(typeScriptStagingEncryption).key,
+                        )
+                    } else {
+                        null
+                    }
+                    try {
+                        addBytes(
+                            zip,
+                            stagedBytes ?: entry.bytes,
+                            "$SOURCE_ROOT_ENTRY/${entry.relativePath}",
+                        )
+                    } finally {
+                        stagedBytes?.fill(0)
+                    }
+                }
             } else {
                 sourcePathInArchive = "$SOURCE_ROOT_ENTRY/${sanitizeEntrySegment(source.name)}"
                 addFile(zip, source, sourcePathInArchive, cancelSignal)
@@ -277,7 +388,14 @@ object RemoteApkBuildRequestPreparer {
                 remoteConfig.setIconPath(REMOTE_ICON_ENTRY)
             }
         }
-        return sourcePathInArchive
+        return ArchivedProjectSource(
+            path = sourcePathInArchive,
+            kind = if (useDirectorySource) {
+                ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY
+            } else {
+                ApkBuildRequestExtraKeys.SOURCE_KIND_FILE
+            },
+        )
     }
 
     private fun addDirectoryTree(
@@ -285,9 +403,12 @@ object RemoteApkBuildRequestPreparer {
         root: File,
         entryRoot: String,
         excludedDirs: List<File>,
+        typeScriptPlan: TypeScriptApkBuildPlan?,
         cancelSignal: AtomicBoolean?,
     ) {
         addDirectoryEntry(zip, "$entryRoot/")
+        val generatedPaths = typeScriptPlan?.generatedPaths.orEmpty()
+        val generatedFoldedPaths = generatedPaths.mapTo(hashSetOf()) { it.asciiCaseFold() }
         root.walkTopDown()
             .onEnter { dir -> !isExcluded(dir, excludedDirs) }
             .filter { it != root }
@@ -295,6 +416,14 @@ object RemoteApkBuildRequestPreparer {
             .forEach { file ->
                 ensureNotCancelled(cancelSignal)
                 val relative = file.relativeTo(root).path.replace(File.separatorChar, '/')
+                if (typeScriptPlan?.omitOriginal(relative) == true) {
+                    return@forEach
+                }
+                if (file.isFile && relative.asciiCaseFold() in generatedFoldedPaths) {
+                    throw IOException(
+                        "TypeScript APK output collides with a retained project file: $relative",
+                    )
+                }
                 val entryName = "$entryRoot/${sanitizeEntryPath(relative)}"
                 if (file.isDirectory) {
                     addDirectoryEntry(zip, "$entryName/")
@@ -908,6 +1037,16 @@ object RemoteApkBuildRequestPreparer {
         zip.closeEntry()
     }
 
+    private fun addBytes(
+        zip: ZipOutputStream,
+        bytes: ByteArray,
+        entryName: String,
+    ) {
+        zip.putNextEntry(ZipEntry(sanitizeEntryPath(entryName)))
+        zip.write(bytes)
+        zip.closeEntry()
+    }
+
     private fun copyStreamWithCancel(
         input: InputStream,
         output: OutputStream,
@@ -1008,4 +1147,17 @@ object RemoteApkBuildRequestPreparer {
         "arm64-v8a" to "arm64",
         "armeabi-v7a" to "arm",
     )
+
+    private fun String.asciiCaseFold(): String = buildString(length) {
+        this@asciiCaseFold.forEach { character ->
+            append(if (character in 'A'..'Z') character + 32 else character)
+        }
+    }
+
+    private fun clearTypeScriptStagingKey(extras: Bundle?) {
+        extras
+            ?.getByteArray(ApkBuildRequestExtraKeys.TYPESCRIPT_STAGING_ENCRYPTION_KEY)
+            ?.fill(0)
+        extras?.remove(ApkBuildRequestExtraKeys.TYPESCRIPT_STAGING_ENCRYPTION_KEY)
+    }
 }

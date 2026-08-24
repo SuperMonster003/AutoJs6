@@ -168,6 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/08/24
 
+* `추가` APK Builder가 패키징 시 Rhino TypeScript 프로젝트를 컴파일합니다. 최종 APK에는 암호화된 JavaScript와 소스가 포함되지 않은 선택적 Source Map만 들어가며 TypeScript 소스와 컴파일러는 포함되지 않습니다. 암호화 프로젝트는 일회용 AES-256-GCM 스테이징을 사용하고 평문은 메모리에만 유지한 뒤 재암호화 후 0으로 지웁니다
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js ESM/dynamic import()/네트워크 및 WebSocket/네이티브 네트워크 모듈/worker_threads/child_process/Java 상호 운용 기능을 정식 기능으로 기본 활성화하고, 권한 선언/허용 목록/샌드박스/리소스 예산 보호는 계속 적용
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
@@ -261,6 +262,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 패키징된 앱 설정에서 "로그" 및 "설정" 런처 바로 가기 표시/숨기기 지원 _[`issue #550`](http://issues.autojs6.com/550)_
 * `추가` 앱 패키징에서 APK Builder Template 플러그인을 사용한 원격 빌드 지원
 * `추가` 개발자 옵션에서 GitHub 액세스 토큰 설정 지원, 업데이트 확인 및 플러그인 인덱스 요청 한도 확장용
+* `수정` 패키징된 앱의 Rhino CommonJS require가 종속 JavaScript 모듈을 복호화하지 못해 패키징 시 컴파일된 다중 파일 TypeScript 출력이 "Cannot read file"로 실패하는 문제
 * `수정` Android Activity가 제거된 뒤에도 Node.js UI 핸들이 활성 상태로 남아 지연 업데이트를 허용하고 실행 정리 시점까지 공급자 소유 리소스를 유지할 수 있던 문제
 * `수정` 모듈 탐색 및 작업 공간 아카이브 예산이 너무 작아 Node.js 플러그인 실행이 대규모 평문 종속성 그래프와 실제 node_modules 작업 공간을 거부할 수 있던 문제
 * `수정` 파일이 많은 작업 디렉터리에서 불필요한 모듈 스캔과 후보 파일 전체 읽기로 인해 비어 있거나 단순한 Node.js 스크립트 시작이 느려지는 문제

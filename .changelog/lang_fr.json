@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/24",
       "feature": [
+        "APK Builder compile désormais les projets Rhino TypeScript lors de l'empaquetage ; les APK finaux ne contiennent que du JavaScript chiffré et des Source Maps facultatives sans source intégrée, jamais les sources TypeScript ni le compilateur ; les projets chiffrés utilisent une zone de staging AES-256-GCM à usage unique, le texte en clair restant uniquement en mémoire puis étant effacé après rechiffrement",
         "Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive \"nodejs\" ou des extensions comme .node.js/.cjs/.mjs",
         "ESM, dynamic import(), le réseau et WebSocket, les modules réseau natifs, worker_threads, child_process et l'interopérabilité Java de Node.js sont des fonctions stables activées par défaut, tandis que les déclarations d'autorisation, listes d'autorisation, bacs à sable et budgets de ressources restent appliqués",
         "L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)",
@@ -98,6 +99,7 @@
         "Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins"
       ],
       "fix": [
+        "Le require Rhino CommonJS des applications empaquetées ne pouvait pas déchiffrer les modules JavaScript dépendants, ce qui faisait échouer avec \"Cannot read file\" les sorties TypeScript multifichiers compilées lors de l'empaquetage",
         "Les handles d'interface Node.js pouvaient rester actifs après la destruction de leur Activity Android, autorisant des mises à jour tardives et conservant les ressources du fournisseur jusqu'à la fin de l'exécution",
         "L'exécution via le plugin Node.js pouvait refuser de grands graphes de dépendances en clair et des espaces node_modules réels, car les budgets de sondage des modules et d'archivage de l'espace de travail étaient trop faibles",
         "Les scripts Node.js vides ou simples démarraient lentement dans les répertoires de travail contenant de nombreux fichiers, car l'analyse inutile des modules lisait intégralement les fichiers candidats",

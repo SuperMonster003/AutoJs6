@@ -168,6 +168,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 ###### 2026/08/24
 
+* `新增` APK Builder 支援在打包階段編譯 Rhino TypeScript 專案; 最終 APK 只包含加密 JavaScript 與不內嵌原始碼的可選 Source Map, 不包含 TypeScript 原始碼或編譯器; 加密專案使用一次性 AES-256-GCM 暫存區, 解密與重新加密的明文只存於記憶體並在使用後清零
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 的 ESM/dynamic import()/網絡與 WebSocket/原生網絡模組/worker_threads/child_process/Java 互操作能力成為正式功能並預設啟用, 同時保留權限聲明/白名單/沙箱及資源預算保護
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -261,6 +262,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 打包應用配置支持顯示或隱藏 "日誌" 及 "設置" 啟動器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 打包應用支持使用 APK Builder Template 插件進行遠程構建
 * `新增` 開發者選項支持 GitHub 訪問令牌設置, 用於提升更新檢查及插件索引請求限額
+* `修復` 打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 "Cannot read file" 失敗的問題
 * `修復` Node.js UI 控制代碼在 Android Activity 銷毀後可能仍保持活動, 允許延遲更新並持續佔用提供者資源直至執行清理
 * `修復` Node.js 插件執行因模組探測及工作區封存預算過小而可能拒絕大型純文字依賴圖及實際 node_modules 工作區
 * `修復` Node.js 空腳本及簡單腳本在包含大量文件的工作目錄中因不必要的模組掃描及完整讀取候選文件而啟動緩慢的問題

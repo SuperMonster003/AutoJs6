@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/24",
       "feature": [
+        "APK Builder 支援在打包階段編譯 Rhino TypeScript 專案; 最終 APK 僅包含加密 JavaScript 與不內嵌原始碼的可選 Source Map, 不包含 TypeScript 原始碼或編譯器; 加密專案使用一次性 AES-256-GCM 暫存區, 解密與重新加密的明文僅存於記憶體並在使用後清零",
         "Node.js 24.5.0 腳本執行環境, 支援透過 \"nodejs\" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本",
         "Node.js 的 ESM/dynamic import()/網路與 WebSocket/原生網路模組/worker_threads/child_process/Java 互通能力成為正式功能並預設啟用, 同時保留權限宣告/允許清單/沙箱及資源預算保護",
         "Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼",
@@ -98,6 +99,7 @@
         "開發者選項支援 GitHub 存取權杖設定, 用於提升更新檢查及外掛索引請求限額"
       ],
       "fix": [
+        "打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 \"Cannot read file\" 失敗的問題",
         "Node.js UI 控制代碼在 Android Activity 銷毀後可能仍保持作用中, 允許延遲更新並持續佔用提供者資源直到執行清理",
         "Node.js 外掛執行因模組探測及工作區封存預算過小而可能拒絕大型純文字相依圖及實際 node_modules 工作區",
         "Node.js 空白腳本及簡單腳本在包含大量檔案的工作目錄中因不必要的模組掃描及完整讀取候選檔案而啟動緩慢的問題",

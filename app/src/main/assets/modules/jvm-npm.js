@@ -24,6 +24,9 @@
     const Scanner = java.util.Scanner;
     const System = java.lang.System;
     const Thread = java.lang.Thread;
+    const EncryptedScriptFileHeader = Packages.org.autojs.autojs.script.EncryptedScriptFileHeader;
+    const ScriptEncryption = Packages.org.autojs.autojs.engine.encryption.ScriptEncryption;
+    const StandardCharsets = java.nio.charset.StandardCharsets;
 
     let _ = {
         Module: (/* @IIFE */ () => {
@@ -254,6 +257,24 @@
         },
         readFile(filename, core) {
             try {
+                if (!core) {
+                    const encryptedBytes = runtime.files.readBytes(filename);
+                    if (encryptedBytes.length >= EncryptedScriptFileHeader.BLOCK_SIZE
+                        && EncryptedScriptFileHeader.isValidFile(encryptedBytes)) {
+                        const clearText = ScriptEncryption.decrypt(
+                            encryptedBytes,
+                            EncryptedScriptFileHeader.BLOCK_SIZE,
+                            encryptedBytes.length,
+                        );
+                        try {
+                            return String(new java.lang.String(clearText, StandardCharsets.UTF_8));
+                        } finally {
+                            for (let i = 0; i < clearText.length; i++) {
+                                clearText[i] = 0;
+                            }
+                        }
+                    }
+                }
                 let input = core
                     ? Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)
                     : new File(filename);

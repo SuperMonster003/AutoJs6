@@ -4,10 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.util.UUID
 import kotlinx.coroutines.CancellationException
@@ -54,6 +52,9 @@ internal class TypeScriptCompilerPluginClient(
         sourceName: String = sourceFile.name,
         sourceIdentity: String? = null,
         targetProfile: String = TypeScriptCompilerContract.PROFILE_RHINO,
+        sourceContentReader: TypeScriptSourceContentReader =
+            PlaintextTypeScriptSourceContentReader,
+        usePersistentCache: Boolean = true,
     ): TypeScriptCompilationOutput = withContext(Dispatchers.IO) {
         require(timeoutMs in TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS..
             TypeScriptCompilerContract.MAX_TIMEOUT_MS)
@@ -93,16 +94,26 @@ internal class TypeScriptCompilerPluginClient(
             "The TypeScript source name is not a canonical single-file name."
         }
 
-        val sourceBytes = readBoundedSource(sourceFile)
-        val canonicalPath = sourceIdentity?.takeIf(String::isNotBlank)
-            ?: runCatching { sourceFile.canonicalPath }.getOrElse { sourceFile.absolutePath }
-        val projectId = "single-file-" +
-            sha256(TypeScriptUtf8.encode(canonicalPath, "TypeScript source path")).take(32)
+        val sourceBytes = sourceContentReader.read(
+            sourceFile,
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+        )
         try {
+            require(
+                sourceBytes.size.toLong() + EMPTY_TSCONFIG_BYTES <=
+                    TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES,
+            ) {
+                "TypeScript source exceeds the ordinary input byte limit."
+            }
+            val canonicalPath = sourceIdentity?.takeIf(String::isNotBlank)
+                ?: runCatching { sourceFile.canonicalPath }.getOrElse { sourceFile.absolutePath }
+            val projectId = "single-file-" +
+                sha256(TypeScriptUtf8.encode(canonicalPath, "TypeScript source path")).take(32)
             compileArchive(
                 timeoutMs = timeoutMs,
                 targetProfile = targetProfile,
                 entrySourceName = sourceName,
+                usePersistentCache = usePersistentCache,
             ) { requestId, authority, inputFile ->
                 TypeScriptSingleFileArchive.write(
                     sourceName = sourceName,
@@ -123,6 +134,9 @@ internal class TypeScriptCompilerPluginClient(
         entryFile: File,
         targetProfile: String,
         timeoutMs: Long = TypeScriptCompilerContract.DEFAULT_TIMEOUT_MS,
+        sourceContentReader: TypeScriptSourceContentReader =
+            PlaintextTypeScriptSourceContentReader,
+        usePersistentCache: Boolean = true,
     ): TypeScriptCompilationOutput = withContext(Dispatchers.IO) {
         require(timeoutMs in TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS..
             TypeScriptCompilerContract.MAX_TIMEOUT_MS)
@@ -149,6 +163,7 @@ internal class TypeScriptCompilerPluginClient(
             timeoutMs = timeoutMs,
             targetProfile = targetProfile,
             entrySourceName = entry.name,
+            usePersistentCache = usePersistentCache,
         ) { requestId, authority, inputFile ->
             TypeScriptProjectArchive.write(
                 projectRoot = root,
@@ -157,6 +172,7 @@ internal class TypeScriptCompilerPluginClient(
                 projectId = projectId,
                 authority = authority,
                 destination = inputFile,
+                sourceContentReader = sourceContentReader,
             )
         }
     }
@@ -165,11 +181,13 @@ internal class TypeScriptCompilerPluginClient(
         timeoutMs: Long,
         targetProfile: String,
         entrySourceName: String,
+        usePersistentCache: Boolean,
         prepare: (String, TypeScriptCompilerAuthority, File) -> TypeScriptPreparedCompilation,
     ): TypeScriptCompilationOutput {
         val requestId = "host-" + UUID.randomUUID()
-        val inputFile = File.createTempFile("typescript-input-", ".zip", appContext.cacheDir)
-        val outputFile = File.createTempFile("typescript-output-", ".zip", appContext.cacheDir)
+        val temporaryArchives = TypeScriptCompilerTemporaryArchives.create(appContext.cacheDir)
+        val inputFile = temporaryArchives.inputFile
+        val outputFile = temporaryArchives.outputFile
         var bindingLease: Closeable? = null
         var started: StartedCompilation? = null
         var terminalReceived = false
@@ -194,7 +212,11 @@ internal class TypeScriptCompilerPluginClient(
 
             compilationMutex.withLock {
                 var cacheKey = TypeScriptCompilationCacheKey.sha256(prepared)
-                val cache = compilationCacheOrNull(appContext)
+                val cache = if (usePersistentCache) {
+                    compilationCacheOrNull(appContext)
+                } else {
+                    null
+                }
                 readCached(cache, cacheKey, prepared)?.let { cached ->
                     return@withLock cached
                 }
@@ -324,8 +346,16 @@ internal class TypeScriptCompilerPluginClient(
                     }
             }
             runCatching { bindingLease?.close() }
-            runCatching { inputFile.delete() }
-            runCatching { outputFile.delete() }
+            try {
+                temporaryArchives.close()
+            } catch (error: IOException) {
+                Log.e(LOG_TAG, "TypeScript compiler temporary archive cleanup failed.", error)
+                throw TypeScriptCompilerException(
+                    TypeScriptCompilerContract.ERROR_COMPILER_UNAVAILABLE,
+                    "Unable to securely delete TypeScript compiler temporary archives.",
+                    cause = error,
+                )
+            }
         }
     }
 
@@ -844,34 +874,6 @@ internal class TypeScriptCompilerPluginClient(
             supportedAbis = null,
             capabilities = Bundle(this),
         )
-    }
-
-    private fun readBoundedSource(file: File): ByteArray {
-        if (
-            file.length() < 0L ||
-            file.length() >
-            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES
-        ) {
-            throw IOException("TypeScript source exceeds the ordinary per-file byte limit.")
-        }
-        FileInputStream(file).use { input ->
-            val output = ByteArrayOutputStream(file.length().toInt().coerceAtLeast(32))
-            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-            var total = 0L
-            while (true) {
-                val count = input.read(buffer)
-                if (count < 0) break
-                total = Math.addExact(total, count.toLong())
-                if (
-                    total + EMPTY_TSCONFIG_BYTES >
-                    TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES
-                ) {
-                    throw IOException("TypeScript source exceeds the ordinary input byte limit.")
-                }
-                output.write(buffer, 0, count)
-            }
-            return output.toByteArray()
-        }
     }
 
     private fun requireBundleBoolean(bundle: Bundle, key: String, expected: Boolean) {

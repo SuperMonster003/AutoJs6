@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/24",
       "feature": [
+        "APK Builder now compiles Rhino TypeScript projects at build time; packaged APKs contain only encrypted JavaScript and optional Source Maps without embedded source, never TypeScript sources or the compiler; encrypted projects use one-time AES-256-GCM staging, with cleartext held only in memory and zeroed after re-encryption",
         "Node.js 24.5.0 script runtime, supporting scripts launched with the \"nodejs\" directive or extensions such as .node.js/.cjs/.mjs",
         "Node.js ESM, dynamic import(), network and WebSocket, native network modules, worker_threads, child_process, and Java interop are stable features enabled by default, while permission declarations, allowlists, sandboxing, and resource budgets remain enforced",
         "Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code",
@@ -98,6 +99,7 @@
         "Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes"
       ],
       "fix": [
+        "Packaged Rhino CommonJS require could not decrypt dependent JavaScript modules, causing multi-file build-time TypeScript output to fail with \"Cannot read file\"",
         "Node.js UI handles could remain active after their Android Activity was destroyed, allowing late updates and retaining provider-owned resources until execution teardown",
         "Node.js plugin execution could reject large plaintext dependency graphs and real-world node_modules workspaces because module-probe and workspace-archive budgets were too small",
         "Empty and simple Node.js scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full",

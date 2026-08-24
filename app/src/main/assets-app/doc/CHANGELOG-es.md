@@ -8,6 +8,7 @@
 
 ###### 2026/08/24
 
+* `Nuevo` APK Builder ahora compila proyectos Rhino TypeScript durante el empaquetado; los APK finales solo contienen JavaScript cifrado y Source Maps opcionales sin código fuente incrustado, nunca fuentes TypeScript ni el compilador; los proyectos cifrados usan staging AES-256-GCM de un solo uso, con el texto claro solo en memoria y borrado tras volver a cifrar
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` ESM, dynamic import(), red y WebSocket, módulos de red nativos, worker_threads, child_process e interoperabilidad con Java de Node.js son funciones estables habilitadas de forma predeterminada, mientras se mantienen las declaraciones de permisos, listas de permitidos, aislamiento y presupuestos de recursos
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -101,6 +102,7 @@
 * `Nuevo` La configuración de aplicaciones empaquetadas permite mostrar u ocultar los accesos directos del iniciador "Registro" y "Configuración" _[`issue #550`](http://issues.autojs6.com/550)_
 * `Nuevo` El empaquetado de aplicaciones admite compilaciones remotas mediante plugins APK Builder Template
 * `Nuevo` Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins
+* `Corrección` El require de Rhino CommonJS en aplicaciones empaquetadas no podía descifrar módulos JavaScript dependientes, por lo que la salida TypeScript multifichero compilada durante el empaquetado fallaba con "Cannot read file"
 * `Corrección` Los identificadores de UI de Node.js podían permanecer activos tras destruirse su Activity de Android, permitiendo actualizaciones tardías y reteniendo recursos del proveedor hasta finalizar la ejecución
 * `Corrección` La ejecución mediante el complemento Node.js podía rechazar grandes grafos de dependencias en texto plano y espacios de trabajo node_modules reales debido a presupuestos insuficientes para sondeos de módulos y archivos del espacio de trabajo
 * `Corrección` Los scripts vacíos y simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos
