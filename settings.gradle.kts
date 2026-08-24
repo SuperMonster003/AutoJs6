@@ -94,7 +94,7 @@ private val pluginApi = listOf(
     "common-plugin-api",
     "protocol-wire-api",
     "ai-common-api",
-    "on-device-ai-api",
+    "ai-provider-api",
     "dex-compiler-api",
     "jvm-source-api",
     "editor-api",
@@ -123,7 +123,7 @@ private val plugins = listOf(
 )
 
 private val pluginConformanceTestApps = listOf(
-    "on-device-ai-provider-conformance",
+    "ai-provider-conformance",
     "dex-compiler-conformance",
     "lua-runtime-conformance",
     "python-runtime-conformance",

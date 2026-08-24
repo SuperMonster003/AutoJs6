@@ -60,7 +60,7 @@
             <action android:name="org.autojs.plugin.JVM_SOURCE" />
         </intent>
         <intent>
-            <action android:name="org.autojs.plugin.ON_DEVICE_AI" />
+            <action android:name="org.autojs.plugin.AI_PROVIDER" />
         </intent>
         <intent>
             <action android:name="org.autojs.plugin.YOLO" />

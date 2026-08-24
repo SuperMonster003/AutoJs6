@@ -602,7 +602,7 @@
     <string name="summary_ai_default_profile">기본값: %1$s</string>
     <string name="summary_ai_default_profile_none">기본 프로필이 없습니다. 전역 ai 모듈을 사용하려면 프로필을 추가하세요.</string>
     <string name="summary_ai_default_profile_unavailable">기본 프로필을 사용할 수 없음: %1$s</string>
-    <string name="summary_ai_local_plugin_installed">로컬 AI 플러그인의 온디바이스 모델 관리</string>
+    <string name="summary_ai_local_plugin_installed">로컬 AI 플러그인의 로컬 모델 관리</string>
     <string name="summary_ai_local_plugin_not_installed">설치되지 않음. 플러그인 센터를 열어 설치하려면 탭하세요</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">프로필 ID: %1$s\n상태: %2$s\n암호화된 데이터가 보존되어 있습니다. 탭하여 삭제하세요.</string>

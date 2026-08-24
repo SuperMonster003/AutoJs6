@@ -1,12 +1,12 @@
 package org.autojs.autojs.runtime.api.ai
 
 import com.google.gson.JsonParser
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
+import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
+import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.autojs.core.plugin.ai.toGenerationOptions
-import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendProfile
-import org.autojs.plugin.ondeviceai.api.OnDeviceAiCapabilityId
-import org.autojs.plugin.ondeviceai.api.OnDeviceAiMimeType
+import org.autojs.plugin.ai.provider.api.AiProviderBackendProfile
+import org.autojs.plugin.ai.provider.api.AiProviderCapabilityId
+import org.autojs.plugin.ai.provider.api.AiProviderMimeType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -31,16 +31,16 @@ class AiPluginAskInputMapperTest {
         val request = AiPluginAskInputMapper.map(input, defaultTimeoutMillis = 9_000L)
 
         assertEquals(
-            OnDeviceAiProviderComponent(
+            AiProviderComponent(
                 packageName = "org.example.provider",
-                className = "org.example.provider.OnDeviceAiService",
+                className = "org.example.provider.AiProviderService",
             ),
             request.component,
         )
         assertEquals("example.provider", request.providerId)
         assertEquals("example-model", request.modelId)
         assertEquals(
-            listOf(OnDeviceAiPluginMessageRole.SYSTEM, OnDeviceAiPluginMessageRole.USER),
+            listOf(AiPluginMessageRole.SYSTEM, AiPluginMessageRole.USER),
             request.messages.map { it.role },
         )
         assertEquals(listOf(systemPrompt, userPrompt), request.messages.map { it.content })
@@ -72,10 +72,10 @@ class AiPluginAskInputMapperTest {
 
         assertEquals(
             listOf(
-                OnDeviceAiPluginMessageRole.SYSTEM,
-                OnDeviceAiPluginMessageRole.USER,
-                OnDeviceAiPluginMessageRole.ASSISTANT,
-                OnDeviceAiPluginMessageRole.USER,
+                AiPluginMessageRole.SYSTEM,
+                AiPluginMessageRole.USER,
+                AiPluginMessageRole.ASSISTANT,
+                AiPluginMessageRole.USER,
             ),
             request.messages.map { it.role },
         )
@@ -94,7 +94,7 @@ class AiPluginAskInputMapperTest {
             Case("[42]", "AI plugin messages must be objects"),
             Case(
                 """[{"role":"assistant","content":"answer"}]""",
-                "The final on-device AI plugin message must have the user role",
+                "The final local AI plugin message must have the user role",
             ),
             Case(
                 """[
@@ -159,19 +159,19 @@ class AiPluginAskInputMapperTest {
         assertEquals(32, request.topK)
         assertEquals(0.9, request.topP!!, 0.0)
         assertEquals(512L, request.maximumOutputTokens)
-        assertEquals(OnDeviceAiBackendProfile.GPU, request.backendProfile)
+        assertEquals(AiProviderBackendProfile.GPU, request.backendProfile)
         val protocolOptions = request.toGenerationOptions(
             stream = true,
             maximumOutputBytes = 4_096,
             timeoutMillis = 8_000,
-            requiredCapabilityIds = listOf(OnDeviceAiCapabilityId.STREAMING),
+            requiredCapabilityIds = listOf(AiProviderCapabilityId.STREAMING),
         )
         assertEquals(0.75, protocolOptions.temperature!!, 0.0)
         assertEquals(32, protocolOptions.topK)
         assertEquals(0.9, protocolOptions.topP!!, 0.0)
         assertEquals(512L, protocolOptions.maximumOutputTokens)
-        assertEquals(OnDeviceAiBackendProfile.GPU, protocolOptions.backendProfile)
-        assertEquals(listOf(OnDeviceAiCapabilityId.STREAMING), protocolOptions.requiredCapabilityIds)
+        assertEquals(AiProviderBackendProfile.GPU, protocolOptions.backendProfile)
+        assertEquals(listOf(AiProviderCapabilityId.STREAMING), protocolOptions.requiredCapabilityIds)
         assertTrue(protocolOptions.reportUsage)
 
         val defaults = AiPluginAskInputMapper.map(input("""[{"role":"user","content":"prompt"}]"""), 9_000L)
@@ -179,7 +179,7 @@ class AiPluginAskInputMapperTest {
         assertNull(defaults.topK)
         assertNull(defaults.topP)
         assertNull(defaults.maximumOutputTokens)
-        assertEquals(OnDeviceAiBackendProfile.CPU, defaults.backendProfile)
+        assertEquals(AiProviderBackendProfile.CPU, defaults.backendProfile)
     }
 
     @Test
@@ -235,12 +235,12 @@ class AiPluginAskInputMapperTest {
             stream = true,
             maximumOutputBytes = 4_096,
             timeoutMillis = 8_000,
-            requiredCapabilityIds = listOf(OnDeviceAiCapabilityId.STREAMING),
+            requiredCapabilityIds = listOf(AiProviderCapabilityId.STREAMING),
         )
         assertTrue(schemaOptions.structuredJson)
-        assertEquals(OnDeviceAiMimeType.JSON, schemaOptions.responseMimeType)
+        assertEquals(AiProviderMimeType.JSON, schemaOptions.responseMimeType)
         assertEquals(
-            setOf(OnDeviceAiCapabilityId.STREAMING, OnDeviceAiCapabilityId.STRUCTURED_JSON),
+            setOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.STRUCTURED_JSON),
             schemaOptions.requiredCapabilityIds.toSet(),
         )
         assertEquals(
@@ -288,7 +288,7 @@ class AiPluginAskInputMapperTest {
               "plugin": {
                 "component": {
                   "packageName": "org.example.provider",
-                  "className": "org.example.provider.OnDeviceAiService"
+                  "className": "org.example.provider.AiProviderService"
                 },
                 "providerId": "example.provider",
                 "modelId": "example-model"

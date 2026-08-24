@@ -1,14 +1,14 @@
 package org.autojs.autojs.runtime.api.ai
 
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskOutcome
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginUsage
+import org.autojs.autojs.core.plugin.ai.AiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.AiPluginAskHandle
+import org.autojs.autojs.core.plugin.ai.AiPluginAskOutcome
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginMessage
+import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
+import org.autojs.autojs.core.plugin.ai.AiProviderComponent
+import org.autojs.autojs.core.plugin.ai.AiPluginUsage
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import org.junit.Assert.assertEquals
@@ -23,7 +23,7 @@ class AiPluginAskRuntimeTest {
     @Test
     fun synchronousCompletionClosesHandleOnceAndLateFailureIsIgnored() {
         val dispatchers = TestDispatchers()
-        val runner = FakeRunner(OnDeviceAiPluginAskOutcome.Completed("exact answer", usage()))
+        val runner = FakeRunner(AiPluginAskOutcome.Completed("exact answer", usage()))
         val runtime = AiPluginAskRuntime({ runner }, dispatchers::create)
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -38,7 +38,7 @@ class AiPluginAskRuntimeTest {
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
 
-        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(AiPluginAskOutcome.Failed(AiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
         assertEquals("exact answer", resolved.get())
         assertNull(rejected.get())
@@ -72,12 +72,12 @@ class AiPluginAskRuntimeTest {
 
         runtime.ask(request()).onResolve(callback(first::set))
         assertEquals(1, providerCalls.get())
-        runner.emit(OnDeviceAiPluginAskOutcome.Completed("first async answer", usage()))
+        runner.emit(AiPluginAskOutcome.Completed("first async answer", usage()))
         dispatchers.drain()
         assertEquals("first async answer", first.get())
 
         runtime.chat(request()).onResolve(callback(second::set))
-        runner.emit(OnDeviceAiPluginAskOutcome.Completed("second async answer", usage()))
+        runner.emit(AiPluginAskOutcome.Completed("second async answer", usage()))
         dispatchers.drain()
         assertPluginChatResponse(second.get(), "second async answer")
         assertEquals(1, providerCalls.get())
@@ -93,7 +93,7 @@ class AiPluginAskRuntimeTest {
         val rejected = AtomicReference<Any?>()
 
         runtime.ask(request()).onReject(callback(rejected::set))
-        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.BUSY))
+        runner.emit(AiPluginAskOutcome.Failed(AiPluginAskFailure.BUSY))
         dispatchers.drain()
 
         val error = rejected.get() as Map<*, *>
@@ -118,8 +118,8 @@ class AiPluginAskRuntimeTest {
             .onReject(callback { rejectCount.incrementAndGet() })
         runtime.close()
         runtime.close()
-        runner.emit(OnDeviceAiPluginAskOutcome.Completed("late", usage()))
-        runner.emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.PROVIDER_FAILED))
+        runner.emit(AiPluginAskOutcome.Completed("late", usage()))
+        runner.emit(AiPluginAskOutcome.Failed(AiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
 
         assertEquals(1, runner.handle.cancelCount.get())
@@ -167,18 +167,18 @@ class AiPluginAskRuntimeTest {
         assertEquals("example-model", response["model"])
     }
 
-    private fun request() = OnDeviceAiPluginAskRequest(
-        component = OnDeviceAiProviderComponent(
+    private fun request() = AiPluginAskRequest(
+        component = AiProviderComponent(
             packageName = "org.example.provider",
-            className = "org.example.provider.OnDeviceAiService",
+            className = "org.example.provider.AiProviderService",
         ),
         providerId = "example.provider",
         modelId = "example-model",
-        messages = listOf(OnDeviceAiPluginMessage(OnDeviceAiPluginMessageRole.USER, "prompt")),
+        messages = listOf(AiPluginMessage(AiPluginMessageRole.USER, "prompt")),
         timeoutMillis = 5_000L,
     )
 
-    private fun usage() = OnDeviceAiPluginUsage(
+    private fun usage() = AiPluginUsage(
         inputTokens = 12,
         outputTokens = 3,
         totalTokens = 15,
@@ -204,35 +204,35 @@ class AiPluginAskRuntimeTest {
     }
 
     private class FakeRunner(
-        private val synchronousOutcome: OnDeviceAiPluginAskOutcome? = null,
+        private val synchronousOutcome: AiPluginAskOutcome? = null,
         terminalOnCancel: Boolean = false,
-    ) : OnDeviceAiPluginAskRunner {
+    ) : AiPluginAskRunner {
         val startCount = AtomicInteger()
-        private val callback = AtomicReference<((OnDeviceAiPluginAskOutcome) -> Unit)?>()
+        private val callback = AtomicReference<((AiPluginAskOutcome) -> Unit)?>()
         val handle = RecordingHandle {
             if (terminalOnCancel) {
-                emit(OnDeviceAiPluginAskOutcome.Failed(OnDeviceAiPluginAskFailure.CANCELLED))
+                emit(AiPluginAskOutcome.Failed(AiPluginAskFailure.CANCELLED))
             }
         }
 
         override fun start(
-            request: OnDeviceAiPluginAskRequest,
-            onOutcome: (OnDeviceAiPluginAskOutcome) -> Unit,
-        ): OnDeviceAiPluginAskHandle {
+            request: AiPluginAskRequest,
+            onOutcome: (AiPluginAskOutcome) -> Unit,
+        ): AiPluginAskHandle {
             startCount.incrementAndGet()
             callback.set(onOutcome)
             synchronousOutcome?.let(onOutcome)
             return handle
         }
 
-        fun emit(outcome: OnDeviceAiPluginAskOutcome) {
+        fun emit(outcome: AiPluginAskOutcome) {
             checkNotNull(callback.get())(outcome)
         }
     }
 
     private class RecordingHandle(
         private val onCancel: () -> Unit,
-    ) : OnDeviceAiPluginAskHandle {
+    ) : AiPluginAskHandle {
         val cancelCount = AtomicInteger()
         val closeCount = AtomicInteger()
 

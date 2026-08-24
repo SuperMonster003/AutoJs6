@@ -3,7 +3,7 @@ package org.autojs.autojs.runtime.api.ai
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.autojs.autojs.core.ai.AiProviderSelector
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiOfficialPlugin
+import org.autojs.autojs.core.plugin.ai.ThreeStoneAiOfficialPlugin
 import org.autojs.plugin.ai.common.api.AiValidation
 import java.util.UUID
 
@@ -123,7 +123,7 @@ internal data class AiControlOptions(
                 // Omitted component selects the official on-device plugin; providerId may still
                 // be pinned explicitly, and modelId may be omitted for its single-model default.
                 val providerId = plugin.takeOptionalString("providerId", "AI plugin providerId")
-                    ?: OnDeviceAiOfficialPlugin.PROVIDER_ID
+                    ?: ThreeStoneAiOfficialPlugin.PROVIDER_ID
                 require(plugin.entrySet().isEmpty()) {
                     "AI plugin selection contains unsupported fields"
                 }
@@ -164,10 +164,10 @@ internal data class AiControlOptions(
 
         private fun officialPluginSelection(
             modelId: String?,
-            providerId: String = OnDeviceAiOfficialPlugin.PROVIDER_ID,
+            providerId: String = ThreeStoneAiOfficialPlugin.PROVIDER_ID,
         ) = AiPluginSelection(
-            packageName = OnDeviceAiOfficialPlugin.PACKAGE_NAME,
-            className = OnDeviceAiOfficialPlugin.CLASS_NAME,
+            packageName = ThreeStoneAiOfficialPlugin.PACKAGE_NAME,
+            className = ThreeStoneAiOfficialPlugin.CLASS_NAME,
             providerId = providerId,
             modelId = modelId,
         )

@@ -1,10 +1,10 @@
 package org.autojs.autojs.runtime.api.augment.ai
 
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginSession
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginMessage
+import org.autojs.autojs.core.plugin.ai.AiPluginSession
+import org.autojs.autojs.core.plugin.ai.AiPluginStreamRunner
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ai.AiPluginAskRuntime
 import org.autojs.autojs.runtime.api.ai.AiPluginRouteException
@@ -19,19 +19,19 @@ import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-/** Rhino-visible owner of one persistent on-device AI Conversation. */
+/** Rhino-visible owner of one persistent local AI Conversation. */
 internal class AiSessionNativeObject(
     private val scriptRuntime: ScriptRuntime,
-    private val baseRequest: OnDeviceAiPluginAskRequest,
+    private val baseRequest: AiPluginAskRequest,
     private val onClosed: (AiSessionNativeObject) -> Unit,
 ) : NativeObject(), Closeable, AiPluginSessionTarget {
 
     private val closed = AtomicBoolean(false)
     private val tracked = AtomicBoolean(true)
-    private val session = AtomicReference<OnDeviceAiPluginSession?>()
+    private val session = AtomicReference<AiPluginSession?>()
     private val askRuntime = AiPluginAskRuntime(
         runnerProvider = {
-            OnDeviceAiPluginAskRunner { request, onOutcome ->
+            AiPluginAskRunner { request, onOutcome ->
                 requireSession().startTurn(
                     message = request.messages.single(),
                     streaming = false,
@@ -50,7 +50,7 @@ internal class AiSessionNativeObject(
     )
     private val streamRuntime = AiPluginStreamRuntime(
         runnerProvider = {
-            OnDeviceAiPluginStreamRunner { request, onEvent ->
+            AiPluginStreamRunner { request, onEvent ->
                 requireSession().startTurn(
                     message = request.messages.single(),
                     streaming = true,
@@ -109,7 +109,7 @@ internal class AiSessionNativeObject(
     override val publicValue: Any
         get() = this
 
-    override fun attach(value: OnDeviceAiPluginSession): Boolean {
+    override fun attach(value: AiPluginSession): Boolean {
         if (closed.get() || !session.compareAndSet(null, value)) return false
         if (closed.get() && session.compareAndSet(value, null)) {
             value.close()
@@ -132,8 +132,8 @@ internal class AiSessionNativeObject(
         }
     }
 
-    private fun turnRequest(message: OnDeviceAiPluginMessage): OnDeviceAiPluginAskRequest =
-        OnDeviceAiPluginAskRequest(
+    private fun turnRequest(message: AiPluginMessage): AiPluginAskRequest =
+        AiPluginAskRequest(
             component = baseRequest.component,
             providerId = baseRequest.providerId,
             modelId = requireSession().modelId,
@@ -147,7 +147,7 @@ internal class AiSessionNativeObject(
             responseSchemaJson = baseRequest.responseSchemaJson,
         )
 
-    private fun requireSession(): OnDeviceAiPluginSession = session.get()
+    private fun requireSession(): AiPluginSession = session.get()
         ?: throw AiPluginRouteException(
             code = "SESSION_CLOSED",
             message = "AI plugin session is not available",

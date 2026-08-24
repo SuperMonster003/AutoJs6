@@ -1,16 +1,16 @@
 package org.autojs.autojs.runtime.api.ai
 
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskOutcome
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginSession
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginSessionOpenOutcome
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginSessionRunner
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamEvent
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
+import org.autojs.autojs.core.plugin.ai.AiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.AiPluginAskHandle
+import org.autojs.autojs.core.plugin.ai.AiPluginAskOutcome
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.AiPluginMessage
+import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
+import org.autojs.autojs.core.plugin.ai.AiPluginSession
+import org.autojs.autojs.core.plugin.ai.AiPluginSessionOpenOutcome
+import org.autojs.autojs.core.plugin.ai.AiPluginSessionRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginStreamEvent
+import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import org.junit.Assert.assertEquals
@@ -27,7 +27,7 @@ class AiPluginSessionRuntimeTest {
     fun synchronousOpenAttachesOnceAndResolvesPublicTarget() {
         val dispatchers = TestDispatchers()
         val session = FakeSession()
-        val runner = FakeRunner(OnDeviceAiPluginSessionOpenOutcome.Completed(session))
+        val runner = FakeRunner(AiPluginSessionOpenOutcome.Completed(session))
         val target = FakeTarget()
         val runtime = AiPluginSessionRuntime({ runner }, dispatchers::create)
         val resolved = AtomicReference<Any?>()
@@ -56,7 +56,7 @@ class AiPluginSessionRuntimeTest {
         val rejected = AtomicReference<Any?>()
 
         runtime.open(request(), target).onReject(callback(rejected::set))
-        runner.emit(OnDeviceAiPluginSessionOpenOutcome.Failed(OnDeviceAiPluginAskFailure.BUSY))
+        runner.emit(AiPluginSessionOpenOutcome.Failed(AiPluginAskFailure.BUSY))
         dispatchers.drain()
 
         val error = rejected.get() as Map<*, *>
@@ -82,7 +82,7 @@ class AiPluginSessionRuntimeTest {
             .onReject(callback { rejected.incrementAndGet() })
         runtime.close()
         val lateSession = FakeSession()
-        runner.emit(OnDeviceAiPluginSessionOpenOutcome.Completed(lateSession))
+        runner.emit(AiPluginSessionOpenOutcome.Completed(lateSession))
         dispatchers.drain()
 
         assertEquals(0, resolved.get())
@@ -93,11 +93,11 @@ class AiPluginSessionRuntimeTest {
         assertEquals(1, lateSession.closeCount.get())
     }
 
-    private fun request() = OnDeviceAiPluginAskRequest(
-        component = OnDeviceAiProviderComponent("org.example", "org.example.Provider"),
+    private fun request() = AiPluginAskRequest(
+        component = AiProviderComponent("org.example", "org.example.Provider"),
         providerId = "example.provider",
         modelId = "example-model",
-        messages = listOf(OnDeviceAiPluginMessage(OnDeviceAiPluginMessageRole.USER, "-")),
+        messages = listOf(AiPluginMessage(AiPluginMessageRole.USER, "-")),
         timeoutMillis = 5_000L,
     )
 
@@ -120,31 +120,31 @@ class AiPluginSessionRuntimeTest {
     }
 
     private class FakeRunner(
-        private val synchronous: OnDeviceAiPluginSessionOpenOutcome? = null,
-    ) : OnDeviceAiPluginSessionRunner {
-        private val callback = AtomicReference<((OnDeviceAiPluginSessionOpenOutcome) -> Unit)?>()
+        private val synchronous: AiPluginSessionOpenOutcome? = null,
+    ) : AiPluginSessionRunner {
+        private val callback = AtomicReference<((AiPluginSessionOpenOutcome) -> Unit)?>()
         val handle = RecordingHandle()
 
         override fun openSession(
-            request: OnDeviceAiPluginAskRequest,
-            onOutcome: (OnDeviceAiPluginSessionOpenOutcome) -> Unit,
-        ): OnDeviceAiPluginAskHandle {
+            request: AiPluginAskRequest,
+            onOutcome: (AiPluginSessionOpenOutcome) -> Unit,
+        ): AiPluginAskHandle {
             callback.set(onOutcome)
             synchronous?.let(onOutcome)
             return handle
         }
 
-        fun emit(outcome: OnDeviceAiPluginSessionOpenOutcome) = checkNotNull(callback.get())(outcome)
+        fun emit(outcome: AiPluginSessionOpenOutcome) = checkNotNull(callback.get())(outcome)
     }
 
     private class FakeTarget : AiPluginSessionTarget {
         override val publicValue: Any = "public-session"
-        val session = AtomicReference<OnDeviceAiPluginSession?>()
+        val session = AtomicReference<AiPluginSession?>()
         val attachCount = AtomicInteger()
         val closeCount = AtomicInteger()
         private val closed = AtomicBoolean(false)
 
-        override fun attach(value: OnDeviceAiPluginSession): Boolean {
+        override fun attach(value: AiPluginSession): Boolean {
             attachCount.incrementAndGet()
             return !closed.get() && session.compareAndSet(null, value)
         }
@@ -156,7 +156,7 @@ class AiPluginSessionRuntimeTest {
         }
     }
 
-    private class FakeSession : OnDeviceAiPluginSession {
+    private class FakeSession : AiPluginSession {
         override val providerId = "example.provider"
         override val modelId = "example-model"
         override val isClosed: Boolean
@@ -164,18 +164,18 @@ class AiPluginSessionRuntimeTest {
         val closeCount = AtomicInteger()
 
         override fun startTurn(
-            message: OnDeviceAiPluginMessage,
+            message: AiPluginMessage,
             streaming: Boolean,
-            onOutcome: ((OnDeviceAiPluginAskOutcome) -> Unit)?,
-            onStreamEvent: ((OnDeviceAiPluginStreamEvent) -> Unit)?,
-        ): OnDeviceAiPluginAskHandle = RecordingHandle()
+            onOutcome: ((AiPluginAskOutcome) -> Unit)?,
+            onStreamEvent: ((AiPluginStreamEvent) -> Unit)?,
+        ): AiPluginAskHandle = RecordingHandle()
 
         override fun close() {
             closeCount.incrementAndGet()
         }
     }
 
-    private class RecordingHandle : OnDeviceAiPluginAskHandle {
+    private class RecordingHandle : AiPluginAskHandle {
         val cancelCount = AtomicInteger()
         val closeCount = AtomicInteger()
 

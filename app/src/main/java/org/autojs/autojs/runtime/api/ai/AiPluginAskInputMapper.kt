@@ -1,12 +1,12 @@
 package org.autojs.autojs.runtime.api.ai
 
 import com.google.gson.JsonObject
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
-import org.autojs.plugin.ondeviceai.api.OnDeviceAiBackendProfile
-import org.autojs.plugin.ondeviceai.api.OnDeviceAiLimits
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.AiPluginMessage
+import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
+import org.autojs.autojs.core.plugin.ai.AiProviderComponent
+import org.autojs.plugin.ai.provider.api.AiProviderBackendProfile
+import org.autojs.plugin.ai.provider.api.AiProviderLimits
 
 /** Strict text-message admission for the explicitly selected local plugin route. */
 internal object AiPluginAskInputMapper {
@@ -23,7 +23,7 @@ internal object AiPluginAskInputMapper {
     fun map(
         input: AiRequestInput,
         defaultTimeoutMillis: Long,
-    ): OnDeviceAiPluginAskRequest {
+    ): AiPluginAskRequest {
         val pluginOptions = input.options.deepCopy()
         val temperature = pluginOptions.takeOptionalDouble("temperature", "AI option temperature")?.also {
             require(it >= 0.0) { "AI option temperature must be non-negative" }
@@ -35,15 +35,15 @@ internal object AiPluginAskInputMapper {
             require(it in 0.0..1.0) { "AI option topP must be between 0 and 1" }
         }
         val maximumOutputTokens = pluginOptions.takeOptionalLong("maxTokens", "AI option maxTokens")?.also {
-            require(it in 1L..OnDeviceAiLimits.MAX_OUTPUT_TOKENS) {
-                "AI option maxTokens must be between 1 and ${OnDeviceAiLimits.MAX_OUTPUT_TOKENS}"
+            require(it in 1L..AiProviderLimits.MAX_OUTPUT_TOKENS) {
+                "AI option maxTokens must be between 1 and ${AiProviderLimits.MAX_OUTPUT_TOKENS}"
             }
         }
         val backendProfile = pluginOptions.takeOptionalString("backend", "AI option backend")
             ?.lowercase()
-            ?: OnDeviceAiBackendProfile.CPU
-        require(backendProfile in OnDeviceAiBackendProfile.VALUES) {
-            "AI option backend must be one of ${OnDeviceAiBackendProfile.VALUES.sorted().joinToString()}"
+            ?: AiProviderBackendProfile.CPU
+        require(backendProfile in AiProviderBackendProfile.VALUES) {
+            "AI option backend must be one of ${AiProviderBackendProfile.VALUES.sorted().joinToString()}"
         }
         val structuredJsonOption = pluginOptions.takeOptionalBoolean(
             "structuredJson",
@@ -68,7 +68,7 @@ internal object AiPluginAskInputMapper {
         val control = AiControlOptions.takeFrom(pluginOptions)
         require(control.pluginSelection != null) { "AI plugin selection is required" }
         val selection = requireNotNull(control.pluginSelection)
-        require(input.messages.size() in 1..OnDeviceAiLimits.MAX_MESSAGES) {
+        require(input.messages.size() in 1..AiProviderLimits.MAX_MESSAGES) {
             "AI plugin ask message count is invalid"
         }
         val messages = input.messages.map { element ->
@@ -77,9 +77,9 @@ internal object AiPluginAskInputMapper {
             val role = when (
                 message.takeRequiredString("role", "AI plugin message role").lowercase()
             ) {
-                "system" -> OnDeviceAiPluginMessageRole.SYSTEM
-                "user" -> OnDeviceAiPluginMessageRole.USER
-                "assistant" -> OnDeviceAiPluginMessageRole.ASSISTANT
+                "system" -> AiPluginMessageRole.SYSTEM
+                "user" -> AiPluginMessageRole.USER
+                "assistant" -> AiPluginMessageRole.ASSISTANT
                 else -> throw IllegalArgumentException("AI plugin message role is unsupported")
             }
             val content = message.takeRequiredString(
@@ -90,10 +90,10 @@ internal object AiPluginAskInputMapper {
             require(message.entrySet().isEmpty()) {
                 "AI plugin ask message contains unsupported fields"
             }
-            OnDeviceAiPluginMessage(role, content)
+            AiPluginMessage(role, content)
         }
-        return OnDeviceAiPluginAskRequest(
-            component = OnDeviceAiProviderComponent(selection.packageName, selection.className),
+        return AiPluginAskRequest(
+            component = AiProviderComponent(selection.packageName, selection.className),
             providerId = selection.providerId,
             modelId = selection.modelId,
             messages = messages,

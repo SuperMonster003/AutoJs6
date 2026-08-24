@@ -620,8 +620,8 @@ dependencies /* Unclassified */ {
     // Plugin API: AI Common API
     implementation(project(":plugin-api:ai-common-api"))
 
-    // Plugin API: On-Device AI API
-    implementation(project(":plugin-api:on-device-ai-api"))
+    // Plugin API: AI Provider API
+    implementation(project(":plugin-api:ai-provider-api"))
 
     // Plugin API: Common API
     implementation(project(":plugin-api:common-plugin-api"))

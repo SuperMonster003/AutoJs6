@@ -78,14 +78,14 @@ jobs:
             ./gradlew \
             :plugin-api:protocol-wire-api:testDebugUnitTest \
             :plugin-api:ai-common-api:testDebugUnitTest \
-            :plugin-api:on-device-ai-api:testDebugUnitTest \
+            :plugin-api:ai-provider-api:testDebugUnitTest \
             :plugin-api:dex-compiler-api:testDebugUnitTest \
             :plugin-api:lua-runtime-api:testDebugUnitTest \
             :plugin-api:lua-runtime-api:assembleDebug \
-            :test-apps:on-device-ai-provider-conformance:testDebugUnitTest \
+            :test-apps:ai-provider-conformance:testDebugUnitTest \
             :test-apps:dex-compiler-conformance:testDebugUnitTest \
             :test-apps:lua-runtime-conformance:testDebugUnitTest \
-            :test-apps:on-device-ai-provider-conformance:assembleDebug \
+            :test-apps:ai-provider-conformance:assembleDebug \
             :test-apps:dex-compiler-conformance:assembleDebug \
             :test-apps:lua-runtime-conformance:assembleDebug \
             --no-daemon \

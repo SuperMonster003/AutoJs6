@@ -601,7 +601,7 @@
     <string name="summary_ai_default_profile">デフォルト: %1$s</string>
     <string name="summary_ai_default_profile_none">デフォルトプロファイルがありません. グローバル ai モジュールを使用するにはプロファイルを追加してください.</string>
     <string name="summary_ai_default_profile_unavailable">デフォルトプロファイルを利用できません: %1$s</string>
-    <string name="summary_ai_local_plugin_installed">ローカル AI プラグインのオンデバイスモデルを管理</string>
+    <string name="summary_ai_local_plugin_installed">ローカル AI プラグインのローカルモデルを管理</string>
     <string name="summary_ai_local_plugin_not_installed">未インストール. タップしてプラグインセンターからインストール</string>
     <string name="summary_ai_profile">%1$s / %2$s / %3$s</string>
     <string name="summary_ai_profile_unavailable">プロファイル ID: %1$s\n状態: %2$s\n暗号化データは保持されています. タップすると削除できます.</string>
