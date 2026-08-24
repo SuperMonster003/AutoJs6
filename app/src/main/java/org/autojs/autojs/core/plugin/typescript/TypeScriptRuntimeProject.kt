@@ -32,6 +32,7 @@ internal class TypeScriptMaterializedRhinoProject private constructor(
         fun create(
             context: Context,
             executable: TypeScriptExecutableSource,
+            entryPrefix: String = "",
         ): TypeScriptMaterializedRhinoProject {
             val projectRoot = requireNotNull(executable.projectRoot).canonicalFile
             val parent = File(context.cacheDir, RUNTIME_DIRECTORY_NAME).canonicalFile
@@ -68,12 +69,18 @@ internal class TypeScriptMaterializedRhinoProject private constructor(
                 executable.modules.forEach { module ->
                     val relative = executable.runtimeRelativeGeneratedPath(module)
                     requireNoRuntimeSupportCollision(relative, runtimeSupportPaths)
-                    val target = writeRuntimeFile(
-                        runtimeRoot,
-                        relative,
-                        module.javaScript.toByteArray(StandardCharsets.UTF_8),
-                    )
-                    generatedSourceNames[module.javaScriptPath] = target.canonicalPath
+                    val javaScript = if (module.javaScriptPath == executable.entryModulePath) {
+                        entryPrefix + module.javaScript
+                    } else {
+                        module.javaScript
+                    }
+                    val bytes = javaScript.toByteArray(StandardCharsets.UTF_8)
+                    try {
+                        val target = writeRuntimeFile(runtimeRoot, relative, bytes)
+                        generatedSourceNames[module.javaScriptPath] = target.canonicalPath
+                    } finally {
+                        bytes.fill(0)
+                    }
                 }
                 val entryPath = requireNotNull(generatedSourceNames[executable.entryModulePath])
                 return TypeScriptMaterializedRhinoProject(

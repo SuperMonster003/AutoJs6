@@ -24,6 +24,16 @@ public class SequenceScriptSource extends JavaScriptSource {
     }
 
     @NonNull
+    public JavaScriptSource getFirstScriptSource() {
+        return mFirstScriptSource;
+    }
+
+    @NonNull
+    public JavaScriptSource getSecondScriptSource() {
+        return mSecondScriptSource;
+    }
+
+    @NonNull
     @Override
     public String getScript() {
         concatScriptsIfNeeded();

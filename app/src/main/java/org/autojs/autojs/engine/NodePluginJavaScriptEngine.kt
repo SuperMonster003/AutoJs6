@@ -135,7 +135,7 @@ class NodePluginJavaScriptEngine(
                             projectRoot = projectRoot,
                             entryFile = sourceFile,
                             workingDirectory = projectRoot,
-                            entrySource = executable.javaScript,
+                            entrySource = compiled.prefixedEntrySource(executable.javaScript),
                             moduleSources = runtimeProject.moduleSources,
                         ),
                     )
@@ -148,12 +148,16 @@ class NodePluginJavaScriptEngine(
                     }
                     NodeProjectRunner.buildResolvedProjectLaunchRequest(
                         plan.copy(
-                            entrySource = executable.javaScript,
+                            entrySource = compiled.prefixedEntrySource(executable.javaScript),
                             moduleSources = plan.moduleSources + runtimeProject.moduleSources,
                         ),
                     )
                 }
                 return projectRequest.copy(
+                    sourceLineOffset = Math.addExact(
+                        projectRequest.sourceLineOffset,
+                        compiled.entryGeneratedLineOffset,
+                    ),
                     sourceName = runtimeProject.entryGeneratedSourceName,
                     typeScriptPrecompiledSnapshot = true,
                     typeScriptPrecompiledSourceNames = runtimeProject.precompiledSourceNames,
@@ -165,8 +169,11 @@ class NodePluginJavaScriptEngine(
                 ?: cwd()?.takeIf(String::isNotBlank)?.let(::File)?.normalizedCanonicalFile()
                 ?: androidContext.cacheDir.normalizedCanonicalFile()
             return NodePluginScriptRequest(
-                source = normalizeSource(compiled.executable.javaScript),
+                source = normalizeSource(
+                    compiled.prefixedEntrySource(compiled.executable.javaScript),
+                ),
                 sourceName = compiled.executable.generatedSourceName,
+                sourceLineOffset = compiled.entryGeneratedLineOffset,
                 workingDirectory = workingDirectory.path,
                 sandboxRoot = workingDirectory.path,
                 typeScriptPrecompiledSnapshot = true,

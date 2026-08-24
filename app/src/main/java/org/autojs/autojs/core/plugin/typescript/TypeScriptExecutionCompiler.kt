@@ -13,6 +13,7 @@ import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs.script.ScriptSource
+import org.autojs.autojs.script.SequenceScriptSource
 import org.autojs.autojs.script.TypeScriptFileSource
 import org.autojs.autojs6.R
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
@@ -82,15 +83,33 @@ internal object TypeScriptExecutionCompiler {
     /** Runs on the script worker thread before an engine is created. */
     @JvmStatic
     fun prepare(context: Context, source: ScriptSource): ScriptSource {
-        if (source !is JavaScriptFileSource || !source.isCompilerBackedTypeScriptSource) {
-            return source
-        }
-        val targetProfile = if (source.engineName == JavaScriptSource.ENGINE_NODEJS) {
+        val candidate = preparationCandidate(source) ?: return source
+        val targetProfile = if (candidate.source.engineName == JavaScriptSource.ENGINE_NODEJS) {
             TypeScriptCompilerContract.PROFILE_NODE
         } else {
             TypeScriptCompilerContract.PROFILE_RHINO
         }
-        return CompiledTypeScriptSource(source, compile(context, source, targetProfile))
+        return CompiledTypeScriptSource(
+            originalSource = candidate.source,
+            executable = compile(context, candidate.source, targetProfile),
+            preExecuteScript = candidate.preExecuteScript,
+        )
+    }
+
+    @JvmStatic
+    fun requiresPreparation(source: ScriptSource): Boolean = preparationCandidate(source) != null
+
+    private fun preparationCandidate(source: ScriptSource): PreparationCandidate? {
+        if (source is JavaScriptFileSource && source.isCompilerBackedTypeScriptSource) {
+            return PreparationCandidate(source)
+        }
+        if (source !is SequenceScriptSource) return null
+        val fileSource = source.secondScriptSource as? JavaScriptFileSource ?: return null
+        if (!fileSource.isCompilerBackedTypeScriptSource) return null
+        return PreparationCandidate(
+            source = fileSource,
+            preExecuteScript = source.firstScriptSource.script,
+        )
     }
 
     private fun compile(
@@ -275,12 +294,25 @@ internal object TypeScriptExecutionCompiler {
     private const val GENERATED_SUFFIX = ".generated.js"
     private const val NODE_PACKAGE_BOUNDARY_NAME = "package.json"
     private val PROJECT_BOUNDARY_NAMES = listOf("project.json", "tsconfig.json")
+
+    private data class PreparationCandidate(
+        val source: JavaScriptFileSource,
+        val preExecuteScript: String? = null,
+    )
 }
 
 internal class CompiledTypeScriptSource(
     val originalSource: JavaScriptFileSource,
     val executable: TypeScriptExecutableSource,
+    preExecuteScript: String? = null,
 ) : JavaScriptSource(executable.sourceName.substringBeforeLast('.', executable.sourceName)) {
+
+    val preExecutePrefix: String = preExecuteScript
+        ?.takeIf(String::isNotEmpty)
+        ?.let { script -> if (script.endsWith('\n')) script else "$script\n" }
+        .orEmpty()
+
+    val entryGeneratedLineOffset: Int = preExecutePrefix.count { character -> character == '\n' }
 
     override val engineName: String
         get() = if (executable.targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
@@ -289,9 +321,11 @@ internal class CompiledTypeScriptSource(
             ENGINE
         }
 
-    override fun getScript(): String = executable.javaScript
+    override fun getScript(): String = prefixedEntrySource(executable.javaScript)
 
-    override fun getScriptReader(): Reader = StringReader(executable.javaScript)
+    override fun getScriptReader(): Reader = StringReader(script)
+
+    fun prefixedEntrySource(javaScript: String): String = preExecutePrefix + javaScript
 
     override fun toString(): String = executable.generatedSourceName
 }

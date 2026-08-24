@@ -41,12 +41,18 @@ import org.autojs.autojs.engine.NodeRuntimeErrorCodes
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
+import org.autojs.autojs.external.ScriptIntents
+import org.autojs.autojs.external.receiver.BaseBroadcastReceiver
+import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory
 import org.autojs.autojs.runtime.exception.ScriptCompilationDiagnosticSeverity
 import org.autojs.autojs.runtime.exception.ScriptCompilationException
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
+import org.autojs.autojs.script.SequenceScriptSource
 import org.autojs.autojs.script.TypeScriptFileSource
+import org.autojs.autojs.timing.IntentTask
+import org.autojs.autojs.timing.TimedTask
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs6.R
@@ -202,6 +208,181 @@ class TypeScriptCompilerPluginClientDeviceTest {
             }
         } finally {
             System.clearProperty(markerKey)
+        }
+    }
+
+    @Test
+    fun executesNonForegroundEntryAdaptersThroughSharedTypeScriptPreparation() {
+        val selectorKey = "autojs6.typescript.background.selector.${System.nanoTime()}"
+        val preExecuteKey = "autojs6.typescript.background.pre.${System.nanoTime()}"
+        val markerKeys = listOf("tasker", "timed", "intent", "shortcut").associateWith { entry ->
+            "autojs6.typescript.background.$entry.${System.nanoTime()}"
+        }
+        (markerKeys.values + selectorKey + preExecuteKey).forEach(System::clearProperty)
+        try {
+            withSource(
+                name = "background-entry.ts",
+                source = """
+                    declare const java: any
+                    const markerKey: string = String(java.lang.System.getProperty("$selectorKey"))
+                    java.lang.System.setProperty(markerKey, "executed")
+                """.trimIndent(),
+            ) { source ->
+                val taskerIntent = Intent()
+                    .putExtra(ScriptIntents.EXTRA_KEY_PATH, source.path)
+                    .putExtra(
+                        ScriptIntents.EXTRA_KEY_PRE_EXECUTE_SCRIPT,
+                        "java.lang.System.setProperty('$preExecuteKey', 'executed');",
+                    )
+                val taskerLaunch = requireNotNull(
+                    ScriptIntents.prepareLaunch(context, taskerIntent),
+                )
+                assertTrue(taskerLaunch.launch.source is SequenceScriptSource)
+                assertTrue(
+                    TypeScriptExecutionCompiler.requiresPreparation(taskerLaunch.launch.source),
+                )
+                System.setProperty(selectorKey, markerKeys.getValue("tasker"))
+                ScriptIntents.handleIntent(context, taskerIntent)
+                awaitSystemProperty(preExecuteKey, "executed")
+                awaitSystemProperty(markerKeys.getValue("tasker"), "executed")
+
+                val timedTask = TimedTask(
+                    System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1),
+                    0L,
+                    source.path,
+                    ExecutionConfig(),
+                )
+                val timedIntent = timedTask.createIntent()
+                val timedLaunch = requireNotNull(
+                    ScriptIntents.prepareLaunch(context, timedIntent),
+                )
+                assertTrue(
+                    TypeScriptExecutionCompiler.requiresPreparation(timedLaunch.launch.source),
+                )
+                System.setProperty(selectorKey, markerKeys.getValue("timed"))
+                ScriptIntents.handleIntent(context, timedIntent)
+                awaitSystemProperty(markerKeys.getValue("timed"), "executed")
+
+                val intentTask = IntentTask().apply {
+                    setScriptPathAndCaptureContext(source.path)
+                    action = "autojs6.typescript.background.${System.nanoTime()}"
+                }
+                System.setProperty(selectorKey, markerKeys.getValue("intent"))
+                BaseBroadcastReceiver.runTask(
+                    context,
+                    Intent(intentTask.action),
+                    intentTask,
+                )
+                awaitSystemProperty(markerKeys.getValue("intent"), "executed")
+
+                val shortcutIntent = ScriptShortcutIntentFactory.create(source.path)
+                val shortcutLaunch = requireNotNull(
+                    ScriptShortcutIntentFactory.prepareDirectPathLaunch(
+                        context,
+                        shortcutIntent,
+                    ),
+                )
+                assertTrue(
+                    TypeScriptExecutionCompiler.requiresPreparation(shortcutLaunch.launch.source),
+                )
+                System.setProperty(selectorKey, markerKeys.getValue("shortcut"))
+                val shortcutTerminal = executeAndAwait(
+                    shortcutLaunch.launch.source,
+                    shortcutLaunch.config.workingDirectory,
+                )
+                shortcutTerminal.failure.get()?.let { error ->
+                    throw AssertionError("TypeScript shortcut execution failed", error)
+                }
+                assertTrue(shortcutTerminal.succeeded.get())
+                assertEquals("executed", System.getProperty(markerKeys.getValue("shortcut")))
+            }
+        } finally {
+            (markerKeys.values + selectorKey + preExecuteKey).forEach(System::clearProperty)
+        }
+    }
+
+    @Test
+    fun executesTaskerPrefixBeforeRhinoTypeScriptProjectEntry() {
+        val preExecuteKey = "autojs6.typescript.project.pre.${System.nanoTime()}"
+        val markerKey = "autojs6.typescript.project.body.${System.nanoTime()}"
+        System.clearProperty(preExecuteKey)
+        System.clearProperty(markerKey)
+        try {
+            withProject { root ->
+                File(root, "project.json").writeText("""{"main":"main.ts"}""")
+                File(root, "value.ts").writeText("export const value: number = 42\n")
+                val entry = File(root, "main.ts").apply {
+                    writeText(
+                        """
+                        declare const java: any
+                        import { value } from './value'
+                        java.lang.System.setProperty('$markerKey', String(value))
+                        """.trimIndent(),
+                    )
+                }
+                val launch = ScriptLaunchSourceFactory.createPathLaunch(
+                    path = entry.path,
+                    preExecuteScript =
+                        "java.lang.System.setProperty('$preExecuteKey', 'executed');",
+                    workingDirectory = root.path,
+                    defaultWorkingDirectory = root.path,
+                )
+
+                assertTrue(launch.source is SequenceScriptSource)
+                assertTrue(TypeScriptExecutionCompiler.requiresPreparation(launch.source))
+                val terminal = executeAndAwait(launch.source, launch.workingDirectory)
+                terminal.failure.get()?.let { error ->
+                    throw AssertionError("Prefixed Rhino TypeScript project failed", error)
+                }
+                assertTrue(terminal.succeeded.get())
+                assertEquals("executed", System.getProperty(preExecuteKey))
+                assertEquals("42", System.getProperty(markerKey))
+            }
+        } finally {
+            System.clearProperty(preExecuteKey)
+            System.clearProperty(markerKey)
+        }
+    }
+
+    @Test
+    fun executesTaskerPrefixBeforeNodeTypeScriptFile() {
+        val marker = "typescript-node-tasker-prefix-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            withSource(
+                name = "tasker-prefix.mts",
+                source = """
+                    const value: number = Number(
+                        (globalThis as { taskerValue?: unknown }).taskerValue,
+                    ) + 1
+                    console.log('$marker:' + value)
+                """.trimIndent(),
+            ) { source ->
+                val launch = ScriptLaunchSourceFactory.createPathLaunch(
+                    path = source.path,
+                    preExecuteScript = "globalThis.taskerValue = 41;",
+                    workingDirectory = source.parentFile?.path,
+                    defaultWorkingDirectory = context.cacheDir.path,
+                )
+
+                assertTrue(launch.source is SequenceScriptSource)
+                assertTrue(TypeScriptExecutionCompiler.requiresPreparation(launch.source))
+                val terminal = executeAndAwait(launch.source, launch.workingDirectory)
+                terminal.failure.get()?.let { error ->
+                    throw AssertionError("Prefixed Node TypeScript execution failed", error)
+                }
+                assertTrue(terminal.succeeded.get())
+                val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                assertTrue(requireNotNull(engine.lastPluginScriptResult).succeeded)
+                val consoleMessage = awaitConsoleMessage(marker)
+                assertTrue(
+                    "Expected $marker:42 in Node console, got: $consoleMessage",
+                    consoleMessage.contains("$marker:42"),
+                )
+            }
+        } finally {
+            console.clear()
         }
     }
 
@@ -1756,6 +1937,16 @@ class TypeScriptCompilerPluginClientDeviceTest {
         }
         fail("Console did not contain $fragment")
         error("Unreachable")
+    }
+
+    private fun awaitSystemProperty(key: String, expected: String) {
+        val deadline = SystemClock.uptimeMillis() +
+            TimeUnit.SECONDS.toMillis(EXECUTION_TIMEOUT_SECONDS)
+        while (SystemClock.uptimeMillis() < deadline) {
+            if (System.getProperty(key) == expected) return
+            SystemClock.sleep(50)
+        }
+        fail("System property $key did not become $expected")
     }
 
     private data class ExecutionTerminal(

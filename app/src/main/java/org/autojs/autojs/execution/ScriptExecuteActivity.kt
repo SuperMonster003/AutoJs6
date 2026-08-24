@@ -38,7 +38,6 @@ import org.autojs.autojs.execution.ScriptExecution.AbstractScriptExecution
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
@@ -145,7 +144,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         mExecutionListener = mScriptExecution.listener
         val source = mScriptExecution.source
         mScriptSource = source
-        if (source is JavaScriptFileSource && source.isRhinoTypeScriptSource) {
+        if (TypeScriptExecutionCompiler.requiresPreparation(source)) {
             prepareTypeScriptAndRun(source, savedInstanceState)
         } else {
             initializeAndRun(source, savedInstanceState)

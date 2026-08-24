@@ -188,6 +188,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Node TypeScript の実行例外でコンパイラの Source Map v3 を使用し, V8 スタックフレームを元の .mts/.cts ファイルの正確な行と列へマッピングし, Console とエディターログパネルのマッピング位置から直接ジャンプ可能
 * `新機能` TypeScript プロジェクトを Rhino または Node 向けの単一 Program として有界スナップショットからコンパイルし, 相対 import, CommonJS 循環依存, JSON 実行時ファイル, package の `type` コンテキスト, import 先モジュールの診断, モジュール単位の Source Map スタックマッピングを保持; package メタデータは厳格に検証し lifecycle scripts を拒否
 * `新機能` TypeScript コンパイル結果をソースグラフ, コンパイラと宣言の指紋, profile と policy の revision, package メタデータを含むセマンティックキーで実行間キャッシュ; 未変更スクリプトはコンパイラ prewarm と Worker コンパイルを省略し, 認証済み出力アーカイブは再利用前に再検証し, 破損またはクォータ超過のエントリは通常コンパイルへフォールバック
+* `新機能` タイマータスク, ブロードキャストタスク, ショートカット, Tasker/ローカル Run Intent がフォアグラウンド起動と同じ TypeScript preparation パイプラインを共有; Tasker の事前実行 JavaScript はコンパイル済み Rhino/Node 出力より先に実行され, Source Map の行オフセットにも接頭部を反映し, コンパイルを迂回した生の TypeScript 実行を防止
 * `新機能` 独立した Python Runtime プラグインバックエンドがローカル .py ファイルと `type: python` 宣言のスクリプトプロジェクトを別の CPython プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, ホットプラグ, JavaScript へのフォールバック禁止に対応
 * `新機能` Python 起動統合がファイルマネージャー/エディター/ローカル Run Intent/単一ファイル Import Intent/新規ショートカット/タイマータスク/ブロードキャストタスクを対象とし, 単一ファイルまたはプロジェクトの厳格なコンテキストを保持; プロジェクト内 import/相対ファイルアクセス/読み取り専用 `autojs6.app/device/execution/project` API に対応
 * `新機能` Python Runtime の実行は ExecutionConfig キー `autojs6.python.stdinSnapshot` を介した任意の上限付き事前供給 stdin スナップショットに対応し, ByteArray/UTF-8 テキストの厳格な受け入れ, プロバイダーの機能/サイズ交渉, 非公開の読み取り専用 PFD 転送とクリーンアップを行う

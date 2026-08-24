@@ -98,7 +98,8 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         try {
             mMaterializedTypeScriptProject?.close()
             mMaterializedTypeScriptProject = null
-            val executable = (source as? CompiledTypeScriptSource)?.executable
+            val compiledSource = source as? CompiledTypeScriptSource
+            val executable = compiledSource?.executable
             executable?.let { compiled ->
                 val bindings: TypeScriptSourceMapBindings
                 val generatedSourceName: String
@@ -106,12 +107,21 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
                     val project = TypeScriptMaterializedRhinoProject.create(
                         androidContext,
                         compiled,
+                        compiledSource.preExecutePrefix,
                     )
                     mMaterializedTypeScriptProject = project
-                    bindings = compiled.sourceMapBindings(project.generatedSourceNames)
+                    bindings = compiled.sourceMapBindings(
+                        generatedSourceNames = project.generatedSourceNames,
+                        entryGeneratedLineOffset = compiledSource.entryGeneratedLineOffset,
+                    )
                     generatedSourceName = project.entryFile.canonicalPath
                 } else {
-                    bindings = TypeScriptSourceMapBindings.single(compiled.sourceMapBinding)
+                    bindings = compiled.sourceMapBindings(
+                        generatedSourceNames = mapOf(
+                            compiled.entryModulePath to compiled.generatedSourceName,
+                        ),
+                        entryGeneratedLineOffset = compiledSource.entryGeneratedLineOffset,
+                    )
                     generatedSourceName = compiled.generatedSourceName
                 }
                 setTag(

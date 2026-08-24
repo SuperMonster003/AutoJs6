@@ -28,6 +28,7 @@
 * `新增` Node TypeScript 執行例外會取用編譯器 Source Map v3, 將 V8 堆疊框架映射回原始 .mts/.cts 檔案的精確行列, Console 與編輯器日誌面板中的映射位置可直接點擊跳轉
 * `新增` TypeScript 專案現在會將有界專案快照作為單一 Program 交給 Rhino 或 Node profile 編譯, 保留相對 import, CommonJS 循環相依, JSON 執行階段檔案, package `type` 上下文, 匯入模組診斷及逐模組 Source Map 堆疊映射; package 中繼資料保持嚴格驗證並拒絕 lifecycle scripts
 * `新增` TypeScript 編譯結果可依原始碼圖, 編譯器與宣告指紋, profile 與 policy 修訂及 package 中繼資料組成的語意鍵跨執行快取; 未修改指令碼會略過編譯器 prewarm 與 Worker 編譯, 已驗證輸出封存在重用前仍會重新驗證, 損毀或超額項目自動回退至正常編譯
+* `新增` 定時任務, 廣播任務, 捷徑及 Tasker/本機 Run Intent 現在與前景啟動共用同一條 TypeScript preparation 管線; Tasker 前置 JavaScript 會維持在已編譯的 Rhino/Node 輸出之前執行, Source Map 行偏移也會計入此前綴, 不再略過編譯並直接執行原始 TypeScript
 * `新增` 獨立 Python Runtime 外掛後端, 支援透過單獨的 CPython 外掛處理程序執行本機 .py 檔案及宣告為 `type: python` 的腳本專案, 並驗證固定元件/簽章/協定/ABI, 支援熱插拔且絕不回退至 JavaScript
 * `新增` Python 啟動整合涵蓋檔案管理器/編輯器/本機 Run Intent/單一檔案 Import Intent/新建快捷方式/定時任務/廣播任務並嚴格保留單一檔案或專案上下文; 專案支援內部 import/相對檔案讀取及唯讀 `autojs6.app/device/execution/project` API
 * `新增` Python Runtime 執行支援透過 ExecutionConfig 鍵 `autojs6.python.stdinSnapshot` 提供可選的有界預置 stdin 快照, 並採用嚴格 ByteArray/UTF-8 文字准入, 提供者能力/大小協商及私有唯讀 PFD 傳輸與清理
