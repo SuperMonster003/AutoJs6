@@ -46,11 +46,32 @@ internal data class PythonHostSelectorBounds(
     val right: Int,
     val bottom: Int,
 ) {
+    init {
+        require(right >= left && bottom >= top) {
+            "Python selector bounds must not be inverted"
+        }
+    }
+
     fun toJson(): JsonObject = JsonObject().apply {
         addProperty("left", left)
         addProperty("top", top)
         addProperty("right", right)
         addProperty("bottom", bottom)
+    }
+
+    companion object {
+        /**
+         * Android can report an inverted axis for a partially clipped accessibility node. Keep
+         * its anchor and collapse only the invalid axis so the pure-data protocol never invents
+         * a visible area or emits bounds which its clients must reject.
+         */
+        fun fromPlatform(left: Int, top: Int, right: Int, bottom: Int) =
+            PythonHostSelectorBounds(
+                left = left,
+                top = top,
+                right = maxOf(left, right),
+                bottom = maxOf(top, bottom),
+            )
     }
 }
 
@@ -408,7 +429,12 @@ internal data class PythonHostSelectorValues(
                 resourceId = node.viewIdResourceName,
                 className = node.className?.toString(),
                 packageName = node.packageName?.toString(),
-                bounds = PythonHostSelectorBounds(rect.left, rect.top, rect.right, rect.bottom),
+                bounds = PythonHostSelectorBounds.fromPlatform(
+                    rect.left,
+                    rect.top,
+                    rect.right,
+                    rect.bottom,
+                ),
                 clickable = node.isClickable,
                 editable = node.isEditable,
                 enabled = node.isEnabled,
