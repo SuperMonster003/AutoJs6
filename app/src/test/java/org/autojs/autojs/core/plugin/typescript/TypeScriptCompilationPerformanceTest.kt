@@ -3,6 +3,7 @@ package org.autojs.autojs.core.plugin.typescript
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
+import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -39,6 +40,62 @@ class TypeScriptCompilationPerformanceTest {
             clock.advanceMillis(75)
             recorder.recordRemoteRoundTripSince(startedAt)
         }
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_INGRESS,
+                TypeScriptR2Contract.PHASE_STATE_STARTED,
+                TimeUnit.MILLISECONDS.toNanos(5L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_INGRESS,
+                TypeScriptR2Contract.PHASE_STATE_COMPLETED,
+                TimeUnit.MILLISECONDS.toNanos(10L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_PARSE,
+                TypeScriptR2Contract.PHASE_STATE_STARTED,
+                TimeUnit.MILLISECONDS.toNanos(11L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_PARSE,
+                TypeScriptR2Contract.PHASE_STATE_COMPLETED,
+                TimeUnit.MILLISECONDS.toNanos(25L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_SEMANTIC,
+                TypeScriptR2Contract.PHASE_STATE_STARTED,
+                TimeUnit.MILLISECONDS.toNanos(26L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_SEMANTIC,
+                TypeScriptR2Contract.PHASE_STATE_COMPLETED,
+                TimeUnit.MILLISECONDS.toNanos(47L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_EMIT,
+                TypeScriptR2Contract.PHASE_STATE_STARTED,
+                TimeUnit.MILLISECONDS.toNanos(48L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_EMIT,
+                TypeScriptR2Contract.PHASE_STATE_COMPLETED,
+                TimeUnit.MILLISECONDS.toNanos(65L),
+            ),
+        )
         recorder.recordCompilerElapsed(68L)
         recorder.checkpoint().also { startedAt ->
             clock.advanceMillis(4)
@@ -60,14 +117,22 @@ class TypeScriptCompilationPerformanceTest {
         assertEquals(140L, report.bindAndPrewarmElapsedMs)
         assertEquals(75L, report.remoteRoundTripElapsedMs)
         assertEquals(68L, report.compilerElapsedMs)
+        assertEquals(5L, report.compilerBeforeIngressElapsedMs)
+        assertEquals(5L, report.compilerIngressElapsedMs)
+        assertEquals(3L, report.compilerInterPhaseElapsedMs)
+        assertEquals(14L, report.compilerParseElapsedMs)
+        assertEquals(21L, report.compilerSemanticElapsedMs)
+        assertEquals(17L, report.compilerEmitElapsedMs)
+        assertEquals(3L, report.compilerAfterEmitElapsedMs)
         assertEquals(4L, report.outputProcessingElapsedMs)
         assertEquals(4_096L, report.inputArchiveBytes)
         assertEquals(3, report.sourceFileCount)
         assertEquals(750L, report.hostHeapDeltaKiB)
         val line = report.toLogLine()
-        assertTrue(line.startsWith("typescript-compile-perf schema=1"))
+        assertTrue(line.startsWith("typescript-compile-perf schema=2"))
         assertTrue(line.contains("bindPrewarmMs=140"))
         assertTrue(line.contains("compilerMs=68"))
+        assertTrue(line.contains("compilerSemanticMs=21"))
         assertFalse(line.contains("requestId"))
         assertFalse(line.contains("sourcePath"))
     }
@@ -101,6 +166,13 @@ class TypeScriptCompilationPerformanceTest {
         assertNull(report.bindAndPrewarmElapsedMs)
         assertNull(report.remoteRoundTripElapsedMs)
         assertNull(report.compilerElapsedMs)
+        assertNull(report.compilerBeforeIngressElapsedMs)
+        assertNull(report.compilerIngressElapsedMs)
+        assertNull(report.compilerInterPhaseElapsedMs)
+        assertNull(report.compilerParseElapsedMs)
+        assertNull(report.compilerSemanticElapsedMs)
+        assertNull(report.compilerEmitElapsedMs)
+        assertNull(report.compilerAfterEmitElapsedMs)
         assertTrue(report.toLogLine().contains("bindPrewarmMs=na"))
         assertTrue(report.toLogLine().contains("compilerMs=na"))
     }
@@ -130,6 +202,70 @@ class TypeScriptCompilationPerformanceTest {
         assertNull(report.bindAndPrewarmElapsedMs)
         assertNull(report.remoteRoundTripElapsedMs)
         assertNull(report.compilerElapsedMs)
+    }
+
+    @Test
+    fun ignoresUnknownDuplicateAndOutOfOrderCompilerPhaseEvents() {
+        val reports = mutableListOf<TypeScriptCompilationPerformanceSnapshot>()
+        val recorder = TypeScriptCompilationPerformanceRecorder(
+            targetProfile = TypeScriptCompilerContract.PROFILE_RHINO,
+            cacheEnabled = false,
+            reporter = TypeScriptCompilationPerformanceReporter(reports::add),
+            monotonicNanos = { 0L },
+            usedHeapKiB = { 1_024L },
+        )
+
+        assertFalse(
+            recorder.recordCompilerPhase(
+                "source/path.ts",
+                TypeScriptR2Contract.PHASE_STATE_STARTED,
+                TimeUnit.MILLISECONDS.toNanos(1L),
+            ),
+        )
+        assertFalse(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_PARSE,
+                TypeScriptR2Contract.PHASE_STATE_STARTED,
+                TimeUnit.MILLISECONDS.toNanos(2L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_INGRESS,
+                TypeScriptR2Contract.PHASE_STATE_STARTED,
+                TimeUnit.MILLISECONDS.toNanos(5L),
+            ),
+        )
+        assertFalse(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_INGRESS,
+                TypeScriptR2Contract.PHASE_STATE_STARTED,
+                TimeUnit.MILLISECONDS.toNanos(6L),
+            ),
+        )
+        assertFalse(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_INGRESS,
+                TypeScriptR2Contract.PHASE_STATE_COMPLETED,
+                TimeUnit.MILLISECONDS.toNanos(4L),
+            ),
+        )
+        assertTrue(
+            recorder.recordCompilerPhase(
+                TypeScriptR2Contract.PHASE_INGRESS,
+                TypeScriptR2Contract.PHASE_STATE_COMPLETED,
+                TimeUnit.MILLISECONDS.toNanos(7L),
+            ),
+        )
+        recorder.recordCompilerElapsed(10L)
+        recorder.finish()
+
+        val report = reports.single()
+        assertEquals(5L, report.compilerBeforeIngressElapsedMs)
+        assertEquals(2L, report.compilerIngressElapsedMs)
+        assertNull(report.compilerInterPhaseElapsedMs)
+        assertNull(report.compilerParseElapsedMs)
+        assertFalse(report.toLogLine().contains("source/path.ts"))
     }
 
     private class FakeClock {

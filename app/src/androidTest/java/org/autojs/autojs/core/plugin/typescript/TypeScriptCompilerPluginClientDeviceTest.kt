@@ -136,8 +136,22 @@ class TypeScriptCompilerPluginClientDeviceTest {
             )
             assertTrue(performance[0].bindAndPrewarmElapsedMs != null)
             assertTrue(performance[0].compilerElapsedMs != null)
+            assertTrue(performance[0].compilerBeforeIngressElapsedMs != null)
+            assertTrue(performance[0].compilerIngressElapsedMs != null)
+            assertTrue(performance[0].compilerInterPhaseElapsedMs != null)
+            assertTrue(performance[0].compilerParseElapsedMs != null)
+            assertTrue(performance[0].compilerSemanticElapsedMs != null)
+            assertTrue(performance[0].compilerEmitElapsedMs != null)
+            assertTrue(performance[0].compilerAfterEmitElapsedMs != null)
             assertNull(performance[1].bindAndPrewarmElapsedMs)
             assertNull(performance[1].compilerElapsedMs)
+            assertNull(performance[1].compilerBeforeIngressElapsedMs)
+            assertNull(performance[1].compilerIngressElapsedMs)
+            assertNull(performance[1].compilerInterPhaseElapsedMs)
+            assertNull(performance[1].compilerParseElapsedMs)
+            assertNull(performance[1].compilerSemanticElapsedMs)
+            assertNull(performance[1].compilerEmitElapsedMs)
+            assertNull(performance[1].compilerAfterEmitElapsedMs)
         }
     }
 

@@ -299,7 +299,10 @@ internal class TypeScriptCompilerPluginClient(
                     }
                 }
 
-                val callback = CompilationCallback()
+                val callback = CompilationCallback(
+                    expectedRequestId = requestId,
+                    performance = performance,
+                )
                 val remoteRoundTripStartedAt = performance.checkpoint()
                 val terminalBundle = try {
                     val ticket = startCompilation(
@@ -1002,10 +1005,43 @@ internal class TypeScriptCompilerPluginClient(
         val authority: TypeScriptCompilerAuthority,
     )
 
-    private class CompilationCallback : ITypeScriptCompilationCallback.Stub() {
+    private class CompilationCallback(
+        private val expectedRequestId: String,
+        private val performance: TypeScriptCompilationPerformanceRecorder,
+    ) : ITypeScriptCompilationCallback.Stub() {
         val terminal = CompletableDeferred<Bundle>()
 
-        override fun onProgress(progress: Bundle?) = Unit
+        override fun onProgress(progress: Bundle?) {
+            if (progress == null) return
+            runCatching {
+                if (
+                    progress.getString(TypeScriptCompilerContract.KEY_REQUEST_ID) !=
+                    expectedRequestId ||
+                    progress.getInt(
+                        TypeScriptR2Contract.KEY_PROGRESS_SCHEMA_REVISION,
+                        -1,
+                    ) != TypeScriptR2Contract.PROGRESS_SCHEMA_REVISION ||
+                    progress.getString(TypeScriptR2Contract.KEY_PROGRESS_KIND) !=
+                    TypeScriptR2Contract.PROGRESS_KIND_PHASE
+                ) {
+                    return@runCatching
+                }
+                val phase = progress.getString(TypeScriptR2Contract.KEY_PHASE)
+                    ?: return@runCatching
+                val state = progress.getString(TypeScriptR2Contract.KEY_PHASE_STATE)
+                    ?: return@runCatching
+                val elapsedNanos = progress.getLong(
+                    TypeScriptR2Contract
+                        .KEY_ELAPSED_REALTIME_NANOS_SINCE_REQUEST_START,
+                    -1L,
+                )
+                performance.recordCompilerPhase(
+                    phase = phase,
+                    state = state,
+                    elapsedNanosSinceRequestStart = elapsedNanos,
+                )
+            }
+        }
 
         override fun onCompleted(result: Bundle?) {
             if (result == null) {

@@ -173,7 +173,7 @@
 * `Corrección` Los nombres de paquete y la información de Activity de las aplicaciones recientes mostrados en el menú del botón flotante eran incorrectos _[`issue #529`](http://issues.autojs6.com/529)_
 * `Corrección` El diálogo "Ejecutar script" del botón flotante podía no restaurarse tras minimizarlo (intento de corrección) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Corrección` El fondo de la pantalla de inicio no se extendía al área de recorte del borde corto
-* `Mejora` La compilación de TypeScript ahora registra observaciones por solicitud que preservan la privacidad sobre preparación, consulta de caché, enlace/precalentamiento del compilador, compilación remota, procesamiento de salida, latencia total, tamaño del archivo, cantidad de fuentes y variación del heap del host; estas observaciones no imponen umbrales de rendimiento
+* `Mejora` La compilación de TypeScript ahora registra observaciones por solicitud que preservan la privacidad sobre preparación, consulta de caché, enlace/precalentamiento del compilador, compilación remota, procesamiento de salida, latencia total, tamaño del archivo, cantidad de fuentes y variación del heap del host, y desglosa el tiempo del compilador en intervalos antes de ingress, ingress, entre fases, parse, semantic, emit y después de emit; se ignoran los callbacks progress malformados o fuera de orden y estas observaciones no imponen umbrales de rendimiento
 * `Mejora` Mejorada la compatibilidad de argumentos de los métodos KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
 * `Mejora` Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku
 * `Mejora` Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación
