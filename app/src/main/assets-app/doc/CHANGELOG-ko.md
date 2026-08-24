@@ -8,6 +8,7 @@
 
 ###### 2026/08/24
 
+* `추가` Ace LSP 기본 파일 형식에 .mts/.cts 및 선언 파일 변형을 추가하여 외부 Ace 편집기가 실행과 동일한 Rhino/Node TypeScript 프로필을 선택하도록 개선; 이전 기본 선택은 마이그레이션하고 명시적 사용자 지정 접미사 집합은 그대로 유지
 * `추가` APK Builder가 패키징 시 Rhino TypeScript 프로젝트를 컴파일합니다. 최종 APK에는 암호화된 JavaScript와 소스가 포함되지 않은 선택적 Source Map만 들어가며 TypeScript 소스와 컴파일러는 포함되지 않습니다. 암호화 프로젝트는 일회용 AES-256-GCM 스테이징을 사용하고 평문은 메모리에만 유지한 뒤 재암호화 후 0으로 지웁니다
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js ESM/dynamic import()/네트워크 및 WebSocket/네이티브 네트워크 모듈/worker_threads/child_process/Java 상호 운용 기능을 정식 기능으로 기본 활성화하고, 권한 선언/허용 목록/샌드박스/리소스 예산 보호는 계속 적용

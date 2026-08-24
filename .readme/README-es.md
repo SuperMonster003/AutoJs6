@@ -168,6 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ###### 2026/08/24
 
+* `Nuevo` Los tipos de archivo predeterminados de Ace LSP ahora incluyen .mts/.cts y sus variantes de declaración, lo que permite al editor Ace externo seleccionar el mismo perfil de ejecución TypeScript Rhino/Node; las selecciones predeterminadas antiguas se migran y los conjuntos de sufijos personalizados explícitos no cambian
 * `Nuevo` APK Builder ahora compila proyectos Rhino TypeScript durante el empaquetado; los APK finales solo contienen JavaScript cifrado y Source Maps opcionales sin código fuente incrustado, nunca fuentes TypeScript ni el compilador; los proyectos cifrados usan staging AES-256-GCM de un solo uso, con el texto claro solo en memoria y borrado tras volver a cifrar
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` ESM, dynamic import(), red y WebSocket, módulos de red nativos, worker_threads, child_process e interoperabilidad con Java de Node.js son funciones estables habilitadas de forma predeterminada, mientras se mantienen las declaraciones de permisos, listas de permitidos, aislamiento y presupuestos de recursos

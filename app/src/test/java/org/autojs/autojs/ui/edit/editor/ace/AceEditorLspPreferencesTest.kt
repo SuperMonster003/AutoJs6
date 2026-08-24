@@ -30,14 +30,43 @@ class AceEditorLspPreferencesTest {
     fun defaultFileTypesCoverSupportedJavaScriptAndTypeScriptSuffixes() {
         assertTrue(
             AceEditorLspPreferences.DEFAULT_FILE_TYPES.containsAll(
-                listOf(".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx", ".d.ts", ".json"),
+                listOf(
+                    ".js",
+                    ".mjs",
+                    ".cjs",
+                    ".jsx",
+                    ".ts",
+                    ".tsx",
+                    ".mts",
+                    ".cts",
+                    ".d.ts",
+                    ".d.mts",
+                    ".d.cts",
+                    ".json",
+                ),
             ),
         )
-        assertFalse(AceEditorLspPreferences.DEFAULT_FILE_TYPES.contains(".mts"))
-        assertFalse(AceEditorLspPreferences.DEFAULT_FILE_TYPES.contains(".cts"))
         assertEquals(
             AceEditorLspPreferences.DEFAULT_FILE_TYPES,
             AceEditorLspPreferences.normalizeFileTypes(AceEditorLspPreferences.DEFAULT_FILE_TYPES),
+        )
+    }
+
+    @Test
+    fun legacyDefaultSelectionMigratesWithoutOverridingNewExplicitChoices() {
+        val legacyDefault = ".js,.mjs,.cjs,.jsx,.ts,.tsx,.d.ts,.json,.auto.js,.node.js"
+
+        assertEquals(
+            AceEditorLspPreferences.DEFAULT_FILE_TYPES,
+            AceEditorLspPreferences.resolveStoredFileTypes(legacyDefault, revision = 1),
+        )
+        assertEquals(
+            AceEditorLspPreferences.normalizeFileTypes(legacyDefault),
+            AceEditorLspPreferences.resolveStoredFileTypes(legacyDefault, revision = 2),
+        )
+        assertEquals(
+            listOf(".js", ".ts"),
+            AceEditorLspPreferences.resolveStoredFileTypes(".js,.ts", revision = 1),
         )
     }
 
