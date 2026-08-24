@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/24
+###### 2026/08/25
 
 * `Feature` Ace LSP defaults now include .mts/.cts and their declaration-file variants, allowing the external Ace editor to select the same Rhino/Node TypeScript execution profile; legacy default selections migrate while explicit custom suffix sets remain unchanged
 * `Feature` APK Builder now compiles Rhino TypeScript projects at build time; packaged APKs contain only encrypted JavaScript and optional Source Maps without embedded source, never TypeScript sources or the compiler; encrypted projects use one-time AES-256-GCM staging, with cleartext held only in memory and zeroed after re-encryption
@@ -173,6 +173,7 @@
 * `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
 * `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Fix` Splash screen background did not extend into the short-edge display cutout area
+* `Fix` File manager did not refresh automatically after an Explorer Action plugin committed a new sibling output through the host session
 * `Improvement` TypeScript compilation now emits privacy-safe per-request observations for preparation, cache lookup, compiler binding/prewarm, remote compilation, output handling, total latency, archive size, source count, and host heap change, and breaks compiler time down into before-ingress, ingress, inter-phase, parse, semantic, emit, and after-emit intervals; malformed or out-of-order progress callbacks are ignored and these observations do not impose performance thresholds
 * `Improvement` Improved argument compatibility for KeyCode methods _[`issue #492`](http://issues.autojs6.com/492)_
 * `Improvement` KeyCode methods support sending key code commands with Shizuku permission
@@ -201,6 +202,7 @@
 * `Improvement` Consolidated file manager media detail queries into a single MediaInfo snapshot to reduce Binder calls and wait time
 * `Improvement` Limited external file viewing and media playback fallbacks to read-only URI access
 * `Improvement` Unified file manager plugin actions for default clicks, primary buttons, media detail playback, and the overflow menu under an explicit main-file-page policy with one deterministic fallback
+* `Improvement` Explorer Action v7 lets archive plugins reopen hidden pending output read-only and verify it before final publication while preserving direct-commit compatibility for v4 clients
 * `Improvement` Moved the local AI and DEX compiler conformance providers from the production `plugins` directory into the dedicated `test-apps` build group, preserving hostile Binder regression coverage while keeping independent production plugins as a separate release boundary
 * `Improvement` DEX compiler experimental host path remains default-off and requires an explicit component while enforcing exact-component UID and complete signer-set pinning, single-dispatch fallback, semantic cache provenance, bounded callback ingress, isolated Binder deadlines, structural DEX ZIP validation, reliable-pipe bounded draining with peer errors checked at EOF, rollback-safe single publication guarded by source and destination digests, and atomic arbitration between asynchronous termination signals and the publication commit point that forces rollback when cancellation, timeout, or Binder death wins before commit
 * `Improvement` DEX compiler R1.1 keeps the experiment default-off and lets raw runtime.loadJar JARs prefer one explicitly selected same-signed exact-component provider, with one built-in D8/dx fallback on failure, no fallback on cancellation, and AAR loading kept on the built-in path

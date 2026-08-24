@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 8 월 24 일.
+데이터 갱신일: 2026 년 8 월 25 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/24
+###### 2026/08/25
 
 * `추가` Ace LSP 기본 파일 형식에 .mts/.cts 및 선언 파일 변형을 추가하여 외부 Ace 편집기가 실행과 동일한 Rhino/Node TypeScript 프로필을 선택하도록 개선; 이전 기본 선택은 마이그레이션하고 명시적 사용자 지정 접미사 집합은 그대로 유지
 * `추가` APK Builder가 패키징 시 Rhino TypeScript 프로젝트를 컴파일합니다. 최종 APK에는 암호화된 JavaScript와 소스가 포함되지 않은 선택적 Source Map만 들어가며 TypeScript 소스와 컴파일러는 포함되지 않습니다. 암호화 프로젝트는 일회용 AES-256-GCM 스테이징을 사용하고 평문은 메모리에만 유지한 뒤 재암호화 후 0으로 지웁니다
@@ -333,6 +333,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 플로팅 버튼 메뉴에 표시되는 최근 앱의 패키지 이름 및 Activity 정보가 올바르지 않은 문제 _[`issue #529`](http://issues.autojs6.com/529)_
 * `수정` 플로팅 버튼의 "스크립트 실행" 대화상자가 최소화된 후 복원되지 않을 수 있는 문제 (수정 시도) _[`issue #500`](http://issues.autojs6.com/500)_
 * `수정` 시작 화면 배경이 노치 화면의 짧은 가장자리 컷아웃 영역까지 확장되지 않는 문제
+* `수정` Explorer Action 플러그인이 호스트 세션을 통해 새 인접 출력을 커밋한 뒤 파일 관리자가 자동으로 새로 고쳐지지 않는 문제
 * `개선` TypeScript 컴파일은 준비, 캐시 조회, 컴파일러 바인딩/프리워밍, 원격 컴파일, 출력 처리, 전체 지연 시간, 아카이브 크기, 소스 수 및 호스트 힙 변화를 요청별 개인정보 보호 관측값으로 기록하고 컴파일러 시간을 ingress 전, ingress, 단계 사이, parse, semantic, emit 및 emit 후 구간으로 분해합니다; 형식이 잘못되거나 순서가 어긋난 progress callback은 무시되며 이 관측값은 성능 임계값을 적용하지 않습니다
 * `개선` KeyCode 메서드의 인수 호환성 향상 _[`issue #492`](http://issues.autojs6.com/492)_
 * `개선` KeyCode 메서드에서 Shizuku 권한으로 키 코드 명령 전송 지원
@@ -361,6 +362,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 파일 관리자의 미디어 상세 정보 조회를 단일 MediaInfo 스냅샷으로 통합하여 Binder 호출 및 대기 시간 감소
 * `개선` 외부 파일 보기 및 미디어 재생 대체 경로를 읽기 전용 URI 접근으로 제한
 * `개선` 파일 관리자의 기본 클릭/주요 버튼/미디어 상세 재생/overflow 메뉴 플러그인 작업을 명시적인 기본 파일 페이지 정책으로 통합하고 결정적인 단일 폴백 적용
+* `개선` Explorer Action v7에서 압축 파일 플러그인이 숨겨진 대기 출력을 읽기 전용으로 다시 열어 최종 게시 전에 검증할 수 있으며 v4 클라이언트의 직접 commit 호환성 유지
 * `개선` AI 텍스트 및 DEX 컴파일러 적합성 provider를 프로덕션 `plugins` 디렉터리에서 전용 `test-apps` build group으로 이동하여 적대적 Binder 회귀 테스트 범위를 유지하고 독립 프로덕션 플러그인의 릴리스 경계를 명확화
 * `개선` DEX 컴파일러 실험적 호스트 경로를 기본 비활성화하고 명시적 컴포넌트를 요구하며, 정확한 컴포넌트 UID와 전체 서명자 집합 고정, 단일 디스패치 폴백, 의미 기반 캐시 출처, 제한된 콜백 입력, 격리된 Binder 시간 제한, 구조적 DEX ZIP 검증, reliable pipe 제한 drain과 EOF 시 peer error 확인, 원본/대상 digest로 보호되는 rollback 가능한 단일 게시, 비동기 종료 신호와 게시 commit 지점 사이의 원자적 중재, 취소/시간 초과/Binder death가 commit 전에 승리할 때 강제 rollback을 적용
 * `개선` DEX 컴파일러 R1.1은 실험을 기본 비활성 상태로 유지하고 runtime.loadJar의 raw JAR가 명시적으로 선택한 호스트와 동일 서명의 정확한 컴포넌트 provider를 우선 사용하도록 하며, 실패 시 내장 D8/dx로 한 번만 폴백하고 취소 시에는 폴백하지 않으며 AAR 로딩은 내장 경로에 유지합니다
@@ -671,7 +673,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 8 월 24 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 8 월 25 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

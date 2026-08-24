@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/24
+###### 2026/08/25
 
 * `Fonctionnalité` Les types de fichiers par défaut d'Ace LSP incluent désormais .mts/.cts et leurs variantes de déclaration, permettant à l'éditeur Ace externe de sélectionner le même profil d'exécution TypeScript Rhino/Node; les anciennes sélections par défaut sont migrées et les ensembles de suffixes personnalisés explicites restent inchangés
 * `Fonctionnalité` APK Builder compile désormais les projets Rhino TypeScript lors de l'empaquetage ; les APK finaux ne contiennent que du JavaScript chiffré et des Source Maps facultatives sans source intégrée, jamais les sources TypeScript ni le compilateur ; les projets chiffrés utilisent une zone de staging AES-256-GCM à usage unique, le texte en clair restant uniquement en mémoire puis étant effacé après rechiffrement
@@ -173,6 +173,7 @@
 * `Correction` Les noms de paquet et les informations d'Activity des applications récentes affichés dans le menu du bouton flottant étaient incorrects _[`issue #529`](http://issues.autojs6.com/529)_
 * `Correction` La boîte de dialogue "Exécuter le script" du bouton flottant pouvait ne pas être restaurée après sa réduction (tentative de correction) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Correction` L'arrière-plan de l'écran de démarrage ne s'étendait pas dans la zone de découpe du bord court
+* `Correction` Le gestionnaire de fichiers ne s'actualisait pas automatiquement après qu'un plugin Explorer Action avait validé une nouvelle sortie voisine via la session hôte
 * `Amélioration` La compilation TypeScript enregistre désormais, pour chaque requête et sans donnée sensible, la préparation, la recherche en cache, la liaison/préchauffe du compilateur, la compilation distante, le traitement de sortie, la durée totale, la taille de l'archive, le nombre de sources et la variation du tas de l'hôte, et décompose le temps du compilateur en intervalles avant ingress, ingress, inter-phases, parse, semantic, emit et après emit; les callbacks progress mal formés ou désordonnés sont ignorés et ces observations n'imposent aucun seuil de performance
 * `Amélioration` Amélioration de la compatibilité des arguments des méthodes KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
 * `Amélioration` Les méthodes KeyCode permettent d'envoyer des commandes de touche avec l'autorisation Shizuku
@@ -201,6 +202,7 @@
 * `Amélioration` Regroupement des requêtes de détails multimédias du gestionnaire de fichiers en un seul instantané MediaInfo afin de réduire les appels Binder et le temps d'attente
 * `Amélioration` Limitation des replis d'affichage et de lecture externes aux accès URI en lecture seule
 * `Amélioration` Unification des actions de plugins du gestionnaire de fichiers pour le clic par défaut, le bouton principal, la lecture depuis les détails multimédias et le menu overflow sous une politique explicite de la page principale des fichiers avec un repli unique et déterministe
+* `Amélioration` Explorer Action v7 permet aux plugins d'archives de rouvrir en lecture seule une sortie en attente masquée et de la vérifier avant sa publication tout en conservant la validation directe des clients v4
 * `Amélioration` Migration des fournisseurs de conformité local AI et compilateur DEX du répertoire de production `plugins` vers le groupe de build dédié `test-apps`, en conservant la couverture de régression Binder hostile et en séparant la frontière de publication des plugins de production indépendants
 * `Amélioration` Le chemin hôte expérimental du compilateur DEX reste désactivé par défaut et exige un composant explicite, avec épinglage de l'UID du composant exact et de l'ensemble complet des signataires, repli à répartition unique, provenance sémantique du cache, entrée de callbacks bornée, délais Binder isolés, validation structurelle du ZIP DEX, vidage borné de reliable pipe avec vérification des erreurs du pair à EOF, publication unique avec retour arrière protégée par les condensats source et destination, et arbitrage atomique entre les signaux de terminaison asynchrones et le point de commit de publication qui force le retour arrière si l'annulation, le délai dépassé ou Binder death l'emporte avant le commit
 * `Amélioration` Le compilateur DEX R1.1 maintient l'expérimentation désactivée par défaut et permet aux JAR bruts de runtime.loadJar de préférer un provider de composant exact explicitement sélectionné et signé comme l'hôte, avec un seul repli vers D8/dx intégré en cas d'échec, aucun repli en cas d'annulation et le chargement AAR conservé sur le chemin intégré

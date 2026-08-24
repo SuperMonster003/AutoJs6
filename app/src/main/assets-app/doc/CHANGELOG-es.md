@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/24
+###### 2026/08/25
 
 * `Nuevo` Los tipos de archivo predeterminados de Ace LSP ahora incluyen .mts/.cts y sus variantes de declaración, lo que permite al editor Ace externo seleccionar el mismo perfil de ejecución TypeScript Rhino/Node; las selecciones predeterminadas antiguas se migran y los conjuntos de sufijos personalizados explícitos no cambian
 * `Nuevo` APK Builder ahora compila proyectos Rhino TypeScript durante el empaquetado; los APK finales solo contienen JavaScript cifrado y Source Maps opcionales sin código fuente incrustado, nunca fuentes TypeScript ni el compilador; los proyectos cifrados usan staging AES-256-GCM de un solo uso, con el texto claro solo en memoria y borrado tras volver a cifrar
@@ -173,6 +173,7 @@
 * `Corrección` Los nombres de paquete y la información de Activity de las aplicaciones recientes mostrados en el menú del botón flotante eran incorrectos _[`issue #529`](http://issues.autojs6.com/529)_
 * `Corrección` El diálogo "Ejecutar script" del botón flotante podía no restaurarse tras minimizarlo (intento de corrección) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Corrección` El fondo de la pantalla de inicio no se extendía al área de recorte del borde corto
+* `Corrección` El gestor de archivos no se actualizaba automáticamente después de que un complemento Explorer Action confirmara una nueva salida adyacente mediante la sesión del host
 * `Mejora` La compilación de TypeScript ahora registra observaciones por solicitud que preservan la privacidad sobre preparación, consulta de caché, enlace/precalentamiento del compilador, compilación remota, procesamiento de salida, latencia total, tamaño del archivo, cantidad de fuentes y variación del heap del host, y desglosa el tiempo del compilador en intervalos antes de ingress, ingress, entre fases, parse, semantic, emit y después de emit; se ignoran los callbacks progress malformados o fuera de orden y estas observaciones no imponen umbrales de rendimiento
 * `Mejora` Mejorada la compatibilidad de argumentos de los métodos KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
 * `Mejora` Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku
@@ -201,6 +202,7 @@
 * `Mejora` Consolidadas las consultas de detalles multimedia del administrador de archivos en una única instantánea de MediaInfo para reducir las llamadas Binder y el tiempo de espera
 * `Mejora` Limitadas las alternativas de visualización y reproducción externas a permisos URI de solo lectura
 * `Mejora` Unificadas las acciones de plugins del administrador de archivos para clic predeterminado, botón principal, reproducción desde detalles multimedia y menú overflow bajo una política explícita de la página principal de archivos con un único fallback determinista
+* `Mejora` Explorer Action v7 permite que los plugins de archivos reabran en modo de solo lectura una salida pendiente oculta y la verifiquen antes de publicarla, manteniendo la compatibilidad de confirmación directa para clientes v4
 * `Mejora` Trasladados los proveedores de conformidad de texto AI y compilador DEX del directorio de producción `plugins` al grupo de compilación dedicado `test-apps`, conservando la cobertura de regresión Binder hostil y separando el límite de publicación de los plugins de producción independientes
 * `Mejora` La ruta experimental del host para el compilador DEX permanece desactivada por defecto y exige un componente explícito, con fijación del UID del componente exacto y del conjunto completo de firmantes, fallback de despacho único, procedencia semántica de caché, entrada de callbacks acotada, plazos Binder aislados, validación estructural del ZIP DEX, drenaje acotado de reliable pipe con errores del par comprobados en EOF, publicación única con rollback protegida por digests de origen y destino, y arbitraje atómico entre señales de terminación asíncronas y el punto de commit de publicación que fuerza rollback si la cancelación, el timeout o Binder death prevalecen antes del commit
 * `Mejora` DEX Compiler R1.1 mantiene el experimento desactivado de forma predeterminada y permite que los JAR sin procesar de runtime.loadJar prefieran un provider de componente exacto seleccionado explícitamente y con la misma firma que el host, con un único retorno a D8/dx integrado ante fallos, sin retorno al cancelar y con la carga de AAR en la ruta integrada

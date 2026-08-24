@@ -22,4 +22,10 @@ interface IExplorerActionHostSession {
     void abortOutput(String transactionId);
 
     void close();
+
+    /**
+     * v7. Opens one read-only descriptor for a staged output after its writer is closed and before
+     * commit. Appended after all v4 methods so their Binder transaction codes remain stable.
+     */
+    ParcelFileDescriptor openPendingOutput(String transactionId);
 }

@@ -5,8 +5,13 @@ import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.ParcelFileDescriptor
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionCatalogPolicy
+import org.autojs.autojs.model.explorer.ExplorerDirPage
+import org.autojs.autojs.model.explorer.ExplorerFileItem
+import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionKeys
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionValues
@@ -29,6 +34,7 @@ internal class ExplorerActionHostSession private constructor(
     commonParent: File,
     targets: List<ExplorerActionHostSessionTarget>,
     private val allowCreateOutput: Boolean,
+    private val onOutputCommitted: (File) -> Unit,
 ) : IExplorerActionHostSession.Stub() {
 
     private val parent = commonParent.canonicalFile
@@ -132,12 +138,33 @@ internal class ExplorerActionHostSession private constructor(
         }
     }
 
-    override fun commitOutput(transactionId: String): Bundle {
+    override fun openPendingOutput(transactionId: String): ParcelFileDescriptor {
         enforceCaller()
         return synchronized(lock) {
             checkOpen()
             val transaction = output(transactionId)
             check(transaction.state == OutputState.OPENED) {
+                "Explorer Action pending output is not ready for verification"
+            }
+            check(transaction.temp.isFile) { "Explorer Action staging output is missing" }
+            val descriptor = ParcelFileDescriptor.open(
+                transaction.temp,
+                ParcelFileDescriptor.MODE_READ_ONLY,
+            )
+            transaction.state = OutputState.VERIFYING
+            descriptor
+        }
+    }
+
+    override fun commitOutput(transactionId: String): Bundle {
+        enforceCaller()
+        val committed = synchronized(lock) {
+            checkOpen()
+            val transaction = output(transactionId)
+            check(
+                transaction.state == OutputState.OPENED ||
+                    transaction.state == OutputState.VERIFYING,
+            ) {
                 "Explorer Action output was not opened"
             }
             check(transaction.temp.isFile) { "Explorer Action staging output is missing" }
@@ -147,11 +174,16 @@ internal class ExplorerActionHostSession private constructor(
             }
             outputs.remove(transaction.id)
             releaseOutputTarget(transaction.target)
-            outputBundle(transaction).apply {
-                putLong(ExplorerActionHostSessionKeys.SIZE, transaction.target.length())
-                putLong(ExplorerActionHostSessionKeys.LAST_MODIFIED, transaction.target.lastModified())
-            }
+            CommittedOutput(
+                target = transaction.target,
+                result = outputBundle(transaction).apply {
+                    putLong(ExplorerActionHostSessionKeys.SIZE, transaction.target.length())
+                    putLong(ExplorerActionHostSessionKeys.LAST_MODIFIED, transaction.target.lastModified())
+                },
+            )
         }
+        runCatching { onOutputCommitted(committed.target) }
+        return committed.result
     }
 
     override fun abortOutput(transactionId: String) {
@@ -342,9 +374,15 @@ internal class ExplorerActionHostSession private constructor(
         var state: OutputState = OutputState.PREPARED,
     )
 
+    private data class CommittedOutput(
+        val target: File,
+        val result: Bundle,
+    )
+
     private enum class OutputState {
         PREPARED,
         OPENED,
+        VERIFYING,
     }
 
     companion object {
@@ -360,13 +398,28 @@ internal class ExplorerActionHostSession private constructor(
             commonParent: File,
             targets: List<ExplorerActionHostSessionTarget>,
             allowCreateOutput: Boolean,
+            onOutputCommitted: (File) -> Unit = ::notifyCreated,
         ): ExplorerActionHostSession {
             return ExplorerActionHostSession(
                 expectedUid = applicationUid(context.packageManager, pluginPackageName),
                 commonParent = commonParent,
                 targets = targets,
                 allowCreateOutput = allowCreateOutput,
+                onOutputCommitted = onOutputCommitted,
             )
+        }
+
+        private fun notifyCreated(file: File) {
+            val notify = {
+                Explorers.workspace().notifyItemCreated(
+                    ExplorerFileItem(file, ExplorerDirPage(file.parentFile, null)),
+                )
+            }
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                notify()
+            } else {
+                Handler(Looper.getMainLooper()).post(notify)
+            }
         }
 
         private fun applicationUid(packageManager: PackageManager, packageName: String): Int {
