@@ -177,6 +177,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 本地单文件 .mts/.cts 脚本会先经独立 TypeScript 编译插件的 Node profile 编译为 .mjs/.cjs, 再交由 Node.js Runtime 插件执行, 保留 UTF-8 文件名并绕过旧的 TypeScript 正则剥离; 单文件 Node .ts 在项目 package 元数据支持完成前会被明确拒绝
 * `新增` Node TypeScript 运行异常会消费编译器 Source Map v3, 将 V8 堆栈帧映射回原 .mts/.cts 文件的精确行列, Console 与编辑器日志面板中的映射位置可直接点击跳转
 * `新增` TypeScript 项目现在会将有界项目快照作为单个 Program 交给 Rhino 或 Node profile 编译, 保留相对 import, CommonJS 循环依赖, JSON 运行时文件, package `type` 上下文, 导入模块诊断及逐模块 Source Map 栈映射; package 元数据保持严格校验并拒绝 lifecycle scripts
+* `新增` TypeScript 编译结果可按源码图, 编译器与声明指纹, profile 与 policy 修订及 package 元数据组成的语义键跨执行缓存; 未修改脚本会跳过编译器 prewarm 与 Worker 编译, 已认证输出归档在复用前仍会重新校验, 损坏或超额条目自动回退到正常编译
 * `新增` Python Runtime 插件, 内置 Chaquopy 17.0.0 与 CPython 3.13.9, 支持识别文件扩展名 (.py) 运行 Python 脚本
 * `新增` Python Runtime 协议 1.4 为每次执行协商显式严格 JSON 结果与可选输出 artifact, 对数量, 规范化路径, 单个/合计大小, 精确 PFD 引用及 SHA-256 设限; Host 仅消费类型化结果且绝不从 stdout 推断
 * `新增` Python Runtime 协议 1.5 新增执行级同步 Host 能力 broker, 校验固定插件 UID, 采用严格有界 JSON, 调用配额, 防重放与生命周期约束, 执行终态后拒绝调用; 完整首批低风险能力向 Python 脚本开放 toast, 剪贴板读写, 应用启动/打开 URL, 动态电量/屏幕/亮度/音量信息, 分级宿主控制台输出及权限感知通知

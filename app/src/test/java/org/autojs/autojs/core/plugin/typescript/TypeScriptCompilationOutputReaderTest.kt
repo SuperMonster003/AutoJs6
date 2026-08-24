@@ -170,6 +170,91 @@ class TypeScriptCompilationOutputReaderTest {
     }
 
     @Test
+    fun replaysValidatedOutputForAsemanticallyIdenticalLaterRequest() {
+        val cacheParent = Files.createTempDirectory("typescript-output-cache-").toFile()
+        val cacheRoot = File(cacheParent, "cache").apply { mkdir() }
+        val firstInput = File(cacheParent, "first-input.zip")
+        val currentInput = File(cacheParent, "current-input.zip")
+        val output = File(cacheParent, "output.zip")
+        try {
+            val sourceBytes = "const value: number = 42;\n".toByteArray(StandardCharsets.UTF_8)
+            val first = TypeScriptSingleFileArchive.write(
+                sourceName = "main.ts",
+                sourceBytes = sourceBytes,
+                requestId = "host-cache-first",
+                projectId = "single-file-cache-test",
+                authority = authority(),
+                destination = firstInput,
+            )
+            val current = TypeScriptSingleFileArchive.write(
+                sourceName = "main.ts",
+                sourceBytes = sourceBytes,
+                requestId = "host-cache-current",
+                projectId = "single-file-cache-test",
+                authority = authority(),
+                destination = currentInput,
+            )
+            val javaScript = "const value = 42;\n//# sourceMappingURL=main.js.map\n"
+                .toByteArray(StandardCharsets.UTF_8)
+            val sourceMap = sourceMap("main.js", "main.ts")
+            val diagnostics = diagnosticsJson(first, emptyList())
+            val artifacts = listOf(
+                artifact("diagnostics.json", "diagnostics", diagnostics, emptyList()),
+                artifact("maps/main.js.map", "source_map", sourceMap, listOf(first.entryPath)),
+                artifact("modules/main.js", "javascript", javaScript, listOf(first.entryPath)),
+            )
+            val manifest = outputManifest(
+                prepared = first,
+                outcome = TypeScriptCompilerContract.OUTCOME_EMITTED,
+                emitSkipped = false,
+                diagnosticCount = 0,
+                emittedModuleCount = 1,
+                entryModulePath = "modules/main.js",
+                artifacts = artifacts,
+            )
+            StoredZipV1Writer.write(
+                output,
+                linkedMapOf(
+                    "compilation-manifest.json" to manifest,
+                    "diagnostics.json" to diagnostics,
+                    "maps/main.js.map" to sourceMap,
+                    "modules/main.js" to javaScript,
+                ),
+            )
+            val terminal = TypeScriptTerminalResult(
+                requestId = first.requestId,
+                outcome = TypeScriptCompilerContract.OUTCOME_EMITTED,
+                succeeded = true,
+                errorCode = null,
+                errorMessage = null,
+                diagnosticCount = 0,
+                emittedModuleCount = 1,
+                outputManifestSha256 = sha256(manifest),
+            )
+            TypeScriptCompilationOutputReader.read(output, first, terminal)
+            val cacheKey = TypeScriptCompilationCacheKey.sha256(first)
+            assertEquals(cacheKey, TypeScriptCompilationCacheKey.sha256(current))
+            val cache = TypeScriptCompilationPersistentCache(
+                cacheRoot,
+                ReaderCacheFileOps,
+            )
+            cache.publish(cacheKey, first, terminal, output)
+            val hit = requireNotNull(cache.lookup(cacheKey))
+
+            val replayed = TypeScriptCompilationOutputReader.read(
+                outputFile = hit.outputFile,
+                prepared = hit.entry.replayPrepared(current),
+                terminal = hit.entry.terminal,
+            ) as TypeScriptCompilationOutput.Emitted
+
+            assertEquals(javaScript.toString(StandardCharsets.UTF_8), replayed.javaScript)
+            assertEquals(current.sourceFiles, replayed.projectSources)
+        } finally {
+            cacheParent.walkBottomUp().forEach(File::delete)
+        }
+    }
+
+    @Test
     fun readsNodeMtsEmissionWithMjsEntryAndSourceMap() {
         val input = File.createTempFile("typescript-node-output-input-", ".zip")
         val output = File.createTempFile("typescript-node-output-test-", ".zip")
@@ -622,6 +707,21 @@ class TypeScriptCompilationOutputReaderTest {
             }
         }
         append('"')
+    }
+
+    private object ReaderCacheFileOps : TypeScriptCompilationPersistentCache.FileOps {
+        override fun makeOwnerReadWrite(file: File) = Unit
+
+        override fun makeOwnerReadOnly(file: File) = Unit
+
+        override fun isOwnerReadOnlyRegularFile(file: File): Boolean = file.isFile
+
+        override fun atomicReplace(source: File, destination: File) {
+            if (destination.exists()) check(destination.delete())
+            check(source.renameTo(destination))
+        }
+
+        override fun syncDirectory(directory: File) = Unit
     }
 
     private data class Artifact(

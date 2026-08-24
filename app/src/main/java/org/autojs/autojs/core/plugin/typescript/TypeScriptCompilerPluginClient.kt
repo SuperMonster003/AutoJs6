@@ -3,7 +3,9 @@ package org.autojs.autojs.core.plugin.typescript
 import android.content.Context
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import java.io.ByteArrayOutputStream
+import java.io.Closeable
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -12,6 +14,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.autojs.autojs.core.plugin.AidlPluginHost
@@ -166,7 +170,8 @@ internal class TypeScriptCompilerPluginClient(
         val requestId = "host-" + UUID.randomUUID()
         val inputFile = File.createTempFile("typescript-input-", ".zip", appContext.cacheDir)
         val outputFile = File.createTempFile("typescript-output-", ".zip", appContext.cacheDir)
-        var leased: AidlPluginHost.LeasedCall<StartedCompilation>? = null
+        var bindingLease: Closeable? = null
+        var started: StartedCompilation? = null
         var terminalReceived = false
 
         return try {
@@ -176,87 +181,120 @@ internal class TypeScriptCompilerPluginClient(
                 engine = TypeScriptPluginIds.ENGINE,
                 label = MODULE_LABEL,
             )
-            leased = host.callWithDedicatedBindingLease(
-                context = appContext,
-                target = target,
-                retryOnRemoteException = false,
-            ) { compiler ->
-                requireContract(compiler)
-                val prewarmResult = compiler.prewarm(prewarmRequest(timeoutMs))
-                prewarmResult.throwCompilerErrorIfPresent()
-                val authority = authorityFrom(
-                    info = compiler.compilerInfo,
-                    targetProfile = targetProfile,
-                    sourceName = entrySourceName,
-                )
-                val prepared = prepare(requestId, authority, inputFile)
+            val advertisedInfo = requireNotNull(target.pluginInfo?.capabilities) {
+                "The TypeScript compiler did not publish capabilities."
+            }
+            val advertisedAuthority = authorityFrom(
+                info = advertisedInfo,
+                targetProfile = targetProfile,
+                sourceName = entrySourceName,
+                requireReady = false,
+            )
+            var prepared = prepare(requestId, advertisedAuthority, inputFile)
+
+            compilationMutex.withLock {
+                var cacheKey = TypeScriptCompilationCacheKey.sha256(prepared)
+                val cache = compilationCacheOrNull(appContext)
+                readCached(cache, cacheKey, prepared)?.let { cached ->
+                    return@withLock cached
+                }
+
+                val leased = host.callWithDedicatedBindingLease(
+                    context = appContext,
+                    target = target,
+                    retryOnRemoteException = false,
+                ) { compiler ->
+                    requireContract(compiler)
+                    val prewarmResult = compiler.prewarm(prewarmRequest(timeoutMs))
+                    prewarmResult.throwCompilerErrorIfPresent()
+                    val readyAuthority = authorityFrom(
+                        info = prewarmResult,
+                        targetProfile = targetProfile,
+                        sourceName = entrySourceName,
+                        requireReady = true,
+                    )
+                    PreparedCompiler(compiler, readyAuthority)
+                }
+                bindingLease = leased.bindingLease
+                val ready = leased.value
+                if (ready.authority != prepared.authority) {
+                    prepared = prepare(requestId, ready.authority, inputFile)
+                    cacheKey = TypeScriptCompilationCacheKey.sha256(prepared)
+                    readCached(cache, cacheKey, prepared)?.let { cached ->
+                        return@withLock cached
+                    }
+                }
+
                 val callback = CompilationCallback()
                 val ticket = startCompilation(
-                    compiler = compiler,
+                    compiler = ready.compiler,
                     prepared = prepared,
                     outputFile = outputFile,
                     timeoutMs = timeoutMs,
                     callback = callback,
                 )
-                StartedCompilation(
-                    compiler = compiler,
+                val active = StartedCompilation(
+                    compiler = ready.compiler,
                     prepared = prepared,
                     callback = callback,
                     ticket = ticket,
                 )
-            }
-
-            val started = leased.value
-            val jobToken = requireAcceptedTicket(started.ticket, requestId)
-            val acknowledgement = cancellationRequest(
-                requestId = requestId,
-                jobToken = jobToken,
-                operation = TypeScriptR2Contract.CANCELLATION_OPERATION_ACKNOWLEDGE,
-            )
-            if (!started.compiler.cancelCompilation(acknowledgement)) {
-                throw TypeScriptCompilerException(
-                    TypeScriptCompilerContract.ERROR_COMPILER_UNAVAILABLE,
-                    "The compiler did not acknowledge the accepted compilation.",
+                started = active
+                val jobToken = requireAcceptedTicket(ticket, requestId)
+                val acknowledgement = cancellationRequest(
+                    requestId = requestId,
+                    jobToken = jobToken,
+                    operation = TypeScriptR2Contract.CANCELLATION_OPERATION_ACKNOWLEDGE,
                 )
-            }
-
-            val terminalBundle = try {
-                withTimeout(timeoutMs + LOCAL_TERMINAL_GRACE_MS) {
-                    started.callback.terminal.await()
-                }
-            } catch (error: TimeoutCancellationException) {
-                runCatching {
-                    started.compiler.cancelCompilation(
-                        cancellationRequest(
-                            requestId = requestId,
-                            jobToken = jobToken,
-                            operation = TypeScriptR2Contract.CANCELLATION_OPERATION_CANCEL,
-                        ),
+                if (!active.compiler.cancelCompilation(acknowledgement)) {
+                    throw TypeScriptCompilerException(
+                        TypeScriptCompilerContract.ERROR_COMPILER_UNAVAILABLE,
+                        "The compiler did not acknowledge the accepted compilation.",
                     )
                 }
-                throw TypeScriptCompilerException(
-                    TypeScriptCompilerContract.ERROR_TIMEOUT,
-                    "The host did not receive a compiler terminal callback in time.",
-                    TypeScriptCompilerContract.OUTCOME_TIMED_OUT,
-                    error,
-                )
-            }
-            terminalReceived = true
-            val terminal = terminalResult(terminalBundle, requestId)
-            when (terminal.outcome) {
-                TypeScriptCompilerContract.OUTCOME_EMITTED,
-                TypeScriptCompilerContract.OUTCOME_DIAGNOSTICS,
-                -> TypeScriptCompilationOutputReader.read(
-                    outputFile = outputFile,
-                    prepared = started.prepared,
-                    terminal = terminal,
-                )
 
-                else -> throw TypeScriptCompilerException(
-                    terminal.errorCode ?: TypeScriptCompilerContract.ERROR_COMPILER_UNAVAILABLE,
-                    terminal.errorMessage ?: "TypeScript compilation did not produce output.",
-                    terminal.outcome,
-                )
+                val terminalBundle = try {
+                    withTimeout(timeoutMs + LOCAL_TERMINAL_GRACE_MS) {
+                        active.callback.terminal.await()
+                    }
+                } catch (error: TimeoutCancellationException) {
+                    runCatching {
+                        active.compiler.cancelCompilation(
+                            cancellationRequest(
+                                requestId = requestId,
+                                jobToken = jobToken,
+                                operation = TypeScriptR2Contract.CANCELLATION_OPERATION_CANCEL,
+                            ),
+                        )
+                    }
+                    throw TypeScriptCompilerException(
+                        TypeScriptCompilerContract.ERROR_TIMEOUT,
+                        "The host did not receive a compiler terminal callback in time.",
+                        TypeScriptCompilerContract.OUTCOME_TIMED_OUT,
+                        error,
+                    )
+                }
+                terminalReceived = true
+                val terminal = terminalResult(terminalBundle, requestId)
+                when (terminal.outcome) {
+                    TypeScriptCompilerContract.OUTCOME_EMITTED,
+                    TypeScriptCompilerContract.OUTCOME_DIAGNOSTICS,
+                    -> TypeScriptCompilationOutputReader.read(
+                        outputFile = outputFile,
+                        prepared = prepared,
+                        terminal = terminal,
+                    ).also {
+                        publishCached(cache, cacheKey, prepared, terminal, outputFile)
+                    }
+
+                    else -> throw TypeScriptCompilerException(
+                        terminal.errorCode
+                            ?: TypeScriptCompilerContract.ERROR_COMPILER_UNAVAILABLE,
+                        terminal.errorMessage
+                            ?: "TypeScript compilation did not produce output.",
+                        terminal.outcome,
+                    )
+                }
             }
         } catch (error: TypeScriptCompilerException) {
             throw error
@@ -269,12 +307,12 @@ internal class TypeScriptCompilerPluginClient(
                 cause = error,
             )
         } finally {
-            val started = leased?.value
-            if (started != null && !terminalReceived && started.ticket.accepted()) {
-                started.ticket.getString(TypeScriptCompilerContract.KEY_JOB_TOKEN)
+            val active = started
+            if (active != null && !terminalReceived && active.ticket.accepted()) {
+                active.ticket.getString(TypeScriptCompilerContract.KEY_JOB_TOKEN)
                     ?.let { jobToken ->
                         runCatching {
-                            started.compiler.cancelCompilation(
+                            active.compiler.cancelCompilation(
                                 cancellationRequest(
                                     requestId = requestId,
                                     jobToken = jobToken,
@@ -285,9 +323,52 @@ internal class TypeScriptCompilerPluginClient(
                         }
                     }
             }
-            runCatching { leased?.bindingLease?.close() }
+            runCatching { bindingLease?.close() }
             runCatching { inputFile.delete() }
             runCatching { outputFile.delete() }
+        }
+    }
+
+    private fun readCached(
+        cache: TypeScriptCompilationPersistentCache?,
+        cacheKey: String,
+        prepared: TypeScriptPreparedCompilation,
+    ): TypeScriptCompilationOutput? {
+        if (cache == null) return null
+        val hit = try {
+            cache.lookup(cacheKey)
+        } catch (error: Exception) {
+            Log.w(LOG_TAG, "TypeScript cache lookup failed; compiling normally.", error)
+            null
+        } ?: return null
+        return try {
+            TypeScriptCompilationOutputReader.read(
+                outputFile = hit.outputFile,
+                prepared = hit.entry.replayPrepared(prepared),
+                terminal = hit.entry.terminal,
+            ).also {
+                Log.i(LOG_TAG, "TypeScript compilation cache hit: ${cacheKey.take(12)}")
+            }
+        } catch (error: Exception) {
+            Log.w(LOG_TAG, "Discarding an invalid TypeScript compilation cache entry.", error)
+            runCatching { cache.invalidate(hit.entry) }
+            null
+        }
+    }
+
+    private fun publishCached(
+        cache: TypeScriptCompilationPersistentCache?,
+        cacheKey: String,
+        prepared: TypeScriptPreparedCompilation,
+        terminal: TypeScriptTerminalResult,
+        outputFile: File,
+    ) {
+        if (cache == null) return
+        try {
+            cache.publish(cacheKey, prepared, terminal, outputFile)
+            Log.i(LOG_TAG, "Published TypeScript compilation cache: ${cacheKey.take(12)}")
+        } catch (error: Exception) {
+            Log.w(LOG_TAG, "TypeScript cache publication failed; keeping compiler output.", error)
         }
     }
 
@@ -307,6 +388,7 @@ internal class TypeScriptCompilerPluginClient(
         info: Bundle,
         targetProfile: String,
         sourceName: String,
+        requireReady: Boolean,
     ): TypeScriptCompilerAuthority {
         info.throwCompilerErrorIfPresent()
         requireBundleInt(
@@ -435,8 +517,18 @@ internal class TypeScriptCompilerPluginClient(
         val status = requireNotNull(
             info.getString(TypeScriptPluginCapabilityKeys.SERVICE_STATUS),
         )
-        require(status == TypeScriptCompilerContract.STATUS_READY) {
-            "The TypeScript compiler did not become ready after prewarm."
+        require(
+            if (requireReady) {
+                status == TypeScriptCompilerContract.STATUS_READY
+            } else {
+                status in COMPILER_SERVICE_STATUSES
+            },
+        ) {
+            if (requireReady) {
+                "The TypeScript compiler did not become ready after prewarm."
+            } else {
+                "The TypeScript compiler advertised an unknown lifecycle state."
+            }
         }
         requireBundleString(
             info,
@@ -815,6 +907,11 @@ internal class TypeScriptCompilerPluginClient(
         val ticket: Bundle,
     )
 
+    private data class PreparedCompiler(
+        val compiler: ITypeScriptCompilerPlugin,
+        val authority: TypeScriptCompilerAuthority,
+    )
+
     private class CompilationCallback : ITypeScriptCompilationCallback.Stub() {
         val terminal = CompletableDeferred<Bundle>()
 
@@ -836,5 +933,37 @@ internal class TypeScriptCompilerPluginClient(
         const val MODULE_LABEL = "TypeScript compiler"
         const val LOCAL_TERMINAL_GRACE_MS = 5_000L
         const val EMPTY_TSCONFIG_BYTES = 2L
+        const val CACHE_DIRECTORY_NAME = "typescript-compiler-cache-v1"
+        val COMPILER_SERVICE_STATUSES = setOf(
+            TypeScriptCompilerContract.STATUS_BOOTSTRAP,
+            TypeScriptCompilerContract.STATUS_STARTING,
+            TypeScriptCompilerContract.STATUS_READY,
+            TypeScriptCompilerContract.STATUS_DEGRADED,
+            TypeScriptCompilerContract.STATUS_FAILED,
+        )
+        val compilationMutex = Mutex()
+        val cacheStores = mutableMapOf<String, TypeScriptCompilationPersistentCache>()
+
+        fun compilationCacheOrNull(context: Context): TypeScriptCompilationPersistentCache? =
+            try {
+                val cacheParent = context.cacheDir.canonicalFile
+                val root = File(cacheParent, CACHE_DIRECTORY_NAME).canonicalFile
+                require(root.parentFile == cacheParent) {
+                    "TypeScript compiler cache escaped the application cache directory."
+                }
+                if (!root.isDirectory) {
+                    check(!root.exists() && root.mkdir()) {
+                        "Unable to create the TypeScript compiler cache directory."
+                    }
+                }
+                synchronized(cacheStores) {
+                    cacheStores.getOrPut(root.path) {
+                        TypeScriptCompilationPersistentCache(root)
+                    }
+                }
+            } catch (error: Exception) {
+                Log.w(LOG_TAG, "Persistent TypeScript compilation cache is unavailable.", error)
+                null
+            }
     }
 }

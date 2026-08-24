@@ -67,6 +67,50 @@ class TypeScriptCompilerPluginClientDeviceTest {
     private val context = instrumentation.targetContext
 
     @Test
+    fun reusesUnchangedCompilationAcrossClientInstances() {
+        val cacheRoot = File(context.cacheDir, TYPESCRIPT_CACHE_DIRECTORY)
+        cacheRoot.listFiles().orEmpty().forEach { child ->
+            child.walkBottomUp().forEach(File::delete)
+        }
+        withSource(
+            name = "cache-${System.nanoTime()}.ts",
+            source = "const cached: number = 42; toast(String(cached));",
+        ) { source ->
+            val firstStarted = SystemClock.elapsedRealtime()
+            val first = runBlocking {
+                TypeScriptCompilerPluginClient(context).compileSingleFile(source)
+            }
+            val firstElapsed = SystemClock.elapsedRealtime() - firstStarted
+            assertTrue(first is TypeScriptCompilationOutput.Emitted)
+            val firstGeneration = cacheRoot.listFiles().orEmpty().map(File::getName).sorted()
+            assertEquals(2, firstGeneration.size)
+            assertTrue(firstGeneration.any { it.endsWith(".entry") })
+            assertTrue(firstGeneration.any { it.endsWith(".output.zip") })
+
+            val secondStarted = SystemClock.elapsedRealtime()
+            val second = runBlocking {
+                TypeScriptCompilerPluginClient(context).compileSingleFile(source)
+            }
+            val secondElapsed = SystemClock.elapsedRealtime() - secondStarted
+            assertTrue(second is TypeScriptCompilationOutput.Emitted)
+            assertEquals(
+                (first as TypeScriptCompilationOutput.Emitted).javaScript,
+                (second as TypeScriptCompilationOutput.Emitted).javaScript,
+            )
+            assertEquals(
+                "A cache hit must retain the committed generation instead of recompiling.",
+                firstGeneration,
+                cacheRoot.listFiles().orEmpty().map(File::getName).sorted(),
+            )
+            Log.i(
+                TEST_LOG_TAG,
+                "typescript-cache-smoke firstMs=$firstElapsed secondMs=$secondElapsed " +
+                    "generation=${firstGeneration.first()}",
+            )
+        }
+    }
+
+    @Test
     fun compilesUtf8SingleFileThroughRealPluginBinder() {
         withSource(
             name = "你好.ts",
@@ -1738,6 +1782,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
 
     private companion object {
         const val TEST_LOG_TAG = "TypeScriptDeviceTest"
+        const val TYPESCRIPT_CACHE_DIRECTORY = "typescript-compiler-cache-v1"
         const val EXECUTION_TIMEOUT_SECONDS = 90L
         const val CONSOLE_TIMEOUT_MILLIS = 5_000L
         const val HTTP_TIMEOUT_MILLIS = 10_000

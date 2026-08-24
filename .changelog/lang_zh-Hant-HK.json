@@ -21,6 +21,7 @@
         "本地單文件 .mts/.cts 腳本會先經獨立 TypeScript 編譯插件的 Node profile 編譯為 .mjs/.cjs, 再交由 Node.js Runtime 插件執行, 保留 UTF-8 文件名並繞過舊有 TypeScript 正則剝離; 單文件 Node .ts 在項目 package 元數據支持完成前會被明確拒絕",
         "Node TypeScript 運行異常會消費編譯器 Source Map v3, 將 V8 堆棧幀映射回原 .mts/.cts 文件的精確行列, Console 與編輯器日誌面板中的映射位置可直接點擊跳轉",
         "TypeScript 項目現在會將有界項目快照作為單個 Program 交給 Rhino 或 Node profile 編譯, 保留相對 import, CommonJS 循環依賴, JSON 運行時文件, package `type` 上下文, 導入模塊診斷及逐模塊 Source Map 棧映射; package 元數據保持嚴格校驗並拒絕 lifecycle scripts",
+        "TypeScript 編譯結果可按源碼圖, 編譯器與聲明指紋, profile 與 policy 修訂及 package 元數據組成的語義鍵跨執行緩存; 未修改腳本會跳過編譯器 prewarm 與 Worker 編譯, 已認證輸出歸檔在重用前仍會重新校驗, 損壞或超額條目自動回退到正常編譯",
         "獨立 Python Runtime 插件後端, 支持通過單獨的 CPython 插件進程運行本地 .py 文件及聲明為 `type: python` 的腳本項目, 並校驗固定組件/簽名/協議/ABI, 支持熱插拔且絕不回退到 JavaScript",
         "Python 啟動集成覆蓋文件管理器/編輯器/本地 Run Intent/單文件 Import Intent/新建快捷方式/定時任務/廣播任務並嚴格保留單文件或項目上下文; 項目支持內部 import/相對文件讀取及只讀 `autojs6.app/device/execution/project` API",
         "Python Runtime 執行支持通過 ExecutionConfig 鍵 `autojs6.python.stdinSnapshot` 提供可選的有界預置 stdin 快照, 並採用嚴格 ByteArray/UTF-8 文本准入, 提供器能力/大小協商及私有只讀 PFD 傳輸與清理",
