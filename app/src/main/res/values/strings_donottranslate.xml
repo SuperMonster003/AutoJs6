@@ -27,7 +27,7 @@
     <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
     <string name="default_key_editor_theme_mode" translatable="false">@string/key_editor_theme_mode_separate</string>
     <string name="default_key_editor_word_wrap_indent_style" translatable="false">@string/key_editor_word_wrap_indent_style_continuation</string>
-    <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all_but_executable</string>
+    <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all</string>
     <string name="default_key_hidden_files" translatable="false">@string/key_hidden_files_not_show</string>
     <string name="default_key_keep_screen_on_when_in_foreground" translatable="false">@string/key_keep_screen_on_when_in_foreground_disabled</string>
     <string name="default_key_launcher_icon" translatable="false">@string/key_launcher_icon_adaptive</string>
