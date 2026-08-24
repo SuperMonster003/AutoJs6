@@ -223,6 +223,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
         private val provider = AtomicReference<IPythonRuntimeProvider?>()
         private val binder = AtomicReference<IBinder?>()
         private val failure = AtomicReference<Throwable?>()
+        private val processExit = PythonRuntimeProcessExitSignal()
         private val deathRecipient = IBinder.DeathRecipient {
             fail(PythonRuntimeHostException(PythonRuntimeHostError.EXECUTION_LOST, "Python Runtime Binder died"))
         }
@@ -253,6 +254,9 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
                 PythonRuntimeHostError.BIND_FAILED,
                 "Official Python Runtime is not connected",
             )
+
+        internal fun awaitRemoteProcessExit(timeoutMillis: Long): Boolean =
+            processExit.awaitUninterruptibly(timeoutMillis)
 
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             if (closed.get()) return
@@ -297,6 +301,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
 
         private fun fail(error: Throwable) {
             if (closed.get()) return
+            processExit.markExited()
             if (failure.compareAndSet(null, error)) {
                 connected.countDown()
                 onConnectionLost(error)
@@ -305,6 +310,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
 
         override fun close() {
             if (!closed.compareAndSet(false, true)) return
+            processExit.markExited()
             binder.getAndSet(null)?.let { value -> runCatching { value.unlinkToDeath(deathRecipient, 0) } }
             provider.set(null)
             unbindIfClosed()

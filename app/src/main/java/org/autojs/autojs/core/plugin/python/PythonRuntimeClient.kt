@@ -123,6 +123,7 @@ internal class PythonRuntimeClient(
         private val stdout = PythonUtf8OutputDecoder()
         private val stderr = PythonUtf8OutputDecoder()
         private val outputFlushed = AtomicBoolean(false)
+        private val remoteStartDispatched = AtomicBoolean(false)
         private val outputLock = Any()
         private val inputTask = AtomicReference<FutureTask<*>?>()
         private val hostCapabilityBroker = AtomicReference<PythonHostCapabilityBroker?>()
@@ -403,11 +404,22 @@ internal class PythonRuntimeClient(
                 throw error
             } finally {
                 closeHostCapabilityBroker()
-                // Suppress the expected death caused by closing a dispatched process-retirement session.
-                binding.getAndSet(null)?.close()
-                reservation.getAndSet(null)?.let { reserved ->
-                    registry.release(reserved)?.let { session -> runCatching { session.close() } }
+                val ownedBinding = binding.get()
+                val ownedSession = reservation.getAndSet(null)?.let(registry::release)
+                ownedSession?.let { session -> runCatching { session.close() } }
+                if (ownedSession != null && remoteStartDispatched.get()) {
+                    // Session close retires this CPython generation. Keep the binding alive until
+                    // Binder death so the next FIFO owner cannot race a RETIRING provider.
+                    if (ownedBinding?.awaitRemoteProcessExit(PROCESS_RETIREMENT_WAIT_MILLIS) == false) {
+                        globalConsole.println(
+                            Log.WARN,
+                            "Python Runtime process retirement confirmation timed out; " +
+                                "provider admission remains fail-closed",
+                        )
+                    }
                 }
+                binding.compareAndSet(ownedBinding, null)
+                ownedBinding?.close()
                 executionSnapshot.getAndSet(null)?.close()
                 runCatching { finishLiveOutput() }
             }
@@ -420,7 +432,6 @@ internal class PythonRuntimeClient(
             closeLongRunningExecution()
             pendingStdinSnapshot.getAndSet(null)?.fill(0)
             cancelRemoteSession()
-            binding.getAndSet(null)?.close()
             executionSnapshot.getAndSet(null)?.close()
             terminalClaimed.compareAndSet(false, true)
             terminal.countDown()
@@ -689,6 +700,7 @@ internal class PythonRuntimeClient(
                                                 start.policy.grantOutputCredits(credits)
                                                 start.session.grantOutputCredits(credits)
                                                 // The registry forbids replay before this one-way dispatch.
+                                                remoteStartDispatched.set(true)
                                                 start.session.start()
                                             }
                                         }
@@ -858,7 +870,6 @@ internal class PythonRuntimeClient(
             closeHostCapabilityBroker()
             closeInteractiveInput()
             cancelRemoteSession()
-            binding.getAndSet(null)?.close()
             executionSnapshot.getAndSet(null)?.close()
             terminal.countDown()
             return true
@@ -869,7 +880,6 @@ internal class PythonRuntimeClient(
             closeHostCapabilityBroker()
             closeInteractiveInput()
             cancelRemoteSession()
-            binding.getAndSet(null)?.close()
             executionSnapshot.getAndSet(null)?.close()
             terminal.countDown()
             return true
@@ -1195,6 +1205,7 @@ internal class PythonRuntimeClient(
         private const val PROVIDER_RPC_POLL_MILLIS = 100L
         private const val TERMINAL_GRACE_MILLIS = 15_000L
         private const val LONG_RUNNING_WAIT_POLL_MILLIS = 1_000L
+        private const val PROCESS_RETIREMENT_WAIT_MILLIS = 3_000L
         private const val DEFAULT_OUTPUT_BYTES = 16L * 1024L * 1024L
         private const val DEFAULT_OUTPUT_CHUNK_BYTES = 32 * 1024
         private const val DEFAULT_OUTPUT_CHUNKS = 16_384L
