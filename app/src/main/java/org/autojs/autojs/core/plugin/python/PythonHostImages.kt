@@ -421,6 +421,22 @@ internal class PythonHostImageTemplateScope(
         return PythonHostTemplateSearch.find(source, template, threshold, region)
     }
 
+    /** Returns an independently owned pixel copy which the caller must clear after use. */
+    @Synchronized
+    fun copyDecoded(templateId: String): PythonHostDecodedImageTemplate {
+        check(!closed) { "Python Host image template scope is closed" }
+        val template = retained
+            ?.takeIf { it.descriptor.id == templateId }
+            ?.template
+            ?: throw PythonHostCapabilityStaleTemplateException()
+        val pixels = try {
+            template.pixels.copyOf()
+        } catch (error: OutOfMemoryError) {
+            throw PythonHostCapabilityResultLimitException(error)
+        }
+        return PythonHostDecodedImageTemplate(template.width, template.height, pixels)
+    }
+
     @Synchronized
     fun release(templateId: String) {
         check(!closed) { "Python Host image template scope is closed" }
