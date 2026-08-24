@@ -172,6 +172,7 @@
         "El fondo de la pantalla de inicio no se extendía al área de recorte del borde corto"
       ],
       "improvement": [
+        "La compilación de TypeScript ahora registra observaciones por solicitud que preservan la privacidad sobre preparación, consulta de caché, enlace/precalentamiento del compilador, compilación remota, procesamiento de salida, latencia total, tamaño del archivo, cantidad de fuentes y variación del heap del host; estas observaciones no imponen umbrales de rendimiento",
         "Mejorada la compatibilidad de argumentos de los métodos KeyCode _[`issue #492`](http://issues.autojs6.com/492)_",
         "Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku",
         "Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación",

@@ -173,6 +173,7 @@
 * `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
 * `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Fix` Splash screen background did not extend into the short-edge display cutout area
+* `Improvement` TypeScript compilation now emits privacy-safe per-request observations for preparation, cache lookup, compiler binding/prewarm, remote compilation, output handling, total latency, archive size, source count, and host heap change; these observations do not impose performance thresholds
 * `Improvement` Improved argument compatibility for KeyCode methods _[`issue #492`](http://issues.autojs6.com/492)_
 * `Improvement` KeyCode methods support sending key code commands with Shizuku permission
 * `Improvement` Deferred initialization of non-critical components to improve app startup performance

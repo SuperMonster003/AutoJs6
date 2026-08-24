@@ -60,6 +60,7 @@ import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
@@ -78,13 +79,21 @@ class TypeScriptCompilerPluginClientDeviceTest {
         cacheRoot.listFiles().orEmpty().forEach { child ->
             child.walkBottomUp().forEach(File::delete)
         }
+        val performance = mutableListOf<TypeScriptCompilationPerformanceSnapshot>()
+        val reporter = TypeScriptCompilationPerformanceReporter { snapshot ->
+            performance += snapshot
+            Log.i(TEST_LOG_TAG, snapshot.toLogLine())
+        }
         withSource(
             name = "cache-${System.nanoTime()}.ts",
             source = "const cached: number = 42; toast(String(cached));",
         ) { source ->
             val firstStarted = SystemClock.elapsedRealtime()
             val first = runBlocking {
-                TypeScriptCompilerPluginClient(context).compileSingleFile(source)
+                TypeScriptCompilerPluginClient(
+                    context,
+                    performanceReporter = reporter,
+                ).compileSingleFile(source)
             }
             val firstElapsed = SystemClock.elapsedRealtime() - firstStarted
             assertTrue(first is TypeScriptCompilationOutput.Emitted)
@@ -95,7 +104,10 @@ class TypeScriptCompilerPluginClientDeviceTest {
 
             val secondStarted = SystemClock.elapsedRealtime()
             val second = runBlocking {
-                TypeScriptCompilerPluginClient(context).compileSingleFile(source)
+                TypeScriptCompilerPluginClient(
+                    context,
+                    performanceReporter = reporter,
+                ).compileSingleFile(source)
             }
             val secondElapsed = SystemClock.elapsedRealtime() - secondStarted
             assertTrue(second is TypeScriptCompilationOutput.Emitted)
@@ -113,6 +125,19 @@ class TypeScriptCompilerPluginClientDeviceTest {
                 "typescript-cache-smoke firstMs=$firstElapsed secondMs=$secondElapsed " +
                     "generation=${firstGeneration.first()}",
             )
+            assertEquals(2, performance.size)
+            assertEquals(
+                TypeScriptCompilationPerformanceSnapshot.CACHE_MISS,
+                performance[0].cacheStatus,
+            )
+            assertEquals(
+                TypeScriptCompilationPerformanceSnapshot.CACHE_HIT,
+                performance[1].cacheStatus,
+            )
+            assertTrue(performance[0].bindAndPrewarmElapsedMs != null)
+            assertTrue(performance[0].compilerElapsedMs != null)
+            assertNull(performance[1].bindAndPrewarmElapsedMs)
+            assertNull(performance[1].compilerElapsedMs)
         }
     }
 

@@ -333,6 +333,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les noms de paquet et les informations d'Activity des applications récentes affichés dans le menu du bouton flottant étaient incorrects _[`issue #529`](http://issues.autojs6.com/529)_
 * `Correction` La boîte de dialogue "Exécuter le script" du bouton flottant pouvait ne pas être restaurée après sa réduction (tentative de correction) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Correction` L'arrière-plan de l'écran de démarrage ne s'étendait pas dans la zone de découpe du bord court
+* `Amélioration` La compilation TypeScript enregistre désormais, pour chaque requête et sans donnée sensible, la préparation, la recherche en cache, la liaison/préchauffe du compilateur, la compilation distante, le traitement de sortie, la durée totale, la taille de l'archive, le nombre de sources et la variation du tas de l'hôte ; ces observations n'imposent aucun seuil de performance
 * `Amélioration` Amélioration de la compatibilité des arguments des méthodes KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
 * `Amélioration` Les méthodes KeyCode permettent d'envoyer des commandes de touche avec l'autorisation Shizuku
 * `Amélioration` Initialisation différée des composants non critiques pour améliorer les performances de démarrage de l'application

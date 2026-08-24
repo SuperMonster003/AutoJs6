@@ -17,6 +17,7 @@ internal data class TypeScriptTerminalResult(
     val diagnosticCount: Int,
     val emittedModuleCount: Int,
     val outputManifestSha256: String?,
+    val elapsedMs: Long = 0L,
 )
 
 internal data class TypeScriptDiagnosticRange(
