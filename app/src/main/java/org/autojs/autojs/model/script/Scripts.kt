@@ -8,6 +8,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.jvm.JvmSourceExplicitRunner
 import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages
 import org.autojs.autojs.core.plugin.python.PythonInteractiveInputAuthorization
+import org.autojs.autojs.core.plugin.python.PythonLongRunningExecutionAuthorization
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
@@ -233,9 +234,15 @@ object Scripts {
             return null
         }
         if (launch.engineName == PythonScriptSource.ENGINE) {
-            PythonInteractiveInputAuthorization.authorizeForeground(config, context)
+            authorizeInteractivePythonExecution(config, context)
         }
         return executeLaunch(context, launch, config)
+    }
+
+    @JvmStatic
+    fun authorizeInteractivePythonExecution(config: ExecutionConfig, context: Context) {
+        PythonInteractiveInputAuthorization.authorizeForeground(config, context)
+        PythonLongRunningExecutionAuthorization.authorizeForeground(config, context)
     }
 
     @JvmStatic
@@ -316,7 +323,7 @@ object Scripts {
         }
         val config = launch.createExecutionConfig()
         if (interactiveContext != null && launch.engineName == PythonScriptSource.ENGINE) {
-            PythonInteractiveInputAuthorization.authorizeForeground(config, interactiveContext)
+            authorizeInteractivePythonExecution(config, interactiveContext)
         }
         return if (source is JvmFileSource) {
             JvmSourceExplicitRunner.runJvmSourceExplicit(

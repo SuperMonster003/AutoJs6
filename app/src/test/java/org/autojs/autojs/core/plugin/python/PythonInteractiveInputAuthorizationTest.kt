@@ -24,4 +24,18 @@ class PythonInteractiveInputAuthorizationTest {
         }
         assertEquals(PythonRuntimeHostError.INTERACTIVE_INPUT_NOT_ALLOWED, error.error)
     }
+
+    @Test
+    fun backgroundAndForgedConfigurationsHaveNoLongRunningAuthority() {
+        assertNull(PythonLongRunningExecutionAuthorization.resolve(null))
+        assertNull(PythonLongRunningExecutionAuthorization.resolve(ExecutionConfig()))
+        val config = ExecutionConfig().apply {
+            setArgument(PythonLongRunningExecutionAuthorization.ARGUMENT, Any())
+        }
+
+        val error = assertThrows(PythonRuntimeHostException::class.java) {
+            PythonLongRunningExecutionAuthorization.resolve(config)
+        }
+        assertEquals(PythonRuntimeHostError.LONG_RUNNING_NOT_ALLOWED, error.error)
+    }
 }

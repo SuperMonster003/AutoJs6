@@ -28,6 +28,14 @@ class PythonRuntimeCodecRoundTripTest {
             PythonRuntimeCodec.decodeSessionStarted(PythonRuntimeCodec.encodeSessionStarted(started)),
         )
 
+        val heartbeat = PythonRuntimeFixtures.heartbeat
+        assertEquals(
+            heartbeat,
+            PythonRuntimeCodec.decodeExecutionHeartbeat(
+                PythonRuntimeCodec.encodeExecutionHeartbeat(heartbeat),
+            ),
+        )
+
         val chunk = PythonOutputChunk(
             requestId = PythonRuntimeFixtures.requestId,
             sequence = 7,
@@ -114,6 +122,7 @@ class PythonRuntimeCodecRoundTripTest {
         assertFalse(legacyCapabilities.supportsInteractiveInput)
         assertFalse(legacyCapabilities.supportsStructuredJsonResult)
         assertFalse(legacyCapabilities.supportsOutputArtifacts)
+        assertFalse(legacyCapabilities.supportsLongRunningExecution)
         assertEquals(0L, legacyCapabilities.limits.maxHostCapabilitySnapshotBytes)
         assertEquals(0, legacyCapabilities.limits.maxInputPromptBytes)
         assertEquals(0, legacyCapabilities.limits.maxInputReplyBytes)
@@ -129,6 +138,12 @@ class PythonRuntimeCodecRoundTripTest {
             PythonRuntimeCodec.decodeExecutionRequest(
                 PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.request),
             ).entryMode,
+        )
+        assertEquals(
+            PythonExecutionMode.BOUNDED,
+            PythonRuntimeCodec.decodeExecutionRequest(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.request),
+            ).executionMode,
         )
 
         assertEquals(
@@ -177,6 +192,18 @@ class PythonRuntimeCodecRoundTripTest {
             PythonRuntimeFixtures.r4ResultRequest,
             PythonRuntimeCodec.decodeExecutionRequest(
                 PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.r4ResultRequest),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeFixtures.longRunningCapabilities,
+            PythonRuntimeCodec.decodeCapabilities(
+                PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.longRunningCapabilities),
+            ),
+        )
+        assertEquals(
+            PythonRuntimeFixtures.longRunningRequest,
+            PythonRuntimeCodec.decodeExecutionRequest(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.longRunningRequest),
             ),
         )
     }

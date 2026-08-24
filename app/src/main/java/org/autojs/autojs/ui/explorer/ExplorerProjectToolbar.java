@@ -148,7 +148,7 @@ public class ExplorerProjectToolbar extends CardView {
         }
         try {
             new ProjectLauncher(directory.getPath())
-                    .launch(AutoJs.getInstance().getScriptEngineService());
+                    .launchInteractive(AutoJs.getInstance().getScriptEngineService(), getContext());
         } catch (Exception e) {
             e.printStackTrace();
             showToast(getContext(), e.getMessage(), true);

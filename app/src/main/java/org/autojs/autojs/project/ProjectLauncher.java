@@ -1,5 +1,6 @@
 package org.autojs.autojs.project;
 
+import android.content.Context;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -7,6 +8,7 @@ import org.autojs.autojs.engine.NodeProjectRunner;
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics;
 import org.autojs.autojs.engine.ScriptEngineService;
 import org.autojs.autojs.execution.ExecutionConfig;
+import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor;
 import org.autojs.autojs.script.NodeProjectLaunchSource;
 import org.autojs.autojs.script.NodeProjectLaunchOptions;
@@ -59,6 +61,14 @@ public class ProjectLauncher {
     }
 
     public void launch(ScriptEngineService service) {
+        launch(service, null);
+    }
+
+    public void launchInteractive(ScriptEngineService service, @NonNull Context context) {
+        launch(service, context);
+    }
+
+    private void launch(ScriptEngineService service, @Nullable Context interactiveContext) {
         if (!mMainScriptFile.exists()) {
             throw new RuntimeException(service.getLanguageContext().getString(R.string.error_project_main_script_file_with_abs_path_does_not_exist, mMainScriptFile.getAbsolutePath()));
         }
@@ -66,6 +76,9 @@ public class ProjectLauncher {
         ExecutionConfig config = launch.createExecutionConfig();
         if (mProjectConfig != null) {
             config.getScriptConfig().setFeatures(mProjectConfig.getFeatures());
+        }
+        if (mPythonProjectAdmission != null && interactiveContext != null) {
+            Scripts.authorizeInteractivePythonExecution(config, interactiveContext);
         }
         service.execute(launch.getSource(), config);
     }

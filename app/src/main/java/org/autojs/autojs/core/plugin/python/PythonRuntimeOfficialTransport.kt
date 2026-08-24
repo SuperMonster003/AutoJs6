@@ -69,6 +69,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
         cancelled: () -> Boolean,
         onConnectionLost: (Throwable) -> Unit,
         abortFailure: () -> Throwable? = { null },
+        important: Boolean = false,
     ): Binding {
         require(timeoutMillis > 0L) { "Python Runtime bind timeout must be positive" }
         requirePluginEnabled()
@@ -78,7 +79,7 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
             applicationContext.bindService(
                 Intent().setComponent(OFFICIAL_COMPONENT),
                 binding,
-                Context.BIND_AUTO_CREATE,
+                Context.BIND_AUTO_CREATE or if (important) Context.BIND_IMPORTANT else 0,
             )
         } catch (error: SecurityException) {
             throw PythonRuntimeHostException(

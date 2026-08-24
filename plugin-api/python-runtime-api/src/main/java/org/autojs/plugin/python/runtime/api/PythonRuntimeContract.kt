@@ -12,7 +12,7 @@ object PythonRuntimeContract {
     const val ENGINE_ID = "python"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 5
+    const val PROTOCOL_MINOR = 6
     const val SCHEMA_MAJOR = 1
     const val SCHEMA_MINOR = 0
 
@@ -32,6 +32,7 @@ object PythonRuntimeContract {
     const val SCHEMA_INPUT_REPLY = 0x5059_0019
     const val SCHEMA_RESULT_POLICY = 0x5059_001a
     const val SCHEMA_OUTPUT_ARTIFACT = 0x5059_001b
+    const val SCHEMA_EXECUTION_HEARTBEAT = 0x5059_001c
 
     const val SOURCE_MIME_TYPE = "text/x-python"
     const val WORKSPACE_MIME_TYPE = "application/vnd.autojs6.python.workspace+zip"
@@ -50,6 +51,9 @@ object PythonRuntimeContract {
     const val MAX_OUTSTANDING_OUTPUT_CREDITS = 8
     const val MAX_TIMEOUT_MILLIS = 24L * 60L * 60L * 1_000L
     const val DEFAULT_TIMEOUT_MILLIS = 5L * 60L * 1_000L
+    const val LONG_RUNNING_HEARTBEAT_INTERVAL_MILLIS = 15_000L
+    const val LONG_RUNNING_HEARTBEAT_LEASE_MILLIS = 45_000L
+    const val LONG_RUNNING_START_LEASE_MILLIS = 2L * 60L * 1_000L
     const val MAX_INPUT_PROMPT_BYTES = 16 * 1024
     const val MAX_INPUT_REPLY_BYTES = 64 * 1024
     const val MAX_INPUT_PROMPTS = 1_024
@@ -103,6 +107,12 @@ enum class PythonCancellationMode(val wireCode: Int) {
 enum class PythonEntryMode(val wireCode: Int) {
     FILE(1),
     MODULE(2),
+}
+
+/** Selects the deadline and liveness policy for one execution. */
+enum class PythonExecutionMode(val wireCode: Int) {
+    BOUNDED(1),
+    LONG_RUNNING(2),
 }
 
 enum class PythonPayloadKind(val wireCode: Int) {

@@ -51,6 +51,8 @@ internal object PythonRuntimeHostTestFixtures {
         supportsInteractiveInput: Boolean = false,
         supportsStructuredJsonResult: Boolean = false,
         supportsOutputArtifacts: Boolean = false,
+        supportsHostCapabilityBroker: Boolean = false,
+        supportsLongRunningExecution: Boolean = false,
         supportsCooperativeCancellation: Boolean = true,
         maxOutputBytes: Long = 4_096L,
     ): PythonRuntimeCapabilities {
@@ -100,6 +102,8 @@ internal object PythonRuntimeHostTestFixtures {
             supportsInteractiveInput = supportsInteractiveInput,
             supportsStructuredJsonResult = supportsStructuredJsonResult,
             supportsOutputArtifacts = supportsOutputArtifacts,
+            supportsHostCapabilityBroker = supportsHostCapabilityBroker,
+            supportsLongRunningExecution = supportsLongRunningExecution,
         )
     }
 

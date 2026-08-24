@@ -42,6 +42,12 @@ internal object PythonRuntimeFixtures {
         providerVersionCode = 5,
     )
 
+    val longRunningRuntimeInfo = runtimeInfo.copy(
+        protocolMax = PythonProtocolVersion(1, 6),
+        providerVersionName = "1.6.0",
+        providerVersionCode = 6,
+    )
+
     val limits = PythonRuntimeResourceLimits(
         maxSourceBytes = 1024 * 1024,
         maxWorkspaceArchiveBytes = 8L * 1024L * 1024L,
@@ -166,6 +172,25 @@ internal object PythonRuntimeFixtures {
         supportsHostCapabilityBroker = true,
     )
 
+    val longRunningCapabilities = PythonRuntimeCapabilities(
+        implementation = brokerCapabilities.implementation,
+        pythonVersion = brokerCapabilities.pythonVersion,
+        supportedAbis = brokerCapabilities.supportedAbis,
+        supportsWorkspaceArchive = brokerCapabilities.supportsWorkspaceArchive,
+        supportsStdinSnapshot = brokerCapabilities.supportsStdinSnapshot,
+        supportsStructuredTraceback = brokerCapabilities.supportsStructuredTraceback,
+        supportsCooperativeCancellation = brokerCapabilities.supportsCooperativeCancellation,
+        cancellationMode = brokerCapabilities.cancellationMode,
+        limits = brokerCapabilities.limits,
+        supportsHostCapabilitySnapshot = brokerCapabilities.supportsHostCapabilitySnapshot,
+        supportsModuleEntry = brokerCapabilities.supportsModuleEntry,
+        supportsInteractiveInput = brokerCapabilities.supportsInteractiveInput,
+        supportsStructuredJsonResult = brokerCapabilities.supportsStructuredJsonResult,
+        supportsOutputArtifacts = brokerCapabilities.supportsOutputArtifacts,
+        supportsHostCapabilityBroker = brokerCapabilities.supportsHostCapabilityBroker,
+        supportsLongRunningExecution = true,
+    )
+
     val source = PythonPayloadReference(
         kind = PythonPayloadKind.SOURCE,
         descriptorIndex = 0,
@@ -281,6 +306,37 @@ internal object PythonRuntimeFixtures {
         maxOutputChunkBytes = 256,
         maxOutputChunks = 128,
         resultPolicy = resultPolicy,
+    )
+
+    fun makeLongRunningRequest(
+        protocolVersion: PythonProtocolVersion = PythonProtocolVersion(1, 6),
+        timeoutMillis: Long = 0,
+        executionMode: PythonExecutionMode = PythonExecutionMode.LONG_RUNNING,
+    ) = PythonExecutionRequest(
+        requestId = r4ResultRequest.requestId,
+        protocolVersion = protocolVersion,
+        entryPoint = r4ResultRequest.entryPoint,
+        source = r4ResultRequest.source,
+        workspaceArchive = r4ResultRequest.workspaceArchive,
+        stdin = r4ResultRequest.stdin,
+        hostCapabilitySnapshot = r4ResultRequest.hostCapabilitySnapshot,
+        arguments = r4ResultRequest.arguments,
+        timeoutMillis = timeoutMillis,
+        maxOutputBytes = r4ResultRequest.maxOutputBytes,
+        maxOutputChunkBytes = r4ResultRequest.maxOutputChunkBytes,
+        maxOutputChunks = r4ResultRequest.maxOutputChunks,
+        entryMode = r4ResultRequest.entryMode,
+        interactiveInput = r4ResultRequest.interactiveInput,
+        resultPolicy = r4ResultRequest.resultPolicy,
+        executionMode = executionMode,
+    )
+
+    val longRunningRequest = makeLongRunningRequest()
+
+    val heartbeat = PythonExecutionHeartbeat(
+        requestId = requestId,
+        sequence = 1,
+        elapsedMillis = PythonRuntimeContract.LONG_RUNNING_HEARTBEAT_INTERVAL_MILLIS,
     )
 
     val outputArtifactBytes = "artifact-data\n".toByteArray()

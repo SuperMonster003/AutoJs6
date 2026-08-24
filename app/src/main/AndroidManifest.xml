@@ -582,6 +582,16 @@
                 android:value="To ensure the app can smoothly complete automation workflow even when running in the background" />
         </service>
 
+        <service
+            android:name="org.autojs.autojs.external.foreground.PythonLongRunningForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs a user-started Python automation project with a persistent stop action and a bounded heartbeat lease" />
+        </service>
+
         <service android:name="org.autojs.autojs.external.ScriptExecutionIntentService" />
 
         <service

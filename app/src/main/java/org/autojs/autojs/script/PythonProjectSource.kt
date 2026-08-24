@@ -2,6 +2,7 @@ package org.autojs.autojs.script
 
 import org.autojs.autojs.core.plugin.python.PythonExecutionTimeoutPolicy
 import org.autojs.plugin.python.runtime.api.PythonEntryMode
+import org.autojs.plugin.python.runtime.api.PythonExecutionMode
 import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -20,6 +21,7 @@ class PythonProjectSource private constructor(
     val timeoutMillis: Long?,
     val entryMode: PythonEntryMode,
     val stdin: PythonProjectStdinSource?,
+    val executionMode: PythonExecutionMode,
 ) : PythonFileSource(sourceFile, entryFile) {
 
     val projectEntryFile: File
@@ -34,8 +36,17 @@ class PythonProjectSource private constructor(
             timeoutMillis: Long? = null,
             entryMode: PythonEntryMode = PythonEntryMode.FILE,
             stdin: PythonProjectStdinSource? = null,
+            executionMode: PythonExecutionMode = PythonExecutionMode.BOUNDED,
         ): PythonProjectSource {
-            return createWithSource(projectRoot, entryFile, entryFile, timeoutMillis, entryMode, stdin)
+            return createWithSource(
+                projectRoot,
+                entryFile,
+                entryFile,
+                timeoutMillis,
+                entryMode,
+                stdin,
+                executionMode,
+            )
         }
 
         internal fun createWithSource(
@@ -45,6 +56,7 @@ class PythonProjectSource private constructor(
             timeoutMillis: Long? = null,
             entryMode: PythonEntryMode = PythonEntryMode.FILE,
             stdin: PythonProjectStdinSource? = null,
+            executionMode: PythonExecutionMode = PythonExecutionMode.BOUNDED,
         ): PythonProjectSource {
             val root = projectRoot.canonicalFile
             val entry = entryFile.canonicalFile
@@ -53,9 +65,12 @@ class PythonProjectSource private constructor(
             require(entry.isFile) { "Python project entry point must be a regular file" }
             require(source.isFile) { "Python project source snapshot must be a regular file" }
             require(
-                timeoutMillis == null ||
-                    PythonExecutionTimeoutPolicy.isValidConfiguredTimeout(timeoutMillis),
-            ) { "Python project timeout is outside the host limit" }
+                when (executionMode) {
+                    PythonExecutionMode.BOUNDED -> timeoutMillis == null ||
+                        PythonExecutionTimeoutPolicy.isValidConfiguredTimeout(timeoutMillis)
+                    PythonExecutionMode.LONG_RUNNING -> timeoutMillis == null
+                },
+            ) { "Python project timeout does not match its execution mode" }
             val rootPrefix = root.path.trimEnd(File.separatorChar) + File.separator
             val ignoreCase = WINDOWS_ABSOLUTE_PATH.matches(root.path)
             require(entry.path.startsWith(rootPrefix, ignoreCase = ignoreCase)) {
@@ -69,7 +84,16 @@ class PythonProjectSource private constructor(
                 PythonRuntimeValidation.moduleNameForFileEntryPoint(relative)
             }
             stdin?.let { PythonProjectLaunchPolicy.validateStdinSource(root, it) }
-            return PythonProjectSource(root, entry, source, relative, timeoutMillis, entryMode, stdin).apply {
+            return PythonProjectSource(
+                root,
+                entry,
+                source,
+                relative,
+                timeoutMillis,
+                entryMode,
+                stdin,
+                executionMode,
+            ).apply {
                 if (source != entry) overriddenFullPath = entry.path
             }
         }

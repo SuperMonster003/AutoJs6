@@ -23,6 +23,9 @@ class PythonRuntimeCompatibilityTest {
         TaggedWireDocument.decode(
             PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.brokerCapabilities),
         ).rejectUnknownRequiredFields((1..14).toSet())
+        TaggedWireDocument.decode(
+            PythonRuntimeCodec.encodeCapabilities(PythonRuntimeFixtures.longRunningCapabilities),
+        ).rejectUnknownRequiredFields((1..15).toSet())
 
         val legacyRequestTags = (1..13).toSet()
         TaggedWireDocument.decode(
@@ -59,6 +62,13 @@ class PythonRuntimeCompatibilityTest {
             ).rejectUnknownRequiredFields(legacyResultTags)
         }
         assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, structuredResultError.error)
+
+        val longRunningError = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(
+                PythonRuntimeCodec.encodeExecutionRequest(PythonRuntimeFixtures.longRunningRequest),
+            ).rejectUnknownRequiredFields((1..16).toSet())
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, longRunningError.error)
     }
 
     @Test

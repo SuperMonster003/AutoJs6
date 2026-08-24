@@ -56,6 +56,7 @@ class PythonRuntimeCapabilities(
     val supportsStructuredJsonResult: Boolean = false,
     val supportsOutputArtifacts: Boolean = false,
     val supportsHostCapabilityBroker: Boolean = false,
+    val supportsLongRunningExecution: Boolean = false,
 ) {
     val supportedAbis: List<String> = immutableList(supportedAbis)
 
@@ -74,7 +75,8 @@ class PythonRuntimeCapabilities(
         supportsInteractiveInput == other.supportsInteractiveInput &&
         supportsStructuredJsonResult == other.supportsStructuredJsonResult &&
         supportsOutputArtifacts == other.supportsOutputArtifacts &&
-        supportsHostCapabilityBroker == other.supportsHostCapabilityBroker
+        supportsHostCapabilityBroker == other.supportsHostCapabilityBroker &&
+        supportsLongRunningExecution == other.supportsLongRunningExecution
 
     override fun hashCode(): Int = listOf(
         implementation,
@@ -92,6 +94,7 @@ class PythonRuntimeCapabilities(
         supportsStructuredJsonResult,
         supportsOutputArtifacts,
         supportsHostCapabilityBroker,
+        supportsLongRunningExecution,
     ).hashCode()
 }
 
@@ -121,6 +124,7 @@ class PythonExecutionRequest(
     val entryMode: PythonEntryMode = PythonEntryMode.FILE,
     val interactiveInput: PythonInteractiveInputPolicy? = null,
     val resultPolicy: PythonResultPolicy? = null,
+    val executionMode: PythonExecutionMode = PythonExecutionMode.BOUNDED,
 ) {
     val arguments: List<String> = immutableList(arguments)
 
@@ -129,6 +133,7 @@ class PythonExecutionRequest(
         protocolVersion == other.protocolVersion &&
         entryPoint == other.entryPoint &&
         entryMode == other.entryMode &&
+        executionMode == other.executionMode &&
         interactiveInput == other.interactiveInput &&
         resultPolicy == other.resultPolicy &&
         source == other.source &&
@@ -146,6 +151,7 @@ class PythonExecutionRequest(
         protocolVersion,
         entryPoint,
         entryMode,
+        executionMode,
         interactiveInput,
         resultPolicy,
         source,
@@ -201,6 +207,13 @@ data class PythonSessionStarted(
     val effectiveMaxOutputChunkBytes: Int,
     val effectiveMaxOutputChunks: Long,
     val runtimeGeneration: Long,
+)
+
+/** Ordered liveness signal emitted only by a protocol 1.6 long-running execution. */
+data class PythonExecutionHeartbeat(
+    val requestId: PythonRequestId,
+    val sequence: Long,
+    val elapsedMillis: Long,
 )
 
 class PythonOutputChunk(

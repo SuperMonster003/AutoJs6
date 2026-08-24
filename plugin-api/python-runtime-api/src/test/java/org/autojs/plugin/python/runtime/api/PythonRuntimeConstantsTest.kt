@@ -12,7 +12,7 @@ class PythonRuntimeConstantsTest {
         assertEquals("org.autojs.permission.PLUGIN", PythonRuntimeContract.PLUGIN_PERMISSION)
         assertEquals("text/x-python", PythonRuntimeContract.SOURCE_MIME_TYPE)
         assertEquals(1, PythonRuntimeContract.PROTOCOL_MAJOR)
-        assertEquals(5, PythonRuntimeContract.PROTOCOL_MINOR)
+        assertEquals(6, PythonRuntimeContract.PROTOCOL_MINOR)
         assertEquals(1, PythonRuntimeContract.SCHEMA_MAJOR)
         assertEquals(0, PythonRuntimeContract.SCHEMA_MINOR)
         assertEquals(64L * 1024L, PythonRuntimeContract.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES)
@@ -20,6 +20,9 @@ class PythonRuntimeConstantsTest {
         assertEquals(64 * 1024, PythonRuntimeContract.MAX_HOST_CAPABILITY_RESPONSE_BYTES)
         assertEquals(1_024, PythonRuntimeContract.MAX_HOST_CAPABILITY_CALLS)
         assertEquals(5_000L, PythonRuntimeContract.HOST_CAPABILITY_CALL_TIMEOUT_MILLIS)
+        assertEquals(15_000L, PythonRuntimeContract.LONG_RUNNING_HEARTBEAT_INTERVAL_MILLIS)
+        assertEquals(45_000L, PythonRuntimeContract.LONG_RUNNING_HEARTBEAT_LEASE_MILLIS)
+        assertEquals(120_000L, PythonRuntimeContract.LONG_RUNNING_START_LEASE_MILLIS)
     }
 
     @Test
@@ -42,6 +45,7 @@ class PythonRuntimeConstantsTest {
                 0x5059_0019,
                 0x5059_001a,
                 0x5059_001b,
+                0x5059_001c,
             ),
             listOf(
                 PythonRuntimeContract.SCHEMA_RUNTIME_INFO,
@@ -60,6 +64,7 @@ class PythonRuntimeConstantsTest {
                 PythonRuntimeContract.SCHEMA_INPUT_REPLY,
                 PythonRuntimeContract.SCHEMA_RESULT_POLICY,
                 PythonRuntimeContract.SCHEMA_OUTPUT_ARTIFACT,
+                PythonRuntimeContract.SCHEMA_EXECUTION_HEARTBEAT,
             ),
         )
     }
@@ -78,6 +83,10 @@ class PythonRuntimeConstantsTest {
         assertEquals(
             listOf("FILE" to 1, "MODULE" to 2),
             PythonEntryMode.entries.map { it.name to it.wireCode },
+        )
+        assertEquals(
+            listOf("BOUNDED" to 1, "LONG_RUNNING" to 2),
+            PythonExecutionMode.entries.map { it.name to it.wireCode },
         )
         assertEquals(
             listOf(

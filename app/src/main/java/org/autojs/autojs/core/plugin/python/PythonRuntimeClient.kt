@@ -17,6 +17,7 @@ import org.autojs.plugin.python.runtime.api.IPythonSessionOpenCallback
 import org.autojs.plugin.python.runtime.api.PythonErrorCode
 import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonExecutionError
+import org.autojs.plugin.python.runtime.api.PythonExecutionMode
 import org.autojs.plugin.python.runtime.api.PythonExecutionRequest
 import org.autojs.plugin.python.runtime.api.PythonExecutionResult
 import org.autojs.plugin.python.runtime.api.PythonImplementation
@@ -58,26 +59,50 @@ internal class PythonRuntimeClient(
         entryMode: PythonEntryMode = PythonEntryMode.FILE,
         stdinSnapshot: ByteArray? = null,
         interactiveInputGrant: PythonInteractiveInputGrant? = null,
+        executionMode: PythonExecutionMode = PythonExecutionMode.BOUNDED,
+        longRunningGrant: PythonLongRunningExecutionGrant? = null,
         configuredTimeoutMillis: Long? = null,
         engineId: Int = -1,
         engineStartedAtMillis: Long = 0L,
         stopSelf: () -> Unit = {},
-    ): Execution = Execution(
-        source,
-        entryMode,
-        stdinSnapshot?.copyOf(),
-        interactiveInputGrant?.openController(),
-        configuredTimeoutMillis,
-        engineId,
-        engineStartedAtMillis,
-        stopSelf,
-    )
+    ): Execution {
+        val interactiveInputController = interactiveInputGrant?.openController()
+        val longRunningController = try {
+            when (executionMode) {
+                PythonExecutionMode.BOUNDED -> null
+                PythonExecutionMode.LONG_RUNNING -> (
+                    longRunningGrant
+                        ?: throw PythonRuntimeHostException(
+                            PythonRuntimeHostError.LONG_RUNNING_NOT_ALLOWED,
+                            "Long-running Python execution requires a foreground user launch",
+                        )
+                    ).openController(source.semanticFile.name, stopSelf)
+            }
+        } catch (error: Throwable) {
+            interactiveInputController?.close()
+            throw error
+        }
+        return Execution(
+            source,
+            entryMode,
+            stdinSnapshot?.copyOf(),
+            interactiveInputController,
+            executionMode,
+            longRunningController,
+            configuredTimeoutMillis,
+            engineId,
+            engineStartedAtMillis,
+            stopSelf,
+        )
+    }
 
     inner class Execution internal constructor(
         private val source: PythonFileSource,
         private val entryMode: PythonEntryMode,
         stdinSnapshot: ByteArray?,
         private val interactiveInputController: PythonInteractiveInputController?,
+        private val executionMode: PythonExecutionMode,
+        private val longRunningController: PythonLongRunningExecutionController?,
         private val configuredTimeoutMillis: Long?,
         private val engineId: Int,
         private val engineStartedAtMillis: Long,
@@ -126,6 +151,7 @@ internal class PythonRuntimeClient(
             } finally {
                 pendingStdinSnapshot.getAndSet(null)?.fill(0)
                 closeInteractiveInput()
+                closeLongRunningExecution()
                 PluginStateChangeRegistry.removeListener(pluginStateChangedListener)
             }
         }
@@ -168,6 +194,7 @@ internal class PythonRuntimeClient(
                     abortFailure = {
                         pluginStateFailure.get() ?: failure.get()
                     },
+                    important = executionMode == PythonExecutionMode.LONG_RUNNING,
                 ).also(binding::set)
                 checkExecutionActive()
                 val provider = connection.provider()
@@ -187,6 +214,7 @@ internal class PythonRuntimeClient(
                 val outputChunkBytes = minOf(DEFAULT_OUTPUT_CHUNK_BYTES, capabilities.limits.maxOutputChunkBytes)
                 val outputChunks = minOf(DEFAULT_OUTPUT_CHUNKS, capabilities.limits.maxOutputChunks, outputBytes)
                 val timeoutMillis = PythonExecutionTimeoutPolicy.resolve(
+                    executionMode,
                     configuredTimeoutMillis,
                     capabilities.limits.maxTimeoutMillis,
                 )
@@ -196,7 +224,7 @@ internal class PythonRuntimeClient(
                 val inputWaitMillis = minOf(
                     DEFAULT_INPUT_WAIT_MILLIS,
                     capabilities.limits.maxInputWaitMillis,
-                    timeoutMillis,
+                    if (executionMode == PythonExecutionMode.BOUNDED) timeoutMillis else Long.MAX_VALUE,
                 )
                 val structuredJsonBytes = minOf(
                     DEFAULT_STRUCTURED_JSON_BYTES,
@@ -226,6 +254,7 @@ internal class PythonRuntimeClient(
                     interactiveInput = interactiveInputController != null,
                     structuredJsonResult = true,
                     outputArtifacts = true,
+                    longRunningExecution = executionMode == PythonExecutionMode.LONG_RUNNING,
                     minimumSourceBytes = maxOf(1L, snapshot.sourceLengthBytes),
                     minimumWorkspaceArchiveBytes = snapshot.workspaceLengthBytes ?: 0L,
                     minimumWorkspaceEntries = snapshot.workspaceEntryCount ?: 0,
@@ -245,7 +274,7 @@ internal class PythonRuntimeClient(
                     minimumOutputChunkBytes = outputChunkBytes,
                     minimumOutputChunks = outputChunks,
                     minimumOutstandingOutputCredits = 1,
-                    minimumTimeoutMillis = timeoutMillis,
+                    minimumTimeoutMillis = if (executionMode == PythonExecutionMode.BOUNDED) timeoutMillis else 0L,
                 )
                 val pinned = selectPinnedProvider(
                     installed.toCandidate(runtimeInfo, capabilities),
@@ -307,6 +336,7 @@ internal class PythonRuntimeClient(
                     entryMode = snapshot.entryMode,
                     interactiveInput = interactiveInputPolicy,
                     resultPolicy = resultPolicy,
+                    executionMode = executionMode,
                 )
                 val refreshedMetadata = callProviderRpc(
                     operation = "pre-dispatch metadata revalidation",
@@ -351,7 +381,7 @@ internal class PythonRuntimeClient(
                 reservation.set(reserved)
                 checkExecutionActive()
                 openSession(provider, pinned, reserved, snapshot)
-                awaitTerminal(request.timeoutMillis)
+                awaitTerminal(request)
                 checkExecutionActive()
                 failure.get()?.let { throw it }
                 return result.get()
@@ -387,6 +417,7 @@ internal class PythonRuntimeClient(
             cancelled.set(true)
             closeHostCapabilityBroker()
             closeInteractiveInput()
+            closeLongRunningExecution()
             pendingStdinSnapshot.getAndSet(null)?.fill(0)
             cancelRemoteSession()
             binding.getAndSet(null)?.close()
@@ -509,11 +540,12 @@ internal class PythonRuntimeClient(
 
             val executionCallback = object : IPythonExecutionCallback.Stub() {
                 override fun onStarted(metadata: ByteArray?) = fromPinnedProvider {
-                    reserved.plan.admissionPlan.sessionPolicy?.onStarted(
-                        PythonRuntimeCodec.decodeSessionStarted(
-                            requireNotNull(metadata) { "Python Runtime started metadata is null" },
-                        ),
-                    ) ?: error("Python Runtime started before admission")
+                    val decoded = PythonRuntimeCodec.decodeSessionStarted(
+                        requireNotNull(metadata) { "Python Runtime started metadata is null" },
+                    )
+                    reserved.plan.admissionPlan.sessionPolicy?.onStarted(decoded)
+                        ?: error("Python Runtime started before admission")
+                    longRunningController?.onStarted()
                 }
 
                 override fun onStdout(chunk: ByteArray?) = acceptOutput(
@@ -599,6 +631,19 @@ internal class PythonRuntimeClient(
                     }
                     policy.onInputPrompt(decoded)
                     dispatchInteractiveInput(decoded, sessionRef, reserved)
+                }
+
+                override fun onHeartbeat(heartbeat: ByteArray?) = fromPinnedProvider {
+                    val decoded = PythonRuntimeCodec.decodeExecutionHeartbeat(
+                        requireNotNull(heartbeat) { "Python Runtime heartbeat is null" },
+                    )
+                    val policy = requireNotNull(reserved.plan.admissionPlan.sessionPolicy) {
+                        "Python Runtime heartbeat arrived before admission"
+                    }
+                    policy.onHeartbeat(decoded)
+                    requireNotNull(longRunningController) {
+                        "Python Runtime emitted a heartbeat for a bounded execution"
+                    }.onHeartbeat(decoded.elapsedMillis)
                 }
             }
             val admissionCallback = object : IPythonSessionOpenCallback.Stub() {
@@ -759,7 +804,15 @@ internal class PythonRuntimeClient(
             }
         }
 
-        private fun awaitTerminal(timeoutMillis: Long) {
+        private fun awaitTerminal(request: PythonExecutionRequest) {
+            if (request.executionMode == PythonExecutionMode.LONG_RUNNING) {
+                awaitLongRunningTerminal()
+            } else {
+                awaitBoundedTerminal(request.timeoutMillis)
+            }
+        }
+
+        private fun awaitBoundedTerminal(timeoutMillis: Long) {
             val waitMillis = Math.addExact(timeoutMillis, TERMINAL_GRACE_MILLIS)
             try {
                 if (!terminal.await(waitMillis, TimeUnit.MILLISECONDS)) {
@@ -777,6 +830,38 @@ internal class PythonRuntimeClient(
                 cancel()
                 throw error
             }
+        }
+
+        private fun awaitLongRunningTerminal() {
+            val controller = requireNotNull(longRunningController) {
+                "Long-running Python request has no foreground controller"
+            }
+            try {
+                while (!terminal.await(LONG_RUNNING_WAIT_POLL_MILLIS, TimeUnit.MILLISECONDS)) {
+                    checkExecutionActive()
+                    failure.get()?.let { throw it }
+                    controller.leaseFailure()?.let { leaseFailure ->
+                        if (abortForLongRunningLease(leaseFailure)) throw leaseFailure
+                        terminal.await(PROVIDER_RPC_POLL_MILLIS, TimeUnit.MILLISECONDS)
+                        return
+                    }
+                }
+            } catch (error: InterruptedException) {
+                cancel()
+                throw error
+            }
+        }
+
+        private fun abortForLongRunningLease(error: PythonRuntimeHostException): Boolean {
+            if (!terminalClaimed.compareAndSet(false, true)) return false
+            failure.set(error)
+            closeHostCapabilityBroker()
+            closeInteractiveInput()
+            cancelRemoteSession()
+            binding.getAndSet(null)?.close()
+            executionSnapshot.getAndSet(null)?.close()
+            terminal.countDown()
+            return true
         }
 
         private fun abortForHostTimeout(): Boolean {
@@ -944,6 +1029,10 @@ internal class PythonRuntimeClient(
             interactiveInputController?.cancel()
         }
 
+        private fun closeLongRunningExecution() {
+            longRunningController?.close()
+        }
+
         private fun closeHostCapabilityBroker() {
             hostCapabilityBroker.getAndSet(null)?.close()
         }
@@ -1105,6 +1194,7 @@ internal class PythonRuntimeClient(
         private const val PROVIDER_RPC_TIMEOUT_MILLIS = 10_000L
         private const val PROVIDER_RPC_POLL_MILLIS = 100L
         private const val TERMINAL_GRACE_MILLIS = 15_000L
+        private const val LONG_RUNNING_WAIT_POLL_MILLIS = 1_000L
         private const val DEFAULT_OUTPUT_BYTES = 16L * 1024L * 1024L
         private const val DEFAULT_OUTPUT_CHUNK_BYTES = 32 * 1024
         private const val DEFAULT_OUTPUT_CHUNKS = 16_384L

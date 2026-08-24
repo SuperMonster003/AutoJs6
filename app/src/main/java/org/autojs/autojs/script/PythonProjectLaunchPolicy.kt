@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import org.autojs.autojs.core.plugin.python.PythonExecutionTimeoutPolicy
 import org.autojs.plugin.python.runtime.api.PythonEntryMode
+import org.autojs.plugin.python.runtime.api.PythonExecutionMode
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContractException
 import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
 import java.io.ByteArrayOutputStream
@@ -56,6 +57,7 @@ object PythonProjectLaunchPolicy {
             declaration.timeoutMillis,
             declaration.entryMode,
             declaration.stdin,
+            declaration.executionMode,
         )
     }
 
@@ -152,12 +154,18 @@ object PythonProjectLaunchPolicy {
         if (type != null && alias != null && !type.equals(alias, ignoreCase = true)) {
             throw PythonProjectLaunchException(PythonProjectLaunchError.CONFIG_INVALID)
         }
+        val executionMode = executionModeValue(json)
+        val timeoutMillis = timeoutMillisValue(json)
+        if (executionMode == PythonExecutionMode.LONG_RUNNING && timeoutMillis != null) {
+            throw PythonProjectLaunchException(PythonProjectLaunchError.CONFIG_INVALID)
+        }
         return Declaration(
             projectType = type ?: alias,
             main = stringValue(json, "main"),
-            timeoutMillis = timeoutMillisValue(json),
+            timeoutMillis = timeoutMillis,
             entryMode = entryModeValue(json),
             stdin = stdinValue(json),
+            executionMode = executionMode,
         )
     }
 
@@ -184,6 +192,13 @@ object PythonProjectLaunchPolicy {
         when (stringValue(json, "entryMode") ?: FILE_ENTRY_MODE) {
             FILE_ENTRY_MODE -> PythonEntryMode.FILE
             MODULE_ENTRY_MODE -> PythonEntryMode.MODULE
+            else -> throw PythonProjectLaunchException(PythonProjectLaunchError.CONFIG_INVALID)
+        }
+
+    private fun executionModeValue(json: JsonObject): PythonExecutionMode =
+        when (stringValue(json, "executionMode") ?: BOUNDED_EXECUTION_MODE) {
+            BOUNDED_EXECUTION_MODE -> PythonExecutionMode.BOUNDED
+            LONG_RUNNING_EXECUTION_MODE -> PythonExecutionMode.LONG_RUNNING
             else -> throw PythonProjectLaunchException(PythonProjectLaunchError.CONFIG_INVALID)
         }
 
@@ -378,12 +393,15 @@ object PythonProjectLaunchPolicy {
         val timeoutMillis: Long?,
         val entryMode: PythonEntryMode,
         val stdin: PythonProjectStdinSource?,
+        val executionMode: PythonExecutionMode,
     )
 
     private const val PROJECT_CONFIG_NAME = "project.json"
     private const val PYTHON_PROJECT_TYPE = "python"
     private const val FILE_ENTRY_MODE = "file"
     private const val MODULE_ENTRY_MODE = "module"
+    private const val BOUNDED_EXECUTION_MODE = "bounded"
+    private const val LONG_RUNNING_EXECUTION_MODE = "long-running"
     private const val STDIN_FILE_PROPERTY = "file"
     private const val MAX_PROJECT_CONFIG_BYTES = 64L * 1024L
     private const val MAX_PROJECT_ANCESTORS = 64
@@ -403,6 +421,7 @@ data class PythonProjectLaunchAdmission(
     val timeoutMillis: Long?,
     val entryMode: PythonEntryMode = PythonEntryMode.FILE,
     val stdin: PythonProjectStdinSource? = null,
+    val executionMode: PythonExecutionMode = PythonExecutionMode.BOUNDED,
 )
 
 sealed class PythonProjectStdinSource {

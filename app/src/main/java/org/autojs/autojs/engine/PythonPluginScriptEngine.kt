@@ -5,6 +5,7 @@ import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.plugin.python.PythonExecutionInputPolicy
 import org.autojs.autojs.core.plugin.python.PythonInteractiveInputAuthorization
+import org.autojs.autojs.core.plugin.python.PythonLongRunningExecutionAuthorization
 import org.autojs.autojs.core.plugin.python.PythonRuntimeClient
 import org.autojs.autojs.core.plugin.python.PythonRuntimeHostError
 import org.autojs.autojs.core.plugin.python.PythonRuntimeHostException
@@ -15,6 +16,7 @@ import org.autojs.autojs.script.PythonFileSource
 import org.autojs.autojs.script.PythonProjectSource
 import org.autojs.autojs.script.PythonRuntimeChannelPolicy
 import org.autojs.autojs.script.PythonScriptSource
+import org.autojs.plugin.python.runtime.api.PythonExecutionMode
 import java.util.concurrent.atomic.AtomicReference
 
 /** Stable host facade; CPython remains entirely in the independent plugin process. */
@@ -55,12 +57,21 @@ class PythonPluginScriptEngine(
         val entryMode = PythonExecutionInputPolicy.resolveEntryMode(executionConfig)
         val stdinSnapshot = PythonExecutionInputPolicy.resolveStdinSnapshot(executionConfig)
         val interactiveInputGrant = PythonInteractiveInputAuthorization.resolve(executionConfig)
+        val executionMode = (fileSource as? PythonProjectSource)?.executionMode
+            ?: PythonExecutionMode.BOUNDED
+        val longRunningGrant = if (executionMode == PythonExecutionMode.LONG_RUNNING) {
+            PythonLongRunningExecutionAuthorization.resolve(executionConfig)
+        } else {
+            null
+        }
         val execution = try {
             client.createExecution(
                 fileSource,
                 entryMode,
                 stdinSnapshot,
                 interactiveInputGrant,
+                executionMode,
+                longRunningGrant,
                 (fileSource as? PythonProjectSource)?.timeoutMillis,
                 id,
                 startTime,
