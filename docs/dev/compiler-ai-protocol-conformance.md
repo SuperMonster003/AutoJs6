@@ -4,6 +4,14 @@ This matrix separates checks that are complete in the repository from checks
 that require an installed provider, multiple Android API levels, or a real
 production engine. A static pass is not a device-runtime claim.
 
+The current official local AI product is 3-Stone AI
+(`io.github.supermonster003.autojs6.plugin.threestoneai`, provider
+`autojs6.three-stone-ai`). Its cross-process contract is the neutral
+`ai-provider-api` surface under `org.autojs.plugin.ai.provider.api`, discovered
+only through `org.autojs.plugin.AI_PROVIDER`. Only results produced from the
+current source and current artifacts count toward its first-release gate;
+dated device-smoke records below remain narrow observational evidence.
+
 The production AI and DEX providers are maintained as independent sibling
 projects and are not source dependencies of this repository. The applications
 under `test-apps` deliberately retain fake package identities and hostile
@@ -24,14 +32,14 @@ behavior only for reproducible host conformance testing.
 | DEX conformance app | Deterministic fixed DEX ZIP, strict bounded JAR framing/hash validation, process-wide single-session gate, explicit hostile services, and single-writer behavior | Conformance compiler unit corpus, 25 tests | PASS, JVM |
 | DEX conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 | AI common | Provider, error, usage, payload reference, version negotiation, malformed and evolution corpus | `AiCommonCodecTest` | PASS, JVM |
-| on-device AI | Capabilities, requests, chunks, reasoning, usage, tools, pages, malformed and evolution corpus | `OnDeviceAiCodecTest` | PASS, JVM |
+| local AI | Capabilities, requests, chunks, reasoning, usage, tools, pages, malformed and evolution corpus | `AiProviderCodecTest` | PASS, JVM |
 | AI lifecycle | Credits, contiguous sequence, single terminal, cancellation, declared tools, verified JSON, aggregate stream digests, tool exactly-once, and cumulative quotas | Lifecycle and quota unit corpus | PASS, JVM |
 | AI models | Page token replay, scope, cycle, generation drift, and cross-page duplicate model IDs | `AiModelPageTokenPolicyTest` | PASS, JVM |
 | AI protocol | Shared wire, common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and pagination | Combined protocol/API corpus, 103 tests | PASS, JVM |
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
 | AI host model list and plugin selection | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, terminal cleanup, and explicit persistent model selection | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests; D3#3 plugin commits `6489a59` / `af0c5fe` and host exact-test commit `b695c303`; D3#4 plugin production/tested-source commits `98d438e` / `a6bc0e3` and host exact-test commit `6495079ea` | PASS, JVM; PARTIAL, one API 35/arm64-v8a real-plugin listing-only Binder method plus one API 31/arm64-v8a real-plugin manager-selection/Binder method |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
-| AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `OnDeviceAiProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
+| AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `AiProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
 | AI explicit ask/chat/stream routes | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process-shared admission, per-script lifecycle ownership, normalized unary/chat/stream results, and stable terminal codes | Earlier ask/stream focused Gradle 25/25; chat tested-source commits `d480b6918` / `b0aa67684` focused Gradle 14/14 (3 mapper + 4 runtime + 7 service), 0 skipped/failures/errors; one real-provider ask plus fake-provider stream and chat public methods on API 31 | PARTIAL, JVM/source plus three narrow positive-path device smokes |
 | AI conformance app | Echo, stream, reasoning, tools, usage, pagination, hostile hidden models including isolated callback UID and provider process death, bounded executors, FD cleanup, and caller authentication | H1 fixture commit `edd10008f` and H2 fixture commit `10dad3e39`; conformance text provider unit corpus: 31 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM; Android hostile results remain PARTIAL below |
 | AI conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
@@ -85,7 +93,7 @@ integrates those scoped changes as production commit `2d256b99f` and test commit
 the APK build/test source.
 
 The 2026-08-11 production positive-path smoke ran the exact method
-`OnDeviceAiPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
+`AiPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
 on `QV710AF65F` (API 31, arm64-v8a). It traversed the real Rhino
 `ScriptEngineService`, public global `ai.ask` with an explicit selector, the
 release plugin service/provider, and a real 2,583,085,056-byte model whose
@@ -127,7 +135,7 @@ four opt-in arguments; a temporary transaction script is not a protocol or
 conformance entry point.
 
 ```powershell
-adb -s QV710AF65F shell am instrument -w -r -e autojs.onDeviceAi.publicAskSmoke.enabled true -e autojs.onDeviceAi.publicAskSmoke.serial QV710AF65F -e autojs.onDeviceAi.publicAskSmoke.modelId litertlm.ab7838cdfc8f77e54d8ca45eadceb204 -e autojs.onDeviceAi.publicAskSmoke.timeoutMillis 600000 -e class 'org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.publicAskSmoke.enabled true -e autojs.aiProvider.publicAskSmoke.serial QV710AF65F -e autojs.aiProvider.publicAskSmoke.modelId litertlm.ab7838cdfc8f77e54d8ca45eadceb204 -e autojs.aiProvider.publicAskSmoke.timeoutMillis 600000 -e class 'org.autojs.autojs.core.plugin.ai.AiPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 Future runs must retain the following fixed record field names so that a result
@@ -143,7 +151,7 @@ evidence_schema=ai-public-ask-smoke-v1
 tested_source_commit=ceb44b8ba272a958bad37ec4f1aae2fd4b29dcbd
 integration_commit=7ce26ceea3f5458e347cb46078005885d1e8f807
 tested_and_integration_app_tree_byte_identical=true
-test_class_method=org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin
+test_class_method=org.autojs.autojs.core.plugin.ai.AiPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin
 device_serial=QV710AF65F
 device_api=31
 device_abi=arm64-v8a
@@ -171,13 +179,13 @@ receipt_scope=local-only
 #### Public Fake-Provider Stream Route
 
 On 2026-08-11, the exact opt-in method
-`OnDeviceAiPluginPublicStreamSmokeTest#publicRhinoAiStreamCompletesThroughExactFakeProvider`
+`AiPluginPublicStreamSmokeTest#publicRhinoAiStreamCompletesThroughExactFakeProvider`
 returned `OK (1 test)` in 1.645 seconds with instrumentation code `-1` on
 `QV710AF65F` (API 31, arm64-v8a, user 0). Source HEAD was
 `50b43d00cc634f8a220856bf68f936fc800442a4`. The method used the real
 `ScriptEngineService` and public Rhino `ai.stream` with the exact test-only
-package `org.autojs.plugin.ondeviceai.fake`, service class
-`org.autojs.plugin.ondeviceai.fake.service.FakeOnDeviceAiProviderService`, provider
+package `org.autojs.plugin.ai.provider.fake`, service class
+`org.autojs.plugin.ai.provider.fake.service.FakeAiProviderService`, provider
 `fake.local`, and model `fake.stream`.
 
 The UTF-8 prompt produced one `open` and more than eight `chunk` events, crossing
@@ -213,7 +221,7 @@ result closes no broad R1 checkbox or protocol exit criterion.
 #### Public Fake-Provider Chat Route
 
 On 2026-08-11, the exact opt-in method
-`OnDeviceAiPluginPublicChatSmokeTest#publicRhinoAiChatReturnsNormalizedResponseThroughExactFakeProvider`
+`AiPluginPublicChatSmokeTest#publicRhinoAiChatReturnsNormalizedResponseThroughExactFakeProvider`
 reported `OK (1 test)`, `Time: 1.54`, and instrumentation code `-1` on
 `QV710AF65F` (API 31, arm64-v8a, user 0). The APK-tested source commit was
 `b0aa6768484d6046551264f69ecc84b527bbb442`, which contains feature commit
@@ -222,8 +230,8 @@ as `2d256b99f` / `c35f199b8`; those integration commits were not the artifact
 source.
 
 The method traversed the real `ScriptEngineService` and public Rhino `ai.chat`
-with the exact test-only package `org.autojs.plugin.ondeviceai.fake`, service class
-`org.autojs.plugin.ondeviceai.fake.service.FakeOnDeviceAiProviderService`, provider
+with the exact test-only package `org.autojs.plugin.ai.provider.fake`, service class
+`org.autojs.plugin.ai.provider.fake.service.FakeAiProviderService`, provider
 `fake.local`, and model `fake.echo`. One naturally completed Promise terminal
 returned the exact 12-key set `text`, `reasoning`, `toolCalls`, `usage`,
 `finishReason`, `message`, `error`, `raw`, `profile`, `route`, `provider`, and
@@ -252,13 +260,13 @@ no broad R1 checkbox or protocol exit criterion.
 
 ### Pure Kotlin AI Session Transcript Evidence
 
-Commit `325577c82` adds `OnDeviceAiProviderSessionPolicy` and its 40-test unit
+Commit `325577c82` adds `AiProviderSessionPolicy` and its 40-test unit
 corpus. The policy is default-off, transport-neutral, and unwired. Its abstract
 descriptor and callback interfaces are not an Android `ParcelFileDescriptor`
-or generated `IOnDeviceAiCallback` adapter, and it does not invoke
-`IOnDeviceAiProvider.openSession`. The standalone Kotlin K2/JVM gate passed 40/40;
+or generated `IAiCallback` adapter, and it does not invoke
+`IAiProvider.openSession`. The standalone Kotlin K2/JVM gate passed 40/40;
 30 repeated rounds passed 1200/1200. A focused Gradle
-`:app:testAppDebugUnitTest` run for `OnDeviceAiProviderSessionTest` recorded
+`:app:testAppDebugUnitTest` run for `AiProviderSessionTest` recorded
 40 tests, 0 skipped, 0 failures, and 0 errors in its XML.
 
 No Android instrumentation, device, or ADB run was performed for this slice.
@@ -273,10 +281,10 @@ Commits `4f22dc854`, `038728f03`, and `a22ed8b75` add the default-off session
 coordinator, Android Binder/PFD adapter, and opt-in instrumentation. There is no
 production call site. An explicitly enabled run checks the locally pinned plan
 and package, performs four exact package inspections, binds one actionless exact
-component, verifies `IOnDeviceAiProvider`, and reads bounded provider info and
+component, verifies `IAiProvider`, and reads bounded provider info and
 capabilities from the same Binder later used for one synchronous
 `openSession`. The final exact inspection occurs immediately before dispatch.
-The returned `IOnDeviceAiSession` descriptor and death recipient are verified
+The returned `IAiSession` descriptor and death recipient are verified
 before the remote is committed; callback-before-return remains provisional.
 
 The generated callback stub captures the Binder calling UID before forwarding.
@@ -371,7 +379,7 @@ B/A/C order:
 
 All pages admitted the expected generation
 `litertlm-catalog-v2-43e043444d5ca606e2c33805c0d5f656`. The exact method
-`OnDeviceAiProviderModelListingAndroidConformanceTest#exactRealPluginListsExternallyProvisionedThreeModelCatalogAcrossStablePages`
+`AiProviderModelListingAndroidConformanceTest#exactRealPluginListsExternallyProvisionedThreeModelCatalogAcrossStablePages`
 returned `OK (1 test)` in 0.691 seconds. It used the real exact-component
 handshake and model-list transports, completed off the Android main thread,
 published one terminal outcome, and retained the initial package identity at
@@ -379,7 +387,7 @@ the final inspection.
 
 Preflight and post-cleanup both found zero installed-user rows for the three
 exact packages--`org.autojs.autojs6`, `org.autojs.autojs6.test`, and
-`io.github.supermonster003.autojs6.plugin.ondeviceai`--and all nine reserved
+`io.github.supermonster003.autojs6.plugin.threestoneai`--and all nine reserved
 external data/media/obb paths absent. The scoped cleanup receipt reported zero
 residuals.
 
@@ -422,7 +430,7 @@ remained unchanged.
 The durable method-level entry is:
 
 ```powershell
-adb -s QV710AF65F shell am instrument -w -r -e autojs.onDeviceAi.realModelSelection.conformance.enabled true -e autojs.onDeviceAi.realModelSelection.conformance.serial QV710AF65F -e autojs.onDeviceAi.realModelSelection.conformance.initialModelId litertlm.85515105bf0e6b25b0ed8ce1cc3801ab -e autojs.onDeviceAi.realModelSelection.conformance.targetModelId litertlm.808c1f662212f7efb70b16956fb784a7 -e autojs.onDeviceAi.realModelSelection.conformance.listingGeneration litertlm-catalog-v2-08e6ec0aff29d234cbdf6acb07be8916 -e class 'org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderModelListingAndroidConformanceTest#exactRealPluginSelectionPersistsAcrossManagerProcessRestartWithoutChangingBinderCatalog' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.realModelSelection.conformance.enabled true -e autojs.aiProvider.realModelSelection.conformance.serial QV710AF65F -e autojs.aiProvider.realModelSelection.conformance.initialModelId litertlm.85515105bf0e6b25b0ed8ce1cc3801ab -e autojs.aiProvider.realModelSelection.conformance.targetModelId litertlm.808c1f662212f7efb70b16956fb784a7 -e autojs.aiProvider.realModelSelection.conformance.listingGeneration litertlm-catalog-v2-08e6ec0aff29d234cbdf6acb07be8916 -e class 'org.autojs.autojs.core.plugin.ai.AiProviderModelListingAndroidConformanceTest#exactRealPluginSelectionPersistsAcrossManagerProcessRestartWithoutChangingBinderCatalog' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 The final transaction strictly admitted exact `OK (1 test)`, instrumentation
@@ -434,7 +442,7 @@ that time is supporting context, not the final transaction's measured time.
 
 Preflight and post-cleanup both found the three exact packages--
 `org.autojs.autojs6`, `org.autojs.autojs6.test`, and
-`io.github.supermonster003.autojs6.plugin.ondeviceai`--absent for users 0 and 10,
+`io.github.supermonster003.autojs6.plugin.threestoneai`--absent for users 0 and 10,
 and all nine reserved external data/media/obb paths absent.
 
 This is one narrow **PARTIAL** manager-selection and Binder-list cell. Both
@@ -457,13 +465,13 @@ patch. That exact content was subsequently committed without source changes as
 file SHA-256 values were:
 
 - `b74c59d9f0cefabeda2ad99fbc42117525ba090fa3ead9ed6ae7f1bcc0df05cc` --
-  `OnDeviceAiProviderModelListingCoordinator.kt`.
+  `AiProviderModelListingCoordinator.kt`.
 - `cd014fc96419613cac1b52e8cb5272dff99241eb7e7a6caa055ba62243154f52` --
-  `AndroidOnDeviceAiProviderModelListing.kt`.
+  `AndroidAiProviderModelListing.kt`.
 - `28204fee38366966442beee3b4b1d6f362c19f5d7785240bd2b33b354e63394f` --
-  `OnDeviceAiProviderModelListingCoordinatorTest.kt`.
+  `AiProviderModelListingCoordinatorTest.kt`.
 - `d344e235e884e66894b2d1a3b1a202d6b3cbf465109de98def62889d9c276750` --
-  `OnDeviceAiProviderModelListingAndroidConformanceTest.kt`.
+  `AiProviderModelListingAndroidConformanceTest.kt`.
 
 After an exclusive-slot preflight observed 30 continuous seconds with no other
 Gradle client, one isolated `--no-daemon --no-parallel --max-workers=2`
@@ -480,14 +488,14 @@ Two separate exact `Class#method` instrumentation invocations returned
 
 | Method | Time | Asserted positive path |
 | --- | ---: | --- |
-| `OnDeviceAiProviderAndroidConformanceTest#exactComponentHandshakeDecodesAndPinsFakeProviderMetadata` | 0.575 s | Existing exact-component metadata handshake decoded and pinned the same-signer on-device fake provider; completion was off the main thread, terminal was unique, and exact package identity was unchanged |
-| `OnDeviceAiProviderModelListingAndroidConformanceTest#exactComponentModelListingRevalidatesAndCollectsAllFakeModels` | 0.524 s | With `pageSize = 1`, collected generation `fake-models-v1` and model IDs `fake.echo`, `fake.stream`, `fake.reasoning`, and `fake.tools`; the catalog retained the pinned provider, completion was off the main thread, terminal was unique, and exact package identity was unchanged |
+| `AiProviderAndroidConformanceTest#exactComponentHandshakeDecodesAndPinsFakeProviderMetadata` | 0.575 s | Existing exact-component metadata handshake decoded and pinned the same-signer on-device fake provider; completion was off the main thread, terminal was unique, and exact package identity was unchanged |
+| `AiProviderModelListingAndroidConformanceTest#exactComponentModelListingRevalidatesAndCollectsAllFakeModels` | 0.524 s | With `pageSize = 1`, collected generation `fake-models-v1` and model IDs `fake.echo`, `fake.stream`, `fake.reasoning`, and `fake.tools`; the catalog retained the pinned provider, completion was off the main thread, terminal was unique, and exact package identity was unchanged |
 
 The exact commands were:
 
 ```text
-adb -s QV710AF65F shell am instrument -w -r -e autojs.onDeviceAi.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderAndroidConformanceTest#exactComponentHandshakeDecodesAndPinsFakeProviderMetadata' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
-adb -s QV710AF65F shell am instrument -w -r -e autojs.onDeviceAi.modelListing.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderModelListingAndroidConformanceTest#exactComponentModelListingRevalidatesAndCollectsAllFakeModels' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiProviderAndroidConformanceTest#exactComponentHandshakeDecodesAndPinsFakeProviderMetadata' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.modelListing.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiProviderModelListingAndroidConformanceTest#exactComponentModelListingRevalidatesAndCollectsAllFakeModels' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 The host, instrumentation, and fake-provider APKs all verified with APK
@@ -502,7 +510,7 @@ Their artifact SHA-256 values were:
 The SHA-256 of each installed device `base.apk` matched its corresponding
 artifact exactly. Before installation, all three packages --
 `org.autojs.autojs6`, `org.autojs.autojs6.test`, and
-`org.autojs.plugin.ondeviceai.fake` -- were absent. The run uninstalled only those
+`org.autojs.plugin.ai.provider.fake` -- were absent. The run uninstalled only those
 temporary packages, and all three were confirmed absent again afterward.
 
 This earlier model-list run is positive-path PARTIAL evidence only. It covers
@@ -518,9 +526,9 @@ additional Android matrix cell.
 
 The later 2026-08-10 run used the same explicit device,
 `QV710AF65F` (API 31, `arm64-v8a`), against the default-off coordinator,
-Android `IOnDeviceAiCallback`/PFD transport, and opt-in instrumentation in commits
+Android `IAiCallback`/PFD transport, and opt-in instrumentation in commits
 `4f22dc854`, `038728f03`, and `a22ed8b75`. A focused Gradle invocation recorded
-18 `OnDeviceAiProviderSessionCoordinatorTest` tests with 0 skipped, 0 failures, and
+18 `AiProviderSessionCoordinatorTest` tests with 0 skipped, 0 failures, and
 0 errors and assembled the host App Debug, App Debug instrumentation, and
 fake-provider Debug APKs.
 
@@ -529,17 +537,17 @@ Two separate exact `Class#method` instrumentation invocations each returned
 
 | Method | Asserted positive path |
 | --- | --- |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#exactComponentSessionStreamsPastInitialCreditsFromRequestDescriptor` | Re-handshook and pinned the exact fake provider, sent the prompt through request descriptor index 0 with exact length/SHA-256/EOF, opened `fake.stream`, received `Started`, approximately 18 contiguous chunks (more than the fixed initial 8 credits), one usage event, and one matching completion off the main thread; request ownership was closed after settlement |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#callbackDescriptorOwnerEnforcesExactLengthProducerErrorsAndIdempotentClose` | In the host instrumentation process, preserved reliable-PFD error state across async ownership transfer, accepted exact bytes, rejected short and trailing data and `closeWithError()` producer failure, balanced four operation leases, and tolerated repeated close |
+| `AiProviderSessionAndroidConformanceTest#exactComponentSessionStreamsPastInitialCreditsFromRequestDescriptor` | Re-handshook and pinned the exact fake provider, sent the prompt through request descriptor index 0 with exact length/SHA-256/EOF, opened `fake.stream`, received `Started`, approximately 18 contiguous chunks (more than the fixed initial 8 credits), one usage event, and one matching completion off the main thread; request ownership was closed after settlement |
+| `AiProviderSessionAndroidConformanceTest#callbackDescriptorOwnerEnforcesExactLengthProducerErrorsAndIdempotentClose` | In the host instrumentation process, preserved reliable-PFD error state across async ownership transfer, accepted exact bytes, rejected short and trailing data and `closeWithError()` producer failure, balanced four operation leases, and tolerated repeated close |
 
 The invocation shape was:
 
 ```text
-adb -s QV710AF65F shell am instrument -w -r -e autojs.onDeviceAi.session.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderSessionAndroidConformanceTest#<method>' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.session.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiProviderSessionAndroidConformanceTest#<method>' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 Before installation, all three packages--`org.autojs.autojs6`,
-`org.autojs.autojs6.test`, and `org.autojs.plugin.ondeviceai.fake`--were absent.
+`org.autojs.autojs6.test`, and `org.autojs.plugin.ai.provider.fake`--were absent.
 Only those temporary packages were installed for the run, and all three were
 confirmed absent again after cleanup.
 
@@ -570,13 +578,13 @@ Seven separate exact `Class#method` invocations on `QV710AF65F` (API 31,
 
 | Method | Asserted H1 boundary |
 | --- | --- |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#completionDescriptorIsMaterializedAcrossProcess` | After initial host credit/open commit, materialized one ordinary-pipe completion descriptor across Binder and accepted exact EOF, declared length, SHA-256, UTF-8 text `descriptor completion across Binder`, descriptor count 1, and terminal cleanup |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#toolDescriptorIsOwnedThenRejectedWithoutExecution` | After `Started`, owned a descriptor-backed tool batch, rejected it as `TOOLS_UNSUPPORTED` without execution, and cleaned up the callback descriptor |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#chunkBeforeStartFailsClosedAfterInitialCreditCommit` | Emitted a chunk before `Started` only after initial host credit and rejected it once as `CALLBACK_MALFORMED` |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#sequenceGapFailsClosedOnce` | Rejected a non-contiguous chunk sequence once as `CALLBACK_MALFORMED` |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#invalidCompletionDescriptorReferenceFailsClosedOnce` | Rejected a completion referring to an absent descriptor once as `CALLBACK_MALFORMED` |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#duplicateTerminalPublishesOnlyOneSettledOutcome` | Published one settled host outcome while observing late callbacks for a bounded 250 ms smoke window |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#stalledSessionCanBeCancelledAfterStartAndReleasesOwner` | Accepted host cancel after one `Started`, published `Cancelled`, and released the process owner |
+| `AiProviderSessionAndroidConformanceTest#completionDescriptorIsMaterializedAcrossProcess` | After initial host credit/open commit, materialized one ordinary-pipe completion descriptor across Binder and accepted exact EOF, declared length, SHA-256, UTF-8 text `descriptor completion across Binder`, descriptor count 1, and terminal cleanup |
+| `AiProviderSessionAndroidConformanceTest#toolDescriptorIsOwnedThenRejectedWithoutExecution` | After `Started`, owned a descriptor-backed tool batch, rejected it as `TOOLS_UNSUPPORTED` without execution, and cleaned up the callback descriptor |
+| `AiProviderSessionAndroidConformanceTest#chunkBeforeStartFailsClosedAfterInitialCreditCommit` | Emitted a chunk before `Started` only after initial host credit and rejected it once as `CALLBACK_MALFORMED` |
+| `AiProviderSessionAndroidConformanceTest#sequenceGapFailsClosedOnce` | Rejected a non-contiguous chunk sequence once as `CALLBACK_MALFORMED` |
+| `AiProviderSessionAndroidConformanceTest#invalidCompletionDescriptorReferenceFailsClosedOnce` | Rejected a completion referring to an absent descriptor once as `CALLBACK_MALFORMED` |
+| `AiProviderSessionAndroidConformanceTest#duplicateTerminalPublishesOnlyOneSettledOutcome` | Published one settled host outcome while observing late callbacks for a bounded 250 ms smoke window |
+| `AiProviderSessionAndroidConformanceTest#stalledSessionCanBeCancelledAfterStartAndReleasesOwner` | Accepted host cancel after one `Started`, published `Cancelled`, and released the process owner |
 
 Every exercised H1 fixture waited for initial host credit before its action,
 keeping the callbacks after synchronous open commit rather than in the
@@ -584,7 +592,7 @@ provisional callback-before-return window. Every method asserted one published
 terminal, off-main-thread delivery, stable package identity, rejected cancel
 after settlement, and reusable process ownership. Preflight found
 `org.autojs.autojs6`, `org.autojs.autojs6.test`, and
-`org.autojs.plugin.ondeviceai.fake` absent; post-cleanup found the same three
+`org.autojs.plugin.ai.provider.fake` absent; post-cleanup found the same three
 packages absent again.
 
 This H1 result remains **PARTIAL**. The completion fixture deliberately used an
@@ -625,7 +633,7 @@ acknowledgement that the host handled the chunk; it is not a sleep-based race.
 
 The 2026-08-11 focused H2 Gradle XML recorded:
 
-- `OnDeviceAiProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures,
+- `AiProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures,
   0 errors.
 - Conformance fake-provider unit corpus: 31 tests, 0 skipped, 0 failures,
   0 errors.
@@ -650,11 +658,11 @@ artifact. On `QV710AF65F` (API 31, `arm64-v8a`), two separate exact
 
 | Method | Time | Asserted H2 boundary |
 | --- | ---: | --- |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#callbackFromIsolatedProviderUidIsRejectedAndReleasesOwner` | 0.852 s | The isolated relay's distinct Binder caller UID was rejected as `CALLBACK_UID_MISMATCH` before any transcript event was published; exactly one terminal settled and the process owner was reusable. |
-| `OnDeviceAiProviderSessionAndroidConformanceTest#providerProcessDeathAfterStartedPublishesOneBinderDiedAndReleasesOwner` | 0.544 s | After one `Started`, the sequence-0 `hostile` chunk, and causal host credit replenishment, killing the fake provider process published exactly one `BinderDied` terminal and released the process owner. |
+| `AiProviderSessionAndroidConformanceTest#callbackFromIsolatedProviderUidIsRejectedAndReleasesOwner` | 0.852 s | The isolated relay's distinct Binder caller UID was rejected as `CALLBACK_UID_MISMATCH` before any transcript event was published; exactly one terminal settled and the process owner was reusable. |
+| `AiProviderSessionAndroidConformanceTest#providerProcessDeathAfterStartedPublishesOneBinderDiedAndReleasesOwner` | 0.544 s | After one `Started`, the sequence-0 `hostile` chunk, and causal host credit replenishment, killing the fake provider process published exactly one `BinderDied` terminal and released the process owner. |
 
 Preflight found `org.autojs.autojs6`, `org.autojs.autojs6.test`, and
-`org.autojs.plugin.ondeviceai.fake` absent. Post-cleanup found the same three
+`org.autojs.plugin.ai.provider.fake` absent. Post-cleanup found the same three
 packages absent again.
 
 These are two narrow **PARTIAL** Android results, not a lifecycle exit gate.
@@ -665,7 +673,7 @@ after an acknowledged callback/credit cycle on one API 31 arm64 device; it does
 not cover host death, timeout, repeated crash/rebind, or other APIs/ABIs.
 
 Deterministic no-credit remains existing JVM policy evidence only through
-`OnDeviceAiProviderSessionTest#ninthChunkBeforeAnyReplenishmentFailsClosedForNoCredit`;
+`AiProviderSessionTest#ninthChunkBeforeAnyReplenishmentFailsClosedForNoCredit`;
 there is no H2 Android no-credit method. Commit `0b9a94742` also exercises two
 coordinator JVM final-reinspection failures before `openSession`: changed
 `lastUpdateTime` and an empty exact discovery result. Those cases prove

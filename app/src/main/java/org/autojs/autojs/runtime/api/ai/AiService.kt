@@ -27,13 +27,13 @@ import org.autojs.autojs.core.ai.transport.AiStreamProtocolException
 import org.autojs.autojs.core.ai.transport.AiToolCall
 import org.autojs.autojs.core.ai.transport.AiUsage
 import org.autojs.autojs.core.ai.transport.SseReader
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListRequest
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginModelListRunner
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginSessionRunner
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginStreamRunner
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiProviderComponent
-import org.autojs.autojs.core.plugin.ai.AndroidOnDeviceAiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginModelListRequest
+import org.autojs.autojs.core.plugin.ai.AiPluginModelListRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginSessionRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginStreamRunner
+import org.autojs.autojs.core.plugin.ai.AiProviderComponent
+import org.autojs.autojs.core.plugin.ai.AndroidAiPluginAskRunner
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
@@ -78,7 +78,7 @@ class AiService private constructor(
         {
             AiPluginAskRuntime(
                 runnerProvider = {
-                    AndroidOnDeviceAiPluginAskRunner.create(context.applicationContext)
+                    AndroidAiPluginAskRunner.create(context.applicationContext)
                 },
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
             )
@@ -86,7 +86,7 @@ class AiService private constructor(
         {
             AiPluginStreamRuntime(
                 runnerProvider = {
-                    AndroidOnDeviceAiPluginAskRunner.createStream(context.applicationContext)
+                    AndroidAiPluginAskRunner.createStream(context.applicationContext)
                 },
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
                 bridges = scriptRuntime.bridges,
@@ -95,7 +95,7 @@ class AiService private constructor(
         {
             AiPluginSessionRuntime(
                 runnerProvider = {
-                    AndroidOnDeviceAiPluginAskRunner.createSession(context.applicationContext)
+                    AndroidAiPluginAskRunner.createSession(context.applicationContext)
                 },
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
             )
@@ -103,7 +103,7 @@ class AiService private constructor(
         {
             AiPluginModelListRuntime(
                 runnerProvider = {
-                    AndroidOnDeviceAiPluginAskRunner.createModelList(context.applicationContext)
+                    AndroidAiPluginAskRunner.createModelList(context.applicationContext)
                 },
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
             )
@@ -114,14 +114,14 @@ class AiService private constructor(
         context: Context,
         scriptRuntime: ScriptRuntime,
         sourceClient: OkHttpClient,
-        pluginAskRunner: OnDeviceAiPluginAskRunner,
+        pluginAskRunner: AiPluginAskRunner,
         pluginDispatcherFactory: () -> AiAsyncDispatcher,
-        pluginStreamRunner: OnDeviceAiPluginStreamRunner =
-            AndroidOnDeviceAiPluginAskRunner.createStream(context.applicationContext),
-        pluginSessionRunner: OnDeviceAiPluginSessionRunner =
-            AndroidOnDeviceAiPluginAskRunner.createSession(context.applicationContext),
-        pluginModelListRunner: OnDeviceAiPluginModelListRunner =
-            AndroidOnDeviceAiPluginAskRunner.createModelList(context.applicationContext),
+        pluginStreamRunner: AiPluginStreamRunner =
+            AndroidAiPluginAskRunner.createStream(context.applicationContext),
+        pluginSessionRunner: AiPluginSessionRunner =
+            AndroidAiPluginAskRunner.createSession(context.applicationContext),
+        pluginModelListRunner: AiPluginModelListRunner =
+            AndroidAiPluginAskRunner.createModelList(context.applicationContext),
     ) : this(
         context,
         scriptRuntime,
@@ -286,8 +286,8 @@ class AiService private constructor(
         }
         val selection = requireNotNull(control.pluginSelection)
         val request = try {
-            OnDeviceAiPluginModelListRequest(
-                component = OnDeviceAiProviderComponent(selection.packageName, selection.className),
+            AiPluginModelListRequest(
+                component = AiProviderComponent(selection.packageName, selection.className),
                 providerId = selection.providerId,
                 timeoutMillis = control.timeoutMillis ?: DEFAULT_CALL_TIMEOUT_MILLIS,
             )

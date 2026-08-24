@@ -7,8 +7,8 @@ import com.google.gson.JsonParser
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessage
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginMessageRole
+import org.autojs.autojs.core.plugin.ai.AiPluginMessage
+import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
 import org.autojs.autojs.runtime.api.ai.AiRequestInput
 import org.autojs.autojs.runtime.api.ai.AiService
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -139,7 +139,7 @@ class Ai(
 
         internal fun parseSessionTurnArguments(
             args: Array<out Any?>,
-        ): OnDeviceAiPluginMessage {
+        ): AiPluginMessage {
             return ensureArgumentsLengthInRange(args, 1..1) { argumentList ->
                 val prompt = parseJson(argumentList[0], "session prompt")
                 if (!prompt.isJsonPrimitive || !prompt.asJsonPrimitive.isString) {
@@ -147,8 +147,8 @@ class Ai(
                         "AI session prompt must be a string",
                     )
                 }
-                OnDeviceAiPluginMessage(
-                    role = OnDeviceAiPluginMessageRole.USER,
+                AiPluginMessage(
+                    role = AiPluginMessageRole.USER,
                     content = prompt.asString,
                 )
             }

@@ -1,11 +1,11 @@
 package org.autojs.autojs.runtime.api.ai
 
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskFailure
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskHandle
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskOutcome
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRequest
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginAskRunner
-import org.autojs.autojs.core.plugin.ai.OnDeviceAiPluginUsage
+import org.autojs.autojs.core.plugin.ai.AiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.AiPluginAskHandle
+import org.autojs.autojs.core.plugin.ai.AiPluginAskOutcome
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRequest
+import org.autojs.autojs.core.plugin.ai.AiPluginAskRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginUsage
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
 import java.io.Closeable
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 /** Per-script owner for local plugin text-message requests; the runner may be process-shared. */
 internal class AiPluginAskRuntime(
-    runnerProvider: () -> OnDeviceAiPluginAskRunner,
+    runnerProvider: () -> AiPluginAskRunner,
     private val dispatcherFactory: () -> AiAsyncDispatcher,
 ) : Closeable {
 
@@ -24,14 +24,14 @@ internal class AiPluginAskRuntime(
     private val runnerDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED, runnerProvider)
     private val runner by runnerDelegate
 
-    fun ask(request: OnDeviceAiPluginAskRequest): ScriptPromiseAdapter =
+    fun ask(request: AiPluginAskRequest): ScriptPromiseAdapter =
         execute(request, Operation.ASK)
 
-    fun chat(request: OnDeviceAiPluginAskRequest): ScriptPromiseAdapter =
+    fun chat(request: AiPluginAskRequest): ScriptPromiseAdapter =
         execute(request, Operation.CHAT)
 
     private fun execute(
-        request: OnDeviceAiPluginAskRequest,
+        request: AiPluginAskRequest,
         operation: Operation,
     ): ScriptPromiseAdapter {
         val attempt = newAttempt(request, operation)
@@ -42,7 +42,7 @@ internal class AiPluginAskRuntime(
         val selectedRunner = try {
             runner
         } catch (_: Exception) {
-            attempt.fail(pluginFailure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE, operation))
+            attempt.fail(pluginFailure(AiPluginAskFailure.INTERNAL_FAILURE, operation))
             return attempt.promiseAdapter
         }
         attempt.start(selectedRunner, request)
@@ -69,7 +69,7 @@ internal class AiPluginAskRuntime(
     }
 
     private fun newAttempt(
-        request: OnDeviceAiPluginAskRequest?,
+        request: AiPluginAskRequest?,
         operation: Operation,
     ): ActiveAsk {
         val attempt = ActiveAsk(
@@ -85,28 +85,28 @@ internal class AiPluginAskRuntime(
     private inner class ActiveAsk(
         private val dispatcher: AiAsyncDispatcher,
         val promiseAdapter: ScriptPromiseAdapter,
-        private val request: OnDeviceAiPluginAskRequest?,
+        private val request: AiPluginAskRequest?,
         private val operation: Operation,
     ) {
-        private val handle = AtomicReference<OnDeviceAiPluginAskHandle?>()
+        private val handle = AtomicReference<AiPluginAskHandle?>()
         private val terminal = AtomicBoolean(false)
         private val cancelRequested = AtomicBoolean(false)
         private val handleCleaned = AtomicBoolean(false)
 
         fun start(
-            selectedRunner: OnDeviceAiPluginAskRunner,
-            request: OnDeviceAiPluginAskRequest,
+            selectedRunner: AiPluginAskRunner,
+            request: AiPluginAskRequest,
         ) {
             if (terminal.get()) return
             val returned = try {
                 selectedRunner.start(request, ::accept)
             } catch (_: Exception) {
-                fail(pluginFailure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE, operation))
+                fail(pluginFailure(AiPluginAskFailure.INTERNAL_FAILURE, operation))
                 return
             }
             if (!handle.compareAndSet(null, returned)) {
                 runCatching(returned::close)
-                fail(pluginFailure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE, operation))
+                fail(pluginFailure(AiPluginAskFailure.INTERNAL_FAILURE, operation))
                 return
             }
             cleanupHandleIfTerminal()
@@ -129,25 +129,25 @@ internal class AiPluginAskRuntime(
             }
         }
 
-        private fun accept(outcome: OnDeviceAiPluginAskOutcome) {
+        private fun accept(outcome: AiPluginAskOutcome) {
             when (outcome) {
-                is OnDeviceAiPluginAskOutcome.Completed -> {
+                is AiPluginAskOutcome.Completed -> {
                     val value = try {
                         completionValue(outcome)
                     } catch (_: Exception) {
-                        fail(pluginFailure(OnDeviceAiPluginAskFailure.INTERNAL_FAILURE, operation))
+                        fail(pluginFailure(AiPluginAskFailure.INTERNAL_FAILURE, operation))
                         return
                     }
                     finish { onDelivered ->
                         dispatcher.resolve(promiseAdapter, value, onDelivered)
                     }
                 }
-                is OnDeviceAiPluginAskOutcome.Failed ->
+                is AiPluginAskOutcome.Failed ->
                     fail(pluginFailure(outcome.failure, operation))
             }
         }
 
-        private fun completionValue(outcome: OnDeviceAiPluginAskOutcome.Completed): Any =
+        private fun completionValue(outcome: AiPluginAskOutcome.Completed): Any =
             when (operation) {
                 Operation.ASK -> outcome.text
                 Operation.CHAT -> pluginChatResponse(
@@ -190,7 +190,7 @@ internal class AiPluginAskRuntime(
         const val PLUGIN_ROUTE = "plugin"
 
         fun pluginFailure(
-            failure: OnDeviceAiPluginAskFailure,
+            failure: AiPluginAskFailure,
             operation: Operation,
         ): AiPluginRouteException =
             AiPluginRouteException(
@@ -200,9 +200,9 @@ internal class AiPluginAskRuntime(
             )
 
         fun pluginChatResponse(
-            request: OnDeviceAiPluginAskRequest,
+            request: AiPluginAskRequest,
             text: String,
-            usage: OnDeviceAiPluginUsage,
+            usage: AiPluginUsage,
             resolvedModelId: String? = null,
         ): Map<String, Any?> = linkedMapOf(
             "text" to text,
@@ -221,7 +221,7 @@ internal class AiPluginAskRuntime(
     }
 }
 
-internal fun OnDeviceAiPluginUsage.toPluginPublicValue(): Map<String, Any?> = linkedMapOf(
+internal fun AiPluginUsage.toPluginPublicValue(): Map<String, Any?> = linkedMapOf(
     "inputTokens" to inputTokens,
     "outputTokens" to outputTokens,
     "totalTokens" to totalTokens,

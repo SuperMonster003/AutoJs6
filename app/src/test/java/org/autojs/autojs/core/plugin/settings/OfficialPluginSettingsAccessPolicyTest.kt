@@ -77,6 +77,6 @@ class OfficialPluginSettingsAccessPolicyTest {
     )
 
     private companion object {
-        const val PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.ondeviceai"
+        const val PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.threestoneai"
     }
 }
