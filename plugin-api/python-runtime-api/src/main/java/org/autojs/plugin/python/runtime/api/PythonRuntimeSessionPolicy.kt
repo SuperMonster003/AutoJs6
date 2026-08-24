@@ -63,6 +63,8 @@ class PythonExecutionSessionPolicy(
     private var pendingInputPrompt: PythonInputPrompt? = null
     private var nextInputPromptId = 1L
     private var observedInputPrompts = 0
+    private var nextHeartbeatSequence = 1L
+    private var lastHeartbeatElapsedMillis = -1L
 
     init {
         PythonRuntimeValidation.validateRequest(expectedRequest)
@@ -216,6 +218,27 @@ class PythonExecutionSessionPolicy(
             observedInputPrompts++
             check(nextInputPromptId < Long.MAX_VALUE) { "Interactive input prompt ID is exhausted" }
             nextInputPromptId++
+        }
+    }
+
+    @Synchronized
+    fun onHeartbeat(heartbeat: PythonExecutionHeartbeat) {
+        acceptCallback {
+            requireStarted()
+            require(expectedRequest.executionMode == PythonExecutionMode.LONG_RUNNING) {
+                "Provider emitted a heartbeat for a bounded execution"
+            }
+            PythonRuntimeValidation.validateHeartbeat(heartbeat)
+            require(heartbeat.requestId == expectedRequest.requestId) { "Heartbeat request ID does not match" }
+            check(heartbeat.sequence == nextHeartbeatSequence) {
+                "Expected heartbeat sequence $nextHeartbeatSequence but received ${heartbeat.sequence}"
+            }
+            check(heartbeat.sequence < Long.MAX_VALUE) { "Heartbeat sequence is exhausted" }
+            check(heartbeat.elapsedMillis >= lastHeartbeatElapsedMillis) {
+                "Heartbeat elapsed time moved backwards"
+            }
+            nextHeartbeatSequence++
+            lastHeartbeatElapsedMillis = heartbeat.elapsedMillis
         }
     }
 

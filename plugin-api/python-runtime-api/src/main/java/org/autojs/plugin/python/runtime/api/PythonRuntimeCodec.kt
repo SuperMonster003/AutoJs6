@@ -94,6 +94,9 @@ object PythonRuntimeCodec {
                 if (value.supportsHostCapabilityBroker) {
                     boolean(CapabilitiesTags.SUPPORTS_HOST_CAPABILITY_BROKER, true)
                 }
+                if (value.supportsLongRunningExecution) {
+                    boolean(CapabilitiesTags.SUPPORTS_LONG_RUNNING_EXECUTION, true)
+                }
             }
             .encode()
     }
@@ -128,6 +131,8 @@ object PythonRuntimeCodec {
                     document.optionalBoolean(CapabilitiesTags.SUPPORTS_OUTPUT_ARTIFACTS) ?: false,
                 supportsHostCapabilityBroker =
                     document.optionalBoolean(CapabilitiesTags.SUPPORTS_HOST_CAPABILITY_BROKER) ?: false,
+                supportsLongRunningExecution =
+                    document.optionalBoolean(CapabilitiesTags.SUPPORTS_LONG_RUNNING_EXECUTION) ?: false,
             ).also(PythonRuntimeValidation::validateCapabilities)
         }
 
@@ -151,6 +156,13 @@ object PythonRuntimeCodec {
                     int32(
                         RequestTags.ENTRY_MODE,
                         value.entryMode.wireCode,
+                        requiredForReader = true,
+                    )
+                }
+                if (value.executionMode != PythonExecutionMode.BOUNDED) {
+                    int32(
+                        RequestTags.EXECUTION_MODE,
+                        value.executionMode.wireCode,
                         requiredForReader = true,
                     )
                 }
@@ -209,6 +221,9 @@ object PythonRuntimeCodec {
                     ?.let(::decodeInteractiveInputPolicy),
                 resultPolicy = document.optionalDocument(RequestTags.RESULT_POLICY)
                     ?.let(::decodeResultPolicy),
+                executionMode = document.optionalInt32(RequestTags.EXECUTION_MODE)
+                    ?.let(::executionMode)
+                    ?: PythonExecutionMode.BOUNDED,
             ).also(PythonRuntimeValidation::validateRequest)
         }
 
@@ -242,6 +257,28 @@ object PythonRuntimeCodec {
                 effectiveMaxOutputChunks = document.requireInt64(StartedTags.EFFECTIVE_MAX_OUTPUT_CHUNKS),
                 runtimeGeneration = document.requireInt64(StartedTags.RUNTIME_GENERATION),
             ).also(PythonRuntimeValidation::validateStarted)
+        }
+
+    fun encodeExecutionHeartbeat(value: PythonExecutionHeartbeat): ByteArray {
+        PythonRuntimeValidation.validateHeartbeat(value)
+        return writer(PythonRuntimeContract.SCHEMA_EXECUTION_HEARTBEAT)
+            .bytes(HeartbeatTags.REQUEST_ID, value.requestId.toByteArray())
+            .int64(HeartbeatTags.SEQUENCE, value.sequence)
+            .int64(HeartbeatTags.ELAPSED_MILLIS, value.elapsedMillis)
+            .encode()
+    }
+
+    fun decodeExecutionHeartbeat(bytes: ByteArray): PythonExecutionHeartbeat =
+        document(
+            bytes,
+            PythonRuntimeContract.SCHEMA_EXECUTION_HEARTBEAT,
+            HeartbeatTags.ALL,
+        ).let { document ->
+            PythonExecutionHeartbeat(
+                requestId = PythonRequestId.fromBytes(document.requireBytes(HeartbeatTags.REQUEST_ID)),
+                sequence = document.requireInt64(HeartbeatTags.SEQUENCE),
+                elapsedMillis = document.requireInt64(HeartbeatTags.ELAPSED_MILLIS),
+            ).also(PythonRuntimeValidation::validateHeartbeat)
         }
 
     fun encodeOutputChunk(value: PythonOutputChunk): ByteArray {
@@ -649,6 +686,9 @@ object PythonRuntimeCodec {
         it.wireCode
     }
 
+    private fun executionMode(code: Int) =
+        enumValue(PythonExecutionMode.entries, code, "execution mode") { it.wireCode }
+
     private fun payloadKind(code: Int) = enumValue(PythonPayloadKind.entries, code, "payload kind") {
         it.wireCode
     }
@@ -722,7 +762,8 @@ object PythonRuntimeCodec {
         const val SUPPORTS_STRUCTURED_JSON_RESULT = 13
         const val SUPPORTS_OUTPUT_ARTIFACTS = 14
         const val SUPPORTS_HOST_CAPABILITY_BROKER = 15
-        val ALL = (1..15).toSet()
+        const val SUPPORTS_LONG_RUNNING_EXECUTION = 16
+        val ALL = (1..16).toSet()
         val REPEATED = setOf(SUPPORTED_ABIS)
     }
 
@@ -776,7 +817,8 @@ object PythonRuntimeCodec {
         const val ENTRY_MODE = 14
         const val INTERACTIVE_INPUT_POLICY = 15
         const val RESULT_POLICY = 16
-        val ALL = (1..16).toSet()
+        const val EXECUTION_MODE = 17
+        val ALL = (1..17).toSet()
         val REPEATED = setOf(ARGUMENT)
     }
 
@@ -791,6 +833,13 @@ object PythonRuntimeCodec {
         const val RUNTIME_GENERATION = 8
         const val EFFECTIVE_MAX_OUTPUT_CHUNKS = 9
         val ALL = (1..9).toSet()
+    }
+
+    private object HeartbeatTags {
+        const val REQUEST_ID = 1
+        const val SEQUENCE = 2
+        const val ELAPSED_MILLIS = 3
+        val ALL = (1..3).toSet()
     }
 
     private object OutputChunkTags {

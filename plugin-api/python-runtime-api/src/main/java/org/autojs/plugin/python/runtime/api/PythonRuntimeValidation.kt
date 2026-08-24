@@ -161,12 +161,25 @@ object PythonRuntimeValidation {
                 "Host capability broker support requires protocol 1.5 or newer"
             }
         }
+        if (capabilities.supportsLongRunningExecution) {
+            requireCapability(runtimeInfo.protocolMax >= LONG_RUNNING_EXECUTION_PROTOCOL) {
+                "Long-running execution support requires protocol 1.6 or newer"
+            }
+        }
         if (
             runtimeInfo.protocolMin <= HOST_CAPABILITY_BROKER_PROTOCOL &&
             runtimeInfo.protocolMax >= HOST_CAPABILITY_BROKER_PROTOCOL
         ) {
             requireCapability(capabilities.supportsHostCapabilityBroker) {
                 "A runtime advertising protocol 1.5 requires host capability broker support"
+            }
+        }
+        if (
+            runtimeInfo.protocolMin <= LONG_RUNNING_EXECUTION_PROTOCOL &&
+            runtimeInfo.protocolMax >= LONG_RUNNING_EXECUTION_PROTOCOL
+        ) {
+            requireCapability(capabilities.supportsLongRunningExecution) {
+                "A runtime advertising protocol 1.6 requires long-running execution support"
             }
         }
     }
@@ -211,14 +224,23 @@ object PythonRuntimeValidation {
                 "Module entry requires a workspace archive"
             }
         }
+        if (request.executionMode == PythonExecutionMode.LONG_RUNNING) {
+            requireValue(
+                request.protocolVersion.major == LONG_RUNNING_EXECUTION_PROTOCOL.major &&
+                    request.protocolVersion >= LONG_RUNNING_EXECUTION_PROTOCOL,
+            ) { "Long-running execution requires Python Runtime protocol 1.6 or newer" }
+        }
         request.interactiveInput?.let { policy ->
             requireValue(
                 request.protocolVersion.major == INTERACTIVE_INPUT_PROTOCOL.major &&
                     request.protocolVersion >= INTERACTIVE_INPUT_PROTOCOL,
             ) { "Interactive input requires Python Runtime protocol 1.3 or newer" }
             validateInteractiveInputPolicy(policy)
-            requireValue(policy.replyTimeoutMillis <= request.timeoutMillis) {
-                "Interactive input reply timeout exceeds the execution timeout"
+            requireValue(
+                request.executionMode == PythonExecutionMode.LONG_RUNNING ||
+                    policy.replyTimeoutMillis <= request.timeoutMillis,
+            ) {
+                "Interactive input reply timeout exceeds the bounded execution timeout"
             }
         }
         request.resultPolicy?.let { policy ->
@@ -242,8 +264,13 @@ object PythonRuntimeValidation {
                 "Arguments exceed the aggregate protocol limit"
             }
         }
-        requireValue(request.timeoutMillis in 1L..PythonRuntimeContract.MAX_TIMEOUT_MILLIS) {
-            "Execution timeout is invalid"
+        when (request.executionMode) {
+            PythonExecutionMode.BOUNDED -> requireValue(
+                request.timeoutMillis in 1L..PythonRuntimeContract.MAX_TIMEOUT_MILLIS,
+            ) { "Bounded execution timeout is invalid" }
+            PythonExecutionMode.LONG_RUNNING -> requireValue(request.timeoutMillis == 0L) {
+                "Long-running execution must not carry a bounded timeout"
+            }
         }
         requireValue(request.maxOutputBytes in 1L..PythonRuntimeContract.MAX_OUTPUT_BYTES) {
             "Execution output limit is invalid"
@@ -350,8 +377,14 @@ object PythonRuntimeValidation {
                 ) { "Aggregate output artifact bytes exceed the provider limit" }
             }
         }
-        requireCapability(request.timeoutMillis <= capabilities.limits.maxTimeoutMillis) {
-            "Execution timeout exceeds the provider limit"
+        if (request.executionMode == PythonExecutionMode.LONG_RUNNING) {
+            requireCapability(capabilities.supportsLongRunningExecution) {
+                "Provider does not support long-running execution"
+            }
+        } else {
+            requireCapability(request.timeoutMillis <= capabilities.limits.maxTimeoutMillis) {
+                "Execution timeout exceeds the provider limit"
+            }
         }
         requireCapability(request.maxOutputBytes <= capabilities.limits.maxOutputBytes) {
             "Execution output limit exceeds the provider limit"
@@ -406,6 +439,11 @@ object PythonRuntimeValidation {
             "Effective output chunk count limit exceeds the non-empty output byte budget"
         }
         requireValue(started.runtimeGeneration > 0L) { "Runtime generation must be positive" }
+    }
+
+    fun validateHeartbeat(heartbeat: PythonExecutionHeartbeat) {
+        requireValue(heartbeat.sequence > 0L) { "Heartbeat sequence must be positive" }
+        requireValue(heartbeat.elapsedMillis >= 0L) { "Heartbeat elapsed time must not be negative" }
     }
 
     fun validateOutputChunk(chunk: PythonOutputChunk) {
@@ -1038,6 +1076,7 @@ object PythonRuntimeValidation {
     private val INTERACTIVE_INPUT_PROTOCOL = PythonProtocolVersion(1, 3)
     private val STRUCTURED_RESULT_PROTOCOL = PythonProtocolVersion(1, 4)
     private val HOST_CAPABILITY_BROKER_PROTOCOL = PythonProtocolVersion(1, 5)
+    private val LONG_RUNNING_EXECUTION_PROTOCOL = PythonProtocolVersion(1, 6)
     private val PYTHON_KEYWORDS = setOf(
         "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class",
         "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global",
