@@ -339,11 +339,23 @@ class PythonHostCapabilityDispatcherTest {
                 ),
             ),
         )
-        assertNull(
+        assertEquals(
+            OCR_LINES,
             success(
                 dispatcher.dispatch(
                     request(
                         42,
+                        PythonHostCapabilities.OCR_RECOGNIZE,
+                        "templateId" to IMAGE_TEMPLATE.id,
+                    ),
+                ),
+            ),
+        )
+        assertNull(
+            success(
+                dispatcher.dispatch(
+                    request(
+                        43,
                         PythonHostCapabilities.IMAGES_RELEASE_TEMPLATE,
                         "templateId" to IMAGE_TEMPLATE.id,
                     ),
@@ -422,6 +434,7 @@ class PythonHostCapabilityDispatcherTest {
             ),
             actions.screenImageSearches,
         )
+        assertEquals(listOf(IMAGE_TEMPLATE.id), actions.ocrRecognitions)
         assertEquals(listOf(IMAGE_TEMPLATE.id), actions.templateReleases)
     }
 
@@ -948,6 +961,46 @@ class PythonHostCapabilityDispatcherTest {
     }
 
     @Test
+    fun mapsOcrAvailabilityRecognitionAndBoundsFailuresToStableCodes() {
+        val actions = RecordingActions()
+        val dispatcher = dispatcher(actions)
+        val failures = listOf(
+            PythonHostCapabilityOcrUnavailableException() to "OCR_UNAVAILABLE",
+            PythonHostCapabilityOcrFailedException() to "OCR_FAILED",
+            PythonHostCapabilityResultLimitException() to "RESULT_LIMIT_EXCEEDED",
+            PythonHostCapabilityStaleTemplateException() to "STALE_TEMPLATE",
+        )
+
+        failures.forEachIndexed { index, (failure, expectedCode) ->
+            actions.ocrFailure = failure
+            assertEquals(
+                expectedCode,
+                failureCode(
+                    dispatcher.dispatch(
+                        request(
+                            (index + 1).toLong(),
+                            PythonHostCapabilities.OCR_RECOGNIZE,
+                            "templateId" to IMAGE_TEMPLATE.id,
+                        ),
+                    ),
+                ),
+            )
+        }
+        assertEquals(
+            "INVALID_ARGUMENT",
+            failureCode(
+                dispatcher.dispatch(
+                    request(
+                        10,
+                        PythonHostCapabilities.OCR_RECOGNIZE,
+                        "templateId" to "template-0",
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun bindsExecutionIdRejectsReplayAndRejectsEveryCallAfterClose() {
         val actions = RecordingActions()
         val dispatcher = dispatcher(actions)
@@ -1224,6 +1277,7 @@ class PythonHostCapabilityDispatcherTest {
         val templateBegins = mutableListOf<Triple<String, Int, String>>()
         val templateChunks = mutableListOf<TemplateChunkCall>()
         val screenImageSearches = mutableListOf<Triple<String, Int, PythonHostImageRegion?>>()
+        val ocrRecognitions = mutableListOf<String>()
         val templateReleases = mutableListOf<String>()
         val screenChunkReads = mutableListOf<Pair<String, Int>>()
         val screenReleases = mutableListOf<String>()
@@ -1238,6 +1292,7 @@ class PythonHostCapabilityDispatcherTest {
         var automatorFailure: RuntimeException? = null
         var selectorFailure: RuntimeException? = null
         var imageFailure: RuntimeException? = null
+        var ocrFailure: RuntimeException? = null
 
         override fun showToast(text: String) {
             toasts += text
@@ -1451,6 +1506,12 @@ class PythonHostCapabilityDispatcherTest {
             return IMAGE_MATCH
         }
 
+        override fun recognizeImageText(templateId: String): List<String> {
+            ocrFailure?.let { throw it }
+            ocrRecognitions += templateId
+            return OCR_LINES
+        }
+
         override fun releaseImageTemplate(templateId: String) {
             imageFailure?.let { throw it }
             templateReleases += templateId
@@ -1558,5 +1619,6 @@ class PythonHostCapabilityDispatcherTest {
             height = 2,
         )
         val IMAGE_MATCH = PythonHostImageMatch.found(17, 29)
+        val OCR_LINES = listOf("AutoJs6", "Python OCR")
     }
 }

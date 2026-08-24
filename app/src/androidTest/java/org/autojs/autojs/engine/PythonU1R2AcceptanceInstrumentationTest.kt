@@ -9,8 +9,12 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -49,9 +53,11 @@ import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.Locale
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
@@ -974,6 +980,116 @@ class PythonU1R2AcceptanceInstrumentationTest {
             }
             restoreHostForeground()
             cleanProjectRoot(projectRoot, "M3 screen template")
+        }
+    }
+
+    @Test
+    fun boundedOcrRecognizesControlledImageThroughConfiguredHostEngine() {
+        assumeTrue(
+            "This acceptance requires an installed Host OCR service",
+            hasInstalledOcrService(),
+        )
+        val projectRoot = freshProjectRoot()
+        try {
+            val fixture = createOcrFixtureBase64()
+            writeSimpleProject(
+                projectRoot,
+                """
+                import base64
+
+                from autojs6 import ocr, result
+
+                image = base64.b64decode("$fixture")
+                lines = ocr.recognize(image)
+                result.set({"lines": list(lines), "type": type(lines).__name__})
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 OCR execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 OCR execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 OCR execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("tuple", structured.getString("type"))
+                val lines = structured.getJSONArray("lines")
+                val recognized = buildString {
+                    repeat(lines.length()) { index ->
+                        if (isNotEmpty()) append(' ')
+                        append(lines.getString(index))
+                    }
+                }.uppercase(Locale.ROOT)
+                assertTrue("Controlled OCR fixture did not contain AUTOJS6: $recognized", "AUTOJS6" in recognized)
+                assertTrue("Controlled OCR fixture did not contain OCR: $recognized", "OCR" in recognized)
+                assertTrue("Controlled OCR fixture did not contain 2026: $recognized", "2026" in recognized)
+                assertTrue(result.outputArtifacts.isEmpty())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 OCR")
+        }
+    }
+
+    @Test
+    fun ocrFailsClosedWithoutAHostEngineThroughPublicPythonEngine() {
+        assumeFalse(
+            "This acceptance requires all Host OCR services to remain unavailable",
+            hasInstalledOcrService(),
+        )
+        val projectRoot = freshProjectRoot()
+        try {
+            writeSimpleProject(
+                projectRoot,
+                """
+                import base64
+
+                from autojs6 import ocr, result
+                from autojs6.errors import CapabilityUnavailableError
+
+                image = base64.b64decode("$SCREEN_TEMPLATE_TARGET_PNG_BASE64")
+                try:
+                    ocr.recognize(image)
+                    outcome = {"error": "NO_ERROR", "message": ""}
+                except CapabilityUnavailableError as error:
+                    outcome = {"error": type(error).__name__, "message": str(error)}
+                result.set(outcome)
+                """.trimIndent() + "\n",
+            )
+            val launch = admittedProjectLaunch(projectRoot)
+            val pending = PendingProjectExecution(projectRoot.canonicalPath)
+            service.registerGlobalScriptExecutionListener(pending.listener)
+            try {
+                service.execute(launch.source, launch.createExecutionConfig())
+                val execution = awaitStarted(pending, "M3 unavailable OCR execution")
+                awaitCompleted(
+                    pending,
+                    execution,
+                    "M3 unavailable OCR execution",
+                    SMOKE_EXECUTION_TIMEOUT_SECONDS,
+                )
+                val result = assertSuccessful(pending, "M3 unavailable OCR execution")
+                val structured = JSONObject(requireNotNull(result.structuredJson))
+                assertEquals("CapabilityUnavailableError", structured.getString("error"))
+                assertEquals(
+                    "No enabled, authorized, and compatible Host OCR engine is available",
+                    structured.getString("message"),
+                )
+                assertTrue(result.outputArtifacts.isEmpty())
+                assertPrivateTransportSnapshotsRemoved()
+            } finally {
+                service.unregisterGlobalScriptExecutionListener(pending.listener)
+            }
+        } finally {
+            cleanProjectRoot(projectRoot, "M3 unavailable OCR")
         }
     }
 
@@ -2569,6 +2685,45 @@ class PythonU1R2AcceptanceInstrumentationTest {
         false
     }
 
+    @Suppress("DEPRECATION")
+    private fun hasInstalledOcrService(): Boolean = context.packageManager
+        .queryIntentServices(Intent(OCR_PLUGIN_ACTION), PackageManager.MATCH_ALL)
+        .any { resolved ->
+            resolved.serviceInfo?.let { serviceInfo ->
+                serviceInfo.enabled && serviceInfo.applicationInfo.enabled
+            } == true
+        }
+
+    private fun createOcrFixtureBase64(): String {
+        val bitmap = Bitmap.createBitmap(OCR_FIXTURE_WIDTH, OCR_FIXTURE_HEIGHT, Bitmap.Config.ARGB_8888)
+        return try {
+            val canvas = Canvas(bitmap)
+            canvas.drawColor(Color.WHITE)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.BLACK
+                textSize = OCR_FIXTURE_TEXT_SIZE
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            }
+            canvas.drawText(OCR_FIXTURE_TEXT, OCR_FIXTURE_LEFT, OCR_FIXTURE_BASELINE, paint)
+            val output = ByteArrayOutputStream()
+            check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)) {
+                "Unable to encode the controlled OCR fixture"
+            }
+            val bytes = output.toByteArray()
+            try {
+                check(bytes.size in 1..OCR_FIXTURE_MAX_BYTES) {
+                    "Controlled OCR fixture exceeds the Python image upload bound"
+                }
+                Base64.encodeToString(bytes, Base64.NO_WRAP)
+            } finally {
+                bytes.fill(0)
+            }
+        } finally {
+            bitmap.eraseColor(Color.TRANSPARENT)
+            bitmap.recycle()
+        }
+    }
+
     private fun ensureAccessibilityServiceStarted(description: String) {
         if (AutoJsAccessibilityService.hasInstance()) return
 
@@ -2722,6 +2877,7 @@ class PythonU1R2AcceptanceInstrumentationTest {
         const val ARG_PROJECT_LOCAL_PACKAGE_ARCHIVE = "autojs.python.m4.packageArchive"
         const val HOST_PACKAGE = "org.autojs.autojs6"
         const val REAL_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.python.runtime"
+        const val OCR_PLUGIN_ACTION = "org.autojs.plugin.PADDLE_OCR"
         const val AUTOJS_ACCESSIBILITY_SERVICE =
             "$HOST_PACKAGE/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
         const val EDITOR_PROMPT = "M2_EDITOR_INPUT> "
@@ -2764,6 +2920,13 @@ class PythonU1R2AcceptanceInstrumentationTest {
             "iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAEElEQVR4nGMQMgmDIAYsLABP/gV9MIEa5AAAAABJRU5ErkJggg=="
         const val SCREEN_TEMPLATE_ABSENT_PNG_BASE64 =
             "iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAEUlEQVR4nGP4d2cXBDFgYQEAXp0XNXCQT6cAAAAASUVORK5CYII="
+        const val OCR_FIXTURE_TEXT = "AUTOJS6 OCR 2026"
+        const val OCR_FIXTURE_WIDTH = 1_200
+        const val OCR_FIXTURE_HEIGHT = 320
+        const val OCR_FIXTURE_TEXT_SIZE = 112f
+        const val OCR_FIXTURE_LEFT = 32f
+        const val OCR_FIXTURE_BASELINE = 205f
+        const val OCR_FIXTURE_MAX_BYTES = 1024 * 1024
         const val STDERR_MARKER = "U1R2_STDERR_DIAGNOSTIC"
         const val STDOUT_JSON_LOOKALIKE = "{\"stdout\":\"diagnostic-only\"}\n"
         const val STDOUT_JSON_LOOKALIKE_ESCAPED = "{\\\"stdout\\\":\\\"diagnostic-only\\\"}"

@@ -94,6 +94,7 @@ internal object PythonHostCapabilities {
     const val IMAGES_WRITE_TEMPLATE_CHUNK = "images.write_template_chunk"
     const val IMAGES_FIND_IMAGE = "images.find_image"
     const val IMAGES_RELEASE_TEMPLATE = "images.release_template"
+    const val OCR_RECOGNIZE = "ocr.recognize"
     const val IMAGES_READ_CHUNK = "images.read_chunk"
     const val IMAGES_RELEASE = "images.release"
 
@@ -138,6 +139,7 @@ internal object PythonHostCapabilities {
         IMAGES_WRITE_TEMPLATE_CHUNK,
         IMAGES_FIND_IMAGE,
         IMAGES_RELEASE_TEMPLATE,
+        OCR_RECOGNIZE,
         IMAGES_READ_CHUNK,
         IMAGES_RELEASE,
     )
@@ -590,6 +592,8 @@ internal interface PythonHostCapabilityActions {
         region: PythonHostImageRegion?,
     ): PythonHostImageMatch
 
+    fun recognizeImageText(templateId: String): List<String>
+
     fun releaseImageTemplate(templateId: String)
 
     fun readScreenImageChunk(imageId: String, offset: Int): PythonHostScreenImageChunk
@@ -888,6 +892,11 @@ internal class AndroidPythonHostCapabilityActions(
             region = region,
         )
     }
+
+    override fun recognizeImageText(templateId: String): List<String> = PythonHostOcr.recognize(
+        context = appContext,
+        image = imageTemplates.copyDecoded(templateId),
+    )
 
     override fun releaseImageTemplate(templateId: String) = imageTemplates.release(templateId)
 
@@ -1282,6 +1291,10 @@ internal class PythonHostCapabilityDispatcher(
                         ),
                     )
                 }
+                PythonHostCapabilities.OCR_RECOGNIZE -> encodeSuccess(
+                    request,
+                    actions.recognizeImageText(request.singleTemplateIdArgument()),
+                )
                 PythonHostCapabilities.IMAGES_RELEASE_TEMPLATE -> {
                     actions.releaseImageTemplate(request.singleTemplateIdArgument())
                     encodeSuccess(request, null)
@@ -1386,6 +1399,14 @@ internal class PythonHostCapabilityDispatcher(
                 ERROR_STALE_TEMPLATE,
                 "Host image template is stale or no longer retained",
             )
+        } catch (_: PythonHostCapabilityOcrUnavailableException) {
+            encodeFailure(
+                request,
+                ERROR_OCR_UNAVAILABLE,
+                "No enabled, authorized, and compatible Host OCR engine is available",
+            )
+        } catch (_: PythonHostCapabilityOcrFailedException) {
+            encodeFailure(request, ERROR_OCR_FAILED, "Host OCR recognition failed")
         } catch (_: IllegalArgumentException) {
             encodeFailure(request, ERROR_INVALID_ARGUMENT, "Host capability arguments are invalid")
         } catch (_: Throwable) {
@@ -1879,6 +1900,8 @@ internal class PythonHostCapabilityDispatcher(
         const val ERROR_STALE_IMAGE = "STALE_IMAGE"
         const val ERROR_INVALID_IMAGE_TEMPLATE = "INVALID_IMAGE_TEMPLATE"
         const val ERROR_STALE_TEMPLATE = "STALE_TEMPLATE"
+        const val ERROR_OCR_UNAVAILABLE = "OCR_UNAVAILABLE"
+        const val ERROR_OCR_FAILED = "OCR_FAILED"
         val REQUEST_KEYS = setOf(KEY_VERSION, KEY_EXECUTION_ID, KEY_CALL_ID, KEY_CAPABILITY, KEY_ARGUMENTS)
         val IMAGE_REGION_KEYS = setOf(REGION_X, REGION_Y, REGION_WIDTH, REGION_HEIGHT)
         val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+")

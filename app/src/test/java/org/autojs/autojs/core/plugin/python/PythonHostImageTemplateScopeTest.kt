@@ -101,6 +101,34 @@ class PythonHostImageTemplateScopeTest {
     }
 
     @Test
+    fun copiesDecodedPixelsForIndependentBoundedConsumers() {
+        val retainedPixels = intArrayOf(
+            0xff010203.toInt(),
+            0xff040506.toInt(),
+        )
+        val scope = PythonHostImageTemplateScope { _, _ ->
+            PythonHostDecodedImageTemplate(2, 1, retainedPixels)
+        }
+        val descriptor = complete(scope, "png", byteArrayOf(1, 2, 3))
+
+        val first = scope.copyDecoded(descriptor.id)
+        assertEquals(2, first.width)
+        assertEquals(1, first.height)
+        assertArrayEquals(retainedPixels, first.pixels)
+        first.pixels[0] = 0
+        val second = scope.copyDecoded(descriptor.id)
+        assertEquals(0xff010203.toInt(), second.pixels[0])
+
+        first.pixels.fill(0)
+        second.pixels.fill(0)
+        scope.release(descriptor.id)
+        assertArrayEquals(IntArray(retainedPixels.size), retainedPixels)
+        assertThrows(PythonHostCapabilityStaleTemplateException::class.java) {
+            scope.copyDecoded(descriptor.id)
+        }
+    }
+
+    @Test
     fun rejectsBrokenHashChunksAndDecodedTemplateBoundsFailClosed() {
         var decodeCalls = 0
         val hashScope = PythonHostImageTemplateScope { _, _ ->
