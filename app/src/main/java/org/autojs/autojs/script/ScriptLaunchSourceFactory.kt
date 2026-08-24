@@ -174,6 +174,7 @@ object ScriptLaunchSourceFactory {
             timeoutMillis = admission.timeoutMillis,
             entryMode = admission.entryMode,
             stdin = admission.stdin,
+            executionMode = admission.executionMode,
         )
         return Launch(
             source = source,
@@ -381,6 +382,7 @@ object ScriptLaunchSourceFactory {
                 timeoutMillis = admission.timeoutMillis,
                 entryMode = admission.entryMode,
                 stdin = admission.stdin,
+                executionMode = admission.executionMode,
             )
         } else {
             PythonFileSource(payloadFile, semanticFile).apply {

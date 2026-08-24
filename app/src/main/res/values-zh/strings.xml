@@ -1891,4 +1891,12 @@
     <string name="text_yearly_task">每年任务</string>
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
+    <string name="python_long_running_notification_channel_name">Python 长任务</string>
+    <string name="python_long_running_notification_channel_description">显示用户启动的 Python 长任务状态与停止操作</string>
+    <string name="python_long_running_notification_title">Python 项目正在运行</string>
+    <string name="python_long_running_notification_preparing">正在准备 Python 运行时…</string>
+    <string name="python_long_running_notification_starting">正在启动 %1$s…</string>
+    <string name="python_long_running_notification_running">正在运行 %1$s</string>
+    <string name="python_long_running_notification_stopping">正在停止 %1$s…</string>
+    <string name="python_long_running_notification_stop">停止</string>
 </resources>

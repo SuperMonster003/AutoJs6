@@ -2,6 +2,7 @@ package org.autojs.autojs.script
 
 import org.autojs.autojs.core.plugin.python.PythonExecutionInputPolicy
 import org.autojs.plugin.python.runtime.api.PythonEntryMode
+import org.autojs.plugin.python.runtime.api.PythonExecutionMode
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -31,6 +32,7 @@ class PythonProjectLaunchPolicyTest {
         assertEquals(entry.canonicalFile, admission.entryFile)
         assertNull(admission.timeoutMillis)
         assertEquals(PythonEntryMode.FILE, admission.entryMode)
+        assertEquals(PythonExecutionMode.BOUNDED, admission.executionMode)
         assertNull(admission.stdin)
         val launch = ScriptLaunchSourceFactory.createPythonProjectLaunchForPreview(
             admission = admission,
@@ -329,6 +331,39 @@ class PythonProjectLaunchPolicyTest {
         val admission = requireNotNull(PythonProjectLaunchPolicy.inspect(root, entry))
 
         assertEquals(1_800_000L, admission.timeoutMillis)
+    }
+
+    @Test
+    fun explicitLongRunningModePropagatesWithoutABoundedTimeout() {
+        val root = project(
+            """{"type":"python","main":"main.py","executionMode":"long-running"}""",
+        )
+        val entry = File(root, "main.py").apply { writeText("print('long-running')") }
+
+        val admission = requireNotNull(PythonProjectLaunchPolicy.inspect(root, entry))
+        val launch = ScriptLaunchSourceFactory.createPythonProjectLaunchForPreview(
+            admission = admission,
+            pythonPreviewEnabled = true,
+        )
+        val source = launch.source as PythonProjectSource
+
+        assertEquals(PythonExecutionMode.LONG_RUNNING, admission.executionMode)
+        assertEquals(PythonExecutionMode.LONG_RUNNING, source.executionMode)
+        assertNull(source.timeoutMillis)
+    }
+
+    @Test
+    fun longRunningModeRejectsTimeoutsAndUnknownModeNames() {
+        listOf(
+            """{"type":"python","main":"main.py","executionMode":"long-running","timeout":1}""",
+            """{"type":"python","main":"main.py","executionMode":"forever"}""",
+        ).forEach { manifest ->
+            val root = project(manifest)
+            val entry = File(root, "main.py").apply { writeText("print('invalid mode')") }
+            assertProjectError(PythonProjectLaunchError.CONFIG_INVALID) {
+                PythonProjectLaunchPolicy.inspect(root, entry)
+            }
+        }
     }
 
     @Test

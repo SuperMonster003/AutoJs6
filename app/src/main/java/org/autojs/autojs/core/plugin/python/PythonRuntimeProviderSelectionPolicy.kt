@@ -107,6 +107,7 @@ internal data class PythonRuntimeCapabilityRequirement(
     val interactiveInput: Boolean = false,
     val structuredJsonResult: Boolean = false,
     val outputArtifacts: Boolean = false,
+    val longRunningExecution: Boolean = false,
     val cooperativeCancellation: Boolean = false,
     val minimumSourceBytes: Long = 1L,
     val minimumWorkspaceArchiveBytes: Long = 0L,
@@ -149,7 +150,9 @@ internal data class PythonRuntimeCapabilityRequirement(
         require(minimumOutputChunkBytes > 0)
         require(minimumOutputChunks > 0L)
         require(minimumOutstandingOutputCredits > 0)
-        require(minimumTimeoutMillis > 0L)
+        require(
+            if (longRunningExecution) minimumTimeoutMillis == 0L else minimumTimeoutMillis > 0L,
+        ) { "Timeout requirement does not match the requested execution mode" }
     }
 
     fun isSatisfiedBy(value: PythonRuntimeCapabilities): Boolean =
@@ -175,6 +178,7 @@ internal data class PythonRuntimeCapabilityRequirement(
                     value.limits.maxInputWaitMillis >= minimumInputWaitMillis
                 ) &&
             (!cooperativeCancellation || value.supportsCooperativeCancellation) &&
+            (!longRunningExecution || value.supportsLongRunningExecution) &&
             (
                 !structuredJsonResult ||
                     value.supportsStructuredJsonResult &&
@@ -194,7 +198,7 @@ internal data class PythonRuntimeCapabilityRequirement(
             value.limits.maxOutputChunkBytes >= minimumOutputChunkBytes &&
             value.limits.maxOutputChunks >= minimumOutputChunks &&
             value.limits.maxOutstandingOutputCredits >= minimumOutstandingOutputCredits &&
-            value.limits.maxTimeoutMillis >= minimumTimeoutMillis
+            (longRunningExecution || value.limits.maxTimeoutMillis >= minimumTimeoutMillis)
 }
 
 internal enum class PythonRuntimeProviderCandidateRejection {

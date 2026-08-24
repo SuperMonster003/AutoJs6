@@ -1891,4 +1891,12 @@
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
 
+    <string name="python_long_running_notification_channel_name">Python long-running tasks</string>
+    <string name="python_long_running_notification_channel_description">Status and stop controls for user-started long-running Python projects</string>
+    <string name="python_long_running_notification_title">Python project is running</string>
+    <string name="python_long_running_notification_preparing">Preparing the Python runtime…</string>
+    <string name="python_long_running_notification_starting">Starting %1$s…</string>
+    <string name="python_long_running_notification_running">Running %1$s</string>
+    <string name="python_long_running_notification_stopping">Stopping %1$s…</string>
+    <string name="python_long_running_notification_stop">Stop</string>
 </resources>

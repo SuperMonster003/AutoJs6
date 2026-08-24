@@ -244,6 +244,32 @@ class PythonRuntimeProviderSelectionPolicyTest {
     }
 
     @Test
+    fun longRunningSelectionRequiresTheProtocol16CapabilityInsteadOfATimeoutLimit() {
+        val requirement = PythonRuntimeCapabilityRequirement(
+            longRunningExecution = true,
+            minimumTimeoutMillis = 0L,
+        )
+        assertEquals(
+            PythonRuntimeProviderCandidateRejection.CAPABILITY_MISMATCH,
+            rejection(candidate(), requirement = requirement),
+        )
+
+        val capable = candidate().copy(
+            runtimeInfo = PythonRuntimeHostTestFixtures.runtimeInfo(
+                protocolMax = PythonProtocolVersion(1, 6),
+            ),
+            capabilities = PythonRuntimeHostTestFixtures.capabilities(
+                supportsHostCapabilityBroker = true,
+                supportsLongRunningExecution = true,
+            ),
+        )
+        assertTrue(
+            select(listOf(capable), requirement = requirement) is
+                PythonRuntimeProviderSelectionResult.Selected,
+        )
+    }
+
+    @Test
     fun dispatchRevalidationAndCallbackUidUseTheExactPin() {
         val original = candidate()
         val pinned = (select(listOf(original)) as PythonRuntimeProviderSelectionResult.Selected).pinned
