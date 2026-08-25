@@ -13,11 +13,14 @@ object JvmSourceContract {
     const val ENGINE_ID = "jvm-source"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 3
+    const val PROTOCOL_MINOR = 4
     const val ENTRY_API_VERSION = 4
 
     @JvmField
     val ARGS_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 3)
+
+    @JvmField
+    val RUNTIME_EXCEPTION_CLASS_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 4)
 
     const val SCHEMA_MAJOR = 1
     const val SCHEMA_MINOR = 1
@@ -54,6 +57,8 @@ object JvmSourceContract {
     const val MAX_ERROR_CODE_BYTES = 128
     const val MAX_ERROR_MESSAGE_CODE_POINTS = 2_048
     const val MAX_DIAGNOSTIC_MESSAGE_CODE_POINTS = 4_096
+    const val MAX_RUNTIME_EXCEPTION_CLASS_NAME_BYTES = 255
+    const val USER_RUNTIME_EXCEPTION_CLASS_NAME = "UserException"
     const val MAX_HOST_METHOD_BYTES = 128
     const val MAX_PROCESS_NAME_BYTES = 256
     const val MAX_ALLOWED_HOST_CALLS = 32

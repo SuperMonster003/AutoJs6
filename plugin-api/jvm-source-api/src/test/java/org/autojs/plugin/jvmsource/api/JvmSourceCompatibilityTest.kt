@@ -278,7 +278,7 @@ class JvmSourceCompatibilityTest {
     }
 
     @Test
-    fun freezesTheProtocol13Entry4CombinedToolchainFingerprint() {
+    fun freezesTheProtocol14Entry4CombinedToolchainFingerprint() {
         val capabilities = JvmSourceFixtures.capabilities()
         assertEquals(
             "12143f542f36552a23a7c4f388baa37e076fec35932231dc7510765bb5f153c8",

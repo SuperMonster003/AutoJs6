@@ -16,10 +16,12 @@ import org.autojs.autojs.execution.ScriptExecutionListener
 import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.jvmsource.api.JvmDexRuntimeProfile
+import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmHostCall
 import org.autojs.plugin.jvmsource.api.JvmRequestId
 import org.autojs.plugin.jvmsource.api.JvmSourceCodec
 import org.autojs.plugin.jvmsource.api.JvmSourceContract
+import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
 import org.autojs.plugin.jvmsource.api.JvmSourceValidation
 import org.json.JSONArray
@@ -121,6 +123,89 @@ class JvmSourceR1EndToEndInstrumentationTest {
 
             emitArgumentRuntimeRecord(result)
         } finally {
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun runtimeExceptionShowsOnlyTheSafeClassAndRequestedSourceLine() {
+        assertTrue(
+            "M9-3 runtime diagnostic selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val directory = File(context.cacheDir, "jvm-source-m9-runtime-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-3 source directory", mkdir())
+        }.canonicalFile
+        val sourceBytes = runtimeExceptionJavaSource().toByteArray(Charsets.UTF_8)
+        val sourceFile = File(directory, "Main.java").apply { writeBytes(sourceBytes) }
+        val publishedDiagnostics = mutableListOf<JvmSourceDiagnostic>()
+        val sink = object : JvmSourceExecutionSink {
+            override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) {
+                publishedDiagnostics += diagnostics
+            }
+
+            override fun publishOutput(stdout: String, stderr: String) = Unit
+        }
+        val host = RemoteJvmSourceHost.createAndroid(
+            context = context,
+            featureEnabled = true,
+            hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+            launchPackage = { true },
+            hasResumedActivity = { true },
+        )
+        val control = JvmSourceExecutionControl()
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+
+            val failure = try {
+                host.execute(
+                    JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                    control,
+                    sink,
+                )
+                throw AssertionError("M9-3 runtime exception source unexpectedly completed")
+            } catch (expected: RemoteJvmSourceException) {
+                expected
+            }
+
+            assertEquals(JvmSourceUserFailureCode.RUNTIME_FAILED, failure.userFailure.code)
+            assertEquals(1, publishedDiagnostics.size)
+            val diagnostic = publishedDiagnostics.single()
+            assertEquals(JvmDiagnosticSeverity.ERROR, diagnostic.severity)
+            assertEquals("JAVA_RUNTIME_EXCEPTION", diagnostic.code)
+            assertEquals("Main.java", diagnostic.sourceFileName)
+            assertEquals(4, diagnostic.line)
+            assertEquals(1, diagnostic.column)
+            assertEquals("java.lang.IllegalStateException", diagnostic.runtimeExceptionClassName)
+            assertEquals("Java execution failed", diagnostic.message)
+
+            val projected = JvmSourcePublicDiagnosticPolicy.project(diagnostic)
+            val publicText = JvmSourcePublicDiagnosticFormatter.format(projected)
+            assertEquals(
+                "Main.java:4:1: JAVA_RUNTIME_EXCEPTION [java.lang.IllegalStateException]: " +
+                    "Java execution failed",
+                publicText,
+            )
+            listOf(diagnostic.toString(), publicText, failure.toString()).forEach { visible ->
+                assertFalse(visible.contains(RUNTIME_SECRET))
+                assertFalse(visible.contains("classes.dex"))
+                assertFalse(visible.contains("uid="))
+                assertFalse(visible.contains("pid="))
+            }
+
+            emitRuntimeDiagnosticRecord(
+                sourceSha256 = sha256(sourceBytes),
+                diagnostic = diagnostic,
+                publicText = publicText,
+            )
+        } finally {
+            control.close()
+            host.close()
             JvmSourceProviderSelection.setExact(context, priorSelection)
             directory.deleteRecursively()
         }
@@ -282,6 +367,37 @@ class JvmSourceR1EndToEndInstrumentationTest {
         instrumentation.sendStatus(
             0,
             Bundle().apply { putString(ARGS_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
+    private fun emitRuntimeDiagnosticRecord(
+        sourceSha256: String,
+        diagnostic: JvmSourceDiagnostic,
+        publicText: String,
+    ) {
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-3")
+            .put("recordType", "production-provider-runtime-diagnostic")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", JvmSourceContract.ENTRY_API_VERSION)
+            .put("providerComponent", PRODUCTION_PROVIDER.flattenToString())
+            .put("sourceSha256", sourceSha256)
+            .put("severity", diagnostic.severity.name)
+            .put("code", diagnostic.code)
+            .put("sourceFileName", diagnostic.sourceFileName)
+            .put("line", diagnostic.line)
+            .put("column", diagnostic.column)
+            .put("runtimeExceptionClassName", diagnostic.runtimeExceptionClassName)
+            .put("message", diagnostic.message)
+            .put("publicText", publicText)
+            .put("secretAbsent", !publicText.contains(RUNTIME_SECRET))
+            .put("hostPid", Process.myPid())
+            .put("deviceApi", Build.VERSION.SDK_INT)
+        Log.i(TAG, "$RUNTIME_DIAGNOSTIC_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(RUNTIME_DIAGNOSTIC_EVIDENCE_STATUS_KEY, record.toString()) },
         )
     }
 
@@ -603,6 +719,15 @@ class JvmSourceR1EndToEndInstrumentationTest {
         }
     """.trimIndent()
 
+    private fun runtimeExceptionJavaSource(): String = """
+        public final class Main implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+            @Override
+            public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                throw new IllegalStateException("$RUNTIME_SECRET");
+            }
+        }
+    """.trimIndent()
+
     private fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256")
         .digest(bytes)
         .joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
@@ -622,6 +747,9 @@ class JvmSourceR1EndToEndInstrumentationTest {
         const val RUNTIME_EVIDENCE_PREFIX = "JVM_SOURCE_R1_RUNTIME_EVIDENCE="
         const val ARGS_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_ARGS_EVIDENCE"
         const val ARGS_EVIDENCE_PREFIX = "JVM_SOURCE_M9_ARGS_EVIDENCE="
+        const val RUNTIME_DIAGNOSTIC_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE"
+        const val RUNTIME_DIAGNOSTIC_EVIDENCE_PREFIX = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE="
+        const val RUNTIME_SECRET = "M9-3 secret must never cross"
         const val SCRIPT_ARGS_JSON =
             "{\"enabled\":true,\"name\":\"AutoJs6\",\"nested\":{\"count\":3,\"nullable\":null}," +
                 "\"tags\":[\"java\",\"m9\"]}"

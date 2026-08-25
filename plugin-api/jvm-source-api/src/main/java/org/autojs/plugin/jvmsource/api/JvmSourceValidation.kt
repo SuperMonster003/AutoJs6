@@ -62,6 +62,10 @@ object JvmSourceValidation {
         "[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*",
     )
     private val DIAGNOSTIC_CODE = Regex("[A-Z0-9][A-Z0-9._-]{0,127}")
+    private val RUNTIME_EXCEPTION_CLASS_NAME = Regex(
+        "(?:java|javax)(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)+|" +
+            JvmSourceContract.USER_RUNTIME_EXCEPTION_CLASS_NAME,
+    )
     private val HOST_METHOD = Regex("[a-z][a-z0-9_-]*(?:\\.[a-z][a-z0-9_-]*)+")
     private val ERROR_CODE = Regex("[A-Z0-9][A-Z0-9._-]{0,127}")
     private val TOOL_VERSION = Regex("[A-Za-z0-9][A-Za-z0-9._+-]{0,127}")
@@ -200,6 +204,45 @@ object JvmSourceValidation {
             requireValue(diagnostic.sourceFileName != null) { "Located diagnostic requires a source file name" }
             requireValue(line > 0 && column > 0) {
                 "Diagnostic line and column must be positive"
+            }
+        }
+        diagnostic.runtimeExceptionClassName?.let { className ->
+            requireValue(diagnostic.code == "JAVA_RUNTIME_EXCEPTION") {
+                "Runtime exception class requires a Java runtime diagnostic"
+            }
+            requireValue(diagnostic.severity == JvmDiagnosticSeverity.ERROR) {
+                "Runtime exception class requires error severity"
+            }
+            requireValue(diagnostic.sourceFileName != null && line != null && column != null) {
+                "Runtime exception class requires a source location"
+            }
+            requireUtf8Text(
+                className,
+                "Runtime exception class name",
+                JvmSourceContract.MAX_RUNTIME_EXCEPTION_CLASS_NAME_BYTES,
+            )
+            requireValue(RUNTIME_EXCEPTION_CLASS_NAME.matches(className)) {
+                "Runtime exception class name is outside the public profile"
+            }
+        }
+    }
+
+    @JvmStatic
+    fun validateDiagnosticAgainst(diagnostic: JvmSourceDiagnostic, request: JvmSourceRequest) {
+        validateDiagnostic(diagnostic)
+        validateRequest(request)
+        requireCapability(diagnostic.requestId == request.requestId) {
+            "Diagnostic request ID differs from the submitted request"
+        }
+        val supportsRuntimeClass =
+            request.protocolVersion >= JvmSourceContract.RUNTIME_EXCEPTION_CLASS_PROTOCOL_VERSION
+        if (diagnostic.code == "JAVA_RUNTIME_EXCEPTION") {
+            requireCapability((diagnostic.runtimeExceptionClassName != null) == supportsRuntimeClass) {
+                "Runtime exception class presence differs from the negotiated protocol"
+            }
+        } else {
+            requireCapability(diagnostic.runtimeExceptionClassName == null) {
+                "Non-runtime diagnostic contains a runtime exception class"
             }
         }
     }

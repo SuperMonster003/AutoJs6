@@ -11,8 +11,8 @@
 | Engine ID | `jvm-source` |
 | Service action | `org.autojs.plugin.JVM_SOURCE` |
 | Signature permission | `org.autojs.permission.PLUGIN` |
-| Protocol | `1.1` |
-| Entry API | `2` |
+| Protocol | `1.4` |
+| Entry API | `4` |
 | Wire schema | `1.1`，tagged binary document |
 | Host / Protocol minimum Android API | 24 |
 | Java Runtime / Kotlin Runtime minimum API | 24 / 26 |
@@ -62,21 +62,27 @@ Provider 进程负责对应语言编译器、D8 与 worker 生命周期；宿主
 
 ## 4. 脚本能力与授予
 
-Protocol 1.1 的 provider 在 `JvmSourceCapabilities.scriptCapabilities` 中声明脚本能力，宿主仅把
+Protocol 1.4 的 provider 在 `JvmSourceCapabilities.scriptCapabilities` 中声明脚本能力，宿主仅把
 这些声明写入本次 `JvmSourceRequest.grantedCapabilities`。需要跨进程调用宿主的能力还必须同时
 出现在 `allowedHostCalls`；validation 要求两者严格对应，worker 与 compiler proxy 会再次逐项校验。
 
-| Capability | Entry API 2 | 数据路径 |
+| Capability | Entry API 方法 | 数据路径 |
 | --- | --- | --- |
 | `app.launch` | `context.app().launch(packageName)` | `app.launch` host bridge |
 | `console.stream` | `context.console().log/error(message)` | worker stdout/stderr 有界管道 |
 | `runtime.sleep` | `context.sleep(millis)` | worker 本地 sleep，session 取消会 interrupt 并抛出 `JvmCancellationException` |
 | `toast.show` | `context.toast(message)` | `toast.show` host bridge，canonical 单字段 JSON，消息上限 8 KiB UTF-8 |
+| `clipboard.read` | Entry API 3：`context.clipboard().getText()` | `clipboard.get` host bridge，独立授权，16 KiB canonical text payload |
+| `clipboard.write` | Entry API 3：`context.clipboard().setText(text)` | `clipboard.set` host bridge，独立授权，16 KiB canonical text payload |
 
 stdout/stderr reader 从 session 打开前即开始 drain，既保留 1 MiB 上限、最终长度与 SHA-256 双向校验，
 也避免等待 terminal 后一次性显示。增量 decoder 会跨 pipe chunk 保留未完成的 UTF-8 字节，只在完整
 换行或 EOF 时发布，非法 UTF-8 仍然失败关闭。`toast.show` 与 `app.launch` 共用 request ID、单调 call ID、
 固定 compiler/worker PID/UID、独立 timeout 和重复调用拒绝机制。
+
+Protocol 1.3 / Entry API 4 在 request tag 17 增加 reader-required 的 `argsJson`，并通过
+`context.args()` 暴露 64 KiB、深度 64 的确定性 JSON object 快照。Protocol 1.2 缺少该字段时只允许
+规范空对象 `{}`；旧 reader 遇到 1.3 的 required tag 会明确拒绝，不能静默丢参继续执行。
 
 ## 5. 单文件源码合同
 
@@ -111,6 +117,7 @@ Protocol 1 的行为承诺。
 | stdout | 1 MiB |
 | stderr | 1 MiB |
 | 单条 diagnostics 总预算 | 64 KiB |
+| 运行时异常公开类名 | 255 bytes UTF-8 |
 | 返回 JSON | 64 KiB |
 | Host bridge payload | 64 KiB |
 | Class artifact | 20 MiB |
@@ -126,6 +133,18 @@ Provider 的稳定错误由 `JvmSourceErrorCode` 与 failure phase 传输，宿�
 `[JVM_SOURCE_*]` 用户错误。缺失、禁用、不可信、协议不兼容、busy、编译失败、运行失败、
 取消和 timeout 必须可区分；后台入口只返回错误，交互式入口可以引导用户打开 Plugin Center。
 
+Protocol 1.4 为 Java `JAVA_RUNTIME_EXCEPTION` diagnostic 增加 tag 8
+`runtimeExceptionClassName`。当该字段出现时始终标记为 reader-required，并且必须与错误 severity、
+安全的请求源码文件名及正行列一起出现。Provider 只保留命中请求入口类或其 inner class 的有界栈帧：
+合法 `java.*` / `javax.*` 二进制类名原样传输，其他命名空间一律归一为精确 `UserException`。异常
+message、完整 stack、绝对路径、provider/user package、UID/PID 均不进入外部 diagnostic；Host 再以
+独立白名单投影并固定显示，例如：
+
+`Main.java:4:1: JAVA_RUNTIME_EXCEPTION [java.lang.IllegalStateException]: Java execution failed`
+
+1.3 diagnostic 没有 tag 8 时，新 decoder 仍解码为 `null`；1.4 request 下缺少该字段会在请求关联验证
+中拒绝。1.3 reader 遇到 tag 8 会因 required-for-reader 明确拒绝，而不是忽略异常类型。
+
 ## 8. 传输层决定（M3）
 
 M3 保留当前专用 `AndroidJvmSourceTransport`，不迁移到通用 `AidlPluginHost`。后者适合
@@ -140,13 +159,16 @@ started→terminal 状态机、deadline/cancel、provider 更新漂移检测和�
 ## 9. 兼容性演进
 
 - 增加可忽略 tagged 字段、capability 或新的诊断 code，可以提升 minor 版本；旧 reader 必须
-  忽略未知的非 required 字段。
-- 改变必填字段、AIDL 方法、FD 语义、终态规则或 Entry ABI，需要提升 major/Entry API，
+  忽略未知的非 required 字段。新增能力若不能安全降级，可以在新 minor 协商下追加
+  reader-required tag；旧 reader 必须明确拒绝。
+- 改变既有必填字段、外部 AIDL 方法、FD 语义或终态规则需要提升 major；改变 Entry ABI 需要提升
+  Entry API，
   同时更新宿主 API 工程、独立插件冻结 AAR 和 lock。
 - 新语言或新宿主能力必须由 capabilities/allowlist 显式声明；不得因文件扩展名相似而回退到
   另一语言 provider。
 - 发布前至少验证：宿主缺插件错误、安装后执行、卸载后错误、无需重装宿主重新安装并恢复。
 
-Entry API 2 为增加 `console/sleep/toast` 提升了 ABI 版本，因此 Protocol 1.1 宿主不协商 1.0 provider；
-Java/Kotlin provider 也只声明 1.1。现有实现 `AutoJsJvmEntry` 的源码无需改动即可重新编译，但宿主、
-provider 与冻结 `jvm-source-api.aar` 必须成套更新，toolchain fingerprint 会使旧编译缓存自然失效。
+版本演进历史：Protocol 1.1 / Entry API 2 增加 `console/sleep/toast`；1.2 / Entry API 3 增加独立
+clipboard read/write；1.3 / Entry API 4 增加 `context.args()`；1.4 保持 Entry API 4，只增加有界、
+脱敏的 Java 运行时异常类名。现有实现 `AutoJsJvmEntry.run(JvmScriptContext)` 的源码无需因 1.4 修改；
+宿主、provider 与冻结 `jvm-source-api.aar` 仍必须成套更新。

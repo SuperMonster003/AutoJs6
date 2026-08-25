@@ -768,6 +768,54 @@ class RemoteJvmSourceHostTest {
     }
 
     @Test
+    fun runtimeFailurePublishesOnlyTheSafeExceptionClassAndLocationBeforeTerminalError() {
+        val directory = Files.createTempDirectory("jvm-source-runtime-diagnostic-test").toFile()
+        val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport(
+            failureCode = JvmSourceErrorCode.EXECUTION_FAILED,
+            failurePhase = JvmSourceFailurePhase.EXECUTION,
+            emitRuntimeDiagnosticBeforeFailure = true,
+        )
+        val published = mutableListOf<JvmSourceDiagnostic>()
+        val sink = object : JvmSourceExecutionSink {
+            override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) {
+                published += diagnostics
+            }
+
+            override fun publishOutput(stdout: String, stderr: String) = Unit
+        }
+        try {
+            val host = newEnabledHost(transport, sourceFile, executor)
+
+            val failure = runCatching {
+                host.execute(
+                    JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                    JvmSourceExecutionControl(),
+                    sink,
+                )
+            }.exceptionOrNull()
+
+            assertTrue(failure is RemoteJvmSourceException)
+            assertEquals(JvmSourceUserFailureCode.RUNTIME_FAILED, (failure as RemoteJvmSourceException).userFailure.code)
+            assertEquals(1, published.size)
+            val diagnostic = published.single()
+            assertEquals(JvmDiagnosticSeverity.ERROR, diagnostic.severity)
+            assertEquals("JAVA_RUNTIME_EXCEPTION", diagnostic.code)
+            assertEquals("Main.java", diagnostic.sourceFileName)
+            assertEquals(4, diagnostic.line)
+            assertEquals(1, diagnostic.column)
+            assertEquals("java.lang.IllegalStateException", diagnostic.runtimeExceptionClassName)
+            assertEquals("Java execution failed", diagnostic.message)
+            assertFalse(diagnostic.toString().contains("M9-3 secret"))
+            assertFalse(diagnostic.toString().contains("private"))
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun binderServiceAndBindingDeathAreTerminalThenAFreshSessionCanRecover() {
         JvmSourceProviderTransportLoss.entries.forEach { loss ->
             val directory = Files.createTempDirectory("jvm-source-provider-loss-recovery-test").toFile()
@@ -1085,6 +1133,7 @@ class RemoteJvmSourceHostTest {
         private val failurePhase: JvmSourceFailurePhase = JvmSourceFailurePhase.EXECUTION,
         private val failureOnce: Boolean = false,
         private val emitDiagnosticBeforeFailure: Boolean = false,
+        private val emitRuntimeDiagnosticBeforeFailure: Boolean = false,
         private val dexVersion: String = "037",
         private val loaderKind: JvmDexLoaderKind = JvmDexLoaderKind.PRIVATE_DEX_CLASS_LOADER,
         private val loaderKindOnce: JvmDexLoaderKind? = null,
@@ -1251,6 +1300,22 @@ class RemoteJvmSourceHostTest {
                                             sourceFileName = "Main.java",
                                             line = 4,
                                             column = 28,
+                                        ),
+                                    ),
+                                )
+                            }
+                            if (emitRuntimeDiagnosticBeforeFailure) {
+                                callback.onDiagnostic(
+                                    JvmSourceCodec.encodeDiagnostic(
+                                        JvmSourceDiagnostic(
+                                            requestId = request.requestId,
+                                            severity = JvmDiagnosticSeverity.ERROR,
+                                            code = "JAVA_RUNTIME_EXCEPTION",
+                                            message = "M9-3 secret C:\\private\\classes.dex uid=1000 pid=2000",
+                                            sourceFileName = "Main.java",
+                                            line = 4,
+                                            column = 1,
+                                            runtimeExceptionClassName = "java.lang.IllegalStateException",
                                         ),
                                     ),
                                 )

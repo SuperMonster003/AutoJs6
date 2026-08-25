@@ -245,6 +245,67 @@ class JvmSourceUserExperiencePolicyTest {
     }
 
     @Test
+    fun runtimeDiagnosticShowsOnlyTheSafeClassLocationAndFixedMessage() {
+        val secret = "M9-3 secret must never cross"
+        val diagnostic = JvmSourceDiagnostic(
+            requestId = REQUEST_ID,
+            severity = JvmDiagnosticSeverity.ERROR,
+            code = "JAVA_RUNTIME_EXCEPTION",
+            message = "$secret C:\\private\\classes.dex uid=1000 pid=2000",
+            sourceFileName = "Main.java",
+            line = 4,
+            column = 1,
+            runtimeExceptionClassName = "java.lang.IllegalStateException",
+        )
+
+        val projected = JvmSourcePublicDiagnosticPolicy.project(diagnostic)
+
+        assertEquals("java.lang.IllegalStateException", projected.runtimeExceptionClassName)
+        assertEquals("Java execution failed", projected.message)
+        assertEquals(
+            "Main.java:4:1: JAVA_RUNTIME_EXCEPTION [java.lang.IllegalStateException]: " +
+                "Java execution failed",
+            JvmSourcePublicDiagnosticFormatter.format(projected),
+        )
+        assertFalse(projected.toString().contains(secret))
+        assertFalse(projected.toString().contains("private"))
+
+        val sanitized = JvmSourcePublicDiagnosticPolicy.sanitize(diagnostic)
+        assertEquals("java.lang.IllegalStateException", sanitized.runtimeExceptionClassName)
+        assertEquals("Java execution failed", sanitized.message)
+    }
+
+    @Test
+    fun runtimeDiagnosticDropsAClassOutsideTheIndependentHostProfile() {
+        listOf(
+            "org.example.SecretFailure",
+            "android.os.DeadObjectException",
+            "kotlin.KotlinNullPointerException",
+            "java.lang.IllegalStateException[]",
+        ).forEach { className ->
+            val projected = JvmSourcePublicDiagnosticPolicy.project(
+                JvmSourceDiagnostic(
+                    requestId = REQUEST_ID,
+                    severity = JvmDiagnosticSeverity.ERROR,
+                    code = "JAVA_RUNTIME_EXCEPTION",
+                    message = "attacker-controlled but superficially safe text",
+                    sourceFileName = "Main.java",
+                    line = 4,
+                    column = 1,
+                    runtimeExceptionClassName = className,
+                ),
+            )
+
+            assertNull(projected.runtimeExceptionClassName)
+            assertEquals("Java execution failed", projected.message)
+            assertEquals(
+                "Main.java:4:1: JAVA_RUNTIME_EXCEPTION: Java execution failed",
+                JvmSourcePublicDiagnosticFormatter.format(projected),
+            )
+        }
+    }
+
+    @Test
     fun kotlinDiagnosticsAndTerminalFailuresRemainLanguageSpecific() {
         val projected = JvmSourcePublicDiagnosticPolicy.project(
             JvmSourceDiagnostic(

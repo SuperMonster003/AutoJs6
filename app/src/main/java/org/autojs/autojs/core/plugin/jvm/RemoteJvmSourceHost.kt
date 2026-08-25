@@ -946,8 +946,7 @@ internal class RemoteJvmSourceHost(
             diagnostic,
             JvmSourceCodec::decodeDiagnostic,
         ) { value ->
-            JvmSourceValidation.validateDiagnostic(value)
-            accept(value.requestId == request.requestId, "Diagnostic request ID differs")
+            JvmSourceValidation.validateDiagnosticAgainst(value, request)
             accept(lifecycle.acceptDiagnostic(diagnostic.size), "Invalid or over-quota diagnostic")
             synchronized(diagnosticValues) {
                 diagnosticValues += JvmSourcePublicDiagnosticPolicy.sanitize(value)

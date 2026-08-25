@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import org.autojs.autojs.core.plugin.jvm.JvmSourceExecutionControl
 import org.autojs.autojs.core.plugin.jvm.JvmSourceExecutionSink
+import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicDiagnosticFormatter
 import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicDiagnosticPolicy
 import org.autojs.autojs.core.plugin.jvm.JvmSourceUserExperiencePolicy
 import org.autojs.autojs.core.plugin.jvm.JvmSourceUserFacingException
@@ -94,10 +95,7 @@ class RemoteJvmScriptEngine internal constructor(
         override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) {
             diagnostics.forEach { diagnostic ->
                 val projected = JvmSourcePublicDiagnosticPolicy.project(diagnostic)
-                val location = projected.sourceFileName?.let { fileName ->
-                    "$fileName:${projected.line}:${projected.column}: "
-                }.orEmpty()
-                val message = "$location${projected.code}: ${projected.message}"
+                val message = JvmSourcePublicDiagnosticFormatter.format(projected)
                 when (projected.severity) {
                     JvmDiagnosticSeverity.INFO -> console.info(message)
                     JvmDiagnosticSeverity.WARNING -> console.warn(message)

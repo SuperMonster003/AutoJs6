@@ -187,6 +187,9 @@ object JvmSourceCodec {
                 value.sourceFileName?.let { string(DiagnosticTags.SOURCE_FILE_NAME, it) }
                 value.line?.let { int32(DiagnosticTags.LINE, it) }
                 value.column?.let { int32(DiagnosticTags.COLUMN, it) }
+                value.runtimeExceptionClassName?.let {
+                    string(DiagnosticTags.RUNTIME_EXCEPTION_CLASS_NAME, it, requiredForReader = true)
+                }
             }
             .encode()
     }
@@ -205,6 +208,7 @@ object JvmSourceCodec {
             sourceFileName = document.optionalString(DiagnosticTags.SOURCE_FILE_NAME),
             line = document.optionalInt32(DiagnosticTags.LINE),
             column = document.optionalInt32(DiagnosticTags.COLUMN),
+            runtimeExceptionClassName = document.optionalString(DiagnosticTags.RUNTIME_EXCEPTION_CLASS_NAME),
         ).also(JvmSourceValidation::validateDiagnostic)
     }
 
@@ -587,7 +591,8 @@ object JvmSourceCodec {
         const val SOURCE_FILE_NAME = 5
         const val LINE = 6
         const val COLUMN = 7
-        val ALL = (1..7).toSet()
+        const val RUNTIME_EXCEPTION_CLASS_NAME = 8
+        val ALL = (1..8).toSet()
     }
 
     private object RequestTags {

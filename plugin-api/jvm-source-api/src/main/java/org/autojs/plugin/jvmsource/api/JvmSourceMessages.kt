@@ -130,6 +130,7 @@ data class JvmSourceDiagnostic(
     val sourceFileName: String? = null,
     val line: Int? = null,
     val column: Int? = null,
+    val runtimeExceptionClassName: String? = null,
 )
 
 /** A request pinned to the exact toolchain advertised during negotiation. */
