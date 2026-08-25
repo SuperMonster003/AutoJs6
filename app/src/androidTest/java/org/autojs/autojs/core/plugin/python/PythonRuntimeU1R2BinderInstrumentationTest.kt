@@ -372,6 +372,13 @@ class PythonRuntimeU1R2BinderInstrumentationTest {
                 }
             }
 
+            override fun onHeartbeat(heartbeat: ByteArray?) {
+                throw AssertionError(
+                    "Non-long-running U1-R2 instrumentation received a heartbeat " +
+                        "(${heartbeat?.size ?: -1} encoded bytes)",
+                )
+            }
+
             override fun onInputPrompt(encodedPrompt: ByteArray?) {
                 fromPinnedProvider {
                     val expectedText = requireNotNull(expectedPrompt) {

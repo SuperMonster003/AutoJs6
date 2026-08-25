@@ -87,6 +87,6 @@ class R8CompilerHostBoundaryTest {
         private const val FROZEN_R8_API_SHA256 =
             "e9df49b7e49992615a15bc0af2372a4525f02b4a2a915a560ddab3128bb2f066"
         private const val FROZEN_PROTOCOL_SOURCE_SHA256 =
-            "5d5c672ef0c7907b1a0cf6fd041ff85dc7c864aa07628316db5b9a9abb9e87c8"
+            "e0155f9f41280246d408cb062f7185a8edb4679ae748a3d8cb6f403ef93e2a5d"
     }
 }
