@@ -8,6 +8,7 @@
 
 ###### 2026/08/25
 
+* `Feature` JVM Source Runtime Protocol 1.2 / Entry API 3 adds independently granted clipboard read and write capabilities with hardcoded host/provider allowlists, canonical JSON, a 16 KiB UTF-8 text limit, and redacted errors
 * `Feature` Ace LSP defaults now include .mts/.cts and their declaration-file variants, allowing the external Ace editor to select the same Rhino/Node TypeScript execution profile; legacy default selections migrate while explicit custom suffix sets remain unchanged
 * `Feature` APK Builder now compiles Rhino TypeScript projects at build time; packaged APKs contain only encrypted JavaScript and optional Source Maps without embedded source, never TypeScript sources or the compiler; encrypted projects use one-time AES-256-GCM staging, with cleartext held only in memory and zeroed after re-encryption
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs

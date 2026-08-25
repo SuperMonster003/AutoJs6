@@ -8,6 +8,7 @@
 
 ###### 2026/08/25
 
+* `Fonctionnalité` Le protocole 1.2 / Entry API 3 de JVM Source Runtime ajoute des capacités de lecture et d’écriture du presse-papiers accordées séparément, avec listes d’autorisation codées en dur côté hôte et Provider, JSON canonique, limite de texte UTF-8 de 16 Kio et erreurs expurgées
 * `Fonctionnalité` Les types de fichiers par défaut d'Ace LSP incluent désormais .mts/.cts et leurs variantes de déclaration, permettant à l'éditeur Ace externe de sélectionner le même profil d'exécution TypeScript Rhino/Node; les anciennes sélections par défaut sont migrées et les ensembles de suffixes personnalisés explicites restent inchangés
 * `Fonctionnalité` APK Builder compile désormais les projets Rhino TypeScript lors de l'empaquetage ; les APK finaux ne contiennent que du JavaScript chiffré et des Source Maps facultatives sans source intégrée, jamais les sources TypeScript ni le compilateur ; les projets chiffrés utilisent une zone de staging AES-256-GCM à usage unique, le texte en clair restant uniquement en mémoire puis étant effacé après rechiffrement
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs

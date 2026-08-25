@@ -14,6 +14,7 @@ class JvmEntryApiBoundaryTest {
             AutoJsJvmEntry::class.java,
             JvmScriptContext::class.java,
             JvmAppApi::class.java,
+            JvmClipboardApi::class.java,
             JvmConsoleApi::class.java,
             JvmCancellation::class.java,
             JvmCancellationException::class.java,
@@ -58,6 +59,18 @@ class JvmEntryApiBoundaryTest {
         assertEquals(
             JvmCancellation::class.java,
             JvmScriptContext::class.java.getMethod("cancellation").returnType,
+        )
+        assertEquals(
+            JvmClipboardApi::class.java,
+            JvmScriptContext::class.java.getMethod("clipboard").returnType,
+        )
+        assertEquals(
+            String::class.java,
+            JvmClipboardApi::class.java.getMethod("getText").returnType,
+        )
+        assertEquals(
+            Void.TYPE,
+            JvmClipboardApi::class.java.getMethod("setText", String::class.java).returnType,
         )
         assertEquals(
             JvmConsoleApi::class.java,

@@ -13,8 +13,8 @@ object JvmSourceContract {
     const val ENGINE_ID = "jvm-source"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 1
-    const val ENTRY_API_VERSION = 2
+    const val PROTOCOL_MINOR = 2
+    const val ENTRY_API_VERSION = 3
 
     const val SCHEMA_MAJOR = 1
     const val SCHEMA_MINOR = 1
@@ -55,6 +55,7 @@ object JvmSourceContract {
     const val MAX_ALLOWED_HOST_CALLS = 32
     const val MAX_SCRIPT_CAPABILITIES = 32
     const val MAX_TOAST_MESSAGE_BYTES = 8 * 1024
+    const val MAX_CLIPBOARD_TEXT_BYTES = 16 * 1024
     const val MAX_JSON_DEPTH = 64
     const val DEFAULT_TIMEOUT_MILLIS = 30_000L
     const val MAX_TIMEOUT_MILLIS = 120_000L
@@ -109,6 +110,8 @@ enum class JvmScriptCapability(
     val hostMethod: String? = null,
 ) {
     APP_LAUNCH("app.launch", "app.launch"),
+    CLIPBOARD_READ("clipboard.read", "clipboard.get"),
+    CLIPBOARD_WRITE("clipboard.write", "clipboard.set"),
     CONSOLE_STREAM("console.stream"),
     SLEEP("runtime.sleep"),
     TOAST("toast.show", "toast.show"),

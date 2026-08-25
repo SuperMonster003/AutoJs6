@@ -15,6 +15,8 @@ fun interface AutoJsJvmEntry {
 interface JvmScriptContext {
     fun app(): JvmAppApi
 
+    fun clipboard(): JvmClipboardApi
+
     fun console(): JvmConsoleApi
 
     fun cancellation(): JvmCancellation
@@ -35,6 +37,14 @@ interface JvmScriptContext {
 interface JvmAppApi {
     /** Requests that the host launch an already-installed application package. */
     fun launch(packageName: String): Boolean
+}
+
+interface JvmClipboardApi {
+    /** Returns the host clipboard's current plain-text value, or an empty string when absent. */
+    fun getText(): String
+
+    /** Replaces the host clipboard with a bounded plain-text value. */
+    fun setText(text: String)
 }
 
 interface JvmConsoleApi {

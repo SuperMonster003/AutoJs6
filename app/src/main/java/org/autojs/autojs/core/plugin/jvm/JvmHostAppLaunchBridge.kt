@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.jvm
 
+import org.autojs.plugin.jvmsource.api.JvmClipboardPayload
 import org.autojs.plugin.jvmsource.api.JvmHostCall
 import org.autojs.plugin.jvmsource.api.JvmHostResponse
 import org.autojs.plugin.jvmsource.api.JvmRequestId
@@ -16,6 +17,8 @@ internal class JvmHostAppLaunchBridge(
     allowedMethods: Collection<String>,
     private val launchPackage: (String) -> Boolean,
     private val showToast: (String) -> Unit = {},
+    private val readClipboard: () -> String = { "" },
+    private val writeClipboard: (String) -> Unit = {},
     private val onViolation: (Throwable) -> Unit,
 ) : JvmSourceHostBridgeEndpoint {
     private val allowedMethods = allowedMethods.toSet()
@@ -58,6 +61,8 @@ internal class JvmHostAppLaunchBridge(
         }
         val response = when (call.method) {
             METHOD_APP_LAUNCH -> appLaunch(call, callback) ?: return
+            METHOD_CLIPBOARD_GET -> clipboardGet(call, callback) ?: return
+            METHOD_CLIPBOARD_SET -> clipboardSet(call, callback) ?: return
             METHOD_TOAST_SHOW -> toast(call, callback) ?: return
             else -> error("Unsupported allowlisted host method")
         }
@@ -138,6 +143,56 @@ internal class JvmHostAppLaunchBridge(
         )
     }
 
+    private fun clipboardGet(
+        call: JvmHostCall,
+        callback: JvmSourceHostBridgeResponse,
+    ): JvmHostResponse? {
+        runCatching { JvmClipboardPayload.validateGetRequest(call.payloadJson) }.getOrElse { error ->
+            reject(callback, call, "INVALID_PAYLOAD", "clipboard.get payload is invalid", error)
+            return null
+        }
+        allowlistedOperationCount.incrementAndGet()
+        return runCatching { JvmClipboardPayload.encodeText(readClipboard()) }.fold(
+            onSuccess = { payload ->
+                JvmHostResponse(requestId, call.callId, succeeded = true, payloadJson = payload)
+            },
+            onFailure = {
+                JvmHostResponse(
+                    requestId,
+                    call.callId,
+                    succeeded = false,
+                    errorCode = "CLIPBOARD_GET_FAILED",
+                    errorMessage = "Unable to read clipboard text",
+                )
+            },
+        )
+    }
+
+    private fun clipboardSet(
+        call: JvmHostCall,
+        callback: JvmSourceHostBridgeResponse,
+    ): JvmHostResponse? {
+        val text = runCatching { JvmClipboardPayload.decodeText(call.payloadJson) }.getOrElse { error ->
+            reject(callback, call, "INVALID_PAYLOAD", "clipboard.set payload is invalid", error)
+            return null
+        }
+        allowlistedOperationCount.incrementAndGet()
+        return runCatching { writeClipboard(text) }.fold(
+            onSuccess = {
+                JvmHostResponse(requestId, call.callId, succeeded = true, payloadJson = "true")
+            },
+            onFailure = {
+                JvmHostResponse(
+                    requestId,
+                    call.callId,
+                    succeeded = false,
+                    errorCode = "CLIPBOARD_SET_FAILED",
+                    errorMessage = "Unable to write clipboard text",
+                )
+            },
+        )
+    }
+
     private fun parseToastMessage(call: JvmHostCall): String {
         return JvmToastPayload.decode(call.payloadJson)
     }
@@ -184,9 +239,16 @@ internal class JvmHostAppLaunchBridge(
 
     companion object {
         const val METHOD_APP_LAUNCH = "app.launch"
+        const val METHOD_CLIPBOARD_GET = "clipboard.get"
+        const val METHOD_CLIPBOARD_SET = "clipboard.set"
         const val METHOD_TOAST_SHOW = "toast.show"
         const val PACKAGE_NAME_FIELD = "packageName"
-        private val SUPPORTED_METHODS = setOf(METHOD_APP_LAUNCH, METHOD_TOAST_SHOW)
+        private val SUPPORTED_METHODS = setOf(
+            METHOD_APP_LAUNCH,
+            METHOD_CLIPBOARD_GET,
+            METHOD_CLIPBOARD_SET,
+            METHOD_TOAST_SHOW,
+        )
         private val APP_LAUNCH_PAYLOAD = Regex(
             "\\{\\\"packageName\\\":\\\"([A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+)\\\"\\}",
         )

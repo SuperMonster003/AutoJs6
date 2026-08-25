@@ -8,6 +8,7 @@
 
 ###### 2026/08/25
 
+* `新增` JVM Source Runtime 協議 1.2 / Entry API 3 新增獨立授權的剪貼簿讀取與寫入能力, 採用宿主與 Provider 雙側硬編碼白名單, 規範化 JSON, 16 KiB UTF-8 文字上限及脫敏錯誤
 * `新增` Ace LSP 默認文件類型新增 .mts/.cts 及其聲明文件變體, 使外部 Ace 編輯器可選擇與執行一致的 Rhino/Node TypeScript profile; 舊版默認選擇會自動遷移, 明確自定義後綴集合保持不變
 * `新增` APK Builder 支援在打包階段編譯 Rhino TypeScript 專案; 最終 APK 只包含加密 JavaScript 與不內嵌原始碼的可選 Source Map, 不包含 TypeScript 原始碼或編譯器; 加密專案使用一次性 AES-256-GCM 暫存區, 解密與重新加密的明文只存於記憶體並在使用後清零
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本

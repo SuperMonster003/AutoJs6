@@ -152,6 +152,8 @@ internal class RemoteJvmSourceHost(
     private val hostIdentity: JvmSourceHostProcessIdentity,
     private val launchPackage: (String) -> Boolean,
     private val showToast: (String) -> Unit = {},
+    private val readClipboard: () -> String = { "" },
+    private val writeClipboard: (String) -> Unit = {},
     private val ownedExecutors: List<ExecutorService> = emptyList(),
     private val providerRetirementTimeoutMillis: Long = PROVIDER_CANCELLATION_ACK_TIMEOUT_MILLIS,
 ) : Closeable {
@@ -406,6 +408,8 @@ internal class RemoteJvmSourceHost(
                 allowedMethods = request.allowedHostCalls,
                 launchPackage = launchPackage,
                 showToast = showToast,
+                readClipboard = readClipboard,
+                writeClipboard = writeClipboard,
                 onViolation = collector::protocolViolation,
             )
             bridge = hostBridge
@@ -1085,6 +1089,7 @@ internal class RemoteJvmSourceHost(
                 ThreadPoolExecutor.AbortPolicy(),
             )
             val transport = AndroidJvmSourceTransport(context)
+            val clipboard = AndroidJvmClipboardActions(context)
             return RemoteJvmSourceHost(
                 transport = transport,
                 artifactStore = AndroidJvmSourceArtifactStore(context, drains),
@@ -1102,6 +1107,8 @@ internal class RemoteJvmSourceHost(
                 ),
                 launchPackage = launchPackage,
                 showToast = { message -> ViewUtils.showToast(context.applicationContext, message) },
+                readClipboard = clipboard::getText,
+                writeClipboard = clipboard::setText,
                 ownedExecutors = listOf(drains, binderCalls),
             )
         }
