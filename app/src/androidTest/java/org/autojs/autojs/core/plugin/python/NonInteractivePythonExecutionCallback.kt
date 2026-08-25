@@ -5,6 +5,8 @@ import org.autojs.plugin.python.runtime.api.IPythonExecutionCallback
 /** Fails closed if a non-interactive instrumentation scenario receives a prompt. */
 internal abstract class NonInteractivePythonExecutionCallback : IPythonExecutionCallback.Stub() {
 
+    override fun onHeartbeat(heartbeat: ByteArray?) = Unit
+
     final override fun onInputPrompt(prompt: ByteArray?) {
         throw AssertionError(
             "Non-interactive Python Runtime instrumentation received an input prompt " +

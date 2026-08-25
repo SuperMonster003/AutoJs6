@@ -372,6 +372,15 @@ class PythonRuntimeU1R2BinderInstrumentationTest {
                 }
             }
 
+            override fun onHeartbeat(heartbeat: ByteArray?) {
+                fromPinnedProvider {
+                    val decoded = PythonRuntimeCodec.decodeExecutionHeartbeat(
+                        requireNotNull(heartbeat) { "Python Runtime heartbeat is null" },
+                    )
+                    policy.onHeartbeat(decoded)
+                }
+            }
+
             override fun onInputPrompt(encodedPrompt: ByteArray?) {
                 fromPinnedProvider {
                     val expectedText = requireNotNull(expectedPrompt) {
