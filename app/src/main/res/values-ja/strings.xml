@@ -142,6 +142,7 @@
     <string name="description_pointer_location">\"ポインタの位置\" は Android の開発者向けオプションにあるデバッグ機能です.\n有効にすると, システムが画面上にタッチポイントの [座標/移動軌跡/数/サイズ/移動速度/圧力] などの情報を表示し, 関連スクリプトの [作成/デバッグ/検証] に役立ちます.</string>
     <string name="description_post_notifications">\"通知の送信\" 権限により, AutoJs6 はシステムに通知を投稿でき, スクリプトで通知バーへカスタム通知を投稿および管理できます.\n\n注: Android 13+ 端末でこの権限が付与されていない場合, 一部の通知が表示されない可能性があり, フォアグラウンドサービスの起動や安定性に影響することがあります.</string>
     <string name="description_project_media_access">プロジェクトのメディアアクセス権を使用すると, 画面録画のセキュリティ警告が表示されなくなります</string>
+    <string name="description_r8_compiler_explicit_preference">デフォルトでは無効です. runtime.loadJarWithR8 だけが, ホストと同じ署名を持つこの完全一致コンポーネントの R8 provider を使用します. この入口には明示的な keep rules が必要で, 完全な shrinking, optimization, obfuscation を実行します. 選択, provider, コンパイル, 生成物, キャッシュ, 読み込みのどの失敗も R8 エラーのままで, D8/dx には決してフォールバックしません. runtime.loadJar と runtime.loadJarWithClasspath は変更されません.</string>
     <string name="description_release_history_preference">GitHub 上の AutoJs6 のリリース版変更履歴と主要カテゴリの統計データを確認する.</string>
     <string name="description_restart_strategy">再起動戦略はホームページのドロワーにある再起動ボタンにのみ適用されます.\n\nクイック再起動: アプリをすばやく再起動します. 再起動に失敗したり予期しない状況が発生した場合は, \"スケジュール再起動\" に切り替えてください.\nスケジュール再起動: あらかじめ短時間のタイマーを設定します. アプリが停止した後, スケジュールに従って再度起動し, アプリの再起動を実現します.</string>
     <string name="description_rhino_java_primitive_wrap">スイッチ有効 (デフォルト): Java メソッドが返す Number/Boolean/Character は Java オブジェクトとしてラップされ, スクリプトに公開されます (String は除外). typeof は \"object\", species は \"JavaObject\". Java のメソッドを呼び出せるため, Java の厳密な型特性やオーバーロード解決を保持しやすくなります.\n\nスイッチ無効: 上記の型はラップされず, JavaScript のプリミティブ値 (number/boolean/1 文字の文字列) として直接公開されます. typeof は対応する JavaScript 型となり, JavaScript のセマンティクス/エコシステムにより沿います. 必要なら new によって明示的に Java ラッパーを生成できます (例: new java.lang.Boolean(true)).\n\n参照: http://issues.autojs6.com/435</string>
@@ -649,6 +650,9 @@
     <string name="summary_post_notifications_permission">AutoJs6 が通知を作成して送信することを許可します</string>
     <string name="summary_post_notifications_permission_inrt">アプリが通知を作成して送信することを許可する</string>
     <string name="summary_pre_execute_script">スクリプトファイルの前に実行する</string>
+    <string name="summary_r8_compiler_explicit_disabled">明示的 R8 入口は無効; runtime.loadJarWithR8 は安全側に失敗</string>
+    <string name="summary_r8_compiler_explicit_disabled_with_selection">明示的 R8 入口は無効; 保持中の provider: %1$s</string>
+    <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 は %1$s を使用; すべての失敗は R8-only のまま</string>
     <string name="summary_record_prompt">スクリプトの録音を開始または停止するときにメッセージを表示する</string>
     <string name="summary_release_history_preference">リリース履歴と統計を表示</string>
     <string name="summary_rhino_java_primitive_wrap">Java のプリミティブ型はスクリプト内で Java オブジェクトとしてラップされます</string>
@@ -1591,6 +1595,11 @@
     <string name="text_pruning_native_libraries">ネイティブライブラリを除外しています</string>
     <string name="text_querying_plugin_info">プラグイン情報を照会しています</string>
     <string name="text_quit">終了</string>
+    <string name="text_r8_compiler">R8 コンパイラ</string>
+    <string name="text_r8_compiler_no_eligible_providers">ホストと同じ署名を持つ利用可能な R8 コンパイラ provider がインストールされていません. キャンセルすると現在の選択を維持し, 確認すると明示的 R8 入口を無効にします.</string>
+    <string name="text_r8_compiler_provider">明示的 full-release R8 provider</string>
+    <string name="text_r8_compiler_provider_discovery_failed">R8 provider の検出に失敗しました. キャンセルすると現在の選択を維持し, 確認すると明示的 R8 入口を無効にします.</string>
+    <string name="text_r8_compiler_use_disabled">無効 (runtime.loadJarWithR8 は安全側に失敗)</string>
     <string name="text_re_signing_apk">APK を再署名中</string>
     <string name="text_reading_android_package">Android パッケージを読み込み中</string>
     <string name="text_reading_splash_resources">スプラッシュ資源を読み込み中</string>

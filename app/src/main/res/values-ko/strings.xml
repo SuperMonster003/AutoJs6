@@ -143,6 +143,7 @@
     <string name="description_pointer_location">\"포인터 위치\" 는 Android 개발자 옵션에 있는 디버깅 기능입니다.\n활성화하면 시스템이 화면에 터치 지점의 [좌표/이동 궤적/개수/크기/이동 속도/압력] 등의 정보를 표시하여 관련 스크립트의 [작성/디버깅/검증] 에 도움이 됩니다.</string>
     <string name="description_post_notifications">\"알림 전송\" 권한은 AutoJs6 가 시스템에 알림을 게시할 수 있게 하여, 스크립트가 알림 영역에서 사용자 지정 알림을 게시하고 관리할 수 있도록 합니다.\n\n참고: Android 13+ 기기에서 이 권한이 부여되지 않으면 일부 알림이 표시되지 않을 수 있으며, 포그라운드 서비스의 시작 및 안정성에 영향을 줄 수 있습니다.</string>
     <string name="description_project_media_access">프로젝트 미디어 액세스를 사용하면 화면 기록에 대한 보안 경고가 중요하지 않습니다.</string>
+    <string name="description_r8_compiler_explicit_preference">기본적으로 비활성화됩니다. runtime.loadJarWithR8 만 호스트와 동일한 서명의 정확한 컴포넌트 R8 provider 를 사용합니다. 이 진입점은 명시적 keep rules 를 요구하며 전체 shrinking, optimization, obfuscation 을 수행합니다. 선택, provider, 컴파일, 산출물, 캐시 또는 로드 실패는 모두 R8 오류로 유지되며 D8/dx 로 폴백하지 않습니다. runtime.loadJar 와 runtime.loadJarWithClasspath 는 변경되지 않습니다.</string>
     <string name="description_release_history_preference">GitHub 에서 AutoJs6 릴리스 버전의 변경 기록과 주요 분류 통계 데이터를 확인하기.</string>
     <string name="description_restart_strategy">재시작 전략은 홈 페이지 드로어의 재시작 버튼에만 적용됩니다.\n\n빠른 재시작: 앱을 빠르게 다시 시작합니다. 재시작이 실패하거나 예기치 않은 상황이 발생하면 \"예약 재시작\"으로 전환해 보세요.\n예약 재시작: 미리 짧은 시간의 예약 작업을 설정합니다. 앱이 중지된 후 예약에 따라 다시 시작하여 앱 재시작을 수행합니다.</string>
     <string name="description_rhino_java_primitive_wrap">스위치 활성화(기본값): Java 메서드가 반환하는 Number/Boolean/Character 값은 Java 객체로 래핑되어 스크립트에 노출됩니다(String 제외). typeof 는 \"object\", species 는 \"JavaObject\"이며, Java 메서드 호출이 가능해 Java의 정밀한 타입 특성과 오버로드 해석을 보존하는 데 도움이 됩니다.\n\n스위치 비활성화: 위 타입들을 더 이상 래핑하지 않고 JavaScript 원시 값(number/boolean/한 글자 문자열)으로 직접 노출합니다. typeof 는 해당 JavaScript 타입이 되며, JavaScript의 의미론/생태계에 더 가깝습니다. 필요 시 new 키워드로 Java 래퍼를 명시적으로 생성할 수 있습니다(예: new java.lang.Boolean(true)).\n\n참고: http://issues.autojs6.com/435</string>
@@ -650,6 +651,9 @@
     <string name="summary_post_notifications_permission">AutoJs6 가 알림을 생성하고 보낼 수 있도록 허용합니다</string>
     <string name="summary_post_notifications_permission_inrt">앱이 알림을 생성하고 보낼 수 있도록 허용합니다</string>
     <string name="summary_pre_execute_script">스크립트 파일 전에 실행하십시오</string>
+    <string name="summary_r8_compiler_explicit_disabled">명시적 R8 진입점 비활성화; runtime.loadJarWithR8 는 안전하게 실패</string>
+    <string name="summary_r8_compiler_explicit_disabled_with_selection">명시적 R8 진입점 비활성화; 유지된 provider: %1$s</string>
+    <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 는 %1$s 사용; 모든 실패는 R8-only 로 유지</string>
     <string name="summary_record_prompt">스크립트 기록을 시작하거나 중지할 때 메시지 표시</string>
     <string name="summary_release_history_preference">릴리스 기록과 통계를 보기</string>
     <string name="summary_rhino_java_primitive_wrap">Java 원시 타입이 스크립트에서 Java 객체로 래핑됩니다</string>
@@ -1592,6 +1596,11 @@
     <string name="text_pruning_native_libraries">네이티브 라이브러리 정리 중</string>
     <string name="text_querying_plugin_info">플러그인 정보 조회 중</string>
     <string name="text_quit">그만두다</string>
+    <string name="text_r8_compiler">R8 컴파일러</string>
+    <string name="text_r8_compiler_no_eligible_providers">호스트와 동일한 서명의 적격 R8 컴파일러 provider 가 설치되어 있지 않습니다. 취소하면 현재 선택을 유지하고 확인하면 명시적 R8 진입점을 비활성화합니다.</string>
+    <string name="text_r8_compiler_provider">명시적 full-release R8 provider</string>
+    <string name="text_r8_compiler_provider_discovery_failed">R8 provider 검색에 실패했습니다. 취소하면 현재 선택을 유지하고 확인하면 명시적 R8 진입점을 비활성화합니다.</string>
+    <string name="text_r8_compiler_use_disabled">비활성화 (runtime.loadJarWithR8 는 안전하게 실패)</string>
     <string name="text_re_signing_apk">APK 재서명 중</string>
     <string name="text_reading_android_package">Android 패키지 읽는 중</string>
     <string name="text_reading_splash_resources">스플래시 리소스 읽는 중</string>

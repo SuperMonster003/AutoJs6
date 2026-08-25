@@ -629,6 +629,10 @@ dependencies /* Unclassified */ {
     // Plugin API: DEX Compiler API
     implementation(project(":plugin-api:dex-compiler-api"))
 
+    // Independent frozen R8 Compiler API
+    implementation(project(":plugin-api:protocol-wire-api"))
+    implementation(project(":libs:r8-compiler-api-0_1_0"))
+
     // Plugin API: JVM Source API
     implementation(project(":plugin-api:jvm-source-api"))
 

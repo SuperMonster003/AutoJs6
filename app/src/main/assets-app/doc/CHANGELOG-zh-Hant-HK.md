@@ -66,6 +66,7 @@
 * `新增` 插件中心支持 APK Builder Template 插件, 可按需安裝及更新打包應用所需模板
 * `新增` 主頁插件標籤頁浮動按鈕支持長按進入插件中心
 * `新增` runtime.loadAar 方法, 用於動態加載 AAR 文件
+* `新增` 顯式 runtime.loadJarWithR8 入口, 支持預設關閉的精確組件選擇, 同簽名身份固定, 有界五產物 R8 傳輸, 隔離快取接納, 以及無 D8/dx 回退的失敗關閉行為
 * `新增` ui.useAndroidLayout 支持 Android 原生佈局控件, include/merge, 腳本項目 res 資源引用及 shape/selector/layer-list 等 Drawable XML
 * `新增` JavaScript (Rhino) 模塊支持 power/settings/work_manager 兼容接口及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全局 JavaScript (Rhino) ai 模塊支持 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 調用及工具調用多輪續接; 開發者選項支持加密的多設定及憑證管理, 本機迴環地址上的兼容端點可免 API 金鑰運行

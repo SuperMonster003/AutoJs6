@@ -136,6 +136,7 @@
     <string name="description_pointer_location">\"Pointer location\" is a debugging feature in Android Developer options.\nWhen enabled, the system will display information about touch point(s) on the screen, such as [coordinates/movement trajectory/count/size/movement speed/pressure], which helps with [writing/debugging/verification] of related scripts.</string>
     <string name="description_post_notifications">The \"post notifications\" permission allows AutoJs6 to publish notifications to the system, so scripts can post and manage custom notifications in the notification shade.\n\nNote: on Android 13+ devices, if this permission is not granted, some notifications may not show, and it may affect foreground service startup and stability.</string>
     <string name="description_project_media_access">With project media access, security warning for screen recording will not prompt.</string>
+    <string name="description_r8_compiler_explicit_preference">Disabled by default. Only runtime.loadJarWithR8 uses this exact-component R8 provider signed like the host. The entry requires explicit keep rules and performs full shrinking, optimization, and obfuscation. Any selection, provider, compilation, artifact, cache, or load failure remains an R8 error and never falls back to D8/dx. runtime.loadJar and runtime.loadJarWithClasspath are unchanged.</string>
     <string name="description_release_history_preference">View the release history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="description_restart_strategy">The restart strategy only affects the restart button in the home page drawer.\n\nQuick restart: Quickly restarts the app. If the restart fails or unexpected situations occur, try switching to \"Scheduled restart\".\nScheduled restart: Sets up a short-timed task in advance. After the app stops, it will start again on schedule to achieve app restart.</string>
     <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one-character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
@@ -643,6 +644,9 @@
     <string name="summary_post_notifications_permission">Allows AutoJs6 to create and post notifications</string>
     <string name="summary_post_notifications_permission_inrt">Allow the application to create and send notifications</string>
     <string name="summary_pre_execute_script">Execute before the script file</string>
+    <string name="summary_r8_compiler_explicit_disabled">Explicit R8 entry disabled; runtime.loadJarWithR8 fails closed</string>
+    <string name="summary_r8_compiler_explicit_disabled_with_selection">Explicit R8 entry disabled; retained provider: %1$s</string>
+    <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 uses %1$s; every failure remains R8-only</string>
     <string name="summary_record_prompt">Show message when starting or stopping recording a script</string>
     <string name="summary_release_history_preference">View release history and statistics</string>
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
@@ -1585,6 +1589,11 @@
     <string name="text_pruning_native_libraries">Pruning native libraries</string>
     <string name="text_querying_plugin_info">Querying plugin info</string>
     <string name="text_quit">Quit</string>
+    <string name="text_r8_compiler">R8 compiler</string>
+    <string name="text_r8_compiler_no_eligible_providers">No eligible same-signed R8 compiler provider is installed. Cancel to preserve the current selection, or confirm to disable the explicit R8 entry.</string>
+    <string name="text_r8_compiler_provider">Explicit full-release R8 provider</string>
+    <string name="text_r8_compiler_provider_discovery_failed">R8 provider discovery failed. Cancel to preserve the current selection, or confirm to disable the explicit R8 entry.</string>
+    <string name="text_r8_compiler_use_disabled">Disabled (runtime.loadJarWithR8 fails closed)</string>
     <string name="text_re_signing_apk">Re-signing APK</string>
     <string name="text_reading_android_package">Reading Android package</string>
     <string name="text_reading_splash_resources">Reading splash resources</string>

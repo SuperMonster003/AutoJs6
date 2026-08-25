@@ -141,6 +141,7 @@
     <string name="description_pointer_location">\"Emplacement du pointeur\" est une fonctionnalité de débogage dans les options pour les développeurs d\'Android.\nUne fois activée, le système affiche à l\'écran des informations sur le(s) point(s) de contact, telles que [coordonnées/trajectoire de déplacement/nombre/taille/vitesse de déplacement/pression], ce qui facilite [l\'écriture/le débogage/la vérification] des scripts associés.</string>
     <string name="description_post_notifications">L\'autorisation \"envoyer des notifications\" permet à AutoJs6 de publier des notifications dans le système, afin que les scripts puissent publier et gérer des notifications personnalisées dans le panneau de notifications.\n\nNote : sur les appareils Android 13+, si cette autorisation n\'est pas accordée, certaines notifications peuvent ne pas s\'afficher, et cela peut affecter le démarrage et la stabilité des services au premier plan.</string>
     <string name="description_project_media_access">Avec l\'accès aux médias du projet, l\'avertissement de sécurité pour l\'enregistrement d\'écran ne sera pas demandé.</string>
+    <string name="description_r8_compiler_explicit_preference">Désactivé par défaut. Seul runtime.loadJarWithR8 utilise ce provider R8 au composant exact et signé comme l\'hôte. L\'entrée exige des keep rules explicites et applique un shrinking, une optimization et une obfuscation complets. Tout échec de sélection, provider, compilation, artefact, cache ou chargement reste une erreur R8 et ne se replie jamais sur D8/dx. runtime.loadJar et runtime.loadJarWithClasspath restent inchangés.</string>
     <string name="description_release_history_preference">Consulter l\'historique des versions publiées d\'AutoJs6 sur GitHub ainsi que les statistiques des principales catégories.</string>
     <string name="description_restart_strategy">La stratégie de redémarrage n\'affecte que le bouton de redémarrage dans le tiroir de la page d\'accueil.\n\nRedémarrage rapide : redémarre rapidement l\'application. Si le redémarrage échoue ou qu\'un comportement inattendu survient, essayez de passer à \"Redémarrage planifié\".\nRedémarrage planifié : configure à l\'avance une tâche de courte durée. Après l\'arrêt de l\'application, elle redémarrera selon la planification afin de relancer l\'application.</string>
     <string name="description_rhino_java_primitive_wrap">Interrupteur activé (par défaut) : les valeurs retournées par les méthodes Java de type Number/Boolean/Character sont encapsulées comme objets Java et exposées au script (String exclu). typeof vaut \"object\", species vaut \"JavaObject\" ; les méthodes Java restent accessibles, ce qui permet de conserver les caractéristiques de type précises de Java et la résolution de surcharge.\n\nInterrupteur désactivé : les types ci-dessus ne sont plus encapsulés et sont exposés directement comme primitives JavaScript (number/boolean/chaîne à un seul caractère). typeof correspond au type JavaScript respectif, plus conforme à la sémantique/à l\'écosystème JavaScript. Il est toujours possible de déclarer explicitement un wrapper Java avec new, par ex. new java.lang.Boolean(true).\n\nVoir : http://issues.autojs6.com/435</string>
@@ -648,6 +649,9 @@
     <string name="summary_post_notifications_permission">Permet à AutoJs6 de créer et d\'envoyer des notifications</string>
     <string name="summary_post_notifications_permission_inrt">Autoriser l\'application à créer et envoyer des notifications</string>
     <string name="summary_pre_execute_script">Exécuter avant le fichier script</string>
+    <string name="summary_r8_compiler_explicit_disabled">Entrée R8 explicite désactivée; runtime.loadJarWithR8 échoue sans repli</string>
+    <string name="summary_r8_compiler_explicit_disabled_with_selection">Entrée R8 explicite désactivée; provider conservé: %1$s</string>
+    <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 utilise %1$s; chaque échec reste exclusivement R8</string>
     <string name="summary_record_prompt">Afficher un message lors du démarrage ou de l\'arrêt de l\'enregistrement d\'un script</string>
     <string name="summary_release_history_preference">Voir l\'historique des versions et les statistiques</string>
     <string name="summary_rhino_java_primitive_wrap">Les types primitifs Java seront exposés comme objets Java dans les scripts</string>
@@ -1590,6 +1594,11 @@
     <string name="text_pruning_native_libraries">Suppression des bibliothèques natives inutiles</string>
     <string name="text_querying_plugin_info">Interrogation des informations du plugin</string>
     <string name="text_quit">Quitter</string>
+    <string name="text_r8_compiler">Compilateur R8</string>
+    <string name="text_r8_compiler_no_eligible_providers">Aucun provider de compilateur R8 éligible et signé comme l\'hôte n\'est installé. Annulez pour conserver la sélection actuelle ou confirmez pour désactiver l\'entrée R8 explicite.</string>
+    <string name="text_r8_compiler_provider">Provider R8 full-release explicite</string>
+    <string name="text_r8_compiler_provider_discovery_failed">La découverte du provider R8 a échoué. Annulez pour conserver la sélection actuelle ou confirmez pour désactiver l\'entrée R8 explicite.</string>
+    <string name="text_r8_compiler_use_disabled">Désactivé (runtime.loadJarWithR8 échoue sans repli)</string>
     <string name="text_re_signing_apk">Re-signature de l\'APK</string>
     <string name="text_reading_android_package">Lecture du package Android</string>
     <string name="text_reading_splash_resources">Lecture des ressources d\'ecran de demarrage</string>

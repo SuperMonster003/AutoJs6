@@ -226,6 +226,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Plugin Center supports APK Builder Template plugins, allowing on-demand installation and updates of templates required for app packaging
 * `Feature` Long-pressing the floating button on the Home Plugins tab opens the Plugin Center
 * `Feature` runtime.loadAar method, for dynamically loading AAR files
+* `Feature` Explicit runtime.loadJarWithR8 entry with default-off exact-component selection, same-signature identity pinning, bounded five-artifact R8 transport, isolated cache adoption, and fail-closed behavior without D8/dx fallback
 * `Feature` ui.useAndroidLayout supports native Android layout widgets, include/merge, script project res references, and Drawable XML such as shape/selector/layer-list
 * `Feature` JavaScript (Rhino) modules support compatible power/settings/work_manager interfaces and an AppInfo wrapper, and complete selected Base64/Crypto/WebSocket/ByteString/automator/images/timers APIs from Auto.js Pro 9.3.11
 * `Feature` Global JavaScript (Rhino) ai module supports OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible providers, ask/chat/stream calls, and multi-round tool-call continuation; Developer options provide encrypted multi-profile configuration and credential management, while compatible endpoints on local loopback addresses can run without an API key

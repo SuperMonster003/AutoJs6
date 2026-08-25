@@ -19,6 +19,8 @@ import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
 import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.plugin.center.PluginAutoMountManager
+import org.autojs.autojs.core.plugin.r8.AndroidR8CompilerHost
+import org.autojs.autojs.core.plugin.r8.R8CompilerExplicitRuntimeRoute
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
@@ -577,6 +579,59 @@ class ScriptRuntime private constructor(builder: Builder) {
             ) { programJar, classpathJars ->
                 sClassLoader.loadJarWithExperimentalCompilerClasspath(programJar, classpathJars)
             }
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
+        }
+    }
+
+    /**
+     * Explicit full-release R8 entry. It is independent from loadJar/loadJarWithClasspath and
+     * deliberately has no D8/dx fallback.
+     */
+    fun loadJarWithR8(
+        program: String,
+        keepRules: Array<String>,
+    ) = loadJarWithR8(
+        program,
+        keepRules,
+        emptyArray(),
+        emptyArray(),
+        IntArray(0),
+    )
+
+    fun loadJarWithR8(
+        program: String,
+        keepRules: Array<String>,
+        orderedClasspath: Array<String>,
+    ) = loadJarWithR8(
+        program,
+        keepRules,
+        orderedClasspath,
+        emptyArray(),
+        IntArray(0),
+    )
+
+    fun loadJarWithR8(
+        program: String,
+        keepRules: Array<String>,
+        orderedClasspath: Array<String>,
+        consumerRules: Array<String>,
+        consumerRuleClasspathOrdinals: IntArray,
+    ) {
+        try {
+            R8CompilerExplicitRuntimeRoute.dispatch(
+                programPath = program,
+                keepRulePaths = keepRules,
+                orderedClasspathPaths = orderedClasspath,
+                consumerRulePaths = consumerRules,
+                consumerRuleClasspathOrdinals = consumerRuleClasspathOrdinals,
+                minApi = Build.VERSION.SDK_INT,
+                resolvePath = files::nonNullPath,
+                compile = { spec ->
+                    AndroidR8CompilerHost.runtimeDispatcher(applicationContext).compile(spec)
+                },
+                loadPublished = sClassLoader::loadR8CompilerDexZip,
+            )
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }

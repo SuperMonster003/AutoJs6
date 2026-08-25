@@ -61,6 +61,7 @@
         "プラグインセンターが APK Builder Template プラグインに対応, アプリのパッケージ化に必要なテンプレートを必要に応じてインストール/更新可能",
         "ホームのプラグインタブにあるフローティングボタンの長押しでプラグインセンターを開く機能に対応",
         "runtime.loadAar メソッド, AAR ファイルの動的ロード用",
+        "明示的な runtime.loadJarWithR8 エントリで, 既定無効の完全一致コンポーネント選択, 同一署名の ID 固定, 上限付き 5 成果物 R8 転送, 分離キャッシュ採用, D8/dx フォールバックなしのフェイルクローズ動作に対応",
         "ui.useAndroidLayout が Android ネイティブレイアウトウィジェット, include/merge, スクリプトプロジェクトの res 参照, shape/selector/layer-list などの Drawable XML に対応",
         "JavaScript (Rhino) モジュールで power/settings/work_manager 互換 API と AppInfo ラッパーをサポートし, Auto.js Pro 9.3.11 の一部の Base64/Crypto/WebSocket/ByteString/automator/images/timers API を拡充",
         "グローバル JavaScript (Rhino) ai モジュールが OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible プロバイダー, ask/chat/stream 呼び出し, ツール呼び出しの複数ラウンド継続に対応; 開発者向けオプションで暗号化された複数プロファイルと認証情報を管理でき, ローカルループバックアドレス上の互換エンドポイントは API キーなしで実行可能",

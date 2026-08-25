@@ -138,6 +138,7 @@
     <string name="description_pointer_location">\"指標位置\" 是安卓開發者選項中的除錯功能.\n開啟後, 系統會在螢幕上顯示觸控點的 [座標/移動軌跡/數量/大小/移動速度/壓力] 等資訊, 便於相關指令碼的 [編寫/除錯/校對] 等.</string>
     <string name="description_post_notifications">\"傳送通知\" 許可權允許 AutoJs6 向系統釋出通知, 使指令碼可以在通知欄釋出並管理自定義通知等.\n\n注: 在 Android 13+ 裝置上未授予該許可權時, 部分通知可能無法顯示, 並可能影響前臺服務的啟動與穩定性.</string>
     <string name="description_project_media_access">被授予 \"投影媒體許可權\" 後, 錄製螢幕的安全提示視窗將不再彈出.</string>
+    <string name="description_r8_compiler_explicit_preference">預設關閉. 只有 runtime.loadJarWithR8 會使用此精確元件且與主程式同簽章的 R8 provider. 此入口要求明確 keep rules, 並執行完整的 shrinking, optimization 與 obfuscation. 選擇, provider, 編譯, 產物, 快取或載入任何失敗都會保持為 R8 錯誤, 絕不降級至 D8/dx. runtime.loadJar 與 runtime.loadJarWithClasspath 的語義不變.</string>
     <string name="description_release_history_preference">檢視 AutoJs6 在 GitHub 發行版本的歷史更新記錄及重要分類的統計資料.</string>
     <string name="description_restart_strategy">重啟策略僅作用於主頁抽屜欄的重啟按鈕.\n\n快速重啟: 快速重啟應用, 如果重啟失敗或出現非預期情況, 可嘗試切換至 \"計劃重啟\".\n計劃重啟: 提前設定一個短時定時任務, 應用停止後會再次定時啟動, 以實現應用重啟.</string>
     <string name="description_rhino_java_primitive_wrap">開關啟用 (預設): 將 Java 方法返回的 Number/Boolean/Character 包裝為 Java 物件暴露到指令碼 (String 除外). typeof 為 \"object\", species 為 \"JavaObject\", 可訪問這些物件的 Java 方法, 利於保留 Java 精確型別特徵與方法過載行為.\n\n開關禁用: 不再包裝上述型別, 直接作為 JavaScript 基元值 (number/boolean/單字元字串). typeof 為相應 JavaScript 型別, 更貼近 JavaScript 語義與生態. 但仍可透過 new 關鍵字顯式宣告一個 Java 包裝型別, 如 new java.lang.Boolean(true).\n\n參閱: http://issues.autojs6.com/435</string>
@@ -645,6 +646,9 @@
     <string name="summary_post_notifications_permission">允許 AutoJs6 建立併發送通知</string>
     <string name="summary_post_notifications_permission_inrt">允許應用建立併發送通知</string>
     <string name="summary_pre_execute_script">在指令碼檔案之前執行</string>
+    <string name="summary_r8_compiler_explicit_disabled">明確 R8 入口已關閉; runtime.loadJarWithR8 將直接失敗</string>
+    <string name="summary_r8_compiler_explicit_disabled_with_selection">明確 R8 入口已關閉; 保留的 provider: %1$s</string>
+    <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 使用 %1$s; 所有失敗都保持 R8-only</string>
     <string name="summary_record_prompt">錄製開始及停止時顯示提示訊息</string>
     <string name="summary_release_history_preference">檢視發行版本歷史更新記錄與統計資料</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始型別在指令碼中將被包裝為對應的 Java 物件</string>
@@ -1587,6 +1591,11 @@
     <string name="text_pruning_native_libraries">正在移除不需要的原生程式庫</string>
     <string name="text_querying_plugin_info">正在查詢外掛資訊</string>
     <string name="text_quit">放棄</string>
+    <string name="text_r8_compiler">R8 編譯器</string>
+    <string name="text_r8_compiler_no_eligible_providers">未安裝符合資格且與主程式同簽章的 R8 編譯器 provider. 取消以保留目前選取, 或確認關閉明確 R8 入口.</string>
+    <string name="text_r8_compiler_provider">明確 full-release R8 provider</string>
+    <string name="text_r8_compiler_provider_discovery_failed">R8 provider 探索失敗. 取消以保留目前選取, 或確認關閉明確 R8 入口.</string>
+    <string name="text_r8_compiler_use_disabled">關閉 (runtime.loadJarWithR8 將直接失敗)</string>
     <string name="text_re_signing_apk">正在重新簽名 APK</string>
     <string name="text_reading_android_package">正在讀取 Android 安裝包</string>
     <string name="text_reading_splash_resources">正在讀取啟動頁資源</string>

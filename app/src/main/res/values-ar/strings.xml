@@ -143,6 +143,7 @@
     <string name="description_pointer_location">\"موقع المؤشر\" هي ميزة تصحيح أخطاء ضمن خيارات المطوّر في Android.\nعند تفعيلها، يعرض النظام على الشاشة معلومات نقاط اللمس مثل [الإحداثيات/مسار الحركة/العدد/الحجم/سرعة الحركة/الضغط]، مما يسهل [كتابة/تصحيح/التحقق من] السكربتات ذات الصلة.</string>
     <string name="description_post_notifications">يسمح إذن \"إرسال الإشعارات\" لـ AutoJs6 بنشر الإشعارات على النظام، مما يتيح للسكربتات نشر وإدارة إشعارات مخصّصة في شريط الإشعارات.\n\nملاحظة: على أجهزة Android 13+، إذا لم يتم منح هذا الإذن فقد لا تظهر بعض الإشعارات، وقد يؤثر ذلك على تشغيل خدمات المقدمة واستقرارها.</string>
     <string name="description_project_media_access">مع الوصول إلى وسائط المشروع ، لن يطلب منك التحذير الأمني لتسجيل الشاشة.</string>
+    <string name="description_r8_compiler_explicit_preference">معطل افتراضيا. يستخدم runtime.loadJarWithR8 وحده provider R8 ذا المكون المطابق تماما والموقع كتوقيع المضيف. يتطلب هذا المدخل keep rules صريحة وينفذ shrinking و optimization و obfuscation كاملة. يبقى أي فشل في الاختيار أو provider أو الترجمة أو الأثر أو التخزين المؤقت أو التحميل خطأ R8 ولا يرجع أبدا إلى D8/dx. لا تتغير runtime.loadJar ولا runtime.loadJarWithClasspath.</string>
     <string name="description_release_history_preference">عرض سجل إصدارات AutoJs6 على GitHub وإحصاءات الفئات الرئيسية.</string>
     <string name="description_restart_strategy">تؤثر استراتيجية إعادة التشغيل فقط في زر إعادة التشغيل في درج الصفحة الرئيسية.\n\nإعادة تشغيل سريعة: تعيد تشغيل التطبيق بسرعة. إذا فشلت عملية إعادة التشغيل أو حدثت حالات غير متوقعة، جرّب التبديل إلى \"إعادة تشغيل مجدولة\".\nإعادة تشغيل مجدولة: تُعدّ مسبقًا مهمة مؤقتة قصيرة. بعد إيقاف التطبيق، سيبدأ مرة أخرى وفق الجدول لتنفيذ إعادة التشغيل.</string>
     <string name="description_rhino_java_primitive_wrap">عند تفعيل المفتاح (الوضع الافتراضي): سيتم تغليف القيم المُعادة من أساليب Java من الأنواع Number/Boolean/Character ككائنات Java وإتاحتها للسكريبت (باستثناء String). ستكون typeof هي \"object\" و species هي \"JavaObject\"، ويمكن استدعاء أساليب Java، مما يساعد على الحفاظ على خصائص الأنواع الدقيقة في Java وحل زيادة التحميل (overload).\n\nعند إيقاف المفتاح: لن تُغلف الأنواع المذكورة، وستُعرض مباشرة كقيم أولية في JavaScript (number/boolean/سلسلة ذات حرف واحد). ستكون typeof هي نوع JavaScript الموافق، وهو أقرب لدلالات ونظام JavaScript البيئي. لا يزال بالإمكان إعلان مغلّف Java صراحةً باستخدام new، مثل new java.lang.Boolean(true).\n\nانظر: http://issues.autojs6.com/435</string>
@@ -650,6 +651,9 @@
     <string name="summary_post_notifications_permission">يسمح لـ AutoJs6 بإنشاء وإرسال الإشعارات</string>
     <string name="summary_post_notifications_permission_inrt">السماح للتطبيق بإنشاء وإرسال الإشعارات</string>
     <string name="summary_pre_execute_script">تنفيذ قبل ملف البرنامج النصي</string>
+    <string name="summary_r8_compiler_explicit_disabled">مدخل R8 الصريح معطل; يفشل runtime.loadJarWithR8 دون رجوع</string>
+    <string name="summary_r8_compiler_explicit_disabled_with_selection">مدخل R8 الصريح معطل; provider المحتفظ به: %1$s</string>
+    <string name="summary_r8_compiler_explicit_selected">يستخدم runtime.loadJarWithR8 ‏%1$s; تبقى كل الأخطاء خاصة بـ R8</string>
     <string name="summary_record_prompt">إظهار الرسالة عند بدء أو إيقاف تسجيل البرنامج النصي</string>
     <string name="summary_release_history_preference">عرض سجل الاصدارات والاحصاءات</string>
     <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
@@ -1592,6 +1596,11 @@
     <string name="text_pruning_native_libraries">جار استبعاد المكتبات الأصلية</string>
     <string name="text_querying_plugin_info">جار الاستعلام عن معلومات المكون الإضافي</string>
     <string name="text_quit">يترك</string>
+    <string name="text_r8_compiler">مترجم R8</string>
+    <string name="text_r8_compiler_no_eligible_providers">لا يوجد provider مترجم R8 مؤهل وموقع كتوقيع المضيف مثبت. اختر إلغاء للاحتفاظ بالاختيار الحالي أو أكد تعطيل مدخل R8 الصريح.</string>
+    <string name="text_r8_compiler_provider">provider R8 صريح بنمط full-release</string>
+    <string name="text_r8_compiler_provider_discovery_failed">فشل اكتشاف provider R8. اختر إلغاء للاحتفاظ بالاختيار الحالي أو أكد تعطيل مدخل R8 الصريح.</string>
+    <string name="text_r8_compiler_use_disabled">معطل (يفشل runtime.loadJarWithR8 دون رجوع)</string>
     <string name="text_re_signing_apk">جارٍ اعادة توقيع APK</string>
     <string name="text_reading_android_package">جارٍ قراءة حزمة Android</string>
     <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>

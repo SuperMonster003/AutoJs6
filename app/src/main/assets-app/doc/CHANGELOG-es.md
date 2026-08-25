@@ -66,6 +66,7 @@
 * `Nuevo` El Centro de plugins admite plugins APK Builder Template, permitiendo instalar y actualizar bajo demanda las plantillas necesarias para empaquetar aplicaciones
 * `Nuevo` Una pulsación prolongada del botón flotante de la pestaña Plugins de la página de inicio abre el Centro de plugins
 * `Nuevo` Método runtime.loadAar, para cargar archivos AAR dinámicamente
+* `Nuevo` Entrada explícita runtime.loadJarWithR8 con selección de componente exacto desactivada de forma predeterminada, fijación de identidad con la misma firma, transporte R8 acotado de cinco artefactos, adopción de caché aislada y cierre seguro sin fallback a D8/dx
 * `Nuevo` ui.useAndroidLayout admite controles de diseño nativos de Android, include/merge, referencias res del proyecto de scripts y archivos Drawable XML como shape/selector/layer-list
 * `Nuevo` Los módulos JavaScript (Rhino) admiten interfaces compatibles con power/settings/work_manager y el contenedor AppInfo, y completan determinadas API de Base64/Crypto/WebSocket/ByteString/automator/images/timers de Auto.js Pro 9.3.11
 * `Nuevo` El módulo global ai de JavaScript (Rhino) admite los proveedores OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible, las llamadas ask/chat/stream y la continuación multirronda de llamadas a herramientas; las opciones de desarrollador ofrecen gestión cifrada de múltiples perfiles y credenciales, y los endpoints compatibles en direcciones de bucle local pueden funcionar sin clave API

@@ -20,6 +20,7 @@ import org.autojs.autojs.core.plugin.dex.DexCompilerRetainedInput
 import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeAndroidTestInstrumentation
 import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeDecision
 import org.autojs.autojs.core.plugin.dex.DexCompilerVerifiedArtifact
+import org.autojs.autojs.core.plugin.r8.R8CompilerLoadableDexZip
 import org.autojs.autojs.pio.PFiles.deleteFilesOfDir
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.MD5Utils.md5
@@ -314,13 +315,36 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
 
     private fun loadVerifiedDexZip(artifact: DexCompilerVerifiedArtifact): DexClassLoader {
         throwIfInterrupted()
-        val outputSha256 = artifact.outputSha256
-        val sizeBytes = artifact.sizeBytes
         val source = artifact.openRead() ?: throw IOException("Verified DEX compiler artifact is unavailable")
+        return loadVerifiedDexZipSource(
+            outputSha256 = artifact.outputSha256,
+            sizeBytes = artifact.sizeBytes,
+            source = source,
+            adoptionPrefix = "verified",
+        )
+    }
+
+    /** R8-only loading seam; it never invokes the raw-JAR D8/dx conversion methods. */
+    internal fun loadR8CompilerDexZip(artifact: R8CompilerLoadableDexZip): DexClassLoader {
+        throwIfInterrupted()
+        return loadVerifiedDexZipSource(
+            outputSha256 = artifact.sha256,
+            sizeBytes = artifact.sizeBytes,
+            source = artifact.openRead(),
+            adoptionPrefix = "r8_verified",
+        )
+    }
+
+    private fun loadVerifiedDexZipSource(
+        outputSha256: String,
+        sizeBytes: Long,
+        source: InputStream,
+        adoptionPrefix: String,
+    ): DexClassLoader {
         var primaryFailure: Throwable? = null
         var adoptedTarget: File? = null
         val adoption = try {
-            val adoptionKey = "verified_$outputSha256"
+            val adoptionKey = "${adoptionPrefix}_$outputSha256"
             val lock = conversionLocks.getOrPut(adoptionKey) { Any() }
             synchronized(lock) {
                 val target = File(cacheDir, "$adoptionKey.dex.zip")

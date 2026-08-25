@@ -66,6 +66,7 @@
 * `추가` 플러그인 센터에서 APK Builder Template 플러그인 지원, 앱 패키징에 필요한 템플릿을 필요할 때 설치/업데이트 가능
 * `추가` 홈의 플러그인 탭에 있는 플로팅 버튼을 길게 눌러 플러그인 센터를 여는 기능 지원
 * `추가` runtime.loadAar 메서드, AAR 파일 동적 로드용
+* `추가` 명시적 runtime.loadJarWithR8 진입점에서 기본 비활성화된 정확한 구성 요소 선택, 동일 서명 ID 고정, 제한된 5개 산출물 R8 전송, 격리 캐시 채택 및 D8/dx 폴백 없는 실패 폐쇄 동작 지원
 * `추가` ui.useAndroidLayout에서 Android 네이티브 레이아웃 위젯, include/merge, 스크립트 프로젝트의 res 참조 및 shape/selector/layer-list 등의 Drawable XML 지원
 * `추가` JavaScript (Rhino) 모듈에서 power/settings/work_manager 호환 인터페이스와 AppInfo 래퍼를 지원하고 Auto.js Pro 9.3.11의 일부 Base64/Crypto/WebSocket/ByteString/automator/images/timers API를 보완
 * `추가` 전역 JavaScript (Rhino) ai 모듈에서 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 공급자, ask/chat/stream 호출 및 도구 호출의 다중 라운드 연속 실행 지원; 개발자 옵션에서 암호화된 다중 프로필과 자격 증명을 관리할 수 있으며 로컬 루프백 주소의 호환 엔드포인트는 API 키 없이 실행 가능

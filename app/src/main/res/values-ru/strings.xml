@@ -141,6 +141,7 @@
     <string name="description_pointer_location">\"Положение указателя\" - это отладочная функция в параметрах разработчика Android.\nПосле включения система будет отображать на экране сведения о точке(ах) касания, такие как [координаты/траектория движения/количество/размер/скорость движения/давление], что упрощает [написание/отладку/проверку] соответствующих скриптов.</string>
     <string name="description_post_notifications">Разрешение \"отправка уведомлений\" позволяет AutoJs6 публиковать уведомления в системе, чтобы скрипты могли создавать и управлять пользовательскими уведомлениями в шторке уведомлений.\n\nПримечание: на устройствах Android 13+ без этого разрешения некоторые уведомления могут не отображаться, а также это может повлиять на запуск и стабильность служб на переднем плане.</string>
     <string name="description_project_media_access">При наличии доступа к медиафайлам проекта предупреждение о безопасности при записи экрана не выдается.</string>
+    <string name="description_r8_compiler_explicit_preference">По умолчанию отключено. Только runtime.loadJarWithR8 использует этот provider R8 с точным компонентом и подписью хоста. Точка входа требует явных keep rules и выполняет полные shrinking, optimization и obfuscation. Любой сбой выбора, provider, компиляции, артефакта, кеша или загрузки остается ошибкой R8 и никогда не приводит к переходу на D8/dx. runtime.loadJar и runtime.loadJarWithClasspath не изменяются.</string>
     <string name="description_release_history_preference">Просмотреть историю выпусков AutoJs6 на GitHub и статистику по основным категориям.</string>
     <string name="description_restart_strategy">Стратегия перезагрузки влияет только на кнопку перезапуска в выдвижном меню главной страницы.\n\nБыстрая перезагрузка: быстро перезапускает приложение. Если перезапуск не удался или возникли непредвиденные ситуации, попробуйте переключиться на \"Запланированную перезагрузку\".\nЗапланированная перезагрузка: заранее настраивает краткосрочную задачу. После остановки приложение будет запущено по расписанию для выполнения перезапуска.</string>
     <string name="description_rhino_java_primitive_wrap">Переключатель включён (по умолчанию): значения, возвращаемые методами Java типов Number/Boolean/Character, оборачиваются в объекты Java и доступны в скрипте (String исключается). typeof = \"object\", species = \"JavaObject\"; доступны методы Java, что помогает сохранять точные типовые характеристики Java и корректную резолюцию перегрузок.\n\nПереключатель выключен: перечисленные типы больше не оборачиваются и передаются напрямую как примитивы JavaScript (number/boolean/строка из одного символа). typeof соответствует соответствующему типу JavaScript, что ближе к семантике/экосистеме JavaScript. При необходимости можно явно создать Java-обёртку через new, например new java.lang.Boolean(true).\n\nСм.: http://issues.autojs6.com/435</string>
@@ -648,6 +649,9 @@
     <string name="summary_post_notifications_permission">Позволяет AutoJs6 создавать и отправлять уведомления</string>
     <string name="summary_post_notifications_permission_inrt">Разрешить приложению создавать и отправлять уведомления</string>
     <string name="summary_pre_execute_script">Выполнять перед файлом сценария</string>
+    <string name="summary_r8_compiler_explicit_disabled">Явная точка входа R8 отключена; runtime.loadJarWithR8 завершается без перехода</string>
+    <string name="summary_r8_compiler_explicit_disabled_with_selection">Явная точка входа R8 отключена; сохраненный provider: %1$s</string>
+    <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 использует %1$s; все сбои остаются только R8</string>
     <string name="summary_record_prompt">Показывать сообщение при начале или прекращении записи сценария</string>
     <string name="summary_release_history_preference">Просмотр истории релизов и статистики</string>
     <string name="summary_rhino_java_primitive_wrap">Примитивы Java в скрипте будут обёрнуты в объекты Java</string>
@@ -1590,6 +1594,11 @@
     <string name="text_pruning_native_libraries">Удаление ненужных нативных библиотек</string>
     <string name="text_querying_plugin_info">Запрос сведений о плагине</string>
     <string name="text_quit">Выйти</string>
+    <string name="text_r8_compiler">Компилятор R8</string>
+    <string name="text_r8_compiler_no_eligible_providers">Не установлен подходящий provider компилятора R8 с подписью хоста. Отмените действие, чтобы сохранить текущий выбор, или подтвердите отключение явной точки входа R8.</string>
+    <string name="text_r8_compiler_provider">Явный full-release provider R8</string>
+    <string name="text_r8_compiler_provider_discovery_failed">Не удалось обнаружить provider R8. Отмените действие, чтобы сохранить текущий выбор, или подтвердите отключение явной точки входа R8.</string>
+    <string name="text_r8_compiler_use_disabled">Отключено (runtime.loadJarWithR8 завершается без перехода)</string>
     <string name="text_re_signing_apk">Повторная подпись APK</string>
     <string name="text_reading_android_package">Чтение пакета Android</string>
     <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>

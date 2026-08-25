@@ -88,6 +88,7 @@ private val libs = listOf(
     "markwon-syntax-highlight-4_6_2",
 
     "root-shell-1_6",
+    "r8-compiler-api-0_1_0",
 )
 
 private val pluginApi = listOf(

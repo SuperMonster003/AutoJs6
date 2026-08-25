@@ -66,6 +66,7 @@
 * `إضافة جديدة` مركز الاضافات يدعم اضافات APK Builder Template, مع تثبيت القوالب اللازمة لتحزيم التطبيقات وتحديثها عند الطلب
 * `إضافة جديدة` الزر العائم في تبويب الاضافات بالصفحة الرئيسية يدعم الضغط المطول لفتح مركز الاضافات
 * `إضافة جديدة` الطريقة runtime.loadAar, لتحميل ملفات AAR ديناميكيا
+* `إضافة جديدة` مدخل runtime.loadJarWithR8 صريح مع اختيار مكون مطابق معطل افتراضيا, وتثبيت هوية ذات التوقيع نفسه, ونقل R8 محدود لخمس مخرجات, واعتماد ذاكرة تخزين مؤقت معزولة, وفشل مغلق دون رجوع الى D8/dx
 * `إضافة جديدة` يدعم ui.useAndroidLayout عناصر تخطيط Android الاصلية, و include/merge, ومراجع موارد res لمشروع النص البرمجي, وملفات Drawable XML مثل shape/selector/layer-list
 * `إضافة جديدة` تدعم وحدات JavaScript (Rhino) واجهات power/settings/work_manager المتوافقة وغلاف AppInfo, وتستكمل بعض واجهات Base64/Crypto/WebSocket/ByteString/automator/images/timers من Auto.js Pro 9.3.11
 * `إضافة جديدة` تدعم وحدة ai العامة في JavaScript (Rhino) مزودي OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible واستدعاءات ask/chat/stream ومواصلة استدعاءات الأدوات عبر جولات متعددة; وتوفر خيارات المطور إدارة مشفرة لملفات تعريف وبيانات اعتماد متعددة, بينما يمكن تشغيل نقاط النهاية المتوافقة على عنوان الاسترجاع المحلي من دون مفتاح API
