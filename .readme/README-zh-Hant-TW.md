@@ -179,6 +179,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Node.js 常駐執行環境支援閒置或記憶體壓力下的回收, 明確關閉及異常處理程序隔離重建
 * `新增` Node.js 外部執行階段插件後端, 支援強制 `plugin` 與可選回退 `pluginOptional` 模式, 常駐 Binder 工作階段及處理程序執行環境, 信任/合約/ABI 驗證和單一活動零佇列背壓
 * `新增` Node.js 外部執行階段插件後端支援請求層級工作區封存傳輸 v2, 包含明確輸入對應/輸出回寫/刪除 tombstone 清單, 且不掃描宿主沙盒
+* `新增` Node.js Runtime 偵錯版本支援按次執行明確開啟僅綁定本機迴環位址的 Inspector/CDP 工作階段, release 版本, 遠端監聽及阻塞等待保持禁止
 * `新增` 打包功能支援 Node.js 腳本專案, 並自動包含所需執行階段程式庫
 * `新增` 獨立 TypeScript 編譯外掛客戶端, 驗證凍結的 AIDL/R2 封存協定, 支援 UTF-8 單一檔案 Rhino 編譯, 有界診斷及強制 Source Map 輸出
 * `新增` 本機單一檔案 .ts 與 Rhino .tsx 腳本會先經獨立編譯外掛再由 Rhino 執行, 保留 UTF-8 來源檔案識別與 Source Map 輸出, 型別錯誤在執行前拒絕, 且絕不回退至 Node.js 外掛或直接執行原始 TypeScript; 不支援的宣告檔案及編譯器不可用情境會傳回明確的本地化錯誤
@@ -276,6 +277,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` Node.js 腳本執行結果因執行階段處理程序穩定等待而延遲傳回的問題
 * `修復` Node.js 活動執行取消時可能在異常處理程序隔離前過早移除執行登錄, 導致完成等待者阻塞及復原延遲的問題
 * `修復` Node.js 外部執行階段 Binder 回應遺失後自動回退可能導致同一腳本被重複執行的問題
+* `修復` Node.js TypeScript 專案經工作區封存執行後可能將僅供執行階段使用的編譯產物同步回原始碼目錄, 導致後續執行與原專案檔案衝突的問題
 * `修復` Android 私有目錄 /data/user/0 與 /data/data 別名未正規化寫回外掛請求, 導致合法 Node.js workingDirectory 被誤判為超出 sandboxRoot 的問題
 * `修復` nodePlugin 在宿主不含 Node 執行階段時錯誤排除所有 ABI 的 JNI/AAR 程式庫, 導致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而當機的問題
 * `修復` Node.js R6 證據收集及驗證因 apksigner 憑證摘要輸出格式變更而拒絕 Android Build Tools 37 回報的 APK 簽章身分的問題

@@ -43,6 +43,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
     private val transportDirectory: File,
     private val outputArchive: File,
     private val deleteEligibleInputFiles: Set<String>,
+    private val ephemeralModuleSourceFiles: Set<String>,
     private var inputDescriptor: ParcelFileDescriptor?,
     private var outputDescriptor: ParcelFileDescriptor?,
     private val relativeWorkingDirectory: String,
@@ -89,7 +90,12 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
         if (!sandboxIdentity.matches(sandboxRoot)) {
             throw IOException("Node.js plugin workspace sandbox identity changed during execution.")
         }
-        extractArchive(outputArchive, sandboxRoot, deleteEligibleInputFiles)
+        extractArchive(
+            outputArchive,
+            sandboxRoot,
+            deleteEligibleInputFiles,
+            ephemeralModuleSourceFiles,
+        )
         if (!sandboxIdentity.matches(sandboxRoot)) {
             throw IOException("Node.js plugin workspace sandbox identity changed during synchronization.")
         }
@@ -177,7 +183,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             val inputArchive = File(transportDirectory, INPUT_ARCHIVE_NAME)
             val outputArchive = File(transportDirectory, OUTPUT_ARCHIVE_NAME)
             try {
-                val deleteEligibleInputFiles = writeExplicitInputArchive(
+                val inputArchivePlan = writeExplicitInputArchive(
                     root = sandboxRoot,
                     workingDirectory = workingDirectory,
                     request = request,
@@ -209,7 +215,8 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                     sandboxIdentity = sandboxIdentity,
                     transportDirectory = transportDirectory,
                     outputArchive = outputArchive,
-                    deleteEligibleInputFiles = deleteEligibleInputFiles,
+                    deleteEligibleInputFiles = inputArchivePlan.deleteEligibleInputFiles,
+                    ephemeralModuleSourceFiles = inputArchivePlan.ephemeralModuleSourceFiles,
                     inputDescriptor = inputDescriptor,
                     outputDescriptor = outputDescriptor,
                     relativeWorkingDirectory = relativeWorkingDirectory,
@@ -242,10 +249,11 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             workingDirectory: File,
             request: NodePluginScriptRequest,
             archive: File,
-        ): Set<String> {
+        ): InputArchivePlan {
             var fileCount = 0
             var totalBytes = 0L
             val entries = LinkedHashMap<String, ExplicitInput>()
+            val ephemeralModuleSourceFiles = LinkedHashSet<String>()
 
             fun relativeCandidate(value: String): Pair<String, File>? {
                 if (value.isBlank() || value.startsWith("<") || '\u0000' in value) return null
@@ -286,7 +294,10 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             request.sourceName.takeIf(String::isNotBlank)?.let(::addExistingExplicitPath)
             request.env.values.forEach(::addExistingExplicitPath)
             request.moduleSources.forEach { (name, source) ->
-                val (relative, _) = relativeCandidate(name) ?: return@forEach
+                val (relative, requested) = relativeCandidate(name) ?: return@forEach
+                if (!requested.exists()) {
+                    ephemeralModuleSourceFiles += relative
+                }
                 entries[relative] = ExplicitInput.Bytes(source.toByteArray(StandardCharsets.UTF_8))
             }
             if (
@@ -368,7 +379,10 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             if (archive.length() > MAX_ARCHIVE_BYTES) {
                 throw IOException("Node.js plugin workspace input archive exceeds the compressed-size limit.")
             }
-            return deleteEligibleInputFiles
+            return InputArchivePlan(
+                deleteEligibleInputFiles = deleteEligibleInputFiles,
+                ephemeralModuleSourceFiles = ephemeralModuleSourceFiles.toSortedSet(),
+            )
         }
 
         /**
@@ -427,6 +441,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             archive: File,
             root: File,
             deleteEligibleInputFiles: Set<String>,
+            ephemeralModuleSourceFiles: Set<String>,
         ) {
             val plan = inspectOutputArchive(archive, deleteEligibleInputFiles)
             var fileCount = 0
@@ -441,6 +456,13 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                     }
                     fileCount = checkedFileCount(fileCount)
                     val relative = validatedArchivePath(entry.name)
+                    if (isEphemeralModuleSourceOutput(relative, ephemeralModuleSourceFiles)) {
+                        if (!entry.isDirectory) {
+                            totalBytes = drainArchiveEntry(input, totalBytes)
+                        }
+                        input.closeEntry()
+                        continue
+                    }
                     val target = File(root, relative)
                     ensureContainedTarget(root, target)
                     if (entry.isDirectory) {
@@ -703,6 +725,24 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             relative == TRANSPORT_PROTOCOL_DIRECTORY ||
                 relative.startsWith("$TRANSPORT_PROTOCOL_DIRECTORY/")
 
+        /**
+         * Module-source overlays that had no host file are runtime-only compiler/provider inputs.
+         * The plugin returns a complete workspace snapshot, so synchronizing those files would
+         * materialize generated JavaScript beside TypeScript sources and make the next run collide.
+         */
+        internal fun isEphemeralModuleSourceOutput(
+            relative: String,
+            ephemeralModuleSourceFiles: Set<String>,
+        ): Boolean {
+            if (relative in ephemeralModuleSourceFiles) return true
+            var separator = relative.lastIndexOf('/')
+            while (separator > 0) {
+                if (relative.substring(0, separator) in ephemeralModuleSourceFiles) return true
+                separator = relative.lastIndexOf('/', separator - 1)
+            }
+            return false
+        }
+
         private fun checkedFileCount(previous: Int): Int {
             if (previous >= MAX_FILES) {
                 throw IOException("Node.js plugin workspace exceeds the entry-count limit.")
@@ -778,6 +818,11 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             data class FileEntry(val file: File) : ExplicitInput
             data class Bytes(val value: ByteArray) : ExplicitInput
         }
+
+        private data class InputArchivePlan(
+            val deleteEligibleInputFiles: Set<String>,
+            val ephemeralModuleSourceFiles: Set<String>,
+        )
 
         private data class OutputArchivePlan(val deletedFiles: Set<String>)
     }

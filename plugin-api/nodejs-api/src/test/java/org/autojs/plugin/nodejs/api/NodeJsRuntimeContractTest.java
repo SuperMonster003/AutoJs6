@@ -94,4 +94,16 @@ public class NodeJsRuntimeContractTest {
                 "ERR_AUTOJS6_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS",
                 NodeJsRuntimeContract.ERROR_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS);
     }
+
+    @Test
+    public void inspectorUsesAnExplicitPerExecutionRequestKey() {
+        assertEquals("inspectorEnabled", NodeJsRuntimeContract.KEY_INSPECTOR_ENABLED);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void executionModeIsLiveWhileRuntimeAdapterRemainsAStableLegacyKey() {
+        assertEquals("executionMode", NodeJsRuntimeContract.KEY_EXECUTION_MODE);
+        assertEquals("runtimeAdapter", NodeJsRuntimeContract.KEY_RUNTIME_ADAPTER);
+    }
 }

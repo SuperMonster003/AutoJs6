@@ -171,6 +171,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Ace LSP 默认文件类型新增 .mts/.cts 及其声明文件变体, 使外部 Ace 编辑器可选择与执行一致的 Rhino/Node TypeScript profile; 旧版默认选择会自动迁移, 显式自定义后缀集合保持不变
 * `新增` APK Builder 支持在打包阶段编译 Rhino TypeScript 项目; 最终 APK 仅包含加密 JavaScript 与不内嵌源码的可选 Source Map, 不包含 TypeScript 源码或编译器; 加密项目使用一次性 AES-256-GCM staging, 解密与重加密明文仅存于内存并在使用后清零
 * `新增` Node.js Runtime 插件, 内置 Node.js 24.5.0 运行时, 支持识别 "nodejs" 模式参数或识别文件扩展名 (.node.js/.cjs/.mjs) 运行 Node.js 脚本
+* `新增` Node.js Runtime 调试构建支持按次执行显式开启仅绑定本机回环地址的 Inspector/CDP 会话, release 构建, 远程监听及阻塞等待保持禁止
 * `新增` 独立 TypeScript 编译插件客户端, 校验冻结的 AIDL/R2 归档协议, 支持 UTF-8 单文件 Rhino 编译, 有界诊断及强制 Source Map 输出
 * `新增` 本地单文件 .ts 及 Rhino .tsx 脚本会先经独立编译插件再由 Rhino 执行, 保留 UTF-8 源文件身份与 Source Map 输出, 类型错误在执行前拒绝, 且绝不回退到 Node.js 插件或直接执行原始 TypeScript; 不受支持的声明文件及编译器不可用场景会返回明确的本地化错误
 * `新增` 带 "ui" 模式参数的本地单文件 .ts/.tsx 脚本支持经编译后在 Rhino Activity 中执行字符串 XML 及原生 TSX 布局, 包含受控内置标签, Fragment, 标量属性, 视图查找, 点击回调, 文本更新及显式关闭 UI
@@ -252,6 +253,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` Node.js 脚本执行结果因运行时进程稳定等待而延迟返回的问题
 * `修复` Node.js 活动执行取消时可能在异常进程隔离前过早移除执行注册, 导致完成等待器阻塞及恢复延迟的问题
 * `修复` Node.js 外部运行时 Binder 响应丢失后自动回退可能导致同一脚本被重复执行的问题
+* `修复` Node.js TypeScript 项目经工作区归档执行后可能将仅供运行时使用的编译产物同步回源码目录, 导致后续执行与原项目文件冲突的问题
 * `修复` Android 私有目录 /data/user/0 与 /data/data 别名未规范化写回插件请求, 导致合法 Node.js workingDirectory 被误判为越过 sandboxRoot 的问题
 * `修复` nodePlugin 在宿主不含 Node 运行时时错误排除所有 ABI 的 JNI/AAR 库, 导致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而崩溃的问题
 * `修复` Node.js R6 证据采集及验证因 apksigner 证书摘要输出格式变更而拒绝 Android Build Tools 37 报告的 APK 签名身份的问题

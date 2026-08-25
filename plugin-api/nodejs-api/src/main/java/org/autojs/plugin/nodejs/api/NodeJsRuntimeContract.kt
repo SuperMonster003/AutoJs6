@@ -39,6 +39,12 @@ object NodeJsRuntimeContract {
     const val KEY_SANDBOX_ROOT = "sandboxRoot"
     const val KEY_TIMEOUT_MS = "timeoutMs"
     const val KEY_EXECUTION_MODE = "executionMode"
+
+    /**
+     * Legacy no-op request metadata. Runtime selection is discovered from the
+     * bound plugin service and cannot be overridden per execution.
+     */
+    @Deprecated("Ignored since runtime contract v2; select the installed runtime service instead")
     const val KEY_RUNTIME_ADAPTER = "runtimeAdapter"
 
     /**
@@ -81,6 +87,8 @@ object NodeJsRuntimeContract {
     const val KEY_ESM_ENABLED = "esmEnabled"
     const val KEY_DYNAMIC_IMPORT_ENABLED = "dynamicImportEnabled"
     const val KEY_RAW_NODE_NETWORK_MODULES_ENABLED = "rawNodeNetworkModulesEnabled"
+    /** Debug builds only. Enables the localhost-only Node inspector facade for this execution. */
+    const val KEY_INSPECTOR_ENABLED = "inspectorEnabled"
     const val KEY_WORKER_THREADS_ENABLED = "workerThreadsEnabled"
     const val KEY_CHILD_PROCESS_ENABLED = "childProcessEnabled"
     const val KEY_JAVA_INTEROP_ENABLED = "javaInteropEnabled"

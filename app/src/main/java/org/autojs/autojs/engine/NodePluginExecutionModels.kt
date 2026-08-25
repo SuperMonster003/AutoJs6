@@ -22,11 +22,12 @@ data class NodePluginScriptRequest(
     val esmEnabled: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
     val dynamicImportEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
     val rawNodeNetworkModulesEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
+    /** Debug builds only; the plugin also enforces its own native debug-build gate. */
+    val inspectorEnabled: Boolean = false,
     val workerThreadsEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
     val childProcessEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
     val javaInteropEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
     val spawnDepth: Int = 0,
-    val runtimeAdapter: String? = null,
     val moduleSourceProvider: INodeJsModuleSourceProvider? = null,
 ) {
     companion object {

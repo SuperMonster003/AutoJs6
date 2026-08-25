@@ -6,6 +6,7 @@ import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 import org.autojs.plugin.nodejs.api.INodeJsRuntimeCallback
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
@@ -13,6 +14,12 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 object NodeJsRuntimePluginBridge {
+
+    internal data class FailureClassification(
+        val fallbackSafe: Boolean,
+        val failureKind: String,
+        val errorCode: String,
+    )
 
     private const val TAG = "NodeJsRuntimePlugin"
     private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
@@ -26,6 +33,28 @@ object NodeJsRuntimePluginBridge {
     private val cancelledExecutionIds = ConcurrentHashMap.newKeySet<String>()
     private val backendExecutionIds = ConcurrentHashMap.newKeySet<String>()
     private val executionLifecycleLock = Any()
+
+    internal fun classifyPluginFailure(error: Throwable): FailureClassification {
+        val fallbackSafe = when (error) {
+            is NodeRuntimePluginUnavailableException,
+            is NodeRuntimePluginContractException,
+            -> true
+            is NodeRuntimePluginOperationException -> !error.dispatchStarted
+            else -> false
+        }
+        val failureKind = when (error) {
+            is NodeRuntimePluginContractException -> "contract"
+            is NodeRuntimePluginUnavailableException -> "unavailable"
+            is NodeRuntimePluginOperationException -> if (error.dispatchStarted) "execution_lost" else "session"
+            else -> "unknown"
+        }
+        val errorCode = when (failureKind) {
+            "contract" -> ERROR_PLUGIN_CONTRACT_MISMATCH
+            "execution_lost" -> ERROR_PLUGIN_EXECUTION_LOST
+            else -> ERROR_PLUGIN_UNAVAILABLE
+        }
+        return FailureClassification(fallbackSafe, failureKind, errorCode)
+    }
 
     fun isRequested(): Boolean {
         return NodeRuntimeBackend.current() == NodeRuntimeBackend.PLUGIN ||
@@ -299,7 +328,6 @@ object NodeJsRuntimePluginBridge {
             putString(NodeJsRuntimeContract.KEY_SANDBOX_ROOT, sandboxRoot)
             putLong(NodeJsRuntimeContract.KEY_TIMEOUT_MS, timeoutMs)
             putString(NodeJsRuntimeContract.KEY_EXECUTION_MODE, executionMode)
-            putString(NodeJsRuntimeContract.KEY_RUNTIME_ADAPTER, runtimeAdapter)
             putStringMap(NodeJsRuntimeContract.KEY_ENV_NAMES, NodeJsRuntimeContract.KEY_ENV_VALUES, env)
             putStringMap(
                 NodeJsRuntimeContract.KEY_MODULE_SOURCE_NAMES,
@@ -325,6 +353,7 @@ object NodeJsRuntimePluginBridge {
             // plugin to revive its migration-only regex stripping path.
             putBoolean(NodeJsRuntimeContract.KEY_LEGACY_TYPESCRIPT_STRIPPING_ENABLED, false)
             putBoolean(NodeJsRuntimeContract.KEY_RAW_NODE_NETWORK_MODULES_ENABLED, rawNodeNetworkModulesEnabled)
+            putBoolean(NodeJsRuntimeContract.KEY_INSPECTOR_ENABLED, BuildConfig.DEBUG && inspectorEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_ENABLED, workerThreadsEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_ENABLED, childProcessEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_ENABLED, javaInteropEnabled)
@@ -423,24 +452,7 @@ object NodeJsRuntimePluginBridge {
         error: Throwable,
     ): NodePluginScriptResult {
         val operationError = error as? NodeRuntimePluginOperationException
-        val fallbackSafe = when (error) {
-            is NodeRuntimePluginUnavailableException,
-            is NodeRuntimePluginContractException,
-            -> true
-            is NodeRuntimePluginOperationException -> !error.dispatchStarted
-            else -> false
-        }
-        val failureKind = when (error) {
-            is NodeRuntimePluginContractException -> "contract"
-            is NodeRuntimePluginUnavailableException -> "unavailable"
-            is NodeRuntimePluginOperationException -> if (error.dispatchStarted) "execution_lost" else "session"
-            else -> "unknown"
-        }
-        val errorCode = when (failureKind) {
-            "contract" -> ERROR_PLUGIN_CONTRACT_MISMATCH
-            "execution_lost" -> ERROR_PLUGIN_EXECUTION_LOST
-            else -> ERROR_PLUGIN_UNAVAILABLE
-        }
+        val classification = classifyPluginFailure(error)
         val candidate = operationError?.candidate
         val diagnostics = operationError?.diagnostics?.toNativeValues().orEmpty()
         return NodePluginScriptResult(
@@ -452,7 +464,7 @@ object NodeJsRuntimePluginBridge {
             errorName = error.javaClass.simpleName,
             errorMessage = error.message ?: error.javaClass.name,
             errorStack = error.stackTraceToString(),
-            errorCode = errorCode,
+            errorCode = classification.errorCode,
             elapsedMs = (SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
             processName = "",
             pid = Process.myPid(),
@@ -460,15 +472,15 @@ object NodeJsRuntimePluginBridge {
             nativeValues = mapOf(
                 "embedded_script.runtime_plugin.enabled" to "true",
                 "embedded_script.runtime_plugin.failure" to "true",
-                "embedded_script.runtime_plugin.failure_kind" to failureKind,
+                "embedded_script.runtime_plugin.failure_kind" to classification.failureKind,
                 "embedded_script.runtime_plugin.backend_dispatched" to
                         (operationError?.dispatchStarted == true).toString(),
-                "embedded_script.runtime_plugin.fallback_safe" to fallbackSafe.toString(),
+                "embedded_script.runtime_plugin.fallback_safe" to classification.fallbackSafe.toString(),
                 "embedded_script.runtime_plugin.package_name" to
                         candidate?.serviceInfo?.packageName.orEmpty(),
                 "embedded_script.runtime_plugin.service_name" to
                         candidate?.serviceInfo?.name.orEmpty(),
-                "embedded_script.error_code" to errorCode,
+                "embedded_script.error_code" to classification.errorCode,
             ) + diagnostics,
             workingDirectory = request.workingDirectory,
         )
