@@ -70,6 +70,8 @@ internal object ExplorerActionCatalogPolicy {
                 protocolVersion >= MULTI_TARGET_PROTOCOL_VERSION
             ExplorerActionValues.ACCESS_REPLACE_TARGET ->
                 protocolVersion >= TARGET_REPLACEMENT_PROTOCOL_VERSION
+            ExplorerActionValues.ACCESS_MANAGE_TARGET ->
+                protocolVersion >= MANAGED_TARGET_PROTOCOL_VERSION
             else -> false
         }
         if (!accessModeSupported) return null
@@ -112,10 +114,18 @@ internal object ExplorerActionCatalogPolicy {
             outputNameSuffix = outputNameSuffix,
             maxOutputBytes = maxOutputBytes,
         ) ?: return null
+        val replacementProtocolVersion = if (
+            accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET
+        ) {
+            MANAGED_TARGET_PROTOCOL_VERSION
+        } else {
+            TARGET_REPLACEMENT_PROTOCOL_VERSION
+        }
         if (
-            accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET &&
+            (accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET ||
+                accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET) &&
             (
-                protocolVersion < TARGET_REPLACEMENT_PROTOCOL_VERSION ||
+                protocolVersion < replacementProtocolVersion ||
                     targetKind != ExplorerActionValues.TARGET_FILE ||
                     normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE ||
                     placement != ExplorerActionValues.PLACEMENT_OVERFLOW ||
@@ -185,7 +195,8 @@ internal object ExplorerActionCatalogPolicy {
         if (
             descriptor.accessMode != ExplorerActionValues.ACCESS_READ_ONLY &&
             descriptor.accessMode != ExplorerActionValues.ACCESS_CREATE_IN_PARENT &&
-            descriptor.accessMode != ExplorerActionValues.ACCESS_REPLACE_TARGET
+            descriptor.accessMode != ExplorerActionValues.ACCESS_REPLACE_TARGET &&
+            descriptor.accessMode != ExplorerActionValues.ACCESS_MANAGE_TARGET
         ) {
             return false
         }
@@ -293,4 +304,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val MULTI_TARGET_PROTOCOL_VERSION = 4
     private const val HOST_EXPLORER_PROTOCOL_VERSION = 5
     private const val TARGET_REPLACEMENT_PROTOCOL_VERSION = 8
+    private const val MANAGED_TARGET_PROTOCOL_VERSION = 9
 }

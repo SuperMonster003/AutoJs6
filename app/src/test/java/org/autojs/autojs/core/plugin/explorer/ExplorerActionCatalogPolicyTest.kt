@@ -275,6 +275,46 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV9ManagedTargetCombinesReplacementAndSiblingCreation() {
+        assertNull(
+            descriptor(
+                protocolVersion = 8,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_MANAGE_TARGET,
+                mimeTypes = listOf("application/zip"),
+            ),
+        )
+        val managed = descriptor(
+            protocolVersion = 9,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            accessMode = ExplorerActionValues.ACCESS_MANAGE_TARGET,
+            mimeTypes = listOf("application/zip"),
+        ) ?: error("Expected a valid managed-target descriptor")
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                managed,
+                ExplorerActionTarget("application/zip", "zip"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 9,
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_MANAGE_TARGET,
+                mimeTypes = emptyList(),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 9,
+                cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+                accessMode = ExplorerActionValues.ACCESS_MANAGE_TARGET,
+            ),
+        )
+    }
+
+    @Test
     fun protocolV5HostExplorerPresentationIsStrictlyReadOnlyAndPrimary() {
         val embedded = descriptor(
             protocolVersion = 5,
@@ -353,9 +393,10 @@ class ExplorerActionCatalogPolicyTest {
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(6L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(7L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(8L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(9L))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(9L))
+        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(10L))
         assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(4L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 4))

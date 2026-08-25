@@ -6,10 +6,12 @@ import android.os.Binder
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
+import android.system.OsConstants
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionCatalogPolicy
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
@@ -23,13 +25,21 @@ import org.autojs.plugin.explorer.api.IExplorerActionHostSession
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.Normalizer
+import java.util.ArrayDeque
 import java.util.Locale
 import java.util.UUID
+import java.util.concurrent.Executors
 
 internal data class ExplorerActionHostSessionTarget(
     val id: String,
     val file: File,
 )
+
+internal fun explorerItemForCreatedOutput(file: File): ExplorerFileItem {
+    val parent = ExplorerDirPage(file.parentFile, null)
+    return if (file.isDirectory) ExplorerDirPage(file, parent) else ExplorerFileItem(file, parent)
+}
 
 /** A request-scoped capability. Every remote call is pinned to the launched plugin UID. */
 internal class ExplorerActionHostSession private constructor(
@@ -40,6 +50,8 @@ internal class ExplorerActionHostSession private constructor(
     private val allowReplaceTarget: Boolean,
     private val onOutputCommitted: (File) -> Unit,
     private val onTargetReplaced: (File) -> Unit,
+    private val outputTreeStore: ExplorerActionOutputTreeStore,
+    private val clock: () -> Long,
 ) : IExplorerActionHostSession.Stub() {
 
     private val parent = commonParent.canonicalFile
@@ -52,6 +64,8 @@ internal class ExplorerActionHostSession private constructor(
     }
     private val lock = Any()
     private val outputs = LinkedHashMap<String, OutputTransaction>()
+    private val terminalOutputs = LinkedHashMap<String, Bundle>()
+    private var clientLease: ClientLease? = null
     private var closed = false
 
     init {
@@ -164,11 +178,175 @@ internal class ExplorerActionHostSession private constructor(
         return outputBundle(transaction)
     }
 
+    override fun prepareOutputTree(displayName: String, conflictPolicy: Int): Bundle {
+        enforceCaller()
+        check(allowCreateOutput) { "Explorer Action does not have create-in-parent access" }
+        val normalizedName = normalizeOutputName(displayName)
+        val transaction = synchronized(lock) {
+            checkOpen()
+            require(parent.canWrite()) { "Explorer Action parent directory is not writable" }
+            val id = UUID.randomUUID().toString()
+            val target = reserveOutputTreeTarget(normalizedName, conflictPolicy)
+            val marker = File(target, "$OUTPUT_TREE_MARKER_PREFIX$id")
+            try {
+                check(marker.createNewFile()) { "Explorer Action output tree marker already exists" }
+                FileOutputStream(marker).use { output ->
+                    output.write(id.toByteArray(Charsets.UTF_8))
+                    output.fd.sync()
+                }
+                val parentIdentity = TargetIdentity.capture(parent)
+                val targetIdentity = TargetIdentity.capture(target)
+                val now = clock()
+                val record = ExplorerActionOutputTreeRecord(
+                    id = id,
+                    pluginUid = expectedUid,
+                    processInstanceId = PROCESS_INSTANCE_ID,
+                    parentPath = parent.path,
+                    parentDevice = parentIdentity.device,
+                    parentInode = parentIdentity.inode,
+                    targetPath = target.path,
+                    targetDevice = targetIdentity.device,
+                    targetInode = targetIdentity.inode,
+                    displayName = target.name,
+                    markerName = marker.name,
+                    state = ExplorerActionHostSessionValues.OUTPUT_STATE_PREPARED,
+                    createdAtMillis = now,
+                    updatedAtMillis = now,
+                )
+                markOutputTreeActive(id, true)
+                outputTreeStore.write(record)
+                OutputTransaction(
+                    id = id,
+                    mimeType = DIRECTORY_MIME_TYPE,
+                    target = target,
+                    temp = target,
+                    mode = OutputMode.CREATE_TREE,
+                    outputTreeMarker = marker,
+                    outputTreeRecord = record,
+                ).also { outputs[it.id] = it }
+            } catch (error: Throwable) {
+                markOutputTreeActive(id, false)
+                safeDeleteTree(target)
+                releaseOutputTarget(target)
+                outputTreeStore.remove(id)
+                throw error
+            }
+        }
+        return outputBundle(transaction)
+    }
+
+    override fun createOutputDirectory(transactionId: String, relativePath: String) {
+        enforceCaller()
+        synchronized(lock) {
+            checkOpen()
+            val transaction = outputTree(transactionId)
+            val normalizedPath = normalizeOutputRelativePath(relativePath)
+            requireOutputTreeCapacity(transaction, normalizedPath)
+            requireOutputTreeParent(transaction, normalizedPath)
+            val directory = resolveOutputTreePath(transaction, normalizedPath)
+            check(!directory.exists() && directory.mkdir()) {
+                "Explorer Action output directory could not be created"
+            }
+            transaction.outputTreeNodes[normalizedPath] = OutputTreeNodeKind.DIRECTORY
+            markOutputTreeWriting(transaction)
+        }
+    }
+
+    override fun openOutputFile(transactionId: String, relativePath: String): ParcelFileDescriptor {
+        enforceCaller()
+        return synchronized(lock) {
+            checkOpen()
+            val transaction = outputTree(transactionId)
+            val normalizedPath = normalizeOutputRelativePath(relativePath)
+            requireOutputTreeCapacity(transaction, normalizedPath)
+            requireOutputTreeParent(transaction, normalizedPath)
+            val file = resolveOutputTreePath(transaction, normalizedPath)
+            check(!file.exists() && file.createNewFile()) {
+                "Explorer Action output file could not be created"
+            }
+            try {
+                ParcelFileDescriptor.open(
+                    file,
+                    ParcelFileDescriptor.MODE_WRITE_ONLY or ParcelFileDescriptor.MODE_TRUNCATE,
+                ).also {
+                    transaction.outputTreeNodes[normalizedPath] = OutputTreeNodeKind.FILE
+                    markOutputTreeWriting(transaction)
+                }
+            } catch (error: Throwable) {
+                file.delete()
+                throw error
+            }
+        }
+    }
+
+    override fun queryOutput(transactionId: String): Bundle {
+        enforceCaller()
+        require(isCanonicalUuid(transactionId)) { "Explorer Action output transaction ID is invalid" }
+        return synchronized(lock) {
+            checkOpen()
+            outputs[transactionId]?.let(::outputBundle)
+                ?: terminalOutputs[transactionId]?.let(::Bundle)
+                ?: outputTreeStore.read(transactionId)
+                    ?.takeIf(::belongsToThisSessionParent)
+                    ?.let(::outputTreeRecordBundle)
+                ?: Bundle().apply {
+                    putString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID, transactionId)
+                    putInt(
+                        ExplorerActionHostSessionKeys.OUTPUT_STATE,
+                        ExplorerActionHostSessionValues.OUTPUT_STATE_UNKNOWN,
+                    )
+                }
+        }
+    }
+
+    override fun listOutputs(): Bundle {
+        enforceCaller()
+        return synchronized(lock) {
+            checkOpen()
+            val results = LinkedHashMap<String, Bundle>()
+            outputTreeStore.list()
+                .filter(::belongsToThisSessionParent)
+                .takeLast(ExplorerActionProtocol.MAX_OUTPUT_TRANSACTION_RESULTS)
+                .forEach { record -> results[record.id] = outputTreeRecordBundle(record) }
+            terminalOutputs.forEach { (id, bundle) -> results[id] = Bundle(bundle) }
+            outputs.forEach { (id, transaction) -> results[id] = outputBundle(transaction) }
+            Bundle().apply {
+                putParcelableArrayList(
+                    ExplorerActionHostSessionKeys.OUTPUTS,
+                    ArrayList(
+                        results.values.toList()
+                            .takeLast(ExplorerActionProtocol.MAX_OUTPUT_TRANSACTION_RESULTS),
+                    ),
+                )
+            }
+        }
+    }
+
+    override fun attachClient(clientToken: IBinder) {
+        enforceCaller()
+        val deathRecipient = IBinder.DeathRecipient {
+            CLIENT_DEATH_EXECUTOR.execute { closeInternal(clientToken) }
+        }
+        val previousLease = synchronized(lock) {
+            checkOpen()
+            clientToken.linkToDeath(deathRecipient, 0)
+            clientLease.also {
+                clientLease = ClientLease(clientToken, deathRecipient)
+            }
+        }
+        previousLease?.let { previous ->
+            runCatching { previous.token.unlinkToDeath(previous.deathRecipient, 0) }
+        }
+    }
+
     override fun openOutput(transactionId: String): ParcelFileDescriptor {
         enforceCaller()
         return synchronized(lock) {
             checkOpen()
             val transaction = output(transactionId)
+            check(transaction.mode != OutputMode.CREATE_TREE) {
+                "Explorer Action directory output requires a child file path"
+            }
             check(transaction.state == OutputState.PREPARED) {
                 "Explorer Action output has already been opened"
             }
@@ -186,6 +364,9 @@ internal class ExplorerActionHostSession private constructor(
         return synchronized(lock) {
             checkOpen()
             val transaction = output(transactionId)
+            check(transaction.mode != OutputMode.CREATE_TREE) {
+                "Explorer Action directory output is verified by the host during commit"
+            }
             check(transaction.state == OutputState.OPENED) {
                 "Explorer Action pending output is not ready for verification"
             }
@@ -209,11 +390,20 @@ internal class ExplorerActionHostSession private constructor(
                     transaction.state == OutputState.OPENED ||
                         transaction.state == OutputState.VERIFYING
                 OutputMode.REPLACE -> transaction.state == OutputState.VERIFYING
+                OutputMode.CREATE_TREE ->
+                    transaction.state == OutputState.PREPARED ||
+                        transaction.state == OutputState.TREE_WRITING
             }
             check(readyToCommit) {
                 "Explorer Action output is not ready to commit"
             }
-            check(transaction.temp.isFile) { "Explorer Action staging output is missing" }
+            check(
+                if (transaction.mode == OutputMode.CREATE_TREE) {
+                    transaction.target.isDirectory
+                } else {
+                    transaction.temp.isFile
+                },
+            ) { "Explorer Action staging output is missing" }
             when (transaction.mode) {
                 OutputMode.CREATE -> {
                     check(!transaction.target.exists()) { "Explorer Action output target now exists" }
@@ -222,21 +412,37 @@ internal class ExplorerActionHostSession private constructor(
                     }
                 }
                 OutputMode.REPLACE -> commitReplacement(transaction)
+                OutputMode.CREATE_TREE -> commitOutputTree(transaction)
             }
             outputs.remove(transaction.id)
             releaseOutputTarget(transaction.target)
+            if (transaction.mode == OutputMode.CREATE_TREE) {
+                markOutputTreeActive(transaction.id, false)
+            }
+            val result = outputBundle(transaction).apply {
+                putInt(
+                    ExplorerActionHostSessionKeys.OUTPUT_STATE,
+                    ExplorerActionHostSessionValues.OUTPUT_STATE_COMMITTED,
+                )
+                if (transaction.mode == OutputMode.CREATE_TREE) {
+                    putLong(ExplorerActionHostSessionKeys.LAST_MODIFIED, transaction.target.lastModified())
+                } else {
+                    putLong(ExplorerActionHostSessionKeys.SIZE, transaction.target.length())
+                    putLong(ExplorerActionHostSessionKeys.LAST_MODIFIED, transaction.target.lastModified())
+                }
+            }
+            rememberTerminalOutput(transaction.id, result)
             CommittedOutput(
                 target = transaction.target,
                 mode = transaction.mode,
-                result = outputBundle(transaction).apply {
-                    putLong(ExplorerActionHostSessionKeys.SIZE, transaction.target.length())
-                    putLong(ExplorerActionHostSessionKeys.LAST_MODIFIED, transaction.target.lastModified())
-                },
+                result = result,
             )
         }
         runCatching {
             when (committed.mode) {
-                OutputMode.CREATE -> onOutputCommitted(committed.target)
+                OutputMode.CREATE,
+                OutputMode.CREATE_TREE,
+                -> onOutputCommitted(committed.target)
                 OutputMode.REPLACE -> onTargetReplaced(committed.target)
             }
         }
@@ -245,21 +451,56 @@ internal class ExplorerActionHostSession private constructor(
 
     override fun abortOutput(transactionId: String) {
         enforceCaller()
-        val transaction = synchronized(lock) {
+        synchronized(lock) {
             checkOpen()
+            val transaction = outputs[transactionId] ?: return
+            cleanup(transaction)
             outputs.remove(transactionId)
-        } ?: return
-        cleanup(transaction)
+            if (transaction.mode == OutputMode.CREATE_TREE) {
+                markOutputTreeActive(transaction.id, false)
+            }
+            rememberTerminalOutput(
+                transaction.id,
+                outputBundle(transaction).apply {
+                    putInt(
+                        ExplorerActionHostSessionKeys.OUTPUT_STATE,
+                        ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED,
+                    )
+                },
+            )
+        }
     }
 
     override fun close() {
         enforceCaller()
-        val abandoned = synchronized(lock) {
+        closeInternal()
+    }
+
+    private fun closeInternal(expectedClientToken: IBinder? = null) {
+        val closeState = synchronized(lock) {
+            if (expectedClientToken != null && clientLease?.token !== expectedClientToken) return
             if (closed) return
             closed = true
-            outputs.values.toList().also { outputs.clear() }
+            val lease = clientLease
+            clientLease = null
+            CloseState(
+                abandoned = outputs.values.toList().also { outputs.clear() },
+                clientLease = lease,
+            )
         }
-        abandoned.forEach(::cleanup)
+        closeState.clientLease?.let { lease ->
+            runCatching { lease.token.unlinkToDeath(lease.deathRecipient, 0) }
+        }
+        closeState.abandoned.forEach { transaction ->
+            try {
+                runCatching { cleanup(transaction) }
+            } finally {
+                releaseOutputTarget(transaction.target)
+                if (transaction.mode == OutputMode.CREATE_TREE) {
+                    markOutputTreeActive(transaction.id, false)
+                }
+            }
+        }
     }
 
     private fun target(targetId: String): File = targetState(targetId).file
@@ -323,6 +564,44 @@ internal class ExplorerActionHostSession private constructor(
             transaction.target.path.take(ExplorerActionProtocol.MAX_PARENT_DISPLAY_PATH_LENGTH),
         )
         putString(ExplorerActionHostSessionKeys.MIME_TYPE, transaction.mimeType)
+        putInt(ExplorerActionHostSessionKeys.OUTPUT_KIND, transaction.mode.protocolKind)
+        putInt(ExplorerActionHostSessionKeys.OUTPUT_STATE, transaction.state.protocolState)
+        if (transaction.mode == OutputMode.CREATE_TREE) {
+            val fileCount = transaction.outputTreeNodes.values.count { it == OutputTreeNodeKind.FILE }
+            val directoryCount = transaction.outputTreeNodes.size - fileCount
+            putInt(ExplorerActionHostSessionKeys.OUTPUT_FILE_COUNT, fileCount)
+            putInt(ExplorerActionHostSessionKeys.OUTPUT_DIRECTORY_COUNT, directoryCount)
+            putLong(
+                ExplorerActionHostSessionKeys.OUTPUT_BYTES,
+                transaction.outputTreeBytes.takeIf { it >= 0L } ?: 0L,
+            )
+        }
+    }
+
+    private fun outputTreeRecordBundle(record: ExplorerActionOutputTreeRecord): Bundle = Bundle().apply {
+        putString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID, record.id)
+        putString(ExplorerActionHostSessionKeys.OUTPUT_DISPLAY_NAME, record.displayName)
+        putString(
+            ExplorerActionHostSessionKeys.OUTPUT_DISPLAY_PATH,
+            record.targetPath.take(ExplorerActionProtocol.MAX_PARENT_DISPLAY_PATH_LENGTH),
+        )
+        putString(ExplorerActionHostSessionKeys.MIME_TYPE, DIRECTORY_MIME_TYPE)
+        putInt(
+            ExplorerActionHostSessionKeys.OUTPUT_KIND,
+            ExplorerActionHostSessionValues.OUTPUT_KIND_DIRECTORY_TREE,
+        )
+        putInt(ExplorerActionHostSessionKeys.OUTPUT_STATE, record.state)
+        putInt(ExplorerActionHostSessionKeys.OUTPUT_FILE_COUNT, record.fileCount)
+        putInt(ExplorerActionHostSessionKeys.OUTPUT_DIRECTORY_COUNT, record.directoryCount)
+        putLong(ExplorerActionHostSessionKeys.OUTPUT_BYTES, record.outputBytes)
+    }
+
+    private fun belongsToThisSessionParent(record: ExplorerActionOutputTreeRecord): Boolean {
+        val identity = runCatching { TargetIdentity.capture(parent) }.getOrNull() ?: return false
+        return record.pluginUid == expectedUid &&
+            record.parentPath == parent.path &&
+            record.parentDevice == identity.device &&
+            record.parentInode == identity.inode
     }
 
     private fun commitReplacement(transaction: OutputTransaction) {
@@ -345,6 +624,186 @@ internal class ExplorerActionHostSession private constructor(
         targetState.identity = committedIdentity
     }
 
+    private fun commitOutputTree(transaction: OutputTransaction) {
+        val marker = requireNotNull(transaction.outputTreeMarker) {
+            "Explorer Action output tree marker is missing"
+        }
+        val record = requireNotNull(transaction.outputTreeRecord) {
+            "Explorer Action output tree journal is missing"
+        }
+        check(outputTreeIdentityMatches(record, transaction.target)) {
+            "Explorer Action output tree root changed before commit"
+        }
+        check(marker.isFile && marker.readText(Charsets.UTF_8) == transaction.id) {
+            "Explorer Action output tree marker changed before commit"
+        }
+        val stats = validateAndSyncOutputTree(transaction)
+        val verifyingRecord = record.copy(
+            state = ExplorerActionHostSessionValues.OUTPUT_STATE_VERIFYING,
+            updatedAtMillis = clock(),
+            fileCount = stats.fileCount,
+            directoryCount = stats.directoryCount,
+            outputBytes = stats.bytes,
+        )
+        outputTreeStore.write(verifyingRecord)
+        transaction.outputTreeRecord = verifyingRecord
+        transaction.outputTreeBytes = stats.bytes
+        transaction.state = OutputState.VERIFYING
+        check(marker.delete()) { "Explorer Action output tree marker could not be removed" }
+        runCatching { syncDirectory(transaction.target) }
+        runCatching { syncDirectory(parent) }
+        val committedRecord = verifyingRecord.copy(
+            state = ExplorerActionHostSessionValues.OUTPUT_STATE_COMMITTED,
+            updatedAtMillis = clock(),
+        )
+        transaction.outputTreeRecord = committedRecord
+        runCatching { outputTreeStore.write(committedRecord) }
+    }
+
+    private fun validateAndSyncOutputTree(transaction: OutputTransaction): OutputTreeStats {
+        val marker = requireNotNull(transaction.outputTreeMarker)
+        val expected = transaction.outputTreeNodes
+        val discovered = LinkedHashMap<String, OutputTreeNodeKind>()
+        var bytes = 0L
+        val pending = ArrayDeque<OutputTreeTraversal>()
+        pending.addLast(OutputTreeTraversal(transaction.target, ""))
+        while (pending.isNotEmpty()) {
+            val current = pending.removeLast()
+            if (current.afterChildren) {
+                syncDirectory(current.file)
+                continue
+            }
+
+            val isRoot = current.relativePath.isEmpty()
+            if (!isRoot) {
+                normalizeOutputRelativePath(current.relativePath)
+                val stat = try {
+                    Os.lstat(current.file.path)
+                } catch (error: ErrnoException) {
+                    throw IOException("Explorer Action output tree entry is unavailable", error)
+                }
+                check(!OsConstants.S_ISLNK(stat.st_mode)) {
+                    "Explorer Action output tree contains a symbolic link"
+                }
+                val kind = if (OsConstants.S_ISDIR(stat.st_mode)) {
+                    OutputTreeNodeKind.DIRECTORY
+                } else {
+                    check(OsConstants.S_ISREG(stat.st_mode)) {
+                        "Explorer Action output tree contains an unsupported node"
+                    }
+                    OutputTreeNodeKind.FILE
+                }
+                check(discovered.put(current.relativePath, kind) == null) {
+                    "Explorer Action output tree contains a duplicate path"
+                }
+                if (kind == OutputTreeNodeKind.FILE) {
+                    FileOutputStream(current.file, true).use { output -> output.fd.sync() }
+                    bytes = Math.addExact(bytes, current.file.length())
+                    continue
+                }
+                pending.addLast(current.copy(afterChildren = true))
+            }
+
+            val children = current.file.listFiles()
+                ?: throw IOException("Explorer Action output tree cannot be inspected")
+            children.sortedByDescending(File::getName).forEach { child ->
+                if (child == marker && isRoot) return@forEach
+                val relativePath = if (isRoot) {
+                    child.name
+                } else {
+                    "${current.relativePath}/${child.name}"
+                }
+                pending.addLast(OutputTreeTraversal(child, relativePath))
+            }
+        }
+        check(discovered == expected) {
+            "Explorer Action output tree changed outside the negotiated session"
+        }
+        return OutputTreeStats(
+            fileCount = discovered.values.count { it == OutputTreeNodeKind.FILE },
+            directoryCount = discovered.values.count { it == OutputTreeNodeKind.DIRECTORY },
+            bytes = bytes,
+        )
+    }
+
+    private fun syncDirectory(directory: File) {
+        var descriptor: java.io.FileDescriptor? = null
+        try {
+            descriptor = Os.open(
+                directory.path,
+                OsConstants.O_RDONLY,
+                0,
+            )
+            Os.fsync(descriptor)
+        } catch (error: ErrnoException) {
+            if (error.errno != OsConstants.EINVAL && error.errno != OsConstants.EOPNOTSUPP) {
+                throw IOException("Explorer Action output directory could not be synchronized", error)
+            }
+        } finally {
+            descriptor?.let { runCatching { Os.close(it) } }
+        }
+    }
+
+    private fun outputTree(transactionId: String): OutputTransaction = output(transactionId).also {
+        check(it.mode == OutputMode.CREATE_TREE) {
+            "Explorer Action output transaction is not a directory tree"
+        }
+        check(it.state == OutputState.PREPARED || it.state == OutputState.TREE_WRITING) {
+            "Explorer Action output tree is not writable"
+        }
+    }
+
+    private fun requireOutputTreeCapacity(transaction: OutputTransaction, relativePath: String) {
+        check(relativePath !in transaction.outputTreeNodes) {
+            "Explorer Action output tree path already exists"
+        }
+        check(transaction.outputTreeNodes.size < ExplorerActionProtocol.MAX_OUTPUT_TREE_ENTRIES) {
+            "Explorer Action output tree exceeds the negotiated entry limit"
+        }
+        val parentPath = relativePath.substringBeforeLast('/', "")
+        val collisionKey = outputTreeCollisionKey(relativePath.substringAfterLast('/'))
+        check(
+            transaction.outputTreeNodes.none { (path, _) ->
+                path.substringBeforeLast('/', "") == parentPath &&
+                    outputTreeCollisionKey(path.substringAfterLast('/')) == collisionKey
+            },
+        ) { "Explorer Action output tree contains an equivalent sibling name" }
+    }
+
+    private fun requireOutputTreeParent(transaction: OutputTransaction, relativePath: String) {
+        val parentPath = relativePath.substringBeforeLast('/', "")
+        if (parentPath.isEmpty()) return
+        check(transaction.outputTreeNodes[parentPath] == OutputTreeNodeKind.DIRECTORY) {
+            "Explorer Action output tree parent directory does not exist"
+        }
+    }
+
+    private fun resolveOutputTreePath(transaction: OutputTransaction, relativePath: String): File {
+        val unresolved = File(
+            transaction.target,
+            relativePath.replace('/', File.separatorChar),
+        ).absoluteFile
+        val parentPath = unresolved.parentFile?.canonicalFile
+            ?: throw IllegalArgumentException("Explorer Action output tree path has no parent")
+        val resolved = File(parentPath, unresolved.name)
+        require(isWithinRoot(transaction.target, resolved) && resolved != transaction.target) {
+            "Explorer Action output tree path escapes its root"
+        }
+        return resolved
+    }
+
+    private fun markOutputTreeWriting(transaction: OutputTransaction) {
+        if (transaction.state == OutputState.TREE_WRITING) return
+        transaction.state = OutputState.TREE_WRITING
+        val record = requireNotNull(transaction.outputTreeRecord)
+        val updated = record.copy(
+            state = ExplorerActionHostSessionValues.OUTPUT_STATE_WRITING,
+            updatedAtMillis = clock(),
+        )
+        outputTreeStore.write(updated)
+        transaction.outputTreeRecord = updated
+    }
+
     private fun reserveOutputTarget(displayName: String, conflictPolicy: Int): File {
         return synchronized(RESERVATION_LOCK) {
             val target = when (conflictPolicy) {
@@ -362,6 +821,57 @@ internal class ExplorerActionHostSession private constructor(
             require(target.parentFile == parent) { "Explorer Action output escapes its parent" }
             check(RESERVED_OUTPUT_PATHS.add(target.path)) { "Explorer Action output is already reserved" }
             target
+        }
+    }
+
+    private fun reserveOutputTreeTarget(displayName: String, conflictPolicy: Int): File {
+        return synchronized(RESERVATION_LOCK) {
+            fun existingCollisionKeys(): Set<String> = parent.listFiles()
+                ?.mapTo(HashSet()) { outputTreeCollisionKey(it.name) }
+                ?: throw IOException("Explorer Action parent directory cannot be inspected")
+
+            fun reserve(candidateName: String): File? {
+                val candidate = File(parent, candidateName).canonicalFile
+                if (candidate.parentFile != parent || candidate.path in RESERVED_OUTPUT_PATHS) return null
+                if (outputTreeCollisionKey(candidateName) in existingCollisionKeys()) return null
+                if (!candidate.mkdir()) return null
+                val equivalentSibling = parent.listFiles()
+                    .orEmpty()
+                    .any { sibling ->
+                        sibling != candidate &&
+                            outputTreeCollisionKey(sibling.name) == outputTreeCollisionKey(candidate.name)
+                    }
+                if (equivalentSibling) {
+                    candidate.delete()
+                    return null
+                }
+                check(RESERVED_OUTPUT_PATHS.add(candidate.path)) {
+                    "Explorer Action output tree is already reserved"
+                }
+                return candidate
+            }
+
+            when (conflictPolicy) {
+                ExplorerActionHostSessionValues.OUTPUT_CONFLICT_FAIL ->
+                    reserve(displayName)
+                        ?: throw IllegalArgumentException("Explorer Action output already exists")
+                ExplorerActionHostSessionValues.OUTPUT_CONFLICT_AUTO_RENAME -> {
+                    reserve(displayName)?.let { return@synchronized it }
+                    for (index in 2..MAX_AUTO_RENAME_ATTEMPTS) {
+                        val suffix = " ($index)"
+                        val maximumStemLength =
+                            ExplorerActionProtocol.MAX_OUTPUT_DISPLAY_NAME_LENGTH - suffix.length
+                        if (maximumStemLength < 1) break
+                        reserve(displayName.take(maximumStemLength) + suffix)?.let {
+                            return@synchronized it
+                        }
+                    }
+                    throw IOException("Explorer Action could not choose an available output directory")
+                }
+                else -> throw IllegalArgumentException(
+                    "Explorer Action output conflict policy is invalid",
+                )
+            }
         }
     }
 
@@ -396,7 +906,31 @@ internal class ExplorerActionHostSession private constructor(
     }
 
     private fun cleanup(transaction: OutputTransaction) {
-        transaction.temp.delete()
+        if (transaction.mode == OutputMode.CREATE_TREE) {
+            val record = requireNotNull(transaction.outputTreeRecord)
+            check(outputTreeIdentityMatches(record, transaction.target)) {
+                "Explorer Action output tree changed before cleanup"
+            }
+            val deleted = safeDeleteTree(transaction.target)
+            if (!deleted) {
+                throw IOException("Explorer Action output tree could not be removed")
+            }
+            val aborted = record.copy(
+                state = ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED,
+                updatedAtMillis = clock(),
+                fileCount = transaction.outputTreeNodes.values.count {
+                    it == OutputTreeNodeKind.FILE
+                },
+                directoryCount = transaction.outputTreeNodes.values.count {
+                    it == OutputTreeNodeKind.DIRECTORY
+                },
+                outputBytes = transaction.outputTreeBytes.coerceAtLeast(0L),
+            )
+            transaction.outputTreeRecord = aborted
+            runCatching { outputTreeStore.write(aborted) }
+        } else {
+            transaction.temp.delete()
+        }
         releaseOutputTarget(transaction.target)
     }
 
@@ -437,6 +971,36 @@ internal class ExplorerActionHostSession private constructor(
         return value
     }
 
+    private fun normalizeOutputRelativePath(value: String): String {
+        require(value.length in 1..ExplorerActionProtocol.MAX_SESSION_RELATIVE_PATH_LENGTH) {
+            "Explorer Action output relative path length is invalid"
+        }
+        require(!value.startsWith('/') && !value.endsWith('/')) {
+            "Explorer Action output path is not relative"
+        }
+        val segments = value.split('/')
+        require(segments.isNotEmpty()) { "Explorer Action output path is empty" }
+        segments.forEach { segment ->
+            normalizeOutputName(segment)
+            require(!segment.startsWith(OUTPUT_TREE_MARKER_PREFIX)) {
+                "Explorer Action output path uses a reserved name"
+            }
+        }
+        return segments.joinToString("/")
+    }
+
+    private fun outputTreeCollisionKey(value: String): String = Normalizer.normalize(
+        value,
+        Normalizer.Form.NFC,
+    ).lowercase(Locale.ROOT)
+
+    private fun rememberTerminalOutput(transactionId: String, bundle: Bundle) {
+        terminalOutputs[transactionId] = Bundle(bundle)
+        while (terminalOutputs.size > ExplorerActionProtocol.MAX_OUTPUT_TRANSACTION_RESULTS) {
+            terminalOutputs.remove(terminalOutputs.keys.first())
+        }
+    }
+
     private fun joinRelativePath(parentPath: String, childName: String): String {
         val path = if (parentPath.isEmpty()) childName else "$parentPath/$childName"
         return normalizeRelativePath(path)
@@ -464,7 +1028,21 @@ internal class ExplorerActionHostSession private constructor(
         val mode: OutputMode,
         val replacementTarget: TargetState? = null,
         val expectedTargetIdentity: TargetIdentity? = null,
+        val outputTreeMarker: File? = null,
+        var outputTreeRecord: ExplorerActionOutputTreeRecord? = null,
+        val outputTreeNodes: LinkedHashMap<String, OutputTreeNodeKind> = LinkedHashMap(),
+        var outputTreeBytes: Long = -1L,
         var state: OutputState = OutputState.PREPARED,
+    )
+
+    private data class ClientLease(
+        val token: IBinder,
+        val deathRecipient: IBinder.DeathRecipient,
+    )
+
+    private data class CloseState(
+        val abandoned: List<OutputTransaction>,
+        val clientLease: ClientLease?,
     )
 
     private data class CommittedOutput(
@@ -504,20 +1082,70 @@ internal class ExplorerActionHostSession private constructor(
     private enum class OutputMode {
         CREATE,
         REPLACE,
+        CREATE_TREE,
+        ;
+
+        val protocolKind: Int
+            get() = when (this) {
+                CREATE -> ExplorerActionHostSessionValues.OUTPUT_KIND_FILE
+                REPLACE -> ExplorerActionHostSessionValues.OUTPUT_KIND_TARGET_REPLACEMENT
+                CREATE_TREE -> ExplorerActionHostSessionValues.OUTPUT_KIND_DIRECTORY_TREE
+            }
     }
 
     private enum class OutputState {
         PREPARED,
         OPENED,
         VERIFYING,
+        TREE_WRITING,
+        ;
+
+        val protocolState: Int
+            get() = when (this) {
+                PREPARED -> ExplorerActionHostSessionValues.OUTPUT_STATE_PREPARED
+                OPENED,
+                TREE_WRITING,
+                -> ExplorerActionHostSessionValues.OUTPUT_STATE_WRITING
+                VERIFYING -> ExplorerActionHostSessionValues.OUTPUT_STATE_VERIFYING
+            }
     }
+
+    private enum class OutputTreeNodeKind {
+        FILE,
+        DIRECTORY,
+    }
+
+    private data class OutputTreeStats(
+        val fileCount: Int,
+        val directoryCount: Int,
+        val bytes: Long,
+    )
+
+    private data class OutputTreeTraversal(
+        val file: File,
+        val relativePath: String,
+        val afterChildren: Boolean = false,
+    )
+
+    private data class OutputTreeDeletion(
+        val file: File,
+        val afterChildren: Boolean = false,
+    )
 
     companion object {
         private const val DIRECTORY_MIME_TYPE = "inode/directory"
         private const val SIZE_UNKNOWN = -1L
         private const val MAX_AUTO_RENAME_ATTEMPTS = 10_000
+        private const val OUTPUT_TREE_MARKER_PREFIX = ".autojs6-explorer-transaction-"
+        private const val OUTPUT_TREE_TERMINAL_RETENTION_MILLIS = 24L * 60L * 60L * 1000L
+        private val PROCESS_INSTANCE_ID = UUID.randomUUID().toString()
         private val RESERVATION_LOCK = Any()
         private val RESERVED_OUTPUT_PATHS = HashSet<String>()
+        private val ACTIVE_OUTPUT_TREE_IDS = HashSet<String>()
+        private val OUTPUT_TREE_RECOVERY_LOCK = Any()
+        private val CLIENT_DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
+            Thread(runnable, "ExplorerActionClientDeath").apply { isDaemon = true }
+        }
 
         fun create(
             context: Context,
@@ -528,23 +1156,152 @@ internal class ExplorerActionHostSession private constructor(
             allowReplaceTarget: Boolean = false,
             onOutputCommitted: (File) -> Unit = ::notifyCreated,
             onTargetReplaced: (File) -> Unit = ::notifyChanged,
+            clock: () -> Long = System::currentTimeMillis,
         ): ExplorerActionHostSession {
+            val canonicalParent = commonParent.canonicalFile
+            val store = ExplorerActionOutputTreeStore(context.applicationContext)
+            synchronized(OUTPUT_TREE_RECOVERY_LOCK) {
+                recoverDurableOutputTrees(store, clock())
+            }
             return ExplorerActionHostSession(
                 expectedUid = applicationUid(context.packageManager, pluginPackageName),
-                commonParent = commonParent,
+                commonParent = canonicalParent,
                 targets = targets,
                 allowCreateOutput = allowCreateOutput,
                 allowReplaceTarget = allowReplaceTarget,
                 onOutputCommitted = onOutputCommitted,
                 onTargetReplaced = onTargetReplaced,
+                outputTreeStore = store,
+                clock = clock,
             )
+        }
+
+        private fun recoverDurableOutputTrees(
+            store: ExplorerActionOutputTreeStore,
+            nowMillis: Long,
+        ) {
+            store.list().forEach { record ->
+                val age = if (nowMillis < record.updatedAtMillis) {
+                    Long.MAX_VALUE
+                } else {
+                    nowMillis - record.updatedAtMillis
+                }
+                val terminal = record.state == ExplorerActionHostSessionValues.OUTPUT_STATE_COMMITTED ||
+                    record.state == ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED
+                if (terminal) {
+                    if (age >= OUTPUT_TREE_TERMINAL_RETENTION_MILLIS) store.remove(record.id)
+                    return@forEach
+                }
+                val activeInThisProcess = synchronized(RESERVATION_LOCK) {
+                    record.id in ACTIVE_OUTPUT_TREE_IDS
+                }
+                if (activeInThisProcess) return@forEach
+
+                val parent = File(record.parentPath)
+                val target = File(record.targetPath)
+                val parentMatches = runCatching {
+                    val identity = TargetIdentity.capture(parent)
+                    identity.device == record.parentDevice && identity.inode == record.parentInode
+                }.getOrDefault(false)
+                if (!parentMatches) {
+                    store.write(
+                        record.copy(
+                            state = ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED,
+                            updatedAtMillis = nowMillis,
+                        ),
+                    )
+                    return@forEach
+                }
+                if (!target.exists()) {
+                    store.write(
+                        record.copy(
+                            state = ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED,
+                            updatedAtMillis = nowMillis,
+                        ),
+                    )
+                    return@forEach
+                }
+                if (!outputTreeIdentityMatches(record, target)) {
+                    store.write(
+                        record.copy(
+                            state = ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED,
+                            updatedAtMillis = nowMillis,
+                        ),
+                    )
+                    return@forEach
+                }
+                val marker = File(target, record.markerName)
+                if (!marker.exists()) {
+                    val terminalState = if (
+                        record.state == ExplorerActionHostSessionValues.OUTPUT_STATE_VERIFYING
+                    ) {
+                        ExplorerActionHostSessionValues.OUTPUT_STATE_COMMITTED
+                    } else {
+                        ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED
+                    }
+                    store.write(record.copy(state = terminalState, updatedAtMillis = nowMillis))
+                } else if (safeDeleteTree(target)) {
+                    store.write(
+                        record.copy(
+                            state = ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED,
+                            updatedAtMillis = nowMillis,
+                        ),
+                    )
+                }
+            }
+        }
+
+        private fun markOutputTreeActive(transactionId: String, active: Boolean) {
+            synchronized(RESERVATION_LOCK) {
+                if (active) {
+                    ACTIVE_OUTPUT_TREE_IDS += transactionId
+                } else {
+                    ACTIVE_OUTPUT_TREE_IDS -= transactionId
+                }
+            }
+        }
+
+        private fun outputTreeIdentityMatches(
+            record: ExplorerActionOutputTreeRecord,
+            target: File,
+        ): Boolean = runCatching {
+            val identity = TargetIdentity.capture(target)
+            identity.device == record.targetDevice && identity.inode == record.targetInode
+        }.getOrDefault(false)
+
+        private fun safeDeleteTree(root: File): Boolean {
+            val rootStat = try {
+                Os.lstat(root.path)
+            } catch (error: ErrnoException) {
+                return error.errno == OsConstants.ENOENT
+            }
+            if (!OsConstants.S_ISDIR(rootStat.st_mode) || OsConstants.S_ISLNK(rootStat.st_mode)) {
+                return false
+            }
+
+            val pending = ArrayDeque<OutputTreeDeletion>()
+            pending.addLast(OutputTreeDeletion(root))
+            while (pending.isNotEmpty()) {
+                val current = pending.removeLast()
+                if (current.afterChildren) {
+                    if (!current.file.delete()) return false
+                    continue
+                }
+                val stat = runCatching { Os.lstat(current.file.path) }.getOrNull() ?: return false
+                if (OsConstants.S_ISDIR(stat.st_mode) && !OsConstants.S_ISLNK(stat.st_mode)) {
+                    val children = current.file.listFiles() ?: return false
+                    pending.addLast(current.copy(afterChildren = true))
+                    children.forEach { child -> pending.addLast(OutputTreeDeletion(child)) }
+                } else if (!current.file.delete()) {
+                    return false
+                }
+            }
+            return true
         }
 
         private fun notifyCreated(file: File) {
             val notify = {
-                Explorers.workspace().notifyItemCreated(
-                    ExplorerFileItem(file, ExplorerDirPage(file.parentFile, null)),
-                )
+                Explorers.workspace().notifyItemCreated(explorerItemForCreatedOutput(file))
             }
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 notify()

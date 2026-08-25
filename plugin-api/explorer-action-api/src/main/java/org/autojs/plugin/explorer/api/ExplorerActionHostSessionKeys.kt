@@ -20,4 +20,10 @@ object ExplorerActionHostSessionKeys {
     const val OUTPUT_TRANSACTION_ID = "outputTransactionId"
     const val OUTPUT_DISPLAY_NAME = "outputDisplayName"
     const val OUTPUT_DISPLAY_PATH = "outputDisplayPath"
+    const val OUTPUT_KIND = "outputKind"
+    const val OUTPUT_STATE = "outputState"
+    const val OUTPUTS = "outputs"
+    const val OUTPUT_FILE_COUNT = "outputFileCount"
+    const val OUTPUT_DIRECTORY_COUNT = "outputDirectoryCount"
+    const val OUTPUT_BYTES = "outputBytes"
 }

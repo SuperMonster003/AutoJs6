@@ -1,6 +1,7 @@
 package org.autojs.plugin.explorer.api;
 
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -34,4 +35,26 @@ interface IExplorerActionHostSession {
      * output open, verify, commit and abort methods drive the rest of the transaction.
      */
     Bundle prepareTargetReplacement(String targetId);
+
+    /**
+     * v9. Atomically reserves a new sibling directory name and creates a host-owned output tree.
+     * Child paths are written only through the methods below; existing sibling content is never
+     * exposed or reused.
+     */
+    Bundle prepareOutputTree(String displayName, int conflictPolicy);
+
+    /** v9. Creates one new directory below a prepared output tree. */
+    void createOutputDirectory(String transactionId, String relativePath);
+
+    /** v9. Creates and opens one new file below a prepared output tree. */
+    ParcelFileDescriptor openOutputFile(String transactionId, String relativePath);
+
+    /** v9. Returns the current or terminal state of one output transaction. */
+    Bundle queryOutput(String transactionId);
+
+    /** v9. Lists bounded active and recently completed output transactions for recovery. */
+    Bundle listOutputs();
+
+    /** v9. Attaches a plugin-process lifetime token so abandoned outputs can be rolled back. */
+    void attachClient(IBinder clientToken);
 }

@@ -99,6 +99,7 @@ internal object ExplorerActionLauncher {
             (
                 action.descriptor.accessMode == ExplorerActionValues.ACCESS_CREATE_IN_PARENT ||
                     action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET ||
+                    action.descriptor.accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET ||
                     targets.size > 1 ||
                     targets.any { target -> target.kind == ExplorerActionValues.TARGET_DIRECTORY }
                 )
@@ -111,9 +112,11 @@ internal object ExplorerActionLauncher {
                     ExplorerActionHostSessionTarget(target.id, target.file)
                 },
                 allowCreateOutput =
-                    action.descriptor.accessMode == ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+                    action.descriptor.accessMode == ExplorerActionValues.ACCESS_CREATE_IN_PARENT ||
+                        action.descriptor.accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET,
                 allowReplaceTarget =
-                    action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET,
+                    action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET ||
+                        action.descriptor.accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET,
             )
         } else {
             null

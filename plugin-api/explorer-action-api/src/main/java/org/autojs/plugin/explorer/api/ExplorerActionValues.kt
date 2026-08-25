@@ -12,6 +12,8 @@ object ExplorerActionValues {
     const val ACCESS_CREATE_IN_PARENT = 2
     /** v8. Rebuilds one selected file through a host-owned staging and atomic replacement. */
     const val ACCESS_REPLACE_TARGET = 3
+    /** v9. Combines target replacement with controlled sibling creation for one selected file. */
+    const val ACCESS_MANAGE_TARGET = 4
 
     const val PLACEMENT_OVERFLOW = 1
     const val PLACEMENT_PRIMARY = 2

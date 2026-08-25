@@ -218,7 +218,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` File manager Explorer Action protocol v4 supports ordered file/directory/mixed targets and same-parent multi-selection actions, exposes plugin compression in directory menus and a five-cell vertical selection bar, and provides request-scoped host file sessions for controlled reads and atomic sibling output
 * `Feature` File manager Explorer Action protocol v5 lets trusted single-file read-only plugins present paginated archive directories in the native Explorer list, path bar, theme, and Back stack through UID-pinned Binder sessions
 * `Feature` File manager Explorer Action protocol v6 previews readable document, image, audio, and video entries through the existing host viewers
-* `Feature` File manager Explorer Action protocols v7 and v8 add mandatory read-back verification of pending output and atomic target-replacement transactions with original-file identity checks and automatic Explorer refresh, enabling archive plugins to edit a selected ZIP without storage permission
+* `Feature` File manager Explorer Action protocols v7, v8, and v9 add mandatory read-back verification of pending file output, atomic target replacement, and host-owned directory-output transactions with client-death and restart recovery, enabling archive plugins to edit a selected ZIP and safely extract a verified tree beside it without storage permission
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting
@@ -337,7 +337,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
 * `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Fix` Splash screen background did not extend into the short-edge display cutout area
-* `Fix` File manager did not refresh automatically after an Explorer Action plugin committed a new sibling output through the host session
+* `Fix` File manager could fail to refresh a newly committed Explorer Action sibling output or could display a committed output directory as a file
 * `Improvement` TypeScript compilation now emits privacy-safe per-request observations for preparation, cache lookup, compiler binding/prewarm, remote compilation, output handling, total latency, archive size, source count, and host heap change, and breaks compiler time down into before-ingress, ingress, inter-phase, parse, semantic, emit, and after-emit intervals; malformed or out-of-order progress callbacks are ignored and these observations do not impose performance thresholds
 * `Improvement` Improved argument compatibility for KeyCode methods _[`issue #492`](http://issues.autojs6.com/492)_
 * `Improvement` KeyCode methods support sending key code commands with Shizuku permission
