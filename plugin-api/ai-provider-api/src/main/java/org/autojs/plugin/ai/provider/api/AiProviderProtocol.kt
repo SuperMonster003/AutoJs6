@@ -10,21 +10,15 @@ object AiProviderProtocol {
     const val ACTION_PROVIDER = "org.autojs.plugin.AI_PROVIDER"
     const val PLUGIN_PERMISSION = AiCommonProtocol.PLUGIN_PERMISSION
 
-    /** Protocol 1.2 adds an explicitly negotiated persistent Conversation lifecycle. */
-    val PROTOCOL_V1_2 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 2)
-
-    /** Protocol 1.3 adds explicit inference backend profiles and device availability reporting. */
-    val PROTOCOL_V1_3 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 3)
+    /** Protocol 2.0 exposes the unified local and remote target catalog. */
+    val PROTOCOL_V2 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 0)
 
     val HOST_PROTOCOL_RANGE = AiProtocolRange(
-        PROTOCOL_V1_2,
-        PROTOCOL_V1_3,
+        PROTOCOL_V2,
+        PROTOCOL_V2,
     )
 
     const val SCHEMA_CAPABILITIES = 0x4150_0001
-    const val SCHEMA_MODEL_LIST_REQUEST = 0x4150_0002
-    const val SCHEMA_MODEL_INFO = 0x4150_0003
-    const val SCHEMA_MODEL_PAGE = 0x4150_0004
     const val SCHEMA_CONTENT_PART = 0x4150_0005
     const val SCHEMA_MESSAGE = 0x4150_0006
     const val SCHEMA_GENERATION_OPTIONS = 0x4150_0007
@@ -39,6 +33,9 @@ object AiProviderProtocol {
     const val SCHEMA_REASONING_METADATA = 0x4150_0010
     const val SCHEMA_COMPLETION_RESULT = 0x4150_0011
     const val SCHEMA_BACKEND_PROFILE_INFO = 0x4150_0012
+    const val SCHEMA_TARGET_LIST_REQUEST = 0x4150_0013
+    const val SCHEMA_TARGET_INFO = 0x4150_0014
+    const val SCHEMA_TARGET_PAGE = 0x4150_0015
 }
 
 object AiProviderBackendProfile {
@@ -65,6 +62,31 @@ object AiProviderBackendUnavailableReason {
         ABI_UNSUPPORTED,
         OPENCL_LIBRARY_UNAVAILABLE,
         NPU_RUNTIME_NOT_PACKAGED,
+    )
+}
+
+object AiTargetAvailability {
+    const val AVAILABLE = "available"
+    const val UNAVAILABLE = "unavailable"
+
+    val VALUES: Set<String> = immutableSetOf(AVAILABLE, UNAVAILABLE)
+}
+
+object AiTargetControlId {
+    const val MAXIMUM_OUTPUT_TOKENS = "maximum-output-tokens"
+    const val TEMPERATURE = "temperature"
+    const val TOP_K = "top-k"
+    const val TOP_P = "top-p"
+    const val RESPONSE_JSON_SCHEMA = "response-json-schema"
+    const val BACKEND_PROFILE = "backend-profile"
+
+    val VALUES: Set<String> = immutableSetOf(
+        MAXIMUM_OUTPUT_TOKENS,
+        TEMPERATURE,
+        TOP_K,
+        TOP_P,
+        RESPONSE_JSON_SCHEMA,
+        BACKEND_PROFILE,
     )
 }
 
@@ -141,11 +163,11 @@ object AiProviderLimits {
     const val MAX_JSON_NESTING_DEPTH = 32
     const val MAX_JSON_NODES = 10_000
     const val MAX_JSON_STRING_BYTES = 64 * 1024
-    const val MAX_MODELS_PER_PAGE = 100
-    const val MAX_MODEL_PAGES = 100
-    const val MAX_MODEL_PAGE_TOKEN_BYTES = 4 * 1024
-    const val MAX_MODEL_PAGE_ENVELOPE_BYTES = 128 * 1024
-    const val MAX_MODEL_PAGE_TOKEN_LEDGER_ENTRIES = 4 * 1024
+    const val MAX_TARGETS_PER_PAGE = 100
+    const val MAX_TARGET_PAGES = 100
+    const val MAX_TARGET_PAGE_TOKEN_BYTES = 4 * 1024
+    const val MAX_TARGET_PAGE_ENVELOPE_BYTES = 128 * 1024
+    const val MAX_TARGET_PAGE_TOKEN_LEDGER_ENTRIES = 4 * 1024
     const val MAX_OUTPUT_TOKENS = 2_147_483_647L
     const val MIN_TIMEOUT_MILLIS = 1_000L
     const val MAX_TIMEOUT_MILLIS = 10L * 60L * 1_000L

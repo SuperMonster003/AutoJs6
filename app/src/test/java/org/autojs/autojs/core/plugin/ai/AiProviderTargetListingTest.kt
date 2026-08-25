@@ -5,10 +5,10 @@ import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiError
 import org.autojs.plugin.ai.common.api.AiErrorCode
 import org.autojs.plugin.ai.provider.api.AiBackendProfileInfo
-import org.autojs.plugin.ai.provider.api.AiModelInfo
-import org.autojs.plugin.ai.provider.api.AiModelListRequest
-import org.autojs.plugin.ai.provider.api.AiModelPage
-import org.autojs.plugin.ai.provider.api.AiModelPageTokenLedger
+import org.autojs.plugin.ai.provider.api.AiTargetInfo
+import org.autojs.plugin.ai.provider.api.AiTargetListRequest
+import org.autojs.plugin.ai.provider.api.AiTargetPage
+import org.autojs.plugin.ai.provider.api.AiTargetPageTokenLedger
 import org.autojs.plugin.ai.provider.api.AiProviderBackendAvailability
 import org.autojs.plugin.ai.provider.api.AiProviderBackendProfile
 import org.autojs.plugin.ai.provider.api.AiProviderBackendUnavailableReason
@@ -27,7 +27,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class AiProviderModelListingTest {
+class AiProviderTargetListingTest {
 
     @Test
     fun defaultOffTerminatesWithoutProducingADispatch() {
@@ -35,9 +35,9 @@ class AiProviderModelListingTest {
 
         val decision = terminal(policy.start())
 
-        assertSame(AiProviderModelListingOutcome.Disabled, decision.outcome)
-        assertSame(AiProviderModelListingDecision.Ignored, policy.start())
-        assertSame(AiProviderModelListingDecision.Ignored, policy.timeout())
+        assertSame(AiProviderTargetListingOutcome.Disabled, decision.outcome)
+        assertSame(AiProviderTargetListingDecision.Ignored, policy.start())
+        assertSame(AiProviderTargetListingDecision.Ignored, policy.timeout())
     }
 
     @Test
@@ -45,7 +45,7 @@ class AiProviderModelListingTest {
         val pinned = pinned()
         val policy = policy(pinned = pinned)
         val dispatch = dispatch(policy.start())
-        val request = AiProviderCodec.decodeModelListRequest(dispatch.copyRequestEnvelope())
+        val request = AiProviderCodec.decodeTargetListRequest(dispatch.copyRequestEnvelope())
         val callerCopy = dispatch.copyRequestEnvelope()
         callerCopy.fill(0)
 
@@ -55,20 +55,20 @@ class AiProviderModelListingTest {
         assertFalse(dispatch.isContinuation)
         assertEquals(
             request,
-            AiProviderCodec.decodeModelListRequest(dispatch.copyRequestEnvelope()),
+            AiProviderCodec.decodeTargetListRequest(dispatch.copyRequestEnvelope()),
         )
 
         val completed = completed(
             policy.acceptPage(
                 sequence = dispatch.sequence,
                 callingUid = PINNED_UID,
-                envelope = page(models = listOf(model(MODEL_ONE))),
+                envelope = page(targets = listOf(target(MODEL_ONE))),
             ),
         )
 
         assertEquals(pinned, completed.catalog.pinnedProvider)
-        assertEquals(LISTING_GENERATION, completed.catalog.listingGeneration)
-        assertEquals(listOf(MODEL_ONE), completed.catalog.models.map(AiModelInfo::modelId))
+        assertEquals(LISTING_GENERATION, completed.catalog.catalogGeneration)
+        assertEquals(listOf(MODEL_ONE), completed.catalog.targets.map(AiTargetInfo::modelId))
     }
 
     @Test
@@ -79,10 +79,10 @@ class AiProviderModelListingTest {
         val secondDecision = policy.acceptPage(
             first.sequence,
             PINNED_UID,
-            page(models = listOf(model(MODEL_ONE)), next = SECRET_TOKEN),
+            page(targets = listOf(target(MODEL_ONE)), next = SECRET_TOKEN),
         )
         val second = dispatch(secondDecision)
-        val secondRequest: AiModelListRequest = AiProviderCodec.decodeModelListRequest(second.copyRequestEnvelope())
+        val secondRequest: AiTargetListRequest = AiProviderCodec.decodeTargetListRequest(second.copyRequestEnvelope())
 
         assertTrue(second.isContinuation)
         assertEquals(SECRET_TOKEN, secondRequest.pageToken)
@@ -93,10 +93,10 @@ class AiProviderModelListingTest {
             policy.acceptPage(
                 second.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_TWO))),
+                page(targets = listOf(target(MODEL_TWO))),
             ),
         )
-        assertEquals(listOf(MODEL_ONE, MODEL_TWO), completed.catalog.models.map(AiModelInfo::modelId))
+        assertEquals(listOf(MODEL_ONE, MODEL_TWO), completed.catalog.targets.map(AiTargetInfo::modelId))
     }
 
     @Test
@@ -105,14 +105,14 @@ class AiProviderModelListingTest {
         val pagePolicy = policy()
         val pageDispatch = dispatch(pagePolicy.start())
         assertFailure(
-            AiProviderModelListingFailure.CALLBACK_UID_MISMATCH,
+            AiProviderTargetListingFailure.CALLBACK_UID_MISMATCH,
             pagePolicy.acceptPage(pageDispatch.sequence, PINNED_UID + 1, malformed),
         )
 
         val errorPolicy = policy()
         val errorDispatch = dispatch(errorPolicy.start())
         assertFailure(
-            AiProviderModelListingFailure.CALLBACK_UID_MISMATCH,
+            AiProviderTargetListingFailure.CALLBACK_UID_MISMATCH,
             errorPolicy.acceptFailed(errorDispatch.sequence, PINNED_UID + 1, malformed),
         )
     }
@@ -120,11 +120,11 @@ class AiProviderModelListingTest {
     @Test
     fun nullEmptyOversizeAndMalformedPagesAreRejectedPrecisely() {
         val cases = listOf(
-            null to AiProviderModelListingFailure.PAGE_MISSING,
-            byteArrayOf() to AiProviderModelListingFailure.PAGE_EMPTY,
-            ByteArray(AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES + 1) to
-                AiProviderModelListingFailure.PAGE_TOO_LARGE,
-            byteArrayOf(1, 2, 3) to AiProviderModelListingFailure.PAGE_INVALID,
+            null to AiProviderTargetListingFailure.PAGE_MISSING,
+            byteArrayOf() to AiProviderTargetListingFailure.PAGE_EMPTY,
+            ByteArray(AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES + 1) to
+                AiProviderTargetListingFailure.PAGE_TOO_LARGE,
+            byteArrayOf(1, 2, 3) to AiProviderTargetListingFailure.PAGE_INVALID,
         )
 
         cases.forEach { (envelope, expected) ->
@@ -137,11 +137,11 @@ class AiProviderModelListingTest {
     @Test
     fun nullEmptyOversizeAndMalformedErrorsAreRejectedPrecisely() {
         val cases = listOf(
-            null to AiProviderModelListingFailure.ERROR_MISSING,
-            byteArrayOf() to AiProviderModelListingFailure.ERROR_EMPTY,
+            null to AiProviderTargetListingFailure.ERROR_MISSING,
+            byteArrayOf() to AiProviderTargetListingFailure.ERROR_EMPTY,
             ByteArray(AiCommonLimits.MAX_BINDER_ENVELOPE_BYTES + 1) to
-                AiProviderModelListingFailure.ERROR_TOO_LARGE,
-            byteArrayOf(1, 2, 3) to AiProviderModelListingFailure.ERROR_INVALID,
+                AiProviderTargetListingFailure.ERROR_TOO_LARGE,
+            byteArrayOf(1, 2, 3) to AiProviderTargetListingFailure.ERROR_INVALID,
         )
 
         cases.forEach { (envelope, expected) ->
@@ -168,7 +168,7 @@ class AiProviderModelListingTest {
                 AiCommonCodec.encodeError(error),
             ),
         )
-        val failed = decision.outcome as AiProviderModelListingOutcome.ProviderFailed
+        val failed = decision.outcome as AiProviderTargetListingOutcome.ProviderFailed
 
         assertEquals(error.code, failed.error.code)
         assertEquals(error.retryDisposition, failed.error.retryDisposition)
@@ -177,7 +177,7 @@ class AiProviderModelListingTest {
         assertFalse(decision.toString().contains(SECRET_PROVIDER_CODE))
         assertFalse(failed.error.toString().contains(SECRET_PROVIDER_CODE))
         assertSame(
-            AiProviderModelListingDecision.Ignored,
+            AiProviderTargetListingDecision.Ignored,
             policy.acceptPage(dispatch.sequence, PINNED_UID, page()),
         )
     }
@@ -190,17 +190,17 @@ class AiProviderModelListingTest {
             generationPolicy.acceptPage(
                 generationFirst.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_ONE)), next = "generation-token"),
+                page(targets = listOf(target(MODEL_ONE)), next = "generation-token"),
             ),
         )
         assertFailure(
-            AiProviderModelListingFailure.PAGINATION_INVALID,
+            AiProviderTargetListingFailure.PAGINATION_INVALID,
             generationPolicy.acceptPage(
                 generationSecond.sequence,
                 PINNED_UID,
                 page(
                     generation = "changed-generation",
-                    models = listOf(model(MODEL_TWO)),
+                    targets = listOf(target(MODEL_TWO)),
                 ),
             ),
         )
@@ -211,15 +211,15 @@ class AiProviderModelListingTest {
             cyclePolicy.acceptPage(
                 cycleFirst.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_ONE)), next = "cycle-token"),
+                page(targets = listOf(target(MODEL_ONE)), next = "cycle-token"),
             ),
         )
         assertFailure(
-            AiProviderModelListingFailure.PAGINATION_INVALID,
+            AiProviderTargetListingFailure.PAGINATION_INVALID,
             cyclePolicy.acceptPage(
                 cycleSecond.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_TWO)), next = "cycle-token"),
+                page(targets = listOf(target(MODEL_TWO)), next = "cycle-token"),
             ),
         )
 
@@ -229,21 +229,21 @@ class AiProviderModelListingTest {
             duplicatePolicy.acceptPage(
                 duplicateFirst.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_ONE)), next = "duplicate-token"),
+                page(targets = listOf(target(MODEL_ONE)), next = "duplicate-token"),
             ),
         )
         assertFailure(
-            AiProviderModelListingFailure.PAGINATION_INVALID,
+            AiProviderTargetListingFailure.PAGINATION_INVALID,
             duplicatePolicy.acceptPage(
                 duplicateSecond.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_ONE))),
+                page(targets = listOf(target(MODEL_ONE))),
             ),
         )
     }
 
     @Test
-    fun modelCapabilitiesCannotExceedThePinnedNegotiation() {
+    fun targetCapabilitiesCannotExceedThePinnedNegotiation() {
         val pinned = pinned(
             capabilities = AiProviderHostTestFixtures.capabilities(supportsTools = false),
         )
@@ -251,13 +251,13 @@ class AiProviderModelListingTest {
         val dispatch = dispatch(policy.start())
 
         assertFailure(
-            AiProviderModelListingFailure.MODEL_CAPABILITY_MISMATCH,
+            AiProviderTargetListingFailure.TARGET_DESCRIPTOR_MISMATCH,
             policy.acceptPage(
                 dispatch.sequence,
                 PINNED_UID,
                 page(
-                    models = listOf(
-                        model(
+                    targets = listOf(
+                        target(
                             modelId = MODEL_ONE,
                             capabilities = listOf(AiProviderCapabilityId.TOOLS),
                         ),
@@ -271,13 +271,13 @@ class AiProviderModelListingTest {
     fun maximumPageCountAndTokenLedgerCapacityAreFailClosed() {
         val exactlyBounded = policy(pageSize = 1)
         var exactPending = dispatch(exactlyBounded.start())
-        repeat(AiProviderLimits.MAX_MODEL_PAGES - 1) { index ->
+        repeat(AiProviderLimits.MAX_TARGET_PAGES - 1) { index ->
             exactPending = dispatch(
                 exactlyBounded.acceptPage(
                     exactPending.sequence,
                     PINNED_UID,
                     page(
-                        models = listOf(model("fixture.model-${index + 1}")),
+                        targets = listOf(target("fixture.model-${index + 1}")),
                         next = "page-token-${index + 2}",
                     ),
                 ),
@@ -287,32 +287,32 @@ class AiProviderModelListingTest {
             exactlyBounded.acceptPage(
                 exactPending.sequence,
                 PINNED_UID,
-                page(models = listOf(model("fixture.model-${AiProviderLimits.MAX_MODEL_PAGES}"))),
+                page(targets = listOf(target("fixture.model-${AiProviderLimits.MAX_TARGET_PAGES}"))),
             ),
         ).catalog
-        assertEquals(AiProviderLimits.MAX_MODEL_PAGES, exactCatalog.models.size)
+        assertEquals(AiProviderLimits.MAX_TARGET_PAGES, exactCatalog.targets.size)
 
         val overflowing = policy(pageSize = 1)
         var overflowPending = dispatch(overflowing.start())
-        repeat(AiProviderLimits.MAX_MODEL_PAGES - 1) { index ->
+        repeat(AiProviderLimits.MAX_TARGET_PAGES - 1) { index ->
             overflowPending = dispatch(
                 overflowing.acceptPage(
                     overflowPending.sequence,
                     PINNED_UID,
                     page(
-                        models = listOf(model("fixture.overflow-model-${index + 1}")),
+                        targets = listOf(target("fixture.overflow-model-${index + 1}")),
                         next = "overflow-token-${index + 2}",
                     ),
                 ),
             )
         }
         assertFailure(
-            AiProviderModelListingFailure.PAGINATION_INVALID,
+            AiProviderTargetListingFailure.PAGINATION_INVALID,
             overflowing.acceptPage(
                 overflowPending.sequence,
                 PINNED_UID,
                 page(
-                    models = listOf(model("fixture.overflow-model-${AiProviderLimits.MAX_MODEL_PAGES}")),
+                    targets = listOf(target("fixture.overflow-model-${AiProviderLimits.MAX_TARGET_PAGES}")),
                     next = "must-not-be-dispatched",
                 ),
             ),
@@ -320,32 +320,32 @@ class AiProviderModelListingTest {
 
         val exhausted = policy(
             pageSize = 1,
-            tokenLedger = AiModelPageTokenLedger(maximumConsumedTokens = 1),
+            tokenLedger = AiTargetPageTokenLedger(maximumConsumedTokens = 1),
         )
         val first = dispatch(exhausted.start())
         val second = dispatch(
             exhausted.acceptPage(
                 first.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_ONE)), next = "ledger-token-1"),
+                page(targets = listOf(target(MODEL_ONE)), next = "ledger-token-1"),
             ),
         )
         assertFailure(
-            AiProviderModelListingFailure.PAGINATION_INVALID,
+            AiProviderTargetListingFailure.PAGINATION_INVALID,
             exhausted.acceptPage(
                 second.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_TWO)), next = "ledger-token-2"),
+                page(targets = listOf(target(MODEL_TWO)), next = "ledger-token-2"),
             ),
         )
     }
 
     @Test
     fun sharedDispatchLedgerRejectsReissuedTokenAfterAnyFirstAttemptTerminal() {
-        val terminalizers = listOf<(AiProviderModelListingPolicy, AiProviderModelListingDispatch) -> Unit>(
+        val terminalizers = listOf<(AiProviderTargetListingPolicy, AiProviderTargetListingDispatch) -> Unit>(
             { firstPolicy, _ ->
                 assertSame(
-                    AiProviderModelListingOutcome.TimedOut,
+                    AiProviderTargetListingOutcome.TimedOut,
                     terminal(firstPolicy.timeout()).outcome,
                 )
             },
@@ -357,11 +357,11 @@ class AiProviderModelListingTest {
                         AiCommonCodec.encodeError(AiError(code = AiErrorCode.INVALID_REQUEST)),
                     ),
                 ).outcome
-                assertTrue(failed is AiProviderModelListingOutcome.ProviderFailed)
+                assertTrue(failed is AiProviderTargetListingOutcome.ProviderFailed)
             },
             { firstPolicy, continuation ->
                 assertFailure(
-                    AiProviderModelListingFailure.CALLBACK_UID_MISMATCH,
+                    AiProviderTargetListingFailure.CALLBACK_UID_MISMATCH,
                     firstPolicy.acceptPage(
                         continuation.sequence,
                         PINNED_UID + 1,
@@ -372,14 +372,14 @@ class AiProviderModelListingTest {
         )
 
         terminalizers.forEach { terminateFirstAttempt ->
-            val sharedLedger = AiModelPageTokenLedger()
+            val sharedLedger = AiTargetPageTokenLedger()
             val firstPolicy = policy(pageSize = 1, tokenLedger = sharedLedger)
             val firstDispatch = dispatch(firstPolicy.start())
             val continuation = dispatch(
                 firstPolicy.acceptPage(
                     firstDispatch.sequence,
                     PINNED_UID,
-                    page(models = listOf(model(MODEL_ONE)), next = SHARED_TOKEN),
+                    page(targets = listOf(target(MODEL_ONE)), next = SHARED_TOKEN),
                 ),
             )
             terminateFirstAttempt(firstPolicy, continuation)
@@ -387,11 +387,11 @@ class AiProviderModelListingTest {
             val secondPolicy = policy(pageSize = 1, tokenLedger = sharedLedger)
             val secondDispatch = dispatch(secondPolicy.start())
             assertFailure(
-                AiProviderModelListingFailure.PAGINATION_INVALID,
+                AiProviderTargetListingFailure.PAGINATION_INVALID,
                 secondPolicy.acceptPage(
                     secondDispatch.sequence,
                     PINNED_UID,
-                    page(models = listOf(model(MODEL_ONE)), next = SHARED_TOKEN),
+                    page(targets = listOf(target(MODEL_ONE)), next = SHARED_TOKEN),
                 ),
             )
         }
@@ -402,7 +402,7 @@ class AiProviderModelListingTest {
         val stalePolicy = policy()
         val staleDispatch = dispatch(stalePolicy.start())
         assertFailure(
-            AiProviderModelListingFailure.STALE_CALLBACK,
+            AiProviderTargetListingFailure.STALE_CALLBACK,
             stalePolicy.acceptPage(staleDispatch.sequence + 1L, PINNED_UID, byteArrayOf(1, 2, 3)),
         )
 
@@ -412,15 +412,15 @@ class AiProviderModelListingTest {
             duplicatePolicy.acceptPage(
                 first.sequence,
                 PINNED_UID,
-                page(models = listOf(model(MODEL_ONE)), next = "next-token"),
+                page(targets = listOf(target(MODEL_ONE)), next = "next-token"),
             ),
         )
         assertFailure(
-            AiProviderModelListingFailure.STALE_CALLBACK,
+            AiProviderTargetListingFailure.STALE_CALLBACK,
             duplicatePolicy.acceptPage(first.sequence, PINNED_UID, page()),
         )
         assertSame(
-            AiProviderModelListingDecision.Ignored,
+            AiProviderTargetListingDecision.Ignored,
             duplicatePolicy.acceptPage(second.sequence, PINNED_UID, page()),
         )
 
@@ -428,11 +428,11 @@ class AiProviderModelListingTest {
         val completedDispatch = dispatch(completedPolicy.start())
         completed(completedPolicy.acceptPage(completedDispatch.sequence, PINNED_UID, page()))
         assertSame(
-            AiProviderModelListingDecision.Ignored,
+            AiProviderTargetListingDecision.Ignored,
             completedPolicy.acceptPage(completedDispatch.sequence, PINNED_UID, page()),
         )
         assertSame(
-            AiProviderModelListingDecision.Ignored,
+            AiProviderTargetListingDecision.Ignored,
             completedPolicy.acceptFailed(completedDispatch.sequence, PINNED_UID, byteArrayOf(1)),
         )
     }
@@ -441,23 +441,23 @@ class AiProviderModelListingTest {
     fun cancelTimeoutAndDeathEachOwnTheTerminalExactlyOnce() {
         val cancelled = policy()
         val cancelledDispatch = dispatch(cancelled.start())
-        assertSame(AiProviderModelListingOutcome.Cancelled, terminal(cancelled.cancel()).outcome)
-        assertSame(AiProviderModelListingDecision.Ignored, cancelled.timeout())
-        assertSame(AiProviderModelListingDecision.Ignored, cancelled.binderDied())
+        assertSame(AiProviderTargetListingOutcome.Cancelled, terminal(cancelled.cancel()).outcome)
+        assertSame(AiProviderTargetListingDecision.Ignored, cancelled.timeout())
+        assertSame(AiProviderTargetListingDecision.Ignored, cancelled.binderDied())
         assertSame(
-            AiProviderModelListingDecision.Ignored,
+            AiProviderTargetListingDecision.Ignored,
             cancelled.acceptPage(cancelledDispatch.sequence, PINNED_UID, page()),
         )
 
         val timedOut = policy()
         dispatch(timedOut.start())
-        assertSame(AiProviderModelListingOutcome.TimedOut, terminal(timedOut.timeout()).outcome)
-        assertSame(AiProviderModelListingDecision.Ignored, timedOut.cancel())
+        assertSame(AiProviderTargetListingOutcome.TimedOut, terminal(timedOut.timeout()).outcome)
+        assertSame(AiProviderTargetListingDecision.Ignored, timedOut.cancel())
 
         val died = policy()
         dispatch(died.start())
-        assertSame(AiProviderModelListingOutcome.BinderDied, terminal(died.binderDied()).outcome)
-        assertSame(AiProviderModelListingDecision.Ignored, died.cancel())
+        assertSame(AiProviderTargetListingOutcome.BinderDied, terminal(died.binderDied()).outcome)
+        assertSame(AiProviderTargetListingDecision.Ignored, died.cancel())
     }
 
     @Test
@@ -467,7 +467,7 @@ class AiProviderModelListingTest {
             dispatch(policy.start())
             val ready = CountDownLatch(3)
             val fire = CountDownLatch(1)
-            val decisions = ConcurrentLinkedQueue<AiProviderModelListingDecision>()
+            val decisions = ConcurrentLinkedQueue<AiProviderTargetListingDecision>()
             val executor = Executors.newFixedThreadPool(3)
             listOf(policy::cancel, policy::timeout, policy::binderDied).forEach { action ->
                 executor.execute {
@@ -481,8 +481,8 @@ class AiProviderModelListingTest {
                 fire.countDown()
                 executor.shutdown()
                 assertTrue(executor.awaitTermination(2, TimeUnit.SECONDS))
-                assertEquals(1, decisions.count { it is AiProviderModelListingDecision.Terminal })
-                assertEquals(2, decisions.count { it === AiProviderModelListingDecision.Ignored })
+                assertEquals(1, decisions.count { it is AiProviderTargetListingDecision.Terminal })
+                assertEquals(2, decisions.count { it === AiProviderTargetListingDecision.Ignored })
             } finally {
                 fire.countDown()
                 executor.shutdown()
@@ -494,8 +494,8 @@ class AiProviderModelListingTest {
     @Test
     fun finalPageAndProviderFailureEachRaceCancelToOneTerminal() {
         val callbackActions = listOf<
-            (AiProviderModelListingPolicy, AiProviderModelListingDispatch) ->
-                AiProviderModelListingDecision
+            (AiProviderTargetListingPolicy, AiProviderTargetListingDispatch) ->
+                AiProviderTargetListingDecision
             >(
             { policy, pending ->
                 policy.acceptPage(pending.sequence, PINNED_UID, page())
@@ -515,9 +515,9 @@ class AiProviderModelListingTest {
                 val pending = dispatch(policy.start())
                 val ready = CountDownLatch(2)
                 val fire = CountDownLatch(1)
-                val decisions = ConcurrentLinkedQueue<AiProviderModelListingDecision>()
+                val decisions = ConcurrentLinkedQueue<AiProviderTargetListingDecision>()
                 val executor = Executors.newFixedThreadPool(2)
-                listOf<() -> AiProviderModelListingDecision>(
+                listOf<() -> AiProviderTargetListingDecision>(
                     { callback(policy, pending) },
                     policy::cancel,
                 ).forEach { action ->
@@ -532,8 +532,8 @@ class AiProviderModelListingTest {
                     fire.countDown()
                     executor.shutdown()
                     assertTrue(executor.awaitTermination(2, TimeUnit.SECONDS))
-                    assertEquals(1, decisions.count { it is AiProviderModelListingDecision.Terminal })
-                    assertEquals(1, decisions.count { it === AiProviderModelListingDecision.Ignored })
+                    assertEquals(1, decisions.count { it is AiProviderTargetListingDecision.Terminal })
+                    assertEquals(1, decisions.count { it === AiProviderTargetListingDecision.Ignored })
                 } finally {
                     fire.countDown()
                     executor.shutdown()
@@ -544,7 +544,7 @@ class AiProviderModelListingTest {
     }
 
     @Test
-    fun completedCatalogIsImmutableAndPlansOnlyTheExactCompatibleModel() {
+    fun completedCatalogIsImmutableAndPlansOnlyTheExactCompatibleTarget() {
         val pinned = pinned()
         val policy = policy(pinned = pinned)
         val dispatch = dispatch(policy.start())
@@ -553,8 +553,8 @@ class AiProviderModelListingTest {
                 dispatch.sequence,
                 PINNED_UID,
                 page(
-                    models = listOf(
-                        model(
+                    targets = listOf(
+                        target(
                             modelId = MODEL_ONE,
                             displayName = SECRET_MODEL_DISPLAY,
                             capabilities = listOf(AiProviderCapabilityId.STREAMING),
@@ -567,33 +567,34 @@ class AiProviderModelListingTest {
 
         assertThrows(UnsupportedOperationException::class.java) {
             @Suppress("UNCHECKED_CAST")
-            (catalog.models as MutableList<AiModelInfo>).add(model(MODEL_TWO))
+            (catalog.targets as MutableList<AiTargetInfo>).add(target(MODEL_TWO))
         }
         val planned = catalog.planExact(
-            modelId = MODEL_ONE,
+            targetId = targetIdFor(MODEL_ONE),
             requirement = AiProviderCapabilityRequirement(
                 requiredCapabilityIds = setOf(AiProviderCapabilityId.STREAMING),
             ),
-        ) as AiProviderExactModelPlanResult.Planned
+        ) as AiProviderExactTargetPlanResult.Planned
         assertEquals(pinned, planned.plan.pinnedProvider)
-        assertEquals(LISTING_GENERATION, planned.plan.listingGeneration)
+        assertEquals(LISTING_GENERATION, planned.plan.catalogGeneration)
+        assertEquals(targetIdFor(MODEL_ONE), planned.plan.targetId)
         assertEquals(MODEL_ONE, planned.plan.modelId)
         assertSame(
-            AiProviderExactModelPlanResult.ModelNotFound,
-            catalog.planExact("fixture.missing"),
+            AiProviderExactTargetPlanResult.TargetNotFound,
+            catalog.planExact("fixture.provider:missing"),
         )
         assertSame(
-            AiProviderExactModelPlanResult.ModelCapabilityMismatch,
+            AiProviderExactTargetPlanResult.TargetCapabilityMismatch,
             catalog.planExact(
-                modelId = MODEL_ONE,
+                targetId = targetIdFor(MODEL_ONE),
                 requirement = AiProviderCapabilityRequirement(
                     requiredCapabilityIds = setOf(AiProviderCapabilityId.TOOLS),
                 ),
             ),
         )
         assertSame(
-            AiProviderExactModelPlanResult.BackendUnavailable,
-            catalog.planExact(MODEL_ONE, backendProfile = AiProviderBackendProfile.GPU),
+            AiProviderExactTargetPlanResult.BackendUnavailable,
+            catalog.planExact(targetIdFor(MODEL_ONE), backendProfile = AiProviderBackendProfile.GPU),
         )
         assertFalse(catalog.toString().contains(SECRET_MODEL_DISPLAY))
         assertFalse(completed.toString().contains(SECRET_MODEL_DISPLAY))
@@ -603,10 +604,10 @@ class AiProviderModelListingTest {
         pinned: AiProviderPinnedIdentity = pinned(),
         enabled: Boolean = true,
         pageSize: Int = DEFAULT_PAGE_SIZE,
-        tokenLedger: AiModelPageTokenLedger = AiModelPageTokenLedger(),
-    ) = AiProviderModelListingPolicy(
+        tokenLedger: AiTargetPageTokenLedger = AiTargetPageTokenLedger(),
+    ) = AiProviderTargetListingPolicy(
         pinnedProvider = pinned,
-        options = AiProviderModelListingOptions(enabled = enabled, pageSize = pageSize),
+        options = AiProviderTargetListingOptions(enabled = enabled, pageSize = pageSize),
         tokenLedger = tokenLedger,
     )
 
@@ -626,17 +627,17 @@ class AiProviderModelListingTest {
 
     private fun page(
         generation: String = LISTING_GENERATION,
-        models: List<AiModelInfo> = listOf(model(MODEL_ONE)),
+        targets: List<AiTargetInfo> = listOf(target(MODEL_ONE)),
         next: String? = null,
-    ): ByteArray = AiProviderCodec.encodeModelPage(
-        AiModelPage(
-            listingGeneration = generation,
-            models = models,
+    ): ByteArray = AiProviderCodec.encodeTargetPage(
+        AiTargetPage(
+            catalogGeneration = generation,
+            targets = targets,
             nextPageToken = next,
         ),
     )
 
-    private fun model(
+    private fun target(
         modelId: String,
         displayName: String = "Fixture model",
         capabilities: List<String> = listOf(AiProviderCapabilityId.STREAMING),
@@ -651,7 +652,8 @@ class AiProviderModelListingTest {
                 AiProviderBackendUnavailableReason.OPENCL_LIBRARY_UNAVAILABLE,
             ),
         ),
-    ) = AiModelInfo(
+    ) = AiProviderHostTestFixtures.target(
+        targetId = targetIdFor(modelId),
         modelId = modelId,
         displayName = displayName,
         capabilityIds = capabilities,
@@ -660,26 +662,29 @@ class AiProviderModelListingTest {
         backendProfiles = backendProfiles,
     )
 
+    private fun targetIdFor(modelId: String): String =
+        "fixture.provider:${modelId.substringAfterLast('.')}"
+
     private fun dispatch(
-        decision: AiProviderModelListingDecision,
-    ): AiProviderModelListingDispatch =
-        (decision as AiProviderModelListingDecision.Dispatch).dispatch
+        decision: AiProviderTargetListingDecision,
+    ): AiProviderTargetListingDispatch =
+        (decision as AiProviderTargetListingDecision.Dispatch).dispatch
 
     private fun terminal(
-        decision: AiProviderModelListingDecision,
-    ): AiProviderModelListingDecision.Terminal =
-        decision as AiProviderModelListingDecision.Terminal
+        decision: AiProviderTargetListingDecision,
+    ): AiProviderTargetListingDecision.Terminal =
+        decision as AiProviderTargetListingDecision.Terminal
 
     private fun completed(
-        decision: AiProviderModelListingDecision,
-    ): AiProviderModelListingOutcome.Completed =
-        terminal(decision).outcome as AiProviderModelListingOutcome.Completed
+        decision: AiProviderTargetListingDecision,
+    ): AiProviderTargetListingOutcome.Completed =
+        terminal(decision).outcome as AiProviderTargetListingOutcome.Completed
 
     private fun assertFailure(
-        expected: AiProviderModelListingFailure,
-        decision: AiProviderModelListingDecision,
+        expected: AiProviderTargetListingFailure,
+        decision: AiProviderTargetListingDecision,
     ) {
-        val rejected = terminal(decision).outcome as AiProviderModelListingOutcome.Rejected
+        val rejected = terminal(decision).outcome as AiProviderTargetListingOutcome.Rejected
         assertEquals(expected, rejected.failure)
     }
 

@@ -1,9 +1,9 @@
 package org.autojs.autojs.core.plugin.ai
 
 import org.autojs.plugin.ai.common.api.AiDataLocality
-import org.autojs.plugin.ai.provider.api.AiModelInfo
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilityId
 import org.autojs.plugin.ai.provider.api.AiProviderMimeType
+import org.autojs.plugin.ai.provider.api.AiTargetInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -11,50 +11,58 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AiProviderSessionPlanningTest {
-
     @Test
-    fun localProviderPlanRequiresNoCredentialChannel() {
+    fun localTargetPlanRequiresNoCredentialChannel() {
         val plan = plan(
             candidate = AiProviderHostTestFixtures.candidate(),
-            model = model(),
+            target = target(),
         )
 
         assertEquals(AiProviderCredentialDisposition.NONE, plan.credentialDisposition)
         assertEquals(512L * 1024L, plan.effectiveMaximumContextBytes)
         assertEquals(256L * 1024L, plan.effectiveMaximumOutputBytes)
+        assertEquals("fixture.provider:model", plan.targetId)
         assertEquals("fixture.model", plan.modelId)
     }
 
     @Test
     fun remoteCredentialsRemainOwnedByTheProviderProcess() {
+        val origin = "https://remote-provider.example"
         val remoteInfo = AiProviderHostTestFixtures.providerInfo(
             locality = AiDataLocality.REMOTE,
-            declaredHttpsOrigins = listOf("https://remote-provider.example"),
+            declaredHttpsOrigins = listOf(origin),
         )
         val plan = plan(
             candidate = AiProviderHostTestFixtures.candidate(providerInfo = remoteInfo),
-            model = model(),
+            target = target(
+                targetId = "fixture.provider:remote",
+                profileId = "remote-profile",
+                locality = AiDataLocality.REMOTE,
+                declaredHttpsOrigins = listOf(origin),
+            ),
         )
 
         assertEquals(AiProviderCredentialDisposition.PROVIDER_PROCESS_ONLY, plan.credentialDisposition)
+        assertEquals("remote-profile", plan.profileId)
+        assertEquals(listOf(origin), plan.targetDeclaredHttpsOrigins)
     }
 
     @Test
-    fun modelMustMeetTheSameCapabilityRequirementAsTheProvider() {
+    fun targetMustMeetTheSameCapabilityRequirementAsTheProvider() {
         val selected = selected(AiProviderHostTestFixtures.candidate())
         val requirement = AiProviderCapabilityRequirement(
             requiredCapabilityIds = setOf(AiProviderCapabilityId.TOOLS),
         )
-        val modelWithoutTools = model(capabilityIds = listOf(AiProviderCapabilityId.STREAMING))
+        val targetWithoutTools = target(capabilityIds = listOf(AiProviderCapabilityId.STREAMING))
 
         assertTrue(
-            AiProviderHostSessionPlanner.plan(selected, LISTING_GENERATION, modelWithoutTools, requirement) ===
-                AiProviderSessionPlanningResult.ModelCapabilityMismatch,
+            AiProviderHostSessionPlanner.plan(selected, CATALOG_GENERATION, targetWithoutTools, requirement) ===
+                AiProviderSessionPlanningResult.TargetCapabilityMismatch,
         )
     }
 
     @Test
-    fun modelCannotAdvertiseACapabilityRemovedByProviderNegotiation() {
+    fun targetCannotAdvertiseACapabilityRemovedByProviderNegotiation() {
         val selected = selected(
             AiProviderHostTestFixtures.candidate(
                 capabilities = AiProviderHostTestFixtures.capabilities(supportsReasoning = false),
@@ -64,23 +72,32 @@ class AiProviderSessionPlanningTest {
         assertTrue(
             AiProviderHostSessionPlanner.plan(
                 selected = selected,
-                listingGeneration = "fixture-generation",
-                model = model(),
+                catalogGeneration = "fixture-generation",
+                target = target(),
                 requirement = AiProviderCapabilityRequirement(),
-            ) === AiProviderSessionPlanningResult.ModelCapabilityMismatch,
+            ) === AiProviderSessionPlanningResult.TargetCapabilityMismatch,
         )
     }
 
     @Test
     fun safePlanAndDiagnosticsNeverExposeProviderConfiguration() {
         val secret = "SENTINEL_SECRET_CONFIGURATION"
+        val secretOrigin = "https://sentinel-secret-configuration.example"
         val info = AiProviderHostTestFixtures.providerInfo(
             displayName = secret,
             locality = AiDataLocality.REMOTE,
-            declaredHttpsOrigins = listOf("https://sentinel-secret-configuration.example"),
+            declaredHttpsOrigins = listOf(secretOrigin),
         )
         val selected = selected(AiProviderHostTestFixtures.candidate(providerInfo = info))
-        val plan = planned(selected, model())
+        val plan = planned(
+            selected,
+            target(
+                targetId = "fixture.provider:remote",
+                profileId = "remote-profile",
+                locality = AiDataLocality.REMOTE,
+                declaredHttpsOrigins = listOf(secretOrigin),
+            ),
+        )
         val visible = listOf(
             selected.toString(),
             selected.pinned.toString(),
@@ -97,73 +114,73 @@ class AiProviderSessionPlanningTest {
     }
 
     @Test
-    fun bindingCacheKeyIsDeterministicAndSensitiveOnlyToSafeSemanticIdentity() {
-        val first = plan(
-            candidate = AiProviderHostTestFixtures.candidate(
-                signers = listOf(AiProviderHostTestFixtures.SIGNER_B, AiProviderHostTestFixtures.SIGNER_A),
+    fun bindingCacheKeyIsDeterministicAndSensitiveToTargetIdentity() {
+        fun candidate(
+            versionCode: Long = 7,
+            minimumHostVersionCode: Long = 0,
+            signers: List<String>,
+        ) = AiProviderHostTestFixtures.candidate(
+            versionCode = versionCode,
+            signers = signers,
+            providerInfo = AiProviderHostTestFixtures.providerInfo(
+                minimumHostVersionCode = minimumHostVersionCode,
             ),
-            model = model(),
+        )
+
+        val first = plan(
+            candidate = candidate(signers = listOf(AiProviderHostTestFixtures.SIGNER_B, AiProviderHostTestFixtures.SIGNER_A)),
+            target = target(),
         )
         val reordered = plan(
-            candidate = AiProviderHostTestFixtures.candidate(
-                signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B),
-            ),
-            model = model(),
+            candidate = candidate(signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B)),
+            target = target(),
         )
         val newerPackage = plan(
-            candidate = AiProviderHostTestFixtures.candidate(
+            candidate = candidate(
                 versionCode = 8,
                 signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B),
             ),
-            model = model(),
+            target = target(),
         )
-        val otherModel = plan(
-            candidate = AiProviderHostTestFixtures.candidate(
-                signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B),
-            ),
-            model = model(modelId = "fixture.other-model"),
+        val otherTarget = plan(
+            candidate = candidate(signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B)),
+            target = target(targetId = "fixture.provider:other", modelId = "fixture.other-model"),
         )
         val changedCapabilities = plan(
-            candidate = AiProviderHostTestFixtures.candidate(
-                signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B),
-            ),
-            model = model(capabilityIds = listOf(AiProviderCapabilityId.STREAMING)),
+            candidate = candidate(signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B)),
+            target = target(capabilityIds = listOf(AiProviderCapabilityId.STREAMING)),
         )
         val changedLimits = plan(
-            candidate = AiProviderHostTestFixtures.candidate(
-                signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B),
-            ),
-            model = model(maximumOutputBytes = 128L * 1024L),
+            candidate = candidate(signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B)),
+            target = target(maximumOutputBytes = 128L * 1024L),
         )
-        val changedListing = plan(
-            candidate = AiProviderHostTestFixtures.candidate(
-                signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B),
-            ),
-            model = model(),
-            listingGeneration = "fixture-generation-2",
+        val changedCatalog = plan(
+            candidate = candidate(signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B)),
+            target = target(),
+            catalogGeneration = "fixture-generation-2",
         )
         val changedProviderCompatibility = plan(
-            candidate = AiProviderHostTestFixtures.candidate(
+            candidate = candidate(
+                minimumHostVersionCode = 1,
                 signers = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B),
-                providerInfo = AiProviderHostTestFixtures.providerInfo(minimumHostVersionCode = 1),
             ),
-            model = model(),
+            target = target(),
         )
 
         val firstKey = AiProviderBindingCacheKey.create(first)
         assertEquals(firstKey, AiProviderBindingCacheKey.create(reordered))
         assertNotEquals(firstKey, AiProviderBindingCacheKey.create(newerPackage))
-        assertNotEquals(firstKey, AiProviderBindingCacheKey.create(otherModel))
+        assertNotEquals(firstKey, AiProviderBindingCacheKey.create(otherTarget))
         assertNotEquals(firstKey, AiProviderBindingCacheKey.create(changedCapabilities))
         assertNotEquals(firstKey, AiProviderBindingCacheKey.create(changedLimits))
-        assertNotEquals(firstKey, AiProviderBindingCacheKey.create(changedListing))
+        assertNotEquals(firstKey, AiProviderBindingCacheKey.create(changedCatalog))
         assertNotEquals(firstKey, AiProviderBindingCacheKey.create(changedProviderCompatibility))
-        assertTrue(Regex("^ai-provider-v1-[0-9a-f]{64}$").matches(firstKey))
+        assertTrue(Regex("^ai-provider-v2-[0-9a-f]{64}$").matches(firstKey))
     }
 
     @Test
     fun bindingCacheKeySeparatesCapabilityCollectionDomains() {
-        val modelCapabilities = listOf(
+        val targetCapabilities = listOf(
             AiProviderCapabilityId.STREAMING,
             AiProviderCapabilityId.REASONING,
             AiProviderCapabilityId.STRUCTURED_JSON,
@@ -177,7 +194,7 @@ class AiProviderSessionPlanningTest {
                     acceptedSchemaMimeTypes = emptyList(),
                 ),
             ),
-            model = model(capabilityIds = modelCapabilities),
+            target = target(capabilityIds = targetCapabilities),
         )
         val textThenSchemaJson = plan(
             candidate = AiProviderHostTestFixtures.candidate(
@@ -187,7 +204,7 @@ class AiProviderSessionPlanningTest {
                     acceptedSchemaMimeTypes = listOf(AiProviderMimeType.JSON),
                 ),
             ),
-            model = model(capabilityIds = modelCapabilities),
+            target = target(capabilityIds = targetCapabilities),
         )
 
         assertNotEquals(
@@ -197,17 +214,17 @@ class AiProviderSessionPlanningTest {
     }
 
     @Test
-    fun publicSessionPlanSnapshotsModelCapabilities() {
+    fun publicSessionPlanSnapshotsTargetCapabilities() {
         val mutableCapabilities = arrayListOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.USAGE)
-        val model = model(capabilityIds = mutableCapabilities)
-        val plan = plan(AiProviderHostTestFixtures.candidate(), model)
+        val target = target(capabilityIds = mutableCapabilities)
+        val plan = plan(AiProviderHostTestFixtures.candidate(), target)
         mutableCapabilities.clear()
 
-        assertEquals(setOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.USAGE), plan.modelCapabilityIds)
+        assertEquals(setOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.USAGE), plan.targetCapabilityIds)
         try {
             @Suppress("UNCHECKED_CAST")
-            (plan.modelCapabilityIds as MutableSet<String>).add(AiProviderCapabilityId.TOOLS)
-            throw AssertionError("Model capabilities must be immutable")
+            (plan.targetCapabilityIds as MutableSet<String>).add(AiProviderCapabilityId.TOOLS)
+            throw AssertionError("Target capabilities must be immutable")
         } catch (_: UnsupportedOperationException) {
             // Expected.
         }
@@ -215,19 +232,19 @@ class AiProviderSessionPlanningTest {
 
     private fun plan(
         candidate: AiProviderCandidate,
-        model: AiModelInfo,
-        listingGeneration: String = LISTING_GENERATION,
-    ): AiProviderHostSessionPlan = planned(selected(candidate), model, listingGeneration)
+        target: AiTargetInfo,
+        catalogGeneration: String = CATALOG_GENERATION,
+    ): AiProviderHostSessionPlan = planned(selected(candidate), target, catalogGeneration)
 
     private fun planned(
         selected: AiProviderSelectionResult.Selected,
-        model: AiModelInfo,
-        listingGeneration: String = LISTING_GENERATION,
+        target: AiTargetInfo,
+        catalogGeneration: String = CATALOG_GENERATION,
     ): AiProviderHostSessionPlan {
         val result = AiProviderHostSessionPlanner.plan(
             selected,
-            listingGeneration,
-            model,
+            catalogGeneration,
+            target,
             AiProviderCapabilityRequirement(),
         )
         assertTrue(result is AiProviderSessionPlanningResult.Planned)
@@ -246,7 +263,9 @@ class AiProviderSessionPlanningTest {
         return result as AiProviderSelectionResult.Selected
     }
 
-    private fun model(
+    private fun target(
+        targetId: String = "fixture.provider:model",
+        profileId: String? = null,
         modelId: String = "fixture.model",
         capabilityIds: List<String> = listOf(
             AiProviderCapabilityId.STREAMING,
@@ -256,15 +275,25 @@ class AiProviderSessionPlanningTest {
             AiProviderCapabilityId.USAGE,
         ),
         maximumOutputBytes: Long = 256L * 1024L,
-    ) = AiModelInfo(
+        locality: Int = if (profileId == null) AiDataLocality.ON_DEVICE else AiDataLocality.REMOTE,
+        declaredHttpsOrigins: List<String> = if (locality == AiDataLocality.ON_DEVICE) {
+            emptyList()
+        } else {
+            listOf("https://provider.example")
+        },
+    ) = AiProviderHostTestFixtures.target(
+        targetId = targetId,
+        profileId = profileId,
         modelId = modelId,
-        displayName = "Fixture Model",
+        displayName = "Fixture Target",
         capabilityIds = capabilityIds,
+        locality = locality,
         maximumContextBytes = 512L * 1024L,
         maximumOutputBytes = maximumOutputBytes,
+        declaredHttpsOrigins = declaredHttpsOrigins,
     )
 
     private companion object {
-        const val LISTING_GENERATION = "fixture-generation-1"
+        const val CATALOG_GENERATION = "fixture-generation-1"
     }
 }

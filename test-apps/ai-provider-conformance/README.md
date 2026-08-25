@@ -1,6 +1,6 @@
 # AI Provider conformance test app
 
-This Android application is a test-only Binder conformance fixture for the AI Provider protocol V1. It is not a production provider, a host fallback, or source shared with the independent `AutoJs6-Plugin-Three-Stone-AI` project.
+This Android application is a test-only Binder conformance fixture for the AI Provider protocol V2 unified target catalog. It is not a production provider, a host fallback, or source shared with the independent `AutoJs6-Plugin-Three-Stone-AI` project.
 
 The fixture intentionally keeps a distinct fake package and hostile scenarios for reasoning, tools, structured JSON, usage, pagination, malformed callbacks, descriptor ownership, and caller authentication. Those behaviors must not be exposed by a production provider merely to test the host.
 

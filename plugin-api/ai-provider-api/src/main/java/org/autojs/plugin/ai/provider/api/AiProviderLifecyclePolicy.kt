@@ -201,7 +201,7 @@ class AiProviderSessionPolicy(
             require(metadata.requestId == request.requestId) { "Session request ID does not match" }
             require(metadata.protocolVersion == request.protocolVersion) { "Session protocol version does not match" }
             require(metadata.providerId == request.providerId) { "Session provider ID does not match" }
-            require(metadata.modelId == request.modelId) { "Session model ID does not match" }
+            require(metadata.targetId == request.targetId) { "Session target ID does not match" }
             require(metadata.effectiveMaximumOutputBytes <= request.options.maximumOutputBytes) {
                 "Provider output limit exceeds the requested limit"
             }
@@ -264,20 +264,6 @@ class AiProviderSessionPolicy(
         requireStarted()
         check(AiUsagePolicy.isMonotonic(usage, next)) { "Usage counters moved backwards" }
         usage = AiUsagePolicy.mergeMonotonic(usage, next)
-    }
-
-    /** Structural compatibility path for sessions that were created without an expected request. */
-    @Deprecated(
-        message = "Use request-aware onCompleted to verify the terminal payload and aggregate stream",
-    )
-    @Synchronized
-    fun onCompleted() {
-        requireStarted()
-        check(expectedRequest == null) {
-            "Request-aware completion must verify the terminal payload"
-        }
-        check(!tools.hasOutstandingTurn) { "Completion cannot bypass an outstanding tool turn" }
-        acceptTerminal(AiTerminalGate.Terminal.COMPLETED)
     }
 
     fun onCompleted(

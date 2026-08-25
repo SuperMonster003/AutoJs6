@@ -31,7 +31,7 @@ internal class AiPluginMessage(
             content,
             1,
             AiCommonLimits.MAX_INLINE_PAYLOAD_BYTES,
-            "local AI plugin message content",
+            "AI provider plugin message content",
         )
     }
 
@@ -65,7 +65,7 @@ internal fun AiUsage.toPluginUsage() = AiPluginUsage(
 internal class AiPluginAskRequest(
     val component: AiProviderComponent,
     val providerId: String,
-    /** Null selects the provider's single installed model; ambiguity fails the request. */
+    /** Null selects the provider's single installed target; ambiguity fails the request. */
     val modelId: String?,
     messages: List<AiPluginMessage>,
     val timeoutMillis: Long,
@@ -75,7 +75,7 @@ internal class AiPluginAskRequest(
     val topK: Int? = null,
     val topP: Double? = null,
     val responseSchemaJson: String? = null,
-    val backendProfile: String = AiProviderBackendProfile.CPU,
+    val backendProfile: String? = null,
 ) {
     val messages: List<AiPluginMessage> = messages.toList()
     val inputBytes: Long = this.messages.sumOf { it.contentBytes.toLong() }
@@ -86,34 +86,36 @@ internal class AiPluginAskRequest(
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
         modelId?.let { require(AiValidation.STABLE_ID.matches(it)) { "Invalid model ID" } }
         require(this.messages.size in 1..AiProviderLimits.MAX_MESSAGES) {
-            "Invalid local AI plugin message count"
+            "Invalid AI provider plugin message count"
         }
         require(this.messages.last().role == AiPluginMessageRole.USER) {
-            "The final local AI plugin message must have the user role"
+            "The final AI provider plugin message must have the user role"
         }
         require(inputBytes in 1L..AiProviderLimits.MAX_TOTAL_INPUT_BYTES) {
-            "Invalid local AI plugin input size"
+            "Invalid AI provider plugin input size"
         }
         require(timeoutMillis in AiProviderLimits.MIN_TIMEOUT_MILLIS..AiProviderLimits.MAX_TIMEOUT_MILLIS) {
-            "Invalid local AI plugin timeout"
+            "Invalid AI provider plugin timeout"
         }
         require(maximumOutputBytes in 1L..AiProviderLimits.MAX_OUTPUT_BYTES) {
-            "Invalid local AI plugin output limit"
+            "Invalid AI provider plugin output limit"
         }
         maximumOutputTokens?.let {
             require(it in 1L..AiProviderLimits.MAX_OUTPUT_TOKENS) {
-                "Invalid local AI plugin token limit"
+                "Invalid AI provider plugin token limit"
             }
         }
         temperature?.let {
-            require(it.isFinite() && it >= 0.0) { "Invalid local AI plugin temperature" }
+            require(it.isFinite() && it >= 0.0) { "Invalid AI provider plugin temperature" }
         }
-        topK?.let { require(it > 0) { "Invalid local AI plugin topK" } }
+        topK?.let { require(it > 0) { "Invalid AI provider plugin topK" } }
         topP?.let {
-            require(it.isFinite() && it in 0.0..1.0) { "Invalid local AI plugin topP" }
+            require(it.isFinite() && it in 0.0..1.0) { "Invalid AI provider plugin topP" }
         }
-        require(backendProfile in AiProviderBackendProfile.VALUES) {
-            "Invalid local AI plugin backend profile"
+        backendProfile?.let {
+            require(it in AiProviderBackendProfile.VALUES) {
+                "Invalid AI provider plugin backend profile"
+            }
         }
         responseSchemaJson?.let { schema ->
             AiValidation.requireUtf8(
@@ -239,7 +241,7 @@ internal sealed class AiPluginStreamEvent {
                 text,
                 1,
                 AiProviderLimits.MAX_CHUNK_TEXT_BYTES,
-                "local AI plugin stream chunk",
+                "AI provider plugin stream chunk",
             )
         }
 
@@ -276,7 +278,7 @@ internal class AiPluginModelListRequest(
     init {
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
         require(timeoutMillis in AiProviderLimits.MIN_TIMEOUT_MILLIS..AiProviderLimits.MAX_TIMEOUT_MILLIS) {
-            "Invalid local AI plugin timeout"
+            "Invalid AI provider plugin timeout"
         }
     }
 }

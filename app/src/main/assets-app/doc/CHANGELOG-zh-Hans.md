@@ -39,10 +39,10 @@
 * `新增` JVM Source Runtime 支持范围为单文件 Java 8 (Java provider 最低 API 24) 与 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次发布仅在 API 31/arm64-v8a 真机完成 smoke, 不声明未验证 API 级别
 * `新增` AutoJs6 官方插件可通过签名权限保护的版本化只读设置契约, 读取宿主主题色, 暗色模式策略及语言的外观快照
 * `新增` ai 模块, 支持单次及流式请求 (参阅 项目文档 > [人工智能](https://docs.autojs6.com/#/ai))
-* `新增` `ai.ask`, `ai.chat` 与 `ai.stream` 本地插件路由支持按顺序传入纯文本 `system`, `user` 与 `assistant` 消息历史的单次及流式请求, 并要求最后一条消息为 `user` 角色; 可通过 `plugin: true` 简写选择官方本地 AI 插件, 单模型场景可省略模型 ID; 新增 `ai.models` 方法枚举插件模型, 插件未安装/未启用/无模型时给出明确错误提示; AI 服务设置提供本地 AI 插件入口; 插件生成会返回精确的输入/输出/总 token 数, `ai.chat` 通过 `usage` 暴露这些数据, 并在 `usage.raw.durationMillis` 中提供插件实测生成耗时
-* `新增` 全局 JavaScript (Rhino) `ai.session` API 可创建持久设备端插件 Conversation, 为会话固定提供商/模型/生成参数, 后续 `ask`/`chat`/`stream` 轮次只发送新的用户提示词; 正常完成后保留上下文, 取消/超时/协议失败或显式关闭时释放整个会话
-* `新增` `ai.ask`/`ai.chat`/`ai.stream` 与持久 `ai.session` 本地插件路由支持 `structuredJson` 和 JSON 对象 `responseSchema`; schema 会隐式启用 LiteRT-LM 原生 JSON Schema 约束解码, 会话为每轮固定同一 schema, 完成结果保持 JSON 文本并执行严格语法验证
-* `新增` `ai.ask`/`ai.chat`/`ai.stream` 与持久 `ai.session` 本地插件路由通过 AI Provider 协议 1.3 支持显式 `cpu`, `gpu` 和 `npu` backend profile; `ai.models` 报告设备可用性, 不可用 profile 会失败且不回退 CPU, 会话固定使用一个 backend, GPU 要求系统 OpenCL 可加载, 官方插件因未打包 EAP runtime 而报告 NPU 不可用
+* `新增` `ai.ask`, `ai.chat` 与 `ai.stream` 的显式 AI provider 路由支持有序纯文本 `system`, `user` 与 `assistant` 历史的单次及流式请求; `plugin: true` 选择官方 AI 插件, 模型选择器通过其 V2 目标目录唯一解析, 插件生成返回精确输入/输出/总 token 数及实测耗时
+* `新增` 全局 JavaScript (Rhino) `ai.session` API 可创建持久 AI provider 插件 Conversation, 为会话固定目标/提供商/模型/生成参数, 后续 `ask`/`chat`/`stream` 轮次只发送新的用户提示词; 正常完成后保留上下文, 取消/超时/协议失败或显式关闭时释放整个会话
+* `新增` `ai.ask`/`ai.chat`/`ai.stream` 与持久 `ai.session` 的 AI provider 路由支持 `structuredJson` 和 JSON 对象 `responseSchema`; schema 启用 LiteRT-LM 原生 JSON Schema 约束解码, 会话为每轮固定同一 schema, 完成 JSON 文本执行严格验证
+* `新增` AI Provider V2 本地目标将显式 `cpu`, `gpu` 和 `npu` backend profile 作为可选目标控件; 可用性按设备报告, 不可用 profile 失败且不回退 CPU, 会话固定一个 backend, GPU 要求系统 OpenCL 可加载, 官方插件因未打包 EAP runtime 而报告 NPU 不可用
 * `新增` 全局 JavaScript (Rhino) yolo 模块提供默认关闭的精确组件 YOLO 提供方路由, 支持版本化 Binder/PFD 传输, 基于清单的 NCNN 模型加载, 目标检测, 显式取消及资源清理, 且不静默回退提供方
 * `新增` tts 模块, 支持文本转换为语音 (参阅 项目文档 > [文本转语音](https://docs.autojs6.com/#/tts))
 * `新增` settings 模块 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
@@ -191,7 +191,7 @@
 * `优化` DEX 编译器 R1 已闭环, 同时保持默认关闭与精确组件显式 opt-in: R1.1 生产加载链路 7/7、R1.2 自动化 4/4、R1.3 真实 provider 矩阵 7/7、退出条件 3/3. API 34 production routing 8/8, 宿主 DEX 16 suites/149 tests、wire 4/24、fake-provider 5/25 及插件 48 tests 全通过, lint 0 error. Canonical campaign f3c2b1af-be93-41e7-b541-f167f90e5cc1 在 API 24/25 使用 D8 CLI、API 26/28/34/36 在 x86_64 使用 D8Command、API 31 使用 QV arm64 多用户真机, 七个真实 provider 单元全部 PASS; 较早失败或主动终止的 campaign 继续原样保留. last-waiter 协作取消与更广泛恢复仍是未勾选的 R2 工作
 * `优化` DEX 编译器实验性一致性测试扩展至真实 Android Binder 传输与产物存储, 覆盖精确签名组件, 恶意回调/输出/超时场景, 目标 API 感知的 DEX 校验及 DexClassLoader 执行
 * `优化` 默认关闭的纯 AI 文本宿主策略支持确定性信任选择, 精确身份锁定与重验证, 宿主/供应商能力交集, 歧义候选拒绝, 插件管理凭据隔离, 不含敏感内容的安全诊断, 取消/终态会话竞态的确定性所有权, 请求绑定的工具及 descriptor JSON 验证, streaming 聚合长度/SHA-256/配额校验, 解码后 JSON 重复键拒绝, 含敏感数据的模型 `toString` 摘要化及能力集合的域分离缓存键
-* `优化` 默认关闭且未接线的 AI 文本宿主基线没有生产调用点. 只读 PackageManager 精确 action 发现/精确组件复查及显式组件 metadata-only Binder 握手, 与新增的精确组件 Android 模型枚举 coordinator/transport 保持分离. metadata 握手仅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在执行时进程内熔断组件; getter 返回后的严格解码及 worker queue/绑定/最终复查阶段超时不会触发熔断. 模型枚举 coordinator 使用同一个 descriptor 已验证 Binder 重新验证有界 provider metadata 并调用 `listModels()`, 在每次初始或续页 dispatch 及每次 callback 准入前精确复查包身份. callback 在唯一一次防御性复制前验证 pinned UID, 对应 page/error 类型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整稳定的 pinned identity 隔离, 并受不驱逐的单 provider 及进程总预算约束. 进程级 single-flight gate, 唯一终态所有者及幂等清理覆盖绑定, death recipient, callback 注册, deadline 与 operation lease. 与 metadata 握手不同, 若模型枚举 deadline 到期时任何已准入 platform/transport operation 尚未退出, 将 fail-closed 地在进程内熔断该精确组件; 熔断无法硬中止操作, gate/watchdog 会保持占用直至晚到退出. 仍无 session dispatch 或 `openSession`, request/result PFD transport, `IAiTextCallback`, credit flow, runtime/UI 集成, `ai.*` 路由及任何生产调用点
+* `优化` 已接通的 AI Provider V2 宿主路径将精确组件 PackageManager 发现与 Binder metadata 协商, 分页 `listTargets` 协调, 每次分发及回调身份复查, 单次消费目录 token, 不含凭据的不可变目标计划, 有界 session/PFD 传输, 流式 credit, 进程熔断, 唯一终态所有者及幂等清理统一用于显式 `ai.*` 插件路由
 * `优化` Ace WebView 运行时/JavaScript bridge/内置语言服务/静态资源完成插件化, 降低宿主 APK 耦合并支持独立安装及更新
 * `优化` 项目离线文档完成插件化, 降低宿主 APK 体积并支持独立安装及更新
 * `优化` 离线项目文档首次加载的文件清单解析及完整 SHA-256 校验移至后台线程, 避免阻塞界面
@@ -214,7 +214,8 @@
 * `优化` 项目字符串资源完成多语言翻译同步/文件分类/名称排序及 ASCII 标点规范化
 * `优化` 限制 APK 语言资源仅保留项目支持的 10 种配置, 降低安装包体积
 * `优化` 构建系统支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本并降低 Gradle 启动内存压力
-* `优化` 将未发布的官方本地 AI 插件定名为 3-Stone AI, 同时以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述符, AP schema 域及重命名的一致性测试夹具完全替换跨进程合约; 不保留身份别名
+* `优化` 将未发布的官方 AI 插件定名为 3-Stone AI, 同时以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述符, AP schema 域及重命名的一致性测试夹具完全替换跨进程合约; 不保留身份别名
+* `优化` 直接实现 AI Provider V2 分页目标发现: 每项目标携带稳定的 target/provider/model 身份, locality, 配置与可用状态, capabilities, limits, controls 及允许的 HTTPS origins; 支持 REMOTE/HYBRID 执行和插件自管凭据, 凭据字节不经过 Binder, 且不保留被取代的 wire 别名
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

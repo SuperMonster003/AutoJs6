@@ -6,6 +6,8 @@ import android.os.Looper
 import android.os.ParcelFileDescriptor
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.ai.common.api.AiCredentialMode
+import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.provider.api.AiContentPart
 import org.autojs.plugin.ai.provider.api.AiGenerationOptions
@@ -67,16 +69,21 @@ class AiProviderSessionAndroidConformanceTest {
             val request = descriptorRequest(pinned, promptBytes)
             val plan = AiProviderHostSessionPlan(
                 pinnedProvider = pinned,
-                listingGeneration = FAKE_LISTING_GENERATION,
-                modelId = FAKE_STREAM_MODEL,
-                modelCapabilityIds = setOf(
+                catalogGeneration = FAKE_CATALOG_GENERATION,
+                targetId = FAKE_STREAM_TARGET,
+                profileId = null,
+                modelId = FAKE_STREAM_MODEL_ID,
+                targetLocality = AiDataLocality.ON_DEVICE,
+                targetCredentialMode = AiCredentialMode.NONE,
+                targetCapabilityIds = setOf(
                     AiProviderCapabilityId.STREAMING,
                     AiProviderCapabilityId.STRUCTURED_JSON,
                     AiProviderCapabilityId.USAGE,
                 ),
+                targetDeclaredHttpsOrigins = emptyList(),
                 effectiveMaximumContextBytes = pinned.negotiatedCapabilities.maximumContextBytes,
                 effectiveMaximumOutputBytes = pinned.negotiatedCapabilities.maximumOutputBytes,
-                credentialDisposition = AiProviderCredentialIsolationPolicy.disposition(pinned),
+                credentialDisposition = AiProviderCredentialDisposition.NONE,
             )
             val events = Collections.synchronizedList(mutableListOf<AiProviderSessionRunEvent>())
             val terminal = CountDownLatch(1)
@@ -126,7 +133,7 @@ class AiProviderSessionAndroidConformanceTest {
             val started = transcript.filterIsInstance<AiProviderSessionEvent.Started>().single()
             val chunks = transcript.filterIsInstance<AiProviderSessionEvent.Chunk>()
             val usage = transcript.filterIsInstance<AiProviderSessionEvent.Usage>()
-            assertEquals(FAKE_STREAM_MODEL, started.metadata.modelId)
+            assertEquals(FAKE_STREAM_TARGET, started.metadata.targetId)
             assertTrue("Session did not cross the fixed initial credit window", chunks.size > 8)
             assertEquals(chunks.indices.map(Int::toLong), chunks.map { it.chunk.sequence })
             assertEquals(prompt, chunks.joinToString(separator = "") { it.chunk.textDelta })
@@ -177,7 +184,7 @@ class AiProviderSessionAndroidConformanceTest {
     @Test
     fun completionDescriptorIsMaterializedAcrossProcess() {
         val result = runHostileScenario(
-            modelId = FAKE_COMPLETION_FD_MODEL,
+            targetId = FAKE_COMPLETION_FD_TARGET,
             prompt = COMPLETION_FD_TEXT,
         )
 
@@ -189,7 +196,7 @@ class AiProviderSessionAndroidConformanceTest {
 
     @Test
     fun toolDescriptorIsOwnedThenRejectedWithoutExecution() {
-        val result = runHostileScenario(modelId = FAKE_TOOL_FD_MODEL)
+        val result = runHostileScenario(targetId = FAKE_TOOL_FD_TARGET)
 
         assertTranscriptRejected(result, AiProviderSessionFailure.TOOLS_UNSUPPORTED)
         assertSettledExactlyOnce(result)
@@ -198,7 +205,7 @@ class AiProviderSessionAndroidConformanceTest {
     @Test
     fun chunkBeforeStartFailsClosedAfterInitialCreditCommit() {
         val result = runHostileScenario(
-            modelId = FAKE_CHUNK_BEFORE_START_MODEL,
+            targetId = FAKE_CHUNK_BEFORE_START_TARGET,
         )
 
         assertTranscriptRejected(result, AiProviderSessionFailure.CALLBACK_MALFORMED)
@@ -208,7 +215,7 @@ class AiProviderSessionAndroidConformanceTest {
     @Test
     fun sequenceGapFailsClosedOnce() {
         val result = runHostileScenario(
-            modelId = FAKE_SEQUENCE_GAP_MODEL,
+            targetId = FAKE_SEQUENCE_GAP_TARGET,
         )
 
         assertTranscriptRejected(result, AiProviderSessionFailure.CALLBACK_MALFORMED)
@@ -217,7 +224,7 @@ class AiProviderSessionAndroidConformanceTest {
 
     @Test
     fun invalidCompletionDescriptorReferenceFailsClosedOnce() {
-        val result = runHostileScenario(modelId = FAKE_INVALID_FD_REFERENCE_MODEL)
+        val result = runHostileScenario(targetId = FAKE_INVALID_FD_REFERENCE_TARGET)
 
         assertTranscriptRejected(result, AiProviderSessionFailure.CALLBACK_MALFORMED)
         assertSettledExactlyOnce(result)
@@ -225,7 +232,7 @@ class AiProviderSessionAndroidConformanceTest {
 
     @Test
     fun duplicateTerminalPublishesOnlyOneSettledOutcome() {
-        val result = runHostileScenario(modelId = FAKE_DUPLICATE_TERMINAL_MODEL)
+        val result = runHostileScenario(targetId = FAKE_DUPLICATE_TERMINAL_TARGET)
 
         when (val terminal = result.terminal) {
             is AiProviderSessionRunEvent.Transcript ->
@@ -248,7 +255,7 @@ class AiProviderSessionAndroidConformanceTest {
     @Test
     fun stalledSessionCanBeCancelledAfterStartAndReleasesOwner() {
         val result = runHostileScenario(
-            modelId = FAKE_STALL_MODEL,
+            targetId = FAKE_STALL_TARGET,
             cancelAfterStarted = true,
         )
 
@@ -260,7 +267,7 @@ class AiProviderSessionAndroidConformanceTest {
 
     @Test
     fun callbackFromIsolatedProviderUidIsRejectedAndReleasesOwner() {
-        val result = runHostileScenario(modelId = FAKE_WRONG_UID_MODEL)
+        val result = runHostileScenario(targetId = FAKE_WRONG_UID_TARGET)
 
         assertTranscriptRejected(result, AiProviderSessionFailure.CALLBACK_UID_MISMATCH)
         assertTrue(
@@ -272,7 +279,7 @@ class AiProviderSessionAndroidConformanceTest {
 
     @Test
     fun providerProcessDeathAfterStartedPublishesOneBinderDiedAndReleasesOwner() {
-        val result = runHostileScenario(modelId = FAKE_PROCESS_DEATH_MODEL)
+        val result = runHostileScenario(targetId = FAKE_PROCESS_DEATH_TARGET)
 
         val terminal = result.terminal as? AiProviderSessionRunEvent.Transcript
         assertNotNull("Expected BinderDied transcript terminal, got ${result.terminal}", terminal)
@@ -285,7 +292,7 @@ class AiProviderSessionAndroidConformanceTest {
     }
 
     private fun runHostileScenario(
-        modelId: String,
+        targetId: String,
         prompt: String = HOSTILE_PROMPT,
         cancelAfterStarted: Boolean = false,
     ): HostileScenarioResult {
@@ -308,17 +315,22 @@ class AiProviderSessionAndroidConformanceTest {
             )
             val request = hostileRequest(
                 pinned = pinned,
-                modelId = modelId,
+                targetId = targetId,
                 prompt = prompt,
             )
             val plan = AiProviderHostSessionPlan(
                 pinnedProvider = pinned,
-                listingGeneration = FAKE_LISTING_GENERATION,
-                modelId = modelId,
-                modelCapabilityIds = setOf(AiProviderCapabilityId.STREAMING),
+                catalogGeneration = FAKE_CATALOG_GENERATION,
+                targetId = targetId,
+                profileId = null,
+                modelId = targetId.substringAfter(':'),
+                targetLocality = AiDataLocality.ON_DEVICE,
+                targetCredentialMode = AiCredentialMode.NONE,
+                targetCapabilityIds = setOf(AiProviderCapabilityId.STREAMING),
+                targetDeclaredHttpsOrigins = emptyList(),
                 effectiveMaximumContextBytes = pinned.negotiatedCapabilities.maximumContextBytes,
                 effectiveMaximumOutputBytes = pinned.negotiatedCapabilities.maximumOutputBytes,
-                credentialDisposition = AiProviderCredentialIsolationPolicy.disposition(pinned),
+                credentialDisposition = AiProviderCredentialDisposition.NONE,
             )
             val events = Collections.synchronizedList(mutableListOf<AiProviderSessionRunEvent>())
             val started = CountDownLatch(1)
@@ -368,7 +380,7 @@ class AiProviderSessionAndroidConformanceTest {
                 cancelAccepted = checkNotNull(runHandle).cancel()
             }
             assertTrue(
-                "Hostile local AI session did not terminate: $modelId",
+                "Hostile local AI session did not terminate: $targetId",
                 terminal.await(OUTCOME_WAIT_MILLIS, TimeUnit.MILLISECONDS),
             )
             Thread.sleep(LATE_CALLBACK_SETTLE_MILLIS)
@@ -401,15 +413,15 @@ class AiProviderSessionAndroidConformanceTest {
 
     private fun hostileRequest(
         pinned: AiProviderPinnedIdentity,
-        modelId: String,
+        targetId: String,
         prompt: String,
     ): AiProviderRequest {
         val promptBytes = prompt.toByteArray(Charsets.UTF_8)
         return AiProviderRequest(
-            requestId = "android-hostile-${modelId.substringAfterLast('.')}",
-            protocolVersion = AiProviderProtocol.PROTOCOL_V1_2,
+            requestId = "android-hostile-${targetId.substringAfterLast('.')}",
+            protocolVersion = AiProviderProtocol.PROTOCOL_V2,
             providerId = pinned.providerId,
-            modelId = modelId,
+            targetId = targetId,
             messages = listOf(
                 AiMessage(
                     role = AiMessageRole.USER,
@@ -496,9 +508,9 @@ class AiProviderSessionAndroidConformanceTest {
         )
         return AiProviderRequest(
             requestId = "android-session-request",
-            protocolVersion = AiProviderProtocol.PROTOCOL_V1_2,
+            protocolVersion = AiProviderProtocol.PROTOCOL_V2,
             providerId = pinned.providerId,
-            modelId = FAKE_STREAM_MODEL,
+            targetId = FAKE_STREAM_TARGET,
             messages = listOf(
                 AiMessage(
                     role = AiMessageRole.USER,
@@ -737,17 +749,18 @@ class AiProviderSessionAndroidConformanceTest {
         const val FAKE_PACKAGE = "org.autojs.plugin.ai.provider.fake"
         const val FAKE_SERVICE =
             "org.autojs.plugin.ai.provider.fake.service.FakeAiProviderService"
-        const val FAKE_LISTING_GENERATION = "fake-models-v1"
-        const val FAKE_STREAM_MODEL = "fake.stream"
-        const val FAKE_COMPLETION_FD_MODEL = "fake.hostile.completion-fd"
-        const val FAKE_TOOL_FD_MODEL = "fake.hostile.tool-fd"
-        const val FAKE_CHUNK_BEFORE_START_MODEL = "fake.hostile.chunk-before-start"
-        const val FAKE_SEQUENCE_GAP_MODEL = "fake.hostile.sequence-gap"
-        const val FAKE_DUPLICATE_TERMINAL_MODEL = "fake.hostile.duplicate-terminal"
-        const val FAKE_INVALID_FD_REFERENCE_MODEL = "fake.hostile.invalid-fd-ref"
-        const val FAKE_WRONG_UID_MODEL = "fake.hostile.wrong-uid"
-        const val FAKE_PROCESS_DEATH_MODEL = "fake.hostile.process-death"
-        const val FAKE_STALL_MODEL = "fake.hostile.stall"
+        const val FAKE_CATALOG_GENERATION = "fake-targets-v2"
+        const val FAKE_STREAM_TARGET = "local:stream"
+        const val FAKE_STREAM_MODEL_ID = "fake.stream"
+        const val FAKE_COMPLETION_FD_TARGET = "local:hostile.completion-fd"
+        const val FAKE_TOOL_FD_TARGET = "local:hostile.tool-fd"
+        const val FAKE_CHUNK_BEFORE_START_TARGET = "local:hostile.chunk-before-start"
+        const val FAKE_SEQUENCE_GAP_TARGET = "local:hostile.sequence-gap"
+        const val FAKE_DUPLICATE_TERMINAL_TARGET = "local:hostile.duplicate-terminal"
+        const val FAKE_INVALID_FD_REFERENCE_TARGET = "local:hostile.invalid-fd-ref"
+        const val FAKE_WRONG_UID_TARGET = "local:hostile.wrong-uid"
+        const val FAKE_PROCESS_DEATH_TARGET = "local:hostile.process-death"
+        const val FAKE_STALL_TARGET = "local:hostile.stall"
         const val COMPLETION_FD_TEXT = "descriptor completion across Binder"
         const val HOSTILE_PROMPT = "hostile Android session"
         const val HANDSHAKE_TIMEOUT_MILLIS = 15_000L

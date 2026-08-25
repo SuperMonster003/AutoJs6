@@ -27,7 +27,7 @@ class FakeAiProviderEngineTest {
     fun streamChunksReassembleUnicodeWithoutSplittingCodePoints() {
         val prompt = "a😀bc😀defghijklmnopqrstuvwxyz"
         val request = fakeRequest(
-            modelId = FakeAiProviderFixture.MODEL_STREAM,
+            targetId = FakeAiProviderFixture.TARGET_STREAM,
             prompt = prompt,
             stream = true,
         )
@@ -43,7 +43,7 @@ class FakeAiProviderEngineTest {
     @Test
     fun reasoningPlanSeparatesReasoningFromVisibleText() {
         val request = fakeRequest(
-            modelId = FakeAiProviderFixture.MODEL_REASONING,
+            targetId = FakeAiProviderFixture.TARGET_REASONING,
             stream = true,
             reasoning = true,
         )
@@ -65,7 +65,7 @@ class FakeAiProviderEngineTest {
         assertTrue(requireNotNull(tokenLimited.usage.outputTokens) <= 1L)
 
         val reasoningLimitedRequest = fakeRequest(
-            modelId = FakeAiProviderFixture.MODEL_REASONING,
+            targetId = FakeAiProviderFixture.TARGET_REASONING,
             stream = true,
             reasoning = true,
             maximumOutputBytes = 16L,
@@ -111,7 +111,7 @@ class FakeAiProviderEngineTest {
     @Test
     fun toolCallAndResultOutputAreDeterministic() {
         val request = fakeRequest(
-            modelId = FakeAiProviderFixture.MODEL_TOOLS,
+            targetId = FakeAiProviderFixture.TARGET_TOOLS,
             stream = true,
             tools = listOf(fakeTool()),
         )

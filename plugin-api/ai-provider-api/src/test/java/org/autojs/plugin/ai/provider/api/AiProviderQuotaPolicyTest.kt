@@ -444,16 +444,16 @@ class AiProviderQuotaPolicyTest {
     @Test
     fun textVersionMustBeNegotiatedAndThenMatchedExactly() {
         val selected = AiProviderVersionPolicy.negotiate(
-            AiProtocolRange(AiProtocolVersion(1, 0), AiProtocolVersion(1, 2)),
+            AiProtocolRange(AiProtocolVersion(2, 0), AiProtocolVersion(2, 0)),
         )
-        assertEquals(AiProviderProtocol.PROTOCOL_V1_2, selected)
-        AiProviderVersionPolicy.requireSelected(AiProviderProtocol.PROTOCOL_V1_2, selected)
+        assertEquals(AiProviderProtocol.PROTOCOL_V2, selected)
+        AiProviderVersionPolicy.requireSelected(AiProviderProtocol.PROTOCOL_V2, selected)
         assertThrows(IllegalArgumentException::class.java) {
-            AiProviderVersionPolicy.requireSelected(AiProtocolVersion(1, 0), selected)
+            AiProviderVersionPolicy.requireSelected(AiProtocolVersion(3, 0), selected)
         }
         assertThrows(IllegalArgumentException::class.java) {
             AiProviderVersionPolicy.negotiate(
-                AiProtocolRange(AiProtocolVersion(2, 0), AiProtocolVersion(2, 0)),
+                AiProtocolRange(AiProtocolVersion(3, 0), AiProtocolVersion(3, 3)),
             )
         }
     }
@@ -469,9 +469,9 @@ class AiProviderQuotaPolicyTest {
         persistentSession: Boolean = false,
     ) = AiProviderRequest(
         requestId = "request-quota",
-        protocolVersion = AiProviderProtocol.PROTOCOL_V1_2,
+        protocolVersion = AiProviderProtocol.PROTOCOL_V2,
         providerId = "fake.local",
-        modelId = "fake.echo",
+        targetId = "fake.local:echo",
         messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(message)))),
         options = AiGenerationOptions(
             stream = stream,

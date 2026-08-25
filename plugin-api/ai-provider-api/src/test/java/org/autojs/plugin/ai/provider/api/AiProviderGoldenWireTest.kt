@@ -6,15 +6,15 @@ import org.junit.Test
 class AiProviderGoldenWireTest {
 
     @Test
-    fun firstModelPageRequestMatchesProtocolV12GoldenDocument() {
-        val request = AiModelListRequest(
-            protocolVersion = AiProviderProtocol.PROTOCOL_V1_2,
+    fun firstTargetPageRequestMatchesProtocolV2GoldenDocument() {
+        val request = AiTargetListRequest(
+            protocolVersion = AiProviderProtocol.PROTOCOL_V2,
             pageSize = 32,
         )
 
-        val encoded = AiProviderCodec.encodeModelListRequest(request)
+        val encoded = AiProviderCodec.encodeTargetListRequest(request)
         assertEquals(GOLDEN_HEX, encoded.toHexString())
-        assertEquals(request, AiProviderCodec.decodeModelListRequest(GOLDEN_HEX.hexToByteArray()))
+        assertEquals(request, AiProviderCodec.decodeTargetListRequest(GOLDEN_HEX.hexToByteArray()))
     }
 
     private fun ByteArray.toHexString(): String = joinToString(separator = "") { byte ->
@@ -31,9 +31,9 @@ class AiProviderGoldenWireTest {
     private companion object {
         const val HEX = "0123456789abcdef"
         const val GOLDEN_HEX =
-            "414a3657000000010000005841500002000000010000000000000003" +
-                "0000000100000001000000010000000400000001" +
-                "0000000200000001000000010000000400000002" +
+            "414a3657000000010000005841500013000000010000000000000003" +
+                "0000000100000001000000010000000400000002" +
+                "0000000200000001000000010000000400000000" +
                 "0000000300000001000000010000000400000020"
     }
 }

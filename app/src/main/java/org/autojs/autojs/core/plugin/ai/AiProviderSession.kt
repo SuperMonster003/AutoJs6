@@ -293,7 +293,7 @@ internal class AiProviderSessionPolicy(
     private fun validateAndPrepareLocked(): AiProviderSessionFailure? {
         val pinned = plan.pinnedProvider
         if (request.protocolVersion != pinned.protocolVersion ||
-            request.providerId != pinned.providerId || request.modelId != plan.modelId ||
+            request.providerId != pinned.providerId || request.targetId != plan.targetId ||
             request.options.maximumOutputBytes > plan.effectiveMaximumOutputBytes
         ) return AiProviderSessionFailure.PLAN_REQUEST_MISMATCH
         if (request.tools.isNotEmpty() || request.options.maximumToolRounds > 0 ||
@@ -310,7 +310,7 @@ internal class AiProviderSessionPolicy(
                 add(AiProviderCapabilityId.USAGE)
             }
         }
-        if (!plan.modelCapabilityIds.containsAll(required)) {
+        if (!plan.targetCapabilityIds.containsAll(required)) {
             return AiProviderSessionFailure.PLAN_REQUEST_MISMATCH
         }
         val descriptorCount = runCatching { requestDescriptors.count }.getOrNull()

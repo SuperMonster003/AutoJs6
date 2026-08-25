@@ -6,10 +6,10 @@ import org.junit.Test
 class AiCommonGoldenWireTest {
 
     @Test
-    fun protocolRangeEncodingMatchesProtocolV1GoldenDocument() {
+    fun protocolRangeEncodingMatchesProtocolV2GoldenDocument() {
         val range = AiProtocolRange(
-            minimum = AiProtocolVersion(1, 0),
-            maximum = AiProtocolVersion(1, 2),
+            minimum = AiProtocolVersion(2, 0),
+            maximum = AiProtocolVersion(2, 0),
         )
 
         val encoded = AiCommonCodec.encodeProtocolRange(range)
@@ -32,9 +32,9 @@ class AiCommonGoldenWireTest {
         const val HEX = "0123456789abcdef"
         const val GOLDEN_HEX =
             "414a3657000000010000006c41490001000000010000000000000004" +
-                "0000000100000001000000010000000400000001" +
+                "0000000100000001000000010000000400000002" +
                 "0000000200000001000000010000000400000000" +
-                "0000000300000001000000010000000400000001" +
-                "0000000400000001000000010000000400000002"
+                "0000000300000001000000010000000400000002" +
+                "0000000400000001000000010000000400000000"
     }
 }

@@ -50,43 +50,65 @@ object AiProviderCodec {
         )
     }
 
-    fun encodeModelListRequest(value: AiModelListRequest): ByteArray =
-        TaggedWireWriter(AiProviderProtocol.SCHEMA_MODEL_LIST_REQUEST, 1, 0)
+    fun encodeTargetListRequest(value: AiTargetListRequest): ByteArray =
+        TaggedWireWriter(AiProviderProtocol.SCHEMA_TARGET_LIST_REQUEST, 1, 0)
             .int32(1, value.protocolVersion.major, true)
             .int32(2, value.protocolVersion.minor, true)
             .int32(3, value.pageSize, true)
             .apply { value.pageToken?.let { string(4, it) } }
             .encode()
 
-    fun decodeModelListRequest(bytes: ByteArray): AiModelListRequest {
-        val document = document(bytes, AiProviderProtocol.SCHEMA_MODEL_LIST_REQUEST, (1..4).toSet())
-        return AiModelListRequest(
+    fun decodeTargetListRequest(bytes: ByteArray): AiTargetListRequest {
+        val document = document(bytes, AiProviderProtocol.SCHEMA_TARGET_LIST_REQUEST, (1..4).toSet())
+        return AiTargetListRequest(
             protocolVersion = AiProtocolVersion(document.requireInt32(1), document.requireInt32(2)),
             pageSize = document.requireInt32(3),
             pageToken = document.optionalString(4),
         )
     }
 
-    fun encodeModelInfo(value: AiModelInfo): ByteArray =
-        TaggedWireWriter(AiProviderProtocol.SCHEMA_MODEL_INFO, 1, 1)
-            .string(1, value.modelId, true)
-            .string(2, value.displayName, true)
-            .strings(3, value.capabilityIds)
-            .int64(4, value.maximumContextBytes, true)
-            .int64(5, value.maximumOutputBytes, true)
-            .apply { value.backendProfiles.forEach { document(6, encodeBackendProfileInfo(it)) } }
+    fun encodeTargetInfo(value: AiTargetInfo): ByteArray =
+        TaggedWireWriter(AiProviderProtocol.SCHEMA_TARGET_INFO, 1, 0)
+            .string(1, value.targetId, true)
+            .string(2, value.providerId, true)
+            .apply { value.profileId?.let { string(3, it) } }
+            .string(4, value.modelId, true)
+            .string(5, value.displayName, true)
+            .strings(6, value.capabilityIds)
+            .int32(7, value.locality, true)
+            .int32(8, value.credentialMode, true)
+            .string(9, value.availability, true)
+            .boolean(10, value.configured, true)
+            .apply { value.maximumContextBytes?.let { int64(11, it) } }
+            .apply { value.maximumOutputBytes?.let { int64(12, it) } }
+            .strings(13, value.supportedControls)
+            .strings(14, value.declaredHttpsOrigins)
+            .apply { value.backendProfiles.forEach { document(15, encodeBackendProfileInfo(it)) } }
             .encode()
 
-    fun decodeModelInfo(bytes: ByteArray): AiModelInfo {
-        val document = document(bytes, AiProviderProtocol.SCHEMA_MODEL_INFO, (1..6).toSet(), setOf(3, 6))
-        val backendProfiles = document.documents(6).map(::decodeBackendProfileInfo)
-        return AiModelInfo(
-            modelId = document.requireString(1),
-            displayName = document.requireString(2),
-            capabilityIds = document.strings(3),
-            maximumContextBytes = document.requireInt64(4),
-            maximumOutputBytes = document.requireInt64(5),
-            backendProfiles = backendProfiles.ifEmpty(::defaultBackendProfiles),
+    fun decodeTargetInfo(bytes: ByteArray): AiTargetInfo {
+        val document = document(
+            bytes,
+            AiProviderProtocol.SCHEMA_TARGET_INFO,
+            (1..15).toSet(),
+            setOf(6, 13, 14, 15),
+        )
+        return AiTargetInfo(
+            targetId = document.requireString(1),
+            providerId = document.requireString(2),
+            profileId = document.optionalString(3),
+            modelId = document.requireString(4),
+            displayName = document.requireString(5),
+            capabilityIds = document.strings(6),
+            locality = document.requireInt32(7),
+            credentialMode = document.requireInt32(8),
+            availability = document.requireString(9),
+            configured = document.requireBoolean(10),
+            maximumContextBytes = document.optionalInt64(11),
+            maximumOutputBytes = document.optionalInt64(12),
+            supportedControls = document.strings(13),
+            declaredHttpsOrigins = document.strings(14),
+            backendProfiles = document.documents(15).map(::decodeBackendProfileInfo),
         )
     }
 
@@ -106,27 +128,27 @@ object AiProviderCodec {
         )
     }
 
-    fun encodeModelPage(value: AiModelPage): ByteArray = requireModelPageEnvelopeSize(
-        TaggedWireWriter(AiProviderProtocol.SCHEMA_MODEL_PAGE, 1, 0)
-            .string(1, value.listingGeneration, true)
-            .apply { value.models.forEach { document(2, encodeModelInfo(it)) } }
+    fun encodeTargetPage(value: AiTargetPage): ByteArray = requireTargetPageEnvelopeSize(
+        TaggedWireWriter(AiProviderProtocol.SCHEMA_TARGET_PAGE, 1, 0)
+            .string(1, value.catalogGeneration, true)
+            .apply { value.targets.forEach { document(2, encodeTargetInfo(it)) } }
             .apply { value.nextPageToken?.let { string(3, it) } }
             .encode(),
     )
 
-    fun decodeModelPage(bytes: ByteArray): AiModelPage {
-        requireModelPageEnvelopeSize(bytes)
-        val document = document(bytes, AiProviderProtocol.SCHEMA_MODEL_PAGE, setOf(1, 2, 3), setOf(2))
-        return AiModelPage(
-            listingGeneration = document.requireString(1),
-            models = document.documents(2).map(::decodeModelInfo),
+    fun decodeTargetPage(bytes: ByteArray): AiTargetPage {
+        requireTargetPageEnvelopeSize(bytes)
+        val document = document(bytes, AiProviderProtocol.SCHEMA_TARGET_PAGE, setOf(1, 2, 3), setOf(2))
+        return AiTargetPage(
+            catalogGeneration = document.requireString(1),
+            targets = document.documents(2).map(::decodeTargetInfo),
             nextPageToken = document.optionalString(3),
         )
     }
 
-    internal fun requireModelPageEnvelopeSize(bytes: ByteArray): ByteArray = bytes.also {
-        require(it.size <= AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES) {
-            "Model page envelope is too large"
+    internal fun requireTargetPageEnvelopeSize(bytes: ByteArray): ByteArray = bytes.also {
+        require(it.size <= AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES) {
+            "Target page envelope is too large"
         }
     }
 
@@ -160,7 +182,7 @@ object AiProviderCodec {
         TaggedWireWriter(
             AiProviderProtocol.SCHEMA_GENERATION_OPTIONS,
             1,
-            if (value.backendProfile == AiProviderBackendProfile.CPU) 2 else 3,
+            0,
         )
             .boolean(1, value.stream, true)
             .boolean(2, value.includeReasoning, true)
@@ -177,12 +199,7 @@ object AiProviderCodec {
             .apply { value.topK?.let { int32(13, it) } }
             .apply { value.topP?.let { float64(14, it) } }
             .boolean(15, value.persistentSession, true)
-            .apply {
-                if (value.backendProfile != AiProviderBackendProfile.CPU) {
-                    // An older provider must reject instead of silently falling back to CPU.
-                    string(16, value.backendProfile, true)
-                }
-            }
+            .apply { value.backendProfile?.let { string(16, it, true) } }
             .encode()
 
     fun decodeGenerationOptions(bytes: ByteArray): AiGenerationOptions {
@@ -203,7 +220,7 @@ object AiProviderCodec {
             topK = document.optionalInt32(13),
             topP = document.optionalFloat64(14),
             persistentSession = document.requireBoolean(15),
-            backendProfile = document.optionalString(16) ?: AiProviderBackendProfile.CPU,
+            backendProfile = document.optionalString(16),
         )
     }
 
@@ -281,7 +298,7 @@ object AiProviderCodec {
             .int32(2, value.protocolVersion.major, true)
             .int32(3, value.protocolVersion.minor, true)
             .string(4, value.providerId, true)
-            .string(5, value.modelId, true)
+            .string(5, value.targetId, true)
             .apply { value.messages.forEach { document(6, encodeMessage(it), true) } }
             .document(7, encodeGenerationOptions(value.options), true)
             .apply { value.tools.forEach { document(8, encodeToolDefinition(it)) } }
@@ -293,7 +310,7 @@ object AiProviderCodec {
             requestId = document.requireString(1),
             protocolVersion = AiProtocolVersion(document.requireInt32(2), document.requireInt32(3)),
             providerId = document.requireString(4),
-            modelId = document.requireString(5),
+            targetId = document.requireString(5),
             messages = document.documents(6).map(::decodeMessage),
             options = decodeGenerationOptions(document.requireDocument(7)),
             tools = document.documents(8).map(::decodeToolDefinition),
@@ -307,7 +324,7 @@ object AiProviderCodec {
             .int32(3, value.protocolVersion.major, true)
             .int32(4, value.protocolVersion.minor, true)
             .string(5, value.providerId, true)
-            .string(6, value.modelId, true)
+            .string(6, value.targetId, true)
             .int64(7, value.firstChunkSequence, true)
             .int64(8, value.effectiveMaximumOutputBytes, true)
             .int32(9, value.effectiveMaximumToolRounds, true)
@@ -320,7 +337,7 @@ object AiProviderCodec {
             sessionId = document.requireString(2),
             protocolVersion = AiProtocolVersion(document.requireInt32(3), document.requireInt32(4)),
             providerId = document.requireString(5),
-            modelId = document.requireString(6),
+            targetId = document.requireString(6),
             firstChunkSequence = document.requireInt64(7),
             effectiveMaximumOutputBytes = document.requireInt64(8),
             effectiveMaximumToolRounds = document.requireInt32(9),
@@ -389,10 +406,4 @@ object AiProviderCodec {
         .rejectUnknownRequiredFields(knownTags)
         .validateKnownCardinality(knownTags, repeatedTags)
 
-    private fun defaultBackendProfiles(): List<AiBackendProfileInfo> = listOf(
-        AiBackendProfileInfo(
-            profileId = AiProviderBackendProfile.CPU,
-            availability = AiProviderBackendAvailability.AVAILABLE,
-        ),
-    )
 }

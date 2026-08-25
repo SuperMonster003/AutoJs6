@@ -186,7 +186,7 @@ data class AiError(
 }
 
 /**
- * Cumulative V1 usage snapshot. When all three token totals are present, [totalTokens] is at least
+ * Cumulative usage snapshot. When all three token totals are present, [totalTokens] is at least
  * [inputTokens] plus [outputTokens]. Reasoning and cached-input counters are detail counters and
  * are not added again because a provider may already include them in output or input tokens.
  * [durationMillis] is the provider-measured generation duration and deliberately excludes host
@@ -347,6 +347,7 @@ object AiDescriptorReferencePolicy {
 
 object AiValidation {
     val STABLE_ID = Regex("^[a-z0-9][a-z0-9._-]{0,127}$")
+    val TARGET_ID = Regex("^[a-z0-9][a-z0-9._-]{0,127}:[a-z0-9][a-z0-9._-]{0,127}$")
     val ABI = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
     val MIME_TYPE = Regex("^[a-z0-9][a-z0-9!#$&^_.+-]{0,63}/[a-z0-9][a-z0-9!#$&^_.+-]{0,63}$")
     val SHA_256 = Regex("^[0-9a-f]{64}$")
@@ -375,6 +376,11 @@ object AiValidation {
     fun requireUtf8(value: String, minimumBytes: Int, maximumBytes: Int, label: String) {
         val bytes = utf8Size(value)
         require(bytes in minimumBytes..maximumBytes) { "$label has an invalid UTF-8 length" }
+    }
+
+    fun requireSafeText(value: String, minimumBytes: Int, maximumBytes: Int, label: String) {
+        requireUtf8(value, minimumBytes, maximumBytes, label)
+        require(value.none(Character::isISOControl)) { "$label contains control characters" }
     }
 
     fun requireHttpsOrigin(origin: String) {

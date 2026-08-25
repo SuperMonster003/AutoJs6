@@ -10,7 +10,7 @@ import org.autojs.plugin.ai.provider.api.AiProviderRequest
 import org.autojs.plugin.ai.provider.api.AiToolDefinition
 
 internal fun fakeRequest(
-    modelId: String = FakeAiProviderFixture.MODEL_ECHO,
+    targetId: String = FakeAiProviderFixture.TARGET_ECHO,
     prompt: String = "hello",
     stream: Boolean = false,
     reasoning: Boolean = false,
@@ -24,7 +24,7 @@ internal fun fakeRequest(
     requestId = "fake-request",
     protocolVersion = FakeAiProviderFixture.protocolVersion,
     providerId = FakeAiProviderFixture.PROVIDER_ID,
-    modelId = modelId,
+    targetId = targetId,
     messages = listOf(
         AiMessage(
             role = AiMessageRole.USER,

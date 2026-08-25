@@ -1,1038 +1,201 @@
 # AI Plugin Protocol Pack Evaluation
 
-This note evaluates a provider-neutral AI plugin protocol for AutoJs6. It
-defines a deliberately narrow build-time protocol pack and its runtime Binder
-boundary. It does not extract the current host AI implementation and does not
-authorize a mixed-modality AI plugin.
+This note records the architectural decision and current implementation status
+for the provider-neutral AI plugin boundary in AutoJs6.
 
 ## Decision
 
-Proceed with a limited GO for a build-time AI protocol pack and a dedicated
-conformance test app.
+Proceed with a dedicated text-generation protocol pack, a strict Binder trust
+boundary, and an independently released official AI plugin. Use one unified
+target catalog for on-device and explicitly configured online destinations.
 
-Implementation status on 2026-08-11: Phase 1 is implemented as a
-provider-neutral text protocol pack and an isolated conformance test app under
-`test-apps`. Phase 3 now has a real CPU-only on-device provider in the
-independent sibling project `AutoJs6-Plugin-Three-Stone-AI`. A non-invasive
-slice of Phase 2 now includes default-off pure Kotlin host selection,
-model-list, and session-transcript policies, read-only Android package discovery,
-an exact-component metadata handshake, and exact-component Android model-list
-and session coordinators/transports. Three strict prompt-only production routes
-now connect explicitly selected `ai.ask`, `ai.chat`, and `ai.stream` calls to
-those layers.
-The protocol layer also binds tool calls to the original request,
-verifies descriptor-backed tool JSON, enforces aggregate streaming digests and
-quotas, rejects decoded duplicate JSON keys, and redacts payload-bearing model
-summaries. The Android session slice can explicitly exercise `openSession`, a
-generated `IAiCallback`, request PFDs, streaming credits, and callback PFD
-ownership. One API 31 production positive-path smoke covers a real release
-provider, real model, and public Rhino `ai.ask`; separate API 31 public Rhino
-`ai.stream` and `ai.chat` smokes cover the test-only fake provider beyond the
-initial eight chunk credits and the normalized prompt-only chat response,
-respectively. Remote `listingGeneration` proof, automatic UI selection,
-real-provider chat/streaming, and the broader production matrix remain open.
-Installing either app alone still has no effect on the public AI module because
-no component is selected automatically.
-Repository and Android runtime
-gates are tracked in
-[the conformance matrix](compiler-ai-protocol-conformance.md), and the frozen
-contract is documented in
-[AI Provider Protocol V1](ai-provider-protocol-v1.md).
+The decision remains a NO-GO for a mixed-modality AI transport and for moving
+credential bytes through the host. Image, audio, and video require separate
+protocol families. Remote credentials remain encrypted and resolved inside the
+selected plugin process.
 
-V1 supports provider-neutral text generation only: one-shot chat, chat over a
-supplied message history, streaming text, reasoning metadata, tool-call
-descriptions, tool results, usage, cancellation, and capability discovery. One
-session represents one generation request plus bounded tool rounds; v1 does not
-publish a reusable conversation handle across separate script calls. The
-current host implementation remains available and continues to back every
-`ai.ask`, `ai.chat`, and `ai.stream` call whose options do not contain a
-`plugin` selector.
+## Current Status
 
-This decision is a NO-GO for immediate extraction of the current host HTTP AI
-stack and a NO-GO for one monolithic AI plugin. Image, audio, and video are
-separate future protocol families and must be delivered as three independent
-plugins. A provider supporting several modalities does not relax that boundary.
+As of 2026-08-25, the host and official 3-Stone AI plugin implement AI Provider
+V2 directly:
 
-## Current Repository Evidence
+- the API exposes only the V2 target catalog and session surface;
+- `listTargets` pages both `local:*` and `profile:*` destinations;
+- every target declares logical provider/model identity, locality,
+  configuration and availability, capabilities, limits, controls, and HTTPS
+  origins;
+- provider declarations support `ON_DEVICE`, `REMOTE`, and `HYBRID`, with
+  `NONE` or `PLUGIN_MANAGED` credential modes as appropriate;
+- host session plans contain no credential bytes or arbitrary network
+  configuration;
+- completed events carry a verified final payload and finish reason;
+- fake-provider, hostile Binder, host policy, Android compile, and real plugin
+  JVM suites cover the V2 surface.
 
-The host AI implementation already contains security-sensitive behavior that
-would not become simpler merely by moving it across Binder:
+The current public `ai.ask`, `ai.chat`, `ai.stream`, and `ai.session` plugin
+route is connected. Its model selector is projected onto the V2 catalog while
+the next roadmap stage adds an explicit public `target` selector and
+`ai.catalog()` view. Existing cloud-backed calls without a plugin selector are
+unchanged during that stage.
 
-- `app/src/main/java/org/autojs/autojs/core/ai/AiProviderDefinition.kt` defines
-  six built-in providers covering OpenAI, Anthropic, Gemini, DeepSeek,
-  OpenRouter, and generic OpenAI-compatible endpoints.
-- `app/src/main/java/org/autojs/autojs/core/ai/AiProviderVault.kt` stores each
-  provider profile and API key as one authenticated encrypted entry through
-  the Android Keystore backed AES-GCM implementation in
-  `app/src/main/java/org/autojs/autojs/core/security/AndroidKeyStoreSecretCipher.kt`.
-- Credential-bearing HTTP clients disable redirects and automatic retries and
-  constrain proxy behavior in
-  `app/src/main/java/org/autojs/autojs/runtime/api/ai/AiHttpClientFactory.kt`.
-- The adapters under `app/src/main/java/org/autojs/autojs/core/ai/transport/`
-  normalize OpenAI-compatible, Anthropic Messages, and Gemini Generate Content
-  request and response shapes.
-- `app/src/main/java/org/autojs/autojs/runtime/api/ai/AiService.kt` and the
-  transport package handle SSE quotas, streaming accumulation, cancellation,
-  provider-neutral usage, reasoning fields, and tool-call round trips.
-- `app/src/main/java/org/autojs/autojs/runtime/api/augment/ai/Ai.kt` exposes the
-  existing `ai.ask`, `ai.chat`, and `ai.stream` script facade.
-- `app/src/main/java/org/autojs/autojs/core/plugin/ai/` contains
-  transport-independent selection, transcript, and session policies plus the
-  process-shared Android runner used only by explicit plugin `ai.ask`,
-  `ai.chat`, and `ai.stream` calls. The pure policies themselves do not query
-  `PackageManager`, bind a service, read a credential, or connect to the script
-  facade.
-- `AiProviderSessionPolicy` now owns a default-off pure Kotlin session
-  transcript: plan/request admission, provisional callbacks around a
-  synchronous open, callback UID and size checks before asynchronous retention
-  or decode, bounded credits and ingress, descriptor cleanup, and one terminal outcome. Its
-  descriptor, callback, and remote interfaces remain transport abstractions.
-- The same package now contains read-only Android discovery, a metadata-only
-  exact-component handshake, and an exact-component model-list
-  coordinator/transport. The model-list adapter can call only the provider
-  metadata getters and `listModels()`; the explicit ask/chat/stream runner
-  composes it with the separate session adapter rather than expanding that
-  surface.
-- A separate `AiProviderSessionCoordinator` and
-  `AndroidAiProviderSession` now adapt those transcript abstractions to one
-  explicitly enabled, exact-component Android session. They revalidate bounded
-  provider metadata on the same Binder used for `openSession`, capture callback
-  UID before typed admission, preserve reliable callback-PFD state through
-  ownership transfer, and serialize credit/death/terminal cleanup. Their entry
-  option still defaults off; only the explicit production ask/chat/stream
-  runner constructs enabled attempts. There is no automatic or UI construction
-  path.
-- Built-in `ai.chat` results include provider-native `message` and `raw` fields;
-  transport tests prove that opaque reasoning/thinking signatures survive a
-  later same-provider tool round trip. The narrow prompt-only plugin chat route
-  instead returns a fixed provider-neutral shape with those fields set to null;
-  it is not full provider-native script compatibility.
-- OkHttp 4.12.0 and Gson 2.13.2 are shared host dependencies rather than
-  AI-only payload.
+The normative contract is [AI Provider Protocol V2](ai-provider-protocol-v2.md).
+Repository and runtime gates are tracked in
+[the conformance matrix](compiler-ai-protocol-conformance.md).
 
-Extracting that code now offers little dependable host-size benefit and would
-add credential, endpoint, retry, and compatibility risk. The stronger near-term
-benefit is extensibility: third parties can add a provider or a local text model
-without changing the stable script API.
+## Why A Target Catalog
 
-## Narrow Production `ai.ask`, `ai.chat`, And `ai.stream` Routes
+A model name alone cannot describe the security and routing decision required
+for a hybrid plugin. The same model string can appear in a local runtime and in
+several online profiles, each with different provider identity, origin,
+credential state, limits, cost boundary, and availability.
 
-Phase 2 preserves the existing `ai.ask`, `ai.chat`, and `ai.stream` signatures
-while admitting this explicit selector shape:
-
-```javascript
-ai.ask(prompt, {
-    plugin: {
-        component: {
-            packageName: "org.example.provider",
-            className: "org.example.provider.AiProviderService",
-        },
-        providerId: "example.provider",
-        modelId: "example-model",
-    },
-    timeout: 120000,
-});
-
-ai.chat(prompt, {
-    plugin: {
-        component: {
-            packageName: "org.example.provider",
-            className: "org.example.provider.AiProviderService",
-        },
-        providerId: "example.provider",
-        modelId: "example-model",
-    },
-    timeout: 120000,
-});
-
-const stream = ai.stream(prompt, {
-    plugin: {
-        component: {
-            packageName: "org.example.provider",
-            className: "org.example.provider.AiProviderService",
-        },
-        providerId: "example.provider",
-        modelId: "example-model",
-    },
-    timeout: 120000,
-});
-```
-
-All four pins are required: component package and class, provider ID, and model
-ID. Timeout must be an integer from 1,000 through 600,000 milliseconds and
-defaults to 120,000. Presence of the `plugin` key chooses the local branch even
-when its value is malformed. That branch strictly rejects unknown fields,
-explicit streaming, and all profile/provider/base-URL/model/API-key cloud
-controls. It never reads the vault, sends HTTP, retries, or falls back to a
-built-in provider. When `plugin` is absent, the established cloud path remains
-unchanged.
-
-All three routes accept one plain-text user message only and send inline data
-with zero request descriptors and no reasoning, structured JSON, usage, tools,
-or tool rounds. `ai.ask` and `ai.chat` open non-streaming sessions through the
-same unary runner. Chat maps completion to the fixed 12-key public result
-`text`, `reasoning`, `toolCalls`, `usage`, `finishReason`, `message`, `error`,
-`raw`, `profile`, `route`, `provider`, and `model`; only text and the exact
-plugin route/provider/model metadata are populated, reasoning is empty,
-toolCalls is empty, and the other optional fields are null. `ai.stream`
-requires the provider/model `STREAMING` capability and maps `Started` to `open`,
-each text chunk to `chunk` followed by `delta` in one dispatcher action, and
-completion to `done`. The exact component must pass the existing repeated
-identity checks, the provider must match the selected ID and remain `ON_DEVICE`
-with credential mode `NONE`, and model listing must plan the exact selected
-model.
-
-One lazily created process backend owns one admission gate shared by routed ask,
-chat, and stream attempts, single-thread orchestration/control/terminal/deadline
-lanes, a bounded
-three-operation blocking pool, and the existing model-list/session process
-owners. One outer absolute deadline covers discovery through the active session
-terminal; lower owners retain settled cleanup responsibility. Per-script
-runtime owners cancel and close active handles once on shutdown and ignore late
-terminals; public stream cancellation propagates to its bound plugin attempt,
-while runtime shutdown is silent. Natural completion only closes the handle.
-No operation is automatically retried after dispatch.
-
-The source/JVM gate remains green. The earlier standalone K2/JUnit ask slice
-passed 15/15 tests (8 parser, 3 mapper, 4 runtime). After production commit
-`2ea3360a2` and test commit `50b43d00c`, the focused Gradle XML recorded 25/25
-tests across `AiPluginAskInputMapperTest` (3), `AiPluginAskRuntimeTest` (4),
-`AiPluginStreamRuntimeTest` (4), `AiServicePluginRouteTest` (5), and
-`AiStreamTest` (9), with 0 skipped, 0 failures, and 0 errors. The production
-plugin separately retained its completed `testDebugUnitTest`, `lintDebug`,
-`assembleDebug`, and `assembleRelease` evidence. For the chat addition, the
-exact tested-source feature/test commits are `d480b6918` / `b0aa67684`; focused
-Gradle XML at tested source `b0aa6768484d6046551264f69ecc84b527bbb442`
-recorded 14/14 tests across `AiPluginAskInputMapperTest` (3),
-`AiPluginAskRuntimeTest` (4), and `AiServicePluginRouteTest` (7), with 0
-skipped, 0 failures, and 0 errors. Main integrates those changes as production
-commit `2d256b99f` and test commit `c35f199b8`; those integration commits are
-traceability references, not the source of the tested APKs.
-
-On 2026-08-11,
-`AiPluginPublicAskSmokeTest#publicRhinoAiAskCompletesThroughExactRealPlugin`
-completed on `QV710AF65F` (API 31, arm64-v8a). The method traversed the real
-Rhino `ScriptEngineService`, public global `ai.ask` with an explicit plugin
-selector, the release plugin service/provider, and one real 2,583,085,056-byte
-model. The model SHA-256 was
-`ab7838cdfc8f77e54d8ca45eadceb20452d9f01e4bfade03e5dce27911b27e42`
-and its imported ID was
-`litertlm.ab7838cdfc8f77e54d8ca45eadceb204`. The public Promise settled with a
-nonempty result; the complete instrumentation method took 7.071 seconds and
-returned `OK (1 test)` with `INSTRUMENTATION_CODE: -1`.
-
-The host App Debug, instrumentation, and release plugin v32 APK SHA-256 values
-were, respectively,
-`b7dab13c33b49f12f45de7a2091fabffa41618c983055fa19083ab1482af9561`,
-`09b6277f7da86d1b0a6b7143bb27236c46873c731736640b79fe8e72edcfd5cf`,
-and `ee16cea749753b4e8d7c03d4cce72066495f8b7fb251ea0a88bf5165a6c0a5bb`.
-All three used APK Signature Scheme v2 with certificate SHA-256
-`31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213`;
-their installed `base.apk` files matched the local candidates byte for byte.
-Exact checks for users 0 and 10 found all three packages absent before and after
-the reversible transaction, as were its three reserved external-storage paths.
-The detailed receipt is retained locally only.
-
-This proves one production positive path, not the broader promotion matrix. It
-is one physical device, one real model, one non-streaming one-shot ask, and an
-App Debug host. That ask method does not cover a release host, API matrix,
-plugin-backed chat/stream, tools, structured output, usage, clipboard behavior,
-active-request update/uninstall, performance, or soak. DocumentsUI model import
-can also drift its last-location UI state because that state has no lossless
-snapshot/restore contract.
-
-Also on 2026-08-11, the exact method
-`AiPluginPublicStreamSmokeTest#publicRhinoAiStreamCompletesThroughExactFakeProvider`
-returned `OK (1 test)` in 1.645 seconds with instrumentation code `-1` on
-`QV710AF65F` (API 31, arm64-v8a, user 0). Source HEAD was
-`50b43d00cc634f8a220856bf68f936fc800442a4`. The method traversed the real
-`ScriptEngineService` and public Rhino `ai.stream`, with the exact test-only
-package `org.autojs.plugin.ai.provider.fake`, service class
-`org.autojs.plugin.ai.provider.fake.service.FakeAiProviderService`, provider
-`fake.local`, and model `fake.stream`. It observed one `open`, more
-than eight `chunk` events, the same number of `delta` events, and one `done`;
-both aggregates and `done.text` exactly reproduced the UTF-8 prompt. It observed
-no usage, tool-call, error, or cancellation event.
-
-The host arm64 App Debug, instrumentation, and fake-provider APK SHA-256 values
-were, respectively,
-`10782233667a77c2df5c02e1299dd0d6d4194cc188d4f586f8d23257dc5cc951`,
-`6025b35860be52b0477013327f7c458e12ce5751f568dfacf1ab299ae074d309`,
-and `6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
-Exact final checks found the three packages absent for users 0 and 10 and all
-nine reserved external data/media/obb paths absent.
-
-This public stream result is **PARTIAL** fake-provider evidence. It ended
-naturally and does not exercise public `stream.cancel()`, engine-stop
-cancellation, a real production provider/model stream, a release host, or any
-API/ABI matrix. The exactly-once public-cancel/completion race and silent
-runtime-close behavior remain JVM evidence in `AiStreamTest` and
-`AiPluginStreamRuntimeTest`; they must not be promoted to Android evidence. This
-additional public route closes neither broad R1 nor protocol exit criteria.
-
-The same date also has one exact public chat conformance smoke.
-`AiPluginPublicChatSmokeTest#publicRhinoAiChatReturnsNormalizedResponseThroughExactFakeProvider`
-reported `OK (1 test)`, `Time: 1.54`, and instrumentation code `-1` on
-`QV710AF65F` (API 31, arm64-v8a, user 0). The APK-tested source was
-`b0aa6768484d6046551264f69ecc84b527bbb442`, following feature commit
-`d480b6918`; the corresponding main integration commits are `2d256b99f` and
-`c35f199b8`, but were not the APK source. The method traversed the real
-`ScriptEngineService` and public Rhino `ai.chat`, selecting the exact test-only
-package `org.autojs.plugin.ai.provider.fake`, service class
-`org.autojs.plugin.ai.provider.fake.service.FakeAiProviderService`, provider
-`fake.local`, and model `fake.echo`.
-
-The Promise resolved exactly once after natural completion. Its response had
-the exact 12-key set `text`, `reasoning`, `toolCalls`, `usage`, `finishReason`,
-`message`, `error`, `raw`, `profile`, `route`, `provider`, and `model`: text
-equalled the UTF-8 prompt, reasoning was an empty string, toolCalls was an empty
-array, usage/finishReason/message/error/raw/profile were null, and route,
-provider, and model were `plugin`, `fake.local`, and `fake.echo`.
-
-The host arm64 App Debug, instrumentation, and fake-provider APK SHA-256 values
-were, respectively,
-`2d3dfb9c16ad91ccb73c6a969db7dcc9b10046df14f716c82d9e61f07faaf1d3`,
-`9caa1cc6936d98c380c9c9ffe81178a0e81e667207da9623fa95c19bf3a11166`,
-and `6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
-Exact pre/post checks found the host, instrumentation, and fake-provider
-packages absent for users 0 and 10 and all nine reserved external
-data/media/obb paths absent.
-
-This chat result is **PARTIAL** fake-provider evidence. It does not exercise a
-real provider or model, a release host, another API/ABI, a failure or Binder
-death, or forced engine/runtime cancellation on device. Failure mapping and
-silent runtime-close behavior remain focused JVM evidence only. It promotes no
-broad R1 checkbox or protocol exit criterion.
-
-## Meaning Of Protocol Pack
-
-The protocol pack is a set of small Android Library artifacts used at build
-time by the host and provider plugins. It is not a runtime plugin APK and does
-not contain an AI engine.
-
-The initial artifact split is:
+The V2 target record makes those properties explicit before session opening:
 
 ```text
-ai-common-api
-  protocol versions, stable IDs, capabilities, errors, usage, finish reasons,
-  locality, credential mode, modality, bounded metadata, and PFD references
-
-ai-provider-api
-  messages, chat requests, stream chunks, reasoning metadata, tools, sessions,
-  callbacks, cancellation, and flow control
-
-ai-provider-conformance
-  conformance provider, hostile fixtures, host harness, and compatibility corpus
+Binder plugin identity
+  -> catalog generation
+    -> exact target identity
+      -> logical provider + model + locality
+      -> configured/available state
+      -> capabilities + limits + controls
+      -> declared HTTPS origins
 ```
 
-The API artifacts must not depend on Gson, OkHttp, Retrofit, Bitmap, OpenCV,
-Media3, a provider SDK, a model runtime, or native libraries. Parcelable and
-AIDL types are the wire contract; provider JSON never crosses the public
-boundary. Binary compatibility checks and a generated public API signature are
-release gates for every protocol artifact.
-
-Every wire Parcelable is size-prefixed and field-tagged, with an explicit
-schema version and only primitives, strings, protocol parcelables, and declared
-PFDs. Ordinary positional `Parcelable`, `Bundle`, Java serialization, arbitrary
-class names, and undeclared Binder objects are forbidden. This encoding is what
-makes an unknown optional field skippable; a Kotlin `@Parcelize` class alone
-does not establish that compatibility property.
-
-Future packs remain separate:
-
-```text
-ai-embedding-api
-ai-image-api
-ai-audio-api
-ai-video-api
-```
-
-`ai-image-api`, `ai-audio-api`, and `ai-video-api` are independent artifacts and
-must not be merged into a multimedia or multimodal catch-all API. Their plugin
-APKs are also independent. OCR, barcode recognition, OpenCV processing, and
-image quantization remain their own domains rather than generic AI operations.
-
-## V1 Scope
-
-V1 includes:
-
-- Text input and text output only.
-- One-shot generation over a single message or a supplied multi-turn history.
-- Incremental streaming with explicit backpressure.
-- Provider-neutral roles, content parts, finish reasons, usage, and bounded
-  reasoning metadata.
-- Tool definitions, plugin-produced tool-call descriptions, host-produced tool
-  results, and bounded multi-round continuation.
-- Provider and model capability discovery with paged model listing.
-- Cancellation, timeout, Binder-death cleanup, and exactly one terminal event.
-- Local and remote provider declarations with explicit credential modes.
-- PFD references for oversized text, schemas, and tool data.
-
-V1 explicitly excludes:
-
-- Image, audio, or video input or output.
-- Embeddings, reranking, OCR, barcode recognition, speech recognition, speech
-  synthesis, image editing, and media generation.
-- One plugin that proxies OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, local
-  LLMs, OCR, vision, and media models together.
-- Direct access to `AiProviderVault` or any host-managed credential.
-- Direct execution of AutoJs6 tools, scripts, intents, shell commands, files, or
-  accessibility actions by the plugin.
-- Automatic cloud fallback, arbitrary HTTP proxying, prompt replay, or deferred
-  offline requests.
-- A v1 model downloader, model marketplace, or shared model-storage manager.
-- Immediate migration or removal of built-in host providers.
-
-## Proposed Text Protocol
-
-A conceptual v1 Binder surface is:
-
-```text
-IAiProvider
-  getInfo()
-  getCapabilities()
-  listModels(pageToken, callback)
-  openSession(request, callback) -> IAiSession
-
-IAiSession
-  grantCredits(count)
-  submitToolResults(results)
-  cancel()
-  close()
-
-IAiCallback
-  onStarted(metadata)
-  onChunk(sequence, chunk)
-  onToolCalls(calls)
-  onUsage(usage)
-  onCompleted(result)
-  onFailed(error)
-  onCancelled()
-```
-
-The interface names describe responsibilities rather than freezing exact AIDL
-syntax. The conformance fixture must validate these semantics before the AAR is
-treated as stable:
-
-- Exactly one terminal callback is allowed.
-- `cancel()` and `close()` are idempotent.
-- Binder death, script-runtime close, host timeout, plugin disable, update, and
-  uninstall close the session and every owned descriptor.
-- `onStarted` occurs at most once and before any data event. The provider
-  serializes callbacks on one logical event lane, and no event is accepted
-  after a terminal callback.
-- Chunk sequence numbers are strictly increasing and unique.
-- At most one tool turn is outstanding. Tool calls pause ordinary completion
-  until every accepted call receives one result or the session is cancelled.
-- Usage counters are non-negative and monotonic when reported incrementally.
-- A provider tool name must occur in the original request tool whitelist.
-  Stable-name syntax alone does not authorize a tool call.
-- Descriptor-backed JSON is materialized within its declared bound and checked
-  for exact length, optional digest, strict UTF-8, one complete JSON entity,
-  complexity quotas, and duplicate decoded object keys.
-- A non-streaming request rejects chunks, and a request that did not ask for
-  reasoning rejects reasoning deltas or terminal reasoning metadata.
-- Streamed visible/reasoning bytes and terminal visible/reasoning payloads use
-  one cumulative negotiated output budget rather than independent allowances.
-- A terminal callback and a bounded error are never blocked by stream credits.
-- Provider-specific deltas are merged inside the plugin. Provider-native
-  continuation state remains plugin-private for the live session and is erased
-  on every terminal path.
-- `listModels()` emits exactly one bounded page or one bounded error. Page
-  tokens are scoped to package, signer, provider, protocol, and listing
-  generation; repeated, expired, or cyclic tokens are rejected.
-
-## Capability And Version Negotiation
-
-Provider capabilities include:
-
-- Protocol minimum and maximum major/minor versions.
-- Stable provider ID, display metadata, implementation version, and signer
-  identity observed by the host.
-- Supported operations, with `TEXT_GENERATION` as the only v1 operation.
-- Input and output modalities, both restricted to `TEXT` in v1.
-- Data locality: `ON_DEVICE`, `REMOTE`, or `HYBRID`.
-- Credential mode: `NONE` or `PLUGIN_MANAGED` in v1.
-- Declared remote HTTPS origins for remote and hybrid providers.
-- Support flags for streaming, reasoning metadata, tools, structured JSON, and
-  usage reporting.
-- Maximum messages, parts, tools, context bytes, output bytes, and tool rounds.
-- Accepted text and schema MIME types.
-- ABI requirements and minimum/maximum supported host versions.
-
-The host intersects requested behavior with declared capabilities before
-opening a session. An unknown required field or capability rejects the plugin.
-An unknown optional field is ignored. Breaking parcel, lifecycle, flow-control,
-credential, or privacy semantics require a new protocol major version.
-
-The current pure host policy accepts candidates from the default-off discovery
-layer. With its entry option explicitly enabled, it checks the action,
-export/enable state, signature-level `org.autojs.permission.PLUGIN` binding
-permission, trust authorization, host version, ABI, and protocol/capability
-intersection. It rejects multiple eligible providers unless one exact
-component was selected; duplicate eligible rows for that same component remain
-ambiguous and are rejected. It pins the exact component, package UID, complete
-normalized signer set, package version, last-update time, provider metadata,
-negotiated protocol, and capabilities, then requires an exact revalidation
-immediately before dispatch. A callback UID must equal the pinned package UID.
-
-`AndroidAiProviderDiscovery` can supply package snapshots when called
-explicitly, and the metadata handshake and model-list transport can bind an
-actionless intent to one exact component. Both verify the AIDL interface
-descriptor before constructing a proxy. The model-list coordinator uses the
-same descriptor-verified Binder to revalidate bounded provider metadata and to
-invoke every initial or continuation `listModels()` request; it reinspects the
-exact package identity immediately before each dispatch and before each
-callback is admitted.
-
-The Android model-list callback captures `Binder.getCallingUid()` synchronously.
-The coordinator rejects the wrong UID and oversized envelope before its one
-defensive copy, bounds callback-flood admission, and gives cancellation,
-timeout, Binder death, callback, and provider-error races one terminal owner.
-Its process owner serializes transcripts, retains component fuses, and isolates
-bounded continuation-token ledgers by the complete pinned transport identity.
-Bindings, death recipients, prepared callback registrations, the absolute
-deadline, and operation leases are coordinator-owned. These classes remain
-default-off and unwired; their existence does not authorize discovery or bind a
-provider.
-
-The Android session coordinator follows the same rule with a stricter dispatch
-sequence. It checks the plan/package pin before admission, performs four exact
-package inspections, binds the exact component with an actionless intent,
-verifies `IAiProvider`, reads bounded provider info and capabilities from
-that same Binder, revalidates the pinned metadata, and performs the final exact
-inspection immediately before one synchronous `openSession`. It verifies the
-returned `IAiSession` descriptor and links death before accepting the
-remote. Callback-before-return is buffered provisionally and becomes visible
-only after the synchronous open commits.
-
-The callback stub captures `Binder.getCallingUid()` on ingress. The policy
-checks the pinned UID, event-specific envelope ceiling, descriptor count, and
-strict wire type before data admission. Request PFDs are borrowed only by the
-synchronous open call. Callback PFDs cross the async boundary by transferring
-the complete `ParcelFileDescriptor` objects, rather than `dup()` of only their
-data FDs, so reliable-pipe `closeWithError()`/`checkError()` state is retained.
-Null elements close all valid peers and become a deterministic invalid-count
-policy failure. Descriptor reads require exact declared length, EOF, optional
-digest/UTF-8 validation at the protocol layer, and reliable producer-error
-checking.
-
-One absolute deadline and one process owner cover binding, Binder/PFD/control
-operations, and cleanup. Eight initial credits are granted after open commit;
-one is replenished only after a chunk is delivered. Cancel, timeout, Binder
-death, callback terminal, and control failure have one winner. Terminal
-publication waits for policy settlement, descriptor/remote cleanup, binding
-release, and process-gate release. An operation crossing the deadline fuses the
-component and keeps the gate busy until it unwinds. No operation is retried
-after dispatch.
-
-The session plan contains the model-list `listingGeneration`, but neither the
-bounded provider metadata getters nor `openSession` return a current catalog
-generation. Same-Binder metadata and exact package revalidation therefore
-cannot remotely prove that the planned generation or model record remains
-current. This is an explicit Phase 2 promotion gap.
-
-Every Android package fact still comes independently from `PackageManager`; an
-action string or package name supplied inside a Parcel is not caller proof. The
-provider must separately check `Binder.getCallingUid()` and the packages/signers
-associated with that UID against its expected authorized host identity.
-
-`AiProviderSessionPolicy` is a separate default-off pure Kotlin transcript
-owner. It validates an already pinned plan and request before producing a
-dispatch decision. Callbacks arriving before the synchronous open transaction
-returns are provisional and become listener-visible only after
-`commitOpenSucceeded()`; external cancel, timeout, or death can supersede them
-before commit, while `commitOpenFailed()` reports `OPEN_FAILED` when no external
-terminal has won. The policy checks callback UID and envelope size before retention
-or decode, uses a bounded callback queue with a minimum capacity of ten (one
-start, eight initially credited chunks, and one terminal), and does not
-replenish credit after terminal ingress.
-
-Remote teardown and late-handle cleanup are serialized, prompt, and idempotent;
-listener publication waits for open resolution, request and callback descriptor
-cleanup, ownership-transfer/read reservations, data delivery, credit grants,
-and remote closures to settle. Executor rejection has an independent terminal fallback,
-and a double-rejection contract breach drains claimable resources without
-invoking the listener on the rejecting thread. Tool-bearing requests and
-tool-call callbacks fail closed in this slice without reading tool descriptors.
-Event summaries omit payload-bearing and provider-controlled text.
-
-The policy source and tests landed in commit `325577c82`. Standalone Kotlin
-K2/JVM execution passed 40/40 tests; 30 repeated rounds passed 1200/1200, and a
-focused Gradle run recorded 40 tests with no skips or failures. The later
-coordinator, Android transport, and instrumentation commits are `4f22dc854`,
-`038728f03`, and `a22ed8b75`. Their focused Gradle coordinator run recorded 18
-tests, 0 skipped, 0 failures, and 0 errors and assembled the host,
-instrumentation, and fake-provider APKs.
-
-The earlier API 31 baseline ran two exact methods: a cross-process
-`fake.stream` request-PFD session delivered approximately 18 ordered chunks
-beyond the initial eight credits, then usage and one off-main-thread
-completion; the process-local descriptor-owner method covered exact, short,
-trailing, reliable-producer-error, and idempotent-close cases.
-
-The H1 hostile-provider and instrumentation commits are `edd10008f` and
-`06ebc788c`. The focused Gradle results were coordinator 18/0 and fake provider
-unit 31/0, followed by successful assembly of the host, instrumentation, and
-fake-provider APKs. All three APKs used Signature Scheme v2 and certificate
-SHA-256
-`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
-Their artifact SHA-256 values were host
-`0ec03495cdd096fa812dd64641c07a484bdd2231df777427f55e8dd9a96e2634`,
-instrumentation
-`68e9a08522c03e2daa2575a0a087403372adf0e6eefee452fcce66263ecdaa59`,
-and final fake provider
-`8c9c3b3d0eca3e67c41a2c563e975d927e5422018c5a790330c10b164303b521`.
-
-On `QV710AF65F` (API 31, arm64-v8a), seven exact H1 method invocations each
-returned `OK (1 test)`: `completionDescriptorIsMaterializedAcrossProcess`,
-`toolDescriptorIsOwnedThenRejectedWithoutExecution`,
-`chunkBeforeStartFailsClosedAfterInitialCreditCommit`,
-`sequenceGapFailsClosedOnce`,
-`invalidCompletionDescriptorReferenceFailsClosedOnce`,
-`duplicateTerminalPublishesOnlyOneSettledOutcome`, and
-`stalledSessionCanBeCancelledAfterStartAndReleasesOwner`. Every exercised H1
-mode waited for initial host credit before acting, placing it after open commit.
-The completion method used an ordinary pipe and proved cross-process
-callback-PFD ownership, exact EOF/declared-length/SHA-256/UTF-8 materialization,
-and cleanup.
-The tool callback was owned, rejected as `TOOLS_UNSUPPORTED`, and cleaned up
-without execution; the malformed ordering, sequence, and descriptor-reference
-cases failed closed; host cancellation after `Started` released the owner; and
-each method observed one settled terminal. The duplicate-terminal observation
-used only a bounded 250 ms late-callback smoke window. All three temporary
-packages were absent before installation and absent again after cleanup.
-
-H2 is integrated as production transport commit `e5bd92b16`, fake-fixture
-commit `10dad3e39`, and host-test commit `0b9a94742`. The transport now reports
-an already-connected `onServiceDisconnected` through the binder-death path,
-leaving `DISCONNECTED` only for a pre-connection callback. The fixture uses an
-exact-bound `isolatedProcess` relay to issue one callback under a distinct UID.
-Its process-death mode waits for initial host credit, emits `Started` and one
-sequence-0 `hostile` chunk, waits until the host grant restores that captured
-credit window, and then kills the provider process.
-
-The focused H2 Gradle XML recorded all 18 coordinator tests and all 31
-fake-provider unit tests with 0 skipped, 0 failures, and 0 errors, and the same
-run assembled the host, instrumentation, and fake-provider APKs. All three APKs
-verified with Signature Scheme v2 and certificate SHA-256
-`2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8`.
-Their local artifact SHA-256 values -- each equal to the installed device
-`base.apk` hash -- were host
-`0685ce99c0f9e8f9056be5f3a8eebc2c7ea5ffca2d422e21eac69d0cb3364629`,
-instrumentation
-`7c91a0af651e2098ad124ff8a89ae3ac3018e0f1d0dec068367595e964739178`,
-and fake provider
-`6c7319a6682b08cab2e3c610d6db0919c7c71bc034c2cec8b46eb23623d55a18`.
-
-On `QV710AF65F` (API 31, arm64-v8a), the exact method
-`callbackFromIsolatedProviderUidIsRejectedAndReleasesOwner` returned
-`OK (1 test)` in 0.852 s: the distinct-UID callback was rejected as
-`CALLBACK_UID_MISMATCH` before transcript publication, with one terminal and a
-reusable owner. The exact method
-`providerProcessDeathAfterStartedPublishesOneBinderDiedAndReleasesOwner`
-returned `OK (1 test)` in 0.544 s: after `Started`, the one `hostile` chunk, and
-causal credit replenishment, provider kill produced one `BinderDied` terminal
-and released the owner. The host, instrumentation, and fake-provider packages
-were absent before installation and absent again after cleanup.
-
-This is still **PARTIAL** evidence. The ordinary-pipe completion case does not
-prove cross-process reliable-pipe producer status; `closeWithError()` /
-`checkError()` remains process-local evidence. The tool case does not prove tool
-execution or reliable-status propagation, and the 250 ms duplicate smoke is
-not an exhaustive late-callback guarantee. H2 adds one real isolated-callback-
-UID rejection and one fake-provider process death on API 31, not a broader
-identity or lifecycle matrix. Deterministic no-credit behavior remains only in
-the existing JVM policy test
-`ninthChunkBeforeAnyReplenishmentFailsClosedForNoCredit`. Update-time drift and
-a missing provider at final exact reinspection are only coordinator JVM cases
-before `openSession`; package absence before and after device testing is cleanup
-evidence, not an Android update or uninstall during an active session. Provider
-disable, host death, other API/ABI, real production plugin/model/runtime, UI,
-remote `listingGeneration`, and the broader `ai.*` wiring matrix remain open.
-H2 does not close broad R1 or protocol exit criteria.
-
-A pure Java or Kotlin provider reports `supportedAbis = emptyArray()`. A local
-native model plugin declares its actual ABIs and should ship ABI splits plus a
-Universal APK when practical.
-
-## Credential And Privacy Boundary
-
-V1 has two credential modes:
-
-### `NONE`
-
-This mode is intended for on-device providers that require no host or remote
-credential. The provider declares `ON_DEVICE`. Absence of the Android
-`INTERNET` permission is a useful release check for a local plugin, but it is
-not treated as proof of all data-flow behavior.
-
-### `PLUGIN_MANAGED`
-
-The plugin owns its credential UI, encrypted storage, endpoint selection, HTTP
-stack, request construction, and billing relationship. The host never reads or
-writes the plugin credential. The plugin never receives an `AiProviderVault`
-entry, host API key, host cookie, host proxy credential, or credential-bearing
-request object.
-
-Before first selection of a remote or hybrid plugin, the host presents the
-plugin package, signer, provider name, declared endpoint origins, locality, and
-an explicit statement that prompt data leaves the device. A signer, origin, or
-locality change invalidates prior authorization and requires confirmation.
-
-Endpoint and locality declarations are signed-package claims, not an Android
-network sandbox. The host cannot prove or enforce which origins an independent
-plugin contacts, and a malicious or compromised plugin can violate its
-declaration using its own permissions. Authorization UI and documentation must
-state this limitation. Host-side origin enforcement is possible only for a
-future host-owned transport with a fixed request policy.
-
-`HOST_TRANSPORT` is deferred. If introduced later, it is limited to an official
-or allowlisted protocol in which a plugin returns a bounded provider-neutral
-request plan and never receives the key. The host would validate a fixed HTTPS
-origin, authentication placement, redirects, cookies, caching, replay, and
-response limits. It must never become an arbitrary credentialed HTTP proxy.
-
-Prompts, tool schemas, tool results, reasoning content, provider-native state,
-and attached text are sensitive. They are excluded from normal logs, crash
-messages, analytics, model-list cache keys, and plugin-discovery diagnostics.
-
-The implemented host session plan is credential-free by construction and can
-represent only `NONE` or `PROVIDER_PROCESS_ONLY`. Its SHA-256 binding-decision
-key covers the pinned identity, negotiated protocol/capabilities,
-`listingGeneration`, model ID, model capability snapshot, and effective
-context/output limits. It is not a response cache and has no prompt, tool data,
-page token, header, or credential input. The diagnostic formatter accepts only
-stable IDs and a bounded event enum; it cannot accept request content, provider
-error text, exception messages, or credentials.
-
-## Tool Boundary
-
-The plugin may describe a requested tool call with a stable call ID, tool name,
-and bounded provider-neutral arguments. It cannot execute the tool.
-
-The host and script runtime own:
-
-- Mapping a declared tool name to a script-provided implementation.
-- Showing or enforcing any user authorization required by the operation.
-- Validating tool arguments and result size.
-- Executing the tool in the normal script security context.
-- Returning a bounded result to the same live session.
-- Rejecting duplicate, unknown, expired, or replayed call IDs.
-
-The plugin receives only tool results explicitly submitted for its own active
-session. It receives no runtime object, Android `Context`, Binder capability
-broker, filesystem path, intent sender, accessibility service, or shell handle.
-Provider-native continuation data stays inside the plugin process, is bound to
-the package, signer, provider, model, session, and protocol version, and is
-erased on every terminal path. It is not transferred to the host, persisted, or
-replayed after either process dies.
-
-Host-executed tools are never inferred from a schema. They require an explicit
-script implementation and an explicit request option. Without both, tool calls
-are returned as descriptions, matching the current host surface, and no
-operation is executed. The current JSON-only `ai.chat` input does not yet carry
-callable implementations, so automatic tool execution is a Phase 2 API and
-compatibility decision rather than an assumed v1 host behavior.
-
-The protocol additionally binds every provider-emitted tool name to the tool
-definitions in the original request. Descriptor-backed arguments are read and
-validated as bounded JSON entities before a script tool can be considered.
-Unknown names and malformed, trailing, over-quota, or duplicate-key JSON are
-rejected before execution.
-
-Tool names, call IDs, JSON depth, object members, array elements, string bytes,
-and argument/result bytes have independent limits. The host rejects duplicate
-names, duplicate or unknown call IDs, non-finite numbers, malformed UTF-8,
-excessive nesting, and results submitted after a tool turn or session expires.
-These checks happen before a script tool is invoked.
-
-## Streaming And Flow Control
-
-Streaming uses a credit window so a fast local model cannot overflow Binder or
-an inactive script callback:
-
-- The host grants 8 initial chunk credits.
-- Outstanding credits may not exceed 16.
-- One `onChunk` consumes one credit regardless of the text length.
-- One chunk is at most 64 KiB including Parcelable overhead.
-- The plugin pauses chunk emission at zero credits without blocking
-  cancellation, usage, tool calls, or a terminal callback.
-- Sequence values begin at a negotiated origin, increase by one, and never
-  repeat.
-- The host rejects out-of-order chunks, duplicate terminal events, chunks for
-  non-streaming requests, or unrequested reasoning. Terminal aggregate text
-  must match the streamed text length and SHA-256 and is charged once; streamed
-  reasoning and the terminal reasoning summary are each charged to the same
-  session quota.
-
-Callback methods are one-way or otherwise return immediately, and the provider
-uses one serialized callback lane. Credits bound ordinary data callbacks; they
-do not permit concurrent Binder threads to reorder events or bypass totals.
-
-Credits apply to callback delivery, not model token budgeting. Token and byte
-limits remain explicit request fields and capability intersections. A plugin
-must not retain unbounded generated text while waiting for credits; it pauses
-generation where supported or fails with a bounded backpressure error.
-
-Automatic retry is disabled after request dispatch. A provider may have billed
-the request, generated a tool call, or advanced opaque state even when the host
-did not receive the callback.
-
-## PFD And Data Transport Boundary
-
-Public AIDL never carries a filesystem path, file URI, raw content URI, or
-unbounded byte array. The host resolves every URI and transfers an exact,
-already-open descriptor.
-
-V1 applies these rules:
-
-- Small text and metadata are inline within the Binder envelope.
-- Large message text, tool schemas, tool arguments, and tool results use a
-  read-only `ParcelFileDescriptor` reference with MIME type, declared length,
-  and optional SHA-256.
-- Non-seekable content is copied to a bounded host-private snapshot before
-  dispatch when replay or length verification is required.
-- A receiver establishes exactly one asynchronous owner and closes every owned
-  descriptor on all terminal paths. It must not blindly call
-  `ParcelFileDescriptor.dup()` when reliable-pipe producer errors matter,
-  because that duplicates the data FD but not the communication FD used by
-  `closeWithError()`/`checkError()`; the current host callback adapter transfers
-  the complete received PFD object instead.
-- Data-FD duplication, where explicitly safe, is for lifetime ownership rather
-  than an independent cursor: duplicates share the same open-file position.
-  Once dispatched, the host does not concurrently read the handed-off
-  text/schema descriptor, and a seekable reader establishes its expected
-  starting offset. A pipe has exactly one consumer.
-- Only `text/plain` with an explicit charset and `application/json` are
-  accepted by the text protocol unless a later compatible extension adds
-  another text MIME type.
-- Descriptor metadata is not accepted as proof of JSON validity. The receiver
-  reads exactly the bounded declared entity, verifies length and optional
-  SHA-256, decodes strict UTF-8, rejects trailing JSON and duplicate decoded
-  object keys, and applies the same depth/node/string quotas as inline JSON.
-- Large plugin-produced text uses a bounded reliable pipe or host-created
-  write-only descriptor. The host verifies the byte count and encoding before
-  exposing the result to the script and checks reliable-pipe errors after EOF.
-- A future persistent artifact uses a host output transaction. The plugin never
-  chooses the destination or publishes a partial file.
-
-API 24 through 26 use pipes and PFD snapshots. V1 text generation does not need
-`SharedMemory`. A future media protocol may negotiate `SharedMemory` on API 27
-and later, but it must retain encoded PFD fallback and remain in the independent
-image, audio, or video protocol.
-
-## Proposed V1 Quotas
-
-| Resource | Proposed limit |
-| --- | ---: |
-| Messages per request | 256 |
-| Total content parts | 512 |
-| Tool definitions | 128 |
-| Tool rounds per session | 16 |
-| Binder envelope | 256 KiB |
-| Inline text field | 64 KiB |
-| Total input text | 2 MiB |
-| One inline schema | 64 KiB |
-| All tool schemas | 1 MiB total, using PFD above the inline limit |
-| One callback chunk | 64 KiB |
-| Chunk text payload | 48 KiB of valid UTF-8 |
-| Initial/max outstanding chunk credits | 8/16 |
-| Tool name/call ID | 128/256 UTF-8 bytes |
-| Tool JSON depth/nodes | 32/10,000 |
-| One tool JSON string | 64 KiB of valid UTF-8 |
-| One tool-call argument or result | 256 KiB, using PFD above the inline limit |
-| Total tool arguments and results per session | 8 MiB |
-| Outstanding tool calls per turn | 32 |
-| Models per page | 100 |
-| Model pages per listing | 100 |
-| Model page token | 4 KiB |
-| Marshaled model page | 128 KiB |
-| Open PFDs per request/session | 16/32 |
-| Non-streaming output | 8 MiB |
-| Total streaming output | 32 MiB |
-| Provider error detail | 64 KiB internal, 512 characters visible |
-| Session timeout | 1 second minimum, 10 minutes maximum |
-
-The request may choose smaller limits. The effective limit is the smallest of
-the host ceiling, provider capability, user request, and script-runtime policy.
-Every count and byte total is checked independently by the host and plugin.
-String and document ceilings are UTF-8 byte limits, while Binder ceilings are
-measured from the marshaled Parcel including field and Parcelable overhead.
-Reasoning text and tool traffic count toward their session totals rather than
-forming unmetered side channels.
-
-Android's Binder transaction buffer is currently 1 MiB shared by all in-flight
-transactions in a process, not a per-call allowance. The smaller protocol
-ceilings above preserve headroom but do not eliminate
-`TransactionTooLargeException`; either side treats it as an ambiguous partial
-failure and terminates the session without retry.
-
-## Fallback And Degradation
-
-The existing built-in providers remain the compatibility baseline. Plugin
-selection is explicit and does not silently replace a built-in profile. The
-narrow `ai.ask`, `ai.chat`, and `ai.stream` runtime routes reach discovery,
-handshake, model listing, and the Android session adapter only when the options
-contain an exact selector; there is still no automatic or UI selector.
-Installing, removing, disabling, or omitting a provider does not change calls
-without that selector.
-
-- Missing, disabled, incompatible, updating, or crashed selected plugins map to
-  bounded route codes such as `PROVIDER_NOT_FOUND`, `PROVIDER_REJECTED`,
-  `BINDER_DIED`, `FUSED`, or `TIMED_OUT`; provider text is not forwarded.
-- A local provider never falls back to a cloud provider automatically.
-- A remote provider never changes model, origin, provider, or credential mode
-  automatically.
-- Offline requests fail immediately. Prompts are not queued for later replay.
-- Binder death produces one terminal failure and no credential-bearing or
-  billable retry.
-- A plugin tool-call failure does not cause the host to execute a different
-  tool or switch providers.
-- OCR never uploads an image as a fallback, and media plugins never become an
-  implicit fallback for text generation.
-
-A user may configure an explicit ordered fallback chain in a later host UI only
-when every entry has been selected and preauthorized for its signer, endpoint,
-credential mode, and locality. The chain is evaluated before dispatch. Once a
-request has been dispatched, automatic fallback remains off unless the protocol
-can prove that no provider work began.
-
-## Conformance Matrix
-
-The limited GO advances only after a conformance provider and hostile fixture pass:
-
-- Android API 24, 26, 27, and the current highest supported API.
-- Current host/current plugin, current host/previous minor plugin, previous host/
-  current minor plugin, incompatible major, and unknown required capability.
-- One-shot chat, multi-turn chat, streaming, reasoning metadata, tools, usage,
-  cancellation, and model pagination.
-- Normal completion, cancel before dispatch, cancel during stream, timeout,
-  Binder death, plugin disable, update, uninstall, and host process death.
-- Slow callback, zero credits, credit overflow, oversized chunks, reordered
-  chunks, duplicate sequence, duplicate terminal, terminal without start, and
-  unbounded plugin buffering.
-- Bad Parcelable/class-loader data, malformed JSON schema, incorrect MIME,
-  length mismatch, truncated pipes, descriptor leaks, and oversized tool data.
-- Bundles, Java serialization, arbitrary Parcelable class names, undeclared
-  Binder objects, unexpected descriptors, and descriptor-count overflow.
-- Unknown tool calls, duplicate call IDs, expired results, excessive rounds,
-  call-ID replay across package, signer, provider, model, or session, repeated
-  model page tokens, and cyclic model pagination.
-- Proof that plugin code cannot enumerate or receive host vault entries and
-  that prompts, keys, raw payloads, and provider-native state do not enter host
-  logs or protocol objects.
-- Current provider-native `message`/`raw` and manual tool round-trip behavior is
-  compared with the provider-neutral plugin result. Any incompatibility remains
-  an explicit selector blocker rather than being hidden by the unchanged
-  `ai.chat` function name.
-- Existing built-in AI unit tests continue to pass with the plugin protocol
-  present and no plugin installed.
-
-The first real provider is an on-device text model with credential mode `NONE`.
-That choice exercises process, ABI, cancellation, memory, and streaming
-boundaries without introducing remote credential transport at the same time.
-
-The fake-provider API 31 Android session result is only a **PARTIAL** cell in
-this matrix. In addition to one normal exact-component request-PFD stream
-beyond the initial eight credits, H1 proves ordinary-pipe completion
-materialization across
-Binder, descriptor-backed tool rejection without execution, three malformed
-callback failures, one bounded duplicate-terminal outcome, and cancel-after-
-start owner release. H2 adds one isolated-process callback-UID rejection and
-one fake-provider death after an acknowledged chunk/credit cycle. It does not
-prove cross-process reliable-pipe status, deterministic Android no-credit
-behavior, active-session update/disable/uninstall, host death, or the version
-matrix. The separate public-route smoke above adds one real provider/model and
-one non-streaming public `ai.ask` positive path. The separate public
-`ai.stream` smoke carries the normal fake stream through the public Rhino entry
-beyond eight credits, but does not promote hostile cells, device cancellation,
-or the missing matrix. The separate public `ai.chat` smoke proves one normalized
-prompt-only fake echo and natural completion, but no device failure or
-cancellation behavior. The no-credit and final-reinspection package-drift cases
-remain JVM evidence only.
-
-## Estimated Benefit And Cost
-
-| Area | Estimate | Basis |
-| --- | --- | --- |
-| New provider extensibility | High benefit | Provider and local-runtime releases no longer require a host release. |
-| On-device text models | High benefit | Native model payloads and ABI splits remain outside the host APK. |
-| Host APK size from extracting current HTTP AI | Unquantified, likely low benefit | OkHttp and Gson are shared, and no identical release-build package decomposition has measured an AI-only delta. |
-| Credential isolation | Mixed | `PLUGIN_MANAGED` keeps plugin keys outside the host, but each remote plugin becomes its own credential and network trust boundary. |
-| Crash and memory isolation | Potential medium benefit | A local model moves work out of the host address space. Android may reclaim its process independently after unbinding, but immediate reclamation is not guaranteed. |
-| Protocol maintenance | Medium to high cost | Streaming, tools, version skew, privacy, PFD transport, and provider quirks need a permanent conformance suite. |
-| User comprehension | Medium cost | Provider, signer, locality, endpoint, and credential ownership must remain visible and understandable. |
-
-The protocol pack is justified by extensibility, not by an immediate promise of
-host size reduction. A migration proposal for an existing built-in provider
-requires separate evidence for APK delta, settings migration, vault handling,
-fallback behavior, and script compatibility. The shared dependency observation
-is directional evidence only, not an APK-size or performance measurement.
-
-## Phased Rollout
-
-### Phase 0: Protocol Documents
-
-- Freeze terminology, ownership, credential modes, flow control, quotas, and
-  fallback semantics.
-- Keep all existing host behavior unchanged.
-
-### Phase 1: Build-Time Pack And Conformance Test App
-
-- Publish `ai-common-api` and `ai-provider-api` as lightweight AARs.
-- Add binary API checks, hostile Parcelable fixtures, and a conformance APK.
-- Run the full version, lifecycle, flow-control, PFD, and vault-secrecy matrix.
-
-### Phase 2: Optional Host Selector
-
-- Keep the completed pure selection, model-list, and session-transcript policy
-  core and the Android discovery, metadata-handshake, model-list, and
-  `openSession`/PFD/`IAiCallback` transports fail-closed. Only the narrow
-  explicit `ai.ask`, `ai.chat`, and `ai.stream` compositions enable individual
-  attempts; catalog-generation proof, UI selection, multi-message/plugin-native
-  chat compatibility, and broader stream features remain absent.
-- Retain the experimental provider selector without changing `ai.ask`,
-  `ai.chat`, or `ai.stream` script signatures.
-- Keep built-in providers as the default and explicit fallback baseline.
-- Surface signer, locality, endpoint, credential mode, and degradation reason.
-- Do not claim response compatibility until provider-native `message`/`raw`
-  round trips and explicit tool execution have a documented mapping. If that
-  mapping needs a persisted opaque envelope or callable script objects, it is a
-  separate versioned API decision.
-
-### Phase 3: First Real Text Provider
-
-- Retain the completed one-device public positive-path smoke for the first
-  on-device text-generation plugin.
-- Still record the ABI matrix, Universal APK, model storage, peak RSS,
-  cancellation latency, throughput, descriptor, and process-death results.
-- Revisit remote `PLUGIN_MANAGED` providers only after the local lifecycle is
-  stable.
-
-### Later Independent Packs
-
-- Evaluate embeddings as a separate operation and API artifact.
-- Evaluate image, audio, and video in three separate stages.
-- Publish separate API artifacts and separate plugin APKs for image, audio, and
-  video, even when one vendor or model family implements all three.
-- Keep OCR, barcode, OpenCV, image quantization, and media playback outside the
-  generic text protocol.
-
-No stage authorizes a combined multimedia AI plugin. Any future modality must
-define its own content model, PFD and output-transaction policy, quotas,
-permissions, privacy notice, fallback behavior, and conformance matrix before
-implementation.
-
-## Android Platform References
-
-- [TransactionTooLargeException](https://developer.android.com/reference/android/os/TransactionTooLargeException)
-  documents the process-wide shared Binder buffer and ambiguous partial
-  failure behavior.
-- [ParcelFileDescriptor](https://developer.android.com/reference/android/os/ParcelFileDescriptor)
-  documents descriptor ownership, shared-offset `dup()` semantics, and reliable
-  pipe error reporting.
-- [Binder](https://developer.android.com/reference/android/os/Binder#getCallingUid())
-  documents caller UID as the Binder security identity.
-- [SharedMemory](https://developer.android.com/reference/android/os/SharedMemory)
-  is available from API 27.
+The host pins the Binder plugin independently of the logical provider stored in
+the target. This permits one authenticated hybrid plugin to expose local
+LiteRT-LM execution and several separately configured online services without
+pretending those service IDs are Binder component identities.
+
+## Existing Host Evidence
+
+AutoJs6 already contains security-sensitive online behavior:
+
+- provider definitions and encrypted profile storage;
+- redirect-free and retry-free credential-bearing HTTP clients;
+- OpenAI-compatible, Anthropic Messages, and Gemini request/response adapters;
+- bounded SSE, cancellation, usage, reasoning, and tool-call normalization;
+- public `ai.ask`, `ai.chat`, and `ai.stream` facades.
+
+Moving all of that behavior across Binder at once would not simplify the trust
+boundary. The protocol pack instead defines a narrow provider-neutral contract
+and lets migration occur behind explicit routing and conformance gates.
+
+## Trust Boundary
+
+The host side performs read-only exact-action discovery, exact-component
+selection, package UID and full-signer verification, Binder descriptor checks,
+metadata negotiation, target catalog validation, and exact-component
+reinspection before sensitive transitions.
+
+The authenticated snapshot includes:
+
+- component name and package UID;
+- complete signer digests;
+- version code and last-update time;
+- Binder provider ID and implementation version;
+- protocol range and negotiated version;
+- provider locality, credential mode, HTTPS origin allowlist, and ABIs;
+- negotiated capabilities and limits.
+
+Catalog and session cache keys are domain-separated and include this snapshot,
+catalog generation, target identity, target locality and credential mode,
+target capabilities and origins, and effective limits. They never contain
+prompts, responses, page tokens, credentials, headers, or provider-native
+configuration.
+
+## Credential And Origin Policy
+
+An on-device target has no remote profile, uses `NONE`, and declares no origin.
+A remote or hybrid target has a plugin-private profile ID, uses
+`PLUGIN_MANAGED`, and declares at least one canonical HTTPS origin.
+
+The provider-level origin list is a pinned upper bound. Every target origin
+must be in that list. The official plugin derives its aggregate declaration
+from the current target catalog and keeps credentials in Android Keystore
+backed app-private storage. Binder receives only configured state and
+non-sensitive target metadata.
+
+The host never supplies API keys, authorization headers, cookies, arbitrary
+base URLs, or retry policy. The selected plugin owns its declared HTTPS request
+and must not silently switch targets, origins, providers, models, credential
+modes, or local/remote boundaries.
+
+## Catalog Transport
+
+Catalog listing is asynchronous and paged. Continuation tokens are opaque,
+bounded, single-use, and scoped to the complete pinned provider identity and
+catalog generation. The host performs exact package reinspection before every
+initial or continuation dispatch and before callback admission.
+
+The callback captures its Binder caller UID synchronously, verifies typed
+page/error envelope ceilings and a bounded flood slot, then performs one
+defensive copy. Duplicate targets, generation changes, token replay,
+cross-provider tokens, excessive pages, callback-after-terminal, and malformed
+metadata fail closed.
+
+## Session Transport
+
+The host validates the requested feature set against host, provider, and target
+capabilities before creating an immutable credential-free plan. Session opening
+then pins the exact provider, catalog generation, target, effective byte limits,
+and credential disposition.
+
+The session policy owns request admission, descriptors, callback UID checks,
+stream credits, sequence order, tool rounds, monotonic usage, output aggregation
+and digest verification, cancellation, timeout, Binder death, terminal
+arbitration, and cleanup. Exactly one completed, failed, or cancelled result can
+win.
+
+Completion is data-bearing: it contains the materialized final output and a
+valid finish reason. The host verifies it against accepted chunks and quotas.
+There is no structural-only tool validation path and no payload-free completion
+shortcut.
+
+## Operational Boundaries
+
+- Plugin routing remains explicit; installing a provider alone does not
+  redirect ordinary host AI traffic.
+- No automatic local-to-remote or remote-to-local fallback is allowed.
+- An unavailable or unconfigured target fails explicitly.
+- Local target execution does not use the network.
+- Online targets may contact only their configured and declared HTTPS origins.
+- Model download remains user initiated and limited to pinned recommendations;
+  it is not network model discovery.
+- Safe diagnostics exclude prompts, output, errors containing provider details,
+  page tokens, credentials, headers, and paths.
+
+## Verification Evidence
+
+The automated matrix includes:
+
+- common/provider API codec and policy tests;
+- local, remote, hybrid, unconfigured, and hostile fake targets;
+- logical target-provider IDs distinct from the Binder provider ID;
+- origin, locality, credential, capability, and limit escalation rejection;
+- PackageManager, UID, signer, descriptor, deadline, and Binder death cases;
+- continuation-token, generation, callback flood, and process-fuse cases;
+- descriptor ownership and reliable-pipe failures;
+- stream credit, aggregation, usage, finish reason, cancellation, and terminal
+  race cases;
+- host JVM and Android-test compilation;
+- official plugin catalog, target request, declaration, backend, and UI policy
+  tests.
+
+Device evidence for 3-Stone AI additionally covers configured online profile
+connection, online generation and regeneration, explicit cloud failure without
+local fallback, local streaming cancellation with partial output retained, and
+completed local regeneration with usage and duration.
+
+## Remaining Product Work
+
+Protocol and internal routing are complete for V2. Remaining roadmap work is
+public product integration rather than a wire compatibility exercise:
+
+- add the explicit public `target` selector;
+- add `ai.catalog()` and derive model/profile/provider views from it;
+- expose complete reasoning, tool calls, finish reason, profile, and usage data;
+- normalize public target-specific errors;
+- update TypeScript declarations and user documentation;
+- migrate settings entry points without transporting credentials;
+- remove the host online implementation only after the public plugin route and
+  migration gates are complete.

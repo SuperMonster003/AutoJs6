@@ -19,7 +19,7 @@ class AiCommonCodecTest {
             displayName = "Fake local provider",
             implementationVersionName = "1.0.0",
             implementationVersionCode = 4L,
-            protocolRange = AiProtocolRange(AiProtocolVersion(1, 0), AiProtocolVersion(1, 2)),
+            protocolRange = AiProtocolRange(AiProtocolVersion(2, 0), AiProtocolVersion(2, 0)),
             locality = AiDataLocality.ON_DEVICE,
             credentialMode = AiCredentialMode.NONE,
             supportedAbis = emptyList(),
@@ -38,7 +38,7 @@ class AiCommonCodecTest {
             displayName = "Remote provider",
             implementationVersionName = "1.0.0",
             implementationVersionCode = 1L,
-            protocolRange = AiProtocolRange(AiProtocolVersion(1, 0), AiProtocolVersion(1, 0)),
+            protocolRange = AiProtocolRange(AiProtocolVersion(2, 0), AiProtocolVersion(2, 0)),
             locality = AiDataLocality.REMOTE,
             credentialMode = AiCredentialMode.PLUGIN_MANAGED,
             declaredHttpsOrigins = origins,
@@ -112,15 +112,15 @@ class AiCommonCodecTest {
     @Test
     fun unknownOptionalProtocolFieldIsSkippedButUnknownRequiredFieldIsRejected() {
         fun encoded(required: Boolean) = TaggedWireWriter(AiCommonProtocol.SCHEMA_PROTOCOL_RANGE, 1, 1)
-            .int32(1, 1, true)
+            .int32(1, 2, true)
             .int32(2, 0, true)
-            .int32(3, 1, true)
-            .int32(4, 1, true)
+            .int32(3, 2, true)
+            .int32(4, 0, true)
             .string(99, "future", required)
             .encode()
 
         assertEquals(
-            AiProtocolVersion(1, 1),
+            AiProtocolVersion(2, 0),
             AiCommonCodec.decodeProtocolRange(encoded(false)).maximum,
         )
         val failure = assertThrows(TaggedWireException::class.java) {
@@ -131,14 +131,14 @@ class AiCommonCodecTest {
 
     @Test
     fun negotiationChoosesHighestSharedVersionAndRejectsDisjointRanges() {
-        val host = AiProtocolRange(AiProtocolVersion(1, 0), AiProtocolVersion(1, 4))
-        val provider = AiProtocolRange(AiProtocolVersion(1, 2), AiProtocolVersion(1, 3))
+        val host = AiProtocolRange(AiProtocolVersion(2, 0), AiProtocolVersion(2, 4))
+        val provider = AiProtocolRange(AiProtocolVersion(2, 2), AiProtocolVersion(2, 3))
 
-        assertEquals(AiProtocolVersion(1, 3), AiProtocolNegotiator.negotiate(host, provider))
+        assertEquals(AiProtocolVersion(2, 3), AiProtocolNegotiator.negotiate(host, provider))
         assertNull(
             AiProtocolNegotiator.negotiate(
                 host,
-                AiProtocolRange(AiProtocolVersion(2, 0), AiProtocolVersion(2, 0)),
+                AiProtocolRange(AiProtocolVersion(3, 0), AiProtocolVersion(3, 0)),
             ),
         )
     }
@@ -236,7 +236,7 @@ class AiCommonCodecTest {
     @Test
     fun malformedAndDuplicateKnownFieldsAreRejected() {
         val valid = AiCommonCodec.encodeProtocolRange(
-            AiProtocolRange(AiProtocolVersion(1, 0), AiProtocolVersion(1, 0)),
+            AiProtocolRange(AiProtocolVersion(2, 0), AiProtocolVersion(2, 0)),
         )
         val malformed = assertThrows(TaggedWireException::class.java) {
             AiCommonCodec.decodeProtocolRange(valid.copyOf(valid.size - 1))
@@ -244,10 +244,10 @@ class AiCommonCodecTest {
         assertEquals(TaggedWireError.MALFORMED_HEADER, malformed.error)
 
         val duplicate = TaggedWireWriter(AiCommonProtocol.SCHEMA_PROTOCOL_RANGE, 1, 0)
-            .int32(1, 1, true)
-            .int32(1, 1)
+            .int32(1, 2, true)
+            .int32(1, 2)
             .int32(2, 0, true)
-            .int32(3, 1, true)
+            .int32(3, 2, true)
             .int32(4, 0, true)
             .encode()
         val duplicateFailure = assertThrows(TaggedWireException::class.java) {

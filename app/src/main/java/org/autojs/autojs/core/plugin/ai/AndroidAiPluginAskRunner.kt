@@ -14,8 +14,6 @@ import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.ai.common.api.AiCommonCodec
 import org.autojs.plugin.ai.common.api.AiCommonLimits
-import org.autojs.plugin.ai.common.api.AiCredentialMode
-import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.common.api.AiProviderInfo
 import org.autojs.plugin.ai.provider.api.AiCompletionResult
@@ -99,7 +97,7 @@ internal fun aiProviderPluginCapabilityRequirement(
 )
 
 /**
- * Lazily initialized process owner for the explicit, default-off Android local AI plugin route.
+ * Lazily initialized process owner for the explicit, default-off Android AI provider route.
  * Merely constructing a script runtime does not discover or bind a provider.
  */
 internal class AndroidAiPluginAskRunner private constructor(
@@ -201,13 +199,13 @@ private class ProcessAiPluginAskRunner(
         deadlineScheduler = AiProviderHandshakeDeadlineScheduler(::schedule),
         clock = AiProviderHandshakeClock(::now),
     )
-    private val modelListing = AiProviderModelListingCoordinator(
-        transport = AndroidAiProviderModelListing(applicationContext),
+    private val targetListing = AiProviderTargetListingCoordinator(
+        transport = AndroidAiProviderTargetListing(applicationContext),
         workerExecutor = coordinatorExecutor,
         blockingExecutor = blockingExecutor,
-        deadlineScheduler = AiProviderModelListingDeadlineScheduler(::schedule),
-        clock = AiProviderModelListingClock(::now),
-        owner = AiProviderModelListingProcessOwner(),
+        deadlineScheduler = AiProviderTargetListingDeadlineScheduler(::schedule),
+        clock = AiProviderTargetListingClock(::now),
+        owner = AiProviderTargetListingProcessOwner(),
     )
     private val session = AiProviderSessionCoordinator(
         transport = AndroidAiProviderSession(applicationContext),
@@ -310,7 +308,7 @@ private class ProcessAiPluginAskRunner(
 
     private fun releaseAdmission() {
         check(admission.compareAndSet(true, false)) {
-            "local AI plugin route admission was not acquired"
+            "AI provider route admission was not acquired"
         }
     }
 
@@ -478,19 +476,17 @@ private class ProcessAiPluginAskRunner(
                 is AiProviderHandshakeOutcome.Selected -> {
                     val pinned = outcome.pinned
                     if (pinned.component != request.component ||
-                        pinned.providerId != request.providerId ||
-                        pinned.locality != AiDataLocality.ON_DEVICE ||
-                        pinned.credentialMode != AiCredentialMode.NONE
+                        pinned.providerId != request.providerId
                     ) {
                         fail(AiPluginAskFailure.PROVIDER_REJECTED)
                     } else {
-                        beginModelListing(snapshot, pinned)
+                        beginTargetListing(snapshot, pinned)
                     }
                 }
             }
         }
 
-        private fun beginModelListing(
+        private fun beginTargetListing(
             snapshot: AiProviderPackageSnapshot,
             pinned: AiProviderPinnedIdentity,
         ) {
@@ -501,19 +497,19 @@ private class ProcessAiPluginAskRunner(
                 return
             }
             val handle = try {
-                backend.modelListing.start(
-                    AiProviderModelListingRunRequest(
+                backend.targetListing.start(
+                    AiProviderTargetListingRunRequest(
                         snapshot = snapshot,
                         pinnedProvider = pinned,
                         environment = backend.environment,
                         hostCapabilities = HOST_CAPABILITIES,
                         requirement = requirement,
-                        options = AiProviderModelListingRunOptions(
+                        options = AiProviderTargetListingRunOptions(
                             enabled = true,
                             timeoutMillis = remaining,
                         ),
                     ),
-                ) { outcome -> enqueue { acceptModelListing(snapshot, pinned, outcome) } }
+                ) { outcome -> enqueue { acceptTargetListing(snapshot, pinned, outcome) } }
             } catch (_: Exception) {
                 fail(AiPluginAskFailure.INTERNAL_FAILURE)
                 return
@@ -521,35 +517,35 @@ private class ProcessAiPluginAskRunner(
             installStage(handle)
         }
 
-        private fun acceptModelListing(
+        private fun acceptTargetListing(
             snapshot: AiProviderPackageSnapshot,
             pinned: AiProviderPinnedIdentity,
-            outcome: AiProviderModelListingRunOutcome,
+            outcome: AiProviderTargetListingRunOutcome,
         ) {
             detachStage()
             if (!isActive()) return
             when (outcome) {
-                AiProviderModelListingRunOutcome.Disabled ->
+                AiProviderTargetListingRunOutcome.Disabled ->
                     fail(AiPluginAskFailure.INTERNAL_FAILURE)
-                AiProviderModelListingRunOutcome.Busy -> fail(AiPluginAskFailure.BUSY)
-                AiProviderModelListingRunOutcome.Fused -> fail(AiPluginAskFailure.FUSED)
-                AiProviderModelListingRunOutcome.Cancelled ->
+                AiProviderTargetListingRunOutcome.Busy -> fail(AiPluginAskFailure.BUSY)
+                AiProviderTargetListingRunOutcome.Fused -> fail(AiPluginAskFailure.FUSED)
+                AiProviderTargetListingRunOutcome.Cancelled ->
                     fail(AiPluginAskFailure.CANCELLED)
-                AiProviderModelListingRunOutcome.TimedOut ->
+                AiProviderTargetListingRunOutcome.TimedOut ->
                     fail(AiPluginAskFailure.TIMED_OUT)
-                AiProviderModelListingRunOutcome.BinderDied ->
+                AiProviderTargetListingRunOutcome.BinderDied ->
                     fail(AiPluginAskFailure.BINDER_DIED)
-                is AiProviderModelListingRunOutcome.ProviderFailed ->
+                is AiProviderTargetListingRunOutcome.ProviderFailed ->
                     fail(AiPluginAskFailure.PROVIDER_FAILED)
-                is AiProviderModelListingRunOutcome.Rejected -> fail(
+                is AiProviderTargetListingRunOutcome.Rejected -> fail(
                     when (outcome.failure) {
-                        AiProviderModelListingRunFailure.EXECUTOR_REJECTED,
-                        AiProviderModelListingRunFailure.INTERNAL_FAILURE,
+                        AiProviderTargetListingRunFailure.EXECUTOR_REJECTED,
+                        AiProviderTargetListingRunFailure.INTERNAL_FAILURE,
                         -> AiPluginAskFailure.INTERNAL_FAILURE
                         else -> AiPluginAskFailure.PROVIDER_REJECTED
                     },
                 )
-                is AiProviderModelListingRunOutcome.Completed -> {
+                is AiProviderTargetListingRunOutcome.Completed -> {
                     val catalog = outcome.catalog
                     if (catalog.pinnedProvider != pinned ||
                         catalog.pinnedProvider.providerId != request.providerId
@@ -561,40 +557,55 @@ private class ProcessAiPluginAskRunner(
                         finishModelList(catalog)
                         return
                     }
-                    val plannedModelId = request.modelId ?: run {
-                        // An omitted modelId only ever resolves against a single-model catalog;
-                        // anything else must stay an explicit, deterministic script decision.
-                        when (catalog.models.size) {
+                    val selectedTarget = request.modelId?.let { requestedModelId ->
+                        val matches = catalog.targets.filter { it.modelId == requestedModelId }
+                        when (matches.size) {
                             0 -> {
                                 fail(AiPluginAskFailure.MODEL_NOT_FOUND)
                                 return
                             }
-                            1 -> catalog.models.single().modelId
+                            1 -> matches.single()
+                            else -> {
+                                fail(AiPluginAskFailure.MODEL_AMBIGUOUS)
+                                return
+                            }
+                        }
+                    } ?: run {
+                        // The current public model projection can omit its selector only for a
+                        // single-target catalog; all other cases remain deterministic failures.
+                        when (catalog.targets.size) {
+                            0 -> {
+                                fail(AiPluginAskFailure.MODEL_NOT_FOUND)
+                                return
+                            }
+                            1 -> catalog.targets.single()
                             else -> {
                                 fail(AiPluginAskFailure.MODEL_AMBIGUOUS)
                                 return
                             }
                         }
                     }
-                    resolvedModelId = plannedModelId
+                    resolvedModelId = selectedTarget.modelId
                     when (
                         val planned = catalog.planExact(
-                            plannedModelId,
+                            selectedTarget.targetId,
                             requirement,
                             request.backendProfile,
                         )
                     ) {
-                        AiProviderExactModelPlanResult.ModelNotFound ->
+                        AiProviderExactTargetPlanResult.TargetNotFound ->
                             fail(AiPluginAskFailure.MODEL_NOT_FOUND)
-                        AiProviderExactModelPlanResult.ModelCapabilityMismatch ->
+                        AiProviderExactTargetPlanResult.TargetCapabilityMismatch,
+                        AiProviderExactTargetPlanResult.TargetUnavailable,
+                        AiProviderExactTargetPlanResult.BackendUnavailable,
+                        ->
                             fail(AiPluginAskFailure.MODEL_CAPABILITY_MISMATCH)
-                        AiProviderExactModelPlanResult.BackendUnavailable ->
-                            fail(AiPluginAskFailure.MODEL_CAPABILITY_MISMATCH)
-                        is AiProviderExactModelPlanResult.Planned -> {
+                        is AiProviderExactTargetPlanResult.Planned -> {
                             val plan = planned.plan
                             if (plan.pinnedProvider != pinned ||
                                 plan.pinnedProvider.providerId != request.providerId ||
-                                plan.modelId != plannedModelId
+                                plan.targetId != selectedTarget.targetId ||
+                                plan.modelId != selectedTarget.modelId
                             ) {
                                 fail(AiPluginAskFailure.PROVIDER_REJECTED)
                             } else if (onSessionOpen != null) {
@@ -608,16 +619,18 @@ private class ProcessAiPluginAskRunner(
             }
         }
 
-        private fun finishModelList(catalog: AiProviderModelCatalog) {
+        private fun finishModelList(catalog: AiProviderTargetCatalog) {
             detachStage()
-            val summaries = catalog.models.map { model ->
+            val summaries = catalog.targets.map { target ->
                 AiPluginModelSummary(
-                    modelId = model.modelId,
-                    displayName = model.displayName,
-                    capabilityIds = model.capabilityIds,
-                    maximumContextBytes = model.maximumContextBytes,
-                    maximumOutputBytes = model.maximumOutputBytes,
-                    backendProfiles = model.backendProfiles,
+                    modelId = target.modelId,
+                    displayName = target.displayName,
+                    capabilityIds = target.capabilityIds,
+                    maximumContextBytes = target.maximumContextBytes
+                        ?: catalog.pinnedProvider.negotiatedCapabilities.maximumContextBytes,
+                    maximumOutputBytes = target.maximumOutputBytes
+                        ?: catalog.pinnedProvider.negotiatedCapabilities.maximumOutputBytes,
+                    backendProfiles = target.backendProfiles,
                 )
             }
             finishList(AiPluginModelListOutcome.Completed(summaries))
@@ -639,7 +652,7 @@ private class ProcessAiPluginAskRunner(
                     requestId = "${if (streaming) "stream" else "ask"}-${UUID.randomUUID()}",
                     protocolVersion = plan.pinnedProvider.protocolVersion,
                     providerId = request.providerId,
-                    modelId = plan.modelId,
+                    targetId = plan.targetId,
                     messages = protocolMessages,
                     options = request.toGenerationOptions(
                         stream = streaming,
@@ -767,7 +780,7 @@ private class ProcessAiPluginAskRunner(
                 if (terminal) {
                     true
                 } else {
-                    check(stageHandle == null) { "local AI plugin route stage overlap" }
+                    check(stageHandle == null) { "AI provider route stage overlap" }
                     stageHandle = handle
                     false
                 }
@@ -787,7 +800,7 @@ private class ProcessAiPluginAskRunner(
                 if (terminal) {
                     true
                 } else {
-                    check(deadlineHandle == null) { "local AI plugin route deadline overlap" }
+                    check(deadlineHandle == null) { "AI provider route deadline overlap" }
                     deadlineHandle = handle
                     false
                 }
@@ -801,7 +814,7 @@ private class ProcessAiPluginAskRunner(
             when {
                 onModelList != null -> {
                     val listOutcome = when (outcome) {
-                        // A completed ask outcome cannot reach a model-list attempt; map it
+                        // A completed ask outcome cannot reach a catalog-view attempt; map it
                         // defensively instead of throwing inside terminal delivery.
                         is AiPluginAskOutcome.Completed ->
                             AiPluginModelListOutcome.Failed(AiPluginAskFailure.INTERNAL_FAILURE)
@@ -1344,7 +1357,7 @@ private class ProcessAiPluginAskRunner(
                     requestId = "session-turn-${UUID.randomUUID()}",
                     protocolVersion = owner.plan.pinnedProvider.protocolVersion,
                     providerId = owner.request.providerId,
-                    modelId = owner.plan.modelId,
+                    targetId = owner.plan.targetId,
                     messages = messages,
                     options = owner.request.toGenerationOptions(
                         stream = streaming,

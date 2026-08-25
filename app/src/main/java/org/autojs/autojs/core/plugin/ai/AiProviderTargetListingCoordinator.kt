@@ -4,7 +4,7 @@ import org.autojs.plugin.ai.common.api.AiCommonCodec
 import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ai.common.api.AiProviderInfo
-import org.autojs.plugin.ai.provider.api.AiModelPageTokenLedger
+import org.autojs.plugin.ai.provider.api.AiTargetPageTokenLedger
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilities
 import org.autojs.plugin.ai.provider.api.AiProviderCodec
 import org.autojs.plugin.ai.provider.api.AiProviderLimits
@@ -15,14 +15,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 /** Opaque connection owned by a future platform transport until its binding is closed. */
-internal interface AiProviderModelListingConnection
+internal interface AiProviderTargetListingConnection
 
-internal interface AiProviderModelListingBinding : Closeable
+internal interface AiProviderTargetListingBinding : Closeable
 
-internal interface AiProviderModelListingBindingCallback {
-    fun onConnected(connection: AiProviderModelListingConnection)
+internal interface AiProviderTargetListingBindingCallback {
+    fun onConnected(connection: AiProviderTargetListingConnection)
 
-    fun onBindingFailure(failure: AiProviderModelListingRunFailure)
+    fun onBindingFailure(failure: AiProviderTargetListingRunFailure)
 
     fun onBinderDeath()
 }
@@ -35,74 +35,74 @@ internal interface AiProviderModelListingBindingCallback {
  * the coordinator validates UID and size, reserves a bounded flood slot, and performs the only
  * defensive envelope copy retained for later transcript admission.
  */
-internal interface AiProviderModelListingCallbackIngress {
+internal interface AiProviderTargetListingCallbackIngress {
     fun onPage(callingUid: Int, envelope: ByteArray?)
 
     fun onFailed(callingUid: Int, envelope: ByteArray?)
 }
 
 /**
- * One callback registration prepared for exactly one model-list Dispatch.
+ * One callback registration prepared for exactly one target-list Dispatch.
  *
  * [dispatch] may perform a Binder transaction and must not run on Android's main thread. Closing
  * the call must detach its local callback sink, even though a remote process may retain the Binder
  * callback object. It must not open a session or accept file descriptors.
  */
-internal interface AiProviderModelListingPreparedCall : Closeable {
+internal interface AiProviderTargetListingPreparedCall : Closeable {
     fun dispatch(requestEnvelope: ByteArray)
 }
 
-/** Descriptor-verified view of the same Binder used for metadata revalidation and model listing. */
-internal interface AiProviderModelListingRpc {
+/** Descriptor-verified view of the same Binder used for metadata revalidation and target catalog. */
+internal interface AiProviderTargetListingRpc {
     fun getProviderInfoEnvelope(): ByteArray?
 
     fun getCapabilitiesEnvelope(): ByteArray?
 
     fun prepareCall(
         sequence: Long,
-        callback: AiProviderModelListingCallbackIngress,
-    ): AiProviderModelListingPreparedCall
+        callback: AiProviderTargetListingCallbackIngress,
+    ): AiProviderTargetListingPreparedCall
 }
 
 /**
- * Platform boundary for an explicitly invoked model-list run.
+ * Platform boundary for an explicitly invoked target-list run.
  *
  * [openRpc] must validate the exact remote interface descriptor before constructing an AIDL proxy.
  * A future Android implementation must bind an actionless Intent to the exact component and keep
  * the returned binding alive until the coordinator closes it.
  */
-internal interface AiProviderModelListingTransport {
+internal interface AiProviderTargetListingTransport {
     fun inspectExact(component: AiProviderComponent): AiProviderDiscoverySourceResult
 
     fun bindExact(
         snapshot: AiProviderPackageSnapshot,
-        callback: AiProviderModelListingBindingCallback,
-    ): AiProviderModelListingBinding
+        callback: AiProviderTargetListingBindingCallback,
+    ): AiProviderTargetListingBinding
 
-    fun openRpc(connection: AiProviderModelListingConnection): AiProviderModelListingRpc
+    fun openRpc(connection: AiProviderTargetListingConnection): AiProviderTargetListingRpc
 }
 
 /** Marker used without retaining or logging an untrusted remote descriptor string. */
-internal class AiProviderModelListingDescriptorMismatchException : SecurityException()
+internal class AiProviderTargetListingDescriptorMismatchException : SecurityException()
 
-internal fun interface AiProviderModelListingDeadlineScheduler {
+internal fun interface AiProviderTargetListingDeadlineScheduler {
     fun schedule(delayMillis: Long, action: () -> Unit): Closeable
 }
 
-internal fun interface AiProviderModelListingClock {
+internal fun interface AiProviderTargetListingClock {
     fun elapsedRealtimeMillis(): Long
 }
 
-internal data class AiProviderModelListingRunOptions(
+internal data class AiProviderTargetListingRunOptions(
     val enabled: Boolean = false,
     val pageSize: Int = DEFAULT_PAGE_SIZE,
     val timeoutMillis: Long = DEFAULT_TIMEOUT_MILLIS,
 ) {
     init {
-        require(pageSize in 1..AiProviderLimits.MAX_MODELS_PER_PAGE) {
-            "Invalid local AI model-list page size"
+        require(pageSize in 1..AiProviderLimits.MAX_TARGETS_PER_PAGE) {
+            "Invalid local AI target-list page size"
         }
-        require(timeoutMillis > 0L) { "Model-list timeout must be positive" }
+        require(timeoutMillis > 0L) { "Target-list timeout must be positive" }
     }
 
     private companion object {
@@ -111,16 +111,16 @@ internal data class AiProviderModelListingRunOptions(
     }
 }
 
-internal data class AiProviderModelListingRunRequest(
+internal data class AiProviderTargetListingRunRequest(
     val snapshot: AiProviderPackageSnapshot,
     val pinnedProvider: AiProviderPinnedIdentity,
     val environment: AiProviderEnvironment,
     val hostCapabilities: AiProviderCapabilities,
     val requirement: AiProviderCapabilityRequirement = AiProviderCapabilityRequirement(),
-    val options: AiProviderModelListingRunOptions = AiProviderModelListingRunOptions(),
+    val options: AiProviderTargetListingRunOptions = AiProviderTargetListingRunOptions(),
 )
 
-internal enum class AiProviderModelListingRunFailure {
+internal enum class AiProviderTargetListingRunFailure {
     PINNED_IDENTITY_MISMATCH,
     IDENTITY_DRIFT,
     BIND_REJECTED,
@@ -146,34 +146,34 @@ internal enum class AiProviderModelListingRunFailure {
     INTERNAL_FAILURE,
 }
 
-internal sealed class AiProviderModelListingRunOutcome {
-    object Disabled : AiProviderModelListingRunOutcome()
-    object Busy : AiProviderModelListingRunOutcome()
-    object Fused : AiProviderModelListingRunOutcome()
-    object Cancelled : AiProviderModelListingRunOutcome()
-    object TimedOut : AiProviderModelListingRunOutcome()
-    object BinderDied : AiProviderModelListingRunOutcome()
+internal sealed class AiProviderTargetListingRunOutcome {
+    object Disabled : AiProviderTargetListingRunOutcome()
+    object Busy : AiProviderTargetListingRunOutcome()
+    object Fused : AiProviderTargetListingRunOutcome()
+    object Cancelled : AiProviderTargetListingRunOutcome()
+    object TimedOut : AiProviderTargetListingRunOutcome()
+    object BinderDied : AiProviderTargetListingRunOutcome()
 
     data class Completed(
-        val catalog: AiProviderModelCatalog,
-    ) : AiProviderModelListingRunOutcome()
+        val catalog: AiProviderTargetCatalog,
+    ) : AiProviderTargetListingRunOutcome()
 
     class ProviderFailed(
-        val error: AiProviderModelListingErrorSummary,
-    ) : AiProviderModelListingRunOutcome() {
+        val error: AiProviderTargetListingErrorSummary,
+    ) : AiProviderTargetListingRunOutcome() {
         override fun toString(): String =
             "ProviderFailed(code=${error.code}, retryDisposition=${error.retryDisposition}, " +
                 "providerCodePresent=${error.providerCodePresent})"
     }
 
     data class Rejected(
-        val failure: AiProviderModelListingRunFailure,
-        val transcriptFailure: AiProviderModelListingFailure? = null,
-    ) : AiProviderModelListingRunOutcome()
+        val failure: AiProviderTargetListingRunFailure,
+        val transcriptFailure: AiProviderTargetListingFailure? = null,
+    ) : AiProviderTargetListingRunOutcome()
 }
 
 /**
- * Explicit process-lifetime ownership for model-list attempts.
+ * Explicit process-lifetime ownership for target-list attempts.
  *
  * A future host owner must share one instance across transcripts. Recreating it per attempt would
  * lose continuation-token replay evidence and defeat single-flight/fuse admission. Token evidence
@@ -182,7 +182,7 @@ internal sealed class AiProviderModelListingRunOutcome {
  * token-entry budget fail closed instead of evicting replay evidence. The owner does not enable
  * discovery or create a production call site by itself.
  */
-internal class AiProviderModelListingProcessOwner(
+internal class AiProviderTargetListingProcessOwner(
     private val maximumProviderIdentities: Int = DEFAULT_MAXIMUM_PROVIDER_IDENTITIES,
     private val maximumConsumedTokensPerProvider: Int =
         DEFAULT_MAXIMUM_CONSUMED_TOKENS_PER_PROVIDER,
@@ -190,31 +190,31 @@ internal class AiProviderModelListingProcessOwner(
     private val lock = Any()
     private var active = false
     private val fusedComponents = HashSet<AiProviderComponent>()
-    private val tokenLedgers = LinkedHashMap<ProviderTokenLedgerIdentity, AiModelPageTokenLedger>()
+    private val tokenLedgers = LinkedHashMap<ProviderTokenLedgerIdentity, AiTargetPageTokenLedger>()
 
     init {
         require(maximumProviderIdentities in 1..MAXIMUM_PROVIDER_IDENTITIES_LIMIT) {
-            "Invalid model-list provider identity capacity"
+            "Invalid target-list provider identity capacity"
         }
         require(
             maximumConsumedTokensPerProvider in
-                1..AiProviderLimits.MAX_MODEL_PAGE_TOKEN_LEDGER_ENTRIES,
-        ) { "Invalid per-provider model page-token capacity" }
+                1..AiProviderLimits.MAX_TARGET_PAGE_TOKEN_LEDGER_ENTRIES,
+        ) { "Invalid per-provider target page-token capacity" }
         require(
             maximumProviderIdentities.toLong() * maximumConsumedTokensPerProvider <=
                 MAXIMUM_PROCESS_TOKEN_ENTRIES,
-        ) { "Model page-token process budget is too large" }
+        ) { "Target page-token process budget is too large" }
     }
 
     internal fun tryAcquire(
         component: AiProviderComponent,
-    ): AiProviderModelListingAdmission = synchronized(lock) {
+    ): AiProviderTargetListingAdmission = synchronized(lock) {
         when {
-            component in fusedComponents -> AiProviderModelListingAdmission.FUSED
-            active -> AiProviderModelListingAdmission.BUSY
+            component in fusedComponents -> AiProviderTargetListingAdmission.FUSED
+            active -> AiProviderTargetListingAdmission.BUSY
             else -> {
                 active = true
-                AiProviderModelListingAdmission.ACQUIRED
+                AiProviderTargetListingAdmission.ACQUIRED
             }
         }
     }
@@ -225,12 +225,12 @@ internal class AiProviderModelListingProcessOwner(
 
     internal fun tokenLedgerFor(
         pinned: AiProviderPinnedIdentity,
-    ): AiModelPageTokenLedger? = synchronized(lock) {
+    ): AiTargetPageTokenLedger? = synchronized(lock) {
         val identity = ProviderTokenLedgerIdentity.from(pinned)
         tokenLedgers[identity] ?: if (tokenLedgers.size >= maximumProviderIdentities) {
             null
         } else {
-            AiModelPageTokenLedger(maximumConsumedTokensPerProvider).also { ledger ->
+            AiTargetPageTokenLedger(maximumConsumedTokensPerProvider).also { ledger ->
                 tokenLedgers[identity] = ledger
             }
         }
@@ -238,7 +238,7 @@ internal class AiProviderModelListingProcessOwner(
 
     internal fun release() {
         synchronized(lock) {
-            check(active) { "Model-list process owner was not acquired" }
+            check(active) { "Target-list process owner was not acquired" }
             active = false
         }
     }
@@ -273,59 +273,59 @@ internal class AiProviderModelListingProcessOwner(
     }
 }
 
-internal enum class AiProviderModelListingAdmission {
+internal enum class AiProviderTargetListingAdmission {
     ACQUIRED,
     BUSY,
     FUSED,
 }
 
 /**
- * Default-off, transport-independent owner for a real model-list Binder transcript.
+ * Default-off, transport-independent owner for a real target-list Binder transcript.
  *
- * The metadata getters and every model-list call use the same descriptor-verified connection. The
+ * The metadata getters and every target-list call use the same descriptor-verified connection. The
  * coordinator revalidates bounded provider metadata against the pinned selection, then performs a
  * full exact-package reinspection immediately before every initial or continuation Dispatch. It
  * owns the binding, callback registrations, absolute deadline, operation leases, and one terminal
  * outcome. It has no production call site and never opens a session, transfers a descriptor,
  * grants credit, touches runtime/UI state, or routes an ai.* API.
  */
-internal class AiProviderModelListingCoordinator(
-    private val transport: AiProviderModelListingTransport,
+internal class AiProviderTargetListingCoordinator(
+    private val transport: AiProviderTargetListingTransport,
     workerExecutor: Executor,
     private val blockingExecutor: Executor,
-    private val deadlineScheduler: AiProviderModelListingDeadlineScheduler,
-    private val clock: AiProviderModelListingClock,
-    private val owner: AiProviderModelListingProcessOwner,
+    private val deadlineScheduler: AiProviderTargetListingDeadlineScheduler,
+    private val clock: AiProviderTargetListingClock,
+    private val owner: AiProviderTargetListingProcessOwner,
 ) {
-    private val lane = ModelListingSerialExecutor(workerExecutor)
+    private val lane = TargetListingSerialExecutor(workerExecutor)
 
     fun start(
-        request: AiProviderModelListingRunRequest,
-        onOutcome: (AiProviderModelListingRunOutcome) -> Unit,
+        request: AiProviderTargetListingRunRequest,
+        onOutcome: (AiProviderTargetListingRunOutcome) -> Unit,
     ): Closeable {
         if (!request.options.enabled) {
-            deliver(onOutcome, AiProviderModelListingRunOutcome.Disabled)
+            deliver(onOutcome, AiProviderTargetListingRunOutcome.Disabled)
             return Closeable {}
         }
         if (!request.snapshot.matchesPinnedPackage(request.pinnedProvider)) {
             deliver(
                 onOutcome,
-                AiProviderModelListingRunOutcome.Rejected(
-                    AiProviderModelListingRunFailure.PINNED_IDENTITY_MISMATCH,
+                AiProviderTargetListingRunOutcome.Rejected(
+                    AiProviderTargetListingRunFailure.PINNED_IDENTITY_MISMATCH,
                 ),
             )
             return Closeable {}
         }
         when (owner.tryAcquire(request.snapshot.component)) {
-            AiProviderModelListingAdmission.FUSED -> {
-                deliver(onOutcome, AiProviderModelListingRunOutcome.Fused)
+            AiProviderTargetListingAdmission.FUSED -> {
+                deliver(onOutcome, AiProviderTargetListingRunOutcome.Fused)
                 return Closeable {}
             }
-            AiProviderModelListingAdmission.BUSY -> {
-                deliver(onOutcome, AiProviderModelListingRunOutcome.Busy)
+            AiProviderTargetListingAdmission.BUSY -> {
+                deliver(onOutcome, AiProviderTargetListingRunOutcome.Busy)
                 return Closeable {}
             }
-            AiProviderModelListingAdmission.ACQUIRED -> Unit
+            AiProviderTargetListingAdmission.ACQUIRED -> Unit
         }
         val attempt = try {
             Attempt(request, onOutcome)
@@ -333,8 +333,8 @@ internal class AiProviderModelListingCoordinator(
             owner.release()
             deliver(
                 onOutcome,
-                AiProviderModelListingRunOutcome.Rejected(
-                    AiProviderModelListingRunFailure.INTERNAL_FAILURE,
+                AiProviderTargetListingRunOutcome.Rejected(
+                    AiProviderTargetListingRunFailure.INTERNAL_FAILURE,
                 ),
             )
             return Closeable {}
@@ -344,8 +344,8 @@ internal class AiProviderModelListingCoordinator(
     }
 
     private inner class Attempt(
-        private val request: AiProviderModelListingRunRequest,
-        private val onOutcome: (AiProviderModelListingRunOutcome) -> Unit,
+        private val request: AiProviderTargetListingRunRequest,
+        private val onOutcome: (AiProviderTargetListingRunOutcome) -> Unit,
     ) {
         private val lifecycleLock = Any()
         private val deadlineAtMillis = saturatingAdd(
@@ -354,17 +354,17 @@ internal class AiProviderModelListingCoordinator(
         )
         private val phase = AtomicReference(Phase.PRE_BIND)
         private val binderRpcInFlight = AtomicBoolean(false)
-        private val bindingSlot = ModelListingCloseSlot<AiProviderModelListingBinding>()
-        private val deadlineSlot = ModelListingCloseSlot<Closeable>()
-        private val preparedCalls = ModelListingCloseRegistry<AiProviderModelListingPreparedCall>()
+        private val bindingSlot = TargetListingCloseSlot<AiProviderTargetListingBinding>()
+        private val deadlineSlot = TargetListingCloseSlot<Closeable>()
+        private val preparedCalls = TargetListingCloseRegistry<AiProviderTargetListingPreparedCall>()
         private val issuedSequences = HashSet<Long>()
         private val successfulDispatchSequences = HashSet<Long>()
         private val pendingCallbackEvents = ArrayDeque<CallbackEvent>()
 
         private var connectionAccepted = false
-        private var rpc: AiProviderModelListingRpc? = null
-        private var policy: AiProviderModelListingPolicy? = null
-        private var pendingDispatch: AiProviderModelListingDispatch? = null
+        private var rpc: AiProviderTargetListingRpc? = null
+        private var policy: AiProviderTargetListingPolicy? = null
+        private var pendingDispatch: AiProviderTargetListingDispatch? = null
         private var dispatchFlowActive = false
         private var callbackAdmissionActive = false
         private var operationsInFlight = 0
@@ -373,7 +373,7 @@ internal class AiProviderModelListingCoordinator(
         private var terminalSettled = false
         private var gateReleased = false
         private var outcomeDelivered = false
-        private var pendingOutcome: AiProviderModelListingRunOutcome? = null
+        private var pendingOutcome: AiProviderTargetListingRunOutcome? = null
 
         fun armDeadlineAndBegin() {
             val remaining = remainingMillis()
@@ -385,8 +385,8 @@ internal class AiProviderModelListingCoordinator(
                 deadlineScheduler.schedule(remaining, ::timeout)
             } catch (_: Exception) {
                 finish(
-                    AiProviderModelListingRunOutcome.Rejected(
-                        AiProviderModelListingRunFailure.EXECUTOR_REJECTED,
+                    AiProviderTargetListingRunOutcome.Rejected(
+                        AiProviderTargetListingRunFailure.EXECUTOR_REJECTED,
                     ),
                 )
                 return
@@ -405,31 +405,31 @@ internal class AiProviderModelListingCoordinator(
             val binding = try {
                 transport.bindExact(
                     request.snapshot,
-                    object : AiProviderModelListingBindingCallback {
-                        override fun onConnected(connection: AiProviderModelListingConnection) {
+                    object : AiProviderTargetListingBindingCallback {
+                        override fun onConnected(connection: AiProviderTargetListingConnection) {
                             enqueue { connected(connection) }
                         }
 
-                        override fun onBindingFailure(failure: AiProviderModelListingRunFailure) {
-                            finishExternal(AiProviderModelListingRunOutcome.Rejected(failure))
+                        override fun onBindingFailure(failure: AiProviderTargetListingRunFailure) {
+                            finishExternal(AiProviderTargetListingRunOutcome.Rejected(failure))
                         }
 
                         override fun onBinderDeath() {
-                            finishExternal(AiProviderModelListingRunOutcome.BinderDied)
+                            finishExternal(AiProviderTargetListingRunOutcome.BinderDied)
                         }
                     },
                 )
             } catch (_: SecurityException) {
                 finish(
-                    AiProviderModelListingRunOutcome.Rejected(
-                        AiProviderModelListingRunFailure.BIND_SECURITY,
+                    AiProviderTargetListingRunOutcome.Rejected(
+                        AiProviderTargetListingRunFailure.BIND_SECURITY,
                     ),
                 )
                 return
             } catch (_: Exception) {
                 finish(
-                    AiProviderModelListingRunOutcome.Rejected(
-                        AiProviderModelListingRunFailure.BIND_REJECTED,
+                    AiProviderTargetListingRunOutcome.Rejected(
+                        AiProviderTargetListingRunFailure.BIND_REJECTED,
                     ),
                 )
                 return
@@ -437,11 +437,11 @@ internal class AiProviderModelListingCoordinator(
             bindingSlot.install(binding)
         }
 
-        private fun connected(connection: AiProviderModelListingConnection) {
+        private fun connected(connection: AiProviderTargetListingConnection) {
             if (connectionAccepted) {
                 finish(
-                    AiProviderModelListingRunOutcome.Rejected(
-                        AiProviderModelListingRunFailure.DUPLICATE_CONNECTION,
+                    AiProviderTargetListingRunOutcome.Rejected(
+                        AiProviderTargetListingRunFailure.DUPLICATE_CONNECTION,
                     ),
                 )
                 return
@@ -451,7 +451,7 @@ internal class AiProviderModelListingCoordinator(
             submitMetadataRead(connection)
         }
 
-        private fun submitMetadataRead(connection: AiProviderModelListingConnection) {
+        private fun submitMetadataRead(connection: AiProviderTargetListingConnection) {
             if (isTerminal()) return
             try {
                 blockingExecutor.execute {
@@ -471,11 +471,11 @@ internal class AiProviderModelListingCoordinator(
         }
 
         private fun readMetadata(
-            connection: AiProviderModelListingConnection,
+            connection: AiProviderTargetListingConnection,
         ): MetadataReadResult {
             if (stopForDeadlineOrTerminal()) return MetadataReadResult.Abandoned
             if (!reinspectMatches()) {
-                return MetadataReadResult.Failed(AiProviderModelListingRunFailure.IDENTITY_DRIFT)
+                return MetadataReadResult.Failed(AiProviderTargetListingRunFailure.IDENTITY_DRIFT)
             }
             if (stopForDeadlineOrTerminal()) return MetadataReadResult.Abandoned
             val openedRpc = if (!beginBinderRpc()) {
@@ -483,17 +483,17 @@ internal class AiProviderModelListingCoordinator(
             } else {
                 try {
                     transport.openRpc(connection)
-                } catch (_: AiProviderModelListingDescriptorMismatchException) {
+                } catch (_: AiProviderTargetListingDescriptorMismatchException) {
                     return MetadataReadResult.Failed(
-                        AiProviderModelListingRunFailure.DESCRIPTOR_MISMATCH,
+                        AiProviderTargetListingRunFailure.DESCRIPTOR_MISMATCH,
                     )
                 } catch (_: SecurityException) {
                     return MetadataReadResult.Failed(
-                        AiProviderModelListingRunFailure.REMOTE_SECURITY,
+                        AiProviderTargetListingRunFailure.REMOTE_SECURITY,
                     )
                 } catch (_: Exception) {
                     return MetadataReadResult.Failed(
-                        AiProviderModelListingRunFailure.REMOTE_FAILURE,
+                        AiProviderTargetListingRunFailure.REMOTE_FAILURE,
                     )
                 } finally {
                     endBinderRpc()
@@ -513,9 +513,9 @@ internal class AiProviderModelListingCoordinator(
             }
             if (stopForDeadlineOrTerminal()) return MetadataReadResult.Abandoned
             val current = reinspectionSnapshot()
-                ?: return MetadataReadResult.Failed(AiProviderModelListingRunFailure.IDENTITY_DRIFT)
+                ?: return MetadataReadResult.Failed(AiProviderTargetListingRunFailure.IDENTITY_DRIFT)
             if (!request.snapshot.samePackageIdentityAs(current)) {
-                return MetadataReadResult.Failed(AiProviderModelListingRunFailure.IDENTITY_DRIFT)
+                return MetadataReadResult.Failed(AiProviderTargetListingRunFailure.IDENTITY_DRIFT)
             }
             val candidate = AiProviderCandidate(
                 component = current.component,
@@ -546,74 +546,74 @@ internal class AiProviderModelListingCoordinator(
                 )
             ) {
                 return MetadataReadResult.Failed(
-                    AiProviderModelListingRunFailure.PINNED_METADATA_MISMATCH,
+                    AiProviderTargetListingRunFailure.PINNED_METADATA_MISMATCH,
                 )
             }
             return MetadataReadResult.Complete(openedRpc)
         }
 
         private fun readProviderInfo(
-            rpc: AiProviderModelListingRpc,
+            rpc: AiProviderTargetListingRpc,
         ): MetadataValue<AiProviderInfo>? {
             if (!beginBinderRpc()) return null
             val envelope = try {
                 rpc.getProviderInfoEnvelope()
             } catch (_: SecurityException) {
-                return MetadataValue.Failed(AiProviderModelListingRunFailure.REMOTE_SECURITY)
+                return MetadataValue.Failed(AiProviderTargetListingRunFailure.REMOTE_SECURITY)
             } catch (_: Exception) {
-                return MetadataValue.Failed(AiProviderModelListingRunFailure.REMOTE_FAILURE)
+                return MetadataValue.Failed(AiProviderTargetListingRunFailure.REMOTE_FAILURE)
             } finally {
                 endBinderRpc()
             } ?: return MetadataValue.Failed(
-                AiProviderModelListingRunFailure.PROVIDER_INFO_MISSING,
+                AiProviderTargetListingRunFailure.PROVIDER_INFO_MISSING,
             )
             if (envelope.isEmpty()) {
                 return MetadataValue.Failed(
-                    AiProviderModelListingRunFailure.PROVIDER_INFO_MISSING,
+                    AiProviderTargetListingRunFailure.PROVIDER_INFO_MISSING,
                 )
             }
             if (envelope.size > AiCommonLimits.MAX_BINDER_ENVELOPE_BYTES) {
                 return MetadataValue.Failed(
-                    AiProviderModelListingRunFailure.PROVIDER_INFO_TOO_LARGE,
+                    AiProviderTargetListingRunFailure.PROVIDER_INFO_TOO_LARGE,
                 )
             }
             val decoded = runCatching {
                 AiCommonCodec.decodeProviderInfo(envelope.copyOf())
             }.getOrNull() ?: return MetadataValue.Failed(
-                AiProviderModelListingRunFailure.PROVIDER_INFO_INVALID,
+                AiProviderTargetListingRunFailure.PROVIDER_INFO_INVALID,
             )
             return MetadataValue.Value(decoded)
         }
 
         private fun readCapabilities(
-            rpc: AiProviderModelListingRpc,
+            rpc: AiProviderTargetListingRpc,
         ): MetadataValue<AiProviderCapabilities>? {
             if (!beginBinderRpc()) return null
             val envelope = try {
                 rpc.getCapabilitiesEnvelope()
             } catch (_: SecurityException) {
-                return MetadataValue.Failed(AiProviderModelListingRunFailure.REMOTE_SECURITY)
+                return MetadataValue.Failed(AiProviderTargetListingRunFailure.REMOTE_SECURITY)
             } catch (_: Exception) {
-                return MetadataValue.Failed(AiProviderModelListingRunFailure.REMOTE_FAILURE)
+                return MetadataValue.Failed(AiProviderTargetListingRunFailure.REMOTE_FAILURE)
             } finally {
                 endBinderRpc()
             } ?: return MetadataValue.Failed(
-                AiProviderModelListingRunFailure.CAPABILITIES_MISSING,
+                AiProviderTargetListingRunFailure.CAPABILITIES_MISSING,
             )
             if (envelope.isEmpty()) {
                 return MetadataValue.Failed(
-                    AiProviderModelListingRunFailure.CAPABILITIES_MISSING,
+                    AiProviderTargetListingRunFailure.CAPABILITIES_MISSING,
                 )
             }
             if (envelope.size > AiCommonLimits.MAX_BINDER_ENVELOPE_BYTES) {
                 return MetadataValue.Failed(
-                    AiProviderModelListingRunFailure.CAPABILITIES_TOO_LARGE,
+                    AiProviderTargetListingRunFailure.CAPABILITIES_TOO_LARGE,
                 )
             }
             val decoded = runCatching {
                 AiProviderCodec.decodeCapabilities(envelope.copyOf())
             }.getOrNull() ?: return MetadataValue.Failed(
-                AiProviderModelListingRunFailure.CAPABILITIES_INVALID,
+                AiProviderTargetListingRunFailure.CAPABILITIES_INVALID,
             )
             return MetadataValue.Value(decoded)
         }
@@ -623,7 +623,7 @@ internal class AiProviderModelListingCoordinator(
             when (result) {
                 MetadataReadResult.Abandoned -> Unit
                 is MetadataReadResult.Failed -> finish(
-                    AiProviderModelListingRunOutcome.Rejected(result.failure),
+                    AiProviderTargetListingRunOutcome.Rejected(result.failure),
                 )
                 is MetadataReadResult.Complete -> {
                     val tokenLedger = owner.tokenLedgerFor(request.pinnedProvider)
@@ -632,9 +632,9 @@ internal class AiProviderModelListingCoordinator(
                         return
                     }
                     rpc = result.rpc
-                    val listingPolicy = AiProviderModelListingPolicy(
+                    val listingPolicy = AiProviderTargetListingPolicy(
                         pinnedProvider = request.pinnedProvider,
-                        options = AiProviderModelListingOptions(
+                        options = AiProviderTargetListingOptions(
                             enabled = true,
                             pageSize = request.options.pageSize,
                         ),
@@ -646,27 +646,27 @@ internal class AiProviderModelListingCoordinator(
             }
         }
 
-        private fun applyDecision(decision: AiProviderModelListingDecision) {
+        private fun applyDecision(decision: AiProviderTargetListingDecision) {
             when (decision) {
-                is AiProviderModelListingDecision.Dispatch -> queueDispatch(decision.dispatch)
-                is AiProviderModelListingDecision.Terminal -> finish(mapOutcome(decision.outcome))
-                AiProviderModelListingDecision.Ignored -> {
+                is AiProviderTargetListingDecision.Dispatch -> queueDispatch(decision.dispatch)
+                is AiProviderTargetListingDecision.Terminal -> finish(mapOutcome(decision.outcome))
+                AiProviderTargetListingDecision.Ignored -> {
                     if (!isTerminal()) finish(internalFailure())
                 }
             }
         }
 
-        private fun queueDispatch(dispatch: AiProviderModelListingDispatch) {
+        private fun queueDispatch(dispatch: AiProviderTargetListingDispatch) {
             val launch = synchronized(lifecycleLock) {
                 if (terminal) return
-                check(pendingDispatch == null) { "Model-list Dispatch was queued twice" }
+                check(pendingDispatch == null) { "Target-list Dispatch was queued twice" }
                 pendingDispatch = dispatch
                 takeDispatchIfReadyLocked()
             }
             if (launch != null) launchDispatch(launch)
         }
 
-        private fun launchDispatch(dispatch: AiProviderModelListingDispatch) {
+        private fun launchDispatch(dispatch: AiProviderTargetListingDispatch) {
             try {
                 blockingExecutor.execute {
                     if (!beginOperation()) return@execute
@@ -684,7 +684,7 @@ internal class AiProviderModelListingCoordinator(
             }
         }
 
-        private fun performDispatch(dispatch: AiProviderModelListingDispatch) {
+        private fun performDispatch(dispatch: AiProviderTargetListingDispatch) {
             phase.set(Phase.DISPATCH)
             if (stopForDeadlineOrTerminal()) return
             if (!reinspectMatches()) {
@@ -732,8 +732,8 @@ internal class AiProviderModelListingCoordinator(
 
         private fun callbackFor(
             sequence: Long,
-        ): AiProviderModelListingCallbackIngress =
-            object : AiProviderModelListingCallbackIngress {
+        ): AiProviderTargetListingCallbackIngress =
+            object : AiProviderTargetListingCallbackIngress {
                 override fun onPage(callingUid: Int, envelope: ByteArray?) {
                     acceptCallback(sequence, callingUid, envelope, page = true)
                 }
@@ -755,32 +755,32 @@ internal class AiProviderModelListingCoordinator(
                     callingUid,
                 )
             ) {
-                finishExternal(transcriptRejected(AiProviderModelListingFailure.CALLBACK_UID_MISMATCH))
+                finishExternal(transcriptRejected(AiProviderTargetListingFailure.CALLBACK_UID_MISMATCH))
                 return
             }
             val oversized = when {
                 envelope == null -> null
-                page && envelope.size > AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES ->
-                    AiProviderModelListingFailure.PAGE_TOO_LARGE
+                page && envelope.size > AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES ->
+                    AiProviderTargetListingFailure.PAGE_TOO_LARGE
                 !page && envelope.size > AiCommonLimits.MAX_BINDER_ENVELOPE_BYTES ->
-                    AiProviderModelListingFailure.ERROR_TOO_LARGE
+                    AiProviderTargetListingFailure.ERROR_TOO_LARGE
                 else -> null
             }
             if (oversized != null) {
                 finishExternal(transcriptRejected(oversized))
                 return
             }
-            var failure: AiProviderModelListingRunFailure? = null
+            var failure: AiProviderTargetListingRunFailure? = null
             val launch = synchronized(lifecycleLock) {
                 if (terminal) return
                 when {
                     sequence !in issuedSequences -> {
-                        failure = AiProviderModelListingRunFailure.CALLBACK_BEFORE_DISPATCH
+                        failure = AiProviderTargetListingRunFailure.CALLBACK_BEFORE_DISPATCH
                         null
                     }
                     pendingCallbackEvents.size + (if (callbackAdmissionActive) 1 else 0) >=
                         MAX_BUFFERED_CALLBACK_EVENTS -> {
-                        failure = AiProviderModelListingRunFailure.CALLBACK_FLOOD
+                        failure = AiProviderTargetListingRunFailure.CALLBACK_FLOOD
                         null
                     }
                     else -> {
@@ -796,7 +796,7 @@ internal class AiProviderModelListingCoordinator(
                 }
             }
             if (failure != null) {
-                finishExternal(AiProviderModelListingRunOutcome.Rejected(requireNotNull(failure)))
+                finishExternal(AiProviderTargetListingRunOutcome.Rejected(requireNotNull(failure)))
             } else if (launch != null) {
                 launchCallbackAdmission(launch)
             }
@@ -825,12 +825,12 @@ internal class AiProviderModelListingCoordinator(
             if (stopForDeadlineOrTerminal()) return CallbackAdmissionResult.Abandoned
             if (!reinspectMatches()) {
                 return CallbackAdmissionResult.Failed(
-                    AiProviderModelListingRunFailure.IDENTITY_DRIFT,
+                    AiProviderTargetListingRunFailure.IDENTITY_DRIFT,
                 )
             }
             if (stopForDeadlineOrTerminal()) return CallbackAdmissionResult.Abandoned
             val listingPolicy = policy ?: return CallbackAdmissionResult.Failed(
-                AiProviderModelListingRunFailure.INTERNAL_FAILURE,
+                AiProviderTargetListingRunFailure.INTERNAL_FAILURE,
             )
             val decision = if (event.page) {
                 listingPolicy.acceptPage(event.sequence, event.callingUid, event.envelope)
@@ -845,7 +845,7 @@ internal class AiProviderModelListingCoordinator(
             when (result) {
                 CallbackAdmissionResult.Abandoned -> Unit
                 is CallbackAdmissionResult.Failed -> finish(
-                    AiProviderModelListingRunOutcome.Rejected(result.failure),
+                    AiProviderTargetListingRunOutcome.Rejected(result.failure),
                 )
                 is CallbackAdmissionResult.Decided -> applyDecision(result.decision)
             }
@@ -878,7 +878,7 @@ internal class AiProviderModelListingCoordinator(
             if (next != null) launchDispatch(next)
         }
 
-        private fun takeDispatchIfReadyLocked(): AiProviderModelListingDispatch? {
+        private fun takeDispatchIfReadyLocked(): AiProviderTargetListingDispatch? {
             if (terminal || dispatchFlowActive) return null
             val dispatch = pendingDispatch ?: return null
             pendingDispatch = null
@@ -913,13 +913,13 @@ internal class AiProviderModelListingCoordinator(
         }
 
         fun cancel() {
-            finishExternal(AiProviderModelListingRunOutcome.Cancelled)
+            finishExternal(AiProviderTargetListingRunOutcome.Cancelled)
         }
 
         private fun timeout() {
             if (!deadlineExpired()) return
             val decision = claimTerminal(
-                requested = AiProviderModelListingRunOutcome.TimedOut,
+                requested = AiProviderTargetListingRunOutcome.TimedOut,
                 retainActiveWatchdog = false,
             )
             if (decision == null) {
@@ -956,16 +956,16 @@ internal class AiProviderModelListingCoordinator(
             )
         }
 
-        private fun finish(outcome: AiProviderModelListingRunOutcome) {
+        private fun finish(outcome: AiProviderTargetListingRunOutcome) {
             finish(outcome, allowEarlyDelivery = false)
         }
 
-        private fun finishExternal(outcome: AiProviderModelListingRunOutcome) {
+        private fun finishExternal(outcome: AiProviderTargetListingRunOutcome) {
             finish(outcome, allowEarlyDelivery = true)
         }
 
         private fun finish(
-            outcome: AiProviderModelListingRunOutcome,
+            outcome: AiProviderTargetListingRunOutcome,
             allowEarlyDelivery: Boolean,
         ) {
             val decision = claimTerminal(
@@ -976,19 +976,19 @@ internal class AiProviderModelListingCoordinator(
             completeClaimed(
                 outcome = decision.outcome,
                 deliverBeforeIdle = decision.timedOut ||
-                    decision.outcome === AiProviderModelListingRunOutcome.Cancelled ||
+                    decision.outcome === AiProviderTargetListingRunOutcome.Cancelled ||
                     allowEarlyDelivery && decision.retainDeadline,
                 retainDeadline = decision.retainDeadline,
             )
         }
 
         private fun claimTerminal(
-            requested: AiProviderModelListingRunOutcome,
+            requested: AiProviderTargetListingRunOutcome,
             retainActiveWatchdog: Boolean,
         ): TerminalDecision? = synchronized(lifecycleLock) {
             if (terminal) return@synchronized null
             val timedOut = deadlineExpired()
-            val outcome = if (timedOut) AiProviderModelListingRunOutcome.TimedOut else requested
+            val outcome = if (timedOut) AiProviderTargetListingRunOutcome.TimedOut else requested
             val retainDeadline = !timedOut && retainActiveWatchdog && operationsInFlight > 0
             terminal = true
             terminalRetainsActiveWatchdog = retainDeadline
@@ -1003,7 +1003,7 @@ internal class AiProviderModelListingCoordinator(
         }
 
         private fun completeClaimed(
-            outcome: AiProviderModelListingRunOutcome,
+            outcome: AiProviderTargetListingRunOutcome,
             deliverBeforeIdle: Boolean,
             retainDeadline: Boolean,
         ) {
@@ -1011,7 +1011,7 @@ internal class AiProviderModelListingCoordinator(
             preparedCalls.close()
             bindingSlot.close()
             synchronized(lifecycleLock) {
-                check(pendingOutcome == null) { "Model-list outcome was stored more than once" }
+                check(pendingOutcome == null) { "Target-list outcome was stored more than once" }
                 pendingOutcome = outcome
                 terminalSettled = true
             }
@@ -1028,7 +1028,7 @@ internal class AiProviderModelListingCoordinator(
         private fun operationDone() {
             if (deadlineExpired()) timeout()
             synchronized(lifecycleLock) {
-                check(operationsInFlight > 0) { "Model-list operation count underflow" }
+                check(operationsInFlight > 0) { "Target-list operation count underflow" }
                 operationsInFlight -= 1
             }
             completeIdleIfReady()
@@ -1041,7 +1041,7 @@ internal class AiProviderModelListingCoordinator(
                 if (deadlineExpired()) {
                     expired = true
                 } else {
-                    check(!binderRpcInFlight.get()) { "Model-list Binder RPC calls must be serial" }
+                    check(!binderRpcInFlight.get()) { "Target-list Binder RPC calls must be serial" }
                     if (sequence != null) issuedSequences += sequence
                     binderRpcInFlight.set(true)
                     return true
@@ -1059,7 +1059,7 @@ internal class AiProviderModelListingCoordinator(
         private fun completeIdleIfReady() {
             var release = false
             var closeDeadline = false
-            var outcome: AiProviderModelListingRunOutcome? = null
+            var outcome: AiProviderTargetListingRunOutcome? = null
             synchronized(lifecycleLock) {
                 val idleAndSettled = terminal && terminalSettled && operationsInFlight == 0
                 if (idleAndSettled && !gateReleased) {
@@ -1099,47 +1099,47 @@ internal class AiProviderModelListingCoordinator(
         private fun remainingMillis(): Long = deadlineAtMillis - clock.elapsedRealtimeMillis()
 
         private fun mapOutcome(
-            outcome: AiProviderModelListingOutcome,
-        ): AiProviderModelListingRunOutcome = when (outcome) {
-            AiProviderModelListingOutcome.Disabled -> AiProviderModelListingRunOutcome.Disabled
-            AiProviderModelListingOutcome.Cancelled -> AiProviderModelListingRunOutcome.Cancelled
-            AiProviderModelListingOutcome.TimedOut -> AiProviderModelListingRunOutcome.TimedOut
-            AiProviderModelListingOutcome.BinderDied -> AiProviderModelListingRunOutcome.BinderDied
-            is AiProviderModelListingOutcome.Completed ->
-                AiProviderModelListingRunOutcome.Completed(outcome.catalog)
-            is AiProviderModelListingOutcome.ProviderFailed ->
-                AiProviderModelListingRunOutcome.ProviderFailed(outcome.error)
-            is AiProviderModelListingOutcome.Rejected ->
-                AiProviderModelListingRunOutcome.Rejected(
-                    failure = AiProviderModelListingRunFailure.TRANSCRIPT_REJECTED,
+            outcome: AiProviderTargetListingOutcome,
+        ): AiProviderTargetListingRunOutcome = when (outcome) {
+            AiProviderTargetListingOutcome.Disabled -> AiProviderTargetListingRunOutcome.Disabled
+            AiProviderTargetListingOutcome.Cancelled -> AiProviderTargetListingRunOutcome.Cancelled
+            AiProviderTargetListingOutcome.TimedOut -> AiProviderTargetListingRunOutcome.TimedOut
+            AiProviderTargetListingOutcome.BinderDied -> AiProviderTargetListingRunOutcome.BinderDied
+            is AiProviderTargetListingOutcome.Completed ->
+                AiProviderTargetListingRunOutcome.Completed(outcome.catalog)
+            is AiProviderTargetListingOutcome.ProviderFailed ->
+                AiProviderTargetListingRunOutcome.ProviderFailed(outcome.error)
+            is AiProviderTargetListingOutcome.Rejected ->
+                AiProviderTargetListingRunOutcome.Rejected(
+                    failure = AiProviderTargetListingRunFailure.TRANSCRIPT_REJECTED,
                     transcriptFailure = outcome.failure,
                 )
         }
 
-        private fun identityDrift() = AiProviderModelListingRunOutcome.Rejected(
-            AiProviderModelListingRunFailure.IDENTITY_DRIFT,
+        private fun identityDrift() = AiProviderTargetListingRunOutcome.Rejected(
+            AiProviderTargetListingRunFailure.IDENTITY_DRIFT,
         )
 
-        private fun executorRejected() = AiProviderModelListingRunOutcome.Rejected(
-            AiProviderModelListingRunFailure.EXECUTOR_REJECTED,
+        private fun executorRejected() = AiProviderTargetListingRunOutcome.Rejected(
+            AiProviderTargetListingRunFailure.EXECUTOR_REJECTED,
         )
 
-        private fun internalFailure() = AiProviderModelListingRunOutcome.Rejected(
-            AiProviderModelListingRunFailure.INTERNAL_FAILURE,
+        private fun internalFailure() = AiProviderTargetListingRunOutcome.Rejected(
+            AiProviderTargetListingRunFailure.INTERNAL_FAILURE,
         )
 
-        private fun remoteSecurity() = AiProviderModelListingRunOutcome.Rejected(
-            AiProviderModelListingRunFailure.REMOTE_SECURITY,
+        private fun remoteSecurity() = AiProviderTargetListingRunOutcome.Rejected(
+            AiProviderTargetListingRunFailure.REMOTE_SECURITY,
         )
 
-        private fun remoteFailure() = AiProviderModelListingRunOutcome.Rejected(
-            AiProviderModelListingRunFailure.REMOTE_FAILURE,
+        private fun remoteFailure() = AiProviderTargetListingRunOutcome.Rejected(
+            AiProviderTargetListingRunFailure.REMOTE_FAILURE,
         )
 
         private fun transcriptRejected(
-            failure: AiProviderModelListingFailure,
-        ) = AiProviderModelListingRunOutcome.Rejected(
-            failure = AiProviderModelListingRunFailure.TRANSCRIPT_REJECTED,
+            failure: AiProviderTargetListingFailure,
+        ) = AiProviderTargetListingRunOutcome.Rejected(
+            failure = AiProviderTargetListingRunFailure.TRANSCRIPT_REJECTED,
             transcriptFailure = failure,
         )
 
@@ -1149,12 +1149,12 @@ internal class AiProviderModelListingCoordinator(
 
     private sealed class MetadataReadResult {
         object Abandoned : MetadataReadResult()
-        data class Failed(val failure: AiProviderModelListingRunFailure) : MetadataReadResult()
-        data class Complete(val rpc: AiProviderModelListingRpc) : MetadataReadResult()
+        data class Failed(val failure: AiProviderTargetListingRunFailure) : MetadataReadResult()
+        data class Complete(val rpc: AiProviderTargetListingRpc) : MetadataReadResult()
     }
 
     private sealed class MetadataValue<out T> {
-        data class Failed(val failure: AiProviderModelListingRunFailure) : MetadataValue<Nothing>()
+        data class Failed(val failure: AiProviderTargetListingRunFailure) : MetadataValue<Nothing>()
         data class Value<T>(val value: T) : MetadataValue<T>()
     }
 
@@ -1167,14 +1167,14 @@ internal class AiProviderModelListingCoordinator(
 
     private sealed class CallbackAdmissionResult {
         object Abandoned : CallbackAdmissionResult()
-        data class Failed(val failure: AiProviderModelListingRunFailure) : CallbackAdmissionResult()
+        data class Failed(val failure: AiProviderTargetListingRunFailure) : CallbackAdmissionResult()
         data class Decided(
-            val decision: AiProviderModelListingDecision,
+            val decision: AiProviderTargetListingDecision,
         ) : CallbackAdmissionResult()
     }
 
     private data class TerminalDecision(
-        val outcome: AiProviderModelListingRunOutcome,
+        val outcome: AiProviderTargetListingRunOutcome,
         val timedOut: Boolean,
         val fuseComponent: Boolean,
         val retainDeadline: Boolean,
@@ -1192,8 +1192,8 @@ internal class AiProviderModelListingCoordinator(
         const val MAX_BUFFERED_CALLBACK_EVENTS = 2
 
         fun deliver(
-            callback: (AiProviderModelListingRunOutcome) -> Unit,
-            outcome: AiProviderModelListingRunOutcome,
+            callback: (AiProviderTargetListingRunOutcome) -> Unit,
+            outcome: AiProviderTargetListingRunOutcome,
         ) {
             runCatching { callback(outcome) }
         }
@@ -1209,14 +1209,14 @@ private fun AiProviderPackageSnapshot.matchesPinnedPackage(
         lastUpdateTime == pinned.lastUpdateTime &&
         signerSha256 == pinned.signerSha256
 
-private class ModelListingCloseSlot<T : Closeable> : Closeable {
+private class TargetListingCloseSlot<T : Closeable> : Closeable {
     private val lock = Any()
     private var value: T? = null
     private var closed = false
 
     fun install(candidate: T) {
         val closeNow = synchronized(lock) {
-            check(value == null) { "Model-list resource was installed more than once" }
+            check(value == null) { "Target-list resource was installed more than once" }
             if (closed) true else {
                 value = candidate
                 false
@@ -1235,7 +1235,7 @@ private class ModelListingCloseSlot<T : Closeable> : Closeable {
     }
 }
 
-private class ModelListingCloseRegistry<T : Closeable> : Closeable {
+private class TargetListingCloseRegistry<T : Closeable> : Closeable {
     private val lock = Any()
     private val values = ArrayList<T>()
     private var closed = false
@@ -1260,7 +1260,7 @@ private class ModelListingCloseRegistry<T : Closeable> : Closeable {
     }
 }
 
-private class ModelListingSerialExecutor(
+private class TargetListingSerialExecutor(
     private val delegate: Executor,
 ) {
     private data class Entry(

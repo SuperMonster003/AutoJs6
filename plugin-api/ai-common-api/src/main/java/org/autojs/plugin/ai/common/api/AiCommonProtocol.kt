@@ -3,7 +3,7 @@ package org.autojs.plugin.ai.common.api
 import java.util.Collections
 
 object AiCommonProtocol {
-    const val MAJOR_VERSION = 1
+    const val MAJOR_VERSION = 2
     const val MINOR_VERSION = 0
 
     const val PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN"
@@ -50,7 +50,7 @@ object AiErrorCode {
     const val UNSUPPORTED_PROTOCOL = 2
     const val UNSUPPORTED_CAPABILITY = 3
     const val PROVIDER_UNAVAILABLE = 4
-    const val MODEL_UNAVAILABLE = 5
+    const val TARGET_UNAVAILABLE = 5
     const val PERMISSION_DENIED = 6
     const val QUOTA_EXCEEDED = 7
     const val BACKPRESSURE = 8
@@ -65,7 +65,7 @@ object AiErrorCode {
         UNSUPPORTED_PROTOCOL,
         UNSUPPORTED_CAPABILITY,
         PROVIDER_UNAVAILABLE,
-        MODEL_UNAVAILABLE,
+        TARGET_UNAVAILABLE,
         PERMISSION_DENIED,
         QUOTA_EXCEEDED,
         BACKPRESSURE,
@@ -85,6 +85,8 @@ object AiCommonLimits {
     const val MAX_INLINE_PAYLOAD_BYTES = 64 * 1024
     const val MAX_PAYLOAD_BYTES = 32L * 1024L * 1024L
     const val MAX_PROVIDER_ID_BYTES = 128
+    const val MAX_TARGET_ID_BYTES = 256
+    const val MAX_MODEL_ID_BYTES = 256
     const val MAX_DISPLAY_NAME_BYTES = 256
     const val MAX_VERSION_NAME_BYTES = 128
     const val MAX_ORIGINS = 32

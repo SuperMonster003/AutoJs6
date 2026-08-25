@@ -2,9 +2,9 @@ package org.autojs.autojs.core.plugin.ai
 
 import org.autojs.plugin.ai.common.api.AiCommonCodec
 import org.autojs.plugin.ai.common.api.AiCommonLimits
-import org.autojs.plugin.ai.provider.api.AiModelInfo
-import org.autojs.plugin.ai.provider.api.AiModelListRequest
-import org.autojs.plugin.ai.provider.api.AiModelPage
+import org.autojs.plugin.ai.provider.api.AiTargetInfo
+import org.autojs.plugin.ai.provider.api.AiTargetListRequest
+import org.autojs.plugin.ai.provider.api.AiTargetPage
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilityId
 import org.autojs.plugin.ai.provider.api.AiProviderCodec
 import org.autojs.plugin.ai.provider.api.AiProviderLimits
@@ -25,29 +25,29 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-class AiProviderModelListingCoordinatorTest {
+class AiProviderTargetListingCoordinatorTest {
 
     @Test
     fun defaultOffHasNoTransportSchedulerOrOwnerSideEffects() {
-        val input = modelListingInput()
-        val transport = FakeModelListingTransport(input)
-        val scheduler = FakeModelListingDeadlineScheduler()
-        val owner = modelListingOwner()
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val input = targetListingInput()
+        val transport = FakeTargetListingTransport(input)
+        val scheduler = FakeTargetListingDeadlineScheduler()
+        val owner = targetListingOwner()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         coordinator(transport, scheduler = scheduler, owner = owner).start(
-            modelListingRequest(input = input, enabled = false),
+            targetListingRequest(input = input, enabled = false),
             outcomes::add,
         )
 
-        assertSame(AiProviderModelListingRunOutcome.Disabled, outcomes.single())
+        assertSame(AiProviderTargetListingRunOutcome.Disabled, outcomes.single())
         assertEquals(0, scheduler.scheduleCalls)
         assertEquals(0, transport.inspectionCalls)
         assertEquals(0, transport.bindCalls)
         assertEquals(0, transport.openRpcCalls)
         assertEquals(0, transport.rpc.dispatchCalls)
         assertEquals(
-            AiProviderModelListingAdmission.ACQUIRED,
+            AiProviderTargetListingAdmission.ACQUIRED,
             owner.tryAcquire(snapshot(input).component),
         )
         owner.release()
@@ -55,21 +55,21 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun singlePageCompletesFromThePinnedSameBinderTranscript() {
-        val input = modelListingInput()
-        val transport = FakeModelListingTransport(input).apply {
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.single")))
+        val input = targetListingInput()
+        val transport = FakeTargetListingTransport(input).apply {
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.single")))
             respondWithQueuedPages()
         }
-        val scheduler = FakeModelListingDeadlineScheduler()
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val scheduler = FakeTargetListingDeadlineScheduler()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         coordinator(transport, scheduler = scheduler).start(
-            modelListingRequest(input),
+            targetListingRequest(input),
             outcomes::add,
         )
 
-        val completed = outcomes.single() as AiProviderModelListingRunOutcome.Completed
-        assertEquals(listOf("fixture.single"), completed.catalog.models.map { it.modelId })
+        val completed = outcomes.single() as AiProviderTargetListingRunOutcome.Completed
+        assertEquals(listOf("fixture.single"), completed.catalog.targets.map { it.modelId })
         assertEquals(1, transport.openRpcCalls)
         assertEquals(1, transport.rpc.providerInfoCalls)
         assertEquals(1, transport.rpc.capabilitiesCalls)
@@ -82,25 +82,25 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun pageSizeOneFollowsFourRealContinuationDecisionsWithoutDispatchReentry() {
-        val input = modelListingInput()
-        val transport = FakeModelListingTransport(input).apply {
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.model-1"), next = "token-1"))
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.model-2"), next = "token-2"))
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.model-3"), next = "token-3"))
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.model-4")))
+        val input = targetListingInput()
+        val transport = FakeTargetListingTransport(input).apply {
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.model-1"), next = "token-1"))
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.model-2"), next = "token-2"))
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.model-3"), next = "token-3"))
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.model-4")))
             respondWithQueuedPages()
         }
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         coordinator(transport).start(
-            modelListingRequest(input = input, pageSize = 1),
+            targetListingRequest(input = input, pageSize = 1),
             outcomes::add,
         )
 
-        val completed = outcomes.single() as AiProviderModelListingRunOutcome.Completed
+        val completed = outcomes.single() as AiProviderTargetListingRunOutcome.Completed
         assertEquals(
             listOf("fixture.model-1", "fixture.model-2", "fixture.model-3", "fixture.model-4"),
-            completed.catalog.models.map { it.modelId },
+            completed.catalog.targets.map { it.modelId },
         )
         assertEquals(listOf(null, "token-1", "token-2", "token-3"), transport.rpc.requests.map { it.pageToken })
         assertTrue(transport.rpc.requests.all { it.pageSize == 1 })
@@ -111,77 +111,77 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun tokenCapacityAndReplayEvidenceAreIsolatedByCompletePinnedProviderIdentity() {
-        val owner = modelListingOwner(
+        val owner = targetListingOwner(
             maximumProviderIdentities = 2,
             maximumConsumedTokensPerProvider = 1,
         )
-        val firstInput = modelListingInput()
-        val firstTransport = FakeModelListingTransport(firstInput).apply {
-            pageResponses += PageResponse(firstInput.packageUid, page(model("fixture.first-1"), "shared-token"))
-            pageResponses += PageResponse(firstInput.packageUid, page(model("fixture.first-2"), "first-overflow"))
+        val firstInput = targetListingInput()
+        val firstTransport = FakeTargetListingTransport(firstInput).apply {
+            pageResponses += PageResponse(firstInput.packageUid, page(target("fixture.first-1"), "shared-token"))
+            pageResponses += PageResponse(firstInput.packageUid, page(target("fixture.first-2"), "first-overflow"))
             respondWithQueuedPages()
         }
-        val firstOutcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val firstOutcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         coordinator(firstTransport, owner = owner).start(
-            modelListingRequest(input = firstInput, pageSize = 1),
+            targetListingRequest(input = firstInput, pageSize = 1),
             firstOutcomes::add,
         )
 
-        val firstRejected = firstOutcomes.single() as AiProviderModelListingRunOutcome.Rejected
-        assertEquals(AiProviderModelListingRunFailure.TRANSCRIPT_REJECTED, firstRejected.failure)
-        assertEquals(AiProviderModelListingFailure.PAGINATION_INVALID, firstRejected.transcriptFailure)
+        val firstRejected = firstOutcomes.single() as AiProviderTargetListingRunOutcome.Rejected
+        assertEquals(AiProviderTargetListingRunFailure.TRANSCRIPT_REJECTED, firstRejected.failure)
+        assertEquals(AiProviderTargetListingFailure.PAGINATION_INVALID, firstRejected.transcriptFailure)
         assertEquals(2, firstTransport.rpc.dispatchCalls)
 
-        val secondInput = modelListingInput(
+        val secondInput = targetListingInput(
             packageName = "second.ai.provider",
             packageUid = PINNED_UID + 1,
         )
-        val secondTransport = FakeModelListingTransport(secondInput).apply {
-            pageResponses += PageResponse(secondInput.packageUid, page(model("fixture.second-1"), "shared-token"))
-            pageResponses += PageResponse(secondInput.packageUid, page(model("fixture.second-2")))
+        val secondTransport = FakeTargetListingTransport(secondInput).apply {
+            pageResponses += PageResponse(secondInput.packageUid, page(target("fixture.second-1"), "shared-token"))
+            pageResponses += PageResponse(secondInput.packageUid, page(target("fixture.second-2")))
             respondWithQueuedPages()
         }
-        val secondOutcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val secondOutcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         coordinator(secondTransport, owner = owner).start(
-            modelListingRequest(input = secondInput, pageSize = 1),
+            targetListingRequest(input = secondInput, pageSize = 1),
             secondOutcomes::add,
         )
 
-        val secondCompleted = secondOutcomes.single() as AiProviderModelListingRunOutcome.Completed
-        assertEquals(listOf("fixture.second-1", "fixture.second-2"), secondCompleted.catalog.models.map { it.modelId })
+        val secondCompleted = secondOutcomes.single() as AiProviderTargetListingRunOutcome.Completed
+        assertEquals(listOf("fixture.second-1", "fixture.second-2"), secondCompleted.catalog.targets.map { it.modelId })
         assertEquals(2, secondTransport.rpc.dispatchCalls)
         assertNull(
             owner.tokenLedgerFor(
-                pinned(modelListingInput(packageName = "third.ai.provider", packageUid = PINNED_UID + 2)),
+                pinned(targetListingInput(packageName = "third.ai.provider", packageUid = PINNED_UID + 2)),
             ),
         )
         assertTrue(
             runCatching {
-                AiProviderModelListingProcessOwner(
+                AiProviderTargetListingProcessOwner(
                     maximumProviderIdentities = 2,
                     maximumConsumedTokensPerProvider =
-                        AiProviderLimits.MAX_MODEL_PAGE_TOKEN_LEDGER_ENTRIES,
+                        AiProviderLimits.MAX_TARGET_PAGE_TOKEN_LEDGER_ENTRIES,
                 )
             }.isFailure,
         )
     }
 
     @Test
-    fun metadataRevalidationMismatchStopsBeforeAnyModelListDispatch() {
-        val input = modelListingInput()
-        val transport = FakeModelListingTransport(input).apply {
+    fun metadataRevalidationMismatchStopsBeforeAnyTargetListDispatch() {
+        val input = targetListingInput()
+        val transport = FakeTargetListingTransport(input).apply {
             rpc.encodedProviderInfo = AiCommonCodec.encodeProviderInfo(
                 AiProviderHostTestFixtures.providerInfo(providerId = "different.provider"),
             )
         }
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
-        coordinator(transport).start(modelListingRequest(input), outcomes::add)
+        coordinator(transport).start(targetListingRequest(input), outcomes::add)
 
-        val rejected = outcomes.single() as AiProviderModelListingRunOutcome.Rejected
-        assertEquals(AiProviderModelListingRunFailure.PINNED_METADATA_MISMATCH, rejected.failure)
+        val rejected = outcomes.single() as AiProviderTargetListingRunOutcome.Rejected
+        assertEquals(AiProviderTargetListingRunFailure.PINNED_METADATA_MISMATCH, rejected.failure)
         assertEquals(1, transport.openRpcCalls)
         assertEquals(1, transport.rpc.providerInfoCalls)
         assertEquals(1, transport.rpc.capabilitiesCalls)
@@ -191,18 +191,18 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun exactIdentityDriftImmediatelyBeforeDispatchStopsWithoutPreparingACall() {
-        val input = modelListingInput()
-        val drifted = modelListingInput(versionCode = input.versionCode + 1L)
-        val transport = FakeModelListingTransport(input).apply {
+        val input = targetListingInput()
+        val drifted = targetListingInput(versionCode = input.versionCode + 1L)
+        val transport = FakeTargetListingTransport(input).apply {
             repeat(3) { inspectionResults += discovered(input) }
             inspectionResults += discovered(drifted)
         }
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
-        coordinator(transport).start(modelListingRequest(input), outcomes::add)
+        coordinator(transport).start(targetListingRequest(input), outcomes::add)
 
-        val rejected = outcomes.single() as AiProviderModelListingRunOutcome.Rejected
-        assertEquals(AiProviderModelListingRunFailure.IDENTITY_DRIFT, rejected.failure)
+        val rejected = outcomes.single() as AiProviderTargetListingRunOutcome.Rejected
+        assertEquals(AiProviderTargetListingRunFailure.IDENTITY_DRIFT, rejected.failure)
         assertEquals(4, transport.inspectionCalls)
         assertEquals(0, transport.rpc.prepareCallCalls)
         assertEquals(0, transport.rpc.dispatchCalls)
@@ -212,34 +212,34 @@ class AiProviderModelListingCoordinatorTest {
     fun callbackIngressRejectsUidAndTypedOversizeBeforeCopyOrReinspection() {
         val cases = listOf(
             CallbackIngressCase(
-                failure = AiProviderModelListingFailure.CALLBACK_UID_MISMATCH,
+                failure = AiProviderTargetListingFailure.CALLBACK_UID_MISMATCH,
                 invoke = { callback ->
-                    callback.onPage(PINNED_UID + 1, ByteArray(AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES + 1))
+                    callback.onPage(PINNED_UID + 1, ByteArray(AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES + 1))
                 },
             ),
             CallbackIngressCase(
-                failure = AiProviderModelListingFailure.PAGE_TOO_LARGE,
+                failure = AiProviderTargetListingFailure.PAGE_TOO_LARGE,
                 invoke = { callback ->
-                    callback.onPage(PINNED_UID, ByteArray(AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES + 1))
+                    callback.onPage(PINNED_UID, ByteArray(AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES + 1))
                 },
             ),
             CallbackIngressCase(
-                failure = AiProviderModelListingFailure.ERROR_TOO_LARGE,
+                failure = AiProviderTargetListingFailure.ERROR_TOO_LARGE,
                 invoke = { callback ->
                     callback.onFailed(PINNED_UID, ByteArray(AiCommonLimits.MAX_BINDER_ENVELOPE_BYTES + 1))
                 },
             ),
         )
         cases.forEach { case ->
-            val input = modelListingInput()
-            val transport = FakeModelListingTransport(input)
-            val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
-            coordinator(transport).start(modelListingRequest(input), outcomes::add)
+            val input = targetListingInput()
+            val transport = FakeTargetListingTransport(input)
+            val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
+            coordinator(transport).start(targetListingRequest(input), outcomes::add)
 
             case.invoke(requireNotNull(transport.rpc.lastCallback))
 
-            val rejected = outcomes.single() as AiProviderModelListingRunOutcome.Rejected
-            assertEquals(AiProviderModelListingRunFailure.TRANSCRIPT_REJECTED, rejected.failure)
+            val rejected = outcomes.single() as AiProviderTargetListingRunOutcome.Rejected
+            assertEquals(AiProviderTargetListingRunFailure.TRANSCRIPT_REJECTED, rejected.failure)
             assertEquals(case.failure, rejected.transcriptFailure)
             assertEquals(4, transport.inspectionCalls)
             assertEquals(1, transport.rpc.dispatchCalls)
@@ -248,11 +248,11 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun thirdCallbackIsRejectedByFloodGateWhileOneIsActiveAndOnePending() {
-        val input = modelListingInput()
+        val input = targetListingInput()
         val admissionEntered = CountDownLatch(1)
         val releaseAdmission = CountDownLatch(1)
         val dispatchReturned = CountDownLatch(1)
-        val transport = FakeModelListingTransport(input).apply {
+        val transport = FakeTargetListingTransport(input).apply {
             inspectBehavior = { inspection ->
                 if (inspection == 5) {
                     admissionEntered.countDown()
@@ -262,22 +262,22 @@ class AiProviderModelListingCoordinatorTest {
             rpc.dispatchBehavior = { _, _ -> dispatchReturned.countDown() }
         }
         val blocking = Executors.newSingleThreadExecutor()
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         try {
-            coordinator(transport, blocking = blocking).start(modelListingRequest(input), outcomes::add)
+            coordinator(transport, blocking = blocking).start(targetListingRequest(input), outcomes::add)
             assertTrue("dispatch did not return", dispatchReturned.await(5, TimeUnit.SECONDS))
             blocking.submit {}.get(5, TimeUnit.SECONDS)
             val callback = requireNotNull(transport.rpc.lastCallback)
-            val envelope = page(model("fixture.flood"))
+            val envelope = page(target("fixture.flood"))
 
             callback.onPage(PINNED_UID, envelope)
             assertTrue("callback admission did not enter", admissionEntered.await(5, TimeUnit.SECONDS))
             callback.onPage(PINNED_UID, envelope)
             callback.onPage(PINNED_UID, envelope)
 
-            val rejected = outcomes.single() as AiProviderModelListingRunOutcome.Rejected
-            assertEquals(AiProviderModelListingRunFailure.CALLBACK_FLOOD, rejected.failure)
+            val rejected = outcomes.single() as AiProviderTargetListingRunOutcome.Rejected
+            assertEquals(AiProviderTargetListingRunFailure.CALLBACK_FLOOD, rejected.failure)
             releaseAdmission.countDown()
             blocking.submit {}.get(5, TimeUnit.SECONDS)
             assertEquals(1, outcomes.size)
@@ -293,10 +293,10 @@ class AiProviderModelListingCoordinatorTest {
     @Test
     fun cancelDeathAndCallbackEachPublishAtMostOneTerminalOutcome() {
         FirstTerminal.entries.forEach { first ->
-            val input = modelListingInput()
-            val transport = FakeModelListingTransport(input)
-            val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
-            val handle = coordinator(transport).start(modelListingRequest(input), outcomes::add)
+            val input = targetListingInput()
+            val transport = FakeTargetListingTransport(input)
+            val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
+            val handle = coordinator(transport).start(targetListingRequest(input), outcomes::add)
             val callback = assertNotNull(transport.rpc.lastCallback).let {
                 requireNotNull(transport.rpc.lastCallback)
             }
@@ -304,17 +304,17 @@ class AiProviderModelListingCoordinatorTest {
             when (first) {
                 FirstTerminal.CANCEL -> handle.close()
                 FirstTerminal.DEATH -> transport.die()
-                FirstTerminal.CALLBACK -> callback.onPage(PINNED_UID, page(model("fixture.race")))
+                FirstTerminal.CALLBACK -> callback.onPage(PINNED_UID, page(target("fixture.race")))
             }
             handle.close()
             transport.die()
-            callback.onPage(PINNED_UID, page(model("fixture.late")))
+            callback.onPage(PINNED_UID, page(target("fixture.late")))
 
             assertEquals("first=$first", 1, outcomes.size)
             when (first) {
-                FirstTerminal.CANCEL -> assertSame(AiProviderModelListingRunOutcome.Cancelled, outcomes.single())
-                FirstTerminal.DEATH -> assertSame(AiProviderModelListingRunOutcome.BinderDied, outcomes.single())
-                FirstTerminal.CALLBACK -> assertTrue(outcomes.single() is AiProviderModelListingRunOutcome.Completed)
+                FirstTerminal.CANCEL -> assertSame(AiProviderTargetListingRunOutcome.Cancelled, outcomes.single())
+                FirstTerminal.DEATH -> assertSame(AiProviderTargetListingRunOutcome.BinderDied, outcomes.single())
+                FirstTerminal.CALLBACK -> assertTrue(outcomes.single() is AiProviderTargetListingRunOutcome.Completed)
             }
             assertEquals("first=$first", 1, transport.binding.closeCalls.get())
             assertEquals("first=$first", 1, transport.rpc.preparedCallCloseCalls.get())
@@ -323,41 +323,41 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun completedOutcomeCallbackCanImmediatelyStartAnotherListingWithoutBusy() {
-        val input = modelListingInput()
-        val transport = FakeModelListingTransport(input).apply {
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.first")))
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.second")))
+        val input = targetListingInput()
+        val transport = FakeTargetListingTransport(input).apply {
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.first")))
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.second")))
             respondWithQueuedPages()
         }
-        val owner = modelListingOwner()
-        val first = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
-        val second = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val owner = targetListingOwner()
+        val first = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
+        val second = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
         val coordinator = coordinator(transport, owner = owner)
 
-        coordinator.start(modelListingRequest(input)) { outcome ->
+        coordinator.start(targetListingRequest(input)) { outcome ->
             first += outcome
-            coordinator.start(modelListingRequest(input), second::add)
+            coordinator.start(targetListingRequest(input), second::add)
         }
 
-        assertTrue(first.single() is AiProviderModelListingRunOutcome.Completed)
-        assertTrue(second.single() is AiProviderModelListingRunOutcome.Completed)
+        assertTrue(first.single() is AiProviderTargetListingRunOutcome.Completed)
+        assertTrue(second.single() is AiProviderTargetListingRunOutcome.Completed)
         assertEquals(2, transport.rpc.dispatchCalls)
     }
 
     @Test
     fun completedOutcomeCallbackBlockedPastDeadlineCannotFuseProvider() {
-        val input = modelListingInput()
+        val input = targetListingInput()
         val callbackEntered = CountDownLatch(1)
         val releaseCallback = CountDownLatch(1)
-        val transport = FakeModelListingTransport(input).apply {
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.blocked-outcome")))
+        val transport = FakeTargetListingTransport(input).apply {
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.blocked-outcome")))
             respondWithQueuedPages()
         }
-        val scheduler = FakeModelListingDeadlineScheduler()
-        val clock = FakeModelListingClock()
-        val owner = modelListingOwner()
+        val scheduler = FakeTargetListingDeadlineScheduler()
+        val clock = FakeTargetListingClock()
+        val owner = targetListingOwner()
         val worker = Executors.newSingleThreadExecutor()
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         try {
             coordinator(
@@ -366,19 +366,19 @@ class AiProviderModelListingCoordinatorTest {
                 scheduler = scheduler,
                 clock = clock,
                 owner = owner,
-            ).start(modelListingRequest(input, timeoutMillis = TIMEOUT_MILLIS)) { outcome ->
+            ).start(targetListingRequest(input, timeoutMillis = TIMEOUT_MILLIS)) { outcome ->
                 outcomes += outcome
                 callbackEntered.countDown()
                 assertTrue("outcome callback was not released", releaseCallback.await(5, TimeUnit.SECONDS))
             }
 
             assertTrue("outcome callback did not enter", callbackEntered.await(5, TimeUnit.SECONDS))
-            assertTrue(outcomes.single() is AiProviderModelListingRunOutcome.Completed)
+            assertTrue(outcomes.single() is AiProviderTargetListingRunOutcome.Completed)
             clock.nowMillis += TIMEOUT_MILLIS
             scheduler.fire()
 
             assertEquals(
-                AiProviderModelListingAdmission.ACQUIRED,
+                AiProviderTargetListingAdmission.ACQUIRED,
                 owner.tryAcquire(snapshot(input).component),
             )
             owner.release()
@@ -396,22 +396,22 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun completedClaimBeforeOperationDoneIgnoresStaleDeadlineWithoutFuse() {
-        val input = modelListingInput()
+        val input = targetListingInput()
         val closeEntered = CountDownLatch(1)
         val releaseClose = CountDownLatch(1)
-        val transport = FakeModelListingTransport(input).apply {
-            pageResponses += PageResponse(PINNED_UID, page(model("fixture.completed-before-unwind")))
+        val transport = FakeTargetListingTransport(input).apply {
+            pageResponses += PageResponse(PINNED_UID, page(target("fixture.completed-before-unwind")))
             respondWithQueuedPages()
             rpc.preparedCloseBehavior = {
                 closeEntered.countDown()
                 releaseClose.await(5, TimeUnit.SECONDS)
             }
         }
-        val scheduler = FakeModelListingDeadlineScheduler()
-        val clock = FakeModelListingClock()
-        val owner = modelListingOwner()
+        val scheduler = FakeTargetListingDeadlineScheduler()
+        val clock = FakeTargetListingClock()
+        val owner = targetListingOwner()
         val worker = Executors.newSingleThreadExecutor()
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         try {
             coordinator(
@@ -420,7 +420,7 @@ class AiProviderModelListingCoordinatorTest {
                 scheduler = scheduler,
                 clock = clock,
                 owner = owner,
-            ).start(modelListingRequest(input, timeoutMillis = TIMEOUT_MILLIS), outcomes::add)
+            ).start(targetListingRequest(input, timeoutMillis = TIMEOUT_MILLIS), outcomes::add)
 
             assertTrue("prepared-call close did not enter", closeEntered.await(5, TimeUnit.SECONDS))
             assertTrue(outcomes.isEmpty())
@@ -428,7 +428,7 @@ class AiProviderModelListingCoordinatorTest {
             scheduler.fire()
 
             assertEquals(
-                AiProviderModelListingAdmission.BUSY,
+                AiProviderTargetListingAdmission.BUSY,
                 owner.tryAcquire(snapshot(input).component),
             )
             assertTrue(outcomes.isEmpty())
@@ -436,9 +436,9 @@ class AiProviderModelListingCoordinatorTest {
 
             releaseClose.countDown()
             worker.submit {}.get(5, TimeUnit.SECONDS)
-            assertTrue(outcomes.single() is AiProviderModelListingRunOutcome.Completed)
+            assertTrue(outcomes.single() is AiProviderTargetListingRunOutcome.Completed)
             assertEquals(
-                AiProviderModelListingAdmission.ACQUIRED,
+                AiProviderTargetListingAdmission.ACQUIRED,
                 owner.tryAcquire(snapshot(input).component),
             )
             owner.release()
@@ -453,11 +453,11 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun cancelledBlockedInspectionKeepsWatchdogAndGateUntilLateUnwind() {
-        val input = modelListingInput()
-        val other = snapshot(modelListingInput(packageName = "other.ai.provider")).component
+        val input = targetListingInput()
+        val other = snapshot(targetListingInput(packageName = "other.ai.provider")).component
         val entered = CountDownLatch(1)
         val release = CountDownLatch(1)
-        val transport = FakeModelListingTransport(input).apply {
+        val transport = FakeTargetListingTransport(input).apply {
             inspectBehavior = { inspection ->
                 if (inspection == 1) {
                     entered.countDown()
@@ -465,11 +465,11 @@ class AiProviderModelListingCoordinatorTest {
                 }
             }
         }
-        val scheduler = FakeModelListingDeadlineScheduler()
-        val clock = FakeModelListingClock()
-        val owner = modelListingOwner()
+        val scheduler = FakeTargetListingDeadlineScheduler()
+        val clock = FakeTargetListingClock()
+        val owner = targetListingOwner()
         val worker = Executors.newSingleThreadExecutor()
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         try {
             val handle = coordinator(
@@ -478,21 +478,21 @@ class AiProviderModelListingCoordinatorTest {
                 scheduler = scheduler,
                 clock = clock,
                 owner = owner,
-            ).start(modelListingRequest(input, timeoutMillis = TIMEOUT_MILLIS), outcomes::add)
+            ).start(targetListingRequest(input, timeoutMillis = TIMEOUT_MILLIS), outcomes::add)
 
             assertTrue("inspection did not enter", entered.await(5, TimeUnit.SECONDS))
             handle.close()
-            assertSame(AiProviderModelListingRunOutcome.Cancelled, outcomes.single())
-            assertEquals(AiProviderModelListingAdmission.BUSY, owner.tryAcquire(other))
+            assertSame(AiProviderTargetListingRunOutcome.Cancelled, outcomes.single())
+            assertEquals(AiProviderTargetListingAdmission.BUSY, owner.tryAcquire(other))
 
             clock.nowMillis += TIMEOUT_MILLIS
             scheduler.fire()
-            assertEquals(AiProviderModelListingAdmission.FUSED, owner.tryAcquire(snapshot(input).component))
+            assertEquals(AiProviderTargetListingAdmission.FUSED, owner.tryAcquire(snapshot(input).component))
             assertEquals(1, outcomes.size)
 
             release.countDown()
             worker.submit {}.get(5, TimeUnit.SECONDS)
-            assertEquals(AiProviderModelListingAdmission.ACQUIRED, owner.tryAcquire(other))
+            assertEquals(AiProviderTargetListingAdmission.ACQUIRED, owner.tryAcquire(other))
             owner.release()
             assertEquals(0, transport.bindCalls)
             assertEquals(0, transport.binding.closeCalls.get())
@@ -506,21 +506,21 @@ class AiProviderModelListingCoordinatorTest {
 
     @Test
     fun deathDuringBlockedPrepareKeepsWatchdogAndClosesLateCallOnce() {
-        val input = modelListingInput()
-        val other = snapshot(modelListingInput(packageName = "other.ai.provider")).component
+        val input = targetListingInput()
+        val other = snapshot(targetListingInput(packageName = "other.ai.provider")).component
         val entered = CountDownLatch(1)
         val release = CountDownLatch(1)
-        val transport = FakeModelListingTransport(input).apply {
+        val transport = FakeTargetListingTransport(input).apply {
             rpc.prepareBehavior = { _, _ ->
                 entered.countDown()
                 assertTrue("blocked prepare was not released", release.await(5, TimeUnit.SECONDS))
             }
         }
-        val scheduler = FakeModelListingDeadlineScheduler()
-        val clock = FakeModelListingClock()
-        val owner = modelListingOwner()
+        val scheduler = FakeTargetListingDeadlineScheduler()
+        val clock = FakeTargetListingClock()
+        val owner = targetListingOwner()
         val blocking = Executors.newSingleThreadExecutor()
-        val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+        val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
         try {
             coordinator(
@@ -529,22 +529,22 @@ class AiProviderModelListingCoordinatorTest {
                 scheduler = scheduler,
                 clock = clock,
                 owner = owner,
-            ).start(modelListingRequest(input, timeoutMillis = TIMEOUT_MILLIS), outcomes::add)
+            ).start(targetListingRequest(input, timeoutMillis = TIMEOUT_MILLIS), outcomes::add)
 
             assertTrue("prepare did not enter", entered.await(5, TimeUnit.SECONDS))
             transport.die()
-            assertSame(AiProviderModelListingRunOutcome.BinderDied, outcomes.single())
-            assertEquals(AiProviderModelListingAdmission.BUSY, owner.tryAcquire(other))
+            assertSame(AiProviderTargetListingRunOutcome.BinderDied, outcomes.single())
+            assertEquals(AiProviderTargetListingAdmission.BUSY, owner.tryAcquire(other))
 
             clock.nowMillis += TIMEOUT_MILLIS
             scheduler.fire()
-            assertEquals(AiProviderModelListingAdmission.FUSED, owner.tryAcquire(snapshot(input).component))
+            assertEquals(AiProviderTargetListingAdmission.FUSED, owner.tryAcquire(snapshot(input).component))
             assertEquals(1, transport.binding.closeCalls.get())
             assertEquals(0, transport.rpc.preparedCallCloseCalls.get())
 
             release.countDown()
             blocking.submit {}.get(5, TimeUnit.SECONDS)
-            assertEquals(AiProviderModelListingAdmission.ACQUIRED, owner.tryAcquire(other))
+            assertEquals(AiProviderTargetListingAdmission.ACQUIRED, owner.tryAcquire(other))
             owner.release()
             assertEquals(1, outcomes.size)
             assertEquals(1, transport.binding.closeCalls.get())
@@ -560,21 +560,21 @@ class AiProviderModelListingCoordinatorTest {
     @Test
     fun blockedDispatchTimeoutOrDeathFusesAndReleasesGateOnlyAfterUnwind() {
         BlockedTerminal.entries.forEach { terminal ->
-            val input = modelListingInput()
-            val other = snapshot(modelListingInput(packageName = "other.ai.provider")).component
+            val input = targetListingInput()
+            val other = snapshot(targetListingInput(packageName = "other.ai.provider")).component
             val entered = CountDownLatch(1)
             val release = CountDownLatch(1)
-            val transport = FakeModelListingTransport(input).apply {
+            val transport = FakeTargetListingTransport(input).apply {
                 rpc.dispatchBehavior = { _, _ ->
                     entered.countDown()
                     assertTrue("blocked dispatch was not released", release.await(5, TimeUnit.SECONDS))
                 }
             }
-            val scheduler = FakeModelListingDeadlineScheduler()
-            val clock = FakeModelListingClock()
-            val owner = modelListingOwner()
+            val scheduler = FakeTargetListingDeadlineScheduler()
+            val clock = FakeTargetListingClock()
+            val owner = targetListingOwner()
             val blocking = Executors.newSingleThreadExecutor()
-            val outcomes = CopyOnWriteArrayList<AiProviderModelListingRunOutcome>()
+            val outcomes = CopyOnWriteArrayList<AiProviderTargetListingRunOutcome>()
 
             try {
                 coordinator(
@@ -583,30 +583,30 @@ class AiProviderModelListingCoordinatorTest {
                     scheduler = scheduler,
                     clock = clock,
                     owner = owner,
-                ).start(modelListingRequest(input, timeoutMillis = TIMEOUT_MILLIS), outcomes::add)
+                ).start(targetListingRequest(input, timeoutMillis = TIMEOUT_MILLIS), outcomes::add)
 
                 assertTrue("dispatch did not enter", entered.await(5, TimeUnit.SECONDS))
                 if (terminal == BlockedTerminal.DEATH) {
                     transport.die()
-                    assertSame(AiProviderModelListingRunOutcome.BinderDied, outcomes.single())
-                    assertEquals(AiProviderModelListingAdmission.BUSY, owner.tryAcquire(other))
+                    assertSame(AiProviderTargetListingRunOutcome.BinderDied, outcomes.single())
+                    assertEquals(AiProviderTargetListingAdmission.BUSY, owner.tryAcquire(other))
                 }
                 clock.nowMillis += TIMEOUT_MILLIS
                 scheduler.fire()
 
                 if (terminal == BlockedTerminal.TIMEOUT) {
-                    assertSame(AiProviderModelListingRunOutcome.TimedOut, outcomes.single())
+                    assertSame(AiProviderTargetListingRunOutcome.TimedOut, outcomes.single())
                 }
-                assertEquals(AiProviderModelListingAdmission.FUSED, owner.tryAcquire(snapshot(input).component))
-                assertEquals(AiProviderModelListingAdmission.BUSY, owner.tryAcquire(other))
+                assertEquals(AiProviderTargetListingAdmission.FUSED, owner.tryAcquire(snapshot(input).component))
+                assertEquals(AiProviderTargetListingAdmission.BUSY, owner.tryAcquire(other))
                 assertEquals(1, transport.binding.closeCalls.get())
                 assertEquals(1, transport.rpc.preparedCallCloseCalls.get())
 
                 release.countDown()
                 blocking.submit {}.get(5, TimeUnit.SECONDS)
 
-                assertEquals(AiProviderModelListingAdmission.FUSED, owner.tryAcquire(snapshot(input).component))
-                assertEquals(AiProviderModelListingAdmission.ACQUIRED, owner.tryAcquire(other))
+                assertEquals(AiProviderTargetListingAdmission.FUSED, owner.tryAcquire(snapshot(input).component))
+                assertEquals(AiProviderTargetListingAdmission.ACQUIRED, owner.tryAcquire(other))
                 owner.release()
                 assertEquals(1, outcomes.size)
                 assertEquals(1, transport.binding.closeCalls.get())
@@ -621,13 +621,13 @@ class AiProviderModelListingCoordinatorTest {
     }
 
     private fun coordinator(
-        transport: FakeModelListingTransport,
+        transport: FakeTargetListingTransport,
         worker: Executor = DIRECT,
         blocking: Executor = DIRECT,
-        scheduler: FakeModelListingDeadlineScheduler = FakeModelListingDeadlineScheduler(),
-        clock: AiProviderModelListingClock = FakeModelListingClock(),
-        owner: AiProviderModelListingProcessOwner = modelListingOwner(),
-    ) = AiProviderModelListingCoordinator(
+        scheduler: FakeTargetListingDeadlineScheduler = FakeTargetListingDeadlineScheduler(),
+        clock: AiProviderTargetListingClock = FakeTargetListingClock(),
+        owner: AiProviderTargetListingProcessOwner = targetListingOwner(),
+    ) = AiProviderTargetListingCoordinator(
         transport = transport,
         workerExecutor = worker,
         blockingExecutor = blocking,
@@ -652,17 +652,17 @@ class AiProviderModelListingCoordinatorTest {
     }
 }
 
-private class FakeModelListingTransport(
+private class FakeTargetListingTransport(
     private val input: AiProviderDiscoveryInput,
-) : AiProviderModelListingTransport {
+) : AiProviderTargetListingTransport {
     val inspectionResults = ArrayDeque<AiProviderDiscoverySourceResult>()
-    val binding = FakeModelListingBinding()
-    val rpc = FakeModelListingRpc()
+    val binding = FakeTargetListingBinding()
+    val rpc = FakeTargetListingRpc()
     val pageResponses = ArrayDeque<PageResponse>()
     @Volatile var inspectionCalls = 0
     @Volatile var bindCalls = 0
     @Volatile var openRpcCalls = 0
-    @Volatile private var bindingCallback: AiProviderModelListingBindingCallback? = null
+    @Volatile private var bindingCallback: AiProviderTargetListingBindingCallback? = null
     var inspectBehavior: (Int) -> Unit = {}
 
     override fun inspectExact(component: AiProviderComponent): AiProviderDiscoverySourceResult {
@@ -673,17 +673,17 @@ private class FakeModelListingTransport(
 
     override fun bindExact(
         snapshot: AiProviderPackageSnapshot,
-        callback: AiProviderModelListingBindingCallback,
-    ): AiProviderModelListingBinding {
+        callback: AiProviderTargetListingBindingCallback,
+    ): AiProviderTargetListingBinding {
         bindCalls += 1
         bindingCallback = callback
-        callback.onConnected(FakeModelListingConnection)
+        callback.onConnected(FakeTargetListingConnection)
         return binding
     }
 
     override fun openRpc(
-        connection: AiProviderModelListingConnection,
-    ): AiProviderModelListingRpc {
+        connection: AiProviderTargetListingConnection,
+    ): AiProviderTargetListingRpc {
         openRpcCalls += 1
         return rpc
     }
@@ -700,9 +700,9 @@ private class FakeModelListingTransport(
     }
 }
 
-private object FakeModelListingConnection : AiProviderModelListingConnection
+private object FakeTargetListingConnection : AiProviderTargetListingConnection
 
-private class FakeModelListingBinding : AiProviderModelListingBinding {
+private class FakeTargetListingBinding : AiProviderTargetListingBinding {
     val closeCalls = AtomicInteger()
     private val closed = AtomicBoolean()
 
@@ -711,7 +711,7 @@ private class FakeModelListingBinding : AiProviderModelListingBinding {
     }
 }
 
-private class FakeModelListingRpc : AiProviderModelListingRpc {
+private class FakeTargetListingRpc : AiProviderTargetListingRpc {
     @Volatile var encodedProviderInfo: ByteArray? = AiCommonCodec.encodeProviderInfo(
         AiProviderHostTestFixtures.providerInfo(),
     )
@@ -722,12 +722,12 @@ private class FakeModelListingRpc : AiProviderModelListingRpc {
     @Volatile var capabilitiesCalls = 0
     @Volatile var prepareCallCalls = 0
     @Volatile var dispatchCalls = 0
-    @Volatile var lastCallback: AiProviderModelListingCallbackIngress? = null
+    @Volatile var lastCallback: AiProviderTargetListingCallbackIngress? = null
     val preparedCallCloseCalls = AtomicInteger()
     val maximumConcurrentDispatches = AtomicInteger()
-    val requests = CopyOnWriteArrayList<AiModelListRequest>()
-    var prepareBehavior: (Long, AiProviderModelListingCallbackIngress) -> Unit = { _, _ -> }
-    var dispatchBehavior: (AiModelListRequest, AiProviderModelListingCallbackIngress) -> Unit = { _, _ -> }
+    val requests = CopyOnWriteArrayList<AiTargetListRequest>()
+    var prepareBehavior: (Long, AiProviderTargetListingCallbackIngress) -> Unit = { _, _ -> }
+    var dispatchBehavior: (AiTargetListRequest, AiProviderTargetListingCallbackIngress) -> Unit = { _, _ -> }
     var preparedCloseBehavior: () -> Unit = {}
     private val concurrentDispatches = AtomicInteger()
 
@@ -743,12 +743,12 @@ private class FakeModelListingRpc : AiProviderModelListingRpc {
 
     override fun prepareCall(
         sequence: Long,
-        callback: AiProviderModelListingCallbackIngress,
-    ): AiProviderModelListingPreparedCall {
+        callback: AiProviderTargetListingCallbackIngress,
+    ): AiProviderTargetListingPreparedCall {
         prepareCallCalls += 1
         lastCallback = callback
         prepareBehavior(sequence, callback)
-        return object : AiProviderModelListingPreparedCall {
+        return object : AiProviderTargetListingPreparedCall {
             private val closed = AtomicBoolean()
 
             override fun dispatch(requestEnvelope: ByteArray) {
@@ -756,7 +756,7 @@ private class FakeModelListingRpc : AiProviderModelListingRpc {
                 val active = concurrentDispatches.incrementAndGet()
                 maximumConcurrentDispatches.updateAndGet { current -> maxOf(current, active) }
                 try {
-                    val request = AiProviderCodec.decodeModelListRequest(requestEnvelope.copyOf())
+                    val request = AiProviderCodec.decodeTargetListRequest(requestEnvelope.copyOf())
                     requests += request
                     dispatchBehavior(request, callback)
                 } finally {
@@ -774,7 +774,7 @@ private class FakeModelListingRpc : AiProviderModelListingRpc {
     }
 }
 
-private class FakeModelListingDeadlineScheduler : AiProviderModelListingDeadlineScheduler {
+private class FakeTargetListingDeadlineScheduler : AiProviderTargetListingDeadlineScheduler {
     @Volatile private var action: (() -> Unit)? = null
     @Volatile var scheduleCalls = 0
     val closeCalls = AtomicInteger()
@@ -794,9 +794,9 @@ private class FakeModelListingDeadlineScheduler : AiProviderModelListingDeadline
     }
 }
 
-private class FakeModelListingClock(
+private class FakeTargetListingClock(
     @Volatile var nowMillis: Long = 1_000L,
-) : AiProviderModelListingClock {
+) : AiProviderTargetListingClock {
     override fun elapsedRealtimeMillis(): Long = nowMillis
 }
 
@@ -806,29 +806,29 @@ private data class PageResponse(
 )
 
 private data class CallbackIngressCase(
-    val failure: AiProviderModelListingFailure,
-    val invoke: (AiProviderModelListingCallbackIngress) -> Unit,
+    val failure: AiProviderTargetListingFailure,
+    val invoke: (AiProviderTargetListingCallbackIngress) -> Unit,
 )
 
-private fun modelListingOwner(
+private fun targetListingOwner(
     maximumProviderIdentities: Int = 16,
     maximumConsumedTokensPerProvider: Int = 256,
-) = AiProviderModelListingProcessOwner(
+) = AiProviderTargetListingProcessOwner(
     maximumProviderIdentities = maximumProviderIdentities,
     maximumConsumedTokensPerProvider = maximumConsumedTokensPerProvider,
 )
 
-private fun modelListingRequest(
-    input: AiProviderDiscoveryInput = modelListingInput(),
+private fun targetListingRequest(
+    input: AiProviderDiscoveryInput = targetListingInput(),
     enabled: Boolean = true,
     pageSize: Int = 50,
     timeoutMillis: Long = TIMEOUT_MILLIS,
-) = AiProviderModelListingRunRequest(
+) = AiProviderTargetListingRunRequest(
     snapshot = snapshot(input),
     pinnedProvider = pinned(input),
     environment = AiProviderHostTestFixtures.environment(),
     hostCapabilities = AiProviderHostTestFixtures.capabilities(),
-    options = AiProviderModelListingRunOptions(
+    options = AiProviderTargetListingRunOptions(
         enabled = enabled,
         pageSize = pageSize,
         timeoutMillis = timeoutMillis,
@@ -836,7 +836,7 @@ private fun modelListingRequest(
 )
 
 private fun pinned(
-    input: AiProviderDiscoveryInput = modelListingInput(),
+    input: AiProviderDiscoveryInput = targetListingInput(),
 ) = AiProviderPinnedIdentity(
     component = AiProviderComponent(input.packageName, input.className),
     packageUid = input.packageUid,
@@ -856,7 +856,7 @@ private fun discovered(input: AiProviderDiscoveryInput) =
         listOf(AiProviderDiscoverySourceEntry.Read(input)),
     )
 
-private fun modelListingInput(
+private fun targetListingInput(
     packageName: String = "example.ai.provider",
     className: String = "AiProviderService",
     packageUid: Int = PINNED_UID,
@@ -879,17 +879,18 @@ private fun modelListingInput(
 )
 
 private fun page(
-    model: AiModelInfo,
+    target: AiTargetInfo,
     next: String? = null,
-) = AiProviderCodec.encodeModelPage(
-    AiModelPage(
-        listingGeneration = "fixture-generation",
-        models = listOf(model),
+) = AiProviderCodec.encodeTargetPage(
+    AiTargetPage(
+        catalogGeneration = "fixture-generation",
+        targets = listOf(target),
         nextPageToken = next,
     ),
 )
 
-private fun model(modelId: String) = AiModelInfo(
+private fun target(modelId: String) = AiProviderHostTestFixtures.target(
+    targetId = "fixture.provider:${modelId.substringAfterLast('.')}",
     modelId = modelId,
     displayName = "Fixture model",
     capabilityIds = listOf(AiProviderCapabilityId.STREAMING),

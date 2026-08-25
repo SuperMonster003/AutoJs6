@@ -41,9 +41,10 @@ internal object AiPluginAskInputMapper {
         }
         val backendProfile = pluginOptions.takeOptionalString("backend", "AI option backend")
             ?.lowercase()
-            ?: AiProviderBackendProfile.CPU
-        require(backendProfile in AiProviderBackendProfile.VALUES) {
-            "AI option backend must be one of ${AiProviderBackendProfile.VALUES.sorted().joinToString()}"
+        backendProfile?.let {
+            require(it in AiProviderBackendProfile.VALUES) {
+                "AI option backend must be one of ${AiProviderBackendProfile.VALUES.sorted().joinToString()}"
+            }
         }
         val structuredJsonOption = pluginOptions.takeOptionalBoolean(
             "structuredJson",

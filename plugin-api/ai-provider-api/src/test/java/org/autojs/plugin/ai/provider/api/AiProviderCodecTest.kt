@@ -3,6 +3,8 @@ package org.autojs.plugin.ai.provider.api
 import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ai.common.api.AiUsage
+import org.autojs.plugin.ai.common.api.AiCredentialMode
+import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.protocol.wire.TaggedWireError
 import org.autojs.plugin.protocol.wire.TaggedWireException
 import org.autojs.plugin.protocol.wire.TaggedWireWriter
@@ -13,12 +15,13 @@ import org.junit.Test
 
 class AiProviderCodecTest {
     @Test
-    fun capabilitiesAndModelPagesRoundTrip() {
+    fun capabilitiesAndTargetPagesRoundTrip() {
         val capabilities = capabilities(persistent = true)
-        val page = AiModelPage(
-            listingGeneration = "generation-1",
-            models = listOf(
-                AiModelInfo(
+        val page = AiTargetPage(
+            catalogGeneration = "generation-1",
+            targets = listOf(
+                localTarget(
+                    targetId = "fake.local:echo",
                     modelId = "fake.echo",
                     displayName = "Fake echo",
                     capabilityIds = listOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.USAGE),
@@ -45,11 +48,11 @@ class AiProviderCodecTest {
         )
 
         assertEquals(capabilities, AiProviderCodec.decodeCapabilities(AiProviderCodec.encodeCapabilities(capabilities)))
-        assertEquals(page, AiProviderCodec.decodeModelPage(AiProviderCodec.encodeModelPage(page)))
+        assertEquals(page, AiProviderCodec.decodeTargetPage(AiProviderCodec.encodeTargetPage(page)))
     }
 
     @Test
-    fun publicModelsSnapshotAndFreezeEveryCallerOwnedList() {
+    fun publicTargetsSnapshotAndFreezeEveryCallerOwnedList() {
         val textMimeTypes = mutableListOf(AiProviderMimeType.PLAIN, AiProviderMimeType.JSON)
         val schemaMimeTypes = mutableListOf(AiProviderMimeType.JSON)
         val negotiatedCapabilities = capabilities().copy(
@@ -63,9 +66,17 @@ class AiProviderCodecTest {
                 AiProviderBackendAvailability.AVAILABLE,
             ),
         )
-        val model = AiModelInfo("fake.echo", "Fake echo", capabilityIds, 1024, 2048, backendProfiles)
-        val models = mutableListOf(model)
-        val page = AiModelPage("generation-1", models)
+        val target = localTarget(
+            targetId = "fake.local:echo",
+            modelId = "fake.echo",
+            displayName = "Fake echo",
+            capabilityIds = capabilityIds,
+            maximumContextBytes = 1024,
+            maximumOutputBytes = 2048,
+            backendProfiles = backendProfiles,
+        )
+        val targets = mutableListOf(target)
+        val page = AiTargetPage("generation-1", targets)
         val part = AiContentPart(textPayload("Hello"))
         val parts = mutableListOf(part)
         val message = AiMessage(AiMessageRole.USER, parts)
@@ -84,9 +95,9 @@ class AiProviderCodecTest {
         val tools = mutableListOf(tool)
         val request = AiProviderRequest(
             requestId = "request-1",
-            protocolVersion = AiProtocolVersion(1, 0),
+            protocolVersion = AiProtocolVersion(2, 0),
             providerId = "fake.local",
-            modelId = "fake.echo",
+            targetId = "fake.local:echo",
             messages = messages,
             options = options,
             tools = tools,
@@ -102,7 +113,7 @@ class AiProviderCodecTest {
         schemaMimeTypes.clear()
         capabilityIds.clear()
         backendProfiles.clear()
-        models.clear()
+        targets.clear()
         parts.clear()
         requiredCapabilityIds.clear()
         messages.clear()
@@ -112,9 +123,9 @@ class AiProviderCodecTest {
 
         assertEquals(listOf(AiProviderMimeType.PLAIN, AiProviderMimeType.JSON), negotiatedCapabilities.acceptedTextMimeTypes)
         assertEquals(listOf(AiProviderMimeType.JSON), negotiatedCapabilities.acceptedSchemaMimeTypes)
-        assertEquals(listOf(AiProviderCapabilityId.STREAMING), model.capabilityIds)
-        assertEquals(listOf(AiProviderBackendProfile.CPU), model.backendProfiles.map { it.profileId })
-        assertEquals(listOf(model), page.models)
+        assertEquals(listOf(AiProviderCapabilityId.STREAMING), target.capabilityIds)
+        assertEquals(listOf(AiProviderBackendProfile.CPU), target.backendProfiles.map { it.profileId })
+        assertEquals(listOf(target), page.targets)
         assertEquals(listOf(part), message.parts)
         assertEquals(listOf(AiProviderCapabilityId.STREAMING), options.requiredCapabilityIds)
         assertEquals(listOf(message), request.messages)
@@ -123,15 +134,13 @@ class AiProviderCodecTest {
         assertEquals(listOf(result), resultBatch.results)
 
         assertEquals(negotiatedCapabilities.acceptedTextMimeTypes, negotiatedCapabilities.component15())
-        assertEquals(model.capabilityIds, model.component3())
-        assertEquals(model.backendProfiles, model.component6())
-        val (_, componentModels) = page
+        val (_, componentTargets) = page
         val (_, componentParts) = message
         val (_, _, _, _, _, _, _, _, _, _, componentRequiredCapabilityIds) = options
         val (_, _, _, _, componentMessages, _, componentTools) = request
         val (componentCalls) = callBatch
         val (componentResults) = resultBatch
-        assertEquals(page.models, componentModels)
+        assertEquals(page.targets, componentTargets)
         assertEquals(message.parts, componentParts)
         assertEquals(options.requiredCapabilityIds, componentRequiredCapabilityIds)
         assertEquals(request.messages, componentMessages)
@@ -141,15 +150,15 @@ class AiProviderCodecTest {
 
         assertFrozen(negotiatedCapabilities.acceptedTextMimeTypes, AiProviderMimeType.PLAIN)
         assertFrozen(negotiatedCapabilities.acceptedSchemaMimeTypes, AiProviderMimeType.JSON)
-        assertFrozen(model.capabilityIds, AiProviderCapabilityId.USAGE)
+        assertFrozen(target.capabilityIds, AiProviderCapabilityId.USAGE)
         assertFrozen(
-            model.backendProfiles,
+            target.backendProfiles,
             AiBackendProfileInfo(
                 AiProviderBackendProfile.GPU,
                 AiProviderBackendAvailability.AVAILABLE,
             ),
         )
-        assertFrozen(page.models, model)
+        assertFrozen(page.targets, target)
         assertFrozen(message.parts, part)
         assertFrozen(options.requiredCapabilityIds, AiProviderCapabilityId.USAGE)
         assertFrozen(request.messages, message)
@@ -165,23 +174,24 @@ class AiProviderCodecTest {
     }
 
     @Test
-    fun modelPageEnvelopeLimitIsSymmetricAtTheEncodeAndDecodeBoundary() {
+    fun targetPageEnvelopeLimitIsSymmetricAtTheEncodeAndDecodeBoundary() {
         assertEquals(
-            AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES,
-            AiProviderCodec.requireModelPageEnvelopeSize(
-                ByteArray(AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES),
+            AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES,
+            AiProviderCodec.requireTargetPageEnvelopeSize(
+                ByteArray(AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES),
             ).size,
         )
         assertThrows(IllegalArgumentException::class.java) {
-            AiProviderCodec.requireModelPageEnvelopeSize(
-                ByteArray(AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES + 1),
+            AiProviderCodec.requireTargetPageEnvelopeSize(
+                ByteArray(AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES + 1),
             )
         }
 
-        val maximumLegalPage = AiModelPage(
-            listingGeneration = "g".repeat(256),
-            models = (0 until AiProviderLimits.MAX_MODELS_PER_PAGE).map { index ->
-                AiModelInfo(
+        val maximumLegalPage = AiTargetPage(
+            catalogGeneration = "g".repeat(256),
+            targets = (0 until AiProviderLimits.MAX_TARGETS_PER_PAGE).map { index ->
+                localTarget(
+                    targetId = "fake.local:model_$index",
                     modelId = "fake.model_$index",
                     displayName = "d".repeat(256),
                     capabilityIds = AiProviderCapabilityId.VALUES.toList(),
@@ -189,11 +199,11 @@ class AiProviderCodecTest {
                     maximumOutputBytes = AiProviderLimits.MAX_STREAMING_OUTPUT_BYTES,
                 )
             },
-            nextPageToken = "t".repeat(AiProviderLimits.MAX_MODEL_PAGE_TOKEN_BYTES),
+            nextPageToken = "t".repeat(AiProviderLimits.MAX_TARGET_PAGE_TOKEN_BYTES),
         )
-        val encoded = AiProviderCodec.encodeModelPage(maximumLegalPage)
-        assertTrue(encoded.size <= AiProviderLimits.MAX_MODEL_PAGE_ENVELOPE_BYTES)
-        assertEquals(maximumLegalPage, AiProviderCodec.decodeModelPage(encoded))
+        val encoded = AiProviderCodec.encodeTargetPage(maximumLegalPage)
+        assertTrue(encoded.size <= AiProviderLimits.MAX_TARGET_PAGE_ENVELOPE_BYTES)
+        assertEquals(maximumLegalPage, AiProviderCodec.decodeTargetPage(encoded))
     }
 
     @Test
@@ -274,9 +284,9 @@ class AiProviderCodecTest {
         val started = AiSessionStarted(
             requestId = "request-1",
             sessionId = "session-1",
-            protocolVersion = AiProtocolVersion(1, 0),
+            protocolVersion = AiProtocolVersion(2, 0),
             providerId = "fake.local",
-            modelId = "fake.echo",
+            targetId = "fake.local:echo",
             firstChunkSequence = 5,
             effectiveMaximumOutputBytes = 4096,
             effectiveMaximumToolRounds = 2,
@@ -296,51 +306,51 @@ class AiProviderCodecTest {
 
     @Test
     fun futureOptionalRequestFieldIsIgnoredAndFutureRequiredFieldIsRejected() {
-        fun encoded(required: Boolean) = TaggedWireWriter(AiProviderProtocol.SCHEMA_MODEL_LIST_REQUEST, 1, 1)
-            .int32(1, 1, true)
+        fun encoded(required: Boolean) = TaggedWireWriter(AiProviderProtocol.SCHEMA_TARGET_LIST_REQUEST, 1, 1)
+            .int32(1, 2, true)
             .int32(2, 0, true)
             .int32(3, 10, true)
             .string(99, "future", required)
             .encode()
 
-        assertEquals(10, AiProviderCodec.decodeModelListRequest(encoded(false)).pageSize)
+        assertEquals(10, AiProviderCodec.decodeTargetListRequest(encoded(false)).pageSize)
         val error = assertThrows(TaggedWireException::class.java) {
-            AiProviderCodec.decodeModelListRequest(encoded(true))
+            AiProviderCodec.decodeTargetListRequest(encoded(true))
         }
         assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, error.error)
     }
 
     @Test
     fun incompatibleSchemaMajorIsRejected() {
-        val encoded = TaggedWireWriter(AiProviderProtocol.SCHEMA_MODEL_LIST_REQUEST, 2, 0)
+        val encoded = TaggedWireWriter(AiProviderProtocol.SCHEMA_TARGET_LIST_REQUEST, 2, 0)
             .int32(1, 2, true)
             .int32(2, 0, true)
             .int32(3, 10, true)
             .encode()
 
         val error = assertThrows(TaggedWireException::class.java) {
-            AiProviderCodec.decodeModelListRequest(encoded)
+            AiProviderCodec.decodeTargetListRequest(encoded)
         }
         assertEquals(TaggedWireError.SCHEMA_MISMATCH, error.error)
     }
 
     @Test
     fun malformedEnvelopeAndKnownFieldTypeMismatchAreRejected() {
-        val valid = AiProviderCodec.encodeModelListRequest(
-            AiModelListRequest(AiProtocolVersion(1, 0), pageSize = 10),
+        val valid = AiProviderCodec.encodeTargetListRequest(
+            AiTargetListRequest(AiProtocolVersion(2, 0), pageSize = 10),
         )
         val malformed = assertThrows(TaggedWireException::class.java) {
-            AiProviderCodec.decodeModelListRequest(valid.copyOf(valid.size - 1))
+            AiProviderCodec.decodeTargetListRequest(valid.copyOf(valid.size - 1))
         }
         assertEquals(TaggedWireError.MALFORMED_HEADER, malformed.error)
 
-        val wrongType = TaggedWireWriter(AiProviderProtocol.SCHEMA_MODEL_LIST_REQUEST, 1, 0)
+        val wrongType = TaggedWireWriter(AiProviderProtocol.SCHEMA_TARGET_LIST_REQUEST, 1, 0)
             .string(1, "one", true)
             .int32(2, 0, true)
             .int32(3, 10, true)
             .encode()
         val typeFailure = assertThrows(TaggedWireException::class.java) {
-            AiProviderCodec.decodeModelListRequest(wrongType)
+            AiProviderCodec.decodeTargetListRequest(wrongType)
         }
         assertEquals(TaggedWireError.TYPE_MISMATCH, typeFailure.error)
     }
@@ -351,9 +361,9 @@ class AiProviderCodecTest {
         responseSchema: AiPayloadReference? = null,
     ) = AiProviderRequest(
         requestId = "request-1",
-        protocolVersion = AiProviderProtocol.PROTOCOL_V1_2,
+        protocolVersion = AiProviderProtocol.PROTOCOL_V2,
         providerId = "fake.local",
-        modelId = "fake.tools",
+        targetId = "fake.local:tools",
         messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(messagePayload)))),
         options = AiGenerationOptions(
             stream = true,
@@ -381,6 +391,31 @@ class AiProviderCodecTest {
         }
     }
 }
+
+internal fun localTarget(
+    targetId: String = "fake.local:echo",
+    modelId: String = "fake.echo",
+    displayName: String = "Fake echo",
+    capabilityIds: List<String> = emptyList(),
+    maximumContextBytes: Long? = 1024,
+    maximumOutputBytes: Long? = 1024,
+    backendProfiles: List<AiBackendProfileInfo> = emptyList(),
+) = AiTargetInfo(
+    targetId = targetId,
+    providerId = "fake.local",
+    profileId = null,
+    modelId = modelId,
+    displayName = displayName,
+    capabilityIds = capabilityIds,
+    locality = AiDataLocality.ON_DEVICE,
+    credentialMode = AiCredentialMode.NONE,
+    availability = AiTargetAvailability.AVAILABLE,
+    configured = true,
+    maximumContextBytes = maximumContextBytes,
+    maximumOutputBytes = maximumOutputBytes,
+    supportedControls = if (backendProfiles.isEmpty()) emptyList() else listOf(AiTargetControlId.BACKEND_PROFILE),
+    backendProfiles = backendProfiles,
+)
 
 internal fun capabilities(
     streaming: Boolean = true,

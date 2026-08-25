@@ -1019,20 +1019,24 @@ private class SessionCoordinatorFixture(
             options = AiProviderSelectionOptions(enabled = true),
         ) as AiProviderSelectionResult.Selected
         ).pinned
-    val plan = AiProviderHostSessionPlan(
-        pinnedProvider = pinned,
-        listingGeneration = "fixture-generation",
+    private val target = AiProviderHostTestFixtures.target(
+        targetId = TARGET_ID,
         modelId = MODEL_ID,
-        modelCapabilityIds = setOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.USAGE),
-        effectiveMaximumContextBytes = 512L * 1024L,
-        effectiveMaximumOutputBytes = 256L * 1024L,
-        credentialDisposition = AiProviderCredentialIsolationPolicy.disposition(pinned),
+        capabilityIds = listOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.USAGE),
+        maximumContextBytes = 512L * 1024L,
+        maximumOutputBytes = 256L * 1024L,
     )
+    val plan = (AiProviderHostSessionPlanner.plan(
+        selected = AiProviderSelectionResult.Selected(pinned),
+        catalogGeneration = "fixture-generation",
+        target = target,
+        requirement = requirement,
+    ) as AiProviderSessionPlanningResult.Planned).plan
     val request = AiProviderRequest(
         requestId = "session-request",
-        protocolVersion = AiProviderProtocol.PROTOCOL_V1_3,
+        protocolVersion = AiProviderProtocol.PROTOCOL_V2,
         providerId = PROVIDER_ID,
-        modelId = MODEL_ID,
+        targetId = TARGET_ID,
         messages = listOf(
             AiMessage(
                 role = AiMessageRole.USER,
@@ -1071,7 +1075,7 @@ private class SessionCoordinatorFixture(
             sessionId = "fixture-session",
             protocolVersion = request.protocolVersion,
             providerId = request.providerId,
-            modelId = request.modelId,
+            targetId = request.targetId,
             firstChunkSequence = 0,
             effectiveMaximumOutputBytes = request.options.maximumOutputBytes,
             effectiveMaximumToolRounds = 0,
@@ -1087,6 +1091,7 @@ private class SessionCoordinatorFixture(
 
     private companion object {
         const val PROVIDER_ID = "fixture.provider"
+        const val TARGET_ID = "fixture.provider:model"
         const val MODEL_ID = "fixture.model"
     }
 }

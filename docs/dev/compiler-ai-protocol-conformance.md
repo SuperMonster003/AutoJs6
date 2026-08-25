@@ -4,7 +4,7 @@ This matrix separates checks that are complete in the repository from checks
 that require an installed provider, multiple Android API levels, or a real
 production engine. A static pass is not a device-runtime claim.
 
-The current official local AI product is 3-Stone AI
+The current official AI product is 3-Stone AI
 (`io.github.supermonster003.autojs6.plugin.threestoneai`, provider
 `autojs6.three-stone-ai`). Its cross-process contract is the neutral
 `ai-provider-api` surface under `org.autojs.plugin.ai.provider.api`, discovered
@@ -32,12 +32,12 @@ behavior only for reproducible host conformance testing.
 | DEX conformance app | Deterministic fixed DEX ZIP, strict bounded JAR framing/hash validation, process-wide single-session gate, explicit hostile services, and single-writer behavior | Conformance compiler unit corpus, 25 tests | PASS, JVM |
 | DEX conformance app | Android service source compatibility against generated AIDL and Android 36 | Offline Kotlin/AIDL static compilation | PASS, static only |
 | AI common | Provider, error, usage, payload reference, version negotiation, malformed and evolution corpus | `AiCommonCodecTest` | PASS, JVM |
-| local AI | Capabilities, requests, chunks, reasoning, usage, tools, pages, malformed and evolution corpus | `AiProviderCodecTest` | PASS, JVM |
+| AI provider API | Capabilities, targets, requests, chunks, reasoning, usage, tools, malformed envelopes, and evolution corpus | `AiProviderCodecTest` | PASS, JVM |
 | AI lifecycle | Credits, contiguous sequence, single terminal, cancellation, declared tools, verified JSON, aggregate stream digests, tool exactly-once, and cumulative quotas | Lifecycle and quota unit corpus | PASS, JVM |
-| AI models | Page token replay, scope, cycle, generation drift, and cross-page duplicate model IDs | `AiModelPageTokenPolicyTest` | PASS, JVM |
-| AI protocol | Shared wire, common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and pagination | Combined protocol/API corpus, 103 tests | PASS, JVM |
+| AI targets | Page token replay, scope, cycle, catalog-generation drift, cross-page duplicate target IDs, and provider/target declaration compatibility | `AiTargetPageTokenPolicyTest`, `AiTargetCatalogPolicyTest` | PASS, JVM |
+| AI protocol | Shared wire, V2 common values, immutable snapshots, redacted summaries, golden wire, text codecs, lifecycle, JSON, quotas, usage, and target pagination | Combined protocol/API corpus | PASS, JVM |
 | AI host | Default-off trust selection, ambiguity rejection, identity revalidation, capability planning, credential isolation, collision-resistant binding keys, safe diagnostics, and terminal race ownership | Pure host policy corpus, 31 tests | PASS, JVM |
-| AI host model list and plugin selection | Default-off exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-flight/fuse/deadline ownership, terminal cleanup, and explicit persistent model selection | Standalone K2/JVM 17 compilation plus JUnit model-list coordinator corpus, 15/15 tests; D3#3 plugin commits `6489a59` / `af0c5fe` and host exact-test commit `b695c303`; D3#4 plugin production/tested-source commits `98d438e` / `a6bc0e3` and host exact-test commit `6495079ea` | PASS, JVM; PARTIAL, one API 35/arm64-v8a real-plugin listing-only Binder method plus one API 31/arm64-v8a real-plugin manager-selection/Binder method |
+| AI host target catalog and plugin selection | Exact-component coordination, same-Binder metadata pinning, per-dispatch and callback reinspection, UID/size-before-copy ingress, bounded flood admission, per-provider token isolation, single-use continuation tokens, single-flight/fuse/deadline ownership, terminal cleanup, and exact target planning | `AiProviderTargetListingCoordinatorTest`, Android transport compilation, and catalog-planning policy corpus | PASS, JVM/static; current V2 device matrix remains open |
 | AI host session transcript | Default-off plan/request admission, provisional callbacks around synchronous open, UID/size-before-retention ingress, bounded credits and callback buffering, descriptor ownership, two-stage terminal and late-remote cleanup, cancel/timeout/death races, executor failure, fatal drain, and summary-only output | Commit `325577c82`; standalone Kotlin K2/JVM 40/40, 30 repeated rounds 1200/1200; focused `:app:testAppDebugUnitTest` XML: 40 tests, 0 skipped, 0 failures, 0 errors | PASS, JVM/host unit only |
 | AI host session coordinator | Default-off exact-component coordination, four exact inspections, same-Binder bounded metadata revalidation and open, callback-before-return commit, absolute deadline, operation leases, component fuse, gate/terminal settlement, connected-disconnect death classification, and no retry after dispatch | Commits `4f22dc854`, `038728f03`, H1 instrumentation `06ebc788c`, and H2 production/test commits `e5bd92b16` / `0b9a94742`; focused `AiProviderSessionCoordinatorTest`: 18 tests, 0 skipped, 0 failures, 0 errors | PARTIAL, JVM/host unit and Android build plus one API 31 normal, seven H1, and two H2 method runs |
 | AI explicit ask/chat/stream routes | Present-key fail-closed routing, exact component/provider/model pins, strict prompt-only mapping, no vault/HTTP/fallback, process-shared admission, per-script lifecycle ownership, normalized unary/chat/stream results, and stable terminal codes | Earlier ask/stream focused Gradle 25/25; chat tested-source commits `d480b6918` / `b0aa67684` focused Gradle 14/14 (3 mapper + 4 runtime + 7 service), 0 skipped/failures/errors; one real-provider ask plus fake-provider stream and chat public methods on API 31 | PARTIAL, JVM/source plus three narrow positive-path device smokes |
@@ -47,32 +47,23 @@ behavior only for reproducible host conformance testing.
 ### Explicit `ai.ask`, `ai.chat`, And `ai.stream` Plugin Route Evidence
 
 The production `AiService` chooses the plugin path for `ai.ask`, `ai.chat`, and
-`ai.stream` only when the request options contain the `plugin` key. A missing
-key leaves legacy cloud ask/chat/stream behavior unchanged. A present key,
-including a null or malformed value, never consults the vault or HTTP path and
-never falls back. Admission requires one exact component package/class,
-provider ID, model ID, and an optional integer timeout from 1,000 through
-600,000 milliseconds; the default is 120,000. Cloud control aliases, an
-explicit `stream` option, and unknown fields fail closed.
+`ai.stream` only when request options contain the `plugin` key. A missing key
+leaves the existing host-backed cloud behavior unchanged. A present but null or
+malformed selector fails closed and never consults the host vault or HTTP path.
+The current public selector pins an exact component and Binder provider ID, then
+resolves its model selector uniquely against the V2 target catalog. An
+ambiguous, unconfigured, unavailable, or capability-incompatible target fails
+without switching targets.
 
-The shared request mapping admits exactly one plain-text user message and sends
-one inline request with zero request descriptors and no reasoning, structured
-output, usage, tools, or tool rounds. `ai.ask` and `ai.chat` are non-streaming;
-chat completion maps to exactly 12 public keys: text, empty reasoning, empty
-toolCalls, null usage/finishReason/message/error/raw/profile, route `plugin`,
-and exact provider/model pins. `ai.stream` requires the planned model's
-`STREAMING` capability and maps `Started` to `open`, every nonempty text chunk
-to `chunk` then `delta` in one dispatcher action, and the aggregate completion
-to `done`. The composed Android runner
-reuses the exact-component discovery, handshake, model-list, and session
-coordinators, requires an `ON_DEVICE`/`NONE` provider and the exact planned
-model, and applies one outer absolute deadline from discovery through the active
-session terminal. Lower handles and coordinators retain settled cleanup
-ownership. One process-shared backend and admission gate serialize ask, chat,
-and stream attempts over the same orchestration/control/terminal/deadline lanes,
-bounded three-operation blocking pool, and coordinator process owners. Each
-script runtime owns cancellation and handle close; terminal and late-callback
-races have one visible winner and no post-dispatch retry.
+The composed Android runner reuses exact-component discovery, metadata
+negotiation, paged target listing, immutable target planning, and session
+coordination. It accepts provider declarations covering `ON_DEVICE`, `REMOTE`,
+or `HYBRID`; remote targets must use plugin-managed credentials and origins
+within the pinned provider allowlist. The host plan and request contain no
+credential bytes. One outer absolute deadline covers discovery through the
+active terminal, and one process-shared admission gate serializes orchestration.
+Each script runtime owns cancellation and close; terminal and late-callback
+races have one visible winner, with no automatic retry or cross-target fallback.
 
 The earlier standalone K2/JUnit ask gate passed 15/15 tests: 8 option-parser,
 3 mapper, and 4 runtime lifecycle cases. After production commit `2ea3360a2`
@@ -342,15 +333,15 @@ APK assembly pass.
 | D8 parity for default/static interface methods, missing libraries, and device boot libraries | Current local compiler versus production plugin | PENDING |
 | AAR normalization and resource behavior | Current local path versus production plugin | PENDING |
 | Cold/warm latency, host/provider RSS, output size, FDs, and temporary storage | Representative physical devices | PENDING |
-| AI exact-component metadata, model-list, selection, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | PARTIAL: API 31/arm64-v8a fake-provider metadata, paged model list, one normal `fake.stream` session, ordinary-pipe completion materialization, and real-plugin explicit A-to-B manager selection with restart persistence; API 35/arm64-v8a real-plugin three-entry paged listing only |
+| AI exact-component metadata, V2 target catalog, selection, and session positive path | Dedicated debug conformance install with explicit serial, signer/hash preflight, per-method result, and reversible cleanup | V2 JVM/static gates pass; the dated device cells below predate the final target-catalog wire and do not count as current V2 runtime evidence |
 | AI public production `ai.ask` positive path | Real signed provider release, real model, public Rhino entry, exact component/provider/model selector, artifact/device hash match, reversible cleanup | PARTIAL, one API 31/arm64-v8a App Debug non-streaming one-shot method; no release-host or API matrix |
 | AI public conformance `ai.stream` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, normalized chunk/delta/done aggregation beyond eight initial credits, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; public active cancel/engine stop remain JVM-only and no real provider/model stream ran |
 | AI public conformance `ai.chat` positive path | Public Rhino entry, exact test-only fake component/provider/model selector, exact normalized 12-key response, one terminal, and reversible cleanup | PARTIAL, one naturally completed API 31/arm64-v8a App Debug method; no real provider/model, device failure/cancel path, release host, or matrix |
 | AI conformance provider normal and hostile Binder corpus | API 24, 28, 34, 36 | PARTIAL, API 31 only: seven H1 methods plus two H2 methods cover completion/tool descriptors, ordering, sequence, descriptor reference, bounded duplicate terminal, cancel-after-start, one isolated wrong UID, and one provider death; deterministic Android no-credit and update/disable/uninstall lifecycle remain pending |
 | AI streaming backpressure and tool turns under provider/host death | API 24, 28, 34, 36 | PARTIAL, API 31 normal session and public Rhino fake stream crossed 8 initial credits, a tool callback was rejected without execution, and one provider kill followed a chunk whose credit was causally replenished; real tool turns, host death, and the matrix remain pending |
-| Provider-native response compatibility | Each proposed migrated provider | PENDING, no V1 claim |
+| Provider-native response compatibility | Each proposed migrated provider | PENDING, no V2 device-matrix claim |
 
-### API 35 AI D3#3 Exact Real-Plugin Model-List Evidence
+### API 35 AI D3#3 Exact Real-Plugin Target-Catalog Evidence
 
 The 2026-08-13 D3#3 run used production plugin commit `6489a59`, focused
 plugin-test commit `af0c5fe`, and host exact-test commit `b695c303`. The target
@@ -379,9 +370,9 @@ B/A/C order:
 
 All pages admitted the expected generation
 `litertlm-catalog-v2-43e043444d5ca606e2c33805c0d5f656`. The exact method
-`AiProviderModelListingAndroidConformanceTest#exactRealPluginListsExternallyProvisionedThreeModelCatalogAcrossStablePages`
+`AiProviderTargetListingAndroidConformanceTest#exactRealPluginListsExternallyProvisionedThreeModelCatalogAcrossStablePages`
 returned `OK (1 test)` in 0.691 seconds. It used the real exact-component
-handshake and model-list transports, completed off the Android main thread,
+handshake and target-catalog transports, completed off the Android main thread,
 published one terminal outcome, and retained the initial package identity at
 the final inspection.
 
@@ -430,7 +421,7 @@ remained unchanged.
 The durable method-level entry is:
 
 ```powershell
-adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.realModelSelection.conformance.enabled true -e autojs.aiProvider.realModelSelection.conformance.serial QV710AF65F -e autojs.aiProvider.realModelSelection.conformance.initialModelId litertlm.85515105bf0e6b25b0ed8ce1cc3801ab -e autojs.aiProvider.realModelSelection.conformance.targetModelId litertlm.808c1f662212f7efb70b16956fb784a7 -e autojs.aiProvider.realModelSelection.conformance.listingGeneration litertlm-catalog-v2-08e6ec0aff29d234cbdf6acb07be8916 -e class 'org.autojs.autojs.core.plugin.ai.AiProviderModelListingAndroidConformanceTest#exactRealPluginSelectionPersistsAcrossManagerProcessRestartWithoutChangingBinderCatalog' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.realModelSelection.conformance.enabled true -e autojs.aiProvider.realModelSelection.conformance.serial QV710AF65F -e autojs.aiProvider.realModelSelection.conformance.initialModelId litertlm.85515105bf0e6b25b0ed8ce1cc3801ab -e autojs.aiProvider.realModelSelection.conformance.targetModelId litertlm.808c1f662212f7efb70b16956fb784a7 -e autojs.aiProvider.realModelSelection.conformance.catalogGeneration litertlm-catalog-v2-08e6ec0aff29d234cbdf6acb07be8916 -e class 'org.autojs.autojs.core.plugin.ai.AiProviderTargetListingAndroidConformanceTest#exactRealPluginSelectionPersistsAcrossManagerProcessRestartWithoutChangingBinderCatalog' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 The final transaction strictly admitted exact `OK (1 test)`, instrumentation
@@ -455,23 +446,15 @@ it makes no real-model compatibility claim.
 
 ### API 31 AI Partial Evidence
 
-#### Metadata And Model-List Run
+#### Metadata And Target-Catalog Run
 
 The 2026-08-10 positive-path run used `QV710AF65F` (API 31,
 `arm64-v8a`). Its source was built in an isolated worktree from baseline
-`54ae482cb2654734b850926e7fca5252901eab3e` plus the four-file model-list
+`54ae482cb2654734b850926e7fca5252901eab3e` plus the four-file catalog
 patch. That exact content was subsequently committed without source changes as
-`19a82f22ff071a1d013be63f8f0c9f8c8a6a570d` (`19a82f22f`). The four source
-file SHA-256 values were:
-
-- `b74c59d9f0cefabeda2ad99fbc42117525ba090fa3ead9ed6ae7f1bcc0df05cc` --
-  `AiProviderModelListingCoordinator.kt`.
-- `cd014fc96419613cac1b52e8cb5272dff99241eb7e7a6caa055ba62243154f52` --
-  `AndroidAiProviderModelListing.kt`.
-- `28204fee38366966442beee3b4b1d6f362c19f5d7785240bd2b33b354e63394f` --
-  `AiProviderModelListingCoordinatorTest.kt`.
-- `d344e235e884e66894b2d1a3b1a202d6b3cbf465109de98def62889d9c276750` --
-  `AiProviderModelListingAndroidConformanceTest.kt`.
+`19a82f22ff071a1d013be63f8f0c9f8c8a6a570d` (`19a82f22f`). Its superseded
+prototype symbol names and commands are intentionally retired; the repeatable
+entry points below use the final V2 target-catalog vocabulary.
 
 After an exclusive-slot preflight observed 30 continuous seconds with no other
 Gradle client, one isolated `--no-daemon --no-parallel --max-workers=2`
@@ -489,13 +472,13 @@ Two separate exact `Class#method` instrumentation invocations returned
 | Method | Time | Asserted positive path |
 | --- | ---: | --- |
 | `AiProviderAndroidConformanceTest#exactComponentHandshakeDecodesAndPinsFakeProviderMetadata` | 0.575 s | Existing exact-component metadata handshake decoded and pinned the same-signer on-device fake provider; completion was off the main thread, terminal was unique, and exact package identity was unchanged |
-| `AiProviderModelListingAndroidConformanceTest#exactComponentModelListingRevalidatesAndCollectsAllFakeModels` | 0.524 s | With `pageSize = 1`, collected generation `fake-models-v1` and model IDs `fake.echo`, `fake.stream`, `fake.reasoning`, and `fake.tools`; the catalog retained the pinned provider, completion was off the main thread, terminal was unique, and exact package identity was unchanged |
+| `AiProviderTargetListingAndroidConformanceTest#exactComponentTargetListingRevalidatesAndCollectsAllFakeModels` | 0.524 s | With `pageSize = 1`, collected generation `fake-targets-v2` and target IDs for echo, stream, reasoning, and tools; the catalog retained the pinned provider, completion was off the main thread, terminal was unique, and exact package identity was unchanged |
 
 The exact commands were:
 
 ```text
 adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiProviderAndroidConformanceTest#exactComponentHandshakeDecodesAndPinsFakeProviderMetadata' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
-adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.modelListing.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiProviderModelListingAndroidConformanceTest#exactComponentModelListingRevalidatesAndCollectsAllFakeModels' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s QV710AF65F shell am instrument -w -r -e autojs.aiProvider.targetListing.conformance.enabled true -e class 'org.autojs.autojs.core.plugin.ai.AiProviderTargetListingAndroidConformanceTest#exactComponentTargetListingRevalidatesAndCollectsAllFakeModels' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 The host, instrumentation, and fake-provider APKs all verified with APK
@@ -513,7 +496,7 @@ artifact exactly. Before installation, all three packages --
 `org.autojs.plugin.ai.provider.fake` -- were absent. The run uninstalled only those
 temporary packages, and all three were confirmed absent again afterward.
 
-This earlier model-list run is positive-path PARTIAL evidence only. It covers
+This earlier target-catalog run is positive-path PARTIAL evidence only. It covers
 no API other than 31 and
 does not cover hostile callbacks, negative signer/UID/identity drift, package
 update/disable/uninstall during a transcript, timeout or callback/provider/host

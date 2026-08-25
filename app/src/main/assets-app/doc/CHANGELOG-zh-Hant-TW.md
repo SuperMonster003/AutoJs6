@@ -72,10 +72,10 @@
 * `新增` ui.useAndroidLayout 支援 Android 原生版面配置元件, include/merge, 指令碼專案 res 資源引用及 shape/selector/layer-list 等 Drawable XML
 * `新增` JavaScript (Rhino) 模組支援 power/settings/work_manager 相容介面及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全域 JavaScript (Rhino) ai 模組支援 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 呼叫及工具呼叫多輪續接; 開發者選項支援加密的多設定檔及憑證管理, 本機迴路位址上的相容端點可免 API 金鑰執行
-* `新增` `ai.ask`, `ai.chat` 與 `ai.stream` 本機外掛路由支援依序傳入純文字 `system`, `user` 與 `assistant` 訊息歷史的單次與串流請求, 並要求最後一則訊息為 `user` 角色; 可透過 `plugin: true` 簡寫選擇官方本機 AI 外掛, 單模型場景可省略模型 ID; 新增 `ai.models` 方法列舉外掛模型, 外掛未安裝/未啟用/無模型時給出明確錯誤提示; AI 服務設定提供本機 AI 外掛入口; 外掛生成會回傳精確的輸入/輸出/總 token 數, `ai.chat` 透過 `usage` 提供這些資料, 並在 `usage.raw.durationMillis` 提供外掛實測生成耗時
-* `新增` 全域 JavaScript (Rhino) `ai.session` API 可建立持久裝置端外掛 Conversation, 為工作階段固定提供者/模型/生成參數, 後續 `ask`/`chat`/`stream` 輪次只傳送新的使用者提示詞; 正常完成後保留上下文, 取消/逾時/協定失敗或顯式關閉時釋放整個工作階段
-* `新增` `ai.ask`/`ai.chat`/`ai.stream` 與持久 `ai.session` 本機外掛路由支援 `structuredJson` 和 JSON 物件 `responseSchema`; schema 會隱式啟用 LiteRT-LM 原生 JSON Schema 約束解碼, 工作階段每輪固定同一 schema, 完成結果保持 JSON 文字並執行嚴格語法驗證
-* `新增` `ai.ask`/`ai.chat`/`ai.stream` 與持久 `ai.session` 本機外掛路由透過 AI Provider 協定 1.3 支援明確 `cpu`, `gpu` 與 `npu` backend profile; `ai.models` 報告裝置可用性, 不可用 profile 會失敗且不回退 CPU, 工作階段固定使用一個 backend, GPU 要求系統 OpenCL 可載入, 官方外掛因未封裝 EAP runtime 而報告 NPU 不可用
+* `新增` `ai.ask`, `ai.chat` 與 `ai.stream` 的明確 AI provider 路由支援有序純文字 `system`, `user` 與 `assistant` 歷史的單次與串流請求; `plugin: true` 選擇官方 AI 外掛, 模型選擇器透過其 V2 目標目錄唯一解析, 外掛生成回傳精確輸入/輸出/總 token 數及實測耗時
+* `新增` 全域 JavaScript (Rhino) `ai.session` API 可建立持久 AI provider 外掛 Conversation, 為工作階段固定目標/提供者/模型/生成參數, 後續 `ask`/`chat`/`stream` 輪次只傳送新的使用者提示詞; 正常完成後保留上下文, 取消/逾時/協定失敗或顯式關閉時釋放整個工作階段
+* `新增` `ai.ask`/`ai.chat`/`ai.stream` 與持久 `ai.session` 的 AI provider 路由支援 `structuredJson` 和 JSON 物件 `responseSchema`; schema 啟用 LiteRT-LM 原生 JSON Schema 約束解碼, 工作階段每輪固定同一 schema, 完成 JSON 文字執行嚴格驗證
+* `新增` AI Provider V2 本機目標將明確 `cpu`, `gpu` 與 `npu` backend profile 作為可選目標控制; 可用性按裝置報告, 不可用 profile 失敗且不回退 CPU, 工作階段固定一個 backend, GPU 要求系統 OpenCL 可載入, 官方外掛因未封裝 EAP runtime 而報告 NPU 不可用
 * `新增` 全域 JavaScript (Rhino) yolo 模組提供預設關閉的精確元件 YOLO 提供端路由, 支援版本化 Binder/PFD 傳輸, 資訊清單驅動的 NCNN 模型載入, 物件偵測, 明確取消及資源清理, 且不會靜默回退提供端
 * `新增` 全域 JavaScript (Rhino) tts 模組提供系統文字轉語音/長文字智慧分段/邏輯佇列/語音及語言探索/離線語音篩選/可觀察任務及音訊事件/靜音插入/採用原子發布的檔案合成, 並具備逾時/背壓/執行階段清理及指定引擎防回退保護
 * `新增` device.getMarketName 方法, 用於獲取裝置的 "市場名稱" _[`issue #513`](http://issues.autojs6.com/513)_
@@ -213,7 +213,7 @@
 * `最佳化` DEX 編譯器 R1 已閉環, 同時維持預設關閉與精確元件明確 opt-in: R1.1 生產載入鏈路 7/7、R1.2 自動化 4/4、R1.3 真實 provider 矩陣 7/7、退出條件 3/3. API 34 production routing 8/8, 主程式 DEX 16 suites/149 tests、wire 4/24、fake-provider 5/25 及外掛 48 tests 全數通過, lint 0 error. Canonical campaign f3c2b1af-be93-41e7-b541-f167f90e5cc1 在 API 24/25 使用 D8 CLI、API 26/28/34/36 在 x86_64 使用 D8Command、API 31 使用 QV arm64 多使用者實體裝置, 七個真實 provider 單元全數 PASS; 較早失敗或主動終止的 campaign 繼續原樣保留. last-waiter 協同取消與更廣泛復原仍是未勾選的 R2 工作
 * `最佳化` DEX 編譯器實驗性符合性測試擴展至真實 Android Binder 傳輸與成品儲存, 涵蓋精確簽署元件, 惡意回呼/輸出/逾時情境, 目標 API 感知的 DEX 驗證及 DexClassLoader 執行
 * `最佳化` 預設關閉的純 AI 文字宿主策略支援確定性信任選擇, 精確身分鎖定與重新驗證, 宿主/供應商能力交集, 歧義候選拒絕, 外掛管理憑證隔離, 不含敏感內容的安全診斷, 取消/終止工作階段競爭的確定性所有權, 請求繫結的工具及 descriptor JSON 驗證, streaming 彙總長度/SHA-256/配額驗證, 解碼後 JSON 重複鍵拒絕, 含敏感資料的模型 `toString` 摘要化及能力集合的域分離快取鍵
-* `最佳化` 預設關閉且未接線的 AI 文字宿主基準沒有生產呼叫點. 唯讀 PackageManager 精確 action 探索/精確元件複查及明確元件 metadata-only Binder 握手, 與新增的精確元件 Android 模型列舉 coordinator/transport 保持分離. metadata 握手僅在 absolute deadline 到期且 interface descriptor, `getProviderInfo()` 或 `getCapabilities()` 同步 RPC 仍在執行時於 process 內熔斷元件; getter 回傳後的嚴格解碼及 worker queue/繫結/最終複查階段逾時不會觸發熔斷. 模型列舉 coordinator 使用同一個 descriptor 已驗證 Binder 重新驗證有界 provider metadata 並呼叫 `listModels()`, 在每次初始或續頁 dispatch 及每次 callback 准入前精確複查套件身分. callback 在唯一一次防禦性複製前驗證 pinned UID, 對應 page/error 類型的 envelope 上限及有界 flood slot. continuation-token ledger 按完整穩定的 pinned identity 隔離, 並受不驅逐的單 provider 及 process 總預算約束. process 級 single-flight gate, 唯一終態所有者及冪等清理涵蓋繫結, death recipient, callback 註冊, deadline 與 operation lease. 與 metadata 握手不同, 若模型列舉 deadline 到期時任何已准入 platform/transport operation 尚未退出, 將 fail-closed 地於 process 內熔斷該精確元件; 熔斷無法強制中止操作, gate/watchdog 會保持占用直至延遲退出. 仍無 session dispatch 或 `openSession`, request/result PFD transport, `IAiCallback`, credit flow, runtime/UI 整合, `ai.*` 路由及任何生產呼叫點
+* `最佳化` 已接通的 AI Provider V2 宿主路徑將精確元件 PackageManager 探索與 Binder metadata 協商, 分頁 `listTargets` 協調, 每次分派及回呼身分複查, 單次消耗目錄 token, 不含憑證的不可變目標計畫, 有界 session/PFD 傳輸, 串流 credit, process 熔斷, 唯一終態所有者及冪等清理統一用於明確 `ai.*` 外掛路由
 * `最佳化` Ace WebView 執行階段/JavaScript bridge/內建語言服務/靜態資源完成外掛化, 降低宿主 APK 耦合並支援獨立安裝及更新
 * `最佳化` 專案離線文件完成外掛化, 降低宿主 APK 體積並支援獨立安裝及更新
 * `最佳化` 離線專案文件首次載入的檔案清單解析及完整 SHA-256 驗證移至背景執行緒, 避免阻塞介面
@@ -235,7 +235,8 @@
 * `最佳化` 專案字串資源完成多語言翻譯同步/檔案分類/名稱排序及 ASCII 標點規範化
 * `最佳化` 限制 APK 語言資源僅保留專案支援的 10 種設定, 降低安裝套件體積
 * `最佳化` 建置系統支援動態匹配 Kotlin/KSP/AGP/R8 相容版本並降低 Gradle 啟動記憶體壓力
-* `最佳化` 將尚未發布的官方本機 AI 外掛定名為 3-Stone AI, 同時以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述元, AP schema 域及重新命名的符合性測試夾具完全取代跨處理程序合約; 不保留識別別名
+* `最佳化` 將尚未發布的官方 AI 外掛定名為 3-Stone AI, 同時以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述元, AP schema 域及重新命名的符合性測試夾具完全取代跨處理程序合約; 不保留識別別名
+* `最佳化` 直接實作 AI Provider V2 分頁目標探索: 每個目標帶有穩定 target/provider/model 識別, locality, 設定與可用狀態, capabilities, limits, controls 及允許的 HTTPS origins; 支援 REMOTE/HYBRID 執行與外掛自管憑證, 憑證位元組不經 Binder, 且不保留被取代的 wire 別名
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

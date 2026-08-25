@@ -8,8 +8,8 @@ class AiProviderConstantsTest {
 
     @Test
     fun protocolAndSamplerDefaultsArePinnedForGenerationOptionInterop() {
-        assertEquals(AiProviderProtocol.PROTOCOL_V1_2, AiProviderProtocol.HOST_PROTOCOL_RANGE.minimum)
-        assertEquals(AiProviderProtocol.PROTOCOL_V1_3, AiProviderProtocol.HOST_PROTOCOL_RANGE.maximum)
+        assertEquals(AiProviderProtocol.PROTOCOL_V2, AiProviderProtocol.HOST_PROTOCOL_RANGE.minimum)
+        assertEquals(AiProviderProtocol.PROTOCOL_V2, AiProviderProtocol.HOST_PROTOCOL_RANGE.maximum)
         assertEquals(1, AiProviderSamplingDefaults.TOP_K)
         assertEquals(0.95, AiProviderSamplingDefaults.TOP_P, 0.0)
         assertEquals(1.0, AiProviderSamplingDefaults.TEMPERATURE, 0.0)
@@ -22,6 +22,8 @@ class AiProviderConstantsTest {
             AiProviderBackendProfile.VALUES,
             AiProviderBackendAvailability.VALUES,
             AiProviderBackendUnavailableReason.VALUES,
+            AiTargetAvailability.VALUES,
+            AiTargetControlId.VALUES,
             AiProviderMimeType.INPUT_VALUES,
             AiProviderMimeType.SCHEMA_VALUES,
         ).forEach { values ->

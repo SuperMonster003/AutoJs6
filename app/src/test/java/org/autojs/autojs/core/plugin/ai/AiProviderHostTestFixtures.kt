@@ -8,6 +8,10 @@ import org.autojs.plugin.ai.common.api.AiProviderInfo
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilities
 import org.autojs.plugin.ai.provider.api.AiProviderMimeType
 import org.autojs.plugin.ai.provider.api.AiProviderProtocol
+import org.autojs.plugin.ai.provider.api.AiBackendProfileInfo
+import org.autojs.plugin.ai.provider.api.AiTargetAvailability
+import org.autojs.plugin.ai.provider.api.AiTargetControlId
+import org.autojs.plugin.ai.provider.api.AiTargetInfo
 
 internal object AiProviderHostTestFixtures {
     const val SIGNER_A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -127,8 +131,53 @@ internal object AiProviderHostTestFixtures {
         allowUserApprovedProviders = allowUserApprovedProviders,
     )
 
+    fun target(
+        targetId: String = "local:echo",
+        providerId: String = "fixture.provider",
+        profileId: String? = null,
+        modelId: String = "fixture.echo",
+        displayName: String = "Fixture echo",
+        capabilityIds: List<String> = emptyList(),
+        locality: Int = if (profileId == null) AiDataLocality.ON_DEVICE else AiDataLocality.REMOTE,
+        credentialMode: Int = if (locality == AiDataLocality.ON_DEVICE) {
+            AiCredentialMode.NONE
+        } else {
+            AiCredentialMode.PLUGIN_MANAGED
+        },
+        availability: String = AiTargetAvailability.AVAILABLE,
+        configured: Boolean = true,
+        maximumContextBytes: Long? = 64L * 1024L,
+        maximumOutputBytes: Long? = 64L * 1024L,
+        backendProfiles: List<AiBackendProfileInfo> = emptyList(),
+        declaredHttpsOrigins: List<String> = if (locality == AiDataLocality.ON_DEVICE) {
+            emptyList()
+        } else {
+            listOf("https://provider.example")
+        },
+    ) = AiTargetInfo(
+        targetId = targetId,
+        providerId = providerId,
+        profileId = profileId,
+        modelId = modelId,
+        displayName = displayName,
+        capabilityIds = capabilityIds,
+        locality = locality,
+        credentialMode = credentialMode,
+        availability = availability,
+        configured = configured,
+        maximumContextBytes = maximumContextBytes,
+        maximumOutputBytes = maximumOutputBytes,
+        supportedControls = if (backendProfiles.isEmpty()) {
+            emptyList()
+        } else {
+            listOf(AiTargetControlId.BACKEND_PROFILE)
+        },
+        declaredHttpsOrigins = declaredHttpsOrigins,
+        backendProfiles = backendProfiles,
+    )
+
     fun unsupportedProtocolRange() = AiProtocolRange(
-        minimum = AiProtocolVersion(2, 0),
-        maximum = AiProtocolVersion(2, 0),
+        minimum = AiProtocolVersion(3, 0),
+        maximum = AiProtocolVersion(3, 3),
     )
 }

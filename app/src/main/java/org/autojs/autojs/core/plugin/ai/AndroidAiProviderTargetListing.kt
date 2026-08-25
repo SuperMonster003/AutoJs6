@@ -7,57 +7,57 @@ import android.content.ServiceConnection
 import android.os.Binder
 import android.os.IBinder
 import android.os.Looper
-import org.autojs.plugin.ai.provider.api.IAiModelListCallback
+import org.autojs.plugin.ai.provider.api.IAiTargetListCallback
 import org.autojs.plugin.ai.provider.api.IAiProvider
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-/** Exact-component Android transport for an explicitly invoked model-list run. */
-internal class AndroidAiProviderModelListing(
+/** Exact-component Android transport for an explicitly invoked target-catalog run. */
+internal class AndroidAiProviderTargetListing(
     context: Context,
-) : AiProviderModelListingTransport {
+) : AiProviderTargetListingTransport {
     private val applicationContext = context.applicationContext
     private val discovery = AndroidAiProviderDiscovery(applicationContext)
 
     override fun inspectExact(
         component: AiProviderComponent,
     ): AiProviderDiscoverySourceResult {
-        requireModelListingBackgroundThread()
+        requireTargetListingBackgroundThread()
         return discovery.inspectExact(component)
     }
 
     override fun bindExact(
         snapshot: AiProviderPackageSnapshot,
-        callback: AiProviderModelListingBindingCallback,
-    ): AiProviderModelListingBinding {
-        requireModelListingBackgroundThread()
+        callback: AiProviderTargetListingBindingCallback,
+    ): AiProviderTargetListingBinding {
+        requireTargetListingBackgroundThread()
         return ExactBinding(snapshot.component, callback).also(ExactBinding::bind)
     }
 
     override fun openRpc(
-        connection: AiProviderModelListingConnection,
-    ): AiProviderModelListingRpc {
-        requireModelListingBackgroundThread()
-        val raw = connection as? AndroidModelListingConnection
+        connection: AiProviderTargetListingConnection,
+    ): AiProviderTargetListingRpc {
+        requireTargetListingBackgroundThread()
+        val raw = connection as? AndroidTargetListingConnection
             ?: throw IllegalArgumentException(
-                "Connection does not belong to the Android local AI model-list transport",
+                "Connection does not belong to the Android AI target-catalog transport",
             )
         if (!raw.binder.isBinderAlive) {
             throw IllegalStateException("local AI provider Binder is not alive")
         }
         if (raw.binder.interfaceDescriptor != IAiProvider.DESCRIPTOR) {
-            throw AiProviderModelListingDescriptorMismatchException()
+            throw AiProviderTargetListingDescriptorMismatchException()
         }
         val provider = requireNotNull(IAiProvider.Stub.asInterface(raw.binder)) {
             "local AI provider Binder has no AIDL interface"
         }
-        return AndroidModelListingRpc(provider)
+        return AndroidTargetListingRpc(provider)
     }
 
     private inner class ExactBinding(
         private val component: AiProviderComponent,
-        private val callback: AiProviderModelListingBindingCallback,
-    ) : AiProviderModelListingBinding, ServiceConnection {
+        private val callback: AiProviderTargetListingBindingCallback,
+    ) : AiProviderTargetListingBinding, ServiceConnection {
         private val closed = AtomicBoolean(false)
         private val registered = AtomicBoolean(false)
         private val unbound = AtomicBoolean(false)
@@ -68,7 +68,7 @@ internal class AndroidAiProviderModelListing(
 
         fun bind() {
             val didBind = applicationContext.bindService(
-                Intent().setComponent(component.toModelListingAndroidComponent()),
+                Intent().setComponent(component.toTargetListingAndroidComponent()),
                 this,
                 Context.BIND_AUTO_CREATE,
             )
@@ -83,13 +83,13 @@ internal class AndroidAiProviderModelListing(
             if (closed.get()) return
             if (!connectionDelivered.compareAndSet(false, true)) {
                 callback.onBindingFailure(
-                    AiProviderModelListingRunFailure.DUPLICATE_CONNECTION,
+                    AiProviderTargetListingRunFailure.DUPLICATE_CONNECTION,
                 )
                 return
             }
-            if (name != component.toModelListingAndroidComponent()) {
+            if (name != component.toTargetListingAndroidComponent()) {
                 callback.onBindingFailure(
-                    AiProviderModelListingRunFailure.UNEXPECTED_COMPONENT,
+                    AiProviderTargetListingRunFailure.UNEXPECTED_COMPONENT,
                 )
                 return
             }
@@ -109,9 +109,9 @@ internal class AndroidAiProviderModelListing(
                     linkedBinder = service
                     linkedRecipient = recipient
                 }
-                callback.onConnected(AndroidModelListingConnection(service))
+                callback.onConnected(AndroidTargetListingConnection(service))
             } catch (_: SecurityException) {
-                callback.onBindingFailure(AiProviderModelListingRunFailure.BIND_SECURITY)
+                callback.onBindingFailure(AiProviderTargetListingRunFailure.BIND_SECURITY)
             } catch (_: Exception) {
                 callback.onBinderDeath()
             }
@@ -119,7 +119,7 @@ internal class AndroidAiProviderModelListing(
 
         override fun onServiceDisconnected(name: ComponentName) {
             if (!closed.get()) {
-                callback.onBindingFailure(AiProviderModelListingRunFailure.DISCONNECTED)
+                callback.onBindingFailure(AiProviderTargetListingRunFailure.DISCONNECTED)
             }
         }
 
@@ -129,7 +129,7 @@ internal class AndroidAiProviderModelListing(
 
         override fun onNullBinding(name: ComponentName) {
             if (!closed.get()) {
-                callback.onBindingFailure(AiProviderModelListingRunFailure.NULL_BINDING)
+                callback.onBindingFailure(AiProviderTargetListingRunFailure.NULL_BINDING)
             }
         }
 
@@ -154,40 +154,40 @@ internal class AndroidAiProviderModelListing(
         }
     }
 
-    private class AndroidModelListingConnection(
+    private class AndroidTargetListingConnection(
         val binder: IBinder,
-    ) : AiProviderModelListingConnection
+    ) : AiProviderTargetListingConnection
 
-    private class AndroidModelListingRpc(
+    private class AndroidTargetListingRpc(
         private val provider: IAiProvider,
-    ) : AiProviderModelListingRpc {
+    ) : AiProviderTargetListingRpc {
         override fun getProviderInfoEnvelope(): ByteArray? {
-            requireModelListingBackgroundThread()
+            requireTargetListingBackgroundThread()
             return provider.getProviderInfo()
         }
 
         override fun getCapabilitiesEnvelope(): ByteArray? {
-            requireModelListingBackgroundThread()
+            requireTargetListingBackgroundThread()
             return provider.getCapabilities()
         }
 
         override fun prepareCall(
             sequence: Long,
-            callback: AiProviderModelListingCallbackIngress,
-        ): AiProviderModelListingPreparedCall {
-            requireModelListingBackgroundThread()
-            require(sequence > 0L) { "Model-list sequence must be positive" }
-            return AndroidPreparedModelListCall(provider, callback)
+            callback: AiProviderTargetListingCallbackIngress,
+        ): AiProviderTargetListingPreparedCall {
+            requireTargetListingBackgroundThread()
+            require(sequence > 0L) { "Target-list sequence must be positive" }
+            return AndroidPreparedTargetListCall(provider, callback)
         }
     }
 
-    private class AndroidPreparedModelListCall(
+    private class AndroidPreparedTargetListCall(
         private val provider: IAiProvider,
-        callback: AiProviderModelListingCallbackIngress,
-    ) : AiProviderModelListingPreparedCall {
-        private val ingress = AtomicReference<AiProviderModelListingCallbackIngress?>(callback)
+        callback: AiProviderTargetListingCallbackIngress,
+    ) : AiProviderTargetListingPreparedCall {
+        private val ingress = AtomicReference<AiProviderTargetListingCallbackIngress?>(callback)
         private val state = AtomicReference(PreparedCallState.OPEN)
-        private val remoteCallback = object : IAiModelListCallback.Stub() {
+        private val remoteCallback = object : IAiTargetListCallback.Stub() {
             override fun onPage(page: ByteArray?) {
                 val callingUid = Binder.getCallingUid()
                 ingress.get()?.onPage(callingUid, page)
@@ -200,14 +200,14 @@ internal class AndroidAiProviderModelListing(
         }
 
         override fun dispatch(requestEnvelope: ByteArray) {
-            requireModelListingBackgroundThread()
+            requireTargetListingBackgroundThread()
             check(state.compareAndSet(PreparedCallState.OPEN, PreparedCallState.DISPATCHED)) {
                 when (state.get()) {
-                    PreparedCallState.CLOSED -> "Model-list call is closed"
-                    else -> "Model-list call was already dispatched"
+                    PreparedCallState.CLOSED -> "Target-list call is closed"
+                    else -> "Target-list call was already dispatched"
                 }
             }
-            provider.listModels(requestEnvelope.copyOf(), remoteCallback)
+            provider.listTargets(requestEnvelope.copyOf(), remoteCallback)
         }
 
         override fun close() {
@@ -223,11 +223,11 @@ internal class AndroidAiProviderModelListing(
     }
 }
 
-private fun AiProviderComponent.toModelListingAndroidComponent(): ComponentName =
+private fun AiProviderComponent.toTargetListingAndroidComponent(): ComponentName =
     ComponentName(packageName, className)
 
-private fun requireModelListingBackgroundThread() {
+private fun requireTargetListingBackgroundThread() {
     check(Looper.myLooper() != Looper.getMainLooper()) {
-        "local AI provider model-list transport must not run on the Android main thread"
+        "AI provider target-catalog transport must not run on the Android main thread"
     }
 }

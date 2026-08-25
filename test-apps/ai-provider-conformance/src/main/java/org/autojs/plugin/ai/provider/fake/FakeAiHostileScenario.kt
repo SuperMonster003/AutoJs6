@@ -1,19 +1,19 @@
 package org.autojs.plugin.ai.provider.fake
 
-enum class FakeAiHostileScenario(val modelId: String) {
-    CHUNK_BEFORE_START("fake.hostile.chunk-before-start"),
-    SEQUENCE_GAP("fake.hostile.sequence-gap"),
-    NO_CREDIT("fake.hostile.no-credit"),
-    DUPLICATE_TERMINAL("fake.hostile.duplicate-terminal"),
-    INVALID_FD_REFERENCE("fake.hostile.invalid-fd-ref"),
-    COMPLETION_FD("fake.hostile.completion-fd"),
-    TOOL_FD("fake.hostile.tool-fd"),
-    WRONG_UID("fake.hostile.wrong-uid"),
-    PROCESS_DEATH("fake.hostile.process-death"),
-    STALL("fake.hostile.stall"),
+enum class FakeAiHostileScenario(val targetId: String) {
+    CHUNK_BEFORE_START("local:hostile.chunk-before-start"),
+    SEQUENCE_GAP("local:hostile.sequence-gap"),
+    NO_CREDIT("local:hostile.no-credit"),
+    DUPLICATE_TERMINAL("local:hostile.duplicate-terminal"),
+    INVALID_FD_REFERENCE("local:hostile.invalid-fd-ref"),
+    COMPLETION_FD("local:hostile.completion-fd"),
+    TOOL_FD("local:hostile.tool-fd"),
+    WRONG_UID("local:hostile.wrong-uid"),
+    PROCESS_DEATH("local:hostile.process-death"),
+    STALL("local:hostile.stall"),
     ;
 
     companion object {
-        fun fromModelId(modelId: String): FakeAiHostileScenario? = values().firstOrNull { it.modelId == modelId }
+        fun fromTargetId(targetId: String): FakeAiHostileScenario? = values().firstOrNull { it.targetId == targetId }
     }
 }

@@ -159,9 +159,9 @@ class AiJsonValidationTest {
 
     private fun jsonRequest() = AiProviderRequest(
         requestId = "json-request",
-        protocolVersion = AiProtocolVersion(1, 0),
+        protocolVersion = AiProtocolVersion(2, 0),
         providerId = "fake.local",
-        modelId = "fake.echo",
+        targetId = "fake.local:echo",
         messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(textPayload("hello"))))),
         options = AiGenerationOptions(
             stream = false,

@@ -259,7 +259,7 @@ class AiPluginPublicAskSmokeTest {
             throw AssertionError("The real local AI provider is not installed: $REAL_COMPONENT", error)
         }
         assertEquals(
-            "The real local AI plugin and host must use the same signer",
+            "The real AI provider plugin and host must use the same signer",
             PackageManager.SIGNATURE_MATCH,
             context.packageManager.checkSignatures(context.packageName, REAL_PLUGIN_PACKAGE),
         )

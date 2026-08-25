@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package org.autojs.plugin.ai.provider.api
 
 import org.autojs.plugin.ai.common.api.AiProtocolVersion
@@ -56,14 +54,17 @@ class AiProviderLifecyclePolicyTest {
 
     @Test
     fun exactlyOneTerminalIsAcceptedAndCompletionRequiresStart() {
-        val notStarted = AiProviderSessionPolicy(maximumToolRounds = 0)
-        assertThrows(IllegalStateException::class.java) { notStarted.onCompleted() }
+        val notStarted = AiProviderSessionPolicy(
+            maximumToolRounds = 0,
+            expectedRequest = requestAwareRequest(stream = false),
+        )
+        assertThrows(IllegalStateException::class.java) { complete(notStarted) }
         notStarted.onFailed()
         assertEquals(AiTerminalGate.Terminal.FAILED, notStarted.terminal)
         assertThrows(IllegalStateException::class.java) { notStarted.onCancelled() }
 
         val started = startedPolicy()
-        started.onCompleted()
+        complete(started)
         assertEquals(AiTerminalGate.Terminal.COMPLETED, started.terminal)
         assertThrows(IllegalStateException::class.java) { started.onFailed() }
     }
@@ -91,12 +92,15 @@ class AiProviderLifecyclePolicyTest {
         assertThrows(IllegalStateException::class.java) {
             policy.onUsage(AiUsage(outputTokens = 1))
         }
-        assertThrows(IllegalStateException::class.java) { policy.onCompleted() }
+        assertThrows(IllegalStateException::class.java) { complete(policy) }
         policy.onFailed()
         assertEquals(AiTerminalGate.Terminal.FAILED, policy.terminal)
         assertThrows(IllegalStateException::class.java) { policy.onCancelled() }
 
-        val cancelledBeforeStart = AiProviderSessionPolicy(maximumToolRounds = 0)
+        val cancelledBeforeStart = AiProviderSessionPolicy(
+            maximumToolRounds = 0,
+            expectedRequest = requestAwareRequest(stream = false),
+        )
         assertTrue(cancelledBeforeStart.requestCancel())
         assertThrows(IllegalStateException::class.java) {
             cancelledBeforeStart.onStarted(startedMetadata())
@@ -111,13 +115,13 @@ class AiProviderLifecyclePolicyTest {
         val calls = calls("call-a", "call-b")
         policy.onToolCalls(calls)
 
-        assertThrows(IllegalStateException::class.java) { policy.onCompleted() }
+        assertThrows(IllegalStateException::class.java) { complete(policy) }
         assertThrows(IllegalArgumentException::class.java) {
             policy.submitToolResults(results("call-a"))
         }
         policy.submitToolResults(results("call-b", "call-a"))
         assertEquals(1, policy.completedToolRounds)
-        policy.onCompleted()
+        complete(policy)
     }
 
     @Test
@@ -227,9 +231,9 @@ class AiProviderLifecyclePolicyTest {
     fun requestAwareSessionRejectsMismatchedIdentityAndValidatesTerminalPayload() {
         val request = AiProviderRequest(
             requestId = "request-life",
-            protocolVersion = AiProtocolVersion(1, 0),
+            protocolVersion = AiProtocolVersion(2, 0),
             providerId = "fake.local",
-            modelId = "fake.echo",
+            targetId = "fake.local:echo",
             messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(textPayload("hello"))))),
             options = AiGenerationOptions(
                 stream = false,
@@ -246,7 +250,7 @@ class AiProviderLifecyclePolicyTest {
             expectedRequest = request,
         )
         assertThrows(IllegalArgumentException::class.java) {
-            mismatched.onStarted(startedMetadata().copy(modelId = "fake.other"))
+            mismatched.onStarted(startedMetadata().copy(targetId = "fake.local:other"))
         }
 
         val policy = AiProviderSessionPolicy(
@@ -272,9 +276,9 @@ class AiProviderLifecyclePolicyTest {
     fun requestAwareSessionMaterializesDescriptorBackedCompletionThroughItsReader() {
         val request = AiProviderRequest(
             requestId = "request-life",
-            protocolVersion = AiProtocolVersion(1, 0),
+            protocolVersion = AiProtocolVersion(2, 0),
             providerId = "fake.local",
-            modelId = "fake.echo",
+            targetId = "fake.local:echo",
             messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(textPayload("hello"))))),
             options = AiGenerationOptions(
                 stream = false,
@@ -333,24 +337,6 @@ class AiProviderLifecyclePolicyTest {
             )
         }
         policy.onToolCalls(calls("call-1"))
-    }
-
-    @Test
-    fun requestAwareSessionCannotBypassTerminalPayloadValidation() {
-        val request = requestAwareRequest(stream = false)
-        val policy = AiProviderSessionPolicy(
-            maximumToolRounds = 0,
-            expectedRequest = request,
-        ).apply {
-            onStarted(startedMetadata())
-        }
-
-        assertThrows(IllegalStateException::class.java) {
-            @Suppress("DEPRECATION")
-            policy.onCompleted()
-        }
-        assertEquals(AiProviderSessionPolicy.State.STARTED, policy.state)
-        assertEquals(null, policy.terminal)
     }
 
     @Test
@@ -505,8 +491,26 @@ class AiProviderLifecyclePolicyTest {
     private fun startedPolicy(
         firstSequence: Long = 0,
         maximumToolRounds: Int = 0,
-    ): AiProviderSessionPolicy = AiProviderSessionPolicy(maximumToolRounds).apply {
+    ): AiProviderSessionPolicy = AiProviderSessionPolicy(
+        maximumToolRounds = maximumToolRounds,
+        expectedRequest = requestAwareRequest(
+            stream = true,
+            tools = if (maximumToolRounds == 0) {
+                emptyList()
+            } else {
+                listOf(AiToolDefinition("lookup", "Lookup", jsonPayload("{}")))
+            },
+            maximumToolRounds = maximumToolRounds,
+        ),
+    ).apply {
         onStarted(startedMetadata(firstSequence, maximumToolRounds))
+    }
+
+    private fun complete(policy: AiProviderSessionPolicy) {
+        policy.onCompleted(
+            result = AiCompletionResult(textPayload(""), AiFinishReason.STOP),
+            descriptorCount = 0,
+        )
     }
 
     private fun startedMetadata(
@@ -516,9 +520,9 @@ class AiProviderLifecyclePolicyTest {
     ) = AiSessionStarted(
         requestId = "request-life",
         sessionId = "session-life",
-        protocolVersion = AiProtocolVersion(1, 0),
+        protocolVersion = AiProtocolVersion(2, 0),
         providerId = "fake.local",
-        modelId = "fake.echo",
+        targetId = "fake.local:echo",
         firstChunkSequence = firstSequence,
         effectiveMaximumOutputBytes = effectiveMaximumOutputBytes,
         effectiveMaximumToolRounds = maximumToolRounds,
@@ -537,11 +541,12 @@ class AiProviderLifecyclePolicyTest {
         includeReasoning: Boolean = false,
         maximumOutputBytes: Long = 4096,
         tools: List<AiToolDefinition> = emptyList(),
+        maximumToolRounds: Int = if (tools.isEmpty()) 0 else 1,
     ) = AiProviderRequest(
         requestId = "request-life",
-        protocolVersion = AiProtocolVersion(1, 0),
+        protocolVersion = AiProtocolVersion(2, 0),
         providerId = "fake.local",
-        modelId = "fake.echo",
+        targetId = "fake.local:echo",
         messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(textPayload("hello"))))),
         options = AiGenerationOptions(
             stream = stream,
@@ -549,7 +554,7 @@ class AiProviderLifecyclePolicyTest {
             structuredJson = false,
             reportUsage = false,
             maximumOutputBytes = maximumOutputBytes,
-            maximumToolRounds = if (tools.isEmpty()) 0 else 1,
+            maximumToolRounds = maximumToolRounds,
             timeoutMillis = 30_000,
         ),
         tools = tools,

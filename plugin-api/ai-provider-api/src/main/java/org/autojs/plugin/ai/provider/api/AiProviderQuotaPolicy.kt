@@ -168,19 +168,6 @@ object AiProviderQuotaPolicy {
     }
 
     /**
-     * Performs structural descriptor accounting only. It does not bind names to a request or
-     * materialize descriptor-backed JSON. Use the request-aware overload at a provider boundary.
-     */
-    @Deprecated(
-        message = "Use request-aware validateToolCalls to bind tool names and verify argument JSON",
-    )
-    fun validateToolCalls(
-        batch: AiToolCallBatch,
-        descriptorCount: Int,
-        maximumDescriptors: Int,
-    ): Long = validateToolPayloads(batch.calls.map { it.arguments }, descriptorCount, maximumDescriptors)
-
-    /**
      * Binds provider tool calls to the original request and returns immutable, fully verified JSON
      * arguments. No descriptor is read until names, declared quotas, and exact descriptor references
      * have passed validation.

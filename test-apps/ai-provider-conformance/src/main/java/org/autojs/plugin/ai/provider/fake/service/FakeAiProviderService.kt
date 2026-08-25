@@ -9,13 +9,13 @@ import org.autojs.plugin.ai.common.api.AiCommonLimits
 import org.autojs.plugin.ai.common.api.AiError
 import org.autojs.plugin.ai.common.api.AiErrorCode
 import org.autojs.plugin.ai.provider.api.AiProviderCodec
-import org.autojs.plugin.ai.provider.api.IAiModelListCallback
+import org.autojs.plugin.ai.provider.api.IAiTargetListCallback
 import org.autojs.plugin.ai.provider.api.IAiCallback
 import org.autojs.plugin.ai.provider.api.IAiProvider
 import org.autojs.plugin.ai.provider.api.IAiSession
 import org.autojs.plugin.ai.provider.fake.FakeAiBinderInputPolicy
 import org.autojs.plugin.ai.provider.fake.FakeBoundedExecutorFactory
-import org.autojs.plugin.ai.provider.fake.FakeAiModelPager
+import org.autojs.plugin.ai.provider.fake.FakeAiTargetPager
 import org.autojs.plugin.ai.provider.fake.FakeAiProviderFixture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
@@ -65,7 +65,7 @@ class FakeAiProviderService : Service() {
             return AiProviderCodec.encodeCapabilities(FakeAiProviderFixture.capabilities)
         }
 
-        override fun listModels(request: ByteArray, callback: IAiModelListCallback) {
+        override fun listTargets(request: ByteArray, callback: IAiTargetListCallback) {
             callerVerifier.enforceAllowedCaller()
             try {
                 FakeAiBinderInputPolicy.requireEnvelopeSize(request.size)
@@ -76,7 +76,7 @@ class FakeAiProviderService : Service() {
                             AiCommonCodec.encodeError(
                                 AiError(
                                     code = AiErrorCode.INVALID_REQUEST,
-                                    message = "Fake model-list request is invalid",
+                                    message = "Fake target-list request is invalid",
                                 ),
                             ),
                         )
@@ -86,10 +86,10 @@ class FakeAiProviderService : Service() {
                 return
             }
             val requestCopy = request.copyOf()
-            val accepted = submitListWork {
+            val accepted = submitCatalogWork {
                 val result = runCatching {
-                    val decoded = AiProviderCodec.decodeModelListRequest(requestCopy)
-                    AiProviderCodec.encodeModelPage(FakeAiModelPager.page(decoded))
+                    val decoded = AiProviderCodec.decodeTargetListRequest(requestCopy)
+                    AiProviderCodec.encodeTargetPage(FakeAiTargetPager.page(decoded))
                 }
                 callbackLane.dispatch(
                     callback = {
@@ -100,7 +100,7 @@ class FakeAiProviderService : Service() {
                                     AiCommonCodec.encodeError(
                                         AiError(
                                             code = AiErrorCode.INVALID_REQUEST,
-                                            message = "Fake model-list request is invalid",
+                                            message = "Fake target-list request is invalid",
                                         ),
                                     ),
                                 )
@@ -117,7 +117,7 @@ class FakeAiProviderService : Service() {
                             AiCommonCodec.encodeError(
                                 AiError(
                                     code = AiErrorCode.BACKPRESSURE,
-                                    message = "Fake model-list queue is full",
+                                    message = "Fake target-list queue is full",
                                 ),
                             ),
                         )
@@ -184,7 +184,7 @@ class FakeAiProviderService : Service() {
         }
     }
 
-    private fun submitListWork(block: () -> Unit): Boolean = try {
+    private fun submitCatalogWork(block: () -> Unit): Boolean = try {
             worker.execute(block)
             true
         } catch (_: RejectedExecutionException) {

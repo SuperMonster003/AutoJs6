@@ -42,7 +42,7 @@ object FakeAiProviderEngine {
         materialized: FakeMaterializedRequest,
         toolResult: String? = null,
     ): FakeAiGenerationPlan {
-        val raw = if (request.modelId == FakeAiProviderFixture.MODEL_TOOLS) {
+        val raw = if (request.targetId == FakeAiProviderFixture.TARGET_TOOLS) {
             "tool:${requireNotNull(toolResult) { "Fake tool result is unavailable" }}"
         } else {
             materialized.prompt.ifEmpty { "fake" }

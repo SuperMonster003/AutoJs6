@@ -1,6 +1,6 @@
 package org.autojs.plugin.ai.provider.api;
 
-oneway interface IAiModelListCallback {
+oneway interface IAiTargetListCallback {
 
     void onPage(in byte[] page);
 

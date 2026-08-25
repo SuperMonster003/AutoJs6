@@ -67,9 +67,9 @@ class AiProviderSessionTest {
             AiSessionStarted(
                 requestId = "secret-request",
                 sessionId = "secret-session",
-                protocolVersion = AiProtocolVersion(1, 0),
+                protocolVersion = AiProtocolVersion(2, 0),
                 providerId = PROVIDER_ID,
-                modelId = MODEL_ID,
+                targetId = TARGET_ID,
                 effectiveMaximumOutputBytes = 4_096,
                 effectiveMaximumToolRounds = 0,
             ),
@@ -112,7 +112,7 @@ class AiProviderSessionTest {
     fun planRequestMismatchFailsBeforeDispatchAndClosesRequestLease() {
         val lane = ManualExecutor()
         val requestLease = RecordingRequestLease(0)
-        val mismatched = request().copy(modelId = "fixture.other-model")
+        val mismatched = request().copy(targetId = "fixture.provider:other")
         val harness = harness(request = mismatched, requestLease = requestLease, lane = lane)
 
         val decision = harness.policy.beginOpen()
@@ -133,7 +133,7 @@ class AiProviderSessionTest {
     fun tokenLimitDispatchDoesNotRequireUsageModelCapability() {
         val request = request(maximumOutputTokens = 64)
         val plan = plan(
-            modelCapabilityIds = setOf(
+            targetCapabilityIds = setOf(
                 AiProviderCapabilityId.STREAMING,
                 AiProviderCapabilityId.REASONING,
                 AiProviderCapabilityId.TOOLS,
@@ -1853,7 +1853,7 @@ class AiProviderSessionTest {
     }
 
     private fun plan(
-        modelCapabilityIds: Set<String> = setOf(
+        targetCapabilityIds: Set<String> = setOf(
             AiProviderCapabilityId.STREAMING,
             AiProviderCapabilityId.REASONING,
             AiProviderCapabilityId.TOOLS,
@@ -1868,15 +1868,19 @@ class AiProviderSessionTest {
             requirement = AiProviderCapabilityRequirement(),
             options = AiProviderSelectionOptions(enabled = true),
         ) as AiProviderSelectionResult.Selected
-        return AiProviderHostSessionPlan(
-            pinnedProvider = selected.pinned,
-            listingGeneration = "fixture-generation",
+        val target = AiProviderHostTestFixtures.target(
+            targetId = TARGET_ID,
             modelId = MODEL_ID,
-            modelCapabilityIds = modelCapabilityIds,
-            effectiveMaximumContextBytes = 512L * 1024L,
-            effectiveMaximumOutputBytes = 256L * 1024L,
-            credentialDisposition = AiProviderCredentialIsolationPolicy.disposition(selected.pinned),
+            capabilityIds = targetCapabilityIds.toList(),
+            maximumContextBytes = 512L * 1024L,
+            maximumOutputBytes = 256L * 1024L,
         )
+        return (AiProviderHostSessionPlanner.plan(
+            selected = selected,
+            catalogGeneration = "fixture-generation",
+            target = target,
+            requirement = AiProviderCapabilityRequirement(),
+        ) as AiProviderSessionPlanningResult.Planned).plan
     }
 
     private fun request(
@@ -1886,9 +1890,9 @@ class AiProviderSessionTest {
         payload: AiPayloadReference = textPayload("hello"),
     ) = AiProviderRequest(
         requestId = "request-session",
-        protocolVersion = AiProviderProtocol.PROTOCOL_V1_3,
+        protocolVersion = AiProviderProtocol.PROTOCOL_V2,
         providerId = PROVIDER_ID,
-        modelId = MODEL_ID,
+        targetId = TARGET_ID,
         messages = listOf(
             AiMessage(
                 role = AiMessageRole.USER,
@@ -1913,7 +1917,7 @@ class AiProviderSessionTest {
             sessionId = "fixture-session",
             protocolVersion = request.protocolVersion,
             providerId = request.providerId,
-            modelId = request.modelId,
+            targetId = request.targetId,
             firstChunkSequence = 0,
             effectiveMaximumOutputBytes = request.options.maximumOutputBytes,
             effectiveMaximumToolRounds = 0,
@@ -2293,6 +2297,7 @@ class AiProviderSessionTest {
     private companion object {
         const val PROVIDER_UID = 10_001
         const val PROVIDER_ID = "fixture.provider"
+        const val TARGET_ID = "fixture.provider:model"
         const val MODEL_ID = "fixture.model"
     }
 }

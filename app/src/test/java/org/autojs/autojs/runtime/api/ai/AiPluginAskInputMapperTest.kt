@@ -94,7 +94,7 @@ class AiPluginAskInputMapperTest {
             Case("[42]", "AI plugin messages must be objects"),
             Case(
                 """[{"role":"assistant","content":"answer"}]""",
-                "The final local AI plugin message must have the user role",
+                "The final AI provider plugin message must have the user role",
             ),
             Case(
                 """[
@@ -179,7 +179,7 @@ class AiPluginAskInputMapperTest {
         assertNull(defaults.topK)
         assertNull(defaults.topP)
         assertNull(defaults.maximumOutputTokens)
-        assertEquals(AiProviderBackendProfile.CPU, defaults.backendProfile)
+        assertNull(defaults.backendProfile)
     }
 
     @Test

@@ -5,6 +5,8 @@ import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ai.common.api.AiUsage
 import org.autojs.plugin.ai.common.api.AiValidation
 import org.autojs.plugin.ai.common.api.AiCommonLimits
+import org.autojs.plugin.ai.common.api.AiCredentialMode
+import org.autojs.plugin.ai.common.api.AiDataLocality
 import java.util.Collections
 
 /**
@@ -176,20 +178,20 @@ class AiProviderCapabilities(
             "supportsPersistentSessions=$supportsPersistentSessions)"
 }
 
-data class AiModelListRequest(
+data class AiTargetListRequest(
     val protocolVersion: AiProtocolVersion,
     val pageSize: Int,
     val pageToken: String? = null,
 ) {
     init {
-        require(pageSize in 1..AiProviderLimits.MAX_MODELS_PER_PAGE)
+        require(pageSize in 1..AiProviderLimits.MAX_TARGETS_PER_PAGE)
         pageToken?.let {
-            AiValidation.requireUtf8(it, 1, AiProviderLimits.MAX_MODEL_PAGE_TOKEN_BYTES, "Model page token")
+            AiValidation.requireUtf8(it, 1, AiProviderLimits.MAX_TARGET_PAGE_TOKEN_BYTES, "Target page token")
         }
     }
 
     override fun toString(): String =
-        "AiModelListRequest(protocolVersion=$protocolVersion, pageSize=$pageSize, " +
+        "AiTargetListRequest(protocolVersion=$protocolVersion, pageSize=$pageSize, " +
         "pageTokenPresent=${pageToken != null})"
 }
 
@@ -211,119 +213,196 @@ data class AiBackendProfileInfo(
     }
 }
 
-class AiModelInfo(
+class AiTargetInfo(
+    val targetId: String,
+    val providerId: String,
+    val profileId: String?,
     val modelId: String,
     val displayName: String,
     capabilityIds: List<String>,
-    val maximumContextBytes: Long,
-    val maximumOutputBytes: Long,
-    backendProfiles: List<AiBackendProfileInfo> = listOf(
-        AiBackendProfileInfo(
-            profileId = AiProviderBackendProfile.CPU,
-            availability = AiProviderBackendAvailability.AVAILABLE,
-        ),
-    ),
+    val locality: Int,
+    val credentialMode: Int,
+    val availability: String,
+    val configured: Boolean,
+    val maximumContextBytes: Long?,
+    val maximumOutputBytes: Long?,
+    supportedControls: List<String> = emptyList(),
+    declaredHttpsOrigins: List<String> = emptyList(),
+    backendProfiles: List<AiBackendProfileInfo> = emptyList(),
 ) {
     val capabilityIds: List<String> = immutableListSnapshot(capabilityIds)
+    val supportedControls: List<String> = immutableListSnapshot(supportedControls)
+    val declaredHttpsOrigins: List<String> = immutableListSnapshot(declaredHttpsOrigins)
     val backendProfiles: List<AiBackendProfileInfo> = immutableListSnapshot(backendProfiles)
+    val available: Boolean
+        get() = availability == AiTargetAvailability.AVAILABLE
 
     init {
-        require(AiValidation.STABLE_ID.matches(modelId)) { "Invalid model ID" }
-        AiValidation.requireUtf8(displayName, 1, 256, "Model display name")
-        require(capabilityIds.distinct().size == capabilityIds.size) { "Duplicate model capability" }
-        require(capabilityIds.all { it in AiProviderCapabilityId.VALUES }) { "Unknown model capability" }
-        require(maximumContextBytes in 1L..AiProviderLimits.MAX_TOTAL_INPUT_BYTES)
-        require(maximumOutputBytes in 1L..AiProviderLimits.MAX_STREAMING_OUTPUT_BYTES)
-        require(backendProfiles.isNotEmpty()) { "A model must declare at least one backend profile" }
+        require(AiValidation.TARGET_ID.matches(targetId)) { "Invalid target ID" }
+        AiValidation.requireUtf8(targetId, 3, AiCommonLimits.MAX_TARGET_ID_BYTES, "Target ID")
+        require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid target provider ID" }
+        profileId?.let { require(AiValidation.STABLE_ID.matches(it)) { "Invalid target profile ID" } }
+        AiValidation.requireSafeText(modelId, 1, AiCommonLimits.MAX_MODEL_ID_BYTES, "Target model ID")
+        AiValidation.requireSafeText(displayName, 1, AiCommonLimits.MAX_DISPLAY_NAME_BYTES, "Target display name")
+        require(locality in AiDataLocality.VALUES) { "Unknown target locality" }
+        require(credentialMode in AiCredentialMode.VALUES) { "Unknown target credential mode" }
+        require(capabilityIds.distinct().size == capabilityIds.size) { "Duplicate target capability" }
+        require(capabilityIds.all { it in AiProviderCapabilityId.VALUES }) { "Unknown target capability" }
+        require(availability in AiTargetAvailability.VALUES) { "Unknown target availability" }
+        require(configured || !available) { "An unconfigured target cannot be available" }
+        maximumContextBytes?.let { require(it in 1L..AiProviderLimits.MAX_TOTAL_INPUT_BYTES) }
+        maximumOutputBytes?.let { require(it in 1L..AiProviderLimits.MAX_STREAMING_OUTPUT_BYTES) }
+        require(supportedControls.distinct().size == supportedControls.size) { "Duplicate target control" }
+        require(supportedControls.all { it in AiTargetControlId.VALUES }) { "Unknown target control" }
+        require(declaredHttpsOrigins.size <= AiCommonLimits.MAX_ORIGINS) { "Too many target origins" }
+        require(declaredHttpsOrigins.distinct().size == declaredHttpsOrigins.size) { "Duplicate target origin" }
+        declaredHttpsOrigins.forEach(AiValidation::requireHttpsOrigin)
+        when (locality) {
+            AiDataLocality.ON_DEVICE -> {
+                require(profileId == null) { "An on-device target cannot have a remote profile" }
+                require(credentialMode == AiCredentialMode.NONE) {
+                    "An on-device target cannot require remote credentials"
+                }
+                require(declaredHttpsOrigins.isEmpty()) { "An on-device target cannot declare remote origins" }
+            }
+            AiDataLocality.REMOTE,
+            AiDataLocality.HYBRID,
+            -> {
+                require(profileId != null) { "A remote target must reference its plugin-managed profile" }
+                require(credentialMode == AiCredentialMode.PLUGIN_MANAGED) {
+                    "Remote target credentials must remain plugin-managed"
+                }
+                require(declaredHttpsOrigins.isNotEmpty()) { "A remote target must declare an HTTPS origin" }
+            }
+        }
         require(backendProfiles.map { it.profileId }.distinct().size == backendProfiles.size) {
-            "Duplicate model backend profile"
+            "Duplicate target backend profile"
+        }
+        require((AiTargetControlId.BACKEND_PROFILE in supportedControls) == backendProfiles.isNotEmpty()) {
+            "Backend-profile controls and declarations must agree"
+        }
+        if (AiTargetControlId.RESPONSE_JSON_SCHEMA in supportedControls) {
+            require(AiProviderCapabilityId.STRUCTURED_JSON in capabilityIds) {
+                "JSON Schema control requires structured JSON capability"
+            }
         }
     }
 
-    operator fun component1() = modelId
-    operator fun component2() = displayName
-    operator fun component3() = capabilityIds
-    operator fun component4() = maximumContextBytes
-    operator fun component5() = maximumOutputBytes
-    operator fun component6() = backendProfiles
-
     fun copy(
+        targetId: String = this.targetId,
+        providerId: String = this.providerId,
+        profileId: String? = this.profileId,
         modelId: String = this.modelId,
         displayName: String = this.displayName,
         capabilityIds: List<String> = this.capabilityIds,
-        maximumContextBytes: Long = this.maximumContextBytes,
-        maximumOutputBytes: Long = this.maximumOutputBytes,
+        locality: Int = this.locality,
+        credentialMode: Int = this.credentialMode,
+        availability: String = this.availability,
+        configured: Boolean = this.configured,
+        maximumContextBytes: Long? = this.maximumContextBytes,
+        maximumOutputBytes: Long? = this.maximumOutputBytes,
+        supportedControls: List<String> = this.supportedControls,
+        declaredHttpsOrigins: List<String> = this.declaredHttpsOrigins,
         backendProfiles: List<AiBackendProfileInfo> = this.backendProfiles,
-    ) = AiModelInfo(
-        modelId,
-        displayName,
-        capabilityIds,
-        maximumContextBytes,
-        maximumOutputBytes,
-        backendProfiles,
+    ) = AiTargetInfo(
+        targetId = targetId,
+        providerId = providerId,
+        profileId = profileId,
+        modelId = modelId,
+        displayName = displayName,
+        capabilityIds = capabilityIds,
+        locality = locality,
+        credentialMode = credentialMode,
+        availability = availability,
+        configured = configured,
+        maximumContextBytes = maximumContextBytes,
+        maximumOutputBytes = maximumOutputBytes,
+        supportedControls = supportedControls,
+        declaredHttpsOrigins = declaredHttpsOrigins,
+        backendProfiles = backendProfiles,
     )
 
     override fun equals(other: Any?): Boolean =
-        this === other || other is AiModelInfo &&
+        this === other || other is AiTargetInfo &&
+            targetId == other.targetId &&
+            providerId == other.providerId &&
+            profileId == other.profileId &&
             modelId == other.modelId &&
             displayName == other.displayName &&
             capabilityIds == other.capabilityIds &&
+            locality == other.locality &&
+            credentialMode == other.credentialMode &&
+            availability == other.availability &&
+            configured == other.configured &&
             maximumContextBytes == other.maximumContextBytes &&
             maximumOutputBytes == other.maximumOutputBytes &&
+            supportedControls == other.supportedControls &&
+            declaredHttpsOrigins == other.declaredHttpsOrigins &&
             backendProfiles == other.backendProfiles
 
-    override fun hashCode(): Int =
-        dataClassHashCode(
-            modelId,
-            displayName,
-            capabilityIds,
-            maximumContextBytes,
-            maximumOutputBytes,
-            backendProfiles,
-        )
+    override fun hashCode(): Int = dataClassHashCode(
+        targetId,
+        providerId,
+        profileId,
+        modelId,
+        displayName,
+        capabilityIds,
+        locality,
+        credentialMode,
+        availability,
+        configured,
+        maximumContextBytes,
+        maximumOutputBytes,
+        supportedControls,
+        declaredHttpsOrigins,
+        backendProfiles,
+    )
 
     override fun toString(): String =
-        "AiModelInfo(modelId=$modelId, displayName=$displayName, capabilityIds=$capabilityIds, " +
-            "maximumContextBytes=$maximumContextBytes, maximumOutputBytes=$maximumOutputBytes, " +
-            "backendProfiles=$backendProfiles)"
+        "AiTargetInfo(targetId=$targetId, providerId=$providerId, profileId=$profileId, " +
+            "modelId=$modelId, displayName=$displayName, locality=$locality, " +
+            "credentialMode=$credentialMode, capabilityIds=$capabilityIds, availability=$availability, " +
+            "configured=$configured, maximumContextBytes=$maximumContextBytes, " +
+            "maximumOutputBytes=$maximumOutputBytes, supportedControls=$supportedControls, " +
+            "declaredHttpsOrigins=$declaredHttpsOrigins, backendProfiles=$backendProfiles)"
 }
 
-class AiModelPage(
-    val listingGeneration: String,
-    models: List<AiModelInfo>,
+class AiTargetPage(
+    val catalogGeneration: String,
+    targets: List<AiTargetInfo>,
     val nextPageToken: String? = null,
 ) {
-    val models: List<AiModelInfo> = immutableListSnapshot(models)
+    val targets: List<AiTargetInfo> = immutableListSnapshot(targets)
 
     init {
-        AiValidation.requireUtf8(listingGeneration, 1, 256, "Model listing generation")
-        require(models.size <= AiProviderLimits.MAX_MODELS_PER_PAGE)
-        require(models.map { it.modelId }.distinct().size == models.size) { "Duplicate model ID in page" }
+        AiValidation.requireUtf8(catalogGeneration, 1, 256, "Target catalog generation")
+        require(targets.size <= AiProviderLimits.MAX_TARGETS_PER_PAGE)
+        require(targets.map { it.targetId }.distinct().size == targets.size) { "Duplicate target ID in page" }
         nextPageToken?.let {
-            AiValidation.requireUtf8(it, 1, AiProviderLimits.MAX_MODEL_PAGE_TOKEN_BYTES, "Model page token")
+            AiValidation.requireUtf8(it, 1, AiProviderLimits.MAX_TARGET_PAGE_TOKEN_BYTES, "Target page token")
         }
     }
 
-    operator fun component1() = listingGeneration
-    operator fun component2() = models
+    operator fun component1() = catalogGeneration
+    operator fun component2() = targets
     operator fun component3() = nextPageToken
 
     fun copy(
-        listingGeneration: String = this.listingGeneration,
-        models: List<AiModelInfo> = this.models,
+        catalogGeneration: String = this.catalogGeneration,
+        targets: List<AiTargetInfo> = this.targets,
         nextPageToken: String? = this.nextPageToken,
-    ) = AiModelPage(listingGeneration, models, nextPageToken)
+    ) = AiTargetPage(catalogGeneration, targets, nextPageToken)
 
     override fun equals(other: Any?): Boolean =
-        this === other || other is AiModelPage &&
-            listingGeneration == other.listingGeneration &&
-            models == other.models &&
+        this === other || other is AiTargetPage &&
+            catalogGeneration == other.catalogGeneration &&
+            targets == other.targets &&
             nextPageToken == other.nextPageToken
 
-    override fun hashCode(): Int = dataClassHashCode(listingGeneration, models, nextPageToken)
+    override fun hashCode(): Int = dataClassHashCode(catalogGeneration, targets, nextPageToken)
 
     override fun toString(): String =
-        "AiModelPage(modelCount=${models.size}, nextPageTokenPresent=${nextPageToken != null})"
+        "AiTargetPage(targetCount=${targets.size}, nextPageTokenPresent=${nextPageToken != null})"
 }
 
 data class AiContentPart(
@@ -385,7 +464,7 @@ class AiGenerationOptions(
     val topK: Int? = null,
     val topP: Double? = null,
     val persistentSession: Boolean = false,
-    val backendProfile: String = AiProviderBackendProfile.CPU,
+    val backendProfile: String? = null,
 ) {
     val requiredCapabilityIds: List<String> = immutableListSnapshot(requiredCapabilityIds)
 
@@ -408,7 +487,9 @@ class AiGenerationOptions(
         require(responseMimeType in AiProviderMimeType.INPUT_VALUES)
         require(requiredCapabilityIds.distinct().size == requiredCapabilityIds.size)
         require(requiredCapabilityIds.all { it in AiProviderCapabilityId.VALUES }) { "Unknown required capability" }
-        require(backendProfile in AiProviderBackendProfile.VALUES) { "Unknown backend profile" }
+        backendProfile?.let {
+            require(it in AiProviderBackendProfile.VALUES) { "Unknown backend profile" }
+        }
         if (structuredJson) {
             require(responseMimeType == AiProviderMimeType.JSON)
         } else {
@@ -454,7 +535,7 @@ class AiGenerationOptions(
         topK: Int? = this.topK,
         topP: Double? = this.topP,
         persistentSession: Boolean = this.persistentSession,
-        backendProfile: String = this.backendProfile,
+        backendProfile: String? = this.backendProfile,
     ) = AiGenerationOptions(
         stream = stream,
         includeReasoning = includeReasoning,
@@ -527,7 +608,7 @@ class AiProviderRequest(
     val requestId: String,
     val protocolVersion: AiProtocolVersion,
     val providerId: String,
-    val modelId: String,
+    val targetId: String,
     messages: List<AiMessage>,
     val options: AiGenerationOptions,
     tools: List<AiToolDefinition> = emptyList(),
@@ -538,14 +619,14 @@ class AiProviderRequest(
     init {
         require(AiValidation.STABLE_ID.matches(requestId)) { "Invalid request ID" }
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
-        require(AiValidation.STABLE_ID.matches(modelId)) { "Invalid model ID" }
+        require(AiValidation.TARGET_ID.matches(targetId)) { "Invalid target ID" }
         require(messages.isNotEmpty()) { "AI messages must not be empty" }
     }
 
     operator fun component1() = requestId
     operator fun component2() = protocolVersion
     operator fun component3() = providerId
-    operator fun component4() = modelId
+    operator fun component4() = targetId
     operator fun component5() = messages
     operator fun component6() = options
     operator fun component7() = tools
@@ -554,28 +635,28 @@ class AiProviderRequest(
         requestId: String = this.requestId,
         protocolVersion: AiProtocolVersion = this.protocolVersion,
         providerId: String = this.providerId,
-        modelId: String = this.modelId,
+        targetId: String = this.targetId,
         messages: List<AiMessage> = this.messages,
         options: AiGenerationOptions = this.options,
         tools: List<AiToolDefinition> = this.tools,
-    ) = AiProviderRequest(requestId, protocolVersion, providerId, modelId, messages, options, tools)
+    ) = AiProviderRequest(requestId, protocolVersion, providerId, targetId, messages, options, tools)
 
     override fun equals(other: Any?): Boolean =
         this === other || other is AiProviderRequest &&
             requestId == other.requestId &&
             protocolVersion == other.protocolVersion &&
             providerId == other.providerId &&
-            modelId == other.modelId &&
+            targetId == other.targetId &&
             messages == other.messages &&
             options == other.options &&
             tools == other.tools
 
     override fun hashCode(): Int =
-        dataClassHashCode(requestId, protocolVersion, providerId, modelId, messages, options, tools)
+        dataClassHashCode(requestId, protocolVersion, providerId, targetId, messages, options, tools)
 
     override fun toString(): String =
         "AiProviderRequest(requestId=$requestId, protocolVersion=$protocolVersion, providerId=$providerId, " +
-            "modelId=$modelId, messageCount=${messages.size}, " +
+            "targetId=$targetId, messageCount=${messages.size}, " +
             "contentPartCount=${messages.sumOf { it.parts.size }}, toolCount=${tools.size}, " +
             "stream=${options.stream}, responseMimeType=${options.responseMimeType})"
 }
@@ -585,15 +666,16 @@ data class AiSessionStarted(
     val sessionId: String,
     val protocolVersion: AiProtocolVersion,
     val providerId: String,
-    val modelId: String,
+    val targetId: String,
     val firstChunkSequence: Long = 0L,
     val effectiveMaximumOutputBytes: Long,
     val effectiveMaximumToolRounds: Int,
 ) {
     init {
-        listOf(requestId, sessionId, providerId, modelId).forEach {
+        listOf(requestId, sessionId, providerId).forEach {
             require(AiValidation.STABLE_ID.matches(it)) { "Invalid session metadata ID" }
         }
+        require(AiValidation.TARGET_ID.matches(targetId)) { "Invalid session target ID" }
         require(firstChunkSequence >= 0L)
         require(effectiveMaximumOutputBytes in 1L..AiProviderLimits.MAX_STREAMING_OUTPUT_BYTES)
         require(effectiveMaximumToolRounds in 0..AiProviderLimits.MAX_TOOL_ROUNDS)

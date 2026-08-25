@@ -3,7 +3,7 @@ package org.autojs.autojs.core.plugin.ai
 import org.autojs.plugin.ai.common.api.AiCredentialMode
 import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.ai.common.api.AiValidation
-import org.autojs.plugin.ai.provider.api.AiModelInfo
+import org.autojs.plugin.ai.provider.api.AiTargetInfo
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilities
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilityId
 import java.nio.ByteBuffer
@@ -21,17 +21,17 @@ internal enum class AiProviderCredentialDisposition {
 }
 
 internal object AiProviderCredentialIsolationPolicy {
-    fun disposition(pinned: AiProviderPinnedIdentity): AiProviderCredentialDisposition =
-        when (pinned.credentialMode) {
+    fun disposition(target: AiTargetInfo): AiProviderCredentialDisposition =
+        when (target.credentialMode) {
             AiCredentialMode.NONE -> {
-                check(pinned.locality == AiDataLocality.ON_DEVICE) {
-                    "A credential-free provider must be on-device in protocol V1"
+                check(target.locality == AiDataLocality.ON_DEVICE) {
+                    "A credential-free target must be on-device"
                 }
                 AiProviderCredentialDisposition.NONE
             }
             AiCredentialMode.PLUGIN_MANAGED -> {
-                check(pinned.locality != AiDataLocality.ON_DEVICE) {
-                    "An on-device provider cannot request plugin-managed remote credentials"
+                check(target.locality != AiDataLocality.ON_DEVICE) {
+                    "An on-device target cannot request plugin-managed remote credentials"
                 }
                 AiProviderCredentialDisposition.PROVIDER_PROCESS_ONLY
             }
@@ -47,76 +47,106 @@ internal object AiProviderCredentialIsolationPolicy {
  */
 internal class AiProviderHostSessionPlan(
     val pinnedProvider: AiProviderPinnedIdentity,
-    val listingGeneration: String,
+    val catalogGeneration: String,
+    val targetId: String,
+    val profileId: String?,
     val modelId: String,
-    modelCapabilityIds: Collection<String>,
+    val targetLocality: Int,
+    val targetCredentialMode: Int,
+    targetCapabilityIds: Collection<String>,
+    targetDeclaredHttpsOrigins: Collection<String>,
     val effectiveMaximumContextBytes: Long,
     val effectiveMaximumOutputBytes: Long,
     val credentialDisposition: AiProviderCredentialDisposition,
 ) {
-    val modelCapabilityIds: Set<String> = Collections.unmodifiableSet(modelCapabilityIds.toSortedSet())
+    val targetCapabilityIds: Set<String> = Collections.unmodifiableSet(targetCapabilityIds.toSortedSet())
+    val targetDeclaredHttpsOrigins: List<String> = Collections.unmodifiableList(
+        targetDeclaredHttpsOrigins.distinct().sorted(),
+    )
 
     init {
-        AiValidation.requireUtf8(listingGeneration, 1, 256, "Model listing generation")
-        require(AiValidation.STABLE_ID.matches(modelId)) { "Invalid model ID" }
-        require(this.modelCapabilityIds.all { it in AiProviderCapabilityId.VALUES }) {
-            "Unknown model capability"
+        AiValidation.requireUtf8(catalogGeneration, 1, 256, "Target catalog generation")
+        require(AiValidation.TARGET_ID.matches(targetId)) { "Invalid target ID" }
+        profileId?.let { require(AiValidation.STABLE_ID.matches(it)) { "Invalid target profile ID" } }
+        AiValidation.requireSafeText(
+            modelId,
+            1,
+            org.autojs.plugin.ai.common.api.AiCommonLimits.MAX_MODEL_ID_BYTES,
+            "Target model ID",
+        )
+        require(targetLocality in AiDataLocality.VALUES) { "Invalid target locality" }
+        require(targetCredentialMode in AiCredentialMode.VALUES) { "Invalid target credential mode" }
+        require(this.targetCapabilityIds.all { it in AiProviderCapabilityId.VALUES }) {
+            "Unknown target capability"
         }
-        require(pinnedProvider.negotiatedCapabilities.supportedCapabilityIds().containsAll(this.modelCapabilityIds)) {
-            "Model capability exceeds the negotiated provider capabilities"
+        require(pinnedProvider.negotiatedCapabilities.supportedCapabilityIds().containsAll(this.targetCapabilityIds)) {
+            "Target capability exceeds the negotiated provider capabilities"
+        }
+        require(this.targetDeclaredHttpsOrigins.all { it in pinnedProvider.declaredHttpsOrigins }) {
+            "Target origin exceeds the pinned provider descriptor"
         }
         require(effectiveMaximumContextBytes > 0L)
         require(effectiveMaximumOutputBytes > 0L)
         require(effectiveMaximumContextBytes <= pinnedProvider.negotiatedCapabilities.maximumContextBytes)
         require(effectiveMaximumOutputBytes <= pinnedProvider.negotiatedCapabilities.maximumOutputBytes)
-        require(credentialDisposition == AiProviderCredentialIsolationPolicy.disposition(pinnedProvider)) {
-            "Session credential disposition does not match the pinned provider"
+        val expectedDisposition = when (targetCredentialMode) {
+            AiCredentialMode.NONE -> AiProviderCredentialDisposition.NONE
+            AiCredentialMode.PLUGIN_MANAGED -> AiProviderCredentialDisposition.PROVIDER_PROCESS_ONLY
+            else -> error("Unsupported target credential mode")
+        }
+        require(credentialDisposition == expectedDisposition) {
+            "Session credential disposition does not match the selected target"
         }
     }
 
     override fun toString(): String =
         "AiProviderHostSessionPlan(providerId=${pinnedProvider.providerId}, " +
             "component=${pinnedProvider.component.packageName}/${pinnedProvider.component.className}, " +
-            "modelId=$modelId, protocolVersion=${pinnedProvider.protocolVersion}, " +
+            "targetId=$targetId, protocolVersion=${pinnedProvider.protocolVersion}, " +
             "credentialDisposition=$credentialDisposition)"
 }
 
 internal sealed class AiProviderSessionPlanningResult {
     data class Planned(val plan: AiProviderHostSessionPlan) : AiProviderSessionPlanningResult()
-    object ModelCapabilityMismatch : AiProviderSessionPlanningResult()
+    object TargetCapabilityMismatch : AiProviderSessionPlanningResult()
 }
 
 internal object AiProviderHostSessionPlanner {
     fun plan(
         selected: AiProviderSelectionResult.Selected,
-        listingGeneration: String,
-        model: AiModelInfo,
+        catalogGeneration: String,
+        target: AiTargetInfo,
         requirement: AiProviderCapabilityRequirement,
     ): AiProviderSessionPlanningResult {
         val pinned = selected.pinned
-        if (!requirement.isSatisfiedBy(model, pinned.negotiatedCapabilities)) {
-            return AiProviderSessionPlanningResult.ModelCapabilityMismatch
+        if (!requirement.isSatisfiedBy(target, pinned.negotiatedCapabilities)) {
+            return AiProviderSessionPlanningResult.TargetCapabilityMismatch
         }
         val supportedCapabilities = pinned.negotiatedCapabilities.supportedCapabilityIds()
-        if (!supportedCapabilities.containsAll(model.capabilityIds)) {
-            return AiProviderSessionPlanningResult.ModelCapabilityMismatch
+        if (!supportedCapabilities.containsAll(target.capabilityIds)) {
+            return AiProviderSessionPlanningResult.TargetCapabilityMismatch
         }
-        val modelCapabilities = model.capabilityIds.toSortedSet()
+        val targetCapabilities = target.capabilityIds.toSortedSet()
         return AiProviderSessionPlanningResult.Planned(
             AiProviderHostSessionPlan(
                 pinnedProvider = pinned,
-                listingGeneration = listingGeneration,
-                modelId = model.modelId,
-                modelCapabilityIds = modelCapabilities,
+                catalogGeneration = catalogGeneration,
+                targetId = target.targetId,
+                profileId = target.profileId,
+                modelId = target.modelId,
+                targetLocality = target.locality,
+                targetCredentialMode = target.credentialMode,
+                targetCapabilityIds = targetCapabilities,
+                targetDeclaredHttpsOrigins = target.declaredHttpsOrigins,
                 effectiveMaximumContextBytes = minOf(
-                    model.maximumContextBytes,
+                    target.maximumContextBytes ?: pinned.negotiatedCapabilities.maximumContextBytes,
                     pinned.negotiatedCapabilities.maximumContextBytes,
                 ),
                 effectiveMaximumOutputBytes = minOf(
-                    model.maximumOutputBytes,
+                    target.maximumOutputBytes ?: pinned.negotiatedCapabilities.maximumOutputBytes,
                     pinned.negotiatedCapabilities.maximumOutputBytes,
                 ),
-                credentialDisposition = AiProviderCredentialIsolationPolicy.disposition(pinned),
+                credentialDisposition = AiProviderCredentialIsolationPolicy.disposition(target),
             ),
         )
     }
@@ -124,13 +154,13 @@ internal object AiProviderHostSessionPlanner {
 
 /**
  * Key for caching an authenticated provider binding decision, never a generated response.
- * Only stable package identity, protocol, model, and negotiated capability values are accepted.
+ * Only stable package identity, protocol, target, and negotiated capability values are accepted.
  */
 internal object AiProviderBindingCacheKey {
     fun create(plan: AiProviderHostSessionPlan): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val pinned = plan.pinnedProvider
-        digest.put("ai-provider-binding-v1")
+        digest.put("ai-provider-binding-v2")
         digest.put(pinned.component.packageName)
         digest.put(pinned.component.className)
         digest.put(pinned.packageUid)
@@ -152,14 +182,19 @@ internal object AiProviderBindingCacheKey {
         digest.putNullable(pinned.maximumHostVersionCode)
         digest.put(pinned.protocolVersion.major)
         digest.put(pinned.protocolVersion.minor)
-        digest.put(plan.listingGeneration)
+        digest.put(plan.catalogGeneration)
+        digest.put(plan.targetId)
+        digest.putNullable(plan.profileId)
         digest.put(plan.modelId)
-        digest.putStrings("model-capabilities", plan.modelCapabilityIds.sorted())
+        digest.put(plan.targetLocality)
+        digest.put(plan.targetCredentialMode)
+        digest.putStrings("target-capabilities", plan.targetCapabilityIds.sorted())
+        digest.putStrings("target-origins", plan.targetDeclaredHttpsOrigins)
         digest.put(plan.effectiveMaximumContextBytes)
         digest.put(plan.effectiveMaximumOutputBytes)
         digest.put(plan.credentialDisposition.name)
         digest.putCapabilities(pinned.negotiatedCapabilities)
-        return "ai-provider-v1-${digest.digest().toHex()}"
+        return "ai-provider-v2-${digest.digest().toHex()}"
     }
 }
 
@@ -217,6 +252,11 @@ private fun MessageDigest.put(value: Int) = update(ByteBuffer.allocate(Int.SIZE_
 private fun MessageDigest.put(value: Long) = update(ByteBuffer.allocate(Long.SIZE_BYTES).putLong(value).array())
 
 private fun MessageDigest.putNullable(value: Long?) {
+    put(value != null)
+    if (value != null) put(value)
+}
+
+private fun MessageDigest.putNullable(value: String?) {
     put(value != null)
     if (value != null) put(value)
 }

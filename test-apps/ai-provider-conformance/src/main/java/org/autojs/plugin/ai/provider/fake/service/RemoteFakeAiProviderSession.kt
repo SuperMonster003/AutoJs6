@@ -230,7 +230,7 @@ internal class RemoteFakeAiProviderSession(
             )
             descriptors.close()
             ensureActive()
-            val hostile = FakeAiHostileScenario.fromModelId(request.modelId)
+            val hostile = FakeAiHostileScenario.fromTargetId(request.targetId)
             if (hostile == null) {
                 runNormal(request, materialized)
             } else {
@@ -253,7 +253,7 @@ internal class RemoteFakeAiProviderSession(
 
     private fun runNormal(request: AiProviderRequest, materialized: FakeMaterializedRequest) {
         emitStarted(request)
-        val toolResult = if (request.modelId == FakeAiProviderFixture.MODEL_TOOLS) {
+        val toolResult = if (request.targetId == FakeAiProviderFixture.TARGET_TOOLS) {
             val calls = FakeAiProviderEngine.createToolCalls(request)
             machine.openToolTurn(calls.calls.map { it.callId })
             dispatchCallback {
@@ -468,7 +468,7 @@ internal class RemoteFakeAiProviderSession(
             sessionId = "fake-session",
             protocolVersion = request.protocolVersion,
             providerId = FakeAiProviderFixture.PROVIDER_ID,
-            modelId = request.modelId,
+            targetId = request.targetId,
             firstChunkSequence = 0L,
             effectiveMaximumOutputBytes = request.options.maximumOutputBytes,
             effectiveMaximumToolRounds = request.options.maximumToolRounds,
@@ -482,7 +482,7 @@ internal class RemoteFakeAiProviderSession(
             sessionId = "fake-isolated-session",
             protocolVersion = request.protocolVersion,
             providerId = FakeAiProviderFixture.PROVIDER_ID,
-            modelId = request.modelId,
+            targetId = request.targetId,
             firstChunkSequence = 0L,
             effectiveMaximumOutputBytes = request.options.maximumOutputBytes,
             effectiveMaximumToolRounds = request.options.maximumToolRounds,

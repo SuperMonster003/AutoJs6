@@ -27,13 +27,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-/** Opt-in positive cross-process evidence for the default-off Android model-list transport. */
-class AiProviderModelListingAndroidConformanceTest {
+/** Opt-in positive cross-process evidence for the default-off Android target-list transport. */
+class AiProviderTargetListingAndroidConformanceTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
 
     @Test
-    fun exactComponentModelListingRevalidatesAndCollectsAllFakeModels() {
+    fun exactComponentTargetListingRevalidatesAndCollectsAllFakeModels() {
         requireConformanceEnvironment()
         val component = AiProviderComponent(FAKE_PACKAGE, FAKE_SERVICE)
         val initial = discoverExact(component)
@@ -61,25 +61,25 @@ class AiProviderModelListingAndroidConformanceTest {
         var listingHandle: Closeable = Closeable {}
         try {
             val pinned = runHandshake(initial, worker, blocking, scheduler)
-            val outcome = AtomicReference<AiProviderModelListingRunOutcome>()
+            val outcome = AtomicReference<AiProviderTargetListingRunOutcome>()
             val outcomeCount = AtomicInteger()
             val callbackOnMain = AtomicBoolean(true)
             val terminal = CountDownLatch(1)
-            val coordinator = AiProviderModelListingCoordinator(
-                transport = AndroidAiProviderModelListing(context),
+            val coordinator = AiProviderTargetListingCoordinator(
+                transport = AndroidAiProviderTargetListing(context),
                 workerExecutor = worker,
                 blockingExecutor = blocking,
-                deadlineScheduler = scheduler.asModelListingDeadlineScheduler(),
-                clock = AiProviderModelListingClock { android.os.SystemClock.elapsedRealtime() },
-                owner = AiProviderModelListingProcessOwner(),
+                deadlineScheduler = scheduler.asTargetListingDeadlineScheduler(),
+                clock = AiProviderTargetListingClock { android.os.SystemClock.elapsedRealtime() },
+                owner = AiProviderTargetListingProcessOwner(),
             )
             listingHandle = coordinator.start(
-                AiProviderModelListingRunRequest(
+                AiProviderTargetListingRunRequest(
                     snapshot = initial,
                     pinnedProvider = pinned,
                     environment = environment(),
                     hostCapabilities = hostCapabilities(),
-                    options = AiProviderModelListingRunOptions(
+                    options = AiProviderTargetListingRunOptions(
                         enabled = true,
                         pageSize = 1,
                         timeoutMillis = LISTING_TIMEOUT_MILLIS,
@@ -92,16 +92,16 @@ class AiProviderModelListingAndroidConformanceTest {
             }
 
             assertTrue(
-                "local AI provider model listing did not terminate",
+                "AI provider target catalog did not terminate",
                 terminal.await(OUTCOME_WAIT_MILLIS, TimeUnit.MILLISECONDS),
             )
-            val completed = outcome.get() as AiProviderModelListingRunOutcome.Completed
+            val completed = outcome.get() as AiProviderTargetListingRunOutcome.Completed
             assertEquals(pinned, completed.catalog.pinnedProvider)
-            assertEquals(FAKE_LISTING_GENERATION, completed.catalog.listingGeneration)
-            assertEquals(FAKE_MODEL_IDS, completed.catalog.models.map { it.modelId })
-            assertFalse("Model-list completion ran on the Android main thread", callbackOnMain.get())
+            assertEquals(FAKE_LISTING_GENERATION, completed.catalog.catalogGeneration)
+            assertEquals(FAKE_MODEL_IDS, completed.catalog.targets.map { it.modelId })
+            assertFalse("Target-list completion ran on the Android main thread", callbackOnMain.get())
             Thread.sleep(LATE_CALLBACK_SETTLE_MILLIS)
-            assertEquals("Model listing emitted more than one terminal outcome", 1, outcomeCount.get())
+            assertEquals("Target catalog emitted more than one terminal outcome", 1, outcomeCount.get())
             assertTrue(initial.samePackageIdentityAs(discoverExact(component)))
         } finally {
             listingHandle.close()
@@ -148,25 +148,25 @@ class AiProviderModelListingAndroidConformanceTest {
         var listingHandle: Closeable = Closeable {}
         try {
             val pinned = runHandshake(initial, worker, blocking, scheduler)
-            val outcome = AtomicReference<AiProviderModelListingRunOutcome>()
+            val outcome = AtomicReference<AiProviderTargetListingRunOutcome>()
             val outcomeCount = AtomicInteger()
             val callbackOnMain = AtomicBoolean(true)
             val terminal = CountDownLatch(1)
-            val coordinator = AiProviderModelListingCoordinator(
-                transport = AndroidAiProviderModelListing(context),
+            val coordinator = AiProviderTargetListingCoordinator(
+                transport = AndroidAiProviderTargetListing(context),
                 workerExecutor = worker,
                 blockingExecutor = blocking,
-                deadlineScheduler = scheduler.asModelListingDeadlineScheduler(),
-                clock = AiProviderModelListingClock { android.os.SystemClock.elapsedRealtime() },
-                owner = AiProviderModelListingProcessOwner(),
+                deadlineScheduler = scheduler.asTargetListingDeadlineScheduler(),
+                clock = AiProviderTargetListingClock { android.os.SystemClock.elapsedRealtime() },
+                owner = AiProviderTargetListingProcessOwner(),
             )
             listingHandle = coordinator.start(
-                AiProviderModelListingRunRequest(
+                AiProviderTargetListingRunRequest(
                     snapshot = initial,
                     pinnedProvider = pinned,
                     environment = environment(),
                     hostCapabilities = hostCapabilities(),
-                    options = AiProviderModelListingRunOptions(
+                    options = AiProviderTargetListingRunOptions(
                         enabled = true,
                         pageSize = 1,
                         timeoutMillis = LISTING_TIMEOUT_MILLIS,
@@ -179,17 +179,17 @@ class AiProviderModelListingAndroidConformanceTest {
             }
 
             assertTrue(
-                "Real local AI provider model listing did not terminate",
+                "Real AI provider target catalog did not terminate",
                 terminal.await(OUTCOME_WAIT_MILLIS, TimeUnit.MILLISECONDS),
             )
-            val completed = outcome.get() as AiProviderModelListingRunOutcome.Completed
+            val completed = outcome.get() as AiProviderTargetListingRunOutcome.Completed
             assertEquals(pinned, completed.catalog.pinnedProvider)
-            assertEquals(fixture.listingGeneration, completed.catalog.listingGeneration)
-            assertEquals(fixture.modelIds, completed.catalog.models.map { it.modelId })
+            assertEquals(fixture.catalogGeneration, completed.catalog.catalogGeneration)
+            assertEquals(fixture.modelIds, completed.catalog.targets.map { it.modelId })
             assertTrue(initial.samePackageIdentityAs(discoverExact(component)))
-            assertFalse("Model-list completion ran on the Android main thread", callbackOnMain.get())
+            assertFalse("Target-list completion ran on the Android main thread", callbackOnMain.get())
             Thread.sleep(LATE_CALLBACK_SETTLE_MILLIS)
-            assertEquals("Real model listing emitted more than one terminal outcome", 1, outcomeCount.get())
+            assertEquals("Real target catalog emitted more than one terminal outcome", 1, outcomeCount.get())
         } finally {
             listingHandle.close()
             worker.shutdownNow()
@@ -212,8 +212,8 @@ class AiProviderModelListingAndroidConformanceTest {
         val fixture = requireRealPluginSelectionFixture()
         val component = AiProviderComponent(REAL_PLUGIN_PACKAGE, REAL_PLUGIN_SERVICE)
         val before = collectRealPluginCatalog(component)
-        assertEquals(fixture.listingGeneration, before.catalog.listingGeneration)
-        assertEquals(fixture.modelIds, before.catalog.models.map { it.modelId })
+        assertEquals(fixture.catalogGeneration, before.catalog.catalogGeneration)
+        assertEquals(fixture.modelIds, before.catalog.targets.map { it.modelId })
         assertExactModelsPlannable(before.catalog, fixture.modelIds)
 
         restartRealPluginModelManager()
@@ -240,8 +240,8 @@ class AiProviderModelListingAndroidConformanceTest {
             "The real plugin package identity changed across the manager restart",
             before.packageSnapshot.samePackageIdentityAs(after.packageSnapshot),
         )
-        assertEquals(before.catalog.listingGeneration, after.catalog.listingGeneration)
-        assertEquals(before.catalog.models, after.catalog.models)
+        assertEquals(before.catalog.catalogGeneration, after.catalog.catalogGeneration)
+        assertEquals(before.catalog.targets, after.catalog.targets)
         assertExactModelsPlannable(after.catalog, fixture.modelIds)
     }
 
@@ -273,25 +273,25 @@ class AiProviderModelListingAndroidConformanceTest {
         var listingHandle: Closeable = Closeable {}
         try {
             val pinned = runHandshake(initial, worker, blocking, scheduler)
-            val outcome = AtomicReference<AiProviderModelListingRunOutcome>()
+            val outcome = AtomicReference<AiProviderTargetListingRunOutcome>()
             val outcomeCount = AtomicInteger()
             val callbackOnMain = AtomicBoolean(true)
             val terminal = CountDownLatch(1)
-            val coordinator = AiProviderModelListingCoordinator(
-                transport = AndroidAiProviderModelListing(context),
+            val coordinator = AiProviderTargetListingCoordinator(
+                transport = AndroidAiProviderTargetListing(context),
                 workerExecutor = worker,
                 blockingExecutor = blocking,
-                deadlineScheduler = scheduler.asModelListingDeadlineScheduler(),
-                clock = AiProviderModelListingClock { SystemClock.elapsedRealtime() },
-                owner = AiProviderModelListingProcessOwner(),
+                deadlineScheduler = scheduler.asTargetListingDeadlineScheduler(),
+                clock = AiProviderTargetListingClock { SystemClock.elapsedRealtime() },
+                owner = AiProviderTargetListingProcessOwner(),
             )
             listingHandle = coordinator.start(
-                AiProviderModelListingRunRequest(
+                AiProviderTargetListingRunRequest(
                     snapshot = initial,
                     pinnedProvider = pinned,
                     environment = environment(),
                     hostCapabilities = hostCapabilities(),
-                    options = AiProviderModelListingRunOptions(
+                    options = AiProviderTargetListingRunOptions(
                         enabled = true,
                         pageSize = 1,
                         timeoutMillis = LISTING_TIMEOUT_MILLIS,
@@ -307,9 +307,9 @@ class AiProviderModelListingAndroidConformanceTest {
                 "Real local AI provider selection listing did not terminate",
                 terminal.await(OUTCOME_WAIT_MILLIS, TimeUnit.MILLISECONDS),
             )
-            val completed = outcome.get() as AiProviderModelListingRunOutcome.Completed
+            val completed = outcome.get() as AiProviderTargetListingRunOutcome.Completed
             assertEquals(pinned, completed.catalog.pinnedProvider)
-            assertFalse("Model-list completion ran on the Android main thread", callbackOnMain.get())
+            assertFalse("Target-list completion ran on the Android main thread", callbackOnMain.get())
             Thread.sleep(LATE_CALLBACK_SETTLE_MILLIS)
             assertEquals("Real selection listing emitted more than one terminal outcome", 1, outcomeCount.get())
             assertTrue(initial.samePackageIdentityAs(discoverExact(component)))
@@ -326,13 +326,15 @@ class AiProviderModelListingAndroidConformanceTest {
     }
 
     private fun assertExactModelsPlannable(
-        catalog: AiProviderModelCatalog,
+        catalog: AiProviderTargetCatalog,
         modelIds: List<String>,
     ) {
         modelIds.forEach { modelId ->
+            val target = catalog.targets.singleOrNull { it.modelId == modelId }
             assertTrue(
                 "Exact model lookup failed for $modelId",
-                catalog.planExact(modelId) is AiProviderExactModelPlanResult.Planned,
+                target != null &&
+                    catalog.planExact(target.targetId) is AiProviderExactTargetPlanResult.Planned,
             )
         }
     }
@@ -393,7 +395,7 @@ class AiProviderModelListingAndroidConformanceTest {
     private fun requireRealPluginFixture(): RealPluginFixture {
         val arguments = InstrumentationRegistry.getArguments()
         assumeTrue(
-            "Real local AI model-list conformance is opt-in; pass -e $ARG_REAL_ENABLED true",
+            "Real local AI target-list conformance is opt-in; pass -e $ARG_REAL_ENABLED true",
             arguments.getString(ARG_REAL_ENABLED) == "true",
         )
         assertTrue("Real local AI conformance requires API 24 or newer", Build.VERSION.SDK_INT >= 24)
@@ -535,7 +537,7 @@ class AiProviderModelListingAndroidConformanceTest {
         return RealPluginSelectionFixture(
             initialModelId = initialModelId,
             targetModelId = targetModelId,
-            listingGeneration = expectedGeneration,
+            catalogGeneration = expectedGeneration,
         )
     }
 
@@ -587,7 +589,7 @@ class AiProviderModelListingAndroidConformanceTest {
 
     private fun requireConformanceEnvironment() {
         assumeTrue(
-            "local AI model-list Android conformance is opt-in; pass -e $ARG_ENABLED true",
+            "local AI target-list Android conformance is opt-in; pass -e $ARG_ENABLED true",
             InstrumentationRegistry.getArguments().getString(ARG_ENABLED).toBoolean(),
         )
         assertTrue("local AI conformance requires API 24 or newer", Build.VERSION.SDK_INT >= 24)
@@ -642,37 +644,37 @@ class AiProviderModelListingAndroidConformanceTest {
             Closeable { future.cancel(false) }
         }
 
-    private fun ScheduledExecutorService.asModelListingDeadlineScheduler() =
-        AiProviderModelListingDeadlineScheduler { delayMillis, action ->
+    private fun ScheduledExecutorService.asTargetListingDeadlineScheduler() =
+        AiProviderTargetListingDeadlineScheduler { delayMillis, action ->
             val future = schedule(action, delayMillis, TimeUnit.MILLISECONDS)
             Closeable { future.cancel(false) }
         }
 
     private data class RealPluginFixture(
         val modelIds: List<String>,
-        val listingGeneration: String,
+        val catalogGeneration: String,
     )
 
     private data class RealPluginSelectionFixture(
         val initialModelId: String,
         val targetModelId: String,
-        val listingGeneration: String,
+        val catalogGeneration: String,
     ) {
         val modelIds = listOf(initialModelId, targetModelId).sorted()
     }
 
     private data class RealPluginCatalogObservation(
         val packageSnapshot: AiProviderPackageSnapshot,
-        val catalog: AiProviderModelCatalog,
+        val catalog: AiProviderTargetCatalog,
     )
 
     private companion object {
-        const val ARG_ENABLED = "autojs.aiProvider.modelListing.conformance.enabled"
-        const val ARG_REAL_ENABLED = "autojs.aiProvider.realModelListing.conformance.enabled"
-        const val ARG_REAL_DEVICE_SERIAL = "autojs.aiProvider.realModelListing.conformance.serial"
-        const val ARG_REAL_MODEL_IDS = "autojs.aiProvider.realModelListing.conformance.modelIds"
+        const val ARG_ENABLED = "autojs.aiProvider.targetListing.conformance.enabled"
+        const val ARG_REAL_ENABLED = "autojs.aiProvider.realTargetListing.conformance.enabled"
+        const val ARG_REAL_DEVICE_SERIAL = "autojs.aiProvider.realTargetListing.conformance.serial"
+        const val ARG_REAL_MODEL_IDS = "autojs.aiProvider.realTargetListing.conformance.modelIds"
         const val ARG_REAL_LISTING_GENERATION =
-            "autojs.aiProvider.realModelListing.conformance.listingGeneration"
+            "autojs.aiProvider.realTargetListing.conformance.catalogGeneration"
         const val ARG_REAL_SELECTION_ENABLED = "autojs.aiProvider.realModelSelection.conformance.enabled"
         const val ARG_REAL_SELECTION_DEVICE_SERIAL = "autojs.aiProvider.realModelSelection.conformance.serial"
         const val ARG_REAL_SELECTION_INITIAL_MODEL_ID =
@@ -680,11 +682,11 @@ class AiProviderModelListingAndroidConformanceTest {
         const val ARG_REAL_SELECTION_TARGET_MODEL_ID =
             "autojs.aiProvider.realModelSelection.conformance.targetModelId"
         const val ARG_REAL_SELECTION_LISTING_GENERATION =
-            "autojs.aiProvider.realModelSelection.conformance.listingGeneration"
+            "autojs.aiProvider.realModelSelection.conformance.catalogGeneration"
         const val FAKE_PACKAGE = "org.autojs.plugin.ai.provider.fake"
         const val FAKE_SERVICE =
             "org.autojs.plugin.ai.provider.fake.service.FakeAiProviderService"
-        const val FAKE_LISTING_GENERATION = "fake-models-v1"
+        const val FAKE_LISTING_GENERATION = "fake-targets-v2"
         const val HANDSHAKE_TIMEOUT_MILLIS = 15_000L
         const val LISTING_TIMEOUT_MILLIS = 20_000L
         const val OUTCOME_WAIT_MILLIS = 30_000L
@@ -703,6 +705,9 @@ class AiProviderModelListingAndroidConformanceTest {
             "fake.stream",
             "fake.reasoning",
             "fake.tools",
+            "fake.remote",
+            "fake.hybrid",
+            "fake.unconfigured",
         )
     }
 }

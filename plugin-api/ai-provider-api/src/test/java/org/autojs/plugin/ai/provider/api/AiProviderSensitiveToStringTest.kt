@@ -9,23 +9,23 @@ import org.junit.Test
 class AiProviderSensitiveToStringTest {
 
     @Test
-    fun modelPagingSummariesDoNotExposeOpaqueTokensOrGeneration() {
-        val requestSummary = AiModelListRequest(
-            protocolVersion = AiProtocolVersion(1, 0),
+    fun targetPagingSummariesDoNotExposeOpaqueTokensOrGeneration() {
+        val requestSummary = AiTargetListRequest(
+            protocolVersion = AiProtocolVersion(2, 0),
             pageSize = 20,
             pageToken = "sensitive-page-token",
         ).toString()
-        val pageSummary = AiModelPage(
-            listingGeneration = "sensitive-listing-generation",
-            models = emptyList(),
+        val pageSummary = AiTargetPage(
+            catalogGeneration = "sensitive-catalog-generation",
+            targets = emptyList(),
             nextPageToken = "sensitive-next-page-token",
         ).toString()
 
         assertFalse(requestSummary.contains("sensitive-page-token"))
         assertTrue(requestSummary.contains("pageTokenPresent=true"))
-        assertFalse(pageSummary.contains("sensitive-listing-generation"))
+        assertFalse(pageSummary.contains("sensitive-catalog-generation"))
         assertFalse(pageSummary.contains("sensitive-next-page-token"))
-        assertTrue(pageSummary.contains("modelCount=0"))
+        assertTrue(pageSummary.contains("targetCount=0"))
         assertTrue(pageSummary.contains("nextPageTokenPresent=true"))
     }
 
@@ -48,9 +48,9 @@ class AiProviderSensitiveToStringTest {
         )
         val request = AiProviderRequest(
             requestId = "request-1",
-            protocolVersion = AiProtocolVersion(1, 0),
+            protocolVersion = AiProtocolVersion(2, 0),
             providerId = "provider-1",
-            modelId = "model-1",
+            targetId = "provider-1:target-1",
             messages = listOf(AiMessage(AiMessageRole.USER, listOf(AiContentPart(prompt)))),
             options = AiGenerationOptions(
                 stream = true,

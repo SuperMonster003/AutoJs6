@@ -4,7 +4,7 @@ import org.autojs.plugin.ai.common.api.AiProtocolNegotiator
 import org.autojs.plugin.ai.common.api.AiProtocolRange
 import org.autojs.plugin.ai.common.api.AiProtocolVersion
 import org.autojs.plugin.ai.common.api.AiProviderInfo
-import org.autojs.plugin.ai.provider.api.AiModelInfo
+import org.autojs.plugin.ai.provider.api.AiTargetInfo
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilities
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilityId
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilityNegotiator
@@ -159,11 +159,11 @@ internal class AiProviderCapabilityRequirement(
             capabilities.acceptedTextMimeTypes.containsAll(requiredTextMimeTypes) &&
             capabilities.acceptedSchemaMimeTypes.containsAll(requiredSchemaMimeTypes)
 
-    fun isSatisfiedBy(model: AiModelInfo, capabilities: AiProviderCapabilities): Boolean =
+    fun isSatisfiedBy(target: AiTargetInfo, capabilities: AiProviderCapabilities): Boolean =
         isSatisfiedBy(capabilities) &&
-            model.capabilityIds.containsAll(requiredCapabilityIds) &&
-            model.maximumContextBytes >= minimumContextBytes &&
-            model.maximumOutputBytes >= minimumOutputBytes
+            target.capabilityIds.containsAll(requiredCapabilityIds) &&
+            target.maximumContextBytes?.let { it >= minimumContextBytes } != false &&
+            target.maximumOutputBytes?.let { it >= minimumOutputBytes } != false
 }
 
 internal enum class AiProviderCandidateRejection {
@@ -203,6 +203,9 @@ internal class AiProviderPinnedIdentity(
 
     val providerId: String
         get() = providerInfoSnapshot.providerId
+
+    val providerInfo: AiProviderInfo
+        get() = providerInfoSnapshot
 
     val implementationVersionCode: Long
         get() = providerInfoSnapshot.implementationVersionCode
