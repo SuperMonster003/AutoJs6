@@ -19,6 +19,7 @@ import org.autojs.autojs.core.plugin.dex.DexCompilerLocalRuntimeLibraryFingerpri
 import org.autojs.autojs.core.plugin.dex.DexCompilerRetainedInput
 import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeAndroidTestInstrumentation
 import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeDecision
+import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeDiagnostics
 import org.autojs.autojs.core.plugin.dex.DexCompilerVerifiedArtifact
 import org.autojs.autojs.core.plugin.r8.R8CompilerLoadableDexZip
 import org.autojs.autojs.pio.PFiles.deleteFilesOfDir
@@ -156,12 +157,19 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
                         "failure=${local.experimentalFailure}, remote=${local.remoteFailure}",
                 )
             },
+            onLocalLoaded = DexCompilerRuntimeDiagnostics::recordFallback,
+            onPublishedLoaded = { published ->
+                DexCompilerRuntimeDiagnostics.recordPublished(published.cacheHit)
+            },
             onPublishedLoadFailure = { failure ->
                 Log.e(
                     TAG,
                     "Verified classpath compilation could not be loaded; using pinned local D8",
                     failure,
                 )
+            },
+            onPublishedFallbackLoaded = {
+                DexCompilerRuntimeDiagnostics.recordPublishedLoadFallback()
             },
             cancelled = { throw ScriptInterruptedException() },
         )
@@ -188,18 +196,26 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
             null
         }
         val decision = testDecision ?: coordinator?.compile(jar)
-            ?: return loadJarLocallySynchronized(jar)
+        if (decision == null) {
+            return loadJarLocallySynchronized(jar).also {
+                DexCompilerRuntimeDiagnostics.recordBuiltIn()
+            }
+        }
 
         return when (decision) {
             is DexCompilerRuntimeDecision.Published -> {
                 try {
                     try {
-                        loadVerifiedDexZip(decision.artifact)
+                        loadVerifiedDexZip(decision.artifact).also {
+                            DexCompilerRuntimeDiagnostics.recordPublished(decision.cacheHit)
+                        }
                     } catch (remoteLoadError: Exception) {
                         throwIfInterrupted(remoteLoadError)
                         runCatching { decision.artifact.invalidate() }
                         Log.e(TAG, "Verified DEX compiler output could not be loaded; using local compiler", remoteLoadError)
-                        loadRetainedSnapshotLocally(decision.fallbackInput)
+                        loadRetainedSnapshotLocally(decision.fallbackInput).also {
+                            DexCompilerRuntimeDiagnostics.recordPublishedLoadFallback()
+                        }
                     }
                 } finally {
                     decision.fallbackInput.close()
@@ -214,11 +230,12 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
                         "DEX compiler provider fallback: reason=${decision.reason}, " +
                             "failure=${decision.experimentalFailure}, remote=${decision.remoteFailure}",
                     )
-                    if (retained == null) {
+                    val loaded = if (retained == null) {
                         loadJarLocallySynchronized(jar)
                     } else {
                         loadRetainedSnapshotLocally(retained)
                     }
+                    loaded.also { DexCompilerRuntimeDiagnostics.recordFallback(decision) }
                 } finally {
                     retained?.close()
                 }

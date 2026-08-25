@@ -612,6 +612,10 @@
     <string name="summary_dex_compiler_experimental_disabled">組み込み D8/dx のみ; AAR は常に組み込み経路</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">組み込み D8/dx のみ; 保持中の provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">runtime.loadJar の raw JAR は %1$s を優先; 失敗時は組み込み D8/dx にフォールバック</string>
+    <string name="summary_dex_compiler_last_failure_details">直近のプロバイダー障害: %1$s</string>
+    <string name="summary_dex_compiler_last_path_builtin">直前の JAR ロード: AutoJs6 組み込みコンパイラを使用</string>
+    <string name="summary_dex_compiler_last_path_cache_hit">直前の JAR ロード: 検証済みキャッシュ結果を再利用</string>
+    <string name="summary_dex_compiler_last_path_plugin">直前の JAR ロード: 選択したプラグインでコンパイル</string>
     <string name="summary_display_over_other_apps">AutoJs6 が他のアプリの上にコンテンツを表示することを許可します</string>
     <string name="summary_display_over_other_apps_inrt">アプリが他のアプリの上にコンテンツを表示することを許可する</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">エディタの実行ボタンでスクリプトを開始した後, 下部ログパネルを自動で開きます</string>
@@ -1014,6 +1018,9 @@
     <string name="text_developer_details_under_development">デベロッパーの詳細については, 現在開発中です</string>
     <string name="text_developer_options">デベロッパーオプション</string>
     <string name="text_dex_compiler">DEX コンパイラ</string>
+    <string name="text_dex_compiler_hint_busy">プラグインがビジーでした. AutoJs6 は組み込みコンパイラを使用しました. 必要なら少し待って再試行してください.</string>
+    <string name="text_dex_compiler_hint_fallback">プラグイン経路を安全に完了できませんでした. AutoJs6 は同じ要求に対して組み込みコンパイラを 1 回使用しました.</string>
+    <string name="text_dex_compiler_hint_timeout">プラグインがタイムアウトしました. AutoJs6 は組み込みコンパイラを使用し, このプロセスの残りの期間はその provider を迂回します.</string>
     <string name="text_dex_compiler_no_eligible_providers">ホストと同じ署名を持つ利用可能な DEX コンパイラ provider がインストールされていません. キャンセルすると現在の選択を維持し, 確認すると組み込みコンパイラを使用します.</string>
     <string name="text_dex_compiler_provider">Raw JAR コンパイラ provider</string>
     <string name="text_dex_compiler_provider_discovery_failed">Provider の検出に失敗しました. キャンセルすると現在の選択を維持し, 確認すると組み込みコンパイラを使用します.</string>

@@ -24,6 +24,7 @@ object DexCompilerContract {
     const val SCHEMA_RUNTIME_LIBRARY_IDENTITY = 0x0203
     const val SCHEMA_DIAGNOSTIC = 0x0204
     const val SCHEMA_INPUT_IDENTITY = 0x0205
+    const val SCHEMA_DIAGNOSTIC_POSITION = 0x0206
     const val SCHEMA_COMPILE_REQUEST = 0x0210
     const val SCHEMA_STARTED = 0x0211
     const val SCHEMA_PROGRESS = 0x0212
@@ -51,6 +52,8 @@ object DexCompilerContract {
     const val MAX_DIAGNOSTIC_BYTES = 64 * 1024
     const val MAX_ERROR_MESSAGE_CODE_POINTS = 512
     const val MAX_DIAGNOSTIC_MESSAGE_CODE_POINTS = 4_096
+    const val MAX_DIAGNOSTIC_ORIGIN_BYTES = 128
+    const val MAX_DIAGNOSTIC_ENTRY_BYTES = 1_024
     const val MAX_RUNTIME_LIBRARY_IDENTITIES = 512
     const val MAX_PROVIDER_ID_BYTES = 128
     const val MAX_VERSION_TEXT_BYTES = 128

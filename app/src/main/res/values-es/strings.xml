@@ -611,6 +611,10 @@
     <string name="summary_dex_compiler_experimental_disabled">Solo D8/dx integrado; AAR siempre usa la ruta integrada</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">Solo D8/dx integrado; provider conservado: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">Los JAR sin procesar de runtime.loadJar prefieren %1$s; los fallos recurren al D8/dx integrado</string>
+    <string name="summary_dex_compiler_last_failure_details">Último fallo del proveedor: %1$s</string>
+    <string name="summary_dex_compiler_last_path_builtin">Última carga de JAR: compilador integrado de AutoJs6</string>
+    <string name="summary_dex_compiler_last_path_cache_hit">Última carga de JAR: se reutilizó un resultado verificado de la caché</string>
+    <string name="summary_dex_compiler_last_path_plugin">Última carga de JAR: compilada por el complemento seleccionado</string>
     <string name="summary_display_over_other_apps">Permite que AutoJs6 muestre contenido encima de otras aplicaciones</string>
     <string name="summary_display_over_other_apps_inrt">Permitir que la aplicación muestre contenido sobre otras aplicaciones</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Abrir automaticamente el panel inferior de registros después de que el boton Ejecutar del editor inicie un script</string>
@@ -1013,6 +1017,9 @@
     <string name="text_developer_details_under_development">Los detalles del desarrollador están en desarrollo</string>
     <string name="text_developer_options">Opciones del desarrollador</string>
     <string name="text_dex_compiler">Compilador DEX</string>
+    <string name="text_dex_compiler_hint_busy">El complemento estaba ocupado. AutoJs6 usó el compilador integrado; vuelve a intentarlo en un momento si es necesario.</string>
+    <string name="text_dex_compiler_hint_fallback">La ruta del complemento no pudo finalizar de forma segura. AutoJs6 usó una vez el compilador integrado para la misma solicitud.</string>
+    <string name="text_dex_compiler_hint_timeout">El complemento agotó el tiempo. AutoJs6 usó el compilador integrado y omitirá ese provider durante el resto de este proceso.</string>
     <string name="text_dex_compiler_no_eligible_providers">No hay instalado ningún provider de compilador DEX elegible con la misma firma que el host. Cancela para conservar la selección actual o confirma el compilador integrado.</string>
     <string name="text_dex_compiler_provider">Provider del compilador de JAR sin procesar</string>
     <string name="text_dex_compiler_provider_discovery_failed">Falló el descubrimiento de providers. Cancela para conservar la selección actual o confirma el compilador integrado.</string>

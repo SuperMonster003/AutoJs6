@@ -127,6 +127,73 @@ class DexCompilerMalformedAndLimitsTest {
     }
 
     @Test
+    fun rejectsUnsafeOrOutOfRangeDiagnosticMetadata() {
+        listOf(
+            "../private.class",
+            "/private.class",
+            "C:/private.class",
+            "folder\\private.class",
+            "e\u0301.class",
+        ).forEach { entry ->
+            assertThrows(DexCompilerContractException::class.java) {
+                DexCompilerValidation.validateDiagnostics(
+                    listOf(
+                        DexCompilerDiagnostic(
+                            DexCompilerDiagnosticSeverity.ERROR,
+                            "D8.ERROR",
+                            "failure",
+                            origin = "program",
+                            entry = entry,
+                        ),
+                    ),
+                )
+            }
+        }
+        assertThrows(DexCompilerContractException::class.java) {
+            DexCompilerValidation.validateDiagnostics(
+                listOf(
+                    DexCompilerDiagnostic(
+                        DexCompilerDiagnosticSeverity.ERROR,
+                        "D8.ERROR",
+                        "failure",
+                        origin = "private/path",
+                    ),
+                ),
+            )
+        }
+        listOf(
+            DexCompilerDiagnosticPosition(line = 3, endLine = 2),
+            DexCompilerDiagnosticPosition(line = 3, column = 5, endLine = 3, endColumn = 4),
+            DexCompilerDiagnosticPosition(offset = 5, endOffset = 4),
+        ).forEach { position ->
+            assertThrows(DexCompilerContractException::class.java) {
+                DexCompilerValidation.validateDiagnostics(
+                    listOf(
+                        DexCompilerDiagnostic(
+                            DexCompilerDiagnosticSeverity.ERROR,
+                            "D8.ERROR",
+                            "failure",
+                            position = position,
+                        ),
+                    ),
+                )
+            }
+        }
+        assertThrows(DexCompilerContractException::class.java) {
+            DexCompilerValidation.validateDiagnostics(
+                listOf(
+                    DexCompilerDiagnostic(
+                        DexCompilerDiagnosticSeverity.ERROR,
+                        "D8.ERROR",
+                        "failure",
+                        position = DexCompilerDiagnosticPosition(line = 0),
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
     fun rejectsMetadataAboveBinderEnvelopeLimit() {
         assertThrows(TaggedWireException::class.java) {
             DexCompilerCodec.decodeInfo(ByteArray(DexCompilerContract.MAX_METADATA_BYTES + 1))

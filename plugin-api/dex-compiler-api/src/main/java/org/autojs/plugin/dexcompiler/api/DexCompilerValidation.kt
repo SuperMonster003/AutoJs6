@@ -2,6 +2,7 @@ package org.autojs.plugin.dexcompiler.api
 
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
+import java.text.Normalizer
 
 object DexCompilerNegotiation {
     val HOST_MIN = DexProtocolVersion(
@@ -38,6 +39,7 @@ object DexCompilerNegotiation {
 
 object DexCompilerValidation {
     private val PROVIDER_ID = Regex("[a-z0-9][a-z0-9._-]{0,127}")
+    private val DIAGNOSTIC_ORIGIN = Regex("[a-z][a-z0-9-]*(?::[0-9]+)?")
     private val DIAGNOSTIC_CODE = Regex("[A-Z0-9][A-Z0-9._-]{0,127}")
 
     fun validateInfo(info: DexCompilerInfo) {
@@ -278,11 +280,92 @@ object DexCompilerValidation {
             val messageBytes = utf8Size(diagnostic.message, "Diagnostic $index message")
             retainedBytes = Math.addExact(retainedBytes, codeBytes.toLong())
             retainedBytes = Math.addExact(retainedBytes, messageBytes.toLong())
+            diagnostic.origin?.let { origin ->
+                requireValue(DIAGNOSTIC_ORIGIN.matches(origin)) {
+                    "Diagnostic $index origin is invalid"
+                }
+                val originBytes = utf8Size(origin, "Diagnostic $index origin")
+                requireValue(originBytes <= DexCompilerContract.MAX_DIAGNOSTIC_ORIGIN_BYTES) {
+                    "Diagnostic $index origin exceeds the protocol limit"
+                }
+                retainedBytes = Math.addExact(retainedBytes, originBytes.toLong())
+            }
+            diagnostic.entry?.let { entry ->
+                requireSafeDiagnosticEntry(entry, index)
+                retainedBytes = Math.addExact(
+                    retainedBytes,
+                    utf8Size(entry, "Diagnostic $index entry").toLong(),
+                )
+            }
+            diagnostic.position?.let { position ->
+                validateDiagnosticPosition(position, index)
+                retainedBytes = Math.addExact(retainedBytes, position.retainedBytes())
+            }
             requireValue(retainedBytes <= DexCompilerContract.MAX_DIAGNOSTIC_BYTES) {
                 "Diagnostics exceed the retained byte limit"
             }
         }
     }
+
+    private fun requireSafeDiagnosticEntry(entry: String, index: Int) {
+        requireValue(entry.isNotBlank()) { "Diagnostic $index entry must not be blank" }
+        requireValue(
+            utf8Size(entry, "Diagnostic $index entry") <= DexCompilerContract.MAX_DIAGNOSTIC_ENTRY_BYTES,
+        ) { "Diagnostic $index entry exceeds the protocol limit" }
+        requireValue(!entry.startsWith('/') && '\\' !in entry && ':' !in entry && !entry.endsWith('/')) {
+            "Diagnostic $index entry is not a canonical archive path"
+        }
+        requireValue(entry.split('/').none { it.isEmpty() || it == "." || it == ".." }) {
+            "Diagnostic $index entry is not a canonical archive path"
+        }
+        requireValue(Normalizer.normalize(entry, Normalizer.Form.NFC) == entry) {
+            "Diagnostic $index entry is not NFC-normalized"
+        }
+        requireValue(entry.codePoints().noneMatch { Character.isISOControl(it) }) {
+            "Diagnostic $index entry contains control characters"
+        }
+    }
+
+    private fun validateDiagnosticPosition(position: DexCompilerDiagnosticPosition, index: Int) {
+        requireValue(
+            position.line != null || position.column != null || position.offset != null ||
+                position.endLine != null || position.endColumn != null || position.endOffset != null,
+        ) { "Diagnostic $index position must not be empty" }
+        listOf(position.line, position.column, position.endLine, position.endColumn).forEach { value ->
+            requireValue(value == null || value > 0) {
+                "Diagnostic $index line and column values must be positive"
+            }
+        }
+        requireValue(position.offset == null || position.offset >= 0L) {
+            "Diagnostic $index offset must not be negative"
+        }
+        requireValue(position.endOffset == null || position.endOffset >= 0L) {
+            "Diagnostic $index end offset must not be negative"
+        }
+        if (position.offset != null && position.endOffset != null) {
+            requireValue(position.endOffset >= position.offset) {
+                "Diagnostic $index position range is reversed"
+            }
+        }
+        if (position.line != null && position.endLine != null) {
+            requireValue(position.endLine >= position.line) {
+                "Diagnostic $index line range is reversed"
+            }
+            if (
+                position.endLine == position.line &&
+                position.column != null &&
+                position.endColumn != null
+            ) {
+                requireValue(position.endColumn >= position.column) {
+                    "Diagnostic $index column range is reversed"
+                }
+            }
+        }
+    }
+
+    private fun DexCompilerDiagnosticPosition.retainedBytes(): Long =
+        listOf(line, column, endLine, endColumn).count { it != null } * Int.SIZE_BYTES.toLong() +
+            listOf(offset, endOffset).count { it != null } * Long.SIZE_BYTES.toLong()
 
     private fun validateLimits(limits: DexCompilerResourceLimits) {
         requireValue(limits.maxCompressedProgramBytes in 1L..DexCompilerContract.MAX_COMPRESSED_PROGRAM_BYTES) {

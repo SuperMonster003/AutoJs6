@@ -606,6 +606,10 @@
     <string name="summary_dex_compiler_experimental_disabled">Built-in D8/dx only; AAR always stays built-in</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">Built-in D8/dx only; retained provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">Raw runtime.loadJar JARs prefer %1$s; failures fall back to built-in D8/dx</string>
+    <string name="summary_dex_compiler_last_failure_details">Last provider failure: %1$s</string>
+    <string name="summary_dex_compiler_last_path_builtin">Last JAR load: AutoJs6 built-in compiler</string>
+    <string name="summary_dex_compiler_last_path_cache_hit">Last JAR load: reused a verified cached result</string>
+    <string name="summary_dex_compiler_last_path_plugin">Last JAR load: compiled by the selected plugin</string>
     <string name="summary_display_over_other_apps">Allows AutoJs6 to display content over other apps</string>
     <string name="summary_display_over_other_apps_inrt">Allow the application to display content over other apps</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
@@ -1008,6 +1012,9 @@
     <string name="text_developer_details_under_development">Developer details is under development</string>
     <string name="text_developer_options">Developer options</string>
     <string name="text_dex_compiler">DEX compiler</string>
+    <string name="text_dex_compiler_hint_busy">The plugin was busy. AutoJs6 used its built-in compiler; retry after a moment if needed.</string>
+    <string name="text_dex_compiler_hint_fallback">The plugin path could not finish safely. AutoJs6 used its built-in compiler once for the same request.</string>
+    <string name="text_dex_compiler_hint_timeout">The plugin timed out. AutoJs6 used its built-in compiler and bypasses the provider for the rest of this process.</string>
     <string name="text_dex_compiler_no_eligible_providers">No eligible same-signed DEX compiler provider is installed. Cancel to preserve the current selection, or confirm the built-in compiler.</string>
     <string name="text_dex_compiler_provider">Raw JAR compiler provider</string>
     <string name="text_dex_compiler_provider_discovery_failed">Provider discovery failed. Cancel to preserve the current selection, or confirm the built-in compiler.</string>

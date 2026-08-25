@@ -70,6 +70,36 @@ no event is accepted after a terminal event.
 The wire payloads use [Plugin Protocol Wire V1](plugin-protocol-wire-v1.md).
 Program and output bytes never enter a Binder byte array.
 
+### R5 Optional Diagnostic Metadata
+
+R5 extends each diagnostic without changing its three required V1 fields
+(`severity`, `code`, and `message`). Tags 4 through 6 are optional and carry a
+logical origin, a validated archive entry, and a nested position document. An
+older reader skips those unknown tags and continues to decode the required
+fields; payloads that omit the new tags retain their existing bytes. No AIDL
+method, protocol version, compiler-selection rule, or terminal callback changed.
+
+The origin is a path-free label such as `program`, `classpath:0`,
+`runtime-library:0`, `output`, or `unknown`. Entry metadata is a canonical
+relative archive name: absolute paths, backslashes, empty or dot segments, and
+control characters are rejected. Position fields are optional one-based line
+and column values plus non-negative offsets, with optional matching end
+values. The complete code, message, origin, entry, and numeric position payload
+shares the existing negotiated diagnostic budget, whose protocol maximum
+remains 64 KiB.
+
+The production D8 provider routes INFO, WARNING, and ERROR callbacks through
+the same collector for both `D8Command` and the API 24/25 CLI-compatible
+argument path. When count or byte limits are reached, higher-severity records
+may evict lower-severity records and a bounded truncation sentinel is retained
+when space permits. Known private workspace paths are replaced by their logical
+labels and other absolute paths are replaced by `<redacted-path>` before wire
+encoding. Successful compilation may therefore return bounded informational or
+warning diagnostics as well as failures returning errors. JVM coverage locks
+the old-reader skip behavior and the provider-side budget, priority, and
+redaction rules; an authorized Android failure case remains required before the
+R5 diagnostic acceptance item is closed.
+
 ## Discovery And Trust
 
 The service action is `org.autojs.plugin.DEX_COMPILER`. A candidate must be
@@ -132,6 +162,18 @@ R1 acceptance is complete: the seven production-route gates and the canonical
 API 24/25/26/28/31/34/36 real-provider matrix passed. This does not alter the
 control plane: installation still does not enable the route, selection remains
 explicit and same-signed, and the plugin is not promoted to the default compiler.
+
+R5 adds a developer-facing observation of the most recently adopted raw-JAR
+route: provider output, validated cache hit, or built-in compilation. BUSY,
+timeout, and other permitted fallback outcomes add one localized hint. This
+state is held only in process memory and is updated after the final class-loader
+route is known; cancellation does not overwrite it. Independently, provider
+failures retain the earlier R2 shared-producer snapshot as bounded stable enum,
+count, and diagnostic-code tokens under a localized label. Neither state
+contains any request identifier, filesystem path, input or output digest, raw
+provider message, timestamp, or persistent key. The observation does not change
+routing, retry, cache, or fallback behavior and disappears when the host process
+exits.
 
 ## Descriptor Ownership
 

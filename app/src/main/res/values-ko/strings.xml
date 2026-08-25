@@ -613,6 +613,10 @@
     <string name="summary_dex_compiler_experimental_disabled">내장 D8/dx만 사용; AAR는 항상 내장 경로 사용</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">내장 D8/dx만 사용; 유지된 provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">runtime.loadJar의 raw JAR는 %1$s 우선; 실패 시 내장 D8/dx로 폴백</string>
+    <string name="summary_dex_compiler_last_failure_details">최근 공급자 실패: %1$s</string>
+    <string name="summary_dex_compiler_last_path_builtin">마지막 JAR 로드: AutoJs6 내장 컴파일러 사용</string>
+    <string name="summary_dex_compiler_last_path_cache_hit">마지막 JAR 로드: 검증된 캐시 결과 재사용</string>
+    <string name="summary_dex_compiler_last_path_plugin">마지막 JAR 로드: 선택한 플러그인으로 컴파일</string>
     <string name="summary_display_over_other_apps">AutoJs6 가 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
     <string name="summary_display_over_other_apps_inrt">앱이 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">편집기의 실행 버튼으로 스크립트를 시작한 뒤 하단 로그 패널을 자동으로 엽니다</string>
@@ -1015,6 +1019,9 @@
     <string name="text_developer_details_under_development">개발자 세부 사항이 개발 중입니다</string>
     <string name="text_developer_options">개발자 옵션</string>
     <string name="text_dex_compiler">DEX 컴파일러</string>
+    <string name="text_dex_compiler_hint_busy">플러그인이 사용 중이었습니다. AutoJs6는 내장 컴파일러를 사용했습니다. 필요한 경우 잠시 후 다시 시도하세요.</string>
+    <string name="text_dex_compiler_hint_fallback">플러그인 경로를 안전하게 완료할 수 없었습니다. AutoJs6는 같은 요청에 내장 컴파일러를 한 번 사용했습니다.</string>
+    <string name="text_dex_compiler_hint_timeout">플러그인 시간이 초과되었습니다. AutoJs6는 내장 컴파일러를 사용했으며 이 프로세스가 끝날 때까지 해당 provider를 우회합니다.</string>
     <string name="text_dex_compiler_no_eligible_providers">호스트와 동일한 서명인 적격 DEX 컴파일러 provider가 설치되어 있지 않습니다. 취소하면 현재 선택을 유지하고 확인하면 내장 컴파일러를 사용합니다.</string>
     <string name="text_dex_compiler_provider">Raw JAR 컴파일러 provider</string>
     <string name="text_dex_compiler_provider_discovery_failed">Provider 검색에 실패했습니다. 취소하면 현재 선택을 유지하고 확인하면 내장 컴파일러를 사용합니다.</string>

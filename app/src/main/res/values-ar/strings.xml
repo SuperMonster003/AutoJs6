@@ -613,6 +613,10 @@
     <string name="summary_dex_compiler_experimental_disabled">D8/dx المدمج فقط; يظل AAR على المسار المدمج دائما</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">D8/dx المدمج فقط; provider المحتفظ به: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">runtime.loadJar لملفات JAR الخام يفضل %1$s; وعند الفشل يجري الرجوع إلى D8/dx المدمج</string>
+    <string name="summary_dex_compiler_last_failure_details">آخر فشل للموفر: %1$s</string>
+    <string name="summary_dex_compiler_last_path_builtin">آخر تحميل JAR: مترجم AutoJs6 المدمج</string>
+    <string name="summary_dex_compiler_last_path_cache_hit">آخر تحميل JAR: أعيد استخدام نتيجة مخزنة مؤقتا جرى التحقق منها</string>
+    <string name="summary_dex_compiler_last_path_plugin">آخر تحميل JAR: تمت الترجمة بواسطة الإضافة المحددة</string>
     <string name="summary_display_over_other_apps">يسمح لـ AutoJs6 بعرض المحتوى فوق التطبيقات الأخرى</string>
     <string name="summary_display_over_other_apps_inrt">السماح للتطبيق بعرض المحتوى فوق التطبيقات الأخرى</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">فتح لوحة السجلات السفلية تلقائيا بعد ان يقوم زر التشغيل في المحرر بتشغيل سكربت</string>
@@ -1015,6 +1019,9 @@
     <string name="text_developer_details_under_development">تفاصيل المطور قيد التطوير</string>
     <string name="text_developer_options">خيارات للمطور</string>
     <string name="text_dex_compiler">مترجم DEX</string>
+    <string name="text_dex_compiler_hint_busy">كانت الإضافة مشغولة. استخدم AutoJs6 المترجم المدمج; أعد المحاولة بعد قليل عند الحاجة.</string>
+    <string name="text_dex_compiler_hint_fallback">لم يتمكن مسار الإضافة من الاكتمال بأمان. استخدم AutoJs6 المترجم المدمج مرة واحدة للطلب نفسه.</string>
+    <string name="text_dex_compiler_hint_timeout">انتهت مهلة الإضافة. استخدم AutoJs6 المترجم المدمج وسيتجاوز هذا provider حتى نهاية العملية الحالية.</string>
     <string name="text_dex_compiler_no_eligible_providers">لا يوجد provider مترجم DEX مؤهل وموقع بالتوقيع نفسه للمضيف مثبت. اختر إلغاء للاحتفاظ بالاختيار الحالي, أو أكد استخدام المترجم المدمج.</string>
     <string name="text_dex_compiler_provider">provider مترجم JAR الخام</string>
     <string name="text_dex_compiler_provider_discovery_failed">فشل اكتشاف provider. اختر إلغاء للاحتفاظ بالاختيار الحالي, أو أكد استخدام المترجم المدمج.</string>

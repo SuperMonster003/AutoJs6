@@ -1089,6 +1089,18 @@ internal class DexCompilerExperimentalHarness(
             diagnostics.forEach { diagnostic ->
                 retainedBytes += diagnostic.code.toByteArray(StandardCharsets.UTF_8).size
                 retainedBytes += diagnostic.message.toByteArray(StandardCharsets.UTF_8).size
+                retainedBytes += diagnostic.origin?.toByteArray(StandardCharsets.UTF_8)?.size ?: 0
+                retainedBytes += diagnostic.entry?.toByteArray(StandardCharsets.UTF_8)?.size ?: 0
+                diagnostic.position?.let { position ->
+                    retainedBytes += listOf(
+                        position.line,
+                        position.column,
+                        position.endLine,
+                        position.endColumn,
+                    ).count { it != null } * Int.SIZE_BYTES
+                    retainedBytes += listOf(position.offset, position.endOffset)
+                        .count { it != null } * Long.SIZE_BYTES
+                }
                 if (retainedBytes > effectiveRequest.diagnosticByteLimit) return false
             }
             return true

@@ -11,6 +11,8 @@ import org.autojs.autojs.core.plugin.dex.DexCompilerOptInOptions
 import org.autojs.autojs.core.plugin.dex.DexCompilerOptInPolicy
 import org.autojs.autojs.core.plugin.dex.DexCompilerOptInStore
 import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeDiagnostics
+import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimeHint
+import org.autojs.autojs.core.plugin.dex.DexCompilerRuntimePath
 import org.autojs.autojs.core.plugin.dex.DexCompilerServiceCandidate
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
@@ -137,8 +139,23 @@ class DexCompilerPreference : MaterialPreference {
             )
             else -> context.getString(R.string.summary_dex_compiler_experimental_disabled)
         }
-        val diagnosticSummary = DexCompilerRuntimeDiagnostics.latestSummary()
-        val nextSummary = if (diagnosticSummary == null) baseSummary else "$baseSummary\n$diagnosticSummary"
+        val latest = DexCompilerRuntimeDiagnostics.latest()
+        val routeSummary = when (latest?.path) {
+            DexCompilerRuntimePath.PLUGIN -> R.string.summary_dex_compiler_last_path_plugin
+            DexCompilerRuntimePath.BUILTIN -> R.string.summary_dex_compiler_last_path_builtin
+            DexCompilerRuntimePath.CACHE_HIT -> R.string.summary_dex_compiler_last_path_cache_hit
+            null -> null
+        }?.let(context::getString)
+        val hint = when (latest?.hint) {
+            DexCompilerRuntimeHint.BUSY -> R.string.text_dex_compiler_hint_busy
+            DexCompilerRuntimeHint.TIMEOUT -> R.string.text_dex_compiler_hint_timeout
+            DexCompilerRuntimeHint.FALLBACK -> R.string.text_dex_compiler_hint_fallback
+            null -> null
+        }?.let(context::getString)
+        val failureDetails = DexCompilerRuntimeDiagnostics.latestFailureDetails()?.let { tokens ->
+            context.getString(R.string.summary_dex_compiler_last_failure_details, tokens)
+        }
+        val nextSummary = listOfNotNull(baseSummary, routeSummary, hint, failureDetails).joinToString("\n")
         if (summary?.toString() != nextSummary) summary = nextSummary
     }
 

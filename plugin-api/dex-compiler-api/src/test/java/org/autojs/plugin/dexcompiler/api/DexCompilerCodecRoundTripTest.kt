@@ -1,5 +1,6 @@
 package org.autojs.plugin.dexcompiler.api
 
+import org.autojs.plugin.protocol.wire.TaggedWireDocument
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -137,6 +138,50 @@ class DexCompilerCodecRoundTripTest {
         assertEquals(2, decoded.dexEntryCount)
         assertEquals(DexCompilerFixtures.outputSha256, decoded.outputSha256)
         assertEquals(DexCompilerFixtures.diagnostics(), decoded.diagnostics)
+    }
+
+    @Test
+    fun roundTripsOptionalDiagnosticMetadataAndKeepsItSkippableByV1Readers() {
+        val diagnostic = DexCompilerDiagnostic(
+            severity = DexCompilerDiagnosticSeverity.ERROR,
+            code = "D8.ERROR",
+            message = "Duplicate definition",
+            origin = "classpath:1",
+            entry = "com/example/Duplicate.class",
+            position = DexCompilerDiagnosticPosition(
+                line = 7,
+                column = 11,
+                offset = 42L,
+                endLine = 7,
+                endColumn = 19,
+                endOffset = 50L,
+            ),
+        )
+        val error = DexCompileError(
+            requestId = DexCompilerFixtures.requestId,
+            code = DexCompilerErrorCode.COMPILATION_FAILED,
+            phase = DexCompilerFailurePhase.COMPILATION,
+            message = "D8 rejected the fixture",
+            retryable = false,
+            diagnostics = listOf(diagnostic),
+        )
+
+        val encoded = DexCompilerCodec.encodeError(error)
+        assertEquals(diagnostic, DexCompilerCodec.decodeError(encoded).diagnostics.single())
+
+        val legacyDiagnostic = TaggedWireDocument.decode(encoded)
+            .requireSchema(DexCompilerContract.SCHEMA_ERROR, DexCompilerContract.SCHEMA_MAJOR)
+            .rejectUnknownRequiredFields((1..6).toSet())
+            .validateKnownCardinality((1..6).toSet(), setOf(6))
+            .documents(6)
+            .single()
+            .let { TaggedWireDocument.decode(it) }
+            .requireSchema(DexCompilerContract.SCHEMA_DIAGNOSTIC, DexCompilerContract.SCHEMA_MAJOR)
+            .rejectUnknownRequiredFields(setOf(1, 2, 3))
+            .validateKnownCardinality(setOf(1, 2, 3))
+        assertEquals(DexCompilerDiagnosticSeverity.ERROR.wireCode, legacyDiagnostic.requireInt32(1))
+        assertEquals("D8.ERROR", legacyDiagnostic.requireString(2))
+        assertEquals("Duplicate definition", legacyDiagnostic.requireString(3))
     }
 
     @Test

@@ -611,6 +611,10 @@
     <string name="summary_dex_compiler_experimental_disabled">Только встроенный D8/dx; AAR всегда остается на встроенном пути</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">Только встроенный D8/dx; сохраненный provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">Для необработанных JAR runtime.loadJar предпочитает %1$s; при сбое используется встроенный D8/dx</string>
+    <string name="summary_dex_compiler_last_failure_details">Последний сбой провайдера: %1$s</string>
+    <string name="summary_dex_compiler_last_path_builtin">Последняя загрузка JAR: встроенный компилятор AutoJs6</string>
+    <string name="summary_dex_compiler_last_path_cache_hit">Последняя загрузка JAR: повторно использован проверенный результат из кеша</string>
+    <string name="summary_dex_compiler_last_path_plugin">Последняя загрузка JAR: компиляция выбранным плагином</string>
     <string name="summary_display_over_other_apps">Позволяет AutoJs6 отображать контент поверх других приложений</string>
     <string name="summary_display_over_other_apps_inrt">Разрешить приложению отображать контент поверх других приложений</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Автоматически открывать нижнюю панель логов после запуска скрипта кнопкой Запуск в редакторе</string>
@@ -1013,6 +1017,9 @@
     <string name="text_developer_details_under_development">Детали разработчика находятся в стадии разработки</string>
     <string name="text_developer_options">Параметры разработчика</string>
     <string name="text_dex_compiler">Компилятор DEX</string>
+    <string name="text_dex_compiler_hint_busy">Плагин был занят. AutoJs6 использовал встроенный компилятор; при необходимости повторите попытку немного позже.</string>
+    <string name="text_dex_compiler_hint_fallback">Путь плагина не удалось безопасно завершить. AutoJs6 один раз использовал встроенный компилятор для того же запроса.</string>
+    <string name="text_dex_compiler_hint_timeout">Время ожидания плагина истекло. AutoJs6 использовал встроенный компилятор и будет обходить этот provider до завершения процесса.</string>
     <string name="text_dex_compiler_no_eligible_providers">Не установлен подходящий provider компилятора DEX с той же подписью, что и хост. Отмените действие, чтобы сохранить текущий выбор, или подтвердите встроенный компилятор.</string>
     <string name="text_dex_compiler_provider">Provider компилятора необработанных JAR</string>
     <string name="text_dex_compiler_provider_discovery_failed">Не удалось обнаружить providers. Отмените действие, чтобы сохранить текущий выбор, или подтвердите встроенный компилятор.</string>

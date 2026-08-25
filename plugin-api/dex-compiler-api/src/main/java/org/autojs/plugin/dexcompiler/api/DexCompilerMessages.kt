@@ -243,6 +243,20 @@ data class DexCompilerDiagnostic(
     val severity: DexCompilerDiagnosticSeverity,
     val code: String,
     val message: String,
+    /** Logical, path-free input origin such as `program` or `classpath:0`. */
+    val origin: String? = null,
+    /** Validated archive entry name, never a host or provider filesystem path. */
+    val entry: String? = null,
+    val position: DexCompilerDiagnosticPosition? = null,
+)
+
+data class DexCompilerDiagnosticPosition(
+    val line: Int? = null,
+    val column: Int? = null,
+    val offset: Long? = null,
+    val endLine: Int? = null,
+    val endColumn: Int? = null,
+    val endOffset: Long? = null,
 )
 
 class DexCompileResult(

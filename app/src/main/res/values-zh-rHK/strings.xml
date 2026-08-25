@@ -608,6 +608,10 @@
     <string name="summary_dex_compiler_experimental_disabled">僅使用內置 D8/dx; AAR 始終使用內置路徑</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">僅使用內置 D8/dx; 保留的 provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">runtime.loadJar 的 raw JAR 優先使用 %1$s; 失敗時回退至內置 D8/dx</string>
+    <string name="summary_dex_compiler_last_failure_details">上次外掛編譯器故障: %1$s</string>
+    <string name="summary_dex_compiler_last_path_builtin">最近一次 JAR 載入: 使用 AutoJs6 內置編譯器</string>
+    <string name="summary_dex_compiler_last_path_cache_hit">最近一次 JAR 載入: 重用了已驗證的快取結果</string>
+    <string name="summary_dex_compiler_last_path_plugin">最近一次 JAR 載入: 由所選插件完成編譯</string>
     <string name="summary_display_over_other_apps">允許 AutoJs6 在其他應用之上顯示內容</string>
     <string name="summary_display_over_other_apps_inrt">允許應用在其他應用之上顯示內容</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">編輯器運行按鈕啓動腳本後自動打開底部日誌面板</string>
@@ -1010,6 +1014,9 @@
     <string name="text_developer_details_under_development">\"開發者詳情\" 正在開發中</string>
     <string name="text_developer_options">開發者選項</string>
     <string name="text_dex_compiler">DEX 編譯器</string>
+    <string name="text_dex_compiler_hint_busy">插件正忙. AutoJs6 已改用內置編譯器; 如有需要, 請稍後重試.</string>
+    <string name="text_dex_compiler_hint_fallback">插件路徑未能安全完成. AutoJs6 已對同一請求使用內置編譯器一次.</string>
+    <string name="text_dex_compiler_hint_timeout">插件已逾時. AutoJs6 已改用內置編譯器, 並會在本進程剩餘期間繞過該 provider.</string>
     <string name="text_dex_compiler_no_eligible_providers">未安裝符合資格且與主程式簽名相同的 DEX 編譯器 provider. 取消以保留目前選擇, 或確認使用內置編譯器.</string>
     <string name="text_dex_compiler_provider">Raw JAR 編譯器 provider</string>
     <string name="text_dex_compiler_provider_discovery_failed">Provider 探索失敗. 取消以保留目前選擇, 或確認使用內置編譯器.</string>

@@ -14,13 +14,16 @@ internal object DexCompilerClasspathDecisionRunner {
         loadLocal: (DexCompilerRetainedInput) -> T,
         checkInterrupted: (Throwable?) -> Unit,
         onUseLocal: (DexCompilerRuntimeDecision.UseLocal) -> Unit = {},
+        onLocalLoaded: (DexCompilerRuntimeDecision.UseLocal) -> Unit = {},
+        onPublishedLoaded: (DexCompilerRuntimeDecision.Published) -> Unit = {},
         onPublishedLoadFailure: (Exception) -> Unit = {},
+        onPublishedFallbackLoaded: (DexCompilerRuntimeDecision.Published) -> Unit = {},
         cancelled: () -> T,
     ): T = when (decision) {
         is DexCompilerRuntimeDecision.Published -> useOwned(decision.fallbackInput) { retained ->
             checkInterrupted(null)
             try {
-                loadPublished(decision.artifact)
+                loadPublished(decision.artifact).also { onPublishedLoaded(decision) }
             } catch (fatal: VirtualMachineError) {
                 throw fatal
             } catch (loadFailure: Exception) {
@@ -34,7 +37,7 @@ internal object DexCompilerClasspathDecisionRunner {
                 }
                 onPublishedLoadFailure(loadFailure)
                 checkInterrupted(null)
-                loadLocal(retained)
+                loadLocal(retained).also { onPublishedFallbackLoaded(decision) }
             }
         }
         is DexCompilerRuntimeDecision.UseLocal -> {
@@ -45,7 +48,7 @@ internal object DexCompilerClasspathDecisionRunner {
                 checkInterrupted(null)
                 onUseLocal(decision)
                 checkInterrupted(null)
-                loadLocal(input)
+                loadLocal(input).also { onLocalLoaded(decision) }
             }
         }
         DexCompilerRuntimeDecision.Cancelled -> cancelled()

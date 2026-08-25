@@ -338,6 +338,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Fix` Splash screen background did not extend into the short-edge display cutout area
 * `Fix` File manager could fail to refresh a newly committed Explorer Action sibling output or could display a committed output directory as a file
+* `Improvement` DEX compiler diagnostics now preserve bounded redacted INFO/WARNING/ERROR details with optional logical origin, archive entry, and position metadata; Developer options show the process-local last JAR route and localized BUSY, timeout, and fallback guidance
 * `Improvement` TypeScript compilation now emits privacy-safe per-request observations for preparation, cache lookup, compiler binding/prewarm, remote compilation, output handling, total latency, archive size, source count, and host heap change, and breaks compiler time down into before-ingress, ingress, inter-phase, parse, semantic, emit, and after-emit intervals; malformed or out-of-order progress callbacks are ignored and these observations do not impose performance thresholds
 * `Improvement` Improved argument compatibility for KeyCode methods _[`issue #492`](http://issues.autojs6.com/492)_
 * `Improvement` KeyCode methods support sending key code commands with Shizuku permission

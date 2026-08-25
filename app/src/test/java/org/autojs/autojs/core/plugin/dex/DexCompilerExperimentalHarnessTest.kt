@@ -1043,6 +1043,32 @@ class DexCompilerExperimentalHarnessTest {
     }
 
     @Test
+    fun resultDiagnosticMetadataCountsAgainstCurrentRequestLimit() {
+        val fixture = Fixture(diagnosticByteLimit = 2)
+        fixture.start()
+        fixture.callback.onStarted(DexCompilerCodec.encodeStarted(fixture.started()))
+
+        fixture.callback.onCompleted(
+            DexCompilerCodec.encodeResult(
+                fixture.result(
+                    diagnostics = listOf(
+                        DexCompilerDiagnostic(
+                            severity = DexCompilerDiagnosticSeverity.WARNING,
+                            code = "F",
+                            message = "m",
+                            origin = "program",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val outcome = fixture.singleOutcome() as DexCompilerExperimentalOutcome.UseLocalCompiler
+        assertEquals(DexCompilerExperimentalFailure.CALLBACK_VIOLATION, outcome.failure)
+        assertEquals(0, fixture.output.publishCount)
+    }
+
+    @Test
     fun errorDiagnosticsMustFitCurrentRequestLimit() {
         val fixture = Fixture(diagnosticByteLimit = 1)
         fixture.start()

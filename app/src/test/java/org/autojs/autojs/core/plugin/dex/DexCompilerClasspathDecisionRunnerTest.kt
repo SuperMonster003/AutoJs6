@@ -12,6 +12,38 @@ import java.io.InputStream
 class DexCompilerClasspathDecisionRunnerTest {
 
     @Test
+    fun successfulPublishedDecisionReportsItsRouteAfterAdoption() {
+        val retained = RecordingRetainedInput()
+        val decision = DexCompilerRuntimeDecision.Published(
+            RecordingArtifact(),
+            retained,
+            cacheHit = true,
+        )
+        var publishedCallbacks = 0
+        var localStarts = 0
+
+        val result = DexCompilerClasspathDecisionRunner.consume(
+            decision = decision,
+            loadPublished = { "cached" },
+            loadLocal = {
+                localStarts += 1
+                error("Local D8 must not run")
+            },
+            checkInterrupted = {},
+            onPublishedLoaded = { observed ->
+                assertSame(decision, observed)
+                publishedCallbacks += 1
+            },
+            cancelled = { error("Cancellation must not run") },
+        )
+
+        assertEquals("cached", result)
+        assertEquals(1, publishedCallbacks)
+        assertEquals(0, localStarts)
+        assertEquals(1, retained.closeCount)
+    }
+
+    @Test
     fun localAndFailedPublishedDecisionsUseTheirSameRetainedInputAndCloseOnce() {
         listOf<(RecordingRetainedInput) -> DexCompilerRuntimeDecision>(
             { retained ->
@@ -47,6 +79,58 @@ class DexCompilerClasspathDecisionRunnerTest {
                 assertEquals(1, (decision.artifact as RecordingArtifact).invalidateCount)
             }
         }
+    }
+
+    @Test
+    fun localRouteCallbacksRunOnlyAfterSuccessfulAdoption() {
+        val retained = RecordingRetainedInput()
+        val decision = DexCompilerRuntimeDecision.UseLocal(
+            DexCompilerLocalReason.OPT_IN_DISABLED,
+            retained,
+        )
+        val events = mutableListOf<String>()
+
+        val result = DexCompilerClasspathDecisionRunner.consume(
+            decision = decision,
+            loadPublished = { error("Published loader must not run") },
+            loadLocal = {
+                events += "load"
+                "local"
+            },
+            checkInterrupted = {},
+            onUseLocal = { events += "selected" },
+            onLocalLoaded = { observed ->
+                assertSame(decision, observed)
+                events += "loaded"
+            },
+            cancelled = { error("Cancellation must not run") },
+        )
+
+        assertEquals("local", result)
+        assertEquals(listOf("selected", "load", "loaded"), events)
+    }
+
+    @Test
+    fun failedLocalAdoptionDoesNotReportACompletedRoute() {
+        val retained = RecordingRetainedInput()
+        val decision = DexCompilerRuntimeDecision.UseLocal(
+            DexCompilerLocalReason.OPT_IN_DISABLED,
+            retained,
+        )
+        var completedRoutes = 0
+
+        assertThrows(IOException::class.java) {
+            DexCompilerClasspathDecisionRunner.consume(
+                decision = decision,
+                loadPublished = { error("Published loader must not run") },
+                loadLocal = { throw IOException("local adoption failed") },
+                checkInterrupted = {},
+                onLocalLoaded = { completedRoutes += 1 },
+                cancelled = { error("Cancellation must not run") },
+            )
+        }
+
+        assertEquals(0, completedRoutes)
     }
 
     @Test

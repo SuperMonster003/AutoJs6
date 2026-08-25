@@ -607,6 +607,11 @@ object DexCompilerCodec {
             .int32(DiagnosticTags.SEVERITY, value.severity.wireCode, requiredForReader = true)
             .string(DiagnosticTags.CODE, value.code, requiredForReader = true)
             .string(DiagnosticTags.MESSAGE, value.message, requiredForReader = true)
+            .apply {
+                value.origin?.let { string(DiagnosticTags.ORIGIN, it) }
+                value.entry?.let { string(DiagnosticTags.ENTRY, it) }
+                value.position?.let { document(DiagnosticTags.POSITION, encodeDiagnosticPosition(it)) }
+            }
             .encode()
 
     private fun decodeDiagnostic(bytes: ByteArray): DexCompilerDiagnostic {
@@ -618,6 +623,37 @@ object DexCompilerCodec {
             ) { it.wireCode },
             code = document.requireString(DiagnosticTags.CODE),
             message = document.requireString(DiagnosticTags.MESSAGE),
+            origin = document.optionalString(DiagnosticTags.ORIGIN),
+            entry = document.optionalString(DiagnosticTags.ENTRY),
+            position = document.optionalDocument(DiagnosticTags.POSITION)?.let(::decodeDiagnosticPosition),
+        )
+    }
+
+    private fun encodeDiagnosticPosition(value: DexCompilerDiagnosticPosition): ByteArray =
+        writer(DexCompilerContract.SCHEMA_DIAGNOSTIC_POSITION)
+            .apply {
+                value.line?.let { int32(DiagnosticPositionTags.LINE, it) }
+                value.column?.let { int32(DiagnosticPositionTags.COLUMN, it) }
+                value.offset?.let { int64(DiagnosticPositionTags.OFFSET, it) }
+                value.endLine?.let { int32(DiagnosticPositionTags.END_LINE, it) }
+                value.endColumn?.let { int32(DiagnosticPositionTags.END_COLUMN, it) }
+                value.endOffset?.let { int64(DiagnosticPositionTags.END_OFFSET, it) }
+            }
+            .encode()
+
+    private fun decodeDiagnosticPosition(bytes: ByteArray): DexCompilerDiagnosticPosition {
+        val document = document(
+            bytes,
+            DexCompilerContract.SCHEMA_DIAGNOSTIC_POSITION,
+            DiagnosticPositionTags.ALL,
+        )
+        return DexCompilerDiagnosticPosition(
+            line = document.optionalInt32(DiagnosticPositionTags.LINE),
+            column = document.optionalInt32(DiagnosticPositionTags.COLUMN),
+            offset = document.optionalInt64(DiagnosticPositionTags.OFFSET),
+            endLine = document.optionalInt32(DiagnosticPositionTags.END_LINE),
+            endColumn = document.optionalInt32(DiagnosticPositionTags.END_COLUMN),
+            endOffset = document.optionalInt64(DiagnosticPositionTags.END_OFFSET),
         )
     }
 
@@ -813,6 +849,19 @@ object DexCompilerCodec {
         const val SEVERITY = 1
         const val CODE = 2
         const val MESSAGE = 3
-        val ALL = setOf(SEVERITY, CODE, MESSAGE)
+        const val ORIGIN = 4
+        const val ENTRY = 5
+        const val POSITION = 6
+        val ALL = (1..6).toSet()
+    }
+
+    private object DiagnosticPositionTags {
+        const val LINE = 1
+        const val COLUMN = 2
+        const val OFFSET = 3
+        const val END_LINE = 4
+        const val END_COLUMN = 5
+        const val END_OFFSET = 6
+        val ALL = (1..6).toSet()
     }
 }
