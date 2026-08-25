@@ -98,6 +98,7 @@ internal object ExplorerActionLauncher {
             action.descriptor.protocolVersion >= MULTI_TARGET_PROTOCOL_VERSION &&
             (
                 action.descriptor.accessMode == ExplorerActionValues.ACCESS_CREATE_IN_PARENT ||
+                    action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET ||
                     targets.size > 1 ||
                     targets.any { target -> target.kind == ExplorerActionValues.TARGET_DIRECTORY }
                 )
@@ -111,6 +112,8 @@ internal object ExplorerActionLauncher {
                 },
                 allowCreateOutput =
                     action.descriptor.accessMode == ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+                allowReplaceTarget =
+                    action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET,
             )
         } else {
             null

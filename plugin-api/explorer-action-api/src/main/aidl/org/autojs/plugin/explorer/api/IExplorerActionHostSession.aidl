@@ -28,4 +28,10 @@ interface IExplorerActionHostSession {
      * commit. Appended after all v4 methods so their Binder transaction codes remain stable.
      */
     ParcelFileDescriptor openPendingOutput(String transactionId);
+
+    /**
+     * v8. Reserves a host-owned replacement transaction for one original request target. Existing
+     * output open, verify, commit and abort methods drive the rest of the transaction.
+     */
+    Bundle prepareTargetReplacement(String targetId);
 }

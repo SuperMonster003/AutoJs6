@@ -57,6 +57,7 @@
 * `Fonctionnalité` Le protocole Explorer Action v4 du gestionnaire de fichiers accepte des cibles ordonnées fichier/dossier/mixtes et les sélections de même dossier parent, affiche la compression des plugins dans les menus de dossiers et une barre verticale de cinq actions, et fournit des sessions de fichiers de l'hôte pour les lectures contrôlées et les sorties atomiques voisines
 * `Fonctionnalité` Le protocole Explorer Action v5 du gestionnaire de fichiers permet aux plugins fiables, limités à un fichier en lecture seule, de présenter les dossiers d'archives paginés dans la liste Explorer native, la barre de chemin, le thème et la pile Retour via des sessions Binder liées à l'UID
 * `Fonctionnalité` Le protocole Explorer Action v6 du gestionnaire de fichiers prévisualise les documents, images, fichiers audio et vidéos lisibles avec les visionneuses existantes de l'hôte
+* `Fonctionnalité` Les protocoles Explorer Action v7 et v8 du gestionnaire de fichiers ajoutent la relecture obligatoire des sorties en attente et des transactions de remplacement atomique avec contrôle d'identité du fichier d'origine et actualisation automatique d'Explorer, permettant aux plugins d'archive de modifier le ZIP sélectionné sans permission de stockage
 * `Fonctionnalité` Le Centre des plugins propose une page de paramètres globaux et une page d'instructions
 * `Fonctionnalité` Le Centre des plugins prend en charge le montage automatique des plugins SDK
 * `Fonctionnalité` Le Centre des plugins prend en charge le tri par priorité de plusieurs variantes

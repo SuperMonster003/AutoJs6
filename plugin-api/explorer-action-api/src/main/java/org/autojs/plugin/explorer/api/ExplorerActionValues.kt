@@ -10,6 +10,8 @@ object ExplorerActionValues {
 
     const val ACCESS_READ_ONLY = 1
     const val ACCESS_CREATE_IN_PARENT = 2
+    /** v8. Rebuilds one selected file through a host-owned staging and atomic replacement. */
+    const val ACCESS_REPLACE_TARGET = 3
 
     const val PLACEMENT_OVERFLOW = 1
     const val PLACEMENT_PRIMARY = 2

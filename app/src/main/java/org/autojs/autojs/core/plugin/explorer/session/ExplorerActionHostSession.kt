@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
+import android.system.ErrnoException
+import android.system.Os
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionCatalogPolicy
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
@@ -19,6 +21,7 @@ import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerActionValues
 import org.autojs.plugin.explorer.api.IExplorerActionHostSession
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.util.Locale
 import java.util.UUID
@@ -34,7 +37,9 @@ internal class ExplorerActionHostSession private constructor(
     commonParent: File,
     targets: List<ExplorerActionHostSessionTarget>,
     private val allowCreateOutput: Boolean,
+    private val allowReplaceTarget: Boolean,
     private val onOutputCommitted: (File) -> Unit,
+    private val onTargetReplaced: (File) -> Unit,
 ) : IExplorerActionHostSession.Stub() {
 
     private val parent = commonParent.canonicalFile
@@ -42,7 +47,8 @@ internal class ExplorerActionHostSession private constructor(
         require(target.id.isNotBlank() && target.id.length <= ExplorerActionProtocol.MAX_TARGET_ID_LENGTH) {
             "Explorer Action host session target ID is invalid"
         }
-        target.id to target.file.canonicalFile
+        val file = target.file.canonicalFile
+        target.id to TargetState(file, TargetIdentity.capture(file))
     }
     private val lock = Any()
     private val outputs = LinkedHashMap<String, OutputTransaction>()
@@ -53,7 +59,7 @@ internal class ExplorerActionHostSession private constructor(
         require(targetsById.isNotEmpty() && targetsById.size == targets.size) {
             "Explorer Action host session targets are empty or duplicated"
         }
-        require(targetsById.values.all { target -> target.parentFile?.canonicalFile == parent }) {
+        require(targetsById.values.all { target -> target.file.parentFile?.canonicalFile == parent }) {
             "Explorer Action host session targets do not share the declared parent"
         }
     }
@@ -111,9 +117,46 @@ internal class ExplorerActionHostSession private constructor(
                     mimeType = normalizedMimeType,
                     target = target,
                     temp = temp,
+                    mode = OutputMode.CREATE,
                 ).also { outputs[it.id] = it }
             } catch (error: Throwable) {
                 releaseOutputTarget(target)
+                temp.delete()
+                throw error
+            }
+        }
+        return outputBundle(transaction)
+    }
+
+    override fun prepareTargetReplacement(targetId: String): Bundle {
+        enforceCaller()
+        check(allowReplaceTarget) { "Explorer Action does not have replace-target access" }
+        val transaction = synchronized(lock) {
+            checkOpen()
+            require(parent.canWrite()) { "Explorer Action parent directory is not writable" }
+            val targetState = targetState(targetId)
+            require(targetState.file.isFile && targetState.file.canRead()) {
+                "Explorer Action replacement target is not a readable file"
+            }
+            val expectedIdentity = targetState.identity
+            require(TargetIdentity.capture(targetState.file) == expectedIdentity) {
+                "Explorer Action replacement target changed before reservation"
+            }
+            reserveReplacementTarget(targetState.file)
+            val temp = File(parent, ".autojs6-explorer-${UUID.randomUUID()}.part")
+            try {
+                check(temp.createNewFile()) { "Explorer Action replacement staging file already exists" }
+                OutputTransaction(
+                    id = UUID.randomUUID().toString(),
+                    mimeType = Mime.fromFileOrWildcard(targetState.file.path),
+                    target = targetState.file,
+                    temp = temp,
+                    mode = OutputMode.REPLACE,
+                    replacementTarget = targetState,
+                    expectedTargetIdentity = expectedIdentity,
+                ).also { outputs[it.id] = it }
+            } catch (error: Throwable) {
+                releaseOutputTarget(targetState.file)
                 temp.delete()
                 throw error
             }
@@ -161,28 +204,42 @@ internal class ExplorerActionHostSession private constructor(
         val committed = synchronized(lock) {
             checkOpen()
             val transaction = output(transactionId)
-            check(
-                transaction.state == OutputState.OPENED ||
-                    transaction.state == OutputState.VERIFYING,
-            ) {
-                "Explorer Action output was not opened"
+            val readyToCommit = when (transaction.mode) {
+                OutputMode.CREATE ->
+                    transaction.state == OutputState.OPENED ||
+                        transaction.state == OutputState.VERIFYING
+                OutputMode.REPLACE -> transaction.state == OutputState.VERIFYING
+            }
+            check(readyToCommit) {
+                "Explorer Action output is not ready to commit"
             }
             check(transaction.temp.isFile) { "Explorer Action staging output is missing" }
-            check(!transaction.target.exists()) { "Explorer Action output target now exists" }
-            if (!transaction.temp.renameTo(transaction.target)) {
-                throw IOException("Explorer Action output could not be committed atomically")
+            when (transaction.mode) {
+                OutputMode.CREATE -> {
+                    check(!transaction.target.exists()) { "Explorer Action output target now exists" }
+                    if (!transaction.temp.renameTo(transaction.target)) {
+                        throw IOException("Explorer Action output could not be committed atomically")
+                    }
+                }
+                OutputMode.REPLACE -> commitReplacement(transaction)
             }
             outputs.remove(transaction.id)
             releaseOutputTarget(transaction.target)
             CommittedOutput(
                 target = transaction.target,
+                mode = transaction.mode,
                 result = outputBundle(transaction).apply {
                     putLong(ExplorerActionHostSessionKeys.SIZE, transaction.target.length())
                     putLong(ExplorerActionHostSessionKeys.LAST_MODIFIED, transaction.target.lastModified())
                 },
             )
         }
-        runCatching { onOutputCommitted(committed.target) }
+        runCatching {
+            when (committed.mode) {
+                OutputMode.CREATE -> onOutputCommitted(committed.target)
+                OutputMode.REPLACE -> onTargetReplaced(committed.target)
+            }
+        }
         return committed.result
     }
 
@@ -205,7 +262,9 @@ internal class ExplorerActionHostSession private constructor(
         abandoned.forEach(::cleanup)
     }
 
-    private fun target(targetId: String): File = synchronized(lock) {
+    private fun target(targetId: String): File = targetState(targetId).file
+
+    private fun targetState(targetId: String): TargetState = synchronized(lock) {
         checkOpen()
         targetsById[targetId]
             ?: throw IllegalArgumentException("Explorer Action host session target is unknown")
@@ -266,6 +325,26 @@ internal class ExplorerActionHostSession private constructor(
         putString(ExplorerActionHostSessionKeys.MIME_TYPE, transaction.mimeType)
     }
 
+    private fun commitReplacement(transaction: OutputTransaction) {
+        val targetState = requireNotNull(transaction.replacementTarget) {
+            "Explorer Action replacement target state is missing"
+        }
+        val expectedIdentity = requireNotNull(transaction.expectedTargetIdentity) {
+            "Explorer Action replacement target identity is missing"
+        }
+        FileOutputStream(transaction.temp, true).use { output -> output.fd.sync() }
+        check(TargetIdentity.capture(transaction.target) == expectedIdentity) {
+            "Explorer Action replacement target changed before commit"
+        }
+        val committedIdentity = TargetIdentity.capture(transaction.temp)
+        try {
+            Os.rename(transaction.temp.path, transaction.target.path)
+        } catch (error: ErrnoException) {
+            throw IOException("Explorer Action target could not be replaced atomically", error)
+        }
+        targetState.identity = committedIdentity
+    }
+
     private fun reserveOutputTarget(displayName: String, conflictPolicy: Int): File {
         return synchronized(RESERVATION_LOCK) {
             val target = when (conflictPolicy) {
@@ -283,6 +362,17 @@ internal class ExplorerActionHostSession private constructor(
             require(target.parentFile == parent) { "Explorer Action output escapes its parent" }
             check(RESERVED_OUTPUT_PATHS.add(target.path)) { "Explorer Action output is already reserved" }
             target
+        }
+    }
+
+    private fun reserveReplacementTarget(target: File) {
+        synchronized(RESERVATION_LOCK) {
+            require(target.parentFile == parent && target.isFile) {
+                "Explorer Action replacement target is invalid"
+            }
+            check(RESERVED_OUTPUT_PATHS.add(target.path)) {
+                "Explorer Action replacement target is already reserved"
+            }
         }
     }
 
@@ -371,13 +461,50 @@ internal class ExplorerActionHostSession private constructor(
         val mimeType: String,
         val target: File,
         val temp: File,
+        val mode: OutputMode,
+        val replacementTarget: TargetState? = null,
+        val expectedTargetIdentity: TargetIdentity? = null,
         var state: OutputState = OutputState.PREPARED,
     )
 
     private data class CommittedOutput(
         val target: File,
+        val mode: OutputMode,
         val result: Bundle,
     )
+
+    private data class TargetState(
+        val file: File,
+        var identity: TargetIdentity,
+    )
+
+    private data class TargetIdentity(
+        val device: Long,
+        val inode: Long,
+        val size: Long,
+        val lastModifiedMillis: Long,
+    ) {
+        companion object {
+            fun capture(file: File): TargetIdentity {
+                val stat = try {
+                    Os.stat(file.path)
+                } catch (error: ErrnoException) {
+                    throw IOException("Explorer Action target identity is unavailable", error)
+                }
+                return TargetIdentity(
+                    device = stat.st_dev,
+                    inode = stat.st_ino,
+                    size = stat.st_size,
+                    lastModifiedMillis = file.lastModified(),
+                )
+            }
+        }
+    }
+
+    private enum class OutputMode {
+        CREATE,
+        REPLACE,
+    }
 
     private enum class OutputState {
         PREPARED,
@@ -398,14 +525,18 @@ internal class ExplorerActionHostSession private constructor(
             commonParent: File,
             targets: List<ExplorerActionHostSessionTarget>,
             allowCreateOutput: Boolean,
+            allowReplaceTarget: Boolean = false,
             onOutputCommitted: (File) -> Unit = ::notifyCreated,
+            onTargetReplaced: (File) -> Unit = ::notifyChanged,
         ): ExplorerActionHostSession {
             return ExplorerActionHostSession(
                 expectedUid = applicationUid(context.packageManager, pluginPackageName),
                 commonParent = commonParent,
                 targets = targets,
                 allowCreateOutput = allowCreateOutput,
+                allowReplaceTarget = allowReplaceTarget,
                 onOutputCommitted = onOutputCommitted,
+                onTargetReplaced = onTargetReplaced,
             )
         }
 
@@ -414,6 +545,18 @@ internal class ExplorerActionHostSession private constructor(
                 Explorers.workspace().notifyItemCreated(
                     ExplorerFileItem(file, ExplorerDirPage(file.parentFile, null)),
                 )
+            }
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                notify()
+            } else {
+                Handler(Looper.getMainLooper()).post(notify)
+            }
+        }
+
+        private fun notifyChanged(file: File) {
+            val notify = {
+                val item = ExplorerFileItem(file, ExplorerDirPage(file.parentFile, null))
+                Explorers.workspace().notifyItemChanged(item, item)
             }
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 notify()

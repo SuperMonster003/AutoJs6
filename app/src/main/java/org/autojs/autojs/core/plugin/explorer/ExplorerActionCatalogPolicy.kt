@@ -68,6 +68,8 @@ internal object ExplorerActionCatalogPolicy {
             ExplorerActionValues.ACCESS_READ_ONLY -> true
             ExplorerActionValues.ACCESS_CREATE_IN_PARENT ->
                 protocolVersion >= MULTI_TARGET_PROTOCOL_VERSION
+            ExplorerActionValues.ACCESS_REPLACE_TARGET ->
+                protocolVersion >= TARGET_REPLACEMENT_PROTOCOL_VERSION
             else -> false
         }
         if (!accessModeSupported) return null
@@ -110,6 +112,19 @@ internal object ExplorerActionCatalogPolicy {
             outputNameSuffix = outputNameSuffix,
             maxOutputBytes = maxOutputBytes,
         ) ?: return null
+        if (
+            accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET &&
+            (
+                protocolVersion < TARGET_REPLACEMENT_PROTOCOL_VERSION ||
+                    targetKind != ExplorerActionValues.TARGET_FILE ||
+                    normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE ||
+                    placement != ExplorerActionValues.PLACEMENT_OVERFLOW ||
+                    normalizedPresentation != ExplorerActionValues.PRESENTATION_ACTIVITY ||
+                    normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE
+                )
+        ) {
+            return null
+        }
         if (
             normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE &&
             (
@@ -169,7 +184,8 @@ internal object ExplorerActionCatalogPolicy {
         }
         if (
             descriptor.accessMode != ExplorerActionValues.ACCESS_READ_ONLY &&
-            descriptor.accessMode != ExplorerActionValues.ACCESS_CREATE_IN_PARENT
+            descriptor.accessMode != ExplorerActionValues.ACCESS_CREATE_IN_PARENT &&
+            descriptor.accessMode != ExplorerActionValues.ACCESS_REPLACE_TARGET
         ) {
             return false
         }
@@ -276,4 +292,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val PRIMARY_PLACEMENT_PROTOCOL_VERSION = 2
     private const val MULTI_TARGET_PROTOCOL_VERSION = 4
     private const val HOST_EXPLORER_PROTOCOL_VERSION = 5
+    private const val TARGET_REPLACEMENT_PROTOCOL_VERSION = 8
 }

@@ -57,6 +57,7 @@
 * `Feature` File manager Explorer Action protocol v4 supports ordered file/directory/mixed targets and same-parent multi-selection actions, exposes plugin compression in directory menus and a five-cell vertical selection bar, and provides request-scoped host file sessions for controlled reads and atomic sibling output
 * `Feature` File manager Explorer Action protocol v5 lets trusted single-file read-only plugins present paginated archive directories in the native Explorer list, path bar, theme, and Back stack through UID-pinned Binder sessions
 * `Feature` File manager Explorer Action protocol v6 previews readable document, image, audio, and video entries through the existing host viewers
+* `Feature` File manager Explorer Action protocols v7 and v8 add mandatory read-back verification of pending output and atomic target-replacement transactions with original-file identity checks and automatic Explorer refresh, enabling archive plugins to edit a selected ZIP without storage permission
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting

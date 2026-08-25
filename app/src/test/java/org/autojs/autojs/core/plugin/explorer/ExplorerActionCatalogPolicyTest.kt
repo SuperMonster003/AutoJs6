@@ -219,6 +219,62 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV8TargetReplacementIsSingleFileActivityOnly() {
+        assertNull(
+            descriptor(
+                protocolVersion = 7,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_REPLACE_TARGET,
+            ),
+        )
+        val replacement = descriptor(
+            protocolVersion = 8,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            accessMode = ExplorerActionValues.ACCESS_REPLACE_TARGET,
+            mimeTypes = listOf("application/zip"),
+        ) ?: error("Expected a valid replace-target descriptor")
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                replacement,
+                ExplorerActionTarget("application/zip", "zip"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 8,
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_REPLACE_TARGET,
+                mimeTypes = emptyList(),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 8,
+                cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+                accessMode = ExplorerActionValues.ACCESS_REPLACE_TARGET,
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 8,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_REPLACE_TARGET,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 8,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_REPLACE_TARGET,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            ),
+        )
+    }
+
+    @Test
     fun protocolV5HostExplorerPresentationIsStrictlyReadOnlyAndPrimary() {
         val embedded = descriptor(
             protocolVersion = 5,
@@ -296,9 +352,10 @@ class ExplorerActionCatalogPolicyTest {
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(5L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(6L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(7L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(8L))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(8L))
+        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(9L))
         assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(4L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 4))
