@@ -90,6 +90,7 @@ abstract class AbstractAutoJs protected constructor(val application: Application
                         featureEnabled = BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
                         hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
                         launchPackage = appUtils::launchPackage,
+                        hasResumedActivity = { appUtils.currentActivity != null },
                     ),
                     globalConsole,
                 )

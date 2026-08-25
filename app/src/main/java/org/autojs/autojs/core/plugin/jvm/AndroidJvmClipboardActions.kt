@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.jvm
 
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import org.autojs.autojs.util.ClipboardUtils
@@ -10,15 +11,20 @@ import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-internal class AndroidJvmClipboardActions(context: Context) {
+internal class AndroidJvmClipboardActions(
+    context: Context,
+    private val hasResumedActivity: () -> Boolean,
+) {
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
 
     fun getText(): String = onMain {
+        requireJvmClipboardAccess(Build.VERSION.SDK_INT, hasResumedActivity)
         ClipboardUtils.getClipOrEmpty(appContext).toString()
     }
 
     fun setText(text: String) = onMain {
+        requireJvmClipboardAccess(Build.VERSION.SDK_INT, hasResumedActivity)
         ClipboardUtils.setClip(appContext, text)
     }
 
@@ -38,5 +44,14 @@ internal class AndroidJvmClipboardActions(context: Context) {
 
     private companion object {
         const val CALL_TIMEOUT_MILLIS = 10_000L
+    }
+}
+
+internal fun requireJvmClipboardAccess(
+    sdkInt: Int,
+    hasResumedActivity: () -> Boolean,
+) {
+    if (sdkInt >= Build.VERSION_CODES.Q) {
+        check(hasResumedActivity()) { "AutoJs6 must be in the foreground to access the system clipboard" }
     }
 }

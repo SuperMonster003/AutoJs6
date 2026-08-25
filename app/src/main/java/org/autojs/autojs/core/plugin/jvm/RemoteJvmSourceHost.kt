@@ -1074,6 +1074,7 @@ internal class RemoteJvmSourceHost(
             featureEnabled: Boolean,
             hostVersionCode: Long,
             launchPackage: (String) -> Boolean,
+            hasResumedActivity: () -> Boolean,
         ): RemoteJvmSourceHost {
             val drains = java.util.concurrent.Executors.newFixedThreadPool(
                 2,
@@ -1089,7 +1090,7 @@ internal class RemoteJvmSourceHost(
                 ThreadPoolExecutor.AbortPolicy(),
             )
             val transport = AndroidJvmSourceTransport(context)
-            val clipboard = AndroidJvmClipboardActions(context)
+            val clipboard = AndroidJvmClipboardActions(context, hasResumedActivity)
             return RemoteJvmSourceHost(
                 transport = transport,
                 artifactStore = AndroidJvmSourceArtifactStore(context, drains),
