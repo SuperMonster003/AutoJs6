@@ -9,8 +9,8 @@
   },
   "example": {
     "capabilities": ["profiler", "inspector"],
-    "expectedProvider": "design-gated inspector profiling",
+    "expectedProvider": "explicit debug-only inspector Profiler session",
     "packagedSupport": "not supported in release builds",
-    "securityLimitations": ["no release profile artifact export", "no DevTools endpoint"]
+    "securityLimitations": ["release builds deny inspector", "no managed .cpuprofile artifact export", "profiles may expose source locations and runtime metadata"]
   }
 }

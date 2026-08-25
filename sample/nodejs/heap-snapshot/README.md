@@ -1,10 +1,14 @@
 # heap-snapshot
 
-Heap snapshot policy example for Phase 9 diagnostics.
+Partial heap diagnostics example. An explicit debug-only request exposes
+`inspector.Session`, enables the `HeapProfiler` domain and reads heap usage. It
+does not write a heap snapshot artifact yet.
 
-- Capabilities: heap snapshot and allocation sampling policy probe
-- Expected provider: design-gated debug diagnostics
+- Capabilities: Inspector `HeapProfiler` and runtime heap usage
+- Expected provider: debug-only `inspector.Session`
 - Packaged support: not supported in release packaged apps
-- Security limitations: snapshots require explicit export and must stay app-private until the user exports them
+- Security limitations: full snapshots can be very large and contain secrets;
+  bounded app-private capture, cleanup and explicit user export are required
+  before `takeHeapSnapshot` is promoted as a supported workflow
 
 Expected output is listed in `expected-output.txt`.

@@ -9,8 +9,8 @@
   },
   "example": {
     "capabilities": ["typescript", "esm"],
-    "expectedProvider": "Embedded Node partial ESM plus lightweight TypeScript stripper",
-    "packagedSupport": "supported for local project files",
-    "securityLimitations": ["local project graph only", "no TSX", "disabled builtins remain denied"]
+    "expectedProvider": "AutoJs6 TypeScript Compiler plugin plus Node Runtime plugin",
+    "packagedSupport": "host compiles local project files into a closed ESM snapshot",
+    "securityLimitations": ["requires the TypeScript Compiler plugin", "local project graph only", "disabled builtins remain denied"]
   }
 }

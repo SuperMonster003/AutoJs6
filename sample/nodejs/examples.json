@@ -81,6 +81,7 @@
     {
       "name": "screenshot-find-image",
       "status": "partial",
+      "reason": "Requires user-approved screen capture and a live image provider; it reports a skip when either is unavailable.",
       "tags": [
         "main-app",
         "bridge",
@@ -93,7 +94,7 @@
     },
     {
       "name": "disabled-features-demo",
-      "status": "partial",
+      "status": "stable",
       "tags": [
         "main-app",
         "security",
@@ -116,6 +117,7 @@
     {
       "name": "packaged-esm",
       "status": "partial",
+      "reason": "Supports a managed local module graph; remote imports and the full desktop ESM loader surface remain unavailable.",
       "tags": [
         "phase7",
         "packaged",
@@ -127,6 +129,7 @@
     {
       "name": "packaged-dynamic-import",
       "status": "partial",
+      "reason": "Dynamic import is limited to the closed local project graph; URL, absolute-path, and project-escape imports remain denied.",
       "tags": [
         "phase7",
         "packaged",
@@ -162,8 +165,21 @@
       "packagedCompatible": false
     },
     {
+      "name": "udp-discovery",
+      "status": "stable",
+      "tags": [
+        "main-app",
+        "network",
+        "raw-network",
+        "udp"
+      ],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
       "name": "ocr-automation",
       "status": "partial",
+      "reason": "Needs a live OCR/image provider and user-approved capture; packaged OCR model policy is not promoted.",
       "tags": [
         "phase7",
         "main-app",
@@ -212,6 +228,7 @@
     {
       "name": "node-test-project",
       "status": "partial",
+      "reason": "Covers the managed node:test subset only; automated test execution and full desktop runner behavior remain developer-only.",
       "tags": [
         "phase7",
         "main-app",
@@ -235,6 +252,7 @@
     {
       "name": "js-plugin-ui",
       "status": "partial",
+      "reason": "Loads checked local JS plugins only; downloads, native plugin archives, and a universally available Activity UI provider are not supported.",
       "tags": [
         "phase7",
         "main-app",
@@ -248,7 +266,7 @@
     },
     {
       "name": "typescript-cjs",
-      "status": "partial",
+      "status": "stable",
       "tags": [
         "phase8",
         "main-app",
@@ -260,7 +278,7 @@
     },
     {
       "name": "typescript-esm",
-      "status": "partial",
+      "status": "stable",
       "tags": [
         "phase8",
         "main-app",
@@ -272,7 +290,7 @@
     },
     {
       "name": "packaged-typescript",
-      "status": "partial",
+      "status": "stable",
       "tags": [
         "phase8",
         "packaged",
@@ -286,6 +304,7 @@
     {
       "name": "require-esm",
       "status": "partial",
+      "reason": "CommonJS can require the managed local ESM subset, but full Node ESM loader and remote graph parity are not available.",
       "tags": [
         "phase8",
         "main-app",
@@ -310,7 +329,7 @@
     },
     {
       "name": "filehandle-advanced",
-      "status": "partial",
+      "status": "stable",
       "tags": [
         "phase8",
         "main-app",
@@ -323,7 +342,7 @@
     },
     {
       "name": "fs-watch",
-      "status": "partial",
+      "status": "stable",
       "tags": [
         "phase8",
         "main-app",
@@ -336,6 +355,7 @@
     {
       "name": "compile-cache",
       "status": "partial",
+      "reason": "Proves CommonJS in-memory module caching only; persistent compile-cache preparation remains runtime-managed with no user control.",
       "tags": [
         "phase8",
         "main-app",
@@ -347,12 +367,12 @@
     },
     {
       "name": "inspector-debug",
-      "status": "disabled",
+      "status": "partial",
+      "reason": "A debug host can opt into the localhost-only CDP endpoint per execution; release builds, remote binding, blocking wait and packaged-project metadata remain denied.",
       "tags": [
         "phase8",
         "main-app",
         "inspector",
-        "design-gated",
         "security"
       ],
       "mainAppSmoke": false,
@@ -360,13 +380,13 @@
     },
     {
       "name": "cpu-profile",
-      "status": "disabled",
+      "status": "partial",
+      "reason": "Profiler.Session works after an explicit debug-only inspector request, but the sample runner has no request toggle and no managed .cpuprofile export workflow exists.",
       "tags": [
         "phase8",
         "main-app",
         "profiler",
-        "inspector",
-        "design-gated"
+        "inspector"
       ],
       "mainAppSmoke": false,
       "packagedCompatible": false
@@ -374,6 +394,7 @@
     {
       "name": "hardened-sandbox",
       "status": "partial",
+      "reason": "Describes a future isolated-process policy; there is no brokered sandbox user-code launch route yet.",
       "tags": [
         "phase8",
         "main-app",
@@ -387,6 +408,7 @@
     {
       "name": "node-runtime-info",
       "status": "partial",
+      "reason": "Reports the current runtime descriptor, while runtime selection remains build-controlled and the Node 24.17 promotion is deferred.",
       "tags": [
         "phase9",
         "main-app",
@@ -398,6 +420,7 @@
     {
       "name": "startup-snapshot",
       "status": "disabled",
+      "reason": "V8 startup snapshots are disabled until a safe, reproducible snapshot build and validation pipeline exists.",
       "tags": [
         "phase9",
         "main-app",
@@ -409,13 +432,13 @@
     },
     {
       "name": "heap-snapshot",
-      "status": "disabled",
+      "status": "partial",
+      "reason": "Debug-only Inspector.Session exposes HeapProfiler and heap usage, while bounded app-private snapshot export and explicit user export remain unimplemented.",
       "tags": [
         "phase9",
         "main-app",
         "heap-snapshot",
-        "inspector",
-        "design-gated"
+        "inspector"
       ],
       "mainAppSmoke": false,
       "packagedCompatible": false
@@ -423,6 +446,7 @@
     {
       "name": "multi-instance",
       "status": "partial",
+      "reason": "Documents the proposed pool shape only; the service intentionally executes one Node environment at a time.",
       "tags": [
         "phase9",
         "main-app",
@@ -434,7 +458,8 @@
     },
     {
       "name": "sandboxed-script",
-      "status": "stable",
+      "status": "disabled",
+      "reason": "Only documents the future brokered isolated-runtime contract; no hardened sandbox provider can execute the script today.",
       "tags": [
         "phase9",
         "main-app",
@@ -449,6 +474,7 @@
     {
       "name": "wasm-basic",
       "status": "partial",
+      "reason": "Validates basic V8 WebAssembly compute, but packaged support and explicit memory/resource budgets are not promoted.",
       "tags": [
         "phase9",
         "main-app",
@@ -460,6 +486,7 @@
     {
       "name": "wasi-scoped-fs",
       "status": "disabled",
+      "reason": "Neither raw node:wasi nor a brokered scoped-fs WASI facade is exposed.",
       "tags": [
         "phase9",
         "main-app",
@@ -474,6 +501,7 @@
     {
       "name": "wasm-worker",
       "status": "partial",
+      "reason": "Worker availability is real, but the sample only records the future bounded WASM-worker policy and resource budgets.",
       "tags": [
         "phase9",
         "main-app",
@@ -488,6 +516,7 @@
     {
       "name": "wasm-plugin",
       "status": "partial",
+      "reason": "WASM plugin metadata and integrity/resource policy remain design-gated; only checked local JS plugin behavior is available.",
       "tags": [
         "phase9",
         "main-app",
@@ -501,7 +530,7 @@
     },
     {
       "name": "typescript-smoke",
-      "status": "partial",
+      "status": "stable",
       "tags": [
         "typescript",
         "bridge"
@@ -548,6 +577,7 @@
     {
       "name": "controlled-wasi",
       "status": "disabled",
+      "reason": "The controlled WASI facade is not implemented and raw node:wasi remains disabled.",
       "tags": [
         "phase10",
         "main-app",
@@ -560,6 +590,7 @@
     {
       "name": "package-install",
       "status": "partial",
+      "reason": "Shows install metadata only; device-side registry download and lifecycle-script handling remain deferred.",
       "tags": [
         "phase10",
         "main-app",
@@ -571,7 +602,7 @@
     },
     {
       "name": "typescript-project",
-      "status": "partial",
+      "status": "stable",
       "tags": [
         "phase10",
         "main-app",
@@ -595,6 +626,7 @@
     {
       "name": "capability-truth-report",
       "status": "partial",
+      "reason": "Prints the capability vocabulary and metadata shape but does not prove every provider at runtime.",
       "tags": [
         "phase10",
         "main-app",
@@ -606,6 +638,7 @@
     {
       "name": "crash-evidence-bundle",
       "status": "partial",
+      "reason": "Prints the evidence-bundle schema only; it does not trigger and recover from a real runtime-process crash.",
       "tags": [
         "phase10",
         "main-app",
@@ -617,6 +650,7 @@
     {
       "name": "adapter-cutover-status",
       "status": "partial",
+      "reason": "Reports the deferred adapter_v1 policy; that adapter is not the selected production runtime.",
       "tags": [
         "phase10",
         "main-app",
@@ -629,6 +663,7 @@
     {
       "name": "debug-hot-reload",
       "status": "partial",
+      "reason": "Documents a debug-only policy; no production hot-reload or inspector-backed reload loop is exposed.",
       "tags": [
         "phase10",
         "main-app",
@@ -653,6 +688,7 @@
     {
       "name": "security-corpus",
       "status": "partial",
+      "reason": "Summarizes security corpus status but is not itself the complete executable negative corpus.",
       "tags": [
         "phase10",
         "main-app",
@@ -664,6 +700,7 @@
     {
       "name": "pro-parity-suite",
       "status": "partial",
+      "reason": "Most Pro-style providers remain permission-, lifecycle-, or disclosure-gated; the catalog runner permits explicit skips.",
       "tags": [
         "phase13",
         "main-app",
@@ -682,6 +719,7 @@
     {
       "name": "desktop-parity-suite",
       "status": "partial",
+      "reason": "Several desktop surfaces remain partial or disabled, notably WASI, inspector, registry installs, and unrestricted loader hooks.",
       "tags": [
         "phase13",
         "main-app",

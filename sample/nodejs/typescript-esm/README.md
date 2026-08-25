@@ -1,6 +1,8 @@
 # typescript-esm
 
-Lightweight TypeScript ESM example for AutoJs6 Node Profile v1.2.
+TypeScript ESM fixture for the complete host compiler pipeline.
 
-The `.mts` entry is always treated as ESM. AutoJs6 strips erasable TypeScript
-syntax and preserves module execution semantics.
+Install and enable the AutoJs6 TypeScript Compiler plugin v0.6.0 or newer, then
+launch this project from AutoJs6. The host compiles `main.mts`, dispatches the
+generated ESM snapshot to the Node Runtime plugin, and retains the source map
+for TypeScript stack locations. Direct raw `.mts` dispatch remains fail-closed.

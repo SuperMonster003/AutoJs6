@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/udp-discovery",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

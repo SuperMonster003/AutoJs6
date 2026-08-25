@@ -1,0 +1,20 @@
+{
+  "name": "udp-discovery",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000,
+    "permissions": ["network"]
+  },
+  "example": {
+    "capabilities": ["network", "raw-network", "udp"],
+    "expectedProvider": "Embedded Node dgram builtin",
+    "packagedSupport": "not yet covered by the packaged-app regression matrix",
+    "securityLimitations": [
+      "the deterministic sample binds loopback only",
+      "UDP discovery payloads are unauthenticated",
+      "rawNodeNetworkModulesEnabled=false disables dgram"
+    ]
+  }
+}

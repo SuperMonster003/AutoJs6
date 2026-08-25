@@ -9,8 +9,12 @@
   },
   "example": {
     "capabilities": ["heap-snapshot", "inspector"],
-    "expectedProvider": "design-gated debug diagnostics",
-    "packagedSupport": "not supported in release packaged apps",
-    "securityLimitations": ["no production inspector", "heap data stays app-private until explicit export"]
+    "expectedProvider": "explicit debug-only inspector HeapProfiler session",
+    "packagedSupport": "unavailable in release packaged apps",
+    "securityLimitations": [
+      "release builds deny inspector",
+      "full snapshot export is not implemented",
+      "heap data may contain secrets and must stay app-private until explicit export"
+    ]
   }
 }

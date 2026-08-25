@@ -1,0 +1,2 @@
+sample.udp-discovery.reply=autojs6:available
+sample.udp-discovery=PASS

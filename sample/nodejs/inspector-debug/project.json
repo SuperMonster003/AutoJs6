@@ -9,8 +9,8 @@
   },
   "example": {
     "capabilities": ["inspector"],
-    "expectedProvider": "design-gated debug-only inspector",
+    "expectedProvider": "explicit debug-only localhost inspector facade",
     "packagedSupport": "not supported in release builds",
-    "securityLimitations": ["no release inspector listener", "NODE_OPTIONS inspector flags remain filtered"]
+    "securityLimitations": ["release builds ignore inspectorEnabled", "listener is forced to 127.0.0.1", "wait=true and NODE_OPTIONS inspector flags remain denied", "CDP source paths and values are not redacted"]
   }
 }

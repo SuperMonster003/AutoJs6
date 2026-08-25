@@ -30,6 +30,7 @@ private val nodeExampleKnownTags = setOf(
     "dynamic-import",
     "network",
     "raw-network",
+    "udp",
     "websocket",
     "ocr",
     "long-running",
@@ -122,10 +123,7 @@ private val nodeTypeDeclarationModules = listOf(
 // Every intentional difference must live here with a concrete reason. The
 // verifier also rejects stale entries, so exceptions cannot silently become
 // permanent after the corresponding catalog is republished.
-private val nodeCapabilityDocumentedDifferences = mapOf(
-    "catalog_missing:accessibility.gesture" to
-            "The immutable 1.2.0 catalog predates M3.2; plugin C++ preflight and both permission manifests enforce it. Remove this exception when the next catalog is published.",
-)
+private val nodeCapabilityDocumentedDifferences = emptyMap<String, String>()
 
 private fun nodeExampleReadJsonObject(file: File): Map<*, *> =
     JsonSlurper().parse(file) as? Map<*, *>
@@ -541,7 +539,7 @@ tasks.register("verifyNodeCapabilityManifestAlignment") {
         "app/src/main/java/io/github/supermonster003/autojs6/plugin/nodejs/NodeBridgePermissionManifest.java"
     )
     val catalogFile = pluginRoot.resolve(
-        "releases/nodejs-capability-catalog/1.2.0/node-capability-catalog.json"
+        "releases/nodejs-capability-catalog/1.3.0/node-capability-catalog.json"
     )
     val reportFile = layout.buildDirectory.file("reports/nodejs/capability-manifest-alignment.json")
 

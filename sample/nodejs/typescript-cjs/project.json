@@ -9,8 +9,8 @@
   },
   "example": {
     "capabilities": ["typescript", "commonjs"],
-    "expectedProvider": "Embedded Node lightweight TypeScript stripper",
-    "packagedSupport": "supported when packaged as project assets or moduleSources",
-    "securityLimitations": ["erasable syntax only", "no TSX", "no enum or decorator transforms"]
+    "expectedProvider": "AutoJs6 TypeScript Compiler plugin plus Node Runtime plugin",
+    "packagedSupport": "host compiles project assets before dispatching generated CommonJS",
+    "securityLimitations": ["requires the TypeScript Compiler plugin", "raw TypeScript never falls back to runtime stripping"]
   }
 }

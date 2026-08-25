@@ -11,6 +11,6 @@
     "capabilities": ["fs-promises", "filehandle"],
     "expectedProvider": "Embedded Node scoped filesystem facade",
     "packagedSupport": "main-app example only in this phase",
-    "securityLimitations": ["project-relative files only", "no host filesystem escape"]
+    "securityLimitations": ["Android app permissions define device-visible reach", "sensitive /proc, /sys, and /dev paths remain denied"]
   }
 }
