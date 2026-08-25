@@ -84,6 +84,7 @@ internal object JvmSourceFixtures {
         expectedToolchainFingerprint: JvmSha256 = capabilities(language).toolchainFingerprint,
         maxStdoutBytes: Long = JvmSourceContract.MAX_STDOUT_BYTES,
         maxStderrBytes: Long = JvmSourceContract.MAX_STDERR_BYTES,
+        argsJson: String = "{}",
     ) = JvmSourceRequest(
         requestId = requestId,
         protocolVersion = JvmSourceNegotiation.HOST_MAX,
@@ -100,6 +101,7 @@ internal object JvmSourceFixtures {
         diagnosticByteLimit = JvmSourceContract.MAX_DIAGNOSTIC_BYTES,
         allowedHostCalls = JvmScriptCapability.entries.mapNotNull(JvmScriptCapability::hostMethod),
         grantedCapabilities = JvmScriptCapability.entries,
+        argsJson = argsJson,
     )
 
     fun result(

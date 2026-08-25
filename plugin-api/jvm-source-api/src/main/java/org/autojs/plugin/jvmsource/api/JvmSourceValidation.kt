@@ -251,6 +251,13 @@ object JvmSourceValidation {
         requireValue(request.grantedCapabilities.distinct().size == request.grantedCapabilities.size) {
             "Granted script capability list contains duplicates"
         }
+        if (request.protocolVersion < JvmSourceContract.ARGS_PROTOCOL_VERSION) {
+            requireValue(request.argsJson == "{}") {
+                "Execution arguments require Protocol ${JvmSourceContract.ARGS_PROTOCOL_VERSION.major}." +
+                    JvmSourceContract.ARGS_PROTOCOL_VERSION.minor
+            }
+        }
+        JvmJsonArguments.decode(request.argsJson)
         val grantedHostMethods = request.grantedCapabilities.mapNotNull(JvmScriptCapability::hostMethod).toSet()
         requireValue(request.allowedHostCalls.toSet() == grantedHostMethods) {
             "Host-call allowlist differs from the granted host capabilities"

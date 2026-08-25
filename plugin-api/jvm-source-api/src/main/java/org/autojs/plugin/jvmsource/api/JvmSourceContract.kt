@@ -13,8 +13,11 @@ object JvmSourceContract {
     const val ENGINE_ID = "jvm-source"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 2
-    const val ENTRY_API_VERSION = 3
+    const val PROTOCOL_MINOR = 3
+    const val ENTRY_API_VERSION = 4
+
+    @JvmField
+    val ARGS_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 3)
 
     const val SCHEMA_MAJOR = 1
     const val SCHEMA_MINOR = 1
@@ -40,6 +43,7 @@ object JvmSourceContract {
     const val MAX_STDERR_BYTES = 1024L * 1024L
     const val MAX_DIAGNOSTIC_BYTES = 64 * 1024
     const val MAX_RESULT_JSON_BYTES = 64 * 1024
+    const val MAX_ARGS_JSON_BYTES = MAX_RESULT_JSON_BYTES
     const val MAX_HOST_PAYLOAD_BYTES = 64 * 1024
     const val MAX_CLASS_ARTIFACT_BYTES = 20L * 1024L * 1024L
     const val MAX_DEX_ARTIFACT_BYTES = 32L * 1024L * 1024L

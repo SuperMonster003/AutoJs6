@@ -1,5 +1,7 @@
 package org.autojs.plugin.jvmsource.api;
 
+import java.util.Collections;
+import java.util.Map;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -26,6 +28,11 @@ public final class JavaEntryCompatibilityTest {
             @Override
             public JvmAppApi app() {
                 return packageName -> packageName.equals("com.example.app");
+            }
+
+            @Override
+            public Map<String, Object> args() {
+                return Collections.singletonMap("name", "entry-api-4");
             }
 
             @Override
@@ -84,6 +91,7 @@ public final class JavaEntryCompatibilityTest {
         assertEquals(Boolean.TRUE, entry.run(context));
         assertEquals("log:hello;error:oops;toast:ready;", output.toString());
         assertTrue(context.app().launch("com.example.app"));
+        assertEquals("entry-api-4", context.args().get("name"));
         context.clipboard().setText("M9 clipboard");
         assertEquals("M9 clipboard", context.clipboard().getText());
         context.throwIfCancellationRequested();

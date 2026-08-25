@@ -14,6 +14,7 @@ import org.autojs.plugin.jvmsource.api.JvmSourceCapabilities
 import org.autojs.plugin.jvmsource.api.JvmSourceCodec
 import org.autojs.plugin.jvmsource.api.JvmSourceCompilerFamily
 import org.autojs.plugin.jvmsource.api.JvmSourceContract
+import org.autojs.plugin.jvmsource.api.JvmSourceContractException
 import org.autojs.plugin.jvmsource.api.JvmSourceCancellation
 import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
 import org.autojs.plugin.jvmsource.api.JvmSourceError
@@ -27,6 +28,7 @@ import org.autojs.plugin.jvmsource.api.JvmSourceStarted
 import org.autojs.plugin.jvmsource.api.JvmToolchainFingerprint
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -39,6 +41,41 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.measureTimeMillis
 
 class RemoteJvmSourceHostTest {
+    @Test
+    fun invalidArgumentJsonFailsBeforeProviderInspectionOrBinding() {
+        val directory = Files.createTempDirectory("jvm-source-invalid-args-test").toFile()
+        val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport()
+        try {
+            val host = RemoteJvmSourceHost(
+                transport = transport,
+                artifactStore = FakeArtifactStore(sourceFile.readBytes()),
+                blockingExecutor = executor,
+                featureEnabled = true,
+                selectedComponent = { _ -> COMPONENT },
+                hostVersionCode = HOST_VERSION,
+                hostRuntimeApi = 24,
+                hostIdentity = HOST_IDENTITY,
+                launchPackage = { true },
+            )
+
+            assertThrows(JvmSourceContractException::class.java) {
+                host.execute(
+                    JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                    JvmSourceExecutionControl(),
+                    argsJson = "{\"value\":NaN}",
+                )
+            }
+            assertEquals(0, transport.inspections)
+            assertEquals(0, transport.binds)
+            assertEquals(null, transport.lastRequest)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
     @Test
     fun closeIsIdempotentAndReleasesOwnedArtifactStoreAndExecutor() {
         val executor = Executors.newSingleThreadExecutor()
@@ -134,6 +171,7 @@ class RemoteJvmSourceHostTest {
             val result = host.execute(
                 JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
                 JvmSourceExecutionControl(),
+                argsJson = ARGS_JSON,
             )
 
             assertEquals("{\"ok\":true}", result.resultJson)
@@ -141,6 +179,7 @@ class RemoteJvmSourceHostTest {
             assertEquals("hello stdout", result.stdout)
             assertEquals("warning stderr", result.stderr)
             assertEquals("org.example.target", launchedPackage)
+            assertEquals(ARGS_JSON, transport.lastRequest?.argsJson)
             assertTrue(result.requestSha256.matches(Regex("[0-9a-f]{64}")))
             assertEquals(1, result.allowlistedBridgeOperationCount)
             assertEquals(0, result.rejectedBridgeOperationCount)
@@ -1351,6 +1390,7 @@ class RemoteJvmSourceHostTest {
         const val HOST_VERSION = 5_300L
         const val COMPILER_PID = 20_001
         const val WORKER_PID = 20_002
+        const val ARGS_JSON = "{\"count\":2,\"nested\":[true,null]}"
         const val FINAL_INSPECTION_BEFORE_FIRST_DISPATCH = 3
         val HOST_IDENTITY = JvmSourceHostProcessIdentity(10_001, 10_000, "org.autojs.autojs6")
         val COMPONENT = JvmSourceComponent(

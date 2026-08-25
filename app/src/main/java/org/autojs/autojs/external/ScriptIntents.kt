@@ -8,6 +8,7 @@ import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.model.script.PathChecker
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.script.LuaScriptSource
+import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.script.PersistedScriptLaunchPolicy
 import org.autojs.autojs.script.PythonProjectLaunchError
 import org.autojs.autojs.script.PythonProjectLaunchException
@@ -292,7 +293,7 @@ object ScriptIntents {
 
     @VisibleForTesting
     internal fun shouldExposeAndroidIntentArgument(engineName: String): Boolean =
-        engineName != LuaScriptSource.ENGINE
+        engineName != LuaScriptSource.ENGINE && engineName != JvmFileSource.ENGINE
 
     private fun JSONObject.optIntentString(key: String): String? {
         if (!has(key) || isNull(key)) {

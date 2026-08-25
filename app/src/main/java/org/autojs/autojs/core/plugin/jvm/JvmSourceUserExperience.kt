@@ -19,6 +19,7 @@ enum class JvmSourceUserFailureCode(val stableCode: String) {
     PROVIDER_UPDATE_DRIFT("JVM_SOURCE_PROVIDER_UPDATE_DRIFT"),
     PROVIDER_ROLLBACK_REQUIRED("JVM_SOURCE_PROVIDER_ROLLBACK_REQUIRED"),
     PROVIDER_QUARANTINED("JVM_SOURCE_PROVIDER_QUARANTINED"),
+    INVALID_ARGUMENTS("JVM_SOURCE_INVALID_ARGUMENTS"),
     COMPILE_FAILED("JVM_SOURCE_COMPILE_FAILED"),
     RUNTIME_FAILED("JVM_SOURCE_RUNTIME_FAILED"),
     CANCELLED("JVM_SOURCE_CANCELLED"),
@@ -34,6 +35,7 @@ enum class JvmSourceRecoveryAction {
     RESTORE_TRUSTED_PROVIDER,
     UPDATE_HOST_OR_PROVIDER,
     RETRY_LATER,
+    FIX_INVOCATION,
     FIX_SOURCE,
     REVIEW_RUNTIME_FAILURE,
     NONE,
@@ -278,6 +280,12 @@ internal object JvmSourceUserExperiencePolicy {
     fun sourcePolicyViolation(
         language: JvmSourceLanguage,
     ): JvmSourceUserFailure = invalidRequest(JvmSourceFailurePhase.INPUT, language)
+
+    fun invalidArguments(): JvmSourceUserFailure = failure(
+        JvmSourceUserFailureCode.INVALID_ARGUMENTS,
+        "JVM source arguments do not satisfy the supported JSON profile",
+        JvmSourceRecoveryAction.FIX_INVOCATION,
+    )
 
     private fun invalidRequest(
         phase: JvmSourceFailurePhase,

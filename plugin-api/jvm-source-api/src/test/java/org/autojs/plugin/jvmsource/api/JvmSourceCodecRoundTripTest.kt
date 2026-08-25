@@ -25,7 +25,9 @@ class JvmSourceCodecRoundTripTest {
 
     @Test
     fun roundTripsRequestAndProgressMetadata() {
-        val request = JvmSourceFixtures.request()
+        val request = JvmSourceFixtures.request(
+            argsJson = "{\"count\":2,\"nested\":[true,null]}",
+        )
         assertEquals(
             request,
             JvmSourceCodec.decodeRequest(JvmSourceCodec.encodeRequest(request)),

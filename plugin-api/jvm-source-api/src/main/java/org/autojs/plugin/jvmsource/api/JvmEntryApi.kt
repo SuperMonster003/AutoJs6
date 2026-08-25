@@ -15,6 +15,9 @@ fun interface AutoJsJvmEntry {
 interface JvmScriptContext {
     fun app(): JvmAppApi
 
+    /** Returns the deeply immutable JSON-profile snapshot supplied by the host execution config. */
+    fun args(): Map<String, Any?>
+
     fun clipboard(): JvmClipboardApi
 
     fun console(): JvmConsoleApi

@@ -114,6 +114,11 @@ class JvmSourceUserExperiencePolicyTest {
         assertEquals(JvmSourceUserFailureCode.COMPILE_FAILED, localKotlinFailure.code)
         assertEquals("Kotlin source does not satisfy the supported source profile", localKotlinFailure.message)
         assertEquals(JvmSourceRecoveryAction.FIX_SOURCE, localKotlinFailure.recoveryAction)
+
+        val invalidArguments = JvmSourceUserExperiencePolicy.invalidArguments()
+        assertEquals(JvmSourceUserFailureCode.INVALID_ARGUMENTS, invalidArguments.code)
+        assertEquals(JvmSourceRecoveryAction.FIX_INVOCATION, invalidArguments.recoveryAction)
+        assertFalse(invalidArguments.retryable)
     }
 
     @Test

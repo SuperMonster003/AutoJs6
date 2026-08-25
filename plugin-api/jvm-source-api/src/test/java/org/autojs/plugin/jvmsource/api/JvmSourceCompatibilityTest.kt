@@ -1,6 +1,7 @@
 package org.autojs.plugin.jvmsource.api
 
 import org.autojs.plugin.protocol.wire.TaggedWireError
+import org.autojs.plugin.protocol.wire.TaggedWireDocument
 import org.autojs.plugin.protocol.wire.TaggedWireException
 import org.autojs.plugin.protocol.wire.TaggedWireWriter
 import org.junit.Assert.assertEquals
@@ -167,6 +168,32 @@ class JvmSourceCompatibilityTest {
     }
 
     @Test
+    fun protocol12RequestRemainsDecodableOnlyWithEmptyLegacyArguments() {
+        val legacy = JvmSourceFixtures.request().copy(
+            protocolVersion = JvmProtocolVersion(1, 2),
+            argsJson = "{}",
+        )
+        assertEquals(legacy, JvmSourceCodec.decodeRequest(JvmSourceCodec.encodeRequest(legacy)))
+
+        val failure = assertThrows(JvmSourceContractException::class.java) {
+            JvmSourceCodec.encodeRequest(legacy.copy(argsJson = "{\"new\":true}"))
+        }
+        assertEquals(JvmSourceContractViolation.INVALID_VALUE, failure.violation)
+    }
+
+    @Test
+    fun protocol13MarksArgumentsAsRequiredForOlderWireReaders() {
+        val encoded = JvmSourceCodec.encodeRequest(
+            JvmSourceFixtures.request(argsJson = "{\"new\":true}"),
+        )
+
+        val failure = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(encoded).rejectUnknownRequiredFields((1..16).toSet())
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, failure.error)
+    }
+
+    @Test
     fun bindsRequestStartedAndResultToOneToolchainFingerprint() {
         val provider = JvmSourceFixtures.providerInfo()
         val capabilities = JvmSourceFixtures.capabilities()
@@ -251,10 +278,10 @@ class JvmSourceCompatibilityTest {
     }
 
     @Test
-    fun freezesTheProtocol12Entry3CombinedToolchainFingerprint() {
+    fun freezesTheProtocol13Entry4CombinedToolchainFingerprint() {
         val capabilities = JvmSourceFixtures.capabilities()
         assertEquals(
-            "f792e93079a76bbca3d9df5dc646dc44a0d939e5a74b577f5c6db5e60184cbd0",
+            "12143f542f36552a23a7c4f388baa37e076fec35932231dc7510765bb5f153c8",
             capabilities.toolchainFingerprint.toHexString(),
         )
         assertNotEquals(

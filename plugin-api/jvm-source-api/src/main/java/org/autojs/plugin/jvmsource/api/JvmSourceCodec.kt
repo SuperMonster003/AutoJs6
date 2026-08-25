@@ -235,6 +235,11 @@ object JvmSourceCodec {
                 value.expectedToolchainFingerprint.toByteArray(),
                 requiredForReader = true,
             )
+            .apply {
+                if (value.protocolVersion >= JvmSourceContract.ARGS_PROTOCOL_VERSION) {
+                    string(RequestTags.ARGS_JSON, value.argsJson, requiredForReader = true)
+                }
+            }
             .encode()
     }
 
@@ -246,12 +251,20 @@ object JvmSourceCodec {
             RequestTags.ALL,
             RequestTags.REPEATED,
         )
+        val protocolVersion = JvmProtocolVersion(
+            document.requireInt32(RequestTags.PROTOCOL_MAJOR),
+            document.requireInt32(RequestTags.PROTOCOL_MINOR),
+        )
+        val encodedArgs = document.optionalString(RequestTags.ARGS_JSON)
+        if (protocolVersion >= JvmSourceContract.ARGS_PROTOCOL_VERSION && encodedArgs == null) {
+            throw JvmSourceContractException(
+                JvmSourceContractViolation.INVALID_VALUE,
+                "Protocol ${protocolVersion.major}.${protocolVersion.minor} request is missing arguments JSON",
+            )
+        }
         return JvmSourceRequest(
             requestId = JvmRequestId.fromBytes(document.requireBytes(RequestTags.REQUEST_ID)),
-            protocolVersion = JvmProtocolVersion(
-                document.requireInt32(RequestTags.PROTOCOL_MAJOR),
-                document.requireInt32(RequestTags.PROTOCOL_MINOR),
-            ),
+            protocolVersion = protocolVersion,
             language = enumByName<JvmSourceLanguage>(
                 document.requireString(RequestTags.LANGUAGE),
                 "source language",
@@ -272,6 +285,7 @@ object JvmSourceCodec {
             grantedCapabilities = document.strings(RequestTags.GRANTED_CAPABILITIES).map { value ->
                 enumByName<JvmScriptCapability>(value, "granted script capability") { it.wireName }
             },
+            argsJson = encodedArgs ?: "{}",
         ).also(JvmSourceValidation::validateRequest)
     }
 
@@ -593,7 +607,8 @@ object JvmSourceCodec {
         const val ALLOWED_HOST_CALLS = 14
         const val EXPECTED_TOOLCHAIN_FINGERPRINT = 15
         const val GRANTED_CAPABILITIES = 16
-        val ALL = (1..16).toSet()
+        const val ARGS_JSON = 17
+        val ALL = (1..17).toSet()
         val REPEATED = setOf(ALLOWED_HOST_CALLS, GRANTED_CAPABILITIES)
     }
 

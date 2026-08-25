@@ -13,6 +13,7 @@ class JvmEntryApiBoundaryTest {
         val apiTypes = listOf(
             AutoJsJvmEntry::class.java,
             JvmScriptContext::class.java,
+            JvmJsonArguments::class.java,
             JvmAppApi::class.java,
             JvmClipboardApi::class.java,
             JvmConsoleApi::class.java,
@@ -55,6 +56,10 @@ class JvmEntryApiBoundaryTest {
         assertEquals(
             JvmAppApi::class.java,
             JvmScriptContext::class.java.getMethod("app").returnType,
+        )
+        assertEquals(
+            Map::class.java,
+            JvmScriptContext::class.java.getMethod("args").returnType,
         )
         assertEquals(
             JvmCancellation::class.java,

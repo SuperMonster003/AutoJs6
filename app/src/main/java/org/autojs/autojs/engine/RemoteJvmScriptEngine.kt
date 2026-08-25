@@ -8,6 +8,7 @@ import org.autojs.autojs.core.plugin.jvm.JvmSourceUserFacingException
 import org.autojs.autojs.core.plugin.jvm.RemoteJvmScriptResult
 import org.autojs.autojs.core.plugin.jvm.RemoteJvmSourceException
 import org.autojs.autojs.core.plugin.jvm.RemoteJvmSourceHost
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.api.Console
 import org.autojs.autojs.script.JvmFileSource
 import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
@@ -42,7 +43,12 @@ class RemoteJvmScriptEngine internal constructor(
             error("Remote JVM script engine is stopped")
         }
         return try {
-            host.execute(scriptSource, control, ConsoleSink())
+            val argsJson = try {
+                executionArgumentsJson()
+            } catch (_: IllegalArgumentException) {
+                throw JvmSourceUserFacingException(JvmSourceUserExperiencePolicy.invalidArguments())
+            }
+            host.execute(scriptSource, control, ConsoleSink(), argsJson)
         } catch (error: RemoteJvmSourceException) {
             // ScriptEngineService is a user-facing boundary. Do not surface the internal cause
             // chain: transport failures may contain component, Binder, UID/PID, or path details.
@@ -69,6 +75,14 @@ class RemoteJvmScriptEngine internal constructor(
         forceStop()
         host.close()
         super.destroy()
+    }
+
+    private fun executionArgumentsJson(): String = when (val config = getTag(ExecutionConfig.tag)) {
+        null -> JvmExecutionArgumentMapper.encode(emptyMap<String, Any?>())
+        is ExecutionConfig -> JvmExecutionArgumentMapper.encode(config.arguments)
+        else -> throw IllegalArgumentException(
+            "JVM source execution config tag has unsupported type ${config.javaClass.name}",
+        )
     }
 
     /**

@@ -5,6 +5,7 @@ import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.script.JvmSourceKind
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.plugin.jvmsource.api.JvmIsolationCapability
+import org.autojs.plugin.jvmsource.api.JvmJsonArguments
 import org.autojs.plugin.jvmsource.api.JvmProviderInfo
 import org.autojs.plugin.jvmsource.api.JvmRequestId
 import org.autojs.plugin.jvmsource.api.JvmScriptCapability
@@ -170,10 +171,12 @@ internal class RemoteJvmSourceHost(
         source: JvmFileSource,
         control: JvmSourceExecutionControl,
         sink: JvmSourceExecutionSink = JvmSourceExecutionSink.NONE,
+        argsJson: String = "{}",
     ): RemoteJvmScriptResult {
         require(JvmSourceExplicitRunner.isAuthorized(source)) {
             "JVM source execution requires runJvmSourceExplicit; generic script execution is not authorized"
         }
+        JvmJsonArguments.decode(argsJson)
         JvmSourceR1Policy.requireSupportedFileName(source.sourceKind, source.file.name)
         val language = JvmSourceR1Policy.language(source.sourceKind)
         when (executionGate.tryAcquire(control)) {
@@ -187,7 +190,7 @@ internal class RemoteJvmSourceHost(
                 throw RemoteJvmSourceException("JVM source host is closed")
         }
         try {
-            return executeOne(source, language, control, sink)
+            return executeOne(source, language, control, sink, argsJson)
         } finally {
             check(executionGate.release(control))
         }
@@ -205,6 +208,7 @@ internal class RemoteJvmSourceHost(
         language: JvmSourceLanguage,
         control: JvmSourceExecutionControl,
         sink: JvmSourceExecutionSink,
+        argsJson: String,
     ): RemoteJvmScriptResult {
         if (!featureEnabled) {
             throw RemoteJvmSourceException(
@@ -393,7 +397,7 @@ internal class RemoteJvmSourceHost(
             }
             requireNoFatalTransportEvent()
             val negotiated = validateHandshake(identity, handshake, language)
-            val request = request(inputSnapshot, handshake.capabilities, negotiated)
+            val request = request(inputSnapshot, handshake.capabilities, negotiated, argsJson)
             val encodedRequest = JvmSourceCodec.encodeRequest(request).requireMetadataSize()
             val requestSha256 = JvmSha256.digest(encodedRequest).toHexString()
             val collector = CallbackCollector(request, handshake.info, handshake.capabilities, identity)
@@ -743,6 +747,7 @@ internal class RemoteJvmSourceHost(
         snapshot: JvmSourceInputSnapshot,
         capabilities: JvmSourceCapabilities,
         protocolVersion: org.autojs.plugin.jvmsource.api.JvmProtocolVersion,
+        argsJson: String,
     ): JvmSourceRequest {
         val request = JvmSourceRequest(
             requestId = JvmRequestId.fromUuid(UUID.randomUUID()),
@@ -760,6 +765,7 @@ internal class RemoteJvmSourceHost(
             diagnosticByteLimit = minOf(JvmSourceContract.MAX_DIAGNOSTIC_BYTES, capabilities.maxDiagnosticBytes),
             allowedHostCalls = capabilities.scriptCapabilities.mapNotNull(JvmScriptCapability::hostMethod),
             grantedCapabilities = capabilities.scriptCapabilities,
+            argsJson = argsJson,
         )
         JvmSourceValidation.validateRequestAgainst(request, capabilities, protocolVersion)
         return request

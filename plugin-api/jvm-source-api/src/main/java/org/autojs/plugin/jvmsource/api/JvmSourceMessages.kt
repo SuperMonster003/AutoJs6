@@ -149,6 +149,7 @@ class JvmSourceRequest(
     val diagnosticByteLimit: Int,
     allowedHostCalls: List<String> = emptyList(),
     grantedCapabilities: List<JvmScriptCapability> = emptyList(),
+    val argsJson: String = "{}",
 ) {
     val allowedHostCalls: List<String> = defensiveList(allowedHostCalls)
     val grantedCapabilities: List<JvmScriptCapability> = defensiveList(grantedCapabilities)
@@ -169,6 +170,7 @@ class JvmSourceRequest(
         diagnosticByteLimit: Int = this.diagnosticByteLimit,
         allowedHostCalls: List<String> = this.allowedHostCalls,
         grantedCapabilities: List<JvmScriptCapability> = this.grantedCapabilities,
+        argsJson: String = this.argsJson,
     ): JvmSourceRequest = JvmSourceRequest(
         requestId,
         protocolVersion,
@@ -185,6 +187,7 @@ class JvmSourceRequest(
         diagnosticByteLimit,
         allowedHostCalls,
         grantedCapabilities,
+        argsJson,
     )
 
     override fun equals(other: Any?): Boolean = other is JvmSourceRequest &&
@@ -202,7 +205,8 @@ class JvmSourceRequest(
         maxStderrBytes == other.maxStderrBytes &&
         diagnosticByteLimit == other.diagnosticByteLimit &&
         allowedHostCalls == other.allowedHostCalls &&
-        grantedCapabilities == other.grantedCapabilities
+        grantedCapabilities == other.grantedCapabilities &&
+        argsJson == other.argsJson
 
     override fun hashCode(): Int {
         var result = requestId.hashCode()
@@ -219,7 +223,8 @@ class JvmSourceRequest(
         result = 31 * result + maxStderrBytes.hashCode()
         result = 31 * result + diagnosticByteLimit
         result = 31 * result + allowedHostCalls.hashCode()
-        return 31 * result + grantedCapabilities.hashCode()
+        result = 31 * result + grantedCapabilities.hashCode()
+        return 31 * result + argsJson.hashCode()
     }
 
     override fun toString(): String =
@@ -228,7 +233,8 @@ class JvmSourceRequest(
             "expectedToolchainFingerprint=$expectedToolchainFingerprint, entryClassName=$entryClassName, " +
             "minApi=$minApi, timeoutMillis=$timeoutMillis, maxStdoutBytes=$maxStdoutBytes, " +
             "maxStderrBytes=$maxStderrBytes, diagnosticByteLimit=$diagnosticByteLimit, " +
-            "allowedHostCalls=$allowedHostCalls, grantedCapabilities=$grantedCapabilities)"
+            "allowedHostCalls=$allowedHostCalls, grantedCapabilities=$grantedCapabilities, " +
+            "argsJsonUtf8Bytes=${argsJson.toByteArray(Charsets.UTF_8).size})"
 }
 
 /**
