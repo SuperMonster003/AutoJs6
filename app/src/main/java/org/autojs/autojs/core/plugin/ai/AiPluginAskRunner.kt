@@ -44,13 +44,24 @@ internal data class AiPluginUsage(
     val outputTokens: Long?,
     val totalTokens: Long?,
     val durationMillis: Long?,
+    val reasoningTokens: Long? = null,
+    val cachedInputTokens: Long? = null,
 ) {
     init {
-        require(listOf(inputTokens, outputTokens, totalTokens).any { it != null }) {
-            "Local AI plugin usage must contain a token count"
+        require(listOf(inputTokens, outputTokens, totalTokens, reasoningTokens, cachedInputTokens).any { it != null }) {
+            "AI plugin usage must contain a token count"
         }
-        require(listOf(inputTokens, outputTokens, totalTokens, durationMillis).filterNotNull().all { it >= 0L }) {
-            "Local AI plugin usage values must not be negative"
+        require(
+            listOf(
+                inputTokens,
+                outputTokens,
+                totalTokens,
+                reasoningTokens,
+                cachedInputTokens,
+                durationMillis,
+            ).filterNotNull().all { it >= 0L },
+        ) {
+            "AI plugin usage values must not be negative"
         }
     }
 }
@@ -59,14 +70,16 @@ internal fun AiUsage.toPluginUsage() = AiPluginUsage(
     inputTokens = inputTokens,
     outputTokens = outputTokens,
     totalTokens = totalTokens,
+    reasoningTokens = reasoningTokens,
+    cachedInputTokens = cachedInputTokens,
     durationMillis = durationMillis,
 )
 
 internal class AiPluginAskRequest(
     val component: AiProviderComponent,
     val providerId: String,
-    /** Null selects the provider's single installed target; ambiguity fails the request. */
-    val modelId: String?,
+    /** Null selects the provider-declared default target. */
+    val targetId: String?,
     messages: List<AiPluginMessage>,
     val timeoutMillis: Long,
     val maximumOutputBytes: Long = DEFAULT_MAXIMUM_OUTPUT_BYTES,
@@ -76,6 +89,7 @@ internal class AiPluginAskRequest(
     val topP: Double? = null,
     val responseSchemaJson: String? = null,
     val backendProfile: String? = null,
+    val includeReasoning: Boolean = false,
 ) {
     val messages: List<AiPluginMessage> = messages.toList()
     val inputBytes: Long = this.messages.sumOf { it.contentBytes.toLong() }
@@ -84,7 +98,7 @@ internal class AiPluginAskRequest(
 
     init {
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
-        modelId?.let { require(AiValidation.STABLE_ID.matches(it)) { "Invalid model ID" } }
+        targetId?.let { require(AiValidation.TARGET_ID.matches(it)) { "Invalid target ID" } }
         require(this.messages.size in 1..AiProviderLimits.MAX_MESSAGES) {
             "Invalid AI provider plugin message count"
         }
@@ -122,22 +136,22 @@ internal class AiPluginAskRequest(
                 schema,
                 1,
                 AiProviderLimits.MAX_ONE_SCHEMA_BYTES.toInt(),
-                "local AI response schema",
+                "AI plugin response schema",
             )
             AiJsonSyntaxValidator.requireValid(schema)
             require(schema.trimStart().startsWith('{')) {
-                "The local AI response schema must be a JSON object"
+                "The AI plugin response schema must be a JSON object"
             }
         }
     }
 
     override fun toString(): String =
-        "AiPluginAskRequest(component=$component, providerId=$providerId, modelId=$modelId, " +
+        "AiPluginAskRequest(component=$component, providerId=$providerId, targetId=$targetId, " +
             "messageCount=${messages.size}, messageRoles=${messages.map { it.role }}, " +
             "inputBytes=$inputBytes, timeoutMillis=$timeoutMillis, " +
             "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
             "temperature=$temperature, topK=$topK, topP=$topP, " +
-            "backendProfile=$backendProfile, " +
+            "backendProfile=$backendProfile, includeReasoning=$includeReasoning, " +
             "structuredJson=$structuredJson, responseSchemaBytes=$responseSchemaBytes)"
 
     internal companion object {
@@ -153,7 +167,7 @@ internal fun AiPluginAskRequest.toGenerationOptions(
     persistentSession: Boolean = false,
 ) = AiGenerationOptions(
     stream = stream,
-    includeReasoning = false,
+    includeReasoning = includeReasoning,
     structuredJson = structuredJson,
     reportUsage = true,
     maximumOutputBytes = maximumOutputBytes,
@@ -175,6 +189,9 @@ internal fun AiPluginAskRequest.toGenerationOptions(
         if (structuredJson && AiProviderCapabilityId.STRUCTURED_JSON !in this) {
             add(AiProviderCapabilityId.STRUCTURED_JSON)
         }
+        if (includeReasoning && AiProviderCapabilityId.REASONING !in this) {
+            add(AiProviderCapabilityId.REASONING)
+        }
     },
     temperature = temperature,
     topK = topK,
@@ -185,17 +202,19 @@ internal fun AiPluginAskRequest.toGenerationOptions(
 
 internal enum class AiPluginAskFailure {
     INVALID_REQUEST,
-    PROVIDER_NOT_FOUND,
-    PROVIDER_DISABLED,
-    PROVIDER_REJECTED,
+    AI_PROVIDER_UNAVAILABLE,
+    AI_PROVIDER_DISABLED,
+    AI_PROVIDER_REJECTED,
     BUSY,
     FUSED,
     CANCELLED,
     TIMED_OUT,
     BINDER_DIED,
-    MODEL_NOT_FOUND,
-    MODEL_AMBIGUOUS,
-    MODEL_CAPABILITY_MISMATCH,
+    TARGET_NOT_FOUND,
+    TARGET_NOT_CONFIGURED,
+    TARGET_UNAVAILABLE,
+    TARGET_CAPABILITY_MISMATCH,
+    BACKEND_UNAVAILABLE,
     SESSION_CLOSED,
     SESSION_REJECTED,
     PROVIDER_FAILED,
@@ -205,12 +224,15 @@ internal enum class AiPluginAskFailure {
 internal sealed class AiPluginAskOutcome {
     class Completed(
         val text: String,
+        val reasoning: String,
         val usage: AiPluginUsage,
-        /** The model that actually served the request, once resolved from the catalog. */
-        val modelId: String? = null,
+        val finishReason: Int,
+        val target: AiPluginTargetSummary,
     ) : AiPluginAskOutcome() {
         override fun toString(): String =
-            "Completed(textBytes=${AiValidation.utf8Size(text)}, modelId=$modelId, usage=$usage)"
+            "Completed(textBytes=${AiValidation.utf8Size(text)}, " +
+                "reasoningBytes=${AiValidation.utf8Size(reasoning)}, targetId=${target.targetId}, " +
+                "finishReason=$finishReason, usage=$usage)"
     }
 
     data class Failed(val failure: AiPluginAskFailure) : AiPluginAskOutcome()
@@ -228,35 +250,40 @@ internal fun interface AiPluginAskRunner {
 }
 
 /**
- * Provider-neutral events for the local text-message plugin stream route.
+ * Provider-neutral events for the text-message plugin stream route.
  *
  * Binder/session identities and provider-native payloads deliberately remain below this boundary.
  */
 internal sealed class AiPluginStreamEvent {
-    object Opened : AiPluginStreamEvent()
+    data class Opened(val target: AiPluginTargetSummary) : AiPluginStreamEvent()
 
-    class Chunk(val text: String) : AiPluginStreamEvent() {
+    class Chunk(val text: String, val reasoning: String = "") : AiPluginStreamEvent() {
         init {
-            AiValidation.requireUtf8(
-                text,
-                1,
-                AiProviderLimits.MAX_CHUNK_TEXT_BYTES,
-                "AI provider plugin stream chunk",
-            )
+            require(text.isNotEmpty() || reasoning.isNotEmpty()) { "AI plugin stream chunk is empty" }
+            require(
+                AiValidation.utf8Size(text).toLong() + AiValidation.utf8Size(reasoning).toLong() <=
+                    AiProviderLimits.MAX_CHUNK_TEXT_BYTES,
+            ) { "AI plugin stream chunk exceeds the protocol limit" }
         }
 
         override fun toString(): String =
-            "Chunk(textBytes=${AiValidation.utf8Size(text)})"
+            "Chunk(textBytes=${AiValidation.utf8Size(text)}, " +
+                "reasoningBytes=${AiValidation.utf8Size(reasoning)})"
     }
 
     data class Usage(val usage: AiPluginUsage) : AiPluginStreamEvent()
 
     class Completed(
         val text: String,
+        val reasoning: String,
         val usage: AiPluginUsage,
+        val finishReason: Int,
+        val target: AiPluginTargetSummary,
     ) : AiPluginStreamEvent() {
         override fun toString(): String =
-            "Completed(textBytes=${AiValidation.utf8Size(text)}, usage=$usage)"
+            "Completed(textBytes=${AiValidation.utf8Size(text)}, " +
+                "reasoningBytes=${AiValidation.utf8Size(reasoning)}, targetId=${target.targetId}, " +
+                "finishReason=$finishReason, usage=$usage)"
     }
 
     data class Failed(val failure: AiPluginAskFailure) : AiPluginStreamEvent()
@@ -269,8 +296,8 @@ internal fun interface AiPluginStreamRunner {
     ): AiPluginAskHandle
 }
 
-/** Read-only model catalog listing against an explicitly selected plugin component. */
-internal class AiPluginModelListRequest(
+/** Read-only target catalog listing against an explicitly selected plugin component. */
+internal class AiPluginCatalogRequest(
     val component: AiProviderComponent,
     val providerId: String,
     val timeoutMillis: Long,
@@ -283,36 +310,71 @@ internal class AiPluginModelListRequest(
     }
 }
 
-internal class AiPluginModelSummary(
+internal class AiPluginTargetSummary(
+    val targetId: String,
+    val providerId: String,
+    val profileId: String?,
     val modelId: String,
     val displayName: String,
-    val capabilityIds: List<String>,
+    capabilityIds: List<String>,
+    val locality: Int,
+    val credentialMode: Int,
+    val availability: String,
+    val configured: Boolean,
+    val isDefault: Boolean,
     val maximumContextBytes: Long,
     val maximumOutputBytes: Long,
+    supportedControls: List<String>,
+    declaredHttpsOrigins: List<String>,
     backendProfiles: List<AiBackendProfileInfo>,
 ) {
+    val capabilityIds: List<String> = capabilityIds.toList()
+    val supportedControls: List<String> = supportedControls.toList()
+    val declaredHttpsOrigins: List<String> = declaredHttpsOrigins.toList()
     val backendProfiles: List<AiBackendProfileInfo> = backendProfiles.toList()
 }
 
-internal sealed class AiPluginModelListOutcome {
-    class Completed(models: List<AiPluginModelSummary>) : AiPluginModelListOutcome() {
-        val models: List<AiPluginModelSummary> = models.toList()
-    }
+internal class AiPluginCatalog(
+    val component: AiProviderComponent,
+    val providerId: String,
+    val generation: String,
+    val defaultTargetId: String?,
+    targets: List<AiPluginTargetSummary>,
+) {
+    val targets: List<AiPluginTargetSummary> = targets.toList()
 
-    data class Failed(val failure: AiPluginAskFailure) : AiPluginModelListOutcome()
+    init {
+        require(this.targets.map { it.targetId }.distinct().size == this.targets.size) {
+            "AI plugin catalog contains duplicate target IDs"
+        }
+        val declaredDefault = this.targets.singleOrNull { it.isDefault }?.targetId
+        require(defaultTargetId == declaredDefault) {
+            "AI plugin catalog default target is inconsistent"
+        }
+    }
 }
 
-internal fun interface AiPluginModelListRunner {
-    fun listModels(
-        request: AiPluginModelListRequest,
-        onOutcome: (AiPluginModelListOutcome) -> Unit,
+internal sealed class AiPluginCatalogOutcome {
+    data class Completed(val catalog: AiPluginCatalog) : AiPluginCatalogOutcome()
+    data class Failed(val failure: AiPluginAskFailure) : AiPluginCatalogOutcome()
+}
+
+internal fun interface AiPluginCatalogRunner {
+    fun listCatalog(
+        request: AiPluginCatalogRequest,
+        onOutcome: (AiPluginCatalogOutcome) -> Unit,
     ): AiPluginAskHandle
 }
 
-/** A planned local plugin Conversation whose model and sampling controls are fixed at creation. */
+/** A planned plugin Conversation whose exact target and sampling controls are fixed at creation. */
 internal interface AiPluginSession : Closeable {
     val providerId: String
+    val target: AiPluginTargetSummary
+    val backendProfile: String?
     val modelId: String
+        get() = target.modelId
+    val targetId: String
+        get() = target.targetId
     val isClosed: Boolean
 
     fun startTurn(

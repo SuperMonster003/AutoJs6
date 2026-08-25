@@ -558,12 +558,14 @@ class AiProviderTargetListingTest {
                             modelId = MODEL_ONE,
                             displayName = SECRET_MODEL_DISPLAY,
                             capabilities = listOf(AiProviderCapabilityId.STREAMING),
+                            isDefault = true,
                         ),
                     ),
                 ),
             ),
         )
         val catalog = completed.catalog
+        assertEquals(targetIdFor(MODEL_ONE), catalog.defaultTarget?.targetId)
 
         assertThrows(UnsupportedOperationException::class.java) {
             @Suppress("UNCHECKED_CAST")
@@ -595,6 +597,21 @@ class AiProviderTargetListingTest {
         assertSame(
             AiProviderExactTargetPlanResult.BackendUnavailable,
             catalog.planExact(targetIdFor(MODEL_ONE), backendProfile = AiProviderBackendProfile.GPU),
+        )
+        val unconfiguredCatalog = AiProviderTargetCatalog(
+            pinnedProvider = pinned,
+            catalogGeneration = "unconfigured",
+            targets = listOf(
+                target(
+                    modelId = MODEL_TWO,
+                    availability = org.autojs.plugin.ai.provider.api.AiTargetAvailability.UNAVAILABLE,
+                    configured = false,
+                ),
+            ),
+        )
+        assertSame(
+            AiProviderExactTargetPlanResult.TargetNotConfigured,
+            unconfiguredCatalog.planExact(targetIdFor(MODEL_TWO)),
         )
         assertFalse(catalog.toString().contains(SECRET_MODEL_DISPLAY))
         assertFalse(completed.toString().contains(SECRET_MODEL_DISPLAY))
@@ -641,6 +658,9 @@ class AiProviderTargetListingTest {
         modelId: String,
         displayName: String = "Fixture model",
         capabilities: List<String> = listOf(AiProviderCapabilityId.STREAMING),
+        availability: String = org.autojs.plugin.ai.provider.api.AiTargetAvailability.AVAILABLE,
+        configured: Boolean = true,
+        isDefault: Boolean = false,
         backendProfiles: List<AiBackendProfileInfo> = listOf(
             AiBackendProfileInfo(
                 AiProviderBackendProfile.CPU,
@@ -657,6 +677,9 @@ class AiProviderTargetListingTest {
         modelId = modelId,
         displayName = displayName,
         capabilityIds = capabilities,
+        availability = availability,
+        configured = configured,
+        isDefault = isDefault,
         maximumContextBytes = 64L * 1024L,
         maximumOutputBytes = 64L * 1024L,
         backendProfiles = backendProfiles,

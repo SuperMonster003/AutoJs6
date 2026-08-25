@@ -146,6 +146,7 @@ internal object AiProviderHostTestFixtures {
         },
         availability: String = AiTargetAvailability.AVAILABLE,
         configured: Boolean = true,
+        isDefault: Boolean = false,
         maximumContextBytes: Long? = 64L * 1024L,
         maximumOutputBytes: Long? = 64L * 1024L,
         backendProfiles: List<AiBackendProfileInfo> = emptyList(),
@@ -167,6 +168,7 @@ internal object AiProviderHostTestFixtures {
         configured = configured,
         maximumContextBytes = maximumContextBytes,
         maximumOutputBytes = maximumOutputBytes,
+        isDefault = isDefault,
         supportedControls = if (backendProfiles.isEmpty()) {
             emptyList()
         } else {

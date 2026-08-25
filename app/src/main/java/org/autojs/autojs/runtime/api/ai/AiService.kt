@@ -9,8 +9,6 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.autojs.autojs.core.ai.AiProviderDefinition
-import org.autojs.autojs.core.ai.AiProviderProfileInspection
-import org.autojs.autojs.core.ai.AiProviderProfileSummary
 import org.autojs.autojs.core.ai.AiProviderVault
 import org.autojs.autojs.core.ai.AiResolvedProviderProfile
 import org.autojs.autojs.core.ai.transport.AiHttpErrors
@@ -28,8 +26,8 @@ import org.autojs.autojs.core.ai.transport.AiToolCall
 import org.autojs.autojs.core.ai.transport.AiUsage
 import org.autojs.autojs.core.ai.transport.SseReader
 import org.autojs.autojs.core.plugin.ai.AiPluginAskRunner
-import org.autojs.autojs.core.plugin.ai.AiPluginModelListRequest
-import org.autojs.autojs.core.plugin.ai.AiPluginModelListRunner
+import org.autojs.autojs.core.plugin.ai.AiPluginCatalogRequest
+import org.autojs.autojs.core.plugin.ai.AiPluginCatalogRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginSessionRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginStreamRunner
 import org.autojs.autojs.core.plugin.ai.AiProviderComponent
@@ -64,7 +62,7 @@ class AiService private constructor(
     pluginAskRuntimeFactory: () -> AiPluginAskRuntime,
     pluginStreamRuntimeFactory: () -> AiPluginStreamRuntime,
     pluginSessionRuntimeFactory: () -> AiPluginSessionRuntime,
-    pluginModelListRuntimeFactory: () -> AiPluginModelListRuntime,
+    pluginCatalogRuntimeFactory: () -> AiPluginCatalogRuntime,
 ) {
 
     constructor(
@@ -101,9 +99,9 @@ class AiService private constructor(
             )
         },
         {
-            AiPluginModelListRuntime(
+            AiPluginCatalogRuntime(
                 runnerProvider = {
-                    AndroidAiPluginAskRunner.createModelList(context.applicationContext)
+                    AndroidAiPluginAskRunner.createCatalog(context.applicationContext)
                 },
                 dispatcherFactory = { AiAsyncDispatcher(scriptRuntime) },
             )
@@ -120,8 +118,8 @@ class AiService private constructor(
             AndroidAiPluginAskRunner.createStream(context.applicationContext),
         pluginSessionRunner: AiPluginSessionRunner =
             AndroidAiPluginAskRunner.createSession(context.applicationContext),
-        pluginModelListRunner: AiPluginModelListRunner =
-            AndroidAiPluginAskRunner.createModelList(context.applicationContext),
+        pluginCatalogRunner: AiPluginCatalogRunner =
+            AndroidAiPluginAskRunner.createCatalog(context.applicationContext),
     ) : this(
         context,
         scriptRuntime,
@@ -146,8 +144,8 @@ class AiService private constructor(
             )
         },
         {
-            AiPluginModelListRuntime(
-                runnerProvider = { pluginModelListRunner },
+            AiPluginCatalogRuntime(
+                runnerProvider = { pluginCatalogRunner },
                 dispatcherFactory = pluginDispatcherFactory,
             )
         },
@@ -169,8 +167,8 @@ class AiService private constructor(
     private val pluginSessionRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         pluginSessionRuntimeFactory()
     }
-    private val pluginModelListRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        pluginModelListRuntimeFactory()
+    private val pluginCatalogRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        pluginCatalogRuntimeFactory()
     }
 
     fun ask(input: AiRequestInput): ScriptPromiseAdapter {
@@ -274,60 +272,25 @@ class AiService private constructor(
         return pluginSessionRuntime().open(request, target)
     }
 
-    /**
-     * Lists models of an explicitly selected local AI plugin. `options.plugin` follows the same
-     * shorthand as ask/chat/stream (`true` or a partial selector picks the official plugin).
-     */
-    fun models(input: AiRequestInput): ScriptPromiseAdapter {
+    /** Lists the complete target catalog of one explicitly selected AI plugin. */
+    fun catalog(input: AiRequestInput): ScriptPromiseAdapter {
         val control = try {
             AiPluginAskInputMapper.requirePluginControl(input)
         } catch (_: Exception) {
-            return pluginModelListRuntime().reject(invalidPluginRequest())
+            return pluginCatalogRuntime().reject(invalidPluginRequest())
         }
         val selection = requireNotNull(control.pluginSelection)
         val request = try {
-            AiPluginModelListRequest(
+            require(control.targetId == null) { "AI catalog does not accept a target selector" }
+            AiPluginCatalogRequest(
                 component = AiProviderComponent(selection.packageName, selection.className),
                 providerId = selection.providerId,
                 timeoutMillis = control.timeoutMillis ?: DEFAULT_CALL_TIMEOUT_MILLIS,
             )
         } catch (_: Exception) {
-            return pluginModelListRuntime().reject(invalidPluginRequest())
+            return pluginCatalogRuntime().reject(invalidPluginRequest())
         }
-        return pluginModelListRuntime().list(request)
-    }
-
-    fun profiles(): List<Map<String, Any?>> {
-        return vault.inspectProfiles().entries.map(AiProviderProfileInspection::toPublicValue)
-    }
-
-    fun providers(): List<Map<String, Any?>> {
-        return AiProviderDefinition.entries.map { provider ->
-            linkedMapOf(
-                "id" to provider.id,
-                "defaultBaseUrl" to provider.defaultBaseUrl,
-            )
-        }
-    }
-
-    fun defaultProfile(): Map<String, Any?>? {
-        return vault.inspectProfiles().entries
-            .firstOrNull(AiProviderProfileInspection::isDefault)
-            ?.toPublicValue()
-    }
-
-    fun isConfigured(): Boolean {
-        return vault.listProfiles().any { profile ->
-            profile.isDefault &&
-                profile.model.isNotBlank() &&
-                (
-                    profile.hasApiKey ||
-                        AiCredentialPolicy.allowsMissingApiKey(
-                            profile.providerId,
-                            profile.baseUrl,
-                        )
-                )
-        }
+        return pluginCatalogRuntime().list(request)
     }
 
     fun close() {
@@ -344,8 +307,8 @@ class AiService private constructor(
             if (pluginSessionRuntimeDelegate.isInitialized()) {
                 pluginSessionRuntimeDelegate.value.close()
             }
-            if (pluginModelListRuntimeDelegate.isInitialized()) {
-                pluginModelListRuntimeDelegate.value.close()
+            if (pluginCatalogRuntimeDelegate.isInitialized()) {
+                pluginCatalogRuntimeDelegate.value.close()
             }
             activePluginSessions.toList().forEach(AiSessionNativeObject::close)
             activeStreams.toList().forEach(AiStream.Controller::cancelSilently)
@@ -405,8 +368,8 @@ class AiService private constructor(
             if (closed.get()) runtime.close()
         }
 
-    private fun pluginModelListRuntime(): AiPluginModelListRuntime =
-        pluginModelListRuntimeDelegate.value.also { runtime ->
+    private fun pluginCatalogRuntime(): AiPluginCatalogRuntime =
+        pluginCatalogRuntimeDelegate.value.also { runtime ->
             if (closed.get()) runtime.close()
         }
 
@@ -895,33 +858,6 @@ class AiService private constructor(
         private const val MAX_ERROR_MESSAGE_CHARS = 512
         private val CONTROL_CHARACTERS = Regex("[\\p{Cc}\\p{Cf}]+")
     }
-}
-
-private fun AiProviderProfileSummary.toPublicValue(): Map<String, Any?> = linkedMapOf(
-    "id" to id,
-    "name" to name,
-    "provider" to providerId,
-    "baseUrl" to baseUrl,
-    "model" to model,
-    "hasApiKey" to hasApiKey,
-    "isDefault" to isDefault,
-    "status" to "available",
-    "errorCode" to null,
-)
-
-private fun AiProviderProfileInspection.toPublicValue(): Map<String, Any?> = when (this) {
-    is AiProviderProfileInspection.Available -> profile.toPublicValue()
-    is AiProviderProfileInspection.Unavailable -> linkedMapOf(
-        "id" to id,
-        "name" to null,
-        "provider" to null,
-        "baseUrl" to null,
-        "model" to null,
-        "hasApiKey" to null,
-        "isDefault" to isDefault,
-        "status" to status.id,
-        "errorCode" to errorCode.id,
-    )
 }
 
 private fun AiStreamChunk.toPublicValue(): Map<String, Any?> = linkedMapOf(

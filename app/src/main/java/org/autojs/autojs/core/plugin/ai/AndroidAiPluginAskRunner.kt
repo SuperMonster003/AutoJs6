@@ -32,6 +32,7 @@ import org.autojs.plugin.ai.provider.api.AiProviderLimits
 import org.autojs.plugin.ai.provider.api.AiProviderMimeType
 import org.autojs.plugin.ai.provider.api.AiProviderRequest
 import org.autojs.plugin.ai.provider.api.AiProviderSessionPolicy
+import org.autojs.plugin.ai.provider.api.AiTargetInfo
 import java.io.Closeable
 import java.util.ArrayDeque
 import java.util.UUID
@@ -78,6 +79,7 @@ internal fun aiProviderPluginCapabilityRequirement(
         if (streaming) add(AiProviderCapabilityId.STREAMING)
         if (persistentSession) add(AiProviderCapabilityId.PERSISTENT_SESSION)
         if (request.structuredJson) add(AiProviderCapabilityId.STRUCTURED_JSON)
+        if (request.includeReasoning) add(AiProviderCapabilityId.REASONING)
     },
     minimumMessages = request.messages.size,
     minimumContentParts = request.messages.size,
@@ -104,7 +106,7 @@ internal class AndroidAiPluginAskRunner private constructor(
     private val applicationContext: Context,
 ) : AiPluginAskRunner,
     AiPluginStreamRunner,
-    AiPluginModelListRunner,
+    AiPluginCatalogRunner,
     AiPluginSessionRunner {
 
     override fun start(
@@ -117,10 +119,10 @@ internal class AndroidAiPluginAskRunner private constructor(
         onEvent: (AiPluginStreamEvent) -> Unit,
     ): AiPluginAskHandle = processBackend(applicationContext).startStream(request, onEvent)
 
-    override fun listModels(
-        request: AiPluginModelListRequest,
-        onOutcome: (AiPluginModelListOutcome) -> Unit,
-    ): AiPluginAskHandle = processBackend(applicationContext).listModels(request, onOutcome)
+    override fun listCatalog(
+        request: AiPluginCatalogRequest,
+        onOutcome: (AiPluginCatalogOutcome) -> Unit,
+    ): AiPluginAskHandle = processBackend(applicationContext).listCatalog(request, onOutcome)
 
     override fun openSession(
         request: AiPluginAskRequest,
@@ -134,7 +136,7 @@ internal class AndroidAiPluginAskRunner private constructor(
         fun createStream(context: Context): AiPluginStreamRunner =
             AndroidAiPluginAskRunner(context.applicationContext)
 
-        fun createModelList(context: Context): AiPluginModelListRunner =
+        fun createCatalog(context: Context): AiPluginCatalogRunner =
             AndroidAiPluginAskRunner(context.applicationContext)
 
         fun createSession(context: Context): AiPluginSessionRunner =
@@ -161,7 +163,7 @@ private class ProcessAiPluginAskRunner(
     private val applicationContext: Context,
 ) : AiPluginAskRunner,
     AiPluginStreamRunner,
-    AiPluginModelListRunner,
+    AiPluginCatalogRunner,
     AiPluginSessionRunner {
     private val admission = AtomicBoolean(false)
     private val threadFactory = AiPluginAskThreadFactory()
@@ -253,12 +255,12 @@ private class ProcessAiPluginAskRunner(
         ).also(Attempt::start)
     }
 
-    override fun listModels(
-        request: AiPluginModelListRequest,
-        onOutcome: (AiPluginModelListOutcome) -> Unit,
+    override fun listCatalog(
+        request: AiPluginCatalogRequest,
+        onOutcome: (AiPluginCatalogOutcome) -> Unit,
     ): AiPluginAskHandle {
         if (!admission.compareAndSet(false, true)) {
-            deliver { onOutcome(AiPluginModelListOutcome.Failed(AiPluginAskFailure.BUSY)) }
+            deliver { onOutcome(AiPluginCatalogOutcome.Failed(AiPluginAskFailure.BUSY)) }
             return CompletedAiPluginAskHandle
         }
         return Attempt(
@@ -266,11 +268,11 @@ private class ProcessAiPluginAskRunner(
             request = AiPluginAskRequest(
                 component = request.component,
                 providerId = request.providerId,
-                modelId = null,
+                targetId = null,
                 messages = listOf(
                     AiPluginMessage(
                         role = AiPluginMessageRole.USER,
-                        content = MODEL_LIST_PLACEHOLDER_PROMPT,
+                        content = CATALOG_PLACEHOLDER_PROMPT,
                     ),
                 ),
                 timeoutMillis = request.timeoutMillis,
@@ -278,7 +280,7 @@ private class ProcessAiPluginAskRunner(
             streaming = false,
             onOutcome = null,
             onStreamEvent = null,
-            onModelList = onOutcome,
+            onCatalog = onOutcome,
         ).also(Attempt::start)
     }
 
@@ -331,7 +333,7 @@ private class ProcessAiPluginAskRunner(
         private val streaming: Boolean,
         private val onOutcome: ((AiPluginAskOutcome) -> Unit)?,
         private val onStreamEvent: ((AiPluginStreamEvent) -> Unit)?,
-        private val onModelList: ((AiPluginModelListOutcome) -> Unit)? = null,
+        private val onCatalog: ((AiPluginCatalogOutcome) -> Unit)? = null,
         private val onSessionOpen: ((AiPluginSessionOpenOutcome) -> Unit)? = null,
     ) : AiPluginAskHandle {
         private val lock = Any()
@@ -344,8 +346,8 @@ private class ProcessAiPluginAskRunner(
             persistentSession = onSessionOpen != null,
         )
 
-        /** The model the catalog resolved for this attempt; echoed on completion. */
-        private var resolvedModelId: String? = request.modelId
+        /** The exact target the catalog resolved for this attempt; echoed on every completion. */
+        private var resolvedTarget: AiPluginTargetSummary? = null
 
         private var terminal = false
         private var stageHandle: Closeable? = null
@@ -362,7 +364,7 @@ private class ProcessAiPluginAskRunner(
             }
             installDeadline(deadline)
             if (!PluginEnableStore.isEnabled(backend.applicationContext, request.component.packageName)) {
-                fail(AiPluginAskFailure.PROVIDER_DISABLED)
+                fail(AiPluginAskFailure.AI_PROVIDER_DISABLED)
                 return
             }
             enqueue(::beginDiscovery)
@@ -416,8 +418,8 @@ private class ProcessAiPluginAskRunner(
         private fun acceptDiscovery(result: InitialDiscoveryResult) {
             if (!isActive()) return
             when (result) {
-                InitialDiscoveryResult.NotFound -> fail(AiPluginAskFailure.PROVIDER_NOT_FOUND)
-                InitialDiscoveryResult.Rejected -> fail(AiPluginAskFailure.PROVIDER_REJECTED)
+                InitialDiscoveryResult.NotFound -> fail(AiPluginAskFailure.AI_PROVIDER_UNAVAILABLE)
+                InitialDiscoveryResult.Rejected -> fail(AiPluginAskFailure.AI_PROVIDER_REJECTED)
                 is InitialDiscoveryResult.Found -> beginHandshake(result.snapshot)
             }
         }
@@ -470,7 +472,7 @@ private class ProcessAiPluginAskRunner(
                         AiProviderHandshakeFailure.EXECUTOR_REJECTED,
                         AiProviderHandshakeFailure.INTERNAL_FAILURE,
                         -> AiPluginAskFailure.INTERNAL_FAILURE
-                        else -> AiPluginAskFailure.PROVIDER_REJECTED
+                        else -> AiPluginAskFailure.AI_PROVIDER_REJECTED
                     },
                 )
                 is AiProviderHandshakeOutcome.Selected -> {
@@ -478,7 +480,7 @@ private class ProcessAiPluginAskRunner(
                     if (pinned.component != request.component ||
                         pinned.providerId != request.providerId
                     ) {
-                        fail(AiPluginAskFailure.PROVIDER_REJECTED)
+                        fail(AiPluginAskFailure.AI_PROVIDER_REJECTED)
                     } else {
                         beginTargetListing(snapshot, pinned)
                     }
@@ -542,7 +544,7 @@ private class ProcessAiPluginAskRunner(
                         AiProviderTargetListingRunFailure.EXECUTOR_REJECTED,
                         AiProviderTargetListingRunFailure.INTERNAL_FAILURE,
                         -> AiPluginAskFailure.INTERNAL_FAILURE
-                        else -> AiPluginAskFailure.PROVIDER_REJECTED
+                        else -> AiPluginAskFailure.AI_PROVIDER_REJECTED
                     },
                 )
                 is AiProviderTargetListingRunOutcome.Completed -> {
@@ -550,42 +552,24 @@ private class ProcessAiPluginAskRunner(
                     if (catalog.pinnedProvider != pinned ||
                         catalog.pinnedProvider.providerId != request.providerId
                     ) {
-                        fail(AiPluginAskFailure.PROVIDER_REJECTED)
+                        fail(AiPluginAskFailure.AI_PROVIDER_REJECTED)
                         return
                     }
-                    if (onModelList != null) {
-                        finishModelList(catalog)
+                    if (onCatalog != null) {
+                        finishCatalog(catalog)
                         return
                     }
-                    val selectedTarget = request.modelId?.let { requestedModelId ->
-                        val matches = catalog.targets.filter { it.modelId == requestedModelId }
-                        when (matches.size) {
-                            0 -> {
-                                fail(AiPluginAskFailure.MODEL_NOT_FOUND)
+                    val selectedTarget = request.targetId?.let { requestedTargetId ->
+                        catalog.targets.singleOrNull { it.targetId == requestedTargetId }
+                            ?: run {
+                                fail(AiPluginAskFailure.TARGET_NOT_FOUND)
                                 return
                             }
-                            1 -> matches.single()
-                            else -> {
-                                fail(AiPluginAskFailure.MODEL_AMBIGUOUS)
-                                return
-                            }
-                        }
-                    } ?: run {
-                        // The current public model projection can omit its selector only for a
-                        // single-target catalog; all other cases remain deterministic failures.
-                        when (catalog.targets.size) {
-                            0 -> {
-                                fail(AiPluginAskFailure.MODEL_NOT_FOUND)
-                                return
-                            }
-                            1 -> catalog.targets.single()
-                            else -> {
-                                fail(AiPluginAskFailure.MODEL_AMBIGUOUS)
-                                return
-                            }
-                        }
+                    } ?: catalog.defaultTarget ?: run {
+                        fail(AiPluginAskFailure.TARGET_NOT_CONFIGURED)
+                        return
                     }
-                    resolvedModelId = selectedTarget.modelId
+                    resolvedTarget = selectedTarget.toPluginTargetSummary(catalog)
                     when (
                         val planned = catalog.planExact(
                             selectedTarget.targetId,
@@ -594,12 +578,15 @@ private class ProcessAiPluginAskRunner(
                         )
                     ) {
                         AiProviderExactTargetPlanResult.TargetNotFound ->
-                            fail(AiPluginAskFailure.MODEL_NOT_FOUND)
-                        AiProviderExactTargetPlanResult.TargetCapabilityMismatch,
-                        AiProviderExactTargetPlanResult.TargetUnavailable,
-                        AiProviderExactTargetPlanResult.BackendUnavailable,
-                        ->
-                            fail(AiPluginAskFailure.MODEL_CAPABILITY_MISMATCH)
+                            fail(AiPluginAskFailure.TARGET_NOT_FOUND)
+                        AiProviderExactTargetPlanResult.TargetNotConfigured ->
+                            fail(AiPluginAskFailure.TARGET_NOT_CONFIGURED)
+                        AiProviderExactTargetPlanResult.TargetUnavailable ->
+                            fail(AiPluginAskFailure.TARGET_UNAVAILABLE)
+                        AiProviderExactTargetPlanResult.TargetCapabilityMismatch ->
+                            fail(AiPluginAskFailure.TARGET_CAPABILITY_MISMATCH)
+                        AiProviderExactTargetPlanResult.BackendUnavailable ->
+                            fail(AiPluginAskFailure.BACKEND_UNAVAILABLE)
                         is AiProviderExactTargetPlanResult.Planned -> {
                             val plan = planned.plan
                             if (plan.pinnedProvider != pinned ||
@@ -607,7 +594,7 @@ private class ProcessAiPluginAskRunner(
                                 plan.targetId != selectedTarget.targetId ||
                                 plan.modelId != selectedTarget.modelId
                             ) {
-                                fail(AiPluginAskFailure.PROVIDER_REJECTED)
+                                fail(AiPluginAskFailure.AI_PROVIDER_REJECTED)
                             } else if (onSessionOpen != null) {
                                 finishSessionOpen(snapshot, plan)
                             } else {
@@ -619,21 +606,19 @@ private class ProcessAiPluginAskRunner(
             }
         }
 
-        private fun finishModelList(catalog: AiProviderTargetCatalog) {
+        private fun finishCatalog(catalog: AiProviderTargetCatalog) {
             detachStage()
-            val summaries = catalog.targets.map { target ->
-                AiPluginModelSummary(
-                    modelId = target.modelId,
-                    displayName = target.displayName,
-                    capabilityIds = target.capabilityIds,
-                    maximumContextBytes = target.maximumContextBytes
-                        ?: catalog.pinnedProvider.negotiatedCapabilities.maximumContextBytes,
-                    maximumOutputBytes = target.maximumOutputBytes
-                        ?: catalog.pinnedProvider.negotiatedCapabilities.maximumOutputBytes,
-                    backendProfiles = target.backendProfiles,
-                )
-            }
-            finishList(AiPluginModelListOutcome.Completed(summaries))
+            finishCatalog(
+                AiPluginCatalogOutcome.Completed(
+                    AiPluginCatalog(
+                        component = request.component,
+                        providerId = request.providerId,
+                        generation = catalog.catalogGeneration,
+                        defaultTargetId = catalog.defaultTarget?.targetId,
+                        targets = catalog.targets.map { it.toPluginTargetSummary(catalog) },
+                    ),
+                ),
+            )
         }
 
         private fun beginSession(
@@ -702,13 +687,20 @@ private class ProcessAiPluginAskRunner(
                     AiProviderSessionEvent.Disabled ->
                         terminalSession(AiPluginAskFailure.INTERNAL_FAILURE)
                     is AiProviderSessionEvent.Started -> {
-                        if (streaming) publish(AiPluginStreamEvent.Opened)
+                        if (streaming) {
+                            publish(AiPluginStreamEvent.Opened(requireNotNull(resolvedTarget)))
+                        }
                     }
                     is AiProviderSessionEvent.Chunk -> {
-                        if (!streaming || transcript.chunk.textDelta.isEmpty()) {
+                        if (!streaming) {
                             terminalSession(AiPluginAskFailure.SESSION_REJECTED)
                         } else {
-                            publish(AiPluginStreamEvent.Chunk(transcript.chunk.textDelta))
+                            publish(
+                                AiPluginStreamEvent.Chunk(
+                                    text = transcript.chunk.textDelta,
+                                    reasoning = transcript.chunk.reasoningDelta,
+                                ),
+                            )
                         }
                     }
                     is AiProviderSessionEvent.Usage -> {
@@ -725,8 +717,10 @@ private class ProcessAiPluginAskRunner(
                         finish(
                             AiPluginAskOutcome.Completed(
                                 text = transcript.result.outputText,
+                                reasoning = transcript.result.reasoningSummaryText.orEmpty(),
                                 usage = usage,
-                                modelId = resolvedModelId,
+                                finishReason = transcript.finishReason,
+                                target = requireNotNull(resolvedTarget),
                             ),
                         )
                     }
@@ -810,23 +804,29 @@ private class ProcessAiPluginAskRunner(
 
         private fun finish(outcome: AiPluginAskOutcome): Boolean {
             if (!markTerminalAndRelease()) return false
-            val onModelList = onModelList
+            val onCatalog = onCatalog
             when {
-                onModelList != null -> {
-                    val listOutcome = when (outcome) {
+                onCatalog != null -> {
+                    val catalogOutcome = when (outcome) {
                         // A completed ask outcome cannot reach a catalog-view attempt; map it
                         // defensively instead of throwing inside terminal delivery.
                         is AiPluginAskOutcome.Completed ->
-                            AiPluginModelListOutcome.Failed(AiPluginAskFailure.INTERNAL_FAILURE)
+                            AiPluginCatalogOutcome.Failed(AiPluginAskFailure.INTERNAL_FAILURE)
                         is AiPluginAskOutcome.Failed ->
-                            AiPluginModelListOutcome.Failed(outcome.failure)
+                            AiPluginCatalogOutcome.Failed(outcome.failure)
                     }
-                    runCatching { checkNotNull(onModelList).invoke(listOutcome) }
+                    runCatching { checkNotNull(onCatalog).invoke(catalogOutcome) }
                 }
                 streaming -> {
                     val event = when (outcome) {
                         is AiPluginAskOutcome.Completed ->
-                            AiPluginStreamEvent.Completed(outcome.text, outcome.usage)
+                            AiPluginStreamEvent.Completed(
+                                text = outcome.text,
+                                reasoning = outcome.reasoning,
+                                usage = outcome.usage,
+                                finishReason = outcome.finishReason,
+                                target = outcome.target,
+                            )
                         is AiPluginAskOutcome.Failed ->
                             AiPluginStreamEvent.Failed(outcome.failure)
                     }
@@ -837,9 +837,9 @@ private class ProcessAiPluginAskRunner(
             return true
         }
 
-        private fun finishList(outcome: AiPluginModelListOutcome): Boolean {
+        private fun finishCatalog(outcome: AiPluginCatalogOutcome): Boolean {
             if (!markTerminalAndRelease()) return false
-            runCatching { checkNotNull(onModelList).invoke(outcome) }
+            runCatching { checkNotNull(onCatalog).invoke(outcome) }
             return true
         }
 
@@ -854,6 +854,7 @@ private class ProcessAiPluginAskRunner(
                     snapshot = snapshot,
                     plan = plan,
                     request = request,
+                    target = requireNotNull(resolvedTarget),
                 )
             } catch (_: Throwable) {
                 backend.releaseAdmission()
@@ -911,6 +912,7 @@ private class ProcessAiPluginAskRunner(
         private val snapshot: AiProviderPackageSnapshot,
         private val plan: AiProviderHostSessionPlan,
         private val request: AiPluginAskRequest,
+        override val target: AiPluginTargetSummary,
     ) : AiPluginSession {
         private val lock = Any()
         private val released = AtomicBoolean(false)
@@ -923,8 +925,8 @@ private class ProcessAiPluginAskRunner(
         override val providerId: String
             get() = request.providerId
 
-        override val modelId: String
-            get() = plan.modelId
+        override val backendProfile: String?
+            get() = request.backendProfile
 
         override val isClosed: Boolean
             get() = synchronized(lock) { closed }
@@ -1074,12 +1076,12 @@ private class ProcessAiPluginAskRunner(
             if (!backend.executeBlocking {
                     try {
                         if (!isCurrent(turn) || !reinspectionMatches()) {
-                            turn.failAsync(AiPluginAskFailure.PROVIDER_REJECTED)
+                            turn.failAsync(AiPluginAskFailure.AI_PROVIDER_REJECTED)
                         } else {
                             exactBinding.bind()
                         }
                     } catch (_: SecurityException) {
-                        turn.failAsync(AiPluginAskFailure.PROVIDER_REJECTED)
+                        turn.failAsync(AiPluginAskFailure.AI_PROVIDER_REJECTED)
                     } catch (_: Throwable) {
                         turn.failAsync(AiPluginAskFailure.PROVIDER_FAILED)
                     }
@@ -1129,7 +1131,7 @@ private class ProcessAiPluginAskRunner(
                         remoteDied()
                         return@executeBlocking
                     } catch (_: SecurityException) {
-                        turn.failAsync(AiPluginAskFailure.PROVIDER_REJECTED)
+                        turn.failAsync(AiPluginAskFailure.AI_PROVIDER_REJECTED)
                         return@executeBlocking
                     } catch (_: Throwable) {
                         turn.failAsync(AiPluginAskFailure.PROVIDER_FAILED)
@@ -1481,17 +1483,22 @@ private class ProcessAiPluginAskRunner(
                 policy.onStarted(metadata)
                 policy.grantCredits(AiProviderLimits.INITIAL_CHUNK_CREDITS)
                 owner.grantCredits(this, AiProviderLimits.INITIAL_CHUNK_CREDITS)
-                if (streaming) publish(AiPluginStreamEvent.Opened)
+                if (streaming) publish(AiPluginStreamEvent.Opened(owner.target))
             }
 
             private fun chunk(envelope: ByteArray?) {
                 val value: AiProviderChunk = AiProviderCodec.decodeTextChunk(requireEnvelope(envelope))
                 policy.onChunk(value)
-                if (!streaming || value.textDelta.isEmpty()) {
+                if (!streaming) {
                     fail(AiPluginAskFailure.SESSION_REJECTED, closeSession = true)
                     return
                 }
-                publish(AiPluginStreamEvent.Chunk(value.textDelta))
+                publish(
+                    AiPluginStreamEvent.Chunk(
+                        text = value.textDelta,
+                        reasoning = value.reasoningDelta,
+                    ),
+                )
                 policy.grantCredits(1)
                 owner.grantCredits(this, 1)
             }
@@ -1524,7 +1531,9 @@ private class ProcessAiPluginAskRunner(
                     val finalUsage = requireNotNull(verified.finalUsage).toPluginUsage()
                     complete(
                         text = verified.outputText,
+                        reasoning = verified.reasoningSummaryText.orEmpty(),
                         usage = finalUsage,
+                        finishReason = result.finishReason,
                         closeSession = result.finishReason == AiFinishReason.LENGTH,
                     )
                 } finally {
@@ -1546,7 +1555,9 @@ private class ProcessAiPluginAskRunner(
 
             private fun complete(
                 text: String,
+                reasoning: String,
                 usage: AiPluginUsage,
+                finishReason: Int,
                 closeSession: Boolean,
             ): Boolean {
                 if (!terminal.compareAndSet(false, true)) return false
@@ -1557,10 +1568,24 @@ private class ProcessAiPluginAskRunner(
                     cancelRemote = false,
                 ) {
                     if (streaming) {
-                        checkNotNull(onStreamEvent).invoke(AiPluginStreamEvent.Completed(text, usage))
+                        checkNotNull(onStreamEvent).invoke(
+                            AiPluginStreamEvent.Completed(
+                                text = text,
+                                reasoning = reasoning,
+                                usage = usage,
+                                finishReason = finishReason,
+                                target = owner.target,
+                            ),
+                        )
                     } else {
                         checkNotNull(onOutcome).invoke(
-                            AiPluginAskOutcome.Completed(text, usage, owner.modelId),
+                            AiPluginAskOutcome.Completed(
+                                text = text,
+                                reasoning = reasoning,
+                                usage = usage,
+                                finishReason = finishReason,
+                                target = owner.target,
+                            ),
                         )
                     }
                 }
@@ -1653,7 +1678,7 @@ private class ProcessAiPluginAskRunner(
                 if (name != ComponentName(request.component.packageName, request.component.className) ||
                     !connected.compareAndSet(false, true)
                 ) {
-                    owner.closeWithFailureAsync(AiPluginAskFailure.PROVIDER_REJECTED)
+                    owner.closeWithFailureAsync(AiPluginAskFailure.AI_PROVIDER_REJECTED)
                     return
                 }
                 val recipient = IBinder.DeathRecipient(owner::remoteDied)
@@ -1675,7 +1700,7 @@ private class ProcessAiPluginAskRunner(
             override fun onBindingDied(name: ComponentName) = owner.remoteDied()
 
             override fun onNullBinding(name: ComponentName) =
-                owner.closeWithFailureAsync(AiPluginAskFailure.PROVIDER_REJECTED)
+                owner.closeWithFailureAsync(AiPluginAskFailure.AI_PROVIDER_REJECTED)
 
             override fun close() {
                 if (!bindingClosed.compareAndSet(false, true)) return
@@ -1786,7 +1811,7 @@ private class ProcessAiPluginAskRunner(
         const val MAXIMUM_BLOCKING_OPERATIONS = 3
 
         /** Satisfies request validation for catalog-only attempts; never sent to a provider. */
-        const val MODEL_LIST_PLACEHOLDER_PROMPT = "-"
+        const val CATALOG_PLACEHOLDER_PROMPT = "-"
 
         val HOST_CAPABILITIES = AiProviderCapabilities(
             supportsStreaming = true,
@@ -1809,6 +1834,29 @@ private class ProcessAiPluginAskRunner(
         )
     }
 }
+
+private fun AiTargetInfo.toPluginTargetSummary(
+    catalog: AiProviderTargetCatalog,
+) = AiPluginTargetSummary(
+    targetId = targetId,
+    providerId = providerId,
+    profileId = profileId,
+    modelId = modelId,
+    displayName = displayName,
+    capabilityIds = capabilityIds,
+    locality = locality,
+    credentialMode = credentialMode,
+    availability = availability,
+    configured = configured,
+    isDefault = isDefault,
+    maximumContextBytes = maximumContextBytes
+        ?: catalog.pinnedProvider.negotiatedCapabilities.maximumContextBytes,
+    maximumOutputBytes = maximumOutputBytes
+        ?: catalog.pinnedProvider.negotiatedCapabilities.maximumOutputBytes,
+    supportedControls = supportedControls,
+    declaredHttpsOrigins = declaredHttpsOrigins,
+    backendProfiles = backendProfiles,
+)
 
 private fun AiProviderPackageSnapshot.samePackageIdentityForPersistentSession(
     other: AiProviderPackageSnapshot,

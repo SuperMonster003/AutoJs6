@@ -126,17 +126,20 @@ internal class AiPluginStreamRuntime(
 
         private fun accept(event: AiPluginStreamEvent) {
             when (event) {
-                AiPluginStreamEvent.Opened -> dispatchNonTerminal {
-                    controller.open(openMetadata())
+                is AiPluginStreamEvent.Opened -> dispatchNonTerminal {
+                    controller.open(openMetadata(event.target))
                 }
                 is AiPluginStreamEvent.Chunk -> dispatchNonTerminal {
-                    controller.textChunk(event.text, normalizedChunk(event.text))
+                    controller.textChunk(
+                        event.text,
+                        normalizedChunk(event.text, event.reasoning),
+                    )
                 }
                 is AiPluginStreamEvent.Usage -> dispatchNonTerminal {
                     controller.usage(event.usage.toPluginPublicValue())
                 }
                 is AiPluginStreamEvent.Completed -> finishNaturally {
-                    controller.complete(completion(event.text, event.usage))
+                    controller.complete(completion(event))
                 }
                 is AiPluginStreamEvent.Failed -> finishNaturally {
                     controller.fail(pluginFailure(event.failure).toPluginStreamPublicValue())
@@ -188,15 +191,20 @@ internal class AiPluginStreamRuntime(
             runCatching(current::close)
         }
 
-        private fun openMetadata(): Map<String, Any?> = linkedMapOf(
+        private fun openMetadata(
+            target: org.autojs.autojs.core.plugin.ai.AiPluginTargetSummary,
+        ): Map<String, Any?> = linkedMapOf(
             "route" to PLUGIN_ROUTE,
-            "provider" to request?.providerId,
-            "model" to request?.modelId,
+            "provider" to target.providerId,
+            "model" to target.modelId,
+            "target" to target.toPublicValue(),
+            "profile" to target.toProfilePublicValue(),
+            "plugin" to request?.toPluginIdentityPublicValue(),
         )
 
-        private fun normalizedChunk(text: String): Map<String, Any?> = linkedMapOf(
+        private fun normalizedChunk(text: String, reasoning: String): Map<String, Any?> = linkedMapOf(
             "text" to text,
-            "reasoning" to "",
+            "reasoning" to reasoning,
             "toolCalls" to emptyList<Any?>(),
             "usage" to null,
             "finishReason" to null,
@@ -204,22 +212,21 @@ internal class AiPluginStreamRuntime(
             "raw" to null,
         )
 
-        private fun completion(
-            text: String,
-            usage: AiPluginUsage,
-        ): Map<String, Any?> = linkedMapOf(
-            "text" to text,
-            "reasoning" to "",
+        private fun completion(event: AiPluginStreamEvent.Completed): Map<String, Any?> = linkedMapOf(
+            "text" to event.text,
+            "reasoning" to event.reasoning,
             "toolCalls" to emptyList<Any?>(),
-            "usage" to usage.toPluginPublicValue(),
-            "finishReason" to null,
+            "usage" to event.usage.toPluginPublicValue(),
+            "finishReason" to event.finishReason.toPublicFinishReason(),
             "message" to null,
             "error" to null,
             "raw" to null,
-            "profile" to null,
+            "profile" to event.target.toProfilePublicValue(),
+            "target" to event.target.toPublicValue(),
+            "plugin" to request?.toPluginIdentityPublicValue(),
             "route" to PLUGIN_ROUTE,
-            "provider" to request?.providerId,
-            "model" to request?.modelId,
+            "provider" to event.target.providerId,
+            "model" to event.target.modelId,
         )
     }
 

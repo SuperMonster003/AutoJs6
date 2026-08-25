@@ -8,10 +8,11 @@ import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.plugin.ai.provider.api.AiProviderBackendProfile
 import org.autojs.plugin.ai.provider.api.AiProviderLimits
 
-/** Strict text-message admission for the explicitly selected local plugin route. */
+/** Strict text-message admission for the explicitly selected plugin target route. */
 internal object AiPluginAskInputMapper {
 
-    fun hasPluginSelection(input: AiRequestInput): Boolean = input.options.has("plugin")
+    fun hasPluginSelection(input: AiRequestInput): Boolean =
+        input.options.has("plugin") || input.options.has("target")
 
     fun requirePluginControl(input: AiRequestInput): AiControlOptions {
         val providerOptions = input.options.deepCopy()
@@ -50,6 +51,10 @@ internal object AiPluginAskInputMapper {
             "structuredJson",
             "AI option structuredJson",
         )
+        val includeReasoning = pluginOptions.takeOptionalBoolean(
+            "reasoning",
+            "AI option reasoning",
+        ) ?: false
         val responseSchemaJson = pluginOptions.remove("responseSchema")?.let { value ->
             if (value.isJsonNull) {
                 null
@@ -96,7 +101,7 @@ internal object AiPluginAskInputMapper {
         return AiPluginAskRequest(
             component = AiProviderComponent(selection.packageName, selection.className),
             providerId = selection.providerId,
-            modelId = selection.modelId,
+            targetId = control.targetId,
             messages = messages,
             timeoutMillis = control.timeoutMillis ?: defaultTimeoutMillis,
             maximumOutputTokens = maximumOutputTokens,
@@ -105,6 +110,7 @@ internal object AiPluginAskInputMapper {
             topP = topP,
             responseSchemaJson = effectiveResponseSchemaJson,
             backendProfile = backendProfile,
+            includeReasoning = includeReasoning,
         )
     }
 

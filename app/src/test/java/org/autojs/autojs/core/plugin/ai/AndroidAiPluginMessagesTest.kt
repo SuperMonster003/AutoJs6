@@ -108,7 +108,7 @@ class AndroidAiPluginMessagesTest {
                 className = "org.example.provider.AiProviderService",
             ),
             providerId = "example.provider",
-            modelId = "example-model",
+            targetId = "local:example-model",
             messages = listOf(AiPluginMessage(AiPluginMessageRole.USER, "Return JSON")),
             timeoutMillis = 5_000L,
             responseSchemaJson = schema,
@@ -196,7 +196,7 @@ class AndroidAiPluginMessagesTest {
             className = "org.example.provider.AiProviderService",
         ),
         providerId = "example.provider",
-        modelId = "example-model",
+        targetId = "local:example-model",
         messages = messages,
         timeoutMillis = 5_000L,
     )

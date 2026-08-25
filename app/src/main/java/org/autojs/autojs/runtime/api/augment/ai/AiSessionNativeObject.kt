@@ -19,7 +19,7 @@ import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-/** Rhino-visible owner of one persistent local AI Conversation. */
+/** Rhino-visible owner of one persistent plugin-target Conversation. */
 internal class AiSessionNativeObject(
     private val scriptRuntime: ScriptRuntime,
     private val baseRequest: AiPluginAskRequest,
@@ -92,10 +92,33 @@ internal class AiSessionNativeObject(
             close()
             RhinoUtils.UNDEFINED
         }
-        defineProperty("provider", { baseRequest.providerId }, null, READONLY or PERMANENT)
+        defineProperty(
+            "provider",
+            { session.get()?.target?.providerId },
+            null,
+            READONLY or PERMANENT,
+        )
         defineProperty(
             "model",
-            { session.get()?.modelId ?: baseRequest.modelId },
+            { session.get()?.modelId },
+            null,
+            READONLY or PERMANENT,
+        )
+        defineProperty(
+            "target",
+            { session.get()?.targetId },
+            null,
+            READONLY or PERMANENT,
+        )
+        defineProperty(
+            "profile",
+            { session.get()?.target?.profileId },
+            null,
+            READONLY or PERMANENT,
+        )
+        defineProperty(
+            "backend",
+            { session.get()?.backendProfile },
             null,
             READONLY or PERMANENT,
         )
@@ -136,7 +159,7 @@ internal class AiSessionNativeObject(
         AiPluginAskRequest(
             component = baseRequest.component,
             providerId = baseRequest.providerId,
-            modelId = requireSession().modelId,
+            targetId = requireSession().targetId,
             messages = listOf(message),
             timeoutMillis = baseRequest.timeoutMillis,
             maximumOutputBytes = baseRequest.maximumOutputBytes,
@@ -145,6 +168,8 @@ internal class AiSessionNativeObject(
             topK = baseRequest.topK,
             topP = baseRequest.topP,
             responseSchemaJson = baseRequest.responseSchemaJson,
+            backendProfile = baseRequest.backendProfile,
+            includeReasoning = baseRequest.includeReasoning,
         )
 
     private fun requireSession(): AiPluginSession = session.get()

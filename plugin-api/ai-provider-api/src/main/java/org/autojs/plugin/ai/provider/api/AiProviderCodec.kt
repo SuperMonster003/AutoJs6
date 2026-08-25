@@ -84,13 +84,14 @@ object AiProviderCodec {
             .strings(13, value.supportedControls)
             .strings(14, value.declaredHttpsOrigins)
             .apply { value.backendProfiles.forEach { document(15, encodeBackendProfileInfo(it)) } }
+            .boolean(16, value.isDefault, true)
             .encode()
 
     fun decodeTargetInfo(bytes: ByteArray): AiTargetInfo {
         val document = document(
             bytes,
             AiProviderProtocol.SCHEMA_TARGET_INFO,
-            (1..15).toSet(),
+            (1..16).toSet(),
             setOf(6, 13, 14, 15),
         )
         return AiTargetInfo(
@@ -109,6 +110,7 @@ object AiProviderCodec {
             supportedControls = document.strings(13),
             declaredHttpsOrigins = document.strings(14),
             backendProfiles = document.documents(15).map(::decodeBackendProfileInfo),
+            isDefault = document.requireBoolean(16),
         )
     }
 

@@ -57,10 +57,10 @@ class AiPluginStreamRuntimeTest {
         val expectedText = (0 until 10).joinToString(separator = "") { "piece-$it|" }
         val runner = FakeStreamRunner(
             synchronousEvents = buildList {
-                add(AiPluginStreamEvent.Opened)
+                add(AiPluginStreamEvent.Opened(testPluginTarget()))
                 repeat(10) { add(AiPluginStreamEvent.Chunk("piece-$it|")) }
                 add(AiPluginStreamEvent.Usage(usage()))
-                add(AiPluginStreamEvent.Completed(expectedText, usage()))
+                add(testPluginStreamCompletion(expectedText, usage()))
             },
         )
         val runtime = runtime(runner, scheduler = scheduled::addLast)
@@ -114,11 +114,13 @@ class AiPluginStreamRuntimeTest {
         assertEquals(0L, (done.get()?.get("toolCalls") as NativeArray).length)
         assertPluginUsage(checkNotNull(reportedUsage.get()))
         assertPluginUsage(done.get()?.get("usage") as Scriptable)
-        assertNull(done.get()?.get("finishReason"))
+        assertEquals("stop", done.get()?.get("finishReason"))
         assertNull(done.get()?.get("message"))
         assertNull(done.get()?.get("error"))
         assertNull(done.get()?.get("raw"))
         assertNull(done.get()?.get("profile"))
+        assertEquals("local:example-model", (done.get()?.get("target") as Scriptable)["id"])
+        assertEquals("example.provider", (done.get()?.get("plugin") as Scriptable)["provider"])
         assertEquals("plugin", done.get()?.get("route"))
         assertEquals("example.provider", done.get()?.get("provider"))
         assertEquals("example-model", done.get()?.get("model"))
@@ -162,14 +164,14 @@ class AiPluginStreamRuntimeTest {
         runtime.stream(request()).once(AiStream.EVENT_DONE, listener { args ->
             first.set((args[0] as Scriptable)["text"] as String)
         })
-        runner.emit(AiPluginStreamEvent.Completed("first", usage()))
+        runner.emit(testPluginStreamCompletion("first", usage()))
         scheduled.removeFirst().invoke()
         assertEquals("first", first.get())
 
         runtime.stream(request()).once(AiStream.EVENT_DONE, listener { args ->
             second.set((args[0] as Scriptable)["text"] as String)
         })
-        runner.emit(AiPluginStreamEvent.Completed("second", usage()))
+        runner.emit(testPluginStreamCompletion("second", usage()))
         scheduled.removeFirst().invoke()
 
         assertEquals("second", second.get())
@@ -217,7 +219,7 @@ class AiPluginStreamRuntimeTest {
         scheduled.removeFirst().invoke()
 
         try {
-            runner.emit(AiPluginStreamEvent.Completed("natural completion lost the race", usage()))
+            runner.emit(testPluginStreamCompletion("natural completion lost the race", usage()))
             assertEquals(1, runner.handle.cancelCount.get())
             assertEquals(1, runner.handle.closeCount.get())
         } finally {
@@ -255,7 +257,7 @@ class AiPluginStreamRuntimeTest {
 
         runtime.close()
         runtime.close()
-        runner.emit(AiPluginStreamEvent.Completed("late", usage()))
+        runner.emit(testPluginStreamCompletion("late", usage()))
         runner.emit(AiPluginStreamEvent.Failed(AiPluginAskFailure.PROVIDER_FAILED))
 
         assertEquals("cancelled", stream.state)
@@ -290,7 +292,7 @@ class AiPluginStreamRuntimeTest {
             className = "org.example.provider.AiProviderService",
         ),
         providerId = "example.provider",
-        modelId = "example-model",
+        targetId = "local:example-model",
         messages = listOf(AiPluginMessage(AiPluginMessageRole.USER, "prompt")),
         timeoutMillis = 5_000L,
     )
@@ -301,8 +303,8 @@ class AiPluginStreamRuntimeTest {
         assertEquals(15L, (usage["totalTokens"] as Number).toLong())
         assertNull(usage["reasoningTokens"])
         assertNull(usage["cachedInputTokens"])
-        val raw = usage["raw"] as Scriptable
-        assertEquals(250L, (raw["durationMillis"] as Number).toLong())
+        assertEquals(250L, (usage["durationMillis"] as Number).toLong())
+        assertNull(usage["raw"])
     }
 
     private fun usage() = AiPluginUsage(

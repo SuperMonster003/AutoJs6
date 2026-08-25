@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 25 August 2026.
+Données mises à jour le 26 August 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/08/25
+###### 2026/08/26
 
 * `Fonctionnalité` Les types de fichiers par défaut d'Ace LSP incluent désormais .mts/.cts et leurs variantes de déclaration, permettant à l'éditeur Ace externe de sélectionner le même profil d'exécution TypeScript Rhino/Node; les anciennes sélections par défaut sont migrées et les ensembles de suffixes personnalisés explicites restent inchangés
 * `Fonctionnalité` APK Builder compile désormais les projets Rhino TypeScript lors de l'empaquetage ; les APK finaux ne contiennent que du JavaScript chiffré et des Source Maps facultatives sans source intégrée, jamais les sources TypeScript ni le compilateur ; les projets chiffrés utilisent une zone de staging AES-256-GCM à usage unique, le texte en clair restant uniquement en mémoire puis étant effacé après rechiffrement
@@ -232,7 +232,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` ui.useAndroidLayout prend en charge les widgets de mise en page Android natifs, include/merge, les références res des projets de scripts et les fichiers Drawable XML comme shape/selector/layer-list
 * `Fonctionnalité` Les modules JavaScript (Rhino) prennent en charge les interfaces compatibles power/settings/work_manager et l'enveloppe AppInfo, et complètent certaines API Base64/Crypto/WebSocket/ByteString/automator/images/timers d'Auto.js Pro 9.3.11
 * `Fonctionnalité` Le module global ai JavaScript (Rhino) prend en charge les fournisseurs OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible, les appels ask/chat/stream et la poursuite multi-tour des appels d'outils; les options pour les développeurs proposent une gestion chiffrée de plusieurs profils et identifiants, et les points de terminaison compatibles sur l'adresse de bouclage locale peuvent fonctionner sans clé API
-* `Fonctionnalité` Les routes AI provider explicites de `ai.ask`, `ai.chat` et `ai.stream` prennent en charge les historiques ordonnés `system`, `user` et `assistant` pour les requêtes ponctuelles et en streaming; `plugin: true` sélectionne le plugin IA officiel, le sélecteur de modèle est résolu sans ambiguïté par son catalogue de cibles V2 et les générations rapportent les tokens exacts ainsi que la durée mesurée
+* `Fonctionnalité` L'API globale JavaScript (Rhino) `ai.catalog` expose un catalogue unifié des cibles locales et en ligne du plugin, tandis que `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` acceptent les ID exacts `local:*` ou `profile:*` et conservent `plugin: true` uniquement comme raccourci vers la cible par défaut du plugin officiel; les réponses incluent reasoning, usage et durée complets, finish reason, profile et metadata de la cible résolue, et les erreurs stables ne changent jamais de route silencieusement
 * `Fonctionnalité` L'API globale JavaScript (Rhino) `ai.session` crée une Conversation persistante de plugin AI provider, fixe la cible/le fournisseur/le modèle/les contrôles de génération et n'envoie que le nouveau prompt utilisateur aux tours `ask`/`chat`/`stream` suivants; une fin normale conserve le contexte, tandis qu'une annulation, un timeout, un échec de protocole ou une fermeture explicite libère toute la session
 * `Fonctionnalité` Les routes AI provider `ai.ask`/`ai.chat`/`ai.stream` et la session persistante `ai.session` prennent en charge `structuredJson` et l'objet JSON `responseSchema`; un schema active le décodage natif contraint par JSON Schema de LiteRT-LM, la session conserve le même schema à chaque tour et le JSON final est validé strictement
 * `Fonctionnalité` Les cibles locales AI Provider V2 exposent les profils backend explicites `cpu`, `gpu` et `npu` comme contrôles facultatifs de cible; la disponibilité dépend de l'appareil, un profil indisponible échoue sans repli CPU, une session fixe un backend, GPU exige OpenCL système et NPU reste indisponible faute de runtime EAP intégré
@@ -678,7 +678,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 25 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 26 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

@@ -20,6 +20,7 @@ internal data class AiControlOptions(
     val model: String?,
     val apiKey: String?,
     val timeoutMillis: Long?,
+    val targetId: String? = null,
     val pluginSelection: AiPluginSelection? = null,
 ) {
 
@@ -59,7 +60,7 @@ internal data class AiControlOptions(
         return "AiControlOptions(profile=${profile.redacted()}, " +
             "providerId=${providerId.redacted()}, baseUrl=${baseUrl.redacted()}, " +
             "model=${model.redacted()}, apiKey=[REDACTED], timeoutMillis=$timeoutMillis, " +
-            "pluginSelection=$pluginSelection)"
+            "targetId=$targetId, pluginSelection=$pluginSelection)"
     }
 
     companion object {
@@ -69,6 +70,9 @@ internal data class AiControlOptions(
 
         fun takeFrom(options: JsonObject): AiControlOptions {
             val pluginElement = options.remove("plugin")
+            val targetId = options.takeString("target")?.also {
+                require(AiValidation.TARGET_ID.matches(it)) { "AI target is invalid" }
+            }
             val hasCloudControl = CLOUD_CONTROL_NAMES.any(options::has)
             val hasExplicitStreamControl = options.has("stream")
             val profile = options.takeString("profile", "profileId", "profile_id")
@@ -88,7 +92,11 @@ internal data class AiControlOptions(
                 }
             }
             options.remove("stream")
-            val pluginSelection = pluginElement?.let(::parsePluginSelection)
+            val pluginSelection = when {
+                pluginElement != null -> parsePluginSelection(pluginElement)
+                targetId != null -> officialPluginSelection()
+                else -> null
+            }
             if (pluginSelection != null) {
                 require(!hasCloudControl) {
                     "AI plugin selection cannot be combined with cloud provider controls"
@@ -104,6 +112,7 @@ internal data class AiControlOptions(
                 model = model,
                 apiKey = apiKey,
                 timeoutMillis = timeout,
+                targetId = targetId,
                 pluginSelection = pluginSelection,
             )
         }
@@ -111,17 +120,13 @@ internal data class AiControlOptions(
         private fun parsePluginSelection(value: JsonElement): AiPluginSelection {
             if (value.isJsonPrimitive && value.asJsonPrimitive.isBoolean) {
                 require(value.asBoolean) { "AI plugin selection must not be false" }
-                return officialPluginSelection(modelId = null)
+                return officialPluginSelection()
             }
             require(value.isJsonObject) { "AI plugin selection must be an object" }
             val plugin = value.asJsonObject.deepCopy()
             val componentElement = plugin.remove("component")
-            val modelId = plugin.takeOptionalString("modelId", "AI plugin modelId")?.also {
-                require(AiValidation.STABLE_ID.matches(it)) { "AI plugin modelId is invalid" }
-            }
             if (componentElement == null) {
-                // Omitted component selects the official on-device plugin; providerId may still
-                // be pinned explicitly, and modelId may be omitted for its single-model default.
+                // Omitted component selects the official plugin; providerId may still be pinned.
                 val providerId = plugin.takeOptionalString("providerId", "AI plugin providerId")
                     ?: ThreeStoneAiOfficialPlugin.PROVIDER_ID
                 require(plugin.entrySet().isEmpty()) {
@@ -130,7 +135,7 @@ internal data class AiControlOptions(
                 require(AiValidation.STABLE_ID.matches(providerId)) {
                     "AI plugin providerId is invalid"
                 }
-                return officialPluginSelection(modelId = modelId, providerId = providerId)
+                return officialPluginSelection(providerId = providerId)
             }
             val providerId = plugin.takeRequiredString("providerId", "AI plugin providerId")
             require(plugin.entrySet().isEmpty()) {
@@ -158,18 +163,15 @@ internal data class AiControlOptions(
                 packageName = packageName,
                 className = className,
                 providerId = providerId,
-                modelId = modelId,
             )
         }
 
         private fun officialPluginSelection(
-            modelId: String?,
             providerId: String = ThreeStoneAiOfficialPlugin.PROVIDER_ID,
         ) = AiPluginSelection(
             packageName = ThreeStoneAiOfficialPlugin.PACKAGE_NAME,
             className = ThreeStoneAiOfficialPlugin.CLASS_NAME,
             providerId = providerId,
-            modelId = modelId,
         )
 
         private fun JsonObject.takeRequiredString(name: String, label: String): String {
@@ -250,10 +252,8 @@ internal data class AiControlOptions(
     }
 }
 
-/** [modelId] may be omitted; the plugin route then resolves the provider's selected model. */
 internal data class AiPluginSelection(
     val packageName: String,
     val className: String,
     val providerId: String,
-    val modelId: String?,
 )

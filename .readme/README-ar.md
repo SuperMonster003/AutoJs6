@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 25 August 2026.
+تم تحديث البيانات في 26 August 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/08/25
+###### 2026/08/26
 
 * `إضافة جديدة` تتضمن أنواع ملفات Ace LSP الافتراضية الآن .mts/.cts ومتغيرات ملفات التعريف الخاصة بها, مما يتيح لمحرر Ace الخارجي اختيار ملف تنفيذ TypeScript نفسه لـ Rhino/Node; تُرحّل الاختيارات الافتراضية القديمة وتظل مجموعات اللواحق المخصصة صراحةً دون تغيير
 * `إضافة جديدة` يدعم APK Builder الآن ترجمة مشاريع Rhino TypeScript أثناء البناء؛ ولا تحتوي حزم APK الناتجة إلا على JavaScript مشفّر وخرائط مصدر اختيارية بلا مصدر مضمّن، من دون مصادر TypeScript أو المصرّف؛ وتستخدم المشاريع المشفّرة منطقة تجهيز مؤقتة لمرة واحدة بتشفير AES-256-GCM مع إبقاء النص الصريح في الذاكرة فقط ومسحه بعد إعادة التشفير
@@ -232,7 +232,7 @@
 * `إضافة جديدة` يدعم ui.useAndroidLayout عناصر تخطيط Android الاصلية, و include/merge, ومراجع موارد res لمشروع النص البرمجي, وملفات Drawable XML مثل shape/selector/layer-list
 * `إضافة جديدة` تدعم وحدات JavaScript (Rhino) واجهات power/settings/work_manager المتوافقة وغلاف AppInfo, وتستكمل بعض واجهات Base64/Crypto/WebSocket/ByteString/automator/images/timers من Auto.js Pro 9.3.11
 * `إضافة جديدة` تدعم وحدة ai العامة في JavaScript (Rhino) مزودي OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible واستدعاءات ask/chat/stream ومواصلة استدعاءات الأدوات عبر جولات متعددة; وتوفر خيارات المطور إدارة مشفرة لملفات تعريف وبيانات اعتماد متعددة, بينما يمكن تشغيل نقاط النهاية المتوافقة على عنوان الاسترجاع المحلي من دون مفتاح API
-* `إضافة جديدة` تدعم مسارات AI provider الصريحة لـ `ai.ask` و`ai.chat` و`ai.stream` سجلات `system` و`user` و`assistant` المرتبة للطلبات الأحادية والبثية؛ يختار `plugin: true` ملحق الذكاء الاصطناعي الرسمي، ويحل محدد النموذج بصورة فريدة عبر كتالوج أهداف V2، وتعيد عمليات التوليد أعداد token الدقيقة والمدة المقاسة
+* `إضافة جديدة` تعرض واجهة JavaScript (Rhino) العامة `ai.catalog` كتالوجا موحدا لأهداف الملحق المحلية والمتصلة, بينما تقبل `ai.ask` و`ai.chat` و`ai.stream` و`ai.session` معرفات `local:*` أو `profile:*` الدقيقة وتبقي `plugin: true` اختصارا لهدف الملحق الرسمي الافتراضي فقط; تتضمن استجابات الملحق reasoning وusage والمدة الكاملة وfinish reason وprofile وmetadata الهدف الفعلي, ولا تغير الأخطاء الثابتة المسار بصمت
 * `إضافة جديدة` تنشئ واجهة `ai.session` العامة في JavaScript (Rhino) جلسة Conversation مستمرة لملحق AI provider، وتثبت الهدف والمزود والنموذج وعناصر تحكم التوليد، وترسل طلب المستخدم الجديد فقط في جولات `ask` و`chat` و`stream` اللاحقة؛ يحتفظ الاكتمال الطبيعي بالسياق، بينما يؤدي الالغاء أو timeout أو فشل البروتوكول أو الاغلاق الصريح إلى تحرير الجلسة كاملة
 * `إضافة جديدة` تدعم مسارات AI provider لـ `ai.ask` و`ai.chat` و`ai.stream` وجلسة `ai.session` الدائمة الخيار `structuredJson` وكائن JSON باسم `responseSchema`؛ يفعل schema فك الترميز المقيد أصليا عبر JSON Schema في LiteRT-LM، وتثبت الجلسة schema نفسه لكل جولة، ويخضع JSON المكتمل لتحقق صارم
 * `إضافة جديدة` تعرض أهداف AI Provider V2 المحلية ملفات backend profile الصريحة `cpu` و`gpu` و`npu` كعناصر تحكم اختيارية؛ يحدد التوافر حسب الجهاز، ويفشل profile غير المتاح دون رجوع إلى CPU، وتثبت الجلسة backend واحدا، ويتطلب GPU تحميل OpenCL النظام، ويبقى NPU غير متاح لعدم تضمين EAP runtime
@@ -678,7 +678,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 25 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 26 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

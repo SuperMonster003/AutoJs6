@@ -38,7 +38,7 @@ class AiPluginAskInputMapperTest {
             request.component,
         )
         assertEquals("example.provider", request.providerId)
-        assertEquals("example-model", request.modelId)
+        assertEquals("local:example-model", request.targetId)
         assertEquals(
             listOf(AiPluginMessageRole.SYSTEM, AiPluginMessageRole.USER),
             request.messages.map { it.role },
@@ -149,7 +149,8 @@ class AiPluginAskInputMapperTest {
                     "topK": 32,
                     "topP": 0.9,
                     "maxTokens": 512,
-                    "backend": "GPU"
+                    "backend": "GPU",
+                    "reasoning": true
                 """.trimIndent(),
             ),
             defaultTimeoutMillis = 9_000L,
@@ -160,6 +161,7 @@ class AiPluginAskInputMapperTest {
         assertEquals(0.9, request.topP!!, 0.0)
         assertEquals(512L, request.maximumOutputTokens)
         assertEquals(AiProviderBackendProfile.GPU, request.backendProfile)
+        assertTrue(request.includeReasoning)
         val protocolOptions = request.toGenerationOptions(
             stream = true,
             maximumOutputBytes = 4_096,
@@ -171,7 +173,11 @@ class AiPluginAskInputMapperTest {
         assertEquals(0.9, protocolOptions.topP!!, 0.0)
         assertEquals(512L, protocolOptions.maximumOutputTokens)
         assertEquals(AiProviderBackendProfile.GPU, protocolOptions.backendProfile)
-        assertEquals(listOf(AiProviderCapabilityId.STREAMING), protocolOptions.requiredCapabilityIds)
+        assertEquals(
+            listOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.REASONING),
+            protocolOptions.requiredCapabilityIds,
+        )
+        assertTrue(protocolOptions.includeReasoning)
         assertTrue(protocolOptions.reportUsage)
 
         val defaults = AiPluginAskInputMapper.map(input("""[{"role":"user","content":"prompt"}]"""), 9_000L)
@@ -180,6 +186,7 @@ class AiPluginAskInputMapperTest {
         assertNull(defaults.topP)
         assertNull(defaults.maximumOutputTokens)
         assertNull(defaults.backendProfile)
+        assertFalse(defaults.includeReasoning)
     }
 
     @Test
@@ -290,9 +297,9 @@ class AiPluginAskInputMapperTest {
                   "packageName": "org.example.provider",
                   "className": "org.example.provider.AiProviderService"
                 },
-                "providerId": "example.provider",
-                "modelId": "example-model"
-              }
+                "providerId": "example.provider"
+              },
+              "target": "local:example-model"
               $optionSuffix
             }
             """,

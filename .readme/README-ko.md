@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 8 월 25 일.
+데이터 갱신일: 2026 년 8 월 26 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/25
+###### 2026/08/26
 
 * `추가` Ace LSP 기본 파일 형식에 .mts/.cts 및 선언 파일 변형을 추가하여 외부 Ace 편집기가 실행과 동일한 Rhino/Node TypeScript 프로필을 선택하도록 개선; 이전 기본 선택은 마이그레이션하고 명시적 사용자 지정 접미사 집합은 그대로 유지
 * `추가` APK Builder가 패키징 시 Rhino TypeScript 프로젝트를 컴파일합니다. 최종 APK에는 암호화된 JavaScript와 소스가 포함되지 않은 선택적 Source Map만 들어가며 TypeScript 소스와 컴파일러는 포함되지 않습니다. 암호화 프로젝트는 일회용 AES-256-GCM 스테이징을 사용하고 평문은 메모리에만 유지한 뒤 재암호화 후 0으로 지웁니다
@@ -232,7 +232,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` ui.useAndroidLayout에서 Android 네이티브 레이아웃 위젯, include/merge, 스크립트 프로젝트의 res 참조 및 shape/selector/layer-list 등의 Drawable XML 지원
 * `추가` JavaScript (Rhino) 모듈에서 power/settings/work_manager 호환 인터페이스와 AppInfo 래퍼를 지원하고 Auto.js Pro 9.3.11의 일부 Base64/Crypto/WebSocket/ByteString/automator/images/timers API를 보완
 * `추가` 전역 JavaScript (Rhino) ai 모듈에서 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 공급자, ask/chat/stream 호출 및 도구 호출의 다중 라운드 연속 실행 지원; 개발자 옵션에서 암호화된 다중 프로필과 자격 증명을 관리할 수 있으며 로컬 루프백 주소의 호환 엔드포인트는 API 키 없이 실행 가능
-* `추가` `ai.ask`, `ai.chat` 및 `ai.stream`의 명시적 AI provider 경로에서 순서가 유지되는 일반 텍스트 `system`, `user`, `assistant` 기록의 단일 및 스트리밍 요청을 지원. `plugin: true`는 공식 AI 플러그인을 선택하고 모델 선택자는 V2 target catalog에서 고유하게 해석되며 생성은 정확한 입출력/전체 token 수와 측정 시간을 반환
+* `추가` 전역 JavaScript (Rhino) `ai.catalog` API가 로컬/온라인 통합 플러그인 target catalog를 공개하고 `ai.ask`/`ai.chat`/`ai.stream`/`ai.session`은 정확한 `local:*` 또는 `profile:*` target ID를 허용하며 `plugin: true`는 공식 플러그인 기본 target 단축 지정으로만 사용. 플러그인 응답은 reasoning, 전체 usage 및 시간, finish reason, profile, 실제 target metadata를 포함하고 안정적 오류는 경로를 자동 변경하지 않음
 * `추가` 전역 JavaScript (Rhino) `ai.session` API가 영구 AI provider 플러그인 Conversation을 만들고 target/공급자/모델/생성 제어를 고정하며 이후 `ask`/`chat`/`stream` 턴에는 새 사용자 프롬프트만 전송. 정상 완료 후 컨텍스트를 유지하고 취소/시간 초과/프로토콜 실패/명시적 닫기 시 전체 세션 해제
 * `추가` `ai.ask`/`ai.chat`/`ai.stream` 및 영구 `ai.session`의 AI provider 경로에서 `structuredJson`과 JSON 객체 `responseSchema` 지원; schema가 LiteRT-LM 네이티브 JSON Schema 제약 디코딩을 활성화하고 세션은 모든 턴에 같은 schema를 고정하며 완료 JSON 텍스트를 엄격하게 검증
 * `추가` AI Provider V2 로컬 target은 명시적 `cpu`, `gpu`, `npu` backend profile을 선택형 target control로 공개; 기기별 가용성을 보고하고 사용 불가 profile은 CPU fallback 없이 실패하며 세션은 하나의 backend를 고정하고 GPU는 시스템 OpenCL 로드를 요구하며 NPU는 EAP runtime 미포함으로 사용 불가
@@ -678,7 +678,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 8 월 25 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 8 월 26 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

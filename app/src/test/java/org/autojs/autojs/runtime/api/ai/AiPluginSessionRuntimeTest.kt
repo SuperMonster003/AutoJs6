@@ -96,7 +96,7 @@ class AiPluginSessionRuntimeTest {
     private fun request() = AiPluginAskRequest(
         component = AiProviderComponent("org.example", "org.example.Provider"),
         providerId = "example.provider",
-        modelId = "example-model",
+        targetId = "local:example-model",
         messages = listOf(AiPluginMessage(AiPluginMessageRole.USER, "-")),
         timeoutMillis = 5_000L,
     )
@@ -158,7 +158,8 @@ class AiPluginSessionRuntimeTest {
 
     private class FakeSession : AiPluginSession {
         override val providerId = "example.provider"
-        override val modelId = "example-model"
+        override val target = testPluginTarget()
+        override val backendProfile: String? = null
         override val isClosed: Boolean
             get() = closeCount.get() > 0
         val closeCount = AtomicInteger()

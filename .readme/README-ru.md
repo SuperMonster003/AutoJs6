@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 25 August 2026 года.
+Данные обновлены на 26 August 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -166,7 +166,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/08/25
+###### 2026/08/26
 
 * `Новое` Типы файлов Ace LSP по умолчанию теперь включают .mts/.cts и варианты файлов деклараций, позволяя внешнему редактору Ace выбирать тот же профиль выполнения TypeScript Rhino/Node; прежние наборы по умолчанию мигрируют, а явно настроенные наборы суффиксов не изменяются
 * `Новое` APK Builder теперь компилирует проекты Rhino TypeScript во время упаковки; итоговый APK содержит только зашифрованный JavaScript и необязательные Source Map без встроенного исходного кода, но не исходники TypeScript и не компилятор; для зашифрованных проектов используется одноразовый staging AES-256-GCM, открытые данные находятся только в памяти и обнуляются после повторного шифрования
@@ -232,7 +232,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Новое` ui.useAndroidLayout поддерживает нативные виджеты разметки Android, include/merge, ссылки на ресурсы res проекта скрипта и Drawable XML, включая shape/selector/layer-list
 * `Новое` Модули JavaScript (Rhino) поддерживают совместимые интерфейсы power/settings/work_manager и оболочку AppInfo, а также дополняют отдельные API Base64/Crypto/WebSocket/ByteString/automator/images/timers из Auto.js Pro 9.3.11
 * `Новое` Глобальный модуль ai для JavaScript (Rhino) поддерживает поставщиков OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible, вызовы ask/chat/stream и многораундовое продолжение вызовов инструментов; параметры разработчика предоставляют зашифрованное управление несколькими профилями и учетными данными, а совместимые конечные точки на локальном адресе обратной петли могут работать без ключа API
-* `Новое` Явные маршруты AI provider для `ai.ask`, `ai.chat` и `ai.stream` поддерживают разовые и потоковые запросы с упорядоченной историей `system`, `user` и `assistant`; `plugin: true` выбирает официальный AI-плагин, селектор модели однозначно разрешается через каталог целей V2, а генерация возвращает точные входные/выходные/общие токены и измеренную длительность
+* `Новое` Глобальный API JavaScript (Rhino) `ai.catalog` публикует единый каталог локальных и онлайн-целей плагина, а `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` принимают точные ID `local:*` или `profile:*` и сохраняют `plugin: true` только как сокращение для цели по умолчанию официального плагина; ответы включают reasoning, полные usage и длительность, finish reason, profile и metadata выбранной цели, а стабильные ошибки никогда не меняют маршрут неявно
 * `Новое` Глобальный API JavaScript (Rhino) `ai.session` создает постоянный Conversation плагина AI provider, фиксирует цель/провайдера/модель/параметры генерации и передает только новый пользовательский запрос в последующих ходах `ask`/`chat`/`stream`; нормальное завершение сохраняет контекст, а отмена, тайм-аут, ошибка протокола или явное закрытие освобождают весь сеанс
 * `Новое` Маршруты AI provider `ai.ask`/`ai.chat`/`ai.stream` и постоянная `ai.session` поддерживают `structuredJson` и JSON-объект `responseSchema`; schema включает нативное декодирование LiteRT-LM с ограничениями JSON Schema, сеанс фиксирует одну schema для всех ходов, а итоговый JSON проходит строгую проверку
 * `Новое` Локальные цели AI Provider V2 публикуют явные backend profile `cpu`, `gpu` и `npu` как необязательные controls цели; доступность определяется для устройства, недоступный profile завершается ошибкой без отката на CPU, сеанс фиксирует один backend, GPU требует системный OpenCL, а NPU недоступен из-за отсутствия EAP runtime в пакете
@@ -678,7 +678,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 25 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 26 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/25
+###### 2026/08/26
 
 * `新增` Ace LSP 預設檔案類型新增 .mts/.cts 及其宣告檔變體, 讓外部 Ace 編輯器可選擇與執行一致的 Rhino/Node TypeScript profile; 舊版預設選擇會自動遷移, 明確自訂副檔名集合保持不變
 * `新增` APK Builder 支援在打包階段編譯 Rhino TypeScript 專案; 最終 APK 僅包含加密 JavaScript 與不內嵌原始碼的可選 Source Map, 不包含 TypeScript 原始碼或編譯器; 加密專案使用一次性 AES-256-GCM 暫存區, 解密與重新加密的明文僅存於記憶體並在使用後清零
@@ -72,7 +72,7 @@
 * `新增` ui.useAndroidLayout 支援 Android 原生版面配置元件, include/merge, 指令碼專案 res 資源引用及 shape/selector/layer-list 等 Drawable XML
 * `新增` JavaScript (Rhino) 模組支援 power/settings/work_manager 相容介面及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全域 JavaScript (Rhino) ai 模組支援 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 呼叫及工具呼叫多輪續接; 開發者選項支援加密的多設定檔及憑證管理, 本機迴路位址上的相容端點可免 API 金鑰執行
-* `新增` `ai.ask`, `ai.chat` 與 `ai.stream` 的明確 AI provider 路由支援有序純文字 `system`, `user` 與 `assistant` 歷史的單次與串流請求; `plugin: true` 選擇官方 AI 外掛, 模型選擇器透過其 V2 目標目錄唯一解析, 外掛生成回傳精確輸入/輸出/總 token 數及實測耗時
+* `新增` 全域 JavaScript (Rhino) `ai.catalog` API 公開統一的本機/線上外掛目標目錄, `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` 接受精確的 `local:*` 或 `profile:*` 目標 ID, `plugin: true` 僅作為官方外掛預設目標的簡寫; 外掛回應包含 reasoning, 完整 usage 與耗時, finish reason, profile 及實際目標 metadata, 穩定錯誤絕不靜默改路由
 * `新增` 全域 JavaScript (Rhino) `ai.session` API 可建立持久 AI provider 外掛 Conversation, 為工作階段固定目標/提供者/模型/生成參數, 後續 `ask`/`chat`/`stream` 輪次只傳送新的使用者提示詞; 正常完成後保留上下文, 取消/逾時/協定失敗或顯式關閉時釋放整個工作階段
 * `新增` `ai.ask`/`ai.chat`/`ai.stream` 與持久 `ai.session` 的 AI provider 路由支援 `structuredJson` 和 JSON 物件 `responseSchema`; schema 啟用 LiteRT-LM 原生 JSON Schema 約束解碼, 工作階段每輪固定同一 schema, 完成 JSON 文字執行嚴格驗證
 * `新增` AI Provider V2 本機目標將明確 `cpu`, `gpu` 與 `npu` backend profile 作為可選目標控制; 可用性按裝置報告, 不可用 profile 失敗且不回退 CPU, 工作階段固定一個 backend, GPU 要求系統 OpenCL 可載入, 官方外掛因未封裝 EAP runtime 而報告 NPU 不可用

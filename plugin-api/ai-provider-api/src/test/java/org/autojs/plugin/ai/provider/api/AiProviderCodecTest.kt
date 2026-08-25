@@ -27,6 +27,7 @@ class AiProviderCodecTest {
                     capabilityIds = listOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.USAGE),
                     maximumContextBytes = 1024,
                     maximumOutputBytes = 2048,
+                    isDefault = true,
                     backendProfiles = listOf(
                         AiBackendProfileInfo(
                             AiProviderBackendProfile.CPU,
@@ -49,6 +50,10 @@ class AiProviderCodecTest {
 
         assertEquals(capabilities, AiProviderCodec.decodeCapabilities(AiProviderCodec.encodeCapabilities(capabilities)))
         assertEquals(page, AiProviderCodec.decodeTargetPage(AiProviderCodec.encodeTargetPage(page)))
+        assertTrue(
+            AiProviderCodec.decodeTargetPage(AiProviderCodec.encodeTargetPage(page))
+                .targets.single().isDefault,
+        )
     }
 
     @Test
@@ -399,6 +404,7 @@ internal fun localTarget(
     capabilityIds: List<String> = emptyList(),
     maximumContextBytes: Long? = 1024,
     maximumOutputBytes: Long? = 1024,
+    isDefault: Boolean = false,
     backendProfiles: List<AiBackendProfileInfo> = emptyList(),
 ) = AiTargetInfo(
     targetId = targetId,
@@ -413,6 +419,7 @@ internal fun localTarget(
     configured = true,
     maximumContextBytes = maximumContextBytes,
     maximumOutputBytes = maximumOutputBytes,
+    isDefault = isDefault,
     supportedControls = if (backendProfiles.isEmpty()) emptyList() else listOf(AiTargetControlId.BACKEND_PROFILE),
     backendProfiles = backendProfiles,
 )

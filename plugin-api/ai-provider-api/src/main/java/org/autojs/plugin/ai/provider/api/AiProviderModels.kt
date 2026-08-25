@@ -226,6 +226,7 @@ class AiTargetInfo(
     val configured: Boolean,
     val maximumContextBytes: Long?,
     val maximumOutputBytes: Long?,
+    val isDefault: Boolean = false,
     supportedControls: List<String> = emptyList(),
     declaredHttpsOrigins: List<String> = emptyList(),
     backendProfiles: List<AiBackendProfileInfo> = emptyList(),
@@ -301,6 +302,7 @@ class AiTargetInfo(
         configured: Boolean = this.configured,
         maximumContextBytes: Long? = this.maximumContextBytes,
         maximumOutputBytes: Long? = this.maximumOutputBytes,
+        isDefault: Boolean = this.isDefault,
         supportedControls: List<String> = this.supportedControls,
         declaredHttpsOrigins: List<String> = this.declaredHttpsOrigins,
         backendProfiles: List<AiBackendProfileInfo> = this.backendProfiles,
@@ -317,6 +319,7 @@ class AiTargetInfo(
         configured = configured,
         maximumContextBytes = maximumContextBytes,
         maximumOutputBytes = maximumOutputBytes,
+        isDefault = isDefault,
         supportedControls = supportedControls,
         declaredHttpsOrigins = declaredHttpsOrigins,
         backendProfiles = backendProfiles,
@@ -336,6 +339,7 @@ class AiTargetInfo(
             configured == other.configured &&
             maximumContextBytes == other.maximumContextBytes &&
             maximumOutputBytes == other.maximumOutputBytes &&
+            isDefault == other.isDefault &&
             supportedControls == other.supportedControls &&
             declaredHttpsOrigins == other.declaredHttpsOrigins &&
             backendProfiles == other.backendProfiles
@@ -353,6 +357,7 @@ class AiTargetInfo(
         configured,
         maximumContextBytes,
         maximumOutputBytes,
+        isDefault,
         supportedControls,
         declaredHttpsOrigins,
         backendProfiles,
@@ -363,7 +368,8 @@ class AiTargetInfo(
             "modelId=$modelId, displayName=$displayName, locality=$locality, " +
             "credentialMode=$credentialMode, capabilityIds=$capabilityIds, availability=$availability, " +
             "configured=$configured, maximumContextBytes=$maximumContextBytes, " +
-            "maximumOutputBytes=$maximumOutputBytes, supportedControls=$supportedControls, " +
+            "maximumOutputBytes=$maximumOutputBytes, isDefault=$isDefault, " +
+            "supportedControls=$supportedControls, " +
             "declaredHttpsOrigins=$declaredHttpsOrigins, backendProfiles=$backendProfiles)"
 }
 

@@ -84,6 +84,7 @@ internal class AiProviderTargetListingErrorSummary private constructor(
 internal sealed class AiProviderExactTargetPlanResult {
     data class Planned(val plan: AiProviderHostSessionPlan) : AiProviderExactTargetPlanResult()
     object TargetNotFound : AiProviderExactTargetPlanResult()
+    object TargetNotConfigured : AiProviderExactTargetPlanResult()
     object TargetCapabilityMismatch : AiProviderExactTargetPlanResult()
     object TargetUnavailable : AiProviderExactTargetPlanResult()
     object BackendUnavailable : AiProviderExactTargetPlanResult()
@@ -96,11 +97,15 @@ internal class AiProviderTargetCatalog internal constructor(
     targets: Collection<AiTargetInfo>,
 ) {
     val targets: List<AiTargetInfo> = Collections.unmodifiableList(ArrayList(targets))
+    val defaultTarget: AiTargetInfo? = this.targets.singleOrNull { it.isDefault }
 
     init {
         AiValidation.requireUtf8(catalogGeneration, 1, 256, "Target catalog generation")
         require(this.targets.map { it.targetId }.distinct().size == this.targets.size) {
             "Duplicate target ID in completed catalog"
+        }
+        require(this.targets.count { it.isDefault } <= 1) {
+            "Completed catalog declares multiple default targets"
         }
     }
 
@@ -112,7 +117,8 @@ internal class AiProviderTargetCatalog internal constructor(
         require(AiValidation.TARGET_ID.matches(targetId)) { "Invalid target ID" }
         val target = targets.singleOrNull { it.targetId == targetId }
             ?: return AiProviderExactTargetPlanResult.TargetNotFound
-        if (!target.configured || !target.available) return AiProviderExactTargetPlanResult.TargetUnavailable
+        if (!target.configured) return AiProviderExactTargetPlanResult.TargetNotConfigured
+        if (!target.available) return AiProviderExactTargetPlanResult.TargetUnavailable
         backendProfile?.let { selectedProfile ->
             require(selectedProfile in AiProviderBackendProfile.VALUES) { "Invalid backend profile" }
             if (target.backendProfiles.none { profile ->

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/25",
+      "released_date": "2026/08/26",
       "feature": [
         "Ace LSP defaults now include .mts/.cts and their declaration-file variants, allowing the external Ace editor to select the same Rhino/Node TypeScript execution profile; legacy default selections migrate while explicit custom suffix sets remain unchanged",
         "APK Builder now compiles Rhino TypeScript projects at build time; packaged APKs contain only encrypted JavaScript and optional Source Maps without embedded source, never TypeScript sources or the compiler; encrypted projects use one-time AES-256-GCM staging, with cleartext held only in memory and zeroed after re-encryption",
@@ -67,7 +67,7 @@
         "ui.useAndroidLayout supports native Android layout widgets, include/merge, script project res references, and Drawable XML such as shape/selector/layer-list",
         "JavaScript (Rhino) modules support compatible power/settings/work_manager interfaces and an AppInfo wrapper, and complete selected Base64/Crypto/WebSocket/ByteString/automator/images/timers APIs from Auto.js Pro 9.3.11",
         "Global JavaScript (Rhino) ai module supports OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible providers, ask/chat/stream calls, and multi-round tool-call continuation; Developer options provide encrypted multi-profile configuration and credential management, while compatible endpoints on local loopback addresses can run without an API key",
-        "Explicit AI-provider routes for `ai.ask`, `ai.chat`, and `ai.stream` support ordered plain-text `system`, `user`, and `assistant` histories for one-shot and streaming requests; `plugin: true` selects the official AI plugin, the model selector resolves uniquely through its V2 target catalog, and plugin generations report exact input/output/total tokens plus provider-measured duration",
+        "Global JavaScript (Rhino) `ai.catalog` exposes one local/online plugin target catalog, while `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` accept exact `local:*` or `profile:*` target IDs and keep `plugin: true` only as the official plugin default-target shorthand; plugin responses include reasoning, complete usage and duration, finish reason, profile and resolved-target metadata, and stable failures never change routes silently",
         "Global JavaScript (Rhino) `ai.session` API creates a persistent AI provider plugin Conversation, pins the target/provider/model/generation controls for the session, and sends only each new user prompt on later `ask`/`chat`/`stream` turns; normal completion retains context, while cancellation, timeout, protocol failure or explicit close releases the complete session",
         "AI-provider routes for `ai.ask`/`ai.chat`/`ai.stream` and persistent `ai.session` support `structuredJson` and JSON-object `responseSchema`; a schema enables native LiteRT-LM JSON Schema constrained decoding, persistent sessions fix the same schema for every turn, and completed JSON text is validated strictly",
         "AI Provider V2 local targets expose explicit `cpu`, `gpu`, and `npu` backend profiles as optional target controls; availability is device-specific, unavailable profiles fail without CPU fallback, sessions pin one backend, GPU requires loadable system OpenCL, and the official plugin reports NPU unavailable because its EAP runtime is not packaged",

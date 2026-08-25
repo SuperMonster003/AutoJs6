@@ -23,7 +23,7 @@ class AiPluginAskRuntimeTest {
     @Test
     fun synchronousCompletionClosesHandleOnceAndLateFailureIsIgnored() {
         val dispatchers = TestDispatchers()
-        val runner = FakeRunner(AiPluginAskOutcome.Completed("exact answer", usage()))
+        val runner = FakeRunner(testPluginCompletion("exact answer", usage()))
         val runtime = AiPluginAskRuntime({ runner }, dispatchers::create)
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -72,12 +72,12 @@ class AiPluginAskRuntimeTest {
 
         runtime.ask(request()).onResolve(callback(first::set))
         assertEquals(1, providerCalls.get())
-        runner.emit(AiPluginAskOutcome.Completed("first async answer", usage()))
+        runner.emit(testPluginCompletion("first async answer", usage()))
         dispatchers.drain()
         assertEquals("first async answer", first.get())
 
         runtime.chat(request()).onResolve(callback(second::set))
-        runner.emit(AiPluginAskOutcome.Completed("second async answer", usage()))
+        runner.emit(testPluginCompletion("second async answer", usage()))
         dispatchers.drain()
         assertPluginChatResponse(second.get(), "second async answer")
         assertEquals(1, providerCalls.get())
@@ -118,7 +118,7 @@ class AiPluginAskRuntimeTest {
             .onReject(callback { rejectCount.incrementAndGet() })
         runtime.close()
         runtime.close()
-        runner.emit(AiPluginAskOutcome.Completed("late", usage()))
+        runner.emit(testPluginCompletion("late", usage()))
         runner.emit(AiPluginAskOutcome.Failed(AiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
 
@@ -141,6 +141,8 @@ class AiPluginAskRuntimeTest {
                 "error",
                 "raw",
                 "profile",
+                "target",
+                "plugin",
                 "route",
                 "provider",
                 "model",
@@ -156,12 +158,15 @@ class AiPluginAskRuntimeTest {
         assertEquals(15L, usage["totalTokens"])
         assertNull(usage["reasoningTokens"])
         assertNull(usage["cachedInputTokens"])
-        assertEquals(250L, (usage["raw"] as Map<*, *>)["durationMillis"])
-        assertNull(response["finishReason"])
+        assertEquals(250L, usage["durationMillis"])
+        assertNull(usage["raw"])
+        assertEquals("stop", response["finishReason"])
         assertNull(response["message"])
         assertNull(response["error"])
         assertNull(response["raw"])
         assertNull(response["profile"])
+        assertEquals("local:example-model", (response["target"] as Map<*, *>)["id"])
+        assertEquals("example.provider", (response["plugin"] as Map<*, *>)["provider"])
         assertEquals("plugin", response["route"])
         assertEquals("example.provider", response["provider"])
         assertEquals("example-model", response["model"])
@@ -173,7 +178,7 @@ class AiPluginAskRuntimeTest {
             className = "org.example.provider.AiProviderService",
         ),
         providerId = "example.provider",
-        modelId = "example-model",
+        targetId = "local:example-model",
         messages = listOf(AiPluginMessage(AiPluginMessageRole.USER, "prompt")),
         timeoutMillis = 5_000L,
     )

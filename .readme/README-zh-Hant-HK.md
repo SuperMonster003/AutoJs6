@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-數據更新於 2026 年 8 月 25 日.
+數據更新於 2026 年 8 月 26 日.
 
 數據條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/08/25
+###### 2026/08/26
 
 * `新增` Ace LSP 默認文件類型新增 .mts/.cts 及其聲明文件變體, 使外部 Ace 編輯器可選擇與執行一致的 Rhino/Node TypeScript profile; 舊版默認選擇會自動遷移, 明確自定義後綴集合保持不變
 * `新增` APK Builder 支援在打包階段編譯 Rhino TypeScript 專案; 最終 APK 只包含加密 JavaScript 與不內嵌原始碼的可選 Source Map, 不包含 TypeScript 原始碼或編譯器; 加密專案使用一次性 AES-256-GCM 暫存區, 解密與重新加密的明文只存於記憶體並在使用後清零
@@ -232,7 +232,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` ui.useAndroidLayout 支持 Android 原生佈局控件, include/merge, 腳本項目 res 資源引用及 shape/selector/layer-list 等 Drawable XML
 * `新增` JavaScript (Rhino) 模塊支持 power/settings/work_manager 兼容接口及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
 * `新增` 全局 JavaScript (Rhino) ai 模塊支持 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 調用及工具調用多輪續接; 開發者選項支持加密的多設定及憑證管理, 本機迴環地址上的兼容端點可免 API 金鑰運行
-* `新增` `ai.ask`, `ai.chat` 及 `ai.stream` 嘅顯式 AI provider 路由支持有序純文字 `system`, `user` 同 `assistant` 歷史嘅單次及串流請求; `plugin: true` 選擇官方 AI 插件, 模型選擇器透過其 V2 目標目錄唯一解析, 插件生成回傳精確輸入/輸出/總 token 數及實測耗時
+* `新增` 全局 JavaScript (Rhino) `ai.catalog` API 公開統一嘅本地/在線插件目標目錄, `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` 接受精確嘅 `local:*` 或 `profile:*` 目標 ID, `plugin: true` 只作為官方插件預設目標嘅簡寫; 插件回應包含 reasoning, 完整 usage 同耗時, finish reason, profile 及實際目標 metadata, 穩定錯誤絕不靜默改路由
 * `新增` 全局 JavaScript (Rhino) `ai.session` API 可建立持久 AI provider 插件 Conversation, 為會話固定目標/提供商/模型/生成參數, 後續 `ask`/`chat`/`stream` 輪次只發送新嘅用戶提示詞; 正常完成後保留上下文, 取消/逾時/協議失敗或顯式關閉時釋放整個會話
 * `新增` `ai.ask`/`ai.chat`/`ai.stream` 同持久 `ai.session` 嘅 AI provider 路由支持 `structuredJson` 同 JSON 物件 `responseSchema`; schema 啟用 LiteRT-LM 原生 JSON Schema 約束解碼, 會話每輪固定同一 schema, 完成 JSON 文字執行嚴格驗證
 * `新增` AI Provider V2 本機目標將明確 `cpu`, `gpu` 同 `npu` backend profile 作為可選目標控制; 可用性按裝置報告, 不可用 profile 失敗且唔回退 CPU, 會話固定一個 backend, GPU 要求系統 OpenCL 可載入, 官方插件因未封裝 EAP runtime 而報告 NPU 不可用
@@ -678,7 +678,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 25 日, AutoJs6 可支持 JDK 最高版本為 `26`.
+截至 2026 年 8 月 26 日, AutoJs6 可支持 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

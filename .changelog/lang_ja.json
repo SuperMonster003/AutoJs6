@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/25",
+      "released_date": "2026/08/26",
       "feature": [
         "Ace LSP の既定ファイル形式に .mts/.cts とその宣言ファイル形式を追加し, 外部 Ace エディターが実行時と同じ Rhino/Node TypeScript プロファイルを選択可能に改善; 旧版の既定選択は移行され, 明示的なカスタム接尾辞セットは維持",
         "APK Builder がパッケージ時に Rhino TypeScript プロジェクトをコンパイルするようになりました。最終 APK には暗号化された JavaScript とソースを埋め込まない任意の Source Map のみが含まれ、TypeScript ソースやコンパイラは含まれません。暗号化プロジェクトでは使い捨ての AES-256-GCM ステージングを使用し、平文はメモリ内だけに保持して再暗号化後にゼロクリアします",
@@ -67,7 +67,7 @@
         "ui.useAndroidLayout が Android ネイティブレイアウトウィジェット, include/merge, スクリプトプロジェクトの res 参照, shape/selector/layer-list などの Drawable XML に対応",
         "JavaScript (Rhino) モジュールで power/settings/work_manager 互換 API と AppInfo ラッパーをサポートし, Auto.js Pro 9.3.11 の一部の Base64/Crypto/WebSocket/ByteString/automator/images/timers API を拡充",
         "グローバル JavaScript (Rhino) ai モジュールが OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible プロバイダー, ask/chat/stream 呼び出し, ツール呼び出しの複数ラウンド継続に対応; 開発者向けオプションで暗号化された複数プロファイルと認証情報を管理でき, ローカルループバックアドレス上の互換エンドポイントは API キーなしで実行可能",
-        "`ai.ask`, `ai.chat`, `ai.stream` の明示的 AI provider 経路が, 順序を保持したプレーンテキストの `system`, `user`, `assistant` 履歴による単発及びストリーミングリクエストに対応; `plugin: true` は公式 AI プラグインを選択し, モデルセレクターは V2 ターゲットカタログで一意に解決され, 生成は正確な入出力/合計 token 数と実測時間を返す",
+        "グローバル JavaScript (Rhino) `ai.catalog` API がローカル/オンラインを統合したプラグインターゲットカタログを公開し, `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` は正確な `local:*` または `profile:*` ターゲット ID を受け付け, `plugin: true` は公式プラグインのデフォルトターゲット短縮指定としてのみ使用; プラグイン応答は reasoning, 完全な usage と所要時間, finish reason, profile, 解決済みターゲット metadata を含み, 安定したエラーで経路を暗黙に変更しない",
         "グローバル JavaScript (Rhino) `ai.session` API が永続的な AI provider プラグイン Conversation を作成し, ターゲット/プロバイダー/モデル/生成設定を固定して, 2 回目以降の `ask`/`chat`/`stream` では新しいユーザープロンプトだけを送信; 正常完了後はコンテキストを保持し, キャンセル/タイムアウト/プロトコル失敗/明示的な終了でセッション全体を解放",
         "`ai.ask`/`ai.chat`/`ai.stream` と永続 `ai.session` の AI provider 経路が `structuredJson` と JSON オブジェクト `responseSchema` に対応; schema は LiteRT-LM のネイティブ JSON Schema 制約デコードを有効化し, セッションでは各ターンに同じ schema を固定し, 完成 JSON テキストを厳密に検証",
         "AI Provider V2 のローカルターゲットは明示的な `cpu`, `gpu`, `npu` backend profile を任意ターゲット control として公開; 可用性はデバイス別に報告され, 使用不可 profile は CPU にフォールバックせず失敗し, セッションは 1 つの backend を固定し, GPU はシステム OpenCL のロードを要求し, NPU は EAP runtime 未同梱のため使用不可",

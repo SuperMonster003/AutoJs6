@@ -161,7 +161,9 @@ class AiPluginPublicAskSmokeTest {
                     assertEquals("available", result.optString("backendAvailability"))
                     assertEquals("unavailable", result.optString("npuAvailability"))
                     assertEquals("npu-runtime-not-packaged", result.optString("npuUnavailableReason"))
-                    assertEquals("MODEL_CAPABILITY_MISMATCH", result.optString("npuRejectionCode"))
+                    assertEquals("BACKEND_UNAVAILABLE", result.optString("npuRejectionCode"))
+                    assertEquals(parameters.targetId, result.optString("targetId"))
+                    assertEquals("stop", result.optString("finishReason"))
                     val parsed = JSONObject(result.getString("text"))
                     assertTrue("Structured JSON omitted answer", parsed.has("answer"))
                     assertTrue("Structured JSON omitted ok", parsed.has("ok"))
@@ -213,10 +215,10 @@ class AiPluginPublicAskSmokeTest {
         assertTrue("The device did not expose a serial to instrumentation", actualSerial.isNotEmpty())
         assertEquals("Instrumentation is running on a different device", expectedSerial, actualSerial)
 
-        val modelId = arguments.getString(ARG_MODEL_ID).orEmpty().trim()
+        val targetId = arguments.getString(ARG_TARGET_ID).orEmpty().trim()
         assertTrue(
-            "Pass the exact imported model ID through -e $ARG_MODEL_ID",
-            REAL_MODEL_ID.matches(modelId),
+            "Pass the exact imported target ID through -e $ARG_TARGET_ID",
+            REAL_TARGET_ID.matches(targetId),
         )
 
         val prompt = arguments.getString(ARG_PROMPT)?.takeIf(String::isNotEmpty)
@@ -243,7 +245,7 @@ class AiPluginPublicAskSmokeTest {
             "$ARG_BACKEND must be one of ${AiProviderBackendProfile.VALUES.sorted().joinToString()}",
             backend in AiProviderBackendProfile.VALUES,
         )
-        return SmokeParameters(modelId, prompt, timeoutMillis, backend)
+        return SmokeParameters(targetId, prompt, timeoutMillis, backend)
     }
 
     @Suppress("DEPRECATION")
@@ -280,27 +282,27 @@ class AiPluginPublicAskSmokeTest {
             packageName: ${JSONObject.quote(REAL_PLUGIN_PACKAGE)},
             className: ${JSONObject.quote(REAL_SERVICE_CLASS)}
           },
-          providerId: ${JSONObject.quote(REAL_PROVIDER_ID)},
-          modelId: ${JSONObject.quote(parameters.modelId)}
+          providerId: ${JSONObject.quote(REAL_PROVIDER_ID)}
         };
         let selectedBackendProfile;
         let npuBackendProfile;
         let npuRejectionCode;
-        ai.models({ plugin: plugin, timeout: ${parameters.timeoutMillis} }).then(
-          models => {
-            const model = models.find(item => item.modelId === ${JSONObject.quote(parameters.modelId)});
-            if (!model) throw new Error("Selected model was absent from ai.models()");
-            const profiles = Array.isArray(model.backendProfiles) ? model.backendProfiles : [];
+        ai.catalog({ plugin: plugin, timeout: ${parameters.timeoutMillis} }).then(
+          catalog => {
+            const target = catalog.targets.find(item => item.id === ${JSONObject.quote(parameters.targetId)});
+            if (!target) throw new Error("Selected target was absent from ai.catalog()");
+            const profiles = Array.isArray(target.backendProfiles) ? target.backendProfiles : [];
             selectedBackendProfile = profiles.find(item => item.id === ${JSONObject.quote(parameters.backend)});
             npuBackendProfile = profiles.find(item => item.id === "npu");
             if (!selectedBackendProfile || selectedBackendProfile.availability !== "available") {
-              throw new Error("Selected backend was not reported available by ai.models()");
+              throw new Error("Selected backend was not reported available by ai.catalog()");
             }
             if (!npuBackendProfile || npuBackendProfile.availability !== "unavailable") {
-              throw new Error("NPU backend was not reported unavailable by ai.models()");
+              throw new Error("NPU backend was not reported unavailable by ai.catalog()");
             }
             return ai.chat("This NPU request must be rejected before generation.", {
               plugin: plugin,
+              target: ${JSONObject.quote(parameters.targetId)},
               timeout: ${parameters.timeoutMillis},
               maxTokens: 1,
               backend: "npu"
@@ -310,7 +312,7 @@ class AiPluginPublicAskSmokeTest {
               },
               error => {
                 npuRejectionCode = String(error && error.code || "");
-                if (npuRejectionCode !== "MODEL_CAPABILITY_MISMATCH") {
+                if (npuRejectionCode !== "BACKEND_UNAVAILABLE") {
                   throw new Error("Unexpected NPU rejection code: " + npuRejectionCode);
                 }
                 return ai.chat(
@@ -320,6 +322,7 @@ class AiPluginPublicAskSmokeTest {
                   ],
                   {
                     plugin: plugin,
+                    target: ${JSONObject.quote(parameters.targetId)},
                     timeout: ${parameters.timeoutMillis},
                     temperature: 0.7,
                     topK: 40,
@@ -343,7 +346,6 @@ class AiPluginPublicAskSmokeTest {
         ).then(
           response => {
             const usage = response && response.usage || {};
-            const rawUsage = usage.raw || {};
             const text = String(response && response.text || "");
             const parsed = JSON.parse(text);
             files.write(markerPath, JSON.stringify({
@@ -358,10 +360,12 @@ class AiPluginPublicAskSmokeTest {
               npuAvailability: npuBackendProfile.availability,
               npuUnavailableReason: npuBackendProfile.unavailableReason,
               npuRejectionCode: npuRejectionCode,
+              targetId: response && response.target && response.target.id,
+              finishReason: response && response.finishReason,
               inputTokens: usage.inputTokens,
               outputTokens: usage.outputTokens,
               totalTokens: usage.totalTokens,
-              durationMillis: rawUsage.durationMillis
+              durationMillis: usage.durationMillis
             }));
           },
           error => {
@@ -417,7 +421,7 @@ class AiPluginPublicAskSmokeTest {
     }
 
     private data class SmokeParameters(
-        val modelId: String,
+        val targetId: String,
         val prompt: String,
         val timeoutMillis: Long,
         val backend: String,
@@ -426,7 +430,7 @@ class AiPluginPublicAskSmokeTest {
     private companion object {
         const val ARG_ENABLED = "autojs.aiProvider.publicAskSmoke.enabled"
         const val ARG_DEVICE_SERIAL = "autojs.aiProvider.publicAskSmoke.serial"
-        const val ARG_MODEL_ID = "autojs.aiProvider.publicAskSmoke.modelId"
+        const val ARG_TARGET_ID = "autojs.aiProvider.publicAskSmoke.targetId"
         const val ARG_PROMPT = "autojs.aiProvider.publicAskSmoke.prompt"
         const val ARG_TIMEOUT_MILLIS = "autojs.aiProvider.publicAskSmoke.timeoutMillis"
         const val ARG_BACKEND = "autojs.aiProvider.publicAskSmoke.backend"
@@ -453,6 +457,6 @@ class AiPluginPublicAskSmokeTest {
         const val MAXIMUM_MARKER_BYTES = 128L * 1024L
 
         val REAL_COMPONENT = ComponentName(REAL_PLUGIN_PACKAGE, REAL_SERVICE_CLASS)
-        val REAL_MODEL_ID = Regex("^litertlm\\.[0-9a-f]{32}$")
+        val REAL_TARGET_ID = Regex("^local:litertlm\\.[0-9a-f]{32}$")
     }
 }

@@ -124,7 +124,10 @@ internal sealed class AiProviderSessionEvent {
         override fun toString(): String = "Chunk($chunk)"
     }
     data class Usage(val usage: AiUsage) : AiProviderSessionEvent()
-    data class Completed(val result: AiProviderCompletionQuotaSnapshot) : AiProviderSessionEvent()
+    data class Completed(
+        val result: AiProviderCompletionQuotaSnapshot,
+        val finishReason: Int,
+    ) : AiProviderSessionEvent()
     data class ProviderFailed(val error: AiProviderSessionErrorSummary) : AiProviderSessionEvent()
     object Cancelled : AiProviderSessionEvent()
     object TimedOut : AiProviderSessionEvent()
@@ -959,7 +962,10 @@ internal class AiProviderSessionPolicy(
                         descriptorCount = descriptors.count,
                         readDescriptor = descriptors::readDeclaredBytes,
                     )
-                    terminateOnLane(AiProviderSessionEvent.Completed(completed), cancelRemote = false)
+                    terminateOnLane(
+                        AiProviderSessionEvent.Completed(completed, result.finishReason),
+                        cancelRemote = false,
+                    )
                 }
                 CallbackKind.FAILED -> {
                     val error = AiCommonCodec.decodeError(checkNotNull(callback.envelope))

@@ -36,7 +36,7 @@ class AiServicePluginRouteTest {
     fun synchronousPluginChatCompletionReusesExactPromptRouteAndReturnsNormalizedShapeWithoutCloudFallback() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
-            synchronousOutcome = AiPluginAskOutcome.Completed("exact local chat answer", usage()),
+            synchronousOutcome = testPluginCompletion("exact local chat answer", usage()),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -65,7 +65,7 @@ class AiServicePluginRouteTest {
         assertEquals("org.example.provider", runner.request.get()?.component?.packageName)
         assertEquals("org.example.provider.AiProviderService", runner.request.get()?.component?.className)
         assertEquals("example.provider", runner.request.get()?.providerId)
-        assertEquals("example-model", runner.request.get()?.modelId)
+        assertEquals("local:example-model", runner.request.get()?.targetId)
         assertEquals("prompt", runner.request.get()?.messages?.single()?.content)
         assertEquals(2_500L, runner.request.get()?.timeoutMillis)
         assertEquals(0, runner.handle.cancelCount.get())
@@ -122,7 +122,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
 
-        runner.emit(AiPluginAskOutcome.Completed("late completion must not win", usage()))
+        runner.emit(testPluginCompletion("late completion must not win", usage()))
         dispatchers.drain()
         assertNull(resolved.get())
         assertEquals(error, rejected.get())
@@ -137,7 +137,7 @@ class AiServicePluginRouteTest {
     fun synchronousPluginCompletionResolvesExactTextAndClosesHandleOnce() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
-            synchronousOutcome = AiPluginAskOutcome.Completed("exact local answer", usage()),
+            synchronousOutcome = testPluginCompletion("exact local answer", usage()),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -154,7 +154,7 @@ class AiServicePluginRouteTest {
         assertEquals("org.example.provider", runner.request.get()?.component?.packageName)
         assertEquals("org.example.provider.AiProviderService", runner.request.get()?.component?.className)
         assertEquals("example.provider", runner.request.get()?.providerId)
-        assertEquals("example-model", runner.request.get()?.modelId)
+        assertEquals("local:example-model", runner.request.get()?.targetId)
         assertEquals("prompt", runner.request.get()?.messages?.single()?.content)
         assertEquals(2_500L, runner.request.get()?.timeoutMillis)
         assertEquals(0, runner.handle.cancelCount.get())
@@ -198,7 +198,7 @@ class AiServicePluginRouteTest {
     fun pluginAskForwardsSystemAndConversationMessagesInOrderWithoutCloudFallback() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
-            synchronousOutcome = AiPluginAskOutcome.Completed("system-aware answer", usage()),
+            synchronousOutcome = testPluginCompletion("system-aware answer", usage()),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
@@ -287,7 +287,7 @@ class AiServicePluginRouteTest {
             .onReject(callback { rejectCount.incrementAndGet() })
         service.close()
         service.close()
-        runner.emit(AiPluginAskOutcome.Completed("late completion", usage()))
+        runner.emit(testPluginCompletion("late completion", usage()))
         runner.emit(AiPluginAskOutcome.Failed(AiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
 
@@ -318,7 +318,7 @@ class AiServicePluginRouteTest {
         assertEquals("org.example.provider", streamRunner.request.get()?.component?.packageName)
         assertEquals("org.example.provider.AiProviderService", streamRunner.request.get()?.component?.className)
         assertEquals("example.provider", streamRunner.request.get()?.providerId)
-        assertEquals("example-model", streamRunner.request.get()?.modelId)
+        assertEquals("local:example-model", streamRunner.request.get()?.targetId)
         assertEquals("prompt", streamRunner.request.get()?.messages?.single()?.content)
         assertEquals(2_500L, streamRunner.request.get()?.timeoutMillis)
         val error = (errors.get() as Wrapper).unwrap() as Map<*, *>
@@ -329,7 +329,7 @@ class AiServicePluginRouteTest {
         assertEquals(0, streamRunner.handle.cancelCount.get())
         assertEquals(1, streamRunner.handle.closeCount.get())
 
-        streamRunner.emit(AiPluginStreamEvent.Completed("late cloud fallback must not win", usage()))
+        streamRunner.emit(testPluginStreamCompletion("late cloud fallback must not win", usage()))
         dispatchers.drain()
         assertEquals(1, streamRunner.handle.closeCount.get())
         service.close()
@@ -378,6 +378,8 @@ class AiServicePluginRouteTest {
                 "error",
                 "raw",
                 "profile",
+                "target",
+                "plugin",
                 "route",
                 "provider",
                 "model",
@@ -394,15 +396,18 @@ class AiServicePluginRouteTest {
                 "totalTokens" to 15L,
                 "reasoningTokens" to null,
                 "cachedInputTokens" to null,
-                "raw" to mapOf("durationMillis" to 250L),
+                "durationMillis" to 250L,
+                "raw" to null,
             ),
             response["usage"],
         )
-        assertNull(response["finishReason"])
+        assertEquals("stop", response["finishReason"])
         assertNull(response["message"])
         assertNull(response["error"])
         assertNull(response["raw"])
         assertNull(response["profile"])
+        assertEquals("local:example-model", (response["target"] as Map<*, *>)["id"])
+        assertEquals("example.provider", (response["plugin"] as Map<*, *>)["provider"])
         assertEquals("plugin", response["route"])
         assertEquals("example.provider", response["provider"])
         assertEquals("example-model", response["model"])
@@ -445,9 +450,9 @@ class AiServicePluginRouteTest {
                       "packageName": "org.example.provider",
                       "className": "org.example.provider.AiProviderService"
                     },
-                    "providerId": "example.provider",
-                    "modelId": "example-model"
-                  }
+                    "providerId": "example.provider"
+                  },
+                  "target": "local:example-model"
                   $timeout
                 }
                 """,

@@ -8,6 +8,7 @@ import org.autojs.autojs.core.plugin.ai.AiPluginAskRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginUsage
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
+import org.autojs.plugin.ai.provider.api.AiFinishReason
 import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -150,12 +151,7 @@ internal class AiPluginAskRuntime(
         private fun completionValue(outcome: AiPluginAskOutcome.Completed): Any =
             when (operation) {
                 Operation.ASK -> outcome.text
-                Operation.CHAT -> pluginChatResponse(
-                    requireNotNull(request),
-                    outcome.text,
-                    outcome.usage,
-                    outcome.modelId,
-                )
+                Operation.CHAT -> pluginChatResponse(requireNotNull(request), outcome)
             }
 
         private fun finish(
@@ -201,22 +197,22 @@ internal class AiPluginAskRuntime(
 
         fun pluginChatResponse(
             request: AiPluginAskRequest,
-            text: String,
-            usage: AiPluginUsage,
-            resolvedModelId: String? = null,
+            outcome: AiPluginAskOutcome.Completed,
         ): Map<String, Any?> = linkedMapOf(
-            "text" to text,
-            "reasoning" to "",
+            "text" to outcome.text,
+            "reasoning" to outcome.reasoning,
             "toolCalls" to emptyList<Any?>(),
-            "usage" to usage.toPluginPublicValue(),
-            "finishReason" to null,
+            "usage" to outcome.usage.toPluginPublicValue(),
+            "finishReason" to outcome.finishReason.toPublicFinishReason(),
             "message" to null,
             "error" to null,
             "raw" to null,
-            "profile" to null,
+            "profile" to outcome.target.toProfilePublicValue(),
+            "target" to outcome.target.toPublicValue(),
+            "plugin" to request.toPluginIdentityPublicValue(),
             "route" to PLUGIN_ROUTE,
-            "provider" to request.providerId,
-            "model" to (resolvedModelId ?: request.modelId),
+            "provider" to outcome.target.providerId,
+            "model" to outcome.target.modelId,
         )
     }
 }
@@ -225,10 +221,39 @@ internal fun AiPluginUsage.toPluginPublicValue(): Map<String, Any?> = linkedMapO
     "inputTokens" to inputTokens,
     "outputTokens" to outputTokens,
     "totalTokens" to totalTokens,
-    "reasoningTokens" to null,
-    "cachedInputTokens" to null,
-    "raw" to durationMillis?.let { linkedMapOf("durationMillis" to it) },
+    "reasoningTokens" to reasoningTokens,
+    "cachedInputTokens" to cachedInputTokens,
+    "durationMillis" to durationMillis,
+    "raw" to null,
 )
+
+internal fun org.autojs.autojs.core.plugin.ai.AiPluginTargetSummary.toProfilePublicValue(): Map<String, Any?>? =
+    profileId?.let { id ->
+        linkedMapOf(
+            "id" to id,
+            "provider" to providerId,
+            "model" to modelId,
+            "target" to targetId,
+        )
+    }
+
+internal fun AiPluginAskRequest.toPluginIdentityPublicValue(): Map<String, Any?> = linkedMapOf(
+    "provider" to providerId,
+    "component" to linkedMapOf(
+        "packageName" to component.packageName,
+        "className" to component.className,
+    ),
+)
+
+internal fun Int.toPublicFinishReason(): String = when (this) {
+    AiFinishReason.STOP -> "stop"
+    AiFinishReason.LENGTH -> "length"
+    AiFinishReason.TOOL_CALLS -> "tool_calls"
+    AiFinishReason.CONTENT_FILTER -> "content_filter"
+    AiFinishReason.ERROR -> "error"
+    AiFinishReason.OTHER -> "other"
+    else -> error("Unsupported AI finish reason")
+}
 
 internal class AiPluginRouteException(
     val code: String,

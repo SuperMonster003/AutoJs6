@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 8 月 25 日.
+数据更新于 2026 年 8 月 26 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/08/25
+###### 2026/08/26
 
 * `新增` Ace LSP 默认文件类型新增 .mts/.cts 及其声明文件变体, 使外部 Ace 编辑器可选择与执行一致的 Rhino/Node TypeScript profile; 旧版默认选择会自动迁移, 显式自定义后缀集合保持不变
 * `新增` APK Builder 支持在打包阶段编译 Rhino TypeScript 项目; 最终 APK 仅包含加密 JavaScript 与不内嵌源码的可选 Source Map, 不包含 TypeScript 源码或编译器; 加密项目使用一次性 AES-256-GCM staging, 解密与重加密明文仅存于内存并在使用后清零
@@ -199,7 +199,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` JVM Source Runtime 支持范围为单文件 Java 8 (Java provider 最低 API 24) 与 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次发布仅在 API 31/arm64-v8a 真机完成 smoke, 不声明未验证 API 级别
 * `新增` AutoJs6 官方插件可通过签名权限保护的版本化只读设置契约, 读取宿主主题色, 暗色模式策略及语言的外观快照
 * `新增` ai 模块, 支持单次及流式请求 (参阅 项目文档 > [人工智能](https://docs.autojs6.com/#/ai))
-* `新增` `ai.ask`, `ai.chat` 与 `ai.stream` 的显式 AI provider 路由支持有序纯文本 `system`, `user` 与 `assistant` 历史的单次及流式请求; `plugin: true` 选择官方 AI 插件, 模型选择器通过其 V2 目标目录唯一解析, 插件生成返回精确输入/输出/总 token 数及实测耗时
+* `新增` 全局 JavaScript (Rhino) `ai.catalog` API 公开统一的本地/在线插件目标目录, `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` 接受精确的 `local:*` 或 `profile:*` 目标 ID, `plugin: true` 仅作为官方插件默认目标的简写; 插件响应包含 reasoning, 完整 usage 与耗时, finish reason, profile 及实际目标元数据, 稳定错误绝不静默改路由
 * `新增` 全局 JavaScript (Rhino) `ai.session` API 可创建持久 AI provider 插件 Conversation, 为会话固定目标/提供商/模型/生成参数, 后续 `ask`/`chat`/`stream` 轮次只发送新的用户提示词; 正常完成后保留上下文, 取消/超时/协议失败或显式关闭时释放整个会话
 * `新增` `ai.ask`/`ai.chat`/`ai.stream` 与持久 `ai.session` 的 AI provider 路由支持 `structuredJson` 和 JSON 对象 `responseSchema`; schema 启用 LiteRT-LM 原生 JSON Schema 约束解码, 会话为每轮固定同一 schema, 完成 JSON 文本执行严格验证
 * `新增` AI Provider V2 本地目标将显式 `cpu`, `gpu` 和 `npu` backend profile 作为可选目标控件; 可用性按设备报告, 不可用 profile 失败且不回退 CPU, 会话固定一个 backend, GPU 要求系统 OpenCL 可加载, 官方插件因未打包 EAP runtime 而报告 NPU 不可用
@@ -657,7 +657,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 8 月 25 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 8 月 26 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
