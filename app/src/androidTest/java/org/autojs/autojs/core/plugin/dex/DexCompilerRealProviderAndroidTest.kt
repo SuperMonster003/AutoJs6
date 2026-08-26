@@ -249,16 +249,16 @@ class DexCompilerRealProviderAndroidTest {
     }
 
     /**
-     * One API 34 representative for the public Rhino entry. The program extends a Host class that
-     * is present in the ordered compile classpath but deliberately absent from the emitted DEX.
-     * The same script also exercises the independent V1.0 runtime.loadJar entry.
+     * Representative device-matrix coverage for the public Rhino entry. The program extends a
+     * Host class that is present in the ordered compile classpath but deliberately absent from the
+     * emitted DEX. The same script also exercises the independent V1.0 runtime.loadJar entry.
+     *
+     * The external acceptance runner owns the authorized-device/API/ABI matrix. Keeping that
+     * policy outside this test lets the same production-path assertions cover both the API 24/25
+     * CLI-compatible D8 path and the API 26+ command path without weakening either one.
      */
     @Test
-    fun api34RhinoClasspathEntryUsesRealProviderAndRetainsLegacyLoadJar() {
-        assumeTrue(
-            "The representative Rhino classpath deployment runs only on API 34",
-            Build.VERSION.SDK_INT == Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
-        )
+    fun representativeRhinoClasspathEntryUsesRealProviderAndRetainsLegacyLoadJar() {
         val identity = requireRealProvider()
         val savedOptIn = snapshotOptInStore()
         val token = UUID.randomUUID()
