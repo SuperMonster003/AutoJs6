@@ -198,8 +198,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 独立 Java/Kotlin JVM Source Runtime 插件后端, 支持在隔离进程中编译和运行单文件 .java/.kt 脚本, 提供 package/import, 实时 console 输出, 可取消 sleep, 宿主 toast 与显式能力协商
 * `新增` JVM Source Runtime 支持范围为单文件 Java 8 (Java provider 最低 API 24) 与 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次发布仅在 API 31/arm64-v8a 真机完成 smoke, 不声明未验证 API 级别
 * `新增` AutoJs6 官方插件可通过签名权限保护的版本化只读设置契约, 读取宿主主题色, 暗色模式策略及语言的外观快照
-* `新增` ai 模块, 支持单次及流式请求 (参阅 项目文档 > [人工智能](https://docs.autojs6.com/#/ai))
-* `新增` 全局 JavaScript (Rhino) `ai.catalog` API 公开统一的本地/在线插件目标目录, `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` 接受精确的 `local:*` 或 `profile:*` 目标 ID, `plugin: true` 仅作为官方插件默认目标的简写; 插件响应包含 reasoning, 完整 usage 与耗时, finish reason, profile 及实际目标元数据, 稳定错误绝不静默改路由
+* `新增` 全局 JavaScript (Rhino) ai 的所有本地与在线请求统一通过 AI Provider 插件目标执行; 开发者选项会打开可信 3-Stone AI 设置入口, 或提供精确的安装/启用/更新指引, 宿主不再保存 AI 档案或凭据, 也不再包含提供商 HTTP 传输
+* `新增` 全局 JavaScript (Rhino) `ai.catalog` API 公开统一的本地/在线插件目标目录; 省略 `plugin` 与 `target` 时选择官方插件声明的默认目标, `target` 精确选择一个目标, `plugin` 精确选择第三方组件; 响应包含 reasoning, 完整 usage 与耗时, finish reason, profile 及实际目标元数据, 稳定错误绝不静默改路由
 * `新增` 全局 JavaScript (Rhino) `ai.session` API 可创建持久 AI provider 插件 Conversation, 为会话固定目标/提供商/模型/生成参数, 后续 `ask`/`chat`/`stream` 轮次只发送新的用户提示词; 正常完成后保留上下文, 取消/超时/协议失败或显式关闭时释放整个会话
 * `新增` `ai.ask`/`ai.chat`/`ai.stream` 与持久 `ai.session` 的 AI provider 路由支持 `structuredJson` 和 JSON 对象 `responseSchema`; schema 启用 LiteRT-LM 原生 JSON Schema 约束解码, 会话为每轮固定同一 schema, 完成 JSON 文本执行严格验证
 * `新增` AI Provider V2 本地目标将显式 `cpu`, `gpu` 和 `npu` backend profile 作为可选目标控件; 可用性按设备报告, 不可用 profile 失败且不回退 CPU, 会话固定一个 backend, GPU 要求系统 OpenCL 可加载, 官方插件因未打包 EAP runtime 而报告 NPU 不可用

@@ -480,7 +480,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         sqlite = ApiSQLite(mUiHandlerAppContext, this)
 
         http = ApiHttp()
-        ai = AiService(mUiHandlerAppContext, this, http.okhttp.client())
+        ai = AiService(mUiHandlerAppContext, this)
         tts = TtsService(mUiHandlerAppContext, this)
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()

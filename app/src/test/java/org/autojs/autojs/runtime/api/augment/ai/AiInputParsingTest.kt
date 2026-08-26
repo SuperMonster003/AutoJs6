@@ -13,7 +13,7 @@ import org.junit.Test
 import org.mozilla.javascript.Context
 import java.lang.reflect.Modifier
 
-class AiInputCompatibilityTest {
+class AiInputParsingTest {
 
     private lateinit var context: Context
     private lateinit var scope: TopLevelScope
@@ -56,7 +56,7 @@ class AiInputCompatibilityTest {
                     { role: "system", content: "Be concise" },
                     { role: "user", content: "Hello" },
                 ],
-                profile: "Primary",
+                target: "local:primary",
                 temperature: 0.2,
             })
             """.trimIndent(),
@@ -73,7 +73,7 @@ class AiInputCompatibilityTest {
         val input = Ai.parseRequestArguments(arrayOf(request, overrides))
 
         assertEquals(2, input.messages.size())
-        assertEquals("Primary", input.options.get("profile").asString)
+        assertEquals("local:primary", input.options.get("target").asString)
         assertEquals(0.8, input.options.get("temperature").asDouble, 0.0)
         assertEquals(64, input.options.get("maxTokens").asInt)
         assertFalse(input.options.has("messages"))

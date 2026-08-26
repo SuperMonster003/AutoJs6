@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-/** Per-script owner for local plugin text-message requests; the runner may be process-shared. */
+/** Per-script owner for plugin-target text-message requests; the runner may be process-shared. */
 internal class AiPluginAskRuntime(
     runnerProvider: () -> AiPluginAskRunner,
     private val dispatcherFactory: () -> AiAsyncDispatcher,

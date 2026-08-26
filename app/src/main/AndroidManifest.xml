@@ -63,6 +63,9 @@
             <action android:name="org.autojs.plugin.AI_PROVIDER" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.AI_PROVIDER_SETTINGS" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.YOLO" />
         </intent>
         <intent>
@@ -490,10 +493,6 @@
 
         <activity
             android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
-            android:theme="@style/AppTheme.Settings" />
-
-        <activity
-            android:name="org.autojs.autojs.ui.settings.AiSettingsActivity"
             android:theme="@style/AppTheme.Settings" />
 
         <activity

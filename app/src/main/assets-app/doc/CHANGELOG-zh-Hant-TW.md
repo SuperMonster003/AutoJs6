@@ -71,8 +71,8 @@
 * `新增` 顯式 runtime.loadJarWithR8 入口, 支援預設關閉的精確元件選擇, 同簽章身分固定, 有界五產物 R8 傳輸, 隔離快取採用, 以及無 D8/dx 回退的失敗關閉行為
 * `新增` ui.useAndroidLayout 支援 Android 原生版面配置元件, include/merge, 指令碼專案 res 資源引用及 shape/selector/layer-list 等 Drawable XML
 * `新增` JavaScript (Rhino) 模組支援 power/settings/work_manager 相容介面及 AppInfo 包裝, 並完善 Auto.js Pro 9.3.11 的部分 Base64/Crypto/WebSocket/ByteString/automator/images/timers API
-* `新增` 全域 JavaScript (Rhino) ai 模組支援 OpenAI/Anthropic/Gemini/DeepSeek/OpenRouter/OpenAI-compatible 服務商, 提供 ask/chat/stream 呼叫及工具呼叫多輪續接; 開發者選項支援加密的多設定檔及憑證管理, 本機迴路位址上的相容端點可免 API 金鑰執行
-* `新增` 全域 JavaScript (Rhino) `ai.catalog` API 公開統一的本機/線上外掛目標目錄, `ai.ask`/`ai.chat`/`ai.stream`/`ai.session` 接受精確的 `local:*` 或 `profile:*` 目標 ID, `plugin: true` 僅作為官方外掛預設目標的簡寫; 外掛回應包含 reasoning, 完整 usage 與耗時, finish reason, profile 及實際目標 metadata, 穩定錯誤絕不靜默改路由
+* `新增` 全域 JavaScript (Rhino) ai 的所有本機與線上請求統一透過 AI Provider 外掛目標執行; 開發者選項會開啟可信 3-Stone AI 設定入口, 或提供精確的安裝/啟用/更新指引, 宿主不再儲存 AI 設定檔或憑證, 也不再包含提供者 HTTP 傳輸
+* `新增` 全域 JavaScript (Rhino) `ai.catalog` API 公開統一的本機/線上外掛目標目錄; 省略 `plugin` 與 `target` 時選擇官方外掛宣告的預設目標, `target` 精確選擇一個目標, `plugin` 精確選擇第三方元件; 回應包含 reasoning, 完整 usage 與耗時, finish reason, profile 及實際目標 metadata, 穩定錯誤絕不靜默改路由
 * `新增` 全域 JavaScript (Rhino) `ai.session` API 可建立持久 AI provider 外掛 Conversation, 為工作階段固定目標/提供者/模型/生成參數, 後續 `ask`/`chat`/`stream` 輪次只傳送新的使用者提示詞; 正常完成後保留上下文, 取消/逾時/協定失敗或顯式關閉時釋放整個工作階段
 * `新增` `ai.ask`/`ai.chat`/`ai.stream` 與持久 `ai.session` 的 AI provider 路由支援 `structuredJson` 和 JSON 物件 `responseSchema`; schema 啟用 LiteRT-LM 原生 JSON Schema 約束解碼, 工作階段每輪固定同一 schema, 完成 JSON 文字執行嚴格驗證
 * `新增` AI Provider V2 本機目標將明確 `cpu`, `gpu` 與 `npu` backend profile 作為可選目標控制; 可用性按裝置報告, 不可用 profile 失敗且不回退 CPU, 工作階段固定一個 backend, GPU 要求系統 OpenCL 可載入, 官方外掛因未封裝 EAP runtime 而報告 NPU 不可用

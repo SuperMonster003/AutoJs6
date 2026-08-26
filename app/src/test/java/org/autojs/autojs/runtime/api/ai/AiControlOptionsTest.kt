@@ -1,9 +1,7 @@
 package org.autojs.autojs.runtime.api.ai
 
 import com.google.gson.JsonParser
-import org.autojs.autojs.core.ai.AiProviderSelector
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -12,38 +10,29 @@ import org.junit.Test
 class AiControlOptionsTest {
 
     @Test
-    fun consumesSupportedAliasesAndLeavesProviderOptions() {
-        val options = JsonParser.parseString(
-            """
-            {
-              "profileId":"Work",
-              "provider_id":"openai",
-              "baseURL":"https://example.test/v1",
-              "api_key":"secret",
-              "timeoutMs":1500,
-              "stream":true,
-              "temperature":0.25
-            }
-            """,
-        ).asJsonObject
+    fun omittedSelectorUsesTheOfficialPluginDefaultTarget() {
+        val options = JsonParser.parseString("""{"timeout":1500}""").asJsonObject
 
         val control = AiControlOptions.takeFrom(options)
 
-        assertEquals("Work", control.profile)
-        assertEquals("openai", control.providerId)
-        assertEquals("https://example.test/v1", control.baseUrl)
-        assertEquals("secret", control.apiKey)
-        assertEquals(1500L, control.timeoutMillis)
-        assertNull(control.pluginSelection)
-        assertFalse(options.has("profileId"))
-        assertFalse(options.has("baseURL"))
-        assertFalse(options.has("timeoutMs"))
-        assertFalse(options.has("stream"))
-        assertEquals(0.25, options.get("temperature").asDouble, 0.0)
+        assertEquals(officialSelection(), control.pluginSelection)
+        assertNull(control.targetId)
+        assertEquals(1_500L, control.timeoutMillis)
+        assertTrue(options.entrySet().isEmpty())
     }
 
     @Test
-    fun exactPluginSelectionIsConsumedWithoutCreatingCloudControls() {
+    fun exactTargetUsesTheOfficialPlugin() {
+        val control = AiControlOptions.takeFrom(
+            JsonParser.parseString("""{"target":"profile:work"}""").asJsonObject,
+        )
+
+        assertEquals(officialSelection(), control.pluginSelection)
+        assertEquals("profile:work", control.targetId)
+    }
+
+    @Test
+    fun exactPluginComponentAndTargetAreConsumed() {
         val options = pluginOptions(", \"timeout\": 1500")
 
         val control = AiControlOptions.takeFrom(options)
@@ -57,27 +46,19 @@ class AiControlOptionsTest {
             control.pluginSelection,
         )
         assertEquals("local:example-model", control.targetId)
-        assertEquals(1500L, control.timeoutMillis)
-        assertNull(control.profile)
-        assertNull(control.providerId)
-        assertNull(control.baseUrl)
-        assertNull(control.model)
-        assertNull(control.apiKey)
+        assertEquals(1_500L, control.timeoutMillis)
         assertTrue(options.entrySet().isEmpty())
     }
 
     @Test
-    fun malformedPluginSelectionIsRejectedWithItsExactBoundary() {
+    fun malformedPluginSelectionIsRejectedAtTheContractBoundary() {
         data class Case(val pluginJson: String, val expectedMessage: String)
 
         val cases = listOf(
             Case("null", "AI plugin selection must be an object"),
             Case("[]", "AI plugin selection must be an object"),
             Case("false", "AI plugin selection must not be false"),
-            Case(
-                """{"component":{}}""",
-                "AI plugin providerId is required",
-            ),
+            Case("""{"component":{}}""", "AI plugin providerId is required"),
             Case(
                 """{"component":{},"providerId":1}""",
                 "AI plugin providerId must be a string",
@@ -118,70 +99,15 @@ class AiControlOptionsTest {
     }
 
     @Test
-    fun pluginShorthandAndExactTargetSelectTheOfficialPlugin() {
-        val officialPackage = "io.github.supermonster003.autojs6.plugin.threestoneai"
-        val officialClass = "$officialPackage.provider.ThreeStoneAiProviderService"
-        val officialProvider = "autojs6.three-stone-ai"
-
-        val boolean = AiControlOptions.takeFrom(
-            JsonParser.parseString("""{"plugin":true}""").asJsonObject,
-        )
-        assertEquals(
-            AiPluginSelection(officialPackage, officialClass, officialProvider),
-            boolean.pluginSelection,
-        )
-
-        val withTarget = AiControlOptions.takeFrom(
-            JsonParser.parseString("""{"target":"profile:work"}""").asJsonObject,
-        )
-        assertEquals(
-            AiPluginSelection(officialPackage, officialClass, officialProvider),
-            withTarget.pluginSelection,
-        )
-        assertEquals("profile:work", withTarget.targetId)
-
-        val explicitComponent = AiControlOptions.takeFrom(pluginOptionsWithoutTarget())
-        assertEquals(
-            AiPluginSelection(
-                packageName = "org.example.provider",
-                className = "org.example.provider.AiProviderService",
-                providerId = "example.provider",
-            ),
-            explicitComponent.pluginSelection,
-        )
-    }
-
-    @Test
-    fun pluginSelectionRejectsCloudControlsAndUnsupportedOuterOptions() {
-        val cloudControls = listOf(
-            "\"profile\":\"Work\"",
-            "\"profileId\":\"Work\"",
-            "\"profile_id\":\"Work\"",
-            "\"provider\":\"openai\"",
-            "\"providerId\":\"openai\"",
-            "\"provider_id\":\"openai\"",
-            "\"baseUrl\":\"https://example.test/v1\"",
-            "\"baseURL\":\"https://example.test/v1\"",
-            "\"base_url\":\"https://example.test/v1\"",
-            "\"model\":\"cloud-model\"",
-            "\"apiKey\":\"secret\"",
-            "\"api_key\":\"secret\"",
-        )
-        cloudControls.forEach { cloudControl ->
+    fun unknownFacadeControlsAreRejected() {
+        listOf(
+            """{"unexpected":true}""",
+            """{"nested":{"unexpected":true}}""",
+        ).forEach { source ->
             val error = assertThrows(IllegalArgumentException::class.java) {
-                AiControlOptions.takeFrom(pluginOptions(", $cloudControl"))
+                AiControlOptions.takeFrom(JsonParser.parseString(source).asJsonObject)
             }
-            assertEquals(
-                "AI plugin selection cannot be combined with cloud provider controls",
-                error.message,
-            )
-        }
-
-        listOf("\"stream\":true", "\"temperature\":0.25").forEach { unsupported ->
-            val error = assertThrows(IllegalArgumentException::class.java) {
-                AiControlOptions.takeFrom(pluginOptions(", $unsupported"))
-            }
-            assertEquals("AI plugin selection contains unsupported options", error.message)
+            assertEquals("AI request contains unsupported options", error.message)
         }
     }
 
@@ -195,62 +121,15 @@ class AiControlOptionsTest {
         }
 
         val scientificInteger = JsonParser.parseString("""{"timeout":1e3}""").asJsonObject
-        assertEquals(1000L, AiControlOptions.takeFrom(scientificInteger).timeoutMillis)
+        assertEquals(1_000L, AiControlOptions.takeFrom(scientificInteger).timeoutMillis)
     }
 
-    @Test
-    fun profileSelectorRecognizesCanonicalUuidAndNames() {
-        val id = "1f81d3cb-9fe2-4e32-85a0-e0a6fc436620"
-        assertEquals(
-            AiProviderSelector.Id(id),
-            AiControlOptions(id, null, null, null, null, null).profileSelector(),
-        )
-        assertEquals(
-            AiProviderSelector.Name("Personal"),
-            AiControlOptions("Personal", null, null, null, null, null).profileSelector(),
-        )
-    }
-
-    @Test
-    fun stringRepresentationRedactsExplicitApiKeyAndMatchingMetadata() {
-        val apiKey = "private-secret-1234"
-        val control = AiControlOptions(
-            profile = "$apiKey-profile",
-            providerId = "openai",
-            baseUrl = "https://example.test/$apiKey",
-            model = "model-$apiKey",
-            apiKey = apiKey,
-            timeoutMillis = 1_000L,
-        )
-
-        val rendered = control.toString()
-
-        assertTrue(apiKey !in rendered)
-        assertTrue("1234" !in rendered)
-        assertTrue("[REDACTED]" in rendered)
-    }
-
-    @Test
-    fun loopbackOpenAiCompatibleConfigCanBeStandaloneWithoutApiKey() {
-        assertTrue(
-            AiControlOptions(
-                profile = null,
-                providerId = "openai-compatible",
-                baseUrl = "http://localhost:11434/v1",
-                model = "local-model",
-                apiKey = null,
-                timeoutMillis = null,
-            ).canUseStandaloneConfig(),
-        )
-        assertFalse(
-            AiControlOptions(
-                profile = null,
-                providerId = "openai-compatible",
-                baseUrl = "https://models.example.com/v1",
-                model = "remote-model",
-                apiKey = null,
-                timeoutMillis = null,
-            ).canUseStandaloneConfig(),
+    private fun officialSelection(): AiPluginSelection {
+        val packageName = "io.github.supermonster003.autojs6.plugin.threestoneai"
+        return AiPluginSelection(
+            packageName = packageName,
+            className = "$packageName.provider.ThreeStoneAiProviderService",
+            providerId = "autojs6.three-stone-ai",
         )
     }
 
@@ -266,20 +145,6 @@ class AiControlOptionsTest {
           },
           "target": "local:example-model"
           $extra
-        }
-        """,
-    ).asJsonObject
-
-    private fun pluginOptionsWithoutTarget() = JsonParser.parseString(
-        """
-        {
-          "plugin": {
-            "component": {
-              "packageName": "org.example.provider",
-              "className": "org.example.provider.AiProviderService"
-            },
-            "providerId": "example.provider"
-          }
         }
         """,
     ).asJsonObject

@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api.augment.ai
 
-import okhttp3.Call
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -20,7 +19,6 @@ class AiStream internal constructor(
     private val onTerminal: (() -> Unit)?,
 ) : EventEmitter(bridges) {
 
-    private val call = AtomicReference<Call?>()
     private val cancellation = AtomicReference<(() -> Unit)?>()
     private val streamState = AtomicReference(State.CREATED)
     private val terminalLock = Any()
@@ -51,20 +49,7 @@ class AiStream internal constructor(
         return this
     }
 
-    private fun bindCall(call: Call): AiStream {
-        synchronized(terminalLock) {
-            if (isDone) {
-                call.cancel()
-                return this
-            }
-            check(this.call.compareAndSet(null, call)) {
-                "AI stream already has a bound call"
-            }
-        }
-        return this
-    }
-
-    /** Binds a non-HTTP transport cancellation without exposing it to Rhino. */
+    /** Binds plugin-transport cancellation without exposing it to Rhino. */
     private fun bindCancellation(action: () -> Unit): AiStream {
         val cancelNow = synchronized(terminalLock) {
             if (isDone) {
@@ -120,13 +105,6 @@ class AiStream internal constructor(
         }
     }
 
-    private fun toolCall(toolCall: Any?): Boolean {
-        if (!markOpen()) return false
-        return dispatcher.dispatchValues(arrayOf(toolCall)) { values ->
-            emit(EVENT_TOOL_CALL, values[0])
-        }
-    }
-
     private fun usage(usage: Any?): Boolean {
         if (!markOpen()) return false
         return dispatcher.dispatchValues(arrayOf(usage)) { values ->
@@ -147,12 +125,10 @@ class AiStream internal constructor(
     }
 
     /**
-     * User-visible cancellation. Bound HTTP and plugin transports are cancelled immediately
-     * while the "cancelled" event and looper-wait release are delivered on the originating JS
-     * thread.
+     * User-visible cancellation. The bound plugin transport is cancelled immediately while the
+     * "cancelled" event and looper-wait release are delivered on the originating JS thread.
      */
     fun cancel(): AiStream {
-        var boundCall: Call? = null
         var boundCancellation: (() -> Unit)? = null
         var cancellationFailure: Throwable? = null
         synchronized(terminalLock) {
@@ -174,11 +150,9 @@ class AiStream internal constructor(
             if (!accepted && cancellationFailure == null) {
                 return this
             }
-            boundCall = call.getAndSet(null)
             boundCancellation = cancellation.getAndSet(null)
         }
         cancellationFailure = cancelTransport(
-            boundCall = boundCall,
             boundCancellation = boundCancellation,
             previousFailure = cancellationFailure,
         )
@@ -190,29 +164,21 @@ class AiStream internal constructor(
      * Runtime-exit cancellation. No JavaScript event is emitted after teardown begins.
      */
     private fun cancelSilently(): Boolean {
-        val boundCall: Call?
         val boundCancellation: (() -> Unit)?
         synchronized(terminalLock) {
             if (!dispatcher.cancelSilently(::notifyTerminal)) return false
             streamState.set(State.CANCELLED)
-            boundCall = call.getAndSet(null)
             boundCancellation = cancellation.getAndSet(null)
         }
-        cancelTransport(boundCall, boundCancellation)?.let { throw it }
+        cancelTransport(boundCancellation)?.let { throw it }
         return true
     }
 
     private fun cancelTransport(
-        boundCall: Call?,
         boundCancellation: (() -> Unit)?,
         previousFailure: Throwable? = null,
     ): Throwable? {
         var firstFailure = previousFailure
-        try {
-            boundCall?.cancel()
-        } catch (error: Throwable) {
-            firstFailure?.addSuppressed(error) ?: run { firstFailure = error }
-        }
         try {
             boundCancellation?.invoke()
         } catch (error: Throwable) {
@@ -250,13 +216,11 @@ class AiStream internal constructor(
                     }
                 }
             } catch (error: Throwable) {
-                call.set(null)
                 cancellation.set(null)
                 notifyTerminal()
                 throw error
             }
             if (!accepted) return false
-            call.set(null)
             cancellation.set(null)
             return true
         }
@@ -299,8 +263,6 @@ class AiStream internal constructor(
         val isDone: Boolean
             get() = stream.isDone
 
-        fun bindCall(call: Call): Controller = apply { stream.bindCall(call) }
-
         fun bindCancellation(action: () -> Unit): Controller = apply {
             stream.bindCancellation(action)
         }
@@ -312,8 +274,6 @@ class AiStream internal constructor(
         fun chunk(chunk: Any?): Boolean = stream.chunk(chunk)
 
         fun textChunk(text: String, chunk: Any?): Boolean = stream.textChunk(text, chunk)
-
-        fun toolCall(toolCall: Any?): Boolean = stream.toolCall(toolCall)
 
         fun usage(usage: Any?): Boolean = stream.usage(usage)
 
@@ -329,7 +289,6 @@ class AiStream internal constructor(
         const val EVENT_OPEN = "open"
         const val EVENT_DELTA = "delta"
         const val EVENT_CHUNK = "chunk"
-        const val EVENT_TOOL_CALL = "toolCall"
         const val EVENT_USAGE = "usage"
         const val EVENT_DONE = "done"
         const val EVENT_ERROR = "error"

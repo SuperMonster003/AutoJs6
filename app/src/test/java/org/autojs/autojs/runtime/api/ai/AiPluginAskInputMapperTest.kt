@@ -136,7 +136,7 @@ class AiPluginAskInputMapperTest {
                 defaultTimeoutMillis = 9_000L,
             )
         }
-        assertEquals("AI plugin selection contains unsupported options", optionError.message)
+        assertEquals("AI request contains unsupported options", optionError.message)
     }
 
     @Test

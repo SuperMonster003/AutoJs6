@@ -2,9 +2,7 @@ package org.autojs.autojs.runtime.api.ai
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.SharedPreferences
 import com.google.gson.JsonParser
-import okhttp3.OkHttpClient
 import org.autojs.autojs.core.plugin.ai.AiPluginAskFailure
 import org.autojs.autojs.core.plugin.ai.AiPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.AiPluginAskOutcome
@@ -24,7 +22,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Wrapper
-import java.lang.reflect.Proxy
 import java.util.ArrayDeque
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -33,7 +30,7 @@ import sun.misc.Unsafe
 class AiServicePluginRouteTest {
 
     @Test
-    fun synchronousPluginChatCompletionReusesExactPromptRouteAndReturnsNormalizedShapeWithoutCloudFallback() {
+    fun synchronousPluginChatCompletionReusesExactTargetAndReturnsNormalizedShape() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
             synchronousOutcome = testPluginCompletion("exact local chat answer", usage()),
@@ -42,9 +39,7 @@ class AiServicePluginRouteTest {
         val rejected = AtomicReference<Any?>()
         val resolveCount = AtomicInteger()
         val rejectCount = AtomicInteger()
-        val httpCallCount = AtomicInteger()
-        TestContext.preferenceCallCount.set(0)
-        val service = service(runner, dispatchers, httpCallCount = httpCallCount)
+        val service = service(runner, dispatchers)
 
         service.chat(pluginInput(timeoutMillis = 2_500L))
             .onResolve(callback { value ->
@@ -70,8 +65,6 @@ class AiServicePluginRouteTest {
         assertEquals(2_500L, runner.request.get()?.timeoutMillis)
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
-        assertEquals(0, TestContext.preferenceCallCount.get())
-        assertEquals(0, httpCallCount.get())
 
         runner.emit(AiPluginAskOutcome.Failed(AiPluginAskFailure.PROVIDER_FAILED))
         dispatchers.drain()
@@ -80,21 +73,18 @@ class AiServicePluginRouteTest {
         assertEquals(1, resolveCount.get())
         assertEquals(0, rejectCount.get())
         assertEquals(1, runner.handle.closeCount.get())
-        assertEquals(0, httpCallCount.get())
         service.close()
     }
 
     @Test
-    fun pluginChatFailureRejectsStableRouteCodeWithoutVaultHttpOrFallback() {
+    fun pluginChatFailureRejectsStableRouteCode() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner()
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
         val resolveCount = AtomicInteger()
         val rejectCount = AtomicInteger()
-        val httpCallCount = AtomicInteger()
-        TestContext.preferenceCallCount.set(0)
-        val service = service(runner, dispatchers, httpCallCount = httpCallCount)
+        val service = service(runner, dispatchers)
 
         service.chat(pluginInput())
             .onResolve(callback { value ->
@@ -116,8 +106,6 @@ class AiServicePluginRouteTest {
         assertEquals("AI plugin chat failed (BINDER_DIED)", error["message"])
         assertEquals("plugin", error["route"])
         assertEquals("BINDER_DIED", error["code"])
-        assertEquals(0, TestContext.preferenceCallCount.get())
-        assertEquals(0, httpCallCount.get())
         assertEquals(1, runner.startCount.get())
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
@@ -129,7 +117,6 @@ class AiServicePluginRouteTest {
         assertEquals(0, resolveCount.get())
         assertEquals(1, rejectCount.get())
         assertEquals(1, runner.handle.closeCount.get())
-        assertEquals(0, httpCallCount.get())
         service.close()
     }
 
@@ -169,12 +156,11 @@ class AiServicePluginRouteTest {
     }
 
     @Test
-    fun pluginFailureRejectsWithStableRouteCodeWithoutCloudFallback() {
+    fun pluginFailureRejectsWithStableRouteCode() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner()
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
-        TestContext.preferenceCallCount.set(0)
         val service = service(runner, dispatchers)
 
         service.ask(pluginInput())
@@ -187,7 +173,6 @@ class AiServicePluginRouteTest {
         val error = rejected.get() as Map<*, *>
         assertEquals("plugin", error["route"])
         assertEquals("BINDER_DIED", error["code"])
-        assertEquals(0, TestContext.preferenceCallCount.get())
         assertEquals(1, runner.startCount.get())
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
@@ -195,16 +180,14 @@ class AiServicePluginRouteTest {
     }
 
     @Test
-    fun pluginAskForwardsSystemAndConversationMessagesInOrderWithoutCloudFallback() {
+    fun pluginAskForwardsSystemAndConversationMessagesInOrder() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner(
             synchronousOutcome = testPluginCompletion("system-aware answer", usage()),
         )
         val resolved = AtomicReference<Any?>()
         val rejected = AtomicReference<Any?>()
-        val httpCallCount = AtomicInteger()
-        TestContext.preferenceCallCount.set(0)
-        val service = service(runner, dispatchers, httpCallCount = httpCallCount)
+        val service = service(runner, dispatchers)
 
         service.ask(
             pluginInput(
@@ -241,20 +224,16 @@ class AiServicePluginRouteTest {
             ),
             request.messages.map { it.content },
         )
-        assertEquals(0, TestContext.preferenceCallCount.get())
-        assertEquals(0, httpCallCount.get())
         service.close()
     }
 
     @Test
-    fun malformedPluginSelectionRejectsWithStableInvalidRequestWithoutCloudFallback() {
+    fun malformedPluginSelectionRejectsWithStableInvalidRequest() {
         val dispatchers = TestDispatchers()
         val runner = FakePluginAskRunner()
         val askRejected = AtomicReference<Any?>()
         val chatRejected = AtomicReference<Any?>()
-        val httpCallCount = AtomicInteger()
-        TestContext.preferenceCallCount.set(0)
-        val service = service(runner, dispatchers, httpCallCount = httpCallCount)
+        val service = service(runner, dispatchers)
         val input = AiRequestInput(
             messages = JsonParser.parseString(
                 """[{"role":"user","content":"prompt"}]""",
@@ -269,8 +248,6 @@ class AiServicePluginRouteTest {
         assertInvalidPluginRequest(askRejected.get())
         assertInvalidPluginRequest(chatRejected.get())
         assertEquals(0, runner.startCount.get())
-        assertEquals(0, TestContext.preferenceCallCount.get())
-        assertEquals(0, httpCallCount.get())
         service.close()
     }
 
@@ -299,12 +276,11 @@ class AiServicePluginRouteTest {
     }
 
     @Test
-    fun pluginStreamFailureUsesExactRouteWithoutVaultOrCloudFallback() {
+    fun pluginStreamFailureUsesExactRoute() {
         val dispatchers = TestDispatchers()
         val askRunner = FakePluginAskRunner()
         val streamRunner = FakePluginStreamRunner()
         val errors = AtomicReference<Any?>()
-        TestContext.preferenceCallCount.set(0)
         val service = service(askRunner, dispatchers, streamRunner)
 
         val stream = service.stream(pluginInput(timeoutMillis = 2_500L))
@@ -324,12 +300,11 @@ class AiServicePluginRouteTest {
         val error = (errors.get() as Wrapper).unwrap() as Map<*, *>
         assertEquals("plugin", error["route"])
         assertEquals("BINDER_DIED", error["code"])
-        assertEquals(0, TestContext.preferenceCallCount.get())
         assertEquals(0, askRunner.startCount.get())
         assertEquals(0, streamRunner.handle.cancelCount.get())
         assertEquals(1, streamRunner.handle.closeCount.get())
 
-        streamRunner.emit(testPluginStreamCompletion("late cloud fallback must not win", usage()))
+        streamRunner.emit(testPluginStreamCompletion("late terminal must not win", usage()))
         dispatchers.drain()
         assertEquals(1, streamRunner.handle.closeCount.get())
         service.close()
@@ -339,31 +314,13 @@ class AiServicePluginRouteTest {
         runner: FakePluginAskRunner,
         dispatchers: TestDispatchers,
         streamRunner: AiPluginStreamRunner = FakePluginStreamRunner(),
-        httpCallCount: AtomicInteger = AtomicInteger(),
     ) = AiService(
         context = testContext(),
         scriptRuntime = RhinoTestRuntime.create(TopLevelScope()),
-        sourceClient = OkHttpClient(),
         pluginAskRunner = runner,
         pluginDispatcherFactory = dispatchers::create,
         pluginStreamRunner = streamRunner,
-    ).also { service ->
-        // AiHttpClientFactory intentionally strips source-client interceptors. Install this on the
-        // actual per-service client so a cloud fallback cannot turn a zero counter into a false pass.
-        val clientField = AiService::class.java.getDeclaredField("client").apply {
-            isAccessible = true
-        }
-        val client = clientField.get(service) as OkHttpClient
-        clientField.set(
-            service,
-            client.newBuilder()
-                .addInterceptor { chain ->
-                    httpCallCount.incrementAndGet()
-                    throw AssertionError("Unexpected cloud HTTP request: ${chain.request().url}")
-                }
-                .build(),
-        )
-    }
+    )
 
     private fun assertPluginChatResponse(value: Any?, expectedText: String) {
         val response = value as Map<*, *>
@@ -472,20 +429,6 @@ class AiServicePluginRouteTest {
     private class TestContext : ContextWrapper(null) {
 
         override fun getApplicationContext(): Context = this
-
-        override fun getSharedPreferences(name: String, mode: Int): SharedPreferences {
-            return Proxy.newProxyInstance(
-                SharedPreferences::class.java.classLoader,
-                arrayOf(SharedPreferences::class.java),
-            ) { _, method, _ ->
-                preferenceCallCount.incrementAndGet()
-                throw AssertionError("Unexpected cloud vault access: ${method.name}")
-            } as SharedPreferences
-        }
-
-        companion object {
-            val preferenceCallCount = AtomicInteger()
-        }
     }
 
     private class TestDispatchers {

@@ -22,7 +22,7 @@ class AiSettingsPreference : MaterialPreference {
         if (handleUnavailableClickIfNeeded()) {
             return
         }
-        AiSettingsActivity.launch(context)
+        AiPluginSettingsLauncher.launch(context)
         super.onClick()
     }
 }

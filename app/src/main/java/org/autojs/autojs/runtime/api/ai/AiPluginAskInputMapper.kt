@@ -11,13 +11,9 @@ import org.autojs.plugin.ai.provider.api.AiProviderLimits
 /** Strict text-message admission for the explicitly selected plugin target route. */
 internal object AiPluginAskInputMapper {
 
-    fun hasPluginSelection(input: AiRequestInput): Boolean =
-        input.options.has("plugin") || input.options.has("target")
-
     fun requirePluginControl(input: AiRequestInput): AiControlOptions {
         val providerOptions = input.options.deepCopy()
         val control = AiControlOptions.takeFrom(providerOptions)
-        require(control.pluginSelection != null) { "AI plugin selection is required" }
         return control
     }
 
@@ -72,8 +68,7 @@ internal object AiPluginAskInputMapper {
             null
         }
         val control = AiControlOptions.takeFrom(pluginOptions)
-        require(control.pluginSelection != null) { "AI plugin selection is required" }
-        val selection = requireNotNull(control.pluginSelection)
+        val selection = control.pluginSelection
         require(input.messages.size() in 1..AiProviderLimits.MAX_MESSAGES) {
             "AI plugin ask message count is invalid"
         }

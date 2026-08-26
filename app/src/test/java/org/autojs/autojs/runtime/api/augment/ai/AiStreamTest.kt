@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api.augment.ai
 
-import okhttp3.Call
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.util.RhinoUtils
@@ -17,9 +16,7 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import java.lang.reflect.Proxy
 import java.util.ArrayDeque
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
@@ -78,29 +75,6 @@ class AiStreamTest {
         assertEquals("ready", Context.toString((receivedDone.get() as Scriptable)["text"]))
         assertEquals(1, releaseCount.get())
         assertEquals(1, terminalCount.get())
-    }
-
-    @Test
-    fun userCancellationCancelsBoundCallAndEmitsCancelled() {
-        val cancelled = AtomicInteger()
-        val releaseCount = AtomicInteger()
-        val fakeCall = fakeCall()
-        val controller = AiStream.Controller(
-            dispatcher = immediateDispatcher(releaseCount),
-            bridges = ScriptBridges(),
-            onTerminal = null,
-        )
-        val stream = controller.stream
-        stream.on(AiStream.EVENT_CANCELLED, listener { cancelled.incrementAndGet() })
-        controller.bindCall(fakeCall.call)
-
-        assertSame(stream, stream.cancel())
-
-        assertEquals("cancelled", stream.state)
-        assertTrue(stream.isDone)
-        assertTrue(fakeCall.cancelled.get())
-        assertEquals(1, cancelled.get())
-        assertEquals(1, releaseCount.get())
     }
 
     @Test
@@ -180,7 +154,7 @@ class AiStreamTest {
     }
 
     @Test
-    fun runtimeCancellationIsSilentAndLateBindingIsCancelled() {
+    fun runtimeCancellationIsSilent() {
         val cancelledEvents = AtomicInteger()
         val releaseCount = AtomicInteger()
         val controller = AiStream.Controller(
@@ -194,12 +168,8 @@ class AiStreamTest {
         assertTrue(controller.cancelSilently())
         assertFalse(controller.cancelSilently())
 
-        val lateCall = fakeCall()
-        controller.bindCall(lateCall.call)
-
         assertEquals("cancelled", stream.state)
         assertEquals(0, cancelledEvents.get())
-        assertTrue(lateCall.cancelled.get())
         assertEquals(1, releaseCount.get())
     }
 
@@ -211,7 +181,7 @@ class AiStreamTest {
         val cancelled = AtomicInteger()
         val terminalCount = AtomicInteger()
         val releaseCount = AtomicInteger()
-        val fakeCall = fakeCall()
+        val transportCancellations = AtomicInteger()
         val dispatcher = AiAsyncDispatcher(
             valueMapper = { it },
             scheduler = scheduled::addLast,
@@ -224,7 +194,7 @@ class AiStreamTest {
         stream.on(AiStream.EVENT_DELTA, listener { deltas.incrementAndGet() })
         stream.on(AiStream.EVENT_CHUNK, listener { chunks.incrementAndGet() })
         stream.on(AiStream.EVENT_CANCELLED, listener { cancelled.incrementAndGet() })
-        controller.bindCall(fakeCall.call)
+        controller.bindCancellation { transportCancellations.incrementAndGet() }
         controller.delta("queued")
         controller.chunk(mapOf("text" to "queued"))
 
@@ -234,7 +204,7 @@ class AiStreamTest {
 
         assertEquals("cancelled", stream.state)
         assertTrue(stream.isDone)
-        assertTrue(fakeCall.cancelled.get())
+        assertEquals(1, transportCancellations.get())
         assertEquals(0, deltas.get())
         assertEquals(0, chunks.get())
         assertEquals(1, cancelled.get())
@@ -243,11 +213,11 @@ class AiStreamTest {
     }
 
     @Test
-    fun userCancellationStillCancelsBoundCallWhenTerminalSchedulingFails() {
+    fun userCancellationStillCancelsPluginTransportWhenTerminalSchedulingFails() {
         val expected = IllegalStateException("scheduler unavailable")
         val releaseCount = AtomicInteger()
         val terminalCount = AtomicInteger()
-        val fakeCall = fakeCall()
+        val transportCancellations = AtomicInteger()
         val dispatcher = AiAsyncDispatcher(
             valueMapper = { it },
             scheduler = { throw expected },
@@ -257,7 +227,7 @@ class AiStreamTest {
             terminalCount.incrementAndGet()
         }
         val stream = controller.stream
-        controller.bindCall(fakeCall.call)
+        controller.bindCancellation { transportCancellations.incrementAndGet() }
 
         val actual = assertThrows(IllegalStateException::class.java) {
             stream.cancel()
@@ -266,7 +236,7 @@ class AiStreamTest {
         assertSame(expected, actual)
         assertEquals("cancelled", stream.state)
         assertTrue(stream.isDone)
-        assertTrue(fakeCall.cancelled.get())
+        assertEquals(1, transportCancellations.get())
         assertEquals(1, terminalCount.get())
         assertEquals(1, releaseCount.get())
     }
@@ -276,13 +246,11 @@ class AiStreamTest {
         val publicMethodNames = AiStream::class.java.methods.map { it.name }
 
         listOf(
-            "bindCall",
             "bindCancellation",
             "open",
             "delta",
             "chunk",
             "textChunk",
-            "toolCall",
             "usage",
             "complete",
             "fail",
@@ -311,34 +279,6 @@ class AiStreamTest {
             RhinoUtils.NOT_CONSTRUCTABLE,
         )
     }
-
-    private fun fakeCall(): FakeCall {
-        val cancelled = AtomicBoolean(false)
-        val proxy = Proxy.newProxyInstance(
-            Call::class.java.classLoader,
-            arrayOf(Call::class.java),
-        ) { instance, method, args ->
-            when (method.name) {
-                "cancel" -> {
-                    cancelled.set(true)
-                    null
-                }
-                "isCanceled" -> cancelled.get()
-                "isExecuted" -> false
-                "clone" -> instance
-                "toString" -> "FakeAiCall"
-                "hashCode" -> System.identityHashCode(instance)
-                "equals" -> instance === args?.firstOrNull()
-                else -> throw UnsupportedOperationException(method.name)
-            }
-        } as Call
-        return FakeCall(proxy, cancelled)
-    }
-
-    private data class FakeCall(
-        val call: Call,
-        val cancelled: AtomicBoolean,
-    )
 
     private operator fun Scriptable.get(name: String): Any? {
         return ScriptableObject.getProperty(this, name)

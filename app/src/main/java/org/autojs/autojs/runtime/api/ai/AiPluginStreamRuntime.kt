@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-/** Per-script owner for local plugin text-message streams. */
+/** Per-script owner for plugin-target text-message streams. */
 internal class AiPluginStreamRuntime(
     runnerProvider: () -> AiPluginStreamRunner,
     private val dispatcherFactory: () -> AiAsyncDispatcher,

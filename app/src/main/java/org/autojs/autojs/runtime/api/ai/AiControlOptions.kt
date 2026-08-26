@@ -2,115 +2,37 @@ package org.autojs.autojs.runtime.api.ai
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import org.autojs.autojs.core.ai.AiProviderSelector
 import org.autojs.autojs.core.plugin.ai.ThreeStoneAiOfficialPlugin
 import org.autojs.plugin.ai.common.api.AiValidation
-import java.util.UUID
+import org.autojs.plugin.ai.provider.api.AiProviderLimits
 
-/**
- * Facade-only options consumed before provider-native request mapping.
- *
- * Parsing lives outside [AiService] so aliases and numeric validation remain independently
- * testable as the JavaScript API evolves.
- */
+/** Facade-only controls consumed before a request crosses the plugin boundary. */
 internal data class AiControlOptions(
-    val profile: String?,
-    val providerId: String?,
-    val baseUrl: String?,
-    val model: String?,
-    val apiKey: String?,
     val timeoutMillis: Long?,
-    val targetId: String? = null,
-    val pluginSelection: AiPluginSelection? = null,
+    val targetId: String?,
+    val pluginSelection: AiPluginSelection,
 ) {
-
-    fun canUseStandaloneConfig(): Boolean {
-        return profile == null &&
-            providerId != null &&
-            model != null &&
-            (
-                apiKey != null ||
-                    baseUrl?.let {
-                        AiCredentialPolicy.allowsMissingApiKey(providerId, it)
-                    } == true
-            )
-    }
-
-    fun profileSelector(): AiProviderSelector {
-        val selectedProfile = profile
-        if (selectedProfile != null) {
-            val normalized = selectedProfile.trim().lowercase()
-            val isUuid = runCatching { UUID.fromString(normalized).toString() == normalized }
-                .getOrDefault(false)
-            return if (isUuid) {
-                AiProviderSelector.Id(normalized)
-            } else {
-                AiProviderSelector.Name(selectedProfile)
-            }
-        }
-        return providerId?.let { AiProviderSelector.ProviderId(it) }
-            ?: AiProviderSelector.Default
-    }
-
-    override fun toString(): String {
-        fun String?.redacted(): String? {
-            val key = apiKey?.takeIf(String::isNotBlank) ?: return this
-            return this?.replace(key, "[REDACTED]")
-        }
-        return "AiControlOptions(profile=${profile.redacted()}, " +
-            "providerId=${providerId.redacted()}, baseUrl=${baseUrl.redacted()}, " +
-            "model=${model.redacted()}, apiKey=[REDACTED], timeoutMillis=$timeoutMillis, " +
-            "targetId=$targetId, pluginSelection=$pluginSelection)"
-    }
 
     companion object {
 
-        const val MIN_TIMEOUT_MILLIS = 1_000L
-        const val MAX_TIMEOUT_MILLIS = 10L * 60L * 1_000L
-
         fun takeFrom(options: JsonObject): AiControlOptions {
             val pluginElement = options.remove("plugin")
-            val targetId = options.takeString("target")?.also {
+            val targetId = options.takeOptionalString("target", "AI target")?.also {
                 require(AiValidation.TARGET_ID.matches(it)) { "AI target is invalid" }
             }
-            val hasCloudControl = CLOUD_CONTROL_NAMES.any(options::has)
-            val hasExplicitStreamControl = options.has("stream")
-            val profile = options.takeString("profile", "profileId", "profile_id")
-            val provider = options.takeString("provider", "providerId", "provider_id")
-            val baseUrl = options.takeString("baseUrl", "baseURL", "base_url")
-            val model = options.takeString("model")
-            val apiKey = options.takeString("apiKey", "api_key")
-            val timeout = options.takeLong(
-                "timeout",
-                "timeoutMillis",
-                "timeoutMs",
-                "timeout_millis",
-            )?.also {
-                require(it in MIN_TIMEOUT_MILLIS..MAX_TIMEOUT_MILLIS) {
-                    "AI timeout must be between $MIN_TIMEOUT_MILLIS and " +
-                        "$MAX_TIMEOUT_MILLIS milliseconds"
+            val timeout = options.takeOptionalLong("timeout", "AI timeout")?.also {
+                require(it in AiProviderLimits.MIN_TIMEOUT_MILLIS..
+                    AiProviderLimits.MAX_TIMEOUT_MILLIS) {
+                    "AI timeout must be between ${AiProviderLimits.MIN_TIMEOUT_MILLIS} and " +
+                        "${AiProviderLimits.MAX_TIMEOUT_MILLIS} milliseconds"
                 }
             }
-            options.remove("stream")
-            val pluginSelection = when {
-                pluginElement != null -> parsePluginSelection(pluginElement)
-                targetId != null -> officialPluginSelection()
-                else -> null
-            }
-            if (pluginSelection != null) {
-                require(!hasCloudControl) {
-                    "AI plugin selection cannot be combined with cloud provider controls"
-                }
-                require(!hasExplicitStreamControl && options.entrySet().isEmpty()) {
-                    "AI plugin selection contains unsupported options"
-                }
+            val pluginSelection = pluginElement?.let(::parsePluginSelection)
+                ?: officialPluginSelection()
+            require(options.entrySet().isEmpty()) {
+                "AI request contains unsupported options"
             }
             return AiControlOptions(
-                profile = profile,
-                providerId = provider,
-                baseUrl = baseUrl,
-                model = model,
-                apiKey = apiKey,
                 timeoutMillis = timeout,
                 targetId = targetId,
                 pluginSelection = pluginSelection,
@@ -126,16 +48,17 @@ internal data class AiControlOptions(
             val plugin = value.asJsonObject.deepCopy()
             val componentElement = plugin.remove("component")
             if (componentElement == null) {
-                // Omitted component selects the official plugin; providerId may still be pinned.
-                val providerId = plugin.takeOptionalString("providerId", "AI plugin providerId")
-                    ?: ThreeStoneAiOfficialPlugin.PROVIDER_ID
+                val providerId = plugin.takeOptionalString(
+                    "providerId",
+                    "AI plugin providerId",
+                ) ?: ThreeStoneAiOfficialPlugin.PROVIDER_ID
                 require(plugin.entrySet().isEmpty()) {
                     "AI plugin selection contains unsupported fields"
                 }
                 require(AiValidation.STABLE_ID.matches(providerId)) {
                     "AI plugin providerId is invalid"
                 }
-                return officialPluginSelection(providerId = providerId)
+                return officialPluginSelection(providerId)
             }
             val providerId = plugin.takeRequiredString("providerId", "AI plugin providerId")
             require(plugin.entrySet().isEmpty()) {
@@ -159,11 +82,7 @@ internal data class AiControlOptions(
             require(component.entrySet().isEmpty()) {
                 "AI plugin component contains unsupported fields"
             }
-            return AiPluginSelection(
-                packageName = packageName,
-                className = className,
-                providerId = providerId,
-            )
+            return AiPluginSelection(packageName, className, providerId)
         }
 
         private fun officialPluginSelection(
@@ -186,6 +105,17 @@ internal data class AiControlOptions(
             return requireCleanString(value, label)
         }
 
+        private fun JsonObject.takeOptionalLong(name: String, label: String): Long? {
+            val value = remove(name) ?: return null
+            if (value.isJsonNull) return null
+            require(value.isJsonPrimitive && value.asJsonPrimitive.isNumber) {
+                "$label must be a number"
+            }
+            return runCatching { value.asBigDecimal.longValueExact() }.getOrElse {
+                throw IllegalArgumentException("$label must be an integer", it)
+            }
+        }
+
         private fun requireCleanString(value: JsonElement, label: String): String {
             require(value.isJsonPrimitive && value.asJsonPrimitive.isString) {
                 "$label must be a string"
@@ -197,58 +127,6 @@ internal data class AiControlOptions(
                 }
             }
         }
-
-        private fun JsonObject.takeString(vararg names: String): String? {
-            var selected: JsonElement? = null
-            names.forEach { name ->
-                remove(name)?.let { value ->
-                    if (selected == null && !value.isJsonNull) {
-                        selected = value
-                    }
-                }
-            }
-            val value = selected ?: return null
-            require(value.isJsonPrimitive && value.asJsonPrimitive.isString) {
-                "AI option ${names.first()} must be a string"
-            }
-            return value.asString.trim().takeIf(String::isNotEmpty)
-        }
-
-        private fun JsonObject.takeLong(vararg names: String): Long? {
-            var selected: JsonElement? = null
-            names.forEach { name ->
-                remove(name)?.let { value ->
-                    if (selected == null && !value.isJsonNull) {
-                        selected = value
-                    }
-                }
-            }
-            val value = selected ?: return null
-            require(value.isJsonPrimitive && value.asJsonPrimitive.isNumber) {
-                "AI option ${names.first()} must be a number"
-            }
-            return runCatching { value.asBigDecimal.longValueExact() }.getOrElse {
-                throw IllegalArgumentException(
-                    "AI option ${names.first()} must be an integer",
-                    it,
-                )
-            }
-        }
-
-        private val CLOUD_CONTROL_NAMES = setOf(
-            "profile",
-            "profileId",
-            "profile_id",
-            "provider",
-            "providerId",
-            "provider_id",
-            "baseUrl",
-            "baseURL",
-            "base_url",
-            "model",
-            "apiKey",
-            "api_key",
-        )
     }
 }
 
