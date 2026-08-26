@@ -97,8 +97,11 @@ labels and other absolute paths are replaced by `<redacted-path>` before wire
 encoding. Successful compilation may therefore return bounded informational or
 warning diagnostics as well as failures returning errors. JVM coverage locks
 the old-reader skip behavior and the provider-side budget, priority, and
-redaction rules; an authorized Android failure case remains required before the
-R5 diagnostic acceptance item is closed.
+redaction rules. The authorized Android failure/recovery gate passed on API 24
+and API 25 x86 AVDs and on an API 31 arm64 physical device. The focused gate
+also verifies the adopted plugin route, while separate physical-device gates
+cover BUSY terminal ownership and cancellation without local fallback. See the
+[R5 diagnostic device evidence](dex-compiler-r5-diagnostic-device-evidence-2026-08-26.md).
 
 ## Discovery And Trust
 
