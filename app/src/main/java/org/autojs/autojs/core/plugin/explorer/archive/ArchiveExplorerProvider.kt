@@ -139,6 +139,9 @@ internal class ArchiveExplorerProvider(
     cacheDirectory: File,
 ) : ExplorerProvider {
 
+    val canExtractEntries: Boolean
+        get() = connection.info.canExtractEntries
+
     private val entryMaterializer = ArchiveEntryMaterializer(
         cacheDirectory = cacheDirectory,
         sessionId = connection.info.sessionId,
@@ -156,7 +159,7 @@ internal class ArchiveExplorerProvider(
         path = syntheticPath(connection.info.rootId),
         modifiedTime = connection.info.sourceLastModified,
         size = connection.info.sourceSize,
-        canExtract = true,
+        canExtract = connection.info.canExtractEntries,
     ).also(::rememberPage)
 
     override fun getExplorerPage(parent: ExplorerPage): Single<out ExplorerPage> = Single.fromCallable {
@@ -185,7 +188,7 @@ internal class ArchiveExplorerProvider(
                     path = path,
                     modifiedTime = info.lastModified,
                     size = info.size,
-                    canExtract = info.canExtract,
+                    canExtract = connection.info.canExtractEntries && info.canExtract,
                 ).also {
                     loaded.addChild(it)
                     rememberPage(it)
@@ -193,7 +196,10 @@ internal class ArchiveExplorerProvider(
             } else {
                 loaded.addChild(
                     ArchiveExplorerFileItem(
-                        info.copy(canOpen = connection.info.canOpenEntries && info.canExtract),
+                        info.copy(
+                            canExtract = connection.info.canExtractEntries && info.canExtract,
+                            canOpen = connection.info.canOpenEntries && info.canExtract,
+                        ),
                         parent,
                         path,
                     ),
@@ -204,6 +210,26 @@ internal class ArchiveExplorerProvider(
     }
 
     fun pageForPath(path: String): ArchiveExplorerPage? = pageByPath[path]
+
+    fun startExtraction(
+        items: List<ArchiveExplorerItem>,
+        listener: ExplorerArchiveExtractionListener,
+    ): String {
+        check(canExtractEntries) { "Archive session does not support host extraction" }
+        require(items.isNotEmpty()) { "Archive extraction selection is empty" }
+        val entryIds = items.map { item ->
+            check(item.canExtractEntry) { "Archive entry cannot be extracted" }
+            val knownPath = pageById[item.entryId]?.path
+                ?: itemInfoById[item.entryId]?.let { syntheticPath(it.id) }
+            check(knownPath == item.path) { "Archive entry does not belong to this session" }
+            item.entryId
+        }
+        return connection.startExtraction(entryIds, listener)
+    }
+
+    fun cancelExtraction(operationId: String) {
+        connection.cancelExtraction(operationId)
+    }
 
     fun materializeEntry(item: ArchiveExplorerFileItem, maxBytes: Long): File {
         check(item.canOpenEntry) { "Archive entry cannot be opened" }

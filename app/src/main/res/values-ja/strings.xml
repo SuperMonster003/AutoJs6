@@ -289,6 +289,8 @@
     <string name="error_android_package_operation_in_progress">別の Android パッケージ操作がすでに進行中です</string>
     <string name="error_app_not_installed">アプリがインストールされていません</string>
     <string name="error_app_not_installed_with_name">\"%s\" アプリがインストールされていません</string>
+    <string name="error_archive_extraction_failed">アーカイブを展開できませんでした: %1$s</string>
+    <string name="error_archive_extraction_requires_interaction">この選択にはパスワードまたは確認が必要です。アーカイブファイルのメニューから展開先を選択してください</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">%2$s#%3$s の引数 %1$s を null 値にはできません</string>
     <string name="error_arguments_cannot_be_empty">引数を空にできません</string>
     <string name="error_arguments_must_be_empty">引数は空でなければなりません</string>
@@ -824,6 +826,9 @@
     <string name="text_app_version_name">アプリのバージョン名</string>
     <string name="text_appearance">外観</string>
     <string name="text_applying_binary_resources">バイナリ資源を適用中</string>
+    <string name="text_archive_extraction_cancelled">アーカイブの展開をキャンセルしました</string>
+    <string name="text_archive_extraction_completed">%1$s に展開しました</string>
+    <string name="text_archive_extraction_progress">%2$d 件中 %1$d 件を展開中</string>
     <string name="text_archiving_project_files">プロジェクトファイルをアーカイブしています</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[氏名, 組織名, 組織単位, 国コード, 州または省, 市区町村, 街] のいずれかの項目を入力する必要があります</string>
     <string name="text_attribute">属性</string>
@@ -861,6 +866,7 @@
     <string name="text_built_apk_file_path">生成された APK のパス</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
+    <string name="text_cancelling_archive_extraction">アーカイブの展開をキャンセル中</string>
     <string name="text_cannot_delete_default">デフォルトは削除できません</string>
     <string name="text_cannot_read_file">ファイルを読めません</string>
     <string name="text_captured_window_info_order">順序</string>
@@ -902,6 +908,7 @@
     <string name="text_clear_updates_checked_states">アップデートのチェック状態をクリアする</string>
     <string name="text_clear_version_history">バージョン履歴を消去</string>
     <string name="text_clear_version_history_confirm">バージョン履歴をすべて消去しますか?</string>
+    <string name="text_cleaning_archive_extraction">未完了の出力を削除中</string>
     <string name="text_click_icon_to_add_launcher_shortcut">アイコンをタップしてランチャーにショートカットを追加</string>
     <string name="text_click_item_to_remove">削除する項目をクリックします</string>
     <string name="text_click_item_to_show_details">項目をタップして詳細を表示します</string>
@@ -921,6 +928,7 @@
     <string name="text_color_palette">カラーパレット</string>
     <string name="text_command_already_copied_to_clip">クリップボードにコピーされたコマンド</string>
     <string name="text_comment">コメント</string>
+    <string name="text_committing_archive_extraction">アーカイブの展開を完了中</string>
     <string name="text_compatibility">互換性</string>
     <string name="text_confidence_level">信頼度</string>
     <string name="text_config">設定</string>
@@ -1127,8 +1135,11 @@
     <string name="text_exported">エクスポートされました</string>
     <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
     <string name="text_extensibility">拡張性</string>
+    <string name="text_extract">展開</string>
+    <string name="text_extract_archive_current_folder">現在のフォルダーを展開</string>
     <string name="text_extracted_plugin_assets">プラグインの資源を抽出しました</string>
     <string name="text_extracted_plugin_libraries">プラグインのライブラリを抽出しました</string>
+    <string name="text_extracting_archive">アーカイブを展開中</string>
     <string name="text_extracting_plugin_asset">プラグイン資源を抽出中</string>
     <string name="text_extracting_plugin_so">プラグインの so を抽出中</string>
     <string name="text_extracting_template_apk">テンプレート APK を展開中</string>
@@ -1569,6 +1580,7 @@
     <string name="text_prepare">準備</string>
     <string name="text_prepare_completed">準備完了</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">準備中...</string>
+    <string name="text_preparing_archive_extraction">アーカイブの展開を準備中</string>
     <string name="text_preparing_assets_dir">assets ディレクトリを準備中</string>
     <string name="text_preparing_build_config">ビルド設定を準備中</string>
     <string name="text_preparing_keystore">keystore を準備中</string>

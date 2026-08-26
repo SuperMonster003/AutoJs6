@@ -290,6 +290,8 @@
     <string name="error_android_package_operation_in_progress">다른 Android 패키지 작업이 이미 진행 중입니다</string>
     <string name="error_app_not_installed">앱이 설치되지 않았습니다</string>
     <string name="error_app_not_installed_with_name">앱이 설치되지 않았습니다: \"%s\"</string>
+    <string name="error_archive_extraction_failed">압축 파일을 풀 수 없습니다: %1$s</string>
+    <string name="error_archive_extraction_requires_interaction">이 선택에는 비밀번호 또는 확인이 필요합니다. 압축 파일 메뉴의 다음 위치에 풀기 작업을 사용하세요.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">%2$s#%3$s 에 대한 인수 %1$s 는 null 값을 가질 수 없습니다</string>
     <string name="error_arguments_cannot_be_empty">인수를 비울 수 없습니다</string>
     <string name="error_arguments_must_be_empty">인수는 비어 있어야 합니다</string>
@@ -825,6 +827,9 @@
     <string name="text_app_version_name">앱 버전 이름</string>
     <string name="text_appearance">모습</string>
     <string name="text_applying_binary_resources">바이너리 리소스 적용 중</string>
+    <string name="text_archive_extraction_cancelled">압축 풀기가 취소되었습니다</string>
+    <string name="text_archive_extraction_completed">%1$s에 압축을 풀었습니다</string>
+    <string name="text_archive_extraction_progress">%2$d개 중 %1$d개 압축 푸는 중</string>
     <string name="text_archiving_project_files">프로젝트 파일 보관 중</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[성명, 조직명, 조직 단위, 국가 코드, 주 또는 도, 시 또는 지역, 거리] 중 하나 이상을 입력해야 합니다</string>
     <string name="text_attribute">기인하다</string>
@@ -862,6 +867,7 @@
     <string name="text_built_apk_file_path">생성된 APK 경로</string>
     <string name="text_cancel">취소</string>
     <string name="text_cancel_simplified">취소</string>
+    <string name="text_cancelling_archive_extraction">압축 풀기를 취소하는 중</string>
     <string name="text_cannot_delete_default">기본 프로필은 삭제할 수 없습니다</string>
     <string name="text_cannot_read_file">파일을 읽을 수 없다</string>
     <string name="text_captured_window_info_order">순서</string>
@@ -903,6 +909,7 @@
     <string name="text_clear_updates_checked_states">확인 된 상태에서 명확한 업데이트</string>
     <string name="text_clear_version_history">버전 기록 삭제</string>
     <string name="text_clear_version_history_confirm">버전 기록의 모든 항목을 삭제할까요?</string>
+    <string name="text_cleaning_archive_extraction">완료되지 않은 출력을 정리하는 중</string>
     <string name="text_click_icon_to_add_launcher_shortcut">아이콘을 눌러 런처에 바로가기를 추가</string>
     <string name="text_click_item_to_remove">제거하려면 항목을 클릭하십시오</string>
     <string name="text_click_item_to_show_details">항목을 탭하면 자세한 정보를 볼 수 있습니다</string>
@@ -922,6 +929,7 @@
     <string name="text_color_palette">색상 팔레트</string>
     <string name="text_command_already_copied_to_clip">클립 보드에 복사 된 명령</string>
     <string name="text_comment">논평</string>
+    <string name="text_committing_archive_extraction">압축 풀기를 완료하는 중</string>
     <string name="text_compatibility">호환성</string>
     <string name="text_confidence_level">신뢰도</string>
     <string name="text_config">구성</string>
@@ -1128,8 +1136,11 @@
     <string name="text_exported">내보낸</string>
     <string name="text_extending_js_build_in_objects">JavaScript 내장 개체 확장</string>
     <string name="text_extensibility">확장성</string>
+    <string name="text_extract">압축 풀기</string>
+    <string name="text_extract_archive_current_folder">현재 폴더 압축 풀기</string>
     <string name="text_extracted_plugin_assets">플러그인 assets를 추출함</string>
     <string name="text_extracted_plugin_libraries">플러그인 라이브러리를 추출함</string>
+    <string name="text_extracting_archive">압축 파일 푸는 중</string>
     <string name="text_extracting_plugin_asset">플러그인 asset 추출 중</string>
     <string name="text_extracting_plugin_so">플러그인 so 파일 추출 중</string>
     <string name="text_extracting_template_apk">템플릿 APK 추출 중</string>
@@ -1570,6 +1581,7 @@
     <string name="text_prepare">준비</string>
     <string name="text_prepare_completed">준비 완료</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">준비 ...</string>
+    <string name="text_preparing_archive_extraction">압축 풀기를 준비하는 중</string>
     <string name="text_preparing_assets_dir">assets 디렉터리 준비 중</string>
     <string name="text_preparing_build_config">빌드 설정 준비 중</string>
     <string name="text_preparing_keystore">keystore 준비 중</string>

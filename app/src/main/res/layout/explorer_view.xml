@@ -13,13 +13,34 @@
         android:orientation="vertical">
 
         <!-- Matches explorer_category.xml: 13sp text with 8dp top and bottom padding. -->
-        <org.autojs.autojs.ui.explorer.ExplorerPathBar
-            android:id="@+id/explorer_path_bar"
+        <LinearLayout
+            android:id="@+id/explorer_path_row"
             android:layout_width="match_parent"
             android:layout_height="33.5dp"
-            android:clipToPadding="false"
-            android:layoutDirection="ltr"
-            android:paddingHorizontal="8dp" />
+            android:orientation="horizontal">
+
+            <org.autojs.autojs.ui.explorer.ExplorerPathBar
+                android:id="@+id/explorer_path_bar"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:layoutDirection="ltr"
+                android:paddingHorizontal="8dp" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/archive_extract_current"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_extract_archive_current_folder"
+                android:padding="7dp"
+                android:src="@drawable/ic_unarchive_black_48dp"
+                android:visibility="gone"
+                app:tint="@color/explorer_category_operation_button"
+                tools:visibility="visible" />
+
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"
@@ -104,7 +125,7 @@
                     android:id="@+id/selection_close_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
@@ -139,7 +160,7 @@
                     android:id="@+id/selection_copy_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
@@ -174,7 +195,7 @@
                     android:id="@+id/selection_move_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
@@ -212,7 +233,7 @@
                     android:id="@+id/selection_plugin_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
@@ -247,7 +268,7 @@
                     android:id="@+id/selection_delete_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"

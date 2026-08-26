@@ -288,6 +288,8 @@
     <string name="error_android_package_operation_in_progress">Ya hay otra operación de paquete Android en curso</string>
     <string name="error_app_not_installed">La aplicación no está instalada</string>
     <string name="error_app_not_installed_with_name">La aplicación no está instalada: \"%s\"</string>
+    <string name="error_archive_extraction_failed">No se pudo extraer el archivo: %1$s</string>
+    <string name="error_archive_extraction_requires_interaction">Esta selección necesita una contraseña o confirmación. Usa la acción Extraer en del menú del archivo.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">El argumento %1$s para %2$s#%3$s no puede ser nulo</string>
     <string name="error_arguments_cannot_be_empty">Los argumentos no pueden estar vacíos</string>
     <string name="error_arguments_must_be_empty">Los argumentos deben estar vacíos</string>
@@ -823,6 +825,9 @@
     <string name="text_app_version_name">Nombre de la versión de la aplicación</string>
     <string name="text_appearance">Aspecto</string>
     <string name="text_applying_binary_resources">Aplicando recursos binarios</string>
+    <string name="text_archive_extraction_cancelled">Extracción del archivo cancelada</string>
+    <string name="text_archive_extraction_completed">Extraído en %1$s</string>
+    <string name="text_archive_extraction_progress">Extrayendo %1$d de %2$d</string>
     <string name="text_archiving_project_files">Archivando archivos del proyecto</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Al menos uno de los campos [Nombre completo, Nombre de la organización, Unidad organizacional, Código de país, Estado o provincia, Ciudad o localidad, Calle] debe estar lleno</string>
     <string name="text_attribute">Atributo</string>
@@ -860,6 +865,7 @@
     <string name="text_built_apk_file_path">Ruta del APK generado</string>
     <string name="text_cancel">Cancelar</string>
     <string name="text_cancel_simplified">Cancelar</string>
+    <string name="text_cancelling_archive_extraction">Cancelando la extracción del archivo</string>
     <string name="text_cannot_delete_default">No se puede eliminar el perfil predeterminado</string>
     <string name="text_cannot_read_file">No se puede leer el archivo</string>
     <string name="text_captured_window_info_order">Orden</string>
@@ -901,6 +907,7 @@
     <string name="text_clear_updates_checked_states">Borrar los estados de comprobación de las actualizaciones</string>
     <string name="text_clear_version_history">Borrar historial de versiones</string>
     <string name="text_clear_version_history_confirm">¿Borrar todos los elementos del historial de versiones?</string>
+    <string name="text_cleaning_archive_extraction">Limpiando la salida incompleta</string>
     <string name="text_click_icon_to_add_launcher_shortcut">Toca el icono para anadir un acceso directo al lanzador</string>
     <string name="text_click_item_to_remove">Haga clic en el elemento a eliminar</string>
     <string name="text_click_item_to_show_details">Toca un elemento para ver los detalles</string>
@@ -920,6 +927,7 @@
     <string name="text_color_palette">Paleta de colores</string>
     <string name="text_command_already_copied_to_clip">Comando copiado en el portapapeles</string>
     <string name="text_comment">Comente</string>
+    <string name="text_committing_archive_extraction">Finalizando la extracción del archivo</string>
     <string name="text_compatibility">Compatibilidad</string>
     <string name="text_confidence_level">Confianza</string>
     <string name="text_config">Configuración</string>
@@ -1126,8 +1134,11 @@
     <string name="text_exported">Exportado</string>
     <string name="text_extending_js_build_in_objects">Extensión de los objetos incorporados de JavaScript</string>
     <string name="text_extensibility">Extensibilidad</string>
+    <string name="text_extract">Extraer</string>
+    <string name="text_extract_archive_current_folder">Extraer carpeta actual</string>
     <string name="text_extracted_plugin_assets">Assets del plugin extraidos</string>
     <string name="text_extracted_plugin_libraries">Bibliotecas del plugin extraidas</string>
+    <string name="text_extracting_archive">Extrayendo archivo</string>
     <string name="text_extracting_plugin_asset">Extrayendo asset del plugin</string>
     <string name="text_extracting_plugin_so">Extrayendo archivo so del plugin</string>
     <string name="text_extracting_template_apk">Extrayendo APK plantilla</string>
@@ -1568,6 +1579,7 @@
     <string name="text_prepare">Preparar</string>
     <string name="text_prepare_completed">Preparacion completada</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Preparando...</string>
+    <string name="text_preparing_archive_extraction">Preparando la extracción del archivo</string>
     <string name="text_preparing_assets_dir">Preparando dir de assets</string>
     <string name="text_preparing_build_config">Preparando configuracion de compilacion</string>
     <string name="text_preparing_keystore">Preparando keystore</string>

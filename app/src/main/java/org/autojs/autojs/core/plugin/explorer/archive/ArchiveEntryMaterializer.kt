@@ -104,9 +104,11 @@ internal class ArchiveEntryMaterializer(
     }
 
     private fun containedFile(parent: File, childName: String): File {
-        val parentPath = parent.canonicalFile.toPath()
+        val canonicalParent = parent.canonicalFile
         val child = File(parent, childName).canonicalFile
-        require(child.toPath().parent == parentPath) { "Archive preview cache path escaped its entry root" }
+        require(child.parentFile?.canonicalFile == canonicalParent) {
+            "Archive preview cache path escaped its entry root"
+        }
         return child
     }
 
@@ -118,9 +120,9 @@ internal class ArchiveEntryMaterializer(
     }
 
     private fun deleteContainedTree(target: File) {
-        val root = rootDirectory.canonicalFile.toPath()
-        val resolved = target.canonicalFile.toPath()
-        if (resolved.parent != root) return
+        val root = rootDirectory.canonicalFile
+        val resolved = target.canonicalFile
+        if (resolved.parentFile?.canonicalFile != root) return
         target.deleteRecursively()
     }
 

@@ -288,6 +288,8 @@
     <string name="error_android_package_operation_in_progress">Другая операция с пакетом Android уже выполняется</string>
     <string name="error_app_not_installed">Приложение не установлено</string>
     <string name="error_app_not_installed_with_name">Приложение не установлено: \"%s\"</string>
+    <string name="error_archive_extraction_failed">Не удалось извлечь архив: %1$s</string>
+    <string name="error_archive_extraction_requires_interaction">Для выбранных элементов нужен пароль или подтверждение. Используйте действие Извлечь в в меню файла архива.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Аргумент %1$s для %2$s#%3$s не может быть пустым</string>
     <string name="error_arguments_cannot_be_empty">Аргументы не могут быть пустыми</string>
     <string name="error_arguments_must_be_empty">Аргументы должны быть пустыми</string>
@@ -823,6 +825,9 @@
     <string name="text_app_version_name">Название версии приложения</string>
     <string name="text_appearance">Внешний вид</string>
     <string name="text_applying_binary_resources">Применение бинарных ресурсов</string>
+    <string name="text_archive_extraction_cancelled">Извлечение архива отменено</string>
+    <string name="text_archive_extraction_completed">Извлечено в %1$s</string>
+    <string name="text_archive_extraction_progress">Извлечение %1$d из %2$d</string>
     <string name="text_archiving_project_files">Архивация файлов проекта</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Необходимо заполнить хотя бы одно поле из: [Полное имя, Название организации, Организационная единица, Код страны, Штат или провинция, Город или населенный пункт, Улица]</string>
     <string name="text_attribute">Атрибут</string>
@@ -860,6 +865,7 @@
     <string name="text_built_apk_file_path">Путь к собранному APK</string>
     <string name="text_cancel">Отменить</string>
     <string name="text_cancel_simplified">Отмен</string>
+    <string name="text_cancelling_archive_extraction">Отмена извлечения архива</string>
     <string name="text_cannot_delete_default">Профиль по умолчанию нельзя удалить</string>
     <string name="text_cannot_read_file">Невозможно прочитать файл</string>
     <string name="text_captured_window_info_order">Порядок</string>
@@ -901,6 +907,7 @@
     <string name="text_clear_updates_checked_states">Очистить состояния проверки обновлений</string>
     <string name="text_clear_version_history">Очистить историю версий</string>
     <string name="text_clear_version_history_confirm">Очистить все элементы истории версий?</string>
+    <string name="text_cleaning_archive_extraction">Очистка незавершенного вывода</string>
     <string name="text_click_icon_to_add_launcher_shortcut">Нажмите на значок, чтобы добавить ярлык на экран</string>
     <string name="text_click_item_to_remove">Нажмите на элемент для удаления</string>
     <string name="text_click_item_to_show_details">Нажмите на пункт, чтобы просмотреть подробности</string>
@@ -920,6 +927,7 @@
     <string name="text_color_palette">Цветовая палитра</string>
     <string name="text_command_already_copied_to_clip">Команда скопирована в буфер обмена</string>
     <string name="text_comment">Комментарий</string>
+    <string name="text_committing_archive_extraction">Завершение извлечения архива</string>
     <string name="text_compatibility">Совместимость</string>
     <string name="text_confidence_level">Доверие</string>
     <string name="text_config">Конфигурация</string>
@@ -1126,8 +1134,11 @@
     <string name="text_exported">Экспортировано</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
     <string name="text_extensibility">Расширяемость</string>
+    <string name="text_extract">Извлечь</string>
+    <string name="text_extract_archive_current_folder">Извлечь текущую папку</string>
     <string name="text_extracted_plugin_assets">Assets плагина извлечены</string>
     <string name="text_extracted_plugin_libraries">Библиотеки плагина извлечены</string>
+    <string name="text_extracting_archive">Извлечение архива</string>
     <string name="text_extracting_plugin_asset">Извлечение asset плагина</string>
     <string name="text_extracting_plugin_so">Извлечение файла so плагина</string>
     <string name="text_extracting_template_apk">Извлечение шаблонного APK</string>
@@ -1568,6 +1579,7 @@
     <string name="text_prepare">Подготовить</string>
     <string name="text_prepare_completed">Подготовка завершена</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Подготовка...</string>
+    <string name="text_preparing_archive_extraction">Подготовка извлечения архива</string>
     <string name="text_preparing_assets_dir">Подготовка каталога assets</string>
     <string name="text_preparing_build_config">Подготовка конфигурации сборки</string>
     <string name="text_preparing_keystore">Подготовка keystore</string>

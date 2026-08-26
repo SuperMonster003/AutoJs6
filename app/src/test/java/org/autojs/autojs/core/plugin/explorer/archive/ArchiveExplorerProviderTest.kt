@@ -67,8 +67,42 @@ class ArchiveExplorerProviderTest {
         provider.close()
     }
 
+    @Test
+    fun providerForwardsOnlySessionOwnedOpaqueExtractionIds() {
+        val client = FakeClient()
+        val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("cache"))
+        val root = provider.rootPage
+        root.copyChildren(provider.getExplorerPage(root).blockingGet())
+        val selected = root.toList().map { it as ArchiveExplorerItem }
+
+        val operationId = provider.startExtraction(selected, NoOpExtractionListener)
+        provider.cancelExtraction(operationId)
+
+        assertEquals("operation", operationId)
+        assertEquals(listOf("folder", "root-file"), client.extractionEntryIds)
+        assertEquals("operation", client.cancelledOperationId)
+        provider.close()
+    }
+
+    @Test
+    fun providerKeepsPreV10SessionsNonExtractable() {
+        val client = FakeClient(canExtractEntries = false)
+        val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("cache"))
+        val root = provider.rootPage
+        root.copyChildren(provider.getExplorerPage(root).blockingGet())
+
+        assertFalse(provider.canExtractEntries)
+        assertFalse(root.canExtractEntry)
+        assertTrue(root.toList().all { item -> !(item as ArchiveExplorerItem).canExtractEntry })
+        assertThrows(IllegalStateException::class.java) {
+            provider.startExtraction(listOf(root), NoOpExtractionListener)
+        }
+        provider.close()
+    }
+
     private class FakeClient(
         canOpenEntries: Boolean = true,
+        canExtractEntries: Boolean = true,
     ) : ExplorerArchiveSessionClient {
         override val sourcePath = "/storage/emulated/0/Archives/sample.zip"
         override val info = ExplorerArchiveSessionInfo(
@@ -78,9 +112,12 @@ class ArchiveExplorerProviderTest {
             sourceSize = 100L,
             sourceLastModified = 200L,
             canOpenEntries = canOpenEntries,
+            canExtractEntries = canExtractEntries,
         )
         var closed = false
         var openEntryCalls = 0
+        var extractionEntryIds: List<String>? = null
+        var cancelledOperationId: String? = null
 
         override fun listAllChildren(parentId: String): List<ExplorerArchiveItemInfo> = when (parentId) {
             "root" -> listOf(
@@ -96,6 +133,18 @@ class ArchiveExplorerProviderTest {
         override fun openEntry(entryId: String): ParcelFileDescriptor {
             openEntryCalls += 1
             error("Entry streaming is not used by this provider test: $entryId")
+        }
+
+        override fun startExtraction(
+            entryIds: List<String>,
+            listener: ExplorerArchiveExtractionListener,
+        ): String {
+            extractionEntryIds = entryIds
+            return "operation"
+        }
+
+        override fun cancelExtraction(operationId: String) {
+            cancelledOperationId = operationId
         }
 
         override fun close() {
@@ -118,5 +167,11 @@ class ArchiveExplorerProviderTest {
             lastModified = 300L,
             canExtract = true,
         )
+    }
+
+    private object NoOpExtractionListener : ExplorerArchiveExtractionListener {
+        override fun onProgress(progress: ExplorerArchiveExtractionProgress) = Unit
+        override fun onCompleted(result: ExplorerArchiveExtractionResult) = Unit
+        override fun onFailed(failure: ExplorerArchiveExtractionFailure) = Unit
     }
 }

@@ -285,6 +285,8 @@
     <string name="error_android_package_operation_in_progress">已有另一個 Android 安裝包操作正在進行</string>
     <string name="error_app_not_installed">應用未安裝</string>
     <string name="error_app_not_installed_with_name">應用未安裝: \"%s\"</string>
+    <string name="error_archive_extraction_failed">無法解壓縮檔案: %1$s</string>
+    <string name="error_archive_extraction_requires_interaction">此選擇需要密碼或確認, 請從檔案文件選單使用解壓縮到操作</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">參數 %1$s 對於 %2$s#%3$s 不可為 nullish</string>
     <string name="error_arguments_cannot_be_empty">參數列表不可為空</string>
     <string name="error_arguments_must_be_empty">參數列表需為空</string>
@@ -820,6 +822,9 @@
     <string name="text_app_version_name">應用版本名</string>
     <string name="text_appearance">外觀</string>
     <string name="text_applying_binary_resources">正在應用二進制資源</string>
+    <string name="text_archive_extraction_cancelled">檔案解壓縮已取消</string>
+    <string name="text_archive_extraction_completed">已解壓縮到 %1$s</string>
+    <string name="text_archive_extraction_progress">正在解壓縮 %1$d / %2$d</string>
     <string name="text_archiving_project_files">正在封存項目文件</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[姓名, 組織名稱, 組織單位, 國家代碼, 州或省份, 城市或區域, 街道] 至少填寫一個</string>
     <string name="text_attribute">屬性</string>
@@ -857,6 +862,7 @@
     <string name="text_built_apk_file_path">打包應用文件路徑</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
+    <string name="text_cancelling_archive_extraction">正在取消檔案解壓縮</string>
     <string name="text_cannot_delete_default">默認配置不可刪除</string>
     <string name="text_cannot_read_file">無法讀取文件</string>
     <string name="text_captured_window_info_order">次序</string>
@@ -898,6 +904,7 @@
     <string name="text_clear_updates_checked_states">清除更新檢查狀態</string>
     <string name="text_clear_version_history">清空全部歷史記錄</string>
     <string name="text_clear_version_history_confirm">是否清空版本歷史全部條目</string>
+    <string name="text_cleaning_archive_extraction">正在清理未完成的輸出</string>
     <string name="text_click_icon_to_add_launcher_shortcut">點擊圖標添加啓動器快捷方式</string>
     <string name="text_click_item_to_remove">點擊條目可移除</string>
     <string name="text_click_item_to_show_details">點擊條目可查看詳情</string>
@@ -917,6 +924,7 @@
     <string name="text_color_palette">調色盤</string>
     <string name="text_command_already_copied_to_clip">指令已複製到剪貼板</string>
     <string name="text_comment">註釋</string>
+    <string name="text_committing_archive_extraction">正在完成檔案解壓縮</string>
     <string name="text_compatibility">兼容性</string>
     <string name="text_confidence_level">置信度</string>
     <string name="text_config">配置</string>
@@ -1123,8 +1131,11 @@
     <string name="text_exported">已導出</string>
     <string name="text_extending_js_build_in_objects">JavaScript 內置對象擴展</string>
     <string name="text_extensibility">擴展性</string>
+    <string name="text_extract">解壓縮</string>
+    <string name="text_extract_archive_current_folder">解壓縮目前資料夾</string>
     <string name="text_extracted_plugin_assets">已提取插件資源</string>
     <string name="text_extracted_plugin_libraries">已提取插件庫文件</string>
+    <string name="text_extracting_archive">正在解壓縮檔案</string>
     <string name="text_extracting_plugin_asset">正在提取插件資源</string>
     <string name="text_extracting_plugin_so">正在提取插件 so 文件</string>
     <string name="text_extracting_template_apk">正在提取模板 APK</string>
@@ -1565,6 +1576,7 @@
     <string name="text_prepare">準備</string>
     <string name="text_prepare_completed">準備完成</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">準備中...</string>
+    <string name="text_preparing_archive_extraction">正在準備檔案解壓縮</string>
     <string name="text_preparing_assets_dir">正在準備資源目錄</string>
     <string name="text_preparing_build_config">正在準備構建配置</string>
     <string name="text_preparing_keystore">正在準備密鑰庫</string>

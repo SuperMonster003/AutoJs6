@@ -284,6 +284,8 @@
     <string name="error_android_package_operation_in_progress">已有另一个 Android 安装包操作正在进行</string>
     <string name="error_app_not_installed">应用未安装</string>
     <string name="error_app_not_installed_with_name">应用未安装: \"%s\"</string>
+    <string name="error_archive_extraction_failed">无法解压档案: %1$s</string>
+    <string name="error_archive_extraction_requires_interaction">该选择需要密码或确认, 请从档案文件菜单使用解压到操作</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">参数 %1$s 对于 %2$s#%3$s 不可为 nullish</string>
     <string name="error_arguments_cannot_be_empty">参数列表不可为空</string>
     <string name="error_arguments_must_be_empty">参数列表需为空</string>
@@ -819,6 +821,9 @@
     <string name="text_app_version_name">应用版本名</string>
     <string name="text_appearance">外观</string>
     <string name="text_applying_binary_resources">正在应用二进制资源</string>
+    <string name="text_archive_extraction_cancelled">档案解压已取消</string>
+    <string name="text_archive_extraction_completed">已解压到 %1$s</string>
+    <string name="text_archive_extraction_progress">正在解压 %1$d / %2$d</string>
     <string name="text_archiving_project_files">正在归档项目文件</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[姓名, 组织名称, 组织单位, 国家代码, 州或省份, 城市或区域, 街道] 至少填写一个</string>
     <string name="text_attribute">属性</string>
@@ -856,6 +861,7 @@
     <string name="text_built_apk_file_path">打包应用文件路径</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
+    <string name="text_cancelling_archive_extraction">正在取消档案解压</string>
     <string name="text_cannot_delete_default">默认配置不可删除</string>
     <string name="text_cannot_read_file">无法读取文件</string>
     <string name="text_captured_window_info_order">次序</string>
@@ -897,8 +903,10 @@
     <string name="text_clear_updates_checked_states">清除更新检查状态</string>
     <string name="text_clear_version_history">清空全部历史记录</string>
     <string name="text_clear_version_history_confirm">是否清空版本历史全部条目</string>
+    <string name="text_cleaning_archive_extraction">正在清理未完成的输出</string>
     <string name="text_click_icon_to_add_launcher_shortcut">点击图标添加启动器快捷方式</string>
     <string name="text_click_item_to_remove">点击条目可移除</string>
+
     <string name="text_click_item_to_show_details">点击条目可查看详情</string>
     <string name="text_click_ok_to_go_to_settings">点击 \"确定\" 跳转到设置页面</string>
     <string name="text_click_other_areas_to_exit_selection">点击其他区域退出选择</string>
@@ -916,6 +924,7 @@
     <string name="text_color_palette">调色盘</string>
     <string name="text_command_already_copied_to_clip">指令已复制到剪贴板</string>
     <string name="text_comment">注释</string>
+    <string name="text_committing_archive_extraction">正在完成档案解压</string>
     <string name="text_compatibility">兼容性</string>
     <string name="text_confidence_level">置信度</string>
     <string name="text_config">配置</string>
@@ -1122,8 +1131,11 @@
     <string name="text_exported">已导出</string>
     <string name="text_extending_js_build_in_objects">JavaScript 内置对象扩展</string>
     <string name="text_extensibility">扩展性</string>
+    <string name="text_extract">解压</string>
+    <string name="text_extract_archive_current_folder">解压当前文件夹</string>
     <string name="text_extracted_plugin_assets">已提取插件资源</string>
     <string name="text_extracted_plugin_libraries">已提取插件库文件</string>
+    <string name="text_extracting_archive">正在解压档案</string>
     <string name="text_extracting_plugin_asset">正在提取插件资源</string>
     <string name="text_extracting_plugin_so">正在提取插件 so 文件</string>
     <string name="text_extracting_template_apk">正在提取模板 APK</string>
@@ -1564,6 +1576,7 @@
     <string name="text_prepare">准备</string>
     <string name="text_prepare_completed">准备完成</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">准备中...</string>
+    <string name="text_preparing_archive_extraction">正在准备档案解压</string>
     <string name="text_preparing_assets_dir">正在准备资源目录</string>
     <string name="text_preparing_build_config">正在准备构建配置</string>
     <string name="text_preparing_keystore">正在准备密钥库</string>

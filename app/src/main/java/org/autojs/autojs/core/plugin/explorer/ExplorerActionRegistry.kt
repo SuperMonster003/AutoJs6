@@ -215,6 +215,10 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
                 request = request,
             )
             ExplorerArchiveSessionConnection.create(
+                context = context,
+                pluginPackageName = action.packageName,
+                pluginUid = action.pluginTarget.serviceInfo.applicationInfo.uid,
+                protocolVersion = action.descriptor.protocolVersion,
                 remote = leased.value,
                 bindingLease = leased.bindingLease,
                 sourcePath = source.path,

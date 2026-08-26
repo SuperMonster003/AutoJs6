@@ -476,6 +476,11 @@ internal class ExplorerActionHostSession private constructor(
         closeInternal()
     }
 
+    /** Closes a locally retained session when its plugin call or archive connection terminates. */
+    internal fun closeFromHost() {
+        closeInternal()
+    }
+
     private fun closeInternal(expectedClientToken: IBinder? = null) {
         val closeState = synchronized(lock) {
             if (expectedClientToken != null && clientLease?.token !== expectedClientToken) return

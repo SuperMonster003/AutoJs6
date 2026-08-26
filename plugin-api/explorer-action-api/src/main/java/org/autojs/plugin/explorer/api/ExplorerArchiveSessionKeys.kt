@@ -9,6 +9,8 @@ object ExplorerArchiveSessionKeys {
     const val SOURCE_LAST_MODIFIED = "sourceLastModified"
     /** False or absent for protocol v5 sessions. */
     const val CAN_OPEN_ENTRIES = "canOpenEntries"
+    /** False or absent before protocol v10. */
+    const val CAN_EXTRACT_ENTRIES = "canExtractEntries"
 
     const val ITEMS = "items"
     const val NEXT_OFFSET = "nextOffset"

@@ -290,6 +290,8 @@
     <string name="error_android_package_operation_in_progress">هناك عملية أخرى لحزمة Android قيد التنفيذ بالفعل</string>
     <string name="error_app_not_installed">التطبيق غير مثبت</string>
     <string name="error_app_not_installed_with_name">التطبيق غير مثبت: \"%s\"</string>
+    <string name="error_archive_extraction_failed">تعذر استخراج الأرشيف: %1$s</string>
+    <string name="error_archive_extraction_requires_interaction">يتطلب هذا التحديد كلمة مرور أو تأكيدا. استخدم إجراء الاستخراج إلى من قائمة ملف الأرشيف.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">لا يمكن أن تكون الوسائط %1$s بالنسبة لـ %2$s#%3$s فارغة</string>
     <string name="error_arguments_cannot_be_empty">لا يمكن أن تكون الوسائط فارغة</string>
     <string name="error_arguments_must_be_empty">يجب أن تكون الوسائط فارغة</string>
@@ -825,6 +827,9 @@
     <string name="text_app_version_name">اسم إصدار التطبيق</string>
     <string name="text_appearance">مظهر</string>
     <string name="text_applying_binary_resources">جارٍ تطبيق الموارد الثنائية</string>
+    <string name="text_archive_extraction_cancelled">تم إلغاء استخراج الأرشيف</string>
+    <string name="text_archive_extraction_completed">تم الاستخراج إلى %1$s</string>
+    <string name="text_archive_extraction_progress">جار استخراج %1$d من %2$d</string>
     <string name="text_archiving_project_files">جار أرشفة ملفات المشروع</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">يجب ملء حقل واحد على الأقل من [الاسم، اسم المنظمة، وحدة التنظيم، رمز الدولة، الولاية أو المقاطعة، المدينة أو المنطقة، الشارع]</string>
     <string name="text_attribute">ينسب</string>
@@ -862,6 +867,7 @@
     <string name="text_built_apk_file_path">مسار APK المبني</string>
     <string name="text_cancel">يلغي</string>
     <string name="text_cancel_simplified">إلغاء</string>
+    <string name="text_cancelling_archive_extraction">جار إلغاء استخراج الأرشيف</string>
     <string name="text_cannot_delete_default">لا يمكن حذف ملف التعريف الافتراضي</string>
     <string name="text_cannot_read_file">لا يمكن قراءة الملف</string>
     <string name="text_captured_window_info_order">الترتيب</string>
@@ -903,6 +909,7 @@
     <string name="text_clear_updates_checked_states">تحديثات مسح الحالات التي تم فحصها</string>
     <string name="text_clear_version_history">مسح سجل الاصدارات</string>
     <string name="text_clear_version_history_confirm">هل تريد مسح جميع عناصر سجل الاصدارات?</string>
+    <string name="text_cleaning_archive_extraction">جار تنظيف الإخراج غير المكتمل</string>
     <string name="text_click_icon_to_add_launcher_shortcut">اضغط على الايقونة لاضافة اختصار للشاشة الرئيسية</string>
     <string name="text_click_item_to_remove">انقر فوق العنصر لإزالته</string>
     <string name="text_click_item_to_show_details">اضغط على العنصر لعرض التفاصيل</string>
@@ -922,6 +929,7 @@
     <string name="text_color_palette">لوحة الألوان</string>
     <string name="text_command_already_copied_to_clip">تم نسخ الأمر إلى الحافظة</string>
     <string name="text_comment">تعليق</string>
+    <string name="text_committing_archive_extraction">جار إنهاء استخراج الأرشيف</string>
     <string name="text_compatibility">التوافق</string>
     <string name="text_confidence_level">ثقة</string>
     <string name="text_config">تكوين</string>
@@ -1128,8 +1136,11 @@
     <string name="text_exported">تصدير</string>
     <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
     <string name="text_extensibility">التمدد</string>
+    <string name="text_extract">استخراج</string>
+    <string name="text_extract_archive_current_folder">استخراج المجلد الحالي</string>
     <string name="text_extracted_plugin_assets">تم استخراج assets الاضافة</string>
     <string name="text_extracted_plugin_libraries">تم استخراج مكتبات الاضافة</string>
+    <string name="text_extracting_archive">استخراج الأرشيف</string>
     <string name="text_extracting_plugin_asset">جارٍ استخراج asset الاضافة</string>
     <string name="text_extracting_plugin_so">جارٍ استخراج ملف so للاضافة</string>
     <string name="text_extracting_template_apk">جارٍ استخراج APK القالب</string>
@@ -1570,6 +1581,7 @@
     <string name="text_prepare">تحضير</string>
     <string name="text_prepare_completed">اكتمل التحضير</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">خطة...</string>
+    <string name="text_preparing_archive_extraction">جار تحضير استخراج الأرشيف</string>
     <string name="text_preparing_assets_dir">جارٍ تحضير مجلد assets</string>
     <string name="text_preparing_build_config">جارٍ تحضير اعدادات البناء</string>
     <string name="text_preparing_keystore">جارٍ تحضير keystore</string>

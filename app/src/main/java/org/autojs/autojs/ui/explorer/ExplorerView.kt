@@ -52,6 +52,10 @@ import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerPage
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerProvider
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveEntryTooLargeException
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionFailure
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionListener
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionProgress
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionResult
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getInt
@@ -113,6 +117,7 @@ import org.autojs.autojs6.databinding.ExplorerFileBinding
 import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding
 import org.autojs.autojs6.databinding.ExplorerViewBinding
 import org.autojs.plugin.explorer.api.ExplorerActionValues
+import org.autojs.plugin.explorer.api.ExplorerArchiveSessionValues
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.util.LinkedList
@@ -139,6 +144,14 @@ private data class ArchiveNavigationState(
     val previousHistory: List<ExplorerView.ExplorerPageState>,
     val sourceParentSegments: List<ExplorerPathSegment>,
 )
+
+private class ArchiveExtractionUiState(
+    val controller: DialogUtils.OperationController,
+    val progressSession: DialogUtils.ProgressDialogSession,
+) {
+    @Volatile
+    var operationId: String? = null
+}
 
 /**
  * Created by Stardust on Aug 21, 2017.
@@ -201,9 +214,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private var mPluginActionProvider: ExplorerPluginActionProvider? = null
     private var mPluginActionSurface = ExplorerSurface.UNSPECIFIED
     private var mSelectionPluginAction: ResolvedExplorerAction? = null
+    private var mSelectionArchiveExtraction = false
     private var mArchiveNavigationState: ArchiveNavigationState? = null
     private var mArchiveOpenJob: Job? = null
     private var mArchiveEntryOpenJob: Job? = null
+    private var mArchiveExtractionStartJob: Job? = null
+    private var mArchiveExtractionUiState: ArchiveExtractionUiState? = null
     private var mOnArchiveModeStateChangeListener: ((Boolean) -> Unit)? = null
 
     private val mPageStateHistory = Stack<ExplorerPageState>()
@@ -271,6 +287,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 mProjectToolbar = it
             }
             binding.explorerPathBar.setOnParentPathClickListener(::navigateToPath)
+            binding.archiveExtractCurrent.setOnClickListener { extractCurrentArchiveFolder() }
             setupSelectionToolbar(binding)
             applySelectionToolbarTheme(ThemeColorManager.currentThemeColor)
         }
@@ -533,6 +550,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         mArchiveOpenJob = null
         mArchiveEntryOpenJob?.cancel()
         mArchiveEntryOpenJob = null
+        mArchiveExtractionStartJob?.cancel()
+        mArchiveExtractionStartJob = null
+        dismissArchiveExtractionUi()
         closeArchiveNavigation(restorePrevious = false)
         mExplorer?.unregisterChangeListener(this)
         mPageStateHistory.clear()
@@ -722,7 +742,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
     }
 
-    private fun isItemSelectable(item: ExplorerItem) = item.canCopy() || item.canMove() || item.canDelete()
+    private fun isItemSelectable(item: ExplorerItem) = when (item) {
+        is ArchiveExplorerItem -> mArchiveNavigationState?.provider?.canExtractEntries == true &&
+            item.canExtractEntry
+        else -> item.canCopy() || item.canMove() || item.canDelete()
+    }
 
     private fun isItemSelected(item: ExplorerItem) = mSelectedItems.containsKey(item.path)
 
@@ -734,10 +758,16 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             binding.selectionCount.text = context.getString(R.string.text_selected_items, selectedCount)
 
             val selectedItems = mSelectedItems.values
-            updateSelectionActionState(binding.selectionCopy, selectedItems.all { it.canCopy() })
-            updateSelectionActionState(binding.selectionMove, selectedItems.all { it.canMove() })
-            updateSelectionActionState(binding.selectionDelete, selectedItems.all { it.canDelete() })
-            val pluginAction = if (selectedItems.isEmpty()) {
+            val archiveSelection = selectedItems.isNotEmpty() &&
+                selectedItems.all { it is ArchiveExplorerItem && it.canExtractEntry } &&
+                mArchiveNavigationState?.provider?.canExtractEntries == true
+            binding.selectionCopy.isVisible = !archiveSelection
+            binding.selectionMove.isVisible = !archiveSelection
+            binding.selectionDelete.isVisible = !archiveSelection
+            updateSelectionActionState(binding.selectionCopy, !archiveSelection && selectedItems.all { it.canCopy() })
+            updateSelectionActionState(binding.selectionMove, !archiveSelection && selectedItems.all { it.canMove() })
+            updateSelectionActionState(binding.selectionDelete, !archiveSelection && selectedItems.all { it.canDelete() })
+            val pluginAction = if (selectedItems.isEmpty() || archiveSelection) {
                 null
             } else {
                 runCatching {
@@ -751,13 +781,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 }.getOrNull()
             }
             mSelectionPluginAction = pluginAction
-            binding.selectionPlugin.isVisible = pluginAction != null
-            pluginAction?.let { action ->
-                binding.selectionPluginText.text = action.actionLabel
-                binding.selectionPlugin.contentDescription = action.actionLabel
+            mSelectionArchiveExtraction = archiveSelection
+            binding.selectionPlugin.isVisible = archiveSelection || pluginAction != null
+            if (archiveSelection) {
+                val label = context.getString(R.string.text_extract)
+                binding.selectionPluginText.text = label
+                binding.selectionPlugin.contentDescription = label
+                binding.selectionPluginIcon.setImageResource(R.drawable.ic_unarchive_black_48dp)
+                updateSelectionActionState(binding.selectionPlugin, mArchiveExtractionUiState == null)
+            } else {
+                binding.selectionPluginIcon.setImageResource(R.drawable.ic_archive_black_48dp)
+                pluginAction?.let { action ->
+                    binding.selectionPluginText.text = action.actionLabel
+                    binding.selectionPlugin.contentDescription = action.actionLabel
+                }
+                updateSelectionActionState(binding.selectionPlugin, pluginAction != null)
             }
             setSelectionToolbarShown(selectedCount > 0)
         }
+        updateArchiveExtractionAction()
         updateProjectToolbarVisibility()
     }
 
@@ -827,6 +869,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         mArchiveOpenJob = null
         mArchiveEntryOpenJob?.cancel()
         mArchiveEntryOpenJob = null
+        mArchiveExtractionStartJob?.cancel()
+        mArchiveExtractionStartJob = null
+        dismissArchiveExtractionUi()
         closeArchiveNavigation(restorePrevious = false)
         mOnArchiveModeStateChangeListener = null
     }
@@ -843,6 +888,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun launchSelectedPluginAction() {
+        if (mSelectionArchiveExtraction) {
+            val selectedItems = mSelectedItems.values.mapNotNull { it as? ArchiveExplorerItem }
+            if (selectedItems.size == mSelectedItems.size && selectedItems.isNotEmpty()) {
+                clearSelection()
+                startArchiveExtraction(selectedItems)
+            }
+            return
+        }
         val action = mSelectionPluginAction ?: return
         val selectedItems = mSelectedItems.values.toList()
         if (selectedItems.isEmpty()) return
@@ -943,8 +996,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         val state = mArchiveNavigationState ?: return
         mArchiveEntryOpenJob?.cancel()
         mArchiveEntryOpenJob = null
+        mArchiveExtractionStartJob?.cancel()
+        mArchiveExtractionStartJob = null
+        dismissArchiveExtractionUi()
         isRefreshing = false
         mArchiveNavigationState = null
+        updateArchiveExtractionAction()
         mExplorer?.unregisterChangeListener(this)
         state.provider.close()
         mOnArchiveModeStateChangeListener?.invoke(false)
@@ -1030,6 +1087,175 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
     }
 
+    private fun extractCurrentArchiveFolder() {
+        val page = currentPage as? ArchiveExplorerPage ?: return
+        startArchiveExtraction(listOf(page))
+    }
+
+    private fun startArchiveExtraction(items: List<ArchiveExplorerItem>) {
+        val archiveState = mArchiveNavigationState ?: return
+        if (mArchiveExtractionUiState != null || items.isEmpty()) return
+        val lifecycleOwner = findViewTreeLifecycleOwner() ?: return
+        val controller = DialogUtils.OperationController()
+        val progressSession = DialogUtils.ProgressDialogSession(controller)
+        val uiState = ArchiveExtractionUiState(controller, progressSession)
+        mArchiveExtractionUiState = uiState
+        updateArchiveExtractionAction()
+        if (mSelectedItems.isNotEmpty()) updateSelectionToolbar()
+
+        progressSession.scheduleShow(
+            MaterialDialog.Builder(context)
+                .title(R.string.text_extracting_archive)
+                .content(R.string.text_preparing_archive_extraction)
+                .progress(false, DialogUtils.PROGRESS_MAX_LARGE, true)
+                .negativeText(R.string.dialog_button_cancel)
+                .onNegative { _, _ -> requestArchiveExtractionCancellation(uiState) }
+                .cancelable(false)
+                .autoDismiss(false),
+        )
+
+        val listener = object : ExplorerArchiveExtractionListener {
+            override fun onProgress(progress: ExplorerArchiveExtractionProgress) {
+                post { renderArchiveExtractionProgress(uiState, progress) }
+            }
+
+            override fun onCompleted(result: ExplorerArchiveExtractionResult) {
+                post { completeArchiveExtraction(uiState, result) }
+            }
+
+            override fun onFailed(failure: ExplorerArchiveExtractionFailure) {
+                post { failArchiveExtraction(uiState, failure) }
+            }
+        }
+        mArchiveExtractionStartJob = lifecycleOwner.lifecycleScope.launch {
+            val startJob = coroutineContext[Job]
+            try {
+                val operationId = withContext(Dispatchers.IO) {
+                    archiveState.provider.startExtraction(items, listener)
+                }
+                uiState.operationId = operationId
+                if (controller.cancelled.get()) {
+                    withContext(Dispatchers.IO) {
+                        archiveState.provider.cancelExtraction(operationId)
+                    }
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                Log.e(LOG_TAG, "Failed to start host archive extraction", error)
+                failArchiveExtraction(
+                    uiState,
+                    ExplorerArchiveExtractionFailure(
+                        ExplorerArchiveSessionValues.EXTRACTION_ERROR_UNKNOWN,
+                        error.message ?: error.toString(),
+                    ),
+                )
+            } finally {
+                if (mArchiveExtractionStartJob === startJob) {
+                    mArchiveExtractionStartJob = null
+                }
+            }
+        }
+    }
+
+    private fun requestArchiveExtractionCancellation(uiState: ArchiveExtractionUiState) {
+        if (mArchiveExtractionUiState !== uiState) return
+        uiState.controller.cancel()
+        uiState.progressSession.setContentThrottled(
+            mutableListOf(context.getString(R.string.text_cancelling_archive_extraction)),
+        )
+        val operationId = uiState.operationId ?: return
+        val archiveState = mArchiveNavigationState ?: return
+        findViewTreeLifecycleOwner()?.lifecycleScope?.launch(Dispatchers.IO) {
+            runCatching { archiveState.provider.cancelExtraction(operationId) }
+                .onFailure { error -> Log.w(LOG_TAG, "Failed to cancel archive extraction", error) }
+        }
+    }
+
+    private fun renderArchiveExtractionProgress(
+        uiState: ArchiveExtractionUiState,
+        progress: ExplorerArchiveExtractionProgress,
+    ) {
+        if (mArchiveExtractionUiState !== uiState) return
+        val content = when (progress.phase) {
+            ExplorerArchiveSessionValues.EXTRACTION_PHASE_PREPARING ->
+                mutableListOf(context.getString(R.string.text_preparing_archive_extraction))
+            ExplorerArchiveSessionValues.EXTRACTION_PHASE_EXTRACTING -> buildList {
+                add(
+                    context.getString(
+                        R.string.text_archive_extraction_progress,
+                        progress.completedEntries,
+                        progress.totalEntries,
+                    ),
+                )
+                progress.currentEntry?.let(::add)
+            }.toMutableList()
+            ExplorerArchiveSessionValues.EXTRACTION_PHASE_COMMITTING ->
+                mutableListOf(context.getString(R.string.text_committing_archive_extraction))
+            ExplorerArchiveSessionValues.EXTRACTION_PHASE_CLEANING_UP ->
+                mutableListOf(context.getString(R.string.text_cleaning_archive_extraction))
+            else -> return
+        }
+        uiState.progressSession.setContentThrottled(content)
+        if (progress.totalBytes > 0L) {
+            uiState.progressSession.setProgressThrottled(progress.bytesWritten, progress.totalBytes)
+        }
+    }
+
+    private fun completeArchiveExtraction(
+        uiState: ArchiveExtractionUiState,
+        result: ExplorerArchiveExtractionResult,
+    ) {
+        if (mArchiveExtractionUiState !== uiState) return
+        finishArchiveExtractionUi(uiState)
+        ViewUtils.showToast(
+            context,
+            context.getString(R.string.text_archive_extraction_completed, result.outputDisplayPath),
+        )
+    }
+
+    private fun failArchiveExtraction(
+        uiState: ArchiveExtractionUiState,
+        failure: ExplorerArchiveExtractionFailure,
+    ) {
+        if (mArchiveExtractionUiState !== uiState) return
+        finishArchiveExtractionUi(uiState)
+        val message = when (failure.code) {
+            ExplorerArchiveSessionValues.EXTRACTION_ERROR_CANCELLED ->
+                context.getString(R.string.text_archive_extraction_cancelled)
+            ExplorerArchiveSessionValues.EXTRACTION_ERROR_INTERACTION_REQUIRED ->
+                context.getString(R.string.error_archive_extraction_requires_interaction)
+            else -> context.getString(R.string.error_archive_extraction_failed, failure.message)
+        }
+        ViewUtils.showToast(context, message, failure.code != ExplorerArchiveSessionValues.EXTRACTION_ERROR_CANCELLED)
+    }
+
+    private fun finishArchiveExtractionUi(uiState: ArchiveExtractionUiState) {
+        if (mArchiveExtractionUiState !== uiState) return
+        mArchiveExtractionUiState = null
+        uiState.progressSession.dismissSafely()
+        updateArchiveExtractionAction()
+        if (mSelectedItems.isNotEmpty()) updateSelectionToolbar()
+    }
+
+    private fun dismissArchiveExtractionUi() {
+        val uiState = mArchiveExtractionUiState ?: return
+        uiState.controller.cancel()
+        finishArchiveExtractionUi(uiState)
+    }
+
+    private fun updateArchiveExtractionAction() {
+        val page = currentPageState.page as? ArchiveExplorerPage
+        val supported = page != null &&
+            page.canExtractEntry &&
+            mArchiveNavigationState?.provider?.canExtractEntries == true
+        binding?.archiveExtractCurrent?.apply {
+            isVisible = supported
+            isEnabled = supported && !isInSelectionMode && mArchiveExtractionUiState == null
+            alpha = if (isEnabled) 1.0f else 0.38f
+        }
+    }
+
     private fun updateProjectToolbarVisibility() {
         if (mArchiveNavigationState != null) {
             mProjectToolbar.visibility = GONE
@@ -1055,6 +1281,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private fun setCurrentPageState(pageState: ExplorerPageState) {
         currentPageState = pageState
         pageState.page?.let(::updatePathBar)
+        updateArchiveExtractionAction()
     }
 
     private fun updatePathBar(page: ExplorerPage) {

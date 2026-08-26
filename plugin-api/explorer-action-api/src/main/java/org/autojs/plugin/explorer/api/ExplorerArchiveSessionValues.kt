@@ -3,4 +3,18 @@ package org.autojs.plugin.explorer.api
 object ExplorerArchiveSessionValues {
     const val KIND_FILE = 1
     const val KIND_DIRECTORY = 2
+
+    const val EXTRACTION_PHASE_PREPARING = 1
+    const val EXTRACTION_PHASE_EXTRACTING = 2
+    const val EXTRACTION_PHASE_COMMITTING = 3
+    const val EXTRACTION_PHASE_CLEANING_UP = 4
+
+    const val EXTRACTION_ERROR_CANCELLED = 1
+    const val EXTRACTION_ERROR_INTERACTION_REQUIRED = 2
+    const val EXTRACTION_ERROR_SOURCE_CHANGED = 3
+    const val EXTRACTION_ERROR_UNSUPPORTED = 4
+    const val EXTRACTION_ERROR_OUTPUT = 5
+    const val EXTRACTION_ERROR_INVALID_REQUEST = 6
+    const val EXTRACTION_ERROR_PLUGIN_UNAVAILABLE = 7
+    const val EXTRACTION_ERROR_UNKNOWN = 8
 }
