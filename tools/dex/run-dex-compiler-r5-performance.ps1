@@ -46,6 +46,9 @@ $sampleIndexArgument = 'autojs.dexCompiler.r5.performance.sampleIndex'
 $corpusStatusKey = 'autojs.dex.r5.performance.corpus'
 $managementStatusKey = 'autojs.dex.r5.performance.management'
 $sampleStatusKey = 'autojs.dex.r5.performance.sample'
+$processQuiescenceTimeoutSeconds = 10
+$processQuiescencePollMilliseconds = 100
+$processQuiescenceRequiredAbsentPolls = 3
 
 if (-not $ConfirmDeviceMutation) {
     throw 'Pass -ConfirmDeviceMutation explicitly; APK installation and process mutation are otherwise forbidden'
@@ -311,11 +314,38 @@ function Restore-PackageSnapshot {
     }
 }
 
+function Test-ProcessPresent {
+    param([Parameter(Mandatory)] [string] $ProcessName)
+
+    $result = Invoke-AdbCapture -Arguments @('shell', 'pidof', $ProcessName) `
+        -Label "find process $ProcessName" -AllowNonZero
+    return $result.ExitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($result.Text)
+}
+
 function Stop-BenchmarkProcesses {
     Invoke-AdbCapture -Arguments @('shell', 'am', 'force-stop', $hostPackage) `
         -Label 'force-stop AutoJs6' | Out-Null
     Invoke-AdbCapture -Arguments @('shell', 'am', 'force-stop', $pluginPackage) `
         -Label 'force-stop DEX compiler plugin' | Out-Null
+
+    $deadline = [DateTimeOffset]::UtcNow.AddSeconds($processQuiescenceTimeoutSeconds)
+    $consecutiveAbsentPolls = 0
+    while ([DateTimeOffset]::UtcNow -lt $deadline) {
+        $hostPresent = Test-ProcessPresent -ProcessName $hostPackage
+        $pluginPresent = Test-ProcessPresent -ProcessName $pluginProcessName
+        if (-not $hostPresent -and -not $pluginPresent) {
+            $consecutiveAbsentPolls++
+            if ($consecutiveAbsentPolls -ge $processQuiescenceRequiredAbsentPolls) { return }
+        } else {
+            $consecutiveAbsentPolls = 0
+            Invoke-AdbCapture -Arguments @('shell', 'am', 'force-stop', $hostPackage) `
+                -Label 'repeat force-stop AutoJs6 during process quiescence' | Out-Null
+            Invoke-AdbCapture -Arguments @('shell', 'am', 'force-stop', $pluginPackage) `
+                -Label 'repeat force-stop DEX compiler plugin during process quiescence' | Out-Null
+        }
+        Start-Sleep -Milliseconds $processQuiescencePollMilliseconds
+    }
+    throw "Benchmark processes did not remain absent for $processQuiescenceRequiredAbsentPolls consecutive polls within $processQuiescenceTimeoutSeconds seconds"
 }
 
 function Assert-InstrumentationSucceeded {
@@ -851,6 +881,9 @@ $report = [ordered]@{
     contract = [ordered]@{
         timingBoundary = 'LOAD_JAR_THROUGH_CLASS_RESOLUTION_AND_STATIC_INVOCATION'
         processState = 'HOST_AND_PROVIDER_FORCE_STOPPED_BEFORE_EVERY_TIMED_SAMPLE'
+        processQuiescence = 'THREE_CONSECUTIVE_ABSENT_PID_POLLS_AFTER_FORCE_STOP'
+        processQuiescencePollMillis = $processQuiescencePollMilliseconds
+        processQuiescenceTimeoutSeconds = $processQuiescenceTimeoutSeconds
         corpusGenerator = 'ON_DEVICE_DETERMINISTIC_JAVA8_CLASSFILE_V1'
         routes = @('BUILTIN', 'PLUGIN')
         cacheStates = @('COLD', 'CACHE_HIT')
