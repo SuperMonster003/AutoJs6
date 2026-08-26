@@ -9,10 +9,8 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
-import org.autojs.autojs6.BuildConfig
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -24,8 +22,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * R6 release-device coverage for switching between the production Rhino engine and the
- * required external Node.js runtime plugin.
+ * R6 release-device coverage for alternating source-routed Rhino and external Node.js engines.
  *
  * This deliberately executes through [AutoJs.scriptEngineService]. It therefore verifies
  * source routing, engine factory selection, execution, engine destruction, plugin session
@@ -38,12 +35,8 @@ class NodeR6EngineSwitchInstrumentationTest {
     private val service
         get() = AutoJs.instance.scriptEngineService
 
-    private var originalSystemProperties: Map<String, String?> = emptyMap()
-
     @Before
     fun settleBefore() {
-        originalSystemProperties = MUTATED_SYSTEM_PROPERTIES.associateWith(System::getProperty)
-        MUTATED_SYSTEM_PROPERTIES.forEach(System::clearProperty)
         NodeJsRuntimePluginHost.invalidateForTest(context)
         service.stopAll()
         awaitNoRegisteredEngines("before R6 engine-switch test")
@@ -54,20 +47,13 @@ class NodeR6EngineSwitchInstrumentationTest {
     fun settleAfter() {
         service.stopAll()
         awaitNoRegisteredEngines("after R6 engine-switch test")
-        originalSystemProperties.forEach { (name, value) ->
-            if (value == null) {
-                System.clearProperty(name)
-            } else {
-                System.setProperty(name, value)
-            }
-        }
         NodeJsRuntimePluginHost.invalidateForTest(context)
         NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
     fun r6_01_requiredPluginNodeAndRhinoAlternateAcrossMultipleRounds() {
-        assertDefaultRequiredPluginBackend()
+        assertFixedPluginTopology()
         val workDir = freshWorkDir("alternating")
         val pluginRuns = mutableListOf<PluginRun>()
         try {
@@ -124,85 +110,9 @@ class NodeR6EngineSwitchInstrumentationTest {
         }
     }
 
-    @Test
-    fun r6_02_pluginRhinoCompatibilityPluginSwitchExecutesAndRecovers() {
-        assertDefaultRequiredPluginBackend()
-        val workDir = freshWorkDir("backend-switch")
-        try {
-            System.setProperty(NODE_BACKEND_PROPERTY, "plugin")
-            assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.current())
-            assertTrue("explicit plugin backend must remain required", NodeJsRuntimePluginBridge.isRequired())
-            val firstPluginToken = "backend-plugin-before"
-            val firstPlugin = assertRequiredPluginExecution(
-                label = "plugin before Rhino compatibility backend",
-                observation = runViaScriptEngineService(
-                    workDir = workDir,
-                    sourceName = "<r6-backend-plugin-before.js>",
-                    source = nativeNodeSource(firstPluginToken, "$firstPluginToken.marker"),
-                    markerName = "$firstPluginToken.marker",
-                    markerValue = firstPluginToken,
-                ),
-            )
-
-            System.setProperty(NODE_BACKEND_PROPERTY, "rhino")
-            assertEquals(NodeRuntimeBackend.RHINO, NodeRuntimeBackend.current())
-            assertFalse("Rhino compatibility backend must not dispatch to the plugin", NodeJsRuntimePluginBridge.isRequested())
-            val compatToken = "backend-rhino-compat"
-            val rhinoCompatibility = runViaScriptEngineService(
-                workDir = workDir,
-                sourceName = "<r6-backend-rhino-compat.js>",
-                source = rhinoCompatibilityNodeSource(compatToken, "$compatToken.marker"),
-                markerName = "$compatToken.marker",
-                markerValue = compatToken,
-            )
-            assertEquals(
-                "Node-marked source did not use the Rhino compatibility engine",
-                NodeJavaScriptEngine::class.java,
-                rhinoCompatibility.engineClass,
-            )
-            assertEquals(JavaScriptSource.ENGINE_NODEJS, rhinoCompatibility.sourceEngineName)
-            assertEquals(null, rhinoCompatibility.result)
-            assertTrue(
-                "Rhino compatibility execution unexpectedly exposed native plugin diagnostics: ${rhinoCompatibility.nativeValues}",
-                rhinoCompatibility.nativeValues.isEmpty(),
-            )
-
-            System.setProperty(NODE_BACKEND_PROPERTY, "plugin")
-            assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.current())
-            assertTrue("restored plugin backend must be required", NodeJsRuntimePluginBridge.isRequired())
-            val recoveredPluginToken = "backend-plugin-after"
-            val recoveredPlugin = assertRequiredPluginExecution(
-                label = "plugin after Rhino compatibility backend",
-                observation = runViaScriptEngineService(
-                    workDir = workDir,
-                    sourceName = "<r6-backend-plugin-after.js>",
-                    source = nativeNodeSource(recoveredPluginToken, "$recoveredPluginToken.marker"),
-                    markerName = "$recoveredPluginToken.marker",
-                    markerValue = recoveredPluginToken,
-                ),
-            )
-
-            assertStablePluginRuntime(
-                "plugin to Rhino compatibility to plugin recovery",
-                listOf(firstPlugin, recoveredPlugin),
-            )
-            assertTrue(
-                "plugin runtime sequence did not advance after backend restoration: before=$firstPlugin after=$recoveredPlugin",
-                recoveredPlugin.executionSequence > firstPlugin.executionSequence,
-            )
-            assertNoRegisteredEngines("plugin/Rhino compatibility/plugin switch")
-        } finally {
-            workDir.deleteRecursively()
-        }
-    }
-
-    private fun assertDefaultRequiredPluginBackend() {
-        assertEquals("R6 engine switch gate requires the nodePlugin release flavor", "nodePlugin", BuildConfig.NODEJS_RELEASE_FLAVOR)
-        assertEquals("R6 engine switch gate requires plugin as the build default", "plugin", BuildConfig.NODEJS_RUNTIME_BACKEND)
-        assertEquals("test setup did not restore the build-default backend", null, System.getProperty(NODE_BACKEND_PROPERTY))
-        assertEquals(NodeRuntimeBackend.PLUGIN, NodeRuntimeBackend.current())
-        assertTrue("default plugin backend was not requested", NodeJsRuntimePluginBridge.isRequested())
-        assertTrue("default plugin backend was not required", NodeJsRuntimePluginBridge.isRequired())
+    private fun assertFixedPluginTopology() {
+        assertTrue("external Node.js runtime plugin was not requested", NodeJsRuntimePluginBridge.isRequested())
+        assertTrue("external Node.js runtime plugin was not required", NodeJsRuntimePluginBridge.isRequired())
     }
 
     private fun assertLegacyRhinoExecution(label: String, observation: EngineObservation) {
@@ -404,22 +314,6 @@ class NodeR6EngineSwitchInstrumentationTest {
         }
         """.trimIndent()
 
-    private fun rhinoCompatibilityNodeSource(token: String, markerName: String): String =
-        """
-        "nodejs";
-        if (typeof require !== "function" || typeof process !== "object") {
-          throw new Error("Rhino Node compatibility globals are unavailable");
-        }
-        if (typeof __autojs6R6RhinoCompatState !== "undefined") {
-          throw new Error("Rhino compatibility global state leaked");
-        }
-        this.__autojs6R6RhinoCompatState = "$token";
-        files.write("./$markerName", "$token");
-        if (files.read("./$markerName") !== "$token") {
-          throw new Error("Rhino compatibility marker verification failed");
-        }
-        """.trimIndent()
-
     private data class EngineObservation(
         val executionId: Int,
         val engineClass: Class<*>,
@@ -443,10 +337,6 @@ class NodeR6EngineSwitchInstrumentationTest {
         private const val ENGINE_REMOVAL_TIMEOUT_MS = 5_000L
         private const val ENGINE_REMOVAL_POLL_MS = 25L
 
-        private const val NODE_BACKEND_PROPERTY = "autojs.nodejs.backend"
-        private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
-        private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
-
         private const val PLUGIN_ENABLED_KEY = "embedded_script.runtime_plugin.enabled"
         private const val PLUGIN_DIAGNOSTICS_SOURCE_KEY = "embedded_script.runtime_plugin.diagnostics_source"
         private const val PLUGIN_FALLBACK_SAFE_KEY = "embedded_script.runtime_plugin.fallback_safe"
@@ -458,11 +348,5 @@ class NodeR6EngineSwitchInstrumentationTest {
         private const val PROCESS_RUNTIME_HEALTHY_KEY = "process_runtime.healthy"
         private const val PROCESS_RUNTIME_TEARDOWN_KEY = "process_runtime.teardown_clean"
         private const val EXECUTION_TEARDOWN_KEY = "execution.teardown_clean"
-
-        private val MUTATED_SYSTEM_PROPERTIES = listOf(
-            NODE_BACKEND_PROPERTY,
-            PLUGIN_RUNTIME_ENABLED_PROPERTY,
-            PLUGIN_RUNTIME_REQUIRED_PROPERTY,
-        )
     }
 }

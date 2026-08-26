@@ -1,14 +1,11 @@
 package org.autojs.autojs.engine
 
-import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -42,21 +39,12 @@ class NodeWebSocketBridgeInstrumentationTest {
 
     @Test
     fun websocketMvpUsesControlledBridgeAndKeepsRawSocketsDisabled() {
-        assumeFalse(
-            "The fake-provider WebSocket MVP regression is only meaningful when autojs.nodejs.network.stable=false.",
-            BuildConfig.NODEJS_NETWORK_ENABLED,
-        )
         NodePluginTestHarness.assumePluginRuntimeAvailable("websocket bridge MVP")
         assertTrue(NodeBridgeModules.supports("websocket", "connect"))
         assertTrue(NodeBridgeModules.supports("websocket", "send"))
         assertTrue(NodeBridgeModules.supports("websocket", "close"))
         assertTrue(NodeBridgeModules.supports("websocket", "drainEvents"))
         assertFalse(NodeBridgeModules.supports("websocket", "listen"))
-
-        val websocketFlag = NodeRuntimeCapabilities.featureFlagsById["websocket"]
-        assertEquals("stable", websocketFlag?.status)
-        assertEquals("high", websocketFlag?.securityLevel)
-        assertFalse(websocketFlag?.defaultEnabled ?: true)
 
         val workDir = File(context.cacheDir, "node-websocket-bridge-${System.nanoTime()}").apply {
             deleteRecursively()
@@ -336,6 +324,7 @@ class NodeWebSocketBridgeInstrumentationTest {
                 sourceName = "<node-websocket-bridge-mvp.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
+                rawNodeNetworkModulesEnabled = false,
             )
 
             NodePluginTestHarness.assertSucceeded("websocket bridge MVP", result)
@@ -366,11 +355,7 @@ class NodeWebSocketBridgeInstrumentationTest {
     }
 
     @Test
-    fun jsWebSocketUsesAndroidLiveProviderWhenNetworkEnabled() {
-        assumeTrue(
-            "Build with -Pautojs.nodejs.network.stable=true to run the live controlled WebSocket provider smoke.",
-            BuildConfig.NODEJS_NETWORK_ENABLED,
-        )
+    fun jsWebSocketUsesAndroidLiveProvider() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled WebSocket live provider smoke")
 
         ControlledWebSocketLoopbackServer().use { server ->
@@ -515,11 +500,6 @@ class NodeWebSocketBridgeInstrumentationTest {
 
     @Test
     fun androidWebSocketProviderClosesActiveLiveConnectionOnDestroy() {
-        assumeTrue(
-            "Build with -Pautojs.nodejs.network.stable=true to run the live controlled WebSocket destroy smoke.",
-            BuildConfig.NODEJS_NETWORK_ENABLED,
-        )
-
         ControlledWebSocketLoopbackServer().use { server ->
             val provider = AndroidNodeBridgeCapabilityProvider(context)
             val callbackLatch = CountDownLatch(1)
@@ -558,33 +538,6 @@ class NodeWebSocketBridgeInstrumentationTest {
                 assertEquals("1", diagnostics["embedded_script.websocket_service_destroy_close_count"])
             }
         }
-    }
-
-    @Test
-    fun androidWebSocketProviderStaysDisabledInNormalBuilds() {
-        assumeFalse(
-            "This default-denial regression is only meaningful when autojs.nodejs.network.stable=false.",
-            BuildConfig.NODEJS_NETWORK_ENABLED,
-        )
-
-        val provider = AndroidNodeBridgeCapabilityProvider(context)
-        val responses = mutableListOf<NodeBridgeResponse>()
-        provider.dispatch(
-            NodeBridgeRequest(
-                id = "websocket-disabled-${System.nanoTime()}",
-                module = "websocket",
-                method = "connect",
-                argsJson = """[{"url":"wss://example.invalid/socket","timeoutMs":1000,"maxMessageBytes":1024}]""",
-                timeoutMs = 1000L,
-                permissions = listOf("network"),
-            ),
-        ) { response -> responses += response }
-
-        assertEquals(1, responses.size)
-        assertFalse(responses.single().ok)
-        assertEquals(NodeRuntimeErrorCodes.NETWORK_DISABLED, responses.single().error?.code)
-        assertEquals("websocket", responses.single().error?.module)
-        assertEquals("connect", responses.single().error?.method)
     }
 
     private class ControlledWebSocketLoopbackServer : AutoCloseable {

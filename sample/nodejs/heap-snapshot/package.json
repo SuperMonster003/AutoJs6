@@ -1,7 +1,0 @@
-{
-  "name": "@autojs6-sample/heap-snapshot",
-  "version": "1.0.0",
-  "private": true,
-  "type": "commonjs",
-  "main": "main.cjs"
-}

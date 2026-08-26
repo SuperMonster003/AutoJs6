@@ -10,7 +10,6 @@ import android.os.SystemClock
 import android.provider.MediaStore
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.json.JSONArray
 import org.json.JSONObject
@@ -27,11 +26,10 @@ import java.util.TimeZone
 import java.util.UUID
 
 /**
- * R6 release soak for the required external runtime plugin.
+ * R6 release soak for the external runtime plugin.
  *
- * This deliberately does not reuse [NodeFinalSoakInstrumentationTest]: that older Phase 13
- * test executes the embedded backend and samples the instrumentation process. R6 must keep a
- * single plugin process-global runtime alive while every execution receives a fresh isolate and
+ * This deliberately does not reuse [NodeFinalSoakInstrumentationTest], which samples the
+ * instrumentation process. R6 must keep a single plugin process-global runtime alive while every execution receives a fresh isolate and
  * execution state, and every resource sample must belong to the PID returned by the plugin.
  */
 class NodeR6PersistentPluginSoakInstrumentationTest {
@@ -48,9 +46,6 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         require(RUN_TOKEN_PATTERN.matches(runToken)) {
             "R6 soak requires a runner-generated 64-character hexadecimal runToken."
         }
-        assertEquals("R6 soak must be built as nodePlugin", "nodePlugin", BuildConfig.NODEJS_RELEASE_FLAVOR)
-        assertEquals("R6 soak must be built with the required plugin backend", "plugin", BuildConfig.NODEJS_RUNTIME_BACKEND)
-
         val durationMs = durationMsFor(kind)
         val maximumSampleIntervalMs = if (kind == KIND_SMOKE) {
             minOf(MAX_SAMPLE_INTERVAL_MS, (durationMs / MIN_REQUIRED_SAMPLES).coerceAtLeast(MIN_SAMPLE_INTERVAL_MS))
@@ -97,8 +92,8 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                     .put("minimumRequiredSamples", minimumRequiredSamples)
                     .put("cycleDelayMs", cycleDelayMs)
                     .put("livenessRecoverabilityEveryCycles", livenessRecoverabilityEveryCycles)
-                    .put("releaseFlavor", BuildConfig.NODEJS_RELEASE_FLAVOR)
-                    .put("backend", BuildConfig.NODEJS_RUNTIME_BACKEND)
+                    .put("runtimeTopology", "external_plugin")
+                    .put("backend", "plugin")
                     .put("pluginRequired", true)
                     .put("settleBetweenExecutions", false)
                     .put("processKillDuringSoak", false)
@@ -122,7 +117,6 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
             .put("failures", failures)
             .put("livenessRecoverabilityCheckDetails", livenessRecoverabilityDetails)
 
-        val originalProperties = MUTATED_SYSTEM_PROPERTIES.associateWith(System::getProperty)
         val workDir = File(context.cacheDir, "node-r6-persistent-plugin-soak-${System.nanoTime()}").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create R6 plugin soak directory: $absolutePath" }
@@ -156,9 +150,6 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         }
 
         try {
-            System.setProperty(NODE_BACKEND_PROPERTY, "plugin")
-            System.setProperty(PLUGIN_RUNTIME_ENABLED_PROPERTY, "true")
-            System.setProperty(PLUGIN_RUNTIME_REQUIRED_PROPERTY, "true")
             assertTrue("R6 soak did not select the plugin backend", NodeJsRuntimePluginBridge.isRequested())
             assertTrue("R6 soak did not select required-plugin semantics", NodeJsRuntimePluginBridge.isRequired())
 
@@ -243,15 +234,6 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                     .put("message", error.message.orEmpty()),
             )
         } finally {
-            var propertiesRestored = true
-            originalProperties.forEach { (name, value) ->
-                runCatching {
-                    if (value == null) System.clearProperty(name) else System.setProperty(name, value)
-                }.onFailure { error ->
-                    propertiesRestored = false
-                    recordCleanupFailure("restoreSystemProperty:$name", error)
-                }
-            }
             val pluginHostInvalidated = runCatching {
                 NodeJsRuntimePluginHost.invalidateForTest(context)
             }.fold(
@@ -274,12 +256,11 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
                 },
             )
             val cleanup = JSONObject()
-                .put("propertiesRestored", propertiesRestored)
                 .put("pluginHostInvalidated", pluginHostInvalidated)
                 .put("workDirectoryDeleted", workDirectoryDeleted)
                 .put(
                     "complete",
-                    propertiesRestored && pluginHostInvalidated && workDirectoryDeleted,
+                    pluginHostInvalidated && workDirectoryDeleted,
                 )
             val growth = analyzeMonotonicGrowth(samples)
             val monotonicLeak = growth.getBoolean("monotonicLeak")
@@ -990,9 +971,6 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         private const val ARG_MAX_LIBUV_DELTA = "autojs.nodejs.r6.soak.maxLibuvHandleDelta"
         private const val ARG_MAX_BRIDGE_DELTA = "autojs.nodejs.r6.soak.maxBridgeActiveDelta"
 
-        private const val NODE_BACKEND_PROPERTY = "autojs.nodejs.backend"
-        private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
-        private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
         private const val PLUGIN_ENABLED_KEY = "embedded_script.runtime_plugin.enabled"
         private const val FALLBACK_SAFE_KEY = "embedded_script.runtime_plugin.fallback_safe"
         private const val DIAGNOSTICS_SOURCE_KEY = "embedded_script.runtime_plugin.diagnostics_source"
@@ -1022,11 +1000,6 @@ class NodeR6PersistentPluginSoakInstrumentationTest {
         private val RUN_TOKEN_PATTERN = Regex("[0-9a-f]{64}")
         private val AUTHORIZED_PLUGIN_STATES = setOf("official", "trusted", "user_granted")
         private val PROCESS_NAME_PATTERN = Regex("[A-Za-z0-9_.:-]+")
-        private val MUTATED_SYSTEM_PROPERTIES = listOf(
-            NODE_BACKEND_PROPERTY,
-            PLUGIN_RUNTIME_ENABLED_PROPERTY,
-            PLUGIN_RUNTIME_REQUIRED_PROPERTY,
-        )
         private val REQUIRED_PAYLOAD_NUMBERS = listOf(
             "rssKb",
             "nodeHeapTotalKb",

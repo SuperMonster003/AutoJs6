@@ -180,6 +180,7 @@
         "Leaving a native archive page on Android 7 could crash while cleaning the session preview cache because the cleanup path called a newer File NIO API"
       ],
       "improvement": [
+        "Removed host-side Node.js Gradle switches and duplicate examples, type declarations, project wizard, and verification scripts; runtime defaults and development assets are now owned by the Node.js Runtime plugin",
         "DEX compiler diagnostics now preserve bounded redacted INFO/WARNING/ERROR details with optional logical origin, archive entry, and position metadata; Developer options show the process-local last JAR route and localized BUSY, timeout, and fallback guidance",
         "TypeScript compilation now emits privacy-safe per-request observations for preparation, cache lookup, compiler binding/prewarm, remote compilation, output handling, total latency, archive size, source count, and host heap change, and breaks compiler time down into before-ingress, ingress, inter-phase, parse, semantic, emit, and after-emit intervals; malformed or out-of-order progress callbacks are ignored and these observations do not impose performance thresholds",
         "Improved argument compatibility for KeyCode methods _[`issue #492`](http://issues.autojs6.com/492)_",

@@ -1,45 +1,39 @@
 # AutoJs6 Node.js Verification Gates
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
-The former phase, alpha/beta/RC, embedded-packaging, native dependency, and Node
-Doctor Gradle gates have been retired. No Node-specific task is attached to the
-default preBuild chain.
+The former phase, embedded-packaging, backend-selection, native-dependency, Node
+Doctor, sample-mirror, declaration, and project-wizard host Gradle gates are retired.
+No Node-specific task is attached to the default host preBuild chain.
 
-## Host-Only Checks
-
-~~~powershell
-.\gradlew.bat :app:verifyNodeExamples
-.\gradlew.bat :app:verifyNodeProjectWizard
-.\gradlew.bat :app:verifyAutoJs6NodeTypeDeclarations
-.\gradlew.bat :app:testAppDebugUnitTest
-.\gradlew.bat :app:compileAppDebugAndroidTestKotlin
-.\gradlew.bat :app:assembleAppDebug
-~~~
-
-The TypeScript smoke task additionally requires a local TypeScript toolchain:
+## Host Checks
 
 ~~~powershell
-.\gradlew.bat :app:typeCheckNodeTypescriptSmoke
+.\gradlew.bat :app:testAppDebugUnitTest --offline
+.\gradlew.bat :app:compileAppDebugKotlin :app:compileAppDebugAndroidTestKotlin --offline
+.\gradlew.bat :app:assembleAppDebug --offline
 ~~~
 
-## Cross-Repository Checks
+## Plugin Checks
+
+Run from **AutoJs6-Plugin-NodeJs-Runtime**:
 
 ~~~powershell
-$pluginRoot = "D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime"
-.\gradlew.bat :plugin-api:nodejs-api:verifyNodeJsApiMirror "-Pautojs.nodejs.plugin.root=$pluginRoot"
-.\gradlew.bat :app:verifyNodeCapabilityManifestAlignment "-Pautojs.nodejs.plugin.root=$pluginRoot"
-.\gradlew.bat :app:verifyNodePluginExampleMirror "-Pautojs.nodejs.plugin.root=$pluginRoot"
+.\gradlew.bat verifyNodePluginExamples verifyNodeProjectWizard `
+  verifyAutoJs6NodeTypeDeclarations typeCheckNodeTypescriptSmoke --offline
+.\gradlew.bat verifyNodeHostIntegration `
+  "-Pautojs.host.root=D:\idea-projects\AutoJs6" --offline
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --offline
 ~~~
 
-The plugin repository is authoritative for nodejs-api. The two repositories retain
-their example trees intentionally, and the mirror task compares all files by
-content. Capability alignment allows only documented catalog-version exceptions.
+The plugin repository is authoritative for nodejs-api, examples, declarations,
+wizard tooling, and runtime defaults. `verifyNodeHostIntegration` checks the host API
+mirror and capability alignment; the host and plugin manifests remain independent
+because they enforce different process boundaries.
 
 ## Device Gate
 
-Compile success is not runtime acceptance. Install the current host and current
-runtime plugin, verify the plugin version, and run the real-plugin classes listed
-in [Testing](TESTING.md). Treat an implausibly fast JUnit success as suspicious:
-Assume-based tests can report OK while skipping the body when plugin discovery
-fails.
+Compile success is not runtime acceptance. Install the current host and runtime
+plugin, verify the plugin version, and run the real-plugin classes listed in
+[Testing](TESTING.md). Treat an implausibly fast JUnit success as suspicious:
+Assume-based tests can report OK while skipping the body when plugin discovery fails.

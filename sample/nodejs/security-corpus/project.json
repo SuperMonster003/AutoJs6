@@ -1,5 +1,0 @@
-{
-  "name": "security-corpus",
-  "type": "node",
-  "main": "main.cjs"
-}

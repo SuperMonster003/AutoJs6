@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Error Catalog
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
 Errors may originate in either process. The host owns routing, trust, bridge,
 permission, workspace, provider, queue, and scheduling failures. The runtime plugin
@@ -9,7 +9,8 @@ message, request ID, and execution ID when reporting a failure.
 
 ## Host Routing and Plugin Availability
 
-- **ERR_AUTOJS6_NODE_DISABLED**: this host build is rhinoOnly.
+- **ERR_AUTOJS6_NODE_DISABLED**: this packaged Inrt application does not support the
+  external Node.js runtime plugin.
 - **ERR_AUTOJS6_NODE_RUNTIME_UNAVAILABLE**: no usable runtime path exists.
 - **ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE**: the required plugin cannot be discovered,
   trusted, enabled, bound, or used for the device ABI.

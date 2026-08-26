@@ -1,9 +1,0 @@
-{
-  "name": "autojs6-pm-fixture-project",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "left-pad-lite": "^1.0.0",
-    "slugify-lite": "~2.1.0"
-  }
-}

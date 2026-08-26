@@ -1,1 +1,0 @@
-sample.package-install=PASS

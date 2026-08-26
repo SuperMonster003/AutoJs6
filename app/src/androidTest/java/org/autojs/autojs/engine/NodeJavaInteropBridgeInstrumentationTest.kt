@@ -1,6 +1,5 @@
 package org.autojs.autojs.engine
 
-import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -29,7 +28,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
     }
 
     @Test
-    fun kotlinJavaInteropProviderIsDisabledByDefaultAndAllowlistedWhenEnabled() {
+    fun kotlinJavaInteropProviderSupportsExplicitDenialAndAllowlistedDefault() {
         assertTrue(NodeBridgeModules.supports("java", "type"))
         assertTrue(NodeBridgeModules.supports("java", "callStatic"))
         assertTrue(NodeBridgeModules.supports("java", "new"))
@@ -39,8 +38,6 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertTrue(NodeBridgeModules.supports("java", "release"))
         assertTrue(NodeBridgeModules.supports("java", "dispose"))
         assertFalse(NodeBridgeModules.supports("java", "reflect"))
-        assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_ENABLED)
-
         val disabledProvider = AndroidNodeBridgeCapabilityProvider(
             context,
             javaInteropEnabled = false,
@@ -180,7 +177,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
     }
 
     @Test
-    fun jsJavaInteropModuleIsDeniedByDefaultAndCannotBeShadowed() {
+    fun jsJavaInteropModuleCanBeExplicitlyDeniedAndCannotBeShadowed() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node Java interop disabled gate")
 
         val workDir = File(context.cacheDir, "node-java-interop-disabled").apply {
@@ -221,10 +218,11 @@ class NodeJavaInteropBridgeInstrumentationTest {
             "<node-java-interop-disabled.js>",
             workingDirectory = workDir,
             timeoutMs = 10_000L,
+            javaInteropEnabled = false,
         )
 
         NodePluginTestHarness.assertSucceeded("Java interop disabled gate", result)
-        assertTrue(result.stdout, result.stdout.contains("java.profile=false|stable|autojs.nodejs.javaInterop.stable|false"))
+        assertTrue(result.stdout, result.stdout.contains("java.profile=false|stable||false"))
         assertTrue(result.stdout, result.stdout.contains("java.disabled=ERR_AUTOJS6_JAVA_INTEROP_DISABLED|ERR_AUTOJS6_JAVA_INTEROP_DISABLED"))
     }
 

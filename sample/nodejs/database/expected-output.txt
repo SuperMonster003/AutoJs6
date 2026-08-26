@@ -1,3 +1,0 @@
-sample.database.provider=sqlite-bridge
-sample.database.rows=<row count or unavailable marker>
-sample.database=PASS

@@ -2,7 +2,6 @@ package org.autojs.autojs.engine
 
 import org.json.JSONArray
 import org.json.JSONObject
-import org.autojs.autojs6.BuildConfig
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Locale
@@ -262,30 +261,30 @@ object NodeBridgePermissionManifest {
     fun runtimeModuleSourceForWorkingDirectory(
         workingDirectory: String?,
         sandboxRoot: String?,
-        includeBuildNetworkPolicy: Boolean = BuildConfig.NODEJS_NETWORK_ENABLED,
+        includeStableNetworkPolicy: Boolean = true,
     ): String = fromRuntimeWorkingDirectory(
         workingDirectory = workingDirectory,
         sandboxRoot = sandboxRoot,
-        includeBuildNetworkPolicy = includeBuildNetworkPolicy,
+        includeStableNetworkPolicy = includeStableNetworkPolicy,
     ).toJson()
 
     fun fromRuntimeWorkingDirectory(
         workingDirectory: String?,
         sandboxRoot: String?,
-        includeBuildNetworkPolicy: Boolean = false,
+        includeStableNetworkPolicy: Boolean = false,
     ): Manifest {
         val primary = fromWorkingDirectory(workingDirectory)
         val fallback = sandboxRoot
             ?.takeIf { it.isNotBlank() && it != workingDirectory }
             ?.let { fromWorkingDirectory(it) }
             ?: Manifest.empty()
-        if (!includeBuildNetworkPolicy && !fallback.enforced) {
+        if (!includeStableNetworkPolicy && !fallback.enforced) {
             return primary
         }
         val permissions = (
                 primary.permissions +
                         fallback.permissions +
-                        if (includeBuildNetworkPolicy) listOf(NETWORK) else emptyList()
+                        if (includeStableNetworkPolicy) listOf(NETWORK) else emptyList()
                 )
             .map(::normalizeCapability)
             .filter { it.isNotEmpty() }
@@ -294,11 +293,11 @@ object NodeBridgePermissionManifest {
         val sources = (
                 primary.sources.filterNot { it == "none" } +
                         fallback.sources.filterNot { it == "none" } +
-                        if (includeBuildNetworkPolicy) listOf("runtime:stable-network") else emptyList()
+                        if (includeStableNetworkPolicy) listOf("runtime:stable-network") else emptyList()
                 )
             .distinct()
         return buildManifest(
-            enforced = primary.enforced || fallback.enforced || includeBuildNetworkPolicy,
+            enforced = primary.enforced || fallback.enforced || includeStableNetworkPolicy,
             permissions = permissions,
             sources = sources,
             warnings = (primary.warnings + fallback.warnings).distinct(),

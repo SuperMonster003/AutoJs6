@@ -1,3 +1,0 @@
-sample.packaged-node-apk.package=<packaged app package name>
-sample.packaged-node-apk.version=<packaged app version name>
-sample.packaged-node-apk=PASS

@@ -56,8 +56,7 @@ class NodeScreenCaptureRealDeviceSmokeInstrumentationTest {
     @Test
     fun capturesOneFrameAfterUserGrantsScreenCapturePermission() {
         assumeTrue(
-            "Run with -Pautojs.nodejs.test.deviceProfile=screen_capture, or pass " +
-                    "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.screenCaptureSmoke=true for focused runs.",
+            "Pass -Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.screenCaptureSmoke=true for focused runs.",
             screenCaptureSmokeEnabled(),
         )
         assumeTrue("Screen capture requires Android 5.0+.", Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
@@ -183,8 +182,7 @@ class NodeScreenCaptureRealDeviceSmokeInstrumentationTest {
     }
 
     private fun screenCaptureSmokeEnabled(): Boolean {
-        return arguments.getString("autojs.nodejs.test.deviceProfile") == "screen_capture" ||
-                arguments.getString("autojs.nodejs.screenCaptureSmoke").toBooleanFlag()
+        return arguments.getString("autojs.nodejs.screenCaptureSmoke").toBooleanFlag()
     }
 
     private fun permissionTimeoutMs(): Long {

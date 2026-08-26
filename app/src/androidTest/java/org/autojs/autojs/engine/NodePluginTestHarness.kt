@@ -3,7 +3,6 @@ package org.autojs.autojs.engine
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs6.BuildConfig
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import java.io.File
@@ -15,9 +14,6 @@ internal object NodePluginTestHarness {
 
     val targetContext: Context
         get() = InstrumentationRegistry.getInstrumentation().targetContext
-
-    private val testContext: Context
-        get() = InstrumentationRegistry.getInstrumentation().context
 
     fun assumePluginRuntimeAvailable(label: String = "Node.js runtime plugin instrumentation") {
         val probe = runCatching {
@@ -43,13 +39,13 @@ internal object NodePluginTestHarness {
         env: Map<String, String> = emptyMap(),
         moduleSources: Map<String, String> = emptyMap(),
         runtimeModuleSources: Map<String, String> = emptyMap(),
-        esmEnabled: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
-        dynamicImportEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
-        rawNodeNetworkModulesEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
+        esmEnabled: Boolean? = null,
+        dynamicImportEnabled: Boolean? = null,
+        rawNodeNetworkModulesEnabled: Boolean? = null,
         inspectorEnabled: Boolean = false,
-        workerThreadsEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
-        childProcessEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
-        javaInteropEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
+        workerThreadsEnabled: Boolean? = null,
+        childProcessEnabled: Boolean? = null,
+        javaInteropEnabled: Boolean? = null,
         executionId: String? = null,
         executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         spawnDepth: Int = 0,
@@ -96,16 +92,4 @@ internal object NodePluginTestHarness {
         appendLine("nativeValues=${result.nativeValues}")
     }
 
-    fun copyAssetTree(assetPath: String, target: File) {
-        val children = testContext.assets.list(assetPath).orEmpty()
-        if (children.isEmpty()) {
-            target.parentFile?.mkdirs()
-            testContext.assets.open(assetPath).use { input ->
-                target.outputStream().use { output -> input.copyTo(output) }
-            }
-        } else {
-            target.mkdirs()
-            children.forEach { child -> copyAssetTree("$assetPath/$child", File(target, child)) }
-        }
-    }
 }

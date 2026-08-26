@@ -759,7 +759,7 @@ class FakeNodeBridgeCapabilityProvider(
 class AndroidNodeBridgeCapabilityProvider(
     context: Context,
     private val engineInfo: NodeBridgeEngineInfo = NodeBridgeEngineInfo.fromContext(context),
-    private val javaInteropEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
+    private val javaInteropEnabled: Boolean = true,
     private val bridgeLimits: NodeBridgeLimits.Policy = NodeBridgeLimits.defaults,
 ) : NodeBridgeCapabilityProvider {
 
@@ -4149,20 +4149,6 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchFetch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        if (!BuildConfig.NODEJS_NETWORK_ENABLED) {
-            callback(
-                NodeBridgeResponse.failure(
-                    request.id,
-                    NodeBridgeError.network(
-                        message = "AutoJs6 controlled fetch is unavailable for this request; verify the network permission policy.",
-                        code = NodeRuntimeErrorCodes.NETWORK_DISABLED,
-                        module = request.module,
-                        method = request.method,
-                    ),
-                ),
-            )
-            return
-        }
         val payload = request.firstObjectArg()
         if (payload == null) {
             callback(
@@ -4279,20 +4265,6 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchWebSocket(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        if (!BuildConfig.NODEJS_NETWORK_ENABLED) {
-            callback(
-                NodeBridgeResponse.failure(
-                    request.id,
-                    NodeBridgeError.network(
-                        message = "AutoJs6 controlled WebSocket is unavailable for this request; verify the network permission policy.",
-                        code = NodeRuntimeErrorCodes.NETWORK_DISABLED,
-                        module = request.module,
-                        method = request.method,
-                    ),
-                ),
-            )
-            return
-        }
         when (request.method) {
             "connect" -> dispatchWebSocketConnect(request, callback)
             "send" -> dispatchWebSocketSend(request, callback)

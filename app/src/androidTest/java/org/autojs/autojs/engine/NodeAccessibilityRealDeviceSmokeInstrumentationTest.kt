@@ -34,8 +34,7 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
     @Test
     fun providerFindsAndClicksControlledUiWhenAccessibilityServiceIsEnabled() {
         assumeTrue(
-            "Run with -Pautojs.nodejs.test.deviceProfile=accessibility, or pass " +
-                    "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke=true for focused runs.",
+            "Pass -Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke=true for focused runs.",
             accessibilitySmokeEnabled(),
         )
         assumeTrue(
@@ -182,8 +181,7 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
     }
 
     private fun accessibilitySmokeEnabled(): Boolean {
-        return arguments.getString("autojs.nodejs.test.deviceProfile") == "accessibility" ||
-                arguments.getString("autojs.nodejs.accessibilitySmoke").toBooleanFlag()
+        return arguments.getString("autojs.nodejs.accessibilitySmoke").toBooleanFlag()
     }
 
     private fun accessibilityGlobalActionsEnabled(): Boolean {

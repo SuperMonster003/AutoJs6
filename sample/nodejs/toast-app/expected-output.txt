@@ -1,2 +1,0 @@
-sample.toast-app.package=<current AutoJs6 package name>
-sample.toast-app=PASS

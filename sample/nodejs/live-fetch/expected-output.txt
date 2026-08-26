@@ -1,4 +1,0 @@
-sample.live-fetch.provider=controlled-fetch
-sample.live-fetch.limit=<provider default max response bytes>
-sample.live-fetch.status=<status or unavailable marker>
-sample.live-fetch=PASS

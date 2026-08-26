@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Host/Plugin Integration
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
 The migration is complete: Node runtime execution is plugin-only.
 
@@ -23,22 +23,24 @@ The migration is complete: Node runtime execution is plugin-only.
 
 The host retains the plugin client, script routing, workspace transport, capability
 manifest/broker/providers, encrypted module-source provider, Android policy, project
-descriptor resolution, Node Doctor, user docs/types, and examples.
+descriptor resolution, Node Doctor, and host-facing integration documentation.
 
 The plugin retains libnode and all C++/JNI runtime code, runtime services, Node module
-loader and compatibility shims, JavaScript-side preflight, and native-runtime tests.
+loader and compatibility shims, JavaScript-side preflight, runtime defaults, native
+runtime tests, examples, TypeScript declarations, and developer project tooling.
 
 The nodejs-api contract is authored in the plugin and mirrored into the host.
-Capabilities and examples have separate cross-repository manual guards.
+The plugin owns the cross-repository API/capability alignment guard.
 
 ## Build Policy
 
-- **nodePlugin** is the normal release mode and resolves to the plugin backend.
-- **rhinoOnly** disables Node execution.
-- Historical native/embedded/auto/pluginOptional backend names migrate to plugin.
-- Historical nodeFull/nodeMini release flavors fail with a migration message.
+- Node-marked host sources always route to the required runtime plugin.
+- Ordinary non-Node JavaScript routes to Rhino independently of Node.
+- Inrt/exported applications reject the external Node runtime path.
+- There is no Node backend, release-flavor, identity, profile, or runtime-feature
+  Gradle property in the host.
 - The host APK never copies native libraries from the plugin repository.
-- Exported applications cannot request an Embedded Node.js library.
+- Runtime defaults and optional runtime behavior are implemented by the plugin.
 
 See [Testing](TESTING.md) for acceptance and [Security model](SECURITY_MODEL.md)
 for authority boundaries.

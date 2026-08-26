@@ -1,1 +1,0 @@
-sample.sandboxed-script=PASS

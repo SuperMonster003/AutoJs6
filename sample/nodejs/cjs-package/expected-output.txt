@@ -1,3 +1,0 @@
-sample.cjs-package.greeting=hello AutoJs6
-sample.cjs-package.answer=42
-sample.cjs-package=PASS

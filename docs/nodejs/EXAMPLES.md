@@ -1,30 +1,33 @@
 # AutoJs6 Node.js Example Projects
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
-Examples live under **sample/nodejs** in both the host and runtime-plugin
-repositories. Both trees currently contain 358 files and are intentionally retained:
-the host exposes user examples while the plugin owns runtime validation.
+Examples live only under **sample/nodejs** in the runtime-plugin repository. Keeping
+one copy prevents host/plugin drift and keeps runtime-specific assets out of the host
+checkout and AndroidTest asset graph. Each example has project metadata, package
+metadata, a documented entry, expected output, and a row in **examples.json**.
 
-Each example has project metadata, package metadata, a documented entry, expected
-output, and a row in **examples.json**. Node project entries run through the external
-runtime plugin and may call host APIs only through declared bridge capabilities.
+Node project entries run through the external runtime plugin and may call host APIs
+only through declared bridge capabilities.
 
 ## Verification
 
+Run from **AutoJs6-Plugin-NodeJs-Runtime**:
+
 ~~~powershell
-.\gradlew.bat :app:verifyNodeExamples
-.\gradlew.bat :app:verifyNodePluginExampleMirror "-Pautojs.nodejs.plugin.root=D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime"
+.\gradlew.bat verifyNodePluginExamples --offline
 ~~~
 
-The mirror task compares relative paths and bytes across all files. Add or update an
-example in both repositories in the same change set.
+Add or update an example only in the plugin repository. Type declarations and the
+TypeScript smoke sample are checked there by `verifyAutoJs6NodeTypeDeclarations` and
+`typeCheckNodeTypescriptSmoke`.
 
-## Device Smoke
+## Host Integration Smoke
 
-**NodeExampleProjectInstrumentationTest** runs seven representative groups through
-the real plugin, including hello-world, bridge permissions, CommonJS/npm, TypeScript,
-and stable profile subsets. A successful compile is not a substitute for this run.
+**NodeHostPluginIntegrationInstrumentationTest** intentionally uses small inline
+fixtures rather than copying the runtime sample catalog into the host. It verifies a
+basic plugin round trip, a live host capability, and TypeScript compiler output
+dispatch. Exhaustive runtime/sample conformance remains plugin-owned.
 
 Legacy packaged-compatible metadata remains readable for historical catalogs, but
 the current host does not embed Node into exported APKs.

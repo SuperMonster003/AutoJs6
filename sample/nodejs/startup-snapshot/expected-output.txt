@@ -1,1 +1,0 @@
-sample.startup-snapshot=PASS

@@ -1,6 +1,5 @@
 package org.autojs.autojs.engine
 
-import org.autojs.autojs6.BuildConfig
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -87,11 +86,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         val healthById = NodeBridgeProviderRegistry.androidHealth(context).associateBy { it.definition.id }
 
         assertEquals(
-            if (BuildConfig.NODEJS_NETWORK_ENABLED) {
-                NodeBridgeProviderStatus.AVAILABLE
-            } else {
-                NodeBridgeProviderStatus.UNAVAILABLE
-            },
+            NodeBridgeProviderStatus.AVAILABLE,
             healthById.getValue("fetch").status,
         )
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ocr").status)

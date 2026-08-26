@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Capability Stability Policy
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
 This policy covers capabilities that cross the runtime-plugin/host boundary. Node
 core behavior and native runtime implementation are owned and versioned by the
@@ -30,9 +30,10 @@ Register new capabilities in this order:
 3. Host NodeBridgePermissionManifest.kt.
 4. The next plugin capability catalog.
 
-Then run the host task **verifyNodeCapabilityManifestAlignment** with an explicit
-plugin root. The plugin and host manifests deliberately remain separate because
-they protect different process boundaries.
+Then run the plugin task **verifyNodeHostCapabilityManifestAlignment** with
+`-Pautojs.host.root=<host repo>` when the repositories are not siblings. The plugin
+and host manifests deliberately remain separate because they protect different
+process boundaries.
 
 ## Compatibility
 

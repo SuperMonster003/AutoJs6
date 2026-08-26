@@ -3,7 +3,6 @@ package org.autojs.autojs.engine
 import android.os.Process
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -14,39 +13,28 @@ import java.io.File
 import java.util.UUID
 
 /**
- * Proves that the R6 required-plugin delivery path preserves the permanent Safe Node denials.
+ * Proves that the external runtime plugin path preserves the permanent Safe Node denials.
  *
  * The older security corpus targets the embedded runtime and is intentionally unavailable in a
- * nodePlugin build. This test exercises the external runtime directly so a release report cannot
- * claim the plugin topology while deriving its security result from a skipped embedded test.
+ * This test exercises the external runtime directly so a release report cannot claim the plugin
+ * topology while deriving its security result from a different engine.
  */
 class NodeR6RequiredPluginSecurityInstrumentationTest {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private var originalProperties: Map<String, String?> = emptyMap()
-
     @Before
     fun settleBefore() {
-        originalProperties = MUTATED_SYSTEM_PROPERTIES.associateWith(System::getProperty)
-        System.setProperty(NODE_BACKEND_PROPERTY, "plugin")
-        System.setProperty(PLUGIN_RUNTIME_ENABLED_PROPERTY, "true")
-        System.setProperty(PLUGIN_RUNTIME_REQUIRED_PROPERTY, "true")
         NodeJsRuntimePluginHost.invalidateForTest(context)
     }
 
     @After
     fun settleAfter() {
-        originalProperties.forEach { (name, value) ->
-            if (value == null) System.clearProperty(name) else System.setProperty(name, value)
-        }
         NodeJsRuntimePluginHost.invalidateForTest(context)
         NodePluginTestHarness.settlePluginRuntime()
     }
 
     @Test
     fun requiredPluginPreservesPermanentSafeNodeDenials() {
-        assertEquals("R6 security gate requires nodePlugin", "nodePlugin", BuildConfig.NODEJS_RELEASE_FLAVOR)
-        assertEquals("R6 security gate requires the plugin backend", "plugin", BuildConfig.NODEJS_RUNTIME_BACKEND)
         assertTrue("R6 security gate did not select the plugin", NodeJsRuntimePluginBridge.isRequested())
         assertTrue("R6 security gate did not require the plugin", NodeJsRuntimePluginBridge.isRequired())
 
@@ -135,18 +123,9 @@ class NodeR6RequiredPluginSecurityInstrumentationTest {
 
     private companion object {
         private const val TEST_TIMEOUT_MS = 15_000L
-        private const val NODE_BACKEND_PROPERTY = "autojs.nodejs.backend"
-        private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
-        private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
         private const val DIAGNOSTICS_SOURCE_KEY = "embedded_script.runtime_plugin.diagnostics_source"
         private const val BRIDGE_ACTIVE_COUNT_KEY = "embedded_script.bridge_resource.active_count"
         private const val EXECUTION_TEARDOWN_KEY = "execution.teardown_clean"
-
-        private val MUTATED_SYSTEM_PROPERTIES = listOf(
-            NODE_BACKEND_PROPERTY,
-            PLUGIN_RUNTIME_ENABLED_PROPERTY,
-            PLUGIN_RUNTIME_REQUIRED_PROPERTY,
-        )
 
         private val REQUIRED_OUTPUT_LABELS = listOf(
             "process.binding",

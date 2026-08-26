@@ -1,3 +1,0 @@
-sample.screenshot-find-image.point=<point or null>
-sample.screenshot-find-image.skipped=<permission or provider error when screen capture is unavailable>
-sample.screenshot-find-image=PASS

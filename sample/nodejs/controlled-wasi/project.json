@@ -1,5 +1,0 @@
-{
-  "name": "controlled-wasi",
-  "type": "node",
-  "main": "main.cjs"
-}

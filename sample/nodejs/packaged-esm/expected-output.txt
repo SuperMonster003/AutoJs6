@@ -1,2 +1,0 @@
-sample.packaged-esm.message=esm-local-module
-sample.packaged-esm=PASS

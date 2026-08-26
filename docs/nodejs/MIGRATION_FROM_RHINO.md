@@ -1,6 +1,6 @@
 # Migrating Rhino Scripts to the Node.js Runtime Plugin
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
 Node.js is a separate engine, not a replacement parser for Rhino source. Migration
 should be explicit and reversible.
@@ -15,8 +15,8 @@ available, a Node-marked script fails; it is not executed as Rhino.
 
 Prefer Node modules and the documented AutoJs6 bridge modules. Do not assume every
 Rhino global, Java package object, Activity, Context, or raw AutoJs6 runtime object is
-available. Consult the plugin's **docs/HOST-API.md** and the declarations under
-[types/autojs6-node](types/autojs6-node/README.md).
+available. Consult the plugin's **docs/HOST-API.md** and its
+[AutoJs6 Node declarations](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/tree/master/docs/nodejs/types/autojs6-node).
 
 ## Declare Authority
 

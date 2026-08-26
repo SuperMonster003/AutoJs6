@@ -1,7 +1,0 @@
-{
-  "name": "@autojs6-sample/desktop-parity-suite",
-  "version": "0.0.0",
-  "private": true,
-  "type": "commonjs",
-  "main": "main.cjs"
-}

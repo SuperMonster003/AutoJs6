@@ -22,8 +22,6 @@ object NodeJsRuntimePluginBridge {
     )
 
     private const val TAG = "NodeJsRuntimePlugin"
-    private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
-    private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
     const val ERROR_PLUGIN_UNAVAILABLE = NodeRuntimeErrorCodes.NODE_PLUGIN_UNAVAILABLE
     const val ERROR_PLUGIN_CONTRACT_MISMATCH = NodeRuntimeErrorCodes.NODE_PLUGIN_CONTRACT_MISMATCH
     const val ERROR_PLUGIN_EXECUTION_LOST = NodeRuntimeErrorCodes.NODE_PLUGIN_EXECUTION_LOST
@@ -56,15 +54,9 @@ object NodeJsRuntimePluginBridge {
         return FailureClassification(fallbackSafe, failureKind, errorCode)
     }
 
-    fun isRequested(): Boolean {
-        return NodeRuntimeBackend.current() == NodeRuntimeBackend.PLUGIN ||
-                booleanSystemProperty(PLUGIN_RUNTIME_ENABLED_PROPERTY)
-    }
+    fun isRequested(): Boolean = !BuildConfig.isInrt
 
-    fun isRequired(): Boolean {
-        return NodeRuntimeBackend.current() == NodeRuntimeBackend.PLUGIN ||
-                booleanSystemProperty(PLUGIN_RUNTIME_REQUIRED_PROPERTY)
-    }
+    fun isRequired(): Boolean = !BuildConfig.isInrt
 
     fun runScript(
         context: Context,
@@ -347,16 +339,18 @@ object NodeJsRuntimePluginBridge {
                 NodeJsRuntimeContract.KEY_TYPESCRIPT_PRECOMPILED_SOURCE_NAMES,
                 typeScriptPrecompiledSourceNames.sorted().toTypedArray(),
             )
-            putBoolean(NodeJsRuntimeContract.KEY_ESM_ENABLED, esmEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_DYNAMIC_IMPORT_ENABLED, dynamicImportEnabled)
+            esmEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_ESM_ENABLED, it) }
+            dynamicImportEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_DYNAMIC_IMPORT_ENABLED, it) }
             // AutoJs6 owns TypeScript compilation. Never ask the Node runtime
             // plugin to revive its migration-only regex stripping path.
             putBoolean(NodeJsRuntimeContract.KEY_LEGACY_TYPESCRIPT_STRIPPING_ENABLED, false)
-            putBoolean(NodeJsRuntimeContract.KEY_RAW_NODE_NETWORK_MODULES_ENABLED, rawNodeNetworkModulesEnabled)
+            rawNodeNetworkModulesEnabled?.let {
+                putBoolean(NodeJsRuntimeContract.KEY_RAW_NODE_NETWORK_MODULES_ENABLED, it)
+            }
             putBoolean(NodeJsRuntimeContract.KEY_INSPECTOR_ENABLED, BuildConfig.DEBUG && inspectorEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_ENABLED, workerThreadsEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_ENABLED, childProcessEnabled)
-            putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_ENABLED, javaInteropEnabled)
+            workerThreadsEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_ENABLED, it) }
+            childProcessEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_ENABLED, it) }
+            javaInteropEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_ENABLED, it) }
             putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker)
             moduleSourceProvider?.let { provider ->
                 putBinder(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER, provider.asBinder())
@@ -577,13 +571,6 @@ object NodeJsRuntimePluginBridge {
 
     private fun Bundle.optionalLong(key: String): Long? {
         return takeIf { containsKey(key) }?.getLong(key)
-    }
-
-    private fun booleanSystemProperty(name: String): Boolean {
-        return when (System.getProperty(name)?.trim()?.lowercase()) {
-            "true", "1", "yes", "y", "on" -> true
-            else -> false
-        }
     }
 
     private const val WORKSPACE_STATUS_KEY =

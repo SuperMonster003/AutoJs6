@@ -1,7 +1,0 @@
-{
-  "name": "@autojs6-sample/hardened-sandbox",
-  "version": "1.0.0",
-  "private": true,
-  "type": "commonjs",
-  "main": "main.cjs"
-}

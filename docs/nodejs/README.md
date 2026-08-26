@@ -1,28 +1,31 @@
 # AutoJs6 Node.js
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
 AutoJs6 runs Node.js scripts through the separately installed AutoJs6 Node.js
-Runtime Plugin. The host APK does not contain libnode, JNI bindings for Node, or
-an embedded Node service. A Node-marked script fails clearly when the required
-plugin is missing, disabled, unauthorized, ABI-incompatible, or contract-incompatible;
-it is never reinterpreted as Rhino.
+Runtime Plugin. The host APK contains no libnode, Node JNI bindings, embedded Node
+service, or selectable Node build backend. A Node-marked script requires the plugin
+and fails clearly when the plugin is missing, disabled, unauthorized,
+ABI-incompatible, or contract-incompatible; it is never reinterpreted as Rhino.
+
+Ordinary JavaScript continues to use the Rhino engine through source routing. This
+is not a Node backend switch. Inrt/exported applications do not support the external
+Node runtime path.
 
 ## Ownership
 
 | Concern | Owner |
 | --- | --- |
-| Node/V8/libuv, native bootstrap, module loading, TypeScript stripping, compatibility shims | Runtime plugin |
-| Script routing, plugin discovery/trust, Binder client, workspace transfer | Host |
-| AutoJs6 API dispatch, Android permissions, capability providers, resource cleanup | Host |
-| Node.js API contract source of truth | Runtime plugin, mirrored into the host |
-| User examples | Retained in both repositories and protected by a byte mirror check |
+| Node/V8/libuv, native bootstrap, module loading, runtime defaults and compatibility shims | Runtime plugin |
+| User examples, TypeScript declarations, project wizard and their verification tasks | Runtime plugin |
+| Node.js API contract source of truth | Runtime plugin, mirrored into the host for compilation |
+| Script routing, plugin discovery/trust, Binder client and workspace transfer | Host |
+| AutoJs6 API dispatch, Android permissions, capability providers and resource cleanup | Host |
+| Minimal route/Binder/bridge/compiler integration coverage | Host |
 
-The host supports the **plugin** and **rhino** build backends. Historical backend
-spellings are accepted only as migration aliases and resolve to the plugin backend.
-Historical **nodeFull** and **nodeMini** release flavors now fail during configuration
-with a migration message. Exported applications cannot bundle Node.js; projects that
-still select the legacy Embedded Node.js APK-builder library are rejected explicitly.
+Runtime feature fields omitted by the host use plugin-owned defaults. The host may
+send an explicit restrictive value for a security boundary or focused test, but no
+Gradle property selects runtime features, profiles, release flavors, or backends.
 
 The legacy work_manager wire value **backend="embedded"** and diagnostic keys under
 **embedded_script.*** remain protocol compatibility tokens. They do not indicate
@@ -42,19 +45,22 @@ that the host embeds or loads a runtime.
 
 ## Cross-Repository Guards
 
-The repositories are not assumed to be siblings. Pass the plugin path explicitly:
+Run ownership and alignment guards from the runtime-plugin repository. When the
+repositories are not siblings, pass the host path to the plugin:
 
 ~~~powershell
-.\gradlew.bat :plugin-api:nodejs-api:verifyNodeJsApiMirror "-Pautojs.nodejs.plugin.root=D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime"
-.\gradlew.bat :app:verifyNodeCapabilityManifestAlignment "-Pautojs.nodejs.plugin.root=D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime"
-.\gradlew.bat :app:verifyNodePluginExampleMirror "-Pautojs.nodejs.plugin.root=D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime"
+Set-Location D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime
+.\gradlew.bat verifyNodeHostIntegration "-Pautojs.host.root=D:\idea-projects\AutoJs6"
 ~~~
 
-These are manual checks. They are intentionally not attached to preBuild or check.
+The aggregate verifies the host mirror of nodejs-api and aligns the independent host
+and plugin capability manifests with the plugin-owned catalog. Example, declaration,
+and wizard checks are plugin-local because those assets now have a single owner.
+These manual checks are intentionally not attached to the normal host preBuild chain.
 
 ## Historical Documents
 
-The completion roadmaps, comparison inventories, v1.1 draft, R2–R6 acceptance
+The completion roadmaps, comparison inventories, v1.1 draft, R2-R6 acceptance
 records, and old deployment context are retained as historical evidence. Each such
-file is marked as a snapshot. Its old task names, paths, release flavors, and
-embedded-runtime topology are not current instructions.
+file is a snapshot. Its old task names, paths, Gradle properties, release flavors,
+and embedded-runtime topology are not current instructions.

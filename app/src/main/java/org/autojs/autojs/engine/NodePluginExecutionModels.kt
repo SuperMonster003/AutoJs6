@@ -1,6 +1,5 @@
 package org.autojs.autojs.engine
 
-import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 
 /** Host-side request model for the external Node.js runtime plugin. */
@@ -19,14 +18,15 @@ data class NodePluginScriptRequest(
     val runtimeModuleSources: Map<String, String> = emptyMap(),
     val typeScriptPrecompiledSnapshot: Boolean = false,
     val typeScriptPrecompiledSourceNames: Set<String> = emptySet(),
-    val esmEnabled: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
-    val dynamicImportEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
-    val rawNodeNetworkModulesEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED,
+    /** Optional compatibility override; absent values are owned and defaulted by the plugin. */
+    val esmEnabled: Boolean? = null,
+    val dynamicImportEnabled: Boolean? = null,
+    val rawNodeNetworkModulesEnabled: Boolean? = null,
     /** Debug builds only; the plugin also enforces its own native debug-build gate. */
     val inspectorEnabled: Boolean = false,
-    val workerThreadsEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
-    val childProcessEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_ENABLED,
-    val javaInteropEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_ENABLED,
+    val workerThreadsEnabled: Boolean? = null,
+    val childProcessEnabled: Boolean? = null,
+    val javaInteropEnabled: Boolean? = null,
     val spawnDepth: Int = 0,
     val moduleSourceProvider: INodeJsModuleSourceProvider? = null,
 ) {

@@ -156,6 +156,7 @@
         "Android 7 离开原生档案页时, 会话预览缓存清理路径调用了较新的 File NIO API, 可能导致应用崩溃的问题"
       ],
       "improvement": [
+        "移除宿主侧 Node.js Gradle 开关及重复的样例, 类型声明, 项目向导与校验脚本, 运行时默认值和开发资产现统一由 Node.js Runtime 插件维护",
         "DEX 编译器诊断现在在既有预算内保留经脱敏的 INFO/WARNING/ERROR 详情及可选逻辑来源, 归档条目与位置元数据; 开发者选项会显示仅存于进程内的最近一次 JAR 加载路径, 并提供 BUSY, 超时及回退提示",
         "TypeScript 编译现在为每次请求记录隐私安全的性能观察, 涵盖准备, 缓存查找, 编译器绑定/预热, 远程编译, 输出处理, 总耗时, 归档大小, 源文件数及宿主堆内存变化, 并将编译器耗时细分为 ingress 前, ingress, 阶段间隔, parse, semantic, emit 及 emit 后区间; 格式错误或乱序的 progress 回调会被忽略, 这些观察不设置性能门禁",
         "插件化离线项目文档, 插件名称 Offline Documentation",

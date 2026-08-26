@@ -1,2 +1,0 @@
-sample.wasm-basic.add=42
-sample.wasm-basic=PASS

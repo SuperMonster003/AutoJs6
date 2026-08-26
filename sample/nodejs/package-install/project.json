@@ -1,5 +1,0 @@
-{
-  "name": "package-install",
-  "type": "node",
-  "main": "main.cjs"
-}

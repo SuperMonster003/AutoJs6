@@ -1,11 +1,12 @@
 # AutoJs6 Node.js Compatibility Profile
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
 ## Runtime and Delivery
 
 - Node.js version: 24.5.0, supplied by the external runtime plugin.
-- Host backends: plugin or rhino.
+- Node runtime topology: required external plugin; no selectable host Node backend.
+- Ordinary non-Node JavaScript: source-routed to Rhino independently of Node.
 - Host APK: no libnode and no Node JNI bridge.
 - Node entries: the "nodejs" directive, .node.js, .cjs, .mjs, .cts, .mts, and
   Node project metadata.
@@ -28,7 +29,8 @@ Context, Activity, View, Bitmap, cursor, shell process, native pointer, and arbi
 Java objects never cross.
 
 The exact module/method inventory lives in the runtime plugin's **docs/HOST-API.md**.
-Type declarations live under [types/autojs6-node](types/autojs6-node/README.md).
+Type declarations live in the runtime plugin under
+[docs/nodejs/types/autojs6-node](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/tree/master/docs/nodejs/types/autojs6-node).
 
 ## Intentionally Unsupported or Restricted
 

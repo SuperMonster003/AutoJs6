@@ -1,14 +1,11 @@
 package org.autojs.autojs.engine
 
-import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -980,11 +977,7 @@ class NodeFetchBridgeInstrumentationTest {
     }
 
     @Test
-    fun jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkEnabled() {
-        assumeTrue(
-            "Build with -Pautojs.nodejs.network.stable=true to run the live controlled fetch provider smoke.",
-            BuildConfig.NODEJS_NETWORK_ENABLED,
-        )
+    fun jsFetchAndAxiosUseAndroidLiveProvider() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled fetch live provider smoke")
 
         ControlledFetchLoopbackServer().use { server ->
@@ -1178,11 +1171,6 @@ class NodeFetchBridgeInstrumentationTest {
 
     @Test
     fun androidFetchProviderCancelsActiveLiveRequestOnDestroy() {
-        assumeTrue(
-            "Build with -Pautojs.nodejs.network.stable=true to run the live controlled fetch cancellation smoke.",
-            BuildConfig.NODEJS_NETWORK_ENABLED,
-        )
-
         ControlledFetchLoopbackServer().use { server ->
             val provider = AndroidNodeBridgeCapabilityProvider(context)
             val callbackLatch = CountDownLatch(1)
@@ -1221,40 +1209,6 @@ class NodeFetchBridgeInstrumentationTest {
                 assertEquals("1", diagnostics["embedded_script.fetch_service_destroy_cancellation_count"])
             }
         }
-    }
-
-    @Test
-    fun androidFetchProviderStaysDisabledInNormalBuilds() {
-        assumeFalse(
-            "This default-denial regression is only meaningful when autojs.nodejs.network.stable=false.",
-            BuildConfig.NODEJS_NETWORK_ENABLED,
-        )
-
-        val provider = AndroidNodeBridgeCapabilityProvider(context)
-        val responses = mutableListOf<NodeBridgeResponse>()
-        provider.dispatch(
-            NodeBridgeRequest(
-                id = "fetch-disabled-${System.nanoTime()}",
-                module = "fetch",
-                method = "request",
-                argsJson = JSONArray().put(
-                    JSONObject().apply {
-                        put("url", "https://example.invalid/")
-                        put("method", "GET")
-                        put("timeoutMs", 1000)
-                        put("maxResponseBytes", 1024)
-                    },
-                ).toString(),
-                timeoutMs = 1000L,
-                permissions = listOf("network"),
-            ),
-        ) { response -> responses += response }
-
-        assertEquals(1, responses.size)
-        assertFalse(responses.single().ok)
-        assertEquals(NodeRuntimeErrorCodes.NETWORK_DISABLED, responses.single().error?.code)
-        assertEquals("fetch", responses.single().error?.module)
-        assertEquals("request", responses.single().error?.method)
     }
 
     private class ControlledFetchLoopbackServer : AutoCloseable {

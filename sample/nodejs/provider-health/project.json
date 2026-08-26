@@ -1,5 +1,0 @@
-{
-  "name": "provider-health",
-  "type": "node",
-  "main": "main.cjs"
-}

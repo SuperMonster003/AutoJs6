@@ -1,7 +1,0 @@
-{
-  "name": "@autojs6-sample/packaged-typescript",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "main": "main.mts"
-}

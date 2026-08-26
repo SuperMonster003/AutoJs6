@@ -1,2 +1,0 @@
-sample.fs-scoped.message=scoped fs
-sample.fs-scoped=PASS

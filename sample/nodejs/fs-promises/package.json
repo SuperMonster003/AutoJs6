@@ -1,6 +1,0 @@
-{
-  "name": "@autojs6-sample/fs-promises",
-  "private": true,
-  "type": "commonjs",
-  "main": "main.cjs"
-}

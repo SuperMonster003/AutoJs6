@@ -1,3 +1,0 @@
-sample.scheduled-node-task.provider=work_manager
-sample.scheduled-node-task.cancelled=<true or unavailable marker>
-sample.scheduled-node-task=PASS

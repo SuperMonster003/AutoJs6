@@ -1,3 +1,0 @@
-sample.ocr-automation.modules=object/function
-sample.ocr-automation.text=<available or unavailable marker>
-sample.ocr-automation=PASS

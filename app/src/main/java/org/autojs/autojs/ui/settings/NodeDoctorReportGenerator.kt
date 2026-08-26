@@ -9,7 +9,6 @@ import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NodeJsRuntimePluginBridge
 import org.autojs.autojs.engine.NodeJsRuntimePluginHost
 import org.autojs.autojs.engine.NodePrivacyDisclosurePolicy
-import org.autojs.autojs.engine.NodeProfileRollbackPolicy
 import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
@@ -55,7 +54,7 @@ object NodeDoctorReportGenerator {
         includeRuntimeProbe: Boolean,
         projectRoot: File?,
     ) = JSONObject().apply {
-        put("schema", "autojs6-node-doctor-device-v2")
+        put("schema", "autojs6-node-doctor-device-v4")
         put("generatedAt", generatedAt)
         put("privacy", privacyJson())
         put("app", appJson(context))
@@ -63,7 +62,6 @@ object NodeDoctorReportGenerator {
         put("runtimePlugin", runtimePluginJson(context, includeRuntimeProbe))
         put("featureFlags", featureFlagsJson())
         put("profileSelection", profileSelectionJson(projectRoot))
-        put("profileRollbackPolicy", NodeProfileRollbackPolicy.toJsonObject())
         put("privacyDisclosurePolicy", NodePrivacyDisclosurePolicy.toJsonObject())
         put("capabilityProfile", capabilityProfileJson())
         put("bridgeCapabilities", bridgeCapabilitiesJson())
@@ -90,10 +88,8 @@ object NodeDoctorReportGenerator {
     private fun runtimeJson() = JSONObject().apply {
         put("owner", "external-plugin")
         put("hostEmbeddedRuntimePresent", false)
-        put("backend", BuildConfig.NODEJS_RUNTIME_BACKEND)
-        put("releaseFlavor", BuildConfig.NODEJS_RELEASE_FLAVOR)
-        put("profileName", NodeRuntimeCapabilities.PROFILE_NAME)
-        put("engineVersion", NodeRuntimeCapabilities.ENGINE_VERSION)
+        put("backend", if (BuildConfig.isInrt) "disabled" else "plugin")
+        put("runtimeDefaultsOwner", "external-plugin")
         put("deviceSupportedAbis", JSONArray(Build.SUPPORTED_ABIS.toList()))
         put("androidSdk", Build.VERSION.SDK_INT)
         put("device", listOf(Build.MANUFACTURER, Build.MODEL).filter(String::isNotBlank).joinToString(" "))
@@ -149,29 +145,11 @@ object NodeDoctorReportGenerator {
         put("supportsLiveBridge", NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE in capabilities)
     }
 
-    private fun featureFlagsJson() = JSONArray().apply {
-        NodeRuntimeCapabilities.featureFlags.forEach { flag ->
-            put(JSONObject().apply {
-                put("id", flag.id)
-                put("owner", "host-request-policy")
-                put("status", flag.status)
-                put("securityLevel", flag.securityLevel)
-                put("effectiveEnabled", featureFlagEnabled(flag.id))
-                put("projectAllowed", flag.projectAllowed)
-                put("packagedAllowed", flag.packagedAllowed)
-            })
-        }
-    }
-
-    private fun featureFlagEnabled(id: String): Boolean = when (id) {
-        "esm" -> BuildConfig.NODEJS_ESM_ENABLED
-        "dynamic_import" -> BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED
-        "network" -> BuildConfig.NODEJS_NETWORK_ENABLED
-        "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED
-        "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_ENABLED
-        "child_process" -> BuildConfig.NODEJS_CHILD_PROCESS_ENABLED
-        "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_ENABLED
-        else -> NodeRuntimeCapabilities.featureFlagsById[id]?.defaultEnabled ?: false
+    private fun featureFlagsJson() = JSONObject().apply {
+        put("owner", "external-plugin")
+        put("hostOverridesSupported", false)
+        put("hostDefaultCatalogPresent", false)
+        put("note", "Runtime feature values and defaults are reported by the installed plugin.")
     }
 
     private fun profileSelectionJson(projectRoot: File?): JSONObject {
@@ -187,11 +165,7 @@ object NodeDoctorReportGenerator {
 
     private fun capabilityProfileJson() = JSONObject().apply {
         put("owner", "host-request-and-bridge-policy")
-        put("backendSwitches", JSONArray(NodeRuntimeCapabilities.backendSwitches.sorted()))
         put("routeSuffixes", JSONArray(NodeRuntimeCapabilities.nodeRouteFileSuffixes.sorted()))
-        put("directBuiltins", JSONArray(NodeRuntimeCapabilities.directBuiltinAliases.keys.sorted()))
-        put("limitedBuiltins", JSONArray(NodeRuntimeCapabilities.limitedBuiltinModuleNames.sorted()))
-        put("networkBuiltins", JSONArray(NodeRuntimeCapabilities.networkBuiltinModuleNames.sorted()))
         put("scopedFs", true)
         put("commonJs", true)
     }
@@ -208,10 +182,10 @@ object NodeDoctorReportGenerator {
         put("network", JSONObject().apply {
             put("capability", NodeBridgePermissionManifest.NETWORK)
             put("requiresDeclaration", true)
-            put("providerEnabled", BuildConfig.NODEJS_NETWORK_ENABLED)
+            put("providerEnabled", true)
             put("requiredAndroidPermissions", JSONArray(networkPermissions))
             put("controlledModules", JSONArray(listOf("fetch", "axios", "websocket")))
-            put("rawNodeNetworkModulesEnabled", BuildConfig.NODEJS_RAW_NETWORK_MODULES_ENABLED)
+            put("rawNodeNetworkModulesEnabled", true)
         })
     }
 
@@ -245,7 +219,6 @@ object NodeDoctorReportGenerator {
             appendLine("  host package: ${app.getString("packageName")}")
             appendLine("  host version: ${app.getString("versionName")} (${app.getInt("versionCode")})")
             appendLine("  backend: ${runtime.getString("backend")}")
-            appendLine("  release flavor: ${runtime.getString("releaseFlavor")}")
             appendLine()
             appendLine("Runtime Plugin:")
             appendLine("  requested: ${plugin.getBoolean("requested")}")

@@ -59,12 +59,6 @@ gradlePlugin {
             displayName = "AutoJs6 JVM Convention Plugin"
             description = "Configures Java/Kotlin targets for Android modules using central Versions."
         }
-        register("nodeAndroidConfigConvention") {
-            id = "org.autojs.build.node-android-config"
-            implementationClass = "org.autojs.build.NodeAndroidConfigPlugin"
-            displayName = "AutoJs6 Node Android Config Convention Plugin"
-            description = "Configures host policy for the external Node.js runtime plugin."
-        }
         register("localAarRegisterConvention") {
             id = "org.autojs.build.local-arr-register-convention"
             implementationClass = "org.autojs.build.LocalAarRegisterConventionPlugin"

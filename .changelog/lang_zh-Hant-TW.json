@@ -180,6 +180,7 @@
         "Android 7 離開原生壓縮檔頁面時, 工作階段預覽快取清理路徑呼叫較新的 File NIO API, 可能導致應用當機的問題"
       ],
       "improvement": [
+        "移除宿主端 Node.js Gradle 開關及重複的範例, 型別宣告, 專案精靈與驗證腳本, 執行階段預設值和開發資產現統一由 Node.js Runtime 外掛維護",
         "DEX 編譯器診斷現在於既有預算內保留經脫敏的 INFO/WARNING/ERROR 詳情及可選邏輯來源, 封存檔項目與位置元資料; 開發者選項會顯示僅存於程序內的最近一次 JAR 載入路徑, 並提供 BUSY, 逾時及回退提示",
         "TypeScript 編譯現在為每次請求記錄隱私安全的效能觀察, 涵蓋準備, 快取查詢, 編譯器繫結/預熱, 遠端編譯, 輸出處理, 總耗時, 封存檔大小, 原始檔案數及宿主堆積記憶體變化, 並將編譯器耗時細分為 ingress 前, ingress, 階段間隔, parse, semantic, emit 及 emit 後區間; 格式錯誤或亂序的 progress 回呼會被忽略, 這些觀察不設效能門檻",
         "KeyCode 方法提升引數相容性 _[`issue #492`](http://issues.autojs6.com/492)_",

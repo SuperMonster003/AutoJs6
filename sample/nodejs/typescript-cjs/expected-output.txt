@@ -1,2 +1,0 @@
-sample.typescript-cjs.value=cjs:1
-sample.typescript-cjs=PASS

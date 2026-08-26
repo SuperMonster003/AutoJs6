@@ -1,5 +1,0 @@
-{
-  "name": "adapter-cutover-status",
-  "type": "node",
-  "main": "main.cjs"
-}

@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Quick Start
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-26.
 
 ## Prerequisites
 

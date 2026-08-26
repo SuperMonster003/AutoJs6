@@ -27,7 +27,6 @@ import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.engine.NodeJsRuntimePluginHost
-import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.inrt.InrtShortcuts
@@ -43,6 +42,7 @@ import org.autojs.autojs.ui.error.CrashReportActivity
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
@@ -269,26 +269,16 @@ class App : Application(), WorkManagerConfiguration.Provider {
     }
 
     private fun prewarmNodePluginIfNeeded() {
-        when (NodeRuntimeBackend.current()) {
-            NodeRuntimeBackend.PLUGIN -> {
-                runCatching {
-                    runBlocking { NodeJsRuntimePluginHost.prewarm(this@App) }
-                }.onFailure { Log.w(TAG, "Failed to prewarm external Node.js runtime plugin.", it) }
-            }
-            NodeRuntimeBackend.RHINO,
-            NodeRuntimeBackend.DISABLED -> Unit
+        if (!BuildConfig.isInrt) {
+            runCatching {
+                runBlocking { NodeJsRuntimePluginHost.prewarm(this@App) }
+            }.onFailure { Log.w(TAG, "Failed to prewarm external Node.js runtime plugin.", it) }
         }
     }
 
     private fun scheduleNodePluginPrewarmIfNeeded() {
-        when (NodeRuntimeBackend.current()) {
-            NodeRuntimeBackend.PLUGIN -> {
-                if (deferredNodePluginPrewarmScheduled.compareAndSet(false, true)) {
-                    mainHandler.postDelayed(deferredNodePluginPrewarm, NODE_PLUGIN_PREWARM_DELAY_MILLIS)
-                }
-            }
-            NodeRuntimeBackend.RHINO,
-            NodeRuntimeBackend.DISABLED -> Unit
+        if (!BuildConfig.isInrt && deferredNodePluginPrewarmScheduled.compareAndSet(false, true)) {
+            mainHandler.postDelayed(deferredNodePluginPrewarm, NODE_PLUGIN_PREWARM_DELAY_MILLIS)
         }
     }
 

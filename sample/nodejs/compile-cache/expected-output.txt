@@ -1,2 +1,0 @@
-sample.compile-cache.same-module=true
-sample.compile-cache=PASS

@@ -3,7 +3,6 @@ package org.autojs.autojs.script
 import android.content.res.AssetManager
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
-import org.autojs.autojs6.BuildConfig
 import org.json.JSONObject
 import java.io.File
 
@@ -15,6 +14,7 @@ object NodeProjectRuntimeCompatibilityDescriptor {
     const val NODE_PROFILE_V1_1 = "node-profile-v1.1"
     const val SAFE_NODE_PROFILE_V1_1 = "safe-node-profile-v1.1"
     const val VERSION_MISMATCH_CODE = "ERR_AUTOJS6_PACKAGED_RUNTIME_VERSION_MISMATCH"
+    const val RUNTIME_BACKEND = "plugin"
 
     const val BOOTSTRAP_VERSION = "autojs6-node-bootstrap-v1.1"
     const val COMMONJS_LOADER_VERSION = "autojs6-commonjs-loader-v1.1"
@@ -107,26 +107,26 @@ object NodeProjectRuntimeCompatibilityDescriptor {
             "Unsupported packaged Node runtime compatibility descriptor profile: $profile"
         }
         json.optStringOrNull("runtimeBackend")?.let { runtimeBackend ->
-            require(runtimeBackend == BuildConfig.NODEJS_RUNTIME_BACKEND) {
+            require(runtimeBackend == RUNTIME_BACKEND) {
                 "Packaged Node runtime compatibility descriptor backend mismatch: " +
-                        "descriptor=$runtimeBackend runtime=${BuildConfig.NODEJS_RUNTIME_BACKEND}"
+                        "descriptor=$runtimeBackend runtime=$RUNTIME_BACKEND"
             }
         }
         requireVersionVector(json, source)
 
         val features = json.optJSONObject("features") ?: return
         features.optBooleanOrNull("esmPartial")?.let { required ->
-            require(!required || BuildConfig.NODEJS_ESM_ENABLED) {
+            require(!required || DEFAULT_ESM_PARTIAL) {
                 "Packaged Node runtime compatibility descriptor requires partial ESM support"
             }
         }
         features.optBooleanOrNull("dynamicImportLocal")?.let { required ->
-            require(!required || BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED) {
+            require(!required || DEFAULT_DYNAMIC_IMPORT_LOCAL) {
                 "Packaged Node runtime compatibility descriptor requires local dynamic import support"
             }
         }
         features.optBooleanOrNull("workerThreads")?.let { required ->
-            require(!required || BuildConfig.NODEJS_WORKER_THREADS_ENABLED) {
+            require(!required || DEFAULT_WORKER_THREADS) {
                 "Packaged Node runtime compatibility descriptor requires worker_threads support"
             }
         }
@@ -139,16 +139,14 @@ object NodeProjectRuntimeCompatibilityDescriptor {
 
     @JvmStatic
     fun currentJson(
-        esmPartial: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
-        dynamicImportLocal: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
-        workerThreads: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
+        esmPartial: Boolean = DEFAULT_ESM_PARTIAL,
+        dynamicImportLocal: Boolean = DEFAULT_DYNAMIC_IMPORT_LOCAL,
+        workerThreads: Boolean = DEFAULT_WORKER_THREADS,
     ): JSONObject {
         return JSONObject()
             .put("schema", SCHEMA)
             .put("nodeProfile", NODE_PROFILE_V1_1)
-            .put("runtimeBackend", BuildConfig.NODEJS_RUNTIME_BACKEND)
-            .put("engineVersion", NodeRuntimeCapabilities.ENGINE_VERSION)
-            .put("nodeExpectedPrefix", NodeRuntimeCapabilities.NODE_VERSION_EXPECTED_PREFIX)
+            .put("runtimeBackend", RUNTIME_BACKEND)
             .put("versions", currentVersionsJson())
             .put(
                 "features",
@@ -190,9 +188,9 @@ object NodeProjectRuntimeCompatibilityDescriptor {
 
     @JvmStatic
     fun currentText(
-        esmPartial: Boolean = BuildConfig.NODEJS_ESM_ENABLED,
-        dynamicImportLocal: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_ENABLED,
-        workerThreads: Boolean = BuildConfig.NODEJS_WORKER_THREADS_ENABLED,
+        esmPartial: Boolean = DEFAULT_ESM_PARTIAL,
+        dynamicImportLocal: Boolean = DEFAULT_DYNAMIC_IMPORT_LOCAL,
+        workerThreads: Boolean = DEFAULT_WORKER_THREADS,
     ): String = currentJson(
         esmPartial = esmPartial,
         dynamicImportLocal = dynamicImportLocal,
@@ -244,4 +242,8 @@ object NodeProjectRuntimeCompatibilityDescriptor {
         }
         return value
     }
+
+    private const val DEFAULT_ESM_PARTIAL = true
+    private const val DEFAULT_DYNAMIC_IMPORT_LOCAL = true
+    private const val DEFAULT_WORKER_THREADS = true
 }

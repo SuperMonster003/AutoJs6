@@ -100,22 +100,22 @@ class NodeBridgePermissionManifestInstrumentationTest {
         val fallbackManifest = NodeBridgePermissionManifest.fromRuntimeWorkingDirectory(
             workingDirectory = workDir.absolutePath,
             sandboxRoot = sandboxRoot.absolutePath,
-            includeBuildNetworkPolicy = false,
+            includeStableNetworkPolicy = false,
         )
         assertTrue(fallbackManifest.enforced)
         assertEquals(listOf("toast"), fallbackManifest.permissions)
         assertTrue(fallbackManifest.sources.contains("package.json:autojs6.node.permissions"))
 
-        val buildNetworkManifest = NodeBridgePermissionManifest.fromRuntimeWorkingDirectory(
+        val stableNetworkManifest = NodeBridgePermissionManifest.fromRuntimeWorkingDirectory(
             workingDirectory = workDir.absolutePath,
             sandboxRoot = sandboxRoot.absolutePath,
-            includeBuildNetworkPolicy = true,
+            includeStableNetworkPolicy = true,
         )
-        assertTrue(buildNetworkManifest.enforced)
-        assertTrue(buildNetworkManifest.permissions.contains(NodeBridgePermissionManifest.NETWORK))
-        assertTrue(buildNetworkManifest.permissions.contains(NodeBridgePermissionManifest.TOAST))
-        assertTrue(buildNetworkManifest.sources.contains("gradle:autojs.nodejs.network.stable"))
-        assertTrue(buildNetworkManifest.androidPermissions.contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET))
+        assertTrue(stableNetworkManifest.enforced)
+        assertTrue(stableNetworkManifest.permissions.contains(NodeBridgePermissionManifest.NETWORK))
+        assertTrue(stableNetworkManifest.permissions.contains(NodeBridgePermissionManifest.TOAST))
+        assertTrue(stableNetworkManifest.sources.contains("runtime:stable-network"))
+        assertTrue(stableNetworkManifest.androidPermissions.contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET))
     }
 
     @Test

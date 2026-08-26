@@ -1,3 +1,0 @@
-sample.hello-node.node=v24.5.0
-sample.hello-node.cwd=<project working directory>
-sample.hello-node=PASS

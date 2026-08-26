@@ -1,2 +1,0 @@
-sample.long-running-service.policy=<never or lifecycle unavailable marker>
-sample.long-running-service=PASS

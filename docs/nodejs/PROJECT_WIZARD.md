@@ -1,10 +1,14 @@
 # AutoJs6 Node Project Wizard
 
-`tools/nodejs/project/autojs6-node-project.js` is a host-side helper for
+Last reviewed: 2026-08-26.
+
+`tools/nodejs/project/autojs6-node-project.js` is a runtime-plugin helper for
 creating and validating Safe Node Profile project directories. It does not run
 inside Android and does not loosen runtime policy.
 For the current v1.2 feature status behind these templates, see
 [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
+
+Run every command below from the **AutoJs6-Plugin-NodeJs-Runtime** repository.
 
 ## Create
 
@@ -134,20 +138,6 @@ Common actionable error codes:
 - `FS_OUTSIDE_SCOPE`
 - `UNSUPPORTED_PACKAGE_MANAGER_LAYOUT`
 
-## Dependency Manager
-
-Lockfile-based dependency installation remains a host-side project action:
-
-```powershell
-.\gradlew.bat --console=plain :app:manageNodeDependencies "-Pautojs.nodejs.dependencyManager.projectRoot=D:\work\my-node-app"
-```
-
-The action requires `package-lock.json`, runs desktop `npm ci` with lifecycle
-scripts ignored by default, validates and sanitizes the installed tree,
-generates SBOM-lite and compatibility reports, updates the dependency cache,
-and writes an APK-ready `assets/project` layout. It does not enable runtime
-package installation on Android.
-
 ## Verification
 
 The checked-in Gradle gate exercises every template and representative invalid
@@ -157,10 +147,10 @@ template has a non-blocking compatibility status, checks the analyzed entry
 format, and exercises source-level unsupported/unsafe analyzer fixtures:
 
 ```powershell
-.\gradlew.bat --console=plain :app:verifyNodeProjectWizard
+.\gradlew.bat --console=plain verifyNodeProjectWizard
 ```
 
 Reports are written to:
 
-- `app/build/reports/nodejs/project-wizard.json`
-- `app/build/reports/nodejs/project-wizard.md`
+- `build/reports/nodejs/project-wizard.json`
+- `build/reports/nodejs/project-wizard.md`

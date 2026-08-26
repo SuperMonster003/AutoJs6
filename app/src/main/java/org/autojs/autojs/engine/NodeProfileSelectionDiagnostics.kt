@@ -56,18 +56,6 @@ object NodeProfileSelectionDiagnostics {
         NodeBridgePermissionManifest.NETWORK,
     )
 
-    private val featureRequiredProfiles = mapOf(
-        "network" to DESKTOP_COMPAT_OPT_IN,
-        "raw_node_network_modules" to DESKTOP_COMPAT_OPT_IN,
-        "websocket" to DESKTOP_COMPAT_OPT_IN,
-        "worker_threads" to DESKTOP_COMPAT_OPT_IN,
-        "vm" to DESKTOP_COMPAT_OPT_IN,
-        "inspector" to DEBUG_UNSAFE_LAB,
-        "java_interop" to PRO_COMPAT_OPT_IN,
-        "native_addon" to DESKTOP_COMPAT_OPT_IN,
-        "child_process" to DESKTOP_COMPAT_OPT_IN,
-    )
-
     fun fromWorkingDirectory(workingDirectory: String?): Report =
         fromManifest(
             manifest = NodeBridgePermissionManifest.fromWorkingDirectory(workingDirectory),
@@ -90,7 +78,7 @@ object NodeProfileSelectionDiagnostics {
         if (normalized in proBridgeCapabilities || normalized.startsWith("plugin.")) {
             return PRO_COMPAT_OPT_IN
         }
-        return featureRequiredProfiles[normalized] ?: SAFE_DEFAULT
+        return SAFE_DEFAULT
     }
 
     fun requiredProfilesForCapabilities(capabilities: Iterable<String>): List<String> =
@@ -249,22 +237,7 @@ object NodeProfileSelectionDiagnostics {
                     put("requiredAndroidPermissions", JSONArray(requiredAndroidPermissionsForCapabilities(listOf(capability))))
                 }
             }
-        val featureFlags = NodeRuntimeCapabilities.featureFlags
-            .filter { it.securityLevel == "high" || it.securityLevel == "critical" }
-            .map { flag ->
-                JSONObject().apply {
-                    put("id", flag.id)
-                    put("source", "feature_flag")
-                    put("declared", false)
-                    put("effectiveProfile", SAFE_DEFAULT)
-                    put("requiredProfile", featureRequiredProfiles[flag.id] ?: SAFE_DEFAULT)
-                    put("enabledByDefault", flag.defaultEnabled)
-                    put("status", flag.status)
-                    put("securityLevel", flag.securityLevel)
-                    put("releaseForbidden", flag.releaseForbidden)
-                }
-            }
-        return declaredCapabilities + featureFlags
+        return declaredCapabilities
     }
 
     private fun failureHintsJson(): JSONObject = JSONObject().apply {

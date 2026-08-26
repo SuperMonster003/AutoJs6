@@ -40,7 +40,7 @@ internal class NodeJsHostCapabilityBroker(
     private val provider = AndroidNodeBridgeCapabilityProvider(
         context = appContext,
         engineInfo = engineInfo,
-        javaInteropEnabled = request.javaInteropEnabled,
+        javaInteropEnabled = request.javaInteropEnabled != false,
         bridgeLimits = bridgeLimits,
     )
 

@@ -12,7 +12,6 @@ import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccess
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.runtime.api.augment.ocr.PaddleOcrEmbeddedEngine
-import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -359,11 +358,7 @@ object NodeBridgeProviderRegistry {
         NodeBridgePackagedSupport(NodeBridgePackagedSupportStatus.UNSUPPORTED, notes)
 
     private fun androidStatus(id: String, context: Context): NodeBridgeProviderStatus = when (id) {
-        FETCH_PROVIDER, WEBSOCKET_PROVIDER -> if (BuildConfig.NODEJS_NETWORK_ENABLED) {
-            NodeBridgeProviderStatus.AVAILABLE
-        } else {
-            NodeBridgeProviderStatus.UNAVAILABLE
-        }
+        FETCH_PROVIDER, WEBSOCKET_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         OCR_PROVIDER -> if (queryOcrPluginServiceCount(context.applicationContext, "mlkit-ocr") > 0) {
             NodeBridgeProviderStatus.AVAILABLE
         } else {

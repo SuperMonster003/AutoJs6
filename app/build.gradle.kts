@@ -12,13 +12,6 @@ plugins {
     id("org.autojs.build.versions")
     id("org.autojs.build.signs")
     id("org.autojs.build.jvm-convention")
-    // @Hint by JetBrains AI Assistant (Claude Opus 5) on Aug 18, 2026.
-    //  ! Must be declared BEFORE "com.android.application": the plugin defers its whole
-    //  ! configuration to an afterEvaluate callback, which has to be registered earlier than the
-    //  ! one AGP registers, so that the Android DSL is still writable when the callback runs.
-    //  ! zh-CN: 必须声明于 "com.android.application" 之前: 此插件将全部配置延迟至 afterEvaluate
-    //  ! 回调中执行, 该回调须早于 AGP 注册的回调, 以保证其运行时 Android DSL 仍可写入.
-    id("org.autojs.build.node-android-config")
     id("com.android.application")
     id("com.google.devtools.ksp")
     id("idea")
@@ -31,6 +24,9 @@ val flavorNameApp = "app"
 val flavorNameInrt = "inrt"
 val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
+val isInrtAssembleTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.substringAfterLast(':').startsWith("assemble${flavorNameInrt.uppercaseFirstChar()}", ignoreCase = true)
+}
 val yoloR6ReleaseAndroidTestProperty = "yoloR6ReleaseAndroidTest"
 val yoloR6ReleaseAndroidTest = providers.gradleProperty(yoloR6ReleaseAndroidTestProperty)
     .map { value ->
@@ -43,7 +39,6 @@ val yoloR6ReleaseAndroidTest = providers.gradleProperty(yoloR6ReleaseAndroidTest
         }
     }
     .orElse(false)
-val buildActionAssemble = "assemble"
 val buildConfigFieldNameIsInrt = "is${flavorNameInrt.uppercaseFirstChar()}"
 val buildTypeNames = listOf(buildTypeDebug, buildTypeRelease)
 val releaseFlavorNames = listOf(flavorNameApp, flavorNameInrt)
@@ -415,15 +410,6 @@ private fun writePublicApiText(output: File, entries: List<RuntimeKitDigestEntry
         Charsets.UTF_8,
     )
 }
-
-extra.apply {
-    set("nodeJsRuntimeConfig.globalApplicationId", globalApplicationId)
-    set("nodeJsRuntimeConfig.flavorNameApp", flavorNameApp)
-    set("nodeJsRuntimeConfig.flavorNameInrt", flavorNameInrt)
-    set("nodeJsRuntimeConfig.buildActionAssemble", buildActionAssemble)
-}
-
-apply(from = "node-runtime-config.gradle.kts")
 
 idea {
     module {
@@ -1019,6 +1005,15 @@ android {
         localeFilters.addAll(supportedResourceLocales)
     }
 
+    splits {
+        abi {
+            isEnable = !isInrtAssembleTaskRequested
+            reset()
+            include("arm64-v8a", "x86_64", "armeabi-v7a", "x86", "armeabi")
+            isUniversalApk = true
+        }
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
     }
@@ -1337,10 +1332,6 @@ tasks.register("generateRuntimeKit") {
         println("Runtime Kit archive: $zipFile")
     }
 }
-
-apply(from = "node-examples.gradle.kts")
-
-apply(from = "node-project-wizard.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

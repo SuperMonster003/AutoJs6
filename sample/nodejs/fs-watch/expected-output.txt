@@ -1,2 +1,0 @@
-sample.fs-watch.closed=true
-sample.fs-watch=PASS
