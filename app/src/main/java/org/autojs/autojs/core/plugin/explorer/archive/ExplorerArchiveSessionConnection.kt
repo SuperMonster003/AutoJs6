@@ -92,6 +92,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
     private val protocolVersion: Int,
     private val remote: IExplorerArchiveSession,
     private val bindingLease: Closeable,
+    private val volumeSource: Closeable?,
     override val sourcePath: String,
     override val info: ExplorerArchiveSessionInfo,
 ) : ExplorerArchiveSessionClient {
@@ -275,6 +276,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
             }
         }
         runCatching { bindingLease.close() }
+        runCatching { volumeSource?.close() }
     }
 
     private fun extractionCallback(operationId: String) =
@@ -511,6 +513,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
             remote: IExplorerArchiveSession,
             bindingLease: Closeable,
             sourcePath: String,
+            volumeSource: Closeable? = null,
         ): ExplorerArchiveSessionConnection {
             try {
                 val bundle = remote.info
@@ -537,6 +540,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                     protocolVersion = protocolVersion,
                     remote = remote,
                     bindingLease = bindingLease,
+                    volumeSource = volumeSource,
                     sourcePath = sourcePath,
                     info = ExplorerArchiveSessionInfo(
                         sessionId = sessionId,
@@ -557,6 +561,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
             } catch (error: Throwable) {
                 runCatching { remote.close() }
                 runCatching { bindingLease.close() }
+                runCatching { volumeSource?.close() }
                 throw error
             }
         }

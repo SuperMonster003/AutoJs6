@@ -18,6 +18,7 @@ import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConn
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenInteractionException
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRequestOptions
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRemoteFailure
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveVolumeSource
 import org.autojs.autojs.core.plugin.explorer.archive.archiveOpenInteractionForServiceError
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.explorer.ExplorerPluginActionProvider
@@ -213,7 +214,20 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
             putLong(ExplorerArchiveRequestKeys.LAST_MODIFIED, item.lastModified())
         }
         val requestPassword = options.passwordChars()
+        var volumeSource: ExplorerArchiveVolumeSource? = null
         try {
+            if (action.descriptor.protocolVersion >= ARCHIVE_VOLUME_PROTOCOL_VERSION) {
+                volumeSource = ExplorerArchiveVolumeSource.create(
+                    source = source,
+                    expectedUid = action.pluginTarget.serviceInfo.applicationInfo.uid,
+                )
+                volumeSource?.let { sourceProvider ->
+                    request.putBinder(
+                        ExplorerArchiveRequestKeys.VOLUME_SOURCE_BINDER,
+                        sourceProvider.asBinder(),
+                    )
+                }
+            }
             requestPassword?.let { password ->
                 request.putCharArray(ExplorerArchiveRequestKeys.PASSWORD, password)
             }
@@ -250,12 +264,15 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
                     remote = leased.value,
                     bindingLease = leased.bindingLease,
                     sourcePath = source.path,
-                )
+                    volumeSource = volumeSource,
+                ).also { volumeSource = null }
             }
         } finally {
             request.getCharArray(ExplorerArchiveRequestKeys.PASSWORD)?.fill('\u0000')
             request.remove(ExplorerArchiveRequestKeys.PASSWORD)
+            request.remove(ExplorerArchiveRequestKeys.VOLUME_SOURCE_BINDER)
             requestPassword?.fill('\u0000')
+            volumeSource?.close()
         }
     }
 
@@ -318,4 +335,5 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
 
     private const val TAG = "ExplorerActionRegistry"
     private const val DIRECTORY_MIME_TYPE = "inode/directory"
+    private const val ARCHIVE_VOLUME_PROTOCOL_VERSION = 12
 }

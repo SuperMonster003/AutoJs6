@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 8 月 26 日 に更新されました.
+データは 2026 年 8 月 27 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/08/26
+###### 2026/08/27
 
 * `新機能` Ace LSP の既定ファイル形式に .mts/.cts とその宣言ファイル形式を追加し, 外部 Ace エディターが実行時と同じ Rhino/Node TypeScript プロファイルを選択可能に改善; 旧版の既定選択は移行され, 明示的なカスタム接尾辞セットは維持
 * `新機能` APK Builder がパッケージ時に Rhino TypeScript プロジェクトをコンパイルするようになりました。最終 APK には暗号化された JavaScript とソースを埋め込まない任意の Source Map のみが含まれ、TypeScript ソースやコンパイラは含まれません。暗号化プロジェクトでは使い捨ての AES-256-GCM ステージングを使用し、平文はメモリ内だけに保持して再暗号化後にゼロクリアします
@@ -221,6 +221,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` ファイルマネージャーの Explorer Action プロトコル v6 が読み取り可能な文書, 画像, 音声, 動画の項目を既存のホストビューアーでプレビュー
 * `新機能` ファイルマネージャーの Explorer Action プロトコル v7 から v10 が保留ファイル出力の必須読み戻し検証, アトミックな対象置換, クライアント終了および再起動から復旧可能なホスト所有ディレクトリ出力, 有界進行表示と取り消し付きのネイティブ現在フォルダー/選択項目展開に対応し, ストレージ権限なしで選択 ZIP の編集と検証済み出力の安全な公開を実現
 * `新機能` ファイルマネージャーの Explorer Action プロトコル v11 が初回オープンと展開に有界なホストネイティブのパスワード復旧を追加し, 再試行ではアーカイブのパスと選択を維持しながら各要求後に一時パスワードバッファーを消去
+* `新機能` ファイルマネージャーの Explorer Action プロトコル v12 がアーカイブセッションに結び付く有界な同一フォルダーボリュームソースを追加; プラグインは不透明 ID と読み取り専用記述子でホスト承認済み ZIP/RAR ボリュームだけを開き, ディレクトリやファイルシステムパスを受け取らない
 * `新機能` プラグインセンターがグローバル設定ページと使用説明ページを提供
 * `新機能` プラグインセンターが SDK プラグインの自動マウント機能に対応
 * `新機能` プラグインセンターが複数バリアントの優先順位付けに対応
@@ -373,6 +374,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` 外部アプリへのファイル表示とメディア再生のフォールバックを読み取り専用 URI アクセスに制限
 * `改善` ファイルマネージャーの既定クリック/主要ボタン/メディア詳細からの再生/overflow メニューのプラグインアクションを明示的なメインファイルページポリシーに統合し, 決定的な単一フォールバックを適用
 * `改善` Explorer Action v7 でアーカイブプラグインが非表示の保留出力を読み取り専用で再度開き, 最終公開前に検証可能, v4 クライアントの直接 commit 互換性も維持
+* `改善` Explorer Action v12 は各ボリュームを開く前に呼び出し元 UID, 通常ファイルの同一性, サイズ, 更新時刻, シンボリックリンク状態, セッション寿命を検証し, 名前, カタログ件数, オープン要求数に固定上限を適用
 * `改善` ネイティブアーカイブ選択モードは終了と展開だけを表示し, 有界進行表示と取り消しを統合; ファイルシステムの 5 アクションバーは狭い画面でラベルをアイコン下に中央揃えして可読性を維持
 * `改善` AI テキストと DEX コンパイラの適合性 provider を本番 `plugins` ディレクトリから専用 `test-apps` build group へ移動し, 敵対的 Binder 回帰テスト範囲を維持しながら独立した本番プラグインのリリース境界を明確化
 * `改善` DEX コンパイラの実験的ホスト経路をデフォルト無効かつ明示コンポーネント必須とし, 正確なコンポーネント UID と完全な署名者集合の固定, 単一ディスパッチフォールバック, セマンティックキャッシュ由来情報, 有界コールバック入力, 分離された Binder タイムアウト, 構造的 DEX ZIP 検証, reliable pipe の有界 drain と EOF 時の peer error 確認, コピー前後の digest で保護された rollback 可能な単一公開, 非同期終端信号と公開 commit point の原子的仲裁, キャンセル/タイムアウト/Binder death が commit 前に勝った場合の強制 rollback を適用
@@ -686,7 +688,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 8 月 26 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 8 月 27 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

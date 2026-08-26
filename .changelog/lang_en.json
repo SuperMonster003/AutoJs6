@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/26",
+      "released_date": "2026/08/27",
       "feature": [
         "Ace LSP defaults now include .mts/.cts and their declaration-file variants, allowing the external Ace editor to select the same Rhino/Node TypeScript execution profile; legacy default selections migrate while explicit custom suffix sets remain unchanged",
         "APK Builder now compiles Rhino TypeScript projects at build time; packaged APKs contain only encrypted JavaScript and optional Source Maps without embedded source, never TypeScript sources or the compiler; encrypted projects use one-time AES-256-GCM staging, with cleartext held only in memory and zeroed after re-encryption",
@@ -56,6 +56,7 @@
         "File manager Explorer Action protocol v6 previews readable document, image, audio, and video entries through the existing host viewers",
         "File manager Explorer Action protocols v7 through v10 add mandatory read-back verification of pending file output, atomic target replacement, host-owned directory-output transactions with client-death and restart recovery, and native current-folder or selected-entry extraction with bounded progress and cancellation, enabling archive plugins to edit a selected ZIP and safely publish verified output without storage permission",
         "File manager Explorer Action protocol v11 adds bounded host-native password recovery for initial archive opening and extraction; retries preserve the archive path and selected entries while transient password buffers are cleared after each request",
+        "File manager Explorer Action protocol v12 adds a bounded sibling-volume source tied to each archive session; archive plugins can open host-approved ZIP and RAR volumes through opaque IDs and read-only descriptors without receiving a directory or filesystem path",
         "Plugin Center provides a global settings page and a user guide page",
         "Plugin Center supports automatic SDK plugin mounting",
         "Plugin Center supports multi-variant priority sorting",
@@ -212,6 +213,7 @@
         "Limited external file viewing and media playback fallbacks to read-only URI access",
         "Unified file manager plugin actions for default clicks, primary buttons, media detail playback, and the overflow menu under an explicit main-file-page policy with one deterministic fallback",
         "Explorer Action v7 lets archive plugins reopen hidden pending output read-only and verify it before final publication while preserving direct-commit compatibility for v4 clients",
+        "Explorer Action v12 verifies caller UID, regular-file identity, size, modification time, symlink status, and session lifetime before each sibling-volume open, with fixed limits on names, catalog size, and open requests",
         "Native archive selection now shows only Exit and Extract, integrates bounded progress and cancellation, and keeps the five-action filesystem bar legible on narrow screens by centering labels below icons",
         "Moved the AI and DEX compiler conformance providers from the production `plugins` directory into the dedicated `test-apps` build group, preserving hostile Binder regression coverage while keeping independent production plugins as a separate release boundary",
         "DEX compiler experimental host path remains default-off and requires an explicit component while enforcing exact-component UID and complete signer-set pinning, single-dispatch fallback, semantic cache provenance, bounded callback ingress, isolated Binder deadlines, structural DEX ZIP validation, reliable-pipe bounded draining with peer errors checked at EOF, rollback-safe single publication guarded by source and destination digests, and atomic arbitration between asynchronous termination signals and the publication commit point that forces rollback when cancellation, timeout, or Binder death wins before commit",

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/26",
+      "released_date": "2026/08/27",
       "feature": [
         "Les types de fichiers par défaut d'Ace LSP incluent désormais .mts/.cts et leurs variantes de déclaration, permettant à l'éditeur Ace externe de sélectionner le même profil d'exécution TypeScript Rhino/Node; les anciennes sélections par défaut sont migrées et les ensembles de suffixes personnalisés explicites restent inchangés",
         "APK Builder compile désormais les projets Rhino TypeScript lors de l'empaquetage ; les APK finaux ne contiennent que du JavaScript chiffré et des Source Maps facultatives sans source intégrée, jamais les sources TypeScript ni le compilateur ; les projets chiffrés utilisent une zone de staging AES-256-GCM à usage unique, le texte en clair restant uniquement en mémoire puis étant effacé après rechiffrement",
@@ -56,6 +56,7 @@
         "Le protocole Explorer Action v6 du gestionnaire de fichiers prévisualise les documents, images, fichiers audio et vidéos lisibles avec les visionneuses existantes de l'hôte",
         "Les protocoles Explorer Action v7 à v10 du gestionnaire de fichiers ajoutent la relecture obligatoire des fichiers en attente, le remplacement atomique de cible, des transactions de sortie de dossier appartenant à l'hôte avec récupération après mort du client ou redémarrage, et l'extraction native du dossier courant ou des entrées sélectionnées avec progression bornée et annulation, permettant aux plugins d'archive de modifier un ZIP sélectionné et de publier une sortie vérifiée sans permission de stockage",
         "Le protocole Explorer Action v11 du gestionnaire de fichiers ajoute une récupération de mot de passe native et bornée lors de l'ouverture initiale ou de l'extraction; les nouvelles tentatives conservent le chemin et la sélection, puis effacent les tampons transitoires après chaque requête",
+        "Le protocole Explorer Action v12 du gestionnaire de fichiers ajoute une source bornée de volumes voisins liée à chaque session d'archive; les plugins ouvrent uniquement les volumes ZIP et RAR approuvés par l'hôte via des ID opaques et des descripteurs en lecture seule, sans recevoir de répertoire ni de chemin du système de fichiers",
         "Le Centre des plugins propose une page de paramètres globaux et une page d'instructions",
         "Le Centre des plugins prend en charge le montage automatique des plugins SDK",
         "Le Centre des plugins prend en charge le tri par priorité de plusieurs variantes",
@@ -212,6 +213,7 @@
         "Limitation des replis d'affichage et de lecture externes aux accès URI en lecture seule",
         "Unification des actions de plugins du gestionnaire de fichiers pour le clic par défaut, le bouton principal, la lecture depuis les détails multimédias et le menu overflow sous une politique explicite de la page principale des fichiers avec un repli unique et déterministe",
         "Explorer Action v7 permet aux plugins d'archives de rouvrir en lecture seule une sortie en attente masquée et de la vérifier avant sa publication tout en conservant la validation directe des clients v4",
+        "Explorer Action v12 vérifie l'UID appelant, l'identité du fichier ordinaire, la taille, la date de modification, l'état de lien symbolique et la durée de la session avant chaque ouverture de volume voisin, avec des limites fixes pour les noms, le catalogue et les requêtes d'ouverture",
         "La sélection native d'archive n'affiche plus que Quitter et Extraire, intègre une progression bornée et l'annulation, et garde la barre de cinq actions lisible sur les écrans étroits en centrant les libellés sous les icônes",
         "Migration des fournisseurs de conformité AI et compilateur DEX du répertoire de production `plugins` vers le groupe de build dédié `test-apps`, en conservant la couverture de régression Binder hostile et en séparant la frontière de publication des plugins de production indépendants",
         "Le chemin hôte expérimental du compilateur DEX reste désactivé par défaut et exige un composant explicite, avec épinglage de l'UID du composant exact et de l'ensemble complet des signataires, repli à répartition unique, provenance sémantique du cache, entrée de callbacks bornée, délais Binder isolés, validation structurelle du ZIP DEX, vidage borné de reliable pipe avec vérification des erreurs du pair à EOF, publication unique avec retour arrière protégée par les condensats source et destination, et arbitrage atomique entre les signaux de terminaison asynchrones et le point de commit de publication qui force le retour arrière si l'annulation, le délai dépassé ou Binder death l'emporte avant le commit",

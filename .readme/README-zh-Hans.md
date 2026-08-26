@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 8 月 26 日.
+数据更新于 2026 年 8 月 27 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/08/26
+###### 2026/08/27
 
 * `新增` Ace LSP 默认文件类型新增 .mts/.cts 及其声明文件变体, 使外部 Ace 编辑器可选择与执行一致的 Rhino/Node TypeScript profile; 旧版默认选择会自动迁移, 显式自定义后缀集合保持不变
 * `新增` APK Builder 支持在打包阶段编译 Rhino TypeScript 项目; 最终 APK 仅包含加密 JavaScript 与不内嵌源码的可选 Source Map, 不包含 TypeScript 源码或编译器; 加密项目使用一次性 AES-256-GCM staging, 解密与重加密明文仅存于内存并在使用后清零
@@ -219,6 +219,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 文件管理器 Explorer Action 协议 v6 支持通过宿主现有预览器直接预览压缩档案内可读取的文档, 图片, 音频和视频条目
 * `新增` 文件管理器 Explorer Action 协议 v7 至 v10 支持待提交文件强制读回校验, 原目标原子替换, 带客户端死亡和重启恢复的宿主持有目录输出事务, 以及带有界进度和取消的原生当前目录/选择项解压, 使压缩档案插件无需存储权限即可修改选中 ZIP 并安全发布已校验输出
 * `新增` 文件管理器 Explorer Action 协议 v11 新增有界的宿主原生密码恢复, 可在首次打开压缩档案或解压时请求及重试密码; 重试保持档案路径与选择, 每次请求后清理瞬态密码缓冲
+* `新增` 文件管理器 Explorer Action 协议 v12 提供有界且绑定档案会话的同级分卷源; 压缩档案插件仅能通过不透明 ID 打开宿主批准的 ZIP 和 RAR 卷只读描述符, 不会获得目录或文件系统路径
 * `新增` 文件管理器支持安全预览 Markdown 与 HTML 文件, 提供 GFM 渲染/多套主题/自定义 CSS 及受控的同目录资源加载
 * `新增` Markdown 与 HTML 预览支持全屏模式及默认关闭的 "以全屏模式启动" 设置
 * `新增` 文件管理器支持通过最左侧图标按钮预览 Markdown/HTML 及查看图片/播放音频/视频; 应用可注册为系统媒体查看器, 音频支持后台播放及通知栏联动控制
@@ -351,6 +352,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 文件外部查看与媒体播放降级仅授予 URI 读取权限
 * `优化` 统一文件管理器默认点击, 主要按钮, 媒体详情播放和 overflow 菜单插件动作, 通过显式主文件页界面策略提供确定性的单次降级
 * `优化` Explorer Action v7 允许压缩档案插件在最终发布前以只读方式重开隐藏的待提交输出并完成校验, 同时保留 v4 客户端的直接提交兼容语义
+* `优化` Explorer Action v12 在每次打开同级卷前校验调用方 UID, 普通文件身份, 大小, 修改时间, 符号链接状态及会话生命周期, 并限制名称长度, 目录数量和打开次数
 * `优化` 原生档案选择模式仅显示退出和解压, 集成有界进度与取消; 文件系统五项操作栏的文字在窄屏上居中显示于图标下方
 * `优化` 将 AI 文本与 DEX 编译器一致性 provider 从生产 `plugins` 目录迁入专用 `test-apps` 构建组, 保留恶意 Binder 回归覆盖并明确独立生产插件的发布边界
 * `优化` DEX 编译器实验性宿主路径保持默认关闭并要求显式组件, 实施精确组件 UID 与完整签名者集合锁定, 单次分派降级, 语义缓存来源追踪, 有界回调入口, 隔离 Binder 超时, 结构化 DEX ZIP 校验, reliable pipe 有界 drain 与 EOF 对端错误检查, 由源/目标双摘要保护的可回滚单次发布, 异步终止信号与发布提交点原子仲裁, 且取消/超时/Binder death 在提交前胜出时强制回滚
@@ -665,7 +667,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 8 月 26 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 8 月 27 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
