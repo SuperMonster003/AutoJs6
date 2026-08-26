@@ -4,6 +4,8 @@ import org.autojs.autojs.core.plugin.jvm.JvmSourceExecutionControl
 import org.autojs.autojs.core.plugin.jvm.JvmSourceExecutionSink
 import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicDiagnosticFormatter
 import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicDiagnosticPolicy
+import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicObservationFormatter
+import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicObservationPolicy
 import org.autojs.autojs.core.plugin.jvm.JvmSourceUserExperiencePolicy
 import org.autojs.autojs.core.plugin.jvm.JvmSourceUserFacingException
 import org.autojs.autojs.core.plugin.jvm.RemoteJvmScriptResult
@@ -14,6 +16,7 @@ import org.autojs.autojs.runtime.api.Console
 import org.autojs.autojs.script.JvmFileSource
 import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
+import org.autojs.plugin.jvmsource.api.JvmSourceObservation
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
@@ -107,6 +110,14 @@ class RemoteJvmScriptEngine internal constructor(
         override fun publishOutput(stdout: String, stderr: String) {
             if (stdout.isNotEmpty()) console.log(stdout)
             if (stderr.isNotEmpty()) console.error(stderr)
+        }
+
+        override fun publishObservation(observation: JvmSourceObservation) {
+            console.info(
+                JvmSourcePublicObservationFormatter.format(
+                    JvmSourcePublicObservationPolicy.project(observation),
+                ),
+            )
         }
     }
 }

@@ -18,11 +18,13 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.jvmsource.api.JvmDexRuntimeProfile
 import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmHostCall
+import org.autojs.plugin.jvmsource.api.JvmObservationCacheOutcome
 import org.autojs.plugin.jvmsource.api.JvmRequestId
 import org.autojs.plugin.jvmsource.api.JvmSourceCodec
 import org.autojs.plugin.jvmsource.api.JvmSourceContract
 import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
+import org.autojs.plugin.jvmsource.api.JvmSourceObservation
 import org.autojs.plugin.jvmsource.api.JvmSourceValidation
 import org.json.JSONArray
 import org.json.JSONObject
@@ -203,6 +205,98 @@ class JvmSourceR1EndToEndInstrumentationTest {
                 diagnostic = diagnostic,
                 publicText = publicText,
             )
+        } finally {
+            control.close()
+            host.close()
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun negotiatedObservationIsVisibleAfterProductionProviderCleanup() {
+        assertTrue(
+            "M9-4 observation selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val directory = File(context.cacheDir, "jvm-source-m9-observation-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-4 source directory", mkdir())
+        }.canonicalFile
+        val sourceBytes = observationJavaSource().toByteArray(Charsets.UTF_8)
+        val sourceFile = File(directory, "Main.java").apply { writeBytes(sourceBytes) }
+        val publishedObservations = mutableListOf<JvmSourceObservation>()
+        val sink = object : JvmSourceExecutionSink {
+            override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) = Unit
+            override fun publishOutput(stdout: String, stderr: String) = Unit
+            override fun publishObservation(observation: JvmSourceObservation) {
+                publishedObservations += observation
+            }
+        }
+        val host = RemoteJvmSourceHost.createAndroid(
+            context = context,
+            featureEnabled = true,
+            hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+            launchPackage = { true },
+            hasResumedActivity = { true },
+        )
+        val control = JvmSourceExecutionControl()
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+            val result = host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                control,
+                sink,
+            )
+
+            assertEquals("42", result.resultJson)
+            assertEquals(1, publishedObservations.size)
+            val observation = publishedObservations.single()
+            assertEquals(result.observation, observation)
+            assertEquals(result.requestId, observation.requestId.toString())
+            assertTrue(observation.sessionElapsedMillis >= 0L)
+            assertNotNull(observation.workerStartupDurationMillis)
+            assertNotNull(observation.workerStartProfile)
+            assertNotNull(observation.loadDurationMillis)
+            assertNotNull(observation.runDurationMillis)
+            assertNotNull(observation.terminationDurationMillis)
+            assertTrue(observation.cacheOutcome != JvmObservationCacheOutcome.NOT_EVALUATED)
+            if (observation.cacheOutcome == JvmObservationCacheOutcome.HIT) {
+                assertNull(observation.compileDurationMillis)
+                assertNull(observation.d8DurationMillis)
+                assertNull(observation.cacheMissReason)
+            } else {
+                assertEquals(JvmObservationCacheOutcome.MISS, observation.cacheOutcome)
+                assertNotNull(observation.cacheMissReason)
+            }
+            assertTrue(observation.resources.isNotEmpty())
+            assertTrue(observation.resources.size <= JvmSourceContract.MAX_OBSERVATION_RESOURCE_SAMPLES)
+            assertEquals(
+                observation.resources.size,
+                observation.resources.distinctBy { it.process to it.phase }.size,
+            )
+            JvmSourceValidation.validateObservation(observation)
+            val encoded = JvmSourceCodec.encodeObservation(observation)
+            assertTrue(encoded.size <= JvmSourceContract.MAX_OBSERVATION_BYTES)
+            assertEquals(observation, JvmSourceCodec.decodeObservation(encoded))
+
+            val publicText = JvmSourcePublicObservationFormatter.format(
+                JvmSourcePublicObservationPolicy.project(observation),
+            )
+            assertTrue(publicText.contains("compile="))
+            assertTrue(publicText.contains("run="))
+            assertTrue(publicText.contains("cache="))
+            assertTrue(publicText.contains("samples="))
+            listOf(
+                result.requestId,
+                directory.absolutePath,
+                PRODUCTION_PROVIDER.flattenToString(),
+            ).forEach { secret -> assertFalse(publicText.contains(secret)) }
+
+            emitObservationRuntimeRecord(result, observation, encoded.size, publicText)
         } finally {
             control.close()
             host.close()
@@ -398,6 +492,60 @@ class JvmSourceR1EndToEndInstrumentationTest {
         instrumentation.sendStatus(
             0,
             Bundle().apply { putString(RUNTIME_DIAGNOSTIC_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
+    private fun emitObservationRuntimeRecord(
+        result: RemoteJvmScriptResult,
+        observation: JvmSourceObservation,
+        encodedBytes: Int,
+        publicText: String,
+    ) {
+        val resources = JSONArray().apply {
+            observation.resources.forEach { resource ->
+                put(
+                    JSONObject()
+                        .put("process", resource.process.name)
+                        .put("phase", resource.phase.name)
+                        .put("rssBytes", resource.rssBytes ?: JSONObject.NULL)
+                        .put("openFileDescriptorCount", resource.openFileDescriptorCount ?: JSONObject.NULL)
+                        .put("temporaryStorageBytes", resource.temporaryStorageBytes ?: JSONObject.NULL)
+                        .put("outputBytes", resource.outputBytes ?: JSONObject.NULL),
+                )
+            }
+        }
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-4")
+            .put("recordType", "production-provider-terminal-observation")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", result.entryApiVersion)
+            .put("hostVersionCode", BuildConfig.VERSION_CODE)
+            .put("providerComponent", result.providerComponent)
+            .put("providerVersionName", result.providerVersionName)
+            .put("providerVersionCode", result.providerVersionCode)
+            .put("sessionElapsedMillis", observation.sessionElapsedMillis)
+            .put("workerStartupDurationMillis", observation.workerStartupDurationMillis ?: JSONObject.NULL)
+            .put("compilerStartProfile", observation.compilerStartProfile.name)
+            .put("workerStartProfile", observation.workerStartProfile?.name ?: JSONObject.NULL)
+            .put("compileDurationMillis", observation.compileDurationMillis ?: JSONObject.NULL)
+            .put("d8DurationMillis", observation.d8DurationMillis ?: JSONObject.NULL)
+            .put("loadDurationMillis", observation.loadDurationMillis ?: JSONObject.NULL)
+            .put("runDurationMillis", observation.runDurationMillis ?: JSONObject.NULL)
+            .put("terminationDurationMillis", observation.terminationDurationMillis ?: JSONObject.NULL)
+            .put("cacheOutcome", observation.cacheOutcome.name)
+            .put("cacheMissReason", observation.cacheMissReason?.name ?: JSONObject.NULL)
+            .put("resources", resources)
+            .put("encodedBytes", encodedBytes)
+            .put("publicText", publicText)
+            .put("hostPid", result.hostPid)
+            .put("compilerPid", result.compilerPid)
+            .put("workerPid", result.workerPid)
+            .put("deviceApi", Build.VERSION.SDK_INT)
+        Log.i(TAG, "$OBSERVATION_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(OBSERVATION_EVIDENCE_STATUS_KEY, record.toString()) },
         )
     }
 
@@ -728,6 +876,15 @@ class JvmSourceR1EndToEndInstrumentationTest {
         }
     """.trimIndent()
 
+    private fun observationJavaSource(): String = """
+        public final class Main implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+            @Override
+            public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                return 42;
+            }
+        }
+    """.trimIndent()
+
     private fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256")
         .digest(bytes)
         .joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
@@ -749,6 +906,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
         const val ARGS_EVIDENCE_PREFIX = "JVM_SOURCE_M9_ARGS_EVIDENCE="
         const val RUNTIME_DIAGNOSTIC_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE"
         const val RUNTIME_DIAGNOSTIC_EVIDENCE_PREFIX = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE="
+        const val OBSERVATION_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_OBSERVATION_EVIDENCE"
+        const val OBSERVATION_EVIDENCE_PREFIX = "JVM_SOURCE_M9_OBSERVATION_EVIDENCE="
         const val RUNTIME_SECRET = "M9-3 secret must never cross"
         const val SCRIPT_ARGS_JSON =
             "{\"enabled\":true,\"name\":\"AutoJs6\",\"nested\":{\"count\":3,\"nullable\":null}," +

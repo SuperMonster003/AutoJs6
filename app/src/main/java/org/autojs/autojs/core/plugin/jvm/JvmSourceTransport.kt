@@ -70,6 +70,7 @@ internal interface JvmSourceArtifactStore : Closeable {
 internal interface JvmSourceExecutionSink {
     fun publishDiagnostics(diagnostics: List<org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic>)
     fun publishOutput(stdout: String, stderr: String)
+    fun publishObservation(observation: org.autojs.plugin.jvmsource.api.JvmSourceObservation) = Unit
 
     companion object {
         val NONE: JvmSourceExecutionSink = object : JvmSourceExecutionSink {

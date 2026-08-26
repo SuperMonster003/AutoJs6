@@ -13,7 +13,7 @@ object JvmSourceContract {
     const val ENGINE_ID = "jvm-source"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 4
+    const val PROTOCOL_MINOR = 5
     const val ENTRY_API_VERSION = 4
 
     @JvmField
@@ -22,8 +22,11 @@ object JvmSourceContract {
     @JvmField
     val RUNTIME_EXCEPTION_CLASS_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 4)
 
+    @JvmField
+    val OBSERVATION_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 5)
+
     const val SCHEMA_MAJOR = 1
-    const val SCHEMA_MINOR = 1
+    const val SCHEMA_MINOR = 2
     const val SCHEMA_PROVIDER_INFO = 0x0301
     const val SCHEMA_CAPABILITIES = 0x0302
     const val SCHEMA_STARTED = 0x0310
@@ -32,6 +35,8 @@ object JvmSourceContract {
     const val SCHEMA_RESULT = 0x0313
     const val SCHEMA_ERROR = 0x0314
     const val SCHEMA_CANCELLATION = 0x0315
+    const val SCHEMA_OBSERVATION = 0x0316
+    const val SCHEMA_RESOURCE_OBSERVATION = 0x0317
     const val SCHEMA_HOST_CALL = 0x0320
     const val SCHEMA_HOST_RESPONSE = 0x0321
 
@@ -58,6 +63,19 @@ object JvmSourceContract {
     const val MAX_ERROR_MESSAGE_CODE_POINTS = 2_048
     const val MAX_DIAGNOSTIC_MESSAGE_CODE_POINTS = 4_096
     const val MAX_RUNTIME_EXCEPTION_CLASS_NAME_BYTES = 255
+    const val DEFAULT_TIMEOUT_MILLIS = 30_000L
+    const val MAX_TIMEOUT_MILLIS = 120_000L
+    const val MAX_OBSERVATION_BYTES = 4 * 1024
+    const val MAX_OBSERVATION_RESOURCE_SAMPLES = 6
+    const val MAX_OBSERVATION_SESSION_ELAPSED_MILLIS = MAX_TIMEOUT_MILLIS + 60_000L
+    const val MAX_OBSERVATION_PHASE_DURATION_MILLIS = MAX_TIMEOUT_MILLIS + 10_000L
+    const val MAX_OBSERVATION_TERMINATION_DURATION_MILLIS =
+        MAX_OBSERVATION_PHASE_DURATION_MILLIS * 2L
+    const val MAX_OBSERVATION_RSS_BYTES = 8L * 1024L * 1024L * 1024L
+    const val MAX_OBSERVATION_OPEN_FILE_DESCRIPTORS = 32_768
+    const val MAX_OBSERVATION_TEMPORARY_STORAGE_BYTES =
+        MAX_SOURCE_BYTES + MAX_CLASS_ARTIFACT_BYTES + MAX_DEX_ARTIFACT_BYTES
+    const val MAX_OBSERVATION_OUTPUT_BYTES = MAX_STDOUT_BYTES + MAX_STDERR_BYTES
     const val USER_RUNTIME_EXCEPTION_CLASS_NAME = "UserException"
     const val MAX_HOST_METHOD_BYTES = 128
     const val MAX_PROCESS_NAME_BYTES = 256
@@ -66,8 +84,6 @@ object JvmSourceContract {
     const val MAX_TOAST_MESSAGE_BYTES = 8 * 1024
     const val MAX_CLIPBOARD_TEXT_BYTES = 16 * 1024
     const val MAX_JSON_DEPTH = 64
-    const val DEFAULT_TIMEOUT_MILLIS = 30_000L
-    const val MAX_TIMEOUT_MILLIS = 120_000L
     const val MAX_CONCURRENT_SESSIONS = 1
 }
 

@@ -393,6 +393,12 @@ object JvmSourceValidation {
         requireValue(result.executionElapsedMillis <= result.elapsedMillis - result.compilationElapsedMillis) {
             "Compilation and execution elapsed time exceed total elapsed time"
         }
+        result.observation?.let { observation ->
+            validateObservation(observation)
+            requireValue(observation.requestId == result.requestId) {
+                "Result observation request ID differs from the result"
+            }
+        }
     }
 
     @JvmStatic
@@ -442,11 +448,91 @@ object JvmSourceValidation {
             "Error message",
             JvmSourceContract.MAX_ERROR_MESSAGE_CODE_POINTS,
         )
+        error.observation?.let { observation ->
+            validateObservation(observation)
+            requireValue(observation.requestId == error.requestId) {
+                "Error observation request ID differs from the error"
+            }
+        }
     }
 
     @JvmStatic
     fun validateCancellation(cancellation: JvmSourceCancellation) {
         requireValue(cancellation.elapsedMillis >= 0L) { "Cancellation elapsed time is negative" }
+        cancellation.observation?.let { observation ->
+            validateObservation(observation)
+            requireValue(observation.requestId == cancellation.requestId) {
+                "Cancellation observation request ID differs from the cancellation"
+            }
+        }
+    }
+
+    @JvmStatic
+    fun validateObservation(observation: JvmSourceObservation) {
+        requireValue(
+            observation.sessionElapsedMillis in 0L..JvmSourceContract.MAX_OBSERVATION_SESSION_ELAPSED_MILLIS,
+        ) { "Observation session elapsed time is outside the protocol limit" }
+        requireValue(
+            observation.workerStartupDurationMillis == null ||
+                observation.workerStartupDurationMillis in 0L..observation.sessionElapsedMillis,
+        ) { "Observation worker startup duration exceeds the session elapsed time" }
+        listOf(
+            observation.compileDurationMillis,
+            observation.d8DurationMillis,
+            observation.loadDurationMillis,
+            observation.runDurationMillis,
+        ).forEach { duration ->
+            requireValue(
+                duration == null || duration in 0L..JvmSourceContract.MAX_OBSERVATION_PHASE_DURATION_MILLIS,
+            ) { "Observation phase duration is outside the protocol limit" }
+        }
+        requireValue(
+            observation.terminationDurationMillis == null ||
+                observation.terminationDurationMillis in
+                0L..JvmSourceContract.MAX_OBSERVATION_TERMINATION_DURATION_MILLIS,
+        ) { "Observation termination duration is outside the protocol limit" }
+        requireValue(
+            (observation.cacheOutcome == JvmObservationCacheOutcome.MISS) ==
+                (observation.cacheMissReason != null),
+        ) { "Observation cache miss reason differs from the cache outcome" }
+        requireValue(
+            observation.cacheOutcome != JvmObservationCacheOutcome.HIT ||
+                (observation.compileDurationMillis == null && observation.d8DurationMillis == null),
+        ) { "Cache-hit observation contains compile or D8 duration" }
+        requireValue(observation.resources.size <= JvmSourceContract.MAX_OBSERVATION_RESOURCE_SAMPLES) {
+            "Observation resource sample count exceeds the protocol limit"
+        }
+        requireValue(
+            observation.resources.distinctBy { resource -> resource.process to resource.phase }.size ==
+                observation.resources.size,
+        ) { "Observation contains duplicate process/phase resource samples" }
+        observation.resources.forEach(::validateResourceObservation)
+    }
+
+    @JvmStatic
+    fun validateObservationAgainst(
+        observation: JvmSourceObservation,
+        request: JvmSourceRequest,
+    ) {
+        validateObservation(observation)
+        validateRequest(request)
+        requireCapability(observation.requestId == request.requestId) {
+            "Observation request ID differs from the submitted request"
+        }
+    }
+
+    /** Enforces the negotiated Protocol 1.5 presence rule at an external terminal boundary. */
+    @JvmStatic
+    fun validateTerminalObservationAgainst(
+        observation: JvmSourceObservation?,
+        request: JvmSourceRequest,
+    ) {
+        validateRequest(request)
+        val negotiated = request.protocolVersion >= JvmSourceContract.OBSERVATION_PROTOCOL_VERSION
+        requireCapability((observation != null) == negotiated) {
+            "Terminal observation presence differs from the negotiated protocol"
+        }
+        observation?.let { validateObservationAgainst(it, request) }
     }
 
     @JvmStatic
@@ -462,6 +548,44 @@ object JvmSourceValidation {
         requireValue(call.timeoutMillis in 1L..JvmSourceContract.MAX_TIMEOUT_MILLIS) {
             "Host-call timeout is invalid"
         }
+    }
+
+    private fun validateResourceObservation(resource: JvmSourceResourceObservation) {
+        val phaseIsLegal = when (resource.process) {
+            JvmObservationProcess.COMPILER -> resource.phase in setOf(
+                JvmObservationPhase.COMPILE,
+                JvmObservationPhase.D8,
+                JvmObservationPhase.TERMINATION,
+            )
+            JvmObservationProcess.WORKER -> resource.phase in setOf(
+                JvmObservationPhase.LOAD,
+                JvmObservationPhase.RUN,
+                JvmObservationPhase.TERMINATION,
+            )
+        }
+        requireValue(phaseIsLegal) { "Observation process/phase resource pair is invalid" }
+        requireValue(
+            resource.rssBytes == null || resource.rssBytes in 0L..JvmSourceContract.MAX_OBSERVATION_RSS_BYTES,
+        ) { "Observation RSS value is outside the protocol limit" }
+        requireValue(
+            resource.openFileDescriptorCount == null ||
+                resource.openFileDescriptorCount in 0..JvmSourceContract.MAX_OBSERVATION_OPEN_FILE_DESCRIPTORS,
+        ) { "Observation file-descriptor count is outside the protocol limit" }
+        requireValue(
+            resource.temporaryStorageBytes == null ||
+                resource.temporaryStorageBytes in
+                0L..JvmSourceContract.MAX_OBSERVATION_TEMPORARY_STORAGE_BYTES,
+        ) { "Observation temporary-storage value is outside the protocol limit" }
+        requireValue(
+            resource.outputBytes == null ||
+                resource.outputBytes in 0L..JvmSourceContract.MAX_OBSERVATION_OUTPUT_BYTES,
+        ) { "Observation output value is outside the protocol limit" }
+        requireValue(
+            resource.rssBytes != null ||
+                resource.openFileDescriptorCount != null ||
+                resource.temporaryStorageBytes != null ||
+                resource.outputBytes != null,
+        ) { "Observation resource sample contains no available measurement" }
     }
 
     @JvmStatic

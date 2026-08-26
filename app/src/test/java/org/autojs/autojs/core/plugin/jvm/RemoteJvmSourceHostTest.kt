@@ -7,6 +7,11 @@ import org.autojs.plugin.jvmsource.api.JvmCancellationReason
 import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmDexLoaderKind
 import org.autojs.plugin.jvmsource.api.JvmIsolationCapability
+import org.autojs.plugin.jvmsource.api.JvmObservationCacheMissReason
+import org.autojs.plugin.jvmsource.api.JvmObservationCacheOutcome
+import org.autojs.plugin.jvmsource.api.JvmObservationPhase
+import org.autojs.plugin.jvmsource.api.JvmObservationProcess
+import org.autojs.plugin.jvmsource.api.JvmObservationStartProfile
 import org.autojs.plugin.jvmsource.api.JvmProviderInfo
 import org.autojs.plugin.jvmsource.api.JvmScriptCapability
 import org.autojs.plugin.jvmsource.api.JvmSha256
@@ -22,6 +27,8 @@ import org.autojs.plugin.jvmsource.api.JvmSourceErrorCode
 import org.autojs.plugin.jvmsource.api.JvmSourceFailurePhase
 import org.autojs.plugin.jvmsource.api.JvmSourceLanguage
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
+import org.autojs.plugin.jvmsource.api.JvmSourceObservation
+import org.autojs.plugin.jvmsource.api.JvmSourceResourceObservation
 import org.autojs.plugin.jvmsource.api.JvmSourceRequest
 import org.autojs.plugin.jvmsource.api.JvmSourceResult
 import org.autojs.plugin.jvmsource.api.JvmSourceStarted
@@ -192,6 +199,9 @@ class RemoteJvmSourceHostTest {
             assertEquals(1, result.internalBridgeCallCount)
             assertEquals("037", result.dexVersion)
             assertEquals("PRIVATE_DEX_CLASS_LOADER", result.loaderKind)
+            assertEquals(3L, result.observation.sessionElapsedMillis)
+            assertEquals(JvmObservationCacheOutcome.MISS, result.observation.cacheOutcome)
+            assertEquals(2, result.observation.resources.size)
             assertTrue(transport.sessionClosed)
             assertEquals(3, transport.inspections)
         } finally {
@@ -734,12 +744,17 @@ class RemoteJvmSourceHostTest {
             emitDiagnosticBeforeFailure = true,
         )
         val published = mutableListOf<JvmSourceDiagnostic>()
+        val publishedObservations = mutableListOf<JvmSourceObservation>()
         val sink = object : JvmSourceExecutionSink {
             override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) {
                 published += diagnostics
             }
 
             override fun publishOutput(stdout: String, stderr: String) = Unit
+
+            override fun publishObservation(observation: JvmSourceObservation) {
+                publishedObservations += observation
+            }
         }
         try {
             val host = newEnabledHost(transport, sourceFile, executor)
@@ -761,6 +776,8 @@ class RemoteJvmSourceHostTest {
             assertEquals(4, published.single().line)
             assertEquals(28, published.single().column)
             assertTrue(published.single().message.contains("println2"))
+            assertEquals(1, publishedObservations.size)
+            assertEquals(JvmObservationCacheOutcome.MISS, publishedObservations.single().cacheOutcome)
         } finally {
             executor.shutdownNow()
             directory.deleteRecursively()
@@ -1064,6 +1081,40 @@ class RemoteJvmSourceHostTest {
     }
 
     @Test
+    fun missingProtocol15ObservationIsQuarantinedAndFreshRunRecovers() {
+        val directory = Files.createTempDirectory("jvm-source-missing-observation-test").toFile()
+        val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport(
+            omitObservationOnce = true,
+            transportDeathOnCancellationOnce = true,
+        )
+        try {
+            val host = newEnabledHost(transport, sourceFile, executor)
+
+            val failure = runCatching {
+                host.execute(
+                    JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                    JvmSourceExecutionControl(),
+                )
+            }.exceptionOrNull()
+
+            assertTrue(failure is RemoteJvmSourceException)
+            assertTrue(failure?.allMessages().orEmpty().contains("observation presence"))
+            assertTrue(transport.transportRetirementObserved)
+
+            val recovered = host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                JvmSourceExecutionControl(),
+            )
+            assertEquals("{\"ok\":true}", recovered.resultJson)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun protocolViolationWithoutRetirementAckReleasesHostAfterBoundedQuarantine() {
         val directory = Files.createTempDirectory("jvm-source-no-retirement-ack-test").toFile()
         val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
@@ -1138,6 +1189,7 @@ class RemoteJvmSourceHostTest {
         private val loaderKind: JvmDexLoaderKind = JvmDexLoaderKind.PRIVATE_DEX_CLASS_LOADER,
         private val loaderKindOnce: JvmDexLoaderKind? = null,
         private val malformedResultOnce: Boolean = false,
+        private val omitObservationOnce: Boolean = false,
         private val transportDeathOnCancellationOnce: Boolean = false,
         private val bridgeCallerPids: Set<Int> = setOf(COMPILER_PID),
         private val discoveredCandidates: List<JvmSourceServiceCandidate> = listOf(CANDIDATE),
@@ -1277,6 +1329,8 @@ class RemoteJvmSourceHostTest {
                             compilationElapsedMillis = 1,
                             executionElapsedMillis = 1,
                             elapsedMillis = 3,
+                            observation = observation(request.requestId)
+                                .takeUnless { omitObservationOnce && bindingOrdinal == 1 },
                         ),
                     )
                     val omitThisTerminal = omitTerminal || (omitTerminalOnce && binds == 1)
@@ -1328,6 +1382,7 @@ class RemoteJvmSourceHostTest {
                                         phase = failurePhase,
                                         message = "controlled fake provider failure",
                                         retryable = false,
+                                        observation = observation(request.requestId),
                                     ),
                                 ),
                             )
@@ -1363,6 +1418,7 @@ class RemoteJvmSourceHostTest {
                                                     reason = JvmCancellationReason.REQUESTED,
                                                     phase = JvmSourceFailurePhase.EXECUTION,
                                                     elapsedMillis = 1,
+                                                    observation = observation(request.requestId),
                                                 ),
                                             ),
                                         )
@@ -1491,6 +1547,38 @@ class RemoteJvmSourceHostTest {
         val DEX_ARTIFACT = "classes.dex".toByteArray()
         val STDOUT = "hello stdout".toByteArray()
         val STDERR = "warning stderr".toByteArray()
+        fun observation(requestId: org.autojs.plugin.jvmsource.api.JvmRequestId) = JvmSourceObservation(
+            requestId = requestId,
+            sessionElapsedMillis = 3L,
+            workerStartupDurationMillis = 1L,
+            compilerStartProfile = JvmObservationStartProfile.WARM,
+            workerStartProfile = JvmObservationStartProfile.COLD,
+            compileDurationMillis = 1L,
+            d8DurationMillis = 1L,
+            loadDurationMillis = 1L,
+            runDurationMillis = 1L,
+            terminationDurationMillis = 1L,
+            cacheOutcome = JvmObservationCacheOutcome.MISS,
+            cacheMissReason = JvmObservationCacheMissReason.NOT_FOUND,
+            resources = listOf(
+                JvmSourceResourceObservation(
+                    process = JvmObservationProcess.COMPILER,
+                    phase = JvmObservationPhase.COMPILE,
+                    rssBytes = 1_024L,
+                    openFileDescriptorCount = 8,
+                    temporaryStorageBytes = 512L,
+                    outputBytes = 0L,
+                ),
+                JvmSourceResourceObservation(
+                    process = JvmObservationProcess.WORKER,
+                    phase = JvmObservationPhase.RUN,
+                    rssBytes = 2_048L,
+                    openFileDescriptorCount = 9,
+                    temporaryStorageBytes = 256L,
+                    outputBytes = 64L,
+                ),
+            ),
+        )
         val CAPABILITIES = JvmSourceCapabilities(
             languages = listOf(JvmSourceLanguage.JAVA),
             isolationCapabilities = JvmIsolationCapability.entries,

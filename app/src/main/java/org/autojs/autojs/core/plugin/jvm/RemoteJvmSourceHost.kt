@@ -18,6 +18,7 @@ import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
 import org.autojs.plugin.jvmsource.api.JvmSourceError
 import org.autojs.plugin.jvmsource.api.JvmSourceLanguage
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
+import org.autojs.plugin.jvmsource.api.JvmSourceObservation
 import org.autojs.plugin.jvmsource.api.JvmSourceRequest
 import org.autojs.plugin.jvmsource.api.JvmSourceResult
 import org.autojs.plugin.jvmsource.api.JvmSourceStarted
@@ -88,6 +89,7 @@ data class RemoteJvmScriptResult(
     val compilationElapsedMillis: Long,
     val executionElapsedMillis: Long,
     val elapsedMillis: Long,
+    val observation: JvmSourceObservation,
     val allowlistedBridgeOperationCount: Int,
     val rejectedBridgeOperationCount: Int,
     val hostBridgeCallerPids: List<Int>,
@@ -487,6 +489,14 @@ internal class RemoteJvmSourceHost(
             publishDiagnostics()
             publishUnstreamedOutput(stdout, stderr)
             requireNoFatalTransportEvent()
+            val terminalObservation = checkNotNull(
+                when (terminal) {
+                    is Terminal.Completed -> terminal.result.observation
+                    is Terminal.Failed -> terminal.error.observation
+                    is Terminal.Cancelled -> terminal.cancellation.observation
+                },
+            ) { "Negotiated JVM source terminal omitted its observation" }
+            runCatching { sink.publishObservation(terminalObservation) }
             if (executionTimedOut) throw RemoteJvmSourceException(
                 "JVM source execution timed out",
                 userFailure = JvmSourceUserExperiencePolicy.timeout(),
@@ -551,6 +561,7 @@ internal class RemoteJvmSourceHost(
                         compilationElapsedMillis = terminal.result.compilationElapsedMillis,
                         executionElapsedMillis = terminal.result.executionElapsedMillis,
                         elapsedMillis = terminal.result.elapsedMillis,
+                        observation = terminalObservation,
                         allowlistedBridgeOperationCount = bridgeStats.allowlistedOperationCount,
                         rejectedBridgeOperationCount = bridgeStats.rejectedOperationCount,
                         hostBridgeCallerPids = bridgeCallerPids.sorted(),
@@ -958,6 +969,7 @@ internal class RemoteJvmSourceHost(
             bridgeCallerPids: Set<Int>,
         ) = decode(result, JvmSourceCodec::decodeResult) { value ->
             JvmSourceValidation.validateResultAgainstRuntime(value, request, hostRuntimeApi)
+            JvmSourceValidation.validateTerminalObservationAgainst(value.observation, request)
             accept(bridgeCallerPids.all { it > 0 }, "Host bridge caller PID is invalid")
             accept(
                 bridgeCallerPidValues.compareAndSet(null, bridgeCallerPids.toSet()),
@@ -971,6 +983,7 @@ internal class RemoteJvmSourceHost(
         override fun onFailed(error: ByteArray) = decode(error, JvmSourceCodec::decodeError) { value ->
             JvmSourceValidation.validateError(value)
             accept(value.requestId == request.requestId, "Error request ID differs")
+            JvmSourceValidation.validateTerminalObservationAgainst(value.observation, request)
             accept(lifecycle.acceptFailed(), "Invalid onFailed ordering")
             retirement.complete(ProviderRetirement.VALID_TERMINAL)
             accept(terminal.complete(Terminal.Failed(value)), "Terminal callback was already recorded")
@@ -981,6 +994,7 @@ internal class RemoteJvmSourceHost(
                 val value = JvmSourceCodec.decodeCancellation(cancellation.requireMetadataSize())
                 JvmSourceValidation.validateCancellation(value)
                 accept(value.requestId == request.requestId, "Cancellation request ID differs")
+                JvmSourceValidation.validateTerminalObservationAgainst(value.observation, request)
                 if (tryAcceptQuarantineCancellation()) return
                 val lifecycleAccepted = lifecycle.acceptCancelled()
                 if (!lifecycleAccepted && tryAcceptQuarantineCancellation()) return

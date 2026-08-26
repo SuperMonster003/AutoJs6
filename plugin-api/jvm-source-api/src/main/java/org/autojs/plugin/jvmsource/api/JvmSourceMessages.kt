@@ -267,6 +267,7 @@ data class JvmSourceResult(
     val compilationElapsedMillis: Long,
     val executionElapsedMillis: Long,
     val elapsedMillis: Long,
+    val observation: JvmSourceObservation? = null,
 )
 
 data class JvmSourceError(
@@ -275,6 +276,7 @@ data class JvmSourceError(
     val phase: JvmSourceFailurePhase,
     val message: String,
     val retryable: Boolean,
+    val observation: JvmSourceObservation? = null,
 )
 
 data class JvmSourceCancellation(
@@ -282,6 +284,7 @@ data class JvmSourceCancellation(
     val reason: JvmCancellationReason,
     val phase: JvmSourceFailurePhase,
     val elapsedMillis: Long,
+    val observation: JvmSourceObservation? = null,
 )
 
 data class JvmHostCall(
