@@ -15,6 +15,10 @@ import org.autojs.autojs.core.plugin.center.PluginResourceResolver
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenInteractionException
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRequestOptions
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRemoteFailure
+import org.autojs.autojs.core.plugin.explorer.archive.archiveOpenInteractionForServiceError
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.explorer.ExplorerPluginActionProvider
 import org.autojs.plugin.common.api.PluginInfo
@@ -180,6 +184,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         entryPoint: ExplorerActionEntryPoint,
         item: ExplorerItem,
         action: ResolvedExplorerAction,
+        options: ExplorerArchiveOpenRequestOptions,
     ): ExplorerArchiveSessionConnection = withContext(Dispatchers.IO) {
         require(action.descriptor.presentation == ExplorerActionValues.PRESENTATION_HOST_EXPLORER) {
             "Explorer Action does not provide a host archive session"
@@ -207,22 +212,50 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
             putLong(ExplorerArchiveRequestKeys.SIZE, source.length())
             putLong(ExplorerArchiveRequestKeys.LAST_MODIFIED, item.lastModified())
         }
-        ParcelFileDescriptor.open(source, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
-            val leased = ExplorerActionPluginHost.openArchive(
-                context = context.applicationContext,
-                target = action.pluginTarget,
-                source = descriptor,
-                request = request,
-            )
-            ExplorerArchiveSessionConnection.create(
-                context = context,
-                pluginPackageName = action.packageName,
-                pluginUid = action.pluginTarget.serviceInfo.applicationInfo.uid,
-                protocolVersion = action.descriptor.protocolVersion,
-                remote = leased.value,
-                bindingLease = leased.bindingLease,
-                sourcePath = source.path,
-            )
+        val requestPassword = options.passwordChars()
+        try {
+            requestPassword?.let { password ->
+                request.putCharArray(ExplorerArchiveRequestKeys.PASSWORD, password)
+            }
+            ParcelFileDescriptor.open(source, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+                val leased = try {
+                    ExplorerActionPluginHost.openArchive(
+                        context = context.applicationContext,
+                        target = action.pluginTarget,
+                        source = descriptor,
+                        request = request,
+                        protocolVersion = action.descriptor.protocolVersion,
+                    )
+                } catch (error: ExplorerArchiveOpenRemoteFailure) {
+                    val interaction = archiveOpenInteractionForServiceError(
+                        action.descriptor.protocolVersion,
+                        error.errorCode,
+                    ) ?: throw error
+                    throw ExplorerArchiveOpenInteractionException(
+                        interactionKind = interaction,
+                        message = error.message
+                            ?.replace(Regex("[\\p{Cc}\\p{Cf}]+"), " ")
+                            ?.trim()
+                            ?.take(ExplorerActionProtocol.MAX_ARCHIVE_OPERATION_MESSAGE_LENGTH)
+                            ?.takeIf(String::isNotEmpty)
+                            ?: "Archive password is required",
+                        cause = error,
+                    )
+                }
+                ExplorerArchiveSessionConnection.create(
+                    context = context,
+                    pluginPackageName = action.packageName,
+                    pluginUid = action.pluginTarget.serviceInfo.applicationInfo.uid,
+                    protocolVersion = action.descriptor.protocolVersion,
+                    remote = leased.value,
+                    bindingLease = leased.bindingLease,
+                    sourcePath = source.path,
+                )
+            }
+        } finally {
+            request.getCharArray(ExplorerArchiveRequestKeys.PASSWORD)?.fill('\u0000')
+            request.remove(ExplorerArchiveRequestKeys.PASSWORD)
+            requestPassword?.fill('\u0000')
         }
     }
 

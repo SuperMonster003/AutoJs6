@@ -198,7 +198,7 @@ internal class ArchiveExplorerProvider(
                     ArchiveExplorerFileItem(
                         info.copy(
                             canExtract = connection.info.canExtractEntries && info.canExtract,
-                            canOpen = connection.info.canOpenEntries && info.canExtract,
+                            canOpen = connection.info.canOpenEntries && info.canOpen,
                         ),
                         parent,
                         path,
@@ -213,6 +213,7 @@ internal class ArchiveExplorerProvider(
 
     fun startExtraction(
         items: List<ArchiveExplorerItem>,
+        options: ExplorerArchiveExtractionRequestOptions,
         listener: ExplorerArchiveExtractionListener,
     ): String {
         check(canExtractEntries) { "Archive session does not support host extraction" }
@@ -224,7 +225,7 @@ internal class ArchiveExplorerProvider(
             check(knownPath == item.path) { "Archive entry does not belong to this session" }
             item.entryId
         }
-        return connection.startExtraction(entryIds, listener)
+        return connection.startExtraction(entryIds, options, listener)
     }
 
     fun cancelExtraction(operationId: String) {

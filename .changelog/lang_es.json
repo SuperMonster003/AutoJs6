@@ -54,6 +54,7 @@
         "El protocolo Explorer Action v5 del administrador de archivos permite que plugins fiables, limitados a un archivo de solo lectura, presenten directorios de archivos paginados en la lista Explorer nativa, la barra de ruta, el tema y la pila Atrás mediante sesiones Binder vinculadas al UID",
         "El protocolo Explorer Action v6 del administrador de archivos muestra vistas previas de entradas legibles de documentos, imágenes, audio y vídeo mediante los visores existentes del host",
         "Los protocolos Explorer Action v7 a v10 del administrador de archivos añaden la relectura obligatoria de archivos pendientes, el reemplazo atómico de objetivos, transacciones de salida de directorios propiedad del host con recuperación tras la muerte del cliente o un reinicio, y extracción nativa de la carpeta actual o de entradas seleccionadas con progreso acotado y cancelación, lo que permite a los plugins de archivos modificar un ZIP seleccionado y publicar salidas verificadas sin permiso de almacenamiento",
+        "El protocolo Explorer Action v11 del administrador de archivos añade recuperación de contraseña nativa y acotada al abrir o extraer un archivo; los reintentos conservan la ruta y la selección, y limpian los búferes transitorios después de cada solicitud",
         "El Centro de plugins ofrece una página de configuración global y una página de instrucciones",
         "El Centro de plugins admite el montaje automático de plugins SDK",
         "El Centro de plugins admite la ordenación por prioridad de múltiples variantes",

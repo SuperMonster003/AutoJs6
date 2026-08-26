@@ -217,6 +217,13 @@
     <string name="dialog_button_view_shortcuts">Просмотреть ярлыки</string>
     <string name="dialog_button_view_update">Просмотреть обновление</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="dialog_message_archive_open_password_required">Этот архив содержит зашифрованные данные. Введите пароль, чтобы открыть его.</string>
+    <string name="dialog_message_archive_password_required">Этот архив содержит зашифрованные данные. Введите пароль, чтобы продолжить извлечение.</string>
+    <string name="dialog_message_archive_resource_budget">Выбранные данные превышают безопасные ограничения и могут занять много места или памяти. Всё равно продолжить?</string>
+    <string name="dialog_message_archive_skip_unsafe_paths">Некоторые элементы содержат небезопасные пути и не могут быть записаны. При продолжении они будут пропущены.</string>
+    <string name="dialog_title_archive_password">Пароль архива</string>
+    <string name="dialog_title_archive_resource_budget">Большое извлечение</string>
+    <string name="dialog_title_archive_unsafe_paths">Небезопасные пути</string>
     <string name="dialog_title_color_details">Детали цвета</string>
     <string name="dialog_title_color_palette">Цветовая палитра</string>
     <string name="dialog_title_theme_color_details">Детали цвета темы</string>
@@ -281,6 +288,7 @@
     <string name="error_app_not_installed_with_name">Приложение не установлено: \"%s\"</string>
     <string name="error_archive_extraction_failed">Не удалось извлечь архив: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">Для выбранных элементов нужен пароль или подтверждение. Используйте действие Извлечь в в меню файла архива.</string>
+    <string name="error_archive_password_incorrect">Неверный пароль архива. Повторите попытку.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Аргумент %1$s для %2$s#%3$s не может быть пустым</string>
     <string name="error_arguments_cannot_be_empty">Аргументы не могут быть пустыми</string>
     <string name="error_arguments_must_be_empty">Аргументы должны быть пустыми</string>
@@ -487,6 +495,7 @@
     <string name="format_editor_info" formatted="false">Заголовки: %d\nСтроки: %d\nРазмер: %s</string>
     <string name="format_file_downloaded" formatted="true">Файл загружен на %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Перейти к] Настройки -> Службы доступности -> AutoJs6 [Включить]]]></string>
+    <string name="hint_archive_password">Пароль архива</string>
     <string name="hint_find_with_regex">Поддерживается регекс. Используйте \"$1\" - \"$9\" для захваченных групп.</string>
     <string name="hint_github_token">Вставьте персональный токен доступа GitHub</string>
     <string name="hint_long_click_run_to_debug">Длительное нажатие кнопки \"Выполнить\" для отладки</string>
@@ -865,6 +874,7 @@
     <string name="text_class_or_package_name">Имя класса / пакета</string>
     <string name="text_clean">Очистить</string>
     <string name="text_clean_completed">Очистка завершена</string>
+    <string name="text_cleaning_archive_extraction">Очистка незавершенного вывода</string>
     <string name="text_cleaning_workspace">Очистка рабочей области</string>
     <string name="text_clear">Очистить</string>
     <string name="text_clear_custom_css">Очистить пользовательский CSS</string>
@@ -875,7 +885,6 @@
     <string name="text_clear_updates_checked_states">Очистить состояния проверки обновлений</string>
     <string name="text_clear_version_history">Очистить историю версий</string>
     <string name="text_clear_version_history_confirm">Очистить все элементы истории версий?</string>
-    <string name="text_cleaning_archive_extraction">Очистка незавершенного вывода</string>
     <string name="text_click_icon_to_add_launcher_shortcut">Нажмите на значок, чтобы добавить ярлык на экран</string>
     <string name="text_click_item_to_remove">Нажмите на элемент для удаления</string>
     <string name="text_click_item_to_show_details">Нажмите на пункт, чтобы просмотреть подробности</string>

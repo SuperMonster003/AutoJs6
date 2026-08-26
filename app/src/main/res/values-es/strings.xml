@@ -217,6 +217,13 @@
     <string name="dialog_button_view_shortcuts">Ver accesos directos</string>
     <string name="dialog_button_view_update">Ver actualización</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="dialog_message_archive_open_password_required">Este archivo contiene contenido cifrado. Introduce su contraseña para abrirlo.</string>
+    <string name="dialog_message_archive_password_required">Este archivo contiene contenido cifrado. Introduce su contraseña para continuar con la extracción.</string>
+    <string name="dialog_message_archive_resource_budget">La selección supera los límites de extracción segura y puede usar mucho almacenamiento o memoria. Continuar de todos modos?</string>
+    <string name="dialog_message_archive_skip_unsafe_paths">Algunas entradas contienen rutas no seguras y no se pueden escribir en el destino. Se omitirán si continúas.</string>
+    <string name="dialog_title_archive_password">Contraseña del archivo</string>
+    <string name="dialog_title_archive_resource_budget">Extracción grande</string>
+    <string name="dialog_title_archive_unsafe_paths">Rutas no seguras</string>
     <string name="dialog_title_color_details">Detalles del color</string>
     <string name="dialog_title_color_palette">Paleta de colores</string>
     <string name="dialog_title_theme_color_details">Detalles del color del tema</string>
@@ -281,6 +288,7 @@
     <string name="error_app_not_installed_with_name">La aplicación no está instalada: \"%s\"</string>
     <string name="error_archive_extraction_failed">No se pudo extraer el archivo: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">Esta selección necesita una contraseña o confirmación. Usa la acción Extraer en del menú del archivo.</string>
+    <string name="error_archive_password_incorrect">La contraseña del archivo es incorrecta. Inténtalo de nuevo.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">El argumento %1$s para %2$s#%3$s no puede ser nulo</string>
     <string name="error_arguments_cannot_be_empty">Los argumentos no pueden estar vacíos</string>
     <string name="error_arguments_must_be_empty">Los argumentos deben estar vacíos</string>
@@ -487,6 +495,7 @@
     <string name="format_editor_info" formatted="false">Caracteres: %d\nLíneas: %d\nTamaño: %s</string>
     <string name="format_file_downloaded" formatted="true">Archivo descargado en %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Ir a] Configuración -> Servicios de Accesibilidad -> AutoJs6 [Habilitar]]]></string>
+    <string name="hint_archive_password">Contraseña del archivo</string>
     <string name="hint_find_with_regex">Se admite Regex. Utilice \"$1\" - \"$9\" para los grupos capturados.</string>
     <string name="hint_github_token">Pega un token de acceso personal de GitHub</string>
     <string name="hint_long_click_run_to_debug">Haga un clic largo en el botón \"Ejecutar\" para depurar</string>
@@ -865,6 +874,7 @@
     <string name="text_class_or_package_name">Nombre de la clase/paquete</string>
     <string name="text_clean">Limpiar</string>
     <string name="text_clean_completed">Limpieza completada</string>
+    <string name="text_cleaning_archive_extraction">Limpiando la salida incompleta</string>
     <string name="text_cleaning_workspace">Limpiando el espacio de trabajo</string>
     <string name="text_clear">Borrar</string>
     <string name="text_clear_custom_css">Borrar CSS personalizado</string>
@@ -875,7 +885,6 @@
     <string name="text_clear_updates_checked_states">Borrar los estados de comprobación de las actualizaciones</string>
     <string name="text_clear_version_history">Borrar historial de versiones</string>
     <string name="text_clear_version_history_confirm">¿Borrar todos los elementos del historial de versiones?</string>
-    <string name="text_cleaning_archive_extraction">Limpiando la salida incompleta</string>
     <string name="text_click_icon_to_add_launcher_shortcut">Toca el icono para anadir un acceso directo al lanzador</string>
     <string name="text_click_item_to_remove">Haga clic en el elemento a eliminar</string>
     <string name="text_click_item_to_show_details">Toca un elemento para ver los detalles</string>

@@ -219,6 +219,13 @@
     <string name="dialog_button_view_shortcuts">عرض الاختصارات</string>
     <string name="dialog_button_view_update">عرض التحديث</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="dialog_message_archive_open_password_required">يحتوي هذا الأرشيف على محتوى مشفر. أدخل كلمة المرور لفتحه.</string>
+    <string name="dialog_message_archive_password_required">يحتوي هذا الأرشيف على محتوى مشفر. أدخل كلمة المرور لمتابعة الاستخراج.</string>
+    <string name="dialog_message_archive_resource_budget">يتجاوز التحديد حدود الاستخراج الآمن وقد يستهلك مساحة تخزين أو ذاكرة كبيرة. هل تريد المتابعة?</string>
+    <string name="dialog_message_archive_skip_unsafe_paths">تحتوي بعض العناصر على مسارات غير آمنة ولا يمكن كتابتها في الوجهة. ستُتخطى هذه العناصر عند المتابعة.</string>
+    <string name="dialog_title_archive_password">كلمة مرور الأرشيف</string>
+    <string name="dialog_title_archive_resource_budget">استخراج كبير</string>
+    <string name="dialog_title_archive_unsafe_paths">مسارات غير آمنة</string>
     <string name="dialog_title_color_details">تفاصيل اللون</string>
     <string name="dialog_title_color_palette">لوحة الألوان</string>
     <string name="dialog_title_theme_color_details">تفاصيل لون الثيم</string>
@@ -283,6 +290,7 @@
     <string name="error_app_not_installed_with_name">التطبيق غير مثبت: \"%s\"</string>
     <string name="error_archive_extraction_failed">تعذر استخراج الأرشيف: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">يتطلب هذا التحديد كلمة مرور أو تأكيدا. استخدم إجراء الاستخراج إلى من قائمة ملف الأرشيف.</string>
+    <string name="error_archive_password_incorrect">كلمة مرور الأرشيف غير صحيحة. حاول مرة أخرى.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">لا يمكن أن تكون الوسائط %1$s بالنسبة لـ %2$s#%3$s فارغة</string>
     <string name="error_arguments_cannot_be_empty">لا يمكن أن تكون الوسائط فارغة</string>
     <string name="error_arguments_must_be_empty">يجب أن تكون الوسائط فارغة</string>
@@ -489,6 +497,7 @@
     <string name="format_editor_info" formatted="false">الأحرف: %d\nالأسطر: %d\nالحجم: %s</string>
     <string name="format_file_downloaded" formatted="true">تم تنزيل الملف إلى %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[إعدادات -> خدمات إمكانية الوصول -> AutoJs6 (يُمكَِن)]]></string>
+    <string name="hint_archive_password">كلمة مرور الأرشيف</string>
     <string name="hint_find_with_regex">Regex مدعوم. استخدم \"$1\" - \"$9\" للمجموعات التي تم التقاطها.</string>
     <string name="hint_github_token">ألصق رمز وصول شخصي إلى GitHub</string>
     <string name="hint_long_click_run_to_debug">انقر الطويل على زر \"تشغيل\" لتصحيح الأخطاء</string>
@@ -867,6 +876,7 @@
     <string name="text_class_or_package_name">اسم الفئة / الحزمة</string>
     <string name="text_clean">تنظيف</string>
     <string name="text_clean_completed">اكتمل التنظيف</string>
+    <string name="text_cleaning_archive_extraction">جار تنظيف الإخراج غير المكتمل</string>
     <string name="text_cleaning_workspace">جارٍ تنظيف مساحة العمل</string>
     <string name="text_clear">صافي</string>
     <string name="text_clear_custom_css">مسح CSS المخصص</string>
@@ -877,7 +887,6 @@
     <string name="text_clear_updates_checked_states">تحديثات مسح الحالات التي تم فحصها</string>
     <string name="text_clear_version_history">مسح سجل الاصدارات</string>
     <string name="text_clear_version_history_confirm">هل تريد مسح جميع عناصر سجل الاصدارات?</string>
-    <string name="text_cleaning_archive_extraction">جار تنظيف الإخراج غير المكتمل</string>
     <string name="text_click_icon_to_add_launcher_shortcut">اضغط على الايقونة لاضافة اختصار للشاشة الرئيسية</string>
     <string name="text_click_item_to_remove">انقر فوق العنصر لإزالته</string>
     <string name="text_click_item_to_show_details">اضغط على العنصر لعرض التفاصيل</string>

@@ -1,7 +1,7 @@
 package org.autojs.plugin.explorer.api
 
 object ExplorerActionProtocol {
-    const val VERSION = 10
+    const val VERSION = 11
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 
@@ -27,6 +27,7 @@ object ExplorerActionProtocol {
     const val MAX_ARCHIVE_ITEMS = 100_000
     const val MAX_ARCHIVE_PAGE_SIZE = 128
     const val MAX_ARCHIVE_EXTRACTION_TARGETS = 128
+    const val MAX_ARCHIVE_PASSWORD_LENGTH = 1_024
     const val MAX_ARCHIVE_OPERATION_MESSAGE_LENGTH = 1_024
     /** Protocol envelope. A host may advertise and enforce a smaller per-action runtime limit. */
     const val MAX_OUTPUT_BYTES = 4L * 1024L * 1024L * 1024L

@@ -219,6 +219,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` File manager Explorer Action protocol v5 lets trusted single-file read-only plugins present paginated archive directories in the native Explorer list, path bar, theme, and Back stack through UID-pinned Binder sessions
 * `Feature` File manager Explorer Action protocol v6 previews readable document, image, audio, and video entries through the existing host viewers
 * `Feature` File manager Explorer Action protocols v7 through v10 add mandatory read-back verification of pending file output, atomic target replacement, host-owned directory-output transactions with client-death and restart recovery, and native current-folder or selected-entry extraction with bounded progress and cancellation, enabling archive plugins to edit a selected ZIP and safely publish verified output without storage permission
+* `Feature` File manager Explorer Action protocol v11 adds bounded host-native password recovery for initial archive opening and extraction; retries preserve the archive path and selected entries while transient password buffers are cleared after each request
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting

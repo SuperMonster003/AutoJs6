@@ -1,9 +1,13 @@
 package org.autojs.plugin.explorer.api
 
-/** Bundle schema for protocol v10 archive extraction requests and callbacks. */
+/** Bundle schema for protocol v10 archive extraction and v11 recoverable interactions. */
 object ExplorerArchiveOperationKeys {
     const val OPERATION_ID = "operationId"
     const val ENTRY_IDS = "entryIds"
+    /** Transient v11 request value. Receivers must copy, bound, and clear it immediately. */
+    const val PASSWORD = "password"
+    const val SKIP_UNSAFE_PATHS = "skipUnsafePaths"
+    const val ALLOW_RESOURCE_BUDGET_OVERRIDE = "allowResourceBudgetOverride"
 
     const val PHASE = "phase"
     const val CURRENT_ENTRY = "currentEntry"
@@ -20,4 +24,5 @@ object ExplorerArchiveOperationKeys {
 
     const val ERROR_CODE = "errorCode"
     const val ERROR_MESSAGE = "errorMessage"
+    const val INTERACTION_KIND = "interactionKind"
 }

@@ -4,8 +4,11 @@ import android.content.Context
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import org.autojs.autojs.core.plugin.AidlPluginHost
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRemoteFailure
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.explorer.api.ExplorerActionPluginActions
+import org.autojs.plugin.explorer.api.ExplorerArchiveOpenKeys
+import org.autojs.plugin.explorer.api.ExplorerArchiveOpenValues
 import org.autojs.plugin.explorer.api.IExplorerActionPlugin
 import org.autojs.plugin.explorer.api.IExplorerArchiveSession
 
@@ -35,8 +38,37 @@ object ExplorerActionPluginHost {
         target: AidlPluginHost.Discovered,
         source: ParcelFileDescriptor,
         request: Bundle,
+        protocolVersion: Int,
     ): AidlPluginHost.LeasedCall<IExplorerArchiveSession> =
         host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
-            requireNotNull(proxy.openArchive(source, request)) { "Explorer Action plugin returned no archive session" }
+            if (protocolVersion < 11) {
+                requireNotNull(proxy.openArchive(source, request)) {
+                    "Explorer Action plugin returned no archive session"
+                }
+            } else {
+                val result = requireNotNull(proxy.openArchiveV11(source, request)) {
+                    "Explorer Action plugin returned no archive-open result"
+                }
+                val errorCode = result.getInt(
+                    ExplorerArchiveOpenKeys.ERROR_CODE,
+                    ExplorerArchiveOpenValues.ERROR_UNRECOVERABLE,
+                )
+                val sessionBinder = result.getBinder(ExplorerArchiveOpenKeys.SESSION_BINDER)
+                if (errorCode == ExplorerArchiveOpenValues.ERROR_NONE && sessionBinder != null) {
+                    requireNotNull(IExplorerArchiveSession.Stub.asInterface(sessionBinder)) {
+                        "Explorer Action plugin returned an invalid archive session"
+                    }
+                } else {
+                    check(sessionBinder == null) {
+                        "Explorer Action plugin returned both a session and an archive-open error"
+                    }
+                    throw ExplorerArchiveOpenRemoteFailure(
+                        errorCode = errorCode,
+                        message = result.getString(ExplorerArchiveOpenKeys.ERROR_MESSAGE)
+                            ?.takeIf(String::isNotBlank)
+                            ?: "Explorer Action plugin could not open the archive",
+                    )
+                }
+            }
         }
 }

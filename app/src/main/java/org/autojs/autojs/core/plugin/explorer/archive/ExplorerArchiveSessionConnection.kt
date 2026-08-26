@@ -27,6 +27,7 @@ internal interface ExplorerArchiveSessionClient : Closeable {
     fun openEntry(entryId: String): ParcelFileDescriptor
     fun startExtraction(
         entryIds: List<String>,
+        options: ExplorerArchiveExtractionRequestOptions,
         listener: ExplorerArchiveExtractionListener,
     ): String
     fun cancelExtraction(operationId: String)
@@ -75,6 +76,7 @@ internal data class ExplorerArchiveExtractionResult(
 internal data class ExplorerArchiveExtractionFailure(
     val code: Int,
     val message: String,
+    val interactionKind: Int = ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_NONE,
 )
 
 internal interface ExplorerArchiveExtractionListener {
@@ -165,6 +167,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
 
     override fun startExtraction(
         entryIds: List<String>,
+        options: ExplorerArchiveExtractionRequestOptions,
         listener: ExplorerArchiveExtractionListener,
     ): String {
         check(!closed.get()) { "Archive session is closed" }
@@ -179,6 +182,9 @@ internal class ExplorerArchiveSessionConnection private constructor(
         }
         require(normalizedEntryIds.distinct().size == normalizedEntryIds.size) {
             "Archive extraction contains duplicate entry IDs"
+        }
+        require(protocolVersion >= EXTRACTION_RECOVERY_PROTOCOL_VERSION || !options.hasRecoveryOptions) {
+            "Archive session does not support recoverable extraction options"
         }
 
         val source = File(sourcePath).canonicalFile
@@ -195,11 +201,26 @@ internal class ExplorerArchiveSessionConnection private constructor(
         )
         val operationId = UUID.randomUUID().toString()
         val active = ActiveExtraction(outputSession, listener)
-        val request = Bundle().apply {
-            putString(ExplorerArchiveOperationKeys.OPERATION_ID, operationId)
-            putStringArrayList(ExplorerArchiveOperationKeys.ENTRY_IDS, ArrayList(normalizedEntryIds))
-        }
+        val request = Bundle()
         try {
+            request.putString(ExplorerArchiveOperationKeys.OPERATION_ID, operationId)
+            request.putStringArrayList(
+                ExplorerArchiveOperationKeys.ENTRY_IDS,
+                ArrayList(normalizedEntryIds),
+            )
+            if (protocolVersion >= EXTRACTION_RECOVERY_PROTOCOL_VERSION) {
+                options.passwordChars()?.let { password ->
+                    request.putCharArray(ExplorerArchiveOperationKeys.PASSWORD, password)
+                }
+                request.putBoolean(
+                    ExplorerArchiveOperationKeys.SKIP_UNSAFE_PATHS,
+                    options.skipUnsafePaths,
+                )
+                request.putBoolean(
+                    ExplorerArchiveOperationKeys.ALLOW_RESOURCE_BUDGET_OVERRIDE,
+                    options.allowResourceBudgetOverride,
+                )
+            }
             synchronized(extractionLock) {
                 check(!closed.get()) { "Archive session is closed" }
                 check(activeExtractions.isEmpty()) { "Another archive extraction is already running" }
@@ -214,6 +235,9 @@ internal class ExplorerArchiveSessionConnection private constructor(
             }
             runCatching { outputSession.closeFromHost() }
             throw error
+        } finally {
+            request.getCharArray(ExplorerArchiveOperationKeys.PASSWORD)?.fill('\u0000')
+            request.remove(ExplorerArchiveOperationKeys.PASSWORD)
         }
         return operationId
     }
@@ -368,9 +392,25 @@ internal class ExplorerArchiveSessionConnection private constructor(
         requireOperationId(bundle, expectedOperationId)
         val code = bundle.getInt(ExplorerArchiveOperationKeys.ERROR_CODE, 0)
         require(code in EXTRACTION_ERROR_CODES) { "Archive extraction error code is invalid" }
+        val interactionKind = if (
+            code == ExplorerArchiveSessionValues.EXTRACTION_ERROR_INTERACTION_REQUIRED &&
+            protocolVersion >= EXTRACTION_RECOVERY_PROTOCOL_VERSION
+        ) {
+            bundle.getInt(
+                ExplorerArchiveOperationKeys.INTERACTION_KIND,
+                ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_NONE,
+            ).also { kind ->
+                require(kind in EXTRACTION_INTERACTION_KINDS) {
+                    "Archive extraction interaction kind is invalid"
+                }
+            }
+        } else {
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_NONE
+        }
         return ExplorerArchiveExtractionFailure(
             code = code,
             message = safeFailureMessage(bundle.getString(ExplorerArchiveOperationKeys.ERROR_MESSAGE)),
+            interactionKind = interactionKind,
         )
     }
 
@@ -432,6 +472,11 @@ internal class ExplorerArchiveSessionConnection private constructor(
             compressedSize = compressedSize,
             lastModified = bundle.getLong(ExplorerArchiveSessionKeys.LAST_MODIFIED, 0L).coerceAtLeast(0L),
             canExtract = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_EXTRACT, false),
+            canOpen = if (protocolVersion >= ENTRY_CAPABILITIES_PROTOCOL_VERSION) {
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_OPEN, false)
+            } else {
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_EXTRACT, false)
+            },
         )
     }
 
@@ -517,6 +562,8 @@ internal class ExplorerArchiveSessionConnection private constructor(
         }
 
         private const val EXTRACTION_PROTOCOL_VERSION = 10
+        private const val EXTRACTION_RECOVERY_PROTOCOL_VERSION = 11
+        private const val ENTRY_CAPABILITIES_PROTOCOL_VERSION = 11
         private const val SOURCE_TARGET_ID = "archive-source"
         private val DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
             Thread(runnable, "ExplorerArchiveSessionDeath").apply { isDaemon = true }
@@ -536,6 +583,12 @@ internal class ExplorerArchiveSessionConnection private constructor(
             ExplorerArchiveSessionValues.EXTRACTION_ERROR_INVALID_REQUEST,
             ExplorerArchiveSessionValues.EXTRACTION_ERROR_PLUGIN_UNAVAILABLE,
             ExplorerArchiveSessionValues.EXTRACTION_ERROR_UNKNOWN,
+        )
+        private val EXTRACTION_INTERACTION_KINDS = setOf(
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_PASSWORD_REQUIRED,
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_WRONG_PASSWORD,
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_UNSAFE_PATHS,
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_RESOURCE_BUDGET,
         )
     }
 }

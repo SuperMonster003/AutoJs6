@@ -217,6 +217,13 @@
     <string name="dialog_button_view_shortcuts">Voir les raccourcis</string>
     <string name="dialog_button_view_update">Voir la mise à jour</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="dialog_message_archive_open_password_required">Cette archive contient des données chiffrées. Saisissez son mot de passe pour l\'ouvrir.</string>
+    <string name="dialog_message_archive_password_required">Cette archive contient des données chiffrées. Saisissez son mot de passe pour poursuivre l\'extraction.</string>
+    <string name="dialog_message_archive_resource_budget">La sélection dépasse les limites d\'extraction sûre et peut utiliser beaucoup de stockage ou de mémoire. Continuer quand même ?</string>
+    <string name="dialog_message_archive_skip_unsafe_paths">Certaines entrées contiennent des chemins non sûrs et ne peuvent pas être écrites dans la destination. Elles seront ignorées si vous continuez.</string>
+    <string name="dialog_title_archive_password">Mot de passe de l\'archive</string>
+    <string name="dialog_title_archive_resource_budget">Extraction volumineuse</string>
+    <string name="dialog_title_archive_unsafe_paths">Chemins non sûrs</string>
     <string name="dialog_title_color_details">Détails de la couleur</string>
     <string name="dialog_title_color_palette">Palette de couleurs</string>
     <string name="dialog_title_theme_color_details">Détails de la couleur du thème</string>
@@ -281,6 +288,7 @@
     <string name="error_app_not_installed_with_name">L\'application n\'est pas installée : \"%s\"</string>
     <string name="error_archive_extraction_failed">Impossible d\'extraire l\'archive : %1$s</string>
     <string name="error_archive_extraction_requires_interaction">Cette sélection nécessite un mot de passe ou une confirmation. Utilisez l\'action Extraire vers du menu du fichier.</string>
+    <string name="error_archive_password_incorrect">Le mot de passe de l\'archive est incorrect. Réessayez.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">L\'argument %1$s pour %2$s#%3$s ne peut pas être nul</string>
     <string name="error_arguments_cannot_be_empty">Les arguments ne peuvent pas être vides</string>
     <string name="error_arguments_must_be_empty">Les arguments doivent être vides</string>
@@ -487,6 +495,7 @@
     <string name="format_editor_info" formatted="false">Chars : %d\nLines : %d\nSize : %s</string>
     <string name="format_file_downloaded" formatted="true">Fichier téléchargé sur %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Ouvrir] Paramètres -> Services d\'accessibilité -> AutoJs6 [Activer]]]></string>
+    <string name="hint_archive_password">Mot de passe de l\'archive</string>
     <string name="hint_find_with_regex">La fonction Regex est prise en charge. Utilisez \"$1\" - \"$9\" pour les groupes capturés.</string>
     <string name="hint_github_token">Collez un jeton d\'accès personnel GitHub</string>
     <string name="hint_long_click_run_to_debug">Cliquez longuement sur le bouton \"Run\" pour déboguer</string>
@@ -865,6 +874,7 @@
     <string name="text_class_or_package_name">Nom de la classe ou du paquet</string>
     <string name="text_clean">Nettoyer</string>
     <string name="text_clean_completed">Nettoyage termine</string>
+    <string name="text_cleaning_archive_extraction">Nettoyage de la sortie incomplète</string>
     <string name="text_cleaning_workspace">Nettoyage de l\'espace de travail</string>
     <string name="text_clear">Effacer</string>
     <string name="text_clear_custom_css">Effacer le CSS personnalisé</string>
@@ -875,7 +885,6 @@
     <string name="text_clear_updates_checked_states">Effacer les états vérifiés des mises à jour</string>
     <string name="text_clear_version_history">Effacer l\'historique des versions</string>
     <string name="text_clear_version_history_confirm">Effacer tous les elements de l\'historique des versions?</string>
-    <string name="text_cleaning_archive_extraction">Nettoyage de la sortie incomplète</string>
     <string name="text_click_icon_to_add_launcher_shortcut">Appuyez sur l\'icone pour ajouter un raccourci au lanceur</string>
     <string name="text_click_item_to_remove">Cliquez sur l\'élément à supprimer</string>
     <string name="text_click_item_to_show_details">Touchez un élément pour afficher les détails</string>

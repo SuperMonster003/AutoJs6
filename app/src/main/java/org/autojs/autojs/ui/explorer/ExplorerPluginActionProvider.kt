@@ -5,6 +5,7 @@ import org.autojs.autojs.core.plugin.explorer.ExplorerActionEntryPoint
 import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRequestOptions
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
 
 internal interface ExplorerPluginActionProvider {
@@ -43,5 +44,6 @@ internal interface ExplorerPluginActionProvider {
         entryPoint: ExplorerActionEntryPoint,
         item: ExplorerItem,
         action: ResolvedExplorerAction,
+        options: ExplorerArchiveOpenRequestOptions,
     ): ExplorerArchiveSessionConnection = error("Explorer Action provider does not support host archive sessions")
 }

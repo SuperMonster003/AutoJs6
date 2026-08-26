@@ -23,5 +23,7 @@ object ExplorerArchiveSessionKeys {
     const val SIZE = "size"
     const val COMPRESSED_SIZE = "compressedSize"
     const val LAST_MODIFIED = "lastModified"
+    /** Per-entry preview capability. False or absent before protocol v11. */
+    const val CAN_OPEN = "canOpen"
     const val CAN_EXTRACT = "canExtract"
 }

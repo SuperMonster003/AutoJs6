@@ -214,6 +214,13 @@
     <string name="dialog_button_view_shortcuts">查看快捷方式</string>
     <string name="dialog_button_view_update">查看更新</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="dialog_message_archive_open_password_required">此壓縮檔包含加密內容. 請輸入密碼以開啟壓縮檔.</string>
+    <string name="dialog_message_archive_password_required">此壓縮檔包含加密內容. 請輸入密碼以繼續解壓縮.</string>
+    <string name="dialog_message_archive_resource_budget">所選內容超過安全解壓縮限制, 可能佔用大量儲存空間或記憶體. 是否仍要繼續?</string>
+    <string name="dialog_message_archive_skip_unsafe_paths">部分項目包含不安全路徑, 無法寫入目的地. 繼續操作將略過這些項目.</string>
+    <string name="dialog_title_archive_password">壓縮檔密碼</string>
+    <string name="dialog_title_archive_resource_budget">大型解壓縮工作</string>
+    <string name="dialog_title_archive_unsafe_paths">不安全路徑</string>
     <string name="dialog_title_color_details">顏色詳情</string>
     <string name="dialog_title_color_palette">調色盤</string>
     <string name="dialog_title_theme_color_details">主題色詳情</string>
@@ -278,6 +285,7 @@
     <string name="error_app_not_installed_with_name">應用未安裝: \"%s\"</string>
     <string name="error_archive_extraction_failed">無法解壓縮檔案: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">此選擇需要密碼或確認, 請從檔案文件選單使用解壓縮到操作</string>
+    <string name="error_archive_password_incorrect">壓縮檔密碼不正確. 請再試一次.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">參數 %1$s 對於 %2$s#%3$s 不可為 nullish</string>
     <string name="error_arguments_cannot_be_empty">參數列表不可為空</string>
     <string name="error_arguments_must_be_empty">參數列表需為空</string>
@@ -484,6 +492,7 @@
     <string name="format_editor_info" formatted="false">字符數: %d\n行數: %d\n大小: %s</string>
     <string name="format_file_downloaded" formatted="true">文件已下載至 %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[打開] 系統設置 -> 無障礙服務 -> AutoJs6 [啓用]]]></string>
+    <string name="hint_archive_password">壓縮檔密碼</string>
     <string name="hint_find_with_regex">支持正則表達式搜索, 可使用 \"$1\" - \"$9\" 表示分組捕獲</string>
     <string name="hint_github_token">貼上 GitHub Personal Access Token</string>
     <string name="hint_long_click_run_to_debug">長按 \"運行\" 圖標可啓動調試</string>
@@ -862,6 +871,7 @@
     <string name="text_class_or_package_name">類/包名</string>
     <string name="text_clean">清理</string>
     <string name="text_clean_completed">清理完成</string>
+    <string name="text_cleaning_archive_extraction">正在清理未完成的輸出</string>
     <string name="text_cleaning_workspace">正在清理工作區</string>
     <string name="text_clear">清空</string>
     <string name="text_clear_custom_css">清除自訂 CSS</string>
@@ -872,7 +882,6 @@
     <string name="text_clear_updates_checked_states">清除更新檢查狀態</string>
     <string name="text_clear_version_history">清空全部歷史記錄</string>
     <string name="text_clear_version_history_confirm">是否清空版本歷史全部條目</string>
-    <string name="text_cleaning_archive_extraction">正在清理未完成的輸出</string>
     <string name="text_click_icon_to_add_launcher_shortcut">點擊圖標添加啓動器快捷方式</string>
     <string name="text_click_item_to_remove">點擊條目可移除</string>
     <string name="text_click_item_to_show_details">點擊條目可查看詳情</string>

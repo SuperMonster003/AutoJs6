@@ -13,5 +13,10 @@ interface IExplorerActionPlugin {
 
     Bundle getActionCatalog();
 
+    // Legacy v5-v10 entry point. Its signature and transaction number remain unchanged.
     IExplorerArchiveSession openArchive(in ParcelFileDescriptor source, in Bundle request);
+
+    // v11 structured result: session Binder on success, or a bounded ExplorerArchiveOpenValues
+    // error. The transient request password must be erased by both peers after this call returns.
+    Bundle openArchiveV11(in ParcelFileDescriptor source, in Bundle request);
 }

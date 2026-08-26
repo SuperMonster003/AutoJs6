@@ -213,6 +213,13 @@
     <string name="dialog_button_view_shortcuts">View shortcuts</string>
     <string name="dialog_button_view_update">View update</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="dialog_message_archive_open_password_required">This archive contains encrypted content. Enter its password to open the archive.</string>
+    <string name="dialog_message_archive_password_required">This archive contains encrypted content. Enter its password to continue extraction.</string>
+    <string name="dialog_message_archive_resource_budget">The selection exceeds safe extraction limits and may use significant storage or memory. Continue anyway?</string>
+    <string name="dialog_message_archive_skip_unsafe_paths">Some entries contain unsafe paths and cannot be written to the destination. Continuing will skip them.</string>
+    <string name="dialog_title_archive_password">Archive password</string>
+    <string name="dialog_title_archive_resource_budget">Large extraction</string>
+    <string name="dialog_title_archive_unsafe_paths">Unsafe paths</string>
     <string name="dialog_title_color_details">Color details</string>
     <string name="dialog_title_color_palette">Color palette</string>
     <string name="dialog_title_theme_color_details">Theme color details</string>
@@ -277,6 +284,7 @@
     <string name="error_app_not_installed_with_name">App is not installed: \"%s\"</string>
     <string name="error_archive_extraction_failed">Could not extract archive: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">This selection needs a password or confirmation. Use the Extract to action from the archive file menu.</string>
+    <string name="error_archive_password_incorrect">The archive password is incorrect. Try again.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Argument %1$s for %2$s#%3$s cannot be nullish</string>
     <string name="error_arguments_cannot_be_empty">Arguments cannot be empty</string>
     <string name="error_arguments_must_be_empty">Arguments must be empty</string>
@@ -483,6 +491,7 @@
     <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
     <string name="format_file_downloaded" formatted="true">File downloaded to %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Go to] Settings -> Accessibility Services -> AutoJs6 [Enable]]]></string>
+    <string name="hint_archive_password">Archive password</string>
     <string name="hint_find_with_regex">Regex is supported. Use \"$1\" - \"$9\" for captured groups.</string>
     <string name="hint_github_token">Paste a GitHub personal access token</string>
     <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
@@ -858,6 +867,7 @@
     <string name="text_class_or_package_name">Class / Package name</string>
     <string name="text_clean">Clean</string>
     <string name="text_clean_completed">Clean completed</string>
+    <string name="text_cleaning_archive_extraction">Cleaning up incomplete output</string>
     <string name="text_cleaning_workspace">Cleaning workspace</string>
     <string name="text_clear">Clear</string>
     <string name="text_clear_custom_css">Clear custom CSS</string>
@@ -868,7 +878,6 @@
     <string name="text_clear_updates_checked_states">Clear updates checked states</string>
     <string name="text_clear_version_history">Clear version history</string>
     <string name="text_clear_version_history_confirm">Clear all version history items?</string>
-    <string name="text_cleaning_archive_extraction">Cleaning up incomplete output</string>
     <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
     <string name="text_click_item_to_remove">Click the item to remove</string>
     <string name="text_click_item_to_show_details">Click an item to view details</string>

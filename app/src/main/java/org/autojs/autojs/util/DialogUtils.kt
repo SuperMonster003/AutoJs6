@@ -793,6 +793,20 @@ object DialogUtils {
                 }
             }, delay)
         }
+
+        /** Closes a failed attempt before its replacement interaction dialog is shown. */
+        fun dismissImmediately() {
+            closed.set(true)
+            val dialog = dialogRef.get() ?: return
+            val dismiss = {
+                try {
+                    if (dialog.isShowing) dialog.dismiss()
+                } catch (_: Throwable) {
+                    /* Ignored. */
+                }
+            }
+            if (Looper.myLooper() == Looper.getMainLooper()) dismiss() else GlobalAppContext.post { dismiss() }
+        }
     }
 
     // Controller for cancellable operations (copy/move/delete).

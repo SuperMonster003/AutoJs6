@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.text.InputFilter
+import android.text.InputType
 import android.util.AttributeSet
 import android.util.Log
 import android.view.ContextThemeWrapper
@@ -55,7 +57,10 @@ import org.autojs.autojs.core.plugin.explorer.archive.ArchiveEntryTooLargeExcept
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionFailure
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionListener
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionProgress
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionRequestOptions
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionResult
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenInteractionException
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRequestOptions
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getInt
@@ -116,7 +121,9 @@ import org.autojs.autojs6.databinding.ExplorerDirectoryBinding
 import org.autojs.autojs6.databinding.ExplorerFileBinding
 import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding
 import org.autojs.autojs6.databinding.ExplorerViewBinding
+import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerActionValues
+import org.autojs.plugin.explorer.api.ExplorerArchiveOpenValues
 import org.autojs.plugin.explorer.api.ExplorerArchiveSessionValues
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
@@ -145,12 +152,80 @@ private data class ArchiveNavigationState(
     val sourceParentSegments: List<ExplorerPathSegment>,
 )
 
-private class ArchiveExtractionUiState(
+private class ArchiveOpenUiState(
+    val surface: ExplorerSurface,
+    val entryPoint: ExplorerActionEntryPoint,
+    val item: ExplorerItem,
+    val action: ResolvedExplorerAction,
+) : AutoCloseable {
+    var interactionDialog: MaterialDialog? = null
+    private var passwordValue: CharArray? = null
+
+    @Synchronized
+    fun replacePassword(password: CharArray?) {
+        passwordValue?.fill('\u0000')
+        passwordValue = password?.takeIf(CharArray::isNotEmpty)?.clone()
+    }
+
+    @Synchronized
+    fun requestOptions(): ExplorerArchiveOpenRequestOptions {
+        val password = passwordValue?.clone()
+        return try {
+            ExplorerArchiveOpenRequestOptions(password)
+        } finally {
+            password?.fill('\u0000')
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        passwordValue?.fill('\u0000')
+        passwordValue = null
+    }
+}
+
+private class ArchiveExtractionAttempt(
     val controller: DialogUtils.OperationController,
     val progressSession: DialogUtils.ProgressDialogSession,
 ) {
     @Volatile
     var operationId: String? = null
+}
+
+private class ArchiveExtractionUiState(
+    val items: List<ArchiveExplorerItem>,
+) : AutoCloseable {
+    var attempt: ArchiveExtractionAttempt? = null
+    var interactionDialog: MaterialDialog? = null
+    var skipUnsafePaths: Boolean = false
+    var allowResourceBudgetOverride: Boolean = false
+    private var passwordValue: CharArray? = null
+
+    @Synchronized
+    fun replacePassword(password: CharArray?) {
+        passwordValue?.fill('\u0000')
+        passwordValue = password?.takeIf(CharArray::isNotEmpty)?.clone()
+    }
+
+    @Synchronized
+    fun requestOptions(): ExplorerArchiveExtractionRequestOptions {
+        val password = passwordValue?.clone()
+        return try {
+            ExplorerArchiveExtractionRequestOptions(
+                password = password,
+                skipUnsafePaths = skipUnsafePaths,
+                allowResourceBudgetOverride = allowResourceBudgetOverride,
+            )
+        } finally {
+            password?.fill('\u0000')
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        passwordValue?.fill('\u0000')
+        passwordValue = null
+    }
 }
 
 /**
@@ -217,6 +292,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private var mSelectionArchiveExtraction = false
     private var mArchiveNavigationState: ArchiveNavigationState? = null
     private var mArchiveOpenJob: Job? = null
+    private var mArchiveOpenUiState: ArchiveOpenUiState? = null
     private var mArchiveEntryOpenJob: Job? = null
     private var mArchiveExtractionStartJob: Job? = null
     private var mArchiveExtractionUiState: ArchiveExtractionUiState? = null
@@ -546,8 +622,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        mArchiveOpenJob?.cancel()
-        mArchiveOpenJob = null
+        cancelArchiveOpenUi()
         mArchiveEntryOpenJob?.cancel()
         mArchiveEntryOpenJob = null
         mArchiveExtractionStartJob?.cancel()
@@ -865,8 +940,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     internal fun releasePluginResources() {
-        mArchiveOpenJob?.cancel()
-        mArchiveOpenJob = null
+        cancelArchiveOpenUi()
         mArchiveEntryOpenJob?.cancel()
         mArchiveEntryOpenJob = null
         mArchiveExtractionStartJob?.cancel()
@@ -877,6 +951,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage) {
+        cancelArchiveOpenUi()
         closeArchiveNavigation(restorePrevious = false)
         if (mExplorer != null) {
             mExplorer!!.unregisterChangeListener(this)
@@ -915,6 +990,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage, currentPage: ExplorerPage) {
+        cancelArchiveOpenUi()
         closeArchiveNavigation(restorePrevious = false)
         mExplorer?.unregisterChangeListener(this)
         mExplorer = explorer
@@ -939,29 +1015,148 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         if (items.size != 1) {
             return Result.failure(IllegalArgumentException("Host archive sessions require one file"))
         }
-        val lifecycleOwner = findViewTreeLifecycleOwner()
-            ?: return Result.failure(IllegalStateException("Explorer lifecycle is unavailable"))
-        if (mArchiveOpenJob?.isActive == true) return Result.success(Unit)
+        if (findViewTreeLifecycleOwner() == null) {
+            return Result.failure(IllegalStateException("Explorer lifecycle is unavailable"))
+        }
+        if (mArchiveOpenUiState != null || mArchiveOpenJob?.isActive == true) {
+            return Result.success(Unit)
+        }
+        val uiState = ArchiveOpenUiState(
+            surface = surface,
+            entryPoint = entryPoint,
+            item = items.single(),
+            action = action,
+        )
+        mArchiveOpenUiState = uiState
+        startArchiveOpenAttempt(uiState)
+        return Result.success(Unit)
+    }
 
+    private fun startArchiveOpenAttempt(uiState: ArchiveOpenUiState) {
+        if (mArchiveOpenUiState !== uiState || mArchiveOpenJob?.isActive == true) return
+        val provider = mPluginActionProvider ?: run {
+            finishArchiveOpenUi(uiState)
+            return
+        }
+        val lifecycleOwner = findViewTreeLifecycleOwner() ?: run {
+            finishArchiveOpenUi(uiState)
+            return
+        }
         mArchiveOpenJob = lifecycleOwner.lifecycleScope.launch {
+            val openJob = coroutineContext[Job]
             var connection: ExplorerArchiveSessionConnection? = null
+            var options: ExplorerArchiveOpenRequestOptions? = null
             try {
                 isRefreshing = true
-                connection = provider.openArchive(context, surface, entryPoint, items.single(), action)
+                val requestOptions = uiState.requestOptions()
+                options = requestOptions
+                connection = provider.openArchive(
+                    context = context,
+                    surface = uiState.surface,
+                    entryPoint = uiState.entryPoint,
+                    item = uiState.item,
+                    action = uiState.action,
+                    options = requestOptions,
+                )
                 enterArchiveNavigation(connection)
                 connection = null
+                finishArchiveOpenUi(uiState)
             } catch (error: CancellationException) {
+                finishArchiveOpenUi(uiState)
                 throw error
+            } catch (error: ExplorerArchiveOpenInteractionException) {
+                showArchiveOpenPasswordDialog(
+                    uiState = uiState,
+                    wrongPassword = error.interactionKind ==
+                        ExplorerArchiveOpenValues.ERROR_WRONG_PASSWORD,
+                )
             } catch (error: Throwable) {
                 Log.e(LOG_TAG, "Failed to open host archive session", error)
+                finishArchiveOpenUi(uiState)
                 ViewUtils.showToast(context, error.message ?: error.toString(), true)
             } finally {
+                options?.close()
                 connection?.close()
                 isRefreshing = false
-                mArchiveOpenJob = null
+                if (mArchiveOpenJob === openJob) {
+                    mArchiveOpenJob = null
+                }
             }
         }
-        return Result.success(Unit)
+    }
+
+    private fun showArchiveOpenPasswordDialog(
+        uiState: ArchiveOpenUiState,
+        wrongPassword: Boolean,
+    ) {
+        if (mArchiveOpenUiState !== uiState) return
+        uiState.replacePassword(null)
+        val dialog = MaterialDialog.Builder(context)
+            .title(R.string.dialog_title_archive_password)
+            .content(
+                if (wrongPassword) {
+                    R.string.error_archive_password_incorrect
+                } else {
+                    R.string.dialog_message_archive_open_password_required
+                },
+            )
+            .inputType(
+                InputType.TYPE_CLASS_TEXT or
+                    InputType.TYPE_TEXT_VARIATION_PASSWORD or
+                    InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS,
+            )
+            .input(context.getString(R.string.hint_archive_password), "", false) { current, input ->
+                val password = input?.let { value ->
+                    CharArray(value.length) { index -> value[index] }
+                }
+                current.inputEditText?.text?.clear()
+                if (
+                    mArchiveOpenUiState === uiState &&
+                    password != null &&
+                    password.isNotEmpty()
+                ) {
+                    uiState.replacePassword(password)
+                    uiState.interactionDialog = null
+                    current.dismiss()
+                    startArchiveOpenAttempt(uiState)
+                }
+                password?.fill('\u0000')
+            }
+            .positiveText(R.string.dialog_button_continue)
+            .negativeText(R.string.dialog_button_cancel)
+            .onNegative { current, _ ->
+                current.inputEditText?.text?.clear()
+                uiState.interactionDialog = null
+                current.dismiss()
+                finishArchiveOpenUi(uiState)
+            }
+            .cancelable(false)
+            .autoDismiss(false)
+            .show()
+        dialog.inputEditText?.filters = arrayOf(
+            InputFilter.LengthFilter(ExplorerActionProtocol.MAX_ARCHIVE_PASSWORD_LENGTH),
+        )
+        uiState.interactionDialog = dialog
+    }
+
+    private fun finishArchiveOpenUi(uiState: ArchiveOpenUiState) {
+        if (mArchiveOpenUiState !== uiState) return
+        mArchiveOpenUiState = null
+        uiState.interactionDialog?.inputEditText?.text?.clear()
+        uiState.interactionDialog?.dismiss()
+        uiState.interactionDialog = null
+        uiState.close()
+    }
+
+    private fun dismissArchiveOpenUi() {
+        val uiState = mArchiveOpenUiState ?: return
+        finishArchiveOpenUi(uiState)
+    }
+
+    private fun cancelArchiveOpenUi() {
+        mArchiveOpenJob?.cancel()
+        mArchiveOpenJob = null
+        dismissArchiveOpenUi()
     }
 
     private fun enterArchiveNavigation(connection: ExplorerArchiveSessionConnection) {
@@ -1093,15 +1288,30 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun startArchiveExtraction(items: List<ArchiveExplorerItem>) {
-        val archiveState = mArchiveNavigationState ?: return
+        if (mArchiveNavigationState == null) return
         if (mArchiveExtractionUiState != null || items.isEmpty()) return
-        val lifecycleOwner = findViewTreeLifecycleOwner() ?: return
-        val controller = DialogUtils.OperationController()
-        val progressSession = DialogUtils.ProgressDialogSession(controller)
-        val uiState = ArchiveExtractionUiState(controller, progressSession)
+        if (findViewTreeLifecycleOwner() == null) return
+        val uiState = ArchiveExtractionUiState(items.toList())
         mArchiveExtractionUiState = uiState
         updateArchiveExtractionAction()
         if (mSelectedItems.isNotEmpty()) updateSelectionToolbar()
+        startArchiveExtractionAttempt(uiState)
+    }
+
+    private fun startArchiveExtractionAttempt(uiState: ArchiveExtractionUiState) {
+        if (mArchiveExtractionUiState !== uiState || uiState.attempt != null) return
+        val archiveState = mArchiveNavigationState ?: run {
+            finishArchiveExtractionUi(uiState)
+            return
+        }
+        val lifecycleOwner = findViewTreeLifecycleOwner() ?: run {
+            finishArchiveExtractionUi(uiState)
+            return
+        }
+        val controller = DialogUtils.OperationController()
+        val progressSession = DialogUtils.ProgressDialogSession(controller)
+        val attempt = ArchiveExtractionAttempt(controller, progressSession)
+        uiState.attempt = attempt
 
         progressSession.scheduleShow(
             MaterialDialog.Builder(context)
@@ -1109,31 +1319,34 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 .content(R.string.text_preparing_archive_extraction)
                 .progress(false, DialogUtils.PROGRESS_MAX_LARGE, true)
                 .negativeText(R.string.dialog_button_cancel)
-                .onNegative { _, _ -> requestArchiveExtractionCancellation(uiState) }
+                .onNegative { _, _ -> requestArchiveExtractionCancellation(uiState, attempt) }
                 .cancelable(false)
                 .autoDismiss(false),
         )
 
         val listener = object : ExplorerArchiveExtractionListener {
             override fun onProgress(progress: ExplorerArchiveExtractionProgress) {
-                post { renderArchiveExtractionProgress(uiState, progress) }
+                post { renderArchiveExtractionProgress(uiState, attempt, progress) }
             }
 
             override fun onCompleted(result: ExplorerArchiveExtractionResult) {
-                post { completeArchiveExtraction(uiState, result) }
+                post { completeArchiveExtraction(uiState, attempt, result) }
             }
 
             override fun onFailed(failure: ExplorerArchiveExtractionFailure) {
-                post { failArchiveExtraction(uiState, failure) }
+                post { failArchiveExtraction(uiState, attempt, failure) }
             }
         }
         mArchiveExtractionStartJob = lifecycleOwner.lifecycleScope.launch {
             val startJob = coroutineContext[Job]
+            var options: ExplorerArchiveExtractionRequestOptions? = null
             try {
+                val requestOptions = uiState.requestOptions()
+                options = requestOptions
                 val operationId = withContext(Dispatchers.IO) {
-                    archiveState.provider.startExtraction(items, listener)
+                    archiveState.provider.startExtraction(uiState.items, requestOptions, listener)
                 }
-                uiState.operationId = operationId
+                attempt.operationId = operationId
                 if (controller.cancelled.get()) {
                     withContext(Dispatchers.IO) {
                         archiveState.provider.cancelExtraction(operationId)
@@ -1145,12 +1358,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 Log.e(LOG_TAG, "Failed to start host archive extraction", error)
                 failArchiveExtraction(
                     uiState,
+                    attempt,
                     ExplorerArchiveExtractionFailure(
                         ExplorerArchiveSessionValues.EXTRACTION_ERROR_UNKNOWN,
                         error.message ?: error.toString(),
                     ),
                 )
             } finally {
+                options?.close()
                 if (mArchiveExtractionStartJob === startJob) {
                     mArchiveExtractionStartJob = null
                 }
@@ -1158,13 +1373,16 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
     }
 
-    private fun requestArchiveExtractionCancellation(uiState: ArchiveExtractionUiState) {
-        if (mArchiveExtractionUiState !== uiState) return
-        uiState.controller.cancel()
-        uiState.progressSession.setContentThrottled(
+    private fun requestArchiveExtractionCancellation(
+        uiState: ArchiveExtractionUiState,
+        attempt: ArchiveExtractionAttempt,
+    ) {
+        if (mArchiveExtractionUiState !== uiState || uiState.attempt !== attempt) return
+        attempt.controller.cancel()
+        attempt.progressSession.setContentThrottled(
             mutableListOf(context.getString(R.string.text_cancelling_archive_extraction)),
         )
-        val operationId = uiState.operationId ?: return
+        val operationId = attempt.operationId ?: return
         val archiveState = mArchiveNavigationState ?: return
         findViewTreeLifecycleOwner()?.lifecycleScope?.launch(Dispatchers.IO) {
             runCatching { archiveState.provider.cancelExtraction(operationId) }
@@ -1174,9 +1392,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private fun renderArchiveExtractionProgress(
         uiState: ArchiveExtractionUiState,
+        attempt: ArchiveExtractionAttempt,
         progress: ExplorerArchiveExtractionProgress,
     ) {
-        if (mArchiveExtractionUiState !== uiState) return
+        if (mArchiveExtractionUiState !== uiState || uiState.attempt !== attempt) return
         val content = when (progress.phase) {
             ExplorerArchiveSessionValues.EXTRACTION_PHASE_PREPARING ->
                 mutableListOf(context.getString(R.string.text_preparing_archive_extraction))
@@ -1196,17 +1415,18 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 mutableListOf(context.getString(R.string.text_cleaning_archive_extraction))
             else -> return
         }
-        uiState.progressSession.setContentThrottled(content)
+        attempt.progressSession.setContentThrottled(content)
         if (progress.totalBytes > 0L) {
-            uiState.progressSession.setProgressThrottled(progress.bytesWritten, progress.totalBytes)
+            attempt.progressSession.setProgressThrottled(progress.bytesWritten, progress.totalBytes)
         }
     }
 
     private fun completeArchiveExtraction(
         uiState: ArchiveExtractionUiState,
+        attempt: ArchiveExtractionAttempt,
         result: ExplorerArchiveExtractionResult,
     ) {
-        if (mArchiveExtractionUiState !== uiState) return
+        if (mArchiveExtractionUiState !== uiState || uiState.attempt !== attempt) return
         finishArchiveExtractionUi(uiState)
         ViewUtils.showToast(
             context,
@@ -1216,9 +1436,18 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private fun failArchiveExtraction(
         uiState: ArchiveExtractionUiState,
+        attempt: ArchiveExtractionAttempt,
         failure: ExplorerArchiveExtractionFailure,
     ) {
-        if (mArchiveExtractionUiState !== uiState) return
+        if (mArchiveExtractionUiState !== uiState || uiState.attempt !== attempt) return
+        if (
+            failure.code == ExplorerArchiveSessionValues.EXTRACTION_ERROR_INTERACTION_REQUIRED &&
+            failure.interactionKind != ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_NONE
+        ) {
+            finishArchiveExtractionAttempt(uiState, attempt)
+            showArchiveExtractionInteraction(uiState, failure.interactionKind)
+            return
+        }
         finishArchiveExtractionUi(uiState)
         val message = when (failure.code) {
             ExplorerArchiveSessionValues.EXTRACTION_ERROR_CANCELLED ->
@@ -1230,17 +1459,153 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         ViewUtils.showToast(context, message, failure.code != ExplorerArchiveSessionValues.EXTRACTION_ERROR_CANCELLED)
     }
 
+    private fun showArchiveExtractionInteraction(
+        uiState: ArchiveExtractionUiState,
+        interactionKind: Int,
+    ) {
+        if (mArchiveExtractionUiState !== uiState) return
+        when (interactionKind) {
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_PASSWORD_REQUIRED,
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_WRONG_PASSWORD,
+            -> showArchivePasswordDialog(
+                uiState,
+                wrongPassword = interactionKind ==
+                    ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_WRONG_PASSWORD,
+            )
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_UNSAFE_PATHS ->
+                showArchiveExtractionConfirmation(
+                    uiState = uiState,
+                    title = R.string.dialog_title_archive_unsafe_paths,
+                    message = R.string.dialog_message_archive_skip_unsafe_paths,
+                ) { uiState.skipUnsafePaths = true }
+            ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_RESOURCE_BUDGET ->
+                showArchiveExtractionConfirmation(
+                    uiState = uiState,
+                    title = R.string.dialog_title_archive_resource_budget,
+                    message = R.string.dialog_message_archive_resource_budget,
+                ) { uiState.allowResourceBudgetOverride = true }
+            else -> {
+                finishArchiveExtractionUi(uiState)
+                ViewUtils.showToast(
+                    context,
+                    R.string.error_archive_extraction_requires_interaction,
+                    true,
+                )
+            }
+        }
+    }
+
+    private fun showArchivePasswordDialog(
+        uiState: ArchiveExtractionUiState,
+        wrongPassword: Boolean,
+    ) {
+        uiState.replacePassword(null)
+        val dialog = MaterialDialog.Builder(context)
+            .title(R.string.dialog_title_archive_password)
+            .content(
+                if (wrongPassword) {
+                    R.string.error_archive_password_incorrect
+                } else {
+                    R.string.dialog_message_archive_password_required
+                },
+            )
+            .inputType(
+                InputType.TYPE_CLASS_TEXT or
+                    InputType.TYPE_TEXT_VARIATION_PASSWORD or
+                    InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS,
+            )
+            .input(context.getString(R.string.hint_archive_password), "", false) { current, input ->
+                val password = input?.let { value ->
+                    CharArray(value.length) { index -> value[index] }
+                }
+                current.inputEditText?.text?.clear()
+                if (
+                    mArchiveExtractionUiState === uiState &&
+                    password != null &&
+                    password.isNotEmpty()
+                ) {
+                    uiState.replacePassword(password)
+                    uiState.interactionDialog = null
+                    current.dismiss()
+                    startArchiveExtractionAttempt(uiState)
+                }
+                password?.fill('\u0000')
+            }
+            .positiveText(R.string.dialog_button_continue)
+            .negativeText(R.string.dialog_button_cancel)
+            .onNegative { current, _ ->
+                current.inputEditText?.text?.clear()
+                uiState.interactionDialog = null
+                current.dismiss()
+                finishArchiveExtractionUi(uiState)
+            }
+            .cancelable(false)
+            .autoDismiss(false)
+            .show()
+        dialog.inputEditText?.filters = arrayOf(
+            InputFilter.LengthFilter(ExplorerActionProtocol.MAX_ARCHIVE_PASSWORD_LENGTH),
+        )
+        uiState.interactionDialog = dialog
+    }
+
+    private fun showArchiveExtractionConfirmation(
+        uiState: ArchiveExtractionUiState,
+        title: Int,
+        message: Int,
+        confirm: () -> Unit,
+    ) {
+        val dialog = MaterialDialog.Builder(context)
+            .title(title)
+            .content(message)
+            .positiveText(R.string.dialog_button_continue)
+            .negativeText(R.string.dialog_button_cancel)
+            .onPositive { current, _ ->
+                if (mArchiveExtractionUiState === uiState) {
+                    confirm()
+                    uiState.interactionDialog = null
+                    current.dismiss()
+                    startArchiveExtractionAttempt(uiState)
+                }
+            }
+            .onNegative { current, _ ->
+                uiState.interactionDialog = null
+                current.dismiss()
+                finishArchiveExtractionUi(uiState)
+            }
+            .cancelable(false)
+            .autoDismiss(false)
+            .show()
+        uiState.interactionDialog = dialog
+    }
+
+    private fun finishArchiveExtractionAttempt(
+        uiState: ArchiveExtractionUiState,
+        attempt: ArchiveExtractionAttempt,
+    ) {
+        if (uiState.attempt !== attempt) return
+        uiState.attempt = null
+        attempt.progressSession.dismissImmediately()
+    }
+
     private fun finishArchiveExtractionUi(uiState: ArchiveExtractionUiState) {
         if (mArchiveExtractionUiState !== uiState) return
         mArchiveExtractionUiState = null
-        uiState.progressSession.dismissSafely()
+        uiState.attempt?.let { attempt ->
+            attempt.controller.cancel()
+            attempt.progressSession.dismissSafely()
+        }
+        uiState.attempt = null
+        uiState.interactionDialog?.inputEditText?.text?.clear()
+        uiState.interactionDialog?.dismiss()
+        uiState.interactionDialog = null
+        uiState.close()
         updateArchiveExtractionAction()
         if (mSelectedItems.isNotEmpty()) updateSelectionToolbar()
     }
 
     private fun dismissArchiveExtractionUi() {
         val uiState = mArchiveExtractionUiState ?: return
-        uiState.controller.cancel()
+        uiState.attempt?.controller?.cancel()
         finishArchiveExtractionUi(uiState)
     }
 

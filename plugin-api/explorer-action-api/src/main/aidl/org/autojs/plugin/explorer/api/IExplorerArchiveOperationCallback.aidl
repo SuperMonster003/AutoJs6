@@ -2,7 +2,7 @@ package org.autojs.plugin.explorer.api;
 
 import android.os.Bundle;
 
-/** Host callback for one protocol v10 archive extraction operation. */
+/** Host callback for one archive extraction operation (v10, with typed interactions in v11). */
 oneway interface IExplorerArchiveOperationCallback {
 
     void onProgress(in Bundle update);

@@ -75,7 +75,9 @@ class ArchiveExplorerProviderTest {
         root.copyChildren(provider.getExplorerPage(root).blockingGet())
         val selected = root.toList().map { it as ArchiveExplorerItem }
 
-        val operationId = provider.startExtraction(selected, NoOpExtractionListener)
+        val operationId = ExplorerArchiveExtractionRequestOptions().use { options ->
+            provider.startExtraction(selected, options, NoOpExtractionListener)
+        }
         provider.cancelExtraction(operationId)
 
         assertEquals("operation", operationId)
@@ -95,7 +97,9 @@ class ArchiveExplorerProviderTest {
         assertFalse(root.canExtractEntry)
         assertTrue(root.toList().all { item -> !(item as ArchiveExplorerItem).canExtractEntry })
         assertThrows(IllegalStateException::class.java) {
-            provider.startExtraction(listOf(root), NoOpExtractionListener)
+            ExplorerArchiveExtractionRequestOptions().use { options ->
+                provider.startExtraction(listOf(root), options, NoOpExtractionListener)
+            }
         }
         provider.close()
     }
@@ -137,6 +141,7 @@ class ArchiveExplorerProviderTest {
 
         override fun startExtraction(
             entryIds: List<String>,
+            options: ExplorerArchiveExtractionRequestOptions,
             listener: ExplorerArchiveExtractionListener,
         ): String {
             extractionEntryIds = entryIds
@@ -166,6 +171,7 @@ class ArchiveExplorerProviderTest {
             compressedSize = if (isDirectory) -1L else size,
             lastModified = 300L,
             canExtract = true,
+            canOpen = !isDirectory,
         )
     }
 

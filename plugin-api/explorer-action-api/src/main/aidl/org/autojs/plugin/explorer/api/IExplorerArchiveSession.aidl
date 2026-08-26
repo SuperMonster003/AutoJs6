@@ -19,7 +19,8 @@ interface IExplorerArchiveSession {
 
     /**
      * Starts one asynchronous extraction into a host-owned output tree. Added in protocol v10.
-     * The request contains opaque entry IDs and a caller-generated operation ID.
+     * The request contains opaque entry IDs and a caller-generated operation ID. Protocol v11
+     * may also carry bounded, one-shot recovery options after an interaction callback.
      */
     void extractEntries(
         in Bundle request,
