@@ -1,0 +1,284 @@
+{
+  "schema": "autojs.dex-compiler.r5-performance-evaluation/v1",
+  "evaluatedAtUtc": "2026-08-26T17:10:36.1368146+00:00",
+  "decision": "NOT_PROMOTED",
+  "sourceReport": {
+    "path": "D:\\idea-projects\\AutoJs6\\docs\\dev\\dex-compiler-r5-performance-baseline-2026-08-27.json",
+    "schema": "autojs.dex-compiler.r5-performance/v1",
+    "campaignId": "97192448-3b71-4d42-b180-43c515aae0c6",
+    "benchmarkClassification": "R5_BASELINE",
+    "sizeBytes": 454193,
+    "sha256": "af14542972a9979f4170f8edfee6d969bd0334a9cdfb7d86dd8b39d43a7fa371"
+  },
+  "environment": {
+    "deviceSerial": "QV710AF65F",
+    "deviceModel": "XQ-AT72",
+    "deviceApiLevel": 31,
+    "devicePrimaryAbi": "arm64-v8a",
+    "deviceBuildFingerprintSha256": "9042a9fbd1a1ff4678bf3cbca5775dfda4b9618c969721f6d0c7c7a528817fdb",
+    "javaVersion": "java version \"1.8.0_311\"\r\nJava(TM) SE Runtime Environment (build 1.8.0_311-b11)\r\nJava HotSpot(TM) 64-Bit Server VM (build 25.311-b11, mixed mode)",
+    "sharedSignerCertificateSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+  },
+  "policy": {
+    "source": "docs/dev/dex-compiler-plugin-evaluation.md",
+    "percentileMethod": "R7_LINEAR_INTERPOLATION",
+    "minimumWarmupSamplesPerCell": 2,
+    "minimumMeasuredSamplesPerCell": 10,
+    "coldLatency": {
+      "maximumAddedP95Percent": 25.0,
+      "minimumAddedP95AllowanceMillis": 1000.0,
+      "rule": "pluginP95 <= builtInP95 + max(25_percent_of_builtInP95, 1000_ms)"
+    },
+    "cacheHitLatency": {
+      "maximumAddedP95Millis": 100.0,
+      "rule": "pluginP95 <= builtInP95 + 100_ms"
+    },
+    "combinedPss": {
+      "maximumP95RegressionPercent": 20.0,
+      "rule": "pluginCombinedPssP95 <= builtInCombinedPssP95 * 1.20"
+    },
+    "cacheStateVerifiedRate": {
+      "required": 1.0,
+      "rule": "all_measured_samples_must_prove_requested_cache_state_and_adopted_route"
+    }
+  },
+  "integrity": {
+    "sourceRunStatus": "PASS",
+    "exactPackageRestoration": true,
+    "measuredSamples": 120,
+    "routeVerifiedSamples": 120,
+    "routeVerifiedRate": 1.0,
+    "cacheStateVerifiedSamples": 120,
+    "cacheStateVerifiedRate": 1.0,
+    "cacheHitMeasuredSamples": 60,
+    "cacheHitVerifiedSamples": 60,
+    "cacheHitVerifiedRate": 1.0,
+    "pluginCacheHitMeasuredSamples": 30,
+    "pluginCacheHitAdoptedSamples": 30,
+    "pluginCacheHitAdoptedRate": 1.0
+  },
+  "gateSummary": {
+    "cellCount": 6,
+    "latencyPassed": 6,
+    "combinedPssPassed": 5,
+    "cacheStatePassed": 6,
+    "deterministicOutputPassed": 6,
+    "failedGateCount": 1
+  },
+  "cells": [
+    {
+      "corpusId": "java8-1x8",
+      "cacheState": "COLD",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 711.5664430999999,
+        "pluginP95Millis": 670.3078876,
+        "pluginAddedP95Millis": -41.25855549999994,
+        "maximumAddedP95Millis": 1000.0,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 188818.1,
+        "pluginP95Kb": 207923.6,
+        "pluginRegressionPercent": 10.118468515465413,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 828,
+        "builtInSha256": "76d560924af36a60bb5a7ecb9d5d73feb1c35312a116507bf26e5e1bccd99431",
+        "pluginSizeBytes": 948,
+        "pluginSha256": "3bfe760ac1c93cc91f06641ce7996f990cc8eae8804e2341ad698652a43f8a6f",
+        "passed": true
+      },
+      "passed": true
+    },
+    {
+      "corpusId": "java8-1x8",
+      "cacheState": "CACHE_HIT",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 646.008252,
+        "pluginP95Millis": 472.5039762,
+        "pluginAddedP95Millis": -173.50427579999996,
+        "maximumAddedP95Millis": 100.0,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 188061.7,
+        "pluginP95Kb": 196217.95,
+        "pluginRegressionPercent": 4.3370074821189,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 828,
+        "builtInSha256": "76d560924af36a60bb5a7ecb9d5d73feb1c35312a116507bf26e5e1bccd99431",
+        "pluginSizeBytes": 948,
+        "pluginSha256": "3bfe760ac1c93cc91f06641ce7996f990cc8eae8804e2341ad698652a43f8a6f",
+        "passed": true
+      },
+      "passed": true
+    },
+    {
+      "corpusId": "java8-128x8",
+      "cacheState": "COLD",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 1893.54406465,
+        "pluginP95Millis": 1364.682125,
+        "pluginAddedP95Millis": -528.8619396500001,
+        "maximumAddedP95Millis": 1000.0,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 217372.5,
+        "pluginP95Kb": 238627.35,
+        "pluginRegressionPercent": 9.778076803643518,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 30152,
+        "builtInSha256": "b0bcd1a1e5bd6ecfd1dc7919898f1af99c16363a9bd0addab15aefe99158dcf1",
+        "pluginSizeBytes": 30272,
+        "pluginSha256": "05bb6da4ed3ab098933b8555b8a888799c60470a995f1be08e04f688ef509179",
+        "passed": true
+      },
+      "passed": true
+    },
+    {
+      "corpusId": "java8-128x8",
+      "cacheState": "CACHE_HIT",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 1905.2703667,
+        "pluginP95Millis": 524.4286461,
+        "pluginAddedP95Millis": -1380.8417206,
+        "maximumAddedP95Millis": 100.0,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 214567.55,
+        "pluginP95Kb": 196238.2,
+        "pluginRegressionPercent": -8.542461336767827,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 30152,
+        "builtInSha256": "b0bcd1a1e5bd6ecfd1dc7919898f1af99c16363a9bd0addab15aefe99158dcf1",
+        "pluginSizeBytes": 30272,
+        "pluginSha256": "05bb6da4ed3ab098933b8555b8a888799c60470a995f1be08e04f688ef509179",
+        "passed": true
+      },
+      "passed": true
+    },
+    {
+      "corpusId": "java8-2048x8",
+      "cacheState": "COLD",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 9033.50875695,
+        "pluginP95Millis": 5162.41918005,
+        "pluginAddedP95Millis": -3871.089576899999,
+        "maximumAddedP95Millis": 2258.3771892375,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 279424.6,
+        "pluginP95Kb": 344539.5,
+        "pluginRegressionPercent": 23.303209524143554,
+        "maximumRegressionPercent": 20.0,
+        "passed": false
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 486188,
+        "builtInSha256": "c4f27c321be6a017ad822a0047096aa11d8cf7403c6bb22d9c614aa0a9f513bf",
+        "pluginSizeBytes": 486308,
+        "pluginSha256": "a0d283fc697e73d60f217e3d9005c34fce3ba472a5b68530603cdcf0557d48ac",
+        "passed": true
+      },
+      "passed": false
+    },
+    {
+      "corpusId": "java8-2048x8",
+      "cacheState": "CACHE_HIT",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 9060.76343895,
+        "pluginP95Millis": 656.26625025,
+        "pluginAddedP95Millis": -8404.4971887,
+        "maximumAddedP95Millis": 100.0,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 281347.2,
+        "pluginP95Kb": 198655.95,
+        "pluginRegressionPercent": -29.391175742996552,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 486188,
+        "builtInSha256": "c4f27c321be6a017ad822a0047096aa11d8cf7403c6bb22d9c614aa0a9f513bf",
+        "pluginSizeBytes": 486308,
+        "pluginSha256": "a0d283fc697e73d60f217e3d9005c34fce3ba472a5b68530603cdcf0557d48ac",
+        "passed": true
+      },
+      "passed": true
+    }
+  ],
+  "failedGates": [
+    {
+      "corpusId": "java8-2048x8",
+      "cacheState": "COLD",
+      "gate": "P95_COMBINED_PSS",
+      "actual": 23.303209524143554,
+      "maximum": 20.0,
+      "unit": "percent_regression_over_builtin"
+    }
+  ],
+  "claims": {
+    "performancePromotionPassed": false,
+    "performanceAdvantageClaimAuthorized": false,
+    "defaultEnableAuthorized": false,
+    "note": "At least one R5.2 promotion gate failed; performance advantage and default enablement remain unauthorized."
+  }
+}
