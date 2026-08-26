@@ -43,6 +43,52 @@ class DexIndexedZipValidatorTest {
     }
 
     @Test
+    fun acceptsDependencyOrderedClassDefinitionsWithNonMonotonicTypeIndices() {
+        val result = DexIndexedZipValidator.validate(
+            zipOf("classes.dex" to dependencyOrderedDex(definitionsInDependencyOrder = true)),
+        )
+
+        assertEquals(2, result.classDefinitionCount)
+    }
+
+    @Test
+    fun rejectsLocallyDefinedSuperclassAfterItsChild() {
+        assertFailure(DexOutputValidationFailure.INVALID_DEX_SECTION) {
+            DexIndexedZipValidator.validate(
+                zipOf("classes.dex" to dependencyOrderedDex(definitionsInDependencyOrder = false)),
+            )
+        }
+    }
+
+    @Test
+    fun acceptsDependencyOrderedInterfacesWithNonMonotonicTypeIndices() {
+        val result = DexIndexedZipValidator.validate(
+            zipOf(
+                "classes.dex" to dependencyOrderedDex(
+                    definitionsInDependencyOrder = true,
+                    dependencyIsInterface = true,
+                ),
+            ),
+        )
+
+        assertEquals(2, result.classDefinitionCount)
+    }
+
+    @Test
+    fun rejectsLocallyDefinedInterfaceAfterItsImplementer() {
+        assertFailure(DexOutputValidationFailure.INVALID_DEX_SECTION) {
+            DexIndexedZipValidator.validate(
+                zipOf(
+                    "classes.dex" to dependencyOrderedDex(
+                        definitionsInDependencyOrder = false,
+                        dependencyIsInterface = true,
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
     fun rejectsUnexpectedAndNonContiguousEntryNames() {
         assertFailure(DexOutputValidationFailure.UNEXPECTED_ZIP_ENTRY) {
             DexIndexedZipValidator.validate(zipOf("resource.txt" to minimalDex("Lfixture/One;")))
@@ -292,6 +338,126 @@ class DexIndexedZipValidatorTest {
         dex[stringDataOffset] = descriptor.length.toByte()
         descriptorBytes.copyInto(dex, stringDataOffset + 1)
         dex[fileSize - 1] = 0
+        resealDex(dex)
+        return dex
+    }
+
+    private fun dependencyOrderedDex(
+        definitionsInDependencyOrder: Boolean,
+        dependencyIsInterface: Boolean = false,
+    ): ByteArray {
+        val descriptors = listOf(
+            if (dependencyIsInterface) "Lfixture/AImplementer;" else "Lfixture/AChild;",
+            if (dependencyIsInterface) "Lfixture/ZInterface;" else "Lfixture/ZBase;",
+            "Ljava/lang/Object;",
+        )
+        check(descriptors == descriptors.sorted())
+        val stringIdsOffset = 0x70
+        val typeIdsOffset = stringIdsOffset + descriptors.size * 4
+        val classDefsOffset = typeIdsOffset + descriptors.size * 4
+        val classDefsSize = 2
+        val mapOffset = classDefsOffset + classDefsSize * 32
+        val mapEntryCount = if (dependencyIsInterface) 7 else 6
+        val typeListOffset = mapOffset + 4 + mapEntryCount * MAP_ITEM_BYTES
+        val stringDataOffset = typeListOffset + if (dependencyIsInterface) 8 else 0
+        val descriptorBytes = descriptors.map { descriptor ->
+            descriptor.toByteArray(Charsets.UTF_8).also { bytes ->
+                require(descriptor.length < 0x80 && bytes.size == descriptor.length)
+            }
+        }
+        val fileSize = stringDataOffset + descriptorBytes.sumOf { 1 + it.size + 1 }
+        val dex = ByteArray(fileSize)
+        "dex\n035\u0000".toByteArray(Charsets.US_ASCII).copyInto(dex, 0)
+        dex.putU32(32, fileSize.toLong())
+        dex.putU32(36, 0x70)
+        dex.putU32(40, 0x12345678)
+        dex.putU32(52, mapOffset.toLong())
+        dex.putU32(56, descriptors.size.toLong())
+        dex.putU32(60, stringIdsOffset.toLong())
+        dex.putU32(64, descriptors.size.toLong())
+        dex.putU32(68, typeIdsOffset.toLong())
+        dex.putU32(96, classDefsSize.toLong())
+        dex.putU32(100, classDefsOffset.toLong())
+        dex.putU32(104, (fileSize - mapOffset).toLong())
+        dex.putU32(108, mapOffset.toLong())
+
+        var nextStringDataOffset = stringDataOffset
+        descriptorBytes.forEachIndexed { index, bytes ->
+            dex.putU32(stringIdsOffset + index * 4, nextStringDataOffset.toLong())
+            dex.putU32(typeIdsOffset + index * 4, index.toLong())
+            dex[nextStringDataOffset] = bytes.size.toByte()
+            bytes.copyInto(dex, nextStringDataOffset + 1)
+            nextStringDataOffset += 1 + bytes.size + 1
+        }
+
+        fun writeClassDefinition(
+            offset: Int,
+            classIndex: Int,
+            superclassIndex: Int,
+            accessFlags: Int = 1,
+            interfacesOffset: Int = 0,
+        ) {
+            dex.putU32(offset, classIndex.toLong())
+            dex.putU32(offset + 4, accessFlags.toLong())
+            dex.putU32(offset + 8, superclassIndex.toLong())
+            dex.putU32(offset + 12, interfacesOffset.toLong())
+            dex.putU32(offset + 16, 0xffffffffL)
+        }
+        data class Definition(
+            val classIndex: Int,
+            val superclassIndex: Int,
+            val accessFlags: Int = 1,
+            val interfacesOffset: Int = 0,
+        )
+        val dependency = Definition(
+            classIndex = 1,
+            superclassIndex = 2,
+            accessFlags = if (dependencyIsInterface) 0x601 else 1,
+        )
+        val consumer = Definition(
+            classIndex = 0,
+            superclassIndex = if (dependencyIsInterface) 2 else 1,
+            interfacesOffset = if (dependencyIsInterface) typeListOffset else 0,
+        )
+        val definitions = if (definitionsInDependencyOrder) {
+            listOf(dependency, consumer)
+        } else {
+            listOf(consumer, dependency)
+        }
+        definitions.forEachIndexed { index, definition ->
+            writeClassDefinition(
+                offset = classDefsOffset + index * 32,
+                classIndex = definition.classIndex,
+                superclassIndex = definition.superclassIndex,
+                accessFlags = definition.accessFlags,
+                interfacesOffset = definition.interfacesOffset,
+            )
+        }
+
+        dex.putU32(mapOffset, mapEntryCount.toLong())
+        var mapCursor = mapOffset + 4
+        listOf(
+            Triple(0x0000, 1, 0),
+            Triple(0x0001, descriptors.size, stringIdsOffset),
+            Triple(0x0002, descriptors.size, typeIdsOffset),
+            Triple(0x0006, classDefsSize, classDefsOffset),
+            Triple(0x1000, 1, mapOffset),
+        ).plus(
+            if (dependencyIsInterface) listOf(Triple(0x1001, 1, typeListOffset)) else emptyList(),
+        ).plus(
+            listOf(
+            Triple(0x2002, descriptors.size, stringDataOffset),
+            ),
+        ).forEach { (type, count, offset) ->
+            dex.putU16(mapCursor, type)
+            dex.putU32(mapCursor + 4, count.toLong())
+            dex.putU32(mapCursor + 8, offset.toLong())
+            mapCursor += MAP_ITEM_BYTES
+        }
+        if (dependencyIsInterface) {
+            dex.putU32(typeListOffset, 1)
+            dex.putU16(typeListOffset + 4, 1)
+        }
         resealDex(dex)
         return dex
     }

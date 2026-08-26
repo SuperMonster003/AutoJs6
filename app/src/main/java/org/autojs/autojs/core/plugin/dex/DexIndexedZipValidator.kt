@@ -341,18 +341,51 @@ internal object DexIndexedZipValidator {
             requireIndex(bytes.u32(offset + 4), stringCount, entryName, "method name index")
         }
 
-        val descriptors = linkedSetOf<String>()
-        var previousClassIndex = -1L
-        repeat(header.classDefsSize.toInt()) { index ->
+        val classIndices = LongArray(header.classDefsSize.toInt())
+        val allDefinedClassIndices = HashSet<Long>(classIndices.size)
+        classIndices.indices.forEach { index ->
             val offset = header.classDefsOffset.toInt() + index * 32
             val classIndex = bytes.u32(offset)
-            if (classIndex >= typeCount || classIndex <= previousClassIndex) {
-                fail(DexOutputValidationFailure.INVALID_DEX_SECTION, "$entryName has invalid or unsorted class definitions")
+            if (classIndex >= typeCount) {
+                fail(DexOutputValidationFailure.INVALID_DEX_SECTION, "$entryName has an invalid class definition index")
             }
-            previousClassIndex = classIndex
+            if (!allDefinedClassIndices.add(classIndex)) {
+                fail(DexOutputValidationFailure.DUPLICATE_CLASS_DEFINITION, "$entryName defines one class more than once")
+            }
+            classIndices[index] = classIndex
+        }
+
+        val descriptors = linkedSetOf<String>()
+        val precedingClassIndices = HashSet<Long>(classIndices.size)
+        repeat(header.classDefsSize.toInt()) { index ->
+            val offset = header.classDefsOffset.toInt() + index * 32
+            val classIndex = classIndices[index]
             val superclassIndex = bytes.u32(offset + 8)
-            if (superclassIndex != NO_INDEX) requireIndex(superclassIndex, typeCount, entryName, "superclass index")
-            requireMappedReference(bytes.u32(offset + 12), TYPE_TYPE_LIST, map, entryName, "interfaces")
+            if (superclassIndex != NO_INDEX) {
+                requireIndex(superclassIndex, typeCount, entryName, "superclass index")
+                requireLocalDefinitionPrecedes(
+                    dependencyIndex = superclassIndex,
+                    allDefinedClassIndices = allDefinedClassIndices,
+                    precedingClassIndices = precedingClassIndices,
+                    entryName = entryName,
+                    label = "superclass",
+                )
+            }
+            readInterfaceTypeIndices(
+                bytes = bytes,
+                offset = bytes.u32(offset + 12),
+                typeCount = typeCount,
+                map = map,
+                entryName = entryName,
+            ).forEach { interfaceIndex ->
+                requireLocalDefinitionPrecedes(
+                    dependencyIndex = interfaceIndex,
+                    allDefinedClassIndices = allDefinedClassIndices,
+                    precedingClassIndices = precedingClassIndices,
+                    entryName = entryName,
+                    label = "interface",
+                )
+            }
             val sourceFileIndex = bytes.u32(offset + 16)
             if (sourceFileIndex != NO_INDEX) requireIndex(sourceFileIndex, stringCount, entryName, "source file index")
             requireMappedReference(
@@ -377,8 +410,64 @@ internal object DexIndexedZipValidator {
             if (!descriptors.add(descriptor)) {
                 fail(DexOutputValidationFailure.DUPLICATE_CLASS_DEFINITION, "$entryName defines $descriptor more than once")
             }
+            precedingClassIndices += classIndex
         }
         return descriptors
+    }
+
+    private fun requireLocalDefinitionPrecedes(
+        dependencyIndex: Long,
+        allDefinedClassIndices: Set<Long>,
+        precedingClassIndices: Set<Long>,
+        entryName: String,
+        label: String,
+    ) {
+        if (dependencyIndex in allDefinedClassIndices && dependencyIndex !in precedingClassIndices) {
+            fail(
+                DexOutputValidationFailure.INVALID_DEX_SECTION,
+                "$entryName defines a local $label after the class that references it",
+            )
+        }
+    }
+
+    private fun readInterfaceTypeIndices(
+        bytes: ByteArray,
+        offset: Long,
+        typeCount: Long,
+        map: DexMap,
+        entryName: String,
+    ): List<Long> {
+        if (offset == 0L) return emptyList()
+        requireMappedReference(offset, TYPE_TYPE_LIST, map, entryName, "interfaces")
+        val item = checkNotNull(map.item(TYPE_TYPE_LIST))
+        val upperBound = map.upperBound(item)
+        if (offset % 4L != 0L || offset > upperBound - 4L) {
+            fail(DexOutputValidationFailure.INVALID_DEX_SECTION, "$entryName has an invalid interfaces list")
+        }
+        val cursor = offset.toIntExact(entryName, "interfaces offset")
+        val size = bytes.u32(cursor)
+        if (size == 0L || size > typeCount) {
+            fail(DexOutputValidationFailure.INVALID_DEX_SECTION, "$entryName has an invalid interfaces count")
+        }
+        val byteLength = checkedAdd(
+            4L,
+            checkedMultiply(size, 2L, "$entryName interfaces size"),
+            "$entryName interfaces size",
+        )
+        if (checkedAdd(offset, byteLength, "$entryName interfaces end") > upperBound) {
+            fail(DexOutputValidationFailure.INVALID_DEX_SECTION, "$entryName interfaces exceed their mapped section")
+        }
+        val result = ArrayList<Long>(size.toInt())
+        val unique = HashSet<Long>(size.toInt())
+        repeat(size.toInt()) { index ->
+            val interfaceIndex = bytes.u16(cursor + 4 + index * 2).toLong()
+            requireIndex(interfaceIndex, typeCount, entryName, "interface index")
+            if (!unique.add(interfaceIndex)) {
+                fail(DexOutputValidationFailure.INVALID_DEX_SECTION, "$entryName has duplicate interfaces")
+            }
+            result += interfaceIndex
+        }
+        return result
     }
 
     private fun requireIndex(index: Long, count: Long, entryName: String, label: String) {
