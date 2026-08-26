@@ -1,0 +1,363 @@
+{
+  "schema": "autojs.dex-compiler.r5-performance/v1",
+  "campaignId": "71fc7660-c57c-4597-8c47-a53b68d9f480",
+  "status": "BLOCKED",
+  "benchmarkClassification": "R5_BASELINE",
+  "startedAtUtc": "2026-08-26T17:37:14.6895435+00:00",
+  "finishedAtUtc": "2026-08-26T17:38:26.7393995+00:00",
+  "contract": {
+    "timingBoundary": "LOAD_JAR_THROUGH_CLASS_RESOLUTION_AND_STATIC_INVOCATION",
+    "processState": "HOST_AND_PROVIDER_FORCE_STOPPED_BEFORE_EVERY_TIMED_SAMPLE",
+    "corpusGenerator": "ON_DEVICE_DETERMINISTIC_JAVA8_CLASSFILE_V1",
+    "routes": [
+      "BUILTIN",
+      "PLUGIN"
+    ],
+    "cacheStates": [
+      "COLD",
+      "CACHE_HIT"
+    ],
+    "warmupSamplesPerCell": 2,
+    "measuredSamplesPerCell": 10,
+    "requestedInterPssPollDelayMillis": 100,
+    "betweenSamplesSeconds": 1,
+    "sampleOrder": "PAIRWISE_ALTERNATING_ROUTE_ORDER_PER_CORPUS_AND_CACHE_STATE",
+    "coldPluginCleanup": "EXACT_TRACKED_GENERATION_INVALIDATED_AFTER_TIMED_LOAD_WITHOUT_UNTIMED_RECOMPILATION",
+    "providerProcessExpectation": "OBSERVED_FOR_PROCESS_COLD_PLUGIN_ROUTE_IN_BOTH_CACHE_STATES_BECAUSE_CACHE_KEY_FINALIZATION_IS_CAPABILITY_BOUND",
+    "percentileMethod": "R7_LINEAR_INTERPOLATION"
+  },
+  "environment": {
+    "hostOs": "Microsoft Windows 10.0.26200",
+    "powershellVersion": "7.6.5",
+    "javaVersion": "java version \"1.8.0_311\"\r\nJava(TM) SE Runtime Environment (build 1.8.0_311-b11)\r\nJava HotSpot(TM) 64-Bit Server VM (build 25.311-b11, mixed mode)",
+    "adbVersion": "Android Debug Bridge version 1.0.41\r\nVersion 37.0.1-15733141\r\nInstalled as E:\\.android\\sdk\\platform-tools\\adb.exe\r\nRunning on Windows 10.0.26200",
+    "adbPath": "E:\\.android\\sdk\\platform-tools\\adb.exe",
+    "aapt2Path": "E:\\.android\\sdk\\build-tools\\37.0.0\\aapt2.exe",
+    "apkSignerPath": "E:\\.android\\sdk\\build-tools\\37.0.0\\apksigner.bat",
+    "deviceBefore": {
+      "exactSerial": "QV710AF65F",
+      "manufacturer": "Sony",
+      "model": "XQ-AT72",
+      "apiLevel": 31,
+      "primaryAbi": "arm64-v8a",
+      "buildId": "58.2.A.10.44A",
+      "securityPatch": "2022-07-01",
+      "buildFingerprintSha256": "9042a9fbd1a1ff4678bf3cbca5775dfda4b9618c969721f6d0c7c7a528817fdb",
+      "battery": {
+        "levelPercent": "100",
+        "status": "5",
+        "plugged": null,
+        "temperatureCelsius": 34.7
+      },
+      "thermalStatusRaw": null
+    },
+    "deviceAfter": null
+  },
+  "artifacts": [
+    {
+      "label": "AutoJs6 host",
+      "path": "C:\\r5p\\app\\build\\outputs\\apk\\app\\debug\\autojs6-v6.8.0-arm64-v8a.apk",
+      "packageName": "org.autojs.autojs6",
+      "versionCode": 5276,
+      "versionName": "6.8.0",
+      "sizeBytes": 42427353,
+      "sha256": "32b787052c76030ac47a7c601dede8cc4e46b0a4c5d249f506fe57c6b4814419",
+      "signerCertificateSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213",
+      "nativeAbis": "arm64-v8a",
+      "debuggable": false
+    },
+    {
+      "label": "AutoJs6 androidTest",
+      "path": "C:\\r5p\\app\\build\\outputs\\apk\\androidTest\\app\\debug\\app-app-debug-androidTest.apk",
+      "packageName": "org.autojs.autojs6.test",
+      "versionCode": null,
+      "versionName": "",
+      "sizeBytes": 1711264,
+      "sha256": "03aca02f2785e9cf3f214a2bfd1855a72249cade930ab78a823d7cfd48554677",
+      "signerCertificateSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213",
+      "nativeAbis": null,
+      "debuggable": false
+    },
+    {
+      "label": "DEX compiler plugin",
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-DEX-Compiler\\app\\build\\outputs\\apk\\release\\autojs6-plugin-dex-compiler-v1.0.0.apk",
+      "packageName": "io.github.supermonster003.autojs6.plugin.dexcompiler",
+      "versionCode": 4,
+      "versionName": "1.0.0",
+      "sizeBytes": 6638094,
+      "sha256": "3b9418227d90fccac495519f61552a78ef8ece5946602930a9100f7ba77981ad",
+      "signerCertificateSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213",
+      "nativeAbis": null,
+      "debuggable": false
+    }
+  ],
+  "initialPackageState": [
+    {
+      "packageName": "org.autojs.autojs6",
+      "initiallyInstalledForUser0": true,
+      "initiallyGlobalKnown": true,
+      "apkCount": 1,
+      "apkSha256": [
+        "fca09ff81ba528d7f1b45803a0e1ee38a484ef779c6b008ae20790aa70a05b2c"
+      ]
+    },
+    {
+      "packageName": "org.autojs.autojs6.test",
+      "initiallyInstalledForUser0": false,
+      "initiallyGlobalKnown": false,
+      "apkCount": 0,
+      "apkSha256": []
+    },
+    {
+      "packageName": "io.github.supermonster003.autojs6.plugin.dexcompiler",
+      "initiallyInstalledForUser0": false,
+      "initiallyGlobalKnown": false,
+      "apkCount": 0,
+      "apkSha256": []
+    }
+  ],
+  "packageRestoration": "NOT_VERIFIED",
+  "recoverySnapshotPath": "C:\\Users\\wu2du\\AppData\\Local\\Temp\\autojs-dex-r5-9531b61a-ded9-4e3a-8f4a-99ce9a04c062",
+  "corpora": [
+    {
+      "schemaVersion": 1,
+      "generatorVersion": 1,
+      "corpusId": "java8-1x8",
+      "classCount": 1,
+      "staticMethodsPerClass": 8,
+      "declaredMethodCount": 9,
+      "inputSizeBytes": 742,
+      "inputSha256": "d2d6a87e61292ee3a14f71673b62b623d50587d31c3616cc7416f59d750c036b",
+      "deterministicRegeneration": true
+    }
+  ],
+  "management": [
+    {
+      "schemaVersion": 1,
+      "action": "CLEANUP",
+      "route": "BUILTIN",
+      "corpus": {
+        "generatorVersion": 1,
+        "corpusId": "java8-1x8",
+        "classCount": 1,
+        "staticMethodsPerClass": 8,
+        "declaredMethodCount": 9,
+        "inputSizeBytes": 742,
+        "inputSha256": "d2d6a87e61292ee3a14f71673b62b623d50587d31c3616cc7416f59d750c036b"
+      },
+      "adoptedPath": null,
+      "artifact": {
+        "outputSizeBytes": 0,
+        "outputSha256": null,
+        "cacheKeySha256": null,
+        "metadataLookupCacheHit": false,
+        "generationInvalidated": false,
+        "loaderCacheFileCount": 0,
+        "loaderCacheBytes": 0
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "action": "CLEANUP",
+      "route": "PLUGIN",
+      "corpus": {
+        "generatorVersion": 1,
+        "corpusId": "java8-1x8",
+        "classCount": 1,
+        "staticMethodsPerClass": 8,
+        "declaredMethodCount": 9,
+        "inputSizeBytes": 742,
+        "inputSha256": "d2d6a87e61292ee3a14f71673b62b623d50587d31c3616cc7416f59d750c036b"
+      },
+      "adoptedPath": null,
+      "artifact": {
+        "outputSizeBytes": 0,
+        "outputSha256": null,
+        "cacheKeySha256": null,
+        "metadataLookupCacheHit": false,
+        "generationInvalidated": false,
+        "loaderCacheFileCount": 0,
+        "loaderCacheBytes": 0
+      }
+    }
+  ],
+  "expectedTimedSamples": 144,
+  "completedTimedSamples": 2,
+  "samples": [
+    {
+      "corpusId": "java8-1x8",
+      "route": "BUILTIN",
+      "cacheState": "COLD",
+      "phase": "WARMUP",
+      "sampleIndex": 0,
+      "startedAtUtc": "2026-08-26T17:37:33.8829670+00:00",
+      "instrumentationWallMillis": 7526.9502,
+      "instrumentationOutputSha256": "a815da3dbe5395d6858d54da1d9f4abf51ec39376ffba033ae172e68c027ebca",
+      "externalMemory": {
+        "requestedInterPollDelayMillis": 100,
+        "pollCount": 13,
+        "hostObserved": true,
+        "providerObserved": false,
+        "hostPeakPssKb": 186379,
+        "providerPeakPssKb": 0,
+        "combinedPeakPssKb": 186379
+      },
+      "device": {
+        "schemaVersion": 1,
+        "sampleIndex": 0,
+        "route": "BUILTIN",
+        "cacheState": "COLD",
+        "cacheExpectedHit": false,
+        "cacheStateVerified": true,
+        "cacheVerification": "EMPTY_FRESH_LOADER_CACHE_AND_BUILTIN_ROUTE",
+        "cacheArtifactLastModifiedDeltaMillis": null,
+        "processState": "HOST_AND_PROVIDER_FORCE_STOPPED_BEFORE_SAMPLE",
+        "timingBoundary": "LOAD_JAR_THROUGH_CLASS_RESOLUTION_AND_STATIC_INVOCATION",
+        "elapsedNanos": 550811875,
+        "elapsedMillis": 550.811875,
+        "adoptedPath": "BUILTIN",
+        "adoptedHint": null,
+        "result": 42,
+        "corpus": {
+          "generatorVersion": 1,
+          "corpusId": "java8-1x8",
+          "classCount": 1,
+          "staticMethodsPerClass": 8,
+          "declaredMethodCount": 9,
+          "inputSizeBytes": 742,
+          "inputSha256": "d2d6a87e61292ee3a14f71673b62b623d50587d31c3616cc7416f59d750c036b"
+        },
+        "memory": {
+          "before": {
+            "hostPssKb": 182598,
+            "javaHeapUsedBytes": 4831304,
+            "nativeHeapAllocatedBytes": 6985152
+          },
+          "after": {
+            "hostPssKb": 185119,
+            "javaHeapUsedBytes": 7315576,
+            "nativeHeapAllocatedBytes": 7206240
+          }
+        },
+        "artifact": {
+          "outputSizeBytes": 828,
+          "outputSha256": "76d560924af36a60bb5a7ecb9d5d73feb1c35312a116507bf26e5e1bccd99431",
+          "cacheKeySha256": null,
+          "metadataLookupCacheHit": true,
+          "generationInvalidated": false,
+          "loaderCacheFileCount": 2,
+          "loaderCacheBytes": 1656
+        },
+        "host": {
+          "packageName": "org.autojs.autojs6",
+          "versionName": "6.8.0",
+          "versionCode": 5276
+        },
+        "device": {
+          "apiLevel": 31,
+          "primaryAbi": "arm64-v8a",
+          "model": "XQ-AT72",
+          "buildFingerprintSha256": "9042a9fbd1a1ff4678bf3cbca5775dfda4b9618c969721f6d0c7c7a528817fdb"
+        }
+      }
+    },
+    {
+      "corpusId": "java8-1x8",
+      "route": "PLUGIN",
+      "cacheState": "COLD",
+      "phase": "WARMUP",
+      "sampleIndex": 0,
+      "startedAtUtc": "2026-08-26T17:37:43.8386683+00:00",
+      "instrumentationWallMillis": 12743.333,
+      "instrumentationOutputSha256": "dd3e05ca96b4f7f513a4227cdf4df68cff10871d48295660bb004885dd58d9c4",
+      "externalMemory": {
+        "requestedInterPollDelayMillis": 100,
+        "pollCount": 9,
+        "hostObserved": true,
+        "providerObserved": true,
+        "hostPeakPssKb": 182274,
+        "providerPeakPssKb": 25654,
+        "combinedPeakPssKb": 207928
+      },
+      "device": {
+        "schemaVersion": 1,
+        "sampleIndex": 0,
+        "route": "PLUGIN",
+        "cacheState": "COLD",
+        "cacheExpectedHit": false,
+        "cacheStateVerified": true,
+        "cacheVerification": "PLUGIN_ROUTE_AND_EXACT_GENERATION_INVALIDATED",
+        "cacheArtifactLastModifiedDeltaMillis": null,
+        "processState": "HOST_AND_PROVIDER_FORCE_STOPPED_BEFORE_SAMPLE",
+        "timingBoundary": "LOAD_JAR_THROUGH_CLASS_RESOLUTION_AND_STATIC_INVOCATION",
+        "elapsedNanos": 693694479,
+        "elapsedMillis": 693.694479,
+        "adoptedPath": "PLUGIN",
+        "adoptedHint": null,
+        "result": 42,
+        "corpus": {
+          "generatorVersion": 1,
+          "corpusId": "java8-1x8",
+          "classCount": 1,
+          "staticMethodsPerClass": 8,
+          "declaredMethodCount": 9,
+          "inputSizeBytes": 742,
+          "inputSha256": "d2d6a87e61292ee3a14f71673b62b623d50587d31c3616cc7416f59d750c036b"
+        },
+        "memory": {
+          "before": {
+            "hostPssKb": 180796,
+            "javaHeapUsedBytes": 5152888,
+            "nativeHeapAllocatedBytes": 7030928
+          },
+          "after": {
+            "hostPssKb": 182365,
+            "javaHeapUsedBytes": 5583392,
+            "nativeHeapAllocatedBytes": 7289104
+          }
+        },
+        "artifact": {
+          "outputSizeBytes": 948,
+          "outputSha256": "3bfe760ac1c93cc91f06641ce7996f990cc8eae8804e2341ad698652a43f8a6f",
+          "cacheKeySha256": "1bc0fe66527fb6e30f3131fc3940afd01bbe293a301e9f48fbf4c01db1efd335",
+          "metadataLookupCacheHit": true,
+          "generationInvalidated": true,
+          "loaderCacheFileCount": 1,
+          "loaderCacheBytes": 948
+        },
+        "host": {
+          "packageName": "org.autojs.autojs6",
+          "versionName": "6.8.0",
+          "versionCode": 5276
+        },
+        "device": {
+          "apiLevel": 31,
+          "primaryAbi": "arm64-v8a",
+          "model": "XQ-AT72",
+          "buildFingerprintSha256": "9042a9fbd1a1ff4678bf3cbca5775dfda4b9618c969721f6d0c7c7a528817fdb"
+        }
+      }
+    }
+  ],
+  "summaries": [],
+  "comparisons": [],
+  "claims": {
+    "performanceAdvantageClaimed": false,
+    "defaultEnableAuthorized": false,
+    "statisticalInferenceClaimed": false,
+    "note": "This report records repeated descriptive measurements; promotion thresholds are evaluated separately."
+  },
+  "error": "force-stop AutoJs6 failed with exit code 1\n* daemon not running; starting now at tcp:5037\r\n* daemon started successfully\r\nadb.exe: device 'QV710AF65F' not found",
+  "cleanupErrors": [
+    "java8-1x8/BUILTIN: force-stop AutoJs6 failed with exit code 1\nadb.exe: device 'QV710AF65F' not found",
+    "java8-1x8/PLUGIN: force-stop AutoJs6 failed with exit code 1\nadb.exe: device 'QV710AF65F' not found",
+    "workspace: force-stop AutoJs6 failed with exit code 1\nadb.exe: device 'QV710AF65F' not found",
+    "force-stop: force-stop AutoJs6 failed with exit code 1\nadb.exe: device 'QV710AF65F' not found",
+    "final-device: read device property ro.product.manufacturer failed with exit code 1\n* daemon not running; starting now at tcp:5037\r\ncould not read ok from ADB Server\r\n* failed to start daemon\r\nadb.exe: cannot connect to daemon"
+  ],
+  "restorationErrors": [
+    "io.github.supermonster003.autojs6.plugin.dexcompiler: query global package record for io.github.supermonster003.autojs6.plugin.dexcompiler failed with exit code 1\nadb.exe: device 'QV710AF65F' not found",
+    "org.autojs.autojs6.test: query global package record for org.autojs.autojs6.test failed with exit code 1\nadb.exe: device 'QV710AF65F' not found",
+    "org.autojs.autojs6: restore package org.autojs.autojs6 failed with exit code 1\nadb.exe: device 'QV710AF65F' not found"
+  ]
+}

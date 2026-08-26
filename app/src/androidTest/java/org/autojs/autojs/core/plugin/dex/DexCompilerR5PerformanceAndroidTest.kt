@@ -227,7 +227,14 @@ class DexCompilerR5PerformanceAndroidTest {
             val timed = try {
                 executor.submit<TimedLoad> {
                     val startedAt = SystemClock.elapsedRealtimeNanos()
-                    val operation = runLoadOperation(route, corpus, checkNotNull(loaderCache))
+                    val operation = runLoadOperation(
+                        route = route,
+                        corpus = corpus,
+                        cacheDirectory = checkNotNull(loaderCache),
+                        clearLoaderCacheOnInit = !(
+                            route == BenchmarkRoute.BUILTIN && cacheState == CacheState.CACHE_HIT
+                        ),
+                    )
                     TimedLoad(
                         elapsedNanos = SystemClock.elapsedRealtimeNanos() - startedAt,
                         operation = operation,
@@ -309,10 +316,12 @@ class DexCompilerR5PerformanceAndroidTest {
         route: BenchmarkRoute,
         corpus: PreparedCorpus,
         cacheDirectory: File,
+        clearLoaderCacheOnInit: Boolean = true,
     ): LoadOperation {
         val loader = AndroidClassLoader(
             parent = requireNotNull(javaClass.classLoader),
             cacheDir = cacheDirectory,
+            clearCacheOnInit = clearLoaderCacheOnInit,
         )
         val dexLoader = when (route) {
             BenchmarkRoute.BUILTIN -> loader.loadJar(corpus.file)
@@ -639,6 +648,14 @@ class DexCompilerR5PerformanceAndroidTest {
         .put("cacheExpectedHit", cacheState == CacheState.CACHE_HIT)
         .put("cacheStateVerified", true)
         .put("cacheVerification", cacheVerification)
+        .put(
+            "loaderCacheInitialization",
+            if (route == BenchmarkRoute.BUILTIN && cacheState == CacheState.CACHE_HIT) {
+                "PRESERVED_FOR_PREEXISTING_ARTIFACT"
+            } else {
+                "CLEARED_ON_CONSTRUCTION"
+            },
+        )
         .put(
             "cacheArtifactLastModifiedDeltaMillis",
             cacheArtifactLastModifiedDeltaMillis ?: JSONObject.NULL,

@@ -56,8 +56,19 @@ import com.legacy.android.dx.command.dexer.Main as LegacyMain
  *
  * @param parent   the parent
  * @param cacheDir the cache directory
+ * @param clearCacheOnInit internal benchmark seam; the production constructor always clears
  */
-class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: File) : ClassLoader(), GeneratedClassLoader {
+class AndroidClassLoader internal constructor(
+    private val parent: ClassLoader,
+    private val cacheDir: File,
+    private val clearCacheOnInit: Boolean,
+) : ClassLoader(), GeneratedClassLoader {
+
+    constructor(parent: ClassLoader, cacheDir: File) : this(
+        parent = parent,
+        cacheDir = cacheDir,
+        clearCacheOnInit = true,
+    )
 
     private val mDexClassLoaders = ConcurrentHashMap<String, DexClassLoader>()
 
@@ -66,12 +77,10 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
     private val conversionLocks = ConcurrentHashMap<String, Any>()
 
     init {
-        if (cacheDir.exists()) {
+        if (clearCacheOnInit && cacheDir.exists()) {
             deleteFilesOfDir(cacheDir)
-        } else {
-            if (!cacheDir.mkdirs()) {
-                Log.e(TAG, "dir.mkdirs() failed")
-            }
+        } else if (!cacheDir.exists() && !cacheDir.mkdirs()) {
+            Log.e(TAG, "dir.mkdirs() failed")
         }
     }
 

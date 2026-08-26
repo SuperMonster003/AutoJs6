@@ -38,6 +38,18 @@ function Assert-Report {
     if (-not $Condition) { throw "Invalid R5 performance report: $Message" }
 }
 
+function Get-RequiredProperty {
+    param(
+        [Parameter(Mandatory)] [object] $Object,
+        [Parameter(Mandatory)] [string] $Property,
+        [Parameter(Mandatory)] [string] $Label
+    )
+
+    $entry = $Object.PSObject.Properties[$Property]
+    Assert-Report ($null -ne $entry) "$Label is missing $Property"
+    return $entry.Value
+}
+
 function Get-OnlySummary {
     param(
         [Parameter(Mandatory)] [object[]] $Summaries,
@@ -85,6 +97,16 @@ Assert-Report ($report.contract.warmupSamplesPerCell -ge $minimumWarmupSamplesPe
     "requires at least $minimumWarmupSamplesPerCell warmups per cell"
 Assert-Report ($report.contract.measuredSamplesPerCell -ge $minimumMeasuredSamplesPerCell) `
     "requires at least $minimumMeasuredSamplesPerCell measured samples per cell"
+$builtInCacheHitInitialization = Get-RequiredProperty -Object $report.contract `
+    -Property 'builtInCacheHitInitialization' -Label 'benchmark contract'
+Assert-Report ($builtInCacheHitInitialization -ceq `
+    'PREWARMED_LOADER_CACHE_PRESERVED_ON_CONSTRUCTION') `
+    "built-in cache-hit initialization is $builtInCacheHitInitialization"
+$builtInCacheHitProof = Get-RequiredProperty -Object $report.contract `
+    -Property 'builtInCacheHitProof' -Label 'benchmark contract'
+Assert-Report ($builtInCacheHitProof -ceq `
+    'ARTIFACT_NAME_SIZE_SHA256_AND_LAST_MODIFIED_UNCHANGED') `
+    "built-in cache-hit proof is $builtInCacheHitProof"
 Assert-Report ($report.packageRestoration -ceq 'EXACT_INITIAL_APK_BYTES_RESTORED_OR_RUN_OWNED_PACKAGE_REMOVED') `
     "package restoration is $($report.packageRestoration)"
 Assert-Report (@($report.cleanupErrors).Count -eq 0) 'cleanup errors are present'
@@ -160,6 +182,41 @@ foreach ($sample in $measuredSamples) {
     }
     if ($sample.device.adoptedPath -ceq $expectedAdoptedPath) { $routeVerifiedCount++ }
     if ([bool] $sample.device.cacheStateVerified) { $cacheStateVerifiedCount++ }
+
+    $sampleLabel = "$($sample.corpusId)/$($sample.route)/$($sample.cacheState)"
+    $expectedHit = $sample.cacheState -ceq 'CACHE_HIT'
+    $actualExpectedHit = Get-RequiredProperty -Object $sample.device -Property 'cacheExpectedHit' `
+        -Label $sampleLabel
+    Assert-Report ([bool] $actualExpectedHit -eq $expectedHit) `
+        "$sampleLabel has a mismatched cache-hit expectation"
+
+    $expectedVerification = switch ("$($sample.route)/$($sample.cacheState)") {
+        'BUILTIN/COLD' { 'EMPTY_FRESH_LOADER_CACHE_AND_BUILTIN_ROUTE' }
+        'BUILTIN/CACHE_HIT' { 'PREEXISTING_ARTIFACT_NAME_SIZE_AND_SHA256_UNCHANGED' }
+        'PLUGIN/COLD' { 'PLUGIN_ROUTE_AND_EXACT_GENERATION_INVALIDATED' }
+        'PLUGIN/CACHE_HIT' { 'DIAGNOSTIC_CACHE_HIT_ROUTE' }
+        default { throw "Invalid R5 performance report: unexpected cell $sampleLabel" }
+    }
+    $actualVerification = Get-RequiredProperty -Object $sample.device -Property 'cacheVerification' `
+        -Label $sampleLabel
+    Assert-Report ($actualVerification -ceq $expectedVerification) `
+        "$sampleLabel cache proof is $actualVerification"
+
+    $expectedInitialization = if ($sample.route -ceq 'BUILTIN' -and $sample.cacheState -ceq 'CACHE_HIT') {
+        'PRESERVED_FOR_PREEXISTING_ARTIFACT'
+    } else {
+        'CLEARED_ON_CONSTRUCTION'
+    }
+    $actualInitialization = Get-RequiredProperty -Object $sample.device `
+        -Property 'loaderCacheInitialization' -Label $sampleLabel
+    Assert-Report ($actualInitialization -ceq $expectedInitialization) `
+        "$sampleLabel loader-cache initialization is $actualInitialization"
+    if ($sample.route -ceq 'BUILTIN' -and $sample.cacheState -ceq 'CACHE_HIT') {
+        $modifiedDelta = Get-RequiredProperty -Object $sample.device `
+            -Property 'cacheArtifactLastModifiedDeltaMillis' -Label $sampleLabel
+        Assert-Report ([long] $modifiedDelta -eq 0L) `
+            "$sampleLabel changed the pre-existing artifact modification time by $modifiedDelta ms"
+    }
 
     Assert-Report ([bool] $sample.externalMemory.hostObserved) `
         "host process was not observed for $($sample.corpusId)/$($sample.route)/$($sample.cacheState)"

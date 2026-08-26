@@ -1,0 +1,300 @@
+{
+  "schema": "autojs.dex-compiler.r5-performance-evaluation/v1",
+  "evaluatedAtUtc": "2026-08-26T19:24:30.8036327+00:00",
+  "decision": "NOT_PROMOTED",
+  "sourceReport": {
+    "path": "D:\\idea-projects\\AutoJs6\\docs\\dev\\dex-compiler-r5-performance-baseline-bounded2-cachefix-avd-api33-2026-08-27.json",
+    "schema": "autojs.dex-compiler.r5-performance/v1",
+    "campaignId": "4acd2687-e372-4f9f-8428-265a2c34dd86",
+    "benchmarkClassification": "R5_BASELINE",
+    "sizeBytes": 465147,
+    "sha256": "8a11f2cb2568a2500976d7bd89fa32af9ff674c48e58332a5ccda8f9cb17a645"
+  },
+  "environment": {
+    "deviceSerial": "emulator-5562",
+    "deviceModel": "sdk_gphone64_x86_64",
+    "deviceApiLevel": 33,
+    "devicePrimaryAbi": "x86_64",
+    "deviceBuildFingerprintSha256": "67d87afcf0f1cc33a95aa2e5c8bf7baa37153ff834015acab0f03e2a48dbf393",
+    "javaVersion": "java version \"1.8.0_311\"\r\nJava(TM) SE Runtime Environment (build 1.8.0_311-b11)\r\nJava HotSpot(TM) 64-Bit Server VM (build 25.311-b11, mixed mode)",
+    "sharedSignerCertificateSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+  },
+  "policy": {
+    "source": "docs/dev/dex-compiler-plugin-evaluation.md",
+    "percentileMethod": "R7_LINEAR_INTERPOLATION",
+    "minimumWarmupSamplesPerCell": 2,
+    "minimumMeasuredSamplesPerCell": 10,
+    "coldLatency": {
+      "maximumAddedP95Percent": 25.0,
+      "minimumAddedP95AllowanceMillis": 1000.0,
+      "rule": "pluginP95 <= builtInP95 + max(25_percent_of_builtInP95, 1000_ms)"
+    },
+    "cacheHitLatency": {
+      "maximumAddedP95Millis": 100.0,
+      "rule": "pluginP95 <= builtInP95 + 100_ms"
+    },
+    "combinedPss": {
+      "maximumP95RegressionPercent": 20.0,
+      "rule": "pluginCombinedPssP95 <= builtInCombinedPssP95 * 1.20"
+    },
+    "cacheStateVerifiedRate": {
+      "required": 1.0,
+      "rule": "all_measured_samples_must_prove_requested_cache_state_and_adopted_route"
+    }
+  },
+  "integrity": {
+    "sourceRunStatus": "PASS",
+    "exactPackageRestoration": true,
+    "measuredSamples": 120,
+    "routeVerifiedSamples": 120,
+    "routeVerifiedRate": 1.0,
+    "cacheStateVerifiedSamples": 120,
+    "cacheStateVerifiedRate": 1.0,
+    "cacheHitMeasuredSamples": 60,
+    "cacheHitVerifiedSamples": 60,
+    "cacheHitVerifiedRate": 1.0,
+    "pluginCacheHitMeasuredSamples": 30,
+    "pluginCacheHitAdoptedSamples": 30,
+    "pluginCacheHitAdoptedRate": 1.0
+  },
+  "gateSummary": {
+    "cellCount": 6,
+    "latencyPassed": 3,
+    "combinedPssPassed": 6,
+    "cacheStatePassed": 6,
+    "deterministicOutputPassed": 6,
+    "failedGateCount": 3
+  },
+  "cells": [
+    {
+      "corpusId": "java8-1x8",
+      "cacheState": "COLD",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 346.68016215,
+        "pluginP95Millis": 292.37447,
+        "pluginAddedP95Millis": -54.30569215000003,
+        "maximumAddedP95Millis": 1000.0,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 190747.2,
+        "pluginP95Kb": 210577.85,
+        "pluginRegressionPercent": 10.396299395220476,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 828,
+        "builtInSha256": "261b70effced33988e820dd4869a21b3a06e35eca538bba59c2bba836c857ead",
+        "pluginSizeBytes": 948,
+        "pluginSha256": "7a0acf35caab6cf0c913ad94b0b44515af2178ae0645fc50b194c2c24e6bf2c9",
+        "passed": true
+      },
+      "passed": true
+    },
+    {
+      "corpusId": "java8-1x8",
+      "cacheState": "CACHE_HIT",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 5.525820349999998,
+        "pluginP95Millis": 238.23409779999997,
+        "pluginAddedP95Millis": 232.70827744999997,
+        "maximumAddedP95Millis": 100.0,
+        "passed": false
+      },
+      "combinedPss": {
+        "builtInP95Kb": 190887.4,
+        "pluginP95Kb": 201129.65,
+        "pluginRegressionPercent": 5.36559772934201,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 828,
+        "builtInSha256": "261b70effced33988e820dd4869a21b3a06e35eca538bba59c2bba836c857ead",
+        "pluginSizeBytes": 948,
+        "pluginSha256": "7a0acf35caab6cf0c913ad94b0b44515af2178ae0645fc50b194c2c24e6bf2c9",
+        "passed": true
+      },
+      "passed": false
+    },
+    {
+      "corpusId": "java8-128x8",
+      "cacheState": "COLD",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 1420.595574,
+        "pluginP95Millis": 1050.17386265,
+        "pluginAddedP95Millis": -370.4217113499999,
+        "maximumAddedP95Millis": 1000.0,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 219108.6,
+        "pluginP95Kb": 220043.85,
+        "pluginRegressionPercent": 0.4268431271068319,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 30152,
+        "builtInSha256": "f2612c6012d4ff34e726b1a6f4f39a19e43bdff5c71176d98b1bb34d24f06c17",
+        "pluginSizeBytes": 30272,
+        "pluginSha256": "f2cc4284fa880732076b20dc608caa5597db34721f34b120c605ae81eb222fcb",
+        "passed": true
+      },
+      "passed": true
+    },
+    {
+      "corpusId": "java8-128x8",
+      "cacheState": "CACHE_HIT",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 6.277497799999999,
+        "pluginP95Millis": 235.44514524999997,
+        "pluginAddedP95Millis": 229.16764744999998,
+        "maximumAddedP95Millis": 100.0,
+        "passed": false
+      },
+      "combinedPss": {
+        "builtInP95Kb": 191100.55,
+        "pluginP95Kb": 200977.65,
+        "pluginRegressionPercent": 5.168535621692353,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 30152,
+        "builtInSha256": "f2612c6012d4ff34e726b1a6f4f39a19e43bdff5c71176d98b1bb34d24f06c17",
+        "pluginSizeBytes": 30272,
+        "pluginSha256": "f2cc4284fa880732076b20dc608caa5597db34721f34b120c605ae81eb222fcb",
+        "passed": true
+      },
+      "passed": false
+    },
+    {
+      "corpusId": "java8-2048x8",
+      "cacheState": "COLD",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 5895.7713839,
+        "pluginP95Millis": 4625.5265391,
+        "pluginAddedP95Millis": -1270.2448447999996,
+        "maximumAddedP95Millis": 1473.942845975,
+        "passed": true
+      },
+      "combinedPss": {
+        "builtInP95Kb": 346865.25,
+        "pluginP95Kb": 252208.25,
+        "pluginRegressionPercent": -27.289271554299543,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 486188,
+        "builtInSha256": "57ad3302f355ec4fce45ed93ebbbf72b29da5ec5133c2c0e21b39480f987c373",
+        "pluginSizeBytes": 486308,
+        "pluginSha256": "65789e527be78233607e8bdcdeb731f5a0345ffbde9eb223dfdb3d4908a28f9f",
+        "passed": true
+      },
+      "passed": true
+    },
+    {
+      "corpusId": "java8-2048x8",
+      "cacheState": "CACHE_HIT",
+      "measuredSamplesPerRoute": 10,
+      "latency": {
+        "builtInP95Millis": 28.266039349999964,
+        "pluginP95Millis": 296.67549499999996,
+        "pluginAddedP95Millis": 268.40945565,
+        "maximumAddedP95Millis": 100.0,
+        "passed": false
+      },
+      "combinedPss": {
+        "builtInP95Kb": 191167.2,
+        "pluginP95Kb": 201268.8,
+        "pluginRegressionPercent": 5.284170087755627,
+        "maximumRegressionPercent": 20.0,
+        "passed": true
+      },
+      "cacheStateVerification": {
+        "builtInRate": 1.0,
+        "pluginRate": 1.0,
+        "requiredRate": 1.0,
+        "passed": true
+      },
+      "deterministicOutput": {
+        "builtInSizeBytes": 486188,
+        "builtInSha256": "57ad3302f355ec4fce45ed93ebbbf72b29da5ec5133c2c0e21b39480f987c373",
+        "pluginSizeBytes": 486308,
+        "pluginSha256": "65789e527be78233607e8bdcdeb731f5a0345ffbde9eb223dfdb3d4908a28f9f",
+        "passed": true
+      },
+      "passed": false
+    }
+  ],
+  "failedGates": [
+    {
+      "corpusId": "java8-1x8",
+      "cacheState": "CACHE_HIT",
+      "gate": "P95_LATENCY",
+      "actual": 232.70827744999997,
+      "maximum": 100.0,
+      "unit": "ms_added_over_builtin"
+    },
+    {
+      "corpusId": "java8-128x8",
+      "cacheState": "CACHE_HIT",
+      "gate": "P95_LATENCY",
+      "actual": 229.16764744999998,
+      "maximum": 100.0,
+      "unit": "ms_added_over_builtin"
+    },
+    {
+      "corpusId": "java8-2048x8",
+      "cacheState": "CACHE_HIT",
+      "gate": "P95_LATENCY",
+      "actual": 268.40945565,
+      "maximum": 100.0,
+      "unit": "ms_added_over_builtin"
+    }
+  ],
+  "claims": {
+    "performancePromotionPassed": false,
+    "performanceAdvantageClaimAuthorized": false,
+    "defaultEnableAuthorized": false,
+    "note": "At least one R5.2 promotion gate failed; performance advantage and default enablement remain unauthorized."
+  }
+}

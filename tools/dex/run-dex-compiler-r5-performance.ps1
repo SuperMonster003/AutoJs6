@@ -463,6 +463,60 @@ function Start-AdbProcess {
     }
 }
 
+function Assert-TimedSampleCacheEvidence {
+    param(
+        [Parameter(Mandatory)] [object] $DeviceStatus,
+        [Parameter(Mandatory)] [ValidateSet('BUILTIN', 'PLUGIN')] [string] $Route,
+        [Parameter(Mandatory)] [ValidateSet('COLD', 'CACHE_HIT')] [string] $CacheState
+    )
+
+    if ($DeviceStatus.route -cne $Route) {
+        throw "Device fixture route differs from the request: expected=$Route actual=$($DeviceStatus.route)"
+    }
+    if ($DeviceStatus.cacheState -cne $CacheState) {
+        throw "Device fixture cache state differs from the request: expected=$CacheState actual=$($DeviceStatus.cacheState)"
+    }
+    $expectedHit = $CacheState -ceq 'CACHE_HIT'
+    if ([bool] $DeviceStatus.cacheExpectedHit -ne $expectedHit) {
+        throw "Device fixture cache-hit expectation differs from the request: expected=$expectedHit"
+    }
+    if (-not [bool] $DeviceStatus.cacheStateVerified) {
+        throw 'Device fixture did not verify the requested cache state'
+    }
+
+    $expectedPath = if ($Route -ceq 'PLUGIN' -and $CacheState -ceq 'CACHE_HIT') {
+        'CACHE_HIT'
+    } else {
+        $Route
+    }
+    if ($DeviceStatus.adoptedPath -cne $expectedPath) {
+        throw "Device fixture adopted path differs from the request: expected=$expectedPath actual=$($DeviceStatus.adoptedPath)"
+    }
+
+    $expectedVerification = switch ("$Route/$CacheState") {
+        'BUILTIN/COLD' { 'EMPTY_FRESH_LOADER_CACHE_AND_BUILTIN_ROUTE' }
+        'BUILTIN/CACHE_HIT' { 'PREEXISTING_ARTIFACT_NAME_SIZE_AND_SHA256_UNCHANGED' }
+        'PLUGIN/COLD' { 'PLUGIN_ROUTE_AND_EXACT_GENERATION_INVALIDATED' }
+        'PLUGIN/CACHE_HIT' { 'DIAGNOSTIC_CACHE_HIT_ROUTE' }
+    }
+    if ($DeviceStatus.cacheVerification -cne $expectedVerification) {
+        throw "Device fixture cache proof differs from the contract: expected=$expectedVerification actual=$($DeviceStatus.cacheVerification)"
+    }
+
+    $expectedInitialization = if ($Route -ceq 'BUILTIN' -and $CacheState -ceq 'CACHE_HIT') {
+        'PRESERVED_FOR_PREEXISTING_ARTIFACT'
+    } else {
+        'CLEARED_ON_CONSTRUCTION'
+    }
+    if ($DeviceStatus.loaderCacheInitialization -cne $expectedInitialization) {
+        throw "Device fixture loader-cache initialization differs from the contract: expected=$expectedInitialization actual=$($DeviceStatus.loaderCacheInitialization)"
+    }
+    if ($Route -ceq 'BUILTIN' -and $CacheState -ceq 'CACHE_HIT' -and
+        [long] $DeviceStatus.cacheArtifactLastModifiedDeltaMillis -ne 0L) {
+        throw 'Built-in cache-hit artifact modification time changed during the timed load'
+    }
+}
+
 function Invoke-TimedSample {
     param(
         [Parameter(Mandatory)] [string] $Corpus,
@@ -510,7 +564,7 @@ function Invoke-TimedSample {
             -Label "timed sample $Corpus $Route $CacheState #$SampleIndex"
         $deviceStatus = Read-InstrumentationStatus -Output $output -StatusKey $sampleStatusKey `
             -Label "timed sample $Corpus $Route $CacheState #$SampleIndex"
-        if (-not $deviceStatus.cacheStateVerified) { throw 'Device fixture did not verify the requested cache state' }
+        Assert-TimedSampleCacheEvidence -DeviceStatus $deviceStatus -Route $Route -CacheState $CacheState
         if (-not $hostObserved) { throw 'External PSS sampler never observed the host process' }
         $providerExpected = $Route -ceq 'PLUGIN'
         if ($pluginObserved -ne $providerExpected) {
@@ -893,6 +947,8 @@ $report = [ordered]@{
         betweenSamplesSeconds = $BetweenSamplesSeconds
         sampleOrder = 'PAIRWISE_ALTERNATING_ROUTE_ORDER_PER_CORPUS_AND_CACHE_STATE'
         coldPluginCleanup = 'EXACT_TRACKED_GENERATION_INVALIDATED_AFTER_TIMED_LOAD_WITHOUT_UNTIMED_RECOMPILATION'
+        builtInCacheHitInitialization = 'PREWARMED_LOADER_CACHE_PRESERVED_ON_CONSTRUCTION'
+        builtInCacheHitProof = 'ARTIFACT_NAME_SIZE_SHA256_AND_LAST_MODIFIED_UNCHANGED'
         providerProcessExpectation = 'OBSERVED_FOR_PROCESS_COLD_PLUGIN_ROUTE_IN_BOTH_CACHE_STATES_BECAUSE_CACHE_KEY_FINALIZATION_IS_CAPABILITY_BOUND'
         percentileMethod = 'R7_LINEAR_INTERPOLATION'
     }
