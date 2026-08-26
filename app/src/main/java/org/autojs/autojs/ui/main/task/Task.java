@@ -44,6 +44,7 @@ public abstract class Task {
     public static class PendingTask extends Task {
 
         private static final String LUA_FILE_SOURCE_KIND_V1 = "lua_file_v1";
+        private static final String AUTOJS_PROJECT_SOURCE_KIND_V1 = "autojs_project_v1";
         private static final String PYTHON_FILE_SOURCE_KIND_V1 = "python_file_v1";
         private static final String PYTHON_PROJECT_SOURCE_KIND_V1 = "python_project_v1";
 
@@ -154,6 +155,9 @@ public abstract class Task {
             if (LUA_FILE_SOURCE_KIND_V1.equals(sourceKind)) {
                 return LuaScriptSource.ENGINE;
             }
+            if (AUTOJS_PROJECT_SOURCE_KIND_V1.equals(sourceKind)) {
+                return AutoFileSource.ENGINE;
+            }
             if (PYTHON_FILE_SOURCE_KIND_V1.equals(sourceKind)
                     || PYTHON_PROJECT_SOURCE_KIND_V1.equals(sourceKind)
                     || projectRoot != null) {
@@ -182,6 +186,10 @@ public abstract class Task {
         @NonNull
         public ExecutionConfig createLaunchExecutionConfig() {
             return createLaunchExecutionConfig(new ExecutionConfig());
+        }
+
+        public boolean isProjectTask() {
+            return AUTOJS_PROJECT_SOURCE_KIND_V1.equals(getSourceKind());
         }
 
         @NonNull

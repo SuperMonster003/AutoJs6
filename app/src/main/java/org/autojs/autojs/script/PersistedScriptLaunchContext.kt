@@ -1,5 +1,6 @@
 package org.autojs.autojs.script
 
+import org.autojs.autojs.project.ProjectConfig
 import java.io.File
 
 /** Versioned local launch context stored by shortcuts and scheduled tasks. */
@@ -10,12 +11,19 @@ data class PersistedScriptLaunchContext(
 
 internal object PersistedScriptLaunchPolicy {
 
+    const val AUTOJS_PROJECT_V1 = "autojs_project_v1"
     const val LUA_FILE_V1 = "lua_file_v1"
     const val PYTHON_FILE_V1 = "python_file_v1"
     const val PYTHON_PROJECT_V1 = "python_project_v1"
 
     fun capture(path: String): PersistedScriptLaunchContext {
         val file = File(path).canonicalFile
+        if (file.isDirectory && ProjectConfig.isProject(file)) {
+            return PersistedScriptLaunchContext(
+                sourceKind = AUTOJS_PROJECT_V1,
+                projectRoot = file.path,
+            )
+        }
         if (LuaScriptSource.isLuaFileName(file.name)) {
             return PersistedScriptLaunchContext(LUA_FILE_V1, null)
         }

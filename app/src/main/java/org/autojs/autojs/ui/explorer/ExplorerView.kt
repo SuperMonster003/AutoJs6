@@ -2736,6 +2736,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             if (!explorerPage.canDelete()) {
                 menu.removeItem(R.id.action_delete)
             }
+            if (!isProjectRecognitionEnabled || !ProjectConfig.isProject(explorerPage)) {
+                menu.removeItem(R.id.action_timed_task)
+            }
             if (!explorerPage.canSetAsWorkingDir()) {
                 menu.removeItem(R.id.action_set_as_working_dir)
             }
@@ -2804,6 +2807,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     R.id.action_delete ->
                         ScriptOperations(context, explorerView, currentPage)
                             .delete(selectedItem.toScriptFile())
+                    R.id.action_timed_task -> {
+                        mRequestHostDialogHide?.run()
+                        ScriptOperations(context, explorerView, currentPage)
+                            .timedTask(selectedItem.toScriptFile())
+                        notifyItemOperated()
+                    }
                     R.id.action_set_as_working_dir ->
                         ScriptOperations(context, explorerView, currentPage)
                             .setAsWorkingDir(selectedItem.toScriptFile())

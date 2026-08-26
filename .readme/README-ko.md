@@ -191,6 +191,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` TypeScript 프로젝트를 Rhino 또는 Node용 단일 Program으로 제한된 프로젝트 스냅샷에서 컴파일하고, 상대 import, CommonJS 순환 의존성, JSON 런타임 파일, package `type` 컨텍스트, 가져온 모듈 진단, 모듈별 Source Map 스택 매핑을 보존; package 메타데이터는 엄격하게 검증하고 lifecycle scripts를 거부
 * `추가` TypeScript 컴파일 결과를 소스 그래프, 컴파일러 및 선언 지문, profile과 policy revision, package 메타데이터를 포함한 semantic key로 실행 간 캐시; 변경되지 않은 스크립트는 컴파일러 prewarm과 Worker 컴파일을 생략하고 인증된 출력 아카이브는 재사용 전에 다시 검증하며 손상되거나 quota를 초과한 항목은 일반 컴파일로 폴백
 * `추가` 예약 작업, 브로드캐스트 작업, 바로 가기 및 Tasker/로컬 Run Intent가 포그라운드 실행과 동일한 TypeScript preparation 파이프라인을 공유; Tasker 사전 실행 JavaScript는 컴파일된 Rhino/Node 출력보다 먼저 실행되고 Source Map 줄 오프셋에도 접두부를 반영하여 컴파일을 우회한 원본 TypeScript 실행을 방지
+* `추가` 프로젝트 폴더에서 예약 작업과 브로드캐스트 작업을 직접 만들 수 있고, 트리거 시 project.json에서 Rhino/Node.js/Python 엔트리를 다시 해석하며 프로젝트 작업 디렉터리와 useFeatures 설정을 복원
 * `추가` 독립 Python Runtime 플러그인 백엔드에서 로컬 .py 파일과 `type: python`으로 선언된 스크립트 프로젝트를 별도의 CPython 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 핫 플러그, JavaScript 폴백 금지를 지원
 * `추가` Python 실행 통합은 파일 관리자/편집기/로컬 Run Intent/단일 파일 Import Intent/새 바로 가기/예약 작업/브로드캐스트 작업을 포함하고 단일 파일 또는 프로젝트 컨텍스트를 엄격하게 유지; 프로젝트에서 내부 import/상대 파일 접근/읽기 전용 `autojs6.app/device/execution/project` API 지원
 * `추가` Python Runtime 실행은 ExecutionConfig 키 `autojs6.python.stdinSnapshot`을 통한 선택적이고 제한된 사전 제공 stdin 스냅샷을 지원하며, 엄격한 ByteArray/UTF-8 텍스트 허용, 공급자 기능/크기 협상, 비공개 읽기 전용 PFD 전송 및 정리를 적용

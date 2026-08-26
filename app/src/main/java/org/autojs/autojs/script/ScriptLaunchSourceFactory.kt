@@ -3,6 +3,7 @@ package org.autojs.autojs.script
 import org.autojs.autojs.core.plugin.python.PythonExecutionInputPolicy
 import org.autojs.autojs.engine.NodeProjectRunner
 import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import java.io.File
@@ -12,6 +13,7 @@ object ScriptLaunchSourceFactory {
     data class Launch(
         val source: ScriptSource,
         val workingDirectory: String,
+        val projectFeatures: List<String>? = null,
     ) {
         val engineName: String
             get() = source.engineName.orEmpty()
@@ -42,6 +44,9 @@ object ScriptLaunchSourceFactory {
             return base.apply {
                 if (overrideWorkingDirectory || workingDirectory.isBlank()) {
                     workingDirectory = this@Launch.workingDirectory
+                }
+                projectFeatures?.let { features ->
+                    scriptConfig.features = features
                 }
                 projectSource?.let { source ->
                     setArgument(
@@ -122,6 +127,56 @@ object ScriptLaunchSourceFactory {
             source = fileSource,
             workingDirectory = workingDirectory ?: fileSource.launchWorkingDirectory(entryFile.path, defaultWorkingDirectory),
         )
+    }
+
+    /** Resolves a project directory for reusable foreground or background execution. */
+    internal fun createAutoJsProjectLaunchForPythonPreview(
+        projectRoot: File,
+        workingDirectory: String?,
+        pythonPreviewEnabled: Boolean,
+    ): Launch {
+        val root = projectRoot.normalizedFile()
+        require(root.isDirectory && ProjectConfig.isProject(root)) {
+            "AUTOJS_PROJECT_CONTEXT_INVALID: Not an AutoJs6 project directory: ${root.path}"
+        }
+
+        val projectConfig = ProjectConfig.fromProjectDir(root.path)
+        val legacyEntry = File(
+            root,
+            projectConfig?.mainScriptFileName ?: ProjectConfig.DEFAULT_MAIN_SCRIPT_FILE_NAME,
+        )
+        val pythonAdmission = PythonProjectLaunchPolicy.inspect(root, legacyEntry)
+        val launch = when {
+            pythonAdmission != null -> createPythonProjectLaunchForPreview(
+                admission = pythonAdmission,
+                workingDirectory = workingDirectory,
+                pythonPreviewEnabled = pythonPreviewEnabled,
+            )
+            else -> {
+                val nodeEntry = NodeProjectRunner.resolveProjectEntryFileIfNodeProject(root)
+                if (nodeEntry == null) {
+                    require(legacyEntry.exists()) {
+                        "AutoJs6 project main script does not exist: ${legacyEntry.absolutePath}"
+                    }
+                    createPathLaunchForPythonPreview(
+                        path = legacyEntry.path,
+                        preExecuteScript = null,
+                        workingDirectory = workingDirectory ?: root.path,
+                        defaultWorkingDirectory = root.path,
+                        pythonPreviewEnabled = pythonPreviewEnabled,
+                    )
+                } else {
+                    createNodeProjectLaunch(
+                        projectRoot = root,
+                        entryFile = nodeEntry,
+                        launchOptions = NodeProjectLaunchDescriptor.readOptionsOrDefault(root),
+                        workingDirectory = workingDirectory,
+                        defaultWorkingDirectory = root.path,
+                    )
+                }
+            }
+        }
+        return launch.copy(projectFeatures = projectConfig?.features?.toList())
     }
 
     @JvmStatic
@@ -500,6 +555,25 @@ object ScriptLaunchSourceFactory {
             )
         }
         return when (sourceKind) {
+            PersistedScriptLaunchPolicy.AUTOJS_PROJECT_V1 -> {
+                val declaredRoot = projectRoot?.takeIf(String::isNotBlank)?.let(::File)
+                    ?: throw autoJsProjectContextInvalid()
+                val requestedRoot = File(path).canonicalFile
+                val normalizedDeclaredRoot = declaredRoot.canonicalFile
+                if (
+                    preExecuteScript != null ||
+                    requestedRoot != normalizedDeclaredRoot ||
+                    !normalizedDeclaredRoot.isDirectory ||
+                    !ProjectConfig.isProject(normalizedDeclaredRoot)
+                ) {
+                    throw autoJsProjectContextInvalid()
+                }
+                createAutoJsProjectLaunchForPythonPreview(
+                    projectRoot = normalizedDeclaredRoot,
+                    workingDirectory = workingDirectory,
+                    pythonPreviewEnabled = pythonPreviewEnabled,
+                )
+            }
             PersistedScriptLaunchPolicy.LUA_FILE_V1 -> {
                 if (projectRoot != null ||
                     preExecuteScript != null ||
@@ -550,6 +624,10 @@ object ScriptLaunchSourceFactory {
             else -> throw PythonProjectLaunchException(PythonProjectLaunchError.CONTEXT_INVALID)
         }
     }
+
+    private fun autoJsProjectContextInvalid(): IllegalArgumentException = IllegalArgumentException(
+        "AUTOJS_PROJECT_CONTEXT_INVALID: Persisted project launch context no longer matches its directory",
+    )
 
     @JvmStatic
     fun capturePersistedLaunchContext(path: String): PersistedScriptLaunchContext =

@@ -24,6 +24,11 @@ class PendingTaskEngineFallbackTest {
     }
 
     @Test
+    fun explicitAutoJsProjectContextDoesNotFallBackToPython() {
+        assertFallback(AutoFileSource.ENGINE, "/stale/project", "autojs_project_v1", "/stale/project")
+    }
+
+    @Test
     fun legacyNullContextKeepsExistingExtensionFallbacks() {
         assertFallback(AutoFileSource.ENGINE, "legacy.py", null, null)
         assertFallback(LuaScriptSource.ENGINE, "legacy.lua", null, null)

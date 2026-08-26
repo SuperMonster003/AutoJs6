@@ -431,13 +431,17 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         public void bind(Task task) {
             mTask = task;
             FileUtils.TYPE.Icon icon;
-            String engineName = mTask.getEngineName();
-            if (JavaScriptFileSource.ENGINE.equals(engineName) || JavaScriptSource.ENGINE_NODEJS.equals(engineName)) {
-                icon = FileUtils.TYPE.JAVASCRIPT.icon;
-            } else if (AutoFileSource.ENGINE.equals(engineName)) {
-                icon = FileUtils.TYPE.AUTO.icon;
+            if (mTask instanceof Task.PendingTask pendingTask && pendingTask.isProjectTask()) {
+                icon = FileUtils.TYPE.PROJECT.icon;
             } else {
-                icon = FileUtils.TYPE.UNKNOWN.icon;
+                String engineName = mTask.getEngineName();
+                if (JavaScriptFileSource.ENGINE.equals(engineName) || JavaScriptSource.ENGINE_NODEJS.equals(engineName)) {
+                    icon = FileUtils.TYPE.JAVASCRIPT.icon;
+                } else if (AutoFileSource.ENGINE.equals(engineName)) {
+                    icon = FileUtils.TYPE.AUTO.icon;
+                } else {
+                    icon = FileUtils.TYPE.UNKNOWN.icon;
+                }
             }
             firstCharIconBinding.firstChar
                     .setIcon(icon)
