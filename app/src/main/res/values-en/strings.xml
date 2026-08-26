@@ -498,6 +498,7 @@
     <string name="hint_loop_delay">Delay before loop</string>
     <string name="hint_loop_times">0 for infinite loop</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 and domain are supported.</string>
+    <string name="hint_plugin_process_failed_to_start">The plugin process could not start reliably. Update or reinstall the plugin; if the problem persists, contact the plugin developer.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Current plugin requires a higher version of the AutoJs6 host environment (required versionCode: %1$d, current versionCode: %2$d), AutoJs6 upgrade needed.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Plugin protocol is incompatible with current AutoJs6, plugin version upgrade required.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Try clicking the \"Activate\" button to activate the plugin once.\nIf activation is successful, the button will automatically turn on within a certain period of time.</string>

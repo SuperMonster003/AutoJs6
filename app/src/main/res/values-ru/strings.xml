@@ -502,6 +502,7 @@
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
     <string name="hint_pc_server_address_supported_formats">Поддерживаются IPv4, IPv6 и доменные имена.</string>
+    <string name="hint_plugin_process_failed_to_start">Не удалось стабильно запустить процесс плагина. Обновите или переустановите плагин; если проблема не исчезнет, обратитесь к разработчику плагина.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Текущий плагин требует более новой версии хост-среды AutoJs6 (требуемый versionCode: %1$d, текущий versionCode: %2$d). Необходимо обновить AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Протокол плагина несовместим с текущей версией AutoJs6. Требуется обновить плагин.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>

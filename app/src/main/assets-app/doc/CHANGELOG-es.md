@@ -166,6 +166,7 @@
 * `Corrección` El editor Ace podía dejar de responder durante mucho tiempo y volver al editor nativo cuando al recargar un archivo grande con una codificación incompatible se generaba una línea de texto extremadamente larga
 * `Corrección` Desactivar o desinstalar el plugin Ace externo mientras el editor o su interfaz de ajustes estaba en uso podía provocar la pérdida de cambios sin guardar o dejar la interfaz en un estado no válido
 * `Corrección` La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos
+* `Corrección` El fallo del proceso de un solo plugin local podía dejar completamente vacía la lista del Centro de plugins
 * `Corrección` Los iconos de los plugins instalados en la pestaña Plugins de la página de inicio no cambiaban dinámicamente al alternar el modo nocturno
 * `Corrección` El Centro de plugins podía instalar el APK de una variante incorrecta cuando una versión del plugin contenía varias variantes
 * `Corrección` Los plugins APK Builder Template podían aparecer duplicados o notificar actualizaciones incorrectamente
@@ -236,6 +237,7 @@
 * `Mejora` Mejorados el estilo y las funciones de los diálogos "Ordenar" y "Filtrar" del Centro de plugins
 * `Mejora` El Centro de plugins muestra las variantes comunes de forma predeterminada y ofrece una página independiente para las demás variantes
 * `Mejora` Mejorados los registros de cambios multilingües/caché de idiomas/verificación oficial/carga de índices y otras funciones del Centro de plugins
+* `Mejora` El Centro de plugins muestra primero una instantánea local ligera y el índice almacenado en caché, y después actualiza en paralelo los metadatos de los plugins y el índice en línea; los plugins anómalos permanecen desactivados y, al intentar activarlos, muestran el error real y una guía de recuperación
 * `Mejora` Normalizados los recursos de cadenas del proyecto con traducciones multilingües completas/clasificación por archivos/orden por nombre/puntuación ASCII
 * `Mejora` Limitados los recursos de idioma del APK a las 10 configuraciones regionales admitidas por el proyecto para reducir el tamaño del paquete
 * `Mejora` El sistema de compilación permite seleccionar dinámicamente versiones compatibles de Kotlin/KSP/AGP/R8 y reduce la presión de memoria al iniciar Gradle

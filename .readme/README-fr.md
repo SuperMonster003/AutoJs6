@@ -326,6 +326,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` L'éditeur Ace pouvait rester longtemps sans répondre et revenir à l'éditeur natif lorsqu'un fichier volumineux rechargé avec un encodage incompatible produisait une ligne de texte extrêmement longue
 * `Correction` La désactivation ou la désinstallation du plugin Ace externe pendant l'utilisation de l'éditeur ou de son interface de paramètres pouvait entraîner la perte de modifications non enregistrées ou laisser l'interface dans un état invalide
 * `Correction` Le cache des icônes et l'état d'actualisation par glissement du Centre des plugins pouvaient devenir incohérents dans certains cas
+* `Correction` La défaillance du processus d'un seul plugin local pouvait laisser la liste du Centre des plugins entièrement vide
 * `Correction` Les icônes des plugins installés dans l'onglet Plugins de la page d'accueil ne changeaient pas dynamiquement lors du basculement du mode nuit
 * `Correction` Le Centre des plugins pouvait installer l'APK d'une mauvaise variante lorsqu'une version de plugin en contenait plusieurs
 * `Correction` Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement
@@ -396,6 +397,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Amélioration du style et des fonctions des boîtes de dialogue "Trier" et "Filtrer" du Centre des plugins
 * `Amélioration` Le Centre des plugins affiche les variantes courantes par défaut et fournit une page distincte pour les autres variantes
 * `Amélioration` Amélioration des journaux des modifications multilingues/du cache des langues/de la vérification officielle/du chargement des index et d'autres fonctions du Centre des plugins
+* `Amélioration` Le Centre des plugins affiche d'abord un instantané local léger et l'index en cache, puis actualise en parallèle les métadonnées des plugins et l'index en ligne; les plugins défaillants restent désactivés et affichent l'erreur réelle ainsi que des conseils de récupération lors d'une tentative d'activation
 * `Amélioration` Normalisation des ressources de chaînes du projet: traductions multilingues complètes/classement par fichier/tri par nom/ponctuation ASCII
 * `Amélioration` Limitation des ressources linguistiques de l'APK aux 10 configurations régionales prises en charge par le projet afin de réduire la taille du paquet
 * `Amélioration` Le système de compilation sélectionne dynamiquement les versions compatibles de Kotlin/KSP/AGP/R8 et réduit la pression mémoire au démarrage de Gradle

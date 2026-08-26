@@ -416,12 +416,14 @@ object PluginInfoDialogManager {
         }
         states += authText
 
-        val enabledText = when (item.enabledState) {
-            PluginEnabledState.READY -> context.getString(R.string.text_enabled)
-            PluginEnabledState.DISABLED -> context.getString(R.string.text_disabled)
-            is PluginEnabledState.ERROR -> context.getString(R.string.text_error)
+        when (item.enabledState) {
+            PluginEnabledState.READY -> states += context.getString(R.string.text_enabled)
+            PluginEnabledState.DISABLED -> states += context.getString(R.string.text_disabled)
+            is PluginEnabledState.ERROR -> {
+                states += context.getString(R.string.text_disabled)
+                states += context.getString(R.string.text_error)
+            }
         }
-        states += enabledText
 
         if (item.isUpdatable) {
             states += context.getString(R.string.text_updatable)

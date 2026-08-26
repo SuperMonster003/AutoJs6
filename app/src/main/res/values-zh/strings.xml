@@ -498,6 +498,7 @@
     <string name="hint_loop_delay">开始循环前的延迟</string>
     <string name="hint_loop_times">0 表示无限循环</string>
     <string name="hint_pc_server_address_supported_formats">支持 IPv4, IPv6 及域名.</string>
+    <string name="hint_plugin_process_failed_to_start">插件进程无法稳定启动. 请更新或重新安装插件; 如问题持续, 请联系插件开发者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">当前插件需要更高版本的 AutoJs6 宿主环境 (要求 versionCode: %1$d, 当前 versionCode: %2$d), 需要升级 AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">插件协议与当前 AutoJs6 不兼容, 需升级插件版本.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可尝试点击 \"激活\" 按钮激活一次插件.\n如激活成功, 按钮将在一定时间内自动开启.</string>

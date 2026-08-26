@@ -502,6 +502,7 @@
     <string name="hint_loop_delay">Retraso antes del bucle</string>
     <string name="hint_loop_times">0 para bucle infinito</string>
     <string name="hint_pc_server_address_supported_formats">Se admiten IPv4, IPv6 y dominios.</string>
+    <string name="hint_plugin_process_failed_to_start">El proceso del plugin no pudo iniciarse de forma estable. Actualiza o reinstala el plugin; si el problema persiste, contacta con el desarrollador del plugin.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">El plugin actual requiere una versión más alta del entorno host de AutoJs6 (versionCode requerido: %1$d, versionCode actual: %2$d). Es necesario actualizar AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">El protocolo del plugin no es compatible con la versión actual de AutoJs6. Debes actualizar el plugin.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Prueba a pulsar el boton \"Activar\" para activar el plugin una vez.\nSi la activacion se realiza correctamente, el boton se activara automaticamente en un periodo de tiempo.</string>

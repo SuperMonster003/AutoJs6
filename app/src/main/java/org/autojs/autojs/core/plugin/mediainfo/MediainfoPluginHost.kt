@@ -23,7 +23,7 @@ object MediainfoPluginHost {
         infoReader = { proxy -> proxy.getInfo() },
     )
 
-    suspend fun discover(context: Context) = host.discover(context)
+    suspend fun discover(context: Context, packageName: String? = null) = host.discover(context, packageName)
 
     suspend fun probe(context: Context, packageName: String): PluginInfo = host.probe(context, packageName)
 

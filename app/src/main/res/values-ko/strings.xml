@@ -504,6 +504,7 @@
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 및 도메인을 지원합니다.</string>
+    <string name="hint_plugin_process_failed_to_start">플러그인 프로세스를 안정적으로 시작할 수 없습니다. 플러그인을 업데이트하거나 다시 설치하십시오. 문제가 계속되면 플러그인 개발자에게 문의하십시오.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">현재 플러그인은 더 높은 버전의 AutoJs6 호스트 환경이 필요합니다 (필요한 versionCode: %1$d, 현재 versionCode: %2$d). AutoJs6를 업그레이드해야 합니다.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">플러그인 프로토콜이 현재 AutoJs6와 호환되지 않습니다. 플러그인 버전을 업그레이드해야 합니다.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"활성화\" 버튼을 눌러 플러그인을 한 번 활성화해 보세요.\n활성화에 성공하면 일정 시간 내에 버튼이 자동으로 켜집니다.</string>

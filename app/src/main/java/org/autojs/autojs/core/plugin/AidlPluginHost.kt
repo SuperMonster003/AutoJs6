@@ -63,8 +63,8 @@ class AidlPluginHost<I : IInterface>(
         val bindingLease: Closeable,
     )
 
-    suspend fun discover(context: Context): List<Discovered> {
-        val services = queryServices(context)
+    suspend fun discover(context: Context, packageName: String? = null): List<Discovered> {
+        val services = queryServices(context, packageName)
         Log.i(tag, "discover: services=${services.size}")
         return services.map { service ->
             Log.i(tag, "discover: ${service.packageName}/${service.name}")

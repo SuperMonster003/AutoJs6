@@ -503,6 +503,7 @@
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
     <string name="hint_pc_server_address_supported_formats">IPv4/IPv6/およびドメイン名に対応しています.</string>
+    <string name="hint_plugin_process_failed_to_start">プラグインプロセスを安定して起動できません. プラグインを更新または再インストールしてください. 問題が続く場合は, プラグイン開発者に連絡してください.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">現在のプラグインには, より新しいバージョンの AutoJs6 ホスト環境が必要です (必要な versionCode: %1$d, 現在の versionCode: %2$d). AutoJs6 をアップグレードしてください.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">プラグインプロトコルは現在の AutoJs6 と互換性がありません. プラグインをアップグレードしてください.</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"有効化\" ボタンをタップして, プラグインを一度有効化してみてください.\n有効化に成功すると, 一定時間内にボタンが自動的にオンになります.</string>

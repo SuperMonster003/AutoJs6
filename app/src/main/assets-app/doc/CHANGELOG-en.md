@@ -166,6 +166,7 @@
 * `Fix` Ace editor could become unresponsive and fall back to the native editor after an incompatible-encoding reload of a large file produced an extremely long text line
 * `Fix` Disabling or uninstalling the external Ace plugin while its editor or settings interface was active could cause unsaved editing state to be lost or leave the interface in an invalid state
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
+* `Fix` A single local plugin process failure could leave Plugin Center with a completely blank list
 * `Fix` Installed plugin icons on the Home Plugins tab did not switch dynamically when night mode changed
 * `Fix` Plugin Center could install an APK from the wrong distribution variant when a plugin release contained multiple variants
 * `Fix` APK Builder Template plugins could appear twice or incorrectly report updates
@@ -236,6 +237,7 @@
 * `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs
 * `Improvement` Plugin Center lists common distribution variants by default and provides a separate page for other variants
 * `Improvement` Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features
+* `Improvement` Plugin Center renders a lightweight local snapshot and cached index first, then refreshes plugin metadata and the online index in parallel; abnormal plugins remain disabled and show their actual failure with recovery guidance when enabling is attempted
 * `Improvement` Standardized multilingual translation coverage/file organization/name ordering/ASCII punctuation for project string resources
 * `Improvement` Limited APK language resources to the 10 locale configurations supported by the project to reduce package size
 * `Improvement` Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure

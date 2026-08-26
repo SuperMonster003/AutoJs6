@@ -6,11 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
@@ -37,18 +42,18 @@ import java.util.Locale
  * merging them into a PluginCenterItem list.
  *
  * Behavior strategy:
- * - First load local plugins and immediately push the list (local priority).
- * - Then load the index in the background, merge with local plugins and push again after success.
- * - If local discovery fails, notify UI to show a dialog and exit Activity through fatalError.
+ * - First render a package-manager-only local snapshot together with the cached index.
+ * - Then refresh complete local metadata and the online index independently in the background.
+ * - Isolate discovery failures so one broken plugin never clears the complete list.
  *
  * zh-CN:
  *
  * 统一加载索引插件与本地已安装插件, 合并为 PluginCenterItem 列表.
  *
  * 行为策略:
- * - 先加载本地插件并立即推送列表 (本地优先).
- * - 紧接着在后台加载索引, 成功后与本地合并再推送一次.
- * - 若本地发现失败, 通过 fatalError 通知 UI 弹窗并退出 Activity.
+ * - 先使用仅依赖 PackageManager 的本地快照与缓存索引渲染列表.
+ * - 随后在后台分别刷新完整本地元数据与在线索引.
+ * - 隔离发现异常, 避免单个异常插件清空整个列表.
  *
  * Created by JetBrains AI Assistant (GPT-5.2) on Nov 26, 2025.
  * Modified by SuperMonster003 as of Jan 17, 2026.
@@ -70,11 +75,6 @@ class PluginCenterViewModel : ViewModel() {
     // zh-CN: 索引加载是否已完成 (包含 "成功/失败/空" 三种结果, 仅代表 "不再加载").
     private val _indexLoaded = MutableStateFlow(false)
     val indexLoaded: StateFlow<Boolean> = _indexLoaded
-
-    // Fatal exception discovered locally (requires user notification and Activity exit).
-    // zh-CN: 本地发现的致命异常 (需要提示用户并退出 Activity).
-    private val _fatalError = MutableSharedFlow<String>(extraBufferCapacity = 1)
-    val fatalError: SharedFlow<String> = _fatalError
 
     private val _toastMessage = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val toastMessage: SharedFlow<String> = _toastMessage
@@ -107,16 +107,17 @@ class PluginCenterViewModel : ViewModel() {
         val iconNightModeEnabled = ViewUtils.isNightModeEnabled
         val generation = ++loadGeneration
         loadJob?.cancel()
-        loadJob = viewModelScope.launch {
+        loadJob = viewModelScope.launch load@{
             fun isLatestLoad() = generation == loadGeneration
-            fun updateLatestItems(next: List<PluginCenterItem>) {
+            fun updateLatestItems(next: List<PluginCenterItem>, forceUpdate: Boolean = false) {
                 if (isLatestLoad()) {
                     val updated = updateItemsIfChanged(
                         next = next,
-                        force = forceRender || iconRenderModeTracker.shouldForceRender(iconNightModeEnabled),
+                        force = forceUpdate || forceRender || iconRenderModeTracker.shouldForceRender(iconNightModeEnabled),
                     )
                     if (updated) {
                         iconRenderModeTracker.markRendered(iconNightModeEnabled)
+                        PluginInfoDialogManager.refreshIfShowing(context, _items.value)
                     }
                 }
             }
@@ -136,185 +137,174 @@ class PluginCenterViewModel : ViewModel() {
                 PluginOnlineSettingsStore.markCheckedNow()
             }
 
-            // First load local plugins (local priority).
-            // zh-CN: 先加载本地插件 (本地优先).
-            PluginCenterProcessLogger.i("Discover installed AIDL plugins.")
-            val installed = runCatching {
-                installedRepo.discoverInstalled(context)
-            }.onFailure { e ->
-                if (e is CancellationException) throw e
-                if (!isLatestLoad()) return@onFailure
-                // Treat "local discovery" failure as a serious exception.
-                // zh-CN: 将 "本地发现" 失败视为严重异常.
-                val message = context.getString(
-                    R.string.error_failed_to_load_plugins_with_reason,
-                    e.message ?: e.toString(),
-                )
-                PluginCenterProcessLogger.i("Failed to discover installed AIDL plugins: ${e.message ?: e.javaClass.simpleName}.")
-                emitRefreshError(message)
-                _fatalError.tryEmit(message)
-            }.getOrNull() ?: run {
-                // Do not continue subsequent logic when unable to obtain local list.
-                // zh-CN: 无法获取本地列表时不再继续后续逻辑.
-                if (!isLatestLoad()) return@launch
-                updateLatestItems(emptyList())
-                _indexLoaded.value = true
-                return@launch
-            }
-            if (!isLatestLoad()) return@launch
-            PluginCenterProcessLogger.i("Installed AIDL plugins discovered: count=${installed.size}.")
-
-            PluginCenterProcessLogger.i("Discover installed legacy SDK plugins.")
-            val legacyInstalled = runCatching {
-                legacyRepo.discoverInstalled(context)
-            }.onFailure { e ->
-                if (e is CancellationException) throw e
-                Log.w(TAG, "legacy discovery failed: ${e.message}")
-                val message = e.message ?: e.toString()
-                PluginCenterProcessLogger.i("Failed to discover installed legacy SDK plugins: $message.")
-                emitRefreshError(message)
-            }.getOrElse { emptyList() }
-            PluginCenterProcessLogger.i("Installed legacy SDK plugins discovered: count=${legacyInstalled.size}.")
-            // Render list using "local only".
-            // zh-CN: 使用 "仅本地" 渲染列表.
-            val localAidlItems = installed.mapNotNull { local ->
-                toPluginCenterItem(
-                    context,
-                    index = null,
-                    local = local,
-                    allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                )
-            }
-            val localLegacyItems = legacyInstalled.mapNotNull { local ->
-                toLegacyPluginCenterItem(
-                    context = context,
-                    local = local,
-                    index = null,
-                    allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                )
-            }
-            val onlyLocalItems = filterHidden(context, localAidlItems + localLegacyItems)
-
-            val installedByPkg = installed.associateBy { it.packageName }
-            val installedByNormalizedTitle = installed.groupBy { normalizeTitle(it.title) }
-            val legacyInstalledByPkg = legacyInstalled.associateBy { it.packageName }
-
-            fun buildMergedItems(indexEntries: List<PluginIndexEntry>): List<PluginCenterItem> {
-                val fromIndex = indexEntries.mapNotNull { entry ->
-                    val legacy = legacyInstalledByPkg[entry.packageName]
-                    if (legacy != null) {
-                        return@mapNotNull toLegacyPluginCenterItem(
+            // Both operations are disk/package-manager only and never bind a plugin process.
+            // Render their merged result before starting complete discovery.
+            // zh-CN: 两个操作均只访问磁盘或 PackageManager, 不绑定插件进程.
+            // 在完整发现开始前优先渲染二者的合并结果.
+            val (cachedIndexEntries, installedSnapshot) = coroutineScope {
+                val cachedIndex = async {
+                    runCatching {
+                        indexRepo.getCachedIndex(
                             context = context,
-                            local = legacy,
-                            index = entry,
-                            allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                            enabledSources = enabledSources,
                         )
-                    }
-                    val local = matchLocalPluginForIndex(
-                        index = entry,
-                        installedByPkg = installedByPkg,
-                        installedByNormalizedTitle = installedByNormalizedTitle,
-                    )
-                    toPluginCenterItem(
-                        context = context,
-                        index = entry,
-                        local = local,
-                        allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                    )
-                }.let(::dedupeByPackagePreferInstalled)
-
-                // Supplement plugins that "exist locally but not in index" (third-party/not yet in index).
-                // zh-CN: 补充 "本地有但索引没有" 的插件 (第三方/暂未入索引).
-                val fromIndexPackageNames = fromIndex.asSequence().map { it.packageName }.toHashSet()
-                val includeUnindexedLocals = sourceScope == null
-                val extraLocals = if (includeUnindexedLocals) {
-                    val extraAidlLocals = installed
-                        .filter { ins -> ins.packageName !in fromIndexPackageNames }
-                        .mapNotNull { local ->
-                            toPluginCenterItem(
-                                context = context,
-                                index = null,
-                                local = local,
-                                allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                            )
-                        }
-                    val extraLegacyLocals = legacyInstalled
-                        .filter { it.packageName !in fromIndexPackageNames }
-                        .mapNotNull { legacy ->
-                            toLegacyPluginCenterItem(
-                                context = context,
-                                local = legacy,
-                                index = null,
-                                allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                            )
-                        }
-                    dedupeByPackagePreferInstalled(extraAidlLocals + extraLegacyLocals)
-                } else {
-                    localLegacyItems.filter { it.packageName in fromIndexPackageNames }
+                    }.onFailure { error ->
+                        if (error is CancellationException) throw error
+                        Log.w(TAG, "getCachedIndex failed: ${error.message}")
+                        val message = error.message ?: error.toString()
+                        PluginCenterProcessLogger.i("Failed to read cached plugin index: $message.")
+                        emitRefreshError(message)
+                    }.getOrElse { emptyList() }
                 }
-
-                val merged = dedupeByPackagePreferInstalled(fromIndex + extraLocals)
-                return filterHidden(context, merged)
-            }
-
-            val cachedIndexEntries = runCatching {
-                indexRepo.getCachedIndex(
-                    context = context,
-                    enabledSources = enabledSources,
-                )
-            }.onFailure {
-                if (it is CancellationException) throw it
-                Log.w(TAG, "getCachedIndex failed: ${it.message}")
-                val message = it.message ?: it.toString()
-                PluginCenterProcessLogger.i("Failed to read cached plugin index: $message.")
-                emitRefreshError(message)
-            }.getOrElse { emptyList() }
-            PluginCenterProcessLogger.i("Cached plugin index entries loaded: count=${cachedIndexEntries.size}.")
-
-            when {
-                cachedIndexEntries.isNotEmpty() -> updateLatestItems(buildMergedItems(cachedIndexEntries))
-                sourceScope == null -> updateLatestItems(onlyLocalItems)
-            }
-            if (!isLatestLoad()) return@launch
-
-            // Asynchronously load index and merge.
-            val indexEntries = runCatching {
-                indexRepo.fetchOnlineIndex(
-                    context = context,
-                    forceRefresh = shouldForceFetchIndex,
-                    enabledSources = enabledSources,
-                    onIssue = { issue ->
-                        emitRefreshError(
-                            context.getString(
-                                R.string.error_plugin_index_source_fetch_failed_with_reason,
-                                issue.source.labelForMessage(context),
-                                issue.message,
-                            ),
+                val localSnapshot = async {
+                    runCatching {
+                        installedRepo.discoverInstalledSnapshot(context)
+                    }.onFailure { error ->
+                        if (error is CancellationException) throw error
+                        Log.w(TAG, "installed snapshot discovery failed: ${error.message}")
+                        val message = context.getString(
+                            R.string.error_failed_to_load_plugins_with_reason,
+                            error.message ?: error.toString(),
                         )
-                    },
-                )
-            }.onFailure {
-                if (it is CancellationException) throw it
-                // Index fetch exception is not fatal, just log it.
-                Log.w(TAG, "fetchOnlineIndex failed: ${it.message}")
-                val message = it.message ?: it.toString()
-                PluginCenterProcessLogger.i("Failed to fetch online plugin index: $message.")
-                emitRefreshError(
-                    context.getString(
-                        R.string.error_plugin_index_fetch_failed_with_reason,
-                        message,
+                        PluginCenterProcessLogger.i(
+                            "Failed to create installed plugin snapshot: ${error.message ?: error.javaClass.simpleName}.",
+                        )
+                        emitRefreshError(message)
+                    }.getOrElse { emptyList() }
+                }
+                cachedIndex.await() to localSnapshot.await()
+            }
+            if (!isLatestLoad()) return@load
+
+            PluginCenterProcessLogger.i("Cached plugin index entries loaded: count=${cachedIndexEntries.size}.")
+            PluginCenterProcessLogger.i("Installed plugin snapshot created: count=${installedSnapshot.size}.")
+            val renderedInitialSnapshot = _items.value.isEmpty()
+            if (renderedInitialSnapshot) {
+                updateLatestItems(
+                    buildMergedItems(
+                        context = context,
+                        indexEntries = cachedIndexEntries,
+                        installed = installedSnapshot,
+                        legacyInstalled = emptyList(),
+                        allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                        sourceScope = sourceScope,
                     ),
                 )
-            }.getOrElse { cachedIndexEntries }
-            if (!isLatestLoad()) return@launch
+            }
 
-            updateLatestItems(buildMergedItems(indexEntries))
+            // Complete AIDL discovery, legacy SDK discovery, and online refresh are independent.
+            // Each result updates the currently visible list without waiting for the other stages.
+            // zh-CN: 完整 AIDL 发现, 传统 SDK 发现及在线刷新彼此独立.
+            // 任一阶段完成后都立即更新当前列表, 无需等待其他阶段.
+            coroutineScope {
+                val stateMutex = Mutex()
+                var currentInstalled = installedSnapshot
+                var currentLegacyInstalled = emptyList<LegacyInstalledPluginRepository.LegacyInstalledPlugin>()
+                var currentIndexEntries = cachedIndexEntries
+
+                suspend fun publish(
+                    installedUpdate: List<InstalledPluginRepository.InstalledPlugin>? = null,
+                    legacyUpdate: List<LegacyInstalledPluginRepository.LegacyInstalledPlugin>? = null,
+                    indexUpdate: List<PluginIndexEntry>? = null,
+                ) {
+                    stateMutex.withLock {
+                        val requiresFullLocalRender = renderedInitialSnapshot && installedUpdate != null
+                        installedUpdate?.let { currentInstalled = it }
+                        legacyUpdate?.let { currentLegacyInstalled = it }
+                        indexUpdate?.let { currentIndexEntries = it }
+                        if (isLatestLoad()) {
+                            updateLatestItems(
+                                buildMergedItems(
+                                    context = context,
+                                    indexEntries = currentIndexEntries,
+                                    installed = currentInstalled,
+                                    legacyInstalled = currentLegacyInstalled,
+                                    allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                                    sourceScope = sourceScope,
+                                ),
+                                forceUpdate = requiresFullLocalRender,
+                            )
+                        }
+                    }
+                }
+
+                val installedJob = launch {
+                    PluginCenterProcessLogger.i("Discover installed AIDL plugins in background.")
+                    val result = runCatching {
+                        installedRepo.discoverInstalled(context)
+                    }.onFailure { error ->
+                        if (error is CancellationException) throw error
+                        Log.w(TAG, "installed discovery failed: ${error.message}")
+                        val message = context.getString(
+                            R.string.error_failed_to_load_plugins_with_reason,
+                            error.message ?: error.toString(),
+                        )
+                        PluginCenterProcessLogger.i(
+                            "Failed to discover installed AIDL plugins: ${error.message ?: error.javaClass.simpleName}.",
+                        )
+                        emitRefreshError(message)
+                    }.getOrNull()
+                    if (result != null) {
+                        PluginCenterProcessLogger.i("Installed AIDL plugins discovered: count=${result.size}.")
+                        publish(installedUpdate = result)
+                    }
+                }
+
+                val legacyJob = launch {
+                    PluginCenterProcessLogger.i("Discover installed legacy SDK plugins in background.")
+                    val result = runCatching {
+                        legacyRepo.discoverInstalled(context)
+                    }.onFailure { error ->
+                        if (error is CancellationException) throw error
+                        Log.w(TAG, "legacy discovery failed: ${error.message}")
+                        val message = error.message ?: error.toString()
+                        PluginCenterProcessLogger.i("Failed to discover installed legacy SDK plugins: $message.")
+                        emitRefreshError(message)
+                    }.getOrNull()
+                    if (result != null) {
+                        PluginCenterProcessLogger.i("Installed legacy SDK plugins discovered: count=${result.size}.")
+                        publish(legacyUpdate = result)
+                    }
+                }
+
+                val indexJob = launch {
+                    val result = runCatching {
+                        indexRepo.fetchOnlineIndex(
+                            context = context,
+                            forceRefresh = shouldForceFetchIndex,
+                            enabledSources = enabledSources,
+                            onIssue = { issue ->
+                                emitRefreshError(
+                                    context.getString(
+                                        R.string.error_plugin_index_source_fetch_failed_with_reason,
+                                        issue.source.labelForMessage(context),
+                                        issue.message,
+                                    ),
+                                )
+                            },
+                        )
+                    }.onFailure { error ->
+                        if (error is CancellationException) throw error
+                        Log.w(TAG, "fetchOnlineIndex failed: ${error.message}")
+                        val message = error.message ?: error.toString()
+                        PluginCenterProcessLogger.i("Failed to fetch online plugin index: $message.")
+                        emitRefreshError(
+                            context.getString(
+                                R.string.error_plugin_index_fetch_failed_with_reason,
+                                message,
+                            ),
+                        )
+                    }.getOrElse { cachedIndexEntries }
+                    publish(indexUpdate = result)
+                }
+
+                joinAll(installedJob, legacyJob, indexJob)
+            }
+            if (!isLatestLoad()) return@load
+
             PluginCenterProcessLogger.i("Plugin center load finished: visible entries=${_items.value.size}.")
             _indexLoaded.value = true
 
-            // When returning to the page, refresh if the details dialog is being displayed.
-            // zh-CN: 返回页面时, 若详情对话框正在显示则刷新.
-            PluginInfoDialogManager.refreshIfShowing(context, _items.value)
         }
         loadJob?.invokeOnCompletion {
             if (generation == loadGeneration && !_indexLoaded.value) {
@@ -333,8 +323,8 @@ class PluginCenterViewModel : ViewModel() {
         _items.value = _items.value.map {
             if (it.packageName == packageName) {
                 val nextEnabledState = when {
+                    error != null && error.code != PluginErrorCode.NOT_AUTHORIZED -> PluginEnabledState.ERROR(error)
                     !enabled -> PluginEnabledState.DISABLED
-                    error != null -> PluginEnabledState.ERROR(error)
                     else -> PluginEnabledState.READY
                 }
                 it.copy(
@@ -365,6 +355,204 @@ class PluginCenterViewModel : ViewModel() {
         return items.filterNot { PluginVisibilityStore.isHidden(context, it.packageName) }
     }
 
+    private fun buildMergedItems(
+        context: Context,
+        indexEntries: List<PluginIndexEntry>,
+        installed: List<InstalledPluginRepository.InstalledPlugin>,
+        legacyInstalled: List<LegacyInstalledPluginRepository.LegacyInstalledPlugin>,
+        allowGlobalUpdateCheck: Boolean,
+        sourceScope: PluginIndexSource?,
+    ): List<PluginCenterItem> {
+        val installedByPackage = installed.associateBy { it.packageName }
+        val installedByNormalizedTitle = installed.groupBy { normalizeTitle(it.title) }
+        val legacyInstalledByPackage = legacyInstalled.associateBy { it.packageName }
+
+        val fromIndex = indexEntries.mapNotNull { entry ->
+            val legacy = legacyInstalledByPackage[entry.packageName]
+            if (legacy != null) {
+                return@mapNotNull toLegacyPluginCenterItemSafely(
+                    context = context,
+                    local = legacy,
+                    index = entry,
+                    allowGlobalUpdateCheck = allowGlobalUpdateCheck,
+                )
+            }
+            val local = matchLocalPluginForIndex(
+                index = entry,
+                installedByPkg = installedByPackage,
+                installedByNormalizedTitle = installedByNormalizedTitle,
+            )
+            toPluginCenterItemSafely(
+                context = context,
+                index = entry,
+                local = local,
+                allowGlobalUpdateCheck = allowGlobalUpdateCheck,
+            )
+        }.let(::dedupeByPackagePreferInstalled)
+
+        // Supplement plugins that exist locally but are absent from the selected index.
+        // zh-CN: 补充已安装但未包含在所选索引中的插件.
+        val fromIndexPackageNames = fromIndex.asSequence().map { it.packageName }.toHashSet()
+        val extraLocals = if (sourceScope == null) {
+            val extraAidlLocals = installed
+                .filter { it.packageName !in fromIndexPackageNames }
+                .mapNotNull { local ->
+                    toPluginCenterItemSafely(
+                        context = context,
+                        index = null,
+                        local = local,
+                        allowGlobalUpdateCheck = allowGlobalUpdateCheck,
+                    )
+                }
+            val extraLegacyLocals = legacyInstalled
+                .filter { it.packageName !in fromIndexPackageNames }
+                .mapNotNull { legacy ->
+                    toLegacyPluginCenterItemSafely(
+                        context = context,
+                        local = legacy,
+                        index = null,
+                        allowGlobalUpdateCheck = allowGlobalUpdateCheck,
+                    )
+                }
+            dedupeByPackagePreferInstalled(extraAidlLocals + extraLegacyLocals)
+        } else {
+            emptyList()
+        }
+
+        return filterHidden(context, dedupeByPackagePreferInstalled(fromIndex + extraLocals))
+    }
+
+    private fun toPluginCenterItemSafely(
+        context: Context,
+        index: PluginIndexEntry?,
+        local: InstalledPluginRepository.InstalledPlugin?,
+        allowGlobalUpdateCheck: Boolean,
+    ): PluginCenterItem? = runCatching {
+        toPluginCenterItem(context, index, local, allowGlobalUpdateCheck)
+    }.getOrElse { error ->
+        val packageName = local?.packageName ?: index?.packageName ?: return@getOrElse null
+        Log.w(TAG, "Failed to build Plugin Center item for $packageName", error)
+        PluginCenterProcessLogger.i(
+            "Failed to build Plugin Center item for $packageName: ${error.message ?: error.javaClass.simpleName}.",
+        )
+        buildFallbackPluginCenterItem(context, index, local, error)
+    }
+
+    private fun toLegacyPluginCenterItemSafely(
+        context: Context,
+        local: LegacyInstalledPluginRepository.LegacyInstalledPlugin,
+        index: PluginIndexEntry?,
+        allowGlobalUpdateCheck: Boolean,
+    ): PluginCenterItem? = runCatching {
+        toLegacyPluginCenterItem(context, local, index, allowGlobalUpdateCheck)
+    }.getOrElse { error ->
+        Log.w(TAG, "Failed to build legacy Plugin Center item for ${local.packageName}", error)
+        PluginCenterProcessLogger.i(
+            "Failed to build legacy Plugin Center item for ${local.packageName}: ${error.message ?: error.javaClass.simpleName}.",
+        )
+        enableStore.setEnabled(context, local.packageName, false)
+        val mappedError = PluginErrorMapper.fromThrowable(error)
+        val trustInfo = runCatching {
+            PluginTrustManager.resolveTrustInfo(context, local.packageName)
+        }.getOrNull()
+        PluginCenterItem(
+            title = local.title.takeIf { it.isNotBlank() } ?: index?.title ?: local.packageName,
+            packageName = local.packageName,
+            versionName = local.versionName,
+            versionCode = local.versionCode,
+            versionDate = local.versionDate,
+            author = local.author ?: index?.author,
+            description = local.description ?: index?.description,
+            packageSize = local.packageSize,
+            icon = local.icon,
+            remoteIconUrl = index?.iconUrl?.toString(),
+            remoteNightIconUrl = index?.nightIconUrl?.toString(),
+            isEnabled = false,
+            isInstalled = true,
+            firstInstallTime = local.firstInstallTime,
+            lastUpdateTime = local.lastUpdateTime,
+            settings = PluginCenterItemSettings(),
+            source = index?.source ?: PluginIndexSource.THIRD_PARTY,
+            isFeatured = index?.isFeatured ?: true,
+            mechanism = PluginMechanism.SDK,
+            authorizedState = trustInfo?.authorizedState ?: PluginAuthorizedState.REQUIRED,
+            activatedState = PluginActivatedState.NOT_SUPPORTED,
+            enabledState = PluginEnabledState.ERROR(mappedError),
+            lastError = mappedError,
+            signingFingerprintSha256 = trustInfo?.primaryFingerprintSha256,
+            isOfficialVerified = trustInfo?.isOfficial == true,
+            requiresHostVersion = index?.requiresHostVersion,
+            hostVersionCode = currentHostVersionCode(),
+        )
+    }
+
+    private fun buildFallbackPluginCenterItem(
+        context: Context,
+        index: PluginIndexEntry?,
+        local: InstalledPluginRepository.InstalledPlugin?,
+        itemError: Throwable,
+    ): PluginCenterItem? {
+        val packageName = local?.packageName ?: index?.packageName ?: return null
+        val isInstalled = local != null
+        val latestRelease = index?.releases?.maxByOrNull { it.versionCode }
+        val mappedError = PluginErrorMapper.fromThrowable(local?.bindError ?: itemError)
+        val trustInfo = if (isInstalled) {
+            runCatching { PluginTrustManager.resolveTrustInfo(context, packageName) }.getOrNull()
+        } else null
+        if (isInstalled) {
+            enableStore.setEnabled(context, packageName, false)
+        }
+        val engine = local?.pluginInfo?.engine ?: index?.engine
+        return PluginCenterItem(
+            title = local?.title?.takeIf { it.isNotBlank() } ?: index?.title ?: packageName,
+            packageName = packageName,
+            versionName = local?.versionName ?: latestRelease?.versionName ?: context.getString(R.string.text_unknown),
+            versionCode = local?.versionCode ?: latestRelease?.versionCode,
+            versionDate = local?.versionDate ?: latestRelease?.versionDate,
+            author = local?.author ?: index?.author ?: trustInfo?.developer,
+            collaborators = index?.collaborators ?: emptyList(),
+            description = local?.description ?: index?.description,
+            instructionHardCoded = local?.instructionHardCoded ?: index?.instructionHardCoded,
+            instructionMarkdownUrl = index?.instructionMarkdownUrl,
+            packageSize = local?.packageSize ?: 0L,
+            installableApkUrl = latestRelease?.apkUrl,
+            installableApkSha256 = latestRelease?.apkSha256,
+            installableApkSizeBytes = latestRelease?.apkSizeBytes,
+            supportedAbis = local?.supportedAbis ?: index?.supportedAbis,
+            remoteIconUrl = index?.iconUrl?.toString(),
+            remoteNightIconUrl = index?.nightIconUrl?.toString(),
+            forceIgnoreLocalIcon = index?.forceIgnoreLocalIcon == true,
+            icon = if (index?.forceIgnoreLocalIcon == true) null else local?.icon,
+            isEnabled = false,
+            isInstalled = isInstalled,
+            firstInstallTime = local?.firstInstallTime,
+            lastUpdateTime = local?.lastUpdateTime,
+            settings = if (isInstalled) PluginCenterItemSettings() else null,
+            source = index?.source ?: PluginIndexSource.OFFICIAL,
+            isFeatured = index?.isFeatured ?: true,
+            engine = engine,
+            variant = local?.pluginInfo?.variant ?: index?.variant,
+            engineId = local?.pluginInfo?.id ?: index?.engineId,
+            isOcrService = local?.isOcrService == true || engine in OCR_SERVICE_ENGINES,
+            isBarcodeService = local?.isBarcodeService == true || engine in BARCODE_SERVICE_ENGINES,
+            serviceAction = local?.serviceAction ?: serviceActionFromEngine(engine),
+            mechanism = if (isInstalled || index?.source != PluginIndexSource.THIRD_PARTY) {
+                PluginMechanism.AIDL
+            } else {
+                PluginMechanism.SDK
+            },
+            authorizedState = trustInfo?.authorizedState ?: PluginAuthorizedState.REQUIRED,
+            activatedState = PluginActivatedState.NOT_SUPPORTED,
+            enabledState = if (isInstalled) PluginEnabledState.ERROR(mappedError) else PluginEnabledState.DISABLED,
+            lastError = mappedError.takeIf { isInstalled },
+            signingFingerprintSha256 = trustInfo?.primaryFingerprintSha256,
+            isOfficialVerified = trustInfo?.isOfficial == true,
+            canActivate = false,
+            requiresHostVersion = local?.requiresHostVersion ?: index?.requiresHostVersion,
+            hostVersionCode = currentHostVersionCode(),
+        )
+    }
+
     private fun isSemanticallySameList(
         current: List<PluginCenterItem>,
         next: List<PluginCenterItem>,
@@ -379,7 +567,13 @@ class PluginCenterViewModel : ViewModel() {
         val enabledStateKey = when (val state = item.enabledState) {
             PluginEnabledState.DISABLED -> "disabled"
             PluginEnabledState.READY -> "ready"
-            is PluginEnabledState.ERROR -> "error:${state.error.code.name}:${state.error.recoverHint.orEmpty()}"
+            is PluginEnabledState.ERROR -> listOf(
+                "error",
+                state.error.code.name,
+                state.error.message.orEmpty(),
+                state.error.recoverHint.orEmpty(),
+                state.error.causeClass.orEmpty(),
+            ).joinToString(":")
         }
         return ItemSnapshot(
             packageName = item.packageName,
@@ -581,11 +775,23 @@ class PluginCenterViewModel : ViewModel() {
             )
         } else null
         val authError = if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED) PluginError(PluginErrorCode.NOT_AUTHORIZED) else null
+        val shouldSurfaceDiscoveryError = mappedError != null &&
+                trustInfo.authorizedState != PluginAuthorizedState.REQUIRED &&
+                hostVersionError == null
+        if (shouldSurfaceDiscoveryError && enabled) {
+            // A plugin that could not complete discovery must not remain logically enabled.
+            // A later user-initiated enable always probes it again before restoring READY.
+            // zh-CN: 无法完成发现的插件不得继续保持逻辑启用状态.
+            // 用户后续主动启用时会再次实时探测, 成功后才恢复 READY.
+            enableStore.setEnabled(context, packageName, false)
+            enabled = false
+        }
         val lastError = authError ?: hostVersionError ?: mappedError
         val enabledState = when {
             hostVersionError != null -> PluginEnabledState.ERROR(hostVersionError)
+            trustInfo.authorizedState == PluginAuthorizedState.REQUIRED -> PluginEnabledState.DISABLED
+            shouldSurfaceDiscoveryError -> PluginEnabledState.ERROR(mappedError)
             !enabled -> PluginEnabledState.DISABLED
-            mappedError != null -> PluginEnabledState.ERROR(mappedError)
             else -> PluginEnabledState.READY
         }
         val readyEnabled = enabled && enabledState is PluginEnabledState.READY

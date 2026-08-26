@@ -81,8 +81,8 @@ object OcrPluginHost {
         val error: Throwable?,
     )
 
-    suspend fun discover(context: Context): List<Discovered> {
-        val services = queryOcrServices(context)
+    suspend fun discover(context: Context, packageName: String? = null): List<Discovered> {
+        val services = queryOcrServices(context, packageName)
         Log.i(TAG, "discover: services=${services.size}")
         return services.map { svc ->
             Log.i(TAG, "discover: ${svc.packageName}/${svc.name}")

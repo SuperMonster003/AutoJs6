@@ -274,20 +274,6 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
         }
 
-        // Subscribe to locally discovered fatal exceptions.
-        // zh-CN: 订阅本地发现致命异常.
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.fatalError.collectLatest { msg ->
-                MaterialDialog.Builder(contextRef)
-                    .title(R.string.text_error)
-                    .content(msg)
-                    .positiveText(R.string.dialog_button_dismiss)
-                    .onPositive { _, _ -> requireActivity().finish() }
-                    .cancelable(false)
-                    .show()
-            }
-        }
-
         // Subscribe to recoverable loading exceptions for user-initiated pull-to-refresh.
         // zh-CN: 订阅用户手动下拉刷新时的可恢复加载异常.
         viewLifecycleOwner.lifecycleScope.launch {
@@ -713,17 +699,26 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             rejectEnableWithError(item, hostVersionError)
             return
         }
-        vm.setEnabled(contextRef, item.packageName, true)
-        item.isEnabled = true
-        item.enabledState = PluginEnabledState.READY
+
+        // Keep the logical state disabled until the live probe succeeds. This prevents other
+        // plugin consumers from selecting a known-bad package during the enable attempt.
+        // zh-CN: 实时探测成功前保持逻辑禁用, 避免其他插件调用方在启用过程中选中异常包.
+        vm.setEnabled(contextRef, item.packageName, false)
+        item.isEnabled = false
+        item.enabledState = PluginEnabledState.DISABLED
         item.lastError = null
         adapter.notifyDataSetChanged()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val error = runCatching {
+            val error = try {
                 probeAidlPlugin(item)
-            }.exceptionOrNull()
-            if (error != null && error !is CancellationException) {
+                null
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                error
+            }
+            if (error != null) {
                 val mapped = PluginErrorMapper.fromThrowable(error)
                 val shouldRecommend = item.canActivate && PluginErrorMapper.shouldRecommendActivation(mapped)
                 if (item.activatedState == PluginActivatedState.UNKNOWN && shouldRecommend) {
@@ -803,6 +798,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                         required,
                         host,
                     )
+                }
+                mapped.code == PluginErrorCode.PLUGIN_PROCESS_CRASHED -> {
+                    getString(R.string.hint_plugin_process_failed_to_start)
                 }
                 shouldShowActivate -> {
                     getString(R.string.hint_try_clicking_the_activate_button_to_activate_the_plugin)

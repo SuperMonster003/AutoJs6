@@ -8,17 +8,28 @@ object PluginErrorMapper {
     fun fromThrowable(t: Throwable): PluginError {
         val message = t.message ?: t.toString()
         val causeClass = t.javaClass.name
+        val causeChain = generateSequence(t) { it.cause }.take(MAX_CAUSE_DEPTH).toList()
+        val diagnosticText = causeChain.joinToString(" | ") { cause ->
+            "${cause.javaClass.name}: ${cause.message.orEmpty()}"
+        }
         val code = when {
-            isProtocolMismatch(message, causeClass) -> PluginErrorCode.PROTOCOL_MISMATCH
-            t is SecurityException -> PluginErrorCode.BIND_SECURITY_EXCEPTION
-            t is DeadObjectException -> PluginErrorCode.DEAD_OBJECT
-            t is RemoteException -> PluginErrorCode.DEAD_OBJECT
-            message.contains("No OCR service found", ignoreCase = true) -> PluginErrorCode.SERVICE_NOT_FOUND
-            message.contains("No plugin info service found", ignoreCase = true) -> PluginErrorCode.SERVICE_NOT_FOUND
-            message.contains("bindService SecurityException", ignoreCase = true) -> PluginErrorCode.BIND_SECURITY_EXCEPTION
-            message.contains("bindService failed", ignoreCase = true) -> PluginErrorCode.BIND_FAILED
-            message.contains("bindService timeout", ignoreCase = true) -> PluginErrorCode.HANDSHAKE_TIMEOUT
-            message.contains("timeout", ignoreCase = true) && message.contains("bind", ignoreCase = true) -> PluginErrorCode.HANDSHAKE_TIMEOUT
+            isProtocolMismatch(diagnosticText, causeChain.joinToString("|") { it.javaClass.name }) -> PluginErrorCode.PROTOCOL_MISMATCH
+            causeChain.any { it is SecurityException } -> PluginErrorCode.BIND_SECURITY_EXCEPTION
+            causeChain.any { it is DeadObjectException } -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            causeChain.any { it is RemoteException } -> PluginErrorCode.DEAD_OBJECT
+            diagnosticText.contains("service binding died", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            diagnosticText.contains("service disconnected", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            diagnosticText.contains("process has died", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            diagnosticText.contains("process crashed", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            diagnosticText.contains("keeps stopping", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            diagnosticText.contains("No OCR service found", ignoreCase = true) -> PluginErrorCode.SERVICE_NOT_FOUND
+            diagnosticText.contains("No plugin info service found", ignoreCase = true) -> PluginErrorCode.SERVICE_NOT_FOUND
+            diagnosticText.contains("bindService SecurityException", ignoreCase = true) -> PluginErrorCode.BIND_SECURITY_EXCEPTION
+            diagnosticText.contains("service returned null binding", ignoreCase = true) -> PluginErrorCode.BIND_FAILED
+            diagnosticText.contains("bind", ignoreCase = true) &&
+                    (diagnosticText.contains("timeout", ignoreCase = true) ||
+                            diagnosticText.contains("timed out", ignoreCase = true)) -> PluginErrorCode.HANDSHAKE_TIMEOUT
+            diagnosticText.contains("bindService failed", ignoreCase = true) -> PluginErrorCode.BIND_FAILED
             else -> PluginErrorCode.INTERNAL_ERROR
         }
         return PluginError(
@@ -46,4 +57,6 @@ object PluginErrorMapper {
             else -> false
         }
     }
+
+    private const val MAX_CAUSE_DEPTH = 8
 }
