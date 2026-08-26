@@ -61,6 +61,11 @@ class JvmSourceCodecRoundTripTest {
             diagnostic,
             JvmSourceCodec.decodeDiagnostic(JvmSourceCodec.encodeDiagnostic(diagnostic)),
         )
+        val packageDiagnostic = diagnostic.copy(sourceFileName = "demo/Helper.java")
+        assertEquals(
+            packageDiagnostic,
+            JvmSourceCodec.decodeDiagnostic(JvmSourceCodec.encodeDiagnostic(packageDiagnostic)),
+        )
     }
 
     @Test

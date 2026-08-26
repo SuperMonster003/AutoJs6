@@ -13,7 +13,7 @@ object JvmSourceContract {
     const val ENGINE_ID = "jvm-source"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 5
+    const val PROTOCOL_MINOR = 6
     const val ENTRY_API_VERSION = 4
 
     @JvmField
@@ -25,8 +25,11 @@ object JvmSourceContract {
     @JvmField
     val OBSERVATION_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 5)
 
+    @JvmField
+    val SOURCE_PACKAGE_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 6)
+
     const val SCHEMA_MAJOR = 1
-    const val SCHEMA_MINOR = 2
+    const val SCHEMA_MINOR = 3
     const val SCHEMA_PROVIDER_INFO = 0x0301
     const val SCHEMA_CAPABILITIES = 0x0302
     const val SCHEMA_STARTED = 0x0310
@@ -47,6 +50,12 @@ object JvmSourceContract {
     const val MIN_ANDROID_API = 24
     const val MAX_METADATA_BYTES = 128 * 1024
     const val MAX_SOURCE_BYTES = 4L * 1024L * 1024L
+    const val MAX_SOURCE_ARCHIVE_BYTES = MAX_SOURCE_BYTES + 64L * 1024L
+    const val MAX_SOURCE_PAYLOAD_BYTES = MAX_SOURCE_ARCHIVE_BYTES
+    const val MAX_SOURCE_FILES = 32
+    const val MAX_SOURCE_PATH_BYTES = 240
+    const val MAX_SOURCE_PACKAGE_DEPTH = 16
+    const val MAX_SOURCE_MANIFEST_BYTES = 16 * 1024
     const val MAX_STDOUT_BYTES = 1024L * 1024L
     const val MAX_STDERR_BYTES = 1024L * 1024L
     const val MAX_DIAGNOSTIC_BYTES = 64 * 1024
@@ -74,7 +83,7 @@ object JvmSourceContract {
     const val MAX_OBSERVATION_RSS_BYTES = 8L * 1024L * 1024L * 1024L
     const val MAX_OBSERVATION_OPEN_FILE_DESCRIPTORS = 32_768
     const val MAX_OBSERVATION_TEMPORARY_STORAGE_BYTES =
-        MAX_SOURCE_BYTES + MAX_CLASS_ARTIFACT_BYTES + MAX_DEX_ARTIFACT_BYTES
+        MAX_SOURCE_PAYLOAD_BYTES + MAX_CLASS_ARTIFACT_BYTES + MAX_DEX_ARTIFACT_BYTES
     const val MAX_OBSERVATION_OUTPUT_BYTES = MAX_STDOUT_BYTES + MAX_STDERR_BYTES
     const val USER_RUNTIME_EXCEPTION_CLASS_NAME = "UserException"
     const val MAX_HOST_METHOD_BYTES = 128
@@ -85,6 +94,11 @@ object JvmSourceContract {
     const val MAX_CLIPBOARD_TEXT_BYTES = 16 * 1024
     const val MAX_JSON_DEPTH = 64
     const val MAX_CONCURRENT_SESSIONS = 1
+}
+
+enum class JvmSourcePayloadKind(val wireName: String) {
+    SINGLE_FILE("single-file"),
+    SOURCE_ARCHIVE("source-archive"),
 }
 
 data class JvmProtocolVersion(

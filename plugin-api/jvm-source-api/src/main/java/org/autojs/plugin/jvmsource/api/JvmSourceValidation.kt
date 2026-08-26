@@ -125,7 +125,7 @@ object JvmSourceValidation {
         requireValue(capabilities.isolationCapabilities.toSet().containsAll(REQUIRED_ISOLATION)) {
             "Provider does not satisfy the required disposable-worker isolation contract"
         }
-        requireValue(capabilities.maxSourceBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES) {
+        requireValue(capabilities.maxSourceBytes in 1L..JvmSourceContract.MAX_SOURCE_PAYLOAD_BYTES) {
             "Source byte limit is invalid"
         }
         requireValue(capabilities.maxStdoutBytes in 0L..JvmSourceContract.MAX_STDOUT_BYTES) {
@@ -194,7 +194,7 @@ object JvmSourceValidation {
             "Diagnostic message",
             JvmSourceContract.MAX_DIAGNOSTIC_MESSAGE_CODE_POINTS,
         )
-        diagnostic.sourceFileName?.let(::validateSourceFileName)
+        diagnostic.sourceFileName?.let(::validateDiagnosticSourceName)
         val line = diagnostic.line
         val column = diagnostic.column
         requireValue((line == null) == (column == null)) {
@@ -257,8 +257,40 @@ object JvmSourceValidation {
         requireValue(!request.sourceFileName.endsWith(".kts", ignoreCase = true)) {
             "Kotlin script files are not supported"
         }
-        requireValue(request.sourceSizeBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES) {
-            "Source size is outside the protocol limit"
+        when (request.sourcePayloadKind) {
+            JvmSourcePayloadKind.SINGLE_FILE -> {
+                requireValue(request.sourceSizeBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES) {
+                    "Single-source size is outside the protocol limit"
+                }
+                requireValue(request.sourceFileCount == 1 && request.sourceContentBytes == request.sourceSizeBytes) {
+                    "Single-source payload metadata is inconsistent"
+                }
+            }
+            JvmSourcePayloadKind.SOURCE_ARCHIVE -> {
+                requireValue(request.protocolVersion >= JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION) {
+                    "Source packages require the negotiated source-package protocol"
+                }
+                requireValue(request.language == JvmSourceLanguage.JAVA) {
+                    "Protocol 1.6 source packages admit Java sources only"
+                }
+                requireValue(request.sourceSizeBytes in 1L..JvmSourceContract.MAX_SOURCE_ARCHIVE_BYTES) {
+                    "Source archive size is outside the protocol limit"
+                }
+                requireValue(request.sourceFileCount in 2..JvmSourceContract.MAX_SOURCE_FILES) {
+                    "Source package file count is outside the protocol limit"
+                }
+                requireValue(request.sourceContentBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES) {
+                    "Source package content size is outside the protocol limit"
+                }
+            }
+        }
+        if (request.protocolVersion < JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION) {
+            requireValue(request.sourcePayloadKind == JvmSourcePayloadKind.SINGLE_FILE &&
+                request.sourceFileCount == 1 && request.sourceContentBytes == request.sourceSizeBytes
+            ) {
+                "Source payload metadata requires Protocol ${JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION.major}." +
+                    JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION.minor
+            }
         }
         requireUtf8Text(
             request.entryClassName,
@@ -639,6 +671,19 @@ object JvmSourceValidation {
         )
         requireValue(value !in setOf(".", "..") && '/' !in value && '\\' !in value && '\u0000' !in value) {
             "Source file name must be a single safe path segment"
+        }
+    }
+
+    private fun validateDiagnosticSourceName(value: String) {
+        requireUtf8Text(
+            value,
+            "Diagnostic source name",
+            JvmSourceContract.MAX_SOURCE_FILE_NAME_BYTES,
+        )
+        if ('/' !in value) {
+            validateSourceFileName(value)
+        } else {
+            JvmSourcePackagePathPolicy.requireSourcePath(value)
         }
     }
 

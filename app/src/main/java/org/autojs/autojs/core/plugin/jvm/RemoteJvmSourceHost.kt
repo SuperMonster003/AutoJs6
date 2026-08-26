@@ -19,6 +19,7 @@ import org.autojs.plugin.jvmsource.api.JvmSourceError
 import org.autojs.plugin.jvmsource.api.JvmSourceLanguage
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
 import org.autojs.plugin.jvmsource.api.JvmSourceObservation
+import org.autojs.plugin.jvmsource.api.JvmSourcePayloadKind
 import org.autojs.plugin.jvmsource.api.JvmSourceRequest
 import org.autojs.plugin.jvmsource.api.JvmSourceResult
 import org.autojs.plugin.jvmsource.api.JvmSourceStarted
@@ -44,6 +45,9 @@ data class RemoteJvmScriptResult(
     val requestSha256: String,
     val sourceSizeBytes: Long,
     val sourceSha256: String,
+    val sourcePayloadKind: String,
+    val sourceFileCount: Int,
+    val sourceContentBytes: Long,
     val resultJson: String,
     val resultSha256: String,
     val stdout: String,
@@ -317,8 +321,18 @@ internal class RemoteJvmSourceHost(
         }
         try {
             ensureActive(control)
+            val packageInput = JvmSourceExplicitRunner.packageInput(source)
             val inputSnapshot = try {
-                artifactStore.snapshotSource(source.file, JvmSourceContract.MAX_SOURCE_BYTES)
+                if (packageInput == null) {
+                    artifactStore.snapshotSource(source.file, JvmSourceContract.MAX_SOURCE_BYTES)
+                } else {
+                    require(language == JvmSourceLanguage.JAVA) { "Source packages currently admit Java only" }
+                    artifactStore.snapshotSourcePackage(
+                        packageInput.sourceRoot,
+                        packageInput.entryFile,
+                        JvmSourceContract.MAX_SOURCE_ARCHIVE_BYTES,
+                    )
+                }
             } catch (error: IllegalArgumentException) {
                 throw RemoteJvmSourceException(
                     "JVM source failed host input policy",
@@ -327,7 +341,11 @@ internal class RemoteJvmSourceHost(
                 )
             }
             snapshot = inputSnapshot
-            require(inputSnapshot.sizeBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES)
+            val maximumPayloadBytes = when (inputSnapshot.sourcePayloadKind) {
+                JvmSourcePayloadKind.SINGLE_FILE -> JvmSourceContract.MAX_SOURCE_BYTES
+                JvmSourcePayloadKind.SOURCE_ARCHIVE -> JvmSourceContract.MAX_SOURCE_ARCHIVE_BYTES
+            }
+            require(inputSnapshot.sizeBytes in 1L..maximumPayloadBytes)
             require(inputSnapshot.language == language) { "JVM source snapshot language changed during admission" }
             val candidates = JvmSourceProviderLanguagePolicy.matching(
                 transport.discoverExactAction(JvmSourceContract.SERVICE_ACTION),
@@ -514,6 +532,9 @@ internal class RemoteJvmSourceHost(
                         requestSha256 = requestSha256,
                         sourceSizeBytes = inputSnapshot.sizeBytes,
                         sourceSha256 = inputSnapshot.sha256Hex,
+                        sourcePayloadKind = inputSnapshot.sourcePayloadKind.wireName,
+                        sourceFileCount = inputSnapshot.sourceFileCount,
+                        sourceContentBytes = inputSnapshot.sourceContentBytes,
                         resultJson = terminal.result.resultJson,
                         resultSha256 = JvmSha256.digest(
                             terminal.result.resultJson.toByteArray(Charsets.UTF_8),
@@ -777,6 +798,9 @@ internal class RemoteJvmSourceHost(
             allowedHostCalls = capabilities.scriptCapabilities.mapNotNull(JvmScriptCapability::hostMethod),
             grantedCapabilities = capabilities.scriptCapabilities,
             argsJson = argsJson,
+            sourcePayloadKind = snapshot.sourcePayloadKind,
+            sourceFileCount = snapshot.sourceFileCount,
+            sourceContentBytes = snapshot.sourceContentBytes,
         )
         JvmSourceValidation.validateRequestAgainst(request, capabilities, protocolVersion)
         return request

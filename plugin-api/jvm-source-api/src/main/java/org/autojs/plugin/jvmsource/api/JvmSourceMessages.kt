@@ -151,6 +151,9 @@ class JvmSourceRequest(
     allowedHostCalls: List<String> = emptyList(),
     grantedCapabilities: List<JvmScriptCapability> = emptyList(),
     val argsJson: String = "{}",
+    val sourcePayloadKind: JvmSourcePayloadKind = JvmSourcePayloadKind.SINGLE_FILE,
+    val sourceFileCount: Int = 1,
+    val sourceContentBytes: Long = sourceSizeBytes,
 ) {
     val allowedHostCalls: List<String> = defensiveList(allowedHostCalls)
     val grantedCapabilities: List<JvmScriptCapability> = defensiveList(grantedCapabilities)
@@ -172,6 +175,9 @@ class JvmSourceRequest(
         allowedHostCalls: List<String> = this.allowedHostCalls,
         grantedCapabilities: List<JvmScriptCapability> = this.grantedCapabilities,
         argsJson: String = this.argsJson,
+        sourcePayloadKind: JvmSourcePayloadKind = this.sourcePayloadKind,
+        sourceFileCount: Int = this.sourceFileCount,
+        sourceContentBytes: Long = this.sourceContentBytes,
     ): JvmSourceRequest = JvmSourceRequest(
         requestId,
         protocolVersion,
@@ -189,6 +195,9 @@ class JvmSourceRequest(
         allowedHostCalls,
         grantedCapabilities,
         argsJson,
+        sourcePayloadKind,
+        sourceFileCount,
+        sourceContentBytes,
     )
 
     override fun equals(other: Any?): Boolean = other is JvmSourceRequest &&
@@ -207,7 +216,10 @@ class JvmSourceRequest(
         diagnosticByteLimit == other.diagnosticByteLimit &&
         allowedHostCalls == other.allowedHostCalls &&
         grantedCapabilities == other.grantedCapabilities &&
-        argsJson == other.argsJson
+        argsJson == other.argsJson &&
+        sourcePayloadKind == other.sourcePayloadKind &&
+        sourceFileCount == other.sourceFileCount &&
+        sourceContentBytes == other.sourceContentBytes
 
     override fun hashCode(): Int {
         var result = requestId.hashCode()
@@ -225,7 +237,10 @@ class JvmSourceRequest(
         result = 31 * result + diagnosticByteLimit
         result = 31 * result + allowedHostCalls.hashCode()
         result = 31 * result + grantedCapabilities.hashCode()
-        return 31 * result + argsJson.hashCode()
+        result = 31 * result + argsJson.hashCode()
+        result = 31 * result + sourcePayloadKind.hashCode()
+        result = 31 * result + sourceFileCount
+        return 31 * result + sourceContentBytes.hashCode()
     }
 
     override fun toString(): String =
@@ -235,7 +250,9 @@ class JvmSourceRequest(
             "minApi=$minApi, timeoutMillis=$timeoutMillis, maxStdoutBytes=$maxStdoutBytes, " +
             "maxStderrBytes=$maxStderrBytes, diagnosticByteLimit=$diagnosticByteLimit, " +
             "allowedHostCalls=$allowedHostCalls, grantedCapabilities=$grantedCapabilities, " +
-            "argsJsonUtf8Bytes=${argsJson.toByteArray(Charsets.UTF_8).size})"
+            "argsJsonUtf8Bytes=${argsJson.toByteArray(Charsets.UTF_8).size}, " +
+            "sourcePayloadKind=$sourcePayloadKind, sourceFileCount=$sourceFileCount, " +
+            "sourceContentBytes=$sourceContentBytes)"
 }
 
 /**

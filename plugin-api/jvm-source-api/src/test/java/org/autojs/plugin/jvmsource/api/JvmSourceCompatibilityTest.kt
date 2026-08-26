@@ -194,6 +194,28 @@ class JvmSourceCompatibilityTest {
     }
 
     @Test
+    fun protocol15SingleFileRequestKeepsLegacySourceMetadataDefaults() {
+        val legacy = JvmSourceFixtures.request().copy(
+            protocolVersion = JvmProtocolVersion(1, 5),
+        )
+
+        assertEquals(legacy, JvmSourceCodec.decodeRequest(JvmSourceCodec.encodeRequest(legacy)))
+        assertEquals(JvmSourcePayloadKind.SINGLE_FILE, legacy.sourcePayloadKind)
+        assertEquals(1, legacy.sourceFileCount)
+        assertEquals(legacy.sourceSizeBytes, legacy.sourceContentBytes)
+    }
+
+    @Test
+    fun protocol16MarksSourcePayloadMetadataAsRequiredForOlderWireReaders() {
+        val encoded = JvmSourceCodec.encodeRequest(JvmSourceFixtures.request())
+
+        val failure = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(encoded).rejectUnknownRequiredFields((1..17).toSet())
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, failure.error)
+    }
+
+    @Test
     fun bindsRequestStartedAndResultToOneToolchainFingerprint() {
         val provider = JvmSourceFixtures.providerInfo()
         val capabilities = JvmSourceFixtures.capabilities()

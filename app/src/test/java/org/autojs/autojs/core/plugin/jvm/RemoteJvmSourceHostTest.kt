@@ -28,6 +28,7 @@ import org.autojs.plugin.jvmsource.api.JvmSourceFailurePhase
 import org.autojs.plugin.jvmsource.api.JvmSourceLanguage
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
 import org.autojs.plugin.jvmsource.api.JvmSourceObservation
+import org.autojs.plugin.jvmsource.api.JvmSourcePayloadKind
 import org.autojs.plugin.jvmsource.api.JvmSourceResourceObservation
 import org.autojs.plugin.jvmsource.api.JvmSourceRequest
 import org.autojs.plugin.jvmsource.api.JvmSourceResult
@@ -48,6 +49,51 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.measureTimeMillis
 
 class RemoteJvmSourceHostTest {
+    @Test
+    fun sourcePackageRequestBindsCanonicalArchiveCountAndContentClaims() {
+        val directory = Files.createTempDirectory("jvm-source-package-request-test").toFile()
+        val packageDirectory = directory.resolve("demo").apply { check(mkdir()) }
+        val entry = packageDirectory.resolve("Main.java").apply {
+            writeText("package demo; public final class Main {}")
+        }
+        packageDirectory.resolve("Helper.java").writeText("package demo; final class Helper {}")
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport()
+        try {
+            val host = RemoteJvmSourceHost(
+                transport = transport,
+                artifactStore = FakeArtifactStore(entry.readBytes()),
+                blockingExecutor = executor,
+                featureEnabled = true,
+                selectedComponent = { _ -> COMPONENT },
+                hostVersionCode = HOST_VERSION,
+                hostRuntimeApi = 24,
+                hostIdentity = HOST_IDENTITY,
+                launchPackage = { true },
+            )
+
+            host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSourcePackage(directory, entry),
+                JvmSourceExecutionControl(),
+            )
+
+            val request = requireNotNull(transport.lastRequest)
+            assertEquals(JvmSourcePayloadKind.SOURCE_ARCHIVE, request.sourcePayloadKind)
+            assertEquals(2, request.sourceFileCount)
+            assertEquals(
+                entry.readBytes().size.toLong() +
+                    packageDirectory.resolve("Helper.java").readBytes().size.toLong(),
+                request.sourceContentBytes,
+            )
+            assertTrue(request.sourceSizeBytes > request.sourceContentBytes)
+            assertEquals("Main.java", request.sourceFileName)
+            assertEquals("demo.Main", request.entryClassName)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
     @Test
     fun invalidArgumentJsonFailsBeforeProviderInspectionOrBinding() {
         val directory = Files.createTempDirectory("jvm-source-invalid-args-test").toFile()
@@ -1457,6 +1503,33 @@ class RemoteJvmSourceHostTest {
         override fun snapshotSource(file: File, maximumBytes: Long): JvmSourceInputSnapshot =
             snapshot(requireNotNull(JvmSourceKind.fromFileName(file.name)))
 
+        override fun snapshotSourcePackage(
+            sourceRoot: File,
+            entryFile: File,
+            maximumBytes: Long,
+        ): JvmSourceInputSnapshot {
+            val data = JvmSourcePackageSnapshotPolicy.collect(
+                sourceRoot,
+                entryFile,
+                JVM_PACKAGE_OPERATIONS,
+            )
+            require(data.archiveBytes.size.toLong() <= maximumBytes)
+            return object : JvmSourceInputSnapshot {
+                override val sizeBytes = data.archiveBytes.size.toLong()
+                override val sha256Hex = MessageDigest.getInstance("SHA-256")
+                    .digest(data.archiveBytes)
+                    .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+                override val sourceFileName = data.sourceFileName
+                override val entryClassName = data.entryClassName
+                override val sourcePayloadKind = JvmSourcePayloadKind.SOURCE_ARCHIVE
+                override val sourceFileCount = data.sourceFileCount
+                override val sourceContentBytes = data.sourceContentBytes
+
+                override fun claimReadDescriptor(): JvmSourceOwnedDescriptor = Descriptor()
+                override fun close() = Unit
+            }
+        }
+
         private fun snapshot(kind: JvmSourceKind): JvmSourceInputSnapshot {
             val layout = JvmSourceR1Policy.inspect(kind, source)
             return object : JvmSourceInputSnapshot {
@@ -1483,6 +1556,31 @@ class RemoteJvmSourceHostTest {
         }
 
         private var nextCapture = 0
+
+        private companion object {
+            val JVM_PACKAGE_OPERATIONS = object : JvmSourcePackageSnapshotPolicy.Operations {
+                override fun typeNoFollow(file: File): JvmSourcePackageSnapshotPolicy.NodeType {
+                    val attributes = runCatching {
+                        Files.readAttributes(
+                            file.toPath(),
+                            java.nio.file.attribute.BasicFileAttributes::class.java,
+                            java.nio.file.LinkOption.NOFOLLOW_LINKS,
+                        )
+                    }.getOrNull() ?: return JvmSourcePackageSnapshotPolicy.NodeType.MISSING
+                    return when {
+                        attributes.isSymbolicLink -> JvmSourcePackageSnapshotPolicy.NodeType.SYMBOLIC_LINK
+                        attributes.isDirectory -> JvmSourcePackageSnapshotPolicy.NodeType.DIRECTORY
+                        attributes.isRegularFile -> JvmSourcePackageSnapshotPolicy.NodeType.REGULAR_FILE
+                        else -> JvmSourcePackageSnapshotPolicy.NodeType.OTHER
+                    }
+                }
+
+                override fun children(directory: File): List<File>? = directory.listFiles()?.toList()
+
+                override fun readRegularFile(file: File, maximumBytes: Long): ByteArray =
+                    file.readBytes().also { require(it.size.toLong() <= maximumBytes) }
+            }
+        }
     }
 
     private class Capture(private val bytes: ByteArray) : JvmSourceOutputCapture {

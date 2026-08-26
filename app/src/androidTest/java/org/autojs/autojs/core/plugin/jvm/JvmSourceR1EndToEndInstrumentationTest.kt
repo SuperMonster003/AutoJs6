@@ -68,6 +68,64 @@ class JvmSourceR1EndToEndInstrumentationTest {
     }
 
     @Test
+    fun explicitMultiFileJavaPackageRunsThroughPinnedProductionProvider() {
+        assertTrue(
+            "M9-5 source-package selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val root = File(context.cacheDir, "jvm-source-m9-package-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-5 source root", mkdir())
+        }.canonicalFile
+        val demo = File(root, "demo").apply { assertTrue("Unable to create the M9-5 package", mkdir()) }
+        val entryBytes = """
+            package demo;
+            public final class Main implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+                @Override
+                public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                    return Helper.answer();
+                }
+            }
+        """.trimIndent().toByteArray()
+        val helperBytes = """
+            package demo;
+            final class Helper {
+                static int answer() { return 42; }
+            }
+        """.trimIndent().toByteArray()
+        val entry = File(demo, "Main.java").apply { writeBytes(entryBytes) }
+        File(demo, "Helper.java").writeBytes(helperBytes)
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+            val outcome = executeAndAwait { listener ->
+                JvmSourceExplicitRunner.runJvmSourcePackageExplicit(
+                    service = service,
+                    sourceRoot = root,
+                    entryFile = entry,
+                    listener = listener,
+                    config = ExecutionConfig(workingDirectory = root.absolutePath),
+                )
+            }
+            outcome.error?.let { throw AssertionError("M9-5 multi-file execution failed", it) }
+            val result = outcome.result as? RemoteJvmScriptResult
+                ?: throw AssertionError("M9-5 result did not use RemoteJvmScriptResult")
+
+            assertEquals("42", result.resultJson)
+            assertEquals("source-archive", result.sourcePayloadKind)
+            assertEquals(2, result.sourceFileCount)
+            assertEquals(entryBytes.size.toLong() + helperBytes.size.toLong(), result.sourceContentBytes)
+            assertTrue(result.sourceSizeBytes > result.sourceContentBytes)
+            assertEquals(PRODUCTION_PROVIDER.flattenToString(), result.providerComponent)
+            emitSourcePackageRuntimeRecord(result)
+        } finally {
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun explicitJavaArgumentsRoundTripThroughPinnedProductionProvider() {
         assertTrue(
             "M9-2 JVM argument selector requires -Pautojs.jvmSource.experimental=true",
@@ -461,6 +519,36 @@ class JvmSourceR1EndToEndInstrumentationTest {
         instrumentation.sendStatus(
             0,
             Bundle().apply { putString(ARGS_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
+    private fun emitSourcePackageRuntimeRecord(result: RemoteJvmScriptResult) {
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-5")
+            .put("recordType", "production-provider-multi-file-source-package")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", result.entryApiVersion)
+            .put("hostVersionCode", BuildConfig.VERSION_CODE)
+            .put("providerComponent", result.providerComponent)
+            .put("providerVersionName", result.providerVersionName)
+            .put("providerVersionCode", result.providerVersionCode)
+            .put("sourcePayloadKind", result.sourcePayloadKind)
+            .put("sourceFileCount", result.sourceFileCount)
+            .put("sourceContentBytes", result.sourceContentBytes)
+            .put("sourceArchiveBytes", result.sourceSizeBytes)
+            .put("sourceArchiveSha256", result.sourceSha256)
+            .put("requestSha256", result.requestSha256)
+            .put("resultJson", result.resultJson)
+            .put("resultSha256", result.resultSha256)
+            .put("hostPid", result.hostPid)
+            .put("compilerPid", result.compilerPid)
+            .put("workerPid", result.workerPid)
+            .put("deviceApi", Build.VERSION.SDK_INT)
+        Log.i(TAG, "$SOURCE_PACKAGE_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(SOURCE_PACKAGE_EVIDENCE_STATUS_KEY, record.toString()) },
         )
     }
 
@@ -908,6 +996,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
         const val RUNTIME_DIAGNOSTIC_EVIDENCE_PREFIX = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE="
         const val OBSERVATION_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_OBSERVATION_EVIDENCE"
         const val OBSERVATION_EVIDENCE_PREFIX = "JVM_SOURCE_M9_OBSERVATION_EVIDENCE="
+        const val SOURCE_PACKAGE_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_PACKAGE_EVIDENCE"
+        const val SOURCE_PACKAGE_EVIDENCE_PREFIX = "JVM_SOURCE_M9_PACKAGE_EVIDENCE="
         const val RUNTIME_SECRET = "M9-3 secret must never cross"
         const val SCRIPT_ARGS_JSON =
             "{\"enabled\":true,\"name\":\"AutoJs6\",\"nested\":{\"count\":3,\"nullable\":null}," +

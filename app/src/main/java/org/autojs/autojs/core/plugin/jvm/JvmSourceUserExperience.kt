@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.jvm
 
 import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
+import org.autojs.plugin.jvmsource.api.JvmSourcePackagePathPolicy
 import org.autojs.plugin.jvmsource.api.JvmSourceError
 import org.autojs.plugin.jvmsource.api.JvmSourceErrorCode
 import org.autojs.plugin.jvmsource.api.JvmSourceFailurePhase
@@ -119,7 +120,7 @@ internal object JvmSourcePublicDiagnosticPolicy {
 
     fun project(value: JvmSourceDiagnostic): JvmSourcePublicDiagnostic {
         val safeCode = value.code.takeIf(SAFE_CODES::contains) ?: "COMPILER_DIAGNOSTIC"
-        val safeLocation = value.sourceFileName?.let(SAFE_SOURCE_FILE::matches) == true &&
+        val safeLocation = value.sourceFileName?.let(::isSafeSourceName) == true &&
             value.line in 1..MAX_SOURCE_POSITION && value.column in 1..MAX_SOURCE_POSITION
         val safeRuntimeExceptionClassName = value.runtimeExceptionClassName?.takeIf { className ->
             safeCode == "JAVA_RUNTIME_EXCEPTION" && safeLocation &&
@@ -155,6 +156,11 @@ internal object JvmSourcePublicDiagnosticPolicy {
         }
         return bounded
     }
+
+    private fun isSafeSourceName(value: String): Boolean =
+        SAFE_SOURCE_FILE.matches(value) || runCatching {
+            JvmSourcePackagePathPolicy.requireSourcePath(value)
+        }.isSuccess
 
     /** Keeps the Protocol V1 container while removing every provider-controlled text/location. */
     fun sanitize(value: JvmSourceDiagnostic): JvmSourceDiagnostic = project(value).let { projected ->

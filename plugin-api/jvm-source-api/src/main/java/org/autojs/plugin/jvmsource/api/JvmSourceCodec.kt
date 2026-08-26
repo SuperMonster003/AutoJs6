@@ -248,6 +248,15 @@ object JvmSourceCodec {
                 if (value.protocolVersion >= JvmSourceContract.ARGS_PROTOCOL_VERSION) {
                     string(RequestTags.ARGS_JSON, value.argsJson, requiredForReader = true)
                 }
+                if (value.protocolVersion >= JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION) {
+                    string(
+                        RequestTags.SOURCE_PAYLOAD_KIND,
+                        value.sourcePayloadKind.wireName,
+                        requiredForReader = true,
+                    )
+                    int32(RequestTags.SOURCE_FILE_COUNT, value.sourceFileCount, requiredForReader = true)
+                    int64(RequestTags.SOURCE_CONTENT_BYTES, value.sourceContentBytes, requiredForReader = true)
+                }
             }
             .encode()
     }
@@ -271,6 +280,18 @@ object JvmSourceCodec {
                 "Protocol ${protocolVersion.major}.${protocolVersion.minor} request is missing arguments JSON",
             )
         }
+        val encodedPayloadKind = document.optionalString(RequestTags.SOURCE_PAYLOAD_KIND)
+        val encodedSourceFileCount = document.optionalInt32(RequestTags.SOURCE_FILE_COUNT)
+        val encodedSourceContentBytes = document.optionalInt64(RequestTags.SOURCE_CONTENT_BYTES)
+        if (protocolVersion >= JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION &&
+            (encodedPayloadKind == null || encodedSourceFileCount == null || encodedSourceContentBytes == null)
+        ) {
+            throw JvmSourceContractException(
+                JvmSourceContractViolation.INVALID_VALUE,
+                "Protocol ${protocolVersion.major}.${protocolVersion.minor} request is missing source payload metadata",
+            )
+        }
+        val sourceSizeBytes = document.requireInt64(RequestTags.SOURCE_SIZE_BYTES)
         return JvmSourceRequest(
             requestId = JvmRequestId.fromBytes(document.requireBytes(RequestTags.REQUEST_ID)),
             protocolVersion = protocolVersion,
@@ -279,7 +300,7 @@ object JvmSourceCodec {
                 "source language",
             ) { it.wireName },
             sourceFileName = document.requireString(RequestTags.SOURCE_FILE_NAME),
-            sourceSizeBytes = document.requireInt64(RequestTags.SOURCE_SIZE_BYTES),
+            sourceSizeBytes = sourceSizeBytes,
             sourceSha256 = JvmSha256.fromBytes(document.requireBytes(RequestTags.SOURCE_SHA256)),
             expectedToolchainFingerprint = JvmSha256.fromBytes(
                 document.requireBytes(RequestTags.EXPECTED_TOOLCHAIN_FINGERPRINT),
@@ -295,6 +316,11 @@ object JvmSourceCodec {
                 enumByName<JvmScriptCapability>(value, "granted script capability") { it.wireName }
             },
             argsJson = encodedArgs ?: "{}",
+            sourcePayloadKind = encodedPayloadKind?.let { value ->
+                enumByName<JvmSourcePayloadKind>(value, "source payload kind") { it.wireName }
+            } ?: JvmSourcePayloadKind.SINGLE_FILE,
+            sourceFileCount = encodedSourceFileCount ?: 1,
+            sourceContentBytes = encodedSourceContentBytes ?: sourceSizeBytes,
         ).also(JvmSourceValidation::validateRequest)
     }
 
@@ -781,7 +807,10 @@ object JvmSourceCodec {
         const val EXPECTED_TOOLCHAIN_FINGERPRINT = 15
         const val GRANTED_CAPABILITIES = 16
         const val ARGS_JSON = 17
-        val ALL = (1..17).toSet()
+        const val SOURCE_PAYLOAD_KIND = 18
+        const val SOURCE_FILE_COUNT = 19
+        const val SOURCE_CONTENT_BYTES = 20
+        val ALL = (1..20).toSet()
         val REPEATED = setOf(ALLOWED_HOST_CALLS, GRANTED_CAPABILITIES)
     }
 
