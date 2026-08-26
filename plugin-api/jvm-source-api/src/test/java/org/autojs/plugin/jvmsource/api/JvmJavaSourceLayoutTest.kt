@@ -33,6 +33,39 @@ class JvmJavaSourceLayoutTest {
     }
 
     @Test
+    fun explicitEntrySimpleNameUsesTheSharedAsciiAndLengthProfile() {
+        listOf("ScriptEntry", "_Entry9", "\$Entry").forEach { entrySimpleName ->
+            assertEquals(
+                entrySimpleName,
+                JvmJavaSourceLayoutPolicy.requireEntrySimpleName(entrySimpleName),
+            )
+            val layout = JvmJavaSourceLayoutPolicy.inspect(
+                "package demo.entries; public final class $entrySimpleName {}".toByteArray(),
+                entrySimpleName,
+            ).layout
+            assertEquals("$entrySimpleName.java", layout.sourceFileName)
+            assertEquals("demo.entries.$entrySimpleName", layout.entryClassName)
+        }
+
+        assertEquals(
+            "A".repeat(JvmSourceContract.MAX_SOURCE_FILE_NAME_BYTES - ".java".length),
+            JvmJavaSourceLayoutPolicy.requireEntrySimpleName(
+                "A".repeat(JvmSourceContract.MAX_SOURCE_FILE_NAME_BYTES - ".java".length),
+            ),
+        )
+        listOf("", "9Entry", "bad-name", "demo.Entry", "café", "Entry ").forEach { entrySimpleName ->
+            assertThrows(IllegalArgumentException::class.java) {
+                JvmJavaSourceLayoutPolicy.requireEntrySimpleName(entrySimpleName)
+            }
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            JvmJavaSourceLayoutPolicy.requireEntrySimpleName(
+                "A".repeat(JvmSourceContract.MAX_SOURCE_FILE_NAME_BYTES - ".java".length + 1),
+            )
+        }
+    }
+
+    @Test
     fun rejectsAmbiguousOrCompilerPretranslatedPackageShapes() {
         val invalid = listOf(
             "package ; public final class Main {}".toByteArray(),

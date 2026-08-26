@@ -40,6 +40,44 @@ class JvmSourcePackageSnapshotPolicyTest {
     }
 
     @Test
+    fun collectsCallerSelectedNonMainEntryAndBindsItsCanonicalPath() {
+        val root = temporaryFolder.newFolder("non-main-source-package")
+        val demo = root.resolve("demo").apply { check(mkdir()) }
+        val entry = demo.resolve("ScriptEntry.java").apply {
+            writeText("package demo; public final class ScriptEntry { Helper helper; }")
+        }
+        demo.resolve("Helper.java").writeText("package demo; final class Helper {}")
+
+        val snapshot = JvmSourcePackageSnapshotPolicy.collect(
+            root,
+            entry,
+            OPERATIONS,
+            "ScriptEntry",
+        )
+        val decoded = JvmSourcePackageCodec.decode(snapshot.archiveBytes)
+
+        assertEquals("ScriptEntry.java", snapshot.sourceFileName)
+        assertEquals("demo.ScriptEntry", snapshot.entryClassName)
+        assertEquals("demo/ScriptEntry.java", decoded.entrySourcePath)
+        assertEquals("ScriptEntry", JvmSourceExplicitRunner.entrySimpleName(
+            JvmSourceExplicitRunner.createAuthorizedSourcePackage(root, entry, "ScriptEntry"),
+        ))
+    }
+
+    @Test
+    fun rejectsSelectedEntryNameThatDiffersFromTheEntryFile() {
+        val root = temporaryFolder.newFolder("mismatched-entry-package")
+        val entry = root.resolve("ScriptEntry.java").apply {
+            writeText("public final class ScriptEntry {}")
+        }
+        root.resolve("Helper.java").writeText("final class Helper {}")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            JvmSourcePackageSnapshotPolicy.collect(root, entry, OPERATIONS, "OtherEntry")
+        }
+    }
+
+    @Test
     fun rejectsPackagePathThatDisagreesWithDeclaredPackageAndNonJavaEntries() {
         val wrongRoot = temporaryFolder.newFolder("wrong-package")
         val wrongEntry = wrongRoot.resolve("Main.java").apply {

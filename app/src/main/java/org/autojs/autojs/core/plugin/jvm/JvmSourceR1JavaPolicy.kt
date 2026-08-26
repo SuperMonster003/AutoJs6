@@ -7,10 +7,9 @@ internal object JvmSourceR1JavaPolicy {
     const val ENTRY_SIMPLE_NAME = JvmJavaSourceLayoutPolicy.DEFAULT_ENTRY_SIMPLE_NAME
 
     /**
-     * Roadmap v2 M1: any well-formed `.java` file name is admitted. The compilation unit remains
-     * normalized to the entry simple name (`Main.java`), while an optional package declaration is
-     * reflected in the request's fully-qualified entry class name. Free file-to-class mapping is
-     * deferred until the provider protocol can evolve independently (post plugin extraction).
+     * Any well-formed physical `.java` file name is admitted. The logical compilation-unit name is
+     * derived from the explicitly selected entry simple name (`Main` by default), while an optional
+     * package declaration supplies the request's fully-qualified prefix.
      */
     fun requireSupportedFileName(fileName: String) {
         require(fileName.length in 6..255 && fileName.endsWith(".java", ignoreCase = true)) {
@@ -21,6 +20,11 @@ internal object JvmSourceR1JavaPolicy {
         }
     }
 
-    fun inspect(source: ByteArray): JvmJavaSourceLayout =
-        JvmJavaSourceLayoutPolicy.inspect(source, ENTRY_SIMPLE_NAME).layout
+    fun requireEntrySimpleName(entrySimpleName: String): String =
+        JvmJavaSourceLayoutPolicy.requireEntrySimpleName(entrySimpleName)
+
+    fun inspect(
+        source: ByteArray,
+        entrySimpleName: String = ENTRY_SIMPLE_NAME,
+    ): JvmJavaSourceLayout = JvmJavaSourceLayoutPolicy.inspect(source, entrySimpleName).layout
 }

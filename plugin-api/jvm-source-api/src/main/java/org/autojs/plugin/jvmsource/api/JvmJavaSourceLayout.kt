@@ -15,11 +15,22 @@ data class JvmJavaSourceLayout(
  *
  * Java Unicode escapes are rejected because the Java compiler translates them before tokenization;
  * accepting them here would let source text disagree with the package seen by ECJ. Imports are
- * deliberately left to ECJ. M1 keeps the entry simple name explicit (`Main` in the host), while the
- * package declaration determines the fully-qualified entry class name.
+ * deliberately left to ECJ. The caller supplies the entry simple name (`Main` remains the default),
+ * while the package declaration determines the fully-qualified entry class name.
  */
 object JvmJavaSourceLayoutPolicy {
     const val DEFAULT_ENTRY_SIMPLE_NAME = "Main"
+
+    /** Validates and returns a Java entry simple name from the shared Host/Provider profile. */
+    @JvmStatic
+    fun requireEntrySimpleName(entrySimpleName: String): String {
+        require(isAsciiIdentifier(entrySimpleName)) { "Java entry simple name is invalid" }
+        require(
+            entrySimpleName.toByteArray(StandardCharsets.UTF_8).size + JAVA_EXTENSION_BYTES <=
+                JvmSourceContract.MAX_SOURCE_FILE_NAME_BYTES,
+        ) { "Java entry simple name is too long" }
+        return entrySimpleName
+    }
 
     @JvmStatic
     @JvmOverloads
@@ -28,7 +39,7 @@ object JvmJavaSourceLayoutPolicy {
         entrySimpleName: String = DEFAULT_ENTRY_SIMPLE_NAME,
     ): Inspection {
         require(sourceBytes.isNotEmpty()) { "Java source snapshot is empty" }
-        require(isAsciiIdentifier(entrySimpleName)) { "Java entry simple name is invalid" }
+        requireEntrySimpleName(entrySimpleName)
         val normalizedSource = try {
             StandardCharsets.UTF_8.newDecoder()
                 .onMalformedInput(CodingErrorAction.REPORT)
@@ -201,5 +212,6 @@ object JvmJavaSourceLayoutPolicy {
     private enum class State { CODE, LINE_COMMENT, BLOCK_COMMENT, STRING, CHAR }
 
     private const val PACKAGE_KEYWORD = "package"
+    private const val JAVA_EXTENSION_BYTES = 5
     private val JAVA_UNICODE_ESCAPE = Regex("\\\\u+[0-9A-Fa-f]{4}")
 }

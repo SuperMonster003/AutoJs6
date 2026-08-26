@@ -29,7 +29,9 @@ internal object JvmSourcePackageSnapshotPolicy {
         sourceRoot: File,
         entryFile: File,
         operations: Operations,
+        entrySimpleName: String = JvmSourceR1Policy.ENTRY_SIMPLE_NAME,
     ): JvmSourcePackageSnapshotData {
+        JvmSourceR1JavaPolicy.requireEntrySimpleName(entrySimpleName)
         val root = sourceRoot.absoluteFile
         require(root.canonicalFile == root && operations.typeNoFollow(root) == NodeType.DIRECTORY) {
             "Java source package root must be an ordinary canonical directory"
@@ -61,8 +63,8 @@ internal object JvmSourcePackageSnapshotPolicy {
                 "Java source package path '$path' differs from its declared package"
             }
             if (path == entryPath) {
-                require(simpleName == JvmSourceR1Policy.ENTRY_SIMPLE_NAME) {
-                    "Java source package entry must remain ${JvmSourceR1Policy.ENTRY_SIMPLE_NAME}.java"
+                require(simpleName == entrySimpleName) {
+                    "Java source package entry file must match the selected entry simple name"
                 }
                 entryClassName = inspection.layout.entryClassName
             }
@@ -74,7 +76,7 @@ internal object JvmSourcePackageSnapshotPolicy {
         val archive = JvmSourcePackageCodec.encode(selectedEntryPath, normalized)
         return JvmSourcePackageSnapshotData(
             archiveBytes = archive,
-            sourceFileName = "${JvmSourceR1Policy.ENTRY_SIMPLE_NAME}.java",
+            sourceFileName = "$entrySimpleName.java",
             entryClassName = selectedEntryClass,
             sourceFileCount = normalized.size,
             sourceContentBytes = normalized.values.sumOf { it.size.toLong() },

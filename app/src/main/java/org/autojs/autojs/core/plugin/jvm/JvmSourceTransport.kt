@@ -58,12 +58,21 @@ internal interface JvmSourceOutputObserver {
 internal interface JvmSourceArtifactStore : Closeable {
     /** Compatibility name retained for existing test doubles; the implementation admits Java and Kotlin. */
     fun snapshotJavaSource(file: java.io.File, maximumBytes: Long): JvmSourceInputSnapshot
-    fun snapshotSource(file: java.io.File, maximumBytes: Long): JvmSourceInputSnapshot =
-        snapshotJavaSource(file, maximumBytes)
+    fun snapshotSource(
+        file: java.io.File,
+        maximumBytes: Long,
+        entrySimpleName: String = JvmSourceR1Policy.ENTRY_SIMPLE_NAME,
+    ): JvmSourceInputSnapshot {
+        require(entrySimpleName == JvmSourceR1Policy.ENTRY_SIMPLE_NAME) {
+            "This JVM source artifact store does not support an explicit entry name"
+        }
+        return snapshotJavaSource(file, maximumBytes)
+    }
     fun snapshotSourcePackage(
         sourceRoot: java.io.File,
         entryFile: java.io.File,
         maximumBytes: Long,
+        entrySimpleName: String = JvmSourceR1Policy.ENTRY_SIMPLE_NAME,
     ): JvmSourceInputSnapshot = throw UnsupportedOperationException("JVM source packages are not supported")
     fun outputCapture(
         maximumBytes: Long,

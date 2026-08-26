@@ -45,6 +45,8 @@ data class RemoteJvmScriptResult(
     val requestSha256: String,
     val sourceSizeBytes: Long,
     val sourceSha256: String,
+    val sourceFileName: String,
+    val entryClassName: String,
     val sourcePayloadKind: String,
     val sourceFileCount: Int,
     val sourceContentBytes: Long,
@@ -322,15 +324,23 @@ internal class RemoteJvmSourceHost(
         try {
             ensureActive(control)
             val packageInput = JvmSourceExplicitRunner.packageInput(source)
+            val entrySimpleName = requireNotNull(JvmSourceExplicitRunner.entrySimpleName(source)) {
+                "Authorized JVM source omitted its entry selection"
+            }
             val inputSnapshot = try {
                 if (packageInput == null) {
-                    artifactStore.snapshotSource(source.file, JvmSourceContract.MAX_SOURCE_BYTES)
+                    artifactStore.snapshotSource(
+                        source.file,
+                        JvmSourceContract.MAX_SOURCE_BYTES,
+                        entrySimpleName,
+                    )
                 } else {
                     require(language == JvmSourceLanguage.JAVA) { "Source packages currently admit Java only" }
                     artifactStore.snapshotSourcePackage(
                         packageInput.sourceRoot,
                         packageInput.entryFile,
                         JvmSourceContract.MAX_SOURCE_ARCHIVE_BYTES,
+                        entrySimpleName,
                     )
                 }
             } catch (error: IllegalArgumentException) {
@@ -532,6 +542,8 @@ internal class RemoteJvmSourceHost(
                         requestSha256 = requestSha256,
                         sourceSizeBytes = inputSnapshot.sizeBytes,
                         sourceSha256 = inputSnapshot.sha256Hex,
+                        sourceFileName = request.sourceFileName,
+                        entryClassName = request.entryClassName,
                         sourcePayloadKind = inputSnapshot.sourcePayloadKind.wireName,
                         sourceFileCount = inputSnapshot.sourceFileCount,
                         sourceContentBytes = inputSnapshot.sourceContentBytes,

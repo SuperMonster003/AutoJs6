@@ -68,6 +68,63 @@ class JvmSourceR1EndToEndInstrumentationTest {
     }
 
     @Test
+    fun explicitNonMainJavaEntryRunsThroughPinnedProductionProvider() {
+        assertTrue(
+            "M9-7 non-Main selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val directory = File(context.cacheDir, "jvm-source-m9-entry-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-7 source directory", mkdir())
+        }.canonicalFile
+        val sourceBytes = nonMainJavaSource().toByteArray(Charsets.UTF_8)
+        val sourceFile = File(directory, "arbitrary-physical-name.java").apply { writeBytes(sourceBytes) }
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+            val outcome = executeAndAwait { listener ->
+                JvmSourceExplicitRunner.runJvmSourceWithEntryExplicit(
+                    service = service,
+                    file = sourceFile,
+                    entrySimpleName = "ScriptEntry",
+                    listener = listener,
+                    config = ExecutionConfig(workingDirectory = directory.absolutePath),
+                )
+            }
+            outcome.error?.let { failure ->
+                val handshakeFailure = diagnoseProviderHandshakeAfterExecutionFailure()
+                if (handshakeFailure != null) {
+                    throw AssertionError("M9-7 provider handshake diagnosis failed", handshakeFailure)
+                }
+                val directHostFailure = diagnoseDirectHostAfterExecutionFailure(
+                    sourceFile,
+                    entrySimpleName = "ScriptEntry",
+                )
+                throw AssertionError(
+                    "M9-7 non-Main execution failed after a verified provider handshake",
+                    directHostFailure ?: failure,
+                )
+            }
+            val result = outcome.result as? RemoteJvmScriptResult
+                ?: throw AssertionError("M9-7 result did not use RemoteJvmScriptResult")
+
+            assertEquals("ScriptEntry.java", result.sourceFileName)
+            assertEquals("demo.entries.ScriptEntry", result.entryClassName)
+            assertEquals("single-file", result.sourcePayloadKind)
+            assertEquals(1, result.sourceFileCount)
+            assertEquals(sourceBytes.size.toLong(), result.sourceContentBytes)
+            assertEquals("\"demo.entries.ScriptEntry\"", result.resultJson)
+            assertEquals(PRODUCTION_PROVIDER.flattenToString(), result.providerComponent)
+            assertEquals(3, setOf(result.hostPid, result.compilerPid, result.workerPid).size)
+            emitEntryRuntimeRecord(result)
+        } finally {
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun explicitMultiFileJavaPackageRunsThroughPinnedProductionProvider() {
         assertTrue(
             "M9-5 source-package selector requires -Pautojs.jvmSource.experimental=true",
@@ -113,6 +170,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
                 ?: throw AssertionError("M9-5 result did not use RemoteJvmScriptResult")
 
             assertEquals("42", result.resultJson)
+            assertEquals("Main.java", result.sourceFileName)
+            assertEquals("demo.Main", result.entryClassName)
             assertEquals("source-archive", result.sourcePayloadKind)
             assertEquals(2, result.sourceFileCount)
             assertEquals(entryBytes.size.toLong() + helperBytes.size.toLong(), result.sourceContentBytes)
@@ -432,6 +491,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
             val sourceSha256 = sha256(sourceBytes)
             assertEquals(sourceBytes.size.toLong(), result.sourceSizeBytes)
             assertEquals(sourceSha256, result.sourceSha256)
+            assertEquals("Main.java", result.sourceFileName)
+            assertEquals("Main", result.entryClassName)
             assertTrue(SHA256.matches(result.requestSha256))
             assertEquals("false", result.resultJson)
             assertEquals(EXPECTED_RESULT_SHA256, result.resultSha256)
@@ -522,6 +583,36 @@ class JvmSourceR1EndToEndInstrumentationTest {
         )
     }
 
+    private fun emitEntryRuntimeRecord(result: RemoteJvmScriptResult) {
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-7")
+            .put("recordType", "production-provider-arbitrary-entry")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", result.entryApiVersion)
+            .put("hostVersionCode", BuildConfig.VERSION_CODE)
+            .put("providerComponent", result.providerComponent)
+            .put("providerVersionName", result.providerVersionName)
+            .put("providerVersionCode", result.providerVersionCode)
+            .put("sourcePayloadKind", result.sourcePayloadKind)
+            .put("sourceFileName", result.sourceFileName)
+            .put("entryClassName", result.entryClassName)
+            .put("sourceBytes", result.sourceSizeBytes)
+            .put("sourceSha256", result.sourceSha256)
+            .put("requestSha256", result.requestSha256)
+            .put("resultJson", result.resultJson)
+            .put("resultSha256", result.resultSha256)
+            .put("hostPid", result.hostPid)
+            .put("compilerPid", result.compilerPid)
+            .put("workerPid", result.workerPid)
+            .put("deviceApi", Build.VERSION.SDK_INT)
+        Log.i(TAG, "$ENTRY_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(ENTRY_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
     private fun emitSourcePackageRuntimeRecord(result: RemoteJvmScriptResult) {
         val record = JSONObject()
             .put("schemaVersion", 1)
@@ -538,6 +629,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
             .put("sourceContentBytes", result.sourceContentBytes)
             .put("sourceArchiveBytes", result.sourceSizeBytes)
             .put("sourceArchiveSha256", result.sourceSha256)
+            .put("sourceFileName", result.sourceFileName)
+            .put("entryClassName", result.entryClassName)
             .put("requestSha256", result.requestSha256)
             .put("resultJson", result.resultJson)
             .put("resultSha256", result.resultSha256)
@@ -759,6 +852,7 @@ class JvmSourceR1EndToEndInstrumentationTest {
     private fun diagnoseDirectHostAfterExecutionFailure(
         sourceFile: File,
         argsJson: String = "{}",
+        entrySimpleName: String = JvmSourceR1Policy.ENTRY_SIMPLE_NAME,
     ): Throwable? {
         val host = RemoteJvmSourceHost.createAndroid(
             context = context,
@@ -770,7 +864,7 @@ class JvmSourceR1EndToEndInstrumentationTest {
         val control = JvmSourceExecutionControl()
         return try {
             host.execute(
-                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile, entrySimpleName),
                 control,
                 argsJson = argsJson,
             )
@@ -857,7 +951,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
             .put("requestId", result.requestId)
             .put("requestSha256", result.requestSha256)
             .put("sessionId", result.requestId)
-            .put("entryClass", "Main")
+            .put("sourceFileName", result.sourceFileName)
+            .put("entryClass", result.entryClassName)
             .put("resultJson", result.resultJson)
             .put("expectedResultSha256", EXPECTED_RESULT_SHA256)
             .put("resultSha256", result.resultSha256))
@@ -932,6 +1027,17 @@ class JvmSourceR1EndToEndInstrumentationTest {
         }
     """.trimIndent()
 
+    private fun nonMainJavaSource(): String = """
+        package demo.entries;
+
+        public final class ScriptEntry implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+            @Override
+            public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                return ScriptEntry.class.getName();
+            }
+        }
+    """.trimIndent()
+
     private fun argumentJavaSource(): String = """
         import java.util.LinkedHashMap;
         import java.util.List;
@@ -992,6 +1098,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
         const val RUNTIME_EVIDENCE_PREFIX = "JVM_SOURCE_R1_RUNTIME_EVIDENCE="
         const val ARGS_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_ARGS_EVIDENCE"
         const val ARGS_EVIDENCE_PREFIX = "JVM_SOURCE_M9_ARGS_EVIDENCE="
+        const val ENTRY_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_ENTRY_EVIDENCE"
+        const val ENTRY_EVIDENCE_PREFIX = "JVM_SOURCE_M9_ENTRY_EVIDENCE="
         const val RUNTIME_DIAGNOSTIC_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE"
         const val RUNTIME_DIAGNOSTIC_EVIDENCE_PREFIX = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE="
         const val OBSERVATION_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_OBSERVATION_EVIDENCE"

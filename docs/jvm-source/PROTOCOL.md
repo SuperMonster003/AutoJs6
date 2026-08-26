@@ -11,9 +11,9 @@
 | Engine ID | `jvm-source` |
 | Service action | `org.autojs.plugin.JVM_SOURCE` |
 | Signature permission | `org.autojs.permission.PLUGIN` |
-| Protocol | `1.4` |
+| Protocol | `1.6` |
 | Entry API | `4` |
-| Wire schema | `1.1`，tagged binary document |
+| Wire schema | `1.3`，tagged binary document |
 | Host / Protocol minimum Android API | 24 |
 | Java Runtime / Kotlin Runtime minimum API | 24 / 26 |
 | Concurrent sessions per provider | 1 |
@@ -84,15 +84,27 @@ Protocol 1.3 / Entry API 4 在 request tag 17 增加 reader-required 的 `argsJs
 `context.args()` 暴露 64 KiB、深度 64 的确定性 JSON object 快照。Protocol 1.2 缺少该字段时只允许
 规范空对象 `{}`；旧 reader 遇到 1.3 的 required tag 会明确拒绝，不能静默丢参继续执行。
 
-## 5. 单文件源码合同
+## 5. 源码形态与入口选择
 
-当前 Java provider 接受任意合法 `.java` 文件名，包括含空格或连字符的文件名。为保持
-Protocol 1 与 ECJ/入口分析链一致，宿主发送的编译单元名仍规范为 `Main.java`：
+Java provider 接受任意合法的物理 `.java` 文件名，包括含空格或连字符的文件名。物理文件名不作为
+入口类名；Host 调用方显式选择入口简名，默认值保持为 `Main`：
 
-- 无 `package` 时入口类为 `Main`；
-- 有 `package a.b;` 时入口类为 `a.b.Main`；
-- 入口类必须实现 `org.autojs.plugin.jvmsource.api.AutoJsJvmEntry`；
-- `import` 与 static import 均允许；当前仍是单文件编译。
+- `JvmSourceExplicitRunner.runJvmSourceExplicit(...)` 与
+  `runJvmSourcePackageExplicit(...)` 保持既有 `Main` 默认；
+- `runJvmSourceWithEntryExplicit(..., entrySimpleName = "ScriptEntry")` 选择单文件入口；
+- `runJvmSourcePackageWithEntryExplicit(..., entrySimpleName = "ScriptEntry")` 选择源码包入口；
+- 入口简名必须符合共享 ASCII Java identifier profile：首字符为字母、`_` 或 `$`，后续还可包含数字；
+  连同 `.java` 后缀不得超过 255 bytes，因此简名最多 250 个 ASCII 字符，最终全限定名最多 512 bytes；
+- Host 用共享 `JvmJavaSourceLayoutPolicy` 在 provider discovery/bind 前验证并生成逻辑编译单元名
+  `<EntrySimpleName>.java`；无 `package` 时入口为 `<EntrySimpleName>`，声明 `package a.b;` 时为
+  `a.b.<EntrySimpleName>`；
+- 入口类必须是 public、具体类，实现 `org.autojs.plugin.jvmsource.api.AutoJsJvmEntry`，并具有 public
+  无参构造器；`import` 与 static import 均允许。
+
+Protocol 1.6 还接受一个含 2–32 个 Java compilation unit 的规范源码包。调用方提供 canonical source
+root、其中的入口文件和入口简名；入口物理文件必须精确为 `<EntrySimpleName>.java`，所有相对路径必须
+与各自的 package + simple name 一致。Host 将整棵树编码成单个有界、STORED-only 的规范归档 FD，
+Provider 在落盘前独立重验 manifest、路径、计数、总量、CRC、SHA 和规范重编码恒等性。
 
 Kotlin Runtime 接受任意合法 `.kt` 文件名，宿主发送的编译单元名规范为 `Main.kt`：
 
@@ -103,8 +115,8 @@ Kotlin Runtime 接受任意合法 `.kt` 文件名，宿主发送的编译单元�
 - Kotlin provider 的最低系统为 API 26，因为固定编译器本身使用 Android 8.0 才提供的
   `java.lang.invoke.MethodHandle`；这不改变协议与 Java provider 的 API 24 下限。
 
-文件名与 public class 的完全自由映射、多文件工程、自定义 classpath 和注解处理器不属于
-Protocol 1 的行为承诺。
+Java 的物理文件名与入口 public class 可以不同，因为 Host 发送的是所选入口对应的逻辑编译单元名。
+Kotlin 的非 `Main` 入口、多语言混编、自定义 classpath 和注解处理器不属于 Protocol 1 的行为承诺。
 
 ## 6. 固定上限
 
