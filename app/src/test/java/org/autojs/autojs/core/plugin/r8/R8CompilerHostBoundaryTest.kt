@@ -21,7 +21,7 @@ class R8CompilerHostBoundaryTest {
         assertTrue(aar.isFile)
         assertTrue(protocolSource.isFile)
         assertEquals(FROZEN_R8_API_SHA256, sha256(aar))
-        assertEquals(FROZEN_PROTOCOL_SOURCE_SHA256, sha256(protocolSource))
+        assertEquals(FROZEN_PROTOCOL_SOURCE_SHA256, normalizedLfSha256(protocolSource))
 
         val appBuild = root.resolve("app/build.gradle.kts").readText()
         val settings = root.resolve("settings.gradle.kts").readText()
@@ -82,6 +82,15 @@ class R8CompilerHostBoundaryTest {
             }
         }
         return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+    }
+
+    private fun normalizedLfSha256(file: File): String {
+        val normalized = file.readText(Charsets.UTF_8)
+            .replace("\r\n", "\n")
+            .replace('\r', '\n')
+        val digest = MessageDigest.getInstance("SHA-256")
+            .digest(normalized.toByteArray(Charsets.UTF_8))
+        return digest.joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
 
     companion object {
