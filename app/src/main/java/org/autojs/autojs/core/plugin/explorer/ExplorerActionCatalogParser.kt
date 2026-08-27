@@ -48,6 +48,9 @@ internal object ExplorerActionCatalogParser {
                 presentation = action.getIntOrNull(ExplorerActionCatalogKeys.PRESENTATION),
                 mimeTypes = action.getStringArrayList(ExplorerActionCatalogKeys.MIME_TYPES),
                 extensions = action.getStringArrayList(ExplorerActionCatalogKeys.EXTENSIONS),
+                fileNameSuffixes = action.getStringArrayList(
+                    ExplorerActionCatalogKeys.FILE_NAME_SUFFIXES,
+                ),
                 outputMode = action.getIntOrNull(ExplorerActionCatalogKeys.OUTPUT_MODE),
                 outputMimeTypes = action.getStringArrayList(ExplorerActionCatalogKeys.OUTPUT_MIME_TYPES),
                 outputNameSuffix = action.getStringOrNull(ExplorerActionCatalogKeys.OUTPUT_NAME_SUFFIX),

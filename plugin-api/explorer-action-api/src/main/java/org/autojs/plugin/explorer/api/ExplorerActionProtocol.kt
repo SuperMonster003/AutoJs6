@@ -1,7 +1,7 @@
 package org.autojs.plugin.explorer.api
 
 object ExplorerActionProtocol {
-    const val VERSION = 13
+    const val VERSION = 14
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 
@@ -10,6 +10,7 @@ object ExplorerActionProtocol {
     const val MAX_LABEL_LENGTH = 160
     const val MAX_ACTIVITY_CLASS_NAME_LENGTH = 512
     const val MAX_MATCHERS_PER_KIND = 128
+    const val MAX_FILE_NAME_SUFFIX_LENGTH = 128
     const val MAX_TARGETS_PER_REQUEST = 128
     const val MAX_TARGET_ID_LENGTH = 128
     const val MAX_TARGET_DISPLAY_NAME_LENGTH = 4_096

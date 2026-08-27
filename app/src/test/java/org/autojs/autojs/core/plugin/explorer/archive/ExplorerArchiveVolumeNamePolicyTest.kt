@@ -9,6 +9,18 @@ import org.junit.Test
 class ExplorerArchiveVolumeNamePolicyTest {
 
     @Test
+    fun numberedZipAndSevenZCandidatesStartAfterTheSelectedFirstVolume() {
+        listOf("backup.zip.001", "backup.7z.001").forEach { selected ->
+            val candidates = ExplorerArchiveVolumeNamePolicy.candidateNames(selected)
+
+            assertEquals(ExplorerActionProtocol.MAX_ARCHIVE_VOLUMES - 1, candidates.size)
+            assertEquals(selected.removeSuffix("001") + "002", candidates.first())
+            assertEquals(selected.removeSuffix("001") + "099", candidates[97])
+            assertEquals(selected.removeSuffix("001") + "128", candidates.last())
+        }
+    }
+
+    @Test
     fun standardZipCandidatesAreBoundedAndKeepTheSelectedStem() {
         val candidates = ExplorerArchiveVolumeNamePolicy.candidateNames("backup.zip")
 
@@ -53,6 +65,9 @@ class ExplorerArchiveVolumeNamePolicyTest {
     @Test
     fun unrelatedArchiveNamesDoNotGrantSiblingAccess() {
         assertTrue(ExplorerArchiveVolumeNamePolicy.candidateNames("backup.7z").isEmpty())
+        assertTrue(ExplorerArchiveVolumeNamePolicy.candidateNames("backup.001").isEmpty())
+        assertTrue(ExplorerArchiveVolumeNamePolicy.candidateNames("backup.zip.01").isEmpty())
+        assertTrue(ExplorerArchiveVolumeNamePolicy.candidateNames("backup.zip.002").isEmpty())
         assertTrue(ExplorerArchiveVolumeNamePolicy.candidateNames("backup.tar.gz").isEmpty())
         assertTrue(ExplorerArchiveVolumeNamePolicy.candidateNames("backup.r00").isEmpty())
     }

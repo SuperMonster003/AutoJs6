@@ -23,6 +23,7 @@ class ExplorerActionCatalogPolicyTest {
         assertEquals(10_000, descriptor.priority)
         assertEquals(setOf("text/markdown"), descriptor.mimeTypes)
         assertEquals(setOf("md", "markdown"), descriptor.extensions)
+        assertTrue(descriptor.fileNameSuffixes.isEmpty())
         assertEquals(ExplorerActionValues.OUTPUT_NONE, descriptor.outputMode)
         assertTrue(descriptor.outputMimeTypes.isEmpty())
         assertNull(descriptor.outputNameSuffix)
@@ -96,6 +97,84 @@ class ExplorerActionCatalogPolicyTest {
         assertNull(descriptor(mimeTypes = emptyList(), extensions = emptyList()))
         assertNull(descriptor(mimeTypes = listOf("not-a-mime")))
         assertNull(descriptor(extensions = listOf("bad.extension")))
+    }
+
+    @Test
+    fun protocolV14CompoundSuffixesMatchOnlyTheDeclaredFirstVolumeNames() {
+        val compound = descriptor(
+            protocolVersion = 14,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            mimeTypes = emptyList(),
+            extensions = emptyList(),
+            fileNameSuffixes = listOf(".ZIP.001", "7z.001"),
+        ) ?: error("Expected a valid compound-suffix descriptor")
+
+        assertEquals(setOf("zip.001", "7z.001"), compound.fileNameSuffixes)
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                compound,
+                ExplorerActionTarget(
+                    mimeType = "application/octet-stream",
+                    extension = "001",
+                    fileName = "Backup.ZIP.001",
+                ),
+            ),
+        )
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                compound,
+                ExplorerActionTarget(
+                    mimeType = "application/octet-stream",
+                    extension = "001",
+                    fileName = "backup.7z.001",
+                ),
+            ),
+        )
+        assertFalse(
+            ExplorerActionCatalogPolicy.matches(
+                compound,
+                ExplorerActionTarget(
+                    mimeType = "application/octet-stream",
+                    extension = "001",
+                    fileName = "backup.001",
+                ),
+            ),
+        )
+        assertFalse(
+            ExplorerActionCatalogPolicy.matches(
+                compound,
+                ExplorerActionTarget(
+                    mimeType = "application/octet-stream",
+                    extension = "002",
+                    fileName = "backup.zip.002",
+                ),
+            ),
+        )
+
+        assertNull(
+            descriptor(
+                protocolVersion = 13,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                fileNameSuffixes = listOf("zip.001"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 14,
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                mimeTypes = emptyList(),
+                extensions = emptyList(),
+                fileNameSuffixes = listOf("zip.001"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 14,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                fileNameSuffixes = listOf("001"),
+            ),
+        )
     }
 
     @Test
@@ -398,9 +477,10 @@ class ExplorerActionCatalogPolicyTest {
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(11L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(12L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(13L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(14L))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(14L))
+        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(15L))
         assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(4L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 4))
@@ -463,6 +543,7 @@ class ExplorerActionCatalogPolicyTest {
         presentation: Int? = null,
         mimeTypes: Collection<String>? = listOf("text/*"),
         extensions: Collection<String>? = emptyList(),
+        fileNameSuffixes: Collection<String>? = null,
     ): ExplorerActionDescriptor? {
         return ExplorerActionCatalogPolicy.normalizeDescriptor(
             protocolVersion = protocolVersion,
@@ -479,6 +560,7 @@ class ExplorerActionCatalogPolicyTest {
             presentation = presentation,
             mimeTypes = mimeTypes,
             extensions = extensions,
+            fileNameSuffixes = fileNameSuffixes,
         )
     }
 }

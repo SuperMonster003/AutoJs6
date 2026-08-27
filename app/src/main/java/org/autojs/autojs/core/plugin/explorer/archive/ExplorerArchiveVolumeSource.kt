@@ -215,6 +215,19 @@ internal class ExplorerArchiveVolumeSource private constructor(
 internal object ExplorerArchiveVolumeNamePolicy {
 
     fun candidateNames(selectedDisplayName: String): List<String> {
+        NUMBERED_ARCHIVE_PATTERN.matchEntire(selectedDisplayName)?.let { match ->
+            if (
+                selectedDisplayName.length >
+                ExplorerActionProtocol.MAX_ARCHIVE_VOLUME_DISPLAY_NAME_LENGTH
+            ) {
+                return emptyList()
+            }
+            val archiveName = match.groupValues[1]
+            return (2..ExplorerActionProtocol.MAX_ARCHIVE_VOLUMES).map { index ->
+                "$archiveName.${index.toString().padStart(NUMBERED_VOLUME_INDEX_WIDTH, '0')}"
+            }
+        }
+
         MODERN_RAR_PATTERN.matchEntire(selectedDisplayName)?.let { match ->
             val selectedIndex = match.groupValues[2].toIntOrNull()
                 ?.takeIf { it in 1..ExplorerActionProtocol.MAX_ARCHIVE_VOLUMES }
@@ -248,7 +261,9 @@ internal object ExplorerArchiveVolumeNamePolicy {
     }
 
     private const val MINIMUM_ZIP_INDEX_WIDTH = 2
+    private const val NUMBERED_VOLUME_INDEX_WIDTH = 3
     private const val LEGACY_RAR_NUMERIC_RANGE = 100
+    private val NUMBERED_ARCHIVE_PATTERN = Regex("(?i)^(.+\\.(?:zip|7z))\\.001$")
     private val MODERN_RAR_PATTERN = Regex("(?i)^(.*\\.part)([0-9]+)(\\.rar)$")
     private val ZIP_PATTERN = Regex("(?i)^(.*)\\.zip$")
     private val LEGACY_RAR_PATTERN = Regex("(?i)^(.*)\\.rar$")

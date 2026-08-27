@@ -18,6 +18,8 @@ object ExplorerActionCatalogKeys {
     const val PLACEMENT = "placement"
     const val MIME_TYPES = "mimeTypes"
     const val EXTENSIONS = "extensions"
+    /** v14 optional. Matches bounded compound suffixes such as `zip.001`. */
+    const val FILE_NAME_SUFFIXES = "fileNameSuffixes"
     const val OUTPUT_MODE = "outputMode"
     const val OUTPUT_MIME_TYPES = "outputMimeTypes"
     const val OUTPUT_NAME_SUFFIX = "outputNameSuffix"

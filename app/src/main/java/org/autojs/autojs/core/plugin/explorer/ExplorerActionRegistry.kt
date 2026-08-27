@@ -144,6 +144,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
                 mimeType = Mime.fromFileOrWildcard(file.path),
                 extension = file.extension.lowercase(Locale.ROOT),
                 kind = org.autojs.plugin.explorer.api.ExplorerActionValues.TARGET_FILE,
+                fileName = file.name,
             )
             file.isDirectory -> ExplorerActionTarget(
                 mimeType = DIRECTORY_MIME_TYPE,
