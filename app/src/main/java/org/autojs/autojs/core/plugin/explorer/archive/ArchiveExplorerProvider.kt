@@ -136,13 +136,22 @@ internal class ArchiveExplorerPage internal constructor(
 
 internal class ArchiveExplorerProvider(
     private val connection: ExplorerArchiveSessionClient,
-    cacheDirectory: File,
+    private val cacheDirectory: File,
 ) : ExplorerProvider {
 
     val canExtractEntries: Boolean
         get() = connection.info.canExtractEntries
 
-    private val entryMaterializer = ArchiveEntryMaterializer(
+    val filenameCharsetNames: List<String>
+        get() = connection.info.filenameCharsetNames
+
+    val filenameCharsetName: String?
+        get() = connection.info.filenameCharsetName
+
+    val filenameCharsetOverride: String?
+        get() = connection.info.filenameCharsetOverride
+
+    private var entryMaterializer = ArchiveEntryMaterializer(
         cacheDirectory = cacheDirectory,
         sessionId = connection.info.sessionId,
     )
@@ -150,17 +159,10 @@ internal class ArchiveExplorerProvider(
     private val itemInfoById = LinkedHashMap<String, ExplorerArchiveItemInfo>()
     private val pageById = LinkedHashMap<String, ArchiveExplorerPage>()
     private val pageByPath = LinkedHashMap<String, ArchiveExplorerPage>()
+    private val restorationLoadedPageIds = HashSet<String>()
 
-    val rootPage = ArchiveExplorerPage(
-        entryId = connection.info.rootId,
-        parentId = null,
-        name = connection.info.displayName,
-        parent = null,
-        path = syntheticPath(connection.info.rootId),
-        modifiedTime = connection.info.sourceLastModified,
-        size = connection.info.sourceSize,
-        canExtract = connection.info.canExtractEntries,
-    ).also(::rememberPage)
+    var rootPage = createRootPage()
+        private set
 
     override fun getExplorerPage(parent: ExplorerPage): Single<out ExplorerPage> = Single.fromCallable {
         require(parent is ArchiveExplorerPage) { "Archive provider received a filesystem page" }
@@ -210,6 +212,70 @@ internal class ArchiveExplorerProvider(
     }
 
     fun pageForPath(path: String): ArchiveExplorerPage? = pageByPath[path]
+
+    fun locatorFor(item: ArchiveExplorerItem): List<String> {
+        val result = ArrayList<String>()
+        val visited = HashSet<String>()
+        var current: ArchiveExplorerItem? = item
+        while (current != null) {
+            check(visited.add(current.entryId)) {
+                "Archive session returned a cyclic entry hierarchy"
+            }
+            result += current.entryId
+            current = current.parent as? ArchiveExplorerPage
+        }
+        val locator = result.asReversed()
+        check(locator.firstOrNull() == connection.info.rootId) {
+            "Archive entry does not belong to this session"
+        }
+        return locator
+    }
+
+    fun reindexFilenameCharset(filenameCharsetName: String?): ExplorerArchiveSessionInfo {
+        val updated = connection.reindexFilenameCharset(filenameCharsetName)
+        itemInfoById.clear()
+        pageById.clear()
+        pageByPath.clear()
+        restorationLoadedPageIds.clear()
+        entryMaterializer.close()
+        entryMaterializer = ArchiveEntryMaterializer(
+            cacheDirectory = cacheDirectory,
+            sessionId = updated.sessionId,
+        )
+        rootPage = createRootPage()
+        return updated
+    }
+
+    fun restorePage(locator: List<String>): List<ArchiveExplorerPage> {
+        val restored = arrayListOf(rootPage)
+        if (locator.firstOrNull() != rootPage.entryId) return restored
+        var current = rootPage
+        locator.drop(1).forEach { entryId ->
+            ensurePageLoaded(current)
+            val child = current
+                .filterIsInstance<ArchiveExplorerPage>()
+                .firstOrNull { page -> page.entryId == entryId }
+                ?: return restored
+            restored += child
+            current = child
+        }
+        return restored
+    }
+
+    fun restoreItem(locator: List<String>): ArchiveExplorerItem? {
+        if (locator.firstOrNull() != rootPage.entryId || locator.size < 2) return null
+        var current = rootPage
+        locator.drop(1).forEachIndexed { index, entryId ->
+            ensurePageLoaded(current)
+            val child = current
+                .filterIsInstance<ArchiveExplorerItem>()
+                .firstOrNull { item -> item.entryId == entryId }
+                ?: return null
+            if (index == locator.size - 2) return child
+            current = child as? ArchiveExplorerPage ?: return null
+        }
+        return null
+    }
 
     fun startExtraction(
         items: List<ArchiveExplorerItem>,
@@ -267,6 +333,22 @@ internal class ArchiveExplorerProvider(
     fun close() {
         connection.close()
         entryMaterializer.close()
+    }
+
+    private fun createRootPage() = ArchiveExplorerPage(
+        entryId = connection.info.rootId,
+        parentId = null,
+        name = connection.info.displayName,
+        parent = null,
+        path = syntheticPath(connection.info.rootId),
+        modifiedTime = connection.info.sourceLastModified,
+        size = connection.info.sourceSize,
+        canExtract = connection.info.canExtractEntries,
+    ).also(::rememberPage)
+
+    private fun ensurePageLoaded(page: ArchiveExplorerPage) {
+        if (!restorationLoadedPageIds.add(page.entryId)) return
+        page.copyChildren(getExplorerPage(page).blockingGet())
     }
 
     private fun rememberPage(page: ArchiveExplorerPage) {

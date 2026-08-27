@@ -152,6 +152,11 @@ private data class ArchiveNavigationState(
     val sourceParentSegments: List<ExplorerPathSegment>,
 )
 
+private data class ArchiveFilenameReindexResult(
+    val restoredPages: List<ArchiveExplorerPage>,
+    val restoredSelection: List<ArchiveExplorerItem>,
+)
+
 private class ArchiveOpenUiState(
     val surface: ExplorerSurface,
     val entryPoint: ExplorerActionEntryPoint,
@@ -294,6 +299,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private var mArchiveOpenJob: Job? = null
     private var mArchiveOpenUiState: ArchiveOpenUiState? = null
     private var mArchiveEntryOpenJob: Job? = null
+    private var mArchiveFilenameReindexJob: Job? = null
     private var mArchiveExtractionStartJob: Job? = null
     private var mArchiveExtractionUiState: ArchiveExtractionUiState? = null
     private var mOnArchiveModeStateChangeListener: ((Boolean) -> Unit)? = null
@@ -363,6 +369,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 mProjectToolbar = it
             }
             binding.explorerPathBar.setOnParentPathClickListener(::navigateToPath)
+            binding.archiveFilenameEncoding.setOnClickListener {
+                showArchiveFilenameEncodingDialog()
+            }
             binding.archiveExtractCurrent.setOnClickListener { extractCurrentArchiveFolder() }
             setupSelectionToolbar(binding)
             applySelectionToolbarTheme(ThemeColorManager.currentThemeColor)
@@ -625,6 +634,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         cancelArchiveOpenUi()
         mArchiveEntryOpenJob?.cancel()
         mArchiveEntryOpenJob = null
+        mArchiveFilenameReindexJob?.cancel()
+        mArchiveFilenameReindexJob = null
         mArchiveExtractionStartJob?.cancel()
         mArchiveExtractionStartJob = null
         dismissArchiveExtractionUi()
@@ -943,6 +954,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         cancelArchiveOpenUi()
         mArchiveEntryOpenJob?.cancel()
         mArchiveEntryOpenJob = null
+        mArchiveFilenameReindexJob?.cancel()
+        mArchiveFilenameReindexJob = null
         mArchiveExtractionStartJob?.cancel()
         mArchiveExtractionStartJob = null
         dismissArchiveExtractionUi()
@@ -1191,6 +1204,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         val state = mArchiveNavigationState ?: return
         mArchiveEntryOpenJob?.cancel()
         mArchiveEntryOpenJob = null
+        mArchiveFilenameReindexJob?.cancel()
+        mArchiveFilenameReindexJob = null
         mArchiveExtractionStartJob?.cancel()
         mArchiveExtractionStartJob = null
         dismissArchiveExtractionUi()
@@ -1278,6 +1293,125 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     isRefreshing = false
                     mArchiveEntryOpenJob = null
                 }
+            }
+        }
+    }
+
+    private fun showArchiveFilenameEncodingDialog() {
+        val provider = mArchiveNavigationState?.provider ?: return
+        val charsetNames = provider.filenameCharsetNames
+        if (
+            charsetNames.isEmpty() ||
+            mArchiveFilenameReindexJob?.isActive == true ||
+            mArchiveEntryOpenJob?.isActive == true ||
+            mArchiveExtractionUiState != null
+        ) {
+            return
+        }
+        val defaultLabel = buildString {
+            append(context.getString(R.string.dialog_button_use_default))
+            if (provider.filenameCharsetOverride == null) {
+                provider.filenameCharsetName?.let { detected ->
+                    append(" (")
+                    append(detected)
+                    append(')')
+                }
+            }
+        }
+        val choices = listOf(defaultLabel) + charsetNames
+        val selectedIndex = provider.filenameCharsetOverride
+            ?.let { selected ->
+                charsetNames.indexOfFirst { name -> name.equals(selected, ignoreCase = true) }
+                    .takeIf { it >= 0 }
+                    ?.plus(1)
+            }
+            ?: 0
+        MaterialDialog.Builder(context)
+            .title(R.string.text_file_encoding)
+            .items(choices)
+            .itemsCallbackSingleChoice(selectedIndex) { _, _, _, _ -> true }
+            .negativeText(R.string.dialog_button_cancel)
+            .positiveText(R.string.dialog_button_confirm)
+            .onPositive { dialog, _ ->
+                val requested = dialog.selectedIndex
+                    .takeIf { it > 0 }
+                    ?.let { index -> charsetNames.getOrNull(index - 1) }
+                if (requested != provider.filenameCharsetOverride) {
+                    reindexArchiveFilenameCharset(requested)
+                }
+            }
+            .show()
+    }
+
+    private fun reindexArchiveFilenameCharset(filenameCharsetName: String?) {
+        val archiveState = mArchiveNavigationState ?: return
+        val provider = archiveState.provider
+        val page = currentPageState.page as? ArchiveExplorerPage ?: return
+        if (mArchiveFilenameReindexJob?.isActive == true) return
+        val lifecycleOwner = findViewTreeLifecycleOwner() ?: return
+        val pageLocator = provider.locatorFor(page)
+        val selectionLocators = mSelectedItems.values.mapNotNull { item ->
+            (item as? ArchiveExplorerItem)?.let(provider::locatorFor)
+        }
+        val previousScrollY = currentPageState.scrollY
+        val previousDirsCollapsed = currentPageState.dirsCollapsed
+        val previousFilesCollapsed = currentPageState.filesCollapsed
+        mRefreshDisposable?.dispose()
+        mRefreshDisposable = null
+        mArchiveFilenameReindexJob = lifecycleOwner.lifecycleScope.launch {
+            val reindexJob = coroutineContext[Job]
+            var refreshStarted = false
+            try {
+                isRefreshing = true
+                updateArchiveExtractionAction()
+                val restored = withContext(Dispatchers.IO) {
+                    provider.reindexFilenameCharset(filenameCharsetName)
+                    val restoredPages = runCatching { provider.restorePage(pageLocator) }
+                        .getOrElse { listOf(provider.rootPage) }
+                    val restoredSelection = selectionLocators.mapNotNull { locator ->
+                        runCatching { provider.restoreItem(locator) }.getOrNull()
+                    }
+                    ArchiveFilenameReindexResult(restoredPages, restoredSelection)
+                }
+                if (mArchiveNavigationState !== archiveState) return@launch
+
+                val restoredPage = restored.restoredPages.last()
+                val exactPageRestored = restoredPage.entryId == pageLocator.lastOrNull()
+                mPageStateHistory.clear()
+                restored.restoredPages.dropLast(1).forEach { ancestor ->
+                    mPageStateHistory.push(ExplorerPageState(ancestor))
+                }
+                mSelectedItems.clear()
+                restored.restoredSelection.forEach { item ->
+                    mSelectedItems[item.path] = item
+                }
+                setCurrentPageState(
+                    ExplorerPageState(restoredPage).also { state ->
+                        if (exactPageRestored) {
+                            state.scrollY = previousScrollY
+                            state.dirsCollapsed = previousDirsCollapsed
+                            state.filesCollapsed = previousFilesCollapsed
+                        }
+                    },
+                )
+                updateSelectionToolbar()
+                refreshCurrentPage()
+                refreshStarted = true
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                if (mArchiveNavigationState === archiveState) {
+                    Log.e(LOG_TAG, "Failed to rebuild archive filename index", error)
+                    ViewUtils.showToast(context, error.message ?: error.toString(), true)
+                    refreshCurrentPage()
+                    refreshStarted = true
+                }
+            } finally {
+                if (mArchiveFilenameReindexJob === reindexJob) {
+                    mArchiveFilenameReindexJob = null
+                }
+                if (!refreshStarted) isRefreshing = false
+                updateArchiveExtractionAction()
             }
         }
     }
@@ -1616,7 +1750,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mArchiveNavigationState?.provider?.canExtractEntries == true
         binding?.archiveExtractCurrent?.apply {
             isVisible = supported
-            isEnabled = supported && !isInSelectionMode && mArchiveExtractionUiState == null
+            isEnabled = supported &&
+                !isInSelectionMode &&
+                mArchiveExtractionUiState == null &&
+                mArchiveFilenameReindexJob?.isActive != true
+            alpha = if (isEnabled) 1.0f else 0.38f
+        }
+        updateArchiveFilenameEncodingAction()
+    }
+
+    private fun updateArchiveFilenameEncodingAction() {
+        val provider = mArchiveNavigationState?.provider
+        val supported = currentPageState.page is ArchiveExplorerPage &&
+            provider?.filenameCharsetNames?.isNotEmpty() == true
+        binding?.archiveFilenameEncoding?.apply {
+            isVisible = supported
+            isEnabled = supported &&
+                !isInSelectionMode &&
+                mArchiveExtractionUiState == null &&
+                mArchiveFilenameReindexJob?.isActive != true
             alpha = if (isEnabled) 1.0f else 0.38f
         }
     }

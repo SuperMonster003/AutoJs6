@@ -11,6 +11,12 @@ object ExplorerArchiveSessionKeys {
     const val CAN_OPEN_ENTRIES = "canOpenEntries"
     /** False or absent before protocol v10. */
     const val CAN_EXTRACT_ENTRIES = "canExtractEntries"
+    /** Empty or absent before protocol v13, or when this format has no filename charset override. */
+    const val FILENAME_CHARSET_NAMES = "filenameCharsetNames"
+    /** Effective charset selected by the backend after automatic detection or an explicit override. */
+    const val FILENAME_CHARSET_NAME = "filenameCharsetName"
+    /** Present only while protocol v13 uses an explicit filename charset override. */
+    const val FILENAME_CHARSET_OVERRIDE = "filenameCharsetOverride"
 
     const val ITEMS = "items"
     const val NEXT_OFFSET = "nextOffset"

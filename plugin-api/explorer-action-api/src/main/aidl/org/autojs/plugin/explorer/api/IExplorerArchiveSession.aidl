@@ -30,4 +30,11 @@ interface IExplorerArchiveSession {
 
     /** Requests cancellation of one extraction started by this caller. Added in protocol v10. */
     void cancelExtraction(String operationId);
+
+    /**
+     * Rebuilds this read-only session with an optional legacy filename charset override. Added in
+     * protocol v13. A null charset restores automatic detection. The previous index remains active
+     * if rebuilding fails.
+     */
+    Bundle reindexFilenameCharset(String filenameCharsetName);
 }

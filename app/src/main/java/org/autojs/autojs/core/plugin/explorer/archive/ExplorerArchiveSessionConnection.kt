@@ -16,6 +16,7 @@ import org.autojs.plugin.explorer.api.IExplorerArchiveOperationCallback
 import org.autojs.plugin.explorer.api.IExplorerArchiveSession
 import java.io.Closeable
 import java.io.File
+import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -25,6 +26,7 @@ internal interface ExplorerArchiveSessionClient : Closeable {
     val info: ExplorerArchiveSessionInfo
     fun listAllChildren(parentId: String): List<ExplorerArchiveItemInfo>
     fun openEntry(entryId: String): ParcelFileDescriptor
+    fun reindexFilenameCharset(filenameCharsetName: String?): ExplorerArchiveSessionInfo
     fun startExtraction(
         entryIds: List<String>,
         options: ExplorerArchiveExtractionRequestOptions,
@@ -41,6 +43,9 @@ internal data class ExplorerArchiveSessionInfo(
     val sourceLastModified: Long,
     val canOpenEntries: Boolean,
     val canExtractEntries: Boolean,
+    val filenameCharsetNames: List<String> = emptyList(),
+    val filenameCharsetName: String? = null,
+    val filenameCharsetOverride: String? = null,
 )
 
 internal data class ExplorerArchiveItemInfo(
@@ -94,8 +99,12 @@ internal class ExplorerArchiveSessionConnection private constructor(
     private val bindingLease: Closeable,
     private val volumeSource: Closeable?,
     override val sourcePath: String,
-    override val info: ExplorerArchiveSessionInfo,
+    initialInfo: ExplorerArchiveSessionInfo,
 ) : ExplorerArchiveSessionClient {
+
+    @Volatile
+    override var info: ExplorerArchiveSessionInfo = initialInfo
+        private set
 
     private val closed = AtomicBoolean(false)
     private val extractionLock = Any()
@@ -164,6 +173,55 @@ internal class ExplorerArchiveSessionConnection private constructor(
             descriptor.close()
             throw error
         }
+    }
+
+    override fun reindexFilenameCharset(filenameCharsetName: String?): ExplorerArchiveSessionInfo {
+        check(!closed.get()) { "Archive session is closed" }
+        check(protocolVersion >= FILENAME_CHARSET_PROTOCOL_VERSION) {
+            "Archive session does not support filename charset overrides"
+        }
+        val previous = info
+        check(previous.filenameCharsetNames.isNotEmpty()) {
+            "Archive format does not support filename charset overrides"
+        }
+        check(synchronized(extractionLock) { activeExtractions.isEmpty() }) {
+            "Archive extraction is still running"
+        }
+        val canonicalOverride = filenameCharsetName?.let { requested ->
+            requireNotNull(previous.filenameCharsetNames.firstOrNull { supported ->
+                supported.equals(requested, ignoreCase = true)
+            }) { "Archive filename charset is not supported" }
+        }
+        val bundle = remote.reindexFilenameCharset(canonicalOverride)
+        val metadata = decodeFilenameCharsetMetadata(bundle, protocolVersion)
+        require(bundle.getString(ExplorerArchiveSessionKeys.SESSION_ID) == previous.sessionId) {
+            "Archive session ID changed while rebuilding the filename index"
+        }
+        require(bundle.getString(ExplorerArchiveSessionKeys.ROOT_ID) == previous.rootId) {
+            "Archive root ID changed while rebuilding the filename index"
+        }
+        require(sanitizeDisplayName(bundle.getString(ExplorerArchiveSessionKeys.DISPLAY_NAME)) == previous.displayName) {
+            "Archive display name changed while rebuilding the filename index"
+        }
+        require(bundle.getLong(ExplorerArchiveSessionKeys.SOURCE_SIZE, -1L) == previous.sourceSize) {
+            "Archive source size changed while rebuilding the filename index"
+        }
+        require(
+            bundle.getLong(ExplorerArchiveSessionKeys.SOURCE_LAST_MODIFIED, -1L) ==
+                previous.sourceLastModified,
+        ) { "Archive source identity changed while rebuilding the filename index" }
+        val updated = previous.copy(
+            canOpenEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_OPEN_ENTRIES, false),
+            canExtractEntries = bundle.getBoolean(
+                ExplorerArchiveSessionKeys.CAN_EXTRACT_ENTRIES,
+                false,
+            ),
+            filenameCharsetNames = metadata.supportedNames,
+            filenameCharsetName = metadata.effectiveName,
+            filenameCharsetOverride = metadata.overrideName,
+        )
+        info = updated
+        return updated
     }
 
     override fun startExtraction(
@@ -504,6 +562,12 @@ internal class ExplorerArchiveSessionConnection private constructor(
         val terminal: AtomicBoolean = AtomicBoolean(false),
     )
 
+    private data class FilenameCharsetMetadata(
+        val supportedNames: List<String>,
+        val effectiveName: String?,
+        val overrideName: String?,
+    )
+
     companion object {
         fun create(
             context: Context,
@@ -533,6 +597,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                     ?: error("Archive session returned an invalid display name")
                 val sourceSize = bundle.getLong(ExplorerArchiveSessionKeys.SOURCE_SIZE, -1L)
                 require(sourceSize >= 0L) { "Archive session returned an invalid source size" }
+                val filenameCharsets = decodeFilenameCharsetMetadata(bundle, protocolVersion)
                 return ExplorerArchiveSessionConnection(
                     context = context.applicationContext,
                     pluginPackageName = pluginPackageName,
@@ -542,7 +607,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                     bindingLease = bindingLease,
                     volumeSource = volumeSource,
                     sourcePath = sourcePath,
-                    info = ExplorerArchiveSessionInfo(
+                    initialInfo = ExplorerArchiveSessionInfo(
                         sessionId = sessionId,
                         rootId = rootId,
                         displayName = displayName,
@@ -556,6 +621,9 @@ internal class ExplorerArchiveSessionConnection private constructor(
                         ),
                         canExtractEntries = protocolVersion >= EXTRACTION_PROTOCOL_VERSION &&
                             bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_EXTRACT_ENTRIES, false),
+                        filenameCharsetNames = filenameCharsets.supportedNames,
+                        filenameCharsetName = filenameCharsets.effectiveName,
+                        filenameCharsetOverride = filenameCharsets.overrideName,
                     ),
                 )
             } catch (error: Throwable) {
@@ -566,9 +634,71 @@ internal class ExplorerArchiveSessionConnection private constructor(
             }
         }
 
+        private fun decodeFilenameCharsetMetadata(
+            bundle: Bundle,
+            protocolVersion: Int,
+        ): FilenameCharsetMetadata {
+            if (protocolVersion < FILENAME_CHARSET_PROTOCOL_VERSION) {
+                return FilenameCharsetMetadata(emptyList(), null, null)
+            }
+            @Suppress("DEPRECATION")
+            val rawSupportedNames = bundle
+                .getStringArrayList(ExplorerArchiveSessionKeys.FILENAME_CHARSET_NAMES)
+                .orEmpty()
+            require(rawSupportedNames.size <= ExplorerActionProtocol.MAX_ARCHIVE_FILENAME_CHARSET_NAMES) {
+                "Archive session returned too many filename charsets"
+            }
+            val supportedNames = rawSupportedNames.map(::requireValidCharsetName)
+            require(
+                supportedNames.distinctBy { name -> name.lowercase(Locale.ROOT) }.size ==
+                    supportedNames.size,
+            ) { "Archive session returned duplicate filename charsets" }
+            val effectiveName = bundle.getString(ExplorerArchiveSessionKeys.FILENAME_CHARSET_NAME)
+                ?.let(::requireValidCharsetName)
+                ?.also { effective ->
+                    require(supportedNames.any { it.equals(effective, ignoreCase = true) }) {
+                        "Archive session returned an unsupported effective filename charset"
+                    }
+                }
+            require(supportedNames.isNotEmpty() || effectiveName == null) {
+                "Archive session returned a filename charset for an unsupported format"
+            }
+            val overrideName = if (
+                bundle.containsKey(ExplorerArchiveSessionKeys.FILENAME_CHARSET_OVERRIDE)
+            ) {
+                val rawOverride = requireNotNull(
+                    bundle.getString(ExplorerArchiveSessionKeys.FILENAME_CHARSET_OVERRIDE),
+                ) { "Archive session returned an empty filename charset override" }
+                val override = requireValidCharsetName(rawOverride)
+                require(supportedNames.any { it.equals(override, ignoreCase = true) }) {
+                    "Archive session returned an unsupported filename charset override"
+                }
+                supportedNames.first { it.equals(override, ignoreCase = true) }
+            } else {
+                null
+            }
+            return FilenameCharsetMetadata(
+                supportedNames = supportedNames,
+                effectiveName = effectiveName,
+                overrideName = overrideName,
+            )
+        }
+
+        private fun requireValidCharsetName(value: String): String = requireNotNull(
+            value.takeIf { name ->
+                name.length in 1..ExplorerActionProtocol.MAX_ARCHIVE_FILENAME_CHARSET_NAME_LENGTH &&
+                    name == name.trim() &&
+                    name.all { character ->
+                        character.isLetterOrDigit() || character == '-' ||
+                            character == '_' || character == '.'
+                    }
+            },
+        ) { "Archive session returned an invalid filename charset" }
+
         private const val EXTRACTION_PROTOCOL_VERSION = 10
         private const val EXTRACTION_RECOVERY_PROTOCOL_VERSION = 11
         private const val ENTRY_CAPABILITIES_PROTOCOL_VERSION = 11
+        private const val FILENAME_CHARSET_PROTOCOL_VERSION = 13
         private const val SOURCE_TARGET_ID = "archive-source"
         private val DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
             Thread(runnable, "ExplorerArchiveSessionDeath").apply { isDaemon = true }
