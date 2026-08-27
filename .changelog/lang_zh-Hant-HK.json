@@ -105,7 +105,8 @@
         "設置頁面提供 \"運行後自動顯示底部日誌面板\", \"代碼高亮閾值\" 等代碼編輯器設置選項",
         "打包應用配置支持顯示或隱藏 \"日誌\" 及 \"設置\" 啟動器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_",
         "打包應用支持使用 APK Builder Template 插件進行遠程構建",
-        "開發者選項支持 GitHub 訪問令牌設置, 用於提升更新檢查及插件索引請求限額"
+        "開發者選項支持 GitHub 訪問令牌設置, 用於提升更新檢查及插件索引請求限額",
+        "全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出嘅 `runtime.loadJarWithR8` 多載及協議 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發佈, retrace 綁定 mapping 來源, 提供者缺失或無效時禁止 D8/dx 或本地回退"
       ],
       "fix": [
         "打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 \"Cannot read file\" 失敗的問題",

@@ -111,6 +111,7 @@
 * `新增` 打包應用配置支持顯示或隱藏 "日誌" 及 "設置" 啟動器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 打包應用支持使用 APK Builder Template 插件進行遠程構建
 * `新增` 開發者選項支持 GitHub 訪問令牌設置, 用於提升更新檢查及插件索引請求限額
+* `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出嘅 `runtime.loadJarWithR8` 多載及協議 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發佈, retrace 綁定 mapping 來源, 提供者缺失或無效時禁止 D8/dx 或本地回退
 * `修復` 打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 "Cannot read file" 失敗的問題
 * `修復` Node.js UI 控制代碼在 Android Activity 銷毀後可能仍保持活動, 允許延遲更新並持續佔用提供者資源直至執行清理
 * `修復` Node.js 插件執行因模組探測及工作區封存預算過小而可能拒絕大型純文字依賴圖及實際 node_modules 工作區

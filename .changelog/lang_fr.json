@@ -105,7 +105,8 @@
         "La page Paramètres propose des options d'éditeur comme \"Afficher automatiquement le panneau de logs inférieur après l'exécution\" et \"Seuil de surlignage du code\"",
         "La configuration des applications empaquetées permet d'afficher ou de masquer les raccourcis de lanceur \"Journal\" et \"Paramètres\" _[`issue #550`](http://issues.autojs6.com/550)_",
         "L'empaquetage d'applications prend en charge les compilations distantes à l'aide de plugins APK Builder Template",
-        "Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins"
+        "Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins",
+        "L'intégration R8 JavaScript globale (Rhino) ajoute trois surcharges `runtime.loadJarWithR8` d'export vérifié et `runtime.retraceR8Stack` du protocole 1.1; mapping/seeds/usage/retrace metadata sont publiés atomiquement, retrace lie la provenance du mapping et un fournisseur absent ou invalide échoue sans repli D8/dx ou local"
       ],
       "fix": [
         "Le require Rhino CommonJS des applications empaquetées ne pouvait pas déchiffrer les modules JavaScript dépendants, ce qui faisait échouer avec \"Cannot read file\" les sorties TypeScript multifichiers compilées lors de l'empaquetage",

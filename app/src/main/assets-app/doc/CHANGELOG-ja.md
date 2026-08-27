@@ -111,6 +111,7 @@
 * `新機能` パッケージ化アプリの設定で "ログ" と "設定" のランチャーショートカットの表示/非表示に対応 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新機能` アプリのパッケージ化が APK Builder Template プラグインを使用したリモートビルドに対応
 * `新機能` 開発者向けオプションが GitHub アクセストークン設定に対応, 更新確認とプラグインインデックスのリクエスト上限を拡張可能
+* `新機能` グローバル JavaScript (Rhino) R8 連携に検証済み成果物を出力する 3 つの `runtime.loadJarWithR8` オーバーロードとプロトコル 1.1 `runtime.retraceR8Stack` を追加; mapping/seeds/usage/retrace metadata を原子的に公開し, retrace は mapping の来歴を結合, Provider 不在または不正時は D8/dx やローカル実装へフォールバックしない
 * `修正` パッケージ済みアプリの Rhino CommonJS require が依存 JavaScript モジュールを復号できず、パッケージ時にコンパイルした複数ファイルの TypeScript 出力が "Cannot read file" で失敗する問題
 * `修正` Android Activity の破棄後も Node.js UI ハンドルがアクティブなままとなり, 遅延更新を許可して実行終了時までプロバイダー所有リソースを保持する可能性がある問題
 * `修正` モジュール探索とワークスペースアーカイブの予算が小さすぎるため, Node.js プラグイン実行が大規模な平文依存グラフや実際の node_modules ワークスペースを拒否する可能性がある問題

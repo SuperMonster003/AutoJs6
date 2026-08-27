@@ -247,6 +247,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 插件中心支持在线安装插件及更新插件; 全局设置页面及使用说明页面; SDK 插件自动挂载功能; 多变体优先级排序功能; 启动页跳转/隐藏插件; 可用 ABI 交集检测及提示
 * `新增` 设置页面提供 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
 * `新增` 打包应用配置支持显示或隐藏 "日志" 及 "设置" 启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
+* `新增` 全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退
 * `修复` 打包应用的 Rhino CommonJS require 加载器无法解密依赖 JavaScript 模块, 导致 build-time 编译的多文件 TypeScript 项目以 "Cannot read file" 失败的问题
 * `修复` Node.js UI 句柄在 Android Activity 销毁后可能仍保持活动, 允许迟到更新并持续占用提供器资源直至执行清理
 * `修复` Node.js 插件执行因模块探测及工作区归档预算过小而可能拒绝大型纯文本依赖图及真实 node_modules 工作区

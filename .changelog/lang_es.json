@@ -105,7 +105,8 @@
         "La página Configuración ofrece opciones del editor de código como \"Mostrar automáticamente el panel inferior de registros tras ejecutar\" y \"Umbral de resaltado de código\"",
         "La configuración de aplicaciones empaquetadas permite mostrar u ocultar los accesos directos del iniciador \"Registro\" y \"Configuración\" _[`issue #550`](http://issues.autojs6.com/550)_",
         "El empaquetado de aplicaciones admite compilaciones remotas mediante plugins APK Builder Template",
-        "Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins"
+        "Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins",
+        "La integración R8 de JavaScript global (Rhino) añade tres sobrecargas de `runtime.loadJarWithR8` para exportación verificada y `runtime.retraceR8Stack` del protocolo 1.1; mapping/seeds/usage/retrace metadata se publican atómicamente, retrace vincula la procedencia del mapping y un proveedor ausente o inválido falla sin fallback D8/dx ni local"
       ],
       "fix": [
         "El require de Rhino CommonJS en aplicaciones empaquetadas no podía descifrar módulos JavaScript dependientes, por lo que la salida TypeScript multifichero compilada durante el empaquetado fallaba con \"Cannot read file\"",

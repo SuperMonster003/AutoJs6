@@ -271,6 +271,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Packaged app configuration supports showing or hiding the "Log" and "Settings" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_
 * `Feature` App packaging supports remote builds using APK Builder Template plugins
 * `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
+* `Feature` Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback
 * `Fix` Packaged Rhino CommonJS require could not decrypt dependent JavaScript modules, causing multi-file build-time TypeScript output to fail with "Cannot read file"
 * `Fix` Node.js UI handles could remain active after their Android Activity was destroyed, allowing late updates and retaining provider-owned resources until execution teardown
 * `Fix` Node.js plugin execution could reject large plaintext dependency graphs and real-world node_modules workspaces because module-probe and workspace-archive budgets were too small

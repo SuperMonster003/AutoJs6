@@ -271,6 +271,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 打包應用設定支援顯示或隱藏 "日誌" 及 "設定" 啟動器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 打包應用支援使用 APK Builder Template 外掛進行遠端建置
 * `新增` 開發者選項支援 GitHub 存取權杖設定, 用於提升更新檢查及外掛索引請求限額
+* `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出的 `runtime.loadJarWithR8` 多載及通訊協定 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發布, retrace 綁定 mapping 溯源, 提供者缺失或無效時禁止 D8/dx 或本機回退
 * `修復` 打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 "Cannot read file" 失敗的問題
 * `修復` Node.js UI 控制代碼在 Android Activity 銷毀後可能仍保持作用中, 允許延遲更新並持續佔用提供者資源直到執行清理
 * `修復` Node.js 外掛執行因模組探測及工作區封存預算過小而可能拒絕大型純文字相依圖及實際 node_modules 工作區

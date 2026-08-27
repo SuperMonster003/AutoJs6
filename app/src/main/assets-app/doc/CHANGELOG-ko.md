@@ -111,6 +111,7 @@
 * `추가` 패키징된 앱 설정에서 "로그" 및 "설정" 런처 바로 가기 표시/숨기기 지원 _[`issue #550`](http://issues.autojs6.com/550)_
 * `추가` 앱 패키징에서 APK Builder Template 플러그인을 사용한 원격 빌드 지원
 * `추가` 개발자 옵션에서 GitHub 액세스 토큰 설정 지원, 업데이트 확인 및 플러그인 인덱스 요청 한도 확장용
+* `추가` 전역 JavaScript (Rhino) R8 통합에 검증된 산출물 내보내기용 `runtime.loadJarWithR8` 오버로드 3개와 프로토콜 1.1 `runtime.retraceR8Stack`을 추가; mapping/seeds/usage/retrace metadata를 원자적으로 게시하고 retrace는 mapping 출처에 결합되며 Provider가 없거나 잘못되면 D8/dx 또는 로컬 fallback 없이 실패
 * `수정` 패키징된 앱의 Rhino CommonJS require가 종속 JavaScript 모듈을 복호화하지 못해 패키징 시 컴파일된 다중 파일 TypeScript 출력이 "Cannot read file"로 실패하는 문제
 * `수정` Android Activity가 제거된 뒤에도 Node.js UI 핸들이 활성 상태로 남아 지연 업데이트를 허용하고 실행 정리 시점까지 공급자 소유 리소스를 유지할 수 있던 문제
 * `수정` 모듈 탐색 및 작업 공간 아카이브 예산이 너무 작아 Node.js 플러그인 실행이 대규모 평문 종속성 그래프와 실제 node_modules 작업 공간을 거부할 수 있던 문제

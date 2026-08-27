@@ -105,7 +105,8 @@
         "Settings page provides code editor options such as \"Auto show bottom log panel after running\" and \"Code highlight threshold\"",
         "Packaged app configuration supports showing or hiding the \"Log\" and \"Settings\" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_",
         "App packaging supports remote builds using APK Builder Template plugins",
-        "Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes"
+        "Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes",
+        "Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback"
       ],
       "fix": [
         "Packaged Rhino CommonJS require could not decrypt dependent JavaScript modules, causing multi-file build-time TypeScript output to fail with \"Cannot read file\"",
