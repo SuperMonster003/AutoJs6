@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 27 August 2026.
+تم تحديث البيانات في 28 August 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/08/27
+###### 2026/08/28
 
 * `إضافة جديدة` توفّر إمكانات Host في Lua Runtime الآن تخزيناً دائماً للمفاتيح والقيم معزولاً لكل ملف نصي وToast: تستخدم `autojs.storage.get/put/remove/clear` نطاقاً خاصاً بالتطبيق ومحدوداً مع تثبيت متزامن, بينما تُرسَل `autojs.ui.toast` مرة واحدة عبر الخيط الرئيسي للـ Host
 * `إضافة جديدة` تتضمن أنواع ملفات Ace LSP الافتراضية الآن .mts/.cts ومتغيرات ملفات التعريف الخاصة بها, مما يتيح لمحرر Ace الخارجي اختيار ملف تنفيذ TypeScript نفسه لـ Rhino/Node; تُرحّل الاختيارات الافتراضية القديمة وتظل مجموعات اللواحق المخصصة صراحةً دون تغيير
@@ -382,6 +382,7 @@
 * `تحسين` يتيح Explorer Action v7 لاضافات الارشيف اعادة فتح الاخراج المخفي المعلق للقراءة فقط والتحقق منه قبل النشر النهائي مع الحفاظ على توافق الاعتماد المباشر لعملاء v4
 * `تحسين` يتحقق Explorer Action v12 من UID للمتصل وهوية الملف العادي والحجم ووقت التعديل وحالة الرابط الرمزي وعمر الجلسة قبل فتح كل جزء مجاور, مع حدود ثابتة للاسماء وحجم الدليل وعدد طلبات الفتح
 * `تحسين` يظهر وضع تحديد الارشيف الاصلي الخروج والاستخراج فقط ويدمج تقدما محدودا والغاء; يحافظ شريط نظام الملفات ذو الاجراءات الخمسة على وضوحه في الشاشات الضيقة بتوسيط التسميات تحت الايقونات
+* `تحسين` تحسين شريط التحديد ذي الاجراءات الخمسة في مدير الملفات للشاشات المدمجة والخطوط الكبيرة والوضع الافقي وRTL وTalkBack, مع اضافة تحقق fail-closed من حجم طلب Explorer Action قبل تشغيل الملحق
 * `تحسين` نقل موفري توافق نص AI ومترجم DEX من دليل الانتاج `plugins` الى مجموعة البناء المخصصة `test-apps`, مع الحفاظ على تغطية انحدار Binder العدائية وفصل حدود اصدار الاضافات الانتاجية المستقلة
 * `تحسين` يبقى مسار المضيف التجريبي لمترجم DEX معطلا افتراضيا ويتطلب مكونا صريحا, مع فرض تثبيت UID للمكون الدقيق ومجموعة الموقعين الكاملة, والرجوع بعد ارسال واحد, وتتبع مصدر ذاكرة التخزين المؤقت الدلالي, ومدخل محدود لردود الاتصال, ومهلات Binder معزولة, والتحقق البنيوي من ملف DEX ZIP, والتفريغ المحدود لـ reliable pipe مع فحص اخطاء الطرف المقابل عند EOF, ونشر واحد قابل للتراجع تحميه خلاصتا المصدر والوجهة, والتحكيم الذري بين اشارات الانهاء غير المتزامنة ونقطة commit للنشر مع فرض التراجع اذا سبق الالغاء او انتهاء المهلة او Binder death نقطة commit
 * `تحسين` يبقي مترجم DEX في R1.1 التجربة معطلة افتراضيا, ويتيح لملفات JAR الخام في runtime.loadJar تفضيل provider واحد لمكون دقيق محدد صراحة وموقع بالتوقيع نفسه للمضيف, مع رجوع واحد إلى D8/dx المدمج عند الفشل, ومن دون رجوع عند الإلغاء, مع إبقاء تحميل AAR على المسار المدمج
@@ -694,7 +695,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 27 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 28 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
