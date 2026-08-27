@@ -9,6 +9,10 @@ import android.system.Os
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import org.autojs.autojs.model.explorer.ExplorerDirPage
+import org.autojs.autojs.storage.history.HistoryDatabase
+import org.autojs.autojs.storage.history.TrashBlobStore
+import org.autojs.autojs.storage.history.TrashRepository
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionKeys
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionValues
 import org.junit.Assert.assertArrayEquals
@@ -24,6 +28,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import java.util.UUID
 
@@ -1280,6 +1285,198 @@ class ExplorerActionHostSessionInstrumentationTest {
             batchIds.forEach(store::remove)
             testRoot.deleteRecursively()
             stateFile.delete()
+        }
+    }
+
+    @Test
+    fun committedArchiveOutputCanMoveTheCompleteSelectionToTrashAndRestoreIt() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v16-trash-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val sourceFileBytes = "v16 source file".encodeToByteArray()
+        val nestedBytes = "v16 nested source".encodeToByteArray()
+        val sourceFile = File(testRoot, "source.txt").apply { writeBytes(sourceFileBytes) }
+        val sourceDirectory = File(testRoot, "folder").apply {
+            assertTrue(mkdir())
+            File(this, "nested.txt").writeBytes(nestedBytes)
+            File(this, "empty").also { assertTrue(it.mkdir()) }
+        }
+        val refreshCount = AtomicInteger()
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(
+                ExplorerActionHostSessionTarget("file", sourceFile),
+                ExplorerActionHostSessionTarget("directory", sourceDirectory),
+            ),
+            allowCreateOutput = true,
+            onSourcesTrashed = { refreshCount.incrementAndGet() },
+        )
+        val repository = TrashRepository(context.applicationContext)
+        var trashIds: List<String> = emptyList()
+
+        try {
+            val unknown = session.queryTargetTrash()
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_STATE_UNKNOWN,
+                unknown.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_STATE),
+            )
+            val outputBytes = "verified archive output".encodeToByteArray()
+            val outputId = prepareVerifiedOutput(session, "sources.zip", outputBytes)
+            session.commitOutput(outputId)
+
+            val result = session.moveTargetsToTrash(
+                mutableListOf("file", "directory"),
+                mutableListOf(outputId),
+            )
+            trashIds = result.getStringArrayList(
+                ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_IDS,
+            ).orEmpty()
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_STATE_COMMITTED,
+                result.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_STATE),
+            )
+            assertEquals(2, result.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_MOVED_COUNT))
+            assertEquals(0, result.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RECOVERY_COUNT))
+            assertEquals(2, trashIds.size)
+            assertFalse(sourceFile.exists())
+            assertFalse(sourceDirectory.exists())
+            assertArrayEquals(outputBytes, File(testRoot, "sources.zip").readBytes())
+            assertEquals(1, refreshCount.get())
+
+            val repeated = session.moveTargetsToTrash(
+                mutableListOf("file", "directory"),
+                mutableListOf(outputId),
+            )
+            assertEquals(
+                trashIds,
+                repeated.getStringArrayList(ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_IDS),
+            )
+            assertEquals(1, refreshCount.get())
+            assertEquals(
+                result.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_STATE),
+                session.queryTargetTrash().getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_STATE),
+            )
+
+            val itemsById = HistoryDatabase.getInstance(context.applicationContext)
+                .historyDao()
+                .listTrashItemsDesc()
+                .filter { item -> item.trashId in trashIds }
+                .associateBy { item -> item.originalPath }
+            assertEquals(2, itemsById.size)
+            listOf(sourceFile, sourceDirectory).forEach { original ->
+                repository.restoreTrashItemToPath(
+                    requireNotNull(itemsById[original.canonicalPath]),
+                    original,
+                    DialogUtils.OperationController(),
+                )
+            }
+            trashIds = emptyList()
+            assertArrayEquals(sourceFileBytes, sourceFile.readBytes())
+            assertArrayEquals(nestedBytes, File(sourceDirectory, "nested.txt").readBytes())
+            assertTrue(File(sourceDirectory, "empty").isDirectory)
+        } finally {
+            val remaining = HistoryDatabase.getInstance(context.applicationContext)
+                .historyDao()
+                .listTrashItemsDesc()
+                .filter { item -> item.trashId in trashIds }
+            remaining.forEach(repository::deleteTrashItem)
+            runCatching { session.close() }
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun targetTrashRejectsMissingProofAndChangedOutputWithoutTouchingSources() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v16-trash-proof-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val first = File(testRoot, "first.txt").apply { writeText("first source") }
+        val second = File(testRoot, "second.txt").apply { writeText("second source") }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(
+                ExplorerActionHostSessionTarget("first", first),
+                ExplorerActionHostSessionTarget("second", second),
+            ),
+            allowCreateOutput = true,
+        )
+
+        try {
+            val outputId = prepareVerifiedOutput(
+                session,
+                "sources.zip",
+                "original output".encodeToByteArray(),
+            )
+            session.commitOutput(outputId)
+
+            expectIllegalArgument {
+                session.moveTargetsToTrash(mutableListOf("first"), mutableListOf(outputId))
+            }
+            File(testRoot, "sources.zip").appendText("externally changed")
+            expectIllegalState {
+                session.moveTargetsToTrash(
+                    mutableListOf("first", "second"),
+                    mutableListOf(outputId),
+                )
+            }
+
+            assertTrue(first.isFile)
+            assertTrue(second.isFile)
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_STATE_UNKNOWN,
+                session.queryTargetTrash().getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_STATE),
+            )
+            assertTrue(
+                HistoryDatabase.getInstance(context.applicationContext)
+                    .historyDao()
+                    .listTrashItemsDesc()
+                    .none { item -> item.originalPath == first.path || item.originalPath == second.path },
+            )
+        } finally {
+            runCatching { session.close() }
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun trashSourceRevalidationFailureKeepsTheSourceAndRemovesUnusedRecoveryData() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v16-trash-revalidate-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val sourceBytes = "source must remain authoritative".encodeToByteArray()
+        val source = File(testRoot, "source.txt").apply { writeBytes(sourceBytes) }
+        val canonicalSourcePath = source.canonicalPath
+        val database = HistoryDatabase.getInstance(context.applicationContext)
+        val blobDirectory = File(context.filesDir, TrashBlobStore.TRASH_BLOB_DIR_REL)
+        val initialBlobNames = blobDirectory.listFiles().orEmpty().map(File::getName).toSet()
+
+        try {
+            expectIllegalState {
+                TrashRepository(context.applicationContext).moveToTrashWithProgress(
+                    path = canonicalSourcePath,
+                    progressCallback = null,
+                    fileCallback = null,
+                    operationController = DialogUtils.OperationController(),
+                    beforeSourceDelete = { error("simulated source identity change") },
+                )
+            }
+
+            assertArrayEquals(sourceBytes, source.readBytes())
+            assertTrue(
+                database.historyDao().listTrashItemsDesc().none { item ->
+                    item.originalPath == canonicalSourcePath
+                },
+            )
+            assertEquals(
+                initialBlobNames,
+                blobDirectory.listFiles().orEmpty().map(File::getName).toSet(),
+            )
+        } finally {
+            testRoot.deleteRecursively()
         }
     }
 

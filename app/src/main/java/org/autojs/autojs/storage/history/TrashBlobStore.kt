@@ -1,9 +1,14 @@
 package org.autojs.autojs.storage.history
 
 import android.content.Context
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.io.OutputStream
 import java.util.UUID
 import java.util.zip.ZipEntry
@@ -41,21 +46,32 @@ class TrashBlobStore(private val context: Context) {
         require(tempFile.exists()) { "Temp trash blob not exists: $tempRelPath" }
 
         finalFile.parentFile?.mkdirs()
+        check(!finalFile.exists()) { "Final trash blob already exists: $finalRel" }
 
-        if (finalFile.exists()) {
-            // Remove existing final blob first to ensure rename success.
-            // zh-CN: 先删除已存在的最终 blob, 以确保 rename 能成功.
-            // noinspection ResultOfMethodCallIgnored
-            finalFile.delete()
-        }
+        FileOutputStream(tempFile, true).use { output -> output.fd.sync() }
 
         // Rename in the same directory is expected to be atomic on Android/Linux.
         // zh-CN: 同目录 rename 在 Android/Linux 上通常具备原子性.
         if (!tempFile.renameTo(finalFile)) {
             throw IllegalStateException("Commit trash blob failed: $tempFile -> $finalFile")
         }
+        syncDirectory(requireNotNull(finalFile.parentFile))
 
         return finalRel
+    }
+
+    private fun syncDirectory(directory: File) {
+        var descriptor: java.io.FileDescriptor? = null
+        try {
+            descriptor = Os.open(directory.path, OsConstants.O_RDONLY, 0)
+            Os.fsync(descriptor)
+        } catch (error: ErrnoException) {
+            if (error.errno != OsConstants.EINVAL && error.errno != OsConstants.EOPNOTSUPP) {
+                throw IOException("Trash blob directory could not be synchronized", error)
+            }
+        } finally {
+            descriptor?.let { runCatching { Os.close(it) } }
+        }
     }
 
     fun writeTrashBlob(trashId: String, bytes: ByteArray): String {

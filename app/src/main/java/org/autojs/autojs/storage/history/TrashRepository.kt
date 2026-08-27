@@ -6,6 +6,7 @@ import org.autojs.autojs.util.DialogUtils
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.security.DigestOutputStream
@@ -16,6 +17,11 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+
+class TrashMoveRecoveryRequiredException(
+    val trashItem: TrashEntities.TrashItem,
+    cause: Throwable,
+) : IOException("Source removal requires recovery from Trash: ${trashItem.originalPath}", cause)
 
 /**
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 4, 2026.
@@ -43,26 +49,29 @@ class TrashRepository(private val context: Context) {
      * - 仅支持内部存储路径.
      * - 目录会以 zip 流形式归档 (不再生成 bytes), 以避免 OOM.
      */
+    fun moveToTrashWithProgress(
+        path: String,
+        progressCallback: ScriptOperations.ProgressCallback?,
+        fileCallback: ScriptOperations.FileProgressCallback?,
+        operationController: DialogUtils.OperationController,
+    ): TrashEntities.TrashItem = moveToTrashWithProgress(
+        path = path,
+        progressCallback = progressCallback,
+        fileCallback = fileCallback,
+        operationController = operationController,
+        beforeSourceDelete = null,
+    )
+
     /**
-     * Move a file or directory into trash.
-     *
-     * Notes:
-     * - Only internal storage paths are supported.
-     * - Directory is archived as zip stream (not bytes) to avoid OOM.
-     *
-     * zh-CN:
-     *
-     * 将文件或目录移入回收站.
-     *
-     * 注意:
-     * - 仅支持内部存储路径.
-     * - 目录会以 zip 流形式归档 (不再生成 bytes), 以避免 OOM.
+     * Variant used by capability-scoped callers that must revalidate a source after the recovery
+     * blob is complete but before the durable Trash record authorizes source removal.
      */
     fun moveToTrashWithProgress(
         path: String,
         progressCallback: ScriptOperations.ProgressCallback?,
         fileCallback: ScriptOperations.FileProgressCallback?,
         operationController: DialogUtils.OperationController,
+        beforeSourceDelete: (() -> Unit)?,
     ): TrashEntities.TrashItem {
         operationController.throwIfCancelled()
 
@@ -132,10 +141,6 @@ class TrashRepository(private val context: Context) {
         // zh-CN: 打开临时 blob 流, 写入完成后通过 rename 提交.
         val (tempRel, rawOut) = blobs.openTrashBlobTempOutputStream(trashId)
 
-        // Commit point marker for cross-resource operation (FS + DB).
-        // zh-CN: 跨资源操作 (文件系统 + 数据库) 的提交点标记, 用于避免在源文件已删除后错误回滚导致数据丢失.
-        var operationCommitted = false
-
         // Track whether temp blob has been committed.
         // zh-CN: 标记临时 blob 是否已提交.
         var blobCommitted = false
@@ -143,6 +148,8 @@ class TrashRepository(private val context: Context) {
         // Final relPath after commit.
         // zh-CN: 提交后的最终 relPath.
         var finalRel: String? = null
+        var durableItem: TrashEntities.TrashItem? = null
+        var recoveryPersisted = false
 
         try {
             operationController.throwIfCancelled()
@@ -196,32 +203,30 @@ class TrashRepository(private val context: Context) {
                 sha256 = sha,
                 blobRelPath = finalRel,
             )
+            durableItem = item
+
+            // A capability-scoped caller can reject a source that changed while the recovery blob
+            // was being produced. This happens before the DB commit, so the intact source remains
+            // authoritative and the unused blob can still be removed safely.
+            beforeSourceDelete?.invoke()
 
             // Persist DB record before deleting source to reduce risk of data loss.
             // zh-CN: 先写入数据库记录再删除源文件, 降低 "源已删但记录未写入" 的数据丢失风险.
             dao.upsertTrashItem(item)
+            recoveryPersisted = true
 
             // Delete original after blob persisted and DB record persisted.
             // zh-CN: 在 blob 落盘且数据库记录写入后删除源文件/目录.
             val deleted = if (isDir) src.deleteRecursively() else src.delete()
             if (!deleted && src.exists()) {
-                // Roll back if source deletion failed.
-                // zh-CN: 若源文件删除失败则回滚, 避免出现 "回收站有记录但源文件仍存在" 的不一致状态.
+                // The durable recovery item must survive a partial directory deletion. Removing it
+                // here could destroy the only remaining copy of children already deleted.
                 throw IllegalStateException("Failed to delete source after trash: $src")
             }
 
-            // Mark committed after DB persisted and source deleted successfully.
-            // zh-CN: 在数据库写入成功且源文件删除成功后标记为已提交, 避免后续异常触发破坏性回滚.
-            operationCommitted = true
-
-            /* Some code which may cause any exception in the future. */
-
             return item
         } catch (t: Throwable) {
-            // Clean up partial data on failure or abort, but avoid rollback after commit.
-            // zh-CN: 失败或中止时清理残留数据, 但在已提交后避免回滚以防数据丢失.
-            @Suppress("KotlinConstantConditions")
-            if (!operationCommitted) {
+            if (!recoveryPersisted) {
                 runCatching { dao.deleteTrashItemsByIds(listOf(trashId)) }
 
                 // Delete final blob if committed, otherwise delete temp blob.
@@ -231,8 +236,9 @@ class TrashRepository(private val context: Context) {
                 } else {
                     runCatching { blobs.deleteBlobByRelPath(tempRel) }
                 }
+                throw t
             }
-            throw t
+            throw TrashMoveRecoveryRequiredException(requireNotNull(durableItem), t)
         }
     }
 
