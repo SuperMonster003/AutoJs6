@@ -1410,6 +1410,7 @@
     <string name="text_package_installation_succeeded">安装包已成功安装</string>
     <string name="text_package_name">包名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (计算中...)</string>
+    <string name="text_parent_folder">父文件夹</string>
     <string name="text_password">密码</string>
     <string name="text_password_cannot_be_empty">密码不能为空</string>
     <string name="text_password_requires_at_least_n_characters">密码至少需要 %d 位字符</string>

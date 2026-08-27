@@ -1413,6 +1413,7 @@
     <string name="text_package_installation_succeeded">Paquete instalado correctamente</string>
     <string name="text_package_name">Nombre del paquete</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nombre del paquete (Calculando...)</string>
+    <string name="text_parent_folder">Carpeta principal</string>
     <string name="text_password">Contraseña</string>
     <string name="text_password_cannot_be_empty">La contraseña no puede estar vacía</string>
     <string name="text_password_requires_at_least_n_characters">La contraseña debe tener al menos %d caracteres</string>

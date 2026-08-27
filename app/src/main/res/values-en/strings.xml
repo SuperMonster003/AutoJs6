@@ -1401,6 +1401,7 @@
     <string name="text_package_installation_succeeded">Package installed successfully</string>
     <string name="text_package_name">Package name</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
+    <string name="text_parent_folder">Parent folder</string>
     <string name="text_password">Password</string>
     <string name="text_password_cannot_be_empty">Password cannot be empty</string>
     <string name="text_password_requires_at_least_n_characters">Password must be at least %d characters long</string>

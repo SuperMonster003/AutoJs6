@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="48dp"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -14,6 +15,7 @@
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
+        android:minHeight="48dp"
         android:orientation="horizontal"
         android:paddingVertical="8dp">
 
@@ -24,6 +26,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="9dp"
             android:layout_marginEnd="6dp"
+            android:importantForAccessibility="no"
             android:src="@drawable/ic_expanded"
             android:translationY="1.2dp"
             app:tint="@color/explorer_category_operation_button" />
@@ -34,6 +37,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="middle"
             android:gravity="center_vertical"
+            android:importantForAccessibility="no"
             android:maxLines="1"
             android:text="@string/text_folder"
             android:textColor="@color/explorer_category_operation_button"
@@ -43,39 +47,39 @@
 
     <ImageView
         android:id="@+id/go_up"
-        android:layout_width="32dp"
-        android:layout_height="match_parent"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center_vertical"
         android:background="?selectableItemBackgroundBorderless"
         android:clickable="true"
-        android:padding="8dp"
-        android:layout_marginHorizontal="3dp"
+        android:contentDescription="@string/text_parent_folder"
+        android:padding="14dp"
         android:src="@drawable/ic_dir_up"
         android:focusable="true"
         app:tint="@color/explorer_category_operation_button" />
 
     <ImageView
         android:id="@+id/sort_order"
-        android:layout_width="32dp"
-        android:layout_height="match_parent"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center_vertical"
         android:background="?selectableItemBackgroundBorderless"
         android:clickable="true"
-        android:padding="8dp"
-        android:layout_marginHorizontal="3dp"
+        android:contentDescription="@string/text_sort_order"
+        android:padding="14dp"
         android:src="@drawable/ic_ascending_order"
         android:focusable="true"
         app:tint="@color/explorer_category_operation_button" />
 
     <ImageView
         android:id="@+id/sort_type"
-        android:layout_width="32dp"
-        android:layout_height="match_parent"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center_vertical"
         android:background="?selectableItemBackgroundBorderless"
         android:clickable="true"
-        android:padding="8dp"
-        android:layout_marginHorizontal="3dp"
+        android:contentDescription="@string/text_sort_field"
+        android:padding="14dp"
         android:src="@drawable/ic_sort"
         android:focusable="true"
         app:tint="@color/explorer_category_operation_button" />

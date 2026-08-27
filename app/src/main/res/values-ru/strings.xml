@@ -1413,6 +1413,7 @@
     <string name="text_package_installation_succeeded">Пакет успешно установлен</string>
     <string name="text_package_name">Имя пакета</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Имя пакета (Вычисление...)</string>
+    <string name="text_parent_folder">Родительская папка</string>
     <string name="text_password">Пароль</string>
     <string name="text_password_cannot_be_empty">Пароль не может быть пустым</string>
     <string name="text_password_requires_at_least_n_characters">Пароль должен содержать не менее %d символов</string>
