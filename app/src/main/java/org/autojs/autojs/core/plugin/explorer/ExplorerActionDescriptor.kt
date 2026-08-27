@@ -14,6 +14,7 @@ internal data class ExplorerActionDescriptor(
     val presentation: Int,
     val mimeTypes: Set<String>,
     val extensions: Set<String>,
+    val fileNameSuffixes: Set<String>,
     val outputMode: Int,
     val outputMimeTypes: Set<String>,
     val outputNameSuffix: String?,
@@ -24,4 +25,5 @@ internal data class ExplorerActionTarget(
     val mimeType: String,
     val extension: String,
     val kind: Int = org.autojs.plugin.explorer.api.ExplorerActionValues.TARGET_FILE,
+    val fileName: String = "",
 )

@@ -10,6 +10,9 @@ internal object ExplorerActionCatalogPolicy {
     private val resourceNamePattern = Regex("[a-z][a-z0-9_]*")
     private val activitySegmentPattern = Regex("[A-Za-z_\$][A-Za-z0-9_\$]*")
     private val extensionPattern = Regex("[a-z0-9][a-z0-9+_-]*")
+    private val fileNameSuffixPattern = Regex(
+        "[a-z0-9][a-z0-9+_-]*(?:\\.[a-z0-9][a-z0-9+_-]*)+",
+    )
     private val mimePartPattern = Regex("[a-z0-9][a-z0-9!#$&^_.+-]*")
 
     @Suppress("LongParameterList")
@@ -28,6 +31,7 @@ internal object ExplorerActionCatalogPolicy {
         presentation: Int? = null,
         mimeTypes: Collection<String>?,
         extensions: Collection<String>?,
+        fileNameSuffixes: Collection<String>? = null,
         outputMode: Int? = null,
         outputMimeTypes: Collection<String>? = null,
         outputNameSuffix: String? = null,
@@ -100,10 +104,31 @@ internal object ExplorerActionCatalogPolicy {
 
         val normalizedMimeTypes = normalizeMatchers(mimeTypes, ::normalizeMimeType)
         val normalizedExtensions = normalizeMatchers(extensions, ::normalizeExtension)
-        if (normalizedMimeTypes == null || normalizedExtensions == null) return null
+        val normalizedFileNameSuffixes = normalizeMatchers(
+            fileNameSuffixes,
+            ::normalizeFileNameSuffix,
+        )
+        if (
+            normalizedMimeTypes == null ||
+            normalizedExtensions == null ||
+            normalizedFileNameSuffixes == null
+        ) {
+            return null
+        }
+        if (
+            normalizedFileNameSuffixes.isNotEmpty() &&
+            (
+                protocolVersion < COMPOUND_SUFFIX_PROTOCOL_VERSION ||
+                    targetKind != ExplorerActionValues.TARGET_FILE
+                )
+        ) {
+            return null
+        }
         if (
             targetKind != ExplorerActionValues.TARGET_DIRECTORY &&
-            normalizedMimeTypes.isEmpty() && normalizedExtensions.isEmpty()
+            normalizedMimeTypes.isEmpty() &&
+            normalizedExtensions.isEmpty() &&
+            normalizedFileNameSuffixes.isEmpty()
         ) {
             return null
         }
@@ -173,6 +198,7 @@ internal object ExplorerActionCatalogPolicy {
             presentation = normalizedPresentation,
             mimeTypes = normalizedMimeTypes,
             extensions = normalizedExtensions,
+            fileNameSuffixes = normalizedFileNameSuffixes,
             outputMode = normalizedOutput.mode,
             outputMimeTypes = normalizedOutput.mimeTypes,
             outputNameSuffix = normalizedOutput.nameSuffix,
@@ -255,6 +281,14 @@ internal object ExplorerActionCatalogPolicy {
         return normalized.takeIf { it.length <= MAX_EXTENSION_LENGTH && extensionPattern.matches(it) }
     }
 
+    private fun normalizeFileNameSuffix(value: String): String? {
+        val normalized = value.trim().removePrefix(".").lowercase(Locale.ROOT)
+        return normalized.takeIf {
+            it.length <= ExplorerActionProtocol.MAX_FILE_NAME_SUFFIX_LENGTH &&
+                fileNameSuffixPattern.matches(it)
+        }
+    }
+
     internal fun normalizeMimeType(value: String): String? {
         val normalized = value.substringBefore(';').trim().lowercase(Locale.ROOT)
         val parts = normalized.split('/')
@@ -285,7 +319,12 @@ internal object ExplorerActionCatalogPolicy {
     }
 
     private fun matchType(descriptor: ExplorerActionDescriptor, target: ExplorerActionTarget): Boolean {
-        if (target.kind == ExplorerActionValues.TARGET_DIRECTORY && descriptor.mimeTypes.isEmpty() && descriptor.extensions.isEmpty()) {
+        if (
+            target.kind == ExplorerActionValues.TARGET_DIRECTORY &&
+            descriptor.mimeTypes.isEmpty() &&
+            descriptor.extensions.isEmpty() &&
+            descriptor.fileNameSuffixes.isEmpty()
+        ) {
             return true
         }
         val normalizedTargetMimeType = normalizeMimeType(target.mimeType)
@@ -294,8 +333,25 @@ internal object ExplorerActionCatalogPolicy {
             mimeMatches(pattern, normalizedTargetMimeType)
         }
         val extensionMatches = normalizedTargetExtension != null && normalizedTargetExtension in descriptor.extensions
-        return mimeMatches || extensionMatches
+        val normalizedTargetFileName = target.fileName
+            .takeIf {
+                it.length in 1..ExplorerActionProtocol.MAX_TARGET_DISPLAY_NAME_LENGTH &&
+                    it.none(::isInvalidFileNameCharacter)
+            }
+            ?.lowercase(Locale.ROOT)
+        val fileNameSuffixMatches = normalizedTargetFileName != null &&
+            descriptor.fileNameSuffixes.any { suffix ->
+                normalizedTargetFileName.endsWith(".$suffix")
+            }
+        return mimeMatches || extensionMatches || fileNameSuffixMatches
     }
+
+    private fun isInvalidFileNameCharacter(character: Char): Boolean =
+        character == '/' ||
+            character == '\\' ||
+            character == '\u0000' ||
+            character.code < 0x20 ||
+            character.code == 0x7F
 
     private const val MIN_PRIORITY = -10_000
     private const val MAX_PRIORITY = 10_000
@@ -305,4 +361,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val HOST_EXPLORER_PROTOCOL_VERSION = 5
     private const val TARGET_REPLACEMENT_PROTOCOL_VERSION = 8
     private const val MANAGED_TARGET_PROTOCOL_VERSION = 9
+    private const val COMPOUND_SUFFIX_PROTOCOL_VERSION = 14
 }

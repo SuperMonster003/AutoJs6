@@ -52,6 +52,45 @@ class ExplorerArchiveVolumeSourceDeviceTest {
     }
 
     @Test
+    fun numberedZipAndSevenZCatalogsExposeOnlyTheirBoundedCompanions() = withTestRoot { root ->
+        val zipPrimary = File(root, "archive.zip.001").apply { writeText("zip-primary") }
+        val zipSecond = File(root, "archive.zip.002").apply { writeText("zip-second") }
+        val zipFourth = File(root, "archive.zip.004").apply { writeText("zip-fourth") }
+        val sevenZPrimary = File(root, "archive.7z.001").apply { writeText("7z-primary") }
+        val sevenZSecond = File(root, "archive.7z.002").apply { writeText("7z-second") }
+        File(root, "archive.zip.003").mkdir()
+        File(root, "unrelated.zip.002").writeText("unrelated")
+
+        val zipSource = requireNotNull(
+            ExplorerArchiveVolumeSource.create(
+                source = zipPrimary,
+                expectedUid = TEST_UID,
+                callingUid = { TEST_UID },
+            ),
+        )
+        val sevenZSource = requireNotNull(
+            ExplorerArchiveVolumeSource.create(
+                source = sevenZPrimary,
+                expectedUid = TEST_UID,
+                callingUid = { TEST_UID },
+            ),
+        )
+        try {
+            assertEquals(
+                listOf(zipSecond.name, zipFourth.name),
+                zipSource.catalogVolumes().map(VolumeRecord::displayName),
+            )
+            assertEquals(
+                listOf(sevenZSecond.name),
+                sevenZSource.catalogVolumes().map(VolumeRecord::displayName),
+            )
+        } finally {
+            zipSource.close()
+            sevenZSource.close()
+        }
+    }
+
+    @Test
     fun wrongCallerUnknownIdAndClosedSourceAreRejected() = withTestRoot { root ->
         val primary = File(root, "set.part1.rar").apply { writeText("primary") }
         File(root, "set.part2.rar").writeText("second")
