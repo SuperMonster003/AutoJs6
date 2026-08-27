@@ -61,7 +61,13 @@ class LuaPluginScriptEngineTest {
         assertEquals(1, backend.connectionCloseCount)
         assertEquals(listOf("from-fake"), backend.outputs)
         assertEquals(LuaValue.MapValue(emptyMap()), backend.lastRequest?.arguments)
-        assertEquals(listOf(LuaRuntimeHostCapabilities.DEVICE_INFO), backend.lastRequest?.requiredCapabilities)
+        assertEquals(
+            listOf(
+                LuaRuntimeHostCapabilities.DEVICE_INFO,
+                LuaRuntimeHostCapabilities.UI_TOAST,
+            ),
+            backend.lastRequest?.requiredCapabilities,
+        )
         assertTrue(temporaryFolder.root.resolve("lua-source-snapshots").listFiles().orEmpty().isEmpty())
 
         engine.destroy()

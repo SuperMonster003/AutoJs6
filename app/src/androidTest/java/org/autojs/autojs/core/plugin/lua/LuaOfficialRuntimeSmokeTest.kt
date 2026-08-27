@@ -84,6 +84,69 @@ class LuaOfficialRuntimeSmokeTest {
                 consoleEntries(stdout),
             )
 
+            val toastMarker = "lua-r5-toast-${UUID.randomUUID()}"
+            val toastResult = engine.execute(
+                source(
+                    "require('autojs').ui.toast('$toastMarker'); return 11",
+                    "official-provider-toast",
+                ),
+            )
+            assertEquals(LuaValue.Int64Value(11L), toastResult)
+            InstrumentationRegistry.getArguments().getString(ARG_TOAST_HOLD_MILLIS)
+                ?.toLongOrNull()
+                ?.takeIf { it in 1L..MAX_TOAST_HOLD_MILLIS }
+                ?.let(Thread::sleep)
+
+            val storageRoot = context.cacheDir.resolve("lua-storage-smoke-${UUID.randomUUID()}")
+            check(storageRoot.mkdir()) { "Cannot create the Lua storage smoke directory" }
+            try {
+                val entry = storageRoot.resolve("persistent.lua")
+                entry.writeText(
+                    """
+                    local storage = require('autojs').storage
+                    local previous = storage.get('counter')
+                    if previous ~= nil then error('storage must start empty') end
+                    if storage.put('counter', 1) ~= true then error('storage put failed') end
+                    return storage.get('counter')
+                    """.trimIndent(),
+                )
+                assertEquals(LuaValue.Int64Value(1L), engine.execute(LuaFileSource(entry)))
+
+                entry.writeText(
+                    """
+                    local storage = require('autojs').storage
+                    local previous = storage.get('counter')
+                    if previous ~= 1 then error('persistent storage value mismatch') end
+                    if storage.put('counter', previous + 1) ~= true then error('storage replace failed') end
+                    return storage.get('counter')
+                    """.trimIndent(),
+                )
+                assertEquals(LuaValue.Int64Value(2L), engine.execute(LuaFileSource(entry)))
+
+                val isolated = storageRoot.resolve("isolated.lua").apply {
+                    writeText(
+                        """
+                        local storage = require('autojs').storage
+                        if storage.get('counter') ~= nil then error('storage principal leaked') end
+                        return storage.clear()
+                        """.trimIndent(),
+                    )
+                }
+                assertEquals(LuaValue.Int64Value(0L), engine.execute(LuaFileSource(isolated)))
+
+                entry.writeText(
+                    """
+                    local storage = require('autojs').storage
+                    local removed = storage.clear()
+                    if storage.get('counter') ~= nil then error('storage clear failed') end
+                    return removed
+                    """.trimIndent(),
+                )
+                assertEquals(LuaValue.Int64Value(1L), engine.execute(LuaFileSource(entry)))
+            } finally {
+                storageRoot.deleteRecursively()
+            }
+
             val moduleRoot = context.cacheDir.resolve("lua-module-smoke-${UUID.randomUUID()}")
             check(moduleRoot.mkdir()) { "Cannot create the Lua module smoke directory" }
             try {
@@ -168,8 +231,10 @@ class LuaOfficialRuntimeSmokeTest {
 
     private companion object {
         const val ARG_ENABLED = "autojs.luaRuntime.officialProvider.enabled"
+        const val ARG_TOAST_HOLD_MILLIS = "autojs.luaRuntime.officialProvider.toastHoldMillis"
         const val HOST_PACKAGE = "org.autojs.autojs6"
         const val OFFICIAL_PROVIDER_PACKAGE = "io.github.supermonster003.autojs6.plugin.lua.runtime"
         const val EXPECTED_RUNTIME_PROCESS = "$OFFICIAL_PROVIDER_PACKAGE:lua_runtime"
+        const val MAX_TOAST_HOLD_MILLIS = 10_000L
     }
 }

@@ -29,7 +29,11 @@ class LuaPluginScriptEngine internal constructor(
 
     constructor(context: Context) : this(
         cacheDirectory = context.applicationContext.cacheDir,
-        backend = BinderLuaEngineRuntimeBackend(LuaRuntimePluginHostFactory.create(context.applicationContext)),
+        backend = BinderLuaEngineRuntimeBackend(
+            host = LuaRuntimePluginHostFactory.create(context.applicationContext),
+            hostStorage = SharedPreferencesLuaHostStorage(context.applicationContext),
+            toastSink = AndroidLuaToastSink(context.applicationContext),
+        ),
         outputSink = ::emitOutput,
         terminalGraceMillis = DEFAULT_TERMINAL_GRACE_MILLIS,
     )
@@ -187,7 +191,7 @@ class LuaPluginScriptEngine internal constructor(
             sourceLengthBytes = snapshot.lengthBytes,
             sourceSha256 = snapshot.sha256,
             arguments = arguments,
-            requiredCapabilities = requiredCapabilities(connection, modules),
+            requiredCapabilities = requiredCapabilities(connection, modules, snapshot.storagePrincipal),
             outputByteLimit = minOf(LuaRuntimeContract.DEFAULT_OUTPUT_BYTES, limits.maxOutputBytes),
             memoryByteLimit = minOf(LuaRuntimeContract.DEFAULT_MEMORY_BYTES, limits.maxMemoryBytes),
             timeoutMillis = minOf(LuaRuntimeContract.DEFAULT_TIMEOUT_MILLIS, limits.maxExecutionMillis),
@@ -197,9 +201,11 @@ class LuaPluginScriptEngine internal constructor(
     private fun requiredCapabilities(
         connection: LuaEngineRuntimeConnection,
         modules: LuaModuleSnapshot,
+        storagePrincipal: LuaStoragePrincipal?,
     ): List<String> = connection.grantedCapabilities.filter { capability ->
         when (capability) {
             LuaRuntimeHostCapabilities.MODULE_SNAPSHOT -> modules.moduleCount != 0
+            LuaRuntimeHostCapabilities.STORAGE_KV -> storagePrincipal != null
             else -> true
         }
     }

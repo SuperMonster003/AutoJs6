@@ -54,6 +54,8 @@ internal interface LuaEngineRemoteSession : Closeable {
 /** Production adapter. It never retries after an execution session has been created. */
 internal class BinderLuaEngineRuntimeBackend(
     private val host: LuaRuntimePluginHost,
+    private val hostStorage: LuaHostStorage,
+    private val toastSink: LuaToastSink,
 ) : LuaEngineRuntimeBackend {
 
     override fun prepare(): LuaEnginePreparedRuntime {
@@ -76,7 +78,7 @@ internal class BinderLuaEngineRuntimeBackend(
             check(acquired.pinnedIdentity.matchesRuntimeInfo(prepared.runtimeInfo)) {
                 "Lua provider runtime identity changed before dispatch"
             }
-            BinderConnection(acquired)
+            BinderConnection(acquired, hostStorage, toastSink)
         } catch (error: Throwable) {
             runCatching { acquired.close() }
             throw error
@@ -85,6 +87,8 @@ internal class BinderLuaEngineRuntimeBackend(
 
     private class BinderConnection(
         private val acquired: LuaRuntimeAcquiredProvider,
+        private val hostStorage: LuaHostStorage,
+        private val toastSink: LuaToastSink,
     ) : LuaEngineRuntimeConnection {
 
         override val runtimeInfo: LuaRuntimeInfo
@@ -107,7 +111,7 @@ internal class BinderLuaEngineRuntimeBackend(
             }
             val sessionRef = AtomicReference<ILuaExecutionSession?>()
             val revoked = AtomicBoolean(false)
-            val broker = hostBroker(request, modules, observer, revoked)
+            val broker = hostBroker(request, source.storagePrincipal, modules, observer, revoked)
             val revokeBroker: () -> Unit = {
                 revoked.set(true)
                 broker.close()
@@ -255,13 +259,15 @@ internal class BinderLuaEngineRuntimeBackend(
 
         private fun hostBroker(
             request: LuaExecutionRequest,
+            storagePrincipal: LuaStoragePrincipal?,
             modules: LuaModuleSnapshot,
             observer: LuaEngineExecutionObserver,
             revoked: AtomicBoolean,
-        ) = SessionHostBroker(request, modules, observer, revoked)
+        ) = SessionHostBroker(request, storagePrincipal, modules, observer, revoked)
 
         private inner class SessionHostBroker(
             private val request: LuaExecutionRequest,
+            storagePrincipal: LuaStoragePrincipal?,
             modules: LuaModuleSnapshot,
             private val observer: LuaEngineExecutionObserver,
             private val revoked: AtomicBoolean,
@@ -270,6 +276,9 @@ internal class BinderLuaEngineRuntimeBackend(
                 executionId = request.requestId,
                 grantedCapabilities = request.requiredCapabilities,
                 moduleSnapshot = modules,
+                storagePrincipal = storagePrincipal,
+                hostStorage = hostStorage,
+                toastSink = toastSink,
             )
 
             override fun invoke(

@@ -42,12 +42,20 @@ internal class LuaHostCapabilityDispatcher(
     private val executionId: LuaRequestId,
     grantedCapabilities: Collection<String>,
     private val moduleSnapshot: LuaModuleSnapshot = LuaModuleSnapshot.EMPTY,
+    private val storagePrincipal: LuaStoragePrincipal? = null,
+    private val hostStorage: LuaHostStorage = LuaHostStorage.Unavailable,
+    private val toastSink: LuaToastSink = LuaToastSink.Unavailable,
     private val deviceInfoSource: LuaDeviceInfoSource = AndroidLuaDeviceInfoSource,
 ) {
     private val grantedCapabilities = grantedCapabilities.toSet()
     private val policy = LuaHostCallPolicy(executionId, this.grantedCapabilities)
     private val admittedCallIds = linkedSetOf<String>()
     private var closed = false
+    private var storageOperations = 0
+    private var storageMutations = 0
+    private var storageReadBytes = 0L
+    private var storageWriteBytes = 0L
+    private var toastDispatches = 0
 
     init {
         require(this.grantedCapabilities.all { it in LuaRuntimeHostCapabilities.ENABLED }) {
@@ -70,6 +78,8 @@ internal class LuaHostCapabilityDispatcher(
             when (request.capability) {
                 LuaRuntimeHostCapabilities.DEVICE_INFO -> dispatchDeviceInfo(request)
                 LuaRuntimeHostCapabilities.MODULE_SNAPSHOT -> dispatchModuleSnapshot(request)
+                LuaRuntimeHostCapabilities.STORAGE_KV -> dispatchStorage(request)
+                LuaRuntimeHostCapabilities.UI_TOAST -> dispatchToast(request)
                 else -> return failOpened(
                     request,
                     LuaHostErrorCode.CAPABILITY_UNAVAILABLE,
@@ -139,6 +149,202 @@ internal class LuaHostCapabilityDispatcher(
         return complete(request, value)
     }
 
+    private fun dispatchStorage(request: LuaHostCallRequest): LuaHostDispatchOutcome {
+        val principal = storagePrincipal
+            ?: return failOpened(
+                request,
+                LuaHostErrorCode.CAPABILITY_UNAVAILABLE,
+                "Persistent storage requires a stable file-backed script identity",
+            )
+        if (!chargeStorageOperation()) {
+            return failOpened(request, LuaHostErrorCode.QUOTA_EXCEEDED, "Storage operation quota is exhausted")
+        }
+        val fields = (request.arguments as? LuaValue.MapValue)?.values
+            ?: return invalidStorageRequest(request)
+        val operation = fields[STORAGE_OPERATION_KEY] as? LuaValue.StringValue
+            ?: return invalidStorageRequest(request)
+        return when (operation.value) {
+            STORAGE_GET -> dispatchStorageGet(request, principal, fields)
+            STORAGE_PUT -> dispatchStoragePut(request, principal, fields)
+            STORAGE_REMOVE -> dispatchStorageRemove(request, principal, fields)
+            STORAGE_CLEAR -> dispatchStorageClear(request, principal, fields)
+            else -> invalidStorageRequest(request)
+        }
+    }
+
+    private fun dispatchStorageGet(
+        request: LuaHostCallRequest,
+        principal: LuaStoragePrincipal,
+        fields: Map<String, LuaValue>,
+    ): LuaHostDispatchOutcome {
+        val key = storageKey(fields, setOf(STORAGE_OPERATION_KEY, STORAGE_KEY_KEY))
+            ?: return invalidStorageRequest(request)
+        val encoded = hostStorage.get(principal, key)
+        if (encoded == null) {
+            return complete(
+                request,
+                LuaValue.MapValue(mapOf(STORAGE_FOUND_KEY to LuaValue.BooleanValue(false))),
+            )
+        }
+        if (!chargeStorageRead(encoded.size)) {
+            return failOpened(request, LuaHostErrorCode.QUOTA_EXCEEDED, "Storage read-byte quota is exhausted")
+        }
+        val value = LuaStorageContract.decodeStoredValue(encoded)
+        return complete(
+            request,
+            LuaValue.MapValue(
+                linkedMapOf(
+                    STORAGE_FOUND_KEY to LuaValue.BooleanValue(true),
+                    STORAGE_VALUE_KEY to value,
+                ),
+            ),
+        )
+    }
+
+    private fun dispatchStoragePut(
+        request: LuaHostCallRequest,
+        principal: LuaStoragePrincipal,
+        fields: Map<String, LuaValue>,
+    ): LuaHostDispatchOutcome {
+        val expected = setOf(STORAGE_OPERATION_KEY, STORAGE_KEY_KEY, STORAGE_VALUE_KEY)
+        val key = storageKey(fields, expected) ?: return invalidStorageRequest(request)
+        val value = fields[STORAGE_VALUE_KEY] ?: return invalidStorageRequest(request)
+        val encoded = try {
+            LuaStorageContract.encodeStoredValue(value)
+        } catch (_: IllegalArgumentException) {
+            return invalidStorageRequest(request)
+        }
+        if (!chargeStorageMutation()) {
+            return failOpened(request, LuaHostErrorCode.QUOTA_EXCEEDED, "Storage mutation quota is exhausted")
+        }
+        if (!chargeStorageWrite(encoded.size)) {
+            return failOpened(request, LuaHostErrorCode.QUOTA_EXCEEDED, "Storage write-byte quota is exhausted")
+        }
+        return try {
+            hostStorage.put(principal, key, encoded)
+            complete(
+                request,
+                LuaValue.MapValue(mapOf(STORAGE_STORED_KEY to LuaValue.BooleanValue(true))),
+            )
+        } catch (_: LuaStorageQuotaExceededException) {
+            failOpened(request, LuaHostErrorCode.QUOTA_EXCEEDED, "Storage principal quota is exhausted")
+        }
+    }
+
+    private fun dispatchStorageRemove(
+        request: LuaHostCallRequest,
+        principal: LuaStoragePrincipal,
+        fields: Map<String, LuaValue>,
+    ): LuaHostDispatchOutcome {
+        val key = storageKey(fields, setOf(STORAGE_OPERATION_KEY, STORAGE_KEY_KEY))
+            ?: return invalidStorageRequest(request)
+        if (!chargeStorageMutation()) {
+            return failOpened(request, LuaHostErrorCode.QUOTA_EXCEEDED, "Storage mutation quota is exhausted")
+        }
+        val removed = hostStorage.remove(principal, key)
+        return complete(
+            request,
+            LuaValue.MapValue(mapOf(STORAGE_REMOVED_KEY to LuaValue.BooleanValue(removed))),
+        )
+    }
+
+    private fun dispatchStorageClear(
+        request: LuaHostCallRequest,
+        principal: LuaStoragePrincipal,
+        fields: Map<String, LuaValue>,
+    ): LuaHostDispatchOutcome {
+        if (fields.keys != setOf(STORAGE_OPERATION_KEY)) return invalidStorageRequest(request)
+        if (!chargeStorageMutation()) {
+            return failOpened(request, LuaHostErrorCode.QUOTA_EXCEEDED, "Storage mutation quota is exhausted")
+        }
+        val removedCount = hostStorage.clear(principal)
+        check(removedCount in 0..LuaStorageContract.MAX_KEYS_PER_PRINCIPAL) {
+            "Lua Host storage returned an invalid clear count"
+        }
+        return complete(
+            request,
+            LuaValue.MapValue(
+                mapOf(STORAGE_REMOVED_COUNT_KEY to LuaValue.Int64Value(removedCount.toLong())),
+            ),
+        )
+    }
+
+    private fun dispatchToast(request: LuaHostCallRequest): LuaHostDispatchOutcome {
+        val fields = (request.arguments as? LuaValue.MapValue)?.values
+            ?: return invalidToastRequest(request)
+        if (fields.keys != setOf(TOAST_TEXT_KEY)) return invalidToastRequest(request)
+        val text = (fields[TOAST_TEXT_KEY] as? LuaValue.StringValue)?.value
+            ?: return invalidToastRequest(request)
+        val textBytes = try {
+            LuaStorageContract.strictUtf8Size(text, "Lua toast text")
+        } catch (_: IllegalArgumentException) {
+            return invalidToastRequest(request)
+        }
+        if (textBytes !in 1..MAX_TOAST_TEXT_BYTES) return invalidToastRequest(request)
+        if (!chargeToastDispatch()) {
+            return failOpened(request, LuaHostErrorCode.QUOTA_EXCEEDED, "UI toast quota is exhausted")
+        }
+        if (!toastSink.enqueue(text)) {
+            return failOpened(request, LuaHostErrorCode.CAPABILITY_UNAVAILABLE, "Host UI lane is unavailable")
+        }
+        return complete(
+            request,
+            LuaValue.MapValue(mapOf(TOAST_ACCEPTED_KEY to LuaValue.BooleanValue(true))),
+        )
+    }
+
+    private fun storageKey(fields: Map<String, LuaValue>, expectedKeys: Set<String>): String? {
+        if (fields.keys != expectedKeys) return null
+        val key = (fields[STORAGE_KEY_KEY] as? LuaValue.StringValue)?.value ?: return null
+        return try {
+            LuaStorageContract.requireValidKey(key)
+            key
+        } catch (_: IllegalArgumentException) {
+            null
+        }
+    }
+
+    private fun invalidStorageRequest(request: LuaHostCallRequest) =
+        failOpened(request, LuaHostErrorCode.INVALID_REQUEST, "Storage request shape is invalid")
+
+    private fun invalidToastRequest(request: LuaHostCallRequest) =
+        failOpened(request, LuaHostErrorCode.INVALID_REQUEST, "UI toast request shape is invalid")
+
+    @Synchronized
+    private fun chargeStorageOperation(): Boolean {
+        if (storageOperations >= LuaStorageContract.MAX_OPERATIONS_PER_EXECUTION) return false
+        storageOperations += 1
+        return true
+    }
+
+    @Synchronized
+    private fun chargeStorageMutation(): Boolean {
+        if (storageMutations >= LuaStorageContract.MAX_MUTATIONS_PER_EXECUTION) return false
+        storageMutations += 1
+        return true
+    }
+
+    @Synchronized
+    private fun chargeStorageRead(bytes: Int): Boolean {
+        if (storageReadBytes > LuaStorageContract.MAX_READ_BYTES_PER_EXECUTION.toLong() - bytes) return false
+        storageReadBytes += bytes
+        return true
+    }
+
+    @Synchronized
+    private fun chargeStorageWrite(bytes: Int): Boolean {
+        if (storageWriteBytes > LuaStorageContract.MAX_WRITE_BYTES_PER_EXECUTION.toLong() - bytes) return false
+        storageWriteBytes += bytes
+        return true
+    }
+
+    @Synchronized
+    private fun chargeToastDispatch(): Boolean {
+        if (toastDispatches >= MAX_TOAST_CALLS_PER_EXECUTION) return false
+        toastDispatches += 1
+        return true
+    }
+
     private fun complete(request: LuaHostCallRequest, value: LuaValue): LuaHostDispatchOutcome.Completed {
         val result = LuaHostCallResult(request.executionId, request.callId, value)
         policy.complete(result)
@@ -169,5 +375,20 @@ internal class LuaHostCapabilityDispatcher(
         const val MODULE_FOUND_KEY = "found"
         const val MODULE_SOURCE_KEY = "source"
         const val MODULE_SHA256_KEY = "sha256"
+        const val STORAGE_OPERATION_KEY = "op"
+        const val STORAGE_KEY_KEY = "key"
+        const val STORAGE_VALUE_KEY = "value"
+        const val STORAGE_FOUND_KEY = "found"
+        const val STORAGE_STORED_KEY = "stored"
+        const val STORAGE_REMOVED_KEY = "removed"
+        const val STORAGE_REMOVED_COUNT_KEY = "removedCount"
+        const val STORAGE_GET = "get"
+        const val STORAGE_PUT = "put"
+        const val STORAGE_REMOVE = "remove"
+        const val STORAGE_CLEAR = "clear"
+        const val TOAST_TEXT_KEY = "text"
+        const val TOAST_ACCEPTED_KEY = "accepted"
+        const val MAX_TOAST_TEXT_BYTES = 1024
+        const val MAX_TOAST_CALLS_PER_EXECUTION = 4
     }
 }

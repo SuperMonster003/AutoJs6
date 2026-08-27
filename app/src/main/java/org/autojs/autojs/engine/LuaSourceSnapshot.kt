@@ -19,6 +19,7 @@ internal class LuaSourceSnapshot private constructor(
     val logicalName: String,
     val lengthBytes: Long,
     val sha256: LuaSha256,
+    val storagePrincipal: LuaStoragePrincipal?,
     internal val snapshotFile: File,
 ) : Closeable {
 
@@ -68,6 +69,7 @@ internal class LuaSourceSnapshot private constructor(
                     logicalName = source.fullName,
                     lengthBytes = total,
                     sha256 = LuaSha256.fromBytes(digest.digest()),
+                    storagePrincipal = LuaStoragePrincipal.fromSource(source),
                     snapshotFile = snapshot,
                 )
             } catch (error: Throwable) {
