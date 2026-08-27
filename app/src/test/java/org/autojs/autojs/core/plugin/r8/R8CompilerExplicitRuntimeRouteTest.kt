@@ -26,6 +26,8 @@ class R8CompilerExplicitRuntimeRouteTest {
             setOf(
                 listOf(String::class.java, stringArray),
                 listOf(String::class.java, stringArray, stringArray),
+                listOf(String::class.java, stringArray, String::class.java),
+                listOf(String::class.java, stringArray, stringArray, String::class.java),
                 listOf(
                     String::class.java,
                     stringArray,
@@ -33,8 +35,24 @@ class R8CompilerExplicitRuntimeRouteTest {
                     stringArray,
                     IntArray::class.java,
                 ),
+                listOf(
+                    String::class.java,
+                    stringArray,
+                    stringArray,
+                    stringArray,
+                    IntArray::class.java,
+                    String::class.java,
+                ),
             ),
             shapes,
+        )
+
+        assertEquals(
+            setOf(listOf(String::class.java, String::class.java, String::class.java)),
+            ScriptRuntime::class.java.methods
+                .filter { it.name == "retraceR8Stack" }
+                .map { it.parameterTypes.toList() }
+                .toSet(),
         )
     }
 

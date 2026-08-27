@@ -49,6 +49,7 @@ internal object R8CompilerExplicitRuntimeRoute {
         consumerRulePaths: Array<out String>,
         consumerRuleClasspathOrdinals: IntArray,
         minApi: Int,
+        exportDirectoryPath: String? = null,
         resolvePath: (String) -> String,
         compile: (R8CompilerHostCompileSpec) -> R8CompilerHostDispatchOutcome,
         loadPublished: (R8CompilerLoadableDexZip) -> T,
@@ -85,16 +86,21 @@ internal object R8CompilerExplicitRuntimeRoute {
             ),
             minApi = minApi,
         )
-        return consume(compile(spec), loadPublished)
+        val exportDirectory = exportDirectoryPath?.let { File(resolvePath(it)) }
+        return consume(compile(spec), exportDirectory, loadPublished)
     }
 
     private fun <T> consume(
         outcome: R8CompilerHostDispatchOutcome,
+        exportDirectory: File?,
         loadPublished: (R8CompilerLoadableDexZip) -> T,
     ): T = when (outcome) {
-        is R8CompilerHostDispatchOutcome.Published -> loadPublished(
-            R8CompilerLoadableDexZip.from(outcome.transaction.artifact),
-        )
+        is R8CompilerHostDispatchOutcome.Published -> {
+            exportDirectory?.let { directory ->
+                R8CompilerArtifactExporter.export(outcome.transaction.artifact, directory)
+            }
+            loadPublished(R8CompilerLoadableDexZip.from(outcome.transaction.artifact))
+        }
 
         is R8CompilerHostDispatchOutcome.NotSelected -> throw R8CompilerExplicitLoadException(
             "Explicit R8 compiler is disabled or has no exact component selection; " +

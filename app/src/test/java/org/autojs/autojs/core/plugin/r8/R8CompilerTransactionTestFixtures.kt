@@ -96,6 +96,7 @@ internal object R8CompilerTransactionTestFixtures {
             val crc = CRC32().apply { update(dex) }
             val entry = ZipEntry(entryName).apply {
                 method = ZipEntry.STORED
+                time = 0L
                 size = dex.size.toLong()
                 compressedSize = dex.size.toLong()
                 this.crc = crc.value

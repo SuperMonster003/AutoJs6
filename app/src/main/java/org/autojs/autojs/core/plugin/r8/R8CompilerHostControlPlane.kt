@@ -72,4 +72,22 @@ internal class R8CompilerHostControlPlane(
             negotiation.identity,
         )
     }
+
+    /** Must be called only for the connection returned by [bindExact]. */
+    fun negotiateRetraceConnected(
+        identity: R8CompilerPinnedIdentity,
+        connection: R8CompilerRemoteConnection,
+    ): R8RetraceNegotiation {
+        val currentCandidate = transport.inspectExact(identity.component)
+        require(R8CompilerSelectionPolicy.revalidate(identity, currentCandidate)) {
+            "R8 provider package identity changed before retrace handshake"
+        }
+        return R8RetraceProtocolGate.negotiate(
+            identity = identity,
+            currentCandidate = currentCandidate,
+            encodedInfo = connection.getCompilerInfo(),
+            encodedCapabilities = connection.getRetraceCapabilities(),
+            hostVersionCode = hostVersionCode,
+        )
+    }
 }

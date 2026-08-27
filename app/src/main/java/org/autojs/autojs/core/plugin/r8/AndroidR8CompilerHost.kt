@@ -10,6 +10,8 @@ import java.io.File
 internal object AndroidR8CompilerHost {
     @Volatile
     private var sharedRuntimeDispatcher: R8CompilerHostDispatcher? = null
+    @Volatile
+    private var sharedRetraceDispatcher: R8RetraceHostDispatcher? = null
 
     fun create(context: Context): R8CompilerHostControlPlane = R8CompilerHostControlPlane(
         transport = AndroidR8CompilerTransport(context.applicationContext),
@@ -47,5 +49,28 @@ internal object AndroidR8CompilerHost {
         }
     }
 
+    fun createRetraceDispatcher(context: Context): R8RetraceHostDispatcher {
+        val applicationContext = context.applicationContext
+        val transactionRoot = File(applicationContext.cacheDir, RETRACE_TRANSACTION_DIRECTORY)
+        R8RetraceTransactionWorkspace.recoverStale(transactionRoot)
+        return R8RetraceHostDispatcher(
+            controlPlane = create(applicationContext),
+            workspaceRoot = transactionRoot,
+            descriptorFactory = AndroidR8CompilerDescriptorFactory,
+            isMainThread = { Looper.myLooper() == Looper.getMainLooper() },
+        )
+    }
+
+    /** One process-wide retrace dispatcher keeps script calls serialized before provider admission. */
+    fun runtimeRetraceDispatcher(context: Context): R8RetraceHostDispatcher {
+        sharedRetraceDispatcher?.let { return it }
+        return synchronized(this) {
+            sharedRetraceDispatcher ?: createRetraceDispatcher(context.applicationContext).also {
+                sharedRetraceDispatcher = it
+            }
+        }
+    }
+
     private const val TRANSACTION_DIRECTORY = "r8-compiler-transactions-v1"
+    private const val RETRACE_TRANSACTION_DIRECTORY = "r8-retrace-transactions-v1"
 }

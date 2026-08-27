@@ -617,7 +617,7 @@ dependencies /* Unclassified */ {
 
     // Independent frozen R8 Compiler API
     implementation(project(":plugin-api:protocol-wire-api"))
-    implementation(project(":libs:r8-compiler-api-0_1_0"))
+    implementation(project(":libs:r8-compiler-api-0_2_0"))
 
     // Plugin API: JVM Source API
     implementation(project(":plugin-api:jvm-source-api"))

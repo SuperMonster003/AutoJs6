@@ -9,11 +9,13 @@ import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
 import androidx.core.content.pm.PackageInfoCompat
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginSignatureUtils
 import org.autojs.plugin.r8compiler.api.IR8CompilerCallback
 import org.autojs.plugin.r8compiler.api.IR8CompilerProvider
+import org.autojs.plugin.r8compiler.api.IR8CompilerSession
 import org.autojs.plugin.r8compiler.api.R8CompilerContract
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -194,16 +196,48 @@ internal class AndroidR8CompilerTransport(
 
         override fun getCapabilities(): ByteArray = provider.capabilities
 
+        override fun getRetraceCapabilities(): ByteArray = provider.retraceCapabilities
+
         override fun openSession(
             encodedRequest: ByteArray,
             inputBundleDescriptor: R8CompilerOwnedDescriptor,
             outputBundleDescriptor: R8CompilerOwnedDescriptor,
             callback: R8CompilerRemoteCallback,
+        ): R8CompilerRemoteSession = openRemoteSession(
+            inputBundleDescriptor,
+            outputBundleDescriptor,
+            callback,
+        ) { input, output, remoteCallback ->
+            provider.openSession(encodedRequest, input, output, remoteCallback)
+        }
+
+        override fun openRetraceSession(
+            encodedRequest: ByteArray,
+            inputBundleDescriptor: R8CompilerOwnedDescriptor,
+            outputStackTraceDescriptor: R8CompilerOwnedDescriptor,
+            callback: R8CompilerRemoteCallback,
+        ): R8CompilerRemoteSession = openRemoteSession(
+            inputBundleDescriptor,
+            outputStackTraceDescriptor,
+            callback,
+        ) { input, output, remoteCallback ->
+            provider.openRetraceSession(encodedRequest, input, output, remoteCallback)
+        }
+
+        private fun openRemoteSession(
+            inputBundleDescriptor: R8CompilerOwnedDescriptor,
+            outputDescriptor: R8CompilerOwnedDescriptor,
+            callback: R8CompilerRemoteCallback,
+            open: (
+                ParcelFileDescriptor,
+                ParcelFileDescriptor,
+                IR8CompilerCallback,
+            ) -> IR8CompilerSession?,
         ): R8CompilerRemoteSession {
             val inputBundle = (inputBundleDescriptor as? AndroidR8CompilerDescriptor)?.descriptor
                 ?: throw IllegalArgumentException("R8 input bundle descriptor is not an Android PFD")
-            val outputBundle = (outputBundleDescriptor as? AndroidR8CompilerDescriptor)?.descriptor
-                ?: throw IllegalArgumentException("R8 output bundle descriptor is not an Android PFD")
+            val output = (outputDescriptor as? AndroidR8CompilerDescriptor)?.descriptor
+                ?: throw IllegalArgumentException("R8 output descriptor is not an Android PFD")
             val remoteCallback = object : IR8CompilerCallback.Stub() {
                 override fun onStarted(metadata: ByteArray) = fromPinnedUid(callback) {
                     callback.onStarted(metadata)
@@ -225,12 +259,8 @@ internal class AndroidR8CompilerTransport(
                     callback.onCancelled(cancellation)
                 }
             }
-            val session = provider.openSession(
-                encodedRequest,
-                inputBundle,
-                outputBundle,
-                remoteCallback,
-            ) ?: throw IllegalStateException("R8 compiler returned a null session")
+            val session = open(inputBundle, output, remoteCallback)
+                ?: throw IllegalStateException("R8 provider returned a null session")
             return object : R8CompilerRemoteSession {
                 private val closed = AtomicBoolean(false)
                 private val cancelled = AtomicBoolean(false)

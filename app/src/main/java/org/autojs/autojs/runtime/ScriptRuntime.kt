@@ -21,6 +21,7 @@ import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.plugin.center.PluginAutoMountManager
 import org.autojs.autojs.core.plugin.r8.AndroidR8CompilerHost
 import org.autojs.autojs.core.plugin.r8.R8CompilerExplicitRuntimeRoute
+import org.autojs.autojs.core.plugin.r8.R8RetraceExplicitRuntimeRoute
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
@@ -618,6 +619,67 @@ class ScriptRuntime private constructor(builder: Builder) {
         consumerRules: Array<String>,
         consumerRuleClasspathOrdinals: IntArray,
     ) {
+        loadJarWithR8Internal(
+            program,
+            keepRules,
+            orderedClasspath,
+            consumerRules,
+            consumerRuleClasspathOrdinals,
+            null,
+        )
+    }
+
+    fun loadJarWithR8(
+        program: String,
+        keepRules: Array<String>,
+        exportDirectory: String,
+    ) = loadJarWithR8Internal(
+        program,
+        keepRules,
+        emptyArray(),
+        emptyArray(),
+        IntArray(0),
+        exportDirectory,
+    )
+
+    fun loadJarWithR8(
+        program: String,
+        keepRules: Array<String>,
+        orderedClasspath: Array<String>,
+        exportDirectory: String,
+    ) = loadJarWithR8Internal(
+        program,
+        keepRules,
+        orderedClasspath,
+        emptyArray(),
+        IntArray(0),
+        exportDirectory,
+    )
+
+    fun loadJarWithR8(
+        program: String,
+        keepRules: Array<String>,
+        orderedClasspath: Array<String>,
+        consumerRules: Array<String>,
+        consumerRuleClasspathOrdinals: IntArray,
+        exportDirectory: String,
+    ) = loadJarWithR8Internal(
+        program,
+        keepRules,
+        orderedClasspath,
+        consumerRules,
+        consumerRuleClasspathOrdinals,
+        exportDirectory,
+    )
+
+    private fun loadJarWithR8Internal(
+        program: String,
+        keepRules: Array<String>,
+        orderedClasspath: Array<String>,
+        consumerRules: Array<String>,
+        consumerRuleClasspathOrdinals: IntArray,
+        exportDirectory: String?,
+    ) {
         try {
             R8CompilerExplicitRuntimeRoute.dispatch(
                 programPath = program,
@@ -626,6 +688,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                 consumerRulePaths = consumerRules,
                 consumerRuleClasspathOrdinals = consumerRuleClasspathOrdinals,
                 minApi = Build.VERSION.SDK_INT,
+                exportDirectoryPath = exportDirectory,
                 resolvePath = files::nonNullPath,
                 compile = { spec ->
                     AndroidR8CompilerHost.runtimeDispatcher(applicationContext).compile(spec)
@@ -635,6 +698,25 @@ class ScriptRuntime private constructor(builder: Builder) {
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }
+    }
+
+    /** Provider-only protocol 1.1 stack retrace with mapping provenance verification. */
+    fun retraceR8Stack(
+        obfuscatedStackTrace: String,
+        mapping: String,
+        retraceMetadata: String,
+    ): String = try {
+        R8RetraceExplicitRuntimeRoute.dispatch(
+            obfuscatedStackTrace = obfuscatedStackTrace,
+            mappingPath = mapping,
+            retraceMetadataPath = retraceMetadata,
+            resolvePath = files::nonNullPath,
+            retrace = { spec ->
+                AndroidR8CompilerHost.runtimeRetraceDispatcher(applicationContext).retrace(spec)
+            },
+        )
+    } catch (error: IOException) {
+        throw UncheckedIOException(error)
     }
 
     fun loadJar(dir: String?, isRecursive: Boolean) {

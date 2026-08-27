@@ -21,6 +21,8 @@ internal interface R8CompilerRemoteCallback {
 internal interface R8CompilerRemoteConnection {
     fun getCompilerInfo(): ByteArray
     fun getCapabilities(): ByteArray
+    fun getRetraceCapabilities(): ByteArray =
+        throw UnsupportedOperationException("R8 retrace protocol 1.1 is unavailable")
 
     fun openSession(
         encodedRequest: ByteArray,
@@ -28,6 +30,14 @@ internal interface R8CompilerRemoteConnection {
         outputBundleDescriptor: R8CompilerOwnedDescriptor,
         callback: R8CompilerRemoteCallback,
     ): R8CompilerRemoteSession
+
+    fun openRetraceSession(
+        encodedRequest: ByteArray,
+        inputBundleDescriptor: R8CompilerOwnedDescriptor,
+        outputStackTraceDescriptor: R8CompilerOwnedDescriptor,
+        callback: R8CompilerRemoteCallback,
+    ): R8CompilerRemoteSession =
+        throw UnsupportedOperationException("R8 retrace protocol 1.1 is unavailable")
 }
 
 internal interface R8CompilerBinding : Closeable

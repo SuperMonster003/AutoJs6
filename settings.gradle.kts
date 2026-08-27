@@ -89,6 +89,7 @@ private val libs = listOf(
 
     "root-shell-1_6",
     "r8-compiler-api-0_1_0",
+    "r8-compiler-api-0_2_0",
 )
 
 private val pluginApi = listOf(
