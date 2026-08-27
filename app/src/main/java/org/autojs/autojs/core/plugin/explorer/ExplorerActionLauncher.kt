@@ -164,7 +164,16 @@ internal object ExplorerActionLauncher {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
         }
-        context.startActivity(intent)
+        var activityStarted = false
+        try {
+            ExplorerActionIntentSizePolicy.requireSafe(intent)
+            context.startActivity(intent)
+            activityStarted = true
+        } finally {
+            if (!activityStarted) {
+                runCatching { hostSession?.close() }
+            }
+        }
     }
 
     private fun resolveTarget(context: Context, item: ExplorerItem): ResolvedTarget {
