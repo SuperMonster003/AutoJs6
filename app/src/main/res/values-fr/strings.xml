@@ -1413,6 +1413,7 @@
     <string name="text_package_installation_succeeded">Package installé avec succès</string>
     <string name="text_package_name">Nom du paquet</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nom du paquet (en cours de calcul...)</string>
+    <string name="text_parent_folder">Dossier parent</string>
     <string name="text_password">Mot de passe</string>
     <string name="text_password_cannot_be_empty">Le mot de passe ne peut pas être vide</string>
     <string name="text_password_requires_at_least_n_characters">Le mot de passe doit contenir au moins %d caractères</string>

@@ -1414,6 +1414,7 @@
     <string name="text_package_installation_succeeded">パッケージをインストールしました</string>
     <string name="text_package_name">パッケージ名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">パッケージ名 (計算中...)</string>
+    <string name="text_parent_folder">親フォルダー</string>
     <string name="text_password">パスワード</string>
     <string name="text_password_cannot_be_empty">パスワードは空であってはならない</string>
     <string name="text_password_requires_at_least_n_characters">パスワードは少なくとも %d 文字以上である必要があります</string>

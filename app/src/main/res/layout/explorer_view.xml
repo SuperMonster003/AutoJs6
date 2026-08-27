@@ -12,11 +12,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Matches explorer_category.xml: 13sp text with 8dp top and bottom padding. -->
+        <!-- Keep the full path row touchable without relying on overlapping TouchDelegates. -->
         <LinearLayout
             android:id="@+id/explorer_path_row"
             android:layout_width="match_parent"
-            android:layout_height="33.5dp"
+            android:layout_height="48dp"
             android:orientation="horizontal">
 
             <org.autojs.autojs.ui.explorer.ExplorerPathBar
@@ -30,11 +30,11 @@
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/archive_filename_encoding"
-                android:layout_width="36dp"
+                android:layout_width="48dp"
                 android:layout_height="match_parent"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="@string/text_file_encoding"
-                android:padding="7dp"
+                android:padding="13dp"
                 android:src="@drawable/ic_translate_black_48dp"
                 android:visibility="gone"
                 app:tint="@color/explorer_category_operation_button"
@@ -42,11 +42,11 @@
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/archive_extract_current"
-                android:layout_width="36dp"
+                android:layout_width="48dp"
                 android:layout_height="match_parent"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="@string/text_extract_archive_current_folder"
-                android:padding="7dp"
+                android:padding="13dp"
                 android:src="@drawable/ic_unarchive_black_48dp"
                 android:visibility="gone"
                 app:tint="@color/explorer_category_operation_button"
@@ -85,6 +85,7 @@
         android:clickable="true"
         android:elevation="8dp"
         android:focusable="true"
+        android:importantForAccessibility="no"
         android:orientation="vertical"
         android:visibility="gone"
         tools:visibility="visible">
@@ -92,11 +93,14 @@
         <TextView
             android:id="@+id/selection_count"
             android:layout_width="match_parent"
-            android:layout_height="32dp"
+            android:layout_height="wrap_content"
+            android:accessibilityLiveRegion="polite"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
+            android:minHeight="32dp"
             android:paddingHorizontal="16dp"
+            android:paddingVertical="4dp"
             android:textSize="13sp"
             tools:text="3 selected" />
 
@@ -108,8 +112,9 @@
         <LinearLayout
             android:id="@+id/selection_actions"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="wrap_content"
             android:baselineAligned="false"
+            android:minHeight="72dp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -118,8 +123,11 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?selectableItemBackground"
+                android:clickable="true"
                 android:contentDescription="@string/text_clear_file_selection"
+                android:focusable="true"
                 android:gravity="center"
+                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp">
@@ -130,18 +138,21 @@
                     android:layout_height="22dp"
                     android:layout_gravity="center"
                     android:layout_marginBottom="2dp"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_close_black_24dp"
                     tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/selection_close_text"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
-                    android:maxLines="1"
+                    android:importantForAccessibility="no"
+                    android:maxLines="2"
                     android:text="@string/text_exit"
+                    android:textDirection="locale"
                     android:textSize="11sp" />
 
             </LinearLayout>
@@ -152,8 +163,11 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?selectableItemBackground"
+                android:clickable="true"
                 android:contentDescription="@string/text_copy_to"
+                android:focusable="true"
                 android:gravity="center"
+                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp">
@@ -165,18 +179,21 @@
                     android:layout_gravity="center"
                     android:padding="1dp"
                     android:layout_marginBottom="2dp"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_content_copy_black_24dp"
                     tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/selection_copy_text"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
-                    android:maxLines="1"
+                    android:importantForAccessibility="no"
+                    android:maxLines="2"
                     android:text="@string/text_copy_to"
+                    android:textDirection="locale"
                     android:textSize="11sp" />
 
             </LinearLayout>
@@ -187,8 +204,11 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?selectableItemBackground"
+                android:clickable="true"
                 android:contentDescription="@string/text_move_to"
+                android:focusable="true"
                 android:gravity="center"
+                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp">
@@ -200,18 +220,21 @@
                     android:padding="1.5dp"
                     android:layout_gravity="center"
                     android:layout_marginBottom="2dp"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_move_to"
                     tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/selection_move_text"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
-                    android:maxLines="1"
+                    android:importantForAccessibility="no"
+                    android:maxLines="2"
                     android:text="@string/text_move_to"
+                    android:textDirection="locale"
                     android:textSize="11sp" />
 
             </LinearLayout>
@@ -222,7 +245,10 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
                 android:gravity="center"
+                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp"
@@ -237,18 +263,21 @@
                     android:layout_height="22dp"
                     android:layout_gravity="center"
                     android:layout_marginBottom="2dp"
+                    android:importantForAccessibility="no"
                     android:padding="1dp"
                     android:src="@drawable/ic_archive_black_48dp"
                     tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/selection_plugin_text"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
-                    android:maxLines="1"
+                    android:importantForAccessibility="no"
+                    android:maxLines="2"
+                    android:textDirection="locale"
                     android:textSize="11sp"
                     tools:ignore="TypographyEllipsis"
                     tools:text="Compress..." />
@@ -261,8 +290,11 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?selectableItemBackground"
+                android:clickable="true"
                 android:contentDescription="@string/text_delete"
+                android:focusable="true"
                 android:gravity="center"
+                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp">
@@ -273,18 +305,21 @@
                     android:layout_height="22dp"
                     android:layout_gravity="center"
                     android:layout_marginBottom="2dp"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_delete_black_24dp"
                     tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/selection_delete_text"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
-                    android:maxLines="1"
+                    android:importantForAccessibility="no"
+                    android:maxLines="2"
                     android:text="@string/text_delete"
+                    android:textDirection="locale"
                     android:textSize="11sp" />
 
             </LinearLayout>

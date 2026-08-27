@@ -19,13 +19,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -405,11 +408,31 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun setupSelectionToolbar(binding: ExplorerViewBinding) {
+        listOf(
+            binding.selectionClose,
+            binding.selectionCopy,
+            binding.selectionMove,
+            binding.selectionPlugin,
+            binding.selectionDelete,
+        ).forEach(::applyButtonAccessibilityRole)
+        ViewCompat.setAccessibilityHeading(binding.selectionCount, true)
         binding.selectionClose.setOnClickListener { clearSelection() }
         binding.selectionCopy.setOnClickListener { copySelectedItems() }
         binding.selectionMove.setOnClickListener { moveSelectedItems() }
         binding.selectionPlugin.setOnClickListener { launchSelectedPluginAction() }
         binding.selectionDelete.setOnClickListener { deleteSelectedItems() }
+    }
+
+    private fun applyButtonAccessibilityRole(view: View) {
+        ViewCompat.setAccessibilityDelegate(view, object : AccessibilityDelegateCompat() {
+            override fun onInitializeAccessibilityNodeInfo(
+                host: View,
+                info: AccessibilityNodeInfoCompat,
+            ) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                info.className = Button::class.java.name
+            }
+        })
     }
 
     fun setOnSelectionToolbarStateChangeListener(listener: OnSelectionToolbarStateChangeListener?) {
@@ -2643,7 +2666,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private fun bindSelectionState(item: ExplorerItem) {
-            mItem.setBackgroundColor(context.getColor(if (isItemSelected(item)) R.color.window_background_selected else R.color.item_background_dark))
+            val selected = isItemSelected(item)
+            mItem.isSelected = selected
+            mItem.setBackgroundColor(context.getColor(if (selected) R.color.window_background_selected else R.color.item_background_dark))
             setVisibilityIf(
                 mOptions,
                 when {
@@ -2971,7 +2996,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mName.text = ExplorerViewHelper.getDisplayName(context, data)
             mDirDate.text = PFile.getFullDateString(data.lastModified())
             mIcon.setImageResource(ExplorerViewHelper.getIconRes(data))
-            binding.item.setCardBackgroundColor(context.getColor(if (isItemSelected(data)) R.color.window_background_selected else R.color.item_background))
+            val selected = isItemSelected(data)
+            binding.item.isSelected = selected
+            binding.item.setCardBackgroundColor(context.getColor(if (selected) R.color.window_background_selected else R.color.item_background))
             mOptions.visibility = when {
                 data is ExplorerSamplePage -> GONE
                 data is ArchiveExplorerPage -> GONE
@@ -3193,6 +3220,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             val titleRes = if (isDirCategory) R.string.text_folder else R.string.text_file
             val count = if (isDirCategory) explorerItemManager.groupCount() else explorerItemManager.itemCount()
             binding.title.text = "${context.getString(titleRes)}  [ $count ]"
+            binding.titleContainer.contentDescription = binding.title.text
             mIsDir = isDirCategory
             if (isDirCategory && canGoUp()) {
                 binding.goUp.visibility = VISIBLE
@@ -3209,11 +3237,27 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private fun setFileOrderIconWithCurrentState() {
-            binding.sortOrder.setImageResource(if (explorerItemManager.isFileSortedAscending) R.drawable.ic_ascending_order else R.drawable.ic_descending_order)
+            val ascending = explorerItemManager.isFileSortedAscending
+            binding.sortOrder.setImageResource(if (ascending) R.drawable.ic_ascending_order else R.drawable.ic_descending_order)
+            updateSortOrderContentDescription(ascending)
         }
 
         private fun setDirOrderIconWithCurrentState() {
-            binding.sortOrder.setImageResource(if (explorerItemManager.isDirSortedAscending) R.drawable.ic_ascending_order else R.drawable.ic_descending_order)
+            val ascending = explorerItemManager.isDirSortedAscending
+            binding.sortOrder.setImageResource(if (ascending) R.drawable.ic_ascending_order else R.drawable.ic_descending_order)
+            updateSortOrderContentDescription(ascending)
+        }
+
+        private fun updateSortOrderContentDescription(ascending: Boolean) {
+            binding.sortOrder.contentDescription = buildString {
+                append(context.getString(R.string.text_sort_order))
+                append(": ")
+                append(
+                    context.getString(
+                        if (ascending) R.string.text_sort_ascending else R.string.text_sort_descending,
+                    ),
+                )
+            }
         }
     }
 
@@ -3252,7 +3296,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     companion object {
         private const val LOG_TAG = "ExplorerView"
         private const val PLUGIN_ACTION_MENU_ORDER_START = 1_000
-        private const val SELECTION_TOOLBAR_CONTENT_HEIGHT_DP = 81F
+        private const val SELECTION_TOOLBAR_CONTENT_HEIGHT_DP = 113F
         private const val SELECTION_TOOLBAR_SHOW_DURATION = 120L
         private const val SELECTION_TOOLBAR_HIDE_DURATION = 90L
         private const val MAX_ARCHIVE_IMAGE_PREVIEW_BYTES = 256L * 1024L * 1024L
