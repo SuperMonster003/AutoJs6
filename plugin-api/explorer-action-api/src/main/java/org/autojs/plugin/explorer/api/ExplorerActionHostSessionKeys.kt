@@ -32,4 +32,9 @@ object ExplorerActionHostSessionKeys {
     const val OUTPUT_BATCHES = "outputBatches"
     const val OUTPUT_TRANSACTION_IDS = "outputTransactionIds"
     const val OUTPUT_BATCH_PUBLISHED_COUNT = "outputBatchPublishedCount"
+
+    const val TARGET_TRASH_STATE = "targetTrashState"
+    const val TARGET_TRASH_ITEM_IDS = "targetTrashItemIds"
+    const val TARGET_TRASH_MOVED_COUNT = "targetTrashMovedCount"
+    const val TARGET_TRASH_RECOVERY_COUNT = "targetTrashRecoveryCount"
 }

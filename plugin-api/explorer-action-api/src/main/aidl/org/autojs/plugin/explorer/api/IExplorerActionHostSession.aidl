@@ -79,4 +79,14 @@ interface IExplorerActionHostSession {
 
     /** v15. Lists bounded active and recently completed output batches for recovery. */
     Bundle listOutputBatches();
+
+    /**
+     * v16. Moves the complete original request selection into the host Trash after every supplied
+     * create-only output has reached the committed state. The host revalidates both source and
+     * output identities and never grants arbitrary path deletion to the plugin.
+     */
+    Bundle moveTargetsToTrash(in List<String> targetIds, in List<String> outputTransactionIds);
+
+    /** v16. Returns the terminal result of this session's single source-to-Trash operation. */
+    Bundle queryTargetTrash();
 }

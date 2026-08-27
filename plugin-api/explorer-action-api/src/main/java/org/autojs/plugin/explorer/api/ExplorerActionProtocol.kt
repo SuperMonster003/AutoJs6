@@ -1,7 +1,7 @@
 package org.autojs.plugin.explorer.api
 
 object ExplorerActionProtocol {
-    const val VERSION = 15
+    const val VERSION = 16
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 

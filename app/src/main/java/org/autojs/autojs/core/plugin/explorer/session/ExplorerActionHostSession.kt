@@ -17,6 +17,9 @@ import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.runtime.api.Mime
+import org.autojs.autojs.storage.history.TrashMoveRecoveryRequiredException
+import org.autojs.autojs.storage.history.TrashRepository
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionKeys
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionValues
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
@@ -43,6 +46,7 @@ internal fun explorerItemForCreatedOutput(file: File): ExplorerFileItem {
 
 /** A request-scoped capability. Every remote call is pinned to the launched plugin UID. */
 internal class ExplorerActionHostSession private constructor(
+    private val applicationContext: Context,
     private val expectedUid: Int,
     commonParent: File,
     targets: List<ExplorerActionHostSessionTarget>,
@@ -50,6 +54,7 @@ internal class ExplorerActionHostSession private constructor(
     private val allowReplaceTarget: Boolean,
     private val onOutputCommitted: (File) -> Unit,
     private val onTargetReplaced: (File) -> Unit,
+    private val onSourcesTrashed: () -> Unit,
     private val outputTreeStore: ExplorerActionOutputTreeStore,
     private val outputBatchStore: ExplorerActionOutputBatchStore,
     private val clock: () -> Long,
@@ -67,7 +72,10 @@ internal class ExplorerActionHostSession private constructor(
     private val lock = Any()
     private val outputs = LinkedHashMap<String, OutputTransaction>()
     private val terminalOutputs = LinkedHashMap<String, Bundle>()
+    private val committedCreateOutputs = LinkedHashMap<String, CommittedCreateOutput>()
     private val outputBatches = LinkedHashMap<String, ExplorerActionOutputBatchRecord>()
+    private var targetTrashResult: Bundle? = null
+    private var targetTrashRunning = false
     private var clientLease: ClientLease? = null
     private var closed = false
 
@@ -474,6 +482,7 @@ internal class ExplorerActionHostSession private constructor(
                     releaseOutputTarget(transaction.target)
                     val result = committedOutputBundle(transaction)
                     rememberTerminalOutput(transaction.id, result)
+                    rememberCommittedCreateOutput(transaction)
                     outputResults += result
                 }
                 markOutputBatchActive(batchId, false)
@@ -553,6 +562,98 @@ internal class ExplorerActionHostSession private constructor(
                     ),
                 )
             }
+        }
+    }
+
+    override fun moveTargetsToTrash(
+        targetIds: MutableList<String>,
+        outputTransactionIds: MutableList<String>,
+    ): Bundle {
+        enforceCaller()
+        val requestedTargetIds = targetIds.toList()
+        val requestedOutputIds = outputTransactionIds.toList()
+        val plan = synchronized(lock) {
+            checkOpen()
+            targetTrashResult?.let { return Bundle(it) }
+            check(!targetTrashRunning) { "Explorer Action target Trash operation is already running" }
+            require(requestedTargetIds == targetsById.keys.toList()) {
+                "Explorer Action target Trash operation must cover the complete request selection"
+            }
+            require(
+                requestedOutputIds.isNotEmpty() &&
+                    requestedOutputIds.size <= ExplorerActionProtocol.MAX_OUTPUT_TRANSACTION_RESULTS &&
+                    requestedOutputIds.distinct().size == requestedOutputIds.size,
+            ) { "Explorer Action target Trash output proof is invalid" }
+            require(requestedOutputIds == committedCreateOutputs.keys.toList()) {
+                "Explorer Action target Trash output proof is incomplete or reordered"
+            }
+            committedCreateOutputs.values.forEach(::requireCommittedCreateOutputIdentity)
+            targetsById.values.forEach(::requireTargetIdentity)
+            targetTrashRunning = true
+            TargetTrashPlan(targetsById.values.toList())
+        }
+
+        try {
+            val trashItemIds = ArrayList<String>(plan.targets.size)
+            var movedCount = 0
+            var recoveryCount = 0
+            var ordinaryFailureCount = 0
+            val repository = TrashRepository(applicationContext)
+            val operationController = DialogUtils.OperationController()
+            plan.targets.forEach { target ->
+                try {
+                    val item = repository.moveToTrashWithProgress(
+                        path = target.file.path,
+                        progressCallback = null,
+                        fileCallback = null,
+                        operationController = operationController,
+                        beforeSourceDelete = { requireTargetIdentity(target) },
+                    )
+                    trashItemIds += item.trashId
+                    movedCount += 1
+                } catch (error: TrashMoveRecoveryRequiredException) {
+                    trashItemIds += error.trashItem.trashId
+                    recoveryCount += 1
+                    if (!target.file.exists()) movedCount += 1
+                } catch (_: Exception) {
+                    ordinaryFailureCount += 1
+                }
+            }
+            val state = when {
+                recoveryCount == 0 && ordinaryFailureCount == 0 && movedCount == plan.targets.size ->
+                    ExplorerActionHostSessionValues.TARGET_TRASH_STATE_COMMITTED
+                trashItemIds.isNotEmpty() || movedCount > 0 ->
+                    ExplorerActionHostSessionValues.TARGET_TRASH_STATE_RECOVERY_REQUIRED
+                else -> ExplorerActionHostSessionValues.TARGET_TRASH_STATE_FAILED
+            }
+            val result = targetTrashBundle(
+                state = state,
+                trashItemIds = trashItemIds,
+                movedCount = movedCount,
+                recoveryCount = recoveryCount,
+            )
+            synchronized(lock) {
+                targetTrashResult = Bundle(result)
+            }
+            if (movedCount > 0 || recoveryCount > 0) runCatching(onSourcesTrashed)
+            return result
+        } finally {
+            synchronized(lock) {
+                targetTrashRunning = false
+            }
+        }
+    }
+
+    override fun queryTargetTrash(): Bundle {
+        enforceCaller()
+        return synchronized(lock) {
+            checkOpen()
+            targetTrashResult?.let(::Bundle) ?: targetTrashBundle(
+                state = ExplorerActionHostSessionValues.TARGET_TRASH_STATE_UNKNOWN,
+                trashItemIds = emptyList(),
+                movedCount = 0,
+                recoveryCount = 0,
+            )
         }
     }
 
@@ -652,6 +753,9 @@ internal class ExplorerActionHostSession private constructor(
                 }
             }
             rememberTerminalOutput(transaction.id, result)
+            if (transaction.mode == OutputMode.CREATE) {
+                rememberCommittedCreateOutput(transaction)
+            }
             CommittedOutput(
                 target = transaction.target,
                 mode = transaction.mode,
@@ -1403,6 +1507,44 @@ internal class ExplorerActionHostSession private constructor(
         }
     }
 
+    private fun rememberCommittedCreateOutput(transaction: OutputTransaction) {
+        check(transaction.mode == OutputMode.CREATE)
+        committedCreateOutputs[transaction.id] = CommittedCreateOutput(
+            transaction.target,
+            TargetIdentity.captureRegularFile(transaction.target),
+        )
+        while (committedCreateOutputs.size > ExplorerActionProtocol.MAX_OUTPUT_TRANSACTION_RESULTS) {
+            committedCreateOutputs.remove(committedCreateOutputs.keys.first())
+        }
+    }
+
+    private fun requireCommittedCreateOutputIdentity(output: CommittedCreateOutput) {
+        check(TargetIdentity.captureRegularFile(output.file) == output.identity) {
+            "Explorer Action committed output changed before source removal"
+        }
+    }
+
+    private fun requireTargetIdentity(target: TargetState) {
+        check(TargetIdentity.capture(target.file) == target.identity) {
+            "Explorer Action source changed before it could be moved to Trash"
+        }
+    }
+
+    private fun targetTrashBundle(
+        state: Int,
+        trashItemIds: List<String>,
+        movedCount: Int,
+        recoveryCount: Int,
+    ): Bundle = Bundle().apply {
+        putInt(ExplorerActionHostSessionKeys.TARGET_TRASH_STATE, state)
+        putStringArrayList(
+            ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_IDS,
+            ArrayList(trashItemIds),
+        )
+        putInt(ExplorerActionHostSessionKeys.TARGET_TRASH_MOVED_COUNT, movedCount)
+        putInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RECOVERY_COUNT, recoveryCount)
+    }
+
     private fun joinRelativePath(parentPath: String, childName: String): String {
         val path = if (parentPath.isEmpty()) childName else "$parentPath/$childName"
         return normalizeRelativePath(path)
@@ -1468,6 +1610,15 @@ internal class ExplorerActionHostSession private constructor(
     private data class TargetState(
         val file: File,
         var identity: TargetIdentity,
+    )
+
+    private data class CommittedCreateOutput(
+        val file: File,
+        val identity: TargetIdentity,
+    )
+
+    private data class TargetTrashPlan(
+        val targets: List<TargetState>,
     )
 
     private data class TargetIdentity(
@@ -1594,6 +1745,7 @@ internal class ExplorerActionHostSession private constructor(
             allowReplaceTarget: Boolean = false,
             onOutputCommitted: (File) -> Unit = ::notifyCreated,
             onTargetReplaced: (File) -> Unit = ::notifyChanged,
+            onSourcesTrashed: () -> Unit = ::notifyWorkspaceChanged,
             clock: () -> Long = System::currentTimeMillis,
             afterBatchMemberPublished: (Int) -> Unit = {},
         ): ExplorerActionHostSession {
@@ -1608,6 +1760,7 @@ internal class ExplorerActionHostSession private constructor(
                 recoverDurableOutputBatches(batchStore, clock())
             }
             return ExplorerActionHostSession(
+                applicationContext = applicationContext,
                 expectedUid = applicationUid(context.packageManager, pluginPackageName),
                 commonParent = canonicalParent,
                 targets = targets,
@@ -1615,6 +1768,7 @@ internal class ExplorerActionHostSession private constructor(
                 allowReplaceTarget = allowReplaceTarget,
                 onOutputCommitted = onOutputCommitted,
                 onTargetReplaced = onTargetReplaced,
+                onSourcesTrashed = onSourcesTrashed,
                 outputTreeStore = store,
                 outputBatchStore = batchStore,
                 clock = clock,
@@ -1876,6 +2030,15 @@ internal class ExplorerActionHostSession private constructor(
                 val item = ExplorerFileItem(file, ExplorerDirPage(file.parentFile, null))
                 Explorers.workspace().notifyItemChanged(item, item)
             }
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                notify()
+            } else {
+                Handler(Looper.getMainLooper()).post(notify)
+            }
+        }
+
+        private fun notifyWorkspaceChanged() {
+            val notify = { Explorers.workspace().refreshAll() }
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 notify()
             } else {

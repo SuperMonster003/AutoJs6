@@ -21,4 +21,9 @@ object ExplorerActionHostSessionValues {
     const val OUTPUT_BATCH_STATE_ABORTED = 4
     const val OUTPUT_BATCH_STATE_RECOVERY_REQUIRED = 5
     const val OUTPUT_BATCH_STATE_UNKNOWN = 6
+
+    const val TARGET_TRASH_STATE_COMMITTED = 1
+    const val TARGET_TRASH_STATE_RECOVERY_REQUIRED = 2
+    const val TARGET_TRASH_STATE_FAILED = 3
+    const val TARGET_TRASH_STATE_UNKNOWN = 4
 }
