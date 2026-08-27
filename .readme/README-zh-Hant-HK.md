@@ -168,6 +168,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 ###### 2026/08/27
 
+* `新增` Lua Runtime 宿主能力新增按檔案腳本隔離的持久鍵值儲存與 Toast: `autojs.storage.get/put/remove/clear` 使用應用程式私有, 同步提交且有界的命名空間, `autojs.ui.toast` 透過宿主主線程單次派發
 * `新增` Ace LSP 默認文件類型新增 .mts/.cts 及其聲明文件變體, 使外部 Ace 編輯器可選擇與執行一致的 Rhino/Node TypeScript profile; 舊版默認選擇會自動遷移, 明確自定義後綴集合保持不變
 * `新增` APK Builder 支援在打包階段編譯 Rhino TypeScript 專案; 最終 APK 只包含加密 JavaScript 與不內嵌原始碼的可選 Source Map, 不包含 TypeScript 原始碼或編譯器; 加密專案使用一次性 AES-256-GCM 暫存區, 解密與重新加密的明文只存於記憶體並在使用後清零
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本

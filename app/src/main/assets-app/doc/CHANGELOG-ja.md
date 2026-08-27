@@ -8,6 +8,7 @@
 
 ###### 2026/08/27
 
+* `新機能` Lua Runtime の Host capability にファイルスクリプト単位で分離された永続 key/value ストレージと Toast を追加: `autojs.storage.get/put/remove/clear` はアプリ専用の上限付き名前空間へ同期 commit し, `autojs.ui.toast` は Host のメインスレッドから一度だけ dispatch
 * `新機能` Ace LSP の既定ファイル形式に .mts/.cts とその宣言ファイル形式を追加し, 外部 Ace エディターが実行時と同じ Rhino/Node TypeScript プロファイルを選択可能に改善; 旧版の既定選択は移行され, 明示的なカスタム接尾辞セットは維持
 * `新機能` APK Builder がパッケージ時に Rhino TypeScript プロジェクトをコンパイルするようになりました。最終 APK には暗号化された JavaScript とソースを埋め込まない任意の Source Map のみが含まれ、TypeScript ソースやコンパイラは含まれません。暗号化プロジェクトでは使い捨ての AES-256-GCM ステージングを使用し、平文はメモリ内だけに保持して再暗号化後にゼロクリアします
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
