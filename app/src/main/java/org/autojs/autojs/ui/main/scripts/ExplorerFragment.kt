@@ -26,6 +26,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.explorer.ExplorerView
+import org.autojs.autojs.ui.explorer.ExplorerViewStateLifecyclePolicy
 import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.FloatingActionMenu
 import org.autojs.autojs.ui.main.FloatingActionMenu.OnFloatingActionButtonClickListener
@@ -99,8 +100,9 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ExplorerActionRegistry.refresh(requireContext())
-                mExplorerView?.notifyDataSetChanged()
+                if (ExplorerActionRegistry.refresh(requireContext())) {
+                    mExplorerView?.notifyPluginActionsChanged()
+                }
             }
         }
         (activity as? MainActivity)?.apply {
@@ -112,6 +114,15 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     }
 
     private fun setTabViewClickListeners(tabView: TabLayout.TabView) {
+        // TabLayout's ViewPager bridge animates across every intermediate page. Jumping from
+        // TASK to FILE therefore keeps ViewPager in SETTLING state long enough to swallow the
+        // first list gesture. Move to FILE first; TabView.performClick() will then select the
+        // already-current tab without starting another smooth scroll.
+        // zh-CN: TabLayout 会逐页平滑滚动, 从任务页到文件页期间会吞掉第一次列表手势.
+        // 先无动画切到文件页, 随后的标签选中不会再启动平滑滚动.
+        tabView.setOnClickListener {
+            (activity as? MainActivity)?.showFilesPageImmediately()
+        }
         tabView.setOnLongClickListener {
             when {
                 !mIsCurrentPageFiles -> false
@@ -323,12 +334,19 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         if (activity?.isFinishing == false) {
             saveViewStates()
         }
-        mExplorerView?.notifyDataSetChanged()
     }
 
     override fun onDestroy() {
+        val shouldClearViewStates = activity?.let { hostActivity ->
+            ExplorerViewStateLifecyclePolicy.shouldClearOnDestroy(
+                isActivityFinishing = hostActivity.isFinishing,
+                isChangingConfigurations = hostActivity.isChangingConfigurations,
+            )
+        } == true
         super.onDestroy()
-        ExplorerView.clearViewStates()
+        if (shouldClearViewStates) {
+            ExplorerView.clearViewStates()
+        }
         EventBus.getDefault().unregister(this)
     }
 

@@ -29,13 +29,13 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.afollestad.materialdialogs.MaterialDialog
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -63,6 +63,7 @@ import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenInterac
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRequestOptions
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
 import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.core.pref.Pref.getInt
 import org.autojs.autojs.core.pref.Pref.getLinkedList
 import org.autojs.autojs.core.pref.Pref.getStringOrNull
@@ -141,6 +142,17 @@ private data class ExplorerItemActionState(
     val runAsMedia: Boolean,
     val installVisible: Boolean,
     val infoVisible: Boolean,
+)
+
+// One background-computed payload per row bind keeps the main thread down to a single
+// callback per row instead of four, avoiding relayout bursts while scrolling.
+// zh-CN: 每次行绑定只在后台计算一份数据载荷, 主线程回调从四次减少到一次, 避免滑动时的布局风暴.
+private data class ExplorerItemMainContent(
+    val icon: FileUtils.TYPE.Icon,
+    val executable: Boolean,
+    val name: CharSequence,
+    val date: CharSequence,
+    val size: CharSequence,
 )
 
 private data class ArchiveNavigationState(
@@ -310,6 +322,18 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     // Keep only one refresh chain running to avoid concurrent updates.
     // zh-CN: 只允许一个刷新链路运行, 避免并发更新导致竞态问题.
     private var mRefreshDisposable: Disposable? = null
+
+    // True after a page navigation or state restore; the next refresh then repopulates fully
+    // and anchors the recorded scroll position. In-place refreshes keep the live position.
+    // zh-CN: 页面导航或状态恢复后为 true, 下一次刷新全量填充并锚定记录的滚动位置;
+    // 原地刷新则保持当前滚动位置不变.
+    private var mApplyPageStateScrollOnRefresh = false
+
+    // Metadata fingerprints (path -> lastModified/size mix) captured by the latest refresh,
+    // used to diff the next refresh so unchanged rows are not rebound.
+    // zh-CN: 最近一次刷新采集的元数据指纹 (path -> lastModified/size 混合值),
+    // 用于与下一次刷新做差量比较, 未变化的行不再重新绑定.
+    private var mRefreshMetaByPath: Map<String, Long> = emptyMap()
 
     // Unify action icon tint to match day/night theme, especially for overlay dialogs.
     // zh-CN: 统一操作图标着色以匹配日/夜主题, 尤其用于 overlay 对话框场景.
@@ -798,6 +822,15 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     fun notifyDataSetChanged() {
         mExplorerAdapter.notifyDataSetChanged()
+    }
+
+    /** Refreshes only attached action buttons, avoiding a full row teardown and asynchronous repaint. */
+    fun notifyPluginActionsChanged() {
+        val recyclerView = explorerItemListView ?: return
+        repeat(recyclerView.childCount) { index ->
+            val child = recyclerView.getChildAt(index)
+            (recyclerView.getChildViewHolder(child) as? ExplorerItemViewHolder)?.refreshActions()
+        }
     }
 
     private fun enterSelectionMode(item: ExplorerItem): Boolean {
@@ -1797,6 +1830,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private fun setCurrentPageState(pageState: ExplorerPageState) {
         currentPageState = pageState
+        mApplyPageStateScrollOnRefresh = true
         pageState.page?.let(::updatePathBar)
         updateArchiveExtractionAction()
     }
@@ -1959,20 +1993,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         val scrollY = getInt(getPrefKey("page_state"), -1)
         if (scrollY > 0) {
             currentPageState.scrollY = scrollY
-            Observable.empty<Any>()
-                .subscribeOn(Schedulers.io())
-                .subscribe {
-                    notifyDataSetChanged()
-                    post { scrollToPositionOrdinarily() }
-                }
+            // The asynchronous page refresh applies this once after restored contents are ready.
+            // Applying it against the old/empty adapter first causes two visible layout passes.
+            // zh-CN: 等目录内容恢复后只应用一次, 避免先对旧列表滚动再二次布局.
         }
-    }
-
-    private fun scrollToPositionOrdinarily() {
-        val layoutManager = explorerItemListView!!.layoutManager
-        val position = currentPageState.scrollY
-
-        layoutManager?.scrollToPosition(position)
     }
 
     // TODO by SuperMonster003 on Apr 1, 2023.
@@ -2123,21 +2147,113 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             .collectInto(explorerItemManager.cloneConfig(), ExplorerItemManager::add)
             .observeOn(Schedulers.computation())
             .doOnSuccess(ExplorerItemManager::sort)
+            .map { newManager -> newManager to buildRefreshMeta(newManager) }
             .observeOn(AndroidSchedulers.mainThread())
             .doFinally {
                 // Always end the refreshing state even when errors happen.
                 // zh-CN: 无论成功或失败都要结束刷新状态.
                 isRefreshing = false
             }
-            .subscribe({ newManager: ExplorerItemManager ->
+            .subscribe({ (newManager, newMeta) ->
                 updateProjectToolbarVisibility()
+                val oldManager = explorerItemManager
+                val oldMeta = mRefreshMetaByPath
+                val applyPageStateScroll = mApplyPageStateScrollOnRefresh
+                mApplyPageStateScrollOnRefresh = false
                 explorerItemManager = newManager
-                notifyDataSetChanged()
-                post { scrollToPositionImmediately() }
+                mRefreshMetaByPath = newMeta
+                if (applyPageStateScroll) {
+                    // Page navigation or state restore: repopulate fully and anchor the layout
+                    // at the recorded position within the same pass (no post-layout jump).
+                    // zh-CN: 页面导航或状态恢复: 全量填充并在同一次布局中锚定记录的滚动位置,
+                    // 避免先按顶部布局再跳转造成的可见闪动.
+                    notifyDataSetChanged()
+                    scrollToPositionImmediately()
+                } else {
+                    notifyRefreshedInPlace(oldManager, oldMeta, newManager, newMeta)
+                }
             }, { e ->
                 Log.e(LOG_TAG, "refreshCurrentPage() failed", e)
                 showSnack(this, R.string.error_refresh_failed, true)
             })
+    }
+
+    /**
+     * Dispatches an in-place refresh as a minimal diff so unchanged rows keep their views and
+     * the live scroll position, falling back to a full rebind when diffing is not applicable.
+     * zh-CN: 原地刷新按最小差量分发, 未变化的行保留视图与当前滚动位置, 差量不可行时回退全量重绑定.
+     */
+    private fun notifyRefreshedInPlace(
+        oldManager: ExplorerItemManager,
+        oldMeta: Map<String, Long>,
+        newManager: ExplorerItemManager,
+        newMeta: Map<String, Long>,
+    ) {
+        val dispatched = runCatching {
+            val oldRows = buildRefreshRows(oldManager, oldMeta)
+            val newRows = buildRefreshRows(newManager, newMeta)
+            if (oldRows.size + newRows.size > MAX_REFRESH_DIFF_ROWS) return@runCatching false
+            val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                override fun getOldListSize() = oldRows.size
+                override fun getNewListSize() = newRows.size
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return oldRows[oldItemPosition].sameItemAs(newRows[newItemPosition])
+                }
+
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return oldRows[oldItemPosition].sameContentAs(newRows[newItemPosition])
+                }
+            }, false)
+            diff.dispatchUpdatesTo(mExplorerAdapter)
+            true
+        }.getOrElse { error ->
+            Log.w(LOG_TAG, "Failed to dispatch Explorer refresh diff", error)
+            false
+        }
+        if (!dispatched) {
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun buildRefreshRows(manager: ExplorerItemManager, meta: Map<String, Long>): List<ExplorerRefreshRow> {
+        val rows = ArrayList<ExplorerRefreshRow>(manager.count() + 2)
+        rows += ExplorerRefreshRow.category(isDir = true, count = manager.groupCount())
+        if (!currentPageState.dirsCollapsed) {
+            repeat(manager.groupCount()) { i ->
+                val dir = manager.getDirItem(i)
+                rows += ExplorerRefreshRow.entry(
+                    isDir = true,
+                    path = dir.path,
+                    fingerprint = meta[dir.path] ?: ExplorerRefreshRow.FINGERPRINT_UNKNOWN,
+                )
+            }
+        }
+        rows += ExplorerRefreshRow.category(isDir = false, count = manager.itemCount())
+        if (!currentPageState.filesCollapsed) {
+            repeat(manager.itemCount()) { i ->
+                val file = manager.getFileItem(i)
+                rows += ExplorerRefreshRow.entry(
+                    isDir = false,
+                    path = file.path,
+                    fingerprint = meta[file.path] ?: ExplorerRefreshRow.FINGERPRINT_UNKNOWN,
+                )
+            }
+        }
+        return rows
+    }
+
+    /** Runs on a background scheduler; entry metadata reads may touch the filesystem. */
+    private fun buildRefreshMeta(manager: ExplorerItemManager): Map<String, Long> {
+        val meta = HashMap<String, Long>(manager.count() * 2)
+        repeat(manager.groupCount()) { i ->
+            val dir = manager.getDirItem(i)
+            meta[dir.path] = ExplorerRefreshRow.fingerprintOf(dir.lastModified(), 0L)
+        }
+        repeat(manager.itemCount()) { i ->
+            val file = manager.getFileItem(i)
+            meta[file.path] = ExplorerRefreshRow.fingerprintOf(file.lastModified(), file.size)
+        }
+        return meta
     }
 
     private fun scrollToPositionSmoothly() {
@@ -2268,6 +2384,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
         private lateinit var mExplorerItem: ExplorerItem
         private var mBindGeneration = 0
+        private var mActionBindGeneration = 0
         private var mPrimaryPluginAction: ResolvedExplorerAction? = null
 
         init {
@@ -2313,13 +2430,61 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mPrimaryPluginAction = null
             val bindGeneration = ++mBindGeneration
 
-            setFirstChar(item)
-
-            setTextWith(mName) { ExplorerViewHelper.getDisplayName(context, item) }
-            setTextWith(mFileDate) { PFile.getFullDateString(item.lastModified()) }
-            setTextWith(mFileSize) { PFiles.formatSizeWithUnit(item.size) }
+            bindMainContent(item, bindGeneration)
             bindSelectionState(item)
-            setVisibilityIf(mActionIconContainer, false)
+            bindActions(item, bindGeneration, clearExisting = true)
+        }
+
+        private fun bindMainContent(item: ExplorerItem, bindGeneration: Int) {
+            Observable.fromCallable {
+                ExplorerItemMainContent(
+                    icon = ExplorerViewHelper.getIcon(item),
+                    executable = item.isExecutable,
+                    name = ExplorerViewHelper.getDisplayName(context, item),
+                    date = PFile.getFullDateString(item.lastModified()),
+                    size = PFiles.formatSizeWithUnit(item.size),
+                )
+            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { content ->
+                    if (bindGeneration != mBindGeneration) return@subscribe
+                    mName.text = content.name
+                    mFileDate.text = content.date
+                    mFileSize.text = content.size
+                    mFirstChar.setIcon(content.icon)
+                    if (content.executable) {
+                        val themeColorForContrast = ColorUtils.adjustColorForContrast(
+                            context.getColor(R.color.item_background_dark),
+                            ThemeColorManagerCompat.getColorPrimary(),
+                            1.15,
+                        )
+                        mFirstChar.setIconTextColorByThemeColorLuminance()
+                        mFirstChar.setStrokeColor(themeColorForContrast)
+                        mFirstChar.setFillColor(themeColorForContrast)
+                    } else {
+                        mFirstChar.setIconTextColorDayNight()
+                        mFirstChar.setStrokeColorDayNight()
+                        mFirstChar.setFillTransparent()
+                    }
+                    mFirstChar.visibility = VISIBLE
+                }
+        }
+
+        fun refreshActions() {
+            if (!::mExplorerItem.isInitialized) return
+            bindActions(mExplorerItem, mBindGeneration, clearExisting = false)
+        }
+
+        private fun bindActions(
+            item: ExplorerItem,
+            bindGeneration: Int,
+            clearExisting: Boolean,
+        ) {
+            val actionBindGeneration = ++mActionBindGeneration
+            if (clearExisting) {
+                setVisibilityIf(mActionIconContainer, false)
+            }
 
             Observable.fromCallable {
                 val primaryAction = when (item) {
@@ -2368,10 +2533,15 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     infoVisible = shouldInfoShow,
                 )
             }
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { state ->
-                    if (bindGeneration != mBindGeneration) return@subscribe
+                    if (
+                        bindGeneration != mBindGeneration ||
+                        actionBindGeneration != mActionBindGeneration
+                    ) {
+                        return@subscribe
+                    }
 
                     mPrimaryPluginAction = state.pluginPrimaryAction
                     val hasPrimaryAction = state.primaryAction != null || state.pluginPrimaryAction != null
@@ -2404,13 +2574,6 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 }
         }
 
-        private fun setTextWith(textView: TextView, callable: () -> CharSequence) {
-            Observable.fromCallable(callable)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { text -> textView.text = text }
-        }
-
         private fun setVisibilityWith(view: View, callable: () -> Boolean) {
             Observable.fromCallable(callable)
                 .subscribeOn(Schedulers.computation())
@@ -2432,53 +2595,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             setVisibilityIf(view, if (visible) VISIBLE else GONE)
         }
 
-        private fun setFirstChar(item: ExplorerItem) {
-            Observable.fromCallable { ExplorerViewHelper.getIcon(item) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { icon ->
-                    mFirstChar.setIcon(icon)
-
-                    val actions = when {
-                        item.type.isExecutable() -> {
-                            Observable.fromCallable {
-                                ColorUtils.adjustColorForContrast(
-                                    context.getColor(R.color.item_background_dark),
-                                    ThemeColorManagerCompat.getColorPrimary(),
-                                    1.15,
-                                )
-                            }.map { themeColorForContrast ->
-                                listOf(
-                                    { mFirstChar.setIconTextColorByThemeColorLuminance() },
-                                    { mFirstChar.setStrokeColor(themeColorForContrast) },
-                                    { mFirstChar.setFillColor(themeColorForContrast) },
-                                    { mFirstChar.visibility = VISIBLE },
-                                )
-                            }
-                        }
-                        else -> Observable.just(
-                            listOf(
-                                { mFirstChar.setIconTextColorDayNight() },
-                                { mFirstChar.setStrokeColorDayNight() },
-                                { mFirstChar.setFillTransparent() },
-                                { mFirstChar.visibility = VISIBLE },
-                            )
-                        )
-                    }
-
-                    actions.subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .flatMapCompletable { list ->
-                            Observable.fromIterable(list)
-                                .flatMapCompletable { action -> Completable.fromAction { action.invoke() } }
-                        }
-                        .subscribe()
-                }
-        }
-
         override fun onViewRecycled() {
             super.onViewRecycled()
             mBindGeneration++
+            mActionBindGeneration++
             mName.text = null
             mFileDate.text = null
             mFileSize.text = null
@@ -2559,7 +2679,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private fun bindPrimaryPluginAction(action: ResolvedExplorerAction) {
-            mPrimaryViewer.setImageResource(R.drawable.ic_extension_black_48dp)
+            mPrimaryViewer.setImageResource(R.drawable.ic_explorer_plugin_action)
             mPrimaryViewer.contentDescription = action.menuTitle
         }
 
@@ -3137,6 +3257,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private const val SELECTION_TOOLBAR_HIDE_DURATION = 90L
         private const val MAX_ARCHIVE_IMAGE_PREVIEW_BYTES = 256L * 1024L * 1024L
         private const val MAX_ARCHIVE_MEDIA_PREVIEW_BYTES = 512L * 1024L * 1024L
+
+        // Upper bound for diff-based refresh dispatching; larger snapshots fall back to
+        // a full rebind to keep the main-thread diff cost negligible.
+        // zh-CN: 差量刷新的行数上限, 超出时回退全量重绑定, 确保主线程差量计算开销可忽略.
+        private const val MAX_REFRESH_DIFF_ROWS = 6000
 
         @Suppress("ConstPropertyName")
         private const val positionOfCategoryDir = 0

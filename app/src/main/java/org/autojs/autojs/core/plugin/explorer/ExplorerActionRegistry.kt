@@ -2,10 +2,13 @@ package org.autojs.autojs.core.plugin.explorer
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
@@ -29,7 +32,6 @@ import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerActionValues
 import org.autojs.plugin.explorer.api.ExplorerArchiveRequestKeys
 import java.io.File
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicReference
 
 internal data class ResolvedExplorerAction(
@@ -45,13 +47,32 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
 
     private val snapshot = AtomicReference<List<ResolvedExplorerAction>>(emptyList())
 
-    suspend fun refresh(context: Context) = withContext(Dispatchers.IO) {
+    // PackageManager-only fingerprint of the last clean refresh. While unchanged, plugin
+    // services are not re-bound: binding may spawn plugin processes and starve the UI for
+    // hundreds of milliseconds right after the host returns to the foreground.
+    // zh-CN: 上次完整刷新的轻量 PackageManager 指纹. 指纹未变化时跳过插件服务重新绑定,
+    // 因为绑定可能拉起插件进程, 在宿主回到前台后造成数百毫秒的界面卡顿.
+    private val refreshStamps = AtomicReference<List<ExplorerActionRefreshStamp>?>(null)
+
+    /**
+     * Rebuilds the action snapshot while reporting only user-visible catalog changes.
+     * Discovery and catalog IPC run only when the installed/enabled/authorized plugin set
+     * changed since the last clean refresh; otherwise the existing snapshot stays valid
+     * because launches re-validate components and re-bind services on demand.
+     */
+    suspend fun refresh(context: Context): Boolean = withContext(Dispatchers.IO) {
         val appContext = context.applicationContext
+        val stamps = collectRefreshStamps(appContext)
+        if (stamps != null && stamps == refreshStamps.get()) {
+            return@withContext false
+        }
+        var discoveryClean = true
         val resolved = LinkedHashMap<String, ResolvedExplorerAction>()
         ExplorerActionPluginHost.discover(appContext)
             .sortedWith(compareBy({ it.serviceInfo.packageName }, { it.serviceInfo.name }))
             .forEach candidateLoop@{ candidate ->
                 val packageName = candidate.serviceInfo.packageName
+                if (candidate.error != null) discoveryClean = false
                 val pluginInfo = candidate.pluginInfo ?: return@candidateLoop
                 val advertisedProtocolVersion = resolveProtocolVersion(pluginInfo)
                 if (!isAvailablePlugin(appContext, packageName, pluginInfo, advertisedProtocolVersion)) {
@@ -90,15 +111,61 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
                         )
                     }
                 }.onFailure { error ->
+                    discoveryClean = false
                     Log.w(TAG, "Failed to load Explorer Action catalog from $packageName", error)
                 }
             }
-        snapshot.set(
-            resolved.values.sortedWith(
-                compareByDescending<ResolvedExplorerAction> { it.descriptor.priority }
-                    .thenBy { it.packageName }
-                    .thenBy { it.descriptor.id }
-            )
+        val next = resolved.values.sortedWith(
+            compareByDescending<ResolvedExplorerAction> { it.descriptor.priority }
+                .thenBy { it.packageName }
+                .thenBy { it.descriptor.id }
+        )
+        // A refresh with failed candidates keeps the fingerprint unset so the next call retries.
+        // zh-CN: 存在失败候选的刷新不记录指纹, 下一次调用会重试.
+        refreshStamps.set(stamps.takeIf { discoveryClean })
+        val previous = snapshot.getAndSet(next)
+        previous.presentationSignature() != next.presentationSignature()
+    }
+
+    private fun collectRefreshStamps(context: Context): List<ExplorerActionRefreshStamp>? = runCatching {
+        val packageManager = context.packageManager
+        val intent = Intent(ExplorerActionPluginHost.ACTION_EXPLORER_ACTION).apply {
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+        }
+        val services = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0L))
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.queryIntentServices(intent, 0)
+        }
+        services.mapNotNull { it.serviceInfo }
+            .map { serviceInfo ->
+                val packageName = serviceInfo.packageName
+                val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0L))
+                } else {
+                    @Suppress("DEPRECATION")
+                    packageManager.getPackageInfo(packageName, 0)
+                }
+                ExplorerActionRefreshStamp(
+                    packageName = packageName,
+                    serviceName = serviceInfo.name,
+                    versionCode = PackageInfoCompat.getLongVersionCode(packageInfo),
+                    lastUpdateTime = packageInfo.lastUpdateTime,
+                    enabled = PluginEnableStore.isEnabled(context, packageName, true),
+                    authorized = PluginTrustManager.isAuthorized(context, packageName),
+                )
+            }
+            .sortedWith(compareBy({ it.packageName }, { it.serviceName }))
+    }.getOrNull()
+
+    private fun List<ResolvedExplorerAction>.presentationSignature() = map { action ->
+        ExplorerActionPresentationSignature(
+            packageName = action.packageName,
+            component = action.component.flattenToString(),
+            actionLabel = action.actionLabel,
+            menuTitle = action.menuTitle,
+            descriptor = action.descriptor,
         )
     }
 
@@ -140,12 +207,19 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         val file = File(item.path)
         if (!file.canRead()) return null
         return when {
-            file.isFile -> ExplorerActionTarget(
-                mimeType = Mime.fromFileOrWildcard(file.path),
-                extension = file.extension.lowercase(Locale.ROOT),
-                kind = org.autojs.plugin.explorer.api.ExplorerActionValues.TARGET_FILE,
-                fileName = file.name,
-            )
+            file.isFile -> {
+                val targetType = ExplorerActionTargetTypePolicy.resolve(
+                    type = item.type,
+                    fallbackMimeType = Mime.fromFileOrWildcard(file.path),
+                    rawExtension = file.extension,
+                )
+                ExplorerActionTarget(
+                    mimeType = targetType.mimeType,
+                    extension = targetType.extension,
+                    kind = org.autojs.plugin.explorer.api.ExplorerActionValues.TARGET_FILE,
+                    fileName = file.name,
+                )
+            }
             file.isDirectory -> ExplorerActionTarget(
                 mimeType = DIRECTORY_MIME_TYPE,
                 extension = "",
@@ -338,3 +412,20 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
     private const val DIRECTORY_MIME_TYPE = "inode/directory"
     private const val ARCHIVE_VOLUME_PROTOCOL_VERSION = 12
 }
+
+private data class ExplorerActionPresentationSignature(
+    val packageName: String,
+    val component: String,
+    val actionLabel: String,
+    val menuTitle: String,
+    val descriptor: ExplorerActionDescriptor,
+)
+
+private data class ExplorerActionRefreshStamp(
+    val packageName: String,
+    val serviceName: String,
+    val versionCode: Long,
+    val lastUpdateTime: Long,
+    val enabled: Boolean,
+    val authorized: Boolean,
+)

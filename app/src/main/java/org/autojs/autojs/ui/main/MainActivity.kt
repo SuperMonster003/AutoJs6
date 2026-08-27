@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Gravity
 import android.view.Menu
@@ -43,6 +44,7 @@ import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.doc.DocumentationFragment
 import org.autojs.autojs.ui.explorer.ExplorerView
+import org.autojs.autojs.ui.explorer.ExplorerViewStateLifecyclePolicy
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.OnDrawerClosed
@@ -137,6 +139,13 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     val filesItemIndex: Int
         get() = findPageIndexByTitle(R.string.text_file)
 
+    fun showFilesPageImmediately() {
+        val index = filesItemIndex
+        if (index >= 0 && mViewPager.currentItem != index) {
+            mViewPager.setCurrentItem(index, false)
+        }
+    }
+
     val docsItemIndex: Int
         get() = findPageIndexByTitle(R.string.text_documentation)
 
@@ -182,7 +191,9 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         Permissions.registerRequestMultiplePermissionsLauncher(this)
 
         WorkingDirectoryUtils.determineIfNeeded()
-        ExplorerView.clearViewStates()
+        if (ExplorerViewStateLifecyclePolicy.shouldClearOnCreate(savedInstanceState != null)) {
+            ExplorerView.clearViewStates()
+        }
 
         FloatyWindowManger.refreshCircularMenuIfNeeded(this)
 
@@ -323,6 +334,16 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         if (hasFocus) {
             setUpStatusBarIconLight()
         }
+    }
+
+    // MainActivity handles rotation-like changes itself (see manifest configChanges), so that
+    // returning from a landscape plugin activity (e.g. a video player) no longer recreates
+    // the whole main UI and the Explorer page keeps its state without any reload.
+    // zh-CN: MainActivity 自行处理旋转类配置变更 (见清单文件 configChanges 声明),
+    // 从横屏插件页面 (如视频播放器) 返回时不再重建主界面, 文件管理器状态得以原样保留.
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        mActionBarDrawerToggle.onConfigurationChanged(newConfig)
     }
 
     private fun setUpToolbarColors() {

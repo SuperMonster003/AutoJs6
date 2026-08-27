@@ -332,6 +332,7 @@
 
         <activity
             android:name="org.autojs.autojs.ui.main.MainActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|screenLayout|locale"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.FullScreen" />
