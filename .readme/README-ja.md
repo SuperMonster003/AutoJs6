@@ -285,6 +285,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` ホストに Node ランタイムを含まない nodePlugin ビルドで全 ABI の JNI/AAR ライブラリが誤って除外され, libjackpal-termexec2.so の欠落により Rhino Shell の初期化時にクラッシュする問題
 * `修正` apksigner の証明書ダイジェスト出力形式の変更により, Node.js R6 の証拠収集と検証で Android Build Tools 37 が報告する APK 署名者 ID が拒否される問題
 * `修正` IntelliJ IDEA で Android モジュールをビルドすると compileJava タスクの一致が曖昧になり失敗する問題
+* `修正` Clean 後の IntelliJ IDEA 全プロジェクトビルドで, Python Runtime API 配布 AAR が生成前に解決され, conformance フィクスチャに追加済み AIDL メソッドがないため失敗する問題
 * `修正` Android が現在割り当て済みのネイティブヒープを 0 バイトと報告すると, 正常な Node.js R6 常駐ランタイムの soak 証拠が拒否される問題
 * `修正` コレクターが最新の Inrt テンプレートを準備せずターゲット ABI も渡さないため, Node.js R6 のパッケージ APK 証拠がスキップされるか arm64 に固定される問題
 * `修正` ABI をまたぐアプリパッケージ時にインストール済みホストプロセスのネイティブライブラリが別 ABI ディレクトリへコピーされ, 32 ビットのパッケージアプリが 64 ビットのターミナルライブラリを読み込んでクラッシュする問題

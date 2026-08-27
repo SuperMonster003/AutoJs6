@@ -644,20 +644,13 @@ tasks {
             val consumerManifest = consumerRoot.resolve("src/main/AndroidManifest.xml")
             check(consumerBuild.isFile && consumerManifest.isFile) { "Python R1 distribution consumer is incomplete" }
             val consumerBuildText = consumerBuild.readText()
-            val consumerBuildCode = consumerBuildText
-                .replace(Regex("""(?s)/\*.*?\*/"""), "")
-                .lineSequence()
-                .joinToString("\n") { line -> line.substringBefore("//") }
-            if (
-                Regex("""\bproject\s*\(""").containsMatchIn(consumerBuildCode) ||
-                Regex("""\bprojects\.""").containsMatchIn(consumerBuildCode)
-            ) {
-                violations += "distribution consumer has a source-project dependency"
-            }
             listOf(
                 "abortOnError = true",
                 "withBuildType(\"release\")",
                 "variant.enable = false",
+                "System.getProperty(\"idea.active\").toBoolean()",
+                "implementation(project(\":plugin-api:protocol-wire-api\"))",
+                "implementation(project(\":plugin-api:python-runtime-api\"))",
                 "protocol-wire-api-debug.aar",
                 "python-runtime-api-debug.aar",
                 "preparePythonR1ApiDistribution",

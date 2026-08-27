@@ -183,6 +183,14 @@ class PythonRuntimeSameSignerDifferentUidAndroidTest {
                 override fun onCancelled(cancellation: ByteArray?) {
                     callbackCount.incrementAndGet()
                 }
+
+                override fun onInputPrompt(prompt: ByteArray?) {
+                    callbackCount.incrementAndGet()
+                }
+
+                override fun onHeartbeat(heartbeat: ByteArray?) {
+                    callbackCount.incrementAndGet()
+                }
             }
             val source = HOSTILE_SOURCE.toByteArray(Charsets.UTF_8)
             val request = PythonExecutionRequest(

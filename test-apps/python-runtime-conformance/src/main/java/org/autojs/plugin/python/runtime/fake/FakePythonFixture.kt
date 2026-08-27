@@ -17,7 +17,7 @@ object FakePythonFixture {
 
     val protocolVersion = PythonProtocolVersion(
         PythonRuntimeContract.PROTOCOL_MAJOR,
-        PythonRuntimeContract.PROTOCOL_MINOR,
+        0,
     )
 
     val runtimeInfo = PythonRuntimeInfo(

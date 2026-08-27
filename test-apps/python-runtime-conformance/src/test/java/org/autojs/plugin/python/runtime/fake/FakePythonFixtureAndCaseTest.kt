@@ -1,6 +1,7 @@
 package org.autojs.plugin.python.runtime.fake
 
 import org.autojs.plugin.protocol.wire.TaggedWireWriter
+import org.autojs.plugin.python.runtime.api.PythonProtocolVersion
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCodec
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
 import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
@@ -17,6 +18,9 @@ class FakePythonFixtureAndCaseTest {
         )
         assertEquals(1, FakePythonFixture.capabilities.limits.maxConcurrentSessions)
         assertTrue(FakePythonFixture.capabilities.supportsWorkspaceArchive.not())
+        assertEquals(PythonProtocolVersion(1, 0), FakePythonFixture.protocolVersion)
+        assertTrue(FakePythonFixture.capabilities.supportsInteractiveInput.not())
+        assertTrue(FakePythonFixture.capabilities.supportsHostCapabilityBroker.not())
     }
 
     @Test

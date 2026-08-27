@@ -7,6 +7,7 @@ import android.os.DeadObjectException
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import org.autojs.plugin.python.runtime.api.IPythonExecutionCallback
+import org.autojs.plugin.python.runtime.api.IPythonHostCapabilityBroker
 import org.autojs.plugin.python.runtime.api.IPythonRuntimeProvider
 import org.autojs.plugin.python.runtime.api.IPythonSessionOpenCallback
 import org.autojs.plugin.python.runtime.api.PythonErrorCode
@@ -201,6 +202,36 @@ class FakePythonRuntimeService : Service() {
                 if (!receiverCopiesTransferred) {
                     OwnedParcelFileDescriptors.closeIncoming(descriptors)
                 }
+            }
+        }
+
+        override fun openSessionWithHostCapabilities(
+            request: ByteArray?,
+            descriptors: Array<out ParcelFileDescriptor?>?,
+            hostCapabilityBroker: IPythonHostCapabilityBroker?,
+            admissionCallback: IPythonSessionOpenCallback?,
+            executionCallback: IPythonExecutionCallback?,
+        ) {
+            try {
+                callerVerifier.enforceAllowedCaller()
+                requireNotNull(hostCapabilityBroker) { "Python Host capability broker is missing" }
+                val safeRequest = requireNotNull(request) { "Python request metadata is missing" }
+                val safeAdmission = requireNotNull(admissionCallback) { "Python admission callback is missing" }
+                val safeExecution = requireNotNull(executionCallback) { "Python execution callback is missing" }
+                requireCallbacksAlive(safeAdmission, safeExecution)
+                val requestId = FakePythonRequestEnvelope.requireUniqueRequestId(safeRequest)
+                reject(
+                    safeAdmission,
+                    PythonExecutionError(
+                        requestId = requestId,
+                        code = PythonErrorCode.UNSUPPORTED_CAPABILITY,
+                        phase = PythonFailurePhase.NEGOTIATION,
+                        message = "Python R1 fake runtime does not support Host capability brokers",
+                        retryableBeforeDispatch = true,
+                    ),
+                )
+            } finally {
+                OwnedParcelFileDescriptors.closeIncoming(descriptors)
             }
         }
     }

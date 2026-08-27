@@ -122,6 +122,7 @@
         "Les builds nodePlugin sans environnement d'exécution Node côté hôte excluaient à tort les bibliothèques JNI/AAR de toutes les ABI, entraînant un plantage lors de l'initialisation de Rhino Shell en raison de l'absence de libjackpal-termexec2.so",
         "La collecte et la vérification des preuves Node.js R6 rejetaient les identités de signature APK signalées par Android Build Tools 37 car apksigner avait modifié le format de sortie de l'empreinte du certificat",
         "Les builds de modules Android dans IntelliJ IDEA échouaient en raison d'une correspondance ambiguë de la tâche compileJava",
+        "Les builds de l'ensemble du projet dans IntelliJ IDEA échouaient après Clean car les AAR distribués de l'API Python Runtime étaient résolus avant leur génération et les fixtures de conformité n'implémentaient pas les méthodes AIDL ajoutées",
         "Les preuves soak Node.js R6 pouvaient rejeter un environnement d'exécution persistant sain lorsqu'Android signalait zéro octet actuellement alloué au tas natif",
         "Les preuves d'APK empaqueté Node.js R6 étaient ignorées ou liées à arm64 car le collecteur ne préparait pas de modèle Inrt récent et ne transmettait pas l'ABI cible",
         "L'empaquetage d'applications entre ABI pouvait copier les bibliothèques natives du processus hôte installé dans le répertoire d'une autre ABI, amenant les applications empaquetées 32 bits à charger des bibliothèques de terminal 64 bits puis à planter",

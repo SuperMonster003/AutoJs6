@@ -122,6 +122,7 @@
         "nodePlugin 在宿主不含 Node 運行時時錯誤排除所有 ABI 的 JNI/AAR 庫, 導致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而崩潰的問題",
         "Node.js R6 證據收集及驗證因 apksigner 證書摘要輸出格式變更而拒絕 Android Build Tools 37 報告的 APK 簽名身份的問題",
         "IntelliJ IDEA 構建 Android 模塊時因 compileJava 任務匹配歧義而失敗的問題",
+        "IntelliJ IDEA 全項目構建在 Clean 後因 Python Runtime API 分發 AAR 尚未生成而無法解析 Android 依賴, 且 conformance 夾具未同步追加的 AIDL 方法導致編譯失敗的問題",
         "Android 報告目前已分配原生堆位元組數為零時, 健康的 Node.js R6 持久運行時 soak 證據被錯誤拒絕的問題",
         "Node.js R6 打包 APK 證據因收集器未準備當前 Inrt 模板或傳入目標 ABI 而被跳過或錯誤綁定 arm64 的問題",
         "跨 ABI 打包應用時錯誤將已安裝宿主進程的原生庫複製到其他 ABI 目錄, 導致 32 位打包應用加載 64 位終端庫並崩潰的問題",

@@ -117,6 +117,12 @@ internal class RemoteFakePythonExecutionSession(
         forceClose()
     }
 
+    override fun replyInput(reply: ByteArray?) {
+        callerVerifier.enforceSessionOwner(ownerUid)
+        requireNotNull(reply) { "Python input reply is missing" }
+        forceClose()
+    }
+
     fun linkCallbackDeaths(): Boolean {
         if (!callbackDeathsLinked.compareAndSet(false, true)) return !cleaned.get()
         return try {

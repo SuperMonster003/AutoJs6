@@ -42,18 +42,27 @@ androidComponents {
 val pythonR1DistributionDirectory = rootProject.layout.buildDirectory.dir(
     "distributions/python-runtime-r1",
 )
+val isIdeaActive = System.getProperty("idea.active").toBoolean()
 
 dependencies {
-    implementation(
-        files(
-            pythonR1DistributionDirectory.map { directory ->
-                directory.file("protocol-wire-api-debug.aar").asFile
-            },
-            pythonR1DistributionDirectory.map { directory ->
-                directory.file("python-runtime-api-debug.aar").asFile
-            },
-        ),
-    )
+    if (isIdeaActive) {
+        // IntelliJ resolves every imported Android module before it executes Gradle tasks. Use
+        // source projects only for that IDE model/build path so a clean checkout does not expose
+        // nonexistent staged AARs to AGP. Command-line gates retain the packaged-AAR boundary.
+        implementation(project(":plugin-api:protocol-wire-api"))
+        implementation(project(":plugin-api:python-runtime-api"))
+    } else {
+        implementation(
+            files(
+                pythonR1DistributionDirectory.map { directory ->
+                    directory.file("protocol-wire-api-debug.aar").asFile
+                },
+                pythonR1DistributionDirectory.map { directory ->
+                    directory.file("python-runtime-api-debug.aar").asFile
+                },
+            ),
+        )
+    }
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.test.runner)
@@ -79,8 +88,10 @@ val distributionConsumerTasks = setOf(
     "assembleDebugAndroidTest",
 )
 
-tasks.configureEach {
-    if (name in distributionConsumerTasks) {
-        dependsOn(preparePythonR1ApiDistributionTask)
+if (!isIdeaActive) {
+    tasks.configureEach {
+        if (name in distributionConsumerTasks) {
+            dependsOn(preparePythonR1ApiDistributionTask)
+        }
     }
 }

@@ -285,6 +285,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` nodePlugin 在宿主不含 Node 執行階段時錯誤排除所有 ABI 的 JNI/AAR 程式庫, 導致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而當機的問題
 * `修復` Node.js R6 證據收集及驗證因 apksigner 憑證摘要輸出格式變更而拒絕 Android Build Tools 37 回報的 APK 簽章身分的問題
 * `修復` IntelliJ IDEA 建置 Android 模組時因 compileJava 工作匹配歧義而失敗的問題
+* `修復` IntelliJ IDEA 全專案建置在 Clean 後因 Python Runtime API 發佈 AAR 尚未產生而無法解析 Android 相依性, 且 conformance 測試夾具未同步追加的 AIDL 方法導致編譯失敗的問題
 * `修復` Android 回報目前已配置原生堆積位元組數為零時, 健康的 Node.js R6 常駐執行階段 soak 證據遭錯誤拒絕的問題
 * `修復` Node.js R6 打包 APK 證據因收集器未準備目前 Inrt 範本或傳入目標 ABI 而遭跳過或錯誤綁定 arm64 的問題
 * `修復` 跨 ABI 打包應用程式時錯誤將已安裝宿主處理程序的原生程式庫複製到其他 ABI 目錄, 導致 32 位打包應用程式載入 64 位終端程式庫並當機的問題

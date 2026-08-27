@@ -6,7 +6,14 @@ Runtime API distribution. It compiles against exactly these staged artifacts:
 - `build/distributions/python-runtime-r1/protocol-wire-api-debug.aar`
 - `build/distributions/python-runtime-r1/python-runtime-api-debug.aar`
 
-It does not depend on either source project and contains no Python runtime,
-native library, network permission, service discovery, or script route. The
-root `preparePythonR1ApiDistribution` task must stage both AARs before consumer
-compilation, unit testing, lint, or assembly.
+Command-line and CI builds do not depend on either source project and contain
+no Python runtime, native library, network permission, service discovery, or
+script route. The root `preparePythonR1ApiDistribution` task stages both AARs
+before command-line consumer compilation, unit testing, lint, or assembly.
+
+IntelliJ IDEA is the only exception: its project model resolves every imported
+Android dependency before Gradle tasks can stage the AARs. When `idea.active`
+is true, this fixture uses the two source projects for IDE modeling and regular
+IDE builds. The command-line verification gate still resolves the consumer
+classpath and rejects any source-project dependency there, preserving the
+packaged-AAR distribution boundary.
