@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.r8
 
+import android.os.Build
 import org.autojs.plugin.r8compiler.api.R8ArtifactContentValidation
 import org.autojs.plugin.r8compiler.api.R8ArtifactRole
 import org.autojs.plugin.r8compiler.api.R8CompilerCodec
@@ -59,11 +60,7 @@ internal object R8CompilerArtifactExporter {
                     R8ArtifactRole.DEX_ZIP -> error("DEX is outside the R8 report export boundary")
                 }
             }
-            try {
-                Files.move(staging.toPath(), destination.toPath(), StandardCopyOption.ATOMIC_MOVE)
-            } catch (_: AtomicMoveNotSupportedException) {
-                Files.move(staging.toPath(), destination.toPath())
-            }
+            publishDirectory(staging, destination)
             published = true
             return destination
         } finally {
@@ -110,6 +107,20 @@ internal object R8CompilerArtifactExporter {
         R8ArtifactRole.USAGE_TEXT -> "usage.txt"
         R8ArtifactRole.RETRACE_METADATA -> "retrace-metadata.bin"
         R8ArtifactRole.DEX_ZIP -> error("DEX is outside the R8 report export boundary")
+    }
+
+    private fun publishDirectory(staging: File, destination: File) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            check(staging.renameTo(destination)) {
+                "Unable to atomically publish the R8 export directory"
+            }
+            return
+        }
+        try {
+            Files.move(staging.toPath(), destination.toPath(), StandardCopyOption.ATOMIC_MOVE)
+        } catch (_: AtomicMoveNotSupportedException) {
+            Files.move(staging.toPath(), destination.toPath())
+        }
     }
 
     private val FILE_NAMES = roles.map(::fileName).toSet()
