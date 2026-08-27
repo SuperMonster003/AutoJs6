@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 8 月 27 日.
+資料更新於 2026 年 8 月 28 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/08/27
+###### 2026/08/28
 
 * `新增` Lua Runtime 主機能力新增依檔案腳本隔離的持久鍵值儲存與 Toast: `autojs.storage.get/put/remove/clear` 使用應用程式私有, 同步提交且有界的命名空間, `autojs.ui.toast` 透過主機主執行緒單次派發
 * `新增` Ace LSP 預設檔案類型新增 .mts/.cts 及其宣告檔變體, 讓外部 Ace 編輯器可選擇與執行一致的 Rhino/Node TypeScript profile; 舊版預設選擇會自動遷移, 明確自訂副檔名集合保持不變
@@ -382,6 +382,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` Explorer Action v7 允許壓縮檔案外掛在最終發布前以唯讀方式重新開啟隱藏的待提交輸出並完成驗證, 同時保留 v4 用戶端的直接提交相容語意
 * `最佳化` Explorer Action v12 在每次開啟同層卷前驗證呼叫端 UID, 一般檔案身分, 大小, 修改時間, 符號連結狀態及工作階段生命週期, 並限制名稱長度, 目錄數量和開啟次數
 * `最佳化` 原生壓縮檔選取模式僅顯示離開與解壓縮, 整合有界進度與取消; 檔案系統五項操作列的文字在窄螢幕上置中顯示於圖示下方
+* `最佳化` 最佳化檔案管理器五項選取操作列在窄螢幕, 大字型, 橫向, RTL 與 TalkBack 下的使用體驗, 並在外掛啟動前對 Explorer Action 請求大小進行封閉驗證
 * `最佳化` 將 AI 文字與 DEX 編譯器符合性 provider 從生產 `plugins` 目錄移入專用 `test-apps` 建置群組, 保留惡意 Binder 回歸涵蓋並明確獨立生產外掛的發布邊界
 * `最佳化` DEX 編譯器實驗性宿主路徑維持預設關閉並要求明確元件, 實施精確元件 UID 與完整簽署者集合鎖定, 單次分派降級, 語意快取來源追蹤, 有界回呼入口, 隔離 Binder 逾時, 結構化 DEX ZIP 驗證, reliable pipe 有界 drain 與 EOF 對端錯誤檢查, 由來源/目標雙摘要保護的可回復單次發布, 非同步終止訊號與發布提交點原子仲裁, 且取消/逾時/Binder death 在提交前勝出時強制回復
 * `最佳化` DEX 編譯器 R1.1 維持實驗預設關閉, 允許 runtime.loadJar 的 raw JAR 優先使用一個明確選取且與主程式同簽章的精確元件 provider, 失敗時只降級一次至內建 D8/dx, 取消時不降級, AAR 載入繼續使用內建路徑
@@ -694,7 +695,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 27 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 8 月 28 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

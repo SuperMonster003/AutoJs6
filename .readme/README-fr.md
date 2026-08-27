@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 27 August 2026.
+Données mises à jour le 28 August 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/08/27
+###### 2026/08/28
 
 * `Fonctionnalité` Les capacités hôte de Lua Runtime fournissent désormais un stockage clé/valeur persistant isolé par fichier de script et Toast: `autojs.storage.get/put/remove/clear` utilise un espace de noms privé à l'application, borné et validé par écriture synchrone, tandis que `autojs.ui.toast` est distribué une seule fois sur le thread principal de l'hôte
 * `Fonctionnalité` Les types de fichiers par défaut d'Ace LSP incluent désormais .mts/.cts et leurs variantes de déclaration, permettant à l'éditeur Ace externe de sélectionner le même profil d'exécution TypeScript Rhino/Node; les anciennes sélections par défaut sont migrées et les ensembles de suffixes personnalisés explicites restent inchangés
@@ -382,6 +382,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Explorer Action v7 permet aux plugins d'archives de rouvrir en lecture seule une sortie en attente masquée et de la vérifier avant sa publication tout en conservant la validation directe des clients v4
 * `Amélioration` Explorer Action v12 vérifie l'UID appelant, l'identité du fichier ordinaire, la taille, la date de modification, l'état de lien symbolique et la durée de la session avant chaque ouverture de volume voisin, avec des limites fixes pour les noms, le catalogue et les requêtes d'ouverture
 * `Amélioration` La sélection native d'archive n'affiche plus que Quitter et Extraire, intègre une progression bornée et l'annulation, et garde la barre de cinq actions lisible sur les écrans étroits en centrant les libellés sous les icônes
+* `Amélioration` Amélioration de la barre de sélection à cinq actions du gestionnaire de fichiers pour les écrans compacts, les grandes polices, le mode paysage, RTL et TalkBack, avec validation fail-closed de la taille des requêtes Explorer Action avant le lancement du plugin
 * `Amélioration` Migration des fournisseurs de conformité AI et compilateur DEX du répertoire de production `plugins` vers le groupe de build dédié `test-apps`, en conservant la couverture de régression Binder hostile et en séparant la frontière de publication des plugins de production indépendants
 * `Amélioration` Le chemin hôte expérimental du compilateur DEX reste désactivé par défaut et exige un composant explicite, avec épinglage de l'UID du composant exact et de l'ensemble complet des signataires, repli à répartition unique, provenance sémantique du cache, entrée de callbacks bornée, délais Binder isolés, validation structurelle du ZIP DEX, vidage borné de reliable pipe avec vérification des erreurs du pair à EOF, publication unique avec retour arrière protégée par les condensats source et destination, et arbitrage atomique entre les signaux de terminaison asynchrones et le point de commit de publication qui force le retour arrière si l'annulation, le délai dépassé ou Binder death l'emporte avant le commit
 * `Amélioration` Le compilateur DEX R1.1 maintient l'expérimentation désactivée par défaut et permet aux JAR bruts de runtime.loadJar de préférer un provider de composant exact explicitement sélectionné et signé comme l'hôte, avec un seul repli vers D8/dx intégré en cas d'échec, aucun repli en cas d'annulation et le chargement AAR conservé sur le chemin intégré
@@ -694,7 +695,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 27 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 28 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

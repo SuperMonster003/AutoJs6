@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/27
+###### 2026/08/28
 
 * `Nuevo` Las capacidades Host de Lua Runtime ahora ofrecen almacenamiento persistente clave/valor aislado por archivo de script y Toast: `autojs.storage.get/put/remove/clear` usa un espacio de nombres privado de la aplicación, acotado y confirmado de forma síncrona, mientras `autojs.ui.toast` se despacha una sola vez en el hilo principal del Host
 * `Nuevo` Los tipos de archivo predeterminados de Ace LSP ahora incluyen .mts/.cts y sus variantes de declaración, lo que permite al editor Ace externo seleccionar el mismo perfil de ejecución TypeScript Rhino/Node; las selecciones predeterminadas antiguas se migran y los conjuntos de sufijos personalizados explícitos no cambian
@@ -222,6 +222,7 @@
 * `Mejora` Explorer Action v7 permite que los plugins de archivos reabran en modo de solo lectura una salida pendiente oculta y la verifiquen antes de publicarla, manteniendo la compatibilidad de confirmación directa para clientes v4
 * `Mejora` Explorer Action v12 verifica el UID del llamador, la identidad del archivo normal, el tamaño, la fecha de modificación, el estado de enlace simbólico y la vida de la sesión antes de abrir cada volumen hermano, con límites fijos para nombres, catálogo y solicitudes de apertura
 * `Mejora` La selección nativa de archivos ahora solo muestra Salir y Extraer, integra progreso acotado y cancelación, y mantiene legible la barra de cinco acciones en pantallas estrechas al centrar las etiquetas bajo los iconos
+* `Mejora` Mejorada la barra de selección de cinco acciones del administrador de archivos para pantallas compactas, fuentes grandes, modo horizontal, RTL y TalkBack, y añadida una validación fail-closed del tamaño de las solicitudes Explorer Action antes de iniciar el plugin
 * `Mejora` Trasladados los proveedores de conformidad de texto AI y compilador DEX del directorio de producción `plugins` al grupo de compilación dedicado `test-apps`, conservando la cobertura de regresión Binder hostil y separando el límite de publicación de los plugins de producción independientes
 * `Mejora` La ruta experimental del host para el compilador DEX permanece desactivada por defecto y exige un componente explícito, con fijación del UID del componente exacto y del conjunto completo de firmantes, fallback de despacho único, procedencia semántica de caché, entrada de callbacks acotada, plazos Binder aislados, validación estructural del ZIP DEX, drenaje acotado de reliable pipe con errores del par comprobados en EOF, publicación única con rollback protegida por digests de origen y destino, y arbitraje atómico entre señales de terminación asíncronas y el punto de commit de publicación que fuerza rollback si la cancelación, el timeout o Binder death prevalecen antes del commit
 * `Mejora` DEX Compiler R1.1 mantiene el experimento desactivado de forma predeterminada y permite que los JAR sin procesar de runtime.loadJar prefieran un provider de componente exacto seleccionado explícitamente y con la misma firma que el host, con un único retorno a D8/dx integrado ante fallos, sin retorno al cancelar y con la carga de AAR en la ruta integrada

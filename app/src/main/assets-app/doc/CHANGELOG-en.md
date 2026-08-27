@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/27
+###### 2026/08/28
 
 * `Feature` Lua Runtime Host capabilities now provide file-script-isolated persistent key/value storage and Toast: `autojs.storage.get/put/remove/clear` uses an app-private, synchronously committed, bounded namespace, while `autojs.ui.toast` dispatches once through the Host main thread
 * `Feature` Ace LSP defaults now include .mts/.cts and their declaration-file variants, allowing the external Ace editor to select the same Rhino/Node TypeScript execution profile; legacy default selections migrate while explicit custom suffix sets remain unchanged
@@ -222,6 +222,7 @@
 * `Improvement` Explorer Action v7 lets archive plugins reopen hidden pending output read-only and verify it before final publication while preserving direct-commit compatibility for v4 clients
 * `Improvement` Explorer Action v12 verifies caller UID, regular-file identity, size, modification time, symlink status, and session lifetime before each sibling-volume open, with fixed limits on names, catalog size, and open requests
 * `Improvement` Native archive selection now shows only Exit and Extract, integrates bounded progress and cancellation, and keeps the five-action filesystem bar legible on narrow screens by centering labels below icons
+* `Improvement` Improved the file manager's five-action selection bar for compact screens, large fonts, landscape, RTL, and TalkBack, and added fail-closed Explorer Action request-size validation before plugin launch
 * `Improvement` Moved the AI and DEX compiler conformance providers from the production `plugins` directory into the dedicated `test-apps` build group, preserving hostile Binder regression coverage while keeping independent production plugins as a separate release boundary
 * `Improvement` DEX compiler experimental host path remains default-off and requires an explicit component while enforcing exact-component UID and complete signer-set pinning, single-dispatch fallback, semantic cache provenance, bounded callback ingress, isolated Binder deadlines, structural DEX ZIP validation, reliable-pipe bounded draining with peer errors checked at EOF, rollback-safe single publication guarded by source and destination digests, and atomic arbitration between asynchronous termination signals and the publication commit point that forces rollback when cancellation, timeout, or Binder death wins before commit
 * `Improvement` DEX compiler R1.1 keeps the experiment default-off and lets raw runtime.loadJar JARs prefer one explicitly selected same-signed exact-component provider, with one built-in D8/dx fallback on failure, no fallback on cancellation, and AAR loading kept on the built-in path

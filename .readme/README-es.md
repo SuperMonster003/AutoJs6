@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 27 de August de 2026.
+Datos actualizados el 28 de August de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/08/27
+###### 2026/08/28
 
 * `Nuevo` Las capacidades Host de Lua Runtime ahora ofrecen almacenamiento persistente clave/valor aislado por archivo de script y Toast: `autojs.storage.get/put/remove/clear` usa un espacio de nombres privado de la aplicación, acotado y confirmado de forma síncrona, mientras `autojs.ui.toast` se despacha una sola vez en el hilo principal del Host
 * `Nuevo` Los tipos de archivo predeterminados de Ace LSP ahora incluyen .mts/.cts y sus variantes de declaración, lo que permite al editor Ace externo seleccionar el mismo perfil de ejecución TypeScript Rhino/Node; las selecciones predeterminadas antiguas se migran y los conjuntos de sufijos personalizados explícitos no cambian
@@ -382,6 +382,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Explorer Action v7 permite que los plugins de archivos reabran en modo de solo lectura una salida pendiente oculta y la verifiquen antes de publicarla, manteniendo la compatibilidad de confirmación directa para clientes v4
 * `Mejora` Explorer Action v12 verifica el UID del llamador, la identidad del archivo normal, el tamaño, la fecha de modificación, el estado de enlace simbólico y la vida de la sesión antes de abrir cada volumen hermano, con límites fijos para nombres, catálogo y solicitudes de apertura
 * `Mejora` La selección nativa de archivos ahora solo muestra Salir y Extraer, integra progreso acotado y cancelación, y mantiene legible la barra de cinco acciones en pantallas estrechas al centrar las etiquetas bajo los iconos
+* `Mejora` Mejorada la barra de selección de cinco acciones del administrador de archivos para pantallas compactas, fuentes grandes, modo horizontal, RTL y TalkBack, y añadida una validación fail-closed del tamaño de las solicitudes Explorer Action antes de iniciar el plugin
 * `Mejora` Trasladados los proveedores de conformidad de texto AI y compilador DEX del directorio de producción `plugins` al grupo de compilación dedicado `test-apps`, conservando la cobertura de regresión Binder hostil y separando el límite de publicación de los plugins de producción independientes
 * `Mejora` La ruta experimental del host para el compilador DEX permanece desactivada por defecto y exige un componente explícito, con fijación del UID del componente exacto y del conjunto completo de firmantes, fallback de despacho único, procedencia semántica de caché, entrada de callbacks acotada, plazos Binder aislados, validación estructural del ZIP DEX, drenaje acotado de reliable pipe con errores del par comprobados en EOF, publicación única con rollback protegida por digests de origen y destino, y arbitraje atómico entre señales de terminación asíncronas y el punto de commit de publicación que fuerza rollback si la cancelación, el timeout o Binder death prevalecen antes del commit
 * `Mejora` DEX Compiler R1.1 mantiene el experimento desactivado de forma predeterminada y permite que los JAR sin procesar de runtime.loadJar prefieran un provider de componente exacto seleccionado explícitamente y con la misma firma que el host, con un único retorno a D8/dx integrado ante fallos, sin retorno al cancelar y con la carga de AAR en la ruta integrada
@@ -694,7 +695,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 27 de August de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 28 de August de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

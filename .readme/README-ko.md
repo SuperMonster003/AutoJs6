@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 8 월 27 일.
+데이터 갱신일: 2026 년 8 월 28 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/27
+###### 2026/08/28
 
 * `추가` Lua Runtime Host capability에 파일 스크립트별로 격리된 영구 key/value 저장소와 Toast 추가: `autojs.storage.get/put/remove/clear`는 앱 전용의 제한된 namespace에 동기 commit하며, `autojs.ui.toast`는 Host 메인 thread에서 한 번만 dispatch
 * `추가` Ace LSP 기본 파일 형식에 .mts/.cts 및 선언 파일 변형을 추가하여 외부 Ace 편집기가 실행과 동일한 Rhino/Node TypeScript 프로필을 선택하도록 개선; 이전 기본 선택은 마이그레이션하고 명시적 사용자 지정 접미사 집합은 그대로 유지
@@ -382,6 +382,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Explorer Action v7에서 압축 파일 플러그인이 숨겨진 대기 출력을 읽기 전용으로 다시 열어 최종 게시 전에 검증할 수 있으며 v4 클라이언트의 직접 commit 호환성 유지
 * `개선` Explorer Action v12는 각 볼륨을 열기 전에 호출자 UID, 일반 파일 ID, 크기, 수정 시간, 심볼릭 링크 상태, 세션 수명을 검증하고 이름, 카탈로그 수, 열기 요청 수에 고정 상한 적용
 * `개선` 네이티브 압축 파일 선택 모드는 나가기와 압축 풀기만 표시하고 제한된 진행률과 취소를 통합; 파일 시스템 5개 작업 표시줄은 좁은 화면에서 텍스트를 아이콘 아래 가운데 정렬해 가독성을 유지
+* `개선` 파일 관리자의 5개 작업 선택 표시줄을 작은 화면, 큰 글꼴, 가로 화면, RTL 및 TalkBack에 맞게 개선하고 플러그인 실행 전에 Explorer Action 요청 크기를 fail-closed 방식으로 검증
 * `개선` AI 텍스트 및 DEX 컴파일러 적합성 provider를 프로덕션 `plugins` 디렉터리에서 전용 `test-apps` build group으로 이동하여 적대적 Binder 회귀 테스트 범위를 유지하고 독립 프로덕션 플러그인의 릴리스 경계를 명확화
 * `개선` DEX 컴파일러 실험적 호스트 경로를 기본 비활성화하고 명시적 컴포넌트를 요구하며, 정확한 컴포넌트 UID와 전체 서명자 집합 고정, 단일 디스패치 폴백, 의미 기반 캐시 출처, 제한된 콜백 입력, 격리된 Binder 시간 제한, 구조적 DEX ZIP 검증, reliable pipe 제한 drain과 EOF 시 peer error 확인, 원본/대상 digest로 보호되는 rollback 가능한 단일 게시, 비동기 종료 신호와 게시 commit 지점 사이의 원자적 중재, 취소/시간 초과/Binder death가 commit 전에 승리할 때 강제 rollback을 적용
 * `개선` DEX 컴파일러 R1.1은 실험을 기본 비활성 상태로 유지하고 runtime.loadJar의 raw JAR가 명시적으로 선택한 호스트와 동일 서명의 정확한 컴포넌트 provider를 우선 사용하도록 하며, 실패 시 내장 D8/dx로 한 번만 폴백하고 취소 시에는 폴백하지 않으며 AAR 로딩은 내장 경로에 유지합니다
@@ -694,7 +695,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 8 월 27 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 8 월 28 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
