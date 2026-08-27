@@ -15,6 +15,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
@@ -1117,6 +1118,171 @@ class ExplorerActionHostSessionInstrumentationTest {
         }
     }
 
+    @Test
+    fun terminalOutputBatchExpiryRequiresExternalRestartHarness() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val phase = InstrumentationRegistry.getArguments()
+            .getString(TERMINAL_EXPIRY_PHASE_ARGUMENT)
+            .orEmpty()
+        assumeTrue(
+            "This terminal expiry gate runs only through the external two-phase harness",
+            phase == TERMINAL_EXPIRY_PHASE_PREPARE || phase == TERMINAL_EXPIRY_PHASE_VERIFY,
+        )
+        val context = instrumentation.targetContext
+        val testRoot = File(context.cacheDir, TERMINAL_EXPIRY_ROOT_NAME)
+        val stateFile = File(context.filesDir, TERMINAL_EXPIRY_STATE_FILE_NAME)
+        val store = ExplorerActionOutputBatchStore(context)
+
+        if (phase == TERMINAL_EXPIRY_PHASE_PREPARE) {
+            store.list()
+                .filter { record -> record.parentPath == testRoot.canonicalPath }
+                .forEach { record -> store.remove(record.id) }
+            testRoot.deleteRecursively()
+            stateFile.delete()
+            assertTrue(testRoot.mkdirs())
+            val source = File(testRoot, "source.txt").apply { writeText("source") }
+            val session = ExplorerActionHostSession.create(
+                context = context,
+                pluginPackageName = context.packageName,
+                commonParent = testRoot,
+                targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+                allowCreateOutput = true,
+            )
+
+            val expiredCommittedId: String
+            val expiredAbortedId: String
+            val freshCommittedId: String
+            try {
+                fun prepareBatch(prefix: String, first: ByteArray, second: ByteArray): String {
+                    val firstId = prepareVerifiedOutput(session, "$prefix-a.zip", first)
+                    val secondId = prepareVerifiedOutput(session, "$prefix-b.zip", second)
+                    return session.prepareOutputBatch(mutableListOf(firstId, secondId))
+                        .getString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID)
+                        .let(::requireNotNull)
+                }
+
+                expiredCommittedId = prepareBatch(
+                    prefix = "expired-committed",
+                    first = byteArrayOf(1, 2, 3),
+                    second = byteArrayOf(4, 5, 6),
+                ).also(session::commitOutputBatch)
+                expiredAbortedId = prepareBatch(
+                    prefix = "expired-aborted",
+                    first = byteArrayOf(7, 8, 9),
+                    second = byteArrayOf(10, 11, 12),
+                ).also(session::abortOutputBatch)
+                freshCommittedId = prepareBatch(
+                    prefix = "fresh-committed",
+                    first = byteArrayOf(13, 14, 15),
+                    second = byteArrayOf(16, 17, 18),
+                ).also(session::commitOutputBatch)
+            } finally {
+                session.close()
+            }
+
+            val expiredAtMillis = (System.currentTimeMillis() - EXPIRED_TERMINAL_AGE_MILLIS)
+                .coerceAtLeast(0L)
+            listOf(expiredCommittedId, expiredAbortedId).forEach { batchId ->
+                val record = requireNotNull(store.read(batchId))
+                store.write(
+                    record.copy(
+                        createdAtMillis = expiredAtMillis,
+                        updatedAtMillis = expiredAtMillis,
+                    ),
+                )
+            }
+            writeDurableText(
+                stateFile,
+                listOf(expiredCommittedId, expiredAbortedId, freshCommittedId).joinToString("\n"),
+            )
+
+            assertTrue(File(testRoot, "expired-committed-a.zip").isFile)
+            assertTrue(File(testRoot, "expired-committed-b.zip").isFile)
+            assertFalse(File(testRoot, "expired-aborted-a.zip").exists())
+            assertFalse(File(testRoot, "expired-aborted-b.zip").exists())
+            assertTrue(File(testRoot, "fresh-committed-a.zip").isFile)
+            assertTrue(File(testRoot, "fresh-committed-b.zip").isFile)
+            assertTrue(stateFile.isFile)
+            return
+        }
+
+        val batchIds = stateFile.readLines(Charsets.UTF_8)
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+        assertEquals(3, batchIds.size)
+        val expiredCommittedId = batchIds[0]
+        val expiredAbortedId = batchIds[1]
+        val freshCommittedId = batchIds[2]
+        val source = File(testRoot, "source.txt")
+        assertTrue(source.isFile)
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+        )
+        try {
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_UNKNOWN,
+                session.queryOutputBatch(expiredCommittedId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_UNKNOWN,
+                session.queryOutputBatch(expiredAbortedId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED,
+                session.queryOutputBatch(freshCommittedId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+            assertNull(store.read(expiredCommittedId))
+            assertNull(store.read(expiredAbortedId))
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED,
+                requireNotNull(store.read(freshCommittedId)).state,
+            )
+            @Suppress("DEPRECATION")
+            val listed = requireNotNull(
+                session.listOutputBatches().getParcelableArrayList<Bundle>(
+                    ExplorerActionHostSessionKeys.OUTPUT_BATCHES,
+                ),
+            )
+            assertEquals(
+                listOf(freshCommittedId),
+                listed.map { batch ->
+                    batch.getString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID)
+                },
+            )
+            assertArrayEquals(
+                byteArrayOf(1, 2, 3),
+                File(testRoot, "expired-committed-a.zip").readBytes(),
+            )
+            assertArrayEquals(
+                byteArrayOf(4, 5, 6),
+                File(testRoot, "expired-committed-b.zip").readBytes(),
+            )
+            assertFalse(File(testRoot, "expired-aborted-a.zip").exists())
+            assertFalse(File(testRoot, "expired-aborted-b.zip").exists())
+            assertArrayEquals(
+                byteArrayOf(13, 14, 15),
+                File(testRoot, "fresh-committed-a.zip").readBytes(),
+            )
+            assertArrayEquals(
+                byteArrayOf(16, 17, 18),
+                File(testRoot, "fresh-committed-b.zip").readBytes(),
+            )
+            assertTrue(testRoot.listFiles().orEmpty().none { file -> file.name.endsWith(".part") })
+        } finally {
+            session.close()
+            batchIds.forEach(store::remove)
+            testRoot.deleteRecursively()
+            stateFile.delete()
+        }
+    }
+
     private fun prepareVerifiedOutput(
         session: ExplorerActionHostSession,
         displayName: String,
@@ -1201,5 +1367,11 @@ class ExplorerActionHostSessionInstrumentationTest {
         const val PROCESS_DEATH_ROOT_NAME = "explorer-action-v15-real-process-death"
         const val PROCESS_DEATH_BATCH_ID_FILE_NAME = "explorer-action-v15-process-death-batch-id"
         const val PROCESS_DEATH_READY_FILE_NAME = "explorer-action-v15-process-death-ready"
+        const val TERMINAL_EXPIRY_PHASE_ARGUMENT = "archiveManagerV15TerminalExpiryPhase"
+        const val TERMINAL_EXPIRY_PHASE_PREPARE = "prepare"
+        const val TERMINAL_EXPIRY_PHASE_VERIFY = "verify"
+        const val TERMINAL_EXPIRY_ROOT_NAME = "explorer-action-v15-terminal-expiry"
+        const val TERMINAL_EXPIRY_STATE_FILE_NAME = "explorer-action-v15-terminal-expiry-state"
+        const val EXPIRED_TERMINAL_AGE_MILLIS = 25L * 60L * 60L * 1000L
     }
 }
