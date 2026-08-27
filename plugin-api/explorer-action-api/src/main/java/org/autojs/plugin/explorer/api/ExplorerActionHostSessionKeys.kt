@@ -26,4 +26,10 @@ object ExplorerActionHostSessionKeys {
     const val OUTPUT_FILE_COUNT = "outputFileCount"
     const val OUTPUT_DIRECTORY_COUNT = "outputDirectoryCount"
     const val OUTPUT_BYTES = "outputBytes"
+
+    const val OUTPUT_BATCH_ID = "outputBatchId"
+    const val OUTPUT_BATCH_STATE = "outputBatchState"
+    const val OUTPUT_BATCHES = "outputBatches"
+    const val OUTPUT_TRANSACTION_IDS = "outputTransactionIds"
+    const val OUTPUT_BATCH_PUBLISHED_COUNT = "outputBatchPublishedCount"
 }

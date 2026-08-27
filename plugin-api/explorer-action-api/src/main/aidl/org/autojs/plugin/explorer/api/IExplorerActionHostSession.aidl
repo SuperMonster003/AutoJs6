@@ -3,6 +3,7 @@ package org.autojs.plugin.explorer.api;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import java.util.List;
 
 /**
  * Short-lived, least-privilege host session attached to an Explorer Action v4 request.
@@ -57,4 +58,25 @@ interface IExplorerActionHostSession {
 
     /** v9. Attaches a plugin-process lifetime token so abandoned outputs can be rolled back. */
     void attachClient(IBinder clientToken);
+
+    /**
+     * v15. Durably groups verified, create-only file outputs before any final name is published.
+     * Every transaction must still be pending in this session and may belong to only one batch.
+     */
+    Bundle prepareOutputBatch(in List<String> transactionIds);
+
+    /**
+     * v15. Publishes every member of a prepared batch, or rolls the whole batch back. Recovery
+     * after host-process death also rolls back an interrupted publication before exposing state.
+     */
+    Bundle commitOutputBatch(String batchId);
+
+    /** v15. Aborts every still-owned member of a prepared or interrupted output batch. */
+    void abortOutputBatch(String batchId);
+
+    /** v15. Returns the current or terminal state of one output batch. */
+    Bundle queryOutputBatch(String batchId);
+
+    /** v15. Lists bounded active and recently completed output batches for recovery. */
+    Bundle listOutputBatches();
 }

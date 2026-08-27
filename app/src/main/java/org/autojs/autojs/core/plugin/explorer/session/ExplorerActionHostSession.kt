@@ -51,7 +51,9 @@ internal class ExplorerActionHostSession private constructor(
     private val onOutputCommitted: (File) -> Unit,
     private val onTargetReplaced: (File) -> Unit,
     private val outputTreeStore: ExplorerActionOutputTreeStore,
+    private val outputBatchStore: ExplorerActionOutputBatchStore,
     private val clock: () -> Long,
+    private val afterBatchMemberPublished: (Int) -> Unit,
 ) : IExplorerActionHostSession.Stub() {
 
     private val parent = commonParent.canonicalFile
@@ -65,6 +67,7 @@ internal class ExplorerActionHostSession private constructor(
     private val lock = Any()
     private val outputs = LinkedHashMap<String, OutputTransaction>()
     private val terminalOutputs = LinkedHashMap<String, Bundle>()
+    private val outputBatches = LinkedHashMap<String, ExplorerActionOutputBatchRecord>()
     private var clientLease: ClientLease? = null
     private var closed = false
 
@@ -339,6 +342,220 @@ internal class ExplorerActionHostSession private constructor(
         }
     }
 
+    override fun prepareOutputBatch(transactionIds: MutableList<String>): Bundle {
+        enforceCaller()
+        val requestedIds = transactionIds.toList()
+        require(requestedIds.size in 2..ExplorerActionProtocol.MAX_OUTPUT_BATCH_ENTRIES) {
+            "Explorer Action output batch size is invalid"
+        }
+        require(requestedIds.distinct().size == requestedIds.size) {
+            "Explorer Action output batch contains duplicate transactions"
+        }
+        return synchronized(lock) {
+            checkOpen()
+            require(parent.canWrite()) { "Explorer Action parent directory is not writable" }
+            val transactions = requestedIds.map(::output)
+            transactions.forEach { transaction ->
+                check(transaction.mode == OutputMode.CREATE) {
+                    "Explorer Action output batch accepts only new file outputs"
+                }
+                check(transaction.state == OutputState.VERIFYING) {
+                    "Explorer Action output batch member has not been verified"
+                }
+                check(transaction.outputBatchId == null) {
+                    "Explorer Action output already belongs to a batch"
+                }
+                check(!transaction.target.exists() && transaction.temp.isFile) {
+                    "Explorer Action output batch member changed before reservation"
+                }
+            }
+            val parentIdentity = TargetIdentity.capture(parent)
+            val batchId = UUID.randomUUID().toString()
+            val now = clock()
+            val record = ExplorerActionOutputBatchRecord(
+                id = batchId,
+                pluginUid = expectedUid,
+                processInstanceId = PROCESS_INSTANCE_ID,
+                parentPath = parent.path,
+                parentDevice = parentIdentity.device,
+                parentInode = parentIdentity.inode,
+                state = ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_PREPARED,
+                createdAtMillis = now,
+                updatedAtMillis = now,
+                members = transactions.map { transaction ->
+                    val identity = TargetIdentity.captureRegularFile(transaction.temp)
+                    ExplorerActionOutputBatchMemberRecord(
+                        transactionId = transaction.id,
+                        targetPath = transaction.target.path,
+                        stagingPath = transaction.temp.path,
+                        stagingDevice = identity.device,
+                        stagingInode = identity.inode,
+                        stagingSize = identity.size,
+                        stagingLastModifiedMillis = identity.lastModifiedMillis,
+                    )
+                },
+            )
+            markOutputBatchActive(batchId, true)
+            try {
+                outputBatchStore.write(record)
+            } catch (error: Throwable) {
+                markOutputBatchActive(batchId, false)
+                throw error
+            }
+            transactions.forEach { transaction -> transaction.outputBatchId = batchId }
+            outputBatches[batchId] = record
+            outputBatchBundle(record)
+        }
+    }
+
+    override fun commitOutputBatch(batchId: String): Bundle {
+        enforceCaller()
+        val committed = synchronized(lock) {
+            checkOpen()
+            val record = activeOutputBatch(batchId)
+            check(record.state == ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_PREPARED) {
+                "Explorer Action output batch is not ready to commit"
+            }
+            val transactions = record.members.map { member ->
+                output(member.transactionId).also { transaction ->
+                    check(transaction.outputBatchId == batchId) {
+                        "Explorer Action output batch membership changed"
+                    }
+                }
+            }
+            var current = record.copy(
+                state = ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTING,
+                updatedAtMillis = outputBatchTimestamp(record),
+            )
+            outputBatchStore.write(current)
+            outputBatches[batchId] = current
+            try {
+                transactions.forEachIndexed { index, transaction ->
+                    val member = current.members[index]
+                    requireBatchMemberIdentity(transaction, member)
+                    FileOutputStream(transaction.temp, true).use { output -> output.fd.sync() }
+                    requireBatchMemberIdentity(transaction, member)
+                    check(!transaction.target.exists()) {
+                        "Explorer Action output batch target now exists"
+                    }
+                    try {
+                        Os.rename(transaction.temp.path, transaction.target.path)
+                    } catch (error: ErrnoException) {
+                        throw IOException("Explorer Action output batch member could not be published", error)
+                    }
+                    afterBatchMemberPublished(index + 1)
+                    current = current.copy(
+                        updatedAtMillis = outputBatchTimestamp(current),
+                        publishedCount = index + 1,
+                    )
+                    outputBatchStore.write(current)
+                    outputBatches[batchId] = current
+                }
+                syncDirectory(parent)
+                current.members.forEach { member ->
+                    check(batchMemberIdentityMatches(File(member.targetPath), member)) {
+                        "Explorer Action output batch member changed after publication"
+                    }
+                    check(!File(member.stagingPath).exists()) {
+                        "Explorer Action output batch staging file survived publication"
+                    }
+                }
+                current = current.copy(
+                    state = ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED,
+                    updatedAtMillis = outputBatchTimestamp(current),
+                    publishedCount = current.members.size,
+                )
+                outputBatchStore.write(current)
+                outputBatches[batchId] = current
+
+                val outputResults = ArrayList<Bundle>(transactions.size)
+                transactions.forEach { transaction ->
+                    outputs.remove(transaction.id)
+                    releaseOutputTarget(transaction.target)
+                    val result = committedOutputBundle(transaction)
+                    rememberTerminalOutput(transaction.id, result)
+                    outputResults += result
+                }
+                markOutputBatchActive(batchId, false)
+                CommittedOutputBatch(
+                    targets = transactions.map(OutputTransaction::target),
+                    result = outputBatchBundle(current).apply {
+                        putParcelableArrayList(ExplorerActionHostSessionKeys.OUTPUTS, outputResults)
+                    },
+                )
+            } catch (error: Throwable) {
+                val rollback = rollbackOutputBatch(current)
+                outputBatches[batchId] = rollback.record
+                if (rollback.failures.isEmpty()) {
+                    releaseOutputBatchTransactions(current)
+                    markOutputBatchActive(batchId, false)
+                } else {
+                    rollback.failures.forEach(error::addSuppressed)
+                }
+                throw error
+            }
+        }
+        committed.targets.forEach { target -> runCatching { onOutputCommitted(target) } }
+        return committed.result
+    }
+
+    override fun abortOutputBatch(batchId: String) {
+        enforceCaller()
+        synchronized(lock) {
+            checkOpen()
+            val record = abortableOutputBatch(batchId)
+            check(record.state != ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED) {
+                "Explorer Action committed output batch cannot be aborted"
+            }
+            val rollback = rollbackOutputBatch(record)
+            outputBatches[batchId] = rollback.record
+            if (rollback.failures.isNotEmpty()) {
+                val error = IOException("Explorer Action output batch rollback requires recovery")
+                rollback.failures.forEach(error::addSuppressed)
+                throw error
+            }
+            releaseOutputBatchTransactions(record)
+            markOutputBatchActive(batchId, false)
+        }
+    }
+
+    override fun queryOutputBatch(batchId: String): Bundle {
+        enforceCaller()
+        require(isCanonicalUuid(batchId)) { "Explorer Action output batch ID is invalid" }
+        return synchronized(lock) {
+            checkOpen()
+            val record = outputBatches[batchId] ?: outputBatchStore.read(batchId)
+            if (record == null || !belongsToThisSessionParent(record)) {
+                unknownOutputBatchBundle(batchId)
+            } else {
+                outputBatchBundle(record)
+            }
+        }
+    }
+
+    override fun listOutputBatches(): Bundle {
+        enforceCaller()
+        return synchronized(lock) {
+            checkOpen()
+            val records = LinkedHashMap<String, ExplorerActionOutputBatchRecord>()
+            outputBatchStore.list()
+                .filter(::belongsToThisSessionParent)
+                .takeLast(ExplorerActionProtocol.MAX_OUTPUT_BATCH_RESULTS)
+                .forEach { record -> records[record.id] = record }
+            outputBatches.forEach { (id, record) -> records[id] = record }
+            Bundle().apply {
+                putParcelableArrayList(
+                    ExplorerActionHostSessionKeys.OUTPUT_BATCHES,
+                    ArrayList(
+                        records.values.toList()
+                            .takeLast(ExplorerActionProtocol.MAX_OUTPUT_BATCH_RESULTS)
+                            .map(::outputBatchBundle),
+                    ),
+                )
+            }
+        }
+    }
+
     override fun openOutput(transactionId: String): ParcelFileDescriptor {
         enforceCaller()
         return synchronized(lock) {
@@ -385,6 +602,9 @@ internal class ExplorerActionHostSession private constructor(
         val committed = synchronized(lock) {
             checkOpen()
             val transaction = output(transactionId)
+            check(transaction.outputBatchId == null) {
+                "Explorer Action output belongs to a batch"
+            }
             val readyToCommit = when (transaction.mode) {
                 OutputMode.CREATE ->
                     transaction.state == OutputState.OPENED ||
@@ -454,6 +674,9 @@ internal class ExplorerActionHostSession private constructor(
         synchronized(lock) {
             checkOpen()
             val transaction = outputs[transactionId] ?: return
+            check(transaction.outputBatchId == null) {
+                "Explorer Action output batch must be aborted as a group"
+            }
             cleanup(transaction)
             outputs.remove(transactionId)
             if (transaction.mode == OutputMode.CREATE_TREE) {
@@ -490,11 +713,19 @@ internal class ExplorerActionHostSession private constructor(
             clientLease = null
             CloseState(
                 abandoned = outputs.values.toList().also { outputs.clear() },
+                batches = outputBatches.values.filter { record ->
+                    record.state != ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED &&
+                        record.state != ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED
+                },
                 clientLease = lease,
             )
         }
         closeState.clientLease?.let { lease ->
             runCatching { lease.token.unlinkToDeath(lease.deathRecipient, 0) }
+        }
+        closeState.batches.forEach { record ->
+            runCatching { rollbackOutputBatch(record) }
+            markOutputBatchActive(record.id, false)
         }
         closeState.abandoned.forEach { transaction ->
             try {
@@ -579,6 +810,172 @@ internal class ExplorerActionHostSession private constructor(
             putLong(
                 ExplorerActionHostSessionKeys.OUTPUT_BYTES,
                 transaction.outputTreeBytes.takeIf { it >= 0L } ?: 0L,
+            )
+        }
+    }
+
+    private fun committedOutputBundle(transaction: OutputTransaction): Bundle =
+        outputBundle(transaction).apply {
+            putInt(
+                ExplorerActionHostSessionKeys.OUTPUT_STATE,
+                ExplorerActionHostSessionValues.OUTPUT_STATE_COMMITTED,
+            )
+            putLong(ExplorerActionHostSessionKeys.SIZE, transaction.target.length())
+            putLong(ExplorerActionHostSessionKeys.LAST_MODIFIED, transaction.target.lastModified())
+        }
+
+    private fun outputBatchBundle(record: ExplorerActionOutputBatchRecord): Bundle = Bundle().apply {
+        putString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID, record.id)
+        putInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE, record.state)
+        putStringArrayList(
+            ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_IDS,
+            ArrayList(record.members.map(ExplorerActionOutputBatchMemberRecord::transactionId)),
+        )
+        putInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_PUBLISHED_COUNT, record.publishedCount)
+    }
+
+    private fun outputBatchTimestamp(record: ExplorerActionOutputBatchRecord): Long =
+        clock().coerceAtLeast(record.updatedAtMillis)
+
+    private fun unknownOutputBatchBundle(batchId: String): Bundle = Bundle().apply {
+        putString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID, batchId)
+        putInt(
+            ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE,
+            ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_UNKNOWN,
+        )
+        putStringArrayList(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_IDS, arrayListOf())
+        putInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_PUBLISHED_COUNT, 0)
+    }
+
+    private fun activeOutputBatch(batchId: String): ExplorerActionOutputBatchRecord {
+        require(isCanonicalUuid(batchId)) { "Explorer Action output batch ID is invalid" }
+        return outputBatches[batchId]
+            ?: throw IllegalArgumentException("Explorer Action output batch is unknown")
+    }
+
+    private fun abortableOutputBatch(batchId: String): ExplorerActionOutputBatchRecord {
+        require(isCanonicalUuid(batchId)) { "Explorer Action output batch ID is invalid" }
+        return outputBatches[batchId]
+            ?: outputBatchStore.read(batchId)?.takeIf(::belongsToThisSessionParent)
+            ?: throw IllegalArgumentException("Explorer Action output batch is unknown")
+    }
+
+    private fun belongsToThisSessionParent(record: ExplorerActionOutputBatchRecord): Boolean {
+        val identity = runCatching { TargetIdentity.capture(parent) }.getOrNull() ?: return false
+        return record.pluginUid == expectedUid &&
+            record.parentPath == parent.path &&
+            record.parentDevice == identity.device &&
+            record.parentInode == identity.inode
+    }
+
+    private fun requireBatchMemberIdentity(
+        transaction: OutputTransaction,
+        member: ExplorerActionOutputBatchMemberRecord,
+    ) {
+        check(transaction.id == member.transactionId)
+        check(transaction.target.path == member.targetPath && transaction.temp.path == member.stagingPath) {
+            "Explorer Action output batch paths changed"
+        }
+        check(transaction.target.parentFile == parent && transaction.temp.parentFile == parent) {
+            "Explorer Action output batch member left its parent"
+        }
+        check(batchMemberIdentityMatches(transaction.temp, member)) {
+            "Explorer Action output batch staging file changed"
+        }
+    }
+
+    private fun batchMemberIdentityMatches(
+        file: File,
+        member: ExplorerActionOutputBatchMemberRecord,
+    ): Boolean = runCatching {
+        val identity = TargetIdentity.captureRegularFile(file)
+        identity.device == member.stagingDevice &&
+            identity.inode == member.stagingInode &&
+            identity.size == member.stagingSize &&
+            identity.lastModifiedMillis == member.stagingLastModifiedMillis
+    }.getOrDefault(false)
+
+    private fun rollbackOutputBatch(
+        record: ExplorerActionOutputBatchRecord,
+    ): OutputBatchRollback {
+        val failures = mutableListOf<Throwable>()
+        val parentMatches = runCatching {
+            val identity = TargetIdentity.capture(parent)
+            record.pluginUid == expectedUid &&
+                record.parentPath == parent.path &&
+                record.parentDevice == identity.device &&
+                record.parentInode == identity.inode
+        }.getOrDefault(false)
+        if (!parentMatches) {
+            failures += IOException("Explorer Action output batch parent identity changed")
+        } else {
+            record.members.asReversed().forEach { member ->
+                listOf(File(member.targetPath), File(member.stagingPath)).forEach { file ->
+                    val failure = runCatching {
+                        val canonical = file.canonicalFile
+                        check(canonical == file && canonical.parentFile == parent) {
+                            "Explorer Action output batch rollback path is invalid"
+                        }
+                        val stat = try {
+                            Os.lstat(file.path)
+                        } catch (error: ErrnoException) {
+                            if (error.errno == OsConstants.ENOENT) return@runCatching
+                            throw IOException(
+                                "Explorer Action output batch rollback path is unavailable",
+                                error,
+                            )
+                        }
+                        check(OsConstants.S_ISREG(stat.st_mode) && !OsConstants.S_ISLNK(stat.st_mode)) {
+                            "Explorer Action output batch rollback path is not a regular file"
+                        }
+                        check(
+                            stat.st_dev == member.stagingDevice &&
+                                stat.st_ino == member.stagingInode &&
+                                stat.st_size == member.stagingSize &&
+                                file.lastModified() == member.stagingLastModifiedMillis,
+                        ) {
+                            "Explorer Action output batch rollback identity changed"
+                        }
+                        if (!file.delete()) {
+                            throw IOException("Explorer Action output batch member could not be removed")
+                        }
+                    }.exceptionOrNull()
+                    if (failure != null) failures += failure
+                }
+            }
+            runCatching { syncDirectory(parent) }.exceptionOrNull()?.let(failures::add)
+        }
+
+        var rolledBack = record.copy(
+            state = if (failures.isEmpty()) {
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED
+            } else {
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_RECOVERY_REQUIRED
+            },
+            updatedAtMillis = outputBatchTimestamp(record),
+        )
+        val journalFailure = runCatching { outputBatchStore.write(rolledBack) }.exceptionOrNull()
+        if (journalFailure != null) {
+            failures += journalFailure
+            rolledBack = rolledBack.copy(
+                state = ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_RECOVERY_REQUIRED,
+            )
+        }
+        return OutputBatchRollback(rolledBack, failures)
+    }
+
+    private fun releaseOutputBatchTransactions(record: ExplorerActionOutputBatchRecord) {
+        record.members.forEach { member ->
+            val transaction = outputs.remove(member.transactionId) ?: return@forEach
+            releaseOutputTarget(transaction.target)
+            rememberTerminalOutput(
+                transaction.id,
+                outputBundle(transaction).apply {
+                    putInt(
+                        ExplorerActionHostSessionKeys.OUTPUT_STATE,
+                        ExplorerActionHostSessionValues.OUTPUT_STATE_ABORTED,
+                    )
+                },
             )
         }
     }
@@ -1038,6 +1435,7 @@ internal class ExplorerActionHostSession private constructor(
         val outputTreeNodes: LinkedHashMap<String, OutputTreeNodeKind> = LinkedHashMap(),
         var outputTreeBytes: Long = -1L,
         var state: OutputState = OutputState.PREPARED,
+        var outputBatchId: String? = null,
     )
 
     private data class ClientLease(
@@ -1047,7 +1445,18 @@ internal class ExplorerActionHostSession private constructor(
 
     private data class CloseState(
         val abandoned: List<OutputTransaction>,
+        val batches: List<ExplorerActionOutputBatchRecord>,
         val clientLease: ClientLease?,
+    )
+
+    private data class CommittedOutputBatch(
+        val targets: List<File>,
+        val result: Bundle,
+    )
+
+    private data class OutputBatchRollback(
+        val record: ExplorerActionOutputBatchRecord,
+        val failures: List<Throwable>,
     )
 
     private data class CommittedOutput(
@@ -1073,6 +1482,23 @@ internal class ExplorerActionHostSession private constructor(
                     Os.stat(file.path)
                 } catch (error: ErrnoException) {
                     throw IOException("Explorer Action target identity is unavailable", error)
+                }
+                return TargetIdentity(
+                    device = stat.st_dev,
+                    inode = stat.st_ino,
+                    size = stat.st_size,
+                    lastModifiedMillis = file.lastModified(),
+                )
+            }
+
+            fun captureRegularFile(file: File): TargetIdentity {
+                val stat = try {
+                    Os.lstat(file.path)
+                } catch (error: ErrnoException) {
+                    throw IOException("Explorer Action output identity is unavailable", error)
+                }
+                require(OsConstants.S_ISREG(stat.st_mode) && !OsConstants.S_ISLNK(stat.st_mode)) {
+                    "Explorer Action output is not a regular file"
                 }
                 return TargetIdentity(
                     device = stat.st_dev,
@@ -1143,11 +1569,18 @@ internal class ExplorerActionHostSession private constructor(
         private const val MAX_AUTO_RENAME_ATTEMPTS = 10_000
         private const val OUTPUT_TREE_MARKER_PREFIX = ".autojs6-explorer-transaction-"
         private const val OUTPUT_TREE_TERMINAL_RETENTION_MILLIS = 24L * 60L * 60L * 1000L
+        private const val OUTPUT_BATCH_TERMINAL_RETENTION_MILLIS = 24L * 60L * 60L * 1000L
+        private val OUTPUT_STAGING_NAME_PATTERN = Regex(
+            "\\.autojs6-explorer-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-" +
+                "[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.part",
+        )
         private val PROCESS_INSTANCE_ID = UUID.randomUUID().toString()
         private val RESERVATION_LOCK = Any()
         private val RESERVED_OUTPUT_PATHS = HashSet<String>()
         private val ACTIVE_OUTPUT_TREE_IDS = HashSet<String>()
+        private val ACTIVE_OUTPUT_BATCH_IDS = HashSet<String>()
         private val OUTPUT_TREE_RECOVERY_LOCK = Any()
+        private val OUTPUT_BATCH_RECOVERY_LOCK = Any()
         private val CLIENT_DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
             Thread(runnable, "ExplorerActionClientDeath").apply { isDaemon = true }
         }
@@ -1162,11 +1595,17 @@ internal class ExplorerActionHostSession private constructor(
             onOutputCommitted: (File) -> Unit = ::notifyCreated,
             onTargetReplaced: (File) -> Unit = ::notifyChanged,
             clock: () -> Long = System::currentTimeMillis,
+            afterBatchMemberPublished: (Int) -> Unit = {},
         ): ExplorerActionHostSession {
             val canonicalParent = commonParent.canonicalFile
-            val store = ExplorerActionOutputTreeStore(context.applicationContext)
+            val applicationContext = context.applicationContext
+            val store = ExplorerActionOutputTreeStore(applicationContext)
             synchronized(OUTPUT_TREE_RECOVERY_LOCK) {
                 recoverDurableOutputTrees(store, clock())
+            }
+            val batchStore = ExplorerActionOutputBatchStore(applicationContext)
+            synchronized(OUTPUT_BATCH_RECOVERY_LOCK) {
+                recoverDurableOutputBatches(batchStore, clock())
             }
             return ExplorerActionHostSession(
                 expectedUid = applicationUid(context.packageManager, pluginPackageName),
@@ -1177,7 +1616,9 @@ internal class ExplorerActionHostSession private constructor(
                 onOutputCommitted = onOutputCommitted,
                 onTargetReplaced = onTargetReplaced,
                 outputTreeStore = store,
+                outputBatchStore = batchStore,
                 clock = clock,
+                afterBatchMemberPublished = afterBatchMemberPublished,
             )
         }
 
@@ -1256,6 +1697,94 @@ internal class ExplorerActionHostSession private constructor(
             }
         }
 
+        private fun recoverDurableOutputBatches(
+            store: ExplorerActionOutputBatchStore,
+            nowMillis: Long,
+        ) {
+            store.list().forEach { record ->
+                val age = if (nowMillis < record.updatedAtMillis) {
+                    0L
+                } else {
+                    nowMillis - record.updatedAtMillis
+                }
+                val terminal = record.state == ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED ||
+                    record.state == ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED
+                if (terminal) {
+                    if (age >= OUTPUT_BATCH_TERMINAL_RETENTION_MILLIS) store.remove(record.id)
+                    return@forEach
+                }
+                val activeInThisProcess = synchronized(RESERVATION_LOCK) {
+                    record.id in ACTIVE_OUTPUT_BATCH_IDS
+                }
+                if (activeInThisProcess) return@forEach
+
+                val failures = mutableListOf<Throwable>()
+                val parent = File(record.parentPath)
+                val parentMatches = runCatching {
+                    val canonicalParent = parent.canonicalFile
+                    val identity = TargetIdentity.capture(canonicalParent)
+                    canonicalParent == parent &&
+                        identity.device == record.parentDevice &&
+                        identity.inode == record.parentInode
+                }.getOrDefault(false)
+                if (!parentMatches) {
+                    failures += IOException("Explorer Action output batch recovery parent changed")
+                } else {
+                    record.members.asReversed().forEach { member ->
+                        listOf(File(member.targetPath), File(member.stagingPath)).forEach { file ->
+                            val failure = runCatching {
+                                val canonical = file.canonicalFile
+                                check(canonical == file && canonical.parentFile == parent) {
+                                    "Explorer Action output batch recovery path is invalid"
+                                }
+                                if (file == File(member.stagingPath)) {
+                                    check(OUTPUT_STAGING_NAME_PATTERN.matches(file.name)) {
+                                        "Explorer Action output batch staging name is invalid"
+                                    }
+                                }
+                                val stat = try {
+                                    Os.lstat(file.path)
+                                } catch (error: ErrnoException) {
+                                    if (error.errno == OsConstants.ENOENT) return@runCatching
+                                    throw IOException(
+                                        "Explorer Action output batch recovery path is unavailable",
+                                        error,
+                                    )
+                                }
+                                check(OsConstants.S_ISREG(stat.st_mode) && !OsConstants.S_ISLNK(stat.st_mode)) {
+                                    "Explorer Action output batch recovery path is not a regular file"
+                                }
+                                check(
+                                    stat.st_dev == member.stagingDevice &&
+                                        stat.st_ino == member.stagingInode &&
+                                        stat.st_size == member.stagingSize &&
+                                        file.lastModified() == member.stagingLastModifiedMillis,
+                                ) { "Explorer Action output batch recovery identity changed" }
+                                if (!file.delete()) {
+                                    throw IOException(
+                                        "Explorer Action output batch recovery file could not be removed",
+                                    )
+                                }
+                            }.exceptionOrNull()
+                            if (failure != null) failures += failure
+                        }
+                    }
+                    runCatching { syncDirectoryForRecovery(parent) }
+                        .exceptionOrNull()
+                        ?.let(failures::add)
+                }
+                val recovered = record.copy(
+                    state = if (failures.isEmpty()) {
+                        ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED
+                    } else {
+                        ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_RECOVERY_REQUIRED
+                    },
+                    updatedAtMillis = nowMillis.coerceAtLeast(record.updatedAtMillis),
+                )
+                runCatching { store.write(recovered) }
+            }
+        }
+
         private fun markOutputTreeActive(transactionId: String, active: Boolean) {
             synchronized(RESERVATION_LOCK) {
                 if (active) {
@@ -1263,6 +1792,33 @@ internal class ExplorerActionHostSession private constructor(
                 } else {
                     ACTIVE_OUTPUT_TREE_IDS -= transactionId
                 }
+            }
+        }
+
+        private fun markOutputBatchActive(batchId: String, active: Boolean) {
+            synchronized(RESERVATION_LOCK) {
+                if (active) {
+                    ACTIVE_OUTPUT_BATCH_IDS += batchId
+                } else {
+                    ACTIVE_OUTPUT_BATCH_IDS -= batchId
+                }
+            }
+        }
+
+        private fun syncDirectoryForRecovery(directory: File) {
+            var descriptor: java.io.FileDescriptor? = null
+            try {
+                descriptor = Os.open(directory.path, OsConstants.O_RDONLY, 0)
+                Os.fsync(descriptor)
+            } catch (error: ErrnoException) {
+                if (error.errno != OsConstants.EINVAL && error.errno != OsConstants.EOPNOTSUPP) {
+                    throw IOException(
+                        "Explorer Action output batch recovery directory could not be synchronized",
+                        error,
+                    )
+                }
+            } finally {
+                descriptor?.let { runCatching { Os.close(it) } }
             }
         }
 
