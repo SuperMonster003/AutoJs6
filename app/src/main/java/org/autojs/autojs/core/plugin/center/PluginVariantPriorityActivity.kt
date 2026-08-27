@@ -63,19 +63,19 @@ class PluginVariantPriorityActivity : BaseActivity() {
                 val source = installed
                     .filter { plugin ->
                         matchesTargetEngine(
-                            pluginEngine = plugin.pluginInfo?.engine,
-                            pluginEngineId = plugin.pluginInfo?.id,
+                            pluginEngine = plugin.engine,
+                            pluginEngineId = plugin.engineId,
                         )
                     }
                     .map { plugin ->
                         VariantItem(
                             packageName = plugin.packageName,
                             title = plugin.title,
-                            variant = plugin.pluginInfo?.variant,
+                            variant = plugin.variant,
                             enabled = PluginEnableStore.isEnabled(
                                 this@PluginVariantPriorityActivity,
                                 plugin.packageName,
-                                PluginDefaultEnabledPolicy.isEnabledByDefault(plugin.pluginInfo?.engine),
+                                PluginDefaultEnabledPolicy.isEnabledByDefault(plugin.engine),
                             ),
                         )
                     }

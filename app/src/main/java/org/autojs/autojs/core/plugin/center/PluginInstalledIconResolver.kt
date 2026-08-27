@@ -9,6 +9,18 @@ import org.autojs.autojs.util.ViewUtils
 
 object PluginInstalledIconResolver {
 
+    /**
+     * Identity of a locally loaded icon for change detection without comparing Drawable
+     * instances: it only changes when the package build or the night mode changes.
+     *
+     * zh-CN: 本地已加载图标的标识, 用于在不比较 Drawable 实例的情况下检测变化:
+     * 仅当包构建或夜间模式变化时才会改变.
+     */
+    fun signatureOf(packageName: String, versionCode: Long?, lastUpdateTime: Long?): String {
+        val nightKey = if (ViewUtils.isNightModeEnabled) "night" else "day"
+        return "$packageName:${versionCode ?: 0L}:${lastUpdateTime ?: 0L}:$nightKey"
+    }
+
     fun load(context: Context, appInfo: ApplicationInfo): Drawable? {
         val pm = context.packageManager
         val iconResId = appInfo.icon.takeIf { it != 0 }

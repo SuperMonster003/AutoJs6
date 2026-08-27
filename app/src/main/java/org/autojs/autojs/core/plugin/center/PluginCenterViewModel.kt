@@ -43,7 +43,10 @@ import java.util.Locale
  *
  * Behavior strategy:
  * - First render a package-manager-only local snapshot together with the cached index.
+ *   The snapshot reuses metadata persisted by the last complete discovery, so the first
+ *   frame matches the last known real state including icons and descriptions.
  * - Then refresh complete local metadata and the online index independently in the background.
+ * - Every publish is gated by PluginCenterItemSemantics, so unchanged content never re-renders.
  * - Isolate discovery failures so one broken plugin never clears the complete list.
  *
  * zh-CN:
@@ -52,7 +55,9 @@ import java.util.Locale
  *
  * 行为策略:
  * - 先使用仅依赖 PackageManager 的本地快照与缓存索引渲染列表.
+ *   快照复用上次完整发现持久化的元数据, 使首帧与上次已知的真实状态一致 (含图标与描述).
  * - 随后在后台分别刷新完整本地元数据与在线索引.
+ * - 所有发布均经 PluginCenterItemSemantics 门控, 内容未变化时不会重新渲染.
  * - 隔离发现异常, 避免单个异常插件清空整个列表.
  *
  * Created by JetBrains AI Assistant (GPT-5.2) on Nov 26, 2025.
@@ -109,11 +114,11 @@ class PluginCenterViewModel : ViewModel() {
         loadJob?.cancel()
         loadJob = viewModelScope.launch load@{
             fun isLatestLoad() = generation == loadGeneration
-            fun updateLatestItems(next: List<PluginCenterItem>, forceUpdate: Boolean = false) {
+            fun updateLatestItems(next: List<PluginCenterItem>) {
                 if (isLatestLoad()) {
                     val updated = updateItemsIfChanged(
                         next = next,
-                        force = forceUpdate || forceRender || iconRenderModeTracker.shouldForceRender(iconNightModeEnabled),
+                        force = forceRender || iconRenderModeTracker.shouldForceRender(iconNightModeEnabled),
                     )
                     if (updated) {
                         iconRenderModeTracker.markRendered(iconNightModeEnabled)
@@ -208,7 +213,6 @@ class PluginCenterViewModel : ViewModel() {
                     indexUpdate: List<PluginIndexEntry>? = null,
                 ) {
                     stateMutex.withLock {
-                        val requiresFullLocalRender = renderedInitialSnapshot && installedUpdate != null
                         installedUpdate?.let { currentInstalled = it }
                         legacyUpdate?.let { currentLegacyInstalled = it }
                         indexUpdate?.let { currentIndexEntries = it }
@@ -222,7 +226,6 @@ class PluginCenterViewModel : ViewModel() {
                                     allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
                                     sourceScope = sourceScope,
                                 ),
-                                forceUpdate = requiresFullLocalRender,
                             )
                         }
                     }
@@ -338,7 +341,7 @@ class PluginCenterViewModel : ViewModel() {
     }
 
     private fun updateItemsIfChanged(next: List<PluginCenterItem>, force: Boolean = false): Boolean {
-        val shouldUpdate = force || !isSemanticallySameList(_items.value, next)
+        val shouldUpdate = force || !PluginCenterItemSemantics.isSameList(_items.value, next)
         if (shouldUpdate) {
             _items.value = next
         }
@@ -465,6 +468,7 @@ class PluginCenterViewModel : ViewModel() {
             description = local.description ?: index?.description,
             packageSize = local.packageSize,
             icon = local.icon,
+            iconSignature = local.iconSignature,
             remoteIconUrl = index?.iconUrl?.toString(),
             remoteNightIconUrl = index?.nightIconUrl?.toString(),
             isEnabled = false,
@@ -502,7 +506,7 @@ class PluginCenterViewModel : ViewModel() {
         if (isInstalled) {
             enableStore.setEnabled(context, packageName, false)
         }
-        val engine = local?.pluginInfo?.engine ?: index?.engine
+        val engine = local?.engine ?: index?.engine
         return PluginCenterItem(
             title = local?.title?.takeIf { it.isNotBlank() } ?: index?.title ?: packageName,
             packageName = packageName,
@@ -523,6 +527,7 @@ class PluginCenterViewModel : ViewModel() {
             remoteNightIconUrl = index?.nightIconUrl?.toString(),
             forceIgnoreLocalIcon = index?.forceIgnoreLocalIcon == true,
             icon = if (index?.forceIgnoreLocalIcon == true) null else local?.icon,
+            iconSignature = if (index?.forceIgnoreLocalIcon == true) null else local?.iconSignature,
             isEnabled = false,
             isInstalled = isInstalled,
             firstInstallTime = local?.firstInstallTime,
@@ -531,8 +536,8 @@ class PluginCenterViewModel : ViewModel() {
             source = index?.source ?: PluginIndexSource.OFFICIAL,
             isFeatured = index?.isFeatured ?: true,
             engine = engine,
-            variant = local?.pluginInfo?.variant ?: index?.variant,
-            engineId = local?.pluginInfo?.id ?: index?.engineId,
+            variant = local?.variant ?: index?.variant,
+            engineId = local?.engineId ?: index?.engineId,
             isOcrService = local?.isOcrService == true || engine in OCR_SERVICE_ENGINES,
             isBarcodeService = local?.isBarcodeService == true || engine in BARCODE_SERVICE_ENGINES,
             serviceAction = local?.serviceAction ?: serviceActionFromEngine(engine),
@@ -550,69 +555,6 @@ class PluginCenterViewModel : ViewModel() {
             canActivate = false,
             requiresHostVersion = local?.requiresHostVersion ?: index?.requiresHostVersion,
             hostVersionCode = currentHostVersionCode(),
-        )
-    }
-
-    private fun isSemanticallySameList(
-        current: List<PluginCenterItem>,
-        next: List<PluginCenterItem>,
-    ): Boolean {
-        if (current.size != next.size) {
-            return false
-        }
-        return current.map(::snapshotOf) == next.map(::snapshotOf)
-    }
-
-    private fun snapshotOf(item: PluginCenterItem): ItemSnapshot {
-        val enabledStateKey = when (val state = item.enabledState) {
-            PluginEnabledState.DISABLED -> "disabled"
-            PluginEnabledState.READY -> "ready"
-            is PluginEnabledState.ERROR -> listOf(
-                "error",
-                state.error.code.name,
-                state.error.message.orEmpty(),
-                state.error.recoverHint.orEmpty(),
-                state.error.causeClass.orEmpty(),
-            ).joinToString(":")
-        }
-        return ItemSnapshot(
-            packageName = item.packageName,
-            title = item.title,
-            versionName = item.versionName,
-            versionCode = item.versionCode,
-            updatableVersionName = item.updatableVersionName,
-            updatableVersionCode = item.updatableVersionCode,
-            updatableChangelogUrl = item.updatableChangelogUrl,
-            updatableChangelogText = item.updatableChangelogText,
-            installableApkUrl = item.installableApkUrl,
-            updatableApkUrl = item.updatableApkUrl,
-            author = item.author,
-            description = item.description,
-            instructionHardCoded = item.instructionHardCoded,
-            instructionMarkdownUrl = item.instructionMarkdownUrl,
-            remoteIconUrl = item.remoteIconUrl,
-            remoteNightIconUrl = item.remoteNightIconUrl,
-            forceIgnoreLocalIcon = item.forceIgnoreLocalIcon,
-            packageSize = item.packageSize,
-            supportedAbis = item.supportedAbis,
-            isEnabled = item.isEnabled,
-            isInstalled = item.isInstalled,
-            firstInstallTime = item.firstInstallTime,
-            lastUpdateTime = item.lastUpdateTime,
-            source = item.source,
-            isFeatured = item.isFeatured,
-            mechanism = item.mechanism,
-            authorizedState = item.authorizedState,
-            activatedState = item.activatedState,
-            enabledStateKey = enabledStateKey,
-            engine = item.engine,
-            variant = item.variant,
-            engineId = item.engineId,
-            isOcrService = item.isOcrService,
-            isBarcodeService = item.isBarcodeService,
-            serviceAction = item.serviceAction,
-            requiresHostVersion = item.requiresHostVersion,
-            hostVersionCode = item.hostVersionCode,
         )
     }
 
@@ -697,9 +639,9 @@ class PluginCenterViewModel : ViewModel() {
         val collaborators = index?.collaborators ?: emptyList()
         val source = index?.source ?: PluginIndexSource.OFFICIAL
         val supportedAbis = local?.supportedAbis ?: index?.supportedAbis
-        val engine = local?.pluginInfo?.engine ?: index?.engine
-        val variant = local?.pluginInfo?.variant ?: index?.variant
-        val engineId = local?.pluginInfo?.id ?: index?.engineId
+        val engine = local?.engine ?: index?.engine
+        val variant = local?.variant ?: index?.variant
+        val engineId = local?.engineId ?: index?.engineId
         val isOcrService = local?.isOcrService == true || engine in OCR_SERVICE_ENGINES
         val isBarcodeService = local?.isBarcodeService == true || engine in BARCODE_SERVICE_ENGINES
         val serviceAction = local?.serviceAction ?: serviceActionFromEngine(engine)
@@ -830,6 +772,7 @@ class PluginCenterViewModel : ViewModel() {
             installableApkSizeBytes = latestRelease?.apkSizeBytes,
             supportedAbis = supportedAbis,
             icon = if (forceIgnoreLocalIcon) null else local?.icon,
+            iconSignature = if (forceIgnoreLocalIcon) null else local?.iconSignature,
             remoteIconUrl = index?.iconUrl?.toString(),
             remoteNightIconUrl = index?.nightIconUrl?.toString(),
             forceIgnoreLocalIcon = forceIgnoreLocalIcon,
@@ -964,6 +907,7 @@ class PluginCenterViewModel : ViewModel() {
             supportedAbis = supportedAbis,
 
             icon = if (forceIgnoreLocalIcon) null else local.icon,
+            iconSignature = if (forceIgnoreLocalIcon) null else local.iconSignature,
             remoteIconUrl = index?.iconUrl?.toString(),
             remoteNightIconUrl = index?.nightIconUrl?.toString(),
             forceIgnoreLocalIcon = forceIgnoreLocalIcon,
@@ -1023,46 +967,6 @@ class PluginCenterViewModel : ViewModel() {
 
         return releases.maxByOrNull { it.versionCode }?.versionDate?.takeIf { it.isNotBlank() }
     }
-
-    private data class ItemSnapshot(
-        val packageName: String,
-        val title: String,
-        val versionName: String,
-        val versionCode: Long?,
-        val updatableVersionName: String?,
-        val updatableVersionCode: Long?,
-        val updatableChangelogUrl: String?,
-        val updatableChangelogText: String?,
-        val installableApkUrl: String?,
-        val updatableApkUrl: String?,
-        val author: String?,
-        val description: String?,
-        val instructionHardCoded: String?,
-        val instructionMarkdownUrl: String?,
-        val remoteIconUrl: String?,
-        val remoteNightIconUrl: String?,
-        val forceIgnoreLocalIcon: Boolean,
-        val packageSize: Long,
-        val supportedAbis: List<String>?,
-        val isEnabled: Boolean,
-        val isInstalled: Boolean,
-        val firstInstallTime: Long?,
-        val lastUpdateTime: Long?,
-        val source: PluginIndexSource,
-        val isFeatured: Boolean,
-        val mechanism: PluginMechanism,
-        val authorizedState: PluginAuthorizedState,
-        val activatedState: PluginActivatedState,
-        val enabledStateKey: String,
-        val engine: String?,
-        val variant: String?,
-        val engineId: String?,
-        val isOcrService: Boolean,
-        val isBarcodeService: Boolean,
-        val serviceAction: String?,
-        val requiresHostVersion: Long?,
-        val hostVersionCode: Long?,
-    )
 
     companion object {
         private const val TAG = "PluginCenterViewModel"

@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -229,7 +230,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             layoutManager = LinearLayoutManager(context)
             adapter = this@PluginCenterFragment.adapter
             addItemDecoration(DividerItemDecoration(context, VERTICAL))
-            itemAnimator = null
+            // Change animations stay off so an updated row rebinds in place without a
+            // cross-fade flash, while structural moves and insertions still animate gently.
+            // zh-CN: 关闭变化动画, 使更新的行原地重绑而无交叉淡出闪烁,
+            // 结构性移动与插入仍保留平缓动画.
+            itemAnimator = DefaultItemAnimator().apply { supportsChangeAnimations = false }
             setHasFixedSize(true)
             excludePaddingClippableViewFromBottomNavigationBar()
         }

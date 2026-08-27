@@ -31,6 +31,7 @@ class LegacyInstalledPluginRepository {
         val firstInstallTime: Long?,
         val lastUpdateTime: Long?,
         val icon: Drawable?,
+        val iconSignature: String?,
         val registryClass: String?,
         val isStopped: Boolean,
     )
@@ -83,6 +84,7 @@ class LegacyInstalledPluginRepository {
                 firstInstallTime = firstInstallTime,
                 lastUpdateTime = lastUpdateTime,
                 icon = icon,
+                iconSignature = icon?.let { PluginInstalledIconResolver.signatureOf(packageName, versionCode, lastUpdateTime) },
                 registryClass = registry,
                 isStopped = isStopped,
             )

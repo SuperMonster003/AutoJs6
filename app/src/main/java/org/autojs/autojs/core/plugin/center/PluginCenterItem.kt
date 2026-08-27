@@ -48,6 +48,11 @@ data class PluginCenterItem(
     val forceIgnoreLocalIcon: Boolean = false,
 
     val icon: Drawable? = null,
+
+    // Stable identity of the local icon; lets list diffing detect icon changes
+    // without comparing Drawable instances.
+    // zh-CN: 本地图标的稳定标识; 使列表差分无需比较 Drawable 实例即可检测图标变化.
+    val iconSignature: String? = null,
     var isEnabled: Boolean = true,
     val isInstalled: Boolean,
     val firstInstallTime: Long? = null,

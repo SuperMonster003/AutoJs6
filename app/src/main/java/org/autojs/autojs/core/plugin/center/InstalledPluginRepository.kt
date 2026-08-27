@@ -25,6 +25,7 @@ import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
+import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginActions
@@ -57,12 +58,17 @@ class InstalledPluginRepository {
         val firstInstallTime: Long?,
         val lastUpdateTime: Long?,
         val icon: Drawable?,
+        val iconSignature: String?,
         val pluginInfo: PluginInfo?,
+        val engine: String?,
+        val variant: String?,
+        val engineId: String?,
         val bindError: Throwable?,
         val isOcrService: Boolean,
         val isBarcodeService: Boolean,
         val serviceAction: String?,
         val isStopped: Boolean,
+        val resolvedMetadata: InstalledPluginMetadataStore.Entry?,
     )
 
     private data class Discovery(
@@ -76,24 +82,32 @@ class InstalledPluginRepository {
 
     /**
      * Builds a package-manager-only snapshot without starting or binding any plugin process.
-     * This is intentionally lightweight so Plugin Center can render installed entries first
-     * and replace their metadata after the complete discovery finishes in the background.
+     * Icons, resource-provided descriptions and the metadata persisted by the last complete
+     * discovery are all available here, so the first frame matches the last known real state.
+     *
+     * zh-CN: 构建仅依赖 PackageManager 的快照, 不启动或绑定任何插件进程.
+     * 图标, 资源提供的描述以及上次完整发现持久化的元数据在此均可用,
+     * 因此首帧即与上次已知的真实状态一致.
      */
     suspend fun discoverInstalledSnapshot(context: Context): List<InstalledPlugin> = withContext(Dispatchers.IO) {
+        val cachedMetadata = InstalledPluginMetadataStore.readAll(context)
         queryDeclaredPluginServices(context)
             .mergeByPackage()
-            .mapIsolated(context, lightweight = true)
+            .mapIsolated(context, cachedMetadata)
     }
 
     suspend fun discoverInstalled(context: Context): List<InstalledPlugin> = withContext(Dispatchers.IO) {
         val declared = queryDeclaredPluginServices(context)
         val bound = discoverBoundPluginServices(context, declared)
+        val cachedMetadata = InstalledPluginMetadataStore.readAll(context)
 
         // A failure in one discovery source must not make packages from that source disappear.
         // Package-manager declarations are retained as a metadata fallback when necessary.
-        (bound + declared)
+        val plugins = (bound + declared)
             .mergeByPackage()
-            .mapIsolated(context, lightweight = false)
+            .mapIsolated(context, cachedMetadata)
+        persistResolvedMetadata(context, plugins)
+        plugins
     }
 
     private suspend fun discoverBoundPluginServices(
@@ -204,16 +218,17 @@ class InstalledPluginRepository {
 
     private fun List<Discovery>.mapIsolated(
         context: Context,
-        lightweight: Boolean,
+        cachedMetadata: Map<String, InstalledPluginMetadataStore.Entry>,
     ): List<InstalledPlugin> = map { discovery ->
+        val cachedEntry = cachedMetadata[discovery.serviceInfo.packageName]
         runCatching {
-            buildInstalledPlugin(context, discovery, lightweight)
+            buildInstalledPlugin(context, discovery, cachedEntry)
         }.getOrElse { error ->
             Log.w(TAG, "Failed to read plugin metadata for ${discovery.serviceInfo.packageName}", error)
             PluginCenterProcessLogger.i(
                 "Failed to read plugin metadata for ${discovery.serviceInfo.packageName}: ${error.message ?: error.javaClass.simpleName}.",
             )
-            buildFallbackInstalledPlugin(context, discovery, error)
+            buildFallbackInstalledPlugin(context, discovery, error, cachedEntry)
         }
     }
 
@@ -221,14 +236,15 @@ class InstalledPluginRepository {
         context: Context,
         discovery: Discovery,
         metadataError: Throwable,
+        cachedEntry: InstalledPluginMetadataStore.Entry?,
     ): InstalledPlugin {
         val packageName = discovery.serviceInfo.packageName
         return InstalledPlugin(
             packageName = packageName,
-            title = packageName,
-            description = null,
-            instructionHardCoded = null,
-            author = null,
+            title = cachedEntry?.title ?: packageName,
+            description = cachedEntry?.description,
+            instructionHardCoded = cachedEntry?.instruction,
+            author = cachedEntry?.author,
             versionName = runCatching { context.getString(R.string.text_unknown) }.getOrDefault("unknown"),
             versionCode = null,
             versionDate = null,
@@ -238,7 +254,11 @@ class InstalledPluginRepository {
             firstInstallTime = null,
             lastUpdateTime = null,
             icon = null,
+            iconSignature = null,
             pluginInfo = null,
+            engine = cachedEntry?.engine,
+            variant = cachedEntry?.variant,
+            engineId = cachedEntry?.engineId,
             bindError = discovery.error ?: metadataError,
             isOcrService = discovery.isOcrService,
             isBarcodeService = discovery.isBarcodeService,
@@ -246,27 +266,43 @@ class InstalledPluginRepository {
             isStopped = runCatching {
                 (discovery.serviceInfo.applicationInfo.flags and ApplicationInfo.FLAG_STOPPED) != 0
             }.getOrDefault(false),
+            resolvedMetadata = null,
         )
     }
 
     private fun buildInstalledPlugin(
         context: Context,
         discovery: Discovery,
-        lightweight: Boolean,
+        cachedEntry: InstalledPluginMetadataStore.Entry?,
     ): InstalledPlugin {
         val pm = context.packageManager
         val serviceInfo = discovery.serviceInfo
         val packageName = serviceInfo.packageName
         val appInfo = getApplicationInfo(pm, packageName) ?: serviceInfo.applicationInfo
         val appLabel = runCatching { appInfo.loadLabel(pm).toString() }.getOrNull()
-        val icon = if (lightweight) null else runCatching { PluginInstalledIconResolver.load(context, appInfo) }.getOrNull()
+        val icon = runCatching { PluginInstalledIconResolver.load(context, appInfo) }.getOrNull()
         val isStopped = (appInfo.flags and ApplicationInfo.FLAG_STOPPED) != 0
         val pluginInfo = discovery.pluginInfo
-        val pluginName = if (lightweight) null else PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.name)
-        val pluginDescription = if (lightweight) null else PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.description)
-        val pluginInstruction = if (lightweight) null else PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.instruction)
-        val pluginAuthor = if (lightweight) null else PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.author)
-        val manifestAuthor = if (lightweight) null else runCatching {
+        val hasLiveInfo = pluginInfo != null
+
+        val pkgInfo = runCatching { pm.getPackageInfo(packageName, 0) }.getOrNull()
+        val versionName = pkgInfo?.versionName ?: pluginInfo?.versionName ?: context.getString(R.string.text_unknown)
+        val versionCode = pkgInfo?.let { PackageInfoCompat.getLongVersionCode(it) } ?: pluginInfo?.versionCode
+        val lastUpdateTime = pkgInfo?.lastUpdateTime
+        val packageSize = calculatePackageSize(appInfo)
+
+        // Values below either come from a live plugin binder or from the metadata persisted by
+        // the last successful complete discovery. Text identity survives package updates while
+        // version-coupled values require an exact package match.
+        // zh-CN: 以下取值来自插件的实时 Binder 或上次完整发现成功时持久化的元数据.
+        // 文本类标识信息可跨包更新沿用, 与版本耦合的取值则要求包构建完全一致.
+        val cachedExact = cachedEntry?.takeIf { it.matchesInstalledPackage(versionCode, lastUpdateTime) }
+
+        val pluginName = PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.name)
+        val pluginDescription = PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.description)
+        val pluginInstruction = PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.instruction)
+        val pluginAuthor = PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.author)
+        val manifestAuthor = runCatching {
             PluginResourceResolver.resolveStringValue(
                 context,
                 packageName,
@@ -274,38 +310,87 @@ class InstalledPluginRepository {
             )
         }.getOrNull()
 
-        val pkgInfo = runCatching { pm.getPackageInfo(packageName, 0) }.getOrNull()
-        val versionName = pkgInfo?.versionName ?: pluginInfo?.versionName ?: context.getString(R.string.text_unknown)
-        val versionCode = pkgInfo?.let { PackageInfoCompat.getLongVersionCode(it) } ?: pluginInfo?.versionCode
-        val packageSize = calculatePackageSize(appInfo)
+        val instructionHardCoded = (if (hasLiveInfo) pluginInstruction else cachedEntry?.instruction)
+            ?.truncateForSafeBinder()
+        val requiresHostVersion = when {
+            hasLiveInfo -> PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities)
+            else -> cachedExact?.requiresHostVersion
+        }
+        val supportedAbis = when {
+            hasLiveInfo -> pluginInfo?.supportedAbis?.toList()?.let(PluginAbiUtils::resolveSupportedAbisFromValue)
+            else -> cachedExact?.supportedAbis
+        }
+
+        val resolvedMetadata = when {
+            hasLiveInfo -> InstalledPluginMetadataStore.Entry(
+                packageName = packageName,
+                versionCode = versionCode,
+                lastUpdateTime = lastUpdateTime,
+                languageTag = Language.getPrefLanguage().locale.toLanguageTag(),
+                title = pluginName,
+                description = pluginDescription,
+                author = pluginAuthor,
+                instruction = instructionHardCoded,
+                versionDate = pluginInfo?.versionDate,
+                requiresHostVersion = requiresHostVersion,
+                supportedAbis = supportedAbis,
+                engine = pluginInfo?.engine,
+                variant = pluginInfo?.variant,
+                engineId = pluginInfo?.id,
+            )
+            else -> null
+        }
 
         return InstalledPlugin(
             packageName = packageName,
-            title = pluginName ?: appLabel ?: packageName,
-            description = if (lightweight) null else PluginResourceResolver.resolve(
+            title = (if (hasLiveInfo) pluginName else cachedEntry?.title) ?: appLabel ?: packageName,
+            description = PluginResourceResolver.resolve(
                 context,
                 packageName,
                 "plugin_description" to PluginResourceResolver.ResType.STRING,
-                pluginDescription,
+                if (hasLiveInfo) pluginDescription else cachedEntry?.description,
             ),
-            instructionHardCoded = pluginInstruction?.truncateForSafeBinder(),
-            author = pluginAuthor ?: manifestAuthor,
+            instructionHardCoded = instructionHardCoded,
+            author = (if (hasLiveInfo) pluginAuthor else cachedEntry?.author) ?: manifestAuthor,
             versionName = versionName,
             versionCode = versionCode,
-            versionDate = pluginInfo?.versionDate,
-            requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities),
-            supportedAbis = pluginInfo?.supportedAbis?.toList()?.let(PluginAbiUtils::resolveSupportedAbisFromValue),
+            versionDate = if (hasLiveInfo) pluginInfo?.versionDate else cachedExact?.versionDate,
+            requiresHostVersion = requiresHostVersion,
+            supportedAbis = supportedAbis,
             packageSize = packageSize,
             firstInstallTime = pkgInfo?.firstInstallTime,
-            lastUpdateTime = pkgInfo?.lastUpdateTime,
+            lastUpdateTime = lastUpdateTime,
             icon = icon,
+            iconSignature = icon?.let { PluginInstalledIconResolver.signatureOf(packageName, versionCode, lastUpdateTime) },
             pluginInfo = pluginInfo,
+            engine = if (hasLiveInfo) pluginInfo?.engine else cachedEntry?.engine,
+            variant = if (hasLiveInfo) pluginInfo?.variant else cachedEntry?.variant,
+            engineId = if (hasLiveInfo) pluginInfo?.id else cachedEntry?.engineId,
             bindError = discovery.error,
             isOcrService = discovery.isOcrService,
             isBarcodeService = discovery.isBarcodeService,
             serviceAction = discovery.serviceAction,
             isStopped = isStopped,
+            resolvedMetadata = resolvedMetadata,
         )
+    }
+
+    private fun persistResolvedMetadata(context: Context, plugins: List<InstalledPlugin>) {
+        // An empty discovery carries no information about installed packages,
+        // so it must not prune previously persisted metadata.
+        // zh-CN: 空的发现结果不包含任何已安装包信息, 不得据此清理已持久化的元数据.
+        if (plugins.isEmpty()) return
+        runCatching {
+            val existing = InstalledPluginMetadataStore.readAll(context)
+            val merged = InstalledPluginMetadataStore.mergeEntries(
+                existing = existing,
+                fresh = plugins.mapNotNull { it.resolvedMetadata },
+                retainedPackages = plugins.mapTo(hashSetOf()) { it.packageName },
+            )
+            InstalledPluginMetadataStore.replaceAll(context, merged)
+        }.onFailure { error ->
+            Log.w(TAG, "Failed to persist installed plugin metadata: ${error.message}")
+        }
     }
 
     private fun calculatePackageSize(appInfo: ApplicationInfo): Long = runCatching {
