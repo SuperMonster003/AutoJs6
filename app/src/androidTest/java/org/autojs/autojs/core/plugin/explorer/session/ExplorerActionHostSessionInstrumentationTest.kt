@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.explorer.session
 
 import android.os.ParcelFileDescriptor
 import android.os.Binder
+import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
 import android.system.Os
@@ -15,9 +16,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicReference
 import java.util.UUID
 
@@ -620,6 +625,528 @@ class ExplorerActionHostSessionInstrumentationTest {
         }
     }
 
+    @Test
+    fun verifiedFileBatchPublishesEveryMemberBeforeRefreshingExplorer() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v15-batch-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "source.txt").apply { writeText("source") }
+        val notified = mutableListOf<File>()
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+            onOutputCommitted = { output -> notified += output },
+        )
+        val store = ExplorerActionOutputBatchStore(context)
+        var batchId: String? = null
+
+        try {
+            val first = prepareVerifiedOutput(session, "first.zip", "first archive".encodeToByteArray())
+            val second = prepareVerifiedOutput(session, "second.7z", "second archive".encodeToByteArray())
+            val preparedBatch = session.prepareOutputBatch(mutableListOf(first, second))
+            batchId = requireNotNull(
+                preparedBatch.getString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID),
+            )
+
+            assertFalse(File(testRoot, "first.zip").exists())
+            assertFalse(File(testRoot, "second.7z").exists())
+            assertTrue(notified.isEmpty())
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_PREPARED,
+                preparedBatch.getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+
+            val committed = session.commitOutputBatch(batchId)
+
+            assertEquals("first archive", File(testRoot, "first.zip").readText())
+            assertEquals("second archive", File(testRoot, "second.7z").readText())
+            assertEquals(listOf("first.zip", "second.7z"), notified.map(File::getName))
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED,
+                committed.getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+            assertEquals(2, committed.getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_PUBLISHED_COUNT))
+            @Suppress("DEPRECATION")
+            val outputs = committed.getParcelableArrayList<Bundle>(
+                ExplorerActionHostSessionKeys.OUTPUTS,
+            )
+            assertEquals(2, outputs?.size)
+            assertTrue(testRoot.listFiles().orEmpty().none { it.name.endsWith(".part") })
+        } finally {
+            runCatching { session.close() }
+            batchId?.let(store::remove)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun failedBatchPublicationRollsBackAlreadyPublishedMembers() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v15-rollback-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "source.txt").apply { writeText("source") }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+            afterBatchMemberPublished = { publishedCount ->
+                if (publishedCount == 1) throw IOException("Injected publication failure")
+            },
+        )
+        val store = ExplorerActionOutputBatchStore(context)
+        var batchId: String? = null
+
+        try {
+            val first = prepareVerifiedOutput(session, "first.zip", byteArrayOf(1, 2, 3))
+            val second = prepareVerifiedOutput(session, "second.zip", byteArrayOf(4, 5, 6))
+            batchId = requireNotNull(
+                session.prepareOutputBatch(mutableListOf(first, second))
+                    .getString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID),
+            )
+
+            expectIOException { session.commitOutputBatch(batchId) }
+
+            assertFalse(File(testRoot, "first.zip").exists())
+            assertFalse(File(testRoot, "second.zip").exists())
+            assertTrue(testRoot.listFiles().orEmpty().none { it.name.endsWith(".part") })
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED,
+                session.queryOutputBatch(batchId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+        } finally {
+            runCatching { session.close() }
+            batchId?.let(store::remove)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun interruptedBatchJournalRollsBackPublishedAndStagedMembersOnNextSession() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v15-recovery-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "source.txt").apply { writeText("source") }
+        val batchId = UUID.randomUUID().toString()
+        val firstId = UUID.randomUUID().toString()
+        val secondId = UUID.randomUUID().toString()
+        val published = File(testRoot, "first.zip").apply { writeText("published before crash") }
+        val staging = File(testRoot, ".autojs6-explorer-${UUID.randomUUID()}.part").apply {
+            writeText("still staged")
+        }
+        val parentStat = Os.stat(testRoot.path)
+        val publishedStat = Os.lstat(published.path)
+        val stagingStat = Os.lstat(staging.path)
+        val now = System.currentTimeMillis()
+        val store = ExplorerActionOutputBatchStore(context)
+        store.write(
+            ExplorerActionOutputBatchRecord(
+                id = batchId,
+                pluginUid = context.applicationInfo.uid,
+                processInstanceId = "dead-host-process",
+                parentPath = testRoot.canonicalPath,
+                parentDevice = parentStat.st_dev,
+                parentInode = parentStat.st_ino,
+                state = ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTING,
+                createdAtMillis = now - 1_000L,
+                updatedAtMillis = now - 1_000L,
+                members = listOf(
+                    ExplorerActionOutputBatchMemberRecord(
+                        transactionId = firstId,
+                        targetPath = published.canonicalPath,
+                        stagingPath = File(
+                            testRoot,
+                            ".autojs6-explorer-${UUID.randomUUID()}.part",
+                        ).canonicalPath,
+                        stagingDevice = publishedStat.st_dev,
+                        stagingInode = publishedStat.st_ino,
+                        stagingSize = publishedStat.st_size,
+                        stagingLastModifiedMillis = published.lastModified(),
+                    ),
+                    ExplorerActionOutputBatchMemberRecord(
+                        transactionId = secondId,
+                        targetPath = File(testRoot, "second.zip").canonicalPath,
+                        stagingPath = staging.canonicalPath,
+                        stagingDevice = stagingStat.st_dev,
+                        stagingInode = stagingStat.st_ino,
+                        stagingSize = stagingStat.st_size,
+                        stagingLastModifiedMillis = staging.lastModified(),
+                    ),
+                ),
+                publishedCount = 0,
+            ),
+        )
+
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+        )
+        try {
+            assertFalse(published.exists())
+            assertFalse(staging.exists())
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED,
+                session.queryOutputBatch(batchId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+        } finally {
+            session.close()
+            store.remove(batchId)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun outputBatchRejectsUnverifiedMembersWithoutReservingThem() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v15-unverified-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "source.txt").apply { writeText("source") }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+        )
+
+        try {
+            val unverified = session.prepareOutput(
+                "unverified.zip",
+                "application/zip",
+                ExplorerActionHostSessionValues.OUTPUT_CONFLICT_FAIL,
+            ).getString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID).let(::requireNotNull)
+            ParcelFileDescriptor.AutoCloseOutputStream(session.openOutput(unverified)).use {
+                it.write(byteArrayOf(1, 2, 3))
+            }
+            val verified = prepareVerifiedOutput(session, "verified.zip", byteArrayOf(4, 5, 6))
+
+            expectIllegalState {
+                session.prepareOutputBatch(mutableListOf(unverified, verified))
+            }
+
+            session.abortOutput(unverified)
+            session.abortOutput(verified)
+            assertFalse(File(testRoot, "unverified.zip").exists())
+            assertFalse(File(testRoot, "verified.zip").exists())
+            assertTrue(testRoot.listFiles().orEmpty().none { it.name.endsWith(".part") })
+        } finally {
+            session.close()
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun outputBatchMembersCanOnlyBeCommittedOrAbortedAsAGroup() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v15-group-only-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "source.txt").apply { writeText("source") }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+        )
+        val store = ExplorerActionOutputBatchStore(context)
+        var batchId: String? = null
+
+        try {
+            val first = prepareVerifiedOutput(session, "first.zip", byteArrayOf(1))
+            val second = prepareVerifiedOutput(session, "second.zip", byteArrayOf(2))
+            batchId = session.prepareOutputBatch(mutableListOf(first, second))
+                .getString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID)
+                .let(::requireNotNull)
+
+            expectIllegalState { session.commitOutput(first) }
+            expectIllegalState { session.abortOutput(second) }
+            @Suppress("DEPRECATION")
+            val listed = session.listOutputBatches().getParcelableArrayList<Bundle>(
+                ExplorerActionHostSessionKeys.OUTPUT_BATCHES,
+            )
+            assertEquals(listOf(batchId), listed?.map {
+                it.getString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID)
+            })
+
+            session.abortOutputBatch(batchId)
+
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED,
+                session.queryOutputBatch(batchId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+            assertFalse(File(testRoot, "first.zip").exists())
+            assertFalse(File(testRoot, "second.zip").exists())
+        } finally {
+            runCatching { session.close() }
+            batchId?.let(store::remove)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun batchCommitToleratesAClockThatMovesBackwards() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v15-clock-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "source.txt").apply { writeText("source") }
+        var nowMillis = 10_000L
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+            clock = { nowMillis },
+        )
+        val store = ExplorerActionOutputBatchStore(context)
+        var batchId: String? = null
+        var recoverySession: ExplorerActionHostSession? = null
+
+        try {
+            val first = prepareVerifiedOutput(session, "first.zip", byteArrayOf(1))
+            val second = prepareVerifiedOutput(session, "second.zip", byteArrayOf(2))
+            batchId = session.prepareOutputBatch(mutableListOf(first, second))
+                .getString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID)
+                .let(::requireNotNull)
+            nowMillis = 1L
+
+            val committed = session.commitOutputBatch(batchId)
+
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED,
+                committed.getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+            assertTrue(File(testRoot, "first.zip").isFile)
+            assertTrue(File(testRoot, "second.zip").isFile)
+
+            session.close()
+            recoverySession = ExplorerActionHostSession.create(
+                context = context,
+                pluginPackageName = context.packageName,
+                commonParent = testRoot,
+                targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+                allowCreateOutput = true,
+                clock = { nowMillis },
+            )
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTED,
+                recoverySession.queryOutputBatch(batchId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+        } finally {
+            runCatching { recoverySession?.close() }
+            runCatching { session.close() }
+            batchId?.let(store::remove)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun recoveryPreservesExternallyChangedFilesAndReportsManualRecovery() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v15-identity-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "source.txt").apply { writeText("source") }
+        val batchId = UUID.randomUUID().toString()
+        val changed = File(testRoot, "first.zip").apply { writeText("original") }
+        val changedStat = Os.lstat(changed.path)
+        val changedLastModified = changed.lastModified()
+        changed.writeText("external replacement with different content")
+        val staging = File(testRoot, ".autojs6-explorer-${UUID.randomUUID()}.part").apply {
+            writeText("still staged")
+        }
+        val stagingStat = Os.lstat(staging.path)
+        val parentStat = Os.stat(testRoot.path)
+        val now = System.currentTimeMillis()
+        val store = ExplorerActionOutputBatchStore(context)
+        store.write(
+            ExplorerActionOutputBatchRecord(
+                id = batchId,
+                pluginUid = context.applicationInfo.uid,
+                processInstanceId = "dead-host-process",
+                parentPath = testRoot.canonicalPath,
+                parentDevice = parentStat.st_dev,
+                parentInode = parentStat.st_ino,
+                state = ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_COMMITTING,
+                createdAtMillis = now,
+                updatedAtMillis = now,
+                members = listOf(
+                    ExplorerActionOutputBatchMemberRecord(
+                        transactionId = UUID.randomUUID().toString(),
+                        targetPath = changed.canonicalPath,
+                        stagingPath = File(
+                            testRoot,
+                            ".autojs6-explorer-${UUID.randomUUID()}.part",
+                        ).canonicalPath,
+                        stagingDevice = changedStat.st_dev,
+                        stagingInode = changedStat.st_ino,
+                        stagingSize = changedStat.st_size,
+                        stagingLastModifiedMillis = changedLastModified,
+                    ),
+                    ExplorerActionOutputBatchMemberRecord(
+                        transactionId = UUID.randomUUID().toString(),
+                        targetPath = File(testRoot, "second.zip").canonicalPath,
+                        stagingPath = staging.canonicalPath,
+                        stagingDevice = stagingStat.st_dev,
+                        stagingInode = stagingStat.st_ino,
+                        stagingSize = stagingStat.st_size,
+                        stagingLastModifiedMillis = staging.lastModified(),
+                    ),
+                ),
+            ),
+        )
+
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+        )
+        try {
+            assertEquals("external replacement with different content", changed.readText())
+            assertFalse(staging.exists())
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_RECOVERY_REQUIRED,
+                session.queryOutputBatch(batchId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+            assertTrue(changed.delete())
+            session.abortOutputBatch(batchId)
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED,
+                session.queryOutputBatch(batchId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+        } finally {
+            session.close()
+            store.remove(batchId)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun realProcessDeathRecoveryRequiresExternalTwoPhaseHarness() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val phase = InstrumentationRegistry.getArguments()
+            .getString(PROCESS_DEATH_PHASE_ARGUMENT)
+            .orEmpty()
+        assumeTrue(
+            "This recovery gate runs only through the external two-phase harness",
+            phase == PROCESS_DEATH_PHASE_PREPARE || phase == PROCESS_DEATH_PHASE_VERIFY,
+        )
+        val context = instrumentation.targetContext
+        val testRoot = File(context.cacheDir, PROCESS_DEATH_ROOT_NAME)
+        val batchIdFile = File(context.filesDir, PROCESS_DEATH_BATCH_ID_FILE_NAME)
+        val readyFile = File(context.filesDir, PROCESS_DEATH_READY_FILE_NAME)
+        val store = ExplorerActionOutputBatchStore(context)
+
+        if (phase == PROCESS_DEATH_PHASE_PREPARE) {
+            batchIdFile.takeIf(File::isFile)?.readText()?.trim()?.takeIf(String::isNotEmpty)?.let {
+                store.remove(it)
+            }
+            testRoot.deleteRecursively()
+            batchIdFile.delete()
+            readyFile.delete()
+            assertTrue(testRoot.mkdirs())
+            val source = File(testRoot, "source.txt").apply { writeText("source") }
+            val blockUntilKilled = CountDownLatch(1)
+            val session = ExplorerActionHostSession.create(
+                context = context,
+                pluginPackageName = context.packageName,
+                commonParent = testRoot,
+                targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+                allowCreateOutput = true,
+                afterBatchMemberPublished = { publishedCount ->
+                    if (publishedCount == 1) {
+                        writeDurableText(readyFile, "ready")
+                        blockUntilKilled.await()
+                    }
+                },
+            )
+            val first = prepareVerifiedOutput(session, "first.zip", byteArrayOf(1, 2, 3))
+            val second = prepareVerifiedOutput(session, "second.zip", byteArrayOf(4, 5, 6))
+            val batchId = session.prepareOutputBatch(mutableListOf(first, second))
+                .getString(ExplorerActionHostSessionKeys.OUTPUT_BATCH_ID)
+                .let(::requireNotNull)
+            writeDurableText(batchIdFile, batchId)
+            session.commitOutputBatch(batchId)
+            throw AssertionError("External harness did not terminate the host process")
+        }
+
+        val batchId = batchIdFile.readText().trim()
+        assertTrue(batchId.isNotEmpty())
+        assertTrue(readyFile.isFile)
+        val source = File(testRoot, "source.txt")
+        assertTrue(source.isFile)
+        val recoverySession = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+        )
+        try {
+            assertEquals(
+                ExplorerActionHostSessionValues.OUTPUT_BATCH_STATE_ABORTED,
+                recoverySession.queryOutputBatch(batchId)
+                    .getInt(ExplorerActionHostSessionKeys.OUTPUT_BATCH_STATE),
+            )
+            assertFalse(File(testRoot, "first.zip").exists())
+            assertFalse(File(testRoot, "second.zip").exists())
+            assertEquals(
+                listOf("source.txt"),
+                testRoot.listFiles().orEmpty().map(File::getName).sorted(),
+            )
+        } finally {
+            recoverySession.close()
+            store.remove(batchId)
+            testRoot.deleteRecursively()
+            batchIdFile.delete()
+            readyFile.delete()
+        }
+    }
+
+    private fun prepareVerifiedOutput(
+        session: ExplorerActionHostSession,
+        displayName: String,
+        bytes: ByteArray,
+    ): String {
+        val prepared = session.prepareOutput(
+            displayName,
+            "application/octet-stream",
+            ExplorerActionHostSessionValues.OUTPUT_CONFLICT_FAIL,
+        )
+        val transactionId = requireNotNull(
+            prepared.getString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID),
+        )
+        ParcelFileDescriptor.AutoCloseOutputStream(session.openOutput(transactionId)).use {
+            it.write(bytes)
+        }
+        val verified = ParcelFileDescriptor.AutoCloseInputStream(
+            session.openPendingOutput(transactionId),
+        ).use { it.readBytes() }
+        assertArrayEquals(bytes, verified)
+        return transactionId
+    }
+
+    private fun writeDurableText(file: File, value: String) {
+        FileOutputStream(file, false).use { output ->
+            output.write(value.toByteArray(Charsets.UTF_8))
+            output.fd.sync()
+        }
+    }
+
     private fun expectIllegalState(block: () -> Unit) {
         try {
             block()
@@ -636,6 +1163,15 @@ class ExplorerActionHostSessionInstrumentationTest {
             return
         }
         throw AssertionError("Expected IllegalArgumentException")
+    }
+
+    private fun expectIOException(block: () -> Unit) {
+        try {
+            block()
+        } catch (_: IOException) {
+            return
+        }
+        throw AssertionError("Expected IOException")
     }
 
     private class SyntheticDeathToken : Binder() {
@@ -659,5 +1195,11 @@ class ExplorerActionHostSessionInstrumentationTest {
     private companion object {
         const val CLIENT_DEATH_TIMEOUT_MILLIS = 5_000L
         const val DEEP_OUTPUT_TREE_DEPTH = 1_024
+        const val PROCESS_DEATH_PHASE_ARGUMENT = "archiveManagerV15ProcessDeathPhase"
+        const val PROCESS_DEATH_PHASE_PREPARE = "prepare"
+        const val PROCESS_DEATH_PHASE_VERIFY = "verify"
+        const val PROCESS_DEATH_ROOT_NAME = "explorer-action-v15-real-process-death"
+        const val PROCESS_DEATH_BATCH_ID_FILE_NAME = "explorer-action-v15-process-death-batch-id"
+        const val PROCESS_DEATH_READY_FILE_NAME = "explorer-action-v15-process-death-ready"
     }
 }

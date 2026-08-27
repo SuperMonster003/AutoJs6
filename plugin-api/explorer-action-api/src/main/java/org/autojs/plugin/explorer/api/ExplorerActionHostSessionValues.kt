@@ -14,4 +14,11 @@ object ExplorerActionHostSessionValues {
     const val OUTPUT_STATE_COMMITTED = 4
     const val OUTPUT_STATE_ABORTED = 5
     const val OUTPUT_STATE_UNKNOWN = 6
+
+    const val OUTPUT_BATCH_STATE_PREPARED = 1
+    const val OUTPUT_BATCH_STATE_COMMITTING = 2
+    const val OUTPUT_BATCH_STATE_COMMITTED = 3
+    const val OUTPUT_BATCH_STATE_ABORTED = 4
+    const val OUTPUT_BATCH_STATE_RECOVERY_REQUIRED = 5
+    const val OUTPUT_BATCH_STATE_UNKNOWN = 6
 }

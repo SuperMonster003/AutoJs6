@@ -65,6 +65,7 @@
 * `Feature` File manager Explorer Action protocol v12 adds a bounded sibling-volume source tied to each archive session; archive plugins can open host-approved ZIP and RAR volumes through opaque IDs and read-only descriptors without receiving a directory or filesystem path
 * `Feature` File manager Explorer Action protocol v13 lets supported archive plugins rebuild filename decoding inside the same read-only session; the native path bar can select a ZIP encoding while preserving the deepest available internal path and existing selected entries
 * `Feature` File manager Explorer Action protocol v14 adds bounded compound filename-suffix matching; archive plugins can register exact `.zip.001` and `.7z.001` first volumes and reuse the session-bound v12 sibling-volume source without matching arbitrary `.001` files or receiving a directory path
+* `Feature` File manager Explorer Action protocol v15 adds recoverable multi-file output batches; plugins can publish only after every pending file is verified, while the host durably records parent and file identity and rolls back only matching members after failure or restart
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting
