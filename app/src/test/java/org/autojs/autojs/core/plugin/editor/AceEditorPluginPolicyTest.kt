@@ -39,10 +39,16 @@ class AceEditorPluginPolicyTest {
     }
 
     @Test
-    fun `contract version must exactly match host`() {
+    fun `contract version must stay inside host compatibility range`() {
+        assertNull(rejection(contractVersion = EditorPluginContract.MIN_SUPPORTED_VERSION))
+        assertNull(rejection(contractVersion = EditorPluginContract.MAX_SUPPORTED_VERSION))
         assertEquals(
             EditorPluginLoadError.CONTRACT_VERSION_UNSUPPORTED,
-            rejection(contractVersion = EditorPluginContract.VERSION + 1),
+            rejection(contractVersion = EditorPluginContract.MIN_SUPPORTED_VERSION - 1),
+        )
+        assertEquals(
+            EditorPluginLoadError.CONTRACT_VERSION_UNSUPPORTED,
+            rejection(contractVersion = EditorPluginContract.MAX_SUPPORTED_VERSION + 1),
         )
     }
 

@@ -280,7 +280,8 @@ object AceEditorPluginHost {
                 "In-process editor plugins must share the host signer or be OFFICIAL/TRUSTED; " +
                     "${candidate.authorizedState} is not sufficient."
             EditorPluginLoadError.CONTRACT_VERSION_UNSUPPORTED ->
-                "Unsupported editor contract ${candidate.contractVersion}; host requires ${EditorPluginContract.VERSION}."
+                "Unsupported editor contract ${candidate.contractVersion}; host supports " +
+                    "${EditorPluginContract.MIN_SUPPORTED_VERSION}..${EditorPluginContract.MAX_SUPPORTED_VERSION}."
             EditorPluginLoadError.HOST_VERSION_TOO_LOW ->
                 "Editor plugin requires host version ${candidate.requiresHostVersion}; current version is ${BuildConfig.VERSION_CODE}."
             EditorPluginLoadError.HOST_VERSION_TOO_HIGH ->
@@ -356,12 +357,15 @@ object AceEditorPluginHost {
         }
         val entrypoint = instantiateEntrypoint(entrypointClass, packageName)
         if (entrypoint.contractVersion != candidate.contractVersion ||
-            entrypoint.contractVersion != EditorPluginContract.VERSION
+            entrypoint.contractVersion !in EditorPluginContract.MIN_SUPPORTED_VERSION..
+                EditorPluginContract.MAX_SUPPORTED_VERSION
         ) {
             throw EditorPluginLoadException(
                 EditorPluginLoadError.ENTRYPOINT_CONTRACT_MISMATCH,
                 packageName,
-                "Entrypoint contract ${entrypoint.contractVersion} does not match manifest/host contract ${EditorPluginContract.VERSION}.",
+                "Entrypoint contract ${entrypoint.contractVersion} does not match its manifest or " +
+                    "host range ${EditorPluginContract.MIN_SUPPORTED_VERSION}.." +
+                    "${EditorPluginContract.MAX_SUPPORTED_VERSION}.",
             )
         }
         val localizedPackageContext = packageContext.createConfigurationContext(
@@ -509,7 +513,8 @@ internal object AceEditorPluginPolicy {
                 authorizedState != PluginAuthorizedState.OFFICIAL &&
                 authorizedState != PluginAuthorizedState.TRUSTED ->
             EditorPluginLoadError.IN_PROCESS_TRUST_REQUIRED
-        contractVersion != EditorPluginContract.VERSION ->
+        contractVersion !in EditorPluginContract.MIN_SUPPORTED_VERSION..
+            EditorPluginContract.MAX_SUPPORTED_VERSION ->
             EditorPluginLoadError.CONTRACT_VERSION_UNSUPPORTED
         !PluginCapabilityResolver.isHostVersionCompatible(hostVersionCode, requiresHostVersion) ->
             EditorPluginLoadError.HOST_VERSION_TOO_LOW
