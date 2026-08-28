@@ -168,6 +168,9 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 ###### 2026/08/28
 
+* `新增` TypeScript 依賴快照現會拒絕原生 addon 訊號 (`.node`, `binding.gyp` 及 `gypfile`) 和安裝生命週期 hook (`preinstall`, `install` 及 `postinstall`), 提供穩定錯誤碼及純 JavaScript/WASM 替代指引; 普通 package script 仍只作為惰性中繼資料保留
+* `新增` 宿主 TypeScript 依賴契約已同步 resolver policy revision 3, 並包含 dayjs, lodash, zod, uuid 及 nanoid 真實發佈 manifest 覆蓋, 鎖定 Rhino CommonJS 入口選擇及穩定的 ESM-only 錯誤
+* `新增` TypeScript 專案編譯與 Ace 現共用同一凍結 `node_modules` 類型層: package `types`/`typings`, TypeScript 6 `typesVersions`, 巢狀聲明及已安裝 `@types` 在 Rhino 和 Node profile 產生一致的 dayjs 補全, hover 與 strict TS2322 診斷
 * `新增` Lua Runtime 宿主能力新增按檔案腳本隔離的持久鍵值儲存與 Toast: `autojs.storage.get/put/remove/clear` 使用應用程式私有, 同步提交且有界的命名空間, `autojs.ui.toast` 透過宿主主線程單次派發
 * `新增` Ace LSP 默認文件類型新增 .mts/.cts 及其聲明文件變體, 使外部 Ace 編輯器可選擇與執行一致的 Rhino/Node TypeScript profile; 舊版默認選擇會自動遷移, 明確自定義後綴集合保持不變
 * `新增` APK Builder 支援在打包階段編譯 Rhino TypeScript 專案; 最終 APK 只包含加密 JavaScript 與不內嵌原始碼的可選 Source Map, 不包含 TypeScript 原始碼或編譯器; 加密專案使用一次性 AES-256-GCM 暫存區, 解密與重新加密的明文只存於記憶體並在使用後清零
@@ -191,6 +194,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Node TypeScript 運行異常會消費編譯器 Source Map v3, 將 V8 堆棧幀映射回原 .mts/.cts 文件的精確行列, Console 與編輯器日誌面板中的映射位置可直接點擊跳轉
 * `新增` TypeScript 項目現在會將有界項目快照作為單個 Program 交給 Rhino 或 Node profile 編譯, 保留相對 import, CommonJS 循環依賴, JSON 運行時文件, package `type` 上下文, 導入模塊診斷及逐模塊 Source Map 棧映射; package 元數據保持嚴格校驗並拒絕 lifecycle scripts
 * `新增` TypeScript 編譯結果可按源碼圖, 編譯器與聲明指紋, profile 與 policy 修訂及 package 元數據組成的語義鍵跨執行緩存; 未修改腳本會跳過編譯器 prewarm 與 Worker 編譯, 已認證輸出歸檔在重用前仍會重新校驗, 損壞或超額條目自動回退到正常編譯
+* `新增` TypeScript 項目從編譯到執行共用一份精確唯讀 `node_modules` 快照; Rhino 載入 CommonJS/JSON 及 dual-package 的 `require` 分支並提供穩定 ESM-only 錯誤, Node 接收不可變私有 workspace overlay 並執行 ESM/CJS/dual package, 且不會回寫依賴變更
 * `新增` 定時任務, 廣播任務, 快捷方式及 Tasker/本地 Run Intent 現在與前台啟動共用同一條 TypeScript preparation 管線; Tasker 前置 JavaScript 會保持在已編譯的 Rhino/Node 輸出之前執行, Source Map 行偏移亦會計入該前綴, 不再繞過編譯並直接執行原始 TypeScript
 * `新增` 項目文件夾支持直接建立定時任務與廣播任務, 觸發時按 project.json 重新解析 Rhino/Node.js/Python 入口, 並恢復項目工作目錄及 useFeatures 配置
 * `新增` 獨立 Python Runtime 插件後端, 支持通過單獨的 CPython 插件進程運行本地 .py 文件及聲明為 `type: python` 的腳本項目, 並校驗固定組件/簽名/協議/ABI, 支持熱插拔且絕不回退到 JavaScript
@@ -277,6 +281,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 打包應用支持使用 APK Builder Template 插件進行遠程構建
 * `新增` 開發者選項支持 GitHub 訪問令牌設置, 用於提升更新檢查及插件索引請求限額
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出嘅 `runtime.loadJarWithR8` 多載及協議 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發佈, retrace 綁定 mapping 來源, 提供者缺失或無效時禁止 D8/dx 或本地回退
+* `修復` 檔案管理員中部分已識別為影片的格式仍會開啟系統應用程式候選選單的問題; 現在所有已識別的影片類型均優先呼叫官方影片播放器外掛程式, 外掛程式未安裝, 已停用, 未獲授權, 不相容, 不可用或啟動失敗時顯示復原指引及明確的 "用其他應用程式開啟" 選項
 * `修復` 打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 "Cannot read file" 失敗的問題
 * `修復` Node.js UI 控制代碼在 Android Activity 銷毀後可能仍保持活動, 允許延遲更新並持續佔用提供者資源直至執行清理
 * `修復` Node.js 插件執行因模組探測及工作區封存預算過小而可能拒絕大型純文字依賴圖及實際 node_modules 工作區
@@ -351,6 +356,13 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 啟動頁背景未延伸到劉海屏的短邊切口區域的問題
 * `修復` 檔案管理器可能不會重新整理 Explorer Action 新提交的同級輸出, 或把已提交的輸出目錄顯示為文件的問題
 * `修復` Android 7 離開原生壓縮檔頁時, 工作階段預覽快取清理路徑呼叫較新的 File NIO API, 可能導致應用當機的問題
+* `修復` 從 Explorer Action 播放器返回時, 檔案管理器即使保留了目錄與捲動位置仍可能連續觸發兩次完整列表重新繫結, 導致頁面劇烈閃動的問題
+* `修復` 從較遠的主頁分頁切換到檔案頁時會逐頁平滑捲動, 期間攔截第一次列表手勢並呈現約 1 秒無回應的問題
+* `修復` 從影片播放器等橫屏插件頁面返回時因配置變更重建整個主介面, 導致檔案管理器劇烈閃動甚至連續閃動兩次的問題
+* `修復` 每次回到主介面都會重新發現並繫結插件服務, 可能拉起插件進程並導致檔案列表約半秒無回應的問題
+* `修復` ZIP/JAR 等由外掛程式處理的檔案, Explorer Action 拼圖圖示填滿整個操作格而顯得過大的問題
+* `修復` 檔案管理器無法可靠區分同為 `.ts/.mts` 副檔名的 TypeScript 原始碼/宣告檔與 MPEG-2 TS 影片, 且 `.d.ts/.d.mts/.d.cts` 未必一律視為宣告檔的問題
+* `修復` 由外掛程式支援的 `.py/.ts/.java/.kt` 原始碼檔未統一顯示可執行原始碼圖示與執行入口的問題
 * `優化` 移除宿主側 Node.js Gradle 開關及重複的示例, 類型聲明, 項目嚮導與校驗腳本, 運行時默認值和開發資產現統一由 Node.js Runtime 插件維護
 * `優化` DEX 編譯器診斷現在於既有預算內保留經脫敏的 INFO/WARNING/ERROR 詳情及可選邏輯來源, 歸檔條目與位置元數據; 開發者選項會顯示僅存於進程內的最近一次 JAR 載入路徑, 並提供 BUSY, 超時及回退提示
 * `優化` TypeScript 編譯現在為每次請求記錄私隱安全的性能觀察, 涵蓋準備, 快取查找, 編譯器綁定/預熱, 遠端編譯, 輸出處理, 總耗時, 歸檔大小, 原始檔案數及宿主堆記憶體變化, 並將編譯器耗時細分為 ingress 前, ingress, 階段間隔, parse, semantic, emit 及 emit 後區間; 格式錯誤或亂序的 progress 回調會被忽略, 這些觀察不設性能門檻
@@ -416,6 +428,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 構建系統支持動態匹配 Kotlin/KSP/AGP/R8 兼容版本並降低 Gradle 啟動內存壓力
 * `優化` 將未發佈的官方 AI 插件定名為 3-Stone AI, 同時以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述符, AP schema 域及重新命名的一致性測試夾具完全取代跨進程合約; 不保留身份別名
 * `優化` 直接實作 AI Provider V2 分頁目標發現: 每個目標帶有穩定 target/provider/model 身份, locality, 設定同可用狀態, capabilities, limits, controls 及允許嘅 HTTPS origins; 支援 REMOTE/HYBRID 執行同插件自管憑據, 憑據位元組唔經 Binder, 亦唔保留被取代嘅 wire 別名
+* `優化` 檔案管理器目錄刷新採用最小差量更新, 未變化的行不再重新繫結, 原地刷新保持目前捲動位置
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

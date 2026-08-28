@@ -168,6 +168,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/08/28
 
+* `추가` TypeScript 의존성 스냅샷은 이제 native addon 신호 (`.node`, `binding.gyp`, `gypfile`)와 설치 lifecycle hook (`preinstall`, `install`, `postinstall`)을 안정적인 오류 코드 및 pure JavaScript/WASM 안내와 함께 거부하며, 일반 패키지 script는 inert metadata로 유지합니다
+* `추가` 호스트 TypeScript 의존성 계약을 resolver policy revision 3과 동기화하고 dayjs, lodash, zod, uuid, nanoid의 실제 릴리스 manifest 검증을 추가하여 Rhino CommonJS 진입점 선택과 안정적인 ESM-only 오류를 고정했습니다
+* `추가` TypeScript project compilation과 Ace가 동일한 frozen `node_modules` type layer를 공유함: package `types`/`typings`, TypeScript 6 `typesVersions`, nested declaration 및 installed `@types`로 Rhino/Node profile의 dayjs completion, hover, strict TS2322 diagnostic이 일치함
 * `추가` Lua Runtime Host capability에 파일 스크립트별로 격리된 영구 key/value 저장소와 Toast 추가: `autojs.storage.get/put/remove/clear`는 앱 전용의 제한된 namespace에 동기 commit하며, `autojs.ui.toast`는 Host 메인 thread에서 한 번만 dispatch
 * `추가` Ace LSP 기본 파일 형식에 .mts/.cts 및 선언 파일 변형을 추가하여 외부 Ace 편집기가 실행과 동일한 Rhino/Node TypeScript 프로필을 선택하도록 개선; 이전 기본 선택은 마이그레이션하고 명시적 사용자 지정 접미사 집합은 그대로 유지
 * `추가` APK Builder가 패키징 시 Rhino TypeScript 프로젝트를 컴파일합니다. 최종 APK에는 암호화된 JavaScript와 소스가 포함되지 않은 선택적 Source Map만 들어가며 TypeScript 소스와 컴파일러는 포함되지 않습니다. 암호화 프로젝트는 일회용 AES-256-GCM 스테이징을 사용하고 평문은 메모리에만 유지한 뒤 재암호화 후 0으로 지웁니다
@@ -191,6 +194,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` Node TypeScript 런타임 오류에서 컴파일러 Source Map v3를 사용해 V8 스택 프레임을 원본 .mts/.cts 파일의 정확한 줄과 열로 매핑하고, Console과 편집기 로그 패널의 매핑 위치를 클릭해 바로 이동 가능
 * `추가` TypeScript 프로젝트를 Rhino 또는 Node용 단일 Program으로 제한된 프로젝트 스냅샷에서 컴파일하고, 상대 import, CommonJS 순환 의존성, JSON 런타임 파일, package `type` 컨텍스트, 가져온 모듈 진단, 모듈별 Source Map 스택 매핑을 보존; package 메타데이터는 엄격하게 검증하고 lifecycle scripts를 거부
 * `추가` TypeScript 컴파일 결과를 소스 그래프, 컴파일러 및 선언 지문, profile과 policy revision, package 메타데이터를 포함한 semantic key로 실행 간 캐시; 변경되지 않은 스크립트는 컴파일러 prewarm과 Worker 컴파일을 생략하고 인증된 출력 아카이브는 재사용 전에 다시 검증하며 손상되거나 quota를 초과한 항목은 일반 컴파일로 폴백
+* `추가` TypeScript project는 compile부터 execution까지 동일한 exact read-only `node_modules` snapshot을 사용함; Rhino는 CommonJS/JSON 및 dual-package의 `require` branch를 load하고 stable ESM-only error를 제공하며, Node는 immutable private workspace overlay에서 dependency change를 write-back하지 않고 ESM/CJS/dual package를 실행함
 * `추가` 예약 작업, 브로드캐스트 작업, 바로 가기 및 Tasker/로컬 Run Intent가 포그라운드 실행과 동일한 TypeScript preparation 파이프라인을 공유; Tasker 사전 실행 JavaScript는 컴파일된 Rhino/Node 출력보다 먼저 실행되고 Source Map 줄 오프셋에도 접두부를 반영하여 컴파일을 우회한 원본 TypeScript 실행을 방지
 * `추가` 프로젝트 폴더에서 예약 작업과 브로드캐스트 작업을 직접 만들 수 있고, 트리거 시 project.json에서 Rhino/Node.js/Python 엔트리를 다시 해석하며 프로젝트 작업 디렉터리와 useFeatures 설정을 복원
 * `추가` 독립 Python Runtime 플러그인 백엔드에서 로컬 .py 파일과 `type: python`으로 선언된 스크립트 프로젝트를 별도의 CPython 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 핫 플러그, JavaScript 폴백 금지를 지원
@@ -277,6 +281,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 앱 패키징에서 APK Builder Template 플러그인을 사용한 원격 빌드 지원
 * `추가` 개발자 옵션에서 GitHub 액세스 토큰 설정 지원, 업데이트 확인 및 플러그인 인덱스 요청 한도 확장용
 * `추가` 전역 JavaScript (Rhino) R8 통합에 검증된 산출물 내보내기용 `runtime.loadJarWithR8` 오버로드 3개와 프로토콜 1.1 `runtime.retraceR8Stack`을 추가; mapping/seeds/usage/retrace metadata를 원자적으로 게시하고 retrace는 mapping 출처에 결합되며 Provider가 없거나 잘못되면 D8/dx 또는 로컬 fallback 없이 실패
+* `수정` 파일 관리자가 이미 동영상으로 분류한 형식도 동영상 버튼에서 시스템 앱 후보가 열릴 수 있던 문제. 인식된 모든 동영상 형식에서 공식 Video Player 플러그인을 먼저 사용하고 플러그인이 없거나 비활성화, 미승인, 비호환, 사용 불가 또는 실행 실패 상태이면 명시적인 "다른 앱으로 열기" 옵션과 복구 안내를 표시
 * `수정` 패키징된 앱의 Rhino CommonJS require가 종속 JavaScript 모듈을 복호화하지 못해 패키징 시 컴파일된 다중 파일 TypeScript 출력이 "Cannot read file"로 실패하는 문제
 * `수정` Android Activity가 제거된 뒤에도 Node.js UI 핸들이 활성 상태로 남아 지연 업데이트를 허용하고 실행 정리 시점까지 공급자 소유 리소스를 유지할 수 있던 문제
 * `수정` 모듈 탐색 및 작업 공간 아카이브 예산이 너무 작아 Node.js 플러그인 실행이 대규모 평문 종속성 그래프와 실제 node_modules 작업 공간을 거부할 수 있던 문제
@@ -351,6 +356,13 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 시작 화면 배경이 노치 화면의 짧은 가장자리 컷아웃 영역까지 확장되지 않는 문제
 * `수정` 파일 관리자가 Explorer Action으로 새로 커밋된 인접 출력을 새로 고치지 않거나 커밋된 출력 디렉터리를 파일로 표시할 수 있는 문제
 * `수정` Android 7에서 네이티브 압축 파일 화면을 나갈 때 세션 미리보기 캐시 정리 경로가 더 최근의 File NIO API를 호출하여 앱이 충돌할 수 있는 문제
+* `수정` Explorer Action 플레이어에서 돌아올 때 폴더와 스크롤 위치가 유지되어도 전체 파일 목록이 최대 두 번 다시 바인딩되어 화면이 심하게 깜박이는 문제
+* `수정` 멀리 떨어진 홈 탭에서 파일 탭으로 전환할 때 중간 페이지를 애니메이션으로 통과하면서 첫 목록 제스처를 가로채 약 1초 동안 응답하지 않는 것처럼 보이는 문제
+* `수정` 동영상 플레이어 등 가로 방향 플러그인 페이지에서 돌아올 때 구성 변경으로 메인 UI 전체가 재생성되어 파일 관리자가 심하게 깜박이고 두 번 연속 깜박이기도 하는 문제
+* `수정` 메인 UI로 돌아올 때마다 플러그인 서비스를 다시 검색하고 바인딩하여 플러그인 프로세스가 실행되고 파일 목록이 약 0.5초 동안 응답하지 않을 수 있는 문제
+* `수정` ZIP/JAR 등 플러그인이 처리하는 파일의 Explorer Action 퍼즐 아이콘이 작업 셀 전체를 채워 지나치게 크게 보이는 문제
+* `수정` 파일 관리자가 같은 `.ts/.mts` 확장자를 가진 TypeScript 소스/선언 파일과 MPEG-2 TS 동영상을 안정적으로 구분하지 못하고 `.d.ts/.d.mts/.d.cts`를 항상 선언 파일로 처리하지 않는 문제
+* `수정` 플러그인이 지원하는 `.py/.ts/.java/.kt` 소스 파일에 실행 가능한 소스 아이콘과 실행 작업이 일관되게 표시되지 않는 문제
 * `개선` 호스트 측 Node.js Gradle 스위치와 중복 샘플, 타입 선언, 프로젝트 마법사, 검증 스크립트를 제거하고 런타임 기본값과 개발 자산 관리를 Node.js Runtime 플러그인으로 통합
 * `개선` DEX 컴파일러 진단은 기존 제한 내에서 비식별화된 INFO/WARNING/ERROR 세부 정보와 선택적 논리 origin, 아카이브 entry 및 위치 메타데이터를 보존합니다; 개발자 옵션에는 프로세스 메모리에만 유지되는 최근 JAR 로드 경로와 BUSY, 시간 초과 및 폴백 안내가 표시됩니다
 * `개선` TypeScript 컴파일은 준비, 캐시 조회, 컴파일러 바인딩/프리워밍, 원격 컴파일, 출력 처리, 전체 지연 시간, 아카이브 크기, 소스 수 및 호스트 힙 변화를 요청별 개인정보 보호 관측값으로 기록하고 컴파일러 시간을 ingress 전, ingress, 단계 사이, parse, semantic, emit 및 emit 후 구간으로 분해합니다; 형식이 잘못되거나 순서가 어긋난 progress callback은 무시되며 이 관측값은 성능 임계값을 적용하지 않습니다
@@ -416,6 +428,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 빌드 시스템에서 Kotlin/KSP/AGP/R8 호환 버전 동적 선택을 지원하고 Gradle 시작 메모리 부담 감소
 * `개선` 미출시 공식 AI 플러그인을 3-Stone AI로 확정하고 프로세스 간 계약을 중립적인 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 새 Binder descriptor, AP schema domain 및 이름이 변경된 conformance fixture로 완전히 교체; 식별자 alias를 유지하지 않음
 * `개선` AI Provider V2 페이지형 target discovery를 직접 구현: 각 target은 안정적인 target/provider/model 식별자, locality, 구성 및 가용 상태, capabilities, limits, controls, 허용된 HTTPS origins를 포함; credential byte가 Binder를 통과하지 않는 plugin-managed credential과 REMOTE/HYBRID 실행을 지원하며 교체된 wire alias는 유지하지 않음
+* `개선` 파일 관리자 디렉터리 새로 고침이 최소 목록 차이만 적용하여 변경되지 않은 행은 다시 바인딩하지 않고 제자리 새로 고침 시 현재 스크롤 위치를 유지
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

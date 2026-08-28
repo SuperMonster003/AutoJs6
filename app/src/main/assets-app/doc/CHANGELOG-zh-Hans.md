@@ -8,6 +8,9 @@
 
 ###### 2026/08/28
 
+* `新增` TypeScript 依赖快照现会拒绝原生 addon 信号 (`.node`, `binding.gyp` 与 `gypfile`) 和安装生命周期 hook (`preinstall`, `install` 与 `postinstall`), 提供稳定错误码及纯 JavaScript/WASM 替代指引; 普通 package script 仍仅作为惰性元数据保留
+* `新增` 宿主 TypeScript 依赖契约已同步 resolver policy revision 3, 并包含 dayjs, lodash, zod, uuid 与 nanoid 真实发布 manifest 覆盖, 锁定 Rhino CommonJS 入口选择和稳定的 ESM-only 错误
+* `新增` TypeScript 项目编译与 Ace 现共用同一冻结 `node_modules` 类型层: package `types`/`typings`, TypeScript 6 `typesVersions`, 嵌套声明与已安装 `@types` 在 Rhino 和 Node profile 中产生一致的 dayjs 补全, hover 与 strict TS2322 诊断
 * `新增` Lua Runtime 宿主能力新增按文件脚本隔离的持久键值存储与 Toast: `autojs.storage.get/put/remove/clear` 使用应用私有, 同步提交且有界的命名空间, `autojs.ui.toast` 通过宿主主线程单次派发
 * `新增` Ace LSP 默认文件类型新增 .mts/.cts 及其声明文件变体, 使外部 Ace 编辑器可选择与执行一致的 Rhino/Node TypeScript profile; 旧版默认选择会自动迁移, 显式自定义后缀集合保持不变
 * `新增` APK Builder 支持在打包阶段编译 Rhino TypeScript 项目; 最终 APK 仅包含加密 JavaScript 与不内嵌源码的可选 Source Map, 不包含 TypeScript 源码或编译器; 加密项目使用一次性 AES-256-GCM staging, 解密与重加密明文仅存于内存并在使用后清零
@@ -22,6 +25,7 @@
 * `新增` Node TypeScript 运行异常会消费编译器 Source Map v3, 将 V8 堆栈帧映射回原 .mts/.cts 文件的精确行列, Console 与编辑器日志面板中的映射位置可直接点击跳转
 * `新增` TypeScript 项目现在会将有界项目快照作为单个 Program 交给 Rhino 或 Node profile 编译, 保留相对 import, CommonJS 循环依赖, JSON 运行时文件, package `type` 上下文, 导入模块诊断及逐模块 Source Map 栈映射; package 元数据保持严格校验并拒绝 lifecycle scripts
 * `新增` TypeScript 编译结果可按源码图, 编译器与声明指纹, profile 与 policy 修订及 package 元数据组成的语义键跨执行缓存; 未修改脚本会跳过编译器 prewarm 与 Worker 编译, 已认证输出归档在复用前仍会重新校验, 损坏或超额条目自动回退到正常编译
+* `新增` TypeScript 项目从编译到执行共用一份精确只读 `node_modules` 快照; Rhino 装载 CommonJS/JSON 和 dual-package 的 `require` 分支并提供稳定的 ESM-only 错误, Node 接收不可变私有 workspace overlay 并执行 ESM/CJS/dual package, 且不会回写依赖变更
 * `新增` 定时任务, 广播任务, 快捷方式及 Tasker/本地 Run Intent 现在与前台启动共用同一条 TypeScript preparation 管线; Tasker 前置 JavaScript 会保持在已编译的 Rhino/Node 输出之前执行, Source Map 行偏移也会计入该前缀, 不再绕过编译并直接执行原始 TypeScript
 * `新增` 项目文件夹支持直接创建定时任务与广播任务, 触发时按 project.json 重新解析 Rhino/Node.js/Python 入口, 并恢复项目工作目录及 useFeatures 配置
 * `新增` Python Runtime 插件, 内置 Chaquopy 17.0.0 与 CPython 3.13.9, 支持识别文件扩展名 (.py) 运行 Python 脚本
@@ -93,6 +97,7 @@
 * `新增` 设置页面提供 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
 * `新增` 打包应用配置支持显示或隐藏 "日志" 及 "设置" 启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退
+* `修复` 文件管理器中部分已识别为视频的格式仍会打开系统应用候选菜单的问题; 现在所有已识别的视频类型均优先调用官方视频播放器插件, 插件未安装, 已禁用, 未授权, 不兼容, 不可用或启动失败时显示恢复引导及明确的 "用其他应用打开" 选项
 * `修复` 打包应用的 Rhino CommonJS require 加载器无法解密依赖 JavaScript 模块, 导致 build-time 编译的多文件 TypeScript 项目以 "Cannot read file" 失败的问题
 * `修复` Node.js UI 句柄在 Android Activity 销毁后可能仍保持活动, 允许迟到更新并持续占用提供器资源直至执行清理
 * `修复` Node.js 插件执行因模块探测及工作区归档预算过小而可能拒绝大型纯文本依赖图及真实 node_modules 工作区
@@ -167,6 +172,13 @@
 * `修复` 启动页背景未延伸到刘海屏的短边切口区域的问题
 * `修复` 文件管理器可能不会刷新 Explorer Action 新提交的同级输出, 或把已提交的输出目录显示为文件的问题
 * `修复` Android 7 离开原生档案页时, 会话预览缓存清理路径调用了较新的 File NIO API, 可能导致应用崩溃的问题
+* `修复` 从 Explorer Action 播放器返回时, 文件管理器即使保留了目录与滚动位置仍可能连续触发两次全列表重绑定, 导致页面剧烈闪动的问题
+* `修复` 从较远的主页标签切换到文件页时会逐页平滑滚动, 期间拦截第一次列表手势并表现为约 1 秒无响应的问题
+* `修复` 从视频播放器等横屏插件页面返回时因配置变更重建整个主界面, 导致文件管理器剧烈闪动甚至连续闪动两次的问题
+* `修复` 每次回到主界面都会重新发现并绑定插件服务, 可能拉起插件进程并导致文件列表约半秒无响应的问题
+* `修复` ZIP/JAR 等由插件处理的文件, Explorer Action 拼图图标填满整个操作单元而显得过大的问题
+* `修复` 文件管理器无法可靠区分同为 `.ts/.mts` 后缀的 TypeScript 源码/声明文件与 MPEG-2 TS 视频, 且 `.d.ts/.d.mts/.d.cts` 未被始终视为声明文件的问题
+* `修复` 插件支持的 `.py/.ts/.java/.kt` 源文件未统一显示可执行源码图标与运行入口的问题
 * `优化` 移除宿主侧 Node.js Gradle 开关及重复的样例, 类型声明, 项目向导与校验脚本, 运行时默认值和开发资产现统一由 Node.js Runtime 插件维护
 * `优化` DEX 编译器诊断现在在既有预算内保留经脱敏的 INFO/WARNING/ERROR 详情及可选逻辑来源, 归档条目与位置元数据; 开发者选项会显示仅存于进程内的最近一次 JAR 加载路径, 并提供 BUSY, 超时及回退提示
 * `优化` TypeScript 编译现在为每次请求记录隐私安全的性能观察, 涵盖准备, 缓存查找, 编译器绑定/预热, 远程编译, 输出处理, 总耗时, 归档大小, 源文件数及宿主堆内存变化, 并将编译器耗时细分为 ingress 前, ingress, 阶段间隔, parse, semantic, emit 及 emit 后区间; 格式错误或乱序的 progress 回调会被忽略, 这些观察不设置性能门禁
@@ -235,6 +247,7 @@
 * `优化` 构建系统支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本并降低 Gradle 启动内存压力
 * `优化` 将未发布的官方 AI 插件定名为 3-Stone AI, 同时以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述符, AP schema 域及重命名的一致性测试夹具完全替换跨进程合约; 不保留身份别名
 * `优化` 直接实现 AI Provider V2 分页目标发现: 每项目标携带稳定的 target/provider/model 身份, locality, 配置与可用状态, capabilities, limits, controls 及允许的 HTTPS origins; 支持 REMOTE/HYBRID 执行和插件自管凭据, 凭据字节不经过 Binder, 且不保留被取代的 wire 别名
+* `优化` 文件管理器目录刷新采用最小差量更新, 未变化的行不再重新绑定, 原地刷新保持当前滚动位置
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

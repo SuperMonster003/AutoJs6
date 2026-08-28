@@ -8,6 +8,9 @@
 
 ###### 2026/08/28
 
+* `新機能` TypeScript dependency snapshot は native addon signal (`.node`, `binding.gyp`, `gypfile`) と install lifecycle hook (`preinstall`, `install`, `postinstall`) を安定した error code と pure JavaScript/WASM の案内付きで拒否し, 通常の package script は inert metadata のまま維持します
+* `新機能` ホストの TypeScript 依存関係コントラクトを resolver policy revision 3 に同期し, dayjs, lodash, zod, uuid, nanoid の実リリース manifest 検証を追加して, Rhino の CommonJS エントリ選択と安定した ESM-only エラーを固定しました
+* `新機能` TypeScript project compilation と Ace が同じ frozen `node_modules` type layer を共有: package `types`/`typings`, TypeScript 6 `typesVersions`, nested declaration, installed `@types` により Rhino/Node profile の dayjs completion, hover, strict TS2322 diagnostic が一致
 * `新機能` Lua Runtime の Host capability にファイルスクリプト単位で分離された永続 key/value ストレージと Toast を追加: `autojs.storage.get/put/remove/clear` はアプリ専用の上限付き名前空間へ同期 commit し, `autojs.ui.toast` は Host のメインスレッドから一度だけ dispatch
 * `新機能` Ace LSP の既定ファイル形式に .mts/.cts とその宣言ファイル形式を追加し, 外部 Ace エディターが実行時と同じ Rhino/Node TypeScript プロファイルを選択可能に改善; 旧版の既定選択は移行され, 明示的なカスタム接尾辞セットは維持
 * `新機能` APK Builder がパッケージ時に Rhino TypeScript プロジェクトをコンパイルするようになりました。最終 APK には暗号化された JavaScript とソースを埋め込まない任意の Source Map のみが含まれ、TypeScript ソースやコンパイラは含まれません。暗号化プロジェクトでは使い捨ての AES-256-GCM ステージングを使用し、平文はメモリ内だけに保持して再暗号化後にゼロクリアします
@@ -31,6 +34,7 @@
 * `新機能` Node TypeScript の実行例外でコンパイラの Source Map v3 を使用し, V8 スタックフレームを元の .mts/.cts ファイルの正確な行と列へマッピングし, Console とエディターログパネルのマッピング位置から直接ジャンプ可能
 * `新機能` TypeScript プロジェクトを Rhino または Node 向けの単一 Program として有界スナップショットからコンパイルし, 相対 import, CommonJS 循環依存, JSON 実行時ファイル, package の `type` コンテキスト, import 先モジュールの診断, モジュール単位の Source Map スタックマッピングを保持; package メタデータは厳格に検証し lifecycle scripts を拒否
 * `新機能` TypeScript コンパイル結果をソースグラフ, コンパイラと宣言の指紋, profile と policy の revision, package メタデータを含むセマンティックキーで実行間キャッシュ; 未変更スクリプトはコンパイラ prewarm と Worker コンパイルを省略し, 認証済み出力アーカイブは再利用前に再検証し, 破損またはクォータ超過のエントリは通常コンパイルへフォールバック
+* `新機能` TypeScript project は compile から execution まで同じ exact read-only `node_modules` snapshot を使用; Rhino は CommonJS/JSON と dual-package の `require` branch を load し stable ESM-only error を返し, Node は immutable private workspace overlay で ESM/CJS/dual package を dependency change の write-back なしに実行
 * `新機能` タイマータスク, ブロードキャストタスク, ショートカット, Tasker/ローカル Run Intent がフォアグラウンド起動と同じ TypeScript preparation パイプラインを共有; Tasker の事前実行 JavaScript はコンパイル済み Rhino/Node 出力より先に実行され, Source Map の行オフセットにも接頭部を反映し, コンパイルを迂回した生の TypeScript 実行を防止
 * `新機能` プロジェクトフォルダーからタイマータスクとブロードキャストタスクを直接作成でき, トリガー時に project.json から Rhino/Node.js/Python エントリを再解決し, プロジェクトの作業ディレクトリと useFeatures 設定を復元
 * `新機能` 独立した Python Runtime プラグインバックエンドがローカル .py ファイルと `type: python` 宣言のスクリプトプロジェクトを別の CPython プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, ホットプラグ, JavaScript へのフォールバック禁止に対応
@@ -117,6 +121,7 @@
 * `新機能` アプリのパッケージ化が APK Builder Template プラグインを使用したリモートビルドに対応
 * `新機能` 開発者向けオプションが GitHub アクセストークン設定に対応, 更新確認とプラグインインデックスのリクエスト上限を拡張可能
 * `新機能` グローバル JavaScript (Rhino) R8 連携に検証済み成果物を出力する 3 つの `runtime.loadJarWithR8` オーバーロードとプロトコル 1.1 `runtime.retraceR8Stack` を追加; mapping/seeds/usage/retrace metadata を原子的に公開し, retrace は mapping の来歴を結合, Provider 不在または不正時は D8/dx やローカル実装へフォールバックしない
+* `修正` ファイルマネージャーで動画と分類済みの形式でも動画ボタンからシステムのアプリ候補が開く問題. 認識済みの全動画形式で公式 Video Player プラグインを最初に使用し, 未インストール, 無効, 未承認, 非互換, 利用不可, または起動失敗の場合は明示的な "他のアプリで開く" を含む復旧案内を表示
 * `修正` パッケージ済みアプリの Rhino CommonJS require が依存 JavaScript モジュールを復号できず、パッケージ時にコンパイルした複数ファイルの TypeScript 出力が "Cannot read file" で失敗する問題
 * `修正` Android Activity の破棄後も Node.js UI ハンドルがアクティブなままとなり, 遅延更新を許可して実行終了時までプロバイダー所有リソースを保持する可能性がある問題
 * `修正` モジュール探索とワークスペースアーカイブの予算が小さすぎるため, Node.js プラグイン実行が大規模な平文依存グラフや実際の node_modules ワークスペースを拒否する可能性がある問題
@@ -191,6 +196,13 @@
 * `修正` 起動画面の背景がノッチ画面の短辺カットアウト領域まで拡張されない問題
 * `修正` Explorer Action がコミットした新しい同階層出力をファイルマネージャーが更新しないか, コミット済み出力ディレクトリをファイルとして表示する可能性がある問題
 * `修正` Android 7 でネイティブアーカイブ画面を離れる際, セッションプレビューキャッシュの消去経路が新しい File NIO API を呼び出してアプリがクラッシュする可能性がある問題
+* `修正` Explorer Action プレーヤーから戻ると, フォルダーとスクロール位置は保持されてもファイル一覧全体が最大 2 回再バインドされ, 画面が激しく点滅する問題
+* `修正` 離れたホームタブからファイルタブへ切り替える際に中間ページをアニメーションで横断し, 最初のリスト操作が遮られて約 1 秒間応答しないように見える問題
+* `修正` 動画プレーヤーなど横向きのプラグインページから戻ると構成変更によりメイン UI 全体が再生成され, ファイルマネージャが激しく点滅し連続で 2 回点滅することもある問題
+* `修正` メイン UI に戻るたびにプラグインサービスを再探索して再バインドし, プラグインのプロセスが起動されてファイル一覧が約 0.5 秒間応答しなくなることがある問題
+* `修正` ZIP/JAR などプラグイン処理対象ファイルの Explorer Action パズルアイコンが操作セル全体を占め, 大きすぎる問題
+* `修正` 同じ `.ts/.mts` 拡張子を持つ TypeScript ソース/宣言ファイルと MPEG-2 TS 動画をファイルマネージャーが確実に区別できず, `.d.ts/.d.mts/.d.cts` が常に宣言ファイルとして扱われない問題
+* `修正` プラグイン対応の `.py/.ts/.java/.kt` ソースファイルで実行可能ソース用アイコンと実行操作が一貫して表示されない問題
 * `改善` ホスト側の Node.js Gradle スイッチと重複するサンプル, 型宣言, プロジェクトウィザード, 検証スクリプトを削除し, ランタイム既定値と開発アセットの管理を Node.js Runtime プラグインに集約
 * `改善` DEX コンパイラー診断は既存の上限内で秘匿化された INFO/WARNING/ERROR の詳細と任意の論理 origin, アーカイブ entry, 位置メタデータを保持; 開発者向けオプションにはプロセス内だけに保存される直近の JAR 読み込み経路と BUSY, タイムアウト, フォールバックの案内を表示
 * `改善` TypeScript コンパイルは準備, キャッシュ検索, コンパイラーの接続/プリウォーム, リモートコンパイル, 出力処理, 総所要時間, アーカイブサイズ, ソース数, ホストヒープ変化をリクエスト単位のプライバシー安全な観測として記録し, コンパイラー時間を ingress 前, ingress, フェーズ間, parse, semantic, emit, emit 後の区間に分解; 不正形式または順序外の progress callback は無視され, これらの観測は性能しきい値を課しません
@@ -256,6 +268,7 @@
 * `改善` ビルドシステムが Kotlin/KSP/AGP/R8 の互換バージョン動的選択に対応し Gradle 起動時のメモリ負荷を削減
 * `改善` 未公開の公式 AI プラグインを 3-Stone AI として確定し, プロセス間契約を中立な `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新しい Binder descriptor, AP schema domain, 改名済み conformance fixture で完全に置換; 識別子 alias は保持しない
 * `改善` AI Provider V2 ページ分割ターゲット探索を直接実装: 各ターゲットは安定した target/provider/model 識別子, locality, 設定・可用状態, capabilities, limits, controls, 許可済み HTTPS origins を保持; REMOTE/HYBRID 実行とプラグイン管理認証情報を Binder に認証情報 byte を渡さずにサポートし, 置換済み wire alias は保持しない
+* `改善` ファイルマネージャのディレクトリ更新は最小限のリスト差分を適用し, 変更のない行は再バインドせず, その場での更新時に現在のスクロール位置を維持
 * `依存関係` モジュール化 Android AXML
 * `依存関係` モジュール化 Android ARSC Editor
 * `依存関係` モジュール化 APK Signer
