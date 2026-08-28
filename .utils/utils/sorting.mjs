@@ -44,32 +44,3 @@ export function sortByMap(src, pattern = null) {
             throw new Error(`Unknown sorting pattern: ${pattern}`);
     }
 }
-
-/**
- * @param {string[] | SetIterator<string> | Set<string>} src
- * @param {ListSortable['sort'] | null} [pattern=null]
- * @returns {string[]}
- */
-export function sortByList(src, pattern = null) {
-    const values = src instanceof Set ? Array.from(src.values()) : Array.from(src);
-    switch (pattern) {
-        case null:
-            return values;
-        case 'ascending':
-        case 'ascending.as.string':
-            return values.sort((a, b) => a.localeCompare(b));
-        case 'ascending.as.number':
-            return values.sort((a, b) => Number(a) - Number(b));
-        case 'ascending.as.version':
-            return values.sort((a, b) => compareVersionStrings(a, b));
-        case 'descending':
-        case 'descending.as.string':
-            return values.sort((a, b) => b.localeCompare(a));
-        case 'descending.as.number':
-            return values.sort((a, b) => Number(b) - Number(a));
-        case 'descending.as.version':
-            return values.sort((a, b) => compareVersionStrings(b, a));
-        default:
-            throw new Error(`Unknown sorting pattern: ${pattern}`);
-    }
-}

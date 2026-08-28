@@ -27,35 +27,12 @@ export function compareVersionStrings(v1, v2) {
 }
 
 /**
- * @param {string} v1
- * @param {string} v2
- * @returns {number}
- */
-export function compareVersionStringsDescending(v1, v2) {
-    const [ n1, s1 ] = toVersionParts(v1);
-    const [ n2, s2 ] = toVersionParts(v2);
-    return compareVersionParts(n2, n1) || compareVersionSuffix(s2, s1);
-}
-
-/**
  * @param {string} version
  * @returns {boolean}
  */
 export function isVersionStable(version) {
     const [ _, [ suffixName ] ] = toVersionParts(version);
     return getSuffixPriority(suffixName) === PRIORITY_STABLE;
-}
-
-/**
- * @param {string} version
- * @param {Object} options
- * @param {string} [options.min]
- * @param {string} [options.max]
- * @returns {boolean}
- */
-export function isVersionInRange(version, { min, max } = {}) {
-    return (min == null || compareVersionStrings(version, min) >= 0)
-        && (max == null || compareVersionStrings(version, max) <= 0);
 }
 
 /**

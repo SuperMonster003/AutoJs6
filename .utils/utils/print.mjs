@@ -134,27 +134,3 @@ export function printLinesDiffs(src, other, options = {}) {
         }
     });
 }
-
-/**
- * @param {Map<string,string>} src
- * @param {Map<string,string>} other
- */
-export function printMapDiffs(src, other) {
-    printLinesDiffs(mapToLines(src), mapToLines(other));
-}
-
-/**
- * @param {string[]} src
- * @param {string[]} other
- */
-export function printListDiffs(src, other) {
-    printLinesDiffs(src.join('\n'), other.join('\n'));
-}
-
-/**
- * @param {Map<string,string>} map
- * @returns {string}
- */
-function mapToLines(map) {
-    return Array.from(map.entries()).map(([ k, v ]) => `"${k}" to "${v}"`).join('\n');
-}

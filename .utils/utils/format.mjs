@@ -1,17 +1,6 @@
 // utils/format.mjs
 
 /**
- * @param {number | null} bytes
- * @param {number} [fractionDigits=2]
- * @returns {string | null}
- */
-export function bytes2GiB(bytes, fractionDigits = 2) {
-    if (bytes == null) return null;
-    const gib = bytes / 1024 ** 3;
-    return `${gib.toFixed(fractionDigits)} GiB`;
-}
-
-/**
  * Constructs a URL with query parameters.<br>
  * zh-CN: 使用查询参数构造 URL.
  *
@@ -29,17 +18,6 @@ export function buildUrl(url, query) {
         .map(([ key, value ]) => `${key}=${encodeURIComponent(value)}`)
         .join('&');
     return `${url}?${q}`;
-}
-
-/**
- * @example
- * "Up | Down ?" -> "Up \| Down \?"
- *
- * @param {string} string
- * @returns {string}
- */
-export function escapeRegExp(string) {
-    return string.replace(/[.*+?^${}()|\[\]\\]/g, '\\$&');
 }
 
 /**

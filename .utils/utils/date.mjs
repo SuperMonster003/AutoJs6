@@ -2,16 +2,6 @@
 
 /**
  * @example string
- * "Aug 23, 2025"
- * @param {Date} [date=new Date()]
- * @returns {string}
- */
-export function toUpdatedStamp(date = new Date()) {
-    return date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-/**
- * @example string
  * "2025/09/20"
  * @param {string} [dateText='']
  * @returns {string | null}

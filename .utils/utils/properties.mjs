@@ -1,8 +1,6 @@
 // utils/properties.mjs
 
 import * as fs from 'node:fs';
-import * as fsp from 'node:fs/promises';
-import { compareVersionStrings } from './versioning.mjs';
 import { generatePropertiesFileTimestamp } from './date.mjs';
 import { sortByMap } from './sorting.mjs';
 
@@ -253,40 +251,11 @@ export function parseProperties(text, sortingPattern = null) {
 /**
  * @param {string} [filePath='../version.properties']
  * @param {GradleMapRwOptions} [options={}]
- * @returns {Promise<Map<string, string>>}
- */
-export async function readProperties(filePath = '../version.properties', { encoding = 'utf8', sort = null } = {}) {
-    const text = await fsp.readFile(filePath, { encoding });
-    return parseProperties(text, sort);
-}
-
-/**
- * @param {string} [filePath='../version.properties']
- * @param {GradleMapRwOptions} [options={}]
  * @returns {Map<string, string>}
  */
 export function readPropertiesSync(filePath = '../version.properties', { encoding = 'utf8', sort = null } = {}) {
     const text = fs.readFileSync(filePath, { encoding });
     return parseProperties(text, sort);
-}
-
-/**
- * @param {string} [filePath='../version.properties']
- * @param {Map<string,string>} [map={}]
- * @param {GradleMapRwOptions} [options={}]
- * @returns {Promise<void>}
- */
-export async function writePropertiesWithMap(filePath = '../version.properties', map = new Map(), { encoding = 'utf8', sort = null } = {}) {
-    const lines = [];
-    sortByMap(map.entries(), sort).forEach(([ key, value ]) => {
-        if (value == null) return;
-        const k = escapeProperty(String(key), true);
-        const v = escapeProperty(String(value), false);
-        lines.push(`${k}=${v}`);
-    });
-    lines.unshift(generatePropertiesFileTimestamp());
-    const text = lines.join('\n') + '\n';
-    return fsp.writeFile(filePath, text, { encoding });
 }
 
 /**
@@ -306,142 +275,4 @@ export function writePropertiesSyncWithMap(filePath = '../version.properties', m
     lines.unshift(generatePropertiesFileTimestamp());
     const text = lines.join('\n') + '\n';
     return fs.writeFileSync(filePath, text, { encoding });
-}
-
-/**
- * @param {string} [filePath='../version.properties']
- * @param {string[]} [lines=[]]
- * @param {GradleDataRwOptions} [options={}]
- * @returns {Promise<void>}
- */
-export async function writePropertiesWithLines(filePath = '../version.properties', lines = [], { encoding = 'utf8' } = {}) {
-    const results = [];
-    lines.forEach((line) => {
-        if (line.startsWith('#') || line.startsWith('!')) {
-            results.push(line);
-        }
-        const [ key, value ] = parseProperties(line).entries().next().value || [];
-        if (value == null) return;
-        const k = escapeProperty(String(key), true);
-        const v = escapeProperty(String(value), false);
-        results.push(`${k}=${v}`);
-    });
-    results.unshift(generatePropertiesFileTimestamp());
-    const text = results.join('\n') + '\n';
-    return fsp.writeFile(filePath, text, { encoding });
-}
-
-/**
- * @param {string} [filePath='../version.properties']
- * @param {string[]} [lines=[]]
- * @param {GradleDataRwOptions} [options={}]
- * @returns {void}
- */
-export function writePropertiesSyncWithLines(filePath = '../version.properties', lines = [], { encoding = 'utf8' } = {}) {
-    const results = [];
-    lines.forEach((line) => {
-        if (line.startsWith('#') || line.startsWith('!')) {
-            results.push(line);
-        }
-        const [ key, value ] = parseProperties(line).entries().next().value || [];
-        if (value == null) return;
-        const k = escapeProperty(String(key), true);
-        const v = escapeProperty(String(value), false);
-        results.push(`${k}=${v}`);
-    });
-    results.unshift(generatePropertiesFileTimestamp());
-    const text = results.join('\n') + '\n';
-    return fs.writeFileSync(filePath, text, { encoding });
-}
-
-/**
- * @param {string} [filePath='../version.properties']
- * @param {Object} options
- * @param {BufferEncoding} [options.encoding='utf8']
- * @returns {string}
- */
-export function getMinSupportedAgpVersion(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
-    let minSupportedVersion = null;
-    Array.from(readPropertiesSync(filePath, { encoding }).entries()).forEach(([ key, value ]) => {
-        if (!/agp.version.*min.supported|min.supported.*agp.version/i.test(key)) return;
-        if (minSupportedVersion === null || compareVersionStrings(value, minSupportedVersion) < 0) {
-            minSupportedVersion = value;
-        }
-    });
-    if (!minSupportedVersion) {
-        throw new Error('Could not determine minSupportedAgpVersion from "version.properties" file');
-    }
-    return minSupportedVersion;
-}
-
-/**
- * @param {string} [filePath='../version.properties']
- * @param {Object} options
- * @param {BufferEncoding} [options.encoding='utf8']
- * @returns {string}
- */
-export function getMinSupportedGradleVersion(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
-    let minSupportedVersion = null;
-    Array.from(readPropertiesSync(filePath, { encoding }).entries()).forEach(([ key, value ]) => {
-        if (!/gradle.version.*min.supported|min.supported.*gradle.version/i.test(key)) return;
-        if (minSupportedVersion === null || compareVersionStrings(value, minSupportedVersion) < 0) {
-            minSupportedVersion = value;
-        }
-    });
-    if (!minSupportedVersion) {
-        throw new Error('Could not determine minSupportedGradleVersion from "version.properties" file');
-    }
-    return minSupportedVersion;
-}
-
-/**
- * @param {string} [filePath='../version.properties']
- * @param {Object} options
- * @param {BufferEncoding} [options.encoding='utf8']
- * @returns {number}
- */
-export function getMinSupportedJavaVersionInt(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
-    return getJavaVersionInfo(filePath, { encoding }).minSupportedJavaVersionInt;
-}
-
-/**
- * @param {string} [filePath='../version.properties']
- * @param {Object} options
- * @param {BufferEncoding} [options.encoding='utf8']
- * @returns {{ minSupportedJavaVersionInt: number, minSuggestedJavaVersionInt: number, maxSupportedJavaVersionInt: number }}
- */
-export function getJavaVersionInfo(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
-    let minSuggestedVer = Infinity;
-    let minSupportedVer = Infinity;
-    let maxSupportedVer = -Infinity;
-
-    Array.from(readPropertiesSync(filePath, { encoding }).entries()).forEach(([ key, value ]) => {
-        const currentVer = parseInt(value, 10);
-        if (/java.version.*min.suggested|min.suggested.*java.version/i.test(key)) {
-            minSuggestedVer = Math.min(minSuggestedVer, currentVer);
-        } else if (/java.version.*min.supported|min.supported.*java.version/i.test(key)) {
-            minSupportedVer = Math.min(minSupportedVer, currentVer);
-        } else if (/java.version.*max.supported|max.supported.*java.version/i.test(key)) {
-            maxSupportedVer = Math.max(maxSupportedVer, currentVer);
-        }
-    });
-
-    /**
-     * @param {number} target
-     * @param {string} variableName
-     * @throws {Error}
-     */
-    const validate = (target, variableName) => {
-        if (!isFinite(target)) throw new Error(`Could not determine ${variableName} from "version.properties" file`);
-    };
-
-    validate(minSuggestedVer, 'minSuggestedJavaVersionInt');
-    validate(minSupportedVer, 'minSupportedJavaVersionInt');
-    validate(maxSupportedVer, 'maxSupportedJavaVersionInt');
-
-    return {
-        minSuggestedJavaVersionInt: minSuggestedVer,
-        minSupportedJavaVersionInt: minSupportedVer,
-        maxSupportedJavaVersionInt: maxSupportedVer,
-    };
 }

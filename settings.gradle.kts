@@ -42,7 +42,7 @@ pluginManagement {
         google()
     }
     plugins {
-        id("org.autojs.build.platform-versions") version "1.4.1"
+        id("org.autojs.build.platform-versions") version "1.5.0"
         id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     }
 }
