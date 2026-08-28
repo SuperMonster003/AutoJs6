@@ -7,8 +7,6 @@ import androidx.core.net.toUri
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
-import org.joda.time.format.DateTimeFormat
-import java.util.Locale
 
 data class PluginCenterItem(
     val title: String,
@@ -17,15 +15,15 @@ data class PluginCenterItem(
     val versionCode: Long? = null,
     val versionDate: String? = null,
 
-    var updatableVersionName: String? = null,
-    var updatableVersionCode: Long? = null,
-    var updatableVersionDate: String? = null,
+    val updatableVersionName: String? = null,
+    val updatableVersionCode: Long? = null,
+    val updatableVersionDate: String? = null,
 
-    var updatableApkUrl: String? = null,
-    var updatableApkSha256: String? = null,
-    var updatableApkSizeBytes: Long? = null,
-    var updatableChangelogUrl: String? = null,
-    var updatableChangelogText: String? = null,
+    val updatableApkUrl: String? = null,
+    val updatableApkSha256: String? = null,
+    val updatableApkSizeBytes: Long? = null,
+    val updatableChangelogUrl: String? = null,
+    val updatableChangelogText: String? = null,
 
     val author: String? = null,
     val collaborators: List<String> = emptyList(),
@@ -77,18 +75,16 @@ data class PluginCenterItem(
     val requiresHostVersion: Long? = null,
     val hostVersionCode: Long? = null,
 ) {
-    val versionSummary: String
-        get() = formatVersionInfo(versionName, versionCode, versionDate)
+    val versionSummary: String = PluginVersionSummaryFormatter.format(versionName, versionCode, versionDate)
 
-    val updatableVersionSummary: String?
-        get() = when {
-            isUpdatable -> formatVersionInfo(
-                updatableVersionName ?: versionName,
-                updatableVersionCode ?: versionCode,
-                updatableVersionDate,
-            )
-            else -> null
-        }
+    val updatableVersionSummary: String? = when {
+        updatableVersionCode != null -> PluginVersionSummaryFormatter.format(
+            updatableVersionName ?: versionName,
+            updatableVersionCode,
+            updatableVersionDate,
+        )
+        else -> null
+    }
 
     val isUpdatable: Boolean
         get() = updatableVersionCode != null
@@ -100,54 +96,6 @@ data class PluginCenterItem(
     var lastUninstallTime: Long?
         get() = PluginRecentStore.getLastUninstalled(packageName)
         set(value) = PluginRecentStore.setLastUninstalled(packageName, value ?: System.currentTimeMillis())
-
-    private fun formatVersionInfo(versionName: String, versionCode: Long?, versionDate: String?): String {
-        val code = versionCode?.takeIf { it > 0 }
-        val date = versionDate
-            ?.trim()
-            ?.takeIf { it.isNotBlank() }
-            ?.let { dateStr ->
-            parseDate(
-                dateStr, "MMM dd, yyyy", Locale.ENGLISH,
-            ) ?: parseDate(
-                dateStr, "yyyy-MM-dd",
-            ) ?: parseDate(
-                dateStr, "yyyy/MM/dd",
-            ) ?: parseDate(
-                dateStr, "dd/MM/yyyy",
-            ) ?: parseDate(
-                dateStr, "MM/dd/yyyy",
-            ) ?: parseDate(
-                dateStr, "yyyy.MM.dd",
-            ) ?: parseDate(
-                dateStr, "dd.MM.yyyy",
-            ) ?: parseDate(
-                dateStr, "yyyyMMdd",
-            ) ?: parseDate(
-                dateStr, "yyyy-MM-dd HH:mm:ss",
-            ) ?: parseDate(
-                dateStr, "yyyy/MM/dd HH:mm:ss",
-            ) ?: parseDate(
-                dateStr, "dd MMM yyyy", Locale.ENGLISH,
-            ) ?: parseDate(
-                dateStr, "MMM dd yyyy", Locale.ENGLISH,
-            ) ?: dateStr
-        }
-
-        return buildString {
-            append(versionName)
-            code?.let { append(" ($it)") }
-            date?.let { append(" | $it") }
-        }
-    }
-
-    private fun parseDate(dateStr: String, pattern: String, locale: Locale = Locale.getDefault()): String? =
-        runCatching {
-            val parsedDate = DateTimeFormat.forPattern(pattern)
-                .withLocale(locale)
-                .parseDateTime(dateStr)
-            DateTimeFormat.forPattern("yyyy-MM-dd").print(parsedDate)
-        }.getOrNull()
 
     fun uninstall(context: Context) {
         Intent(Intent.ACTION_DELETE, "package:$packageName".toUri())

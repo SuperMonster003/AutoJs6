@@ -195,9 +195,9 @@
         "Le gestionnaire de fichiers pouvait ne pas actualiser une nouvelle sortie voisine validée par Explorer Action ou afficher un dossier de sortie validé comme un fichier",
         "Quitter une page native d'archive sous Android 7 pouvait faire planter l'application pendant le nettoyage du cache d'aperçu, car le chemin de nettoyage appelait une API File NIO plus récente",
         "Le retour depuis un lecteur Explorer Action pouvait déclencher jusqu'à deux rebinding complets de la liste, provoquant de forts clignotements malgré la conservation du dossier et de la position de défilement",
-        "Le passage d'un onglet d'accueil éloigné à Fichier animait la traversée des pages intermédiaires, interceptait le premier geste sur la liste et semblait bloqué pendant environ une seconde",
+        "Un clic sur Fichier depuis un autre onglet d'accueil n'affichait pas l'animation de transition de ViewPager",
         "Le retour depuis une page de plugin en paysage comme le lecteur vidéo reconstruisait toute l'interface principale suite au changement de configuration, faisant fortement clignoter le gestionnaire de fichiers, parfois deux fois de suite",
-        "Chaque retour vers l'interface principale redécouvrait et reliait à nouveau les services de plugin, ce qui pouvait lancer des processus de plugin et laisser la liste de fichiers sans réponse pendant environ une demi-seconde",
+        "Lors de la première ouverture de l'onglet Plugins de l'accueil ou du Centre de plugins autonome, ou du retour vers n'importe quel onglet d'accueil après avoir visité Plugins, les gestes immédiats pouvaient rester bloqués pendant environ une demi-seconde",
         "L'icône puzzle Explorer Action des fichiers ZIP/JAR et autres fichiers gérés par un plugin remplissait toute la cellule d'action et paraissait surdimensionnée",
         "Le gestionnaire de fichiers ne distinguait pas fiablement les sources et déclarations TypeScript `.ts/.mts` des vidéos MPEG-2 TS portant les mêmes suffixes, et ne traitait pas toujours `.d.ts/.d.mts/.d.cts` comme des déclarations",
         "Les sources `.py/.ts/.java/.kt` prises en charge par des plugins n'affichaient pas systématiquement une icône de source exécutable et l'action Exécuter"

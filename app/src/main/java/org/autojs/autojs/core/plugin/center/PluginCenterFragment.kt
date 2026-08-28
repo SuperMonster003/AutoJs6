@@ -11,7 +11,6 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -230,11 +229,12 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             layoutManager = LinearLayoutManager(context)
             adapter = this@PluginCenterFragment.adapter
             addItemDecoration(DividerItemDecoration(context, VERTICAL))
-            // Change animations stay off so an updated row rebinds in place without a
-            // cross-fade flash, while structural moves and insertions still animate gently.
-            // zh-CN: 关闭变化动画, 使更新的行原地重绑而无交叉淡出闪烁,
-            // 结构性移动与插入仍保留平缓动画.
-            itemAnimator = DefaultItemAnimator().apply { supportsChangeAnimations = false }
+            // Data snapshots can arrive exactly when the user starts dragging. RecyclerView's
+            // structural animations retain and relayout both old and new holders in that frame,
+            // so keep snapshot publication visually stable and leave motion to page/scroll UI.
+            // zh-CN: 数据快照可能恰在用户开始拖动时到达. RecyclerView 的结构动画会在该帧
+            // 同时保留并重新布局新旧 ViewHolder, 因此列表快照保持静态更新, 动效交由页面与滚动 UI.
+            itemAnimator = null
             setHasFixedSize(true)
             excludePaddingClippableViewFromBottomNavigationBar()
         }

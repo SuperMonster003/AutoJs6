@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -16,6 +17,7 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
@@ -186,7 +188,7 @@ class PluginCenterViewModel : ViewModel() {
             val renderedInitialSnapshot = _items.value.isEmpty()
             if (renderedInitialSnapshot) {
                 updateLatestItems(
-                    buildMergedItems(
+                    buildMergedItemsInBackground(
                         context = context,
                         indexEntries = cachedIndexEntries,
                         installed = installedSnapshot,
@@ -218,7 +220,7 @@ class PluginCenterViewModel : ViewModel() {
                         indexUpdate?.let { currentIndexEntries = it }
                         if (isLatestLoad()) {
                             updateLatestItems(
-                                buildMergedItems(
+                                buildMergedItemsInBackground(
                                     context = context,
                                     indexEntries = currentIndexEntries,
                                     installed = currentInstalled,
@@ -356,6 +358,24 @@ class PluginCenterViewModel : ViewModel() {
     private fun filterHidden(context: Context, items: List<PluginCenterItem>): List<PluginCenterItem> {
         if (items.isEmpty()) return emptyList()
         return items.filterNot { PluginVisibilityStore.isHidden(context, it.packageName) }
+    }
+
+    private suspend fun buildMergedItemsInBackground(
+        context: Context,
+        indexEntries: List<PluginIndexEntry>,
+        installed: List<InstalledPluginRepository.InstalledPlugin>,
+        legacyInstalled: List<LegacyInstalledPluginRepository.LegacyInstalledPlugin>,
+        allowGlobalUpdateCheck: Boolean,
+        sourceScope: PluginIndexSource?,
+    ): List<PluginCenterItem> = withContext(Dispatchers.Default) {
+        buildMergedItems(
+            context = context,
+            indexEntries = indexEntries,
+            installed = installed,
+            legacyInstalled = legacyInstalled,
+            allowGlobalUpdateCheck = allowGlobalUpdateCheck,
+            sourceScope = sourceScope,
+        )
     }
 
     private fun buildMergedItems(

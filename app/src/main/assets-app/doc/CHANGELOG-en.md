@@ -198,9 +198,9 @@
 * `Fix` File manager could fail to refresh a newly committed Explorer Action sibling output or could display a committed output directory as a file
 * `Fix` Leaving a native archive page on Android 7 could crash while cleaning the session preview cache because the cleanup path called a newer File NIO API
 * `Fix` Returning from an Explorer Action player could trigger up to two full file-list rebinds, causing severe flashing even though the folder and scroll position were retained
-* `Fix` Switching from a distant Home tab to File animated across the intermediate pages, intercepted the first list gesture, and appeared unresponsive for about one second
+* `Fix` Clicking File from another Home tab skipped the ViewPager transition animation
 * `Fix` Returning from a landscape plugin page such as the video player rebuilt the whole main UI on the configuration change, making the file manager flash severely and sometimes twice in a row
-* `Fix` Every return to the main UI re-discovered and re-bound plugin services, which could spawn plugin processes and leave the file list unresponsive for about half a second
+* `Fix` Opening the Home Plugins tab or standalone Plugin Center for the first time, or returning to any Home tab after visiting Plugins, could block immediate gestures for about half a second
 * `Fix` Explorer Action puzzle icons for ZIP/JAR and other plugin-handled files filled the entire action cell and appeared oversized
 * `Fix` The file manager could not reliably distinguish TypeScript `.ts/.mts` sources and declarations from MPEG-2 TS video with the same suffixes, and did not always treat `.d.ts/.d.mts/.d.cts` as declaration files
 * `Fix` Plugin-backed `.py/.ts/.java/.kt` source files did not consistently use executable-source icons and expose the Run action

@@ -6,14 +6,13 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
+import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -37,12 +36,15 @@ class PluginCenterItemViewHolder(
 
     private val context = itemViewBinding.root.context
 
-    private val themeColor
-        get() = ThemeColorManager.colorPrimary
-    private val adjustedTextContrastColor
-        get() = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), themeColor, 3.2)
-    private val adjustedImageContrastColor
-        get() = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), themeColor, 2.3)
+    private val themeColor = ThemeColorManager.colorPrimary
+    private val adjustedTextContrastColor =
+        ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), themeColor, 3.2)
+    private val adjustedImageContrastColor =
+        ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), themeColor, 2.3)
+    private val colorPrimary = context.getColor(R.color.text_color_primary)
+    private val colorPrimaryA50 = context.getColor(R.color.text_color_primary_alpha_50)
+    private val colorPrimaryA30 = context.getColor(R.color.text_color_primary_alpha_30)
+    private val colorPrimaryA20 = context.getColor(R.color.text_color_primary_alpha_20)
 
     private val iconView: CircleImageView = itemViewBinding.icon
 
@@ -55,7 +57,6 @@ class PluginCenterItemViewHolder(
     private val downloadButton = itemViewBinding.downloadButton
 
     private val updatableBadgeView = itemViewBinding.updatableBadge
-    private val updatableBadgeTextView = itemViewBinding.updatableBadgeText
     private val versionInfoForUpdateView = itemViewBinding.versionInfoForUpdate
 
     private val btnDeleteView = itemViewBinding.btnDelete
@@ -65,6 +66,13 @@ class PluginCenterItemViewHolder(
 
     private var lastBoundPackageName: String? = null
     private lateinit var currentItem: PluginCenterItem
+
+    init {
+        val actionIconSize = context.resources.getDimensionPixelSize(R.dimen.plugin_center_action_icon_size)
+        listOf(btnDeleteView, btnUpdateView, btnSettingsView, btnDetailsView).forEach { actionView ->
+            actionView.resizeStartCompoundDrawable(actionIconSize)
+        }
+    }
 
     fun bind(item: PluginCenterItem) {
         currentItem = item
@@ -193,17 +201,12 @@ class PluginCenterItemViewHolder(
         }
     }
 
-    private fun LinearLayout.setButtonState(enabled: Boolean, onClickListener: View.OnClickListener? = null) {
+    private fun TextView.setButtonState(enabled: Boolean, onClickListener: View.OnClickListener? = null) {
         this.isEnabled = enabled
         this.setOnClickListener(onClickListener)
     }
 
     private fun applyUiBySwitch(isOn: Boolean, item: PluginCenterItem) {
-        val colorPrimary = context.getColor(R.color.text_color_primary)
-        val colorPrimaryA50 = context.getColor(R.color.text_color_primary_alpha_50)
-        val colorPrimaryA30 = context.getColor(R.color.text_color_primary_alpha_30)
-        val colorPrimaryA20 = context.getColor(R.color.text_color_primary_alpha_20)
-
         if (btnDeleteView.isEnabled) {
             btnDeleteView.setActionColors(iconColor = colorPrimaryA50, textColor = colorPrimary)
         } else {
@@ -230,23 +233,25 @@ class PluginCenterItemViewHolder(
 
         if (isOn) {
             versionInfoForUpdateView.setTextColor(adjustedTextContrastColor)
-            updatableBadgeTextView.setTextColor(adjustedTextContrastColor)
+            updatableBadgeView.setTextColor(adjustedTextContrastColor)
         } else {
             versionInfoForUpdateView.setTextColor(colorPrimary)
-            updatableBadgeTextView.setTextColor(colorPrimary)
+            updatableBadgeView.setTextColor(colorPrimary)
         }
 
         iconView.colorFilterWithDesaturateOrNull(isOn, 0.5F)
     }
 
-    private fun LinearLayout.setActionColors(iconColor: Int, textColor: Int) {
-        val imageView = getChildAtOrNull(0) as? ImageView
-        val textView = getChildAtOrNull(1) as? TextView
-        imageView?.let { ImageViewCompat.setImageTintList(it, ColorStateList.valueOf(iconColor)) }
-        textView?.setTextColor(textColor)
+    private fun TextView.setActionColors(iconColor: Int, textColor: Int) {
+        TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(iconColor))
+        setTextColor(textColor)
     }
 
-    private fun LinearLayout.getChildAtOrNull(index: Int) = if (index in 0 until childCount) getChildAt(index) else null
+    private fun TextView.resizeStartCompoundDrawable(size: Int) {
+        val drawables = compoundDrawablesRelative
+        val start = drawables[0]?.mutate()?.apply { setBounds(0, 0, size, size) }
+        setCompoundDrawablesRelative(start, drawables[1], drawables[2], drawables[3])
+    }
 
     private fun buildFallbackIconDrawable() =
         AppCompatResources.getDrawable(iconView.context, R.drawable.ic_plugin_center_default)

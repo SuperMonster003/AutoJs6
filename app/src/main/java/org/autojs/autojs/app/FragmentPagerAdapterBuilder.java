@@ -65,7 +65,12 @@ public class FragmentPagerAdapterBuilder {
         private OnFragmentInstantiateListener mOnFragmentInstantiateListener;
 
         public StoredFragmentPagerAdapter(FragmentManager fm) {
-            super(fm);
+            // Retain every page instance, but only resume the page that is actually visible.
+            // Hidden pages must not receive onResume callbacks or start expensive refresh work
+            // merely because their host Activity returned to the foreground.
+            // zh-CN: 保留所有页面实例, 但仅恢复实际可见的页面.
+            // 隐藏页面不得仅因宿主 Activity 回到前台就收到 onResume 或启动高开销刷新.
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         }
 
         @NonNull

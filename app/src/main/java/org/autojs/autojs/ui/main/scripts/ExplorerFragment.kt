@@ -108,21 +108,12 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         (activity as? MainActivity)?.apply {
             val tabLayout: TabLayout = findViewById(R.id.tab)
             val filesTab = tabLayout.getTabAt(filesItemIndex)
-            filesTab?.view?.let { setTabViewClickListeners(it) }
+            filesTab?.view?.let { setTabViewLongClickListener(it) }
         }
         restoreViewStates()
     }
 
-    private fun setTabViewClickListeners(tabView: TabLayout.TabView) {
-        // TabLayout's ViewPager bridge animates across every intermediate page. Jumping from
-        // TASK to FILE therefore keeps ViewPager in SETTLING state long enough to swallow the
-        // first list gesture. Move to FILE first; TabView.performClick() will then select the
-        // already-current tab without starting another smooth scroll.
-        // zh-CN: TabLayout 会逐页平滑滚动, 从任务页到文件页期间会吞掉第一次列表手势.
-        // 先无动画切到文件页, 随后的标签选中不会再启动平滑滚动.
-        tabView.setOnClickListener {
-            (activity as? MainActivity)?.showFilesPageImmediately()
-        }
+    private fun setTabViewLongClickListener(tabView: TabLayout.TabView) {
         tabView.setOnLongClickListener {
             when {
                 !mIsCurrentPageFiles -> false

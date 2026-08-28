@@ -26,55 +26,45 @@
             tools:src="@drawable/ic_plugin_paddle_ocr" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
+            android:layout_weight="1"
             android:gravity="center_vertical"
             android:orientation="vertical">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:ellipsize="middle"
                     android:maxLines="1"
                     android:textColor="@color/text_color_primary"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@+id/updatable_badge"
-                    app:layout_constraintHorizontal_bias="0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_goneMarginEnd="0dp"
                     tools:text="Paddle OCR (PP-OCRv5)" />
 
-                <FrameLayout
+                <TextView
                     android:id="@+id/updatable_badge"
-                    android:layout_width="wrap_content"
+                    android:layout_width="@dimen/plugin_center_item_side_length"
                     android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:padding="2sp"
+                    android:text="@string/text_updatable"
+                    android:textColor="#03A5EF"
+                    android:textSize="12sp"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:visibility="visible">
-
-                    <TextView
-                        android:id="@+id/updatable_badge_text"
-                        android:layout_width="@dimen/plugin_center_item_side_length"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:padding="2sp"
-                        android:textColor="#03A5EF"
-                        android:textSize="12sp"
-                        android:text="@string/text_updatable" />
-                </FrameLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    tools:visibility="visible" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -151,28 +141,17 @@
                 </FrameLayout>
             </LinearLayout>
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/description"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:breakStrategy="simple"
-                    android:textColor="@color/text_color_primary_alpha_70"
-                    android:textSize="12sp"
-                    tools:text="百度飞桨光学字符识别插件" />
-
-                <FrameLayout
-                    android:id="@+id/reserved"
-                    android:layout_width="@dimen/plugin_center_item_side_length"
-                    android:layout_height="match_parent" />
-            </LinearLayout>
+                android:layout_marginEnd="@dimen/plugin_center_item_side_length"
+                android:breakStrategy="simple"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/text_color_primary_alpha_70"
+                android:textSize="12sp"
+                tools:text="百度飞桨光学字符识别插件" />
         </LinearLayout>
     </LinearLayout>
 
@@ -190,144 +169,86 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <TextView
             android:id="@+id/btn_delete"
-            android:layout_width="wrap_content"
-            android:minWidth="@dimen/plugin_center_item_side_length"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="?selectableItemBackground"
+            android:drawablePadding="4dp"
+            android:drawableStart="@drawable/ic_delete_forever_black_48dp"
+            android:drawableTint="@color/text_color_primary_alpha_50"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:minWidth="@dimen/plugin_center_item_side_length"
             android:paddingHorizontal="6dp"
             android:paddingVertical="4dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:text="@string/text_uninstall"
+            android:textColor="@color/text_color_primary"
+            android:textSize="13sp"
+            android:translationY="-0.5dp" />
 
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_marginEnd="4dp"
-                android:contentDescription="@string/text_uninstall"
-                android:src="@drawable/ic_delete_forever_black_48dp"
-                app:tint="@color/text_color_primary_alpha_50" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:maxLines="1"
-                android:text="@string/text_uninstall"
-                android:textColor="@color/text_color_primary"
-                android:textSize="13sp"
-                android:translationY="-0.5dp" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="18dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
+        <TextView
             android:id="@+id/btn_update"
-            android:layout_width="wrap_content"
-            android:minWidth="@dimen/plugin_center_item_side_length"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
             android:background="?selectableItemBackground"
+            android:drawablePadding="4dp"
+            android:drawableStart="@drawable/ic_cloud_download_black_48dp"
+            android:drawableTint="@color/text_color_primary_alpha_20"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:minWidth="@dimen/plugin_center_item_side_length"
             android:paddingHorizontal="6dp"
             android:paddingVertical="4dp"
+            android:text="@string/text_update"
+            android:textColor="@color/text_color_primary_alpha_30"
+            android:textSize="13sp"
+            android:translationY="-0.5dp"
             tools:backgroundTint="#03A5EF"
-            android:gravity="center"
-            android:orientation="horizontal">
+            tools:textColor="#03A5EF" />
 
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_marginEnd="4dp"
-                android:contentDescription="@string/text_update"
-                android:src="@drawable/ic_cloud_download_black_48dp"
-                app:tint="@color/text_color_primary_alpha_20"
-                tools:tint="#03A5EF" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:maxLines="1"
-                android:text="@string/text_update"
-                android:textColor="@color/text_color_primary_alpha_30"
-                android:textSize="13sp"
-                android:translationY="-0.5dp"
-                tools:textColor="#03A5EF" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="18dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
+        <TextView
             android:id="@+id/btn_settings"
-            android:layout_width="wrap_content"
-            android:minWidth="@dimen/plugin_center_item_side_length"
-            android:layout_height="wrap_content"
-            android:background="?selectableItemBackground"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="4dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_marginEnd="4dp"
-                android:layout_gravity="center"
-                android:contentDescription="@string/text_settings"
-                android:src="@drawable/ic_circular_menu_settings"
-                app:tint="@color/text_color_primary_alpha_20" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:maxLines="1"
-                android:text="@string/text_settings"
-                android:textColor="@color/text_color_primary_alpha_30"
-                android:textSize="13sp"
-                android:translationY="-0.5dp" />
-        </LinearLayout>
-
-        <View
             android:layout_width="0dp"
-            android:layout_height="18dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:id="@+id/btn_details"
-            android:layout_width="wrap_content"
-            android:minWidth="@dimen/plugin_center_item_side_length"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="?selectableItemBackground"
+            android:drawablePadding="4dp"
+            android:drawableStart="@drawable/ic_circular_menu_settings"
+            android:drawableTint="@color/text_color_primary_alpha_20"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:minWidth="@dimen/plugin_center_item_side_length"
             android:paddingHorizontal="6dp"
             android:paddingVertical="4dp"
+            android:text="@string/text_settings"
+            android:textColor="@color/text_color_primary_alpha_30"
+            android:textSize="13sp"
+            android:translationY="-0.5dp" />
+
+        <TextView
+            android:id="@+id/btn_details"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?selectableItemBackground"
+            android:drawablePadding="4dp"
+            android:drawableStart="@drawable/ic_info_black_48dp"
+            android:drawableTint="@color/text_color_primary_alpha_50"
+            android:ellipsize="end"
             android:gravity="center"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_marginEnd="4dp"
-                android:contentDescription="@string/text_details"
-                android:src="@drawable/ic_info_black_48dp"
-                app:tint="@color/text_color_primary_alpha_50" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:maxLines="1"
-                android:text="@string/text_details"
-                android:textColor="@color/text_color_primary"
-                android:textSize="13sp"
-                android:translationY="-0.5dp" />
-        </LinearLayout>
+            android:maxLines="1"
+            android:minWidth="@dimen/plugin_center_item_side_length"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="4dp"
+            android:text="@string/text_details"
+            android:textColor="@color/text_color_primary"
+            android:textSize="13sp"
+            android:translationY="-0.5dp" />
     </LinearLayout>
 </LinearLayout>

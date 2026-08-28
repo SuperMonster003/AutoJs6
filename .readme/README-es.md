@@ -358,9 +358,9 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` El gestor de archivos podía no actualizar una nueva salida adyacente confirmada por Explorer Action o mostrar un directorio de salida confirmado como archivo
 * `Corrección` Al salir de una página nativa de archivo en Android 7, la aplicación podía fallar al limpiar la caché de vistas previas porque la ruta de limpieza llamaba a una API File NIO más reciente
 * `Corrección` Al volver de un reproductor Explorer Action podían ejecutarse hasta dos reenlaces completos de la lista, causando parpadeos intensos aunque se conservaran la carpeta y la posición de desplazamiento
-* `Corrección` Al cambiar desde una pestaña de inicio lejana a Archivo se animaba el recorrido por páginas intermedias, se interceptaba el primer gesto de la lista y parecía no responder durante cerca de un segundo
+* `Corrección` Al pulsar Archivo desde otra pestaña de inicio no se mostraba la animación de transición de ViewPager
 * `Corrección` Al volver de una página de plugin en horizontal como el reproductor de vídeo, el cambio de configuración reconstruía toda la interfaz principal, haciendo que el administrador de archivos parpadeara con intensidad e incluso dos veces seguidas
-* `Corrección` Cada regreso a la interfaz principal volvía a descubrir y enlazar los servicios de plugin, lo que podía iniciar procesos de plugin y dejar la lista de archivos sin responder durante cerca de medio segundo
+* `Corrección` Al abrir por primera vez la pestaña Plugins de inicio o el Centro de plugins independiente, o al volver a cualquier pestaña de inicio tras visitar Plugins, los gestos inmediatos podían quedar bloqueados durante cerca de medio segundo
 * `Corrección` El icono de rompecabezas de Explorer Action para ZIP/JAR y otros archivos gestionados por plugins llenaba toda la celda de acción y parecía demasiado grande
 * `Corrección` El gestor de archivos no distinguía de forma fiable las fuentes y declaraciones TypeScript `.ts/.mts` de los vídeos MPEG-2 TS con los mismos sufijos, ni trataba siempre `.d.ts/.d.mts/.d.cts` como declaraciones
 * `Corrección` Los archivos fuente `.py/.ts/.java/.kt` compatibles con plugins no mostraban de forma coherente un icono de fuente ejecutable y la acción Ejecutar

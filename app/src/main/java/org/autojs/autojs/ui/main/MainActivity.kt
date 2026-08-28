@@ -139,13 +139,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     val filesItemIndex: Int
         get() = findPageIndexByTitle(R.string.text_file)
 
-    fun showFilesPageImmediately() {
-        val index = filesItemIndex
-        if (index >= 0 && mViewPager.currentItem != index) {
-            mViewPager.setCurrentItem(index, false)
-        }
-    }
-
     val docsItemIndex: Int
         get() = findPageIndexByTitle(R.string.text_documentation)
 

@@ -3,14 +3,12 @@ package org.autojs.autojs.core.plugin.center
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ListAdapter
 import org.autojs.autojs6.databinding.PluginCenterRecyclerViewItemBinding
 
 class PluginCenterItemAdapter(
     private val listener: Listener,
-) : RecyclerView.Adapter<PluginCenterItemViewHolder>() {
-
-    internal var items = emptyList<PluginCenterItem>()
+) : ListAdapter<PluginCenterItem, PluginCenterItemViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PluginCenterItemViewHolder {
         val binding = PluginCenterRecyclerViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -18,12 +16,10 @@ class PluginCenterItemAdapter(
     }
 
     override fun onBindViewHolder(holder: PluginCenterItemViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(getItem(position))
     }
 
-    override fun getItemCount() = items.size
-
-    fun items() = items
+    fun items(): List<PluginCenterItem> = currentList
 
     /**
      * Dispatches incremental updates so background refreshes only touch rows whose
@@ -31,23 +27,7 @@ class PluginCenterItemAdapter(
      *
      * zh-CN: 以增量方式派发更新, 使后台刷新只影响内容真正变化的行, 保持列表视觉平稳.
      */
-    fun updateData(newItems: List<PluginCenterItem>) {
-        val oldItems = items
-        val diffResult = DiffUtil.calculateDiff(
-            object : DiffUtil.Callback() {
-                override fun getOldListSize() = oldItems.size
-                override fun getNewListSize() = newItems.size
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                    PluginCenterItemSemantics.areItemsTheSame(oldItems[oldItemPosition], newItems[newItemPosition])
-
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                    PluginCenterItemSemantics.areContentsTheSame(oldItems[oldItemPosition], newItems[newItemPosition])
-            },
-            true,
-        )
-        items = newItems
-        diffResult.dispatchUpdatesTo(this)
-    }
+    fun updateData(newItems: List<PluginCenterItem>) = submitList(newItems)
 
     interface Listener {
         fun onInstall(item: PluginCenterItem)
@@ -56,5 +36,15 @@ class PluginCenterItemAdapter(
         fun onDetails(item: PluginCenterItem)
         fun onUpdate(item: PluginCenterItem)
         fun onSettings(item: PluginCenterItem)
+    }
+
+    private companion object {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<PluginCenterItem>() {
+            override fun areItemsTheSame(oldItem: PluginCenterItem, newItem: PluginCenterItem): Boolean =
+                PluginCenterItemSemantics.areItemsTheSame(oldItem, newItem)
+
+            override fun areContentsTheSame(oldItem: PluginCenterItem, newItem: PluginCenterItem): Boolean =
+                PluginCenterItemSemantics.areContentsTheSame(oldItem, newItem)
+        }
     }
 }
