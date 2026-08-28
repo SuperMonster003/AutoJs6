@@ -232,6 +232,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` File manager Explorer Action protocol v15 adds recoverable multi-file output batches; plugins can publish only after every pending file is verified, while the host durably records parent and file identity and rolls back only matching members after failure or restart
 * `Feature` File manager Explorer Action protocol v16 adds a host-owned source-to-Trash handoff gated by the exact original selection and every committed output; the host persists a recovery copy before source removal without granting plugins arbitrary-path or delete authority
 * `Feature` File manager Explorer Action protocol v17 adds an explicit read-only Open as archive... fallback only when the normal primary action does not match; one existing archive session performs structural detection and can label the actual format in the native path bar without background menu scans or new file authority
+* `Feature` File manager Explorer Action protocol v18 keeps the previous target version in host-private durable storage before a managed replacement, exposes only opaque bounded history metadata, and permits one restore only while the current file still matches the exact committed replacement; external changes are never overwritten and interrupted recovery evidence is retained
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting
