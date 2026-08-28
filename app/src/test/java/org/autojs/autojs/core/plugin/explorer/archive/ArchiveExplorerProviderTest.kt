@@ -68,6 +68,31 @@ class ArchiveExplorerProviderTest {
     }
 
     @Test
+    fun providerExposesActualFormatAnnotationOnlyForMismatchedNames() {
+        val mismatched = ArchiveExplorerProvider(
+            FakeClient(
+                formatDisplayName = "ZIP",
+                displayNameMatchesFormat = false,
+            ),
+            temporaryFolder.newFolder("mismatched-format-cache"),
+        )
+        val matching = ArchiveExplorerProvider(
+            FakeClient(
+                formatDisplayName = "ZIP",
+                displayNameMatchesFormat = true,
+            ),
+            temporaryFolder.newFolder("matching-format-cache"),
+        )
+
+        assertEquals("ZIP", mismatched.formatDisplayName)
+        assertTrue(mismatched.shouldAnnotateFormat)
+        assertFalse(matching.shouldAnnotateFormat)
+
+        mismatched.close()
+        matching.close()
+    }
+
+    @Test
     fun providerForwardsOnlySessionOwnedOpaqueExtractionIds() {
         val client = FakeClient()
         val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("cache"))
@@ -131,6 +156,8 @@ class ArchiveExplorerProviderTest {
         canOpenEntries: Boolean = true,
         canExtractEntries: Boolean = true,
         filenameCharsets: Boolean = false,
+        formatDisplayName: String? = null,
+        displayNameMatchesFormat: Boolean = true,
     ) : ExplorerArchiveSessionClient {
         override val sourcePath = "/storage/emulated/0/Archives/sample.zip"
         override var info = ExplorerArchiveSessionInfo(
@@ -141,6 +168,9 @@ class ArchiveExplorerProviderTest {
             sourceLastModified = 200L,
             canOpenEntries = canOpenEntries,
             canExtractEntries = canExtractEntries,
+            formatId = formatDisplayName?.lowercase(),
+            formatDisplayName = formatDisplayName,
+            displayNameMatchesFormat = displayNameMatchesFormat,
             filenameCharsetNames = if (filenameCharsets) listOf("UTF-8", "IBM437") else emptyList(),
             filenameCharsetName = if (filenameCharsets) "UTF-8" else null,
         )

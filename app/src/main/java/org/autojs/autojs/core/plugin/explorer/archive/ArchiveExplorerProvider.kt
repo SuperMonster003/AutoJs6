@@ -142,6 +142,12 @@ internal class ArchiveExplorerProvider(
     val canExtractEntries: Boolean
         get() = connection.info.canExtractEntries
 
+    val formatDisplayName: String?
+        get() = connection.info.formatDisplayName
+
+    val shouldAnnotateFormat: Boolean
+        get() = !connection.info.displayNameMatchesFormat && formatDisplayName != null
+
     val filenameCharsetNames: List<String>
         get() = connection.info.filenameCharsetNames
 

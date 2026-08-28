@@ -808,6 +808,7 @@
     <string name="text_archive_extraction_cancelled">تم إلغاء استخراج الأرشيف</string>
     <string name="text_archive_extraction_completed">تم الاستخراج إلى %1$s</string>
     <string name="text_archive_extraction_progress">جار استخراج %1$d من %2$d</string>
+    <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">جار أرشفة ملفات المشروع</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">يجب ملء حقل واحد على الأقل من [الاسم، اسم المنظمة، وحدة التنظيم، رمز الدولة، الولاية أو المقاطعة، المدينة أو المنطقة، الشارع]</string>
     <string name="text_attribute">ينسب</string>

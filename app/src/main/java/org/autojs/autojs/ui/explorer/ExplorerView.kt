@@ -1866,7 +1866,18 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         val archiveState = mArchiveNavigationState
         if (archiveState != null && page is ArchiveExplorerPage) {
             return archiveState.sourceParentSegments + archiveState.provider.ancestors(page).map { archivePage ->
-                ExplorerPathSegment(archivePage.name, archivePage.path)
+                val label = if (
+                    archivePage.parent == null && archiveState.provider.shouldAnnotateFormat
+                ) {
+                    context.getString(
+                        R.string.text_archive_format_path_segment,
+                        archivePage.name,
+                        archiveState.provider.formatDisplayName,
+                    )
+                } else {
+                    archivePage.name
+                }
+                ExplorerPathSegment(label, archivePage.path)
             }
         }
         return createPathSegments(page.path)

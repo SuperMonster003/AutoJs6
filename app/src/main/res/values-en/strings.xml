@@ -799,6 +799,7 @@
     <string name="text_archive_extraction_cancelled">Archive extraction cancelled</string>
     <string name="text_archive_extraction_completed">Extracted to %1$s</string>
     <string name="text_archive_extraction_progress">Extracting %1$d of %2$d</string>
+    <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">Archiving project files</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from [Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street] must be filled</string>
     <string name="text_attribute">Attribute</string>

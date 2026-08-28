@@ -806,6 +806,7 @@
     <string name="text_archive_extraction_cancelled">Extraction de l\'archive annulée</string>
     <string name="text_archive_extraction_completed">Extrait vers %1$s</string>
     <string name="text_archive_extraction_progress">Extraction de %1$d sur %2$d</string>
+    <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">Archivage des fichiers du projet</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Au moins un champ parmi [Nom complet, Nom de l\'organisation, Unité organisationnelle, Code du pays, État ou province, Ville ou localité, Rue] doit être renseigné</string>
     <string name="text_attribute">Attribut</string>

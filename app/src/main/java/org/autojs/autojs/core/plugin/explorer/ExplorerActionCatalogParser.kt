@@ -32,7 +32,7 @@ internal object ExplorerActionCatalogParser {
         }
 
         val actionIds = HashSet<String>()
-        return actionBundles.mapNotNull { action ->
+        val descriptors = actionBundles.mapNotNull { action ->
             val descriptor = ExplorerActionCatalogPolicy.normalizeDescriptor(
                 protocolVersion = protocolVersion,
                 packageName = packageName,
@@ -51,6 +51,9 @@ internal object ExplorerActionCatalogParser {
                 fileNameSuffixes = action.getStringArrayList(
                     ExplorerActionCatalogKeys.FILE_NAME_SUFFIXES,
                 ),
+                probeForActionId = action.getStringOrNull(
+                    ExplorerActionCatalogKeys.PROBE_FOR_ACTION_ID,
+                ),
                 outputMode = action.getIntOrNull(ExplorerActionCatalogKeys.OUTPUT_MODE),
                 outputMimeTypes = action.getStringArrayList(ExplorerActionCatalogKeys.OUTPUT_MIME_TYPES),
                 outputNameSuffix = action.getStringOrNull(ExplorerActionCatalogKeys.OUTPUT_NAME_SUFFIX),
@@ -58,6 +61,7 @@ internal object ExplorerActionCatalogParser {
             ) ?: return@mapNotNull null
             descriptor.takeIf { actionIds.add(it.id) }
         }
+        return ExplorerActionCatalogPolicy.validateDescriptorReferences(descriptors)
     }
 
     private fun Bundle.getIntOrNull(key: String): Int? {
@@ -71,4 +75,5 @@ internal object ExplorerActionCatalogParser {
     private fun Bundle.getStringOrNull(key: String): String? {
         return if (containsKey(key)) getString(key) ?: "" else null
     }
+
 }
