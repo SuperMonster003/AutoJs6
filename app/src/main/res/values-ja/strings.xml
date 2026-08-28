@@ -463,6 +463,10 @@
     <string name="error_timeout_while_querying_plugin_info">%1$s プラグイン情報の取得がタイムアウトしました.</string>
     <string name="error_typescript_compilation_failed">TypeScript のコンパイルに失敗しました</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript コンパイラプラグインを利用できません. プラグインセンターでインストールまたは有効化してから再試行してください.</string>
+    <string name="error_typescript_project_rename_failed">プロジェクトの名前変更に失敗しました. 部分的な変更は保持されていません.</string>
+    <string name="error_typescript_project_rename_rollback_failed">名前変更に失敗し自動ロールバックも完了しませんでした. 続行する前にエディターを再読み込みしてください. 復旧コピー:</string>
+    <string name="error_typescript_project_rename_save_first">プロジェクトシンボルの名前を変更する前に現在のドキュメントを保存してください.</string>
+    <string name="error_typescript_project_rename_stale">名前変更を適用する前にプロジェクトファイルが変更されました. 更新して再試行してください.</string>
     <string name="error_typescript_source_not_executable">TypeScript ソース \"%1$s\" は Rhino 単一ファイルプロファイルでは実行できません</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">現在のファイルパスが不明なため, ファイルのエンコーディングを変更できません</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">現在のファイルパスが不明のため, ファイル詳細を表示できません</string>
@@ -1830,6 +1834,9 @@
     <string name="text_type">種類</string>
     <string name="text_type_file">ファイル</string>
     <string name="text_type_folder">フォルダー</string>
+    <string name="text_typescript_project_rename">プロジェクトシンボルの名前を変更</string>
+    <string name="text_typescript_project_rename_applied">影響するすべてのファイルでシンボル名を変更しました</string>
+    <string name="text_typescript_project_rename_preview">\"%1$s\" を \"%2$s\" に変更しますか? 対象は %3$d ファイルの %4$d 参照です. すべての対象ファイルを 1 つのトランザクションとして保存します.</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">現在のバージョンの AutoJs6 には上記の ABI が含まれていないため, 選択した ABI \"%s\" を使用してパッケージアプリケーションを作成できません</string>
     <string name="text_unavailable">使用できません</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" は使用できません</string>

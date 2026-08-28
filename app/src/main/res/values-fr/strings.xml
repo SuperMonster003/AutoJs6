@@ -462,6 +462,10 @@
     <string name="error_timeout_while_querying_plugin_info">Délai d\'attente dépassé lors de la requête des informations du plugin %1$s.</string>
     <string name="error_typescript_compilation_failed">La compilation TypeScript a échoué</string>
     <string name="error_typescript_compiler_plugin_unavailable">Le plugin compilateur TypeScript n\'est pas disponible. Installez-le ou activez-le dans le Centre des plugins, puis réessayez.</string>
+    <string name="error_typescript_project_rename_failed">Échec du renommage du projet. Aucune modification partielle n\'a été conservée.</string>
+    <string name="error_typescript_project_rename_rollback_failed">Le renommage a échoué et le retour arrière automatique est incomplet. Rechargez l\'éditeur avant de continuer. Copies de récupération:</string>
+    <string name="error_typescript_project_rename_save_first">Enregistrez le document actif avant de renommer un symbole du projet.</string>
+    <string name="error_typescript_project_rename_stale">Les fichiers du projet ont changé avant l\'application du renommage. Actualisez puis réessayez.</string>
     <string name="error_typescript_source_not_executable">La source TypeScript \"%1$s\" n\'est pas exécutable avec le profil Rhino à fichier unique</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible de modifier l\'encodage du fichier</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible d\'afficher les details du fichier</string>
@@ -1829,6 +1833,9 @@
     <string name="text_type">Type</string>
     <string name="text_type_file">Fichier</string>
     <string name="text_type_folder">Dossier</string>
+    <string name="text_typescript_project_rename">Renommer le symbole du projet</string>
+    <string name="text_typescript_project_rename_applied">Symbole renommé dans tous les fichiers concernés</string>
+    <string name="text_typescript_project_rename_preview">Renommer \"%1$s\" en \"%2$s\" dans %3$d fichiers (%4$d références)? Tous les fichiers concernés seront enregistrés dans une seule transaction.</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">L\'ABI sélectionné \"%s\" ne peut pas être utilisé pour créer une application packagée, car la version actuelle d\'AutoJs6 n\'inclut pas l\'ABI ci-dessus.</string>
     <string name="text_unavailable">Indisponible</string>
     <string name="text_unavailable_abi_for">L\'ABI \"%s\" n\'est pas disponible</string>

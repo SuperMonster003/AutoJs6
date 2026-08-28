@@ -464,6 +464,10 @@
     <string name="error_timeout_while_querying_plugin_info">%1$s 플러그인 정보 조회가 시간 초과되었습니다.</string>
     <string name="error_typescript_compilation_failed">TypeScript 컴파일에 실패했습니다</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript 컴파일러 플러그인을 사용할 수 없습니다. 플러그인 센터에서 설치하거나 활성화한 후 다시 시도하세요.</string>
+    <string name="error_typescript_project_rename_failed">프로젝트 이름 바꾸기에 실패했습니다. 부분 변경은 유지되지 않았습니다.</string>
+    <string name="error_typescript_project_rename_rollback_failed">이름 바꾸기에 실패했고 자동 롤백도 완료되지 않았습니다. 계속하기 전에 편집기를 다시 불러오세요. 복구 사본:</string>
+    <string name="error_typescript_project_rename_save_first">프로젝트 기호의 이름을 바꾸기 전에 현재 문서를 저장하세요.</string>
+    <string name="error_typescript_project_rename_stale">이름 바꾸기를 적용하기 전에 프로젝트 파일이 변경되었습니다. 새로 고친 후 다시 시도하세요.</string>
     <string name="error_typescript_source_not_executable">TypeScript 소스 \"%1$s\" 은(는) Rhino 단일 파일 프로필에서 실행할 수 없습니다</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 파일 인코딩을 변경할 수 없습니다</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 파일 정보를 표시할 수 없습니다</string>
@@ -1831,6 +1835,9 @@
     <string name="text_type">유형</string>
     <string name="text_type_file">파일</string>
     <string name="text_type_folder">폴더</string>
+    <string name="text_typescript_project_rename">프로젝트 기호 이름 바꾸기</string>
+    <string name="text_typescript_project_rename_applied">영향을 받는 모든 파일에서 프로젝트 기호 이름을 변경했습니다</string>
+    <string name="text_typescript_project_rename_preview">\"%1$s\"을(를) \"%2$s\"로 바꾸시겠습니까? %3$d개 파일의 %4$d개 참조가 대상입니다. 모든 대상 파일을 하나의 트랜잭션으로 저장합니다.</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">현재 버전의 AutoJs6 에 위의 ABI 가 포함되어 있지 않으므로 선택한 ABI \"%s\" 를 사용하여 패키지 응용 프로그램을 만들 수 없습니다.</string>
     <string name="text_unavailable">사용할 수 없음</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" 를 사용할 수 없습니다</string>

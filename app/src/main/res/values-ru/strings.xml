@@ -462,6 +462,10 @@
     <string name="error_timeout_while_querying_plugin_info">Тайм-аут при запросе информации о плагине %1$s.</string>
     <string name="error_typescript_compilation_failed">Не удалось скомпилировать TypeScript</string>
     <string name="error_typescript_compiler_plugin_unavailable">Плагин компилятора TypeScript недоступен. Установите или включите его в Центре плагинов и повторите попытку.</string>
+    <string name="error_typescript_project_rename_failed">Не удалось переименовать символ в проекте. Частичные изменения не сохранены.</string>
+    <string name="error_typescript_project_rename_rollback_failed">Переименование завершилось ошибкой, а автоматический откат выполнен не полностью. Перезагрузите редактор перед продолжением. Резервные копии:</string>
+    <string name="error_typescript_project_rename_save_first">Сохраните активный документ перед переименованием символа проекта.</string>
+    <string name="error_typescript_project_rename_stale">Файлы проекта изменились до применения переименования. Обновите данные и повторите попытку.</string>
     <string name="error_typescript_source_not_executable">Исходный файл TypeScript \"%1$s\" нельзя выполнить в однофайловом профиле Rhino</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно изменить кодировку файла</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать сведения о файле</string>
@@ -1829,6 +1833,9 @@
     <string name="text_type">Тип</string>
     <string name="text_type_file">Файл</string>
     <string name="text_type_folder">Папка</string>
+    <string name="text_typescript_project_rename">Переименовать символ проекта</string>
+    <string name="text_typescript_project_rename_applied">Символ переименован во всех затронутых файлах</string>
+    <string name="text_typescript_project_rename_preview">Переименовать \"%1$s\" в \"%2$s\" в %3$d файлах (%4$d ссылок)? Все затронутые файлы будут сохранены одной транзакцией.</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">Выбранный ABI \"%s\" не может быть использован для создания упакованного приложения, поскольку текущая версия AutoJs6 не включает указанный ABI.</string>
     <string name="text_unavailable">Недоступно</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" недоступен</string>

@@ -458,6 +458,10 @@
     <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
     <string name="error_typescript_compilation_failed">TypeScript compilation failed</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript Compiler plugin is unavailable. Install or enable it in Plugin Center, then try again.</string>
+    <string name="error_typescript_project_rename_failed">Project rename failed. No partial changes were kept.</string>
+    <string name="error_typescript_project_rename_rollback_failed">Project rename failed and automatic rollback was incomplete. Reload the editor before continuing. Recovery copies:</string>
+    <string name="error_typescript_project_rename_save_first">Save the active document before renaming a project symbol.</string>
+    <string name="error_typescript_project_rename_stale">Project files changed before the rename could be applied. Refresh and try again.</string>
     <string name="error_typescript_source_not_executable">TypeScript source \"%1$s\" is not executable in the single-file Rhino profile</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Current file path is unknown, unable to change file encoding</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
@@ -1817,6 +1821,9 @@
     <string name="text_type">Type</string>
     <string name="text_type_file">File</string>
     <string name="text_type_folder">Folder</string>
+    <string name="text_typescript_project_rename">Rename project symbol</string>
+    <string name="text_typescript_project_rename_applied">Project symbol renamed in all affected files</string>
+    <string name="text_typescript_project_rename_preview">Rename \"%1$s\" to \"%2$s\" in %3$d files (%4$d references)? All affected files will be saved as one transaction.</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>
     <string name="text_unavailable">Unavailable</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" is unavailable</string>

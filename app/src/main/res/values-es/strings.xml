@@ -462,6 +462,10 @@
     <string name="error_timeout_while_querying_plugin_info">Tiempo de espera agotado al consultar la información del plugin %1$s.</string>
     <string name="error_typescript_compilation_failed">La compilación de TypeScript falló</string>
     <string name="error_typescript_compiler_plugin_unavailable">El plugin compilador TypeScript no está disponible. Instálelo o actívelo en el Centro de plugins y vuelva a intentarlo.</string>
+    <string name="error_typescript_project_rename_failed">Error al cambiar el nombre en el proyecto. No se conservaron cambios parciales.</string>
+    <string name="error_typescript_project_rename_rollback_failed">Error al cambiar el nombre y la reversión automática quedó incompleta. Vuelva a cargar el editor antes de continuar. Copias de recuperación:</string>
+    <string name="error_typescript_project_rename_save_first">Guarde el documento activo antes de cambiar el nombre de un símbolo del proyecto.</string>
+    <string name="error_typescript_project_rename_stale">Los archivos del proyecto cambiaron antes de aplicar el cambio de nombre. Actualice y vuelva a intentarlo.</string>
     <string name="error_typescript_source_not_executable">El origen TypeScript \"%1$s\" no se puede ejecutar con el perfil Rhino de un solo archivo</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se puede cambiar la codificación del archivo</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se pueden mostrar los detalles del archivo</string>
@@ -1829,6 +1833,9 @@
     <string name="text_type">Tipo</string>
     <string name="text_type_file">Archivo</string>
     <string name="text_type_folder">Carpeta</string>
+    <string name="text_typescript_project_rename">Cambiar nombre de símbolo del proyecto</string>
+    <string name="text_typescript_project_rename_applied">Se cambió el nombre del símbolo en todos los archivos afectados</string>
+    <string name="text_typescript_project_rename_preview">¿Cambiar \"%1$s\" por \"%2$s\" en %3$d archivos (%4$d referencias)? Todos los archivos afectados se guardarán como una sola transacción.</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">La ABI seleccionada \"%s\" no se puede utilizar para crear una aplicación empaquetada, porque la versión actual de AutoJs6 no incluye la ABI mencionada.</string>
     <string name="text_unavailable">No disponible</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" no está disponible</string>

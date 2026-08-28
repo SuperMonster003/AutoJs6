@@ -28,4 +28,32 @@ object EditorFileIoCoordinator {
         val lock = uriLocks.computeIfAbsent(key) { ReentrantReadWriteLock(true) }
         return lock.write(action)
     }
+
+    /**
+     * Holds every requested document write lock in stable identity order.
+     *
+     * Multi-file editor transactions use this overload so an ordinary save in another editor
+     * cannot interleave between per-file freshness checks and publication. Duplicate identities
+     * are collapsed, and the global ordering prevents two overlapping transactions deadlocking.
+     */
+    fun <T> withWriteAccess(uris: Collection<Uri>, action: () -> T): T {
+        val locks = uris.asSequence()
+            .map(Uri::editorDocumentIdentity)
+            .distinct()
+            .sorted()
+            .map { key -> uriLocks.computeIfAbsent(key) { ReentrantReadWriteLock(true) } }
+            .toList()
+        return withWriteLocks(locks, index = 0, action)
+    }
+
+    private fun <T> withWriteLocks(
+        locks: List<ReentrantReadWriteLock>,
+        index: Int,
+        action: () -> T,
+    ): T {
+        if (index == locks.size) return action()
+        return locks[index].write {
+            withWriteLocks(locks, index + 1, action)
+        }
+    }
 }

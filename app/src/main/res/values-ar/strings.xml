@@ -464,6 +464,10 @@
     <string name="error_timeout_while_querying_plugin_info">انتهت مهلة الاستعلام عن معلومات المكوّن الإضافي %1$s.</string>
     <string name="error_typescript_compilation_failed">فشل ترجمة TypeScript</string>
     <string name="error_typescript_compiler_plugin_unavailable">ملحق مترجم TypeScript غير متاح. ثبته أو مكّنه في مركز الملحقات ثم أعد المحاولة.</string>
+    <string name="error_typescript_project_rename_failed">فشلت إعادة التسمية في المشروع. لم يتم الاحتفاظ بأي تغييرات جزئية.</string>
+    <string name="error_typescript_project_rename_rollback_failed">فشلت إعادة التسمية ولم يكتمل التراجع التلقائي. أعد تحميل المحرر قبل المتابعة. نُسخ الاسترداد:</string>
+    <string name="error_typescript_project_rename_save_first">احفظ المستند النشط قبل إعادة تسمية رمز في المشروع.</string>
+    <string name="error_typescript_project_rename_stale">تغيرت ملفات المشروع قبل تطبيق إعادة التسمية. حدّث وحاول مرة أخرى.</string>
     <string name="error_typescript_source_not_executable">لا يمكن تنفيذ مصدر TypeScript \"%1$s\" ضمن ملف تعريف Rhino للملف الواحد</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف, لا يمكن تغيير ترميز الملف</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن عرض تفاصيل الملف</string>
@@ -1831,6 +1835,9 @@
     <string name="text_type">يكتب</string>
     <string name="text_type_file">ملف</string>
     <string name="text_type_folder">مجلد</string>
+    <string name="text_typescript_project_rename">إعادة تسمية رمز المشروع</string>
+    <string name="text_typescript_project_rename_applied">تمت إعادة تسمية الرمز في جميع الملفات المتأثرة</string>
+    <string name="text_typescript_project_rename_preview">هل تريد إعادة تسمية \"%1$s\" إلى \"%2$s\" في %3$d ملفات (%4$d مراجع)؟ سيتم حفظ جميع الملفات المتأثرة كمعاملة واحدة.</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">لا يمكن استخدام ABI المحدد \"%s\" لإنشاء تطبيق مجمع، لأن الإصدار الحالي من AutoJs6 لا يتضمن ABI أعلاه.</string>
     <string name="text_unavailable">غير متوفره</string>
     <string name="text_unavailable_abi_for">واجهة برمجة التطبيقات \"%s\" غير متوفرة</string>

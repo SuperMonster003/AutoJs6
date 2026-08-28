@@ -55,6 +55,9 @@ import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorDefinitionTargetResolver
+import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectRenameException
+import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectRenameFailureReason
+import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectRenameTransaction
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
@@ -128,6 +131,7 @@ import org.autojs.autojs.ui.edit.editor.service.EditorDefinitionNavigationDispat
 import org.autojs.autojs.ui.edit.editor.service.EditorFileRollbackFailedException
 import org.autojs.autojs.ui.edit.editor.service.EditorFileSaveEncoding
 import org.autojs.autojs.ui.edit.editor.service.EditorFileService
+import org.autojs.autojs.ui.edit.editor.service.EditorFileIoCoordinator
 import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsRecord
 import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsResult
 import org.autojs.autojs.ui.edit.editor.service.EditorScriptRunPolicy
@@ -179,6 +183,10 @@ import org.autojs.autojs6.databinding.DialogAceEditorFontFilterBinding
 import org.autojs.autojs6.databinding.EditorViewBinding
 import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
 import org.autojs.plugin.editor.api.EditorPluginCurrentDocumentCodeAction
+import org.autojs.plugin.editor.api.EditorPluginProjectRenameCallback
+import org.autojs.plugin.editor.api.EditorPluginProjectRenameContract
+import org.autojs.plugin.editor.api.EditorPluginProjectRenameRequest
+import org.autojs.plugin.editor.api.EditorPluginProjectRenameResult
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
@@ -645,6 +653,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mSaveAsAdoptionDisposable: Disposable? = null
     private var mDefinitionNavigationDisposable: Disposable? = null
     private var mDefinitionNavigationGeneration = 0L
+    private val mProjectRenameTransaction = TypeScriptEditorProjectRenameTransaction()
+    private var mProjectRenameDisposable: Disposable? = null
+    private var mProjectRenameDialog: MaterialDialog? = null
+    private var mProjectRenameCompletion: EditorPluginProjectRenameCallback? = null
+    private var mProjectRenameRequestedEditor: ScriptEditorEngine? = null
+    private var mProjectRenamePublication: TypeScriptEditorProjectRenameTransaction.Publication? = null
+    private var mProjectRenameActiveBufferApplied = false
+    private var mProjectRenameGeneration = 0L
+    @Volatile
+    private var mProjectRenameInProgress = false
     private var mTextRevision = 0L
     @Volatile
     private var mEncodingReloadRollback: EncodingReloadRollback? = null
@@ -2626,7 +2644,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 统一主按钮状态.
         when {
             mEditorLoading || mEncodingOperationInProgress || mFileSaveInProgress ||
-                mSaveThenReloadInProgress ||
+                mSaveThenReloadInProgress || mProjectRenameInProgress ||
                 mSaveAsInProgress || mDraftRestoreInProgress -> {
                 setMenuItemStatus(R.id.run, false)
                 setMenuItemStatus(R.id.undo, false)
@@ -3792,7 +3810,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun canToggleReadOnlyMode(): Boolean {
         return !mReadOnlyLockedByIntent && !mEditorLoading && !mEncodingOperationInProgress &&
             !mFileSaveInProgress && !mSaveThenReloadInProgress && !mSaveAsInProgress &&
-            !mDraftRestoreInProgress
+            !mDraftRestoreInProgress && !mProjectRenameInProgress
     }
 
     fun toggleReadOnlyMode() {
@@ -3924,7 +3942,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun isEditorEngineSwitchBlocked(): Boolean =
         mEditorLoading || editor.isLoadingText || mLargeFileFrameCallback != null ||
             mEncodingOperationInProgress || mFileSaveInProgress || mSaveThenReloadInProgress ||
-            mSaveAsInProgress || mDraftRestoreInProgress
+            mSaveAsInProgress || mDraftRestoreInProgress || mProjectRenameInProgress
 
     private fun drainPendingEditorEngineSwitchIfIdle() {
         if (mDestroyed || mSwitchingEditorEngine || isEditorEngineSwitchBlocked()) return
@@ -4112,6 +4130,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             (oldEditor as? AceScriptEditorEngine)?.onAceStateChanged = null
             (oldEditor as? AceScriptEditorEngine)?.onSelectionAction = null
             (oldEditor as? AceScriptEditorEngine)?.onDefinitionNavigationRequested = null
+            (oldEditor as? AceScriptEditorEngine)?.onProjectRenameRequested = null
             oldEditor.setHistoryOperationListener(null)
             oldEditor.onUserTouchInTextArea = null
             binding.editorContainer.removeView(oldEditor.view)
@@ -4218,6 +4237,432 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }.getOrDefault(false)
                 onComplete.onComplete(authorized)
             }
+    }
+
+    private fun configureAceProjectRename(editor: ScriptEditorEngine) {
+        (editor as? AceScriptEditorEngine)?.onProjectRenameRequested =
+            projectRename@{ request, onComplete ->
+                requestAceProjectRename(editor, request, onComplete)
+            }
+    }
+
+    private fun requestAceProjectRename(
+        requestedEditor: ScriptEditorEngine,
+        request: EditorPluginProjectRenameRequest,
+        onComplete: EditorPluginProjectRenameCallback,
+    ) {
+        val documentPath = uri
+            ?.takeIf { value -> value.scheme.equals("file", ignoreCase = true) }
+            ?.path
+            ?.takeIf(String::isNotBlank)
+        if (
+            mDestroyed || mProjectRenameInProgress || requestedEditor !== editor ||
+            requestedEditor.engineType != EditorEngineType.ACE || mReadOnly ||
+            requestedEditor.isReadOnly || mEditorLoading || requestedEditor.isLoadingText ||
+            mEncodingOperationInProgress || mFileSaveInProgress || mSaveAsInProgress ||
+            mSaveThenReloadInProgress || mDraftRestoreInProgress || mFileStateRequiresReload ||
+            !mFileEncodingValidationComplete || documentPath == null ||
+            !EditorPluginProjectRenameContract.isSupported(request)
+        ) {
+            onComplete.onComplete(EditorPluginProjectRenameResult.REJECTED)
+            return
+        }
+        if (requestedEditor.isTextChanged) {
+            showSnack(this, R.string.error_typescript_project_rename_save_first)
+            onComplete.onComplete(EditorPluginProjectRenameResult.REJECTED)
+            return
+        }
+
+        mProjectRenameInProgress = true
+        mProjectRenameCompletion = onComplete
+        mProjectRenameRequestedEditor = requestedEditor
+        val generation = ++mProjectRenameGeneration
+        val identityGeneration = mDocumentIdentityGeneration
+        val textRevision = mTextRevision
+        val baseText = requestedEditor.textSnapshot
+        syncPrimaryMenuState()
+        mProjectRenameDisposable = Observable.fromCallable {
+            mProjectRenameTransaction.prepare(documentPath, baseText, request)
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ prepared ->
+                mProjectRenameDisposable = null
+                if (
+                    !isAceProjectRenameContextCurrent(
+                        generation,
+                        identityGeneration,
+                        textRevision,
+                        requestedEditor,
+                        baseText,
+                    )
+                ) {
+                    finishAceProjectRename(generation, EditorPluginProjectRenameResult.STALE)
+                    return@subscribe
+                }
+                showAceProjectRenamePreview(
+                    generation = generation,
+                    identityGeneration = identityGeneration,
+                    textRevision = textRevision,
+                    requestedEditor = requestedEditor,
+                    baseText = baseText,
+                    prepared = prepared,
+                )
+            }, { error ->
+                mProjectRenameDisposable = null
+                handleAceProjectRenameFailure(generation, error)
+            })
+    }
+
+    private fun showAceProjectRenamePreview(
+        generation: Long,
+        identityGeneration: Long,
+        textRevision: Long,
+        requestedEditor: ScriptEditorEngine,
+        baseText: String,
+        prepared: TypeScriptEditorProjectRenameTransaction.Prepared,
+    ) {
+        val request = prepared.request
+        val content = buildString {
+            append(
+                context.getString(
+                    R.string.text_typescript_project_rename_preview,
+                    request.symbolName,
+                    request.newName,
+                    prepared.fileCount,
+                    prepared.editCount,
+                ),
+            )
+            append("\n\n")
+            request.files.forEach { file ->
+                append("- ")
+                append(file.relativePath)
+                append(": ")
+                append(file.edits.size)
+                append('\n')
+            }
+        }.trimEnd()
+        val dialog = runCatching {
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_typescript_project_rename)
+                    .content(content)
+                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_attraction)
+                    .autoDismiss(false)
+                    .onNegative { current, _ ->
+                        if (mProjectRenameDialog === current) {
+                            mProjectRenameDialog = null
+                            current.dismiss()
+                            finishAceProjectRename(
+                                generation,
+                                EditorPluginProjectRenameResult.REJECTED,
+                            )
+                        }
+                    }
+                    .onPositive { current, _ ->
+                        if (mProjectRenameDialog !== current) return@onPositive
+                        mProjectRenameDialog = null
+                        current.dismiss()
+                        commitAceProjectRename(
+                            generation = generation,
+                            identityGeneration = identityGeneration,
+                            textRevision = textRevision,
+                            requestedEditor = requestedEditor,
+                            baseText = baseText,
+                            prepared = prepared,
+                        )
+                    }
+                    .build()
+            }
+        }.getOrElse {
+            finishAceProjectRename(generation, EditorPluginProjectRenameResult.FAILED)
+            return
+        }
+        mProjectRenameDialog = dialog
+        dialog.setOnDismissListener {
+            if (mProjectRenameDialog === dialog) {
+                mProjectRenameDialog = null
+                finishAceProjectRename(generation, EditorPluginProjectRenameResult.REJECTED)
+            }
+        }
+    }
+
+    private fun commitAceProjectRename(
+        generation: Long,
+        identityGeneration: Long,
+        textRevision: Long,
+        requestedEditor: ScriptEditorEngine,
+        baseText: String,
+        prepared: TypeScriptEditorProjectRenameTransaction.Prepared,
+    ) {
+        if (
+            !isAceProjectRenameContextCurrent(
+                generation,
+                identityGeneration,
+                textRevision,
+                requestedEditor,
+                baseText,
+            )
+        ) {
+            showSnack(this, R.string.error_typescript_project_rename_stale)
+            finishAceProjectRename(generation, EditorPluginProjectRenameResult.STALE)
+            return
+        }
+        requestedEditor.setReadOnly(true)
+        syncPrimaryMenuState()
+        mProjectRenameDisposable = Observable.fromCallable {
+            EditorFileIoCoordinator.withWriteAccess(
+                prepared.files.map { plan -> Uri.fromFile(plan.target) },
+            ) {
+                mProjectRenameTransaction.publish(prepared)
+            }
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ publication ->
+                mProjectRenameDisposable = null
+                mProjectRenamePublication = publication
+                if (
+                    !isAceProjectRenameContextCurrent(
+                        generation,
+                        identityGeneration,
+                        textRevision,
+                        requestedEditor,
+                        baseText,
+                    )
+                ) {
+                    rollbackAceProjectRenamePublication(
+                        generation,
+                        publication,
+                        EditorPluginProjectRenameResult.STALE,
+                    )
+                    return@subscribe
+                }
+                val token = "typescript-project-rename-${SystemClock.uptimeMillis()}"
+                requestedEditor.replaceAllTextUndoably(
+                    prepared.activeDocumentResultText,
+                    token,
+                ) { succeeded ->
+                    if (
+                        !succeeded || mDestroyed || generation != mProjectRenameGeneration ||
+                        requestedEditor !== editor ||
+                        requestedEditor.textSnapshot != prepared.activeDocumentResultText
+                    ) {
+                        runCatching {
+                            if (requestedEditor === editor && !mDestroyed) {
+                                requestedEditor.text = baseText
+                            }
+                        }
+                        rollbackAceProjectRenamePublication(
+                            generation,
+                            publication,
+                            EditorPluginProjectRenameResult.FAILED,
+                        )
+                        return@replaceAllTextUndoably
+                    }
+                    mProjectRenameActiveBufferApplied = true
+                    completeAceProjectRenamePublication(
+                        generation,
+                        requestedEditor,
+                        publication,
+                    )
+                }
+            }, { error ->
+                mProjectRenameDisposable = null
+                handleAceProjectRenameFailure(generation, error)
+            })
+    }
+
+    private fun completeAceProjectRenamePublication(
+        generation: Long,
+        requestedEditor: ScriptEditorEngine,
+        publication: TypeScriptEditorProjectRenameTransaction.Publication,
+    ) {
+        mProjectRenameDisposable = Observable.fromCallable {
+            mProjectRenameTransaction.complete(publication)
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                mProjectRenameDisposable = null
+                if (
+                    mDestroyed || generation != mProjectRenameGeneration ||
+                    mProjectRenamePublication !== publication || requestedEditor !== editor
+                ) {
+                    return@subscribe
+                }
+                mProjectRenamePublication = null
+                mCurrentFileSizeBytes = null
+                uri?.let(fileService::discardStableDraft)
+                requestedEditor.markTextAsSaved()
+                saveStickyDirty = false
+                mHadDirectEditSinceSave = false
+                showSnack(this, R.string.text_typescript_project_rename_applied)
+                finishAceProjectRename(generation, EditorPluginProjectRenameResult.APPLIED)
+            }, { error ->
+                mProjectRenameDisposable = null
+                handleAceProjectRenameFailure(generation, error)
+            })
+    }
+
+    private fun rollbackAceProjectRenamePublication(
+        generation: Long,
+        publication: TypeScriptEditorProjectRenameTransaction.Publication,
+        result: EditorPluginProjectRenameResult,
+    ) {
+        mProjectRenameDisposable = Observable.fromCallable {
+            EditorFileIoCoordinator.withWriteAccess(
+                publication.entries.map { entry -> Uri.fromFile(entry.plan.target) },
+            ) {
+                mProjectRenameTransaction.rollback(publication)
+            }
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                mProjectRenameDisposable = null
+                if (mProjectRenamePublication === publication) {
+                    mProjectRenamePublication = null
+                }
+                if (result == EditorPluginProjectRenameResult.STALE && !mDestroyed) {
+                    showSnack(this, R.string.error_typescript_project_rename_stale)
+                }
+                finishAceProjectRename(generation, result)
+            }, { error ->
+                mProjectRenameDisposable = null
+                handleAceProjectRenameFailure(generation, error)
+            })
+    }
+
+    private fun handleAceProjectRenameFailure(generation: Long, error: Throwable) {
+        val failure = error as? TypeScriptEditorProjectRenameException
+        val result = when (failure?.reason) {
+            TypeScriptEditorProjectRenameFailureReason.STALE ->
+                EditorPluginProjectRenameResult.STALE
+            TypeScriptEditorProjectRenameFailureReason.REJECTED,
+            TypeScriptEditorProjectRenameFailureReason.UNSAVED_DOCUMENT,
+                -> EditorPluginProjectRenameResult.REJECTED
+            else -> EditorPluginProjectRenameResult.FAILED
+        }
+        if (!mDestroyed && generation == mProjectRenameGeneration) {
+            when (failure?.reason) {
+                TypeScriptEditorProjectRenameFailureReason.UNSAVED_DOCUMENT ->
+                    showSnack(this, R.string.error_typescript_project_rename_save_first)
+                TypeScriptEditorProjectRenameFailureReason.STALE ->
+                    showSnack(this, R.string.error_typescript_project_rename_stale)
+                TypeScriptEditorProjectRenameFailureReason.ROLLBACK_FAILED -> {
+                    markFileStateRequiresReload()
+                    showAceProjectRenameRollbackFailure(failure)
+                }
+                else -> showSnack(this, R.string.error_typescript_project_rename_failed)
+            }
+        }
+        finishAceProjectRename(generation, result)
+    }
+
+    private fun showAceProjectRenameRollbackFailure(
+        failure: TypeScriptEditorProjectRenameException,
+    ) {
+        val content = buildString {
+            append(context.getString(R.string.error_typescript_project_rename_rollback_failed))
+            if (failure.recoveryFiles.isNotEmpty()) {
+                append("\n\n")
+                failure.recoveryFiles.forEach { file ->
+                    append(file.absolutePath)
+                    append('\n')
+                }
+            }
+        }.trimEnd()
+        runCatching {
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.error_save_failed)
+                    .content(content)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .build()
+            }
+        }
+    }
+
+    private fun isAceProjectRenameContextCurrent(
+        generation: Long,
+        identityGeneration: Long,
+        textRevision: Long,
+        requestedEditor: ScriptEditorEngine,
+        baseText: String,
+    ): Boolean =
+        !mDestroyed && mProjectRenameInProgress && generation == mProjectRenameGeneration &&
+            identityGeneration == mDocumentIdentityGeneration && textRevision == mTextRevision &&
+            requestedEditor === editor && requestedEditor.engineType == EditorEngineType.ACE &&
+            requestedEditor.textSnapshot == baseText
+
+    private fun finishAceProjectRename(
+        generation: Long,
+        result: EditorPluginProjectRenameResult,
+    ) {
+        if (generation != mProjectRenameGeneration) return
+        mProjectRenameDisposable?.dispose()
+        mProjectRenameDisposable = null
+        mProjectRenameDialog?.let { dialog ->
+            mProjectRenameDialog = null
+            runCatching { dialog.dismiss() }
+        }
+        val requestedEditor = mProjectRenameRequestedEditor
+        mProjectRenameRequestedEditor = null
+        if (!mDestroyed && requestedEditor === editor) {
+            requestedEditor.setReadOnly(mReadOnly)
+        }
+        mProjectRenamePublication = null
+        mProjectRenameActiveBufferApplied = false
+        mProjectRenameInProgress = false
+        mProjectRenameGeneration++
+        val completion = mProjectRenameCompletion
+        mProjectRenameCompletion = null
+        if (!mDestroyed) {
+            syncPrimaryMenuState()
+        }
+        completion?.onComplete(result)
+    }
+
+    private fun abandonAceProjectRenameOnDestroy() {
+        if (!mProjectRenameInProgress) return
+        mProjectRenameDialog?.let { dialog ->
+            mProjectRenameDialog = null
+            runCatching { dialog.dismiss() }
+        }
+        mProjectRenameCompletion?.onComplete(EditorPluginProjectRenameResult.REJECTED)
+        mProjectRenameCompletion = null
+        if (mProjectRenameDisposable != null) {
+            // A running prepare/publish/complete/rollback call is synchronous on its IO worker.
+            // Keep its observer attached so a publication that races destruction is still either
+            // completed after an applied buffer edit or rolled back before it is abandoned.
+            return
+        }
+        val publication = mProjectRenamePublication
+        val activeBufferApplied = mProjectRenameActiveBufferApplied
+        if (publication != null) {
+            Schedulers.io().scheduleDirect {
+                runCatching {
+                    if (activeBufferApplied) {
+                        mProjectRenameTransaction.complete(publication)
+                    } else {
+                        EditorFileIoCoordinator.withWriteAccess(
+                            publication.entries.map { entry -> Uri.fromFile(entry.plan.target) },
+                        ) {
+                            mProjectRenameTransaction.rollback(publication)
+                        }
+                    }
+                }
+            }
+        }
+        mProjectRenamePublication = null
+        mProjectRenameRequestedEditor = null
+        mProjectRenameActiveBufferApplied = false
+        mProjectRenameInProgress = false
+        mProjectRenameGeneration++
     }
 
     private fun requestAceDefinitionNavigation(target: EditorPluginDefinitionTarget) {
@@ -4503,6 +4948,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         configureAceActionHistory(editor)
         configureAceDefinitionNavigation(editor)
         configureAceCodeActions(editor)
+        configureAceProjectRename(editor)
         editor.let { editor ->
             editor.setHistoryOperationListener { token, direction ->
                 // Both engines dispatch history completion on the main thread. Applying it here
@@ -4696,6 +5142,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return true
         }
         if (mDraftRestoreInProgress || mFileSaveInProgress || mSaveThenReloadInProgress ||
+            mProjectRenameInProgress ||
             mSaveAsInProgress ||
             (mEncodingOperationInProgress && mEncodingReloadRollback == null)
         ) {
@@ -4897,6 +5344,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun save(): Observable<String> {
         return Observable.defer {
             if (mDraftRestoreInProgress || mFileSaveInProgress || mSaveAsInProgress ||
+                mProjectRenameInProgress ||
                 mEditorLoading || editor.isLoadingText
             ) {
                 return@defer Observable.error(
@@ -7165,6 +7613,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun destroy() {
         mDestroyed = true
+        abandonAceProjectRenameOnDestroy()
         mFullscreenHintSnackbar?.dismiss()
         mFullscreenHintSnackbar = null
         removeFullscreenSnackbarBottomProtection()

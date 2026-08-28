@@ -459,6 +459,10 @@
     <string name="error_timeout_while_querying_plugin_info">查詢 %1$s 插件信息超時.</string>
     <string name="error_typescript_compilation_failed">TypeScript 編譯失敗</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript 編譯插件不可用. 請在插件中心安裝或啓用後重試.</string>
+    <string name="error_typescript_project_rename_failed">項目重命名失敗. 未保留局部變更.</string>
+    <string name="error_typescript_project_rename_rollback_failed">項目重命名失敗且自動回滾不完整. 請先重新載入編輯器再繼續. 恢復副本:</string>
+    <string name="error_typescript_project_rename_save_first">重命名項目符號前請先儲存目前文件.</string>
+    <string name="error_typescript_project_rename_stale">套用重命名前項目檔案已發生變化. 請重新整理後再試.</string>
     <string name="error_typescript_source_not_executable">TypeScript 源文件 \"%1$s\" 不能在 Rhino 單文件設定中執行</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">當前文件路徑未知, 無法更改文件編碼</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">當前文件路徑未知, 無法顯示文件詳情</string>
@@ -1826,6 +1830,9 @@
     <string name="text_type">類型</string>
     <string name="text_type_file">文件</string>
     <string name="text_type_folder">文件夾</string>
+    <string name="text_typescript_project_rename">重命名項目符號</string>
+    <string name="text_typescript_project_rename_applied">已在所有受影響檔案中重命名項目符號</string>
+    <string name="text_typescript_project_rename_preview">將 \"%1$s\" 重命名為 \"%2$s\", 涉及 %3$d 個檔案和 %4$d 個引用? 所有受影響檔案將作為一個交易儲存.</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">選擇的 ABI 架構 \"%s\" 無法用於創建打包應用, 因當前 AutoJs6 版本未包含上述 ABI 架構.</string>
     <string name="text_unavailable">不可用</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" 不可用</string>

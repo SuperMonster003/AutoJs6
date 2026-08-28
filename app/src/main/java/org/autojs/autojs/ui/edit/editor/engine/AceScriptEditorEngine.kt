@@ -27,6 +27,9 @@ import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
 import org.autojs.plugin.editor.api.EditorPluginFailure
 import org.autojs.plugin.editor.api.EditorPluginHealthState
 import org.autojs.plugin.editor.api.EditorPluginHistoryDirection
+import org.autojs.plugin.editor.api.EditorPluginProjectRenameCallback
+import org.autojs.plugin.editor.api.EditorPluginProjectRenameRequest
+import org.autojs.plugin.editor.api.EditorPluginProjectRenameResult
 import org.autojs.plugin.editor.api.EditorPluginSearchOptions
 import org.autojs.plugin.editor.api.EditorPluginSearchResult
 import org.autojs.plugin.editor.api.EditorPluginSearchSyntaxException
@@ -119,6 +122,8 @@ class AceScriptEditorEngine private constructor(
     var onDefinitionNavigationRequested: ((EditorPluginDefinitionTarget) -> Unit)? = null
     var onCurrentDocumentCodeActionRequested:
         ((EditorPluginCurrentDocumentCodeAction, EditorPluginBooleanCallback) -> Unit)? = null
+    var onProjectRenameRequested:
+        ((EditorPluginProjectRenameRequest, EditorPluginProjectRenameCallback) -> Unit)? = null
     override var onUserTouchInTextArea: (() -> Unit)? = null
 
     override val view: View
@@ -260,6 +265,19 @@ class AceScriptEditorEngine private constructor(
             }
             runCatching { handler(action, onComplete) }
                 .onFailure { onComplete.onComplete(false) }
+        }
+
+        override fun onProjectRenameRequested(
+            request: EditorPluginProjectRenameRequest,
+            onComplete: EditorPluginProjectRenameCallback,
+        ) {
+            val handler = this@AceScriptEditorEngine.onProjectRenameRequested
+            if (handler == null) {
+                onComplete.onComplete(EditorPluginProjectRenameResult.REJECTED)
+                return
+            }
+            runCatching { handler(request, onComplete) }
+                .onFailure { onComplete.onComplete(EditorPluginProjectRenameResult.FAILED) }
         }
 
         override fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) {
@@ -593,6 +611,7 @@ class AceScriptEditorEngine private constructor(
         onSelectionAction = null
         onDefinitionNavigationRequested = null
         onCurrentDocumentCodeActionRequested = null
+        onProjectRenameRequested = null
         releaseSession()
     }
 
@@ -760,6 +779,11 @@ class AceScriptEditorEngine private constructor(
             action: EditorPluginCurrentDocumentCodeAction,
             onComplete: EditorPluginBooleanCallback,
         ) = dispatch { it.onCurrentDocumentCodeActionRequested(action, onComplete) }
+
+        override fun onProjectRenameRequested(
+            request: EditorPluginProjectRenameRequest,
+            onComplete: EditorPluginProjectRenameCallback,
+        ) = dispatch { it.onProjectRenameRequested(request, onComplete) }
 
         override fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) =
             dispatch { it.onTextSizeSpChangedByGesture(size, persist) }
