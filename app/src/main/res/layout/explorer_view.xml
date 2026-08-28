@@ -93,14 +93,12 @@
         <TextView
             android:id="@+id/selection_count"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="32dp"
             android:accessibilityLiveRegion="polite"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:minHeight="32dp"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="4dp"
             android:textSize="13sp"
             tools:text="3 selected" />
 
@@ -112,9 +110,8 @@
         <LinearLayout
             android:id="@+id/selection_actions"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:baselineAligned="false"
-            android:minHeight="72dp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -127,7 +124,6 @@
                 android:contentDescription="@string/text_clear_file_selection"
                 android:focusable="true"
                 android:gravity="center"
-                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp">
@@ -144,15 +140,14 @@
 
                 <TextView
                     android:id="@+id/selection_close_text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:importantForAccessibility="no"
-                    android:maxLines="2"
+                    android:maxLines="1"
                     android:text="@string/text_exit"
-                    android:textDirection="locale"
                     android:textSize="11sp" />
 
             </LinearLayout>
@@ -167,7 +162,6 @@
                 android:contentDescription="@string/text_copy_to"
                 android:focusable="true"
                 android:gravity="center"
-                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp">
@@ -185,15 +179,14 @@
 
                 <TextView
                     android:id="@+id/selection_copy_text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:importantForAccessibility="no"
-                    android:maxLines="2"
+                    android:maxLines="1"
                     android:text="@string/text_copy_to"
-                    android:textDirection="locale"
                     android:textSize="11sp" />
 
             </LinearLayout>
@@ -208,7 +201,6 @@
                 android:contentDescription="@string/text_move_to"
                 android:focusable="true"
                 android:gravity="center"
-                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp">
@@ -226,15 +218,14 @@
 
                 <TextView
                     android:id="@+id/selection_move_text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:importantForAccessibility="no"
-                    android:maxLines="2"
+                    android:maxLines="1"
                     android:text="@string/text_move_to"
-                    android:textDirection="locale"
                     android:textSize="11sp" />
 
             </LinearLayout>
@@ -248,7 +239,6 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp"
@@ -270,14 +260,13 @@
 
                 <TextView
                     android:id="@+id/selection_plugin_text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:importantForAccessibility="no"
-                    android:maxLines="2"
-                    android:textDirection="locale"
+                    android:maxLines="1"
                     android:textSize="11sp"
                     tools:ignore="TypographyEllipsis"
                     tools:text="Compress..." />
@@ -294,7 +283,6 @@
                 android:contentDescription="@string/text_delete"
                 android:focusable="true"
                 android:gravity="center"
-                android:minHeight="72dp"
                 android:orientation="vertical"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="5dp">
@@ -311,15 +299,14 @@
 
                 <TextView
                     android:id="@+id/selection_delete_text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:importantForAccessibility="no"
-                    android:maxLines="2"
+                    android:maxLines="1"
                     android:text="@string/text_delete"
-                    android:textDirection="locale"
                     android:textSize="11sp" />
 
             </LinearLayout>
