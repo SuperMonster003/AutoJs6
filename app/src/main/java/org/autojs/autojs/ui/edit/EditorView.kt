@@ -4467,6 +4467,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     completeAceProjectRenamePublication(
                         generation,
                         requestedEditor,
+                        prepared,
                         publication,
                     )
                 }
@@ -4479,6 +4480,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun completeAceProjectRenamePublication(
         generation: Long,
         requestedEditor: ScriptEditorEngine,
+        prepared: TypeScriptEditorProjectRenameTransaction.Prepared,
         publication: TypeScriptEditorProjectRenameTransaction.Publication,
     ) {
         mProjectRenameDisposable = Observable.fromCallable {
@@ -4500,6 +4502,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 requestedEditor.markTextAsSaved()
                 saveStickyDirty = false
                 mHadDirectEditSinceSave = false
+                requestedEditor.setDocumentPath(prepared.documentPath)
                 showSnack(this, R.string.text_typescript_project_rename_applied)
                 finishAceProjectRename(generation, EditorPluginProjectRenameResult.APPLIED)
             }, { error ->
