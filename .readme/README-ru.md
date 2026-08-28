@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 28 August 2026 года.
+Данные обновлены на 29 August 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -166,8 +166,9 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/08/28
+###### 2026/08/29
 
+* `Новое` Контракт редактора 4 добавляет авторизованные хостом автоимпорт и исправление опечаток TypeScript для активного буфера: запросы могут содержать только ограниченные упорядоченные правки UTF-16 и точные SHA-256 исходного и итогового текста, а хост независимо воспроизводит их и до одноразового разрешения отклоняет запросы для буфера только для чтения, а также устаревшие, некорректные, пересекающиеся или подменённые действия
 * `Новое` Контракт редактора 3 добавляет переход к определениям TypeScript, авторизованный snapshot проекта: Ace может запрашивать позиции в исходниках проекта и замороженных декларациях зависимостей, а хост независимо перепроверяет корень проекта, канонический относительный путь, fingerprint реестра исходников или зависимостей, SHA-256 содержимого и диапазон перед открытием и позиционированием цели; символические ссылки, устаревшие snapshot и несовпадающий несохранённый текст отклоняются
 * `Новое` Контракт редактора 2 теперь передаёт Ace тот же полный ограниченный snapshot исходников проекта TypeScript, который используется компиляцией перед запуском, включая живую межфайловую диагностику неверных путей импорта и совместимость с плагинами редактора контракта 1
 * `Новое` Снимки зависимостей TypeScript теперь отклоняют признаки нативных дополнений (`.node`, `binding.gyp` и `gypfile`) и hooks жизненного цикла установки (`preinstall`, `install` и `postinstall`) со стабильными кодами ошибок и рекомендациями pure JavaScript/WASM; обычные scripts пакета остаются инертными метаданными
@@ -716,7 +717,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 28 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 29 August 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

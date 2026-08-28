@@ -6,8 +6,9 @@
 
 # v6.8.0
 
-###### 2026/08/28
+###### 2026/08/29
 
+* `Fonctionnalité` Le contrat d'éditeur 4 ajoute l'import automatique et les corrections orthographiques TypeScript autorisés par l'hôte pour le tampon actif: les requêtes ne peuvent contenir que des modifications UTF-16 bornées et ordonnées avec les SHA-256 exacts de la base et du résultat, tandis que l'hôte les rejoue indépendamment et refuse les actions en lecture seule, périmées, mal formées, chevauchantes ou altérées avant une autorisation unique
 * `Fonctionnalité` Le contrat d'éditeur 3 ajoute la navigation vers les définitions TypeScript autorisée par le snapshot du projet: Ace peut demander des positions dans les sources du projet et les déclarations de dépendances gelées, tandis que l'hôte revérifie indépendamment la racine, le chemin relatif canonique, l'empreinte de l'inventaire des sources ou dépendances, le SHA-256 du contenu et la plage avant d'ouvrir et positionner la cible; les liens symboliques, snapshots périmés et contenus non enregistrés divergents sont refusés
 * `Fonctionnalité` Le contrat d'éditeur 2 fournit désormais à Ace le même snapshot borné des sources du projet TypeScript que la compilation avant exécution, permettant des diagnostics inter-fichiers en direct pour les chemins d'import invalides tout en conservant la compatibilité avec les plugins d'éditeur de contrat 1
 * `Fonctionnalité` Les instantanés de dépendances TypeScript rejettent désormais les signaux d'extensions natives (`.node`, `binding.gyp` et `gypfile`) et les hooks du cycle d'installation (`preinstall`, `install` et `postinstall`) avec des codes d'erreur stables et des conseils JavaScript pur/WASM; les scripts ordinaires du paquet restent des métadonnées inertes

@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 8 月 28 日 に更新されました.
+データは 2026 年 8 月 29 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,8 +166,9 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/08/28
+###### 2026/08/29
 
+* `新機能` editor contract 4 に host 認可の TypeScript auto-import と spelling correction を追加: request は active buffer に対する上限付きの整列済み UTF-16 edit と正確な base/result SHA-256 のみを保持でき, host は独立して replay し, read-only, stale, malformed, overlap, tamper を one-shot approval 前に拒否します
 * `新機能` editor contract 3 に project snapshot で認可された TypeScript 定義ジャンプを追加: Ace は project source と frozen dependency declaration の位置を要求でき, host は target を開いて位置決めする前に project root, canonical relative path, source/dependency inventory fingerprint, content SHA-256, range を独立して再検証します; symbolic link, stale snapshot, 未保存内容の不一致は拒否します
 * `新機能` editor contract 2 は実行前コンパイルと同じ上限付き TypeScript project source snapshot を Ace に提供し, 不正な import path のリアルタイム跨ファイル診断を有効にしました. contract 1 editor plugin との互換性も維持します
 * `新機能` TypeScript dependency snapshot は native addon signal (`.node`, `binding.gyp`, `gypfile`) と install lifecycle hook (`preinstall`, `install`, `postinstall`) を安定した error code と pure JavaScript/WASM の案内付きで拒否し, 通常の package script は inert metadata のまま維持します
@@ -716,7 +717,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 8 月 28 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 8 月 29 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

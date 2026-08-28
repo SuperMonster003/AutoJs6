@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Aug 28, 2026.
+Data updated on Aug 29, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,8 +166,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/08/28
+###### 2026/08/29
 
+* `Feature` Editor contract 4 adds host-authorized TypeScript auto-import and spelling corrections for the active buffer: requests can contain only bounded, ordered UTF-16 edits and exact base/result SHA-256 values, while the host independently replays them and rejects read-only, stale, malformed, overlapping, or tampered actions before one-shot approval
 * `Feature` Editor contract 3 adds project-snapshot-authorized TypeScript definition navigation: Ace can request locations in project sources and frozen dependency declarations, while the host independently revalidates the project root, canonical relative path, source or dependency inventory fingerprint, content SHA-256, and range before opening and positioning the target; symlinks, stale snapshots, and mismatched unsaved content are rejected
 * `Feature` Editor contract 2 now supplies Ace with the same bounded TypeScript project-source snapshot used by pre-run compilation, enabling live cross-file diagnostics for invalid import paths while retaining compatibility with contract-1 editor plugins
 * `Feature` TypeScript dependency snapshots now reject native addon signals (`.node`, `binding.gyp`, and `gypfile`) and install lifecycle hooks (`preinstall`, `install`, and `postinstall`) with stable error codes and pure JavaScript/WASM guidance; ordinary package scripts remain inert metadata
@@ -716,7 +717,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Aug 28, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Aug 29, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

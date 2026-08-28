@@ -6,8 +6,9 @@
 
 # v6.8.0
 
-###### 2026/08/28
+###### 2026/08/29
 
+* `新增` 編輯器 contract 4 新增由主機授權的 TypeScript 自動匯入與拼字修正, 目標僅限目前緩衝區: 請求只能攜帶有界且有序的 UTF-16 編輯及精確的修改前後 SHA-256, 主機會獨立重播並在一次性核准前拒絕唯讀, 過期, 畸形, 重疊或遭竄改的操作
 * `新增` 編輯器 contract 3 新增經專案快照授權的 TypeScript 定義跳轉: Ace 可請求專案原始碼及凍結相依性宣告中的位置, 主機會在開啟目標檔案並定位前獨立複驗專案根目錄, 規範相對路徑, 原始碼或相依性清單指紋, 內容 SHA-256 與範圍; 符號連結, 過期快照及不相符的未儲存內容均會被拒絕
 * `新增` 編輯器 contract 2 現會向 Ace 提供與執行前編譯相同的有界 TypeScript 專案原始碼快照, 從而即時跨檔案診斷錯誤 import 路徑, 同時繼續相容 contract 1 編輯器外掛
 * `新增` TypeScript 相依性快照現在會拒絕原生 addon 訊號 (`.node`, `binding.gyp` 與 `gypfile`) 和安裝生命週期 hook (`preinstall`, `install` 與 `postinstall`), 提供穩定錯誤碼及純 JavaScript/WASM 替代指引; 一般 package script 仍僅作為惰性中繼資料保留

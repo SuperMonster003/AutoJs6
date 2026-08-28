@@ -1,8 +1,9 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/28",
+      "released_date": "2026/08/29",
       "feature": [
+        "El contrato de editor 4 añade importación automática y correcciones ortográficas de TypeScript autorizadas por el host para el búfer activo: las solicitudes solo pueden incluir ediciones UTF-16 acotadas y ordenadas y valores SHA-256 exactos de base y resultado, mientras el host las reproduce de forma independiente y rechaza acciones de solo lectura, obsoletas, malformadas, superpuestas o manipuladas antes de una aprobación de un solo uso",
         "El contrato de editor 3 añade navegación a definiciones TypeScript autorizada por la instantánea del proyecto: Ace puede solicitar ubicaciones en fuentes del proyecto y declaraciones de dependencias congeladas, mientras el host vuelve a validar de forma independiente la raíz, la ruta relativa canónica, la huella del inventario de fuentes o dependencias, el SHA-256 del contenido y el rango antes de abrir y posicionar el destino; se rechazan enlaces simbólicos, instantáneas obsoletas y contenido sin guardar que no coincida",
         "El contrato de editor 2 proporciona ahora a Ace la misma instantánea acotada de fuentes del proyecto TypeScript que usa la compilación previa a la ejecución, permitiendo diagnósticos en vivo entre archivos para rutas de importación incorrectas y manteniendo la compatibilidad con plugins de editor de contrato 1",
         "Las instantáneas de dependencias TypeScript ahora rechazan señales de addons nativos (`.node`, `binding.gyp` y `gypfile`) y hooks del ciclo de instalación (`preinstall`, `install` y `postinstall`) con códigos de error estables y orientación hacia JavaScript puro/WASM; los scripts ordinarios del paquete siguen siendo metadatos inertes",

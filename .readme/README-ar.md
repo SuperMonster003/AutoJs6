@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 28 August 2026.
+تم تحديث البيانات في 29 August 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,8 +166,9 @@
 
 # v6.8.0
 
-###### 2026/08/28
+###### 2026/08/29
 
+* `إضافة جديدة` يضيف عقد المحرر 4 استيراد TypeScript التلقائي وتصحيحات الإملاء بتفويض من المضيف للمخزن النشط: لا يمكن أن تحتوي الطلبات إلا على تعديلات UTF-16 محدودة ومرتبة وقيم SHA-256 دقيقة للنص الأساسي والنتيجة, بينما يعيد المضيف تطبيقها مستقلا ويرفض الإجراءات للقراءة فقط أو القديمة أو المشوهة أو المتداخلة أو المتلاعب بها قبل موافقة لمرة واحدة
 * `إضافة جديدة` يضيف عقد المحرر 3 تنقل TypeScript إلى التعريف بتفويض من لقطة المشروع: يستطيع Ace طلب مواقع في مصادر المشروع وتصريحات التبعيات المجمدة, بينما يعيد المضيف مستقلا التحقق من جذر المشروع والمسار النسبي القياسي وبصمة قائمة المصادر أو التبعيات وSHA-256 للمحتوى والنطاق قبل فتح الهدف وتحديد موضعه; وترفض الروابط الرمزية واللقطات القديمة والمحتوى غير المحفوظ غير المطابق
 * `إضافة جديدة` يوفر عقد المحرر 2 الآن إلى Ace نفس لقطة مصادر مشروع TypeScript المحدودة المستخدمة في التجميع قبل التشغيل، مما يتيح تشخيصات مباشرة بين الملفات لمسارات الاستيراد غير الصحيحة مع الحفاظ على التوافق مع إضافات المحرر ذات العقد 1
 * `إضافة جديدة` ترفض لقطات تبعيات TypeScript الآن إشارات الإضافات الأصلية (`.node` و`binding.gyp` و`gypfile`) وخطافات دورة حياة التثبيت (`preinstall` و`install` و`postinstall`) باستخدام رموز أخطاء مستقرة وإرشادات لبدائل JavaScript الخالصة/WASM; وتظل scripts العادية للحزم بيانات وصفية خاملة
@@ -716,7 +717,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 28 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 29 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

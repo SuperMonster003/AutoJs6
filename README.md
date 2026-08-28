@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 8 月 28 日.
+数据更新于 2026 年 8 月 29 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,8 +166,9 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/08/28
+###### 2026/08/29
 
+* `新增` 编辑器 contract 4 新增由宿主授权的 TypeScript 自动导入与拼写修正, 目标仅限当前缓冲区: 请求只能携带有界且有序的 UTF-16 编辑及精确的修改前后 SHA-256, 宿主会独立重放并在一次性批准前拒绝只读, 过期, 畸形, 重叠或被篡改的操作
 * `新增` 编辑器 contract 3 新增经项目快照授权的 TypeScript 定义跳转: Ace 可请求项目源码及冻结依赖声明中的位置, 宿主会在打开目标文件并定位前独立复验项目根目录, 规范相对路径, 源码或依赖清单指纹, 内容 SHA-256 与范围; 符号链接, 过期快照及不匹配的未保存内容均会被拒绝
 * `新增` 编辑器 contract 2 现会向 Ace 提供与运行前编译相同的有界 TypeScript 项目源码快照, 从而实时跨文件诊断错误 import 路径, 同时继续兼容 contract 1 编辑器插件
 * `新增` TypeScript 依赖快照现会拒绝原生 addon 信号 (`.node`, `binding.gyp` 与 `gypfile`) 和安装生命周期 hook (`preinstall`, `install` 与 `postinstall`), 提供稳定错误码及纯 JavaScript/WASM 替代指引; 普通 package script 仍仅作为惰性元数据保留
@@ -695,7 +696,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 8 月 28 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 8 月 29 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
