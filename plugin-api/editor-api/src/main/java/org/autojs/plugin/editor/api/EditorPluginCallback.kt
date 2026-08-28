@@ -35,6 +35,16 @@ interface EditorPluginCallback {
         onComplete: EditorPluginBooleanCallback,
     ) = onComplete.onComplete(false)
 
+    /**
+     * Available from editor contract 5. The host owns preview, validation and publication of the
+     * complete multi-file transaction. A plugin must never write project files or apply a second
+     * active-buffer edit after reporting this request.
+     */
+    fun onProjectRenameRequested(
+        request: EditorPluginProjectRenameRequest,
+        onComplete: EditorPluginProjectRenameCallback,
+    ) = onComplete.onComplete(EditorPluginProjectRenameResult.REJECTED)
+
     fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) = Unit
 
     fun onUserTouchInTextArea() = Unit
@@ -52,4 +62,15 @@ fun interface EditorPluginBooleanCallback {
 
 fun interface EditorPluginTextCallback {
     fun onText(text: String)
+}
+
+fun interface EditorPluginProjectRenameCallback {
+    fun onComplete(result: EditorPluginProjectRenameResult)
+}
+
+enum class EditorPluginProjectRenameResult {
+    APPLIED,
+    REJECTED,
+    STALE,
+    FAILED,
 }
