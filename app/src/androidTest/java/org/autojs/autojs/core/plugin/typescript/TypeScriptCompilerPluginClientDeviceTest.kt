@@ -509,12 +509,580 @@ class TypeScriptCompilerPluginClientDeviceTest {
     }
 
     @Test
+    fun dependencyLayerWithThreeDirectPackagesCompilesThroughRealPluginBinder() {
+        withProject { root ->
+            File(root, "project.json").writeText("""{"type":"node","main":"main.mts"}""")
+            File(root, "package.json").writeText(
+                """{"type":"module","dependencies":{"dayjs":"1.11.13","lodash":"4.17.21","zod":"4.1.5"}}""",
+            )
+            File(root, "package-lock.json").writeText(
+                """{"name":"t2-device-project","lockfileVersion":3,"packages":{}}""",
+            )
+            val dependencies = File(root, "node_modules").apply { mkdirs() }
+            listOf("dayjs", "lodash", "zod").forEachIndexed { index, packageName ->
+                val packageRoot = File(dependencies, packageName).apply { mkdirs() }
+                File(packageRoot, "package.json").writeText(
+                    """{"name":"$packageName","main":"index.js","types":"index.d.ts","scripts":{"test":"must-not-run"}}""",
+                )
+                File(packageRoot, "index.js").writeText("export const value = $index;\n")
+                File(packageRoot, "index.d.ts").writeText(
+                    "export declare const value: number;\n",
+                )
+                File(packageRoot, "README.md").writeText("excluded documentation")
+                File(packageRoot, "tests").apply { mkdirs() }
+                    .resolve("must-not-run.js")
+                    .writeText("throw new Error('excluded dependency test');\n")
+            }
+            val entry = File(root, "main.mts").apply {
+                writeText("export const dependencyLayerAdmission: number = 42;\n")
+            }
+            val performance = mutableListOf<TypeScriptCompilationPerformanceSnapshot>()
+            val client = TypeScriptCompilerPluginClient(
+                context,
+                performanceReporter = TypeScriptCompilationPerformanceReporter { snapshot ->
+                    performance += snapshot
+                },
+            )
+
+            fun compile(): TypeScriptCompilationOutput = runBlocking {
+                client.compileProject(
+                    projectRoot = root,
+                    entryFile = entry,
+                    targetProfile =
+                        org.autojs.plugin.typescript.api.TypeScriptCompilerContract.PROFILE_NODE,
+                )
+            }
+
+            val first = compile() as TypeScriptCompilationOutput.Emitted
+            File(dependencies, "dayjs/index.js").writeText("export const value = 42;\n")
+            val dependencyChanged = compile() as TypeScriptCompilationOutput.Emitted
+            assertEquals(1, first.modules.size)
+            assertEquals(first.javaScript, dependencyChanged.javaScript)
+            assertTrue(first.javaScript.contains("dependencyLayerAdmission"))
+            assertEquals(
+                TypeScriptR2Contract.DEPENDENCY_LAYER_SCHEMA_REVISION,
+                first.authority.dependencyLayerSchemaRevision,
+            )
+            assertEquals(
+                TypeScriptR2Contract.DEPENDENCY_LAYER_POLICY_REVISION,
+                first.authority.dependencyLayerPolicyRevision,
+            )
+            assertEquals(
+                DEPENDENCY_LAYER_POLICY_FINGERPRINT,
+                first.authority.dependencyLayerPolicyFingerprint,
+            )
+            assertEquals(2, performance.size)
+            assertTrue(performance.all { snapshot ->
+                snapshot.cacheStatus == TypeScriptCompilationPerformanceSnapshot.CACHE_MISS &&
+                    snapshot.compilerElapsedMs != null
+            })
+        }
+    }
+
+    @Test
+    fun nativeAndInstallLifecycleDependenciesFailBeforePluginBinderCompilation() {
+        withProject { root ->
+            File(root, "project.json").writeText("""{"type":"node","main":"main.mts"}""")
+            val entry = File(root, "main.mts").apply {
+                writeText("import bcrypt from \"bcrypt\"; export const hash = bcrypt;\n")
+            }
+            val dependency = File(root, "node_modules/bcrypt").apply { mkdirs() }
+            File(dependency, "package.json").writeText(
+                """{"name":"bcrypt","version":"6.0.0","scripts":{"install":"node-gyp-build"}}""",
+            )
+            File(dependency, "index.js").writeText("module.exports = {};\n")
+            val binding = File(dependency, "binding.gyp").apply { writeText("{}\n") }
+            val native = File(dependency, "prebuilds/darwin-arm64").apply { mkdirs() }
+                .resolve("bcrypt.node")
+                .apply { writeBytes(byteArrayOf(0x7f, 0x45, 0x4c, 0x46)) }
+
+            fun compileFailure(): Pair<TypeScriptCompilerException, TypeScriptDependencyBoundaryException> {
+                val error = runCatching {
+                    runBlocking {
+                        TypeScriptCompilerPluginClient(context).compileProject(
+                            projectRoot = root,
+                            entryFile = entry,
+                            targetProfile =
+                                org.autojs.plugin.typescript.api.TypeScriptCompilerContract.PROFILE_NODE,
+                        )
+                    }
+                }.exceptionOrNull()
+                assertTrue(
+                    "Expected TypeScriptCompilerException, got " +
+                        "${error?.javaClass?.name}: ${error?.message}",
+                    error is TypeScriptCompilerException,
+                )
+                error as TypeScriptCompilerException
+                assertTrue(
+                    "Expected TypeScriptDependencyBoundaryException cause, got " +
+                        "${error.cause?.javaClass?.name}: ${error.cause?.message}",
+                    error.cause is TypeScriptDependencyBoundaryException,
+                )
+                return error to (error.cause as TypeScriptDependencyBoundaryException)
+            }
+
+            val (nativeFailure, nativeBoundary) = compileFailure()
+            assertEquals(TypeScriptR2Contract.ERROR_NATIVE_DEPENDENCY_UNSUPPORTED, nativeFailure.code)
+            assertEquals("native-binary", nativeBoundary.signal)
+            assertEquals("bcrypt", nativeBoundary.packageName)
+
+            assertTrue(native.delete())
+            assertTrue(binding.delete())
+            val (lifecycleFailure, lifecycleBoundary) = compileFailure()
+            assertEquals(
+                TypeScriptR2Contract.ERROR_DEPENDENCY_INSTALL_SCRIPT_UNSUPPORTED,
+                lifecycleFailure.code,
+            )
+            assertEquals("scripts.install", lifecycleBoundary.signal)
+            assertEquals("bcrypt", lifecycleBoundary.packageName)
+        }
+    }
+
+    @Test
+    fun bareDayjsAndZodExportsCompileThroughRealPluginBinder() {
+        withProject { root ->
+            File(root, "project.json").writeText("""{"type":"node","main":"main.mts"}""")
+            File(root, "package.json").writeText(
+                """{"type":"module","dependencies":{"dayjs":"1.11.13","zod":"4.1.5"}}""",
+            )
+            File(root, "package-lock.json").writeText(
+                """{"name":"t2-2-device-project","lockfileVersion":3,"packages":{}}""",
+            )
+            val dependencies = File(root, "node_modules").apply { mkdirs() }
+            File(dependencies, "dayjs").apply {
+                mkdirs()
+                resolve("package.json").writeText(
+                    """{"name":"dayjs","main":"dayjs.min.js","types":"index.d.ts"}""",
+                )
+                resolve("index.d.ts").writeText(
+                    "declare function dayjs(): { format(): string };\n" +
+                        "export = dayjs;\n",
+                )
+                resolve("dayjs.min.js").writeText("module.exports = function dayjs() {};\n")
+            }
+            File(dependencies, "zod").apply {
+                mkdirs()
+                resolve("package.json").writeText(
+                    """
+                    {
+                      "name":"zod",
+                      "type":"module",
+                      "exports":{
+                        ".":{"types":"./index.d.ts","import":"./index.js","require":"./index.cjs"},
+                        "./mini":{"types":"./mini/index.d.ts","import":"./mini/index.js","require":"./mini/index.cjs"}
+                      }
+                    }
+                    """.trimIndent(),
+                )
+                resolve("index.d.ts").writeText(
+                    "export declare const z: { string(): { parse(value: unknown): string } };\n",
+                )
+                resolve("index.js").writeText("export const z = {};\n")
+                resolve("index.cjs").writeText("exports.z = {};\n")
+                resolve("mini").apply {
+                    mkdirs()
+                    resolve("index.d.ts").writeText(
+                        "export declare const mini: { number(): { parse(value: unknown): number } };\n",
+                    )
+                    resolve("index.js").writeText("export const mini = {};\n")
+                    resolve("index.cjs").writeText("exports.mini = {};\n")
+                }
+            }
+            val entry = File(root, "main.mts").apply {
+                writeText(
+                    """
+                    import dayjs from "dayjs"
+                    import { z } from "zod"
+                    import { mini } from "zod/mini"
+                    const formatted: string = dayjs().format()
+                    const parsed: string = z.string().parse("ok")
+                    const count: number = mini.number().parse(42)
+                    export const t2BareSpecifierAcceptance = formatted + parsed + count
+                    """.trimIndent(),
+                )
+            }
+
+            val output = runBlocking {
+                TypeScriptCompilerPluginClient(context).compileProject(
+                    projectRoot = root,
+                    entryFile = entry,
+                    targetProfile =
+                        org.autojs.plugin.typescript.api.TypeScriptCompilerContract.PROFILE_NODE,
+                )
+            }
+            assertTrue(
+                "Expected emitted T2-2 output, got: $output",
+                output is TypeScriptCompilationOutput.Emitted,
+            )
+            output as TypeScriptCompilationOutput.Emitted
+            assertEquals(1, output.modules.size)
+            assertTrue(output.javaScript.contains("dayjs"))
+            assertTrue(output.javaScript.contains("zod/mini"))
+            assertEquals(
+                TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_REVISION,
+                output.authority.dependencyResolverPolicyRevision,
+            )
+            assertEquals(
+                TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
+                output.authority.dependencyResolverPolicyFingerprint,
+            )
+        }
+    }
+
+    @Test
+    fun packageTypesVersionsAndAtTypesMatchAcrossCompilerProfiles() {
+        val diagnosticCodesByProfile = listOf(
+            org.autojs.plugin.typescript.api.TypeScriptCompilerContract.PROFILE_RHINO,
+            org.autojs.plugin.typescript.api.TypeScriptCompilerContract.PROFILE_NODE,
+        ).associateWith { profile ->
+            withProject { root ->
+                val node = profile ==
+                    org.autojs.plugin.typescript.api.TypeScriptCompilerContract.PROFILE_NODE
+                val entryName = if (node) "main.mts" else "main.ts"
+                File(root, "project.json").writeText(
+                    if (node) {
+                        """{"type":"node","main":"$entryName"}"""
+                    } else {
+                        """{"type":"rhino","main":"$entryName"}"""
+                    },
+                )
+                File(root, "tsconfig.json").writeText(
+                    """{"compilerOptions":{"strict":true}}""",
+                )
+                File(root, "package.json").writeText(
+                    """{"type":"${if (node) "module" else "commonjs"}","dependencies":{"dayjs":"1.11.13"},"devDependencies":{"@types/ambient":"1.0.0"}}""",
+                )
+                File(root, "package-lock.json").writeText(
+                    """{"name":"t2-4-device-project","lockfileVersion":3,"packages":{}}""",
+                )
+                val dependencies = File(root, "node_modules").apply { mkdirs() }
+                File(dependencies, "dayjs").apply {
+                    mkdirs()
+                    resolve("package.json").writeText(
+                        """
+                        {
+                          "name":"dayjs",
+                          "main":"dayjs.min.js",
+                          "types":"legacy/index.d.ts",
+                          "typesVersions":{">=6.0":{"*":["ts6/*"]}}
+                        }
+                        """.trimIndent(),
+                    )
+                    resolve("dayjs.min.js").writeText(
+                        "module.exports = function dayjs() {};\n",
+                    )
+                    resolve("legacy").apply {
+                        mkdirs()
+                        resolve("index.d.ts").writeText(
+                            "interface LegacyDayjs { legacyOnly(): never }\n" +
+                                "declare function dayjs(): LegacyDayjs\n" +
+                                "export = dayjs\n",
+                        )
+                    }
+                    resolve("ts6/legacy").apply {
+                        mkdirs()
+                        resolve("index.d.ts").writeText(
+                            "import { Dayjs } from './internal'\n" +
+                                "declare function dayjs(): Dayjs\n" +
+                                "export = dayjs\n",
+                        )
+                        resolve("internal.d.ts").writeText(
+                            "export interface Dayjs { format(): string; unix(): number }\n",
+                        )
+                    }
+                }
+                File(dependencies, "@types/ambient").apply {
+                    mkdirs()
+                    resolve("package.json").writeText(
+                        """{"name":"@types/ambient","types":"index.d.ts"}""",
+                    )
+                    resolve("index.d.ts").writeText("declare const ambientAnswer: 42\n")
+                }
+                val entry = File(root, entryName)
+                fun writeEntry(wrongType: String) {
+                    entry.writeText(
+                        """
+                        import dayjs from "dayjs"
+                        const value = dayjs()
+                        const formatted: string = value.format()
+                        const unix: number = value.unix()
+                        const ambient: 42 = ambientAnswer
+                        const wrong: $wrongType = value.format()
+                        export const t2DependencyTypes = formatted + unix + ambient + wrong
+                        """.trimIndent(),
+                    )
+                }
+                fun compile(): TypeScriptCompilationOutput = runBlocking {
+                    TypeScriptCompilerPluginClient(context).compileProject(
+                        projectRoot = root,
+                        entryFile = entry,
+                        targetProfile = profile,
+                    )
+                }
+
+                writeEntry("string")
+                val emitted = compile()
+                assertTrue("Expected emitted T2-4 $profile output, got: $emitted", emitted is TypeScriptCompilationOutput.Emitted)
+                emitted as TypeScriptCompilationOutput.Emitted
+                assertTrue(emitted.javaScript.contains("t2DependencyTypes"))
+                assertEquals(
+                    TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_REVISION,
+                    emitted.authority.dependencyResolverPolicyRevision,
+                )
+                assertEquals(
+                    TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
+                    emitted.authority.dependencyResolverPolicyFingerprint,
+                )
+
+                writeEntry("number")
+                val diagnostics = compile()
+                assertTrue(
+                    "Expected T2-4 $profile diagnostics, got: $diagnostics",
+                    diagnostics is TypeScriptCompilationOutput.Diagnostics,
+                )
+                (diagnostics as TypeScriptCompilationOutput.Diagnostics)
+                    .diagnostics
+                    .map(TypeScriptDiagnostic::code)
+                    .sorted()
+            }
+        }
+
+        assertEquals(listOf(2322), diagnosticCodesByProfile.getValue("rhino"))
+        assertEquals(
+            diagnosticCodesByProfile.getValue("rhino"),
+            diagnosticCodesByProfile.getValue("node"),
+        )
+    }
+
+    @Test
+    fun executesSameDualPackageSnapshotThroughRhinoAndNodeProfiles() {
+        val rhinoMarker = "autojs6.typescript.t2_3.rhino.${System.nanoTime()}"
+        val nodeMarker = "typescript-t2-3-node-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        System.clearProperty(rhinoMarker)
+        console.clear()
+        try {
+            withProject { root ->
+                File(root, "tsconfig.json").writeText("{}")
+                File(root, "package.json").writeText(
+                    """{"dependencies":{"dual-runtime":"1.0.0"}}""",
+                )
+                val dependency = File(root, "node_modules/dual-runtime").apply { mkdirs() }
+                File(dependency, "package.json").writeText(
+                    """
+                    {
+                      "name": "dual-runtime",
+                      "version": "1.0.0",
+                      "type": "module",
+                      "exports": {
+                        ".": {
+                          "types": "./index.d.ts",
+                          "import": "./index.mjs",
+                          "require": "./index.cjs"
+                        }
+                      }
+                    }
+                    """.trimIndent(),
+                )
+                File(dependency, "index.d.ts").writeText(
+                    "export declare const flavor: string\n" +
+                        "export declare const value: number\n",
+                )
+                File(dependency, "index.cjs").writeText(
+                    "exports.flavor = 'cjs'; exports.value = 42;\n",
+                )
+                File(dependency, "index.mjs").writeText(
+                    "export const flavor = 'esm'; export const value = 42;\n",
+                )
+
+                val rhinoEntry = File(root, "rhino-main.ts").apply {
+                    writeText(
+                        """
+                        declare const java: any
+                        import { flavor, value } from "dual-runtime"
+                        java.lang.System.setProperty("$rhinoMarker", flavor + ":" + value)
+                        """.trimIndent(),
+                    )
+                }
+                val rhinoLaunch = ScriptLaunchSourceFactory.createFileLaunch(rhinoEntry)
+                assertTrue(rhinoLaunch.source is TypeScriptFileSource)
+                val rhinoTerminal = executeAndAwait(rhinoLaunch.source, root.path)
+                rhinoTerminal.failure.get()?.let { error ->
+                    val details = (error as? ScriptCompilationException)?.consoleMessage
+                    throw AssertionError(
+                        "Rhino dual-package execution failed" +
+                            if (details.isNullOrBlank()) "" else "\n$details",
+                        error,
+                    )
+                }
+                assertTrue(rhinoTerminal.succeeded.get())
+                assertTrue(rhinoTerminal.execution.engine is LoopBasedJavaScriptEngine)
+                assertEquals("cjs:42", System.getProperty(rhinoMarker))
+
+                val nodeEntry = File(root, "node-main.mts").apply {
+                    writeText(
+                        """
+                        import { flavor, value } from "dual-runtime"
+                        console.log("$nodeMarker:" + flavor + ":" + value)
+                        """.trimIndent(),
+                    )
+                }
+                val nodeLaunch = ScriptLaunchSourceFactory.createFileLaunch(nodeEntry)
+                assertEquals(
+                    JavaScriptSource.ENGINE_NODEJS,
+                    (nodeLaunch.source as JavaScriptSource).engineName,
+                )
+                val nodeTerminal = executeAndAwait(nodeLaunch.source, root.path)
+                nodeTerminal.failure.get()?.let { error ->
+                    val details = (error as? ScriptCompilationException)?.consoleMessage
+                    throw AssertionError(
+                        "Node dual-package execution failed" +
+                            if (details.isNullOrBlank()) "" else "\n$details",
+                        error,
+                    )
+                }
+                assertTrue(nodeTerminal.succeeded.get())
+                val engine = nodeTerminal.execution.engine as NodePluginJavaScriptEngine
+                assertTrue(requireNotNull(engine.lastPluginScriptResult).succeeded)
+                assertTrue(
+                    awaitConsoleMessage(nodeMarker).contains("$nodeMarker:esm:42"),
+                )
+            }
+        } finally {
+            System.clearProperty(rhinoMarker)
+            console.clear()
+        }
+    }
+
+    @Test
     fun executesCommonJsNodeTsProjectWithCycleJsonAndMoreThanTenModules() =
         assertNodeTsProjectExecution(packageType = "commonjs", includeJson = true, includeCycle = true)
 
     @Test
     fun executesEsmNodeTsProjectWithMoreThanTenModules() =
         assertNodeTsProjectExecution(packageType = "module", includeJson = false, includeCycle = false)
+
+    @Test
+    fun executesEsmAndCommonJsWorkspacePackagesInOneNodeProject() {
+        val marker = "typescript-node-workspace-boundaries-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            withProject { root ->
+                File(root, "project.json").writeText("""{"type":"node","main":"main.mts"}""")
+                File(root, "package.json").writeText("{}")
+                val packages = File(root, "packages").apply { mkdirs() }
+                val esmPackage = File(packages, "esm-package").apply { mkdirs() }
+                File(esmPackage, "package.json").writeText("""{"type":"module"}""")
+                File(esmPackage, "value.ts").writeText(
+                    "export const esmValue: number = 20\n",
+                )
+                val commonJsPackage = File(packages, "commonjs-package").apply { mkdirs() }
+                File(commonJsPackage, "package.json").writeText("""{"type":"commonjs"}""")
+                File(commonJsPackage, "value.ts").writeText(
+                    "export const commonJsValue: number = 22\n",
+                )
+                val entry = File(root, "main.mts").apply {
+                    writeText(
+                        """
+                        import { esmValue } from "./packages/esm-package/value.js"
+                        import { commonJsValue } from "./packages/commonjs-package/value.js"
+                        const total: number = esmValue + commonJsValue
+                        console.log("$marker:" + total)
+                        """.trimIndent(),
+                    )
+                }
+
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(entry)
+                assertTrue(launch.source is NodeProjectLaunchSource)
+                val terminal = executeAndAwait(launch.source, root.path)
+                terminal.failure.get()?.let { error ->
+                    val details = (error as? ScriptCompilationException)?.consoleMessage
+                    throw AssertionError(
+                        "Mixed ESM/CommonJS workspace package execution failed" +
+                            if (details.isNullOrBlank()) "" else "\n$details",
+                        error,
+                    )
+                }
+                assertTrue(terminal.succeeded.get())
+                val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                assertTrue(requireNotNull(engine.lastPluginScriptResult).succeeded)
+                assertTrue(awaitConsoleMessage(marker).contains("$marker:42"))
+            }
+        } finally {
+            console.clear()
+        }
+    }
+
+    @Test
+    fun executesEsmTypeScriptCycleWithLiveBindings() {
+        val marker = "typescript-node-esm-live-binding-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            withProject { root ->
+                File(root, "project.json").writeText("""{"type":"node","main":"main.mts"}""")
+                File(root, "package.json").writeText("""{"type":"module"}""")
+                File(root, "main.mts").writeText(
+                    """
+                    import { snapshot, setValue } from "./state.mjs"
+                    console.log("$marker:initial=" + snapshot())
+                    setValue(42)
+                    console.log("$marker:updated=" + snapshot())
+                    """.trimIndent(),
+                )
+                File(root, "state.mts").writeText(
+                    """
+                    import { readValue } from "./reader.mjs"
+                    export let value: number = 1
+                    export function setValue(next: number): void { value = next }
+                    export function snapshot(): number { return readValue() }
+                    """.trimIndent(),
+                )
+                File(root, "reader.mts").writeText(
+                    """
+                    import { value } from "./barrel.mjs"
+                    export function readValue(): number { return value }
+                    """.trimIndent(),
+                )
+                File(root, "barrel.mts").writeText(
+                    """export { value } from "./state.mjs"""",
+                )
+
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(File(root, "main.mts"))
+                assertTrue(launch.source is NodeProjectLaunchSource)
+                val terminal = executeAndAwait(launch.source, root.path)
+                terminal.failure.get()?.let { error ->
+                    val details = (error as? ScriptCompilationException)?.consoleMessage
+                    throw AssertionError(
+                        "ESM TypeScript live-binding cycle execution failed" +
+                            if (details.isNullOrBlank()) "" else "\n$details",
+                        error,
+                    )
+                }
+                assertTrue(terminal.succeeded.get())
+                val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                val result = requireNotNull(engine.lastPluginScriptResult)
+                assertTrue(result.succeeded)
+                assertEquals(
+                    "vm_source_text_module",
+                    result.nativeValues["embedded_script.esm_linker"],
+                )
+                assertEquals(
+                    "true",
+                    result.nativeValues["embedded_script.esm_live_bindings"],
+                )
+                assertTrue(
+                    awaitConsoleMessage("$marker:initial=").contains("$marker:initial=1"),
+                )
+                assertTrue(
+                    awaitConsoleMessage("$marker:updated=").contains("$marker:updated=42"),
+                )
+            }
+        } finally {
+            console.clear()
+        }
+    }
 
     @Test
     fun mapsImportedNodeProjectRuntimeFailureBackToTypeScriptSources() {
@@ -826,6 +1394,66 @@ class TypeScriptCompilerPluginClientDeviceTest {
                         "false",
                         result.nativeValues["embedded_script.typescript.legacy_stripping_enabled"],
                     )
+                    assertEquals(
+                        "precompiled_only",
+                        result.nativeValues["embedded_script.typescript.preparation_mode"],
+                    )
+                    assertTrue(awaitConsoleMessage(marker).contains("$marker:42"))
+                }
+            }
+        } finally {
+            console.clear()
+        }
+    }
+
+    @Test
+    fun executesNodeTopLevelAwaitForMtsAndTypeModuleTs() {
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            listOf(
+                Triple("main.mts", ".mjs", "mts"),
+                Triple("main.ts", ".js", "type-module-ts"),
+            ).forEach { (sourceName, generatedExtension, format) ->
+                val marker = "typescript-node-top-level-await-$format-${System.nanoTime()}"
+                withProject { root ->
+                    File(root, "project.json").writeText(
+                        """{"type":"node","main":"$sourceName"}""",
+                    )
+                    File(root, "package.json").writeText("""{"type":"module"}""")
+                    File(root, "tsconfig.json").writeText(
+                        """{"compilerOptions":{"lib":["ES2022"],"target":"ES2022"},"files":["$sourceName"]}""",
+                    )
+                    val entry = File(root, sourceName).apply {
+                        writeText(
+                            """
+                            const sleep = (milliseconds: number): Promise<void> =>
+                              new Promise((resolve): void => {
+                                setTimeout((): void => resolve(), milliseconds)
+                              })
+                            await sleep(25)
+                            export const answer: number = 40 + 2
+                            console.log("$marker:" + answer)
+                            """.trimIndent(),
+                        )
+                    }
+
+                    val launch = ScriptLaunchSourceFactory.createFileLaunch(entry)
+                    assertTrue(launch.source is NodeProjectLaunchSource)
+                    val terminal = executeAndAwait(launch.source, root.path)
+                    terminal.failure.get()?.let { error ->
+                        val details = (error as? ScriptCompilationException)?.consoleMessage
+                        throw AssertionError(
+                            "Node top-level await $format execution failed" +
+                                if (details.isNullOrBlank()) "" else "\n$details",
+                            error,
+                        )
+                    }
+                    assertTrue(terminal.succeeded.get())
+                    val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                    val result = requireNotNull(engine.lastPluginScriptResult)
+                    assertTrue(result.succeeded)
+                    assertTrue(result.sourceName.endsWith(generatedExtension))
                     assertEquals(
                         "precompiled_only",
                         result.nativeValues["embedded_script.typescript.preparation_mode"],
@@ -1433,11 +2061,11 @@ class TypeScriptCompilerPluginClientDeviceTest {
         }
     }
 
-    private fun withProject(block: (File) -> Unit) {
+    private fun <T> withProject(block: (File) -> T): T {
         val root = File(context.cacheDir, "typescript-project-${System.nanoTime()}")
         check(root.mkdirs())
         try {
-            block(root)
+            return block(root)
         } finally {
             root.deleteRecursively()
         }
@@ -2013,6 +2641,8 @@ class TypeScriptCompilerPluginClientDeviceTest {
     private companion object {
         const val TEST_LOG_TAG = "TypeScriptDeviceTest"
         const val TYPESCRIPT_CACHE_DIRECTORY = "typescript-compiler-cache-v1"
+        const val DEPENDENCY_LAYER_POLICY_FINGERPRINT =
+            "c159ae179de24307c456c69ae4e456ed9d7dba71dc965c22e6114f632af3834a"
         const val EXECUTION_TIMEOUT_SECONDS = 90L
         const val CONSOLE_TIMEOUT_MILLIS = 5_000L
         const val HTTP_TIMEOUT_MILLIS = 10_000

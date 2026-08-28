@@ -13,6 +13,7 @@ import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 
 internal data class TypeScriptNodeRuntimeProject(
     val moduleSources: Map<String, String>,
+    val workspaceModuleSources: Map<String, String>,
     val generatedSourceNames: Map<String, String>,
     val precompiledSourceNames: Set<String>,
     val entryGeneratedSourceName: String,
@@ -22,7 +23,11 @@ internal class TypeScriptMaterializedRhinoProject private constructor(
     val root: File,
     val entryFile: File,
     val generatedSourceNames: Map<String, String>,
+    private val dependencyResolver: TypeScriptRhinoDependencyResolver?,
 ) : Closeable {
+
+    fun resolveCommonJsDependency(specifier: String, parentUri: java.net.URI?): File? =
+        dependencyResolver?.resolve(specifier, parentUri)
 
     override fun close() {
         root.walkBottomUp().forEach { entry -> runCatching { entry.delete() } }
@@ -65,6 +70,32 @@ internal class TypeScriptMaterializedRhinoProject private constructor(
                     }
                 }
 
+                val dependencyPackageManifests = LinkedHashMap<String, String>()
+                val runtimeDependencies = verifiedRuntimeDependencySources(
+                    projectRoot,
+                    executable.dependencyLayer,
+                )
+                runtimeDependencies.forEach { dependency ->
+                        val payload = if (dependency.runtimeRelativePath.endsWith(".json", true)) {
+                            "module.exports = ${dependency.source};\n"
+                                .toByteArray(StandardCharsets.UTF_8)
+                        } else {
+                            dependency.source.toByteArray(StandardCharsets.UTF_8)
+                        }
+                        try {
+                            val target = writeRuntimeFile(
+                                runtimeRoot,
+                                dependency.runtimeRelativePath,
+                                payload,
+                            )
+                            if (dependency.runtimeRelativePath.endsWith("/package.json", true)) {
+                                dependencyPackageManifests[target.canonicalPath] = dependency.source
+                            }
+                        } finally {
+                            payload.fill(0)
+                        }
+                    }
+
                 val generatedSourceNames = LinkedHashMap<String, String>(executable.modules.size)
                 executable.modules.forEach { module ->
                     val relative = executable.runtimeRelativeGeneratedPath(module)
@@ -87,6 +118,14 @@ internal class TypeScriptMaterializedRhinoProject private constructor(
                     root = runtimeRoot,
                     entryFile = File(entryPath),
                     generatedSourceNames = generatedSourceNames,
+                    dependencyResolver = runtimeDependencies
+                        .takeIf { dependencies -> dependencies.isNotEmpty() }
+                        ?.let {
+                            TypeScriptRhinoDependencyResolver(
+                                runtimeRoot,
+                                dependencyPackageManifests,
+                            )
+                        },
                 )
             } catch (error: Throwable) {
                 runtimeRoot.walkBottomUp().forEach { entry -> runCatching { entry.delete() } }
@@ -103,8 +142,12 @@ internal object TypeScriptNodeRuntimeProjectBuilder {
     fun build(executable: TypeScriptExecutableSource): TypeScriptNodeRuntimeProject {
         val projectRoot = requireNotNull(executable.projectRoot).canonicalFile
         val moduleSources = LinkedHashMap<String, String>()
-        verifiedPackageMetadataSource(projectRoot, executable.packageMetadata)?.let { (path, source) ->
-            moduleSources[path] = source
+        moduleSources.putAll(verifiedPackageMetadataSources(projectRoot, executable.packageMetadata))
+        val workspaceModuleSources = verifiedRuntimeDependencySources(
+            projectRoot,
+            executable.dependencyLayer,
+        ).associateTo(LinkedHashMap()) { dependency ->
+            dependency.hostPath to dependency.source
         }
         val runtimeSupportPaths = executable.projectSources
             .filter(TypeScriptPreparedSource::isRuntimeSupportSource)
@@ -145,6 +188,7 @@ internal object TypeScriptNodeRuntimeProjectBuilder {
         }
         return TypeScriptNodeRuntimeProject(
             moduleSources = moduleSources,
+            workspaceModuleSources = workspaceModuleSources,
             generatedSourceNames = generatedSourceNames,
             precompiledSourceNames = precompiledSourceNames,
             entryGeneratedSourceName = requireNotNull(
@@ -153,24 +197,96 @@ internal object TypeScriptNodeRuntimeProjectBuilder {
         )
     }
 
-    private fun verifiedPackageMetadataSource(
+    private fun verifiedPackageMetadataSources(
         projectRoot: File,
         metadata: TypeScriptPreparedPackageMetadata?,
-    ): Pair<String, String>? {
-        if (metadata == null) return null
-        val packageFile = File(projectRoot, metadata.archivePath).canonicalFile
-        require(packageFile.isInsideOrSame(projectRoot) && packageFile.isFile) {
-            "TypeScript package metadata changed after compilation."
-        }
-        require(packageFile.length() == metadata.size)
-        val bytes = packageFile.readBytes()
-        try {
-            require(bytes.size.toLong() == metadata.size && sha256(bytes) == metadata.sha256) {
+    ): Map<String, String> {
+        if (metadata == null) return emptyMap()
+        val sources = LinkedHashMap<String, String>(metadata.files.size)
+        metadata.files.forEach { descriptor ->
+            val packageFile = File(projectRoot, descriptor.archivePath).canonicalFile
+            require(packageFile.isInsideOrSame(projectRoot) && packageFile.isFile) {
                 "TypeScript package metadata changed after compilation."
             }
-            return packageFile.path to TypeScriptUtf8.decode(
-                bytes,
-                "TypeScript package metadata",
+            require(packageFile.length() == descriptor.size)
+            val bytes = packageFile.readBytes()
+            try {
+                require(
+                    bytes.size.toLong() == descriptor.size && sha256(bytes) == descriptor.sha256,
+                ) {
+                    "TypeScript package metadata changed after compilation."
+                }
+                sources[packageFile.path] = TypeScriptUtf8.decode(
+                    bytes,
+                    "TypeScript package metadata",
+                )
+            } finally {
+                bytes.fill(0)
+            }
+        }
+        return sources
+    }
+}
+
+internal class TypeScriptRuntimeDependencyException(
+    val code: String,
+    message: String,
+    cause: Throwable? = null,
+) : IllegalStateException("$code: $message", cause)
+
+internal data class TypeScriptRuntimeDependencySource(
+    val hostPath: String,
+    val runtimeRelativePath: String,
+    val source: String,
+)
+
+internal fun verifiedRuntimeDependencySources(
+    projectRoot: File,
+    layer: TypeScriptPreparedDependencyLayer?,
+): List<TypeScriptRuntimeDependencySource> {
+    if (layer == null) return emptyList()
+    return layer.files.mapNotNull { descriptor ->
+        if (!descriptor.archivePath.startsWith(RUNTIME_DEPENDENCY_ARCHIVE_PREFIX)) {
+            return@mapNotNull null
+        }
+        val runtimeRelativePath = descriptor.archivePath.removePrefix("dependencies/")
+        val requested = File(projectRoot, runtimeRelativePath).absoluteFile.normalize()
+        val sourceFile = runCatching { requested.canonicalFile }.getOrElse { error ->
+            throw TypeScriptRuntimeDependencyException(
+                TypeScriptR2Contract.ERROR_RUNTIME_DEPENDENCY_CHANGED,
+                "Dependency path cannot be canonicalized: $runtimeRelativePath",
+                error,
+            )
+        }
+        if (
+            !sourceFile.isInsideOrSame(projectRoot) ||
+            requested.path != sourceFile.path ||
+            !sourceFile.isFile ||
+            sourceFile.length() != descriptor.size
+        ) {
+            throw TypeScriptRuntimeDependencyException(
+                TypeScriptR2Contract.ERROR_RUNTIME_DEPENDENCY_CHANGED,
+                "Dependency changed after compilation: $runtimeRelativePath",
+            )
+        }
+        val bytes = sourceFile.readBytes()
+        try {
+            if (
+                bytes.size.toLong() != descriptor.size ||
+                sha256(bytes) != descriptor.sha256
+            ) {
+                throw TypeScriptRuntimeDependencyException(
+                    TypeScriptR2Contract.ERROR_RUNTIME_DEPENDENCY_CHANGED,
+                    "Dependency content changed after compilation: $runtimeRelativePath",
+                )
+            }
+            TypeScriptRuntimeDependencySource(
+                hostPath = sourceFile.path,
+                runtimeRelativePath = runtimeRelativePath,
+                source = TypeScriptUtf8.decode(
+                    bytes,
+                    "TypeScript runtime dependency $runtimeRelativePath",
+                ),
             )
         } finally {
             bytes.fill(0)
@@ -247,3 +363,5 @@ private fun File.isInsideOrSame(root: File): Boolean {
     val candidatePath = absolutePath
     return candidatePath == rootPath || candidatePath.startsWith("$rootPath${File.separator}")
 }
+
+private const val RUNTIME_DEPENDENCY_ARCHIVE_PREFIX = "dependencies/node_modules/"

@@ -161,6 +161,7 @@ class NodePluginJavaScriptEngine(
                     sourceName = runtimeProject.entryGeneratedSourceName,
                     typeScriptPrecompiledSnapshot = true,
                     typeScriptPrecompiledSourceNames = runtimeProject.precompiledSourceNames,
+                    workspaceModuleSources = runtimeProject.workspaceModuleSources,
                     spawnDepth = currentSpawnDepth(),
                 )
             }

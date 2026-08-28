@@ -15,6 +15,8 @@ data class NodePluginScriptRequest(
     val timeoutMs: Long = DEFAULT_TIMEOUT_MS,
     val env: Map<String, String> = emptyMap(),
     val moduleSources: Map<String, String> = emptyMap(),
+    /** Host-only immutable files published through the private workspace, never through Binder. */
+    val workspaceModuleSources: Map<String, String> = emptyMap(),
     val runtimeModuleSources: Map<String, String> = emptyMap(),
     val typeScriptPrecompiledSnapshot: Boolean = false,
     val typeScriptPrecompiledSourceNames: Set<String> = emptySet(),

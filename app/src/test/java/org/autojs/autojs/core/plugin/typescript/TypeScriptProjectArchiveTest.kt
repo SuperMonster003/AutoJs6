@@ -49,6 +49,7 @@ class TypeScriptProjectArchiveTest {
             assertEquals(12, prepared.rootPaths.size)
             assertEquals(14, prepared.sourceFiles.size)
             assertNull(prepared.packageMetadata)
+            assertNull(prepared.dependencyLayer)
             assertTrue(prepared.rootPaths.contains("sources/模块/m10.ts"))
             assertTrue(prepared.sourceFiles.all { source ->
                 source.originalFile?.isFile == true && source.sha256.length == 64
@@ -116,6 +117,162 @@ class TypeScriptProjectArchiveTest {
     }
 
     @Test
+    fun packsThreeDirectDependenciesIntoAnIndependentReadOnlyLayer() {
+        withProject { root ->
+            File(root, "package.json").writeText(
+                """{"type":"module","dependencies":{"dayjs":"1.11.13","lodash":"4.17.21","zod":"4.1.5"}}""",
+            )
+            File(root, "package-lock.json").writeText(
+                """{"name":"t2-project","lockfileVersion":3,"packages":{}}""",
+            )
+            File(root, "main.ts").writeText("export const ready: boolean = true;\n")
+            listOf("dayjs", "lodash", "zod").forEachIndexed { index, packageName ->
+                val packageRoot = File(root, "node_modules/$packageName").apply { mkdirs() }
+                File(packageRoot, "package.json").writeText(
+                    """{"name":"$packageName","scripts":{"test":"ignored"}}""",
+                )
+                File(packageRoot, "index.js").writeText("export const value = $index;\n")
+                File(packageRoot, "index.d.ts").writeText("export declare const value: number;\n")
+                File(packageRoot, "README.md").writeText("excluded documentation")
+                File(packageRoot, "index.js.map").writeText("{}")
+                File(packageRoot, "tests").apply { mkdirs() }
+                    .resolve("fixture.js").writeText("throw new Error('excluded');\n")
+            }
+
+            fun prepare(name: String): TypeScriptPreparedCompilation =
+                TypeScriptProjectArchive.write(
+                    projectRoot = root,
+                    entryFile = File(root, "main.ts"),
+                    requestId = "$REQUEST_ID-$name",
+                    projectId = PROJECT_ID,
+                    authority = nodeAuthority(),
+                    destination = File(root, "$name.zip"),
+                )
+
+            val first = prepare("first")
+            val firstLayer = requireNotNull(first.dependencyLayer)
+            assertEquals("package-lock", firstLayer.identityKind)
+            assertEquals("dependencies/lockfiles/package-lock.json", firstLayer.identityPath)
+            assertEquals(10, firstLayer.files.size)
+            assertEquals(1, first.sourceFiles.size)
+            assertTrue(firstLayer.files.all { file -> file.archivePath.startsWith("dependencies/") })
+            assertFalse(firstLayer.files.any { file ->
+                file.archivePath.endsWith(".md") ||
+                    file.archivePath.endsWith(".map") ||
+                    "/tests/" in file.archivePath
+            })
+
+            val firstManifest = ZipFile(first.archiveFile).use { zip ->
+                assertTrue(zip.getEntry("dependencies/node_modules/dayjs/index.js") != null)
+                assertTrue(zip.getEntry("dependencies/node_modules/lodash/README.md") == null)
+                TypeScriptStrictJson.parseObject(
+                    zip.getInputStream(zip.getEntry("request-manifest.json")).use { it.readBytes() },
+                )
+            }
+            @Suppress("UNCHECKED_CAST")
+            val dependencyManifest =
+                firstManifest.getValue("dependencyLayer") as Map<String, Any?>
+            @Suppress("UNCHECKED_CAST")
+            val callerFiles = firstManifest.getValue("files") as List<Map<String, Any?>>
+            assertEquals(1, callerFiles.size)
+            assertEquals(
+                10L,
+                (dependencyManifest.getValue("fileCount") as TypeScriptStrictJson.NumberToken)
+                    .source.toLong(),
+            )
+
+            File(root, "node_modules/dayjs/index.js").writeText("export const value = 42;\n")
+            val contentChanged = prepare("content-changed")
+            assertEquals(
+                firstManifest.getValue("callerInventoryFingerprint"),
+                ZipFile(contentChanged.archiveFile).use { zip ->
+                    TypeScriptStrictJson.parseObject(
+                        zip.getInputStream(zip.getEntry("request-manifest.json")).use {
+                            it.readBytes()
+                        },
+                    ).getValue("callerInventoryFingerprint")
+                },
+            )
+            assertFalse(
+                firstLayer.fingerprint == requireNotNull(contentChanged.dependencyLayer).fingerprint,
+            )
+
+            File(root, "package-lock.json").appendText("\n")
+            val lockChanged = prepare("lock-changed")
+            assertFalse(
+                requireNotNull(contentChanged.dependencyLayer).fingerprint ==
+                    requireNotNull(lockChanged.dependencyLayer).fingerprint,
+            )
+        }
+    }
+
+    @Test
+    fun rejectsNativeDependencyBeforeFilteredFilesEnterTheArchive() {
+        withProject { root ->
+            File(root, "main.ts").writeText("import bcrypt from 'bcrypt';\n")
+            val packageRoot = File(root, "node_modules/bcrypt").apply { mkdirs() }
+            File(packageRoot, "package.json").writeText(
+                """{"name":"bcrypt","version":"6.0.0","scripts":{"install":"node-gyp-build"}}""",
+            )
+            File(packageRoot, "index.js").writeText("module.exports = {};\n")
+            File(packageRoot, "binding.gyp").writeText("{}\n")
+            File(packageRoot, "prebuilds/linux-arm64").apply { mkdirs() }
+                .resolve("bcrypt.glibc.node").writeBytes(byteArrayOf(0x7f, 0x45, 0x4c, 0x46))
+
+            val error = runCatching {
+                TypeScriptProjectArchive.write(
+                    projectRoot = root,
+                    entryFile = File(root, "main.ts"),
+                    requestId = REQUEST_ID,
+                    projectId = PROJECT_ID,
+                    authority = nodeAuthority(),
+                    destination = File(root, "native-input.zip"),
+                )
+            }.exceptionOrNull()
+
+            assertTrue(error is TypeScriptDependencyBoundaryException)
+            error as TypeScriptDependencyBoundaryException
+            assertEquals(TypeScriptR2Contract.ERROR_NATIVE_DEPENDENCY_UNSUPPORTED, error.code)
+            assertEquals("native-binary", error.signal)
+            assertEquals("bcrypt", error.packageName)
+            assertEquals("bcrypt/prebuilds/linux-arm64/bcrypt.glibc.node", error.dependencyPath)
+        }
+    }
+
+    @Test
+    fun rejectsDependencyInstallLifecycleButKeepsOrdinaryScriptsInert() {
+        withProject { root ->
+            File(root, "main.ts").writeText("import value from 'scripted';\n")
+            val packageRoot = File(root, "node_modules/scripted").apply { mkdirs() }
+            File(packageRoot, "package.json").writeText(
+                """{"name":"scripted","scripts":{"build":"ignored","test":"ignored","preinstall":"first-in-json","postinstall":"second-in-json","install":"last-in-json"}}""",
+            )
+            File(packageRoot, "index.js").writeText("export default 1;\n")
+
+            val error = runCatching {
+                TypeScriptProjectArchive.write(
+                    projectRoot = root,
+                    entryFile = File(root, "main.ts"),
+                    requestId = REQUEST_ID,
+                    projectId = PROJECT_ID,
+                    authority = nodeAuthority(),
+                    destination = File(root, "lifecycle-input.zip"),
+                )
+            }.exceptionOrNull()
+
+            assertTrue(error is TypeScriptDependencyBoundaryException)
+            error as TypeScriptDependencyBoundaryException
+            assertEquals(
+                TypeScriptR2Contract.ERROR_DEPENDENCY_INSTALL_SCRIPT_UNSUPPORTED,
+                error.code,
+            )
+            assertEquals("scripts.install", error.signal)
+            assertEquals("scripted", error.packageName)
+            assertEquals("scripted/package.json", error.dependencyPath)
+        }
+    }
+
+    @Test
     fun rejectsNodePackageLifecycleScripts() {
         withProject { root ->
             File(root, "package.json").writeText(
@@ -138,18 +295,87 @@ class TypeScriptProjectArchiveTest {
     }
 
     @Test
-    fun rejectsNestedNodePackageBoundaryUntilItHasExplicitAuthority() {
+    fun bindsNearestEsmAndCommonJsWorkspacePackageBoundaries() {
         withProject { root ->
-            File(root, "package.json").writeText("""{"type":"commonjs"}""")
-            File(root, "main.ts").writeText("import './nested/value.js';\n")
-            val nested = File(root, "nested").apply { mkdirs() }
-            File(nested, "package.json").writeText("""{"type":"module"}""")
+            File(root, "package.json").writeText("{}")
+            File(root, "main.mts").writeText(
+                "import { esmValue } from './packages/@scope/esm/value.js'; " +
+                    "import { cjsValue } from './packages/cjs/value.js'; " +
+                    "export const total = esmValue + cjsValue;\n",
+            )
+            val esm = File(root, "packages/@scope/esm").apply { mkdirs() }
+            File(esm, "package.json").writeText("""{"type":"module"}""")
+            File(esm, "value.ts").writeText("export const esmValue = 20;\n")
+            val cjs = File(root, "packages/cjs").apply { mkdirs() }
+            File(cjs, "package.json").writeText("""{"type":"commonjs"}""")
+            File(cjs, "value.ts").writeText("export const cjsValue = 22;\n")
+
+            val archive = File(root, "input.zip")
+            val prepared = TypeScriptProjectArchive.write(
+                projectRoot = root,
+                entryFile = File(root, "main.mts"),
+                requestId = REQUEST_ID,
+                projectId = PROJECT_ID,
+                authority = nodeAuthority(),
+                destination = archive,
+            )
+
+            val metadata = requireNotNull(prepared.packageMetadata)
+            assertEquals(
+                listOf("packages/@scope/esm", "packages/cjs"),
+                metadata.dependencyRoots,
+            )
+            assertEquals(
+                listOf(
+                    "package.json",
+                    "packages/@scope/esm/package.json",
+                    "packages/cjs/package.json",
+                ),
+                metadata.files.map(TypeScriptPreparedPackageMetadataFile::archivePath),
+            )
+            assertEquals(
+                "commonjs",
+                metadata.nearestFileForSource("sources/packages/cjs/value.ts").typeState,
+            )
+            assertEquals(
+                "module",
+                metadata.nearestFileForSource("/sources/packages/@scope/esm/value.ts").typeState,
+            )
+            ZipFile(archive).use { zip ->
+                assertTrue(zip.getEntry("package.json") != null)
+                assertTrue(zip.getEntry("packages/@scope/esm/package.json") != null)
+                assertTrue(zip.getEntry("packages/cjs/package.json") != null)
+                val manifest = TypeScriptStrictJson.parseObject(
+                    zip.getInputStream(zip.getEntry("request-manifest.json")).use { it.readBytes() },
+                )
+                @Suppress("UNCHECKED_CAST")
+                val packageMetadata = manifest.getValue("packageMetadata") as Map<String, Any?>
+                assertEquals(metadata.dependencyRoots, packageMetadata.getValue("dependencyRoots"))
+                @Suppress("UNCHECKED_CAST")
+                val files = packageMetadata.getValue("files") as List<Map<String, Any?>>
+                assertEquals(
+                    metadata.files.map(TypeScriptPreparedPackageMetadataFile::archivePath),
+                    files.map { file -> file.getValue("path") },
+                )
+            }
+        }
+    }
+
+    @Test
+    fun rejectsLifecycleScriptsInWorkspacePackageMetadata() {
+        withProject { root ->
+            File(root, "package.json").writeText("{}")
+            File(root, "main.mts").writeText("export const value = 1;\n")
+            val nested = File(root, "packages/esm").apply { mkdirs() }
+            File(nested, "package.json").writeText(
+                """{"type":"module","scripts":{"build":"ignored"}}""",
+            )
             File(nested, "value.ts").writeText("export const value = 1;\n")
 
             val error = runCatching {
                 TypeScriptProjectArchive.write(
                     projectRoot = root,
-                    entryFile = File(root, "main.ts"),
+                    entryFile = File(root, "main.mts"),
                     requestId = REQUEST_ID,
                     projectId = PROJECT_ID,
                     authority = nodeAuthority(),
@@ -157,8 +383,33 @@ class TypeScriptProjectArchiveTest {
                 )
             }.exceptionOrNull()
 
-            assertTrue(error is IllegalStateException)
-            assertTrue(error?.message.orEmpty().contains("Nested TypeScript package boundaries"))
+            assertTrue(error is IllegalArgumentException)
+            assertTrue(error?.message.orEmpty().contains("lifecycle scripts"))
+        }
+    }
+
+    @Test
+    fun rejectsPackageMetadataOutsideControlledWorkspaceRoots() {
+        withProject { root ->
+            File(root, "package.json").writeText("{}")
+            File(root, "main.mts").writeText("export const value = 1;\n")
+            val nested = File(root, "nested").apply { mkdirs() }
+            File(nested, "package.json").writeText("""{"type":"module"}""")
+            File(nested, "value.ts").writeText("export const value = 1;\n")
+
+            val error = runCatching {
+                TypeScriptProjectArchive.write(
+                    projectRoot = root,
+                    entryFile = File(root, "main.mts"),
+                    requestId = REQUEST_ID,
+                    projectId = PROJECT_ID,
+                    authority = nodeAuthority(),
+                    destination = File(root, "input.zip"),
+                )
+            }.exceptionOrNull()
+
+            assertTrue(error is IllegalArgumentException)
+            assertTrue(error?.message.orEmpty().contains("controlled packages workspace"))
         }
     }
 
@@ -218,6 +469,13 @@ class TypeScriptProjectArchiveTest {
         configKind = TypeScriptR2Contract.CONFIG_KIND_TSCONFIG,
         configPolicyRevision = TypeScriptR2Contract.CONTROLLED_TSCONFIG_POLICY_REVISION,
         configPolicyFingerprint = CONTROLLED_TSCONFIG_POLICY_FINGERPRINT,
+        dependencyLayerSchemaRevision = TypeScriptR2Contract.DEPENDENCY_LAYER_SCHEMA_REVISION,
+        dependencyLayerPolicyRevision = TypeScriptR2Contract.DEPENDENCY_LAYER_POLICY_REVISION,
+        dependencyLayerPolicyFingerprint = DEPENDENCY_LAYER_POLICY_FINGERPRINT,
+        dependencyResolverPolicyRevision =
+            TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_REVISION,
+        dependencyResolverPolicyFingerprint =
+            TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
     )
 
     private fun nodeAuthority() = TypeScriptCompilerAuthority(
@@ -234,6 +492,13 @@ class TypeScriptProjectArchiveTest {
         packageMetadataSchemaRevision = 1,
         packageMetadataPolicyRevision = 1,
         packageMetadataPolicyFingerprint = PACKAGE_METADATA_POLICY_FINGERPRINT,
+        dependencyLayerSchemaRevision = TypeScriptR2Contract.DEPENDENCY_LAYER_SCHEMA_REVISION,
+        dependencyLayerPolicyRevision = TypeScriptR2Contract.DEPENDENCY_LAYER_POLICY_REVISION,
+        dependencyLayerPolicyFingerprint = DEPENDENCY_LAYER_POLICY_FINGERPRINT,
+        dependencyResolverPolicyRevision =
+            TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_REVISION,
+        dependencyResolverPolicyFingerprint =
+            TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
     )
 
     private companion object {
@@ -243,5 +508,7 @@ class TypeScriptProjectArchiveTest {
             "849f882618d294d61683cc5930ecd4855f53435d7a673ceda08ad127504fa24d"
         const val PACKAGE_METADATA_POLICY_FINGERPRINT =
             "fab8fec29ed0f0a1de65594620e233c9a9bef2fa514dac16c3079d5570325e97"
+        const val DEPENDENCY_LAYER_POLICY_FINGERPRINT =
+            "6666666666666666666666666666666666666666666666666666666666666666"
     }
 }

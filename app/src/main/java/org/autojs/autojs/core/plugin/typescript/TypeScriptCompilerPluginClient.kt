@@ -390,6 +390,12 @@ internal class TypeScriptCompilerPluginClient(
             }
         } catch (error: TypeScriptCompilerException) {
             throw error
+        } catch (error: TypeScriptDependencyBoundaryException) {
+            throw TypeScriptCompilerException(
+                code = error.code,
+                message = error.detail,
+                cause = error,
+            )
         } catch (error: CancellationException) {
             throw error
         } catch (error: Throwable) {
@@ -708,6 +714,18 @@ internal class TypeScriptCompilerPluginClient(
             } else {
                 null
             },
+            dependencyLayerSchemaRevision =
+                info.getInt(TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_SCHEMA_REVISION, -1),
+            dependencyLayerPolicyRevision =
+                info.getInt(TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_POLICY_REVISION, -1),
+            dependencyLayerPolicyFingerprint = info.requireString(
+                TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_POLICY_FINGERPRINT,
+            ),
+            dependencyResolverPolicyRevision =
+                info.getInt(TypeScriptR2Contract.KEY_DEPENDENCY_RESOLVER_POLICY_REVISION, -1),
+            dependencyResolverPolicyFingerprint = info.requireString(
+                TypeScriptR2Contract.KEY_DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
+            ),
         )
     }
 
@@ -812,6 +830,36 @@ internal class TypeScriptCompilerPluginClient(
             putString(
                 TypeScriptR2Contract.KEY_PACKAGE_METADATA_INVENTORY_FINGERPRINT,
                 packageMetadata.inventoryFingerprint,
+            )
+        }
+        prepared.dependencyLayer?.let { dependencyLayer ->
+            putInt(
+                TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_SCHEMA_REVISION,
+                requireNotNull(prepared.authority.dependencyLayerSchemaRevision),
+            )
+            putInt(
+                TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_POLICY_REVISION,
+                requireNotNull(prepared.authority.dependencyLayerPolicyRevision),
+            )
+            putString(
+                TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_POLICY_FINGERPRINT,
+                requireNotNull(prepared.authority.dependencyLayerPolicyFingerprint),
+            )
+            putString(
+                TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_INVENTORY_FINGERPRINT,
+                dependencyLayer.inventoryFingerprint,
+            )
+            putString(
+                TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_FINGERPRINT,
+                dependencyLayer.fingerprint,
+            )
+            putInt(
+                TypeScriptR2Contract.KEY_DEPENDENCY_RESOLVER_POLICY_REVISION,
+                requireNotNull(prepared.authority.dependencyResolverPolicyRevision),
+            )
+            putString(
+                TypeScriptR2Contract.KEY_DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
+                requireNotNull(prepared.authority.dependencyResolverPolicyFingerprint),
             )
         }
         putString(

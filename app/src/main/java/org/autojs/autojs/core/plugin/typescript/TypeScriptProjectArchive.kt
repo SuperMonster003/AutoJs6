@@ -60,18 +60,18 @@ internal object TypeScriptProjectArchive {
             }
             else -> error("Unsupported TypeScript config kind: ${authority.configKind}")
         }
-        val packageBytes = if (authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE) {
-            File(root, PACKAGE_METADATA_PATH).takeIf(File::isFile)?.let { packageFile ->
-                readBounded(packageFile, MAX_PACKAGE_METADATA_FILE_BYTES)
-            }
+        val packageSnapshot = if (
+            authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
+        ) {
+            collectPackageMetadata(root, authority)
         } else {
             null
         }
+        val dependencySnapshot = collectDependencyLayer(root, authority)
 
         try {
-            val packageMetadata = packageBytes?.let { bytes ->
-                packageMetadata(bytes, authority)
-            }
+            val packageMetadata = packageSnapshot?.metadata
+            val dependencyLayer = dependencySnapshot?.metadata
             if (
                 authority.targetProfile == TypeScriptCompilerContract.PROFILE_NODE &&
                 sources.any { source ->
@@ -87,14 +87,18 @@ internal object TypeScriptProjectArchive {
             val configSha256 = configBytes?.let(::sha256)
             val callerFileCount = sources.size +
                 (if (configBytes == null) 0 else 1) +
-                (if (packageBytes == null) 0 else 1)
+                (packageSnapshot?.files?.size ?: 0)
             require(callerFileCount <= TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_FILES) {
                 "TypeScript project exceeds the ordinary input file-count limit."
             }
             val callerBytes = sources.fold(0L) { total, source ->
                 Math.addExact(total, source.bytes.size.toLong())
             }.let { total -> Math.addExact(total, configBytes?.size?.toLong() ?: 0L) }
-                .let { total -> Math.addExact(total, packageBytes?.size?.toLong() ?: 0L) }
+                .let { total ->
+                    packageSnapshot?.files?.fold(total) { current, file ->
+                        Math.addExact(current, file.bytes.size.toLong())
+                    } ?: total
+                }
             require(callerBytes <= TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES) {
                 "TypeScript project exceeds the ordinary input byte limit."
             }
@@ -116,6 +120,7 @@ internal object TypeScriptProjectArchive {
                 configBytes = configBytes,
                 configSha256 = configSha256,
                 packageMetadata = packageMetadata,
+                dependencyLayer = dependencyLayer,
                 callerInventoryFingerprint = inventoryFingerprint,
                 authority = authority,
             )
@@ -123,13 +128,25 @@ internal object TypeScriptProjectArchive {
                 "TypeScript project request manifest exceeds its byte limit."
             }
 
-            val entries = LinkedHashMap<String, ByteArray>(sources.size + 3)
+            val entries = LinkedHashMap<String, ByteArray>(
+                sources.size + (dependencySnapshot?.files?.size ?: 0) + 3,
+            )
             entries[TypeScriptR2Contract.INPUT_ARCHIVE_MANIFEST_PATH] = manifest
             configBytes?.let { bytes -> entries[CONTROLLED_CONFIG_PATH] = bytes }
-            packageBytes?.let { bytes -> entries[PACKAGE_METADATA_PATH] = bytes }
+            packageSnapshot?.files?.forEach { file ->
+                entries[file.metadata.archivePath] = file.bytes
+            }
             sources.forEach { source -> entries[source.archivePath] = source.bytes }
+            dependencySnapshot?.files?.forEach { file ->
+                entries[file.metadata.archivePath] = file.bytes
+            }
             StoredZipV1Writer.write(destination, entries)
-            require(destination.length() <= TypeScriptCompilerContract.MAX_INPUT_ARCHIVE_BYTES) {
+            val maximumArchiveBytes = if (dependencyLayer == null) {
+                TypeScriptCompilerContract.MAX_INPUT_ARCHIVE_BYTES
+            } else {
+                TypeScriptR2Contract.MAX_INPUT_ARCHIVE_WITH_DEPENDENCIES_BYTES
+            }
+            require(destination.length() <= maximumArchiveBytes) {
                 "TypeScript project input archive exceeds its transport byte limit."
             }
 
@@ -154,11 +171,13 @@ internal object TypeScriptProjectArchive {
                     )
                 },
                 packageMetadata = packageMetadata,
+                dependencyLayer = dependencyLayer,
             )
         } finally {
             sources.forEach { source -> source.bytes.fill(0) }
             configBytes?.fill(0)
-            packageBytes?.fill(0)
+            packageSnapshot?.files?.forEach { file -> file.bytes.fill(0) }
+            dependencySnapshot?.files?.forEach { file -> file.bytes.fill(0) }
         }
     }
 
@@ -189,16 +208,6 @@ internal object TypeScriptProjectArchive {
                         }
                     ) {
                         return@forEach
-                    }
-                    if (
-                        targetProfile == TypeScriptCompilerContract.PROFILE_NODE &&
-                        file.name.equals(PACKAGE_METADATA_PATH, ignoreCase = true) &&
-                        !relativePath.equals(PACKAGE_METADATA_PATH, ignoreCase = true)
-                    ) {
-                        error(
-                            "Nested TypeScript package boundaries are not supported: " +
-                                relativePath,
-                        )
                     }
                     if (!isSnapshotSource(relativePath, targetProfile)) return@forEach
                     requireCanonicalRelativePath(relativePath)
@@ -277,10 +286,125 @@ internal object TypeScriptProjectArchive {
             (relativePath.endsWith(".mts") || relativePath.endsWith(".cts"))
     }
 
-    private fun packageMetadata(
-        bytes: ByteArray,
+    private fun collectPackageMetadata(
+        root: File,
         authority: TypeScriptCompilerAuthority,
-    ): TypeScriptPreparedPackageMetadata {
+    ): ProjectPackageMetadataSnapshot? {
+        val files = mutableListOf<ProjectPackageMetadataFile>()
+        try {
+            root.walkTopDown()
+                .onEnter { directory ->
+                    directory == root || directory.name !in EXCLUDED_DIRECTORY_NAMES
+                }
+                .filter(File::isFile)
+                .filter { candidate ->
+                    candidate.name.equals(PACKAGE_METADATA_PATH, ignoreCase = true)
+                }
+                .forEach { candidate ->
+                    val file = candidate.normalizedCanonicalFile()
+                    require(file.isInside(root)) {
+                        "TypeScript package metadata escapes its project root."
+                    }
+                    require(candidate.absoluteFile.normalize().path == file.path) {
+                        "TypeScript package metadata may not traverse symbolic links."
+                    }
+                    val relativePath = file.relativePathInside(root)
+                    require(candidate.name == PACKAGE_METADATA_PATH) {
+                        "TypeScript package metadata must use canonical lowercase package.json: " +
+                            relativePath
+                    }
+                    requirePackageMetadataPath(relativePath)
+                    val bytes = readBounded(file, MAX_PACKAGE_METADATA_FILE_BYTES)
+                    var retained = false
+                    try {
+                        files += ProjectPackageMetadataFile(
+                            metadata = packageMetadataFile(relativePath, bytes),
+                            bytes = bytes,
+                        )
+                        retained = true
+                    } finally {
+                        if (!retained) bytes.fill(0)
+                    }
+                }
+            if (files.isEmpty()) return null
+
+            files.sortBy { file -> file.metadata.archivePath }
+            require(files.first().metadata.archivePath == PACKAGE_METADATA_PATH) {
+                "Nested TypeScript package metadata requires the project package.json."
+            }
+            require(files.size <= MAX_PACKAGE_METADATA_FILES) {
+                "TypeScript package metadata exceeds its file-count limit."
+            }
+            require(
+                files.map { file -> file.metadata.archivePath }.distinct().size == files.size &&
+                    files.map { file -> file.metadata.archivePath.asciiCaseFold() }
+                        .distinct().size == files.size,
+            ) {
+                "TypeScript package metadata contains a path collision."
+            }
+            val dependencyRoots = files.asSequence()
+                .map { file -> file.metadata.archivePath }
+                .filter { path -> path != PACKAGE_METADATA_PATH }
+                .map(::dependencyRootForPackageMetadata)
+                .distinct()
+                .sorted()
+                .toList()
+            require(dependencyRoots.size <= MAX_PACKAGE_METADATA_DEPENDENCY_ROOTS) {
+                "TypeScript package metadata exceeds its dependency-root limit."
+            }
+            dependencyRoots.forEach { dependencyRoot ->
+                require(files.any { file ->
+                    file.metadata.archivePath == "$dependencyRoot/$PACKAGE_METADATA_PATH"
+                }) {
+                    "TypeScript workspace package root has no package.json: $dependencyRoot"
+                }
+            }
+            val totalBytes = files.fold(0L) { total, file ->
+                Math.addExact(total, file.bytes.size.toLong())
+            }
+            require(totalBytes <= MAX_PACKAGE_METADATA_TOTAL_BYTES) {
+                "TypeScript package metadata exceeds its aggregate byte limit."
+            }
+            val canonicalInventory = buildString {
+                append(PACKAGE_METADATA_INVENTORY_DOMAIN)
+                dependencyRoots.forEach { rootPath ->
+                    append("|root=")
+                    append(rootPath)
+                }
+                files.forEach { file ->
+                    append("|file=")
+                    append(file.metadata.archivePath)
+                    append(',')
+                    append(file.metadata.size)
+                    append(',')
+                    append(file.metadata.sha256)
+                }
+            }
+            require(canonicalInventory.all { character -> character.code in 0x20..0x7e })
+            val metadata = TypeScriptPreparedPackageMetadata(
+                dependencyRoots = dependencyRoots,
+                files = files.map(ProjectPackageMetadataFile::metadata),
+                inventoryFingerprint = sha256(
+                    canonicalInventory.toByteArray(StandardCharsets.US_ASCII),
+                ),
+            )
+            require(requireNotNull(authority.packageMetadataSchemaRevision) > 0)
+            require(requireNotNull(authority.packageMetadataPolicyRevision) > 0)
+            requireLowerSha256(
+                requireNotNull(authority.packageMetadataPolicyFingerprint),
+                "package metadata policy fingerprint",
+            )
+            return ProjectPackageMetadataSnapshot(metadata = metadata, files = files)
+        } catch (error: Throwable) {
+            files.forEach { file -> file.bytes.fill(0) }
+            throw error
+        }
+    }
+
+    private fun packageMetadataFile(
+        archivePath: String,
+        bytes: ByteArray,
+    ): TypeScriptPreparedPackageMetadataFile {
         require(bytes.size.toLong() <= MAX_PACKAGE_METADATA_FILE_BYTES)
         val root = TypeScriptStrictJson.parseObject(
             bytes = bytes,
@@ -297,23 +421,305 @@ internal object TypeScriptProjectArchive {
             else -> error("TypeScript package metadata has an unsupported top-level type value.")
         }
         val digest = sha256(bytes)
-        val canonicalInventory = PACKAGE_METADATA_INVENTORY_DOMAIN +
-            "|file=$PACKAGE_METADATA_PATH,${bytes.size},$digest"
-        require(canonicalInventory.all { character -> character.code in 0x20..0x7e })
-        return TypeScriptPreparedPackageMetadata(
-            archivePath = PACKAGE_METADATA_PATH,
+        return TypeScriptPreparedPackageMetadataFile(
+            archivePath = archivePath,
             size = bytes.size.toLong(),
             sha256 = digest,
-            inventoryFingerprint = sha256(canonicalInventory.toByteArray(StandardCharsets.US_ASCII)),
             typeState = typeState,
-        ).also {
-            require(requireNotNull(authority.packageMetadataSchemaRevision) > 0)
-            require(requireNotNull(authority.packageMetadataPolicyRevision) > 0)
-            requireLowerSha256(
-                requireNotNull(authority.packageMetadataPolicyFingerprint),
-                "package metadata policy fingerprint",
-            )
+        )
+    }
+
+    private fun requirePackageMetadataPath(path: String) {
+        require(
+            path.length <= TypeScriptCompilerContract.MAX_ARCHIVE_ENTRY_NAME_BYTES &&
+                PACKAGE_METADATA_PATH_PATTERN.matches(path) &&
+                path.split('/').none { segment -> segment.equals("node_modules", true) },
+        ) {
+            "TypeScript package metadata is outside the controlled packages workspace: $path"
         }
+        if (path == PACKAGE_METADATA_PATH) return
+        require(path.startsWith(PACKAGE_METADATA_DEPENDENCY_PREFIX)) {
+            "TypeScript package metadata is outside the controlled packages workspace: $path"
+        }
+        val segments = path.split('/')
+        require(segments.size >= 3 && segments.last() == PACKAGE_METADATA_PATH) {
+            "TypeScript package metadata path is not canonical: $path"
+        }
+    }
+
+    private fun dependencyRootForPackageMetadata(path: String): String {
+        val segments = path.split('/')
+        val dependencyRoot = if (segments.getOrNull(1)?.startsWith('@') == true) {
+            require(segments.size >= 4)
+            segments.take(3).joinToString("/")
+        } else {
+            require(segments.size >= 3)
+            segments.take(2).joinToString("/")
+        }
+        require(PACKAGE_METADATA_DEPENDENCY_ROOT_PATTERN.matches(dependencyRoot)) {
+            "TypeScript workspace package root is not canonical: $dependencyRoot"
+        }
+        return dependencyRoot
+    }
+
+    /**
+     * Captures node_modules as a separate immutable namespace. Its files are deliberately absent
+     * from the caller inventory and caller quotas; only this independent policy is charged.
+     */
+    private fun collectDependencyLayer(
+        root: File,
+        authority: TypeScriptCompilerAuthority,
+    ): ProjectDependencyLayerSnapshot? {
+        val requestedRoot = File(root, DEPENDENCY_SOURCE_DIRECTORY)
+        if (!requestedRoot.exists()) return null
+        val dependencyRoot = requestedRoot.normalizedCanonicalFile()
+        require(dependencyRoot.isDirectory && dependencyRoot.isInside(root)) {
+            "TypeScript dependency layer is outside its project root."
+        }
+        require(requestedRoot.absoluteFile.normalize().path == dependencyRoot.path) {
+            "TypeScript dependency root may not be a symbolic link."
+        }
+        require(
+            authority.dependencyLayerSchemaRevision ==
+                TypeScriptR2Contract.DEPENDENCY_LAYER_SCHEMA_REVISION &&
+                authority.dependencyLayerPolicyRevision ==
+                TypeScriptR2Contract.DEPENDENCY_LAYER_POLICY_REVISION,
+        ) { "TypeScript dependency-layer authority is not supported." }
+        val policyFingerprint = requireNotNull(authority.dependencyLayerPolicyFingerprint)
+        requireLowerSha256(policyFingerprint, "dependency layer policy fingerprint")
+
+        val files = mutableListOf<ProjectDependencyLayerFile>()
+        val boundaries = mutableListOf<TypeScriptDependencyBoundary>()
+        try {
+            dependencyRoot.walkTopDown()
+                .onEnter { directory ->
+                    directory == dependencyRoot ||
+                        directory.name.asciiCaseFold() !in
+                        DEPENDENCY_EXCLUDED_DIRECTORY_NAMES
+                }
+                .filter(File::isFile)
+                .forEach { candidate ->
+                    val file = candidate.normalizedCanonicalFile()
+                    require(file.isInside(dependencyRoot)) {
+                        "TypeScript dependency file escapes node_modules."
+                    }
+                    require(candidate.absoluteFile.normalize().path == file.path) {
+                        "TypeScript dependency files may not traverse symbolic links."
+                    }
+                    val relativePath = file.path
+                        .removePrefix(dependencyRoot.path + File.separator)
+                        .replace(File.separatorChar, '/')
+                    TypeScriptDependencyBoundaryPolicy.inspectPath(relativePath)
+                        ?.let(boundaries::add)
+                    if (!isCompilationRelevantDependencyPath(relativePath)) return@forEach
+                    val archivePath = DEPENDENCY_ARCHIVE_PREFIX + relativePath
+                    requireCanonicalDependencyArchivePath(archivePath)
+                    val bytes = readBounded(
+                        file,
+                        TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_SINGLE_FILE_BYTES,
+                    )
+                    var retained = false
+                    try {
+                        TypeScriptDependencyBoundaryPolicy.inspectPackageJson(relativePath, bytes)
+                            ?.let(boundaries::add)
+                        TypeScriptUtf8.decode(
+                            bytes,
+                            "TypeScript dependency asset $relativePath",
+                        )
+                        files += ProjectDependencyLayerFile(
+                            metadata = TypeScriptPreparedDependencyLayerFile(
+                                archivePath = archivePath,
+                                size = bytes.size.toLong(),
+                                sha256 = sha256(bytes),
+                            ),
+                            bytes = bytes,
+                        )
+                        retained = true
+                    } finally {
+                        if (!retained) bytes.fill(0)
+                    }
+                }
+            TypeScriptDependencyBoundaryPolicy.requireSupported(boundaries)
+            if (files.isEmpty()) return null
+
+            val identity = collectDependencyIdentity(root)
+            identity?.let(files::add)
+            files.sortBy { file -> file.metadata.archivePath }
+            require(files.size <= TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_FILES) {
+                "TypeScript dependency layer exceeds its independent file-count limit."
+            }
+            require(
+                files.map { file -> file.metadata.archivePath }.distinct().size == files.size &&
+                    files.map { file -> file.metadata.archivePath.asciiCaseFold() }
+                        .distinct().size == files.size,
+            ) { "TypeScript dependency layer contains a path collision." }
+
+            val totalBytes = files.fold(0L) { total, file ->
+                Math.addExact(total, file.metadata.size)
+            }
+            require(totalBytes <= TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_BYTES) {
+                "TypeScript dependency layer exceeds its independent aggregate byte limit."
+            }
+            val totalPathBytes = files.fold(0L) { total, file ->
+                Math.addExact(
+                    total,
+                    TypeScriptUtf8.encode(
+                        file.metadata.archivePath,
+                        "dependency layer path",
+                    ).size.toLong(),
+                )
+            }
+            require(totalPathBytes <= TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_PATH_BYTES) {
+                "TypeScript dependency paths exceed their independent metadata limit."
+            }
+
+            val descriptors = files.map(ProjectDependencyLayerFile::metadata)
+            val inventoryFingerprint = dependencyInventoryFingerprint(descriptors)
+            val identityKind = when (identity?.metadata?.archivePath) {
+                DEPENDENCY_PACKAGE_LOCK_ARCHIVE_PATH -> DEPENDENCY_IDENTITY_PACKAGE_LOCK
+                DEPENDENCY_PNPM_LOCK_ARCHIVE_PATH -> DEPENDENCY_IDENTITY_PNPM_LOCK
+                else -> DEPENDENCY_IDENTITY_CONTENT
+            }
+            val identityPath = identity?.metadata?.archivePath.orEmpty()
+            val identityFingerprint = identity?.metadata?.sha256 ?: inventoryFingerprint
+            val fingerprint = dependencyLayerFingerprint(
+                identityKind = identityKind,
+                identityPath = identityPath,
+                identityFingerprint = identityFingerprint,
+                inventoryFingerprint = inventoryFingerprint,
+                policyFingerprint = policyFingerprint,
+            )
+            return ProjectDependencyLayerSnapshot(
+                metadata = TypeScriptPreparedDependencyLayer(
+                    identityKind = identityKind,
+                    identityPath = identityPath,
+                    identityFingerprint = identityFingerprint,
+                    inventoryFingerprint = inventoryFingerprint,
+                    fingerprint = fingerprint,
+                    files = descriptors,
+                    totalBytes = totalBytes,
+                    totalPathBytes = totalPathBytes,
+                ),
+                files = files,
+            )
+        } catch (error: Throwable) {
+            files.forEach { file -> file.bytes.fill(0) }
+            throw error
+        }
+    }
+
+    private fun collectDependencyIdentity(root: File): ProjectDependencyLayerFile? {
+        val candidates = listOf(
+            Triple(
+                DEPENDENCY_PACKAGE_LOCK_FILE,
+                DEPENDENCY_PACKAGE_LOCK_ARCHIVE_PATH,
+                DEPENDENCY_IDENTITY_PACKAGE_LOCK,
+            ),
+            Triple(
+                DEPENDENCY_PNPM_LOCK_FILE,
+                DEPENDENCY_PNPM_LOCK_ARCHIVE_PATH,
+                DEPENDENCY_IDENTITY_PNPM_LOCK,
+            ),
+        )
+        val selected = candidates.firstOrNull { candidate -> File(root, candidate.first).isFile }
+            ?: return null
+        val requestedFile = File(root, selected.first)
+        val file = requestedFile.normalizedCanonicalFile()
+        require(file.isInside(root) && requestedFile.absoluteFile.normalize().path == file.path) {
+            "TypeScript dependency lockfile may not traverse a symbolic link."
+        }
+        val bytes = readBounded(
+            file,
+            TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_LOCKFILE_BYTES,
+        )
+        var retained = false
+        try {
+            TypeScriptUtf8.decode(bytes, "TypeScript dependency ${selected.first}")
+            val result = ProjectDependencyLayerFile(
+                metadata = TypeScriptPreparedDependencyLayerFile(
+                    archivePath = selected.second,
+                    size = bytes.size.toLong(),
+                    sha256 = sha256(bytes),
+                ),
+                bytes = bytes,
+            )
+            retained = true
+            return result
+        } finally {
+            if (!retained) bytes.fill(0)
+        }
+    }
+
+    private fun isCompilationRelevantDependencyPath(relativePath: String): Boolean {
+        val segments = relativePath.split('/')
+        if (segments.size < 2) return false
+        val foldedSegments = segments.map { segment -> segment.asciiCaseFold() }
+        if (foldedSegments.any(DEPENDENCY_EXCLUDED_DIRECTORY_NAMES::contains)) return false
+        val name = foldedSegments.last()
+        return DEPENDENCY_EXCLUDED_SUFFIXES.none(name::endsWith) &&
+            DEPENDENCY_ALLOWED_SUFFIXES.any(name::endsWith)
+    }
+
+    private fun requireCanonicalDependencyArchivePath(path: String) {
+        val encoded = TypeScriptUtf8.encode(path, "TypeScript dependency archive path")
+        require(
+            path.startsWith(DEPENDENCY_ARCHIVE_PREFIX) &&
+                encoded.size <= TypeScriptCompilerContract.MAX_ARCHIVE_ENTRY_NAME_BYTES &&
+                '\\' !in path,
+        ) { "TypeScript dependency path is not canonical." }
+        val segments = path.split('/')
+        require(
+            segments.size <= TypeScriptCompilerContract.MAX_ARCHIVE_PATH_DEPTH &&
+                segments.all { segment ->
+                    segment.isNotEmpty() && segment != "." && segment != ".." &&
+                        segment.none { character -> Character.isISOControl(character.code) }
+                },
+        ) { "TypeScript dependency path is not canonical." }
+    }
+
+    private fun dependencyInventoryFingerprint(
+        files: List<TypeScriptPreparedDependencyLayerFile>,
+    ): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.update(DEPENDENCY_INVENTORY_DOMAIN.toByteArray(StandardCharsets.US_ASCII))
+        digest.update('\n'.code.toByte())
+        files.forEach { file ->
+            digest.update(file.archivePath.toByteArray(StandardCharsets.UTF_8))
+            digest.update(0)
+            digest.update(file.size.toString().toByteArray(StandardCharsets.US_ASCII))
+            digest.update(0)
+            digest.update(file.sha256.toByteArray(StandardCharsets.US_ASCII))
+            digest.update('\n'.code.toByte())
+        }
+        return digest.digest().toLowerHex()
+    }
+
+    private fun dependencyLayerFingerprint(
+        identityKind: String,
+        identityPath: String,
+        identityFingerprint: String,
+        inventoryFingerprint: String,
+        policyFingerprint: String,
+    ): String {
+        val canonical = buildString {
+            append(DEPENDENCY_FINGERPRINT_DOMAIN)
+            append("|schemaRevision=")
+            append(TypeScriptR2Contract.DEPENDENCY_LAYER_SCHEMA_REVISION)
+            append("|policyRevision=")
+            append(TypeScriptR2Contract.DEPENDENCY_LAYER_POLICY_REVISION)
+            append("|policyFingerprint=")
+            append(policyFingerprint)
+            append("|identityKind=")
+            append(identityKind)
+            append("|identityPath=")
+            append(identityPath)
+            append("|identityFingerprint=")
+            append(identityFingerprint)
+            append("|inventoryFingerprint=")
+            append(inventoryFingerprint)
+        }
+        require(canonical.all { character -> character.code in 0x20..0x7e })
+        return sha256(canonical.toByteArray(StandardCharsets.US_ASCII))
     }
 
     private fun callerInventoryFingerprint(
@@ -340,7 +746,7 @@ internal object TypeScriptProjectArchive {
                 sha256 = requireNotNull(configSha256),
             )
         }
-        packageMetadata?.let { metadata ->
+        packageMetadata?.files?.forEach { metadata ->
             digest.updateInventoryRecord(
                 domain = "package-metadata",
                 path = "/${metadata.archivePath}",
@@ -377,10 +783,13 @@ internal object TypeScriptProjectArchive {
         configBytes: ByteArray?,
         configSha256: String?,
         packageMetadata: TypeScriptPreparedPackageMetadata?,
+        dependencyLayer: TypeScriptPreparedDependencyLayer?,
         callerInventoryFingerprint: String,
         authority: TypeScriptCompilerAuthority,
     ): ByteArray {
-        val json = buildString(4_096 + sources.size * 160) {
+        val json = buildString(
+            4_096 + sources.size * 160 + (dependencyLayer?.files?.size ?: 0) * 180,
+        ) {
             append('{')
             appendJsonField("schema", TypeScriptR2Contract.INPUT_ARCHIVE_SCHEMA)
             append(',')
@@ -488,18 +897,79 @@ internal object TypeScriptProjectArchive {
                 append(',')
                 appendJsonString("dependencyRoots")
                 append(':')
-                append("[]")
+                appendJsonStringArray(packageMetadata.dependencyRoots)
                 append(',')
                 appendJsonString("files")
                 append(':')
                 append('[')
-                append('{')
-                appendJsonField("path", packageMetadata.archivePath)
-                append(',')
-                appendJsonField("size", packageMetadata.size)
-                append(',')
-                appendJsonField("sha256", packageMetadata.sha256)
+                packageMetadata.files.forEachIndexed { index, file ->
+                    if (index > 0) append(',')
+                    append('{')
+                    appendJsonField("path", file.archivePath)
+                    append(',')
+                    appendJsonField("size", file.size)
+                    append(',')
+                    appendJsonField("sha256", file.sha256)
+                    append('}')
+                }
+                append(']')
                 append('}')
+            }
+            if (dependencyLayer != null) {
+                append(',')
+                appendJsonString("dependencyLayer")
+                append(':')
+                append('{')
+                appendJsonField(
+                    "schemaRevision",
+                    requireNotNull(authority.dependencyLayerSchemaRevision),
+                )
+                append(',')
+                appendJsonField(
+                    "policyRevision",
+                    requireNotNull(authority.dependencyLayerPolicyRevision),
+                )
+                append(',')
+                appendJsonField(
+                    "policyFingerprint",
+                    requireNotNull(authority.dependencyLayerPolicyFingerprint),
+                )
+                append(',')
+                appendJsonField("identityKind", dependencyLayer.identityKind)
+                append(',')
+                appendJsonField("identityPath", dependencyLayer.identityPath)
+                append(',')
+                appendJsonField(
+                    "identityFingerprint",
+                    dependencyLayer.identityFingerprint,
+                )
+                append(',')
+                appendJsonField(
+                    "inventoryFingerprint",
+                    dependencyLayer.inventoryFingerprint,
+                )
+                append(',')
+                appendJsonField("fingerprint", dependencyLayer.fingerprint)
+                append(',')
+                appendJsonField("fileCount", dependencyLayer.files.size)
+                append(',')
+                appendJsonField("totalBytes", dependencyLayer.totalBytes)
+                append(',')
+                appendJsonField("totalPathBytes", dependencyLayer.totalPathBytes)
+                append(',')
+                appendJsonString("files")
+                append(':')
+                append('[')
+                dependencyLayer.files.forEachIndexed { index, file ->
+                    if (index > 0) append(',')
+                    append('{')
+                    appendJsonField("path", file.archivePath)
+                    append(',')
+                    appendJsonField("size", file.size)
+                    append(',')
+                    appendJsonField("sha256", file.sha256)
+                    append('}')
+                }
                 append(']')
                 append('}')
             }
@@ -667,6 +1137,26 @@ internal object TypeScriptProjectArchive {
         val sha256: String,
     )
 
+    private data class ProjectPackageMetadataFile(
+        val metadata: TypeScriptPreparedPackageMetadataFile,
+        val bytes: ByteArray,
+    )
+
+    private data class ProjectPackageMetadataSnapshot(
+        val metadata: TypeScriptPreparedPackageMetadata,
+        val files: List<ProjectPackageMetadataFile>,
+    )
+
+    private data class ProjectDependencyLayerFile(
+        val metadata: TypeScriptPreparedDependencyLayerFile,
+        val bytes: ByteArray,
+    )
+
+    private data class ProjectDependencyLayerSnapshot(
+        val metadata: TypeScriptPreparedDependencyLayer,
+        val files: List<ProjectDependencyLayerFile>,
+    )
+
     private val EMPTY_TSCONFIG = "{}".toByteArray(StandardCharsets.UTF_8)
     private val EXCLUDED_DIRECTORY_NAMES = setOf(
         ".git",
@@ -676,17 +1166,74 @@ internal object TypeScriptProjectArchive {
         "dist",
         "node_modules",
     )
-    private val RESERVED_ROOT_FILES = setOf("project.json", "tsconfig.json")
+    private val DEPENDENCY_EXCLUDED_DIRECTORY_NAMES = setOf(
+        ".bin",
+        ".git",
+        ".github",
+        "bench",
+        "benchmark",
+        "benchmarks",
+        "coverage",
+        "doc",
+        "docs",
+        "example",
+        "examples",
+        "test",
+        "tests",
+    )
+    private val DEPENDENCY_ALLOWED_SUFFIXES = setOf(
+        ".cjs",
+        ".cts",
+        ".js",
+        ".json",
+        ".jsx",
+        ".mjs",
+        ".mts",
+        ".ts",
+        ".tsx",
+    )
+    private val DEPENDENCY_EXCLUDED_SUFFIXES = setOf(".map", ".markdown", ".md")
+    private val RESERVED_ROOT_FILES = setOf(
+        "project.json",
+        "tsconfig.json",
+        DEPENDENCY_PACKAGE_LOCK_FILE,
+        DEPENDENCY_PNPM_LOCK_FILE,
+    )
     private const val CONTROLLED_CONFIG_PATH = "tsconfig.json"
     private const val PACKAGE_METADATA_PATH = "package.json"
+    private const val PACKAGE_METADATA_DEPENDENCY_PREFIX = "packages/"
+    private const val DEPENDENCY_SOURCE_DIRECTORY = "node_modules"
+    private const val DEPENDENCY_ARCHIVE_PREFIX = "dependencies/node_modules/"
+    private const val DEPENDENCY_PACKAGE_LOCK_FILE = "package-lock.json"
+    private const val DEPENDENCY_PNPM_LOCK_FILE = "pnpm-lock.yaml"
+    private const val DEPENDENCY_PACKAGE_LOCK_ARCHIVE_PATH =
+        "dependencies/lockfiles/package-lock.json"
+    private const val DEPENDENCY_PNPM_LOCK_ARCHIVE_PATH =
+        "dependencies/lockfiles/pnpm-lock.yaml"
+    private const val DEPENDENCY_IDENTITY_PACKAGE_LOCK = "package-lock"
+    private const val DEPENDENCY_IDENTITY_PNPM_LOCK = "pnpm-lock"
+    private const val DEPENDENCY_IDENTITY_CONTENT = "content"
+    private const val DEPENDENCY_INVENTORY_DOMAIN =
+        "autojs6.typescript.dependency-layer.inventory.v1"
+    private const val DEPENDENCY_FINGERPRINT_DOMAIN =
+        "autojs6.typescript.dependency-layer.fingerprint.v1"
     private const val PACKAGE_METADATA_INVENTORY_DOMAIN =
         "autojs6.typescript.package-metadata.inventory.v1"
     private const val PACKAGE_TYPE_MISSING = "missing"
     private const val PACKAGE_TYPE_MODULE = "module"
     private const val PACKAGE_TYPE_COMMONJS = "commonjs"
     private const val MAX_PACKAGE_METADATA_FILE_BYTES = 64L * 1024L
+    private const val MAX_PACKAGE_METADATA_TOTAL_BYTES = 1024L * 1024L
+    private const val MAX_PACKAGE_METADATA_FILES = 256
+    private const val MAX_PACKAGE_METADATA_DEPENDENCY_ROOTS = 128
     private const val MAX_PACKAGE_METADATA_JSON_DEPTH = 16
     private const val MAX_PACKAGE_METADATA_JSON_NODES = 4 * 1024
+    private val PACKAGE_METADATA_PATH_PATTERN = Regex(
+        "(?:package\\.json|packages/(?:[A-Za-z0-9@._+~-]+/)+package\\.json)",
+    )
+    private val PACKAGE_METADATA_DEPENDENCY_ROOT_PATTERN = Regex(
+        "packages/(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*",
+    )
     private const val INPUT_INVENTORY_PREFIX = "autojs6.typescript.input-inventory.v1\n"
     private const val HEX_DIGITS = "0123456789ABCDEF"
 }

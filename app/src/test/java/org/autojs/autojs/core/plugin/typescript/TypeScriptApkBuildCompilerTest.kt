@@ -161,6 +161,7 @@ class TypeScriptApkBuildCompilerTest {
         entryModulePath = entryModulePath,
         projectSources = modules.map(TypeScriptEmittedModule::source),
         packageMetadata = null,
+        dependencyLayer = null,
         projectId = "apk-build-test",
         authority = authority(),
         configByteLength = 2L,

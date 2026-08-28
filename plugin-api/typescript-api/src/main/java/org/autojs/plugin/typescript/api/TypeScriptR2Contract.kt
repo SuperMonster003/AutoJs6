@@ -26,6 +26,33 @@ object TypeScriptR2Contract {
         "packageMetadataPolicyFingerprint"
     const val KEY_PACKAGE_METADATA_INVENTORY_FINGERPRINT =
         "packageMetadataInventoryFingerprint"
+    /* Optional T2 read-only node_modules dependency-layer authority. */
+    const val KEY_DEPENDENCY_LAYER_SCHEMA_REVISION = "dependencyLayerSchemaRevision"
+    const val KEY_DEPENDENCY_LAYER_POLICY_REVISION = "dependencyLayerPolicyRevision"
+    const val KEY_DEPENDENCY_LAYER_POLICY_FINGERPRINT = "dependencyLayerPolicyFingerprint"
+    const val KEY_DEPENDENCY_LAYER_INVENTORY_FINGERPRINT =
+        "dependencyLayerInventoryFingerprint"
+    const val KEY_DEPENDENCY_LAYER_FINGERPRINT = "dependencyLayerFingerprint"
+    const val KEY_DEPENDENCY_RESOLVER_POLICY_REVISION =
+        "dependencyResolverPolicyRevision"
+    const val KEY_DEPENDENCY_RESOLVER_POLICY_FINGERPRINT =
+        "dependencyResolverPolicyFingerprint"
+    /* Host runtime dependency snapshot errors introduced by T2-3. */
+    const val ERROR_RUNTIME_DEPENDENCY_CHANGED =
+        "ERR_AUTOJS6_TYPESCRIPT_RUNTIME_DEPENDENCY_CHANGED"
+    const val ERROR_RHINO_ESM_ONLY_DEPENDENCY =
+        "ERR_AUTOJS6_TYPESCRIPT_RHINO_ESM_ONLY_DEPENDENCY"
+    const val ERROR_RHINO_DEPENDENCY_ENTRY_UNSUPPORTED =
+        "ERR_AUTOJS6_TYPESCRIPT_RHINO_DEPENDENCY_ENTRY_UNSUPPORTED"
+    const val ERROR_RHINO_DEPENDENCY_PACKAGE_INVALID =
+        "ERR_AUTOJS6_TYPESCRIPT_RHINO_DEPENDENCY_PACKAGE_INVALID"
+    const val ERROR_RHINO_DEPENDENCY_PATH_NOT_EXPORTED =
+        "ERR_AUTOJS6_TYPESCRIPT_RHINO_DEPENDENCY_PATH_NOT_EXPORTED"
+    /* Stable T2-6 host/compiler boundaries for npm packages that require native preparation. */
+    const val ERROR_NATIVE_DEPENDENCY_UNSUPPORTED =
+        "ERR_AUTOJS6_TYPESCRIPT_NATIVE_DEPENDENCY_UNSUPPORTED"
+    const val ERROR_DEPENDENCY_INSTALL_SCRIPT_UNSUPPORTED =
+        "ERR_AUTOJS6_TYPESCRIPT_DEPENDENCY_INSTALL_SCRIPT_UNSUPPORTED"
     /* Exact public NodeNext revision-2 authority advertised alongside default Rhino metadata. */
     const val KEY_NODE_PROFILE_REVISION = "nodeProfileRevision"
     const val KEY_NODE_CONFIG_SCHEMA_REVISION = "nodeConfigSchemaRevision"
@@ -89,21 +116,70 @@ object TypeScriptR2Contract {
     const val DIAGNOSTIC_CATEGORY_MESSAGE = 3
 
     /**
-     * Revision 2 ordinary-compilation caller-input quota.
+     * Revision 3 ordinary-compilation caller-input quota.
      *
      * The file and byte totals cover caller sources, the optional raw config, package metadata,
      * and package targets (v1 or v2). Plugin-owned trusted declarations are deliberately outside
      * this caller domain and are governed by the compiler's separate retained-input guardrail.
      * The transport-owned request-manifest.json entry is also outside this accounting domain.
      *
-     * These values are deliberately independent from the larger v1 archive transport and ZIP
-     * validation ceilings in [TypeScriptCompilerContract]. A payload being transport-valid does
-     * not make it eligible for ordinary compilation.
+     * Revision 3 promotes the ordinary caller domain to 4,096 files and 64 MiB total. The request
+     * manifest and ZIP/container overhead remain outside the semantic caller domain. Additive R2
+     * archive constants therefore reserve one extra entry, 512 KiB expanded bytes, and 1 MiB
+     * container bytes without changing the frozen v1 API class. The single-file limit remains
+     * 8 MiB.
+     *
+     * Revision 2 values remain public because constants are inlined into already-compiled hosts.
+     * A current compiler accepts both revisions and applies the limits belonging to the revision
+     * carried by the request manifest; newly compiled hosts emit revision 3.
      */
-    const val ORDINARY_COMPILATION_INPUT_QUOTA_REVISION = 2
-    const val MAX_ORDINARY_COMPILATION_INPUT_FILES = 512
+    const val LEGACY_ORDINARY_COMPILATION_INPUT_QUOTA_REVISION = 2
+    const val LEGACY_MAX_ORDINARY_COMPILATION_INPUT_FILES = 512
+    const val LEGACY_MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES = 8L * 1024L * 1024L
+    const val LEGACY_MAX_ORDINARY_COMPILATION_INPUT_BYTES = 8L * 1024L * 1024L
+
+    const val ORDINARY_COMPILATION_INPUT_QUOTA_REVISION = 3
+    const val MAX_ORDINARY_COMPILATION_INPUT_FILES =
+        TypeScriptCompilerContract.MAX_INPUT_FILES
     const val MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES = 8L * 1024L * 1024L
-    const val MAX_ORDINARY_COMPILATION_INPUT_BYTES = 8L * 1024L * 1024L
+    const val MAX_ORDINARY_COMPILATION_INPUT_BYTES = TypeScriptCompilerContract.MAX_INPUT_BYTES
+    const val ORDINARY_COMPILATION_INPUT_MANIFEST_FILES = 1
+    const val MAX_ORDINARY_COMPILATION_INPUT_MANIFEST_BYTES = 512L * 1024L
+    const val MAX_ORDINARY_COMPILATION_INPUT_ARCHIVE_FILES =
+        MAX_ORDINARY_COMPILATION_INPUT_FILES + ORDINARY_COMPILATION_INPUT_MANIFEST_FILES
+    const val MAX_ORDINARY_COMPILATION_INPUT_ARCHIVE_EXPANDED_BYTES =
+        MAX_ORDINARY_COMPILATION_INPUT_BYTES +
+            MAX_ORDINARY_COMPILATION_INPUT_MANIFEST_BYTES
+    const val MAX_ORDINARY_COMPILATION_INPUT_ARCHIVE_BYTES = 65L * 1024L * 1024L
+
+    /**
+     * T2 schema-1 read-only dependency layer with revision-2 native-boundary policy.
+     *
+     * This domain contains compilation-relevant UTF-8 files copied from `node_modules/` plus at
+     * most one root lockfile. It is deliberately outside the ordinary caller-input quota above:
+     * source/config/package-target accounting remains 4,096 files / 64 MiB. The combined ZIP/PFD
+     * transport receives its own additive envelope and does not change the frozen v1 Binder
+     * method or ordinary quota revision.
+     */
+    const val DEPENDENCY_LAYER_SCHEMA_REVISION = 1
+    const val DEPENDENCY_LAYER_POLICY_REVISION = 2
+    const val DEPENDENCY_RESOLVER_POLICY_REVISION = 4
+    const val DEPENDENCY_RESOLVER_POLICY_FINGERPRINT =
+        "d8207539237d2a08a6b97b530c5e6215f4b73311fdd6954ce9f8004717ebd635"
+    const val MAX_DEPENDENCY_LAYER_FILES = 8_192
+    const val MAX_DEPENDENCY_LAYER_SINGLE_FILE_BYTES = 8L * 1024L * 1024L
+    const val MAX_DEPENDENCY_LAYER_BYTES = 64L * 1024L * 1024L
+    const val MAX_DEPENDENCY_LAYER_LOCKFILE_BYTES = 8L * 1024L * 1024L
+    const val MAX_DEPENDENCY_LAYER_PATH_BYTES = 1536L * 1024L
+    const val MAX_INPUT_ARCHIVE_WITH_DEPENDENCIES_FILES =
+        MAX_ORDINARY_COMPILATION_INPUT_FILES +
+            MAX_DEPENDENCY_LAYER_FILES +
+            ORDINARY_COMPILATION_INPUT_MANIFEST_FILES
+    const val MAX_INPUT_ARCHIVE_WITH_DEPENDENCIES_EXPANDED_BYTES =
+        MAX_ORDINARY_COMPILATION_INPUT_BYTES +
+            MAX_DEPENDENCY_LAYER_BYTES +
+            TypeScriptCompilerContract.MAX_MANIFEST_BYTES
+    const val MAX_INPUT_ARCHIVE_WITH_DEPENDENCIES_BYTES = 140L * 1024L * 1024L
 
     /**
      * Revision 2 ordinary-compilation output quota.
@@ -205,21 +281,27 @@ object TypeScriptR2Contract {
     }
 
     /*
-     * Controlled project-config policy. Revision 2 admits raw tsconfig.json for the public Rhino
-     * compilation path. Its 18 Boolean options are effective compiler inputs; unclassified keys
-     * are ignored with bounded warning diagnostics, while profile, output, resolution, and
-     * transformer escape surfaces remain fail-closed.
+     * Controlled project-config policy. Revisions are append-only: revision 3 adds
+     * profile-bounded target/lib values and non-structural emit options; revision 4 adds a
+     * project-snapshot-only baseUrl/paths alias table. Existing revision-2 Rhino and revision-3
+     * dual-profile requests remain admitted with their original fingerprints.
      */
     const val CONFIG_KIND_NONE = "none"
     const val CONFIG_KIND_TSCONFIG = "tsconfig"
     const val CONTROLLED_TSCONFIG_SCHEMA_REVISION = 2
-    const val CONTROLLED_TSCONFIG_POLICY_REVISION = 2
+    const val LEGACY_CONTROLLED_TSCONFIG_POLICY_REVISION = 2
+    const val PREVIOUS_CONTROLLED_TSCONFIG_POLICY_REVISION = 3
+    const val CONTROLLED_TSCONFIG_POLICY_REVISION = 4
     const val MAX_CONTROLLED_TSCONFIG_BYTES =
         TypeScriptCompilerContract.MAX_COMPILER_OPTIONS_BYTES
     const val MAX_CONTROLLED_TSCONFIG_SELECTORS = 512
     const val MAX_CONTROLLED_TSCONFIG_SELECTOR_UTF8_BYTES = 4 * 1024
     const val MAX_CONTROLLED_TSCONFIG_JSON_DEPTH = 16
     const val MAX_CONTROLLED_TSCONFIG_JSON_NODES = 4 * 1024
+    const val MAX_CONTROLLED_TSCONFIG_PATH_ALIASES = 128
+    const val MAX_CONTROLLED_TSCONFIG_PATH_TARGETS_PER_ALIAS = 8
+    const val MAX_CONTROLLED_TSCONFIG_PATH_TARGETS = 512
+    const val MAX_CONTROLLED_TSCONFIG_PATH_PATTERN_UTF8_BYTES = 4 * 1024
 
     /* Stable config-policy detail codes. Error messages are deliberately non-contractual. */
     const val CONFIG_POLICY_CODE_ENCODING_INVALID = "CONFIG_ENCODING_INVALID"

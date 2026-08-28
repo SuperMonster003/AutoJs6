@@ -9,28 +9,62 @@ import org.junit.Test
 class TypeScriptR2ContractTest {
 
     @Test
-    fun ordinaryCompilationInputQuotaIsExactRevisionTwoAndNotTheTransportCeiling() {
-        assertEquals(2, TypeScriptR2Contract.ORDINARY_COMPILATION_INPUT_QUOTA_REVISION)
-        assertEquals(512, TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_FILES)
+    fun ordinaryCompilationInputQuotaRevisionThreePromotesTheTransportCeiling() {
+        assertEquals(3, TypeScriptR2Contract.ORDINARY_COMPILATION_INPUT_QUOTA_REVISION)
+        assertEquals(4_096, TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_FILES)
         assertEquals(
             8L * 1024L * 1024L,
             TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
         )
         assertEquals(
-            8L * 1024L * 1024L,
+            64L * 1024L * 1024L,
             TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES,
         )
-        assertTrue(
-            TypeScriptCompilerContract.MAX_INPUT_FILES >
-                TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_FILES,
+        assertEquals(
+            TypeScriptCompilerContract.MAX_INPUT_FILES,
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_FILES,
         )
-        assertTrue(
-            TypeScriptCompilerContract.MAX_INPUT_BYTES >
-                TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES,
+        assertEquals(
+            TypeScriptCompilerContract.MAX_INPUT_BYTES,
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES,
         )
         assertEquals(
             TypeScriptCompilerContract.MAX_SINGLE_FILE_BYTES,
             TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+        )
+        assertEquals(1, TypeScriptR2Contract.ORDINARY_COMPILATION_INPUT_MANIFEST_FILES)
+        assertEquals(
+            4_097,
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_ARCHIVE_FILES,
+        )
+        assertEquals(
+            512L * 1024L,
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_MANIFEST_BYTES,
+        )
+        assertEquals(
+            64L * 1024L * 1024L + 512L * 1024L,
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_ARCHIVE_EXPANDED_BYTES,
+        )
+        assertEquals(
+            65L * 1024L * 1024L,
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_ARCHIVE_BYTES,
+        )
+    }
+
+    @Test
+    fun ordinaryCompilationInputQuotaRevisionTwoRemainsAvailableForOldHosts() {
+        assertEquals(
+            2,
+            TypeScriptR2Contract.LEGACY_ORDINARY_COMPILATION_INPUT_QUOTA_REVISION,
+        )
+        assertEquals(512, TypeScriptR2Contract.LEGACY_MAX_ORDINARY_COMPILATION_INPUT_FILES)
+        assertEquals(
+            8L * 1024L * 1024L,
+            TypeScriptR2Contract.LEGACY_MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+        )
+        assertEquals(
+            8L * 1024L * 1024L,
+            TypeScriptR2Contract.LEGACY_MAX_ORDINARY_COMPILATION_INPUT_BYTES,
         )
     }
 
@@ -202,6 +236,42 @@ class TypeScriptR2ContractTest {
             TypeScriptR2Contract.KEY_CONFIG_POLICY_FINGERPRINT,
         )
         assertEquals(
+            "packageMetadataSchemaRevision",
+            TypeScriptR2Contract.KEY_PACKAGE_METADATA_SCHEMA_REVISION,
+        )
+        assertEquals(
+            "packageMetadataPolicyRevision",
+            TypeScriptR2Contract.KEY_PACKAGE_METADATA_POLICY_REVISION,
+        )
+        assertEquals(
+            "packageMetadataPolicyFingerprint",
+            TypeScriptR2Contract.KEY_PACKAGE_METADATA_POLICY_FINGERPRINT,
+        )
+        assertEquals(
+            "packageMetadataInventoryFingerprint",
+            TypeScriptR2Contract.KEY_PACKAGE_METADATA_INVENTORY_FINGERPRINT,
+        )
+        assertEquals(
+            "dependencyLayerSchemaRevision",
+            TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_SCHEMA_REVISION,
+        )
+        assertEquals(
+            "dependencyLayerPolicyRevision",
+            TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_POLICY_REVISION,
+        )
+        assertEquals(
+            "dependencyLayerPolicyFingerprint",
+            TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_POLICY_FINGERPRINT,
+        )
+        assertEquals(
+            "dependencyLayerInventoryFingerprint",
+            TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_INVENTORY_FINGERPRINT,
+        )
+        assertEquals(
+            "dependencyLayerFingerprint",
+            TypeScriptR2Contract.KEY_DEPENDENCY_LAYER_FINGERPRINT,
+        )
+        assertEquals(
             "outputArchiveSchemaRevision",
             TypeScriptR2Contract.KEY_OUTPUT_ARCHIVE_SCHEMA_REVISION,
         )
@@ -233,6 +303,57 @@ class TypeScriptR2ContractTest {
         assertEquals(
             "request-manifest.json",
             TypeScriptR2Contract.INPUT_ARCHIVE_MANIFEST_PATH,
+        )
+    }
+
+    @Test
+    fun dependencyLayerSchemaOnePolicyTwoHasAnIndependentAdditiveTransportEnvelope() {
+        assertEquals(1, TypeScriptR2Contract.DEPENDENCY_LAYER_SCHEMA_REVISION)
+        assertEquals(2, TypeScriptR2Contract.DEPENDENCY_LAYER_POLICY_REVISION)
+        assertEquals(8_192, TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_FILES)
+        assertEquals(
+            8L * 1024L * 1024L,
+            TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_SINGLE_FILE_BYTES,
+        )
+        assertEquals(
+            64L * 1024L * 1024L,
+            TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_BYTES,
+        )
+        assertEquals(
+            8L * 1024L * 1024L,
+            TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_LOCKFILE_BYTES,
+        )
+        assertEquals(
+            1536L * 1024L,
+            TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_PATH_BYTES,
+        )
+        assertEquals(
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_FILES +
+                TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_FILES + 1,
+            TypeScriptR2Contract.MAX_INPUT_ARCHIVE_WITH_DEPENDENCIES_FILES,
+        )
+        assertEquals(
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES +
+                TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_BYTES +
+                TypeScriptCompilerContract.MAX_MANIFEST_BYTES,
+            TypeScriptR2Contract.MAX_INPUT_ARCHIVE_WITH_DEPENDENCIES_EXPANDED_BYTES,
+        )
+        assertEquals(
+            140L * 1024L * 1024L,
+            TypeScriptR2Contract.MAX_INPUT_ARCHIVE_WITH_DEPENDENCIES_BYTES,
+        )
+        assertEquals(4, TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_REVISION)
+        assertEquals(
+            "d8207539237d2a08a6b97b530c5e6215f4b73311fdd6954ce9f8004717ebd635",
+            TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
+        )
+        assertEquals(
+            "ERR_AUTOJS6_TYPESCRIPT_NATIVE_DEPENDENCY_UNSUPPORTED",
+            TypeScriptR2Contract.ERROR_NATIVE_DEPENDENCY_UNSUPPORTED,
+        )
+        assertEquals(
+            "ERR_AUTOJS6_TYPESCRIPT_DEPENDENCY_INSTALL_SCRIPT_UNSUPPORTED",
+            TypeScriptR2Contract.ERROR_DEPENDENCY_INSTALL_SCRIPT_UNSUPPORTED,
         )
     }
 
@@ -322,7 +443,9 @@ class TypeScriptR2ContractTest {
         assertEquals("none", TypeScriptR2Contract.CONFIG_KIND_NONE)
         assertEquals("tsconfig", TypeScriptR2Contract.CONFIG_KIND_TSCONFIG)
         assertEquals(2, TypeScriptR2Contract.CONTROLLED_TSCONFIG_SCHEMA_REVISION)
-        assertEquals(2, TypeScriptR2Contract.CONTROLLED_TSCONFIG_POLICY_REVISION)
+        assertEquals(2, TypeScriptR2Contract.LEGACY_CONTROLLED_TSCONFIG_POLICY_REVISION)
+        assertEquals(3, TypeScriptR2Contract.PREVIOUS_CONTROLLED_TSCONFIG_POLICY_REVISION)
+        assertEquals(4, TypeScriptR2Contract.CONTROLLED_TSCONFIG_POLICY_REVISION)
         assertEquals(
             TypeScriptCompilerContract.MAX_COMPILER_OPTIONS_BYTES,
             TypeScriptR2Contract.MAX_CONTROLLED_TSCONFIG_BYTES,
@@ -334,6 +457,16 @@ class TypeScriptR2ContractTest {
         )
         assertEquals(16, TypeScriptR2Contract.MAX_CONTROLLED_TSCONFIG_JSON_DEPTH)
         assertEquals(4 * 1024, TypeScriptR2Contract.MAX_CONTROLLED_TSCONFIG_JSON_NODES)
+        assertEquals(128, TypeScriptR2Contract.MAX_CONTROLLED_TSCONFIG_PATH_ALIASES)
+        assertEquals(
+            8,
+            TypeScriptR2Contract.MAX_CONTROLLED_TSCONFIG_PATH_TARGETS_PER_ALIAS,
+        )
+        assertEquals(512, TypeScriptR2Contract.MAX_CONTROLLED_TSCONFIG_PATH_TARGETS)
+        assertEquals(
+            4 * 1024,
+            TypeScriptR2Contract.MAX_CONTROLLED_TSCONFIG_PATH_PATTERN_UTF8_BYTES,
+        )
         assertEquals(
             910_001,
             TypeScriptR2Contract.CONFIG_DIAGNOSTIC_CODE_IGNORED_TOP_LEVEL_PROPERTY,

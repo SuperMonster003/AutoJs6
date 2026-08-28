@@ -8,6 +8,7 @@ import android.view.View
 import org.autojs.autojs.core.plugin.typescript.CompiledTypeScriptSource
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
 import org.autojs.autojs.core.plugin.typescript.TypeScriptMaterializedRhinoProject
+import org.autojs.autojs.core.plugin.typescript.TypeScriptRhinoCommonJsRequire
 import org.autojs.autojs.core.plugin.typescript.TypeScriptSourceMapBindings
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AndroidRhinoAssetLoader
@@ -45,7 +46,6 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.VarScope
-import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.Require
 import org.mozilla.javascript.commonjs.module.provider.MultiModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
@@ -270,10 +270,12 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
                 SoftCachingModuleScriptProvider(provider),
             )
         )
-        mRequire = RequireBuilder()
-            .setModuleScriptProvider(moduleScriptProvider)
-            .setSandboxed(true)
-            .createRequire(context, scope)
+        mRequire = TypeScriptRhinoCommonJsRequire(
+            context = context,
+            nativeScope = scope,
+            moduleScriptProvider = moduleScriptProvider,
+            runtimeProject = { mMaterializedTypeScriptProject },
+        )
         mRequire.install(scope)
     }
 

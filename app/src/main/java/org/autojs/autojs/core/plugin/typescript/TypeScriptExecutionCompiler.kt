@@ -31,6 +31,7 @@ internal data class TypeScriptExecutableSource(
     val projectRoot: File?,
     val projectSources: List<TypeScriptPreparedSource>,
     val packageMetadata: TypeScriptPreparedPackageMetadata?,
+    val dependencyLayer: TypeScriptPreparedDependencyLayer?,
 ) {
 
     val isProjectCompilation: Boolean
@@ -187,6 +188,7 @@ internal object TypeScriptExecutionCompiler {
                     projectRoot = projectRoot,
                     projectSources = output.projectSources,
                     packageMetadata = output.packageMetadata,
+                    dependencyLayer = output.dependencyLayer,
                 )
             }
             is TypeScriptCompilationOutput.Diagnostics -> throw TypeScriptDiagnosticsException(

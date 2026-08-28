@@ -16,7 +16,7 @@ import org.autojs.plugin.typescript.api.TypeScriptR2Contract
  */
 internal object TypeScriptCompilationCacheKey {
 
-    private const val FORMAT_VERSION = 1
+    private const val FORMAT_VERSION = 4
     private val DOMAIN =
         "AutoJs6/TypeScriptCompilationCacheKey".toByteArray(StandardCharsets.US_ASCII)
 
@@ -67,11 +67,34 @@ internal object TypeScriptCompilationCacheKey {
             val packageMetadata = prepared.packageMetadata
             data.writeBoolean(packageMetadata != null)
             packageMetadata?.let { metadata ->
-                data.writeText(metadata.archivePath)
-                data.writeLong(metadata.size)
-                data.writeSha256(metadata.sha256)
+                data.writeInt(metadata.dependencyRoots.size)
+                metadata.dependencyRoots.forEach { root -> data.writeText(root) }
+                data.writeInt(metadata.files.size)
+                metadata.files.forEach { file ->
+                    data.writeText(file.archivePath)
+                    data.writeLong(file.size)
+                    data.writeSha256(file.sha256)
+                    data.writeText(file.typeState)
+                }
                 data.writeSha256(metadata.inventoryFingerprint)
-                data.writeText(metadata.typeState)
+            }
+
+            val dependencyLayer = prepared.dependencyLayer
+            data.writeBoolean(dependencyLayer != null)
+            dependencyLayer?.let { layer ->
+                data.writeText(layer.identityKind)
+                data.writeText(layer.identityPath)
+                data.writeSha256(layer.identityFingerprint)
+                data.writeSha256(layer.inventoryFingerprint)
+                data.writeSha256(layer.fingerprint)
+                data.writeLong(layer.totalBytes)
+                data.writeLong(layer.totalPathBytes)
+                data.writeInt(layer.files.size)
+                layer.files.forEach { file ->
+                    data.writeText(file.archivePath)
+                    data.writeLong(file.size)
+                    data.writeSha256(file.sha256)
+                }
             }
 
             data.writeAuthority(prepared.authority)
@@ -95,6 +118,11 @@ internal object TypeScriptCompilationCacheKey {
         writeNullableInt(authority.packageMetadataSchemaRevision)
         writeNullableInt(authority.packageMetadataPolicyRevision)
         writeNullableSha256(authority.packageMetadataPolicyFingerprint)
+        writeNullableInt(authority.dependencyLayerSchemaRevision)
+        writeNullableInt(authority.dependencyLayerPolicyRevision)
+        writeNullableSha256(authority.dependencyLayerPolicyFingerprint)
+        writeNullableInt(authority.dependencyResolverPolicyRevision)
+        writeNullableSha256(authority.dependencyResolverPolicyFingerprint)
     }
 
     private fun DataOutputStream.writeText(value: String) {

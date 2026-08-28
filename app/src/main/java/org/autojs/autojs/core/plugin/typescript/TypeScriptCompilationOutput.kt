@@ -76,6 +76,7 @@ internal sealed interface TypeScriptCompilationOutput {
         val entryModulePath: String,
         val projectSources: List<TypeScriptPreparedSource>,
         val packageMetadata: TypeScriptPreparedPackageMetadata?,
+        val dependencyLayer: TypeScriptPreparedDependencyLayer?,
         val projectId: String,
         val authority: TypeScriptCompilerAuthority,
         val configByteLength: Long?,
@@ -407,6 +408,7 @@ internal object TypeScriptCompilationOutputReader {
                     entryModulePath = entryModulePath,
                     projectSources = prepared.sourceFiles,
                     packageMetadata = prepared.packageMetadata,
+                    dependencyLayer = prepared.dependencyLayer,
                     projectId = prepared.projectId,
                     authority = prepared.authority,
                     configByteLength = prepared.configByteLength,
@@ -512,10 +514,11 @@ internal object TypeScriptCompilationOutputReader {
                     val metadata = requireNotNull(packageMetadata) {
                         "Node .ts output requires bound package metadata."
                     }
-                    packageTypeState = metadata.typeState
+                    val nearest = metadata.nearestFileForSource(sourcePath)
+                    packageTypeState = nearest.typeState
                     packageInventoryFingerprint = metadata.inventoryFingerprint
-                    packageBoundary = "/"
-                    moduleFormat = if (metadata.typeState == "module") "esm" else "commonjs"
+                    packageBoundary = nearest.boundaryPath
+                    moduleFormat = if (nearest.typeState == "module") "esm" else "commonjs"
                     outputExtension = ".js"
                 }
             }
@@ -633,14 +636,18 @@ internal object TypeScriptCompilationOutputReader {
             append(requireNotNull(authority.packageMetadataPolicyFingerprint))
             append("|packageMetadataInventoryFingerprint=")
             append(packageMetadata.inventoryFingerprint)
-            append("|record=")
-            append(packageMetadata.archivePath)
-            append(",/,")
-            append(packageMetadata.size)
-            append(',')
-            append(packageMetadata.sha256)
-            append(',')
-            append(packageMetadata.typeState)
+            packageMetadata.files.forEach { file ->
+                append("|record=")
+                append(file.archivePath)
+                append(',')
+                append(file.boundaryPath)
+                append(',')
+                append(file.size)
+                append(',')
+                append(file.sha256)
+                append(',')
+                append(file.typeState)
+            }
         }
         require(canonicalInput.all { character -> character.code in 0x20..0x7e })
         return sha256(canonicalInput.toByteArray(Charsets.US_ASCII))

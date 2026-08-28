@@ -111,6 +111,7 @@ class TypeScriptBackgroundPreparationRouteTest {
             projectRoot = null,
             projectSources = listOf(preparedSource),
             packageMetadata = null,
+            dependencyLayer = null,
         )
         val compiled = CompiledTypeScriptSource(
             originalSource = TypeScriptFileSource(originalFile),

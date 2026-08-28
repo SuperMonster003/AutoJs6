@@ -1,8 +1,11 @@
 package org.autojs.autojs.core.plugin.typescript
 
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 import java.io.File
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
@@ -74,7 +77,13 @@ class TypeScriptCompilationCacheKeyTest {
     fun includesNodePackageMetadataAndPolicyAuthority() {
         val base = nodePrepared()
         val packageChanged = base.copy(
-            packageMetadata = requireNotNull(base.packageMetadata).copy(sha256 = hash('c')),
+            packageMetadata = requireNotNull(base.packageMetadata).let { metadata ->
+                metadata.copy(
+                    files = metadata.files.mapIndexed { index, file ->
+                        if (index == 0) file.copy(sha256 = hash('c')) else file
+                    },
+                )
+            },
         )
         val policyChanged = base.copy(
             authority = base.authority.copy(packageMetadataPolicyFingerprint = hash('d')),
@@ -87,6 +96,59 @@ class TypeScriptCompilationCacheKeyTest {
         assertNotEquals(
             TypeScriptCompilationCacheKey.sha256(base),
             TypeScriptCompilationCacheKey.sha256(policyChanged),
+        )
+    }
+
+    @Test
+    fun includesDependencyLockContentInventoryAndPolicyAuthority() {
+        val base = nodePrepared()
+        val layer = requireNotNull(base.dependencyLayer)
+        val variants = listOf(
+            base.copy(dependencyLayer = layer.copy(fingerprint = hash('c'))),
+            base.copy(
+                dependencyLayer = layer.copy(
+                    identityFingerprint = hash('d'),
+                    inventoryFingerprint = hash('e'),
+                    fingerprint = hash('f'),
+                    files = layer.files.mapIndexed { index, file ->
+                        if (index == 0) file.copy(sha256 = hash('d')) else file
+                    },
+                ),
+            ),
+            base.copy(
+                authority = base.authority.copy(
+                    dependencyLayerPolicyFingerprint = hash('0'),
+                ),
+            ),
+        )
+
+        variants.forEach { variant ->
+            assertNotEquals(
+                TypeScriptCompilationCacheKey.sha256(base),
+                TypeScriptCompilationCacheKey.sha256(variant),
+            )
+        }
+
+        val resolverAuthorityBytes = ByteArrayOutputStream().also { output ->
+            DataOutputStream(output).use { data ->
+                data.writeBoolean(true)
+                data.writeInt(TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_REVISION)
+                data.writeBoolean(true)
+                data.write(
+                    TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_FINGERPRINT
+                        .chunked(2)
+                        .map { byte -> byte.toInt(16).toByte() }
+                        .toByteArray(),
+                )
+            }
+        }.toByteArray()
+        val canonicalBytes = TypeScriptCompilationCacheKey.canonicalBytes(base)
+        assertArrayEquals(
+            resolverAuthorityBytes,
+            canonicalBytes.copyOfRange(
+                canonicalBytes.size - resolverAuthorityBytes.size,
+                canonicalBytes.size,
+            ),
         )
     }
 
@@ -128,13 +190,44 @@ class TypeScriptCompilationCacheKeyTest {
             TypeScriptPreparedSource("sources/main.ts", "main.ts", File("main.ts"), hash('1')),
         ),
         packageMetadata = TypeScriptPreparedPackageMetadata(
-            archivePath = "package.json",
-            size = 17L,
-            sha256 = hash('2'),
+            dependencyRoots = emptyList(),
+            files = listOf(
+                TypeScriptPreparedPackageMetadataFile(
+                    archivePath = "package.json",
+                    size = 17L,
+                    sha256 = hash('2'),
+                    typeState = "module",
+                ),
+            ),
             inventoryFingerprint = hash('3'),
-            typeState = "module",
         ),
+        dependencyLayer = dependencyLayer(),
     )
+
+    private fun dependencyLayer(): TypeScriptPreparedDependencyLayer {
+        val files = listOf(
+            TypeScriptPreparedDependencyLayerFile(
+                archivePath = "dependencies/lockfiles/package-lock.json",
+                size = 17L,
+                sha256 = hash('8'),
+            ),
+            TypeScriptPreparedDependencyLayerFile(
+                archivePath = "dependencies/node_modules/dayjs/index.js",
+                size = 21L,
+                sha256 = hash('b'),
+            ),
+        )
+        return TypeScriptPreparedDependencyLayer(
+            identityKind = "package-lock",
+            identityPath = "dependencies/lockfiles/package-lock.json",
+            identityFingerprint = hash('8'),
+            inventoryFingerprint = hash('9'),
+            fingerprint = hash('a'),
+            files = files,
+            totalBytes = files.sumOf(TypeScriptPreparedDependencyLayerFile::size),
+            totalPathBytes = files.sumOf { file -> file.archivePath.toByteArray().size.toLong() },
+        )
+    }
 
     private fun rhinoAuthority() = TypeScriptCompilerAuthority(
         targetProfile = TypeScriptCompilerContract.PROFILE_RHINO,
@@ -165,6 +258,13 @@ class TypeScriptCompilationCacheKeyTest {
         packageMetadataSchemaRevision = 1,
         packageMetadataPolicyRevision = 1,
         packageMetadataPolicyFingerprint = hash('5'),
+        dependencyLayerSchemaRevision = TypeScriptR2Contract.DEPENDENCY_LAYER_SCHEMA_REVISION,
+        dependencyLayerPolicyRevision = TypeScriptR2Contract.DEPENDENCY_LAYER_POLICY_REVISION,
+        dependencyLayerPolicyFingerprint = hash('6'),
+        dependencyResolverPolicyRevision =
+            TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_REVISION,
+        dependencyResolverPolicyFingerprint =
+            TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
     )
 
     private fun hash(character: Char) = character.toString().repeat(64)

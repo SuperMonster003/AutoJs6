@@ -293,6 +293,16 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
 
             request.sourceName.takeIf(String::isNotBlank)?.let(::addExistingExplicitPath)
             request.env.values.forEach(::addExistingExplicitPath)
+            request.workspaceModuleSources.forEach { (name, source) ->
+                val (relative, _) = relativeCandidate(name) ?: return@forEach
+                require(relative !in entries) {
+                    "Node.js workspace module-source overlay contains a path collision: $relative"
+                }
+                entries[relative] = ExplicitInput.Bytes(source.toByteArray(StandardCharsets.UTF_8))
+                // A workspace overlay is an immutable execution input even when a same-named host
+                // file exists. Never synchronize plugin-side writes back over node_modules.
+                ephemeralModuleSourceFiles += relative
+            }
             request.moduleSources.forEach { (name, source) ->
                 val (relative, requested) = relativeCandidate(name) ?: return@forEach
                 if (!requested.exists()) {

@@ -27,6 +27,11 @@ internal data class TypeScriptCompilerAuthority(
     val packageMetadataSchemaRevision: Int? = null,
     val packageMetadataPolicyRevision: Int? = null,
     val packageMetadataPolicyFingerprint: String? = null,
+    val dependencyLayerSchemaRevision: Int? = null,
+    val dependencyLayerPolicyRevision: Int? = null,
+    val dependencyLayerPolicyFingerprint: String? = null,
+    val dependencyResolverPolicyRevision: Int? = null,
+    val dependencyResolverPolicyFingerprint: String? = null,
 ) {
     init {
         require(targetProfile in TypeScriptCompilerContract.TARGET_PROFILES)
@@ -76,6 +81,51 @@ internal data class TypeScriptCompilerAuthority(
                     packageMetadataPolicyFingerprint == null,
             )
         }
+        val dependencyAuthorityPresence = listOf(
+            dependencyLayerSchemaRevision != null,
+            dependencyLayerPolicyRevision != null,
+            dependencyLayerPolicyFingerprint != null,
+        )
+        val dependencyResolverAuthorityPresence = listOf(
+            dependencyResolverPolicyRevision != null,
+            dependencyResolverPolicyFingerprint != null,
+        )
+        require(
+            dependencyAuthorityPresence.all { present -> present } ||
+                dependencyAuthorityPresence.none { present -> present },
+        ) { "Dependency-layer authority must be either complete or absent." }
+        if (dependencyAuthorityPresence.all { present -> present }) {
+            require(
+                dependencyLayerSchemaRevision ==
+                    TypeScriptR2Contract.DEPENDENCY_LAYER_SCHEMA_REVISION,
+            )
+            require(
+                dependencyLayerPolicyRevision ==
+                    TypeScriptR2Contract.DEPENDENCY_LAYER_POLICY_REVISION,
+            )
+            requireLowerSha256(
+                requireNotNull(dependencyLayerPolicyFingerprint),
+                "dependency layer policy fingerprint",
+            )
+        }
+        require(
+            dependencyResolverAuthorityPresence.all { present -> present } ||
+                dependencyResolverAuthorityPresence.none { present -> present },
+        ) { "Dependency resolver authority must be either complete or absent." }
+        require(
+            dependencyAuthorityPresence.all { present -> present } ==
+                dependencyResolverAuthorityPresence.all { present -> present },
+        ) { "Dependency-layer and resolver authorities must be present together." }
+        if (dependencyResolverAuthorityPresence.all { present -> present }) {
+            require(
+                dependencyResolverPolicyRevision ==
+                    TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_REVISION,
+            )
+            require(
+                dependencyResolverPolicyFingerprint ==
+                    TypeScriptR2Contract.DEPENDENCY_RESOLVER_POLICY_FINGERPRINT,
+            )
+        }
     }
 
     companion object {
@@ -92,13 +142,116 @@ internal data class TypeScriptPreparedSource(
     val sha256: String,
 )
 
-internal data class TypeScriptPreparedPackageMetadata(
+internal data class TypeScriptPreparedPackageMetadataFile(
     val archivePath: String,
     val size: Long,
     val sha256: String,
-    val inventoryFingerprint: String,
     val typeState: String,
-)
+) {
+
+    val boundaryPath: String
+        get() = if (archivePath == "package.json") {
+            "/"
+        } else {
+            "/${archivePath.removeSuffix("/package.json")}"
+        }
+}
+
+internal data class TypeScriptPreparedPackageMetadata(
+    val dependencyRoots: List<String>,
+    val files: List<TypeScriptPreparedPackageMetadataFile>,
+    val inventoryFingerprint: String,
+) {
+
+    init {
+        require(dependencyRoots == dependencyRoots.sorted() && dependencyRoots.distinct() == dependencyRoots)
+        require(files.isNotEmpty() && files.first().archivePath == "package.json")
+        require(files == files.sortedBy(TypeScriptPreparedPackageMetadataFile::archivePath))
+        require(files.map(TypeScriptPreparedPackageMetadataFile::archivePath).distinct().size == files.size)
+        requireLowerSha256(inventoryFingerprint, "package metadata inventory fingerprint")
+        files.forEach { file ->
+            require(file.size >= 0L)
+            requireLowerSha256(file.sha256, "package metadata file fingerprint")
+            require(file.typeState in PACKAGE_TYPE_STATES)
+            require(
+                file.archivePath == "package.json" ||
+                    dependencyRoots.any { root -> file.archivePath.startsWith("$root/") },
+            )
+        }
+    }
+
+    val archivePath: String
+        get() = files.first().archivePath
+
+    val size: Long
+        get() = files.first().size
+
+    val sha256: String
+        get() = files.first().sha256
+
+    val typeState: String
+        get() = files.first().typeState
+
+    fun nearestFileForSource(sourcePath: String): TypeScriptPreparedPackageMetadataFile {
+        val canonicalSourcePath = sourcePath.removePrefix("/")
+        require(canonicalSourcePath.startsWith("sources/"))
+        val projectPath = "/${canonicalSourcePath.removePrefix("sources/")}"
+        return requireNotNull(
+            files.asSequence()
+                .filter { file ->
+                    file.boundaryPath == "/" || projectPath.startsWith("${file.boundaryPath}/")
+                }
+                .maxByOrNull { file -> file.boundaryPath.length },
+        ) { "TypeScript source has no accepted package boundary." }
+    }
+
+    private companion object {
+        val PACKAGE_TYPE_STATES = setOf("missing", "module", "commonjs")
+    }
+}
+
+internal data class TypeScriptPreparedDependencyLayerFile(
+    val archivePath: String,
+    val size: Long,
+    val sha256: String,
+) {
+    init {
+        require(archivePath.startsWith("dependencies/"))
+        require(size in 0L..TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_SINGLE_FILE_BYTES)
+        requireLowerSha256(sha256, "dependency layer file fingerprint")
+    }
+}
+
+internal data class TypeScriptPreparedDependencyLayer(
+    val identityKind: String,
+    val identityPath: String,
+    val identityFingerprint: String,
+    val inventoryFingerprint: String,
+    val fingerprint: String,
+    val files: List<TypeScriptPreparedDependencyLayerFile>,
+    val totalBytes: Long,
+    val totalPathBytes: Long,
+) {
+    init {
+        require(identityKind in setOf("package-lock", "pnpm-lock", "content"))
+        require(identityPath.isEmpty() || identityPath.startsWith("dependencies/lockfiles/"))
+        requireLowerSha256(identityFingerprint, "dependency layer identity fingerprint")
+        requireLowerSha256(inventoryFingerprint, "dependency layer inventory fingerprint")
+        requireLowerSha256(fingerprint, "dependency layer fingerprint")
+        require(files.isNotEmpty())
+        require(files == files.sortedBy(TypeScriptPreparedDependencyLayerFile::archivePath))
+        require(files.map(TypeScriptPreparedDependencyLayerFile::archivePath).distinct().size == files.size)
+        require(files.size <= TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_FILES)
+        require(totalBytes == files.sumOf(TypeScriptPreparedDependencyLayerFile::size))
+        require(totalBytes <= TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_BYTES)
+        require(
+            totalPathBytes == files.sumOf { file ->
+                TypeScriptUtf8.encode(file.archivePath, "dependency layer path").size.toLong()
+            },
+        )
+        require(totalPathBytes <= TypeScriptR2Contract.MAX_DEPENDENCY_LAYER_PATH_BYTES)
+    }
+}
 
 internal data class TypeScriptPreparedCompilation(
     val requestId: String,
@@ -114,6 +267,7 @@ internal data class TypeScriptPreparedCompilation(
     val rootPaths: List<String> = listOf(entryPath),
     val sourceFiles: List<TypeScriptPreparedSource> = emptyList(),
     val packageMetadata: TypeScriptPreparedPackageMetadata? = null,
+    val dependencyLayer: TypeScriptPreparedDependencyLayer? = null,
 )
 
 internal object TypeScriptSingleFileArchive {
