@@ -602,6 +602,7 @@
     <string name="summary_ace_word_wrap_enabled">在編輯器可視區域內對長行自動換行</string>
     <string name="summary_all_files_access">允許 AutoJs6 訪問所有文件, 包括外部存儲</string>
     <string name="summary_all_files_access_inrt">允許應用訪問所有文件, 包括外部存儲</string>
+    <string name="summary_clear_media_playback_history">清除宿主儲存的全部媒體播放位置</string>
     <string name="summary_code_editor_settings">打開完整的代碼編輯器設置頁面</string>
     <string name="summary_dex_compiler_experimental_disabled">僅使用內置 D8/dx; AAR 始終使用內置路徑</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">僅使用內置 D8/dx; 保留的 provider: %1$s</string>
@@ -651,6 +652,7 @@
     <string name="summary_r8_compiler_explicit_disabled">明確 R8 入口已關閉; runtime.loadJarWithR8 將直接失敗</string>
     <string name="summary_r8_compiler_explicit_disabled_with_selection">明確 R8 入口已關閉; 保留的 provider: %1$s</string>
     <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 使用 %1$s; 所有失敗都保持 R8-only</string>
+    <string name="summary_record_media_playback_progress">預設關閉. 僅在你啓用此選項後, 才會在本機儲存播放位置</string>
     <string name="summary_record_prompt">錄製開始及停止時顯示提示消息</string>
     <string name="summary_release_history_preference">查看發行版本歷史更新記錄與統計數據</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始類型在腳本中將被包裝為對應的 Java 對象</string>
@@ -878,6 +880,7 @@
     <string name="text_clear">清空</string>
     <string name="text_clear_custom_css">清除自訂 CSS</string>
     <string name="text_clear_file_selection">清空文件選擇</string>
+    <string name="text_clear_media_playback_history">清除媒體播放歷史</string>
     <string name="text_clear_pre_execute_script">清空預執行腳本</string>
     <string name="text_clear_trash">清空回收站</string>
     <string name="text_clear_trash_confirm">是否清空回收站全部條目</string>
@@ -1600,6 +1603,7 @@
     <string name="text_reading_splash_resources">正在讀取啓動頁資源</string>
     <string name="text_recommended">推薦</string>
     <string name="text_record_finished">錄製完成</string>
+    <string name="text_record_media_playback_progress">記錄媒體播放進度</string>
     <string name="text_record_prompt">錄製提示</string>
     <string name="text_record_stopped">錄製已停止</string>
     <string name="text_recorded_output_file_type">錄製生成文件類型</string>
@@ -1881,6 +1885,7 @@
     <string name="text_version_info">版本信息</string>
     <string name="text_version_name">版本名稱</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">版本名稱 (計算中...)</string>
+    <string name="text_video_player">影片播放器</string>
     <string name="text_view">查看</string>
     <string name="text_view_docs">查看文檔</string>
     <string name="text_vivo_background_popup_permission">後台彈出界面</string>

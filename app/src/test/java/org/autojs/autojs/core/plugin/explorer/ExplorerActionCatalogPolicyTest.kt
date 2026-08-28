@@ -462,6 +462,58 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV12MediaSessionExtensionsAreOptionalAndStrictlyScoped() {
+        val descriptor = descriptor(
+            protocolVersion = 12,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+            readSiblings = true,
+            playbackProgress = true,
+        ) ?: error("Expected a valid v12 media-session descriptor")
+
+        assertTrue(descriptor.readSiblings)
+        assertTrue(descriptor.playbackProgress)
+        assertFalse(
+            descriptor(
+                protocolVersion = 12,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            )!!.readSiblings,
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 11,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                readSiblings = true,
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 12,
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                mimeTypes = emptyList(),
+                readSiblings = true,
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 12,
+                cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+                placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+                playbackProgress = true,
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 12,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+                playbackProgress = true,
+            ),
+        )
+    }
+
+    @Test
     fun protocolV17AddsAnOverflowOnlyUnmatchedFileProbe() {
         val probe = descriptor(
             protocolVersion = 17,
@@ -739,6 +791,8 @@ class ExplorerActionCatalogPolicyTest {
         extensions: Collection<String>? = emptyList(),
         fileNameSuffixes: Collection<String>? = null,
         probeForActionId: String? = null,
+        readSiblings: Boolean? = null,
+        playbackProgress: Boolean? = null,
     ): ExplorerActionDescriptor? {
         return ExplorerActionCatalogPolicy.normalizeDescriptor(
             protocolVersion = protocolVersion,
@@ -757,6 +811,8 @@ class ExplorerActionCatalogPolicyTest {
             extensions = extensions,
             fileNameSuffixes = fileNameSuffixes,
             probeForActionId = probeForActionId,
+            readSiblings = readSiblings,
+            playbackProgress = playbackProgress,
         )
     }
 }

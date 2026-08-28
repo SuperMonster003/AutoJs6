@@ -37,6 +37,8 @@ internal object ExplorerActionCatalogPolicy {
         outputMimeTypes: Collection<String>? = null,
         outputNameSuffix: String? = null,
         maxOutputBytes: Long? = null,
+        readSiblings: Boolean? = null,
+        playbackProgress: Boolean? = null,
     ): ExplorerActionDescriptor? {
         if (
             protocolVersion !in
@@ -210,6 +212,21 @@ internal object ExplorerActionCatalogPolicy {
         ) {
             return null
         }
+        val normalizedReadSiblings = readSiblings == true
+        val normalizedPlaybackProgress = playbackProgress == true
+        if (
+            (normalizedReadSiblings || normalizedPlaybackProgress) &&
+            (
+                protocolVersion < SESSION_MEDIA_EXTENSION_PROTOCOL_VERSION ||
+                    targetKind != ExplorerActionValues.TARGET_FILE ||
+                    normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE ||
+                    accessMode != ExplorerActionValues.ACCESS_READ_ONLY ||
+                    normalizedPresentation != ExplorerActionValues.PRESENTATION_ACTIVITY ||
+                    normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE
+                )
+        ) {
+            return null
+        }
 
         return ExplorerActionDescriptor(
             protocolVersion = protocolVersion,
@@ -231,6 +248,8 @@ internal object ExplorerActionCatalogPolicy {
             outputMimeTypes = normalizedOutput.mimeTypes,
             outputNameSuffix = normalizedOutput.nameSuffix,
             maxOutputBytes = normalizedOutput.maxBytes,
+            readSiblings = normalizedReadSiblings,
+            playbackProgress = normalizedPlaybackProgress,
         )
     }
 
@@ -413,6 +432,7 @@ internal object ExplorerActionCatalogPolicy {
     private const val HOST_EXPLORER_PROTOCOL_VERSION = 5
     private const val TARGET_REPLACEMENT_PROTOCOL_VERSION = 8
     private const val MANAGED_TARGET_PROTOCOL_VERSION = 9
+    private const val SESSION_MEDIA_EXTENSION_PROTOCOL_VERSION = 12
     private const val COMPOUND_SUFFIX_PROTOCOL_VERSION = 14
     private const val UNMATCHED_FILE_PROBE_PROTOCOL_VERSION = 17
 }

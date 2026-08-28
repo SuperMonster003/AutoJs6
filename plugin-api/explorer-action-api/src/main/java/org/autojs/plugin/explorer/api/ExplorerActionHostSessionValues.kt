@@ -26,4 +26,7 @@ object ExplorerActionHostSessionValues {
     const val TARGET_TRASH_STATE_RECOVERY_REQUIRED = 2
     const val TARGET_TRASH_STATE_FAILED = 3
     const val TARGET_TRASH_STATE_UNKNOWN = 4
+
+    const val PLAYBACK_REPORT_PROGRESS = 1
+    const val PLAYBACK_REPORT_COMPLETED = 2
 }

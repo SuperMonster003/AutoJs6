@@ -219,6 +219,13 @@ object Pref {
         get() = getString(R.string.key_hidden_files, key(R.string.default_key_hidden_files)) == key(R.string.key_hidden_files_show)
 
     @JvmStatic
+    val isExplorerPlaybackHistoryEnabled
+        get() = getBoolean(
+            R.string.key_explorer_playback_history,
+            resources.getBoolean(R.bool.pref_explorer_playback_history),
+        )
+
+    @JvmStatic
     val isFileExtensionsShownForAll
         get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_show_all)
 

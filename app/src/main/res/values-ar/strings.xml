@@ -607,6 +607,7 @@
     <string name="summary_ace_word_wrap_enabled">التفاف الأسطر الطويلة داخل إطار عرض المحرر</string>
     <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
+    <string name="summary_clear_media_playback_history">حذف جميع مواضع تشغيل الوسائط التي حفظها المضيف</string>
     <string name="summary_code_editor_settings">فتح صفحة إعدادات محرر الشفرة الكاملة</string>
     <string name="summary_dex_compiler_experimental_disabled">D8/dx المدمج فقط; يظل AAR على المسار المدمج دائما</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">D8/dx المدمج فقط; provider المحتفظ به: %1$s</string>
@@ -656,6 +657,7 @@
     <string name="summary_r8_compiler_explicit_disabled">مدخل R8 الصريح معطل; يفشل runtime.loadJarWithR8 دون رجوع</string>
     <string name="summary_r8_compiler_explicit_disabled_with_selection">مدخل R8 الصريح معطل; provider المحتفظ به: %1$s</string>
     <string name="summary_r8_compiler_explicit_selected">يستخدم runtime.loadJarWithR8 ‏%1$s; تبقى كل الأخطاء خاصة بـ R8</string>
+    <string name="summary_record_media_playback_progress">متوقف افتراضيًا. تُخزَّن مواضع التشغيل محليًا فقط بعد تفعيل هذا الخيار</string>
     <string name="summary_record_prompt">إظهار الرسالة عند بدء أو إيقاف تسجيل البرنامج النصي</string>
     <string name="summary_release_history_preference">عرض سجل الاصدارات والاحصاءات</string>
     <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
@@ -883,6 +885,7 @@
     <string name="text_clear">صافي</string>
     <string name="text_clear_custom_css">مسح CSS المخصص</string>
     <string name="text_clear_file_selection">مسح اختيار الملف</string>
+    <string name="text_clear_media_playback_history">مسح سجل تشغيل الوسائط</string>
     <string name="text_clear_pre_execute_script">مسح السيناريو قبل التنفيذ</string>
     <string name="text_clear_trash">تفريغ سلة المحذوفات</string>
     <string name="text_clear_trash_confirm">هل تريد تفريغ جميع العناصر في سلة المحذوفات?</string>
@@ -1605,6 +1608,7 @@
     <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
     <string name="text_recommended">مُستَحسَن</string>
     <string name="text_record_finished">انتهى التسجيل</string>
+    <string name="text_record_media_playback_progress">تسجيل تقدم تشغيل الوسائط</string>
     <string name="text_record_prompt">موجه التسجيل</string>
     <string name="text_record_stopped">توقف التسجيل</string>
     <string name="text_recorded_output_file_type">نوع ملف الإخراج المسجل</string>
@@ -1886,6 +1890,7 @@
     <string name="text_version_info">معلومات الإصدار</string>
     <string name="text_version_name">اسم الإصدار</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">اسم الإصدار (جارٍ الحساب...)</string>
+    <string name="text_video_player">مشغل الفيديو</string>
     <string name="text_view">عرض</string>
     <string name="text_view_docs">عرض المستندات</string>
     <string name="text_vivo_background_popup_permission">النوافذ المنبثقة في الخلفية</string>

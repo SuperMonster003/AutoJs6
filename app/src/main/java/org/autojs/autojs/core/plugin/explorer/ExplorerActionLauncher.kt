@@ -100,6 +100,8 @@ internal object ExplorerActionLauncher {
                 action.descriptor.accessMode == ExplorerActionValues.ACCESS_CREATE_IN_PARENT ||
                     action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET ||
                     action.descriptor.accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET ||
+                    action.descriptor.readSiblings ||
+                    action.descriptor.playbackProgress ||
                     targets.size > 1 ||
                     targets.any { target -> target.kind == ExplorerActionValues.TARGET_DIRECTORY }
                 )
@@ -117,6 +119,8 @@ internal object ExplorerActionLauncher {
                 allowReplaceTarget =
                     action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET ||
                         action.descriptor.accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET,
+                allowReadSiblings = action.descriptor.readSiblings,
+                allowPlaybackProgress = action.descriptor.playbackProgress,
             )
         } else {
             null
@@ -186,7 +190,15 @@ internal object ExplorerActionLauncher {
         } else {
             ExplorerActionValues.TARGET_FILE
         }
-        val mimeType = if (file.isDirectory) DIRECTORY_MIME_TYPE else Mime.fromFileOrWildcard(file.path)
+        val mimeType = if (file.isDirectory) {
+            DIRECTORY_MIME_TYPE
+        } else {
+            ExplorerActionTargetTypePolicy.resolve(
+                type = item.type,
+                fallbackMimeType = Mime.fromFileOrWildcard(file.path),
+                rawExtension = file.extension,
+            ).mimeType
+        }
         return ResolvedTarget(
             id = stableTargetId(file),
             item = item,

@@ -113,6 +113,19 @@
             app:itemDefaultKey="@string/default_key_file_extensions"
             app:longClickPrompt="@string/description_file_extensions_preference" />
 
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_explorer_playback_history"
+            app:defaultValue="@bool/pref_explorer_playback_history"
+            app:title="@string/text_record_media_playback_progress"
+            app:summary="@string/summary_record_media_playback_progress" />
+
+        <org.autojs.autojs.ui.settings.ClearExplorerPlaybackHistoryPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_clear_explorer_playback_history"
+            app:title="@string/text_clear_media_playback_history"
+            app:summary="@string/summary_clear_media_playback_history" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory

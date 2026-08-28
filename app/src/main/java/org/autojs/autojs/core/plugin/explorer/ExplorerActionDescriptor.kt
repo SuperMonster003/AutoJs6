@@ -20,6 +20,8 @@ internal data class ExplorerActionDescriptor(
     val outputMimeTypes: Set<String>,
     val outputNameSuffix: String?,
     val maxOutputBytes: Long?,
+    val readSiblings: Boolean,
+    val playbackProgress: Boolean,
 )
 
 internal data class ExplorerActionTarget(

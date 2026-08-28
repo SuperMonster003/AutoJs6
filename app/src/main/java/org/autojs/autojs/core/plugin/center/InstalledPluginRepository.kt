@@ -313,11 +313,11 @@ class InstalledPluginRepository {
         val instructionHardCoded = (if (hasLiveInfo) pluginInstruction else cachedEntry?.instruction)
             ?.truncateForSafeBinder()
         val requiresHostVersion = when {
-            hasLiveInfo -> PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities)
+            hasLiveInfo -> PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo.capabilities)
             else -> cachedExact?.requiresHostVersion
         }
         val supportedAbis = when {
-            hasLiveInfo -> pluginInfo?.supportedAbis?.toList()?.let(PluginAbiUtils::resolveSupportedAbisFromValue)
+            hasLiveInfo -> pluginInfo.supportedAbis?.toList()?.let(PluginAbiUtils::resolveSupportedAbisFromValue)
             else -> cachedExact?.supportedAbis
         }
 
@@ -331,12 +331,12 @@ class InstalledPluginRepository {
                 description = pluginDescription,
                 author = pluginAuthor,
                 instruction = instructionHardCoded,
-                versionDate = pluginInfo?.versionDate,
+                versionDate = pluginInfo.versionDate,
                 requiresHostVersion = requiresHostVersion,
                 supportedAbis = supportedAbis,
-                engine = pluginInfo?.engine,
-                variant = pluginInfo?.variant,
-                engineId = pluginInfo?.id,
+                engine = pluginInfo.engine,
+                variant = pluginInfo.variant,
+                engineId = pluginInfo.id,
             )
             else -> null
         }
@@ -354,7 +354,7 @@ class InstalledPluginRepository {
             author = (if (hasLiveInfo) pluginAuthor else cachedEntry?.author) ?: manifestAuthor,
             versionName = versionName,
             versionCode = versionCode,
-            versionDate = if (hasLiveInfo) pluginInfo?.versionDate else cachedExact?.versionDate,
+            versionDate = if (hasLiveInfo) pluginInfo.versionDate else cachedExact?.versionDate,
             requiresHostVersion = requiresHostVersion,
             supportedAbis = supportedAbis,
             packageSize = packageSize,
@@ -363,9 +363,9 @@ class InstalledPluginRepository {
             icon = icon,
             iconSignature = icon?.let { PluginInstalledIconResolver.signatureOf(packageName, versionCode, lastUpdateTime) },
             pluginInfo = pluginInfo,
-            engine = if (hasLiveInfo) pluginInfo?.engine else cachedEntry?.engine,
-            variant = if (hasLiveInfo) pluginInfo?.variant else cachedEntry?.variant,
-            engineId = if (hasLiveInfo) pluginInfo?.id else cachedEntry?.engineId,
+            engine = if (hasLiveInfo) pluginInfo.engine else cachedEntry?.engine,
+            variant = if (hasLiveInfo) pluginInfo.variant else cachedEntry?.variant,
+            engineId = if (hasLiveInfo) pluginInfo.id else cachedEntry?.engineId,
             bindError = discovery.error,
             isOcrService = discovery.isOcrService,
             isBarcodeService = discovery.isBarcodeService,

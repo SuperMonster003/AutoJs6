@@ -601,6 +601,7 @@
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
     <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
+    <string name="summary_clear_media_playback_history">Delete every playback position saved by the host</string>
     <string name="summary_code_editor_settings">Open the full code editor settings page</string>
     <string name="summary_dex_compiler_last_failure_details">Last provider failure: %1$s</string>
     <string name="summary_dex_compiler_last_path_builtin">Last JAR load: AutoJs6 built-in compiler</string>
@@ -647,6 +648,7 @@
     <string name="summary_r8_compiler_explicit_disabled">Explicit R8 entry disabled; runtime.loadJarWithR8 fails closed</string>
     <string name="summary_r8_compiler_explicit_disabled_with_selection">Explicit R8 entry disabled; retained provider: %1$s</string>
     <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 uses %1$s; every failure remains R8-only</string>
+    <string name="summary_record_media_playback_progress">Off by default. Store playback positions locally only after you enable this option</string>
     <string name="summary_record_prompt">Show message when starting or stopping recording a script</string>
     <string name="summary_release_history_preference">View release history and statistics</string>
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
@@ -874,6 +876,7 @@
     <string name="text_clear">Clear</string>
     <string name="text_clear_custom_css">Clear custom CSS</string>
     <string name="text_clear_file_selection">Clear file selection</string>
+    <string name="text_clear_media_playback_history">Clear media playback history</string>
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
     <string name="text_clear_trash">Clear trash</string>
     <string name="text_clear_trash_confirm">Clear all items in trash?</string>
@@ -1591,6 +1594,7 @@
     <string name="text_reading_splash_resources">Reading splash resources</string>
     <string name="text_recommended">Recommended</string>
     <string name="text_record_finished">Recording finished</string>
+    <string name="text_record_media_playback_progress">Record media playback progress</string>
     <string name="text_record_prompt">Recording prompt</string>
     <string name="text_record_stopped">Recording stopped</string>
     <string name="text_recorded_output_file_type">Recorded output file type</string>
@@ -1872,6 +1876,7 @@
     <string name="text_version_info">Version info</string>
     <string name="text_version_name">Version name</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Version name (computing...)</string>
+    <string name="text_video_player">Video Player</string>
     <string name="text_view">View</string>
     <string name="text_view_docs">View documents</string>
     <string name="text_vivo_background_popup_permission">Background pop-ups</string>

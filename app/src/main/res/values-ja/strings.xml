@@ -606,6 +606,7 @@
     <string name="summary_ace_word_wrap_enabled">エディターのビューポート内で長い行を折り返す</string>
     <string name="summary_all_files_access">AutoJs6 が外部ストレージを含むすべてのファイルにアクセスすることを許可します</string>
     <string name="summary_all_files_access_inrt">アプリが外部ストレージを含むすべてのファイルにアクセスすることを許可する</string>
+    <string name="summary_clear_media_playback_history">ホストが保存したすべての再生位置を削除します</string>
     <string name="summary_code_editor_settings">コードエディターの全設定ページを開く</string>
     <string name="summary_dex_compiler_experimental_disabled">組み込み D8/dx のみ; AAR は常に組み込み経路</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">組み込み D8/dx のみ; 保持中の provider: %1$s</string>
@@ -655,6 +656,7 @@
     <string name="summary_r8_compiler_explicit_disabled">明示的 R8 入口は無効; runtime.loadJarWithR8 は安全側に失敗</string>
     <string name="summary_r8_compiler_explicit_disabled_with_selection">明示的 R8 入口は無効; 保持中の provider: %1$s</string>
     <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 は %1$s を使用; すべての失敗は R8-only のまま</string>
+    <string name="summary_record_media_playback_progress">既定ではオフです。この設定を有効にした後にのみ再生位置をローカルに保存します</string>
     <string name="summary_record_prompt">スクリプトの録音を開始または停止するときにメッセージを表示する</string>
     <string name="summary_release_history_preference">リリース履歴と統計を表示</string>
     <string name="summary_rhino_java_primitive_wrap">Java のプリミティブ型はスクリプト内で Java オブジェクトとしてラップされます</string>
@@ -882,6 +884,7 @@
     <string name="text_clear">クリア</string>
     <string name="text_clear_custom_css">カスタム CSS をクリア</string>
     <string name="text_clear_file_selection">ファイル選択の解除</string>
+    <string name="text_clear_media_playback_history">メディア再生履歴を消去</string>
     <string name="text_clear_pre_execute_script">実行前スクリプトのクリア</string>
     <string name="text_clear_trash">ゴミ箱を空にする</string>
     <string name="text_clear_trash_confirm">ゴミ箱内の項目をすべて削除しますか?</string>
@@ -1604,6 +1607,7 @@
     <string name="text_reading_splash_resources">スプラッシュ資源を読み込み中</string>
     <string name="text_recommended">推奨</string>
     <string name="text_record_finished">記録終了</string>
+    <string name="text_record_media_playback_progress">メディアの再生進行状況を記録</string>
     <string name="text_record_prompt">録画のプロンプト</string>
     <string name="text_record_stopped">記録停止</string>
     <string name="text_recorded_output_file_type">記録された出力ファイルの種類</string>
@@ -1885,6 +1889,7 @@
     <string name="text_version_info">バージョン情報</string>
     <string name="text_version_name">バージョン名</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">バージョン名 (計算中...)</string>
+    <string name="text_video_player">動画プレーヤー</string>
     <string name="text_view">表示</string>
     <string name="text_view_docs">ドキュメントを見る</string>
     <string name="text_vivo_background_popup_permission">バックグラウンドでのポップアップ表示</string>

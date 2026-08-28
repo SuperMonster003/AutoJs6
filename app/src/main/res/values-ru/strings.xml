@@ -605,6 +605,7 @@
     <string name="summary_ace_word_wrap_enabled">Переносить длинные строки в пределах области редактора</string>
     <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
+    <string name="summary_clear_media_playback_history">Удалить все позиции воспроизведения, сохранённые хостом</string>
     <string name="summary_code_editor_settings">Открыть полную страницу настроек редактора кода</string>
     <string name="summary_dex_compiler_experimental_disabled">Только встроенный D8/dx; AAR всегда остается на встроенном пути</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">Только встроенный D8/dx; сохраненный provider: %1$s</string>
@@ -654,6 +655,7 @@
     <string name="summary_r8_compiler_explicit_disabled">Явная точка входа R8 отключена; runtime.loadJarWithR8 завершается без перехода</string>
     <string name="summary_r8_compiler_explicit_disabled_with_selection">Явная точка входа R8 отключена; сохраненный provider: %1$s</string>
     <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 использует %1$s; все сбои остаются только R8</string>
+    <string name="summary_record_media_playback_progress">По умолчанию отключено. Позиции воспроизведения сохраняются локально только после включения этой настройки</string>
     <string name="summary_record_prompt">Показывать сообщение при начале или прекращении записи сценария</string>
     <string name="summary_release_history_preference">Просмотр истории релизов и статистики</string>
     <string name="summary_rhino_java_primitive_wrap">Примитивы Java в скрипте будут обёрнуты в объекты Java</string>
@@ -881,6 +883,7 @@
     <string name="text_clear">Очистить</string>
     <string name="text_clear_custom_css">Очистить пользовательский CSS</string>
     <string name="text_clear_file_selection">Очистить выбор файла</string>
+    <string name="text_clear_media_playback_history">Очистить историю воспроизведения медиа</string>
     <string name="text_clear_pre_execute_script">Очистить сценарий предварительного выполнения</string>
     <string name="text_clear_trash">Очистить корзину</string>
     <string name="text_clear_trash_confirm">Очистить все элементы в корзине?</string>
@@ -1603,6 +1606,7 @@
     <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>
     <string name="text_recommended">Рекомендуемый</string>
     <string name="text_record_finished">Запись завершена</string>
+    <string name="text_record_media_playback_progress">Записывать прогресс воспроизведения медиа</string>
     <string name="text_record_prompt">Запрос записи</string>
     <string name="text_record_stopped">Запись остановлена</string>
     <string name="text_recorded_output_file_type">Тип выходного файла записи</string>
@@ -1884,6 +1888,7 @@
     <string name="text_version_info">Информация о версии</string>
     <string name="text_version_name">Название версии</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Название версии (Вычисление...)</string>
+    <string name="text_video_player">Видеоплеер</string>
     <string name="text_view">Просмотр</string>
     <string name="text_view_docs">Просмотр документов</string>
     <string name="text_vivo_background_popup_permission">Всплывающие окна в фоне</string>

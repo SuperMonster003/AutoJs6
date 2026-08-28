@@ -89,4 +89,22 @@ interface IExplorerActionHostSession {
 
     /** v16. Returns the terminal result of this session's single source-to-Trash operation. */
     Bundle queryTargetTrash();
+
+    /**
+     * v12 optional extension. Returns host-owned playback progress for the target or a permitted
+     * direct sibling. The result always reports whether host history is enabled.
+     */
+    Bundle getPlaybackProgress(String targetId, String relativePath);
+
+    /**
+     * v12 optional extension. Stores or clears host-owned playback progress for the target or a
+     * permitted direct sibling. Hosts with history disabled ignore reports.
+     */
+    void reportPlaybackProgress(
+        String targetId,
+        String relativePath,
+        long positionMillis,
+        long durationMillis,
+        int reportState
+    );
 }

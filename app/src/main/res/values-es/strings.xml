@@ -605,6 +605,7 @@
     <string name="summary_ace_word_wrap_enabled">Ajustar las líneas largas dentro del área visible del editor</string>
     <string name="summary_all_files_access">Permite que AutoJs6 acceda a todos los archivos, incluidos los del almacenamiento externo</string>
     <string name="summary_all_files_access_inrt">Permitir que la aplicación acceda a todos los archivos, incluido el almacenamiento externo</string>
+    <string name="summary_clear_media_playback_history">Eliminar todas las posiciones de reproducción guardadas por el host</string>
     <string name="summary_code_editor_settings">Abrir la página completa de ajustes del editor de código</string>
     <string name="summary_dex_compiler_experimental_disabled">Solo D8/dx integrado; AAR siempre usa la ruta integrada</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">Solo D8/dx integrado; provider conservado: %1$s</string>
@@ -654,6 +655,7 @@
     <string name="summary_r8_compiler_explicit_disabled">Entrada R8 explícita desactivada; runtime.loadJarWithR8 falla de forma cerrada</string>
     <string name="summary_r8_compiler_explicit_disabled_with_selection">Entrada R8 explícita desactivada; provider conservado: %1$s</string>
     <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 usa %1$s; todos los fallos siguen siendo solo R8</string>
+    <string name="summary_record_media_playback_progress">Desactivado de forma predeterminada. Las posiciones de reproducción solo se guardan localmente después de activar esta opción</string>
     <string name="summary_record_prompt">Mostrar mensaje al iniciar o detener la grabación de un guion</string>
     <string name="summary_release_history_preference">Ver historial de lanzamientos y estadisticas</string>
     <string name="summary_rhino_java_primitive_wrap">Los tipos primitivos de Java se envolverán como objetos Java en los scripts</string>
@@ -881,6 +883,7 @@
     <string name="text_clear">Borrar</string>
     <string name="text_clear_custom_css">Borrar CSS personalizado</string>
     <string name="text_clear_file_selection">Borrar selección de archivos</string>
+    <string name="text_clear_media_playback_history">Borrar historial de reproducción multimedia</string>
     <string name="text_clear_pre_execute_script">Borrar script de pre-ejecución</string>
     <string name="text_clear_trash">Vaciar papelera</string>
     <string name="text_clear_trash_confirm">¿Vaciar todos los elementos de la papelera?</string>
@@ -1603,6 +1606,7 @@
     <string name="text_reading_splash_resources">Leyendo recursos de inicio</string>
     <string name="text_recommended">Recomendado</string>
     <string name="text_record_finished">Grabación terminada</string>
+    <string name="text_record_media_playback_progress">Registrar el progreso de reproducción multimedia</string>
     <string name="text_record_prompt">Aviso de grabación</string>
     <string name="text_record_stopped">Grabación detenida</string>
     <string name="text_recorded_output_file_type">Tipo de archivo de salida grabado</string>
@@ -1884,6 +1888,7 @@
     <string name="text_version_info">Información de la versión</string>
     <string name="text_version_name">Nombre de la versión</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Nombre de la versión (Calculando...)</string>
+    <string name="text_video_player">Reproductor de video</string>
     <string name="text_view">Ver</string>
     <string name="text_view_docs">Ver documentos</string>
     <string name="text_vivo_background_popup_permission">Ventanas emergentes en segundo plano</string>

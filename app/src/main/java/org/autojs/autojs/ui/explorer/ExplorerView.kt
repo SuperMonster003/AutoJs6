@@ -1001,6 +1001,75 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
     }
 
+    private fun selectPluginAction(
+        item: ExplorerItem,
+        actions: List<ResolvedExplorerAction>,
+    ): ResolvedExplorerAction? {
+        return if (requiresOfficialVideoPlayer(item)) {
+            actions.firstOrNull(ExplorerVideoPlayerPluginUi::isOfficialAction)
+        } else {
+            actions.firstOrNull()
+        }
+    }
+
+    private fun resolvePluginAction(
+        entryPoint: ExplorerActionEntryPoint,
+        item: ExplorerItem,
+    ): ResolvedExplorerAction? {
+        val provider = mPluginActionProvider
+            ?: return null
+        return runCatching {
+            selectPluginAction(
+                item,
+                provider.actionsFor(mPluginActionSurface, entryPoint, item),
+            )
+        }.onFailure { error ->
+            Log.w(LOG_TAG, "Failed to resolve Explorer plugin action from $entryPoint", error)
+        }.getOrNull()
+    }
+
+    /**
+     * Handles every file-manager video playback request, including materialized archive entries
+     * and unavailable-plugin states. A true result forbids an implicit ACTION_VIEW fallback.
+     */
+    private fun launchOfficialVideoOrShowGuidance(
+        entryPoint: ExplorerActionEntryPoint,
+        item: ExplorerItem,
+        preResolvedAction: ResolvedExplorerAction? = null,
+    ): Boolean {
+        if (!requiresOfficialVideoPlayer(item)) return false
+        val action = preResolvedAction
+            ?.takeIf(ExplorerVideoPlayerPluginUi::isOfficialAction)
+            ?: resolvePluginAction(entryPoint, item)
+        val launched = action?.let { launchPluginAction(entryPoint, it, item) } == true
+        if (!launched) {
+            ExplorerVideoPlayerPluginUi.showUnavailableDialog(context, item)
+        }
+        return true
+    }
+
+    private fun requiresOfficialVideoPlayer(item: ExplorerItem): Boolean =
+        mPluginActionSurface == ExplorerSurface.MAIN_FILES && item.type.isVideoFile()
+
+    private fun launchPluginAction(
+        entryPoint: ExplorerActionEntryPoint,
+        pluginAction: ResolvedExplorerAction,
+        item: ExplorerItem,
+    ): Boolean {
+        if (mPluginActionProvider == null) return false
+        return runCatching {
+            dispatchPluginAction(
+                context,
+                mPluginActionSurface,
+                entryPoint,
+                listOf(item),
+                pluginAction,
+            ).getOrThrow()
+        }.onFailure { error ->
+            Log.w(LOG_TAG, "Failed to launch Explorer plugin action from $entryPoint", error)
+        }.isSuccess
+    }
+
     internal fun setOnArchiveModeStateChangeListener(listener: ((Boolean) -> Unit)?) {
         mOnArchiveModeStateChangeListener = listener
         listener?.invoke(mArchiveNavigationState != null)
@@ -1327,7 +1396,17 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     ExplorerPrimaryAction.IMAGE_VIEW,
                     ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,
                     -> ExplorerFileItem(materialized, null).view(context)
-                    ExplorerPrimaryAction.MEDIA_PLAY -> ExplorerFileItem(materialized, null).play(context)
+                    ExplorerPrimaryAction.MEDIA_PLAY -> {
+                        val mediaItem = ExplorerFileItem(materialized, null)
+                        if (
+                            !launchOfficialVideoOrShowGuidance(
+                                ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                                mediaItem,
+                            )
+                        ) {
+                            mediaItem.play(context)
+                        }
+                    }
                 }
             } catch (error: CancellationException) {
                 throw error
@@ -2536,7 +2615,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                             mPluginActionSurface,
                             ExplorerActionEntryPoint.PRIMARY_BUTTON,
                             item,
-                        )?.firstOrNull()
+                        )?.let { actions -> selectPluginAction(item, actions) }
                     }.onFailure { error ->
                         Log.w(LOG_TAG, "Failed to resolve primary Explorer plugin action", error)
                     }.getOrNull()
@@ -2655,13 +2734,31 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 notifyItemOperated()
                 return
             }
-            val pluginAction = resolvePluginAction(ExplorerActionEntryPoint.DEFAULT_CLICK)
+            if (
+                launchOfficialVideoOrShowGuidance(
+                    ExplorerActionEntryPoint.DEFAULT_CLICK,
+                    mExplorerItem,
+                )
+            ) {
+                notifyItemOperated()
+                return
+            }
+            val pluginAction = resolvePluginAction(
+                ExplorerActionEntryPoint.DEFAULT_CLICK,
+                mExplorerItem,
+            )
             if (pluginAction == null) {
                 dispatchHostItemClick()
                 return
             }
             if (ExplorerActionExecution.withFallback(
-                    attempt = { launchPluginAction(ExplorerActionEntryPoint.DEFAULT_CLICK, pluginAction) },
+                    attempt = {
+                        launchPluginAction(
+                            ExplorerActionEntryPoint.DEFAULT_CLICK,
+                            pluginAction,
+                            mExplorerItem,
+                        )
+                    },
                     fallback = ::dispatchHostItemClick,
                 )
             ) {
@@ -2738,10 +2835,26 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 notifyItemOperated()
                 return
             }
+            if (
+                launchOfficialVideoOrShowGuidance(
+                    entryPoint = ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                    item = mExplorerItem,
+                    preResolvedAction = pluginAction,
+                )
+            ) {
+                notifyItemOperated()
+                return
+            }
             val fallback = { openHostPrimaryViewer(action) }
             if (pluginAction != null) {
                 ExplorerActionExecution.withFallback(
-                    attempt = { launchPluginAction(ExplorerActionEntryPoint.PRIMARY_BUTTON, pluginAction) },
+                    attempt = {
+                        launchPluginAction(
+                            ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                            pluginAction,
+                            mExplorerItem,
+                        )
+                    },
                     fallback = fallback,
                 )
             } else {
@@ -2767,43 +2880,17 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             }
         }
 
-        private fun resolvePluginAction(
-            entryPoint: ExplorerActionEntryPoint,
-            item: ExplorerItem = mExplorerItem,
-        ): ResolvedExplorerAction? {
-            val provider = mPluginActionProvider
-                ?: return null
-            return runCatching {
-                provider.actionsFor(mPluginActionSurface, entryPoint, item).firstOrNull()
-            }.onFailure { error ->
-                Log.w(LOG_TAG, "Failed to resolve Explorer plugin action from $entryPoint", error)
-            }.getOrNull()
-        }
-
-        private fun launchPluginAction(
-            entryPoint: ExplorerActionEntryPoint,
-            pluginAction: ResolvedExplorerAction,
-            item: ExplorerItem = mExplorerItem,
-        ): Boolean {
-            if (mPluginActionProvider == null) return false
-            return runCatching {
-                dispatchPluginAction(
-                    context,
-                    mPluginActionSurface,
-                    entryPoint,
-                    listOf(item),
-                    pluginAction,
-                ).getOrThrow()
-            }.onFailure { error ->
-                Log.w(LOG_TAG, "Failed to launch Explorer plugin action from $entryPoint", error)
-            }.isSuccess
-        }
-
         private fun run() {
             mRequestHostDialogHide?.run()
             when {
                 mExplorerItem.isExecutable -> {
                     Scripts.runInteractive(context, ScriptFile(mExplorerItem.path))
+                    notifyItemOperated()
+                }
+                launchOfficialVideoOrShowGuidance(
+                    ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                    mExplorerItem,
+                ) -> {
                     notifyItemOperated()
                 }
                 mExplorerItem.isMediaPlayable -> {
@@ -2860,9 +2947,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                             mRequestHostDialogShow?.run()
                         },
                         onPlayRequested = {
-                            resolvePluginAction(ExplorerActionEntryPoint.MEDIA_INFO_DIALOG, mediaItem)?.let { action ->
-                                launchPluginAction(ExplorerActionEntryPoint.MEDIA_INFO_DIALOG, action, mediaItem)
-                            } == true
+                            launchOfficialVideoOrShowGuidance(
+                                ExplorerActionEntryPoint.MEDIA_INFO_DIALOG,
+                                mediaItem,
+                            ) || (
+                                resolvePluginAction(ExplorerActionEntryPoint.MEDIA_INFO_DIALOG, mediaItem)?.let { action ->
+                                    launchPluginAction(ExplorerActionEntryPoint.MEDIA_INFO_DIALOG, action, mediaItem)
+                                } == true
+                            )
                         },
                     )
                     notifyItemOperated()

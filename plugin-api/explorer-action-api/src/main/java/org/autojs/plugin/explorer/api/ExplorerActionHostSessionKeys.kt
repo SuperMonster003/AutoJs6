@@ -37,4 +37,10 @@ object ExplorerActionHostSessionKeys {
     const val TARGET_TRASH_ITEM_IDS = "targetTrashItemIds"
     const val TARGET_TRASH_MOVED_COUNT = "targetTrashMovedCount"
     const val TARGET_TRASH_RECOVERY_COUNT = "targetTrashRecoveryCount"
+
+    const val PLAYBACK_HISTORY_ENABLED = "playbackHistoryEnabled"
+    const val PLAYBACK_PROGRESS_PRESENT = "playbackProgressPresent"
+    const val PLAYBACK_POSITION_MILLIS = "playbackPositionMillis"
+    const val PLAYBACK_DURATION_MILLIS = "playbackDurationMillis"
+    const val PLAYBACK_UPDATED_AT_MILLIS = "playbackUpdatedAtMillis"
 }

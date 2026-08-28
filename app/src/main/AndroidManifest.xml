@@ -35,6 +35,7 @@
 
     <queries>
         <package android:name="io.github.supermonster003.autojs6.plugin.python.runtime" />
+        <package android:name="io.github.supermonster003.autojs6.plugin.videoplayer" />
         <intent>
             <action android:name="org.autojs.plugin.INFO" />
         </intent>

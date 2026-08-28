@@ -16,6 +16,7 @@
     <bool name="pref_editor_auto_show_log_bottom_sheet_on_run">true</bool>
     <bool name="pref_editor_fullscreen_mode">false</bool>
     <bool name="pref_editor_pinch_to_zoom_change_text_size_enabled">true</bool>
+    <bool name="pref_explorer_playback_history">false</bool>
     <bool name="pref_extending_js_build_in_objects">false</bool>
     <bool name="pref_gesture_observing">false</bool>
     <bool name="pref_guard_mode">false</bool>

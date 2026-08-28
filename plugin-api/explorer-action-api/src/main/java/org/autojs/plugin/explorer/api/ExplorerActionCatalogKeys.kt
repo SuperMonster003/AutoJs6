@@ -26,4 +26,10 @@ object ExplorerActionCatalogKeys {
     const val OUTPUT_MIME_TYPES = "outputMimeTypes"
     const val OUTPUT_NAME_SUFFIX = "outputNameSuffix"
     const val MAX_OUTPUT_BYTES = "maxOutputBytes"
+
+    /** v12 optional. Grants direct-parent enumeration and direct-sibling read access for one file. */
+    const val READ_SIBLINGS = "readSiblings"
+
+    /** v12 optional. Grants access to the host's opt-in playback progress channel. */
+    const val PLAYBACK_PROGRESS = "playbackProgress"
 }

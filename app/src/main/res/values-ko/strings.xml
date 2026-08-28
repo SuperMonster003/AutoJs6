@@ -607,6 +607,7 @@
     <string name="summary_ace_word_wrap_enabled">편집기 뷰포트 안에서 긴 줄 바꿈</string>
     <string name="summary_all_files_access">AutoJs6 가 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_all_files_access_inrt">앱이 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
+    <string name="summary_clear_media_playback_history">호스트가 저장한 모든 미디어 재생 위치 삭제</string>
     <string name="summary_code_editor_settings">전체 코드 편집기 설정 페이지 열기</string>
     <string name="summary_dex_compiler_experimental_disabled">내장 D8/dx만 사용; AAR는 항상 내장 경로 사용</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">내장 D8/dx만 사용; 유지된 provider: %1$s</string>
@@ -656,6 +657,7 @@
     <string name="summary_r8_compiler_explicit_disabled">명시적 R8 진입점 비활성화; runtime.loadJarWithR8 는 안전하게 실패</string>
     <string name="summary_r8_compiler_explicit_disabled_with_selection">명시적 R8 진입점 비활성화; 유지된 provider: %1$s</string>
     <string name="summary_r8_compiler_explicit_selected">runtime.loadJarWithR8 는 %1$s 사용; 모든 실패는 R8-only 로 유지</string>
+    <string name="summary_record_media_playback_progress">기본적으로 꺼져 있습니다. 이 옵션을 활성화한 후에만 재생 위치를 로컬에 저장합니다</string>
     <string name="summary_record_prompt">스크립트 기록을 시작하거나 중지할 때 메시지 표시</string>
     <string name="summary_release_history_preference">릴리스 기록과 통계를 보기</string>
     <string name="summary_rhino_java_primitive_wrap">Java 원시 타입이 스크립트에서 Java 객체로 래핑됩니다</string>
@@ -883,6 +885,7 @@
     <string name="text_clear">분명한</string>
     <string name="text_clear_custom_css">사용자 지정 CSS 지우기</string>
     <string name="text_clear_file_selection">파일 선택을 지우십시오</string>
+    <string name="text_clear_media_playback_history">미디어 재생 기록 지우기</string>
     <string name="text_clear_pre_execute_script">사전 에코 슈트 스크립트를 지우십시오</string>
     <string name="text_clear_trash">휴지통 비우기</string>
     <string name="text_clear_trash_confirm">휴지통의 모든 항목을 비울까요?</string>
@@ -1605,6 +1608,7 @@
     <string name="text_reading_splash_resources">스플래시 리소스 읽는 중</string>
     <string name="text_recommended">권장</string>
     <string name="text_record_finished">녹음 완료</string>
+    <string name="text_record_media_playback_progress">미디어 재생 진행률 기록</string>
     <string name="text_record_prompt">녹음 프롬프트</string>
     <string name="text_record_stopped">녹화 중지됨</string>
     <string name="text_recorded_output_file_type">기록 된 출력 파일 유형</string>
@@ -1886,6 +1890,7 @@
     <string name="text_version_info">버전 정보</string>
     <string name="text_version_name">버전 이름</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">버전 이름 (계산 중...)</string>
+    <string name="text_video_player">동영상 플레이어</string>
     <string name="text_view">보기</string>
     <string name="text_view_docs">문서를 봅니다</string>
     <string name="text_vivo_background_popup_permission">백그라운드 팝업</string>

@@ -58,6 +58,8 @@ internal object ExplorerActionCatalogParser {
                 outputMimeTypes = action.getStringArrayList(ExplorerActionCatalogKeys.OUTPUT_MIME_TYPES),
                 outputNameSuffix = action.getStringOrNull(ExplorerActionCatalogKeys.OUTPUT_NAME_SUFFIX),
                 maxOutputBytes = action.getLongOrNull(ExplorerActionCatalogKeys.MAX_OUTPUT_BYTES),
+                readSiblings = action.getBooleanOrNull(ExplorerActionCatalogKeys.READ_SIBLINGS),
+                playbackProgress = action.getBooleanOrNull(ExplorerActionCatalogKeys.PLAYBACK_PROGRESS),
             ) ?: return@mapNotNull null
             descriptor.takeIf { actionIds.add(it.id) }
         }
@@ -76,4 +78,7 @@ internal object ExplorerActionCatalogParser {
         return if (containsKey(key)) getString(key) ?: "" else null
     }
 
+    private fun Bundle.getBooleanOrNull(key: String): Boolean? {
+        return if (containsKey(key)) getBoolean(key) else null
+    }
 }

@@ -31,6 +31,12 @@ object FileUtils {
     private const val MINIMUM_URI_CACHE_RESERVE_BYTES = 128L * 1024L * 1024L
     private const val URI_CACHE_SPACE_RECHECK_BYTES = 8L * 1024L * 1024L
     private const val URI_CACHE_SESSION_MAX_AGE_MILLIS = 24L * 60L * 60L * 1000L
+    private const val MPEG2_TS_PROBE_BYTES = 16 * 1024
+    private const val MPEG2_TS_MIN_PACKETS = 4
+    private const val MPEG2_TS_HEADER_BYTES = 4
+    private const val MPEG2_TS_MAX_LEADING_BYTES = 4 * 1024
+    private val MPEG2_TS_PACKET_SIZES = intArrayOf(188, 192, 204)
+    private val MPEG2_TS_SYNC_BYTE = 0x47.toByte()
 
     @JvmStatic
     fun getExtension(file: File): String = getExtension(file.name)
@@ -329,7 +335,19 @@ object FileUtils {
         val DISK_IMAGE_CUE_SHEET = TypeData(DISK_IMAGE.iconData, TYPE.IDENTITY_TEXT_EDITABLE)
         val CODE = TypeData(IconData("⌗", toTop = 1), TYPE.IDENTITY_TEXT_EDITABLE)
         val JAVA_SOURCE = TypeData(
-            IconData("⌗", toTop = 1),
+            IconData("J"),
+            TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE,
+        )
+        val KOTLIN_SOURCE = TypeData(
+            IconData("K"),
+            TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE,
+        )
+        val TYPESCRIPT_SOURCE = TypeData(
+            IconData("T"),
+            TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE,
+        )
+        val PYTHON_SOURCE = TypeData(
+            IconData("P"),
             TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE,
         )
         val COMPILE = TypeData(IconData("☍"))
@@ -403,8 +421,8 @@ object FileUtils {
         NODE_JAVASCRIPT("node.js", TypeDataHolder.NODE_JAVASCRIPT),
         MODULE_JAVASCRIPT("mjs", TypeDataHolder.NODE_JAVASCRIPT),
         COMMONJS_JAVASCRIPT("cjs", TypeDataHolder.NODE_JAVASCRIPT),
-        MODULE_TYPESCRIPT("mts", TypeDataHolder.NODE_JAVASCRIPT),
-        COMMONJS_TYPESCRIPT("cts", TypeDataHolder.NODE_JAVASCRIPT),
+        MODULE_TYPESCRIPT("mts", TypeDataHolder.TYPESCRIPT_SOURCE, priority = 1),
+        COMMONJS_TYPESCRIPT("cts", TypeDataHolder.TYPESCRIPT_SOURCE),
         AUTO("auto", TypeDataHolder.AUTO),
 
         // 编程语言 (Programming language)
@@ -414,18 +432,21 @@ object FileUtils {
 
         /** TypeScript source file, a typed superset of JavaScript. */
         TYPESCRIPT(
-            "ts", TypeDataHolder.CODE,
-            CandidateCriterion({ it.isTypeScriptLike() }, 10),
-            CandidateCriterion({ it.isSizeLessThan(100, SizeUnit.KB) }, 5),
-            CandidateCriterion({ it.isSizeLessThan(1, SizeUnit.MB) }, 1),
+            "ts", TypeDataHolder.TYPESCRIPT_SOURCE,
             priority = 1,
         ),
 
         /** TypeScript declaration file, describes the types of a module. */
         TYPESCRIPT_DECLARATION("d.ts", TypeDataHolder.CREATION),
 
+        /** TypeScript declaration file for an ECMAScript module. */
+        TYPESCRIPT_MODULE_DECLARATION("d.mts", TypeDataHolder.CREATION),
+
+        /** TypeScript declaration file for a CommonJS module. */
+        TYPESCRIPT_COMMONJS_DECLARATION("d.cts", TypeDataHolder.CREATION),
+
         /** React TypeScript file, used for React components with TypeScript. */
-        REACT_TYPESCRIPT("tsx", TypeDataHolder.CODE),
+        REACT_TYPESCRIPT("tsx", TypeDataHolder.TYPESCRIPT_SOURCE),
 
         /** React JavaScript file, used for React components with JavaScript. */
         REACT_JAVASCRIPT("jsx", TypeDataHolder.CODE),
@@ -440,7 +461,7 @@ object FileUtils {
         NFEX("nfex", TypeDataHolder.CODE),
 
         /** Kotlin source file, used in Kotlin applications. */
-        KOTLIN("kt", TypeDataHolder.JAVA_SOURCE),
+        KOTLIN("kt", TypeDataHolder.KOTLIN_SOURCE),
 
         /** Kotlin script file, used for scripting with Kotlin. */
         KOTLIN_SCRIPT("kts", TypeDataHolder.CODE),
@@ -470,7 +491,7 @@ object FileUtils {
         INC("inc", TypeDataHolder.CODE),
 
         /** Python source file, used in Python applications. */
-        PYTHON("py", TypeDataHolder.CODE),
+        PYTHON("py", TypeDataHolder.PYTHON_SOURCE),
 
         /** Ruby source file, used for Ruby programming. */
         RUBY("rb", TypeDataHolder.CODE),
@@ -1706,7 +1727,10 @@ object FileUtils {
         MPV4("mpv4", TypeDataHolder.VIDEO),
 
         /** MPEG Transport Stream video file, typically used by advanced videocams. */
-        MTS("mts", TypeDataHolder.VIDEO),
+        MTS(
+            "mts", TypeDataHolder.VIDEO,
+            CandidateCriterion({ it.isMpeg2TsLike() }, 100),
+        ),
 
         /** Ogg Media file, supports various codecs. */
         OGM("ogm", TypeDataHolder.VIDEO),
@@ -1741,10 +1765,7 @@ object FileUtils {
         /** MPEG-2 Transport Stream video file used in broadcasting. */
         MPEG2_TS(
             "ts", TypeDataHolder.VIDEO,
-            CandidateCriterion({ it.isMpeg2TsLike() }, 10),
-            CandidateCriterion({ it.isSizeGreaterThan(10, SizeUnit.MB) }, 1),
-            CandidateCriterion({ it.isSizeGreaterThan(100, SizeUnit.MB) }, 3),
-            CandidateCriterion({ it.isSizeGreaterThan(500, SizeUnit.MB) }, 5),
+            CandidateCriterion({ it.isMpeg2TsLike() }, 100),
         ),
 
         /** Generic video file format. */
@@ -3126,6 +3147,9 @@ object FileUtils {
 
         fun isImageFile() = typeData === TypeDataHolder.PICTURE
 
+        fun isVideoFile() =
+            typeData === TypeDataHolder.VIDEO || typeData === TypeDataHolder.VIDEO_PLAYLIST
+
         fun isImageViewable() = viewerType == ViewerType.IMAGE
 
         fun isAudioPlayable() = viewerType == ViewerType.AUDIO
@@ -3229,17 +3253,40 @@ object FileUtils {
 
     @JvmStatic
     fun File.isMpeg2TsLike(): Boolean {
-        val magicByte = 0x47.toByte()
-        val tsPacketSize = 188
         return runCatching {
             this@isMpeg2TsLike.inputStream().use { inputStream ->
-                val buffer = ByteArray(tsPacketSize)
-                when (inputStream.read(buffer)) {
-                    tsPacketSize -> buffer[0] == magicByte
-                    else -> false
+                val buffer = ByteArray(MPEG2_TS_PROBE_BYTES)
+                var byteCount = 0
+                while (byteCount < buffer.size) {
+                    val read = inputStream.read(buffer, byteCount, buffer.size - byteCount)
+                    if (read <= 0) break
+                    byteCount += read
+                }
+                MPEG2_TS_PACKET_SIZES.any { packetSize ->
+                    hasMpeg2TsPacketCadence(buffer, byteCount, packetSize)
                 }
             }
         }.getOrElse { false }
+    }
+
+    private fun hasMpeg2TsPacketCadence(
+        bytes: ByteArray,
+        byteCount: Int,
+        packetSize: Int,
+    ): Boolean {
+        val requiredSpan = (MPEG2_TS_MIN_PACKETS - 1) * packetSize + MPEG2_TS_HEADER_BYTES
+        val lastStart = minOf(
+            byteCount - requiredSpan,
+            MPEG2_TS_MAX_LEADING_BYTES,
+        )
+        if (lastStart < 0) return false
+        return (0..lastStart).any { start ->
+            (0 until MPEG2_TS_MIN_PACKETS).all { packetIndex ->
+                val offset = start + packetIndex * packetSize
+                bytes[offset] == MPEG2_TS_SYNC_BYTE &&
+                    ((bytes[offset + 3].toInt() ushr 4) and 0x03) != 0
+            }
+        }
     }
 
     @JvmStatic

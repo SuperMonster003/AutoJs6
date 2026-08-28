@@ -52,11 +52,14 @@ internal class ExplorerActionHostSession private constructor(
     targets: List<ExplorerActionHostSessionTarget>,
     private val allowCreateOutput: Boolean,
     private val allowReplaceTarget: Boolean,
+    private val allowReadSiblings: Boolean,
+    private val allowPlaybackProgress: Boolean,
     private val onOutputCommitted: (File) -> Unit,
     private val onTargetReplaced: (File) -> Unit,
     private val onSourcesTrashed: () -> Unit,
     private val outputTreeStore: ExplorerActionOutputTreeStore,
     private val outputBatchStore: ExplorerActionOutputBatchStore,
+    private val playbackHistoryStore: ExplorerPlaybackHistoryStore,
     private val clock: () -> Long,
     private val afterBatchMemberPublished: (Int) -> Unit,
 ) : IExplorerActionHostSession.Stub() {
@@ -96,7 +99,15 @@ internal class ExplorerActionHostSession private constructor(
             "Explorer Action child page size is invalid"
         }
         val root = target(targetId)
-        val directory = resolve(root, relativePath)
+        val directory = if (root.isFile) {
+            check(allowReadSiblings) { "Explorer Action does not have direct-sibling access" }
+            require(normalizeRelativePath(relativePath).isEmpty()) {
+                "Explorer Action file target can list only its direct parent"
+            }
+            parent
+        } else {
+            resolve(root, relativePath)
+        }
         require(directory.isDirectory) { "Explorer Action session path is not a directory" }
         val children = directory.listFiles()
             ?.sortedWith(compareBy<File>({ it.name.lowercase(Locale.ROOT) }, File::getName))
@@ -105,8 +116,13 @@ internal class ExplorerActionHostSession private constructor(
         val page = children.drop(offset).take(limit)
         val items = ArrayList<Bundle>(page.size)
         page.forEach { child ->
-            val childRelativePath = joinRelativePath(relativePath, child.name)
-            items += childMetadata(root, child, childRelativePath)
+            val childRelativePath = if (root.isFile) {
+                normalizeRelativePath(child.name)
+            } else {
+                joinRelativePath(relativePath, child.name)
+            }
+            val metadataRoot = if (root.isFile) directory else root
+            items += childMetadata(metadataRoot, child, childRelativePath)
         }
         val nextOffset = offset + page.size
         return Bundle().apply {
@@ -118,9 +134,46 @@ internal class ExplorerActionHostSession private constructor(
 
     override fun openFile(targetId: String, relativePath: String): ParcelFileDescriptor {
         enforceCaller()
-        val file = resolve(target(targetId), relativePath)
+        val file = resolveInput(targetId, relativePath)
         require(file.isFile && file.canRead()) { "Explorer Action session file is not readable" }
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+    }
+
+    override fun getPlaybackProgress(targetId: String, relativePath: String): Bundle {
+        enforceCaller()
+        check(allowPlaybackProgress) { "Explorer Action does not have playback-progress access" }
+        val file = resolveInput(targetId, relativePath)
+        require(file.isFile && file.canRead()) { "Explorer Action playback target is not readable" }
+        val enabled = playbackHistoryStore.enabled
+        val record = if (enabled) playbackHistoryStore.get(file) else null
+        return Bundle().apply {
+            putBoolean(ExplorerActionHostSessionKeys.PLAYBACK_HISTORY_ENABLED, enabled)
+            putBoolean(ExplorerActionHostSessionKeys.PLAYBACK_PROGRESS_PRESENT, record != null)
+            record?.let {
+                putLong(ExplorerActionHostSessionKeys.PLAYBACK_POSITION_MILLIS, it.positionMillis)
+                putLong(ExplorerActionHostSessionKeys.PLAYBACK_DURATION_MILLIS, it.durationMillis)
+                putLong(ExplorerActionHostSessionKeys.PLAYBACK_UPDATED_AT_MILLIS, it.updatedAtMillis)
+            }
+        }
+    }
+
+    override fun reportPlaybackProgress(
+        targetId: String,
+        relativePath: String,
+        positionMillis: Long,
+        durationMillis: Long,
+        reportState: Int,
+    ) {
+        enforceCaller()
+        check(allowPlaybackProgress) { "Explorer Action does not have playback-progress access" }
+        val file = resolveInput(targetId, relativePath)
+        require(file.isFile && file.canRead()) { "Explorer Action playback target is not readable" }
+        val completed = when (reportState) {
+            ExplorerActionHostSessionValues.PLAYBACK_REPORT_PROGRESS -> false
+            ExplorerActionHostSessionValues.PLAYBACK_REPORT_COMPLETED -> true
+            else -> throw IllegalArgumentException("Explorer Action playback report state is invalid")
+        }
+        playbackHistoryStore.report(file, positionMillis, durationMillis, completed)
     }
 
     override fun prepareOutput(displayName: String, mimeType: String, conflictPolicy: Int): Bundle {
@@ -859,6 +912,21 @@ internal class ExplorerActionHostSession private constructor(
         val resolved = unresolved.canonicalFile
         require(unresolved == resolved) { "Explorer Action symbolic-link traversal is not allowed" }
         require(isWithinRoot(root, resolved)) { "Explorer Action session path escapes its target" }
+        return resolved
+    }
+
+    private fun resolveInput(targetId: String, rawRelativePath: String): File {
+        val root = target(targetId)
+        val relativePath = normalizeRelativePath(rawRelativePath)
+        if (root.isDirectory || relativePath.isEmpty()) return resolve(root, relativePath)
+        check(allowReadSiblings) { "Explorer Action file target cannot open sibling files" }
+        require('/' !in relativePath) { "Explorer Action sibling path must have one segment" }
+        val unresolved = File(parent, relativePath).absoluteFile
+        val resolved = unresolved.canonicalFile
+        require(unresolved == resolved) { "Explorer Action symbolic-link traversal is not allowed" }
+        require(resolved.parentFile?.canonicalFile == parent) {
+            "Explorer Action sibling path escapes the direct parent"
+        }
         return resolved
     }
 
@@ -1743,6 +1811,8 @@ internal class ExplorerActionHostSession private constructor(
             targets: List<ExplorerActionHostSessionTarget>,
             allowCreateOutput: Boolean,
             allowReplaceTarget: Boolean = false,
+            allowReadSiblings: Boolean = false,
+            allowPlaybackProgress: Boolean = false,
             onOutputCommitted: (File) -> Unit = ::notifyCreated,
             onTargetReplaced: (File) -> Unit = ::notifyChanged,
             onSourcesTrashed: () -> Unit = ::notifyWorkspaceChanged,
@@ -1766,11 +1836,14 @@ internal class ExplorerActionHostSession private constructor(
                 targets = targets,
                 allowCreateOutput = allowCreateOutput,
                 allowReplaceTarget = allowReplaceTarget,
+                allowReadSiblings = allowReadSiblings,
+                allowPlaybackProgress = allowPlaybackProgress,
                 onOutputCommitted = onOutputCommitted,
                 onTargetReplaced = onTargetReplaced,
                 onSourcesTrashed = onSourcesTrashed,
                 outputTreeStore = store,
                 outputBatchStore = batchStore,
+                playbackHistoryStore = ExplorerPlaybackHistoryStore(context.applicationContext, clock),
                 clock = clock,
                 afterBatchMemberPublished = afterBatchMemberPublished,
             )

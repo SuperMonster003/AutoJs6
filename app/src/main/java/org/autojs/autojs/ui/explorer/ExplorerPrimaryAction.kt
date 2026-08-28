@@ -14,7 +14,7 @@ internal object ExplorerPrimaryActionResolver {
     fun resolve(type: FileUtils.TYPE): ExplorerPrimaryAction? = when {
         type.isPreviewable() -> ExplorerPrimaryAction.DOCUMENT_PREVIEW
         type.isImageViewable() -> ExplorerPrimaryAction.IMAGE_VIEW
-        type.isAudioPlayable() || type.isVideoPlayable() -> ExplorerPrimaryAction.MEDIA_PLAY
+        type.isAudioPlayable() || type.isVideoFile() -> ExplorerPrimaryAction.MEDIA_PLAY
         type.isImageFile() -> ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL
         else -> null
     }

@@ -8,11 +8,13 @@ import android.os.SystemClock
 import android.system.Os
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.TrashBlobStore
 import org.autojs.autojs.storage.history.TrashRepository
 import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs6.R
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionKeys
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionValues
 import org.junit.Assert.assertArrayEquals
@@ -1507,6 +1509,154 @@ class ExplorerActionHostSessionInstrumentationTest {
         FileOutputStream(file, false).use { output ->
             output.write(value.toByteArray(Charsets.UTF_8))
             output.fd.sync()
+        }
+    }
+
+    @Test
+    fun directSiblingAccessListsAndOpensOnlyOneParentLevel() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v12-siblings-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val selected = File(testRoot, "episode02.mkv").apply { writeText("selected") }
+        val sibling = File(testRoot, "episode01.mkv").apply { writeText("sibling") }
+        File(testRoot, "episode02.srt").writeText("subtitle")
+        File(testRoot, "nested").apply {
+            assertTrue(mkdir())
+            File(this, "secret.mkv").writeText("secret")
+        }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("selected", selected)),
+            allowCreateOutput = false,
+            allowReadSiblings = true,
+        )
+
+        try {
+            val page = session.listChildren("selected", "", 0, 100)
+            @Suppress("DEPRECATION")
+            val items = requireNotNull(
+                page.getParcelableArrayList<android.os.Bundle>(ExplorerActionHostSessionKeys.ITEMS),
+            )
+            assertEquals(
+                listOf("episode01.mkv", "episode02.mkv", "episode02.srt", "nested"),
+                items.map { it.getString(ExplorerActionHostSessionKeys.RELATIVE_PATH) },
+            )
+            assertTrue(page.getBoolean(ExplorerActionHostSessionKeys.COMPLETE))
+            val actual = ParcelFileDescriptor.AutoCloseInputStream(
+                session.openFile("selected", sibling.name),
+            ).use { it.readBytes().decodeToString() }
+            assertEquals("sibling", actual)
+            expectIllegalArgument { session.openFile("selected", "nested/secret.mkv") }
+            expectIllegalArgument { session.listChildren("selected", "nested", 0, 100) }
+        } finally {
+            session.close()
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun mediaSessionExtensionsAreDeniedWithoutExplicitCatalogCapabilities() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v12-denied-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val selected = File(testRoot, "episode02.mkv").apply { writeText("selected") }
+        val sibling = File(testRoot, "episode01.mkv").apply { writeText("sibling") }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("selected", selected)),
+            allowCreateOutput = false,
+        )
+
+        try {
+            assertEquals(
+                "selected",
+                ParcelFileDescriptor.AutoCloseInputStream(session.openFile("selected", ""))
+                    .use { it.readBytes().decodeToString() },
+            )
+            expectIllegalState { session.listChildren("selected", "", 0, 100) }
+            expectIllegalState { session.openFile("selected", sibling.name) }
+            expectIllegalState { session.getPlaybackProgress("selected", "") }
+            expectIllegalState {
+                session.reportPlaybackProgress(
+                    "selected",
+                    "",
+                    30_000L,
+                    120_000L,
+                    ExplorerActionHostSessionValues.PLAYBACK_REPORT_PROGRESS,
+                )
+            }
+        } finally {
+            session.close()
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun playbackHistoryRequiresOptInAndCompletionClearsProgress() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val previousEnabled = Pref.isExplorerPlaybackHistoryEnabled
+        val testRoot = File(context.cacheDir, "explorer-action-v12-history-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val selected = File(testRoot, "episode01.mkv").apply { writeText("video") }
+        ExplorerPlaybackHistoryStore.clearAll(context)
+        Pref.putBooleanSync(R.string.key_explorer_playback_history, false)
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("selected", selected)),
+            allowCreateOutput = false,
+            allowPlaybackProgress = true,
+            clock = { 42L },
+        )
+
+        try {
+            val disabled = session.getPlaybackProgress("selected", "")
+            assertFalse(disabled.getBoolean(ExplorerActionHostSessionKeys.PLAYBACK_HISTORY_ENABLED))
+            session.reportPlaybackProgress(
+                "selected",
+                "",
+                30_000L,
+                120_000L,
+                ExplorerActionHostSessionValues.PLAYBACK_REPORT_PROGRESS,
+            )
+            assertEquals(0, ExplorerPlaybackHistoryStore.entryCount(context))
+
+            Pref.putBooleanSync(R.string.key_explorer_playback_history, true)
+            session.reportPlaybackProgress(
+                "selected",
+                "",
+                30_000L,
+                120_000L,
+                ExplorerActionHostSessionValues.PLAYBACK_REPORT_PROGRESS,
+            )
+            val stored = session.getPlaybackProgress("selected", "")
+            assertTrue(stored.getBoolean(ExplorerActionHostSessionKeys.PLAYBACK_HISTORY_ENABLED))
+            assertTrue(stored.getBoolean(ExplorerActionHostSessionKeys.PLAYBACK_PROGRESS_PRESENT))
+            assertEquals(30_000L, stored.getLong(ExplorerActionHostSessionKeys.PLAYBACK_POSITION_MILLIS))
+            assertEquals(120_000L, stored.getLong(ExplorerActionHostSessionKeys.PLAYBACK_DURATION_MILLIS))
+            assertEquals(42L, stored.getLong(ExplorerActionHostSessionKeys.PLAYBACK_UPDATED_AT_MILLIS))
+
+            session.reportPlaybackProgress(
+                "selected",
+                "",
+                120_000L,
+                120_000L,
+                ExplorerActionHostSessionValues.PLAYBACK_REPORT_COMPLETED,
+            )
+            assertFalse(
+                session.getPlaybackProgress("selected", "")
+                    .getBoolean(ExplorerActionHostSessionKeys.PLAYBACK_PROGRESS_PRESENT),
+            )
+        } finally {
+            session.close()
+            ExplorerPlaybackHistoryStore.clearAll(context)
+            Pref.putBooleanSync(R.string.key_explorer_playback_history, previousEnabled)
+            testRoot.deleteRecursively()
         }
     }
 

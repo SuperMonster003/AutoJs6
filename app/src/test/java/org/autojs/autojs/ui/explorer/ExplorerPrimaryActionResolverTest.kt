@@ -98,12 +98,36 @@ class ExplorerPrimaryActionResolverTest {
     }
 
     @Test
-    fun unsupportedMediaFormatsRetainLegacyExternalPlayback() {
+    fun everyExplorerVideoTypeResolvesToPrimaryMediaPlayer() {
+        val videoTypes = FileUtils.TYPE.entries.filter { type -> type.isVideoFile() }
+        assertTrue(
+            videoTypes.containsAll(
+                listOf(
+                    FileUtils.TYPE.WMV,
+                    FileUtils.TYPE.MXF,
+                    FileUtils.TYPE.H264,
+                    FileUtils.TYPE.M3U_VIDEO,
+                    FileUtils.TYPE.M3U8_VIDEO,
+                    FileUtils.TYPE.SWF,
+                ),
+            ),
+        )
+        videoTypes.forEach { type ->
+            assertTrue(type.name, type.isVideoFile())
+            assertTrue(type.name, type.isMediaPlayable())
+            assertSame(
+                type.name,
+                ExplorerPrimaryAction.MEDIA_PLAY,
+                ExplorerPrimaryActionResolver.resolve(type),
+            )
+        }
+    }
+
+    @Test
+    fun unsupportedAudioFormatsRetainLegacyExternalPlayback() {
         listOf(
             FileUtils.TYPE.M3U_AUDIO,
             FileUtils.TYPE.AUDIO_CUE_SHEET,
-            FileUtils.TYPE.M3U_VIDEO,
-            FileUtils.TYPE.SWF,
         ).forEach { type ->
             assertTrue(type.name, type.isMediaPlayable())
             assertNull(type.name, type.viewerType)
