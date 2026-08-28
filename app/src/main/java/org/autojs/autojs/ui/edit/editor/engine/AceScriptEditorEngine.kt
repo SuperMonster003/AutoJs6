@@ -21,6 +21,7 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.editor.api.EditorPluginBooleanCallback
 import org.autojs.plugin.editor.api.EditorPluginBreakpoint
 import org.autojs.plugin.editor.api.EditorPluginCallback
+import org.autojs.plugin.editor.api.EditorPluginCurrentDocumentCodeAction
 import org.autojs.plugin.editor.api.EditorPluginDiagnostics
 import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
 import org.autojs.plugin.editor.api.EditorPluginFailure
@@ -116,6 +117,8 @@ class AceScriptEditorEngine private constructor(
     var onAceStateChanged: (() -> Unit)? = null
     var onSelectionAction: ((SelectionAction) -> Unit)? = null
     var onDefinitionNavigationRequested: ((EditorPluginDefinitionTarget) -> Unit)? = null
+    var onCurrentDocumentCodeActionRequested:
+        ((EditorPluginCurrentDocumentCodeAction, EditorPluginBooleanCallback) -> Unit)? = null
     override var onUserTouchInTextArea: (() -> Unit)? = null
 
     override val view: View
@@ -244,6 +247,19 @@ class AceScriptEditorEngine private constructor(
 
         override fun onDefinitionNavigationRequested(target: EditorPluginDefinitionTarget) {
             this@AceScriptEditorEngine.onDefinitionNavigationRequested?.invoke(target)
+        }
+
+        override fun onCurrentDocumentCodeActionRequested(
+            action: EditorPluginCurrentDocumentCodeAction,
+            onComplete: EditorPluginBooleanCallback,
+        ) {
+            val handler = this@AceScriptEditorEngine.onCurrentDocumentCodeActionRequested
+            if (handler == null) {
+                onComplete.onComplete(false)
+                return
+            }
+            runCatching { handler(action, onComplete) }
+                .onFailure { onComplete.onComplete(false) }
         }
 
         override fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) {
@@ -576,6 +592,7 @@ class AceScriptEditorEngine private constructor(
         onAceStateChanged = null
         onSelectionAction = null
         onDefinitionNavigationRequested = null
+        onCurrentDocumentCodeActionRequested = null
         releaseSession()
     }
 
@@ -738,6 +755,11 @@ class AceScriptEditorEngine private constructor(
 
         override fun onDefinitionNavigationRequested(target: EditorPluginDefinitionTarget) =
             dispatch { it.onDefinitionNavigationRequested(target) }
+
+        override fun onCurrentDocumentCodeActionRequested(
+            action: EditorPluginCurrentDocumentCodeAction,
+            onComplete: EditorPluginBooleanCallback,
+        ) = dispatch { it.onCurrentDocumentCodeActionRequested(action, onComplete) }
 
         override fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) =
             dispatch { it.onTextSizeSpChangedByGesture(size, persist) }

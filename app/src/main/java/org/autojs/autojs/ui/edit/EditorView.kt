@@ -123,6 +123,7 @@ import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.service.EditorBreakpointModelStore
+import org.autojs.autojs.ui.edit.editor.service.EditorCurrentDocumentCodeActionAuthorizer
 import org.autojs.autojs.ui.edit.editor.service.EditorDefinitionNavigationDispatcher
 import org.autojs.autojs.ui.edit.editor.service.EditorFileRollbackFailedException
 import org.autojs.autojs.ui.edit.editor.service.EditorFileSaveEncoding
@@ -177,6 +178,7 @@ import org.autojs.autojs6.R.string.text_unknown
 import org.autojs.autojs6.databinding.DialogAceEditorFontFilterBinding
 import org.autojs.autojs6.databinding.EditorViewBinding
 import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
+import org.autojs.plugin.editor.api.EditorPluginCurrentDocumentCodeAction
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
@@ -4201,6 +4203,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
+    private fun configureAceCodeActions(editor: ScriptEditorEngine) {
+        (editor as? AceScriptEditorEngine)?.onCurrentDocumentCodeActionRequested =
+            codeAction@{ action: EditorPluginCurrentDocumentCodeAction, onComplete ->
+                val authorized = runCatching {
+                    !mDestroyed &&
+                        this.editor === editor &&
+                        editor.engineType == EditorEngineType.ACE &&
+                        EditorCurrentDocumentCodeActionAuthorizer.isAuthorized(
+                            action = action,
+                            currentText = editor.textSnapshot,
+                            readOnly = editor.isReadOnly,
+                        )
+                }.getOrDefault(false)
+                onComplete.onComplete(authorized)
+            }
+    }
+
     private fun requestAceDefinitionNavigation(target: EditorPluginDefinitionTarget) {
         val documentPath = currentDocumentPathOrName()?.takeIf(String::isNotBlank) ?: return
         val requestedEditor = editor
@@ -4483,6 +4502,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         configureAceFallback(editor)
         configureAceActionHistory(editor)
         configureAceDefinitionNavigation(editor)
+        configureAceCodeActions(editor)
         editor.let { editor ->
             editor.setHistoryOperationListener { token, direction ->
                 // Both engines dispatch history completion on the main thread. Applying it here
