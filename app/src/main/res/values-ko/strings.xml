@@ -808,6 +808,7 @@
     <string name="text_archive_extraction_cancelled">압축 풀기가 취소되었습니다</string>
     <string name="text_archive_extraction_completed">%1$s에 압축을 풀었습니다</string>
     <string name="text_archive_extraction_progress">%2$d개 중 %1$d개 압축 푸는 중</string>
+    <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">프로젝트 파일 보관 중</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[성명, 조직명, 조직 단위, 국가 코드, 주 또는 도, 시 또는 지역, 거리] 중 하나 이상을 입력해야 합니다</string>
     <string name="text_attribute">기인하다</string>

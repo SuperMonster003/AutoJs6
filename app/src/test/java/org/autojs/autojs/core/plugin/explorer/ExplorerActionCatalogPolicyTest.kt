@@ -24,6 +24,7 @@ class ExplorerActionCatalogPolicyTest {
         assertEquals(setOf("text/markdown"), descriptor.mimeTypes)
         assertEquals(setOf("md", "markdown"), descriptor.extensions)
         assertTrue(descriptor.fileNameSuffixes.isEmpty())
+        assertNull(descriptor.probeForActionId)
         assertEquals(ExplorerActionValues.OUTPUT_NONE, descriptor.outputMode)
         assertTrue(descriptor.outputMimeTypes.isEmpty())
         assertNull(descriptor.outputNameSuffix)
@@ -106,10 +107,10 @@ class ExplorerActionCatalogPolicyTest {
             cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
             mimeTypes = emptyList(),
             extensions = emptyList(),
-            fileNameSuffixes = listOf(".ZIP.001", "7z.001"),
+            fileNameSuffixes = listOf(".ZIP.001", "7z.001", "tar.gz"),
         ) ?: error("Expected a valid compound-suffix descriptor")
 
-        assertEquals(setOf("zip.001", "7z.001"), compound.fileNameSuffixes)
+        assertEquals(setOf("zip.001", "7z.001", "tar.gz"), compound.fileNameSuffixes)
         assertTrue(
             ExplorerActionCatalogPolicy.matches(
                 compound,
@@ -137,6 +138,26 @@ class ExplorerActionCatalogPolicyTest {
                     mimeType = "application/octet-stream",
                     extension = "001",
                     fileName = "backup.001",
+                ),
+            ),
+        )
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                compound,
+                ExplorerActionTarget(
+                    mimeType = "application/octet-stream",
+                    extension = "gz",
+                    fileName = "backup.TAR.GZ",
+                ),
+            ),
+        )
+        assertFalse(
+            ExplorerActionCatalogPolicy.matches(
+                compound,
+                ExplorerActionTarget(
+                    mimeType = "application/octet-stream",
+                    extension = "gz",
+                    fileName = "backup.gz",
                 ),
             ),
         )
@@ -441,6 +462,176 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV17AddsAnOverflowOnlyUnmatchedFileProbe() {
+        val probe = descriptor(
+            protocolVersion = 17,
+            id = "open-as-archive",
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            mimeTypes = emptyList(),
+            extensions = emptyList(),
+            fileNameSuffixes = emptyList(),
+            probeForActionId = "open-archive",
+        ) ?: error("Expected a valid unmatched-file probe")
+
+        assertEquals("open-archive", probe.probeForActionId)
+        assertFalse(
+            ExplorerActionCatalogPolicy.matches(
+                probe,
+                ExplorerActionTarget("application/octet-stream", "bin", fileName = "archive.bin"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 16,
+                id = "open-as-archive",
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+                mimeTypes = emptyList(),
+                extensions = emptyList(),
+                probeForActionId = "open-archive",
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 17,
+                id = "open-as-archive",
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+                mimeTypes = listOf("*/*"),
+                extensions = emptyList(),
+                probeForActionId = "open-archive",
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 17,
+                id = "open-as-archive",
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+                mimeTypes = emptyList(),
+                extensions = emptyList(),
+                probeForActionId = "open-archive",
+            ),
+        )
+    }
+
+    @Test
+    fun unmatchedFileProbeAppearsOnlyWhenItsPrimaryActionDoesNotMatch() {
+        val primary = descriptor(
+            protocolVersion = 17,
+            id = "open-archive",
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+            presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            mimeTypes = listOf("application/zip"),
+            extensions = listOf("zip"),
+        ) ?: error("Expected a valid primary archive action")
+        val probe = descriptor(
+            protocolVersion = 17,
+            id = "open-as-archive",
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            mimeTypes = emptyList(),
+            extensions = emptyList(),
+            probeForActionId = primary.id,
+        ) ?: error("Expected a valid unmatched-file probe")
+        val descriptors = listOf(primary, probe)
+
+        assertEquals(
+            setOf(primary.id),
+            ExplorerActionMatchingPolicy.matchingActionIds(
+                descriptors,
+                listOf(ExplorerActionTarget("application/zip", "zip", fileName = "archive.zip")),
+            ),
+        )
+        assertEquals(
+            setOf(probe.id),
+            ExplorerActionMatchingPolicy.matchingActionIds(
+                descriptors,
+                listOf(ExplorerActionTarget("text/plain", "txt", fileName = "archive.txt")),
+            ),
+        )
+        assertTrue(
+            ExplorerActionMatchingPolicy.matchingActionIds(
+                descriptors,
+                listOf(
+                    ExplorerActionTarget(
+                        mimeType = "inode/directory",
+                        extension = "",
+                        kind = ExplorerActionValues.TARGET_DIRECTORY,
+                    ),
+                ),
+            ).isEmpty(),
+        )
+    }
+
+    @Test
+    fun unmatchedFileProbeReferencesOneValidPrimaryArchiveAction() {
+        val primary = descriptor(
+            protocolVersion = 17,
+            id = "open-archive",
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+            presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            mimeTypes = listOf("application/zip"),
+        ) ?: error("Expected a valid primary archive action")
+        val firstProbe = descriptor(
+            protocolVersion = 17,
+            id = "open-as-archive",
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            mimeTypes = emptyList(),
+            extensions = emptyList(),
+            probeForActionId = primary.id,
+        ) ?: error("Expected a valid unmatched-file probe")
+        val duplicateProbe = descriptor(
+            protocolVersion = 17,
+            id = "try-as-archive",
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            mimeTypes = emptyList(),
+            extensions = emptyList(),
+            probeForActionId = primary.id,
+        ) ?: error("Expected a second valid unmatched-file probe")
+        val unrelatedActivity = descriptor(
+            protocolVersion = 17,
+            id = "preview-text",
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            mimeTypes = listOf("text/plain"),
+        ) ?: error("Expected a valid activity action")
+        val invalidTargetProbe = firstProbe.copy(
+            id = "probe-preview",
+            probeForActionId = unrelatedActivity.id,
+        )
+        val missingTargetProbe = firstProbe.copy(
+            id = "probe-missing",
+            probeForActionId = "missing-primary",
+        )
+
+        assertEquals(
+            listOf(primary, firstProbe, unrelatedActivity),
+            ExplorerActionCatalogPolicy.validateDescriptorReferences(
+                listOf(
+                    primary,
+                    firstProbe,
+                    duplicateProbe,
+                    unrelatedActivity,
+                    invalidTargetProbe,
+                    missingTargetProbe,
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun descriptorRejectsInvalidIdentifiersAndActivityNames() {
         assertNull(descriptor(id = "Preview"))
         assertNull(descriptor(activityClassName = "com.example.preview/PreviewActivity"))
@@ -480,9 +671,10 @@ class ExplorerActionCatalogPolicyTest {
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(14L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(15L))
         assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(16L))
+        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(17L))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(17L))
+        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(18L))
         assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(4L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 4))
@@ -546,6 +738,7 @@ class ExplorerActionCatalogPolicyTest {
         mimeTypes: Collection<String>? = listOf("text/*"),
         extensions: Collection<String>? = emptyList(),
         fileNameSuffixes: Collection<String>? = null,
+        probeForActionId: String? = null,
     ): ExplorerActionDescriptor? {
         return ExplorerActionCatalogPolicy.normalizeDescriptor(
             protocolVersion = protocolVersion,
@@ -563,6 +756,7 @@ class ExplorerActionCatalogPolicyTest {
             mimeTypes = mimeTypes,
             extensions = extensions,
             fileNameSuffixes = fileNameSuffixes,
+            probeForActionId = probeForActionId,
         )
     }
 }

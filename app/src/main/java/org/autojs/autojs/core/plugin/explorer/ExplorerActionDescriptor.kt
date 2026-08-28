@@ -15,6 +15,7 @@ internal data class ExplorerActionDescriptor(
     val mimeTypes: Set<String>,
     val extensions: Set<String>,
     val fileNameSuffixes: Set<String>,
+    val probeForActionId: String?,
     val outputMode: Int,
     val outputMimeTypes: Set<String>,
     val outputNameSuffix: String?,

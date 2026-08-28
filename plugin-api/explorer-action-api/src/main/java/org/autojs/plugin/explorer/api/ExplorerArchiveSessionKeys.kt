@@ -5,6 +5,12 @@ object ExplorerArchiveSessionKeys {
     const val SESSION_ID = "sessionId"
     const val ROOT_ID = "rootId"
     const val DISPLAY_NAME = "displayName"
+    /** v17 stable format identifier reported after structural archive detection. */
+    const val FORMAT_ID = "formatId"
+    /** v17 bounded user-facing format name, for example ZIP or TAR.GZ. */
+    const val FORMAT_DISPLAY_NAME = "formatDisplayName"
+    /** v17 true when the source name already declares the detected format. */
+    const val DISPLAY_NAME_MATCHES_FORMAT = "displayNameMatchesFormat"
     const val SOURCE_SIZE = "sourceSize"
     const val SOURCE_LAST_MODIFIED = "sourceLastModified"
     /** False or absent for protocol v5 sessions. */

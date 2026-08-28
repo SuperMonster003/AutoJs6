@@ -32,6 +32,7 @@ internal object ExplorerActionCatalogPolicy {
         mimeTypes: Collection<String>?,
         extensions: Collection<String>?,
         fileNameSuffixes: Collection<String>? = null,
+        probeForActionId: String? = null,
         outputMode: Int? = null,
         outputMimeTypes: Collection<String>? = null,
         outputNameSuffix: String? = null,
@@ -43,9 +44,13 @@ internal object ExplorerActionCatalogPolicy {
         ) {
             return null
         }
-        val normalizedId = id?.trim()?.takeIf {
-            it.length <= ExplorerActionProtocol.MAX_ACTION_ID_LENGTH && actionIdPattern.matches(it)
-        } ?: return null
+        val normalizedId = normalizeActionId(id) ?: return null
+        val normalizedProbeForActionId = when {
+            probeForActionId == null -> null
+            protocolVersion < UNMATCHED_FILE_PROBE_PROTOCOL_VERSION -> return null
+            else -> normalizeActionId(probeForActionId) ?: return null
+        }
+        if (normalizedProbeForActionId == normalizedId) return null
         val normalizedLabelResourceName = labelResourceName
             ?.trim()
             ?.takeIf { resourceNamePattern.matches(it) }
@@ -128,7 +133,18 @@ internal object ExplorerActionCatalogPolicy {
             targetKind != ExplorerActionValues.TARGET_DIRECTORY &&
             normalizedMimeTypes.isEmpty() &&
             normalizedExtensions.isEmpty() &&
-            normalizedFileNameSuffixes.isEmpty()
+            normalizedFileNameSuffixes.isEmpty() &&
+            normalizedProbeForActionId == null
+        ) {
+            return null
+        }
+        if (
+            normalizedProbeForActionId != null &&
+            (
+                normalizedMimeTypes.isNotEmpty() ||
+                    normalizedExtensions.isNotEmpty() ||
+                    normalizedFileNameSuffixes.isNotEmpty()
+                )
         ) {
             return null
         }
@@ -178,8 +194,19 @@ internal object ExplorerActionCatalogPolicy {
                     normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE ||
                     accessMode != ExplorerActionValues.ACCESS_READ_ONLY ||
                     normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE ||
-                    placement != ExplorerActionValues.PLACEMENT_PRIMARY
+                    when {
+                        normalizedProbeForActionId == null ->
+                            placement != ExplorerActionValues.PLACEMENT_PRIMARY
+                        protocolVersion < UNMATCHED_FILE_PROBE_PROTOCOL_VERSION -> true
+                        else -> placement != ExplorerActionValues.PLACEMENT_OVERFLOW
+                    }
                 )
+        ) {
+            return null
+        }
+        if (
+            normalizedProbeForActionId != null &&
+            normalizedPresentation != ExplorerActionValues.PRESENTATION_HOST_EXPLORER
         ) {
             return null
         }
@@ -199,6 +226,7 @@ internal object ExplorerActionCatalogPolicy {
             mimeTypes = normalizedMimeTypes,
             extensions = normalizedExtensions,
             fileNameSuffixes = normalizedFileNameSuffixes,
+            probeForActionId = normalizedProbeForActionId,
             outputMode = normalizedOutput.mode,
             outputMimeTypes = normalizedOutput.mimeTypes,
             outputNameSuffix = normalizedOutput.nameSuffix,
@@ -208,6 +236,18 @@ internal object ExplorerActionCatalogPolicy {
 
     fun matches(descriptor: ExplorerActionDescriptor, target: ExplorerActionTarget): Boolean =
         matches(descriptor, listOf(target))
+
+    fun validateDescriptorReferences(
+        descriptors: List<ExplorerActionDescriptor>,
+    ): List<ExplorerActionDescriptor> {
+        val descriptorsById = descriptors.associateBy(ExplorerActionDescriptor::id)
+        val claimedProbeTargets = HashSet<String>()
+        return descriptors.filter { descriptor ->
+            val targetId = descriptor.probeForActionId ?: return@filter true
+            val target = descriptorsById[targetId] ?: return@filter false
+            isValidProbeTarget(target) && claimedProbeTargets.add(targetId)
+        }
+    }
 
     fun matches(descriptor: ExplorerActionDescriptor, targets: List<ExplorerActionTarget>): Boolean {
         if (targets.isEmpty() || targets.size > ExplorerActionProtocol.MAX_TARGETS_PER_REQUEST) return false
@@ -274,6 +314,10 @@ internal object ExplorerActionCatalogPolicy {
             result += normalized
         }
         return result
+    }
+
+    private fun normalizeActionId(value: String?): String? = value?.trim()?.takeIf {
+        it.length <= ExplorerActionProtocol.MAX_ACTION_ID_LENGTH && actionIdPattern.matches(it)
     }
 
     private fun normalizeExtension(value: String): String? {
@@ -346,6 +390,14 @@ internal object ExplorerActionCatalogPolicy {
         return mimeMatches || extensionMatches || fileNameSuffixMatches
     }
 
+    private fun isValidProbeTarget(descriptor: ExplorerActionDescriptor): Boolean =
+        descriptor.probeForActionId == null &&
+            descriptor.targetKind == ExplorerActionValues.TARGET_FILE &&
+            descriptor.cardinality == ExplorerActionValues.CARDINALITY_SINGLE &&
+            descriptor.accessMode == ExplorerActionValues.ACCESS_READ_ONLY &&
+            descriptor.placement == ExplorerActionValues.PLACEMENT_PRIMARY &&
+            descriptor.presentation == ExplorerActionValues.PRESENTATION_HOST_EXPLORER
+
     private fun isInvalidFileNameCharacter(character: Char): Boolean =
         character == '/' ||
             character == '\\' ||
@@ -362,4 +414,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val TARGET_REPLACEMENT_PROTOCOL_VERSION = 8
     private const val MANAGED_TARGET_PROTOCOL_VERSION = 9
     private const val COMPOUND_SUFFIX_PROTOCOL_VERSION = 14
+    private const val UNMATCHED_FILE_PROBE_PROTOCOL_VERSION = 17
 }

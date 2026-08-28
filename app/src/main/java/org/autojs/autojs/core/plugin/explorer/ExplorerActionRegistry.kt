@@ -116,8 +116,16 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         if (items.isEmpty() || items.size > ExplorerActionProtocol.MAX_TARGETS_PER_REQUEST) return emptyList()
         if (!targetsShareCanonicalParent(items)) return emptyList()
         val targets = items.map { item -> targetFor(item) ?: return emptyList() }
-        return snapshot.get().filter { action ->
-            ExplorerActionCatalogPolicy.matches(action.descriptor, targets)
+        val actions = snapshot.get()
+        val matchingIdsByPackage = actions.groupBy(ResolvedExplorerAction::packageName).mapValues {
+            (_, packageActions) ->
+            ExplorerActionMatchingPolicy.matchingActionIds(
+                descriptors = packageActions.map(ResolvedExplorerAction::descriptor),
+                targets = targets,
+            )
+        }
+        return actions.filter { action ->
+            action.descriptor.id in matchingIdsByPackage[action.packageName].orEmpty()
         }
     }
 

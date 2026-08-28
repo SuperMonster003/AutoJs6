@@ -807,6 +807,7 @@
     <string name="text_archive_extraction_cancelled">アーカイブの展開をキャンセルしました</string>
     <string name="text_archive_extraction_completed">%1$s に展開しました</string>
     <string name="text_archive_extraction_progress">%2$d 件中 %1$d 件を展開中</string>
+    <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">プロジェクトファイルをアーカイブしています</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[氏名, 組織名, 組織単位, 国コード, 州または省, 市区町村, 街] のいずれかの項目を入力する必要があります</string>
     <string name="text_attribute">属性</string>

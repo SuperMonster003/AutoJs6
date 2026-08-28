@@ -43,6 +43,9 @@ internal data class ExplorerArchiveSessionInfo(
     val sourceLastModified: Long,
     val canOpenEntries: Boolean,
     val canExtractEntries: Boolean,
+    val formatId: String? = null,
+    val formatDisplayName: String? = null,
+    val displayNameMatchesFormat: Boolean = true,
     val filenameCharsetNames: List<String> = emptyList(),
     val filenameCharsetName: String? = null,
     val filenameCharsetOverride: String? = null,
@@ -597,6 +600,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                     ?: error("Archive session returned an invalid display name")
                 val sourceSize = bundle.getLong(ExplorerArchiveSessionKeys.SOURCE_SIZE, -1L)
                 require(sourceSize >= 0L) { "Archive session returned an invalid source size" }
+                val formatMetadata = decodeFormatMetadata(bundle, protocolVersion)
                 val filenameCharsets = decodeFilenameCharsetMetadata(bundle, protocolVersion)
                 return ExplorerArchiveSessionConnection(
                     context = context.applicationContext,
@@ -621,6 +625,9 @@ internal class ExplorerArchiveSessionConnection private constructor(
                         ),
                         canExtractEntries = protocolVersion >= EXTRACTION_PROTOCOL_VERSION &&
                             bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_EXTRACT_ENTRIES, false),
+                        formatId = formatMetadata.id,
+                        formatDisplayName = formatMetadata.displayName,
+                        displayNameMatchesFormat = formatMetadata.displayNameMatches,
                         filenameCharsetNames = filenameCharsets.supportedNames,
                         filenameCharsetName = filenameCharsets.effectiveName,
                         filenameCharsetOverride = filenameCharsets.overrideName,
@@ -684,6 +691,36 @@ internal class ExplorerArchiveSessionConnection private constructor(
             )
         }
 
+        private fun decodeFormatMetadata(
+            bundle: Bundle,
+            protocolVersion: Int,
+        ): ArchiveFormatMetadata {
+            if (protocolVersion < ARCHIVE_FORMAT_PROTOCOL_VERSION) {
+                return ArchiveFormatMetadata(null, null, true)
+            }
+            val id = requireNotNull(bundle.getString(ExplorerArchiveSessionKeys.FORMAT_ID)?.takeIf {
+                it.length in 1..ExplorerActionProtocol.MAX_ARCHIVE_FORMAT_ID_LENGTH &&
+                    ARCHIVE_FORMAT_ID_PATTERN.matches(it)
+            }) { "Archive session returned an invalid format ID" }
+            val displayName = requireNotNull(
+                bundle.getString(ExplorerArchiveSessionKeys.FORMAT_DISPLAY_NAME)
+                    ?.replace(Regex("[\\p{Cc}\\p{Cf}]+"), " ")
+                    ?.trim()
+                    ?.take(ExplorerActionProtocol.MAX_ARCHIVE_FORMAT_DISPLAY_NAME_LENGTH)
+                    ?.takeIf(String::isNotEmpty),
+            ) { "Archive session returned an invalid format display name" }
+            require(bundle.containsKey(ExplorerArchiveSessionKeys.DISPLAY_NAME_MATCHES_FORMAT)) {
+                "Archive session did not report whether its display name matches the format"
+            }
+            return ArchiveFormatMetadata(
+                id = id,
+                displayName = displayName,
+                displayNameMatches = bundle.getBoolean(
+                    ExplorerArchiveSessionKeys.DISPLAY_NAME_MATCHES_FORMAT,
+                ),
+            )
+        }
+
         private fun requireValidCharsetName(value: String): String = requireNotNull(
             value.takeIf { name ->
                 name.length in 1..ExplorerActionProtocol.MAX_ARCHIVE_FILENAME_CHARSET_NAME_LENGTH &&
@@ -699,7 +736,9 @@ internal class ExplorerArchiveSessionConnection private constructor(
         private const val EXTRACTION_RECOVERY_PROTOCOL_VERSION = 11
         private const val ENTRY_CAPABILITIES_PROTOCOL_VERSION = 11
         private const val FILENAME_CHARSET_PROTOCOL_VERSION = 13
+        private const val ARCHIVE_FORMAT_PROTOCOL_VERSION = 17
         private const val SOURCE_TARGET_ID = "archive-source"
+        private val ARCHIVE_FORMAT_ID_PATTERN = Regex("[a-z0-9][a-z0-9._-]*")
         private val DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
             Thread(runnable, "ExplorerArchiveSessionDeath").apply { isDaemon = true }
         }
@@ -726,6 +765,12 @@ internal class ExplorerArchiveSessionConnection private constructor(
             ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_RESOURCE_BUDGET,
         )
     }
+
+    private data class ArchiveFormatMetadata(
+        val id: String?,
+        val displayName: String?,
+        val displayNameMatches: Boolean,
+    )
 }
 
 private fun isInvalidOpaqueIdCharacter(character: Char): Boolean =
