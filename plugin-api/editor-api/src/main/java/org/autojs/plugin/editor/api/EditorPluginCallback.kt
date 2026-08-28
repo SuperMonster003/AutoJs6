@@ -22,6 +22,9 @@ interface EditorPluginCallback {
 
     fun onSelectionAction(action: EditorPluginSelectionAction) = Unit
 
+    /** Available from editor contract 3. The host must validate the target before opening it. */
+    fun onDefinitionNavigationRequested(target: EditorPluginDefinitionTarget) = Unit
+
     fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) = Unit
 
     fun onUserTouchInTextArea() = Unit
