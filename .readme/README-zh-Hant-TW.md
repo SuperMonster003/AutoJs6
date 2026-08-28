@@ -430,6 +430,8 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 直接實作 AI Provider V2 分頁目標探索: 每個目標帶有穩定 target/provider/model 識別, locality, 設定與可用狀態, capabilities, limits, controls 及允許的 HTTPS origins; 支援 REMOTE/HYBRID 執行與外掛自管憑證, 憑證位元組不經 Binder, 且不保留被取代的 wire 別名
 * `最佳化` 檔案管理器目錄重新整理採用最小差量更新, 未變化的列不再重新繫結, 原地重新整理保持目前捲動位置
 * `最佳化` 重構檔案管理器的清單配置, 項目呈現, 選取工具列, 封存工作流程, 輸入能力, 輸出保留及復原元件, 縮減過大的檢視與工作階段類別, 並使導覽, 安全邊界及操作原則可獨立測試
+* `最佳化` TypeScript 編譯器繫結與啟動改為在有界的應用程式啟動預熱中完成, 不再占用首次使用者編譯; revision 1 專案工作階段會在進入編輯器或實際編譯後保留一個活動繫結, 啟動閒置到期、記憶體壓力、失敗與應用程式結束時均安全回退至冷編譯
+* `最佳化` Gradle 平台相容性資料及其更新工作已移至 AutoJs6-Gradle-Platform-Versions; AutoJs6 現在直接使用 Maven Local 中的 1.5.0 版本, 不再保留本機資料覆寫、重複擷取器及原有 Puppeteer 相依性
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

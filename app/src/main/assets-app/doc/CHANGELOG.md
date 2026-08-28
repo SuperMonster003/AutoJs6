@@ -249,6 +249,8 @@
 * `优化` 直接实现 AI Provider V2 分页目标发现: 每项目标携带稳定的 target/provider/model 身份, locality, 配置与可用状态, capabilities, limits, controls 及允许的 HTTPS origins; 支持 REMOTE/HYBRID 执行和插件自管凭据, 凭据字节不经过 Binder, 且不保留被取代的 wire 别名
 * `优化` 文件管理器目录刷新采用最小差量更新, 未变化的行不再重新绑定, 原地刷新保持当前滚动位置
 * `优化` 重构文件管理器的列表布局, 条目呈现, 选择工具栏, 归档工作流, 输入能力, 输出预留及恢复组件, 缩减过大的视图与会话类, 并使导航, 安全边界及操作策略可独立测试
+* `优化` TypeScript 编译器绑定与启动改为在有界的应用启动预热中完成, 不再占用首次用户编译; revision 1 项目会话会在进入编辑器或真实编译后保留一个活动绑定, 启动空闲到期、内存压力、失败与应用退出时均安全回退到冷编译
+* `优化` Gradle 平台兼容数据及其更新任务已迁至 AutoJs6-Gradle-Platform-Versions; AutoJs6 现直接使用 Maven Local 中的 1.5.0 版本, 不再保留本地数据覆盖、重复抓取器及原有 Puppeteer 依赖
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

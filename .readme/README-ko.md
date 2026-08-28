@@ -430,6 +430,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` AI Provider V2 페이지형 target discovery를 직접 구현: 각 target은 안정적인 target/provider/model 식별자, locality, 구성 및 가용 상태, capabilities, limits, controls, 허용된 HTTPS origins를 포함; credential byte가 Binder를 통과하지 않는 plugin-managed credential과 REMOTE/HYBRID 실행을 지원하며 교체된 wire alias는 유지하지 않음
 * `개선` 파일 관리자 디렉터리 새로 고침이 최소 목록 차이만 적용하여 변경되지 않은 행은 다시 바인딩하지 않고 제자리 새로 고침 시 현재 스크롤 위치를 유지
 * `개선` 파일 관리자를 목록 레이아웃, 항목 표시, 선택 도구 모음, 아카이브 워크플로, 입력 권한, 출력 예약 및 복구 컴포넌트로 재구성하여 비대해진 뷰/세션 클래스를 축소하고 탐색, 보안 경계 및 동작 정책을 독립적으로 테스트할 수 있도록 개선
+* `개선` TypeScript 컴파일러 바인딩과 부트스트랩을 첫 사용자 컴파일 대신 제한된 앱 시작 사전 준비에서 수행; revision 1 프로젝트 세션은 편집기 진입 또는 실제 컴파일 후 활성 바인딩 하나를 유지하며, 시작 유휴 만료, 메모리 압박, 실패 및 앱 종료 시 안전하게 콜드 컴파일로 대체
+* `개선` Gradle 플랫폼 호환성 데이터와 갱신 작업을 AutoJs6-Gradle-Platform-Versions로 이전; AutoJs6는 이제 Maven Local의 1.5.0 버전을 직접 사용하며 로컬 데이터 재정의, 중복 스크레이퍼 및 기존 Puppeteer 의존성을 제거
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

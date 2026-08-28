@@ -430,6 +430,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Implemented AI Provider V2 paged target discovery directly: every target carries stable target/provider/model identity, locality, configuration and availability, capabilities, limits, controls, and allowed HTTPS origins; REMOTE/HYBRID execution and plugin-managed credentials are supported without credential bytes crossing Binder, and no superseded wire aliases remain
 * `Improvement` File manager directory refreshes dispatch minimal list diffs, keeping unchanged rows bound and preserving the live scroll position during in-place refreshes
 * `Improvement` Refactored the file manager around explicit list layout, row presentation, selection toolbar, archive workflow, input capability, output reservation, and recovery components, reducing oversized view/session classes and making navigation, security boundaries, and action policies independently testable
+* `Improvement` TypeScript compiler binding and bootstrap now run during a bounded startup prewarm instead of the first user compilation; revision-1 project sessions retain one live binding after editor or compile use, while idle startup expiry, memory pressure, failures, and app exit safely fall back to cold compilation
+* `Improvement` Gradle platform compatibility data and its updater tasks moved to AutoJs6-Gradle-Platform-Versions; AutoJs6 now consumes version 1.5.0 from Maven Local directly, without local data overrides, duplicate scrapers, or the former Puppeteer dependency
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
