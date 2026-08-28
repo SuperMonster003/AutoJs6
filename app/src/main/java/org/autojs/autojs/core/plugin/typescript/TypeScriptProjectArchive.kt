@@ -190,7 +190,7 @@ internal object TypeScriptProjectArchive {
         try {
             root.walkTopDown()
                 .onEnter { directory ->
-                    directory == root || directory.name !in EXCLUDED_DIRECTORY_NAMES
+                    shouldEnterSourceDirectory(root, directory)
                 }
                 .filter(File::isFile)
                 .forEach { candidate ->
@@ -254,7 +254,10 @@ internal object TypeScriptProjectArchive {
         }
     }
 
-    private fun isSnapshotSource(relativePath: String, targetProfile: String): Boolean {
+    internal fun shouldEnterSourceDirectory(root: File, directory: File): Boolean =
+        directory == root || directory.name !in EXCLUDED_DIRECTORY_NAMES
+
+    internal fun isSnapshotSource(relativePath: String, targetProfile: String): Boolean {
         val name = relativePath.substringAfterLast('/')
         if (name in RESERVED_ROOT_FILES || name.equals(PACKAGE_METADATA_PATH, ignoreCase = true)) {
             return false

@@ -9,6 +9,8 @@ data class EditorPluginSessionConfig(
     val storageDirectoryPath: String,
     val documentPath: String? = null,
     val extras: Bundle? = null,
+    /** Available from editor contract 2. Implementations must call it away from the main thread. */
+    val projectSnapshotProvider: EditorPluginProjectSnapshotProvider? = null,
 )
 
 data class EditorPluginCursor(

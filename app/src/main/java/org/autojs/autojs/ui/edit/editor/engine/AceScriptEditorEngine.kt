@@ -8,6 +8,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.view.View
 import org.autojs.autojs.core.plugin.editor.AceEditorPluginHost
+import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectSnapshotProvider
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
@@ -664,6 +665,7 @@ class AceScriptEditorEngine private constructor(
                     hostVersionName = BuildConfig.VERSION_NAME,
                     hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
                     storageDirectoryPath = File(applicationContext.noBackupFilesDir, "ace_fonts").absolutePath,
+                    projectSnapshotProvider = TypeScriptEditorProjectSnapshotProvider,
                 ),
                 callback = callbackRelay,
             )

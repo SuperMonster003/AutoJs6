@@ -447,6 +447,54 @@ class TypeScriptProjectArchiveTest {
         }
     }
 
+    @Test
+    fun editorProjectSnapshotMatchesTheCompilerSourceInventory() {
+        withProject { root ->
+            File(root, "project.json").writeText("""{"main":"src/main.ts"}""")
+            File(root, "tsconfig.json").writeText("""{"compilerOptions":{"strict":true}}""")
+            val entry = File(root, "src/main.ts").apply {
+                requireNotNull(parentFile).mkdirs()
+                writeText("import { answer } from './shared'; export const value = answer;\n")
+            }
+            File(root, "src/shared.ts").writeText("export const answer: number = 42;\n")
+            File(root, "src/data.json").writeText("""{"answer":42}""")
+            File(root, "build/ignored.ts").apply {
+                requireNotNull(parentFile).mkdirs()
+                writeText("export const ignored = true;\n")
+            }
+            File(root, "node_modules/pkg/index.d.ts").apply {
+                requireNotNull(parentFile).mkdirs()
+                writeText("export declare const external: string;\n")
+            }
+
+            val prepared = TypeScriptProjectArchive.write(
+                projectRoot = root,
+                entryFile = entry,
+                requestId = REQUEST_ID,
+                projectId = PROJECT_ID,
+                authority = rhinoAuthority(),
+                destination = File(root, "editor-source-golden.zip"),
+            )
+            val editorSnapshot = requireNotNull(
+                TypeScriptEditorProjectSnapshotProvider.captureRequired(entry.path),
+            )
+
+            assertEquals(TypeScriptCompilerContract.PROFILE_RHINO, editorSnapshot.targetProfile)
+            assertEquals(
+                prepared.sourceFiles.map(TypeScriptPreparedSource::projectRelativePath),
+                editorSnapshot.sourceFiles.map { source -> source.relativePath },
+            )
+            assertEquals(
+                prepared.sourceFiles.map(TypeScriptPreparedSource::sha256),
+                editorSnapshot.sourceFiles.map { source -> source.sha256 },
+            )
+            assertFalse(editorSnapshot.sourceFiles.any { source ->
+                source.relativePath.startsWith("build/") ||
+                    source.relativePath.startsWith("node_modules/")
+            })
+        }
+    }
+
     private fun withProject(block: (File) -> Unit) {
         val root = Files.createTempDirectory("typescript-project-test-").toFile()
         try {
