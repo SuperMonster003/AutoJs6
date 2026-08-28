@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/28",
       "feature": [
+        "editor contract 2 は実行前コンパイルと同じ上限付き TypeScript project source snapshot を Ace に提供し, 不正な import path のリアルタイム跨ファイル診断を有効にしました. contract 1 editor plugin との互換性も維持します",
         "TypeScript dependency snapshot は native addon signal (`.node`, `binding.gyp`, `gypfile`) と install lifecycle hook (`preinstall`, `install`, `postinstall`) を安定した error code と pure JavaScript/WASM の案内付きで拒否し, 通常の package script は inert metadata のまま維持します",
         "ホストの TypeScript 依存関係コントラクトを resolver policy revision 3 に同期し, dayjs, lodash, zod, uuid, nanoid の実リリース manifest 検証を追加して, Rhino の CommonJS エントリ選択と安定した ESM-only エラーを固定しました",
         "TypeScript project compilation と Ace が同じ frozen `node_modules` type layer を共有: package `types`/`typings`, TypeScript 6 `typesVersions`, nested declaration, installed `@types` により Rhino/Node profile の dayjs completion, hover, strict TS2322 diagnostic が一致",

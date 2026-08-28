@@ -168,6 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/08/28
 
+* `추가` editor contract 2가 이제 실행 전 컴파일과 동일한 제한된 TypeScript 프로젝트 소스 snapshot을 Ace에 제공하여 잘못된 import 경로를 실시간 교차 파일 진단으로 표시하며, contract 1 편집기 플러그인과의 호환성도 유지합니다
 * `추가` TypeScript 의존성 스냅샷은 이제 native addon 신호 (`.node`, `binding.gyp`, `gypfile`)와 설치 lifecycle hook (`preinstall`, `install`, `postinstall`)을 안정적인 오류 코드 및 pure JavaScript/WASM 안내와 함께 거부하며, 일반 패키지 script는 inert metadata로 유지합니다
 * `추가` 호스트 TypeScript 의존성 계약을 resolver policy revision 3과 동기화하고 dayjs, lodash, zod, uuid, nanoid의 실제 릴리스 manifest 검증을 추가하여 Rhino CommonJS 진입점 선택과 안정적인 ESM-only 오류를 고정했습니다
 * `추가` TypeScript project compilation과 Ace가 동일한 frozen `node_modules` type layer를 공유함: package `types`/`typings`, TypeScript 6 `typesVersions`, nested declaration 및 installed `@types`로 Rhino/Node profile의 dayjs completion, hover, strict TS2322 diagnostic이 일치함

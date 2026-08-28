@@ -8,6 +8,7 @@
 
 ###### 2026/08/28
 
+* `Feature` Editor contract 2 now supplies Ace with the same bounded TypeScript project-source snapshot used by pre-run compilation, enabling live cross-file diagnostics for invalid import paths while retaining compatibility with contract-1 editor plugins
 * `Feature` TypeScript dependency snapshots now reject native addon signals (`.node`, `binding.gyp`, and `gypfile`) and install lifecycle hooks (`preinstall`, `install`, and `postinstall`) with stable error codes and pure JavaScript/WASM guidance; ordinary package scripts remain inert metadata
 * `Feature` Aligned the host TypeScript dependency contract with resolver policy revision 3 and added real release-manifest coverage for dayjs, lodash, zod, uuid, and nanoid, locking Rhino CommonJS entry selection and stable ESM-only errors
 * `Feature` TypeScript project compilation and Ace now share one frozen `node_modules` type layer: package `types`/`typings`, TypeScript 6 `typesVersions`, nested declarations, and installed `@types` produce matching dayjs completion, hover, and strict TS2322 diagnostics in Rhino and Node profiles

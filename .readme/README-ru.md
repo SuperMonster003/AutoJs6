@@ -168,6 +168,7 @@ AutoJs6 разработан на основе финальной версии �
 
 ###### 2026/08/28
 
+* `Новое` Контракт редактора 2 теперь передаёт Ace тот же полный ограниченный snapshot исходников проекта TypeScript, который используется компиляцией перед запуском, включая живую межфайловую диагностику неверных путей импорта и совместимость с плагинами редактора контракта 1
 * `Новое` Снимки зависимостей TypeScript теперь отклоняют признаки нативных дополнений (`.node`, `binding.gyp` и `gypfile`) и hooks жизненного цикла установки (`preinstall`, `install` и `postinstall`) со стабильными кодами ошибок и рекомендациями pure JavaScript/WASM; обычные scripts пакета остаются инертными метаданными
 * `Новое` Контракт зависимостей TypeScript хоста синхронизирован с политикой resolver revision 3; добавлена проверка реальных manifest выпусков dayjs, lodash, zod, uuid и nanoid, фиксирующая выбор CommonJS-входов Rhino и стабильные ошибки ESM-only
 * `Новое` Компиляция проектов TypeScript и Ace теперь используют один frozen type layer `node_modules`: package `types`/`typings`, TypeScript 6 `typesVersions`, вложенные declarations и установленные `@types` дают одинаковые completion dayjs, hover и strict diagnostic TS2322 в профилях Rhino и Node

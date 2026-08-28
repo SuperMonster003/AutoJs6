@@ -8,6 +8,7 @@
 
 ###### 2026/08/28
 
+* `إضافة جديدة` يوفر عقد المحرر 2 الآن إلى Ace نفس لقطة مصادر مشروع TypeScript المحدودة المستخدمة في التجميع قبل التشغيل، مما يتيح تشخيصات مباشرة بين الملفات لمسارات الاستيراد غير الصحيحة مع الحفاظ على التوافق مع إضافات المحرر ذات العقد 1
 * `إضافة جديدة` ترفض لقطات تبعيات TypeScript الآن إشارات الإضافات الأصلية (`.node` و`binding.gyp` و`gypfile`) وخطافات دورة حياة التثبيت (`preinstall` و`install` و`postinstall`) باستخدام رموز أخطاء مستقرة وإرشادات لبدائل JavaScript الخالصة/WASM; وتظل scripts العادية للحزم بيانات وصفية خاملة
 * `إضافة جديدة` وُحّد عقد تبعيات TypeScript في المضيف مع سياسة resolver بالمراجعة 3، وأضيفت تغطية لملفات manifest للإصدارات الفعلية من dayjs وlodash وzod وuuid وnanoid، مع تثبيت اختيار مداخل CommonJS في Rhino وأخطاء ESM-only المستقرة
 * `إضافة جديدة` تشترك TypeScript project compilation وAce الان في frozen `node_modules` type layer واحدة: تنتج package `types`/`typings` وTypeScript 6 `typesVersions` وnested declarations و`@types` المثبتة dayjs completion وhover وstrict TS2322 diagnostics متطابقة في Rhino وNode profiles

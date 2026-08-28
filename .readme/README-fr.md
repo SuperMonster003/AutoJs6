@@ -168,6 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 ###### 2026/08/28
 
+* `Fonctionnalité` Le contrat d'éditeur 2 fournit désormais à Ace le même snapshot borné des sources du projet TypeScript que la compilation avant exécution, permettant des diagnostics inter-fichiers en direct pour les chemins d'import invalides tout en conservant la compatibilité avec les plugins d'éditeur de contrat 1
 * `Fonctionnalité` Les instantanés de dépendances TypeScript rejettent désormais les signaux d'extensions natives (`.node`, `binding.gyp` et `gypfile`) et les hooks du cycle d'installation (`preinstall`, `install` et `postinstall`) avec des codes d'erreur stables et des conseils JavaScript pur/WASM; les scripts ordinaires du paquet restent des métadonnées inertes
 * `Fonctionnalité` Alignement du contrat de dépendances TypeScript de l'hôte sur la révision 3 de la politique du resolver et ajout d'une couverture des manifestes de versions réelles de dayjs, lodash, zod, uuid et nanoid, garantissant la sélection des entrées CommonJS de Rhino et des erreurs ESM-only stables
 * `Fonctionnalité` La compilation de projets TypeScript et Ace partagent maintenant une meme couche gelee de types `node_modules`: `types`/`typings`, `typesVersions` de TypeScript 6, declarations imbriquees et `@types` installes donnent la meme completion dayjs, le meme hover et le meme diagnostic strict TS2322 dans Rhino et Node

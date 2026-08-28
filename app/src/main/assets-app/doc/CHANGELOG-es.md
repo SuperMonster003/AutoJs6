@@ -8,6 +8,7 @@
 
 ###### 2026/08/28
 
+* `Nuevo` El contrato de editor 2 proporciona ahora a Ace la misma instantánea acotada de fuentes del proyecto TypeScript que usa la compilación previa a la ejecución, permitiendo diagnósticos en vivo entre archivos para rutas de importación incorrectas y manteniendo la compatibilidad con plugins de editor de contrato 1
 * `Nuevo` Las instantáneas de dependencias TypeScript ahora rechazan señales de addons nativos (`.node`, `binding.gyp` y `gypfile`) y hooks del ciclo de instalación (`preinstall`, `install` y `postinstall`) con códigos de error estables y orientación hacia JavaScript puro/WASM; los scripts ordinarios del paquete siguen siendo metadatos inertes
 * `Nuevo` Se alineó el contrato de dependencias TypeScript del host con la revisión 3 de la política del resolver y se añadieron pruebas de manifiestos de versiones reales para dayjs, lodash, zod, uuid y nanoid, fijando la selección de entradas CommonJS de Rhino y los errores ESM-only estables
 * `Nuevo` La compilacion de proyectos TypeScript y Ace comparten ahora una misma capa congelada de tipos `node_modules`: `types`/`typings`, `typesVersions` de TypeScript 6, declaraciones anidadas y `@types` instalados producen el mismo completado de dayjs, hover y diagnostico strict TS2322 en Rhino y Node

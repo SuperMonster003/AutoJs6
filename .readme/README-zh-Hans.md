@@ -168,6 +168,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 ###### 2026/08/28
 
+* `新增` 编辑器 contract 2 现会向 Ace 提供与运行前编译相同的有界 TypeScript 项目源码快照, 从而实时跨文件诊断错误 import 路径, 同时继续兼容 contract 1 编辑器插件
 * `新增` TypeScript 依赖快照现会拒绝原生 addon 信号 (`.node`, `binding.gyp` 与 `gypfile`) 和安装生命周期 hook (`preinstall`, `install` 与 `postinstall`), 提供稳定错误码及纯 JavaScript/WASM 替代指引; 普通 package script 仍仅作为惰性元数据保留
 * `新增` 宿主 TypeScript 依赖契约已同步 resolver policy revision 3, 并包含 dayjs, lodash, zod, uuid 与 nanoid 真实发布 manifest 覆盖, 锁定 Rhino CommonJS 入口选择和稳定的 ESM-only 错误
 * `新增` TypeScript 项目编译与 Ace 现共用同一冻结 `node_modules` 类型层: package `types`/`typings`, TypeScript 6 `typesVersions`, 嵌套声明与已安装 `@types` 在 Rhino 和 Node profile 中产生一致的 dayjs 补全, hover 与 strict TS2322 诊断

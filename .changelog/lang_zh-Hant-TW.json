@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/28",
       "feature": [
+        "編輯器 contract 2 現會向 Ace 提供與執行前編譯相同的有界 TypeScript 專案原始碼快照, 從而即時跨檔案診斷錯誤 import 路徑, 同時繼續相容 contract 1 編輯器外掛",
         "TypeScript 相依性快照現在會拒絕原生 addon 訊號 (`.node`, `binding.gyp` 與 `gypfile`) 和安裝生命週期 hook (`preinstall`, `install` 與 `postinstall`), 提供穩定錯誤碼及純 JavaScript/WASM 替代指引; 一般 package script 仍僅作為惰性中繼資料保留",
         "宿主 TypeScript 依賴契約已同步 resolver policy revision 3, 並包含 dayjs, lodash, zod, uuid 與 nanoid 真實發行 manifest 覆蓋, 鎖定 Rhino CommonJS 入口選擇與穩定的 ESM-only 錯誤",
         "TypeScript 專案編譯與 Ace 現共用同一凍結 `node_modules` 型別層: package `types`/`typings`, TypeScript 6 `typesVersions`, 巢狀宣告及已安裝 `@types` 在 Rhino 和 Node profile 產生一致的 dayjs 補全, hover 與 strict TS2322 診斷",
