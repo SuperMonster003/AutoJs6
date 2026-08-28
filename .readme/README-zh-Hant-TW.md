@@ -429,6 +429,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 將尚未發布的官方 AI 外掛定名為 3-Stone AI, 同時以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述元, AP schema 域及重新命名的符合性測試夾具完全取代跨處理程序合約; 不保留識別別名
 * `最佳化` 直接實作 AI Provider V2 分頁目標探索: 每個目標帶有穩定 target/provider/model 識別, locality, 設定與可用狀態, capabilities, limits, controls 及允許的 HTTPS origins; 支援 REMOTE/HYBRID 執行與外掛自管憑證, 憑證位元組不經 Binder, 且不保留被取代的 wire 別名
 * `最佳化` 檔案管理器目錄重新整理採用最小差量更新, 未變化的列不再重新繫結, 原地重新整理保持目前捲動位置
+* `最佳化` 重構檔案管理器的清單配置, 項目呈現, 選取工具列, 封存工作流程, 輸入能力, 輸出保留及復原元件, 縮減過大的檢視與工作階段類別, 並使導覽, 安全邊界及操作原則可獨立測試
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

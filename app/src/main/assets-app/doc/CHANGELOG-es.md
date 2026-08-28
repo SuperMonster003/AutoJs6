@@ -269,6 +269,7 @@
 * `Mejora` Consolidado el plugin oficial de IA no publicado como 3-Stone AI y reemplazado su contrato entre procesos por `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, nuevos descriptores Binder, el dominio schema AP y fixtures de conformidad renombrados; no se conservan alias de identidad
 * `Mejora` El descubrimiento paginado de destinos de AI Provider V2 se implementó directamente: cada destino incluye identidades target/provider/model estables, locality, estados de configuración y disponibilidad, capacidades, límites, controles y orígenes HTTPS permitidos; REMOTE/HYBRID y las credenciales gestionadas por el plugin se admiten sin pasar bytes de credenciales por Binder y no se conservan alias wire sustituidos
 * `Mejora` La actualización de directorios del administrador de archivos aplica diferencias mínimas de lista, mantiene enlazadas las filas sin cambios y conserva la posición de desplazamiento durante las actualizaciones en el mismo lugar
+* `Mejora` Refactorización del administrador de archivos mediante componentes explícitos para el diseño de listas, la presentación de elementos, la barra de selección, el flujo de archivos comprimidos, las capacidades de entrada, la reserva de salidas y la recuperación, reduciendo las clases de vista y sesión sobredimensionadas y permitiendo probar por separado la navegación, los límites de seguridad y las políticas de acciones
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

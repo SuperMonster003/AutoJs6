@@ -269,6 +269,7 @@
 * `개선` 미출시 공식 AI 플러그인을 3-Stone AI로 확정하고 프로세스 간 계약을 중립적인 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 새 Binder descriptor, AP schema domain 및 이름이 변경된 conformance fixture로 완전히 교체; 식별자 alias를 유지하지 않음
 * `개선` AI Provider V2 페이지형 target discovery를 직접 구현: 각 target은 안정적인 target/provider/model 식별자, locality, 구성 및 가용 상태, capabilities, limits, controls, 허용된 HTTPS origins를 포함; credential byte가 Binder를 통과하지 않는 plugin-managed credential과 REMOTE/HYBRID 실행을 지원하며 교체된 wire alias는 유지하지 않음
 * `개선` 파일 관리자 디렉터리 새로 고침이 최소 목록 차이만 적용하여 변경되지 않은 행은 다시 바인딩하지 않고 제자리 새로 고침 시 현재 스크롤 위치를 유지
+* `개선` 파일 관리자를 목록 레이아웃, 항목 표시, 선택 도구 모음, 아카이브 워크플로, 입력 권한, 출력 예약 및 복구 컴포넌트로 재구성하여 비대해진 뷰/세션 클래스를 축소하고 탐색, 보안 경계 및 동작 정책을 독립적으로 테스트할 수 있도록 개선
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer

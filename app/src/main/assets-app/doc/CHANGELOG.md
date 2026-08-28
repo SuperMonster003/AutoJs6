@@ -248,6 +248,7 @@
 * `优化` 将未发布的官方 AI 插件定名为 3-Stone AI, 同时以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述符, AP schema 域及重命名的一致性测试夹具完全替换跨进程合约; 不保留身份别名
 * `优化` 直接实现 AI Provider V2 分页目标发现: 每项目标携带稳定的 target/provider/model 身份, locality, 配置与可用状态, capabilities, limits, controls 及允许的 HTTPS origins; 支持 REMOTE/HYBRID 执行和插件自管凭据, 凭据字节不经过 Binder, 且不保留被取代的 wire 别名
 * `优化` 文件管理器目录刷新采用最小差量更新, 未变化的行不再重新绑定, 原地刷新保持当前滚动位置
+* `优化` 重构文件管理器的列表布局, 条目呈现, 选择工具栏, 归档工作流, 输入能力, 输出预留及恢复组件, 缩减过大的视图与会话类, 并使导航, 安全边界及操作策略可独立测试
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

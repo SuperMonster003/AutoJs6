@@ -267,7 +267,8 @@
         "Le système de compilation sélectionne dynamiquement les versions compatibles de Kotlin/KSP/AGP/R8 et réduit la pression mémoire au démarrage de Gradle",
         "Le plugin IA officiel non publié est finalisé sous le nom 3-Stone AI et son contrat interprocessus est remplacé par `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, de nouveaux descripteurs Binder, le domaine schema AP et des fixtures de conformité renommées; aucun alias d'identité n'est conservé",
         "La découverte paginée de cibles AI Provider V2 est implémentée directement: chaque cible porte des identités target/provider/model stables, locality, états de configuration et disponibilité, capacités, limites, contrôles et origines HTTPS autorisées; REMOTE/HYBRID et les identifiants gérés par le plugin sont pris en charge sans octets d'identification dans Binder, et aucun alias wire remplacé n'est conservé",
-        "L'actualisation des dossiers du gestionnaire de fichiers applique des différences minimales de liste, garde liées les lignes inchangées et conserve la position de défilement lors des actualisations sur place"
+        "L'actualisation des dossiers du gestionnaire de fichiers applique des différences minimales de liste, garde liées les lignes inchangées et conserve la position de défilement lors des actualisations sur place",
+        "Refactorisation du gestionnaire de fichiers autour de composants explicites pour la disposition des listes, la présentation des éléments, la barre de sélection, les archives, les capacités d'entrée, la réservation des sorties et la récupération, afin de réduire les classes de vue et de session surdimensionnées et de rendre la navigation, les limites de sécurité et les politiques d'action testables indépendamment"
       ],
       "dependency": [
         "Android AXML modularise",

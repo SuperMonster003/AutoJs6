@@ -429,6 +429,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` 未公開の公式 AI プラグインを 3-Stone AI として確定し, プロセス間契約を中立な `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新しい Binder descriptor, AP schema domain, 改名済み conformance fixture で完全に置換; 識別子 alias は保持しない
 * `改善` AI Provider V2 ページ分割ターゲット探索を直接実装: 各ターゲットは安定した target/provider/model 識別子, locality, 設定・可用状態, capabilities, limits, controls, 許可済み HTTPS origins を保持; REMOTE/HYBRID 実行とプラグイン管理認証情報を Binder に認証情報 byte を渡さずにサポートし, 置換済み wire alias は保持しない
 * `改善` ファイルマネージャのディレクトリ更新は最小限のリスト差分を適用し, 変更のない行は再バインドせず, その場での更新時に現在のスクロール位置を維持
+* `改善` ファイルマネージャをリストレイアウト, 項目表示, 選択ツールバー, アーカイブ処理, 入力権限, 出力予約, 復旧の明確なコンポーネントへ再構成し, 肥大化したビュー/セッションクラスを縮小するとともに, ナビゲーション, セキュリティ境界, アクションポリシーを個別にテスト可能化
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
