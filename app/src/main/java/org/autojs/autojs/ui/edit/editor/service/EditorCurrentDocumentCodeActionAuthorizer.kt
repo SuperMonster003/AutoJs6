@@ -18,6 +18,7 @@ object EditorCurrentDocumentCodeActionAuthorizer {
         if (currentText.length > EditorPluginCurrentDocumentCodeActionContract.MAX_DOCUMENT_UTF16_LENGTH) {
             return false
         }
+        if (!isWellFormedUtf16(currentText)) return false
         if (sha256(currentText) != action.baseContentSha256) return false
 
         val result = StringBuilder(currentText)
@@ -31,7 +32,9 @@ object EditorCurrentDocumentCodeActionAuthorizer {
             return false
         }
         val resultText = result.toString()
-        return resultText != currentText && sha256(resultText) == action.resultContentSha256
+        return resultText != currentText &&
+            isWellFormedUtf16(resultText) &&
+            sha256(resultText) == action.resultContentSha256
     }
 
     private fun isUtf16Boundary(text: String, offset: Int): Boolean =
@@ -39,6 +42,23 @@ object EditorCurrentDocumentCodeActionAuthorizer {
             (offset == 0 || offset == text.length ||
                 !Character.isHighSurrogate(text[offset - 1]) ||
                 !Character.isLowSurrogate(text[offset]))
+
+    private fun isWellFormedUtf16(value: String): Boolean {
+        var index = 0
+        while (index < value.length) {
+            when {
+                Character.isHighSurrogate(value[index]) -> {
+                    if (index + 1 >= value.length || !Character.isLowSurrogate(value[index + 1])) {
+                        return false
+                    }
+                    index += 2
+                }
+                Character.isLowSurrogate(value[index]) -> return false
+                else -> index++
+            }
+        }
+        return true
+    }
 
     private fun sha256(text: String): String =
         MessageDigest.getInstance("SHA-256")

@@ -78,6 +78,19 @@ class EditorCurrentDocumentCodeActionAuthorizerTest {
         assertFalse(EditorCurrentDocumentCodeActionAuthorizer.isAuthorized(action, base, false))
     }
 
+    @Test
+    fun rejectsMalformedUtf16BaseBeforeHashAuthorization() {
+        val base = "prefix\uD83Dsuffix"
+        val result = "prefixxsuffix"
+        val action = action(
+            base = base,
+            result = result,
+            edits = listOf(EditorPluginTextEdit(6, 7, "x")),
+        )
+
+        assertFalse(EditorCurrentDocumentCodeActionAuthorizer.isAuthorized(action, base, false))
+    }
+
     private fun action(
         base: String,
         result: String,
