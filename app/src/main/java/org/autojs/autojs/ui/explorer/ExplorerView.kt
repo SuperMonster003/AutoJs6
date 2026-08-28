@@ -3307,7 +3307,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     companion object {
         private const val LOG_TAG = "ExplorerView"
         private const val PLUGIN_ACTION_MENU_ORDER_START = 1_000
-        private const val SELECTION_TOOLBAR_CONTENT_HEIGHT_DP = 113F
+        private const val SELECTION_TOOLBAR_CONTENT_HEIGHT_DP = 81F
         private const val SELECTION_TOOLBAR_SHOW_DURATION = 120L
         private const val SELECTION_TOOLBAR_HIDE_DURATION = 90L
         private const val MAX_ARCHIVE_IMAGE_PREVIEW_BYTES = 256L * 1024L * 1024L

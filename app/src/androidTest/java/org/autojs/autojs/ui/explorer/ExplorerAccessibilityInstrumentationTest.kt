@@ -61,6 +61,8 @@ class ExplorerAccessibilityInstrumentationTest {
 
                 val actions = selectionActions(explorer)
                 assertEquals(5, actions.size)
+                assertHeight(context, count, 32F)
+                assertHeight(context, actionsContainer, 64F)
                 actions.forEach { action ->
                     assertTouchTarget(context, action)
                     assertTrue(action.contentDescription?.isNotBlank() == true)
@@ -82,7 +84,7 @@ class ExplorerAccessibilityInstrumentationTest {
 
                 selectionLabels(explorer).forEach { label ->
                     val textLayout = checkNotNull(label.layout)
-                    assertTrue(textLayout.lineCount in 1..2)
+                    assertEquals(1, textLayout.lineCount)
                     assertTrue(textLayout.height <= label.height - label.paddingTop - label.paddingBottom)
                     assertEquals(View.IMPORTANT_FOR_ACCESSIBILITY_NO, label.importantForAccessibility)
                 }
