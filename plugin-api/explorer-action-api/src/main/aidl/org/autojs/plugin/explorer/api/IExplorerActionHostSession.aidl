@@ -107,4 +107,16 @@ interface IExplorerActionHostSession {
         long durationMillis,
         int reportState
     );
+
+    /**
+     * v18. Returns the latest host-owned replacement history for one original request target.
+     * The plugin receives only an opaque history ID and bounded metadata, never a backup path.
+     */
+    Bundle queryTargetReplacement(String targetId);
+
+    /**
+     * v18. Restores the exact previous version only while the current target still matches the
+     * replacement committed by this history record. The history ID is single-use.
+     */
+    Bundle undoTargetReplacement(String targetId, String replacementHistoryId);
 }

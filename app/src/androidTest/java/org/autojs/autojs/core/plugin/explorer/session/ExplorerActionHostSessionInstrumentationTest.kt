@@ -31,6 +31,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.UUID
 
@@ -469,10 +470,610 @@ class ExplorerActionHostSessionInstrumentationTest {
             assertArrayEquals(expected, source.readBytes())
             assertEquals(source.canonicalFile, notifiedReplacement.get()?.canonicalFile)
             assertEquals(expected.size.toLong(), committed.getLong(ExplorerActionHostSessionKeys.SIZE))
+            assertFalse(
+                committed.containsKey(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID),
+            )
+            expectIllegalState { session.queryTargetReplacement("archive") }
             assertFalse(testRoot.listFiles().orEmpty().any { it.name.endsWith(".part") })
         } finally {
             session.close()
             testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun replacementHistoryRestoresThePreviousArchiveExactlyOnce() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v18-undo-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val original = "original archive version".encodeToByteArray()
+        val replacement = "verified replacement archive".encodeToByteArray()
+        val source = File(testRoot, "archive.zip").apply { writeBytes(original) }
+        val notifications = AtomicInteger()
+        val historyStore = ExplorerActionReplacementHistoryStore(context)
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+            allowCreateOutput = false,
+            allowReplaceTarget = true,
+            allowReplacementUndo = true,
+            onTargetReplaced = { notifications.incrementAndGet() },
+        )
+
+        try {
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_NONE,
+                session.queryTargetReplacement("archive")
+                    .getInt(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE),
+            )
+            val transactionId = requireNotNull(
+                session.prepareTargetReplacement("archive")
+                    .getString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID),
+            )
+            ParcelFileDescriptor.AutoCloseOutputStream(session.openOutput(transactionId)).use {
+                it.write(replacement)
+            }
+            ParcelFileDescriptor.AutoCloseInputStream(
+                session.openPendingOutput(transactionId),
+            ).use { assertArrayEquals(replacement, it.readBytes()) }
+
+            val committed = session.commitOutput(transactionId)
+            val historyId = requireNotNull(
+                committed.getString(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID),
+            )
+            assertArrayEquals(replacement, source.readBytes())
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_AVAILABLE,
+                committed.getInt(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE),
+            )
+            assertEquals(
+                original.size.toLong(),
+                committed.getLong(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_PREVIOUS_SIZE),
+            )
+            assertEquals(
+                historyId,
+                session.queryTargetReplacement("archive")
+                    .getString(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID),
+            )
+
+            val restored = session.undoTargetReplacement("archive", historyId)
+            assertArrayEquals(original, source.readBytes())
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_RESTORED,
+                restored.getInt(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE),
+            )
+            assertEquals(original.size.toLong(), restored.getLong(ExplorerActionHostSessionKeys.SIZE))
+            assertEquals(2, notifications.get())
+            expectIllegalState { session.undoTargetReplacement("archive", historyId) }
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_RESTORED,
+                session.queryTargetReplacement("archive")
+                    .getInt(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE),
+            )
+        } finally {
+            session.close()
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun externallyChangedReplacementBecomesStaleAndIsNeverOverwrittenByUndo() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v18-stale-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "archive.zip").apply { writeText("original archive") }
+        val historyStore = ExplorerActionReplacementHistoryStore(context)
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+            allowCreateOutput = false,
+            allowReplaceTarget = true,
+            allowReplacementUndo = true,
+        )
+
+        try {
+            val transactionId = requireNotNull(
+                session.prepareTargetReplacement("archive")
+                    .getString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID),
+            )
+            ParcelFileDescriptor.AutoCloseOutputStream(session.openOutput(transactionId)).use {
+                it.write("replacement archive".encodeToByteArray())
+            }
+            ParcelFileDescriptor.AutoCloseInputStream(
+                session.openPendingOutput(transactionId),
+            ).use { it.readBytes() }
+            val historyId = requireNotNull(
+                session.commitOutput(transactionId)
+                    .getString(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID),
+            )
+
+            val external = "external archive update that must remain untouched"
+            source.writeText(external)
+            val queried = session.queryTargetReplacement("archive")
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_STALE,
+                queried.getInt(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE),
+            )
+            expectIllegalState { session.undoTargetReplacement("archive", historyId) }
+            assertEquals(external, source.readText())
+        } finally {
+            session.close()
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun corruptedReplacementBackupRequiresRecoveryAndLeavesNoRestoreTemp() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v18-corrupt-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "archive.zip").apply { writeText("original archive") }
+        val historyStore = ExplorerActionReplacementHistoryStore(context)
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+            allowCreateOutput = false,
+            allowReplaceTarget = true,
+            allowReplacementUndo = true,
+        )
+
+        try {
+            val transactionId = requireNotNull(
+                session.prepareTargetReplacement("archive")
+                    .getString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID),
+            )
+            ParcelFileDescriptor.AutoCloseOutputStream(session.openOutput(transactionId)).use {
+                it.write("replacement archive".encodeToByteArray())
+            }
+            ParcelFileDescriptor.AutoCloseInputStream(
+                session.openPendingOutput(transactionId),
+            ).use { it.readBytes() }
+            val historyId = requireNotNull(
+                session.commitOutput(transactionId)
+                    .getString(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID),
+            )
+            val history = requireNotNull(
+                historyStore.queryLatest(context.applicationInfo.uid, source),
+            )
+            val backup = File(
+                context.noBackupFilesDir,
+                "explorer-action-replacement-history/${history.backupRelativePath}",
+            )
+            val corrupted = backup.readBytes().also { bytes ->
+                bytes[0] = (bytes[0].toInt() xor 0x01).toByte()
+            }
+            backup.writeBytes(corrupted)
+
+            expectIllegalState { session.undoTargetReplacement("archive", historyId) }
+            assertEquals("replacement archive", source.readText())
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_RECOVERY_REQUIRED,
+                session.queryTargetReplacement("archive")
+                    .getInt(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE),
+            )
+            assertTrue(
+                testRoot.listFiles().orEmpty().none { file ->
+                    file.name.startsWith(".autojs6-explorer-") && file.name.endsWith(".part")
+                },
+            )
+        } finally {
+            session.close()
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun preparedReplacementHistoryRecoversAfterAtomicRenameInterruption() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v18-recovery-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val original = "original archive before interruption".encodeToByteArray()
+        val replacement = "replacement archive after interruption".encodeToByteArray()
+        val source = File(testRoot, "archive.zip").apply { writeBytes(original) }
+        val candidate = File(testRoot, ".autojs6-explorer-${UUID.randomUUID()}.part").apply {
+            writeBytes(replacement)
+        }
+        val historyStore = ExplorerActionReplacementHistoryStore(context)
+        val record = historyStore.prepare(
+            transactionId = UUID.randomUUID().toString(),
+            pluginUid = context.applicationInfo.uid,
+            parent = testRoot,
+            target = source,
+            previousIdentity = ExplorerActionFileIdentity.captureRegularFile(source),
+            replacementIdentity = ExplorerActionFileIdentity.captureRegularFile(candidate),
+        )
+        Os.rename(candidate.path, source.path)
+        var session: ExplorerActionHostSession? = null
+
+        try {
+            session = ExplorerActionHostSession.create(
+                context = context,
+                pluginPackageName = context.packageName,
+                commonParent = testRoot,
+                targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+                allowCreateOutput = false,
+                allowReplaceTarget = true,
+                allowReplacementUndo = true,
+            )
+            val recovered = session.queryTargetReplacement("archive")
+            assertEquals(record.id, recovered.getString(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID))
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_AVAILABLE,
+                recovered.getInt(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE),
+            )
+            session.undoTargetReplacement("archive", record.id)
+            assertArrayEquals(original, source.readBytes())
+        } finally {
+            session?.close()
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            candidate.delete()
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun interruptedAtomicJournalWriteRecoversPreparedReplacementHistory() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v18-journal-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val original = "original archive before journal interruption".encodeToByteArray()
+        val replacement = "replacement archive after journal interruption".encodeToByteArray()
+        val source = File(testRoot, "archive.zip").apply { writeBytes(original) }
+        val candidate = File(testRoot, "replacement.part").apply { writeBytes(replacement) }
+        val historyStore = ExplorerActionReplacementHistoryStore(context)
+        val record = historyStore.prepare(
+            transactionId = UUID.randomUUID().toString(),
+            pluginUid = context.applicationInfo.uid,
+            parent = testRoot,
+            target = source,
+            previousIdentity = ExplorerActionFileIdentity.captureRegularFile(source),
+            replacementIdentity = ExplorerActionFileIdentity.captureRegularFile(candidate),
+        )
+        Os.rename(candidate.path, source.path)
+        val journal = File(
+            context.noBackupFilesDir,
+            "explorer-action-replacement-history/records/${record.id}.json",
+        )
+        val atomicBackup = File(journal.path + ".bak")
+        assertTrue(journal.renameTo(atomicBackup))
+
+        try {
+            historyStore.recover()
+            val recovered = requireNotNull(
+                historyStore.queryLatest(context.applicationInfo.uid, source),
+            )
+            assertEquals(record.id, recovered.id)
+            assertEquals(ExplorerActionReplacementHistoryState.AVAILABLE, recovered.state)
+            assertTrue(journal.isFile)
+            assertFalse(atomicBackup.exists())
+            historyStore.undo(context.applicationInfo.uid, source, record.id)
+            assertArrayEquals(original, source.readBytes())
+        } finally {
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            candidate.delete()
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun replacementHistoryToleratesAClockThatMovesBackwards() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v18-clock-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val original = "original archive before clock rollback".encodeToByteArray()
+        val replacement = "replacement archive after clock rollback".encodeToByteArray()
+        val source = File(testRoot, "archive.zip").apply { writeBytes(original) }
+        val candidate = File(testRoot, "replacement.part").apply { writeBytes(replacement) }
+        val clock = AtomicLong(2_000L)
+        val historyStore = ExplorerActionReplacementHistoryStore(context, clock::get)
+        val record = historyStore.prepare(
+            transactionId = UUID.randomUUID().toString(),
+            pluginUid = context.applicationInfo.uid,
+            parent = testRoot,
+            target = source,
+            previousIdentity = ExplorerActionFileIdentity.captureRegularFile(source),
+            replacementIdentity = ExplorerActionFileIdentity.captureRegularFile(candidate),
+        )
+        Os.rename(candidate.path, source.path)
+        clock.set(1_000L)
+
+        try {
+            val available = historyStore.markAvailable(record.id)
+            assertEquals(ExplorerActionReplacementHistoryState.AVAILABLE, available.state)
+            assertEquals(2_000L, available.createdAtMillis)
+            assertEquals(2_000L, available.updatedAtMillis)
+            val restored = historyStore.undo(context.applicationInfo.uid, source, record.id)
+            assertEquals(ExplorerActionReplacementHistoryState.RESTORED, restored.record.state)
+            assertEquals(2_000L, restored.record.updatedAtMillis)
+            assertArrayEquals(original, source.readBytes())
+        } finally {
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            candidate.delete()
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun unresolvedReplacementRecoveryIsPreservedAndBlocksAnotherReplacement() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v18-unresolved-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val source = File(testRoot, "archive.zip").apply { writeText("original archive") }
+        val firstCandidate = File(testRoot, "first-candidate.part").apply {
+            writeText("first replacement")
+        }
+        val historyStore = ExplorerActionReplacementHistoryStore(context)
+        val record = historyStore.prepare(
+            transactionId = UUID.randomUUID().toString(),
+            pluginUid = context.applicationInfo.uid,
+            parent = testRoot,
+            target = source,
+            previousIdentity = ExplorerActionFileIdentity.captureRegularFile(source),
+            replacementIdentity = ExplorerActionFileIdentity.captureRegularFile(firstCandidate),
+        )
+
+        try {
+            source.writeText("unrelated external archive content")
+            val secondCandidate = File(testRoot, "second-candidate.part").apply {
+                writeText("second replacement")
+            }
+            expectIllegalState {
+                historyStore.prepare(
+                    transactionId = UUID.randomUUID().toString(),
+                    pluginUid = context.applicationInfo.uid,
+                    parent = testRoot,
+                    target = source,
+                    previousIdentity = ExplorerActionFileIdentity.captureRegularFile(source),
+                    replacementIdentity =
+                        ExplorerActionFileIdentity.captureRegularFile(secondCandidate),
+                )
+            }
+            val unresolved = requireNotNull(
+                historyStore.queryLatest(context.applicationInfo.uid, source),
+            )
+            assertEquals(record.id, unresolved.id)
+            assertEquals(
+                ExplorerActionReplacementHistoryState.RECOVERY_REQUIRED,
+                unresolved.state,
+            )
+            assertEquals("unrelated external archive content", source.readText())
+        } finally {
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun realReplacementRecoveryRequiresExternalTwoPhaseHarness() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val phase = InstrumentationRegistry.getArguments()
+            .getString(REPLACEMENT_PROCESS_DEATH_PHASE_ARGUMENT)
+            .orEmpty()
+        assumeTrue(
+            "This replacement recovery gate runs only through the external two-phase harness",
+            phase in REPLACEMENT_PROCESS_DEATH_PHASES,
+        )
+        val context = instrumentation.targetContext
+        val testRoot = File(context.cacheDir, REPLACEMENT_PROCESS_DEATH_ROOT_NAME)
+        val source = File(testRoot, "archive.zip")
+        val historyIdFile = File(
+            context.filesDir,
+            REPLACEMENT_PROCESS_DEATH_HISTORY_ID_FILE_NAME,
+        )
+        val readyFile = File(context.filesDir, REPLACEMENT_PROCESS_DEATH_READY_FILE_NAME)
+        val historyStore = ExplorerActionReplacementHistoryStore(context)
+
+        fun cleanup() {
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            testRoot.deleteRecursively()
+            historyIdFile.delete()
+            readyFile.delete()
+        }
+
+        when (phase) {
+            REPLACEMENT_PROCESS_DEATH_COMMIT_PREPARE -> {
+                cleanup()
+                assertTrue(testRoot.mkdirs())
+                source.writeText(REPLACEMENT_PROCESS_DEATH_ORIGINAL)
+                val blockUntilKilled = CountDownLatch(1)
+                val session = ExplorerActionHostSession.create(
+                    context = context,
+                    pluginPackageName = context.packageName,
+                    commonParent = testRoot,
+                    targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+                    allowCreateOutput = false,
+                    allowReplaceTarget = true,
+                    allowReplacementUndo = true,
+                    afterReplacementPublished = {
+                        writeDurableText(readyFile, "commit-ready")
+                        blockUntilKilled.await()
+                    },
+                )
+                val transactionId = prepareVerifiedReplacement(
+                    session,
+                    REPLACEMENT_PROCESS_DEATH_REPLACEMENT.encodeToByteArray(),
+                )
+                session.commitOutput(transactionId)
+                throw AssertionError("External harness did not terminate the host process")
+            }
+            REPLACEMENT_PROCESS_DEATH_COMMIT_VERIFY -> {
+                assertEquals("commit-ready", readyFile.readText())
+                assertEquals(REPLACEMENT_PROCESS_DEATH_REPLACEMENT, source.readText())
+                val session = ExplorerActionHostSession.create(
+                    context = context,
+                    pluginPackageName = context.packageName,
+                    commonParent = testRoot,
+                    targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+                    allowCreateOutput = false,
+                    allowReplaceTarget = true,
+                    allowReplacementUndo = true,
+                )
+                try {
+                    val recovered = session.queryTargetReplacement("archive")
+                    assertEquals(
+                        ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_AVAILABLE,
+                        recovered.getInt(
+                            ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE,
+                        ),
+                    )
+                    val historyId = requireNotNull(
+                        recovered.getString(
+                            ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID,
+                        ),
+                    )
+                    session.undoTargetReplacement("archive", historyId)
+                    assertEquals(REPLACEMENT_PROCESS_DEATH_ORIGINAL, source.readText())
+                } finally {
+                    session.close()
+                    cleanup()
+                }
+            }
+            REPLACEMENT_PROCESS_DEATH_RESTORE_PREPARE -> {
+                cleanup()
+                assertTrue(testRoot.mkdirs())
+                source.writeText(REPLACEMENT_PROCESS_DEATH_ORIGINAL)
+                val blockUntilKilled = CountDownLatch(1)
+                val session = ExplorerActionHostSession.create(
+                    context = context,
+                    pluginPackageName = context.packageName,
+                    commonParent = testRoot,
+                    targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+                    allowCreateOutput = false,
+                    allowReplaceTarget = true,
+                    allowReplacementUndo = true,
+                    afterReplacementRestored = {
+                        writeDurableText(readyFile, "restore-ready")
+                        blockUntilKilled.await()
+                    },
+                )
+                val transactionId = prepareVerifiedReplacement(
+                    session,
+                    REPLACEMENT_PROCESS_DEATH_REPLACEMENT.encodeToByteArray(),
+                )
+                val historyId = requireNotNull(
+                    session.commitOutput(transactionId).getString(
+                        ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID,
+                    ),
+                )
+                writeDurableText(historyIdFile, historyId)
+                session.undoTargetReplacement("archive", historyId)
+                throw AssertionError("External harness did not terminate the host process")
+            }
+            REPLACEMENT_PROCESS_DEATH_RESTORE_VERIFY -> {
+                assertEquals("restore-ready", readyFile.readText())
+                val historyId = historyIdFile.readText().trim()
+                assertTrue(historyId.isNotEmpty())
+                assertEquals(REPLACEMENT_PROCESS_DEATH_ORIGINAL, source.readText())
+                val session = ExplorerActionHostSession.create(
+                    context = context,
+                    pluginPackageName = context.packageName,
+                    commonParent = testRoot,
+                    targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+                    allowCreateOutput = false,
+                    allowReplaceTarget = true,
+                    allowReplacementUndo = true,
+                )
+                try {
+                    val recovered = session.queryTargetReplacement("archive")
+                    assertEquals(
+                        historyId,
+                        recovered.getString(
+                            ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID,
+                        ),
+                    )
+                    assertEquals(
+                        ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_RESTORED,
+                        recovered.getInt(
+                            ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE,
+                        ),
+                    )
+                    expectIllegalState {
+                        session.undoTargetReplacement("archive", historyId)
+                    }
+                } finally {
+                    session.close()
+                    cleanup()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun realLowStorageRejectsReplacementBeforePublishingTheTarget() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val enabled = InstrumentationRegistry.getArguments()
+            .getString(REPLACEMENT_LOW_STORAGE_ARGUMENT)
+            .orEmpty()
+        assumeTrue(
+            "This low-storage gate runs only through the external storage harness",
+            enabled == REPLACEMENT_LOW_STORAGE_RUN,
+        )
+        val context = instrumentation.targetContext
+        val testRoot = File(context.cacheDir, REPLACEMENT_LOW_STORAGE_ROOT_NAME)
+        val source = File(testRoot, "archive.zip")
+        val readyFile = File(context.filesDir, REPLACEMENT_LOW_STORAGE_READY_FILE_NAME)
+        val fillFile = File(context.filesDir, REPLACEMENT_LOW_STORAGE_FILL_FILE_NAME)
+        val historyStore = ExplorerActionReplacementHistoryStore(context)
+        historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+        testRoot.deleteRecursively()
+        readyFile.delete()
+        deleteLowStorageFill(fillFile)
+        assertTrue(testRoot.mkdirs())
+        val original = ByteArray(REPLACEMENT_LOW_STORAGE_SOURCE_BYTES) { index ->
+            (index and 0xff).toByte()
+        }
+        source.writeBytes(original)
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("archive", source)),
+            allowCreateOutput = false,
+            allowReplaceTarget = true,
+            allowReplacementUndo = true,
+        )
+        val transactionId = prepareVerifiedReplacement(
+            session,
+            "replacement must remain unpublished".encodeToByteArray(),
+        )
+
+        try {
+            writeDurableText(readyFile, "ready")
+            val requiredBytes = original.size.toLong() + REPLACEMENT_LOW_STORAGE_RESERVE_BYTES
+            val deadline = SystemClock.elapsedRealtime() + REPLACEMENT_LOW_STORAGE_TIMEOUT_MILLIS
+            while (
+                testRoot.usableSpace >= requiredBytes &&
+                SystemClock.elapsedRealtime() < deadline
+            ) {
+                SystemClock.sleep(REPLACEMENT_LOW_STORAGE_POLL_MILLIS)
+            }
+            assertTrue(
+                "External harness did not create the low-storage condition",
+                fillFile.isFile && testRoot.usableSpace < requiredBytes,
+            )
+            expectIOException { session.commitOutput(transactionId) }
+            assertArrayEquals(original, source.readBytes())
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_NONE,
+                session.queryTargetReplacement("archive")
+                    .getInt(ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE),
+            )
+        } finally {
+            runCatching { session.abortOutput(transactionId) }
+            session.close()
+            readyFile.delete()
+            historyStore.removeAllForTarget(context.applicationInfo.uid, source)
+            testRoot.deleteRecursively()
+            deleteLowStorageFill(fillFile)
         }
     }
 
@@ -1505,10 +2106,38 @@ class ExplorerActionHostSessionInstrumentationTest {
         return transactionId
     }
 
+    private fun prepareVerifiedReplacement(
+        session: ExplorerActionHostSession,
+        bytes: ByteArray,
+    ): String {
+        val transactionId = requireNotNull(
+            session.prepareTargetReplacement("archive")
+                .getString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID),
+        )
+        ParcelFileDescriptor.AutoCloseOutputStream(session.openOutput(transactionId)).use {
+            it.write(bytes)
+        }
+        val verified = ParcelFileDescriptor.AutoCloseInputStream(
+            session.openPendingOutput(transactionId),
+        ).use { it.readBytes() }
+        assertArrayEquals(bytes, verified)
+        return transactionId
+    }
+
     private fun writeDurableText(file: File, value: String) {
         FileOutputStream(file, false).use { output ->
             output.write(value.toByteArray(Charsets.UTF_8))
             output.fd.sync()
+        }
+    }
+
+    private fun deleteLowStorageFill(file: File) {
+        if (!file.exists() || file.delete()) return
+        runCatching {
+            FileOutputStream(file, false).use { output -> output.fd.sync() }
+        }
+        check(!file.exists() || file.delete()) {
+            "Low-storage harness fill file could not be removed"
         }
     }
 
@@ -1720,5 +2349,37 @@ class ExplorerActionHostSessionInstrumentationTest {
         const val TERMINAL_EXPIRY_ROOT_NAME = "explorer-action-v15-terminal-expiry"
         const val TERMINAL_EXPIRY_STATE_FILE_NAME = "explorer-action-v15-terminal-expiry-state"
         const val EXPIRED_TERMINAL_AGE_MILLIS = 25L * 60L * 60L * 1000L
+        const val REPLACEMENT_PROCESS_DEATH_PHASE_ARGUMENT =
+            "archiveManagerV18ReplacementProcessDeathPhase"
+        const val REPLACEMENT_PROCESS_DEATH_COMMIT_PREPARE = "commit-prepare"
+        const val REPLACEMENT_PROCESS_DEATH_COMMIT_VERIFY = "commit-verify"
+        const val REPLACEMENT_PROCESS_DEATH_RESTORE_PREPARE = "restore-prepare"
+        const val REPLACEMENT_PROCESS_DEATH_RESTORE_VERIFY = "restore-verify"
+        val REPLACEMENT_PROCESS_DEATH_PHASES = setOf(
+            REPLACEMENT_PROCESS_DEATH_COMMIT_PREPARE,
+            REPLACEMENT_PROCESS_DEATH_COMMIT_VERIFY,
+            REPLACEMENT_PROCESS_DEATH_RESTORE_PREPARE,
+            REPLACEMENT_PROCESS_DEATH_RESTORE_VERIFY,
+        )
+        const val REPLACEMENT_PROCESS_DEATH_ROOT_NAME =
+            "explorer-action-v18-real-process-death"
+        const val REPLACEMENT_PROCESS_DEATH_HISTORY_ID_FILE_NAME =
+            "explorer-action-v18-process-death-history-id"
+        const val REPLACEMENT_PROCESS_DEATH_READY_FILE_NAME =
+            "explorer-action-v18-process-death-ready"
+        const val REPLACEMENT_PROCESS_DEATH_ORIGINAL = "original archive before process death"
+        const val REPLACEMENT_PROCESS_DEATH_REPLACEMENT =
+            "replacement archive before process death"
+        const val REPLACEMENT_LOW_STORAGE_ARGUMENT = "archiveManagerV18LowStorage"
+        const val REPLACEMENT_LOW_STORAGE_RUN = "run"
+        const val REPLACEMENT_LOW_STORAGE_ROOT_NAME = "explorer-action-v18-real-low-storage"
+        const val REPLACEMENT_LOW_STORAGE_READY_FILE_NAME =
+            "explorer-action-v18-low-storage-ready"
+        const val REPLACEMENT_LOW_STORAGE_FILL_FILE_NAME =
+            "explorer-action-v18-low-storage-fill"
+        const val REPLACEMENT_LOW_STORAGE_SOURCE_BYTES = 1024 * 1024
+        const val REPLACEMENT_LOW_STORAGE_RESERVE_BYTES = 128L * 1024L * 1024L
+        const val REPLACEMENT_LOW_STORAGE_TIMEOUT_MILLIS = 60_000L
+        const val REPLACEMENT_LOW_STORAGE_POLL_MILLIS = 100L
     }
 }

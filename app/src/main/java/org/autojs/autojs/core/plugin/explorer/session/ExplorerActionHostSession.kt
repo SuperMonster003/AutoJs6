@@ -49,6 +49,7 @@ internal class ExplorerActionHostSession private constructor(
     targets: List<ExplorerActionHostSessionTarget>,
     private val allowCreateOutput: Boolean,
     private val allowReplaceTarget: Boolean,
+    private val allowReplacementUndo: Boolean,
     allowReadSiblings: Boolean,
     allowPlaybackProgress: Boolean,
     private val onOutputCommitted: (File) -> Unit,
@@ -56,9 +57,11 @@ internal class ExplorerActionHostSession private constructor(
     private val onSourcesTrashed: () -> Unit,
     private val outputTreeStore: ExplorerActionOutputTreeStore,
     private val outputBatchStore: ExplorerActionOutputBatchStore,
+    private val replacementHistoryStore: ExplorerActionReplacementHistoryStore,
     playbackHistoryStore: ExplorerPlaybackHistoryStore,
     private val clock: () -> Long,
     private val afterBatchMemberPublished: (Int) -> Unit,
+    private val afterReplacementPublished: () -> Unit,
 ) : IExplorerActionHostSession.Stub() {
 
     private val lock = Any()
@@ -113,6 +116,49 @@ internal class ExplorerActionHostSession private constructor(
             durationMillis = durationMillis,
             reportState = reportState,
         )
+    }
+
+    override fun queryTargetReplacement(targetId: String): Bundle {
+        enforceCaller()
+        check(allowReplacementUndo) {
+            "Explorer Action does not have replacement-history access"
+        }
+        return synchronized(lock) {
+            checkOpen()
+            val target = targetState(targetId)
+            replacementHistoryBundle(
+                replacementHistoryStore.queryLatest(expectedUid, target.file),
+            )
+        }
+    }
+
+    override fun undoTargetReplacement(targetId: String, replacementHistoryId: String): Bundle {
+        enforceCaller()
+        check(allowReplacementUndo) {
+            "Explorer Action does not have replacement-history access"
+        }
+        val restored = synchronized(lock) {
+            checkOpen()
+            val target = targetState(targetId)
+            val result = replacementHistoryStore.undo(
+                pluginUid = expectedUid,
+                target = target.file,
+                historyId = replacementHistoryId,
+            )
+            target.identity = result.restoredIdentity
+            RestoredReplacement(
+                target = target.file,
+                result = replacementHistoryBundle(result.record).apply {
+                    putLong(ExplorerActionHostSessionKeys.SIZE, target.file.length())
+                    putLong(
+                        ExplorerActionHostSessionKeys.LAST_MODIFIED,
+                        target.file.lastModified(),
+                    )
+                },
+            )
+        }
+        runCatching { onTargetReplaced(restored.target) }
+        return restored.result
     }
 
     override fun prepareOutput(displayName: String, mimeType: String, conflictPolicy: Int): Bundle {
@@ -724,7 +770,8 @@ internal class ExplorerActionHostSession private constructor(
                         throw IOException("Explorer Action output could not be committed atomically")
                     }
                 }
-                OutputMode.REPLACE -> commitReplacement(transaction)
+                OutputMode.REPLACE ->
+                    transaction.replacementHistory = commitReplacement(transaction)
                 OutputMode.CREATE_TREE -> commitOutputTree(transaction)
             }
             outputs.remove(transaction.id)
@@ -865,6 +912,9 @@ internal class ExplorerActionHostSession private constructor(
                 ExplorerActionHostSessionKeys.OUTPUT_BYTES,
                 transaction.outputTreeBytes.takeIf { it >= 0L } ?: 0L,
             )
+        }
+        transaction.replacementHistory?.let { history ->
+            putAll(replacementHistoryBundle(history))
         }
     }
 
@@ -1060,7 +1110,9 @@ internal class ExplorerActionHostSession private constructor(
             record.parentInode == identity.inode
     }
 
-    private fun commitReplacement(transaction: OutputTransaction) {
+    private fun commitReplacement(
+        transaction: OutputTransaction,
+    ): ExplorerActionReplacementHistoryRecord? {
         val targetState = requireNotNull(transaction.replacementTarget) {
             "Explorer Action replacement target state is missing"
         }
@@ -1068,16 +1120,36 @@ internal class ExplorerActionHostSession private constructor(
             "Explorer Action replacement target identity is missing"
         }
         FileOutputStream(transaction.temp, true).use { output -> output.fd.sync() }
-        check(TargetIdentity.capture(transaction.target) == expectedIdentity) {
+        check(TargetIdentity.captureRegularFile(transaction.target) == expectedIdentity) {
             "Explorer Action replacement target changed before commit"
         }
-        val committedIdentity = TargetIdentity.capture(transaction.temp)
+        val committedIdentity = TargetIdentity.captureRegularFile(transaction.temp)
+        val history = if (allowReplacementUndo) {
+            replacementHistoryStore.prepare(
+                transactionId = transaction.id,
+                pluginUid = expectedUid,
+                parent = parent,
+                target = transaction.target,
+                previousIdentity = expectedIdentity,
+                replacementIdentity = committedIdentity,
+            )
+        } else {
+            null
+        }
         try {
             Os.rename(transaction.temp.path, transaction.target.path)
         } catch (error: ErrnoException) {
+            history?.let { record ->
+                runCatching { replacementHistoryStore.discardPrepared(record.id) }
+            }
             throw IOException("Explorer Action target could not be replaced atomically", error)
         }
         targetState.identity = committedIdentity
+        runCatching { syncDirectory(parent) }
+        afterReplacementPublished()
+        return history?.let { record ->
+            runCatching { replacementHistoryStore.markAvailable(record.id) }.getOrElse { record }
+        }
     }
 
     private fun commitOutputTree(transaction: OutputTransaction) {
@@ -1361,6 +1433,30 @@ internal class ExplorerActionHostSession private constructor(
         putInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RECOVERY_COUNT, recoveryCount)
     }
 
+    private fun replacementHistoryBundle(
+        record: ExplorerActionReplacementHistoryRecord?,
+    ): Bundle = Bundle().apply {
+        putInt(
+            ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_UNDO_STATE,
+            record?.protocolState
+                ?: ExplorerActionHostSessionValues.TARGET_REPLACEMENT_UNDO_STATE_NONE,
+        )
+        record?.let { history ->
+            putString(
+                ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_HISTORY_ID,
+                history.id,
+            )
+            putLong(
+                ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_PREVIOUS_SIZE,
+                history.previousIdentity.size,
+            )
+            putLong(
+                ExplorerActionHostSessionKeys.TARGET_REPLACEMENT_CREATED_AT,
+                history.createdAtMillis,
+            )
+        }
+    }
+
     private fun isWithinRoot(root: File, candidate: File): Boolean {
         return ExplorerActionInputPathPolicy.isWithinRoot(root, candidate)
     }
@@ -1389,6 +1485,7 @@ internal class ExplorerActionHostSession private constructor(
         var outputTreeBytes: Long = -1L,
         var state: OutputState = OutputState.PREPARED,
         var outputBatchId: String? = null,
+        var replacementHistory: ExplorerActionReplacementHistoryRecord? = null,
     )
 
     private data class ClientLease(
@@ -1415,6 +1512,11 @@ internal class ExplorerActionHostSession private constructor(
     private data class CommittedOutput(
         val target: File,
         val mode: OutputMode,
+        val result: Bundle,
+    )
+
+    private data class RestoredReplacement(
+        val target: File,
         val result: Bundle,
     )
 
@@ -1490,6 +1592,7 @@ internal class ExplorerActionHostSession private constructor(
             targets: List<ExplorerActionHostSessionTarget>,
             allowCreateOutput: Boolean,
             allowReplaceTarget: Boolean = false,
+            allowReplacementUndo: Boolean = false,
             allowReadSiblings: Boolean = false,
             allowPlaybackProgress: Boolean = false,
             onOutputCommitted: (File) -> Unit = ::notifyCreated,
@@ -1497,20 +1600,36 @@ internal class ExplorerActionHostSession private constructor(
             onSourcesTrashed: () -> Unit = ::notifyWorkspaceChanged,
             clock: () -> Long = System::currentTimeMillis,
             afterBatchMemberPublished: (Int) -> Unit = {},
+            afterReplacementPublished: () -> Unit = {},
+            afterReplacementRestored: () -> Unit = {},
         ): ExplorerActionHostSession {
+            require(
+                !allowReplacementUndo ||
+                    (allowReplaceTarget && targets.size == 1),
+            ) {
+                "Explorer Action replacement history requires one replaceable target"
+            }
             val canonicalParent = commonParent.canonicalFile
             val applicationContext = context.applicationContext
             val store = ExplorerActionOutputTreeStore(applicationContext)
             ExplorerActionOutputRecovery.recoverOutputTrees(store, clock())
             val batchStore = ExplorerActionOutputBatchStore(applicationContext)
             ExplorerActionOutputRecovery.recoverOutputBatches(batchStore, clock())
+            val replacementHistoryStore = ExplorerActionReplacementHistoryStore(
+                applicationContext,
+                clock,
+                afterReplacementRestored,
+            )
+            if (allowReplacementUndo) replacementHistoryStore.recover()
+            val pluginUid = applicationUid(context.packageManager, pluginPackageName)
             return ExplorerActionHostSession(
                 applicationContext = applicationContext,
-                expectedUid = applicationUid(context.packageManager, pluginPackageName),
+                expectedUid = pluginUid,
                 commonParent = canonicalParent,
                 targets = targets,
                 allowCreateOutput = allowCreateOutput,
                 allowReplaceTarget = allowReplaceTarget,
+                allowReplacementUndo = allowReplacementUndo,
                 allowReadSiblings = allowReadSiblings,
                 allowPlaybackProgress = allowPlaybackProgress,
                 onOutputCommitted = onOutputCommitted,
@@ -1518,9 +1637,11 @@ internal class ExplorerActionHostSession private constructor(
                 onSourcesTrashed = onSourcesTrashed,
                 outputTreeStore = store,
                 outputBatchStore = batchStore,
+                replacementHistoryStore = replacementHistoryStore,
                 playbackHistoryStore = ExplorerPlaybackHistoryStore(context.applicationContext, clock),
                 clock = clock,
                 afterBatchMemberPublished = afterBatchMemberPublished,
+                afterReplacementPublished = afterReplacementPublished,
             )
         }
 

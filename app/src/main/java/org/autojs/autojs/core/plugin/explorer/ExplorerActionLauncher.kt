@@ -119,6 +119,12 @@ internal object ExplorerActionLauncher {
                 allowReplaceTarget =
                     action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET ||
                         action.descriptor.accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET,
+                allowReplacementUndo =
+                    action.descriptor.protocolVersion >= REPLACEMENT_UNDO_PROTOCOL_VERSION &&
+                        (
+                            action.descriptor.accessMode == ExplorerActionValues.ACCESS_REPLACE_TARGET ||
+                                action.descriptor.accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET
+                            ),
                 allowReadSiblings = action.descriptor.readSiblings,
                 allowPlaybackProgress = action.descriptor.playbackProgress,
             )
@@ -238,6 +244,7 @@ internal object ExplorerActionLauncher {
         .joinToString("") { byte -> "%02x".format(byte.toInt() and 0xFF) }
 
     private const val MULTI_TARGET_PROTOCOL_VERSION = 4
+    private const val REPLACEMENT_UNDO_PROTOCOL_VERSION = 18
     private const val DIRECTORY_MIME_TYPE = "inode/directory"
     private const val SIZE_UNKNOWN = -1L
 

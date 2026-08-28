@@ -38,6 +38,11 @@ object ExplorerActionHostSessionKeys {
     const val TARGET_TRASH_MOVED_COUNT = "targetTrashMovedCount"
     const val TARGET_TRASH_RECOVERY_COUNT = "targetTrashRecoveryCount"
 
+    const val TARGET_REPLACEMENT_HISTORY_ID = "targetReplacementHistoryId"
+    const val TARGET_REPLACEMENT_UNDO_STATE = "targetReplacementUndoState"
+    const val TARGET_REPLACEMENT_PREVIOUS_SIZE = "targetReplacementPreviousSize"
+    const val TARGET_REPLACEMENT_CREATED_AT = "targetReplacementCreatedAt"
+
     const val PLAYBACK_HISTORY_ENABLED = "playbackHistoryEnabled"
     const val PLAYBACK_PROGRESS_PRESENT = "playbackProgressPresent"
     const val PLAYBACK_POSITION_MILLIS = "playbackPositionMillis"
