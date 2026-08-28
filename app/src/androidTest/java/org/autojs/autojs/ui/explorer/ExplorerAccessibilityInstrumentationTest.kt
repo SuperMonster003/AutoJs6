@@ -94,8 +94,8 @@ class ExplorerAccessibilityInstrumentationTest {
     }
 
     @Test
-    fun explorerPathRowsAndItemActionsExposeFortyEightDpTargetsAndLabels() = onMain {
-        val specification = LayoutSpecification(320, 568, 1.5F, Locale.ENGLISH)
+    fun compactExplorerRowsRetainActionLabels() = onMain {
+        val specification = LayoutSpecification(320, 568, 1F, Locale.ENGLISH)
         val context = configuredContext(specification)
 
         val explorer = ExplorerView(context)
@@ -103,9 +103,12 @@ class ExplorerAccessibilityInstrumentationTest {
         explorer.findViewById<View>(R.id.archive_filename_encoding).visibility = View.VISIBLE
         explorer.findViewById<View>(R.id.archive_extract_current).visibility = View.VISIBLE
         measureAndLayout(explorer, specification.widthDp, specification.heightDp, context)
-        assertTargets(
+        assertHeight(context, explorer.findViewById(R.id.explorer_path_row), 33.5F)
+        assertSizes(
             context,
             explorer,
+            36F,
+            33.5F,
             R.id.archive_filename_encoding,
             R.id.archive_extract_current,
         )
@@ -114,24 +117,27 @@ class ExplorerAccessibilityInstrumentationTest {
         val file = inflater.inflate(R.layout.explorer_file, null, false)
         file.findViewById<View>(R.id.primary_viewer).visibility = View.VISIBLE
         file.findViewById<View>(R.id.edit).visibility = View.VISIBLE
-        measureAndLayout(file, specification.widthDp, 160, context)
-        assertTargets(context, file, R.id.item, R.id.primary_viewer, R.id.edit, R.id.more)
+        measureAndLayoutWrapHeight(file, specification.widthDp, 160, context)
+        assertHeight(context, file.findViewById(R.id.action_icon_container), 36F)
+        assertSizes(context, file, 36F, 36F, R.id.primary_viewer, R.id.edit, R.id.more)
 
         val directory = inflater.inflate(R.layout.explorer_directory, null, false)
-        measureAndLayout(directory, specification.widthDp, 96, context)
-        assertTargets(context, directory, R.id.item, R.id.more)
+        measureAndLayoutWrapHeight(directory, specification.widthDp, 96, context)
+        assertSizes(context, directory, 52F, 20F, R.id.more)
 
         val category = inflater.inflate(R.layout.explorer_category, null, false)
         category.findViewById<View>(R.id.title_container).contentDescription = "Folders [2]"
-        measureAndLayout(category, specification.widthDp, 48, context)
-        assertTargets(
+        measureAndLayoutWrapHeight(category, specification.widthDp, 48, context)
+        assertTrue(category.height < dp(context, 48F))
+        assertWidths(
             context,
             category,
-            R.id.title_container,
+            32F,
             R.id.go_up,
             R.id.sort_order,
             R.id.sort_type,
         )
+        assertTrue(category.findViewById<View>(R.id.title_container).contentDescription?.isNotBlank() == true)
         listOf(R.id.go_up, R.id.sort_order, R.id.sort_type).forEach { id ->
             assertTrue(category.findViewById<View>(id).contentDescription?.isNotBlank() == true)
         }
@@ -153,14 +159,31 @@ class ExplorerAccessibilityInstrumentationTest {
         R.id.selection_delete_text,
     ).map(root::findViewById)
 
-    private fun assertTargets(context: Context, root: View, vararg ids: Int) {
+    private fun assertSizes(
+        context: Context,
+        root: View,
+        widthDp: Float,
+        heightDp: Float,
+        vararg ids: Int,
+    ) {
         ids.forEach { id ->
             val target = root.findViewById<View>(id)
-            assertTouchTarget(context, target)
-            if (target !== root.findViewById<View>(R.id.item)) {
-                assertTrue("${resourceName(id)} needs an accessibility label", target.contentDescription?.isNotBlank() == true)
-            }
+            assertEquals("${resourceName(id)} width", dp(context, widthDp), target.width)
+            assertEquals("${resourceName(id)} height", dp(context, heightDp), target.height)
+            assertTrue("${resourceName(id)} needs an accessibility label", target.contentDescription?.isNotBlank() == true)
         }
+    }
+
+    private fun assertWidths(context: Context, root: View, widthDp: Float, vararg ids: Int) {
+        ids.forEach { id ->
+            val target = root.findViewById<View>(id)
+            assertEquals("${resourceName(id)} width", dp(context, widthDp), target.width)
+            assertTrue("${resourceName(id)} needs an accessibility label", target.contentDescription?.isNotBlank() == true)
+        }
+    }
+
+    private fun assertHeight(context: Context, target: View, heightDp: Float) {
+        assertEquals("${resourceName(target.id)} height", dp(context, heightDp), target.height)
     }
 
     private fun assertTouchTarget(context: Context, target: View) {
@@ -204,7 +227,25 @@ class ExplorerAccessibilityInstrumentationTest {
         view.layout(0, 0, width, height)
     }
 
+    private fun measureAndLayoutWrapHeight(
+        view: View,
+        widthDp: Int,
+        maximumHeightDp: Int,
+        context: Context,
+    ) {
+        val width = dp(context, widthDp.toFloat())
+        val maximumHeight = dp(context, maximumHeightDp.toFloat())
+        view.measure(
+            View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(maximumHeight, View.MeasureSpec.AT_MOST),
+        )
+        view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+    }
+
     private fun dp(context: Context, value: Int): Int =
+        dp(context, value.toFloat())
+
+    private fun dp(context: Context, value: Float): Int =
         (value * context.resources.displayMetrics.density).roundToInt()
 
     private fun resourceName(id: Int): String = runCatching {
