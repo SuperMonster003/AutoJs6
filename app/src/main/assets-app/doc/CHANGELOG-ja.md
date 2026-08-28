@@ -8,6 +8,7 @@
 
 ###### 2026/08/28
 
+* `新機能` editor contract 3 に project snapshot で認可された TypeScript 定義ジャンプを追加: Ace は project source と frozen dependency declaration の位置を要求でき, host は target を開いて位置決めする前に project root, canonical relative path, source/dependency inventory fingerprint, content SHA-256, range を独立して再検証します; symbolic link, stale snapshot, 未保存内容の不一致は拒否します
 * `新機能` editor contract 2 は実行前コンパイルと同じ上限付き TypeScript project source snapshot を Ace に提供し, 不正な import path のリアルタイム跨ファイル診断を有効にしました. contract 1 editor plugin との互換性も維持します
 * `新機能` TypeScript dependency snapshot は native addon signal (`.node`, `binding.gyp`, `gypfile`) と install lifecycle hook (`preinstall`, `install`, `postinstall`) を安定した error code と pure JavaScript/WASM の案内付きで拒否し, 通常の package script は inert metadata のまま維持します
 * `新機能` ホストの TypeScript 依存関係コントラクトを resolver policy revision 3 に同期し, dayjs, lodash, zod, uuid, nanoid の実リリース manifest 検証を追加して, Rhino の CommonJS エントリ選択と安定した ESM-only エラーを固定しました

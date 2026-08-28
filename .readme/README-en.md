@@ -168,6 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 ###### 2026/08/28
 
+* `Feature` Editor contract 3 adds project-snapshot-authorized TypeScript definition navigation: Ace can request locations in project sources and frozen dependency declarations, while the host independently revalidates the project root, canonical relative path, source or dependency inventory fingerprint, content SHA-256, and range before opening and positioning the target; symlinks, stale snapshots, and mismatched unsaved content are rejected
 * `Feature` Editor contract 2 now supplies Ace with the same bounded TypeScript project-source snapshot used by pre-run compilation, enabling live cross-file diagnostics for invalid import paths while retaining compatibility with contract-1 editor plugins
 * `Feature` TypeScript dependency snapshots now reject native addon signals (`.node`, `binding.gyp`, and `gypfile`) and install lifecycle hooks (`preinstall`, `install`, and `postinstall`) with stable error codes and pure JavaScript/WASM guidance; ordinary package scripts remain inert metadata
 * `Feature` Aligned the host TypeScript dependency contract with resolver policy revision 3 and added real release-manifest coverage for dayjs, lodash, zod, uuid, and nanoid, locking Rhino CommonJS entry selection and stable ESM-only errors
