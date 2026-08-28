@@ -25,6 +25,16 @@ interface EditorPluginCallback {
     /** Available from editor contract 3. The host must validate the target before opening it. */
     fun onDefinitionNavigationRequested(target: EditorPluginDefinitionTarget) = Unit
 
+    /**
+     * Available from editor contract 4. The host must validate the exact active-document edits
+     * against its current text before approving them. A plugin must not apply the action unless
+     * [onComplete][EditorPluginBooleanCallback.onComplete] reports `true`.
+     */
+    fun onCurrentDocumentCodeActionRequested(
+        action: EditorPluginCurrentDocumentCodeAction,
+        onComplete: EditorPluginBooleanCallback,
+    ) = onComplete.onComplete(false)
+
     fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) = Unit
 
     fun onUserTouchInTextArea() = Unit
