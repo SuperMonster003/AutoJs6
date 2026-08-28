@@ -8,10 +8,14 @@ import android.webkit.WebView
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorDefinitionTargetResolver
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectSnapshotProvider
+import org.autojs.autojs.ui.edit.editor.service.EditorCurrentDocumentCodeActionAuthorizer
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.editor.api.EditorPluginCallback
+import org.autojs.plugin.editor.api.EditorPluginBooleanCallback
 import org.autojs.plugin.editor.api.EditorPluginContract
+import org.autojs.plugin.editor.api.EditorPluginCurrentDocumentCodeAction
+import org.autojs.plugin.editor.api.EditorPluginCurrentDocumentCodeActionKind
 import org.autojs.plugin.editor.api.EditorPluginFailure
 import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
 import org.autojs.plugin.editor.api.EditorPluginDefinitionTargetKind
@@ -114,11 +118,15 @@ class AceEditorPluginHostDeviceTest {
             "import { shared } from './shared';",
             "import { absent } from './absent';",
             "const answer: 42 = shared('value');",
-            "void absent; void answer;",
+            "const imported: 7 = projectMagicAnswer;",
+            "void absent; void answer; void imported;",
         ).joinToString("\n")
         val document = File(project, "main.ts").apply { writeText(sourceText) }
         val shared = File(project, "shared.ts").apply {
-            writeText("export function shared(value: string): 42 { return 42; }")
+            writeText(
+                "export function shared(value: string): 42 { return 42; }\n" +
+                    "export const projectMagicAnswer = 7 as const;",
+            )
         }
         val documentPath = document.canonicalPath
         val providerSnapshot = requireNotNull(
@@ -130,6 +138,8 @@ class AceEditorPluginHostDeviceTest {
         val fatalFailure = AtomicReference<EditorPluginFailure>()
         val definitionTarget = AtomicReference<EditorPluginDefinitionTarget>()
         val definitionRequested = CountDownLatch(1)
+        val codeAction = AtomicReference<EditorPluginCurrentDocumentCodeAction>()
+        val codeActionRequested = CountDownLatch(1)
         val loaded = AtomicReference<AceEditorPluginHost.LoadedSession>()
         val activity = launchHostActivity()
         try {
@@ -164,6 +174,21 @@ class AceEditorPluginHostDeviceTest {
                                 definitionTarget.set(target)
                                 definitionRequested.countDown()
                             }
+
+                            override fun onCurrentDocumentCodeActionRequested(
+                                action: EditorPluginCurrentDocumentCodeAction,
+                                onComplete: EditorPluginBooleanCallback,
+                            ) {
+                                codeAction.set(action)
+                                val currentSession = loaded.get().session
+                                val approved = EditorCurrentDocumentCodeActionAuthorizer.isAuthorized(
+                                    action = action,
+                                    currentText = currentSession.textSnapshot,
+                                    readOnly = currentSession.isReadOnly,
+                                )
+                                codeActionRequested.countDown()
+                                onComplete.onComplete(approved)
+                            }
                         },
                     ),
                 )
@@ -178,7 +203,7 @@ class AceEditorPluginHostDeviceTest {
                 fail("Ace editor plugin failed: ${failure.type}: ${failure.message}")
             }
             runOnMainSync {
-                assertEquals(3, loaded.get().plugin.entrypoint.contractVersion)
+                assertEquals(4, loaded.get().plugin.entrypoint.contractVersion)
                 loaded.get().session.setInitialText(sourceText)
             }
 
@@ -201,7 +226,7 @@ class AceEditorPluginHostDeviceTest {
 
             assertEquals(
                 "Host-backed project diagnostic golden changed",
-                listOf("2307"),
+                listOf("2304", "2307"),
                 diagnosticCodes.sorted(),
             )
 
@@ -231,6 +256,49 @@ class AceEditorPluginHostDeviceTest {
             assertEquals(shared.canonicalPath, resolved.targetPath)
             assertEquals(0, resolved.line)
             assertEquals(16, resolved.column)
+
+            val quickFixResult = evaluateJavascript(
+                loaded.get().session.inputView as WebView,
+                "Boolean(window.AutoJsAce && window.AutoJsAce.quickFix && " +
+                    "window.AutoJsAce.quickFix(3, 29))",
+            )
+            assertEquals("true", quickFixResult)
+            assertTrue(
+                "Ace editor plugin did not publish an auto-import code action",
+                codeActionRequested.await(10, TimeUnit.SECONDS),
+            )
+            val requestedAction = requireNotNull(codeAction.get())
+            assertEquals(EditorPluginCurrentDocumentCodeActionKind.AUTO_IMPORT, requestedAction.kind)
+            assertEquals(2304, requestedAction.diagnosticCode)
+            waitUntil("Host-approved auto-import was not applied") {
+                runOnMainSync {
+                    loaded.get().session.textSnapshot.lineSequence().first()
+                        .contains("projectMagicAnswer")
+                }
+            }
+
+            var remainingDiagnosticCodes = emptyList<String>()
+            val codeFixDeadline = SystemClock.uptimeMillis() + 20_000L
+            while (SystemClock.uptimeMillis() < codeFixDeadline) {
+                val raw = evaluateJavascript(
+                    loaded.get().session.inputView as WebView,
+                    "JSON.stringify(window.AutoJsAce && window.AutoJsAce.validateLsp " +
+                        "? window.AutoJsAce.validateLsp() : [])",
+                )
+                val decoded = runCatching { JSONTokener(raw).nextValue() as? String }
+                    .getOrNull().orEmpty()
+                val diagnostics = runCatching { JSONArray(decoded) }.getOrElse { JSONArray() }
+                remainingDiagnosticCodes = List(diagnostics.length()) { index ->
+                    diagnostics.getJSONObject(index).optString("code")
+                }.sorted()
+                if (remainingDiagnosticCodes == listOf("2307")) break
+                SystemClock.sleep(100L)
+            }
+            assertEquals(
+                "Auto-import should remove TS2304 while preserving the unrelated TS2307",
+                listOf("2307"),
+                remainingDiagnosticCodes,
+            )
         } finally {
             loaded.get()?.let { loadedSession ->
                 runOnMainSync { loadedSession.destroy() }
