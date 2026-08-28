@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/29",
       "feature": [
+        "Editor contract 5 adds project-wide TypeScript symbol rename: Ace submits bounded per-file edits with exact source identities, while the Host independently revalidates a clean project snapshot, shows a file/edit preview, freezes the active buffer, and atomically stages, publishes, or rolls back every file before refreshing diagnostics",
         "Editor contract 4 adds host-authorized TypeScript auto-import and spelling corrections for the active buffer: requests can contain only bounded, ordered UTF-16 edits and exact base/result SHA-256 values, while the host independently replays them and rejects read-only, stale, malformed, overlapping, or tampered actions before one-shot approval",
         "Editor contract 3 adds project-snapshot-authorized TypeScript definition navigation: Ace can request locations in project sources and frozen dependency declarations, while the host independently revalidates the project root, canonical relative path, source or dependency inventory fingerprint, content SHA-256, and range before opening and positioning the target; symlinks, stale snapshots, and mismatched unsaved content are rejected",
         "Editor contract 2 now supplies Ace with the same bounded TypeScript project-source snapshot used by pre-run compilation, enabling live cross-file diagnostics for invalid import paths while retaining compatibility with contract-1 editor plugins",

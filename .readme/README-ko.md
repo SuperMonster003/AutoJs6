@@ -168,6 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/08/29
 
+* `추가` 편집기 contract 5에 프로젝트 전체 TypeScript 심볼 이름 바꾸기를 추가했습니다: Ace는 정확한 소스 ID가 포함된 파일별 제한 편집을 제출하고, Host는 깨끗한 프로젝트 스냅샷을 독립적으로 재검증해 미리보기를 표시하며, 활성 버퍼를 잠근 뒤 모든 파일을 원자적으로 staging, 게시 또는 롤백하고 진단을 새로 고칩니다
 * `추가` editor contract 4에 host 승인 TypeScript auto-import 및 spelling correction을 추가했습니다: 요청은 active buffer에 대한 제한되고 정렬된 UTF-16 edit와 정확한 base/result SHA-256만 포함할 수 있으며, host는 이를 독립적으로 replay하고 one-shot 승인 전에 read-only, stale, malformed, overlap 또는 tamper 작업을 거부합니다
 * `추가` editor contract 3에 프로젝트 snapshot으로 승인된 TypeScript 정의 이동을 추가했습니다: Ace는 프로젝트 소스와 frozen dependency declaration의 위치를 요청할 수 있고, host는 대상을 열고 위치를 지정하기 전에 프로젝트 루트, canonical 상대 경로, 소스 또는 의존성 inventory fingerprint, 콘텐츠 SHA-256 및 범위를 독립적으로 재검증합니다; symbolic link, 오래된 snapshot 및 일치하지 않는 미저장 콘텐츠는 거부합니다
 * `추가` editor contract 2가 이제 실행 전 컴파일과 동일한 제한된 TypeScript 프로젝트 소스 snapshot을 Ace에 제공하여 잘못된 import 경로를 실시간 교차 파일 진단으로 표시하며, contract 1 편집기 플러그인과의 호환성도 유지합니다
