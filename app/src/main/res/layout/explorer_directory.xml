@@ -62,13 +62,13 @@
         <ImageView
             android:id="@+id/more"
             android:layout_width="52dp"
-            android:layout_height="48dp"
+            android:layout_height="20dp"
             android:layout_gravity="center_vertical"
             android:background="?selectableItemBackgroundBorderless"
             android:clickable="true"
             android:contentDescription="@string/text_more"
             android:focusable="true"
-            android:padding="14dp"
+            android:paddingHorizontal="16dp"
             android:src="@drawable/ic_more_vert_black_24dp"
             app:tint="#A9AAAB" />
 

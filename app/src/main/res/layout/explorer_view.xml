@@ -12,11 +12,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Keep the full path row touchable without relying on overlapping TouchDelegates. -->
+        <!-- Matches explorer_category.xml: 13sp text with 8dp top and bottom padding. -->
         <LinearLayout
             android:id="@+id/explorer_path_row"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="33.5dp"
             android:orientation="horizontal">
 
             <org.autojs.autojs.ui.explorer.ExplorerPathBar
@@ -30,11 +30,11 @@
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/archive_filename_encoding"
-                android:layout_width="48dp"
+                android:layout_width="36dp"
                 android:layout_height="match_parent"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="@string/text_file_encoding"
-                android:padding="13dp"
+                android:padding="7dp"
                 android:src="@drawable/ic_translate_black_48dp"
                 android:visibility="gone"
                 app:tint="@color/explorer_category_operation_button"
@@ -42,11 +42,11 @@
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/archive_extract_current"
-                android:layout_width="48dp"
+                android:layout_width="36dp"
                 android:layout_height="match_parent"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="@string/text_extract_archive_current_folder"
-                android:padding="13dp"
+                android:padding="7dp"
                 android:src="@drawable/ic_unarchive_black_48dp"
                 android:visibility="gone"
                 app:tint="@color/explorer_category_operation_button"
