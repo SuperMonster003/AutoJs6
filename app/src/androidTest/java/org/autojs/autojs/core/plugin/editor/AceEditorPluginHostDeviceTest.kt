@@ -2,15 +2,27 @@ package org.autojs.autojs.core.plugin.editor
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.os.Bundle
 import android.os.SystemClock
+import android.view.accessibility.AccessibilityNodeInfo
 import android.webkit.WebView
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorDefinitionTargetResolver
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectSnapshotProvider
+import org.autojs.autojs.ui.edit.EditActivity
+import org.autojs.autojs.ui.edit.EditorView
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences
+import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
+import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
+import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.service.EditorCurrentDocumentCodeActionAuthorizer
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.autojs.plugin.editor.api.EditorPluginCallback
 import org.autojs.plugin.editor.api.EditorPluginBooleanCallback
 import org.autojs.plugin.editor.api.EditorPluginContract
@@ -21,6 +33,7 @@ import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
 import org.autojs.plugin.editor.api.EditorPluginDefinitionTargetKind
 import org.autojs.plugin.editor.api.EditorPluginSessionConfig
 import org.json.JSONArray
+import org.json.JSONObject
 import org.json.JSONTokener
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -30,6 +43,7 @@ import org.junit.Assert.fail
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import java.io.File
+import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -203,7 +217,7 @@ class AceEditorPluginHostDeviceTest {
                 fail("Ace editor plugin failed: ${failure.type}: ${failure.message}")
             }
             runOnMainSync {
-                assertEquals(4, loaded.get().plugin.entrypoint.contractVersion)
+                assertEquals(5, loaded.get().plugin.entrypoint.contractVersion)
                 loaded.get().session.setInitialText(sourceText)
             }
 
@@ -308,6 +322,433 @@ class AceEditorPluginHostDeviceTest {
         }
     }
 
+    @Test
+    fun installedAceEditorRenamesThreeFilesThroughHostTransaction() {
+        assumeTrue("Ace editor plugin is not installed", isPluginInstalled())
+
+        val enginePreference = captureStringPreference(EditorEnginePreferences.KEY_EDITOR_ENGINE)
+        val selectionModePreference = captureStringPreference(
+            EditorEnginePreferences.KEY_EDITOR_ENGINE_SELECTION_MODE,
+        )
+        val lspEnabledPreference = captureBooleanPreference(
+            AceEditorLspPreferences.KEY_ACE_LSP_ENABLED,
+        )
+        val lspFileTypesPreference = captureStringPreference(
+            AceEditorLspPreferences.KEY_ACE_LSP_FILE_TYPES,
+        )
+        val lspFileTypesRevisionPreference = captureIntPreference(
+            AceEditorLspPreferences.KEY_ACE_LSP_FILE_TYPES_REVISION,
+        )
+        val originalPluginEnabled = PluginEnableStore.isEnabled(
+            context,
+            EditorPluginContract.DEFAULT_PACKAGE_NAME,
+            defaultEnabled = true,
+        )
+        val project = File(
+            context.cacheDir,
+            "ace-editor-host-project-rename-${SystemClock.uptimeMillis()}",
+        ).apply {
+            deleteRecursively()
+            mkdirs()
+        }
+        File(project, "tsconfig.json").writeText("{\"compilerOptions\":{\"strict\":true}}")
+        val mainText = listOf(
+            "import { answer } from './shared';",
+            "export const mainValue = answer('main');",
+        ).joinToString("\n")
+        val sharedText = listOf(
+            "export function answer(value: string): number {",
+            "    return value.length;",
+            "}",
+        ).joinToString("\n")
+        val consumerText = listOf(
+            "import { answer } from './shared';",
+            "export const consumed = answer('consumer');",
+        ).joinToString("\n")
+        val document = File(project, "main.ts").apply { writeText(mainText) }
+        val shared = File(project, "shared.ts").apply { writeText(sharedText) }
+        val consumer = File(project, "consumer.ts").apply { writeText(consumerText) }
+        val initialSnapshot = requireNotNull(
+            TypeScriptEditorProjectSnapshotProvider.captureRequired(document.canonicalPath),
+        )
+        assertEquals(3, initialSnapshot.sourceFileCount)
+        var activity: EditActivity? = null
+        var editorView: EditorView? = null
+
+        try {
+            setPluginEnabled(true)
+            assumeTrue(
+                "Installed Ace editor plugin is not eligible for host loading",
+                runOnMainSync { AceEditorPluginStateMonitor.current(context).available },
+            )
+            val selection = runOnMainSync {
+                AceEditorLspPreferences.setEnabled(true)
+                AceEditorLspPreferences.setFileTypes(AceEditorLspPreferences.DEFAULT_FILE_TYPES)
+                EditorEnginePreferences.selectByUser(context, EditorEngineType.ACE)
+            }
+            assertEquals(EditorEngineType.ACE, selection.effectiveType)
+
+            val launchedActivity = launchEditActivity(document)
+            activity = launchedActivity
+            val activeEditorView = runOnMainSync {
+                checkNotNull(launchedActivity.findViewById<EditorView>(R.id.editor_view))
+            }
+            editorView = activeEditorView
+            val editorLoadState = AtomicReference("not sampled")
+            try {
+                waitUntil(
+                    message = "Host editor did not load the clean TypeScript document in Ace",
+                    timeoutMillis = 25_000L,
+                ) {
+                    runOnMainSync {
+                        val engine = activeEditorView.editor
+                        editorLoadState.set(
+                            "engine=${engine.engineType},ready=${engine.isReady}," +
+                                "text=${engine.textSnapshot.replace("\n", "\\n")}," +
+                                "dirty=${activeEditorView.isTextChanged}," +
+                                "stickyDirty=${activeEditorView.saveStickyDirty}",
+                        )
+                        engine.engineType == EditorEngineType.ACE &&
+                            engine.isReady &&
+                            engine.textSnapshot == mainText &&
+                            !activeEditorView.isTextChanged
+                    }
+                }
+            } catch (error: AssertionError) {
+                throw AssertionError(
+                    "Host editor did not load the clean TypeScript document in Ace; " +
+                        "last state: ${editorLoadState.get()}",
+                    error,
+                )
+            }
+
+            val webView = runOnMainSync { activeEditorView.editor.inputView as WebView }
+            val renameColumn = mainText.lineSequence().elementAt(1).indexOf("answer") + 2
+            assertTrue(renameColumn > 1)
+            var renameInvoked = false
+            val invokeDeadline = SystemClock.uptimeMillis() + 30_000L
+            while (!renameInvoked && SystemClock.uptimeMillis() < invokeDeadline) {
+                renameInvoked = evaluateJavascript(
+                    webView,
+                    "Boolean(window.AutoJsAce && window.AutoJsAce.renameSymbol && " +
+                        "window.AutoJsAce.renameSymbol(1, $renameColumn))",
+                ) == "true"
+                if (!renameInvoked) SystemClock.sleep(100L)
+            }
+            val renameDiagnostics = runOnMainSync {
+                val engine = activeEditorView.editor as AceScriptEditorEngine
+                engine.createAceDiagnosticsSnapshot()
+            }
+            val renameRuntimeState = renameDiagnostics.lspRuntimeState.orEmpty()
+            assertTrue(
+                "Ace did not produce the host project rename candidate: $renameRuntimeState; " +
+                    "documentUri=${renameDiagnostics.lspDocumentUri}; " +
+                    "events=${renameDiagnostics.runtimeEventHistory}",
+                renameInvoked,
+            )
+
+            setForegroundDialogTextAndConfirm("projectAnswer")
+            confirmForegroundProjectRenamePreview("answer", "projectAnswer")
+
+            val expectedMain = mainText.replace("answer", "projectAnswer")
+            val expectedShared = sharedText.replace("answer", "projectAnswer")
+            val expectedConsumer = consumerText.replace("answer", "projectAnswer")
+            try {
+                waitUntil(
+                    message = "Host did not atomically publish the three-file project rename",
+                    timeoutMillis = 30_000L,
+                ) {
+                    document.readText() == expectedMain &&
+                        shared.readText() == expectedShared &&
+                        consumer.readText() == expectedConsumer &&
+                        runOnMainSync {
+                            activeEditorView.editor.textSnapshot == expectedMain &&
+                                !activeEditorView.isTextChanged &&
+                                !activeEditorView.saveStickyDirty &&
+                                !activeEditorView.editor.isReadOnly
+                        }
+                }
+            } catch (error: AssertionError) {
+                val editorState = runOnMainSync {
+                    val diagnostics =
+                        (activeEditorView.editor as AceScriptEditorEngine).createAceDiagnosticsSnapshot()
+                    "text=${activeEditorView.editor.textSnapshot.replace("\n", "\\n")}," +
+                        "dirty=${activeEditorView.isTextChanged}," +
+                        "stickyDirty=${activeEditorView.saveStickyDirty}," +
+                        "readOnly=${activeEditorView.editor.isReadOnly}," +
+                        "events=${diagnostics.runtimeEventHistory}"
+                }
+                throw AssertionError(
+                    "Host did not atomically publish the three-file project rename; " +
+                        "main=${document.readText().replace("\n", "\\n")}; " +
+                        "shared=${shared.readText().replace("\n", "\\n")}; " +
+                        "consumer=${consumer.readText().replace("\n", "\\n")}; " +
+                        "files=${project.list()?.sorted()}; editor=$editorState",
+                    error,
+                )
+            }
+            assertTrue(
+                "Project rename temporary files must be removed after commit",
+                project.walkTopDown().none { file ->
+                    file.name.startsWith(".autojs6-rename-")
+                },
+            )
+
+            val refreshedSnapshot = requireNotNull(
+                TypeScriptEditorProjectSnapshotProvider.captureRequired(document.canonicalPath),
+            )
+            assertEquals(3, refreshedSnapshot.sourceFileCount)
+            var postRenameDiagnostics = listOf("pending")
+            var runtimeState = JSONObject()
+            val diagnosticsDeadline = SystemClock.uptimeMillis() + 30_000L
+            while (SystemClock.uptimeMillis() < diagnosticsDeadline) {
+                val raw = evaluateJavascript(
+                    webView,
+                    "JSON.stringify(window.AutoJsAce && window.AutoJsAce.validateLsp " +
+                        "? window.AutoJsAce.validateLsp() : [])",
+                )
+                val decoded = runCatching { JSONTokener(raw).nextValue() as? String }
+                    .getOrNull().orEmpty()
+                val diagnostics = runCatching { JSONArray(decoded) }.getOrElse { JSONArray() }
+                postRenameDiagnostics = List(diagnostics.length()) { index ->
+                    diagnostics.getJSONObject(index).optString("code")
+                }.sorted()
+                runtimeState = runOnMainSync {
+                    val engine = activeEditorView.editor as AceScriptEditorEngine
+                    runCatching {
+                        JSONObject(engine.createAceDiagnosticsSnapshot().lspRuntimeState.orEmpty())
+                    }.getOrElse { JSONObject() }
+                }
+                if (
+                    postRenameDiagnostics.isEmpty() &&
+                    runtimeState.optBoolean("tsProjectSnapshotReady") &&
+                    runtimeState.optString("projectSourceInventoryFingerprint") ==
+                    refreshedSnapshot.sourceInventoryFingerprint
+                ) {
+                    break
+                }
+                SystemClock.sleep(100L)
+            }
+            assertEquals(
+                "Renamed three-file project should compile without TypeScript diagnostics: " +
+                    runtimeState,
+                emptyList<String>(),
+                postRenameDiagnostics,
+            )
+            assertTrue(runtimeState.optBoolean("tsProjectSnapshotReady"))
+            assertEquals(
+                refreshedSnapshot.sourceInventoryFingerprint,
+                runtimeState.optString("projectSourceInventoryFingerprint"),
+            )
+            assertEquals(3, runtimeState.optInt("tsLoadedProjectSourceFileCount"))
+        } finally {
+            editorView?.let { activeEditorView ->
+                runCatching {
+                    runOnMainSync {
+                        activeEditorView.editor.markTextAsSaved()
+                        activeEditorView.saveStickyDirty = false
+                    }
+                }
+            }
+            activity?.let(::finishHostActivity)
+            runOnMainSync {
+                PluginEnableStore.setEnabled(
+                    context,
+                    EditorPluginContract.DEFAULT_PACKAGE_NAME,
+                    originalPluginEnabled,
+                )
+                AceEditorPluginStateMonitor.refresh(
+                    AceEditorPluginStateMonitor.Cause.PLUGIN_STATE_CHANGED,
+                )
+            }
+            restoreEnginePreferences(enginePreference, selectionModePreference)
+            restoreLspPreferences(
+                lspEnabledPreference,
+                lspFileTypesPreference,
+                lspFileTypesRevisionPreference,
+            )
+            project.deleteRecursively()
+        }
+    }
+
+    private fun launchEditActivity(sourceFile: File): EditActivity {
+        val intent = Intent(context, EditActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .putExtra(EditorView.EXTRA_PATH, sourceFile.canonicalPath)
+            .putExtra(EditorView.EXTRA_NAME, sourceFile.nameWithoutExtension)
+        return (instrumentation.startActivitySync(intent) as EditActivity).also {
+            instrumentation.waitForIdleSync()
+        }
+    }
+
+    private fun setPluginEnabled(enabled: Boolean) {
+        runOnMainSync {
+            PluginEnableStore.setEnabled(
+                context,
+                EditorPluginContract.DEFAULT_PACKAGE_NAME,
+                enabled,
+            )
+            AceEditorPluginStateMonitor.refresh(
+                AceEditorPluginStateMonitor.Cause.PLUGIN_STATE_CHANGED,
+            )
+        }
+        instrumentation.waitForIdleSync()
+    }
+
+    private fun setForegroundDialogTextAndConfirm(value: String) {
+        val deadline = SystemClock.uptimeMillis() + DIALOG_TIMEOUT_MILLIS
+        var lastTree = ""
+        while (SystemClock.uptimeMillis() < deadline) {
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            if (root != null) {
+                val nodes = accessibilityTree(root)
+                lastTree = accessibilitySummary(nodes)
+                val input = nodes.firstOrNull { node ->
+                    node.className?.toString() == "android.widget.EditText" &&
+                        node.actionList.any { action ->
+                            action.id == AccessibilityNodeInfo.ACTION_SET_TEXT
+                        }
+                }
+                val positive = findPositiveDialogButton(nodes, android.R.string.ok)
+                if (input != null && positive != null) {
+                    val arguments = Bundle().apply {
+                        putCharSequence(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                            value,
+                        )
+                    }
+                    assertTrue(
+                        "Unable to enter the project rename identifier",
+                        input.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments),
+                    )
+                    assertTrue(
+                        "Unable to confirm the Ace project rename dialog",
+                        positive.performAction(AccessibilityNodeInfo.ACTION_CLICK),
+                    )
+                    SystemClock.sleep(DIALOG_SETTLE_MILLIS)
+                    return
+                }
+            }
+            SystemClock.sleep(DIALOG_POLL_MILLIS)
+        }
+        fail("Ace project rename dialog did not become actionable: $lastTree")
+    }
+
+    private fun confirmForegroundProjectRenamePreview(oldName: String, newName: String) {
+        val title = context.getString(R.string.text_typescript_project_rename)
+        val deadline = SystemClock.uptimeMillis() + DIALOG_TIMEOUT_MILLIS
+        var lastTree = ""
+        while (SystemClock.uptimeMillis() < deadline) {
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            if (root != null) {
+                val nodes = accessibilityTree(root)
+                lastTree = accessibilitySummary(nodes)
+                val titleVisible = nodes.any { node -> node.text?.toString() == title }
+                val previewVisible = nodes.any { node ->
+                    val text = node.text?.toString().orEmpty()
+                    oldName in text && newName in text && "3" in text && "5" in text
+                }
+                val positive = findPositiveDialogButton(
+                    nodes,
+                    R.string.dialog_button_confirm,
+                )
+                if (titleVisible && previewVisible && positive != null) {
+                    assertTrue(
+                        "Unable to confirm the host project rename preview",
+                        positive.performAction(AccessibilityNodeInfo.ACTION_CLICK),
+                    )
+                    SystemClock.sleep(DIALOG_SETTLE_MILLIS)
+                    return
+                }
+            }
+            SystemClock.sleep(DIALOG_POLL_MILLIS)
+        }
+        fail("Host project rename preview did not become actionable: $lastTree")
+    }
+
+    private fun findPositiveDialogButton(
+        nodes: List<AccessibilityNodeInfo>,
+        textResource: Int,
+    ): AccessibilityNodeInfo? = nodes.firstOrNull { node ->
+        node.isClickable &&
+            (
+                node.viewIdResourceName?.substringAfterLast('/') in
+                    setOf("button1", "md_buttonDefaultPositive") ||
+                    node.text?.toString() == context.getString(textResource)
+            )
+    }
+
+    private fun accessibilityTree(root: AccessibilityNodeInfo): List<AccessibilityNodeInfo> {
+        val result = ArrayList<AccessibilityNodeInfo>()
+        val pending = ArrayDeque<AccessibilityNodeInfo>()
+        pending.add(root)
+        while (pending.isNotEmpty()) {
+            val node = pending.removeFirst()
+            result += node
+            repeat(node.childCount) { index ->
+                node.getChild(index)?.let(pending::addLast)
+            }
+        }
+        return result
+    }
+
+    private fun accessibilitySummary(nodes: List<AccessibilityNodeInfo>): String =
+        nodes.take(80).joinToString(separator = " | ") { node ->
+            "${node.className}:${node.viewIdResourceName}:${node.text}"
+        }
+
+    private fun captureStringPreference(key: String): StoredStringPreference {
+        val preferences = Pref.get()
+        return StoredStringPreference(
+            present = preferences.contains(key),
+            value = preferences.getString(key, null),
+        )
+    }
+
+    private fun captureBooleanPreference(key: String): StoredBooleanPreference {
+        val preferences = Pref.get()
+        return StoredBooleanPreference(
+            present = preferences.contains(key),
+            value = preferences.getBoolean(key, false),
+        )
+    }
+
+    private fun captureIntPreference(key: String): StoredIntPreference {
+        val preferences = Pref.get()
+        return StoredIntPreference(
+            present = preferences.contains(key),
+            value = preferences.getInt(key, 0),
+        )
+    }
+
+    private fun restoreEnginePreferences(
+        enginePreference: StoredStringPreference,
+        selectionModePreference: StoredStringPreference,
+    ) {
+        val editor = Pref.get().edit()
+        enginePreference.restore(editor, EditorEnginePreferences.KEY_EDITOR_ENGINE)
+        selectionModePreference.restore(
+            editor,
+            EditorEnginePreferences.KEY_EDITOR_ENGINE_SELECTION_MODE,
+        )
+        assertTrue("Original editor preferences should be restored", editor.commit())
+    }
+
+    private fun restoreLspPreferences(
+        enabled: StoredBooleanPreference,
+        fileTypes: StoredStringPreference,
+        fileTypesRevision: StoredIntPreference,
+    ) {
+        val editor = Pref.get().edit()
+        enabled.restore(editor, AceEditorLspPreferences.KEY_ACE_LSP_ENABLED)
+        fileTypes.restore(editor, AceEditorLspPreferences.KEY_ACE_LSP_FILE_TYPES)
+        fileTypesRevision.restore(
+            editor,
+            AceEditorLspPreferences.KEY_ACE_LSP_FILE_TYPES_REVISION,
+        )
+        assertTrue("Original Ace LSP preferences should be restored", editor.commit())
+    }
+
     private fun launchHostActivity(): Activity {
         val intent = Intent(context, LogActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return instrumentation.startActivitySync(intent).also {
@@ -374,7 +815,49 @@ class AceEditorPluginHostDeviceTest {
         return value.get()
     }
 
+    private data class StoredStringPreference(
+        val present: Boolean,
+        val value: String?,
+    ) {
+        fun restore(editor: SharedPreferences.Editor, key: String) {
+            if (present) {
+                editor.putString(key, value)
+            } else {
+                editor.remove(key)
+            }
+        }
+    }
+
+    private data class StoredBooleanPreference(
+        val present: Boolean,
+        val value: Boolean,
+    ) {
+        fun restore(editor: SharedPreferences.Editor, key: String) {
+            if (present) {
+                editor.putBoolean(key, value)
+            } else {
+                editor.remove(key)
+            }
+        }
+    }
+
+    private data class StoredIntPreference(
+        val present: Boolean,
+        val value: Int,
+    ) {
+        fun restore(editor: SharedPreferences.Editor, key: String) {
+            if (present) {
+                editor.putInt(key, value)
+            } else {
+                editor.remove(key)
+            }
+        }
+    }
+
     companion object {
         private const val SMOKE_TEXT = "const aceEditorPluginSmoke = true;\n"
+        private const val DIALOG_TIMEOUT_MILLIS = 20_000L
+        private const val DIALOG_POLL_MILLIS = 100L
+        private const val DIALOG_SETTLE_MILLIS = 250L
     }
 }
