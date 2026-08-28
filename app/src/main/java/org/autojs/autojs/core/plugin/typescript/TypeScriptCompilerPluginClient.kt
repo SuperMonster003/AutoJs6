@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.typescript
 
 import android.content.Context
 import android.os.Bundle
+import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import java.io.Closeable
@@ -16,6 +17,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import org.autojs.autojs.App
 import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.typescript.api.ITypeScriptCompilationCallback
@@ -47,6 +49,43 @@ internal class TypeScriptCompilerPluginClient(
         proxyFactory = ITypeScriptCompilerPlugin.Stub::asInterface,
         infoReader = { compiler -> compiler.compilerInfo.toPluginInfo() },
     )
+
+    internal suspend fun openWarmBinding(
+        timeoutMs: Long = TypeScriptCompilerContract.DEFAULT_TIMEOUT_MS,
+    ): TypeScriptCompilerWarmBinding = withContext(Dispatchers.IO) {
+        require(timeoutMs in TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS..
+            TypeScriptCompilerContract.MAX_TIMEOUT_MS)
+        val target = host.selectOrThrow(
+            context = appContext,
+            engineId = TypeScriptPluginIds.ID,
+            engine = TypeScriptPluginIds.ENGINE,
+            label = MODULE_LABEL,
+        )
+        val leased = host.callWithDedicatedBindingLease(
+            context = appContext,
+            target = target,
+            retryOnRemoteException = false,
+        ) { compiler ->
+            requireContract(compiler)
+            val prewarmResult = compiler.prewarm(prewarmRequest(timeoutMs))
+            prewarmResult.throwCompilerErrorIfPresent()
+            authorityFrom(
+                info = prewarmResult,
+                targetProfile = TypeScriptCompilerContract.PROFILE_RHINO,
+                sourceName = PREWARM_SOURCE_NAME,
+                requireReady = true,
+            )
+            WarmCompiler(
+                binder = compiler.asBinder(),
+                projectSessionRevision = negotiatedProjectSessionRevision(prewarmResult),
+            )
+        }
+        TypeScriptCompilerWarmBinding(
+            bindingLease = leased.bindingLease,
+            binder = leased.value.binder,
+            projectSessionRevision = leased.value.projectSessionRevision,
+        )
+    }
 
     suspend fun compileSingleFile(
         sourceFile: File,
@@ -95,6 +134,8 @@ internal class TypeScriptCompilerPluginClient(
         ) {
             "The TypeScript source name is not a canonical single-file name."
         }
+
+        (appContext as? App)?.cancelDeferredTypeScriptCompilerPrewarm()
 
         observeCompilation(targetProfile, usePersistentCache) { performance ->
             val sourceBytes = sourceContentReader.read(
@@ -162,6 +203,7 @@ internal class TypeScriptCompilerPluginClient(
         ) {
             "TypeScript declaration files are not executable entries."
         }
+        (appContext as? App)?.cancelDeferredTypeScriptCompilerPrewarm()
         observeCompilation(targetProfile, usePersistentCache) { performance ->
             val projectId = "directory-" + sha256(
                 TypeScriptUtf8.encode(root.path, "TypeScript project root"),
@@ -224,6 +266,7 @@ internal class TypeScriptCompilerPluginClient(
         var terminalReceived = false
 
         return try {
+            TypeScriptCompilerStartupPrewarm.awaitPendingPrewarm()
             val target = host.selectOrThrow(
                 context = appContext,
                 engineId = TypeScriptPluginIds.ID,
@@ -257,6 +300,8 @@ internal class TypeScriptCompilerPluginClient(
                     return@withLock cached
                 }
 
+                val warmBindingGeneration =
+                    TypeScriptCompilerStartupPrewarm.generationToken()
                 val bindAndPrewarmStartedAt = performance.checkpoint()
                 val leased = try {
                     host.callWithDedicatedBindingLease(
@@ -273,7 +318,12 @@ internal class TypeScriptCompilerPluginClient(
                             sourceName = entrySourceName,
                             requireReady = true,
                         )
-                        PreparedCompiler(compiler, readyAuthority)
+                        PreparedCompiler(
+                            compiler = compiler,
+                            authority = readyAuthority,
+                            projectSessionRevision =
+                                negotiatedProjectSessionRevision(prewarmResult),
+                        )
                     }
                 } finally {
                     performance.recordBindAndPrewarmSince(bindAndPrewarmStartedAt)
@@ -310,6 +360,7 @@ internal class TypeScriptCompilerPluginClient(
                         prepared = prepared,
                         outputFile = outputFile,
                         timeoutMs = timeoutMs,
+                        projectSessionRevision = ready.projectSessionRevision,
                         callback = callback,
                     )
                     val active = StartedCompilation(
@@ -359,7 +410,7 @@ internal class TypeScriptCompilerPluginClient(
                 terminalReceived = true
                 val terminal = terminalResult(terminalBundle, requestId)
                 performance.recordCompilerElapsed(terminal.elapsedMs)
-                when (terminal.outcome) {
+                val output = when (terminal.outcome) {
                     TypeScriptCompilerContract.OUTCOME_EMITTED,
                     TypeScriptCompilerContract.OUTCOME_DIAGNOSTICS,
                     -> {
@@ -387,6 +438,18 @@ internal class TypeScriptCompilerPluginClient(
                         terminal.outcome,
                     )
                 }
+                if (ready.projectSessionRevision != null) {
+                    TypeScriptCompilerStartupPrewarm.retainCompilationBinding(
+                        TypeScriptCompilerWarmBinding(
+                            bindingLease = requireNotNull(bindingLease),
+                            binder = ready.compiler.asBinder(),
+                            projectSessionRevision = ready.projectSessionRevision,
+                        ),
+                        expectedGeneration = warmBindingGeneration,
+                    )
+                    bindingLease = null
+                }
+                output
             }
         } catch (error: TypeScriptCompilerException) {
             throw error
@@ -734,6 +797,7 @@ internal class TypeScriptCompilerPluginClient(
         prepared: TypeScriptPreparedCompilation,
         outputFile: File,
         timeoutMs: Long,
+        projectSessionRevision: Int?,
         callback: ITypeScriptCompilationCallback,
     ): Bundle {
         val inputDescriptor = ParcelFileDescriptor.open(
@@ -746,7 +810,7 @@ internal class TypeScriptCompilerPluginClient(
         )
         return try {
             compiler.startCompilation(
-                compilationRequest(prepared, timeoutMs),
+                compilationRequest(prepared, timeoutMs, projectSessionRevision),
                 inputDescriptor,
                 outputDescriptor,
                 callback,
@@ -760,6 +824,7 @@ internal class TypeScriptCompilerPluginClient(
     private fun compilationRequest(
         prepared: TypeScriptPreparedCompilation,
         timeoutMs: Long,
+        projectSessionRevision: Int?,
     ) = Bundle().apply {
         putInt(TypeScriptCompilerContract.KEY_CONTRACT_VERSION, TypeScriptCompilerContract.VERSION)
         putString(TypeScriptCompilerContract.KEY_CONTRACT_HASH, TypeScriptCompilerContract.HASH)
@@ -773,6 +838,9 @@ internal class TypeScriptCompilerPluginClient(
         )
         putString(TypeScriptCompilerContract.KEY_REQUEST_ID, prepared.requestId)
         putString(TypeScriptCompilerContract.KEY_PROJECT_ID, prepared.projectId)
+        projectSessionRevision?.let { revision ->
+            putInt(TypeScriptR2Contract.KEY_PROJECT_SESSION_REVISION, revision)
+        }
         putString(TypeScriptCompilerContract.KEY_ENTRY_SOURCE_URI, prepared.entrySourceUri)
         putString(
             TypeScriptCompilerContract.KEY_TARGET_PROFILE,
@@ -893,6 +961,17 @@ internal class TypeScriptCompilerPluginClient(
         putString(TypeScriptCompilerContract.KEY_CONTRACT_HASH, TypeScriptCompilerContract.HASH)
         putLong(TypeScriptCompilerContract.KEY_TIMEOUT_MS, timeoutMs)
     }
+
+    private fun negotiatedProjectSessionRevision(info: Bundle): Int? =
+        TypeScriptProjectSessionPolicy.negotiatedRevision(
+            if (info.containsKey(TypeScriptR2Contract.KEY_PROJECT_SESSION_REVISION)) {
+                runCatching {
+                    info.getInt(TypeScriptR2Contract.KEY_PROJECT_SESSION_REVISION)
+                }.getOrNull()
+            } else {
+                null
+            },
+        )
 
     private fun cancellationRequest(
         requestId: String,
@@ -1051,6 +1130,12 @@ internal class TypeScriptCompilerPluginClient(
     private data class PreparedCompiler(
         val compiler: ITypeScriptCompilerPlugin,
         val authority: TypeScriptCompilerAuthority,
+        val projectSessionRevision: Int?,
+    )
+
+    private data class WarmCompiler(
+        val binder: IBinder,
+        val projectSessionRevision: Int?,
     )
 
     private class CompilationCallback(
@@ -1105,6 +1190,7 @@ internal class TypeScriptCompilerPluginClient(
     private companion object {
         const val LOG_TAG = "TypeScriptCompiler"
         const val MODULE_LABEL = "TypeScript compiler"
+        const val PREWARM_SOURCE_NAME = "startup-prewarm.ts"
         const val LOCAL_TERMINAL_GRACE_MS = 5_000L
         const val EMPTY_TSCONFIG_BYTES = 2L
         const val CACHE_DIRECTORY_NAME = "typescript-compiler-cache-v1"

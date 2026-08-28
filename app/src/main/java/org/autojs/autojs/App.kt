@@ -2,6 +2,7 @@ package org.autojs.autojs
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -24,6 +25,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputCoordinator
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
+import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerStartupPrewarm
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.engine.NodeJsRuntimePluginHost
@@ -64,11 +66,26 @@ class App : Application(), WorkManagerConfiguration.Provider {
 
     private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
     private val deferredNodePluginPrewarmScheduled = AtomicBoolean(false)
+    private val deferredTypeScriptCompilerPrewarmScheduled = AtomicBoolean(false)
+    private val deferredTypeScriptCompilerStartupReleaseScheduled = AtomicBoolean(false)
     private val deferredMaintenanceScheduled = AtomicBoolean(false)
 
     private val deferredNodePluginPrewarm = Runnable {
         if (deferredNodePluginPrewarmScheduled.compareAndSet(true, false)) {
             Thread(::prewarmNodePluginIfNeeded, "AutoJs6-Node-Plugin-StartupPrewarm").start()
+        }
+    }
+
+    private val deferredTypeScriptCompilerPrewarm = Runnable {
+        if (deferredTypeScriptCompilerPrewarmScheduled.compareAndSet(true, false)) {
+            TypeScriptCompilerStartupPrewarm.requestAsync(this, "app-start")
+            scheduleTypeScriptCompilerStartupRelease()
+        }
+    }
+
+    private val deferredTypeScriptCompilerStartupRelease = Runnable {
+        if (deferredTypeScriptCompilerStartupReleaseScheduled.compareAndSet(true, false)) {
+            TypeScriptCompilerStartupPrewarm.release("app-start-idle-timeout")
         }
     }
 
@@ -102,6 +119,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 if (getProcessNameCompat() == applicationInfo.processName) {
                     EditorEnginePreferences.initialize(this)
                     scheduleNodePluginPrewarmIfNeeded()
+                    scheduleTypeScriptCompilerPrewarmIfNeeded()
                     if (!AbstractAutoJs.isInrt) {
                         OpenCvPluginHost.preload(this)
                     }
@@ -292,6 +310,37 @@ class App : Application(), WorkManagerConfiguration.Provider {
         }
     }
 
+    private fun scheduleTypeScriptCompilerPrewarmIfNeeded() {
+        if (
+            !BuildConfig.isInrt &&
+            deferredTypeScriptCompilerPrewarmScheduled.compareAndSet(false, true)
+        ) {
+            mainHandler.postDelayed(
+                deferredTypeScriptCompilerPrewarm,
+                TYPESCRIPT_COMPILER_PREWARM_DELAY_MILLIS,
+            )
+        }
+    }
+
+    private fun scheduleTypeScriptCompilerStartupRelease() {
+        if (deferredTypeScriptCompilerStartupReleaseScheduled.compareAndSet(false, true)) {
+            mainHandler.postDelayed(
+                deferredTypeScriptCompilerStartupRelease,
+                TYPESCRIPT_COMPILER_STARTUP_KEEPALIVE_MILLIS,
+            )
+        }
+    }
+
+    /** A real compile/editor visit cancels both delayed startup work and its idle expiry. */
+    internal fun cancelDeferredTypeScriptCompilerPrewarm() {
+        if (deferredTypeScriptCompilerPrewarmScheduled.compareAndSet(true, false)) {
+            mainHandler.removeCallbacks(deferredTypeScriptCompilerPrewarm)
+        }
+        if (deferredTypeScriptCompilerStartupReleaseScheduled.compareAndSet(true, false)) {
+            mainHandler.removeCallbacks(deferredTypeScriptCompilerStartupRelease)
+        }
+    }
+
     private fun scheduleDeferredMaintenance() {
         if (deferredMaintenanceScheduled.compareAndSet(false, true)) {
             mainHandler.postDelayed(deferredMaintenance, MAINTENANCE_SCHEDULING_DELAY_MILLIS)
@@ -320,6 +369,22 @@ class App : Application(), WorkManagerConfiguration.Provider {
         super.onConfigurationChanged(newConfig)
     }
 
+    @Suppress("DEPRECATION")
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (
+            level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW &&
+            level != ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
+        ) {
+            TypeScriptCompilerStartupPrewarm.release("trim-memory-$level")
+        }
+    }
+
+    override fun onLowMemory() {
+        TypeScriptCompilerStartupPrewarm.release("low-memory")
+        super.onLowMemory()
+    }
+
     fun clear() {
         clearInternal()
     }
@@ -328,6 +393,8 @@ class App : Application(), WorkManagerConfiguration.Provider {
 
     private fun clearInternal() {
         cancelDeferredNodePluginPrewarm()
+        cancelDeferredTypeScriptCompilerPrewarm()
+        TypeScriptCompilerStartupPrewarm.release("app-clear")
         if (deferredMaintenanceScheduled.compareAndSet(true, false)) {
             mainHandler.removeCallbacks(deferredMaintenance)
         }
@@ -339,6 +406,8 @@ class App : Application(), WorkManagerConfiguration.Provider {
 
         private const val TAG = "App"
         private const val NODE_PLUGIN_PREWARM_DELAY_MILLIS = 1_800L
+        private const val TYPESCRIPT_COMPILER_PREWARM_DELAY_MILLIS = 3_600L
+        private const val TYPESCRIPT_COMPILER_STARTUP_KEEPALIVE_MILLIS = 60_000L
         private const val MAINTENANCE_SCHEDULING_DELAY_MILLIS = 2_500L
 
         private lateinit var instance: WeakReference<App>

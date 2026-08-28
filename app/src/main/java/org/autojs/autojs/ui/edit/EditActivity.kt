@@ -25,11 +25,14 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.MaterialDialogThemeDelegate
 import com.afollestad.materialdialogs.MaterialDialogThemeOwner
 import io.reactivex.android.schedulers.AndroidSchedulers
+import org.autojs.autojs.App
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
 import org.autojs.autojs.core.permission.OnRequestPermissionsResultCallback
 import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
+import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerStartupPrewarm
+import org.autojs.autojs.core.plugin.typescript.TypeScriptProjectSessionPolicy
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.edit.editor.service.EditorDraftService
@@ -52,6 +55,7 @@ import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.titleView
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
@@ -119,6 +123,7 @@ open class EditActivity :
             applyPendingSaveAsRecordToIntent(it)
         }
         super.onCreate(savedInstanceState)
+        prewarmTypeScriptCompilerForEditorIntent()
 
         val binding = ActivityEditBinding.inflate(layoutInflater).also {
             setContentView(it.root)
@@ -218,6 +223,19 @@ open class EditActivity :
         if (::draftService.isInitialized) {
             draftService.rebindDraftKeyPath(destinationUri.editorDocumentIdentity())
         }
+    }
+
+    private fun prewarmTypeScriptCompilerForEditorIntent() {
+        if (BuildConfig.isInrt) return
+        val candidates = listOf(
+            intent.getStringExtra(EditorView.EXTRA_PATH),
+            intent.getStringExtra(EditorView.EXTRA_NAME),
+            intent.data?.path,
+            intent.data?.lastPathSegment,
+        )
+        if (!TypeScriptProjectSessionPolicy.shouldPrewarmForEditor(candidates)) return
+        (applicationContext as? App)?.cancelDeferredTypeScriptCompilerPrewarm()
+        TypeScriptCompilerStartupPrewarm.requestAsync(applicationContext, "editor")
     }
 
     private fun handleEditorIntentWhenSaveAsSettles() {

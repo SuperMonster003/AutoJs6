@@ -9,6 +9,15 @@ import org.junit.Test
 class TypeScriptR2ContractTest {
 
     @Test
+    fun projectSessionOptInIsAnAdditiveRevisionOneBundleKey() {
+        assertEquals(
+            "projectSessionRevision",
+            TypeScriptR2Contract.KEY_PROJECT_SESSION_REVISION,
+        )
+        assertEquals(1, TypeScriptR2Contract.PROJECT_SESSION_REVISION)
+    }
+
+    @Test
     fun ordinaryCompilationInputQuotaRevisionThreePromotesTheTransportCeiling() {
         assertEquals(3, TypeScriptR2Contract.ORDINARY_COMPILATION_INPUT_QUOTA_REVISION)
         assertEquals(4_096, TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_FILES)

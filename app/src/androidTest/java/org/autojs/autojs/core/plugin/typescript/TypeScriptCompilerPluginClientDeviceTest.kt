@@ -56,6 +56,7 @@ import org.autojs.autojs.timing.TimedTask
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs6.R
+import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -154,6 +155,113 @@ class TypeScriptCompilerPluginClientDeviceTest {
             assertNull(performance[1].compilerAfterEmitElapsedMs)
         }
     }
+
+    @Test
+    fun startupPrewarmMovesCompilerBootstrapOffFirstRunAndKeepsRevisionOneSession() {
+        TypeScriptCompilerStartupPrewarm.release("device-test-setup")
+        try {
+            val prewarm = runBlocking {
+                TypeScriptCompilerStartupPrewarm.prewarm(context, "device-test")
+            }
+            assertTrue("The compiler prewarm binding was not retained", prewarm.retained)
+            assertEquals(
+                TypeScriptR2Contract.PROJECT_SESSION_REVISION,
+                prewarm.projectSessionRevision,
+            )
+
+            withProject { root ->
+                File(root, "project.json").writeText(
+                    """{"type":"rhino","main":"main.ts"}""",
+                )
+                File(root, "tsconfig.json").writeText(
+                    """{"compilerOptions":{"strict":true}}""",
+                )
+                val moduleCount = 9
+                for (index in 0 until moduleCount - 1) {
+                    File(root, "module$index.ts").writeText(
+                        "import { value as nextValue, marker } from './module${index + 1}'\n" +
+                            "export { marker }\n" +
+                            "export const value: number = nextValue + 1\n",
+                    )
+                }
+                val leaf = File(root, "module${moduleCount - 1}.ts")
+                fun writeLeaf(revision: String, value: Int) {
+                    leaf.writeText(
+                        "export const value: number = $value\n" +
+                            "export const marker: string = '$revision'\n",
+                    )
+                }
+                writeLeaf("revision-cold", 1)
+                val entry = File(root, "main.ts").apply {
+                    writeText(
+                        "import { value, marker } from './module0'\n" +
+                            "export const result: string = marker + ':' + value\n",
+                    )
+                }
+                val performance = mutableListOf<TypeScriptCompilationPerformanceSnapshot>()
+                val client = TypeScriptCompilerPluginClient(
+                    context,
+                    performanceReporter = TypeScriptCompilationPerformanceReporter { snapshot ->
+                        performance += snapshot
+                        Log.i(TEST_LOG_TAG, snapshot.toLogLine())
+                    },
+                )
+                fun compile(): TypeScriptCompilationOutput.Emitted = runBlocking {
+                    client.compileProject(
+                        projectRoot = root,
+                        entryFile = entry,
+                        targetProfile = TypeScriptCompilerContract.PROFILE_RHINO,
+                        usePersistentCache = false,
+                    ) as TypeScriptCompilationOutput.Emitted
+                }
+
+                val cold = compile()
+                assertEquals(moduleCount + 1, cold.modules.size)
+                val revision = "revision-warm"
+                writeLeaf(revision, 2)
+                val warm = compile()
+                assertEquals(moduleCount + 1, warm.modules.size)
+                assertTrue(
+                    "Warm output did not include $revision",
+                    warm.modules.any { module -> revision in module.javaScript },
+                )
+
+                assertEquals(2, performance.size)
+                assertTrue(performance.all { snapshot ->
+                    snapshot.cacheStatus == TypeScriptCompilationPerformanceSnapshot.CACHE_DISABLED
+                })
+                val firstRunBindPrewarmMs =
+                    requireNotNull(performance.first().bindAndPrewarmElapsedMs)
+                val coldCoreCompilerMs = performance.first().coreCompilerElapsedMs()
+                val warmCoreCompilerMs = performance.last().coreCompilerElapsedMs()
+                Log.i(
+                    TEST_LOG_TAG,
+                    "typescript-startup-prewarm-acceptance schema=1 files=${moduleCount + 1} " +
+                        "prewarmMs=${prewarm.elapsedMs} firstRunBindPrewarmMs=$firstRunBindPrewarmMs " +
+                        "coldCoreCompilerMs=$coldCoreCompilerMs " +
+                        "warmCoreCompilerMs=$warmCoreCompilerMs",
+                )
+                assertTrue(
+                    "Startup prewarm must remove at least half of bind/bootstrap latency from " +
+                        "the first user run: prewarm=${prewarm.elapsedMs}ms " +
+                        "firstRunBindPrewarm=${firstRunBindPrewarmMs}ms",
+                    firstRunBindPrewarmMs * 2L <= prewarm.elapsedMs,
+                )
+                assertTrue(
+                    "The second edit must reuse revision-1 compiler core state: " +
+                        "cold=${coldCoreCompilerMs}ms warm=${warmCoreCompilerMs}ms",
+                    warmCoreCompilerMs < coldCoreCompilerMs,
+                )
+            }
+        } finally {
+            TypeScriptCompilerStartupPrewarm.release("device-test-finished")
+        }
+    }
+
+    private fun TypeScriptCompilationPerformanceSnapshot.coreCompilerElapsedMs(): Long =
+        requireNotNull(compilerParseElapsedMs) +
+            requireNotNull(compilerSemanticElapsedMs) +
+            requireNotNull(compilerEmitElapsedMs)
 
     @Test
     fun compilesUtf8SingleFileThroughRealPluginBinder() {

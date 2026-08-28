@@ -37,6 +37,16 @@ object TypeScriptR2Contract {
         "dependencyResolverPolicyRevision"
     const val KEY_DEPENDENCY_RESOLVER_POLICY_FINGERPRINT =
         "dependencyResolverPolicyFingerprint"
+    /**
+     * Optional T3 project-session opt-in carried by the existing compilation Bundle.
+     *
+     * The caller supplies only this revision. The compiler service derives the opaque Worker
+     * cache identity from the Binder calling UID and the accepted project ID, so callers cannot
+     * select another application's resident state. Omitting the key preserves the historical
+     * per-job WebView teardown and fully cold compilation path.
+     */
+    const val KEY_PROJECT_SESSION_REVISION = "projectSessionRevision"
+    const val PROJECT_SESSION_REVISION = 1
     /* Host runtime dependency snapshot errors introduced by T2-3. */
     const val ERROR_RUNTIME_DEPENDENCY_CHANGED =
         "ERR_AUTOJS6_TYPESCRIPT_RUNTIME_DEPENDENCY_CHANGED"
