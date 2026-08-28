@@ -6,12 +6,15 @@ import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.webkit.WebView
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorDefinitionTargetResolver
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectSnapshotProvider
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.editor.api.EditorPluginCallback
 import org.autojs.plugin.editor.api.EditorPluginContract
 import org.autojs.plugin.editor.api.EditorPluginFailure
+import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
+import org.autojs.plugin.editor.api.EditorPluginDefinitionTargetKind
 import org.autojs.plugin.editor.api.EditorPluginSessionConfig
 import org.json.JSONArray
 import org.json.JSONTokener
@@ -99,7 +102,7 @@ class AceEditorPluginHostDeviceTest {
     }
 
     @Test
-    fun installedAceEditorConsumesHostSnapshotForLiveProjectDiagnostics() {
+    fun installedAceEditorConsumesHostSnapshotForProjectDiagnosticsAndDefinitionNavigation() {
         assumeTrue("Ace editor plugin is not installed", isPluginInstalled())
 
         val project = File(context.cacheDir, "ace-editor-host-project-diagnostics").apply {
@@ -107,11 +110,16 @@ class AceEditorPluginHostDeviceTest {
             mkdirs()
         }
         File(project, "tsconfig.json").writeText("{}")
-        val sourceText =
-            "import { shared } from './shared'; import { absent } from './absent'; " +
-                "const answer: 42 = shared; void absent; void answer;"
+        val sourceText = listOf(
+            "import { shared } from './shared';",
+            "import { absent } from './absent';",
+            "const answer: 42 = shared('value');",
+            "void absent; void answer;",
+        ).joinToString("\n")
         val document = File(project, "main.ts").apply { writeText(sourceText) }
-        File(project, "shared.ts").writeText("export const shared = 42 as const;")
+        val shared = File(project, "shared.ts").apply {
+            writeText("export function shared(value: string): 42 { return 42; }")
+        }
         val documentPath = document.canonicalPath
         val providerSnapshot = requireNotNull(
             TypeScriptEditorProjectSnapshotProvider.captureRequired(documentPath),
@@ -120,6 +128,8 @@ class AceEditorPluginHostDeviceTest {
 
         val ready = CountDownLatch(1)
         val fatalFailure = AtomicReference<EditorPluginFailure>()
+        val definitionTarget = AtomicReference<EditorPluginDefinitionTarget>()
+        val definitionRequested = CountDownLatch(1)
         val loaded = AtomicReference<AceEditorPluginHost.LoadedSession>()
         val activity = launchHostActivity()
         try {
@@ -147,6 +157,13 @@ class AceEditorPluginHostDeviceTest {
                                     ready.countDown()
                                 }
                             }
+
+                            override fun onDefinitionNavigationRequested(
+                                target: EditorPluginDefinitionTarget,
+                            ) {
+                                definitionTarget.set(target)
+                                definitionRequested.countDown()
+                            }
                         },
                     ),
                 )
@@ -161,7 +178,7 @@ class AceEditorPluginHostDeviceTest {
                 fail("Ace editor plugin failed: ${failure.type}: ${failure.message}")
             }
             runOnMainSync {
-                assertEquals(2, loaded.get().plugin.entrypoint.contractVersion)
+                assertEquals(3, loaded.get().plugin.entrypoint.contractVersion)
                 loaded.get().session.setInitialText(sourceText)
             }
 
@@ -187,6 +204,33 @@ class AceEditorPluginHostDeviceTest {
                 listOf("2307"),
                 diagnosticCodes.sorted(),
             )
+
+            val navigationResult = evaluateJavascript(
+                loaded.get().session.inputView as WebView,
+                "Boolean(window.AutoJsAce && window.AutoJsAce.goToDefinition && " +
+                    "window.AutoJsAce.goToDefinition(2, 22))",
+            )
+            assertEquals("true", navigationResult)
+            assertTrue(
+                "Ace editor plugin did not publish a definition navigation request",
+                definitionRequested.await(10, TimeUnit.SECONDS),
+            )
+            val target = requireNotNull(definitionTarget.get())
+            assertEquals(EditorPluginDefinitionTargetKind.PROJECT_SOURCE, target.kind)
+            assertEquals(project.canonicalPath, target.projectRootPath)
+            assertEquals("shared.ts", target.relativePath)
+            assertEquals(0, target.line)
+            assertEquals(16, target.column)
+            assertEquals(
+                providerSnapshot.sourceInventoryFingerprint,
+                target.projectSourceInventoryFingerprint,
+            )
+            val resolved = requireNotNull(
+                TypeScriptEditorDefinitionTargetResolver.resolve(documentPath, target),
+            )
+            assertEquals(shared.canonicalPath, resolved.targetPath)
+            assertEquals(0, resolved.line)
+            assertEquals(16, resolved.column)
         } finally {
             loaded.get()?.let { loadedSession ->
                 runOnMainSync { loadedSession.destroy() }

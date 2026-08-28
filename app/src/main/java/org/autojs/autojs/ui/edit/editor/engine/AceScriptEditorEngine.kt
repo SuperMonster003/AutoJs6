@@ -22,6 +22,7 @@ import org.autojs.plugin.editor.api.EditorPluginBooleanCallback
 import org.autojs.plugin.editor.api.EditorPluginBreakpoint
 import org.autojs.plugin.editor.api.EditorPluginCallback
 import org.autojs.plugin.editor.api.EditorPluginDiagnostics
+import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
 import org.autojs.plugin.editor.api.EditorPluginFailure
 import org.autojs.plugin.editor.api.EditorPluginHealthState
 import org.autojs.plugin.editor.api.EditorPluginHistoryDirection
@@ -114,6 +115,7 @@ class AceScriptEditorEngine private constructor(
 
     var onAceStateChanged: (() -> Unit)? = null
     var onSelectionAction: ((SelectionAction) -> Unit)? = null
+    var onDefinitionNavigationRequested: ((EditorPluginDefinitionTarget) -> Unit)? = null
     override var onUserTouchInTextArea: (() -> Unit)? = null
 
     override val view: View
@@ -238,6 +240,10 @@ class AceScriptEditorEngine private constructor(
 
         override fun onSelectionAction(action: EditorPluginSelectionAction) {
             onSelectionAction?.invoke(AceEditorPluginMappings.toHost(action))
+        }
+
+        override fun onDefinitionNavigationRequested(target: EditorPluginDefinitionTarget) {
+            this@AceScriptEditorEngine.onDefinitionNavigationRequested?.invoke(target)
         }
 
         override fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) {
@@ -569,6 +575,7 @@ class AceScriptEditorEngine private constructor(
         onFatalFailure = null
         onAceStateChanged = null
         onSelectionAction = null
+        onDefinitionNavigationRequested = null
         releaseSession()
     }
 
@@ -728,6 +735,9 @@ class AceScriptEditorEngine private constructor(
 
         override fun onSelectionAction(action: EditorPluginSelectionAction) =
             dispatch { it.onSelectionAction(action) }
+
+        override fun onDefinitionNavigationRequested(target: EditorPluginDefinitionTarget) =
+            dispatch { it.onDefinitionNavigationRequested(target) }
 
         override fun onTextSizeSpChangedByGesture(size: Float, persist: Boolean) =
             dispatch { it.onTextSizeSpChangedByGesture(size, persist) }

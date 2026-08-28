@@ -54,6 +54,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
+import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorDefinitionTargetResolver
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
@@ -122,6 +123,7 @@ import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.service.EditorBreakpointModelStore
+import org.autojs.autojs.ui.edit.editor.service.EditorDefinitionNavigationDispatcher
 import org.autojs.autojs.ui.edit.editor.service.EditorFileRollbackFailedException
 import org.autojs.autojs.ui.edit.editor.service.EditorFileSaveEncoding
 import org.autojs.autojs.ui.edit.editor.service.EditorFileService
@@ -174,6 +176,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.R.string.text_unknown
 import org.autojs.autojs6.databinding.DialogAceEditorFontFilterBinding
 import org.autojs.autojs6.databinding.EditorViewBinding
+import org.autojs.plugin.editor.api.EditorPluginDefinitionTarget
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
@@ -638,6 +641,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mPendingCompletedSaveAs: EditorPendingSaveAsRecord? = null
     private var mSaveAsAdoptionValidationInProgress = false
     private var mSaveAsAdoptionDisposable: Disposable? = null
+    private var mDefinitionNavigationDisposable: Disposable? = null
+    private var mDefinitionNavigationGeneration = 0L
     private var mTextRevision = 0L
     @Volatile
     private var mEncodingReloadRollback: EncodingReloadRollback? = null
@@ -4100,9 +4105,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mAutoCompletion?.shutdown()
             mAutoCompletion = null
             recordLastAceDiagnostics(oldEditor)
+            cancelAceDefinitionNavigation()
             (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
             (oldEditor as? AceScriptEditorEngine)?.onAceStateChanged = null
             (oldEditor as? AceScriptEditorEngine)?.onSelectionAction = null
+            (oldEditor as? AceScriptEditorEngine)?.onDefinitionNavigationRequested = null
             oldEditor.setHistoryOperationListener(null)
             oldEditor.onUserTouchInTextArea = null
             binding.editorContainer.removeView(oldEditor.view)
@@ -4186,6 +4193,92 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 actionForAceSelectionAction(action)?.let(::recordAceHistoryAction)
             }
         }
+    }
+
+    private fun configureAceDefinitionNavigation(editor: ScriptEditorEngine) {
+        (editor as? AceScriptEditorEngine)?.onDefinitionNavigationRequested = { target ->
+            requestAceDefinitionNavigation(target)
+        }
+    }
+
+    private fun requestAceDefinitionNavigation(target: EditorPluginDefinitionTarget) {
+        val documentPath = currentDocumentPathOrName()?.takeIf(String::isNotBlank) ?: return
+        val requestedEditor = editor
+        val documentIdentityGeneration = mDocumentIdentityGeneration
+        val textRevision = mTextRevision
+        val currentDocumentText = requestedEditor.textSnapshot
+        cancelAceDefinitionNavigation()
+        val requestGeneration = mDefinitionNavigationGeneration
+        mDefinitionNavigationDisposable = Observable.fromCallable {
+            listOfNotNull(
+                TypeScriptEditorDefinitionTargetResolver.resolve(
+                    documentPath = documentPath,
+                    target = target,
+                    currentDocumentText = currentDocumentText,
+                ),
+            )
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ targets ->
+                if (requestGeneration == mDefinitionNavigationGeneration) {
+                    mDefinitionNavigationDisposable = null
+                }
+                handleResolvedAceDefinitionNavigation(
+                    requestGeneration = requestGeneration,
+                    documentIdentityGeneration = documentIdentityGeneration,
+                    textRevision = textRevision,
+                    requestedEditor = requestedEditor,
+                    target = targets.singleOrNull(),
+                )
+            }, {
+                if (requestGeneration == mDefinitionNavigationGeneration) {
+                    mDefinitionNavigationDisposable = null
+                }
+            })
+    }
+
+    private fun handleResolvedAceDefinitionNavigation(
+        requestGeneration: Long,
+        documentIdentityGeneration: Long,
+        textRevision: Long,
+        requestedEditor: ScriptEditorEngine,
+        target: TypeScriptEditorDefinitionTargetResolver.ResolvedTarget?,
+    ) {
+        if (
+            target == null ||
+            mDestroyed ||
+            requestGeneration != mDefinitionNavigationGeneration ||
+            documentIdentityGeneration != mDocumentIdentityGeneration ||
+            textRevision != mTextRevision ||
+            requestedEditor !== editor ||
+            editor.engineType != EditorEngineType.ACE
+        ) {
+            return
+        }
+        EditorDefinitionNavigationDispatcher.dispatch(
+            target = target,
+            jumpCurrentDocument = { line, column ->
+                editor.jumpTo(line, column)
+                editor.requestEditorFocus()
+            },
+            openTargetDocument = { name, path, line, column ->
+                EditActivity.editFileAt(
+                    context = activity,
+                    name = name,
+                    path = path,
+                    lineNumber = line,
+                    columnNumber = column,
+                    newTask = false,
+                )
+            },
+        )
+    }
+
+    private fun cancelAceDefinitionNavigation() {
+        mDefinitionNavigationGeneration++
+        mDefinitionNavigationDisposable?.dispose()
+        mDefinitionNavigationDisposable = null
     }
 
     private fun fallbackToNativeFromAceFailure(failure: AceFailure) {
@@ -4389,6 +4482,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setUpEditor(resetInitialState: Boolean = true) {
         configureAceFallback(editor)
         configureAceActionHistory(editor)
+        configureAceDefinitionNavigation(editor)
         editor.let { editor ->
             editor.setHistoryOperationListener { token, direction ->
                 // Both engines dispatch history completion on the main thread. Applying it here
@@ -7068,6 +7162,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mEncodingDialogDisposable = null
         mSaveAsAdoptionDisposable?.dispose()
         mSaveAsAdoptionDisposable = null
+        cancelAceDefinitionNavigation()
         fileService.destroy()
         mEncodingOperationDisposable?.dispose()
         mEncodingOperationDisposable = null
