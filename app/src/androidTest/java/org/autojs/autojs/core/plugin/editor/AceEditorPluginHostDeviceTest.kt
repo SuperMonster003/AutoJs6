@@ -4,13 +4,17 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.SystemClock
+import android.webkit.WebView
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectSnapshotProvider
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.editor.api.EditorPluginCallback
 import org.autojs.plugin.editor.api.EditorPluginContract
 import org.autojs.plugin.editor.api.EditorPluginFailure
 import org.autojs.plugin.editor.api.EditorPluginSessionConfig
+import org.json.JSONArray
+import org.json.JSONTokener
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
@@ -94,6 +98,104 @@ class AceEditorPluginHostDeviceTest {
         }
     }
 
+    @Test
+    fun installedAceEditorConsumesHostSnapshotForLiveProjectDiagnostics() {
+        assumeTrue("Ace editor plugin is not installed", isPluginInstalled())
+
+        val project = File(context.cacheDir, "ace-editor-host-project-diagnostics").apply {
+            deleteRecursively()
+            mkdirs()
+        }
+        File(project, "tsconfig.json").writeText("{}")
+        val sourceText =
+            "import { shared } from './shared'; import { absent } from './absent'; " +
+                "const answer: 42 = shared; void absent; void answer;"
+        val document = File(project, "main.ts").apply { writeText(sourceText) }
+        File(project, "shared.ts").writeText("export const shared = 42 as const;")
+        val documentPath = document.canonicalPath
+        val providerSnapshot = requireNotNull(
+            TypeScriptEditorProjectSnapshotProvider.captureRequired(documentPath),
+        )
+        assertEquals(2, providerSnapshot.sourceFileCount)
+
+        val ready = CountDownLatch(1)
+        val fatalFailure = AtomicReference<EditorPluginFailure>()
+        val loaded = AtomicReference<AceEditorPluginHost.LoadedSession>()
+        val activity = launchHostActivity()
+        try {
+            runOnMainSync {
+                loaded.set(
+                    AceEditorPluginHost.createSession(
+                        context = activity,
+                        config = EditorPluginSessionConfig(
+                            hostPackageName = context.packageName,
+                            hostVersionName = BuildConfig.VERSION_NAME,
+                            hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+                            storageDirectoryPath =
+                                File(context.cacheDir, "ace-editor-host-project-fonts").absolutePath,
+                            documentPath = documentPath,
+                            projectSnapshotProvider = TypeScriptEditorProjectSnapshotProvider,
+                        ),
+                        callback = object : EditorPluginCallback {
+                            override fun onReady(state: org.autojs.plugin.editor.api.EditorPluginState) {
+                                ready.countDown()
+                            }
+
+                            override fun onFailure(failure: EditorPluginFailure) {
+                                if (failure.fatal) {
+                                    fatalFailure.compareAndSet(null, failure)
+                                    ready.countDown()
+                                }
+                            }
+                        },
+                    ),
+                )
+                activity.setContentView(loaded.get().session.view)
+            }
+
+            assertTrue(
+                "Ace project diagnostic session did not become ready",
+                ready.await(20, TimeUnit.SECONDS),
+            )
+            fatalFailure.get()?.let { failure ->
+                fail("Ace editor plugin failed: ${failure.type}: ${failure.message}")
+            }
+            runOnMainSync {
+                assertEquals(2, loaded.get().plugin.entrypoint.contractVersion)
+                loaded.get().session.setInitialText(sourceText)
+            }
+
+            var diagnosticCodes = emptyList<String>()
+            val deadline = SystemClock.uptimeMillis() + 30_000L
+            while (SystemClock.uptimeMillis() < deadline && "2307" !in diagnosticCodes) {
+                val raw = evaluateJavascript(
+                    loaded.get().session.inputView as WebView,
+                    "JSON.stringify(window.AutoJsAce && window.AutoJsAce.validateLsp " +
+                        "? window.AutoJsAce.validateLsp() : [])",
+                )
+                val decoded = runCatching { JSONTokener(raw).nextValue() as? String }
+                    .getOrNull().orEmpty()
+                val diagnostics = runCatching { JSONArray(decoded) }.getOrElse { JSONArray() }
+                diagnosticCodes = List(diagnostics.length()) { index ->
+                    diagnostics.getJSONObject(index).optString("code")
+                }
+                if ("2307" !in diagnosticCodes) SystemClock.sleep(100L)
+            }
+
+            assertEquals(
+                "Host-backed project diagnostic golden changed",
+                listOf("2307"),
+                diagnosticCodes.sorted(),
+            )
+        } finally {
+            loaded.get()?.let { loadedSession ->
+                runOnMainSync { loadedSession.destroy() }
+            }
+            finishHostActivity(activity)
+            project.deleteRecursively()
+        }
+    }
+
     private fun launchHostActivity(): Activity {
         val intent = Intent(context, LogActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return instrumentation.startActivitySync(intent).also {
@@ -131,6 +233,19 @@ class AceEditorPluginHostDeviceTest {
             SystemClock.sleep(50L)
         }
         fail(message)
+    }
+
+    private fun evaluateJavascript(webView: WebView, script: String): String {
+        val result = AtomicReference<String>()
+        val completed = CountDownLatch(1)
+        runOnMainSync {
+            webView.evaluateJavascript(script) { raw ->
+                result.set(raw)
+                completed.countDown()
+            }
+        }
+        assertTrue("Ace JavaScript evaluation timed out", completed.await(5, TimeUnit.SECONDS))
+        return result.get().orEmpty()
     }
 
     private fun <T> runOnMainSync(block: () -> T): T {
