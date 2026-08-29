@@ -66,6 +66,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     private var pkgChangeRefreshJob: Job? = null
 
     private var isFirstEnter: Boolean = true
+    private val resumeRefreshPolicy = PluginCenterResumeRefreshPolicy()
     private var latestIndexLoaded: Boolean = false
     private var lastNightModeEnabled: Boolean? = null
     private var nightModeRefreshJob: Job? = null
@@ -1051,6 +1052,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     override fun onStop() {
         super.onStop()
+        resumeRefreshPolicy.onStopped()
         if (::contextRef.isInitialized) {
             unregisterSortPrefListener(contextRef)
             if (!isScopedLibraryMode) {
@@ -1079,9 +1081,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
             lastNightModeEnabled = currentNightModeEnabled
         }
-        // Refresh once when returning to page, to cover state after installation/uninstallation.
-        // zh-CN: 回到页面时刷新一次, 覆盖安装/卸载后的状态.
-        if ((shouldReloadForNightMode || !isFirstEnter) && ::contextRef.isInitialized) {
+        // A ViewPager tab switch does not stop this Fragment, and package broadcasts
+        // remain registered while it is STARTED. Only catch up after a real STOPPED
+        // interval (such as visiting another Activity), or when icon mode changed.
+        // zh-CN: ViewPager 标签切换不会停止此 Fragment, 且处于 STARTED 时
+        // 包广播仍保持注册. 仅在真正经历 STOPPED (如访问其他 Activity) 后补刷,
+        // 或在图标模式变化时刷新.
+        if (resumeRefreshPolicy.consumeRefreshOnResume(shouldReloadForNightMode) && ::contextRef.isInitialized) {
             vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope, forceRender = shouldReloadForNightMode)
         }
     }
