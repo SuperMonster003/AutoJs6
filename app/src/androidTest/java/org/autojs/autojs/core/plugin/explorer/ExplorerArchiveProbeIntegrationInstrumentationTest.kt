@@ -162,11 +162,12 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
                     options = options,
                 )
             }
-            provider = ArchiveExplorerProvider(
+            val openedProvider = ArchiveExplorerProvider(
                 connection = connection,
                 cacheDirectory = File(root, "entry-cache"),
             )
-            val initial = provider.getExplorerPage(provider.rootPage).blockingGet()
+            provider = openedProvider
+            val initial = openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
                 .filterIsInstance<ArchiveExplorerFileItem>()
                 .single { entry -> entry.name == ENTRY_NAME }
             assertTrue(initial.canRenameEntry)
@@ -174,11 +175,11 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
             val stableEntryId = initial.entryId
 
             val renamedResult = awaitMutation { listener ->
-                provider.startRename(initial, RENAMED_ENTRY_NAME, listener)
+                openedProvider.startRename(initial, RENAMED_ENTRY_NAME, listener)
             }
             assertEquals(1, renamedResult.mutatedEntries)
-            provider.reloadAfterMutation()
-            val renamed = provider.getExplorerPage(provider.rootPage).blockingGet()
+            openedProvider.reloadAfterMutation()
+            val renamed = openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
                 .filterIsInstance<ArchiveExplorerFileItem>()
                 .single { entry -> entry.name == RENAMED_ENTRY_NAME }
             assertEquals(RENAMED_ENTRY_NAME, renamed.name)
@@ -186,15 +187,51 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
             assertEquals(setOf(KEEP_ENTRY_NAME, RENAMED_ENTRY_NAME), zipEntryNames(archive).toSet())
 
             val deletedResult = awaitMutation { listener ->
-                provider.startDeletion(listOf(renamed), listener)
+                openedProvider.startDeletion(listOf(renamed), listener)
             }
             assertEquals(1, deletedResult.mutatedEntries)
-            provider.reloadAfterMutation()
+            openedProvider.reloadAfterMutation()
             assertEquals(
                 listOf(KEEP_ENTRY_NAME),
-                provider.getExplorerPage(provider.rootPage).blockingGet().map { entry -> entry.name },
+                openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
+                    .map { entry -> entry.name },
             )
             assertEquals(listOf(KEEP_ENTRY_NAME), zipEntryNames(archive))
+
+            val remaining = openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
+                .filterIsInstance<ArchiveExplorerFileItem>()
+                .single { entry -> entry.name == KEEP_ENTRY_NAME }
+            val deletedLastResult = awaitMutation { listener ->
+                openedProvider.startDeletion(listOf(remaining), listener)
+            }
+            assertEquals(1, deletedLastResult.mutatedEntries)
+            openedProvider.reloadAfterMutation()
+            assertTrue(
+                openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet().none(),
+            )
+            assertLegalEmptyZip(archive)
+
+            openedProvider.close()
+            provider = null
+            val reopenedConnection = ExplorerArchiveOpenRequestOptions().use { options ->
+                ExplorerActionRegistry.openArchive(
+                    context = context,
+                    surface = ExplorerSurface.MAIN_FILES,
+                    entryPoint = ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                    item = item,
+                    action = action,
+                    options = options,
+                )
+            }
+            val reopenedProvider = ArchiveExplorerProvider(
+                connection = reopenedConnection,
+                cacheDirectory = File(root, "entry-cache-reopened"),
+            )
+            provider = reopenedProvider
+            assertEquals("zip", reopenedConnection.info.formatId)
+            assertTrue(
+                reopenedProvider.getExplorerPage(reopenedProvider.rootPage).blockingGet().none(),
+            )
         } finally {
             provider?.close()
             historyStore.removeAllForTarget(context.applicationInfo.uid, archive)
@@ -267,6 +304,38 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
         zip.entries().asSequence().map(ZipEntry::getName).toList()
     }
 
+    private fun assertLegalEmptyZip(archive: File) {
+        val bytes = archive.readBytes()
+        val minimumOffset = (bytes.size - ZIP_END_RECORD_MAXIMUM_SIZE).coerceAtLeast(0)
+        val endRecordOffset = (bytes.size - ZIP_END_RECORD_MINIMUM_SIZE downTo minimumOffset)
+            .firstOrNull { offset ->
+                bytes.hasZipEndRecordSignature(offset) &&
+                    bytes.readUnsignedShortLittleEndian(offset + 20) ==
+                    bytes.size - offset - ZIP_END_RECORD_MINIMUM_SIZE
+            }
+        assertTrue("The committed archive has no valid ZIP end record", endRecordOffset != null)
+        val offset = requireNotNull(endRecordOffset)
+        assertEquals(0, bytes.readUnsignedShortLittleEndian(offset + 8))
+        assertEquals(0, bytes.readUnsignedShortLittleEndian(offset + 10))
+        assertEquals(0L, bytes.readUnsignedIntLittleEndian(offset + 12))
+    }
+
+    private fun ByteArray.hasZipEndRecordSignature(offset: Int): Boolean =
+        offset >= 0 &&
+            offset + ZIP_END_RECORD_MINIMUM_SIZE <= size &&
+            (this[offset].toInt() and 0xff) == 0x50 &&
+            (this[offset + 1].toInt() and 0xff) == 0x4b &&
+            (this[offset + 2].toInt() and 0xff) == 0x05 &&
+            (this[offset + 3].toInt() and 0xff) == 0x06
+
+    private fun ByteArray.readUnsignedShortLittleEndian(offset: Int): Int =
+        (this[offset].toInt() and 0xff) or
+            ((this[offset + 1].toInt() and 0xff) shl 8)
+
+    private fun ByteArray.readUnsignedIntLittleEndian(offset: Int): Long =
+        readUnsignedShortLittleEndian(offset).toLong() or
+            (readUnsignedShortLittleEndian(offset + 2).toLong() shl 16)
+
     private fun pluginIsInstalled(): Boolean = runCatching {
         context.packageManager.getPackageInfo(PLUGIN_PACKAGE, 0)
     }.isSuccess
@@ -280,5 +349,7 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
         const val KEEP_ENTRY_NAME = "keep.txt"
         const val RENAMED_ENTRY_NAME = "renamed.txt"
         const val OPERATION_TIMEOUT_SECONDS = 30L
+        const val ZIP_END_RECORD_MINIMUM_SIZE = 22
+        const val ZIP_END_RECORD_MAXIMUM_SIZE = ZIP_END_RECORD_MINIMUM_SIZE + 0xffff
     }
 }
