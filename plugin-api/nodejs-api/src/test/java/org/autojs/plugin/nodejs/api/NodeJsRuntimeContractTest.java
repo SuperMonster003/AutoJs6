@@ -71,10 +71,7 @@ public class NodeJsRuntimeContractTest {
     }
 
     @Test
-    public void legacyTypeScriptStrippingIsAnExplicitMigrationOnlyRequestKey() {
-        assertEquals(
-                "legacyTypeScriptStrippingEnabled",
-                NodeJsRuntimeContract.KEY_LEGACY_TYPESCRIPT_STRIPPING_ENABLED);
+    public void rawTypeScriptCompilerRequirementHasAStableFailureCode() {
         assertEquals(
                 "ERR_AUTOJS6_TYPESCRIPT_COMPILER_REQUIRED",
                 NodeJsRuntimeContract.ERROR_TYPESCRIPT_COMPILER_REQUIRED);

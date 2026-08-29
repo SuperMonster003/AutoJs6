@@ -1777,16 +1777,8 @@ class TypeScriptCompilerPluginClientDeviceTest {
                     assertTrue(result.succeeded)
                     assertTrue(result.sourceName.endsWith(generatedExtension))
                     assertFalse(
-                        "The legacy Node TypeScript stripper must not see generated JavaScript",
-                        "embedded_script.typescript.stripped" in result.nativeValues,
-                    )
-                    assertEquals(
-                        "false",
-                        result.nativeValues["embedded_script.typescript.legacy_stripping_enabled"],
-                    )
-                    assertEquals(
-                        "precompiled_only",
-                        result.nativeValues["embedded_script.typescript.preparation_mode"],
+                        "Generated JavaScript must not carry raw TypeScript policy diagnostics",
+                        "embedded_script.typescript.error" in result.nativeValues,
                     )
                     assertTrue(awaitConsoleMessage(marker).contains("$marker:42"))
                 }

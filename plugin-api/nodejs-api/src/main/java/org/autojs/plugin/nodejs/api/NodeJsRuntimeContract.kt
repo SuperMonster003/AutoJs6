@@ -70,13 +70,6 @@ object NodeJsRuntimeContract {
     const val KEY_RUNTIME_MODULE_SOURCES = "runtimeModuleSources"
 
     /**
-     * Temporary migration-only opt-in for the runtime plugin's legacy regex
-     * TypeScript erasure. The runtime defaults this key to false: production
-     * hosts must compile TypeScript before dispatching JavaScript to Node.
-     */
-    const val KEY_LEGACY_TYPESCRIPT_STRIPPING_ENABLED = "legacyTypeScriptStrippingEnabled"
-
-    /**
      * Marks a request whose TypeScript graph was compiled from a closed host
      * snapshot. In this mode the runtime maps .ts/.mts/.cts specifiers only to
      * matching JavaScript records already present in moduleSources.
