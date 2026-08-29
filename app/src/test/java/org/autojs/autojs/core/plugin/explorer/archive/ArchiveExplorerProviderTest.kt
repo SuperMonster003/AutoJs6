@@ -130,6 +130,21 @@ class ArchiveExplorerProviderTest {
     }
 
     @Test
+    fun sessionMutationCapabilitiesGateFileAndDirectoryItemCapabilities() {
+        val client = FakeClient(
+            canMutateEntries = false,
+            itemCanMutateEntries = true,
+        )
+        val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("capability-cache"))
+        val root = provider.rootPage
+
+        root.copyChildren(provider.getExplorerPage(root).blockingGet())
+
+        assertTrue(root.toList().all { item -> !item.canDelete() && !item.canRename() })
+        provider.close()
+    }
+
+    @Test
     fun providerForwardsOnlyWritableSessionOwnedMutationIds() {
         val client = FakeClient(canMutateEntries = true)
         val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("mutation-cache"))
@@ -183,6 +198,7 @@ class ArchiveExplorerProviderTest {
         canOpenEntries: Boolean = true,
         canExtractEntries: Boolean = true,
         canMutateEntries: Boolean = false,
+        itemCanMutateEntries: Boolean = canMutateEntries,
         filenameCharsets: Boolean = false,
         formatDisplayName: String? = null,
         displayNameMatchesFormat: Boolean = true,
@@ -211,7 +227,7 @@ class ArchiveExplorerProviderTest {
         var reindexedFilenameCharset: String? = null
         var mutationRequest: ExplorerArchiveMutationRequest? = null
         var cancelledMutationId: String? = null
-        private val mutableEntries = canMutateEntries
+        private val mutableEntries = itemCanMutateEntries
 
         override fun listAllChildren(parentId: String): List<ExplorerArchiveItemInfo> = when (parentId) {
             "root" -> listOf(

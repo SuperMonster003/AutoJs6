@@ -225,6 +225,8 @@ internal class ArchiveExplorerProvider(
                         info.copy(
                             canExtract = connection.info.canExtractEntries && info.canExtract,
                             canOpen = connection.info.canOpenEntries && info.canOpen,
+                            canDelete = connection.info.canDeleteEntries && info.canDelete,
+                            canRename = connection.info.canRenameEntries && info.canRename,
                         ),
                         parent,
                         path,
