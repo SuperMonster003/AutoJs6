@@ -355,6 +355,9 @@ object NodeJsRuntimePluginBridge {
             moduleSourceProvider?.let { provider ->
                 putBinder(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER, provider.asBinder())
             }
+            moduleSourceProviderVersion?.let { version ->
+                putInt(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION, version)
+            }
         }
     }
 

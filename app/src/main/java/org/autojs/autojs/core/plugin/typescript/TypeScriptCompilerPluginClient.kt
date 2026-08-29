@@ -184,6 +184,7 @@ internal class TypeScriptCompilerPluginClient(
         sourceContentReader: TypeScriptSourceContentReader =
             PlaintextTypeScriptSourceContentReader,
         usePersistentCache: Boolean = true,
+        sourceOverlays: Map<String, ByteArray> = emptyMap(),
     ): TypeScriptCompilationOutput = withContext(Dispatchers.IO) {
         require(timeoutMs in TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS..
             TypeScriptCompilerContract.MAX_TIMEOUT_MS)
@@ -223,6 +224,7 @@ internal class TypeScriptCompilerPluginClient(
                     authority = authority,
                     destination = inputFile,
                     sourceContentReader = sourceContentReader,
+                    sourceOverlays = sourceOverlays,
                 )
             }
         }

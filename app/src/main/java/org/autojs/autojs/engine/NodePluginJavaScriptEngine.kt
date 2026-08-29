@@ -13,6 +13,7 @@ import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchSource
+import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import java.io.File
 import java.io.IOException
@@ -31,11 +32,36 @@ class NodePluginJavaScriptEngine(
         private set
 
     override fun doExecution(source: JavaScriptSource): Any? {
-        val compiled = (source as? CompiledTypeScriptSource)?.executable?.takeIf { executable ->
+        val compiledSource = source as? CompiledTypeScriptSource
+        val compiled = compiledSource?.executable?.takeIf { executable ->
             executable.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
         }
         val executionId = newExecutionId()
-        val request = buildRequest(source).copy(executionId = executionId)
+        val baseRequest = buildRequest(source).copy(executionId = executionId)
+        val onDemandTypeScriptProvider = compiled
+            ?.takeIf { executable -> executable.isProjectCompilation }
+            ?.let { executable ->
+                NodeJsTypeScriptModuleSourceProvider(
+                    context = androidContext,
+                    rootDirectory = requireNotNull(executable.projectRoot),
+                    entryFile = requireNotNull(compiledSource).originalSource.file,
+                    executionId = executionId,
+                    timeoutMs = baseRequest.timeoutMs,
+                    initialSourceCount = baseRequest.moduleSources.size,
+                    initialSourceBytes = baseRequest.moduleSources.values.sumOf { moduleSource ->
+                        moduleSource.toByteArray(Charsets.UTF_8).size.toLong()
+                    },
+                )
+            }
+        val request = if (onDemandTypeScriptProvider == null) {
+            baseRequest
+        } else {
+            baseRequest.copy(
+                moduleSourceProvider = onDemandTypeScriptProvider,
+                moduleSourceProviderVersion = NodeJsRuntimeContract
+                    .MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
+            )
+        }
         val sourceMapBindings = compiled?.let { executable ->
             val generatedNames = if (executable.isProjectCompilation) {
                 val root = requireNotNull(executable.projectRoot).normalizedCanonicalFile()
@@ -75,7 +101,7 @@ class NodePluginJavaScriptEngine(
                 request = request,
                 outputListener = { type, text ->
                     printScriptOutput(
-                        if (type == org.autojs.plugin.nodejs.api.NodeJsRuntimeContract.EVENT_STDERR) {
+                        if (type == NodeJsRuntimeContract.EVENT_STDERR) {
                             Log.ERROR
                         } else {
                             Log.DEBUG
@@ -89,11 +115,19 @@ class NodePluginJavaScriptEngine(
                 activeExecutionId = null
             }
         }
+        val effectiveSourceMapBindings = sourceMapBindings?.let { initial ->
+            val dynamic = onDemandTypeScriptProvider?.sourceMapBindings().orEmpty()
+            if (dynamic.isEmpty()) initial else TypeScriptSourceMapBindings.of(
+                initial.bindings + dynamic,
+            ).also { combined ->
+                setTag(TypeScriptExecutionCompiler.SOURCE_MAP_ENGINE_TAG, combined)
+            }
+        }
         val result = if (compiled == null || rawResult.errorStack.isNullOrBlank()) {
             rawResult
         } else {
             val mappedStack = TypeScriptNodeStackTraceFormatter.format(
-                bindings = requireNotNull(sourceMapBindings),
+                bindings = requireNotNull(effectiveSourceMapBindings),
                 stack = rawResult.errorStack,
             )
             if (mappedStack == null) rawResult else rawResult.copy(errorStack = mappedStack)
@@ -153,12 +187,18 @@ class NodePluginJavaScriptEngine(
                         ),
                     )
                 }
+                val timeoutMs = if (launchSource?.nodeProjectTimeoutMs == null) {
+                    maxOf(projectRequest.timeoutMs, DEFAULT_TYPESCRIPT_PROJECT_TIMEOUT_MS)
+                } else {
+                    projectRequest.timeoutMs
+                }
                 return projectRequest.copy(
                     sourceLineOffset = Math.addExact(
                         projectRequest.sourceLineOffset,
                         compiled.entryGeneratedLineOffset,
                     ),
                     sourceName = runtimeProject.entryGeneratedSourceName,
+                    timeoutMs = timeoutMs,
                     typeScriptPrecompiledSnapshot = true,
                     typeScriptPrecompiledSourceNames = runtimeProject.precompiledSourceNames,
                     workspaceModuleSources = runtimeProject.workspaceModuleSources,
@@ -325,6 +365,7 @@ class NodePluginJavaScriptEngine(
     private companion object {
         private const val TAG = "NodePluginJavaScriptEngine"
         private const val DEFAULT_SOURCE_NAME = "<node-plugin-user-script.js>"
+        private const val DEFAULT_TYPESCRIPT_PROJECT_TIMEOUT_MS = 30_000L
         private const val SCRIPT_OUTPUT_LOG_LINE_MAX_CHARS = 1800
         private const val ENCRYPTED_BLOCK_BYTES = 16L
         private const val BOM = "\uFEFF"

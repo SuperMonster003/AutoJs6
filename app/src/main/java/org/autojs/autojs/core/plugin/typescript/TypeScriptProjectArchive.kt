@@ -20,6 +20,7 @@ internal object TypeScriptProjectArchive {
         destination: File,
         sourceContentReader: TypeScriptSourceContentReader =
             PlaintextTypeScriptSourceContentReader,
+        sourceOverlays: Map<String, ByteArray> = emptyMap(),
     ): TypeScriptPreparedCompilation {
         require(requestId.isNotBlank())
         require(requestId.length <= TypeScriptCompilerContract.MAX_REQUEST_ID_CHARS)
@@ -33,7 +34,12 @@ internal object TypeScriptProjectArchive {
             "TypeScript project entry is outside its project root."
         }
 
-        val sources = collectSources(root, authority.targetProfile, sourceContentReader)
+        val sources = collectSources(
+            root = root,
+            targetProfile = authority.targetProfile,
+            sourceContentReader = sourceContentReader,
+            sourceOverlays = sourceOverlays,
+        )
         val entryRelativePath = entry.relativePathInside(root)
         val entryPath = "sources/$entryRelativePath"
         require(sources.any { source -> source.archivePath == entryPath }) {
@@ -185,6 +191,7 @@ internal object TypeScriptProjectArchive {
         root: File,
         targetProfile: String,
         sourceContentReader: TypeScriptSourceContentReader,
+        sourceOverlays: Map<String, ByteArray>,
     ): List<ProjectSource> {
         val sources = mutableListOf<ProjectSource>()
         try {
@@ -236,6 +243,38 @@ internal object TypeScriptProjectArchive {
                         if (!retained) bytes.fill(0)
                     }
                 }
+            sourceOverlays.toSortedMap().forEach { (relativePath, sourceBytes) ->
+                requireCanonicalRelativePath(relativePath)
+                require(isSnapshotSource(relativePath, targetProfile)) {
+                    "TypeScript project overlay is not an admitted source: $relativePath"
+                }
+                require(
+                    sourceBytes.size.toLong() <=
+                        TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+                ) {
+                    "TypeScript project overlay exceeds its byte limit: $relativePath"
+                }
+                require(sources.none { source ->
+                    source.projectRelativePath.asciiCaseFold() == relativePath.asciiCaseFold()
+                }) {
+                    "TypeScript project overlay collides with another source: $relativePath"
+                }
+                val bytes = sourceBytes.copyOf()
+                var retained = false
+                try {
+                    TypeScriptUtf8.decode(bytes, "TypeScript project overlay $relativePath")
+                    sources += ProjectSource(
+                        archivePath = "sources/$relativePath",
+                        projectRelativePath = relativePath,
+                        file = null,
+                        bytes = bytes,
+                        sha256 = sha256(bytes),
+                    )
+                    retained = true
+                } finally {
+                    if (!retained) bytes.fill(0)
+                }
+            }
             sources.sortBy(ProjectSource::archivePath)
             require(sources.isNotEmpty()) {
                 "TypeScript project contains no admitted source files."
@@ -1135,7 +1174,7 @@ internal object TypeScriptProjectArchive {
     private data class ProjectSource(
         val archivePath: String,
         val projectRelativePath: String,
-        val file: File,
+        val file: File?,
         val bytes: ByteArray,
         val sha256: String,
     )

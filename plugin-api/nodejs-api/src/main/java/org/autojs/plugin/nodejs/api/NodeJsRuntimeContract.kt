@@ -6,11 +6,11 @@ object NodeJsRuntimeContract {
     const val MIN_CONTRACT_VERSION = 2
     const val MAX_CONTRACT_VERSION = CONTRACT_VERSION
     const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
-    const val MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 2
+    const val MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 3
     // Module-source transport versioning remains independent from the runtime
     // request contract so both published transport revisions stay readable.
     const val MODULE_SOURCE_PROVIDER_MIN_CONTRACT_VERSION = 1
-    const val MODULE_SOURCE_PROVIDER_MAX_CONTRACT_VERSION = 2
+    const val MODULE_SOURCE_PROVIDER_MAX_CONTRACT_VERSION = 3
     const val WORKSPACE_ARCHIVE_TRANSPORT_CONTRACT_VERSION = 2
 
     @JvmStatic
@@ -129,6 +129,9 @@ object NodeJsRuntimeContract {
     const val KEY_MODULE_SOURCE_PROVIDER_RESOLVED_PATH = "moduleSourceProviderResolvedPath"
     const val KEY_MODULE_SOURCE_PROVIDER_SOURCE_FD = "moduleSourceProviderSourceFd"
     const val KEY_MODULE_SOURCE_PROVIDER_SOURCE_BYTES = "moduleSourceProviderSourceBytes"
+    const val KEY_MODULE_SOURCE_PROVIDER_INPUT_FD = "moduleSourceProviderInputFd"
+    const val KEY_MODULE_SOURCE_PROVIDER_INPUT_BYTES = "moduleSourceProviderInputBytes"
+    const val KEY_MODULE_SOURCE_PROVIDER_INPUT_SHA256 = "moduleSourceProviderInputSha256"
     const val KEY_MODULE_SOURCE_PROVIDER_ELAPSED_MS = "moduleSourceProviderElapsedMs"
     const val KEY_MODULE_SOURCE_PROVIDER_ROOT = "moduleSourceProviderRoot"
     const val KEY_MODULE_SOURCE_PROVIDER_DENIAL_REASON = "moduleSourceProviderDenialReason"
@@ -139,6 +142,7 @@ object NodeJsRuntimeContract {
 
     const val MODULE_SOURCE_PROVIDER_STATUS_DECRYPTED = "decrypted"
     const val MODULE_SOURCE_PROVIDER_STATUS_PLAINTEXT = "plaintext"
+    const val MODULE_SOURCE_PROVIDER_STATUS_COMPILED_TYPESCRIPT = "compiled_typescript"
     const val MODULE_SOURCE_PROVIDER_STATUS_NOT_ENCRYPTED = "not_encrypted"
     const val MODULE_SOURCE_PROVIDER_STATUS_NOT_FOUND = "not_found"
     const val MODULE_SOURCE_PROVIDER_STATUS_DENIED = "denied"
@@ -149,6 +153,8 @@ object NodeJsRuntimeContract {
     const val MODULE_SOURCE_PROVIDER_OPERATION_RESOLVE_EXISTING = "resolve_existing"
     const val MODULE_SOURCE_PROVIDER_OPERATION_MATERIALIZE_MISSING_PLAINTEXT =
         "materialize_missing_plaintext"
+    const val MODULE_SOURCE_PROVIDER_OPERATION_COMPILE_MISSING_TYPESCRIPT =
+        "compile_missing_typescript"
 
     const val ERROR_MODULE_SOURCE_PROVIDER_INVALID_REQUEST =
         "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_INVALID_REQUEST"
@@ -164,6 +170,8 @@ object NodeJsRuntimeContract {
         "ERR_AUTOJS6_TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND"
     const val ERROR_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS =
         "ERR_AUTOJS6_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS"
+    const val ERROR_TYPESCRIPT_COMPILATION_FAILED =
+        "ERR_AUTOJS6_TYPESCRIPT_COMPILATION_FAILED"
 
     const val RUNTIME_MODULE_SOURCE_PROVIDER_NAME = "autojs6:module-source-provider"
 
@@ -184,5 +192,7 @@ object NodeJsRuntimeContract {
     const val CAPABILITY_ON_DEMAND_MODULE_SOURCE_PROVIDER = "onDemandModuleSourceProvider"
     const val CAPABILITY_HOST_PLAINTEXT_MODULE_SOURCE_MATERIALIZATION =
         "hostPlaintextModuleSourceMaterialization"
+    const val CAPABILITY_HOST_TYPESCRIPT_ON_DEMAND_COMPILATION =
+        "hostTypeScriptOnDemandCompilation"
     const val CAPABILITY_SCOPED_WORKSPACE_ARCHIVE_TRANSPORT = "scopedWorkspaceArchiveTransport"
 }

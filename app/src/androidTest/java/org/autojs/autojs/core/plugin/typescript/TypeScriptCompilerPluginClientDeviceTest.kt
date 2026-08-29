@@ -1321,7 +1321,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
     }
 
     @Test
-    fun mapsComputedTypeScriptSpecifiersOnlyWithinClosedNodeSnapshot() {
+    fun compilesRuntimeCreatedTypeScriptAndKeepsSnapshotErrorsStable() {
         val marker = "typescript-node-dynamic-snapshot-${System.nanoTime()}"
         val console = AutoJs.instance.globalConsole
         console.clear()
@@ -1365,14 +1365,9 @@ class TypeScriptCompilerPluginClientDeviceTest {
                         const runtimeFs = await import(fsSpecifier) as {
                             writeFileSync(path: string, data: string): void
                         }
-                        runtimeFs.writeFileSync("./late.mts", "export const value: number = 99\\n")
-                        let missing: string = ""
+                        runtimeFs.writeFileSync("./late.mts", "export const value: number = 99\n")
                         const lateTarget: string = "./late." + "mts"
-                        try {
-                            await import(lateTarget)
-                        } catch (error: unknown) {
-                            missing = errorCode(error)
-                        }
+                        const late = await import(lateTarget) as { value: number }
 
                         let escaping: string = ""
                         const escapingTarget: string = "../escape." + "mts"
@@ -1382,7 +1377,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
                             escaping = errorCode(error)
                         }
 
-                        console.log("$marker:" + [total, ambiguous, missing, escaping].join("|"))
+                        console.log("$marker:" + [total, ambiguous, late.value, escaping].join("|"))
                         """.trimIndent(),
                     )
                 }
@@ -1405,7 +1400,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
                 val expected = listOf(
                     "42",
                     NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS,
-                    NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND,
+                    "99",
                     NodeRuntimeErrorCodes.FS_PATH_ESCAPE,
                 ).joinToString("|")
                 val consoleMessage = awaitConsoleMessage(marker)
@@ -1420,19 +1415,19 @@ class TypeScriptCompilerPluginClientDeviceTest {
                     ],
                 )
                 assertEquals(
-                    "4",
+                    "5",
                     result.nativeValues[
                         "embedded_script.typescript.dynamic_specifier.source_count"
                     ],
                 )
                 assertEquals(
-                    "3",
+                    "4",
                     result.nativeValues[
                         "embedded_script.typescript.dynamic_specifier.mapped_count"
                     ],
                 )
                 assertEquals(
-                    "2",
+                    "1",
                     result.nativeValues[
                         "embedded_script.typescript.dynamic_specifier.rejected_count"
                     ],
@@ -1444,7 +1439,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
                     ],
                 )
                 assertEquals(
-                    NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND,
+                    "",
                     result.nativeValues[
                         "embedded_script.typescript.dynamic_specifier.last_error_code"
                     ],
@@ -1455,9 +1450,187 @@ class TypeScriptCompilerPluginClientDeviceTest {
                         "embedded_script.module_provider.missing_candidate_request_count"
                     ],
                 )
+                assertEquals(
+                    "1",
+                    result.nativeValues[
+                        "embedded_script.typescript.on_demand_compile.count"
+                    ],
+                )
+                assertTrue(
+                    result.nativeValues[
+                        "embedded_script.typescript.on_demand_compile.source_bytes"
+                    ].orEmpty().toLong() > 0L,
+                )
+                assertEquals(
+                    "1",
+                    result.nativeValues[
+                        "embedded_script.module_provider.typescript_compile_count"
+                    ],
+                )
+                assertEquals(
+                    "0",
+                    result.nativeValues[
+                        "embedded_script.module_provider.typescript_compile_failure_count"
+                    ],
+                )
             }
         } finally {
             console.clear()
+        }
+    }
+
+    @Test
+    fun runtimeCreatedTypeScriptTypeErrorsReturnReadableDiagnostics() {
+        val marker = "typescript-node-on-demand-diagnostic-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            withProject { root ->
+                File(root, "project.json").writeText("""{"type":"node","main":"main.mts"}""")
+                File(root, "package.json").writeText("""{"type":"module"}""")
+                val entry = File(root, "main.mts").apply {
+                    writeText(
+                        """
+                        export {}
+
+                        const fsSpecifier: string = "node:" + "fs"
+                        const runtimeFs = await import(fsSpecifier) as {
+                            writeFileSync(path: string, data: string): void
+                        }
+                        runtimeFs.writeFileSync(
+                            "./late-error.mts",
+                            'export const value: number = "not-a-number"\n',
+                        )
+                        const lateTarget: string = "./late-error." + "mts"
+                        let code: string = ""
+                        let message: string = ""
+                        try {
+                            await import(lateTarget)
+                        } catch (error: unknown) {
+                            const typed = error as { code?: unknown; message?: unknown }
+                            code = String(typed.code ?? "")
+                            message = String(typed.message ?? "")
+                        }
+                        console.log("$marker:" + code + "|" + message.replace(/\s+/g, " "))
+                        """.trimIndent(),
+                    )
+                }
+
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(entry)
+                assertTrue(launch.source is NodeProjectLaunchSource)
+                val terminal = executeAndAwait(launch.source, root.path)
+                terminal.failure.get()?.let { error ->
+                    val details = (error as? ScriptCompilationException)?.consoleMessage
+                    throw AssertionError(
+                        "On-demand TypeScript diagnostic execution failed" +
+                            if (details.isNullOrBlank()) "" else "\n$details",
+                        error,
+                    )
+                }
+                assertTrue(terminal.succeeded.get())
+                val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+                val result = requireNotNull(engine.lastPluginScriptResult)
+                assertTrue(result.succeeded)
+                val consoleMessage = awaitConsoleMessage(marker)
+                assertTrue(
+                    "Expected a stable on-demand compilation error code, got: $consoleMessage",
+                    consoleMessage.contains(
+                        NodeRuntimeErrorCodes.TYPESCRIPT_ON_DEMAND_COMPILATION_FAILED,
+                    ),
+                )
+                assertTrue(
+                    "Expected late-error.mts in the compiler diagnostic, got: $consoleMessage",
+                    consoleMessage.contains("late-error.mts"),
+                )
+                assertTrue(
+                    "Expected TS2322 in the compiler diagnostic, got: $consoleMessage",
+                    consoleMessage.contains("TS2322"),
+                )
+                assertEquals(
+                    "0",
+                    result.nativeValues[
+                        "embedded_script.typescript.on_demand_compile.count"
+                    ],
+                )
+                assertEquals(
+                    "1",
+                    result.nativeValues[
+                        "embedded_script.module_provider.typescript_compile_failure_count"
+                    ],
+                )
+            }
+        } finally {
+            console.clear()
+        }
+    }
+
+    @Test
+    fun mapsRuntimeCreatedTypeScriptFailureBackToDynamicSource() {
+        val marker = "typescript-node-on-demand-map-${System.nanoTime()}"
+        withProject { root ->
+            File(root, "project.json").writeText("""{"type":"node","main":"main.mts"}""")
+            File(root, "package.json").writeText("""{"type":"module"}""")
+            val entry = File(root, "main.mts").apply {
+                writeText(
+                    """
+                    export {}
+
+                    const fsSpecifier: string = "node:" + "fs"
+                    const runtimeFs = await import(fsSpecifier) as {
+                        writeFileSync(path: string, data: string): void
+                    }
+                    const dynamicSource: string = [
+                        "export function fail(): never {",
+                        "  const message: string = '$marker'",
+                        "  throw new Error(message)",
+                        "}",
+                        "fail()",
+                        "",
+                    ].join("\n")
+                    runtimeFs.writeFileSync("./late-stack.mts", dynamicSource)
+                    const lateTarget: string = "./late-stack." + "mts"
+                    await import(lateTarget)
+                    """.trimIndent(),
+                )
+            }
+
+            val launch = ScriptLaunchSourceFactory.createFileLaunch(entry)
+            assertTrue(launch.source is NodeProjectLaunchSource)
+            val terminal = executeAndAwait(launch.source, root.path)
+            assertFalse(terminal.succeeded.get())
+            assertTrue(
+                "Expected NodePluginScriptExecutionException, got " +
+                    (terminal.failure.get()?.javaClass?.name ?: "no failure"),
+                terminal.failure.get() is NodePluginScriptExecutionException,
+            )
+            val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+            val result = requireNotNull(engine.lastPluginScriptResult)
+            assertFalse(result.succeeded)
+            val mappedStack = requireNotNull(result.errorStack)
+            assertTrue(
+                "Expected dynamic TypeScript error marker, got:\n$mappedStack",
+                mappedStack.contains(marker),
+            )
+            assertTrue(
+                "Expected dynamic TypeScript frame at late-stack.mts:3, got:\n$mappedStack",
+                mappedStack.contains("/late-stack.mts:3:"),
+            )
+            assertFalse(
+                "Generated dynamic JavaScript frame leaked:\n$mappedStack",
+                mappedStack.contains("late-stack.mjs"),
+            )
+            assertEquals(
+                "1",
+                result.nativeValues[
+                    "embedded_script.typescript.on_demand_compile.count"
+                ],
+            )
+            assertEquals(
+                "0",
+                result.nativeValues[
+                    "embedded_script.module_provider.typescript_compile_failure_count"
+                ],
+            )
         }
     }
 

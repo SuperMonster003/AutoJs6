@@ -30,15 +30,16 @@ public class NodeJsRuntimeContractTest {
     }
 
     @Test
-    public void moduleSourceProviderV2IsIndependentFromRuntimeContractV2() {
+    public void moduleSourceProviderV3IsIndependentFromRuntimeContractV2() {
         assertEquals(2, NodeJsRuntimeContract.CONTRACT_VERSION);
-        assertEquals(2, NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION);
+        assertEquals(3, NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION);
         assertEquals(1, NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_MIN_CONTRACT_VERSION);
-        assertEquals(2, NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_MAX_CONTRACT_VERSION);
+        assertEquals(3, NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_MAX_CONTRACT_VERSION);
+        assertTrue(NodeJsRuntimeContract.supportsModuleSourceProviderContractVersion(3));
         assertTrue(NodeJsRuntimeContract.supportsModuleSourceProviderContractVersion(2));
         assertTrue(NodeJsRuntimeContract.supportsModuleSourceProviderContractVersion(1));
         assertFalse(NodeJsRuntimeContract.supportsModuleSourceProviderContractVersion(0));
-        assertFalse(NodeJsRuntimeContract.supportsModuleSourceProviderContractVersion(3));
+        assertFalse(NodeJsRuntimeContract.supportsModuleSourceProviderContractVersion(4));
     }
 
     @Test
@@ -93,6 +94,31 @@ public class NodeJsRuntimeContractTest {
         assertEquals(
                 "ERR_AUTOJS6_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS",
                 NodeJsRuntimeContract.ERROR_TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS);
+    }
+
+    @Test
+    public void moduleSourceProviderV3PublishesBoundedTypeScriptCompilationSemantics() {
+        assertEquals(
+                "compile_missing_typescript",
+                NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_OPERATION_COMPILE_MISSING_TYPESCRIPT);
+        assertEquals(
+                "compiled_typescript",
+                NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_COMPILED_TYPESCRIPT);
+        assertEquals(
+                "moduleSourceProviderInputFd",
+                NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_INPUT_FD);
+        assertEquals(
+                "moduleSourceProviderInputBytes",
+                NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_INPUT_BYTES);
+        assertEquals(
+                "moduleSourceProviderInputSha256",
+                NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_INPUT_SHA256);
+        assertEquals(
+                "ERR_AUTOJS6_TYPESCRIPT_COMPILATION_FAILED",
+                NodeJsRuntimeContract.ERROR_TYPESCRIPT_COMPILATION_FAILED);
+        assertEquals(
+                "hostTypeScriptOnDemandCompilation",
+                NodeJsRuntimeContract.CAPABILITY_HOST_TYPESCRIPT_ON_DEMAND_COMPILATION);
     }
 
     @Test

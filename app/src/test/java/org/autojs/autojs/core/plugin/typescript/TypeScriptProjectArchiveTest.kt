@@ -6,6 +6,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -13,6 +14,74 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TypeScriptProjectArchiveTest {
+
+    @Test
+    fun addsNewInMemorySourceOverlayWithoutMutatingProjectOrCallerBytes() {
+        withProject { root ->
+            File(root, "package.json").writeText("""{"type":"commonjs"}""")
+            val entry = File(root, "main.ts").apply {
+                writeText("export const initial: number = 1;\n")
+            }
+            val overlayBytes = "export const answer: number = 42;\n".toByteArray()
+            val archive = File(root, "overlay.zip")
+
+            val prepared = TypeScriptProjectArchive.write(
+                projectRoot = root,
+                entryFile = entry,
+                requestId = REQUEST_ID,
+                projectId = PROJECT_ID,
+                authority = nodeAuthority(),
+                destination = archive,
+                sourceOverlays = mapOf("runtime/generated.ts" to overlayBytes),
+            )
+
+            assertFalse(File(root, "runtime/generated.ts").exists())
+            assertArrayEquals(
+                "export const answer: number = 42;\n".toByteArray(),
+                overlayBytes,
+            )
+            assertTrue("sources/runtime/generated.ts" in prepared.rootPaths)
+            val overlay = prepared.sourceFiles.single { source ->
+                source.projectRelativePath == "runtime/generated.ts"
+            }
+            assertNull(overlay.originalFile)
+            ZipFile(archive).use { zip ->
+                assertArrayEquals(
+                    overlayBytes,
+                    zip.getInputStream(zip.getEntry("sources/runtime/generated.ts"))
+                        .use { input -> input.readBytes() },
+                )
+            }
+        }
+    }
+
+    @Test
+    fun rejectsOverlayPathEscapeAndDiskSourceCollisions() {
+        listOf("main.ts", "MAIN.ts", "../escape.ts").forEachIndexed { index, overlayPath ->
+            withProject { root ->
+                File(root, "package.json").writeText("""{"type":"commonjs"}""")
+                val entry = File(root, "main.ts").apply {
+                    writeText("export const initial: number = 1;\n")
+                }
+
+                val error = runCatching {
+                    TypeScriptProjectArchive.write(
+                        projectRoot = root,
+                        entryFile = entry,
+                        requestId = "$REQUEST_ID-$index",
+                        projectId = PROJECT_ID,
+                        authority = nodeAuthority(),
+                        destination = File(root, "overlay-$index.zip"),
+                        sourceOverlays = mapOf(
+                            overlayPath to "export const answer = 42;\n".toByteArray(),
+                        ),
+                    )
+                }.exceptionOrNull()
+
+                assertTrue("Expected overlay rejection for $overlayPath", error != null)
+            }
+        }
+    }
 
     @Test
     fun writesRhinoProjectSnapshotWithTsConfigJsonAndMoreThanTenModules() {

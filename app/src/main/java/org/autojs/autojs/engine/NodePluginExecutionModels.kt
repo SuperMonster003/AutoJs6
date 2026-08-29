@@ -31,6 +31,7 @@ data class NodePluginScriptRequest(
     val javaInteropEnabled: Boolean? = null,
     val spawnDepth: Int = 0,
     val moduleSourceProvider: INodeJsModuleSourceProvider? = null,
+    val moduleSourceProviderVersion: Int? = null,
 ) {
     companion object {
         const val DEFAULT_TIMEOUT_MS = 300_000L
