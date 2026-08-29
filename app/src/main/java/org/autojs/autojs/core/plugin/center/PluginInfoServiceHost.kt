@@ -10,13 +10,17 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.os.RemoteException
 import android.os.SystemClock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.ServiceBindingLease
 import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginInfo
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -84,78 +88,112 @@ object PluginInfoServiceHost {
         serviceInfo: ServiceInfo,
         bindTimeoutMs: Long = DEFAULT_BIND_TIMEOUT_MS,
         block: (IPluginInfoProvider) -> T,
-    ): T = suspendCancellableCoroutine { cont ->
-        val appContext = context.applicationContext
+    ): T {
+        val binding = awaitInfoServiceBinding(
+            appContext = context.applicationContext,
+            serviceInfo = serviceInfo,
+            bindTimeoutMs = bindTimeoutMs,
+        )
+        return try {
+            // ServiceConnection callbacks use the application's main thread by default.
+            // Never invoke a remote plugin from that callback: even a short Binder wait
+            // freezes ViewPager and swipe-refresh animations.
+            // zh-CN: ServiceConnection 回调默认运行在应用主线程. 禁止在回调内调用
+            // 远程插件; 即使短暂的 Binder 等待也会冻结 ViewPager 与下拉刷新动画.
+            withContext(Dispatchers.IO) {
+                block(binding.proxy)
+            }
+        } finally {
+            binding.lease.close()
+        }
+    }
+
+    private suspend fun awaitInfoServiceBinding(
+        appContext: Context,
+        serviceInfo: ServiceInfo,
+        bindTimeoutMs: Long,
+    ): InfoServiceBinding = suspendCancellableCoroutine { continuation ->
         val component = ComponentName(serviceInfo.packageName, serviceInfo.name)
         val intent = Intent().setComponent(component)
-        var resumed = false
+        val completionClaimed = AtomicBoolean(false)
+        val timeoutRef = AtomicReference<Runnable?>()
 
         lateinit var connection: ServiceConnection
-        val timeout = Runnable {
-            if (!resumed) {
-                resumed = true
-                runCatching { appContext.unbindService(connection) }
-                cont.resumeWithException(IllegalStateException("bindService timed out: $component"))
-            }
+        val lease = ServiceBindingLease {
+            timeoutRef.getAndSet(null)?.let(handler::removeCallbacks)
+            runCatching { appContext.unbindService(connection) }
         }
+
+        fun fail(error: Throwable) {
+            if (completionClaimed.compareAndSet(false, true)) {
+                timeoutRef.getAndSet(null)?.let(handler::removeCallbacks)
+                if (!continuation.isCompleted) {
+                    continuation.resumeWithException(error)
+                }
+            }
+            lease.close()
+        }
+
         connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, service: IBinder) {
-                if (resumed) return
-                handler.removeCallbacks(timeout)
+                if (lease.isClosed || !service.isBinderAlive) {
+                    fail(IllegalStateException("plugin info service disconnected before use: $name"))
+                    return
+                }
                 val proxy = IPluginInfoProvider.Stub.asInterface(service)
-                try {
-                    val value = block(proxy)
-                    resumed = true
-                    cont.resume(value)
-                } catch (e: RemoteException) {
-                    resumed = true
-                    cont.resumeWithException(e)
-                } catch (e: RuntimeException) {
-                    resumed = true
-                    cont.resumeWithException(e)
-                } finally {
-                    runCatching { appContext.unbindService(this) }
+                if (completionClaimed.compareAndSet(false, true)) {
+                    timeoutRef.getAndSet(null)?.let(handler::removeCallbacks)
+                    if (!continuation.isCompleted) {
+                        continuation.resume(InfoServiceBinding(proxy, lease))
+                    } else {
+                        lease.close()
+                    }
+                } else {
+                    lease.close()
                 }
             }
 
             override fun onServiceDisconnected(name: ComponentName) {
-                if (!resumed) {
-                    handler.removeCallbacks(timeout)
-                    resumed = true
-                    cont.resumeWithException(IllegalStateException("service disconnected before getInfo: $name"))
-                }
+                fail(IllegalStateException("plugin info service disconnected before use: $name"))
             }
 
             override fun onBindingDied(name: ComponentName) {
-                if (!resumed) {
-                    handler.removeCallbacks(timeout)
-                    resumed = true
-                    cont.resumeWithException(IllegalStateException("service binding died before getInfo: $name"))
-                }
+                fail(IllegalStateException("plugin info service binding died before use: $name"))
             }
 
             override fun onNullBinding(name: ComponentName) {
-                if (!resumed) {
-                    handler.removeCallbacks(timeout)
-                    resumed = true
-                    cont.resumeWithException(IllegalStateException("service returned null binding: $name"))
-                }
+                fail(IllegalStateException("plugin info service returned null binding: $name"))
             }
         }
 
-        cont.invokeOnCancellation {
-            handler.removeCallbacks(timeout)
-            runCatching { appContext.unbindService(connection) }
+        continuation.invokeOnCancellation {
+            completionClaimed.set(true)
+            lease.close()
         }
 
+        val timeout = Runnable {
+            fail(IllegalStateException("bindService timed out: $component"))
+        }
+        timeoutRef.set(timeout)
         handler.postDelayed(timeout, bindTimeoutMs)
-        val bound = appContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-        if (!bound && !resumed) {
-            handler.removeCallbacks(timeout)
-            resumed = true
-            cont.resumeWithException(
+
+        val bound = try {
+            appContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        } catch (error: RuntimeException) {
+            fail(IllegalStateException("bindService failed with exception: $component", error))
+            return@suspendCancellableCoroutine
+        }
+        if (!bound) {
+            fail(
                 IllegalStateException("bindService failed: $component at ${SystemClock.uptimeMillis()}")
             )
+            return@suspendCancellableCoroutine
         }
+        lease.markRegistered()
     }
+
+    private data class InfoServiceBinding(
+        val proxy: IPluginInfoProvider,
+        val lease: ServiceBindingLease,
+    )
 }
