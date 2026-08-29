@@ -8,6 +8,7 @@
 
 ###### 2026/08/29
 
+* `新增` `engines.execScript` 記憶體 TypeScript 即時執行: `.ts/.tsx/.mts/.cts` 原始碼名稱經獨立編譯器處理, 診斷與 Source Map 堆疊對應和檔案指令碼一致, Rhino 回傳最終運算式值, 完整記錄頁及編輯器記錄面板可互動求值單行 TypeScript 片段
 * `新增` compiler-backed Node TypeScript 專案現可按需編譯執行期間建立的 `.ts/.mts/.cts`: Node 透過綁定精確位元組數與 SHA-256 的有界 PFD 將原始碼交給主機, 主機重用常駐專案工作階段, 保留型別診斷與 Source Map 堆疊對應, 並繼續拒絕路徑逸出, 符號連結和歧義目標
 * `新增` Ace 編輯器現會在儲存後增量重新整理常駐 TypeScript 專案語言服務, 並以 450 ms 停頓 debounce 和儲存後 50 ms 診斷排程延遲取消過期工作; 20 個檔案的真機驗收在不阻塞輸入的前提下, 從儲存完成到 TS2322 重新整理實測 201 ms
 * `新增` 編輯器 contract 5 新增專案範圍 TypeScript 符號重新命名: Ace 提交附帶精確原始碼身分的有界逐檔案編輯, Host 獨立重新驗證乾淨的專案快照, 顯示檔案與編輯數量預覽, 凍結作用中的緩衝區, 並在重新整理診斷前以原子方式 staging, 發佈或回復全部檔案

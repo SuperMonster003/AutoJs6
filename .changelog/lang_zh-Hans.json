@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/29",
       "feature": [
+        "`engines.execScript` 内存 TypeScript 即时执行: `.ts/.tsx/.mts/.cts` 源名称经独立编译器处理, 诊断与 Source Map 栈映射同文件脚本一致, Rhino 返回最终表达式值, 完整日志页及编辑器日志面板可交互求值单行 TypeScript 片段",
         "compiler-backed Node TypeScript 项目现可按需编译运行中创建的 `.ts/.mts/.cts`: Node 通过绑定精确字节数与 SHA-256 的有界 PFD 将源码交给宿主, 宿主复用常驻项目会话, 保留类型诊断与 Source Map 栈映射, 并继续拒绝路径逃逸, 符号链接和歧义目标",
         "Ace 编辑器现会在保存后增量刷新常驻 TypeScript 项目语言服务, 并以 450 ms 停顿防抖和保存后 50 ms 诊断调度延迟取消过期任务; 20 文件真机验收在不阻塞输入的前提下, 从保存完成到 TS2322 刷新实测 201 ms",
         "编辑器 contract 5 新增项目范围 TypeScript 符号重命名: Ace 提交带精确源码身份的有界逐文件编辑, 宿主独立复验干净的项目快照, 展示文件与编辑数量预览, 冻结活动缓冲区, 并在刷新诊断前原子 staging, 发布或回滚全部文件",

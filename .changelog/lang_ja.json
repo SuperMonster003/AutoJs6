@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/29",
       "feature": [
+        "`engines.execScript` による in-memory TypeScript 即時実行: `.ts/.tsx/.mts/.cts` source name は独立 compiler で処理され, file script と同じ diagnostics と Source Map stack mapping を維持し, Rhino は最終 expression value を返し, 完全な Log page と editor Log panel で 1 行 snippet を対話的に評価できます",
         "compiler-backed Node TypeScript project は実行中に作成された `.ts/.mts/.cts` をオンデマンドでコンパイルできるようになりました: Node は byte count と SHA-256 で拘束された PFD を介して source を host に渡し, host は resident project session を再利用し, type diagnostics と Source Map stack mapping を維持しながら path escape, symbolic link, ambiguous target を引き続き拒否します",
         "Ace エディターは保存後に常駐 TypeScript プロジェクト言語サービスを増分更新し, 450 ms の入力停止 debounce と保存後 50 ms の診断スケジュールで古い処理をキャンセルします; 20 ファイルの受入テストでは入力をブロックせず, 保存完了から TS2322 更新まで 201 ms でした",
         "エディター contract 5 でプロジェクト全体の TypeScript シンボル名変更を追加: Ace は正確なソース ID を持つファイル単位の有界編集を送信し, Host はクリーンなプロジェクトスナップショットを独立に再検証してプレビューを表示し, アクティブバッファーを固定してから全ファイルをアトミックに staging, 公開またはロールバックし, 診断を更新します",

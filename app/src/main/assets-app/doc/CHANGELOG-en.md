@@ -8,6 +8,7 @@
 
 ###### 2026/08/29
 
+* `Feature` In-memory TypeScript execution through `engines.execScript`: `.ts/.tsx/.mts/.cts` source names use the independent compiler with file-equivalent diagnostics and Source Map stack mapping, Rhino returns the final expression value, and the full Log page plus editor Log panel evaluate one-line snippets interactively
 * `Feature` Compiler-backed Node TypeScript projects can now compile runtime-created `.ts/.mts/.cts` files on demand: Node transfers bounded source through a byte- and SHA-256-bound PFD, the host reuses the resident project session, type diagnostics and Source Map stack mapping are preserved, and path escape, symlinks, and ambiguous targets remain denied
 * `Feature` Ace now incrementally refreshes its resident TypeScript project language service after a save and cancels stale work with a 450 ms idle debounce plus a 50 ms post-save diagnostic scheduling delay; on the acceptance device, TS2322 refreshed 201 ms after saving a 20-file project without blocking input
 * `Feature` Editor contract 5 adds project-wide TypeScript symbol rename: Ace submits bounded per-file edits with exact source identities, while the Host independently revalidates a clean project snapshot, shows a file/edit preview, freezes the active buffer, and atomically stages, publishes, or rolls back every file before refreshing diagnostics

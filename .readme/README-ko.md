@@ -168,6 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/08/29
 
+* `추가` `engines.execScript` 기반 in-memory TypeScript 즉시 실행: `.ts/.tsx/.mts/.cts` source name은 독립 compiler를 사용해 file script와 동일한 diagnostics 및 Source Map stack mapping을 유지하고, Rhino는 최종 expression value를 반환하며, 전체 Log page와 editor Log panel에서 한 줄 snippet을 대화형으로 평가할 수 있습니다
 * `추가` compiler-backed Node TypeScript project가 실행 중 생성된 `.ts/.mts/.cts` 파일을 이제 on-demand compile할 수 있습니다: Node는 byte count와 SHA-256으로 고정된 PFD를 통해 source를 host로 전달하고, host는 resident project session을 재사용하며, type diagnostics와 Source Map stack mapping을 유지하면서 path escape, symbolic link, ambiguous target을 계속 거부합니다
 * `추가` Ace 편집기는 이제 저장 후 상주 TypeScript 프로젝트 언어 서비스를 증분 갱신하고, 450 ms 유휴 debounce와 저장 후 50 ms 진단 예약 지연으로 오래된 작업을 취소합니다; 입력을 막지 않은 20개 파일 인수 테스트에서 저장 완료 후 TS2322 갱신까지 201 ms가 걸렸습니다
 * `추가` 편집기 contract 5에 프로젝트 전체 TypeScript 심볼 이름 바꾸기를 추가했습니다: Ace는 정확한 소스 ID가 포함된 파일별 제한 편집을 제출하고, Host는 깨끗한 프로젝트 스냅샷을 독립적으로 재검증해 미리보기를 표시하며, 활성 버퍼를 잠근 뒤 모든 파일을 원자적으로 staging, 게시 또는 롤백하고 진단을 새로 고칩니다
