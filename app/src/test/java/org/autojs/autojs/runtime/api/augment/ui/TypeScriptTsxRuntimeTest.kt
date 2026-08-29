@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.ui
 
+import org.autojs.autojs6.R
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -12,11 +13,15 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.TopLevel
+import java.io.File
 
 class TypeScriptTsxRuntimeTest {
 
     private lateinit var context: Context
     private lateinit var scope: TopLevel
+    private val messages = TypeScriptTsxRuntime.MessageResolver { resourceId, formatArgs ->
+        "$resourceId:${formatArgs.joinToString("|")}"
+    }
 
     @Before
     fun enterContext() {
@@ -49,22 +54,30 @@ class TypeScriptTsxRuntimeTest {
         assertEquals(
             "<vertical padding=\"8\"><text text=\"A&lt;&amp;&quot;&apos;\" />" +
                 "<button id=\"__autojs6_tsx_0\" text=\"Run\" /></vertical>",
-            requireNotNull(TypeScriptTsxRuntime.renderOrNull(root)).xml,
+            requireNotNull(TypeScriptTsxRuntime.renderOrNull(root, messages)).xml,
         )
-        assertNull(TypeScriptTsxRuntime.renderOrNull("<vertical />"))
+        assertNull(TypeScriptTsxRuntime.renderOrNull("<vertical />", messages))
     }
 
     @Test
     fun factoryRejectsUnsupportedEventsObjectsAndInvalidXmlText() {
-        assertThrows(IllegalArgumentException::class.java) {
+        val unsupportedEvent = assertThrows(IllegalArgumentException::class.java) {
             element("button", props("onLongClick" to object : BaseFunction() {}))
         }
+        assertEquals(
+            "${R.string.error_typescript_tsx_event_unsupported}:onLongClick",
+            unsupportedEvent.message,
+        )
         assertThrows(IllegalArgumentException::class.java) {
             element("text", props("text" to props("nested" to true)))
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        val invalidText = assertThrows(IllegalArgumentException::class.java) {
             element("text", null, "bad\u0000text")
         }
+        assertEquals(
+            "${R.string.error_typescript_tsx_invalid_xml_text}:",
+            invalidText.message,
+        )
     }
 
     @Test
@@ -76,7 +89,7 @@ class TypeScriptTsxRuntimeTest {
             element("text", props("id" to "same", "text" to "two")),
         )
         assertThrows(IllegalArgumentException::class.java) {
-            TypeScriptTsxRuntime.renderOrNull(duplicateIdRoot)
+            TypeScriptTsxRuntime.renderOrNull(duplicateIdRoot, messages)
         }
 
         val multipleRoots = element(
@@ -86,12 +99,42 @@ class TypeScriptTsxRuntimeTest {
             element("text", props("text" to "two")),
         )
         assertThrows(IllegalArgumentException::class.java) {
-            TypeScriptTsxRuntime.renderOrNull(multipleRoots)
+            TypeScriptTsxRuntime.renderOrNull(multipleRoots, messages)
         }
 
         assertThrows(IllegalArgumentException::class.java) {
-            TypeScriptTsxRuntime.renderOrNull(element("vertical", null, "text"))
+            TypeScriptTsxRuntime.renderOrNull(element("vertical", null, "text"), messages)
         }
+    }
+
+    @Test
+    fun validationMessagesAreResourceBackedAcrossEverySupportedLocale() {
+        val root = hostRoot()
+        val source = root.resolve(
+            "app/src/main/java/org/autojs/autojs/runtime/api/augment/ui/TypeScriptTsxRuntime.kt",
+        ).readText()
+        val referencedNames = Regex("""R\.string\.(error_typescript_tsx_[a-z0-9_]+)""")
+            .findAll(source)
+            .map { match -> match.groupValues[1] }
+            .toSet()
+
+        assertEquals(29, referencedNames.size)
+        val localizedMessages = RESOURCE_DIRECTORIES.associateWith { directory ->
+            val strings = root.resolve("app/src/main/res/$directory/strings.xml").readText()
+            Regex("""<string name="(error_typescript_tsx_[a-z0-9_]+)">([^<]*)</string>""")
+                .findAll(strings)
+                .associate { match -> match.groupValues[1] to match.groupValues[2] }
+        }
+        localizedMessages.forEach { (directory, messages) ->
+            assertEquals("Incomplete TSX messages in $directory", referencedNames, messages.keys)
+        }
+        assertEquals(localizedMessages.getValue("values"), localizedMessages.getValue("values-en"))
+        assertEquals(
+            emptyList<String>(),
+            source.lineSequence()
+                .filter { line -> line.contains('"') && line.contains("TypeScript TSX") }
+                .toList(),
+        )
     }
 
     private fun element(
@@ -100,6 +143,7 @@ class TypeScriptTsxRuntimeTest {
         vararg children: Any?,
     ): TypeScriptTsxRuntime.Value = TypeScriptTsxRuntime.create(
         arrayOf(type, props, *children),
+        messages,
     )
 
     private fun props(vararg entries: Pair<String, Any?>): NativeObject =
@@ -108,4 +152,31 @@ class TypeScriptTsxRuntimeTest {
                 ScriptableObject.putProperty(value, name, property)
             }
         }
+
+    private fun hostRoot(): File {
+        val workingDirectory = File(checkNotNull(System.getProperty("user.dir"))).absoluteFile
+        return checkNotNull(
+            generateSequence(workingDirectory) { directory -> directory.parentFile }
+                .firstOrNull { directory ->
+                    directory.resolve("settings.gradle.kts").isFile &&
+                        directory.resolve("app/src/main/res/values/strings.xml").isFile
+                },
+        ) { "Unable to locate the AutoJs6 root" }
+    }
+
+    companion object {
+        private val RESOURCE_DIRECTORIES = listOf(
+            "values",
+            "values-en",
+            "values-ar",
+            "values-es",
+            "values-fr",
+            "values-ja",
+            "values-ko",
+            "values-ru",
+            "values-zh",
+            "values-zh-rHK",
+            "values-zh-rTW",
+        )
+    }
 }

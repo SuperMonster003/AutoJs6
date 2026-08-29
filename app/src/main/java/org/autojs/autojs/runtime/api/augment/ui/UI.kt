@@ -381,7 +381,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun __autojs6Tsx(
             scriptRuntime: ScriptRuntime,
             args: Array<out Any?>,
-        ): Any = TypeScriptTsxRuntime.create(args)
+        ): Any = TypeScriptTsxRuntime.create(
+            args,
+            TypeScriptTsxRuntime.messageResolver(globalContext),
+        )
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -520,7 +523,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun layout(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { xml ->
             ensureActivity(scriptRuntime) { activity ->
                 scriptRuntime.ui.layoutInflater.context = activity
-                val tsxLayout = TypeScriptTsxRuntime.renderOrNull(xml)
+                val tsxLayout = TypeScriptTsxRuntime.renderOrNull(
+                    xml,
+                    TypeScriptTsxRuntime.messageResolver(globalContext),
+                )
                 val inflated = scriptRuntime.ui.layoutInflater.inflate(
                     tsxLayout?.xml ?: toXMLString(xml),
                     activity.window.decorView as ViewGroup,

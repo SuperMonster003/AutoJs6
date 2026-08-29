@@ -1,6 +1,9 @@
 package org.autojs.autojs.runtime.api.augment.ui
 
+import android.content.Context as AndroidContext
 import android.view.View
+import androidx.annotation.StringRes
+import org.autojs.autojs6.R
 import org.autojs.autojs.core.ui.JsViewHelper
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
@@ -16,6 +19,14 @@ import org.mozilla.javascript.ScriptableObject
 internal object TypeScriptTsxRuntime {
 
     object FragmentToken
+
+    fun interface MessageResolver {
+        fun resolve(@StringRes resourceId: Int, formatArgs: Array<out Any>): String
+    }
+
+    fun messageResolver(context: AndroidContext): MessageResolver = MessageResolver { resourceId, formatArgs ->
+        context.getString(resourceId, *formatArgs)
+    }
 
     class Value internal constructor(
         internal val tagName: String?,
@@ -33,13 +44,14 @@ internal object TypeScriptTsxRuntime {
     data class RenderedLayout internal constructor(
         val xml: String,
         private val clickBindings: List<ClickBinding>,
+        private val messages: MessageResolver,
     ) {
         fun attachClickHandlers(scriptRuntime: ScriptRuntime, root: View) {
             clickBindings.forEach { binding ->
                 val target = requireNotNull(
                     JsViewHelper.findViewByStringId(root, binding.id),
                 ) {
-                    "Inflated TypeScript TSX view is missing event target '${binding.id}'."
+                    messages.text(R.string.error_typescript_tsx_event_target_missing, binding.id)
                 }
                 ViewExtras.getNativeView(
                     scriptRuntime.topLevelScope,
@@ -56,9 +68,9 @@ internal object TypeScriptTsxRuntime {
         val listener: Callable,
     )
 
-    fun create(args: Array<out Any?>): Value {
+    fun create(args: Array<out Any?>, messages: MessageResolver): Value {
         require(args.size >= 2) {
-            "The private TypeScript TSX factory requires a tag and props argument."
+            messages.text(R.string.error_typescript_tsx_factory_arguments)
         }
         val rawType = args[0].jsUnwrapped()
         val isFragment = rawType === FragmentToken
@@ -66,15 +78,15 @@ internal object TypeScriptTsxRuntime {
             isFragment -> null
             rawType is String && TAG_NAME.matches(rawType) -> rawType
             rawType is String -> throw IllegalArgumentException(
-                "TypeScript TSX tag '$rawType' is not a supported XML tag name.",
+                messages.text(R.string.error_typescript_tsx_tag_name_unsupported, rawType),
             )
             else -> throw IllegalArgumentException(
-                "TypeScript TSX supports only intrinsic XML tags and fragments.",
+                messages.text(R.string.error_typescript_tsx_supports_intrinsic_only),
             )
         }
-        val parsedProps = parseProps(args[1], isFragment)
+        val parsedProps = parseProps(args[1], isFragment, messages)
         val children = ArrayList<Child>()
-        args.drop(2).forEach { child -> appendChild(child, children, 0) }
+        args.drop(2).forEach { child -> appendChild(child, children, 0, messages) }
         return Value(
             tagName = tagName,
             attributes = parsedProps.first,
@@ -83,85 +95,99 @@ internal object TypeScriptTsxRuntime {
         )
     }
 
-    fun renderOrNull(value: Any?): RenderedLayout? {
+    fun renderOrNull(value: Any?, messages: MessageResolver): RenderedLayout? {
         val root = value.jsUnwrapped() as? Value ?: return null
         val roots = ArrayList<Value>()
-        flattenRoot(root, roots, 0)
+        flattenRoot(root, roots, 0, messages)
         require(roots.size == 1) {
-            "A TypeScript TSX layout must resolve to exactly one root element."
+            messages.text(R.string.error_typescript_tsx_root_count)
         }
         val bindings = ArrayList<ClickBinding>()
         val ids = HashSet<String>()
         val state = RenderState()
         val xml = buildString {
-            appendElement(roots.single(), bindings, ids, state, 1)
+            appendElement(roots.single(), bindings, ids, state, 1, messages)
         }
         require(xml.toByteArray(Charsets.UTF_8).size <= MAXIMUM_XML_BYTES) {
-            "TypeScript TSX layout exceeds the XML byte limit."
+            messages.text(R.string.error_typescript_tsx_layout_xml_limit)
         }
-        return RenderedLayout(xml, bindings.toList())
+        return RenderedLayout(xml, bindings.toList(), messages)
     }
 
     private fun parseProps(
         value: Any?,
         isFragment: Boolean,
+        messages: MessageResolver,
     ): Pair<Map<String, String>, Callable?> {
         if (value.isJsNullish()) return emptyMap<String, String>() to null
-        require(!isFragment) { "TypeScript TSX fragments cannot carry props." }
+        require(!isFragment) { messages.text(R.string.error_typescript_tsx_fragment_props) }
         val props = value as? Scriptable
-            ?: throw IllegalArgumentException("TypeScript TSX props must be an object or null.")
+            ?: throw IllegalArgumentException(
+                messages.text(R.string.error_typescript_tsx_props_object),
+            )
         require(props.ids.size <= MAXIMUM_ATTRIBUTES_PER_ELEMENT) {
-            "TypeScript TSX element has too many attributes."
+            messages.text(R.string.error_typescript_tsx_props_attributes_limit)
         }
         val attributes = linkedMapOf<String, String>()
         var onClick: Callable? = null
         props.ids.forEach { id ->
             val name = id as? String
-                ?: throw IllegalArgumentException("TypeScript TSX prop names must be strings.")
+                ?: throw IllegalArgumentException(
+                    messages.text(R.string.error_typescript_tsx_prop_names_strings),
+                )
             require(ATTRIBUTE_NAME.matches(name)) {
-                "TypeScript TSX prop '$name' is not a supported XML attribute name."
+                messages.text(R.string.error_typescript_tsx_attribute_name_unsupported, name)
             }
             val raw = ScriptableObject.getProperty(props, name)
             if (name == ON_CLICK_PROPERTY) {
                 if (!raw.isJsNullish()) {
                     require(raw is Callable) {
-                        "TypeScript TSX onClick must be a JavaScript function."
+                        messages.text(R.string.error_typescript_tsx_onclick_function)
                     }
                     onClick = raw
                 }
             } else {
                 require(!name.startsWith("on")) {
-                    "TypeScript TSX event prop '$name' is not supported."
+                    messages.text(R.string.error_typescript_tsx_event_unsupported, name)
                 }
-                attributes[name] = scalarAttribute(raw, name)
+                attributes[name] = scalarAttribute(raw, name, messages)
             }
         }
         return attributes.toMap() to onClick
     }
 
-    private fun scalarAttribute(value: Any?, name: String): String {
+    private fun scalarAttribute(
+        value: Any?,
+        name: String,
+        messages: MessageResolver,
+    ): String {
         val unwrapped = value.jsUnwrapped()
         require(!unwrapped.isJsNullish()) {
-            "TypeScript TSX attribute '$name' cannot be null or undefined."
+            messages.text(R.string.error_typescript_tsx_attribute_nullish, name)
         }
         return when (unwrapped) {
-            is String -> unwrapped.also(::requireValidXmlText)
+            is String -> unwrapped.also { requireValidXmlText(it, messages) }
             is Boolean -> unwrapped.toString()
             is Number -> {
                 require(unwrapped.toDouble().isFinite()) {
-                    "TypeScript TSX attribute '$name' must be a finite number."
+                    messages.text(R.string.error_typescript_tsx_attribute_finite_number, name)
                 }
                 Context.toString(unwrapped)
             }
             else -> throw IllegalArgumentException(
-                "TypeScript TSX attribute '$name' must be a string, number, or boolean.",
+                messages.text(R.string.error_typescript_tsx_attribute_scalar_required, name),
             )
         }
     }
 
-    private fun appendChild(value: Any?, destination: MutableList<Child>, depth: Int) {
+    private fun appendChild(
+        value: Any?,
+        destination: MutableList<Child>,
+        depth: Int,
+        messages: MessageResolver,
+    ) {
         require(depth <= MAXIMUM_ARRAY_DEPTH) {
-            "TypeScript TSX child arrays are nested too deeply."
+            messages.text(R.string.error_typescript_tsx_child_arrays_too_deep)
         }
         val unwrapped = value.jsUnwrapped()
         when {
@@ -175,24 +201,24 @@ internal object TypeScriptTsxRuntime {
             }
             unwrapped is NativeArray -> {
                 require(unwrapped.length <= MAXIMUM_CHILDREN_PER_ARRAY) {
-                    "TypeScript TSX child array is too large."
+                    messages.text(R.string.error_typescript_tsx_child_array_too_large)
                 }
                 for (index in 0 until unwrapped.length) {
-                    appendChild(unwrapped[index], destination, depth + 1)
+                    appendChild(unwrapped[index], destination, depth + 1, messages)
                 }
             }
             unwrapped is String -> {
-                requireValidXmlText(unwrapped)
+                requireValidXmlText(unwrapped, messages)
                 if (unwrapped.isNotBlank()) destination += Child.Text(unwrapped)
             }
             unwrapped is Number -> {
                 require(unwrapped.toDouble().isFinite()) {
-                    "TypeScript TSX text children must be finite numbers."
+                    messages.text(R.string.error_typescript_tsx_text_children_finite)
                 }
                 destination += Child.Text(Context.toString(unwrapped))
             }
             else -> throw IllegalArgumentException(
-                "TypeScript TSX children must be elements, arrays, text, numbers, or nullish values.",
+                messages.text(R.string.error_typescript_tsx_children_unsupported),
             )
         }
     }
@@ -212,17 +238,24 @@ internal object TypeScriptTsxRuntime {
         }
     }
 
-    private fun flattenRoot(value: Value, destination: MutableList<Value>, depth: Int) {
-        require(depth <= MAXIMUM_TREE_DEPTH) { "TypeScript TSX tree is nested too deeply." }
+    private fun flattenRoot(
+        value: Value,
+        destination: MutableList<Value>,
+        depth: Int,
+        messages: MessageResolver,
+    ) {
+        require(depth <= MAXIMUM_TREE_DEPTH) {
+            messages.text(R.string.error_typescript_tsx_tree_too_deep)
+        }
         if (value.tagName != null) {
             destination += value
             return
         }
         value.children.forEach { child ->
             when (child) {
-                is Child.Element -> flattenRoot(child.value, destination, depth + 1)
+                is Child.Element -> flattenRoot(child.value, destination, depth + 1, messages)
                 is Child.Text -> require(child.value.isBlank()) {
-                    "A TypeScript TSX root fragment cannot contain text."
+                    messages.text(R.string.error_typescript_tsx_root_fragment_text)
                 }
             }
         }
@@ -234,11 +267,14 @@ internal object TypeScriptTsxRuntime {
         ids: MutableSet<String>,
         state: RenderState,
         depth: Int,
+        messages: MessageResolver,
     ) {
-        require(depth <= MAXIMUM_TREE_DEPTH) { "TypeScript TSX tree is nested too deeply." }
+        require(depth <= MAXIMUM_TREE_DEPTH) {
+            messages.text(R.string.error_typescript_tsx_tree_too_deep)
+        }
         state.nodeCount += 1
         require(state.nodeCount <= MAXIMUM_ELEMENTS) {
-            "TypeScript TSX layout contains too many elements."
+            messages.text(R.string.error_typescript_tsx_layout_elements_limit)
         }
         val tagName = requireNotNull(element.tagName)
         val attributes = element.attributes.toMutableMap()
@@ -246,19 +282,21 @@ internal object TypeScriptTsxRuntime {
         val elementChildren = element.children.filterIsInstance<Child.Element>()
         if (textChildren.isNotEmpty()) {
             require(elementChildren.isEmpty() && tagName in TEXT_CHILD_TAGS) {
-                "TypeScript TSX text children are supported only by leaf text controls."
+                messages.text(R.string.error_typescript_tsx_text_children_leaf_only)
             }
             require(TEXT_ATTRIBUTE !in attributes) {
-                "TypeScript TSX cannot combine a text child with a text attribute."
+                messages.text(R.string.error_typescript_tsx_text_attribute_conflict)
             }
             attributes[TEXT_ATTRIBUTE] = textChildren.joinToString("") { child -> child.value }
         }
         val explicitId = attributes[ID_ATTRIBUTE]
         if (explicitId != null) {
             require(ID_VALUE.matches(explicitId) && !explicitId.startsWith(RESERVED_ID_PREFIX)) {
-                "TypeScript TSX id '$explicitId' is invalid or reserved."
+                messages.text(R.string.error_typescript_tsx_id_invalid, explicitId)
             }
-            require(ids.add(explicitId)) { "TypeScript TSX id '$explicitId' is duplicated." }
+            require(ids.add(explicitId)) {
+                messages.text(R.string.error_typescript_tsx_id_duplicate, explicitId)
+            }
         }
         if (element.onClick != null) {
             val targetId = explicitId ?: "$RESERVED_ID_PREFIX${state.generatedIdCount++}"
@@ -274,7 +312,7 @@ internal object TypeScriptTsxRuntime {
             append(' ')
             append(name)
             append("=\"")
-            appendEscapedAttribute(value)
+            appendEscapedAttribute(value, messages)
             append('"')
         }
         if (elementChildren.isEmpty()) {
@@ -287,12 +325,19 @@ internal object TypeScriptTsxRuntime {
             if (childValue.tagName == null) {
                 childValue.children.forEach { fragmentChild ->
                     require(fragmentChild is Child.Element) {
-                        "TypeScript TSX fragments inside layouts cannot contain text."
+                        messages.text(R.string.error_typescript_tsx_fragment_layout_text)
                     }
-                    appendElement(fragmentChild.value, bindings, ids, state, depth + 1)
+                    appendElement(
+                        fragmentChild.value,
+                        bindings,
+                        ids,
+                        state,
+                        depth + 1,
+                        messages,
+                    )
                 }
             } else {
-                appendElement(childValue, bindings, ids, state, depth + 1)
+                appendElement(childValue, bindings, ids, state, depth + 1, messages)
             }
         }
         append("</")
@@ -300,8 +345,8 @@ internal object TypeScriptTsxRuntime {
         append('>')
     }
 
-    private fun StringBuilder.appendEscapedAttribute(value: String) {
-        requireValidXmlText(value)
+    private fun StringBuilder.appendEscapedAttribute(value: String, messages: MessageResolver) {
+        requireValidXmlText(value, messages)
         value.forEach { character ->
             when (character) {
                 '&' -> append("&amp;")
@@ -314,7 +359,7 @@ internal object TypeScriptTsxRuntime {
         }
     }
 
-    private fun requireValidXmlText(value: String) {
+    private fun requireValidXmlText(value: String, messages: MessageResolver) {
         var index = 0
         while (index < value.length) {
             val character = value[index]
@@ -325,11 +370,16 @@ internal object TypeScriptTsxRuntime {
                     index + 1 < value.length &&
                     value[index + 1].isLowSurrogate() -> index += 2
                 else -> throw IllegalArgumentException(
-                    "TypeScript TSX contains text that is not valid XML 1.0.",
+                    messages.text(R.string.error_typescript_tsx_invalid_xml_text),
                 )
             }
         }
     }
+
+    private fun MessageResolver.text(
+        @StringRes resourceId: Int,
+        vararg formatArgs: Any,
+    ): String = resolve(resourceId, formatArgs)
 
     private class RenderState(
         var nodeCount: Int = 0,
