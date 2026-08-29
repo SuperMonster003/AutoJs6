@@ -14,7 +14,6 @@ internal enum class ExplorerPlaybackReportDecision { STORE, CLEAR }
 /** Android-free validation, retention and serialization rules for opt-in host playback history. */
 internal object ExplorerPlaybackHistoryPolicy {
 
-    const val MAX_ENTRIES = 200
     const val MIN_DURATION_MILLIS = 30_000L
     const val MIN_POSITION_MILLIS = 5_000L
 

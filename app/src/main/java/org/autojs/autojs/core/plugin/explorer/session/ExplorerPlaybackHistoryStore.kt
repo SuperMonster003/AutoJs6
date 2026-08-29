@@ -1,11 +1,10 @@
 package org.autojs.autojs.core.plugin.explorer.session
 
 import android.content.Context
-import android.content.SharedPreferences
 import org.autojs.autojs.core.pref.Pref
 import java.io.File
 
-/** Host-private bounded playback history. Preference keys contain only SHA-256 path digests. */
+/** Host-private single-item playback history. Preference keys contain only SHA-256 path digests. */
 internal class ExplorerPlaybackHistoryStore(
     context: Context,
     private val clock: () -> Long = System::currentTimeMillis,
@@ -24,7 +23,11 @@ internal class ExplorerPlaybackHistoryStore(
         val key = entryKey(file)
         val encoded = preferences.getString(key, null)
         val record = ExplorerPlaybackHistoryPolicy.decode(encoded)
-        if (encoded != null && record == null) preferences.edit().remove(key).apply()
+        val obsoleteKeys = entryKeys().filter { it != key }.toMutableList()
+        if (encoded != null && record == null) obsoleteKeys += key
+        if (obsoleteKeys.isNotEmpty()) {
+            preferences.edit().also { editor -> obsoleteKeys.forEach(editor::remove) }.apply()
+        }
         record
     }
 
@@ -43,7 +46,12 @@ internal class ExplorerPlaybackHistoryStore(
                 completed,
             )
         ) {
-            ExplorerPlaybackReportDecision.CLEAR -> preferences.edit().remove(key).apply()
+            ExplorerPlaybackReportDecision.CLEAR -> {
+                val keys = entryKeys()
+                if (keys.isNotEmpty()) {
+                    preferences.edit().also { editor -> keys.forEach(editor::remove) }.apply()
+                }
+            }
             ExplorerPlaybackReportDecision.STORE -> {
                 val record = ExplorerPlaybackProgressRecord(
                     positionMillis = positionMillis,
@@ -54,33 +62,14 @@ internal class ExplorerPlaybackHistoryStore(
                     key,
                     ExplorerPlaybackHistoryPolicy.encode(record),
                 )
-                prune(editor, key, record)
+                entryKeys().filter { it != key }.forEach(editor::remove)
                 editor.apply()
             }
         }
     }
 
-    private fun prune(
-        editor: SharedPreferences.Editor,
-        pendingKey: String,
-        pendingRecord: ExplorerPlaybackProgressRecord,
-    ) {
-        val records = preferences.all.mapNotNull { (key, value) ->
-            if (!key.startsWith(ENTRY_PREFIX)) return@mapNotNull null
-            if (key == pendingKey) return@mapNotNull key to pendingRecord
-            val record = ExplorerPlaybackHistoryPolicy.decode(value as? String)
-            if (record == null) {
-                editor.remove(key)
-                null
-            } else {
-                key to record
-            }
-        }.toMutableList()
-        if (records.none { it.first == pendingKey }) records += pendingKey to pendingRecord
-        records.sortedWith(compareBy<Pair<String, ExplorerPlaybackProgressRecord>> { it.second.updatedAtMillis }
-            .thenBy { it.first })
-            .take((records.size - ExplorerPlaybackHistoryPolicy.MAX_ENTRIES).coerceAtLeast(0))
-            .forEach { (key, _) -> editor.remove(key) }
+    private fun entryKeys(): Set<String> = preferences.all.keys.filterTo(mutableSetOf()) {
+        it.startsWith(ENTRY_PREFIX)
     }
 
     private fun entryKey(file: File): String = ENTRY_PREFIX +

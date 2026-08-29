@@ -2289,6 +2289,74 @@ class ExplorerActionHostSessionInstrumentationTest {
         }
     }
 
+    @Test
+    fun playbackHistoryKeepsOnlyTheMostRecentlyOpenedVideo() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val previousEnabled = Pref.isExplorerPlaybackHistoryEnabled
+        val testRoot = File(context.cacheDir, "explorer-action-v12-single-history-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val selected = File(testRoot, "episode01.mkv").apply { writeText("first") }
+        val sibling = File(testRoot, "episode02.mkv").apply { writeText("second") }
+        ExplorerPlaybackHistoryStore.clearAll(context)
+        Pref.putBooleanSync(R.string.key_explorer_playback_history, true)
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("selected", selected)),
+            allowCreateOutput = false,
+            allowReadSiblings = true,
+            allowPlaybackProgress = true,
+            clock = { 42L },
+        )
+
+        try {
+            session.reportPlaybackProgress(
+                "selected",
+                "",
+                30_000L,
+                120_000L,
+                ExplorerActionHostSessionValues.PLAYBACK_REPORT_PROGRESS,
+            )
+            assertEquals(1, ExplorerPlaybackHistoryStore.entryCount(context))
+
+            val differentVideo = session.getPlaybackProgress("selected", sibling.name)
+            assertFalse(
+                differentVideo.getBoolean(ExplorerActionHostSessionKeys.PLAYBACK_PROGRESS_PRESENT),
+            )
+            assertEquals(0, ExplorerPlaybackHistoryStore.entryCount(context))
+
+            session.reportPlaybackProgress(
+                "selected",
+                sibling.name,
+                40_000L,
+                120_000L,
+                ExplorerActionHostSessionValues.PLAYBACK_REPORT_PROGRESS,
+            )
+            assertEquals(1, ExplorerPlaybackHistoryStore.entryCount(context))
+            val sameVideo = session.getPlaybackProgress("selected", sibling.name)
+            assertTrue(sameVideo.getBoolean(ExplorerActionHostSessionKeys.PLAYBACK_PROGRESS_PRESENT))
+            assertEquals(
+                40_000L,
+                sameVideo.getLong(ExplorerActionHostSessionKeys.PLAYBACK_POSITION_MILLIS),
+            )
+
+            session.reportPlaybackProgress(
+                "selected",
+                sibling.name,
+                120_000L,
+                120_000L,
+                ExplorerActionHostSessionValues.PLAYBACK_REPORT_COMPLETED,
+            )
+            assertEquals(0, ExplorerPlaybackHistoryStore.entryCount(context))
+        } finally {
+            session.close()
+            ExplorerPlaybackHistoryStore.clearAll(context)
+            Pref.putBooleanSync(R.string.key_explorer_playback_history, previousEnabled)
+            testRoot.deleteRecursively()
+        }
+    }
+
     private fun expectIllegalState(block: () -> Unit) {
         try {
             block()
