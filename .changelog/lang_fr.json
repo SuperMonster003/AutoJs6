@@ -212,7 +212,8 @@
         "Les animations de transition vers l'onglet Plugins de l'accueil et de tirage pour actualiser dans le Centre de plugins pouvaient se figer à mi-parcours pendant la découverte des métadonnées de services et la création à froid des lignes denses; le Centre de plugins autonome pouvait aussi restaurer le service d'accessibilité via root/settings pendant la création de l'Activity",
         "L'icône puzzle Explorer Action des fichiers ZIP/JAR et autres fichiers gérés par un plugin remplissait toute la cellule d'action et paraissait surdimensionnée",
         "Le gestionnaire de fichiers ne distinguait pas fiablement les sources et déclarations TypeScript `.ts/.mts` des vidéos MPEG-2 TS portant les mêmes suffixes, et ne traitait pas toujours `.d.ts/.d.mts/.d.cts` comme des déclarations",
-        "Les sources `.py/.ts/.java/.kt` prises en charge par des plugins n'affichaient pas systématiquement une icône de source exécutable et l'action Exécuter"
+        "Les sources `.py/.ts/.java/.kt` prises en charge par des plugins n'affichaient pas systématiquement une icône de source exécutable et l'action Exécuter",
+        "Les projets de script minimaux sans métadonnées de packaging APK revenaient à `main.js` au lieu de lancer l'entrée `main` déclarée dans `project.json`"
       ],
       "improvement": [
         "Les messages de validation du runtime TypeScript TSX suivent désormais la langue de l'application dans les 10 langues prises en charge au lieu d'afficher de l'anglais codé en dur",

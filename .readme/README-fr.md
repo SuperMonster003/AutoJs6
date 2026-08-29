@@ -376,6 +376,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` L'icône puzzle Explorer Action des fichiers ZIP/JAR et autres fichiers gérés par un plugin remplissait toute la cellule d'action et paraissait surdimensionnée
 * `Correction` Le gestionnaire de fichiers ne distinguait pas fiablement les sources et déclarations TypeScript `.ts/.mts` des vidéos MPEG-2 TS portant les mêmes suffixes, et ne traitait pas toujours `.d.ts/.d.mts/.d.cts` comme des déclarations
 * `Correction` Les sources `.py/.ts/.java/.kt` prises en charge par des plugins n'affichaient pas systématiquement une icône de source exécutable et l'action Exécuter
+* `Correction` Les projets de script minimaux sans métadonnées de packaging APK revenaient à `main.js` au lieu de lancer l'entrée `main` déclarée dans `project.json`
 * `Amélioration` Les messages de validation du runtime TypeScript TSX suivent désormais la langue de l'application dans les 10 langues prises en charge au lieu d'afficher de l'anglais codé en dur
 * `Amélioration` Suppression de l'indicateur de requête obsolète de stripping TypeScript hérité de Node.js Runtime ; le TypeScript brut reste réservé au compilateur et n'est jamais effacé par expressions régulières dans le runtime
 * `Amélioration` Suppression côté hôte des options Gradle Node.js et des copies d'exemples, déclarations de types, assistant de projet et scripts de vérification; les valeurs par défaut du runtime et les ressources de développement appartiennent désormais au plugin Node.js Runtime

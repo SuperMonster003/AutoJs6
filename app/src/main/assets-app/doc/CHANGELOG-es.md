@@ -216,6 +216,7 @@
 * `Corrección` El icono de rompecabezas de Explorer Action para ZIP/JAR y otros archivos gestionados por plugins llenaba toda la celda de acción y parecía demasiado grande
 * `Corrección` El gestor de archivos no distinguía de forma fiable las fuentes y declaraciones TypeScript `.ts/.mts` de los vídeos MPEG-2 TS con los mismos sufijos, ni trataba siempre `.d.ts/.d.mts/.d.cts` como declaraciones
 * `Corrección` Los archivos fuente `.py/.ts/.java/.kt` compatibles con plugins no mostraban de forma coherente un icono de fuente ejecutable y la acción Ejecutar
+* `Corrección` Los proyectos de script mínimos sin metadatos de empaquetado APK recurrían a `main.js` en lugar de iniciar la entrada `main` declarada en `project.json`
 * `Mejora` Los mensajes de validación del runtime TypeScript TSX ahora siguen el idioma de la aplicación en los 10 idiomas compatibles en lugar de mostrar inglés codificado de forma fija
 * `Mejora` Se eliminó la obsoleta opción de solicitud de eliminación heredada de TypeScript de Node.js Runtime; TypeScript sin compilar sigue requiriendo el compilador y el runtime nunca lo borra mediante expresiones regulares
 * `Mejora` Se eliminaron del host los conmutadores Gradle de Node.js y las copias de ejemplos, declaraciones de tipos, asistente de proyectos y scripts de verificación; los valores predeterminados del runtime y los recursos de desarrollo ahora pertenecen al plugin Node.js Runtime

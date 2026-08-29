@@ -376,6 +376,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Explorer Action puzzle icons for ZIP/JAR and other plugin-handled files filled the entire action cell and appeared oversized
 * `Fix` The file manager could not reliably distinguish TypeScript `.ts/.mts` sources and declarations from MPEG-2 TS video with the same suffixes, and did not always treat `.d.ts/.d.mts/.d.cts` as declaration files
 * `Fix` Plugin-backed `.py/.ts/.java/.kt` source files did not consistently use executable-source icons and expose the Run action
+* `Fix` Minimal script projects without APK packaging metadata fell back to `main.js` instead of launching the `main` entry declared in `project.json`
 * `Improvement` TypeScript TSX runtime validation messages now follow the app language across all 10 supported locales instead of exposing hardcoded English
 * `Improvement` Removed the obsolete Node.js Runtime legacy TypeScript stripping request flag; raw TypeScript remains compiler-only and is never regex-erased by the runtime
 * `Improvement` Removed host-side Node.js Gradle switches and duplicate examples, type declarations, project wizard, and verification scripts; runtime defaults and development assets are now owned by the Node.js Runtime plugin
