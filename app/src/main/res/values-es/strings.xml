@@ -288,6 +288,7 @@
     <string name="error_app_not_installed_with_name">La aplicación no está instalada: \"%s\"</string>
     <string name="error_archive_extraction_failed">No se pudo extraer el archivo: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">Esta selección necesita una contraseña o confirmación. Usa la acción Extraer en del menú del archivo.</string>
+    <string name="error_archive_input_selection_empty">Seleccione al menos un archivo o una carpeta</string>
     <string name="error_archive_password_incorrect">La contraseña del archivo es incorrecta. Inténtalo de nuevo.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">El argumento %1$s para %2$s#%3$s no puede ser nulo</string>
     <string name="error_arguments_cannot_be_empty">Los argumentos no pueden estar vacíos</string>
@@ -775,6 +776,7 @@
     <string name="text_adb_tool_needed">Se necesita la herramienta ADB</string>
     <string name="text_add_bom">Agregar BOM</string>
     <string name="text_add_color_library">Agregar biblioteca de colores</string>
+    <string name="text_add_files_or_folders">Añadir archivos o carpetas</string>
     <string name="text_add_symbol_hint">Anadir un simbolo</string>
     <string name="text_ai">IA</string>
     <string name="text_ai_settings">Ajustes del servicio de IA</string>

@@ -537,6 +537,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             binding.archiveCreateDirectory.setOnClickListener {
                 showArchiveCreateDirectoryDialog()
             }
+            binding.archiveAddEntries.setOnClickListener {
+                showArchiveAddEntriesDialog()
+            }
             binding.archiveExtractCurrent.setOnClickListener { extractCurrentArchiveFolder() }
             mSelectionToolbar = ExplorerSelectionToolbarController(
                 context = context,
@@ -1153,6 +1156,19 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         )
     }
 
+    private fun showArchiveAddEntriesDialog() {
+        val provider = mArchiveNavigationState?.provider ?: return
+        val page = currentPageState.page as? ArchiveExplorerPage ?: return
+        mArchiveCoordinator.showAddEntriesDialog(
+            provider = provider,
+            page = page,
+            selectedItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem },
+            previousScrollY = currentPageState.scrollY,
+            previousDirsCollapsed = currentPageState.dirsCollapsed,
+            previousFilesCollapsed = currentPageState.filesCollapsed,
+        )
+    }
+
 
     private fun updateArchiveExtractionAction() {
         val page = currentPageState.page as? ArchiveExplorerPage
@@ -1169,6 +1185,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             alpha = if (isEnabled) 1.0f else 0.38f
         }
         updateArchiveCreateDirectoryAction()
+        updateArchiveAddEntriesAction()
         updateArchiveFilenameEncodingAction()
     }
 
@@ -1179,6 +1196,23 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             page.canCreateChildren &&
             provider?.canCreateDirectory == true
         binding?.archiveCreateDirectory?.apply {
+            isVisible = supported
+            isEnabled = supported &&
+                !isInSelectionMode &&
+                !mArchiveCoordinator.isExtracting &&
+                !mArchiveCoordinator.isFilenameReindexing &&
+                !mArchiveCoordinator.isMutating
+            alpha = if (isEnabled) 1.0f else 0.38f
+        }
+    }
+
+    private fun updateArchiveAddEntriesAction() {
+        val provider = mArchiveNavigationState?.provider
+        val page = currentPageState.page as? ArchiveExplorerPage
+        val supported = page != null &&
+            page.canAddChildren &&
+            provider?.canAddEntries == true
+        binding?.archiveAddEntries?.apply {
             isVisible = supported
             isEnabled = supported &&
                 !isInSelectionMode &&

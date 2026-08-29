@@ -289,6 +289,7 @@
     <string name="error_app_not_installed_with_name">\"%s\" アプリがインストールされていません</string>
     <string name="error_archive_extraction_failed">アーカイブを展開できませんでした: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">この選択にはパスワードまたは確認が必要です。アーカイブファイルのメニューから展開先を選択してください</string>
+    <string name="error_archive_input_selection_empty">ファイルまたはフォルダーを1つ以上選択してください</string>
     <string name="error_archive_password_incorrect">アーカイブのパスワードが正しくありません. もう一度お試しください.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">%2$s#%3$s の引数 %1$s を null 値にはできません</string>
     <string name="error_arguments_cannot_be_empty">引数を空にできません</string>
@@ -776,6 +777,7 @@
     <string name="text_adb_tool_needed">ADB ツールが必要</string>
     <string name="text_add_bom">BOM を追加</string>
     <string name="text_add_color_library">カラーライブラリを追加</string>
+    <string name="text_add_files_or_folders">ファイルまたはフォルダーを追加</string>
     <string name="text_add_symbol_hint">記号を追加</string>
     <string name="text_ai">AI</string>
     <string name="text_ai_settings">AI サービス設定</string>

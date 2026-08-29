@@ -22,6 +22,7 @@ internal sealed class ArchiveExplorerItem(
     val canDeleteEntry: Boolean,
     val canRenameEntry: Boolean,
     val canCreateChildren: Boolean,
+    val canAddChildren: Boolean,
 ) : ExplorerItem {
 
     override fun getName(): String = displayName
@@ -93,6 +94,7 @@ internal class ArchiveExplorerFileItem(
     canDeleteEntry = info.canDelete,
     canRenameEntry = info.canRename,
     canCreateChildren = false,
+    canAddChildren = false,
 )
 
 internal class ArchiveExplorerPage internal constructor(
@@ -107,6 +109,7 @@ internal class ArchiveExplorerPage internal constructor(
     canDelete: Boolean,
     canRename: Boolean,
     canCreateChildren: Boolean,
+    canAddChildren: Boolean,
 ) : ArchiveExplorerItem(
     entryId = entryId,
     displayName = name,
@@ -120,6 +123,7 @@ internal class ArchiveExplorerPage internal constructor(
     canDeleteEntry = canDelete,
     canRenameEntry = canRename,
     canCreateChildren = canCreateChildren,
+    canAddChildren = canAddChildren,
 ), ExplorerPage {
 
     private var children: MutableList<ExplorerItem> = mutableListOf()
@@ -163,6 +167,9 @@ internal class ArchiveExplorerProvider(
     val canCreateDirectory: Boolean
         get() = connection.info.canCreateDirectory
 
+    val canAddEntries: Boolean
+        get() = connection.info.canAddEntries
+
     val formatDisplayName: String?
         get() = connection.info.formatDisplayName
 
@@ -205,6 +212,7 @@ internal class ArchiveExplorerProvider(
             canDelete = parent.canDeleteEntry,
             canRename = parent.canRenameEntry,
             canCreateChildren = parent.canCreateChildren,
+            canAddChildren = parent.canAddChildren,
         )
         connection.listAllChildren(parent.entryId).forEach { info ->
             check(itemInfoById.putIfAbsent(info.id, info)?.let { it == info } != false) {
@@ -225,6 +233,7 @@ internal class ArchiveExplorerProvider(
                     canRename = connection.info.canRenameEntries && info.canRename,
                     canCreateChildren =
                         connection.info.canCreateDirectory && info.canCreateChildren,
+                    canAddChildren = connection.info.canAddEntries && info.canAddChildren,
                 ).also {
                     loaded.addChild(it)
                     rememberPage(it)
@@ -391,6 +400,27 @@ internal class ArchiveExplorerProvider(
         )
     }
 
+    fun startAddEntries(
+        parent: ArchiveExplorerPage,
+        selectedRoots: List<File>,
+        checkCancelled: () -> Unit,
+        listener: ExplorerArchiveMutationListener,
+    ): String {
+        check(canAddEntries && parent.canAddChildren) {
+            "Archive directory does not support adding entries"
+        }
+        require(selectedRoots.isNotEmpty()) { "Archive input selection is empty" }
+        requireKnownItem(parent)
+        return connection.startMutation(
+            ExplorerArchiveMutationRequest.AddEntries(
+                parent.entryId,
+                selectedRoots,
+                checkCancelled,
+            ),
+            listener,
+        )
+    }
+
     fun cancelMutation(operationId: String) {
         connection.cancelMutation(operationId)
     }
@@ -444,6 +474,7 @@ internal class ArchiveExplorerProvider(
         canDelete = false,
         canRename = false,
         canCreateChildren = connection.info.canCreateDirectory,
+        canAddChildren = connection.info.canAddEntries,
     ).also(::rememberPage)
 
     private fun requireKnownItem(item: ArchiveExplorerItem) {

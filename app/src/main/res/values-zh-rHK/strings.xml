@@ -285,6 +285,7 @@
     <string name="error_app_not_installed_with_name">應用未安裝: \"%s\"</string>
     <string name="error_archive_extraction_failed">無法解壓縮檔案: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">此選擇需要密碼或確認, 請從檔案文件選單使用解壓縮到操作</string>
+    <string name="error_archive_input_selection_empty">請至少選擇一個文件或文件夾</string>
     <string name="error_archive_password_incorrect">壓縮檔密碼不正確. 請再試一次.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">參數 %1$s 對於 %2$s#%3$s 不可為 nullish</string>
     <string name="error_arguments_cannot_be_empty">參數列表不可為空</string>
@@ -772,6 +773,7 @@
     <string name="text_adb_tool_needed">需要 ADB 命令行工具</string>
     <string name="text_add_bom">添加 BOM</string>
     <string name="text_add_color_library">添加顏色庫</string>
+    <string name="text_add_files_or_folders">加入文件或文件夾</string>
     <string name="text_add_symbol_hint">添加一個符號</string>
     <string name="text_ai">AI</string>
     <string name="text_ai_settings">AI 服務設定</string>

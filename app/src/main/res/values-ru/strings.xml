@@ -288,6 +288,7 @@
     <string name="error_app_not_installed_with_name">Приложение не установлено: \"%s\"</string>
     <string name="error_archive_extraction_failed">Не удалось извлечь архив: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">Для выбранных элементов нужен пароль или подтверждение. Используйте действие Извлечь в в меню файла архива.</string>
+    <string name="error_archive_input_selection_empty">Выберите хотя бы один файл или папку</string>
     <string name="error_archive_password_incorrect">Неверный пароль архива. Повторите попытку.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Аргумент %1$s для %2$s#%3$s не может быть пустым</string>
     <string name="error_arguments_cannot_be_empty">Аргументы не могут быть пустыми</string>
@@ -775,6 +776,7 @@
     <string name="text_adb_tool_needed">Необходим инструмент ADB</string>
     <string name="text_add_bom">Добавить BOM</string>
     <string name="text_add_color_library">Добавить цветовую библиотеку</string>
+    <string name="text_add_files_or_folders">Добавить файлы или папки</string>
     <string name="text_add_symbol_hint">Добавить символ</string>
     <string name="text_ai">ИИ</string>
     <string name="text_ai_settings">Настройки службы ИИ</string>

@@ -106,8 +106,13 @@ class ExplorerAccessibilityInstrumentationTest {
             View.GONE,
             explorer.findViewById<View>(R.id.archive_create_directory).visibility,
         )
+        assertEquals(
+            View.GONE,
+            explorer.findViewById<View>(R.id.archive_add_entries).visibility,
+        )
         explorer.findViewById<View>(R.id.archive_filename_encoding).visibility = View.VISIBLE
         explorer.findViewById<View>(R.id.archive_create_directory).visibility = View.VISIBLE
+        explorer.findViewById<View>(R.id.archive_add_entries).visibility = View.VISIBLE
         explorer.findViewById<View>(R.id.archive_extract_current).visibility = View.VISIBLE
         measureAndLayout(explorer, specification.widthDp, specification.heightDp, context)
         assertHeight(context, explorer.findViewById(R.id.explorer_path_row), 33.5F)
@@ -118,6 +123,7 @@ class ExplorerAccessibilityInstrumentationTest {
             33.5F,
             R.id.archive_filename_encoding,
             R.id.archive_create_directory,
+            R.id.archive_add_entries,
             R.id.archive_extract_current,
         )
 

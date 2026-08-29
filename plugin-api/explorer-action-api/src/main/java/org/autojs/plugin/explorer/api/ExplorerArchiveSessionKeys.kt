@@ -23,7 +23,7 @@ object ExplorerArchiveSessionKeys {
     const val CAN_RENAME_ENTRIES = "canRenameEntries"
     /** False or absent before protocol v20. */
     const val CAN_CREATE_DIRECTORY = "canCreateDirectory"
-    /** Reserved for the v20 bounded-input slice. False or absent until implemented. */
+    /** True when protocol v20 accepts a frozen host input grant. */
     const val CAN_ADD_ENTRIES = "canAddEntries"
     /** Empty or absent before protocol v13, or when this format has no filename charset override. */
     const val FILENAME_CHARSET_NAMES = "filenameCharsetNames"
@@ -51,6 +51,6 @@ object ExplorerArchiveSessionKeys {
     const val CAN_RENAME = "canRename"
     /** Directory-only capability. False or absent before protocol v20. */
     const val CAN_CREATE_CHILDREN = "canCreateChildren"
-    /** Reserved for the v20 bounded-input slice. False or absent until implemented. */
+    /** Directory-only v20 frozen-input capability. */
     const val CAN_ADD_CHILDREN = "canAddChildren"
 }

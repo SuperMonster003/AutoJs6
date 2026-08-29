@@ -84,6 +84,11 @@ internal sealed interface ExplorerArchiveMutationRequest {
         val parentEntryId: String,
         val newName: String,
     ) : ExplorerArchiveMutationRequest
+    data class AddEntries(
+        val parentEntryId: String,
+        val selectedRoots: List<File>,
+        val checkCancelled: () -> Unit,
+    ) : ExplorerArchiveMutationRequest
 }
 
 internal data class ExplorerArchiveMutationProgress(
@@ -274,7 +279,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME_ENTRIES, false),
             canCreateDirectory = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_CREATE_DIRECTORY, false),
-            canAddEntries = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+            canAddEntries = protocolVersion >= ARCHIVE_INPUT_PROTOCOL_VERSION &&
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_ADD_ENTRIES, false),
             filenameCharsetNames = metadata.supportedNames,
             filenameCharsetName = metadata.effectiveName,
@@ -385,7 +390,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
             "Archive source has no parent directory"
         }
         val requestBundle = Bundle()
-        when (request) {
+        val maximumMutatedEntries = when (request) {
             is ExplorerArchiveMutationRequest.Delete -> {
                 check(info.canDeleteEntries) { "Archive session does not support deletion" }
                 require(
@@ -406,6 +411,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                     ExplorerArchiveMutationKeys.ENTRY_IDS,
                     ArrayList(entryIds),
                 )
+                entryIds.size
             }
             is ExplorerArchiveMutationRequest.Rename -> {
                 check(info.canRenameEntries) { "Archive session does not support rename" }
@@ -417,6 +423,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                 )
                 requestBundle.putString(ExplorerArchiveMutationKeys.ENTRY_ID, entryId)
                 requestBundle.putString(ExplorerArchiveMutationKeys.NEW_NAME, newName)
+                1
             }
             is ExplorerArchiveMutationRequest.CreateDirectory -> {
                 check(
@@ -437,8 +444,28 @@ internal class ExplorerArchiveSessionConnection private constructor(
                     parentEntryId,
                 )
                 requestBundle.putString(ExplorerArchiveMutationKeys.NEW_NAME, newName)
+                1
+            }
+            is ExplorerArchiveMutationRequest.AddEntries -> {
+                check(
+                    protocolVersion >= ARCHIVE_INPUT_PROTOCOL_VERSION &&
+                        info.canAddEntries,
+                ) { "Archive session does not support adding entries" }
+                require(
+                    request.selectedRoots.size in 1..ExplorerActionProtocol.MAX_ARCHIVE_INPUT_ROOTS,
+                ) { "Archive input root count is invalid" }
+                val parentEntryId = requireValidId(
+                    request.parentEntryId,
+                    "archive destination directory",
+                )
+                requestBundle.putString(
+                    ExplorerArchiveMutationKeys.PARENT_ENTRY_ID,
+                    parentEntryId,
+                )
+                ExplorerActionProtocol.MAX_ARCHIVE_INPUT_NODES
             }
         }
+        val operationId = UUID.randomUUID().toString()
         val outputSession = ExplorerActionHostSession.create(
             context = context,
             pluginPackageName = pluginPackageName,
@@ -448,8 +475,22 @@ internal class ExplorerArchiveSessionConnection private constructor(
             allowReplaceTarget = true,
             allowReplacementUndo = true,
         )
-        val operationId = UUID.randomUUID().toString()
-        val active = ActiveMutation(outputSession, listener)
+        val inputSession = try {
+            (request as? ExplorerArchiveMutationRequest.AddEntries)?.let { addition ->
+                ExplorerArchiveInputSession.create(
+                    expectedUid = pluginUid,
+                    archiveSessionId = info.sessionId,
+                    operationId = operationId,
+                    selectedRoots = addition.selectedRoots,
+                    checkCancelled = addition.checkCancelled,
+                )
+            }
+        } catch (error: Throwable) {
+            runCatching { outputSession.closeFromHost() }
+            throw error
+        }
+        val callbackMaximumMutatedEntries = inputSession?.nodeCount ?: maximumMutatedEntries
+        val active = ActiveMutation(outputSession, inputSession, listener)
         try {
             requestBundle.putString(ExplorerArchiveMutationKeys.OPERATION_ID, operationId)
             synchronized(operationLock) {
@@ -459,12 +500,26 @@ internal class ExplorerArchiveSessionConnection private constructor(
                 }
                 activeMutations[operationId] = active
             }
-            remote.mutateEntries(requestBundle, outputSession, mutationCallback(operationId))
+            if (inputSession == null) {
+                remote.mutateEntries(
+                    requestBundle,
+                    outputSession,
+                    mutationCallback(operationId, callbackMaximumMutatedEntries),
+                )
+            } else {
+                remote.addEntries(
+                    requestBundle,
+                    outputSession,
+                    inputSession,
+                    mutationCallback(operationId, callbackMaximumMutatedEntries),
+                )
+            }
         } catch (error: Throwable) {
             synchronized(operationLock) {
                 if (activeMutations[operationId] === active) activeMutations.remove(operationId)
             }
             runCatching { outputSession.closeFromHost() }
+            runCatching { inputSession?.closeFromHost() }
             throw error
         }
         return operationId
@@ -508,6 +563,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
         }
         abandonedMutations.forEach { mutation ->
             runCatching { mutation.outputSession.closeFromHost() }
+            runCatching { mutation.inputSession?.closeFromHost() }
             if (notifyPluginUnavailable && mutation.terminal.compareAndSet(false, true)) {
                 runCatching {
                     mutation.listener.onFailed(
@@ -549,7 +605,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
             }
         }
 
-    private fun mutationCallback(operationId: String) =
+    private fun mutationCallback(
+        operationId: String,
+        maximumMutatedEntries: Int,
+    ) =
         object : IExplorerArchiveOperationCallback.Stub() {
             override fun onProgress(update: Bundle) {
                 enforcePluginCaller()
@@ -562,7 +621,9 @@ internal class ExplorerArchiveSessionConnection private constructor(
 
             override fun onCompleted(result: Bundle) {
                 enforcePluginCaller()
-                runCatching { decodeMutationResult(result, operationId) }
+                runCatching {
+                    decodeMutationResult(result, operationId, maximumMutatedEntries)
+                }
                     .onSuccess { decoded ->
                         info = decoded.updatedInfo
                         finishMutation(operationId) { it.onCompleted(decoded) }
@@ -617,6 +678,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
         val active = synchronized(operationLock) { activeMutations.remove(operationId) } ?: return
         if (!active.terminal.compareAndSet(false, true)) return
         runCatching { active.outputSession.closeFromHost() }
+        runCatching { active.inputSession?.closeFromHost() }
         runCatching { notify(active.listener) }
     }
 
@@ -629,7 +691,11 @@ internal class ExplorerArchiveSessionConnection private constructor(
         require(phase in MUTATION_PHASES) { "Archive mutation phase is invalid" }
         val completedEntries = bundle.getInt(ExplorerArchiveMutationKeys.COMPLETED_ENTRIES, -1)
         val totalEntries = bundle.getInt(ExplorerArchiveMutationKeys.TOTAL_ENTRIES, -1)
-        require(completedEntries >= 0 && totalEntries >= 0 && completedEntries <= totalEntries) {
+        require(
+            completedEntries >= 0 &&
+                totalEntries in 0..ExplorerActionProtocol.MAX_ARCHIVE_ITEMS &&
+                completedEntries <= totalEntries,
+        ) {
             "Archive mutation entry progress is invalid"
         }
         return ExplorerArchiveMutationProgress(
@@ -644,13 +710,14 @@ internal class ExplorerArchiveSessionConnection private constructor(
     private fun decodeMutationResult(
         bundle: Bundle,
         expectedOperationId: String,
+        maximumMutatedEntries: Int,
     ): ExplorerArchiveMutationResult {
         requireMutationOperationId(bundle, expectedOperationId)
         val updatedBundle = requireNotNull(bundle.getBundle(ExplorerArchiveMutationKeys.SESSION_INFO)) {
             "Archive mutation result has no updated session information"
         }
         val mutatedEntries = bundle.getInt(ExplorerArchiveMutationKeys.MUTATED_ENTRIES, -1)
-        require(mutatedEntries in 1..ExplorerActionProtocol.MAX_ARCHIVE_MUTATION_TARGETS) {
+        require(mutatedEntries in 1..maximumMutatedEntries) {
             "Archive mutation result count is invalid"
         }
         return ExplorerArchiveMutationResult(
@@ -704,7 +771,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
             canRenameEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME_ENTRIES, false),
             canCreateDirectory = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_CREATE_DIRECTORY, false),
-            canAddEntries = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+            canAddEntries = protocolVersion >= ARCHIVE_INPUT_PROTOCOL_VERSION &&
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_ADD_ENTRIES, false),
             displayNameMatchesFormat = format.displayNameMatches,
             filenameCharsetNames = filenameCharsets.supportedNames,
@@ -898,7 +965,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME, false),
             canCreateChildren = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_CREATE_CHILDREN, false),
-            canAddChildren = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+            canAddChildren = protocolVersion >= ARCHIVE_INPUT_PROTOCOL_VERSION &&
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_ADD_CHILDREN, false),
         )
     }
@@ -927,6 +994,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
 
     private data class ActiveMutation(
         val outputSession: ExplorerActionHostSession,
+        val inputSession: ExplorerArchiveInputSession?,
         val listener: ExplorerArchiveMutationListener,
         val terminal: AtomicBoolean = AtomicBoolean(false),
     )
@@ -1001,7 +1069,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
                                     ExplorerArchiveSessionKeys.CAN_CREATE_DIRECTORY,
                                     false,
                                 ),
-                        canAddEntries = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                        canAddEntries = protocolVersion >= ARCHIVE_INPUT_PROTOCOL_VERSION &&
                             bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_ADD_ENTRIES, false),
                         formatId = formatMetadata.id,
                         formatDisplayName = formatMetadata.displayName,
@@ -1117,6 +1185,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
         private const val ARCHIVE_FORMAT_PROTOCOL_VERSION = 17
         private const val MUTATION_PROTOCOL_VERSION = 19
         private const val DIRECTORY_CREATION_PROTOCOL_VERSION = 20
+        private const val ARCHIVE_INPUT_PROTOCOL_VERSION = 20
         private const val SOURCE_TARGET_ID = "archive-source"
         private val ARCHIVE_FORMAT_ID_PATTERN = Regex("[a-z0-9][a-z0-9._-]*")
         private val DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->

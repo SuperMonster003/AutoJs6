@@ -290,6 +290,7 @@
     <string name="error_app_not_installed_with_name">التطبيق غير مثبت: \"%s\"</string>
     <string name="error_archive_extraction_failed">تعذر استخراج الأرشيف: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">يتطلب هذا التحديد كلمة مرور أو تأكيدا. استخدم إجراء الاستخراج إلى من قائمة ملف الأرشيف.</string>
+    <string name="error_archive_input_selection_empty">حدد ملفا أو مجلدا واحدا على الأقل</string>
     <string name="error_archive_password_incorrect">كلمة مرور الأرشيف غير صحيحة. حاول مرة أخرى.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">لا يمكن أن تكون الوسائط %1$s بالنسبة لـ %2$s#%3$s فارغة</string>
     <string name="error_arguments_cannot_be_empty">لا يمكن أن تكون الوسائط فارغة</string>
@@ -777,6 +778,7 @@
     <string name="text_adb_tool_needed">هناك حاجة إلى أداة ADB</string>
     <string name="text_add_bom">إضافة BOM</string>
     <string name="text_add_color_library">إضافة مكتبة ألوان</string>
+    <string name="text_add_files_or_folders">إضافة ملفات أو مجلدات</string>
     <string name="text_add_symbol_hint">اضافة رمز</string>
     <string name="text_ai">AI</string>
     <string name="text_ai_settings">إعدادات خدمة AI</string>

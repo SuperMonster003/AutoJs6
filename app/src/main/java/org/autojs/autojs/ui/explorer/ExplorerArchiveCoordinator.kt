@@ -34,6 +34,7 @@ import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRequest
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.pio.PFiles
+import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.ViewUtils
@@ -42,6 +43,7 @@ import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerArchiveOpenValues
 import org.autojs.plugin.explorer.api.ExplorerArchiveSessionValues
 import java.io.File
+import java.io.InterruptedIOException
 
 /** Result of rebuilding an archive index with a different filename charset. */
 internal data class ExplorerArchiveReindexResult(
@@ -368,6 +370,54 @@ internal class ExplorerArchiveCoordinator(
         )
     }
 
+    fun showAddEntriesDialog(
+        provider: ArchiveExplorerProvider,
+        page: ArchiveExplorerPage,
+        selectedItems: List<ArchiveExplorerItem>,
+        previousScrollY: Int,
+        previousDirsCollapsed: Boolean,
+        previousFilesCollapsed: Boolean,
+    ) {
+        if (
+            isMutating ||
+            isExtracting ||
+            isFilenameReindexing ||
+            !provider.canAddEntries ||
+            !page.canAddChildren
+        ) {
+            return
+        }
+        FileChooserDialogBuilder(host.archiveContext)
+            .title(R.string.text_add_files_or_folders)
+            .chooseFilesAndDirectories()
+            .requireExplicitSelection()
+            .multiChoice(ExplorerActionProtocol.MAX_ARCHIVE_INPUT_ROOTS) { selected ->
+                if (selected.isEmpty()) {
+                    ViewUtils.showToast(
+                        host.archiveContext,
+                        R.string.error_archive_input_selection_empty,
+                    )
+                    return@multiChoice
+                }
+                startMutation(
+                    provider = provider,
+                    command = ArchiveMutationCommand.AddEntries(
+                        parent = page,
+                        selectedRoots = selected.map { file -> File(file.path) },
+                    ),
+                    navigation = mutationNavigationSnapshot(
+                        provider,
+                        page,
+                        selectedItems,
+                        previousScrollY,
+                        previousDirsCollapsed,
+                        previousFilesCollapsed,
+                    ),
+                )
+            }
+            .show()
+    }
+
     /** Cancels work tied to the currently displayed archive without cancelling a new open request. */
     fun closeArchiveContent() {
         entryOpenJob?.cancel()
@@ -610,6 +660,7 @@ internal class ExplorerArchiveCoordinator(
                         is ArchiveMutationCommand.Delete -> R.string.text_deleting
                         is ArchiveMutationCommand.Rename -> R.string.text_rename
                         is ArchiveMutationCommand.CreateDirectory -> R.string.text_new_folder
+                        is ArchiveMutationCommand.AddEntries -> R.string.text_add_files_or_folders
                     },
                 )
                 .content(R.string.text_preparing)
@@ -648,6 +699,19 @@ internal class ExplorerArchiveCoordinator(
                                 command.newName,
                                 listener,
                             )
+                        is ArchiveMutationCommand.AddEntries ->
+                            provider.startAddEntries(
+                                parent = command.parent,
+                                selectedRoots = command.selectedRoots,
+                                checkCancelled = {
+                                    if (controller.cancelled.get()) {
+                                        throw InterruptedIOException(
+                                            "Archive input scan was cancelled",
+                                        )
+                                    }
+                                },
+                                listener = listener,
+                            )
                     }
                 }
                 uiState.operationId = operationId
@@ -661,7 +725,11 @@ internal class ExplorerArchiveCoordinator(
                 failMutation(
                     uiState,
                     ExplorerArchiveMutationFailure(
-                        ExplorerArchiveSessionValues.MUTATION_ERROR_UNKNOWN,
+                        if (controller.cancelled.get()) {
+                            ExplorerArchiveSessionValues.MUTATION_ERROR_CANCELLED
+                        } else {
+                            ExplorerArchiveSessionValues.MUTATION_ERROR_UNKNOWN
+                        },
                         error.message ?: error.toString(),
                     ),
                 )
@@ -1175,6 +1243,10 @@ internal class ExplorerArchiveCoordinator(
         data class CreateDirectory(
             val parent: ArchiveExplorerPage,
             val newName: String,
+        ) : ArchiveMutationCommand
+        data class AddEntries(
+            val parent: ArchiveExplorerPage,
+            val selectedRoots: List<File>,
         ) : ArchiveMutationCommand
     }
 

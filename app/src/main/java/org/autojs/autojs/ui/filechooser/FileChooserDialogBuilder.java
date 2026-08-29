@@ -43,6 +43,7 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
     private FileFilter mFileFilter;
     private String mRootDir;
     private String mInitialDir;
+    private boolean mSelectCurrentDirectoryWhenEmpty = true;
 
     public FileChooserDialogBuilder(@NonNull Context context) {
         super(context);
@@ -56,19 +57,25 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
         negativeColorRes(R.color.dialog_button_default);
         positiveText(R.string.dialog_button_confirm);
         positiveColorRes(R.color.dialog_button_attraction);
-        onPositive((dialog, which) -> notifySelected());
+        onPositive((dialog, which) -> {
+            boolean accepted = notifySelected();
+            if (!mSelectCurrentDirectoryWhenEmpty && accepted) {
+                dialog.dismiss();
+            }
+        });
         cancelable(false);
     }
 
-    private void notifySelected() {
+    private boolean notifySelected() {
         if (mCallback == null)
-            return;
+            return false;
         List<PFile> selectedFiles = mFileChooseListView.getSelectedFilesList();
-        if (selectedFiles.isEmpty()) {
+        if (selectedFiles.isEmpty() && mSelectCurrentDirectoryWhenEmpty) {
             mCallback.onSelected(Collections.singletonList(mFileChooseListView.getCurrentDirectory()));
         } else {
             mCallback.onSelected(selectedFiles);
         }
+        return !selectedFiles.isEmpty() || mSelectCurrentDirectoryWhenEmpty;
     }
 
     @Override
@@ -96,6 +103,20 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
     public FileChooserDialogBuilder chooseDir() {
         mFileFilter = File::isDirectory;
         mFileChooseListView.setCanChooseDir(true);
+        return this;
+    }
+
+    /** Allows one explicit multi-selection to contain both regular files and directories. */
+    public FileChooserDialogBuilder chooseFilesAndDirectories() {
+        mFileFilter = null;
+        mFileChooseListView.setCanChooseDir(true);
+        return this;
+    }
+
+    /** Prevents an empty multi-selection from implicitly selecting the current directory. */
+    public FileChooserDialogBuilder requireExplicitSelection() {
+        mSelectCurrentDirectoryWhenEmpty = false;
+        autoDismiss(false);
         return this;
     }
 

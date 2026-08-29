@@ -164,10 +164,30 @@ class ArchiveExplorerProviderTest {
     }
 
     @Test
+    fun sessionAdditionCapabilityGatesWritableDirectoryItems() {
+        val client = FakeClient(
+            canAddEntries = false,
+            itemCanAddChildren = true,
+        )
+        val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("add-gate-cache"))
+        val root = provider.rootPage
+
+        root.copyChildren(provider.getExplorerPage(root).blockingGet())
+
+        assertFalse(provider.canAddEntries)
+        assertFalse(root.canAddChildren)
+        assertTrue(
+            root.filterIsInstance<ArchiveExplorerPage>().all { page -> !page.canAddChildren },
+        )
+        provider.close()
+    }
+
+    @Test
     fun providerForwardsOnlyWritableSessionOwnedMutationIds() {
         val client = FakeClient(
             canMutateEntries = true,
             canCreateDirectory = true,
+            canAddEntries = true,
         )
         val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("mutation-cache"))
         val root = provider.rootPage
@@ -202,6 +222,27 @@ class ArchiveExplorerProviderTest {
             ExplorerArchiveMutationRequest.CreateDirectory("folder", "empty"),
             client.mutationRequest,
         )
+
+        val selectedFile = temporaryFolder.newFile("selected.txt")
+        var cancellationChecked = false
+        assertTrue(provider.canAddEntries)
+        assertTrue(root.canAddChildren)
+        assertTrue(folder.canAddChildren)
+        assertFalse(file.canAddChildren)
+        assertEquals(
+            "mutation",
+            provider.startAddEntries(
+                parent = folder,
+                selectedRoots = listOf(selectedFile),
+                checkCancelled = { cancellationChecked = true },
+                listener = NoOpMutationListener,
+            ),
+        )
+        val addition = client.mutationRequest as ExplorerArchiveMutationRequest.AddEntries
+        assertEquals("folder", addition.parentEntryId)
+        assertEquals(listOf(selectedFile), addition.selectedRoots)
+        addition.checkCancelled()
+        assertTrue(cancellationChecked)
         provider.cancelMutation("mutation")
         assertEquals("mutation", client.cancelledMutationId)
         provider.close()
@@ -237,6 +278,8 @@ class ArchiveExplorerProviderTest {
         itemCanMutateEntries: Boolean = canMutateEntries,
         canCreateDirectory: Boolean = false,
         itemCanCreateChildren: Boolean = canCreateDirectory,
+        canAddEntries: Boolean = false,
+        itemCanAddChildren: Boolean = canAddEntries,
         filenameCharsets: Boolean = false,
         formatDisplayName: String? = null,
         displayNameMatchesFormat: Boolean = true,
@@ -253,6 +296,7 @@ class ArchiveExplorerProviderTest {
             canDeleteEntries = canMutateEntries,
             canRenameEntries = canMutateEntries,
             canCreateDirectory = canCreateDirectory,
+            canAddEntries = canAddEntries,
             formatId = formatDisplayName?.lowercase(),
             formatDisplayName = formatDisplayName,
             displayNameMatchesFormat = displayNameMatchesFormat,
@@ -268,6 +312,7 @@ class ArchiveExplorerProviderTest {
         var cancelledMutationId: String? = null
         private val mutableEntries = itemCanMutateEntries
         private val mutableDirectories = itemCanCreateChildren
+        private val addableDirectories = itemCanAddChildren
 
         override fun listAllChildren(parentId: String): List<ExplorerArchiveItemInfo> = when (parentId) {
             "root" -> listOf(
@@ -341,6 +386,7 @@ class ArchiveExplorerProviderTest {
             canDelete = mutableEntries,
             canRename = mutableEntries,
             canCreateChildren = isDirectory && mutableDirectories,
+            canAddChildren = isDirectory && addableDirectories,
         )
     }
 

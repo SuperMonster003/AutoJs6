@@ -3,6 +3,7 @@ package org.autojs.plugin.explorer.api;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import org.autojs.plugin.explorer.api.IExplorerActionHostSession;
+import org.autojs.plugin.explorer.api.IExplorerArchiveInputSession;
 import org.autojs.plugin.explorer.api.IExplorerArchiveOperationCallback;
 
 /** A caller-bound view of one archive. Added in Explorer Action protocol v5. */
@@ -52,4 +53,16 @@ interface IExplorerArchiveSession {
 
     /** Requests cancellation of one mutation started by this caller. Added in protocol v19. */
     void cancelMutation(String operationId);
+
+    /**
+     * Adds one frozen selection of regular files and directory trees below an opaque archive
+     * directory ID. Added in protocol v20. The input grant exposes no host paths or URIs and must
+     * verify unchanged after every source has been consumed but before replacement publication.
+     */
+    void addEntries(
+        in Bundle request,
+        IExplorerActionHostSession outputSession,
+        IExplorerArchiveInputSession inputSession,
+        IExplorerArchiveOperationCallback callback
+    );
 }

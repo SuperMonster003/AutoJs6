@@ -283,6 +283,7 @@
     <string name="error_app_not_installed_with_name">App is not installed: \"%s\"</string>
     <string name="error_archive_extraction_failed">Could not extract archive: %1$s</string>
     <string name="error_archive_extraction_requires_interaction">This selection needs a password or confirmation. Use the Extract to action from the archive file menu.</string>
+    <string name="error_archive_input_selection_empty">Select at least one file or folder</string>
     <string name="error_archive_password_incorrect">The archive password is incorrect. Try again.</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Argument %1$s for %2$s#%3$s cannot be nullish</string>
     <string name="error_arguments_cannot_be_empty">Arguments cannot be empty</string>
@@ -770,6 +771,7 @@
     <string name="text_adb_tool_needed">ADB tool is needed</string>
     <string name="text_add_bom">Add BOM</string>
     <string name="text_add_color_library">Add a color library</string>
+    <string name="text_add_files_or_folders">Add files or folders</string>
     <string name="text_add_symbol_hint">Add a symbol</string>
     <string name="text_ai">AI</string>
     <string name="text_ai_settings">AI service settings</string>

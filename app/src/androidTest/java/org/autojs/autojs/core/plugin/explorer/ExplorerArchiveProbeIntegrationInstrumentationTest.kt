@@ -220,12 +220,58 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
                 zipEntryNames(archive).toSet(),
             )
 
+            val looseInput = File(root, "loose.txt").apply { writeText("loose input") }
+            val directoryInput = File(root, CREATED_DIRECTORY_NAME).apply { assertTrue(mkdir()) }
+            File(directoryInput, "nested.txt").writeText("nested input")
+            assertTrue(File(directoryInput, "nested-empty").mkdir())
+            val secondDirectoryInput = File(
+                root,
+                "second-source/$CREATED_DIRECTORY_NAME",
+            ).apply { assertTrue(mkdirs()) }
+            File(secondDirectoryInput, "second.txt").writeText("second input")
+            assertTrue(openedProvider.canAddEntries)
+            assertTrue(openedProvider.rootPage.canAddChildren)
+            val addedResult = awaitMutation { listener ->
+                openedProvider.startAddEntries(
+                    parent = openedProvider.rootPage,
+                    selectedRoots = listOf(looseInput, directoryInput, secondDirectoryInput),
+                    checkCancelled = {},
+                    listener = listener,
+                )
+            }
+            assertEquals(6, addedResult.mutatedEntries)
+            openedProvider.reloadAfterMutation()
+            assertEquals(
+                setOf(
+                    CREATED_DIRECTORY_NAME,
+                    "$CREATED_DIRECTORY_NAME (2)",
+                    "$CREATED_DIRECTORY_NAME (3)",
+                    KEEP_ENTRY_NAME,
+                    "loose.txt",
+                ),
+                openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
+                    .mapTo(linkedSetOf()) { entry -> entry.name },
+            )
+            assertEquals(
+                setOf(
+                    "$CREATED_DIRECTORY_NAME/",
+                    "$CREATED_DIRECTORY_NAME (2)/",
+                    "$CREATED_DIRECTORY_NAME (2)/nested.txt",
+                    "$CREATED_DIRECTORY_NAME (2)/nested-empty/",
+                    "$CREATED_DIRECTORY_NAME (3)/",
+                    "$CREATED_DIRECTORY_NAME (3)/second.txt",
+                    KEEP_ENTRY_NAME,
+                    "loose.txt",
+                ),
+                zipEntryNames(archive).toSet(),
+            )
+
             val remaining = openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
                 .filterIsInstance<ArchiveExplorerItem>()
             val deletedLastResult = awaitMutation { listener ->
                 openedProvider.startDeletion(remaining, listener)
             }
-            assertEquals(2, deletedLastResult.mutatedEntries)
+            assertEquals(5, deletedLastResult.mutatedEntries)
             openedProvider.reloadAfterMutation()
             assertTrue(
                 openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet().none(),
