@@ -290,6 +290,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 打包應用支持使用 APK Builder Template 插件進行遠程構建
 * `新增` 開發者選項支持 GitHub 訪問令牌設置, 用於提升更新檢查及插件索引請求限額
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出嘅 `runtime.loadJarWithR8` 多載及協議 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發佈, retrace 綁定 mapping 來源, 提供者缺失或無效時禁止 D8/dx 或本地回退
+* `修復` 壓縮檔案項目的重新命名/刪除操作未依照目前工作階段宣告的修改能力收斂, 導致唯讀或不支援修改的工作階段仍可能顯示提供者無法完成的操作
 * `修復` 檔案管理員 Explorer 動作在外掛程式啟用、重新授權或更新後可能繼續使用過期快取或檔案列參照, 導致已識別檔案在 AutoJs6 重新啟動前回退至系統應用程式選擇器
 * `修復` 檔案管理員中部分已識別為影片的格式仍會開啟系統應用程式候選選單的問題; 現在所有已識別的影片類型均優先呼叫官方影片播放器外掛程式, 外掛程式未安裝, 已停用, 未獲授權, 不相容, 不可用或啟動失敗時顯示復原指引及明確的 "用其他應用程式開啟" 選項
 * `修復` 打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 "Cannot read file" 失敗的問題
@@ -374,6 +375,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` ZIP/JAR 等由外掛程式處理的檔案, Explorer Action 拼圖圖示填滿整個操作格而顯得過大的問題
 * `修復` 檔案管理器無法可靠區分同為 `.ts/.mts` 副檔名的 TypeScript 原始碼/宣告檔與 MPEG-2 TS 影片, 且 `.d.ts/.d.mts/.d.cts` 未必一律視為宣告檔的問題
 * `修復` 由外掛程式支援的 `.py/.ts/.java/.kt` 原始碼檔未統一顯示可執行原始碼圖示與執行入口的問題
+* `優化` 移除已過時的 Node.js Runtime legacy TypeScript stripping 請求旗標; 原始 TypeScript 維持只可經編譯器處理, Runtime 絕不再以正則表達式擦除
 * `優化` 移除宿主側 Node.js Gradle 開關及重複的示例, 類型聲明, 項目嚮導與校驗腳本, 運行時默認值和開發資產現統一由 Node.js Runtime 插件維護
 * `優化` DEX 編譯器診斷現在於既有預算內保留經脫敏的 INFO/WARNING/ERROR 詳情及可選邏輯來源, 歸檔條目與位置元數據; 開發者選項會顯示僅存於進程內的最近一次 JAR 載入路徑, 並提供 BUSY, 超時及回退提示
 * `優化` TypeScript 編譯現在為每次請求記錄私隱安全的性能觀察, 涵蓋準備, 快取查找, 編譯器綁定/預熱, 遠端編譯, 輸出處理, 總耗時, 歸檔大小, 原始檔案數及宿主堆記憶體變化, 並將編譯器耗時細分為 ingress 前, ingress, 階段間隔, parse, semantic, emit 及 emit 後區間; 格式錯誤或亂序的 progress 回調會被忽略, 這些觀察不設性能門檻

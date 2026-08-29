@@ -266,6 +266,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 设置页面提供 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
 * `新增` 打包应用配置支持显示或隐藏 "日志" 及 "设置" 启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退
+* `修复` 压缩档案条目的重命名/删除操作未按当前会话声明的修改能力收敛, 导致只读或不支持修改的会话仍可能显示提供方无法完成的操作的问题
 * `修复` 文件管理器 Explorer 动作在插件启用、重新授权或更新后可能继续使用过期缓存或文件行引用, 导致已识别文件在 AutoJs6 重启前回退至系统应用选择器
 * `修复` 文件管理器中部分已识别为视频的格式仍会打开系统应用候选菜单的问题; 现在所有已识别的视频类型均优先调用官方视频播放器插件, 插件未安装, 已禁用, 未授权, 不兼容, 不可用或启动失败时显示恢复引导及明确的 "用其他应用打开" 选项
 * `修复` 打包应用的 Rhino CommonJS require 加载器无法解密依赖 JavaScript 模块, 导致 build-time 编译的多文件 TypeScript 项目以 "Cannot read file" 失败的问题
@@ -350,6 +351,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` ZIP/JAR 等由插件处理的文件, Explorer Action 拼图图标填满整个操作单元而显得过大的问题
 * `修复` 文件管理器无法可靠区分同为 `.ts/.mts` 后缀的 TypeScript 源码/声明文件与 MPEG-2 TS 视频, 且 `.d.ts/.d.mts/.d.cts` 未被始终视为声明文件的问题
 * `修复` 插件支持的 `.py/.ts/.java/.kt` 源文件未统一显示可执行源码图标与运行入口的问题
+* `优化` 移除已过时的 Node.js Runtime legacy TypeScript stripping 请求开关; 原始 TypeScript 仍只可经编译器处理, Runtime 绝不再用正则表达式擦除
 * `优化` 移除宿主侧 Node.js Gradle 开关及重复的样例, 类型声明, 项目向导与校验脚本, 运行时默认值和开发资产现统一由 Node.js Runtime 插件维护
 * `优化` DEX 编译器诊断现在在既有预算内保留经脱敏的 INFO/WARNING/ERROR 详情及可选逻辑来源, 归档条目与位置元数据; 开发者选项会显示仅存于进程内的最近一次 JAR 加载路径, 并提供 BUSY, 超时及回退提示
 * `优化` TypeScript 编译现在为每次请求记录隐私安全的性能观察, 涵盖准备, 缓存查找, 编译器绑定/预热, 远程编译, 输出处理, 总耗时, 归档大小, 源文件数及宿主堆内存变化, 并将编译器耗时细分为 ingress 前, ingress, 阶段间隔, parse, semantic, emit 及 emit 后区间; 格式错误或乱序的 progress 回调会被忽略, 这些观察不设置性能门禁

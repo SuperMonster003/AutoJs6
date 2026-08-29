@@ -127,6 +127,7 @@
         "Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback"
       ],
       "fix": [
+        "Archive entry Rename and Delete actions did not honor the current session's declared mutation capabilities, allowing read-only or unsupported sessions to expose operations the provider could not complete",
         "File manager Explorer actions could retain stale cache entries or row references after a plugin was enabled, re-authorized, or updated, causing recognized files to fall back to the system application chooser until AutoJs6 restarted",
         "File manager video buttons could open the system application chooser for formats already classified as video; all recognized video types now use the official Video Player plugin first, and if it is missing, disabled, unauthorized, incompatible, unavailable, or fails to launch, the host shows recovery guidance with an explicit \"Open with other apps\" option",
         "Packaged Rhino CommonJS require could not decrypt dependent JavaScript modules, causing multi-file build-time TypeScript output to fail with \"Cannot read file\"",
@@ -213,6 +214,7 @@
         "Plugin-backed `.py/.ts/.java/.kt` source files did not consistently use executable-source icons and expose the Run action"
       ],
       "improvement": [
+        "Removed the obsolete Node.js Runtime legacy TypeScript stripping request flag; raw TypeScript remains compiler-only and is never regex-erased by the runtime",
         "Removed host-side Node.js Gradle switches and duplicate examples, type declarations, project wizard, and verification scripts; runtime defaults and development assets are now owned by the Node.js Runtime plugin",
         "DEX compiler diagnostics now preserve bounded redacted INFO/WARNING/ERROR details with optional logical origin, archive entry, and position metadata; Developer options show the process-local last JAR route and localized BUSY, timeout, and fallback guidance",
         "TypeScript compilation now emits privacy-safe per-request observations for preparation, cache lookup, compiler binding/prewarm, remote compilation, output handling, total latency, archive size, source count, and host heap change, and breaks compiler time down into before-ingress, ingress, inter-phase, parse, semantic, emit, and after-emit intervals; malformed or out-of-order progress callbacks are ignored and these observations do not impose performance thresholds",
