@@ -733,6 +733,9 @@ dependencies /* Material Dialogs */ {
 }
 
 dependencies /* Layout */ {
+    // Async Layout Inflater
+    implementation(libs.asynclayoutinflater)
+
     // Expandable Layout
     // implementation("com.github.aakira:expandable-layout:1.6.0")
     // implementation(project(":libs:expandable-layout-1_6_0"))

@@ -208,6 +208,7 @@
 * `Fix` Clicking File from another Home tab skipped the ViewPager transition animation
 * `Fix` Returning from a landscape plugin page such as the video player rebuilt the whole main UI on the configuration change, making the file manager flash severely and sometimes twice in a row
 * `Fix` Opening the Home Plugins tab or standalone Plugin Center for the first time, or returning to any Home tab after visiting Plugins, could block immediate gestures for about half a second
+* `Fix` Home-to-Plugins transitions and Plugin Center pull-to-refresh animations could freeze midway while plugin service metadata and dense cold list rows were prepared; the standalone Plugin Center could also perform root/settings accessibility restoration during Activity creation
 * `Fix` Explorer Action puzzle icons for ZIP/JAR and other plugin-handled files filled the entire action cell and appeared oversized
 * `Fix` The file manager could not reliably distinguish TypeScript `.ts/.mts` sources and declarations from MPEG-2 TS video with the same suffixes, and did not always treat `.d.ts/.d.mts/.d.cts` as declaration files
 * `Fix` Plugin-backed `.py/.ts/.java/.kt` source files did not consistently use executable-source icons and expose the Run action
@@ -290,6 +291,7 @@
 * `Dependency` Modularized AndroidX Media3 version 1.10.1
 * `Dependency` Added Apache Commons Codec version 1.15
 * `Dependency` Added juniversalchardet version 2.0.4
+* `Dependency` Added AndroidX AsyncLayoutInflater version 1.1.0
 * `Dependency` Removed Android Annotations version 4.8.0
 * `Dependency` Removed local APK Parser module
 * `Dependency` Removed Glide KSP version 5.0.5

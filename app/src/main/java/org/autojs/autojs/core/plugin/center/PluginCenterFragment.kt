@@ -53,6 +53,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     private val vm: PluginCenterViewModel by viewModels()
     private lateinit var adapter: PluginCenterItemAdapter
+    private lateinit var listSubmitter: PluginCenterFrameChunkedListSubmitter<PluginCenterItem>
+    private lateinit var itemViewPreloader: PluginCenterItemViewPreloader
     private lateinit var contextRef: Context
 
     private var pkgReceiver: BroadcastReceiver? = null
@@ -75,6 +77,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     // Latest full list from ViewModel (unfiltered).
     // zh-CN: 来自 ViewModel 的最新完整列表 (未过滤).
     private var latestFullItems: List<PluginCenterItem> = emptyList()
+    private var pendingInitialRenderItems: List<PluginCenterItem>? = null
+    private var isInitialViewportReady = false
 
     // Current query used by UI filtering, null means "no filtering".
     // zh-CN: 当前用于 UI 过滤的查询串, null 表示 "不做过滤".
@@ -239,6 +243,28 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             setHasFixedSize(true)
             excludePaddingClippableViewFromBottomNavigationBar()
         }
+
+        listSubmitter = PluginCenterFrameChunkedListSubmitter(
+            submitList = adapter::updateData,
+            postNextFrame = binding.pluginCenterRecyclerView::postOnAnimation,
+            removeFrameCallback = binding.pluginCenterRecyclerView::removeCallbacks,
+        )
+        isInitialViewportReady = false
+        pendingInitialRenderItems = null
+        itemViewPreloader = PluginCenterItemViewPreloader(
+            context = context,
+            parent = binding.pluginCenterRecyclerView,
+            onItemViewReady = adapter::offerPreloadedItemView,
+            onViewportReady = {
+                if (_binding != null) {
+                    isInitialViewportReady = true
+                    pendingInitialRenderItems?.let { items ->
+                        pendingInitialRenderItems = null
+                        listSubmitter.submit(items)
+                    }
+                }
+            },
+        ).also(PluginCenterItemViewPreloader::start)
 
         // Pull-to-refresh: force refresh index every time (still respects backoff window).
         // zh-CN: 下拉刷新: 每次都强制刷新索引 (仍遵守退避窗口).
@@ -498,7 +524,12 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
         val sorted = filtered.sortedWith(buildSortComparator())
 
-        adapter.updateData(sorted)
+        if (sorted.isEmpty() || isInitialViewportReady) {
+            pendingInitialRenderItems = null
+            listSubmitter.submit(sorted)
+        } else {
+            pendingInitialRenderItems = sorted
+        }
         updateEmptyHint(
             filteredItems = sorted,
             indexLoaded = vm.indexLoaded.value,
@@ -1108,6 +1139,17 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        if (::listSubmitter.isInitialized) {
+            listSubmitter.cancel()
+        }
+        if (::itemViewPreloader.isInitialized) {
+            itemViewPreloader.cancel()
+        }
+        if (::adapter.isInitialized) {
+            adapter.clearPreloadedItemViews()
+        }
+        pendingInitialRenderItems = null
+        isInitialViewportReady = false
         emptyHintJob?.cancel()
         emptyHintJob = null
         pkgChangeRefreshJob?.cancel()

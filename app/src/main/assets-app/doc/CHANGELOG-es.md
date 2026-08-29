@@ -208,6 +208,7 @@
 * `Corrección` Al pulsar Archivo desde otra pestaña de inicio no se mostraba la animación de transición de ViewPager
 * `Corrección` Al volver de una página de plugin en horizontal como el reproductor de vídeo, el cambio de configuración reconstruía toda la interfaz principal, haciendo que el administrador de archivos parpadeara con intensidad e incluso dos veces seguidas
 * `Corrección` Al abrir por primera vez la pestaña Plugins de inicio o el Centro de plugins independiente, o al volver a cualquier pestaña de inicio tras visitar Plugins, los gestos inmediatos podían quedar bloqueados durante cerca de medio segundo
+* `Corrección` Las animaciones al cambiar a Plugins de inicio y al deslizar para actualizar en el Centro de plugins podían congelarse a mitad mientras se descubrían los metadatos de servicios y se creaban filas densas en frío; el Centro de plugins independiente también podía restaurar el servicio de accesibilidad mediante root/settings durante la creación de la Activity
 * `Corrección` El icono de rompecabezas de Explorer Action para ZIP/JAR y otros archivos gestionados por plugins llenaba toda la celda de acción y parecía demasiado grande
 * `Corrección` El gestor de archivos no distinguía de forma fiable las fuentes y declaraciones TypeScript `.ts/.mts` de los vídeos MPEG-2 TS con los mismos sufijos, ni trataba siempre `.d.ts/.d.mts/.d.cts` como declaraciones
 * `Corrección` Los archivos fuente `.py/.ts/.java/.kt` compatibles con plugins no mostraban de forma coherente un icono de fuente ejecutable y la acción Ejecutar
@@ -290,6 +291,7 @@
 * `Dependencia` AndroidX Media3 version 1.10.1 modularizado
 * `Dependencia` Se agrega Apache Commons Codec version 1.15
 * `Dependencia` Se agrega juniversalchardet version 2.0.4
+* `Dependencia` Se agrega AndroidX AsyncLayoutInflater version 1.1.0
 * `Dependencia` Se elimina Android Annotations version 4.8.0
 * `Dependencia` Se elimina el módulo local APK Parser
 * `Dependencia` Se elimina Glide KSP version 5.0.5

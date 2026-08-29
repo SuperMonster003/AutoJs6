@@ -208,6 +208,7 @@
 * `Correction` Un clic sur Fichier depuis un autre onglet d'accueil n'affichait pas l'animation de transition de ViewPager
 * `Correction` Le retour depuis une page de plugin en paysage comme le lecteur vidéo reconstruisait toute l'interface principale suite au changement de configuration, faisant fortement clignoter le gestionnaire de fichiers, parfois deux fois de suite
 * `Correction` Lors de la première ouverture de l'onglet Plugins de l'accueil ou du Centre de plugins autonome, ou du retour vers n'importe quel onglet d'accueil après avoir visité Plugins, les gestes immédiats pouvaient rester bloqués pendant environ une demi-seconde
+* `Correction` Les animations de transition vers l'onglet Plugins de l'accueil et de tirage pour actualiser dans le Centre de plugins pouvaient se figer à mi-parcours pendant la découverte des métadonnées de services et la création à froid des lignes denses; le Centre de plugins autonome pouvait aussi restaurer le service d'accessibilité via root/settings pendant la création de l'Activity
 * `Correction` L'icône puzzle Explorer Action des fichiers ZIP/JAR et autres fichiers gérés par un plugin remplissait toute la cellule d'action et paraissait surdimensionnée
 * `Correction` Le gestionnaire de fichiers ne distinguait pas fiablement les sources et déclarations TypeScript `.ts/.mts` des vidéos MPEG-2 TS portant les mêmes suffixes, et ne traitait pas toujours `.d.ts/.d.mts/.d.cts` comme des déclarations
 * `Correction` Les sources `.py/.ts/.java/.kt` prises en charge par des plugins n'affichaient pas systématiquement une icône de source exécutable et l'action Exécuter
@@ -290,6 +291,7 @@
 * `Dépendance` AndroidX Media3 version 1.10.1 modularise
 * `Dépendance` Ajout de Apache Commons Codec version 1.15
 * `Dépendance` Ajout de juniversalchardet version 2.0.4
+* `Dépendance` Ajout de AndroidX AsyncLayoutInflater version 1.1.0
 * `Dépendance` Suppression de Android Annotations version 4.8.0
 * `Dépendance` Suppression du module local APK Parser
 * `Dépendance` Suppression de Glide KSP version 5.0.5

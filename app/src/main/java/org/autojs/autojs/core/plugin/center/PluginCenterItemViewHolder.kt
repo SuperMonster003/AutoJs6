@@ -65,6 +65,7 @@ class PluginCenterItemViewHolder(
     private val btnDetailsView = itemViewBinding.btnDetails
 
     private var lastBoundPackageName: String? = null
+    private var hasRemoteIconRequest = false
     private lateinit var currentItem: PluginCenterItem
 
     init {
@@ -82,7 +83,7 @@ class PluginCenterItemViewHolder(
         val cachedPackageIcon = getCachedRemotePackageIcon(item.packageName)
             ?: getCachedRemotePackageIcon(item.packageName, isNightModeEnabled = !ViewUtils.isNightModeEnabled)
         item.icon?.let {
-            Glide.with(iconView).clear(iconView)
+            clearRemoteIconRequest()
             iconView.setImageDrawable(if (item.remoteIconUrl.isNullOrBlank()) cachedPackageIcon ?: it else it)
         } ?: item.remoteIconUrl?.takeIf { it.isNotBlank() }?.let { url ->
             val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, url, item.remoteNightIconUrl) ?: url
@@ -111,8 +112,9 @@ class PluginCenterItemViewHolder(
                 )
             }
             request.into(iconView)
+            hasRemoteIconRequest = true
         } ?: run {
-            Glide.with(iconView).clear(iconView)
+            clearRemoteIconRequest()
             iconView.setImageDrawable(
                 cachedPackageIcon
                     ?: iconView.drawable?.takeIf { previousPackageName == item.packageName }
@@ -201,6 +203,17 @@ class PluginCenterItemViewHolder(
         }
     }
 
+    fun recycle() {
+        clearRemoteIconRequest()
+        lastBoundPackageName = null
+    }
+
+    private fun clearRemoteIconRequest() {
+        if (!hasRemoteIconRequest) return
+        Glide.with(iconView).clear(iconView)
+        hasRemoteIconRequest = false
+    }
+
     private fun TextView.setButtonState(enabled: Boolean, onClickListener: View.OnClickListener? = null) {
         this.isEnabled = enabled
         this.setOnClickListener(onClickListener)
@@ -249,7 +262,13 @@ class PluginCenterItemViewHolder(
 
     private fun TextView.resizeStartCompoundDrawable(size: Int) {
         val drawables = compoundDrawablesRelative
-        val start = drawables[0]?.mutate()?.apply { setBounds(0, 0, size, size) }
+        // Bounds belong to the Drawable instance, so mutating its shared ConstantState is
+        // unnecessary. BitmapDrawable.mutate() allocates a Paint-backed state for every
+        // action icon and is especially costly while the cold viewport is being created.
+        // zh-CN: bounds 属于 Drawable 实例, 无需复制其共享 ConstantState.
+        // BitmapDrawable.mutate() 会为每个操作图标分配含 Paint 的状态,
+        // 在冷启动首屏集中创建时开销尤为明显.
+        val start = drawables[0]?.apply { setBounds(0, 0, size, size) }
         setCompoundDrawablesRelative(start, drawables[1], drawables[2], drawables[3])
     }
 

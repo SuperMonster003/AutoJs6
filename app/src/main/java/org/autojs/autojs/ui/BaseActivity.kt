@@ -11,7 +11,7 @@ import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import org.autojs.autojs.core.accessibility.AccessibilityTool
+import org.autojs.autojs.core.accessibility.AccessibilityServiceAutoStart
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
@@ -64,7 +64,11 @@ abstract class BaseActivity : AppCompatActivity() {
         // @Dubious by SuperMonster003 on Oct 28, 2024.
         //  ! Is it property to start a11y service automatically here?
         //  ! zh-CN: 无障碍服务自启动放在这里是否合适?
-        AccessibilityTool(this).apply { if (!isRunning()) startService(false) }
+        // Root and secure-settings recovery can perform blocking I/O, so keep the policy
+        // process-wide while moving its execution away from Activity creation.
+        // zh-CN: root 与安全设置恢复可能执行阻塞 I/O, 因此保留进程级策略,
+        // 同时将实际操作移出 Activity 创建过程.
+        AccessibilityServiceAutoStart.request(applicationContext)
     }
 
     private fun setApplicationLocale(context: Context) {
