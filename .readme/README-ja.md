@@ -168,6 +168,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 ###### 2026/08/29
 
+* `新機能` Ace エディターは保存後に常駐 TypeScript プロジェクト言語サービスを増分更新し, 450 ms の入力停止 debounce と保存後 50 ms の診断スケジュールで古い処理をキャンセルします; 20 ファイルの受入テストでは入力をブロックせず, 保存完了から TS2322 更新まで 201 ms でした
 * `新機能` エディター contract 5 でプロジェクト全体の TypeScript シンボル名変更を追加: Ace は正確なソース ID を持つファイル単位の有界編集を送信し, Host はクリーンなプロジェクトスナップショットを独立に再検証してプレビューを表示し, アクティブバッファーを固定してから全ファイルをアトミックに staging, 公開またはロールバックし, 診断を更新します
 * `新機能` editor contract 4 に host 認可の TypeScript auto-import と spelling correction を追加: request は active buffer に対する上限付きの整列済み UTF-16 edit と正確な base/result SHA-256 のみを保持でき, host は独立して replay し, read-only, stale, malformed, overlap, tamper を one-shot approval 前に拒否します
 * `新機能` editor contract 3 に project snapshot で認可された TypeScript 定義ジャンプを追加: Ace は project source と frozen dependency declaration の位置を要求でき, host は target を開いて位置決めする前に project root, canonical relative path, source/dependency inventory fingerprint, content SHA-256, range を独立して再検証します; symbolic link, stale snapshot, 未保存内容の不一致は拒否します
