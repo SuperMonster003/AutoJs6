@@ -1834,6 +1834,7 @@
     <string name="text_type">種類</string>
     <string name="text_type_file">ファイル</string>
     <string name="text_type_folder">フォルダー</string>
+    <string name="text_typescript_console_hint">TypeScript の式または文を入力</string>
     <string name="text_typescript_project_rename">プロジェクトシンボルの名前を変更</string>
     <string name="text_typescript_project_rename_applied">影響するすべてのファイルでシンボル名を変更しました</string>
     <string name="text_typescript_project_rename_preview">\"%1$s\" を \"%2$s\" に変更しますか? 対象は %3$d ファイルの %4$d 参照です. すべての対象ファイルを 1 つのトランザクションとして保存します.</string>

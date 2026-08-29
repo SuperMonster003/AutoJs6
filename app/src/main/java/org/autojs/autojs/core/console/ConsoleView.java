@@ -12,10 +12,14 @@ import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -53,11 +57,19 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     public interface OnStackFrameClickListener {
         void onStackFrameClick(String fileName, int lineNumber, int columnNumber);
     }
+
+    public interface OnCommandSubmitListener {
+        void onCommandSubmit(String command);
+    }
     
     private final Map<Integer, Integer> mColors = new MapBuilder<Integer, Integer>().build();
     private ConsoleImpl mConsole;
     private WeakReference<LogActivity> mLogActivity = null;
     private RecyclerView mLogListRecyclerView;
+    private View mCommandInputContainer;
+    private EditText mCommandInput;
+    private Button mCommandSubmit;
+    private OnCommandSubmitListener mCommandSubmitListener;
     private boolean mShouldStopRefresh = false;
     private final ArrayList<ConsoleImpl.LogEntry> mLogEntries = new ArrayList<>();
 
@@ -131,6 +143,23 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         mLogListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mLogListRecyclerView.setAdapter(new Adapter());
 
+        mCommandInputContainer = findViewById(R.id.input_container);
+        mCommandInput = findViewById(R.id.input);
+        mCommandSubmit = findViewById(R.id.submit);
+        mCommandSubmit.setOnClickListener(view -> submitCommand());
+        mCommandInput.setOnEditorActionListener((view, actionId, event) -> {
+            boolean isKeyboardAction = actionId == EditorInfo.IME_ACTION_SEND ||
+                    actionId == EditorInfo.IME_ACTION_DONE;
+            boolean isEnterKey = event != null &&
+                    event.getKeyCode() == KeyEvent.KEYCODE_ENTER &&
+                    event.getAction() == KeyEvent.ACTION_UP;
+            if (!isKeyboardAction && !isEnterKey) {
+                return false;
+            }
+            submitCommand();
+            return true;
+        });
+
         mLogListRecyclerView.setOnTouchListener((v, event) -> {
             if (!mIsPinchToZoomEnabled) {
                 return super.onTouchEvent(event);
@@ -140,7 +169,9 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         });
 
         if (isExcludeFromNavigationBar) {
-            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(mLogListRecyclerView);
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(
+                    findViewById(R.id.navigation_bar_spacer)
+            );
         }
     }
 
@@ -259,6 +290,47 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
      */
     public void setOnStackFrameClickListener(OnStackFrameClickListener listener) {
         mStackFrameClickListener = listener;
+    }
+
+    public void setCommandInputVisible(boolean visible) {
+        mCommandInputContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setOnCommandSubmitListener(@Nullable OnCommandSubmitListener listener) {
+        mCommandSubmitListener = listener;
+    }
+
+    public void setCommandInputBusy(boolean busy) {
+        mCommandInput.setEnabled(!busy);
+        mCommandSubmit.setEnabled(!busy);
+        if (!busy) {
+            mCommandInput.requestFocus();
+        }
+    }
+
+    public void setCommandInputTextColor(int color) {
+        mCommandInput.setTextColor(color);
+        mCommandInput.setHintTextColor(Color.argb(
+                Math.round(Color.alpha(color) * 0.6f),
+                Color.red(color),
+                Color.green(color),
+                Color.blue(color)
+        ));
+        mCommandInput.getBackground().mutate().setTint(color);
+        mCommandSubmit.setTextColor(color);
+    }
+
+    private void submitCommand() {
+        OnCommandSubmitListener listener = mCommandSubmitListener;
+        if (listener == null || !mCommandInput.isEnabled()) {
+            return;
+        }
+        String command = mCommandInput.getText().toString().trim();
+        if (command.isEmpty()) {
+            return;
+        }
+        mCommandInput.setText("");
+        listener.onCommandSubmit(command);
     }
 
     /**

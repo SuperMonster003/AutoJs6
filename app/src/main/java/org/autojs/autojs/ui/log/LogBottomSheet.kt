@@ -23,6 +23,7 @@ import org.autojs.autojs.util.ContextUtils.getColorsForMode
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.BottomSheetLogBinding
+import java.io.File
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
@@ -40,6 +41,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
     private lateinit var mScriptPath: String
     private var mEditorBackgroundColor by Delegates.notNull<Int>()
     private var mEditorForegroundColor by Delegates.notNull<Int>()
+    private lateinit var mTypeScriptEvaluator: TypeScriptConsoleEvaluator
 
     private var mStackFrameClickListener: OnStackFrameClickListener? = null
     private var mScriptControlListener: ScriptControlListener? = null
@@ -151,6 +153,9 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         mScriptPath = argScriptPath
         mEditorBackgroundColor = argEditorBackgroundColor
         mEditorForegroundColor = argEditorForegroundColor
+        mTypeScriptEvaluator = TypeScriptConsoleEvaluator(
+            workingDirectory = mScriptPath.takeIf(String::isNotBlank)?.let(::File)?.parent.orEmpty(),
+        )
     }
 
     override fun onCreateView(
@@ -183,13 +188,21 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         }
 
         binding.console.setConsole(AutoJs.instance.globalConsole)
-        binding.console.findViewById<View>(R.id.input_container)?.visibility = View.GONE
         binding.console.setEnableStackFrameLinks(true)
         binding.console.setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
             when (mStackFrameClickListener?.onStackFrameClick(fileName, lineNumber, columnNumber)) {
                 StackFrameClickResult.DISMISS -> dismissAllowingStateLoss()
                 StackFrameClickResult.KEEP_OPEN -> Unit
                 StackFrameClickResult.FAILED, null -> ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
+            }
+        }
+        binding.console.setCommandInputVisible(true)
+        binding.console.setOnCommandSubmitListener { source ->
+            binding.console.setCommandInputBusy(true)
+            mTypeScriptEvaluator.evaluate(source) {
+                _binding?.console?.post {
+                    _binding?.console?.setCommandInputBusy(false)
+                }
             }
         }
         setupConsoleLogList()
@@ -257,6 +270,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 ),
             ),
         )
+        binding.console.setCommandInputTextColor(foregroundColor)
     }
 
     private fun applyEditorPaletteToDialogWindow() {

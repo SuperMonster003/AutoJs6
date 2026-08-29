@@ -1835,6 +1835,7 @@
     <string name="text_type">유형</string>
     <string name="text_type_file">파일</string>
     <string name="text_type_folder">폴더</string>
+    <string name="text_typescript_console_hint">TypeScript 식 또는 문 입력</string>
     <string name="text_typescript_project_rename">프로젝트 기호 이름 바꾸기</string>
     <string name="text_typescript_project_rename_applied">영향을 받는 모든 파일에서 프로젝트 기호 이름을 변경했습니다</string>
     <string name="text_typescript_project_rename_preview">\"%1$s\"을(를) \"%2$s\"로 바꾸시겠습니까? %3$d개 파일의 %4$d개 참조가 대상입니다. 모든 대상 파일을 하나의 트랜잭션으로 저장합니다.</string>

@@ -1835,6 +1835,7 @@
     <string name="text_type">يكتب</string>
     <string name="text_type_file">ملف</string>
     <string name="text_type_folder">مجلد</string>
+    <string name="text_typescript_console_hint">أدخل تعبير TypeScript أو عبارة</string>
     <string name="text_typescript_project_rename">إعادة تسمية رمز المشروع</string>
     <string name="text_typescript_project_rename_applied">تمت إعادة تسمية الرمز في جميع الملفات المتأثرة</string>
     <string name="text_typescript_project_rename_preview">هل تريد إعادة تسمية \"%1$s\" إلى \"%2$s\" في %3$d ملفات (%4$d مراجع)؟ سيتم حفظ جميع الملفات المتأثرة كمعاملة واحدة.</string>

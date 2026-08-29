@@ -1830,6 +1830,7 @@
     <string name="text_type">類型</string>
     <string name="text_type_file">文件</string>
     <string name="text_type_folder">文件夾</string>
+    <string name="text_typescript_console_hint">輸入 TypeScript 表達式或語句</string>
     <string name="text_typescript_project_rename">重命名項目符號</string>
     <string name="text_typescript_project_rename_applied">已在所有受影響檔案中重命名項目符號</string>
     <string name="text_typescript_project_rename_preview">將 \"%1$s\" 重命名為 \"%2$s\", 涉及 %3$d 個檔案和 %4$d 個引用? 所有受影響檔案將作為一個交易儲存.</string>

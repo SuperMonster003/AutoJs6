@@ -23,6 +23,7 @@ class LogActivity : BaseActivity() {
     private lateinit var mConsoleImpl: GlobalConsole
     private var mEditorScriptName: String? = null
     private var mEditorScriptPath: String? = null
+    private lateinit var mTypeScriptEvaluator: TypeScriptConsoleEvaluator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +31,9 @@ class LogActivity : BaseActivity() {
         val activityLogBinding = ActivityLogBinding.inflate(layoutInflater)
         mEditorScriptName = intent.getStringExtra(EXTRA_EDITOR_SCRIPT_NAME).takeUnless { it.isNullOrBlank() }
         mEditorScriptPath = intent.getStringExtra(EXTRA_EDITOR_SCRIPT_PATH).takeUnless { it.isNullOrBlank() }
+        mTypeScriptEvaluator = TypeScriptConsoleEvaluator(
+            workingDirectory = mEditorScriptPath?.let(::File)?.parent.orEmpty(),
+        )
 
         setContentView(activityLogBinding.root)
         setToolbarAsBack(R.string.text_log)
@@ -42,11 +46,18 @@ class LogActivity : BaseActivity() {
             setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
                 openStackFrameTarget(fileName, lineNumber, columnNumber)
             }
+            setCommandInputVisible(true)
+            setOnCommandSubmitListener { source ->
+                setCommandInputBusy(true)
+                mTypeScriptEvaluator.evaluate(source) {
+                    post { setCommandInputBusy(false) }
+                }
+            }
         }
 
         activityLogBinding.fab.apply {
             setOnClickListener { mConsoleImpl.clear() }
-            excludeFloatingActionButtonFromBottomNavigationBar()
+            excludeFloatingActionButtonFromBottomNavigationBar(72F)
         }
     }
 

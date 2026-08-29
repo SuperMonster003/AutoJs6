@@ -3,9 +3,12 @@ package org.autojs.autojs.core.console
 import android.graphics.Color
 import android.text.Spanned
 import android.text.style.ClickableSpan
+import android.view.View
+import android.widget.EditText
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import java.util.concurrent.atomic.AtomicReference
+import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,6 +18,26 @@ import org.junit.runner.RunWith
 class ConsoleViewStackFrameLinkDeviceTest {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
+
+    @Test
+    fun submitsOneLineCommandAndClearsTheInput() {
+        val submitted = AtomicReference<String>()
+        instrumentation.runOnMainSync {
+            val view = ConsoleView(instrumentation.targetContext).apply {
+                setCommandInputVisible(true)
+                setOnCommandSubmitListener(submitted::set)
+            }
+            val input = view.findViewById<EditText>(R.id.input)
+            input.setText("  const answer: number = 42; answer  ")
+
+            view.findViewById<View>(R.id.submit).performClick()
+
+            assertEquals(View.VISIBLE, view.findViewById<View>(R.id.input_container).visibility)
+            assertEquals("", input.text.toString())
+        }
+
+        assertEquals("const answer: number = 42; answer", submitted.get())
+    }
 
     @Test
     fun dispatchCompilationDiagnosticLinkWithEditorCoordinates() {

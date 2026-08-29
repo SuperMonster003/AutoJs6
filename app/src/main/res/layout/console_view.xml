@@ -11,4 +11,47 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+    <LinearLayout
+            android:id="@+id/input_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="4dp"
+            android:visibility="gone">
+
+        <EditText
+                android:id="@+id/input"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="monospace"
+                android:hint="@string/text_typescript_console_hint"
+                android:imeOptions="actionSend"
+                android:inputType="textVisiblePassword"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textColorHint="?android:attr/textColorHint"
+                android:textSize="14sp" />
+
+        <Button
+                android:id="@+id/submit"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:minWidth="48dp"
+                android:text="@string/text_run" />
+
+    </LinearLayout>
+
+    <View
+            android:id="@+id/navigation_bar_spacer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
 </LinearLayout>

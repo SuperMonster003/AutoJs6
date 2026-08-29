@@ -1833,6 +1833,7 @@
     <string name="text_type">Type</string>
     <string name="text_type_file">Fichier</string>
     <string name="text_type_folder">Dossier</string>
+    <string name="text_typescript_console_hint">Saisissez une expression ou une instruction TypeScript</string>
     <string name="text_typescript_project_rename">Renommer le symbole du projet</string>
     <string name="text_typescript_project_rename_applied">Symbole renommé dans tous les fichiers concernés</string>
     <string name="text_typescript_project_rename_preview">Renommer \"%1$s\" en \"%2$s\" dans %3$d fichiers (%4$d références)? Tous les fichiers concernés seront enregistrés dans une seule transaction.</string>

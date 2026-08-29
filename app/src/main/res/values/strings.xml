@@ -1829,6 +1829,7 @@
     <string name="text_type">Type</string>
     <string name="text_type_file">File</string>
     <string name="text_type_folder">Folder</string>
+    <string name="text_typescript_console_hint">Enter a TypeScript expression or statement</string>
     <string name="text_typescript_project_rename">Rename project symbol</string>
     <string name="text_typescript_project_rename_applied">Project symbol renamed in all affected files</string>
     <string name="text_typescript_project_rename_preview">Rename \"%1$s\" to \"%2$s\" in %3$d files (%4$d references)? All affected files will be saved as one transaction.</string>

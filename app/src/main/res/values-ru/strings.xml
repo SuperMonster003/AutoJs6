@@ -1833,6 +1833,7 @@
     <string name="text_type">Тип</string>
     <string name="text_type_file">Файл</string>
     <string name="text_type_folder">Папка</string>
+    <string name="text_typescript_console_hint">Введите выражение или инструкцию TypeScript</string>
     <string name="text_typescript_project_rename">Переименовать символ проекта</string>
     <string name="text_typescript_project_rename_applied">Символ переименован во всех затронутых файлах</string>
     <string name="text_typescript_project_rename_preview">Переименовать \"%1$s\" в \"%2$s\" в %3$d файлах (%4$d ссылок)? Все затронутые файлы будут сохранены одной транзакцией.</string>
