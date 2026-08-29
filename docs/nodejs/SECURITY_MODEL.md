@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Security Model
 
-Last reviewed: 2026-08-21.
+Last reviewed: 2026-08-29.
 
 AutoJs6 Node.js spans two Android applications with separate UIDs. The runtime plugin
 executes Node/V8/libuv. The host owns Android automation authority. Neither side is a
@@ -22,7 +22,13 @@ realpath/symlink escape, and unbounded watches are denied by policy.
 
 Host-side module-source providers are request-scoped. They materialize or decrypt only
 resolver-selected candidates, enforce version/byte/count/time limits, and are closed
-with the execution. They do not turn the host into a second module loader.
+with the execution. Provider v3 may additionally compile an exact runtime-created
+`.ts/.mts/.cts` candidate for a compiler-backed Node project. The runtime plugin reads
+that candidate from its private workspace with no-follow identity checks and sends a
+byte- and SHA-256-bound PFD; the host overlays it on the existing project snapshot
+without writing source or output into the project. Generated paths, Source Maps, and
+the original file identity are revalidated before execution. This does not turn the
+host into a second module resolver or grant either process a new filesystem root.
 
 ## Capability Boundary
 

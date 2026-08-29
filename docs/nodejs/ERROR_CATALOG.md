@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Error Catalog
 
-Last reviewed: 2026-08-26.
+Last reviewed: 2026-08-29.
 
 Errors may originate in either process. The host owns routing, trust, bridge,
 permission, workspace, provider, queue, and scheduling failures. The runtime plugin
@@ -42,6 +42,13 @@ scope/realpath/symlink escape, and watch limits. Module-source providers use
 **ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_*** for invalid, denied, cancelled, timed-out,
 or failed requests. Feature boundaries use specific codes for disabled builtins,
 network, process APIs, workers, native addons, or Java interop.
+
+Compiler-backed Node TypeScript projects may request provider-v3 compilation for an
+exact runtime-created `.ts/.mts/.cts` file. **ERR_AUTOJS6_TYPESCRIPT_COMPILATION_FAILED**
+means that the dynamic source produced TypeScript error diagnostics or no exact emitted
+module; preserve its file, TS code, line, and column from the message. Snapshot
+not-found and ambiguous codes remain authoritative for old providers, missing targets,
+extensionless collisions, and candidates that cannot be admitted safely.
 
 Historical **ERR_AUTOJS6_EMBEDDED_NODE_*** codes can still appear from an older plugin
 or compatibility payload. They are legacy wire names, not evidence that the current
