@@ -129,14 +129,23 @@ public class MDTintHelper {
             fEditor.setAccessible(true);
             Object editor = fEditor.get(editText);
             Class<?> clazz = editor.getClass();
+            Drawable cursorDrawable = ContextCompat.getDrawable(editText.getContext(), mCursorDrawableRes);
+            if (cursorDrawable == null) return;
+            cursorDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            try {
+                Field fDrawableForCursor = clazz.getDeclaredField("mDrawableForCursor");
+                fDrawableForCursor.setAccessible(true);
+                fDrawableForCursor.set(editor, cursorDrawable);
+                return;
+            } catch (NoSuchFieldException ignored) {
+                // Android 7-8 use the older two-drawable cursor field.
+            }
             Field fCursorDrawable = clazz.getDeclaredField("mCursorDrawable");
             fCursorDrawable.setAccessible(true);
-            Drawable[] drawables = new Drawable[2];
-            drawables[0] = ContextCompat.getDrawable(editText.getContext(), mCursorDrawableRes);
-            drawables[1] = ContextCompat.getDrawable(editText.getContext(), mCursorDrawableRes);
-            drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            fCursorDrawable.set(editor, drawables);
+            Drawable secondCursorDrawable = ContextCompat.getDrawable(editText.getContext(), mCursorDrawableRes);
+            if (secondCursorDrawable == null) return;
+            secondCursorDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            fCursorDrawable.set(editor, new Drawable[]{cursorDrawable, secondCursorDrawable});
         } catch (NoSuchFieldException e1) {
             Log.d("MDTintHelper", "Device issue with cursor tinting: " + e1.getMessage());
             // e1.printStackTrace();

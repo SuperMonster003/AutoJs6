@@ -66,6 +66,7 @@ import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.size
 import androidx.core.view.updateLayoutParams
+import com.afollestad.materialdialogs.internal.MDTintHelper
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
@@ -1103,6 +1104,8 @@ object ViewUtils {
                 textCursorDrawable = textCursorDrawable?.mutate()?.apply {
                     setTint(fullColor)
                 }
+            } else {
+                MDTintHelper.setTint(this, fullColor)
             }
         }
         findViewById<ImageView?>(androidx.appcompat.R.id.search_close_btn)?.apply {
