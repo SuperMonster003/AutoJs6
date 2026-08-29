@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.MenuItemCompat;
 import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on Oct 25, 2017.
@@ -39,6 +40,7 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
 
     public void setColorsByThemeColorLuminance() {
         if (mSearchView != null) {
+            mSearchView.setQueryHint(mActivity.getString(R.string.text_search));
             ViewUtils.setSearchViewColorsByThemeColorLuminance(mActivity, mSearchView);
         }
     }

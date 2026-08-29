@@ -1099,6 +1099,11 @@ object ViewUtils {
             setTextColor(fullColor)
             setHintTextColor(hintColor)
             setLinkTextColor(fullColor)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                textCursorDrawable = textCursorDrawable?.mutate()?.apply {
+                    setTint(fullColor)
+                }
+            }
         }
         findViewById<ImageView?>(androidx.appcompat.R.id.search_close_btn)?.apply {
             setColorFilter(fullColor)
