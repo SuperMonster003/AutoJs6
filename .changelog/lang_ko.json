@@ -124,6 +124,7 @@
         "전역 JavaScript (Rhino) R8 통합에 검증된 산출물 내보내기용 `runtime.loadJarWithR8` 오버로드 3개와 프로토콜 1.1 `runtime.retraceR8Stack`을 추가; mapping/seeds/usage/retrace metadata를 원자적으로 게시하고 retrace는 mapping 출처에 결합되며 Provider가 없거나 잘못되면 D8/dx 또는 로컬 fallback 없이 실패"
       ],
       "fix": [
+        "플러그인을 활성화, 재승인 또는 업데이트한 뒤에도 파일 관리자의 Explorer Action이 오래된 캐시나 행 참조를 유지해 AutoJs6를 재시작할 때까지 인식된 파일이 시스템 앱 선택기로 돌아가던 문제",
         "파일 관리자가 이미 동영상으로 분류한 형식도 동영상 버튼에서 시스템 앱 후보가 열릴 수 있던 문제. 인식된 모든 동영상 형식에서 공식 Video Player 플러그인을 먼저 사용하고 플러그인이 없거나 비활성화, 미승인, 비호환, 사용 불가 또는 실행 실패 상태이면 명시적인 \"다른 앱으로 열기\" 옵션과 복구 안내를 표시",
         "패키징된 앱의 Rhino CommonJS require가 종속 JavaScript 모듈을 복호화하지 못해 패키징 시 컴파일된 다중 파일 TypeScript 출력이 \"Cannot read file\"로 실패하는 문제",
         "Android Activity가 제거된 뒤에도 Node.js UI 핸들이 활성 상태로 남아 지연 업데이트를 허용하고 실행 정리 시점까지 공급자 소유 리소스를 유지할 수 있던 문제",

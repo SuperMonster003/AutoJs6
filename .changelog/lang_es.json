@@ -124,6 +124,7 @@
         "La integración R8 de JavaScript global (Rhino) añade tres sobrecargas de `runtime.loadJarWithR8` para exportación verificada y `runtime.retraceR8Stack` del protocolo 1.1; mapping/seeds/usage/retrace metadata se publican atómicamente, retrace vincula la procedencia del mapping y un proveedor ausente o inválido falla sin fallback D8/dx ni local"
       ],
       "fix": [
+        "Las acciones Explorer del administrador de archivos podían conservar caché o referencias de fila obsoletas después de activar, volver a autorizar o actualizar un plugin, por lo que los archivos reconocidos volvían al selector de aplicaciones del sistema hasta reiniciar AutoJs6",
         "Los botones de video del administrador de archivos podían abrir el selector de aplicaciones del sistema para formatos ya clasificados como video; ahora todos los tipos de video reconocidos usan primero el plugin oficial Video Player y, si falta, está desactivado, no está autorizado, es incompatible, no está disponible o no se inicia, el host muestra instrucciones de recuperación con la opción explícita \"Abrir con otras aplicaciones\"",
         "El require de Rhino CommonJS en aplicaciones empaquetadas no podía descifrar módulos JavaScript dependientes, por lo que la salida TypeScript multifichero compilada durante el empaquetado fallaba con \"Cannot read file\"",
         "Los identificadores de UI de Node.js podían permanecer activos tras destruirse su Activity de Android, permitiendo actualizaciones tardías y reteniendo recursos del proveedor hasta finalizar la ejecución",

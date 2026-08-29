@@ -263,6 +263,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 设置页面提供 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
 * `新增` 打包应用配置支持显示或隐藏 "日志" 及 "设置" 启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退
+* `修复` 文件管理器 Explorer 动作在插件启用、重新授权或更新后可能继续使用过期缓存或文件行引用, 导致已识别文件在 AutoJs6 重启前回退至系统应用选择器
 * `修复` 文件管理器中部分已识别为视频的格式仍会打开系统应用候选菜单的问题; 现在所有已识别的视频类型均优先调用官方视频播放器插件, 插件未安装, 已禁用, 未授权, 不兼容, 不可用或启动失败时显示恢复引导及明确的 "用其他应用打开" 选项
 * `修复` 打包应用的 Rhino CommonJS require 加载器无法解密依赖 JavaScript 模块, 导致 build-time 编译的多文件 TypeScript 项目以 "Cannot read file" 失败的问题
 * `修复` Node.js UI 句柄在 Android Activity 销毁后可能仍保持活动, 允许迟到更新并持续占用提供器资源直至执行清理

@@ -287,6 +287,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 打包應用支援使用 APK Builder Template 外掛進行遠端建置
 * `新增` 開發者選項支援 GitHub 存取權杖設定, 用於提升更新檢查及外掛索引請求限額
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出的 `runtime.loadJarWithR8` 多載及通訊協定 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發布, retrace 綁定 mapping 溯源, 提供者缺失或無效時禁止 D8/dx 或本機回退
+* `修復` 檔案管理員 Explorer 動作在外掛程式啟用、重新授權或更新後可能繼續使用過期快取或檔案列參照, 導致已辨識檔案在 AutoJs6 重新啟動前回退至系統應用程式選擇器
 * `修復` 檔案管理員中部分已辨識為影片的格式仍會開啟系統應用程式候選選單的問題; 現在所有已辨識的影片類型均優先呼叫官方影片播放器外掛程式, 外掛程式未安裝, 已停用, 未授權, 不相容, 不可用或啟動失敗時顯示復原指引及明確的 "用其他應用程式開啟" 選項
 * `修復` 打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 "Cannot read file" 失敗的問題
 * `修復` Node.js UI 控制代碼在 Android Activity 銷毀後可能仍保持作用中, 允許延遲更新並持續佔用提供者資源直到執行清理

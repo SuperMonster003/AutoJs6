@@ -127,6 +127,7 @@
 * `新增` 打包應用支持使用 APK Builder Template 插件進行遠程構建
 * `新增` 開發者選項支持 GitHub 訪問令牌設置, 用於提升更新檢查及插件索引請求限額
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出嘅 `runtime.loadJarWithR8` 多載及協議 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發佈, retrace 綁定 mapping 來源, 提供者缺失或無效時禁止 D8/dx 或本地回退
+* `修復` 檔案管理員 Explorer 動作在外掛程式啟用、重新授權或更新後可能繼續使用過期快取或檔案列參照, 導致已識別檔案在 AutoJs6 重新啟動前回退至系統應用程式選擇器
 * `修復` 檔案管理員中部分已識別為影片的格式仍會開啟系統應用程式候選選單的問題; 現在所有已識別的影片類型均優先呼叫官方影片播放器外掛程式, 外掛程式未安裝, 已停用, 未獲授權, 不相容, 不可用或啟動失敗時顯示復原指引及明確的 "用其他應用程式開啟" 選項
 * `修復` 打包應用程式的 Rhino CommonJS require 載入器無法解密相依 JavaScript 模組, 導致 build-time 編譯的多檔案 TypeScript 專案以 "Cannot read file" 失敗的問題
 * `修復` Node.js UI 控制代碼在 Android Activity 銷毀後可能仍保持活動, 允許延遲更新並持續佔用提供者資源直至執行清理

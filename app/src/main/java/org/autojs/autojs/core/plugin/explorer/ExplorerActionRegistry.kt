@@ -55,10 +55,14 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
     private val refreshStamps = AtomicReference<List<ExplorerActionRefreshStamp>?>(null)
 
     /**
-     * Rebuilds the action snapshot while reporting only user-visible catalog changes.
-     * Discovery and catalog IPC run only when the installed/enabled/authorized plugin set
-     * changed since the last clean refresh; otherwise the existing snapshot stays valid
-     * because launches re-validate components and re-bind services on demand.
+     * Rebuilds the action snapshot and reports whether consumers must rebind their action
+     * references. Discovery and catalog IPC run only when the installed/enabled/authorized
+     * plugin set changed since the last clean refresh; otherwise the existing snapshot stays
+     * valid because launches re-validate components and re-bind services on demand.
+     *
+     * A completed refresh always replaces the backing action objects, even when their visible
+     * catalog presentation is unchanged. Consumers must therefore rebind after every completed
+     * refresh so a row cannot retain a pre-update action that fails launch-time membership checks.
      */
     suspend fun refresh(context: Context): Boolean = withContext(Dispatchers.IO) {
         val appContext = context.applicationContext
@@ -123,8 +127,8 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         // A refresh with failed candidates keeps the fingerprint unset so the next call retries.
         // zh-CN: 存在失败候选的刷新不记录指纹, 下一次调用会重试.
         refreshStamps.set(stamps.takeIf { discoveryClean })
-        val previous = snapshot.getAndSet(next)
-        previous.presentationSignature() != next.presentationSignature()
+        snapshot.set(next)
+        true
     }
 
     private fun collectRefreshStamps(context: Context): List<ExplorerActionRefreshStamp>? = runCatching {
@@ -158,16 +162,6 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
             }
             .sortedWith(compareBy({ it.packageName }, { it.serviceName }))
     }.getOrNull()
-
-    private fun List<ResolvedExplorerAction>.presentationSignature() = map { action ->
-        ExplorerActionPresentationSignature(
-            packageName = action.packageName,
-            component = action.component.flattenToString(),
-            actionLabel = action.actionLabel,
-            menuTitle = action.menuTitle,
-            descriptor = action.descriptor,
-        )
-    }
 
     override fun actionsFor(
         surface: ExplorerSurface,
@@ -420,14 +414,6 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
     private const val DIRECTORY_MIME_TYPE = "inode/directory"
     private const val ARCHIVE_VOLUME_PROTOCOL_VERSION = 12
 }
-
-private data class ExplorerActionPresentationSignature(
-    val packageName: String,
-    val component: String,
-    val actionLabel: String,
-    val menuTitle: String,
-    val descriptor: ExplorerActionDescriptor,
-)
 
 private data class ExplorerActionRefreshStamp(
     val packageName: String,

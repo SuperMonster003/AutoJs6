@@ -18,6 +18,7 @@ import com.google.android.material.tabs.TabLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.launch
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionRegistry
 import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -65,10 +66,18 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     private var mFabVisibilityBeforeArchive = View.VISIBLE
     private var mFabTranslationYBeforeArchive = 0f
     private var mFabStateSavedForArchive = false
+    private val mPluginStateChangedListener: (String) -> Unit = {
+        GlobalAppContext.post {
+            lifecycleScope.launch {
+                refreshPluginActions()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         EventBus.getDefault().register(this)
+        PluginStateChangeRegistry.addListener(mPluginStateChangedListener)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -100,9 +109,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                if (ExplorerActionRegistry.refresh(requireContext())) {
-                    mExplorerView?.notifyPluginActionsChanged()
-                }
+                refreshPluginActions()
             }
         }
         (activity as? MainActivity)?.apply {
@@ -328,6 +335,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     }
 
     override fun onDestroy() {
+        PluginStateChangeRegistry.removeListener(mPluginStateChangedListener)
         val shouldClearViewStates = activity?.let { hostActivity ->
             ExplorerViewStateLifecyclePolicy.shouldClearOnDestroy(
                 isActivityFinishing = hostActivity.isFinishing,
@@ -339,6 +347,13 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
             ExplorerView.clearViewStates()
         }
         EventBus.getDefault().unregister(this)
+    }
+
+    private suspend fun refreshPluginActions() {
+        val currentContext = context ?: return
+        if (ExplorerActionRegistry.refresh(currentContext)) {
+            mExplorerView?.notifyPluginActionsChanged()
+        }
     }
 
     override fun onDestroyView() {
