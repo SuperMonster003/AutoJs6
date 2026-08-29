@@ -140,7 +140,7 @@ object ScriptLaunchSourceFactory {
             "AUTOJS_PROJECT_CONTEXT_INVALID: Not an AutoJs6 project directory: ${root.path}"
         }
 
-        val projectConfig = ProjectConfig.fromProjectDir(root.path)
+        val projectConfig = ProjectConfig.fromProjectDirForExecution(root.path)
         val legacyEntry = File(
             root,
             projectConfig?.mainScriptFileName ?: ProjectConfig.DEFAULT_MAIN_SCRIPT_FILE_NAME,

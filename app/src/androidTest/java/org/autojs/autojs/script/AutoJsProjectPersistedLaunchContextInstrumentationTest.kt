@@ -38,6 +38,31 @@ class AutoJsProjectPersistedLaunchContextInstrumentationTest {
     }
 
     @Test
+    fun minimalRhinoProjectRestoresTypeScriptEntryWithoutPackagingMetadata() {
+        val root = project(
+            """{"name":"Minimal Rhino","main":"main.ts"}""",
+            "main.ts",
+        )
+
+        assertNull(ProjectConfig.fromProjectDir(root.path))
+        assertEquals(
+            "main.ts",
+            requireNotNull(ProjectConfig.fromProjectDirForExecution(root.path)).mainScriptFileName,
+        )
+
+        val launch = persistedLaunch(
+            root,
+            ScriptLaunchSourceFactory.capturePersistedLaunchContext(root.path),
+        )
+        val source = launch.source as JavaScriptFileSource
+
+        assertEquals(File(root, "main.ts").canonicalFile, source.file.canonicalFile)
+        assertEquals(root.canonicalPath, launch.workingDirectory)
+        assertNull(launch.nodeProjectLaunchSource)
+        assertNull(launch.pythonProjectSource)
+    }
+
+    @Test
     fun nodeAndPythonProjectsKeepTheirDedicatedLaunchRoutes() {
         val nodeRoot = project("""{"type":"node","main":"main.cjs"}""", "main.cjs")
         val nodeLaunch = persistedLaunch(

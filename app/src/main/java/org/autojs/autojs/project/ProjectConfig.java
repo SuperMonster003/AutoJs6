@@ -232,8 +232,22 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         return config;
     }
 
+    /**
+     * Parses the project fields required to execute a project without requiring APK packaging
+     * metadata. User-facing script projects may intentionally omit package and version fields;
+     * callers that build an APK must continue using {@link #fromJson(String)}.
+     */
+    @Nullable
+    public static ProjectConfig fromJsonForExecution(String json) {
+        if (json == null) {
+            return null;
+        }
+        ProjectConfig config = sGson.fromJson(json, ProjectConfig.class);
+        return isValidForExecution(config) ? config : null;
+    }
+
     private static boolean isValid(ProjectConfig config) {
-        if (TextUtils.isEmpty(config.getName())) {
+        if (!isValidForExecution(config)) {
             return false;
         }
         if (TextUtils.isEmpty(config.getPackageName())) {
@@ -242,10 +256,13 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         if (TextUtils.isEmpty(config.getVersionName())) {
             return false;
         }
-        if (TextUtils.isEmpty(config.getMainScriptFileName())) {
-            return false;
-        }
         return config.getVersionCode() != -1;
+    }
+
+    private static boolean isValidForExecution(ProjectConfig config) {
+        return config != null
+                && !TextUtils.isEmpty(config.getName())
+                && !TextUtils.isEmpty(config.getMainScriptFileName());
     }
 
     public static ProjectConfig fromAssets(Context context, String path) {
@@ -572,6 +589,26 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     @Nullable
     public static ProjectConfig fromProjectDir(String path) {
         return fromFilePath(configFileOfDir(path));
+    }
+
+    /**
+     * Reads a runnable project descriptor while keeping packaging metadata validation separate.
+     */
+    @Nullable
+    public static ProjectConfig fromProjectDirForExecution(String path) {
+        String configPath = configFileOfDir(path);
+        try {
+            return fromJsonForExecution(PFiles.read(configPath));
+        } catch (UncheckedIOException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                return null;
+            }
+            throw e;
+        } catch (Exception e) {
+            Log.d(TAG, "Failed to read execution json from file: " + configPath
+                    + " (" + e.getMessage() + ")");
+            return null;
+        }
     }
 
     public static String configFileOfDir(String projectDir) {
