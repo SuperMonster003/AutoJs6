@@ -3,9 +3,13 @@ package org.autojs.autojs.core.plugin.center
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 
-enum class PluginMechanism(val displayName: String) {
-    AIDL(str(R.string.text_plugin_mechanism_aidl)),
-    SDK(str(R.string.text_plugin_mechanism_sdk)),
+enum class PluginMechanism(private val displayNameRes: Int) {
+    AIDL(R.string.text_plugin_mechanism_aidl),
+    SDK(R.string.text_plugin_mechanism_sdk),
+    ;
+
+    val displayName: String
+        get() = str(displayNameRes)
 }
 
 enum class PluginAuthorizedState {
