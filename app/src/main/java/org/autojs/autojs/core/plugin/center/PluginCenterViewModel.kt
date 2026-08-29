@@ -48,7 +48,8 @@ import java.util.Locale
  *   The snapshot reuses metadata persisted by the last complete discovery, so the first
  *   frame matches the last known real state including icons and descriptions.
  * - Then refresh complete local metadata and the online index independently in the background.
- * - Every publish is gated by PluginCenterItemSemantics, so unchanged content never re-renders.
+ * - Every publish is gated in the background by PluginCenterItemSemantics, so unchanged
+ *   content never re-renders and comparison work never interrupts UI motion.
  * - Isolate discovery failures so one broken plugin never clears the complete list.
  *
  * zh-CN:
@@ -59,7 +60,8 @@ import java.util.Locale
  * - 先使用仅依赖 PackageManager 的本地快照与缓存索引渲染列表.
  *   快照复用上次完整发现持久化的元数据, 使首帧与上次已知的真实状态一致 (含图标与描述).
  * - 随后在后台分别刷新完整本地元数据与在线索引.
- * - 所有发布均经 PluginCenterItemSemantics 门控, 内容未变化时不会重新渲染.
+ * - 所有发布均在后台经 PluginCenterItemSemantics 门控, 内容未变化时不会重新渲染,
+ *   比较工作也不会打断 UI 动效.
  * - 隔离发现异常, 避免单个异常插件清空整个列表.
  *
  * Created by JetBrains AI Assistant (GPT-5.2) on Nov 26, 2025.
@@ -116,7 +118,7 @@ class PluginCenterViewModel : ViewModel() {
         loadJob?.cancel()
         loadJob = viewModelScope.launch load@{
             fun isLatestLoad() = generation == loadGeneration
-            fun updateLatestItems(next: List<PluginCenterItem>) {
+            suspend fun updateLatestItems(next: List<PluginCenterItem>) {
                 if (isLatestLoad()) {
                     val updated = updateItemsIfChanged(
                         next = next,
@@ -342,12 +344,30 @@ class PluginCenterViewModel : ViewModel() {
         PluginInfoDialogManager.refreshIfShowing(context, _items.value)
     }
 
-    private fun updateItemsIfChanged(next: List<PluginCenterItem>, force: Boolean = false): Boolean {
-        val shouldUpdate = force || !PluginCenterItemSemantics.isSameList(_items.value, next)
-        if (shouldUpdate) {
+    private suspend fun updateItemsIfChanged(next: List<PluginCenterItem>, force: Boolean = false): Boolean {
+        if (force) {
             _items.value = next
+            return true
         }
-        return shouldUpdate
+
+        while (true) {
+            val comparedItems = _items.value
+            val unchanged = withContext(Dispatchers.Default) {
+                PluginCenterItemSemantics.isSameList(comparedItems, next)
+            }
+            // A toggle or another publisher may update the list while comparison is
+            // running. Compare again instead of overwriting that newer state.
+            // zh-CN: 比较期间可能由开关或其他发布者更新列表.
+            // 此时重新比较, 避免覆盖更新的状态.
+            if (_items.value !== comparedItems) {
+                continue
+            }
+            if (unchanged) {
+                return false
+            }
+            _items.value = next
+            return true
+        }
     }
 
     private fun PluginIndexSource.labelForMessage(context: Context): String = when (this) {
