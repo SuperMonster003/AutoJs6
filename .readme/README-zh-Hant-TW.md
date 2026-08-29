@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 8 月 29 日.
+資料更新於 2026 年 8 月 30 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/08/29
+###### 2026/08/30
 
 * `新增` `engines.execScript` 記憶體 TypeScript 即時執行: `.ts/.tsx/.mts/.cts` 原始碼名稱經獨立編譯器處理, 診斷與 Source Map 堆疊對應和檔案指令碼一致, Rhino 回傳最終運算式值, 完整記錄頁及編輯器記錄面板可互動求值單行 TypeScript 片段
 * `新增` compiler-backed Node TypeScript 專案現可按需編譯執行期間建立的 `.ts/.mts/.cts`: Node 透過綁定精確位元組數與 SHA-256 的有界 PFD 將原始碼交給主機, 主機重用常駐專案工作階段, 保留型別診斷與 Source Map 堆疊對應, 並繼續拒絕路徑逸出, 符號連結和歧義目標
@@ -291,6 +291,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 打包應用支援使用 APK Builder Template 外掛進行遠端建置
 * `新增` 開發者選項支援 GitHub 存取權杖設定, 用於提升更新檢查及外掛索引請求限額
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出的 `runtime.loadJarWithR8` 多載及通訊協定 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發布, retrace 綁定 mapping 溯源, 提供者缺失或無效時禁止 D8/dx 或本機回退
+* `修復` 完整日誌頁面及編輯器底部日誌面板啟用 TypeScript 命令列後, wrap-content 導覽列預留檢視會占用全部剩餘高度並將日誌清單壓縮為零; 現將命令列置於可見日誌區域上方, 日誌頁 FAB 也恢復原有底部偏移
 * `修復` 壓縮檔案項目的重新命名/刪除操作未依目前工作階段宣告的修改能力收斂, 導致唯讀或不支援修改的工作階段仍可能顯示提供者無法完成的操作
 * `修復` 檔案管理員 Explorer 動作在外掛程式啟用、重新授權或更新後可能繼續使用過期快取或檔案列參照, 導致已辨識檔案在 AutoJs6 重新啟動前回退至系統應用程式選擇器
 * `修復` 檔案管理員中部分已辨識為影片的格式仍會開啟系統應用程式候選選單的問題; 現在所有已辨識的影片類型均優先呼叫官方影片播放器外掛程式, 外掛程式未安裝, 已停用, 未授權, 不相容, 不可用或啟動失敗時顯示復原指引及明確的 "用其他應用程式開啟" 選項
@@ -363,6 +364,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 檔案管理器解析 APK 時錯誤忽略 ZIP 條目名稱的大小寫, 導致部分包含僅大小寫不同條目的有效安裝包被誤判為含有重複條目而無法檢視或安裝的問題
 * `修復` 外部 URI 快取匯入因信任內容提供者檔案名稱而可能引發路徑穿越或同名檔案覆寫的問題
 * `修復` 檔案管理器在資源回收筒刪除檔案後清單捲動位置被重設的問題
+* `修復` 搜尋框可能保留預設藍色游標而未使用適合目前主題的前景色, 且搜尋提示可能停留在後備語言而未跟隨目前應用程式語言的問題
 * `修復` 主頁抽屜開關項的開關檢視有效點選區域過小的問題
 * `修復` 浮動按鈕選單顯示的最近應用程式套件名稱及 Activity 資訊異常的問題 _[`issue #529`](http://issues.autojs6.com/529)_
 * `修復` 浮動按鈕 "執行腳本" 對話框最小化後可能無法還原的問題 (試修) _[`issue #500`](http://issues.autojs6.com/500)_
@@ -730,7 +732,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 29 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 8 月 30 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

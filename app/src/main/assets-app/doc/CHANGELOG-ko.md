@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/08/29
+###### 2026/08/30
 
 * `추가` `engines.execScript` 기반 in-memory TypeScript 즉시 실행: `.ts/.tsx/.mts/.cts` source name은 독립 compiler를 사용해 file script와 동일한 diagnostics 및 Source Map stack mapping을 유지하고, Rhino는 최종 expression value를 반환하며, 전체 Log page와 editor Log panel에서 한 줄 snippet을 대화형으로 평가할 수 있습니다
 * `추가` compiler-backed Node TypeScript project가 실행 중 생성된 `.ts/.mts/.cts` 파일을 이제 on-demand compile할 수 있습니다: Node는 byte count와 SHA-256으로 고정된 PFD를 통해 source를 host로 전달하고, host는 resident project session을 재사용하며, type diagnostics와 Source Map stack mapping을 유지하면서 path escape, symbolic link, ambiguous target을 계속 거부합니다
@@ -131,6 +131,7 @@
 * `추가` 앱 패키징에서 APK Builder Template 플러그인을 사용한 원격 빌드 지원
 * `추가` 개발자 옵션에서 GitHub 액세스 토큰 설정 지원, 업데이트 확인 및 플러그인 인덱스 요청 한도 확장용
 * `추가` 전역 JavaScript (Rhino) R8 통합에 검증된 산출물 내보내기용 `runtime.loadJarWithR8` 오버로드 3개와 프로토콜 1.1 `runtime.retraceR8Stack`을 추가; mapping/seeds/usage/retrace metadata를 원자적으로 게시하고 retrace는 mapping 출처에 결합되며 Provider가 없거나 잘못되면 D8/dx 또는 로컬 fallback 없이 실패
+* `수정` 전체 로그 페이지와 편집기 하단 로그 패널에서 TypeScript 명령 행을 활성화하면 wrap-content 내비게이션 바 스페이서가 남은 높이를 모두 차지해 로그 목록 높이가 0이 되던 문제. 이제 명령 행은 표시 가능한 로그 영역 위에 배치되고 로그 페이지 FAB도 원래 하단 오프셋으로 복원
 * `수정` 압축 파일 항목 이름 바꾸기 및 삭제 작업이 현재 세션에서 선언한 변경 기능을 따르지 않아 읽기 전용 또는 미지원 세션에서도 공급자가 완료할 수 없는 작업이 노출될 수 있던 문제
 * `수정` 플러그인을 활성화, 재승인 또는 업데이트한 뒤에도 파일 관리자의 Explorer Action이 오래된 캐시나 행 참조를 유지해 AutoJs6를 재시작할 때까지 인식된 파일이 시스템 앱 선택기로 돌아가던 문제
 * `수정` 파일 관리자가 이미 동영상으로 분류한 형식도 동영상 버튼에서 시스템 앱 후보가 열릴 수 있던 문제. 인식된 모든 동영상 형식에서 공식 Video Player 플러그인을 먼저 사용하고 플러그인이 없거나 비활성화, 미승인, 비호환, 사용 불가 또는 실행 실패 상태이면 명시적인 "다른 앱으로 열기" 옵션과 복구 안내를 표시
@@ -203,6 +204,7 @@
 * `수정` 파일 관리자가 APK를 분석할 때 ZIP 항목 이름의 대소문자를 잘못 무시하여 대소문자만 다른 항목을 포함한 일부 유효한 패키지를 중복 항목이 있는 것으로 오인하고 상세 보기 또는 설치를 차단하는 문제
 * `수정` 외부 URI 캐시 가져오기에서 콘텐츠 제공자가 제공한 파일 이름을 신뢰하여 경로 탐색 또는 같은 이름의 파일 덮어쓰기가 발생할 수 있는 문제
 * `수정` 파일 관리자에서 휴지통의 파일을 삭제한 후 목록 스크롤 위치가 초기화되는 문제
+* `수정` 검색 필드가 테마에 적합한 전경색 대신 기본 파란색 커서를 유지하고, 힌트가 현재 앱 언어를 따르지 않고 폴백 언어로 남을 수 있는 문제
 * `수정` 홈 서랍 스위치 항목의 유효 터치 영역이 지나치게 작은 문제
 * `수정` 플로팅 버튼 메뉴에 표시되는 최근 앱의 패키지 이름 및 Activity 정보가 올바르지 않은 문제 _[`issue #529`](http://issues.autojs6.com/529)_
 * `수정` 플로팅 버튼의 "스크립트 실행" 대화상자가 최소화된 후 복원되지 않을 수 있는 문제 (수정 시도) _[`issue #500`](http://issues.autojs6.com/500)_

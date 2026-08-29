@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 8 月 29 日.
+数据更新于 2026 年 8 月 30 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/08/29
+###### 2026/08/30
 
 * `新增` `engines.execScript` 内存 TypeScript 即时执行: `.ts/.tsx/.mts/.cts` 源名称经独立编译器处理, 诊断与 Source Map 栈映射同文件脚本一致, Rhino 返回最终表达式值, 完整日志页及编辑器日志面板可交互求值单行 TypeScript 片段
 * `新增` compiler-backed Node TypeScript 项目现可按需编译运行中创建的 `.ts/.mts/.cts`: Node 通过绑定精确字节数与 SHA-256 的有界 PFD 将源码交给宿主, 宿主复用常驻项目会话, 保留类型诊断与 Source Map 栈映射, 并继续拒绝路径逃逸, 符号链接和歧义目标
@@ -267,6 +267,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 设置页面提供 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
 * `新增` 打包应用配置支持显示或隐藏 "日志" 及 "设置" 启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退
+* `修复` 完整日志页及编辑器底部日志面板启用 TypeScript 命令栏后, wrap-content 导航栏占位视图会吞占全部剩余高度并将日志列表压缩为零; 现将命令栏置于可见日志区域上方, 日志页 FAB 也恢复原底部偏移
 * `修复` 压缩档案条目的重命名/删除操作未按当前会话声明的修改能力收敛, 导致只读或不支持修改的会话仍可能显示提供方无法完成的操作的问题
 * `修复` 文件管理器 Explorer 动作在插件启用、重新授权或更新后可能继续使用过期缓存或文件行引用, 导致已识别文件在 AutoJs6 重启前回退至系统应用选择器
 * `修复` 文件管理器中部分已识别为视频的格式仍会打开系统应用候选菜单的问题; 现在所有已识别的视频类型均优先调用官方视频播放器插件, 插件未安装, 已禁用, 未授权, 不兼容, 不可用或启动失败时显示恢复引导及明确的 "用其他应用打开" 选项
@@ -339,6 +340,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 文件管理器解析 APK 时错误忽略 ZIP 条目名的大小写, 导致部分包含仅大小写不同条目的有效安装包被误判为含有重复条目而无法查看或安装的问题
 * `修复` 外部 URI 缓存导入因信任内容提供方文件名而可能引发路径穿越或同名文件覆盖的问题
 * `修复` 文件管理器在回收站删除文件后列表滚动位置被重置的问题
+* `修复` 搜索框可能保留默认蓝色光标而未使用适合当前主题的前景色, 且搜索提示可能停留在回退语言而未跟随当前应用语言的问题
 * `修复` 主页抽屉开关项的开关视图有效点击区域过小的问题
 * `修复` 浮动按钮菜单显示的最近应用包名及 Activity 信息异常的问题 _[`issue #529`](http://issues.autojs6.com/529)_
 * `修复` 浮动按钮 "运行脚本" 对话框最小化后可能无法还原的问题 (试修) _[`issue #500`](http://issues.autojs6.com/500)_
@@ -709,7 +711,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 8 月 29 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 8 月 30 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

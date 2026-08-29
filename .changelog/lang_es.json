@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/29",
+      "released_date": "2026/08/30",
       "feature": [
         "Ejecución inmediata de TypeScript en memoria mediante `engines.execScript`: los nombres `.ts/.tsx/.mts/.cts` usan el compilador independiente con diagnósticos y mapeo de pila Source Map equivalentes a los archivos, Rhino devuelve el valor de la expresión final y la página Log completa junto con el panel Log del editor evalúan fragmentos de una línea de forma interactiva",
         "Los proyectos Node TypeScript respaldados por el compilador ahora pueden compilar bajo demanda archivos `.ts/.mts/.cts` creados durante la ejecución: Node transfiere la fuente mediante un PFD acotado por bytes y SHA-256, el host reutiliza la sesión residente del proyecto, se conservan los diagnósticos de tipos y el mapeo de pila con Source Map, y siguen rechazados el escape de ruta, los enlaces simbólicos y los destinos ambiguos",
@@ -128,6 +128,7 @@
         "La integración R8 de JavaScript global (Rhino) añade tres sobrecargas de `runtime.loadJarWithR8` para exportación verificada y `runtime.retraceR8Stack` del protocolo 1.1; mapping/seeds/usage/retrace metadata se publican atómicamente, retrace vincula la procedencia del mapping y un proveedor ausente o inválido falla sin fallback D8/dx ni local"
       ],
       "fix": [
+        "Al activar la fila de comandos TypeScript en la página completa de Registro y en el panel inferior de Registro del editor, un separador de la barra de navegación con wrap-content podía consumir toda la altura restante y reducir la lista de registros a cero; ahora la fila queda sobre un área de registros visible y el FAB de la página de Registro recupera su desplazamiento inferior original",
         "Las acciones Renombrar y Eliminar de entradas de archivo no respetaban las capacidades de modificación declaradas por la sesión actual, por lo que sesiones de solo lectura o no compatibles podían mostrar operaciones que el proveedor no podía completar",
         "Las acciones Explorer del administrador de archivos podían conservar caché o referencias de fila obsoletas después de activar, volver a autorizar o actualizar un plugin, por lo que los archivos reconocidos volvían al selector de aplicaciones del sistema hasta reiniciar AutoJs6",
         "Los botones de video del administrador de archivos podían abrir el selector de aplicaciones del sistema para formatos ya clasificados como video; ahora todos los tipos de video reconocidos usan primero el plugin oficial Video Player y, si falta, está desactivado, no está autorizado, es incompatible, no está disponible o no se inicia, el host muestra instrucciones de recuperación con la opción explícita \"Abrir con otras aplicaciones\"",
@@ -200,6 +201,7 @@
         "El administrador de archivos ignoraba por error las diferencias entre mayúsculas y minúsculas en los nombres de las entradas ZIP al analizar APK, por lo que entradas que solo diferían en el uso de mayúsculas y minúsculas se consideraban duplicadas en algunos paquetes válidos e impedían verlos o instalarlos",
         "Las importaciones en caché desde URI externos confiaban en los nombres de archivo proporcionados por el proveedor de contenido, lo que podía permitir el cruce de rutas o la sobrescritura de archivos con el mismo nombre",
         "La posición de desplazamiento de la lista del administrador de archivos se restablecía tras eliminar archivos de la Papelera",
+        "Los campos de búsqueda podían conservar el cursor azul predeterminado en lugar del color de primer plano adecuado para el tema, y sus indicaciones podían permanecer en el idioma de reserva en vez de seguir el idioma actual de la aplicación",
         "El área táctil efectiva de los interruptores del cajón de inicio era demasiado pequeña",
         "Los nombres de paquete y la información de Activity de las aplicaciones recientes mostrados en el menú del botón flotante eran incorrectos _[`issue #529`](http://issues.autojs6.com/529)_",
         "El diálogo \"Ejecutar script\" del botón flotante podía no restaurarse tras minimizarlo (intento de corrección) _[`issue #500`](http://issues.autojs6.com/500)_",

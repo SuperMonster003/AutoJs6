@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 8 月 29 日 に更新されました.
+データは 2026 年 8 月 30 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/08/29
+###### 2026/08/30
 
 * `新機能` `engines.execScript` による in-memory TypeScript 即時実行: `.ts/.tsx/.mts/.cts` source name は独立 compiler で処理され, file script と同じ diagnostics と Source Map stack mapping を維持し, Rhino は最終 expression value を返し, 完全な Log page と editor Log panel で 1 行 snippet を対話的に評価できます
 * `新機能` compiler-backed Node TypeScript project は実行中に作成された `.ts/.mts/.cts` をオンデマンドでコンパイルできるようになりました: Node は byte count と SHA-256 で拘束された PFD を介して source を host に渡し, host は resident project session を再利用し, type diagnostics と Source Map stack mapping を維持しながら path escape, symbolic link, ambiguous target を引き続き拒否します
@@ -291,6 +291,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` アプリのパッケージ化が APK Builder Template プラグインを使用したリモートビルドに対応
 * `新機能` 開発者向けオプションが GitHub アクセストークン設定に対応, 更新確認とプラグインインデックスのリクエスト上限を拡張可能
 * `新機能` グローバル JavaScript (Rhino) R8 連携に検証済み成果物を出力する 3 つの `runtime.loadJarWithR8` オーバーロードとプロトコル 1.1 `runtime.retraceR8Stack` を追加; mapping/seeds/usage/retrace metadata を原子的に公開し, retrace は mapping の来歴を結合, Provider 不在または不正時は D8/dx やローカル実装へフォールバックしない
+* `修正` 完全なログページとエディター下部ログパネルで TypeScript コマンド行を有効にすると、wrap-content のナビゲーションバー用スペーサーが残りの高さをすべて占有し、ログリストの高さが 0 になる問題。コマンド行を表示可能なログ領域の上に配置し、ログページの FAB も元の下端オフセットに復元
 * `修正` アーカイブ項目の名前変更と削除が現在のセッションで宣言された変更能力に従わず、読み取り専用または未対応のセッションでもプロバイダーが完了できない操作を表示することがある問題
 * `修正` プラグインを有効化、再承認、または更新した後もファイルマネージャーのExplorer Actionが古いキャッシュや行参照を使い続け, AutoJs6を再起動するまで認識済みファイルがシステムのアプリ候補へ戻る問題
 * `修正` ファイルマネージャーで動画と分類済みの形式でも動画ボタンからシステムのアプリ候補が開く問題. 認識済みの全動画形式で公式 Video Player プラグインを最初に使用し, 未インストール, 無効, 未承認, 非互換, 利用不可, または起動失敗の場合は明示的な "他のアプリで開く" を含む復旧案内を表示
@@ -363,6 +364,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` ファイルマネージャーで APK を解析する際に ZIP エントリ名の大文字と小文字を誤って区別せず, 大文字と小文字のみが異なるエントリを含む一部の有効なパッケージが重複エントリありと誤判定されて詳細表示またはインストールできない問題
 * `修正` 外部 URI のキャッシュ取り込みでコンテンツプロバイダー提供のファイル名を信頼していたため, パストラバーサルまたは同名ファイルの上書きが発生する可能性がある問題
 * `修正` ファイルマネージャーでゴミ箱からファイルを削除するとリストのスクロール位置がリセットされる問題
+* `修正` 検索フィールドがテーマに適した前景色ではなく既定の青いカーソルを保持し, ヒントが現在のアプリ言語に追従せずフォールバック言語のままになる可能性がある問題
 * `修正` ホームドロワーのスイッチ操作領域が狭すぎる問題
 * `修正` フローティングボタンメニューに表示される最近のアプリのパッケージ名と Activity 情報が正しくない問題 _[`issue #529`](http://issues.autojs6.com/529)_
 * `修正` フローティングボタンの "スクリプトを実行" ダイアログが最小化後に復元できない可能性がある問題 (修正試行) _[`issue #500`](http://issues.autojs6.com/500)_
@@ -730,7 +732,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 8 月 29 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 8 月 30 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

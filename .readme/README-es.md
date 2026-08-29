@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 29 de August de 2026.
+Datos actualizados el 30 de August de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/08/29
+###### 2026/08/30
 
 * `Nuevo` Ejecución inmediata de TypeScript en memoria mediante `engines.execScript`: los nombres `.ts/.tsx/.mts/.cts` usan el compilador independiente con diagnósticos y mapeo de pila Source Map equivalentes a los archivos, Rhino devuelve el valor de la expresión final y la página Log completa junto con el panel Log del editor evalúan fragmentos de una línea de forma interactiva
 * `Nuevo` Los proyectos Node TypeScript respaldados por el compilador ahora pueden compilar bajo demanda archivos `.ts/.mts/.cts` creados durante la ejecución: Node transfiere la fuente mediante un PFD acotado por bytes y SHA-256, el host reutiliza la sesión residente del proyecto, se conservan los diagnósticos de tipos y el mapeo de pila con Source Map, y siguen rechazados el escape de ruta, los enlaces simbólicos y los destinos ambiguos
@@ -291,6 +291,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` El empaquetado de aplicaciones admite compilaciones remotas mediante plugins APK Builder Template
 * `Nuevo` Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins
 * `Nuevo` La integración R8 de JavaScript global (Rhino) añade tres sobrecargas de `runtime.loadJarWithR8` para exportación verificada y `runtime.retraceR8Stack` del protocolo 1.1; mapping/seeds/usage/retrace metadata se publican atómicamente, retrace vincula la procedencia del mapping y un proveedor ausente o inválido falla sin fallback D8/dx ni local
+* `Corrección` Al activar la fila de comandos TypeScript en la página completa de Registro y en el panel inferior de Registro del editor, un separador de la barra de navegación con wrap-content podía consumir toda la altura restante y reducir la lista de registros a cero; ahora la fila queda sobre un área de registros visible y el FAB de la página de Registro recupera su desplazamiento inferior original
 * `Corrección` Las acciones Renombrar y Eliminar de entradas de archivo no respetaban las capacidades de modificación declaradas por la sesión actual, por lo que sesiones de solo lectura o no compatibles podían mostrar operaciones que el proveedor no podía completar
 * `Corrección` Las acciones Explorer del administrador de archivos podían conservar caché o referencias de fila obsoletas después de activar, volver a autorizar o actualizar un plugin, por lo que los archivos reconocidos volvían al selector de aplicaciones del sistema hasta reiniciar AutoJs6
 * `Corrección` Los botones de video del administrador de archivos podían abrir el selector de aplicaciones del sistema para formatos ya clasificados como video; ahora todos los tipos de video reconocidos usan primero el plugin oficial Video Player y, si falta, está desactivado, no está autorizado, es incompatible, no está disponible o no se inicia, el host muestra instrucciones de recuperación con la opción explícita "Abrir con otras aplicaciones"
@@ -363,6 +364,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` El administrador de archivos ignoraba por error las diferencias entre mayúsculas y minúsculas en los nombres de las entradas ZIP al analizar APK, por lo que entradas que solo diferían en el uso de mayúsculas y minúsculas se consideraban duplicadas en algunos paquetes válidos e impedían verlos o instalarlos
 * `Corrección` Las importaciones en caché desde URI externos confiaban en los nombres de archivo proporcionados por el proveedor de contenido, lo que podía permitir el cruce de rutas o la sobrescritura de archivos con el mismo nombre
 * `Corrección` La posición de desplazamiento de la lista del administrador de archivos se restablecía tras eliminar archivos de la Papelera
+* `Corrección` Los campos de búsqueda podían conservar el cursor azul predeterminado en lugar del color de primer plano adecuado para el tema, y sus indicaciones podían permanecer en el idioma de reserva en vez de seguir el idioma actual de la aplicación
 * `Corrección` El área táctil efectiva de los interruptores del cajón de inicio era demasiado pequeña
 * `Corrección` Los nombres de paquete y la información de Activity de las aplicaciones recientes mostrados en el menú del botón flotante eran incorrectos _[`issue #529`](http://issues.autojs6.com/529)_
 * `Corrección` El diálogo "Ejecutar script" del botón flotante podía no restaurarse tras minimizarlo (intento de corrección) _[`issue #500`](http://issues.autojs6.com/500)_
@@ -730,7 +732,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 29 de August de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 30 de August de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

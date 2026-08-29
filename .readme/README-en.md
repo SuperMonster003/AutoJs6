@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Aug 29, 2026.
+Data updated on Aug 30, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,7 +166,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/08/29
+###### 2026/08/30
 
 * `Feature` In-memory TypeScript execution through `engines.execScript`: `.ts/.tsx/.mts/.cts` source names use the independent compiler with file-equivalent diagnostics and Source Map stack mapping, Rhino returns the final expression value, and the full Log page plus editor Log panel evaluate one-line snippets interactively
 * `Feature` Compiler-backed Node TypeScript projects can now compile runtime-created `.ts/.mts/.cts` files on demand: Node transfers bounded source through a byte- and SHA-256-bound PFD, the host reuses the resident project session, type diagnostics and Source Map stack mapping are preserved, and path escape, symlinks, and ambiguous targets remain denied
@@ -291,6 +291,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` App packaging supports remote builds using APK Builder Template plugins
 * `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
 * `Feature` Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback
+* `Fix` Enabling the TypeScript command row in the full Log page and editor bottom Log panel let a wrap-content navigation-bar spacer consume the entire remaining height, collapsing the log list to zero; the row now stays above a visible log viewport, and the Log page FAB uses its original bottom offset
 * `Fix` Archive entry Rename and Delete actions did not honor the current session's declared mutation capabilities, allowing read-only or unsupported sessions to expose operations the provider could not complete
 * `Fix` File manager Explorer actions could retain stale cache entries or row references after a plugin was enabled, re-authorized, or updated, causing recognized files to fall back to the system application chooser until AutoJs6 restarted
 * `Fix` File manager video buttons could open the system application chooser for formats already classified as video; all recognized video types now use the official Video Player plugin first, and if it is missing, disabled, unauthorized, incompatible, unavailable, or fails to launch, the host shows recovery guidance with an explicit "Open with other apps" option
@@ -363,6 +364,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The file manager incorrectly ignored case in ZIP entry names when inspecting APKs, causing some valid packages with case-distinct entries to be reported as containing duplicates and preventing them from being viewed or installed
 * `Fix` External URI cache imports trusted content-provider filenames, potentially allowing path traversal or same-name overwrites
 * `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin
+* `Fix` Search fields could keep the default blue cursor instead of the theme-appropriate foreground color, while their hints could remain in the fallback language instead of following the current app language
 * `Fix` Switch views in home drawer settings had an excessively small effective touch area
 * `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
 * `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
@@ -730,7 +732,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Aug 29, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Aug 30, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 
