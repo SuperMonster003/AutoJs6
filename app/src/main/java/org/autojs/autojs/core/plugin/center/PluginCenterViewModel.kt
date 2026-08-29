@@ -74,6 +74,7 @@ class PluginCenterViewModel : ViewModel() {
 
     private val installedRepo = InstalledPluginRepository()
     private val legacyRepo = LegacyInstalledPluginRepository()
+    private val legacyRefreshState = PluginCenterLegacyRefreshState<LegacyInstalledPluginRepository.LegacyInstalledPlugin>()
     private val enableStore = PluginEnableStore
     private val iconRenderModeTracker = PluginIconRenderModeTracker()
 
@@ -187,6 +188,7 @@ class PluginCenterViewModel : ViewModel() {
 
             PluginCenterProcessLogger.i("Cached plugin index entries loaded: count=${cachedIndexEntries.size}.")
             PluginCenterProcessLogger.i("Installed plugin snapshot created: count=${installedSnapshot.size}.")
+            val retainedLegacySnapshot = legacyRefreshState.beginRefresh()
             val renderedInitialSnapshot = _items.value.isEmpty()
             if (renderedInitialSnapshot) {
                 updateLatestItems(
@@ -194,7 +196,7 @@ class PluginCenterViewModel : ViewModel() {
                         context = context,
                         indexEntries = cachedIndexEntries,
                         installed = installedSnapshot,
-                        legacyInstalled = emptyList(),
+                        legacyInstalled = retainedLegacySnapshot,
                         allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
                         sourceScope = sourceScope,
                     ),
@@ -208,7 +210,7 @@ class PluginCenterViewModel : ViewModel() {
             coroutineScope {
                 val stateMutex = Mutex()
                 var currentInstalled = installedSnapshot
-                var currentLegacyInstalled = emptyList<LegacyInstalledPluginRepository.LegacyInstalledPlugin>()
+                var currentLegacyInstalled = retainedLegacySnapshot
                 var currentIndexEntries = cachedIndexEntries
 
                 suspend fun publish(
@@ -217,21 +219,22 @@ class PluginCenterViewModel : ViewModel() {
                     indexUpdate: List<PluginIndexEntry>? = null,
                 ) {
                     stateMutex.withLock {
+                        if (!isLatestLoad()) return@withLock
                         installedUpdate?.let { currentInstalled = it }
-                        legacyUpdate?.let { currentLegacyInstalled = it }
-                        indexUpdate?.let { currentIndexEntries = it }
-                        if (isLatestLoad()) {
-                            updateLatestItems(
-                                buildMergedItemsInBackground(
-                                    context = context,
-                                    indexEntries = currentIndexEntries,
-                                    installed = currentInstalled,
-                                    legacyInstalled = currentLegacyInstalled,
-                                    allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                                    sourceScope = sourceScope,
-                                ),
-                            )
+                        legacyUpdate?.let {
+                            currentLegacyInstalled = legacyRefreshState.completeRefresh(it)
                         }
+                        indexUpdate?.let { currentIndexEntries = it }
+                        updateLatestItems(
+                            buildMergedItemsInBackground(
+                                context = context,
+                                indexEntries = currentIndexEntries,
+                                installed = currentInstalled,
+                                legacyInstalled = currentLegacyInstalled,
+                                allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                                sourceScope = sourceScope,
+                            ),
+                        )
                     }
                 }
 
