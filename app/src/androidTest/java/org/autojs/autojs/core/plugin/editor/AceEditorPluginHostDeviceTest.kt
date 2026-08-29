@@ -571,6 +571,279 @@ class AceEditorPluginHostDeviceTest {
         }
     }
 
+    @Test
+    fun installedAceEditorRefreshesTwentyFileProjectDiagnosticsAfterSaveWithinOneSecond() {
+        assumeTrue("Ace editor plugin is not installed", isPluginInstalled())
+
+        val enginePreference = captureStringPreference(EditorEnginePreferences.KEY_EDITOR_ENGINE)
+        val selectionModePreference = captureStringPreference(
+            EditorEnginePreferences.KEY_EDITOR_ENGINE_SELECTION_MODE,
+        )
+        val lspEnabledPreference = captureBooleanPreference(
+            AceEditorLspPreferences.KEY_ACE_LSP_ENABLED,
+        )
+        val lspFileTypesPreference = captureStringPreference(
+            AceEditorLspPreferences.KEY_ACE_LSP_FILE_TYPES,
+        )
+        val lspFileTypesRevisionPreference = captureIntPreference(
+            AceEditorLspPreferences.KEY_ACE_LSP_FILE_TYPES_REVISION,
+        )
+        val originalPluginEnabled = PluginEnableStore.isEnabled(
+            context,
+            EditorPluginContract.DEFAULT_PACKAGE_NAME,
+            defaultEnabled = true,
+        )
+        val project = File(
+            context.cacheDir,
+            "ace-editor-host-save-diagnostics-${SystemClock.uptimeMillis()}",
+        ).apply {
+            deleteRecursively()
+            mkdirs()
+        }
+        File(project, "tsconfig.json").writeText("{\"compilerOptions\":{\"strict\":true}}")
+        val mainText = listOf(
+            "import { sharedValue } from './file01';",
+            "export const checked: number = sharedValue;",
+        ).joinToString("\n")
+        val document = File(project, "main.ts").apply { writeText(mainText) }
+        val shared = File(project, "file01.ts").apply {
+            writeText("export const sharedValue = 42;")
+        }
+        (2 until 20).forEach { index ->
+            val suffix = index.toString().padStart(2, '0')
+            File(project, "file$suffix.ts").writeText("export const value$suffix = $index;")
+        }
+        val initialSnapshot = requireNotNull(
+            TypeScriptEditorProjectSnapshotProvider.captureRequired(document.canonicalPath),
+        )
+        assertEquals(20, initialSnapshot.sourceFileCount)
+        var activity: EditActivity? = null
+        var editorView: EditorView? = null
+
+        try {
+            setPluginEnabled(true)
+            assumeTrue(
+                "Installed Ace editor plugin is not eligible for host loading",
+                runOnMainSync { AceEditorPluginStateMonitor.current(context).available },
+            )
+            val selection = runOnMainSync {
+                AceEditorLspPreferences.setEnabled(true)
+                AceEditorLspPreferences.setFileTypes(AceEditorLspPreferences.DEFAULT_FILE_TYPES)
+                EditorEnginePreferences.selectByUser(context, EditorEngineType.ACE)
+            }
+            assertEquals(EditorEngineType.ACE, selection.effectiveType)
+
+            val launchedActivity = launchEditActivity(document)
+            activity = launchedActivity
+            val activeEditorView = runOnMainSync {
+                checkNotNull(launchedActivity.findViewById<EditorView>(R.id.editor_view))
+            }
+            editorView = activeEditorView
+            waitUntil(
+                message = "Host editor did not load the 20-file TypeScript project in Ace",
+                timeoutMillis = 25_000L,
+            ) {
+                runOnMainSync {
+                    val engine = activeEditorView.editor
+                    engine.engineType == EditorEngineType.ACE &&
+                        engine.isReady &&
+                        engine.textSnapshot == mainText &&
+                        !activeEditorView.isTextChanged
+                }
+            }
+
+            val webView = runOnMainSync { activeEditorView.editor.inputView as WebView }
+            var initialRuntimeState = JSONObject()
+            waitUntil(
+                message = "Ace did not initialize the resident 20-file TypeScript service",
+                timeoutMillis = 30_000L,
+            ) {
+                initialRuntimeState = readLspState(webView)
+                initialRuntimeState.optJSONObject("tsService")?.optBoolean("ready") == true &&
+                    initialRuntimeState.optString("projectSourceInventoryFingerprint") ==
+                    initialSnapshot.sourceInventoryFingerprint &&
+                    initialRuntimeState.optInt("projectSourceFileCount") == 20
+            }
+            initialRuntimeState = readLspState(webView)
+            val initialTsState = requireNotNull(initialRuntimeState.optJSONObject("tsService")) {
+                "Ace TypeScript service state was missing: $initialRuntimeState"
+            }
+            assertTrue(
+                "Ace TypeScript service was not ready: $initialRuntimeState",
+                initialTsState.optBoolean("ready"),
+            )
+            assertEquals(
+                initialSnapshot.sourceInventoryFingerprint,
+                initialRuntimeState.optString("projectSourceInventoryFingerprint"),
+            )
+            assertEquals(20, initialTsState.optInt("loadedProjectSourceFileCount"))
+            val initialDiagnostics = validateLspDiagnosticCodes(webView)
+            assertTrue(
+                "Initial 20-file project should not contain TS2322: $initialDiagnostics",
+                "2322" !in initialDiagnostics,
+            )
+            initialRuntimeState = readLspState(webView)
+            val initialServiceRevision = initialRuntimeState.optLong("tsServiceInstanceRevision")
+            val initialRefreshCount =
+                initialRuntimeState.optLong("projectSnapshotIncrementalRefreshCount")
+            val initialDiagnosticPublishCount =
+                initialRuntimeState.optLong("diagnosticPublishCount")
+            assertTrue(initialServiceRevision > 0L)
+
+            shared.writeText("export const sharedValue = 'saved';")
+            val siblingMutationSnapshot = requireNotNull(
+                TypeScriptEditorProjectSnapshotProvider.captureRequired(document.canonicalPath),
+            )
+            assertEquals(20, siblingMutationSnapshot.sourceFileCount)
+            assertTrue(
+                "Sibling mutation must change the project inventory fingerprint",
+                siblingMutationSnapshot.sourceInventoryFingerprint !=
+                    initialSnapshot.sourceInventoryFingerprint,
+            )
+
+            val dirtyText = "$mainText\n"
+            assertEquals(
+                "true",
+                evaluateJavascript(
+                    webView,
+                    "Boolean(window.AutoJsAce && window.AutoJsAce.setTextDirty && " +
+                        "(window.AutoJsAce.setTextDirty(${JSONObject.quote(dirtyText)}, true, false), true))",
+                ),
+            )
+            waitUntil("Ace dirty text did not reach the host editor") {
+                runOnMainSync {
+                    activeEditorView.editor.textSnapshot == dirtyText &&
+                        activeEditorView.isTextChanged &&
+                        activeEditorView.saveStickyDirty
+                }
+            }
+            val stateBeforeSave = readLspState(webView)
+            assertEquals(
+                "The sibling disk mutation must remain outside the frozen snapshot before save",
+                initialSnapshot.sourceInventoryFingerprint,
+                stateBeforeSave.optString("projectSourceInventoryFingerprint"),
+            )
+
+            val savedText = AtomicReference<String>()
+            val saveError = AtomicReference<Throwable>()
+            val saveCompletedAt = AtomicReference(0L)
+            val saveFinished = CountDownLatch(1)
+            val saveStartedAt = SystemClock.elapsedRealtime()
+            runOnMainSync {
+                activeEditorView.save().subscribe({ text ->
+                    savedText.set(text)
+                    saveCompletedAt.set(SystemClock.elapsedRealtime())
+                    saveFinished.countDown()
+                }, { error ->
+                    saveError.set(error)
+                    saveCompletedAt.set(SystemClock.elapsedRealtime())
+                    saveFinished.countDown()
+                })
+            }
+            assertTrue(
+                "Host save did not finish",
+                saveFinished.await(10, TimeUnit.SECONDS),
+            )
+            saveError.get()?.let { error ->
+                throw AssertionError("Host save failed: ${error.message}", error)
+            }
+            assertEquals(dirtyText, savedText.get())
+            assertEquals(dirtyText, document.readText())
+            val savedSnapshot = requireNotNull(
+                TypeScriptEditorProjectSnapshotProvider.captureRequired(document.canonicalPath),
+            )
+            assertEquals(20, savedSnapshot.sourceFileCount)
+            assertTrue(
+                savedSnapshot.sourceInventoryFingerprint !=
+                    siblingMutationSnapshot.sourceInventoryFingerprint,
+            )
+
+            var refreshedRuntimeState = JSONObject()
+            var refreshedDiagnosticCodes = emptyList<String>()
+            var diagnosticsObservedAt = 0L
+            val diagnosticDeadline = SystemClock.elapsedRealtime() + 5_000L
+            while (SystemClock.elapsedRealtime() < diagnosticDeadline) {
+                refreshedRuntimeState = readLspState(webView)
+                refreshedDiagnosticCodes = diagnosticCodes(refreshedRuntimeState)
+                if (
+                    "2322" in refreshedDiagnosticCodes &&
+                    refreshedRuntimeState.optString("projectSourceInventoryFingerprint") ==
+                    savedSnapshot.sourceInventoryFingerprint &&
+                    refreshedRuntimeState.optString("lastDiagnosticReason") == "project-snapshot" &&
+                    refreshedRuntimeState.optLong("projectSnapshotIncrementalRefreshCount") >
+                    initialRefreshCount &&
+                    refreshedRuntimeState.optLong("diagnosticPublishCount") >
+                    initialDiagnosticPublishCount
+                ) {
+                    diagnosticsObservedAt = SystemClock.elapsedRealtime()
+                    break
+                }
+                SystemClock.sleep(20L)
+            }
+            val saveToDiagnosticMillis = diagnosticsObservedAt - saveCompletedAt.get()
+            val totalSaveLoopMillis = diagnosticsObservedAt - saveStartedAt
+            assertTrue(
+                "Saved 20-file project did not publish TS2322 from the refreshed snapshot: " +
+                    "$refreshedRuntimeState; codes=$refreshedDiagnosticCodes",
+                diagnosticsObservedAt > 0L,
+            )
+            assertTrue(
+                "20-file diagnostics took ${saveToDiagnosticMillis} ms after save completion " +
+                    "(${totalSaveLoopMillis} ms including the save): $refreshedRuntimeState",
+                saveToDiagnosticMillis in 0L until 1_000L &&
+                    totalSaveLoopMillis in 0L until 1_000L,
+            )
+            assertEquals(
+                "Project save must reuse the resident TypeScript service",
+                initialServiceRevision,
+                refreshedRuntimeState.optLong("tsServiceInstanceRevision"),
+            )
+            assertEquals(450L, refreshedRuntimeState.optLong("diagnosticDebounceDelayMs"))
+            assertEquals(50L, refreshedRuntimeState.optLong("projectSnapshotDiagnosticDelayMs"))
+            assertTrue(refreshedRuntimeState.optLong("lastDiagnosticLatencyMs") < 1_000L)
+            assertTrue(refreshedRuntimeState.optLong("lastDiagnosticDurationMs") < 1_000L)
+            assertTrue(
+                (refreshedRuntimeState.optJSONObject("tsService")
+                    ?.optLong("projectSnapshotUpdateCount", 0L) ?: 0L) > 0L,
+            )
+            println(
+                "T4_5_SAVE_DIAGNOSTICS_METRIC " +
+                    "files=20,saveToDiagnosticMs=$saveToDiagnosticMillis," +
+                    "saveAndDiagnosticMs=$totalSaveLoopMillis," +
+                    "scheduledLatencyMs=${refreshedRuntimeState.optLong("lastDiagnosticLatencyMs")}," +
+                    "diagnosticDurationMs=${refreshedRuntimeState.optLong("lastDiagnosticDurationMs")}," +
+                    "serviceRevision=${refreshedRuntimeState.optLong("tsServiceInstanceRevision")}",
+            )
+        } finally {
+            editorView?.let { activeEditorView ->
+                runCatching {
+                    runOnMainSync {
+                        activeEditorView.editor.markTextAsSaved()
+                        activeEditorView.saveStickyDirty = false
+                    }
+                }
+            }
+            activity?.let(::finishHostActivity)
+            runOnMainSync {
+                PluginEnableStore.setEnabled(
+                    context,
+                    EditorPluginContract.DEFAULT_PACKAGE_NAME,
+                    originalPluginEnabled,
+                )
+                AceEditorPluginStateMonitor.refresh(
+                    AceEditorPluginStateMonitor.Cause.PLUGIN_STATE_CHANGED,
+                )
+            }
+            restoreEnginePreferences(enginePreference, selectionModePreference)
+            restoreLspPreferences(
+                lspEnabledPreference,
+                lspFileTypesPreference,
+                lspFileTypesRevisionPreference,
+            )
+            project.deleteRecursively()
+        }
+    }
+
     private fun launchEditActivity(sourceFile: File): EditActivity {
         val intent = Intent(context, EditActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -786,6 +1059,36 @@ class AceEditorPluginHostDeviceTest {
             SystemClock.sleep(50L)
         }
         fail(message)
+    }
+
+    private fun readLspState(webView: WebView): JSONObject {
+        val raw = evaluateJavascript(
+            webView,
+            "JSON.stringify(window.AutoJsAce && window.AutoJsAce.getLspState " +
+                "? window.AutoJsAce.getLspState() : {})",
+        )
+        val decoded = runCatching { JSONTokener(raw).nextValue() as? String }
+            .getOrNull().orEmpty()
+        return runCatching { JSONObject(decoded) }.getOrElse { JSONObject() }
+    }
+
+    private fun validateLspDiagnosticCodes(webView: WebView): List<String> {
+        val raw = evaluateJavascript(
+            webView,
+            "JSON.stringify(window.AutoJsAce && window.AutoJsAce.validateLsp " +
+                "? window.AutoJsAce.validateLsp() : [])",
+        )
+        val decoded = runCatching { JSONTokener(raw).nextValue() as? String }
+            .getOrNull().orEmpty()
+        val diagnostics = runCatching { JSONArray(decoded) }.getOrElse { JSONArray() }
+        return List(diagnostics.length()) { index ->
+            diagnostics.getJSONObject(index).optString("code")
+        }.sorted()
+    }
+
+    private fun diagnosticCodes(state: JSONObject): List<String> {
+        val codes = state.optJSONArray("diagnosticCodes") ?: JSONArray()
+        return List(codes.length()) { index -> codes.optString(index) }.sorted()
     }
 
     private fun evaluateJavascript(webView: WebView, script: String): String {

@@ -5436,6 +5436,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                         mCurrentDecodingErrorsWereAccepted = false
                         fileService.discardStableDraft(result.currentUri)
                         editor.markTextAsSaved()
+                        syncEditorDocumentPath()
 
                         // Reset sticky dirty only when the current text is the exact snapshot that
                         // reached disk. Edits made while IO was in flight remain dirty.
