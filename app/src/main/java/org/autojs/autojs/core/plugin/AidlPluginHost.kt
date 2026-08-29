@@ -476,7 +476,7 @@ class AidlPluginHost<I : IInterface>(
         val deathRecipientRef = AtomicReference<IBinder.DeathRecipient?>()
         lateinit var connection: ServiceConnection
 
-        val lease = AidlDedicatedBindingLease {
+        val lease = ServiceBindingLease {
             timeoutRef.getAndSet(null)?.let(poolHandler::removeCallbacks)
             val binder = binderRef.getAndSet(null)
             val deathRecipient = deathRecipientRef.getAndSet(null)

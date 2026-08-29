@@ -10,12 +10,12 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-class AidlDedicatedBindingLeaseTest {
+class ServiceBindingLeaseTest {
 
     @Test
     fun registeredLeaseConcurrentCloseUnbindsExactlyOnce() {
         val unbindCount = AtomicInteger()
-        val lease = AidlDedicatedBindingLease(unbindCount::incrementAndGet)
+        val lease = ServiceBindingLease(unbindCount::incrementAndGet)
         lease.markRegistered()
         val ready = CountDownLatch(16)
         val start = CountDownLatch(1)
@@ -42,7 +42,7 @@ class AidlDedicatedBindingLeaseTest {
     @Test
     fun closeBeforeBindRegistrationUnbindsWhenLateBindSucceeds() {
         val unbindCount = AtomicInteger()
-        val lease = AidlDedicatedBindingLease(unbindCount::incrementAndGet)
+        val lease = ServiceBindingLease(unbindCount::incrementAndGet)
 
         lease.close()
         assertEquals(0, unbindCount.get())
@@ -56,7 +56,7 @@ class AidlDedicatedBindingLeaseTest {
     @Test
     fun failedBindThatNeverRegistersDoesNotUnbind() {
         val unbindCount = AtomicInteger()
-        val lease = AidlDedicatedBindingLease(unbindCount::incrementAndGet)
+        val lease = ServiceBindingLease(unbindCount::incrementAndGet)
 
         lease.close()
 
@@ -65,9 +65,9 @@ class AidlDedicatedBindingLeaseTest {
     }
 
     @Test
-    fun registeredDedicatedLeaseIsNotReleasedByThePooledThirtySecondIdleWindow() {
+    fun registeredLeaseRemainsOpenUntilItsOwnerClosesIt() {
         val unbindCount = AtomicInteger()
-        val lease = AidlDedicatedBindingLease(unbindCount::incrementAndGet)
+        val lease = ServiceBindingLease(unbindCount::incrementAndGet)
         lease.markRegistered()
 
         assertFalse(lease.isClosed)
@@ -78,11 +78,11 @@ class AidlDedicatedBindingLeaseTest {
     }
 
     @Test
-    fun concurrentDedicatedLeasesReleaseOnlyTheirOwnBindings() {
+    fun concurrentLeasesReleaseOnlyTheirOwnBindings() {
         val firstUnbindCount = AtomicInteger()
         val secondUnbindCount = AtomicInteger()
-        val first = AidlDedicatedBindingLease(firstUnbindCount::incrementAndGet).apply { markRegistered() }
-        val second = AidlDedicatedBindingLease(secondUnbindCount::incrementAndGet).apply { markRegistered() }
+        val first = ServiceBindingLease(firstUnbindCount::incrementAndGet).apply { markRegistered() }
+        val second = ServiceBindingLease(secondUnbindCount::incrementAndGet).apply { markRegistered() }
 
         first.close()
         first.close()
@@ -94,10 +94,10 @@ class AidlDedicatedBindingLeaseTest {
     }
 
     @Test
-    fun normalExceptionCancelAndDeathPathsEachReleaseTheirDedicatedLease() {
+    fun normalExceptionCancelAndDeathPathsEachReleaseTheirLease() {
         ReleasePath.entries.forEach { path ->
             val unbindCount = AtomicInteger()
-            val lease = AidlDedicatedBindingLease(unbindCount::incrementAndGet)
+            val lease = ServiceBindingLease(unbindCount::incrementAndGet)
             lease.markRegistered()
 
             when (path) {
