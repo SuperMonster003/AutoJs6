@@ -44,7 +44,9 @@ class NodePluginJavaScriptEngine(
                 NodeJsTypeScriptModuleSourceProvider(
                     context = androidContext,
                     rootDirectory = requireNotNull(executable.projectRoot),
-                    entryFile = requireNotNull(compiledSource).originalSource.file,
+                    entryFile = requireNotNull(
+                        requireNotNull(compiledSource).originalSource as? JavaScriptFileSource,
+                    ).file,
                     executionId = executionId,
                     timeoutMs = baseRequest.timeoutMs,
                     initialSourceCount = baseRequest.moduleSources.size,
@@ -157,12 +159,13 @@ class NodePluginJavaScriptEngine(
             val executable = compiled.executable
             if (executable.isProjectCompilation) {
                 val projectRoot = requireNotNull(executable.projectRoot).normalizedCanonicalFile()
-                val sourceFile = original.file.normalizedCanonicalFile()
+                val fileSource = requireNotNull(original as? JavaScriptFileSource)
+                val sourceFile = fileSource.file.normalizedCanonicalFile()
                 require(sourceFile.path.startsWith(projectRoot.path + File.separator)) {
                     "Compiled Node TypeScript entry escapes its project root."
                 }
                 val runtimeProject = TypeScriptNodeRuntimeProjectBuilder.build(executable)
-                val launchSource = original as? NodeProjectLaunchSource
+                val launchSource = fileSource as? NodeProjectLaunchSource
                 val projectRequest = if (launchSource == null) {
                     NodeProjectRunner.buildResolvedEntryRequest(
                         NodeProjectRunner.Request(
@@ -205,8 +208,10 @@ class NodePluginJavaScriptEngine(
                     spawnDepth = currentSpawnDepth(),
                 )
             }
-            val sourceFile = original.file.normalizedCanonicalFile()
-            val workingDirectory = sourceFile.parentFile?.normalizedCanonicalFile()
+            val sourceFile = (original as? JavaScriptFileSource)
+                ?.file
+                ?.normalizedCanonicalFile()
+            val workingDirectory = sourceFile?.parentFile?.normalizedCanonicalFile()
                 ?: cwd()?.takeIf(String::isNotBlank)?.let(::File)?.normalizedCanonicalFile()
                 ?: androidContext.cacheDir.normalizedCanonicalFile()
             return NodePluginScriptRequest(

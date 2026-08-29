@@ -44,6 +44,7 @@ import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.receiver.BaseBroadcastReceiver
 import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory
+import org.autojs.autojs.runtime.api.Engines
 import org.autojs.autojs.runtime.exception.ScriptCompilationDiagnosticSeverity
 import org.autojs.autojs.runtime.exception.ScriptCompilationException
 import org.autojs.autojs.script.JavaScriptSource
@@ -51,6 +52,7 @@ import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.SequenceScriptSource
 import org.autojs.autojs.script.TypeScriptFileSource
+import org.autojs.autojs.script.TypeScriptStringSource
 import org.autojs.autojs.timing.IntentTask
 import org.autojs.autojs.timing.TimedTask
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
@@ -1480,6 +1482,113 @@ class TypeScriptCompilerPluginClientDeviceTest {
     }
 
     @Test
+    fun compilesAndExecutesInMemoryTypeScriptWithItsFinalValue() {
+        val output = runBlocking {
+            TypeScriptCompilerPluginClient(context).compileSingleSource(
+                source = "const answer: number = 40; answer + 2",
+                sourceName = "inline-result.ts",
+            )
+        }
+
+        assertTrue(output is TypeScriptCompilationOutput.Emitted)
+        output as TypeScriptCompilationOutput.Emitted
+        assertTrue(output.javaScript.contains("answer + 2"))
+        assertTrue(output.sourceMap.contains("inline-result.ts"))
+
+        val source = Engines.createExecScriptSource(
+            "inline-result.ts",
+            "const answer: number = 40; answer + 2",
+        )
+        assertTrue(source is TypeScriptStringSource)
+        assertTrue(TypeScriptExecutionCompiler.requiresPreparation(source))
+        val terminal = executeAndAwait(source, context.cacheDir.path)
+
+        terminal.failure.get()?.let { error ->
+            throw AssertionError("In-memory TypeScript execution failed", error)
+        }
+        assertTrue(terminal.succeeded.get())
+        assertEquals(42.0, terminal.result.get())
+        assertTrue(terminal.execution.engine is LoopBasedJavaScriptEngine)
+    }
+
+    @Test
+    fun compilesAndExecutesInMemoryNodeTypeScript() {
+        val marker = "inline-node-typescript-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            val source = Engines.createExecScriptSource(
+                "inline-node.mts",
+                "const answer: number = 40 + 2; console.log('$marker:' + answer)",
+            )
+
+            assertTrue(source is TypeScriptStringSource)
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, source.engineName)
+            assertTrue(TypeScriptExecutionCompiler.requiresPreparation(source))
+            val terminal = executeAndAwait(source, context.cacheDir.path)
+
+            terminal.failure.get()?.let { error ->
+                throw AssertionError("In-memory Node TypeScript execution failed", error)
+            }
+            assertTrue(terminal.succeeded.get())
+            val engine = terminal.execution.engine as NodePluginJavaScriptEngine
+            assertTrue(requireNotNull(engine.lastPluginScriptResult).succeeded)
+            assertTrue(awaitConsoleMessage(marker).contains("$marker:42"))
+        } finally {
+            console.clear()
+        }
+    }
+
+    @Test
+    fun reportsDiagnosticsForInMemoryTypeScriptWithoutExecutingIt() {
+        val source = Engines.createExecScriptSource(
+            "inline-diagnostic.ts",
+            "const count: number = \"not-a-number\"; count",
+        )
+        val terminal = executeAndAwait(source, context.cacheDir.path)
+        val failure = terminal.failure.get()
+
+        assertFalse(terminal.succeeded.get())
+        assertTrue(failure is ScriptCompilationException)
+        failure as ScriptCompilationException
+        assertTrue(
+            failure.diagnostics.any { diagnostic ->
+                diagnostic.sourceName == "inline-diagnostic.ts" &&
+                    diagnostic.code == "TS2322"
+            },
+        )
+        assertEquals(null, terminal.execution.engine)
+    }
+
+    @Test
+    fun mapsInMemoryRuntimeErrorsBackToTheTypeScriptName() {
+        val marker = "inline-typescript-runtime-${System.nanoTime()}"
+        val console = AutoJs.instance.globalConsole
+        console.clear()
+        try {
+            val source = Engines.createExecScriptSource(
+                "inline-runtime.ts",
+                """
+                    function fail(): never {
+                        const message: string = "$marker"
+                        throw new Error(message)
+                    }
+                    fail()
+                """.trimIndent(),
+            )
+            val terminal = executeAndAwait(source, context.cacheDir.path)
+
+            assertFalse(terminal.succeeded.get())
+            assertTrue(terminal.failure.get() is RhinoException)
+            val consoleMessage = awaitConsoleMessage(marker)
+            assertTrue(consoleMessage.contains("inline-runtime.ts:3"))
+            assertFalse(consoleMessage.contains(".generated.js"))
+        } finally {
+            console.clear()
+        }
+    }
+
+    @Test
     fun runtimeCreatedTypeScriptTypeErrorsReturnReadableDiagnostics() {
         val marker = "typescript-node-on-demand-diagnostic-${System.nanoTime()}"
         val console = AutoJs.instance.globalConsole
@@ -2849,8 +2958,10 @@ class TypeScriptCompilerPluginClientDeviceTest {
         val completed = CountDownLatch(1)
         val succeeded = AtomicBoolean(false)
         val failure = AtomicReference<Throwable>()
+        val terminalResult = AtomicReference<Any?>()
         val listener = object : SimpleScriptExecutionListener() {
             override fun onSuccess(execution: ScriptExecution, result: Any?) {
+                terminalResult.set(result)
                 succeeded.set(true)
                 completed.countDown()
             }
@@ -2869,7 +2980,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
             "TypeScript execution did not reach a terminal state",
             completed.await(EXECUTION_TIMEOUT_SECONDS, TimeUnit.SECONDS),
         )
-        return ExecutionTerminal(execution, succeeded, failure)
+        return ExecutionTerminal(execution, succeeded, failure, terminalResult)
     }
 
     private fun awaitConsoleMessage(fragment: String): String {
@@ -2901,6 +3012,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
         val execution: ScriptExecution,
         val succeeded: AtomicBoolean,
         val failure: AtomicReference<Throwable>,
+        val result: AtomicReference<Any?>,
     )
 
     private data class GestureTarget(

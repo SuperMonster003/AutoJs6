@@ -15,6 +15,7 @@ import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.SequenceScriptSource
 import org.autojs.autojs.script.TypeScriptFileSource
+import org.autojs.autojs.script.TypeScriptStringSource
 import org.autojs.autojs6.R
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
@@ -101,43 +102,52 @@ internal object TypeScriptExecutionCompiler {
     fun requiresPreparation(source: ScriptSource): Boolean = preparationCandidate(source) != null
 
     private fun preparationCandidate(source: ScriptSource): PreparationCandidate? {
+        if (source is TypeScriptStringSource) {
+            return PreparationCandidate(source)
+        }
         if (source is JavaScriptFileSource && source.isCompilerBackedTypeScriptSource) {
             return PreparationCandidate(source)
         }
         if (source !is SequenceScriptSource) return null
-        val fileSource = source.secondScriptSource as? JavaScriptFileSource ?: return null
-        if (!fileSource.isCompilerBackedTypeScriptSource) return null
+        val typeScriptSource = when (val candidate = source.secondScriptSource) {
+            is TypeScriptStringSource -> candidate
+            is JavaScriptFileSource -> candidate.takeIf(JavaScriptFileSource::isCompilerBackedTypeScriptSource)
+            else -> null
+        } ?: return null
         return PreparationCandidate(
-            source = fileSource,
+            source = typeScriptSource,
             preExecuteScript = source.firstScriptSource.script,
         )
     }
 
     private fun compile(
         context: Context,
-        source: JavaScriptFileSource,
+        source: JavaScriptSource,
         targetProfile: String,
     ): TypeScriptExecutableSource {
+        val fileSource = source as? JavaScriptFileSource
         val sourceName = source.compilationName()
-        val sourceIdentity = (source as? TypeScriptFileSource)?.compilationSourceIdentity
-            ?: source.originPath?.takeIf(String::isNotBlank)
-            ?: source.originUri?.takeIf(String::isNotBlank)
-            ?: runCatching { source.file.canonicalPath }.getOrElse { source.file.absolutePath }
-        val projectRoot = source.typeScriptProjectRoot(targetProfile)
+        val sourceIdentity = source.compilationIdentity()
+        val projectRoot = fileSource?.typeScriptProjectRoot(targetProfile)
         val output = try {
             runBlocking {
                 val client = TypeScriptCompilerPluginClient(context)
-                if (projectRoot == null) {
-                    client.compileSingleFile(
-                        sourceFile = source.file,
+                when {
+                    source is TypeScriptStringSource -> client.compileSingleSource(
+                        source = source.script,
                         sourceName = sourceName,
                         sourceIdentity = sourceIdentity,
                         targetProfile = targetProfile,
                     )
-                } else {
-                    client.compileProject(
+                    projectRoot != null -> client.compileProject(
                         projectRoot = projectRoot,
-                        entryFile = source.file,
+                        entryFile = requireNotNull(fileSource).file,
+                        targetProfile = targetProfile,
+                    )
+                    else -> client.compileSingleFile(
+                        sourceFile = requireNotNull(fileSource).file,
+                        sourceName = sourceName,
+                        sourceIdentity = sourceIdentity,
                         targetProfile = targetProfile,
                     )
                 }
@@ -173,7 +183,7 @@ internal object TypeScriptExecutionCompiler {
                     originalSourceName = if (projectRoot == null) {
                         sourceName
                     } else {
-                        output.entryModule.source.originalFile?.path ?: source.file.path
+                        output.entryModule.source.originalFile?.path ?: requireNotNull(fileSource).file.path
                     },
                 )
                 TypeScriptExecutableSource(
@@ -228,16 +238,32 @@ internal object TypeScriptExecutionCompiler {
     private fun File.normalizedCanonicalFile(): File =
         runCatching { canonicalFile }.getOrElse { absoluteFile.normalize() }
 
-    private fun JavaScriptFileSource.compilationName(): String {
-        if (this is TypeScriptFileSource) {
+    private fun JavaScriptSource.compilationName(): String {
+        if (this is TypeScriptStringSource) {
             return compilationSourceName
         }
+        val fileSource = this as? JavaScriptFileSource ?: return "main.ts"
+        if (fileSource is TypeScriptFileSource) {
+            return fileSource.compilationSourceName
+        }
         return sequenceOf(
-            originPath?.let(::File)?.name,
-            file.name,
+            fileSource.originPath?.let(::File)?.name,
+            fileSource.file.name,
         ).filterNotNull()
             .firstOrNull(JavaScriptSource::isCompilerBackedTypeScriptFileName)
             ?: "main.ts"
+    }
+
+    private fun JavaScriptSource.compilationIdentity(): String {
+        if (this is TypeScriptStringSource) {
+            return compilationSourceIdentity
+        }
+        val fileSource = requireNotNull(this as? JavaScriptFileSource)
+        return (fileSource as? TypeScriptFileSource)?.compilationSourceIdentity
+            ?: fileSource.originPath?.takeIf(String::isNotBlank)
+            ?: fileSource.originUri?.takeIf(String::isNotBlank)
+            ?: runCatching { fileSource.file.canonicalPath }
+                .getOrElse { fileSource.file.absolutePath }
     }
 
     fun formatDiagnostic(sourceName: String, diagnostic: TypeScriptDiagnostic): String {
@@ -298,13 +324,13 @@ internal object TypeScriptExecutionCompiler {
     private val PROJECT_BOUNDARY_NAMES = listOf("project.json", "tsconfig.json")
 
     private data class PreparationCandidate(
-        val source: JavaScriptFileSource,
+        val source: JavaScriptSource,
         val preExecuteScript: String? = null,
     )
 }
 
 internal class CompiledTypeScriptSource(
-    val originalSource: JavaScriptFileSource,
+    val originalSource: JavaScriptSource,
     val executable: TypeScriptExecutableSource,
     preExecuteScript: String? = null,
 ) : JavaScriptSource(executable.sourceName.substringBeforeLast('.', executable.sourceName)) {

@@ -6,6 +6,7 @@ import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.SequenceScriptSource
 import org.autojs.autojs.script.TypeScriptFileSource
+import org.autojs.autojs.script.TypeScriptStringSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -17,6 +18,17 @@ class TypeScriptBackgroundPreparationRouteTest {
 
     @get:Rule
     val temporaryFolder = TemporaryFolder()
+
+    @Test
+    fun inMemoryTypeScriptUsesTheSameBackgroundPreparationRoute() {
+        val source = TypeScriptStringSource(
+            "inline.ts",
+            "const answer: number = 42; answer",
+        )
+
+        assertTrue(TypeScriptExecutionCompiler.requiresPreparation(source))
+        assertEquals(JavaScriptSource.ENGINE, source.engineName)
+    }
 
     @Test
     fun taskerPrefixRetainsTheCompilerBackedFileRoute() {

@@ -9,9 +9,11 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.AutoFileSource
+import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.StringScriptSource
+import org.autojs.autojs.script.TypeScriptStringSource
 import org.mozilla.javascript.NativeArray
 
 /**
@@ -71,8 +73,20 @@ class Engines(private val mScriptRuntime: ScriptRuntime) {
             )
         }
 
+        @VisibleForTesting
+        internal fun createExecScriptSource(name: String, script: String): JavaScriptSource {
+            return if (
+                JavaScriptSource.isCompilerBackedTypeScriptFileName(name) ||
+                JavaScriptSource.isTypeScriptDeclarationFileName(name)
+            ) {
+                TypeScriptStringSource(name, script)
+            } else {
+                StringScriptSource(name, script)
+            }
+        }
+
         private fun execScriptInternal(name: String, script: String, config: ExecutionConfig): ScriptExecution {
-            val scriptSource = StringScriptSource(name, script).apply { prefix = "\$engine/" }
+            val scriptSource = createExecScriptSource(name, script).apply { prefix = "\$engine/" }
             return AutoJs.instance.scriptEngineService.execute(scriptSource, config)
         }
 

@@ -97,9 +97,79 @@ internal class TypeScriptCompilerPluginClient(
             PlaintextTypeScriptSourceContentReader,
         usePersistentCache: Boolean = true,
     ): TypeScriptCompilationOutput = withContext(Dispatchers.IO) {
+        require(sourceFile.isFile) { "TypeScript source is not a regular file." }
+        validateSingleSourceRequest(timeoutMs, sourceName, targetProfile)
+
+        (appContext as? App)?.cancelDeferredTypeScriptCompilerPrewarm()
+
+        observeCompilation(targetProfile, usePersistentCache) { performance ->
+            val sourceBytes = sourceContentReader.read(
+                sourceFile,
+                TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+            )
+            try {
+                val canonicalPath = sourceIdentity?.takeIf(String::isNotBlank)
+                    ?: runCatching { sourceFile.canonicalPath }
+                        .getOrElse { sourceFile.absolutePath }
+                compileSingleSourceBytes(
+                    sourceBytes = sourceBytes,
+                    timeoutMs = timeoutMs,
+                    sourceName = sourceName,
+                    sourceIdentity = canonicalPath,
+                    targetProfile = targetProfile,
+                    usePersistentCache = usePersistentCache,
+                    performance = performance,
+                )
+            } finally {
+                sourceBytes.fill(0)
+            }
+        }
+    }
+
+    suspend fun compileSingleSource(
+        source: String,
+        timeoutMs: Long = TypeScriptCompilerContract.DEFAULT_TIMEOUT_MS,
+        sourceName: String = "main.ts",
+        sourceIdentity: String = "autojs://string/$sourceName",
+        targetProfile: String = TypeScriptCompilerContract.PROFILE_RHINO,
+        usePersistentCache: Boolean = true,
+    ): TypeScriptCompilationOutput = withContext(Dispatchers.IO) {
+        validateSingleSourceRequest(timeoutMs, sourceName, targetProfile)
+        require(
+            source.length <= TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+        ) { "TypeScript source exceeds the ordinary single-file byte limit." }
+
+        (appContext as? App)?.cancelDeferredTypeScriptCompilerPrewarm()
+
+        observeCompilation(targetProfile, usePersistentCache) { performance ->
+            val sourceBytes = TypeScriptUtf8.encode(source, "TypeScript source")
+            try {
+                require(
+                    sourceBytes.size <=
+                        TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+                ) { "TypeScript source exceeds the ordinary single-file byte limit." }
+                compileSingleSourceBytes(
+                    sourceBytes = sourceBytes,
+                    timeoutMs = timeoutMs,
+                    sourceName = sourceName,
+                    sourceIdentity = sourceIdentity,
+                    targetProfile = targetProfile,
+                    usePersistentCache = usePersistentCache,
+                    performance = performance,
+                )
+            } finally {
+                sourceBytes.fill(0)
+            }
+        }
+    }
+
+    private fun validateSingleSourceRequest(
+        timeoutMs: Long,
+        sourceName: String,
+        targetProfile: String,
+    ) {
         require(timeoutMs in TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS..
             TypeScriptCompilerContract.MAX_TIMEOUT_MS)
-        require(sourceFile.isFile) { "TypeScript source is not a regular file." }
         require(
             listOf(".d.ts", ".d.mts", ".d.cts").none { declarationExtension ->
                 sourceName.endsWith(declarationExtension, ignoreCase = true)
@@ -134,45 +204,43 @@ internal class TypeScriptCompilerPluginClient(
         ) {
             "The TypeScript source name is not a canonical single-file name."
         }
+    }
 
-        (appContext as? App)?.cancelDeferredTypeScriptCompilerPrewarm()
-
-        observeCompilation(targetProfile, usePersistentCache) { performance ->
-            val sourceBytes = sourceContentReader.read(
-                sourceFile,
-                TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+    private suspend fun compileSingleSourceBytes(
+        sourceBytes: ByteArray,
+        timeoutMs: Long,
+        sourceName: String,
+        sourceIdentity: String,
+        targetProfile: String,
+        usePersistentCache: Boolean,
+        performance: TypeScriptCompilationPerformanceRecorder,
+    ): TypeScriptCompilationOutput {
+        require(
+            sourceBytes.size.toLong() + EMPTY_TSCONFIG_BYTES <=
+                TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES,
+        ) {
+            "TypeScript source exceeds the ordinary input byte limit."
+        }
+        val canonicalIdentity = sourceIdentity.takeIf(String::isNotBlank)
+            ?: "autojs://string/$sourceName"
+        val projectId = "single-file-" + sha256(
+            TypeScriptUtf8.encode(canonicalIdentity, "TypeScript source identity"),
+        ).take(32)
+        return compileArchive(
+            timeoutMs = timeoutMs,
+            targetProfile = targetProfile,
+            entrySourceName = sourceName,
+            usePersistentCache = usePersistentCache,
+            performance = performance,
+        ) { requestId, authority, inputFile ->
+            TypeScriptSingleFileArchive.write(
+                sourceName = sourceName,
+                sourceBytes = sourceBytes,
+                requestId = requestId,
+                projectId = projectId,
+                authority = authority,
+                destination = inputFile,
             )
-            try {
-                require(
-                    sourceBytes.size.toLong() + EMPTY_TSCONFIG_BYTES <=
-                        TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_INPUT_BYTES,
-                ) {
-                    "TypeScript source exceeds the ordinary input byte limit."
-                }
-                val canonicalPath = sourceIdentity?.takeIf(String::isNotBlank)
-                    ?: runCatching { sourceFile.canonicalPath }
-                        .getOrElse { sourceFile.absolutePath }
-                val projectId = "single-file-" +
-                    sha256(TypeScriptUtf8.encode(canonicalPath, "TypeScript source path")).take(32)
-                compileArchive(
-                    timeoutMs = timeoutMs,
-                    targetProfile = targetProfile,
-                    entrySourceName = sourceName,
-                    usePersistentCache = usePersistentCache,
-                    performance = performance,
-                ) { requestId, authority, inputFile ->
-                    TypeScriptSingleFileArchive.write(
-                        sourceName = sourceName,
-                        sourceBytes = sourceBytes,
-                        requestId = requestId,
-                        projectId = projectId,
-                        authority = authority,
-                        destination = inputFile,
-                    )
-                }
-            } finally {
-                sourceBytes.fill(0)
-            }
         }
     }
 
