@@ -170,7 +170,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
         if (isExcludeFromNavigationBar) {
             ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(
-                    findViewById(R.id.navigation_bar_spacer)
+                    findViewById(R.id.console_content)
             );
         }
     }

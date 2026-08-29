@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/console_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:orientation="vertical">
-
-    <androidx.recyclerview.widget.ThemeColorRecyclerView
-            android:id="@+id/log_list"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
 
     <LinearLayout
             android:id="@+id/input_container"
@@ -42,16 +37,17 @@
                 android:id="@+id/submit"
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:minWidth="48dp"
                 android:text="@string/text_run" />
 
     </LinearLayout>
 
-    <View
-            android:id="@+id/navigation_bar_spacer"
+    <androidx.recyclerview.widget.ThemeColorRecyclerView
+            android:id="@+id/log_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
 </LinearLayout>
