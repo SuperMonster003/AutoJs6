@@ -1859,6 +1859,7 @@
     <string name="text_type">Type</string>
     <string name="text_type_file">File</string>
     <string name="text_type_folder">Folder</string>
+    <string name="text_typescript_console">TypeScript console</string>
     <string name="text_typescript_console_hint">Enter a TypeScript expression or statement</string>
     <string name="text_typescript_project_rename">Rename project symbol</string>
     <string name="text_typescript_project_rename_applied">Project symbol renamed in all affected files</string>
@@ -1931,6 +1932,7 @@
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_working_dir_path">Working directory path</string>
+    <string name="text_working_dir_path_with_value">Working directory: %1$s</string>
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="text_writing_app_icon">Writing app icon</string>

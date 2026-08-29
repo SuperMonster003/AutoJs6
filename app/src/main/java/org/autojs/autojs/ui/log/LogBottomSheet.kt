@@ -6,21 +6,33 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.console.ConsoleImpl
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ContextUtils.getColorsForMode
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.BottomSheetLogBinding
 import java.io.File
@@ -39,9 +51,13 @@ class LogBottomSheet : BottomSheetDialogFragment() {
 
     private lateinit var mScriptName: String
     private lateinit var mScriptPath: String
+    private lateinit var mWorkingDirectory: String
     private var mEditorBackgroundColor by Delegates.notNull<Int>()
     private var mEditorForegroundColor by Delegates.notNull<Int>()
     private lateinit var mTypeScriptEvaluator: TypeScriptConsoleEvaluator
+    private var mTypeScriptAvailabilityJob: Job? = null
+    private var mTypeScriptConsoleAvailable = false
+    private var mTypeScriptConsoleVisible = false
 
     private var mStackFrameClickListener: OnStackFrameClickListener? = null
     private var mScriptControlListener: ScriptControlListener? = null
@@ -58,6 +74,14 @@ class LogBottomSheet : BottomSheetDialogFragment() {
     private var mDragStartY = 0f
     private var mDragStartHeight = 0
     private var mDidLaunchFullLogActivity = false
+
+    private val mExportLogsLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument(Mime.TEXT_PLAIN),
+    ) { uri ->
+        if (uri != null) {
+            AutoJs.instance.globalConsole.export(uri)
+        }
+    }
 
     enum class StackFrameClickResult {
         DISMISS,
@@ -151,10 +175,17 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         }
         mScriptName = argScriptName
         mScriptPath = argScriptPath
+        mWorkingDirectory = mScriptPath
+            .takeIf(String::isNotBlank)
+            ?.let(::File)
+            ?.absoluteFile
+            ?.parent
+            ?.takeIf(String::isNotBlank)
+            ?: WorkingDirectoryUtils.path
         mEditorBackgroundColor = argEditorBackgroundColor
         mEditorForegroundColor = argEditorForegroundColor
         mTypeScriptEvaluator = TypeScriptConsoleEvaluator(
-            workingDirectory = mScriptPath.takeIf(String::isNotBlank)?.let(::File)?.parent.orEmpty(),
+            workingDirectory = mWorkingDirectory,
         )
     }
 
@@ -180,6 +211,11 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         applyEditorPaletteToDialogWindow()
     }
 
+    override fun onResume() {
+        super.onResume()
+        refreshTypeScriptConsoleAvailability()
+    }
+
     private fun setupViews() {
         binding.dragHandleTouchArea.setOnTouchListener { _, event -> handleDrag(event) }
 
@@ -196,7 +232,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 StackFrameClickResult.FAILED, null -> ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
             }
         }
-        binding.console.setCommandInputVisible(true)
+        binding.console.setCommandInputVisible(false)
         binding.console.setOnCommandSubmitListener { source ->
             binding.console.setCommandInputBusy(true)
             mTypeScriptEvaluator.evaluate(source) {
@@ -205,6 +241,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 }
             }
         }
+        binding.console.setOnCommandStopListener { mTypeScriptEvaluator.stop() }
         setupConsoleLogList()
 
         binding.btnRunStop.setOnClickListener {
@@ -227,6 +264,10 @@ class LogBottomSheet : BottomSheetDialogFragment() {
 
         binding.btnClose.setOnClickListener {
             dismissAllowingStateLoss()
+        }
+
+        binding.btnMore.setOnClickListener {
+            showMoreMenu()
         }
 
         applyEditorPaletteToViews()
@@ -257,6 +298,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         binding.btnClear.imageTintList = ColorStateList.valueOf(foregroundColor)
         binding.btnMaximize.imageTintList = ColorStateList.valueOf(foregroundColor)
         binding.btnClose.imageTintList = ColorStateList.valueOf(foregroundColor)
+        binding.btnMore.imageTintList = ColorStateList.valueOf(foregroundColor)
         binding.console.setTextColors(
             context.getColorsForMode(
                 darkMode = asDarkMode,
@@ -271,6 +313,60 @@ class LogBottomSheet : BottomSheetDialogFragment() {
             ),
         )
         binding.console.setCommandInputTextColor(foregroundColor)
+    }
+
+    private fun showMoreMenu() {
+        PopupMenu(requireContext(), binding.btnMore, Gravity.END).apply {
+            menuInflater.inflate(R.menu.menu_log_bottom_sheet_more, menu)
+            menu.findItem(R.id.action_typescript_console)?.apply {
+                isVisible = mTypeScriptConsoleAvailable
+                isChecked = mTypeScriptConsoleVisible
+            }
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_copy -> true.also { AutoJs.instance.globalConsole.copyAll() }
+                    R.id.action_send -> true.also { AutoJs.instance.globalConsole.send() }
+                    R.id.action_export -> true.also {
+                        mExportLogsLauncher.launch(ConsoleImpl.createLogExportFileName())
+                    }
+                    R.id.action_typescript_console -> true.also {
+                        setTypeScriptConsoleVisible(!mTypeScriptConsoleVisible, persist = true)
+                    }
+                    else -> false
+                }
+            }
+            show()
+        }
+    }
+
+    private fun refreshTypeScriptConsoleAvailability() {
+        mTypeScriptAvailabilityJob?.cancel()
+        val appContext = requireContext().applicationContext
+        mTypeScriptAvailabilityJob = viewLifecycleOwner.lifecycleScope.launch {
+            val available = withContext(Dispatchers.IO) {
+                TypeScriptConsoleAvailability.isAvailable(appContext)
+            }
+            mTypeScriptConsoleAvailable = available
+            if (!available) {
+                mTypeScriptEvaluator.stop()
+            }
+            setTypeScriptConsoleVisible(
+                visible = available && Pref.getBoolean(
+                    R.string.key_editor_log_panel_typescript_console_visible,
+                    false,
+                ),
+                persist = false,
+            )
+        }
+    }
+
+    private fun setTypeScriptConsoleVisible(visible: Boolean, persist: Boolean) {
+        val resolved = visible && mTypeScriptConsoleAvailable
+        mTypeScriptConsoleVisible = resolved
+        _binding?.console?.setCommandInputVisible(resolved)
+        if (persist) {
+            Pref.putBoolean(R.string.key_editor_log_panel_typescript_console_visible, resolved)
+        }
     }
 
     private fun applyEditorPaletteToDialogWindow() {
@@ -430,6 +526,8 @@ class LogBottomSheet : BottomSheetDialogFragment() {
     private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).roundToInt()
 
     override fun onDestroyView() {
+        mTypeScriptAvailabilityJob?.cancel()
+        mTypeScriptAvailabilityJob = null
         mHeightAnimator?.cancel()
         mHeightAnimator = null
         mBottomSheetBehavior = null

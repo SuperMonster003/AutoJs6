@@ -33,14 +33,17 @@
                 android:textColorHint="?android:attr/textColorHint"
                 android:textSize="14sp" />
 
-        <Button
+        <ImageButton
                 android:id="@+id/submit"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:minWidth="48dp"
-                android:text="@string/text_run" />
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="4dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_run"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_play_arrow_white_48dp"
+                android:tint="@color/dialog_button_finish" />
 
     </LinearLayout>
 

@@ -4,6 +4,7 @@ import androidx.test.runner.AndroidJUnit4
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.autojs.autojs.AutoJs
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +39,32 @@ class TypeScriptConsoleEvaluatorDeviceTest {
                 messages.any { message -> "=> 42" in message },
             )
         } finally {
+            console.clear()
+        }
+    }
+
+    @Test
+    fun stopsTheActiveTypeScriptSnippet() {
+        val console = AutoJs.instance.globalConsole
+        val completed = CountDownLatch(1)
+        val evaluator = TypeScriptConsoleEvaluator()
+        console.clear()
+        try {
+            evaluator.evaluate(
+                "while (true) { }",
+                completed::countDown,
+            )
+
+            assertTrue(evaluator.isRunning())
+            assertTrue("The active TypeScript snippet was not accepted for stopping", evaluator.stop())
+            assertTrue(
+                "The stopped TypeScript snippet did not reach a terminal state",
+                completed.await(90, TimeUnit.SECONDS),
+            )
+            assertFalse(evaluator.isRunning())
+            assertFalse(evaluator.stop())
+        } finally {
+            evaluator.stop()
             console.clear()
         }
     }

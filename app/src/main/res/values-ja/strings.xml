@@ -1864,6 +1864,7 @@
     <string name="text_type">種類</string>
     <string name="text_type_file">ファイル</string>
     <string name="text_type_folder">フォルダー</string>
+    <string name="text_typescript_console">TypeScript コンソール</string>
     <string name="text_typescript_console_hint">TypeScript の式または文を入力</string>
     <string name="text_typescript_project_rename">プロジェクトシンボルの名前を変更</string>
     <string name="text_typescript_project_rename_applied">影響するすべてのファイルでシンボル名を変更しました</string>
@@ -1936,6 +1937,7 @@
     <string name="text_weekly_task">週次タスク</string>
     <string name="text_weekly_task_should_check_day_of_week">最低 1 日選択する必要があります</string>
     <string name="text_working_dir_path">作業ディレクトリのパス</string>
+    <string name="text_working_dir_path_with_value">作業ディレクトリ: %1$s</string>
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="text_writing_app_icon">アプリアイコンを書き込み中</string>

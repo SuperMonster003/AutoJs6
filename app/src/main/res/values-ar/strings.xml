@@ -1865,6 +1865,7 @@
     <string name="text_type">يكتب</string>
     <string name="text_type_file">ملف</string>
     <string name="text_type_folder">مجلد</string>
+    <string name="text_typescript_console">وحدة تحكم TypeScript</string>
     <string name="text_typescript_console_hint">أدخل تعبير TypeScript أو عبارة</string>
     <string name="text_typescript_project_rename">إعادة تسمية رمز المشروع</string>
     <string name="text_typescript_project_rename_applied">تمت إعادة تسمية الرمز في جميع الملفات المتأثرة</string>
@@ -1937,6 +1938,7 @@
     <string name="text_weekly_task">مهمة أسبوعية</string>
     <string name="text_weekly_task_should_check_day_of_week">يجب اختيار يوم واحد على الأقل</string>
     <string name="text_working_dir_path">مسار دليل العمل</string>
+    <string name="text_working_dir_path_with_value">دليل العمل: %1$s</string>
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="text_writing_app_icon">جارٍ كتابة ايقونة التطبيق</string>

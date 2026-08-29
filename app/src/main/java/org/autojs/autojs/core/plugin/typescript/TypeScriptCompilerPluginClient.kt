@@ -50,6 +50,12 @@ internal class TypeScriptCompilerPluginClient(
         infoReader = { compiler -> compiler.compilerInfo.toPluginInfo() },
     )
 
+    suspend fun isAvailable(): Boolean = host.select(
+        context = appContext,
+        engineId = TypeScriptPluginIds.ID,
+        engine = TypeScriptPluginIds.ENGINE,
+    ) != null
+
     internal suspend fun openWarmBinding(
         timeoutMs: Long = TypeScriptCompilerContract.DEFAULT_TIMEOUT_MS,
     ): TypeScriptCompilerWarmBinding = withContext(Dispatchers.IO) {

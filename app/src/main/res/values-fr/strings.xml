@@ -1863,6 +1863,7 @@
     <string name="text_type">Type</string>
     <string name="text_type_file">Fichier</string>
     <string name="text_type_folder">Dossier</string>
+    <string name="text_typescript_console">Console TypeScript</string>
     <string name="text_typescript_console_hint">Saisissez une expression ou une instruction TypeScript</string>
     <string name="text_typescript_project_rename">Renommer le symbole du projet</string>
     <string name="text_typescript_project_rename_applied">Symbole renommé dans tous les fichiers concernés</string>
@@ -1935,6 +1936,7 @@
     <string name="text_weekly_task">Tâche hebdomadaire</string>
     <string name="text_weekly_task_should_check_day_of_week">Au moins un jour doit être sélectionné</string>
     <string name="text_working_dir_path">Chemin du répertoire de travail.</string>
+    <string name="text_working_dir_path_with_value">Chemin du répertoire de travail: %1$s</string>
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité.</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="text_writing_app_icon">Ecriture de l\'icone de l\'appli</string>

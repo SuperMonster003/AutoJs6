@@ -97,14 +97,28 @@
             android:id="@+id/btn_close"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginStart="16dp"
+            android:layout_toStartOf="@id/btn_more"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_close"
             android:padding="4dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_ali_close"
+            app:tint="@color/day_night" />
+
+        <ImageButton
+            android:id="@+id/btn_more"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/text_more"
+            android:padding="2dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_more_vert_black_24dp"
             app:tint="@color/day_night" />
     </RelativeLayout>
 

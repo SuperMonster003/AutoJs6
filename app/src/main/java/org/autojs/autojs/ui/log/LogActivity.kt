@@ -6,39 +6,57 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.AutoJs.Companion.instance
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.util.IntentUtils.startSafelyWithOptions
 import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.showToast
+import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityLogBinding
 import java.io.File
 
 class LogActivity : BaseActivity() {
 
+    private lateinit var mBinding: ActivityLogBinding
     private lateinit var mConsoleImpl: GlobalConsole
     private var mEditorScriptName: String? = null
     private var mEditorScriptPath: String? = null
+    private lateinit var mWorkingDirectory: String
     private lateinit var mTypeScriptEvaluator: TypeScriptConsoleEvaluator
+    private var mTypeScriptAvailabilityJob: Job? = null
+    private var mTypeScriptConsoleAvailable = false
+    private var mTypeScriptConsoleVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val activityLogBinding = ActivityLogBinding.inflate(layoutInflater)
+        mBinding = ActivityLogBinding.inflate(layoutInflater)
         mEditorScriptName = intent.getStringExtra(EXTRA_EDITOR_SCRIPT_NAME).takeUnless { it.isNullOrBlank() }
         mEditorScriptPath = intent.getStringExtra(EXTRA_EDITOR_SCRIPT_PATH).takeUnless { it.isNullOrBlank() }
+        mWorkingDirectory = mEditorScriptPath
+            ?.let(::File)
+            ?.absoluteFile
+            ?.parent
+            ?.takeIf(String::isNotBlank)
+            ?: WorkingDirectoryUtils.path
         mTypeScriptEvaluator = TypeScriptConsoleEvaluator(
-            workingDirectory = mEditorScriptPath?.let(::File)?.parent.orEmpty(),
+            workingDirectory = mWorkingDirectory,
         )
 
-        setContentView(activityLogBinding.root)
+        setContentView(mBinding.root)
         setToolbarAsBack(R.string.text_log)
 
-        activityLogBinding.console.apply {
+        mBinding.console.apply {
             setConsole(instance.globalConsole.also { mConsoleImpl = it })
             setLogActivity(this@LogActivity)
             setPinchToZoomEnabled(true)
@@ -46,19 +64,25 @@ class LogActivity : BaseActivity() {
             setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
                 openStackFrameTarget(fileName, lineNumber, columnNumber)
             }
-            setCommandInputVisible(true)
+            setCommandInputVisible(false)
             setOnCommandSubmitListener { source ->
                 setCommandInputBusy(true)
                 mTypeScriptEvaluator.evaluate(source) {
                     post { setCommandInputBusy(false) }
                 }
             }
+            setOnCommandStopListener { mTypeScriptEvaluator.stop() }
         }
 
-        activityLogBinding.fab.apply {
+        mBinding.fab.apply {
             setOnClickListener { mConsoleImpl.clear() }
             excludeFloatingActionButtonFromBottomNavigationBar()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshTypeScriptConsoleAvailability()
     }
 
     private fun openStackFrameTarget(fileName: String, lineNumber: Int, columnNumber: Int) {
@@ -90,7 +114,13 @@ class LogActivity : BaseActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_console, menu)
+        syncTypeScriptConsoleMenuItem(menu)
         return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        syncTypeScriptConsoleMenuItem(menu)
+        return super.onPrepareOptionsMenu(menu)
     }
 
     @Deprecated("Deprecated in Java")
@@ -120,8 +150,53 @@ class LogActivity : BaseActivity() {
                 // TODO by SuperMonster003 on Jul 3, 2023.
                 showToast(this, R.string.text_under_development)
             }
+            R.id.action_typescript_console -> {
+                setTypeScriptConsoleVisible(!mTypeScriptConsoleVisible, persist = true)
+            }
         }
         return true
+    }
+
+    private fun refreshTypeScriptConsoleAvailability() {
+        mTypeScriptAvailabilityJob?.cancel()
+        mTypeScriptAvailabilityJob = lifecycleScope.launch {
+            val available = withContext(Dispatchers.IO) {
+                TypeScriptConsoleAvailability.isAvailable(applicationContext)
+            }
+            mTypeScriptConsoleAvailable = available
+            if (!available) {
+                mTypeScriptEvaluator.stop()
+            }
+            setTypeScriptConsoleVisible(
+                visible = available && Pref.getBoolean(
+                    R.string.key_log_activity_typescript_console_visible,
+                    false,
+                ),
+                persist = false,
+            )
+        }
+    }
+
+    private fun setTypeScriptConsoleVisible(visible: Boolean, persist: Boolean) {
+        val resolved = visible && mTypeScriptConsoleAvailable
+        mTypeScriptConsoleVisible = resolved
+        mBinding.console.setCommandInputVisible(resolved)
+        mBinding.toolbar.subtitle = if (resolved) {
+            getString(R.string.text_working_dir_path_with_value, mWorkingDirectory)
+        } else {
+            null
+        }
+        if (persist) {
+            Pref.putBoolean(R.string.key_log_activity_typescript_console_visible, resolved)
+        }
+        invalidateOptionsMenu()
+    }
+
+    private fun syncTypeScriptConsoleMenuItem(menu: Menu) {
+        menu.findItem(R.id.action_typescript_console)?.apply {
+            isVisible = mTypeScriptConsoleAvailable
+            isChecked = mTypeScriptConsoleVisible
+        }
     }
 
     @Suppress("DEPRECATION")

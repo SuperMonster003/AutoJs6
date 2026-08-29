@@ -1865,6 +1865,7 @@
     <string name="text_type">유형</string>
     <string name="text_type_file">파일</string>
     <string name="text_type_folder">폴더</string>
+    <string name="text_typescript_console">TypeScript 콘솔</string>
     <string name="text_typescript_console_hint">TypeScript 식 또는 문 입력</string>
     <string name="text_typescript_project_rename">프로젝트 기호 이름 바꾸기</string>
     <string name="text_typescript_project_rename_applied">영향을 받는 모든 파일에서 프로젝트 기호 이름을 변경했습니다</string>
@@ -1937,6 +1938,7 @@
     <string name="text_weekly_task">주간 과제</string>
     <string name="text_weekly_task_should_check_day_of_week">최소한 하루를 선택해야합니다</string>
     <string name="text_working_dir_path">작업 디렉토리 경로</string>
+    <string name="text_working_dir_path_with_value">작업 디렉토리: %1$s</string>
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="text_writing_app_icon">앱 아이콘 기록 중</string>

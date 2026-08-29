@@ -205,8 +205,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     fun export() {
-        @Suppress("SpellCheckingInspection")
-        mConsoleView?.get()?.export("autojs6-log-${DateTimeFormat.forPattern("yyyyMMdd-HHmmss").print(System.currentTimeMillis())}.txt")
+        mConsoleView?.get()?.export(createLogExportFileName())
     }
 
     fun export(uri: Uri?) {
@@ -1087,6 +1086,11 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         const val DEFAULT_GRAVITY = Gravity.NO_GRAVITY
         const val DEFAULT_EXIT_ON_CLOSE_TIMEOUT = 5000L
         const val DEFAULT_EXIT_ON_CLOSE = true
+
+        @JvmStatic
+        @Suppress("SpellCheckingInspection")
+        fun createLogExportFileName(): String =
+            "autojs6-log-${DateTimeFormat.forPattern("yyyyMMdd-HHmmss").print(System.currentTimeMillis())}.txt"
 
         val DEFAULT_TITLE_BAR_BG_COLOR_RES = R.color.floating_console_title_bar_bg
         val DEFAULT_CONTENT_BG_COLOR_RES = R.color.floating_console_content_bg

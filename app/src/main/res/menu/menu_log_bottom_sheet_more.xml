@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/action_copy"
+            android:icon="@drawable/ic_content_copy_small_black_48dp"
+            android:title="@string/text_copy" />
+
+    <item
+            android:id="@+id/action_send"
+            android:icon="@drawable/ic_send_black_48dp"
+            android:title="@string/text_send" />
+
+    <item
+            android:id="@+id/action_export"
+            android:icon="@drawable/ic_export_black_48dp"
+            android:title="@string/text_export" />
+
+    <item
+            android:id="@+id/action_typescript_console"
+            android:checkable="true"
+            android:title="@string/text_typescript_console"
+            android:visible="false" />
+
+</menu>

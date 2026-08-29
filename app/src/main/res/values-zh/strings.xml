@@ -1860,6 +1860,7 @@
     <string name="text_type">类型</string>
     <string name="text_type_file">文件</string>
     <string name="text_type_folder">文件夹</string>
+    <string name="text_typescript_console">TypeScript 控制台</string>
     <string name="text_typescript_console_hint">输入 TypeScript 表达式或语句</string>
     <string name="text_typescript_project_rename">重命名项目符号</string>
     <string name="text_typescript_project_rename_applied">已在所有受影响文件中重命名项目符号</string>
@@ -1932,6 +1933,7 @@
     <string name="text_weekly_task">每周任务</string>
     <string name="text_weekly_task_should_check_day_of_week">需至少选择一天</string>
     <string name="text_working_dir_path">工作路径</string>
+    <string name="text_working_dir_path_with_value">工作路径: %1$s</string>
     <string name="text_write_secure_settings">修改安全设置</string>
     <string name="text_write_system_settings">修改系统设置</string>
     <string name="text_writing_app_icon">正在写入应用图标</string>

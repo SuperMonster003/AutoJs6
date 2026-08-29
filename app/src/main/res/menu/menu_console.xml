@@ -33,4 +33,11 @@
             android:title="@string/text_settings"
             app:showAsAction="never"/>
 
+    <item
+            android:id="@+id/action_typescript_console"
+            android:checkable="true"
+            android:title="@string/text_typescript_console"
+            android:visible="false"
+            app:showAsAction="never" />
+
 </menu>

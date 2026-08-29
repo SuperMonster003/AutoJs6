@@ -2,6 +2,7 @@ package org.autojs.autojs.core.console;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.text.SpannableString;
@@ -18,9 +19,9 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,6 +62,10 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     public interface OnCommandSubmitListener {
         void onCommandSubmit(String command);
     }
+
+    public interface OnCommandStopListener {
+        void onCommandStop();
+    }
     
     private final Map<Integer, Integer> mColors = new MapBuilder<Integer, Integer>().build();
     private ConsoleImpl mConsole;
@@ -68,8 +73,10 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private RecyclerView mLogListRecyclerView;
     private View mCommandInputContainer;
     private EditText mCommandInput;
-    private Button mCommandSubmit;
+    private ImageButton mCommandSubmit;
     private OnCommandSubmitListener mCommandSubmitListener;
+    private OnCommandStopListener mCommandStopListener;
+    private boolean mCommandInputBusy = false;
     private boolean mShouldStopRefresh = false;
     private final ArrayList<ConsoleImpl.LogEntry> mLogEntries = new ArrayList<>();
 
@@ -146,7 +153,8 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         mCommandInputContainer = findViewById(R.id.input_container);
         mCommandInput = findViewById(R.id.input);
         mCommandSubmit = findViewById(R.id.submit);
-        mCommandSubmit.setOnClickListener(view -> submitCommand());
+        mCommandSubmit.setOnClickListener(view -> performCommandAction());
+        updateCommandActionState();
         mCommandInput.setOnEditorActionListener((view, actionId, event) -> {
             boolean isKeyboardAction = actionId == EditorInfo.IME_ACTION_SEND ||
                     actionId == EditorInfo.IME_ACTION_DONE;
@@ -294,15 +302,26 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
     public void setCommandInputVisible(boolean visible) {
         mCommandInputContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (!visible) {
+            mCommandInput.clearFocus();
+            ViewUtils.hideSoftInput(mCommandInput);
+        }
     }
 
     public void setOnCommandSubmitListener(@Nullable OnCommandSubmitListener listener) {
         mCommandSubmitListener = listener;
+        updateCommandActionState();
+    }
+
+    public void setOnCommandStopListener(@Nullable OnCommandStopListener listener) {
+        mCommandStopListener = listener;
+        updateCommandActionState();
     }
 
     public void setCommandInputBusy(boolean busy) {
+        mCommandInputBusy = busy;
         mCommandInput.setEnabled(!busy);
-        mCommandSubmit.setEnabled(!busy);
+        updateCommandActionState();
         if (!busy) {
             mCommandInput.requestFocus();
         }
@@ -317,12 +336,38 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
                 Color.blue(color)
         ));
         mCommandInput.getBackground().mutate().setTint(color);
-        mCommandSubmit.setTextColor(color);
+    }
+
+    private void performCommandAction() {
+        if (mCommandInputBusy) {
+            OnCommandStopListener listener = mCommandStopListener;
+            if (listener != null) {
+                listener.onCommandStop();
+            }
+            return;
+        }
+        submitCommand();
+    }
+
+    private void updateCommandActionState() {
+        int icon = mCommandInputBusy
+                ? R.drawable.ic_stop_button_fill
+                : R.drawable.ic_play_arrow_white_48dp;
+        int tint = mCommandInputBusy
+                ? R.color.dialog_button_caution
+                : R.color.dialog_button_finish;
+        int description = mCommandInputBusy ? R.string.text_stop : R.string.text_run;
+        mCommandSubmit.setImageResource(icon);
+        mCommandSubmit.setImageTintList(ColorStateList.valueOf(getContext().getColor(tint)));
+        mCommandSubmit.setContentDescription(getContext().getString(description));
+        mCommandSubmit.setEnabled(mCommandInputBusy
+                ? mCommandStopListener != null
+                : mCommandSubmitListener != null);
     }
 
     private void submitCommand() {
         OnCommandSubmitListener listener = mCommandSubmitListener;
-        if (listener == null || !mCommandInput.isEnabled()) {
+        if (listener == null || mCommandInputBusy) {
             return;
         }
         String command = mCommandInput.getText().toString().trim();

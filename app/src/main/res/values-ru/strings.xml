@@ -1863,6 +1863,7 @@
     <string name="text_type">Тип</string>
     <string name="text_type_file">Файл</string>
     <string name="text_type_folder">Папка</string>
+    <string name="text_typescript_console">Консоль TypeScript</string>
     <string name="text_typescript_console_hint">Введите выражение или инструкцию TypeScript</string>
     <string name="text_typescript_project_rename">Переименовать символ проекта</string>
     <string name="text_typescript_project_rename_applied">Символ переименован во всех затронутых файлах</string>
@@ -1935,6 +1936,7 @@
     <string name="text_weekly_task">Недельное задание</string>
     <string name="text_weekly_task_should_check_day_of_week">Должен быть выбран хотя бы один день</string>
     <string name="text_working_dir_path">Путь к рабочему каталогу</string>
+    <string name="text_working_dir_path_with_value">Рабочий каталог: %1$s</string>
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="text_writing_app_icon">Запись значка приложения</string>
